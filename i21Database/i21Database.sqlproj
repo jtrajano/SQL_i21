@@ -5022,6 +5022,7 @@
     <Build Include="dbo\Stored Procedures\uspICDuplicateStorageLocation.sql" />
     <Build Include="dbo\Tables\tblQMControlPointLotStatus.sql" />
     <Build Include="dbo\Views\vyuCTGetNeedPlanWeek.sql" />
+    <Build Include="dbo\Views\vyuRestApiCTPriceContractFixationDetail.sql" />
     <Build Include="dbo\Tables\tblSMMultiCurrency.sql" />
     <Build Include="dbo\Stored Procedures\uspPATCreateVoucherForProcessRefund.sql" />
     <Build Include="dbo\Tables\tblQMSampleTypeUserRole.sql" />
