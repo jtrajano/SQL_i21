@@ -182,7 +182,7 @@ WHERE
 AND ReceiptCharge.ysnAccrue = 1      
 -- AND ReceiptCharge.ysnInventoryCost = 0
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
-AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
+AND ReceiptCharge.intEntityVendorId != ISNULL(Receipt.intEntityVendorId, 0) --make sure that the result would be for third party vendor only    
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
