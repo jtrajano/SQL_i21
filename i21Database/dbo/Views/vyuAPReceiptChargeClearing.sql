@@ -174,7 +174,7 @@ WHERE
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
 --HANDLE RECEIPT WHICH intEntityVendorId IS NULL
-AND ISNULL(Receipt.intEntityVendorId,ReceiptCharge.intEntityVendorId) = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only 
+AND ISNULL(Receipt.intEntityVendorId, 0) = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
@@ -234,6 +234,7 @@ WHERE
 AND ReceiptCharge.ysnAccrue = 1      
 -- AND ReceiptCharge.ysnInventoryCost = 0
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
+--HANDLE RECEIPT WHICH intEntityVendorId IS NULL
 AND ReceiptCharge.intEntityVendorId != ISNULL(Receipt.intEntityVendorId, 0) --make sure that the result would be for third party vendor only    
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
