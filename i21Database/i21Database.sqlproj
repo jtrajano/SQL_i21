@@ -8948,6 +8948,8 @@
     <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
     <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
     <Build Include="dbo\Views\vyuCTContractOptionView.sql" />
+    <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
