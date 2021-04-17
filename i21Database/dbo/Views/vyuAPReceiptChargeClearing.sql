@@ -198,7 +198,7 @@ WHERE
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
-AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
+AND ReceiptCharge.intEntityVendorId != ISNULL(Receipt.intEntityVendorId, 0) --make sure that the result would be for third party vendor only    
 AND NOT EXISTS (
 	--DP to OS and vice verse
     SELECT intInventoryReceiptChargeId
