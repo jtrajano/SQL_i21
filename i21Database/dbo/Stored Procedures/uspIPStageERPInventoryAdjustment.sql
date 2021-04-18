@@ -18,7 +18,10 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'Quantity Adj'
+	WHERE strType IN (
+			'Quantity Adj'
+			,'Consumption'
+			)
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -168,7 +171,10 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Quantity Adj'
+			AND strType IN (
+				'Quantity Adj'
+				,'Consumption'
+				)
 	END
 
 	IF (ISNULL(@strInfo1, '')) <> ''
