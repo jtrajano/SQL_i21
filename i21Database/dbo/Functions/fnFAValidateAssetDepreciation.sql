@@ -22,6 +22,16 @@ BEGIN
         JOIN @Id I on I.intId =  A.intAssetId
         WHERE  ISNULL(ysnDisposed, 0) = 1
 
+        INSERT INTO @tbl
+        SELECT  intAssetId, 'Asset cost should be greater than zero.' FROM tblFAFixedAsset A 
+        JOIN @Id I on I.intId =  A.intAssetId
+        WHERE  ISNULL(dblCost, 0) = 0
+
+        INSERT INTO @tbl
+        SELECT  intAssetId, 'Salvage value should be less than asset cost.' FROM tblFAFixedAsset A 
+        JOIN @Id I on I.intId =  A.intAssetId
+        WHERE  ISNULL(dblSalvageValue, 0) > 0 AND  ISNULL(dblSalvageValue, 0) >= ISNULL(dblCost, 0) 
+
         IF EXISTS(SELECT TOP 1 1 FROM @tbl)
             RETURN
 

@@ -441,7 +441,7 @@ BEGIN
 
 UPDATE A SET [ysnDepreciated] = 1   
 FROM tblFAFixedAsset  A JOIN  @tblDepComputation B ON B.intAssetId = A.intAssetId
-WHERE B.ysnDepreciated =1 
+WHERE B.ysnDepreciated =1
 
 
 UPDATE A  SET ysnFullyDepreciated  =1  
@@ -454,8 +454,40 @@ UPDATE A  SET ysnFullyDepreciated  =1
 LogError:
 DECLARE @intLogId INT
 
-INSERT INTO tblFADepreciateLog(strBatchId, dtmDate, intEntityId)
-SELECT @strBatchId, GETDATE(), @intEntityId
+IF EXISTS(SELECT 1 FROM tblFADepreciateLog where strBatchId = @strBatchId )
+BEGIN
+  SELECT @intLogId = intLogId  FROM tblFADepreciateLog WHERE strBatchId = @strBatchId
+END
+ELSE
+BEGIN
+  INSERT INTO tblFADepreciateLog(strBatchId, dtmDate, intEntityId)
+  SELECT @strBatchId, GETDATE(), @intEntityId
+  SELECT @intLogId = SCOPE_IDENTITY()
+END
+
+
+
+
+ 
+  ;WITH Q as(
+    SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult,'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError FROM tblGLDetail C WHERE @strBatchId = strBatchId
+    AND ysnIsUnposted = 0  AND @BookId = 1
+    GROUP by strReference, strTransactionId, dtmDate
+    UNION
+    SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) FROM  tblFAFixedAssetDepreciation A 
+    JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+	  WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
+    UNION
+    SELECT strAssetId,'' strTransactionId, strError strResult, 
+	  case when @BookId = 1 then 'GAAP' 
+		when @BookId = 2 THEN 'Tax'
+	  end strBook, 
+   null dtmDate ,
+   cast(1 as BIT)
+   FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
+  )
+  INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate,ysnError) 
+  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError FROM Q 
 
 SELECT @intLogId = SCOPE_IDENTITY()
 
