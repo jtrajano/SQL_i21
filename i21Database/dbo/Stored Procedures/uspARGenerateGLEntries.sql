@@ -36,158 +36,6 @@ IF ISNULL(@raiseError,0) = 0
 			END
 	END
 
-IF @Post = 1
-BEGIN
-    INSERT INTO #ARInvoiceGLEntries
-        ([dtmDate]
-        ,[strBatchId]
-        ,[intAccountId]
-        ,[dblDebit]
-        ,[dblCredit]
-        ,[dblDebitUnit]
-        ,[dblCreditUnit]
-        ,[strDescription]
-        ,[strCode]
-        ,[strReference]
-        ,[intCurrencyId]
-        ,[dblExchangeRate]
-        ,[dtmDateEntered]
-        ,[dtmTransactionDate]
-        ,[strJournalLineDescription]
-        ,[intJournalLineNo]
-        ,[ysnIsUnposted]
-        ,[intUserId]
-        ,[intEntityId]
-        ,[strTransactionId]
-        ,[intTransactionId]
-        ,[strTransactionType]
-        ,[strTransactionForm]
-        ,[strModuleName]
-        ,[intConcurrencyId]
-        ,[dblDebitForeign]
-        ,[dblDebitReport]
-        ,[dblCreditForeign]
-        ,[dblCreditReport]
-        ,[dblReportingRate]
-        ,[dblForeignRate]
-        ,[strDocument]
-        ,[strComments]
-        ,[strSourceDocumentId]
-        ,[intSourceLocationId]
-        ,[intSourceUOMId]
-        ,[dblSourceUnitDebit]
-        ,[dblSourceUnitCredit]
-        ,[intCommodityId]
-        ,[intSourceEntityId])
-    SELECT 
-         [dtmDate]						= CAST(ISNULL(P.[dtmPostDate], P.[dtmDate]) AS DATE)
-        ,[strBatchId]					= P.[strBatchId]
-        ,[intAccountId]					= GL.[intAccountId]
-        ,[dblDebit]						= GL.[dblCredit]
-        ,[dblCredit]					= GL.[dblDebit]
-        ,[dblDebitUnit]					= GL.[dblCreditUnit]
-        ,[dblCreditUnit]				= GL.[dblDebitUnit]
-        ,[strDescription]				= 'Reverse Provisional Invoice' + ISNULL((' - ' + GL.strDescription), '')
-        ,[strCode]						= @CODE
-        ,[strReference]					= GL.[strReference]
-        ,[intCurrencyId]				= GL.[intCurrencyId]
-        ,[dblExchangeRate]				= GL.[dblExchangeRate]
-        ,[dtmDateEntered]				= P.[dtmDatePosted]
-        ,[dtmTransactionDate]			= P.[dtmDate]
-        ,[strJournalLineDescription]	= GL.[strJournalLineDescription]
-        ,[intJournalLineNo]				= P.[intOriginalInvoiceId]
-        ,[ysnIsUnposted]				= 0
-        ,[intUserId]					= P.[intUserId]
-        ,[intEntityId]					= P.[intUserId]
-        ,[strTransactionId]				= P.[strInvoiceNumber]
-        ,[intTransactionId]				= P.[intInvoiceId]
-        ,[strTransactionType]			= P.[strTransactionType]
-        ,[strTransactionForm]			= @SCREEN_NAME
-        ,[strModuleName]				= @MODULE_NAME
-        ,[intConcurrencyId]				= 1
-        ,[dblDebitForeign]				= GL.[dblCreditForeign]
-        ,[dblDebitReport]				= GL.[dblCreditReport]
-        ,[dblCreditForeign]				= GL.[dblDebitForeign]
-        ,[dblCreditReport]				= GL.[dblDebitReport]
-        ,[dblReportingRate]				= GL.[dblReportingRate]
-        ,[dblForeignRate]				= GL.[dblForeignRate]
-        ,[strDocument]					= GL.[strDocument]
-        ,[strComments]					= GL.[strComments]
-        ,[strSourceDocumentId]			= GL.[strSourceDocumentId]
-        ,[intSourceLocationId]			= GL.[intSourceLocationId]
-        ,[intSourceUOMId]				= GL.[intSourceUOMId]
-        ,[dblSourceUnitDebit]			= GL.[dblSourceUnitCredit]
-        ,[dblSourceUnitCredit]			= GL.[dblSourceUnitDebit]
-        ,[intCommodityId]				= GL.[intCommodityId]
-        ,[intSourceEntityId]			= GL.[intSourceEntityId]
-    FROM (
-        SELECT 
-			 [intOriginalInvoiceId]
-			,[strBatchId]
-			,[intInvoiceId]
-			,[dtmPostDate]
-			,[dtmDate]
-			,[dtmDatePosted]
-			,[strInvoiceNumber]
-			,[strTransactionType]
-			,[strInvoiceOriginId]
-			,[intUserId]
-        FROM
-			#ARPostInvoiceHeader
-        WHERE
-			[intOriginalInvoiceId] IS NOT NULL
-			AND [ysnFromProvisional] = 1
-			AND [ysnProvisionalWithGL] = 1 
-            AND [ysnPost] = 1
-			AND (
-                ([strTransactionType] <> 'Credit Memo'	AND [dblBaseInvoiceTotal] = 0.000000 AND [dblInvoiceTotal] = 0.000000)
-                OR
-                ([strTransactionType] IN ('Credit Memo', 'Invoice') AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000)
-				)
-    ) P
-    INNER JOIN (
-        SELECT 
-			 [intAccountId]
-			,[intGLDetailId]
-			,[intTransactionId]
-			,[strTransactionId]
-			,[dblCredit]
-			,[dblDebit]
-			,[dblCreditUnit]
-			,[dblDebitUnit]
-			,[strReference]
-			,[strDescription]
-			,[strJournalLineDescription]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dblCreditForeign]
-			,[dblCreditReport]
-			,[dblDebitForeign]
-			,[dblDebitReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[strDocument]
-			,[strComments]
-			,[strSourceDocumentId]
-			,[intSourceLocationId]
-			,[intSourceUOMId]
-			,[dblSourceUnitDebit]
-			,[dblSourceUnitCredit]
-			,[intCommodityId]
-			,[intSourceEntityId]
-        FROM
-			tblGLDetail WITH (NOLOCK)
-        WHERE 
-            [ysnIsUnposted] = 0
-			AND [strModuleName] = @MODULE_NAME
-    ) GL ON P.[intOriginalInvoiceId] = GL.[intTransactionId]
-        AND P.[strInvoiceOriginId] = GL.[strTransactionId]
-    ORDER BY GL.intGLDetailId				
-END
-
-IF @Post = 1
-EXEC [dbo].[uspARGenerateGLEntriesForInvoices]
-
 DECLARE  @AVERAGECOST   INT = 1
 		,@FIFO          INT = 2
         ,@LIFO          INT = 3
@@ -200,6 +48,7 @@ DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods
 DECLARE @ItemsForPost AS ItemCostingTableType
 
 IF @Post = 1
+
 INSERT INTO @ItemsForPost
     ([intItemId]
     ,[intItemLocationId]
@@ -261,14 +110,14 @@ SELECT
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 FROM 
-	#ARItemsForCosting
+	##ARItemsForCosting
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 BEGIN
 	BEGIN TRY
 		-- Call the post routine 
-		INSERT INTO #ARInvoiceGLEntries (
+		INSERT INTO ##ARInvoiceGLEntries (
 			 [dtmDate]
 			,[strBatchId]
 			,[intAccountId]
@@ -324,7 +173,7 @@ BEGIN
 				ELSE
 					SAVE TRANSACTION @CurrentSavepoint
 						
-				INSERT INTO #ARInvalidInventories (
+				INSERT INTO ##ARInvalidInventories (
 					 [strMessage]
 					,[strTransactionType]
 					,[strTransactionId]
@@ -337,8 +186,8 @@ BEGIN
 					,[strTransactionId]     = IH.[strInvoiceNumber]
 					,[strBatchNumber]       = @BatchId
 					,[intTransactionId]     = IH.[intInvoiceId] 
-				FROM #ARPostInvoiceHeader IH
-				INNER JOIN #ARItemsForCosting COSTING ON IH.strInvoiceNumber = COSTING.strTransactionId AND IH.intInvoiceId = COSTING.intTransactionId
+				FROM ##ARPostInvoiceHeader IH
+				INNER JOIN ##ARItemsForCosting COSTING ON IH.strInvoiceNumber = COSTING.strTransactionId AND IH.intInvoiceId = COSTING.intTransactionId
 				LEFT JOIN (
 					SELECT DISTINCT intTransactionId
 								  , strTransactionId
@@ -372,7 +221,7 @@ DECLARE  @InTransitItems                ItemInTransitCostingTableType
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
 				
-IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM #ARPostInvoiceDetail WHERE intSourceId = 2))
+IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM ##ARPostInvoiceDetail WHERE intSourceId = 2))
 INSERT INTO @InTransitItems
     ([intItemId] 
     ,[intItemLocationId] 
@@ -421,14 +270,13 @@ SELECT
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
     ,[dblForexRate]
-FROM 
-	#ARItemsForInTransitCosting
+FROM ##ARItemsForInTransitCosting
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 BEGIN
 	BEGIN TRY 
 		 --Call the post routine 
-		INSERT INTO #ARInvoiceGLEntries
+		INSERT INTO ##ARInvoiceGLEntries
 			([dtmDate] 
 			,[strBatchId]
 			,[intAccountId]
@@ -483,7 +331,7 @@ BEGIN
 				ELSE
 					SAVE TRANSACTION @CurrentSavepoint
 						
-				INSERT INTO #ARInvalidInventories (
+				INSERT INTO ##ARInvalidInventories (
 					 [strMessage]
 					,[strTransactionType]
 					,[strTransactionId]
@@ -496,8 +344,8 @@ BEGIN
 					,[strTransactionId]     = IH.[strInvoiceNumber]
 					,[strBatchNumber]       = @BatchId
 					,[intTransactionId]     = IH.[intInvoiceId] 
-				FROM #ARPostInvoiceHeader IH
-				INNER JOIN #ARItemsForInTransitCosting INTRANSIT ON IH.strInvoiceNumber = INTRANSIT.strTransactionId AND IH.intInvoiceId = INTRANSIT.intTransactionId
+				FROM ##ARPostInvoiceHeader IH
+				INNER JOIN ##ARItemsForInTransitCosting INTRANSIT ON IH.strInvoiceNumber = INTRANSIT.strTransactionId AND IH.intInvoiceId = INTRANSIT.intTransactionId
 				LEFT JOIN (
 					SELECT DISTINCT intTransactionId
 								  , strTransactionId
@@ -529,10 +377,10 @@ BEGIN
 	UPDATE B
 	SET intAccountId = dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
 	FROM tblICInventoryTransaction  A
-	JOIN #ARInvoiceGLEntries B ON A.intInventoryTransactionId = B.intJournalLineNo
+	JOIN ##ARInvoiceGLEntries B ON A.intInventoryTransactionId = B.intJournalLineNo
 							  AND A.intTransactionId = B.intTransactionId
 							  AND A.strTransactionId = B.strTransactionId
-	JOIN #ARItemsForInTransitCosting C ON A.intTransactionId = C.intTransactionId
+	JOIN ##ARItemsForInTransitCosting C ON A.intTransactionId = C.intTransactionId
 					             AND A.strTransactionId = C.strTransactionId
 					             AND A.intTransactionDetailId =  C.intTransactionDetailId 
 					             AND A.intItemId = C.intItemId
@@ -586,14 +434,14 @@ SELECT
     ,[intStorageLocationId]
     ,[strActualCostId]
 FROM 
-	#ARItemsForStorageCosting
+	##ARItemsForStorageCosting
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 BEGIN 
 	BEGIN TRY
 		-- Call the post routine 
-		INSERT INTO #ARInvoiceGLEntries
+		INSERT INTO ##ARInvoiceGLEntries
 			([dtmDate] 
 			,[strBatchId]
 			,[intAccountId]
@@ -647,7 +495,7 @@ BEGIN
 				ELSE
 					SAVE TRANSACTION @CurrentSavepoint
 						
-				INSERT INTO #ARInvalidInventories (
+				INSERT INTO ##ARInvalidInventories (
 					 [strMessage]
 					,[strTransactionType]
 					,[strTransactionId]
@@ -660,8 +508,8 @@ BEGIN
 					,[strTransactionId]     = IH.[strInvoiceNumber]
 					,[strBatchNumber]       = @BatchId
 					,[intTransactionId]     = IH.[intInvoiceId] 
-				FROM #ARPostInvoiceHeader IH
-				INNER JOIN #ARItemsForStorageCosting STORAGE ON IH.strInvoiceNumber = STORAGE.strTransactionId AND IH.intInvoiceId = STORAGE.intTransactionId
+				FROM ##ARPostInvoiceHeader IH
+				INNER JOIN ##ARItemsForStorageCosting STORAGE ON IH.strInvoiceNumber = STORAGE.strTransactionId AND IH.intInvoiceId = STORAGE.intTransactionId
 				LEFT JOIN (
 					SELECT DISTINCT intTransactionId
 								  , strTransactionId
@@ -693,7 +541,7 @@ END
 
 IF @Post = 0
 BEGIN
-    INSERT INTO #ARInvoiceGLEntries
+    INSERT INTO ##ARInvoiceGLEntries
         ([dtmDate]
         ,[strBatchId]
         ,[intAccountId]
@@ -776,7 +624,7 @@ BEGIN
         ,[intCommodityId]				= GLD.[intCommodityId]
         ,[intSourceEntityId]			= GLD.[intSourceEntityId]
     FROM
-		#ARPostInvoiceHeader PID
+		##ARPostInvoiceHeader PID
     INNER JOIN
         tblGLDetail GLD
             ON PID.[intInvoiceId] = GLD.[intTransactionId]
@@ -787,14 +635,14 @@ BEGIN
         GLD.[intGLDetailId]
 END
 
-UPDATE #ARInvoiceGLEntries
+UPDATE ##ARInvoiceGLEntries
 SET [dtmDateEntered] = @PostDate
    ,[strBatchId]     = @BatchId
 
 UPDATE GL
 SET GL.intSourceEntityId = I.intEntityCustomerId
   , GL.intEntityId		 = I.intEntityId
-FROM #ARInvoiceGLEntries GL
+FROM ##ARInvoiceGLEntries GL
 INNER JOIN tblARInvoice I ON GL.strTransactionId = I.strInvoiceNumber
 						 AND GL.intTransactionId = I.intInvoiceId
 WHERE GL.intSourceEntityId IS NULL
