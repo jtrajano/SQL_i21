@@ -6,7 +6,8 @@ CREATE TABLE tblFADepreciateLogDetail
     strAssetId NVARCHAR(20) COLLATE Latin1_General_CI_AS  NULL,
     strBook NVARCHAR(20) COLLATE Latin1_General_CI_AS  NULL,
     dtmDate DATETIME NULL,
-    strResult NVARCHAR(200) COLLATE Latin1_General_CI_AS  NULL
+    strResult NVARCHAR(200) COLLATE Latin1_General_CI_AS  NULL,
+    ysnError BIT NULL
     CONSTRAINT [PK_tblFADepreciateLogDetail] PRIMARY KEY CLUSTERED 
 (
 	[intLogDetailId] ASC
