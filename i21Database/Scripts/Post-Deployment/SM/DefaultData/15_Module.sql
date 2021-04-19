@@ -1273,11 +1273,14 @@ GO
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing')
 	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing'
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'IDP')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
-	SELECT [intModuleId]					=		124,
+	SELECT [intModuleId]					=		125,
 		   [strApplicationName]				=		N'i21',
-		   [strModule]						=		N'Document Processing (IDP)',
+		   [strModule]						=		N'IDP',
 		   [strAppCode]						=		N'',
 		   [ysnSupported]					=		1,
 	       [intSort]						=		123,
