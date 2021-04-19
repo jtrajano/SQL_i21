@@ -121,11 +121,11 @@ BEGIN
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'Duplicate Batch ID'
 	FROM 
-		#ARPostInvoiceHeader I
+		##ARPostInvoiceHeader I
 	WHERE  
 		EXISTS(SELECT strBatchId FROM tblGLDetail WHERE strBatchId = @BatchId)
 
-	INSERT INTO #ARInvalidInvoiceData
+	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
 		,[strTransactionType]

@@ -736,7 +736,7 @@ DECLARE @tblContractsFinancial AS Id
 
 INSERT INTO @tblContractsFinancial
 SELECT DISTINCT intInvoiceId
-FROM #ARPostInvoiceDetail 
+FROM ##ARPostInvoiceDetail 
 WHERE intContractDetailId IS NOT NULL
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblContractsFinancial)
@@ -796,7 +796,7 @@ SELECT intTransactionId			= PID.intInvoiceId
 	, intItemContractHeaderId	= ID.intItemContractHeaderId
 	, intItemContractDetailId	= ID.intItemContractDetailId
 	, intItemContractLineNo		= ICD.intLineNo
-FROM #ARPostInvoiceDetail PID
+FROM ##ARPostInvoiceDetail PID
 INNER JOIN tblARInvoiceDetail ID ON PID.intInvoiceDetailId = ID.intInvoiceDetailId
 INNER JOIN tblCTItemContractDetail ICD ON ID.intItemContractDetailId = ICD.intItemContractDetailId
 WHERE ID.intItemContractDetailId IS NOT NULL
