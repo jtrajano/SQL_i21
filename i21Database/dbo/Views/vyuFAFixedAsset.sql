@@ -56,7 +56,7 @@ LEFT JOIN tblGLAccount GLGainLoss ON GLGainLoss.intAccountId = FA.intGainLossAcc
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID=FA.intCurrencyId      
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId      
 OUTER APPLY(  
- SELECT intDepreciationMethodId FROM tblFABookDepreciation  WHERE intAssetId = FA.intAssetId AND intBookId =1  
+ SELECT TOP 1 intDepreciationMethodId FROM tblFABookDepreciation  WHERE intAssetId = FA.intAssetId AND intBookId =1  
 )BD  
 OUTER APPLY(  
  SELECT TOP 1 intDepreciationMethodId,strDepreciationMethodId,strConvention,strDepreciationType  
@@ -66,5 +66,5 @@ OUTER APPLY(
  SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intDepreciationMethodId = DM.intDepreciationMethodId ORDER BY intAssetDepreciationId DESC      
 )D
 OUTER APPLY(
-	SELECT  ysnFullyDepreciated FROM tblFABookDepreciation where intAssetId= FA.intAssetId AND ysnFullyDepreciated = 0
+	SELECT  TOP 1 ysnFullyDepreciated FROM tblFABookDepreciation where intAssetId= FA.intAssetId AND ysnFullyDepreciated = 0
 )BDF

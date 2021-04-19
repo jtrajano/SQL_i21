@@ -16,6 +16,9 @@ EXEC uspFADepreciateMultipleAsset
 @ysnReverseCurrentDate,  
 @strBatchId,  
 @successfulCount OUTPUT  
+
+
+
   
 IF @ysnPost =1  
 	BEGIN  
@@ -28,17 +31,37 @@ IF @ysnPost =1
 	GROUP BY A.intId  
 	
 	IF EXISTS(SELECT 1 FROM @Id1)  
+		EXEC uspFADepreciateMultipleAsset  
+		@Id,  
+		2,  	
+		@ysnPost,  
+		@ysnRecap,  
+		@intEntityId,  
+		@ysnReverseCurrentDate,  
+		@strBatchId,  
+		@successfulCount OUTPUT
 	
-	EXEC uspFADepreciateMultipleAsset  
-	@Id,  
-	2,  
-	@ysnPost,  
-	@ysnRecap,  
-	@intEntityId,  
-	@ysnReverseCurrentDate,  
-	@strBatchId,  
-	@successfulCount OUTPUT
+	
+
 END  
+
+
+DECLARE @tCount INT
+SELECT @tCount = COUNT(*) FROM tblFADepreciateLogDetail A JOIN tblFADepreciateLog B on A.intLogId = B.intLogId
+AND strBatchId = @strBatchId
+AND ISNULL(ysnError,0) = 1
+
+IF @tCount = 1
+BEGIN
+	DECLARE @strResult NVARCHAR(200)
+	SELECT @strResult = strResult FROM tblFADepreciateLogDetail A JOIN tblFADepreciateLog B on A.intLogId = B.intLogId
+	AND strBatchId = @strBatchId
+	AND ISNULL(ysnError,0) = 1
+	RAISERROR(@strResult, 16, 1)
+
+END
+		
+	
   
 RETURN 1  
   
