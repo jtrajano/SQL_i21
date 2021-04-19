@@ -65,6 +65,7 @@ BEGIN TRY
 					) CT
 					WHERE intTicketId = @intTicketId AND SC.strDistributionOption != 'SPL'
 						AND SC.strDistributionOption != 'LOD'
+						AND SC.strDistributionOption != 'SPT'
 				END
 				ELSE
 				BEGIN
