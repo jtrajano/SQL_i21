@@ -3926,13 +3926,16 @@ BEGIN TRY
 					-- Priced 1000 | BD 0 /
 					-- Priced 500 | BD 0 /
 					-- Priced 400 | BD 100 /
-					IF (@_basis > 0 OR @_actual > 0) AND @ysnDirect <> 1 AND isnull(@ysnLoadBased,0) = 0
-					BEGIN				
-						-- Basis Deliveries  
-						UPDATE @cbLogSpecific SET dblQty = CASE WHEN @ysnLoadBased = 1 THEN @_actual ELSE @_basis END,
-												  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
-												  intPricingTypeId = CASE WHEN ISNULL(@dblBasis, 0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+					IF ISNULL(@TotalPriced, 0) <= 0
+					BEGIN
+						IF (@_basis > 0 OR @_actual > 0) AND @ysnDirect <> 1
+						BEGIN				
+							-- Basis Deliveries  
+							UPDATE @cbLogSpecific SET dblQty = CASE WHEN @ysnLoadBased = 1 THEN @_actual ELSE @_basis END,
+													  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
+													  intPricingTypeId = CASE WHEN ISNULL(@dblBasis, 0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+						END
 					END
 				END
 				ELSE
