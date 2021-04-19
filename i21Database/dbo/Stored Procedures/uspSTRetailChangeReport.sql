@@ -10,6 +10,8 @@ BEGIN
 
 	SELECT DISTINCT
 		preview.strCategoryDescription AS strCategoryDescription,
+		preview.intCategoryId,
+		preview.intItemId,
 		preview.strItemNo,
 		preview.strDescription AS strItemDescription,
 		preview.strOldData,
@@ -18,6 +20,8 @@ BEGIN
 	(
 		SELECT 
 			cat.strDescription AS strCategoryDescription,
+			item.intCategoryId,
+			item.intItemId,
 			item.strItemNo,
 			item.strDescription,
 			et.strOldData,
@@ -29,16 +33,27 @@ BEGIN
 				MAX(tblMaxRetail.dblRetailPrice) AS strNewData,  
 				MIN(te.dblRetailPrice) AS strOldData
 			FROM (
-				SELECT *
-				FROM
+					SELECT *
+					FROM
 					(
-						SELECT
-							ep.*, 
-							COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
-							ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
-												ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts
-						FROM tblICEffectiveItemPrice ep
-						WHERE ep.dtmEffectiveRetailPriceDate < @dtmEndChange
+						SELECT ep.*, 
+								COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
+								ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
+													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts 
+						FROM
+						(
+							SELECT intItemId, intItemLocationId, dblRetailPrice, dtmEffectiveRetailPriceDate
+							FROM tblICEffectiveItemPrice ep
+							WHERE ep.dtmEffectiveRetailPriceDate < @dtmEndChange
+
+							UNION
+
+							SELECT ep.intItemId, ep.intItemLocationId, ep.dblSalePrice AS dblRetailPrice, '1900-01-01 00:00:00.000' AS dtmEffectiveRetailPriceDate
+							FROM tblICItemPricing ep
+								JOIN tblICEffectiveItemPrice eip 
+								ON ep.intItemId = eip.intItemId AND ep.intItemLocationId = eip.intItemLocationId
+
+						) ep
 					) r
 					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 2
 				) te
