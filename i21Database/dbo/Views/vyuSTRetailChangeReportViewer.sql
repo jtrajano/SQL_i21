@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuSTRetailChangeReportViewer]
 AS
-	SELECT 
+	SELECT DISTINCT
 		preview.intStoreId,
 		preview.dtmEffectiveRetailPriceDateMin,
 		preview.dtmEffectiveRetailPriceDateMax,
@@ -31,15 +31,26 @@ AS
 				MIN(te.dtmEffectiveRetailPriceDate) AS dtmEffectiveRetailPriceDateMin,
 				MAX(tblMaxRetail.dtmEffectiveRetailPriceDate) AS dtmEffectiveRetailPriceDateMax
 			FROM (
-				SELECT *
-				FROM
+					SELECT *
+					FROM
 					(
-						SELECT
-							ep.*, 
-							COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
-							ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
-												ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts
-						FROM tblICEffectiveItemPrice ep
+						SELECT ep.*, 
+								COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
+								ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
+													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts 
+						FROM
+						(
+							SELECT intItemId, intItemLocationId, dblRetailPrice, dtmEffectiveRetailPriceDate
+							FROM tblICEffectiveItemPrice ep
+
+							UNION
+
+							SELECT ep.intItemId, ep.intItemLocationId, ep.dblSalePrice AS dblRetailPrice, '1900-01-01 00:00:00.000' AS dtmEffectiveRetailPriceDate
+							FROM tblICItemPricing ep
+								JOIN tblICEffectiveItemPrice eip 
+								ON ep.intItemId = eip.intItemId AND ep.intItemLocationId = eip.intItemLocationId
+
+						) ep
 					) r
 					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 2
 				) te
@@ -54,8 +65,8 @@ AS
 								ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
 													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts
 							FROM tblICEffectiveItemPrice ep
-						) r
-						WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 1
+					) r
+					WHERE r.ts = 1
 				) tblMaxRetail
 				ON te.intItemId = tblMaxRetail.intItemId AND te.intItemLocationId = tblMaxRetail.intItemLocationId
 				GROUP BY te.intItemId, te.intItemLocationId
