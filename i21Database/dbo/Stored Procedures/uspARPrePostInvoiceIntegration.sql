@@ -254,7 +254,7 @@ SELECT
     ,[intStorageLocationId] = [intStorageLocationId]
     ,[intUserId]            = [intUserId]
     ,[dtmDate]              = [dtmPostDate] 
-FROM #ARPostInvoiceDetail
+FROM ##ARPostInvoiceDetail
 WHERE
     [ysnBlended] = 0
     AND [ysnAutoBlend] = 1
@@ -329,7 +329,7 @@ SET
 FROM
     tblARInvoice ARI
 INNER JOIN
-    #ARPostInvoiceHeader ARI1
+    ##ARPostInvoiceHeader ARI1
 		ON ARI.[intInvoiceId] = ARI1.[intInvoiceId]
 		AND ARI.[strType] = 'Provisional'
 

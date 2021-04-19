@@ -33,7 +33,7 @@ DECLARE @tblToProcess TABLE (
 	  , dtmDate						DATETIME NULL
 )
 
-DELETE FROM #ARItemsForContracts
+DELETE FROM ##ARItemsForContracts
 DELETE FROM @tblToProcess
 INSERT INTO @tblToProcess (
 	  intInvoiceDetailId
@@ -90,7 +90,7 @@ SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
 	, strTransactionType			= ID.strTransactionType
 	, strItemNo						= ID.strItemNo
 	, dtmDate						= ID.dtmDate
-FROM #ARPostInvoiceDetail ID
+FROM ##ARPostInvoiceDetail ID
 INNER JOIN tblARInvoiceDetail IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -167,7 +167,7 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 			, strTransactionType	= I.strTransactionType
 			, strItemNo				= I.strItemNo
 			, dtmDate				= I.dtmDate
-		FROM #ARPostInvoiceDetail I
+		FROM ##ARPostInvoiceDetail I
 		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 		INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -341,7 +341,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 		BEGIN
 				IF	@ReduceBalance	=	1
 				BEGIN
-					INSERT INTO #ARItemsForContracts (
+					INSERT INTO ##ARItemsForContracts (
 						  intInvoiceId
 						, intInvoiceDetailId
 						, intOriginalInvoiceId
@@ -387,7 +387,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 				
 				IF ISNULL(@ysnFromReturn, 0) = 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3))
 				BEGIN
-					INSERT INTO #ARItemsForContracts (
+					INSERT INTO ##ARItemsForContracts (
 						  intInvoiceId
 						, intInvoiceDetailId
 						, intItemId
@@ -446,7 +446,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 							  	
 							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
-							UPDATE #ARItemsForContracts
+							UPDATE ##ARItemsForContracts
 							SET dblQuantity = dblQuantity - CASE WHEN @Post = 1 AND @dblQty > 0 THEN @dblRemainingSchedQty ELSE 0 END
 							  , dblSheduledQty = dblSheduledQty - CASE WHEN @Post = 1 AND @dblQty > 0 THEN @dblRemainingSchedQty ELSE 0 END
 							WHERE strType = 'Contract Scheduled'
@@ -456,6 +456,52 @@ WHILE ISNULL(@intUniqueId,0) > 0
 						END
 				END
 		END
+		
+		IF ISNULL(@ysnFromReturn, 0) = 1 AND ISNULL(@ysnDestWtGrd,0) = 1
+			BEGIN
+				INSERT INTO ##ARItemsForContracts (
+					  intInvoiceId
+					, intInvoiceDetailId
+					, intOriginalInvoiceId
+					, intOriginalInvoiceDetailId
+					, intItemId
+					, intContractDetailId
+					, intContractHeaderId
+					, intEntityId
+					, intUserId
+					, dtmDate
+					, dblQuantity
+					, dblBalanceQty
+					, dblSheduledQty
+					, dblRemainingQty
+					, strType
+					, strTransactionType
+					, strInvoiceNumber
+					, strItemNo
+					, strBatchId
+					, ysnFromReturn
+				)
+				SELECT intInvoiceId					= @intInvoiceId
+					, intInvoiceDetailId			= @intInvoiceDetailId
+					, intOriginalInvoiceId			= @intOriginalInvoiceId
+					, intOriginalInvoiceDetailId	= @intOriginalInvoiceDetailId
+					, intItemId						= @intItemId
+					, intContractDetailId			= @intContractDetailId
+					, intContractHeaderId			= @intContractHeaderId
+					, intEntityId					= @intEntityId
+					, intUserId						= @intEntityId
+					, dtmDate						= @dtmDate
+					, dblQuantity					= @dblConvertedQty
+					, dblBalanceQty					= @dblConvertedQty
+					, dblSheduledQty				= 0
+					, dblRemainingQty				= 0
+					, strType						= 'Contract Balance'
+					, strTransactionType			= @strTransactionType
+					, strInvoiceNumber				= @strInvoiceNumber
+					, strItemNo						= @strItemNo
+					, strBatchId					= @strBatchId
+					, ysnFromReturn					= @ysnFromReturn
+			END
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
