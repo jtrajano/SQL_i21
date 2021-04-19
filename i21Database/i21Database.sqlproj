@@ -9220,6 +9220,7 @@
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
