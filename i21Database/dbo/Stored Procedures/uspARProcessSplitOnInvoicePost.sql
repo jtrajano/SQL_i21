@@ -23,67 +23,6 @@ ELSE
 
 BEGIN TRY
 
-
---IF @post = 1 AND @recap = 0
---BEGIN
---	DECLARE @SplitInvoiceData TABLE([intInvoiceId] INT)
-
---	INSERT INTO @SplitInvoiceData
---	SELECT 
---		intInvoiceId
---	FROM
---		dbo.tblARInvoice ARI WITH (NOLOCK)
---	WHERE
---		ARI.[ysnSplitted] = 0 
---		AND ISNULL(ARI.[intSplitId], 0) > 0
---		AND EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
---		AND ARI.strTransactionType IN ('Invoice', 'Cash', 'Debit Memo')
-
---	WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
---		BEGIN
---			DECLARE @invoicesToAdd NVARCHAR(MAX) = NULL, @intSplitInvoiceId INT
-
---			SELECT TOP 1 @intSplitInvoiceId = intInvoiceId FROM @SplitInvoiceData ORDER BY intInvoiceId
-
---			EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @userId, @invoicesToAdd OUT
-
---			DELETE FROM @PostInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
-
---			IF (ISNULL(@invoicesToAdd, '') <> '')
---				BEGIN
---                    DELETE FROM @InvoiceIds
-
---                    INSERT INTO @InvoiceIds
---                        ([intHeaderId]
---                        ,[ysnPost]
---                        ,[ysnRecap]
---                        ,[strBatchId]
---                        ,[ysnAccrueLicense])
---                    SELECT
---                            [intHeaderId]      = ARI.[intInvoiceId]
---                        ,[ysnPost]          = @post
---                        ,[ysnRecap]         = @recap
---                        ,[strBatchId]       = @batchIdUsed
---                        ,[ysnAccrueLicense]	= @accrueLicense
---                    FROM
---                        tblARInvoice ARI
---                    WHERE
---                        EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd) DV WHERE DV.[intID] = ARI.[intInvoiceId])
---                        AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
-
---                    INSERT INTO @PostInvoiceData 
---                    SELECT *
---                    FROM [dbo].[fnARGetInvoiceDetailsForPosting]
---                        (@InvoiceIds        --@InvoiceIds
---                        ,@batchIdUsed       --@BatchId
---                        ,@userId            --@UserId
---                        ,NULL               --@IntegrationLogId
---                        )					
---				END
-
---			DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
---		END
---END
 DECLARE @ForInsertion NVARCHAR(MAX)
 DECLARE @ForDeletion NVARCHAR(MAX)
 
@@ -248,7 +187,7 @@ SELECT
 	,[strReceiptNumber]
 	,[ysnInterCompany]
 FROM
-    #ARPostInvoiceHeader
+    ##ARPostInvoiceHeader
 WHERE
 	[ysnSplitted] = 0
     AND ISNULL([intSplitId], 0) > 0
@@ -313,10 +252,10 @@ END
 
 IF (ISNULL(@ForDeletion, '') <> '')
 	BEGIN
-        DELETE FROM #ARPostInvoiceHeader
+        DELETE FROM ##ARPostInvoiceHeader
         WHERE 
             [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
-        DELETE FROM #ARPostInvoiceDetail
+        DELETE FROM ##ARPostInvoiceDetail
         WHERE 
             [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
 	END
@@ -342,17 +281,8 @@ IF (ISNULL(@ForInsertion, '') <> '')
             tblARInvoice ARI
         WHERE
             EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@ForInsertion) DV WHERE DV.[intID] = ARI.[intInvoiceId])
-            AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+            AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
 
-        --INSERT INTO #ARPostInvoiceData 
-        --SELECT *
-        --FROM [dbo].[fnARGetInvoiceDetailsForPosting]
-        --        (@InvoiceIds   --@InvoiceIds
-        --        ,@BatchId      --@BatchId
-        --        ,@UserId       --@UserId
-        --        ,NULL          --@IntegrationLogId
-        --        )
-		--DELETE FROM @InvoiceIds		
 		EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
 			 @Param             = NULL
 			,@BeginDate         = NULL
@@ -368,10 +298,7 @@ IF (ISNULL(@ForInsertion, '') <> '')
 			,@AccrueLicense     = 0
 			,@TransType         = NULL
 			,@UserId            = @UserId	
-			
-
 	END
-
 
 END TRY
 BEGIN CATCH

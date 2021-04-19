@@ -10,7 +10,7 @@ AS
 	DECLARE @intInvoiceId INT = 0
 
 	SELECT @strDatabaseName = strDatabaseName, @strInvoiceNumber = strInvoiceNumber
-	FROM #ARPostInvoiceHeader I
+	FROM ##ARPostInvoiceHeader I
 	INNER JOIN tblARCustomer C
 	ON I.intEntityCustomerId = C.intEntityId
 	INNER JOIN tblSMInterCompany IC
