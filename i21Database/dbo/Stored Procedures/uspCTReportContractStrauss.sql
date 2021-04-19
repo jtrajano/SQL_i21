@@ -262,9 +262,9 @@ BEGIN TRY
 		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
 		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId 
 	
-	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
+	SELECT @ysnExternal = (CASE WHEN intBookVsEntityId > 0 THEN CONVERT(BIT, 0) ELSE CONVERT(BIT, 1) END)
 	FROM tblCTContractHeader CH
-	left join tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
+	LEFT JOIN tblCTBookVsEntity be ON be.intEntityId = CH.intEntityId
 	WHERE CH.intContractHeaderId = @intContractHeaderId
 	
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
@@ -334,7 +334,7 @@ BEGIN TRY
 		,StraussContractApproverSignature		= @blbChildApproveSignature
 		,strEntityName							= (CASE WHEN @ysnIsParent = CONVERT(BIT, 0) THEN LTRIM(RTRIM(EY.strEntityName)) ELSE @strCompanyName END)
 		,strCompanyName							= (CASE WHEN @ysnIsParent = CONVERT(BIT, 0) THEN @strCompanyName ELSE LTRIM(RTRIM(EY.strEntityName)) END)
-		,strItemBundleNoLabel					= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN 'GROUP QUALITY CODE:' ELSE NULL END)
+		,strItemBundleNoLabel					= (CASE WHEN @ysnExternal = CONVERT(BIT, 0) THEN 'GROUP QUALITY CODE:' ELSE NULL END)
 		,blbHeaderLogo							= dbo.fnSMGetCompanyLogo('Header')
 		,strStraussOtherPartyAddress			= '<span style="font-family:Arial;font-size:12px;">' +
 													CASE WHEN CH.strReportTo = 'Buyer'
@@ -359,7 +359,7 @@ BEGIN TRY
 		 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
 		 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
 		 ,strItemDescription					= @strItemDescription
-		 ,strItemBundleNo						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN @strItemBundleNo ELSE NULL END)
+		 ,strItemBundleNo						= (CASE WHEN @ysnExternal = CONVERT(BIT, 0) THEN @strItemBundleNo ELSE NULL END)
 		 ,strStraussPrice						= CASE WHEN CH.intPricingTypeId = 2 THEN 'Price to be fixed basis ' + @strFutMarketName + ' ' +
 															@strFutureMonthYear + CASE WHEN @dblContractDetailBasis < 0 THEN ' minus ' ELSE ' plus ' END +
 															@strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(@dblContractDetailBasis),2) + '/'+ @strUnitMeasure +' at '+ @strFixationBy+'''s option prior to first notice day of '+@strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
