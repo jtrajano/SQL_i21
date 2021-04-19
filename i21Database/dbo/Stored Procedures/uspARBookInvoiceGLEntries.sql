@@ -115,7 +115,7 @@ SELECT
     ,[intSourceEntityId]
     ,[ysnRebuild]
 FROM
-	#ARInvoiceGLEntries
+	##ARInvoiceGLEntries
 
 DECLARE @SkipICValidation BIT = 0
  
@@ -177,7 +177,7 @@ IF @Post = 0
              [intInvoiceId]
             ,[strInvoiceNumber]
         FROM
-            #ARPostInvoiceDetail
+            ##ARPostInvoiceDetail
         WHERE
 		    [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash')				 	
             AND [intItemId] IS NOT NULL
@@ -194,8 +194,8 @@ IF @Post = 0
             ORDER BY
                 [intInvoiceId]
 
-            SELECT @WStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
-            SELECT @WOStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
+            SELECT @WStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
+            SELECT @WOStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
             IF @WOStorageCount > 0
             BEGIN
                 -- Unpost onhand stocks. 

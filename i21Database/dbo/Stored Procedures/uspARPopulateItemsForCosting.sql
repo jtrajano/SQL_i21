@@ -26,7 +26,7 @@ SET @ZeroBit = CAST(0 AS BIT)
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
 
-INSERT INTO #ARItemsForCosting
+INSERT INTO ##ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -110,7 +110,7 @@ SELECT
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[ysnForValidation]         = @OneBit
 FROM
-    #ARPostInvoiceDetail ARID
+    ##ARPostInvoiceDetail ARID
 INNER JOIN
 	(SELECT [intItemId], [ysnSeparateStockForUOMs], [strLotTracking] FROM tblICItem WITH (NOLOCK)) ICI
 		ON ARID.[intItemId] = ICI.[intItemId]
@@ -148,7 +148,7 @@ WHERE
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ARID.[intOriginalInvoiceDetailId] IS NULL))
 
-INSERT INTO #ARItemsForCosting
+INSERT INTO ##ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -232,7 +232,7 @@ SELECT
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[ysnForValidation]         = @ZeroBit
 FROM
-    #ARPostInvoiceDetail ARID
+    ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -263,7 +263,7 @@ WHERE
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ARID.[intOriginalInvoiceDetailId] IS NULL))
 
-INSERT INTO #ARItemsForCosting
+INSERT INTO ##ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -328,7 +328,7 @@ SELECT
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
-	#ARPostInvoiceDetail ARID
+	##ARPostInvoiceDetail ARID
 		ON ARIC.[intItemId] = ARID.[intItemId]
 		AND ARIC.[intCompanyLocationId] = ARID.[intCompanyLocationId]	
 INNER JOIN

@@ -19,7 +19,7 @@ WHERE	[strName] = 'Invoice'
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000			
 
-INSERT INTO #ARItemsForInTransitCosting
+INSERT INTO ##ARItemsForInTransitCosting
 	([intItemId] 
 	,[intItemLocationId] 
 	,[intItemUOMId] 
@@ -70,7 +70,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
@@ -130,7 +130,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
@@ -187,7 +187,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
@@ -255,7 +255,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
@@ -314,7 +314,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
 		 , LGD.[intLoadDetailId]
@@ -383,7 +383,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
 		 , LGD.[intLoadDetailId]
@@ -451,7 +451,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= NULL
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
 		 , LGD.[intLoadDetailId]
@@ -521,7 +521,7 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= NULL
-FROM #ARPostInvoiceDetail ARID
+FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
 		 , LGD.[intLoadDetailId]
@@ -561,7 +561,7 @@ WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (A
 
 UPDATE A 
 SET intLinkedItemId = B.intItemId
-FROM #ARItemsForInTransitCosting A
+FROM ##ARItemsForInTransitCosting A
 JOIN tblICInventoryShipmentItem B ON A.intLinkedItem = B.intParentItemLinkId
 WHERE A.intLinkedItem IS NOT NULL
 
