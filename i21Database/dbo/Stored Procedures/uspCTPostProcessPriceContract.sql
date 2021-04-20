@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspCTPostProcessPriceContract]
+﻿CREATE PROCEDURE [dbo].[uspCTPostProcessPriceContract]
 	@strXML    NVARCHAR(MAX),
 	@intUserId INT
 
