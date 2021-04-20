@@ -85,15 +85,47 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-OUTER APPLY (
-    --DO NOT ADD TAX FOR RECEIPT IF THERE IS NO TAX (NO TAX DETAILS) ON VOUCHER TO REMOVE DATA ON CLEARING REPORT
-    --FOR MATCHING WITH GL, WE HAVE DATA FIXES FOR GL
-    SELECT
-        COUNT(*) AS intCount
-    FROM tblAPBillDetail billDetail
-    INNER JOIN tblAPBillDetailTax bdTax ON bdTax.intBillDetailId = billDetail.intBillDetailId
-    WHERE billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-) voucherTax
+LEFT JOIN (
+    --SINCE WE REVERSE IN GL THOSE TAX DETAIL THAT DOES NOT HAVE VOUCHER
+    --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
+    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
+    --IF NO VOUCHER JUST TAKE THE TAX
+    SELECT SUM(dblTax) AS dblTax,
+		intInventoryReceiptItemId
+    FROM (
+        SELECT DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
+            rctTax.intInventoryReceiptItemId,
+            --rctTax.intInventoryReceiptItemTaxId,
+            rctTax.dblTax AS dblTax
+        FROM tblICInventoryReceiptItemTax rctTax
+		INNER JOIN tblICInventoryReceiptItem rctItem ON rctItem.intInventoryReceiptItemId = rctTax.intInventoryReceiptItemId
+        LEFT JOIN tblAPBillDetail billDetail 
+            ON billDetail.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId
+            AND billDetail.intInventoryReceiptChargeId IS NULL
+        LEFT JOIN tblAPBillDetailTax billDetailTax
+                ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
+                AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
+                AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+        WHERE 
+            rctTax.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId 
+        AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
+                ELSE (
+                    CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
+                )
+                END
+    ) tmpTax
+	GROUP BY intInventoryReceiptItemId
+) clearingTax
+	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+-- OUTER APPLY (
+--     --DO NOT ADD TAX FOR RECEIPT IF THERE IS NO TAX (NO TAX DETAILS) ON VOUCHER TO REMOVE DATA ON CLEARING REPORT
+--     --FOR MATCHING WITH GL, WE HAVE DATA FIXES FOR GL
+--     SELECT
+--         COUNT(*) AS intCount
+--     FROM tblAPBillDetail billDetail
+--     INNER JOIN tblAPBillDetailTax bdTax ON bdTax.intBillDetailId = billDetail.intBillDetailId
+--     WHERE billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+-- ) voucherTax
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
