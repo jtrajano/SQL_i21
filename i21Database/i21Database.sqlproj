@@ -6103,7 +6103,6 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLErrorMessages.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSummaryReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringToColumns.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTags.sql" />
