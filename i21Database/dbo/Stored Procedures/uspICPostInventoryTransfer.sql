@@ -973,7 +973,7 @@ BEGIN
 			)
 			SELECT 'Create',
 				Transfer.intSourceId, 
-				Transfer.strSourceTransactionNo, 
+				COALESCE(Transfer.strSourceTransactionNo, 'Missing Transaction No'), 
 				Transfer.strSourceModule, 
 				Transfer.strSourceScreen,
 				@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Transfer'

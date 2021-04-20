@@ -2020,7 +2020,7 @@ BEGIN
 			)
 			SELECT 'Create',
 				Receipt.intOrderId, 
-				COALESCE(Receipt.strOrderNumber, Receipt.strSourceNumber), 
+				COALESCE(Receipt.strOrderNumber, Receipt.strSourceNumber, 'Missing Transaction No'), 
 				Receipt.strSourceType, 
 				Receipt.strSourceType,
 				@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Receipt'

@@ -1058,7 +1058,7 @@ BEGIN
 			)
 			SELECT 'Create',
 				Shipment.intOrderId, 
-				Shipment.strOrderNumber,
+				COALESCE(Shipment.strOrderNumber, 'Missing Transaction No'),
 				@strSourceName,
 				@strSourceName,
 				@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Shipment'

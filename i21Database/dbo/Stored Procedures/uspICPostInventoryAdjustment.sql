@@ -614,7 +614,7 @@ BEGIN
 				)
 				SELECT 'Create',
 					Adjustment.intSourceId, 
-					Adjustment.strSourceTransactionNo, 
+					COALESCE(Adjustment.strSourceTransactionNo, 'Missing Transaction No'), 
 					'None', 
 					'None',
 					@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Adjustment'

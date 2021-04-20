@@ -84,7 +84,7 @@ BEGIN
 		SELECT 'Create',
 			@intReceiptId, Voucher.strReceiptNumber, 'Inventory', 'Inventory Receipt',
 			Voucher.intDestinationId, 
-			Voucher.strDestinationNo, 
+			COALESCE(Voucher.strDestinationNo, 'Missing Transaction No'), 
 			'Purchasing', 
 			'Voucher'
 		FROM dbo.vyuICGetReceiptItemVoucherDestination Voucher
