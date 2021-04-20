@@ -12,6 +12,12 @@
     --CONSTRAINT [FK_dbo.tblSMLog_dbo.tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [PK_dbo.tblSMLog] PRIMARY KEY CLUSTERED ([intLogId] ASC)
 );
+
 GO
 CREATE NONCLUSTERED INDEX [IX_tblSMLog_intLogId] ON [dbo].[tblSMLog] ([intTransactionId])
 GO
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSMLog_1] ON [dbo].[tblSMLog] ([dtmDate]) include ([intTransactionId])
+GO
+
