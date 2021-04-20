@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspRestApiImportInvoice] (@guiUniqueId UNIQUEIDENTIFIER)
+ALTER PROCEDURE [dbo].[uspRestApiImportInvoice] (@guiUniqueId UNIQUEIDENTIFIER)
 AS
 
 DECLARE @InvoiceEntries		AS InvoiceStagingTable
@@ -45,28 +45,41 @@ WHERE e.guiUniqueId = @guiUniqueId
 	AND (e.intDollarContractDetailId IS NOT NULL AND e.intDollarContractHeaderId IS NOT NULL)
 	AND c.intCategoryId IS NULL
 
-IF NOT EXISTS (SELECT TOP 1 NULL FROM tblRestApiInvoiceStaging IE INNER JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(IE.intEntityId, 0) WHERE guiUniqueId = @guiUniqueId)
-BEGIN
-	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-	SELECT 'The customer does not exists. Please ensure that the entityId is correct.', 'entityId', 'Error',
-		(SELECT TOP 1 ISNULL(CAST(IE.intEntityId AS NVARCHAR(200)), IE.strCustomerNumber) FROM tblRestApiInvoiceStaging IE LEFT JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(IE.intEntityId, 0) WHERE guiUniqueId = @guiUniqueId)
-END
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT DISTINCT 'The customer does not exists. Please ensure that the customerId is correct.', 'customerId', 'Error', IE.strCustomerNumber
+FROM tblRestApiInvoiceStaging IE 
+LEFT JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber))
+WHERE guiUniqueId = @guiUniqueId
+	AND C.intEntityId IS NULL
+	AND NULLIF(IE.intEntityId, 0) IS NULL
+	AND NULLIF(IE.strCustomerNumber, '') IS NOT NULL
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'The location does not exists.', 'locationId', 'Error', IE.strCompanyLocation
+SELECT DISTINCT 'The customer does not exists. Please ensure that the entityId is correct.', 'entityId', 'Error', CAST(IE.intEntityId AS NVARCHAR(200))
+FROM tblRestApiInvoiceStaging IE 
+LEFT JOIN tblARCustomer C ON NULLIF(IE.intEntityId, 0) = C.intEntityId
+WHERE guiUniqueId = @guiUniqueId
+	AND C.intEntityId IS NULL
+	AND NULLIF(IE.strCustomerNumber, '') IS NULL
+	AND NULLIF(IE.intEntityId, 0) IS NOT NULL
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT DISTINCT 'The location does not exists.', 'strCompanyLocation', 'Error', IE.strCompanyLocation
 FROM tblRestApiInvoiceStaging IE
 LEFT JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)) 
 	OR RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationName))
 WHERE IE.guiUniqueId = @guiUniqueId
 	AND NULLIF(IE.intLocationId, 0) IS NULL
+	AND NULLIF(IE.strCompanyLocation, '') IS NOT NULL
 	AND CL.intCompanyLocationId IS NULL
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Invalid locationId.', 'locationId', 'Error', NULLIF(IE.intLocationId, 0)
+SELECT DISTINCT 'Invalid locationId.', 'locationId', 'Error', NULLIF(IE.intLocationId, 0)
 FROM tblRestApiInvoiceStaging IE
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = NULLIF(IE.intLocationId, 0)
 WHERE IE.guiUniqueId = @guiUniqueId
 	AND NULLIF(IE.intLocationId, 0) IS NOT NULL
+	AND NULLIF(IE.strCompanyLocation, '') IS NULL
 	AND CL.intCompanyLocationId IS NULL
 
 IF NOT EXISTS(SELECT * FROM @Logs)
