@@ -8950,6 +8950,7 @@
     <Build Include="dbo\Views\vyuCTContractOptionView.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
