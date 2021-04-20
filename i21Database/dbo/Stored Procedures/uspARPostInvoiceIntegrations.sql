@@ -723,7 +723,7 @@ WHERE ISNULL(CUSTOMER.[dblCreditLimit], @ZeroDecimal) > @ZeroDecimal
 --UPDATE BATCH ID
 UPDATE INV
 SET INV.[strBatchId]	 = CASE WHEN PID.[ysnPost] = 1 THEN PID.[strBatchId] ELSE NULL END
-  , INV.[dtmBatchDate]  = CASE WHEN PID.[ysnPost] = 1 THEN PID.[dtmPostDate] ELSE NULL END
+  , INV.[dtmBatchDate]  = CASE WHEN PID.[ysnPost] = 1 THEN CAST(GETDATE() AS DATE) ELSE NULL END
   , INV.[intPostedById] = CASE WHEN PID.[ysnPost] = 1 THEN PID.[intUserId] ELSE NULL END
 FROM tblARInvoice INV
 INNER JOIN ##ARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
