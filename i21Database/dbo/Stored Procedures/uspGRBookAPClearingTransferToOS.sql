@@ -147,7 +147,6 @@ BEGIN TRY
     ) APC
     WHERE TSR.intTransferStorageReferenceId = @intTransferStorageReferenceId
         AND IR.ysnPosted = 1
-        AND (IRC.ysnAccrue = 1 OR IRC.ysnPrice = 1)
 
     -- APC Offset Entries for Item
     -- DP (from transfer) to OS

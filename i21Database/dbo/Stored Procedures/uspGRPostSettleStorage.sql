@@ -2925,6 +2925,55 @@ BEGIN TRY
 			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
 		--END
 
+	--8 Book AP clearing for Customer Owned storage settlement
+	IF @strOwnedPhysicalStock ='Customer' AND @ysnFromPriceBasisContract = 0
+	BEGIN		
+		DECLARE @APClearing AS APClearing;
+		DELETE FROM @APClearing;
+		INSERT INTO @APClearing
+		(
+			[intTransactionId],
+			[strTransactionId],
+			[intTransactionType],
+			[strReferenceNumber],
+			[dtmDate],
+			[intEntityVendorId],
+			[intLocationId],
+			--DETAIL
+			[intTransactionDetailId],
+			[intAccountId],
+			[intItemId],
+			[intItemUOMId],
+			[dblQuantity],
+			[dblAmount],
+			--OTHER INFORMATION
+			[strCode]
+		)
+		SELECT
+			-- HEADER
+			[intTransactionId]          = V.intSettleStorageId
+			,[strTransactionId]         = V.strTransactionNumber
+			,[intTransactionType]       = 6 -- GRAIN
+			,[strReferenceNumber]       = ''
+			,[dtmDate]                  = V.dtmDate
+			,[intEntityVendorId]        = V.intEntityVendorId
+			,[intLocationId]            = V.intLocationId
+			-- DETAIL
+			,[intTransactionDetailId]   = V.intCustomerStorageId
+			,[intAccountId]             = V.intAccountId
+			,[intItemId]                = V.intItemId
+			,[intItemUOMId]             = V.intItemUOMId
+			,[dblQuantity]              = V.dblSettleStorageQty
+			,[dblAmount]                = V.dblSettleStorageAmount
+			,[strCode]                  = 'STR'
+		FROM vyuAPGrainClearing V
+		WHERE V.strTransactionNumber = @strSettleTicket
+		AND V.intSettleStorageId = @intSettleStorageId
+		AND V.dblSettleStorageAmount <> 0
+
+		EXEC uspAPClearing @APClearing = @APClearing, @post = 1;
+	END
+
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage	
 	WHERE intParentSettleStorageId = @intParentSettleStorageId 
