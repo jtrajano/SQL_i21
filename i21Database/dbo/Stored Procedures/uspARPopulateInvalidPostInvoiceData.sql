@@ -2300,6 +2300,65 @@ BEGIN
 		,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
 	FROM 
 		[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @OneBit)
+
+	--VALIDATE INVENTORY ACCOUNTS
+	DECLARE @InvalidItemsForPosting TABLE (
+		  intInvoiceId				INT
+		, intInvoiceDetailId		INT
+		, intItemId					INT
+		, intItemLocationId			INT
+		, strInvoiceNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		, strAccountCategory		NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	)
+
+	INSERT INTO @InvalidItemsForPosting (
+		  intInvoiceId
+		, intInvoiceDetailId
+		, intItemId
+		, intItemLocationId
+		, strInvoiceNumber
+		, strAccountCategory
+	)
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Inventory'
+	FROM @ItemsForCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory') IS NULL	
+
+	UNION ALL
+
+	SELECT intInvoiceId			= IC.intTransactionId
+		, intInvoiceDetailId	= IC.intTransactionDetailId		
+		, intItemId				= IC.intItemId
+		, intItemLocationId		= IC.intItemLocationId
+		, strInvoiceNumber		= IC.strTransactionId
+		, strAccountCategory	= 'Inventory In-Transit'
+	FROM @ItemsForInTransitCosting IC
+	WHERE dbo.fnGetItemGLAccount(IC.intItemId, IC.intItemLocationId, 'Inventory In-Transit') IS NULL	
+	
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	SELECT
+		 [intInvoiceId]			= IC.intInvoiceId
+		,[strInvoiceNumber]		= IC.strInvoiceNumber
+		,[strTransactionType]	= 'Invoice'
+		,[intInvoiceDetailId]	= IC.intInvoiceDetailId
+		,[intItemId]			= IC.intItemId
+		,[strBatchId]			= @BatchId
+		,[strPostingError]		= ITEM.strItemNo + ' in ' + CL.strLocationName + ' is missing a GL account setup for ' + IC.strAccountCategory + ' account category.'
+	FROM @InvalidItemsForPosting IC
+	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
+	INNER JOIN tblICItemLocation IL ON IC.intItemLocationId = IL.intItemLocationId
+	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
 END
 
 IF @Post = @ZeroBit
