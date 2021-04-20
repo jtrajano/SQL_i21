@@ -8156,6 +8156,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryValuationAsCommodityStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
     <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
