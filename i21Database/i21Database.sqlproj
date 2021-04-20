@@ -9308,6 +9308,7 @@
     <Build Include="dbo\Views\vyuICGetAdjustmentDetailSource.sql" />
     <Build Include="dbo\Views\vyuICGetTransferDetailSource.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItemVoucherDestination.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
