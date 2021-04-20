@@ -366,17 +366,27 @@ BEGIN TRY
 									ELSE CASE WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
 											ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END * CD.dblQuantityPerLoad END
 		*/
-		  , dblAppliedLoadQty =  	CASE
-									WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)
-									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
+	    , dblAppliedLoadQty =   case
+								when CT.ysnLoad = 1
+								then
+									case
+									when Bill.dblQuantity > 0 THEN Bill.dblQuantity
 									WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
-									ELSE
-										CASE
-										WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
-										ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)
-										END
-										* CD.dblQuantityPerLoad
-									END
+									else (ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ) * CD.dblQuantityPerLoad 
+									end
+								else
+									CASE  
+									WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)  
+									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity  
+									WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity  
+									ELSE  
+										CASE  
+										WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)  
+										ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)  
+										END  
+										* CD.dblQuantityPerLoad  
+									END 
+								end
 		, dblExchangeRate = dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0)
 		, IM.intProductTypeId
 		, ysnItemUOMIdExist = CAST(1 AS BIT)
