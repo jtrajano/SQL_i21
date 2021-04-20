@@ -60,7 +60,7 @@ BEGIN
 	FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRSettleStorageTicket ST ON ST.intCustomerStorageId = CS.intCustomerStorageId
 	INNER JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = ST.intSettleStorageId
-	WHERE CS.intCustomerStorageId = @intCustomerStorageId AND SS.intSettleStorageId = @intSettleStorageId AND CS.intItemId = @intItemId
+	WHERE CS.intCustomerStorageId = @intCustomerStorageId AND SS.intSettleStorageId = @intSettleStorageId
 
 	--UNION ALL
 	--GRAIN TRANSFER
