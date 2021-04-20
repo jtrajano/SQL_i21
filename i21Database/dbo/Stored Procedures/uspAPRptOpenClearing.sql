@@ -181,7 +181,7 @@ SET @query = '
 		'+ @filterPerItem +'
 		GROUP BY intTransactionType, intTransactionDetailId, intItemId, strVendorIdName, strTransactionId, strLocationName, strReferenceNumber
 	) detailedClearing
-	WHERE detailedClearing.dblClearingAmount <> 0
+	WHERE detailedClearing.dblClearingAmount <> 0 AND detailedClearing.dblQuantity <> 0
 '
 
 --FINALIZE AND ADD HEADER INFORMATIONS
