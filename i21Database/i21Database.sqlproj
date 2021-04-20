@@ -9185,6 +9185,7 @@
     <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPreProcessPriceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPostProcessPriceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
