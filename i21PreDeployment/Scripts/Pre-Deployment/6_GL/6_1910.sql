@@ -41,6 +41,6 @@ GO
 
 
 GO
-PRINT ('Finished removing unused GL Table Index')
+PRINT ('Finished removing unused GL Objects')
 GO
 
