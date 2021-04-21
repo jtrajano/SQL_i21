@@ -2,7 +2,7 @@
 REMOVE INDEX FROM OBSOLETE REPORT GL By Account Id Detail Report
 */
 GO
-PRINT ('Begin removing unused GL Table Index')
+PRINT ('Begin removing unused GL Objects')
 GO
 
 DECLARE @tblIndex TABLE (
@@ -34,6 +34,13 @@ BEGIN
     DELETE FROM @tblIndex WHERE strIndex = @strIndex
 END
 
+--20.1 above
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspGLErrorMessages')
+	EXEC ('DROP PROCEDURE uspGLErrorMessages')
+GO
+
+
 GO
 PRINT ('Finished removing unused GL Table Index')
 GO
+
