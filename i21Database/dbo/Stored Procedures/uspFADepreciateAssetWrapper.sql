@@ -32,7 +32,7 @@ IF @ysnPost =1
 	
 	IF EXISTS(SELECT 1 FROM @Id1)  
 		EXEC uspFADepreciateMultipleAsset  
-		@Id,  
+		@Id1,  
 		2,  	
 		@ysnPost,  
 		@ysnRecap,  
@@ -41,8 +41,6 @@ IF @ysnPost =1
 		@strBatchId,  
 		@successfulCount OUTPUT
 	
-	
-
 END  
 
 
