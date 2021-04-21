@@ -89,6 +89,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , intLoadId							= INV.intLoadId
      , intEntityId							= INV.intEntityId
      , dblTotalWeight						= INV.dblTotalWeight
+     , dblTotalStandardWeight               = INV.dblTotalStandardWeight
      , intEntityContactId					= INV.intEntityContactId
      , intEntityApplicatorId				= INV.intEntityApplicatorId
      , intDocumentMaintenanceId				= INV.intDocumentMaintenanceId
