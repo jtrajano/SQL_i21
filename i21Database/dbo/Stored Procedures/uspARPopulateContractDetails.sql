@@ -505,5 +505,3 @@ WHILE ISNULL(@intUniqueId,0) > 0
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
-
-SELECT '#ARItemsForContracts', * FROM #ARItemsForContracts
