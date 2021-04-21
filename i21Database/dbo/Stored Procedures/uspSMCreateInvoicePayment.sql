@@ -8,6 +8,7 @@
 	,@intEntityCustomerId	AS INT 				= NULL
 	,@intEntityCardInfoId 	AS INT 				= NULL
 	,@intPaymentId 			AS INT 				= NULL
+	,@strPaymentMethod 		AS NVARCHAR(50)		= NULL
 	,@strPaymentIdNew 		AS NVARCHAR(50) 	= NULL OUTPUT
 	,@intPaymentIdNew 		AS INT 				= NULL OUTPUT
 	,@ErrorMessage 			AS NVARCHAR(250)	= NULL OUTPUT
@@ -45,7 +46,7 @@ BEGIN
 
 	SELECT TOP 1 @intPaymentMethodId = intPaymentMethodID
 	FROM tblSMPaymentMethod
-	WHERE strPaymentMethod = 'ACH'
+	WHERE strPaymentMethod = @strPaymentMethod
 
 	IF ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0
 		BEGIN
