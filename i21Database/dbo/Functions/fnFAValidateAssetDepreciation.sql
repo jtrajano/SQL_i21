@@ -50,32 +50,16 @@ BEGIN
         SELECT A.intId, 'Missing Depreciation Method' FROM @Id A LEFT JOIN tblFADepreciationMethod DM on DM.intAssetId = A.intId
         WHERE DM.intAssetId IS NULL
 
-        IF EXISTS(SELECT TOP 1 1 FROM @tbl)
-            RETURN
+        INSERT INTO @tbl
+        SELECT A.intAssetId, 'There is Depreciation Date on a closed period in this asset.' 
+        FROM tblFAFixedAssetDepreciation A 
+        JOIN  tblFAFixedAsset B on A.intAssetId = B.intAssetId
+	    JOIN @Id I on I.intId =  A.intAssetId
+        WHERE dbo.fnFAIsOpenAccountingDate(A.[dtmDepreciationToDate]) = 0
+        AND ISNULL(A.intBookId,1) = @BookId
+        GROUP BY  A.intAssetId
 
-
-        
-
-        
-    END
-
-
-    INSERT INTO @tbl
-    SELECT A.intAssetId, 'There is Depreciation Date on a closed period in this asset.' 
-    FROM tblFAFixedAssetDepreciation A 
-    JOIN  tblFAFixedAsset B on A.intAssetId = B.intAssetId
-	JOIN @Id I on I.intId =  A.intAssetId
-    OUTER APPLY(
-        SELECT ISNULL([dbo].isOpenAccountingDate(A.[dtmDepreciationToDate]), 0)  isOpenAccountingDate
-    ) FiscalPeriod
-    WHERE FiscalPeriod.isOpenAccountingDate = 0
-    GROUP BY  A.intAssetId
-
-    IF EXISTS(SELECT TOP 1 1 FROM @tbl)
-        RETURN
-
-
-    INSERT INTO @tbl
+        INSERT INTO @tbl
         SELECT 
         intId,  'Next Depreciation Date is on a closed period in this asset.'
         FROM @Id I 
@@ -83,6 +67,7 @@ BEGIN
                 SELECT TOP 1  DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmDepreciationToDate))+ 2, 0))  nextDate
                 FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId 
                 AND strTransaction = 'Depreciation'
+                AND dtmDepreciationToDate IS NOT NULL
                 ORDER BY intAssetDepreciationId DESC
             )Depreciation
             OUTER APPLY(
@@ -92,6 +77,6 @@ BEGIN
                 select dbo.isOpenAccountingDateByModule(Depreciation.nextDate,'Fixed Assets') isOpenAccountingDate
             ) FixedAssetPeriod
             WHERE FiscalPeriod.isOpenAccountingDate = 0  OR FixedAssetPeriod.isOpenAccountingDate = 0
-        
-	RETURN
+    END
+   RETURN
 END
