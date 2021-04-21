@@ -1,3 +1,4 @@
+
 CREATE PROCEDURE uspGLMergeGLAccount
   @ysnClear BIT  = 0
 AS
@@ -16,8 +17,10 @@ BEGIN
 
     IF @ysnClear = 1
     BEGIN
-        DELETE FROM tblGLAccount
-        DELETE FROM tblGLDetail
+		DELETE FROM tblGLSummary
+        DELETE FROM tblGLAccountSegmentMapping
+		DELETE FROM tblGLDetail
+		DELETE FROM tblGLAccount		
     END
 
     DECLARE @tblUnionAccounts Table(  
@@ -61,6 +64,8 @@ BEGIN
           DELETE FROM @tblSubsidiary WHERE @strDatabase = strDatabase 
     END
 
+
+
     ;WITH allAccounts
     as(
         SELECT strAccountId, 
@@ -77,9 +82,6 @@ BEGIN
         SELECT * FROM allAccounts where rowId = 1
     )
 
-	
-
-	
 
     MERGE INTO tblGLAccount  
     WITH (holdlock)  
@@ -122,11 +124,13 @@ BEGIN
         MergedTable.intAccountUnitId,  
         MergedTable.strDescription,
         MergedTable.strComments,
+		--1
         MergedTable.ysnActive
     );  
     
     UPDATE tblGLSubsidiaryCompany SET ysnMergedCOA = 1
     
-    EXEC uspGLRebuildSegmentMapping
+    
+	EXEC uspGLRebuildSegmentMapping
    
 END
