@@ -159,9 +159,9 @@ SET @query = '
 			intTransactionType,
 			strVendorIdName,
 			strTransactionId,
-			dtmDate = MIN(dtmDate),
-			strLocationName,
-			strReferenceNumber,
+			MIN(dtmDate) dtmDate,
+			MAX(strLocationName) strLocationName,
+			MAX(strReferenceNumber) strReferenceNumber,
 			SUM(dblQuantity) AS dblQuantity,
 			SUM(dblAmount) AS dblAmount,
 			SUM(dblOffsetQuantity) AS dblOffsetQuantity,
@@ -172,7 +172,7 @@ SET @query = '
 			'+ @query +'
 		) filteredClearing
 		'+ @filterPerItem +'
-		GROUP BY intTransactionType, intTransactionDetailId, intItemId, strVendorIdName, strTransactionId, strLocationName, strReferenceNumber
+		GROUP BY intTransactionType, intTransactionDetailId, intItemId, strVendorIdName, strTransactionId
 	) detailedClearing
 	WHERE detailedClearing.dblClearingAmount <> 0 AND detailedClearing.dblQuantity <> 0
 '
