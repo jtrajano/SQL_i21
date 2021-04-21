@@ -119,6 +119,9 @@ IF @dtmTransactionDateFrom IS NOT NULL
 ELSE 			  
 	SET @dtmTransactionDateFrom = CAST(-53690 AS DATETIME)
 
+DELETE FROM tblARSalesTrendStagingTable
+
+INSERT INTO tblARSalesTrendStagingTable
 SELECT *
 ,CASE WHEN intMonth = 1  THEN dblQuantity   ELSE 0 END AS dblJanuary
 ,CASE WHEN intMonth = 2  THEN dblQuantity   ELSE 0 END AS dblFebruary
@@ -167,5 +170,8 @@ WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDate
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
   AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
+
+SELECT *
+FROM tblARSalesTrendStagingTable
 
 RETURN 0
