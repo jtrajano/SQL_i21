@@ -67,6 +67,7 @@ SELECT intSalesOrderId				= SO.intSalesOrderId
      , strLostQuoteComment			= SO.strLostQuoteComment
      , strQuoteType					= SO.strQuoteType
      , dblTotalWeight				= SO.dblTotalWeight
+     , dblTotalStandardWeight           = SO.dblTotalStandardWeight
      , intEntityContactId			= SO.intEntityContactId
      , intEntityApplicatorId		= SO.intEntityApplicatorId
      , intDocumentMaintenanceId		= SO.intDocumentMaintenanceId

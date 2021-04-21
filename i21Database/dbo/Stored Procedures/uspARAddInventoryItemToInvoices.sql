@@ -411,6 +411,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intPriceUOMId]					INT												NULL
 	,[dblUnitQuantity]					NUMERIC(38,20)									NULL
 	,[dblItemWeight]					NUMERIC(38,20)									NULL
+	,[dblStandardWeight]				NUMERIC(28,20)									NULL
 	,[intItemWeightUOMId]				INT												NULL
 	,[dblDiscount]						NUMERIC(18, 6)									NULL
 	,[dblItemTermDiscount]				NUMERIC(18, 6)									NULL
@@ -542,6 +543,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -672,6 +674,7 @@ SELECT
 	,[intPriceUOMId]						= ISNULL(IP.[intPriceUOMId], ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId]))))
 	,[dblUnitQuantity]						= ISNULL(IP.[dblPriceUOMQuantity], ISNULL(IE.[dblContractPriceUOMQty], 1.000000))
 	,[dblItemWeight]						= IE.[dblItemWeight]
+	,[dblStandardWeight]					= IE.[dblStandardWeight]
 	,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
 	,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
 	,[dblItemTermDiscount]					= ISNULL(ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount]), @ZeroDecimal)
@@ -892,6 +895,7 @@ USING
 		,[intPriceUOMId]
 		,[dblUnitQuantity]
 		,[dblItemWeight]
+		,[dblStandardWeight]
 		,[intItemWeightUOMId]
 		,[dblDiscount]
 		,[dblItemTermDiscount]
@@ -1027,6 +1031,7 @@ INSERT(
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -1147,6 +1152,7 @@ VALUES(
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
