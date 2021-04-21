@@ -422,6 +422,12 @@ FROM (
 		WHERE intOrderType <> 2 
 		  AND ysnPosted = 1 
 	) ICIS ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	LEFT JOIN (
+		SELECT intTicketId
+			 , intItemUOMIdTo
+			 , dblNetUnits
+		FROM dbo.tblSCTicket T WITH (NOLOCK)
+	) TICKET ON ICISI.intSourceId = TICKET.intTicketId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 			 , dblGrossWeight	= SUM(dblGrossWeight)
