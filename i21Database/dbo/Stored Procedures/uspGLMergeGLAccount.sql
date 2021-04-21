@@ -27,6 +27,7 @@ BEGIN
 		strAccountType		NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
 		strUOMCode			NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,  
         strComments			NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
+        ysnActive           BIT NULL,
         idx                 INT
     )  
 
@@ -50,7 +51,7 @@ BEGIN
     WHILE EXISTS (SELECT TOP 1 1 FROM @tblSubsidiary)
         BEGIN
           SELECT TOP 1 @strDatabase = strDatabase, @strCompanySegment = ISNULL( '-' + strCompanySegment, '') FROM @tblSubsidiary
-          SET @strSQL = REPLACE ('select strAccountId + ''[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments, [idx] from [strDatabase].dbo.vyuGLAccountDetail'
+          SET @strSQL = REPLACE ('select strAccountId + ''[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments, ysnActive, [idx] from [strDatabase].dbo.vyuGLAccountDetail'
           , '[strDatabase]', @strDatabase)
 
           SET @strSQL = REPLACE(@strSQL , '[idx]', cast( @idx as nvarchar(2)))
@@ -67,6 +68,7 @@ BEGIN
         strAccountGroup, 
         strComments,
         strUOMCode,
+        ysnActive,
         ROW_NUMBER() OVER(PARTITION BY strAccountId, strAccountType  ORDER BY idx) rowId
 		from @tblUnionAccounts  
         
@@ -88,7 +90,8 @@ BEGIN
         strDescription,  
         G.intAccountGroupId,  
         strComments,
-        U.intAccountUnitId
+        U.intAccountUnitId,
+        ysnActive
         FROM tblUnionAccounts A   
         LEFT JOIN tblGLAccountGroup G on G.strAccountGroup = A.strAccountGroup  
         LEFT JOIN tblGLAccountUnit U on U.strUOMCode = A.strUOMCode
@@ -100,7 +103,8 @@ BEGIN
     SET  
         AccountTable.intAccountGroupId = MergedTable.intAccountGroupId,  
         AccountTable.strDescription = MergedTable.strDescription,
-        AccountTable.intAccountUnitId = MergedTable.intAccountUnitId
+        AccountTable.intAccountUnitId = MergedTable.intAccountUnitId,
+        AccountTable.ysnActive = MergedTable.ysnActive
 
     WHEN NOT MATCHED BY TARGET THEN  
     INSERT (  
@@ -108,7 +112,8 @@ BEGIN
         intAccountGroupId,  
         intAccountUnitId,  
         strDescription,
-        strComments 
+        strComments,
+        ysnActive 
     )  
     VALUES  
     (  
@@ -116,7 +121,8 @@ BEGIN
         MergedTable.intAccountGroupId,  
         MergedTable.intAccountUnitId,  
         MergedTable.strDescription,
-        MergedTable. strComments 
+        MergedTable.strComments,
+        MergedTable.ysnActive
     );  
     
     UPDATE tblGLSubsidiaryCompany SET ysnMergedCOA = 1
