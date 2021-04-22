@@ -2,7 +2,7 @@
 AS
 SELECT 
 	intSubLocationId = ISNULL(StockUnit.intSubLocationId, StockUOM.intSubLocationId)
-	,intStorageLocationId = ISNULL(StockUnit.intSubLocationId, StockUOM.intStorageLocationId)
+	,intStorageLocationId = ISNULL(StockUnit.intStorageLocationId, StockUOM.intStorageLocationId)
 	,iu.strUpcCode
 	,iu.dblUnitQty
 	,iu.strLongUPCCode
