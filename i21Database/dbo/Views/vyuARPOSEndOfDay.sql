@@ -24,6 +24,7 @@ SELECT intPOSEndOfDayId				= EOD.intPOSEndOfDayId
 	 , ysnAllowMultipleUser			= DRAWER.ysnAllowMultipleUser
 	 , dblTotalCashReceipt          = EOD.dblExpectedEndingBalance
 	 , dblCashReceived				= ISNULL(EOD.dblCashPaymentReceived,0.000000)
+	 , dblUnprocessTransaction		= ISNULL(UnprocessTransaction.dblTotal, 0)
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN tblSMCompanyLocationPOSDrawer DRAWER ON  EOD.intCompanyLocationPOSDrawerId = DRAWER.intCompanyLocationPOSDrawerId
 INNER JOIN (
@@ -65,5 +66,15 @@ LEFT JOIN (
 		strDescription
 	FROM tblSTStore
 ) ST ON EOD.intStoreId = ST.intStoreId
+LEFT JOIN (
+	SELECT SUM(dblTotal) [dblTotal],POSLOG.intPOSLogId
+	FROM dbo.tblARPOS POS
+		INNER JOIN dbo.tblARPOSLog POSLOG
+			ON POS.intPOSLogId = POSLOG.intPOSLogId
+		INNER JOIN dbo.tblARPOSEndOfDay EOD
+			ON POSLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
+	WHERE  POS.intInvoiceId IS  NULL	 AND POS.intCreditMemoId IS  NULL	 AND EOD.ysnClosed = 0
+	GROUP BY  POSLOG.intPOSLogId
+)UnprocessTransaction ON  UnprocessTransaction.intPOSLogId = POSLOG.intPOSLogId
 
 GO 
