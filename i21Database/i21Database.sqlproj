@@ -469,6 +469,7 @@
     <Build Include="dbo\Views\vyuFAFixedAsset.sql" />
     <Build Include="dbo\Views\vyuFALastDepDate.sql" />
     <Build Include="dbo\Views\vyuFANextDepreciation.sql" />
+    <Build Include="dbo\Views\vyuFAFixedAssetHistory.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
@@ -5236,10 +5237,12 @@
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspFACreateAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADepreciateAssetWrapper.sql" />
     <Build Include="dbo\Stored Procedures\uspFADisposeAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFACopyDepreciationMethod.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseMultipleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateMultipleAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFASyncBookDepreciation.sql" />
     <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepreciation.sql" />
@@ -5249,6 +5252,7 @@
     <Build Include="dbo\Tables\tblFADepreciateLogDetail.sql" />
     <Build Include="dbo\Tables\tblFAImportLog.sql" />
     <Build Include="dbo\Tables\tblFAImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblFABookDepreciation.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
