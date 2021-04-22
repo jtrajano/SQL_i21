@@ -10,9 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strModuleName = 'IDP')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'RiskManagement.view.OpenDerivativesPosition?multiGrouping=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -3716,9 +3715,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Open Derivatives Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Open Derivatives Position Report', N'Risk Management', @RiskManagementReportParentMenuId, N'Open Derivatives Position Report', N'Report', N'Screen', N'RiskManagement.view.OpenDerivativesPosition', N'small-menu-report', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Open Derivatives Position Report', N'Risk Management', @RiskManagementReportParentMenuId, N'Open Derivatives Position Report', N'Report', N'Screen', N'RiskManagement.view.OpenDerivativesPosition?multiGrouping=true', N'small-menu-report', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'RiskManagement.view.OpenDerivativesPosition' WHERE strMenuName = 'Open Derivatives Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'RiskManagement.view.OpenDerivativesPosition?multiGrouping=true' WHERE strMenuName = 'Open Derivatives Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId
 
 /* START OF DELETE */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Futures/Options Settlement Prices' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
