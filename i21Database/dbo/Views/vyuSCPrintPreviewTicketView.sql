@@ -152,8 +152,32 @@ AS SELECT
 
 	,tblEMEntity.strName
 	,tblEMEntity.strEntityNo
-	,strShipToLocationAddress = ShipToLocation.strAddress
     ,strShipToLocationName  = ShipToLocation.strLocationName
+	,strShipToLocationAddress = LTRIM(RTRIM(CASE   
+       WHEN ISNULL(ShipToLocation.strLocationName, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strLocationName + ' '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strAddress, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strAddress + CHAR(13)  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strCity, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strCity + ', '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strState, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strState + ', '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strZipCode, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strZipCode + ', '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strCountry, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strCountry  
+       END))  
 	,tblEMEntitySplit.strSplitNumber
 	,vyuEMSearchShipVia.strName AS strHaulerName
 	--,EMDriver.strName AS strDriverName
