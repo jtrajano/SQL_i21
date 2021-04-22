@@ -103,7 +103,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		IF @IsTank = 1
 			BEGIN
 				SELECT 
-					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = D.strCustomerNumber)
+					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblARCustomer WHERE strCustomerNumber = D.strCustomerNumber)
 					,@Date							= D.dtmDate
 					,@ShipDate						= D.dtmDate		
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
@@ -281,7 +281,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		ELSE
 			BEGIN
 				SELECT 
-					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = D.strCustomerNumber)
+					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblARCustomer WHERE strCustomerNumber = D.strCustomerNumber)
 					,@Date							= D.dtmDate
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
 					,@EntityId						= ISNULL(@UserEntityId, H.intEntityId)
