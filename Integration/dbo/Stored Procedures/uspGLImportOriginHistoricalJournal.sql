@@ -147,8 +147,8 @@ ELSE
 		0 AS DebitRate,
 		CASE WHEN (glhst_dr_cr_ind = ''C'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''D'' AND glhst_amt < 0) THEN ABS(glhst_amt) ELSE 0 END Credit,
 		0 AS CreditRate,
-		CASE WHEN (glhst_dr_cr_ind = ''D'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''C'' AND glhst_amt < 0) THEN ABS(glhst_units) ELSE 0 END DebitUnits,
-		CASE WHEN (glhst_dr_cr_ind = ''C'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''D'' AND glhst_amt < 0) THEN ABS(glhst_units) ELSE 0 END CreditUnits,
+		CASE WHEN (OriginAcct.glact_normal_value = ''D'' ) AND glhst_units >0 OR (OriginAcct.glact_normal_value = ''C'' ) AND glhst_units <0 THEN ABS(glhst_units) ELSE 0 END DebitUnits,    
+  		CASE WHEN (OriginAcct.glact_normal_value = ''C'' ) AND glhst_units >0 OR (OriginAcct.glact_normal_value = ''D'' ) AND glhst_units <0 THEN ABS(glhst_units) ELSE 0 END CreditUnits,
 		glhst_ref AS strDescription,
 		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
@@ -171,6 +171,9 @@ ELSE
 	 INNER JOIN tblGLCOACrossReference ON
 		SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
+	 OUTER APPLY(
+		SELECT TOP 1 glact_normal_value FROM glactmst where glact_acct1_8 = glhst_acct1_8 and glact_acct9_16 = glhst_acct9_16
+	 )OriginAcct
 
 	
 

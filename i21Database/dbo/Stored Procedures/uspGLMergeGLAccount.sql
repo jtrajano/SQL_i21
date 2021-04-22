@@ -1,3 +1,4 @@
+
 CREATE PROCEDURE uspGLMergeGLAccount
   @ysnClear BIT  = 0
 AS
@@ -16,8 +17,10 @@ BEGIN
 
     IF @ysnClear = 1
     BEGIN
-        DELETE FROM tblGLAccount
-        DELETE FROM tblGLDetail
+		DELETE FROM tblGLSummary
+        DELETE FROM tblGLAccountSegmentMapping
+		DELETE FROM tblGLDetail
+		DELETE FROM tblGLAccount		
     END
 
     DECLARE @tblUnionAccounts Table(  
@@ -26,7 +29,9 @@ BEGIN
         strAccountGroup		NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,  
 		strAccountType		NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
 		strUOMCode			NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,  
-        strComments			NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL
+        strComments			NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
+        ysnActive           BIT NULL,
+        idx                 INT
     )  
 
     DECLARE @tblSubsidiary TABLE 
@@ -40,30 +45,44 @@ BEGIN
     DECLARE @strDatabase NVARCHAR(40)
     DECLARE @strCompanySegment NVARCHAR(10)
 	DECLARE @strSQL NVARCHAR(MAX)
+    DECLARE @idx INT = 1
 
+	
 
+	
+    
     WHILE EXISTS (SELECT TOP 1 1 FROM @tblSubsidiary)
         BEGIN
           SELECT TOP 1 @strDatabase = strDatabase, @strCompanySegment = ISNULL( '-' + strCompanySegment, '') FROM @tblSubsidiary
-          SET @strSQL = REPLACE ('select strAccountId + ''[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments from [strDatabase].dbo.vyuGLAccountDetail'
+          SET @strSQL = REPLACE ('select strAccountId + ''-[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments, ysnActive, [idx] from [strDatabase].dbo.vyuGLAccountDetail'
           , '[strDatabase]', @strDatabase)
 
+          SET @strSQL = REPLACE(@strSQL , '[idx]', cast( @idx as nvarchar(2)))
           SET @strSQL = REPLACE (@strSQL , '[strCompanySegment]', @strCompanySegment)
           INSERT INTO @tblUnionAccounts EXEC (@strSQL)
           
           DELETE FROM @tblSubsidiary WHERE @strDatabase = strDatabase 
     END
 
-    ;WITH tblUnionAccounts
+
+
+    ;WITH allAccounts
     as(
         SELECT strAccountId, 
-        MAX(isnull(strDescription,'''')) strDescription,  
-        MAX(isnull(strAccountGroup,'''')) strAccountGroup, 
-        MAX(isnull(strComments,'''')) strComments,
-        MAX(isnull(strUOMCode,'''')) strUOMCode 
+        strDescription,  
+        strAccountGroup, 
+        strComments,
+        strUOMCode,
+        ysnActive,
+        ROW_NUMBER() OVER(PARTITION BY strAccountId, strAccountType  ORDER BY idx) rowId
 		from @tblUnionAccounts  
-        GROUP BY  strAccountId, strAccountType  
+        
+    ),
+    tblUnionAccounts AS(
+        SELECT * FROM allAccounts where rowId = 1
     )
+
+
     MERGE INTO tblGLAccount  
     WITH (holdlock)  
     AS AccountTable  
@@ -73,7 +92,8 @@ BEGIN
         strDescription,  
         G.intAccountGroupId,  
         strComments,
-        U.intAccountUnitId
+        U.intAccountUnitId,
+        ysnActive
         FROM tblUnionAccounts A   
         LEFT JOIN tblGLAccountGroup G on G.strAccountGroup = A.strAccountGroup  
         LEFT JOIN tblGLAccountUnit U on U.strUOMCode = A.strUOMCode
@@ -85,7 +105,8 @@ BEGIN
     SET  
         AccountTable.intAccountGroupId = MergedTable.intAccountGroupId,  
         AccountTable.strDescription = MergedTable.strDescription,
-        AccountTable.intAccountUnitId = MergedTable.intAccountUnitId
+        AccountTable.intAccountUnitId = MergedTable.intAccountUnitId,
+        AccountTable.ysnActive = MergedTable.ysnActive
 
     WHEN NOT MATCHED BY TARGET THEN  
     INSERT (  
@@ -93,7 +114,8 @@ BEGIN
         intAccountGroupId,  
         intAccountUnitId,  
         strDescription,
-        strComments 
+        strComments,
+        ysnActive 
     )  
     VALUES  
     (  
@@ -101,11 +123,13 @@ BEGIN
         MergedTable.intAccountGroupId,  
         MergedTable.intAccountUnitId,  
         MergedTable.strDescription,
-        MergedTable. strComments 
+        MergedTable.strComments,
+        MergedTable.ysnActive
     );  
     
     UPDATE tblGLSubsidiaryCompany SET ysnMergedCOA = 1
     
-    EXEC uspGLRebuildSegmentMapping
+    
+	EXEC uspGLRebuildSegmentMapping
    
 END

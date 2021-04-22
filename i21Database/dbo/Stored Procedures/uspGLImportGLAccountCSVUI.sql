@@ -1,48 +1,17 @@
 
-CREATE PROCEDURE uspGLImportGLAccountCSV  
+CREATE PROCEDURE uspGLImportGLAccountCSVUI
 (  
- @filePath NVARCHAR(MAX),
+ @strGUID NVARCHAR(40),
  @intEntityId INT,
  @strVersion NVARCHAR(100),
  @importLogId INT OUT 
 )  
 AS  
   
-IF object_id('tblStagingTable') IS NOT NULL   
- DROP TABLE dbo.tblStagingTable  
+
 IF object_id('tblGLAccountImportDataStaging2') IS NOT NULL   
  DROP TABLE dbo.tblGLAccountImportDataStaging2  
   
-  
-CREATE TABLE tblStagingTable (  
- [strPrimarySegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,  
- [strLocationSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,  
- [strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,  
- [strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,  
- [strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL  
-)  
-   
-  
-  
-BEGIN TRY  
- DECLARE @s NVARCHAR(MAX) =  
- 'BULK  
- INSERT tblStagingTable  
- FROM ''' +   @filePath +  
-  
- ''' WITH  
- (  
- FIELDTERMINATOR = '','',  
- ROWTERMINATOR = ''\n''  
- )'  
- --select @s  
- Exec(@s)  
-END TRY  
-BEGIN CATCH  
- RAISERROR('Bulk Load operation failed', 16, 1);  
- RETURN;  
-  
-END CATCH    
   
 --Check the content of the table.  
 CREATE TABLE tblGLAccountImportDataStaging2  
@@ -53,7 +22,7 @@ CREATE TABLE tblGLAccountImportDataStaging2
  [strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,  
  [strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,  
  [strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,  
-  [intAccountId] [int] NULL,  
+ [intAccountId] [int] NULL,  
  [strAccountId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL,  
  [ysnMissingSegment] [bit] NULL,  
  [ysnGLAccountExist] [bit] NULL,  
@@ -66,9 +35,7 @@ CREATE TABLE tblGLAccountImportDataStaging2
  intAccountUnitId INT,  
  [ysnInvalid] BIT NULL,  
  strError NVARCHAR(MAX)  
-)  
-  
-  
+)
   
 INSERT INTO tblGLAccountImportDataStaging2([strPrimarySegment],[strLocationSegment],[strLOBSegment],[strDescription],[strUOM])  
 SELECT   
@@ -76,11 +43,9 @@ REPLACE(LTRIM(RTRIM([strPrimarySegment])),'"','')
 ,REPLACE(LTRIM(RTRIM([strLocationSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strLOBSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strDescription])),'"','')  
-,REPLACE(LTRIM(RTRIM([strUOM])),'"','') FROM tblStagingTable  
+,REPLACE(LTRIM(RTRIM([strUOM])),'"','') FROM tblGLAccountImportDataStaging  
+WHERE strGUID=@strGUID
   
-
-
-
   
 CREATE UNIQUE INDEX indunique  
   ON [tblGLAccountImportDataStaging2]([strAccountId])  
@@ -110,6 +75,9 @@ JOIN tblGLAccount A ON A.strAccountId COLLATE Latin1_General_CI_AS = T.strAccoun
 UPDATE T SET intAccountUnitId = A.intAccountUnitId  
 FROM  [tblGLAccountImportDataStaging2] T   
 LEFT JOIN tblGLAccountUnit A ON LOWER(A.strUOMCode) COLLATE Latin1_General_CI_AS = LOWER(RTRIM(LTRIM(ISNULL(T.strUOM,'')))) COLLATE Latin1_General_CI_AS  
+  
+  
+
 
 UPDATE T SET   
 intPrimarySegmentId = A.intAccountSegmentId  
@@ -123,7 +91,9 @@ FROM  [tblGLAccountImportDataStaging2] T
 LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =RTRIM(LTRIM(T.strLocationSegment)) COLLATE Latin1_General_CI_AS  
 JOIN tblGLAccountStructure S on S.intAccountStructureId = A.intAccountStructureId  
 WHERE strStructureName = 'Location'  
-    
+  
+  
+  
 IF @withLOB =1   
 begin
  UPDATE T SET [intLOBSegmentId] = A.intAccountSegmentId  
@@ -146,12 +116,12 @@ JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment))
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId   
 WHERE  ST.strType = 'Primary'AND ISNULL(ysnInvalid,0) = 0 AND  ISNULL(T.[ysnNoDescription],0)  = 1  
   
-UPDATE T set strDescription = ISNULL(T.strDescription,'') + '-' + ISNULL(S.strChartDesc,'') FROM [tblGLAccountImportDataStaging2] T   
+UPDATE T set strDescription = T.strDescription + '-' + ISNULL(S.strChartDesc,'') FROM [tblGLAccountImportDataStaging2] T   
 JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strLocationSegment))   
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId   
 WHERE  ST.strStructureName = 'Location'AND ISNULL(ysnInvalid,0) = 0  AND  ISNULL(T.[ysnNoDescription],0)  = 1  
   
-UPDATE T set strDescription = ISNULL(T.strDescription,'') + '-' + ISNULL(S.strChartDesc,'') FROM [tblGLAccountImportDataStaging2] T   
+UPDATE T set strDescription = T.strDescription + '-' + ISNULL(S.strChartDesc,'') FROM [tblGLAccountImportDataStaging2] T   
 JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strLOBSegment))   
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId   
 WHERE  ST.strStructureName = 'LOB'AND ISNULL(ysnInvalid,0) = 0 AND  ISNULL(T.[ysnNoDescription],0)  = 1  
