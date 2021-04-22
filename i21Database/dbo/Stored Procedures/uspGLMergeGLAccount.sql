@@ -54,7 +54,7 @@ BEGIN
     WHILE EXISTS (SELECT TOP 1 1 FROM @tblSubsidiary)
         BEGIN
           SELECT TOP 1 @strDatabase = strDatabase, @strCompanySegment = ISNULL( '-' + strCompanySegment, '') FROM @tblSubsidiary
-          SET @strSQL = REPLACE ('select strAccountId + ''[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments, ysnActive, [idx] from [strDatabase].dbo.vyuGLAccountDetail'
+          SET @strSQL = REPLACE ('select strAccountId + ''-[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments, ysnActive, [idx] from [strDatabase].dbo.vyuGLAccountDetail'
           , '[strDatabase]', @strDatabase)
 
           SET @strSQL = REPLACE(@strSQL , '[idx]', cast( @idx as nvarchar(2)))
@@ -124,7 +124,6 @@ BEGIN
         MergedTable.intAccountUnitId,  
         MergedTable.strDescription,
         MergedTable.strComments,
-		--1
         MergedTable.ysnActive
     );  
     
