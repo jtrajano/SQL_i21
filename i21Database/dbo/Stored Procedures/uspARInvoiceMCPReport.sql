@@ -482,6 +482,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , blbLogo					= ORIG.blbLogo
 		  , strUnitMeasure			= ORIG.strUnitMeasure
 		  , strSalesOrderNumber		= ORIG.strSalesOrderNumber
+		  , dblPrice				= STAGING.dblItemPrice / STAGING.dblQtyShipped
 		FROM tblARInvoiceReportStagingTable STAGING
 		INNER JOIN (
 			SELECT *
