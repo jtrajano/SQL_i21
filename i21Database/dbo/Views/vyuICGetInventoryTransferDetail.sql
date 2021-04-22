@@ -99,6 +99,7 @@ AS
 	, TransferDetail.dblNet
 	, TransferDetail.dblTare
 	, TransferDetail.intGrossNetUOMId
+	, dblStandardWeight = ISNULL(TransferDetail.dblStandardWeight, ItemUOM.dblStandardWeight)
 	, dblLineTotal = dbo.fnMultiply(TransferDetail.dblQuantity, ISNULL(TransferDetail.dblCost, 0))
 	, strGrossNetUOM = GrossNetUOM.strUnitMeasure
 	, strNewLotId = ISNULL(TransferDetail.strNewLotId, '')
