@@ -14,7 +14,7 @@ SELECT 'The item does not exists.', 'itemId', 'Error', e.strItemNo
 FROM tblRestApiInvoiceStaging e
 LEFT JOIN tblICItem i ON i.intItemId = e.intItemId
 WHERE e.guiUniqueId = @guiUniqueId
-	AND (e.intDollarContractDetailId IS NULL AND e.intDollarContractHeaderId IS NULL)
+	AND (e.intItemContractDetailId IS NULL AND e.intItemContractHeaderId IS NULL)
 	AND i.intItemId IS NULL
 	AND e.intItemId IS NOT NULL
 
@@ -23,7 +23,7 @@ SELECT 'The item does not exists.', 'itemId', 'Error', e.strItemNo
 FROM tblRestApiInvoiceStaging e
 LEFT JOIN tblICItem i ON i.strItemNo = e.strItemNo
 WHERE e.guiUniqueId = @guiUniqueId
-	AND (e.intDollarContractDetailId IS NULL AND e.intDollarContractHeaderId IS NULL)
+	AND (e.intItemContractDetailId IS NULL AND e.intItemContractHeaderId IS NULL)
 	AND i.intItemId IS NULL
 	AND e.strItemNo IS NOT NULL
 
@@ -35,15 +35,17 @@ LEFT JOIN tblCTItemContractDetail i ON i.intItemContractDetailId = e.intItemCont
 WHERE e.guiUniqueId = @guiUniqueId
 	AND (e.intItemContractDetailId IS NOT NULL AND e.intItemContractHeaderId IS NOT NULL)
 	AND i.intItemContractDetailId IS NULL
+	AND e.strItemContractType = 'Item'
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Invalid dollar contract ID.', 'dollarContractDetailId', 'Error', CAST(e.intDollarContractDetailId AS NVARCHAR(50))
+SELECT 'Invalid dollar contract ID.', 'intItemContractDetailId', 'Error', CAST(e.intItemContractDetailId AS NVARCHAR(50))
 FROM tblRestApiInvoiceStaging e
-LEFT JOIN tblCTItemContractHeaderCategory c ON c.intItemCategoryId = e.intDollarContractDetailId
-	AND c.intItemContractHeaderId = e.intDollarContractHeaderId
+LEFT JOIN tblCTItemContractHeaderCategory c ON c.intItemCategoryId = e.intItemContractDetailId
+	AND c.intItemContractHeaderId = e.intItemContractHeaderId
 WHERE e.guiUniqueId = @guiUniqueId
-	AND (e.intDollarContractDetailId IS NOT NULL AND e.intDollarContractHeaderId IS NOT NULL)
+	AND (e.intItemContractDetailId IS NOT NULL AND e.intItemContractHeaderId IS NOT NULL)
 	AND c.intCategoryId IS NULL
+	AND e.strItemContractType = 'Dollar'
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT DISTINCT 'The customer does not exists. Please ensure that the customerId is correct.', 'customerId', 'Error', IE.strCustomerNumber
@@ -124,6 +126,7 @@ INSERT INTO @InvoiceEntries (
 	, ysnPost
 	, intItemContractHeaderId
 	, intItemContractDetailId
+	, intPrepayTypeId
 )
 SELECT 
 	  intId					= I.intRestApiInvoiceStagingId
@@ -165,6 +168,7 @@ SELECT
 	, ysnPost				= CAST(0 AS BIT)
 	, intItemContractHeaderId = I.intItemContractHeaderId
 	, intItemContractDetailId = I.intItemContractDetailId
+	, intPrepayTypeId		= 2
 FROM tblRestApiInvoiceStaging I
 INNER JOIN tblARCustomer C ON RTRIM(LTRIM(I.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(I.intEntityId, 0)
 LEFT JOIN tblSMCompanyLocation CLL ON CLL.intCompanyLocationId = I.intLocationId
