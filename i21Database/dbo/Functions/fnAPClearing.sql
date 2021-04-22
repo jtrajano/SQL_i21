@@ -63,7 +63,7 @@ BEGIN
 				BD.intBillId,
 				BD.intItemId
 			)
-		ORDER BY intSourceTransactionTypeId DESC
+		ORDER BY intSourceTransactionTypeId
 	) ST
 	WHERE B.intBillId IN (SELECT intId FROM @ids) AND
 	AD.intAccountCategoryId = 45 AND
@@ -107,7 +107,7 @@ BEGIN
 				BD.intBillId,
 				BD.intItemId
 			)
-		ORDER BY intSourceTransactionTypeId DESC
+		ORDER BY intSourceTransactionTypeId
 	) ST
 	WHERE B.intBillId IN (SELECT intId FROM @ids) AND
 	AD.intAccountCategoryId = 45 AND
