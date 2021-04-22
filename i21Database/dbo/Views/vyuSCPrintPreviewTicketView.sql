@@ -152,6 +152,8 @@ AS SELECT
 
 	,tblEMEntity.strName
 	,tblEMEntity.strEntityNo
+	,strShipToLocationAddress = ShipToLocation.strAddress
+    ,strShipToLocationName  = ShipToLocation.strLocationName
 	,tblEMEntitySplit.strSplitNumber
 	,vyuEMSearchShipVia.strName AS strHaulerName
 	--,EMDriver.strName AS strDriverName
@@ -249,6 +251,7 @@ AS SELECT
   LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
   LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
   LEFT JOIN tblEMEntityLocation EMScaleOps on EMScaleOps.intEntityId = SC.intEntityScaleOperatorId
+  LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = SC.intShipToLocationId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber
