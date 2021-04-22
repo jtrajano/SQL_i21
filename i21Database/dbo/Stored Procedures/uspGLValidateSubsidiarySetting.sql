@@ -28,10 +28,11 @@ IF EXISTS (SELECT 1 from tblGLSubsidiaryCompany WHERE ISNULL(strCompanySegment,'
 IF @@ERROR > 0
 	RETURN
 
+	
 
 INSERT INTO @tbl SELECT strDatabase FROM tblGLSubsidiaryCompany
 
-DECLARE @subsidiaryCount int
+DECLARE @companyCount int
 DECLARE @tSql NVARCHAR(MAX)
 DECLARE @tblStructure TABLE (
     
@@ -41,21 +42,23 @@ DECLARE @tblStructure TABLE (
     [intLength]              INT            NULL
 )
 
-
+SELECT @companyCount = count(*) + 1 from @tbl
 
 INSERT INTO @tblStructure
 SELECT intStructureType, strStructureName, strType, intLength  from tblGLAccountStructure WHERE intStructureType <> 6
+AND strType <> 'Divider'
+
+
 
 WHILE EXISTS (SELECT TOP 1 1 FROM @tbl)
 BEGIN
 	SELECT TOP 1 @strDatabase = strDatabase FROM @tbl
-	SET @tSql = REPLACE('select intStructureType, strStructureName, strType, intLength  from [strDatabase].dbo.tblGLAccountStructure WHERE intStructureType <> 6', '[strDatabase]', @strDatabase)
+	SET @tSql = REPLACE('select intStructureType, strStructureName, strType, intLength  from [strDatabase].dbo.tblGLAccountStructure WHERE intStructureType <> 6 AND strType <> ''Divider''', '[strDatabase]', @strDatabase)
 	INSERT INTO @tblStructure EXEC (@tSql)
 	DELETE FROM @tbl where @strDatabase = strDatabase
 END
 
-SELECT @subsidiaryCount = COUNT(*) FROM tblGLAccountStructure where intStructureType <> 6
+
 	
-IF EXISTS(SELECT  1  FROM @tblStructure GROUP BY intStructureType,strStructureName, intLength HAVING COUNT(*) <> @subsidiaryCount)
+IF EXISTS(SELECT  1  FROM @tblStructure GROUP BY intStructureType,strStructureName, intLength HAVING COUNT(*) <> @companyCount)
 	RAISERROR('Account structure is not compatible for merging', 16, 1)
-	
