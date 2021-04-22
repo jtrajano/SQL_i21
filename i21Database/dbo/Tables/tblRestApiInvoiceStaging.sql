@@ -41,7 +41,6 @@ CREATE TABLE tblRestApiInvoiceStaging (
 	,[strFeedDiet]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[intItemContractHeaderId]              INT NULL
 	,[intItemContractDetailId]              INT NULL
-	,[intDollarContractHeaderId]            INT NULL
-	,[intDollarContractDetailId]            INT NULL
+	,[strItemContractType]	    			NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	,CONSTRAINT PK_tblRestApiInvoiceStaging_intRestApiInvoiceStagingId PRIMARY KEY(intRestApiInvoiceStagingId)
 )
