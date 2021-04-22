@@ -184,6 +184,7 @@ BEGIN TRY
 		JOIN dbo.tblCTBook B ON B.intBookId = A.intBookId
 		JOIN dbo.tblSMTerm T ON T.intTermID = A.intTermsId
 		JOIN dbo.tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
+		WHERE A.intBillId = @intBillId
 
 		IF ISNULL(@intTransactionType, 0) = 0
 		BEGIN
