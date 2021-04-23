@@ -23,7 +23,7 @@ IF @Recap = @ZeroBit
 
 DECLARE @ItemsForContracts					[InvoicePostingTable]
 DECLARE @GLEntries							[RecapTableType]
-EXEC [dbo].[uspARPopulateContractDetails]
+EXEC [dbo].[uspARPopulateContractDetails] @Post
 
 DECLARE @strDatabaseName NVARCHAR(50)
 DECLARE @strCompanyName NVARCHAR(50)

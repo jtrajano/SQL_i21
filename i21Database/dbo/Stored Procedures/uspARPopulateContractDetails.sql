@@ -1,4 +1,5 @@
 CREATE PROCEDURE [dbo].[uspARPopulateContractDetails]
+	@Post BIT
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
