@@ -241,6 +241,14 @@ BEGIN TRY
 			SELECT @strError = @strError + 'Remarks cannot be blank. '
 		END
 
+		IF @intActionId <> 1
+		BEGIN
+			IF ISNULL(@strERPVoucherNo, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
+			END
+		END
+
 		IF @strError <> ''
 		BEGIN
 			UPDATE tblAPBillPreStage
@@ -295,8 +303,7 @@ BEGIN TRY
 
 		SELECT @strXML += '<Remarks>' + ISNULL(@strRemarks, '') + '</Remarks>'
 
-		IF @intActionId <> 1
-			SELECT @strXML += '<ERPVoucherNo>' + ISNULL(@strERPVoucherNo, '') + '</ERPVoucherNo>'
+		SELECT @strXML += '<ERPVoucherNo>' + ISNULL(@strERPVoucherNo, '') + '</ERPVoucherNo>'
 
 		DELETE
 		FROM @tblAPBillDetail

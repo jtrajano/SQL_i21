@@ -21,30 +21,48 @@ BEGIN TRY
 		,@intUnitMeasureId INT
 		,@intItemId INT
 		,@intItemUOMId INT
-	DECLARE @intCommitmentPricingId INT
-	
-	DECLARE @intBillPreStageId INT
-		,@intBillId INT
+	DECLARE @intCommitmentPricingStageId INT
+		,@intCommitmentPricingId INT
 		,@intActionId INT
-		,@intTransactionType INT
-		,@strBillId NVARCHAR(50)
-
-	DECLARE @intBillDetailId INT
-
-	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
-	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
+		,@ysnPost BIT
+		,@strPricingNumber NVARCHAR(50)
+		,@strCustomerPrefix NVARCHAR(100)
+		,@dtmDeliveryFrom DATETIME
+		,@dtmDeliveryTo DATETIME
+		,@strUnitMeasure NVARCHAR(50)
+		,@strCurrency NVARCHAR(40)
+		,@dtmPricingDate DATETIME
+		,@strComment NVARCHAR(MAX)
+		,@dblMarketArbitrage NUMERIC(18, 6)
+		,@dblCalculatedArbitrage NUMERIC(18, 6)
+		,@dblCalculatedFutures NUMERIC(18, 6)
+		,@dblCalculatedFXPrice NUMERIC(18, 6)
+		,@dblCalculatedRefPrice NUMERIC(18, 6)
+		,@strERPRefNo NVARCHAR(100)
+	DECLARE @intCommitmentPricingDetailStageId INT
+		,@intDetailActionId INT
+		,@intLineType INT
+		,@strContractNo NVARCHAR(50)
+		,@strCommodityOrderNo NVARCHAR(50)
+		,@intSequenceNo INT
+		,@strActualBlend NVARCHAR(50)
+		,@strERPRecipeNo NVARCHAR(50)
+		,@dblTotalCostPR NUMERIC(18, 6)
+		,@strDetailRowState NVARCHAR(100)
+	DECLARE @tblMFCommitmentPricingStage TABLE (intCommitmentPricingStageId INT)
+	DECLARE @tblMFCommitmentPricingDetailStage TABLE (intCommitmentPricingDetailStageId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
-		,intBillId INT
+		,intCommitmentPricingStageId INT
 		,strRowState NVARCHAR(50)
 		,strXML NVARCHAR(MAX)
-		,strBillId NVARCHAR(50)
-		,strERPVoucherNo NVARCHAR(50)
+		,strPricingNumber NVARCHAR(50)
+		,strERPRefNo NVARCHAR(100)
 		)
 
 	IF NOT EXISTS (
 			SELECT 1
-			FROM tblAPBillPreStage
+			FROM tblMFCommitmentPricingStage
 			WHERE intStatusId IS NULL
 			)
 	BEGIN
@@ -52,30 +70,23 @@ BEGIN TRY
 	END
 
 	DELETE
-	FROM @tblAPBillPreStage
+	FROM @tblMFCommitmentPricingStage
 
-	INSERT INTO @tblAPBillPreStage (intBillPreStageId)
-	SELECT TOP 50 BPS.intBillPreStageId
-	FROM tblAPBillPreStage BPS
-	JOIN tblAPBill B ON B.intBillId = BPS.intBillId
-		AND B.intTransactionType IN (
-			1
-			,3
-			,11
-			)
-	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intStoreLocationId
-		AND CL.strLotOrigin = @strCompanyLocation
-	WHERE BPS.intStatusId IS NULL
+	INSERT INTO @tblMFCommitmentPricingStage (intCommitmentPricingStageId)
+	SELECT TOP 50 CPS.intCommitmentPricingStageId
+	FROM tblMFCommitmentPricingStage CPS
+	JOIN tblMFCommitmentPricing CP ON CP.intCommitmentPricingId = CPS.intCommitmentPricingId
+	WHERE CPS.intStatusId IS NULL
 
-	SELECT @intBillPreStageId = MIN(intBillPreStageId)
-	FROM @tblAPBillPreStage
+	SELECT @intCommitmentPricingStageId = MIN(intCommitmentPricingStageId)
+	FROM @tblMFCommitmentPricingStage
 
-	IF @intBillPreStageId IS NULL
+	IF @intCommitmentPricingStageId IS NULL
 	BEGIN
 		RETURN
 	END
 
-	WHILE @intBillPreStageId IS NOT NULL
+	WHILE @intCommitmentPricingStageId IS NOT NULL
 	BEGIN
 		SELECT @strRowState = NULL
 			,@strUserName = NULL
@@ -83,109 +94,145 @@ BEGIN TRY
 			,@intUserId = NULL
 
 		SELECT @intActionId = NULL
-			,@intTransactionType = NULL
-			,@strBillId = NULL
+			,@intCommitmentPricingId = NULL
+			,@ysnPost = NULL
+			,@strPricingNumber = NULL
+			,@strCustomerPrefix = NULL
+			,@dtmDeliveryFrom = NULL
+			,@dtmDeliveryTo = NULL
+			,@strUnitMeasure = NULL
+			,@strCurrency = NULL
+			,@dtmPricingDate = NULL
+			,@strComment = NULL
+			,@dblMarketArbitrage = NULL
+			,@dblCalculatedArbitrage = NULL
+			,@dblCalculatedFutures = NULL
+			,@dblCalculatedFXPrice = NULL
+			,@dblCalculatedRefPrice = NULL
+			,@strERPRefNo = NULL
 
-
-		SELECT @intBillDetailId = NULL
+		SELECT @intCommitmentPricingDetailStageId = NULL
 			,@strDetailXML = ''
 
-		SELECT @intBillId = intBillId
-			,@strRowState = strRowState
+		SELECT @intCommitmentPricingId = intCommitmentPricingId
 			,@intUserId = intUserId
-		FROM tblAPBillPreStage
-		WHERE intBillPreStageId = @intBillPreStageId
+			,@ysnPost = ysnPost
+		FROM tblMFCommitmentPricingStage
+		WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
 
-		IF @strRowState = 'Posted'
+		IF @ysnPost = 1
 		BEGIN
-			SELECT @intActionId = 1
+			SELECT @strRowState = 'Posted'
+				,@intActionId = 1
 
 			IF EXISTS (
 					SELECT 1
-					FROM tblAPBillPreStage
-					WHERE intBillId = @intBillId
-						AND intBillPreStageId < @intBillPreStageId
+					FROM tblMFCommitmentPricingStage
+					WHERE intCommitmentPricingId = @intCommitmentPricingId
+						AND intCommitmentPricingStageId < @intCommitmentPricingStageId
 					)
-				SELECT @intActionId = 2
+			BEGIN
+				SELECT @strRowState = 'Reposted'
+					,@intActionId = 2
+			END
 		END
-		ELSE IF @strRowState = 'Unposted'
+		ELSE
 		BEGIN
-			SELECT @intActionId = 3
+			SELECT @strRowState = 'Unposted'
+				,@intActionId = 3
 		END
 
-		SELECT CP.strPricingNumber
-			,E.strExternalERPId
-			,CP.dtmDeliveryFrom
-			,CP.dtmDeliveryTo
-			,UOM.strUnitMeasure
-			,CUR.strCurrency
-			,CP.dtmDate
-			,CP.strComment
-			,CP.dblMarketArbitrage
-			,CP.dblCalculatedArbitrage
-			,CP.dblCalculatedFutures
-			,CP.dblCalculatedFXPrice
-			,CP.dblCalculatedRefPrice
-			,CP.strERPNo
+		SELECT @strUserName = US.strUserName
+			,@strPricingNumber = CP.strPricingNumber
+			,@strCustomerPrefix = E.strExternalERPId
+			,@dtmDeliveryFrom = CP.dtmDeliveryFrom
+			,@dtmDeliveryTo = CP.dtmDeliveryTo
+			,@strUnitMeasure = UOM.strUnitMeasure
+			,@strCurrency = CUR.strCurrency
+			,@dtmPricingDate = CP.dtmDate
+			,@strComment = CP.strComment
+			,@dblMarketArbitrage = CONVERT(NUMERIC(18, 6), CP.dblMarketArbitrage)
+			,@dblCalculatedArbitrage = CONVERT(NUMERIC(18, 6), CP.dblCalculatedArbitrage)
+			,@dblCalculatedFutures = CONVERT(NUMERIC(18, 6), CP.dblCalculatedFutures)
+			,@dblCalculatedFXPrice = CONVERT(NUMERIC(18, 6), CP.dblCalculatedFXPrice)
+			,@dblCalculatedRefPrice = CONVERT(NUMERIC(18, 6), CP.dblCalculatedRefPrice)
+			,@strERPRefNo = CP.strERPNo
 		FROM dbo.tblMFCommitmentPricing CP
-		JOIN tblEMEntity E ON E.intEntityId = CP.intEntityId
-		JOIN tblARCustomer C ON C.intEntityId = E.intEntityId
-		JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CP.intUnitMeasureId
+		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = @intUserId
+		JOIN dbo.tblEMEntity E ON E.intEntityId = CP.intEntityId
+		JOIN dbo.tblARCustomer C ON C.intEntityId = E.intEntityId
+		JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CP.intUnitMeasureId
 		JOIN dbo.tblSMCurrency CUR ON CUR.intCurrencyID = CP.intCurrencyId
 		WHERE CP.intCommitmentPricingId = @intCommitmentPricingId
 
-		SELECT (CASE WHEN CPS.intConcurrencyId = 1 THEN 1 ELSE 2 END)
-			,1
-			,CH.strContractNumber
-			,CD.strERPPONumber
-			,CPS.intSequenceNo
-		FROM tblMFCommitmentPricingSales CPS
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CPS.intContractDetailId
-		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE CPS.intCommitmentPricingId = @intCommitmentPricingId
+		IF ISNULL(@strCustomerPrefix, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Customer Prefix cannot be blank. '
+		END
 
-		SELECT (CASE WHEN CPR.intConcurrencyId = 1 THEN 1 ELSE 2 END)
-			,2
-			,AI.strItemNo
-			,AR.strERPRecipeNo
-			,CPR.dblVirtualTotalCost
-		FROM tblMFCommitmentPricingRecipe CPR
-		JOIN tblMFRecipe AR ON AR.intRecipeId = CPR.intActualRecipeId
-		JOIN tblMFRecipeItem ARI ON ARI.intRecipeItemId = CPR.intActualRecipeItemId
-			AND ARI.intRecipeItemTypeId = 2
-		JOIN tblICItem AI ON AI.intItemId = ARI.intItemId
-		WHERE CPR.intCommitmentPricingId = @intCommitmentPricingId
+		IF @dtmDeliveryFrom IS NULL
+		BEGIN
+			SELECT @strError = @strError + 'Delivery From cannot be blank. '
+		END
 
-		--IF @dtmDueDate IS NULL
-		--BEGIN
-		--	SELECT @strError = @strError + 'Due Date cannot be blank. '
-		--END
+		IF @dtmDeliveryTo IS NULL
+		BEGIN
+			SELECT @strError = @strError + 'Delivery To cannot be blank. '
+		END
 
-		--IF ISNULL(@dblTotal, 0) = 0
-		--BEGIN
-		--	SELECT @strError = @strError + 'Voucher Total should be greater than 0. '
-		--END
+		IF ISNULL(@strUnitMeasure, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'UOM cannot be blank. '
+		END
 
-		--IF ISNULL(@strRemarks, '') = ''
-		--BEGIN
-		--	SELECT @strError = @strError + 'Remarks cannot be blank. '
-		--END
+		IF ISNULL(@strCurrency, '') = ''
+		BEGIN
+			SELECT @strError = @strError + 'Currency cannot be blank. '
+		END
+
+		IF @dtmPricingDate IS NULL
+		BEGIN
+			SELECT @strError = @strError + 'Pricing Date cannot be blank. '
+		END
+
+		IF ISNULL(@dblCalculatedFutures, 0) = 0
+		BEGIN
+			SELECT @strError = @strError + 'Futures Price should be greater than 0. '
+		END
+
+		IF ISNULL(@dblCalculatedFXPrice, 0) = 0
+		BEGIN
+			SELECT @strError = @strError + 'FX Price should be greater than 0. '
+		END
+
+		IF ISNULL(@dblCalculatedRefPrice, 0) = 0
+		BEGIN
+			SELECT @strError = @strError + 'Reference Price should be greater than 0. '
+		END
+
+		IF @intActionId <> 1
+		BEGIN
+			IF ISNULL(@strERPRefNo, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'ERP Reference No. cannot be blank. '
+			END
+		END
 
 		IF @strError <> ''
 		BEGIN
-			UPDATE tblAPBillPreStage
+			UPDATE tblMFCommitmentPricingStage
 			SET strMessage = @strError
 				,intStatusId = 1
-			WHERE intBillPreStageId = @intBillPreStageId
+			WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
 
 			GOTO NextRec
 		END
 
 		SELECT @strXML = ''
 
-		SELECT @strXML += '<header id="' + LTRIM(@intBillPreStageId) + '">'
+		SELECT @strXML += '<header id="' + LTRIM(@intCommitmentPricingStageId) + '">'
 
-		SELECT @strXML += '<TrxSequenceNo>' + LTRIM(@intBillPreStageId) + '</TrxSequenceNo>'
+		SELECT @strXML += '<TrxSequenceNo>' + LTRIM(@intCommitmentPricingStageId) + '</TrxSequenceNo>'
 
 		SELECT @strXML += '<CompanyLocation>' + LTRIM(@strCompanyLocation) + '</CompanyLocation>'
 
@@ -195,26 +242,119 @@ BEGIN TRY
 
 		SELECT @strXML += '<CreatedByUser>' + @strUserName + '</CreatedByUser>'
 
-		SELECT @strXML += '<VoucherTypeId>' + LTRIM(@intTransactionType) + '</VoucherTypeId>'
+		SELECT @strXML += '<PricingNo>' + ISNULL(@strPricingNumber, '') + '</PricingNo>'
 
-		SELECT @strXML += '<VoucherNo>' + ISNULL(@strBillId, '') + '</VoucherNo>'
+		SELECT @strXML += '<CustomerPrefix>' + ISNULL(@strCustomerPrefix, '') + '</CustomerPrefix>'
 
+		SELECT @strXML += '<DeliveryFrom>' + ISNULL(CONVERT(VARCHAR, @dtmDeliveryFrom, 112), '') + '</DeliveryFrom>'
 
-		--IF @intActionId <> 1
-		--	SELECT @strXML += '<ERPVoucherNo>' + ISNULL(@strERPVoucherNo, '') + '</ERPVoucherNo>'
+		SELECT @strXML += '<DeliveryTo>' + ISNULL(CONVERT(VARCHAR, @dtmDeliveryTo, 112), '') + '</DeliveryTo>'
 
+		SELECT @strXML += '<UOM>' + ISNULL(@strUnitMeasure, '') + '</UOM>'
+
+		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
+
+		SELECT @strXML += '<PricingDate>' + ISNULL(CONVERT(VARCHAR, @dtmPricingDate, 112), '') + '</PricingDate>'
+
+		SELECT @strXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
+
+		SELECT @strXML += '<MarketArb>' + LTRIM(@dblMarketArbitrage) + '</MarketArb>'
+
+		SELECT @strXML += '<Arbitrage>' + LTRIM(@dblCalculatedArbitrage) + '</Arbitrage>'
+
+		SELECT @strXML += '<FuturesPrice>' + LTRIM(@dblCalculatedFutures) + '</FuturesPrice>'
+
+		SELECT @strXML += '<FXPrice>' + LTRIM(@dblCalculatedFXPrice) + '</FXPrice>'
+
+		SELECT @strXML += '<RefPrice>' + LTRIM(@dblCalculatedRefPrice) + '</RefPrice>'
+
+		SELECT @strXML += '<ERPRefNo>' + ISNULL(@strERPRefNo, '') + '</ERPRefNo>'
+
+		INSERT INTO tblMFCommitmentPricingDetailStage (
+			intCommitmentPricingStageId
+			,intCommitmentPricingId
+			,intActionId
+			,intLineType
+			,strContractNo
+			,strCommodityOrderNo
+			,intSequenceNo
+			,strRowState
+			)
+		SELECT @intCommitmentPricingStageId
+			,@intCommitmentPricingId
+			,(
+				CASE 
+					WHEN CPS.intConcurrencyId = 1
+						THEN 1
+					ELSE 2
+					END
+				)
+			,1
+			,CH.strContractNumber
+			,CD.strERPPONumber
+			,CPS.intSequenceNo
+			,(
+				CASE 
+					WHEN CPS.intConcurrencyId = 1
+						THEN 'Added'
+					ELSE 'Modified'
+					END
+				)
+		FROM tblMFCommitmentPricingSales CPS
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CPS.intContractDetailId
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE CPS.intCommitmentPricingId = @intCommitmentPricingId
+
+		INSERT INTO tblMFCommitmentPricingDetailStage (
+			intCommitmentPricingStageId
+			,intCommitmentPricingId
+			,intActionId
+			,intLineType
+			,strActualBlend
+			,strERPRecipeNo
+			,dblTotalCostPR
+			,strRowState
+			)
+		SELECT @intCommitmentPricingStageId
+			,@intCommitmentPricingId
+			,(
+				CASE 
+					WHEN CPR.intConcurrencyId = 1
+						THEN 1
+					ELSE 2
+					END
+				)
+			,2
+			,AI.strItemNo
+			,AR.strERPRecipeNo
+			,CPR.dblVirtualTotalCost
+			,(
+				CASE 
+					WHEN CPR.intConcurrencyId = 1
+						THEN 'Added'
+					ELSE 'Modified'
+					END
+				)
+		FROM tblMFCommitmentPricingRecipe CPR
+		JOIN tblMFRecipe AR ON AR.intRecipeId = CPR.intActualRecipeId
+		JOIN tblMFRecipeItem ARI ON ARI.intRecipeItemId = CPR.intActualRecipeItemId
+			AND ARI.intRecipeItemTypeId = 2
+		JOIN tblICItem AI ON AI.intItemId = ARI.intItemId
+		WHERE CPR.intCommitmentPricingId = @intCommitmentPricingId
+
+		-- Unpost / Repost - Compare and add deleted records for both Sales Contract and Recipe
 		DELETE
-		FROM @tblAPBillDetail
+		FROM @tblMFCommitmentPricingDetailStage
 
-		INSERT INTO @tblAPBillDetail (intBillDetailId)
-		SELECT BD.intBillDetailId
-		FROM tblAPBillDetail BD
-		WHERE BD.intBillId = @intBillId
+		INSERT INTO @tblMFCommitmentPricingDetailStage (intCommitmentPricingDetailStageId)
+		SELECT CPDS.intCommitmentPricingDetailStageId
+		FROM tblMFCommitmentPricingDetailStage CPDS
+		WHERE CPDS.intCommitmentPricingStageId = @intCommitmentPricingStageId
 
-		SELECT @intBillDetailId = MIN(intBillDetailId)
-		FROM @tblAPBillDetail
+		SELECT @intCommitmentPricingDetailStageId = MIN(intCommitmentPricingDetailStageId)
+		FROM @tblMFCommitmentPricingDetailStage
 
-		WHILE @intBillDetailId IS NOT NULL
+		WHILE @intCommitmentPricingDetailStageId IS NOT NULL
 		BEGIN
 			SELECT @strQuantityUOM = NULL
 				,@strDefaultCurrency = NULL
@@ -223,12 +363,15 @@ BEGIN TRY
 				,@intItemId = NULL
 				,@intItemUOMId = NULL
 
-			--SELECT @strContractNumber = NULL
-
-
-			SELECT @intItemId = BD.intItemId
-			FROM dbo.tblAPBillDetail BD
-			WHERE BD.intBillDetailId = @intBillDetailId
+			SELECT @intDetailActionId = NULL
+				,@intLineType = NULL
+				,@strContractNo = NULL
+				,@strCommodityOrderNo = NULL
+				,@intSequenceNo = NULL
+				,@strActualBlend = NULL
+				,@strERPRecipeNo = NULL
+				,@dblTotalCostPR = NULL
+				,@strDetailRowState = NULL
 
 			SELECT @strQuantityUOM = strQuantityUOM
 				,@strDefaultCurrency = strDefaultCurrency
@@ -246,115 +389,135 @@ BEGIN TRY
 				WHERE strCurrency LIKE '%USD%'
 			END
 
-			SELECT @intUnitMeasureId = IUOM.intUnitMeasureId
-				,@intItemUOMId = IUOM.intItemUOMId
-			FROM tblICUnitMeasure UOM
-			JOIN tblICItemUOM IUOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId
-				AND IUOM.intItemId = @intItemId
-				AND UOM.strUnitMeasure = @strQuantityUOM
-
-			IF @intUnitMeasureId IS NULL
-			BEGIN
-				SELECT TOP 1 @intItemUOMId = IUOM.intItemUOMId
-					,@intUnitMeasureId = IUOM.intUnitMeasureId
-					,@strQuantityUOM = UOM.strUnitMeasure
-				FROM dbo.tblICItemUOM IUOM
-				JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
-					AND IUOM.intItemId = @intItemId
-					AND IUOM.ysnStockUnit = 1
-			END
-
-			--SELECT @strContractNumber = CH.strContractNumber
-			--	,@strSequenceNo = LTRIM(CD.intContractSeq)
-			--	,@strERPPONumber = CD.strERPPONumber
-			--	,@strERPItemNumber = CD.strERPItemNumber
-			--	,@strItemNo = I.strItemNo
-			--	,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId, @intItemUOMId, BD.dblQtyReceived), 0))
-			--	,@strDetailCurrency = C.strCurrency
-			--	,@dblDetailCost = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intCostUOMId, @intItemUOMId, BD.dblCost), 0))
-			--	,@dblDetailDiscount = CONVERT(NUMERIC(18, 6), BD.dblDiscount)
-			--	,@dblDetailTotal = CONVERT(NUMERIC(18, 6), BD.dblTotal)
-			--	,@dblDetailTax = CONVERT(NUMERIC(18, 6), BD.dblTax)
-			--FROM tblAPBillDetail BD
-			--JOIN tblICItem I ON I.intItemId = BD.intItemId
-			--JOIN dbo.tblSMCurrency C ON C.intCurrencyID = BD.intCurrencyId
-			--LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = BD.intContractHeaderId
-			--LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = BD.intContractDetailId
-			--WHERE BD.intBillDetailId = @intBillDetailId
-
-			--SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
-
-			--SELECT TOP 1 @strWorkOrderNo = W.strWorkOrderNo
-			--	,@strERPOrderNo = W.strERPOrderNo
-			--	,@strERPServicePONumber = W.strERPServicePONumber
-			--	,@strERPServicePOLineNo = WMD.strERPServicePOLineNo
-			--FROM tblAPBillDetail BD
-			--JOIN tblMFWorkOrderWarehouseRateMatrixDetail WMD ON WMD.intBillId = BD.intBillId
-			--	AND WMD.intBillId = @intBillId
-			--JOIN tblMFWorkOrder W ON W.intWorkOrderId = WMD.intWorkOrderId
-			--JOIN tblLGWarehouseRateMatrixDetail MD ON MD.intWarehouseRateMatrixDetailId = WMD.intWarehouseRateMatrixDetailId
-			--WHERE BD.intBillDetailId = @intBillDetailId
-
-
-			--IF ISNULL(@dblDetailTotalwithTax, 0) = 0
+			--SELECT @intUnitMeasureId = IUOM.intUnitMeasureId
+			--	,@intItemUOMId = IUOM.intItemUOMId
+			--FROM tblICUnitMeasure UOM
+			--JOIN tblICItemUOM IUOM ON IUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			--	AND IUOM.intItemId = @intItemId
+			--	AND UOM.strUnitMeasure = @strQuantityUOM
+			--IF @intUnitMeasureId IS NULL
 			--BEGIN
-			--	SELECT @strError = @strError + 'Detail - Total with Tax should be greater than 0. '
+			--	SELECT TOP 1 @intItemUOMId = IUOM.intItemUOMId
+			--		,@intUnitMeasureId = IUOM.intUnitMeasureId
+			--		,@strQuantityUOM = UOM.strUnitMeasure
+			--	FROM dbo.tblICItemUOM IUOM
+			--	JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+			--		AND IUOM.intItemId = @intItemId
+			--		AND IUOM.ysnStockUnit = 1
 			--END
+			SELECT @intDetailActionId = CPDS.intActionId
+				,@intLineType = CPDS.intLineType
+				,@strContractNo = CPDS.strContractNo
+				,@strCommodityOrderNo = CPDS.strCommodityOrderNo
+				,@intSequenceNo = CPDS.intSequenceNo
+				,@strActualBlend = CPDS.strActualBlend
+				,@strERPRecipeNo = CPDS.strERPRecipeNo
+				,@dblTotalCostPR = CONVERT(NUMERIC(18, 6), CPDS.dblTotalCostPR)
+				,@strDetailRowState = CPDS.strRowState
+			FROM tblMFCommitmentPricingDetailStage CPDS
+			WHERE intCommitmentPricingDetailStageId = @intCommitmentPricingDetailStageId
+
+			IF ISNULL(@intLineType, 0) = 1
+			BEGIN
+				IF ISNULL(@strContractNo, '') = ''
+				BEGIN
+					SELECT @strError = @strError + 'Sales Contract No cannot be blank. '
+				END
+
+				IF ISNULL(@strCommodityOrderNo, '') = ''
+				BEGIN
+					SELECT @strError = @strError + 'AX Commodity Order No cannot be blank. '
+				END
+
+				IF ISNULL(@intSequenceNo, 0) = 0
+				BEGIN
+					SELECT @strError = @strError + 'Sequence Number cannot be blank. '
+				END
+			END
+			ELSE IF ISNULL(@intLineType, 0) = 2
+			BEGIN
+				IF ISNULL(@strActualBlend, '') = ''
+				BEGIN
+					SELECT @strError = @strError + 'Actual Blend Item No cannot be blank. '
+				END
+
+				IF ISNULL(@strERPRecipeNo, '') = ''
+				BEGIN
+					SELECT @strError = @strError + 'Actual Blend Item - ERP Recipe No cannot be blank. '
+				END
+
+				IF ISNULL(@dblTotalCostPR, 0) = 0
+				BEGIN
+					SELECT @strError = @strError + 'Total Cost - PR should be greater than 0. '
+				END
+			END
 
 			IF @strError <> ''
 			BEGIN
-				UPDATE tblAPBillPreStage
+				UPDATE tblMFCommitmentPricingStage
 				SET strMessage = @strError
 					,intStatusId = 1
-				WHERE intBillPreStageId = @intBillPreStageId
+				WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
 
 				GOTO NextRec
 			END
 
 			SELECT @strItemXML = ''
 
-			SELECT @strItemXML += '<line id="' + LTRIM(@intBillDetailId) + '" parentId="' + LTRIM(@intBillPreStageId) + '">'
+			SELECT @strItemXML += '<line id="' + LTRIM(@intCommitmentPricingDetailStageId) + '" parentId="' + LTRIM(@intCommitmentPricingStageId) + '">'
 
-			SELECT @strItemXML += '<TrxSequenceNo>' + LTRIM(@intBillDetailId) + '</TrxSequenceNo>'
+			SELECT @strItemXML += '<TrxSequenceNo>' + LTRIM(@intCommitmentPricingDetailStageId) + '</TrxSequenceNo>'
 
-			--SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNumber, '') + '</ContractNo>'
+			SELECT @strItemXML += '<ActionId>' + LTRIM(@intDetailActionId) + '</ActionId>'
 
-		
+			SELECT @strItemXML += '<LineType>' + LTRIM(@intLineType) + '</LineType>'
+
+			SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNo, '') + '</ContractNo>'
+
+			SELECT @strItemXML += '<CommodityOrderNo>' + ISNULL(@strCommodityOrderNo, '') + '</CommodityOrderNo>'
+
+			SELECT @strItemXML += '<ActualBlend>' + ISNULL(@strActualBlend, '') + '</ActualBlend>'
+
+			SELECT @strItemXML += '<ERPRecipeNo>' + ISNULL(@strERPRecipeNo, '') + '</ERPRecipeNo>'
+
+			SELECT @strItemXML += '<TotalCostPR>' + LTRIM(@dblTotalCostPR) + '</TotalCostPR>'
+
+			SELECT @strItemXML += '<SequenceNumber>' + LTRIM(@intSequenceNo) + '</SequenceNumber>'
 
 			SELECT @strItemXML += '</line>'
 
 			IF ISNULL(@strItemXML, '') = ''
 			BEGIN
-				UPDATE tblAPBillPreStage
+				UPDATE tblMFCommitmentPricingStage
 				SET strMessage = 'Detail XML not available. '
 					,intStatusId = 1
-				WHERE intBillPreStageId = @intBillPreStageId
+				WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
 
 				GOTO NextRec
 			END
 
 			SELECT @strDetailXML = @strDetailXML + @strItemXML
 
-			SELECT @intBillDetailId = MIN(intBillDetailId)
-			FROM @tblAPBillDetail
-			WHERE intBillDetailId > @intBillDetailId
+			SELECT @intCommitmentPricingDetailStageId = MIN(intCommitmentPricingDetailStageId)
+			FROM @tblMFCommitmentPricingDetailStage
+			WHERE intCommitmentPricingDetailStageId > @intCommitmentPricingDetailStageId
 		END
 
 		SELECT @strFinalXML = @strFinalXML + @strXML + @strDetailXML + '</header>'
 
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
-			UPDATE tblAPBillPreStage
+			UPDATE tblMFCommitmentPricingStage
 			SET strMessage = NULL
 				,intStatusId = 2
-			WHERE intBillPreStageId = @intBillPreStageId
+			WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
 		END
 
 		NextRec:
 
-		SELECT @intBillPreStageId = MIN(intBillPreStageId)
-		FROM @tblAPBillPreStage
-		WHERE intBillPreStageId > @intBillPreStageId
+		SELECT @intCommitmentPricingStageId = MIN(intCommitmentPricingStageId)
+		FROM @tblMFCommitmentPricingStage
+		WHERE intCommitmentPricingStageId > @intCommitmentPricingStageId
 	END
 
 	IF @strFinalXML <> ''
@@ -365,25 +528,25 @@ BEGIN TRY
 		FROM @tblOutput
 
 		INSERT INTO @tblOutput (
-			intBillId
+			intCommitmentPricingStageId
 			,strRowState
 			,strXML
-			,strBillId
-			,strERPVoucherNo
+			,strPricingNumber
+			,strERPRefNo
 			)
 		VALUES (
-			@intBillId
+			@intCommitmentPricingStageId
 			,'CREATE'
 			,@strFinalXML
-			,ISNULL(@strBillId, '')
-			,''--,ISNULL(@strERPVoucherNo, '')
+			,ISNULL(@strPricingNumber, '')
+			,ISNULL(@strERPRefNo, '')
 			)
 	END
 
-	SELECT IsNULL(intBillId, '0') AS id
+	SELECT IsNULL(intCommitmentPricingStageId, '0') AS id
 		,IsNULL(strXML, '') AS strXml
-		,IsNULL(strBillId, '') AS strInfo1
-		,IsNULL(strERPVoucherNo, '') AS strInfo2
+		,IsNULL(strPricingNumber, '') AS strInfo1
+		,IsNULL(strERPRefNo, '') AS strInfo2
 		,'' AS strOnFailureCallbackSql
 	FROM @tblOutput
 	ORDER BY intRowNo
