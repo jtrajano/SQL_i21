@@ -580,6 +580,65 @@ END CATCH
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+--=====================================================================================================================================
+-- 	AP CLEARING
+---------------------------------------------------------------------------------------------------------------------------------------
+
+	DECLARE @APClearing APClearing
+
+	INSERT INTO @APClearing (
+		[intTransactionId]
+		, [strTransactionId]
+		, [intTransactionType]
+		, [strReferenceNumber]
+		, [dtmDate]
+		, [intEntityVendorId]
+		, [intLocationId]
+		, [intTransactionDetailId]
+		, [intAccountId]
+		, [intItemId]
+		, [intItemUOMId]
+		, [dblQuantity]
+		, [dblAmount]
+		, [intOffsetId]
+		, [strOffsetId]
+		, [intOffsetDetailId]
+		, [intOffsetDetailTaxId]
+		, [strCode]
+		, [strRemarks]
+	)
+	SELECT [intTransactionId]		= R.intRefundId
+		, [strTransactionId]		= R.strRefundNo
+		, [intTransactionType]		= 9
+		, [strReferenceNumber]		= R.strRefundNo
+		, [dtmDate]					= R.dtmRefundDate
+		, [intEntityVendorId]		= B.intEntityVendorId
+		, [intLocationId]			= B.intShipToId	
+		, [intTransactionDetailId]	= RC.intRefundCustomerId
+		, [intAccountId]			= B.intAccountId
+		, [intItemId]				= BD.intItemId
+		, [intItemUOMId]			= BD.intUnitOfMeasureId
+		, [dblQuantity]				= BD.dblQtyReceived
+		, [dblAmount]				= BD.dblTotal	
+		, [intOffsetId]				= B.intBillId
+		, [strOffsetId]				= B.strBillId
+		, [intOffsetDetailId]		= BD.intBillDetailId
+		, [intOffsetDetailTaxId]	= NULL	
+		, [strCode]					= 'PAT'
+		, [strRemarks]				= NULL
+	FROM tblPATRefund R
+	INNER JOIN tblPATRefundCustomer RC ON R.intRefundId = RC.intRefundId
+	INNER JOIN tblAPBill B ON RC.intBillId = B.intBillId
+	INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+	WHERE RC.intBillId IS NOT NULL
+	AND R.intRefundId = @intRefundId
+
+	IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
+		EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
+	
+---------------------------------------------------------------------------------------------------------------------------------------
+
+
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 GOTO Post_Commit;
