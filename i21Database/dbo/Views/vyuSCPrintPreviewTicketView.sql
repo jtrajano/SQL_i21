@@ -220,6 +220,7 @@ AS SELECT
 	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')  COLLATE Latin1_General_CI_AS
 	,EMScaleOps.strTimezone
 	,SC.strTrailerId
+	,tblSCTicketPrintOption.intTicketPrintOptionId
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
@@ -242,7 +243,6 @@ AS SELECT
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
   LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
-  --LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SC.intEntityContactId
   LEFT JOIN tblEMEntitySignature EM ON EM.intEntityId = SC.intEntityScaleOperatorId
   LEFT JOIN tblSMSignature SMS ON SMS.intSignatureId = EM.intElectronicSignatureId
   LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
@@ -288,6 +288,6 @@ AS SELECT
 		FOR XML PATH('')) 
 
   )SealNumber
-,(
-	SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
-  ) SMCompanySetup
+	OUTER APPLY(
+		SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
+	) SMCompanySetup
