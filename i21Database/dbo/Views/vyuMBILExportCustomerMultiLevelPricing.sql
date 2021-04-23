@@ -6,7 +6,7 @@ CREATE VIEW [dbo].[vyuMBILExportCustomerMultiLevelPricing]
 		CUSTOMER.strCustomerNumber,
 		CUSTOMER.strLevel,
 		PLEVEL.intItemPricingLevelId,
-		PLEVEL.intCompanyLocationPricingLevelId,
+		CLEVEL.intCompanyLocationId as intCompanyLocationPricingLevelId,
 		PLEVEL.intItemId,
 		ICITEM.strItemNo,
 		PLEVEL.intItemLocationId,
