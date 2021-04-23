@@ -73,9 +73,9 @@ BEGIN
 
       IF @ReverseResult <> 0 RETURN --1  
       SET @successfulCount = @intCount  
-        IF ISNULL(@ysnRecap,0) = 0  
-        BEGIN  
-            UPDATE A SET ysnDepreciated = 0, ysnFullyDepreciated = 0, ysnDisposed = 0, ysnAcquired = 0
+        IF ISNULL(@ysnRecap,0) = 0
+        BEGIN
+            UPDATE A SET ysnDepreciated = 0, ysnFullyDepreciated = 0, ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             UPDATE A SET ysnFullyDepreciated = 0 FROM tblFABookDepreciation A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
