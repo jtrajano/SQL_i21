@@ -270,6 +270,10 @@ BEGIN TRY
 
 		SELECT @strXML += '<ERPRefNo>' + ISNULL(@strERPRefNo, '') + '</ERPRefNo>'
 
+		DELETE
+		FROM tblMFCommitmentPricingDetailStage
+		WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
+
 		INSERT INTO tblMFCommitmentPricingDetailStage (
 			intCommitmentPricingStageId
 			,intCommitmentPricingId
@@ -451,6 +455,10 @@ BEGIN TRY
 					SELECT @strError = @strError + 'Total Cost - PR should be greater than 0. '
 				END
 			END
+			ELSE
+			BEGIN
+				SELECT @strError = @strError + 'Invalid Line Type. '
+			END
 
 			IF @strError <> ''
 			BEGIN
@@ -472,17 +480,22 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<LineType>' + LTRIM(@intLineType) + '</LineType>'
 
-			SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNo, '') + '</ContractNo>'
+			IF @intLineType = 1
+			BEGIN
+				SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNo, '') + '</ContractNo>'
 
-			SELECT @strItemXML += '<CommodityOrderNo>' + ISNULL(@strCommodityOrderNo, '') + '</CommodityOrderNo>'
+				SELECT @strItemXML += '<CommodityOrderNo>' + ISNULL(@strCommodityOrderNo, '') + '</CommodityOrderNo>'
 
-			SELECT @strItemXML += '<ActualBlend>' + ISNULL(@strActualBlend, '') + '</ActualBlend>'
+				SELECT @strItemXML += '<SequenceNumber>' + LTRIM(@intSequenceNo) + '</SequenceNumber>'
+			END
+			ELSE IF @intLineType = 2
+			BEGIN
+				SELECT @strItemXML += '<ActualBlend>' + ISNULL(@strActualBlend, '') + '</ActualBlend>'
 
-			SELECT @strItemXML += '<ERPRecipeNo>' + ISNULL(@strERPRecipeNo, '') + '</ERPRecipeNo>'
+				SELECT @strItemXML += '<ERPRecipeNo>' + ISNULL(@strERPRecipeNo, '') + '</ERPRecipeNo>'
 
-			SELECT @strItemXML += '<TotalCostPR>' + LTRIM(@dblTotalCostPR) + '</TotalCostPR>'
-
-			SELECT @strItemXML += '<SequenceNumber>' + LTRIM(@intSequenceNo) + '</SequenceNumber>'
+				SELECT @strItemXML += '<TotalCostPR>' + LTRIM(@dblTotalCostPR) + '</TotalCostPR>'
+			END
 
 			SELECT @strItemXML += '</line>'
 
