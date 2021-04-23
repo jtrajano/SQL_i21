@@ -249,6 +249,7 @@ AS SELECT
   LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
   LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
   LEFT JOIN tblEMEntityLocation EMScaleOps on EMScaleOps.intEntityId = SC.intEntityScaleOperatorId
+		AND ysnDefaultLocation = 1
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber
