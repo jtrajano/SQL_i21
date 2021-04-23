@@ -131,7 +131,7 @@ WHERE
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
 --HANDLE RECEIPT WHICH intEntityVendorId IS NULL
-AND ISNULL(Receipt.intEntityVendorId,ReceiptCharge.intEntityVendorId) = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only 
+AND ISNULL(Receipt.intEntityVendorId, 0) = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only
 AND NOT EXISTS (
 	--DP to OS and vice verse
     SELECT intInventoryReceiptChargeId
