@@ -457,9 +457,9 @@ BEGIN
 		UPDATE tblPATRetireStock SET ysnPosted = @ysnPosted WHERE intRetireStockId = @intRetireStockId;
 
 	--------------------- AP CLEARING -----------------------
-	DECLARE @APClearing		APClearing
+	DECLARE @APClearingtbl		APClearing
 
-	INSERT INTO @APClearing (
+	INSERT INTO @APClearingtbl (
 		  [intTransactionId]
 		, [strTransactionId]
 		, [intTransactionType]
@@ -505,8 +505,8 @@ BEGIN
 	WHERE RS.intBillId IS NOT NULL
 	  AND RS.intRetireStockId = @intRetireStockId
 
-	IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
-		EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
+	IF EXISTS(SELECT TOP 1 NULL FROM @APClearingtbl)
+		EXEC dbo.uspAPClearing @APClearing = @APClearingtbl, @post = @ysnPosted
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
