@@ -8,7 +8,8 @@ SELECT
 	 ,CH.intContractHeaderId
 	,CH.strContractNumber
 	,CD.intContractSeq
-	,CT.strContractType 
+	,CT.strContractType
+	,PT.strPricingType 
 	,ET.strName
 	,dbo.fnCTGetContractStatuses(CH.intContractHeaderId) COLLATE Latin1_General_CI_AS AS	strStatuses
 	,CH.intCommodityId
@@ -39,4 +40,4 @@ INNER JOIN tblCTContractOption CO ON CO.intContractDetailId = CD.intContractDeta
 INNER JOIN tblCTBuySell BS ON BS.intBuySellId = CO.intBuySellId
 INNER JOIN tblCTPutCall PC ON PC.intPutCallId = CO.intPutCallId
 INNER JOIN tblCTPremFee PF ON PF.intPremFeeId = CO.intPremFeeId
-
+INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CH.intPricingTypeId
