@@ -9320,6 +9320,10 @@
     <Build Include="dbo\Tables\tblMFCommitmentPricingDetailStage.sql" />
     <Build Include="dbo\Views\vyuSMDefaultValues.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAddPaymentSchedules.sql" />
+    <Build Include="dbo\Tables\tblIPLotMergeFeed.sql" />
+    <Build Include="dbo\Tables\tblIPLotPropertyFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotProperty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
