@@ -120,63 +120,6 @@ END
 ----------------------------------------------------------------------------------------
 
 --=====================================================================================================================================
---  UNPOST AND DELETE VOUCHER
----------------------------------------------------------------------------------------------------------------------------------------
-
-DECLARE @voucheredRefunds INT = 0;
-SELECT @voucheredRefunds = COUNT(*) FROM #tmpRefundData WHERE intBillId IS NOT NULL;
-
-IF(ISNULL(@ysnPosted,0) = 0 AND ISNULL(@ysnRecap, 0) = 0 AND @voucheredRefunds > 0)
-BEGIN
-
-	BEGIN TRY
-	SET ANSI_WARNINGS ON;
-	DECLARE @voucherId AS NVARCHAR(MAX);
-	SELECT @voucherId = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intBillId) FROM #tmpRefundData
-	WHERE intBillId IS NOT NULL 
-	FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
-	SET ANSI_WARNINGS OFF;
-
-	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);
-
-	EXEC [dbo].[uspAPPostBill]
-		@batchId = NULL,
-		@billBatchId = NULL,
-		@transactionType = 'Credit Card',
-		@post = 0,
-		@recap = 0,
-		@isBatch = 0,
-		@param = @voucherId,
-		@userId = @intUserId,
-		@beginTransaction = NULL,
-		@endTransaction = NULL,
-		@success = @success OUTPUT,
-		@batchIdUsed = @batchIdUsedInBill OUTPUT;
-
-
-	END TRY
-	BEGIN CATCH
-		SET @error = ERROR_MESSAGE();
-		RAISERROR(@error, 16, 1);
-		GOTO Post_Rollback;
-	END CATCH
-	
-	IF(@success = 0)
-	BEGIN
-		SELECT TOP 1 @error = strMessage
-		FROM tblAPPostResult 
-		WHERE strBatchNumber = @batchIdUsedInBill;
-		
-		RAISERROR(@error, 16, 1);
-		GOTO Post_Rollback;
-	END
-
-	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));	
-END
-
----------------------------------------------------------------------------------------------------------------------------------------
-
---=====================================================================================================================================
 -- 	CREATE GL ENTRIES
 ---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -638,6 +581,62 @@ END CATCH
 	
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+--=====================================================================================================================================
+--  UNPOST AND DELETE VOUCHER
+---------------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE @voucheredRefunds INT = 0;
+SELECT @voucheredRefunds = COUNT(*) FROM #tmpRefundData WHERE intBillId IS NOT NULL;
+
+IF(ISNULL(@ysnPosted,0) = 0 AND ISNULL(@ysnRecap, 0) = 0 AND @voucheredRefunds > 0)
+BEGIN
+
+	BEGIN TRY
+	SET ANSI_WARNINGS ON;
+	DECLARE @voucherId AS NVARCHAR(MAX);
+	SELECT @voucherId = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intBillId) FROM #tmpRefundData
+	WHERE intBillId IS NOT NULL 
+	FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
+	SET ANSI_WARNINGS OFF;
+
+	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);
+
+	EXEC [dbo].[uspAPPostBill]
+		@batchId = NULL,
+		@billBatchId = NULL,
+		@transactionType = 'Credit Card',
+		@post = 0,
+		@recap = 0,
+		@isBatch = 0,
+		@param = @voucherId,
+		@userId = @intUserId,
+		@beginTransaction = NULL,
+		@endTransaction = NULL,
+		@success = @success OUTPUT,
+		@batchIdUsed = @batchIdUsedInBill OUTPUT;
+
+
+	END TRY
+	BEGIN CATCH
+		SET @error = ERROR_MESSAGE();
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback;
+	END CATCH
+	
+	IF(@success = 0)
+	BEGIN
+		SELECT TOP 1 @error = strMessage
+		FROM tblAPPostResult 
+		WHERE strBatchNumber = @batchIdUsedInBill;
+		
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback;
+	END
+
+	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));	
+END
+
+---------------------------------------------------------------------------------------------------------------------------------------
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

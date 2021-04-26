@@ -348,6 +348,9 @@ BEGIN
 	IF(@batchId2 IS NULL)
 		EXEC uspSMGetStartingNumber 3, @batchId2 OUT
 
+	--------------------- AP CLEARING -----------------------
+	DECLARE @APClearingtbl		APClearing
+
 	--------------------- RETIRED STOCKS ------------------	
 		IF(@ysnPosted = 1)
 		BEGIN
@@ -412,10 +415,56 @@ BEGIN
 				@endTransaction = @createdVouchersId,
 				@success = @success OUTPUT
 
-				UPDATE tblPATCustomerStock
-				SET dblSharesNo = 0,
-					strActivityStatus = 'Retired'
-				WHERE intCustomerStockId IN (SELECT intCustomerStockId FROM #tempCustomerStock);
+			UPDATE tblPATCustomerStock
+			SET dblSharesNo = 0,
+				strActivityStatus = 'Retired'
+			WHERE intCustomerStockId IN (SELECT intCustomerStockId FROM #tempCustomerStock);
+
+			INSERT INTO @APClearingtbl (
+				[intTransactionId]
+				, [strTransactionId]
+				, [intTransactionType]
+				, [strReferenceNumber]
+				, [dtmDate]
+				, [intEntityVendorId]
+				, [intLocationId]
+				, [intTransactionDetailId]
+				, [intAccountId]
+				, [intItemId]
+				, [intItemUOMId]
+				, [dblQuantity]
+				, [dblAmount]
+				, [intOffsetId]
+				, [strOffsetId]
+				, [intOffsetDetailId]
+				, [intOffsetDetailTaxId]
+				, [strCode]
+				, [strRemarks]
+			)
+			SELECT [intTransactionId]		= RS.intRetireStockId
+				, [strTransactionId]		= RS.strRetireNo
+				, [intTransactionType]		= 9
+				, [strReferenceNumber]		= RS.strRetireNo
+				, [dtmDate]					= RS.dtmRetireDate
+				, [intEntityVendorId]		= B.intEntityVendorId
+				, [intLocationId]			= B.intShipToId	
+				, [intTransactionDetailId]	= RS.intRetireStockId
+				, [intAccountId]			= B.intAccountId
+				, [intItemId]				= BD.intItemId
+				, [intItemUOMId]			= BD.intUnitOfMeasureId
+				, [dblQuantity]				= BD.dblQtyReceived
+				, [dblAmount]				= BD.dblTotal	
+				, [intOffsetId]				= B.intBillId
+				, [strOffsetId]				= B.strBillId
+				, [intOffsetDetailId]		= BD.intBillDetailId
+				, [intOffsetDetailTaxId]	= NULL		
+				, [strCode]					= 'PAT'
+				, [strRemarks]				= NULL
+			FROM tblPATRetireStock RS
+			INNER JOIN tblAPBill B ON RS.intBillId = B.intBillId
+			INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+			WHERE RS.intBillId IS NOT NULL
+			  AND RS.intRetireStockId = @intRetireStockId
 		END
 		ELSE
 		BEGIN
@@ -442,6 +491,52 @@ BEGIN
 				RAISERROR(@error, 16, 1);
 				GOTO Post_Rollback;
 			END
+
+			INSERT INTO @APClearingtbl (
+				[intTransactionId]
+				, [strTransactionId]
+				, [intTransactionType]
+				, [strReferenceNumber]
+				, [dtmDate]
+				, [intEntityVendorId]
+				, [intLocationId]
+				, [intTransactionDetailId]
+				, [intAccountId]
+				, [intItemId]
+				, [intItemUOMId]
+				, [dblQuantity]
+				, [dblAmount]
+				, [intOffsetId]
+				, [strOffsetId]
+				, [intOffsetDetailId]
+				, [intOffsetDetailTaxId]
+				, [strCode]
+				, [strRemarks]
+			)
+			SELECT [intTransactionId]		= RS.intRetireStockId
+				, [strTransactionId]		= RS.strRetireNo
+				, [intTransactionType]		= 9
+				, [strReferenceNumber]		= RS.strRetireNo
+				, [dtmDate]					= RS.dtmRetireDate
+				, [intEntityVendorId]		= B.intEntityVendorId
+				, [intLocationId]			= B.intShipToId	
+				, [intTransactionDetailId]	= RS.intRetireStockId
+				, [intAccountId]			= B.intAccountId
+				, [intItemId]				= BD.intItemId
+				, [intItemUOMId]			= BD.intUnitOfMeasureId
+				, [dblQuantity]				= BD.dblQtyReceived
+				, [dblAmount]				= BD.dblTotal	
+				, [intOffsetId]				= B.intBillId
+				, [strOffsetId]				= B.strBillId
+				, [intOffsetDetailId]		= BD.intBillDetailId
+				, [intOffsetDetailTaxId]	= NULL		
+				, [strCode]					= 'PAT'
+				, [strRemarks]				= NULL
+			FROM tblPATRetireStock RS
+			INNER JOIN tblAPBill B ON RS.intBillId = B.intBillId
+			INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+			WHERE RS.intBillId IS NOT NULL
+			  AND RS.intRetireStockId = @intRetireStockId
 			
 			DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tempCustomerStock) AND ysnPaid <> 1;
 			
@@ -455,58 +550,9 @@ BEGIN
 		END
 
 		UPDATE tblPATRetireStock SET ysnPosted = @ysnPosted WHERE intRetireStockId = @intRetireStockId;
-
-	--------------------- AP CLEARING -----------------------
-	DECLARE @APClearingtbl		APClearing
-
-	INSERT INTO @APClearingtbl (
-		  [intTransactionId]
-		, [strTransactionId]
-		, [intTransactionType]
-		, [strReferenceNumber]
-		, [dtmDate]
-		, [intEntityVendorId]
-		, [intLocationId]
-		, [intTransactionDetailId]
-		, [intAccountId]
-		, [intItemId]
-		, [intItemUOMId]
-		, [dblQuantity]
-		, [dblAmount]
-		, [intOffsetId]
-		, [strOffsetId]
-		, [intOffsetDetailId]
-		, [intOffsetDetailTaxId]
-		, [strCode]
-		, [strRemarks]
-	)
-	SELECT [intTransactionId]		= RS.intRetireStockId
-		, [strTransactionId]		= RS.strRetireNo
-		, [intTransactionType]		= 9
-		, [strReferenceNumber]		= RS.strRetireNo
-		, [dtmDate]					= RS.dtmRetireDate
-		, [intEntityVendorId]		= B.intEntityVendorId
-		, [intLocationId]			= B.intShipToId	
-		, [intTransactionDetailId]	= RS.intRetireStockId
-		, [intAccountId]			= B.intAccountId
-		, [intItemId]				= BD.intItemId
-		, [intItemUOMId]			= BD.intUnitOfMeasureId
-		, [dblQuantity]				= BD.dblQtyReceived
-		, [dblAmount]				= BD.dblTotal	
-		, [intOffsetId]				= B.intBillId
-		, [strOffsetId]				= B.strBillId
-		, [intOffsetDetailId]		= BD.intBillDetailId
-		, [intOffsetDetailTaxId]	= NULL		
-		, [strCode]					= 'PAT'
-		, [strRemarks]				= NULL
-	FROM tblPATRetireStock RS
-	INNER JOIN tblAPBill B ON RS.intBillId = B.intBillId
-	INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-	WHERE RS.intBillId IS NOT NULL
-	  AND RS.intRetireStockId = @intRetireStockId
-
-	IF EXISTS(SELECT TOP 1 NULL FROM @APClearingtbl)
-		EXEC dbo.uspAPClearing @APClearing = @APClearingtbl, @post = @ysnPosted
+	
+		IF EXISTS(SELECT TOP 1 NULL FROM @APClearingtbl)
+			EXEC dbo.uspAPClearing @APClearing = @APClearingtbl, @post = @ysnPosted
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
