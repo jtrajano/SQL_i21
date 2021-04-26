@@ -243,3 +243,10 @@ GO
 GO
 	print 'End fixing SM Transaction records associated to wrong Pricing Screen ID';
 GO
+
+if not exists (select top 1 1 from tblSMControl where intScreenId = 340 and strControlId = 'cboBasisUOM' and strControlName = 'Basis UOM')
+begin
+	update tblSMCompanySetup set ysnScreenControlListingUpdated = 0;
+end
+
+GO
