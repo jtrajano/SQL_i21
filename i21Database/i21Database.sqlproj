@@ -9199,6 +9199,10 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPInventoryAdjustAck.sql" />
     <Build Include="dbo\Tables\tblICImportStagingItemVendorXref.sql" />
+    <Build Include="dbo\Tables\tblIPLotMergeFeed.sql" />
+    <Build Include="dbo\Tables\tblIPLotPropertyFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotProperty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
