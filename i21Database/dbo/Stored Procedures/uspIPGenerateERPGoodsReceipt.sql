@@ -137,7 +137,7 @@ BEGIN TRY
 			,@strCurrency = C.strCurrency
 		FROM dbo.tblICInventoryReceipt R
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(R.intModifiedByUserId, R.intCreatedByUserId)
-		JOIN dbo.tblAPVendor V ON V.intEntityId = R.intEntityVendorId
+		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = R.intEntityVendorId
 		LEFT JOIN tblSMCurrency C ON C.intCurrencyID = R.intCurrencyId
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
 

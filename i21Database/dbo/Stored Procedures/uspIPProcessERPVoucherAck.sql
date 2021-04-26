@@ -133,6 +133,12 @@ BEGIN TRY
 					WHERE intBillId = @intBillId
 						AND intStatusId = 2
 
+					--Update the ERP Voucher No in UnPost / Repost records
+					UPDATE tblAPBillPreStage
+					SET strERPVoucherNo = @ERPVoucherNo
+					WHERE intBillId = @intBillId
+						AND ISNULL(intStatusId, 1) = 1
+
 					UPDATE tblAPBill
 					SET intConcurrencyId = intConcurrencyId + 1
 						,strComment = @ERPVoucherNo

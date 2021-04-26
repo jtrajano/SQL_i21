@@ -161,8 +161,8 @@ BEGIN TRY
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = @intUserId
 		JOIN dbo.tblEMEntity E ON E.intEntityId = CP.intEntityId
 		JOIN dbo.tblARCustomer C ON C.intEntityId = E.intEntityId
-		JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CP.intUnitMeasureId
-		JOIN dbo.tblSMCurrency CUR ON CUR.intCurrencyID = CP.intCurrencyId
+		LEFT JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CP.intUnitMeasureId
+		LEFT JOIN dbo.tblSMCurrency CUR ON CUR.intCurrencyID = CP.intCurrencyId
 		WHERE CP.intCommitmentPricingId = @intCommitmentPricingId
 
 		IF ISNULL(@strCustomerPrefix, '') = ''
@@ -210,14 +210,6 @@ BEGIN TRY
 			SELECT @strError = @strError + 'Reference Price should be greater than 0. '
 		END
 
-		IF @intActionId <> 1
-		BEGIN
-			IF ISNULL(@strERPRefNo, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'ERP Reference No. cannot be blank. '
-			END
-		END
-
 		IF @strError <> ''
 		BEGIN
 			UPDATE tblMFCommitmentPricingStage
@@ -226,6 +218,35 @@ BEGIN TRY
 			WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
 
 			GOTO NextRec
+		END
+
+		-- If previous feed is waiting for acknowledgement then do not send the current feed
+		IF EXISTS (
+				SELECT TOP 1 1
+				FROM tblMFCommitmentPricingStage CPS
+				JOIN tblMFCommitmentPricing CP ON CP.intCommitmentPricingId = CPS.intCommitmentPricingId
+					AND CP.intCommitmentPricingId = @intCommitmentPricingId
+					AND CPS.intCommitmentPricingStageId < @intCommitmentPricingStageId
+					AND CPS.intStatusId = 2
+				ORDER BY CPS.intCommitmentPricingStageId DESC
+				)
+		BEGIN
+			GOTO NextRec
+		END
+
+		IF @intActionId <> 1
+		BEGIN
+			IF ISNULL(@strERPRefNo, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'ERP Reference No. cannot be blank. '
+
+				UPDATE tblMFCommitmentPricingStage
+				SET strMessage = @strError
+					,intStatusId = 1
+				WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
+
+				GOTO NextRec
+			END
 		END
 
 		SELECT @strXML = ''

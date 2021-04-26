@@ -180,10 +180,10 @@ BEGIN TRY
 			,@strERPVoucherNo = A.strComment
 		FROM dbo.tblAPBill A
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(@intUserId, A.intEntityId)
-		JOIN dbo.tblAPVendor V ON V.intEntityId = A.intEntityVendorId
-		JOIN dbo.tblCTBook B ON B.intBookId = A.intBookId
-		JOIN dbo.tblSMTerm T ON T.intTermID = A.intTermsId
-		JOIN dbo.tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
+		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = A.intEntityVendorId
+		LEFT JOIN dbo.tblCTBook B ON B.intBookId = A.intBookId
+		LEFT JOIN dbo.tblSMTerm T ON T.intTermID = A.intTermsId
+		LEFT JOIN dbo.tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
 		WHERE A.intBillId = @intBillId
 
 		IF ISNULL(@intTransactionType, 0) = 0
@@ -241,14 +241,6 @@ BEGIN TRY
 			SELECT @strError = @strError + 'Remarks cannot be blank. '
 		END
 
-		IF @intActionId <> 1
-		BEGIN
-			IF ISNULL(@strERPVoucherNo, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
-			END
-		END
-
 		IF @strError <> ''
 		BEGIN
 			UPDATE tblAPBillPreStage
@@ -257,6 +249,35 @@ BEGIN TRY
 			WHERE intBillPreStageId = @intBillPreStageId
 
 			GOTO NextRec
+		END
+
+		-- If previous feed is waiting for acknowledgement then do not send the current feed
+		IF EXISTS (
+				SELECT TOP 1 1
+				FROM tblAPBillPreStage BPS
+				JOIN tblAPBill B ON B.intBillId = BPS.intBillId
+					AND B.intBillId = @intBillId
+					AND BPS.intBillPreStageId < @intBillPreStageId
+					AND BPS.intStatusId = 2
+				ORDER BY BPS.intBillPreStageId DESC
+				)
+		BEGIN
+			GOTO NextRec
+		END
+
+		IF @intActionId <> 1
+		BEGIN
+			IF ISNULL(@strERPVoucherNo, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
+				
+				UPDATE tblAPBillPreStage
+				SET strMessage = @strError
+					,intStatusId = 1
+				WHERE intBillPreStageId = @intBillPreStageId
+
+				GOTO NextRec
+			END
 		END
 
 		SELECT @strXML = ''
