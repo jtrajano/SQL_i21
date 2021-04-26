@@ -9,7 +9,7 @@ SELECT
 	,tfd.intInventoryTransferDetailId
 	,dtmDeliveryDate = tfd.dtmDeliveryDate
 	,strPONumber = CAST(ch.strContractNumber + '/' + cast(cd.intContractSeq as nvarchar(50)) as nvarchar(500)) 
-	,strSupplierRef = ch.strCustomerContract --v.strVendorId
+	,strSupplierRef = v.strVendorId
 	,strItemNo = i.strItemNo
 	,strItemDescription = i.strDescription
 	,strMotherLotNumber = pl.strParentLotNumber
@@ -43,11 +43,11 @@ SELECT
 				'Cost not available. Please post the transfer.'
 			ELSE 
 				dbo.fnICFormatErrorMessage (
-					'%s %f %s %s'
+					'%s %f'
 					,COALESCE(currency.strSymbol, currency.strCurrency, '') 
 					,ISNULL(approxValue.dblValue, 0.00) 
-					,'per'
-					,uom.strUnitMeasure
+					,DEFAULT
+					,DEFAULT
 					,DEFAULT
 					,DEFAULT
 					,DEFAULT
@@ -152,14 +152,3 @@ FROM
 		WHERE 
 			c.intCurrencyID = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	) currency
-
-	OUTER APPLY (
-		SELECT TOP 1 
-			u.strUnitMeasure
-		FROM 
-			tblICItemUOM iu INNER JOIN tblICUnitMeasure u
-				ON iu.intUnitMeasureId = u.intUnitMeasureId
-		WHERE
-			iu.intItemId = tfd.intItemId
-			AND iu.ysnStockUnit = 1 
-	) uom
