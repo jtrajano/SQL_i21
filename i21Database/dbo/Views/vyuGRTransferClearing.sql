@@ -50,8 +50,8 @@ SELECT
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,CAST(0 AS BIT) ysnAllowVoucher
-    ,APClearing.intAccountId
-	,APClearing.strAccountId
+    ,gl.intAccountId as intAccountId
+    ,gl.strAccountId as strAccountId
 	--,'a'=receiptItem.dblOpenReceive
 	--,'b'=S.dblNetUnits
 	--,'c'=S.dblShrinkage
@@ -152,10 +152,25 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
-LEFT JOIN vyuAPReceiptClearingGL APClearing
-    ON APClearing.strTransactionId = receipt.strReceiptNumber
-        AND APClearing.intItemId = receiptItem.intItemId
-        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+-- LEFT JOIN vyuAPReceiptClearingGL APClearing
+--     ON APClearing.strTransactionId = receipt.strReceiptNumber
+--         AND APClearing.intItemId = receiptItem.intItemId
+--         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    INNER JOIN tblICInventoryTransaction it
+        ON it.intTransactionId = receipt.intInventoryReceiptId
+        AND it.strTransactionId = receipt.strReceiptNumber
+        AND gl.intJournalLineNo = it.intInventoryTransactionId
+        AND it.ysnIsUnposted = 0
+    WHERE receipt.strReceiptNumber = gl.strTransactionId      
+    AND receipt.intInventoryReceiptId = gl.intTransactionId
+    AND (gl.dblCredit != 0 OR gl.dblDebit != 0)   
+) gl
 WHERE 
     receiptItem.dblUnitCost != 0
 	AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
