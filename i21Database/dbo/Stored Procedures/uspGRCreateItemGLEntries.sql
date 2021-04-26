@@ -305,7 +305,7 @@ AS
 		FROM tblGRSettleVoucherCreateReferenceTable SV2
 		INNER JOIN tblICItem I
 			ON I.intItemId = SV2.intItemId
-				AND I.ysnInventoryCost = 1
+				AND isnull(SV2.ysnItemInventoryCost,I.ysnInventoryCost) = 1
 				and SV2.intItemType = 3
 		WHERE SV2.strBatchId = t.strBatchId
 	) DiscountCost
