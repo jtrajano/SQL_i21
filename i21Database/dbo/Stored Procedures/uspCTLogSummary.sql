@@ -524,6 +524,8 @@ BEGIN TRY
 						, dtmEndDate
 						, dblOrigQty
 						, intContractStatusId
+						, strTransactionReference
+						, strTransactionReferenceNo
 						, COUNT (*)
 					FROM (
 						SELECT TOP 1 intRowId = 1, * FROM @cbLogTemp
@@ -552,6 +554,8 @@ BEGIN TRY
 						, dtmEndDate
 						, dblOrigQty
 						, intContractStatusId
+						, strTransactionReference
+						, strTransactionReferenceNo
 					HAVING COUNT(*) > 1)
 			BEGIN
 				DELETE FROM @cbLogTemp
