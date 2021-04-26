@@ -197,7 +197,9 @@ INNER JOIN tblICCommodity CO
 INNER JOIN tblICItem IM
 	ON IM.strType = 'Other Charge' 
 		AND IM.strCostType = 'Storage Charge' 
-		AND (IM.intCommodityId = CO.intCommodityId OR IM.intCommodityId IS NULL)
+		AND (IM.intCommodityId = CO.intCommodityId OR isnull(IM.intCommodityId, 0) = 0)
+		-- AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
 INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = CS.intCompanyLocationId
 	
@@ -385,21 +387,33 @@ OUTER APPLY
 	FROM tblGLDetail GD
 	INNER JOIN vyuGLAccountDetail AD
 		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+	OUTER APPLY (
+		SELECT TOP 1 [ysnAccountPosted] = 1
+		FROM tblGLDetail GD2
+		WHERE GD2.strTransactionId = GD.strTransactionId
+		AND GD2.intTransactionId = GD.intTransactionId
+		AND GD2.strCode = 'STR'
+		AND GD2.strDescription = GD.strDescription
+		AND GD2.ysnIsUnposted = 0
+		AND GD2.intAccountId = GD.intAccountId
+		AND (GD2.dblDebit = GD.dblCredit OR GD2.dblCredit = GD.dblDebit)
+	) GD2
 	WHERE GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strCode = 'STR'
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
 		AND GD.ysnIsUnposted = 0
-		AND GD.intAccountId NOT IN (SELECT GD.intAccountId
-	FROM tblGLDetail		
-	WHERE strTransactionId = GD.strTransactionId
-		AND intTransactionId = GD.intTransactionId
-		AND strCode = 'STR'
-		AND strDescription = GD.strDescription
-		AND ysnIsUnposted = 0
-		AND intAccountId = GD.intAccountId
-		AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
-	)
+		AND GD2.ysnAccountPosted IS NULL
+	-- 	AND GD.intAccountId NOT IN (SELECT GD.intAccountId
+	-- FROM tblGLDetail		
+	-- WHERE strTransactionId = GD.strTransactionId
+	-- 	AND intTransactionId = GD.intTransactionId
+	-- 	AND strCode = 'STR'
+	-- 	AND strDescription = GD.strDescription
+	-- 	AND ysnIsUnposted = 0
+	-- 	AND intAccountId = GD.intAccountId
+	-- 	AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
+	-- )
 ) GLDetail
 WHERE 
 	QM.strSourceType = 'Storage' 
