@@ -915,6 +915,7 @@ BEGIN
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
 		INNER JOIN tblGRCustomerStorage ToStorage
 			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+				AND FromStorage.intTicketId IS NOT NULL --SCALE TICKET ONLY
 		INNER JOIN tblGRTransferStorageSplit TSS
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblGRStorageHistory SourceHistory
@@ -923,6 +924,30 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
 		WHERE SR.intTransferStorageId = @intTransferStorageId
+		UNION ALL
+		SELECT
+			[intCustomerStorageId]				= A.intToCustomerStorageId
+			,[intTransferStorageId]				= TransferStorageSplit.intTransferStorageId
+			,[intContractHeaderId]				= CD.intContractHeaderId
+			,[dblUnits]							= A.dblUnitQty
+			,[dtmHistoryDate]					= GETDATE()
+			,[intUserId]						= @intUserId
+			,[ysnPost]							= 1
+			,[intTransactionTypeId]				= 3
+			,[strPaidDescription]				= 'Generated from Transfer Storage'
+			,[strType]							= 'From Transfer'
+			,[intInventoryReceiptId]			= NULL
+			,[intTransferStorageReferenceId] 	= TSR.intTransferStorageReferenceId  
+			,[strTransferTicket]				= TS.strTransferStorageTicket
+		FROM tblGRTransferStorageSplit TransferStorageSplit
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = TransferStorageSplit.intTransferStorageId
+		INNER JOIN @newCustomerStorageIds A
+			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId
+		INNER JOIN tblGRTransferStorageReference TSR
+			ON TSR.intToCustomerStorageId = A.intToCustomerStorageId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
 		--integration to IC
