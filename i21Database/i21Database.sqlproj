@@ -9319,6 +9319,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPCommitmentPricing.sql" />
     <Build Include="dbo\Tables\tblMFCommitmentPricingDetailStage.sql" />
     <Build Include="dbo\Views\vyuSMDefaultValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAddPaymentSchedules.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9596,6 +9597,7 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
+    <None Include="dbo\User Defined Types\PaymentSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
