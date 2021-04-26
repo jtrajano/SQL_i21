@@ -285,6 +285,7 @@ BEGIN
 	WHERE dblOrigQty IS NULL
 		AND dblQty IS NOT NULL
 END
+
 GO
 
 IF EXISTS (SELECT TOP 1 1 FROM tblCTContractHeader WHERE ysnLoad IS NULL)
@@ -293,4 +294,12 @@ BEGIN
 	SET ysnLoad = ISNULL(ysnLoad, 0)
 	WHERE ysnLoad IS NULL
 END
+
+GO
+
+if not exists (select top 1 1 from tblSMControl where intScreenId = 340 and strControlId = 'cboBasisUOM' and strControlName = 'Basis UOM')
+begin
+	update tblSMCompanySetup set ysnScreenControlListingUpdated = 0;
+end
+
 GO
