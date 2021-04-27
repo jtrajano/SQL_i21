@@ -2946,6 +2946,7 @@ BEGIN TRY
 					and cter.intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
 					and (cter.dblQty * -1) = curr.dblQty
 					and cter.intId <> curr.intId
+					and cter.strTransactionType = curr.strTransactionType
 			where
 				curr.intId = @intId
 		)
