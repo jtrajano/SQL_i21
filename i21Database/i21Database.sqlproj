@@ -9601,7 +9601,7 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
-    <None Include="dbo\User Defined Types\PaymentSchedule.sql" />
+    <Build Include="dbo\User Defined Types\PaymentSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
