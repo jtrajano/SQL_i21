@@ -9202,6 +9202,10 @@
     <Build Include="dbo\Tables\tblIPLotPropertyFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReserveStockForInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryTransferAfterSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICBeforePostInventoryTransferIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryTransferIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
