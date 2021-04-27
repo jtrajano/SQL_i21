@@ -115,30 +115,6 @@ having (case when c.strTransactionId like 'BWD%' or c.strTransactionId like 'BTR
 c.dtmDate >= @dtmCMDate -- DATEADD( SECOND, 1, @dtmDateTo)
 then a.dblAmount*0
 else a.dblAmount end) <>0
-UNION
-SELECT 
-@dtmDateTo dtmDate ,
-'' strName,
-strCode strSourceTransactionId,
-'' strPaymentMethod,
-strCode strSourceSystem,
-'' strEODNumber,
-'' strEODDrawer ,
-NULL ysnEODComplete ,
-'' strCardType,
-'' strLocationName,
-'' strUserName,
-'' strTransactionId,
-cast (1 AS BIT)  ysnPosted,
-null dtmCMDate,
-SUM(dblDebit - dblCredit) dblAmoun
-FROM tblGLDetail
-WHERE intAccountId IN(SELECT intUndepositedFundsId FROM tblSMCompanyLocation)
-and ysnIsUnposted = 0
-AND strCode NOT IN('BDEP', 'AR', 'BWD')
-and dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-GROUP BY strCode 
-
 )
 
 select ROW_NUMBER() OVER( ORDER BY dtmDate) rowId, * from mainTable
