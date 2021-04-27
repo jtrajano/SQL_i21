@@ -49,6 +49,7 @@ BEGIN TRY
 		,@strERPRecipeNo NVARCHAR(50)
 		,@dblTotalCostPR NUMERIC(18, 6)
 		,@strDetailRowState NVARCHAR(100)
+	DECLARE @intPrevCommitmentPricingStageId INT
 	DECLARE @tblMFCommitmentPricingStage TABLE (intCommitmentPricingStageId INT)
 	DECLARE @tblMFCommitmentPricingDetailStage TABLE (intCommitmentPricingDetailStageId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -59,6 +60,11 @@ BEGIN TRY
 		,strPricingNumber NVARCHAR(50)
 		,strERPRefNo NVARCHAR(100)
 		)
+
+	IF @strCompanyLocation <> '10'
+	BEGIN
+		RETURN
+	END
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -113,6 +119,8 @@ BEGIN TRY
 
 		SELECT @intCommitmentPricingDetailStageId = NULL
 			,@strDetailXML = ''
+
+		SELECT @intPrevCommitmentPricingStageId = NULL
 
 		SELECT @intCommitmentPricingId = intCommitmentPricingId
 			,@intUserId = intUserId
@@ -367,7 +375,78 @@ BEGIN TRY
 		JOIN tblICItem AI ON AI.intItemId = ARI.intItemId
 		WHERE CPR.intCommitmentPricingId = @intCommitmentPricingId
 
-		-- Unpost / Repost - Compare and add deleted records for both Sales Contract and Recipe
+		-- Repost - Compare and add deleted records for both Sales Contract and Recipe
+		IF @intActionId = 2 -- Repost
+		BEGIN
+			SELECT @intPrevCommitmentPricingStageId = MAX(intCommitmentPricingStageId)
+			FROM tblMFCommitmentPricingStage
+			WHERE intCommitmentPricingId = @intCommitmentPricingId
+				AND intCommitmentPricingStageId < @intCommitmentPricingStageId
+				AND ysnPost = 1
+
+			INSERT INTO tblMFCommitmentPricingDetailStage (
+				intCommitmentPricingStageId
+				,intCommitmentPricingId
+				,intActionId
+				,intLineType
+				,strContractNo
+				,strCommodityOrderNo
+				,intSequenceNo
+				,strRowState
+				)
+			SELECT @intCommitmentPricingStageId
+				,@intCommitmentPricingId
+				,4
+				,1
+				,CPDS.strContractNo
+				,CPDS.strCommodityOrderNo
+				,CPDS.intSequenceNo
+				,'Delete'
+			FROM tblMFCommitmentPricingDetailStage CPDS
+			WHERE CPDS.intCommitmentPricingStageId = @intPrevCommitmentPricingStageId
+				AND CPDS.intLineType = 1
+				AND NOT EXISTS (
+					SELECT 1
+					FROM tblMFCommitmentPricingSales CPS
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = CPS.intContractDetailId
+						AND CPS.intCommitmentPricingId = @intCommitmentPricingId
+					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					WHERE CH.strContractNumber = CPDS.strContractNo
+					)
+
+			INSERT INTO tblMFCommitmentPricingDetailStage (
+				intCommitmentPricingStageId
+				,intCommitmentPricingId
+				,intActionId
+				,intLineType
+				,strActualBlend
+				,strERPRecipeNo
+				,dblTotalCostPR
+				,strRowState
+				)
+			SELECT @intCommitmentPricingStageId
+				,@intCommitmentPricingId
+				,4
+				,2
+				,CPDS.strActualBlend
+				,CPDS.strERPRecipeNo
+				,CPDS.dblTotalCostPR
+				,'Delete'
+			FROM tblMFCommitmentPricingDetailStage CPDS
+			WHERE CPDS.intCommitmentPricingStageId = @intPrevCommitmentPricingStageId
+				AND CPDS.intLineType = 2
+				AND NOT EXISTS (
+					SELECT 1
+					FROM tblMFCommitmentPricingRecipe CPR
+					JOIN tblMFRecipe AR ON AR.intRecipeId = CPR.intActualRecipeId
+						AND CPR.intCommitmentPricingId = @intCommitmentPricingId
+					JOIN tblMFRecipeItem ARI ON ARI.intRecipeItemId = CPR.intActualRecipeItemId
+						AND ARI.intRecipeItemTypeId = 2
+					JOIN tblICItem AI ON AI.intItemId = ARI.intItemId
+					WHERE AI.strItemNo = CPDS.strActualBlend
+					)
+		END
+
 		DELETE
 		FROM @tblMFCommitmentPricingDetailStage
 
@@ -378,6 +457,16 @@ BEGIN TRY
 
 		SELECT @intCommitmentPricingDetailStageId = MIN(intCommitmentPricingDetailStageId)
 		FROM @tblMFCommitmentPricingDetailStage
+
+		IF @intCommitmentPricingDetailStageId IS NULL
+		BEGIN
+			UPDATE tblMFCommitmentPricingStage
+			SET strMessage = 'Pricing Detail not available. '
+				,intStatusId = 1
+			WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
+
+			GOTO NextRec
+		END
 
 		WHILE @intCommitmentPricingDetailStageId IS NOT NULL
 		BEGIN
@@ -489,6 +578,20 @@ BEGIN TRY
 				WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
 
 				GOTO NextRec
+			END
+
+			IF @intActionId = 1 -- Post
+			BEGIN
+				SELECT @intDetailActionId = 1
+			END
+			ELSE IF @intActionId = 3 -- UnPost
+			BEGIN
+				SELECT @intDetailActionId = 2
+			END
+			ELSE IF @intActionId = 2 -- Repost
+			BEGIN
+				IF @strDetailRowState = 'Delete'
+					SELECT @intDetailActionId = 4
 			END
 
 			SELECT @strItemXML = ''
