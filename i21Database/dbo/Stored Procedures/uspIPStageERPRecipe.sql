@@ -163,7 +163,7 @@ BEGIN TRY
 					END AS RowState
 				,NULL AS ItemGroupName
 				,TrxSequenceNo
-				,ParentTrxSequenceNo
+				,parentId
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					TrxSequenceNo INT
 					,[Version] INT '../Version'
@@ -178,7 +178,7 @@ BEGIN TRY
 					,ValidFrom DATETIME
 					,ValidTo DATETIME
 					,YearValidation INT
-					,ParentTrxSequenceNo INT '@ParentTrxSequenceNo'
+					,parentId INT '@parentId'
 					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation' 
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation

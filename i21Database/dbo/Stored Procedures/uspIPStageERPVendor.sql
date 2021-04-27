@@ -110,11 +110,11 @@ BEGIN TRY
 			SELECT (
 					SELECT TOP 1 intStageEntityId
 					FROM tblIPEntityStage
-					WHERE intTrxSequenceNo = x.ParentTrxSequenceNo
+					WHERE intTrxSequenceNo = x.parentId
 					)
 				,VendorName
 				,TrxSequenceNo
-				,ParentTrxSequenceNo
+				,parentId
 				,ActionId
 				,LineType
 				,LocationName
@@ -129,7 +129,7 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					VendorName NVARCHAR(100) COLLATE Latin1_General_CI_AS '../VendorName'
 					,TrxSequenceNo INT
-					,ParentTrxSequenceNo INT '@ParentTrxSequenceNo'
+					,parentId INT '@parentId'
 					,ActionId INT
 					,LineType INT
 					,LocationName NVARCHAR(200)
