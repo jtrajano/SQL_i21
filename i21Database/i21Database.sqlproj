@@ -9199,6 +9199,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPInventoryAdjustAck.sql" />
     <Build Include="dbo\Tables\tblICImportStagingItemVendorXref.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemVendorXrefFromStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
