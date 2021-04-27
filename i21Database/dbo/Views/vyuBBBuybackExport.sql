@@ -18,8 +18,6 @@ AS
 		,P.strProgramDescription
 		,P.strVendorProgramId
 		,E.strVendorCustomerLocation
-		,E.strVendorShipTo
-		,E.strVendorSoldTo
 		,M.intVendorSetupId
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
