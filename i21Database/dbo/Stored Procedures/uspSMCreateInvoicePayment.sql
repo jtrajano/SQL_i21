@@ -164,7 +164,7 @@ BEGIN
 				, intCurrencyId					= INVOICE.intCurrencyId
 				, dtmDatePaid					= GETDATE()
 				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
-				, strPaymentMethod				= ISNULL(@strCreditCardNumber, 'ACH')
+				, strPaymentMethod				= ISNULL(@strCreditCardNumber, @strPaymentMethod)
 				, strPaymentInfo				= NULL
 				, strNotes						= NULL
 				, intAccountId					= INVOICE.intAccountId
@@ -239,7 +239,7 @@ BEGIN
 				, intCurrencyId					= C.intCurrencyId
 				, dtmDatePaid					= GETDATE()
 				, intPaymentMethodId			= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @intPaymentMethodId ELSE 11 END
-				, strPaymentMethod				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN 'ACH' ELSE @strCreditCardNumber END
+				, strPaymentMethod				= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 THEN @strPaymentMethod ELSE @strCreditCardNumber END
 				, strPaymentInfo				= NULL
 				, strNotes						= 'Prepayment from Portal.'
 				, intAccountId					= @intUndepositedFundId
