@@ -1019,6 +1019,9 @@ BEGIN
 			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId
 		INNER JOIN tblGRTransferStorageReference TSR
 			ON TSR.intToCustomerStorageId = A.intToCustomerStorageId
+		INNER JOIN tblGRCustomerStorage CS
+			ON CS.intCustomerStorageId = A.intSourceCustomerStorageId
+				AND CS.intTicketId IS NULL --DELIVERY SHEET ONLY
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 
