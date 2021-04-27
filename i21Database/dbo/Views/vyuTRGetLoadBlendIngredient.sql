@@ -20,6 +20,7 @@ SELECT LoadIngredient.intLoadBlendIngredientId
 	, LoadIngredient.intSubstituteItemId
 	, strSubstituteItemNo = Item.strItemNo
 	, strSubstituteItemDescription = Item.strDescription
+	, strType = Item.strType
 FROM tblTRLoadBlendIngredient LoadIngredient
 LEFT JOIN tblTRLoadDistributionDetail LoadDetail ON LoadDetail.intLoadDistributionDetailId = LoadIngredient.intLoadDistributionDetailId
 LEFT JOIN vyuMFGetRecipeItem Recipe ON Recipe.intRecipeItemId = LoadIngredient.intRecipeItemId
