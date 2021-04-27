@@ -26,3 +26,8 @@
 	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxClass_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES [dbo].[tblSMTaxClass] ([intTaxClassId]),
 	CONSTRAINT [FK_tblAPBillDetailTax_tblGLAccount_intSalesTaxAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblAPBillDetailTax_taxInfo]
+		ON [dbo].[tblAPBillDetailTax]([intBillDetailId],[intTaxClassId],[intTaxCodeId])
+		INCLUDE (intBillDetailTaxId)
+GO
