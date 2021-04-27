@@ -1999,6 +1999,11 @@ BEGIN TRY
 				EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
 					,@strRowState = @strRowState
 					,@intShipmentType = 1 -- LS
+
+				IF @strRowState = 'Modified'
+				BEGIN
+					EXEC uspLGProcessIntegrationLogData
+				END
 			END
 
 			--Move to Archive
