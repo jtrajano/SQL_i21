@@ -331,7 +331,6 @@ BEGIN
 		END
 		
 	SET @TaxCodeExemption = NULL
-	SET @ExemptionPercent = 0.00000
 	SET @TaxExempt = 0
 	SET @InvalidSetup = 0				
 	
