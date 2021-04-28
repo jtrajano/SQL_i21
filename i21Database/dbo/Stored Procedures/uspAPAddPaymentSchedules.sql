@@ -11,7 +11,7 @@ INSERT INTO @invalidPaySchedules
 SELECT
 	A.inBillId,
 	'Payment Schedule not equal with the voucher (' + B.strBillId + ') amount due.'
-FROM @invalidPaySchedules A
+FROM @paySchedules A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 GROUP BY A.intBillId
 HAVING SUM(A.dblPayment) != B.dblTotal
@@ -19,7 +19,7 @@ UNION ALL
 SELECT --EXCLUDE PAID
 	A.inBillId,
 	'Voucher (' + B.strBillId + ') is already paid.'
-FROM @invalidPaySchedules A
+FROM @paySchedules A
 INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 WHERE B.ysnPaid = 1
 
