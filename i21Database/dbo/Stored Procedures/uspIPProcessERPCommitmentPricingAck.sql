@@ -14,6 +14,7 @@ BEGIN TRY
 		,@CompanyLocation NVARCHAR(6)
 		,@CreatedDate DATETIME
 		,@CreatedBy NVARCHAR(50)
+		,@OriginalTrxSequenceNo INT
 		,@PricingNo NVARCHAR(50)
 		,@ERPRefNo NVARCHAR(100)
 		,@StatusId INT
@@ -31,6 +32,7 @@ BEGIN TRY
 		,CompanyLocation NVARCHAR(6)
 		,CreatedDate DATETIME
 		,CreatedBy NVARCHAR(50)
+		,OriginalTrxSequenceNo INT
 		,PricingNo NVARCHAR(50)
 		,ERPRefNo NVARCHAR(100)
 		,StatusId INT
@@ -74,6 +76,7 @@ BEGIN TRY
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
+				,OriginalTrxSequenceNo
 				,PricingNo
 				,ERPRefNo
 				,StatusId
@@ -84,7 +87,8 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
+				,OriginalTrxSequenceNo
 				,PricingNo
 				,ERPRefNo
 				,StatusId
@@ -95,7 +99,8 @@ BEGIN TRY
 					TrxSequenceNo INT '../TrxSequenceNo'
 					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
 					,CreatedDate DATETIME '../CreatedDate'
-					,CreatedBy NVARCHAR(50) '../CreatedBy'
+					,CreatedByUser NVARCHAR(50) '../CreatedByUser'
+					,OriginalTrxSequenceNo INT '../OriginalTrxSequenceNo'
 					,PricingNo NVARCHAR(50) '../PricingNo'
 					,ERPRefNo NVARCHAR(100) '../ERPRefNo'
 					,StatusId INT '../StatusId'
@@ -113,6 +118,7 @@ BEGIN TRY
 					,@CompanyLocation = NULL
 					,@CreatedDate = NULL
 					,@CreatedBy = NULL
+					,@OriginalTrxSequenceNo = NULL
 					,@PricingNo = NULL
 					,@ERPRefNo = NULL
 					,@StatusId = NULL
@@ -126,6 +132,7 @@ BEGIN TRY
 					,@CompanyLocation = CompanyLocation
 					,@CreatedDate = CreatedDate
 					,@CreatedBy = CreatedBy
+					,@OriginalTrxSequenceNo = OriginalTrxSequenceNo
 					,@PricingNo = PricingNo
 					,@ERPRefNo = ERPRefNo
 					,@StatusId = StatusId
@@ -135,10 +142,13 @@ BEGIN TRY
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
-				SELECT @intCommitmentPricingId = P.intCommitmentPricingId
-				FROM tblMFCommitmentPricing P
-				WHERE P.strPricingNumber = @PricingNo
+				SELECT @intCommitmentPricingId = intCommitmentPricingId
+				FROM tblMFCommitmentPricingStage
+				WHERE intCommitmentPricingStageId = @OriginalTrxSequenceNo
 
+				--SELECT @intCommitmentPricingId = P.intCommitmentPricingId
+				--FROM tblMFCommitmentPricing P
+				--WHERE P.strPricingNumber = @PricingNo
 				SELECT @intCommitmentPricingRecipeId = PR.intCommitmentPricingRecipeId
 				FROM tblMFCommitmentPricingRecipe PR
 				JOIN tblMFRecipeItem RI ON RI.intRecipeItemId = PR.intActualRecipeItemId
@@ -146,15 +156,33 @@ BEGIN TRY
 				WHERE PR.intCommitmentPricingId = @intCommitmentPricingId
 					AND I.strItemNo = @ActualBlend
 
+				INSERT INTO tblIPInitialAck (
+					intTrxSequenceNo
+					,strCompanyLocation
+					,dtmCreatedDate
+					,strCreatedBy
+					,intMessageTypeId
+					,intStatusId
+					,strStatusText
+					)
+				SELECT @TrxSequenceNo
+					,@CompanyLocation
+					,@CreatedDate
+					,@CreatedBy
+					,20
+					,1
+					,'Success'
+
 				IF @StatusId = 1
 				BEGIN
 					UPDATE tblMFCommitmentPricingStage
 					SET intStatusId = 6
 						,strMessage = 'Success'
 						,strFeedStatus = 'Ack Rcvd'
-					WHERE intCommitmentPricingId = @intCommitmentPricingId
-						AND intStatusId = 2
+					WHERE intCommitmentPricingStageId = @OriginalTrxSequenceNo
 
+					--WHERE intCommitmentPricingId = @intCommitmentPricingId
+					--	AND intStatusId = 2
 					UPDATE tblMFCommitmentPricing
 					SET strERPNo = @ERPRefNo
 						,intConcurrencyId = intConcurrencyId + 1
@@ -184,9 +212,10 @@ BEGIN TRY
 					SET intStatusId = 5
 						,strMessage = @StatusText
 						,strFeedStatus = 'Ack Rcvd'
-					WHERE intCommitmentPricingId = @intCommitmentPricingId
-						AND intStatusId = 2
+					WHERE intCommitmentPricingStageId = @OriginalTrxSequenceNo
 
+					--WHERE intCommitmentPricingId = @intCommitmentPricingId
+					--	AND intStatusId = 2
 					INSERT INTO @tblMessage (
 						strMessageType
 						,strMessage

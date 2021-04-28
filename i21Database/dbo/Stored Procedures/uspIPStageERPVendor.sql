@@ -62,7 +62,7 @@ BEGIN TRY
 				,CompanyLocation
 				,ActionId
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,[Status]
 				,VendorAccountNumber
 				,VendorName
@@ -76,7 +76,7 @@ BEGIN TRY
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					,[Status] NVARCHAR(50)
 					,VendorAccountNumber NVARCHAR(50)
 					,VendorName NVARCHAR(100)
@@ -160,7 +160,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,5
 				,1
 				,'Success'
@@ -168,7 +168,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 
 			--Move to Archive
@@ -210,7 +210,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,5
 				,0
 				,@ErrMsg
@@ -218,7 +218,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 			
 			--Move to Error

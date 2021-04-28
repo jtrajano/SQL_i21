@@ -14,6 +14,7 @@ BEGIN TRY
 		,@CompanyLocation NVARCHAR(6)
 		,@CreatedDate DATETIME
 		,@CreatedBy NVARCHAR(50)
+		,@OriginalTrxSequenceNo INT
 		,@ContractNo NVARCHAR(50)
 		,@StatusId INT
 		,@StatusText NVARCHAR(2048)
@@ -31,6 +32,7 @@ BEGIN TRY
 		,CompanyLocation NVARCHAR(6)
 		,CreatedDate DATETIME
 		,CreatedBy NVARCHAR(50)
+		,OriginalTrxSequenceNo INT
 		,ContractNo NVARCHAR(50)
 		,StatusId INT
 		,StatusText NVARCHAR(2048)
@@ -74,6 +76,7 @@ BEGIN TRY
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
+				,OriginalTrxSequenceNo
 				,ContractNo
 				,StatusId
 				,StatusText
@@ -84,7 +87,8 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
+				,OriginalTrxSequenceNo
 				,ContractNo
 				,StatusId
 				,StatusText
@@ -95,7 +99,8 @@ BEGIN TRY
 					TrxSequenceNo INT '../TrxSequenceNo'
 					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
 					,CreatedDate DATETIME '../CreatedDate'
-					,CreatedBy NVARCHAR(50) '../CreatedBy'
+					,CreatedByUser NVARCHAR(50) '../CreatedByUser'
+					,OriginalTrxSequenceNo INT '../OriginalTrxSequenceNo'
 					,ContractNo NVARCHAR(50) '../ContractNo'
 					,StatusId INT '../StatusId'
 					,StatusText NVARCHAR(2048) '../StatusText'
@@ -113,6 +118,7 @@ BEGIN TRY
 					,@CompanyLocation = NULL
 					,@CreatedDate = NULL
 					,@CreatedBy = NULL
+					,@OriginalTrxSequenceNo = NULL
 					,@ContractNo = NULL
 					,@StatusId = NULL
 					,@StatusText = NULL
@@ -126,6 +132,7 @@ BEGIN TRY
 					,@CompanyLocation = CompanyLocation
 					,@CreatedDate = CreatedDate
 					,@CreatedBy = CreatedBy
+					,@OriginalTrxSequenceNo = OriginalTrxSequenceNo
 					,@ContractNo = ContractNo
 					,@StatusId = StatusId
 					,@StatusText = StatusText
@@ -135,20 +142,34 @@ BEGIN TRY
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
-				--SELECT @intContractDetailId = intContractDetailId
+				SELECT @intContractDetailId = intContractDetailId
+					,@intContractHeaderId = intContractHeaderId
+				FROM tblCTContractFeed
+				WHERE intContractFeedId = @OriginalTrxSequenceNo
+
+				--SELECT TOP 1 @intContractDetailId = intContractDetailId
 				--	,@intContractHeaderId = intContractHeaderId
+				--	,@TrxSequenceNo = intContractFeedId
 				--FROM tblCTContractFeed
-				--WHERE intContractFeedId = @TrxSequenceNo
+				--WHERE intStatusId = 2
 				--	AND strContractNumber = @ContractNo
 				--	AND intContractSeq = @SequenceNo
-
-				SELECT TOP 1 @intContractDetailId = intContractDetailId
-					,@intContractHeaderId = intContractHeaderId
-					,@TrxSequenceNo = intContractFeedId
-				FROM tblCTContractFeed
-				WHERE intStatusId = 2
-					AND strContractNumber = @ContractNo
-					AND intContractSeq = @SequenceNo
+				INSERT INTO tblIPInitialAck (
+					intTrxSequenceNo
+					,strCompanyLocation
+					,dtmCreatedDate
+					,strCreatedBy
+					,intMessageTypeId
+					,intStatusId
+					,strStatusText
+					)
+				SELECT @TrxSequenceNo
+					,@CompanyLocation
+					,@CreatedDate
+					,@CreatedBy
+					,19
+					,1
+					,'Success'
 
 				IF @StatusId = 1
 				BEGIN
@@ -158,7 +179,7 @@ BEGIN TRY
 						,strFeedStatus = 'Ack Rcvd'
 						,strERPPONumber = @ERPPONumber
 						,strERPItemNumber = @ERPPOlineNo
-					WHERE intContractFeedId = @TrxSequenceNo
+					WHERE intContractFeedId = @OriginalTrxSequenceNo
 
 					--Update the PO Details in modified sequences
 					UPDATE tblCTContractFeed
@@ -196,7 +217,7 @@ BEGIN TRY
 					SET intStatusId = 5
 						,strMessage = @StatusText
 						,strFeedStatus = 'Ack Rcvd'
-					WHERE intContractFeedId = @TrxSequenceNo
+					WHERE intContractFeedId = @OriginalTrxSequenceNo
 
 					INSERT INTO @tblMessage (
 						strMessageType

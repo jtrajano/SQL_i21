@@ -98,6 +98,9 @@ BEGIN TRY
 
 			SELECT @strXML += '<StatusId>' + ISNULL(CONVERT(VARCHAR, @intStatusId), '') + '</StatusId>'
 
+			IF @intStatusId = 1
+				SELECT @strStatusText = ''
+
 			SELECT @strXML += '<StatusText>' + @strStatusText + '</StatusText>'
 
 			SELECT @strXML += '</header>'

@@ -59,7 +59,7 @@ BEGIN TRY
 				,CompanyLocation
 				,ActionId
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,FromCurrency
 				,ToCurrency
 				,Rate
@@ -70,7 +70,7 @@ BEGIN TRY
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					,FromCurrency NVARCHAR(50)
 					,ToCurrency NVARCHAR(50)
 					,Rate NUMERIC(18, 6)
@@ -93,7 +93,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,8
 				,1
 				,'Success'
@@ -101,7 +101,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 
 			--Move to Archive
@@ -143,7 +143,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,8
 				,0
 				,@ErrMsg
@@ -151,7 +151,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 
 			--Move to Error

@@ -78,7 +78,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,ContractNo
 				,StatusId
 				,StatusText
@@ -87,7 +87,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					,ContractNo NVARCHAR(50)
 					,StatusId INT
 					,StatusText NVARCHAR(2048)

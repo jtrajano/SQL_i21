@@ -69,7 +69,7 @@ BEGIN TRY
 				,CompanyLocation
 				,ActionId
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,ItemNo
 				,[Description]
 				,ShortName
@@ -90,7 +90,7 @@ BEGIN TRY
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					,ItemNo NVARCHAR(50)
 					,[Description] NVARCHAR(100)
 					,ShortName NVARCHAR(50)
@@ -159,7 +159,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,1
 				,1
 				,'Success'
@@ -167,7 +167,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 
 			--Move to Archive
@@ -209,7 +209,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,1
 				,0
 				,@ErrMsg
@@ -217,7 +217,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 
 			--Move to Error
