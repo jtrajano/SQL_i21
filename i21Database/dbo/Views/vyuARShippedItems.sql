@@ -299,8 +299,7 @@ FROM (
 	     , strItemDescription				= NULL
 	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
 		 , intPriceUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intPriceItemUOMId ELSE ICISI.intPriceUOMId END
-	     --, intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
-		 , intOrderUOMId					= ISNULL(TICKET.intItemUOMIdTo, ICISI.intItemUOMId)
+	     , intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
 		 , dblWeight						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1) ELSE 1 END
@@ -310,7 +309,10 @@ FROM (
 														dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 												END)
 	     --, dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
-		 , dblQtyOrdered					= ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+		 , dblQtyOrdered					= CASE WHEN ARCC.ysnLoad = 1
+													THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+													ELSE ARCC.dblDetailQuantity
+												END
 	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL AND ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 1
 														THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0))
 													ELSE
@@ -505,6 +507,7 @@ FROM (
 			 , dblPriceUOMQuantity
 			 , intBookId
 			 , intSubBookId
+			 , ysnLoad
 		 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
 		  AND ICIS.intOrderType = 1
