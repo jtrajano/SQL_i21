@@ -3185,7 +3185,7 @@ BEGIN TRY
 					END				
 					IF ISNULL(@dblBasis,0) > 0
 					BEGIN
-						IF (@dblQty > 0 and @strTransactionReference <> 'Inventory Shipment')
+						IF @dblQty > 0
 						BEGIN
 							-- Balance
 							SET @_basis = (CASE WHEN @dblQty > ISNULL(@dblBasis,0) THEN ISNULL(@dblBasis,0) ELSE @dblQty END)
