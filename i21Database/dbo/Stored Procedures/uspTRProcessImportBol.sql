@@ -572,6 +572,16 @@ BEGIN
 			CLOSE @CursorDistributionTran
 			DEALLOCATE @CursorDistributionTran
 
+			UPDATE tblTRImportLoadDetail SET ysnProcess = 1
+			WHERE intImportLoadId = @intImportLoadId 
+			AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)
+			AND intCarrierId = @intCarrierId 
+			AND intDriverId = @intDriverId 
+			AND ISNULL(intTrailerId, 0) =  ISNULL(@intTrailerId, 0) 
+			AND dtmPullDate = @dtmPullDate
+			AND ysnValid = 1
+			AND strMessage = @strTransactionNumber
+
 			FETCH NEXT FROM @CursorHeaderTran INTO @intTruckId, @intCarrierId, @intDriverId, @intTrailerId, @dtmPullDate
 		END
 

@@ -33,12 +33,13 @@ SELECT ILD.[intImportLoadDetailId]
       ,ILD.[ysnValid]
       ,ILD.[strMessage]
       ,ILD.[strPONumber]
-	  ,ILD.[intConcurrencyId]
-	  ,IL.[strSource]
-	  ,IL.[dtmImportDate]
-	  ,ISNULL(ILD.[ysnProcess], 0)  ysnProcess
-	  ,IL.[intUserId]
-	  ,EM.[strName] strUserName
+	,ILD.[intConcurrencyId]
+	,IL.[strSource]
+	,IL.[dtmImportDate]
+	,ISNULL(ILD.[ysnProcess], 0) ysnProcess
+	,IL.[intUserId]
+	,EM.[strName] strUserName
+      ,IL.guidImportIdentifier
 FROM tblTRImportLoadDetail ILD
 INNER JOIN tblTRImportLoad IL
 	ON IL.intImportLoadId = ILD.intImportLoadId

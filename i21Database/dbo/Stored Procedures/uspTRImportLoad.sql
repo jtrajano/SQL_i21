@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRImportLoad]
 	@guidImportIdentifier UNIQUEIDENTIFIER,
     @intUserId INT,
-	@return INT OUTPUT
+	@return INT OUTPUT,
+	@ysnReprocess BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -36,24 +37,49 @@ BEGIN
 	
 		DECLARE @CursorTran AS CURSOR
 
-		SET @CursorTran = CURSOR FOR
-		SELECT D.intImportLoadDetailId
-			, D.strTruck
-			, D.strTerminal
-			, D.strCarrier
-			, D.strDriver
-			, D.strTrailer
-			, D.strSupplier
-			, D.strDestination
-			, D.strPullProduct
-			, D.strDropProduct 
-			, D.ysnValid
-			, D.strMessage
-			, D.strBillOfLading
-			, D.dtmPullDate
-		FROM tblTRImportLoad L 
-		INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
-		WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
+		IF(@ysnReprocess = 1)
+		BEGIN
+			SET @CursorTran = CURSOR FOR
+			SELECT D.intImportLoadDetailId
+				, D.strTruck
+				, D.strTerminal
+				, D.strCarrier
+				, D.strDriver
+				, D.strTrailer
+				, D.strSupplier
+				, D.strDestination
+				, D.strPullProduct
+				, D.strDropProduct 
+				, D.ysnValid
+				, D.strMessage
+				, D.strBillOfLading
+				, D.dtmPullDate
+			FROM tblTRImportLoad L 
+			INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
+			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 AND ISNULL(D.ysnProcess, 0) = 0
+		END
+		ELSE
+		BEGIN
+			SET @CursorTran = CURSOR FOR
+			SELECT D.intImportLoadDetailId
+				, D.strTruck
+				, D.strTerminal
+				, D.strCarrier
+				, D.strDriver
+				, D.strTrailer
+				, D.strSupplier
+				, D.strDestination
+				, D.strPullProduct
+				, D.strDropProduct 
+				, D.ysnValid
+				, D.strMessage
+				, D.strBillOfLading
+				, D.dtmPullDate
+			FROM tblTRImportLoad L 
+			INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
+			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
+		END
+		
 
 		BEGIN TRANSACTION
 
