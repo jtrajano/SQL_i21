@@ -36,9 +36,7 @@ BEGIN TRY
 			GROUP BY
 				ID.intOriginalInvoiceDetailId
 		) CM ON CM.intOriginalInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
-	WHERE
-		InvoiceDetail.strPricing = 'Contracts'
-		AND Invoice.ysnPosted = 1
+	WHERE Invoice.ysnPosted = 1
 		AND Invoice.strTransactionType = 'Invoice'
 		AND CD.intContractHeaderId = @intContractHeaderId
 	GROUP BY
