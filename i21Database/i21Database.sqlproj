@@ -9327,6 +9327,11 @@
     <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
     <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
     <Build Include="dbo\Views\vyuTRImportLoadDetail.sql" />
+    <Build Include="dbo\Tables\tblIPCommitmentPricingBalQtyStage.sql" />
+    <Build Include="dbo\Tables\tblIPCommitmentPricingBalQtyError.sql" />
+    <Build Include="dbo\Tables\tblIPCommitmentPricingBalQtyArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPCommitmentPricingBalQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPCommitmentPricingBalQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
