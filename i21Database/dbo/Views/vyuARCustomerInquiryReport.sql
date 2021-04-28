@@ -43,8 +43,7 @@ SELECT strCustomerName				= CUSTOMER.strName
      , strCompanyAddress			= COMPANY.strCompanyAddress
      , strPhone1 					= CONTACT.strPhone
      , strEmail 					= CONTACT.strEmail
-     , strInternalNotes				= CONTACT.strInternalNotes
-	 , dblCreditStopDays			= ISNULL(AGING.dblCreditStopDays, 0)
+     , strInternalNotes				= CONTACT.strInternalNotes 
 FROM vyuARCustomerSearch CUSTOMER
 LEFT JOIN (
 	SELECT intEntityCustomerId

@@ -54,7 +54,6 @@ SELECT intEntityCustomerId          = C.intEntityId
 	 , dtmBudgetMonth				= CI.dtmBudgetMonth
 	 , dtmHighestARDate				= CI.dtmHighestARDate
 	 , dtmHighestDueARDate			= CI.dtmHighestDueARDate
-	 , dblCreditStopDays			= ISNULL(CI.dblCreditStopDays, CONVERT(NUMERIC(18,6), 0))
 FROM vyuARCustomer C
 LEFT JOIN vyuARCustomerInquiryReport CI
 	ON C.intEntityId = CI.intEntityCustomerId
