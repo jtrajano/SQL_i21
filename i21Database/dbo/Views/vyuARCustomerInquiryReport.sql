@@ -62,7 +62,6 @@ LEFT JOIN (
 		 , dblCredits			= SUM(dblAvailableCredit) * -1
 		 , dblPrepayments		= SUM(dblPrepayments) * -1
 		 , dblPrepaids			= 0.000000
-		 , dblCreditStopDays	= SUM(dblCreditStopDays)
 	FROM vyuARCustomerAgingSubview
 	GROUP BY intEntityCustomerId
 ) AGING ON CUSTOMER.intEntityCustomerId = AGING.intEntityCustomerId
