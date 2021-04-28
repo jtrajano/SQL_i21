@@ -837,6 +837,16 @@ FROM
 			, BD.intInventoryReceiptChargeId
 
 	) Billed
+	OUTER APPLY (
+		SELECT TOP 1 
+			ri.ysnAddPayable
+		FROM 
+			tblICInventoryReceiptItem ri
+		WHERE
+			ri.intInventoryReceiptId = A.intInventoryReceiptId
+			AND A.intContractHeaderId = COALESCE(ri.intContractHeaderId, ri.intOrderId)
+			AND A.intContractDetailId = COALESCE(ri.intContractDetailId, ri.intLineNo) 
+	) contractItem 
 WHERE
 	-- This part is used to convert the IR to Voucher. It should not include the 3rd party vendors
 	(
@@ -850,9 +860,10 @@ WHERE
 				OR Billed.dblQtyReceived IS NULL
 			)
 			/*
-				Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
-				2: BASIS 
-				5: DELAYED PRICING 
+				1. Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
+						2: BASIS 
+						5: DELAYED PRICING 
+
 			*/
 			AND 1 = 
 				CASE 
@@ -876,16 +887,19 @@ WHERE
 				OR Billed.dblQtyReceived IS NULL
 			)
 			/*
-				Exclude the charge from the payable it is for the Receipt Vendor and the contract is one of the following: 
-				2: BASIS 
-				5: DELAYED PRICING 
+				1. Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
+						2: BASIS 
+						5: DELAYED PRICING 
 
-				Always include the payables for the 3rd-party vendors. 
+				2. Exclude the charge if contract item is set as ysnAddPayable = 0. 
+
 			*/
 			AND 1 = 
 				CASE 
-					WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IN (2, 5)) THEN 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND CD.intPricingTypeId IN (2, 5) THEN 
 						0 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND ISNULL(contractItem.ysnAddPayable, 1) = 0 THEN 
+						0
 					ELSE 
 						1 
 				END 

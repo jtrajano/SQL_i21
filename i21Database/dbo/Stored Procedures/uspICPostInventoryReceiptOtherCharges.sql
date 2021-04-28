@@ -1681,7 +1681,19 @@ BEGIN
 				ELSE 
 					ReceiptCharges.dblQuantity
 			END	
-		,[dblAmount] = ReceiptCharges.dblAmount
+		,[dblAmount] = 
+			CASE 
+				/*Negate the other charge if it is an Inventory Return*/
+				WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+					-ReceiptCharges.dblAmount
+
+				/*Negate the other charge if it is a "Charge Entity"*/
+				WHEN ISNULL(ReceiptCharges.ysnPrice, 0) = 1 THEN 
+					-ReceiptCharges.dblAmount
+
+				ELSE 
+					ReceiptCharges.dblAmount
+			END			
 		,strBatchId = @strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt 
 			INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharges

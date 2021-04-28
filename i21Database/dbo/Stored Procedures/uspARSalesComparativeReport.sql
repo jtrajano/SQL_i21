@@ -22,13 +22,14 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @dtmEndingDateTo				DATETIME
       , @dtmEndingDateFrom				DATETIME
 	  , @intEntityCustomerId			INT	= NULL
-	  , @strSalesPersonIds					NVARCHAR(100)
+	  , @strSalesPersonIds				NVARCHAR(100)
 	  , @strName						NVARCHAR(MAX)
-	  , @strCustomerIds				NVARCHAR(MAX)
+	  , @strCustomerIds					NVARCHAR(MAX)
 	  , @strAccountStatusCode			NVARCHAR(MAX)
 	  , @strCategoryCodeIds				NVARCHAR(300)
 	  , @strItemIds						NVARCHAR(300)
-	  , @strCompanyLocationIds				NVARCHAR(300)
+	  , @strItemDescriptions			NVARCHAR(MAX)
+	  , @strCompanyLocationIds			NVARCHAR(300)
 	  , @strSource						NVARCHAR(300)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
@@ -92,6 +93,10 @@ WHERE	[fieldname] = 'strCategoryCodeIds'
 SELECT  @strItemIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strItemIds'
+
+SELECT  @strItemDescriptions = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strItemDescriptions'
 
 SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
@@ -199,6 +204,14 @@ WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
+  AND (intItemId IN (
+		SELECT intItemId
+		FROM tblICItem
+		WHERE strDescription IN (
+			SELECT strDescription
+			FROM tblICItem
+			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
+		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
   AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
@@ -237,6 +250,14 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
+  AND (intItemId IN (
+		SELECT intItemId
+		FROM tblICItem
+		WHERE strDescription IN (
+			SELECT strDescription
+			FROM tblICItem
+			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
+		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
   AND (strSource = @strSource OR ISNULL(@strSource, '') = '')

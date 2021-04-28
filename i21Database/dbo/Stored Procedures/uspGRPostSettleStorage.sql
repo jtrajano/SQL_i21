@@ -2619,9 +2619,11 @@ BEGIN TRY
 
 				----- delete voucher payable that does not have quantity to bill -----
 				delete from @voucherPayable where dblQuantityToBill = 0
-				
-				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
-				BEGIN
+
+				DECLARE @dblVoucherTotalPrecision DECIMAL(18,6) = round(@dblVoucherTotal,2)
+
+				IF @dblVoucherTotalPrecision > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
+				BEGIN					
 					update @voucherPayable set ysnStage = 0
 					EXEC uspAPCreateVoucher
 						@voucherPayables = @voucherPayable
@@ -2635,7 +2637,7 @@ BEGIN TRY
 					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory' and dblOrderQty <> 0))
 					BEGIN
 						BEGIN
-						RAISERROR('Total Voucher will be negative',16,1)
+						RAISERROR('Unable to post settlement. Voucher will have an invalid amount.',16,1)
 						END
 					END
 
@@ -2922,6 +2924,55 @@ BEGIN TRY
 				,intBillId = @createdVouchersId
 			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
 		--END
+
+	--8 Book AP clearing for Customer Owned storage settlement
+	IF @strOwnedPhysicalStock ='Customer' AND @ysnFromPriceBasisContract = 0
+	BEGIN		
+		DECLARE @APClearing AS APClearing;
+		DELETE FROM @APClearing;
+		INSERT INTO @APClearing
+		(
+			[intTransactionId],
+			[strTransactionId],
+			[intTransactionType],
+			[strReferenceNumber],
+			[dtmDate],
+			[intEntityVendorId],
+			[intLocationId],
+			--DETAIL
+			[intTransactionDetailId],
+			[intAccountId],
+			[intItemId],
+			[intItemUOMId],
+			[dblQuantity],
+			[dblAmount],
+			--OTHER INFORMATION
+			[strCode]
+		)
+		SELECT
+			-- HEADER
+			[intTransactionId]          = V.intSettleStorageId
+			,[strTransactionId]         = V.strTransactionNumber
+			,[intTransactionType]       = 6 -- GRAIN
+			,[strReferenceNumber]       = ''
+			,[dtmDate]                  = V.dtmDate
+			,[intEntityVendorId]        = V.intEntityVendorId
+			,[intLocationId]            = V.intLocationId
+			-- DETAIL
+			,[intTransactionDetailId]   = V.intCustomerStorageId
+			,[intAccountId]             = V.intAccountId
+			,[intItemId]                = V.intItemId
+			,[intItemUOMId]             = V.intItemUOMId
+			,[dblQuantity]              = V.dblSettleStorageQty
+			,[dblAmount]                = V.dblSettleStorageAmount
+			,[strCode]                  = 'STR'
+		FROM vyuAPGrainClearing V
+		WHERE V.strTransactionNumber = @strSettleTicket
+		AND V.intSettleStorageId = @intSettleStorageId
+		AND V.dblSettleStorageAmount <> 0
+
+		EXEC uspAPClearing @APClearing = @APClearing, @post = 1;
+	END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage	

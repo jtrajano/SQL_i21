@@ -368,7 +368,12 @@ BEGIN TRY
 		*/
 	    , dblAppliedLoadQty =   case
 								when CT.ysnLoad = 1
-								then (ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ) * CD.dblQuantityPerLoad 
+								then
+									case
+									when Bill.dblQuantity > 0 THEN Bill.dblQuantity
+									WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
+									else (ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ) * CD.dblQuantityPerLoad 
+									end
 								else
 									CASE  
 									WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)  

@@ -55,7 +55,7 @@ BEGIN TRY
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId
 			AND S.intProductTypeId = 6 
 		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  
-		AND ST.intControlPointId in (5,6,9)
+		AND ST.intControlPointId in (4,5,6,9)
 		and S.intSampleId in (Select Max(S1.intSampleId) from tblQMSample S1 JOIN tblQMSampleType ST1 on S1.intSampleTypeId=ST1.intSampleTypeId Where S1.intSampleStatusId =3 and S1.strLotNumber=L1.strLotNumber AND S1.intProductTypeId = 6 and ST1.intControlPointId=ST.intControlPointId )
 		JOIN tblQMTestResult AS TR ON TR.intSampleId = S.intSampleId
 		JOIN tblQMProperty AS P ON P.intPropertyId = TR.intPropertyId
@@ -148,7 +148,7 @@ WHERE W.intWorkOrderId ='+ ltrim(@intWorkOrderId)
 		JOIN tblICItemUOM AS IU1 ON IU1.intItemId = L.intItemId and IU1.intUnitMeasureId=' + Ltrim(@intUnitMeasureId) + 
 		'
 		JOIN tblQMSample S ON S.intProductValueId = L.intLotId AND S.intProductTypeId = 6 
-		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  AND ST.intControlPointId in (5,6,9)
+		JOIN tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId  AND ST.intControlPointId in (4,5,6,9)
 		and S.intSampleId in (Select Max(S1.intSampleId) from tblQMSample S1 JOIN tblQMSampleType ST1 on S1.intSampleTypeId=ST1.intSampleTypeId Where S1.intSampleStatusId =3 and S1.strLotNumber=L1.strLotNumber AND S1.intProductTypeId = 6 and ST1.intControlPointId=ST.intControlPointId )
 		Left JOIN @tblMFTask T on T.strLotNumber=L1.strLotNumber
 		'

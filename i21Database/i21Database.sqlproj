@@ -5019,10 +5019,10 @@
     <Build Include="dbo\Tables\tblRestApiReceiptItemStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptItemLotStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
-	<Build Include="dbo\Views\vyuRestApiShipVia.sql" />
-	<Build Include="dbo\Stored Procedures\uspRestApiImportInvoice.sql" />
-	<Build Include="dbo\Stored Procedures\uspRestApiImportReceipt.sql" />
-	<Build Include="dbo\Views\vyuRestApiCTPriceContractFixationDetail.sql" />
+    <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiImportInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiImportReceipt.sql" />
+    <Build Include="dbo\Views\vyuRestApiCTPriceContractFixationDetail.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistoryTotal.sql" />
@@ -6219,7 +6219,6 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessMemoToInvoice.sql" />
     <Build Include="dbo\User Defined Types\TFInvoiceDetailTransaction.sql" />
     <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLErrorMessages.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSummaryReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringToColumns.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTags.sql" />
@@ -9159,7 +9158,6 @@
     <Build Include="dbo\Stored Procedures\uspAGCreateInvoiceFromShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspTFUpgradeCountyLocation.sql" />
     <Build Include="dbo\User Defined Types\TFCountyLocation.sql" />
-    <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
     <Build Include="dbo\Stored Procedures\uspAGCreateInvoiceFromScaleShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreatePrice.sql" />
     <Build Include="dbo\Tables\tblMFCommitmentPricing.sql" />
@@ -9262,6 +9260,8 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
+    <Build Include="dbo\Views\vyuGRTransferFlow.sql" />
+    <Build Include="dbo\Functions\fnGRCheckForSameTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddContainerDetailLink.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustmentStage.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustmentError.sql" />
@@ -9294,6 +9294,38 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPGoodsReceipt.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceiptAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesTrendReport.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
+    <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherDTN.sql" />
+    <Build Include="dbo\Functions\fnTRGetFreightSurcharge.sql" />
+    <Build Include="dbo\Views\vyuTRFreightSurcharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPServiceOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPServiceOrderAck.sql" />
+    <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucherAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnpostAPClearingTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToDP.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToOS.sql" />
+    <Build Include="dbo\Tables\tblSMDefaultValues.sql" />
+    <Build Include="dbo\Views\vyuICGetAdjustmentDetailSource.sql" />
+    <Build Include="dbo\Views\vyuICGetTransferDetailSource.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptItemVoucherDestination.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
+    <Build Include="dbo\Views\vyuCTContractOptionView.sql" />
+    <Build Include="dbo\Tables\tblARSalesTrendStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPCommitmentPricingAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPCommitmentPricing.sql" />
+    <Build Include="dbo\Tables\tblMFCommitmentPricingDetailStage.sql" />
+    <Build Include="dbo\Views\vyuSMDefaultValues.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAddPaymentSchedules.sql" />
+    <Build Include="dbo\Tables\tblIPLotMergeFeed.sql" />
+    <Build Include="dbo\Tables\tblIPLotPropertyFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotProperty.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
+    <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9568,7 +9600,10 @@
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
+    <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
+    <Build Include="dbo\User Defined Types\PaymentSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

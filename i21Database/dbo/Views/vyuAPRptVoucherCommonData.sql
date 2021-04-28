@@ -9,7 +9,12 @@ A.intBillId
 				 + ISNULL(RTRIM(companySetup.strZip),'') + ' ' + ISNULL(RTRIM(companySetup.strCity), '') + ' ' + ISNULL(RTRIM(companySetup.strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(companySetup.strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(companySetup.strPhone)+ CHAR(13) + char(10), '')
+,strCompanyAddressNoPhone = ISNULL(RTRIM(companySetup.strCompanyName) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(companySetup.strAddress) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(companySetup.strZip),'') + ' ' + ISNULL(RTRIM(companySetup.strCity), '') + ' ' + ISNULL(RTRIM(companySetup.strState), '') + CHAR(13) + char(10)
+				 + ISNULL('' + RTRIM(companySetup.strCountry) + CHAR(13) + char(10), '')
 ,strShipFrom = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone) COLLATE Latin1_General_CI_AS
+,strShipFrom2 = [dbo].[fnAPFormatAddress2](NULL, NULL, NULL, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, NULL) COLLATE Latin1_General_CI_AS
 ,strShipTo = [dbo].[fnAPFormatAddress](NULL,companySetup.strCompanyName, A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone) COLLATE Latin1_General_CI_AS
 ,dbo.fnTrim(ISNULL(B.strVendorId, B2.strEntityNo) + ' - ' + ISNULL(B2.strName,'')) as strVendorIdName 
 ,ISNULL(B2.strName,'') AS strVendorName 
@@ -23,11 +28,21 @@ A.intBillId
 ,dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(BankAccount.strBankAccountNo)) AS strBankAccountNo
 ,BankAccount.strIBAN
 ,BankAccount.strSWIFT
+,strBankAccountOrReference = CASE WHEN A.intBankInfoId > 0 
+								THEN 'Bank Name: ' + Bank.strBankName + CHAR(10) +
+									 'Bank Account: ' + dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(BankAccount.strBankAccountNo)) + CHAR(10) +
+									 'Bank Account Holder: ' + BankAccount.strBankAccountHolder + CHAR(10) +
+									 'IBAN: ' + BankAccount.strIBAN + CHAR(10) +
+									 'SWIFT: ' + BankAccount.strSWIFT
+								ELSE A.strReference
+							END
 ,Term.strTerm
 ,A.strRemarks
 ,A.strBillId
 ,A.dtmDate
 ,A.dtmDueDate--CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
+,FORMAT(A.dtmBillDate, CP.strReportDateFormat) dtmBillDate
+,ISNULL(A.strVendorOrderNumber, '') strVendorOrderNumber
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 FROM tblAPBill A 
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.intEntityId = B2.intEntityId)
@@ -39,4 +54,5 @@ LEFT JOIN tblSMCompanyLocation TranLoc ON A.intStoreLocationId = TranLoc.intComp
 LEFT JOIN tblCMBankAccount BankAccount ON BankAccount.intBankAccountId = A.intBankInfoId
 LEFT JOIN tblCMBank Bank ON BankAccount.intBankId = Bank.intBankId
 LEFT JOIN tblSMTerm Term ON A.intTermsId = Term.intTermID
+CROSS JOIN tblSMCompanyPreference CP
 

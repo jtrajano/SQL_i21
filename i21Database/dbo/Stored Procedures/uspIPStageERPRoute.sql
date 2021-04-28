@@ -88,14 +88,14 @@ BEGIN TRY
 				,StorageLocation
 				,ManufacturingGroup
 				,TrxSequenceNo
-				,ParentTrxSequenceNo
+				,parentId
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					ItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS '../ItemNo'
 					,ManufacturingCell NVARCHAR(50)
 					,StorageLocation NVARCHAR(50)
 					,ManufacturingGroup NVARCHAR(50)
 					,TrxSequenceNo INT
-					,ParentTrxSequenceNo INT '@ParentTrxSequenceNo'
+					,parentId INT '@parentId'
 					) x
 
 			UPDATE IRD

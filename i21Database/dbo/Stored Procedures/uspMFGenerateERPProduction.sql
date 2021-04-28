@@ -85,7 +85,7 @@ BEGIN TRY
 			+'<StorageLocation>'+	IsNULL(SL.strSubLocationName,'')  +'</StorageLocation>'
 			+'<WorkOrderNo>'+	W.strWorkOrderNo    +'</WorkOrderNo>'
 			+'<ERPShopOrderNo>'+	IsNULL(W.strERPOrderNo,'')     +'</ERPShopOrderNo>'
-			+'<Status>Completed</Status>'
+			+'<WorkOrderStatus>Completed</WorkOrderStatus>'
 		FROM dbo.tblMFWorkOrder W
 		JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 		LEFT JOIN dbo.tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = IsNULL(W.intSubLocationId, MC.intSubLocationId)

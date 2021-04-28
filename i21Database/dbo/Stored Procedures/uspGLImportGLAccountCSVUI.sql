@@ -58,11 +58,8 @@ DECLARE @withLOB BIT = 0, @separator nchar(1) = ''
 SELECT @separator = strMask FROM tblGLAccountStructure WHERE strType = 'Divider'  
 SELECT @withLOB = 1 FROM tblGLAccountStructure WHERE strStructureName = 'LOB'  
   
-UPDATE [tblGLAccountImportDataStaging2]   
-SET strAccountId = RTRIM(LTRIM(strPrimarySegment)) + @separator + RTRIM(LTRIM(strLocationSegment)) +    
- CASE WHEN RTRIM(LTRIM(ISNULL(strLOBSegment,''))) = ''   
- THEN ''    
- ELSE @separator + strLOBSegment  END  
+
+
 UPDATE [tblGLAccountImportDataStaging2] SET ysnNoDescription = 1 WHERE RTRIM(LTRIM(ISNULL([strDescription],''))) = ''  
 UPDATE [tblGLAccountImportDataStaging2] SET [ysnMissingLOBSegment] = CAST(0 AS BIT)
    
@@ -79,6 +76,7 @@ LEFT JOIN tblGLAccountUnit A ON LOWER(A.strUOMCode) COLLATE Latin1_General_CI_AS
   
 
 
+
 UPDATE T SET   
 intPrimarySegmentId = A.intAccountSegmentId  
 FROM  [tblGLAccountImportDataStaging2] T   
@@ -92,8 +90,7 @@ LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =RTRIM
 JOIN tblGLAccountStructure S on S.intAccountStructureId = A.intAccountStructureId  
 WHERE strStructureName = 'Location'  
   
-  
-  
+
 IF @withLOB =1   
 begin
  UPDATE T SET [intLOBSegmentId] = A.intAccountSegmentId  
@@ -133,7 +130,14 @@ CASE WHEN intPrimarySegmentId IS NULL THEN  ' Error : Missing or invalid Primary
 CASE WHEN intLocationSegmentId IS NULL THEN  'Error : Missing or invalid Location Segment |' ELSE '' END +  
 CASE WHEN intLOBSegmentId IS NULL AND @withLOB = 1 THEN  ' Error : Missing or invalid LOB Segment |' ELSE '' END +  
 CASE WHEN intAccountUnitId IS NULL THEN  'Warning : Missing or invalid UOM Code |' ELSE '' END  
-  
+ 
+ UPDATE [tblGLAccountImportDataStaging2]   
+SET strAccountId = RTRIM(LTRIM(strPrimarySegment)) + @separator + RTRIM(LTRIM(strLocationSegment)) +    
+ CASE WHEN RTRIM(LTRIM(ISNULL(strLOBSegment,''))) = ''   
+ THEN ''    
+ ELSE @separator + strLOBSegment  END  
+ WHERE isnull(ysnInvalid,0) = 0  
+
   
 INSERT intO tblGLAccount   
 ([strAccountId],[strDescription], [intAccountGroupId],[ysnSystem],[ysnActive],intCurrencyID,intAccountUnitId,  intConcurrencyId, intEntityIdLastModified)  
@@ -175,7 +179,9 @@ WHERE A.strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE s
  FROM tblGLCOACrossReference C Join tblGLAccount A on A.intAccountId = C.inti21Id   
  JOIN [tblGLAccountImportDataStaging2] D  on D.intAccountId = A.intAccountId  
  join glactmst G on G.A4GLIdentity = C.intLegacyReferenceId  
- where isnull(ysnNoDescription,0) = 0')  
+ where isnull(ysnNoDescription,0) = 0
+ and isnull(ysnInvalid,0) = 0 
+ ')  
  SET ANSI_WARNINGS  ON
 END  
   

@@ -131,7 +131,12 @@ BEGIN TRY
 						,strFeedStatus = 'Ack Rcvd'
 						,strERPTransferOrderNo = @ERPReferenceNo
 					WHERE intInventoryReceiptId = @intInventoryReceiptId
-						AND intStatusId IS NULL
+						AND intStatusId = 2
+
+					UPDATE tblIPInvReceiptFeed
+					SET strERPTransferOrderNo = @ERPReferenceNo
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+						AND ISNULL(intStatusId, 1) = 1
 
 					INSERT INTO @tblMessage (
 						strMessageType
@@ -153,7 +158,7 @@ BEGIN TRY
 						,strMessage = @StatusText
 						,strFeedStatus = 'Ack Rcvd'
 					WHERE intInventoryReceiptId = @intInventoryReceiptId
-						AND intStatusId IS NULL
+						AND intStatusId = 2
 
 					INSERT INTO @tblMessage (
 						strMessageType

@@ -10,11 +10,11 @@ BEGIN TRY
 
 	DECLARE @intInventoryAdjustmentStageId INT
 	DECLARE @ErrMsg NVARCHAR(max)
-	--DECLARE @strJson NVARCHAR(Max)
 	DECLARE @dtmDate DATETIME
 	DECLARE @intUserId INT
 	DECLARE @strUserName NVARCHAR(100)
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
+		,@ItemsForPost AS ItemCostingTableType
 		,@intTrxSequenceNo INT
 		,@strCompanyLocation NVARCHAR(6)
 		,@intActionId INT
@@ -40,6 +40,14 @@ BEGIN TRY
 		,@intLotId INT
 		,@strAdjustmentNo NVARCHAR(50)
 		,@intAdjustmentId INT
+		,@intBatchId INT
+		,@intTransactionId INT
+		,@dblLastCost NUMERIC(18, 6)
+		,@intItemLocationId INT
+		,@GLEntries AS RecapTableType
+		,@STARTING_NUMBER_BATCH AS INT = 3
+		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
+		,@strBatchId AS NVARCHAR(40)
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -101,8 +109,7 @@ BEGIN TRY
 					WHERE intTrxSequenceNo = @intTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo ' + Ltrim(@intTrxSequenceNo) + ' is exists in i21.'
-
+				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processsed in i21.'
 				RAISERROR (
 						@strError
 						,16
@@ -151,7 +158,7 @@ BEGIN TRY
 						,1
 						)
 			END
-			--Select @strStorageLocation,@intCompanyLocationId
+
 			SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
 			FROM dbo.tblSMCompanyLocationSubLocation
 			WHERE strSubLocationName = @strStorageLocation
@@ -179,7 +186,7 @@ BEGIN TRY
 						,1
 						)
 			END
-			--Select @strStorageUnit,@intCompanyLocationSubLocationId
+
 			SELECT @intStorageLocationId = intStorageLocationId
 			FROM dbo.tblICStorageLocation
 			WHERE strName = @strStorageUnit
@@ -256,29 +263,167 @@ BEGIN TRY
 				AND intUnitMeasureId = @intUnitMeasureId
 
 			SELECT @intLotId = intLotId
+				,@dblLastCost = dblLastCost
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
 
 			BEGIN TRAN
 
-			EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
-				,@dblNewLotQty = @dblQuantity
-				,@intAdjustItemUOMId = @intItemUOMId
-				,@intUserId = @intUserId
-				,@strReasonCode = @strReasonCode
-				,@blnValidateLotReservation = 0
-				,@strNotes = @strNotes
-				,@dtmDate = NULL
-				,@ysnBulkChange = 0
-				,@strReferenceNo = NULL
-				,@intAdjustmentId = @intAdjustmentId OUTPUT
+			IF @intTransactionTypeId = 10
+			BEGIN
+				EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
+					,@dblNewLotQty = @dblQuantity
+					,@intAdjustItemUOMId = @intItemUOMId
+					,@intUserId = @intUserId
+					,@strReasonCode = @strReasonCode
+					,@blnValidateLotReservation = 0
+					,@strNotes = @strNotes
+					,@dtmDate = NULL
+					,@ysnBulkChange = 0
+					,@strReferenceNo = NULL
+					,@intAdjustmentId = @intAdjustmentId OUTPUT
 
-			SELECT @strAdjustmentNo = strAdjustmentNo
-			FROM dbo.tblICInventoryAdjustment
-			WHERE intInventoryAdjustmentId = @intAdjustmentId
+				SELECT @strAdjustmentNo = strAdjustmentNo
+				FROM dbo.tblICInventoryAdjustment
+				WHERE intInventoryAdjustmentId = @intAdjustmentId
+			END
+			ELSE IF @intTransactionTypeId = 8
+			BEGIN
+				EXEC dbo.uspMFGeneratePatternId @intCategoryId = NULL
+					,@intItemId = @intItemId
+					,@intManufacturingId = NULL
+					,@intSubLocationId = NULL
+					,@intLocationId = @intCompanyLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 33
+					,@ysnProposed = 0
+					,@strPatternString = @intTransactionId OUTPUT
+
+				SELECT @intItemLocationId = intItemLocationId
+				FROM tblICItemLocation
+				WHERE intItemId = @intItemId
+					AND intLocationId = @intCompanyLocationId
+
+				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
+					,@strBatchId OUTPUT
+
+				SELECT @dtmDate = dbo.fnGetBusinessDate(GETDATE(), @intCompanyLocationId)
+
+				--Lot Tracking
+				INSERT INTO @ItemsForPost (
+					intItemId
+					,intItemLocationId
+					,intItemUOMId
+					,dtmDate
+					,dblQty
+					,dblUOMQty
+					,dblCost
+					,dblSalesPrice
+					,intCurrencyId
+					,dblExchangeRate
+					,intTransactionId
+					,intTransactionDetailId
+					,strTransactionId
+					,intTransactionTypeId
+					,intLotId
+					,intSubLocationId
+					,intStorageLocationId
+					,intSourceTransactionId
+					,strSourceTransactionId
+					)
+				SELECT intItemId = @intItemId
+					,intItemLocationId = @intItemLocationId
+					,intItemUOMId = @intItemUOMId
+					,dtmDate = @dtmDate
+					,dblQty = - @dblQuantity
+					,dblUOMQty = @intItemUOMId
+					,dblCost = @dblLastCost
+					,dblSalesPrice = 0
+					,intCurrencyId = NULL
+					,dblExchangeRate = 1
+					,intTransactionId = @intTransactionId
+					,intTransactionDetailId = @intTransactionId
+					,strTransactionId = @intTrxSequenceNo
+					,intTransactionTypeId = 8
+					,intLotId = @intLotId
+					,intSubLocationId = @intCompanyLocationSubLocationId
+					,intStorageLocationId = @intStorageLocationId
+					,intSourceTransactionId = 8
+					,strSourceTransactionId = @intTransactionId
+
+				-- Call the post routine 
+				INSERT INTO @GLEntries (
+					[dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					)
+				EXEC dbo.uspICPostCosting @ItemsForPost
+					,@strBatchId
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@intUserId
+
+				EXEC dbo.uspGLBookEntries @GLEntries
+					,1
+			END
 
 			MOVE_TO_ARCHIVE:
+
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,(
+					CASE 
+						WHEN @intTransactionTypeId = 10
+							THEN 15
+						WHEN @intTransactionTypeId = 11
+							THEN 8
+						END
+					) AS intMessageTypeId
+				,1 AS intStatusId
+				,'Success' AS strStatusText
 
 			--Move to Ack
 			INSERT INTO tblIPInventoryAdjustmentAck (
@@ -318,7 +463,7 @@ BEGIN TRY
 				,strNotes
 				,@strAdjustmentNo
 				,1 AS intStatusId
-				,'Success' As strStatusText
+				,'Success' AS strStatusText
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
 
@@ -337,8 +482,25 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,15 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
+
 			--Move to Error
-			INSERT INTO tblIPInventoryAdjustmentAck (
+			INSERT INTO tblIPInventoryAdjustmentError (
 				intTrxSequenceNo
 				,strCompanyLocation
 				,intActionId
@@ -354,8 +516,7 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
-				,intStatusId
-				,strStatusText
+				,strErrorMessage
 				)
 			SELECT intTrxSequenceNo
 				,strCompanyLocation
@@ -372,8 +533,7 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
-				,0 As intStatusId
-				,@ErrMsg As strStatusText
+				,@ErrMsg AS strStatusText
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
 

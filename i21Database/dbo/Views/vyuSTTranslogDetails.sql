@@ -5,8 +5,8 @@ FROM
 (
 	SELECT DISTINCT 
 		CAST(TR.intTermMsgSN AS NVARCHAR(MAX)) + '0' +  CAST(TR.intTermMsgSNterm AS NVARCHAR(MAX)) + '0' + CAST(TR.intStoreId AS NVARCHAR(MAX)) 
-	   --+ CAST(USec.intEntityId AS NVARCHAR(MAX)) 
-	   COLLATE Latin1_General_CI_AS AS strUniqueId
+			--+ CAST(USec.intEntityId AS NVARCHAR(MAX)) 
+			COLLATE Latin1_General_CI_AS AS strUniqueId
        , TR.intTrlDeptNumber
 	   , TR.strTrlDept
 	   , TR.strTrlNetwCode
@@ -27,7 +27,7 @@ FROM
 	   , CAST(TR.intCashierSysId AS INT) AS intCashierSysId
 	   , TR.strCashier
 	   , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
-	   -- , USec.intEntityId
+	   --, USec.intEntityId
 	FROM tblSTTranslogRebates TR
 	JOIN tblSTStore ST 
 		ON TR.intStoreId = ST.intStoreId 

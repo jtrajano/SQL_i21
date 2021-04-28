@@ -1022,7 +1022,7 @@ BEGIN TRY
 					WHEN [Changes].ysnDepositRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strDepositPLUId_Original			= [Changes].intDepositPLUId_Original
-			, strDepositPLU_Original			= ISNULL(PLUOriginal.strUpcCode, '') -- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
+			, strDepositPLU_Original			= ISNULL(PLUOriginal.strLongUPCCode, '') -- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -1097,7 +1097,7 @@ BEGIN TRY
 					WHEN [Changes].ysnDepositRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strDepositPLUId_New			= [Changes].intDepositPLUId_New
-			, strDepositPLU_New				= ISNULL(PLUNew.strUpcCode, '')	-- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
+			, strDepositPLU_New				= ISNULL(PLUNew.strLongUPCCode, '')	-- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -1161,7 +1161,7 @@ BEGIN TRY
 			, strVendorId_OldDataPreview			= ISNULL(VendorOriginal.strName, '')
 			, strStorageLocationId_OldDataPreview	= ISNULL(StorageLocOriginal.strSubLocationName, '')
 			, strCountGroupId_OldDataPreview		= ISNULL(CountGroup_Orig.strCountGroup, '')
-			, strDepositPLUId_OldDataPreview		= ISNULL(PLUOriginal.strUpcCode, '')
+			, strDepositPLUId_OldDataPreview		= ISNULL(PLUOriginal.strLongUPCCode, '')
 
 		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
 		INNER JOIN tblICItem I 

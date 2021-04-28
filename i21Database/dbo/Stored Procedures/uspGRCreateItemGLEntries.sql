@@ -304,10 +304,10 @@ AS
 			,0) AS dblTotalDiscountCost
 		FROM tblGRSettleVoucherCreateReferenceTable SV2
 		INNER JOIN tblICItem I
-			ON I.intItemId = SV2.intItemId
-				AND I.ysnInventoryCost = 1
+			ON I.intItemId = SV2.intItemId				
 				and SV2.intItemType = 3
 		WHERE SV2.strBatchId = t.strBatchId
+			AND isnull(SV2.ysnItemInventoryCost,I.ysnInventoryCost) = 1
 	) DiscountCost
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 

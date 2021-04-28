@@ -57,7 +57,7 @@ BEGIN TRY
 				)
 			OUTPUT INSERTED.strDemandName
 			INTO @tblIPDemand
-			SELECT ParentTrxSequenceNo
+			SELECT parentId
 				,ActionId
 				,CreatedDate
 				,CreatedBy
@@ -69,7 +69,7 @@ BEGIN TRY
 				,QuantityUOM
 				,DemandDate
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					ParentTrxSequenceNo INT '@ParentTrxSequenceNo'
+					parentId INT '@parentId'
 					,ActionId INT '../ActionId'
 					,CreatedDate DATETIME '../CreatedDate'
 					,CreatedBy NVARCHAR(50) '../CreatedBy'

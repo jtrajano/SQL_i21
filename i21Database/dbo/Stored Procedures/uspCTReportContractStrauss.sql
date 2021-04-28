@@ -20,8 +20,6 @@ BEGIN TRY
 			,@intTransactionId						INT
 			,@intScreenId							INT
 			,@ysnExternal							BIT
-			,@ysnFairtrade							BIT = 0
-			,@rtFLOID								nvarchar(10) = 'FLO ID'
 			,@strAmendedColumns						NVARCHAR(MAX)
 			,@strSequenceHistoryId					NVARCHAR(MAX)
 			,@strCompanyName						NVARCHAR(500)
@@ -47,7 +45,8 @@ BEGIN TRY
 			,@intPriceItemUOMId						INT
 			,@intUnitMeasureId2						INT
 			,@strUnitMeasure2						NVARCHAR(500)
-			,@dtmEndDate							DateTime
+			,@dtmStartDate							DATETIME
+			,@dtmEndDate							DATETIME
 			,@intDestinationPortId					INT
 			,@strDestinationPort					NVARCHAR(500)
 			,@strApplicableLaw						NVARCHAR(MAX)
@@ -179,7 +178,7 @@ BEGIN TRY
 		ORDER BY intApprovalId
 	END
 
---if contract is for amendment
+	--if contract is for amendment
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMTransaction WHERE intTransactionId = @intTransactionId AND ysnOnceApproved = 1)
 	BEGIN
 
@@ -263,31 +262,36 @@ BEGIN TRY
 		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
 		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId 
 	
-	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
+	SELECT @ysnExternal = (CASE WHEN intBookVsEntityId > 0 THEN CONVERT(BIT, 0) ELSE CONVERT(BIT, 1) END)
 	FROM tblCTContractHeader CH
-	left join tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
+	LEFT JOIN tblCTBookVsEntity be ON be.intEntityId = CH.intEntityId
 	WHERE CH.intContractHeaderId = @intContractHeaderId
-
-	IF EXISTS
-	(
-				SELECT	TOP 1 1 
-				FROM	tblCTContractCertification	CC  WITH (NOLOCK)
-				JOIN	tblCTContractDetail			CH	WITH (NOLOCK) ON	CC.intContractDetailId	=	CH.intContractDetailId
-				JOIN	tblICCertification			CF	WITH (NOLOCK) ON	CF.intCertificationId	=	CC.intCertificationId	
-				WHERE	UPPER(CF.strCertificationName) = 'FAIRTRADE' AND CH.intContractHeaderId = @intContractHeaderId
-	)
-	BEGIN
-		SET @ysnFairtrade = 1
-	END
 	
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
 	FROM	tblSMCompanySetup WITH (NOLOCK)
 
-	select top 1 @strPackingDescription = strPackingDescription, @intContractDetailItemId = intItemId, @intContractDetailBundleItemId = intItemBundleId, @intFutureMarketId = intFutureMarketId, @intFutureMonthId = intFutureMonthId, @dblContractDetailBasis = dblBasis,@intBasisCurrencyId = intBasisCurrencyId, @intBasisUOMId = intBasisUOMId, @strFixationBy = strFixationBy, @dblCashPrice = dblCashPrice, @intPriceItemUOMId = intPriceItemUOMId, @dtmEndDate = dtmEndDate, @intDestinationPortId = intDestinationPortId from tblCTContractDetail where intContractHeaderId = @intContractHeaderId order by intContractSeq;
-	select top 1 @strItemDescription = strDescription from tblICItem where intItemId = @intContractDetailItemId;
-	select top 1 @strItemBundleNo = strItemNo from tblICItem where intItemId = @intContractDetailBundleItemId;
-	select top 1 @strFutMarketName = strFutMarketName from tblRKFutureMarket where intFutureMarketId = @intFutureMarketId;
-	select top 1 @dtmFutureMonthsDate = dtmFutureMonthsDate from tblRKFuturesMonth where intFutureMonthId = @intFutureMonthId;
+	SELECT TOP 1 @strPackingDescription = strPackingDescription
+		, @intContractDetailItemId = intItemId
+		, @intContractDetailBundleItemId = intItemBundleId
+		, @intFutureMarketId = intFutureMarketId
+		, @intFutureMonthId = intFutureMonthId
+		, @dblContractDetailBasis = dblBasis
+		, @intBasisCurrencyId = intBasisCurrencyId
+		, @intBasisUOMId = intBasisUOMId
+		, @strFixationBy = strFixationBy
+		, @dblCashPrice = dblCashPrice
+		, @intPriceItemUOMId = intPriceItemUOMId
+		, @dtmEndDate = dtmEndDate
+		, @dtmStartDate = dtmStartDate
+		, @intDestinationPortId = intDestinationPortId
+	FROM tblCTContractDetail
+	WHERE intContractHeaderId = @intContractHeaderId
+	ORDER BY intContractSeq
+
+	SELECT TOP 1 @strItemDescription = strDescription from tblICItem where intItemId = @intContractDetailItemId;
+	SELECT TOP 1 @strItemBundleNo = strItemNo from tblICItem where intItemId = @intContractDetailBundleItemId;
+	SELECT TOP 1 @strFutMarketName = strFutMarketName from tblRKFutureMarket where intFutureMarketId = @intFutureMarketId;
+	SELECT TOP 1 @dtmFutureMonthsDate = dtmFutureMonthsDate from tblRKFuturesMonth where intFutureMonthId = @intFutureMonthId;
 
 	set @strFutureMonthYear = DATENAME(mm,@dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,@dtmFutureMonthsDate);
 
@@ -322,108 +326,71 @@ BEGIN TRY
 	FROM	tblCTContractHeader CH WITH (NOLOCK)						
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 	
-	SELECT
-		intContractHeaderId								= CH.intContractHeaderId
-		,intContractTypeId								=		CH.intContractTypeId
-		
-		,StraussContractSubmitByParentSignature			=		@blbParentSubmitSignature--(case when @ysnIsParent = convert(bit,1) then @blbParentSubmitSignature else @blbChildSubmitSignature end)
-		,InterCompApprovalSign							=		@blbParentApproveSignature--(case when @ysnIsParent = convert(bit,1) then @blbParentApproveSignature else @blbChildApproveSignature end)
-		,StraussContractSubmitSignature					=		@blbChildSubmitSignature--(case when @ysnIsParent = convert(bit,1) then @blbChildSubmitSignature else @blbParentSubmitSignature end)
-		,StraussContractApproverSignature				=		@blbChildApproveSignature--(case when @ysnIsParent = convert(bit,1) then @blbChildApproveSignature else @blbParentApproveSignature end)
-		,strEntityName									=		(case when @ysnIsParent = convert(bit,0) then LTRIM(RTRIM(EY.strEntityName)) else @strCompanyName end)
-		,strCompanyName									=		(case when @ysnIsParent = convert(bit,0) then @strCompanyName else LTRIM(RTRIM(EY.strEntityName)) end)
-		
-		,strItemBundleNoLabel							=		(case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end)
-		,blbHeaderLogo									=		dbo.fnSMGetCompanyLogo('Header')
-		,strStraussOtherPartyAddress					= '<span style="font-family:Arial;font-size:12px;">' +
-															CASE   
-															WHEN
-																CH.strReportTo = 'Buyer'
-															THEN
-																LTRIM(RTRIM(EC.strEntityName)) + '</br>'    +
-																ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + '</br>' +
-																ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') +   
-																ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState))   END,'') +   
-																ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') +   
-																ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END,'') +  
-																CASE
-																WHEN @ysnFairtrade = 1
-																THEN ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': ' +
-																	CASE
-																	WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = ''
-																	THEN NULL
-																	ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId)))
-																	END,
-																	'')  
-																ELSE
-																	''
-																END               
-																ELSE
-																	LTRIM(RTRIM(EY.strEntityName)) + '</br>' +
-																	ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + '</br>' +
-																	ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') +   
-																	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') +   
-																	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') +   
-																	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +  
-																	CASE
-																	WHEN @ysnFairtrade = 1
-																	THEN ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': ' + 
-																		CASE
-																		WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = ''
-																		THEN NULL
-																		ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId)))
-																		END,
-																		'')  
-																	ELSE ''
-																	END  
-																END + '</span>'
-	 ,dtmContractDate									= CH.dtmContractDate
-	 ,strContractNumberStrauss				= CH.strContractNumber + (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) = 0 then '' else ' - AMENDMENT' end)
-	 ,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
-	 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
-	 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
-	 ,strItemDescription					= @strItemDescription
-	 ,strItemBundleNo						=	(case when @ysnExternal = convert(bit,1) then @strItemBundleNo else null end)
-	 ,strStraussPrice						=	CASE WHEN CH.intPricingTypeId = 2 THEN 
-															'Price to be fixed basis ' + @strFutMarketName + ' ' + 
+	SELECT intContractHeaderId					= CH.intContractHeaderId
+		,intContractTypeId						= CH.intContractTypeId
+		,StraussContractSubmitByParentSignature	= @blbParentSubmitSignature
+		,InterCompApprovalSign					= @blbParentApproveSignature
+		,StraussContractSubmitSignature			= @blbChildSubmitSignature
+		,StraussContractApproverSignature		= @blbChildApproveSignature
+		,strEntityName							= (CASE WHEN @ysnIsParent = CONVERT(BIT, 0) THEN LTRIM(RTRIM(EY.strEntityName)) ELSE @strCompanyName END)
+		,strCompanyName							= (CASE WHEN @ysnIsParent = CONVERT(BIT, 0) THEN @strCompanyName ELSE LTRIM(RTRIM(EY.strEntityName)) END)
+		,strItemBundleNoLabel					= (CASE WHEN @ysnExternal = CONVERT(BIT, 0) THEN 'GROUP QUALITY CODE:' ELSE NULL END)
+		,blbHeaderLogo							= dbo.fnSMGetCompanyLogo('Header')
+		,strStraussOtherPartyAddress			= '<span style="font-family:Arial;font-size:12px;">' +
+													CASE WHEN CH.strReportTo = 'Buyer'
+													THEN
+														'<b>' + LTRIM(RTRIM(EC.strEntityName)) + '</b></br>' +
+														CASE WHEN REPLACE(ISNULL(LTRIM(RTRIM(EC.strEntityAddress)), ''), CHAR(10), '</br>') = '' THEN '' ELSE REPLACE(ISNULL(LTRIM(RTRIM(EC.strEntityAddress)), ''), CHAR(10), '</br>') + '</br>' END +
+														CASE WHEN ISNULL(LTRIM(RTRIM(EC.strEntityZipCode)), '') = '' THEN '' ELSE LTRIM(RTRIM(EC.strEntityZipCode)) + ' ' END +
+														CASE WHEN ISNULL(LTRIM(RTRIM(EC.strEntityCity)), '') = '' THEN CASE WHEN ISNULL(LTRIM(RTRIM(EC.strEntityZipCode)), '') = '' THEN '' ELSE '</br>' END ELSE LTRIM(RTRIM(EC.strEntityCity)) + '</br>' END +
+														ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) + '</br>' END, '') +
+														ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END, '')
+													ELSE
+														'<b>' + LTRIM(RTRIM(EY.strEntityName)) + '</b></br>' +
+														CASE WHEN REPLACE(ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), ''), CHAR(10), '</br>') = '' THEN '' ELSE REPLACE(ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), ''), CHAR(10), '</br>') + '</br>' END +
+														CASE WHEN ISNULL(LTRIM(RTRIM(EY.strEntityZipCode)), '') = '' THEN '' ELSE LTRIM(RTRIM(EY.strEntityZipCode)) + ' ' END +
+														CASE WHEN ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '') = '' THEN CASE WHEN ISNULL(LTRIM(RTRIM(EY.strEntityZipCode)), '') = '' THEN '' ELSE '</br>' END ELSE LTRIM(RTRIM(EY.strEntityCity)) + '</br>' END +
+														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) + '</br>' END, '') +
+														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END, '')
+													END + '</span>'
+		 ,dtmContractDate						= CH.dtmContractDate
+		 ,strContractNumberStrauss				= CH.strContractNumber + (CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns, '')))) = 0 OR (@strTransactionApprovalStatus = 'Waiting for Submit' OR @strTransactionApprovalStatus = 'Waiting for Approval') THEN '' ELSE ' - AMENDMENT' END)
+		 ,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
+		 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
+		 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
+		 ,strItemDescription					= @strItemDescription
+		 ,strItemBundleNo						= (CASE WHEN @ysnExternal = CONVERT(BIT, 0) THEN @strItemBundleNo ELSE NULL END)
+		 ,strStraussPrice						= CASE WHEN CH.intPricingTypeId = 2 THEN 'Price to be fixed basis ' + @strFutMarketName + ' ' +
 															@strFutureMonthYear + CASE WHEN @dblContractDetailBasis < 0 THEN ' minus ' ELSE ' plus ' END +
 															@strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(@dblContractDetailBasis),2) + '/'+ @strUnitMeasure +' at '+ @strFixationBy+'''s option prior to first notice day of '+@strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
-														ELSE
-															'' + dbo.fnCTChangeNumericScale(@dblCashPrice,2) + ' ' + @strPriceCurrencyAndUOMForPriced2	
-														END
-	,strStraussShipmentLabel				= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end)
-	,strStraussShipment						= datename(m,@dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,@dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end)
-	,strDestinationPointName				= (case when PO.strPositionType = 'Spot' then CT.strCity else @strDestinationPort end)
-	,strStraussCondition     				= 	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + isnull(CT.strCity,'') + ' ' + isnull(W1.strWeightGradeDesc,'')
-	,strTerm							    = TM.strTerm
-	,strStraussApplicableLaw				=	@strApplicableLaw
-	,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
-	,strStrussOtherCondition				= '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  isnull(@strGeneralCondition,'') + '</span>'
-	,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
+													ELSE '' + dbo.fnCTChangeNumericScale(@dblCashPrice,2) + ' ' + @strPriceCurrencyAndUOMForPriced2 END
+		,strStraussShipmentLabel				= (CASE WHEN PO.strPositionType = 'Spot' THEN 'DELIVERY' ELSE 'SHIPMENT' END)
+		,strStraussShipment						= CONVERT(VARCHAR, @dtmStartDate, 101) + ' - ' + CONVERT(VARCHAR, @dtmEndDate, 101)
+		,strDestinationPointName				= (CASE WHEN PO.strPositionType = 'Spot' THEN CT.strCity ELSE @strDestinationPort END)
+		,strStraussCondition     				= CB.strFreightTerm + '(' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
+		,strTerm							    = TM.strTerm
+		,strStraussApplicableLaw				= @strApplicableLaw
+		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'
+		,strStrussOtherCondition				= '<span style="font-family:Arial;font-size:13px;">' + ISNULL(W2.strWeightGradeDesc, '') +  ISNULL(@strGeneralCondition, '') + '</span>'
+		,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
+		,ysnExternal							= @ysnExternal
+		,strArbitrationText						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN ARB.strCity ELSE NULL END)
+		,strReferenceNo							= CASE WHEN LTRIM(RTRIM(ISNULL(CH.strCustomerContract, ''))) <> '' THEN 'Your Ref. ' + ltrim(rtrim(CH.strCustomerContract)) ELSE NULL END
 
-	FROM
-		tblCTContractHeader CH
-		LEFT JOIN vyuCTEntity	EC WITH (NOLOCK)
-			ON	EC.intEntityId = CH.intCounterPartyId  
-			AND EC.strEntityType = 'Customer'
-		LEFT JOIN tblSMCountry rtc12
-			on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
-		LEFT JOIN tblAPVendor VR WITH (NOLOCK)
-			ON VR.intEntityId = CH.intEntityId
-		LEFT JOIN tblARCustomer CR WITH (NOLOCK)
-			ON CR.intEntityId = CH.intEntityId
-		JOIN vyuCTEntity EY	WITH (NOLOCK)
-			ON EY.intEntityId =	CH.intEntityId
-			AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-	LEFT JOIN	tblICCommodityUnitMeasure	CU	WITH (NOLOCK) ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		
-	LEFT JOIN	tblICUnitMeasure			UM	WITH (NOLOCK) ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId
-	LEFT JOIN	tblCTPosition				PO	WITH (NOLOCK) ON	PO.intPositionId				=	CH.intPositionId
-	LEFT JOIN	tblSMCity					CT	WITH (NOLOCK) ON	CT.intCityId					=	CH.intINCOLocationTypeId
-	LEFT JOIN	tblSMFreightTerms			CB	WITH (NOLOCK) ON	CB.intFreightTermId				=	CH.intFreightTermId
-	LEFT JOIN	tblCTWeightGrade			W1	WITH (NOLOCK) ON	W1.intWeightGradeId				=	CH.intWeightId
-	LEFT JOIN	tblSMTerm					TM	WITH (NOLOCK) ON	TM.intTermID					=	CH.intTermId
-	LEFT JOIN	tblCTAssociation			AN	WITH (NOLOCK) ON	AN.intAssociationId				=	CH.intAssociationId
-	LEFT JOIN	tblCTWeightGrade			W2	WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId
+	FROM tblCTContractHeader CH
+	LEFT JOIN vyuCTEntity EC WITH (NOLOCK) ON EC.intEntityId = CH.intCounterPartyId AND EC.strEntityType = 'Customer'
+	LEFT JOIN tblSMCountry rtc12 on lower(rtrim(ltrim(rtc12.strCountry))) = lower(rtrim(ltrim(EC.strEntityCountry)))
+	JOIN vyuCTEntity EY	WITH (NOLOCK) ON EY.intEntityId =	CH.intEntityId AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	LEFT JOIN tblICCommodityUnitMeasure	CU	WITH (NOLOCK) ON CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		
+	LEFT JOIN tblICUnitMeasure			UM	WITH (NOLOCK) ON UM.intUnitMeasureId			=	CU.intUnitMeasureId
+	LEFT JOIN tblCTPosition				PO	WITH (NOLOCK) ON PO.intPositionId				=	CH.intPositionId
+	LEFT JOIN tblSMCity					CT	WITH (NOLOCK) ON CT.intCityId					=	CH.intINCOLocationTypeId
+	LEFT JOIN tblSMFreightTerms			CB	WITH (NOLOCK) ON CB.intFreightTermId			=	CH.intFreightTermId
+	LEFT JOIN tblCTWeightGrade			W1	WITH (NOLOCK) ON W1.intWeightGradeId			=	CH.intWeightId
+	LEFT JOIN tblSMTerm					TM	WITH (NOLOCK) ON TM.intTermID					=	CH.intTermId
+	LEFT JOIN tblCTAssociation			AN	WITH (NOLOCK) ON AN.intAssociationId			=	CH.intAssociationId
+	LEFT JOIN tblCTWeightGrade			W2	WITH (NOLOCK) ON W2.intWeightGradeId			=	CH.intGradeId
+	LEFT JOIN tblSMCity ARB WITH (NOLOCK) ON ARB.intCityId = CH.intArbitrationId AND ISNULL(ARB.ysnArbitration, 0) = 1
 	where CH.intContractHeaderId = @intContractHeaderId
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference

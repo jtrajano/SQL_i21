@@ -40,8 +40,8 @@ SELECT intPrepaidAndCreditId				= PC.intPrepaidAndCreditId
      , strCategoryCode						= CAT.strCategoryCode
 	 , strCategoryDescription				= CAT.strDescription
 	 , dblPrepayRate						= ISNULL(PREPAYDETAIL.dblPrepayRate, 0)
-	 , dblLineItemTotal						= ISNULL(PREPAYDETAIL.dblTotal, 0)
-	 , dblBaseLineItemTotal					= ISNULL(PREPAYDETAIL.dblBaseTotal, 0)
+	 , dblLineItemTotal						= ISNULL(PREPAYDETAIL.dblTotal, 0) - ISNULL(TOTALPAID.dblTotalPayment, 0)
+	 , dblBaseLineItemTotal					= ISNULL(PREPAYDETAIL.dblBaseTotal, 0) - ISNULL(TOTALPAID.dblBaseTotalPayment, 0)
 	 , dblInvoiceTotal						= CASE WHEN ISNULL(PREPAYDETAIL.ysnRestricted, 0) = 1 THEN ISNULL(PREPAYDETAIL.dblTotal, 0) ELSE ISNULL(PREPAY.dblInvoiceTotal, 0) END
 	 , dblBaseInvoiceTotal					= CASE WHEN ISNULL(PREPAYDETAIL.ysnRestricted, 0) = 1 THEN ISNULL(PREPAYDETAIL.dblTotal, 0) ELSE ISNULL(PREPAY.dblBaseInvoiceTotal, 0) END
 	 , dblPrepaidAmount						= CASE WHEN PREPAYDETAIL.intPrepayTypeId = 1 THEN PREPAY.dblInvoiceTotal
@@ -67,3 +67,11 @@ LEFT JOIN tblCTItemContractHeader ICH ON PREPAYDETAIL.intItemContractHeaderId = 
 LEFT JOIN tblCTItemContractDetail ICD ON PREPAYDETAIL.intItemContractDetailId = ICD.intItemContractDetailId
 LEFT JOIN tblICCategory CAT ON PREPAYDETAIL.intCategoryId = CAT.intCategoryId
 LEFT JOIN tblICItem ITEM ON PREPAYDETAIL.intItemId = ITEM.intItemId
+LEFT JOIN (
+	SELECT intPrepaymentId
+		 , dblTotalPayment = SUM(dblAppliedInvoiceDetailAmount) 
+		 , dblBaseTotalPayment = SUM(dblBaseAppliedInvoiceDetailAmount)
+	FROM tblARPrepaidAndCredit 
+	WHERE ysnApplied = 1
+	GROUP BY intPrepaymentId
+) TOTALPAID ON PC.intPrepaymentId = TOTALPAID.intPrepaymentId

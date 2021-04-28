@@ -287,6 +287,23 @@ BEGIN TRY
 
 			MOVE_TO_ARCHIVE:
 
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,10 AS intMessageTypeId
+				,1 AS intStatusId
+				,'Success' AS strStatusText
+
 			--Move to Archive
 			INSERT INTO dbo.tblIPBendDemandArchive (
 				intTrxSequenceNo
@@ -335,6 +352,23 @@ BEGIN TRY
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,10 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
 
 			--Move to Error
 			INSERT INTO dbo.tblIPBendDemandError (

@@ -129,7 +129,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 1. "Amount"
 																											-- 2. "Percentage"	
 	,[dblItemWeight]						NUMERIC(38, 20)									NULL
-	,[intItemWeightUOMId]					INT												NULL	
+	,[intItemWeightUOMId]					INT												NULL
+	,[dblStandardWeight]					NUMERIC(38, 20)									NULL		-- The Item UOM Standard weight
     ,[dblPrice]								NUMERIC(18, 6)									NULL		-- The line item price
 	,[dblUnitPrice]							NUMERIC(18, 6)									NULL		-- The line item unit price
     ,[strPricing]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL

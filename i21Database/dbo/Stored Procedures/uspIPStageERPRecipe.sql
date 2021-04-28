@@ -163,7 +163,7 @@ BEGIN TRY
 					END AS RowState
 				,NULL AS ItemGroupName
 				,TrxSequenceNo
-				,ParentTrxSequenceNo
+				,parentId
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					TrxSequenceNo INT
 					,[Version] INT '../Version'
@@ -178,7 +178,7 @@ BEGIN TRY
 					,ValidFrom DATETIME
 					,ValidTo DATETIME
 					,YearValidation INT
-					,ParentTrxSequenceNo INT '@ParentTrxSequenceNo'
+					,parentId INT '@parentId'
 					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation' 
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
@@ -214,6 +214,29 @@ BEGIN TRY
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,4 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
 
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (

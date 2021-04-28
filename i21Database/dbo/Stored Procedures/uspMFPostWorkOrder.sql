@@ -1300,7 +1300,7 @@ BEGIN TRY
 
 			SELECT @dblVariance = IsNULL(@dblNewCost, 0) - IsNULL(@dblNewValue, 0)
 
-			IF @dblVariance < 1
+			IF @dblVariance < 1 and @strCostingByCoEfficient = 'False'
 			BEGIN
 				SELECT TOP 1 @intTransactionDetailId = intTransactionDetailId
 				FROM @adjustedEntries
