@@ -9221,6 +9221,7 @@
     <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

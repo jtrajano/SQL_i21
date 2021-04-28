@@ -1500,8 +1500,8 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Responsible Party Task' and strModule = 'Cash Management')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 157
-			,[strTransactionType]	= N'Grain Receipt'
-			,[strPrefix]			= N''
+			,[strTransactionType]	= N'Canadian Grain Receipt'
+			,[strPrefix]			= N'GR-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
