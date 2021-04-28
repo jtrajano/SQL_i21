@@ -9324,6 +9324,8 @@
     <Build Include="dbo\Tables\tblIPLotPropertyFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotProperty.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
+    <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
