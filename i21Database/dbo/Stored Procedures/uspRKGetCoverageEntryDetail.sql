@@ -332,17 +332,20 @@ BEGIN
 		, dtmDemandDate
 		, intProductTypeId
 		, dblQuantity
+		, intItemId
 	INTO #DemandDetail
 	FROM (
 		SELECT intCommodityId
 			, dtmDemandDate
 			, intProductTypeId
 			, dblQuantity = SUM(dblQuantity)
+			, intItemId
 		FROM (
 			SELECT i.intCommodityId
 				, DD.dtmDemandDate
 				, dblQuantity = dbo.fnCTConvertQuantityToTargetItemUOM (i.intItemId, iUOM.intUnitMeasureId, @intUnitMeasureId, DD.dblQuantity)
-				, i.intProductTypeId	
+				, i.intProductTypeId
+				, i.intItemId	
 			FROM tblMFDemandDetail DD
 			JOIN tblICItem i ON i.intItemId = DD.intItemId
 			JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
@@ -356,22 +359,8 @@ BEGIN
 		GROUP BY intCommodityId
 			, dtmDemandDate
 			, intProductTypeId
+			, intItemId
 	) tbl
-
-	SELECT tbl.*
-		, dblRunningTotal
-		, intProductTypeIndex = ROW_NUMBER() OVER (PARTITION BY tbl.intProductTypeId ORDER BY intRowNum)
-	INTO #Demand
-	FROM #DemandDetail tbl
-	CROSS APPLY (
-		SELECT dblRunningTotal = ISNULL(SUM(ddSum.dblQuantity), 0)
-		FROM (
-			SELECT dd.dblQuantity
-			FROM #DemandDetail dd
-			WHERE dd.intRowNum <= tbl.intRowNum
-				AND dd.intProductTypeId = tbl.intProductTypeId
-		) ddSum
-	) RT
 
 	SELECT *
 	INTO #iterateTable
@@ -389,6 +378,7 @@ BEGIN
 		, @optionsCovered NUMERIC(24, 10)
 		, @dblDemand NUMERIC(24,10)
 		, @dblDifference NUMERIC(24,10) = 0
+		, @dblTotalAvgConsumption NUMERIC(24, 10)
 		
 	WHILE EXISTS(SELECT TOP 1 1 FROM #iterateTable)
 	BEGIN
@@ -399,66 +389,43 @@ BEGIN
 			, @intProductType = intProductTypeId
 		FROM #iterateTable i
 		
-		SELECT @dblRunningBalance = 0
+		SELECT @dblTotalAvgConsumption = 0
 			, @startOption = 0
 			, @dblDemand = 0
 
-		SELECT  @monthsCovered = COUNT(intProductTypeId)
-		FROM #Demand
-		WHERE intProductTypeId = @intProductType
-		
-		SELECT TOP 1 @dblRunningBalance = dblRunningTotal
-			, @monthsCovered = intProductTypeIndex
-			, @startOption = intProductTypeIndex
-			, @dblDemand = dblQuantity
-		FROM #Demand
-		WHERE dblRunningTotal >= @dblPosition
-			AND intProductTypeId = @intProductType
-		ORDER BY intRowNum
+		--a.	Calculate total demand quantity = Sum of Quantity group by item number
+		select 
+			dblQuantity = sum(dblQuantity)  
+			,intItemId
+			, intProductTypeId
+		into #tmpDemandQuantity
+		from #DemandDetail
+		where intProductTypeId = @intProductType
+		group by intItemId, intProductTypeId
 
-		IF (ISNULL(@dblRunningBalance, 0) <> 0)
-		BEGIN
-			IF (@dblRunningBalance > @dblPosition)
-			BEGIN
-				SET @monthsCovered -= 1
-				SET @dblDifference = @dblPosition - (@dblRunningBalance - @dblDemand)
-				SET @monthsCovered += @dblDifference / @dblDemand
-				SET @dblDifference = @dblDemand - @dblDifference
-			END
-			
-			IF (@dblDifference > @dblOption)
-			BEGIN
-				SET @optionsCovered = @dblOption / @dblDemand
-			END
-			ELSE IF (@dblOption >= @dblDifference)
-			BEGIN
-				SET @optionsCovered = @dblDifference / @dblDemand
-				SET @dblDifference = @dblOption - @dblDifference
-			END
-			
-			IF (@dblDifference <> 0)
-			BEGIN
-				SELECT TOP 1 @dblRunningBalance = dblRunningTotal, @endOption = intProductTypeIndex, @dblDemand = dblQuantity FROM #Demand
-				WHERE dblRunningTotal >= (@dblPosition + @dblOption)
-					AND intProductTypeId = @intProductType
-				ORDER BY intRowNum
-				
-				IF (@startOption <> @endOption) AND (@dblRunningBalance > (@dblPosition + @dblOption))
-				BEGIN
-					SET @endOption -= 1
-					SET @endOption -= @startOption
+		--b.	Calculate number of months = Count Demand month group by item number
+		select count(dtmDemandDate) - 1 as dblNoOfMonths, 
+			intItemId,
+			intProductTypeId
+		into #tmpNumberOfMonths
+		from #DemandDetail
+		where intProductTypeId = @intProductType
+		group by intItemId, intProductTypeId
 
-					SET @dblDifference = (@dblPosition + @dblOption) - (@dblRunningBalance - @dblDemand)
-					SET @optionsCovered += @dblDifference / @dblDemand
-					SET @dblDifference = 0
-					SET @optionsCovered += @endOption
-				END
-			END
-		END
-		ELSE
-		BEGIN
-			SET @optionsCovered = 0
-		END
+		--c.	Calculate Average = ‘a’ / ‘b’
+		select dblCalculatedAvg =  DQ.dblQuantity / NOM.dblNoOfMonths, DQ.intItemId, DQ.intProductTypeId 
+		into #tmpCalculatedAverage
+		from #tmpDemandQuantity DQ
+		inner join #tmpNumberOfMonths NOM on NOM.intItemId = DQ.intItemId
+
+		--d.	Total Average consumption by Product type = Sum of ‘c’ group by Product Type
+		select
+			@dblTotalAvgConsumption =  sum(dblCalculatedAvg)
+		from #tmpCalculatedAverage
+		where intProductTypeId = @intProductType
+
+		SET @monthsCovered = @dblPosition / @dblTotalAvgConsumption
+		SET @optionsCovered = @dblOption / @dblTotalAvgConsumption
 
 		UPDATE @FinalTable
 		SET dblMonthsCovered = @monthsCovered
@@ -466,6 +433,9 @@ BEGIN
 		WHERE intRowId = @rowId
 
 		DELETE FROM #iterateTable WHERE intRowId = @rowId
+		DROP TABLE #tmpDemandQuantity
+		DROP TABLE #tmpNumberOfMonths
+		DROP TABLE #tmpCalculatedAverage
 	END
 
 	SELECT intProductTypeId
@@ -492,7 +462,6 @@ BEGIN
 	DROP TABLE #OptionsTotal
 	DROP TABLE #DapSettlement
 	DROP TABLE #iterateTable
-	DROP TABLE #Demand
 	DROP TABLE #DemandDetail
 	DROP TABLE #tmpTempBalances
 END
