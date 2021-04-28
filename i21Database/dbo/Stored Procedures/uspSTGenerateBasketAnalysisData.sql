@@ -46,7 +46,7 @@ FROM tblSTTranslogRebates AS trans
 INNER JOIN tblSTStore AS store
 ON trans.intStoreId = store.intStoreId
 INNER JOIN tblICItemUOM uom
-ON CAST(strTrlUPCwithoutCheckDigit AS FLOAT) = LEFT(uom.intUpcCode, LEN(uom.intUpcCode) - 1)
+ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPCwithoutCheckDigit AS FLOAT)) = LEFT(uom.intUpcCode, LEN(uom.intUpcCode) - 1)
 INNER JOIN tblICItem item
 ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
