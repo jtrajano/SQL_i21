@@ -277,6 +277,8 @@ BEGIN
 		WHEN @msgId = 80261 THEN 'The Storage Location invalid in %s for %s.'
 		WHEN @msgId = 80262 THEN 'Unable to Post. The following contract(s) needs to be Priced:<p><br><div style="list-style-position: inside;"><ul>%s</ul></div></p>'
 		WHEN @msgId = 80263 THEN 'Category changed for item %s.'
+		WHEN @msgId = 80264 THEN 'The item type for %s is not "stockable". Costing is not allowed.'
+		WHEN @msgId = 80265 THEN 'Cost adjustment for %s is missing. Stock rebuild will abort.'
 	END 
 
 	RETURN @msg
