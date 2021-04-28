@@ -1556,6 +1556,17 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pricing Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 160
+			,[strTransactionType]	= N'Canadian Grain Receipt'
+			,[strPrefix]			= N'GR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Ticket Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Canadian Grain Receipt' AND strModule = 'Ticket Management')
+
+
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

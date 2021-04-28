@@ -31,6 +31,7 @@
     [ysnRailXMLExport] BIT NOT NULL DEFAULT (0), 
     [strRailXMLDocumentPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''),
     [ysnEnableBOLOnScale] BIT NOT NULL DEFAULT(0), 
+    [ysnEnableCanadianGrainReceipt] BIT NOT NULL DEFAULT(0),
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
