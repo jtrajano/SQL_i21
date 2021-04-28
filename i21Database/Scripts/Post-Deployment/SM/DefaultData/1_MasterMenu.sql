@@ -10,8 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'RiskManagement.view.OpenDerivativesPosition?multiGrouping=true')
+
+	IF  EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'AccountsPayable.view.Voucher?showSearch=true&activeTab=Processed Vouchers')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6768,9 +6768,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Processed Vouchers' AND strModuleName = 'IDP' AND intParentMenuID = @IDPActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Processed Vouchers', N'IDP', @IDPActivitiesParentMenuId, N'Processed Vouchers', N'Activity', N'Screen', N'AccountsPayable.view.Voucher?showSearch=true&activeTab=Processed Vouchers', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
+	VALUES (N'Processed Vouchers', N'IDP', @IDPActivitiesParentMenuId, N'Processed Vouchers', N'Activity', N'Screen', N'GlobalComponentEngine.view.Voucher?showSearch=true&activeTab=Processed Vouchers', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'AccountsPayable.view.Voucher?showSearch=true&activeTab=Processed Vouchers' WHERE strMenuName = 'Processed Vouchers' AND strModuleName = 'IDP' AND intParentMenuID = @IDPActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GlobalComponentEngine.view.Voucher?showSearch=true&activeTab=Processed Vouchers' WHERE strMenuName = 'Processed Vouchers' AND strModuleName = 'IDP' AND intParentMenuID = @IDPActivitiesParentMenuId
 
 --MAINTENANCE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId)
