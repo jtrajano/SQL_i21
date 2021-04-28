@@ -14,6 +14,7 @@
     [strClaimReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [strDebitMemoReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
     [strVoucherReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
+    [strPurchaseOrderReportName] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[intVoucherInvoiceNoOption] TINYINT             NULL,
 	[intDebitMemoInvoiceNoOption] TINYINT             NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
