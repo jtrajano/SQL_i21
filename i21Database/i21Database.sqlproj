@@ -8946,6 +8946,7 @@
     <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
     <Build Include="dbo\Views\vyuCTContractOptionView.sql" />
+    <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
