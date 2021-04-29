@@ -1984,15 +1984,15 @@ BEGIN TRY
 					AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
 					and a.intItemType = 1
 
-					IF @ysnFromPriceBasisContract = 1
-					BEGIN
-						UPDATE SVC
-						SET SVC.dblUnits = CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (@dblTotalUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity ELSE @dblTotalUnits END
-						FROM @SettleVoucherCreate SVC
-						INNER JOIN tblGRCustomerStorage CS
-							ON CS.intCustomerStorageId = SVC.intCustomerStorageId
-						WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
-					END
+					-- IF @ysnFromPriceBasisContract = 1
+					-- BEGIN
+					-- 	UPDATE SVC
+					-- 	SET SVC.dblUnits = CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (@dblTotalUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity ELSE @dblTotalUnits END
+					-- 	FROM @SettleVoucherCreate SVC
+					-- 	INNER JOIN tblGRCustomerStorage CS
+					-- 		ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					-- 	WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
+					-- END
 					
 				
 				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
