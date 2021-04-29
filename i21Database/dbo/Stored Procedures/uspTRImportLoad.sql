@@ -39,6 +39,12 @@ BEGIN
 
 		IF(@ysnReprocess = 1)
 		BEGIN
+
+			UPDATE D SET D.ysnValid = 1, D.strMessage = '' FROM tblTRImportLoadDetail D 
+				INNER JOIN tblTRImportLoad L
+					ON L.intImportLoadId = D.intImportLoadId
+			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 0 AND ISNULL(D.ysnProcess, 0) = 0
+
 			SET @CursorTran = CURSOR FOR
 			SELECT D.intImportLoadDetailId
 				, D.strTruck
