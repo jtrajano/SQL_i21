@@ -1,4 +1,6 @@
-CREATE PROCEDURE uspICImportItemPricingsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemPricingsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItemPricing WHERE strImportIdentifier <> @strIdentifier
@@ -48,14 +50,14 @@ SELECT
 	  intItemId				= i.intItemId
 	, intItemLocationId		= il.intItemLocationId
 	, intCompanyLocationId	= c.intCompanyLocationId
-	, dblAmountPercent		= s.dblAmountPercent
-	, dblSalePrice			= s.dblRetailPrice
-	, dblMSRPPrice			= s.dblMSRP		
+	, dblAmountPercent		= NULLIF(s.dblAmountPercent, 0)
+	, dblSalePrice			= NULLIF(s.dblRetailPrice, 0)
+	, dblMSRPPrice			= NULLIF(s.dblMSRP, 0)
 	, strPricingMethod		= s.strPricingMethod		
-	, dblLastCost			= s.dblLastCost			
-	, dblStandardCost		= s.dblStandardCost		
-	, dblAverageCost		= s.dblAverageCost			
-	, dblDefaultGrossPrice	= s.dblDefaultGrossPrice	
+	, dblLastCost			= NULLIF(s.dblLastCost, 0)
+	, dblStandardCost		= NULLIF(s.dblStandardCost, 0)
+	, dblAverageCost		= NULLIF(s.dblAverageCost, 0)
+	, dblDefaultGrossPrice	= NULLIF(s.dblDefaultGrossPrice, 0)
 	, dtmDateCreated		= s.dtmDateCreated		
 	, intCreatedByUserId	= s.intCreatedByUserId	
 FROM tblICImportStagingItemPricing s
@@ -70,7 +72,7 @@ CREATE TABLE #output (
 	, strAction NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, intItemIdInserted INT NULL)
 
-;MERGE INTO tblICItemPricing AS target
+;MERGE INTO tblICItemPricing AS [target]
 USING
 (
 	SELECT
@@ -88,20 +90,21 @@ USING
 	, dtmDateCreated		
 	, intCreatedByUserId
 	FROM #tmp s
-) AS source ON target.intItemId = source.intItemId
-	AND target.intItemLocationId = source.intItemLocationId
+) AS 
+	source ON [target].intItemId = source.intItemId
+	AND [target].intItemLocationId = source.intItemLocationId
 WHEN MATCHED THEN
 	UPDATE SET
 		  intItemId				= source.intItemId
 		, intItemLocationId		= source.intItemLocationId
-		, dblAmountPercent		= source.dblAmountPercent
-		, dblSalePrice			= source.dblSalePrice
-		, dblMSRPPrice			= source.dblMSRPPrice
+		, dblAmountPercent		= ISNULL(source.dblAmountPercent, [target].dblAmountPercent)
+		, dblSalePrice			= ISNULL(source.dblSalePrice, [target].dblSalePrice)
+		, dblMSRPPrice			= ISNULL(source.dblMSRPPrice, [target].dblMSRPPrice)
 		, strPricingMethod		= source.strPricingMethod
-		, dblLastCost			= source.dblLastCost
-		, dblStandardCost		= source.dblStandardCost
-		, dblAverageCost		= source.dblAverageCost
-		, dblDefaultGrossPrice	= source.dblDefaultGrossPrice
+		, dblLastCost			= ISNULL(source.dblLastCost, [target].dblLastCost)
+		, dblStandardCost		= ISNULL(source.dblStandardCost, [target].dblStandardCost)
+		, dblAverageCost		= ISNULL(source.dblAverageCost, [target].dblAverageCost)
+		, dblDefaultGrossPrice	= ISNULL(source.dblDefaultGrossPrice, [target].dblDefaultGrossPrice)
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
 		, intImportFlagInternal = 1
