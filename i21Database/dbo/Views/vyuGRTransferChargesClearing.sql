@@ -430,6 +430,7 @@ INNER JOIN tblSMCompanyLocation CL
 INNER JOIN tblQMTicketDiscount QM	
 	ON QM.intTicketFileId = CS.intCustomerStorageId	
 		AND QM.strSourceType = 'Storage'
+		AND QM.dblDiscountDue <> 0
 INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 INNER JOIN tblICItem IM
@@ -442,7 +443,8 @@ OUTER APPLY
 		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 	WHERE GD.strTransactionId = TS.strTransferStorageTicket
 		AND GD.intTransactionId = TS.intTransferStorageId
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+		-- AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
 		AND GD.ysnIsUnposted = 0
 		AND GD.intAccountId NOT IN (
 			SELECT GD.intAccountId
@@ -461,7 +463,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE GL.strDescription NOT LIKE '%Charges from %'
+-- WHERE GL.strDescription NOT LIKE '%Charges from %'
+WHERE GL.strCode = 'IC'
 AND NOT EXISTS(SELECT intTransferStorageReferenceId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
 AND QM.dblDiscountDue <> 0
 AND GLDetail.intAccountId IS NOT NULL
@@ -541,6 +544,7 @@ INNER JOIN tblSMCompanyLocation CL
 INNER JOIN tblQMTicketDiscount QM	
 	ON QM.intTicketFileId = CS.intCustomerStorageId	
 		AND QM.strSourceType = 'Storage'
+		AND QM.dblDiscountDue <> 0
 INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 INNER JOIN tblICItem IM
@@ -553,7 +557,8 @@ OUTER APPLY
 		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 	WHERE GD.strTransactionId = TS.strTransferStorageTicket
 		AND GD.intTransactionId = TS.intTransferStorageId
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+		-- AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
 		AND GD.ysnIsUnposted = 0
 		AND GD.intAccountId NOT IN (
 			SELECT GD.intAccountId
@@ -572,7 +577,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE GL.strDescription NOT LIKE '%Charges from %'
+-- WHERE GL.strDescription NOT LIKE '%Charges from %'
+WHERE GL.strCode = 'IC'
 --AND TS.strTransferStorageTicket = 'TRA-563'
 AND QM.dblDiscountDue <> 0
 AND GLDetail.intAccountId IS NOT NULL
