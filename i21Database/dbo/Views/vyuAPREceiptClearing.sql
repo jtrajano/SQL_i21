@@ -164,6 +164,13 @@ LEFT JOIN (
 -- 		--AND APClearing.intTransactionId = receipt.intInventoryReceiptId
 -- 		--AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- 		--AND APClearing.intItemId = receiptItem.intItemId
+
+--receipts in storage that were transferred
+LEFT JOIN vyuGRTransferClearing transferClr
+    ON transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+--receipts in storage that were FULLY transferred from DP to DP only
+LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
+    ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 WHERE 
     receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
 --DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
@@ -172,17 +179,8 @@ AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
-AND NOT EXISTS (
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-)
-AND NOT EXISTS (
-	--receipts in storage that were FULLY transferred from DP to DP only
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing_FullDPtoDP transferClrDP
-    WHERE transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-)
+AND transferClr.intInventoryReceiptItemId IS NULL
+AND transferClrDP.intInventoryReceiptItemId IS NULL
 -- AND receipt.intSourceType != 7 --NOT STORE
 -- UNION ALL
 -- SELECT	
@@ -536,6 +534,13 @@ OUTER APPLY (
 -- 		AND APClearing.intTransactionId = receipt.intInventoryReceiptId
 -- 		AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- 		AND APClearing.intItemId = receiptItem.intItemId
+
+--receipts in storage that were transferred
+LEFT JOIN vyuGRTransferClearing transferClr
+    ON transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+--receipts in storage that were FULLY transferred from DP to DP only
+LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
+    ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
 AND bill.ysnPosted = 1
@@ -543,18 +548,8 @@ AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
-AND NOT EXISTS (
-	--receipts in storage that were transferred
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-)
-AND NOT EXISTS (
-	--receipts in storage that were FULLY transferred from DP to DP only
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing_FullDPtoDP transferClrDP
-    WHERE transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-)
+AND transferClr.intInventoryReceiptItemId IS NULL
+AND transferClrDP.intInventoryReceiptItemId IS NULL
 --AND receipt.dtmReceiptDate >= '2020-09-09'GO
 
 
@@ -628,24 +623,20 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
+--receipts in storage that were transferred
+LEFT JOIN vyuGRTransferClearing transferClr
+    ON transferClr.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+--receipts in storage that were FULLY transferred from DP to DP only
+LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
+    ON transferClrDP.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 WHERE 
      bill.ysnPosted = 1
+	 AND transferClr.intInventoryReceiptItemId IS NULL
+	 AND transferClrDP.intInventoryReceiptItemId IS NULL
 
 
 AND Receipt.strReceiptType != 'Transfer Order'
 
-AND NOT EXISTS (
-	--receipts in storage that were transferred
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-)
-AND NOT EXISTS (
-	--receipts in storage that were FULLY transferred from DP to DP only
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing_FullDPtoDP transferClrDP
-    WHERE transferClrDP.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-)
 --AND receipt.dtmReceiptDate >= '2020-09-09'GO
 
 
