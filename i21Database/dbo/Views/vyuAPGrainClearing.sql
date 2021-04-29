@@ -56,7 +56,7 @@ INNER JOIN tblGLDetail GD
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strTransactionType = 'Storage Settlement'
 		AND GD.ysnIsUnposted = 0
-		AND GD.strDescription LIKE '%Item: ' + IM.strItemNo + '%'
+		AND GD.strCode = 'IC'
  INNER JOIN vyuGLAccountDetail AD
  	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN tblGRSettleContract SC
@@ -419,33 +419,11 @@ OUTER APPLY
 	FROM tblGLDetail GD
 	INNER JOIN vyuGLAccountDetail AD
 		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
-	OUTER APPLY (
-		SELECT TOP 1 [ysnAccountPosted] = 1
-		FROM tblGLDetail GD2
-		WHERE GD2.strTransactionId = GD.strTransactionId
-		AND GD2.intTransactionId = GD.intTransactionId
-		AND GD2.strCode = 'STR'
-		AND GD2.strDescription = GD.strDescription
-		AND GD2.ysnIsUnposted = 0
-		AND GD2.intAccountId = GD.intAccountId
-		AND (GD2.dblDebit = GD.dblCredit OR GD2.dblCredit = GD.dblDebit)
-	) GD2
 	WHERE GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strCode = 'STR'
 		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
 		AND GD.ysnIsUnposted = 0
-		AND GD2.ysnAccountPosted IS NULL
-	-- 	AND GD.intAccountId NOT IN (SELECT GD.intAccountId
-	-- FROM tblGLDetail		
-	-- WHERE strTransactionId = GD.strTransactionId
-	-- 	AND intTransactionId = GD.intTransactionId
-	-- 	AND strCode = 'STR'
-	-- 	AND strDescription = GD.strDescription
-	-- 	AND ysnIsUnposted = 0
-	-- 	AND intAccountId = GD.intAccountId
-	-- 	AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
-	-- )
 ) GLDetail
 WHERE 
 	QM.strSourceType = 'Storage' 
@@ -540,15 +518,16 @@ LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
 left join tblCTContractHeader CH
 		on CH.intContractHeaderId = CT.intContractHeaderId
-WHERE bill.ysnPosted = 1
-AND EXISTS (
-	SELECT 1
+OUTER APPLY (
+	SELECT TOP 1 [ysnDiscountExists] = 1
 	FROM tblQMTicketDiscount QM
 	INNER JOIN tblGRDiscountScheduleCode DSC
 		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 		AND DSC.intItemId = billDetail.intItemId
 		AND billDetail.intCustomerStorageId = QM.intTicketFileId
-)
+) QM
+WHERE bill.ysnPosted = 1
+AND QM.ysnDiscountExists = 1
 AND glAccnt.intAccountCategoryId = 45
 --AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 

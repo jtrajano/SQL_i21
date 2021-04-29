@@ -217,7 +217,9 @@ INNER JOIN tblICInventoryReceipt IR
 INNER JOIN tblSMCompanyLocation CL
     ON CL.intCompanyLocationId = CS.intCompanyLocationId
 INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
+    AND strCode = 'IC'
+    -- AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
@@ -379,7 +381,9 @@ INNER JOIN tblSMCompanyLocation CL
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
 INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
+    AND strCode = 'IC'
+    -- AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
@@ -435,7 +439,9 @@ INNER JOIN tblSMCompanyLocation CL
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
 INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
+    AND strCode = 'IC'
+    -- AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
@@ -495,7 +501,9 @@ join tblAPBill Bill
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
 INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
+    AND strCode = 'IC'
+    -- AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
@@ -578,7 +586,9 @@ join tblAPBill Bill
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
 INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
+    AND strCode = 'IC'
+    -- AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
@@ -658,7 +668,9 @@ OUTER APPLY (
 	GROUP BY intInventoryReceiptItemId
 ) TOTAL
 LEFT JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId, strDescription FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+	SELECT DISTINCT intAccountId, intTransactionId, strDescription FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
+    AND strCode = 'IC'
+    -- AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
