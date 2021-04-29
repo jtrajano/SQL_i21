@@ -9206,6 +9206,7 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferAfterSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICBeforePostInventoryTransferIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryTransferIntegration.sql" />
+<Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
