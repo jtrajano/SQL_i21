@@ -8840,6 +8840,7 @@
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
+    <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
