@@ -9333,6 +9333,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPCommitmentPricingBalQty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPCommitmentPricingBalQty.sql" />
 <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkInventoryReceiptTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

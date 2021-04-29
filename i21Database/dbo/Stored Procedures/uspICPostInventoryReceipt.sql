@@ -2004,33 +2004,6 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
-
-	BEGIN 
-			
-		DECLARE @TransactionLinks udtICTransactionLinks
-		DELETE FROM @TransactionLinks
-		
-		IF EXISTS (SELECT intOrderId FROM dbo.vyuICGetReceiptItemSource WHERE intInventoryReceiptId = @intTransactionId AND intOrderId IS NOT NULL)
-		BEGIN
-		
-			INSERT INTO @TransactionLinks (
-				strOperation, -- Operation
-				intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-				intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-			)
-			SELECT 'Create',
-				Receipt.intOrderId, 
-				COALESCE(Receipt.strOrderNumber, Receipt.strSourceNumber, 'Missing Transaction No'), 
-				Receipt.strSourceType, 
-				Receipt.strSourceType,
-				@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Receipt'
-			FROM dbo.vyuICGetReceiptItemSource Receipt
-			WHERE intInventoryReceiptId = @intTransactionId
-
-			EXEC dbo.uspICAddTransactionLinks @TransactionLinks
-
-		END
-	END
 END   
 
 --------------------------------------------------------------------------------------------  

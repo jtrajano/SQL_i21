@@ -2113,6 +2113,13 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		
+		-- Link Inventory Receipt Transaction
+		BEGIN
+			EXEC dbo.uspICLinkInventoryReceiptTransaction
+				@inventoryReceiptId,
+				true
+		END
+
 		-- Create an Audit Log
 		BEGIN 
 			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'
