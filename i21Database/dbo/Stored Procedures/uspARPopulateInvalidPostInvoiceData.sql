@@ -1839,7 +1839,7 @@ BEGIN
 	FROM 
 		[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @OneBit)
 
-	-- IC Costing
+	-- IC Costing Negative inventory
 	DELETE FROM @ItemsForCosting	
 	INSERT INTO @ItemsForCosting
 		([intItemId]
@@ -1873,6 +1873,61 @@ BEGIN
 		,[intItemUOMId]
 		,[dtmDate]
 		,CASE WHEN [strType] IN ('CF Tran') THEN ABS([dblQty]) ELSE [dblQty] END
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+	FROM ##ARItemsForCosting
+
+	-- IC Costing Zero Cost
+	INSERT INTO @ItemsForCosting
+		([intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate])
+	SELECT
+		 [intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,CASE WHEN [strType] IN ('POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
