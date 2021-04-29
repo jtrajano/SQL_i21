@@ -9332,6 +9332,7 @@
     <Build Include="dbo\Tables\tblIPCommitmentPricingBalQtyArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPCommitmentPricingBalQty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPCommitmentPricingBalQty.sql" />
+<Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
