@@ -28,6 +28,16 @@ INNER JOIN tblEMEntityType G on G.intEntityId = F.intEntityId
 INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId  
 WHERE C.strNamespace = 'EntityManagement.view.EntitySplit' 
 AND F.ysnSent = 0
+UNION
+SELECT  DISTINCT F.intEntityId as 'intRecordId', A.intLogId, A.dtmDate FROM tblSMLog A
+inner join tblSMAudit e on e.intLogId = A.intLogId
+INNER JOIN tblSMTransaction B ON B.intTransactionId = A.intTransactionId
+INNER JOIN tblEMEntityToContact X ON X.intEntityContactId = B.intRecordId
+INNER JOIN tblEMEntity F ON F.intEntityId = X.intEntityId
+INNER JOIN tblEMEntityType G ON G.intEntityId = F.intEntityId
+INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId 
+WHERE C.strNamespace = 'EntityManagement.view.EntityContact'
+AND F.ysnSent = 0   and X.ysnDefaultContact = 1
 )
    
 SELECT intRecordId, intLogId, dtmDate  FROM secondLayer 
