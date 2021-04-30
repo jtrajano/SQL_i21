@@ -604,6 +604,7 @@ INSERT INTO @ShipmentCharges(
 		, strChargesLink
 		, ysnAllowVoucher
 		, ysnAllowInvoice
+		, ysnAddPayable
 )
 SELECT 
 		intOrderType
@@ -629,6 +630,7 @@ SELECT
 		, strChargesLink
 		, ysnAllowVoucher
 		, ysnAllowInvoice
+		, ysnAddPayable
 FROM @Charges
 
 -- 3. Item Lots
@@ -1011,6 +1013,7 @@ INSERT INTO tblICInventoryShipmentCharge(
 	, intConcurrencyId
 	, ysnAllowVoucher
 	, ysnAllowInvoice
+	, ysnAddPayable
 )
 SELECT 
 	sc.intShipmentId
@@ -1032,6 +1035,7 @@ SELECT
 	, intConcurrencyId = 1
 	, sc.ysnAllowVoucher
 	, sc.ysnAllowInvoice
+	, sc.ysnAddPayable
 FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 		ON sc.intShipmentId = s.intInventoryShipmentId 
 	-- Get the SM forex rate. 
