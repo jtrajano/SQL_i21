@@ -2,7 +2,7 @@
 
 AS
 
-SELECT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq AS NVARCHAR)
+SELECT DISTINCT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq AS NVARCHAR)
 	, strPONumber = CD.strERPPONumber
 	, CH.dtmContractDate
 	, dtmStartDate = CONVERT(DATE, CD.dtmStartDate)
@@ -24,7 +24,6 @@ SELECT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq
 	, strProductType = PT.strDescription
 	, strINCOShipTerms = ST.strFreightTerm
 	, CS.strContractStatus
-	, strCostItem = CI.strItemNo
 	, CCTotal.dblFinancingCost
 	, CCTotal.dblFOB
 	, CCTotal.dblSustainabilityPremium
@@ -32,12 +31,10 @@ SELECT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq
 	, CCTotal.dblOtherCost
 	, CD.dblBasis
 	, CD.dblCashPrice
-FROM tblCTContractCost CC
-JOIN tblCTContractDetail CD ON CD.intContractDetailId = CC.intContractDetailId
+FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EN ON EN.intEntityId = CH.intEntityId
 JOIN tblICItem IT ON IT.intItemId = CD.intItemId
-JOIN tblICItem CI ON CI.intItemId = CC.intItemId
 JOIN tblICUnitMeasure IUOM ON IUOM.intUnitMeasureId = CD.intUnitMeasureId
 JOIN tblICItemUOM WIUOM ON WIUOM.intItemUOMId = CD.intNetWeightUOMId
 JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = WIUOM.intUnitMeasureId
@@ -68,12 +65,9 @@ LEFT JOIN (
 	) AS pivot_table
 ) CCTotal ON CCTotal.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblICItemUOM IIUOM ON IIUOM.intItemUOMId = CD.intItemUOMId
-LEFT JOIN tblICItemUOM CUOM ON CUOM.intItemUOMId = CC.intItemUOMId
-LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intUnitMeasureId = CUOM.intUnitMeasureId AND ICUOM.intItemId = CD.intItemId
 LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = CD.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = CD.intFutureMonthId
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblSMFreightTerms ST ON ST.intFreightTermId = ISNULL(CH.intFreightTermId, CD.intFreightTermId)
 LEFT JOIN tblICCommodityAttribute PT ON	PT.intCommodityAttributeId = IT.intProductTypeId AND PT.strType = 'ProductType'
-WHERE ISNULL(CC.ysnBasis, 0) = 1
