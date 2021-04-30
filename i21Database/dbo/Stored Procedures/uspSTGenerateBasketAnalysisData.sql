@@ -123,12 +123,10 @@ END
 --DATE--
 IF(ISNULL(@dtmBeginDate,'') != '' AND ISNULL(@dtmEndDate,'') != '')
 BEGIN
-	IF(@dtmBeginDate != @ValueMinDate AND @dtmEndDate != @ValueMaxDate) 
-	BEGIN
-		SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldDate + @CharSpace + @CharSpace + @CharBetween + @CharSpace + @CharStartMinDate + @CharSQuote + @dtmBeginDate + @CharSQuote + @CharEndMinDate + @CharSpace + @CharAnd + @CharSpace + @CharStartMaxDate + @CharSQuote + @dtmEndDate + @CharSQuote + @CharEndMaxDate
-		SET @CharConjunction = @CharAnd
-	END
+	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldDate + @CharSpace + @CharSpace + @CharBetween + @CharSpace + @CharStartMinDate + @CharSQuote + @dtmBeginDate + @CharSQuote + @CharEndMinDate + @CharSpace + @CharAnd + @CharSpace + @CharStartMaxDate + @CharSQuote + @dtmEndDate + @CharSQuote + @CharEndMaxDate
+	SET @CharConjunction = @CharAnd
 END
+
 
 --STRING--
 IF(ISNULL(@strDistrict,'') != '')
