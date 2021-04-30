@@ -29,6 +29,7 @@
 	,strAllocatePriceBy NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,ysnAllowVoucher BIT NULL
 	,ysnAllowInvoice BIT NULL
+	,ysnAddPayable BIT NULL
 
 	-- Fields for Internal Use Only
 	,intHeaderId INT NULL
