@@ -250,7 +250,10 @@ SELECT
     ,[strItemDescription]                   = ARSI.[strItemDescription]
     ,[intOrderUOMId]                        = ARSI.[intOrderUOMId]
     --,[dblQtyOrdered]                        = ICISI.dblQuantity
-    ,[dblQtyOrdered]                        = dbo.fnCTConvertQtyToTargetItemUOM(ICISI.intItemUOMId,ARSI.[intOrderUOMId],ICISI.dblQuantity)
+    ,[dblQtyOrdered]                        = CASE WHEN CD.dblQuantity IS NOT NULL
+													THEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, ARSI.[intOrderUOMId], CD.dblQuantity)
+													ELSE dbo.fnCTConvertQtyToTargetItemUOM(ICISI.intItemUOMId, ARSI.[intOrderUOMId], ICISI.dblQuantity)
+													END
     ,[intItemUOMId]                         = ARSI.[intItemUOMId]
     ,[intPriceUOMId]                        = ARSI.[intPriceUOMId]
     ,[dblContractPriceUOMQty]               = ARSI.[dblPriceUOMQuantity]

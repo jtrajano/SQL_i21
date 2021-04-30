@@ -100,9 +100,13 @@ BEGIN TRY
 				,@InvoiceId								INT
 
 		SELECT	TOP 1
-				 @InvoiceId								= intInvoiceId
+				 @InvoiceId								= ARD.intInvoiceId
 				,@ItemQtyShipped                        = @dblQty
-				,@ItemQtyOrdered                        = (SELECT TOP 1 dblQuantity FROM tblICInventoryShipmentItem WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId)
+				--,@ItemQtyOrdered                        = (SELECT TOP 1 dblQuantity FROM tblICInventoryShipmentItem WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId)
+				,@ItemQtyOrdered                        = CASE WHEN @intContractDetailId IS NOT NULL
+																THEN CTD.dblQuantity
+																ELSE ICISI.dblQuantity
+																END
 				,@ItemUnitPrice                         = @dblPrice
 				,@ItemPrice								= @dblPrice
 				,@ItemInventoryShipmentItemId			= @intInventoryShipmentItemId
@@ -110,37 +114,37 @@ BEGIN TRY
 				
 				,@ItemContractHeaderId                  = @intContractHeaderId
 				,@ItemContractDetailId                  = @intContractDetailId
-				,@ItemId								= intItemId
-				,@ItemPrepayTypeId						= intPrepayTypeId
-				,@ItemPrepayRate						= dblPrepayRate
-				,@ItemIsBlended							= ysnBlended
-				,@ItemDocumentNumber					= strDocumentNumber
-				,@ItemDescription						= strItemDescription            
-				,@ItemOrderUOMId						= intOrderUOMId
-				,@ItemPriceUOMId						= intPriceUOMId          
-				,@ItemUnitQuantity						= dblUnitQuantity
-				,@ItemDiscount							= dblDiscount
-				,@ItemTermDiscount						= dblItemTermDiscount
-				,@ItemTermDiscountBy					= strItemTermDiscountBy      
-				,@ItemPricing							= strPricing
-				,@ItemVFDDocumentNumber					= strVFDDocumentNumber
-				,@ItemMaintenanceType					= strMaintenanceType
-				,@ItemFrequency							= strFrequency
-				,@ItemMaintenanceDate					= dtmMaintenanceDate
-				,@ItemMaintenanceAmount					= dblMaintenanceAmount
-				,@ItemLicenseAmount						= dblLicenseAmount
-				,@ItemTaxGroupId						= intTaxGroupId
-				,@ItemStorageLocationId					= intStorageLocationId
-				,@ItemCompanyLocationSubLocationId		= intCompanyLocationSubLocationId
-				,@ItemSCInvoiceId						= intSCInvoiceId
-				,@ItemSCInvoiceNumber					= strSCInvoiceNumber
+				,@ItemId								= ARD.intItemId
+				,@ItemPrepayTypeId						= ARD.intPrepayTypeId
+				,@ItemPrepayRate						= ARD.dblPrepayRate
+				,@ItemIsBlended							= ARD.ysnBlended
+				,@ItemDocumentNumber					= ARD.strDocumentNumber
+				,@ItemDescription						= ARD.strItemDescription            
+				,@ItemOrderUOMId						= ARD.intOrderUOMId
+				,@ItemPriceUOMId						= ARD.intPriceUOMId          
+				,@ItemUnitQuantity						= ARD.dblUnitQuantity
+				,@ItemDiscount							= ARD.dblDiscount
+				,@ItemTermDiscount						= ARD.dblItemTermDiscount
+				,@ItemTermDiscountBy					= ARD.strItemTermDiscountBy      
+				,@ItemPricing							= ARD.strPricing
+				,@ItemVFDDocumentNumber					= ARD.strVFDDocumentNumber
+				,@ItemMaintenanceType					= ARD.strMaintenanceType
+				,@ItemFrequency							= ARD.strFrequency
+				,@ItemMaintenanceDate					= ARD.dtmMaintenanceDate
+				,@ItemMaintenanceAmount					= ARD.dblMaintenanceAmount
+				,@ItemLicenseAmount						= ARD.dblLicenseAmount
+				,@ItemTaxGroupId						= ARD.intTaxGroupId
+				,@ItemStorageLocationId					= ARD.intStorageLocationId
+				,@ItemCompanyLocationSubLocationId		= ARD.intCompanyLocationSubLocationId
+				,@ItemSCInvoiceId						= ARD.intSCInvoiceId
+				,@ItemSCInvoiceNumber					= ARD.strSCInvoiceNumber
 				,@ItemInventoryShipmentChargeId			= NULL
-				,@ItemRecipeItemId						= intRecipeItemId
-				,@ItemRecipeId							= intRecipeId
-				,@ItemCostTypeId						= intCostTypeId
-				,@ItemMarginById						= intMarginById
-				,@ItemCommentTypeId						= intCommentTypeId
-				,@ItemMargin							= dblMargin
+				,@ItemRecipeItemId						= ARD.intRecipeItemId
+				,@ItemRecipeId							= ARD.intRecipeId
+				,@ItemCostTypeId						= ARD.intCostTypeId
+				,@ItemMarginById						= ARD.intMarginById
+				,@ItemCommentTypeId						= ARD.intCommentTypeId
+				,@ItemMargin							= ARD.dblMargin
 				,@ItemSalesOrderDetailId				= NULL
 				,@ItemSalesOrderNumber					= ''
 				,@ItemShipmentId						= NULL
@@ -149,10 +153,10 @@ BEGIN TRY
 				,@ItemShipmentGrossWt                   = 0.000000
 				,@ItemShipmentTareWt					= 0.000000
 				,@ItemShipmentNetWt                     = 0.000000           
-				,@ItemTicketId                          = intTicketId
+				,@ItemTicketId                          = ARD.intTicketId
 				,@ItemTicketHoursWorkedId				= NULL
-				,@ItemCustomerStorageId                 = intCustomerStorageId
-				,@ItemSiteDetailId                      = intSiteDetailId
+				,@ItemCustomerStorageId                 = ARD.intCustomerStorageId
+				,@ItemSiteDetailId                      = ARD.intSiteDetailId
 				,@ItemLoadDetailId                      = NULL
 				,@ItemLotId                             = NULL
 				,@ItemOriginalInvoiceDetailId			= NULL
@@ -168,19 +172,25 @@ BEGIN TRY
 				,@ItemLeaseBilling                      = 0
 				,@ItemVirtualMeterReading				= 0
 				,@EntitySalespersonId                   = NULL
-				,@ItemCurrencyExchangeRateTypeId		= intCurrencyExchangeRateTypeId
-				,@ItemCurrencyExchangeRateId			= intCurrencyExchangeRateId
-				,@ItemCurrencyExchangeRate				= dblCurrencyExchangeRate
-				,@ItemSubCurrencyId                     = intSubCurrencyId
-				,@ItemSubCurrencyRate                   = dblSubCurrencyRate
-				,@ItemStorageScheduleTypeId				= intStorageScheduleTypeId
-				,@ItemDestinationGradeId				= intDestinationGradeId
-				,@ItemDestinationWeightId				= intDestinationWeightId
-				,@ItemWeightUOMId						= intItemWeightUOMId
+				,@ItemCurrencyExchangeRateTypeId		= ARD.intCurrencyExchangeRateTypeId
+				,@ItemCurrencyExchangeRateId			= ARD.intCurrencyExchangeRateId
+				,@ItemCurrencyExchangeRate				= ARD.dblCurrencyExchangeRate
+				,@ItemSubCurrencyId                     = ARD.intSubCurrencyId
+				,@ItemSubCurrencyRate                   = ARD.dblSubCurrencyRate
+				,@ItemStorageScheduleTypeId				= ARD.intStorageScheduleTypeId
+				,@ItemDestinationGradeId				= ARD.intDestinationGradeId
+				,@ItemDestinationWeightId				= ARD.intDestinationWeightId
+				,@ItemWeightUOMId						= ARD.intItemWeightUOMId
 		  
 
-		FROM	tblARInvoiceDetail with (nolock)
-		WHERE	intInvoiceDetailId = @intInvoiceDetailId
+		FROM	tblARInvoiceDetail ARD with (nolock) 
+				LEFT JOIN
+				tblCTContractDetail CTD with (nolock) 
+		ON		CTD.intContractDetailId = @intContractDetailId
+				LEFT JOIN
+				tblICInventoryShipmentItem ICISI with (nolock) 
+		ON		ICISI.intInventoryShipmentItemId = @intInventoryShipmentItemId
+		WHERE	ARD.intInvoiceDetailId = @intInvoiceDetailId
 
 
 		EXEC [uspARInsertTransactionDetail] @InvoiceId, @intUserId
