@@ -8838,6 +8838,7 @@
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesArchive.sql" />
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesError.sql" />
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesStage.sql" />
+    <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
