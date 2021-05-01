@@ -35,11 +35,12 @@ BEGIN
 			@strBillOfLading NVARCHAR(200) = NULL,
 			@dtmPullDate DATETIME = NULL
 	
+		BEGIN TRANSACTION
+
 		DECLARE @CursorTran AS CURSOR
 
 		IF(@ysnReprocess = 1)
 		BEGIN
-
 			UPDATE D SET D.ysnValid = 1, D.strMessage = '' FROM tblTRImportLoadDetail D 
 				INNER JOIN tblTRImportLoad L
 					ON L.intImportLoadId = D.intImportLoadId
@@ -87,8 +88,7 @@ BEGIN
 		END
 		
 
-		BEGIN TRANSACTION
-
+		
 		OPEN @CursorTran
 		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate 
 		WHILE @@FETCH_STATUS = 0

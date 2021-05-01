@@ -24,7 +24,7 @@ BEGIN
 			LD.intDriverId, 
 			LD.intTrailerId, 
 			LD.dtmPullDate
-		FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intImportLoadId = @intImportLoadId
+		FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intImportLoadId = @intImportLoadId AND ISNULL(ysnProcess, 0) = 0
 
 		DECLARE @intTruckId INT = NULL,
 			@intCarrierId INT = NULL,
