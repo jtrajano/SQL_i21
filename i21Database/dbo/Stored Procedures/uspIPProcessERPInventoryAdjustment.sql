@@ -48,6 +48,10 @@ BEGIN TRY
 		,@STARTING_NUMBER_BATCH AS INT = 3
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
 		,@strBatchId AS NVARCHAR(40)
+		,@intInventoryReceiptItemId INT
+		,@intInventoryReceiptId INT
+		,@intLoadContainerId INT
+		,@intLoadId INT
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -110,6 +114,7 @@ BEGIN TRY
 					)
 			BEGIN
 				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processsed in i21.'
+
 				RAISERROR (
 						@strError
 						,16
@@ -287,6 +292,96 @@ BEGIN TRY
 				SELECT @strAdjustmentNo = strAdjustmentNo
 				FROM dbo.tblICInventoryAdjustment
 				WHERE intInventoryAdjustmentId = @intAdjustmentId
+
+				IF @strReasonCode = 30
+				BEGIN
+					IF NOT EXISTS (
+							SELECT *
+							FROM tblIPInventoryAdjustment
+							WHERE strLotNumber = @strLotNo
+							)
+					BEGIN
+						SELECT TOP 1 @intInventoryReceiptItemId = intInventoryReceiptItemId
+						FROM tblICInventoryReceiptItemLot
+						WHERE strLotNumber = @strLotNo
+						ORDER BY intInventoryReceiptItemLotId ASC
+
+						SELECT @intInventoryReceiptId = intInventoryReceiptId
+							,@intLoadContainerId = intContainerId
+						FROM tblICInventoryReceiptItem
+						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+						SELECT @intLoadId = intLoadId
+						FROM tblLGLoadContainer
+						WHERE intLoadContainerId = @intLoadContainerId
+
+						INSERT INTO tblIPInventoryAdjustment (
+							dtmCreatedDate
+							,intContractHeaderId
+							,intContractDetailId
+							,intLoadId
+							,intLoadDetailId
+							,intLoadContainerId
+							,intInventoryReceiptId
+							,strLotNumber
+							,dblNet
+							,dblGross
+							)
+						SELECT GETDATE() AS dtmCreatedDate
+							,RI.intOrderId AS intContractHeaderId
+							,RI.intLineNo AS intContractDetailId
+							,@intLoadId
+							,RI.intSourceId AS intLoadDetailId
+							,RI.intContainerId AS intLoadContainerId
+							,RI.intInventoryReceiptId
+							,RL.strLotNumber
+							,CASE 
+								WHEN RL.strLotNumber = @strLotNo
+									THEN @dblQuantity
+								ELSE RL.dblGrossWeight - RL.dblTareWeight
+								END AS dblNet
+							,CASE 
+								WHEN RL.strLotNumber = @strLotNo
+									THEN @dblQuantity
+								ELSE RL.dblGrossWeight - RL.dblTareWeight
+								END AS dblGrossWeight
+						FROM tblICInventoryReceiptItemLot RL
+						JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
+						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+
+						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
+							,@intPurchaseSale = 1
+							,@intLoadContainerId = @intLoadContainerId
+							,@ysnAddClaim = 1
+					END
+					ELSE
+					BEGIN
+						SELECT TOP 1 @intInventoryReceiptItemId = intInventoryReceiptItemId
+						FROM tblICInventoryReceiptItemLot
+						WHERE strLotNumber = @strLotNo
+						ORDER BY intInventoryReceiptItemLotId ASC
+
+						SELECT @intInventoryReceiptId = intInventoryReceiptId
+							,@intLoadContainerId = intContainerId
+						FROM tblICInventoryReceiptItem
+						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+						UPDATE tblIPInventoryAdjustment
+						SET dblNet = @dblQuantity
+							,dblGross = @dblQuantity
+						WHERE intInventoryReceiptId = @intInventoryReceiptId
+							AND strLotNumber = @strLotNo
+
+						SELECT @intLoadId = intLoadId
+						FROM tblLGLoadContainer
+						WHERE intLoadContainerId = @intLoadContainerId
+
+						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
+							,@intPurchaseSale = 1
+							,@intLoadContainerId = @intLoadContainerId
+							,@ysnAddClaim = 1
+					END
+				END
 			END
 			ELSE IF @intTransactionTypeId = 8
 			BEGIN
