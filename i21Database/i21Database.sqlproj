@@ -9332,8 +9332,10 @@
     <Build Include="dbo\Tables\tblIPCommitmentPricingBalQtyArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPCommitmentPricingBalQty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPCommitmentPricingBalQty.sql" />
-<Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
+    <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryReceiptTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPAddPendingClaim.sql" />
+    <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
