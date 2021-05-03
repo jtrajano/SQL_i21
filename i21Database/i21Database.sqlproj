@@ -9205,9 +9205,10 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferAfterSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICBeforePostInventoryTransferIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryTransferIntegration.sql" />
-<Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
+	<Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
     <Build Include="dbo\Stored Procedures\uspIPAddPendingClaim.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
