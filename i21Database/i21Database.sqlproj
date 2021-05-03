@@ -9336,6 +9336,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotProperty.sql" />
     <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
     <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
