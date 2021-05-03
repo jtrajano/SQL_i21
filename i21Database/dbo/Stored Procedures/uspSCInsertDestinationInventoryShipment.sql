@@ -838,7 +838,7 @@ BEGIN TRY
 		END
 		
 	---Update ysnAddPayable. Do not add charges to payable if DWG is unposted
-	UPDATE ShipmentCharges
+	UPDATE @ShipmentCharges
 	SET ysnAddPayable = @ysnPost
 
 
