@@ -62,6 +62,7 @@ DECLARE @intStorageScheduleId AS INT
 
 DECLARE @intLoadContractDetailId INT  
 DECLARE @intTicketContractDetailId INT  
+DECLARE @intTicketItemContractDetailId INT  
 DECLARE @dblTicketScheduleQuantity AS NUMERIC(18,6)
 DECLARE @_dblTicketScheduleQuantity AS NUMERIC(18,6)
 DECLARE @dblLoopAdjustedScheduleQuantity NUMERIC (38,20)  
@@ -107,6 +108,7 @@ SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @_dblTicketScheduleQuantity = ISNULL(dblScheduleQty,0)
 	, @intTicketContractDetailId = intContractId
 	, @intTicketLoadDetailId = intLoadDetailId
+	, @intTicketItemContractDetailId = intItemContractDetailId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 
@@ -367,6 +369,26 @@ OPEN intListCursor;
 					END
 					ELSE
 						BEGIN
+
+						if @strDistributionOption = 'ICN'	
+						begin
+							if @intTicketItemContractDetailId != @intLoopContractId  
+							begin
+								EXEC uspCTItemContractUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale'
+							end
+							else 
+							begin
+								set @_dblConvertedLoopQty = (@dblTicketScheduleQuantity * -1)
+								EXEC uspCTItemContractUpdateScheduleQuantity @intLoopContractId, @_dblConvertedLoopQty, @intUserId, @intTicketId, 'Auto - Scale'
+								EXEC uspCTItemContractUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale'
+							end
+							
+							EXEC dbo.uspSCUpdateTicketItemContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+							
+						end					
+
+
+
 						INSERT INTO @ItemsForItemShipment (
 								intItemId
 								,intItemLocationId
