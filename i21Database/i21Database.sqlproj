@@ -8894,6 +8894,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
