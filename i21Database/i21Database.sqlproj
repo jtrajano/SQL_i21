@@ -9344,6 +9344,7 @@
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryReceiptTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspIPAddPendingClaim.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9836,4 +9837,5 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\FL_Florida.sql" />
   </ItemGroup>
+</Project>
 </Project>
