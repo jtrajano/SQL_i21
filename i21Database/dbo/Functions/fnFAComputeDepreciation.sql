@@ -20,7 +20,7 @@ SELECT
 @strConvention = strConvention,
 @intDepreciationMethodId = B.intDepreciationMethodId,
 @dtmPlacedInService = dtmDateInService
-FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intAssetId = B.intAssetId
+FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
 WHERE A.intAssetId = @intAssetId
 
 -- Running Balance

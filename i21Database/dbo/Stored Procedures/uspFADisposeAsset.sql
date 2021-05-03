@@ -49,7 +49,8 @@ NULL
 FROM #AssetID A 
 JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
 OUTER APPLY(
-	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
+	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate 
+	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
 	ORDER BY dtmDepreciationToDate DESC
 )D
 OUTER APPLY(
@@ -81,7 +82,7 @@ END
 
 IF NOT EXISTS(SELECT 1 FROM @tblAsset)
 BEGIN
-	RAISERROR('There are no assets for disposal', 16,1)
+	RAISERROR('There are no assets for disposal or asset is not yet depreciated', 16,1)
 	GOTO Post_Rollback
 END
 

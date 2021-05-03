@@ -466,6 +466,7 @@
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
     <Build Include="dbo\Tables\tblGLPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostJournal.sql" />
+    <Build Include="dbo\Views\vyuFADepreciationMethod.sql" />
     <Build Include="dbo\Views\vyuFAFixedAsset.sql" />
     <Build Include="dbo\Views\vyuFALastDepDate.sql" />
     <Build Include="dbo\Views\vyuFANextDepreciation.sql" />
@@ -5260,10 +5261,8 @@
     <None Include="Scripts\Post-Deployment\ST\10_Checkout_Commander_Translog.sql" />
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspFACreateAsset.sql" />
-    <Build Include="dbo\Stored Procedures\uspFADepreciateAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateAssetWrapper.sql" />
     <Build Include="dbo\Stored Procedures\uspFADisposeAsset.sql" />
-    <Build Include="dbo\Stored Procedures\uspFACopyDepreciationMethod.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseMultipleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateMultipleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFASyncBookDepreciation.sql" />
@@ -9342,8 +9341,10 @@
     <Build Include="dbo\Tables\tblIPCommitmentPricingBalQtyArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPCommitmentPricingBalQty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPCommitmentPricingBalQty.sql" />
-<Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
+    <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryReceiptTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPAddPendingClaim.sql" />
+    <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

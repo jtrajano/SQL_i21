@@ -495,7 +495,7 @@ BEGIN TRY
 				, sh.intUserId
 			FROM tblCTSequenceHistory sh
 			INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
-			WHERE intSequenceUsageHistoryId IS NULL
+			WHERE intSequenceUsageHistoryId IS NULL OR ISNULL(ysnStatusChange, 0) = 1
 		) tbl
 		WHERE Row_Num = 1
 
@@ -557,6 +557,12 @@ BEGIN TRY
 						, strTransactionReference
 						, strTransactionReferenceNo
 					HAVING COUNT(*) > 1)
+			BEGIN
+				DELETE FROM @cbLogTemp
+			END
+			ELSE IF NOT EXISTS(
+						SELECT TOP 1 intRowId = 1, * FROM @cbLogTemp WHERE intContractStatusId <> 5
+						UNION ALL SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY intId DESC) intRowId, * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) tbl WHERE intRowId = 1 AND intContractStatusId <> 5)
 			BEGIN
 				DELETE FROM @cbLogTemp
 			END
