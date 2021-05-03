@@ -6,7 +6,6 @@ SELECT dtmDepreciationToDate, intAssetId
 FROM tblFAFixedAssetDepreciation 
 GROUP BY dtmDepreciationToDate,intAssetId
 )
-
 SELECT G.dtmDepreciationToDate, GAAP.dblDepreciationToDate , Tax.dblDepreciationToDate dblTaxDepreciationToDate, G.intAssetId,
 ISNULL(GAAP.intAssetDepreciationId,Tax.intAssetDepreciationId) intAssetDepreciationId,
 ISNULL(GAAP.intDepreciationMethodId, Tax.intDepreciationMethodId) intDepreciationMethodId,
@@ -20,8 +19,7 @@ ISNULL(GAAP.dtmDateInService, Tax.dtmDateInService)dtmDateInService,
 ISNULL(GAAP.dtmDispositionDate,Tax.dtmDispositionDate)dtmDispositionDate,
 ISNULL(GAAP.dblSalvageValue, Tax.dblSalvageValue)dblSalvageValue,
 ISNULL(GAAP.intConcurrencyId, Tax.intConcurrencyId)intConcurrencyId
-
-from G 
+FROM G 
 outer apply(
 	SELECT 
 	intAssetDepreciationId,
@@ -38,14 +36,12 @@ outer apply(
 	A.dblSalvageValue,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
-	left join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
-	
-	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate and A.intAssetId = G.intAssetId
-	
-	and intBookId = 1
+	LEFT JOIN tblFADepreciationMethod B ON A.intDepreciationMethodId = B.intDepreciationMethodId
+	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
+	AND A.intAssetId = G.intAssetId
+	AND intBookId = 1
 )GAAP
-outer apply(
-
+OUTER APPLY(
 	SELECT 
 	intAssetDepreciationId,
 	A.intDepreciationMethodId,
@@ -61,8 +57,9 @@ outer apply(
 	A.dblSalvageValue,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
-	left join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
-	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate and A.intAssetId = G.intAssetId
+	LEFT JOIN tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
+	AND A.intAssetId = G.intAssetId
 	AND intBookId = 2
 )Tax
 
