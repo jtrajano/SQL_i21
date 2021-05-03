@@ -166,6 +166,7 @@ WHERE
 OR A.intTransactionType IS NULL
 OR (A.dblQuantityToBill IS NULL)
 OR (A.intAccountId IS NULL)
+OR A.ysnIsActive = 0
 
 DECLARE @invalidPayables AS TABLE (strVendorOrderNumber NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, strError NVARCHAR(MAX) COLLATE Latin1_General_CI_AS)
 INSERT INTO @invalidPayables
