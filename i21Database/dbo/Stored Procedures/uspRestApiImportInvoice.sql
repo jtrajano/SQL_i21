@@ -7,7 +7,7 @@ DECLARE @ErrorMessage		NVARCHAR(250)	= NULL
 DECLARE @LogId				INT				= NULL
 DECLARE @intUserId	INT = (SELECT TOP 1 intEntityId FROM tblSMUserSecurity)
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'The item does not exists.', 'itemId', 'Error', e.strItemNo
@@ -205,8 +205,8 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @Logs (intLineNumber, strLogLevel)
-		SELECT i.intInvoiceId, 'Ids'
+		INSERT INTO @Logs (intLineNumber, dblTotalAmount, strLogLevel, strField)
+		SELECT i.intInvoiceId, i.dblInvoiceTotal, 'Ids', i.strInvoiceNumber
 		FROM tblARInvoice i
 		INNER JOIN tblARInvoiceIntegrationLogDetail d ON i.intInvoiceId = d.intInvoiceId
 		WHERE d.intIntegrationLogId = @LogId 
