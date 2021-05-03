@@ -5013,7 +5013,6 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
     <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
-
     <Build Include="dbo\Tables\tblRestApiSchemaDollarContract.sql" />
     <Build Include="dbo\Tables\tblRestApiItemTaxes.sql" />
     <Build Include="dbo\Tables\tblRestApiInvoiceStaging.sql" />
@@ -5030,7 +5029,6 @@
     <Build Include="dbo\Functions\fnRestApiCalculateItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspRestApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRestApiSchemaTransformDollarContract.sql" />
-
     <Build Include="dbo\Views\vyuRestApiCTPriceContractFixationDetail.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
@@ -9345,6 +9343,7 @@
     <Build Include="dbo\Stored Procedures\uspIPAddPendingClaim.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9837,5 +9836,4 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\FL_Florida.sql" />
   </ItemGroup>
-</Project>
 </Project>
