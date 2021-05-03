@@ -836,6 +836,11 @@ BEGIN TRY
 			WHERE ContractCost.intItemId != @intFreightItemId AND ContractCost.dblRate != 0 
 			AND SC.intTicketId = @intTicketId
 		END
+		
+	---Update ysnAddPayable. Do not add charges to payable if DWG is unposted
+	UPDATE ShipmentCharges
+	SET ysnAddPayable = @ysnPost
+
 
 	-- Call the uspICPostDestinationInventoryShipment sp to post the following:
 	-- 1. Destination qty 
