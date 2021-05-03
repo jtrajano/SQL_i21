@@ -5027,8 +5027,8 @@
     <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
     <Build Include="dbo\Stored Procedures\uspRestApiImportInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspRestApiImportReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspRestApiGetTaxableAmount.sql" />
-    <Build Include="dbo\Stored Procedures\uspRestApiCalculateItemTax.sql" />
+    <Build Include="dbo\Functions\fnRestApiGetTaxableAmount.sql" />
+    <Build Include="dbo\Functions\fnRestApiCalculateItemTax.sql" />
     <Build Include="dbo\Stored Procedures\uspRestApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspRestApiSchemaTransformDollarContract.sql" />
 
