@@ -5237,10 +5237,8 @@
     <None Include="Scripts\Post-Deployment\ST\10_Checkout_Commander_Translog.sql" />
     <Build Include="dbo\Views\vyuARPaymentSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspFACreateAsset.sql" />
-    <Build Include="dbo\Stored Procedures\uspFADepreciateAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateAssetWrapper.sql" />
     <Build Include="dbo\Stored Procedures\uspFADisposeAsset.sql" />
-    <Build Include="dbo\Stored Procedures\uspFACopyDepreciationMethod.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseMultipleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateMultipleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFASyncBookDepreciation.sql" />
