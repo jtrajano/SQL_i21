@@ -54,20 +54,24 @@ INSERT INTO  @tblAssetInfo(
 )
 SELECT 
 intId,
-B.intDepreciationMethodId,
+BD.intDepreciationMethodId,
 strConvention,
 BD.dblCost - BD.dblSalvageValue,
 BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
 NULL
-FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intAssetId = B.intAssetId
-JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= B.intDepreciationMethodId AND BD.intBookId =@BookId
+FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
+JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
 JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
 	SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
 	AND ISNULL(intBookId,1) = @BookId
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
+
+
+
+
 
 UPDATE @tblAssetInfo SET strError =  'Fixed asset should be disposed' 
 	WHERE ROUND(dblYear,2) >=  ROUND(dblBasis,2)
@@ -88,7 +92,7 @@ intYear = CEILING(D.intMonth/12.0),
 dblPercentage = E.dblPercentage,
 dblAnnualDep = (E.dblPercentage *.01) * dblBasis
 FROM @tblAssetInfo T JOIN
-tblFADepreciationMethod  M ON  M.intAssetId = T.intAssetId
+tblFADepreciationMethod  M ON  M.intDepreciationMethodId = T.intDepreciationMethodId
 JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= M.intDepreciationMethodId AND BD.intBookId =@BookId
 OUTER APPLY(
 	SELECT COUNT(1) intMonth FROM tblFAFixedAssetDepreciation B
@@ -96,7 +100,7 @@ OUTER APPLY(
 ) D
 OUTER APPLY(
 	SELECT ISNULL(dblPercentage,1) dblPercentage FROM tblFADepreciationMethodDetail 
-		WHERE T.[intDepreciationMethodId] = intDepreciationMethodId and intYear =   CEILING(D.intMonth/12.0)
+		WHERE M.[intDepreciationMethodId] = intDepreciationMethodId and intYear =   CEILING(D.intMonth/12.0)
 )E
 WHERE strError IS NULL
 

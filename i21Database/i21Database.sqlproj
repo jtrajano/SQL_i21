@@ -466,6 +466,7 @@
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
     <Build Include="dbo\Tables\tblGLPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostJournal.sql" />
+    <Build Include="dbo\Views\vyuFADepreciationMethod.sql" />
     <Build Include="dbo\Views\vyuFAFixedAsset.sql" />
     <Build Include="dbo\Views\vyuFALastDepDate.sql" />
     <Build Include="dbo\Views\vyuFANextDepreciation.sql" />

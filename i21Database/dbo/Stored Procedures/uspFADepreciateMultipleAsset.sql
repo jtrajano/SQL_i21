@@ -75,7 +75,9 @@ BEGIN
       SET @successfulCount = @intCount  
         IF ISNULL(@ysnRecap,0) = 0
         BEGIN
-            UPDATE A SET ysnDepreciated = 0, ysnFullyDepreciated = 0, ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
+            UPDATE A SET ysnDepreciated = 0, ysnTaxDepreciated = 0,
+            ysnFullyDepreciated = 0, ysnTaxFullyDepreciated = 0,
+            ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             UPDATE A SET ysnFullyDepreciated = 0 FROM tblFABookDepreciation A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
@@ -203,9 +205,10 @@ BEGIN
                     @strBatchId
                     FROM 
                     tblFAFixedAsset F 
-                    JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
-                    JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
+                    JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
+                    JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                     WHERE F.intAssetId = @i
+                    AND BD.intBookId = @BookId
                   
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
                   DELETE FROM @IdIterate WHERE intId = @i
@@ -252,8 +255,8 @@ BEGIN
                   D.strConvention,
                   @strBatchId
                   FROM tblFAFixedAsset F 
-                  JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
-                  JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
+                  JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
+                  JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                   OUTER APPLY (
                     SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
@@ -263,6 +266,7 @@ BEGIN
                     ORDER BY dtmDepreciationToDate DESC
                   )Depreciation
                   WHERE F.intAssetId = @i
+                  AND BD.intBookId = @BookId
 
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
                   DELETE FROM @IdIterate WHERE intId = @i
@@ -310,23 +314,20 @@ BEGIN
                 D.strConvention,
                 @strBatchId
                 FROM tblFAFixedAsset F 
-                  JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
-                  JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
-
-                  OUTER APPLY (
-                    SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
-                  ) E
-                  OUTER APPLY(
-                    SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] = @i 
-                    AND intBookId = @BookId
-                    ORDER BY dtmDepreciationToDate DESC
-                  )Depreciation
-                  WHERE F.intAssetId = @i
+                JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
+                JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+                OUTER APPLY (
+                  SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
+                ) E
+                OUTER APPLY(
+                  SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] = @i 
+                  AND intBookId = @BookId
+                  ORDER BY dtmDepreciationToDate DESC
+                )Depreciation
+                WHERE F.intAssetId = @i
+                AND BD.intBookId = @BookId
 
                 UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
-                UPDATE FA SET ysnFullyDepreciated = 1  FROM tblFAFixedAsset FA JOIN @tblDepComputation D on D.intAssetId = FA.intAssetId
-                WHERE D.ysnFullyDepreciated = 1 AND FA.intAssetId = @i
-
                 DELETE FROM @IdIterate WHERE intId = @i
           END
       END  
@@ -463,31 +464,26 @@ BEGIN
           EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
           IF @@ERROR <> 0 OR @PostResult <> 0 RETURN --1
       END
-END
-  
-  
-  
-  
---=====================================================================================================================================  
---  UPDATE FIXEDASSETS TABLE  
----------------------------------------------------------------------------------------------------------------------------------------  
+END  
 
--- IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetDepreciationId FROM tblFAFixedAssetDepreciation A   
---       WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID)   
---         AND ISNULL([dbo].isOpenAccountingDate(A.[dtmDepreciationToDate]), 0) = 0 ORDER BY A.intAssetDepreciationId DESC ) TBL)  
--- BEGIN  
---  RAISERROR('There is Depreciation Date on a closed period in this asset.', 16,1)  
---  RETURN-1  
--- END  
+-- THIS WILL REFLECT IN THE ASSET SCREEN ysnFullyDepreciated FLAG
+UPDATE A  SET A.ysnFullyDepreciated  =1  
+  FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
+  WHERE B.ysnFullyDepreciated = 1 AND 1 = @BookId
 
-UPDATE A SET [ysnDepreciated] = 1   
-FROM tblFAFixedAsset  A JOIN  @tblDepComputation B ON B.intAssetId = A.intAssetId
-WHERE B.ysnDepreciated =1
+UPDATE A  SET A.ysnTaxFullyDepreciated  =1  
+  FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
+  WHERE B.ysnFullyDepreciated = 1 AND 2 = @BookId
+
+UPDATE A  SET A.ysnDepreciated  =1  
+  FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
+  WHERE B.ysnDepreciated = 1  AND 1 = @BookId
+
+UPDATE A  SET A.ysnTaxDepreciated = 1  
+  FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
+  WHERE B.ysnDepreciated = 1  AND 2 = @BookId
 
 
-UPDATE A  SET A.ysnFullyDepreciated  =1
-  FROM tblFABookDepreciation A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId
-  WHERE B.ysnFullyDepreciated = 1  AND A.intBookId = @BookId
 
 --=====================================================================================================================================  
 --  RETURN TOTAL NUMBER OF VALID FIXEDASSETS  
@@ -511,21 +507,24 @@ END
 
  
   ;WITH Q as(
-    SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult,'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError FROM tblGLDetail C WHERE @strBatchId = strBatchId
-    AND ysnIsUnposted = 0  AND @BookId = 1
-    GROUP by strReference, strTransactionId, dtmDate
+      SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult,
+      'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError 
+      FROM tblGLDetail C WHERE @strBatchId = strBatchId
+      AND ysnIsUnposted = 0  AND @BookId = 1
+      AND strModuleName ='Fixed Assets'
+      GROUP by strReference, strTransactionId, dtmDate
     UNION
-    SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) FROM  tblFAFixedAssetDepreciation A 
-    JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
-	  WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
+      SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) FROM  tblFAFixedAssetDepreciation A 
+      JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+      WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
     UNION
-    SELECT strAssetId,'' strTransactionId, strError strResult, 
-	  case when @BookId = 1 then 'GAAP' 
-		when @BookId = 2 THEN 'Tax'
-	  end strBook, 
-   null dtmDate ,
-   cast(1 as BIT)
-   FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
+      SELECT strAssetId,'' strTransactionId, strError strResult, 
+      CASE WHEN @BookId = 1 THEN 'GAAP' 
+      WHEN @BookId = 2 THEN 'Tax'
+      END strBook, 
+      NULL dtmDate ,
+      CAST(1 AS BIT)
+      FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
   )
   INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate,ysnError) 
   SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError FROM Q 
