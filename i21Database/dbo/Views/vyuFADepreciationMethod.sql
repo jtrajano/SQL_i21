@@ -1,7 +1,7 @@
-CREATE VIEW vyuFADepreciationMethod
+CREATE VIEW  vyuFADepreciationMethod
 AS
 SELECT A.* ,
-ISNULL(U.ysnHasDepreciatedAsset , 0) ysnHasDepreciatedAsset
+CAST(ISNULL(U.ysnHasDepreciatedAsset , 0) AS BIT) ysnHasDepreciatedAsset
 FROM 
 tblFADepreciationMethod A
 -- SHOWS IF DM WAS ALREADY USED TO DEPRECIATE ASSET
