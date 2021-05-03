@@ -26,7 +26,69 @@ CREATE TABLE #AssetID(
 IF (ISNULL(@Param, '') <> '') 
 	INSERT INTO #AssetID EXEC (@Param)
 ELSE
-	INSERT INTO #AssetID SELECT [intAssetId] FROM tblFAFixedAsset
+	INSERT INTO #AssetID( intAssetid ) SELECT [intAssetId] FROM tblFAFixedAsset
+
+--START GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
+INSERT INTO @tblAsset
+SELECT
+B.strAssetId,
+A.intAssetId,
+D.dtmDepreciationToDate,
+F.ysnOpenPeriod,
+0,
+NULL
+FROM #AssetID A 
+JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+OUTER APPLY(
+	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate 
+	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
+	ORDER BY dtmDepreciationToDate DESC
+)D
+OUTER APPLY(
+	SELECT ISNULL(ysnOpen,0) &  ISNULL(ysnFAOpen,0) ysnOpenPeriod FROM tblGLFiscalYearPeriod WHERE 
+	D.dtmDepreciationToDate BETWEEN
+	dtmStartDate AND dtmEndDate
+)F
+WHERE isnull(ysnAcquired,0) = 1 AND isnull(ysnDisposed,0) = 0 AND isnull(ysnDepreciated,0) = 1
+
+UPDATE A SET 
+dtmDispose = F.dtmStartDate,
+ysnOpenPeriod = 1
+FROM @tblAsset A 
+CROSS APPLY(
+	SELECT TOP 1 dtmStartDate FROM tblGLFiscalYearPeriod 
+	WHERE dtmDispose < dtmStartDate
+	AND (ISNULL(ysnOpen,0) &  ISNULL(ysnFAOpen,0)) = 1
+	ORDER BY dtmStartDate 
+)F
+WHERE ysnOpenPeriod = 0
+
+IF EXISTS(SELECT TOP 1 1 FROM @tblAsset WHERE ysnOpenPeriod = 0)
+BEGIN
+	SELECT TOP 1 @strAssetId = strAssetId FROM @tblAsset WHERE ysnOpenPeriod = 0
+	SET @ErrorMessage = @strAssetId + ' does not have an open fiscal period to dispose'
+	RAISERROR(@ErrorMessage, 16,1)
+	GOTO Post_Rollback
+END
+
+IF NOT EXISTS(SELECT 1 FROM @tblAsset)
+BEGIN
+	RAISERROR('There are no assets for disposal or asset is not yet depreciated', 16,1)
+	GOTO Post_Rollback
+END
+
+WHILE EXISTS( SELECT TOP 1 1 FROM @tblAsset WHERE strTransactionId IS NULL)
+BEGIN
+	SELECT TOP 1 @strAssetId = strAssetId FROM @tblAsset WHERE strTransactionId IS NULL
+	EXEC uspSMGetStartingNumber 111, @strTransactionId OUTPUT
+	UPDATE @tblAsset SET strTransactionId = @strTransactionId FROM @tblAsset where strAssetId = @strAssetId
+END
+
+
+--END GETTING THE DISPOSAL DATE AND CHECKING IT AGAINST FISCAL PERIOD
+
+DECLARE @strBatchId AS NVARCHAR(100)= ''
+EXEC uspSMGetStartingNumber 3, @strBatchId OUTPUT
 	
 --=====================================================================================================================================
 -- 	UNPOSTING FIXEDASSETS TRANSACTIONS ysnPost = 0
