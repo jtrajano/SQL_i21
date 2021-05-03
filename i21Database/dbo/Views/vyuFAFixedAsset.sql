@@ -30,7 +30,8 @@ FA.intGainLossAccountId,
 FA.strManufacturerName,
 FA.strModelNumber,
 FA.ysnAcquired,
-FA.ysnDepreciated,
+ysnTaxDepreciated = ISNULL(FA.ysnTaxDepreciated,0),
+ysnDepreciated = ISNULL(FA.ysnDepreciated, 0) | ISNULL(FA.ysnTaxDepreciated, 0),
 FA.ysnDisposed,     
 FA.dblCost - FA.dblSalvageValue dblBasis,      
 DM.intDepreciationMethodId,      
@@ -45,7 +46,7 @@ GLGainLoss.strAccountId strGainLossAccountId,
 D.dblDepreciationToDate,      
 Company.strLocationName strCompanyLocation,      
 Currency.strCurrency,
-ISNULL(BDF.ysnFullyDepreciated,0)ysnFullyDepreciated,
+ysnFullyDepreciated = ISNULL(FA.ysnFullyDepreciated,0) & ISNULL(FA.ysnTaxFullyDepreciated,0),
 FA.intConcurrencyId
 from tblFAFixedAsset FA     
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId      
@@ -65,6 +66,3 @@ OUTER APPLY(
 OUTER APPLY(      
  SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intDepreciationMethodId = DM.intDepreciationMethodId ORDER BY intAssetDepreciationId DESC      
 )D
-OUTER APPLY(
-	SELECT  TOP 1 ysnFullyDepreciated FROM tblFABookDepreciation where intAssetId= FA.intAssetId AND ysnFullyDepreciated = 0
-)BDF

@@ -15,15 +15,17 @@ BEGIN
 	, dblSalvageValue= B.dblSalvageValue
 	, dtmPlacedInService= B.dtmDateInService
 	FROM
-	tblFABookDepreciation A JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId
+	tblFABookDepreciation A JOIN tblFAFixedAsset B on A.intDepreciationMethodId = B.intDepreciationMethodId
 	WHERE intBookDepreciationId = @intBookDepreciationId
 END
 ELSE
 BEGIN
 	DECLARE @intDepreciationMethodId INT
-	SELECT TOP 1 @intDepreciationMethodId =A.intDepreciationMethodId FROM tblFADepreciationMethod A
+	SELECT TOP 1 @intDepreciationMethodId =A.intDepreciationMethodId FROM 
+	tblFADepreciationMethod A
+	JOIN tblFAFixedAsset FA ON FA.intDepreciationMethodId = A.intDepreciationMethodId
 	LEFT JOIN tblFABookDepreciation B ON B.intDepreciationMethodId= A.intDepreciationMethodId
-	WHERE A.intAssetId = @intAssetId AND ISNULL(B.intBookId,1) = 1
+	WHERE FA.intAssetId = @intAssetId AND ISNULL(B.intBookId,1) = 1
 
 
 	IF @intDepreciationMethodId IS NOT NULL
