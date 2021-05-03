@@ -104,7 +104,7 @@ BEGIN
 		-- Then convert the cost to the sub-currency value. 
 		CASE	WHEN ISNULL(@ysnSubCurrency, 0) = 1 AND ISNULL(@intSubCurrencyCents, 1) NOT IN (0, 1) THEN 
 					--@result / @intSubCurrencyCents 
-					dbo.fnDivide(@result, @intSubCurrencyCents) 
+					dbo.fnDivide(@result, @intSubCurrencyCents)
 				ELSE 
 					@result
 		END

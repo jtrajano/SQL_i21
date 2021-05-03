@@ -1988,6 +1988,53 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
+
+	-- Process the decimal discrepancy
+	BEGIN 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+		)
+		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+			@strReceiptNumber = @strTransactionId
+			,@strBatchId = @strBatchId
+			,@GLEntries = @GLEntries
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END
 END   
 
 --------------------------------------------------------------------------------------------  
