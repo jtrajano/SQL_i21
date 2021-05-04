@@ -219,7 +219,8 @@ BEGIN
 							 + ISNULL('; Tax Code: ' + TC.[strTaxCode], '')
 							 + ISNULL('; Tax Class: ' + TCL.[strTaxClass], '')
 							 + ISNULL('; Tax State: ' + TE.[strState], '')
-		,@ExemptionPercent = TE.[dblPartialTax] 
+		,@ExemptionPercent	= TE.[dblPartialTax] 
+		,@TaxExempt			= 1
 	FROM
 		tblARCustomerTaxingTaxException TE
 	LEFT OUTER JOIN
@@ -331,7 +332,6 @@ BEGIN
 		END
 		
 	SET @TaxCodeExemption = NULL
-	SET @TaxExempt = 0
 	SET @InvalidSetup = 0				
 	
 	INSERT INTO @returntable

@@ -709,8 +709,10 @@ BEGIN
 			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal) AND @DisregardExemptionSetup = 0
 				SET @ItemTaxAmount = @ZeroDecimal;
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal) OR @DisregardExemptionSetup = 1
+			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal) AND @DisregardExemptionSetup = 0
 				SET @ItemTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal);
+			ELSE IF(@DisregardExemptionSetup = 1)
+				SET @ItemTaxAmount = @ItemTaxAmount - @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal);
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
