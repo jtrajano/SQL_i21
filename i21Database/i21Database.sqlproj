@@ -9344,6 +9344,7 @@
     <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLinks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
