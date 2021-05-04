@@ -291,6 +291,8 @@ BEGIN TRY
 
 	IF @post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+
+	EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @param, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
