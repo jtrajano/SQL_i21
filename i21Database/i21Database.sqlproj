@@ -9211,6 +9211,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotSplit.sql" />
     <Build Include="dbo\Tables\tblIPLotSplitFeed.sql" />
+	<Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
