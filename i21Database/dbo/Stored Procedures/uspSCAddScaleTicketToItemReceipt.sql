@@ -352,14 +352,30 @@ END
 	,[intForexRateTypeId]				= RE.intForexRateTypeId
 	,[dblForexRate]						= RE.dblForexRate
 	,[ysnInventoryCost]					= IC.ysnInventoryCost
-	,[strCostMethod]					= case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
+	,[strCostMethod]					= IC.strCostMethod --case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE 
 												WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
 												WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
-											WHEN IC.strCostMethod = 'Amount' THEN 0
+											WHEN IC.strCostMethod = 'Amount' THEN --0
+										CASE
+											WHEN RE.ysnIsStorage = 1 THEN 0
+											WHEN RE.ysnIsStorage = 0 THEN
+										CASE 
+											WHEN QM.dblDiscountAmount < 0 THEN
+												CASE 
+													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)    
+													ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)  
+												END
+											WHEN QM.dblDiscountAmount > 0 THEN 
+											CASE    
+											WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)    
+											ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) 
+												END  
+											END
+										END
 											ELSE 0
 										END
 	,[intCostUOMId]						= CASE
