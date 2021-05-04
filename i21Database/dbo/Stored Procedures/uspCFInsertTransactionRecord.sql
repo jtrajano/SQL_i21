@@ -1011,6 +1011,11 @@ BEGIN
 		END
 	END
 
+	IF(LOWER(@strTransactionType) LIKE '%foreign%')
+	BEGIN
+		SET @intCardId = NULL
+	END
+
 	IF (@intCardId = 0)
 	BEGIN
 		SET @intCardId = NULL
