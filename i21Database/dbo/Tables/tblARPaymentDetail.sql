@@ -38,6 +38,10 @@
 );
 
 GO
+CREATE NONCLUSTERED INDEX [NC_Index_tblARPaymentDetail]
+ON [dbo].[tblARPaymentDetail]([intPaymentId]) INCLUDE ([dblDiscount], [dblInterest], [dblPayment], [intInvoiceId]);
+
+GO
 CREATE TRIGGER trg_tblARPaymentDetailUpdate
 ON dbo.tblARPaymentDetail
 INSTEAD OF UPDATE
