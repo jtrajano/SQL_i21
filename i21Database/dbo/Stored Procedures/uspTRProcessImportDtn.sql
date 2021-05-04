@@ -88,9 +88,16 @@ BEGIN
 					END
 					ELSE
 					BEGIN
+						SET @intBillId = @intExistBillId
 						UPDATE tblTRImportDtnDetail SET intBillId = @intExistBillId WHERE intImportDtnDetailId = @intImportDtnDetailId
 						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher already exists')
 					END
+
+					-- ADD PAYMENT
+					EXEC [dbo].[uspTRImportDtnVoucherPayment] 
+						@intBillId = @intBillId,
+						@intImportLoadId = @intImportLoadId,
+						@intImportDtnDetailId = @intImportDtnDetailId
 
 					-- POST VOUCHER
 					DECLARE @success BIT = NULL
