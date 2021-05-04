@@ -9345,7 +9345,9 @@
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLinks.sql" />
-	<Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotSplit.sql" />
+    <Build Include="dbo\Tables\tblIPLotSplitFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
