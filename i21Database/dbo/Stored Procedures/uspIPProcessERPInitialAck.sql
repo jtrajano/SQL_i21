@@ -27,6 +27,13 @@ BEGIN TRY
 		,@intMinRowNo INT
 		,@intWorkOrderId INT
 		,@strWorkOrderNo NVARCHAR(50)
+		,@intContractHeaderId INT
+		,@intContractDetailId INT
+		,@strContractNo NVARCHAR(50)
+		,@intInventoryReceiptId INT
+		,@strReceiptNo NVARCHAR(50)
+		,@intBillId INT
+		,@strVoucherNo NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,TrxSequenceNo INT
@@ -51,7 +58,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'InitialAck'
+	WHERE strType = 'Initial Ack'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -90,7 +97,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,MessageTypeId
 				,ERPCONumber
 				,ERPReferenceNo
@@ -103,7 +110,7 @@ BEGIN TRY
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					,MessageTypeId INT
 					,ERPCONumber NVARCHAR(50)
 					,ERPReferenceNo NVARCHAR(50)
@@ -133,6 +140,15 @@ BEGIN TRY
 					,@StatusId = NULL
 					,@StatusText = NULL
 
+				SELECT @intWorkOrderId = NULL
+					,@intContractHeaderId = NULL
+					,@intContractDetailId = NULL
+					,@strContractNo = NULL
+					,@intInventoryReceiptId = NULL
+					,@strReceiptNo = NULL
+					,@intBillId = NULL
+					,@strVoucherNo = NULL
+
 				SELECT @TrxSequenceNo = TrxSequenceNo
 					,@CompanyLocation = CompanyLocation
 					,@CreatedDate = CreatedDate
@@ -148,15 +164,160 @@ BEGIN TRY
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
-				/*  
+				/*
     Not Processed: NULL  
     In-Progress: -1  
     Internal Error in i21: 1  
     Sent to AX: 2  
     AX 1st Level Failure: 3, AX 1st Level Success: 4  
     AX 2nd Level Failure: 5, AX 2nd Level Success: 6  
-   */
-				IF @MessageTypeId = 6 --Production Order
+*/
+				IF @MessageTypeId = 1 -- CO
+				BEGIN
+					SELECT @intContractDetailId = intContractDetailId
+						,@intContractHeaderId = intContractHeaderId
+						,@strContractNo = strContractNumber
+					FROM tblCTContractFeed
+					WHERE intContractFeedId = @TrxSequenceNo
+
+					UPDATE tblCTContractFeed
+					SET intStatusId = (
+							CASE 
+								WHEN @StatusId = 1
+									THEN 4
+								ELSE 3
+								END
+							)
+						,strMessage = @StatusText
+					WHERE intContractFeedId = @TrxSequenceNo
+
+					--Update the PO Details in modified sequences
+					UPDATE tblCTContractFeed
+					SET strERPPONumber = @ERPCONumber
+					WHERE intContractDetailId = @intContractDetailId
+						AND intStatusId IS NULL
+
+					UPDATE tblCTContractDetail
+					SET strERPPONumber = @ERPCONumber
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE intContractDetailId = @intContractDetailId
+
+					UPDATE tblCTContractHeader
+					SET intConcurrencyId = intConcurrencyId + 1
+					WHERE intContractHeaderId = @intContractHeaderId
+
+					INSERT INTO @tblMessage (
+						strMessageType
+						,strMessage
+						,strInfo1
+						,strInfo2
+						)
+					VALUES (
+						'Initial Ack'
+						,'Success'
+						,@strContractNo
+						,@ERPCONumber
+						)
+				END
+				ELSE IF @MessageTypeId = 2 -- PO
+				BEGIN
+					UPDATE tblCTContractFeed
+					SET intStatusId = (
+							CASE 
+								WHEN @StatusId = 1
+									THEN 4
+								ELSE 3
+								END
+							)
+						,strMessage = @StatusText
+					WHERE intContractFeedId = @TrxSequenceNo
+				END
+				ELSE IF @MessageTypeId = 3 -- Goods Receipt
+				BEGIN
+					SELECT @intInventoryReceiptId = intInventoryReceiptId
+						,@strReceiptNo = strReceiptNumber
+					FROM tblICInventoryReceipt
+					WHERE intInventoryReceiptId = @TrxSequenceNo
+
+					UPDATE tblIPInvReceiptFeed
+					SET intStatusId = (
+							CASE 
+								WHEN @StatusId = 1
+									THEN 4
+								ELSE 3
+								END
+							)
+						,strMessage = @StatusText
+						,strERPTransferOrderNo = @ERPReferenceNo
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+						AND intStatusId = 2
+
+					UPDATE tblIPInvReceiptFeed
+					SET strERPTransferOrderNo = @ERPReferenceNo
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+						AND ISNULL(intStatusId, 1) = 1
+
+					INSERT INTO @tblMessage (
+						strMessageType
+						,strMessage
+						,strInfo1
+						,strInfo2
+						)
+					VALUES (
+						'Initial Ack'
+						,'Success'
+						,@strReceiptNo
+						,@ERPReferenceNo
+						)
+				END
+				ELSE IF @MessageTypeId = 4 -- Voucher
+				BEGIN
+					SELECT @intBillId = intBillId
+					FROM tblAPBillPreStage
+					WHERE intBillPreStageId = @TrxSequenceNo
+
+					SELECT @strVoucherNo = strBillId
+					FROM tblAPBill
+					WHERE intBillId = @intBillId
+
+					UPDATE tblAPBillPreStage
+					SET intStatusId = (
+							CASE 
+								WHEN @StatusId = 1
+									THEN 4
+								ELSE 3
+								END
+							)
+						,strMessage = @StatusText
+						,strERPVoucherNo = @ERPVoucherNo
+					WHERE intBillId = @intBillId
+						AND intStatusId = 2
+
+					--Update the ERP Voucher No in UnPost / Repost records
+					UPDATE tblAPBillPreStage
+					SET strERPVoucherNo = @ERPVoucherNo
+					WHERE intBillId = @intBillId
+						AND ISNULL(intStatusId, 1) = 1
+
+					UPDATE tblAPBill
+					SET intConcurrencyId = intConcurrencyId + 1
+						,strComment = @ERPVoucherNo
+					WHERE intBillId = @intBillId
+
+					INSERT INTO @tblMessage (
+						strMessageType
+						,strMessage
+						,strInfo1
+						,strInfo2
+						)
+					VALUES (
+						'Initial Ack'
+						,'Success'
+						,@strVoucherNo
+						,@ERPVoucherNo
+						)
+				END
+				ELSE IF @MessageTypeId = 6 --Production Order
 				BEGIN
 					SELECT @intWorkOrderId = intWorkOrderId
 						,@strWorkOrderNo = strWorkOrderNo
@@ -186,7 +347,7 @@ BEGIN TRY
 						,strInfo2
 						)
 					VALUES (
-						'InitialAck'
+						'Initial Ack'
 						,'Success'
 						,@strWorkOrderNo
 						,@ERPShopOrderNo
@@ -218,7 +379,7 @@ BEGIN TRY
 						,strInfo2
 						)
 					VALUES (
-						'InitialAck'
+						'Initial Ack'
 						,'Success'
 						,@strWorkOrderNo
 						,@ERPShopOrderNo
@@ -276,6 +437,19 @@ BEGIN TRY
 						,strMessage = @StatusText
 					WHERE intLotPropertyFeedId = @TrxSequenceNo
 				END
+				ELSE IF @MessageTypeId = 14 -- Commitment Pricing
+				BEGIN
+					UPDATE tblMFCommitmentPricingStage
+					SET intStatusId = (
+							CASE 
+								WHEN @StatusId = 1
+									THEN 4
+								ELSE 3
+								END
+							)
+						,strMessage = @StatusText
+					WHERE intCommitmentPricingStageId = @TrxSequenceNo
+				END
 
 				SELECT @intMinRowNo = MIN(intRowNo)
 				FROM @tblAcknowledgement
@@ -330,7 +504,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'InitialAck'
+			AND strType = 'Initial Ack'
 	END
 
 	SELECT strMessageType
