@@ -250,6 +250,19 @@ BEGIN TRY
 						,strMessage = @StatusText
 					WHERE intLotMergeFeedId = @TrxSequenceNo
 				END
+				ELSE IF @MessageTypeId = 11 --Lot Split
+				BEGIN
+					UPDATE tblIPLotSplitFeed
+					SET intStatusId = (
+							CASE 
+								WHEN @StatusId = 1
+									THEN 4
+								ELSE 3
+								END
+							)
+						,strMessage = @StatusText
+					WHERE intLotSplitFeedId = @TrxSequenceNo
+				END
 				ELSE IF @MessageTypeId = 13 --Lot Property Adj
 				BEGIN
 					UPDATE tblIPLotPropertyFeed
