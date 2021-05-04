@@ -90,20 +90,23 @@ BEGIN
 				[dtmDueDate],
 				[dblPayment],
 				[ysnPaid],
-				[ysnScheduleDiscountOverride])
+				[ysnScheduleDiscountOverride],
+				[dblDiscount])
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
 				dtmDueDate = @dtmDueDate,
 				dblPayment = @dblDeferredAmt,
 				ysnPaid = 0,
-				ysnScheduleDiscountOverride = 0
+				ysnScheduleDiscountOverride = 0,
+				dblDiscount = 0
 			UNION ALL
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
 				dtmDueDate = @dtmDeferredDate1,
 				dblPayment = @dblDeferredAmt1,
 				ysnPaid = 0,
-				ysnScheduleDiscountOverride = 0
+				ysnScheduleDiscountOverride = 0,
+				dblDiscount = 0
 
 			IF(ISNULL(@dblDeferredAmt2, 0) > 0)
 			BEGIN
@@ -112,13 +115,166 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride])
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
 					dtmDueDate = @dtmDeferredDate2,
 					dblPayment = @dblDeferredAmt2,
 					ysnPaid = 0,
-					ysnScheduleDiscountOverride = 0
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate3,
+					dblPayment = @dblDeferredAmt3,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 AND ISNULL(@dblDeferredAmt4, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate4,
+					dblPayment = @dblDeferredAmt4,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate5,
+					dblPayment = @dblDeferredAmt5,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
+				AND ISNULL(@dblDeferredAmt6, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate6,
+					dblPayment = @dblDeferredAmt6,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
+				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate7,
+					dblPayment = @dblDeferredAmt7,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
+				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
+				AND ISNULL(@dblDeferredAmt8, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate8,
+					dblPayment = @dblDeferredAmt8,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
+				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
+				AND ISNULL(@dblDeferredAmt8, 0) > 0 AND ISNULL(@dblDeferredAmt9, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate9,
+					dblPayment = @dblDeferredAmt9,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
+			END
+			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
+				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
+				AND ISNULL(@dblDeferredAmt8, 0) > 0 AND ISNULL(@dblDeferredAmt9, 0) > 0
+				AND ISNULL(@dblDeferredAmt10, 0) > 0)
+			BEGIN
+				INSERT INTO @PaymentSchedule ([intBillId],
+					[intTermsId],
+					[dtmDueDate],
+					[dblPayment],
+					[ysnPaid],
+					[ysnScheduleDiscountOverride]
+					[dblDiscount])
+				SELECT intBillId = @intBillId,
+					intTermsId = @intTermId,
+					dtmDueDate = @dtmDeferredDate10,
+					dblPayment = @dblDeferredAmt10,
+					ysnPaid = 0,
+					ysnScheduleDiscountOverride = 0,
+					dblDiscount = 0
 			END
 
 			IF EXISTS(SELECT TOP 1 1 FROM @PaymentSchedule)
@@ -127,7 +283,7 @@ BEGIN
 				EXEC [dbo].[uspAPAddPaymentSchedules]
 					@paySchedules = @PaymentSchedule
 					,@error = @error OUTPUT
-					
+
 				IF(@error IS NOT NULL)
 				BEGIN
 					RAISERROR(@error, 16, 1)  
