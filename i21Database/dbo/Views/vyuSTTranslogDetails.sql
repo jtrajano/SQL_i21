@@ -11,6 +11,8 @@ FROM
 	   , TR.strTrlDept
 	   , TR.strTrlNetwCode
 	   , TR.strTrlUPC
+	   , TR.strTrpPaycode
+	   , TR.strTrpCardInfoTrpcCCName
 	   , TR.strTrlDesc
 	   , TR.dblTrlQty
 	   , TR.dblTrlUnitPrice
