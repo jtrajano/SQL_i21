@@ -29,6 +29,16 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPGoodsReceipt @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
+	ELSE IF @strType = 'Commitment Pricing'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPCommitmentPricing @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
+	ELSE IF @strType = 'Voucher'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPVoucher @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
 	ELSE IF @strType = 'Service Order'
 	BEGIN
 		EXEC dbo.uspMFGenerateERPServiceOrder @strCompanyLocation = @strCompanyLocation
