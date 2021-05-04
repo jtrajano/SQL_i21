@@ -29,7 +29,7 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPGoodsReceipt @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
-	ELSE IF @strType = 'Service Order Ack'
+	ELSE IF @strType = 'Service Order'
 	BEGIN
 		EXEC dbo.uspMFGenerateERPServiceOrder @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
@@ -37,6 +37,21 @@ BEGIN TRY
 	ELSE IF @strType = 'Production'
 	BEGIN
 		EXEC dbo.uspMFGenerateERPProduction @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
+	ELSE IF @strType = 'Lot Merge'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPLotMerge @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
+	ELSE IF @strType = 'Lot Property Adj'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPLotProperty @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
+	ELSE IF @strType = 'Lot Split'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPLotSplit @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
 END TRY
