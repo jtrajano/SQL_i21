@@ -115,7 +115,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -132,7 +132,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -149,7 +149,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -167,7 +167,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -186,7 +186,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -205,7 +205,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -225,7 +225,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -245,7 +245,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
@@ -266,7 +266,7 @@ BEGIN
 					[dtmDueDate],
 					[dblPayment],
 					[ysnPaid],
-					[ysnScheduleDiscountOverride]
+					[ysnScheduleDiscountOverride],
 					[dblDiscount])
 				SELECT intBillId = @intBillId,
 					intTermsId = @intTermId,
