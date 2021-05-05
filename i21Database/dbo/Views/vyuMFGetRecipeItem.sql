@@ -21,6 +21,8 @@ SELECT r.intRecipeId
 	,r.dtmValidFrom AS dtmRecipeValidFrom
 	,r.dtmValidTo AS dtmRecipeValidTo
 	,r.strComment
+	,ri.ysnComplianceItem
+	,ri.dblCompliancePercent
 	,ri.dblLowerTolerance
 	,ri.dblUpperTolerance
 	,cm.strName AS strConsumptionMethod
