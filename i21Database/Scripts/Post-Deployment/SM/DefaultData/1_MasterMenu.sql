@@ -10,8 +10,9 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'RiskManagement.view.OpenDerivativesPosition?multiGrouping=true')
+
+
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'Transports.view.ImportLoadList' AND strModuleName = 'Transports')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -5869,6 +5870,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Ve
 	VALUES (N'Import Vendor Invoice - DTN', N'Transports', @TransportsImportParentMenuId, N'Import Vendor Invoice - DTN', N'Import', N'Screen', N'Transports.view.ImportDtnOutboundInvoice', N'small-menu-import', 0, 0, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportDtnOutboundInvoice', intSort = 0 WHERE strMenuName = 'Import Vendor Invoice - DTN' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Transport Load - Pending' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Import Transport Load - Pending', N'Transports', @TransportsImportParentMenuId, N'Import Transport Load - Pending', N'Import', N'Screen', N'Transports.view.ImportLoadList', N'small-menu-import', 0, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportLoadList', intSort = 0 WHERE strMenuName = 'Import Transport Load - Pending' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Rack Price' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
