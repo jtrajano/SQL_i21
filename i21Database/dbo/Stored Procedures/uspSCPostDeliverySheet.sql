@@ -2,6 +2,7 @@
 	@intDeliverySheetId INT
 	,@intUserId INT
 	,@dblNetUnits NUMERIC(38,20)
+	,@dtmClientDate DATETIME = null
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -94,6 +95,10 @@ DECLARE @processTicket TABLE(
 BEGIN TRY
 	SET @dblTempSplitQty = @dblNetUnits;
 
+	IF(@dtmClientDate IS NULL)
+	BEGIN
+		SET @dtmClientDate = GETDATE();
+	END
 
 	SELECT TOP 1 
 		@intDSLocationId = intCompanyLocationId
@@ -257,7 +262,7 @@ BEGIN TRY
 	)
 	SELECT 
 		[intItemId]							= SCD.intItemId
-		,[dtmDate]							= dbo.fnRemoveTimeOnDate(GETDATE())
+		,[dtmDate]							= dbo.fnRemoveTimeOnDate(@dtmClientDate)
 		,[intLocationId]					= SCD.intCompanyLocationId
 		,[intSubLocationId]					= SC.intSubLocationId
 		,[intStorageLocationId]				= SC.intStorageLocationId
