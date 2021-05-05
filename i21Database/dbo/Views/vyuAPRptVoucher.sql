@@ -3,6 +3,7 @@ AS
 SELECT
 	commonData.*
 	,strContractNumber		=	ContractHeader.strContractNumber
+	,strVendorRef			=	ISNULL(ContractHeader.strCustomerContract, '')
 	,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
 											AND ContractDetail.intItemContractId > 0
 											AND DMDetails.intContractCostId IS NULL
