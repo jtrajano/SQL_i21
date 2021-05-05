@@ -46,6 +46,7 @@ RETURNS @returntable TABLE
 	,[ysnTaxOnly]					BIT
 	,[ysnInvalidSetup]				BIT
 	,[strNotes]						NVARCHAR(500)
+	,[dblExemptionAmount]			NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -75,6 +76,7 @@ BEGIN
 		,[intUnitMeasureId]				INT
 		,[ysnComputed]					BIT
 		,[ysnTaxableFlagged]			BIT
+		,[dblExemptionAmount]			NUMERIC(18,6)
 		)
 
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM @LineItemTaxEntries)
@@ -693,16 +695,26 @@ BEGIN
 				
 			
 			DECLARE @ItemTaxAmount NUMERIC(18,6) = @ZeroDecimal
+			DECLARE @ItemExemptedTaxAmount NUMERIC(18,6) = @ZeroDecimal
+
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal) AND @DisregardExemptionSetup = 0
-				SET @ItemTaxAmount = @ZeroDecimal;
-
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal) OR @DisregardExemptionSetup = 1
-				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal) );
+			IF(@TaxExempt = 1 AND @DisregardExemptionSetup = 0)
+			BEGIN
+				IF(@ExemptionPercent = 0)
+				BEGIN
+					SET @ItemExemptedTaxAmount = 0
+					SET @ItemTaxAmount = 0
+				END
+				ELSE
+				BEGIN
+					SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+					SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
+				END
+			END
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
@@ -713,8 +725,9 @@ BEGIN
 			UPDATE
 				@ItemTaxes
 			SET
-				dblTax			= ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
+				 dblTax			= ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
 				,dblAdjustedTax = ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
+				,dblExemptionAmount = ROUND(ROUND(@ItemExemptedTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
 				,ysnComputed	= 1 
 			WHERE
 				[Id] = @Id				
@@ -737,6 +750,7 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
+		,[dblExemptionAmount]
 	)
 	SELECT
 		 [intTaxGroupId]
@@ -755,6 +769,7 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
+		,[dblExemptionAmount]
 	FROM
 		@ItemTaxes 	
 	RETURN		
