@@ -9390,6 +9390,7 @@
     <Build Include="dbo\Stored Procedures\uspIPAddPendingClaim.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
