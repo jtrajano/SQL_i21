@@ -1005,6 +1005,17 @@ End
 
 		SELECT @dblQtyToProduce = @dblQtyToProduce - @PerBlendSheetQty
 
+		INSERT INTO dbo.tblMFWorkOrderPreStage (
+			intWorkOrderId
+			,intWorkOrderStatusId
+			,intUserId
+			,strRowState
+			)
+		SELECT @intWorkOrderId
+			,9
+			,@intUserId
+			,'Added'
+
 		SET @intNoOfSheet = @intNoOfSheet - 1
 	END
 
