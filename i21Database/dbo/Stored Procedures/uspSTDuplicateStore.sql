@@ -303,6 +303,8 @@ BEGIN TRANSACTION
 		,strSapphireIpAddress
 		,strSAPPHIREUserName
 		,strSAPPHIREPassword
+		,ysnSAPPHIRECaptureTransactionLog
+		,intSAPPHIRECaptureIntervalMinutes
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
 		,ysnSAPPHIREAutoUpdatePassword
@@ -391,6 +393,8 @@ BEGIN TRANSACTION
 		,strSapphireIpAddress
 		,strSAPPHIREUserName
 		,strSAPPHIREPassword
+		,ysnSAPPHIRECaptureTransactionLog
+		,intSAPPHIRECaptureIntervalMinutes
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
 		,ysnSAPPHIREAutoUpdatePassword
