@@ -1,18 +1,16 @@
-CREATE PROCEDURE [dbo].uspICDeleteTransactionLinks(@TransactionLinks udtICTransactionLinks READONLY)
+CREATE PROCEDURE [dbo].uspICDeleteTransactionLinks(@intReceiptId INT READONLY, @strReceiptNumber NVARCHAR(50) READONLY)
 AS
 BEGIN
 
-DELETE TL FROM tblICTransactionLinks TL 
-INNER JOIN @TransactionLinks L
-ON L.intSrcId = TL.intSrcId AND 
-L.strSrcTransactionNo = TL.strSrcTransactionNo AND
-L.strSrcModuleName = TL.strSrcModuleName AND 
-L.strSrcTransactionType = TL.strSrcTransactionType AND 
-L.intDestId = TL.intDestId AND 
-L.strDestTransactionNo = TL.strDestTransactionNo AND 
-L.strDestModuleName = TL.strDestModuleName AND 
-L.strDestTransactionType = TL.strDestTransactionType
+    DELETE tblICTransactionLinks 
+    FROM tblICTransactionLinks
+    WHERE (intDestId = @intReceiptId AND strDestTransactionNo = @strReceiptNumber) OR 
+    (intSrcId = @intReceiptId AND strSrcTransactionNo = @strReceiptNumber)
 
+    DELETE tblICTransactionNodes
+    FROM tblICTransactionNodes 
+    WHERE intTransactionId = @intReceiptId 
+    AND strTransactionNo = @strReceiptNumber
 
 END
 

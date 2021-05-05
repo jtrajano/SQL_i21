@@ -51,38 +51,11 @@ END
 IF @ysnIsCreate = 0
 BEGIN
 
-	INSERT INTO @TransactionLink (
-		strOperation, -- Operation
-		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-	)
-	SELECT
-		'Create',
-		intSrcId = ReceiptItemSource.intOrderId, 
-		strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber, 'Missing Transaction No'), 
-		strSrcModuleName = ReceiptItemSource.strSourceType, 
-		strSrcTransactionType = ReceiptItemSource.strSourceType,
-		intDestId = ReceiptItemSource.intInventoryReceiptId,
-		strDestTransactionNo = COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'),
-		'Inventory',
-		'Inventory Receipt'
-    FROM dbo.tblICInventoryReceipt Receipt
-	INNER JOIN dbo.vyuICGetReceiptItemSource ReceiptItemSource
-	ON Receipt.intInventoryReceiptId = ReceiptItemSource.intInventoryReceiptId
-	WHERE ReceiptItemSource.intOrderId IS NOT NULL 
-	AND Receipt.intInventoryReceiptId = @intReceiptId
+	DECLARE @strReceiptNumber AS VARCHAR(50) 
 
-	DELETE Links FROM dbo.tblICTransactionLinks Links 
-	INNER JOIN @TransactionLink ReceiptLink 
-	ON Links.intSrcId = ReceiptLink.intSrcId AND
-	Links.intSrcId = ReceiptLink.intSrcId AND
-	Links.strSrcTransactionNo = ReceiptLink.strSrcTransactionNo AND
-	Links.strSrcModuleName = ReceiptLink.strSrcModuleName AND
-	Links.strSrcTransactionType = ReceiptLink.strSrcTransactionType AND
-	Links.intDestId = ReceiptLink.intDestId AND
-	Links.strDestTransactionNo = ReceiptLink.strDestTransactionNo AND
-	Links.strDestModuleName = ReceiptLink.strDestModuleName AND
-	Links.strDestTransactionType = ReceiptLink.strDestTransactionType
+	SELECT @strReceiptNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptId;
+
+	EXEC dbo.uspICDeleteTransactionLinks @intReceiptId, @strReceiptNumber
 
 	GOTO Link_Exit
 END
