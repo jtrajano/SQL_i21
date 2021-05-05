@@ -174,7 +174,7 @@ SELECT strVendorOrderNumber, strError
 FROM (
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find vendor ' + strVendorId AS strError FROM #tmpConvertedLassusData WHERE intEntityVendorId IS NULL AND strVendorId IS NOT NULL
 	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Vendor ' + strVendorId + ' is not an active vendor.' AS strError FROM #tmpConvertedLassusData WHERE ysnIsActive = 1
+	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Vendor ' + strVendorId + ' is not an active vendor.' AS strError FROM #tmpConvertedLassusData WHERE ysnIsActive = 0
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find transaction type ' + CAST(intVoucherType AS NVARCHAR) FROM #tmpConvertedLassusData WHERE intTransactionType IS NULL AND CAST(intVoucherType AS NVARCHAR) IS NOT NULL
 	UNION ALL
