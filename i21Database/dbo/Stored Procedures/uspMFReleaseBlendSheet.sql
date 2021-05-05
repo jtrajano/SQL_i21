@@ -1005,6 +1005,17 @@ End
 
 		SELECT @dblQtyToProduce = @dblQtyToProduce - @PerBlendSheetQty
 
+		INSERT INTO dbo.tblMFWorkOrderPreStage (
+			intWorkOrderId
+			,intWorkOrderStatusId
+			,intUserId
+			,strRowState
+			)
+		SELECT @intWorkOrderId
+			,9
+			,@intUserId
+			,'Added'
+
 		SET @intNoOfSheet = @intNoOfSheet - 1
 	END
 
@@ -1049,17 +1060,6 @@ End
 		SET @dblBalancedQtyToProduceOut = 0
 	SET @strWorkOrderNoOut = @strNextWONo;
 	SET @intWorkOrderIdOut = @intWorkOrderId
-
-	INSERT INTO dbo.tblMFWorkOrderPreStage (
-		intWorkOrderId
-		,intWorkOrderStatusId
-		,intUserId
-		,strRowState
-		)
-	SELECT @intWorkOrderId
-		,9
-		,@intUserId
-		,'Added'
 
 	COMMIT TRAN
 
