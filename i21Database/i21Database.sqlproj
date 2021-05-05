@@ -8957,6 +8957,7 @@
     <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
