@@ -132,7 +132,7 @@ BEGIN TRY
 				+'<Quantity>'+	ltrim(W.dblQuantity)    +'</Quantity>'
 				+'<QuantityUOM>'+	UM.strUnitMeasure    +'</QuantityUOM>'
 				+'<ManufacturingCell>'+	MC.strCellName     +'</ManufacturingCell>'
-				+'<DueDate>'+	IsNULL(convert(varchar, W.dtmPlannedDate, 112),'')    +'</DueDate>'
+				+'<DueDate>'+	IsNULL(convert(varchar, IsNULL(W.dtmPlannedDate,W.dtmExpectedDate), 112),'')    +'</DueDate>'
 				+'<Machine>'+	IsNULL(M.strName,'')    +'</Machine>'
 				+'<ERPShopOrderNo>'+	IsNULL(W.strERPOrderNo,'')     +'</ERPShopOrderNo>'
 			FROM dbo.tblMFWorkOrder W
