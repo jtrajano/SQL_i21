@@ -233,16 +233,18 @@ WHERE ysnPosted = 1
 
 --#CASHREFUNDS
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
-     , dblRefundTotal		= I.dblInvoiceTotal
+	 , strDocumentNumber 	= ID.strDocumentNumber
+	 , dblRefundTotal		= SUM(ID.dblTotal)
 INTO #CASHREFUNDS
-FROM tblARInvoice I
+FROM tblARInvoiceDetail ID
+INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
   AND (ISNULL(I.intOriginalInvoiceId, '') <> '' OR ISNULL(ID.strDocumentNumber, '') <> '')
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY I.intOriginalInvoiceId, I.dblInvoiceTotal
+GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
 --#CASHRETURNS
 SELECT I.intInvoiceId
