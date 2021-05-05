@@ -51,7 +51,7 @@ DECLARE @intStagingId INT
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT s.intApiItemContractStagingId
-	, CASE s.strContractType WHEN 'Sale' THEN 2 ELSE 1 END
+	, 2
 	, s.intEntityId
 	, s.intCurrencyId
 	, s.intCompanyLocationId

@@ -47,13 +47,12 @@ DECLARE @ysnPrinted BIT
 DECLARE @intOpportunityNameId INT
 DECLARE @intLineOfBusinessId INT
 DECLARE @dtmDueDate DATETIME
-DECLARE @dblDollarValue NUMERIC(18,6)
 DECLARE @intStagingId INT
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT s.intApiItemContractStagingId
-	, CASE s.strContractType WHEN 'Sale' THEN 2 ELSE 1 END
+	, 2
 	, s.intEntityId
 	, s.intCurrencyId
 	, s.intCompanyLocationId
@@ -71,7 +70,6 @@ SELECT s.intApiItemContractStagingId
 	, s.intOpportunityNameId
 	, s.intLineOfBusinessId
 	, s.dtmDueDate
-	, s.dblDollarValue
 FROM tblCTApiItemContractStaging s
 WHERE s.guiApiUniqueId = @guiUniqueId
 
@@ -97,14 +95,13 @@ FETCH NEXT FROM cur INTO
 , @intOpportunityNameId 
 , @intLineOfBusinessId 
 , @dtmDueDate 
-, @dblDollarValue
 
-DECLARE @strDollarContractNumber NVARCHAR(3400)
+DECLARE @strItemContractNumber NVARCHAR(3400)
 DECLARE @intItemContractHeaderId INT
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber 144, @strDollarContractNumber OUTPUT, @intCompanyLocationId
+	EXEC dbo.uspSMGetStartingNumber 144, @strItemContractNumber OUTPUT, @intCompanyLocationId
 	
 	INSERT INTO tblCTItemContractHeader(
 		  intConcurrencyId
@@ -128,7 +125,6 @@ BEGIN
 		, intOpportunityId
 		, intLineOfBusinessId
 		, dtmDueDate
-		, dblDollarValue
 		, strContractNumber
 		, guiApiUniqueId)
 	SELECT 1
@@ -152,16 +148,46 @@ BEGIN
 		, @intOpportunityNameId 
 		, @intLineOfBusinessId 
 		, @dtmDueDate 
-		, @dblDollarValue
-		, @strDollarContractNumber
+		, @strItemContractNumber
 		, @guiUniqueId
 
 	SET @intItemContractHeaderId = SCOPE_IDENTITY()
 
-	INSERT INTO tblCTItemContractDetail(intItemContractHeaderId, intItemId, intContractStatusId, intItemUOMId, intLineNo, intTaxGroupId
-		,dblApplied, dblAvailable, dblBalance, dblContracted, dblPrice, dblScheduled, dblTax, dblTotal, dtmDeliveryDate, dtmLastDeliveryDate, strItemDescription)
-	SELECT @intItemContractHeaderId, ds.intItemId, s.intContractStatusId, ds.intItemUOMId, ds.intLineNo, ds.intTaxGroupId,
-		ds.dblApplied, ds.dblAvailable, ds.dblBalance, ds.dblContracted ,ds.dblPrice, ds.dblScheduled, ds.dblTax, ds.dblContracted * ds.dblPrice, ds.dtmDeliveryDate, ds.dtmLastDeliveryDate
+	INSERT INTO tblCTItemContractDetail(
+		  intItemContractHeaderId
+		, intItemId
+		, intContractStatusId
+		, intItemUOMId
+		, intLineNo
+		, intTaxGroupId
+		-- , dblApplied
+		-- , dblAvailable
+		-- , dblBalance
+		, dblContracted
+		, dblPrice
+		-- , dblScheduled
+		-- , dblTax
+		, dblTotal
+		, dtmDeliveryDate
+		-- , dtmLastDeliveryDate
+		, strItemDescription)
+	SELECT
+		  @intItemContractHeaderId
+		, ds.intItemId
+		, s.intContractStatusId
+		, ds.intItemUOMId
+		, ds.intLineNo
+		, ds.intTaxGroupId
+		-- , ds.dblApplied
+		-- , ds.dblAvailable
+		-- , ds.dblBalance
+		, ds.dblContracted
+		, ds.dblPrice
+		-- , ds.dblScheduled
+		-- , ds.dblTax
+		, ds.dblContracted * ds.dblPrice
+		, ds.dtmDeliveryDate
+		-- , ds.dtmLastDeliveryDate
 		, i.strDescription
 	FROM tblCTApiItemContractDetailStaging ds
 	LEFT JOIN tblCTContractStatus s ON s.strContractStatus = ds.strContractStatus
@@ -188,7 +214,6 @@ BEGIN
 	, @intOpportunityNameId 
 	, @intLineOfBusinessId 
 	, @dtmDueDate 
-	, @dblDollarValue
 
 END
 
