@@ -2,8 +2,7 @@ CREATE VIEW [dbo].[vyuAPReceiptClearingGL]
 AS     
     
 SELECT DISTINCT * FROM (    
- SELECT       
- DISTINCT      
+ SELECT             
   ad.strAccountId      
   ,ad.intAccountId      
   ,t.strTransactionId      
@@ -25,7 +24,7 @@ SELECT DISTINCT * FROM (
  AND t.ysnIsUnposted = 0       
  AND (gd.dblCredit != 0 OR gd.dblDebit != 0)    
  UNION ALL    
- SELECT DISTINCT      
+ SELECT      
    ad.strAccountId      
    ,ad.intAccountId      
    ,A.strReceiptNumber      
@@ -48,7 +47,7 @@ SELECT DISTINCT * FROM (
  AND item.strType = 'Non-Inventory' 
  UNION ALL 
  --ADD THIS TO GET THE ACCOUNT OF CHARGE FROM IR-39345 (MCP)
- SELECT DISTINCT    
+ SELECT    
    ad.strAccountId    
    ,ad.intAccountId    
    ,A.strReceiptNumber    
