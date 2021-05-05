@@ -327,3 +327,85 @@ BEGIN
 			AND intImportFileRecordMarkerId = @importFileRecordMarkerId
 	END
 END
+GO
+
+-- Rack Price - iRely Enterprise
+DECLARE @LayoutTitle NVARCHAR(100)
+, @FileHeaderId INT = NULL
+, @DetailId INT = NULL
+
+SET @LayoutTitle = 'Rack Price - iRely Enterprise'
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+BEGIN
+	PRINT ('Deploying - Rack Price - iRely Enterprise')
+
+	INSERT INTO tblSMImportFileHeader (strLayoutTitle
+		, strFileType
+		, strFieldDelimiter
+		, ysnActive
+		, intConcurrencyId)
+	VALUES (@LayoutTitle
+		, 'Delimiter'
+		, 'Comma'
+		, 1
+		, 1)
+
+	SET @FileHeaderId = SCOPE_IDENTITY()
+
+	-- Supplier Name
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Supplier Name', 0, 0, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 1, 'tblTRImportRackPriceDetail', 'strSupplierName', 1, 1)
+
+	-- Supplier Location
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Supply Point', 0, 1, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 2, 'tblTRImportRackPriceDetail', 'intSupplyPointId', 1, 1)
+
+	-- Product Description
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Product Description', 0, 5, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 3, 'tblTRImportRackPriceDetail', 'intItemId', 1, 1)
+
+	-- Effective Date
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId, strFormat) 
+	VALUES (@FileHeaderId, 'Efftive Date', 0, 7, 1, 'YYYYMMDD')
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 4, 'tblTRImportRackPriceDetail', 'dtmEffectiveDateTime', 1, 1)
+
+	-- Effective Time
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId, strFormat) 
+	VALUES (@FileHeaderId, 'Efftive Time', 0, 8, 1, 'HHMM')
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 5, 'tblTRImportRackPriceDetail', 'dtmEffectiveDateTime', 1, 1)
+
+	-- Rack Price
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Rack Price', 0, 9, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 6, 'tblTRImportRackPriceDetail', 'dblVendorRack', 1, 1)
+
+END
+GO

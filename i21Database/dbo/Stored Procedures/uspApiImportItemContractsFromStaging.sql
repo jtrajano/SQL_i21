@@ -10,19 +10,19 @@ FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = s.intCompanyLocationId
 WHERE c.intCompanyLocationId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strvalue)
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the customer with an entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
 WHERE e.intEntityId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strvalue)
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the item with an itemId ''' + CAST(s.intItemId AS NVARCHAR(50)) + '''', 'itemId', 'Error',  CAST(s.intItemId AS NVARCHAR(50))
 FROM tblCTApiItemContractDetailStaging s
 LEFT JOIN tblICItem i ON i.intItemId = s.intItemId
 WHERE i.intItemId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strvalue)
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'The item with an itemId ''' + CAST(s.intItemId AS NVARCHAR(50)) + ''' was already ' + LOWER(i.strStatus), 'itemId', 'Error',  CAST(s.intItemId AS NVARCHAR(50))
 FROM tblCTApiItemContractDetailStaging s
 INNER JOIN tblICItem i ON i.intItemId = s.intItemId

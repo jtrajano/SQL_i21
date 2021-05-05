@@ -166,6 +166,26 @@ END
 CLOSE cur
 DEALLOCATE cur
 
-DROP TABLE #tmp
+_exit_with_error:
+_clean_up: 
 
-DELETE FROM tblICImportStagingOpeningBalance WHERE strImportIdentifier = @strIdentifier
+DELETE 
+FROM 
+	tblICImportStagingOpeningBalance 
+WHERE 
+	strImportIdentifier = @strIdentifier
+	
+-- Logs 
+BEGIN 
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intTotalErrors]
+		,[intTotalWarnings]
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = ISNULL(@row_inserted, 0)
+		,intTotalErrors = ISNULL(@row_errors, 0) 
+		,intTotalWarnings = ISNULL(@row_warnings, 0)
+END

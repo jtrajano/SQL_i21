@@ -40,4 +40,8 @@
     [dblPrepayments]			NUMERIC(18, 6) NULL, 
     [dblPrepaids]				NUMERIC(18, 6) NULL,
     [dblTotalCustomerAR]        NUMERIC(18, 6) NULL 
-)
+);
+
+GO
+CREATE NONCLUSTERED INDEX [NC_Index_tblARCustomerAgingStagingTable]
+ON [dbo].[tblARCustomerAgingStagingTable]([intEntityUserId]) INCLUDE ([intEntityCustomerId], [strAgingType], [dbl0Days], [dbl10Days], [dbl30Days], [dbl60Days], [dbl90Days], [dbl91Days], [dbl120Days], [dbl121Days], [dblCredits], [dblPrepayments]);

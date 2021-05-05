@@ -1371,19 +1371,21 @@ BEGIN
 					,t.intItemUOMId
 					,r.[dtmReceiptDate] 
 					,dblQty = 
-						CASE WHEN (loadShipmentLookup.strContainerNumber IS NULL) THEN
-							-- If there are no containers, reduce the in-transit qty based on how it was increased by Load Schedule. 
-							-t.dblQty 
-							ELSE
-								CASE		
-									-- If Gross/Net UOM is specified, use Net Weight as qty
-									WHEN ri.intWeightUOMId IS NOT NULL THEN
-										-dbo.fnCalculateQtyBetweenUOM(ri.intWeightUOMId, t.intItemUOMId, ri.dblNet)
-									-- If Gross/Net UOM is missing, then get the item/lot qty. 
-									ELSE
-										-dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, ri.dblOpenReceive)
-								END	
-							END
+						-t.dblQty 
+						--CASE 
+						--	WHEN (loadShipmentLookup.strContainerNumber IS NULL) THEN
+						--		-- If there are no containers, reduce the in-transit qty based on how it was increased by Load Schedule. 
+						--		-t.dblQty 
+						--	ELSE
+						--		CASE		
+						--			-- If Gross/Net UOM is specified, use Net Weight as qty
+						--			WHEN ri.intWeightUOMId IS NOT NULL THEN
+						--				-dbo.fnCalculateQtyBetweenUOM(ri.intWeightUOMId, t.intItemUOMId, ri.dblNet)
+						--			-- If Gross/Net UOM is missing, then get the item/lot qty. 
+						--			ELSE
+						--				-dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, ri.dblOpenReceive)
+						--		END	
+						--END
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
@@ -2004,6 +2006,53 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
+	
+	-- Process the decimal discrepancy
+	BEGIN 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+		)
+		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+			@strReceiptNumber = @strTransactionId
+			,@strBatchId = @strBatchId
+			,@GLEntries = @GLEntries
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END	
 END   
 
 --------------------------------------------------------------------------------------------  

@@ -24,17 +24,22 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[intExpenseAccountId]		INT NULL,
 	[intDepreciationAccountId]	INT NULL,
 	[intAccumulatedAccountId]	INT NULL,
-	[intGainLossAccountId]	INT NULL,
+	[intGainLossAccountId]		INT NULL,
+	[intDepreciationMethodId]	INT NULL,
 	[strManufacturerName]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strModelNumber]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAcquired]				BIT NULL,
 	[ysnDepreciated]			BIT NULL,
-	[ysnDisposed]				BIT NULL,	
+	[ysnTaxDepreciated]			BIT NULL,
 	[ysnFullyDepreciated]		BIT NULL,
+	[ysnTaxFullyDepreciated]	BIT NULL,
+	[ysnDisposed]				BIT NULL,	
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount2] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount3] FOREIGN KEY ([intDepreciationAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblFRBudget_tblGLAccount4] FOREIGN KEY ([intAccumulatedAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+	CONSTRAINT [FK_tblFRBudget_tblGLAccount4] FOREIGN KEY ([intAccumulatedAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId]) REFERENCES [dbo].[tblFADepreciationMethod] ([intDepreciationMethodId])
 );
+

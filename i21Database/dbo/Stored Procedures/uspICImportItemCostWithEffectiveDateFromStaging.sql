@@ -107,43 +107,18 @@ WHEN NOT MATCHED THEN
 
 --EXEC dbo.uspICUpdateItemImportedPricingLevel
 
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
-
-DECLARE @TotalImported INT
-DECLARE @LogId INT
-
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
-WHERE strUniqueId = @strIdentifier
-
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
+-- Logs 
+BEGIN 
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intRowsUpdated] 
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+		,intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
 END
-
----- Sync Pricing to Location to make sure all locations have corresponding price
---DECLARE @intItemId INT
---DECLARE @intUserId INT
---DECLARE cur CURSOR FOR
---SELECT DISTINCT intItemId, intCreatedByUserId FROM #tmp
-
---OPEN cur
-
---FETCH NEXT FROM cur INTO @intItemId, @intUserId
-
---WHILE @@FETCH_STATUS = 0
---BEGIN
---	EXEC dbo.uspICSyncItemLocationPricing @intItemId = @intItemId, @intUserId = @intUserId
---	FETCH NEXT FROM cur INTO @intItemId, @intUserId
---END
-
---CLOSE cur
---DEALLOCATE cur
 
 DROP TABLE #tmp
 DROP TABLE #output
