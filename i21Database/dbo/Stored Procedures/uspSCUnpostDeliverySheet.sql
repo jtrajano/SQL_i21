@@ -97,6 +97,14 @@ BEGIN TRY
 				FETCH NEXT FROM ticketCursor INTO @strTransactionId, @intInventoryAdjustmentId
 				WHILE @@FETCH_STATUS = 0  
 				BEGIN
+
+					if @intInventoryAdjustmentId > 0
+						exec uspSCDeliverySheetShrinkage @DeliverySheetId = @intDeliverySheetId
+														, @InventoryAdjustmentId = @intInventoryAdjustmentId
+														, @intEntityUserSecurityId = @intUserId
+														, @ysnPost = 0
+
+
 					EXEC uspICPostInventoryAdjustment 0, 0, @strTransactionId,@intUserId, @strBatchId OUTPUT
 
 					SELECT @dblAdjustByQuantity = dblNewQuantity FROM tblICInventoryAdjustmentDetail WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
