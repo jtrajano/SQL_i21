@@ -113,7 +113,7 @@ BEGIN
 									AND (WCD.intLoadContainerId IS NULL OR ISNULL(IRI.intContainerId, -1) = ISNULL(WCD.intLoadContainerId, -1))
 								WHERE WCD.intWeightClaimId = WC.intWeightClaimId) IR
 			WHERE L.intPurchaseSale = 1 
-				AND WC.intWeightClaimId = WC.intWeightClaimId
+				AND WC.intWeightClaimId = @intTransactionId
 		END
 		ELSE
 		BEGIN
