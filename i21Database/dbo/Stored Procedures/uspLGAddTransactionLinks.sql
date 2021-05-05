@@ -105,17 +105,15 @@ BEGIN
 				,strOperation = 'Create'
 			FROM tblLGWeightClaim WC
 				INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
-				OUTER APPLY (SELECT TOP 1 ysnWeightClaimsByContainer FROM tblLGCompanyPreference) CP
 				CROSS APPLY (SELECT TOP 1 IR.intInventoryReceiptId, IR.strReceiptNumber
-							 FROM tblICInventoryReceipt IR
+								FROM tblICInventoryReceipt IR
 								INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 								INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId AND LD.intPContractDetailId = IRI.intLineNo AND L.intLoadId = LD.intLoadId
 								LEFT JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId 
-									AND (WCD.intLoadContainerId IS NULL OR ISNULL(IRI.intContainerId, -1) = ISNULL(WCD.intLoadContainerId, -1)) 
-									AND CP.ysnWeightClaimsByContainer = 1
-							 WHERE WCD.intWeightClaimId = WC.intWeightClaimId) IR
+									AND (WCD.intLoadContainerId IS NULL OR ISNULL(IRI.intContainerId, -1) = ISNULL(WCD.intLoadContainerId, -1))
+								WHERE WCD.intWeightClaimId = WC.intWeightClaimId) IR
 			WHERE L.intPurchaseSale = 1 
-				AND WC.intWeightClaimId = @intTransactionId
+				AND WC.intWeightClaimId = WC.intWeightClaimId
 		END
 		ELSE
 		BEGIN
