@@ -9215,6 +9215,9 @@
     <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherDTN.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
+    <Build Include="dbo\Tables\tblICImportLogFromStaging.sql" />
+    <Build Include="dbo\Tables\tblICImportLogDetailFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateImportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
