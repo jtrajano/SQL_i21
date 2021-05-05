@@ -9211,9 +9211,10 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotSplit.sql" />
     <Build Include="dbo\Tables\tblIPLotSplitFeed.sql" />
-	  <Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherDTN.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddTransactionLinks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
