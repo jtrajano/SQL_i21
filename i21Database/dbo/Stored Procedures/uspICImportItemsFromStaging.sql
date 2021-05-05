@@ -1,4 +1,6 @@
-CREATE PROCEDURE uspICImportItemsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItem WHERE strImportIdentifier <> @strIdentifier
@@ -20,7 +22,7 @@ CREATE TABLE #tmp (
 	  intId INT IDENTITY(1, 1) PRIMARY KEY
 	, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, strType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	, strStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, intLifeTime INT NULL
 	, strShortName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
@@ -534,46 +536,46 @@ WHEN NOT MATCHED THEN
 	)
 	OUTPUT deleted.strItemNo, $action, inserted.strItemNo INTO #output;
 ;
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
 
-/* LOGS */
+-- Logs 
+BEGIN 
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intRowsUpdated] 
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+		,intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
 
-DECLARE @TotalImported INT
-DECLARE @LogId INT
-
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0)
-FROM tblICImportLog
-WHERE strUniqueId = @strIdentifier
-
--- Validate Incompatible inventory types of items vs. categories
-INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-SELECT @LogId, 1, 'Category', 'Import Failed.', ISNULL(c.strCategoryCode, ''), 'Invalid category type "' + ISNULL(c.strInventoryType, '') + '" for item "' + ISNULL(s.strItemNo, '') + '"', 'Failed', 'Error', 1
-FROM tblICImportStagingItem s
-	LEFT OUTER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
-WHERE s.strImportIdentifier = @strIdentifier
-	AND LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory')))) = LTRIM(RTRIM(LOWER(c.strInventoryType)))
-
-UPDATE l
-SET l.intTotalErrors = x.Errors
-FROM tblICImportLog l
-INNER JOIN (
-	SELECT l.intImportLogId, COUNT(d.intImportLogDetailId) Errors
-	FROM tblICImportLog l
-		INNER JOIN tblICImportLogDetail d ON d.intImportLogId = l.intImportLogId
-	WHERE l.strUniqueId = @strIdentifier
-		AND d.strType = 'Error'
-	GROUP BY l.intImportLogId 
-) x ON l.intImportLogId = x.intImportLogId
-
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Finished', 'Warning', 1
+	-- Validate Incompatible inventory types of items vs. categories
+	INSERT INTO tblICImportLogDetailFromStaging(
+		strUniqueId
+		, intRecordNo
+		, strField
+		, strAction
+		, strValue
+		, strMessage
+		, strStatus
+		, strType
+		, intConcurrencyId
+	)
+	SELECT 
+		@strIdentifier
+		, 1
+		, 'Category'
+		, 'Import Failed.'
+		, ISNULL(c.strCategoryCode, '')
+		, 'Invalid category type "' + ISNULL(c.strInventoryType, '') + '" for item "' + ISNULL(s.strItemNo, '') + '"', 'Failed', 'Error', 1
+	FROM 
+		tblICImportStagingItem s INNER JOIN tblICCategory c 
+			ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
+	WHERE 
+		s.strImportIdentifier = @strIdentifier
+		AND LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory')))) <> LTRIM(RTRIM(LOWER(c.strInventoryType)))
 END
+
 DROP TABLE #tmp
 DROP TABLE #output
 

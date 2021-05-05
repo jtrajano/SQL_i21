@@ -148,25 +148,6 @@ WHEN NOT MATCHED THEN
 
 EXEC dbo.uspICUpdateItemImportedPricingLevel
 
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
-
-DECLARE @TotalImported INT
-DECLARE @LogId INT
-
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
-WHERE strUniqueId = @strIdentifier
-
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
-END
-
 -- Sync Pricing to Location to make sure all locations have corresponding price
 DECLARE @intItemId INT
 DECLARE @intUserId INT
@@ -185,6 +166,19 @@ END
 
 CLOSE cur
 DEALLOCATE cur
+
+-- Logs 
+BEGIN 
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intRowsUpdated] 
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+		,intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
+END
 
 DROP TABLE #tmp
 DROP TABLE #output
