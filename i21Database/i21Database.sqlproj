@@ -9350,6 +9350,9 @@
     <Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotSplit.sql" />
     <Build Include="dbo\Tables\tblIPLotSplitFeed.sql" />
+    <Build Include="dbo\Tables\tblICImportLogFromStaging.sql" />
+    <Build Include="dbo\Tables\tblICImportLogDetailFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateImportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

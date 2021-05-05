@@ -428,51 +428,25 @@ CLOSE cur
 DEALLOCATE cur
 
 _exit_with_error:
-
-IF ISNULL(@row_errors, 0) <> 0 
-BEGIN 
-	-- Create/Update the import logs. 
-	UPDATE l
-	SET 
-		l.strDescription = 'Import Failed'
-	FROM 
-		tblICImportLog l
-	WHERE 
-		l.strUniqueId = @strIdentifier
-END
-
 _clean_up: 
+
+DELETE 
+FROM 
+	tblICImportStagingOpeningBalance 
+WHERE 
+	strImportIdentifier = @strIdentifier
+	
+-- Logs 
 BEGIN 
-	IF ISNULL(@row_inserted, 0) = 0 AND @LogId IS NOT NULL
-	BEGIN
-		INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-		SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Failed', 'Warning', 1
-
-		SET @row_warnings = ISNULL(@row_warnings, 0) + 1
-	END
-
-	IF ISNULL(@row_inserted, 0) <> 0 AND @LogId IS NOT NULL AND ISNULL(@row_errors, 0) = 0
-	BEGIN
-		INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-		SELECT @LogId, 0, 'Import finished.', ' ', 'Import Succesful', 'Success', 'Success', 1
-	END
-
-	-- Create/Update the import logs. 
-	UPDATE l
-	SET 
-		l.intRowsImported = ISNULL(@row_inserted, 0)
-		,l.intTotalErrors = ISNULL(@row_errors, 0) 
-		,l.intTotalWarnings = ISNULL(@row_warnings, 0) 
-	FROM 
-		tblICImportLog l
-	WHERE 
-		l.strUniqueId = @strIdentifier	
-
-	DROP TABLE #tmp
-
-	DELETE 
-	FROM 
-		tblICImportStagingOpeningBalance 
-	WHERE 
-		strImportIdentifier = @strIdentifier
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intTotalErrors]
+		,[intTotalWarnings]
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = ISNULL(@row_inserted, 0)
+		,intTotalErrors = ISNULL(@row_errors, 0) 
+		,intTotalWarnings = ISNULL(@row_warnings, 0)
 END
