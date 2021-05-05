@@ -125,7 +125,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0)
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0)
 			BEGIN
 				INSERT INTO @PaymentSchedule ([intBillId],
 					[intTermsId],
@@ -142,7 +143,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 AND ISNULL(@dblDeferredAmt4, 0) > 0)
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 AND ISNULL(@dblDeferredAmt4, 0) > 0)
 			BEGIN
 				INSERT INTO @PaymentSchedule ([intBillId],
 					[intTermsId],
@@ -159,7 +161,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
 				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0)
 			BEGIN
 				INSERT INTO @PaymentSchedule ([intBillId],
@@ -177,7 +180,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
 				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
 				AND ISNULL(@dblDeferredAmt6, 0) > 0)
 			BEGIN
@@ -196,7 +200,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
 				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
 				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0)
 			BEGIN
@@ -215,7 +220,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
 				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
 				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
 				AND ISNULL(@dblDeferredAmt8, 0) > 0)
@@ -235,7 +241,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
 				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
 				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
 				AND ISNULL(@dblDeferredAmt8, 0) > 0 AND ISNULL(@dblDeferredAmt9, 0) > 0)
@@ -255,7 +262,8 @@ BEGIN
 					ysnScheduleDiscountOverride = 0,
 					dblDiscount = 0
 			END
-			ELSE IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
+			
+			IF(ISNULL(@dblDeferredAmt2, 0) > 0 AND ISNULL(@dblDeferredAmt3, 0) > 0 
 				AND ISNULL(@dblDeferredAmt4, 0) > 0 AND ISNULL(@dblDeferredAmt5, 0) > 0 
 				AND ISNULL(@dblDeferredAmt6, 0) > 0 AND ISNULL(@dblDeferredAmt7, 0) > 0
 				AND ISNULL(@dblDeferredAmt8, 0) > 0 AND ISNULL(@dblDeferredAmt9, 0) > 0
