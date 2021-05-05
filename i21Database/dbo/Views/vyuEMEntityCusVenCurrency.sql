@@ -15,6 +15,9 @@
 	strCustomerCurrency = f.strCurrency,
 	ysnCustomer = b.Customer
 
+	,ysnVendorActive = cast(isnull(c.ysnPymtCtrlActive, 0) as bit)
+	,ysnCustomerActive = cast(isnull(d.ysnActive, 0) as bit)
+
 
 	from tblEMEntity a
 		join vyuEMEntityType b

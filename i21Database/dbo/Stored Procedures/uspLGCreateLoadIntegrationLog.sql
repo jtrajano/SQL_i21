@@ -109,7 +109,7 @@ BEGIN TRY
 				,strRowState
 				,dtmFeedCreated
 				)
-			SELECT intLoadId
+			SELECT L.intLoadId
 				,strShipmentType = CASE L.intShipmentType
 					WHEN 1
 						THEN 'Shipment'
@@ -119,33 +119,15 @@ BEGIN TRY
 						THEN 'Vessel Nomination'
 					ELSE ''
 					END COLLATE Latin1_General_CI_AS
-				,strLoadNumber
-				,CASE 
-					WHEN ISNULL(L.strShippingInstructionNumber, '') = ''
-						THEN L.strLoadNumber
-					ELSE L.strShippingInstructionNumber
-					END
-				,strContractBasis = (
-					SELECT TOP 1 CB.strContractBasis
-					FROM tblCTContractHeader CH
-					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					WHERE LD.intLoadId = L.intLoadId
-					)
-				,strContractBasisDesc = (
-					SELECT TOP 1 CB.strDescription
-					FROM tblCTContractHeader CH
-					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					WHERE LD.intLoadId = L.intLoadId
-					)
+				,L.strLoadNumber
+				,strShippingInstructionNumber = ISNULL(LSI.strLoadNumber, L.strLoadNumber)
+				,strContractBasis = CB.strContractBasis
+				,strContractBasisDesc = CB.strDescription
 				,L.strBLNumber
-				,L.strShippingLine
+				,strShippingLine = E.strName
 				,V.strVendorAccountNum
 				,L.strExternalShipmentNumber
-				,'015' AS strDateQualifier
+				,strDateQualifier = '015'
 				,L.dtmScheduledDate
 				,L.strMVessel
 				,L.strMVoyageNumber
@@ -157,10 +139,19 @@ BEGIN TRY
 				,L.dtmBLDate
 				,@strRowState
 				,GETDATE()
-			FROM vyuLGLoadView L
+			FROM tblLGLoad L
 			LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
-			WHERE intLoadId = @intLoadId
+			OUTER APPLY (
+					SELECT TOP 1 CB.strContractBasis, CB.strDescription
+					FROM tblCTContractHeader CH
+					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
+					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+					WHERE LD.intLoadId = L.intLoadId
+					) CB
+			WHERE L.intLoadId = @intLoadId
 
 			SELECT @intLoadStgId = SCOPE_IDENTITY()
 

@@ -156,7 +156,10 @@ BEGIN TRY
 				CD.dblQuantityPerLoad,
 				CD.intBookId,	
 				CD.intSubBookId,
-				CD.dblFutures	
+				CD.dblFutures,
+				CD.intContractStatusId,
+				ysnLoad = isnull(CH.ysnLoad	,0),
+				intHeaderPricingTypeId = CH.intPricingTypeId
 		
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
@@ -236,7 +239,10 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.dblQuantityPerLoad,
 				CH.intBookId,	
 				CH.intSubBookId,
-				CD.dblFutures	
+				CD.dblFutures,
+				CD.intContractStatusId,
+				ysnLoad = isnull(CH.ysnLoad	,0),
+				intHeaderPricingTypeId = CH.intPricingTypeId
 
 		INTO	#MultiPriceFixation
 		FROM	#tblCTPriceFixation			PF	

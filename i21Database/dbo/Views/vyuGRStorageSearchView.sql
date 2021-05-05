@@ -108,6 +108,8 @@ SELECT DISTINCT
 	,strStorageTransactionNumber = CS.strStorageTicketNumber
 	,CS.dblBasis
 	,CS.dblSettlementPrice
+	--,intTicketPricingTypeId = ISNULL(CH.intPricingTypeId, -99)
+	,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
@@ -152,7 +154,7 @@ LEFT JOIN tblEMEntitySplit EMSplit
 	ON EMSplit.intSplitId = SC.intSplitId 
 		OR EMSplit.intSplitId = DeliverySheet.intSplitId
 LEFT JOIN tblCTContractDetail CD
-    ON CD.intContractDetailId = SC.intContractId  
+    ON CD.intContractDetailId = IRI.intContractDetailId
 LEFT JOIN tblCTContractHeader CH 
     ON CH.intContractHeaderId = CD.intContractHeaderId  
 LEFT JOIN (

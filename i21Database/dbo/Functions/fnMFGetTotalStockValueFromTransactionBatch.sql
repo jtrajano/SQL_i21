@@ -15,7 +15,7 @@ BEGIN
 	-- Get the total value of items from a batch of inventory transaction
 	SELECT	@Value = SUM(
 					CAST(
-						dbo.fnMultiply(A.dblQty, A.dblCost) + ISNULL(A.dblValue, 0) 
+						ROUND(dbo.fnMultiply(A.dblQty, A.dblCost) + ISNULL(A.dblValue, 0),2) 
 						AS NUMERIC(18, 6)
 					) 
 			) 

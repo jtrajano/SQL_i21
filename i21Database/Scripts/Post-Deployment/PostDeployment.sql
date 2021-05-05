@@ -94,6 +94,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_DeleteDuplicateUserPreference.sql
 :r .\SM\2010_RemoveF9Shortcut.sql
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
+:r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 
 
 -- Canned Report
@@ -228,14 +229,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
-
--- Cash Management
-:r .\CM\1_BankTransactionTypes.sql
-:r .\CM\2_DataImportStatus.sql
-:r .\CM\3_PopulateSourceSystemData.sql
-:r .\CM\4_DataFix.sql
-:r .\CM\5_UndepositedFund.sql
-:r .\CM\7_AlterCashProjectionView.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
@@ -402,7 +395,12 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\GR_FarmField.sql
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
+:R .\GR\StorageHistoryPaidAmount.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
+
+:R .\GR\1920_Dev_Linking_Voucher_Discount.sql
+:R .\GR\StorageInventoryReceipt.sql
+:R .\GR\Fix_NULL_SSId_in_voucher_details.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -637,6 +635,15 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
+
+
+-- Cash Management
+:r .\CM\1_BankTransactionTypes.sql
+:r .\CM\2_DataImportStatus.sql
+:r .\CM\3_PopulateSourceSystemData.sql
+:r .\CM\4_DataFix.sql
+:r .\CM\5_UndepositedFund.sql
+:r .\CM\7_AlterCashProjectionView.sql
 
 
 print 'END POST DEPLOYMENT'

@@ -16,9 +16,11 @@ DECLARE @intEntityCustomerId	INT	= NULL
 	  , @ysnPosted				BIT	= 0
 	  , @strErrorMessage		NVARCHAR(MAX)
 	  , @ZeroDecimal			NUMERIC(18, 6)	= 0
+	  , @dtmPostDate			DATETIME = NULL
 
 SELECT @intEntityCustomerId	= intEntityCustomerId
 	 , @ysnPosted			= ysnPosted
+	 , @dtmPostDate			= dtmPostDate
 FROM tblARInvoice
 WHERE intInvoiceId = @InvoiceId
 
@@ -99,6 +101,7 @@ BEGIN TRY
 	  AND intEntityCustomerId = @intEntityCustomerId
 	  AND dblAmountDue > 0
 	  AND intInvoiceId <> @InvoiceId
+	  AND dtmPostDate <= @dtmPostDate
 
 	--GET OPEN PREPAIDS
 	SELECT intInvoiceId			= OP.intInvoiceId
@@ -115,6 +118,7 @@ BEGIN TRY
 	  AND OP.intEntityCustomerId = @intEntityCustomerId
 	  AND OP.dblAmountDue > 0
 	  AND OP.intInvoiceId <> @InvoiceId
+	  AND dtmPostDate <= @dtmPostDate
 
 	--GET UN-RESTRICTED PREPAIDS
 	SELECT intInvoiceId			= OP.intInvoiceId

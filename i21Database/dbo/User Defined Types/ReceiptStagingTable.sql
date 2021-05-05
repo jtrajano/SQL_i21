@@ -56,6 +56,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intSort] INT NULL
 	,[dblUnitRetail] NUMERIC(38, 20) NULL 
 	,[ysnAllowVoucher] BIT NULL
+	,[ysnAddPayable] BIT NULL
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	

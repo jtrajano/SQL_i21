@@ -400,7 +400,7 @@ BEGIN
 		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.dblAmountPaid = 0
-		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
+		AND LOWER(B.strPaymentMethod) NOT IN ('ach','debit memos and payments')
 
 		--DO NOT ALLOW TO POST PAYMENT IF IT HAS ASSOCIATED PREPAYMENT FOR CONTRACT OR IT IS RESTRICTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -620,6 +620,23 @@ BEGIN
 		WHERE 
 			A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND payDetails.dblPayment != A.dblAmountPaid
+
+		--DO NOT ALLOW DISCOUNT FOR VOUCHER WITH NO DISCOUNT ACCOUNT IN ITS LOCATION
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Location of ' + B.strBillId + ' has no Purchase Discount Account setup.',
+			'Payable',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intShipToId
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND PD.dblPayment <> 0
+		AND PD.dblDiscount <> 0
+		AND CL.intDiscountAccountId IS NULL
+
 	END
 	ELSE
 	BEGIN

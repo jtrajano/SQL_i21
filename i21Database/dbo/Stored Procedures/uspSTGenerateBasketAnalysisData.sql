@@ -46,7 +46,7 @@ FROM tblSTTranslogRebates AS trans
 INNER JOIN tblSTStore AS store
 ON trans.intStoreId = store.intStoreId
 INNER JOIN tblICItemUOM uom
-ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPCwithoutCheckDigit AS FLOAT)) = LEFT(uom.intUpcCode, LEN(uom.intUpcCode) - 1)
+ON CAST(strTrlUPCwithoutCheckDigit AS FLOAT) = LEFT(uom.intUpcCode, LEN(uom.intUpcCode) - 1)
 INNER JOIN tblICItem item
 ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
@@ -123,12 +123,10 @@ END
 --DATE--
 IF(ISNULL(@dtmBeginDate,'') != '' AND ISNULL(@dtmEndDate,'') != '')
 BEGIN
-	IF(@dtmBeginDate != @ValueMinDate AND @dtmEndDate != @ValueMaxDate) 
-	BEGIN
-		SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldDate + @CharSpace + @CharSpace + @CharBetween + @CharSpace + @CharStartMinDate + @CharSQuote + @dtmBeginDate + @CharSQuote + @CharEndMinDate + @CharSpace + @CharAnd + @CharSpace + @CharStartMaxDate + @CharSQuote + @dtmEndDate + @CharSQuote + @CharEndMaxDate
-		SET @CharConjunction = @CharAnd
-	END
+	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldDate + @CharSpace + @CharSpace + @CharBetween + @CharSpace + @CharStartMinDate + @CharSQuote + @dtmBeginDate + @CharSQuote + @CharEndMinDate + @CharSpace + @CharAnd + @CharSpace + @CharStartMaxDate + @CharSQuote + @dtmEndDate + @CharSQuote + @CharEndMaxDate
+	SET @CharConjunction = @CharAnd
 END
+
 
 --STRING--
 IF(ISNULL(@strDistrict,'') != '')

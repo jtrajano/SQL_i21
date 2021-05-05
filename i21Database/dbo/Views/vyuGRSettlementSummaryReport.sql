@@ -5,7 +5,7 @@ SELECT
 	,strPaymentNo				    = strPaymentNo
 	,InboundNetWeight			    = SUM(InboundNetWeight)
 	,InboundGrossDollars		    = SUM(InboundGrossDollars)
-	,InboundTax					    = SUM(InboundTax)
+	,InboundTax					    = SUM(InboundTax) + isnull(AdditionalTax.dblTax,0)
 	,InboundDiscount			    = SUM(InboundDiscount)
 	,InboundNetDue				    = SUM(InboundNetDue)
 	,OutboundNetWeight			    = OutboundNetWeight		
@@ -14,7 +14,7 @@ SELECT
 	,OutboundDiscount			    = OutboundDiscount		
 	,OutboundNetDue				    = OutboundNetDue			
 	,SalesAdjustment			    = SalesAdjustment	
-	,VoucherAdjustment			    = VoucherAdjustment
+	,VoucherAdjustment			    = SUM(VoucherAdjustment)
 	,dblVendorPrepayment		    = SUM(dblVendorPrepayment)	 
 	,lblVendorPrepayment		    = lblVendorPrepayment		 
 	,dblCustomerPrepayment		    = dblCustomerPrepayment		 
@@ -51,7 +51,12 @@ FROM
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTax
 												END
-											)
+											) +
+											-- Include tax for discounts/other charges
+											CASE 
+												WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
+												ELSE ISNULL(BillByReceipt.dblTax, 0)
+											END
 		,InboundDiscount				= CASE 
 											WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 											ELSE ISNULL(BillByReceipt.dblTotal, 0)
@@ -62,13 +67,18 @@ FROM
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal + BillDtl.dblTax +BillDtl.dblDiscount
 												END
-											) +
+											) +											
 											( 
 												CASE 													
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
 												END
-											)
+											) +
+											-- Include tax for discounts/other charges
+											CASE 
+												WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTax,0) 
+												ELSE ISNULL(BillByReceipt.dblTax, 0)
+											END
 		,OutboundNetWeight				= 0
 		,OutboundGrossDollars			= 0
 		,OutboundTax					= 0
@@ -101,6 +111,7 @@ FROM
 											ELSE NULL 
 										END
 		,CheckAmount				  = PYMT.dblAmountPaid
+		,intMark					  = 1
 	FROM tblAPPayment PYMT 
 	JOIN tblAPPaymentDetail PYMTDTL 
 		ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -114,6 +125,7 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			SUM(dblAmount) dblTotal
+			,SUM(dblTax) dblTax
 			,strId
 			,intBillDetailId
 		FROM vyuGRSettlementSubReport 
@@ -137,6 +149,7 @@ FROM
 			a.intBillId
 			,a.intInventoryReceiptItemId
 			,SUM(a.dblTotal) dblTotal
+			,SUM(a.dblTax) dblTax
 		FROM tblAPBillDetail a 
 			join tblAPBill  b
 				on a.intBillId = b.intBillId --and b.intTransactionType = 1
@@ -147,14 +160,14 @@ FROM
 		AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	LEFT JOIN (
 		SELECT 
-			intPaymentId
+			Bill.intBillId
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 
 				AND Bill.intTransactionType = 3
-		GROUP BY intPaymentId
-	) BillByReceiptItem ON BillByReceiptItem.intPaymentId = PYMT.intPaymentId			 
+		GROUP BY Bill.intBillId
+	) BillByReceiptItem ON BillByReceiptItem.intBillId = Bill.intBillId			 
 	LEFT JOIN (
 		SELECT 
 			PYMT.intPaymentId
@@ -170,25 +183,30 @@ FROM
 		WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL
 		GROUP BY PYMT.intPaymentId
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			 
-	LEFT JOIN (
+	OUTER APPLY (
 		SELECT 
 			a.intBillId
 			,SUM(a.dblAmountApplied * - 1) AS dblVendorPrepayment
 		FROM tblAPAppliedPrepaidAndDebit a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  not in (13, 3)
 		WHERE a.ysnApplied = 1
+		AND b.intBillId = Bill.intBillId
 		GROUP BY a.intBillId		
 
 		union 
 		select 
-			intBillId,
-			dblTotal
+			ap.intBillId,
+			[dblVendorPrepayment] = (ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
 		from 
-		tblAPBill 
-		where intTransactionType = 2 
+		tblAPBill ap
+		inner join tblAPPaymentDetail pay
+			ON pay.intBillId = ap.intBillId
+		where ap.intTransactionType = 2
+		and ap.intBillId = Bill.intBillId
+		and pay.intPaymentId = PYMT.intPaymentId
 		
 
 		
-	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
+	) VendorPrepayment
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
@@ -220,16 +238,18 @@ FROM
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
 	) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
-	WHERE (
+	WHERE ((
 			BillDtl.intInventoryReceiptChargeId IS NOT NULL
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
 		)
-		AND Item.strType <> 'Other Charge' 
+		AND Item.strType <> 'Other Charge' )
+		OR Bill.intTransactionType = 2
 	GROUP BY 
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
 		,Bill.strBillId
 		,BillByReceipt.dblTotal
+		,BillByReceipt.dblTax
 		,Invoice.dblPayment
 		,BillByReceiptItem.dblTotal
 		,VendorPrepayment.dblVendorPrepayment
@@ -242,6 +262,7 @@ FROM
 		,BillDtl.intCustomerStorageId
 		,BillDtl.intInventoryReceiptItemId
 		,tblOtherCharge.dblTotal
+		,tblOtherCharge.dblTax
 		,BillDtl.intInventoryReceiptChargeId
 		,BasisPayment.dblVendorPrepayment
 	--------------------------------------------------------
@@ -272,13 +293,14 @@ FROM
 													ELSE BillDtl.dblTax
 												END
 											)
+											+ ISNULL(tblOtherCharge.dblTax,0)
 		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal,0) 
 		,InboundNetDue					= SUM(
 												CASE 
 													WHEN Bill.intTransactionType = 2 then 0													
 													ELSE BillDtl.dblTotal + BillDtl.dblTax + isnull(tblOtherCharge.dblTotal, 0)
 												END
-											) 
+											) + ISNULL(tblOtherCharge.dblTax,0)
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
@@ -307,7 +329,8 @@ FROM
 										END
 		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepayment			= sum(ISNULL(BasisPayment.dblVendorPrepayment,0))
-		,CheckAmount				    = PYMT.dblAmountPaid 		    
+		,CheckAmount				    = PYMT.dblAmountPaid 
+		,intMark					  	= 2	    
 	FROM tblAPPayment PYMT 
 	JOIN tblAPPaymentDetail PYMTDTL	
 		ON PYMT.intPaymentId = PYMTDTL.intPaymentId
@@ -321,6 +344,7 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			SUM(dblAmount) dblTotal
+			,SUM(dblTax) dblTax
 			,strId
 			,intBillDetailId
 		FROM vyuGRSettlementSubReport
@@ -348,7 +372,7 @@ FROM
 	) tblTax ON tblTax.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
-			intPaymentId
+			Bill.intBillId
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
@@ -358,8 +382,8 @@ FROM
 			ON BD.intBillId = Bill.intBillId
 				AND BD.intCustomerStorageId IS NULL
 				AND BD.intSettleStorageId IS NULL
-		GROUP BY intPaymentId
-	) tblAdjustment ON tblAdjustment.intPaymentId = PYMT.intPaymentId			
+		GROUP BY Bill.intBillId
+	) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT
 			PYMT.intPaymentId
@@ -374,23 +398,28 @@ FROM
 				AND B.strType = 'Other Charge'
 		GROUP BY PYMT.intPaymentId
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			
-	LEFT JOIN (
+	OUTER APPLY (
 		SELECT
 			a.intBillId
 			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
 		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType not  in (13, 3)
 		WHERE a.ysnApplied = 1
+		AND b.intBillId = Bill.intBillId
 		GROUP BY a.intBillId
 			
 		union 
 		select 
-			intBillId,
-			dblTotal
+			ap.intBillId,
+			[dblVendorPrepayment] = (ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
 		from 
-		tblAPBill 
-		where intTransactionType = 2 
+		tblAPBill ap
+		inner join tblAPPaymentDetail pay
+			ON pay.intBillId = ap.intBillId
+		where ap.intTransactionType = 2
+		and ap.intBillId = Bill.intBillId
+		and pay.intPaymentId = PYMT.intPaymentId
 
-	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId			
+	) VendorPrepayment		
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
@@ -425,6 +454,7 @@ FROM
 		,PYMT.strPaymentRecordNum
 		,Bill.strBillId
 		,tblOtherCharge.dblTotal
+		,tblOtherCharge.dblTax
 		,Invoice.dblPayment
 		,tblAdjustment.dblTotal
 		,VendorPrepayment.dblVendorPrepayment
@@ -436,6 +466,31 @@ FROM
 		,PYMT.dblAmountPaid	
 		--,BasisPayment.dblVendorPrepayment					
 ) t
+
+--This is added for GRN-2639
+-- The focus of this fix is for the tax part of the settlement report
+-- the issue is that the manually added other charge item is used to offset the tax
+-- we cannot link those taxes to the settlement because we do not have link to it. 
+-- so the best way, I think, is to get all the tax and just add it at the end of this query.
+-- Only applicable to the scale part :) 
+-- MonGonzales 20210414
+outer apply (
+	select 
+		sum(BillDetail.dblTax) dblTax
+	from tblAPPaymentDetail PaymentDetail
+		join tblAPBillDetail BillDetail
+			on BillDetail.intBillId = PaymentDetail.intBillId
+		join tblICItem Item
+			on Item.intItemId = BillDetail.intItemId
+				and Item.strType = 'Other Charge'
+		join tblAPPayment Payment
+			on PaymentDetail.intPaymentId = Payment.intPaymentId
+		where Payment.intPaymentId = t.intPaymentId
+			and ((BillDetail.intCustomerStorageId is null and BillDetail.intSettleStorageId is null) or (BillDetail.intScaleTicketId is null))
+			and t.intMark = 1
+			and BillDetail.ysnStage = 0
+) AdditionalTax
+
 GROUP BY 			
 	intPaymentId	
 	,strPaymentNo
@@ -445,7 +500,7 @@ GROUP BY
 	,OutboundDiscount		
 	,OutboundNetDue			
 	,SalesAdjustment	
-	,VoucherAdjustment		 
+	-- ,VoucherAdjustment		 
 	,lblVendorPrepayment		 
 	,dblCustomerPrepayment		 
 	,lblCustomerPrepayment		 
@@ -455,6 +510,7 @@ GROUP BY
 	,lblPartialPrepayment		 
 	--,dblPartialPrepayment		 
 	,CheckAmount
+	,AdditionalTax.dblTax
 GO
 
 

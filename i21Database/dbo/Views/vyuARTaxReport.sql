@@ -37,7 +37,10 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTaxable       		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN 0 
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  ELSE 0.000000
+													 END
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
@@ -48,7 +51,10 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) +
 											(CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  ELSE 0.000000
+													 END
 												ELSE 0.000000 
 											END))
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
@@ -122,7 +128,7 @@ INNER JOIN (
 		 , strItemNo				= ITEM.strItemNo
 		 , strCategoryCode			= CATEGORY.strCategoryCode
 		 , intTaxClassId			= IDT.intTaxClassId
-		 , intSalesTaxAccountId		= TAXCODE.intSalesTaxAccountId
+		 , intSalesTaxAccountId		= IDT.intSalesTaxAccountId
 		 , intPurchaseTaxAccountId	= TAXCODE.intPurchaseTaxAccountId
 		 , intCategoryId			= ITEM.intCategoryId
 		 , intTaxCodeCount			= ISNULL(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount)
@@ -139,8 +145,9 @@ INNER JOIN (
 			 , dblAdjustedTax		
 			 , dblTax				
 			 , ysnTaxExempt
-			 ,ysnTaxAdjusted
+			 , ysnTaxAdjusted
 			 , ysnInvalidSetup
+			 , intSalesTaxAccountId
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	LEFT JOIN (
@@ -210,7 +217,7 @@ INNER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
 		FROM dbo.tblGLAccount WITH (NOLOCK)
-	) SALESACCOUNT ON TAXCODE.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
+	) SALESACCOUNT ON IDT.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
 	LEFT OUTER JOIN (
 		SELECT intAccountId
 			 , strAccountId 

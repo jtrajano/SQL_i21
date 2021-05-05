@@ -11,3 +11,11 @@
     CONSTRAINT [PK_tblGRDiscountScheduleLine] PRIMARY KEY ([intDiscountScheduleLineId]), 
     CONSTRAINT [FK_tblGRDiscountScheduleLine_tblGRDiscountScheduleCode] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId]) ON DELETE CASCADE  
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGRDiscountScheduleLine_intDiscountScheduleCodeId] ON [dbo].[tblGRDiscountScheduleLine]
+(
+	[intDiscountScheduleCodeId] ASC
+)
+INCLUDE([intDiscountScheduleLineId],[dblRangeStartingValue],[dblRangeEndingValue],[dblIncrementValue],[dblDiscountValue],[dblShrinkValue],[intConcurrencyId]) 
+GO

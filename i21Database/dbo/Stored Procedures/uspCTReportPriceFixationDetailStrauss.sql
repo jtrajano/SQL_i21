@@ -58,7 +58,7 @@ BEGIN TRY
 			strFutMarketName = MA.strFutMarketName,
 			MO.strFutureMonth,
 			dblNoOfLots = dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]),
-			strPrice = dbo.fnCTChangeNumericScale(PD.dblFutures,2) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
+			strPrice = dbo.fnCTChangeNumericScale(PD.dblFutures,4) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
 			PD.strNotes
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId

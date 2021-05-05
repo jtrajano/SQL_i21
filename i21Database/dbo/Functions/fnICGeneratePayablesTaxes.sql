@@ -59,14 +59,19 @@ BEGIN
 				,dblTax						= 
 					CASE 
 						--WHEN voucherItems.ysnReturn = 1 THEN -ItemTax.dblTax
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ItemTax.dblTax
-						ELSE ItemTax.dblTax
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-ROUND(dbo.fnMultiply(ItemTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+						ELSE 							
+							ROUND(dbo.fnMultiply(ItemTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
 					END
+
 				,dblAdjustedTax				= 
 					CASE 
 						--WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ItemTax.dblAdjustedTax, 0)
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ISNULL(ItemTax.dblAdjustedTax, 0)
-						ELSE ISNULL(ItemTax.dblAdjustedTax, 0)
+						WHEN @billTypeToUse = @type_DebitMemo THEN 							
+							-ROUND(dbo.fnMultiply(ItemTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+						ELSE 
+							ROUND(dbo.fnMultiply(ItemTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
 					END
 				,ysnTaxAdjusted				= ItemTax.ysnTaxAdjusted
 				,ysnSeparateOnBill			= ItemTax.ysnSeparateOnInvoice
@@ -93,16 +98,49 @@ BEGIN
 				,intAccountId				= ChargeTax.intTaxAccountId
 				,dblTax						= 
 					CASE 
-						--WHEN voucherItems.ysnReturn = 1 THEN -ChargeTax.dblTax
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ChargeTax.dblTax
-						ELSE ChargeTax.dblTax
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2) 
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
+							
+						ELSE 
+							(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2) 
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
 					END 
+
 				,dblAdjustedTax				= 
 					CASE 
-						--WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ChargeTax.dblAdjustedTax, 0)
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ISNULL(ChargeTax.dblAdjustedTax, 0)
-						ELSE ISNULL(ChargeTax.dblAdjustedTax, 0)
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
+						ELSE 
+							(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
 					END 
+
 				,ysnTaxAdjusted				= ChargeTax.ysnTaxAdjusted
 				,ysnSeparateOnBill			= 0
 				,ysnCheckoffTax				= ChargeTax.ysnCheckoffTax
@@ -110,6 +148,8 @@ BEGIN
 				,ysnTaxOnly					= ChargeTax.ysnTaxOnly
 		FROM 
 			tblICInventoryReceiptChargeTax ChargeTax
+			INNER JOIN tblICInventoryReceiptCharge Charge
+				ON ChargeTax.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
 			INNER JOIN @voucherItems voucherItems 
 				ON voucherItems.intInventoryReceiptChargeId = ChargeTax.intInventoryReceiptChargeId
 			INNER JOIN tblICItem Item 

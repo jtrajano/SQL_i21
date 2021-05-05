@@ -170,6 +170,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
 	,[ysnConvertToStockUOM]
@@ -321,6 +322,7 @@ SELECT
 	,[intStorageScheduleTypeId]			= [intStorageScheduleTypeId]
 	,[intDestinationGradeId]			= [intDestinationGradeId]
 	,[intDestinationWeightId]			= [intDestinationWeightId]
+	,[intPriceFixationDetailId]			= [intPriceFixationDetailId]
     ,[strAddonDetailKey]                = [strAddonDetailKey]
     ,[ysnAddonParent]                   = [ysnAddonParent]
 	,[ysnConvertToStockUOM]				= [ysnConvertToStockUOM]
@@ -1039,6 +1041,35 @@ WHERE
 	AND NOT EXISTS (SELECT NULL FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL)
 
 INSERT INTO #ARInvalidInvoiceRecords
+	([intId]
+	,[strMessage]		
+	,[strTransactionType]
+	,[strType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'Duplicate Ticket Number found ' + ITG.[strSourceId] +  '.' +  ' This file may not be imported until all Ticket Numbers are unique.'
+	,[strTransactionType]	= ITG.[strTransactionType]
+	,[strType]				= ITG.[strType]
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intInvoiceId]			= ITG.[intInvoiceId]
+FROM
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
+	INNER JOIN (
+		SELECT COUNT(strSourceId)[SourceCount],strSourceId FROM  @InvoicesToGenerate GROUP BY strSourceId 
+	)ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
+	WHERE ID.SourceCount > 1
+	AND [strType] <> 'POS'
+	AND ITG.[strSourceTransaction] <> 'Store Charge'
+
+
+
+INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
     ,[strMessage]		
     ,[strTransactionType]
@@ -1467,7 +1498,7 @@ SELECT
 	,[intOriginalInvoiceId]			= ITG.[intOriginalInvoiceId]
 	,[intLoadId]                    = ITG.[intLoadId]
 	,[intEntityId]					= ITG.[intEntityId]
-	,[intEntityContactId]			= ITG.[intEntityContactId]
+	,[intEntityContactId]			= ISNULL(ITG.[intEntityContactId], ETC.intEntityContactId)
 	,[intDocumentMaintenanceId]		= NULL
 	,[dblTotalWeight]				= @ZeroDecimal
 	,[dblTotalTermDiscount]			= @ZeroDecimal
@@ -1515,6 +1546,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
 		ON ARC.[intBillToId] = BL1.intEntityLocationId
+LEFT OUTER JOIN
+	(SELECT intEntityId, intEntityContactId FROM tblEMEntityToContact WITH (NOLOCK) WHERE ysnDefaultContact = 1) ETC
+		ON ITG.intEntityCustomerId = ETC.intEntityId
 		
 WHILE EXISTS(SELECT TOP 1 NULL FROM #CustomerInvoice WHERE RTRIM(LTRIM(ISNULL([strInvoiceNumber],''))) = '' ORDER BY [intRowId])	
 BEGIN
@@ -2107,6 +2141,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
@@ -2254,6 +2289,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+		,[intPriceFixationDetailId]				= ITG.[intPriceFixationDetailId]
         ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
@@ -2362,7 +2398,42 @@ BEGIN TRY
 		[ysnSuccess] = 1 
 		AND [ysnInsert] = 1
 
-	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
+
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceLog)
+	BEGIN
+		DECLARE  @ActionType NVARCHAR(50)
+				,@SourceScreen NVARCHAR(100)
+				,@KeyValueId NVARCHAR(MAX)
+				,@EntityId INT
+				,@ChangeDescription  VARCHAR(50)
+				,@strFromValue  VARCHAR(50)
+				,@strToValue  VARCHAR(50)
+
+		SELECT TOP 1 
+			 @KeyValueId   =  CAST([intKeyValueId] AS NVARCHAR(MAX))
+			,@SourceScreen = [strScreenName]
+			,@EntityId     = [intEntityId]
+			,@ActionType   = [strActionType]
+			,@ChangeDescription = [strChangeDescription]
+			,@strFromValue		= strFromValue
+			,@strToValue	= strToValue
+		FROM @InvoiceLog
+		ORDER BY intKeyValueId	
+
+		EXEC dbo.uspSMAuditLog 
+			 @screenName		 = @SourceScreen	                -- Screen Namespace
+			,@keyValue			 = @KeyValueId						-- Primary Key Value of the Invoice. 
+			,@entityId			 = @EntityId						-- Entity Id.
+			,@actionType		 = @ActionType						-- Action Type
+			,@changeDescription  = @ChangeDescription				-- Description
+			,@fromValue			 = @strFromValue					-- Previous Value
+			,@toValue			 = @strToValue						-- New Value	
+
+		DELETE FROM @InvoiceLog WHERE intKeyValueId = @KeyValueId
+	END
+
+	--EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+
 
 END TRY
 BEGIN CATCH

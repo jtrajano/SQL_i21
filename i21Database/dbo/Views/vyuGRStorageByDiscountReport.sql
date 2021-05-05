@@ -14,12 +14,14 @@ WITH cte as (
 		,IM.strItemNo
 		,QM.dblGradeReading
 	FROM tblQMTicketDiscount QM
+	LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+		on QM.intTicketDiscountId = QMII.intTicketDiscountId	
 	INNER JOIN tblGRDiscountScheduleCode DSC
 		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 	INNER JOIN tblGRCustomerStorage CS
 		ON CS.intCustomerStorageId = QM.intTicketFileId
 	INNER JOIN tblICItem IM
-		ON DSC.intItemId = IM.intItemId
+		ON isnull(QMII.intItemId, DSC.intItemId) = IM.intItemId
 	INNER JOIN tblGRDiscountSchedule DS
 		ON DS.intDiscountScheduleId = DSC.intDiscountScheduleId
 	INNER JOIN tblICCommodity CO

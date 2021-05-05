@@ -141,7 +141,7 @@ BEGIN TRY
 			SET intBondStatusId = @intLotStatusId
 			FROM dbo.tblICLot AS L
 			JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
-			JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+			JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.strLotNumber = L.strLotNumber
 			WHERE RIL.strContainerNo = @strContainerNumber
 		END
 		ELSE

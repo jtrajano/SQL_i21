@@ -47,8 +47,8 @@ BEGIN TRY
 		,C.strContractNumber
 		,C.intContractSeq
 		,C.strContractNumber + '/' + CONVERT(NVARCHAR, C.intContractSeq) AS strContractSeq
-		,LD.dblQuantity AS dblLoadQty
-		,dblContainerQty
+		,dblLoadQty = LD.dblQuantity
+		,dblContainerQty = S.dblRepresentingQty
 		,strSampleNumber
 		,strSampleStatus
 		,C.ysnSampleRequired
@@ -56,36 +56,33 @@ BEGIN TRY
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN vyuLGLoadOpenContracts C ON LD.intPContractDetailId = C.intContractDetailId
+	OUTER APPLY (
+		SELECT TOP 1 
+			dblRepresentingQty = ISNULL(dbo.fnCalculateQtyBetweenUOM(S.intRepresentingUOMId, CD.intItemUOMId, S.dblRepresentingQty), 0)
+		FROM tblQMSample S 
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = S.intContractDetailId
+		WHERE S.intContractDetailId = C.intContractDetailId
+		ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 	WHERE L.intLoadId = @intLoadId
 		AND C.intShipmentType = 1
 
 	SELECT C.intContractDetailId
 		,C.strContractNumber
 		,C.strContractNumber + '/' + CONVERT(NVARCHAR, C.intContractSeq) AS strContractSeq
-		,LD.dblQuantity AS dblLoadQty
+		,dblLoadQty = LD.dblQuantity 
 		,C.ysnSampleRequired
-		,(
-			SELECT ISNULL(SUM(SA.dblRepresentingQty), 0)
-			FROM tblQMSample SA
-			WHERE SA.intContractDetailId = C.intContractDetailId
-				AND SA.intSampleStatusId = 3
-			) dblSampleQty
+		,dblSampleQty = S.dblSampleQty
 	INTO #tempContractSampleQuantityDetail
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN vyuLGLoadOpenContracts C ON LD.intPContractDetailId = C.intContractDetailId
-	LEFT JOIN tblQMSample S ON S.intContractDetailId = C.intContractDetailId
+	OUTER APPLY (
+		SELECT dblSampleQty = ISNULL(SUM(ISNULL(dbo.fnCalculateQtyBetweenUOM(s.intRepresentingUOMId, cd.intItemUOMId, s.dblRepresentingQty), 0)), 0)
+		 FROM tblQMSample s 
+		 INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = s.intContractDetailId
+		WHERE s.intContractDetailId = C.intContractDetailId AND s.intProductTypeId = 8 AND s.intSampleStatusId <> 4) S
 	WHERE L.intLoadId = @intLoadId
 		AND C.intShipmentType = 1
-		AND S.intProductTypeId = 8
-		AND S.intSampleStatusId <> 4
-	GROUP BY C.intContractDetailId
-		,C.strContractNumber
-		,C.intContractSeq
-		,C.intContractSeq
-		,LD.dblQuantity
-		,intSampleStatusId
-		,C.ysnSampleRequired
 
 	INSERT INTO @tblContractSampleDetail
 	SELECT intContractDetailId
@@ -136,13 +133,6 @@ BEGIN TRY
 			SET @strErrorMessage = 'Sample(s) have not been received for the contract ' + @strContractSeq + '.'
 		END
 		ELSE IF (ISNULL(@strSampleStatus, '') = 'Rejected')
-			AND NOT EXISTS (
-				SELECT TOP 1 1
-				FROM tblQMSample S
-				JOIN tblQMSampleStatus SS ON S.intSampleStatusId = SS.intSampleStatusId
-				WHERE S.intContractDetailId = @intContractDetailId
-					AND SS.strStatus = 'Approved'
-				)
 		BEGIN
 			SET @strErrorMessage = 'Sample(s) were rejected for the contract ' + @strContractSeq + '.'
 		END
@@ -153,7 +143,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			SET @strMessage = @strMessage + '<br>' + @strErrorMessage
+			SET @strMessage = @strMessage + CASE WHEN (ISNULL(@strErrorMessage, '') <> '') THEN '<br>' + @strErrorMessage ELSE '' END
 		END
 
 		SELECT @intMinRecordId = MIN(intRecordId)
@@ -161,45 +151,49 @@ BEGIN TRY
 		WHERE intRecordId > @intMinRecordId
 	END
 
-	SELECT @intMinQuantityRecordId = MIN(intRecordId)
-	FROM @tblContractSampleQuantityDetail
-
-	WHILE (@intMinQuantityRecordId IS NOT NULL)
+	IF (ISNULL(@strMessage, '') = '')
 	BEGIN
-		SET @intContractDetailId = NULL
-		SET @strContractNumber = NULL
-		SET @intContractSeq = NULL
-		SET @strContractSeq = NULL
-		SET @dblLoadQty = NULL
-		SET @dblContainerQty = NULL
-		SET @strSampleNumber = NULL
-		SET @strSampleStatus = NULL
-
-		SELECT @intContractDetailId = intContractDetailId
-			,@strContractNumber = strContractNumber
-			,@strContractSeq = strContractSeq
-			,@dblLoadQty = dblLoadQty
-			,@dblApprovedSampleQty = dblSampleQty
-		FROM @tblContractSampleQuantityDetail
-		WHERE intRecordId = @intMinQuantityRecordId
-
-		IF (ISNULL(@dblLoadQty, 0) > ISNULL(@dblApprovedSampleQty, 0))
-		BEGIN
-			SET @strErrorMessage = 'Shipment qty is more than the approved sample qty for the contract ' + @strContractSeq + '.'
-		END
-
-		IF (ISNULL(@strMessage, '') = '')
-		BEGIN
-			SET @strMessage = @strErrorMessage
-		END
-		ELSE
-		BEGIN
-			SET @strMessage = @strMessage + '<br>' + @strErrorMessage
-		END
-
 		SELECT @intMinQuantityRecordId = MIN(intRecordId)
 		FROM @tblContractSampleQuantityDetail
-		WHERE intRecordId > @intMinQuantityRecordId
+
+		SET @strErrorMessage = NULL
+		WHILE (@intMinQuantityRecordId IS NOT NULL)
+		BEGIN
+			SET @intContractDetailId = NULL
+			SET @strContractNumber = NULL
+			SET @intContractSeq = NULL
+			SET @strContractSeq = NULL
+			SET @dblLoadQty = NULL
+			SET @dblContainerQty = NULL
+			SET @strSampleNumber = NULL
+			SET @strSampleStatus = NULL
+
+			SELECT @intContractDetailId = intContractDetailId
+				,@strContractNumber = strContractNumber
+				,@strContractSeq = strContractSeq
+				,@dblLoadQty = dblLoadQty
+				,@dblApprovedSampleQty = dblSampleQty
+			FROM @tblContractSampleQuantityDetail
+			WHERE intRecordId = @intMinQuantityRecordId
+
+			IF (ISNULL(@dblLoadQty, 0) > ISNULL(@dblApprovedSampleQty, 0))
+			BEGIN
+				SET @strErrorMessage = 'Shipment qty is more than the approved sample qty for the contract ' + @strContractSeq + '.'
+			END
+
+			IF (ISNULL(@strMessage, '') = '')
+			BEGIN
+				SET @strMessage = @strErrorMessage
+			END
+			ELSE
+			BEGIN
+				SET @strMessage = @strMessage + CASE WHEN (ISNULL(@strErrorMessage, '') <> '') THEN '<br>' + @strErrorMessage ELSE '' END
+			END
+
+			SELECT @intMinQuantityRecordId = MIN(intRecordId)
+			FROM @tblContractSampleQuantityDetail
+			WHERE intRecordId > @intMinQuantityRecordId
+		END
 	END
 END TRY
 

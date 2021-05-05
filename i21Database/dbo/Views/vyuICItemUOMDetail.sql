@@ -26,7 +26,7 @@ SELECT
 	, strStockUOMType = unitmeasure.strUnitType
 	, itemUOM.strUpcCode
 	, itemUOM.strLongUPCCode
-	, dblStockUnitQty = itemUOM.dblUnitQty
+	, dblStockUnitQty = CAST( itemUOM.dblUnitQty AS NUMERIC(28, 6))
 	, itemLocation.intAllowNegativeInventory
 	, strAllowNegativeInventory = (
 			CASE 
@@ -43,53 +43,55 @@ SELECT
 				WHEN itemLocation.intCostingMethod = 3 THEN 'LIFO' 
 			END
 		) COLLATE Latin1_General_CI_AS
-	, dblAmountPercent = ISNULL((itemPricing.dblAmountPercent), 0.00)
-	, dblSalePrice = ISNULL((itemPricing.dblSalePrice), 0.00)
-	, dblMSRPPrice = ISNULL((itemPricing.dblMSRPPrice), 0.00)
+	, dblAmountPercent = CAST(ISNULL((itemPricing.dblAmountPercent), 0.00) AS NUMERIC(28, 6))
+	, dblSalePrice = CAST(ISNULL((itemPricing.dblSalePrice), 0.00) AS NUMERIC(28, 6))
+	, dblMSRPPrice = CAST(ISNULL((itemPricing.dblMSRPPrice), 0.00) AS NUMERIC(28, 6))
 	, itemPricing.strPricingMethod
-	, dblLastCost = ISNULL((itemPricing.dblLastCost), 0.00)
-	, dblStandardCost = ISNULL((itemPricing.dblStandardCost), 0.00)
-	, dblAverageCost = ISNULL((itemPricing.dblAverageCost), 0.00)
-	, dblEndMonthCost = ISNULL((itemPricing.dblEndMonthCost), 0.00)
+	, dblLastCost = CAST(ISNULL((itemPricing.dblLastCost), 0.00) AS NUMERIC(28, 6))
+	, dblStandardCost = CAST(ISNULL((itemPricing.dblStandardCost), 0.00) AS NUMERIC(28, 6))
+	, dblAverageCost = CAST(ISNULL((itemPricing.dblAverageCost), 0.00) AS NUMERIC(28, 6))
+	, dblEndMonthCost = CAST(ISNULL((itemPricing.dblEndMonthCost), 0.00) AS NUMERIC(28, 6))
 
-	, dblOnOrder = COALESCE(stockInStockUOM.dblOnOrder, stockUOM.dblOnOrder, 0)
-	, dblInTransitInbound = COALESCE(stockInStockUOM.dblInTransitInbound, stockUOM.dblInTransitInbound, 0)
-	, dblUnitOnHand = COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
-	, dblInTransitOutbound = COALESCE(stockInStockUOM.dblInTransitOutbound, stockUOM.dblInTransitOutbound, 0)
-	, dblBackOrder = 0 --COALESCE(stockInStockUOM.dblOnUnitOnHand, stockUOM.dblOnHand, 0)
-	, dblOrderCommitted = COALESCE(stockInStockUOM.dblOrderCommitted, stockUOM.dblOrderCommitted, 0)
-	, dblUnitStorage = COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0)
-	, dblConsignedPurchase = COALESCE(stockInStockUOM.dblConsignedPurchase, stockUOM.dblConsignedPurchase, 0)
-	, dblConsignedSale = COALESCE(stockInStockUOM.dblConsignedSale, stockUOM.dblConsignedSale, 0)
-	, dblUnitReserved = COALESCE(stockInStockUOM.dblUnitReserved, stockUOM.dblUnitReserved, 0)
+	, dblOnOrder = CAST(COALESCE(stockInStockUOM.dblOnOrder, stockUOM.dblOnOrder, 0) AS NUMERIC(28, 6))
+	, dblInTransitInbound = CAST(COALESCE(stockInStockUOM.dblInTransitInbound, stockUOM.dblInTransitInbound, 0) AS NUMERIC(28, 6))
+	, dblUnitOnHand = CAST(COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0) AS NUMERIC(28, 6))
+	, dblInTransitOutbound = CAST(COALESCE(stockInStockUOM.dblInTransitOutbound, stockUOM.dblInTransitOutbound, 0) AS NUMERIC(28, 6))
+	, dblBackOrder = CAST(0  AS NUMERIC(28, 6))--COALESCE(stockInStockUOM.dblOnUnitOnHand, stockUOM.dblOnHand, 0)
+	, dblOrderCommitted = CAST(COALESCE(stockInStockUOM.dblOrderCommitted, stockUOM.dblOrderCommitted, 0) AS NUMERIC(28, 6))
+	, dblUnitStorage = CAST(COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0) AS NUMERIC(28, 6))
+	, dblConsignedPurchase = CAST(COALESCE(stockInStockUOM.dblConsignedPurchase, stockUOM.dblConsignedPurchase, 0) AS NUMERIC(28, 6))
+	, dblConsignedSale = CAST(COALESCE(stockInStockUOM.dblConsignedSale, stockUOM.dblConsignedSale, 0) AS NUMERIC(28, 6))
+	, dblUnitReserved = CAST(COALESCE(stockInStockUOM.dblUnitReserved, stockUOM.dblUnitReserved, 0) AS NUMERIC(28, 6))
 	, dblAvailable = 
-		COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
-		- COALESCE(stockInStockUOM.dblUnitReserved, stockUOM.dblUnitReserved, 0)
-		- COALESCE(stockInStockUOM.dblConsignedSale, stockUOM.dblConsignedSale, 0)
-		+ COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0)
-	, dblExtended = 
-		(
+		CAST(
 			COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
+			- COALESCE(stockInStockUOM.dblUnitReserved, stockUOM.dblUnitReserved, 0)
+			- COALESCE(stockInStockUOM.dblConsignedSale, stockUOM.dblConsignedSale, 0)
 			+ COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0)
-			+ COALESCE(stockInStockUOM.dblConsignedPurchase, stockUOM.dblConsignedPurchase, 0)
-		) 
-		* dbo.fnCalculateCostBetweenUOM(
-			intItemStockUOM.intItemUOMId
-			,itemUOM.intItemUOMId
-			,ISNULL(itemPricing.dblAverageCost, 0)
-		)
-		
-		
-	, dblMinOrder = ISNULL(itemLocation.dblMinOrder, 0)
-	, dblReorderPoint = ISNULL(itemLocation.dblReorderPoint, 0)
+		 AS NUMERIC(28, 6))
+	, dblExtended = 
+		CAST (
+			(
+				COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
+				+ COALESCE(stockInStockUOM.dblUnitStorage, stockUOM.dblUnitStorage, 0)
+				+ COALESCE(stockInStockUOM.dblConsignedPurchase, stockUOM.dblConsignedPurchase, 0)
+			) 
+			* dbo.fnCalculateCostBetweenUOM(
+				intItemStockUOM.intItemUOMId
+				,itemUOM.intItemUOMId
+				,ISNULL(itemPricing.dblAverageCost, 0)
+			)	
+		 AS NUMERIC(28, 6))
+	, dblMinOrder = CAST(ISNULL(itemLocation.dblMinOrder, 0) AS NUMERIC(28, 6))
+	, dblReorderPoint = CAST(ISNULL(itemLocation.dblReorderPoint, 0) AS NUMERIC(28, 6))
 	, dblNearingReorderBy = 
 		CAST(
 			COALESCE(stockInStockUOM.dblUnitOnHand, stockUOM.dblOnHand, 0)
 			- ISNULL(itemLocation.dblReorderPoint, 0) 
-			AS NUMERIC(38, 7)
+			AS NUMERIC(28, 7)
 		)
 	, itemUOM.ysnStockUnit
-	, dblInTransitDirect = COALESCE(stockInStockUOM.dblInTransitDirect, stockUOM.dblInTransitDirect, 0)
+	, dblInTransitDirect = CAST(COALESCE(stockInStockUOM.dblInTransitDirect, stockUOM.dblInTransitDirect, 0) AS NUMERIC(28, 6))
 FROM
 	tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitmeasure
 		ON itemUOM.intUnitMeasureId = unitmeasure.intUnitMeasureId

@@ -6,7 +6,13 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	intBillDetailId					INT,
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
+	intSourceId						INT,
+	dblQuantity						numeric(18,6),
+	dtmCreatedDate					datetime null default getdate(),
 	ysnMarkDelete					BIT,
+	ysnReturn						BIT null default 0,
+	ysnPreDeploymentFix				BIT null default 0,
+	strInvoiceDiscountsChargesIds	nvarchar(500) COLLATE Latin1_General_CI_AS,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),
@@ -23,7 +29,6 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
     FOR INSERT
     AS
     BEGIN
-    
 		SET NoCount ON  
 		declare @ErrMsg nvarchar(max);  
 		declare @intActiveContractDetailId int = 0; 
@@ -56,7 +61,7 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 			SET @ErrMsg = ERROR_MESSAGE();  
 			RAISERROR (@ErrMsg,18,1,'WITH NOWAIT');  
 
-		end catch
+		end catch  
 
 
     END

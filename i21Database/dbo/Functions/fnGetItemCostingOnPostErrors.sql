@@ -493,10 +493,41 @@ RETURN (
 			INNER JOIN tblICItemLocation IL ON IL.intItemId = @intItemId
 				AND IL.intItemLocationId = @intItemLocationId
 			INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = IL.intLocationId
-		WHERE Item.intItemId = @intItemId
-			AND ISNULL(IL.intAllowZeroCostTypeId, 1) = 1
+		WHERE Item.intItemId = @intItemId			
 			AND ISNULL(@dblQty, 0) > 0
 			AND ISNULL(@dblCost, 0) = 0
+			AND (
+				-- Do not allow zero cost if: 
+				-- 1. Allow Zero Cost = "No"
+				-- 2. Allow Zero Cost = "Yes on Produce" but transaction type is not Produce. 
+				ISNULL(IL.intAllowZeroCostTypeId, 1) = 1 
+				OR (
+					@intTransactionTypeId NOT IN (9)
+					AND ISNULL(IL.intAllowZeroCostTypeId, 1) = 4
+				)
+			)
+
+		-- 'The item type for %s is not "stockable". Costing is not allowed.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80264)
+							, Item.strItemNo
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						) 
+				,intErrorCode = 80264				
+		FROM	tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+				AND Item.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material')
 
 	) AS Query		
 )

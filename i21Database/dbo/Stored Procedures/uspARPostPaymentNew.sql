@@ -236,6 +236,8 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBaseTransactionInterest]       NUMERIC(18,6)   NULL
     ,[dblTransactionAmountDue]          NUMERIC(18,6)   NULL
     ,[dblBaseTransactionAmountDue]      NUMERIC(18,6)   NULL
+	,[dblTransactionPayment]			NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionPayment]		NUMERIC(18,6)   NULL
 	,[intCurrencyExchangeRateTypeId]    INT             NULL
     ,[dblCurrencyExchangeRate]          NUMERIC(18,6)   NULL
     ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL)

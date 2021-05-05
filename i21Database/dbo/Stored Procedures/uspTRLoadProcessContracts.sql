@@ -50,31 +50,31 @@ BEGIN TRY
     END
   
 	--Distribution which used Contract
-	SELECT DD.intContractDetailId
-		,DD.dblUnits
-		,DD.intLoadDistributionDetailId
-	INTO #tmpDistribution
-	FROM tblTRLoadHeader TL
-	JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
-	JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
-	WHERE TL.intLoadHeaderId = @intLoadHeaderId AND ISNULL(DD.intContractDetailId, '') <> ''
+	-- SELECT DD.intContractDetailId
+	-- 	,DD.dblUnits
+	-- 	,DD.intLoadDistributionDetailId
+	-- INTO #tmpDistribution
+	-- FROM tblTRLoadHeader TL
+	-- JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
+	-- JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+	-- WHERE TL.intLoadHeaderId = @intLoadHeaderId AND ISNULL(DD.intContractDetailId, '') <> ''
 				
-    WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDistribution)
-    BEGIN
-		SELECT TOP 1 @dblQuantity = dblUnits
-			, @intContractDetailId = intContractDetailId
-			, @intDistributionId = intLoadDistributionDetailId
-		FROM #tmpDistribution
+    -- WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDistribution)
+    -- BEGIN
+	-- 	SELECT TOP 1 @dblQuantity = dblUnits
+	-- 		, @intContractDetailId = intContractDetailId
+	-- 		, @intDistributionId = intLoadDistributionDetailId
+	-- 	FROM #tmpDistribution
 		
-		IF (@action = 'Delete')
-		BEGIN
-			SET @dblQuantity = @dblQuantity * -1
-		END
+	-- 	IF (@action = 'Delete')
+	-- 	BEGIN
+	-- 		SET @dblQuantity = @dblQuantity * -1
+	-- 	END
 		
-		EXEC uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity, @intUserId, @intDistributionId, 'Transport Sale'
+	-- 	EXEC uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity, @intUserId, @intDistributionId, 'Transport Sale'
 		
-		DELETE FROM #tmpDistribution WHERE intLoadDistributionDetailId = @intDistributionId
-    END
+	-- 	DELETE FROM #tmpDistribution WHERE intLoadDistributionDetailId = @intDistributionId
+    -- END
 END TRY
 BEGIN CATCH
 	SELECT 

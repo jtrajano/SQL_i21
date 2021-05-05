@@ -297,7 +297,7 @@ BEGIN TRY
 		JOIN	tblCTCropYear				CP	ON	CP.strCropYear		=	CI.strCropYear			
 												AND	CP.intCommodityId	=	CM.intCommodityId		LEFT
 		JOIN	tblCTPosition				PN	ON	PN.strPosition		=	CI.strPosition			LEFT
-		JOIN	tblRKFutureMarket			MA	ON	MA.strFutMarketName	=	CI.strFutMarketName		LEFT
+		JOIN	tblRKFutureMarket			MA	ON	LTRIM(RTRIM(LOWER(MA.strFutMarketName))) =	LTRIM(RTRIM(LOWER(CI.strFutMarketName)))		LEFT
 		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
 												AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
 												AND	(YEAR(MO.dtmFutureMonthsDate) % 100) = CI.intYear		LEFT
@@ -312,6 +312,18 @@ BEGIN TRY
 
 	IF EXISTS(SELECT * FROM #tmpExtracted)
 	BEGIN
+		;WITH CTE AS 
+		(
+			SELECT intContractTypeId, strContractNumber, intEntityId, intCommodityId, ROW_NUMBER() OVER 
+			(
+				PARTITION BY intContractTypeId, strContractNumber, intEntityId, intCommodityId ORDER BY intContractTypeId, strContractNumber, intEntityId, intCommodityId
+			) RowNumber
+			FROM #tmpExtracted
+		)
+		DELETE
+		FROM CTE 
+		WHERE RowNumber > 1;
+
 		INSERT	INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter, ysnReadOnlyInterCoContract)
 		SELECT	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, 0, 0
 		FROM	#tmpExtracted

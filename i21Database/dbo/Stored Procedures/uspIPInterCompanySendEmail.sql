@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPInterCompanySendEmail @strMessageType NVARCHAR(50)
+﻿CREATE PROCEDURE [dbo].[uspIPInterCompanySendEmail] @strMessageType NVARCHAR(50)
 	,@strStatus NVARCHAR(50) = ''
 	,@ysnDailyNotification BIT=0
 	,@intStatusId INT = NULL
@@ -1088,6 +1088,36 @@ BEGIN
 		WHERE S.dtmFeedDate BETWEEN @dtmDate
 				AND @dtmDate2 
 				AND intMultiCompanyId =4
+END
+IF @strMessageType = 'Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblICItemStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + 'Success' + '</td>' + '<td>&nbsp;' + 'Item' + '</td>
+	</tr>'
+		FROM tblICItemStage S WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblICItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
 END
 
 IF @strMessageType = 'Item'

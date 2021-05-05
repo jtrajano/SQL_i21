@@ -37,9 +37,17 @@ BEGIN
 				tblSMRecurringTransaction SM
 				WHERE  strTransactionNumber= @strJournalId1 and strTransactionType  = 'General Journal'
 			END
-			INSERT INTO tblGLJournal(intCompanyId, strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,intEntityId,ysnPosted,strRecurringStatus)
-			SELECT intCompanyId,strDescription,intCurrencyId,@journalDate,@reverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,0,'Locked' FROM tblGLJournal
+			INSERT INTO tblGLJournal(
+				intCompanyId, strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,
+				intEntityId,ysnPosted,strRecurringStatus, intFiscalYearId, intFiscalPeriodId)
+			SELECT intCompanyId,strDescription,intCurrencyId,@journalDate,@reverseDate,@smID,'Recurring Journal','General Journal','GJ',
+				@entityid,0,'Locked', FY.intFiscalYearId, FY.intGLFiscalYearPeriodId
+			FROM tblGLJournal J
+			OUTER APPLY(
+				SELECT intFiscalYearId, intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod WHERE @journalDate BETWEEN dtmStartDate AND dtmEndDate
+			)FY
 			WHERE intJournalId = @journalId
+
 			SELECT  @intJournalID = SCOPE_IDENTITY() 
 			INSERT INTO tblGLJournalDetail (intJournalId,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit, dblDebitRate,strDescription,strReference,strComments,strDocument,dtmDate)
 			SELECT @intJournalID,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit,dblDebitRate,strDescription,strReference,strComments,strDocument,@journalDate

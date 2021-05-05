@@ -209,4 +209,5 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
     ,[ysnAddonParent]                       BIT                                             NULL
     ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                 NULL
 	,[ysnConvertToStockUOM]					BIT                                             NULL		-- If true, intItemUOMId will be converted to Stock UOM
+	,[intPriceFixationDetailId]				INT												NULL
 )

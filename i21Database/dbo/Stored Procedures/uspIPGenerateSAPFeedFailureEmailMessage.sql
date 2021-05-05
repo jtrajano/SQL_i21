@@ -212,6 +212,31 @@ Begin
 	AND ISNULL(ysnMailSent,0)=0
 End
 
+If @strMessageType='GL1'
+Begin
+	SET @strHeader = '<tr>
+						<th>&nbsp;Type</th>
+						<th>&nbsp;Match No</th>
+						<th>&nbsp;Market Name</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+	
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + 'Future' + '</td>'
+		+ '<td>&nbsp;' + ISNULL(CONVERT(VARCHAR,intMatchNo),'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strFutMarketName,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(strMessage,'') + '</td>
+	</tr>'
+	From tblRKStgMatchPnS 
+	Where strStatus='IGNORE' AND ISNULL(strMessage,'') NOT IN ('', 'Success')
+	AND ISNULL(ysnMailSent,0)=0
+
+	Update tblRKStgMatchPnS Set ysnMailSent=1
+	Where strStatus='IGNORE' AND ISNULL(strMessage,'') NOT IN ('', 'Success')
+	AND ISNULL(ysnMailSent,0)=0
+End
+
 If @strMessageType='GL'
 Begin
 	SET @strHeader = '<tr>

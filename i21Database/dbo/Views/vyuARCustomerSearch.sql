@@ -5,8 +5,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intSalespersonId			= SALESPERSON.intEntityId
 	 , intCurrencyId			= CUSTOMER.intCurrencyId
 	 , intTermsId				= CUSTOMER.intTermsId
-	 , intShipToId				= CUSTOMER.intShipToId
-	 , intBillToId				= CUSTOMER.intBillToId
+	 , intShipToId				= SHIPTOLOCATION.intEntityLocationId
+	 , intBillToId				= BILLTOLOCATION.intEntityLocationId
 	 , strName					= ENTITY.strName
 	 , strCustomerNumber		= CASE WHEN ISNULL(CUSTOMER.strCustomerNumber, '') = '' THEN ENTITY.strEntityNo ELSE CUSTOMER.strCustomerNumber END	 
 	 , strVatNumber				= CUSTOMER.strVatNumber
@@ -222,8 +222,10 @@ LEFT JOIN (
 		 , strZipCode
 		 , strCountry
 		 , strPhone
+		 , intEntityId
+		 , ysnDefaultLocation
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
-) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
+) BILLTOLOCATION ON CUSTOMER.intEntityId = BILLTOLOCATION.intEntityId AND BILLTOLOCATION.ysnDefaultLocation=1
 LEFT JOIN (
 	SELECT S.intEntityId
 		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END

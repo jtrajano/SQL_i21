@@ -31,7 +31,7 @@ FROM (
 		 , strPaymentSource			= CASE WHEN POSEOD.strEODNo IS NULL THEN 'Manual Entry' ELSE 'POS' END COLLATE Latin1_General_CI_AS
 		 , strEODNumber				= POSEOD.strEODNo
 		 , strDrawerName			= POSEOD.strPOSDrawerName
-		 , ysnCompleted				= CAST(1 AS BIT)
+		 , ysnCompleted				= CASE WHEN EodCLose.ysnClosed = 0 Then  CAST(ysnClosed AS BIT)  ELSE CAST(1 AS BIT) END 
 	FROM tblARPayment PAYMENT
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON PAYMENT.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
@@ -57,13 +57,14 @@ FROM (
 					FOR XML PATH('')
 				), 1, 2, '')
 			)
-	) POSEOD	
+	) POSEOD
+	LEFT JOIN tblARPOSEndOfDay EodCLose ON EodCLose.strEODNo = POSEOD.strEODNo	
 	WHERE PAYMENT.ysnPosted = 1
 	  AND PAYMENT.ysnProcessedToNSF = 0
 	  AND PAYMENT.intAccountId IS NOT NULL
 	  AND (PAYMENT.ysnImportedFromOrigin <> 1 AND PAYMENT.ysnImportedAsPosted <> 1)
-	  AND CM.intSourceTransactionId IS NULL
-	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
+	  AND CM.intSourceTransactionId IS NULL	  
+	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) NOT IN (UPPER('Write Off'), UPPER('CF Invoice'))
 	  AND (ISNULL(PAYMENT.dblAmountPaid, 0) > 0 OR (ISNULL(PAYMENT.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('ACH','Prepay', 'Cash', 'Manual Credit Card', 'Debit Card')))
 
 	UNION ALL	
@@ -91,7 +92,7 @@ FROM (
 	  AND INVOICE.intAccountId IS NOT NULL
 	  AND INVOICE.strTransactionType = 'Cash'
 	  AND CM.intSourceTransactionId IS NULL
-	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
+	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) NOT IN (UPPER('Write Off'), UPPER('CF Invoice'))
 	  AND (ISNULL(INVOICE.ysnImportedFromOrigin,0) <> 1 AND ISNULL(INVOICE.ysnImportedAsPosted,0) <> 1)
 
 	UNION ALL	

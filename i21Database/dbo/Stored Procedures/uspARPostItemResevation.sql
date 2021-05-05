@@ -33,7 +33,7 @@ SELECT
      [intHeaderId]  = ARID.[intInvoiceId]
     ,[ysnPost]      = ARID.[ysnPost]
 FROM
-    #ARPostInvoiceDetail ARID
+    ##ARPostInvoiceDetail ARID
 INNER JOIN
     tblICStockReservation ICSR
 		ON ARID.[intInvoiceId] = ICSR.[intTransactionId] 
@@ -46,7 +46,7 @@ SELECT
     [intHeaderId]  = ARID.[intInvoiceId]
     ,[ysnPost]      = ARID.[ysnPost] 
 FROM
-    #ARPostInvoiceDetail ARID
+    ##ARPostInvoiceDetail ARID
 JOIN tblICItemBundle BDL
     ON BDL.intItemId = ARID.intItemId
 INNER JOIN

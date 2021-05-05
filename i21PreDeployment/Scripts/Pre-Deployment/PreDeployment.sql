@@ -18,6 +18,8 @@
 --DONT PUT ABOVE THIS 
 :r .\4_SM\1910_StopAuditMigrationJob.sql
 
+:r .\14_CT\CreatePricingInvoiceLink.sql
+
 -- Validate Origin records
 -- --coctlmst
 :r .\UpdateValidation\1_CheckCoctlmst.sql

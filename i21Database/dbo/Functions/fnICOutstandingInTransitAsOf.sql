@@ -3,14 +3,12 @@
 	, @intCommodityId INT
 	, @dtmDate DATETIME
 )
-
 RETURNS TABLE 
-
 AS
 
 RETURN 
-
-SELECT strItemNo = i.strItemNo
+SELECT 
+	strItemNo = i.strItemNo
 	, intItemId = i.intItemId
 	, intItemLocationId= tblInTransit.intInTransitSourceLocationId
 	, intItemUOMId = stockUOM.intItemUOMId
@@ -19,57 +17,63 @@ SELECT strItemNo = i.strItemNo
 	, intTransactionId = tblInTransit.intTransactionId
 	, intTransactionDetailId = tblInTransit.intTransactionDetailId
 	, tblInTransit.intInventoryTransactionId
-	, dblInTransitQty = tblInTransit.dblInTransitQtyInStockUOM
+	, dblInTransitQty = ROUND(tblInTransit.dblInTransitQtyInStockUOM, 3)
 	, dtmDate = dbo.fnRemoveTimeOnDate(tblInTransit.dtmDate) 
-FROM tblICItem i
-INNER JOIN (
-	tblICItemUOM stockUOM
-	INNER JOIN tblICUnitMeasure stockUnit ON stockUOM.intUnitMeasureId = stockUnit.intUnitMeasureId
-) ON stockUOM.intItemId = i.intItemId AND stockUOM.ysnStockUnit = 1
-CROSS APPLY (
-	SELECT cb.strTransactionId
-		, cb.intTransactionId
-		, cb.intTransactionDetailId
-		, cbt.intInventoryTransactionId
-		, cb.dtmDate
-		, cb.intItemUOMId
-		-- In-Transit Qty using the transaction UOM
-		, dblInTransitQty = cb.dblStockIn - isnull(t.totalOut, 0) 
-		-- In-Transit Qty converted to stock UOM
-		, dblInTransitQtyInStockUOM = dbo.fnCalculateQtyBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblStockIn - isnull(t.totalOut, 0))
-		, cbt.intInTransitSourceLocationId
-	FROM tblICInventoryActualCost cb
+FROM 
+	tblICItem i
+	INNER JOIN (
+		tblICItemUOM stockUOM INNER JOIN tblICUnitMeasure stockUnit 
+			ON stockUOM.intUnitMeasureId = stockUnit.intUnitMeasureId
+	) 
+		ON stockUOM.intItemId = i.intItemId 
+		AND stockUOM.ysnStockUnit = 1
 	CROSS APPLY (
-		SELECT TOP 1 intInventoryTransactionId
-			, intInTransitSourceLocationId
-		FROM tblICInventoryTransaction cbt
-		WHERE cbt.strTransactionId = cb.strTransactionId
-			AND cbt.intItemId = cb.intItemId
-			AND cbt.intItemLocationId = cb.intItemLocationId
-			AND cbt.intItemUOMId = cb.intItemUOMId
-			AND cbt.intTransactionDetailId = cb.intTransactionDetailId
-			AND cbt.dblQty = cb.dblStockIn
-			AND cbt.dblCost = cb.dblCost
-			AND cbt.ysnIsUnposted = 0 	
-	) cbt
-	INNER JOIN tblICItemLocation il ON cb.intItemLocationId = il.intItemLocationId AND il.intLocationId IS NULL
-	OUTER APPLY (
-		SELECT totalOut = SUM(cbOut.dblQty)
-		FROM tblICInventoryActualCostOut cbOut
-		INNER JOIN tblICInventoryTransaction t ON t.intInventoryTransactionId = cbOut.intInventoryTransactionId
-		WHERE cbOut.intInventoryActualCostId = cb.intInventoryActualCostId
-			AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-			AND t.ysnIsUnposted = 0
-	) t	
-	WHERE cb.intItemId = i.intItemId
-		AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
-		AND (cb.dblStockIn - isnull(t.totalOut, 0)) > 0
-) tblInTransit
-WHERE (i.intItemId = @intItemId OR @intItemId IS NULL)
+		SELECT cb.strTransactionId
+			, cb.intTransactionId
+			, cb.intTransactionDetailId
+			, cbt.intInventoryTransactionId
+			, cb.dtmDate
+			, cb.intItemUOMId
+			-- In-Transit Qty using the transaction UOM
+			, dblInTransitQty = cb.dblStockIn - isnull(t.totalOut, 0) 
+			-- In-Transit Qty converted to stock UOM
+			, dblInTransitQtyInStockUOM = dbo.fnCalculateQtyBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblStockIn - isnull(t.totalOut, 0))
+			, cbt.intInTransitSourceLocationId
+		FROM tblICInventoryActualCost cb
+		CROSS APPLY (
+			SELECT TOP 1 intInventoryTransactionId
+				, intInTransitSourceLocationId
+			FROM tblICInventoryTransaction cbt
+			WHERE cbt.strTransactionId = cb.strTransactionId
+				AND cbt.intItemId = cb.intItemId
+				AND cbt.intItemLocationId = cb.intItemLocationId
+				AND cbt.intItemUOMId = cb.intItemUOMId
+				AND cbt.intTransactionDetailId = cb.intTransactionDetailId
+				AND cbt.dblQty = cb.dblStockIn
+				AND cbt.dblCost = cb.dblCost
+				AND cbt.ysnIsUnposted = 0 	
+		) cbt
+		INNER JOIN tblICItemLocation il ON cb.intItemLocationId = il.intItemLocationId AND il.intLocationId IS NULL
+		OUTER APPLY (
+			SELECT totalOut = ROUND(SUM(cbOut.dblQty), 3)
+			FROM tblICInventoryActualCostOut cbOut
+			INNER JOIN tblICInventoryTransaction t ON t.intInventoryTransactionId = cbOut.intInventoryTransactionId
+			WHERE cbOut.intInventoryActualCostId = cb.intInventoryActualCostId
+				AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+				AND t.ysnIsUnposted = 0
+		) t	
+		WHERE cb.intItemId = i.intItemId
+			AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+			AND (cb.dblStockIn - isnull(t.totalOut, 0)) > 0
+	) tblInTransit
+WHERE 
+	(i.intItemId = @intItemId OR @intItemId IS NULL)
 	AND (i.intCommodityId = @intCommodityId OR @intCommodityId IS NULL)
 	AND i.strLotTracking NOT LIKE 'Yes%'
 
-UNION ALL SELECT strItemNo = i.strItemNo
+UNION ALL 
+SELECT 
+	strItemNo = i.strItemNo
 	, intItemId = i.intItemId
 	, intItemLocationId = tblInTransit.intInTransitSourceLocationId
 	, intItemUOMId = stockUOM.intItemUOMId
@@ -78,53 +82,57 @@ UNION ALL SELECT strItemNo = i.strItemNo
 	, intTransactionId = tblInTransit.intTransactionId
 	, intTransactionDetailId = tblInTransit.intTransactionDetailId
 	, tblInTransit.intInventoryTransactionId
-	, dblInTransitQty = tblInTransit.dblInTransitQtyInStockUOM
+	, dblInTransitQty = ROUND(tblInTransit.dblInTransitQtyInStockUOM, 3)
 	, dtmDate = dbo.fnRemoveTimeOnDate(tblInTransit.dtmDate)
-FROM tblICItem i
-INNER JOIN (
-	tblICItemUOM stockUOM
-	INNER JOIN tblICUnitMeasure stockUnit ON stockUOM.intUnitMeasureId = stockUnit.intUnitMeasureId
-) ON stockUOM.intItemId = i.intItemId AND stockUOM.ysnStockUnit = 1
-CROSS APPLY (
-	SELECT cb.strTransactionId
-		, cb.intTransactionId
-		, cb.intTransactionDetailId
-		, cbt.intInventoryTransactionId
-		, cb.dtmDate
-		, cb.intItemUOMId
-		-- In-Transit Qty using the transaction UOM
-		, dblInTransitQty = cb.dblStockIn - isnull(t.totalOut, 0)
-		-- In-Transit Qty converted to stock UOM
-		, dblInTransitQtyInStockUOM = dbo.fnCalculateQtyBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblStockIn) - isnull(t.totalOut, 0)
-		, cbt.intInTransitSourceLocationId
-	FROM tblICInventoryLot cb
+FROM 
+	tblICItem i
+	INNER JOIN (
+		tblICItemUOM stockUOM INNER JOIN tblICUnitMeasure stockUnit 
+			ON stockUOM.intUnitMeasureId = stockUnit.intUnitMeasureId
+	) 
+		ON stockUOM.intItemId = i.intItemId 
+		AND stockUOM.ysnStockUnit = 1
 	CROSS APPLY (
-		SELECT TOP 1 cbt.intInventoryTransactionId
-			, intInTransitSourceLocationId
-		FROM tblICInventoryTransaction cbt
-		WHERE cbt.strTransactionId = cb.strTransactionId
-			AND cbt.intItemId = cb.intItemId
-			AND cbt.intItemLocationId = cb.intItemLocationId
-			AND cbt.intItemUOMId = cb.intItemUOMId
-			AND cbt.intTransactionDetailId = cb.intTransactionDetailId
-			AND cbt.intLotId = cb.intLotId
-			AND cbt.dblQty = cb.dblStockIn
-			AND cbt.dblCost = cb.dblCost
-			AND cbt.ysnIsUnposted = 0
-	) cbt
-	INNER JOIN tblICItemLocation il ON cb.intItemLocationId = il.intItemLocationId AND il.intLocationId IS NULL
-	OUTER APPLY (
-		SELECT totalOut = SUM(cbOut.dblQty)
-		FROM tblICInventoryLotOut cbOut
-		INNER JOIN tblICInventoryTransaction t ON t.intInventoryTransactionId = cbOut.intInventoryTransactionId
-		WHERE cbOut.intInventoryLotId = cb.intInventoryLotId
-			AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-			AND t.ysnIsUnposted = 0
-	) t
-	WHERE cb.intItemId = i.intItemId
-		AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
-		AND (cb.dblStockIn - isnull(t.totalOut, 0)) > 0
-) tblInTransit
-WHERE (i.intItemId = @intItemId OR @intItemId IS NULL)
+		SELECT cb.strTransactionId
+			, cb.intTransactionId
+			, cb.intTransactionDetailId
+			, cbt.intInventoryTransactionId
+			, cb.dtmDate
+			, cb.intItemUOMId
+			-- In-Transit Qty using the transaction UOM
+			, dblInTransitQty = cb.dblStockIn - isnull(t.totalOut, 0)
+			-- In-Transit Qty converted to stock UOM
+			, dblInTransitQtyInStockUOM = dbo.fnCalculateQtyBetweenUOM(cb.intItemUOMId, stockUOM.intItemUOMId, cb.dblStockIn) - isnull(t.totalOut, 0)
+			, cbt.intInTransitSourceLocationId
+		FROM tblICInventoryLot cb
+		CROSS APPLY (
+			SELECT TOP 1 cbt.intInventoryTransactionId
+				, intInTransitSourceLocationId
+			FROM tblICInventoryTransaction cbt
+			WHERE cbt.strTransactionId = cb.strTransactionId
+				AND cbt.intItemId = cb.intItemId
+				AND cbt.intItemLocationId = cb.intItemLocationId
+				AND cbt.intItemUOMId = cb.intItemUOMId
+				AND cbt.intTransactionDetailId = cb.intTransactionDetailId
+				AND cbt.intLotId = cb.intLotId
+				AND cbt.dblQty = cb.dblStockIn
+				AND cbt.dblCost = cb.dblCost
+				AND cbt.ysnIsUnposted = 0
+		) cbt
+		INNER JOIN tblICItemLocation il ON cb.intItemLocationId = il.intItemLocationId AND il.intLocationId IS NULL
+		OUTER APPLY (
+			SELECT totalOut = ROUND(SUM(cbOut.dblQty), 3)
+			FROM tblICInventoryLotOut cbOut
+			INNER JOIN tblICInventoryTransaction t ON t.intInventoryTransactionId = cbOut.intInventoryTransactionId
+			WHERE cbOut.intInventoryLotId = cb.intInventoryLotId
+				AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+				AND t.ysnIsUnposted = 0
+		) t
+		WHERE cb.intItemId = i.intItemId
+			AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+			AND (cb.dblStockIn - isnull(t.totalOut, 0)) > 0
+	) tblInTransit
+WHERE 
+	(i.intItemId = @intItemId OR @intItemId IS NULL)
 	AND (i.intCommodityId = @intCommodityId OR @intCommodityId IS NULL)
 	AND i.strLotTracking LIKE 'Yes%'

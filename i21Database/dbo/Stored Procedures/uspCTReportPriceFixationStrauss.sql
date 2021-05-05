@@ -215,10 +215,10 @@ BEGIN TRY
 								ELSE	'This confirms that the above contract has been partially priced as follows:'
 						END,
 			dblLotsUnFixed = dbo.fnCTChangeNumericScale(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0),1),
-			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,2) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
-			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,4) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),4) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
-			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,2) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,4) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
 			strSummary = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	'All lot(s) are fixed.'
 								ELSE	''

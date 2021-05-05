@@ -69,6 +69,7 @@
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
+    ,[ysnFromReturn]                        BIT             NULL
 
     ,[intInvoiceDetailId]                   INT             NULL
     ,[intItemId]                            INT             NULL

@@ -233,7 +233,7 @@ BEGIN TRY
 
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
 		BEGIN
-			UPDATE @CDTableUpdate SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)
+			--UPDATE @CDTableUpdate SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)
 			
 			DECLARE @FutureMonthId INT
 
@@ -254,7 +254,11 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-			SELECT @dblLotsFixed =  dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+			declare
+				@dblSlicedFutures numeric(18,6)
+				,@dblSlicedCashPrice numeric(18,6);
+
+			SELECT @dblLotsFixed =  round(dblLotsFixed,2), @dblSlicedFutures = dblFinalPrice - dblOriginalBasis, @dblSlicedCashPrice = dblFinalPrice FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId;
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	@CDTableUpdate
@@ -262,6 +266,16 @@ BEGIN TRY
 						dblCashPrice		=	NULL,
 						dblTotalCost		=	NULL,
 						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 2 END
+				WHERE	intContractDetailId	=	@intContractDetailId
+			END
+
+			IF @dblNoOfLots = @dblLotsFixed AND @intPricingTypeId = 2
+			BEGIN
+				UPDATE	@CDTableUpdate
+				SET		dblFutures			=	@dblSlicedFutures,
+						dblCashPrice		=	@dblSlicedCashPrice,
+						dblTotalCost		=	(dblQuantity * @dblSlicedCashPrice),
+						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 1 END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
@@ -378,14 +392,14 @@ BEGIN TRY
 			@ysnFeedOnApproval		=	1	AND
 			NOT EXISTS (SELECT TOP 1 1 FROM tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
 		BEGIN
-			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1
+			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1, 1
 		END
 
 		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND
 			NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractCost WHERE ysnBasis = 1 AND intContractDetailId = @intContractDetailId) -- ADD missing Basis components
 		BEGIN
-			INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis)
-			SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis
+			INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis, ysnAccrue)
+			SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis, 0 AS ysnAccrue
 			FROM	tblICItem		IM
 			JOIN	tblICItemUOM	IU ON IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE	ysnBasisContract = 1
@@ -460,7 +474,8 @@ BEGIN TRY
 	END
 
 	--Slice
-	--EXEC uspQMSampleContractSlice @intContractHeaderId --Please do not uncomment this one. This is related to jira CT-4391
+	EXEC uspQMSampleContractSlice @intContractHeaderId
+
 	EXEC uspLGLoadContractSlice @intContractHeaderId
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
 

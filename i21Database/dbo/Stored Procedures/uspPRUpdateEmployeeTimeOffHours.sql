@@ -104,7 +104,7 @@ BEGIN
 								ELSE 0
 							END * dblRate * dblRateFactor
 		--Calculate Total Earned Hours
-		,dblEarnedHours = CASE WHEN (GETDATE() >= dtmNextAward) THEN
+		,dblEarnedHours = CASE WHEN (GETDATE() >= dtmNextAward OR strAwardPeriod = 'Paycheck' ) THEN
 								CASE WHEN (strPeriod = 'Hour') THEN 
 									ISNULL((SELECT SUM((PE.dblHours / ISNULL(NULLIF(dblPerPeriod, 0), 1)))
 											FROM tblPRPaycheck P 

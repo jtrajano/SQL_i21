@@ -2,7 +2,7 @@
 
 AS
 
-SELECT intRowId = CAST(ROW_NUMBER() OVER (ORDER BY intSeqNo DESC) AS INT)
+SELECT intRowId = CAST(ROW_NUMBER() OVER (ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END, intSeqNo, strType) AS INT)
 	, intDPRHeaderId
 	, strCommodityCode
 	, intSeqNo = CAST(intSeqNo AS INT)

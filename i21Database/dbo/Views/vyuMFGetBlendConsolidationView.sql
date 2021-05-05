@@ -45,10 +45,10 @@
 	JOIN tblMFBlendRequirement br ON br.intBlendRequirementId=w.intBlendRequirementId
 	JOIN tblMFWorkOrderConsumedLot wc ON wc.intWorkOrderId=w.intWorkOrderId
 	JOIN tblICItem i ON i.intItemId=w.intItemId
-	JOIN tblICLot l on l.intLotId=wc.intLotId
-	JOIN tblICItem i1 ON i1.intItemId=l.intItemId
+	Left JOIN tblICLot l on l.intLotId=wc.intLotId
+	JOIN tblICItem i1 ON i1.intItemId=wc.intItemId
 	JOIN tblMFWorkOrderProducedLot wp on wp.intWorkOrderId=w.intWorkOrderId AND ISNULL(wp.ysnProductionReversed,0)=0
-	JOIN tblICLot l1 on l1.intLotId=wp.intLotId
+	Left JOIN tblICLot l1 on l1.intLotId=wp.intLotId
 	LEFT JOIN tblICCategory cg on cg.intCategoryId=i.intCategoryId
 	JOIN tblICItemUOM iu on iu.intItemUOMId=wc.intItemUOMId
 	JOIN tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId

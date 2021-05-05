@@ -264,6 +264,7 @@ DECLARE  @Id									INT
 		,@ItemRecipeItemId						INT
 		,@ItemRecipeId							INT
 		,@ItemSublocationId						INT
+		,@ItemPriceFixationDetailId				INT
 		,@ItemCostTypeId						INT
 		,@ItemMarginById						INT
 		,@ItemCommentTypeId						INT
@@ -404,7 +405,7 @@ BEGIN
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Card Fueling Transaction', 'CF Tran') THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@ContractHeaderId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
-		,@LoadId						= (CASE WHEN @FromImportTransactionCSV = 1 THEN [intLoadId] WHEN ISNULL([strSourceTransaction],'') IN ('Load Schedule', 'Weight Claim') OR ([strTransactionType] = 'Credit Memo' AND [strSourceTransaction] != 'POS') THEN ISNULL([intLoadId], [intSourceId]) ELSE NULL END)
+		,@LoadId						= (CASE WHEN @FromImportTransactionCSV = 1 THEN [intLoadId] WHEN ISNULL([strSourceTransaction],'') IN ('Load Schedule', 'Weight Claim') OR ([strTransactionType] = 'Credit Memo'  AND [strSourceTransaction] != 'POS') THEN ISNULL([intLoadId], NULLIF([intSourceId],0)) ELSE NULL END)
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional' OR ((ISNULL([strSourceTransaction],'') = 'Invoice' OR ISNULL([strSourceTransaction],'') = 'Direct') AND ISNULL([strTransactionType],'') = 'Credit Memo') OR ISNULL([strTransactionType],'') = 'Cash Refund' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@TruckDriverId					= [intTruckDriverId]
@@ -460,6 +461,7 @@ BEGIN
 		,@ItemRecipeItemId				= (CASE WHEN @GroupingOption = 0 THEN [intRecipeItemId] ELSE NULL END)
 		,@ItemRecipeId					= (CASE WHEN @GroupingOption = 0 THEN [intRecipeId] ELSE NULL END)
 		,@ItemSublocationId				= (CASE WHEN @GroupingOption = 0 THEN [intSubLocationId] ELSE NULL END)
+		,@ItemPriceFixationDetailId		= (CASE WHEN @GroupingOption = 0 THEN [intPriceFixationDetailId] ELSE NULL END)
 		,@ItemCostTypeId				= (CASE WHEN @GroupingOption = 0 THEN [intCostTypeId] ELSE NULL END)
 		,@ItemMarginById				= (CASE WHEN @GroupingOption = 0 THEN [intMarginById] ELSE NULL END)
 		,@ItemCommentTypeId				= (CASE WHEN @GroupingOption = 0 THEN [intCommentTypeId] ELSE NULL END)
@@ -711,6 +713,7 @@ BEGIN
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
 			,@ItemSublocationId				= @ItemSublocationId
+			,@ItemPriceFixationDetailId		= @ItemPriceFixationDetailId
 			,@ItemCostTypeId				= @ItemCostTypeId
 			,@ItemMarginById				= @ItemMarginById
 			,@ItemCommentTypeId				= @ItemCommentTypeId
@@ -886,6 +889,7 @@ BEGIN
 					,@ItemRecipeItemId				= [intRecipeItemId]
 					,@ItemRecipeId					= [intRecipeId]
 					,@ItemSublocationId				= [intSubLocationId]
+					,@ItemPriceFixationDetailId		= [intPriceFixationDetailId]
 					,@ItemCostTypeId				= [intCostTypeId]
 					,@ItemMarginById				= [intMarginById]
 					,@ItemCommentTypeId				= [intCommentTypeId]
@@ -984,6 +988,7 @@ BEGIN
 						,@ItemRecipeItemId				= @ItemRecipeItemId
 						,@ItemRecipeId					= @ItemRecipeId
 						,@ItemSublocationId				= @ItemSublocationId
+						,@ItemPriceFixationDetailId		= @ItemPriceFixationDetailId
 						,@ItemCostTypeId				= @ItemCostTypeId
 						,@ItemMarginById				= @ItemMarginById
 						,@ItemCommentTypeId				= @ItemCommentTypeId
@@ -1658,6 +1663,7 @@ BEGIN TRY
 						,@ItemRecipeItemId				= [intRecipeItemId]
 						,@ItemRecipeId					= [intRecipeId]
 						,@ItemSublocationId				= [intSubLocationId]
+						,@ItemPriceFixationDetailId		= [intPriceFixationDetailId]
 						,@ItemCostTypeId				= [intCostTypeId]
 						,@ItemMarginById				= [intMarginById]
 						,@ItemCommentTypeId				= [intCommentTypeId]
@@ -1752,6 +1758,7 @@ BEGIN TRY
 							,@ItemRecipeItemId				= @ItemRecipeItemId
 							,@ItemRecipeId					= @ItemRecipeId
 							,@ItemSublocationId				= @ItemSublocationId
+							,@ItemPriceFixationDetailId		= @ItemPriceFixationDetailId
 							,@ItemCostTypeId				= @ItemCostTypeId
 							,@ItemMarginById				= @ItemMarginById
 							,@ItemCommentTypeId				= @ItemCommentTypeId
@@ -1983,6 +1990,7 @@ BEGIN TRY
 					,@ItemRecipeItemId				= [intRecipeItemId]	
 					,@ItemRecipeId					= [intRecipeId]
 					,@ItemSublocationId				= [intSubLocationId]
+					,@ItemPriceFixationDetailId		= [intPriceFixationDetailId]
 					,@ItemCostTypeId				= [intCostTypeId]
 					,@ItemMarginById				= [intMarginById]
 					,@ItemCommentTypeId				= [intCommentTypeId]
@@ -2146,6 +2154,7 @@ BEGIN TRY
 						,[intRecipeItemId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeItemId ELSE [intRecipeItemId] END
 						,[intRecipeId]							= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemRecipeId ELSE [intRecipeId] END
 						,[intSubLocationId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSublocationId ELSE [intSubLocationId] END
+						,[intPriceFixationDetailId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemPriceFixationDetailId ELSE [intPriceFixationDetailId] END
 						,[intCostTypeId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCostTypeId ELSE [intCostTypeId] END
 						,[intMarginById]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemMarginById ELSE [intMarginById] END
 						,[intCommentTypeId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemCommentTypeId ELSE [intCommentTypeId] END

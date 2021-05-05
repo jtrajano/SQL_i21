@@ -668,7 +668,7 @@ BEGIN
 						
 						
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
-					BEGIN						
+					BEGIN
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
 							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax

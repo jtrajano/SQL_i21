@@ -29,7 +29,8 @@ BEGIN TRY
 	DECLARE @loopCustomerId				INT
 	DECLARE @CFID NVARCHAR(MAX)
 
-	IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
+	-- IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
+	BEGIN TRANSACTION
 
 	----------CREATE TEMPORARY TABLE----------
 	CREATE TABLE #tblCFDisctinctCustomerInvoice	
@@ -197,7 +198,8 @@ BEGIN TRY
 
 	IF(@ysnHasError = 1)
 	BEGIN
-		IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+		-- IF (@@TRANCOUNT > 0) 
+		ROLLBACK TRANSACTION 
 
 		SELECT   
 			@CatchErrorMessage = ERROR_MESSAGE(),  
@@ -215,11 +217,13 @@ BEGIN TRY
 		
 		SELECT @index = CHARINDEX('>',@CatchErrorMessage)
 		SELECT @ErrorMessage = SUBSTRING(@CatchErrorMessage,@index + 1, 1000);  
+
+		RETURN
 	END
 	ELSE
 	BEGIN
 		UPDATE tblCFAccount SET dtmLastBillingCycleDate = @dtmInvoiceDate WHERE intAccountId IN (SELECT intAccountId FROM tblCFInvoiceStagingTable where strUserId = @username)
-		IF (@@TRANCOUNT > 0) COMMIT TRANSACTION
+		-- IF (@@TRANCOUNT > 0) 
 	END
 
 	--------HISTORY--------
@@ -1027,12 +1031,15 @@ BEGIN TRY
 	DROP TABLE #tblCFDisctinctCustomerInvoice
 	----------------------------------------
 
+	
+	COMMIT TRANSACTION
 	 
 
 END TRY
 BEGIN CATCH
 	
-	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+	-- IF (@@TRANCOUNT > 0) 
+	ROLLBACK TRANSACTION 
   
 	SELECT   
 		@CatchErrorMessage = ERROR_MESSAGE(),  

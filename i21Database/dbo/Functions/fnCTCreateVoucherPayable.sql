@@ -147,4 +147,5 @@ RETURNS TABLE AS RETURN
 		WHEN @type = 'cost' AND CC.intContractCostId = @id THEN 1
 	END = 1 
 	AND CASE WHEN @accrue = 0 AND payable.intEntityVendorId IS NOT NULL THEN 1 ELSE @accrue END = 1
+	AND ISNULL(CC.ysnBasis, 0) <> 1
 )

@@ -63,5 +63,18 @@ GO
 --END
 --GO
 
-PRINT N'END - IC Add Constraint'
 GO
+
+-- Add the CHECK CONSTRAINTS in tblICItem 
+IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_AllowCommodityChange' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItem', 'U'))
+BEGIN
+	EXEC('
+		ALTER TABLE tblICItem
+		WITH NOCHECK ADD CONSTRAINT CK_AllowCommodityChange
+		CHECK (dbo.fnAllowCommodityToChange(intItemId, intCommodityId) = 1)'
+	);
+
+END
+GO 
+
+PRINT N'END - IC Add Constraint'

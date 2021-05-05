@@ -41,6 +41,10 @@ DECLARE @strShipmentNumber AS NVARCHAR(50)
 		,@intInvoiceId AS INT
 		,@IntegrationId AS InventoryAdjustmentIntegrationId
 
+		,@intContractHeaderId AS INT
+		,@intContractDetailId AS INT
+		,@intEntityCustomerId AS INT 
+
 DECLARE	@ErrorMessage NVARCHAR(4000)
 		,@ErrorSeverity INT
 		,@ErrorState INT 
@@ -94,6 +98,10 @@ BEGIN
 			, si.intOwnershipType
 			, sc.intTicketId
 			, inv.intInvoiceId
+			, si.intOrderId
+			, si.intLineNo
+			, s.intEntityCustomerId
+
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			left join tblICInventoryShipmentItemLot as sil
@@ -160,6 +168,9 @@ BEGIN
 			,@intOwnershipType			
 			,@intTicketId
 			,@intInvoiceId
+			,@intContractHeaderId 
+			,@intContractDetailId 
+			,@intEntityCustomerId 
 
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
@@ -192,6 +203,11 @@ BEGIN
 				,DEFAULT
 				,@ysnPost
 				,@temp_integration_table
+
+				,@intContractHeaderId 
+				,@intContractDetailId 
+				,@intEntityCustomerId 
+
 		END TRY 
 		BEGIN CATCH
 			SELECT 
@@ -226,6 +242,10 @@ BEGIN
 				,@intOwnershipType			
 				,@intTicketId
 				,@intInvoiceId
+				,@intContractHeaderId 
+				,@intContractDetailId 
+				,@intEntityCustomerId 
+
 	END
 
 	GOTO _EndLoop

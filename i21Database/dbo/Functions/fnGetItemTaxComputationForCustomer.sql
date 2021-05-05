@@ -305,8 +305,8 @@ BEGIN
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
 					BEGIN
 
-						IF @TaxOnly = 1
-							SET @TaxableAmount = @ZeroDecimal
+						-- IF @TaxOnly = 1
+						-- 	SET @TaxableAmount = @ZeroDecimal
 
 						IF(@TaxAdjustedTax = 1)
 						BEGIN

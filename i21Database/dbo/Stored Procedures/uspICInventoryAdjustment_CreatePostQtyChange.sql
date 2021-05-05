@@ -19,6 +19,10 @@
 	,@strDescription AS NVARCHAR(1000) = NULL 
 	,@ysnPost BIT = 1
 	,@InventoryAdjustmentIntegrationId as InventoryAdjustmentIntegrationId READONLY
+	
+	,@intContractHeaderId AS INT = NULL
+	,@intContractDetailId AS INT = NULL
+	,@intEntityId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -225,6 +229,9 @@ BEGIN
 			,dblNewCost
 			,intSort
 			,intConcurrencyId
+			,intContractHeaderId
+			,intContractDetailId
+			,intEntityId
 	)
 	SELECT 
 			intInventoryAdjustmentId	= @intInventoryAdjustmentId
@@ -262,6 +269,10 @@ BEGIN
 			,dblNewCost					= @dblNewUnitCost
 			,intSort					= 1
 			,intConcurrencyId			= 1
+			,intContractHeaderId		= @intContractHeaderId
+			,intContractDetailId		= @intContractDetailId
+			,intEntityId				= @intEntityId
+
 	FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON ItemLocation.intItemId = Item.intItemId
 				AND ItemLocation.intLocationId = @intLocationId	

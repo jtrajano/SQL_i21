@@ -16,6 +16,7 @@
 	[intSiteId]							INT				NULL,
 	[intItemId]							INT				NULL,
 	[intTicketId]						INT				NULL,
+	[intSortId]							INT				NULL,
 	[strRequestId]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyAddress]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -125,5 +126,5 @@
 	[dtmScaleDate]						DATETIME		NULL,
 	[blbLogo]							VARBINARY (MAX) NULL,
 	[blbSignature]						VARBINARY (MAX) NULL,
-	[dtmCreated]						DATETIME		NULL,
+	[dtmCreated]						DATETIME		NULL
 );

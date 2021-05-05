@@ -16,20 +16,15 @@ IF @transCount = 0 BEGIN TRANSACTION
 ELSE SAVE TRAN @SavePoint
 
 --DROP TABLE THAT WE ARE USING FOR STAGING, THERE SHOULD BE NO OTHER USER IMPORTING
-IF (EXISTS (SELECT * 
-                 FROM INFORMATION_SCHEMA.TABLES 
-                 WHERE TABLE_SCHEMA = 'dbo' 
-                 AND  TABLE_NAME = 'tblEMEntityStaging'))
-BEGIN
-	DELETE FROM tblAPVendorStagingSynergy
-	DELETE FROM tblAPVendorContactInfoSynergy
-    DROP TABLE tblEMEntityStaging
-	DROP TABLE tblAPVendorStaging
-	DROP TABLE tblEMEntityToContactStaging
-	DROP TABLE tblEMEntityContactDataStaging
-	DROP TABLE tblEMEntityContactLocationDataStaging
-	DROP TABLE tblEMEntityContactPhoneDataStaging
-END
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblEMEntityStaging') DROP TABLE tblEMEntityStaging;
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblEMEntityToContactStaging') DROP TABLE tblEMEntityToContactStaging;
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblEMEntityContactDataStaging') DROP TABLE tblEMEntityContactDataStaging;
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblEMEntityContactLocationDataStaging') DROP TABLE tblEMEntityContactLocationDataStaging;
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblEMEntityContactPhoneDataStaging') DROP TABLE tblEMEntityContactPhoneDataStaging;
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblAPVendorStaging') DROP TABLE tblAPVendorStaging;
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblEMEntityLocationStaging') DROP TABLE tblEMEntityLocationStaging;
+DELETE FROM tblAPVendorStagingSynergy
+DELETE FROM tblAPVendorContactInfoSynergy
 
 --GET ALL ENTITY VENDOR INFO
 SELECT
@@ -80,6 +75,14 @@ INTO tblAPVendorStaging
 FROM tblAPVendor vendor
 INNER JOIN tblEMEntityStaging entStg
 	ON vendor.intEntityId = entStg.intEntityId
+
+--GET ALL OF VENDOR LOCATION
+SELECT
+	vndLocStg.*
+INTO tblEMEntityLocationStaging
+FROM tblEMEntityLocation vndLocStg
+INNER JOIN tblAPVendorStaging vndStg
+	ON vndLocStg.intEntityId = vndStg.intEntityId
 
 IF @transCount = 0 COMMIT TRANSACTION;
 

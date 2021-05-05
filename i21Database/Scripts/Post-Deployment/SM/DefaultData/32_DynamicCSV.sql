@@ -496,13 +496,19 @@ UPDATE tblSMCSVDynamicImport SET
 
 		if @detailcustomerno <> '''' and exists(select top 1 1 from tblARCustomer where strCustomerNumber = @detailcustomerno)
 		begin
-			
 			set @ValidationMessage = @ValidationMessage + '', Customer Number (''+  @detailcustomerno +'') already exists.''
+			set @IsValid = 0
 		end
 
 		if @detailcustomerno = ''''
 		begin
 			set @detailcustomerno = @entityno
+		end
+
+		if patindex(''%[^a-zA-Z0-9]%'' , RTRIM(LTRIM(@detailcustomerno))) > 0
+		begin
+			set @ValidationMessage = @ValidationMessage + '', Customer Number (''+  @detailcustomerno +'') has special characters.''
+			set @IsValid = 0
 		end
 
 		if @detailtype = '''' or @detailtype not in (''Company'', ''Person'')

@@ -257,6 +257,7 @@ BEGIN
 				[intAccountId]						= 	@bankGLAccountId,
 				[intBankAccountId]					= 	@bankAccount,
 				[intPaymentMethodId]				= 	CASE WHEN (vouchersPay.dblAmountPaid - vouchersPay.dblWithheld) = 0 
+																AND @paymentMethod <> 2
 														THEN 3 --Debit Memos and Payments
 														ELSE @paymentMethod END,
 				[intPayToAddressId]					= 	vouchersPay.intPayToAddressId,
@@ -361,7 +362,7 @@ BEGIN
 		--UPDATE STARTING NUMBER
 		UPDATE pay
 			SET 
-				strPaymentRecordNum = @payPrefix + CAST(@payStartingNumber - 1 AS NVARCHAR)
+				strPaymentRecordNum = @payPrefix + CAST(@payStartingNumber AS NVARCHAR)
 				-- ,strPayee = dbo.fnAPGetCheckPayee(@payPrefix + CAST(@payStartingNumber - 1 AS NVARCHAR), pay.dtmDatePaid , pay.intEntityVendorId, pay.intPayToAddressId)
 				,@payStartingNumber = @payStartingNumber + 1
 		FROM tblAPPayment pay
@@ -430,6 +431,26 @@ BEGIN
 	SELECT @createdPaymentIds = COALESCE(@createdPaymentIds + ',', '') +  CONVERT(VARCHAR(12),intCreatePaymentId)
 	FROM #tmpMultiVouchersCreatedPayment
 	ORDER BY intCreatePaymentId
+
+	DECLARE @totalCreated INT = 0
+	DECLARE @createdCtr INT = 0
+	DECLARE @createdId INT = 0
+	SELECT @totalCreated = COUNT(*) FROM #tmpMultiVouchersCreatedPayment
+
+	WHILE (@createdCtr <> @totalCreated)
+	BEGIN
+		SET @createdCtr = @createdCtr + 1
+
+		SELECT @createdId = intCreatePaymentId 
+		FROM ( SELECT intCreatePaymentId, ROW_NUMBER() OVER (ORDER BY intCreatePaymentId ASC) AS intRow FROM #tmpMultiVouchersCreatedPayment ) auditId
+		WHERE intRow = @createdCtr
+
+		EXEC dbo.uspSMAuditLog 
+		@screenName = 'AccountsPayable.view.PayVouchersDetail'			-- Screen Namespace
+		,@keyValue = @createdId											-- Primary Key Value
+		,@entityId = @userId											-- Entity Id
+		,@actionType = 'Created'										-- Action Type
+	END
 
 	BEGIN TRY
 		EXEC uspAPPostPayment @userId = @userId,

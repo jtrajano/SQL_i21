@@ -26,8 +26,16 @@ BEGIN
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			EXEC dbo.uspSMGetStartingNumber  2,@smID OUTPUT,NULL
-			INSERT INTO tblGLJournal(strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,intEntityId,ysnPosted,strRecurringStatus)
-			SELECT strReference,intCurrencyId,@dateNow,dtmReverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,0,strMode FROM tblGLJournalRecurring
+			INSERT INTO tblGLJournal(
+				strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,
+				strSourceType,intEntityId,ysnPosted,strRecurringStatus,intFiscalYearId, intFiscalPeriodId
+			
+			)
+			SELECT strReference,intCurrencyId,@dateNow,dtmReverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,
+				0,strMode, FY.intFiscalYearId, FY.intGLFiscalYearPeriodId FROM tblGLJournalRecurring
+			OUTER APPLY(
+				SELECT intFiscalYearId, intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod WHERE @dateNow BETWEEN dtmStartDate AND dtmEndDate
+			)FY
 			WHERE intJournalRecurringId = @id
 			SELECT  @intJournalID = SCOPE_IDENTITY() 
 			SET @journalIDS = CONVERT(VARCHAR(5), @intJournalID) + @delimiter

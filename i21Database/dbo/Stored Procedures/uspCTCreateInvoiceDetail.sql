@@ -179,7 +179,7 @@ BEGIN TRY
 				,@ItemWeightUOMId						= intItemWeightUOMId
 		  
 
-		FROM	tblARInvoiceDetail
+		FROM	tblARInvoiceDetail with (nolock)
 		WHERE	intInvoiceDetailId = @intInvoiceDetailId
 
 
@@ -272,6 +272,7 @@ BEGIN TRY
 				,@NewInvoiceDetailId					=	@NewInvoiceDetailId	OUTPUT
 
 		-- Check if the contract is destination weights and grades
+		/*
 		IF EXISTS 
 		(
 			select top 1 1 
@@ -292,6 +293,7 @@ BEGIN TRY
 									@intTransactionId		= 	@intPriceFixationDetailId,
 									@dblTransactionQty		= 	@ItemQtyShipped
 		END		
+		*/
 
 		EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @InvoiceId, @UserId = @intUserId
 

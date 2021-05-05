@@ -469,7 +469,51 @@ WHERE ysnInvoicePrepayment = 0
   AND ysnPosted = 1
   AND ISNULL(P.ysnProcessedToNSF, 0) = 0
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
-GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblDiscountTaken, strNotes'
+GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblDiscountTaken, strNotes
+
+UNION ALL
+
+SELECT intInvoiceId			= NULL
+	 , intEntityCustomerId	= P.intEntityCustomerId
+	 , intPaymentId			= P.intPaymentId
+	 , intCompanyLocationId	= P.intLocationId
+	 , intTermId			= NULL
+	 , strInvoiceNumber		= NULL
+	 , strRecordNumber		= P.strRecordNumber + '' - '' + ''Write Off''
+	 , strInvoiceOriginId	= NULL
+	 , strBOLNumber			= NULL
+	 , strPaymentInfo		= ''PAYMENT REF: '' + ISNULL(P.strPaymentInfo, '''')
+	 , strTransactionType	= ''Payment''
+	 , dblInvoiceTotal		= 0.00
+	 , dblBalance			= 0.00
+	 , dblPayment			= ISNULL(PD.dblWriteOffAmount, 0)
+	 , dtmDate				= P.dtmDatePaid
+	 , dtmDueDate			= NULL
+	 , dtmShipDate			= NULL
+	 , dtmDatePaid			= P.dtmDatePaid
+	 , strType				= NULL
+	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
+	 , strTicketNumbers		= NULL
+FROM dbo.tblARPayment P WITH (NOLOCK)
+INNER JOIN (
+	SELECT intPaymentId
+		 , dblWriteOffAmount = SUM(PD.dblWriteOffAmount)
+	FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intInvoiceId
+		FROM dbo.tblARInvoice WITH (NOLOCK)
+		WHERE ysnPosted = 1
+		  AND ISNULL(ysnProcessedToNSF, 0) = 0
+		  AND strType <> ''CF Tran''
+	) I ON I.intInvoiceId = PD.intInvoiceId
+	WHERE PD.dblWriteOffAmount > 0
+	GROUP BY intPaymentId
+) PD ON P.intPaymentId = PD.intPaymentId
+WHERE ysnInvoicePrepayment = 0
+  AND ysnPosted = 1
+  AND ISNULL(P.ysnProcessedToNSF, 0) = 0
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.dblWriteOffAmount, strNotes'
 
 SET @queryForNonCF = CAST('' AS NVARCHAR(MAX)) + '
 SELECT intInvoiceId			= NULL

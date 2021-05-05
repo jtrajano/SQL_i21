@@ -114,7 +114,7 @@ SELECT
     ,[intCommodityId]
     ,[intSourceEntityId]
     ,[ysnRebuild]
-FROM #ARInvoiceGLEntries
+FROM ##ARInvoiceGLEntries
 
 IF @Post = 0
     BEGIN
@@ -144,7 +144,7 @@ IF @Post = 0
 		)
         SELECT DISTINCT [intInvoiceId]
 			, [strInvoiceNumber]
-        FROM #ARPostInvoiceDetail
+        FROM ##ARPostInvoiceDetail
         WHERE [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash')				 	
           AND [intItemId] IS NOT NULL
           AND ISNULL([strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software')
@@ -158,8 +158,8 @@ IF @Post = 0
 			FROM @UnPostICInvoiceData
             ORDER BY [intInvoiceId]
 
-            SELECT @WStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
-            SELECT @WOStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
+            SELECT @WStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
+            SELECT @WOStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
             IF @WOStorageCount > 0
             BEGIN
 				-- Unpost onhand stocks. 

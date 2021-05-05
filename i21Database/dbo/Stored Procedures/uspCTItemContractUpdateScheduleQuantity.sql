@@ -35,7 +35,8 @@ BEGIN TRY
 			@strTransactionId			NVARCHAR(50),
 			@intTransactionId			INT,
 			@strReason					NVARCHAR(50),
-			@ErrMsg						NVARCHAR(MAX)
+			@ErrMsg						NVARCHAR(MAX),
+			@dtmTransactionDate			DATETIME
 
 	IF NOT EXISTS(SELECT * FROM tblCTItemContractDetail WHERE intItemContractDetailId = @intItemContractDetailId)
 	BEGIN
@@ -112,6 +113,8 @@ BEGIN TRY
 				WHERE A.intInvoiceDetailId = @intTransactionDetailId
 	END
 
+	set @dtmTransactionDate = getdate();
+
 
 	-- INSERT HISTORY
 	EXEC uspCTItemContractCreateHistory 
@@ -127,7 +130,8 @@ BEGIN TRY
 			@dblNewApplied				=	@dblOrigApplied,
 			@dblNewBalance				=	@dblOrigBalance,
 			@intNewContractStatusId		=	@intContractStatusId,
-			@dtmNewLastDeliveryDate		=	@dtmOrigLastDeliveryDate
+			@dtmNewLastDeliveryDate		=	@dtmOrigLastDeliveryDate,
+			@dtmTransactionDate			=	@dtmTransactionDate
 
 
 	-- UPDATE ITEM CONTRACT

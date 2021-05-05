@@ -64,6 +64,7 @@ SELECT
 	,[intTaxGroupId]							=	ShipmentCharge.intTaxGroupId
 	,intForexRateTypeId							=	ShipmentCharge.intForexRateTypeId
 	,dblForexRate								=	ShipmentCharge.dblForexRate
+	,ShipmentCharge.ysnAddPayable
 
 FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item 
 		ON ShipmentCharge.intChargeId = Item.intItemId
@@ -134,3 +135,4 @@ WHERE
 		)
 	)
 	AND ISNULL(ShipmentCharge.ysnAllowVoucher, 1) = 1
+	AND (ShipmentCharge.ysnAddPayable IS NULL OR ShipmentCharge.ysnAddPayable = 1) 

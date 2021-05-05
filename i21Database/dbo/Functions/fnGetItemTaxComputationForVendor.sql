@@ -75,9 +75,6 @@ BEGIN
 			,[ysnComputed]					BIT
 			)
 					
-	IF ISNULL(@TaxGroupId, 0) = 0
-		SELECT @TaxGroupId = [dbo].[fnGetTaxGroupIdForVendor](@VendorId, @CompanyLocationId, @ItemId, @VendorLocationId, @FreightTermId)	
-					
 	INSERT INTO @ItemTaxes (
 		 [intTransactionDetailTaxId] 
 		,[intTransactionDetailId]
@@ -237,8 +234,8 @@ BEGIN
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
 					BEGIN	
 					
-						IF @TaxOnly = 1
-							SET @TaxableAmount = @ZeroDecimal
+						-- IF @TaxOnly = 1
+						-- 	SET @TaxableAmount = @ZeroDecimal
 
 						IF(@TaxAdjustedTax = 1)
 						BEGIN

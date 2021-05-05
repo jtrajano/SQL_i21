@@ -7,5 +7,6 @@ CREATE TABLE tblGRTransferStorageReference
 	intTransferStorageId INT NOT NULL,
 	dblUnitQty NUMERIC(38,20) NOT NULL DEFAULT(0),
 	dblSplitPercent NUMERIC(38,20) NOT NULL DEFAULT(0),
-	dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
+	dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE()),
+	CONSTRAINT [FK_tblGRTransferStorageReference_tblGRTransferStorage_intTransferStorageId] FOREIGN KEY ([intTransferStorageId]) REFERENCES [dbo].[tblGRTransferStorage] ([intTransferStorageId]) ON DELETE CASCADE,	
 )

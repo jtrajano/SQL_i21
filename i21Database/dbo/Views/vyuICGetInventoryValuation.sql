@@ -240,6 +240,17 @@ FROM 	tblICInventoryTransaction t
 			AND settleStorage.intSettleStorageId = t.intTransactionDetailId
 			AND t.strTransactionForm IN ('Settle Storage', 'Storage Settlement')
 			AND ty.intTransactionTypeId = 44 
+
+		LEFT JOIN tblICInventoryAdjustment adj
+			ON adj.intInventoryAdjustmentId = t.intTransactionId
+			AND adj.strAdjustmentNo = t.strTransactionId
+			AND ty.strTransactionForm = 'Inventory Adjustment'
+
+		LEFT JOIN tblICInventoryAdjustmentDetail adjustmentItem
+			ON adjustmentItem.intInventoryAdjustmentId = adj.intInventoryAdjustmentId
+			AND adjustmentItem.intInventoryAdjustmentDetailId = t.intTransactionDetailId
+			AND adjustmentItem.intItemId = t.intItemId
+
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = COALESCE(
 				receipt.intEntityVendorId
@@ -249,6 +260,7 @@ FROM 	tblICInventoryTransaction t
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
 				, settleStorage.intEntityId
+				, adjustmentItem.intEntityId
 			)
 
 		LEFT JOIN tblSCTicket ScaleView

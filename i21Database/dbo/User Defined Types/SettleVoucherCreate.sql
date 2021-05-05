@@ -18,4 +18,8 @@ CREATE TYPE [dbo].[SettleVoucherCreate] AS TABLE
 	,dblCostUnitQty DECIMAL(24, 10) NULL
 	,dblSettleContractUnits DECIMAL(24,10) NULL
 	,ysnDiscountFromGrossWeight BIT NULL
+	,ysnPercentChargeType BIT NULL
+	,dblCashPriceUsed DECIMAL(24,10) --to determine the cash price used in Percent discounts
+	,intSettleContractId int null
+	,ysnInventoryCost bit null
 )

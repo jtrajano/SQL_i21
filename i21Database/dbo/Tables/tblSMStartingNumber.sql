@@ -15,8 +15,13 @@
 	CONSTRAINT [AK_tblSMStartingNumber_strTransactionType] UNIQUE NONCLUSTERED ([strTransactionType] ASC)
 
 );
-
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSMStartingNumber_intStartingNumberId]
+		ON [dbo].[tblSMStartingNumber]([intStartingNumberId] ASC)
+		INCLUDE ([strTransactionType], [strPrefix], [intNumber], [strModule])
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity field',
     @level0type = N'SCHEMA',

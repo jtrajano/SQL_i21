@@ -40,6 +40,7 @@
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT				= NULL
 	,@ItemCostTypeId				INT				= NULL
 	,@ItemMarginById				INT				= NULL
 	,@ItemCommentTypeId				INT				= NULL
@@ -111,7 +112,7 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@CurrencyId			INT
 		,@InitTranCount			INT
 		,@Savepoint				NVARCHAR(32)
-
+		,@strItemType			NVARCHAR(50)
 		,@ItemName				NVARCHAR(50)
 		,@LocationName			NVARCHAR(50)
 		,@ItemLocationError		NVARCHAR(255)
@@ -146,7 +147,7 @@ END
 
 SET @ItemCurrencyExchangeRate = CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemCurrencyExchangeRate, 1.000000) END
 SET @ItemSubCurrencyRate = CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemSubCurrencyRate, 1.000000) END
-	
+SET @strItemType = (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @ItemId)	
 	
 IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
 	BEGIN		
@@ -166,7 +167,7 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 	
 IF NOT EXISTS(	SELECT NULL 
 				FROM tblICItem IC INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
-				WHERE IC.[intItemId] = @ItemId AND IL.[intLocationId] = @CompanyLocationId)
+				WHERE IC.[intItemId] = @ItemId AND IL.[intLocationId] = @CompanyLocationId) AND @strItemType <> 'Comment'
 	BEGIN		
 		IF (ISNULL(@RaiseError,0) = 1)
 		begin
@@ -348,6 +349,7 @@ BEGIN TRY
 				,[intRecipeItemId] 
 				,[intRecipeId]
 				,[intSubLocationId]
+				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
 				,[intCommentTypeId]
@@ -465,6 +467,7 @@ BEGIN TRY
 				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intRecipeId]						= @ItemRecipeId
 				,[intSubLocationId]					= @ItemSublocationId
+				,[intPriceFixationDetailId]			= @ItemPriceFixationDetailId
 				,[intCostTypeId]					= @ItemCostTypeId
 				,[intMarginById]					= @ItemMarginById
 				,[intCommentTypeId]					= @ItemCommentTypeId	

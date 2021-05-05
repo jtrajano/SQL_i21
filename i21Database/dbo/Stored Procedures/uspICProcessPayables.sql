@@ -243,31 +243,27 @@ SET ANSI_WARNINGS OFF
 				,[strBillOfLading] = Shipment.strBOLNumber
 				,[ysnReturn] = 0 
 			FROM vyuICShipmentChargesPayables ShipmentCharges
-			INNER JOIN tblICInventoryShipment Shipment
-				ON Shipment.intInventoryShipmentId = ShipmentCharges.intInventoryShipmentId
-			INNER JOIN tblICItemLocation ItemLocation 
-				ON ItemLocation.intItemId = ShipmentCharges.intItemId
-				AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
-			WHERE Shipment.intInventoryShipmentId = @intShipmentId
+				INNER JOIN tblICInventoryShipment Shipment
+					ON Shipment.intInventoryShipmentId = ShipmentCharges.intInventoryShipmentId
+				INNER JOIN tblICItemLocation ItemLocation 
+					ON ItemLocation.intItemId = ShipmentCharges.intItemId
+					AND ItemLocation.intLocationId = ShipmentCharges.intLocationId
+				OUTER APPLY (
+					SELECT TOP 1 
+						intVoucherPayableId
+					FROM tblAPVoucherPayable 
+					WHERE 
+						intEntityVendorId = ShipmentCharges.intEntityVendorId 
+						AND intContractDetailId = ShipmentCharges.intContractDetailId
+						AND intInventoryShipmentChargeId = ShipmentCharges.intInventoryShipmentChargeId				
+						AND strSourceNumber <> ShipmentCharges.strSourceNumber
+						AND intInventoryReceiptItemId IS NULL 
+						AND intInventoryReceiptChargeId IS NULL
+				) existingPayable
+			WHERE 
+				Shipment.intInventoryShipmentId = @intShipmentId
 				AND Shipment.ysnPosted = @ysnPost
-				AND (ShipmentCharges.intContractDetailId IS NULL OR 
-					(
-						CASE WHEN ShipmentCharges.intContractDetailId IS NOT NULL 
-							AND EXISTS(
-								SELECT TOP 1 1 
-								FROM tblAPVoucherPayable 
-								WHERE 
-									intEntityVendorId = ShipmentCharges.intEntityVendorId 
-									AND intContractDetailId = ShipmentCharges.intContractDetailId
-									AND strSourceNumber <> ShipmentCharges.strSourceNumber
-									AND intInventoryReceiptItemId IS NULL 
-									AND intInventoryReceiptChargeId IS NULL 									
-									AND intInventoryShipmentChargeId IS NULL 
-							)
-							THEN 0 ELSE 1 
-						END = 1
-					)
-				)
+				AND existingPayable.intVoucherPayableId IS NULL 
 	END
 	
 	BEGIN 

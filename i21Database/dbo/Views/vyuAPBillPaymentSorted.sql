@@ -33,7 +33,13 @@ SELECT
 								LEFT JOIN dbo.tblARPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 								WHERE PD.intBillId = B.intBillId
 							) paymentData
-						FOR XML PATH('')), 1, 1, '')
+						FOR XML PATH('')), 1, 1, ''),
+	ysnIsPaymentReleased = CAST(CASE
+									WHEN VP.ysnPosted = 1 AND LOWER(VP.strPaymentMethod) IN ('echeck','cash') THEN 1
+									WHEN VP.ysnCleared = 1 THEN 1
+									WHEN VP.ysnPrinted = 1 THEN 1
+									ELSE 0
+						   		END AS BIT)
 FROM tblAPBill B
 CROSS APPLY (
 	SELECT TOP 1 * FROM (
@@ -46,11 +52,13 @@ CROSS APPLY (
 			ISNULL(T.ysnClr,0) AS ysnCleared,
 			P.ysnPosted,
 			T.strLink AS strBatchId,
-			P.dtmDatePaid
+			P.dtmDatePaid,
+			PM.strPaymentMethod
 		FROM dbo.tblAPPayment P
 		LEFT JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 		LEFT JOIN tblCMBankTransaction T ON T.strTransactionId = P.strPaymentRecordNum
-		WHERE PD.intBillId = B.intBillId
+		LEFT JOIN tblSMPaymentMethod PM ON PM.intPaymentMethodID = P.intPaymentMethodId
+		WHERE ISNULL(PD.intBillId, PD.intOrigBillId) = B.intBillId
 		UNION ALL
 		SELECT
 			PD.intBillId,
@@ -61,10 +69,12 @@ CROSS APPLY (
 			ISNULL(T.ysnClr,0) AS ysnCleared,
 			P.ysnPosted,
 			T.strLink AS strBatchId,
-			P.dtmDatePaid
+			P.dtmDatePaid,
+			PM.strPaymentMethod
 		FROM dbo.tblARPayment P
 		LEFT JOIN tblARPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 		LEFT JOIN tblCMBankTransaction T ON T.strTransactionId = P.strRecordNumber
+		LEFT JOIN tblSMPaymentMethod PM ON PM.intPaymentMethodID = P.intPaymentMethodId
 		WHERE PD.intBillId = B.intBillId
 	) P
 	ORDER BY P.intPaymentId DESC

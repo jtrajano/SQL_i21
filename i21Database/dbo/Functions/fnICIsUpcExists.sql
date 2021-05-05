@@ -13,23 +13,26 @@ BEGIN
 		RETURN @ysnExists;
 	END
 
+	DECLARE @intUpcCode AS BIGINT 
+	SET @intUpcCode = 
+			CASE 
+				WHEN 
+					@strLongUPCCode IS NOT NULL 
+					AND ISNUMERIC(RTRIM(LTRIM(@strLongUPCCode))) = 1 
+					AND NOT (@strLongUPCCode LIKE '%.%' OR @strLongUPCCode LIKE '%e%' OR @strLongUPCCode LIKE '%E%') 
+				THEN 				
+					CAST(RTRIM(LTRIM(@strLongUPCCode)) AS BIGINT) 
+				ELSE 
+					CAST(NULL AS BIGINT) 
+			END
+
 	IF EXISTS (
 		SELECT TOP 1 1 
 		FROM tblICItemUOM 
 		WHERE 
 			(
 				strLongUPCCode = @strLongUPCCode 
-				OR intUpcCode = 
-					CASE 
-						WHEN 
-							@strLongUPCCode IS NOT NULL 
-							AND ISNUMERIC(RTRIM(LTRIM(@strLongUPCCode))) = 1 
-							AND NOT (@strLongUPCCode LIKE '%.%' OR @strLongUPCCode LIKE '%e%' OR @strLongUPCCode LIKE '%E%') 
-						THEN 				
-							CAST(RTRIM(LTRIM(@strLongUPCCode)) AS BIGINT) 
-						ELSE 
-							CAST(NULL AS BIGINT) 
-					END
+				OR intUpcCode = @intUpcCode
 			)
 			AND intItemUOMId <> @intItemUOMId
 			AND strLongUPCCode IS NOT NULL 

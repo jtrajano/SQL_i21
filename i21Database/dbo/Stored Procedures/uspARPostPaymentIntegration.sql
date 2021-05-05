@@ -421,7 +421,7 @@ IF @Post = 0
 			DECLARE @PaymentIdToDelete int		
 			SELECT TOP 1 @PaymentIdToDelete = [intTransactionId] FROM #ARPostOverPayment
 					
-			EXEC [dbo].[uspARDeleteOverPayment] @PaymentIdToDelete, 1, @BatchId ,@UserId 
+			EXEC [dbo].[uspARDeleteOverPayment] @PaymentIdToDelete, @UserId 
 					
 			DELETE FROM #ARPostOverPayment WHERE [intTransactionId] = @PaymentIdToDelete
 		END			

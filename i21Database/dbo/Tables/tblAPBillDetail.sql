@@ -35,6 +35,7 @@
 	[intPrepayTransactionId]    INT             NULL,
 	[intReallocationId]    INT             NULL,
 	[intItemBundleId]	INT 	NULL,
+	[intLinkingId]	INT NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblBundleTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
@@ -144,7 +145,10 @@ CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intSettleStorageId]
 		ON [dbo].[tblAPBillDetail]([intSettleStorageId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
-
+CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intContractDetailId]
+		ON [dbo].[tblAPBillDetail]([intContractDetailId] ASC)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBillDetail]
 (
 	[intBillId] ASC,

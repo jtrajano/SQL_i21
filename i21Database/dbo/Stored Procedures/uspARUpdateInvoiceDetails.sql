@@ -1,9 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceDetails]
-	@intInvoiceDetailId		INT,
-	@intEntityId			INT,
-	@intPriceUOMId			INT = NULL,
-	@dblQtyShipped			NUMERIC(38, 20) = NULL,
-	@dblPrice				NUMERIC(18, 6) = NULL
+	@intInvoiceDetailId			INT,
+	@intEntityId				INT,
+	@intPriceUOMId				INT = NULL,
+	@dblQtyShipped				NUMERIC(38, 20) = NULL,
+	@dblPrice					NUMERIC(18, 6) = NULL,
+	@intPriceFixationDetailId	INT = NULL
 AS
 
 IF ISNULL(@intInvoiceDetailId, 0) = 0 OR NOT EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId)
@@ -82,9 +83,10 @@ IF @ysnPosted = 1
 EXEC [uspARInsertTransactionDetail] @intInvoiceId, @intEntityId
 
 UPDATE tblARInvoiceDetail
-SET dblQtyShipped = CASE WHEN @dblQtyShipped IS NOT NULL THEN @dblQtyShipped ELSE dblQtyShipped END
-  , dblPrice	  = CASE WHEN @dblPrice IS NOT NULL THEN @dblPrice ELSE dblPrice END
-  , intPriceUOMId = CASE WHEN @intPriceUOMId IS NOT NULL THEN @intPriceUOMId ELSE intPriceUOMId END  
+SET dblQtyShipped 				= CASE WHEN @dblQtyShipped IS NOT NULL THEN @dblQtyShipped ELSE dblQtyShipped END
+  , dblPrice	  				= CASE WHEN @dblPrice IS NOT NULL THEN @dblPrice ELSE dblPrice END
+  , intPriceUOMId 				= CASE WHEN @intPriceUOMId IS NOT NULL THEN @intPriceUOMId ELSE intPriceUOMId END
+  , intPriceFixationDetailId	= @intPriceFixationDetailId  
 WHERE intInvoiceDetailId = @intInvoiceDetailId
 
 EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @UserId = @intEntityId

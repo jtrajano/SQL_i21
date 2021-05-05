@@ -198,7 +198,7 @@ BEGIN
 			from tblGRStorageHistory 
 				where intCustomerStorageId = CS.intCustomerStorageId 
 					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
-					and intTransactionTypeId in ( 1, 4, 3, 5, 9)
+					and (intTransactionTypeId in ( 1, 4, 3, 5, 9) or (intTransactionTypeId = 2 and strPaidDescription = 'Open Balance Adj'))
 	) as MagicalOpenBalance
 	INNER JOIN @BillStorageValues SV
 		ON SV.intCustomerStorageId = CS.intCustomerStorageId
@@ -235,7 +235,8 @@ BEGIN
 					end
 				) + SV.dblStorageDuePerUnit
 			) >= 0
-		and SV.dblStorageDuePerUnit > 0
+		AND SV.dblStorageDuePerUnit > 0
+		AND MagicalOpenBalance.dblOpenBalance >= 1 
 	ORDER BY EM.strName, CL.strLocationName		
 
 	RETURN;

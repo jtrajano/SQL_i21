@@ -116,6 +116,7 @@ SELECT TOP 100 PERCENT
 	,intContractDetailId				=	ctDetail.intContractDetailId
 	,intPriceFixationDetailId			=	A.intPriceFixationDetailId
 	,intContractSeq						=	ctDetail.intContractSeq
+	,intLinkingId						=	A.intLinkingId
 	/*Prepaid info*/					
 	,dblPrepayPercentage				=	A.dblPrepayPercentage
 	,intPrepayTypeId					=	A.intPrepayTypeId
@@ -143,16 +144,18 @@ SELECT TOP 100 PERCENT
 	,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
 											ELSE A.dblCostUnitQty END
-	,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
-														THEN ctDetail.dblSeqPrice
-													ELSE 
-														(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
-															THEN ctDetail.dblSeqPrice
-															ELSE A.dblCost
-														END)
-													END)
-											ELSE A.dblCost END
+	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
+	,dblCost							=	A.dblCost
+	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
+	-- 													THEN ctDetail.dblSeqPrice
+	-- 												ELSE 
+	-- 													(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
+	-- 														THEN ctDetail.dblSeqPrice
+	-- 														ELSE A.dblCost
+	-- 													END)
+	-- 												END)
+	-- 										ELSE A.dblCost END
 	,dblOldCost							=	A.dblOldCost
 	/*Quantity info*/					
 	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
@@ -338,7 +341,7 @@ LEFT JOIN @payablesKey payableKeys
 	ON payableKeys.intOldPayableId = A.intVoucherPayableId
 LEFT JOIN tblAPVoucherPayable vp 
 	ON payableKeys.intNewPayableId = vp.intVoucherPayableId
-WHERE A.ysnStage = 1
+WHERE A.ysnStage = 1 AND vp.intVoucherPayableId IS NOT NULL --UPDATE ONLY THOSE WHO IS IN tblAPVoucherPayable
 
 MERGE INTO tblAPBillDetail AS destination
 USING
@@ -391,6 +394,7 @@ INSERT
 	,intContractDetailId	
 	,intPriceFixationDetailId			
 	,intContractSeq						
+	,intLinkingId					
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
 	,intPrepayTypeId					
@@ -482,6 +486,7 @@ VALUES
 	,intContractDetailId	
 	,intPriceFixationDetailId			
 	,intContractSeq						
+	,intLinkingId			
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
 	,intPrepayTypeId					
@@ -587,7 +592,7 @@ FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
 LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
-WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
+WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL OR A.intPriceFixationDetailId > 0
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 

@@ -2,7 +2,8 @@
 	 @InvoiceId			INT = NULL	
 	,@ForDelete			BIT = 0    
 	,@UserId			INT = NULL
-	,@InvoiceDetailId 	INT = NULL     
+	,@InvoiceDetailId 	INT = NULL
+	,@ysnLogRisk		BIT = 1     
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -98,6 +99,9 @@ BEGIN TRY
 			END
 		END
 
+	--Update Invoice for ID
+	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
+
 	--UPDATE PREPAID ITEM CONTRACT
 	IF ISNULL(@ysnFromItemContract, 0) <> 0
 	BEGIN
@@ -128,39 +132,9 @@ BEGIN TRY
 		 , strBatchId 	= @strBatchId	
 
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
-	EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
-
-	-- --PRICING LAYER
-	-- INSERT INTO @InvoicesForContractDelete(
-	-- 	  intHeaderId
-	-- 	, intDetailId
-	-- 	, ysnForDelete
-	-- 	, strBatchId
-	-- )--INVOICE HEADER DELETED 
-	-- SELECT intHeaderId 	= intInvoiceId
-	-- 	 , intDetailId	= intInvoiceDetailId
-	-- 	 , ysnForDelete = CAST(1 AS BIT)
-	-- 	 , strBatchId 	= @strBatchId
-	-- FROM tblARInvoiceDetail ID
-	-- WHERE (@ForDelete = 1 AND ID.intInvoiceId = @intInvoiceId)
-	--    AND ID.intContractDetailId IS NOT NULL
-	   
-	-- WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoicesForContractDelete)
-	-- 	BEGIN
-	-- 		DECLARE @intInvoiceToDelete			INT = NULL
-	-- 			  , @intInvoiceDetailToDeleteId	INT = NULL
-
-	-- 		SELECT TOP 1 @intInvoiceToDelete			= intHeaderId
-	-- 			       , @intInvoiceDetailToDeleteId	= intDetailId
-	-- 		FROM @InvoicesForContractDelete
-
-	-- 		EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
-	-- 										   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
-    -- 										   , @strScreen 			= 'Invoice'
-    -- 										   , @intUserId				= @UserId
-			
-	-- 		DELETE FROM @InvoicesForContractDelete WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
-	-- 	END
+	
+	IF ISNULL(@ysnLogRisk, 0) = 1
+		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
 
 	IF @ForDelete = 1
 		BEGIN

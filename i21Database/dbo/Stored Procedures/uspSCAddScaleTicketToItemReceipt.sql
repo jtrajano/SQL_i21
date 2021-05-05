@@ -127,6 +127,7 @@ INSERT INTO @ReceiptStagingTable(
 		,[intLoadShipmentId] 
 		,[intLoadShipmentDetailId] 
 		,intTaxGroupId
+		,ysnAddPayable
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -237,7 +238,17 @@ SELECT
 		,intShipFromEntityId		= SC.intEntityId
 		,[intLoadShipmentId] 		= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadId ELSE NULL END
 		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadDetailId ELSE NULL END
-		,intTaxGroupId				= CASE WHEN LI.strSourceTransactionId = 'DP' THEN -1 ELSE NULL END
+		,intTaxGroupId				= CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
+										ELSE 
+											CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
+											THEN -1
+											ELSE NULL
+											END 
+										END
+		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
+										THEN 0
+										ELSE NULL
+										END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
 	SELECT CTD.intContractHeaderId
@@ -279,6 +290,12 @@ LEFT JOIN tblEMEntityLocation VNDL
 		AND VNDL.ysnDefaultLocation = 1
 LEFT JOIN tblEMEntityLocation VNDSF
 	ON VND.intShipFromId = VNDSF.intEntityLocationId
+LEFT JOIN tblGRStorageType StorageType
+	ON LI.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId 
+LEFT JOIN tblCTContractDetail ConDetail
+	ON LI.intTransactionDetailId = ConDetail.intContractDetailId
+LEFT JOIN tblCTContractHeader ConHeader
+	ON ConDetail.intContractHeaderId = ConHeader.intContractHeaderId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 
@@ -335,14 +352,30 @@ END
 	,[intForexRateTypeId]				= RE.intForexRateTypeId
 	,[dblForexRate]						= RE.dblForexRate
 	,[ysnInventoryCost]					= IC.ysnInventoryCost
-	,[strCostMethod]					= IC.strCostMethod
+	,[strCostMethod]					= IC.strCostMethod --case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE 
 												WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
 												WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
-											WHEN IC.strCostMethod = 'Amount' THEN 0
+											WHEN IC.strCostMethod = 'Amount' THEN --0
+										CASE
+											WHEN RE.ysnIsStorage = 1 THEN 0
+											WHEN RE.ysnIsStorage = 0 THEN
+										CASE 
+											WHEN QM.dblDiscountAmount < 0 THEN
+												CASE 
+													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)    
+													ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)  
+												END
+											WHEN QM.dblDiscountAmount > 0 THEN 
+											CASE    
+											WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)    
+											ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) 
+												END  
+											END
+										END
 											ELSE 0
 										END
 	,[intCostUOMId]						= CASE
@@ -398,6 +431,7 @@ END
 	) CNT ON CNT.intContractDetailId = RE.intContractDetailId
 	WHERE RE.intSourceId = @intTicketId AND (QM.dblDiscountAmount != 0 OR GR.ysnSpecialDiscountCode = 1) AND RE.ysnIsStorage = 0 AND ISNULL(intPricingTypeId,0) IN (0,1,2,5,6) 
 
+		and isnull(@intDeliverySheetId,0 ) = 0
 	--FOR FEE CHARGES
 	INSERT INTO @OtherCharges
 	(
@@ -1595,6 +1629,8 @@ UPDATE	SC
 SET		SC.intInventoryReceiptId = addResult.intInventoryReceiptId
 FROM	dbo.tblSCTicket SC INNER JOIN #tmpAddItemReceiptResult addResult
 			ON SC.intTicketId = addResult.intSourceId
+
+exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
 
 _PostOrUnPost:
 -- Post the Inventory Receipts                                            

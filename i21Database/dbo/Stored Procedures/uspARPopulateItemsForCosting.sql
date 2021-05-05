@@ -26,7 +26,7 @@ SET @ZeroBit = CAST(0 AS BIT)
 DECLARE @OneBit BIT
 SET @OneBit = CAST(1 AS BIT)
 
-INSERT INTO #ARItemsForCosting
+INSERT INTO ##ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -112,7 +112,7 @@ SELECT
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
 FROM
-    #ARPostInvoiceDetail ARID
+    ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -153,7 +153,7 @@ WHERE
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))))
 
 --Bundle Items
-INSERT INTO #ARItemsForCosting
+INSERT INTO ##ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -218,7 +218,7 @@ SELECT
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
-	#ARPostInvoiceDetail ARID
+	##ARPostInvoiceDetail ARID
 		ON ARIC.[intItemId] = ARID.[intItemId]
 		AND ARIC.[intCompanyLocationId] = ARID.[intCompanyLocationId]	
 INNER JOIN
@@ -246,11 +246,12 @@ WHERE
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
+	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
 -- Final Invoice
-INSERT INTO #ARItemsForCosting
+INSERT INTO ##ARItemsForCosting
 	([intItemId]
 	,[intItemLocationId]
 	,[intItemUOMId]
@@ -303,8 +304,8 @@ SELECT
 	,ARIC.[intCategoryId]
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
-FROM #ARItemsForCosting ARIC
-INNER JOIN #ARPostInvoiceDetail ARID
+FROM ##ARItemsForCosting ARIC
+INNER JOIN ##ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
 INNER JOIN tblARInvoiceDetail ARIDP
 ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId

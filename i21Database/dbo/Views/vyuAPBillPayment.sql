@@ -28,6 +28,7 @@ intId
 ,Payments.ysnCleared
 ,Payments.dtmDateReconciled
 ,Payments.strBatchId
+,CAST(Payments.ysnIsPaymentReleased AS BIT) ysnIsPaymentReleased
 ,A2.strPaymentInfoKey COLLATE Latin1_General_CI_AS AS strPaymentInfoKey
 FROM dbo.tblAPBill A
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
@@ -54,6 +55,13 @@ INNER JOIN
 		,allPayment.ysnPrepay
 		,allPayment.strBatchId
 		,allPayment.dtmDateReconciled
+		,ysnIsPaymentReleased = 
+			CASE 
+			WHEN allPayment.ysnPosted = 1 AND LOWER(I.strPaymentMethod) IN ('echeck','cash') THEN 1
+			WHEN allPayment.ysnCleared = 1 THEN 1
+			WHEN allPayment.ysnPrinted = 1 THEN 1
+			ELSE 0 
+			END
 	FROM (
 		SELECT
 			B.[intEntityVendorId]
@@ -74,14 +82,15 @@ INNER JOIN
 			,B.ysnPrepay
 			,H.strLink AS strBatchId
 			,H.dtmDateReconciled
+			,B.intPaymentMethodId
 		FROM dbo.tblAPPayment B 
-			LEFT JOIN dbo.tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
+		LEFT JOIN dbo.tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 		LEFT JOIN dbo.tblCMBankAccount G ON B.intBankAccountId = G.intBankAccountId
 		LEFT JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
 		--WHERE B.ysnPosted = 1
 		GROUP BY [intEntityVendorId], intBillId, intOrigBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr,
 		G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid, H.dtmDateReconciled, B.ysnPosted
-		,H.strLink, B.ysnPrepay
+		,H.strLink, B.ysnPrepay, B.intPaymentMethodId
 		UNION ALL
 		SELECT
 			B.[intCurrencyId]
@@ -102,6 +111,7 @@ INNER JOIN
 			,0
 			,H.strLink AS strBatchId
 			,H.dtmDateReconciled
+			,B.intPaymentMethodId
 		FROM dbo.tblARPayment B 
 			LEFT JOIN dbo.tblARPaymentDetail C ON B.intPaymentId = C.intPaymentId
 		LEFT JOIN dbo.tblCMBankAccount G ON B.intBankAccountId = G.intBankAccountId
@@ -109,7 +119,8 @@ INNER JOIN
 		WHERE C.intBillId > 0
 		GROUP BY B.[intCurrencyId], intBillId, intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr,
 			G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid, H.dtmDateReconciled, B.ysnPosted
-			,H.strLink
+			,H.strLink, B.intPaymentMethodId
 	) allPayment
+	LEFT JOIN dbo.tblSMPaymentMethod I ON I.intPaymentMethodID = allPayment.intPaymentMethodId
 ) Payments
 ON A.intBillId = Payments.intBillId

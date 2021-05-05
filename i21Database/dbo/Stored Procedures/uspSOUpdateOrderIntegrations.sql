@@ -23,20 +23,29 @@ SET @ysnForUnship = @ForUnship
 
 IF @ForDelete = 1
 BEGIN
-	DECLARE @ErrorMessage NVARCHAR(250) = NULL
+	DECLARE @ItemsToReserve AS dbo.ItemReservationTableType
+	DECLARE @ErrorMessage 	NVARCHAR(250) = NULL
+		  , @intPickListId	INT = NULL
+
 	SELECT TOP 1
 		@ErrorMessage = 'Unable to Delete! Line Item - ' + ICI.strItemNo + ' was blended already.'
-	FROM
-		tblSOSalesOrderDetail SOD
-	INNER JOIN
-		tblICItem ICI
-			ON SOD.intItemId = ICI.intItemId
-	WHERE
-		ISNULL(SOD.ysnBlended,0) = 1
-		AND SOD.[intSalesOrderId] = @SalesOrderId
+	FROM tblSOSalesOrderDetail SOD
+	INNER JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId
+	WHERE ISNULL(SOD.ysnBlended,0) = 1
+	  AND SOD.[intSalesOrderId] = @SalesOrderId
 		
 	IF RTRIM(LTRIM(ISNULL(@ErrorMessage,''))) <> ''
 		RAISERROR(@ErrorMessage, 16, 1);
+
+	SELECT @intPickListId = intPickListId
+	FROM tblMFPickList
+	WHERE intSalesOrderId = @intSalesOrderId
+
+	--CLEAR PICK LIST ITEM RESERVATION
+	IF ISNULL(@intPickListId, 0) <> 0
+		EXEC dbo.uspICCreateStockReservation @ItemsToReserve
+    									   , @intPickListId
+    									   , 34
 END
 
 EXEC dbo.[uspARUpdatePricingHistory] 1, @intSalesOrderId, @intUserId

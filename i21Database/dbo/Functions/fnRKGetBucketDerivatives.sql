@@ -135,7 +135,7 @@ BEGIN
 		, strUserName
 		, strAction
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strDistributionType, c.strInOut ORDER BY c.intSummaryLogId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strDistributionType, c.strInOut, c.intFutureMarketId ORDER BY c.intSummaryLogId DESC)
 			, c.intFutOptTransactionId
 			, dblOpenContract =  ISNULL(c.dblOrigNoOfLots, 0) - CASE WHEN c.strInOut = 'IN' THEN  ISNULL(ABS(md.dblOrigNoOfLots), 0) ELSE ISNULL(md.dblOrigNoOfLots, 0) END
 			, intCommodityId
@@ -164,7 +164,7 @@ BEGIN
 			, ysnPreCrush = CAST(ISNULL(mf.ysnPreCrush, 0) AS BIT)
 			, strNotes
 			, strBrokerTradeNo = mf.strBrokerTradeNo			
-			, mf.intFutOptTransactionHeaderId
+			, intFutOptTransactionHeaderId = c.intTransactionRecordHeaderId
 			, c.intCurrencyId
 			, c.strCurrency
 			, dtmCreatedDate

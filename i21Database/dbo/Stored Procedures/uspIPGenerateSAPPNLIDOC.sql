@@ -78,6 +78,28 @@ Begin
 		GOTO NEXT_GL
 	END
 
+	-- GL feed should not go to SAP if the match no is posted and unposted at the same time previously
+	IF EXISTS (
+			SELECT TOP 1 1
+			FROM tblRKStgMatchPnS M1
+			JOIN tblRKStgMatchPnS M2 ON M2.intMatchNo = M1.intMatchNo
+				AND M2.intStgMatchPnSId = M1.intStgMatchPnSId + 1
+				AND ISNULL(M2.ysnPost, 0) = 0
+				AND ISNULL(M1.ysnPost, 0) = 1
+				AND DATEDIFF(ss, M1.dtmPostingDate, M2.dtmPostingDate) < 4
+			WHERE M2.intMatchNo = @intMatchNo
+				AND M2.intStgMatchPnSId < @intMinStageId
+			ORDER BY M1.intStgMatchPnSId DESC
+			)
+	BEGIN
+		UPDATE tblRKStgMatchPnS
+		SET strStatus = 'IGNORE'
+			,strMessage = 'GL Feed not sent since Match No is Posted and Unposted at the same time previously.'
+		WHERE intStgMatchPnSId = @intMinStageId
+
+		GOTO NEXT_GL
+	END
+
 	Begin
 		Set @strXml =  '<ACC_DOCUMENT03>'
 		Set @strXml += '<IDOC BEGIN="1">'

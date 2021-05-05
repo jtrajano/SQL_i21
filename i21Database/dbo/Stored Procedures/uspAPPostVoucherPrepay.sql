@@ -306,6 +306,16 @@ BEGIN
 		SET prepay.ysnPosted = @post, prepay.intConcurrencyId = ISNULL(prepay.intConcurrencyId,0) + 1
 	FROM tblAPBill prepay
 	INNER JOIN @validVoucherPrepay prepayIds ON prepay.intBillId = prepayIds.intId
+
+	--CLEAN ysnInPayment, dblPaymentTemp, & ysnPrepayHasPayment
+	--WE CAN ASSUME NEWLY POSTED VOUCHERS DOES NOT HAVE PAYMENT YET
+	UPDATE B
+	SET B.ysnInPayment = 0,
+		B.dblPaymentTemp = 0,
+		B.ysnPrepayHasPayment = 0
+	FROM tblAPBill B
+	INNER JOIN @validVoucherPrepay VP ON VP.intId = B.intBillId
+	WHERE B.ysnPrepayHasPayment = 0 AND @post = 1
 END
 ELSE
 BEGIN
