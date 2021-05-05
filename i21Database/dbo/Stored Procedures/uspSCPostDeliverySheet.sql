@@ -319,6 +319,16 @@ BEGIN TRY
 				,@intInventoryAdjustmentId OUTPUT
 				,@strAdjustmentDescription;
 		
+
+
+			
+			if @intInventoryAdjustmentId > 0
+				exec uspSCDeliverySheetShrinkage @DeliverySheetId = @intDeliverySheetId
+														, @InventoryAdjustmentId = @intInventoryAdjustmentId
+														, @intEntityUserSecurityId = @intUserId
+														, @ysnPost = 1
+
+
 			SELECT @strDescription =  'Quantity Adjustment : ' + strAdjustmentNo, @strTransactionId = strAdjustmentNo  
 			FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 
