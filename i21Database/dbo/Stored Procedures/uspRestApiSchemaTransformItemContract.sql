@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspRestApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
+CREATE PROCEDURE [dbo].[uspRestApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
 -- Validations
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
