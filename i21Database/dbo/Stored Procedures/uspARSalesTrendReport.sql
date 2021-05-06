@@ -93,7 +93,7 @@ WHERE	[fieldname] = 'strItemIds'
 
 SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAccountStatusCodeIds'
+WHERE	[fieldname] = 'strAccountStatusCode'
 
 SELECT  @strSource = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
@@ -168,7 +168,7 @@ WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDate
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
+  AND (strAccountStatusCode LIKE '%' + @strAccountStatusCode + '%' OR ISNULL(@strAccountStatusCode, '') = '')
   AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
 
 SELECT *

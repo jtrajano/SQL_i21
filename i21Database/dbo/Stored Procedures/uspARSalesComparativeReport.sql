@@ -6,7 +6,6 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 		
 		SELECT * FROM vyuARTransactionSummary
-
 		
   		OUTER APPLY (
 		SELECT TOP 1 strCompanyName
@@ -100,7 +99,7 @@ WHERE	[fieldname] = 'strItemDescriptions'
 
 SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAccountStatusCodeIds'
+WHERE	[fieldname] = 'strAccountStatusCode'
 
 SELECT  @strSource = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
@@ -213,7 +212,7 @@ WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
 			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
 		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
+  AND (strAccountStatusCode LIKE '%' + @strAccountStatusCode + '%' OR ISNULL(@strAccountStatusCode, '') = '')
   AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
 
 UNION ALL
@@ -259,7 +258,7 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
 			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
 		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
+  AND (strAccountStatusCode LIKE '%' + @strAccountStatusCode + '%' OR ISNULL(@strAccountStatusCode, '') = '')
   AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
   ) SUMMARY
    	OUTER APPLY (
@@ -270,5 +269,4 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 	) COMPANY
 
-
-  GROUP BY strName, strCustomerNumber, strItemNo ,strCompanyName,strCompanyAddress
+GROUP BY strName, strCustomerNumber, strItemNo ,strCompanyName,strCompanyAddress
