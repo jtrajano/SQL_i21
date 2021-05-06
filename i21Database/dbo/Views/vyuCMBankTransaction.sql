@@ -1,6 +1,4 @@
-﻿
-
-CREATE  VIEW [dbo].[vyuCMBankTransaction]
+﻿CREATE  VIEW [dbo].[vyuCMBankTransaction]
 AS 
 SELECT 
 A.*,
@@ -10,14 +8,8 @@ ysnPayeeEFTInfoActive = ISNULL((
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 ),0),
 strPayeeEFTInfoEffective = ISNULL((
-		SELECT TOP 1 (CASE WHEN dtmEffectiveDate <=  
-		DATEADD( HH, DATEDIFF(HH, GETDATE(), GETUTCDATE()) *-1, GETUTCDATE()) -- CONVERTS TO LOCAL DATE
-		THEN 'EFFECTIVE' ELSE 'INEFFECTIVE' END)  
-		FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 
-		AND dtmEffectiveDate <=  
-		DATEADD( HH, DATEDIFF(HH, GETDATE(), GETUTCDATE()) *-1, GETUTCDATE()) -- CONVERTS TO LOCAL DATE
-		AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
+		SELECT TOP 1 (CASE WHEN dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) THEN 'EFFECTIVE' ELSE 'INEFFECTIVE' END)  FROM [tblEMEntityEFTInformation] EFTInfo 
+		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 ),'INVALID') COLLATE Latin1_General_CI_AS,
 ysnPrenoteSent = ISNULL((
 		SELECT TOP 1 ysnPrenoteSent FROM [tblEMEntityEFTInformation] EFTInfo 
