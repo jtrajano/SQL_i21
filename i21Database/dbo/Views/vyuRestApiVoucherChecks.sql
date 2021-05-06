@@ -5,9 +5,8 @@ SELECT
 	, p.intBillId
 	, pp.strPaymentRecordNum strRecordNo
 	, pp.intEntityId
-	, pp.strVendorId strVendorNo
 	, p.intLocationId
-	, v.strName strVendorName
+	, pp.strPayTo strPayTo
 	, pp.intCurrencyId
 	, pp.strCurrency
 	, pp.dtmDatePaid
