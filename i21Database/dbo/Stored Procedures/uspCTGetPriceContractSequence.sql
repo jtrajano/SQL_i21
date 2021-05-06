@@ -104,7 +104,7 @@ BEGIN TRY
 				intDetailBookId = CD.intBookId,
 				intDetailSubBookId = CD.intSubBookId,
 				CD.intContractStatusId
-
+				,CD.ysnReadOnlyInterCoContract
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 												AND	CD.dblNoOfLots IS NOT NULL		 
@@ -198,6 +198,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				intDetailBookId = null,
 				intDetailSubBookId = null, 
 				CD.intContractStatusId
+				,CH.ysnReadOnlyInterCoContract
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
