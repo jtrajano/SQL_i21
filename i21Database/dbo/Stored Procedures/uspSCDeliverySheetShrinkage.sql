@@ -298,14 +298,22 @@ end
 else 
 begin
 	
-	DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-	DECLARE @strBatchId NVARCHAR(100)
-	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
+	if exists(select top 1 1 from tblGLDetail 
+					where strTransactionId = @DeliverySheetNumber 
+						and ysnIsUnposted = 0 
+						and strCode = 'SC' 
+						and strTransactionType = 'Delivery Sheet')
+	begin
+		DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
+		DECLARE @strBatchId NVARCHAR(100)
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 
-	exec uspGLInsertReverseGLEntry 
-		@strTransactionId = @DeliverySheetNumber
-		,@intEntityId = @intEntityUserSecurityId
-		,@dtmDateReverse  = @CurrentDate
-		,@strBatchId = @strBatchId
+		exec uspGLInsertReverseGLEntry 
+			@strTransactionId = @DeliverySheetNumber
+			,@intEntityId = @intEntityUserSecurityId
+			,@dtmDateReverse  = @CurrentDate
+			,@strBatchId = @strBatchId
+	end
+	
 
 end
