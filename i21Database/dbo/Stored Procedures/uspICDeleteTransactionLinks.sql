@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].uspICDeleteTransactionLinks(@intReceiptId INT READONLY, @strReceiptNumber NVARCHAR(50) READONLY)
+CREATE PROCEDURE [dbo].uspICDeleteTransactionLinks(@intReceiptId INT, @strReceiptNumber NVARCHAR(50))
 AS
 BEGIN
 
