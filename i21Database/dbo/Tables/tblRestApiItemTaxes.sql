@@ -27,7 +27,7 @@ CREATE TABLE tblRestApiItemTaxes (
 	, strTaxGroup NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strNotes NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL
 	, intUnitMeasureId INT NULL
-	, strUnitMeasure INT NULL
+	, strUnitMeasure NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
 	, strTaxClass NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, ysnAddToCost BIT NULL
     , CONSTRAINT PK_tblRestApiItemTaxes PRIMARY KEY (intRestApiItemTaxesId)

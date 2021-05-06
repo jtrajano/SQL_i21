@@ -5018,6 +5018,8 @@
     <Build Include="dbo\Tables\tblRestApiItemTaxes.sql" />
     <Build Include="dbo\Tables\tblRestApiInvoiceStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptStaging.sql" />
+    <Build Include="dbo\Tables\tblRestApiTransformationLogs.sql" />
+    <Build Include="dbo\Tables\tblRestApiTransformationDeltas.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptItemStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptItemLotStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />

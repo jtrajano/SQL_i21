@@ -1,29 +1,78 @@
-CREATE PROCEDURE [dbo].[uspApiImportItemContractsFromStaging] (@guiUniqueId UNIQUEIDENTIFIER)
+ALTER PROCEDURE [dbo].[uspApiImportItemContractsFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
-
--- Validations
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the location with a companyLocationId ''' + CAST(s.intCompanyLocationId AS NVARCHAR(50)) + '''', 'companyLocationId', 'Error', CAST(s.intCompanyLocationId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the location with a companyLocationId ''' + CAST(s.intCompanyLocationId AS NVARCHAR(50)) + '''', 
+	strField = 'companyLocationId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intCompanyLocationId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = s.intCompanyLocationId
 WHERE c.intCompanyLocationId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the customer with an entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the customer with an entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''',
+	strField = 'entityId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intEntityId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
 WHERE e.intEntityId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the item with an itemId ''' + CAST(s.intItemId AS NVARCHAR(50)) + '''', 'itemId', 'Error',  CAST(s.intItemId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the item with an itemId ''' + CAST(s.intItemId AS NVARCHAR(50)) + '''',
+	strField = 'itemId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intItemId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiItemContractDetailStaging s
 LEFT JOIN tblICItem i ON i.intItemId = s.intItemId
 WHERE i.intItemId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'The item with an itemId ''' + CAST(s.intItemId AS NVARCHAR(50)) + ''' was already ' + LOWER(i.strStatus), 'itemId', 'Error',  CAST(s.intItemId AS NVARCHAR(50))
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'The item with an itemId ''' + CAST(s.intItemId AS NVARCHAR(50)) + ''' was already ' + LOWER(i.strStatus),
+	strField = 'itemId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intItemId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTApiItemContractDetailStaging s
 INNER JOIN tblICItem i ON i.intItemId = s.intItemId
 WHERE i.strStatus IN ('Discontinued', 'Phased Out')
@@ -71,7 +120,7 @@ SELECT s.intApiItemContractStagingId
 	, s.intLineOfBusinessId
 	, s.dtmDueDate
 FROM tblCTApiItemContractStaging s
-WHERE s.guiApiUniqueId = @guiUniqueId
+WHERE s.guiApiUniqueId = @guiApiUniqueId
 
 OPEN CUR
 
@@ -149,7 +198,7 @@ BEGIN
 		, @intLineOfBusinessId 
 		, @dtmDueDate 
 		, @strItemContractNumber
-		, @guiUniqueId
+		, @guiApiUniqueId
 
 	SET @intItemContractHeaderId = SCOPE_IDENTITY()
 
@@ -249,7 +298,7 @@ DECLARE @tblRestApiItemTaxes TABLE (
 	, strTaxGroup NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strNotes NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL
 	, intUnitMeasureId INT NULL
-	, strUnitMeasure INT NULL
+	, strUnitMeasure NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
 	, strTaxClass NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, ysnAddToCost BIT NULL
 )
@@ -269,7 +318,7 @@ SELECT
 	, h.intCurrencyId
 FROM tblCTItemContractDetail d
 INNER JOIN tblCTItemContractHeader h ON h.intItemContractHeaderId = d.intItemContractHeaderId
-WHERE h.guiApiUniqueId = @guiUniqueId
+WHERE h.guiApiUniqueId = @guiApiUniqueId
 
 OPEN dcur
 
@@ -412,20 +461,30 @@ DEALLOCATE dcur
 
 DELETE FROM tblRestApiItemTaxes WHERE guiTaxesUniqueId = @guiTaxesUniqueId
 
-INSERT INTO @Logs (intLineNumber, dblTotalAmount, strLogLevel, strField)
-SELECT h.intItemContractHeaderId, SUM(ISNULL(d.dblTotal, 0)) + SUM(ISNULL(d.dblTax, 0)), 'Ids', h.strContractNumber
+INSERT INTO tblRestApiTransformationDelta (guiTransformationDeltaId,intTransactionId, strTransactionNo, dblTotalAmount,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	intTransactionId = h.intItemContractHeaderId,
+	strTransactionNo = h.strContractNumber, 
+	dblTotalAmount = SUM(ISNULL(d.dblTotal, 0)) + SUM(ISNULL(d.dblTax, 0)),
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblCTItemContractHeader h
 LEFT JOIN tblCTItemContractDetail d ON d.intItemContractHeaderId = h.intItemContractHeaderId
-WHERE h.guiApiUniqueId = @guiUniqueId
+WHERE h.guiApiUniqueId = @guiApiUniqueId
 GROUP BY h.intItemContractHeaderId, h.strContractNumber
 
-SELECT * FROM @Logs
+SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId
 
 -- Cleanup
 DELETE d
 FROM tblCTApiItemContractDetailStaging d
 INNER JOIN tblCTApiItemContractStaging s ON s.intApiItemContractStagingId = d.intApiItemContractStagingId
-WHERE s.guiApiUniqueId = @guiUniqueId
+WHERE s.guiApiUniqueId = @guiApiUniqueId
 
 DELETE FROM tblCTApiItemContractStaging
-WHERE guiApiUniqueId = @guiUniqueId
+WHERE guiApiUniqueId = @guiApiUniqueId
