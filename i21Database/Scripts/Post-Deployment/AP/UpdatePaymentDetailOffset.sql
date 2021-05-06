@@ -1,4 +1,5 @@
-﻿UPDATE A
+﻿PRINT N'START: UPDATING PAYMENT DETAIL OFFSET'
+UPDATE A
 	SET 
 		A.dblTotal = A.dblTotal * (CASE WHEN A.dblTotal > 0 THEN -1 ELSE 1 END),
 		A.dblPayment = A.dblPayment * (CASE WHEN A.dblPayment > 0 THEN -1 ELSE 1 END),
@@ -71,3 +72,4 @@ INNER JOIN tblCMBankTransaction C
 	ON C.strTransactionId = A2.strPaymentRecordNum
 WHERE C.intBankTransactionTypeId IN (116, 19, 122)
 AND B.intTransactionType IN (2) AND A.ysnOffset = 1
+PRINT N'SUCCESS: UPDATING PAYMENT DETAIL OFFSET'

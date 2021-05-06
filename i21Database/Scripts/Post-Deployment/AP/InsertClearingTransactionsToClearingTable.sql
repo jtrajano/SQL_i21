@@ -1,4 +1,5 @@
-﻿IF NOT EXISTS(SELECT 1 FROM tblAPClearing)
+﻿PRINT N'START: INITIALIZING tblAPClearing'
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPClearing)
 BEGIN
     PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPReceiptClearing...'
     INSERT INTO dbo.tblAPClearing (
@@ -486,3 +487,4 @@ BEGIN
           intAccountId                  IS NOT NULL
     PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPPatClearing...'
 END
+PRINT N'SUCCESS: INITIALIZING tblAPClearing'
