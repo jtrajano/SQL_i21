@@ -55,7 +55,8 @@ AS
 			strPackingDescription,
 			intLoadingPortId,
 			CD.intProducerId,
-			CD.intItemContractId
+			CD.intItemContractId,
+			CH.ysnReadOnlyInterCoContract
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
