@@ -1,4 +1,7 @@
-CREATE PROCEDURE uspICImportItemUOMsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemUOMsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @ysnAllowOverwrite BIT = 0
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
@@ -19,6 +22,54 @@ DELETE FROM cte WHERE RowNumber > 1;
 	AND NULLIF(RTRIM(LTRIM(strUPCCode)), '') IS NOT NULL
 )
 DELETE FROM cte WHERE RowNumber > 1;
+
+
+CREATE TABLE #tmp_missingItem (
+	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+)
+
+CREATE TABLE #tmp_missingUOM (
+	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+)
+
+-- Validate records
+
+-- Check if the item is missing
+IF @ysnAllowOverwrite = 1
+BEGIN 
+	INSERT INTO #tmp_missingItem (
+		strItemNo
+	)
+	SELECT
+		s.strItemNo
+	FROM 
+		tblICImportStagingUOM s	LEFT JOIN tblICItem i 
+			ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(s.strItemNo) COLLATE Latin1_General_CI_AS	
+	WHERE
+		s.strImportIdentifier = @strIdentifier
+		AND i.intItemId IS NULL 
+END 
+
+-- Check if the UOM is missing
+IF @ysnAllowOverwrite = 1
+BEGIN 
+	INSERT INTO #tmp_missingUOM (
+		strItemNo
+		,strUnitMeasure
+	)
+	SELECT
+		s.strItemNo
+		,s.strUOM
+	FROM 
+		tblICImportStagingUOM s	LEFT JOIN tblICUnitMeasure u 
+			ON RTRIM(LTRIM(u.strUnitMeasure)) COLLATE Latin1_General_CI_AS = LTRIM(s.strUOM) COLLATE Latin1_General_CI_AS
+	WHERE
+		s.strImportIdentifier = @strIdentifier
+		AND u.intUnitMeasureId IS NULL 
+END 
+
+
 
 CREATE TABLE #tmp (
 	  intId INT IDENTITY(1, 1) PRIMARY KEY
@@ -91,7 +142,12 @@ FROM tblICImportStagingUOM x
 			AND intItemId = i.intItemId
 			AND ysnStockUnit = 1
 	) stock
-WHERE x.strImportIdentifier = @strIdentifier
+	LEFT JOIN #tmp_missingItem v1 ON v1.strItemNo = x.strItemNo
+	LEFT JOIN #tmp_missingUOM v2 ON v2.strItemNo = x.strItemNo
+WHERE 
+	x.strImportIdentifier = @strIdentifier
+	AND v1.strItemNo IS NULL 
+	AND v2.strItemNo IS NULL 
 
 CREATE TABLE #output (
 	  intItemIdDeleted INT NULL
@@ -119,12 +175,14 @@ USING
 		, dtmDateCreated
 		, intCreatedByUserId
 	FROM #tmp s
-) AS source ON (target.intUnitMeasureId = source.intUnitMeasureId AND target.intItemId = source.intItemId)
-	OR RTRIM(LTRIM(target.strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(source.strLongUPCCode) COLLATE Latin1_General_CI_AS
-WHEN MATCHED THEN
+) AS source 
+	ON (target.intUnitMeasureId = source.intUnitMeasureId AND target.intItemId = source.intItemId)
+	--OR RTRIM(LTRIM(target.strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(source.strLongUPCCode) COLLATE Latin1_General_CI_AS -- Comment this one. It can cause bugs. 
+
+WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 	UPDATE SET 
-		intItemId = source.intItemId,
-		intUnitMeasureId = source.intUnitMeasureId,
+		--intItemId = source.intItemId, -- Do not update the item id. Why update it when it is the on used in the source-target as linking keys. 
+		--intUnitMeasureId = source.intUnitMeasureId, -- Do not update the unit measure id. Why update it when it is the on used in the source-target as linking keys. 
 		strLongUPCCode = source.strLongUPCCode,
 		strUpcCode = source.strUpcCode,
 		dblUnitQty = source.dblUnitQty,
@@ -186,15 +244,67 @@ WHEN NOT MATCHED THEN
 
 -- Logs 
 BEGIN 
+	DECLARE 
+		@intRowsImported AS INT 
+		,@intRowsUpdated AS INT
+		,@intRowsSkipped AS INT
+
+	SELECT @intRowsImported = COUNT(*) FROM #output WHERE strAction = 'INSERT'
+	SELECT @intRowsUpdated = COUNT(*) FROM #output WHERE strAction = 'UPDATE'
+	SELECT 
+		@intRowsSkipped = COUNT(1) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0) 
+	FROM 
+		tblICImportStagingUOM s
+	WHERE
+		s.strImportIdentifier = @strIdentifier
+
 	INSERT INTO tblICImportLogFromStaging (
 		[strUniqueId] 
 		,[intRowsImported] 
 		,[intRowsUpdated] 
+		,[intRowsSkipped]
 	)
 	SELECT
 		@strIdentifier
-		,intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-		,intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
+		,intRowsImported = ISNULL(@intRowsImported, 0)
+		,intRowsUpdated = ISNULL(@intRowsUpdated, 0) 
+		,intRowsSkipped = ISNULL(@intRowsSkipped, 0)
+
+	-- Log Detail for missing items and uoms
+	INSERT INTO tblICImportLogDetailFromStaging(
+		strUniqueId
+		, strField
+		, strAction
+		, strValue
+		, strMessage
+		, strStatus
+		, strType
+		, intConcurrencyId
+	)
+	SELECT 
+		@strIdentifier
+		, 'Item No.'
+		, 'Import Failed.'
+		, strItemNo
+		, 'Missing item: "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		#tmp_missingItem
+
+	UNION ALL
+	SELECT 
+		@strIdentifier
+		, 'UOM'
+		, 'Import Failed.'
+		, strUnitMeasure
+		, 'Missing unit of measure: "' + strUnitMeasure + '" on item "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		#tmp_missingUOM
 END
 
 DROP TABLE #tmp
