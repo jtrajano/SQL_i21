@@ -37,7 +37,7 @@ INNER JOIN tblEMEntity F ON F.intEntityId = X.intEntityId
 INNER JOIN tblEMEntityType G ON G.intEntityId = F.intEntityId
 INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId 
 WHERE C.strNamespace = 'EntityManagement.view.EntityContact'
-AND F.ysnSent = 0   and X.ysnDefaultContact = 1
+AND F.ysnSent = 0   --and X.ysnDefaultContact = 1
 )
    
 SELECT intRecordId, intLogId, dtmDate  FROM secondLayer 
