@@ -35,6 +35,14 @@ begin
 			,@TransactionType as nvarchar(50)= 'Delivery Sheet'
 		
 	
+	declare @ItemIds table(
+		id int
+	)
+
+	insert into @ItemIds(id)
+	select intItemId 
+		from tblICInventoryAdjustmentDetail
+			where intInventoryAdjustmentId = @InventoryAdjustmentId
 
 	-- Get the GL Account ids to use
 	INSERT INTO @GLAccounts (
@@ -58,12 +66,14 @@ begin
 		FROM dbo.tblICInventoryTransaction t 
 		INNER JOIN tblICItem i
 			ON t.intItemId = i.intItemId 
+		
 		WHERE 
-			t.intItemId = 1
+			t.intItemId in ( select id from @ItemIds) 
 			AND i.strType <> 'Non-Inventory'
 	) Query
 
 
+	select * from @GLAccounts
 
 			INSERT INTO @GLEntries 
 			(
@@ -298,4 +308,4 @@ begin
 		,@dtmDateReverse  = @CurrentDate
 		,@strBatchId = @strBatchId
 
-end 
+end
