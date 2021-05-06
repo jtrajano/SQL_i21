@@ -1,5 +1,6 @@
 ﻿IF NOT EXISTS(SELECT 1 FROM tblAPClearing)
 BEGIN
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPReceiptClearing...'
     INSERT INTO dbo.tblAPClearing (
 		intTransactionId,
 		strTransactionId,
@@ -22,8 +23,6 @@ BEGIN
 		ysnPostAction,
 		dtmDateEntered
 	)
-
-    --RECEIPT
     SELECT
         intInventoryReceiptId,
         strTransactionNumber,
@@ -53,9 +52,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intInventoryReceiptItemId     IS NOT NULL AND 
           intAccountId                  IS NOT NULL
-    
-    --RECEIPT CHARGE
-    UNION ALL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPReceiptClearing...'
+
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPReceiptChargeClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intInventoryReceiptId,
         strTransactionNumber,
@@ -85,10 +106,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intInventoryReceiptChargeId   IS NOT NULL AND 
           intAccountId                  IS NOT NULL
-    
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPReceiptChargeClearing...'
 
-    --SHIPMENT CHARGE
-    UNION ALL
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPShipmentChargeClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intInventoryShipmentId,
         strTransactionNumber,
@@ -118,9 +160,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intInventoryShipmentChargeId  IS NOT NULL AND 
           intAccountId                  IS NOT NULL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPShipmentChargeClearing...'
 
-    --LOAD
-    UNION ALL
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPLoadClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intLoadId,
         strTransactionNumber,
@@ -150,9 +214,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intLoadDetailId               IS NOT NULL AND 
           intAccountId                  IS NOT NULL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPLoadClearing...'
 
-    --LOAD COST
-    UNION ALL
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPLoadCostClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intLoadId,
         strTransactionNumber,
@@ -182,9 +268,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intLoadCostId                 IS NOT NULL AND 
           intAccountId                  IS NOT NULL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPLoadCostClearing...'
     
-    --GRAIN
-    UNION ALL
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPGrainClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intSettleStorageId,
         strTransactionNumber,
@@ -214,9 +322,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intCustomerStorageId          IS NOT NULL AND 
           intAccountId                  IS NOT NULL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPGrainClearing...'
     
-    --TRANSFER
-    UNION ALL
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuGRTransferClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intInventoryReceiptId,
         strTransactionNumber,
@@ -246,9 +376,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intInventoryReceiptItemId     IS NOT NULL AND 
           intAccountId                  IS NOT NULL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuGRTransferClearing...'
     
-    --TRANSFER CHARGE
-    UNION ALL
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuGRTransferChargesClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intInventoryReceiptId,
         strTransactionNumber,
@@ -278,9 +430,31 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intInventoryReceiptChargeId   IS NOT NULL AND 
           intAccountId                  IS NOT NULL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuGRTransferChargesClearing...'
 
-    --PAT
-    UNION ALL
+    PRINT N'START: INSERTING RECORDS TO tblAPClearing FROM vyuAPPatClearing...'
+    INSERT INTO dbo.tblAPClearing (
+		intTransactionId,
+		strTransactionId,
+        intTransactionType,
+        strReferenceNumber,
+		dtmDate,
+		intEntityVendorId,
+		intLocationId,
+		intTransactionDetailId,
+		intAccountId,
+		intItemId,
+		intItemUOMId,
+		dblQuantity,
+		dblAmount,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
+		strCode,
+		ysnPostAction,
+		dtmDateEntered
+	)
     SELECT
         intRefundId,
         strTransactionNumber,
@@ -310,4 +484,5 @@ BEGIN
           intLocationId                 IS NOT NULL AND 
           intRefundCustomerId           IS NOT NULL AND 
           intAccountId                  IS NOT NULL
+    PRINT N'SUCCESS: INSERTING RECORDS TO tblAPClearing FROM vyuAPPatClearing...'
 END
