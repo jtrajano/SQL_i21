@@ -23,7 +23,7 @@ BEGIN
 	SELECT R.intInventoryReceiptId, R.strReceiptNumber, @intInventoryReceiptItemId, 1
 	FROM tblICInventoryReceiptItem RI
 	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-	WHERE RI.intInventoryReceiptItemId = @intInventoryReceiptItemId
+	WHERE RI.intInventoryReceiptItemId = @intInventoryReceiptItemId AND @intInventoryReceiptChargeId IS NULL
 
 	UNION ALL
 	--RECEIPT CHARGE
