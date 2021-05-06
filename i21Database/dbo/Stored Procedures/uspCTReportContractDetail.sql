@@ -135,7 +135,7 @@ BEGIN TRY
 										   ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
 									   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		= CONVERT(VARCHAR, CD.dtmStartDate, 103) + ' - ' + CONVERT(VARCHAR, CD.dtmEndDate, 103),
+			strStraussShipment		= FORMAT( CD.dtmStartDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')) + ' - ' + FORMAT( CD.dtmEndDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')),
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
@@ -171,6 +171,7 @@ BEGIN TRY
 	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId
 		
 	CROSS JOIN tblCTCompanyPreference   CP
+	CROSS JOIN tblSMCompanyPreference SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractStatusId <> 3
 
