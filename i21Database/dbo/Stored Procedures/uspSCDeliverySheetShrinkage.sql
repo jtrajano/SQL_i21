@@ -73,7 +73,7 @@ begin
 	) Query
 
 
-	select * from @GLAccounts
+	-- select * from @GLAccounts
 
 			INSERT INTO @GLEntries 
 			(
