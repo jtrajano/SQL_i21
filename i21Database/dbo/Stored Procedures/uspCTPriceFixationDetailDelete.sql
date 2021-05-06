@@ -49,7 +49,7 @@ BEGIN TRY
 
 	declare @intDWGIdId int
 			,@ysnDestinationWeightsAndGrades bit = 0;
-
+			
 	if exists 
 	(
 		select top 1 1 
@@ -58,6 +58,7 @@ BEGIN TRY
 		inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
 			and wg.strWhereFinalized = 'Destination'
 		where cd.intContractDetailId = @intContractDetailId
+  		and ch.intContractTypeId = 2
 	)
 	begin
 		set @ysnDestinationWeightsAndGrades = 1

@@ -47,7 +47,7 @@ SELECT
 		 END
 ,dmuse = LEFT(ISNULL(A.strAcctStatus,''),3)
 ,dmprcd = ''  COLLATE Latin1_General_CI_AS 
-,dmcomm = ISNULL(F.strItemNo,'')
+,dmcomm = CAST(ISNULL(F.strItemNo,'') AS VARCHAR(15))
 ,dbcoun = ISNULL(A.strCountry,'')
 ,dmtwns = ISNULL((SELECT strTankTownship FROM tblTMTankTownship WHERE intTankTownshipId = A.intTankTownshipId),'')
 ,dmrtpr = ''  COLLATE Latin1_General_CI_AS 

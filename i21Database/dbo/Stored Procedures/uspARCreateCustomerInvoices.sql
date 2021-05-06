@@ -170,6 +170,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
 	,[ysnConvertToStockUOM]
@@ -321,6 +322,7 @@ SELECT
 	,[intStorageScheduleTypeId]			= [intStorageScheduleTypeId]
 	,[intDestinationGradeId]			= [intDestinationGradeId]
 	,[intDestinationWeightId]			= [intDestinationWeightId]
+	,[intPriceFixationDetailId]			= [intPriceFixationDetailId]
     ,[strAddonDetailKey]                = [strAddonDetailKey]
     ,[ysnAddonParent]                   = [ysnAddonParent]
 	,[ysnConvertToStockUOM]				= [ysnConvertToStockUOM]
@@ -1061,7 +1063,9 @@ FROM
 	INNER JOIN (
 		SELECT COUNT(strSourceId)[SourceCount],strSourceId FROM  @InvoicesToGenerate GROUP BY strSourceId 
 	)ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
-	where ID.SourceCount > 1
+	WHERE ID.SourceCount > 1
+	AND [strType] <> 'POS'
+	AND ITG.[strSourceTransaction] <> 'Store Charge'
 
 
 
@@ -2137,6 +2141,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
@@ -2284,6 +2289,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+		,[intPriceFixationDetailId]				= ITG.[intPriceFixationDetailId]
         ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]

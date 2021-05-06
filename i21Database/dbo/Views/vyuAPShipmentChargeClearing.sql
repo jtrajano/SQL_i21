@@ -48,7 +48,11 @@ OUTER APPLY (
 		AND ag.strAccountType = 'Liability'
 		AND gd.ysnIsUnposted = 0 
 ) APClearing
-WHERE Shipment.ysnPosted = 1 AND ShipmentCharge.ysnAccrue = 1  
+WHERE 
+    ShipmentCharge.ysnAccrue = 1  
+AND ShipmentCharge.intEntityVendorId IS NOT NULL
+AND ISNULL(Shipment.ysnPosted, 0) = 1
+AND APClearing.intAccountId IS NOT NULL
 UNION ALL  
 SELECT  
     bill.dtmDate AS dtmDate  
@@ -62,8 +66,17 @@ SELECT
     ,billDetail.intItemId  
     ,billDetail.intUnitOfMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal  
-    ,CASE   
+    ,(billDetail.dblTotal + billDetail.dblTax) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        )
+    AS dblVoucherTotal  
+    ,(CASE   
         WHEN billDetail.intWeightUOMId IS NULL THEN   
             ISNULL(billDetail.dblQtyReceived, 0)   
         ELSE   
@@ -73,7 +86,16 @@ SELECT
                 ELSE   
                     ISNULL(billDetail.dblNetWeight, 0)   
             END  
-    END AS dblVoucherQty  
+    END)
+    *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        )
+     AS dblVoucherQty  
     ,0 AS dblReceiptChargeTotal
     ,0 AS dblReceiptChargeQty
     -- ,((ShipmentCharge.dblAmount) * (CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -1 ELSE 1 END))  
@@ -117,3 +139,4 @@ OUTER APPLY (
 WHERE   
     billDetail.intInventoryShipmentChargeId IS NOT NULL  
 AND bill.ysnPosted = 1
+AND APClearing.intAccountId IS NOT NULL

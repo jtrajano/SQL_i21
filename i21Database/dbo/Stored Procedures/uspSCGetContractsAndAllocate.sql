@@ -10,8 +10,6 @@ CREATE PROCEDURE uspSCGetContractsAndAllocate
 	@ysnAutoDistribution	BIT = 1,
 	@strDistributionOption AS NVARCHAR(3)	 = ''
 	,@intLoadDetailId		INT = NULL
-	,@intFutureMarketId		INT = NULL
-	,@intFutureMonthId		INT = NULL
 AS
 
 BEGIN TRY
@@ -41,6 +39,8 @@ BEGIN TRY
 			@intContractTypeId		INT,
 			@intCommodityId			INT,
 			@strSeqMonth			NVARCHAR(50),
+			@strContractNumber		NVARCHAR(50),
+			@intContractSeq			INT,
 			@UseScheduleForAvlCalc	BIT = 1,
 			@dblScheduleQty			NUMERIC(18,6),
 			@dblInreaseSchBy		NUMERIC(18,6),
@@ -61,6 +61,8 @@ BEGIN TRY
 	DECLARE @LoadDetailUsedId Id
     DECLARE @dtmTicketDate             DATETIME
     DECLARE @intTicketSclaeSetupId    INT
+	DECLARE @intFutureMarketId INT
+	DECLARE @intFutureMonthId INT
 
 	DECLARE @strEntityNo NVARCHAR(200)
 	DECLARE @errorMessage NVARCHAR(500)
@@ -217,6 +219,9 @@ BEGIN TRY
 				FROM	vyuCTContractSequence 
 				WHERE	intContractHeaderId = @intNewContractHeaderId
 
+				-- Get default futures market and month for the commodity
+				EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
+
 				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
 					DROP TABLE #FutureAndBasisPrice						
 
@@ -251,6 +256,59 @@ BEGIN TRY
 			BEGIN
 				RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT') 
 			END 
+		END
+		ELSE
+		BEGIN
+			-- Validate Risk price for existing DP contract
+			SELECT	@strContractNumber = CTH.strContractNumber,
+					@intContractSeq = CTD.intContractSeq
+			FROM tblCTContractDetail CTD
+			INNER JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+			WHERE CTD.intContractDetailId = @intContractDetailId
+
+			SELECT	@intContractTypeId		=	intContractTypeId,
+					@intCommodityId			=	intCommodityId,
+					@strSeqMonth			=	RIGHT(CONVERT(varchar, dtmEndDate, 106),8)
+					-- @intItemId				=	intItemId
+			FROM	vyuCTContractSequence 
+			WHERE	intContractDetailId = @intContractDetailId
+
+			-- Get default futures market and month for the commodity
+			EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
+
+			IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
+				DROP TABLE #FutureAndBasisPrice2
+
+			SELECT * INTO #FutureAndBasisPrice2 FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,@intFutureMarketId,@intFutureMonthId,@locationId,null,0,@intItemId,null)
+
+			IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice2)
+			BEGIN
+				SET @ErrMsg = 'DP contract ' + @strContractNumber + '- Seq. ' + CAST(@intContractSeq AS VARCHAR(5)) + ' does not have settlement price in risk management or kindly check your currency in forex setup.';
+				RAISERROR (@ErrMsg,16,1,'WITH NOWAIT');
+			END
+
+			IF EXISTS(SELECT * FROM #FutureAndBasisPrice2 WHERE ISNULL(dblSettlementPrice,0) = 0)
+			BEGIN
+				SET @ErrMsg = 'DP contract ' + @strContractNumber + '- Seq. ' + CAST(@intContractSeq AS VARCHAR(5)) + ' does not have settlement price in risk management or kindly check your currency in forex setup.';
+				RAISERROR (@ErrMsg,16,1,'WITH NOWAIT');
+			END
+
+			IF EXISTS(SELECT * FROM #FutureAndBasisPrice2 WHERE dblBasis IS NULL)
+			BEGIN
+				SET @ErrMsg = 'DP contract ' + @strContractNumber + '- Seq. ' + CAST(@intContractSeq AS VARCHAR(5)) + ' does not have basis in risk management or kindly check your currency in forex setup.';
+				RAISERROR (@ErrMsg,16,1,'WITH NOWAIT');
+			END
+
+			IF EXISTS(SELECT * FROM #FutureAndBasisPrice2 WHERE ISNULL(intSettlementUOMId,0) = 0)
+			BEGIN
+				RAISERROR ('Settlement UOM in risk management is not available.',16,1,'WITH NOWAIT') 
+			END
+
+			IF EXISTS(SELECT * FROM #FutureAndBasisPrice2 WHERE ISNULL(intBasisUOMId,0) = 0)
+			BEGIN
+				RAISERROR ('Basis UOM in risk management is not available.',16,1,'WITH NOWAIT') 
+			END
+
 		END
 	END
 

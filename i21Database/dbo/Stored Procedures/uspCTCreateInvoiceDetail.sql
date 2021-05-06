@@ -179,7 +179,7 @@ BEGIN TRY
 				,@ItemWeightUOMId						= intItemWeightUOMId
 		  
 
-		FROM	tblARInvoiceDetail
+		FROM	tblARInvoiceDetail with (nolock)
 		WHERE	intInvoiceDetailId = @intInvoiceDetailId
 
 

@@ -153,12 +153,12 @@ BEGIN
 		(SELECT dblTotal = SUM(dblTaxableAmount) FROM @tmpPayCheckTax WHERE (strCalculationType = 'USA State' AND ((intTypeTaxStateId = 41 AND strVal2 <> 'None') 
 																											OR (intTypeTaxStateId = 45 AND strVal3 <> 'None (None)'))) ) TXBLMUNI OUTER APPLY
 				
-		/* Tips Percentage */
-		(SELECT dblTipsPercent = CASE WHEN ((ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) > 0)
-										THEN (ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) ELSE 0 END
-			FROM (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E1,
-				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E2,
-				(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND strPaidBy = 'Employee' AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) D1
+		/* Tips Percentage */    
+		(SELECT dblTipsPercent = CASE WHEN ((ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / NULLIF(ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0),0) > 0)    
+				THEN (ISNULL(E2.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) / (ISNULL(E1.dblTotal, 0) - ISNULL(D1.dblTotal, 0)) ELSE 0 END    
+		FROM (SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType <> 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E1,    
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckEarning WHERE strCalculationType = 'Tip' AND ysnSSTaxable = 1 AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) E2,    
+		(SELECT dblTotal = SUM(dblTotal) FROM vyuPRPaycheckDeduction WHERE strDeductFrom = 'Gross Pay' AND ysnSSTaxable = 1 AND strPaidBy = 'Employee' AND YEAR(dtmPayDate) = @intYear AND intEntityEmployeeId = @intEntityEmployeeId AND ysnVoid = 0) D1    
 		) [TIPS] OUTER APPLY
 
 		/* Tax Amounts */

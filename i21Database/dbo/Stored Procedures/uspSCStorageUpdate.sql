@@ -6,8 +6,6 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intDPContractId AS INT
 	,@intStorageScheduleId AS INT = NULL
-	,@intFutureMarketId AS INT = NULL
-	,@intFutureMonthId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -54,6 +52,8 @@ DECLARE @dblBasis NUMERIC(18,6)
 DECLARE @dblFutures NUMERIC(18,6)
 DECLARE @intTicketDeliverySheetId INT
 DECLARE @intTicketItemUOMIdTo INT
+DECLARE @intFutureMarketId INT
+DECLARE @intFutureMonthId INT
 
 
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -100,6 +100,9 @@ BEGIN TRY
 		FROM	dbo.tblICCommodity COM	        
 		WHERE	COM.intCommodityId = @intCommodityId
 	END
+
+	-- Get default futures market and month for the commodity
+	EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
 
     BEGIN
 	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'

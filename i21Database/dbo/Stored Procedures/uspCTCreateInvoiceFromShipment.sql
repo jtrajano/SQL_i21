@@ -178,6 +178,7 @@ INSERT INTO @EntriesForInvoice
     ,[intStorageScheduleTypeId]
     ,[intDestinationGradeId]
     ,[intDestinationWeightId]
+    ,[intPriceFixationDetailId]
     --,[strAddonDetailKey]
     --,[ysnAddonParent]
     --,[dblAddOnQuantity]
@@ -329,18 +330,19 @@ SELECT
     ,[intStorageScheduleTypeId]             = ARSI.[intStorageScheduleTypeId]
     ,[intDestinationGradeId]                = ARSI.[intDestinationGradeId]
     ,[intDestinationWeightId]               = ARSI.[intDestinationWeightId]
+    ,[intPriceFixationDetailId]             = @intPriceFixationDetailId
     --,[strAddonDetailKey]                    = NULL
     --,[ysnAddonParent]                       = @ZeroBit
     --,[dblAddOnQuantity]                     = @ZeroDecimal
 FROM
-    tblICInventoryShipment ICIS
+    tblICInventoryShipment ICIS with (nolock)
 INNER JOIN
-	tblICInventoryShipmentItem ICISI on ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId and ICISI.intLineNo = @intContractDetailId
+	tblICInventoryShipmentItem ICISI with (nolock) on ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId and ICISI.intLineNo = @intContractDetailId
 INNER JOIN
-    vyuARShippedItems ARSI
+    vyuARShippedItems ARSI with (nolock)
         ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId] and ARSI.intContractDetailId = ICISI.intLineNo and ARSI.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
-LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
-left join tblCTContractHeader ch on ch.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblCTContractDetail CD with (nolock) ON CD.intContractDetailId = ARSI.intContractDetailId 
+left join tblCTContractHeader ch with (nolock) on ch.intContractHeaderId = CD.intContractHeaderId
 WHERE
 ICIS.[intInventoryShipmentId] = @ShipmentId AND ARSI.strTransactionType = 'Inventory Shipment'
 and ICISI.intInventoryShipmentItemId = @ShipmentItemId
@@ -406,7 +408,7 @@ SELECT
 FROM
 	@EntriesForInvoice  EFI
 INNER JOIN
-	tblSOSalesOrderDetailTax SOSODT
+	tblSOSalesOrderDetailTax SOSODT with (nolock)
 		ON EFI.[intTempDetailIdForTaxes] = SOSODT.[intSalesOrderDetailId] 
 ORDER BY 
 	 EFI.[intSalesOrderDetailId] ASC
@@ -449,7 +451,7 @@ EXEC    [dbo].[uspARProcessInvoicesByBatch]
              ,@ErrorMessage         = @ErrorMessage OUTPUT
              ,@LogId                = @LogId OUTPUT
              
-SELECT @NewInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
+SELECT @NewInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail with (nolock) WHERE intIntegrationLogId = @LogId
 
 exec uspCTUpdateSequenceStatus
      @intContractDetailId = @intContractDetailId

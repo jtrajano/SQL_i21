@@ -16,6 +16,7 @@ AS
 	IM.strDescription,
     CD.intContractSeq,
     CD.dblQuantity,
+	CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) dblAvailableQty,
     ISNULL(B.dblPrice,CD.dblCashPrice) as dblContractPrice,
     CASE WHEN CH.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalance,0)    
         ELSE ISNULL(CD.dblQuantity,0) - ISNULL(CD.dblBalance,0)                

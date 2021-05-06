@@ -51,24 +51,28 @@ INNER JOIN(
 	
 		SELECT E.intEntityId  
 			  ,dblHoursUsedYTD = SUM(
-										CASE WHEN (T.strAwardPeriod = 'Anniversary Date') THEN 
+										CASE WHEN PCTimeOff.intYear IS NOT NULL AND (T.strAwardPeriod = 'Anniversary Date') THEN 
 													CASE WHEN (PCTimeOff.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  
 															AND PCTimeOff.dtmDateFrom > ISNULL(T.dtmLastAward, E.dtmDateHired)  
 															) THEN dblHours
-															ELSE 0
+													ELSE 0
+
 													END
 											ELSE 
-												CASE WHEN (PCTimeOff.intYear = YEAR(GETDATE())) THEN
-													dblHours
+												CASE WHEN PCTimeOff.intYear IS NOT NULL AND (PCTimeOff.intYear = YEAR(GETDATE())) THEN
+														dblHours
+
+													WHEN TOR.intYear IS NOT NULL AND (TOR.intYear = YEAR(GETDATE())) THEN
+														TOR.dblHoursTOR
 												ELSE
 													0
 												END
 										END
 										)
  
-			,intTypeTimeOffId
+			,T.intTypeTimeOffId
 			FROM tblPREmployee E INNER JOIN tblPREmployeeTimeOff T  ON E.intEntityId = T.intEntityEmployeeId  
-
+			
 			LEFT JOIN 
 				(SELECT 
 					intYear = YEAR(dtmPayDate)
@@ -90,9 +94,20 @@ INNER JOIN(
 				ON PCTimeOff.intEntityEmployeeId = E.intEntityId 
 				AND PCTimeOff.intTypeTimeoffId = T.intTypeTimeOffId
    
+   		LEFT JOIN (	SELECT
+						intYear  = YEAR(dtmDateFrom)
+						,intEntityEmployeeId
+						,intTypeTimeOffId
+						,dblHoursTOR = dblRequest
+						FROM tblPRTimeOffRequest TOR
+						WHERE ysnPostedToCalendar = 1
+				)TOR
+				ON E.intEntityId = TOR.intEntityEmployeeId
+				AND T.intTypeTimeOffId = TOR.intTypeTimeOffId
+
    			GROUP BY 
 			E.intEntityId
-			,intTypeTimeOffId   
+			,T.intTypeTimeOffId   
 ) TOYTD 
 	ON ETO.intEntityEmployeeId = TOYTD.intEntityId 
-		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId 		
+		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId

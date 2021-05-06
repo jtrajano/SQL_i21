@@ -64,14 +64,35 @@ as
 			,dblLoadPriced = pfd.dblLoadPriced
 			,dblLoadApplied = pfd.dblLoadApplied
 			,dblLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
-			,dblCorrectQuantityAppliedAndPriced = 0.00--pfd.dblQuantityAppliedAndPriced
-			,dblCorrectLoadAppliedAndPriced = 0.00--pfd.dblLoadAppliedAndPriced 
+			,dblCorrectQuantityAppliedAndPriced = isnull(applied.dblQuantityApplied,0.00)--pfd.dblQuantityAppliedAndPriced
+			,dblCorrectLoadAppliedAndPriced = case when @ysnLoad = 1 then isnull(applied.dblLoadApplied,0.00) else 0 end--pfd.dblLoadAppliedAndPriced 
 		from
 			tblCTPriceFixation pf
-			,tblCTPriceFixationDetail pfd
+			join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+			outer apply (
+				select
+					tbl.intPriceFixationDetailId
+					,dblQuantityApplied = sum(tbl.dblQuantityApplied)
+					,dblLoadApplied = sum(tbl.dblLoadApplied)
+				from
+				(
+					select
+						a.intPriceFixationDetailId
+						,dblQuantityApplied = isnull(ap.dblApplied,ar.dblApplied)
+						,dblLoadApplied = case when isnull(ap.dblApplied,ar.dblApplied) is null then 0 else 1 end
+					from
+						tblCTPriceFixationDetailAPAR a
+						outer apply (select dblApplied = sum(b.dblQtyReceived) from tblAPBillDetail b where b.intBillDetailId = a.intBillDetailId) ap
+						outer apply (select dblApplied = sum(b.dblQtyShipped) from tblARInvoiceDetail b where b.intInvoiceDetailId = a.intInvoiceDetailId and isnull(b.ysnReturned,0) = 0) ar
+					where isnull(a.ysnReturn,0) = 0
+				) tbl
+				where
+					tbl.intPriceFixationDetailId = pfd.intPriceFixationDetailId
+				group by
+					tbl.intPriceFixationDetailId
+			) applied
 		where
-			pf.intContractDetailId = @intContractDetailId
-			and pfd.intPriceFixationId = pf.intPriceFixationId;
+			pf.intContractDetailId = @intContractDetailId;			
 
 		if exists (select top 1 1 from @PurchasePricing)
 		begin
@@ -83,12 +104,12 @@ as
 				begin
 					if (@dblSequenceAppliedQuantity > @dblPricedQuantity)
 					begin
-						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = @dblPricedQuantity where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = case when isnull(dblCorrectQuantityAppliedAndPriced,0) = 0 then @dblPricedQuantity else dblCorrectQuantityAppliedAndPriced end where intPriceFixationDetailId = @intActivePriceFixationDetailId;
 						select @dblSequenceAppliedQuantity = @dblSequenceAppliedQuantity - @dblPricedQuantity;
 					end
 					else
 					begin
-						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = @dblSequenceAppliedQuantity where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = case when isnull(dblCorrectQuantityAppliedAndPriced,0) = 0 then @dblSequenceAppliedQuantity else dblCorrectQuantityAppliedAndPriced end where intPriceFixationDetailId = @intActivePriceFixationDetailId;
 						select @dblSequenceAppliedQuantity = 0;
 					end
 				end
@@ -96,12 +117,12 @@ as
 				begin
 					if (@intSequenceAppliedLoad > @dblPricedLoad)
 					begin
-						update @PurchasePricing set dblCorrectLoadAppliedAndPriced = @dblPricedLoad where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						update @PurchasePricing set dblCorrectLoadAppliedAndPriced = case when isnull(dblCorrectLoadAppliedAndPriced,0) = 0 then @dblPricedLoad else dblCorrectLoadAppliedAndPriced end where intPriceFixationDetailId = @intActivePriceFixationDetailId;
 						select @intSequenceAppliedLoad = @intSequenceAppliedLoad - @dblPricedLoad;
 					end
 					else
 					begin
-						update @PurchasePricing set dblCorrectLoadAppliedAndPriced = @intSequenceAppliedLoad where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						update @PurchasePricing set dblCorrectLoadAppliedAndPriced = case when isnull(dblCorrectLoadAppliedAndPriced,0) = 0 then @intSequenceAppliedLoad else dblCorrectLoadAppliedAndPriced end where intPriceFixationDetailId = @intActivePriceFixationDetailId;
 						select @intSequenceAppliedLoad = 0;
 					end
 				end

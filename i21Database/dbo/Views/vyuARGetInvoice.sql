@@ -158,7 +158,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , dblProvisionalBasePayment			= CASE WHEN ysnFromProvisional = 1 AND dblBaseProvisionalAmount > 0 THEN PROVISIONALPAYMENT.dblBasePayment ELSE 0 END 
      , ysnHasCreditApprover					= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
      , dblCreditStopDays					= CUSTOMERAGING.dblCreditStopDays
-
+     , intCreditStopDays					= CUS.intCreditStopDays
      , ysnImportFromCSV						= ISNULL(INV.ysnImportFromCSV, 0)
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
@@ -172,6 +172,7 @@ INNER JOIN (
 		 , strName
 		 , strCreditCode
 		 , intEntityContactId
+         , intCreditStopDays
     FROM vyuARCustomerSearch WITH (NOLOCK)
 ) CUS ON CUS.intEntityId = INV.intEntityCustomerId
 INNER JOIN (

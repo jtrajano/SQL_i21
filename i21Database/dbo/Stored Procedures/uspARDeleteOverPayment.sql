@@ -1,12 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARDeleteOverPayment]
-	 @PaymentId		as int
-	,@UnPost		as bit			= 1
-	,@BatchId		as nvarchar(20)	= NULL
-	,@UserId		as int			= 1
+	  @PaymentId	AS INT
+	, @UserId		AS INT			= 1
 AS
 
 BEGIN
-
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -14,67 +11,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-
-WHILE EXISTS(
-			SELECT TOP 1
-				I.intInvoiceId 
-			FROM
-				tblARInvoice I
-			INNER JOIN
-				tblARPayment P
-					--ON I.strComments = P.strRecordNumber				
-					ON I.intPaymentId = P.intPaymentId
-			WHERE
-				I.strTransactionType = 'Overpayment'
-				AND P.intPaymentId = @PaymentId
-			)
+WHILE EXISTS (SELECT TOP 1 NULL FROM tblARInvoice WHERE intPaymentId = @PaymentId AND strTransactionType = 'Overpayment')
 	BEGIN
+		DECLARE @intInvoiceId	INT = NULL
 
-		DECLARE @invoiceId int
+		SELECT TOP 1 @intInvoiceId = intInvoiceId
+		FROM tblARInvoice 
+		WHERE intPaymentId = @PaymentId 
+		  AND strTransactionType = 'Overpayment'
 
-		SELECT TOP 1
-			@invoiceId = I.intInvoiceId 
-		FROM
-			tblARInvoice I
-		INNER JOIN
-			tblARPayment P
-				--ON I.strComments = P.strRecordNumber				
-				ON I.intPaymentId = P.intPaymentId
-		WHERE
-			I.strTransactionType = 'Overpayment'
-			AND P.intPaymentId = @PaymentId
+		UPDATE tblARInvoice
+		SET ysnPosted = 0
+		WHERE intInvoiceId = @intInvoiceId
 
-		--IF @UnPost = 1
-		--	BEGIN
-		--		DECLARE	@successfulCount int,
-		--				@invalidCount int,
-		--				@success bit
-
-		--		EXEC	[dbo].[uspARPostInvoice]
-		--				@batchId = @BatchId,
-		--				@post = 0,
-		--				@recap = 0,
-		--				@param = @invoiceId,
-		--				@userId = @UserId,
-		--				@beginDate = NULL,
-		--				@endDate = NULL,
-		--				@beginTransaction = NULL,
-		--				@endTransaction = NULL,
-		--				@exclude = NULL,
-		--				@successfulCount = @successfulCount OUTPUT,
-		--				@invalidCount = @invalidCount OUTPUT,
-		--				@success = @success OUTPUT,
-		--				@batchIdUsed = NULL,
-		--				@recapId = NULL,
-		--				@transType = N'Overpayment'
-		--	END 
-
-		DELETE FROM tblARInvoiceDetail 
-		WHERE intInvoiceId = @invoiceId
-
-		DELETE FROM tblARInvoice 
-		WHERE intInvoiceId = @invoiceId
-
+		EXEC dbo.uspARDeleteInvoice @intInvoiceId, @UserId
 	END
 		                     
 RETURN 1

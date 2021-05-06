@@ -2,6 +2,7 @@
 (
 	 @intTicketd INT
 	,@strSourceType NVARCHAR(30)
+	,@ysnExcludeZeroReadingDiscount BIT = 0
 )
 RETURNS NVARCHAR(MAX)
 AS
@@ -16,6 +17,9 @@ BEGIN
 													JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 													JOIN tblICItem Item ON Item.intItemId = DCode.intItemId
 													WHERE QM.strSourceType = 'Scale' AND QM.intTicketId = @intTicketd
+													AND 1 = (CASE WHEN @ysnExcludeZeroReadingDiscount = 1 THEN
+															CASE WHEN QM.dblGradeReading > 0 THEN 1 ELSE 0 END
+														ELSE 1 END)
 													FOR XML PATH('')
 												 ), 1, 2, '')
 	END
@@ -27,6 +31,9 @@ BEGIN
 													JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 													JOIN tblICItem Item ON Item.intItemId = DCode.intItemId
 													WHERE QM.strSourceType = 'Storage' AND QM.intTicketFileId = @intTicketd
+													AND 1 = (CASE WHEN @ysnExcludeZeroReadingDiscount = 1 THEN
+															CASE WHEN QM.dblGradeReading > 0 THEN 1 ELSE 0 END
+														ELSE 1 END)
 													FOR XML PATH('')
 													), 1, 2, '')
 	END

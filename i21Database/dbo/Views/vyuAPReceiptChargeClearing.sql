@@ -22,7 +22,14 @@ SELECT
     ,0 AS dblVoucherTotal      
     ,0 AS dblVoucherQty      
     ,CAST((ISNULL(dblAmount * -1,0) --multiple the amount to reverse if ysnPrice = 1      
-        + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
+        --WE NEED TO MULTIPLY THE TAX AS WELL TO MATCH WITH VOUCHER
+        --EXAMPLE SCENARIO
+        --"IR" CHARGE 100, TAX -10 (CHECKOFF) * 1QTY = 90
+        --"BL" CHARGE 100, TAX -10 (CHECKOFF) * -1QTY = 90
+        --IF WE DON'T HAVE *-1 IN TAX THE TOTAL WOULD BE
+        --(CHARGE 100 * -1QTY) + TAX -10 = -110
+        --TO ACCOMPLISH THIS CHECKOFF TAX MUST BE CONSISTENTLY NEGATIVE
+        + ISNULL(dblTax * -1,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
     ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) * -1 AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
@@ -40,6 +47,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId    
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 -- OUTER APPLY (    
 --  SELECT TOP 1    
 --   ga.strAccountId    
@@ -56,10 +65,15 @@ LEFT JOIN
 -- ) APClearing    
 WHERE       
     Receipt.ysnPosted = 1        
-AND ReceiptCharge.ysnPrice = 1      
--- AND ReceiptCharge.ysnInventoryCost = 0
+AND ReceiptCharge.ysnPrice = 1   
+AND transferClr.intInventoryReceiptChargeId IS NULL
+-- AND NOT EXISTS (
+--     SELECT intInventoryReceiptChargeId
+--     FROM vyuGRTransferChargesClearing transferClr
+--     WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+-- )   
 UNION ALL      
---BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
+--BILL ysnAccrue = 1/There is a vendor selected, receipt vendor   IR-4345 Roth
 SELECT      
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
@@ -93,6 +107,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId     
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 -- OUTER APPLY (    
 --  SELECT TOP 1    
 --   ga.strAccountId    
@@ -110,8 +126,14 @@ LEFT JOIN
 WHERE       
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
--- AND ReceiptCharge.ysnInventoryCost = 0
-AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only    
+--HANDLE RECEIPT WHICH intEntityVendorId IS NULL
+AND ISNULL(Receipt.intEntityVendorId,ReceiptCharge.intEntityVendorId) = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only 
+AND transferClr.intInventoryReceiptChargeId IS NULL
+-- AND NOT EXISTS (
+--     SELECT intInventoryReceiptChargeId
+--     FROM vyuGRTransferChargesClearing transferClr
+--     WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+-- )     
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
 SELECT      
@@ -147,6 +169,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId     
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 -- OUTER APPLY (    
 --  SELECT TOP 1    
 --   ga.strAccountId    
@@ -167,6 +191,12 @@ AND ReceiptCharge.ysnAccrue = 1
 -- AND ReceiptCharge.ysnInventoryCost = 0
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
+AND transferClr.intInventoryReceiptChargeId IS NULL
+-- AND NOT EXISTS (
+--     SELECT intInventoryReceiptChargeId
+--     FROM vyuGRTransferChargesClearing transferClr
+--     WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+-- )  
 UNION ALL      
 --Voucher For Receipt Charges      
 SELECT      
@@ -244,6 +274,8 @@ INNER JOIN tblICInventoryReceipt receipt
     ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId      
 INNER JOIN tblSMCompanyLocation compLoc      
     ON receipt.intLocationId = compLoc.intCompanyLocationId    
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -252,8 +284,14 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
 WHERE       
     billDetail.intInventoryReceiptChargeId IS NOT NULL      
+    AND transferClr.intInventoryReceiptChargeId IS NULL
 -- AND receiptCharge.ysnInventoryCost = 0
 AND bill.ysnPosted = 1  
+-- AND NOT EXISTS (
+--     SELECT intInventoryReceiptChargeId
+--     FROM vyuGRTransferChargesClearing transferClr
+--     WHERE transferClr.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
+-- )  
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl

@@ -42,7 +42,7 @@ BEGIN
 			, @ItemUOMId = intItemUOMId 
 		FROM #tmpMeterReading
 
-		SELECT *
+		SELECT dblRate, ysnTaxExempt
 		INTO #tmpTaxes
 		FROM dbo.fnConstructLineItemTaxDetail (
 			1
@@ -57,7 +57,7 @@ BEGIN
 			, @TransactionDate
 			, NULL
 			, 1
-			,0			--@IncludeInvalidCodes
+			, 0			--@IncludeInvalidCodes
 			, NULL
 			, NULL
 			, NULL

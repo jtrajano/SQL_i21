@@ -73,6 +73,29 @@ BEGIN
 		INNER JOIN @voucherPrepayIds B ON A.intBillId = B.intId
 		WHERE
 			A.ysnPosted = 1
+
+		--VALIDATE THE AMOUNT DUE
+		INSERT INTO @returntable
+		SELECT
+			A.strBillId + ' has invalid amount due.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			34
+		FROM tblAPBill A
+		WHERE 
+		A.intBillId IN (SELECT intId FROM @voucherPrepayIds) 
+		AND 
+		(
+			--amount due should be total less payment
+			(A.dblAmountDue != (A.dblTotal - A.dblPayment))
+			OR
+			--amount due cannot be greater than the total
+			(A.dblAmountDue > A.dblTotal)
+			OR
+			--amount due cannot be negative
+			(A.dblAmountDue < 0)
+		)
 	END
 	ELSE
 	BEGIN

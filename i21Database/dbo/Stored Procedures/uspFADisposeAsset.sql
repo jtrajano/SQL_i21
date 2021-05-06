@@ -66,8 +66,18 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 DECLARE @dblDailyRate	NUMERIC (18,6)
 
 IF ISNULL(@ysnRecap, 0) = 0
-	BEGIN							
-		
+	BEGIN				
+		DECLARE @totalDepre NUMERIC(18,6)			
+
+		SELECT @totalDepre = SUM(dblCredit-dblDebit) 
+			FROM tblGLDetail GL
+			JOIN tblFAFixedAsset FA ON FA.strAssetId = GL.strReference
+			JOIN #AssetID A ON A.intAssetId = FA.intAssetId
+			WHERE FA.intAccumulatedAccountId = GL.intAccountId
+			AND strCode = 'AMDPR'
+			AND ysnIsUnposted = 0
+
+
 		DECLARE @GLEntries RecapTableType				
 		
 		DELETE FROM @GLEntries
@@ -112,7 +122,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= A.[dblCost]
+			,[dblDebit]				= @totalDepre
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= 0
 			,[dblCreditForeign]		= 0
@@ -139,7 +149,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
 		
-		FROM tblFAFixedAsset A
+		FROM tblFAFixedAsset A 
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
 		UNION ALL
 		SELECT 
@@ -178,6 +188,45 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+		UNION ALL
+		SELECT 
+			 [strTransactionId]		= @strTransactionId
+			,[intTransactionId]		= A.[intAssetId]
+			,[intAccountId]			= A.[intGainLossAccountId]
+			,[strDescription]		= A.[strAssetDescription]
+			,[strReference]			= A.strAssetId
+			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[dblDebit]				= CASE WHEN A.dblCost > @totalDepre THEN A.dblCost - @totalDepre ELSE 0 END
+			,[dblCredit]			= CASE WHEN @totalDepre > A.dblCost THEN @totalDepre - A.dblCost ELSE 0 END
+			,[dblDebitForeign]		= 0
+			,[dblCreditForeign]		= 0
+			,[dblDebitReport]		= 0
+			,[dblCreditReport]		= 0
+			,[dblReportingRate]		= 0
+			,[dblForeignRate]		= 0
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[dtmDate]				= ISNULL(A.[dtmDateAcquired], GETDATE())
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intCurrencyId]		= A.intCurrencyId
+			,[dblExchangeRate]		= 0
+			,[intUserId]			= 0
+			,[intEntityId]			= @intEntityId			
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchId]			= @strBatchId
+			,[strCode]				= 'AMDIS' --FA
+								
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]		= A.[intAssetId]			
+			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionForm]	= 'Fixed Assets'
+			,[strModuleName]		= 'Fixed Assets'
+		
+		FROM tblFAFixedAsset A
+		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+		AND @totalDepre <> A.dblCost
+
 
 		
 		BEGIN TRY

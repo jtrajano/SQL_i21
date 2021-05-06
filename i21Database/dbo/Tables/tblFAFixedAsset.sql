@@ -32,6 +32,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[intExpenseAccountId]		INT NULL,
 	[intDepreciationAccountId]	INT NULL,
 	[intAccumulatedAccountId]	INT NULL,
+	[intGainLossAccountId]	INT NULL,
 
 	[strManufacturerName]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strModelNumber]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,

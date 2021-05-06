@@ -60,23 +60,23 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
 
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
-			  intEntityCustomerId
-			, strCustomerNumber
-			, strCustomerName
-			, dblARBalance
-			, dblTotalAmount
-			, ysnHasEmailSetup
-			, intConcurrencyId
-			, intEntityUserId
-		)
-SELECT AGING.intEntityCustomerId
-	 , AGING.strCustomerNumber
-	 , AGING.strCustomerName
-	 , AGING.dblTotalAR
-	 , AGING.dblTotalAR
-	 , ysnHasEmailSetup			= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
-	 , 1
-	 , @intEntityUserId
+	  intEntityCustomerId
+	, strCustomerNumber
+	, strCustomerName
+	, dblARBalance
+	, dblTotalAmount
+	, ysnHasEmailSetup
+	, intConcurrencyId
+	, intEntityUserId
+)
+SELECT intEntityCustomerId	= AGING.intEntityCustomerId
+	, strCustomerNumber		= AGING.strCustomerNumber
+	, strCustomerName		= AGING.strCustomerName
+	, dblTotalAR			= CASE WHEN ISNULL(@strStatementFormat, 'Open Item') = 'Full Details - No Card Lock' THEN AGING.dblTotalAR - ISNULL(dblFuture, 0) ELSE AGING.dblTotalAR END
+	, dblTotalAR			= CASE WHEN ISNULL(@strStatementFormat, 'Open Item') = 'Full Details - No Card Lock' THEN AGING.dblTotalAR - ISNULL(dblFuture, 0) ELSE AGING.dblTotalAR END
+	, ysnHasEmailSetup		= CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END
+	, intConcurrencyId		= 1
+	, intEntityUserId		= @intEntityUserId
 FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId

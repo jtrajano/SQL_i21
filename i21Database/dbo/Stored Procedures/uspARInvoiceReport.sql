@@ -55,10 +55,11 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) OR dtmCreated IS NULL
-DELETE FROM tblARInvoiceReportStagingTableCopy WHERE dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) OR dtmCreated IS NULL
+DELETE FROM tblARInvoiceReportStagingTable 
+WHERE	(intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein'))
+OR		dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) 
+OR		dtmCreated IS NULL
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
 	 , intCompanyLocationId
@@ -183,7 +184,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strCurrency				= CURRENCY.strCurrency	 	 
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strBillToLocationName	= INV.strBillToLocationName
-	 , strBillTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strBillTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, ENTITYLOCATION.strCheckPayeeName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 	 , strShipTo				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
 	 									THEN CONSUMPTIONSITE.strSiteFullAddress
 										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
@@ -203,8 +204,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strFreightTerm			= FREIGHT.strFreightTerm
 	 , strDeliverPickup			= FREIGHT.strFobPoint
 	 , strComments				= dbo.fnEliminateHTMLTags(INV.strComments, 0)
-	 , strInvoiceHeaderComment	= INV.strComments
-	 , strInvoiceFooterComment	= INV.strFooterComments
+	 , strInvoiceHeaderComment	= ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Header', NULL, 1), INV.strComments)
+	 , strInvoiceFooterComment	= ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Footer', NULL, 1), INV.strFooterComments)
 	 , dblInvoiceSubtotal		= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
@@ -455,6 +456,11 @@ LEFT JOIN (
 		 , strName
 	FROM dbo.tblEMEntity
 ) SHIPVIA ON INV.intShipViaId = SHIPVIA.intEntityId
+OUTER APPLY (
+ SELECT strCheckPayeeName
+ FROM dbo.tblEMEntityLocation
+ WHERE intEntityLocationId = INV.intBillToLocationId
+) ENTITYLOCATION
 LEFT JOIN (
 	SELECT intFreightTermId
 		 , strFreightTerm
@@ -548,268 +554,6 @@ OUTER APPLY (
 	WHERE intInvoiceId = STAGING.intInvoiceId
 	  AND ISNULL(strSubFormula, '') <> ''
 ) SUBFORMULA
-WHERE STAGING.intEntityUserId = @intEntityUserId 
-  AND STAGING.strRequestId = @strRequestId 
-  AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
-
-INSERT INTO tblARInvoiceReportStagingTableCopy (
-	  intInvoiceId
-	, intCompanyLocationId
-	, intEntityCustomerId
-	, intEntityUserId
-	, intInvoiceDetailId
-	, intTaxCodeId
-	, intDetailCount
-	, intRecipeId
-	, intOneLinePrintId
-	, intTruckDriverId
-	, intBillToLocationId
-	, intShipToLocationId
-	, intTermId
-	, intShipViaId
-	, intSiteId
-	, intItemId
-	, intTicketId
-	, strRequestId
-	, strCompanyName
-	, strCompanyAddress
-	, strCompanyInfo
-	, strCompanyPhoneNumber
-	, strCompanyEmail
-	, strCompanyLocation
-	, strRemitToAddress
-	, strType
-	, strTicketType
-	, strCustomerName
-	, strCustomerNumber
-	, strLocationName
-	, strLocationNumber
-	, strCurrency
-	, strInvoiceNumber
-	, strSalesOrderNumber
-	, strBillToLocationName
-	, strShipToLocationName
-	, strBillTo
-	, strShipTo
-	, strSalespersonName
-	, strPONumber
-	, strBOLNumber
-	, strPaymentInfo
-	, strShipVia
-	, strTerm
-	, strFreightTerm
-	, strDeliverPickup
-	, strInvoiceHeaderComment
-	, strInvoiceFooterComment
-	, strItemNo
-	, strContractNumber
-	, strItem
-	, strItemDescription
-	, strUnitMeasure
-	, strUnitMeasureSymbol
-	, strPaid
-	, strPosted
-	, strTaxCode
-	, strTransactionType
-	, strInvoiceComments
-	, strItemComments
-	, strPaymentComments
-	, strCustomerComments
-	, strItemType
-	, strVFDDocumentNumber
-	, strBOLNumberDetail
-	, strProvisional
-	, strTicketNumbers
-	, strTicketNumber
-	, strTicketNumberDate
-	, strCustomerReference
-	, strSalesReference
-	, strPurchaseReference
-	, strLoadNumber
-	, strEntityContract
-	, strSiteNumber
-	, strAddonDetailKey
-	, strTruckDriver
-	, strSource
-	, strOrigin
-	, strComments
-	, strContractNo
-	, strContractNoSeq
-	, strInvoiceFormat
-	, strBargeNumber
-	, strCommodity
-	, strSubFormula
-	, strTrailer
-	, strSeals
-	, strLotNumber
-	, dblInvoiceSubtotal
-	, dblShipping
-	, dblTax
-	, dblInvoiceTotal
-	, dblAmountDue
-	, dblContractBalance
-	, dblQtyShipped
-	, dblQtyOrdered
-	, dblDiscount
-	, dblTotalTax
-	, dblPrice
-	, dblItemPrice
-	, dblTaxDetail
-	, dblTotalWeight
-	, dblTotalProvisional
-	, dblEstimatedPercentLeft
-	, dblPercentFull
-	, dblInvoiceTax
-	, dblPriceWithTax
-	, dblTotalPriceWithTax
-	, ysnHasEmailSetup
-	, ysnHasRecipeItem
-	, ysnHasVFDDrugItem
-	, ysnHasProvisional
-	, ysnPrintInvoicePaymentDetail
-	, ysnListBundleSeparately
-	, ysnHasAddOnItem
-	, ysnStretchLogo
-	, ysnHasSubFormula
-	, dtmDate
-	, dtmPostDate
-	, dtmShipDate
-	, dtmDueDate
-	, dtmLoadedDate
-	, dtmScaleDate
-	, blbLogo
-	, blbSignature
-	, dtmCreated
-)
-SELECT 
-	  intInvoiceId
-	, intCompanyLocationId
-	, intEntityCustomerId
-	, intEntityUserId
-	, intInvoiceDetailId
-	, intTaxCodeId
-	, intDetailCount
-	, intRecipeId
-	, intOneLinePrintId
-	, intTruckDriverId
-	, intBillToLocationId
-	, intShipToLocationId
-	, intTermId
-	, intShipViaId
-	, intSiteId
-	, intItemId
-	, intTicketId
-	, strRequestId
-	, strCompanyName
-	, strCompanyAddress
-	, strCompanyInfo
-	, strCompanyPhoneNumber
-	, strCompanyEmail
-	, strCompanyLocation
-	, strRemitToAddress
-	, strType
-	, strTicketType
-	, strCustomerName
-	, strCustomerNumber
-	, strLocationName
-	, strLocationNumber
-	, strCurrency
-	, strInvoiceNumber
-	, strSalesOrderNumber
-	, strBillToLocationName
-	, strShipToLocationName
-	, strBillTo
-	, strShipTo
-	, strSalespersonName
-	, strPONumber
-	, strBOLNumber
-	, strPaymentInfo
-	, strShipVia
-	, strTerm
-	, strFreightTerm
-	, strDeliverPickup
-	, strInvoiceHeaderComment
-	, strInvoiceFooterComment
-	, strItemNo
-	, strContractNumber
-	, strItem
-	, strItemDescription
-	, strUnitMeasure
-	, strUnitMeasureSymbol
-	, strPaid
-	, strPosted
-	, strTaxCode
-	, strTransactionType
-	, strInvoiceComments
-	, strItemComments
-	, strPaymentComments
-	, strCustomerComments
-	, strItemType
-	, strVFDDocumentNumber
-	, strBOLNumberDetail
-	, strProvisional
-	, strTicketNumbers
-	, strTicketNumber
-	, strTicketNumberDate
-	, strCustomerReference
-	, strSalesReference
-	, strPurchaseReference
-	, strLoadNumber
-	, strEntityContract
-	, strSiteNumber
-	, strAddonDetailKey
-	, strTruckDriver
-	, strSource
-	, strOrigin
-	, strComments
-	, strContractNo
-	, strContractNoSeq
-	, strInvoiceFormat
-	, strBargeNumber
-	, strCommodity
-	, strSubFormula
-	, strTrailer
-	, strSeals
-	, strLotNumber
-	, dblInvoiceSubtotal
-	, dblShipping
-	, dblTax
-	, dblInvoiceTotal
-	, dblAmountDue
-	, dblContractBalance
-	, dblQtyShipped
-	, dblQtyOrdered
-	, dblDiscount
-	, dblTotalTax
-	, dblPrice
-	, dblItemPrice
-	, dblTaxDetail
-	, dblTotalWeight
-	, dblTotalProvisional
-	, dblEstimatedPercentLeft
-	, dblPercentFull
-	, dblInvoiceTax
-	, dblPriceWithTax
-	, dblTotalPriceWithTax
-	, ysnHasEmailSetup
-	, ysnHasRecipeItem
-	, ysnHasVFDDrugItem
-	, ysnHasProvisional
-	, ysnPrintInvoicePaymentDetail
-	, ysnListBundleSeparately
-	, ysnHasAddOnItem
-	, ysnStretchLogo
-	, ysnHasSubFormula
-	, dtmDate
-	, dtmPostDate
-	, dtmShipDate
-	, dtmDueDate
-	, dtmLoadedDate
-	, dtmScaleDate
-	, blbLogo
-	, blbSignature
-	, GETDATE() 
-FROM tblARInvoiceReportStagingTable STAGING
 WHERE STAGING.intEntityUserId = @intEntityUserId 
   AND STAGING.strRequestId = @strRequestId 
   AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 

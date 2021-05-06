@@ -254,7 +254,7 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 		IF @raiseError = 1
 			BEGIN
 				IF ISNULL(@ErrorMerssage, '') = ''
-					SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed
+					SELECT TOP 1 @ErrorMerssage = [strMessage] FROM tblARPostResult WHERE [strBatchNumber] = @batchIdUsed ORDER BY intId DESC
 
 				RAISERROR(@ErrorMerssage, 11, 1)							
 			END				

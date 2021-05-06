@@ -114,6 +114,7 @@ BEGIN TRY
 			,dtmPlannedDate DATETIME
 			,intPlannedShiftId INT
 			)
+	Where IsNULL(dblQuantity,0)>0
 
 	IF @intSalesOrderDetailId = 0
 		SET @intSalesOrderDetailId = NULL

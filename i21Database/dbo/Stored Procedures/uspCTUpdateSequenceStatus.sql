@@ -22,7 +22,7 @@ BEGIN TRY
 		,@intOldContractStatusId = intContractStatusId
 		,@intContractHeaderId = intContractHeaderId
 	from
-		tblCTContractDetail
+		tblCTContractDetail with (nolock)
 	where
 		isnull(intNoOfLoad,0) > 0
 		and intContractDetailId = @intContractDetailId;
@@ -31,8 +31,8 @@ BEGIN TRY
 	if (@intNoOfLoad > 0)
 	begin
 
-		select @intInvoiceCount = count(*) from tblARInvoice i where i.intInvoiceId in (
-			select intInvoiceId from tblARInvoiceDetail di where di.intContractDetailId = @intContractDetailId
+		select @intInvoiceCount = count(*) from tblARInvoice i with (nolock) where i.intInvoiceId in (
+			select intInvoiceId from tblARInvoiceDetail di with (nolock) where di.intContractDetailId = @intContractDetailId
 		)
 
 		if (@intNoOfLoad <= @intInvoiceCount and (@intOldContractStatusId = 1 or @intOldContractStatusId = 4))

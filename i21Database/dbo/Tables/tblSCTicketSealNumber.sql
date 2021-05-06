@@ -10,3 +10,13 @@ CREATE TABLE tblSCTicketSealNumber
 	CONSTRAINT [FK_tblSCTicketSealNumber_tblSCSealNumber_intSealNumberId] FOREIGN KEY ([intSealNumberId]) REFERENCES [tblSCSealNumber](intSealNumberId),
 	CONSTRAINT [FK_tblSCTicketSealNumber_tblSCTruckDriverReference_intTruckDriverReferenceId] FOREIGN KEY ([intTruckDriverReferenceId]) REFERENCES [tblSCTruckDriverReference]([intTruckDriverReferenceId])
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSCTicketSealNumber_intTicketId_intSealNumberId] ON [dbo].[tblSCTicketSealNumber]
+(
+	[intTicketId] ASC,
+	[intSealNumberId] ASC
+)
+
+GO

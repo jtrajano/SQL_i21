@@ -179,8 +179,8 @@ BEGIN
 			, cb.intUserId
 			, strUserName = u.strName
 			, cb.strAction
+			, dblTotal = SUM(dblQty) OVER(PARTITION BY cb.intContractDetailId ORDER BY cb.intContractDetailId)
 		FROM tblCTContractBalanceLog cb
-		--INNER JOIN @OpenBasisContract obc ON cb.intContractDetailId = obc.intContractDetailId
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
 		INNER JOIN tblICItem i ON i.intItemId = cb.intItemId
 		INNER JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
@@ -198,6 +198,15 @@ BEGIN
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(cb.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(cb.intEntityId, 0))
 	) t
+	WHERE dblTotal >= 0
+
+	--DELETE FROM @returntable
+	--WHERE intContractDetailId IN (
+	--	SELECT intContractDetailId
+	--	FROM @returntable
+	--	GROUP BY intContractDetailId
+	--	HAVING SUM(dblQty) < 0
+	--)
 
 	--DELETE FROM @returntable
 	--WHERE intContractDetailId IN (

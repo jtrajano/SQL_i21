@@ -8,7 +8,7 @@ SELECT
 	intLoadContainerId = LDCL.intLoadContainerId,
 	strLoadNumber = L.strLoadNumber,
 	strTrackingNumber = L.strLoadNumber,
-	intCompanyLocationId = L.intCompanyLocationId,
+	intCompanyLocationId = PCT.intCompanyLocationId,
 	strLocationName = CL.strLocationName,
 	strCommodity = CY.strDescription,
 	strPosition = PO.strPosition,
@@ -54,6 +54,7 @@ SELECT
 	dtmETAPOD = L.dtmETAPOD,
 	dtmDispatchedDate = L.dtmDispatchedDate,
 	strComments = L.strComments,
+	strExternalShipmentNumber = L.strExternalShipmentNumber,
 
 	---- Purchase Contract Details
 	intContractDetailId = PCT.intContractDetailId,
@@ -66,7 +67,9 @@ SELECT
 	strPContractNumber = CAST(PCH.strContractNumber as VARCHAR(100)) + '/' + CAST(PCT.intContractSeq AS VARCHAR(100)),
 	dblCashPrice = ISNULL(PAD.dblSeqPrice, PAD.dblSeqPartialPrice),
 	dblCashPriceInQtyUOM = dbo.fnCTConvertQtyToTargetItemUOM(PCT.intItemUOMId,PCT.intPriceItemUOMId,PCT.dblCashPrice),
+	intCurrencyId = CUR.intCurrencyID,
 	strCurrency = CUR.strCurrency,
+	ysnSubCurrency = CUR.ysnSubCurrency,
 	strPriceUOM = U2.strUnitMeasure,
 	intItemId = PCT.intItemId,
 	intItemUOMId = PCT.intItemUOMId,
@@ -91,6 +94,7 @@ SELECT
 	dtmStartDate = PCT.dtmStartDate,
 	dtmEndDate = PCT.dtmEndDate,
 	ysnOnTime = CAST(CASE WHEN DATEDIFF (DAY, L.dtmPostedDate, PCT.dtmEndDate) >= 0 THEN 1 ELSE 0 END as Bit),
+	strERPPONumber = PCT.strERPPONumber,
 
 	---- Sales Contract Details
 	intSContractDetailId = SCT.intContractDetailId,
@@ -253,8 +257,8 @@ LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCT.intProducerId
 LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
-OUTER APPLY (SELECT TOP 1 CER.strCertificationName 
-				FROM tblCTContractCertification CC JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId 
+OUTER APPLY (SELECT TOP 1 CE.strCertificationName 
+				FROM tblCTContractCertification CC JOIN tblICCertification CE ON CE.intCertificationId = CC.intCertificationId 
 				WHERE CC.intContractDetailId = PCT.intContractDetailId) CER
 OUTER APPLY (SELECT TOP 1 R.strReceiptNumber, R.dtmReceiptDate, RL.strLocationName 
 			FROM tblICInventoryReceiptItem RI

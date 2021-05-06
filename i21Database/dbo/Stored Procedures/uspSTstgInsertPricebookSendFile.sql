@@ -593,6 +593,7 @@ BEGIN
 										INSERT INTO tblSTUpdateRegisterItemReport
 										(
 											strGuid, 
+											intStoreId,
 											strActionType,
 											strUpcCode,
 											strDescription,
@@ -606,6 +607,7 @@ BEGIN
 										)
 										SELECT 
 											strGuid = @strGuid,
+											intStoreId = (SELECT intStoreNo FROM tblSTStore WHERE intStoreId = @intStoreId),
 											strActionType = t1.strActionType,
 											strUpcCode = t1.strUpcCode,
 											strDescription = t1.strDescription,
@@ -1174,6 +1176,7 @@ BEGIN
 						INSERT INTO tblSTUpdateRegisterItemReport
 						(
 							strGuid, 
+							intStoreId,
 							strActionType,
 							strUpcCode,
 							strDescription,
@@ -1187,6 +1190,7 @@ BEGIN
 						)
 						SELECT 
 							strGuid = @strGuid,
+							intStoreId = (SELECT intStoreNo FROM tblSTStore WHERE intStoreId = @intStoreId),
 							strActionType = t1.strActionType,
 							strUpcCode = t1.strUpcCode,
 							strDescription = t1.strDescription,
@@ -1436,3 +1440,5 @@ ExitWithRollback:
 
 		
 ExitPost:
+
+

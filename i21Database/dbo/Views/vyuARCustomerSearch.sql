@@ -222,8 +222,10 @@ LEFT JOIN (
 		 , strZipCode
 		 , strCountry
 		 , strPhone
+		 , intEntityId
+		 , ysnDefaultLocation
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
-) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
+) BILLTOLOCATION ON CUSTOMER.intEntityId = BILLTOLOCATION.intEntityId AND BILLTOLOCATION.ysnDefaultLocation=1
 LEFT JOIN (
 	SELECT S.intEntityId
 		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END

@@ -65,6 +65,8 @@ END
 -- PADDING AND NUMBER OF DIGITS
 DECLARE @padding NVARCHAR(10)
 DECLARE @digit INT
+DECLARE @tblSMStartingNumber TABLE (intNumber INT)
+Declare @intNumber int
 
 SET @padding = '000000000' 
 
@@ -118,28 +120,53 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		-- Assemble the string ID. 
-		SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
+		---- Assemble the string ID. 
+		--SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
+		--FROM	tblSMStartingNumber
+		--WHERE	intStartingNumberId = @intStartingNumberId
+
+		---- Increment the next number
+		--UPDATE	tblSMStartingNumber
+		--SET		intNumber = ISNULL(intNumber, 0) + 1
+		--WHERE	intStartingNumberId = @intStartingNumberId
+
+
+
+		--work around for duplicate start--
+		UPDATE tblSMStartingNumber SET intNumber = ISNULL(intNumber, 0) + 1 OUTPUT inserted.intNumber INTO @tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
+		Select @intNumber=intNumber from @tblSMStartingNumber
+	
+		---- Assemble the string ID. 
+		SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(@intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(@intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
 		FROM	tblSMStartingNumber
 		WHERE	intStartingNumberId = @intStartingNumberId
+		--work around for duplicate end--
 
-		-- Increment the next number
-		UPDATE	tblSMStartingNumber
-		SET		intNumber = ISNULL(intNumber, 0) + 1
-		WHERE	intStartingNumberId = @intStartingNumberId
 	END
 END
 ELSE
 BEGIN
-	-- Assemble the string ID. 
-	SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
+	
+	--work around for duplicate start--
+	UPDATE tblSMStartingNumber SET intNumber = ISNULL(intNumber, 0) + 1 OUTPUT inserted.intNumber INTO @tblSMStartingNumber WHERE intStartingNumberId = @intStartingNumberId
+	Select @intNumber=intNumber from @tblSMStartingNumber
+	
+	---- Assemble the string ID. 
+	SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(@intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(@intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
 	FROM	tblSMStartingNumber
 	WHERE	intStartingNumberId = @intStartingNumberId
+	--work around for duplicate end--
 
-	-- Increment the next number
-	UPDATE	tblSMStartingNumber
-	SET		intNumber = ISNULL(intNumber, 0) + 1
-	WHERE	intStartingNumberId = @intStartingNumberId
+
+	---- Assemble the string ID. 
+	--SELECT	@strID = @locationNumber + strPrefix + @parameters + CASE WHEN @digit = 0 THEN CAST(intNumber AS NVARCHAR(20)) ELSE RIGHT(@padding + CAST(ISNULL(intNumber, 1) AS NVARCHAR(20)), @digit) END--CAST(intNumber AS NVARCHAR(20))
+	--FROM	tblSMStartingNumber
+	--WHERE	intStartingNumberId = @intStartingNumberId
+
+	---- Increment the next number
+	--UPDATE	tblSMStartingNumber
+	--SET		intNumber = ISNULL(intNumber, 0) + 1
+	--WHERE	intStartingNumberId = @intStartingNumberId
 END
 
 -- Raise an error if the generated id is invalid. 

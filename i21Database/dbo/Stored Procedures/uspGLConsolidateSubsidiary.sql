@@ -1,18 +1,20 @@
 CREATE PROCEDURE [dbo].[uspGLConsolidateSubsidiary]
-	@dBName NVARCHAR(50) = '',
-	@CompanyId INT,
+	@intSubsidiaryCompanyId INT,
 	@dtmDate DATETIME,
-	@strCompanyName NVARCHAR(50),
-	@parentDbName NVARCHAR(50)
+	@parentDbName NVARCHAR(50),
+	@subsidiaryDBName NVARCHAR(50),
+	@intConsolidateLogId INT
 AS
 DECLARE @sql NVARCHAR(MAX)
 DECLARE @strCommand NVARCHAR(MAX)
 
 SET @strCommand =
-'USE [consolidatingDb]
+'USE [subSidiaryDbName]
 DECLARE @ysnOpen BIT, @ysnUnpostedTrans BIT, 
 	@intFiscalYearId INT,@intFiscalPeriodId INT,
-	@dtmStartDate DATETIME,	@dtmEndDate DATETIME
+	@dtmStartDate DATETIME,	@dtmEndDate DATETIME,
+	@dtmCurrentDate DATETIME = GETDATE(),
+	@strAccountId NVARCHAR(30)
 
 SELECT @ysnOpen = 0 , @ysnUnpostedTrans = 0
 
@@ -26,43 +28,43 @@ FROM dbo.tblGLFiscalYearPeriod
 WHERE ''[dtmDateConsolidate]''
 BETWEEN dtmStartDate and dtmEndDate
 
-IF @dtmStartDate IS NULL
-BEGIN
-	INSERT INTO ##ConsolidateResult
-	SELECT ''[CompanyName]'', 0 , 0, '' Fiscal Period not existing in subsidiary company.'' strResult
-	RETURN
-END
-
-
-
 exec dbo.uspGLGetAllUnpostedTransactionsByFiscal @intFiscalYearId,
 1,
 @intFiscalPeriodId,
 ''GL'' ,@ysnUnpostedTrans OUT
-	
+
 IF @ysnOpen = 1 or @ysnUnpostedTrans = 1 
 BEGIN
-	
-	DECLARE @strResult NVARCHAR(1000)
-	IF @ysnOpen =1 and @ysnUnpostedTrans = 0 SET @strResult = ''Fiscal Period is still open in the subsidiary company.''
-	IF @ysnOpen =0 and @ysnUnpostedTrans = 1 SET @strResult = ''Fiscal Period have unposted transactions in the subsidiary company.''
-	IF @ysnOpen =1 and @ysnUnpostedTrans = 1 SET @strResult = ''Fiscal Period is still open and have unposted transactions in the subsidiary company.''
-	
-	SELECT @ysnOpen = CASE WHEN @ysnOpen = 1 THEN 0 ELSE 1 END
-	SELECT @ysnUnpostedTrans = CASE WHEN @ysnUnpostedTrans = 1 THEN 0 ELSE 1 END
-	
-	INSERT INTO ##ConsolidateResult
-	SELECT ''[CompanyName]'', @ysnOpen ysnFiscalOpen, @ysnUnpostedTrans ysnUnpostedTrans, @strResult strResult
+	UPDATE 
+	[ParentDbName].dbo.tblGLConsolidateLog
+	SET ysnFiscalOpen=case when isnull(@ysnOpen,0) = 0 then 1 else 0 end,
+	ysnHasUnposted = @ysnUnpostedTrans,
+	strComment=
+	CASE 
+	WHEN @ysnOpen =1 and @ysnUnpostedTrans = 0 THEN ''Fiscal Period is still open in the subsidiary company.''
+	WHEN @ysnOpen =0 and @ysnUnpostedTrans = 1 THEN ''Fiscal Period have unposted transactions in the subsidiary company.''
+	WHEN @ysnOpen =1 and @ysnUnpostedTrans = 1 THEN ''Fiscal Period is still open and have unposted transactions in the subsidiary company.''
+	ELSE '''' END,
+	intConcurrencyId = intConcurrencyId + 1
+	WHERE
+	intConsolidateLogId = [ConsolidateLogId]
 END
+	
 ELSE
 BEGIN
-	
-		
-		DELETE FROM [ParentDbName].dbo.tblGLDetail WHERE intCompanyId = [CompanyId]
-		
+		SELECT TOP 1 @strAccountId = A.strAccountId from dbo.vyuGLDetail A
+			LEFT JOIN [ParentDbName].dbo.tblGLAccount B
+			on A.strAccountId= B.strAccountId
+			WHERE A.dtmDate BETWEEN @dtmStartDate AND @dtmEndDate AND B.strAccountId IS NULL
+
+		IF (@strAccountId IS NOT NULL)
+			RAISERROR (''Account id %s is not existing in [ParentDbName] '', 16,1,@strAccountId);  
+
+		DELETE FROM [ParentDbName].dbo.tblGLDetail WHERE intSubsidiaryCompanyId = [CompanyId]
+		AND dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
 	
 		INSERT INTO [ParentDbName].dbo.tblGLDetail (
-			[intCompanyId]
+			intSubsidiaryCompanyId
 			,[dtmDate]
 			,[strBatchId]
 			,[intAccountId]
@@ -135,17 +137,21 @@ BEGIN
 			   ,[dtmReconciled]
 			   ,[ysnReconciled]
 			   ,[ysnRevalued]
-			   --,[ysnExported]
-			   --,[dtmExportedDate]
 				FROM tblGLDetail 
 				WHERE dtmDate BETWEEN @dtmStartDate AND @dtmEndDate
 				AND ysnIsUnposted =0
-			
-				INSERT INTO ##ConsolidateResult
-				SELECT ''[CompanyName]'', 0 , 0 , ''Successfully consolidated'' strResult
-END		
-		
-		
+			UPDATE [ParentDbName].dbo.tblGLConsolidateLog
+			SET strComment= ''Successfully consolidated'' ,
+			intRowInserted = @@ROWCOUNT,
+			intConcurrencyId = intConcurrencyId + 1
+			WHERE intConsolidateLogId = [ConsolidateLogId]
+END			
 '
-SET @strCommand =REPLACE(REPLACE(REPLACE( REPLACE(REPLACE( @strCommand, '[consolidatingDb]',@dBName),'[CompanyId]',@CompanyId),'[dtmDateConsolidate]', @dtmDate),'[CompanyName]', @strCompanyName), '[ParentDbName]', @parentDbName)
+SET @strCommand = REPLACE(REPLACE(REPLACE(@strCommand,'  ',''), CHAR(10), ''), CHAR(13), ' ')
+SET @strCommand = REPLACE(@strCommand,'[subSidiaryDbName]',@subsidiaryDBName )
+SET @strCommand = REPLACE(@strCommand,'[CompanyId]', @intSubsidiaryCompanyId )
+SET @strCommand = REPLACE(@strCommand,'[dtmDateConsolidate]',@dtmDate )
+SET @strCommand = REPLACE(@strCommand,'[ParentDbName]',@parentDbName )
+SET @strCommand = REPLACE(@strCommand,'[ConsolidateLogId]',@intConsolidateLogId )
+
 EXEC sp_executesql @strCommand

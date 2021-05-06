@@ -91,3 +91,4 @@ LEFT JOIN tblCTPricingType PT_HEAD
 OUTER APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 GO
 
+

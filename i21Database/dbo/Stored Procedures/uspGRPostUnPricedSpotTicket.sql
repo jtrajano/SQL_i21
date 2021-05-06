@@ -181,6 +181,7 @@ BEGIN TRY
 							,[dtmVoucherDate]
 							,[intStorageLocationId]
 							,[intSubLocationId]
+							,[ysnStage]
 					)
 					SELECT 
 						GP.[intEntityVendorId]
@@ -237,7 +238,8 @@ BEGIN TRY
 						,GP.dtmDate
 						,GP.intStorageLocationId
 						,GP.intSubLocationId
-					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId,1,1) GP
+						,0
+					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
 
 					END 
 

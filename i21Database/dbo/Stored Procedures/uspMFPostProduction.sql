@@ -114,6 +114,10 @@ BEGIN
 		SELECT @intLocationId = intLocationId
 		FROM tblICStorageLocation
 		WHERE intStorageLocationId = @intStorageLocationId
+
+		SELECT @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY  = NULL
+		SELECT @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY  = 'Inventory Adjustment'
+
 	END
 	ELSE
 	BEGIN

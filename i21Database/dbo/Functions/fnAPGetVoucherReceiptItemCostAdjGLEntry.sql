@@ -43,10 +43,12 @@ RETURNS TABLE AS RETURN
 		,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	LEFT JOIN tblICInventoryReceiptItem E
+	LEFT JOIN (tblICInventoryReceiptItem E INNER JOIN tblICInventoryReceipt E2 ON E.intInventoryReceiptId = E2.intInventoryReceiptId)
 		ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 	LEFT JOIN (tblICInventoryReceiptCharge charges INNER JOIN tblICInventoryReceipt r ON charges.intInventoryReceiptId = r.intInventoryReceiptId)
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+	-- LEFT JOIN tblICInventoryShipmentCharge shipmentCharges
+	-- 	ON B.intInventoryShipmentChargeId = shipmentCharges.intInventoryShipmentChargeId
 	LEFT JOIN tblPOPurchaseDetail poDetail
 		ON B.intPurchaseDetailId = poDetail.intPurchaseDetailId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
@@ -69,6 +71,8 @@ RETURNS TABLE AS RETURN
 		SELECT dblTotal = CAST (
 				CASE WHEN B.intInventoryReceiptChargeId > 0
 				THEN charges.dblAmount
+				-- WHEN B.intInventoryShipmentChargeId > 0
+				-- 	THEN shipmentCharges.dblAmount (PENDING)
 				ELSE (CASE	
 						-- If there is a Gross/Net UOM, compute by the net weight. 
 						WHEN E.intWeightUOMId IS NOT NULL THEN 

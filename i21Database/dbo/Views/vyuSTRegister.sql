@@ -143,4 +143,3 @@ INNER JOIN tblSTStore st
 --FROM tblSTRegister R
 --INNER JOIN tblSTStore S 
 --	ON S.intStoreId = R.intStoreId
-

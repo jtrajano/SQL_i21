@@ -2247,6 +2247,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inquire B
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'AccountsReceivable.view.CustomerInquiry?showSearch=true' WHERE strMenuName = 'Inquire Balance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebuild' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Rebuild', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Rebuild', N'Activity', N'Screen', N'AccountsReceivable.view.Rebuild?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 11, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'AccountsReceivable.view.Rebuild?showSearch=true' WHERE strMenuName = 'Rebuild' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+
 -- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivables' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 -- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 -- 	VALUES (N'Notes Receivables', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Notes Receivables', N'Activity', N'Screen', N'AccountsReceivable.view.NotesReceivable?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 11, 1)
@@ -2528,6 +2534,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Tr
 	VALUES (N'Import Transactions from CSV', N'Accounts Receivable', @AccountsReceivableImportParentMenuId, N'Import Transactions from CSV', N'Import', N'Screen', N'AccountsReceivable.view.ImportTransactionsCSV', N'small-menu-import', 1, 0, 0, 1, 3, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'AccountsReceivable.view.ImportTransactionsCSV' WHERE strMenuName = 'Import Transactions from CSV' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableImportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES ( N'Performance Maintenance', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Performance Maintenance', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=PerformanceMatrix&direct=true', N'small-menu-report', 0, 0, 0, 1, 20, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 20, strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=PerformanceMatrix&direct=true' WHERE strMenuName = 'Performance Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Credit Memos' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
@@ -3803,9 +3815,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Disconnected Scale Schedule' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Disconnected Scale Schedule', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Disconnected Scale Schedule', N'Maintenance', N'Screen', N'Grain.view.DisconnectedScaleSchedule', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Disconnected Scale Schedule', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Disconnected Scale Schedule', N'Maintenance', N'Screen', N'Grain.view.DisconnectedScaleSchedule?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.DisconnectedScaleSchedule', intSort = 9 WHERE strMenuName = 'Disconnected Scale Schedule' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.DisconnectedScaleSchedule?showSearch=true', intSort = 9 WHERE strMenuName = 'Disconnected Scale Schedule' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Accrued Storage' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 

@@ -308,6 +308,10 @@ BEGIN TRY
 								END
 							END
 
+							-- Set Inventory Transfer status back to "In Transit" if ticket distribution type is Transfer In
+							IF @intEntityId = 0
+								EXEC [dbo].[uspICUpdateTransferOrderStatus] @InventoryReceiptId, 2
+
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
 
@@ -1534,7 +1538,10 @@ BEGIN TRY
 					SELECT TOP 1 dtmTicketDateTime FROM tblSCTicket WHERE intDeliverySheetId = GRC.intDeliverySheetId AND strTicketStatus = 'C' ORDER BY dtmTicketDateTime DESC
 				) SC
 				WHERE GRC.intDeliverySheetId = @intDeliverySheetId  
-	END
+
+
+				exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId, @ysnUndistribute = 1
+		END
 
 		--Audit Log
 		EXEC dbo.uspSMAuditLog 

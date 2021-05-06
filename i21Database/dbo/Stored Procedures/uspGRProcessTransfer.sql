@@ -1,9 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessTransfer]
 (
 	@intTransferStorageId INT,
-	@intUserId INT,
-	@intFutureMarketId INT = NULL,
-	@intFutureMonthId INT = NULL
+	@intUserId INT
 )
 AS
 BEGIN
@@ -647,8 +645,6 @@ BEGIN
   				@ItemsToPost = @ItemsToPost_OStoDP
   				,@intTransferStorageId = @intTransferStorageId
   				,@intUserId = @intUserId
-  				,@intFutureMarketId = @intFutureMarketId
-  				,@intFutureMonthId = @intFutureMonthId
 
 			--/*start === FOR DP to DP only*/
 			DECLARE @strBatchId NVARCHAR(500)
@@ -988,7 +984,6 @@ BEGIN
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
 		INNER JOIN tblGRCustomerStorage ToStorage
 			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
-				AND FromStorage.intTicketId IS NOT NULL --SCALE TICKET ONLY
 		INNER JOIN tblGRTransferStorageSplit TSS
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblGRStorageHistory SourceHistory
@@ -997,33 +992,6 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
 		WHERE SR.intTransferStorageId = @intTransferStorageId
-		UNION ALL
-		SELECT
-			[intCustomerStorageId]				= A.intToCustomerStorageId
-			,[intTransferStorageId]				= TransferStorageSplit.intTransferStorageId
-			,[intContractHeaderId]				= CD.intContractHeaderId
-			,[dblUnits]							= A.dblUnitQty
-			,[dtmHistoryDate]					= GETDATE()
-			,[intUserId]						= @intUserId
-			,[ysnPost]							= 1
-			,[intTransactionTypeId]				= 3
-			,[strPaidDescription]				= 'Generated from Transfer Storage'
-			,[strType]							= 'From Transfer'
-			,[intInventoryReceiptId]			= NULL
-			,[intTransferStorageReferenceId] 	= TSR.intTransferStorageReferenceId  
-			,[strTransferTicket]				= TS.strTransferStorageTicket
-		FROM tblGRTransferStorageSplit TransferStorageSplit
-		INNER JOIN tblGRTransferStorage TS
-			ON TS.intTransferStorageId = TransferStorageSplit.intTransferStorageId
-		INNER JOIN @newCustomerStorageIds A
-			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId
-		INNER JOIN tblGRTransferStorageReference TSR
-			ON TSR.intToCustomerStorageId = A.intToCustomerStorageId
-		INNER JOIN tblGRCustomerStorage CS
-			ON CS.intCustomerStorageId = A.intSourceCustomerStorageId
-				AND CS.intTicketId IS NULL --DELIVERY SHEET ONLY
-		LEFT JOIN tblCTContractDetail CD
-			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
 		BEGIN

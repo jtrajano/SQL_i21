@@ -67,6 +67,7 @@ BEGIN
 		,dblForRemoveLoad numeric(18,6)
 		,dblForRemoveQuantity numeric(18,6)
 		,dblForRemoveLots numeric(18,6)
+		,intCurrentPriceContractId int
 		,intNumber int
 		,strPriceContractNo nvarchar(50)
 	)
@@ -566,6 +567,7 @@ BEGIN
 				,dblForRemoveLoad = dblLoadPriced - intNoOfInvoices
 				,dblForRemoveQuantity = (dblLoadPriced - intNoOfInvoices) * dblQuantityPerLoad
 				,dblForRemoveLots = ((dblLoadPriced - intNoOfInvoices) * dblQuantityPerLoad) / (dblQuantity / dblNoOfLots)
+				,intCurrentPriceContractId
 				,intNumber = intNumber
 				,strPriceContractNo = strPriceContractNo
 			from
@@ -577,7 +579,8 @@ BEGIN
 				,pfd.dblLoadPriced
 				,dblQuantityPerLoad = @dblQuantityPerLoad
 				,intNoOfInvoices = count(ar.intPriceFixationDetailAPARId) --- @intRemovedInvoice
-				,intNumber = pfd.intNumber
+				,intNumber = pfd.intNumber				
+				,intCurrentPriceContractId = pf.intPriceContractId
 				,strPriceContractNo = pc.strPriceContractNo
 			from
 				tblCTPriceFixation pf
@@ -592,6 +595,7 @@ BEGIN
 				,pfd.dblQuantity
 				,pfd.dblLoadPriced
 				,pfd.intNumber
+				,pf.intPriceContractId
 				,pc.strPriceContractNo
 			) tbl
 			)tbl1
@@ -613,9 +617,10 @@ BEGIN
 					,@dblForRemoveLoad = dblForRemoveLoad
 					,@dblOverQuantity = dblForRemoveQuantity
 					,@dblForRemoveLots = dblForRemoveLots
+					,@intCurrentPriceContractId = intCurrentPriceContractId
 					,@intPriceLayer = intNumber
 					,@strPriceContractNo = strPriceContractNo
-				from @PriceDetailToProcessLoad where intId = @intId
+				from @PriceDetailToProcessLoad where intId = @intId				
 
 				if (@dblLoadPriced > @dblForRemoveLoad and @dblForRemoveLoad > 0)
 				begin

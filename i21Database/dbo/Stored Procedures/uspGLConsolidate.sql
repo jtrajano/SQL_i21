@@ -1,61 +1,78 @@
-CREATE PROCEDURE [dbo].[uspGLConsolidate]
-@dtmDate DATETIME
-AS
-DECLARE @sql NVARCHAR(MAX)
+CREATE PROCEDURE [dbo].[uspGLConsolidate]  
+ @dtmDate DATETIME,  
+ @intEntityId INT  
+AS  
+DECLARE @intFiscalPeriodId  INT  
+DECLARE @ysnOpen BIT  
+DECLARE @strPeriod NVARCHAR(40)  
+DECLARE @dtmCurrentDate DATETIME =GETDATE()  
 
-IF object_id('tempdb..##ConsolidateResult') IS NOT NULL
-	BEGIN
-		DROP TABLE ##ConsolidateResult
-	END
-	CREATE TABLE ##ConsolidateResult(
-			[strCompanyName] [nvarchar](50) NULL,
-			[ysnFiscalOpen] [bit] NULL,
-			[ysnUnpostedTrans] [bit] NULL,
-			[strResult] [nvarchar](1000) NULL
-		)
 
-BEGIN TRY
-BEGIN TRAN
-	
-	DECLARE @dbTable TABLE
-	(
-	DbName NVARCHAR(50),
-	Id INT,
-	CompanyName NVARCHAR(50)
-	)
+SELECT TOP 1 @intFiscalPeriodId=intGLFiscalYearPeriodId, @ysnOpen=ysnOpen, @strPeriod=strPeriod  
+FROM tblGLFiscalYearPeriod WHERE @dtmDate BETWEEN dtmStartDate AND dtmEndDate  
 
-	DECLARE @intParentId int,@strParentDbName NVARCHAR(50),  @strCompanyName NVARCHAR(50)
-	SELECT top 1 @intParentId= intMultiCompanyId , @strParentDbName = strDatabaseName FROM tblSMMultiCompany WHERE intMultiCompanyParentId IS NULL
-	
-	INSERT INTO @dbTable
-	--select * from [dbo].[fnSplitString](@arrDbName, @char)
-		SELECT strDatabaseName, intMultiCompanyId, strCompanyName FROM tblSMMultiCompany WHERE intMultiCompanyParentId = @intParentId
+IF @ysnOpen = 0   
+	RAISERROR('Selected Fiscal Period is closed', 16, 1);  
+ELSE
+BEGIN
+	DECLARE @parentDbName NVARCHAR(50)  
+	SELECT @parentDbName= DB_NAME()  
+	DECLARE @dbTable TABLE ( intSubsidiaryCompanyId int, strDatabase NVARCHAR(50), strCompany NVARCHAR(50) )  
+	DECLARE @intSubsidiaryCompanyId INT  
+	DECLARE @strDatabase NVARCHAR(50)  
+	DECLARE @strCompany NVARCHAR(50)  
+	DECLARE @intConsolidateLogId INT  
 
-	DECLARE @DbName NVARCHAR(50), @CompanyId INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM @dbTable)
-	BEGIN
-		SELECT TOP 1 @DbName= DbName,@CompanyId = Id,@strCompanyName = CompanyName FROM @dbTable
-		EXEC dbo.uspGLConsolidateSubsidiary @DbName ,@CompanyId, @dtmDate,@strCompanyName, @strParentDbName
-		DELETE FROM @dbTable WHERE Id = @CompanyId
-		--EXEC sp_executesql @strCommand
+	INSERT INTO @dbTable (intSubsidiaryCompanyId, strDatabase, strCompany)  
+	SELECT intSubsidiaryCompanyId, strDatabase, strCompany FROM tblGLSubsidiaryCompany  
+	WHERE intDatabaseId <> DB_ID()  
 		
+	WHILE EXISTS(SELECT TOP 1 1 FROM @dbTable)  
+	BEGIN  
+		SELECT TOP 1   
+		@intSubsidiaryCompanyId= intSubsidiaryCompanyId,   
+		@strDatabase =strDatabase,   
+		@strCompany = strCompany  
+		FROM @dbTable  
+		
+		DELETE FROM @dbTable WHERE intSubsidiaryCompanyId = @intSubsidiaryCompanyId  
+		
+		INSERT INTO tblGLConsolidateLog  
+		(  
+			ysnSuccess,  
+			dtmDateEntered ,  
+			dtmDate,  
+			intFiscalPeriodId ,  
+			intConcurrencyId ,  
+			intSubsidiaryCompanyId ,  
+			intEntityId,  
+			strPeriod  
+		)  
+		SELECT   
+		0,  
+		@dtmCurrentDate,  
+		@dtmDate,  
+		@intFiscalPeriodId ,  
+		1 ,  
+		@intSubsidiaryCompanyId,  
+		@intEntityId,  
+		@strPeriod  
+		
+		SELECT @intConsolidateLogId = SCOPE_IDENTITY()  
+		
+		BEGIN TRY  
+			EXEC dbo.uspGLConsolidateSubsidiary   
+			@intSubsidiaryCompanyId,  
+			@dtmDate,  
+			@parentDbName,  
+			@strDatabase,  
+			@intConsolidateLogId  
+		END TRY  
+		BEGIN CATCH  
+				UPDATE tblGLConsolidateLog  
+				SET strComment= ERROR_MESSAGE(),  
+				intConcurrencyId = intConcurrencyId + 1  
+				WHERE intConsolidateLogId = @intConsolidateLogId  
+		END CATCH  
 	END
-	IF @@TRANCOUNT > 0 
-		COMMIT TRAN
-
-	SELECT * FROM ##ConsolidateResult
-	--SET  IDENTITY_INSERT tblGLAccountCategory OFF
-END TRY
-BEGIN CATCH
-	IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION
-	Declare @ErrorNumber int
-	Declare @ErrorMessage varchar(2000)
-	Declare @ErrorSeverity int
-	Declare @ErrorState int
-	Select @ErrorNumber = Error_Number()
-           ,@ErrorMessage = 'Error updating consolidation table :' + Error_message()
-           ,@ErrorSeverity= Error_Severity()
-           ,@ErrorState = Error_State()
-    RaisError (@ErrorMessage, @ErrorSeverity, @ErrorState)
-	
-END CATCH
+END  

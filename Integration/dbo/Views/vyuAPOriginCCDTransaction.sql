@@ -17,7 +17,10 @@ EXEC ('
 														ELSE A.apivc_ivc_no END),
 					[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEMEntityLocation 
 													WHERE intEntityId = (SELECT intEntityId FROM tblAPVendor 
-														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt''))
+														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.apivc_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+					[dtmDate]				=	CASE WHEN ISDATE(A.apivc_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) ELSE 
+												(CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END) 
+											END
 				FROM apivcmst A
 					LEFT JOIN apcbkmst B
 						ON A.apivc_cbk_no = B.apcbk_no
@@ -50,7 +53,7 @@ EXEC ('
 		)
 
 
-		SELECT DISTINCT APOriginCCDTransaction.strVendorOrderNumber, Bill.intBillId FROM APOriginCCDTransaction 
+		SELECT DISTINCT APOriginCCDTransaction.strVendorOrderNumber, APOriginCCDTransaction.dtmDate, Bill.intBillId FROM APOriginCCDTransaction 
 		LEFT JOIN Bill ON Bill.strVendorOrderNumber = APOriginCCDTransaction.strVendorOrderNumber COLLATE Latin1_General_CI_AS
 		WHERE intBillId IS NULL
 		')

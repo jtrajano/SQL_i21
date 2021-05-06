@@ -198,7 +198,7 @@ BEGIN
 			WHERE IC.ysnInventoryCost = 1
 
 			UPDATE @OtherChargesDetail SET dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
-
+			
 			/*end >> other charges*/
 			
 			DELETE FROM @GLEntries
@@ -268,13 +268,15 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
 			)
 			EXEC dbo.uspICPostCosting 
 				@ItemsToPost	= @ItemsToPostCopy
 				,@strBatchId	= @strBatchId
 				,@strAccountToCounterInventory	= 'AP Clearing'
 				,@intEntityUserSecurityId	= @intUserId
-
+				
 			IF @ysnFromDS = 0
 			BEGIN
 				--discounts
@@ -313,7 +315,12 @@ BEGIN
 					,[dblForeignRate]
 					,[strRateType]
 				)
-				EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1,@intTransferStorageReferenceId = @intTransactionDetailId
+				EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] 
+					 @intTransferStorageId = @intTransferStorageId
+					,@intTransactionDetailId = @intTransactionDetailId
+					,@strBatchId = @strBatchId
+					,@dblCost = @dblOriginalCost
+					,@ysnPost = 1
 
 				UPDATE @GLEntries 
 				SET dblDebit		= dblCredit

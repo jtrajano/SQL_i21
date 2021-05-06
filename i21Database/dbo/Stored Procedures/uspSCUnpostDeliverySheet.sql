@@ -61,6 +61,26 @@ DECLARE @intDSContractAdjusmentItemUOMId INT
 
 BEGIN TRY
 
+		declare @dtmDeliverySheetDate datetime 
+		set @dtmDeliverySheetDate = null
+		select @dtmDeliverySheetDate = dtmDeliverySheetDate from tblSCDeliverySheet where intDeliverySheetId = @intDeliverySheetId
+				
+		if @dtmDeliverySheetDate is not null
+		begin
+			
+			if EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDateByModule(@dtmDeliverySheetDate, 'Inventory') = 0)
+				or EXISTS (SELECT 1 WHERE dbo.isOpenAccountingDateByModule(@dtmDeliverySheetDate, 'Accounts Payable') = 0)
+			
+			BEGIN   
+
+				-- Unable to find an open fiscal year period to match the transaction date.  
+				RAISERROR('Unable to find an open fiscal year period for (Inventory and Accounts Payable) to match the transaction date.', 11, 1);
+				RETURN;
+			END  
+
+		end
+
+
 		-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 		SET @currencyDecimal = 20
 		IF @strInOutFlag = 'I'

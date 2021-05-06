@@ -355,6 +355,7 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
@@ -500,6 +501,7 @@ BEGIN
 		,[intStorageScheduleTypeId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intStorageScheduleTypeId] ELSE NULL END)
 		,[intDestinationGradeId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationGradeId] ELSE NULL END)
 		,[intDestinationWeightId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationWeightId] ELSE NULL END)
+		,[intPriceFixationDetailId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intPriceFixationDetailId] ELSE NULL END)
         ,[strAddonDetailKey]                = (CASE WHEN @GroupingOption = 0 THEN IE.[strAddonDetailKey] ELSE NULL END)
         ,[ysnAddonParent]                   = (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAddonParent] ELSE NULL END)
 		,[ysnConvertToStockUOM]				= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnConvertToStockUOM] ELSE NULL END)
@@ -719,6 +721,7 @@ BEGIN
 			,[intStorageScheduleTypeId]
 			,[intDestinationGradeId]
 			,[intDestinationWeightId]
+			,[intPriceFixationDetailId]
             ,[strAddonDetailKey]
             ,[ysnAddonParent]
 			,[ysnConvertToStockUOM]
@@ -864,6 +867,7 @@ BEGIN
 			,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 			,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 			,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+			,[intPriceFixationDetailId]				= ITG.[intPriceFixationDetailId]
             ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
             ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 			,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
@@ -1332,6 +1336,7 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
@@ -1471,6 +1476,7 @@ BEGIN
 		,[intStorageScheduleTypeId]			= IE.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]			= IE.[intDestinationGradeId]
 		,[intDestinationWeightId]			= IE.[intDestinationWeightId]
+		,[intPriceFixationDetailId]			= IE.[intPriceFixationDetailId]
         ,[strAddonDetailKey]                = IE.[strAddonDetailKey]
         ,[ysnAddonParent]                   = IE.[ysnAddonParent]
 		,[ysnConvertToStockUOM]				= IE.[ysnConvertToStockUOM]

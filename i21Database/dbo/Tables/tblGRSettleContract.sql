@@ -11,12 +11,11 @@
 	CONSTRAINT [FK_tblGRSettleContract_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].[tblGRSettleStorage] ([intSettleStorageId]) ON DELETE CASCADE,	
 	CONSTRAINT [FK_tblGRSettleContract_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),	
 )
+
 GO
-CREATE NONCLUSTERED INDEX [IX_tblGRSettleContract_intSettleStorageId] ON [dbo].[tblGRSettleContract](
-	[intSettleStorageId] ASC
-);
-GO
-CREATE NONCLUSTERED INDEX [IX_tblGRSettleContract_intContractDetailId] ON [dbo].[tblGRSettleContract](
-	[intContractDetailId] ASC
-);
+
+CREATE NONCLUSTERED INDEX IX_tblGRSettleContract_intContractDetailId
+	ON tblGRSettleContract (intSettleStorageId ASC)
+	INCLUDE (intContractDetailId,dblUnits);
+
 GO

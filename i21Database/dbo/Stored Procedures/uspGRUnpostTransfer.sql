@@ -43,22 +43,22 @@ BEGIN
 	ON TSR.intTransferStorageSplitId = TSS.intTransferStorageSplitId
 	WHERE TSS.intTransferStorageId = @intTransferStorageId   AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
 
-	IF (SELECT SUM(A.dblOpenBalance)
-			FROM tblGRCustomerStorage A 
-			INNER JOIN #tmpTransferCustomerStorage B 
-			ON B.intToCustomerStorage = A.intCustomerStorageId) <>	
-		(SELECT  sum(B.dblUnits)
-			FROM tblGRCustomerStorage A 
-			OUTER APPLY (
-				SELECT dblUnitQty = SUM(dblUnitQty)
-					,intTransferStorageId
-				FROM tblGRTransferStorageReference
-				WHERE intTransferStorageId = @intTransferStorageId
-					AND intToCustomerStorageId = A.intCustomerStorageId
-				GROUP BY intToCustomerStorageId,intTransferStorageId
-			) F
-			WHERE F.intTransferStorageId = @intTransferStorageId AND F.dblUnitQty <> A.dblOpenBalance
-	)
+	--IF (SELECT SUM(A.dblOpenBalance)
+	--		FROM tblGRCustomerStorage A 
+	--		INNER JOIN #tmpTransferCustomerStorage B 
+	--		ON B.intToCustomerStorage = A.intCustomerStorageId) <>	
+	--	(SELECT  sum(B.dblOpenBalance)
+	--		FROM tblGRCustomerStorage B
+	--		OUTER APPLY (
+	--			SELECT dblUnitQty = SUM(dblUnitQty)
+	--				,intTransferStorageId
+	--			FROM tblGRTransferStorageReference
+	--			WHERE intTransferStorageId = @intTransferStorageId
+	--				AND intToCustomerStorageId = B.intCustomerStorageId
+	--			GROUP BY intToCustomerStorageId,intTransferStorageId
+	--		) F
+	--		WHERE F.intTransferStorageId = @intTransferStorageId AND F.dblUnitQty <> B.dblOpenBalance
+	--)
 	BEGIN
 		DECLARE @TicketNo VARCHAR(50)
 
@@ -84,10 +84,13 @@ BEGIN
 			FOR XML PATH('')
 		),1,1,'')
 		
-		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user. Reversal of transfer cannot proceed.'
+		IF @TicketNo IS NOT NULL
+		BEGIN
+			SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user. Reversal of transfer cannot proceed.'
 		
-		RAISERROR(@ErrMsg,16,1)
-		RETURN;
+			RAISERROR(@ErrMsg,16,1)
+			RETURN;
+		END
 	END
 
 	IF EXISTS(SELECT TOP 1 1 
@@ -390,10 +393,10 @@ BEGIN
 				)
 				EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage]
 					@intTransferStorageId = @intTransferStorageId
+					,@intTransactionDetailId = @intTransactionDetailId
 					,@strBatchId = @strBatchId
 					,@dblCost = 0
 					,@ysnPost = 1
-					,@intTransferStorageReferenceId = @intTransactionDetailId
 			END
 			/*UNPOST STORAGE*/						
 			

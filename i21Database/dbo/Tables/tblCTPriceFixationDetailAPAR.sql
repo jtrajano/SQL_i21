@@ -61,7 +61,7 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 			SET @ErrMsg = ERROR_MESSAGE();  
 			RAISERROR (@ErrMsg,18,1,'WITH NOWAIT');  
 
-		end catch
+		end catch  
 
 
     END

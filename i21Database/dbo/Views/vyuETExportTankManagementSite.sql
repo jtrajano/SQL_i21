@@ -21,7 +21,7 @@ SELECT
 	,ISNULL(A.strAcctStatus,'') AccountStatus
 	,ISNULL(A.dblTotalCapacity,0) TotalCapacity
 	,ROUND(ISNULL(A.dblTotalReserve,0),2) TotalReserve
-	,ISNULL(RTRIM(LTRIM(F.strItemNo)),'') Product
+	,CAST(ISNULL(RTRIM(LTRIM(F.strItemNo)),'') AS VARCHAR(15))  Product
 	,CASE ISNULL(A.ysnTaxable,0) WHEN 1 THEN 'Yes' ELSE 'No' END COLLATE Latin1_General_CI_AS SalesTax
 	,ISNULL(LEFT(G.strTaxGroup,2),'') COLLATE Latin1_General_CI_AS TaxStateID
 	,ISNULL(G.intTaxGroupId,'') TaxLocale1

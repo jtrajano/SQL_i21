@@ -6,8 +6,6 @@
 	@InventoryReceiptId AS INT OUTPUT,
 	@intBillId AS INT OUTPUT
 	,@ysnSkipValidation as BIT = NULL
-	,@intFutureMarketId AS INT = NULL
-	,@intFutureMonthId AS INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -375,8 +373,6 @@ OPEN intListCursor;
 					,@intLoopContractId
 					,@intUserId
 					,@ysnDPStorage
-					,@intFutureMarketId	= @intFutureMarketId
-					,@intFutureMonthId = @intFutureMonthId
 
 					DECLARE @intDPContractId INT;
 					DECLARE @dblDPContractUnits NUMERIC(12,4);
@@ -420,7 +416,7 @@ OPEN intListCursor;
 								,intStorageScheduleTypeId
 								,ysnAllowVoucher  
 							)
-							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId, @intFutureMarketId, @intFutureMonthId
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @intEntityId, @ysnIsStorage;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
@@ -856,6 +852,8 @@ END
 		BEGIN
 			EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
 		END
+
+		--EXEC uspSCModifyTicketDiscountItemInfo @intTicketId
 		
 		EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

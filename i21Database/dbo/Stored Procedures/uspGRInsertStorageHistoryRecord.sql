@@ -25,6 +25,7 @@ BEGIN TRY
 		,dblUnits
 		,dtmHistoryDate
 		,dblPaidAmount
+		,dblCost
 		,dblCurrencyRate
 		,intUserId
 		,ysnPost
@@ -52,6 +53,7 @@ BEGIN TRY
 		,dblUnits
 		,dtmHistoryDate
 		,dblPaidAmount
+		,dblCost
 		,dblCurrencyRate
 		,intUserId
 		,ysnPost
@@ -101,6 +103,7 @@ BEGIN TRY
 			[dblUnits],
 			[dtmHistoryDate],
 			[dblPaidAmount],
+			[dblCost],
 			[strPaidDescription],
 			[dblCurrencyRate],
 			[strType],
@@ -130,6 +133,7 @@ BEGIN TRY
 			[dblUnits]                      = SH.dblUnits,
 			[dtmHistoryDate]                = SH.dtmHistoryDate,
 			[dblPaidAmount]                 = SH.dblPaidAmount,
+			[dblCost]                 		= SH.dblCost,
 			[strPaidDescription]            = SH.strPaidDescription,
 			[dblCurrencyRate]               = SH.dblCurrencyRate,
 			[strType]                       = SH.strType,
