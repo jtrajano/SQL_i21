@@ -1,32 +1,81 @@
-CREATE PROCEDURE [dbo].[uspRestApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
+ALTER PROCEDURE [dbo].[uspRestApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
-
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
-
 -- Validations
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the location: ''' + sc.strLocation + '''', 'Location', 'Error', sc.strLocation
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the location: ''' + sc.strLocation + '''',
+	strField = 'Location', 
+	strLogLevel = 'Error', 
+	strValue = sc.strLocation,
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI_CSV',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblRestApiSchemaItemContract sc
 LEFT JOIN tblSMCompanyLocation loc ON loc.strLocationName = sc.strLocation OR loc.strLocationNumber = sc.strLocation
 WHERE loc.intCompanyLocationId IS NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the customer with Customer No.: ''' + sc.strCustomerNo + '''', 'Customer No', 'Error',  sc.strCustomerNo
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the customer with Customer No.: ''' + sc.strCustomerNo + '''',
+	strField = 'Customer No', 
+	strLogLevel = 'Error', 
+	strValue = sc.strCustomerNo,
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI_CSV',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblRestApiSchemaItemContract sc
 LEFT JOIN vyuARCustomer customer ON customer.strCustomerNumber = sc.strCustomerNo OR customer.strName = sc.strCustomerNo
 WHERE customer.intEntityId IS NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the salesperson: ''' + sc.strSalesperson + '''', 'Salesperson', 'Error',  sc.strSalesperson
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the salesperson: ''' + sc.strSalesperson + '''',
+	strField = 'Salesperson', 
+	strLogLevel = 'Error', 
+	strValue = sc.strSalesperson,
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI_CSV',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblRestApiSchemaItemContract sc
 LEFT JOIN vyuCTEntity sp ON sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson
 WHERE sp.intEntityId IS NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-SELECT 'Cannot find the currency: ''' + sc.strCurrency + '''', 'Currency', 'Error',  sc.strCurrency
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the currency: ''' + sc.strCurrency + '''',
+	strField = 'Currency', 
+	strLogLevel = 'Error', 
+	strValue = sc.strCurrency,
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI_CSV',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
 FROM tblRestApiSchemaItemContract sc
 LEFT JOIN tblSMCurrency currency ON currency.strCurrency = sc.strCurrency OR currency.strDescription = sc.strCurrency
 WHERE currency.intCurrencyID IS NULL
@@ -203,8 +252,21 @@ BEGIN
 
     SET @intItemContractStagingId = SCOPE_IDENTITY()
 
-    INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-    SELECT 'Cannot find the Item No.: ''' + sc.strItemNo + '''', 'Item No', 'Error',  sc.strItemNo
+    INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+		strError, strField, strLogLevel, strValue, intLineNumber,
+		guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+	SELECT
+		NEWID(),
+        strError = 'Cannot find the Item No.: ''' + ISNULL(sc.strItemNo, '') + '''',
+        strField = 'Item No', 
+        strLogLevel = 'Error', 
+        strValue = sc.strItemNo,
+        intLineNumber = NULL,
+        @guiApiUniqueId,
+        strIntegrationType = 'RESTfulAPI_CSV',
+        strTransactionType = 'Item Contracts',
+        strApiVersion = NULL,
+        guiSubscriptionId = NULL
     FROM tblRestApiSchemaItemContract sc
     LEFT JOIN tblICItem i ON i.strItemNo = sc.strItemNo
     WHERE sc.guiApiUniqueId = @guiApiUniqueId
@@ -226,8 +288,21 @@ BEGIN
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
         AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
 
-    INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-    SELECT 'In valid UOM.: ''' + sc.strUnitMeasure + '''', 'UOM', 'Error',  sc.strUnitMeasure
+    INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+		strError, strField, strLogLevel, strValue, intLineNumber,
+		guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+	SELECT
+		NEWID(),
+        strError = 'In valid UOM: ''' + ISNULL(sc.strUnitMeasure, '') + '''',
+        strField = 'UOM', 
+        strLogLevel = 'Error', 
+        strValue = sc.strUnitMeasure,
+        intLineNumber = NULL,
+        @guiApiUniqueId,
+        strIntegrationType = 'RESTfulAPI_CSV',
+        strTransactionType = 'Item Contracts',
+        strApiVersion = NULL,
+        guiSubscriptionId = NULL
     FROM tblRestApiSchemaItemContract sc
     LEFT JOIN tblICItem i ON i.strItemNo = sc.strItemNo
     LEFT JOIN tblICUnitMeasure uom ON uom.strUnitMeasure = sc.strUnitMeasure
@@ -251,8 +326,21 @@ BEGIN
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
         AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
 
-    INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-    SELECT 'Invalid tax group: ''' + sc.strTaxGroup + '''', 'Tax Group', 'Error',  sc.strTaxGroup
+    INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+		strError, strField, strLogLevel, strValue, intLineNumber,
+		guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+	SELECT
+		NEWID(),
+        strError = 'Invalid tax group: ''' + sc.strTaxGroup + '''',
+        strField = 'Tax Group', 
+        strLogLevel = 'Error', 
+        strValue = sc.strTaxGroup,
+        intLineNumber = NULL,
+        @guiApiUniqueId,
+        strIntegrationType = 'RESTfulAPI_CSV',
+        strTransactionType = 'Item Contracts',
+        strApiVersion = NULL,
+        guiSubscriptionId = NULL
     FROM tblRestApiSchemaItemContract sc
     LEFT JOIN tblSMTaxGroup taxGroup ON taxGroup.strTaxGroup = sc.strTaxGroup
     WHERE sc.guiApiUniqueId = @guiApiUniqueId
@@ -274,8 +362,21 @@ BEGIN
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
         AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
 
-    INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-    SELECT 'Invalid contract status: ''' + sc.strStatus + '''', 'Status', 'Error',  sc.strStatus
+    INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+		strError, strField, strLogLevel, strValue, intLineNumber,
+		guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+	SELECT
+		NEWID(),
+        strError = 'Invalid contract status: ''' + ISNULL(sc.strStatus, '') + '''',
+        strField = 'Status', 
+        strLogLevel = 'Error', 
+        strValue = sc.strStatus,
+        intLineNumber = NULL,
+        @guiApiUniqueId,
+        strIntegrationType = 'RESTfulAPI_CSV',
+        strTransactionType = 'Item Contracts',
+        strApiVersion = NULL,
+        guiSubscriptionId = NULL
     FROM tblRestApiSchemaItemContract sc
     LEFT JOIN tblCTContractStatus s ON s.strContractStatus = sc.strStatus
     WHERE sc.guiApiUniqueId = @guiApiUniqueId
@@ -370,9 +471,8 @@ END
 CLOSE cur;
 DEALLOCATE cur;
 
-INSERT INTO @Logs
 EXEC dbo.uspApiImportItemContractsFromStaging @guiApiUniqueId
 
 DELETE FROM tblRestApiSchemaItemContract WHERE guiApiUniqueId = @guiApiUniqueId
 
-SELECT * FROM @Logs
+SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId
