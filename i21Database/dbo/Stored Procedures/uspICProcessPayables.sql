@@ -109,10 +109,10 @@ SET ANSI_WARNINGS OFF
 			,GP.[dblQtyToBillUnitQty]				
 			,GP.[intQtyToBillUOMId]				
 			,[dblCost] = GP.dblUnitCost							
-			,GP.[dblCostUnitQty]					
+			,ISNULL(GP.[dblCostUnitQty], 1) 
 			,GP.[intCostUOMId]						
 			,GP.[dblNetWeight]						
-			,GP.[dblWeightUnitQty]					
+			,ISNULL(GP.[dblWeightUnitQty], 1) 
 			,GP.[intWeightUOMId]					
 			,GP.[intCostCurrencyId]
 			,GP.[dblTax]							

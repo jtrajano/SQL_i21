@@ -5,8 +5,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intSalespersonId			= SALESPERSON.intEntityId
 	 , intCurrencyId			= CUSTOMER.intCurrencyId
 	 , intTermsId				= CUSTOMER.intTermsId
-	 , intShipToId				= CUSTOMER.intShipToId
-	 , intBillToId				= CUSTOMER.intBillToId
+	 , intShipToId				= SHIPTOLOCATION.intEntityLocationId
+	 , intBillToId				= BILLTOLOCATION.intEntityLocationId
 	 , strName					= ENTITY.strName
 	 , strCustomerNumber		= CASE WHEN ISNULL(CUSTOMER.strCustomerNumber, '') = '' THEN ENTITY.strEntityNo ELSE CUSTOMER.strCustomerNumber END	 
 	 , strVatNumber				= CUSTOMER.strVatNumber

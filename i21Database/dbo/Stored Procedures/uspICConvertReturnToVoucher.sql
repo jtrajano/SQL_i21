@@ -185,10 +185,10 @@ BEGIN
 			,[dblQtyToBillUnitQty]				
 			,[intQtyToBillUOMId]				
 			,[dblCost] = dblUnitCost							
-			,[dblCostUnitQty]					
+			,ISNULL([dblCostUnitQty], 1) 
 			,[intCostUOMId]						
 			,[dblNetWeight]						
-			,[dblWeightUnitQty]					
+			,ISNULL([dblWeightUnitQty], 1) 
 			,[intWeightUOMId]					
 			,[intCostCurrencyId]
 			,[dblTax]							

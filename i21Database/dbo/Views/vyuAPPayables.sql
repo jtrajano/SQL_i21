@@ -238,7 +238,7 @@ WHERE A.ysnPosted = 1 AND B.ysnApplied = 1
 UNION ALL
 --APPLIED DM, (DM HAVE BEEN USED AS OFFSET IN PREPAID AND DEBIT MEMO TABS)
 SELECT
-	A.dtmDate
+	C.dtmDate --THIS SHOUD BE THE DATE OF THE VOUCHER THAT APPLIED THE DM
 	,A.intBillId
 	,A.strBillId
 	,B.dblAmountApplied * (CASE WHEN A.intTransactionType NOT IN (1,14) THEN -1 ELSE 1 END)
@@ -259,7 +259,7 @@ SELECT
 	-- ,'DM transactions have been paid using Prepaid And Debit Tab' AS [Info]
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intTransactionId
-INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
+INNER JOIN dbo.tblAPBill C ON B.intBillId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		

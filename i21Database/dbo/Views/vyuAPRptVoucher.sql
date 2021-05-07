@@ -7,8 +7,9 @@ SELECT
 											AND ContractDetail.intItemContractId > 0
 											AND DMDetails.intContractCostId IS NULL
 									THEN ItemContract.strContractItemName
-									ELSE ISNULL(Item.strDescription, CASE WHEN DMDetails.ysnStage = 0 THEN ISNULL(DMDetails.strMiscDescription, '') ELSE '' END)
+									ELSE ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, ''))
 								END
+	,strMiscQuality			=	ISNULL(I.strDescription, ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, '')))
 	,strItemNo				=	CASE WHEN Item.strType = 'Other Charge' THEN '' ELSE Item.strItemNo END --AP-3233
 	,strBillOfLading		=	Receipt.strBillOfLading
 	,strCountryOrigin		=	CASE WHEN ContractDetail.intItemId > 0 THEN 
@@ -57,6 +58,9 @@ SELECT
 	,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 	,strERPPONumber			=	ContractDetail.strERPPONumber
 	,strContainerNumber		=	LCointainer.strContainerNumber
+	,strContractNumberSeq	=	CASE WHEN ContractHeader.intContractHeaderId > 0 THEN ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq) ELSE '' END
+	,dblDetailTotalWithTax	=	FORMAT((DMDetails.dblTotal + DMDetails.dblTax), 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
+	,dblHeaderTotal			=	FORMAT(DM.dblTotal, 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
 FROM tblAPBill DM
 INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -82,4 +86,6 @@ LEFT JOIN tblICItem ContractItem ON ContractItem.intItemId = ContractDetail.intI
 LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = ContractItem.intOriginId
 LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
 LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
+LEFT JOIN tblICItem I ON I.intItemId = ContractDetail.intItemId
+CROSS JOIN tblSMCompanyPreference CP
 WHERE DM.intTransactionType = 1

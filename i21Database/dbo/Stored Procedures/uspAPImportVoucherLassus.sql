@@ -57,7 +57,11 @@ SELECT
 	dtmVoucherDate		=	CONVERT(DATETIME, SUBSTRING(A.strDateOrAccount,1,2) + '/'+SUBSTRING(A.strDateOrAccount,3,2) + '/'+SUBSTRING(A.strDateOrAccount,5,4)),
     dblQuantityToBill	=	1 * 
 							(CASE WHEN CAST(details.dblDebit AS DECIMAL(18,2)) - CAST(details.dblCredit AS DECIMAL(18,2))
-								< 0 THEN -1 ELSE 1 END),
+								--If amount is on 'Credit' AND voucher type, make it negative
+								< 0 THEN (CASE WHEN A.intVoucherType = 1 THEN -1 ELSE 1 END)
+								--If amount is on 'Debit' AND debit memo type, make it negative
+								ELSE (CASE WHEN A.intVoucherType = 5 THEN -1 ELSE 1 END) 
+								END),
 	strDetailInfo		=	details.strDetailInfo,
     dblCost				=	ABS(CAST(details.dblCredit AS DECIMAL(18,2)) - CAST(details.dblDebit AS DECIMAL(18,2))),
 	intAccountId		=	details.intAccountId,

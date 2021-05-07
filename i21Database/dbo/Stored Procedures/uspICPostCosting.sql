@@ -206,33 +206,37 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
-SELECT  intId
-		,intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate = dbo.fnRemoveTimeOnDate(dtmDate)
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		,strActualCostId
-		,intForexRateTypeId
-		,dblForexRate 
-		,dblUnitRetail
-		,intCategoryId
-		,dblAdjustCostValue
-		,dblAdjustRetailValue
-		,intSourceEntityId
-FROM	@StockToPost 
-
+SELECT  p.intId
+		,p.intItemId
+		,p.intItemLocationId
+		,p.intItemUOMId
+		,p.dtmDate
+		,p.dblQty
+		,p.dblUOMQty
+		,p.dblCost
+		,p.dblSalesPrice
+		,p.intCurrencyId
+		,p.intTransactionId
+		,p.intTransactionDetailId
+		,p.strTransactionId
+		,p.intTransactionTypeId
+		,p.intLotId
+		,p.intSubLocationId
+		,p.intStorageLocationId
+		,p.strActualCostId
+		,p.intForexRateTypeId
+		,p.dblForexRate 
+		,p.dblUnitRetail
+		,p.intCategoryId
+		,p.dblAdjustCostValue
+		,p.dblAdjustRetailValue
+		,p.intSourceEntityId
+FROM	@StockToPost p INNER JOIN tblICItem i 
+			ON p.intItemId = i.intItemId 
+WHERE
+		-- Allow only the items that are considered as "stockable" types. 
+		i.strType IN ('Inventory', 'Finished Good', 'Raw Material')
+		
 OPEN loopItems;
 
 -- Initial fetch attempt

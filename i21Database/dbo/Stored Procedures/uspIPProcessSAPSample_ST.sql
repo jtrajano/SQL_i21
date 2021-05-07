@@ -20,6 +20,7 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@strVendor NVARCHAR(50)
 		,@dblQuantity NUMERIC(18, 6)
+		,@dblOrgQuantity NUMERIC(18, 6)
 		,@strQuantityUOM NVARCHAR(50)
 		,@strSampleRefNo NVARCHAR(30)
 		,@strSampleNote NVARCHAR(512)
@@ -35,6 +36,8 @@ BEGIN TRY
 		,@dtmCreated DATETIME
 		,@strTransactionType NVARCHAR(50)
 	DECLARE @intContractDetailId INT
+		,@intContractHeaderId INT
+		,@intFromItemUOMId INT
 		,@intSampleTypeId INT
 		,@intItemId INT
 		,@intEntityId INT -- Vendor
@@ -116,6 +119,7 @@ BEGIN TRY
 				,@strItemNo = NULL
 				,@strVendor = NULL
 				,@dblQuantity = NULL
+				,@dblOrgQuantity = NULL
 				,@strQuantityUOM = NULL
 				,@strSampleRefNo = NULL
 				,@strSampleNote = NULL
@@ -132,6 +136,8 @@ BEGIN TRY
 				,@strTransactionType = NULL
 
 			SELECT @intContractDetailId = NULL
+				,@intContractHeaderId = NULL
+				,@intFromItemUOMId = NULL
 				,@intSampleTypeId = NULL
 				,@intItemId = NULL
 				,@intEntityId = NULL
@@ -187,6 +193,7 @@ BEGIN TRY
 				,@strItemNo = strItemNo
 				,@strVendor = strVendor
 				,@dblQuantity = dblQuantity
+				,@dblOrgQuantity = dblQuantity
 				,@strQuantityUOM = strQuantityUOM
 				,@strSampleRefNo = strSampleRefNo
 				,@strSampleNote = strSampleNote
@@ -281,6 +288,11 @@ BEGIN TRY
 							,1
 							)
 				END
+
+				SELECT @intFromItemUOMId = intItemUOMId
+				FROM tblICItemUOM WITH (NOLOCK)
+				WHERE intItemId = @intItemId
+					AND intUnitMeasureId = @intRepresentingUOMId
 			END
 
 			-- Offer / Approval(Pre-shipment) sample type
@@ -291,6 +303,7 @@ BEGIN TRY
 					)
 			BEGIN
 				SELECT @intContractDetailId = NULL
+					,@intContractHeaderId = NULL
 					,@intLocationId = NULL
 					,@intProductTypeId = 2 -- Item
 					,@intProductValueId = IM.intItemId
@@ -317,46 +330,83 @@ BEGIN TRY
 							)
 				END
 
-				SELECT @intContractDetailId = CD.intContractDetailId
-				FROM tblCTContractDetail CD WITH (NOLOCK)
-				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+				SELECT @intContractHeaderId = CH.intContractHeaderId
+				FROM tblCTContractHeader CH WITH (NOLOCK)
 				WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/' + @strERPItemNumber) + '%'
 
-				IF ISNULL(@intContractDetailId, 0) = 0
+				IF ISNULL(@intContractHeaderId, 0) = 0
 				BEGIN
+					SELECT @intContractHeaderId = CH.intContractHeaderId
+					FROM tblCTContractHeader CH WITH (NOLOCK)
+					WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/') + '%'
+				END
+
+				IF ISNULL(@intContractHeaderId, 0) > 0
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblCTContractDetail t WITH (NOLOCK)
+							WHERE t.intContractHeaderId = @intContractHeaderId
+								AND t.intItemId = @intItemId
+							)
+					BEGIN
+						RAISERROR (
+								'Item No is not matching with Contract Sequence Item. '
+								,16
+								,1
+								)
+					END
+
 					IF (
 							SELECT COUNT(1)
 							FROM tblCTContractDetail CD WITH (NOLOCK)
-							JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+							WHERE CD.intContractHeaderId = @intContractHeaderId
 								AND CD.intItemId = @intItemId
-								AND CD.dblQuantity = @dblQuantity
-								AND CD.intUnitMeasureId = @intRepresentingUOMId
-							WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/') + '%'
 							) > 1
 					BEGIN
-						RAISERROR (
-								'Multiple Contracts are matching. '
-								,16
-								,1
-								)
+						IF (
+								SELECT COUNT(1)
+								FROM tblCTContractDetail CD WITH (NOLOCK)
+								WHERE CD.intContractHeaderId = @intContractHeaderId
+									AND CD.intItemId = @intItemId
+									AND CD.dblNetWeight = @dblOrgQuantity
+								) > 1
+						BEGIN
+							RAISERROR (
+									'Multiple Contracts are matching. '
+									,16
+									,1
+									)
+						END
+						ELSE
+						BEGIN
+							SELECT @intContractDetailId = CD.intContractDetailId
+								,@intRepresentingUOMId = CD.intUnitMeasureId
+								,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intFromItemUOMId, CD.intItemUOMId, @dblOrgQuantity)
+							FROM tblCTContractDetail CD WITH (NOLOCK)
+							WHERE CD.intContractHeaderId = @intContractHeaderId
+								AND CD.intItemId = @intItemId
+								AND CD.dblNetWeight = @dblOrgQuantity
+						END
 					END
-
-					SELECT @intContractDetailId = CD.intContractDetailId
-					FROM tblCTContractDetail CD WITH (NOLOCK)
-					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
-						AND CD.intItemId = @intItemId
-						AND CD.dblQuantity = @dblQuantity
-						AND CD.intUnitMeasureId = @intRepresentingUOMId
-					WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/') + '%'
-
-					IF ISNULL(@intContractDetailId, 0) = 0
+					ELSE
 					BEGIN
-						RAISERROR (
-								'Invalid Contract. '
-								,16
-								,1
-								)
+						SELECT @intContractDetailId = CD.intContractDetailId
+							,@intRepresentingUOMId = CD.intUnitMeasureId
+							,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intFromItemUOMId, CD.intItemUOMId, @dblOrgQuantity)
+						FROM tblCTContractDetail CD WITH (NOLOCK)
+						WHERE CD.intContractHeaderId = @intContractHeaderId
+							AND CD.intItemId = @intItemId
 					END
+				END
+
+				IF ISNULL(@intContractDetailId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Contract. '
+							,16
+							,1
+							)
 				END
 
 				SELECT @intContractDetailId = CD.intContractDetailId

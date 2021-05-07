@@ -5004,6 +5004,7 @@
     <Build Include="dbo\Views\vyuARInvoicesForPayment.sql" />
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
+    <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
@@ -9224,6 +9225,31 @@
     <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
     <Build Include="dbo\Tables\tblICItemCategoryChangeLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
+    <Build Include="dbo\Tables\tblARRebuildLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuild.sql" />
+    <Build Include="dbo\Views\vyuARSearchRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
+    <Build Include="dbo\Functions\fnGRComputeMyUnitFromShrinkage.sql" />
+    <Build Include="dbo\Functions\fnGRWhatIsMyTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTranferChecking.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferFixDissection.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildStocksWithCategoryChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
+    <Build Include="dbo\Views\vyuGRTransferFlow.sql" />
+    <Build Include="dbo\Functions\fnGRCheckForSameTransfer.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
+    <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
+    <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
+    <Build Include="dbo\Views\vyuCTContractOptionView.sql" />
+    <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9487,18 +9513,22 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertVouchersInSettleStorageBillDetailTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
-    <Build Include="dbo\Views\vyuPATClearingItem.sql" />
-    <Build Include="dbo\Views\vyuPATClearingItemGL.sql" />
-    <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCheckPendingAttachmentFileIfPresent.sql" />
+    <Build Include="dbo\User Defined Types\PaymentSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
+    <Build Include="dbo\Views\vyuPATClearingItem.sql" />
+    <Build Include="dbo\Views\vyuPATClearingItemGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateDiscountGLEntriesTransfer_DPtoDP.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer_DPtoDP.sql" />
+    <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
+    <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
     <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
-    <Build Include="dbo\User Defined Types\PaymentSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
