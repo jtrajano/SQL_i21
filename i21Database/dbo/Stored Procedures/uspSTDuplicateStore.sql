@@ -305,6 +305,7 @@ BEGIN TRANSACTION
 		,strSAPPHIREPassword
 		,ysnSAPPHIRECaptureTransactionLog
 		,intSAPPHIRECaptureIntervalMinutes
+		,strSAPPHIRECheckoutPullTime
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
 		,ysnSAPPHIREAutoUpdatePassword
@@ -395,6 +396,7 @@ BEGIN TRANSACTION
 		,strSAPPHIREPassword
 		,ysnSAPPHIRECaptureTransactionLog
 		,intSAPPHIRECaptureIntervalMinutes
+		,strSAPPHIRECheckoutPullTime
 		,intSAPPHIRECheckoutPullTimePeriodId
 		,intSAPPHIRECheckoutPullTimeSetId
 		,ysnSAPPHIREAutoUpdatePassword

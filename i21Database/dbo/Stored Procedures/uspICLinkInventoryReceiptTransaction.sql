@@ -55,7 +55,11 @@ BEGIN
 
 	SELECT @strReceiptNumber = strReceiptNumber FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptId;
 
-	EXEC dbo.uspICDeleteTransactionLinks @intReceiptId, @strReceiptNumber
+	EXEC dbo.uspICDeleteTransactionLinks 
+		@intReceiptId, 
+		@strReceiptNumber, 
+		'Inventory Receipt',
+		'Inventory'
 
 	GOTO Link_Exit
 END

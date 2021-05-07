@@ -63,7 +63,7 @@ BEGIN TRY
 		 +'<LotNo>'+ IsNULL(strLotNo,'')  +'</LotNo>'  
 		 +'<StorageUnit>'+ IsNULL(strStorageUnit,'')  +'</StorageUnit>'  
 		 +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  
-		 +'<NewExpiryDate>'+ IsNULL(dtmNewExpiryDate,'')  +'</NewExpiryDate>'  
+		 +'<NewExpiryDate>'+ IsNULL(convert(VARCHAR, dtmNewExpiryDate,112),'')  +'</NewExpiryDate>'  
 		 +'<NewStatus>'+ IsNULL(strNewStatus,'')  +'</NewStatus>'  
 		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
 		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  

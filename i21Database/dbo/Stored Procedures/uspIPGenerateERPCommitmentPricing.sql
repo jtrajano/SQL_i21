@@ -287,15 +287,15 @@ BEGIN TRY
 
 		SELECT @strXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
 
-		SELECT @strXML += '<MarketArb>' + LTRIM(@dblMarketArbitrage) + '</MarketArb>'
+		SELECT @strXML += '<MarketArb>' + LTRIM(ISNULL(@dblMarketArbitrage, 0)) + '</MarketArb>'
 
-		SELECT @strXML += '<Arbitrage>' + LTRIM(@dblCalculatedArbitrage) + '</Arbitrage>'
+		SELECT @strXML += '<Arbitrage>' + LTRIM(ISNULL(@dblCalculatedArbitrage, 0)) + '</Arbitrage>'
 
-		SELECT @strXML += '<FuturesPrice>' + LTRIM(@dblCalculatedFutures) + '</FuturesPrice>'
+		SELECT @strXML += '<FuturesPrice>' + LTRIM(ISNULL(@dblCalculatedFutures, 0)) + '</FuturesPrice>'
 
-		SELECT @strXML += '<FXPrice>' + LTRIM(@dblCalculatedFXPrice) + '</FXPrice>'
+		SELECT @strXML += '<FXPrice>' + LTRIM(ISNULL(@dblCalculatedFXPrice, 0)) + '</FXPrice>'
 
-		SELECT @strXML += '<RefPrice>' + LTRIM(@dblCalculatedRefPrice) + '</RefPrice>'
+		SELECT @strXML += '<RefPrice>' + LTRIM(ISNULL(@dblCalculatedRefPrice, 0)) + '</RefPrice>'
 
 		SELECT @strXML += '<ERPRefNo>' + ISNULL(@strERPRefNo, '') + '</ERPRefNo>'
 
@@ -610,7 +610,7 @@ BEGIN TRY
 
 				SELECT @strItemXML += '<CommodityOrderNo>' + ISNULL(@strCommodityOrderNo, '') + '</CommodityOrderNo>'
 
-				SELECT @strItemXML += '<SequenceNumber>' + LTRIM(@intSequenceNo) + '</SequenceNumber>'
+				SELECT @strItemXML += '<SequenceNumber>' + LTRIM(ISNULL(@intSequenceNo, 0)) + '</SequenceNumber>'
 			END
 			ELSE IF @intLineType = 2
 			BEGIN
@@ -618,7 +618,7 @@ BEGIN TRY
 
 				SELECT @strItemXML += '<ERPRecipeNo>' + ISNULL(@strERPRecipeNo, '') + '</ERPRecipeNo>'
 
-				SELECT @strItemXML += '<TotalCostPR>' + LTRIM(@dblTotalCostPR) + '</TotalCostPR>'
+				SELECT @strItemXML += '<TotalCostPR>' + LTRIM(ISNULL(@dblTotalCostPR, 0)) + '</TotalCostPR>'
 			END
 
 			SELECT @strItemXML += '</line>'

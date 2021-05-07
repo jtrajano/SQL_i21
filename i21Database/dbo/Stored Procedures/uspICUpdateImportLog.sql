@@ -44,6 +44,7 @@ UPDATE l
 SET 
 	l.intRowsImported = ISNULL(l.intRowsImported, 0) + ISNULL(s.intRowsImported, 0)
 	,l.intRowsUpdated = ISNULL(l.intRowsUpdated, 0) + ISNULL(s.intRowsUpdated, 0)
+	,l.intRowsSkipped = ISNULL(l.intRowsSkipped, 0) + ISNULL(s.intRowsSkipped, 0)
 	,l.intTotalErrors = ISNULL(l.intTotalErrors, 0) + ISNULL(errors.intErrors, 0) 
 	,l.intTotalWarnings = ISNULL(l.intTotalWarnings, 0) + ISNULL(s.intTotalWarnings, 0) 
 FROM 

@@ -316,11 +316,11 @@ BEGIN TRY
 
 		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
-		SELECT @strXML += '<TotalDiscount>' + LTRIM(@dblDiscount) + '</TotalDiscount>'
+		SELECT @strXML += '<TotalDiscount>' + LTRIM(ISNULL(@dblDiscount, 0)) + '</TotalDiscount>'
 
-		SELECT @strXML += '<TotalTax>' + LTRIM(@dblTax) + '</TotalTax>'
+		SELECT @strXML += '<TotalTax>' + LTRIM(ISNULL(@dblTax, 0)) + '</TotalTax>'
 
-		SELECT @strXML += '<VoucherTotal>' + LTRIM(@dblTotal) + '</VoucherTotal>'
+		SELECT @strXML += '<VoucherTotal>' + LTRIM(ISNULL(@dblTotal, 0)) + '</VoucherTotal>'
 
 		SELECT @strXML += '<Remarks>' + ISNULL(@strRemarks, '') + '</Remarks>'
 
@@ -497,23 +497,23 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<ItemNo>' + ISNULL(@strItemNo, '') + '</ItemNo>'
 
-			SELECT @strItemXML += '<Quantity>' + LTRIM(@dblDetailQuantity) + '</Quantity>'
+			SELECT @strItemXML += '<Quantity>' + LTRIM(ISNULL(@dblDetailQuantity, 0)) + '</Quantity>'
 
 			SELECT @strItemXML += '<QuantityUOM>' + ISNULL(@strQuantityUOM, '') + '</QuantityUOM>'
 
 			SELECT @strItemXML += '<Currency>' + ISNULL(@strDetailCurrency, '') + '</Currency>'
 
-			SELECT @strItemXML += '<Cost>' + LTRIM(@dblDetailCost) + '</Cost>'
+			SELECT @strItemXML += '<Cost>' + LTRIM(ISNULL(@dblDetailCost, 0)) + '</Cost>'
 
 			SELECT @strItemXML += '<CostUOM>' + ISNULL(@strQuantityUOM, '') + '</CostUOM>'
 
-			SELECT @strItemXML += '<DiscountPerc>' + LTRIM(@dblDetailDiscount) + '</DiscountPerc>'
+			SELECT @strItemXML += '<DiscountPerc>' + LTRIM(ISNULL(@dblDetailDiscount, 0)) + '</DiscountPerc>'
 
-			SELECT @strItemXML += '<SubTotal>' + LTRIM(@dblDetailTotal) + '</SubTotal>'
+			SELECT @strItemXML += '<SubTotal>' + LTRIM(ISNULL(@dblDetailTotal, 0)) + '</SubTotal>'
 
-			SELECT @strItemXML += '<Tax>' + LTRIM(@dblDetailTax) + '</Tax>'
+			SELECT @strItemXML += '<Tax>' + LTRIM(ISNULL(@dblDetailTax, 0)) + '</Tax>'
 
-			SELECT @strItemXML += '<lineTotal>' + LTRIM(@dblDetailTotalwithTax) + '</lineTotal>'
+			SELECT @strItemXML += '<lineTotal>' + LTRIM(ISNULL(@dblDetailTotalwithTax, 0)) + '</lineTotal>'
 
 			SELECT @strItemXML += '</line>'
 
