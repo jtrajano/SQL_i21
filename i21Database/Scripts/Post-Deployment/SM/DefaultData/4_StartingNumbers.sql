@@ -732,7 +732,7 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 77
-			,[strTransactionType]	= N'Adjustment1099'
+			,[strTransactionType]	= N'1099 Adjustment'
 			,[strPrefix]			= N'ADJ1099-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Payable'
