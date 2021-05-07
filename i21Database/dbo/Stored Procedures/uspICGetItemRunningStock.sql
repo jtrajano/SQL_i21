@@ -111,7 +111,8 @@ FROM
 		ON Lot.intLotId = t.intLotId
 WHERE 
 	t.intItemId = @intItemId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	--AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND t.intInTransitSourceLocationId IS NULL
 	--AND ISNULL(t.ysnIsUnposted, 0) = 0
 	AND IL.intLocationId = @intLocationId
@@ -151,7 +152,8 @@ FROM
 WHERE 
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	--AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	--AND ISNULL(t.ysnIsUnposted, 0) = 0
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
@@ -170,7 +172,8 @@ FROM
 		ON Lot.intLotId = t.intLotId
 WHERE 
 	t.intItemId = @intItemId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	--AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND t.intInTransitSourceLocationId IS NULL
 	AND ISNULL(t.ysnIsUnposted, 0) = 0
 	AND IL.intLocationId = @intLocationId
@@ -373,20 +376,17 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 	) 
 		ON ItemUOM.intItemUOMId = t.intItemUOMId
-	OUTER APPLY (
-		SELECT SUM(ReservedQty.dblQty) dblQty
-		FROM (
-			SELECT sr.strTransactionId, sr.dblQty dblQty
-			FROM tblICStockReservation sr
-				LEFT JOIN tblICInventoryTransaction xt ON xt.intTransactionId = sr.intTransactionId
-			WHERE sr.intItemId = t.intItemId
-				AND sr.intItemLocationId = t.intItemLocationId
-				AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(t.intStorageLocationId, 0)
-				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(t.intSubLocationId, 0)
-				--AND ISNULL(sr.intLotId, 0) = ISNULL(t.intLotId, 0)
-				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @dtmDate) = 1
-			GROUP BY sr.strTransactionId, sr.dblQty
-		) AS ReservedQty
+	OUTER APPLY (		
+		SELECT 
+			dblQty = SUM(sr.dblQty) 
+		FROM 
+			tblICItemStockDetail sr
+		WHERE 
+			sr.intItemId = t.intItemId
+			AND sr.intItemLocationId = t.intItemLocationId
+			AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(t.intStorageLocationId, 0)
+			AND ISNULL(sr.intSubLocationId, 0) = ISNULL(t.intSubLocationId, 0)
+			AND sr.intItemStockTypeId = 9
 	) reserved
 	CROSS APPLY (
 		SELECT
