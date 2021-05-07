@@ -5009,6 +5009,7 @@
     <Build Include="dbo\Views\vyuARInvoicesForPayment.sql" />
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
+    <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
@@ -9198,7 +9199,6 @@
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
-    <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
@@ -9355,6 +9355,8 @@
     <Build Include="dbo\Tables\tblICImportLogFromStaging.sql" />
     <Build Include="dbo\Tables\tblICImportLogDetailFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateImportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
