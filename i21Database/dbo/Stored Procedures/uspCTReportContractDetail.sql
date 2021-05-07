@@ -6,7 +6,7 @@
 AS
 
 BEGIN TRY
-	DECLARE @ysnExternal BIT 
+	
 	DECLARE	@ErrMsg NVARCHAR(MAX)
 
 	
@@ -19,7 +19,8 @@ BEGIN TRY
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
 			@strAmendedColumns NVARCHAR(MAX),
-			@intContractDetailId INT
+			@intContractDetailId INT,
+			@ysnExternal BIT
 
 	DECLARE @Amend TABLE (intContractDetailId INT, strAmendedColumns NVARCHAR(MAX))
 
@@ -31,11 +32,6 @@ BEGIN TRY
 	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId=@intContractHeaderId AND intContractStatusId <> 3
 
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
-
-	SELECT @ysnExternal = (CASE WHEN intBookVsEntityId > 0 THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END)		
-	FROM tblCTContractHeader CH
-	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
-	WHERE CH.intContractHeaderId = @intContractHeaderId
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -63,7 +59,10 @@ BEGIN TRY
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 	
-
+	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
+	FROM tblCTContractHeader CH
+	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
+	WHERE CH.intContractHeaderId = @intContractHeaderId
 
 	SELECT	intContractHeaderId		= CD.intContractHeaderId,
 			intContractSeq			= CD.intContractSeq,
@@ -130,13 +129,13 @@ BEGIN TRY
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
-			strStraussPrice			= CASE WHEN CD.intPricingTypeId = 2 THEN 'Price to be fixed basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + 
+			strStraussPrice			= CASE WHEN CD.intPricingTypeId = 2 THEN 'PTBF basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + 
 												CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END +
-													BCU.strCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/'+ BUM.strUnitMeasure +' at '+ CD.strFixationBy + '''s option prior to first notice day of ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + ' or on presentation of documents,whichever is earlier.'
+													BCU.strCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/'+ BUM.strUnitMeasure +' at '+ CD.strFixationBy + '''s option prior to FND of ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + ' or on presentation of documents,whichever is earlier.'
 										   ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
 									   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		= CONVERT(VARCHAR, CD.dtmStartDate, 103) + ' - ' + CONVERT(VARCHAR, CD.dtmEndDate, 103),
+			strStraussShipment		= FORMAT( CD.dtmStartDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')) + ' - ' + FORMAT( CD.dtmEndDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')),
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
@@ -172,6 +171,7 @@ BEGIN TRY
 	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId
 		
 	CROSS JOIN tblCTCompanyPreference   CP
+	CROSS JOIN tblSMCompanyPreference SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractStatusId <> 3
 

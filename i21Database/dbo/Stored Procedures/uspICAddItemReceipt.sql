@@ -2088,13 +2088,13 @@ BEGIN
 		END 
 
 		-- Validate the receipt total. Do not allow negative receipt total. 
-		-- However, allow it if source type is a 'STORE'
+		-- However, allow it if the source type is a 'Store' or 'None'
 		IF EXISTS (
 			SELECT 1
 			FROM	tblICInventoryReceipt r
 			WHERE	r.intInventoryReceiptId = @inventoryReceiptId
 					AND dbo.fnICGetReceiptTotals(@inventoryReceiptId, 6) < 0
-					AND r.intSourceType <> @SourceType_STORE 
+					AND r.intSourceType NOT IN (@SourceType_NONE, @SourceType_STORE)
 		) 
 		BEGIN
 			-- Unable to create the Inventory Receipt. The receipt total is going to be negative.

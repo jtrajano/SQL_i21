@@ -63,12 +63,12 @@ DECLARE @EIN NVARCHAR(50)
 		AND strFormCode = @FormCodeParam
 
 	SELECT TOP 1 @LicenseNumber = strConfiguration 
-		FROM tblTFTaxReportTemplate 
+		FROM vyuTFGetReportingComponentConfiguration 
 		WHERE strFormCode = @FormCodeParam 
 		AND strTemplateItemId = 'SF-401-LicenseNumber'
 
 	SELECT TOP 1 @MotorCarrier = strConfiguration 
-		FROM tblTFTaxReportTemplate 
+		FROM vyuTFGetReportingComponentConfiguration 
 		WHERE strFormCode = @FormCodeParam 
 		AND strTemplateItemId = 'SF-401-MotorCarrier'
 
@@ -91,8 +91,9 @@ DECLARE @EIN NVARCHAR(50)
 
 	-- 1A
 	SELECT @ItemDescription = strDescription
-		FROM tblTFTaxReportTemplate 
+		FROM vyuTFGetReportingComponentConfiguration 
 		WHERE strTemplateItemId = 'SF-401-Summary-001'
+		AND strFormCode =  @FormCodeParam
 
 	SET @ColumnValueGas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '1A' AND strType = 'Special Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 	SET @ColumnValueGasKerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '1A' AND strType = 'Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
@@ -154,8 +155,9 @@ DECLARE @EIN NVARCHAR(50)
 
 	-- 2A
 	SELECT @ItemDescription = strDescription
-	 	FROM tblTFTaxReportTemplate 
+	 	FROM vyuTFGetReportingComponentConfiguration 
 	 	WHERE strTemplateItemId = 'SF-401-Summary-002'
+		AND strFormCode =  @FormCodeParam
 
 	SET @ColumnValueGas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '2A' AND strType = 'Special Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 	SET @ColumnValueGasKerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '2A' AND strType = 'Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
@@ -214,8 +216,9 @@ DECLARE @EIN NVARCHAR(50)
 	
 	-- 3A
 	SELECT @ItemDescription = strDescription
-	 	FROM tblTFTaxReportTemplate 
+	 	FROM vyuTFGetReportingComponentConfiguration 
 	 	WHERE strTemplateItemId = 'SF-401-Summary-003'
+		AND strFormCode =  @FormCodeParam 
 
 	SET @ColumnValueGas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '3A' AND strType = 'Special Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 	SET @ColumnValueGasKerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode = '3A' AND strType = 'Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
@@ -275,8 +278,9 @@ DECLARE @EIN NVARCHAR(50)
 	--SF-401-Summary-004
 
 	SELECT @ItemDescription = strDescription
-	 	FROM tblTFTaxReportTemplate 
+	 	FROM vyuTFGetReportingComponentConfiguration 
 	 	WHERE strTemplateItemId = 'SF-401-Summary-004'
+		AND strFormCode =  @FormCodeParam
 
 	SET @ColumnValueGas = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Special Fuel' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)
 	SET @ColumnValueGasKerosene = (SELECT ISNULL(SUM(dblQtyShipped), 0) FROM vyuTFGetTransaction WHERE strScheduleCode IN ('1A','2A','3A') AND strType = 'Gasoline' AND uniqTransactionGuid = @Guid AND strFormCode = @FormCodeParam)

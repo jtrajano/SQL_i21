@@ -91,17 +91,31 @@ LEFT JOIN (
     --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
     --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
     --IF NO VOUCHER JUST TAKE THE TAX
-    SELECT intInventoryReceiptItemId, SUM(dblTax) dblTax
+    SELECT SUM(dblTax) AS dblTax,
+		intInventoryReceiptItemId
     FROM (
-        SELECT RI.intInventoryReceiptItemId, RIT.dblTax, ROW_NUMBER() OVER(PARTITION BY RI.intInventoryReceiptItemId, RIT.dblTax ORDER BY RI.intInventoryReceiptItemId, RIT.dblTax) intDuplicate
-        FROM tblICInventoryReceiptItem RI
-        INNER JOIN tblICInventoryReceiptItemTax RIT ON RIT.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
-        LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
-        LEFT JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId AND BDT.intTaxCodeId = RIT.intTaxCodeId AND BDT.intTaxClassId = RIT.intTaxClassId
-        WHERE 1 = CASE WHEN BD.intBillDetailId IS NULL THEN 1 ELSE (CASE WHEN BDT.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END) END
+        SELECT DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
+            rctTax.intInventoryReceiptItemId,
+            --rctTax.intInventoryReceiptItemTaxId,
+            rctTax.dblTax AS dblTax
+        FROM tblICInventoryReceiptItemTax rctTax
+		INNER JOIN tblICInventoryReceiptItem rctItem ON rctItem.intInventoryReceiptItemId = rctTax.intInventoryReceiptItemId
+        LEFT JOIN tblAPBillDetail billDetail 
+            ON billDetail.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId
+            AND billDetail.intInventoryReceiptChargeId IS NULL
+        LEFT JOIN tblAPBillDetailTax billDetailTax
+                ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
+                AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
+                AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+        WHERE 
+            rctTax.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId 
+        AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
+                ELSE (
+                    CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
+                )
+                END
     ) tmpTax
-    WHERE intDuplicate = 1
-    GROUP BY intInventoryReceiptItemId
+	GROUP BY intInventoryReceiptItemId
 ) clearingTax
 	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 -- OUTER APPLY (
