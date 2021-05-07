@@ -907,7 +907,7 @@ INNER JOIN tblGRSettleStorage SS
  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY CS.dtmDeliveryDate, tmpAPOpenClearing.intEntityVendorId
   UNION ALL 
- --TRANSFER
+ --TRANSFER (original receipts that were transferred)
  SELECT  
  receipt.intEntityVendorId
   ,	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=30 
@@ -937,7 +937,46 @@ INNER JOIN tblGRSettleStorage SS
  ) tmpAPOpenClearing  
 INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt 
             ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
-  ON receiptItem.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId
+  ON receiptItem.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId AND receipt.strReceiptNumber = tmpAPOpenClearing.strTransactionNumber
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
+ GROUP BY receipt.dtmReceiptDate, receipt.intEntityVendorId
+   UNION ALL 
+ --TRANSFER (transfer storages that were transferred)
+ SELECT  
+ receipt.intEntityVendorId
+  ,	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=30 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
+		ELSE 0 
+	END AS dbl1, 
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>30 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=60
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl30, 
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>60 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=90 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl60,
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>90  
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) ELSE 0 
+	END AS dbl90
+ FROM    
+ (  
+  SELECT  
+   B.intInventoryReceiptItemId
+   ,SUM(B.dblReceiptQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
+   ,SUM(B.dblReceiptTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
+  FROM grainTransferClearing B  
+  GROUP BY   
+   intInventoryReceiptItemId
+ ) tmpAPOpenClearing  
+INNER JOIN (
+			tblGRTransferStorageReference transferreference
+			INNER JOIN tblGRCustomerStorage cs
+				ON cs.intCustomerStorageId = transferreference.intToCustomerStorageId
+			INNER JOIN tblGRTransferStorage transferstorage
+				ON transferstorage.intTransferStorageId = transferreference.intTransferStorageId
+			)
+	ON transferreference.intTransferStorageReferenceId = tmpAPOpenClearing.intInventoryReceiptItemId
  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY receipt.dtmReceiptDate, receipt.intEntityVendorId
  UNION ALL 
@@ -969,10 +1008,12 @@ INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryRecei
   GROUP BY   
    intInventoryReceiptChargeId
  ) tmpAPOpenClearing  
-INNER JOIN tblICInventoryReceiptCharge rc  
-  ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
- INNER JOIN tblICInventoryReceipt receipt  
-  ON receipt.intInventoryReceiptId = rc.intInventoryReceiptId  
+INNER JOIN tblGRTransferStorageReference tsr
+    ON tmpAPOpenClearing.intTransferStorageReferenceId = tsr.intTransferStorageReferenceId
+INNER JOIN tblGRCustomerStorage cs
+  ON tsr.intToCustomerStorageId = cs.intCustomerStorageId
+INNER JOIN tblGRTransferStorage ts
+  ON ts.intTransferStorageId = tsr.intTransferStorageId
  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY receipt.dtmReceiptDate, receipt.intEntityVendorId
  UNION ALL 
