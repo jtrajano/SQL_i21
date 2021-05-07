@@ -150,6 +150,9 @@ END
 		, strNotes NVARCHAR(100)
 		, ysnPreCrush BIT)
 	
+	-- Override @ysnIsCrushPosition. Always set to False to improve performance
+	SET @ysnIsCrushPosition = 0
+
 	IF @ysnIsCrushPosition = 1
 	BEGIN
 		INSERT INTO @List (
