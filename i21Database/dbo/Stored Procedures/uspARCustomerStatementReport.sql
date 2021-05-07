@@ -395,7 +395,7 @@ FROM (
 			 , strLocationName
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 	) CL ON I.intCompanyLocationId = CL.intCompanyLocationId
-	WHERE I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) <> 0
+	WHERE I.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
 ) MainQuery'
  
 IF ISNULL(@filter,'') != ''
