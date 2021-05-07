@@ -233,8 +233,8 @@ WHERE ysnPosted = 1
 
 --#CASHREFUNDS
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
-	 , strDocumentNumber 	= ID.strDocumentNumber
-	 , dblRefundTotal		= SUM(ID.dblTotal)
+		,strDocumentNumber = ID.strDocumentNumber
+		, dblRefundTotal		= SUM(ID.dblTotal)
 INTO #CASHREFUNDS
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
@@ -431,7 +431,7 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 AND  ISNULL(CR.dblRefundTotal, 0) = 0
 
@@ -451,7 +451,7 @@ SELECT I.intInvoiceId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
+	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 WHERE I.strTransactionType = 'Customer Prepayment'
 AND  ISNULL(CR.dblRefundTotal, 0) = 0 
 
