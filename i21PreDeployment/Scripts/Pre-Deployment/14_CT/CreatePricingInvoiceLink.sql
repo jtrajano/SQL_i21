@@ -44,7 +44,7 @@ end
 
 	IF OBJECT_ID(N'tblCTPriceFixationDetailAPAR') IS NOT NULL
 	begin
-		IF EXISTS
+		IF NOT EXISTS
 			(
 				SELECT
 					1
