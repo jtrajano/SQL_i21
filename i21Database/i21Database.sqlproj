@@ -9026,6 +9026,9 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMDS7762.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildInvoice.sql" />
+    <Build Include="dbo\Tables\tblAPClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPClearing.sql" />
+    <Build Include="dbo\User Defined Types\APClearing.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
     <Build Include="dbo\Views\vyuIPContractDetailERPInfoView.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicGA.sql" />
@@ -9113,6 +9116,8 @@
     <Build Include="dbo\Views\vyuIPAuditView.sql" />
     <Build Include="dbo\Tables\tblAGApplicator.sql" />
     <Build Include="dbo\Stored Procedures\uspAGUpdateWOShippedQty.sql" />
+    <Build Include="dbo\Functions\fnAPClearing.sql" />
+    <Build Include="dbo\Functions\fnAPGetDetailSourceTransaction.sql" />
     <Build Include="dbo\Tables\tblAGApplicatorLicense.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferDetailReportMPCT.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetailReportMPCT.sql" />
@@ -9153,6 +9158,7 @@
     <None Include="Scripts\Post-Deployment\AG\1_AGUOMDefaultData.sql" />
     <Build Include="dbo\Views\vyuMFGetExternalGroupItem.sql" />
     <Build Include="dbo\Views\vyuMFGetItemList.sql" />
+    <None Include="Scripts\Post-Deployment\AP\InsertClearingTransactionsToClearingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAdditionalBasisError.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateAdditionalBasis.sql" />
     <Build Include="dbo\Stored Procedures\uspMFImportAdditionalBasis.sql" />
@@ -9188,6 +9194,8 @@
     <Build Include="dbo\Tables\tblTFTransactionDynamicFL.sql" />
     <Build Include="dbo\Views\vyuICSearchBundleDetails.sql" />
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummaryOld.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingOld.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
