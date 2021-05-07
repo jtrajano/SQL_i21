@@ -616,7 +616,7 @@ INSERT INTO @TaxCategoryVA(
 SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Gasoline', intMasterId = 460001
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Alternative Fuels', intMasterId = 460002
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Undyed Diesel', intMasterId = 460003
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Avaition Jet Fuel', intMasterId = 460004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Aviation Jet Fuel', intMasterId = 460004
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Aviation Gasoline', intMasterId = 460005
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Dyed Diesel', intMasterId = 460006
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Kerosene', intMasterId = 460007

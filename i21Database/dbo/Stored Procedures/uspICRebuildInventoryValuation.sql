@@ -4888,6 +4888,7 @@ BEGIN
 						,@intItemId -- This is only used when rebuilding the stocks.
 						,@strTransactionId -- This is only used when rebuilding the stocks.
 						,@intCategoryId -- This is only used when rebuilding the stocks.
+						,@ysnRebuild = 1 
 
 					IF @intReturnValue <> 0 
 					BEGIN 
@@ -4965,6 +4966,7 @@ BEGIN
 						,@intItemId -- This is only used when rebuilding the stocks.
 						,@strTransactionId -- This is only used when rebuilding the stocks.
 						,@intCategoryId -- This is only used when rebuilding the stocks.
+						,@ysnRebuild = 1
 
 					IF @intReturnValue <> 0 
 					BEGIN 

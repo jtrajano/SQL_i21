@@ -3,7 +3,7 @@ AS
 
 WITH G AS(
 SELECT dtmDepreciationToDate, intAssetId
-FROM tblFAFixedAssetDepreciation
+FROM tblFAFixedAssetDepreciation 
 GROUP BY dtmDepreciationToDate,intAssetId
 )
 SELECT G.dtmDepreciationToDate, GAAP.dblDepreciationToDate , Tax.dblDepreciationToDate dblTaxDepreciationToDate, G.intAssetId,
@@ -21,7 +21,7 @@ ISNULL(GAAP.dblSalvageValue, Tax.dblSalvageValue)dblSalvageValue,
 ISNULL(GAAP.intConcurrencyId, Tax.intConcurrencyId)intConcurrencyId
 FROM G 
 outer apply(
-	SELECT
+	SELECT 
 	intAssetDepreciationId,
 	A.intDepreciationMethodId,
 	strDepreciationMethodId,
@@ -62,3 +62,6 @@ OUTER APPLY(
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 2
 )Tax
+
+
+

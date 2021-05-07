@@ -189,7 +189,7 @@ BEGIN TRY
 				END
 			) AS dblActualTotalCost
 		,intRecipeItemTypeId
-		,'' AS strItemProductType
+		,strProductType AS strItemProductType
 	FROM (
 		SELECT ROW_NUMBER() OVER (
 				ORDER BY IsNULL(VRI.intRecipeId,ARI.intVirtualRecipeId)
@@ -231,6 +231,7 @@ BEGIN TRY
 			,C.dblCost4 AS dblCost4
 			,C.dblCost5 AS dblCost5
 			,ISNULL(VRI.intRecipeItemTypeId, ARI.intRecipeItemTypeId) AS intRecipeItemTypeId
+			,CA.strDescription AS strProductType
 		FROM dbo.tblMFVirtualRecipeMap VA
 		JOIN dbo.tblMFRecipeItem VRI ON VRI.intRecipeId = VA.intVirtualRecipeId
 		JOIN dbo.tblICItem VI ON VI.intItemId = VRI.intItemId
@@ -242,6 +243,8 @@ BEGIN TRY
 		LEFT JOIN @MarketBasis AB ON AB.intItemId = AI.intItemId
 		LEFT JOIN @Cost C ON C.intRecipeId = VA.intVirtualRecipeId
 			AND C.intItemId = ISNULL(VI.intItemId, AI.intItemId)
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = ISNULL(VI.intCommodityId,AI.intCommodityId )
+			AND CA.intCommodityAttributeId = ISNULL(VI.intProductTypeId,AI.intProductTypeId)
 		) AS DT
 	ORDER BY ISNULL(DT.intVirtualRecipeId, DT.intActualRecipeId)
 		,DT.intRecipeItemTypeId DESC

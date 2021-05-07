@@ -1193,4 +1193,4 @@ BEGIN
 	END 
 	CLOSE loopAuditLog;
 	DEALLOCATE loopAuditLog;
-END 
+END

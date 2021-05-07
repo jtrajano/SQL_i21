@@ -454,6 +454,7 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -744,6 +745,7 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1017,6 +1019,7 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1312,6 +1315,7 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1642,6 +1646,7 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1931,6 +1936,7 @@ BEGIN
 			FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -2202,6 +2208,7 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -2490,6 +2497,7 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 

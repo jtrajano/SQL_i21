@@ -8,5 +8,6 @@
 	ysnThirdPartyMailSent				BIT DEFAULT 0,
 	dtmProcessedDate DateTime Constraint DF_tblIPThirdPartyContractFeed_dtmProcessedDate Default GetDATE(),				
 	strRowState				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strBook NVARCHAR(100),
 	CONSTRAINT [PK_tblIPThirdPartyContractFeed_intThirdPartyContractFeedId] PRIMARY KEY CLUSTERED (intThirdPartyContractFeedId ASC)				
 )					

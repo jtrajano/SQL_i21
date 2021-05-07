@@ -316,11 +316,63 @@ END
 -- 	UPDATE DIVIDENDS TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 
-	UPDATE tblPATDividends 
-	   SET ysnPosted = ISNULL(@ysnPosted,0)
-	  FROM tblPATDividends R
-	 WHERE R.intDividendId = @intDividendId
+UPDATE tblPATDividends 
+SET ysnPosted = ISNULL(@ysnPosted,0)
+FROM tblPATDividends R
+WHERE R.intDividendId = @intDividendId
 
+--------------------- AP CLEARING -----------------------
+DECLARE @APClearing APClearing
+
+INSERT INTO @APClearing (
+	  [intTransactionId]
+	, [strTransactionId]
+	, [intTransactionType]
+	, [strReferenceNumber]
+	, [dtmDate]
+	, [intEntityVendorId]
+	, [intLocationId]
+	, [intTransactionDetailId]
+	, [intAccountId]
+	, [intItemId]
+	, [intItemUOMId]
+	, [dblQuantity]
+	, [dblAmount]
+	, [intOffsetId]
+	, [strOffsetId]
+	, [intOffsetDetailId]
+	, [intOffsetDetailTaxId]
+	, [strCode]
+	, [strRemarks]
+)
+SELECT [intTransactionId]		= D.intDividendId
+	, [strTransactionId]		= D.strDividendNo
+	, [intTransactionType]		= 9
+	, [strReferenceNumber]		= D.strDividendNo
+	, [dtmDate]					= D.dtmProcessDate
+	, [intEntityVendorId]		= B.intEntityVendorId
+	, [intLocationId]			= B.intShipToId	
+	, [intTransactionDetailId]	= DC.intDividendCustomerId
+	, [intAccountId]			= B.intAccountId
+	, [intItemId]				= BD.intItemId
+	, [intItemUOMId]			= BD.intUnitOfMeasureId
+	, [dblQuantity]				= BD.dblQtyReceived
+	, [dblAmount]				= BD.dblTotal	
+	, [intOffsetId]				= B.intBillId
+	, [strOffsetId]				= B.strBillId
+	, [intOffsetDetailId]		= BD.intBillDetailId
+	, [intOffsetDetailTaxId]	= NULL	
+	, [strCode]					= 'PAT'
+	, [strRemarks]				= NULL
+FROM tblPATDividends D
+INNER JOIN tblPATDividendsCustomer DC ON D.intDividendId = DC.intDividendId
+INNER JOIN tblAPBill B ON DC.intBillId = B.intBillId
+INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+WHERE DC.intBillId IS NOT NULL
+  AND D.intDividendId = @intDividendId
+
+IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
+	EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

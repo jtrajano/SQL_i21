@@ -292,7 +292,8 @@ BEGIN
 				AND t.intSubLocationId = Lot.intSubLocationId
 				AND t.intStorageLocationId = Lot.intStorageLocationId
 				AND t.intLotId = Lot.intLotId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1		
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1		
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 		) LotTransactions 
 
 		-- last transaction
@@ -312,7 +313,8 @@ BEGIN
 				AND t.intLotId = Lot.intLotId
 				AND t.dblQty > 0 
 				AND ISNULL(t.ysnIsUnposted, 0) = 0 
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1	
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1	
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) LastLotTransaction 
@@ -328,7 +330,8 @@ BEGIN
 				AND ISNULL(sr.intLotId, 0) = ISNULL(Lot.intLotId, 0)
 				AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(Lot.intStorageLocationId, 0)
 				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Lot.intSubLocationId, 0)				
-				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
+				AND FLOOR(CAST(xt.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 		) reserved
 		LEFT JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = Item.intCategoryId
 		LEFT JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
@@ -476,7 +479,8 @@ BEGIN
 			WHERE
 				t.intItemId = i.intItemId
 				AND t.intItemLocationId = il.intItemLocationId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 				AND t.dblQty > 0 
 				AND t.ysnIsUnposted = 0 
 			ORDER BY
@@ -497,7 +501,8 @@ BEGIN
 			WHERE	
 					v.intItemId = i.intItemId
 					AND v.intItemLocationId = il.intItemLocationId
-					AND dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+					--AND dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+					AND FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			GROUP BY 
 					v.intItemId
 					,u.intItemUOMId
@@ -515,7 +520,8 @@ BEGIN
 			WHERE
 				t.intItemId = i.intItemId
 				AND t.intItemLocationId = il.intItemLocationId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 				AND t.dblQty <> 0 				
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
@@ -664,7 +670,8 @@ BEGIN
 					,intStorageLocationId
 					,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
 			FROM	vyuICGetItemStockSummary
-			WHERE	dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+			WHERE	--dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+					FLOOR(CAST(dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			GROUP BY 
 					intItemId,
 					intItemUOMId,
@@ -696,7 +703,8 @@ BEGIN
 					ON suom.intItemId = st.intItemId
 					AND suom.ysnStockUnit = 1
 			WHERE	
-				dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+				--dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+				FLOOR(CAST(dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			GROUP BY 
 				st.intItemId
 				,st.intItemLocationId
@@ -741,7 +749,8 @@ BEGIN
 				AND t.intItemLocationId = il.intItemLocationId 
 				AND t.dblQty > 0 
 				AND ISNULL(t.ysnIsUnposted, 0) = 0 
-				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) lastTransaction 
@@ -751,11 +760,12 @@ BEGIN
 			FROM 
 				vyuICGetItemStockSummary v
 			WHERE 
-				dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
-				AND v.intItemId = i.intItemId
+				--dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+				v.intItemId = i.intItemId
 				AND v.intItemLocationId = il.intItemLocationId
 				AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
 				AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL)    
+				AND FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 		) hasExistingStock 
 		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 

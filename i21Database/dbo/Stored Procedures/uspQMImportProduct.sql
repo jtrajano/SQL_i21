@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspQMImportProduct @intUserId INT = NULL
+	,@ysnCreateTemplateBySampleType BIT = 0
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -271,12 +272,24 @@ BEGIN TRY
 				END
 			END
 
-			IF NOT EXISTS (
-					SELECT 1
-					FROM tblQMProduct
-					WHERE intProductTypeId = @intProductTypeId
-						AND intProductValueId = @intProductValueId
-					)
+			IF @ysnCreateTemplateBySampleType = 1
+			BEGIN
+				SELECT @intProductId = P.intProductId
+				FROM tblQMProduct P
+				JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+				WHERE P.intProductTypeId = @intProductTypeId
+					AND P.intProductValueId = @intProductValueId
+					AND PC.intSampleTypeId = @intSampleTypeId
+			END
+			ELSE
+			BEGIN
+				SELECT @intProductId = intProductId
+				FROM tblQMProduct
+				WHERE intProductTypeId = @intProductTypeId
+					AND intProductValueId = @intProductValueId
+			END
+
+			IF ISNULL(@intProductId, 0) = 0
 			BEGIN
 				INSERT INTO tblQMProduct (
 					[intConcurrencyId]
@@ -435,10 +448,10 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT @intProductId = intProductId
-				FROM tblQMProduct
-				WHERE intProductTypeId = @intProductTypeId
-					AND intProductValueId = @intProductValueId
+				--SELECT @intProductId = intProductId
+				--FROM tblQMProduct
+				--WHERE intProductTypeId = @intProductTypeId
+				--	AND intProductValueId = @intProductValueId
 
 				IF NOT EXISTS (
 						SELECT 1

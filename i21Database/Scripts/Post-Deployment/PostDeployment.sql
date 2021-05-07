@@ -94,6 +94,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_DeleteDuplicateUserPreference.sql
 :r .\SM\2010_RemoveF9Shortcut.sql
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
+:r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 
 
 -- Canned Report
@@ -320,6 +321,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePaymentDetailOffset.sql
 :r .\AP\UpdatePayableFreightTerm.sql
 :r .\AP\NonEmployeeCompensationTo1099NEC.sql
+:r .\AP\InsertClearingTransactionsToClearingTable.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -347,6 +349,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\25_TransactionTypeRename.sql 
 :r .\IC\26_LockAvgCost.sql 
 :r .\IC\27_ActivateItemLocations.sql 
+:r .\IC\28_PopulateICAPClearing.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -362,6 +365,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
 :r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
+:r .\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql
 
 
 -- Patronage

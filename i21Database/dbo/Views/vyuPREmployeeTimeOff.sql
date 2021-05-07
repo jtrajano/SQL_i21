@@ -53,21 +53,38 @@ INNER JOIN(
 		SELECT E.intEntityId  
 			  ,dblHoursUsedYTD = SUM(
 										CASE WHEN (T.strAwardPeriod = 'Anniversary Date') THEN 
-													CASE WHEN (PCTimeOff.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  
-															AND PCTimeOff.dtmDateFrom > ISNULL(T.dtmLastAward, E.dtmDateHired)  
-															) THEN dblHours
-															ELSE 0
-													END
+													CASE WHEN TOR.intTypeTimeOffId IS NULL THEN
+														CASE WHEN (PCTimeOff.dtmDateFrom < DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)  
+																AND PCTimeOff.dtmDateFrom > ISNULL(T.dtmLastAward, E.dtmDateHired)  
+																) THEN dblHours
+																ELSE 0
+														END
+													ELSE
+													    CASE WHEN (YEAR(TOR.dtmDateTo) = YEAR(GETDATE())) THEN
+															dblRequest
+														ELSE
+															0
+														END
+													END 
 											ELSE 
-												CASE WHEN (PCTimeOff.intYear = YEAR(GETDATE())) THEN
-													dblHours
+												CASE WHEN TOR.intTypeTimeOffId IS NULL THEN
+													CASE WHEN (PCTimeOff.intYear = YEAR(GETDATE())) THEN
+														dblHours
+													ELSE
+														0
+													END
 												ELSE
-													0
+													CASE WHEN (YEAR(TOR.dtmDateTo) = YEAR(GETDATE())) THEN
+														dblRequest
+													ELSE
+														0
+													END
 												END
 										END
-										)
+										
+                                     )
  
-			,intTypeTimeOffId
+			,T.intTypeTimeOffId
 			FROM tblPREmployee E INNER JOIN tblPREmployeeTimeOff T  ON E.intEntityId = T.intEntityEmployeeId  
 
 			LEFT JOIN 
@@ -90,10 +107,12 @@ INNER JOIN(
 				)PCTimeOff
 				ON PCTimeOff.intEntityEmployeeId = E.intEntityId 
 				AND PCTimeOff.intTypeTimeoffId = T.intTypeTimeOffId
-   
+            
+			LEFT JOIN (SELECT dblRequest ,intTypeTimeOffId, intEntityEmployeeId, dtmDateTo,dtmDateFrom FROM tblPRTimeOffRequest WHERE ysnPostedToCalendar = 1 ) TOR ON TOR.intTypeTimeOffId = T.intTypeTimeOffId  AND TOR.intEntityEmployeeId = T.intEntityEmployeeId
+			 
    			GROUP BY 
 			E.intEntityId
-			,intTypeTimeOffId   
+			,T.intTypeTimeOffId   
 ) TOYTD 
 	ON ETO.intEntityEmployeeId = TOYTD.intEntityId 
-		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId 		
+		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId

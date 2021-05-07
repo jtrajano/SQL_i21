@@ -36,7 +36,9 @@ USING
 		intVendorType			=	0,
 		strVendorType			=	'Both',
 		intEntityLocationId		=	vndLocStg.intEntityLocationId,
-		strLocationName			=	vndLocStg.strLocationName
+		strLocationName			=	vndLocStg.strLocationName,
+		dtmCreated				=	vndStg.dtmCreated,
+		dtmLastModified			=	vndStg.dtmLastModified
 	FROM tblEMEntityStaging entStg
 	INNER JOIN tblAPVendorStaging vndStg
 		ON entStg.intEntityId = vndStg.intEntityId
@@ -59,7 +61,9 @@ INSERT
 	intVendorType,
 	strVendorType,
 	intEntityLocationId,
-	strLocationName
+	strLocationName,
+	dtmCreated,
+	dtmLastModified
 )
 VALUES
 (
@@ -71,7 +75,9 @@ VALUES
 	intVendorType,
 	strVendorType,
 	intEntityLocationId,
-	strLocationName
+	strLocationName,
+	dtmCreated,
+	dtmLastModified
 )
 OUTPUT
 	inserted.intVendorStagingId,

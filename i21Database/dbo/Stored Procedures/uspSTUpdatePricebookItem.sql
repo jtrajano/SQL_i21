@@ -80,7 +80,6 @@ BEGIN
 
 			SET @ysnResultSuccess = CAST(1 AS BIT)
 			SET @strResultMessage = ''
-
 		
 
 			--PRINT 'Commented'
@@ -332,23 +331,31 @@ BEGIN
 						-- [END] - PREVIEW IF DEBUG (ITEM)
 						-- ===============================================
 
+						IF EXISTS (SELECT TOP 1 intItemId FROM tblICItemUOM WHERE intItemId != @intItemId AND (strUpcCode = @strUpcCode OR strLongUPCCode = @strLongUpcCode))
+							BEGIN
+							SET @ysnResultSuccess = 0
+							SET @strResultMessage = 'Error updating Item: Short UPC Code or UPC Code already existing on other item'  
 
-						--EXEC [dbo].[uspICUpdateItemForCStore]
-						--	-- filter params	
-						--	@strDescription				= NULL 
-						--	,@dblRetailPriceFrom		= NULL  
-						--	,@dblRetailPriceTo			= NULL 
-						--	,@intItemId					= @intItemId 
-						--	,@intItemUOMId				= @intItemUOMId 
-						--	-- update params
-						--	,@intCategoryId				= @intCategoryId
-						--	,@strCountCode				= NULL
-						--	,@strItemDescription		= @strDescription 	
-						--	,@strItemNo					= @strItemNo 
-						--	,@strShortName				= @strShortName 
-						--	,@strUpcCode				= @strUpcCode 
-						--	,@strLongUpcCode			= @strLongUpcCode 
-						--	,@intEntityUserSecurityId	= @intEntityId
+							GOTO ExitWithRollback
+							END
+						ELSE 
+							EXEC [dbo].[uspICUpdateItemForCStore]
+								-- filter params	
+								@strDescription				= NULL 
+								,@dblRetailPriceFrom		= NULL  
+								,@dblRetailPriceTo			= NULL 
+								,@intItemId					= @intItemId 
+								,@intItemUOMId				= @intItemUOMId 
+								-- update params
+								,@intCategoryId				= @intCategoryId
+								,@strCountCode				= NULL
+								,@strItemDescription		= @strDescription 	
+								,@strItemNo					= @strItemNo 
+								,@strShortName				= @strShortName 
+								,@strUpcCode				= @strUpcCode 
+								,@strLongUpcCode			= @strLongUpcCode 
+								,@intEntityUserSecurityId	= @intEntityId
+							
 
 						--OLD
 						-- EXEC [dbo].[uspICUpdateItemForCStore]
@@ -525,7 +532,6 @@ BEGIN
 						-- ===============================================
 						-- [END] - PREVIEW IF DEBUG (ITEM LOCATION)
 						-- ===============================================
-
 						SET @intFamilyId   =  ISNULL(@intFamilyId, 0)
 						SET @intClassId	   =  ISNULL(@intClassId, 0)
 						SET @intVendorId   =  ISNULL(@intVendorId, 0)
@@ -930,8 +936,7 @@ BEGIN
 										, @intLoopCompanyLocationId		= temp.intCompanyLocationId
 									FROM @tblItemCostPricing temp
 									
-
-							
+														
 									-- ITEM PRICING
 									
 										-- ===============================================
@@ -1185,7 +1190,7 @@ BEGIN
 																,@intVendorId				= @intVendorId
 																,@intEntityUserSecurityId	= @intEntityId
 																,@intItemLocationId			= @intNewItemLocationId OUTPUT 
-										
+																
 																-- =================================================================================
 																-- [START] - ADD ITEM UOM DEBUG
 																-- =================================================================================
@@ -1747,7 +1752,7 @@ BEGIN
 													@strUpcCode					= NULL 
 													, @strDescription			= NULL 
 													, @intItemId				= @intLoopRetailItemId 
-													, @intItemPricingId			= @intPricingId 
+													, @intItemPricingId			= @intRetailPricingId 
 													, @intEffectiveItemPriceId	= @intLoopRetailEffectiveItemCostId 
 
 													-- update params

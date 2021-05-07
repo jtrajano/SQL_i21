@@ -64,7 +64,6 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPLotSplit @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
-
 END TRY
 
 BEGIN CATCH

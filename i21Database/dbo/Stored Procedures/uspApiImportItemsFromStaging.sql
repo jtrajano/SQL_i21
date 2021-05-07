@@ -544,7 +544,7 @@ WHEN NOT MATCHED THEN
 /* LOGS */
 
 -- Validate Incompatible inventory types of items vs. categories
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Invalid category type ''' + ISNULL(c.strInventoryType, '') + ''' for item ''' + ISNULL(s.strItemNo, '') + '''', 'Category', 'Error', ISNULL(c.strCategoryCode, '')

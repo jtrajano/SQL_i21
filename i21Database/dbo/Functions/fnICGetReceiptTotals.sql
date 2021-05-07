@@ -16,10 +16,10 @@ BEGIN
 			,@totalChargesTax NUMERIC(38,6) = 0
 			
 	--Get the totals for the receipt
-	SELECT @subTotal = SUM(ReceiptItem.dblLineTotal)
-		   ,@totalTax = SUM(ReceiptItem.dblTax)
-		   ,@totalGross = SUM(ReceiptItem.dblGross)
-		   ,@totalNet = SUM(ReceiptItem.dblNet)
+	SELECT @subTotal = SUM(ISNULL(ReceiptItem.dblLineTotal, 0))
+		   ,@totalTax = SUM(ISNULL(ReceiptItem.dblTax, 0))
+		   ,@totalGross = SUM(ISNULL(ReceiptItem.dblGross, 0))
+		   ,@totalNet = SUM(ISNULL(ReceiptItem.dblNet, 0))
 	FROM	tblICInventoryReceiptItem ReceiptItem
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 	

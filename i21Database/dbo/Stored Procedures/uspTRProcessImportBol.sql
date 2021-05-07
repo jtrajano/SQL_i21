@@ -24,7 +24,7 @@ BEGIN
 			LD.intDriverId, 
 			LD.intTrailerId, 
 			LD.dtmPullDate
-		FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intImportLoadId = @intImportLoadId
+		FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intImportLoadId = @intImportLoadId AND ISNULL(ysnProcess, 0) = 0
 
 		DECLARE @intTruckId INT = NULL,
 			@intCarrierId INT = NULL,
@@ -571,6 +571,16 @@ BEGIN
 			END
 			CLOSE @CursorDistributionTran
 			DEALLOCATE @CursorDistributionTran
+
+			UPDATE tblTRImportLoadDetail SET ysnProcess = 1
+			WHERE intImportLoadId = @intImportLoadId 
+			AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)
+			AND intCarrierId = @intCarrierId 
+			AND intDriverId = @intDriverId 
+			AND ISNULL(intTrailerId, 0) =  ISNULL(@intTrailerId, 0) 
+			AND dtmPullDate = @dtmPullDate
+			AND ysnValid = 1
+			AND strMessage = @strTransactionNumber
 
 			FETCH NEXT FROM @CursorHeaderTran INTO @intTruckId, @intCarrierId, @intDriverId, @intTrailerId, @dtmPullDate
 		END

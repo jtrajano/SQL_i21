@@ -23,7 +23,7 @@ SELECT CPR.intCommitmentPricingRecipeId
 		END AS strActualInputItemNo
 	,VRI.intItemId AS intVirtualItemId
 	,ARI.intItemId AS intActualItemId
-	,'' AS strItemProductType
+	,CA.strDescription AS strItemProductType
 FROM tblMFCommitmentPricingRecipe CPR
 LEFT JOIN tblMFRecipe VR ON VR.intRecipeId = CPR.intVirtualRecipeId
 LEFT JOIN tblMFRecipe AR ON AR.intRecipeId = CPR.intActualRecipeId
@@ -33,3 +33,5 @@ LEFT JOIN tblMFRecipeItem VRI ON VRI.intRecipeItemId = CPR.intVirtualRecipeItemI
 LEFT JOIN tblMFRecipeItem ARI ON ARI.intRecipeItemId = CPR.intActualRecipeItemId
 LEFT JOIN tblICItem VI ON VI.intItemId = VRI.intItemId
 LEFT JOIN tblICItem AI ON AI.intItemId = ARI.intItemId
+LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = ISNULL(VI.intCommodityId,AI.intCommodityId )
+AND CA.intCommodityAttributeId = ISNULL(VI.intProductTypeId,AI.intProductTypeId)

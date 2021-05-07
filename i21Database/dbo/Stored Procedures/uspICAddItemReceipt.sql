@@ -2094,7 +2094,7 @@ BEGIN
 			FROM	tblICInventoryReceipt r
 			WHERE	r.intInventoryReceiptId = @inventoryReceiptId
 					AND dbo.fnICGetReceiptTotals(@inventoryReceiptId, 6) < 0
-					AND r.intSourceType NOT IN (@SourceType_NONE, @SourceType_STORE)
+					AND r.intSourceType NOT IN (@SourceType_NONE, @SourceType_STORE) 
 		) 
 		BEGIN
 			-- Unable to create the Inventory Receipt. The receipt total is going to be negative.
@@ -2113,6 +2113,13 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		
+		-- Link Inventory Receipt Transaction
+		BEGIN
+			EXEC dbo.uspICLinkInventoryReceiptTransaction
+				@inventoryReceiptId,
+				true
+		END
+
 		-- Create an Audit Log
 		BEGIN 
 			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'

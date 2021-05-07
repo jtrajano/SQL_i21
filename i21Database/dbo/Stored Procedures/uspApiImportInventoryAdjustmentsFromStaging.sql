@@ -21,7 +21,7 @@ DECLARE @strTempAdjustmentNo NVARCHAR(200)
 DECLARE @strIntegrationDocNo NVARCHAR(200)
 DECLARE @intAdjustmentId INT
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT, intLinePosition INT, strLogLevel NVARCHAR(50))
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 -- Log Invalid company locations
 INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)

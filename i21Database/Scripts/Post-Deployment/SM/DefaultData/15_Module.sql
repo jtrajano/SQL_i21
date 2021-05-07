@@ -1259,7 +1259,8 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		121,
 		   [strPrefix]						=		N'SCH'
-		   IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Agronomy')
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Agronomy')
 	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
 	SELECT [intModuleId]					=		122,
 		   [strApplicationName]				=		N'i21',
@@ -1268,6 +1269,22 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		122,
 		   [strPrefix]						=		N'AG'
+	
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing'
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'IDP')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
+	SELECT [intModuleId]					=		125,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'IDP',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		123,
+		   [strPrefix]						=		N'IDP'
 	
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 

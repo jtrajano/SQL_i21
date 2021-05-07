@@ -239,6 +239,16 @@ BEGIN TRANSACTION
 	FROM tblCFTransactionNote
 	WHERE ISNULL(intTransactionId,0) = ISNULL(@TransactionId,0)
 
+
+	EXEC dbo.uspSMAuditLog 
+	 @keyValue			= @newId							-- Primary Key Value of the Invoice. 
+	,@screenName		= 'CardFueling.view.Transaction'	-- Screen Namespace
+	,@entityId			= @UserId									-- Entity Id.
+	,@actionType		= 'Add'							    -- Action Type
+	,@changeDescription	= @strAuditLogTilte							-- Description
+	,@fromValue			= ''								-- Previous Value
+	,@toValue			= ''	
+	
 	DECLARE @processName nvarchar(max) = ('Duplicated from ' + @strTransactionId)
 
 	EXEC [uspCFTransactionAuditLog] 

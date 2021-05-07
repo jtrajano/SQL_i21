@@ -348,7 +348,7 @@ BEGIN TRY
 		INNER JOIN tblICItem I 
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemUOM UOM 
-			ON I.intItemId = UOM.intItemId
+			ON I.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
 	END
 
 
@@ -646,12 +646,15 @@ BEGIN TRY
 	----------------------------- START Query Preview -------------------------------------
 	---------------------------------------------------------------------------------------
 	-- Query Preview display
-	SELECT  intItemId
+	SELECT  pr.intItemId
+			  , ci.strItemNo
 			  , strItemDescription
 			  , strChangeDescription
 			  , strPreviewOldData AS strOldData
 			  , strPreviewNewData AS strNewData
-	FROM @tblPreview
+	FROM @tblPreview pr
+		JOIN tblICItem ci
+			ON pr.intItemId = ci.intItemId
 	WHERE ysnPreview = 1
 	ORDER BY strItemDescription, strChangeDescription ASC
    

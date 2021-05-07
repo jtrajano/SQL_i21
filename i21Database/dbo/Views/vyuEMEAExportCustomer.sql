@@ -32,6 +32,8 @@ SELECT [intId] 				= e.intEntityId
 	 , [CreditLimit]		= c.dblCreditLimit
 	 , [ShipToLatitude]		= e.dblShipToLatitude
 	 , [ShipToLongitude]	= e.dblShipToLongitude
+	 , [DateModified]		= c.dtmDateModified
+	 , [DateCreated]		= c.dtmDateCreated
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId

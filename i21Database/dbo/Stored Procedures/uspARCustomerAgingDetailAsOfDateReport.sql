@@ -247,20 +247,22 @@ WHERE I.strTransactionType = 'Cash Refund'
 GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
 --#CASHRETURNS
-SELECT intInvoiceId
-	 , intOriginalInvoiceId
-	 , dblInvoiceTotal
-	 , strInvoiceOriginId
-	 , strInvoiceNumber
-	 , dtmPostDate
+SELECT I.intInvoiceId
+	 , I.intOriginalInvoiceId
+	 , I.dblInvoiceTotal
+	 , I.strInvoiceOriginId
+	 , I.strInvoiceNumber
+	 , I.dtmPostDate
 INTO #CASHRETURNS	 
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-WHERE ysnPosted = 1
-  AND ysnRefundProcessed = 1
-  AND strTransactionType = 'Credit Memo'
-  AND intOriginalInvoiceId IS NOT NULL
-  AND ISNULL(strInvoiceOriginId, '') <> ''
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+LEFT JOIN tblARInvoice RI ON I.intOriginalInvoiceId = RI.intInvoiceId AND I.strInvoiceOriginId = RI.strInvoiceNumber
+WHERE I.ysnPosted = 1
+  AND I.ysnRefundProcessed = 1
+  AND I.strTransactionType = 'Credit Memo'
+  AND I.intOriginalInvoiceId IS NOT NULL
+  AND ISNULL(I.strInvoiceOriginId, '') <> ''
+  AND ISNULL(RI.ysnReturned, 0) = 0
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
@@ -449,7 +451,7 @@ SELECT I.intInvoiceId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 WHERE I.strTransactionType = 'Customer Prepayment'
 AND  ISNULL(CR.dblRefundTotal, 0) = 0 
 

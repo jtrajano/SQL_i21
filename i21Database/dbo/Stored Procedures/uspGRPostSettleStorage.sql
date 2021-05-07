@@ -2213,8 +2213,8 @@ BEGIN TRY
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																WHEN a.intPricingTypeId in (1, 6) AND @ysnFromPriceBasisContract = 1 
 																	THEN a.dblUnits -- @dblTotalVoucheredQuantity
-																WHEN @ysnFromPriceBasisContract = 1 AND (intItemType = 2 OR intItemType = 3)
-																	THEN ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits, 15)
+																WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
+																	THEN a.dblUnits
 																ELSE 
 																	CASE 
 																		WHEN @ysnFromPriceBasisContract = 1 AND  availableQtyForVoucher.intContractDetailId IS NULL  AND c.strType = 'Inventory' 
@@ -2924,6 +2924,55 @@ BEGIN TRY
 				,intBillId = @createdVouchersId
 			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
 		--END
+
+	--8 Book AP clearing for Customer Owned storage settlement
+	IF @strOwnedPhysicalStock ='Customer' AND @ysnFromPriceBasisContract = 0
+	BEGIN		
+		DECLARE @APClearing AS APClearing;
+		DELETE FROM @APClearing;
+		INSERT INTO @APClearing
+		(
+			[intTransactionId],
+			[strTransactionId],
+			[intTransactionType],
+			[strReferenceNumber],
+			[dtmDate],
+			[intEntityVendorId],
+			[intLocationId],
+			--DETAIL
+			[intTransactionDetailId],
+			[intAccountId],
+			[intItemId],
+			[intItemUOMId],
+			[dblQuantity],
+			[dblAmount],
+			--OTHER INFORMATION
+			[strCode]
+		)
+		SELECT
+			-- HEADER
+			[intTransactionId]          = V.intSettleStorageId
+			,[strTransactionId]         = V.strTransactionNumber
+			,[intTransactionType]       = 6 -- GRAIN
+			,[strReferenceNumber]       = ''
+			,[dtmDate]                  = V.dtmDate
+			,[intEntityVendorId]        = V.intEntityVendorId
+			,[intLocationId]            = V.intLocationId
+			-- DETAIL
+			,[intTransactionDetailId]   = V.intCustomerStorageId
+			,[intAccountId]             = V.intAccountId
+			,[intItemId]                = V.intItemId
+			,[intItemUOMId]             = V.intItemUOMId
+			,[dblQuantity]              = V.dblSettleStorageQty
+			,[dblAmount]                = V.dblSettleStorageAmount
+			,[strCode]                  = 'STR'
+		FROM vyuAPGrainClearing V
+		WHERE V.strTransactionNumber = @strSettleTicket
+		AND V.intSettleStorageId = @intSettleStorageId
+		AND V.dblSettleStorageAmount <> 0
+
+		EXEC uspAPClearing @APClearing = @APClearing, @post = 1;
+	END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage	

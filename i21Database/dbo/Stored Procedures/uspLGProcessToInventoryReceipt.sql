@@ -20,6 +20,12 @@ BEGIN TRY
 	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
 	DECLARE @strLotCondition NVARCHAR(50)
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+	DECLARE @strFOBPoint AS NVARCHAR(50)
+
+	SELECT @strFOBPoint = FT.strFobPoint 
+	FROM tblLGLoad L
+	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId 
+	WHERE intLoadId = @intLoadId
 
 	SELECT TOP 1 @strLotCondition = strLotCondition
 	FROM tblICCompanyPreference
@@ -473,7 +479,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
 			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
-			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0) AND @strFOBPoint = 'Origin'
 		BEGIN
 			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
 		END

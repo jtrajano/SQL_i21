@@ -35,8 +35,8 @@ BEGIN TRANSACTION;
    ,[intConcurrencyId]   
    ,[dblExchangeRate]  
    ,[intCurrencyId]
-   ,[intJournalLineNo]
-   ,[intCurrencyExchangeRateTypeId]
+   ,[intJournalLineNo] 
+   ,[intCurrencyExchangeRateTypeId]  
    ,[intUserId]  
    ,[intEntityId]  
    ,[dtmDateEntered]  
@@ -49,9 +49,9 @@ BEGIN TRANSACTION;
   SELECT   
     [strTransactionId]  
    ,[intTransactionId]  
-   ,[intAccountId]
+   ,[intAccountId]     
    ,[strDescription]  =  A.strJournalLineDescription  
-   ,[strReference]
+   ,[strReference]     
    ,[dtmTransactionDate]   
    ,[dblDebit]    = A.[dblCredit]  
    ,[dblCredit]   = A.[dblDebit]   
@@ -61,11 +61,11 @@ BEGIN TRANSACTION;
    ,[dblCreditUnit]  = A.[dblDebitUnit]  
    ,dtmDate = ISNULL(@dtmDateReverse, A.dtmDate) -- If date is provided, use date reverse as the date for unposting the transaction.  
    ,[ysnIsUnposted] = 1   
-   ,[intConcurrencyId] = A.[intConcurrencyId]
+   ,[intConcurrencyId] = A.[intConcurrencyId]    
    ,[dblExchangeRate]  
    ,[intCurrencyId]
-   ,[intJournalLineNo]
-   ,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
+   ,[intJournalLineNo] 
+   ,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]  
    ,[intUserId]   = 0  
    ,[intEntityId]   = @intEntityId  
    ,[dtmDateEntered]  = GETDATE()  
