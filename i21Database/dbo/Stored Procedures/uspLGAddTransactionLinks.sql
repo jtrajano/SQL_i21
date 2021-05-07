@@ -80,7 +80,8 @@ BEGIN
 	ELSE IF (@intTransactionType = 2) 
 	/* Weight Claims */
 	BEGIN
-		IF EXISTS(SELECT 1 FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId WHERE L.intPurchaseSale = 1)
+		IF EXISTS(SELECT 1 FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId 
+					WHERE L.intPurchaseSale = 1 AND WC.intWeightClaimId = @intTransactionId)
 		BEGIN
 			/* If Weight Claims is processed from Inbound Shipment - Link: IR(s) to WC */
 			INSERT INTO @TransactionLinks (
