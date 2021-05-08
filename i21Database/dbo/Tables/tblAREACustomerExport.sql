@@ -54,6 +54,6 @@
 	dblCreditLimit NUMERIC(18, 6) NULL,
 	dblShipToLatitude NUMERIC(18, 6) NULL,
 	dblShipToLongitude NUMERIC(18, 6) NULL,
-	dtmDateCreated DATETIME NULL,
-	dtmDateModified DATETIME NULL
+	dtmDateCreated DATETIME2 NULL,
+	dtmDateModified DATETIME2 NULL
 )
