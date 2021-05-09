@@ -2665,6 +2665,22 @@ BEGIN TRY
 								ELSE 1 
 							END = 1)
 					
+
+					UPDATE APD
+					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
+							CASE WHEN APB.intShipFromEntityId != APB.intEntityVendorId THEN APB.intShipFromEntityId ELSE APB.intEntityVendorId END,
+							APB.intShipToId,
+							APD.intItemId,
+							APB.intShipFromId,
+							EM.intFreightTermId
+						)
+					FROM tblAPBillDetail APD 
+					INNER JOIN tblAPBill APB
+						ON APD.intBillId = APB.intBillId
+					LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+					INNER JOIN @detailCreated ON intBillDetailId = intId
+					WHERE APD.intTaxGroupId IS NULL AND CASE WHEN @ysnDPOwnedType = 1 THEN CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
+
 					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 
