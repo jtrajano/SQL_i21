@@ -75,7 +75,23 @@ BEGIN TRY
 		,@strOrderBy NVARCHAR(100) = ''
 		,@strOrderByFinal NVARCHAR(100) = ''
 		,@strPickByStorageLocation NVARCHAR(50)
-		,@intSubLocationId int
+		,@intSubLocationId INT
+		,@dblUpperToleranceQty NUMERIC(38, 20)
+		,@dblLowerToleranceQty NUMERIC(38, 20)
+		,@ysnComplianceItem BIT
+		,@dblCompliancePercent NUMERIC(38, 20)
+		,@dblQuantity NUMERIC(38, 20)
+		,@dblIssuedQuantity NUMERIC(38, 20)
+		,@intItemIssuedUOMId INT
+		,@dblUnitCost NUMERIC(38, 20)
+		,@dblPickedQty NUMERIC(38, 20)
+		,@dblItemRequiredQty NUMERIC(38, 20)
+		,@intSeq INT
+		,@dblTotalPickedQty NUMERIC(38, 20)
+	DECLARE @tblInputItemSeq TABLE (
+		intItemId INT
+		,intSeq INT
+		)
 
 	IF @ysnFromPickList = 0
 		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
@@ -185,7 +201,7 @@ BEGIN TRY
 	FROM tblMFManufacturingProcessAttribute pa
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
-		AND pa.intAttributeId=123
+		AND pa.intAttributeId = 123
 
 	IF ISNULL(@ysnIncludeKitStagingLocation, 0) = 1
 		SET @intKitStagingLocationId = 0
@@ -196,14 +212,12 @@ BEGIN TRY
 
 	SELECT @intIssuedUOMTypeId = ISNULL(intIssuedUOMTypeId, 0)
 		,@strBlenderName = strName
-		,@intSubLocationId=intSubLocationId
+		,@intSubLocationId = intSubLocationId
 	FROM tblMFMachine
 	WHERE intMachineId = @intMachineId
 
 	IF ISNULL(@intIssuedUOMTypeId, 0) = 0
 	BEGIN
-		--SET @strErrMsg='Please configure Issued UOM Type for machine ''' + @strBlenderName + '''.'
-		--RAISERROR(@strErrMsg,16,1)
 		SET @intIssuedUOMTypeId = 1
 	END
 
@@ -224,6 +238,11 @@ BEGIN TRY
 		,dblMaxSubstituteRatio NUMERIC(38, 20)
 		,strLotTracking NVARCHAR(50)
 		,intItemUOMId INT
+		,dblUpperToleranceQty NUMERIC(38, 20)
+		,dblLowerToleranceQty NUMERIC(38, 20)
+		,ysnComplianceItem BIT
+		,dblCompliancePercent NUMERIC(38, 20)
+		,dblPickedQty NUMERIC(38, 20)
 		)
 
 	IF OBJECT_ID('tempdb..#tblBlendSheetLot') IS NOT NULL
@@ -326,10 +345,10 @@ BEGIN TRY
 
 	DECLARE @tblSourceSubLocation AS TABLE (intSubLocationId INT)
 
-	IF IsNULL(@strPickByStorageLocation,'')='True'
+	IF IsNULL(@strPickByStorageLocation, '') = 'True'
 	BEGIN
 		INSERT INTO @tblSourceSubLocation
-		SELECT @intSubLocationId 
+		SELECT @intSubLocationId
 	END
 	ELSE
 	BEGIN
@@ -420,6 +439,10 @@ BEGIN TRY
 				,dblMaxSubstituteRatio
 				,strLotTracking
 				,intItemUOMId
+				,dblUpperToleranceQty
+				,dblLowerToleranceQty
+				,ysnComplianceItem
+				,dblCompliancePercent
 				)
 			SELECT r.intRecipeId
 				,ri.intRecipeItemId
@@ -434,6 +457,10 @@ BEGIN TRY
 				,0.0
 				,i.strLotTracking
 				,ri.intItemUOMId
+				,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+				,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+				,ri.ysnComplianceItem
+				,ri.dblCompliancePercent
 			FROM tblMFWorkOrderRecipeItem ri
 			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = ri.intWorkOrderId
 			JOIN tblICItem i ON ri.intItemId = i.intItemId
@@ -460,6 +487,10 @@ BEGIN TRY
 				,rs.dblMaxSubstituteRatio
 				,i.strLotTracking
 				,ri.intItemUOMId
+				,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+				,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+				,ri.ysnComplianceItem
+				,ri.dblCompliancePercent
 			FROM tblMFWorkOrderRecipeSubstituteItem rs
 			JOIN tblMFWorkOrderRecipe r ON r.intWorkOrderId = rs.intWorkOrderId
 			JOIN tblMFWorkOrderRecipeItem ri ON rs.intRecipeItemId = ri.intRecipeItemId
@@ -467,7 +498,8 @@ BEGIN TRY
 			JOIN tblICItem i ON rs.intSubstituteItemId = i.intItemId
 			WHERE r.intWorkOrderId = @intWorkOrderId
 				AND rs.intRecipeItemTypeId = 1
-			ORDER BY ysnIsSubstitute
+			ORDER BY 4 Desc
+				,ysnIsSubstitute
 				,ysnMinorIngredient
 
 			SELECT @dblRecipeQty = dblQuantity
@@ -490,6 +522,10 @@ BEGIN TRY
 				,dblMaxSubstituteRatio
 				,strLotTracking
 				,intItemUOMId
+				,dblUpperToleranceQty
+				,dblLowerToleranceQty
+				,ysnComplianceItem
+				,dblCompliancePercent
 				)
 			SELECT @intRecipeId
 				,ri.intRecipeItemId
@@ -504,6 +540,10 @@ BEGIN TRY
 				,0.0
 				,i.strLotTracking
 				,ri.intItemUOMId
+				,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+				,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+				,ri.ysnComplianceItem
+				,ri.dblCompliancePercent
 			FROM tblMFRecipeItem ri
 			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			JOIN tblICItem i ON ri.intItemId = i.intItemId
@@ -542,13 +582,18 @@ BEGIN TRY
 				,rs.dblMaxSubstituteRatio
 				,i.strLotTracking
 				,ri.intItemUOMId
+				,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+				,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
+				,ri.ysnComplianceItem
+				,ri.dblCompliancePercent
 			FROM tblMFRecipeSubstituteItem rs
 			JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
 			JOIN tblMFRecipeItem ri ON rs.intRecipeItemId = ri.intRecipeItemId
 			JOIN tblICItem i ON ri.intItemId = i.intItemId
 			WHERE r.intRecipeId = @intRecipeId
 				AND rs.intRecipeItemTypeId = 1
-			ORDER BY ysnIsSubstitute
+			ORDER BY 4 Desc
+				,ysnIsSubstitute
 				,ysnMinorIngredient
 
 			SELECT @dblRecipeQty = dblQuantity
@@ -710,6 +755,9 @@ BEGIN TRY
 	IF ISNULL(@strOrderByFinal, '') = ''
 		SET @strOrderByFinal = 'PL.dtmCreateDate ASC'
 
+	UPDATE @tblInputItem
+	SET dblPickedQty = dblRequiredQty
+
 	WHILE @intNoOfSheets > 0
 	BEGIN
 		SET @strSQL = ''
@@ -723,6 +771,20 @@ BEGIN TRY
 
 		WHILE @intMinRowNo IS NOT NULL
 		BEGIN
+			SELECT @intRecipeItemId = NULL
+				,@intRawItemId = NULL
+				,@dblRequiredQty = NULL
+				,@ysnMinorIngredient = NULL
+				,@intConsumptionMethodId = NULL
+				,@intConsumptionStoragelocationId = NULL
+				,@ysnIsSubstitute = NULL
+				,@strLotTracking = NULL
+				,@intItemUOMId = NULL
+				,@dblUpperToleranceQty = NULL
+				,@dblLowerToleranceQty = NULL
+				,@ysnComplianceItem = NULL
+				,@dblCompliancePercent = NULL
+
 			SELECT @intRecipeItemId = intRecipeItemId
 				,@intRawItemId = intItemId
 				,@dblRequiredQty = (dblRequiredQty / @intEstNoOfSheets)
@@ -732,6 +794,10 @@ BEGIN TRY
 				,@ysnIsSubstitute = ysnIsSubstitute
 				,@strLotTracking = strLotTracking
 				,@intItemUOMId = intItemUOMId
+				,@dblUpperToleranceQty = dblUpperToleranceQty
+				,@dblLowerToleranceQty = dblLowerToleranceQty
+				,@ysnComplianceItem = ysnComplianceItem
+				,@dblCompliancePercent = dblCompliancePercent
 			FROM @tblInputItem
 			WHERE intRowNo = @intMinRowNo
 
@@ -975,7 +1041,12 @@ BEGIN TRY
 					WHERE intRowNo > @intMinItem
 				END
 
-				IF ISNULL(@dblRequiredQty, 0) > 0 and NOT EXISTS(SELECT *FROM @tblPickedItem Where intItemId=@intRawItemId)
+				IF ISNULL(@dblRequiredQty, 0) > 0
+					AND NOT EXISTS (
+						SELECT *
+						FROM @tblPickedItem
+						WHERE intItemId = @intRawItemId
+						)
 					INSERT INTO @tblPickedItem (
 						intItemStockUOMId
 						,intItemId
@@ -1038,7 +1109,7 @@ BEGIN TRY
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 			JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 			JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
-			JOIN @tblSourceSubLocation SubLoc on SubLoc.intSubLocationId =L.intSubLocationId 
+			JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
@@ -1522,6 +1593,10 @@ BEGIN TRY
 					) = 0
 				GOTO NOLOT
 
+			UPDATE @tblInputItem
+			SET dblPickedQty = 0
+			WHERE intItemId = @intRawItemId
+
 			DECLARE Cursor_FetchItem CURSOR LOCAL FAST_FORWARD
 			FOR
 			SELECT intParentLotId
@@ -1546,11 +1621,15 @@ BEGIN TRY
 				IF @dblRequiredQty < @dblWeightPerQty
 					AND ISNULL(@intPartialQuantitySubLocationId, 0) > 0
 					AND @intIssuedUOMTypeId = 2
-					--SELECT @intIssuedUOMTypeId = 1
 					GOTO LOOP_END
 
 				IF @intIssuedUOMTypeId = 2 --'BAG' 
 					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty)
+
+				IF @intIssuedUOMTypeId = 3 --Weight and Pack 
+				BEGIN
+					SET @dblAvailableQty = @dblAvailableQty - (@dblAvailableQty % @dblWeightPerQty)
+				END
 
 				IF @dblAvailableQty > 0
 				BEGIN
@@ -1609,60 +1688,163 @@ BEGIN TRY
 							WHERE L.intLotId = @intParentLotId
 								AND L.dblQty > @dblDefaultResidueQty
 						ELSE
-							INSERT INTO #tblBlendSheetLot (
-								intParentLotId
-								,intItemId
-								,dblQuantity
-								,intItemUOMId
-								,dblIssuedQuantity
-								,intItemIssuedUOMId
-								,intRecipeItemId
-								,intStorageLocationId
-								,dblWeightPerQty
-								,dblUnitCost
-								)
-							SELECT Top 1 L.intParentLotId
-								,L.intItemId
-								,CASE 
-									WHEN @intIssuedUOMTypeId = 2
-										THEN Convert(NUMERIC(38, 20), (
-													(
+							SELECT TOP 1 @intParentLotId = L.intParentLotId
+								,@intItemId = L.intItemId
+								,@dblQuantity = (
+									CASE 
+										WHEN @intIssuedUOMTypeId = 2
+											THEN Convert(NUMERIC(38, 20), (
+														(
+															CASE 
+																WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
+																	THEN 1
+																ELSE Floor(@dblRequiredQty / L.dblWeightPerQty)
+																END
+															) * L.dblWeightPerQty
+														))
+										ELSE @dblRequiredQty -- To Review ROUND(@dblRequiredQty,3) 
+										END
+									)
+								,@intItemUOMId = L.intItemUOMId
+								,@dblIssuedQuantity = (
+									CASE 
+										WHEN @intIssuedUOMTypeId = 2
+											THEN Convert(NUMERIC(38, 20), (
 														CASE 
 															WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
 																THEN 1
-															ELSE Floor(@dblRequiredQty / L.dblWeightPerQty)
+															ELSE Convert(NUMERIC(38, 20), Floor(@dblRequiredQty / L.dblWeightPerQty))
 															END
-														) * L.dblWeightPerQty
-													))
-									ELSE @dblRequiredQty -- To Review ROUND(@dblRequiredQty,3) 
-									END AS dblQuantity
-								,L.intItemUOMId
-								,CASE 
-									WHEN @intIssuedUOMTypeId = 2
-										THEN Convert(NUMERIC(38, 20), (
-													CASE 
-														WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
-															THEN 1
-														ELSE Convert(NUMERIC(38, 20), Floor(@dblRequiredQty / L.dblWeightPerQty))
-														END
-													))
-									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
-									END AS dblIssuedQuantity
-								,CASE 
-									WHEN @intIssuedUOMTypeId = 2
-										THEN L.intItemIssuedUOMId
-									ELSE L.intItemUOMId
-									END AS intItemIssuedUOMId
-								,@intRecipeItemId AS intRecipeItemId
-								,CASE 
-									WHEN @ysnShowAvailableLotsByStorageLocation = 1
-										THEN @intStorageLocationId
-									ELSE 0
-									END AS intStorageLocationId
-								,L.dblWeightPerQty
-								,L.dblUnitCost
+														))
+										ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
+										END
+									)
+								,@intItemIssuedUOMId = (
+									CASE 
+										WHEN @intIssuedUOMTypeId in (2,3)
+											THEN L.intItemIssuedUOMId
+										ELSE L.intItemUOMId
+										END
+									)
+								--,@intRecipeItemId AS intRecipeItemId
+								,@intStorageLocationId = (
+									CASE 
+										WHEN @ysnShowAvailableLotsByStorageLocation = 1
+											THEN @intStorageLocationId
+										ELSE 0
+										END
+									)
+								,@dblWeightPerQty = L.dblWeightPerQty
+								,@dblUnitCost = L.dblUnitCost
 							FROM #tblParentLot L
-							WHERE L.intParentLotId = @intParentLotId --AND L.dblWeight > 0
+							WHERE L.intParentLotId = @intParentLotId
+
+						IF @intIssuedUOMTypeId = 3
+						BEGIN
+							SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0) * @dblWeightPerQty)
+							,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0) )
+
+							IF @dblQuantity = 0
+							BEGIN
+								SELECT @dblQuantity = @dblRequiredQty
+									,@dblIssuedQuantity = @dblRequiredQty
+									,@intItemIssuedUOMId = @intItemUOMId
+
+								UPDATE @tblInputItem
+								SET dblPickedQty = dblPickedQty + @dblQuantity
+								WHERE intItemId = @intRawItemId
+							END
+							ELSE
+							BEGIN
+								UPDATE @tblInputItem
+								SET dblPickedQty = dblPickedQty + @dblQuantity
+								WHERE intItemId = @intRawItemId
+
+								SELECT @dblPickedQty = NULL
+
+								SELECT @dblPickedQty = dblPickedQty
+								FROM @tblInputItem
+								WHERE intItemId = @intRawItemId
+
+								IF (
+										@dblPickedQty BETWEEN @dblLowerToleranceQty
+											AND @dblUpperToleranceQty
+										)
+									AND @dblLowerToleranceQty > 0
+									AND @dblUpperToleranceQty > 0
+								BEGIN
+									DELETE
+									FROM @tblInputItemSeq
+
+									INSERT INTO @tblInputItemSeq (
+										intItemId
+										,intSeq
+										)
+									SELECT intItemId
+										,row_number() OVER (
+											ORDER BY dblPickedQty DESC
+											)
+									FROM @tblInputItem
+
+									SELECT @intSeq = NULL
+
+									SELECT @intSeq = intSeq
+									FROM @tblInputItemSeq
+									WHERE intItemId = @intRawItemId
+
+									IF @intMinRowNo = @intSeq
+									BEGIN
+										SELECT @dblTotalPickedQty = NULL
+
+										SELECT @dblTotalPickedQty = Sum(dblPickedQty)
+										FROM @tblInputItem
+
+										IF @ysnComplianceItem = 1
+											AND ((@dblPickedQty / @dblTotalPickedQty) * 100) < @dblCompliancePercent
+										BEGIN
+											SELECT @dblQuantity = @dblRequiredQty
+												,@dblIssuedQuantity = @dblRequiredQty
+												,@intItemIssuedUOMId = @intItemUOMId
+										END
+									END
+									ELSE
+									BEGIN
+										SELECT @dblQuantity = @dblRequiredQty
+											,@dblIssuedQuantity = @dblRequiredQty
+											,@intItemIssuedUOMId = @intItemUOMId
+									END
+								END
+								ELSE
+								BEGIN
+									SELECT @dblQuantity = @dblRequiredQty
+										,@dblIssuedQuantity = @dblRequiredQty
+										,@intItemIssuedUOMId = @intItemUOMId
+								END
+							END
+						END
+
+						INSERT INTO #tblBlendSheetLot (
+							intParentLotId
+							,intItemId
+							,dblQuantity
+							,intItemUOMId
+							,dblIssuedQuantity
+							,intItemIssuedUOMId
+							,intRecipeItemId
+							,intStorageLocationId
+							,dblWeightPerQty
+							,dblUnitCost
+							)
+						SELECT @intParentLotId
+							,@intItemId
+							,@dblQuantity
+							,@intItemUOMId
+							,@dblIssuedQuantity
+							,@intItemIssuedUOMId
+							,@intRecipeItemId
+							,@intStorageLocationId
+							,@dblWeightPerQty
+							,@dblUnitCost
 
 						IF ISNULL(@intPartialQuantitySubLocationId, 0) > 0
 							AND @intIssuedUOMTypeId = 2
@@ -1759,6 +1941,16 @@ BEGIN TRY
 															END
 														) * L.dblWeightPerQty
 													))
+									WHEN @intIssuedUOMTypeId = 3
+										THEN Convert(NUMERIC(38, 20), (
+													(
+														CASE 
+															WHEN Round(@dblAvailableQty / L.dblWeightPerQty, 0) = 0
+																THEN 1
+															ELSE Round(@dblAvailableQty / L.dblWeightPerQty, 0)
+															END
+														) * L.dblWeightPerQty
+													))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
 									END AS dblQuantity
 								,L.intItemUOMId
@@ -1771,10 +1963,21 @@ BEGIN TRY
 														ELSE Convert(NUMERIC(38, 20), Floor(@dblAvailableQty / L.dblWeightPerQty))
 														END
 													))
+									WHEN @intIssuedUOMTypeId = 3
+										THEN Convert(NUMERIC(38, 20), (
+													CASE 
+														WHEN Round(@dblAvailableQty / L.dblWeightPerQty, 0) = 0
+															THEN 1
+														ELSE Convert(NUMERIC(38, 20), Round(@dblAvailableQty / L.dblWeightPerQty, 0))
+														END
+													))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
 									END AS dblIssuedQuantity
 								,CASE 
-									WHEN @intIssuedUOMTypeId = 2
+									WHEN @intIssuedUOMTypeId IN (
+											2
+											,3
+											)
 										THEN L.intItemIssuedUOMId
 									ELSE L.intItemUOMId
 									END AS intItemIssuedUOMId
@@ -1787,11 +1990,11 @@ BEGIN TRY
 								,L.dblWeightPerQty
 								,L.dblUnitCost
 							FROM #tblParentLot L
-							WHERE L.intParentLotId = @intParentLotId --AND L.dblWeight > 0
+							WHERE L.intParentLotId = @intParentLotId
 
 						SET @dblRequiredQty = @dblRequiredQty - @dblAvailableQty
 					END
-				END --AvailaQty>0 End
+				END
 
 				SET @intStorageLocationId = NULL
 
@@ -2259,7 +2462,7 @@ BEGIN TRY
 					FROM tblQMTestResult TR
 					INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
 						AND ISNUMERIC(TR.strPropertyValue) = 1
-						AND P.strPropertyName ='Density'
+						AND P.strPropertyName = 'Density'
 					WHERE TR.intProductTypeId = 11
 						AND TR.intProductValueId = PL.intParentLotId
 					ORDER BY TR.intSampleId DESC
@@ -2285,7 +2488,7 @@ BEGIN TRY
 		INNER JOIN tblICUnitMeasure UM2 ON IU2.intUnitMeasureId = UM2.intUnitMeasureId
 		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
-		INNER JOIN tblSMCompanyLocationSubLocation CLSL on CLSL.intCompanyLocationSubLocationId =SL.intSubLocationId 
+		INNER JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 		WHERE BS.dblQuantity > 0
 	ELSE
 		SELECT PL.intParentLotId AS intWorkOrderInputLotId
@@ -2301,7 +2504,7 @@ BEGIN TRY
 			,UM2.strUnitMeasure AS strIssuedUOM
 			,BS.intItemId
 			,BS.intRecipeItemId
-			,BS.dblUnitCost AS dblUnitCost 
+			,BS.dblUnitCost AS dblUnitCost
 			,CONVERT(DECIMAL(24, 2), (
 					SELECT TOP 1 (
 							CASE 
