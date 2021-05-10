@@ -321,6 +321,9 @@ IF(@batchId IS NULL)
 	
 	---------------- BEGIN - AP CLEARING ------------------	
 	DECLARE @APClearing APClearing
+	DECLARE @intLocationId	INT = NULL
+
+	SELECT @intLocationId = dbo.fnGetUserDefaultLocation(@intUserId)
 
 	INSERT INTO @APClearing (
 		[intTransactionId]
@@ -348,26 +351,25 @@ IF(@batchId IS NULL)
 		, [intTransactionType]		= 9
 		, [strReferenceNumber]		= P.strPaymentNumber
 		, [dtmDate]					= P.dtmPaymentDate
-		, [intEntityVendorId]		= B.intEntityVendorId
-		, [intLocationId]			= B.intShipToId	
+		, [intEntityVendorId]		= PS.intCustomerPatronId
+		, [intLocationId]			= @intLocationId
 		, [intTransactionDetailId]	= PS.intEquityPaySummaryId
-		, [intAccountId]			= B.intAccountId
-		, [intItemId]				= BD.intItemId
-		, [intItemUOMId]			= BD.intUnitOfMeasureId
-		, [dblQuantity]				= BD.dblQtyReceived
-		, [dblAmount]				= BD.dblTotal	
-		, [intOffsetId]				= B.intBillId
-		, [strOffsetId]				= B.strBillId
-		, [intOffsetDetailId]		= BD.intBillDetailId
+		, [intAccountId]			= E.intAPClearingGLAccount
+		, [intItemId]				= NULL
+		, [intItemUOMId]			= NULL
+		, [dblQuantity]				= 1
+		, [dblAmount]				= ROUND(EPD.dblEquityPay, 2)
+		, [intOffsetId]				= NULL
+		, [strOffsetId]				= NULL
+		, [intOffsetDetailId]		= NULL
 		, [intOffsetDetailTaxId]	= NULL	
 		, [strCode]					= 'PAT'
 		, [strRemarks]				= NULL
 	FROM tblPATEquityPay P
 	INNER JOIN tblPATEquityPaySummary PS ON P.intEquityPayId = PS.intEquityPayId
-	INNER JOIN tblAPBill B ON PS.intBillId = B.intBillId
-	INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-	WHERE PS.intBillId IS NOT NULL
-	AND P.intEquityPayId = @intEquityPayId
+	INNER JOIN tblPATEquityPayDetail EPD ON PS.intEquityPaySummaryId = EPD.intEquityPaySummaryId
+	CROSS JOIN tblPATCompanyPreference E
+	WHERE P.intEquityPayId = @intEquityPayId
 
 	IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
 		EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
