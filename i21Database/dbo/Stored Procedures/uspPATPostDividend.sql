@@ -323,6 +323,9 @@ WHERE R.intDividendId = @intDividendId
 
 --------------------- AP CLEARING -----------------------
 DECLARE @APClearing APClearing
+DECLARE @intLocationId	INT = NULL
+
+SELECT @intLocationId = dbo.fnGetUserDefaultLocation(@intUserId)
 
 INSERT INTO @APClearing (
 	  [intTransactionId]
@@ -350,26 +353,23 @@ SELECT [intTransactionId]		= D.intDividendId
 	, [intTransactionType]		= 9
 	, [strReferenceNumber]		= D.strDividendNo
 	, [dtmDate]					= D.dtmProcessDate
-	, [intEntityVendorId]		= B.intEntityVendorId
-	, [intLocationId]			= B.intShipToId	
+	, [intEntityVendorId]		= DC.intCustomerId
+	, [intLocationId]			= @intLocationId
 	, [intTransactionDetailId]	= DC.intDividendCustomerId
-	, [intAccountId]			= B.intAccountId
-	, [intItemId]				= BD.intItemId
-	, [intItemUOMId]			= BD.intUnitOfMeasureId
-	, [dblQuantity]				= BD.dblQtyReceived
-	, [dblAmount]				= BD.dblTotal	
-	, [intOffsetId]				= B.intBillId
-	, [strOffsetId]				= B.strBillId
-	, [intOffsetDetailId]		= BD.intBillDetailId
+	, [intAccountId]			= @intAPClearingId
+	, [intItemId]				= NULL
+	, [intItemUOMId]			= NULL
+	, [dblQuantity]				= 1
+	, [dblAmount]				= ROUND(DC.dblDividendAmount, 2)	
+	, [intOffsetId]				= NULL
+	, [strOffsetId]				= NULL
+	, [intOffsetDetailId]		= NULL
 	, [intOffsetDetailTaxId]	= NULL	
 	, [strCode]					= 'PAT'
 	, [strRemarks]				= NULL
 FROM tblPATDividends D
 INNER JOIN tblPATDividendsCustomer DC ON D.intDividendId = DC.intDividendId
-INNER JOIN tblAPBill B ON DC.intBillId = B.intBillId
-INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-WHERE DC.intBillId IS NOT NULL
-  AND D.intDividendId = @intDividendId
+WHERE D.intDividendId = @intDividendId
 
 IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
 	EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted

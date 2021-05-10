@@ -528,6 +528,9 @@ END CATCH
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 	DECLARE @APClearing APClearing
+	DECLARE @intLocationId	INT = NULL
+
+	SELECT @intLocationId = dbo.fnGetUserDefaultLocation(@intUserId)
 
 	INSERT INTO @APClearing (
 		[intTransactionId]
@@ -555,26 +558,25 @@ END CATCH
 		, [intTransactionType]		= 9
 		, [strReferenceNumber]		= R.strRefundNo
 		, [dtmDate]					= R.dtmRefundDate
-		, [intEntityVendorId]		= B.intEntityVendorId
-		, [intLocationId]			= B.intShipToId	
+		, [intEntityVendorId]		= RC.intCustomerId
+		, [intLocationId]			= @intLocationId
 		, [intTransactionDetailId]	= RC.intRefundCustomerId
-		, [intAccountId]			= B.intAccountId
-		, [intItemId]				= BD.intItemId
-		, [intItemUOMId]			= BD.intUnitOfMeasureId
-		, [dblQuantity]				= BD.dblQtyReceived
-		, [dblAmount]				= BD.dblTotal	
-		, [intOffsetId]				= B.intBillId
-		, [strOffsetId]				= B.strBillId
-		, [intOffsetDetailId]		= BD.intBillDetailId
+		, [intAccountId]			= E.intAPClearingGLAccount
+		, [intItemId]				= NULL
+		, [intItemUOMId]			= NULL
+		, [dblQuantity]				= 1
+		, [dblAmount]				= RC.dblRefundAmount
+		, [intOffsetId]				= NULL
+		, [strOffsetId]				= NULL
+		, [intOffsetDetailId]		= NULL
 		, [intOffsetDetailTaxId]	= NULL	
 		, [strCode]					= 'PAT'
 		, [strRemarks]				= NULL
 	FROM tblPATRefund R
 	INNER JOIN tblPATRefundCustomer RC ON R.intRefundId = RC.intRefundId
-	INNER JOIN tblAPBill B ON RC.intBillId = B.intBillId
-	INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-	WHERE RC.intBillId IS NOT NULL
-	AND R.intRefundId = @intRefundId
+	INNER JOIN tblAPVendor V ON RC.intCustomerId = V.intEntityId
+	CROSS JOIN tblPATCompanyPreference E
+	WHERE R.intRefundId = @intRefundId
 
 	IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
 		EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
