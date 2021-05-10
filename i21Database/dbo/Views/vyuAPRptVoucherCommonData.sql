@@ -41,7 +41,7 @@ A.intBillId
 ,A.strBillId
 ,A.dtmDate
 ,A.dtmDueDate--CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
-,FORMAT(A.dtmBillDate, CP.strReportDateFormat) dtmBillDate
+,CONVERT(NVARCHAR(10), A.dtmBillDate, 103) dtmBillDate
 ,ISNULL(A.strVendorOrderNumber, '') strVendorOrderNumber
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 FROM tblAPBill A 
