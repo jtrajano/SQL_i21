@@ -9395,6 +9395,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
