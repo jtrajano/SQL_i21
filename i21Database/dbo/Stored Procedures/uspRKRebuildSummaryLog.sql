@@ -86,6 +86,7 @@ BEGIN TRY
 			,intEntityId
 			,intUserId
 			,intItemUOMId
+			, ysnIsDWG
 		INTO #tmpContractUsage
 		FROM (
 			SELECT CH.intContractTypeId
@@ -100,7 +101,7 @@ BEGIN TRY
 								ELSE
 									ISNULL( CASE WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL THEN 
 													MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN 
-																ShipmentItem.dblDestinationNet
+																CASE WHEN ShipmentItem.dblDestinationNet > ShipmentItem.dblQuantity THEN ShipmentItem.dblQuantity ELSE ShipmentItem.dblDestinationNet END
 														ELSE 0 END)
 													ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN 
 																		ShipmentItem.dblQuantity
@@ -119,6 +120,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = Shipment.intEntityId
 				, intItemUOMId  = CASE WHEN CH.ysnLoad = 1 THEN  CD.intItemUOMId ELSE ShipmentItem.intItemUOMId END
+				, ysnIsDWG = CASE WHEN ShipmentItem.dblDestinationNet IS NOT NULL THEN 1 ELSE 0 END
 			FROM tblICInventoryShipment Shipment
 			JOIN tblICInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
@@ -180,6 +182,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = InvTran.intCreatedEntityId
 				, InvTran.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblICInventoryTransaction InvTran
 			JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvTran.intTransactionId
 			JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceId = InvTran.intTransactionId
@@ -236,6 +239,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = InvTran.intCreatedEntityId
 				, InvTran.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblICInventoryTransaction InvTran
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId AND LD.intLoadDetailId = InvTran.intTransactionDetailId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -286,6 +290,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = InvTran.intCreatedEntityId
 				, InvTran.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblICInventoryTransaction InvTran
 			JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
 				AND strReceiptType = 'Purchase Contract'
@@ -344,6 +349,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = Receipt.intCreatedByUserId
 				, ReceiptItem.intUnitMeasureId
+				, ysnIsDWG = 0
 			FROM tblICInventoryReceipt Receipt
 			JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 				AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
@@ -393,6 +399,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = SS.intCreatedUserId
 				, SS.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblGRSettleContract SC
 			JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
 			JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
@@ -438,6 +445,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = SS.intCreatedUserId
 				, SS.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblGRSettleStorage SS
 			INNER JOIN tblGRStorageHistory SH ON SH.intSettleStorageId = SS.intSettleStorageId
 			INNER JOIN (
@@ -485,6 +493,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserId = SS.intCreatedUserId
 				, SS.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblGRSettleStorage SS
 			INNER JOIN tblGRStorageHistory SH ON SH.intSettleStorageId = SS.intSettleStorageId
 			INNER JOIN (
@@ -533,6 +542,7 @@ BEGIN TRY
 				, CH_SOURCE.intEntityId
 				, intUserId = TS.intUserId
 				, TS.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblGRTransferStorage TS
 			INNER JOIN tblGRTransferStorageSourceSplit TS_SOURCE
 				ON TS_SOURCE.intTransferStorageId = TS.intTransferStorageId
@@ -582,6 +592,7 @@ BEGIN TRY
 				, CH_SPLIT.intEntityId
 				, intUserId = TS.intUserId
 				, TS.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblGRTransferStorage TS
 			INNER JOIN tblGRTransferStorageSplit TS_SPLIT
 				ON TS_SPLIT.intTransferStorageId = TS.intTransferStorageId
@@ -629,6 +640,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, intUserdId = IB.intImportedById
 				, CD.intItemUOMId
+				, ysnIsDWG = 0
 			FROM tblCTImportBalance IB
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = IB.intContractHeaderId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
@@ -714,7 +726,7 @@ BEGIN TRY
 		from #tmpContractUsage CU
 		inner join tblARInvoiceDetail ID on ID.intInventoryShipmentItemId = CU.intSourceDetailId and ID.intInventoryShipmentChargeId is null
 		inner join tblARInvoice I on I.intInvoiceId = ID.intInvoiceId 
-		where CU.strType = 'Inventory Shipment'
+		where CU.strType = 'Inventory Shipment' AND CU.ysnIsDWG = 0
 	
 
 		select
@@ -1037,12 +1049,12 @@ BEGIN TRY
 				SELECT 
 					dtmDate
 					,dblBalance = CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-									WHEN strType IN ('Inventory Shipment','Inventory Receipt', 'Inventory Return', 'Outbound Shipment', 'Storage') THEN CB.dblQuantity * -1
+									WHEN strType IN ('Inventory Shipment','Inventory Receipt', 'Inventory Return', 'Outbound Shipment', 'Storage', 'Invoice') THEN CB.dblQuantity * -1
 									ELSE 0
 								END
 					,dblBasis = CASE WHEN CD.intPricingTypeId = 2 THEN
 									CASE WHEN strType IN( 'Contract Sequence') THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment','Price Fixation', 'Storage') THEN CB.dblQuantity * -1
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment','Price Fixation', 'Storage', 'Invoice') THEN CB.dblQuantity * -1
 										ELSE 0
 									END
 								ELSE 0
@@ -1054,7 +1066,7 @@ BEGIN TRY
 									END
 								WHEN CD.intPricingTypeId = 1 THEN 
 									CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment', 'Storage') THEN 
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment', 'Storage', 'Invoice') THEN 
 											 CB.dblQuantity * -1
 										ELSE 0
 									END
