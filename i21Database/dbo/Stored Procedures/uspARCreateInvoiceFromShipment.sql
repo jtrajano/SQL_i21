@@ -199,6 +199,8 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[strSalesOrderNumber]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intItemContractHeaderId]
+	,[intItemContractDetailId]
 	,[intShipmentPurchaseSalesContractId]
 	,[dblShipmentGrossWt]
 	,[dblShipmentTareWt]
@@ -315,6 +317,8 @@ SELECT
 	,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
 	,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
 	,[intContractDetailId]					= ARSI.[intContractDetailId] 
+	,[intItemContractHeaderId]				= ARSI.[intItemContractHeaderId] 
+	,[intItemContractHeaderId]				= ARSI.[intItemContractDetailId] 
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
 	,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
@@ -435,6 +439,8 @@ SELECT
 	,[strSalesOrderNumber]					= SO.strSalesOrderNumber 
 	,[intContractHeaderId]					= NULL
 	,[intContractDetailId]					= NULL
+	,[intItemContractHeaderId]				= NULL
+	,[intItemContractHeaderId]				= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[dblShipmentGrossWt]					= @ZeroDecimal 
 	,[dblShipmentTareWt]					= @ZeroDecimal
@@ -558,6 +564,8 @@ SELECT
 	,[strSalesOrderNumber]					= '' 
 	,[intContractHeaderId]					= NULL
 	,[intContractDetailId]					= NULL
+	,[intItemContractHeaderId]				= NULL
+	,[intItemContractHeaderId]				= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[dblShipmentGrossWt]					= @ZeroDecimal 
 	,[dblShipmentTareWt]					= @ZeroDecimal
