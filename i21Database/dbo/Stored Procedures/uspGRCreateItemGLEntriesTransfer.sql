@@ -344,7 +344,7 @@ SELECT
 	,dblDebitUnit				= DebitUnit.Value
 	,dblCreditUnit				= CreditUnit.Value
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) --+ 'A'
-	,strCode					= 'TRA' 
+	,strCode					= 'IC' 
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -410,7 +410,7 @@ SELECT
 	,dblDebitUnit				= CreditUnit.Value
 	,dblCreditUnit				= DebitUnit.Value
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) --+ 'Z'
-	,strCode					= 'TRA' 
+	,strCode					= 'IC' 
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
@@ -476,7 +476,7 @@ SELECT
 	,dblDebitUnit				= CASE WHEN strTransactionType = 'Inventory' THEN CreditUnit.Value ELSE DebitUnit.Value END
 	,dblCreditUnit				= CASE WHEN strTransactionType = 'Inventory' THEN DebitUnit.Value ELSE CreditUnit.Value END
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, CASE WHEN strTransactionType = 'Inventory' THEN dblItemCost ELSE dblCost END) --+ 'B'
-	,strCode					= 'TRA' 
+	,strCode					= 'IC' 
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
