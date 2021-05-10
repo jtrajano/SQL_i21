@@ -9366,6 +9366,7 @@
     <None Include="Scripts\Post-Deployment\GL\01_CleanupObjects.sql" />
     <Build Include="dbo\Tables\tblIPInvTransferFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPTransferOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
