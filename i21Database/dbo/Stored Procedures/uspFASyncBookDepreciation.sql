@@ -6,14 +6,18 @@ SELECT TOP 1 @intDepreciationMethodId = intDepreciationMethodId FROM tblFAFixedA
   
 IF EXISTS(SELECT 1 FROM tblFABookDepreciation WHERE intAssetId = @intAssetId AND intBookId =1 )
 BEGIN  
-	UPDATE tblFABookDepreciation SET intDepreciationMethodId = @intDepreciationMethodId WHERE intBookDepreciationId = @intBookDepreciationId
-	UPDATE A SET   
-	dblCost = B.dblCost  
-	, dblSalvageValue= B.dblSalvageValue  
-	, dtmPlacedInService= B.dtmDateInService  
-	FROM  
-	tblFABookDepreciation A JOIN tblFAFixedAsset B on A.intDepreciationMethodId = B.intDepreciationMethodId  
-	WHERE intBookDepreciationId = @intBookDepreciationId  
+	UPDATE tblFABookDepreciation SET intDepreciationMethodId = @intDepreciationMethodId 
+	WHERE intBookDepreciationId = @intBookDepreciationId
+
+	UPDATE A 
+	SET dblCost = B.dblCost , 
+	dblSalvageValue= B.dblSalvageValue , 
+	dtmPlacedInService= B.dtmDateInService  
+	FROM tblFABookDepreciation A JOIN tblFAFixedAsset B 
+	ON A.intAssetId = B.intAssetId
+	WHERE intBookDepreciationId = @intBookDepreciationId
+	AND intBookId = 1
+	AND A.intAssetId = @intAssetId
 END  
 ELSE  
 BEGIN  
