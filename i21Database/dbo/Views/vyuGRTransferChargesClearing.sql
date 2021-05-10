@@ -466,7 +466,6 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 -- WHERE GL.strDescription NOT LIKE '%Charges from %'
 WHERE GL.strCode = 'IC'
-AND NOT EXISTS(SELECT intTransferStorageReferenceId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
 AND QM.dblDiscountDue <> 0
 AND GLDetail.intAccountId IS NOT NULL
 UNION ALL
@@ -497,19 +496,8 @@ SELECT DISTINCT '7',
 		THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))--@dblGrossUnits 
 	ELSE SR.dblUnitQty END * (CASE WHEN QM.dblDiscountAmount > 0 THEN 1 ELSE -1 END)) * -1), 2) AS dblTransferQty  
     --,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) dblReceiptChargeTotal  
-	,CAST((CASE
-		WHEN QM.strDiscountChargeType = 'Percent'
-			THEN (QM.dblDiscountAmount * (CS.dblBasis + CS.dblSettlementPrice) * -1)
-		WHEN QM.strDiscountChargeType = 'Dollar' THEN QM.dblDiscountAmount
-	END 
-	* (CASE 
-		WHEN QM.strCalcMethod = 3 
-			THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))	
-		ELSE SR.dblUnitQty
-	END) * -1) AS DECIMAL(18,2))
-    ,ROUND(((CASE WHEN QM.strCalcMethod = 3 
-		THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))--@dblGrossUnits 
-	ELSE SR.dblUnitQty END * (CASE WHEN QM.dblDiscountAmount > 0 THEN 1 ELSE -1 END)) ) * -1, 2) AS dblReceiptChargeQty 
+	,0 AS dblReceiptChargeTotal
+    ,0 AS dblReceiptChargeQty 
     ,CS.intCompanyLocationId      
     ,CL.strLocationName      
     ,0
