@@ -550,7 +550,7 @@ SELECT
 	,dblDebitUnit				= CASE WHEN GL.dblDebitUnit = 0 THEN DebitUnit.Value ELSE 0 END
 	,dblCreditUnit				= CASE WHEN GL.dblCreditUnit = 0 THEN CreditUnit.Value ELSE 0 END
 	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' A'
-	,strCode					= 'TRA'
+	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= 1--GL.dblExchangeRate
@@ -620,7 +620,7 @@ SELECT DISTINCT
 	,dblDebitUnit				= CASE WHEN @ysnUnpost = 0 THEN CASE WHEN GL.dblDebitUnit = 0 THEN DebitUnit.Value ELSE 0 END ELSE DebitUnit.Value END
 	,dblCreditUnit				= CASE WHEN @ysnUnpost = 0 THEN CASE WHEN GL.dblCreditUnit = 0 THEN CreditUnit.Value ELSE 0 END ELSE CreditUnit.Value END
 	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' B'
-	,strCode					= 'TRA'
+	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= 1--GL.dblExchangeRate
@@ -688,7 +688,7 @@ SELECT
 	,dblDebitUnit				= CreditUnit.Value
 	,dblCreditUnit				= DebitUnit.Value
 	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' C'
-	,strCode					= 'TRA'
+	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= 1
