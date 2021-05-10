@@ -272,7 +272,7 @@ DECLARE  @Id									INT
 		,@ItemRecipeQty							NUMERIC(18,6)
 		,@ItemSalesOrderDetailId				INT
 		,@ItemSalesOrderNumber					NVARCHAR(25)		
-		,@ItemContractDetailId					INT
+		,@ContractDetailId						INT
 		,@ItemShipmentPurchaseSalesContractId	INT
 		,@ItemWeightUOMId						INT
 		,@ItemWeight							NUMERIC(38, 20)
@@ -311,6 +311,8 @@ DECLARE  @Id									INT
         ,@ItemAddonDetailKey                    NVARCHAR(100)
 		,@ItemAddonParent                       BIT
 		,@ItemAddOnQuantity                     NUMERIC(38, 20)
+		,@ItemContractHeaderId					INT
+		,@ItemContractDetailId					INT
 
 --INSERT
 BEGIN TRY
@@ -405,6 +407,9 @@ BEGIN
 		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') IN ('Card Fueling Transaction', 'CF Tran') THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 		,@MeterReadingId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Meter Billing' THEN ISNULL([intMeterReadingId], [intSourceId]) ELSE NULL END)
 		,@ContractHeaderId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Sales Contract' THEN ISNULL([intContractHeaderId], [intSourceId]) ELSE NULL END)
+		,@ContractDetailId				= (CASE WHEN @GroupingOption = 0 THEN [intContractDetailId] ELSE NULL END)
+		,@ItemContractHeaderId			= [intItemContractHeaderId]
+		,@ItemContractDetailId			= [intItemContractDetailId]
 		,@LoadId						= (CASE WHEN @FromImportTransactionCSV = 1 THEN [intLoadId] WHEN ISNULL([strSourceTransaction],'') IN ('Load Schedule', 'Weight Claim') OR ([strTransactionType] = 'Credit Memo'  AND [strSourceTransaction] != 'POS') THEN ISNULL([intLoadId], NULLIF([intSourceId],0)) ELSE NULL END)
 		,@OriginalInvoiceId				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Provisional' OR ((ISNULL([strSourceTransaction],'') = 'Invoice' OR ISNULL([strSourceTransaction],'') = 'Direct') AND ISNULL([strTransactionType],'') = 'Credit Memo') OR ISNULL([strTransactionType],'') = 'Cash Refund' THEN ISNULL([intOriginalInvoiceId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
@@ -469,7 +474,6 @@ BEGIN
 		,@ItemRecipeQty					= (CASE WHEN @GroupingOption = 0 THEN [dblRecipeQuantity] ELSE NULL END)
 		,@ItemSalesOrderDetailId		= (CASE WHEN @GroupingOption = 0 THEN [intSalesOrderDetailId] ELSE NULL END)
 		,@ItemSalesOrderNumber			= (CASE WHEN @GroupingOption = 0 THEN [strSalesOrderNumber] ELSE NULL END)		
-		,@ItemContractDetailId			= (CASE WHEN @GroupingOption = 0 THEN [intContractDetailId] ELSE NULL END)
 		,@ItemShipmentPurchaseSalesContractId = (CASE WHEN @GroupingOption = 0 THEN [intShipmentPurchaseSalesContractId] ELSE NULL END)
 		,@ItemWeightUOMId				= (CASE WHEN @GroupingOption = 0 THEN [intItemWeightUOMId] ELSE NULL END)
 		,@ItemWeight					= (CASE WHEN @GroupingOption = 0 THEN [dblItemWeight] ELSE NULL END)
@@ -721,7 +725,9 @@ BEGIN
 			,@ItemRecipeQty					= @ItemRecipeQty			
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
-			,@ItemContractHeaderId			= @ContractHeaderId
+			,@ContractHeaderId				= @ContractHeaderId
+			,@ContractDetailId				= @ContractDetailId
+			,@ItemContractHeaderId			= @ItemContractHeaderId
 			,@ItemContractDetailId			= @ItemContractDetailId
 			,@ItemShipmentPurchaseSalesContractId = @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
@@ -898,7 +904,9 @@ BEGIN
 					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 					,@ContractHeaderId				= [intContractHeaderId]
-					,@ItemContractDetailId			= [intContractDetailId]
+					,@ContractDetailId				= ISNULL([intContractDetailId], [intItemContractDetailId])
+					,@ItemContractHeaderId			= [intItemContractHeaderId]
+					,@ItemContractDetailId			= [intItemContractDetailId]
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 					,@ItemWeightUOMId				= [intItemWeightUOMId]
 					,@ItemWeight					= [dblItemWeight]
@@ -941,7 +949,7 @@ BEGIN
 					@InvoiceEntries
 				WHERE
 					[intId] = @ForDetailId
-					
+
 				BEGIN TRY
 					EXEC [dbo].[uspARAddItemToInvoice]
 						 @InvoiceId						= @NewInvoiceId	
@@ -996,7 +1004,9 @@ BEGIN
 						,@ItemRecipeQty					= @ItemRecipeQty						
 						,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 						,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
-						,@ItemContractHeaderId			= @ContractHeaderId
+						,@ContractHeaderId				= @ContractHeaderId
+						,@ContractDetailId				= @ContractDetailId
+						,@ItemContractHeaderId			= @ItemContractHeaderId
 						,@ItemContractDetailId			= @ItemContractDetailId
 						,@ItemShipmentId				= @ShipmentId
 						,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
@@ -1672,7 +1682,9 @@ BEGIN TRY
 						,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 						,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 						,@ContractHeaderId				= [intContractHeaderId]
-						,@ItemContractDetailId			= [intContractDetailId]
+						,@ContractDetailId				= [intContractDetailId]
+						,@ItemContractHeaderId			= [intItemContractHeaderId]
+						,@ItemContractDetailId			= [intItemContractDetailId]
 						,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 						,@ItemWeightUOMId				= [intItemWeightUOMId]
 						,@ItemWeight					= [dblItemWeight]
@@ -1766,8 +1778,8 @@ BEGIN TRY
 							,@ItemRecipeQty					= @ItemRecipeQty							
 							,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 							,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
-							,@ItemContractHeaderId			= @ContractHeaderId
-							,@ItemContractDetailId			= @ItemContractDetailId
+							,@ContractHeaderId				= @ContractHeaderId
+							,@ContractDetailId				= @ContractDetailId
 							,@ItemShipmentId				= @ShipmentId
 							,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 							,@ItemTicketId					= @ItemTicketId
@@ -1999,7 +2011,7 @@ BEGIN TRY
 					,@ItemSalesOrderDetailId		= [intSalesOrderDetailId]
 					,@ItemSalesOrderNumber			= [strSalesOrderNumber]
 					,@ContractHeaderId				= [intContractHeaderId]
-					,@ItemContractDetailId			= [intContractDetailId]
+					,@ContractDetailId				= [intContractDetailId]
 					,@ItemShipmentPurchaseSalesContractId =  [intShipmentPurchaseSalesContractId]
 					,@ItemWeightUOMId				= [intItemWeightUOMId]
 					,@ItemWeight					= [dblItemWeight]
@@ -2067,7 +2079,7 @@ BEGIN TRY
 							,@Price							= @SpecialPrice					OUTPUT
 							,@Pricing						= @Pricing						OUTPUT
 							,@ContractHeaderId				= @ContractHeaderId				OUTPUT
-							,@ContractDetailId				= @ItemContractDetailId			OUTPUT
+							,@ContractDetailId				= @ContractDetailId				OUTPUT
 							,@ContractNumber				= @ContractNumber				OUTPUT
 							,@ContractSeq					= @ContractSeq					OUTPUT
 							,@TermDiscount					= @ItemTermDiscount				OUTPUT
@@ -2084,7 +2096,7 @@ BEGIN TRY
 						SET @ItemPrice				= @SpecialPrice
 						SET @ItemUnitPrice			= @SpecialPrice
 						SET @ItemPricing			= @Pricing
-						IF ISNULL(@ItemContractDetailId,0) <> 0
+						IF ISNULL(@ContractDetailId,0) <> 0
 						BEGIN
 							SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
 							SET @ItemPriceUOMId					= @PriceUOMId
@@ -2163,7 +2175,7 @@ BEGIN TRY
 						,[intSalesOrderDetailId]				= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSalesOrderDetailId ELSE [intSalesOrderDetailId] END			
 						,[strSalesOrderNumber]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemSalesOrderNumber ELSE [strSalesOrderNumber] END		
 						,[intContractHeaderId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ContractHeaderId ELSE [intContractHeaderId] END			
-						,[intContractDetailId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemContractDetailId ELSE [intContractDetailId] END			
+						,[intContractDetailId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ContractDetailId ELSE [intContractDetailId] END			
 						,[intShipmentId]						= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ShipmentId ELSE [intShipmentId] END			
 						,[intShipmentPurchaseSalesContractId]	= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemShipmentPurchaseSalesContractId ELSE [intShipmentPurchaseSalesContractId] END
 						,[intItemWeightUOMId]					= CASE WHEN @UpdateAvailableDiscount = 0 THEN @ItemWeightUOMId ELSE [intItemWeightUOMId] END
