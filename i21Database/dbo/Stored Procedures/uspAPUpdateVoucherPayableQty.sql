@@ -174,20 +174,6 @@ ELSE SAVE TRAN @SavePoint
 			,intNewPayableId
 		FROM dbo.fnAPGetPayableKeyInfo(@validPayables)
 
-		--UPDATE THE QTY BEFORE BACKING UP AND DELETING, SO WE COULD ACTUAL QTY WHEN RE-INSERTING
-		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
-		UPDATE P
-		SET P.dblQuantityToBill = (P.dblQuantityToBill - P2.dblQuantityToBill),
-			P.dblQuantityBilled = (P.dblQuantityBilled + P2.dblQuantityToBill),
-			P.dblNetWeight = (P.dblNetWeight - P2.dblNetWeight)
-		FROM tblAPVoucherPayable P
-		INNER JOIN (
-			SELECT PK.intNewPayableId, SUM(dblQuantityToBill) dblQuantityToBill, SUM(dblNetWeight) dblNetWeight
-			FROM @payablesKey PK
-			INNER JOIN @validPayables VP ON VP.intVoucherPayableId = PK.intOldPayableId
-			GROUP BY PK.intNewPayableId
-		) P2 ON P2.intNewPayableId = P.intVoucherPayableId
-		
 		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE T
 		SET T.dblTax = T.dblTax - T2.dblTax,
@@ -199,6 +185,26 @@ ELSE SAVE TRAN @SavePoint
 			INNER JOIN @validPayablesTax VT ON VT.intVoucherPayableId = PK.intOldPayableId
 			GROUP BY PK.intNewPayableId, VT.intTaxGroupId, VT.intTaxCodeId
 		) T2 ON T2.intNewPayableId = T.intVoucherPayableId AND T2.intTaxGroupId = T.intTaxGroupId AND T2.intTaxCodeId = T.intTaxCodeId
+
+		--UPDATE THE QTY BEFORE BACKING UP AND DELETING, SO WE COULD ACTUAL QTY WHEN RE-INSERTING
+		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
+		UPDATE P
+		SET P.dblQuantityToBill = (P.dblQuantityToBill - P2.dblQuantityToBill),
+			P.dblQuantityBilled = (P.dblQuantityBilled + P2.dblQuantityToBill),
+			P.dblNetWeight = (P.dblNetWeight - P2.dblNetWeight),
+			P.dblTax = PT.dblRemainingTax
+		FROM tblAPVoucherPayable P
+		INNER JOIN (
+			SELECT PK.intNewPayableId, SUM(dblQuantityToBill) dblQuantityToBill, SUM(dblNetWeight) dblNetWeight
+			FROM @payablesKey PK
+			INNER JOIN @validPayables VP ON VP.intVoucherPayableId = PK.intOldPayableId
+			GROUP BY PK.intNewPayableId
+		) P2 ON P2.intNewPayableId = P.intVoucherPayableId
+		OUTER APPLY (
+			SELECT SUM(dblAdjustedTax) dblRemainingTax
+			FROM tblAPVoucherPayableTaxStaging
+			WHERE intVoucherPayableId = P.intVoucherPayableId
+		) PT
 
 		--AS THE VALUES ARE NOW CORRECTLY SUMMED AND GROUPED REMOVE ENTRY IF SAME PAYABLE
 		;WITH CTE AS (
@@ -606,19 +612,6 @@ ELSE SAVE TRAN @SavePoint
 			,intNewPayableId
 		FROM dbo.fnAPGetPayableKeyInfo(@validPayables)
 
-		--UPDATE QTY FOR PARTIAL
-		UPDATE B
-			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
-				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
-				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
-		FROM tblAPVoucherPayable B
-		INNER JOIN @payablesKeyPartial B2
-			ON B2.intNewPayableId = B.intVoucherPayableId
-		INNER JOIN @validPayables C
-			ON C.intVoucherPayableId = B2.intOldPayableId
-
-		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
-
 		UPDATE A
 			SET 
 				A.dblTax = A.dblTax + taxData.dblTax,
@@ -641,6 +634,24 @@ ELSE SAVE TRAN @SavePoint
 		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
 		-- ) taxData
 
+		--UPDATE QTY FOR PARTIAL
+		UPDATE B
+			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
+				B.dblQuantityBilled = 0, --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
+				B.dblTax = PT.dblRemainingTax
+		FROM tblAPVoucherPayable B
+		INNER JOIN @payablesKeyPartial B2
+			ON B2.intNewPayableId = B.intVoucherPayableId
+		INNER JOIN @validPayables C
+			ON C.intVoucherPayableId = B2.intOldPayableId
+		OUTER APPLY (
+			SELECT SUM(dblAdjustedTax) dblRemainingTax
+			FROM tblAPVoucherPayableTaxStaging
+			WHERE intVoucherPayableId = B.intVoucherPayableId
+		) PT
+
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
 
 		--IF ALREADY EXISTS GET PAYABLES KEY
 		INSERT INTO @payablesKey(intOldPayableId, intNewPayableId)
@@ -1006,18 +1017,6 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayableTaxCompleted A
 		INNER JOIN @deleted B ON A.intVoucherPayableId = B.intVoucherPayableId
 
-		--UPDATE QTY AFTER REINSERTING
-		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
-		UPDATE B
-			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
-				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
-				B.dblQuantityBilled = 0 --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
-		FROM tblAPVoucherPayable B
-		INNER JOIN @deleted B2
-			ON B.intVoucherPayableId = B2.intNewPayableId
-		INNER JOIN @validPayables C
-			ON B2.intVoucherPayableKey = C.intVoucherPayableId
-
 		UPDATE A
 			SET A.dblTax = A.dblTax + taxData.dblTax, A.dblAdjustedTax = A.dblAdjustedTax + taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
@@ -1039,6 +1038,23 @@ ELSE SAVE TRAN @SavePoint
 		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
 		-- ) taxData
 
+		--UPDATE QTY AFTER REINSERTING
+		--UPDATE QTY IF THERE ARE STILL QTY LEFT TO BILL	
+		UPDATE B
+			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
+				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
+				B.dblQuantityBilled = 0, --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
+				B.dblTax = PT.dblRemainingTax
+		FROM tblAPVoucherPayable B
+		INNER JOIN @deleted B2
+			ON B.intVoucherPayableId = B2.intNewPayableId
+		INNER JOIN @validPayables C
+			ON B2.intVoucherPayableKey = C.intVoucherPayableId
+		OUTER APPLY (
+			SELECT SUM(dblAdjustedTax) dblRemainingTax
+			FROM tblAPVoucherPayableTaxStaging
+			WHERE intVoucherPayableId = B.intVoucherPayableId
+		) PT
 	END
 	ELSE
 	BEGIN
