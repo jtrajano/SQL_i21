@@ -96,7 +96,7 @@ BEGIN
 		,[ysnAccrue]						= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN LoadCost.ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
-		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+		,[ysnAllowVoucher]				= CASE WHEN ISNULL(LoadCost.intVendorId,0) > 0 AND ISNULL(LoadCost.intVendorId,0) <> RE.intEntityVendorId THEN 1 ELSE  RE.ysnAllowVoucher END
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
 		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 		,intTaxGroupId = RE.intTaxGroupId
@@ -179,7 +179,7 @@ BEGIN
 		,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
-		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+		,[ysnAllowVoucher]				= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 AND ISNULL(ContractCost.intVendorId,0) <> RE.intEntityVendorId THEN 1 ELSE  RE.ysnAllowVoucher END
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
 		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 		,intTaxGroupId = RE.intTaxGroupId
