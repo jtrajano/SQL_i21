@@ -313,7 +313,10 @@ BEGIN TRY
 		intWorkOrderId
 		,intWarehouseRateMatrixDetailId
 		,dblQuantity
+		,dblProcessedQty
 		,dblEstimatedAmount
+		,dblActualAmount
+		,dblDifference
 		,dtmCreated
 		,intCreatedUserId
 		,dtmLastModified
@@ -323,7 +326,10 @@ BEGIN TRY
 	SELECT @intWorkOrderId
 		,intWarehouseRateMatrixDetailId
 		,dblQuantity
+		,dblProcessedQty
 		,dblEstimatedAmount
+		,dblActualAmount
+		,dblDifference
 		,@dtmCurrentDate
 		,intUserId
 		,@dtmCurrentDate
@@ -333,7 +339,10 @@ BEGIN TRY
 			intWorkOrderWarehouseRateMatrixDetailId INT
 			,intWarehouseRateMatrixDetailId INT
 			,dblQuantity NUMERIC(18, 6)
+			,dblProcessedQty NUMERIC(18, 6)
 			,dblEstimatedAmount NUMERIC(18, 6)
+			,dblActualAmount NUMERIC(18, 6)
+			,dblDifference NUMERIC(18, 6)
 			,intUserId INT
 			,strRowState NVARCHAR(50)
 			) x
@@ -342,14 +351,20 @@ BEGIN TRY
 
 	UPDATE dbo.tblMFWorkOrderWarehouseRateMatrixDetail
 	SET dblQuantity = x.dblQuantity
+		,dblProcessedQty = x.dblProcessedQty
 		,dblEstimatedAmount = x.dblEstimatedAmount
+		,dblActualAmount = x.dblActualAmount
+		,dblDifference = x.dblDifference
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = x.intUserId
 		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 	FROM OPENXML(@idoc, 'root/WarehouseRateMatrixDetails/WarehouseRateMatrixDetail', 2) WITH (
 			intWorkOrderWarehouseRateMatrixDetailId INT
 			,dblQuantity NUMERIC(18, 6)
+			,dblProcessedQty NUMERIC(18, 6)
 			,dblEstimatedAmount NUMERIC(18, 6)
+			,dblActualAmount NUMERIC(18, 6)
+			,dblDifference NUMERIC(18, 6)
 			,intUserId INT
 			,strRowState NVARCHAR(50)
 			) x
