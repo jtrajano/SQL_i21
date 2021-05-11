@@ -285,6 +285,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultData\Categories1099.sql
 :r .\AP\DefaultData\Categories1099PATR.sql
 :r .\AP\DefaultData\Categories1099DIV.sql
+:r .\AP\DefaultData\Categories1099K.sql
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
