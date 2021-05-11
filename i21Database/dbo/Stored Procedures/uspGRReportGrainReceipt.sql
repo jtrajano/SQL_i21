@@ -26,7 +26,10 @@ DECLARE  @strCompanyName NVARCHAR(500)
 		,@GrainUnloadedDecimal DECIMAL(24,10)  
 		,@NetWeightDecimal DECIMAL(24,10)
 		,@strScaleTicketNo NVARCHAR(50)
-		,@strDeliveryLocation NVARCHAR(MAX)    
+		,@strDeliveryLocation NVARCHAR(MAX)  
+    ,@dblCheckOff DECIMAL(24,2)
+		,@dblNetAmtPayable DECIMAL(24,2)
+	  
 	
   
 
@@ -138,6 +141,13 @@ DECLARE  @strCompanyName NVARCHAR(500)
    END  
  FROM tblSMCompanySetup  
 
+  SELECT TOP 1
+	  @dblCheckOff = CAST(RI.dblTax AS DECIMAL(18,2)) 
+   ,@dblNetAmtPayable = CAST((RI.dblLineTotal + RI.dblTax) AS DECIMAL(18,2))
+ FROM tblICInventoryReceipt IR
+ INNER JOIN tblICInventoryReceiptItem RI on IR.intInventoryReceiptId = RI.intInventoryReceiptId
+ INNER JOIN tblSCTicket c on c.intTicketId = RI.intSourceId AND c.intTicketId = @intScaleTicketId AND IR.intSourceType = 1 --SCALE
+
 
   SELECT DISTINCT  
      @strCompanyName +   
@@ -223,7 +233,12 @@ DECLARE  @strCompanyName NVARCHAR(500)
        ELSE ShipToLocation.strCountry  
        END)) 
 	   ,strContractNumber =  ISNULL(CT.strContractNumber,'')
-	    
+
+     ,dblPricePerNetTonne = CAST(SC.dblUnitPrice AS DECIMAL(18,2))
+     ,dblTotaPurchasePrice = CAST((SC.dblUnitPrice * SC.dblNetUnits) AS DECIMAL(18,2))
+     ,@dblCheckOff AS dblCheckOff
+     ,@dblNetAmtPayable AS dblNetAmtPayable
+  
   
  FROM tblSCTicket SC  
  JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId  
@@ -234,7 +249,7 @@ DECLARE  @strCompanyName NVARCHAR(500)
  LEFT JOIN tblCTWeightGrade ctGrade ON ctGrade.intWeightGradeId = SC.intGradeId
  LEFT JOIN tblGLAccount  glAccount ON glAccount.intAccountId = ctGrade.intAccountId
  LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityId = SC.intEntityId
- LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = SC.intContractId  
+ LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = SC.intContractId
  WHERE SC.intTicketId = @intScaleTicketId   
 
 
