@@ -9,10 +9,18 @@ AS
 set nocount on
 
 declare @DeliverySheetNumber nvarchar(100)
+declare @StorageCost decimal(18, 6)
 declare @CurrentDate datetime
 
-select @DeliverySheetNumber =  strDeliverySheetNumber from tblSCDeliverySheet where intDeliverySheetId = @DeliverySheetId
+select @DeliverySheetNumber =  strDeliverySheetNumber 
+	from tblSCDeliverySheet where intDeliverySheetId = @DeliverySheetId
+
+select @StorageCost = isnull(dblBasis, 0) + isnull(dblSettlementPrice, 0)
+	from tblGRCustomerStorage 
+		where intDeliverySheetId = @DeliverySheetId
+			and ysnTransferStorage = 0
 select @CurrentDate = getdate()
+
 
 if @ysnPost = 1
 begin
@@ -33,6 +41,7 @@ begin
 			,@GLAccounts AS dbo.ItemGLAccount
 			,@Code as nvarchar(10) = 'SC'
 			,@TransactionType as nvarchar(50)= 'Delivery Sheet'
+			,@GLDescription nvarchar(150) = 'Delivery Sheet Shrinkage:' + @DeliverySheetNumber
 		
 	
 	declare @ItemIds table(
@@ -118,7 +127,7 @@ begin
 				,dblCredit					= Credit.Value
 				,dblDebitUnit				= DebitUnit.Value
 				,dblCreditUnit				= CreditUnit.Value
-				,strDescription				= GLDetailFinTrax.strDescription
+				,strDescription				= tblGLAccount.strDescription + '. ' + @GLDescription
 				,strCode					= @Code
 				,strReference				= '' 
 				,intCurrencyId				= GLDetailFinTrax.intCurrencyId
@@ -144,15 +153,15 @@ begin
 				,dblForeignRate				= GLDetailFinTrax.dblForeignRate 			
 			
 		from tblICInventoryAdjustment Adjustment			
-			cross apply (
-				select sum(dblDebit) as dblAmount
-					,sum(dblDebitUnit) as dblUnit	
-						from tblGLDetail 
-							where strTransactionId = Adjustment.strAdjustmentNo
-							 and strCode = 'IC'
-							 and ysnIsUnposted = 0
+			--cross apply (
+			--	select sum(dblDebit) as dblAmount
+			--		,sum(dblDebitUnit) as dblUnit	
+			--			from tblGLDetail 
+			--				where strTransactionId = Adjustment.strAdjustmentNo
+			--				 and strCode = 'IC'
+			--				 and ysnIsUnposted = 0
 
-			) GLDetailData
+			--) GLDetailData
 			cross apply (
 				select top 1 intCurrencyId					
 					,dblExchangeRate
@@ -176,23 +185,25 @@ begin
 				AND 10 = GLAccounts.intTransactionTypeId
 			INNER JOIN dbo.tblGLAccount
 				ON tblGLAccount.intAccountId = GLAccounts.intContraInventoryId
+		
 
-			CROSS APPLY dbo.fnGetDebit(GLDetailData.dblAmount) Debit
-			CROSS APPLY dbo.fnGetCredit(GLDetailData.dblAmount) Credit
+		
+			CROSS APPLY dbo.fnGetDebit(isnull(@StorageCost, AdjustmentDetail.dblCost) * abs(dblNewQuantity)) Debit
+			CROSS APPLY dbo.fnGetCredit(isnull(@StorageCost, AdjustmentDetail.dblCost) * abs(dblNewQuantity)) Credit
 			CROSS APPLY dbo.fnGetDebitForeign(
-				GLDetailData.dblAmount
+				AdjustmentDetail.dblCost * abs(dblNewQuantity)
 				,GLDetailFinTrax.intCurrencyId
 				,@DefaultCurrencyId
 				,GLDetailFinTrax.dblExchangeRate
 			) DebitForeign
 			CROSS APPLY dbo.fnGetCreditForeign(
-				GLDetailData.dblAmount
+				AdjustmentDetail.dblCost * abs(dblNewQuantity)
 				,GLDetailFinTrax.intCurrencyId
 				,@DefaultCurrencyId
 				,GLDetailFinTrax.dblExchangeRate
 			) CreditForeign
-			CROSS APPLY dbo.fnGetDebitUnit(GLDetailData.dblUnit) DebitUnit
-			CROSS APPLY dbo.fnGetCreditUnit(GLDetailData.dblUnit) CreditUnit
+			CROSS APPLY dbo.fnGetDebitUnit( abs(dblNewQuantity)) DebitUnit
+			CROSS APPLY dbo.fnGetCreditUnit( abs(dblNewQuantity)) CreditUnit
 
 		 where Adjustment.intInventoryAdjustmentId = @InventoryAdjustmentId
 
@@ -211,7 +222,7 @@ begin
 				,dblCredit					= Debit.Value
 				,dblDebitUnit				= CreditUnit.Value
 				,dblCreditUnit				= DebitUnit.Value
-				,strDescription				= GLDetailFinTrax.strDescription--ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblCost) --+ 'Z'
+				,strDescription				= tblGLAccount.strDescription  + '. ' + @GLDescription
 				,strCode					= @Code
 				,strReference				= '' 
 				,intCurrencyId				= GLDetailFinTrax.intCurrencyId
@@ -236,14 +247,14 @@ begin
 				,dblReportingRate			= NULL 
 				,dblForeignRate				= GLDetailFinTrax.dblForeignRate 
 		from tblICInventoryAdjustment Adjustment			
-			cross apply (
-				select sum(dblDebit) as dblAmount
-					,sum(dblDebitUnit) as dblUnit	
-						from tblGLDetail where strTransactionId = Adjustment.strAdjustmentNo
-							 and strCode = 'IC'
-							 and ysnIsUnposted = 0
+			--cross apply (
+			--	select sum(dblDebit) as dblAmount
+			--		,sum(dblDebitUnit) as dblUnit	
+			--			from tblGLDetail where strTransactionId = Adjustment.strAdjustmentNo
+			--				 and strCode = 'IC'
+			--				 and ysnIsUnposted = 0
 
-			) GLDetailData
+			--) GLDetailData
 			cross apply (
 				select top 1 intCurrencyId					
 					,dblExchangeRate
@@ -269,26 +280,25 @@ begin
 			INNER JOIN dbo.tblGLAccount
 				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
 
-			CROSS APPLY dbo.fnGetDebit(GLDetailData.dblAmount) Debit
-			CROSS APPLY dbo.fnGetCredit(GLDetailData.dblAmount) Credit
+			CROSS APPLY dbo.fnGetDebit(isnull(@StorageCost, AdjustmentDetail.dblCost) * abs(dblNewQuantity)) Debit
+			CROSS APPLY dbo.fnGetCredit(isnull(@StorageCost, AdjustmentDetail.dblCost) * abs(dblNewQuantity)) Credit
 			CROSS APPLY dbo.fnGetDebitForeign(
-				GLDetailData.dblAmount
+				AdjustmentDetail.dblCost * abs(dblNewQuantity)
 				,GLDetailFinTrax.intCurrencyId
 				,@DefaultCurrencyId
 				,GLDetailFinTrax.dblExchangeRate
 			) DebitForeign
 			CROSS APPLY dbo.fnGetCreditForeign(
-				GLDetailData.dblAmount
+				AdjustmentDetail.dblCost * abs(dblNewQuantity)
 				,GLDetailFinTrax.intCurrencyId
 				,@DefaultCurrencyId
 				,GLDetailFinTrax.dblExchangeRate
 			) CreditForeign
-			CROSS APPLY dbo.fnGetDebitUnit(GLDetailData.dblUnit) DebitUnit
-			CROSS APPLY dbo.fnGetCreditUnit(GLDetailData.dblUnit) CreditUnit
+			CROSS APPLY dbo.fnGetDebitUnit(abs(dblNewQuantity)) DebitUnit
+			CROSS APPLY dbo.fnGetCreditUnit(abs(dblNewQuantity)) CreditUnit
 
 
 		 where Adjustment.intInventoryAdjustmentId = @InventoryAdjustmentId
-
 
 		if exists ( select top 1 1 from @GLEntries)
 			EXEC uspGLBookEntries @GLEntries, @ysnPost	
