@@ -7839,6 +7839,7 @@
     <Build Include="dbo\Views\vyuGRTransferFlow.sql" />
     <Build Include="dbo\Functions\fnGRCheckForSameTransfer.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
+    <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
@@ -8103,6 +8104,7 @@
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
   </ItemGroup>
   <ItemGroup>
