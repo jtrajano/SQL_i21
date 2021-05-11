@@ -576,6 +576,33 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--Approval
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]            = I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= ISNULL(SMT.strApprovalStatus, 'Not Yet Approved')
+	FROM 
+		##ARPostInvoiceHeader I 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
+	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
+	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
+	WHERE ISNULL(SMT.strApprovalStatus, '') =  'Waiting for Approval'
+	AND VI.ysnHasCreditApprover = 1	
+    AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--UOM is required
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
