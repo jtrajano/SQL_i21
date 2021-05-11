@@ -7856,6 +7856,8 @@
     <Build Include="dbo\Functions\fnAP1099EFileKPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfK.sql" />
 </ItemGroup>
+    <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
@@ -8101,6 +8103,7 @@
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
