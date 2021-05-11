@@ -1139,8 +1139,12 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnAccrue]						= @ysnAccrue
 						,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 						,[strChargesLink]					= RE.strChargesLink
-						,[ysnAllowVoucher]				= CASE WHEN ISNULL(RE.ysnIsStorage,0) = 0 THEN
-																RE.ysnAllowVoucher
+						,[ysnAllowVoucher]				= CASE WHEN ISNULL(RE.ysnIsStorage,0) = 0 
+														  THEN
+																CASE WHEN ISNULL(@ysnAccrue,0) = 1 AND ISNULL(@intHaulerId,0) > 0 AND @intHaulerId <> RE.intEntityVendorId 
+																THEN 1 
+																ELSE RE.ysnAllowVoucher 
+																END
 														  ELSE
 																1 -- allow to be added in add payable for customer storage
 														  END
@@ -1229,7 +1233,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnAccrue]						= @ysnAccrue
 							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
-							,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+							,[ysnAllowVoucher]				= CASE WHEN ISNULL(@intHaulerId,0) > 0 AND @intHaulerId <> RE.intEntityVendorId THEN 1 ELSE RE.ysnAllowVoucher END
 							,[intLoadShipmentId]			= RE.intLoadShipmentId 
 							,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 							,intTaxGroupId = RE.intTaxGroupId
@@ -1304,7 +1308,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnAccrue]						= ContractCost.ysnAccrue
 							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
-							,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+							,[ysnAllowVoucher]				= CASE WHEN ContractCost.ysnAccrue = 1 AND ContractCost.intVendorId <> RE.intEntityVendorId THEN 1 ELSE RE.ysnAllowVoucher END
 							,[intLoadShipmentId]			= RE.intLoadShipmentId 
 							,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 							,intTaxGroupId = RE.intTaxGroupId
@@ -1376,7 +1380,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
-								,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+								,[ysnAllowVoucher]				= CASE WHEN ISNULL(@intHaulerId,0) > 0 AND @intHaulerId <> RE.intEntityVendorId THEN 1 ELSE RE.ysnAllowVoucher END
 								,[intLoadShipmentId]			= RE.intLoadShipmentId 
 								,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 								,intTaxGroupId = RE.intTaxGroupId
@@ -1446,7 +1450,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 				,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 				,[strChargesLink]					= RE.strChargesLink
-				,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+				,[ysnAllowVoucher]				= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0  AND ISNULL(ContractCost.intVendorId,0) <> RE.intEntityVendorId  THEN 1 ELSE RE.ysnAllowVoucher END 
 				,[intLoadShipmentId]			= RE.intLoadShipmentId 
 				,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 				,intTaxGroupId = RE.intTaxGroupId
