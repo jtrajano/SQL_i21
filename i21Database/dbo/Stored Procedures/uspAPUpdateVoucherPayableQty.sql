@@ -192,7 +192,7 @@ ELSE SAVE TRAN @SavePoint
 		SET P.dblQuantityToBill = (P.dblQuantityToBill - P2.dblQuantityToBill),
 			P.dblQuantityBilled = (P.dblQuantityBilled + P2.dblQuantityToBill),
 			P.dblNetWeight = (P.dblNetWeight - P2.dblNetWeight),
-			P.dblTax = PT.dblRemainingTax
+			P.dblTax = ISNULL(PT.dblRemainingTax, 0)
 		FROM tblAPVoucherPayable P
 		INNER JOIN (
 			SELECT PK.intNewPayableId, SUM(dblQuantityToBill) dblQuantityToBill, SUM(dblNetWeight) dblNetWeight
@@ -639,7 +639,7 @@ ELSE SAVE TRAN @SavePoint
 			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
 				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
 				B.dblQuantityBilled = 0, --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
-				B.dblTax = PT.dblRemainingTax
+				B.dblTax = ISNULL(PT.dblRemainingTax, 0)
 		FROM tblAPVoucherPayable B
 		INNER JOIN @payablesKeyPartial B2
 			ON B2.intNewPayableId = B.intVoucherPayableId
@@ -1044,7 +1044,7 @@ ELSE SAVE TRAN @SavePoint
 			SET B.dblQuantityToBill = (B.dblQuantityToBill + C.dblQuantityToBill),
 				B.dblNetWeight = (B.dblNetWeight + C.dblNetWeight),
 				B.dblQuantityBilled = 0, --when returning to tblAPVoucherPayable, we expect that qty to billed is 0
-				B.dblTax = PT.dblRemainingTax
+				B.dblTax = ISNULL(PT.dblRemainingTax, 0)
 		FROM tblAPVoucherPayable B
 		INNER JOIN @deleted B2
 			ON B.intVoucherPayableId = B2.intNewPayableId
