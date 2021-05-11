@@ -90,10 +90,11 @@ FROM
 		AND iu.ysnStockUnit = 1		
 WHERE	
 	t.intItemId = @intItemId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	--AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND IL.intLocationId = @intLocationId
-	AND (@intSubLocationId IS NULL OR @intSubLocationId = Lot.intSubLocationId)
-	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = Lot.intStorageLocationId)
+	AND (NULLIF(@intSubLocationId, 0) IS NULL OR @intSubLocationId = Lot.intSubLocationId)
+	AND (NULLIF(@intStorageLocationId, 0) IS NULL OR @intStorageLocationId = Lot.intStorageLocationId)
 	AND (@intLotId IS NULL OR @intLotId = t.intLotId)
 	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%' COLLATE Latin1_General_CI_AS)
 	AND @intOwnershipType = 1
@@ -126,12 +127,15 @@ FROM
 WHERE 
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	--AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND (@intSubLocationId IS NULL OR  @intSubLocationId = Lot.intSubLocationId)
 	AND (@intStorageLocationId IS NULL OR  @intStorageLocationId = Lot.intStorageLocationId)
 	AND (@intLotId IS NULL OR @intLotId = t.intLotId)
 	AND (@strLotNumber IS NULL OR Lot.strLotNumber LIKE @strLotNumber + '%' COLLATE Latin1_General_CI_AS)
 	AND @intOwnershipType = 2
+
+
 
 -- Return the result back. 
 SELECT 
