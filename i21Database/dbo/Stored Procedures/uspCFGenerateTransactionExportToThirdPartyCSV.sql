@@ -90,7 +90,7 @@ SELECT
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 					) > 0
 		                THEN 
 							CASE 
@@ -98,14 +98,14 @@ SELECT
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0   
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0   
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -122,7 +122,7 @@ SELECT
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId    
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
 					) > 0
 		                THEN 
 							CASE 
@@ -130,14 +130,14 @@ SELECT
 									ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 									AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 									AND strState 											= C.strTaxState 
-									AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId    
+									AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId    
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -155,7 +155,7 @@ SELECT
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0    
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0    
 					) > 0
 		                THEN 
 							CASE 
@@ -163,14 +163,14 @@ SELECT
 									ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 									AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 									AND strState 											= C.strTaxState 
-									AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0    
+									AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0    
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -185,7 +185,7 @@ SELECT
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId 
 					) > 0
 		                THEN 
 							CASE 
@@ -193,14 +193,14 @@ SELECT
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId 
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
 											ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 											AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 											AND strState 											= C.strTaxState 
-											AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId
+											AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -217,7 +217,7 @@ SELECT
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 					) > 0
 		                THEN 
 							CASE 
@@ -225,14 +225,14 @@ SELECT
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -248,7 +248,7 @@ SELECT
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId   
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId   
 					) > 0
 		                THEN 
 							CASE 
@@ -256,14 +256,14 @@ SELECT
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId   
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId   
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId  
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -278,7 +278,7 @@ SELECT
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0   
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0   
 					) > 0
 		                THEN 
 							CASE 
@@ -286,14 +286,14 @@ SELECT
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0   
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0   
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
 										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -344,13 +344,13 @@ SELECT
 					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0 
 					)
 
 					
@@ -363,13 +363,13 @@ SELECT
 					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId   
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId   
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
 					)
 
 
@@ -383,13 +383,13 @@ SELECT
 					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0    
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0    
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 					)
 
 
@@ -402,13 +402,13 @@ SELECT
 					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId    
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
 					)
 
 
@@ -421,13 +421,13 @@ SELECT
 					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0
 					)
 
 
@@ -440,13 +440,13 @@ SELECT
 					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId  
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= I.intCategoryId
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId
 					)
 
 					-- 8
@@ -458,13 +458,13 @@ SELECT
 					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0 
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
 						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
 						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0		= 0 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0 
 					)
 
 
