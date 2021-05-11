@@ -54,6 +54,7 @@ BEGIN TRY
 		,@intProductTypeId INT
 		,@intProductValueId INT
 		,@intItemContractId INT
+		,@intItemBundleId INT
 		,@intCountryID INT
 		,@strCountry NVARCHAR(50)
 		,@intBookId INT
@@ -154,6 +155,7 @@ BEGIN TRY
 				,@intProductTypeId = NULL
 				,@intProductValueId = NULL
 				,@intItemContractId = NULL
+				,@intItemBundleId = NULL
 				,@intCountryID = NULL
 				,@strCountry = NULL
 				,@intBookId = NULL
@@ -308,6 +310,7 @@ BEGIN TRY
 					,@intProductTypeId = 2 -- Item
 					,@intProductValueId = IM.intItemId
 					,@intItemContractId = NULL
+					,@intItemBundleId = NULL
 					,@intCountryID = CA.intCountryID
 					,@strCountry = CA.strDescription
 					,@intBookId = NULL
@@ -414,6 +417,7 @@ BEGIN TRY
 					,@intProductTypeId = 8 -- Contract Line Item
 					,@intProductValueId = CD.intContractDetailId
 					,@intItemContractId = CD.intItemContractId
+					,@intItemBundleId = CD.intItemBundleId
 					,@intCountryID = ISNULL(CA.intCountryID, IC.intCountryId)
 					,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
 					,@intBookId = CD.intBookId
@@ -620,6 +624,7 @@ BEGIN TRY
 					,intPreviousSampleStatusId
 					,intItemId
 					,intItemContractId
+					,intItemBundleId
 					,intContractDetailId
 					,intCountryID
 					,intEntityId
@@ -663,6 +668,7 @@ BEGIN TRY
 					,@intSampleStatusId
 					,@intItemId
 					,@intItemContractId
+					,@intItemBundleId
 					,@intContractDetailId
 					,@intCountryID
 					,@intEntityId
@@ -845,6 +851,7 @@ BEGIN TRY
 					,intSampleStatusId = @intSampleStatusId
 					,intPreviousSampleStatusId = @intPreviousSampleStatusId
 					,intItemContractId = @intItemContractId
+					,intItemBundleId = @intItemBundleId
 					,intContractDetailId = @intContractDetailId
 					,intCountryID = @intCountryID
 					,intEntityId = @intEntityId
