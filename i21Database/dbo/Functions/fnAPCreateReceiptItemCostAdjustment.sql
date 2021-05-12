@@ -203,6 +203,7 @@ BEGIN
 				) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
 		) 
+		AND B.dblQtyReceived > 0
 		UNION ALL
 		--SETTLE STORAGE
 		--ITEM
@@ -277,6 +278,7 @@ BEGIN
 				and B.intContractDetailId = SC.intContractDetailId
 		WHERE (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 			and SC.intSettleStorageId is null
+		AND B.dblQtyReceived > 0
 		UNION ALL
 		--SETTLE STORAGE
 		--ITEM
@@ -354,7 +356,7 @@ BEGIN
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)		
 		WHERE B.intCustomerStorageId > 0 AND D.strType = 'Inventory' and (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost)
-			
+		AND B.dblQtyReceived > 0
 			
 		-- UNION ALL
 		-- --DISCOUNTS
@@ -467,7 +469,7 @@ BEGIN
 		) as TransferFlow
 		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 			and TransferFlow.ysnSame = 0
-
+		AND B.dblQtyReceived > 0
 		--DP STORAGES FROM THE DELIVERY SHEET
 		UNION ALL
 		
@@ -551,7 +553,7 @@ BEGIN
 		LEFT JOIN tblICItemUOM receiptCostUOM ON receiptCostUOM.intItemUOMId = ISNULL(SIR.intCostUOMId, SIR.intUnitMeasureId)
 		LEFT JOIN tblICInventoryTransactionType transType ON transType.strName = 'Bill' -- 'Cost Adjustment'
 		WHERE item.strType = 'Inventory' 
-
+		AND B.dblQtyReceived > 0
 		UNION ALL
 
 		--TRANSFER STORAGE (OP >> DP)
@@ -626,7 +628,7 @@ BEGIN
 		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) 
 			AND B.intCustomerStorageId > 0 
 			AND D.strType = 'Inventory'
-
+		AND B.dblQtyReceived > 0
 		UNION ALL
 		--TRANSFER STORAGE (DP >> DP)
 		SELECT
@@ -715,5 +717,6 @@ BEGIN
 		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) 
 			AND B.intCustomerStorageId > 0 
 			AND D.strType = 'Inventory'
+		AND B.dblQtyReceived > 0
 	RETURN;
 END
