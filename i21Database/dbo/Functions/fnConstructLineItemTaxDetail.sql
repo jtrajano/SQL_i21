@@ -215,7 +215,6 @@ BEGIN
 		tblSMTaxCode SMTC
 			ON LITE.[intTaxCodeId] = SMTC.[intTaxCodeId]
 		
-		
 	DECLARE @TotalUnitTax			NUMERIC(18,6)
 			,@UnitTax				NUMERIC(18,6)
 			,@CheckOffUnitTax		NUMERIC(18,6)
@@ -225,9 +224,38 @@ BEGIN
 			,@CheckOffRate			NUMERIC(18,6)
 			,@TaxableByOtherRate	NUMERIC(18,6)
 			,@ItemPrice				NUMERIC(18,6)
+			,@NetPrice				NUMERIC(18,6)
 	
+	DECLARE @StateExciseTax NUMERIC(18,6)
+	DECLARE @StateSalesTax		NUMERIC(18,6)
+	DECLARE @FederalExciseTax	NUMERIC(18,6)
+	DECLARE @DistrictTax	NUMERIC(18,6)
+
+	SELECT @StateExciseTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%State Excise Tax%'
+
+	SELECT @StateSalesTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%State Sales Tax%'
 	
-	
+	SELECT @FederalExciseTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%Federal Excise Tax%'
+
+	SELECT @DistrictTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%District Tax%'
+
+	SET @NetPrice = ((4.024 - @StateExciseTax) / (1 + (@DistrictTax/@HundredDecimal) + (@StateSalesTax/@HundredDecimal))) - @FederalExciseTax
 
 	IF ISNULL(@IsReversal,0) = 0
 		BEGIN
@@ -719,8 +747,18 @@ BEGIN
 				END
 				ELSE
 				BEGIN
-					SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
-					SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
+					IF ISNULL(@IsReversal,0) = 0
+					BEGIN
+						SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+						SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
+					END
+					ELSE
+					BEGIN
+						DECLARE @StateSalesTaxTotal NUMERIC(18,6) = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
+
+						SET @ItemExemptedTaxAmount = (@StateSalesTaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
+						SET @ItemTaxAmount = (@StateSalesTaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
+					END
 				END
 			END
 				
