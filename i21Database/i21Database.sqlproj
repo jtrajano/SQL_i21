@@ -9400,6 +9400,7 @@
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
