@@ -6,7 +6,7 @@ INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 SELECT
 	NEWID(),
-	strError = 'Cannot find the location: ''' + sc.strLocation + '''',
+	strError = CASE WHEN sc.strLocation IS NULL THEN 'Location is blank.' ELSE 'Cannot find the location: ''' + sc.strLocation + '''' END,
 	strField = 'Location', 
 	strLogLevel = 'Error', 
 	strValue = sc.strLocation,
@@ -46,7 +46,7 @@ INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 SELECT
 	NEWID(),
-	strError = 'Cannot find the salesperson: ''' + sc.strSalesperson + '''',
+	strError = CASE WHEN sc.strSalesperson IS NULL THEN 'Salesperson is blank.' ELSE 'Cannot find the salesperson: ''' + sc.strSalesperson + '''' END,
 	strField = 'Salesperson', 
 	strLogLevel = 'Error', 
 	strValue = sc.strSalesperson,
@@ -66,7 +66,7 @@ INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 SELECT
 	NEWID(),
-	strError = 'Cannot find the currency: ''' + sc.strCurrency + '''',
+	strError = CASE WHEN sc.strCurrency IS NULL THEN 'Currency is blank.' ELSE 'Cannot find the currency: ''' + sc.strCurrency + '''' END,
 	strField = 'Currency', 
 	strLogLevel = 'Error', 
 	strValue = sc.strCurrency,
@@ -257,7 +257,7 @@ BEGIN
 		guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 	SELECT
 		NEWID(),
-        strError = 'Cannot find the Item No.: ''' + ISNULL(sc.strItemNo, '') + '''',
+        strError = CASE WHEN sc.strItemNo IS NULL THEN 'Item No is blank.' ELSE 'Cannot find the Item No.: ''' + ISNULL(sc.strItemNo, '') + '''' END,
         strField = 'Item No', 
         strLogLevel = 'Error', 
         strValue = sc.strItemNo,
@@ -293,7 +293,7 @@ BEGIN
 		guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 	SELECT
 		NEWID(),
-        strError = 'In valid UOM: ''' + ISNULL(sc.strUnitMeasure, '') + '''',
+        strError = CASE WHEN sc.strUnitMeasure IS NULL THEN 'UOM is blank.' ELSE 'In valid UOM: ''' + ISNULL(sc.strUnitMeasure, '') + '''' END,
         strField = 'UOM', 
         strLogLevel = 'Error', 
         strValue = sc.strUnitMeasure,
@@ -331,7 +331,7 @@ BEGIN
 		guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 	SELECT
 		NEWID(),
-        strError = 'Invalid tax group: ''' + sc.strTaxGroup + '''',
+        strError = CASE WHEN sc.strTaxGroup IS NULL THEN 'Tax Group is blank.' ELSE 'Invalid tax group: ''' + sc.strTaxGroup + '''' END,
         strField = 'Tax Group', 
         strLogLevel = 'Error', 
         strValue = sc.strTaxGroup,
