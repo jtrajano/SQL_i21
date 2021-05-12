@@ -674,7 +674,7 @@ BEGIN TRY
 
 			IF EXISTS (
 					SELECT 1
-					FROM master.dbo.sysdatabases
+					FROM sys.databases
 					WHERE name = @strDatabaseName
 					)
 			BEGIN
