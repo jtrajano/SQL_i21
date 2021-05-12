@@ -402,6 +402,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\StorageInventoryReceipt.sql
 :R .\GR\Fix_NULL_SSId_in_voucher_details.sql
 :R .\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql
+:R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
