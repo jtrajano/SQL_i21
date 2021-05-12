@@ -165,7 +165,7 @@ AS
 	, [Broker].strName AS strBroker
 	, [Transfer].strTrailerId
 	, [Transfer].strERPTransferNo
-
+	, TransferDetail.strComment 	
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
