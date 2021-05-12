@@ -299,12 +299,14 @@ BEGIN TRY
 		DELETE FROM @tblDepletion
 		DELETE FROM @SettleVoucherCreate
 
+		select @TicketNo = dbo.fnGRGetStorageTicket(@intSettleStorageId)
+
 		SELECT 
 			@intCreatedUserId 				= intCreatedUserId
 			,@EntityId 						= intEntityId
 			,@LocationId 					= intCompanyLocationId
 			,@ItemId 						= intItemId
-			,@TicketNo 						= strStorageTicket
+			,@TicketNo 						= case when isnull(@TicketNo , '') = '' then strStorageTicket else @TicketNo end 
 			,@strStorageAdjustment 			= strStorageAdjustment
 			,@dtmCalculateStorageThrough 	= dtmCalculateStorageThrough
 			,@dblAdjustPerUnit 				= dblAdjustPerUnit
@@ -565,8 +567,7 @@ BEGIN TRY
 				outer apply (
 					select sum(dblQtyReceived) as dblTotal
 						from tblAPBillDetail 
-							where intBillId in 
-								(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+							where intSettleStorageId = @intSettleStorageId
 							and intContractDetailId = a.intContractDetailId
 				) total_bill
 					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
@@ -600,8 +601,8 @@ BEGIN TRY
 
 						 select @cur_billed_per_contract_id = sum(ISNULL(dblQtyReceived,0))
 							from tblAPBillDetail 
-								where intBillId in 
-									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+								where 
+								intSettleStorageId = @intSettleStorageId
 								and intContractDetailId = @cur_contract_id
 
 						--select '@cur_billed_per_contract_id',@cur_billed_per_contract_id
@@ -1526,7 +1527,7 @@ BEGIN TRY
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
 					,intTransactionDetailId		=  case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
-					,strTransactionId			= @TicketNo
+					,strTransactionId			= @strSettleTicket--@TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
@@ -1598,7 +1599,7 @@ BEGIN TRY
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
 					,intTransactionDetailId		= case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
-					,strTransactionId			= @TicketNo
+					,strTransactionId			= @strSettleTicket--@TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
@@ -2043,7 +2044,7 @@ BEGIN TRY
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
 					,[intShipFromId]				= @intShipFrom	
-					,[intShipFromEntityId]			= @shipFromEntityId
+					,[intShipFromEntityId]			= @shipFromEntityId					
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription]			= c.[strItemNo]
 					,[intItemId]					= a.[intItemId]
@@ -2334,7 +2335,7 @@ BEGIN TRY
 										and a.intSettleStorageId = c.intSettleStorageId
 								join tblAPBill d
 									on c.intBillId = d.intBillId
-										and d.strVendorOrderNumber = @TicketNo
+										
 							)
 							
 				---we should update the voucher payable to remove the contract detail that has a null contract header
@@ -2402,7 +2403,7 @@ BEGIN TRY
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
 					,[intShipFromId]				= @intShipFrom	
-					,[intShipFromEntityId]			= @shipFromEntityId
+					,[intShipFromEntityId]			= @shipFromEntityId					
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription] 			= Item.[strItemNo]
 					,[intItemId] 					= ReceiptCharge.[intChargeId]
@@ -2522,7 +2523,7 @@ BEGIN TRY
 					,[intLocationId]		= @LocationId
 					,[intShipToId]			= @LocationId
 					,[intShipFromId]		= @intShipFrom	
-					,[intShipFromEntityId]	= @shipFromEntityId
+					,[intShipFromEntityId]	= @shipFromEntityId					
 					,[strVendorOrderNumber]	= @TicketNo
 					,[strMiscDescription]	= Item.[strItemNo]
 					,[intItemId]			= CC.[intItemId]
