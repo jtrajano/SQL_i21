@@ -591,7 +591,7 @@ BEGIN
 	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
 	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
 	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
-	WHERE ISNULL(SMT.strApprovalStatus, '') =  'Waiting for Approval'
+	WHERE ISNULL(SMT.strApprovalStatus, '') IN  ('Waiting for Approval', 'Waiting for Submit')
 	AND VI.ysnHasCreditApprover = 1	
     AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
 
