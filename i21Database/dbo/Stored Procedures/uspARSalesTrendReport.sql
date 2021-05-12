@@ -168,8 +168,8 @@ WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDate
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode LIKE '%' + @strAccountStatusCode + '%' OR ISNULL(@strAccountStatusCode, '') = '')
-  AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
+  AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
+  AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
 
 SELECT *
 FROM tblARSalesTrendStagingTable

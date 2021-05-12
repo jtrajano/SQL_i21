@@ -212,8 +212,8 @@ WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
 			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
 		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode LIKE '%' + @strAccountStatusCode + '%' OR ISNULL(@strAccountStatusCode, '') = '')
-  AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
+  AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
+  AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
 
 UNION ALL
 
@@ -258,8 +258,8 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
 			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
 		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode LIKE '%' + @strAccountStatusCode + '%' OR ISNULL(@strAccountStatusCode, '') = '')
-  AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
+  AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
+  AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
   ) SUMMARY
    	OUTER APPLY (
 	SELECT TOP 1 strCompanyName
