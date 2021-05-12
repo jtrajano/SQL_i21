@@ -380,6 +380,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\StorageInventoryReceipt.sql
 :R .\GR\StorageHistoryPaidAmount.sql
+:R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
