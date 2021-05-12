@@ -44,6 +44,7 @@
 	[strLotCondition] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intCostingMethod] INT NULL,
 	[ysnWeighed] BIT NULL DEFAULT ((0)),
+	[strComment] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     [dtmDateCreated] DATETIME NULL,
     [dtmDateModified] DATETIME NULL,
     [intCreatedByUserId] INT NULL,
