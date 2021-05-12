@@ -9227,6 +9227,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
