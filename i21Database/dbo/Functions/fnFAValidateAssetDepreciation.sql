@@ -43,8 +43,8 @@ BEGIN
             FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId
             ORDER BY dtmDepreciationToDate DESC
         )D
-        WHERE D.dblDepreciationToDate >=(ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0)) 
-        OR ( ISNULL(A.ysnFullyDepreciated,0) = 1 AND ISNULL(A.ysnTaxFullyDepreciated,0) = 1 )
+        WHERE (D.dblDepreciationToDate >=(ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0)) 
+        OR  ISNULL(BD.ysnFullyDepreciated,0) = 1 )
         AND ISNULL(A.ysnDisposed, 0) = 0
 
         IF EXISTS(SELECT TOP 1 1 FROM @tbl)
