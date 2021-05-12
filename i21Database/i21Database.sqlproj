@@ -9400,6 +9400,7 @@
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
+    <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
     <Build Include="dbo\Tables\tblIPInvTransferFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPTransferOrder.sql" />
