@@ -224,14 +224,6 @@ INNER JOIN tblICInventoryReceipt IR
 INNER JOIN tblSMCompanyLocation CL
     ON CL.intCompanyLocationId = CS.intCompanyLocationId
 INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
-    AND strCode = 'IC'
-    -- AND strDescription LIKE '%Item: %'
-) GL ON GL.intTransactionId = TSR.intTransferStorageId
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
-INNER JOIN (
 	SELECT 
 		intCustomerStorageId
 		,intInventoryReceiptId
@@ -243,6 +235,16 @@ INNER JOIN (
 	FROM tblGRStorageInventoryReceipt
 	WHERE ysnUnposted = 0
 ) S ON S.intInventoryReceiptId = SIR.intInventoryReceiptId AND S.intInventoryReceiptItemId = SIR.intInventoryReceiptItemId AND S.rk = 1
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = TS.strTransferStorageTicket
+    AND gl.intTransactionId = TSR.intTransferStorageId
+    AND gl.strCode = 'IC'
+) APClearing
 OUTER APPLY (
 	SELECT S.intInventoryReceiptItemId
 		,CASE WHEN ABS(dblTransferredUnits - IRI.dblOpenReceive) <= 0.01 THEN IRI.dblOpenReceive ELSE dblTransferredUnits END dblTotalTransfer
@@ -258,6 +260,7 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
 WHERE SIR.ysnUnposted = 0
+AND APClearing.intAccountId IS NOT NULL
 
 /*END ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
 UNION ALL
@@ -394,14 +397,16 @@ INNER JOIN tblSMCompanyLocation CL
 --	ON GL.intTransactionId = TSR.intTransferStorageId
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
-INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
-    AND strCode = 'IC'
-    -- AND strDescription LIKE '%Item: %'
-) GL ON GL.intTransactionId = TSR.intTransferStorageId
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = TS.strTransferStorageTicket
+    AND gl.intTransactionId = TSR.intTransferStorageId
+    AND gl.strCode = 'IC'
+) APClearing
 LEFT JOIN 
 (
     tblICItemUOM itemUOM 
@@ -411,6 +416,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
 WHERE (ST_TO.ysnDPOwnedType = 0 AND ST.ysnDPOwnedType = 1) --DP to OS
 		OR (ST_TO.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 0) --OS to DP
+        AND APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 UNION ALL
 /*START ====>>>  ***DS/SC*** FOR OP TO DP*/
@@ -452,14 +458,16 @@ INNER JOIN tblSMCompanyLocation CL
 --	ON GL.intTransactionId = TSR.intTransferStorageId
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
-INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
-    AND strCode = 'IC'
-    -- AND strDescription LIKE '%Item: %'
-) GL ON GL.intTransactionId = TSR.intTransferStorageId
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = TS.strTransferStorageTicket
+    AND gl.intTransactionId = TSR.intTransferStorageId
+    AND gl.strCode = 'IC'
+) APClearing
 LEFT JOIN 
 (
     tblICItemUOM itemUOM 
@@ -467,6 +475,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+WHERE APClearing.intAccountId IS NOT NULL
 -- WHERE NOT EXISTS (SELECT intSourceCustomerStorageId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
 UNION ALL
 -- Bill for Transfer Settlement
@@ -514,14 +523,16 @@ join tblAPBill Bill
 --	ON GL.intTransactionId = TSR.intTransferStorageId
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
-INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
-    AND strCode = 'IC'
-    -- AND strDescription LIKE '%Item: %'
-) GL ON GL.intTransactionId = TSR.intTransferStorageId
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = TS.strTransferStorageTicket
+    AND gl.intTransactionId = TSR.intTransferStorageId
+    AND gl.strCode = 'IC'
+) APClearing
 LEFT JOIN 
 (
     tblICItemUOM itemUOM 
@@ -530,6 +541,7 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 Where Bill.ysnPosted = 1
+AND APClearing.intAccountId IS NOT NULL
 
 
 ----
@@ -599,14 +611,16 @@ join tblAPBill Bill
 --	ON GL.intTransactionId = TSR.intTransferStorageId
 --		AND GL.strTransactionType = 'Transfer Storage'
 --		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
-INNER JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
-    AND strCode = 'IC'
-    -- AND strDescription LIKE '%Item: %'
-) GL ON GL.intTransactionId = TSR.intTransferStorageId
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = TS.strTransferStorageTicket
+    AND gl.intTransactionId = TSR.intTransferStorageId
+    AND gl.strCode = 'IC'
+) APClearing
 LEFT JOIN 
 (
     tblICItemUOM itemUOM 
@@ -615,6 +629,7 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 Where Bill.ysnPosted = 1
+AND APClearing.intAccountId IS NOT NULL
 ----
 
 
@@ -643,8 +658,8 @@ SELECT DISTINCT
     ,CS_TO.intCompanyLocationId
     ,CL_TO.strLocationName
     ,0
-    ,APClearing.intAccountId
-	,APClearing.strAccountId
+    ,GL.intAccountId
+	,GL.strAccountId
 FROM tblGRTransferStorageReference TSR
 INNER JOIN tblGRCustomerStorage CS_FROM
 	ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
@@ -681,14 +696,16 @@ OUTER APPLY (
 		--AND intTransferStorageReferenceId = TSR.intTransferStorageReferenceId
 	GROUP BY intInventoryReceiptItemId
 ) TOTAL
-LEFT JOIN (
-	SELECT DISTINCT intAccountId, intTransactionId, strDescription FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage'
-    AND strCode = 'IC'
-    -- AND strDescription LIKE '%Item: %'
-) GL ON GL.intTransactionId = TSR.intTransferStorageId
-LEFT JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId, gl.strDescription
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = TS_TO.strTransferStorageTicket
+    AND gl.intTransactionId = TSR.intTransferStorageId
+    AND gl.strCode = 'IC'
+) GL
 LEFT JOIN 
 (
     tblICItemUOM itemUOM 
@@ -696,7 +713,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS_TO.intItemUOMId
-WHERE APClearing.intAccountId IS NOT NULL
+WHERE GL.intAccountId IS NOT NULL
 /*END ====>>> ***DS/SC*** FOR OP TO DP*/
 --) A 
 --WHERE dtmDate between '2021-03-03' and '2021-03-04'
