@@ -751,6 +751,17 @@ BEGIN
 		DECLARE @CFNState	NVARCHAR(MAX) = NULL
 		SELECT TOP 1 @CFNState = strPostalCode FROM tblCFStateCode where strStateName = @strSiteTaxLocation
 
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @CFNState
+		END
+
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
+		END
+
+
 		INSERT INTO tblCFSite
 			(
 				 intNetworkId		
