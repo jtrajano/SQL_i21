@@ -665,5 +665,6 @@ print 'BEGIN POST DEPLOYMENT'
 -- Clean up i21 database objects
 :r .\IC\29_CleanupObjects.sql
 :r .\RM\03_CleanupObjects.sql
+:r .\IP\2_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'
