@@ -34,6 +34,11 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPCommitmentPricing @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
+	ELSE IF @strType = 'Transfer Order'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPTransferOrder @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
 	ELSE IF @strType = 'Voucher'
 	BEGIN
 		EXEC dbo.uspIPGenerateERPVoucher @strCompanyLocation = @strCompanyLocation

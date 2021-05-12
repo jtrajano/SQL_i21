@@ -9401,6 +9401,8 @@
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
+    <Build Include="dbo\Tables\tblIPInvTransferFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPTransferOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
