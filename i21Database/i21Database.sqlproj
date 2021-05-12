@@ -9679,8 +9679,6 @@
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
-    <Build Include="dbo\Views\vyuARCustomerDocument.sql" />
-    <Build Include="dbo\Tables\tblARCustomerDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
