@@ -65,6 +65,43 @@ BEGIN TRY
 		) SH 
 		where SH.intContractStatusId NOT IN (3,5,6) and CD.intPricingTypeId <> 5
 
+		UNION ALL --These are contract with single entry in contract sequence history
+		select 
+			  CD.dtmCreated
+			, CD.dtmEndDate
+			, dblQuantity = CASE WHEN CH.ysnLoad = 1 THEN CD.intNoOfLoad * CD.dblQuantityPerLoad ELSE CD.dblQuantity  END
+			, CD.intNoOfLoad
+			, CD.dblQuantityPerLoad
+			, strType = 'Contract Sequence'
+			, CH.intContractTypeId
+			, CH.intContractHeaderId
+			, CH.strContractNumber
+			, CD.intContractDetailId
+			, CD.intContractSeq
+			, PT.strPricingType
+			, SH.intContractStatusId
+			, CH.intEntityId
+			, CH.intCommodityId
+			, intUserId = CD.intCreatedById
+			, CD.intItemUOMId
+		from tblCTContractHeader CH 
+		inner join tblCTContractDetail CD on CD.intContractHeaderId = CH.intContractHeaderId
+		inner join tblCTPricingType PT on PT.intPricingTypeId = CH.intPricingTypeId
+		inner join (select intContractHeaderId, intContractDetailId
+					from tblCTSequenceHistory
+					group by intContractHeaderId, intContractDetailId
+					having count(intContractDetailId) = 1 ) A ON A.intContractHeaderId = CH.intContractHeaderId AND A.intContractDetailId = CD.intContractDetailId
+		cross apply (
+			select top 1 * from tblCTSequenceHistory 
+			where intContractHeaderId = A.intContractHeaderId
+				and intContractDetailId = A.intContractDetailId
+			order by intSequenceHistoryId
+		) SH 
+		where SH.intContractStatusId IN (5) 
+		and CH.intCommodityId = 1 and SH.dblBalance = 0
+		order by intContractDetailId
+
+
 
 		SELECT 
 			dtmDate
@@ -425,11 +462,11 @@ BEGIN TRY
 
 			UNION ALL
 			SELECT 
-				CH.intContractTypeId
-				, CH.strContractNumber
-				, CD.intContractSeq
-				, CH.intContractHeaderId
-				, CD.intContractDetailId
+				C.intContractTypeId
+				, C.strContractNumber
+				, C.intContractSeq
+				, C.intContractHeaderId
+				, C.intContractDetailId
 				, dbo.fnRemoveTimeOnDate(SS.dtmCreated)
 				, @dtmEndDate AS dtmEndDate
 				, SUM(SH.dblUnits) AS dblQuantity
@@ -439,35 +476,43 @@ BEGIN TRY
 				, SS.strStorageTicket
 				, SS.intSettleStorageId
 				, 'Storage' --Settle Storage
-				, CH.intCommodityId
-				, CH.ysnLoad
-				, CH.dblQuantityPerLoad
-				, CH.intEntityId
+				, C.intCommodityId
+				, C.ysnLoad
+				, C.dblQuantityPerLoad
+				, C.intEntityId
 				, intUserId = SS.intCreatedUserId
 				, SS.intItemUOMId
 				, ysnIsDWG = 0
 			FROM tblGRSettleStorage SS
 			INNER JOIN tblGRStorageHistory SH ON SH.intSettleStorageId = SS.intSettleStorageId
 			INNER JOIN (
-				tblGRStorageHistory SH_DP
+					SELECT DISTINCT SH_DP.intCustomerStorageId,CH.intContractHeaderId,CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, CH.intContractTypeId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CD.intContractDetailId
+					FROM tblGRStorageHistory SH_DP
 				INNER JOIN tblCTContractHeader CH
 					ON CH.intContractHeaderId = SH_DP.intContractHeaderId
 						AND SH_DP.intTransactionTypeId IN (1,5) 
 				INNER JOIN tblCTContractDetail CD
 					ON CD.intContractHeaderId = CH.intContractHeaderId
-			) ON SH_DP.intCustomerStorageId = SH.intCustomerStorageId
-			GROUP BY CH.intContractTypeId
-				, CH.intContractHeaderId
-				, CD.intContractDetailId
+			) C ON C.intCustomerStorageId = SH.intCustomerStorageId
+			GROUP BY C.intContractTypeId
+				, C.intContractHeaderId
+				, C.intContractDetailId
 				, SS.dtmCreated
 				, SS.intSettleStorageId
 				, SS.strStorageTicket
-				, CH.strContractNumber
-				, CD.intContractSeq
-				, CH.intCommodityId
-				, CH.ysnLoad
-				, CH.dblQuantityPerLoad
-				, CH.intEntityId
+				, C.strContractNumber
+				, C.intContractSeq
+				, C.intCommodityId
+				, C.ysnLoad
+				, C.dblQuantityPerLoad
+				, C.intEntityId
 				, SS.intCreatedUserId
 				, SS.intItemUOMId
 
@@ -568,6 +613,36 @@ BEGIN TRY
 				, CH_SOURCE.intEntityId
 				, TS.intUserId
 				, TS.intItemUOMId
+			
+			UNION ALL
+			SELECT
+				CH.intContractTypeId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, dbo.fnRemoveTimeOnDate(SUH.dtmTransactionDate)
+				, @dtmEndDate AS dtmEndDate
+				, SUH.dblTransactionQuantity * -1 --SUM(SH.dblUnits) AS dblQuantity
+				, 0
+				, NULL
+				, SUH.intExternalId
+				, SUH.strNumber
+				, SUH.intExternalId
+				, 'Storage' --Settle Storage
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, intUserId = SUH.intUserId
+				, intItemUOMId = CD.intItemUOMId
+				, ysnIsDWG = 0
+			FROM tblCTSequenceUsageHistory SUH 
+				INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = SUH.intContractHeaderId
+				INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = SUH.intContractDetailId
+			WHERE CH.intPricingTypeId = 5
+				AND SUH.strScreenName = 'Delivery Sheet'
+				AND SUH.strFieldName = 'Balance'
 			
 			--INCREASE IN DP CONTRACTS
 			UNION ALL
