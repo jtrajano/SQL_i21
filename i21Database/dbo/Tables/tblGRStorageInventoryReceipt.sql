@@ -20,11 +20,11 @@
 )
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblGRStorageInventoryReceipt_intCustomerStorageId]
-	ON [dbo].[tblGRStorageInventoryReceipt]([intCustomerStorageId] DESC)
-	INCLUDE ([intInventoryReceiptId],[intInventoryReceiptItemId],[dblUnits])
+CREATE NONCLUSTERED INDEX IX_tblGRStorageInventoryReceipt_intCustomerStorageId
+	ON dbo.tblGRStorageInventoryReceipt(intCustomerStorageId DESC)
+	INCLUDE (intInventoryReceiptId,intInventoryReceiptItemId,dblUnits)
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblGRStorageInventoryReceipt_intInventoryReceiptItemId]
-	ON [dbo].[tblGRStorageInventoryReceipt]([intInventoryReceiptItemId] DESC)
+CREATE NONCLUSTERED INDEX IX_tblGRStorageInventoryReceipt_intInventoryReceiptItemId
+	ON dbo.tblGRStorageInventoryReceipt(intInventoryReceiptItemId DESC)
 GO
