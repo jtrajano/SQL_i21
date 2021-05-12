@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFGenerateTransactionExportToThirdPartyCSV]
+﻿CREATE PROCEDURE [dbo].[uspCFGenerateTransactionExportToThirdPartyCSV]
 @strWhereClause NVARCHAR(MAX) 
 AS
 
