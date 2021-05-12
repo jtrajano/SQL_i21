@@ -26,7 +26,7 @@ INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 SELECT
 	NEWID(),
-	strError = 'Cannot find the customer with Customer No.: ''' + sc.strCustomerNo + '''',
+	strError = CASE WHEN sc.strCustomerNo IS NULL THEN 'The Customer No is blank.' ELSE 'Cannot find the customer with Customer No.: ''' + sc.strCustomerNo + '''' END,
 	strField = 'Customer No', 
 	strLogLevel = 'Error', 
 	strValue = sc.strCustomerNo,
