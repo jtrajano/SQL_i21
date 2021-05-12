@@ -70,7 +70,7 @@ BEGIN
 				,@dtmDeferredDate10 = dtmDeferredDate10
 			FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
 						
-			SELECT @intTermId = intTermsId, @dtmDueDate = dtmDueDate, @dblAmountDue = dblAmountDue FROM tblAPBill B WHERE B.intBillId = @intBillId
+			SELECT @intTermId = intTermsId, @dtmDueDate = dtmBillDate, @dblAmountDue = dblAmountDue FROM tblAPBill B WHERE B.intBillId = @intBillId
 
 			SET @dblDeferredAmt = @dblAmountDue - (ISNULL(@dblDeferredAmt1, 0) 
 				+ ISNULL(@dblDeferredAmt2, 0) 
