@@ -34,6 +34,8 @@ BEGIN TRY
 		,@strReceiptNo NVARCHAR(50)
 		,@intBillId INT
 		,@strVoucherNo NVARCHAR(50)
+		,@intInventoryTransferId INT
+		,@strTransferNo NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,TrxSequenceNo INT
@@ -148,6 +150,8 @@ BEGIN TRY
 					,@strReceiptNo = NULL
 					,@intBillId = NULL
 					,@strVoucherNo = NULL
+					,@intInventoryTransferId = NULL
+					,@strTransferNo = NULL
 
 				SELECT @TrxSequenceNo = TrxSequenceNo
 					,@CompanyLocation = CompanyLocation
@@ -315,6 +319,50 @@ BEGIN TRY
 						,'Success'
 						,@strVoucherNo
 						,@ERPVoucherNo
+						)
+				END
+				ELSE IF @MessageTypeId = 5 -- Transfer Order
+				BEGIN
+					SELECT @intInventoryTransferId = intInventoryTransferId
+						,@strTransferNo = strTransferNo
+					FROM tblICInventoryTransfer
+					WHERE intInventoryTransferId = @TrxSequenceNo
+
+					UPDATE tblIPInvTransferFeed
+					SET intStatusId = (
+							CASE 
+								WHEN @StatusId = 1
+									THEN 4
+								ELSE 3
+								END
+							)
+						,strMessage = @StatusText
+						,strERPTransferOrderNo = @ERPTransferOrderNo
+					WHERE intInventoryTransferId = @intInventoryTransferId
+						AND intStatusId = 2
+
+					UPDATE tblIPInvTransferFeed
+					SET strERPTransferOrderNo = @ERPTransferOrderNo
+					WHERE intInventoryTransferId = @intInventoryTransferId
+						AND ISNULL(intStatusId, 1) = 1
+
+					--Change to correct field and Enable in 21.2 since they added new field in 21.2
+					UPDATE tblICInventoryTransfer
+					SET intConcurrencyId = intConcurrencyId + 1
+						--,strERPTransferNo = @ERPTransferOrderNo
+					WHERE intInventoryTransferId = @intInventoryTransferId
+
+					INSERT INTO @tblMessage (
+						strMessageType
+						,strMessage
+						,strInfo1
+						,strInfo2
+						)
+					VALUES (
+						'Initial Ack'
+						,'Success'
+						,@strTransferNo
+						,@ERPTransferOrderNo
 						)
 				END
 				ELSE IF @MessageTypeId = 6 --Production Order

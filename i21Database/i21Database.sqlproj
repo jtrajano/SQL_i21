@@ -9363,6 +9363,8 @@
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
     <None Include="Scripts\Post-Deployment\IP\2_CleanupObjects.sql" />
+    <Build Include="dbo\Tables\tblIPInvTransferFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPTransferOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
