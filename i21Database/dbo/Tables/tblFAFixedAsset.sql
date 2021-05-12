@@ -31,8 +31,6 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[ysnAcquired]				BIT NULL,
 	[ysnDepreciated]			BIT NULL,
 	[ysnTaxDepreciated]			BIT NULL,
-	[ysnFullyDepreciated]		BIT NULL,
-	[ysnTaxFullyDepreciated]	BIT NULL,
 	[ysnDisposed]				BIT NULL,	
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
