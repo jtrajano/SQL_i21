@@ -1371,7 +1371,8 @@ BEGIN
 					,t.intItemUOMId
 					,r.[dtmReceiptDate] 
 					,dblQty = 
-						-t.dblQty 
+						-ri.dblOpenReceive
+						---t.dblQty 
 						--CASE 
 						--	WHEN (loadShipmentLookup.strContainerNumber IS NULL) THEN
 						--		-- If there are no containers, reduce the in-transit qty based on how it was increased by Load Schedule. 
