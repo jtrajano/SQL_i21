@@ -9641,6 +9641,7 @@
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
     <Build Include="dbo\User Defined Types\PaymentSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

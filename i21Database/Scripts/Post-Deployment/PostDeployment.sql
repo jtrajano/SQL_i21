@@ -662,4 +662,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
 
+-- Clean up i21 database objects
+:r .\IC\29_CleanupObjects.sql
+
 print 'END POST DEPLOYMENT'
