@@ -57,11 +57,15 @@ BEGIN
 		WHERE intLoadDetailId = @intLoadDetailId
 
 		IF EXISTS (
-				SELECT *
+				/*SELECT *
 				FROM dbo.vyuIPGetOpenWeightClaim
 				WHERE intLoadId = @intLoadId
 					AND intContainerCount = intIRCount
-					AND IsNULL(dblClaimableWt, 0) + IsNULL(dblFranchiseWt, 0) < 0
+					AND IsNULL(dblClaimableWt, 0) + IsNULL(dblFranchiseWt, 0) < 0*/
+				SELECT *
+				FROM tblLGPendingClaim
+				WHERE intLoadId = @intLoadId
+					AND dblClaimableWt < 0
 				)
 		BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
