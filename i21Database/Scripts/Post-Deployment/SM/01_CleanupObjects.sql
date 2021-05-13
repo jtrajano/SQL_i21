@@ -10,6 +10,10 @@ GO
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMReplicationDropPublication'))
        DROP PROCEDURE uspSMReplicationDropPublication;
 GO
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspIUAuditLogs'))
+       DROP PROCEDURE uspIUAuditLogs;
+GO
+
 
 
 PRINT 'End SM Clean up Objects - Drop obsolete objects'
