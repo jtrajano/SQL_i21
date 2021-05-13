@@ -2,9 +2,14 @@
 GO
 
 
-IF OBJECT_ID('vyuPOSGetLoggedIn ','v') IS NOT NULL
+IF OBJECT_ID('vyuPOSGetLoggedIn','v') IS NOT NULL
 	DROP VIEW vyuPOSGetLoggedIn;
 GO
+
+IF OBJECT_ID('vyuARSearchPOSEndOfDay','v') IS NOT NULL
+	DROP VIEW vyuARSearchPOSEndOfDay;
+GO
+
 
 
 
