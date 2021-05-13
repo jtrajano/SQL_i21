@@ -9363,6 +9363,7 @@
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
     <None Include="Scripts\Post-Deployment\IP\2_CleanupObjects.sql" />
+    <Build Include="Scripts\Post-Deployment\SM\01_CleanupObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
