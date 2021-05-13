@@ -508,10 +508,14 @@ BEGIN TRY
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
 				,strType
+				,strFileName
+				,strCompany
 				,dtmCreatedDate
 				)
 			SELECT strXml
 				,strType
+				,strFileName
+				,strCompany
 				,dtmCreatedDate
 			FROM tblIPIDOCXMLStage
 			WHERE intIDOCXMLStageId = @intRowNo
@@ -534,11 +538,15 @@ BEGIN TRY
 			INSERT INTO tblIPIDOCXMLError (
 				strXml
 				,strType
+				,strFileName
+				,strCompany
 				,strMsg
 				,dtmCreatedDate
 				)
 			SELECT strXml
 				,strType
+				,strFileName
+				,strCompany
 				,@ErrMsg
 				,dtmCreatedDate
 			FROM tblIPIDOCXMLStage

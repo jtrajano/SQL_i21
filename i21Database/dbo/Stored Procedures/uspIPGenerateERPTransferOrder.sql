@@ -14,274 +14,190 @@ BEGIN TRY
 		,@strXML NVARCHAR(MAX) = ''
 		,@strItemXML NVARCHAR(MAX) = ''
 		,@strDetailXML NVARCHAR(MAX) = ''
-		,@intUserId INT
 	DECLARE @strQuantityUOM NVARCHAR(50)
 		,@strDefaultCurrency NVARCHAR(40)
 		,@intCurrencyId INT
 		,@intUnitMeasureId INT
 		,@intItemId INT
 		,@intItemUOMId INT
-	DECLARE @intBillPreStageId INT
-		,@intBillId INT
+	DECLARE @intInventoryTransferId INT
 		,@intActionId INT
-		,@intTransactionType INT
-		,@strBillId NVARCHAR(50)
-		,@dtmDate DATETIME
-		,@strVendorAccountNum NVARCHAR(50)
-		,@strBook NVARCHAR(50)
-		,@strInvoiceNo NVARCHAR(50)
-		,@dtmInvoiceDate DATETIME
-		,@strTermCode NVARCHAR(50)
-		,@dtmDueDate DATETIME
-		,@strReference NVARCHAR(200)
-		,@strCurrency NVARCHAR(40)
-		,@dblDiscount NUMERIC(18, 6)
-		,@dblTax NUMERIC(18, 6)
-		,@dblTotal NUMERIC(18, 6)
-		,@strRemarks NVARCHAR(200)
-		,@strERPVoucherNo NVARCHAR(50)
-	DECLARE @intBillDetailId INT
-		,@strContractNumber NVARCHAR(50)
-		,@strSequenceNo NVARCHAR(3)
-		,@strERPPONumber NVARCHAR(100)
-		,@strERPItemNumber NVARCHAR(100)
-		,@strWorkOrderNo NVARCHAR(50)
-		,@strERPOrderNo NVARCHAR(50)
-		,@strERPServicePONumber NVARCHAR(50)
-		,@strERPServicePOLineNo NVARCHAR(50)
+		,@strTransferNo NVARCHAR(50)
+		,@dtmTransferDate DATETIME
+		,@strShipVia NVARCHAR(50)
+		,@strBolNumber NVARCHAR(50)
+		,@dtmBolDate DATETIME
+		,@dtmBolReceivedDate DATETIME
+		,@strBroker NVARCHAR(50)
+		,@strTrailerId NVARCHAR(100)
+		,@strFromLocation NVARCHAR(50)
+		,@strToLocation NVARCHAR(50)
+	DECLARE @intInventoryTransferDetailId INT
 		,@strItemNo NVARCHAR(50)
-		,@dblDetailQuantity NUMERIC(18, 6)
-		,@strDetailCurrency NVARCHAR(40)
-		,@dblDetailCost NUMERIC(18, 6)
-		,@dblDetailDiscount NUMERIC(18, 6)
-		,@dblDetailTotal NUMERIC(18, 6)
-		,@dblDetailTax NUMERIC(18, 6)
-		,@dblDetailTotalwithTax NUMERIC(18, 6)
-	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
-	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
+		,@strFromStorageLocation NVARCHAR(50)
+		,@strFromStorageUnit NVARCHAR(50)
+		,@strParentLotNumber NVARCHAR(50)
+		,@strLotNumber NVARCHAR(50)
+		,@dblQuantity NUMERIC(18, 6)
+		,@strQtyUOM NVARCHAR(50)
+		,@strToStorageLocation NVARCHAR(50)
+		,@strToStorageUnit NVARCHAR(50)
+		,@dtmDeliveryDate DATETIME
+		,@strContainerNumber NVARCHAR(100)
+		,@strMarks NVARCHAR(400)
+		,@dblTransferPrice NUMERIC(18, 6)
+		,@strCurrency NVARCHAR(40)
+		,@strComment NVARCHAR(50)
+		,@dblGross NUMERIC(18, 6)
+		,@dblTare NUMERIC(18, 6)
+		,@dblNet NUMERIC(18, 6)
+	DECLARE @tblICInventoryTransfer TABLE (intInventoryTransferId INT)
+	DECLARE @tblICInventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
-		,intBillId INT
+		,intInventoryTransferId INT
 		,strRowState NVARCHAR(50)
 		,strXML NVARCHAR(MAX)
-		,strBillId NVARCHAR(50)
-		,strERPVoucherNo NVARCHAR(50)
+		,strTransferNo NVARCHAR(50)
+		,strERPTransferOrderNo NVARCHAR(50)
 		)
+
+	DELETE
+	FROM @tblICInventoryTransfer
+
+	INSERT INTO @tblICInventoryTransfer (intInventoryTransferId)
+	SELECT DISTINCT IT.intInventoryTransferId
+	FROM tblICInventoryTransfer IT
+	JOIN tblICInventoryTransferDetail ITD ON ITD.intInventoryTransferId = IT.intInventoryTransferId
+	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = IT.intFromLocationId
+		AND CL.strLotOrigin = @strCompanyLocation
+	WHERE IT.ysnPosted = 1
+		AND IT.intInventoryTransferId NOT IN (
+			SELECT intInventoryTransferId
+			FROM tblIPInvTransferFeed
+			WHERE ISNULL(intStatusId, 1) <> 1 -- If already sent, don't send the feed again
+			)
 
 	IF NOT EXISTS (
 			SELECT 1
-			FROM tblAPBillPreStage
-			WHERE intStatusId IS NULL
+			FROM @tblICInventoryTransfer
 			)
 	BEGIN
 		RETURN
 	END
 
-	DELETE
-	FROM @tblAPBillPreStage
+	SELECT @intInventoryTransferId = MIN(intInventoryTransferId)
+	FROM @tblICInventoryTransfer
 
-	INSERT INTO @tblAPBillPreStage (intBillPreStageId)
-	SELECT TOP 50 BPS.intBillPreStageId
-	FROM tblAPBillPreStage BPS
-	JOIN tblAPBill B ON B.intBillId = BPS.intBillId
-		AND B.intTransactionType IN (
-			1
-			,3
-			,11
-			)
-	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intStoreLocationId
-		AND CL.strLotOrigin = @strCompanyLocation
-	WHERE BPS.intStatusId IS NULL
-
-	SELECT @intBillPreStageId = MIN(intBillPreStageId)
-	FROM @tblAPBillPreStage
-
-	IF @intBillPreStageId IS NULL
-	BEGIN
-		RETURN
-	END
-
-	WHILE @intBillPreStageId IS NOT NULL
+	WHILE @intInventoryTransferId IS NOT NULL
 	BEGIN
 		SELECT @strRowState = NULL
 			,@strUserName = NULL
 			,@strError = ''
-			,@intUserId = NULL
 
 		SELECT @intActionId = NULL
-			,@intTransactionType = NULL
-			,@strBillId = NULL
-			,@dtmDate = NULL
-			,@strVendorAccountNum = NULL
-			,@strBook = NULL
-			,@strInvoiceNo = NULL
-			,@dtmInvoiceDate = NULL
-			,@strTermCode = NULL
-			,@dtmDueDate = NULL
-			,@strReference = NULL
-			,@strCurrency = NULL
-			,@dblDiscount = NULL
-			,@dblTax = NULL
-			,@dblTotal = NULL
-			,@strRemarks = NULL
-			,@strERPVoucherNo = NULL
+			,@strTransferNo = NULL
+			,@dtmTransferDate = NULL
+			,@strShipVia = NULL
+			,@strBolNumber = NULL
+			,@dtmBolDate = NULL
+			,@dtmBolReceivedDate = NULL
+			,@strBroker = NULL
+			,@strTrailerId = NULL
+			,@strFromLocation = NULL
+			,@strToLocation = NULL
 
-		SELECT @intBillDetailId = NULL
+		SELECT @intInventoryTransferDetailId = NULL
 			,@strDetailXML = ''
 
-		SELECT @intBillId = intBillId
-			,@strRowState = strRowState
-			,@intUserId = intUserId
-		FROM tblAPBillPreStage
-		WHERE intBillPreStageId = @intBillPreStageId
-
-		IF @strRowState = 'Posted'
-		BEGIN
-			SELECT @intActionId = 1
-		END
-
-		SELECT US.strUserName
-			,IT.strTransferNo
-			,IT.dtmTransferDate
-			,ISNULL(ShipVia.strShipVia, '')
-			,ISNULL(IT.strBolNumber, '')
-			,IT.dtmBolDate
-			,IT.dtmBolReceivedDate
-			,ISNULL(E.strName, '') AS strBroker
-			,ISNULL(NULL, '') AS strTrailerId -- Change it in 21.2
-			,ISNULL(FCL.strLocationName, '') AS strFromLocation
-			,ISNULL(TCL.strLocationName, '') AS strToLocation
-		FROM dbo.tblICInventoryTransfer IT
-		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(IT.intEntityId, IT.intCreatedUserId)
-		JOIN tblSMCompanyLocation FCL ON FCL.intCompanyLocationId = IT.intFromLocationId
-		JOIN tblSMCompanyLocation TCL ON TCL.intCompanyLocationId = IT.intToLocationId
-		LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = IT.intShipViaId
-		LEFT JOIN tblEMEntity E ON E.intEntityId = IT.intBrokerId
-		WHERE IT.intInventoryTransferId = @intBillId
+		SELECT @intActionId = 1
 
 		SELECT @strUserName = US.strUserName
-			,@strBillId = A.strBillId
-			,@dtmDate = A.dtmDate
-			,@strVendorAccountNum = V.strVendorAccountNum
-			,@strBook = B.strBook
-			,@strInvoiceNo = A.strVendorOrderNumber
-			,@dtmInvoiceDate = A.dtmBillDate
-			,@strTermCode = T.strTermCode
-			,@dtmDueDate = A.dtmDueDate
-			,@strReference = A.strReference
-			,@strCurrency = C.strCurrency
-			,@dblDiscount = CONVERT(NUMERIC(18, 6), A.dblDiscount)
-			,@dblTax = CONVERT(NUMERIC(18, 6), A.dblTax)
-			,@dblTotal = CONVERT(NUMERIC(18, 6), A.dblTotal)
-			,@strRemarks = A.strRemarks
-			,@strERPVoucherNo = A.strComment
-		FROM dbo.tblAPBill A
-		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(@intUserId, A.intEntityId)
-		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = A.intEntityVendorId
-		LEFT JOIN dbo.tblCTBook B ON B.intBookId = A.intBookId
-		LEFT JOIN dbo.tblSMTerm T ON T.intTermID = A.intTermsId
-		LEFT JOIN dbo.tblSMCurrency C ON C.intCurrencyID = A.intCurrencyId
-		WHERE A.intBillId = @intBillId
+			,@strTransferNo = IT.strTransferNo
+			,@dtmTransferDate = IT.dtmTransferDate
+			,@strShipVia = ShipVia.strShipVia
+			,@strBolNumber = IT.strBolNumber
+			,@dtmBolDate = IT.dtmBolDate
+			,@dtmBolReceivedDate = IT.dtmBolReceivedDate
+			,@strBroker = E.strName
+			,@strTrailerId = '' -- Change it in 21.2
+			,@strFromLocation = FCL.strLotOrigin
+			,@strToLocation = TCL.strLotOrigin
+		FROM dbo.tblICInventoryTransfer IT
+		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(IT.intEntityId, IT.intCreatedUserId)
+		LEFT JOIN dbo.tblSMCompanyLocation FCL ON FCL.intCompanyLocationId = IT.intFromLocationId
+		LEFT JOIN dbo.tblSMCompanyLocation TCL ON TCL.intCompanyLocationId = IT.intToLocationId
+		LEFT JOIN dbo.tblSMShipVia ShipVia ON ShipVia.intEntityId = IT.intShipViaId
+		LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = IT.intBrokerId
+		WHERE IT.intInventoryTransferId = @intInventoryTransferId
 
-		IF ISNULL(@intTransactionType, 0) = 0
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tblIPInvTransferFeed
+				WHERE intInventoryTransferId = @intInventoryTransferId
+				)
 		BEGIN
-			SELECT @strError = @strError + 'Invalid Voucher Type. '
+			INSERT INTO tblIPInvTransferFeed (
+				strCompanyLocation
+				,intInventoryTransferId
+				,strTransferNo
+				,strERPTransferOrderNo
+				,strCreatedBy
+				,strTransactionType
+				,intStatusId
+				,strMessage
+				,strFeedStatus
+				)
+			SELECT @strCompanyLocation
+				,@intInventoryTransferId
+				,@strTransferNo
+				,NULL
+				,@strUserName
+				,LTRIM(@intActionId)
+				,NULL
+				,NULL
+				,NULL
+		END
+		ELSE
+		BEGIN
+			UPDATE tblIPInvTransferFeed
+			SET strCreatedBy = @strUserName
+				,strMessage = NULL
+				,intStatusId = NULL
+				,strFeedStatus = NULL
+			WHERE intInventoryTransferId = @intInventoryTransferId
 		END
 
-		IF ISNULL(@strVendorAccountNum, '') = ''
+		IF @dtmTransferDate IS NULL
 		BEGIN
-			SELECT @strError = @strError + 'Vendor Account Number cannot be blank. '
+			SELECT @strError = @strError + 'Transfer Date cannot be blank. '
 		END
 
-		IF ISNULL(@strBook, '') = ''
+		IF ISNULL(@strFromLocation, '') = ''
 		BEGIN
-			SELECT @strError = @strError + 'Book cannot be blank. '
+			SELECT @strError = @strError + 'From Location cannot be blank. '
 		END
 
-		IF ISNULL(@strInvoiceNo, '') = ''
+		IF ISNULL(@strToLocation, '') = ''
 		BEGIN
-			SELECT @strError = @strError + 'Invoice No. cannot be blank. '
-		END
-
-		IF @dtmInvoiceDate IS NULL
-		BEGIN
-			SELECT @strError = @strError + 'Invoice Date cannot be blank. '
-		END
-
-		IF ISNULL(@strTermCode, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Terms cannot be blank. '
-		END
-
-		IF @dtmDueDate IS NULL
-		BEGIN
-			SELECT @strError = @strError + 'Due Date cannot be blank. '
-		END
-
-		IF ISNULL(@strReference, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Reference cannot be blank. '
-		END
-
-		IF ISNULL(@strCurrency, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Currency cannot be blank. '
-		END
-
-		IF ISNULL(@dblTotal, 0) = 0
-		BEGIN
-			SELECT @strError = @strError + 'Voucher Total should be greater than 0. '
-		END
-
-		IF ISNULL(@strRemarks, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Remarks cannot be blank. '
+			SELECT @strError = @strError + 'To Location cannot be blank. '
 		END
 
 		IF @strError <> ''
 		BEGIN
-			UPDATE tblAPBillPreStage
+			UPDATE tblIPInvTransferFeed
 			SET strMessage = @strError
 				,intStatusId = 1
-			WHERE intBillPreStageId = @intBillPreStageId
+			WHERE intInventoryTransferId = @intInventoryTransferId
 
 			GOTO NextRec
-		END
-
-		-- If previous feed is waiting for acknowledgement then do not send the current feed
-		IF EXISTS (
-				SELECT TOP 1 1
-				FROM tblAPBillPreStage BPS
-				JOIN tblAPBill B ON B.intBillId = BPS.intBillId
-					AND B.intBillId = @intBillId
-					AND BPS.intBillPreStageId < @intBillPreStageId
-					AND BPS.intStatusId = 2
-				ORDER BY BPS.intBillPreStageId DESC
-				)
-		BEGIN
-			GOTO NextRec
-		END
-
-		IF @intActionId <> 1
-		BEGIN
-			IF ISNULL(@strERPVoucherNo, '') = ''
-			BEGIN
-				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
-				
-				UPDATE tblAPBillPreStage
-				SET strMessage = @strError
-					,intStatusId = 1
-				WHERE intBillPreStageId = @intBillPreStageId
-
-				GOTO NextRec
-			END
 		END
 
 		SELECT @strXML = ''
 
-		SELECT @strXML += '<header id="' + LTRIM(@intBillPreStageId) + '">'
+		SELECT @strXML += '<header id="' + LTRIM(@intInventoryTransferId) + '">'
 
-		SELECT @strXML += '<TrxSequenceNo>' + LTRIM(@intBillPreStageId) + '</TrxSequenceNo>'
+		SELECT @strXML += '<TrxSequenceNo>' + LTRIM(@intInventoryTransferId) + '</TrxSequenceNo>'
 
 		SELECT @strXML += '<CompanyLocation>' + LTRIM(@strCompanyLocation) + '</CompanyLocation>'
 
@@ -291,50 +207,38 @@ BEGIN TRY
 
 		SELECT @strXML += '<CreatedByUser>' + @strUserName + '</CreatedByUser>'
 
-		SELECT @strXML += '<VoucherTypeId>' + LTRIM(@intTransactionType) + '</VoucherTypeId>'
+		SELECT @strXML += '<TransferNo>' + ISNULL(@strTransferNo, '') + '</TransferNo>'
 
-		SELECT @strXML += '<VoucherNo>' + ISNULL(@strBillId, '') + '</VoucherNo>'
+		SELECT @strXML += '<TransferDate>' + ISNULL(CONVERT(VARCHAR, @dtmTransferDate, 112), '') + '</TransferDate>'
 
-		SELECT @strXML += '<VoucherDate>' + ISNULL(CONVERT(VARCHAR, @dtmDate, 112), '') + '</VoucherDate>'
+		SELECT @strXML += '<ShipVia>' + ISNULL(@strShipVia, '') + '</ShipVia>'
 
-		SELECT @strXML += '<VendorAccountNo>' + ISNULL(@strVendorAccountNum, '') + '</VendorAccountNo>'
+		SELECT @strXML += '<BOLNumber>' + ISNULL(@strBolNumber, '') + '</BOLNumber>'
 
-		SELECT @strXML += '<Book>' + ISNULL(@strBook, '') + '</Book>'
+		SELECT @strXML += '<BOLDate>' + ISNULL(CONVERT(VARCHAR, @dtmBolDate, 112), '') + '</BOLDate>'
 
-		SELECT @strXML += '<InvoiceNo>' + ISNULL(@strInvoiceNo, '') + '</InvoiceNo>'
+		SELECT @strXML += '<BOLReceivedDate>' + ISNULL(CONVERT(VARCHAR, @dtmBolReceivedDate, 112), '') + '</BOLReceivedDate>'
 
-		SELECT @strXML += '<InvoiceDate>' + ISNULL(CONVERT(VARCHAR, @dtmInvoiceDate, 112), '') + '</InvoiceDate>'
+		SELECT @strXML += '<Broker>' + ISNULL(@strBroker, '') + '</Broker>'
 
-		SELECT @strXML += '<TermCode>' + ISNULL(@strTermCode, '') + '</TermCode>'
+		SELECT @strXML += '<TrailerId>' + ISNULL(@strTrailerId, '') + '</TrailerId>'
 
-		SELECT @strXML += '<DueDate>' + ISNULL(CONVERT(VARCHAR, @dtmDueDate, 112), '') + '</DueDate>'
+		SELECT @strXML += '<FromLocation>' + ISNULL(@strFromLocation, '') + '</FromLocation>'
 
-		SELECT @strXML += '<ReferenceNo>' + ISNULL(@strReference, '') + '</ReferenceNo>'
-
-		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
-
-		SELECT @strXML += '<TotalDiscount>' + LTRIM(ISNULL(@dblDiscount, 0)) + '</TotalDiscount>'
-
-		SELECT @strXML += '<TotalTax>' + LTRIM(ISNULL(@dblTax, 0)) + '</TotalTax>'
-
-		SELECT @strXML += '<VoucherTotal>' + LTRIM(ISNULL(@dblTotal, 0)) + '</VoucherTotal>'
-
-		SELECT @strXML += '<Remarks>' + ISNULL(@strRemarks, '') + '</Remarks>'
-
-		SELECT @strXML += '<ERPVoucherNo>' + ISNULL(@strERPVoucherNo, '') + '</ERPVoucherNo>'
+		SELECT @strXML += '<ToLocation>' + ISNULL(@strToLocation, '') + '</ToLocation>'
 
 		DELETE
-		FROM @tblAPBillDetail
+		FROM @tblICInventoryTransferDetail
 
-		INSERT INTO @tblAPBillDetail (intBillDetailId)
-		SELECT BD.intBillDetailId
-		FROM tblAPBillDetail BD
-		WHERE BD.intBillId = @intBillId
+		INSERT INTO @tblICInventoryTransferDetail (intInventoryTransferDetailId)
+		SELECT ITD.intInventoryTransferDetailId
+		FROM tblICInventoryTransferDetail ITD
+		WHERE ITD.intInventoryTransferId = @intInventoryTransferId
 
-		SELECT @intBillDetailId = MIN(intBillDetailId)
-		FROM @tblAPBillDetail
+		SELECT @intInventoryTransferDetailId = MIN(intInventoryTransferDetailId)
+		FROM @tblICInventoryTransferDetail
 
-		WHILE @intBillDetailId IS NOT NULL
+		WHILE @intInventoryTransferDetailId IS NOT NULL
 		BEGIN
 			SELECT @strQuantityUOM = NULL
 				,@strDefaultCurrency = NULL
@@ -343,26 +247,28 @@ BEGIN TRY
 				,@intItemId = NULL
 				,@intItemUOMId = NULL
 
-			SELECT @strContractNumber = NULL
-				,@strSequenceNo = NULL
-				,@strERPPONumber = NULL
-				,@strERPItemNumber = NULL
-				,@strWorkOrderNo = NULL
-				,@strERPOrderNo = NULL
-				,@strERPServicePONumber = NULL
-				,@strERPServicePOLineNo = NULL
-				,@strItemNo = NULL
-				,@dblDetailQuantity = NULL
-				,@strDetailCurrency = NULL
-				,@dblDetailCost = NULL
-				,@dblDetailDiscount = NULL
-				,@dblDetailTotal = NULL
-				,@dblDetailTax = NULL
-				,@dblDetailTotalwithTax = NULL
+			SELECT @strItemNo = NULL
+				,@strFromStorageLocation = NULL
+				,@strFromStorageUnit = NULL
+				,@strParentLotNumber = NULL
+				,@strLotNumber = NULL
+				,@dblQuantity = NULL
+				,@strQtyUOM = NULL
+				,@strToStorageLocation = NULL
+				,@strToStorageUnit = NULL
+				,@dtmDeliveryDate = NULL
+				,@strContainerNumber = NULL
+				,@strMarks = NULL
+				,@dblTransferPrice = NULL
+				,@strCurrency = NULL
+				,@strComment = NULL
+				,@dblGross = NULL
+				,@dblTare = NULL
+				,@dblNet = NULL
 
-			SELECT @intItemId = BD.intItemId
-			FROM dbo.tblAPBillDetail BD
-			WHERE BD.intBillDetailId = @intBillDetailId
+			SELECT @intItemId = ITD.intItemId
+			FROM dbo.tblICInventoryTransferDetail ITD
+			WHERE ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
 
 			SELECT @strQuantityUOM = strQuantityUOM
 				,@strDefaultCurrency = strDefaultCurrency
@@ -398,24 +304,24 @@ BEGIN TRY
 					AND IUOM.ysnStockUnit = 1
 			END
 
-			SELECT ISNULL(I.strItemNo, '')
-				,ISNULL(FSL.strSubLocationName, '') AS strFromStorageLocation
-				,ISNULL(FSU.strName, '') AS strFromStorageUnit
-				,ISNULL(PL.strParentLotNumber, '')
-				,ISNULL(L.strLotNumber, '')
-				,CONVERT(NUMERIC(18, 6), ITD.dblQuantity)
-				,ISNULL(UOM.strUnitMeasure, '') AS strQtyUOM
-				,ISNULL(TSL.strSubLocationName, '') AS strToStorageLocation
-				,ISNULL(TSU.strName, '') AS strToStorageUnit
-				,ITD.dtmDeliveryDate
-				,ISNULL(ITD.strContainerNumber, '')
-				,ISNULL(ITD.strMarks, '')
-				,CONVERT(NUMERIC(18, 6), ITD.dblTransferPrice)
-				,ISNULL(C.strCurrency, '')
-				,ISNULL(NULL, '') AS strComment -- Change it in 21.2
-				,CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblGross), 0))
-				,CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblTare), 0))
-				,CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblNet), 0))
+			SELECT @strItemNo = ISNULL(I.strItemNo, '')
+				,@strFromStorageLocation = ISNULL(FSL.strSubLocationName, '')
+				,@strFromStorageUnit = ISNULL(FSU.strName, '')
+				,@strParentLotNumber = ISNULL(PL.strParentLotNumber, '')
+				,@strLotNumber = ISNULL(L.strLotNumber, '')
+				,@dblQuantity = CONVERT(NUMERIC(18, 6), ITD.dblQuantity)
+				,@strQtyUOM = ISNULL(UOM.strUnitMeasure, '')
+				,@strToStorageLocation = ISNULL(TSL.strSubLocationName, '')
+				,@strToStorageUnit = ISNULL(TSU.strName, '')
+				,@dtmDeliveryDate = ITD.dtmDeliveryDate
+				,@strContainerNumber = ISNULL(ITD.strContainerNumber, '')
+				,@strMarks = ISNULL(ITD.strMarks, '')
+				,@dblTransferPrice = CONVERT(NUMERIC(18, 6), ITD.dblTransferPrice)
+				,@strCurrency = ISNULL(C.strCurrency, '')
+				,@strComment = '' -- Change it in 21.2
+				,@dblGross = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblGross), 0))
+				,@dblTare = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblTare), 0))
+				,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblNet), 0))
 			FROM tblICInventoryTransferDetail ITD
 			JOIN tblICItem I ON I.intItemId = ITD.intItemId
 			LEFT JOIN tblSMCompanyLocationSubLocation FSL ON FSL.intCompanyLocationSubLocationId = ITD.intFromSubLocationId
@@ -427,144 +333,151 @@ BEGIN TRY
 			LEFT JOIN tblSMCompanyLocationSubLocation TSL ON TSL.intCompanyLocationSubLocationId = ITD.intToSubLocationId
 			LEFT JOIN tblICStorageLocation TSU ON TSU.intStorageLocationId = ITD.intToStorageLocationId
 			LEFT JOIN tblSMCurrency C ON C.intCurrencyID = ITD.intCurrencyId
-			WHERE ITD.intInventoryTransferDetailId = @intBillDetailId
-
-			SELECT @strContractNumber = CH.strContractNumber
-				,@strSequenceNo = LTRIM(CD.intContractSeq)
-				,@strERPPONumber = CD.strERPPONumber
-				,@strERPItemNumber = CD.strERPItemNumber
-				,@strItemNo = I.strItemNo
-				,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId, @intItemUOMId, BD.dblQtyReceived), 0))
-				,@strDetailCurrency = C.strCurrency
-				,@dblDetailCost = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intCostUOMId, @intItemUOMId, BD.dblCost), 0))
-				,@dblDetailDiscount = CONVERT(NUMERIC(18, 6), BD.dblDiscount)
-				,@dblDetailTotal = CONVERT(NUMERIC(18, 6), BD.dblTotal)
-				,@dblDetailTax = CONVERT(NUMERIC(18, 6), BD.dblTax)
-			FROM tblAPBillDetail BD
-			JOIN tblICItem I ON I.intItemId = BD.intItemId
-			JOIN dbo.tblSMCurrency C ON C.intCurrencyID = BD.intCurrencyId
-			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = BD.intContractHeaderId
-			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = BD.intContractDetailId
-			WHERE BD.intBillDetailId = @intBillDetailId
-
-			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
+			WHERE ITD.intInventoryTransferDetailId = @intInventoryTransferDetailId
 
 			IF ISNULL(@strItemNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Item No cannot be blank. '
 			END
 
-			IF ISNULL(@dblDetailQuantity, 0) = 0
+			IF ISNULL(@strFromStorageLocation, '') = ''
 			BEGIN
-				SELECT @strError = @strError + 'Detail - Quantity should be greater than 0. '
+				SELECT @strError = @strError + 'From Storage Location cannot be blank. '
 			END
 
-			IF ISNULL(@strDetailCurrency, '') = ''
+			IF ISNULL(@strFromStorageUnit, '') = ''
 			BEGIN
-				SELECT @strError = @strError + 'Detail - Currency cannot be blank. '
+				SELECT @strError = @strError + 'From Storage Unit cannot be blank. '
 			END
 
-			IF ISNULL(@dblDetailCost, 0) = 0
+			IF ISNULL(@strParentLotNumber, '') = ''
 			BEGIN
-				SELECT @strError = @strError + 'Detail - Cost should be greater than 0. '
+				SELECT @strError = @strError + 'Parent Lot No cannot be blank. '
 			END
 
-			IF ISNULL(@dblDetailTotal, 0) = 0
+			IF ISNULL(@strLotNumber, '') = ''
 			BEGIN
-				SELECT @strError = @strError + 'Detail - Total should be greater than 0. '
+				SELECT @strError = @strError + 'Lot No cannot be blank. '
 			END
 
-			IF ISNULL(@dblDetailTotalwithTax, 0) = 0
+			IF ISNULL(@dblQuantity, 0) = 0
 			BEGIN
-				SELECT @strError = @strError + 'Detail - Total with Tax should be greater than 0. '
+				SELECT @strError = @strError + 'Transfer Qty should be greater than 0. '
+			END
+
+			IF ISNULL(@strQtyUOM, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'Transfer Qty UOM cannot be blank. '
+			END
+
+			IF ISNULL(@strToStorageLocation, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'To Storage Location cannot be blank. '
+			END
+
+			IF ISNULL(@strToStorageUnit, '') = ''
+			BEGIN
+				SELECT @strError = @strError + 'To Storage Unit cannot be blank. '
+			END
+
+			IF ISNULL(@dblGross, 0) = 0
+			BEGIN
+				SELECT @strError = @strError + 'Gross Weight should be greater than 0. '
+			END
+
+			IF ISNULL(@dblNet, 0) = 0
+			BEGIN
+				SELECT @strError = @strError + 'Net Weight should be greater than 0. '
 			END
 
 			IF @strError <> ''
 			BEGIN
-				UPDATE tblAPBillPreStage
+				UPDATE tblIPInvTransferFeed
 				SET strMessage = @strError
 					,intStatusId = 1
-				WHERE intBillPreStageId = @intBillPreStageId
+				WHERE intInventoryTransferId = @intInventoryTransferId
 
 				GOTO NextRec
 			END
 
 			SELECT @strItemXML = ''
 
-			SELECT @strItemXML += '<line id="' + LTRIM(@intBillDetailId) + '" parentId="' + LTRIM(@intBillPreStageId) + '">'
+			SELECT @strItemXML += '<line id="' + LTRIM(@intInventoryTransferDetailId) + '" parentId="' + LTRIM(@intInventoryTransferId) + '">'
 
-			SELECT @strItemXML += '<TrxSequenceNo>' + LTRIM(@intBillDetailId) + '</TrxSequenceNo>'
-
-			SELECT @strItemXML += '<ContractNo>' + ISNULL(@strContractNumber, '') + '</ContractNo>'
-
-			SELECT @strItemXML += '<SequenceNo>' + ISNULL(@strSequenceNo, '') + '</SequenceNo>'
-
-			SELECT @strItemXML += '<ERPPONumber>' + ISNULL(@strERPPONumber, '') + '</ERPPONumber>'
-
-			SELECT @strItemXML += '<ERPPOlineNo>' + ISNULL(@strERPItemNumber, '') + '</ERPPOlineNo>'
-
-			SELECT @strItemXML += '<WorkOrderNo>' + ISNULL(@strWorkOrderNo, '') + '</WorkOrderNo>'
-
-			SELECT @strItemXML += '<ERPShopOrderNo>' + ISNULL(@strERPOrderNo, '') + '</ERPShopOrderNo>'
-
-			SELECT @strItemXML += '<ERPServicePONumber>' + ISNULL(@strERPServicePONumber, '') + '</ERPServicePONumber>'
-
-			SELECT @strItemXML += '<ERPServicePOlineNo>' + ISNULL(@strERPServicePOLineNo, '') + '</ERPServicePOlineNo>'
+			SELECT @strItemXML += '<TrxSequenceNo>' + LTRIM(@intInventoryTransferDetailId) + '</TrxSequenceNo>'
 
 			SELECT @strItemXML += '<ItemNo>' + ISNULL(@strItemNo, '') + '</ItemNo>'
 
-			SELECT @strItemXML += '<Quantity>' + LTRIM(ISNULL(@dblDetailQuantity, 0)) + '</Quantity>'
+			SELECT @strItemXML += '<FromStorageLocation>' + ISNULL(@strFromStorageLocation, '') + '</FromStorageLocation>'
 
-			SELECT @strItemXML += '<QuantityUOM>' + ISNULL(@strQuantityUOM, '') + '</QuantityUOM>'
+			SELECT @strItemXML += '<FromStorageUnit>' + ISNULL(@strFromStorageUnit, '') + '</FromStorageUnit>'
 
-			SELECT @strItemXML += '<Currency>' + ISNULL(@strDetailCurrency, '') + '</Currency>'
+			SELECT @strItemXML += '<MotherLotNo>' + ISNULL(@strParentLotNumber, '') + '</MotherLotNo>'
 
-			SELECT @strItemXML += '<Cost>' + LTRIM(ISNULL(@dblDetailCost, 0)) + '</Cost>'
+			SELECT @strItemXML += '<LotNo>' + ISNULL(@strLotNumber, '') + '</LotNo>'
 
-			SELECT @strItemXML += '<CostUOM>' + ISNULL(@strQuantityUOM, '') + '</CostUOM>'
+			SELECT @strItemXML += '<TransferQty>' + LTRIM(ISNULL(@dblQuantity, 0)) + '</TransferQty>'
 
-			SELECT @strItemXML += '<DiscountPerc>' + LTRIM(ISNULL(@dblDetailDiscount, 0)) + '</DiscountPerc>'
+			SELECT @strItemXML += '<TransferQtyUOM>' + ISNULL(@strQtyUOM, '') + '</TransferQtyUOM>'
 
-			SELECT @strItemXML += '<SubTotal>' + LTRIM(ISNULL(@dblDetailTotal, 0)) + '</SubTotal>'
+			SELECT @strItemXML += '<ToStorageLocation>' + ISNULL(@strToStorageLocation, '') + '</ToStorageLocation>'
 
-			SELECT @strItemXML += '<Tax>' + LTRIM(ISNULL(@dblDetailTax, 0)) + '</Tax>'
+			SELECT @strItemXML += '<ToStorageUnit>' + ISNULL(@strToStorageUnit, '') + '</ToStorageUnit>'
 
-			SELECT @strItemXML += '<lineTotal>' + LTRIM(ISNULL(@dblDetailTotalwithTax, 0)) + '</lineTotal>'
+			SELECT @strItemXML += '<DeliveryDate>' + ISNULL(CONVERT(VARCHAR, @dtmDeliveryDate, 112), '') + '</DeliveryDate>'
+
+			SELECT @strItemXML += '<ContainerNo>' + ISNULL(@strContainerNumber, '') + '</ContainerNo>'
+
+			SELECT @strItemXML += '<Marks>' + ISNULL(@strMarks, '') + '</Marks>'
+
+			SELECT @strItemXML += '<TransferPrice>' + LTRIM(ISNULL(@dblTransferPrice, 0)) + '</TransferPrice>'
+
+			SELECT @strItemXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
+
+			SELECT @strItemXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
+
+			SELECT @strItemXML += '<GrossWeight>' + LTRIM(ISNULL(@dblGross, 0)) + '</GrossWeight>'
+
+			SELECT @strItemXML += '<TareWeight>' + LTRIM(ISNULL(@dblTare, 0)) + '</TareWeight>'
+
+			SELECT @strItemXML += '<NetWeight>' + LTRIM(ISNULL(@dblNet, 0)) + '</NetWeight>'
+
+			SELECT @strItemXML += '<WeightUOM>' + ISNULL(@strQuantityUOM, '') + '</WeightUOM>'
 
 			SELECT @strItemXML += '</line>'
 
 			IF ISNULL(@strItemXML, '') = ''
 			BEGIN
-				UPDATE tblAPBillPreStage
-				SET strMessage = 'Detail XML not available. '
+				UPDATE tblIPInvTransferFeed
+				SET strMessage = 'Transfer Detail XML not available. '
 					,intStatusId = 1
-				WHERE intBillPreStageId = @intBillPreStageId
+				WHERE intInventoryTransferId = @intInventoryTransferId
 
 				GOTO NextRec
 			END
 
 			SELECT @strDetailXML = @strDetailXML + @strItemXML
 
-			SELECT @intBillDetailId = MIN(intBillDetailId)
-			FROM @tblAPBillDetail
-			WHERE intBillDetailId > @intBillDetailId
+			SELECT @intInventoryTransferDetailId = MIN(intInventoryTransferDetailId)
+			FROM @tblICInventoryTransferDetail
+			WHERE intInventoryTransferDetailId > @intInventoryTransferDetailId
 		END
 
 		SELECT @strFinalXML = @strFinalXML + @strXML + @strDetailXML + '</header>'
 
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
-			UPDATE tblAPBillPreStage
+			UPDATE tblIPInvTransferFeed
 			SET strMessage = NULL
 				,intStatusId = 2
-			WHERE intBillPreStageId = @intBillPreStageId
+			WHERE intInventoryTransferId = @intInventoryTransferId
 		END
 
 		NextRec:
 
-		SELECT @intBillPreStageId = MIN(intBillPreStageId)
-		FROM @tblAPBillPreStage
-		WHERE intBillPreStageId > @intBillPreStageId
+		SELECT @intInventoryTransferId = MIN(intInventoryTransferId)
+		FROM @tblICInventoryTransfer
+		WHERE intInventoryTransferId > @intInventoryTransferId
 	END
 
 	IF @strFinalXML <> ''
@@ -575,25 +488,25 @@ BEGIN TRY
 		FROM @tblOutput
 
 		INSERT INTO @tblOutput (
-			intBillId
+			intInventoryTransferId
 			,strRowState
 			,strXML
-			,strBillId
-			,strERPVoucherNo
+			,strTransferNo
+			,strERPTransferOrderNo
 			)
 		VALUES (
-			@intBillId
+			@intInventoryTransferId
 			,'CREATE'
 			,@strFinalXML
-			,ISNULL(@strBillId, '')
-			,ISNULL(@strERPVoucherNo, '')
+			,ISNULL(@strTransferNo, '')
+			,''
 			)
 	END
 
-	SELECT IsNULL(intBillId, '0') AS id
+	SELECT IsNULL(intInventoryTransferId, '0') AS id
 		,IsNULL(strXML, '') AS strXml
-		,IsNULL(strBillId, '') AS strInfo1
-		,IsNULL(strERPVoucherNo, '') AS strInfo2
+		,IsNULL(strTransferNo, '') AS strInfo1
+		,IsNULL(strERPTransferOrderNo, '') AS strInfo2
 		,'' AS strOnFailureCallbackSql
 	FROM @tblOutput
 	ORDER BY intRowNo
