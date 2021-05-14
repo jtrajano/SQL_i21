@@ -287,4 +287,133 @@ FROM tblEMEntityLocation EL
 JOIN vyuEMEntity EN ON EN.intEntityId = EL.intEntityId
 JOIN tblEMEntityType ET ON ET.intEntityId = EN.intEntityId
 WHERE ET.strType = 'Vendor' Or ET.strType = 'Customer' Or ET.strType='Prospect'
+
+UNION ALL
+
+SELECT
+	intSourceType = 6 /* Sales Orders */
+	,intOrderId = SO.intSalesOrderId
+	,intEntityId = SO.intEntityId
+	,intEntityLocationId = SO.intShipToLocationId
+	,intEntityTypeId = NULL
+	,strEntityType = 'Customer'
+	,strCustomerNumber = NULL
+	,intSiteID = NULL
+	,intCustomerID = NULL
+	,intDispatchID = NULL
+	,intLoadDetailId = NULL
+	,intLoadId = NULL
+	,intSequence = -1
+	,strOrderNumber = SO.strSalesOrderNumber
+	,strLocationName = CompLoc.strLocationName
+	,intLocationId = CompLoc.intCompanyLocationId
+	,strLocationAddress = CompLoc.strAddress
+	,strLocationCity = CompLoc.strCity
+	,strLocationZipCode = CompLoc.strZipPostalCode
+	,strLocationState = CompLoc.strStateProvince
+	,strLocationCountry = CompLoc.strCountry
+	,dblFromLongitude = CompLoc.dblLongitude
+	,dblFromLatitude = CompLoc.dblLatitude
+	,dtmScheduledDate = SO.dtmDate
+	,strEntityName = E.strName
+	,strToAddress = EL.strAddress
+	,strToCity = EL.strCity
+	,strToZipCode = EL.strZipCode
+	,strToState = EL.strState
+	,strToCountry = EL.strCountry
+	,strDestination = EL.strAddress + ', ' + EL.strCity + ', ' + EL.strState + ' ' + EL.strZipCode 
+	,dblToLongitude = EL.dblLongitude
+	,dblToLatitude = EL.dblLatitude
+	,strOrderStatus = SO.strOrderStatus
+	,strDriver = NULL
+	,strItemNo = I.strItemNo
+	,dblQuantity = SOD.dblQtyOrdered
+	,strCustomerReference = SO.strPONumber
+	,strOrderComments = SOD.strComments
+	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
+	,intDaysPassed = DATEDIFF (DAY, SO.dtmDate, GetDate())
+	,strOrderType = 'Sales' COLLATE Latin1_General_CI_AS
+	,intPriority = -1
+	,ysnLeakCheckRequired = Cast(0 as Bit)
+	,dblPercentLeft = 0.0
+	,dblARBalance = ISNULL(CB.dbl30Days,0.0) + ISNULL(CB.dbl60Days,0.0) + ISNULL(CB.dbl90Days,0.0) + ISNULL(CB.dbl91Days,0.0)
+	,strFillMethod = ''
+	,ysnHold = Cast(0 as Bit)
+	,ysnRoutingAlert = Cast(0 as Bit)
+
+FROM tblSOSalesOrderDetail SOD
+JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId 
+JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = SO.intCompanyLocationId
+JOIN tblEMEntity E ON E.intEntityId = SO.intEntityCustomerId
+JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId AND SO.intShipToLocationId = EL.intEntityLocationId
+JOIN tblICItem I ON I.intItemId = SOD.intItemId
+LEFT JOIN vyuARCustomerInquiryReport CB ON CB.intEntityCustomerId = E.intEntityId
+WHERE SO.strTransactionType = 'Order' AND SO.strOrderStatus NOT IN ('Closed')
+
+UNION ALL
+
+SELECT
+	intSourceType = 6  /* Transfer Orders */
+	,intOrderId = IT.intInventoryTransferId 
+	,intEntityId = E.intEntityId
+	,intEntityLocationId = NULL
+	,intEntityTypeId = NULL
+	,strEntityType = 'User'
+	,strCustomerNumber = NULL
+	,intSiteID = NULL
+	,intCustomerID = NULL
+	,intDispatchID = NULL
+	,intLoadDetailId = NULL
+	,intLoadId = NULL
+	,intSequence = -1
+	,strOrderNumber = IT.strTransferNo
+	,strLocationName = FromLoc.strLocationName
+	,intLocationId = FromLoc.intCompanyLocationId
+	,strLocationAddress = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.strAddress ELSE FromLoc.strAddress END
+	,strLocationCity = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.strCity ELSE FromLoc.strCity END
+	,strLocationZipCode = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.strZipCode ELSE FromLoc.strZipPostalCode END
+	,strLocationState = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.strState ELSE FromLoc.strStateProvince END
+	,strLocationCountry = FromLoc.strCountry
+	,dblFromLongitude = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.dblLongitude ELSE FromLoc.dblLongitude END
+	,dblFromLatitude = CASE WHEN ITD.intFromSubLocationId IS NOT NULL AND ISNULL(FromStrg.strAddress, '') <> '' THEN FromStrg.dblLatitude ELSE FromLoc.dblLatitude END
+	,dtmScheduledDate = IT.dtmTransferDate
+	,strEntityName = E.strName
+	,strToAddress = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.strAddress ELSE ToLoc.strAddress END
+	,strToCity = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.strCity ELSE ToLoc.strCity END
+	,strToZipCode = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.strZipCode ELSE ToLoc.strZipPostalCode END
+	,strToState = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.strState ELSE ToLoc.strStateProvince END
+	,strToCountry = ToLoc.strCountry
+	,strDestination = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' 
+		THEN ToStrg.strAddress + ', ' + ToStrg.strCity + ', ' + ToStrg.strState + ' ' + ToStrg.strZipCode
+		ELSE ToLoc.strAddress + ', ' + ToLoc.strCity + ', ' + ToLoc.strStateProvince + ' ' + ToLoc.strZipPostalCode END
+	,dblToLongitude = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.dblLongitude ELSE ToLoc.dblLongitude END
+	,dblToLatitude = CASE WHEN ITD.intToSubLocationId IS NOT NULL AND ISNULL(ToStrg.strAddress, '') <> '' THEN ToStrg.dblLatitude ELSE ToLoc.dblLatitude END
+	,strOrderStatus = ITS.strStatus
+	,strDriver = NULL
+	,strItemNo = I.strItemNo
+	,dblQuantity = ITD.dblQuantity
+	,strCustomerReference = NULL
+	,strOrderComments = ITD.strComment
+	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
+	,intDaysPassed = DATEDIFF (DAY, IT.dtmTransferDate, GetDate())
+	,strOrderType = 'Transfer' COLLATE Latin1_General_CI_AS
+	,intPriority = -1
+	,ysnLeakCheckRequired = Cast(0 as Bit)
+	,dblPercentLeft = 0.0
+	,dblARBalance = 0.0
+	,strFillMethod = ''
+	,ysnHold = Cast(0 as Bit)
+	,ysnRoutingAlert = Cast(0 as Bit)
+
+FROM tblICInventoryTransferDetail ITD
+JOIN tblICInventoryTransfer IT ON IT.intInventoryTransferId = ITD.intInventoryTransferId 
+JOIN tblSMCompanyLocation FromLoc ON FromLoc.intCompanyLocationId = IT.intFromLocationId
+JOIN tblSMCompanyLocation ToLoc ON ToLoc.intCompanyLocationId = IT.intToLocationId
+JOIN tblEMEntity E ON E.intEntityId = IT.intEntityId
+JOIN tblICItem I ON I.intItemId = ITD.intItemId
+LEFT JOIN tblICStatus ITS ON ITS.intStatusId = IT.intStatusId
+LEFT JOIN tblSMCompanyLocationSubLocation FromStrg ON FromStrg.intCompanyLocationSubLocationId = ITD.intFromSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation ToStrg ON ToStrg.intCompanyLocationSubLocationId = ITD.intToSubLocationId
+WHERE IT.ysnPosted = 1 AND IT.intStatusId IN (1, 2)
+
 ) t1
