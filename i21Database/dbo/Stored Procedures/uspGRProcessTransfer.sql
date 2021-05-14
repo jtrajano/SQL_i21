@@ -284,6 +284,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		VALUES
 		(
@@ -327,6 +329,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,
