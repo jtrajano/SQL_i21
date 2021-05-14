@@ -63,14 +63,26 @@ LEFT JOIN tblGLAccount GLGainLoss ON GLGainLoss.intAccountId = FA.intGainLossAcc
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID=FA.intCurrencyId      
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId      
 OUTER APPLY(  
- SELECT TOP 1 intDepreciationMethodId FROM tblFABookDepreciation  WHERE intAssetId = FA.intAssetId AND intBookId =1  
+ SELECT TOP 1 intDepreciationMethodId
+ FROM tblFABookDepreciation  
+ WHERE intAssetId = FA.intAssetId
+ AND intBookId = 1
 )BD  
 OUTER APPLY(  
- SELECT TOP 1 intDepreciationMethodId,strDepreciationMethodId,strConvention,strDepreciationType  
- FROM tblFADepreciationMethod WHERE intDepreciationMethodId  = BD.intDepreciationMethodId  
+ SELECT TOP 1 dm.intDepreciationMethodId,
+ strDepreciationMethodId,strConvention,strDepreciationType  
+ FROM tblFADepreciationMethod dm JOIN 
+ tblFABookDepreciation bd ON dm.intDepreciationMethodId=bd.intDepreciationMethodId
+ WHERE bd.intDepreciationMethodId  = BD.intDepreciationMethodId  
 )DM  
 OUTER APPLY(      
- SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intDepreciationMethodId = DM.intDepreciationMethodId ORDER BY intAssetDepreciationId DESC      
+ SELECT TOP 1 
+ dblDepreciationToDate 
+ FROM tblFAFixedAssetDepreciation
+ WHERE
+ intAssetId =FA.intAssetId
+ AND intBookId=1
+ ORDER BY intAssetDepreciationId DESC          
 )D
 OUTER APPLY(
     SELECT COUNT(*)Cnt FROM tblFABookDepreciation
