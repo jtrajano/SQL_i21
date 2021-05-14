@@ -67,6 +67,7 @@ SELECT
 	,ysnTaxable = ISNULL(A.ysnTaxable,0)
 	,strSiteDescription = ISNULL(A.strDescription,'')
 	,strSiteRecurringPO = ISNULL(A.strRecurringPONumber,'')
+	,Driver.strName AS strDriverName
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
@@ -127,5 +128,6 @@ LEFT JOIN (
 	GROUP BY intSiteId,intCurrentSeasonYear,intSeasonYear
 )HH
 	ON A.intSiteID = HH.intSiteId
-
+LEFT JOIN tblEMEntity Driver
+	ON Driver.intEntityId = A.intDriverID
 GO
