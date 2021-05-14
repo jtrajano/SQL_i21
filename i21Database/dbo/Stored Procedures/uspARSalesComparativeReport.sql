@@ -24,12 +24,12 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @strSalesPersonIds				NVARCHAR(100)
 	  , @strName						NVARCHAR(MAX)
 	  , @strCustomerIds					NVARCHAR(MAX)
-	  , @strAccountStatusCode			NVARCHAR(MAX)
+	  , @strAccountStatusCodes			NVARCHAR(MAX)
 	  , @strCategoryCodeIds				NVARCHAR(300)
 	  , @strItemIds						NVARCHAR(300)
 	  , @strItemDescriptions			NVARCHAR(MAX)
 	  , @strCompanyLocationIds			NVARCHAR(300)
-	  , @strSource						NVARCHAR(300)
+	  , @strSources						NVARCHAR(MAX)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
 
@@ -97,13 +97,13 @@ SELECT  @strItemDescriptions = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strItemDescriptions'
 
-SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT  @strAccountStatusCodes = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAccountStatusCode'
+WHERE	[fieldname] = 'strAccountStatusCodes'
 
-SELECT  @strSource = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT  @strSources = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strSource'
+WHERE	[fieldname] = 'strSources'
 
 SELECT  @strCompanyLocationIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
@@ -171,7 +171,7 @@ SELECT
 	 , strCompanyAddress		= strCompanyAddress
 
  FROM (
-      SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
+      SELECT dtmBeginDate		= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
      , dtmEndingDate			= CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) 
 	 , dtmTransactionDate		= dtmTransactionDate
 	 , dtmTransactionDateEnding	= dtmTransactionDateEnding

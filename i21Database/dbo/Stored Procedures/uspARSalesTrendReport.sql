@@ -23,11 +23,12 @@ DECLARE @dtmTransactionDateTo			DATETIME
 	  , @strSalesPersonIds				NVARCHAR(100)
 	  , @strName						NVARCHAR(MAX)
 	  , @strCustomerIds					NVARCHAR(MAX)
-	  , @strAccountStatusCode			NVARCHAR(MAX)
+	  , @strAccountStatusCodes			NVARCHAR(MAX)
 	  , @strCategoryCodeIds				NVARCHAR(300)
 	  , @strItemIds						NVARCHAR(300)
+	  , @strItemDescriptions			NVARCHAR(MAX)
 	  , @strCompanyLocationIds			NVARCHAR(300)
-	  , @strSource						NVARCHAR(300)
+	  , @strSources						NVARCHAR(MAX)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
 
@@ -91,13 +92,17 @@ SELECT  @strItemIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strItemIds'
 
-SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT  @strItemDescriptions = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAccountStatusCode'
+WHERE	[fieldname] = 'strItemDescriptions'
 
-SELECT  @strSource = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT  @strAccountStatusCodes = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strSource'
+WHERE	[fieldname] = 'strAccountStatusCodes'
+
+SELECT  @strSources = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strSources'
 
 SELECT  @strCompanyLocationIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
@@ -167,6 +172,14 @@ WHERE dtmTransactionDate BETWEEN @dtmTransactionDateFrom AND @dtmTransactionDate
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
+  AND (intItemId IN (
+		SELECT intItemId
+		FROM tblICItem
+		WHERE strDescription IN (
+			SELECT strDescription
+			FROM tblICItem
+			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
+		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
   AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
   AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
