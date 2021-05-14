@@ -713,6 +713,7 @@ BEGIN
 END;
 
 -- Create the AP Clearing
+IF @ysnPost = 1
 BEGIN 
 	DECLARE 
 	@intVoucherInvoiceNoOption TINYINT
