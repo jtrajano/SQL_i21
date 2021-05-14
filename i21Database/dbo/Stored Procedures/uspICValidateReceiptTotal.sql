@@ -5,6 +5,6 @@ AS
 
 DECLARE @dblDifference AS NUMERIC(38, 15)
 
-SELECT @dblDifference = (dblGrandTotal - dblInvoiceAmount) FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptId
+SELECT @dblDifference = (dblInvoiceAmount - dblGrandTotal) FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intReceiptId
 
 SET @ysnValid = CASE WHEN @dblDifference <> 0 THEN 0 ELSE 1 END 
