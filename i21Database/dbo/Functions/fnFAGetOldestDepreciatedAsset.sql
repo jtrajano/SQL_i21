@@ -8,8 +8,7 @@ BEGIN
 	SELECT A.intAssetId, MAX( dtmDepreciationToDate )dtmDepreciationToDate
         FROM tblFAFixedAssetDepreciation A JOIN
 		tblFAFixedAsset B ON A.intAssetId = B.intAssetId
-		WHERE B.ysnDisposed = 0
-        AND B.ysnFullyDepreciated = 0
+		WHERE B.ysnDisposed = 0        
         AND B.ysnAcquired = 1
 	    GROUP BY A.intAssetId
 	)

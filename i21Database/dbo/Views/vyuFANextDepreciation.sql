@@ -4,8 +4,7 @@ WITH GetNextForDepreciate AS(
 	SELECT B.intAssetId, dtmNextDepreciation = CASE WHEN dtmDepreciationToDate IS NULL THEN  B.dtmDateInService ELSE DATEADD(MONTH,1 , dtmDepreciationToDate)END
 	FROM tblFAFixedAssetDepreciation A RIGHT JOIN
     tblFAFixedAsset B ON A.intAssetId = B.intAssetId
-	WHERE ISNULL(ysnFullyDepreciated,0) = 0
-	AND ISNULL(ysnDisposed,0) = 0
+	WHERE ISNULL(ysnDisposed,0) = 0
 	AND ISNULL(ysnAcquired,0) = 1
 ),
 Ordered AS(
