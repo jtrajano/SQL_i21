@@ -58,6 +58,7 @@ BEGIN
 		AND RCat.intPatronageCategoryId = CV.intPatronageCategoryId
 		AND R.ysnPosted <> 1
 	WHERE RCat.dblVolume > (CV.dblVolume - CV.dblVolumeProcessed)
+	  AND R.intRefundId = @intRefundId
 
 END
 ELSE
@@ -486,24 +487,26 @@ END CATCH
 		AND VolumeMaster.intFiscalYear = tempRefund.intFiscalYearId
 		AND VolumeMaster.intPatronageCategoryId = tempRefund.intPatronageCategoryId
 
-	--IF(@ysnPosted = 1)
-	--BEGIN
-	--	UPDATE CV
-	--	SET CV.intRefundCustomerId = tRD.intRefundCustomerId, CV.ysnRefundProcessed = 1
-	--	FROM tblPATCustomerVolume CV
-	--	INNER JOIN #tmpRefundData tRD
-	--		ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
-	--	WHERE CV.ysnRefundProcessed = 0
-	--END
-	--ELSE
-	--BEGIN
-	--	UPDATE CV
-	--	--SET CV.intRefundCustomerId = null
-	--	SET ysnRefundProcessed = 0
-	--	FROM tblPATCustomerVolume CV
-	--	INNER JOIN #tmpRefundData tRD
-	--		ON CV.intRefundCustomerId = tRD.intRefundCustomerId
-	--END
+	UPDATE CV
+	SET ysnRefundProcessed = CASE WHEN @ysnPosted = 1 
+								THEN CASE WHEN CV.dblVolume - CV.dblVolumeProcessed <= 0 
+											THEN CAST(1 AS BIT) 
+											ELSE CAST(0 AS BIT) 
+									END
+								ELSE CAST(0 AS BIT) 
+							END
+	, intRefundCustomerId = CASE WHEN @ysnPosted = 1
+								THEN RCAT.intRefundCustomerId
+								ELSE NULL
+							END
+	FROM tblPATRefund R
+	INNER JOIN tblPATRefundCustomer RC ON R.intRefundId = RC.intRefundId
+	INNER JOIN tblPATRefundCategory RCAT ON RC.intRefundCustomerId = RCAT.intRefundCustomerId
+	INNER JOIN tblPATCustomerVolume CV ON CV.intFiscalYear = R.intFiscalYearId
+									AND CV.intCustomerPatronId = RC.intCustomerId
+									AND CV.intPatronageCategoryId = RCAT.intPatronageCategoryId
+	WHERE R.intRefundId = @intRefundId
+	  AND RC.ysnEligibleRefund = 1
 
 	--UPDATE tblPATCustomerVolume
 	--SET ysnRefundProcessed = @ysnPosted
