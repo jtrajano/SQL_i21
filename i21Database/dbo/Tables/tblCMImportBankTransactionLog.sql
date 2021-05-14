@@ -9,7 +9,7 @@ CREATE TABLE [dbo].[tblCMImportBankTransactionLog] (
     primary key ([intImportLogId])
 );
 GO
-ALTER TABLE [dbo].[tblCMImportBankTransactionLog]  WITH CHECK ADD  CONSTRAINT [tblCMImportBankTransactionLog_tblSMUserSecurity] FOREIGN KEY([intEntityId])
+ALTER TABLE [dbo].[tblCMImportBankTransactionLog] ADD  CONSTRAINT [tblCMImportBankTransactionLog_tblSMUserSecurity] FOREIGN KEY([intEntityId])
 REFERENCES [dbo].[tblSMUserSecurity] ([intEntityId])
 GO
 ALTER TABLE [dbo].[tblCMImportBankTransactionLog] CHECK CONSTRAINT [tblCMImportBankTransactionLog_tblSMUserSecurity]
