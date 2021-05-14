@@ -139,6 +139,32 @@ BEGIN
 	DECLARE @strChargeItem AS NVARCHAR(50)
 
 
+	-- Validate Receipt Total
+	
+	-- Source Type must be equal to 0 - None to trigger Receipt Total Validation
+	IF @intSourceType = 0
+	BEGIN
+
+		DECLARE @ysnValidateReceiptTotal AS BIT
+
+		SELECT TOP 1 @ysnValidateReceiptTotal = ysnValidateReceiptTotal FROM tblICCompanyPreference
+
+		-- Company Preference if Receipt Total should be validated
+		IF @ysnValidateReceiptTotal = 1
+		BEGIN
+
+			DECLARE @ysnValidReceiptTotal AS BIT
+
+			EXEC uspICValidateReceiptTotal @intTransactionId, @ysnValidReceiptTotal OUTPUT
+
+			IF @ysnValidReceiptTotal = 0
+			BEGIN
+				EXEC uspICRaiseError 80266;
+				GOTO With_Rollback_Exit
+			END
+		END
+	END
+
 	-- Validate if the Inventory Receipt exists   
 	IF @intTransactionId IS NULL  
 	BEGIN   
