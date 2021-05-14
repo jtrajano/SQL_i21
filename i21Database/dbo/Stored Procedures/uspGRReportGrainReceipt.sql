@@ -79,11 +79,11 @@ DECLARE  @strCompanyName NVARCHAR(500)
 	BEGIN
 		  SELECT @strReceiptNumber = (strPrefix + [dbo].[fnAddZeroPrefixes](intNumber, 5))  
 		  FROM tblSMStartingNumber  
-		  WHERE [strTransactionType] = N'Canadian Grain Receipt'  
+		  WHERE [strTransactionType] = N'Grain Receipt'  
   
 		  UPDATE tblSMStartingNumber  
 		  SET intNumber = intNumber + 1  
-		  WHERE [strTransactionType] = N'Canadian Grain Receipt'  
+		  WHERE [strTransactionType] = N'Grain Receipt'  
   
 		  UPDATE tblSCTicket  
 		  SET strGrainReceiptNumber = @strReceiptNumber  
