@@ -3889,6 +3889,15 @@ BEGIN TRY
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
 							end
 						END
+						ELSE IF (@strTransactionReference = 'Inventory Receipt')  
+						BEGIN  
+							if (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix,0) = 1)  
+							begin  
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0   
+							end  
+
+						END 
 
 					END				
 					ELSE IF ISNULL(@dblBasis, 0) > 0
