@@ -46,7 +46,13 @@ GLGainLoss.strAccountId strGainLossAccountId,
 D.dblDepreciationToDate,      
 Company.strLocationName strCompanyLocation,      
 Currency.strCurrency,
-ysnFullyDepreciated = ISNULL(FA.ysnFullyDepreciated,0) & ISNULL(FA.ysnTaxFullyDepreciated,0),
+ysnFullyDepreciated =
+ CASE WHEN (BDFD.Cnt > 0 AND BDCnt.Cnt > 0) OR BDCnt.Cnt = 0
+ THEN CAST(0 AS BIT)
+
+ ELSE
+    CAST(1 AS BIT)
+    END,
 FA.intConcurrencyId
 from tblFAFixedAsset FA     
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId      
@@ -66,3 +72,12 @@ OUTER APPLY(
 OUTER APPLY(      
  SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intDepreciationMethodId = DM.intDepreciationMethodId ORDER BY intAssetDepreciationId DESC      
 )D
+OUTER APPLY(
+    SELECT COUNT(*)Cnt FROM tblFABookDepreciation
+    WHERE intAssetId = FA.intAssetId
+)BDCnt
+OUTER APPLY(
+    SELECT COUNT(*)Cnt  FROM tblFABookDepreciation
+    WHERE intAssetId = FA.intAssetId
+    AND ISNULL(ysnFullyDepreciated,0) = 0
+)BDFD

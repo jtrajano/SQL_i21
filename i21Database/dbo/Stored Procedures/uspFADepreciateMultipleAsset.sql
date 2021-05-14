@@ -30,6 +30,23 @@ DECLARE @tblError TABLE (
 INSERT INTO @tblError 
       SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @BookId, @Id)
 
+
+  UPDATE BD
+  SET ysnFullyDepreciated = 1
+  FROM
+  tblFABookDepreciation BD JOIN @tblError E
+  ON E.intAssetId = BD.intAssetId
+  WHERE intBookId = @BookId
+  AND strError = 'Asset already fully depreciated.'
+
+  UPDATE A
+  SET ysnDisposed = 1
+  FROM
+  tblFAFixedAsset A JOIN @tblError E
+  ON A.intAssetId = A.intAssetId
+  WHERE strError = 'Asset was already disposed.'
+
+
 INSERT INTO @IdGood
     SELECT A.intId FROM @Id A LEFT JOIN @tblError B
     ON A.intId = B.intAssetId WHERE B.intAssetId IS NULL
@@ -76,10 +93,13 @@ BEGIN
         IF ISNULL(@ysnRecap,0) = 0
         BEGIN
             UPDATE A SET ysnDepreciated = 0, ysnTaxDepreciated = 0,
-            ysnFullyDepreciated = 0, ysnTaxFullyDepreciated = 0,
             ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
+
+            UPDATE BD SET ysnFullyDepreciated  =0
+            FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId
+
         END
      
 END  
@@ -466,13 +486,11 @@ BEGIN
 END  
 
 -- THIS WILL REFLECT IN THE ASSET SCREEN ysnFullyDepreciated FLAG
-UPDATE A  SET A.ysnFullyDepreciated  =1  
-  FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
-  WHERE B.ysnFullyDepreciated = 1 AND 1 = @BookId
 
-UPDATE A  SET A.ysnTaxFullyDepreciated  =1  
-  FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
-  WHERE B.ysnFullyDepreciated = 1 AND 2 = @BookId
+UPDATE BD  SET ysnFullyDepreciated  =1
+  FROM tblFABookDepreciation BD  JOIN @tblDepComputation B ON BD.intAssetId = B.intAssetId
+  WHERE B.ysnFullyDepreciated = 1
+  AND BD.intBookId  = @BookId
 
 UPDATE A  SET A.ysnDepreciated  =1  
   FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
