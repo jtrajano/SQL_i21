@@ -34,10 +34,10 @@ ysnTaxDepreciated = ISNULL(FA.ysnTaxDepreciated,0),
 ysnDepreciated = ISNULL(FA.ysnDepreciated, 0) | ISNULL(FA.ysnTaxDepreciated, 0),
 FA.ysnDisposed,     
 FA.dblCost - FA.dblSalvageValue dblBasis,      
-D.intDepreciationMethodId,      
-D.strDepreciationMethodId,      
-D.strConvention,      
-D.strDepreciationType,      
+DM.intDepreciationMethodId,      
+DM.strDepreciationMethodId,      
+DM.strConvention,      
+DM.strDepreciationType,      
 GLAsset.strAccountId strAssetAccountId,      
 GLExpense.strAccountId strExpenseAccountId,      
 GLDepreciation.strAccountId strDepreciationAccountId,      
@@ -62,21 +62,27 @@ LEFT JOIN tblGLAccount GLAccumulation ON GLAccumulation.intAccountId = FA.intAcc
 LEFT JOIN tblGLAccount GLGainLoss ON GLGainLoss.intAccountId = FA.intGainLossAccountId      
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID=FA.intCurrencyId      
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId      
-
+OUTER APPLY(  
+ SELECT TOP 1 intDepreciationMethodId
+ FROM tblFABookDepreciation  
+ WHERE intAssetId = FA.intAssetId
+ AND intBookId = 1
+)BD  
+OUTER APPLY(  
+ SELECT TOP 1 dm.intDepreciationMethodId,
+ strDepreciationMethodId,strConvention,strDepreciationType  
+ FROM tblFADepreciationMethod dm JOIN 
+ tblFABookDepreciation bd ON dm.intDepreciationMethodId=bd.intDepreciationMethodId
+ WHERE bd.intDepreciationMethodId  = BD.intDepreciationMethodId  
+)DM  
 OUTER APPLY(      
  SELECT TOP 1 
- dblDepreciationToDate ,
- DM.intDepreciationMethodId,
- DM.strDepreciationMethodId,
- DM.strDepreciationType,
- DM.strConvention
- FROM tblFAFixedAssetDepreciation A JOIN
- tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId
- JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId= BD.intDepreciationMethodId
- WHERE BD.intDepreciationMethodId = DM.intDepreciationMethodId 
- AND FA.intAssetId =A.intAssetId
- AND A.intBookId=1
- ORDER BY intAssetDepreciationId DESC      
+ dblDepreciationToDate 
+ FROM tblFAFixedAssetDepreciation
+ WHERE
+ intAssetId =FA.intAssetId
+ AND intBookId=1
+ ORDER BY intAssetDepreciationId DESC          
 )D
 OUTER APPLY(
     SELECT COUNT(*)Cnt FROM tblFABookDepreciation 
