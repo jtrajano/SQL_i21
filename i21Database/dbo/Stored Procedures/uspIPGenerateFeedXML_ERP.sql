@@ -69,6 +69,11 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPLotSplit @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
+	ELSE IF @strType = 'Lot Item Change'
+	BEGIN
+		EXEC dbo.uspIPGenerateERPLotItemChange @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
 END TRY
 
 BEGIN CATCH
