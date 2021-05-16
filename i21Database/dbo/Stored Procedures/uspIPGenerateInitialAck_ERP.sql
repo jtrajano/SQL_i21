@@ -21,6 +21,8 @@ BEGIN TRY
 		,@intMessageTypeId INT
 		,@intStatusId INT
 		,@strStatusText NVARCHAR(MAX)
+		,@strReceiptNo	NVARCHAR(50) 
+		,@strAdjustmentNo	NVARCHAR(50) 
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intInitialAckId INT
@@ -31,6 +33,8 @@ BEGIN TRY
 		,intMessageTypeId INT
 		,intStatusId INT
 		,strStatusText NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+		,strReceiptNo	NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strAdjustmentNo	NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 
 	DELETE
@@ -45,6 +49,8 @@ BEGIN TRY
 		,intMessageTypeId
 		,intStatusId
 		,strStatusText
+		,strReceiptNo
+		,strAdjustmentNo
 		)
 	SELECT intInitialAckId
 		,intTrxSequenceNo
@@ -54,6 +60,8 @@ BEGIN TRY
 		,intMessageTypeId
 		,intStatusId
 		,strStatusText
+		,strReceiptNo
+		,strAdjustmentNo
 	FROM tblIPInitialAck
 	WHERE strFeedStatus IS NULL
 		AND strCompanyLocation = @strCompany
@@ -71,7 +79,9 @@ BEGIN TRY
 			,@intMessageTypeId = NULL
 			,@intStatusId = NULL
 			,@strStatusText = NULL
-
+			,@strReceiptNo = NULL
+			,@strAdjustmentNo = NULL
+			 
 		SELECT @intInitialAckId = intInitialAckId
 			,@intTrxSequenceNo = intTrxSequenceNo
 			,@strCompanyLocation = strCompanyLocation
@@ -80,6 +90,8 @@ BEGIN TRY
 			,@intMessageTypeId = intMessageTypeId
 			,@intStatusId = intStatusId
 			,@strStatusText = strStatusText
+			,@strReceiptNo = strReceiptNo
+			,@strAdjustmentNo = strAdjustmentNo
 		FROM @tblAcknowledgement
 		WHERE intRowNo = @intMinRowNo
 
@@ -102,6 +114,8 @@ BEGIN TRY
 				SELECT @strStatusText = ''
 
 			SELECT @strXML += '<StatusText>' + @strStatusText + '</StatusText>'
+			SELECT @strXML += '<ReceiptNo>' + IsNULL(@strReceiptNo,'') + '</ReceiptNo>'
+			SELECT @strXML += '<AdjustmentNo>' + IsNULL(@strAdjustmentNo,'') + '</AdjustmentNo>'
 
 			SELECT @strXML += '</header>'
 		END

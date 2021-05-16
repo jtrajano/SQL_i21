@@ -15,5 +15,7 @@
 	,strQuantityUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strReasonCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strNotes NVARCHAR(2048) COLLATE Latin1_General_CI_AS
+	,strNewStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strNewStorageUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,CONSTRAINT PK_tblIPInventoryAdjustmentStage PRIMARY KEY (intInventoryAdjustmentStageId)
 	)

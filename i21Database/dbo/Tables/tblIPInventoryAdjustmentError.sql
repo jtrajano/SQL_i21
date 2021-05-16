@@ -17,5 +17,7 @@
 	,strNotes NVARCHAR(2048) COLLATE Latin1_General_CI_AS
 	,strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,ysnMailSent BIT 
+	,strNewStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strNewStorageUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,CONSTRAINT PK_tblIPInventoryAdjustmentError PRIMARY KEY (intInventoryAdjustmentErrorId)
 	)
