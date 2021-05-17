@@ -149,7 +149,7 @@ join (
 LEFT JOIN vyuGRTransferClearing transferClr
     ON transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
     AND transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-    AND transferClr.strTransferStorageTicket = receipt.strReceiptNumber
+    AND transferClr.strTransactionNumber = receipt.strReceiptNumber
 --receipts in storage that were FULLY transferred from DP to DP only
 LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
     ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
