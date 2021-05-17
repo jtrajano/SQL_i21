@@ -369,7 +369,7 @@ INNER JOIN tblICInventoryReceiptCharge IRC
 	ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
 INNER JOIN tblICItem IC
 	ON IC.intItemId = IRC.intChargeId
-	AND GL.strDescription LIKE CONCAT('%', IC.strItemNo, '%')
+	AND GL.strDescription LIKE '%' + IC.strItemNo + '%'
 INNER JOIN tblICInventoryReceiptChargeTax IRCT
 	ON IRCT.intInventoryReceiptChargeId = IRC.intInventoryReceiptChargeId
 LEFT JOIN   
