@@ -332,7 +332,7 @@ INNER JOIN
 		ON ARIC.[intItemId] = ARID.[intItemId]
 		AND ARIC.[intCompanyLocationId] = ARID.[intCompanyLocationId]	
 INNER JOIN
-	(SELECT [intItemId], [ysnAutoBlend] FROM tblICItem WITH (NOLOCK)) ICI
+	(SELECT [intItemId], [ysnAutoBlend], [strType] FROM tblICItem WITH (NOLOCK)) ICI
 		ON ARIC.[intComponentItemId] = ICI.[intItemId]
 LEFT OUTER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
@@ -356,7 +356,8 @@ WHERE
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
-	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment')
+	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
+	AND ICI.[strType] NOT IN ('Non-Inventory')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadDetailId IS NULL OR (ARID.intLoadDetailId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
