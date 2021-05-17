@@ -879,6 +879,13 @@ BEGIN
 	SET intShipmentId = @CurrentShipmentId
 	WHERE intHeaderId = @intId
 
+	-- Link Inventory Shipment Transaction
+		BEGIN
+			EXEC dbo.uspICLinkInventoryShipmentTransaction
+				@CurrentShipmentId,
+				true
+		END
+
 	-- Create an Audit Log
 	BEGIN 
 		DECLARE @StrDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Shipment'

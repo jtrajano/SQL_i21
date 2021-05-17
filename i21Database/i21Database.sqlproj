@@ -9369,6 +9369,8 @@
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
     <Build Include="dbo\Tables\tblIPLotItemChangeFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotItemChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkInventoryShipmentTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkInventoryTransferTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
