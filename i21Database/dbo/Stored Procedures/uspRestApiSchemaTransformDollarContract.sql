@@ -40,6 +40,13 @@ WHERE country.intCountryID IS NULL
   AND NULLIF(sc.strCountry, '') IS NOT NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the term: ''' + sc.strTerms + '''', 'Terms', 'Error',  sc.strTerms
+FROM tblRestApiSchemaItemContract sc
+LEFT JOIN tblSMTerm term ON term.strTerm = sc.strTerms OR term.strTermCode = sc.strTerms
+WHERE term.intTermID IS NULL
+  AND NULLIF(sc.strTerms, '') IS NOT NULL
+	AND sc.guiApiUniqueId = @guiApiUniqueId
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR

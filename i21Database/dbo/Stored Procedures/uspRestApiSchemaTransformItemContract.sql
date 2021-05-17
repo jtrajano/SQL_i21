@@ -102,6 +102,26 @@ WHERE country.intCountryID IS NULL
     AND NULLIF(sc.strCountry, '') IS NOT NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = CASE WHEN sc.strTerms IS NULL THEN 'Terms is blank.' ELSE 'Cannot find the terms: ''' + sc.strTerms + '''' END,
+	strField = 'Terms', 
+	strLogLevel = 'Error', 
+	strValue = sc.strTerms,
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI_CSV',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
+FROM tblRestApiSchemaItemContract sc
+LEFT JOIN tblSMTerm term ON term.strTerm = sc.strTerms OR term.strTermCode = sc.strTerms
+WHERE term.intTermID IS NULL
+    AND NULLIF(sc.strTerms, '') IS NOT NULL
+	AND sc.guiApiUniqueId = @guiApiUniqueId
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
