@@ -3,7 +3,10 @@ AS
 DECLARE @intBookDepreciationId INT = NULL , @intDepreciationMethodId INT
 SELECT TOP 1 @intBookDepreciationId = intBookDepreciationId FROM tblFABookDepreciation WHERE intAssetId = @intAssetId AND intBookId =1  
 SELECT TOP 1 @intDepreciationMethodId = intDepreciationMethodId FROM tblFAFixedAsset where intAssetId = @intAssetId
-  
+
+IF @intDepreciationMethodId IS NULL
+	DELETE FROM tblFABookDepreciation WHERE intAssetId= @intAssetId AND intBookId =1
+ELSE
 IF EXISTS(SELECT 1 FROM tblFABookDepreciation WHERE intAssetId = @intAssetId AND intBookId =1 )
 BEGIN  
 	UPDATE tblFABookDepreciation SET intDepreciationMethodId = @intDepreciationMethodId 
