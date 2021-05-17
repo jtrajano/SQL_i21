@@ -9656,6 +9656,7 @@
     <None Include="Scripts\Post-Deployment\RM\03_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\AR\01_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
