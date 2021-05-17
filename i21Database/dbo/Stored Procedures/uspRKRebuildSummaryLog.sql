@@ -138,7 +138,7 @@ BEGIN TRY
 								ELSE
 									ISNULL( CASE WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL THEN 
 													MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN 
-																CASE WHEN ShipmentItem.dblDestinationNet > ShipmentItem.dblQuantity THEN ShipmentItem.dblQuantity ELSE ShipmentItem.dblDestinationNet END
+																CASE WHEN ShipmentItem.dblDestinationNet >= ISNULL(SUH.dblOldValue,0) THEN ISNULL(SUH.dblOldValue,0) ELSE ShipmentItem.dblDestinationNet END
 														ELSE 0 END)
 													ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN 
 																		ShipmentItem.dblQuantity
@@ -162,6 +162,7 @@ BEGIN TRY
 			JOIN tblICInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = CH.intContractHeaderId
+			LEFT JOIN tblCTSequenceUsageHistory SUH ON SUH.intExternalHeaderId = Shipment.intInventoryShipmentId AND SUH.strFieldName = 'Balance' AND SUH.strScreenName = 'Inventory Shipment'
 			LEFT JOIN (
 				SELECT DISTINCT ID.intInventoryShipmentItemId
 					, IV.ysnPosted
