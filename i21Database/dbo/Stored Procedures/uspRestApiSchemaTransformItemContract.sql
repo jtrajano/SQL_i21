@@ -81,6 +81,27 @@ LEFT JOIN tblSMCurrency currency ON currency.strCurrency = sc.strCurrency OR cur
 WHERE currency.intCurrencyID IS NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = CASE WHEN sc.strCountry IS NULL THEN 'Country is blank.' ELSE 'Cannot find the country: ''' + sc.strCountry + '''' END,
+	strField = 'Country', 
+	strLogLevel = 'Error', 
+	strValue = sc.strCurrency,
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI_CSV',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
+FROM tblRestApiSchemaItemContract sc
+LEFT JOIN tblSMCountry country ON country.strCountry = sc.strCountry OR country.strCountryCode = sc.strCountry
+WHERE country.intCountryID IS NULL
+    AND NULLIF(sc.strCountry, '') IS NOT NULL
+	AND sc.guiApiUniqueId = @guiApiUniqueId
+
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
