@@ -48,6 +48,14 @@ WHERE term.intTermID IS NULL
   AND NULLIF(sc.strTerms, '') IS NOT NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the freight term: ''' + sc.strTerms + '''', 'Freight Terms', 'Error',  sc.strFreightTerm
+FROM tblRestApiSchemaItemContract sc
+LEFT JOIN tblSMFreightTerms term ON term.strFreightTerm = sc.strFreightTerm OR term.strDescription = sc.strFreightTerm
+WHERE term.intFreightTermId IS NULL
+  AND NULLIF(sc.strFreightTerm, '') IS NOT NULL
+	AND sc.guiApiUniqueId = @guiApiUniqueId
+
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT DISTINCT

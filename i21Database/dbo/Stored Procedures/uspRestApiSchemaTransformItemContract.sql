@@ -123,6 +123,27 @@ WHERE term.intTermID IS NULL
     AND NULLIF(sc.strTerms, '') IS NOT NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = CASE WHEN sc.strFreightTerm IS NULL THEN 'Freight Term is blank.' ELSE 'Cannot find the Freight Term: ''' + sc.strFreightTerm + '''' END,
+	strField = 'Freight Term', 
+	strLogLevel = 'Error', 
+	strValue = sc.strTerms,
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI_CSV',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
+FROM tblRestApiSchemaItemContract sc
+LEFT JOIN tblSMFreightTerms term ON term.strFreightTerm = sc.strFreightTerm OR term.strDescription = sc.strFreightTerm
+WHERE term.intFreightTermId IS NULL
+    AND NULLIF(sc.strFreightTerm, '') IS NOT NULL
+	AND sc.guiApiUniqueId = @guiApiUniqueId
+
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT DISTINCT
