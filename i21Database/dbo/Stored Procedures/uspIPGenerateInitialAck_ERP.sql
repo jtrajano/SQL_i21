@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspIPGenerateInitialAck_ERP @strCompany NVARCHAR(50) = ''
+	,@intMessageType INT = NULL
 	,@ysnUpdateFeedStatus BIT = 0
 AS
 BEGIN TRY
@@ -65,6 +66,7 @@ BEGIN TRY
 	FROM tblIPInitialAck
 	WHERE strFeedStatus IS NULL
 		AND strCompanyLocation = @strCompany
+		AND intMessageTypeId = @intMessageType
 
 	SELECT @intMinRowNo = MIN(intRowNo)
 	FROM @tblAcknowledgement
@@ -96,7 +98,7 @@ BEGIN TRY
 		WHERE intRowNo = @intMinRowNo
 
 		BEGIN
-			SELECT @strXML += '<header>'
+			SELECT @strXML += '<header id="' + LTRIM(@intTrxSequenceNo) + '">'
 
 			SELECT @strXML += '<TrxSequenceNo>' + ISNULL(CONVERT(VARCHAR, @intTrxSequenceNo), '') + '</TrxSequenceNo>'
 
