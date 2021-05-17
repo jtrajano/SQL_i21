@@ -43,6 +43,7 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 3 THEN 'LG Loads - Inbound'
 		WHEN 4 THEN 'TM Sites'
 		WHEN 5 THEN 'Entities'
+		WHEN 6 THEN 'Sales/Transfer Orders'
 		END COLLATE Latin1_General_CI_AS
 	,CP.strALKMapKey
 	,CP.intTransUsedBy
