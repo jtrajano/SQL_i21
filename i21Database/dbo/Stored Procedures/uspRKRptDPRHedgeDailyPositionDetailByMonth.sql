@@ -139,7 +139,7 @@ END
 		, intFromCommodityUnitMeasureId int
 		, intToCommodityUnitMeasureId int
 		, strAccountNumber NVARCHAR(100)
-		, strTranType NVARCHAR(20)
+		, strTranType NVARCHAR(100)
 		, dblNoOfLot NUMERIC(24, 10)
 		, dblDelta NUMERIC(24, 10)
 		, intBrokerageAccountId int
