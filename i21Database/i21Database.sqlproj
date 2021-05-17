@@ -9343,6 +9343,7 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
+    <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
