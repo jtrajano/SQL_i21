@@ -350,22 +350,32 @@ SELECT
 	, dblRunningAvailableQtyNoReserved = ROUND(ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0), 6) 
 	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
 	, dblCost = 
-			CASE 
-				-- Get the average cost. 
-				WHEN CostMethod.intCostingMethodId = 1 THEN 				
-					dbo.fnCalculateCostBetweenUOM(
-						@intStockUOMId
-						, ItemUOM.intItemUOMId
-						, dbo.[fnICGetMovingAverageCost](
-							t.intItemId
-							, t.intItemLocationId
-							, @intLastInventoryTransactionId
+		COALESCE (
+			NULLIF(
+				CASE 
+					-- Get the average cost. 
+					WHEN CostMethod.intCostingMethodId = 1 THEN 				
+						dbo.fnCalculateCostBetweenUOM(
+							@intStockUOMId
+							, ItemUOM.intItemUOMId
+							, dbo.[fnICGetMovingAverageCost](
+								t.intItemId
+								, t.intItemLocationId
+								, @intLastInventoryTransactionId
+							)
 						)
-					)
-				-- Otherwise, get the last cost 
-				ELSE 
-					t.dblCost
-			END
+					-- Otherwise, get the last cost 
+					ELSE 
+						t.dblCost
+				END, 
+				0
+			),
+			NULLIF(
+				ItemPricing.dblLastCost, 
+				0
+			), 
+			ItemPricing.dblStandardCost
+		)
 	, intDecimalPlaces = iUOM.intDecimalPlaces
 	, ItemUOM.ysnAllowPurchase
 	, ItemUOM.ysnAllowSale
@@ -426,6 +436,8 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		AND StockUOM.ysnStockUnit = 1
 	LEFT JOIN tblICItemLocation ItemLocation
 		ON ItemLocation.intItemLocationId = t.intItemLocationId
+	LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = t.intItemLocationId
+    	AND ItemPricing.intItemId = ItemLocation.intItemId
 	LEFT JOIN tblSMCompanyLocation CompanyLocation
 		ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation
