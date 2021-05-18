@@ -274,7 +274,7 @@ SELECT
 	,[strDocumentNumber]					= @ShipmentNumber 
 	,[strItemDescription]					= ARSI.[strItemDescription]
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-	,[dblQtyOrdered]						= CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0
+	,[dblQtyOrdered]						= CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0 AND ISNULL(ARSI.[intItemContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intItemContractDetailId], 0) = 0
 											  THEN 0 
 											  ELSE ARSI.[dblQtyOrdered] 
 											  END

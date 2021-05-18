@@ -313,9 +313,8 @@ FROM (
 													ELSE
 														dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 												END)
-	     --, dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
-		 , dblQtyOrdered					= CASE WHEN ARCC.ysnLoad = 1 OR ISNULL(ITEMCONTRACT.intItemContractHeaderId, 0) > 0
-													THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+		 , dblQtyOrdered					= CASE	WHEN ARCC.ysnLoad = 1 THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+													WHEN ISNULL(ITEMCONTRACT.intItemContractHeaderId, 0) > 0 THEN ISNULL(ITEMCONTRACT.dblContracted, 0)
 													ELSE ARCC.dblDetailQuantity
 												END
 	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL AND ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 1
@@ -439,6 +438,7 @@ FROM (
 	LEFT JOIN (
 		SELECT    intItemContractHeaderId
 				, intItemContractDetailId
+				, dblContracted
 		FROM dbo.tblCTItemContractDetail WITH (NOLOCK)
 	) ITEMCONTRACT ON TICKET.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId
 	LEFT OUTER JOIN (
