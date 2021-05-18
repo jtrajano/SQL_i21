@@ -326,7 +326,10 @@ END
 SELECT	@ysnGLEntriesRequired = 1
 FROM	tblICInventoryTransfer 
 WHERE	intInventoryTransferId = @intTransactionId 
-		AND intFromLocationId <> intToLocationId
+		AND (
+			intFromLocationId <> intToLocationId
+			OR ysnShipmentRequired = 1
+		)
 
 -- Add to the "not-to-log" list if shipment is not required 
 IF @ysnShipmentRequired <> 1
