@@ -87,16 +87,19 @@ BEGIN
 		,@intCurrencyId			= CS.intCurrencyId
 		,@InventoryItemId		= CS.intItemId  
 		,@dblUnits				= SR.dblUnitQty--dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, isnull(@intInventoryItemUOMId, CS.intItemUOMId) , SST.dblUnits) 
-		,@dblGrossUnits			= ( 
-									dbo.fnMultiply(
-											case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS.dblGrossQuantity) else  CS.dblGrossQuantity end
-										, dbo.fnDivide(isnull(SR.dblSplitPercent, 100),	100)
-										)
-									)
+		-- ,@dblGrossUnits			= ( 
+		-- 							dbo.fnMultiply(
+		-- 									case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS.dblGrossQuantity) else  CS.dblGrossQuantity end
+		-- 								, dbo.fnDivide(isnull(SR.dblSplitPercent, 100),	100)
+		-- 								)
+		-- 							)
+		,@dblGrossUnits			= case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS_TO.dblGrossQuantity) else  CS_TO.dblGrossQuantity end
 		,@intCSInventoryItemUOMId = CS.intItemUOMId
 	FROM tblGRTransferStorageReference SR
 	JOIN tblGRCustomerStorage CS 
 		ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
 	WHERE SR.intTransferStorageId = @intTransferStorageId AND SR.intTransferStorageReferenceId = @intTransactionDetailId
 
 	if @debug_awesome = 1 and 1 = 1
