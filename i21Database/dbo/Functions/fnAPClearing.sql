@@ -40,8 +40,8 @@ BEGIN
 		BD.intAccountId,
 		BD.intItemId,
 		BD.intUnitOfMeasureId,
-		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(BD.dblQtyReceived, 0) ELSE ISNULL(BD.dblQtyReceived, 0) * -1 END,
-		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * BD.dblQtyReceived, 0) ELSE ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * BD.dblQtyReceived, 0) * -1 END,
+		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) ELSE ISNULL(ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) * -1 END,
+		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) ELSE ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) * -1 END,
 		B.intBillId,
 		B.strBillId,
 		BD.intBillDetailId,
@@ -51,23 +51,8 @@ BEGIN
 	FROM tblAPBill B
 	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 	INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = BD.intAccountId
-	OUTER APPLY (
-		SELECT TOP 1 *
-		FROM fnAPGetDetailSourceTransaction (
-				BD.intInventoryReceiptItemId,
-				BD.intInventoryReceiptChargeId,
-				BD.intInventoryShipmentChargeId,
-				BD.intLoadDetailId,
-				BD.intCustomerStorageId,
-				BD.intSettleStorageId,
-				BD.intBillId,
-				BD.intItemId
-			)
-		ORDER BY intSourceTransactionTypeId
-	) ST
-	WHERE B.intBillId IN (SELECT intId FROM @ids) AND
-	AD.intAccountCategoryId = 45 AND
-	ST.intSourceTransactionId > 0
+	CROSS APPLY fnAPGetDetailSourceTransaction(BD.intInventoryReceiptItemId, BD.intInventoryReceiptChargeId, BD.intInventoryShipmentChargeId, BD.intLoadDetailId, BD.intCustomerStorageId, BD.intSettleStorageId, BD.intBillId, BD.intItemId) ST
+	WHERE B.intBillId IN (SELECT intId FROM @ids) AND AD.intAccountCategoryId = 45
 
 	INSERT @returntable
 	--DETAIL TAX
@@ -95,23 +80,9 @@ BEGIN
 	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 	INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId
 	INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = BD.intAccountId
-	OUTER APPLY (
-		SELECT TOP 1 *
-		FROM fnAPGetDetailSourceTransaction (
-				BD.intInventoryReceiptItemId,
-				BD.intInventoryReceiptChargeId,
-				BD.intInventoryShipmentChargeId,
-				BD.intLoadDetailId,
-				BD.intCustomerStorageId,
-				BD.intSettleStorageId,
-				BD.intBillId,
-				BD.intItemId
-			)
-		ORDER BY intSourceTransactionTypeId
-	) ST
-	WHERE B.intBillId IN (SELECT intId FROM @ids) AND
-	AD.intAccountCategoryId = 45 AND
-	ST.intSourceTransactionId > 0
+	CROSS APPLY fnAPGetDetailSourceTransaction(BD.intInventoryReceiptItemId, BD.intInventoryReceiptChargeId, BD.intInventoryShipmentChargeId, BD.intLoadDetailId, BD.intCustomerStorageId, BD.intSettleStorageId, BD.intBillId, BD.intItemId) ST
+	WHERE B.intBillId IN (SELECT intId FROM @ids) AND AD.intAccountCategoryId = 45 
+	AND ST.dblQuantity IS NULL --EXCEPTION FOR GRAIN DELIVERY SHEET
 
 	RETURN
 END
