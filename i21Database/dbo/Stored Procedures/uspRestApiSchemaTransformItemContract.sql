@@ -57,7 +57,8 @@ SELECT
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
 FROM tblRestApiSchemaItemContract sc
-LEFT JOIN vyuCTEntity sp ON sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson
+LEFT JOIN vyuCTEntity sp ON (sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson)
+	AND sp.strEntityType = 'Salesperson'
 WHERE sp.intEntityId IS NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 

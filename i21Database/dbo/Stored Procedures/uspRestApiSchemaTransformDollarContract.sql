@@ -21,7 +21,8 @@ WHERE customer.intEntityId IS NULL
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the salesperson: ''' + sc.strSalesperson + '''', 'Salesperson', 'Error',  sc.strSalesperson
 FROM tblRestApiSchemaDollarContract sc
-LEFT JOIN vyuCTEntity sp ON sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson
+LEFT JOIN vyuCTEntity sp ON (sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson)
+	AND sp.strEntityType = 'Salesperson'
 WHERE sp.intEntityId IS NULL
 	AND sc.guiApiUniqueId = @guiApiUniqueId
 
