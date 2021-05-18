@@ -55,7 +55,7 @@ BEGIN
 		r.intInventoryReceiptId = @ReceiptId
 		AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 
-	IF @PostedTransferOrder IS NOT NULL
+	IF @PostedTransferOrder IS NOT NULL AND @PostedTransferOrderReceipt IS NOT NULL 
 	BEGIN
 		-- 'Cannot post this Inventory Receipt. The transfer order "{Transfer No}" was already posted in "{Inventory Receipt}".'
 		EXEC uspICRaiseError 80086, @PostedTransferOrder, @PostedTransferOrderReceipt;
