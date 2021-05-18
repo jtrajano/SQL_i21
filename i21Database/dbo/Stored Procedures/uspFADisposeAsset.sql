@@ -157,6 +157,44 @@ IF ISNULL(@ysnRecap, 0) = 0
 		) G
 
 
+		 INSERT INTO tblFAFixedAssetDepreciation (  
+                [intAssetId],  
+                [intBookId],
+                [intDepreciationMethodId],  
+                [dblBasis],  
+                [dtmDateInService],  
+                [dtmDispositionDate],  
+                [dtmDepreciationToDate],  
+                [dblDepreciationToDate],  
+                [dblSalvageValue],  
+                [strTransaction],  
+                [strTransactionId],  
+                [strType],  
+                [strConvention],
+                [strBatchId]
+              )  
+              SELECT  
+                F.intAssetId,
+                1,
+                D.intDepreciationMethodId,
+                BD.dblCost - BD.dblSalvageValue,  
+                BD.dtmPlacedInService,  
+                A.dtmDispose,
+				A.dtmDispose,
+				A.totalDepre,  
+                BD.dblSalvageValue,  
+                'Dispose',  
+                A.strTransactionId,  
+                D.strDepreciationType,  
+                D.strConvention,
+                @strBatchId
+                FROM tblFAFixedAsset F 
+				JOIN @tblAsset A ON A.intAssetId = F.intAssetId
+                JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
+                JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+                WHERE BD.intBookId = 1
+
+
 
 		DECLARE @GLEntries RecapTableType				
 		
