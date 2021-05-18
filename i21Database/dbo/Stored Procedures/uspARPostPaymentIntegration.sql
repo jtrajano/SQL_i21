@@ -168,7 +168,27 @@ BEGIN
     )
 
 	EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 0
-						
+
+  --DELETE INVENTORY LINK 
+	DECLARE @tblPaymentLink   Id
+
+  INSERT INTO @tblPaymentLink
+  SELECT DISTINCT intId FROM @PaymentIds
+
+  WHILE EXISTS (SELECT TOP 1 NULL FROM @tblPaymentLink)
+    BEGIN
+      DECLARE @intPaymentId     INT = NULL
+            , @strRecordNumber  NVARCHAR(100) = NULL
+
+      SELECT TOP 1 @intPaymentId    = P.intPaymentId
+                 , @strRecordNumber = P.strRecordNumber
+      FROM @tblPaymentLink PL
+      INNER JOIN tblARPayment P ON PL.intId = P.intPaymentId
+
+      EXEC dbo.[uspICDeleteTransactionLinks] @intPaymentId, @strRecordNumber, 'Receive Payment', 'Accounts Receivable'
+
+      DELETE FROM @tblPaymentLink WHERE intId = @intPaymentId
+    END
 END
 ELSE
 BEGIN
@@ -303,6 +323,57 @@ BEGIN
     WHERE ISNULL(P.[ysnInvoicePrepayment],0) = 0	
 
     EXEC uspAPUpdateBillPaymentFromAR @paymentIds = @PaymentIds, @post = 1
+
+    --INSERT TO TRANSACTION LINKS
+  DECLARE @tblTransactionLinks    udtICTransactionLinks
+
+  INSERT INTO @tblTransactionLinks (
+      intSrcId
+    , strSrcTransactionNo
+    , strSrcTransactionType
+    , strSrcModuleName
+    , intDestId
+    , strDestTransactionNo
+    , strDestTransactionType
+    , strDestModuleName
+    , strOperation
+  )
+  SELECT intSrcId					      = SRC.intTransactionId
+    , strSrcTransactionNo       = SRC.strTransactionNumber
+    , strSrcTransactionType     = SRC.strTransactionType
+    , strSrcModuleName          = SRC.strModuleName
+    , intDestId                 = PAYMENT.intPaymentId
+    , strDestTransactionNo      = PAYMENT.strRecordNumber
+    , strDestTransactionType    = 'Receive Payment'
+    , strDestModuleName         = 'Accounts Receivable'
+    , strOperation              = 'Process'
+  FROM tblARPayment PAYMENT
+  INNER JOIN #ARPostPaymentHeader PH ON PAYMENT.intPaymentId = PH.intTransactionId
+  CROSS APPLY (
+    --INVOICES
+    SELECT intTransactionId		= INVOICE.intInvoiceId
+      , strTransactionNumber	= INVOICE.strInvoiceNumber
+      , strTransactionType	  = 'Invoice'
+      , strModuleName        	= 'Accounts Receivable'
+    FROM tblARInvoice INVOICE
+    INNER JOIN tblARPaymentDetail PD ON INVOICE.intInvoiceId = PD.intInvoiceId
+    WHERE PD.intInvoiceId IS NOT NULL
+      AND PD.intPaymentId = PAYMENT.intPaymentId
+    
+    UNION ALL
+
+    --VOUCHERS
+    SELECT intTransactionId		= BILL.intBillId
+      , strTransactionNumber	= BILL.strBillId
+      , strTransactionType	  = 'Voucher'
+      , strModuleName        	= 'Purchasing'
+    FROM tblAPBill BILL
+    INNER JOIN tblARPaymentDetail PD ON BILL.intBillId = PD.intBillId
+    WHERE PD.intBillId IS NOT NULL
+      AND PD.intPaymentId = PAYMENT.intPaymentId
+  ) SRC
+
+  EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
 END
 
 --UPDATE PAYMENT DETAIL AMOUNT DUE PAID FROM VOUCHER
@@ -464,7 +535,6 @@ ELSE
 		END				
 									
 	END			
-
 
 RETURN 1
 END

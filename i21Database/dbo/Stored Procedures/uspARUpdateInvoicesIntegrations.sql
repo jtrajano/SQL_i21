@@ -55,7 +55,9 @@ EXEC dbo.[uspARUpdateLineItemsCommitted] @IIDs
 
 EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @IIDs
 
-EXEC [dbo].[uspARLogRiskPosition] @IIDs, @UserId
+EXEC dbo.[uspARLogRiskPosition] @IIDs, @UserId
+
+EXEC dbo.[uspARInsertInvoiceTransactionLink] @IIDs
 
 DELETE FROM ARTD
 FROM tblARTransactionDetail ARTD WITH (NOLOCK)
@@ -66,6 +68,5 @@ INNER JOIN (
 	FROM tblARInvoice WITH (NOLOCK)
 ) ARI ON II.[intHeaderId] = ARI.[intInvoiceId] 
 	 AND ARTD .[strTransactionType] = ARI.[strTransactionType] 
-
 
 GO

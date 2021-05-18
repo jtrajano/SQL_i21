@@ -148,6 +148,9 @@ BEGIN TRY
 		BEGIN
 			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
 		END
+	
+	--INSERT TO TRANSACTION LINKS
+	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
