@@ -2074,7 +2074,11 @@ BEGIN TRY
 																		ELSE NULL
 																END
 													END
-					,[intCustomerStorageId]			= a.[intCustomerStorageId]
+					,[intCustomerStorageId]			= CASE WHEN RI.intInventoryReceiptId IS NULL
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL)
+															THEN a.[intCustomerStorageId] 
+															ELSE NULL END
+					-- ,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
 														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, b.intItemUOMId, CD.dblQuantity),6) 
@@ -2154,7 +2158,12 @@ BEGIN TRY
 														end					
 															
 					,[dblOldCost]					=  CASE 
-															WHEN @ysnFromPriceBasisContract = 0 THEN NULL 
+															WHEN @ysnFromPriceBasisContract = 0 THEN
+																CASE
+																	WHEN ST.ysnDPOwnedType = 1 AND a.intItemType = 1
+																	THEN ISNULL(CS.dblSettlementPrice, 0) + ISNULL(CS.dblBasis, 0)
+																	ELSE NULL
+																END
 															ELSE 
 																CASE 
 																	WHEN (a.intContractHeaderId IS NOT NULL AND a.intPricingTypeId = 1 AND CH.intPricingTypeId <> 2) OR (@origdblSpotUnits > 0) 
@@ -2319,7 +2328,7 @@ BEGIN TRY
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType
-				 
+					
 				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
 				 ---we should delete priced contracts that has a voucher already
 					delete from @voucherPayable 
