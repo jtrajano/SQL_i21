@@ -146,8 +146,8 @@ WHERE term.intFreightTermId IS NULL
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
-SELECT DISTINCT
-      customer.intEntityId intCustomerId
+SELECT 
+    customer.intEntityId intCustomerId
     , sc.dtmContractDate
     , sc.dtmExpirationDate
     , sc.strEntryContract
@@ -176,13 +176,13 @@ FROM tblRestApiSchemaItemContract sc
 INNER JOIN vyuARCustomer customer ON customer.strCustomerNumber = sc.strCustomerNo OR customer.strName = sc.strCustomerNo
 INNER JOIN tblSMCompanyLocation loc ON loc.strLocationName = sc.strLocation OR loc.strLocationNumber = sc.strLocation
 INNER JOIN tblSMCurrency currency ON currency.strCurrency = sc.strCurrency OR currency.strDescription = sc.strCurrency
-INNER JOIN vyuCTEntity sp ON sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson
+INNER JOIN vyuCTEntity sp ON (sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson) AND sp.strEntityType = 'Salesperson'
 LEFT JOIN tblSMFreightTerms ft ON ft.strFreightTerm = sc.strFreightTerm OR ft.strDescription = sc.strFreightTerm
 LEFT JOIN tblSMTerm t ON t.strTerm = sc.strTerms OR t.strTermCode = sc.strTerms
 LEFT JOIN tblSMCountry ct ON ct.strCountry = sc.strCountry OR ct.strCountryCode = sc.strCountry
 LEFT JOIN tblCTContractText ctext ON ctext.strTextCode = sc.strContractText
 LEFT JOIN tblSMLineOfBusiness lob ON lob.strLineOfBusiness = sc.strLineOfBusiness
-WHERE sc.guiApiUniqueId = @guiApiUniqueId
+WHERE sc.guiApiUniqueId = @guiApiUniqueId 
 GROUP BY
       customer.intEntityId
     , sc.dtmContractDate
