@@ -72,10 +72,44 @@
 ,@QuoteTaxExemption					BIT				= 1
 ,@ProcessType						NVARCHAR(MAX)   = 'invoice'
 ,@ForeignCardId						NVARCHAR(MAX)   = ''
+,@UserId							INT				=  0
 	
 AS
 
 BEGIN
+
+	DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
+	DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
+
+	IF(ISNULL(@BatchRecalculate,0) = 1)
+	BEGIN
+		SELECT TOP 1
+		  @dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
+		, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
+		, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
+		, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
+		, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
+		, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
+		, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
+		, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
+		, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
+		, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
+		, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
+		, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
+		FROM tblCFTransaction
+		WHERE intTransactionId = @TransactionId 
+	END
+
 	
 	------------ GET ITEM PRICE PARAMETERS  ------------
 	DECLARE @intItemId						INT
@@ -692,6 +726,7 @@ BEGIN
 		,[strTaxExemptReason]				NVARCHAR(MAX)
 		,[dblCalculatedTax]					NUMERIC(18,10)
 		,[dblOriginalTax]					NUMERIC(18,10)
+		,[dblExemptionAmount]				NUMERIC(18,10)
 	)
 	DECLARE @tblCFTransactionTax					TABLE
 	(
@@ -849,6 +884,7 @@ BEGIN
 		,[strTaxExemptReason]				NVARCHAR(MAX)
 		,[dblCalculatedTax]					NUMERIC(18,10)
 		,[dblOriginalTax]					NUMERIC(18,10)
+		,[dblExemptionAmount]				NUMERIC(18,10)
 	)
 	DECLARE @tblCFTransactionTaxZeroQuantity		TABLE
 	(
@@ -1264,7 +1300,8 @@ BEGIN
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
 								,[ysnInvalidSetup]				
-								,[strNotes]							
+								,[strNotes]
+								,[dblExemptionAmount]							
 							)	
 							SELECT 
 								 [intTaxGroupId]			
@@ -1281,7 +1318,8 @@ BEGIN
 								,[ysnCheckoffTax]				
 								,[ysnTaxExempt]					
 								,[ysnInvalidSetup]				
-								,[strNotes]						
+								,[strNotes]
+								,[dblExemptionAmount]									
 							FROM [fnConstructLineItemTaxDetail] 
 							(
 								 @dblQuantity
@@ -1301,7 +1339,7 @@ BEGIN
 								,@companyConfigFreightTermId
 								,@intCardId		
 								,@intVehicleId
-								,1 --@DisregardExemptionSetup
+								,0 --@DisregardExemptionSetup
 								,0
 								, @intItemUOMId	--intItemUOMId			
 								,@intSiteId
@@ -1311,6 +1349,7 @@ BEGIN
 								,NULL	--@@CurrencyExchangeRateTypeId
 								,NULL	--@@CurrencyExchangeRate	
 							)
+
 							INSERT INTO @tblCFCalculatedTaxExemptZeroQuantity	
 							(
 								 [intTaxGroupId]				
@@ -1327,7 +1366,8 @@ BEGIN
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
 								,[ysnInvalidSetup]				
-								,[strNotes]							
+								,[strNotes]
+								,[dblExemptionAmount]										
 							)	
 							SELECT 
 								 [intTaxGroupId]			
@@ -1344,7 +1384,8 @@ BEGIN
 								,[ysnCheckoffTax]				
 								,[ysnTaxExempt]					
 								,[ysnInvalidSetup]				
-								,[strNotes]						
+								,[strNotes]
+								,[dblExemptionAmount]									
 							FROM [fnConstructLineItemTaxDetail] 
 							(
 								 @dblZeroQuantity
@@ -1364,7 +1405,7 @@ BEGIN
 								,@companyConfigFreightTermId
 								,@intCardId		
 								,@intVehicleId
-								,1 --@DisregardExemptionSetup
+								,0 --@DisregardExemptionSetup
 								,0
 								, @intItemUOMId	--intItemUOMId			
 								,@intSiteId
@@ -1393,7 +1434,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]
+							,[dblExemptionAmount]										
 							)	
 							SELECT 
 							 [intTaxGroupId]			
@@ -1410,7 +1452,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]						
+							,[strNotes]
+							,[dblExemptionAmount]									
 							FROM [fnConstructLineItemTaxDetail] 
 							(
 								@dblQuantity
@@ -1430,7 +1473,7 @@ BEGIN
 								,@companyConfigFreightTermId
 								,@intCardId		
 								,@intVehicleId
-								,1 -- @DisregardExemptionSetup
+								,0 -- @DisregardExemptionSetup
 								,0
 								,@intItemUOMId	--intItemUOMId
 								,@intSiteId
@@ -1440,6 +1483,7 @@ BEGIN
 								,NULL	--@@CurrencyExchangeRateTypeId
 								,NULL	--@@CurrencyExchangeRate
 							)
+
 							INSERT INTO @tblCFCalculatedTaxExemptZeroQuantity	
 						(
 						 [intTaxGroupId]				
@@ -1456,7 +1500,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]
+						,[dblExemptionAmount]										
 						)	
 						SELECT 
 						 [intTaxGroupId]			
@@ -1473,7 +1518,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]						
+						,[strNotes]
+						,[dblExemptionAmount]									
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							@dblZeroQuantity
@@ -1493,7 +1539,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 -- @DisregardExemptionSetup
+							,0 -- @DisregardExemptionSetup
 							,0
 							,@intItemUOMId	--intItemUOMId
 							,@intSiteId
@@ -1930,7 +1976,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]
+								,[dblExemptionAmount]										
 						)	
 						SELECT 
 							 [intTaxGroupId]			
@@ -1946,7 +1993,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]						
+							,[strNotes]
+								,[dblExemptionAmount]									
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							 @dblZeroQuantity
@@ -1966,7 +2014,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 --@DisregardExemptionSetup
+							,0 --@DisregardExemptionSetup
 							,0
 							, @intItemUOMId	--intItemUOMId			
 							,@intSiteId
@@ -1991,7 +2039,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]
+								,[dblExemptionAmount]										
 						)	
 						SELECT 
 							 [intTaxGroupId]			
@@ -2007,7 +2056,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]						
+							,[strNotes]
+								,[dblExemptionAmount]									
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							 @dblQuantity
@@ -2027,7 +2077,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 --@DisregardExemptionSetup
+							,0 --@DisregardExemptionSetup
 							,0
 							, @intItemUOMId	--intItemUOMId			
 							,@intSiteId
@@ -2306,42 +2356,34 @@ BEGIN
 
 
 				-- RE COMPUTE TAX > FOR CFN NETWORK ONLY
-				IF(@strNetworkType = 'CFN' AND ISNULL(@intTaxGroupId,0) = 0)
+				IF(@strNetworkType = 'CFN' AND ISNULL(@intTaxGroupId,0) = 0 AND ISNULL(@IsImporting,0) = 1) 
 				BEGIN
 
-
-					UPDATE @tblCFCalculatedTaxExemptZeroQuantity
-					SET dblTax = (ISNULL(li.dblTax,0) / @dblQuantity) * @dblZeroQuantity,
-						dblAdjustedTax =  (ISNULL(li.dblAdjustedTax,0) / @dblQuantity) * @dblZeroQuantity
-					FROM @tblCFCalculatedTaxExemptZeroQuantity AS ot
-					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON ot.intTaxGroupId			= li.intTaxGroupId
-					AND ot.intTaxCodeId		= li.intTaxCodeId
-					AND ot.intTaxClassId	= li.intTaxClassId
-					AND ot.dblRate			= li.dblRate
-
-					UPDATE @tblCFCalculatedTaxExempt
-					SET dblTax = li.dblTax,
-						dblAdjustedTax = li.dblAdjustedTax
-					FROM @tblCFCalculatedTaxExempt AS ot
-					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON ot.intTaxGroupId			= li.intTaxGroupId
-					AND ot.intTaxCodeId		= li.intTaxCodeId
-					AND ot.intTaxClassId	= li.intTaxClassId
-					AND ot.dblRate			= li.dblRate
 
 					UPDATE @tblCFOriginalTax 
 					SET dblTax = li.dblTax,
 						dblAdjustedTax = li.dblAdjustedTax
 					FROM @tblCFOriginalTax AS ot
 					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON ot.intTaxGroupId			= li.intTaxGroupId
+				    ON ot.intTaxGroupId		= li.intTaxGroupId
 					AND ot.intTaxCodeId		= li.intTaxCodeId
 					AND ot.intTaxClassId	= li.intTaxClassId
 					AND ot.dblRate			= li.dblRate
-					
 					WHERE ISNULL(ot.ysnTaxExempt,0) = 0
 					AND ISNULL(ot.ysnInvalidSetup,0) = 0
+					
+
+					UPDATE @tblCFOriginalTaxZeroQuantity 
+					SET dblTax = (li.dblTax / @dblQuantity) * @dblZeroQuantity,
+						dblAdjustedTax = (li.dblAdjustedTax / @dblQuantity) * @dblZeroQuantity
+					FROM @tblCFOriginalTaxZeroQuantity AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
 
 
 					UPDATE @tblCFCalculatedTax 
@@ -2355,6 +2397,48 @@ BEGIN
 					AND ct.dblRate			= li.dblRate
 					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
 					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+
+
+					UPDATE @tblCFCalculatedTaxExempt 
+					SET dblTax = li.dblTax,
+						dblAdjustedTax = li.dblAdjustedTax,
+						dblExemptionAmount = li.dblTax		
+					FROM @tblCFCalculatedTaxExempt AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 1
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+
+
+					UPDATE @tblCFCalculatedTaxExemptZeroQuantity 
+					SET dblTax = (li.dblTax / @dblQuantity) * @dblZeroQuantity,
+						dblAdjustedTax = (li.dblAdjustedTax / @dblQuantity) * @dblZeroQuantity,
+						dblExemptionAmount = (li.dblTax / @dblQuantity) * @dblZeroQuantity		
+					FROM @tblCFCalculatedTaxExemptZeroQuantity AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 1
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+					
+
+					UPDATE @tblCFCalculatedTaxZeroQuantity 
+					SET dblTax = (li.dblTax / @dblQuantity) * @dblZeroQuantity,
+						dblAdjustedTax = (li.dblAdjustedTax / @dblQuantity) * @dblZeroQuantity
+					FROM @tblCFCalculatedTaxZeroQuantity AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+					
 
 
 					--SELECT  '@tblCFOriginalTax',* FROM @tblCFOriginalTax --TEMP ME--
@@ -2667,7 +2751,8 @@ BEGIN
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
 								,[ysnInvalidSetup]				
-								,[strNotes]							
+								,[strNotes]
+								,[dblExemptionAmount]									
 							)	
 							SELECT 
 								 [intTaxGroupId]			
@@ -2684,7 +2769,8 @@ BEGIN
 								,[ysnCheckoffTax]				
 								,[ysnTaxExempt]					
 								,[ysnInvalidSetup]				
-								,[strNotes]						
+								,[strNotes]	
+								,[dblExemptionAmount]							
 							FROM [fnConstructLineItemTaxDetail] 
 							(
 								 @dblQuantity
@@ -2704,7 +2790,7 @@ BEGIN
 								,@companyConfigFreightTermId
 								,@intCardId		
 								,@intVehicleId
-								,1 --@DisregardExemptionSetup
+								,0 --@DisregardExemptionSetup
 								,0
 								, @intItemUOMId	--intItemUOMId			
 								,@intSiteId
@@ -2730,7 +2816,8 @@ BEGIN
 								,[ysnCheckoffTax]
 								,[ysnTaxExempt]
 								,[ysnInvalidSetup]				
-								,[strNotes]							
+								,[strNotes]	
+								,[dblExemptionAmount]								
 							)	
 							SELECT 
 								 [intTaxGroupId]			
@@ -2747,7 +2834,8 @@ BEGIN
 								,[ysnCheckoffTax]				
 								,[ysnTaxExempt]					
 								,[ysnInvalidSetup]				
-								,[strNotes]						
+								,[strNotes]	
+								,[dblExemptionAmount]							
 							FROM [fnConstructLineItemTaxDetail] 
 							(
 								 @dblZeroQuantity
@@ -2767,7 +2855,7 @@ BEGIN
 								,@companyConfigFreightTermId
 								,@intCardId		
 								,@intVehicleId
-								,1 --@DisregardExemptionSetup
+								,0 --@DisregardExemptionSetup
 								,0
 								, @intItemUOMId	--intItemUOMId			
 								,@intSiteId
@@ -2796,7 +2884,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]	
+								,[dblExemptionAmount]								
 							)	
 							SELECT 
 							 [intTaxGroupId]			
@@ -2813,7 +2902,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]						
+							,[strNotes]
+								,[dblExemptionAmount]								
 							FROM [fnConstructLineItemTaxDetail] 
 							(
 								@dblQuantity
@@ -2833,7 +2923,7 @@ BEGIN
 								,@companyConfigFreightTermId
 								,@intCardId		
 								,@intVehicleId
-								,1 -- @DisregardExemptionSetup
+								,0 -- @DisregardExemptionSetup
 								,0
 								,@intItemUOMId	--intItemUOMId
 								,@intSiteId
@@ -2859,7 +2949,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]
+								,[dblExemptionAmount]									
 						)	
 						SELECT 
 						 [intTaxGroupId]			
@@ -2876,7 +2967,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]						
+						,[strNotes]
+								,[dblExemptionAmount]								
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							@dblZeroQuantity
@@ -2896,7 +2988,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 -- @DisregardExemptionSetup
+							,0 -- @DisregardExemptionSetup
 							,0
 							,@intItemUOMId	--intItemUOMId
 							,@intSiteId
@@ -3455,7 +3547,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]	
+								,[dblExemptionAmount]								
 						)	
 						SELECT 
 								[intTaxGroupId]			
@@ -3471,7 +3564,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]						
+							,[strNotes]		
+								,[dblExemptionAmount]						
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 								@dblQuantity
@@ -3491,7 +3585,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 -- @DisregardExemptionSetup
+							,0 -- @DisregardExemptionSetup
 							,0
 							, @intItemUOMId	--intItemUOMId	
 							,@intSiteId
@@ -3516,7 +3610,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]	
+								,[dblExemptionAmount]								
 						)	
 						SELECT 
 								[intTaxGroupId]			
@@ -3532,7 +3627,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]						
+							,[strNotes]	
+								,[dblExemptionAmount]							
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 								@dblZeroQuantity
@@ -3552,7 +3648,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 -- @DisregardExemptionSetup
+							,0 -- @DisregardExemptionSetup
 							,0
 							, @intItemUOMId	--intItemUOMId	
 							,@intSiteId
@@ -3845,7 +3941,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]	
+								,[dblExemptionAmount]								
 						)	
 						SELECT 
 								[intTaxGroupId]			
@@ -3861,7 +3958,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]
+								,[dblExemptionAmount]									
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 								@dblQuantity
@@ -3881,7 +3979,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 --@DisregardExemptionSetup
+							,0 --@DisregardExemptionSetup
 							,0
 							, @intItemUOMId	--intItemUOMId
 							,@intSiteId
@@ -3906,7 +4004,8 @@ BEGIN
 							,[ysnCheckoffTax]
 							,[ysnTaxExempt]
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]	
+								,[dblExemptionAmount]								
 						)	
 						SELECT 
 								[intTaxGroupId]			
@@ -3922,7 +4021,8 @@ BEGIN
 							,[ysnCheckoffTax]				
 							,[ysnTaxExempt]					
 							,[ysnInvalidSetup]				
-							,[strNotes]							
+							,[strNotes]			
+								,[dblExemptionAmount]						
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 								@dblZeroQuantity
@@ -3942,7 +4042,7 @@ BEGIN
 							,@companyConfigFreightTermId
 							,@intCardId		
 							,@intVehicleId
-							,1 --@DisregardExemptionSetup
+							,0 --@DisregardExemptionSetup
 							,0
 							, @intItemUOMId	--intItemUOMId
 							,@intSiteId
@@ -4530,7 +4630,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]	
+								,[dblExemptionAmount]								
 					)	
 					SELECT 
 							[intTaxGroupId]			
@@ -4547,7 +4648,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]		
+								,[dblExemptionAmount]							
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 							@dblQuantity
@@ -4567,7 +4669,7 @@ BEGIN
 						,@companyConfigFreightTermId
 						,@intCardId		
 						,@intVehicleId
-						,1 --@DisregardExemptionSetup
+						,0 --@DisregardExemptionSetup
 						,0
 						, @intItemUOMId	--intItemUOMId
 						,@intSiteId
@@ -4593,7 +4695,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]	
+								,[dblExemptionAmount]								
 					)	
 					SELECT 
 							[intTaxGroupId]			
@@ -4610,7 +4713,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]	
+								,[dblExemptionAmount]								
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 							@dblZeroQuantity
@@ -4630,7 +4734,7 @@ BEGIN
 						,@companyConfigFreightTermId
 						,@intCardId		
 						,@intVehicleId
-						,1 --@DisregardExemptionSetup
+						,0 --@DisregardExemptionSetup
 						,0
 						, @intItemUOMId	--intItemUOMId
 						,@intSiteId
@@ -4659,7 +4763,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]	
+								,[dblExemptionAmount]								
 					)	
 					SELECT 
 							[intTaxGroupId]			
@@ -4676,7 +4781,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]						
+						,[strNotes]		
+								,[dblExemptionAmount]						
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 							@dblQuantity
@@ -4696,7 +4802,7 @@ BEGIN
 						,@companyConfigFreightTermId
 						,@intCardId		
 						,@intVehicleId
-						,1 -- @DisregardExemptionSetup
+						,0 -- @DisregardExemptionSetup
 						,0
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
@@ -4722,7 +4828,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]	
+								,[dblExemptionAmount]								
 					)	
 					SELECT 
 							[intTaxGroupId]			
@@ -4739,7 +4846,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]						
+						,[strNotes]	
+								,[dblExemptionAmount]							
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 							@dblZeroQuantity
@@ -4759,7 +4867,7 @@ BEGIN
 						,@companyConfigFreightTermId
 						,@intCardId		
 						,@intVehicleId
-						,1 -- @DisregardExemptionSetup
+						,0 -- @DisregardExemptionSetup
 						,0
 						, @intItemUOMId	--intItemUOMId		
 						,@intSiteId
@@ -5064,7 +5172,8 @@ BEGIN
                         ,[ysnCheckoffTax]
                         ,[ysnTaxExempt]
                         ,[ysnInvalidSetup]				
-                        ,[strNotes]							
+                        ,[strNotes]	
+								,[dblExemptionAmount]								
                     )	
                     SELECT 
                             [intTaxGroupId]			
@@ -5080,7 +5189,8 @@ BEGIN
                         ,[ysnCheckoffTax]				
                         ,[ysnTaxExempt]					
                         ,[ysnInvalidSetup]				
-                        ,[strNotes]						
+                        ,[strNotes]	
+								,[dblExemptionAmount]							
                     FROM [fnConstructLineItemTaxDetail] 
                     (
                             @dblZeroQuantity
@@ -5094,13 +5204,13 @@ BEGIN
                         ,0
                         ,@dtmTransactionDate
                         ,NULL
-                        ,1
+             ,1
 						,0			--@IncludeInvalidCodes
                         ,NULL
                         ,@companyConfigFreightTermId
                         ,@intCardId		
                         ,@intVehicleId
-                        ,1-- @DisregardExemptionSetup
+                        ,0-- @DisregardExemptionSetup
                         ,0
                         , @intItemUOMId	--intItemUOMId
                         ,@intSiteId
@@ -5125,7 +5235,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]	
+								,[dblExemptionAmount]								
 					)	
 					SELECT 
 							[intTaxGroupId]			
@@ -5141,7 +5252,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]						
+						,[strNotes]		
+								,[dblExemptionAmount]						
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 							@dblQuantity
@@ -5161,7 +5273,7 @@ BEGIN
 						,@companyConfigFreightTermId
 						,@intCardId		
 						,@intVehicleId
-						,1-- @DisregardExemptionSetup
+						,0-- @DisregardExemptionSetup
 						,0
 						, @intItemUOMId	--intItemUOMId
 						,@intSiteId
@@ -5454,7 +5566,8 @@ BEGIN
 						,[ysnCheckoffTax]
 						,[ysnTaxExempt]
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]	
+								,[dblExemptionAmount]								
 					)	
 					SELECT 
 							[intTaxGroupId]			
@@ -5470,7 +5583,8 @@ BEGIN
 						,[ysnCheckoffTax]				
 						,[ysnTaxExempt]					
 						,[ysnInvalidSetup]				
-						,[strNotes]							
+						,[strNotes]			
+								,[dblExemptionAmount]						
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 							@dblQuantity
@@ -5490,7 +5604,7 @@ BEGIN
 						,@companyConfigFreightTermId
 						,@intCardId		
 						,@intVehicleId
-						,1 --@DisregardExemptionSetup
+						,0 --@DisregardExemptionSetup
 						,0
 						, @intItemUOMId	--intItemUOMId
 						,@intSiteId
@@ -5515,7 +5629,8 @@ BEGIN
                         ,[ysnCheckoffTax]
                         ,[ysnTaxExempt]
                         ,[ysnInvalidSetup]				
-                        ,[strNotes]							
+                        ,[strNotes]	
+								,[dblExemptionAmount]								
                     )	
                     SELECT 
                             [intTaxGroupId]			
@@ -5531,12 +5646,13 @@ BEGIN
                         ,[ysnCheckoffTax]				
                         ,[ysnTaxExempt]					
                         ,[ysnInvalidSetup]				
-                        ,[strNotes]							
+                        ,[strNotes]		
+								,[dblExemptionAmount]							
                     FROM [fnConstructLineItemTaxDetail] 
                     (
                             @dblZeroQuantity
                         ,0
-                        ,@LineItemTaxDetailStagingTable
+                 ,@LineItemTaxDetailStagingTable
                         ,0
                         ,@intItemId
                         ,@intCustomerId
@@ -5551,7 +5667,7 @@ BEGIN
                         ,@companyConfigFreightTermId
                         ,@intCardId		
                         ,@intVehicleId
-                        ,1 --@DisregardExemptionSetup
+                        ,0 --@DisregardExemptionSetup
                         ,0
                         , @intItemUOMId	--intItemUOMId
                         ,@intSiteId
@@ -6070,7 +6186,7 @@ BEGIN
 	--SELECT '@tblCFCalculatedTaxExempt', * FROM @tblCFCalculatedTaxExempt -- TEMP ME --
 
 		SELECT 
-		@totalCalculatedTaxExempt = ISNULL(SUM([dbo].fnRoundBanker(cftx.dblTax,2)),0)
+		@totalCalculatedTaxExempt = ISNULL(SUM([dbo].fnRoundBanker(cftx.dblExemptionAmount,2)),0)
 		FROM
 		@tblCFTransactionTax as cft
 		INNER JOIN @tblCFCalculatedTaxExempt as cftx
@@ -6086,7 +6202,7 @@ BEGIN
 
 	
 		SELECT 
-		@totalCalculatedTaxExemptZeroQuantity = ISNULL(SUM(cftx.dblTax),0) 
+		@totalCalculatedTaxExemptZeroQuantity = ISNULL(SUM(cftx.dblExemptionAmount),0) 
 		FROM
 		@tblCFTransactionTaxZeroQuantity as cft
 		INNER JOIN @tblCFCalculatedTaxExemptZeroQuantity as cftx
@@ -6113,7 +6229,7 @@ BEGIN
 
 
 		UPDATE @tblCFTransactionTax 
-		SET  [@tblCFTransactionTax].dblTaxCalculatedExemptAmount = [dbo].fnRoundBanker(cftx.dblTax,2)
+		SET  [@tblCFTransactionTax].dblTaxCalculatedExemptAmount = [dbo].fnRoundBanker(cftx.dblExemptionAmount,2)
 		FROM @tblCFCalculatedTaxExempt cftx
 		WHERE [@tblCFTransactionTax].intTaxClassId = cftx.intTaxClassId
 		AND  [@tblCFTransactionTax].intTaxCodeId = cftx.intTaxCodeId
@@ -6269,11 +6385,11 @@ BEGIN
 	
 
 		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPriceZeroQty
-		SET @dblOriginalGrossPrice		 = 	 @dblPrice
+		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
 		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
-		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
+		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblOriginalPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
 		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblPrice * @dblQuantity,2)
+		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
 		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
@@ -6326,6 +6442,9 @@ BEGIN
 			SET @dblPrice = @dblLocalIndexRetailGrossPrice
 			SET @dblPriceZeroQty = @dblLocalIndexRetailGrossPriceZeroQty
 			SET @ysnReRunCalcTax = 1
+
+			--select 'xxxxxx'
+			--SELECT @dblLocalIndexRetailGrossPrice , Round((Round((@dblLocalIndexRetailGrossPriceZeroQty * @dblQuantity),2) -  (ISNULL(@totalCalculatedTax,0))) / @dblQuantity,6)
 			GOTO TAXCOMPUTATION
 		END
 		ELSE
@@ -6404,7 +6523,7 @@ BEGIN
 			IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
 			BEGIN
 				SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
-				SET @dblOriginalPriceZeroQty				= Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6)
+				SET @dblOriginalPriceZeroQty			= Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6)
 				SET @dblOriginalPrice					= Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 				SET @ysnReRunForSpecialTax				= 1
 				GOTO TAXCOMPUTATION
@@ -7117,7 +7236,26 @@ BEGIN
 			SET strNewPriceMethod = @strPriceMethod 
 			,dblNewTotalAmount = @dblCalculatedTotalPrice 
 			,strStatus = 'Done'
-			WHERE intTransactionId = @intTransactionId
+			WHERE intTransactionId = @intTransactionId 
+
+
+			EXEC [uspCFTransactionAuditLog] 
+			@processName					= 'Batch Recalculate'
+			,@keyValue						= @intTransactionId
+			,@entityId						= @UserId
+			,@action						= ''
+			,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
+			,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
+			,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
+			,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
+			,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
+			,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
+			,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
+			,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
+			,@strFromPriceMethod			= @strAuditPriceMethod			
+			,@strFromPriceBasis				= @strAuditPriceBasis			
+			,@strFromPriceProfileId			= @strAuditPriceProfileId		
+			,@strFromPriceIndexId			= @strAuditPriceIndexId			
 
 
 
@@ -7797,3 +7935,5 @@ BEGIN
 			,1
 			,@currentErrorText
 	END
+
+	
