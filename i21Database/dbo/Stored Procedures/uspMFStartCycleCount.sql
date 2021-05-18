@@ -1335,7 +1335,8 @@ BEGIN TRY
 			8
 			,9
 			)
-		AND I.intStorageLocationId = IsNULL(SR.intStorageLocationId,I.intStorageLocationId)
+		--AND I.intStorageLocationId = IsNULL(SR.intStorageLocationId,I.intStorageLocationId)
+		AND I.intStorageLocationId = SR.intStorageLocationId
 	GROUP BY I.intItemId
 		,I.intItemUOMId
 		,I.intStorageLocationId
