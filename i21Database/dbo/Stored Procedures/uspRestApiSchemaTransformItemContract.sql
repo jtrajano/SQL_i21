@@ -369,7 +369,7 @@ BEGIN
     FROM tblRestApiSchemaItemContract sc
     LEFT JOIN tblICItem i ON i.strItemNo = sc.strItemNo
     LEFT JOIN tblICUnitMeasure uom ON uom.strUnitMeasure = sc.strUnitMeasure
-    LEFT JOIN tblICItemUOM u ON u.intItemId = i.intItemId AND uom.intUnitMeasureId = uom.intUnitMeasureId
+    LEFT JOIN tblICItemUOM u ON u.intItemId = i.intItemId AND u.intUnitMeasureId = uom.intUnitMeasureId
     WHERE sc.guiApiUniqueId = @guiApiUniqueId
         AND u.intItemUOMId IS NULL
         AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
@@ -483,7 +483,7 @@ BEGIN
     INNER JOIN tblCTContractStatus s ON s.strContractStatus = sc.strStatus
     INNER JOIN tblICItem i ON i.strItemNo = sc.strItemNo
     INNER JOIN tblICUnitMeasure uom ON uom.strUnitMeasure = sc.strUnitMeasure
-    INNER JOIN tblICItemUOM u ON u.intItemId = i.intItemId AND u.intUnitMeasureId = u.intUnitMeasureId
+    INNER JOIN tblICItemUOM u ON u.intItemId = i.intItemId AND u.intUnitMeasureId = uom.intUnitMeasureId
     INNER JOIN tblSMTaxGroup taxGroup ON taxGroup.strTaxGroup = sc.strTaxGroup OR taxGroup.strDescription =  sc.strTaxGroup
     WHERE sc.guiApiUniqueId = @guiApiUniqueId
         AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
