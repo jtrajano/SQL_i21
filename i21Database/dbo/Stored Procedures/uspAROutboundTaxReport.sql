@@ -51,7 +51,7 @@ DECLARE @strTaxCode             NVARCHAR(100)
 	  , @ZeroDecimal			DECIMAL(18, 6)	= CAST(0 AS DECIMAL(18,6))
 	  , @dtmDateFrom			DATETIME
 	  , @dtmDateTo				DATETIME
-	  , @strcondition			NVARCHAR(100)
+	  , @strCategoryCodeCondition	NVARCHAR(100)
 
 SELECT TOP 1 @strCompanyName    = strCompanyName
 		   , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
@@ -141,7 +141,8 @@ SELECT TOP 1 @strItemNo = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strItemNo'
 
-SELECT TOP 1 @strCategoryCode = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT TOP 1    @strCategoryCode = REPLACE(ISNULL([from], ''), '''''', '''')
+               ,@strCategoryCodeCondition = [condition]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCategoryCode'
 
@@ -155,7 +156,6 @@ WHERE [fieldname] = 'strInvoiceNumber'
 
 SELECT @dtmDateFrom		= CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	 , @dtmDateTo		= CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
-     , @strcondition	= [condition]
 FROM @temp_xml_table 
 WHERE [fieldname] = 'dtmDate'
 
@@ -208,7 +208,9 @@ SELECT intCategoryId
 	 , strDescription
 INTO #CATEGORIES
 FROM dbo.tblICCategory WITH (NOLOCK)
-WHERE (@strCategoryCode IS NULL OR strCategoryCode = @strCategoryCode)
+WHERE   @strCategoryCode IS NULL
+OR (strCategoryCode = @strCategoryCode AND @strCategoryCodeCondition = 'Equal To')
+OR (strCategoryCode <> @strCategoryCode AND @strCategoryCodeCondition = 'Not Equal To')
 
 --#ITEMS
 SELECT I.intItemId
