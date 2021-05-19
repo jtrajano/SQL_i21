@@ -495,7 +495,7 @@ BEGIN
 			, [intItemId]				= NULL
 			, [intItemUOMId]			= NULL
 			, [dblQuantity]				= ROUND(RS.dblSharesNo, 2)
-			, [dblAmount]				= ROUND(RS.dblParValue, 2)	
+			, [dblAmount]				= ROUND(RS.dblFaceValue, 2)	
 			, [intOffsetId]				= NULL
 			, [strOffsetId]				= NULL
 			, [intOffsetDetailId]		= NULL
