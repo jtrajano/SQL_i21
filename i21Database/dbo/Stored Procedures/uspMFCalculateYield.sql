@@ -70,6 +70,7 @@ BEGIN TRY
 		,@intConsumedLotId INT
 		,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 		,@dblOnHand NUMERIC(18, 6)
+		,@strCycleCountBasedOnRecipeTolerance NVARCHAR(50)
 
 	SELECT @dtmCurrentDateTime = GETDATE()
 
@@ -244,6 +245,15 @@ BEGIN TRY
 	WHERE intManufacturingProcessId = @intManufacturingProcessId
 		AND intLocationId = @intLocationId
 		AND intAttributeId = 20
+
+	SELECT @strCycleCountBasedOnRecipeTolerance = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 117 
+
+	if @strCycleCountBasedOnRecipeTolerance is null or @strCycleCountBasedOnRecipeTolerance=''
+	Select @strCycleCountBasedOnRecipeTolerance='False'
 
 	INSERT INTO @tblInputItem (
 		intItemId
@@ -433,7 +443,7 @@ BEGIN TRY
 		,@strLowerToleranceQty NVARCHAR(50)
 		,@intInputItemId INT
 
-	IF EXISTS (
+	IF @strCycleCountBasedOnRecipeTolerance ='True' and EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
@@ -473,7 +483,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF EXISTS (
+	IF @strCycleCountBasedOnRecipeTolerance ='True' and EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
 			WHERE intWorkOrderId = @intWorkOrderId
