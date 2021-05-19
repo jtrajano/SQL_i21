@@ -52,7 +52,7 @@ SELECT
 	 -- Formula: Gross Margin % = Total Sales - (Qty * Item Movement Item Cost) / Total Sales
 	 , CASE 
 		WHEN (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) <> 0
-			THEN ( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblUnitCost * tblIMQty.intQtySoldSum) )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) 
+			THEN (( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblUnitCost * tblIMQty.intQtySoldSum) )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum)) * 100
 		ELSE 0
 	 END AS dblGrossMarginPercent
 FROM
