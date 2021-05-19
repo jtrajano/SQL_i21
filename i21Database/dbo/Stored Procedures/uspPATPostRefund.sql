@@ -568,7 +568,7 @@ END CATCH
 		, [intItemId]				= NULL
 		, [intItemUOMId]			= NULL
 		, [dblQuantity]				= 1
-		, [dblAmount]				= RC.dblRefundAmount
+		, [dblAmount]				= RC.dblCashRefund
 		, [intOffsetId]				= NULL
 		, [strOffsetId]				= NULL
 		, [intOffsetDetailId]		= NULL
