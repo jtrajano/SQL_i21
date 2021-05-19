@@ -1454,10 +1454,10 @@ INNER JOIN (
  WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END 
    UNION ALL --IR CHARGES THAT WERE TRANSFERRED
   SELECT  
-  ts.strTransferStorageTicket
-  ,ts.dtmTransferStorageDate
+  r.strReceiptNumber 
+  ,r.dtmReceiptDate
   ,NULL AS intInventoryReceiptItemId
-  ,tmpAPOpenClearing.intInventoryReceiptChargeId
+  ,rc.intInventoryReceiptChargeId
   ,NULL AS intInventoryShipmentChargeId
   ,NULL AS intLoadDetailId
   ,NULL AS intSettleStorageId 
@@ -1467,9 +1467,9 @@ INNER JOIN (
   -- ,vouchersDate.strVoucherDate AS dtmBillDate  
   -- ,vouchers.strVoucherIds AS strBillId  
   -- ,vouchersTerm.strVoucherTerm AS strTerm  
-  ,CASE WHEN DATEDIFF(dayofyear,ts.dtmTransferStorageDate,GETDATE())<=0   
+  ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
    THEN 0  
-  ELSE ISNULL(DATEDIFF(dayofyear,ts.dtmTransferStorageDate,GETDATE()),0) END AS intAging  
+  ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
   ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
   ,tmpAPOpenClearing.strLocationName  
   ,tmpAPOpenClearing.dblReceiptChargeQty AS dblQtyToReceive  
@@ -1484,8 +1484,7 @@ INNER JOIN (
  FROM    
  (  
   SELECT  
-  B.intTransferStorageReferenceId
-   ,B.intInventoryReceiptChargeId
+  B.intInventoryReceiptChargeId
    ,B.strTransactionNumber  
    ,SUM(B.dblTransferTotal) AS dblTransferTotal
    ,SUM(B.dblTransferQty) AS dblTransferQty  
@@ -1497,8 +1496,7 @@ INNER JOIN (
    ,B.strLocationName
   FROM grainTransferChargeClearing B  
   GROUP BY   
-   intTransferStorageReferenceId
-   ,intInventoryReceiptChargeId
+   intInventoryReceiptChargeId
    ,strTransactionNumber  
    ,intItemId  
    ,intLocationId  
@@ -1512,7 +1510,7 @@ INNER JOIN tblICInventoryReceiptCharge rc
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = rc.intInventoryReceiptId 
   INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
-  ON cs.intEntityId = vendor.intEntityId  
+  ON r.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
 WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
 	AND tmpAPOpenClearing.strTransactionNumber NOT LIKE ''TRA%''
