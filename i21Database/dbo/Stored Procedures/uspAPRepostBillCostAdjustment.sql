@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICRepostBillCostAdjustment]
+﻿CREATE PROCEDURE [dbo].[uspAPRepostBillCostAdjustment]
 	@strBillId AS NVARCHAR(50)
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT

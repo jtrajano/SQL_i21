@@ -1768,8 +1768,8 @@ BEGIN
 			BEGIN 
 				--PRINT 'Reposting Bill Cost Adjustments: ' + @strTransactionId
 				
-				-- uspICRepostBillCostAdjustment creates and posts it own g/l entries 
-				EXEC @intReturnValue = uspICRepostBillCostAdjustment
+				-- uspAPRepostBillCostAdjustment creates and posts it own g/l entries 
+				EXEC @intReturnValue = uspAPRepostBillCostAdjustment
 					@strTransactionId
 					,@strBatchId
 					,@intEntityUserSecurityId

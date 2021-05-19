@@ -4189,7 +4189,7 @@
     <Build Include="dbo\Views\vyuPRTimeOffRequest.sql" />
     <Build Include="dbo\Stored Procedures\uspARValidatePendingSOItems.sql" />
     <Build Include="dbo\Functions\fnGetDefaultGrossNetUOMForLotItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRepostCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRepostCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLSnapshotOnRebuildInventoryValuation.sql" />
     <Build Include="dbo\Tables\tblICRebuildValuationGLSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareGLSnapshotOnRebuildInventoryValuation.sql" />
@@ -5309,7 +5309,7 @@
     <Build Include="dbo\Views\vyuARPaymentACHSearch.sql" />
     <Build Include="dbo\Views\vyuCRMOpportunityQuoteSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRepostBillCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
     <Build Include="dbo\Tables\tblPRDepartmentShift.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessACHPayments.sql" />
@@ -5339,7 +5339,6 @@
     <Build Include="dbo\Tables\tblSMDocumentSourceFolder.sql" />
     <Build Include="dbo\Tables\tblSMDocumentTypeFieldValue.sql" />
     <Build Include="dbo\Tables\tblSMNewDocument.sql" />
-    <Build Include="dbo\Stored Procedures\uspICRepostBillCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostSettleStorageCostAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspEMCheckStrongPassword.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePricebookItem.sql" />
@@ -9411,6 +9410,7 @@
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryTransferTransaction.sql" />
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
+    <Build Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9691,7 +9691,7 @@
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />    
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
