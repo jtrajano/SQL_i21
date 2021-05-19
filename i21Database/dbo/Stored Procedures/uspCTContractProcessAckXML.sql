@@ -146,7 +146,7 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblCTContractHeader
 				SET intContractHeaderRefId = @intContractHeaderId
-					,intConcurrencyId=intConcurrencyId+1
+					,strCustomerContract = @strContractNumber
 				WHERE intContractHeaderId = @intContractHeaderRefId
 					AND intContractHeaderRefId IS NULL
 
