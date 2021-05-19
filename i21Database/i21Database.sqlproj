@@ -8954,6 +8954,7 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
