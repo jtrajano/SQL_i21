@@ -454,7 +454,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -745,7 +744,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -862,7 +860,7 @@ BEGIN
 			WHERE BNKTRN.intBankAccountId = @intBankAccountId
 				AND BNKTRN.strTransactionId = @strPaymentNo
 				and INVRCPTITEM.intInventoryReceiptItemId is null
-				--and InventoryReceipt.intSourceType = 1
+				and InventoryReceipt.intSourceType = 1
 			/*--------------------------------------------------------
 			*******************FROM SETTLE STORAGE********************
 			--------------------------------------------------------*/			
@@ -950,8 +948,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1019,7 +1017,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1027,24 +1024,23 @@ BEGIN
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
-					AND Item.strType <> 'Other Charge'
-			JOIN ( --DEV'S NOTE: GRN-2409; changed to cater multiple vouchers in settlements
-					tblGRSettleStorageBillDetail BD 
-					JOIN tblGRStorageHistory StrgHstry
-						ON StrgHstry.intSettleStorageId = BD.intSettleStorageId
-				) ON BD.intBillId = Bill.intBillId
-			-- JOIN tblGRStorageHistory StrgHstry 
-			-- 	ON Bill.intBillId = StrgHstry.intBillId
+					AND Item.strType <> 'Other Charge'	
+			JOIN tblGRStorageHistory StrgHstry 
+				ON ( 
+						Bill.intBillId = StrgHstry.intBillId
+						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
+							and StrgHstry.strType = 'Settlement'
+							)
+				)
 			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			LEFT JOIN tblSCTicket SC  
+			JOIN tblSCTicket SC 
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
-						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -1052,10 +1048,8 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
-					,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
 				ON tblOtherCharge.intBillId = Bill.intBillId			
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1246,8 +1240,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1315,7 +1309,6 @@ BEGIN
 				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1358,7 +1351,6 @@ BEGIN
 			LEFT JOIN (
 						SELECT 
 							A.intBillId
-							,isnull(A.intLinkingId, -90) as intLinkingId
 							,SUM(dblTotal) AS dblTotal
 							,SUM(dblTax) AS dblTax
 						FROM tblAPBillDetail A
@@ -1366,10 +1358,8 @@ BEGIN
 							ON A.intItemId = B.intItemId 
 								AND B.strType = 'Other Charge'
 						GROUP BY A.intBillId
-							,isnull(A.intLinkingId, -90)
 					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId	
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
+					ON tblOtherCharge.intBillId = Bill.intBillId			
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1646,7 +1636,6 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -1936,7 +1925,6 @@ BEGIN
 			FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -2141,8 +2129,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2208,7 +2196,6 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
@@ -2228,7 +2215,6 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
-						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -2236,10 +2222,8 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
-							,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId				
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
+				ON tblOtherCharge.intBillId = Bill.intBillId			
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -2430,8 +2414,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2497,7 +2481,6 @@ BEGIN
 			FROM tblAPPayment PYMT 
 			JOIN tblAPPaymentDetail PYMTDTL 
 				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill 
 				ON PYMTDTL.intBillId = Bill.intBillId
 			JOIN tblAPBillDetail BillDtl 
