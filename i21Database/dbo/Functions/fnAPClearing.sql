@@ -40,8 +40,8 @@ BEGIN
 		BD.intAccountId,
 		BD.intItemId,
 		BD.intUnitOfMeasureId,
-		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) ELSE ISNULL(ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) * -1 END,
-		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) ELSE ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * ISNULL(ST.dblQuantity, BD.dblQtyReceived), 0) * -1 END,
+		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(ISNULL(ST.dblSourceTransactionQuantity, BD.dblQtyReceived), 0) ELSE ISNULL(ISNULL(ST.dblSourceTransactionQuantity, BD.dblQtyReceived), 0) * -1 END,
+		CASE WHEN B.intTransactionType IN (2, 3, 8, 13) THEN ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * ISNULL(ST.dblSourceTransactionQuantity, BD.dblQtyReceived), 0) ELSE ISNULL(ISNULL(BD.dblOldCost, BD.dblCost) * ISNULL(ST.dblSourceTransactionQuantity, BD.dblQtyReceived), 0) * -1 END,
 		B.intBillId,
 		B.strBillId,
 		BD.intBillDetailId,
@@ -82,7 +82,7 @@ BEGIN
 	INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = BD.intAccountId
 	CROSS APPLY fnAPGetDetailSourceTransaction(BD.intInventoryReceiptItemId, BD.intInventoryReceiptChargeId, BD.intInventoryShipmentChargeId, BD.intLoadDetailId, BD.intCustomerStorageId, BD.intSettleStorageId, BD.intBillId, BD.intItemId) ST
 	WHERE B.intBillId IN (SELECT intId FROM @ids) AND AD.intAccountCategoryId = 45 
-	AND ST.dblQuantity IS NULL --EXCEPTION FOR GRAIN DELIVERY SHEET
+	AND ST.intSourceTransactionTypeId IN (1, 2, 3) AND ST.dblSourceTransactionTax <> 0 AND DT.dblTax <> 0 --ONLY RECEIPT AND SHIPMENT TAXES AND DON'T INCLUDE 0 
 
 	RETURN
 END
