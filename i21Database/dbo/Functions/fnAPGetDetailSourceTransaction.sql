@@ -15,41 +15,43 @@ RETURNS @returntable TABLE
 	strSourceTransaction NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL,
 	intSourceTransactionDetailId INT NOT NULL,
 	intSourceTransactionTypeId INT NOT NULL,
-	dblQuantity NUMERIC(18, 6) NULL
+	dblSourceTransactionQuantity NUMERIC(18, 6) NULL,
+	dblSourceTransactionAmount NUMERIC(18, 6) NULL,
+	dblSourceTransactionTax NUMERIC(18, 6) NULL
 )
 AS
 BEGIN
 	INSERT @returntable
 	--RECEIPT ITEM
-	SELECT R.intInventoryReceiptId, R.strReceiptNumber, @intInventoryReceiptItemId, 1, NULL
+	SELECT R.intInventoryReceiptId, R.strReceiptNumber, @intInventoryReceiptItemId, 1, NULL, NULL, RI.dblTax
 	FROM tblICInventoryReceiptItem RI
 	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
 	WHERE RI.intInventoryReceiptItemId = @intInventoryReceiptItemId AND @intInventoryReceiptChargeId IS NULL
 
 	UNION ALL
 	--RECEIPT CHARGE
-	SELECT R.intInventoryReceiptId, R.strReceiptNumber, @intInventoryReceiptChargeId, 2, NULL
+	SELECT R.intInventoryReceiptId, R.strReceiptNumber, @intInventoryReceiptChargeId, 2, NULL, NULL, RC.dblTax
 	FROM tblICInventoryReceiptCharge RC
 	INNER JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RC.intInventoryReceiptId
 	WHERE RC.intInventoryReceiptChargeId = @intInventoryReceiptChargeId
 
 	UNION ALL
 	--SHIPMENT CHARGE
-	SELECT S.intInventoryShipmentId, S.strShipmentNumber, @intInventoryShipmentChargeId, 3, NULL
+	SELECT S.intInventoryShipmentId, S.strShipmentNumber, @intInventoryShipmentChargeId, 3, NULL, NULL, SC.dblTax
 	FROM tblICInventoryShipmentCharge SC
 	INNER JOIN tblICInventoryShipment S ON S.intInventoryShipmentId = SC.intInventoryShipmentId
 	WHERE SC.intInventoryShipmentChargeId = @intInventoryShipmentChargeId
 
 	UNION ALL
 	--LOAD
-	SELECT L.intLoadId, L.strLoadNumber, @intLoadDetailId, 4, NULL
+	SELECT L.intLoadId, L.strLoadNumber, @intLoadDetailId, 4, NULL, NULL, NULL
 	FROM tblLGLoadDetail LD
 	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	WHERE LD.intLoadDetailId = @intLoadDetailId AND LD.intItemId = @intItemId
 
 	UNION ALL
 	--LOAD COST
-	SELECT L.intLoadId, L.strLoadNumber, @intLoadDetailId, 5, NULL
+	SELECT L.intLoadId, L.strLoadNumber, @intLoadDetailId, 5, NULL, NULL, NULL
 	FROM tblLGLoadDetail LD
 	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 	INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
@@ -57,7 +59,7 @@ BEGIN
 
 	UNION ALL
 	--GRAIN SETTLE
-	SELECT SS.intSettleStorageId, SS.strStorageTicket, @intCustomerStorageId, 6, NULL
+	SELECT SS.intSettleStorageId, SS.strStorageTicket, @intCustomerStorageId, 6, NULL, NULL, NULL
 	FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 0
 	INNER JOIN tblGRSettleStorageTicket SST ON SST.intCustomerStorageId = CS.intCustomerStorageId
@@ -66,7 +68,7 @@ BEGIN
 
 	UNION ALL
 	--GRAIN DELIVERY SHEET
-	SELECT R.intInventoryReceiptId, R.strReceiptNumber, RI.intInventoryReceiptItemId, 1, SIR.dblTransactionUnits
+	SELECT R.intInventoryReceiptId, R.strReceiptNumber, RI.intInventoryReceiptItemId, 1, SIR.dblTransactionUnits, NULL, RI.dblTax
 	FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
 	INNER JOIN tblGRStorageInventoryReceipt SIR ON SIR.intCustomerStorageId = CS.intCustomerStorageId AND SIR.ysnUnposted = 0
@@ -76,7 +78,7 @@ BEGIN
 	
 	UNION ALL
 	--GRAIN TRANSFER ITEM
-	SELECT TS.intTransferStorageId, TS.strTransferStorageTicket, TSR.intTransferStorageReferenceId, 7, NULL
+	SELECT TS.intTransferStorageId, TS.strTransferStorageTicket, TSR.intTransferStorageReferenceId, 7, NULL, NULL, NULL
 	FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
 	INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
@@ -86,7 +88,7 @@ BEGIN
 
 	UNION ALL
 	--GRAIN TRANSFER CHARGE
-	SELECT TS.intTransferStorageId, TS.strTransferStorageTicket, TSR.intTransferStorageReferenceId, 8, NULL
+	SELECT TS.intTransferStorageId, TS.strTransferStorageTicket, TSR.intTransferStorageReferenceId, 8, NULL, NULL, NULL
 	FROM tblGRCustomerStorage CS
 	INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
 	INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
@@ -96,7 +98,7 @@ BEGIN
 
 	UNION ALL
 	--PAT
-	SELECT R.intRefundId, R.strRefundNo, RC.intRefundCustomerId, 9, NULL
+	SELECT R.intRefundId, R.strRefundNo, RC.intRefundCustomerId, 9, NULL, NULL, NULL
 	FROM tblPATRefundCustomer RC
 	INNER JOIN tblPATRefund R ON R.intRefundId = RC.intRefundId
 	WHERE RC.intBillId = @intBillId
