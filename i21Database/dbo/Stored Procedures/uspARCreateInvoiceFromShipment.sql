@@ -228,6 +228,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[dblCurrencyExchangeRate]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
+	,[dblStandardWeight]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -346,6 +347,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
+	,[dblStandardWeight]					= ARSI.dblStandardWeight
 FROM vyuARShippedItems ARSI
 WHERE ARSI.[strTransactionType] = 'Inventory Shipment'
   AND ARSI.[intInventoryShipmentId] = @ShipmentId
@@ -468,6 +470,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
+	,[dblStandardWeight]					= SOD.dblStandardWeight
 FROM tblICInventoryShipment ICIS
 INNER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
 							 AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
@@ -593,6 +596,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ICISI.[dblForexRate]
 	,[intSubCurrencyId]						= NULL
 	,[dblSubCurrencyRate]					= @ZeroDecimal
+	,[dblStandardWeight]					= @ZeroDecimal
 FROM 
 	tblICInventoryShipment ICIS
 INNER JOIN
@@ -1001,6 +1005,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
 									, intPriceFixationDetailId
+									, dblStandardWeight
 								)
 								SELECT strSourceTransaction
 									, intSourceId
@@ -1059,6 +1064,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, intCompanyLocationSubLocationId
 									, intSubLocationId
 									, intPriceFixationDetailId	= @intPriceFixationDetailId
+									, dblStandardWeight
 								FROM @EntriesForInvoice
 								WHERE intId = @intInvoiceEntriesId
 
@@ -1131,6 +1137,7 @@ ELSE
 				, intStorageLocationId
 				, intSubLocationId
 				, intCompanyLocationSubLocationId
+				, dblStandardWeight
 			)
 			SELECT intInvoiceDetailId				= NULL
 				, strSourceTransaction				= 'Direct'
@@ -1167,6 +1174,7 @@ ELSE
 				, intStorageLocationId				= EI.intStorageLocationId
 				, intSubLocationId					= EI.intSubLocationId
 				, intCompanyLocationSubLocationId	= EI.intSubLocationId
+				, dblStandardWeight					= EI.dblStandardWeight
 			FROM @EntriesForInvoice EI
 
 			EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
