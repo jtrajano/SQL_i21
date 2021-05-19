@@ -37,6 +37,16 @@ BEGIN TRY
 		,strReceiptNo	NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strAdjustmentNo	NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @tblOutput AS TABLE (
+		intRowNo INT IDENTITY(1, 1)
+		,intInitialAckId INT
+		,strXML NVARCHAR(MAX)
+		,strInfo1 NVARCHAR(100)
+		,strInfo2 NVARCHAR(100)
+		)
+
+	DELETE
+	FROM @tblOutput
 
 	DELETE
 	FROM @tblAcknowledgement
@@ -139,12 +149,28 @@ BEGIN TRY
 		SELECT @strFinalXML = '<root><data>' + @strXML + '</data></root>'
 
 		SELECT @strInfo1 = 'Initial Ack'
+
+		INSERT INTO @tblOutput (
+			intInitialAckId
+			,strXML
+			,strInfo1
+			,strInfo2
+			)
+		VALUES (
+			@intInitialAckId
+			,@strFinalXML
+			,ISNULL(@strInfo1, '')
+			,''
+			)
 	END
 
-	SELECT @strFinalXML AS strMessage
-		,@strInfo1 AS strInfo1
-		,''
+	SELECT IsNULL(intInitialAckId, '0') AS id
+		,IsNULL(strXML, '') AS strXml
+		,IsNULL(strInfo1, '') AS strInfo1
+		,IsNULL(strInfo2, '') AS strInfo2
 		,'' AS strOnFailureCallbackSql
+	FROM @tblOutput
+	ORDER BY intRowNo
 END TRY
 
 BEGIN CATCH
