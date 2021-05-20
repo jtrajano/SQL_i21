@@ -226,36 +226,40 @@ BEGIN
 			,@ItemPrice				NUMERIC(18,6)
 			,@NetPrice				NUMERIC(18,6)
 	
-	DECLARE @StateExciseTax NUMERIC(18,6)
-	DECLARE @StateSalesTax		NUMERIC(18,6)
-	DECLARE @FederalExciseTax	NUMERIC(18,6)
-	DECLARE @DistrictTax	NUMERIC(18,6)
+	DECLARE @StateExciseTax		NUMERIC(18,6) = 0
+	DECLARE @StateSalesTax		NUMERIC(18,6) = 0
+	DECLARE @FederalExciseTax	NUMERIC(18,6) = 0
+	DECLARE @DistrictTax		NUMERIC(18,6) = 0
 
-	SELECT @StateExciseTax = SUM(ISNULL(dblRate, 0))
+	SELECT @StateExciseTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
 	FROM @ItemTaxes IT
 	INNER JOIN tblSMTaxClass SMTC
 	ON IT.intTaxClassId = SMTC.intTaxClassId
 	WHERE strTaxClass Like '%State Excise Tax%'
+	GROUP BY IT.strCalculationMethod
 
-	SELECT @StateSalesTax = SUM(ISNULL(dblRate, 0))
+	SELECT @StateSalesTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
 	FROM @ItemTaxes IT
 	INNER JOIN tblSMTaxClass SMTC
 	ON IT.intTaxClassId = SMTC.intTaxClassId
 	WHERE strTaxClass Like '%State Sales Tax%'
+	GROUP BY IT.strCalculationMethod
 	
-	SELECT @FederalExciseTax = SUM(ISNULL(dblRate, 0))
+	SELECT @FederalExciseTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
 	FROM @ItemTaxes IT
 	INNER JOIN tblSMTaxClass SMTC
 	ON IT.intTaxClassId = SMTC.intTaxClassId
 	WHERE strTaxClass Like '%Federal Excise Tax%'
+	GROUP BY IT.strCalculationMethod
 
-	SELECT @DistrictTax = SUM(ISNULL(dblRate, 0))
+	SELECT @DistrictTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
 	FROM @ItemTaxes IT
 	INNER JOIN tblSMTaxClass SMTC
 	ON IT.intTaxClassId = SMTC.intTaxClassId
 	WHERE strTaxClass Like '%District Tax%'
+	GROUP BY IT.strCalculationMethod
 
-	SET @NetPrice = ((4.024 - @StateExciseTax) / (1 + (@DistrictTax/@HundredDecimal) + (@StateSalesTax/@HundredDecimal))) - @FederalExciseTax
+	SET @NetPrice = (((@GrossAmount / @Quantity) - @StateExciseTax) / (1 + @DistrictTax + @StateSalesTax)) - @FederalExciseTax
 
 	IF ISNULL(@IsReversal,0) = 0
 		BEGIN
@@ -739,17 +743,25 @@ BEGIN
 				END
 				ELSE
 				BEGIN
-					IF ISNULL(@IsReversal,0) = 0
+					IF(@CalculationMethod = 'Percentage')
+					BEGIN
+						IF ISNULL(@IsReversal,0) = 0
+						BEGIN
+							SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+							SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
+						END
+						ELSE
+						BEGIN
+							DECLARE @TaxTotal NUMERIC(18,6) = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
+
+							SET @ItemExemptedTaxAmount = (@TaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
+							SET @ItemTaxAmount = (@TaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
+						END
+					END
+					ELSE 
 					BEGIN
 						SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
-						SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
-					END
-					ELSE
-					BEGIN
-						DECLARE @StateSalesTaxTotal NUMERIC(18,6) = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
-
-						SET @ItemExemptedTaxAmount = (@StateSalesTaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
-						SET @ItemTaxAmount = (@StateSalesTaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
+						SET @ItemTaxAmount = @ItemTaxAmount - @ItemExemptedTaxAmount
 					END
 				END
 			END
