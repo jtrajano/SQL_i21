@@ -8,6 +8,7 @@
     [strRecordNo]       NVARCHAR (50)    COLLATE Latin1_General_CI_AS NOT NULL,
     [dtmDateModified]   DATETIME         NOT NULL,
     [intSize]           INT              NOT NULL,
+    [intOptimizedSize]  INT              NULL,
     [intEntityId]       INT              NULL,
 	[ysnDisableDelete]	BIT				 NULL,
     [intConcurrencyId]  INT              NOT NULL,
