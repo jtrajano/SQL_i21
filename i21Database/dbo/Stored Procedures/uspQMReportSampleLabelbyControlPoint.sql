@@ -52,6 +52,8 @@ BEGIN TRY
 			,'' strCropYear
 			,'' strPeriod
 			,'' strFarmNumber
+			,'' strMarks
+			,'' dtmStartDate
 			,@strCompanyName AS strCompanyName
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
@@ -121,6 +123,8 @@ BEGIN TRY
 			,'' strCropYear
 			,'' strPeriod
 			,'' strFarmNumber
+			,'' strMarks
+			,'' dtmStartDate
 			,@strCompanyName AS strCompanyName
 			,@strCompanyAddress AS strCompanyAddress
 			,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
@@ -150,6 +154,8 @@ BEGIN TRY
 		,ISNULL(CY.strCropYear, '') AS strCropYear
 		,dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat(CD.dtmEndDate, 0) AS strPeriod
 		,ISNULL(EF.strFarmNumber, '') AS strFarmNumber
+		,ISNULL(S.strMarks, '') AS strMarks
+		,dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) AS dtmStartDate
 		,@strCompanyName AS strCompanyName
 		,@strCompanyAddress AS strCompanyAddress
 		,@strCity + ', ' + @strState + ', ' + @strZip AS strCityStateZip
