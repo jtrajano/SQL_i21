@@ -92,8 +92,8 @@ SELECT
 	,dblFromLongitude = CompLoc.dblLongitude
 	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = LGL.dtmScheduledDate
-	,dtmHoursFrom = CAST(NULL AS DATETIME)
-	,dtmHoursTo = CAST(NULL AS DATETIME)
+	,dtmHoursFrom = EML.dtmOperatingHoursStartTime
+	,dtmHoursTo = EML.dtmOperatingHoursEndTime
 	,strEntityName = LGLD.strCustomer
 	,strToWarehouse = LGLD.strPSubLocationName
 	,strToAddress = LGLD.strShipToAddress
@@ -123,7 +123,7 @@ SELECT
 	,strFillMethod = ''
 	,ysnHold = Cast(0 as Bit)
 	,ysnRoutingAlert = Cast(0 as Bit)
-	,strRoute = CAST(NULL AS NVARCHAR(500))
+	,strRoute = EML.strLocationRoute
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intSCompanyLocationId
@@ -159,8 +159,8 @@ SELECT
 	,dblFromLongitude = CompLoc.dblLongitude
 	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = LGL.dtmScheduledDate
-	,dtmHoursFrom = CAST(NULL AS DATETIME)
-	,dtmHoursTo = CAST(NULL AS DATETIME)
+	,dtmHoursFrom = EML.dtmOperatingHoursStartTime
+	,dtmHoursTo = EML.dtmOperatingHoursEndTime
 	,strEntityName = LGLD.strVendor
 	,strToWarehouse = LGLD.strPSubLocationName
 	,strToAddress = LGLD.strShipFromAddress
@@ -190,7 +190,7 @@ SELECT
 	,strFillMethod = ''
 	,ysnHold = Cast(0 as Bit)
 	,ysnRoutingAlert = Cast(0 as Bit)
-	,strRoute = CAST(NULL AS NVARCHAR(500))
+	,strRoute = EML.strLocationRoute
 FROM vyuLGLoadDetailView LGLD
 JOIN vyuLGLoadView LGL ON LGL.intLoadId = LGLD.intLoadId 
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = LGLD.intPCompanyLocationId
@@ -288,8 +288,8 @@ SELECT
 	,dblFromLongitude = NULL
 	,dblFromLatitude = NULL
 	,dtmScheduledDate = NULL
-	,dtmHoursFrom = CAST(NULL AS DATETIME)
-	,dtmHoursTo = CAST(NULL AS DATETIME)
+	,dtmHoursFrom = EL.dtmOperatingHoursStartTime
+	,dtmHoursTo = EL.dtmOperatingHoursEndTime
 	,strEntityName = EN.strName
 	,strToWarehouse = NULL
 	,strToAddress = EL.strAddress
@@ -319,7 +319,7 @@ SELECT
 	,strFillMethod = ''
 	,ysnHold = Cast(0 as Bit)
 	,ysnRoutingAlert = Cast(0 as Bit)
-	,strRoute = CAST(NULL AS NVARCHAR(500))
+	,strRoute = EL.strLocationRoute
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntity EN ON EN.intEntityId = EL.intEntityId
 JOIN tblEMEntityType ET ON ET.intEntityId = EN.intEntityId
@@ -353,8 +353,8 @@ SELECT
 	,dblFromLongitude = CompLoc.dblLongitude
 	,dblFromLatitude = CompLoc.dblLatitude
 	,dtmScheduledDate = SO.dtmDate
-	,dtmHoursFrom = CAST(NULL AS DATETIME)
-	,dtmHoursTo = CAST(NULL AS DATETIME)
+	,dtmHoursFrom = EL.dtmOperatingHoursStartTime
+	,dtmHoursTo = EL.dtmOperatingHoursEndTime
 	,strEntityName = E.strName
 	,strToWarehouse = ToStrg.strSubLocationName
 	,strToAddress = EL.strAddress
@@ -384,7 +384,7 @@ SELECT
 	,strFillMethod = ''
 	,ysnHold = Cast(0 as Bit)
 	,ysnRoutingAlert = Cast(0 as Bit)
-	,strRoute = CAST(NULL AS NVARCHAR(500))
+	,strRoute = EL.strLocationRoute
 FROM tblSOSalesOrderDetail SOD
 JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId 
 JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = SO.intCompanyLocationId
