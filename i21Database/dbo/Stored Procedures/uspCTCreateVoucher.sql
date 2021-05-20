@@ -131,7 +131,8 @@ begin try
 		,@int1099Form					INT
 		,@int1099Category				INT
 		,@dbl1099						DECIMAL(18,6)
-		,@ysnStage						BIT;
+		,@ysnStage						BIT
+		,@ysnPostBill					BIT;
 
 	declare @voucherPayablesDataTemp as table (
 		intVoucherPayableId int
@@ -1080,7 +1081,19 @@ begin try
 				select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				while (@intCreatedBillId is not null and @intCreatedBillId > 0)
 				begin
-					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intCreatedBillId,@userId = @userId,@success = @ysnSuccessBillPosting OUTPUT
+					select top 1 @intInventoryReceiptItemId = intInventoryReceiptItemId, @ysnPostBill = 1, @intCreatedBillDetailId = intBillDetailId from @CreatedVoucher where intBillId = @intCreatedBillId ;
+					if exists (select top 1 1 from tblICInventoryReceiptItem ri join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId where ri.intInventoryReceiptItemId = @intInventoryReceiptItemId and ir.intSourceType = 1)
+					begin
+						if exists (select top 1 1 from tblAPBillDetail bd join tblCTContractDetail cd on cd.intContractDetailId = bd.intContractDetailId where bd.intBillDetailId = @intCreatedBillDetailId and cd.intPricingTypeId in (1,6))
+						begin
+							select top 1 @ysnPostBill = isnull(v.ysnPostVoucher,0)from tblAPBill b join tblAPVendor v on v.intEntityId = b.intEntityVendorId where b.intBillId = @intCreatedBillId
+						end
+					end
+					if (@ysnPostBill = 1)
+					begin
+						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intCreatedBillId,@userId = @userId,@success = @ysnSuccessBillPosting OUTPUT
+					end
+
 					select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				end
 
