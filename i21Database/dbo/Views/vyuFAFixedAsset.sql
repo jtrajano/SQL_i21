@@ -30,6 +30,8 @@ FA.intGainLossAccountId,
 FA.strManufacturerName,
 FA.strModelNumber,
 FA.ysnAcquired,
+FA.ysnImported,
+FA.dtmImportedDepThru,
 ysnTaxDepreciated = ISNULL(FA.ysnTaxDepreciated,0),
 ysnDepreciated = ISNULL(FA.ysnDepreciated, 0) | ISNULL(FA.ysnTaxDepreciated, 0),
 FA.ysnDisposed,     
@@ -43,7 +45,8 @@ GLExpense.strAccountId strExpenseAccountId,
 GLDepreciation.strAccountId strDepreciationAccountId,      
 GLAccumulation.strAccountId strAccumulatedAccountId,      
 GLGainLoss.strAccountId strGainLossAccountId,      
-D.dblDepreciationToDate,      
+D.dblDepreciationToDate dblGAAPDepreciationToDate,      
+T.dblDepreciationToDate dblTaxDepreciationToDate,   
 Company.strLocationName strCompanyLocation,      
 Currency.strCurrency,
 ysnFullyDepreciated = 
@@ -84,6 +87,15 @@ OUTER APPLY(
  AND intBookId=1
  ORDER BY intAssetDepreciationId DESC          
 )D
+OUTER APPLY(      
+ SELECT TOP 1 
+ dblDepreciationToDate 
+ FROM tblFAFixedAssetDepreciation
+ WHERE
+ intAssetId =FA.intAssetId
+ AND intBookId=2
+ ORDER BY intAssetDepreciationId DESC          
+)T
 OUTER APPLY(
     SELECT COUNT(*)Cnt FROM tblFABookDepreciation 
     WHERE intAssetId = FA.intAssetId
