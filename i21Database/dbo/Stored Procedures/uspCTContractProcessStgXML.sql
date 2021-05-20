@@ -509,7 +509,6 @@ BEGIN TRY
 					UPDATE CD
 					SET CD.strERPPONumber = x.strERPPONumber
 						,CD.strERPItemNumber = x.strERPItemNumber
-						,CD.intConcurrencyId=CD.intConcurrencyId+1
 					FROM OPENXML(@idoc, 'vyuIPContractDetailERPInfoViews/vyuIPContractDetailERPInfoView', 2) WITH (
 							strERPPONumber NVARCHAR(100) Collate Latin1_General_CI_AS
 							,strERPItemNumber NVARCHAR(100) Collate Latin1_General_CI_AS
