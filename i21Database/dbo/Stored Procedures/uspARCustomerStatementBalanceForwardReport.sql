@@ -506,7 +506,7 @@ INNER JOIN (
 		  AND ISNULL(ysnProcessedToNSF, 0) = 0
 		  AND strType <> ''CF Tran''
 	) I ON I.intInvoiceId = PD.intInvoiceId
-	WHERE PD.dblWriteOffAmount > 0
+	WHERE PD.dblWriteOffAmount <> 0
 	GROUP BY intPaymentId
 ) PD ON P.intPaymentId = PD.intPaymentId
 WHERE ysnInvoicePrepayment = 0
