@@ -1,11 +1,10 @@
-﻿CREATE PROCEDURE dbo.uspIPCreateWeightClaims @intLoadId INT
-	,@intNewWeightClaimId INT OUTPUT
+﻿Create PROCEDURE dbo.uspIPCreateWeightClaims @intLoadId INT,@intNewWeightClaimId int output
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strNewWeightClaimReferenceNo NVARCHAR(50)
 		,@intUserId INT
-		,@strDescription NVARCHAR(50)
+		,@strDescription nvarchar(50)
 
 	SET @strNewWeightClaimReferenceNo = NULL
 
@@ -29,7 +28,7 @@ BEGIN TRY
 		,intBookId
 		,intSubBookId
 		)
-	/*SELECT DISTINCT 1
+	SELECT DISTINCT 1
 		,@strNewWeightClaimReferenceNo
 		,GETDATE()
 		,intLoadId
@@ -45,29 +44,7 @@ BEGIN TRY
 		,intBookId
 		,intSubBookId
 	FROM vyuIPGetOpenWeightClaim
-	WHERE intLoadId = @intLoadId*/
-	SELECT DISTINCT 1
-		,@strNewWeightClaimReferenceNo
-		,GETDATE()
-		,PC.intLoadId
-		,'' strComments
-		,L.dtmETAPOD
-		,L.dtmETAPOD + ISNULL(ASN.intLastWeighingDays, 0) AS dtmLastWeighingDate
-		,NULL dtmActualWeighingDate
-		,NULL dtmClaimValidTill
-		,PC.intPurchaseSale
-		,NULL
-		,NULL
-		,L.intCompanyId
-		,L.intBookId
-		,L.intSubBookId
-	FROM tblLGPendingClaim PC
-	JOIN tblLGLoad L ON L.intLoadId = PC.intLoadId
-		AND L.intLoadId = @intLoadId
-	LEFT JOIN tblCTContractDetail AS CD ON CD.intContractDetailId = PC.intContractDetailId
-	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	LEFT JOIN tblCTAssociation ASN ON ASN.intAssociationId = CH.intAssociationId
-	WHERE L.intLoadId = @intLoadId
+	WHERE intLoadId = @intLoadId
 
 	SET @intNewWeightClaimId = SCOPE_IDENTITY();
 
@@ -95,7 +72,7 @@ BEGIN TRY
 		,dblToGross
 		,dblToTare
 		)
-	/*SELECT 1
+	SELECT 1
 		,@intNewWeightClaimId
 		,WC.intItemId
 		,dblShippedNetWt
@@ -118,38 +95,10 @@ BEGIN TRY
 		,dblReceivedGrossWt
 		,dblReceivedGrossWt-dblReceivedNetWt
 	FROM vyuLGGetOpenWeightClaim WC
-	WHERE intLoadId = @intLoadId*/
-	SELECT 1
-		,@intNewWeightClaimId
-		,intItemId
-		,dblShippedNetWt
-		,dblReceivedNetWt
-		,dblFranchiseWt
-		,dblWeightLoss
-		,dblWeightLoss + dblFranchiseWt
-		,intPartyEntityId
-		,dblSeqPrice
-		,intSeqCurrencyId
-		,dblClaimableAmount
-		,intSeqPriceUOMId
-		,NULL
-		,NULL
-		,intContractDetailId
-		,NULL
-		,NULL
-		,dblFranchise
-		,dblSeqPriceConversionFactoryWeightUOM
-		,dblReceivedGrossWt
-		,dblReceivedGrossWt - dblReceivedNetWt
-	FROM tblLGPendingClaim
 	WHERE intLoadId = @intLoadId
 
 	INSERT INTO tblLGWeightClaimPreStage (intWeightClaimId)
 	SELECT @intNewWeightClaimId
-
-	DELETE
-	FROM tblLGPendingClaim
-	WHERE intLoadId = @intLoadId
 
 	SELECT @strDescription = 'Created from system : ' + @strNewWeightClaimReferenceNo
 
@@ -161,6 +110,7 @@ BEGIN TRY
 		,@changeDescription = @strDescription
 		,@fromValue = ''
 		,@toValue = @strNewWeightClaimReferenceNo
+
 END TRY
 
 BEGIN CATCH
