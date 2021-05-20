@@ -40,6 +40,36 @@ CREATE TABLE #tmp (
 	, intCreatedByUserId INT NULL
 )
 
+DECLARE @tblDuplicateUPCCodes TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200), strDescription NVARCHAR(MAX))
+
+INSERT INTO @tblDuplicateUPCCodes (strItemNo, strUPCCode, strDescription)
+SELECT
+	x.strItemNo,
+	x.strUPCCode,
+	i.strDescription
+FROM tblICImportStagingUOM x
+INNER JOIN tblICItem i 
+ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(x.strItemNo) COLLATE Latin1_General_CI_AS
+OUTER APPLY (
+	SELECT TOP 1 intUpcCode
+	FROM tblICItemUOM
+	WHERE intUpcCode = case when x.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
+		AND NOT (x.strUPCCode like '%.%' OR x.strUPCCode like '%e%' OR x.strUPCCode like '%E%') then CONVERT([bigint],rtrim(ltrim(x.strUPCCode)),0) else CONVERT([bigint],NULL,0) end
+) upc
+WHERE upc.intUpcCode IS NOT NULL
+
+DECLARE @tblInvalidStockUnitQuantities TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200), strDescription NVARCHAR(MAX))
+
+INSERT INTO @tblInvalidStockUnitQuantities (strItemNo, strUOM, strDescription)
+SELECT
+	x.strItemNo,
+	x.strUOM,
+	i.strDescription
+FROM tblICImportStagingUOM x
+INNER JOIN tblICItem i 
+ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(x.strItemNo) COLLATE Latin1_General_CI_AS
+WHERE x.ysnIsStockUnit = 1 AND CONVERT(DECIMAL(38,20), x.dblUnitQty) <> 1
+
 INSERT INTO #tmp (
 	intItemId, 
 	intUnitMeasureId, 
@@ -184,9 +214,16 @@ WHEN NOT MATCHED THEN
 	)
 	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
+DECLARE @intTotalUPCCodeDuplicates INT
+DECLARE @intTotalInvalidStockUnit INT
+
+SELECT @intTotalUPCCodeDuplicates = COUNT(*) FROM @tblDuplicateUPCCodes 
+SELECT @intTotalInvalidStockUnit = COUNT(*) FROM @tblInvalidStockUnitQuantities
+
 UPDATE l
 SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
+	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE'),
+	l.intTotalWarnings = l.intTotalWarnings + @intTotalUPCCodeDuplicates + @intTotalInvalidStockUnit
 FROM tblICImportLog l
 WHERE l.strUniqueId = @strIdentifier
 
@@ -201,6 +238,36 @@ IF @TotalImported = 0 AND @LogId IS NOT NULL
 BEGIN
 	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
 	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
+END
+
+IF @intTotalUPCCodeDuplicates > 0
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT 
+		@LogId,
+		0,
+		'Import finished.',
+		'UPC Code',
+		'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + ' and still uploaded UOM with empty UPC Code.',
+		'Success',
+		'Warning',
+		1
+	FROM @tblDuplicateUPCCodes Codes
+END
+
+IF @intTotalInvalidStockUnit > 0
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT 
+		@LogId,
+		0,
+		'Import finished.',
+		'UOM',
+		'Unit Qty for Stock Unit ' + UOMs.strUOM + ' of ' + UOMs.strItemNo + ' - ' + UOMs.strDescription + ' is greater than 1. Setting it to 1',
+		'Success',
+		'Warning',
+		1
+	FROM @tblInvalidStockUnitQuantities UOMs
 END
 
 DROP TABLE #tmp
