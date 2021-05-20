@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[dtmDateAcquired]			DATETIME NULL,			
 	[dtmDateInService]			DATETIME NULL,
 	[dblCost]					NUMERIC (18, 6) NULL DEFAULT ((0)),
+	[dblForexRate]				NUMERIC (18, 6) NULL DEFAULT ((1)),
 	[intCurrencyId]				INT NULL,
 	[dblMarketValue]			NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[dblInsuranceValue]			NUMERIC (18, 6) NULL DEFAULT ((0)),
