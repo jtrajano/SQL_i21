@@ -10,7 +10,6 @@
     [ysnOcrProcessed]   BIT NULL DEFAULT(0),
     [dtmDateModified]   DATETIME         NOT NULL,
     [intSize]           INT              NOT NULL,
-    [intOptimizedSize]  INT              NULL,
     [intEntityId]       INT              NULL,
 	[ysnDisableDelete]	BIT				 NULL,
     [intConcurrencyId]  INT              NOT NULL,
