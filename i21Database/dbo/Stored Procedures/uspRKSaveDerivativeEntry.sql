@@ -166,6 +166,7 @@ BEGIN
 			, @dblStrike NUMERIC(24, 10)
 			, @strOptionType NVARCHAR(50)
 			, @dblContractSize NUMERIC(24, 10)
+			, @dblNoOfLots NUMERIC(24, 10)
 			, @strInstrumentType NVARCHAR(50)
 			, @intBrokerageAccountId INT
 			, @strBrokerAccount NVARCHAR(50)
@@ -178,6 +179,7 @@ BEGIN
 			, @strBatchId NVARCHAR(50)
 			
 		SELECT TOP 1 @dblContractSize = dblContractSize
+			, @dblNoOfLots = dblNoOfLots
 			, @intOptionMonthId = intOptionMonthId
 			, @strOptionMonth = strOptionMonth
 			, @dblStrike = dblStrike
@@ -220,7 +222,7 @@ BEGIN
 				AND strBucketType = 'Derivatives'
 				AND strTransactionType = 'Derivative Entry'
 				AND strTransactionNumber = @strTransactionNumber
-				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strBuySell OR intFutureMarketId <> @intFutureMarketId)
+				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strBuySell OR intFutureMarketId <> @intFutureMarketId OR dblOrigNoOfLots <> @dblNoOfLots)
 				AND ysnNegate IS NULL)
 		BEGIN
 				INSERT INTO tblRKSummaryLog(strBatchId
@@ -299,7 +301,7 @@ BEGIN
 					AND strBucketType = 'Derivatives'
 					AND strTransactionType = 'Derivative Entry'
 					AND strTransactionNumber = @strTransactionNumber
-					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strBuySell OR intFutureMarketId <> @intFutureMarketId)
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strBuySell OR intFutureMarketId <> @intFutureMarketId OR dblOrigNoOfLots <> @dblNoOfLots)
 					AND ysnNegate IS NULL 
 
 				UPDATE tblRKSummaryLog SET ysnNegate = 1
@@ -307,7 +309,7 @@ BEGIN
 					AND strBucketType = 'Derivatives'
 					AND strTransactionType = 'Derivative Entry'
 					AND strTransactionNumber = @strTransactionNumber
-					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strBuySell OR intFutureMarketId <> @intFutureMarketId)
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strBuySell OR intFutureMarketId <> @intFutureMarketId OR dblOrigNoOfLots <> @dblNoOfLots)
 					AND ysnNegate IS NULL 
 
 		END
