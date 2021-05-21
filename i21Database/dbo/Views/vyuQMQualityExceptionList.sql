@@ -49,6 +49,8 @@ SELECT TR.intTestResultId
 	,TR.intSequenceNo
 	,B.strBook
 	,SB.strSubBook
+	,CH.intContractHeaderId
+	,S.intItemId
 FROM dbo.tblQMTestResult AS TR
 JOIN dbo.tblQMSample AS S ON S.intSampleId = TR.intSampleId
 JOIN dbo.tblQMSampleType AS ST ON ST.intSampleTypeId = S.intSampleTypeId
