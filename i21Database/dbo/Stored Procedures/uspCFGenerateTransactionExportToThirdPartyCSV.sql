@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFGenerateTransactionExportToThirdPartyCSV]
+﻿CREATE PROCEDURE [dbo].[uspCFGenerateTransactionExportToThirdPartyCSV]
 @strWhereClause NVARCHAR(MAX) 
 AS
 
@@ -49,31 +48,31 @@ SELECT
 					WHEN (tblCFTransaction.strTransactionType like '%Foreign%') 
 					THEN '00000000' 
 
-					-- First:
+					-- 1:
 					-- Transaction > Site                   = Factor X-Ref Site
 					-- Transaction > Site > State           = Factor X-Ref State
 					-- Transaction > Item > Category  		= Factor X-Ref Category
 					-- Transaction > Customer            	= Factor X-Ref Customer
 	               WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
 						AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
 					) > 0
 		                THEN 
 							CASE 
 								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
 										AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
 										AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -81,31 +80,31 @@ SELECT
 					
 
 
-					-- Second
-					-- Transaction > Site                   = Factor X-Ref Site
-					-- Transaction > Site > State          	= Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
+					-- 2
 					-- Transaction > Customer            	= Factor X-Ref Customer
+					-- Factor X-Ref Site 					= Factor X-Ref Site
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		= 0
 				    WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 					) > 0
 		                THEN 
 							CASE 
 								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0   
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -113,31 +112,31 @@ SELECT
 
 	               
 
-					-- Third
-					-- Transaction > Site                   = Factor X-Ref Site
-					-- Transaction > Site > State          	= Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
-					-- Transaction > Customer            	< > Factor X-Ref Customer
+					-- 3:
+					-- Transaction > Customer            	= Factor X-Ref Customer
+					-- Factor X-Ref Site 					= is Blank
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		= Factor X-Ref Category
 					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
 					) > 0
 		                THEN 
 							CASE 
 								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-									ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+									ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+									AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 									AND strState 											= C.strTaxState 
-									AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-									AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+									AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -145,62 +144,62 @@ SELECT
 
 	              
 
-					-- Fourth:
-					-- Factor X-Ref Site 					is Blank
-					-- Transaction > Site > State          	= Factor X-Ref State
-					-- Transaction > Item > Category  		= Factor X-Ref Category
+					-- 4
 					-- Transaction > Customer            	= Factor X-Ref Customer
+					-- Factor X-Ref Site 					= is Blank
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		= is Blank
 
 					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-					ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0    
 					) > 0
 		                THEN 
 							CASE 
 								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-									ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+									ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+									AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 									AND strState 											= C.strTaxState 
-									AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-									AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+									AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0    
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
 							END
 
-					-- Fifth
-					-- Factor X-Ref Site 					is Blank
+					-- 5
+					-- Transaction > Customer            	is Blank
+					-- Factor X-Ref Site 					= Factor X-Ref Site
 					-- Transaction > Site > State           = Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
-					-- Transaction > Customer            	= Factor X-Ref Customer
+					-- Transaction > Item > Category  		= Factor X-Ref Category
 					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId 
 					) > 0
 		                THEN 
 							CASE 
 								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 										AND strState 											= C.strTaxState 
-										AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId 
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-											ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+											ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+											AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 											AND strState 											= C.strTaxState 
-											AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-											AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+											AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
@@ -208,35 +207,97 @@ SELECT
 
 
 
-					-- Sixth
+					-- 6
+					-- Transaction > Customer            	is Blank
+					-- Factor X-Ref Site 					= Factor X-Ref Site
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		is Blank
+						 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
+					) > 0
+		                THEN 
+							CASE 
+								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
+										AND strState 											= C.strTaxState 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
+										),'') != ''
+								  THEN 
+										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
+										AND strState 											= C.strTaxState 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
+										)
+								  ELSE 
+								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
+							END
+
+
+						-- 7
+					-- Transaction > Customer            	is Blank
 					-- Factor X-Ref Site 					is Blank
 					-- Transaction > Site > State           = Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
-					-- Transaction > Customer            	< > Factor X-Ref Customer
+					-- Transaction > Item > Category  		= Factor X-Ref Category
 						 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId   
 					) > 0
 		                THEN 
 							CASE 
 								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId   
 										),'') != ''
 								  THEN 
 										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
-										ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 										AND strState 											= C.strTaxState 
-										AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-										AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
 										)
 								  ELSE 
 								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
 							END
+
+					-- 8
+					-- Transaction > Customer            	is Blank
+					-- Factor X-Ref Site 					is Blank
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		is Blank
+						 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0   
+					) > 0
+		                THEN 
+							CASE 
+								  WHEN ISNULL((SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
+										AND strState 											= C.strTaxState 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0   
+										),'') != ''
+								  THEN 
+										(SELECT TOP 1 strAltAccount FROM tblCFFactorTaxGroupXRef WHERE 
+										ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+										AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
+										AND strState 											= C.strTaxState 
+										AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
+										)
+								  ELSE 
+								  dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left')  
+							END
+							
 
 					ELSE 
 						dbo.fnCFPadString(tblARCustomer.strCustomerNumber , 8, '0', 'left') 
@@ -254,118 +315,157 @@ SELECT
                 , 'Tax Group' = CASE 
 					
 
-					-- First:
+					-- 1:
 					-- Transaction > Site                   = Factor X-Ref Site
 					-- Transaction > Site > State           = Factor X-Ref State
 					-- Transaction > Item > Category  		= Factor X-Ref Category
 					-- Transaction > Customer            	= Factor X-Ref Customer
 	               WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
 						AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
 						AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
 					)
 
 
-					-- Second
-					-- Transaction > Site                   = Factor X-Ref Site
-					-- Transaction > Site > State          	= Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
+					-- 2
 					-- Transaction > Customer            	= Factor X-Ref Customer
-	               WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+					-- Factor X-Ref Site 					= Factor X-Ref Site
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		= 0
+					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
+					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0 
 					)
 
-
-					-- Third
-					-- Transaction > Site                   = Factor X-Ref Site
-					-- Transaction > Site > State          	= Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
-					-- Transaction > Customer            	< > Factor X-Ref Customer
-	                WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
-						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
-					) > 0
-		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= tblCFTransaction.intSiteId
-						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
-					)
-
-
-					-- Fourth:
-					-- Factor X-Ref Site 					is Blank
-					-- Transaction > Site > State          	= Factor X-Ref State
+					
+					-- 3:
+					-- Transaction > Customer            	= Factor X-Ref Customer
+					-- Factor X-Ref Site 					= is Blank
+					-- Transaction > Site > State           = Factor X-Ref State
 					-- Transaction > Item > Category  		= Factor X-Ref Category
-					-- Transaction > Customer            	= Factor X-Ref Customer
 					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId   
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
 					)
 
 
-					-- Fifth
+
+					-- 4
+					-- Transaction > Customer            	= Factor X-Ref Customer
+					-- Factor X-Ref Site 					= is Blank
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		= is Blank
+					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
+					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0    
+					) > 0
+		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
+					)
+
+
+					-- 5:
+					-- Transaction > Customer            	is Blank
+					-- Factor X-Ref Site 					= Factor X-Ref Site
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		= Factor X-Ref Category
+					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
+					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId    
+					) > 0
+		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
+					)
+
+
+					-- 6
+					-- Transaction > Customer            	is Blank
+					-- Factor X-Ref Site 					= Factor X-Ref Site
+					-- Transaction > Site > State           = Factor X-Ref State
+					-- Transaction > Item > Category  		is Blank
+					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
+					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0  
+					) > 0
+		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= tblCFTransaction.intSiteId
+						AND strState 											= C.strTaxState 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0
+					)
+
+
+					-- 7
+					-- Transaction > Customer            	is Blank
 					-- Factor X-Ref Site 					is Blank
 					-- Transaction > Site > State           = Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
-					-- Transaction > Customer            	= Factor X-Ref Customer
+					-- Transaction > Item > Category  		= Factor X-Ref Category
 					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId  
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= I.intCategoryId
 					)
 
-
-					-- Sixth
+					-- 8
+					-- Transaction > Customer            	is Blank
 					-- Factor X-Ref Site 					is Blank
 					-- Transaction > Site > State           = Factor X-Ref State
-					-- Transaction > Item > Category  		< > Factor X-Ref Category
-					-- Transaction > Customer            	< > Factor X-Ref Customer
+					-- Transaction > Item > Category  		is Blank
 					 WHEN (SELECT COUNT(1) FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+					 	ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0 
 					) > 0
 		                THEN (SELECT TOP 1 strFactorTaxGroup FROM tblCFFactorTaxGroupXRef WHERE 
-						ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 			= 0
+						ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 		= 0
+						AND ISNULL(tblCFFactorTaxGroupXRef.intSiteId,0) 		= 0
 						AND strState 											= C.strTaxState 
-						AND tblCFFactorTaxGroupXRef.intCategoryId 				!= I.intCategoryId 
-						AND ISNULL(tblCFFactorTaxGroupXRef.intCustomerId,0) 	!= tblCFTransaction.intCustomerId 
+						AND ISNULL(tblCFFactorTaxGroupXRef.intCategoryId,0)		= 0 
 					)
+
 
 					--No Match--
 	                ELSE ''

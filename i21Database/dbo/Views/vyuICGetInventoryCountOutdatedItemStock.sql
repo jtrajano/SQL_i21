@@ -207,6 +207,7 @@ FROM
 				)
 				AND ISNULL(t.intLotId, 0) = ISNULL(cd.intLotId, 0) 
 				AND t.ysnIsUnposted = 0 
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 			ORDER BY
 				t.dtmDate DESC 
 				,t.intInventoryTransactionId DESC 
