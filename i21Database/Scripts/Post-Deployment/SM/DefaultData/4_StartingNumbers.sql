@@ -732,7 +732,7 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 77
-			,[strTransactionType]	= N'Adjustment1099'
+			,[strTransactionType]	= N'1099 Adjustment'
 			,[strPrefix]			= N'ADJ1099-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Payable'
@@ -1599,7 +1599,7 @@ GO
 GO
 	PRINT N'BEGIN CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO
-	--EXEC uspAPFixStartingNumbers
+	EXEC uspAPFixStartingNumbers
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO
