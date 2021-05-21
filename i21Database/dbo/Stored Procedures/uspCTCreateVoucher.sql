@@ -132,7 +132,7 @@ begin try
 		,@int1099Category				INT
 		,@dbl1099						DECIMAL(18,6)
 		,@ysnStage						BIT
-  		,@ysnPostBill bit = 1;
+		,@ysnPostBill					BIT;
 
 	declare @voucherPayablesDataTemp as table (
 		intVoucherPayableId int
@@ -1093,7 +1093,6 @@ begin try
 				select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				while (@intCreatedBillId is not null and @intCreatedBillId > 0)
 				begin
-
 					select top 1 @intInventoryReceiptItemId = intInventoryReceiptItemId, @ysnPostBill = 1, @intCreatedBillDetailId = intBillDetailId from @CreatedVoucher where intBillId = @intCreatedBillId ;
 					if exists (select top 1 1 from tblICInventoryReceiptItem ri join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId where ri.intInventoryReceiptItemId = @intInventoryReceiptItemId and ir.intSourceType = 1)
 					begin
@@ -1107,7 +1106,6 @@ begin try
 						EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intCreatedBillId,@userId = @userId,@success = @ysnSuccessBillPosting OUTPUT
 					end
 
-					
 					select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				end
 
