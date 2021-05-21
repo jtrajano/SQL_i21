@@ -23,57 +23,44 @@ DELETE FROM cte WHERE RowNumber > 1;
 )
 DELETE FROM cte WHERE RowNumber > 1;
 
-
-CREATE TABLE #tmp_missingItem (
-	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-)
-
-CREATE TABLE #tmp_missingUOM (
-	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-)
-
 DECLARE @tblDuplicateUPCCodes TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200), strDescription NVARCHAR(MAX))
-
 DECLARE @tblInvalidStockUnitQuantities TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200), strDescription NVARCHAR(MAX))
+DECLARE @tblMissingUOMs TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200))
+DECLARE @tblMissingItems TABLE (strItemNo NVARCHAR(200))
 
--- Validate records
+--Validate Records
 
--- Check if the item is missing
-IF @ysnAllowOverwrite = 1
-BEGIN 
-	INSERT INTO #tmp_missingItem (
-		strItemNo
-	)
-	SELECT
-		s.strItemNo
-	FROM 
-		tblICImportStagingUOM s	LEFT JOIN tblICItem i 
-			ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(s.strItemNo) COLLATE Latin1_General_CI_AS	
-	WHERE
-		s.strImportIdentifier = @strIdentifier
-		AND i.intItemId IS NULL 
-END 
+--Check missing Items
 
--- Check if the UOM is missing
-IF @ysnAllowOverwrite = 1
-BEGIN 
-	INSERT INTO #tmp_missingUOM (
-		strItemNo
-		,strUnitMeasure
-	)
-	SELECT
-		s.strItemNo
-		,s.strUOM
-	FROM 
-		tblICImportStagingUOM s	LEFT JOIN tblICUnitMeasure u 
-			ON RTRIM(LTRIM(u.strUnitMeasure)) COLLATE Latin1_General_CI_AS = LTRIM(s.strUOM) COLLATE Latin1_General_CI_AS
-	WHERE
-		s.strImportIdentifier = @strIdentifier
-		AND u.intUnitMeasureId IS NULL 
-END
+INSERT INTO @tblMissingItems (
+	strItemNo
+)
+SELECT
+	s.strItemNo
+FROM 
+	tblICImportStagingUOM s	LEFT JOIN tblICItem i 
+		ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(s.strItemNo) COLLATE Latin1_General_CI_AS	
+WHERE
+	s.strImportIdentifier = @strIdentifier
+	AND i.intItemId IS NULL
 
--- Check Duplicate UPC Codes imported
+--Check missing UOMs
+
+INSERT INTO @tblMissingUOMs (
+	strItemNo
+	,strUOM
+)
+SELECT
+	s.strItemNo
+	,s.strUOM
+FROM 
+	tblICImportStagingUOM s	LEFT JOIN tblICUnitMeasure u 
+		ON RTRIM(LTRIM(u.strUnitMeasure)) COLLATE Latin1_General_CI_AS = LTRIM(s.strUOM) COLLATE Latin1_General_CI_AS
+WHERE
+	s.strImportIdentifier = @strIdentifier
+	AND u.intUnitMeasureId IS NULL
+
+--Check Duplicate UPC codes
 
 INSERT INTO @tblDuplicateUPCCodes (strItemNo, strUPCCode, strDescription)
 SELECT
@@ -89,9 +76,10 @@ OUTER APPLY (
 	WHERE intUpcCode = case when x.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
 		AND NOT (x.strUPCCode like '%.%' OR x.strUPCCode like '%e%' OR x.strUPCCode like '%E%') then CONVERT([bigint],rtrim(ltrim(x.strUPCCode)),0) else CONVERT([bigint],NULL,0) end
 ) upc
-WHERE upc.intUpcCode IS NOT NULL
+LEFT JOIN @tblMissingUOMs missingUOM ON missingUOM.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
+WHERE upc.intUpcCode IS NOT NULL AND missingUOM.strItemNo IS NULL
 
--- Check invalid Stock Quantity imported
+--Check invalid Stock Unit quantities
 
 INSERT INTO @tblInvalidStockUnitQuantities (strItemNo, strUOM, strDescription)
 SELECT
@@ -101,7 +89,15 @@ SELECT
 FROM tblICImportStagingUOM x
 INNER JOIN tblICItem i 
 ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(x.strItemNo) COLLATE Latin1_General_CI_AS
-WHERE x.ysnIsStockUnit = 1 AND CONVERT(DECIMAL(38,20), x.dblUnitQty) <> 1
+LEFT JOIN @tblMissingUOMs missingUOM 
+	ON missingUOM.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
+LEFT JOIN @tblMissingItems missingItem 
+	ON missingItem.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
+WHERE 
+	x.ysnIsStockUnit = 1 AND 
+	CONVERT(DECIMAL(38,20), x.dblUnitQty) <> 1 AND 
+	missingUOM.strItemNo IS NULL AND
+	missingItem.strItemNo IS NULL
 
 CREATE TABLE #tmp (
 	  intId INT IDENTITY(1, 1) PRIMARY KEY
@@ -174,8 +170,8 @@ FROM tblICImportStagingUOM x
 			AND intItemId = i.intItemId
 			AND ysnStockUnit = 1
 	) stock
-	LEFT JOIN #tmp_missingItem v1 ON v1.strItemNo = x.strItemNo
-	LEFT JOIN #tmp_missingUOM v2 ON v2.strItemNo = x.strItemNo
+	LEFT JOIN @tblMissingItems v1 ON v1.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo  COLLATE Latin1_General_CI_AS	
+	LEFT JOIN @tblMissingUOMs v2 ON v2.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS	
 WHERE 
 	x.strImportIdentifier = @strIdentifier
 	AND v1.strItemNo IS NULL 
@@ -330,20 +326,20 @@ BEGIN
 		, 'Error'
 		, 1
 	FROM 
-		#tmp_missingItem
+		@tblMissingItems
 
 	UNION ALL
 	SELECT 
 		@strIdentifier
 		, 'UOM'
 		, 'Import Failed.'
-		, strUnitMeasure
-		, 'Missing unit of measure: "' + strUnitMeasure + '" on item "' + strItemNo + '"'
+		, strUOM
+		, 'Missing unit of measure: "' + strUOM + '" on item "' + strItemNo + '"'
 		, 'Failed'
 		, 'Error'
 		, 1
 	FROM 
-		#tmp_missingUOM
+		@tblMissingUOMs
 
 	-- Check if there are UPC duplicates to log as warning
 
@@ -388,7 +384,7 @@ BEGIN
 		SELECT 
 			@strIdentifier,
 			'UOM',
-			'Import finished.',
+			'Import Finished.',
 			UOMs.strUOM,
 			'Unit Qty for Stock Unit ' + UOMs.strUOM + ' of ' + UOMs.strItemNo + ' - ' + UOMs.strDescription + ' is greater than 1. Setting it to not stock unit',
 			'Success',
@@ -402,6 +398,14 @@ DROP TABLE #tmp
 DROP TABLE #output
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier = @strIdentifier
+
+UPDATE ItemUOM 
+SET ItemUOM.dblUnitQty = 1 
+FROM tblICItemUOM ItemUOM
+INNER JOIN tblICItem Item
+	ON Item.intItemId = ItemUOM.intItemId
+INNER JOIN @tblInvalidStockUnitQuantities InvalidStockUnit
+	ON Item.strItemNo COLLATE Latin1_General_CI_AS = InvalidStockUnit.strItemNo COLLATE Latin1_General_CI_AS
 
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
