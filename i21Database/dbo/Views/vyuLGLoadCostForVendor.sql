@@ -20,7 +20,7 @@ SELECT [strTransactionType] = 'Load Schedule' COLLATE Latin1_General_CI_AS
 	,[strContractNumber] = NULL --CH.strContractNumber
 	,[intContractDetailId] = NULL --CD.intContractDetailId
 	,[intContractSeq] = NULL --CD.intContractSeq
-	,[intCompanyLocationId] = LD.intPCompanyLocationId
+	,[intCompanyLocationId] = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSCompanyLocationId ELSE LD.intPCompanyLocationId END
 	,[strLocationName] = SMCL.[strLocationName]
 	,[intItemId] = ICI.[intItemId]
 	,[strItemNo] = ICI.[strItemNo]
@@ -80,12 +80,12 @@ FROM tblLGLoad L
 			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
 			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = W.intSubLocationId
 			WHERE intLoadId = L.intLoadId) LW
-GROUP BY L.[strLoadNumber],LD.intLoadDetailId,EME.[strName],
+GROUP BY L.[strLoadNumber],LD.intLoadDetailId,EME.[strName],L.intPurchaseSale,
 		L.dtmScheduledDate,L.intLoadId,SMCL.[strLocationName],ICI.strItemNo,
 		ICI.strDescription,
 		LD.intItemUOMId,
 		ARC.[intCurrencyId],LC.intVendorId,
-		LD.intPCompanyLocationId,ICI.intItemId,
+		LD.intPCompanyLocationId,LD.intSCompanyLocationId,ICI.intItemId,
 		LD.dblQuantity,
 		LC.dblRate,LD.[intWeightItemUOMId],ARIA.[intAccountId],
 		ARIA.[intCOGSAccountId],ARIA.[intSalesAccountId],ARIA.[intInventoryAccountId],
