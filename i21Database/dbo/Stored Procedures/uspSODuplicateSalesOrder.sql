@@ -238,6 +238,7 @@ BEGIN
 				   ,[strAddonDetailKey]
 				   ,[ysnAddonParent]
 		           ,[dblAddOnQuantity]
+				   ,[dblStandardWeight]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -288,6 +289,7 @@ BEGIN
 				   ,[strAddonDetailKey]
 				   ,[ysnAddonParent]
 			       ,[dblAddOnQuantity]
+				   ,[dblStandardWeight]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

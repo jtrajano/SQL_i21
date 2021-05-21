@@ -470,7 +470,8 @@ IF @IsCancel = 0
 				,[dblCurrencyExchangeRate]
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
-				,[dblAddOnQuantity])
+				,[dblAddOnQuantity]
+				,[dblStandardWeight])
 			SELECT 
 				[intInvoiceId]					= @CreatedInvoiceId
 				,[strDocumentNumber]			= ''
@@ -559,6 +560,7 @@ IF @IsCancel = 0
 				,[strAddonDetailKey]			= ARID.[strAddonDetailKey]
 				,[ysnAddonParent]				= ARID.[ysnAddonParent]
 				,[dblAddOnQuantity]				= ARID.[dblAddOnQuantity]
+				,[dblStandardWeight]		    = ARID.[dblStandardWeight]
 			FROM
 				tblARInvoiceDetail ARID
 			LEFT OUTER JOIN
