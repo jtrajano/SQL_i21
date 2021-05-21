@@ -2,9 +2,13 @@ CREATE VIEW vyuFANextDepreciation
 AS  
 WITH GetNextForDepreciate AS(  
  SELECT B.intAssetId, 
- dtmNextDepreciation = CASE WHEN dtmDepreciationToDate IS NULL 
- THEN  B.dtmDateInService ELSE  
-	DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1 , dtmDepreciationToDate))+1,0))
+ dtmNextDepreciation = 
+ CASE 
+   WHEN dtmDepreciationToDate IS NULL 
+      THEN  B.dtmDateInService 
+   WHEN dtmDepreciationToDate = B.dtmDateInService   
+      THEN  DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1 , B.dtmDateInService)),0))
+   ELSE DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1 , dtmDepreciationToDate))+1,0))
  END  
  FROM tblFAFixedAssetDepreciation A RIGHT JOIN  
     tblFAFixedAsset B ON A.intAssetId = B.intAssetId  
