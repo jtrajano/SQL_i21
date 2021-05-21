@@ -721,3 +721,22 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'AL', @TaxCategories = @TaxCa
 
 DELETE @TaxCategoryAL
 GO
+
+PRINT ('Deploying MO Tax Category')
+
+DECLARE @TaxCategoryMO AS TFTaxCategory
+
+INSERT INTO @TaxCategoryMO(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Motor Fuel Tax', intMasterId = 250001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Agriculture Inspection Fee', intMasterId = 250002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Transport Load Fee', intMasterId = 250003
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MO', @TaxCategories = @TaxCategoryMO
+
+DELETE @TaxCategoryMO
+GO
