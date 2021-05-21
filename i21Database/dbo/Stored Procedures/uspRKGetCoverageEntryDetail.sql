@@ -224,9 +224,7 @@ BEGIN
 	GROUP BY intCommodityId, intProductTypeId
 
 	SELECT DER.intCommodityId
-		, dblQty = SUM(dbo.fnCTConvertQtyToTargetCommodityUOM(DER.intCommodityId, FM.intUnitMeasureId, @intUnitMeasureId, 
-						CASE WHEN strOptionType = 'Put' THEN DER.dblOpenContract * -1 ELSE DER.dblOpenContract END
-						* DER.dblContractSize))
+		, dblQty = SUM(dbo.fnCTConvertQtyToTargetCommodityUOM(DER.intCommodityId, FM.intUnitMeasureId, @intUnitMeasureId, DER.dblOpenContract * DER.dblContractSize))
 		, MAT.strCommodityAttributeId
 	INTO #OptionsTotal
 	FROM vyuRKFutOptTransaction DER

@@ -9372,6 +9372,7 @@
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryTransferTransaction.sql" />
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9655,6 +9656,7 @@
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\RM\03_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\AR\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
