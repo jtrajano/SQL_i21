@@ -120,7 +120,7 @@ SET
 dblMonth = 
 	CASE 
 	WHEN strConvention = 'Actual Days' THEN
-		dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService))/ CAST(intDaysInFirstMonth AS FLOAT))
+		dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
 	WHEN strConvention= 'Mid Month' THEN
 		dblMonth *.50
 	ELSE
@@ -156,7 +156,7 @@ SET
 dblMonth = dblMonth *
 CASE 
 	WHEN strConvention = 'Actual Days' THEN
-	(DAY(dtmPlacedInService) / CAST(intDaysInFirstMonth AS FLOAT)) 
+	(DAY(dtmPlacedInService) - 1)/ CAST(intDaysInFirstMonth AS FLOAT)
 	WHEN strConvention = 'Mid Month'
 		THEN .50
 	END, 
