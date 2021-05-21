@@ -107,7 +107,8 @@ BEGIN TRY
 			,strBasis					 = dbo.fnFormatNumber(DV.dblBasis)
 			,strFutureMonthZee			 = CASE	WHEN intPricingTypeId = 1 THEN '' ELSE REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') END
 			,strQuantity				 = dbo.fnFormatNumber(dblDetailQuantity) + ' ' + strItemUOM
-			,strPrice					 = dbo.fnFormatNumber(CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))) + ' per ' + strPriceUOM + ' ' + strCurrency
+			-- ,strPrice					 = dbo.fnFormatNumber(CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))) + ' per ' + strPriceUOM + ' ' + strCurrency
+			,strPrice					 = dbo.fnFormatNumber(CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))) + ' / ' + strPriceUOM
 			,strPriceZee				 = ''
 			,strQuantityRoth			 = convert(nvarchar(30),CAST(ISNULL(dblDetailQuantity,0) AS DECIMAL(24,2))) + ' ' + strItemUOM
 			,strQuantityZee				 = REPLACE(CONVERT(VARCHAR,CONVERT(MONEY,dblDetailQuantity),1), '.00','') + ' ' + strItemUOM
