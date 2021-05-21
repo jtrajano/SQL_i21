@@ -285,6 +285,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultData\Categories1099.sql
 :r .\AP\DefaultData\Categories1099PATR.sql
 :r .\AP\DefaultData\Categories1099DIV.sql
+:r .\AP\DefaultData\Categories1099K.sql
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
@@ -664,5 +665,11 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
+
+-- Clean up i21 database objects
+:r .\IC\29_CleanupObjects.sql
+:r .\RM\03_CleanupObjects.sql
+:r .\IP\2_CleanupObjects.sql
+:r .\AR\01_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'

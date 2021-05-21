@@ -1970,7 +1970,6 @@
     <Build Include="dbo\Functions\fnGetItemPricing.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspIUAuditLogs.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
     <Build Include="dbo\Tables\tblHDReminder.sql" />
@@ -7200,7 +7199,6 @@
     <Build Include="dbo\Stored Procedures\uspSMReplicationPullSubscription.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationMainConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspSMReplicationRemoteConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationDropPublication.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageMeasurementReading.sql" />
     <None Include="Scripts\Post-Deployment\EM\041_FixVendorNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
@@ -7580,7 +7578,6 @@
     <Build Include="dbo\Stored Procedures\uspSMMigrateScheduledAuditLog.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_CreateAuditLogMigrationPlan.sql" />
     <None Include="Scripts\Post-Deployment\SM\1910_MigrateAuditLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
     <Build Include="dbo\Tables\tblMBImportMeterReading.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceGroupByDriverPinOdometerHistory.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceGroupByDriverPinOdometer.sql" />
@@ -9388,6 +9385,7 @@
     <Build Include="dbo\Tables\tblIPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
+    <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspTRImportDtnVoucherPayment.sql" />
@@ -9398,11 +9396,14 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
-    <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
+    <None Include="Scripts\Post-Deployment\IP\2_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\SM\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\GL\01_CleanupObjects.sql" />
     <Build Include="dbo\Tables\tblIPInvTransferFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPTransferOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateReceiptTotal.sql" />
     <Build Include="dbo\Tables\tblIPLotItemChangeFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPLotItemChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryShipmentTransaction.sql" />
@@ -9410,6 +9411,7 @@
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9689,8 +9691,12 @@
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
     <None Include="dbo\Stored Procedures\uspICTransactionLinkPatcher.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceTransactionLink.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
+    <None Include="Scripts\Post-Deployment\RM\03_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\AR\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
