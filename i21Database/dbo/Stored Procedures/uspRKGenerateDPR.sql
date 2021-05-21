@@ -3282,6 +3282,7 @@ BEGIN TRY
 			AND intLocationId = ISNULL(@intLocationId, intLocationId)
 			AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 			AND ISNULL(t.ysnPreCrush, 0) = 0
+			AND t.strInstrumentType = 'Options'
 
 				
 		IF @ysnPreCrush = 1 AND ISNULL(@strPositionBy,'') <> ''
