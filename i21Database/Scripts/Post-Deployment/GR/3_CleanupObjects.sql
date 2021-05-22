@@ -6,6 +6,10 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspD
        DROP PROCEDURE uspDMMergeTables;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMSyncTables'))
+       DROP PROCEDURE uspSMSyncTables;
+GO
+
 
 
 PRINT 'End Ticket Management Clean up Objects - Drop obsolete objects'
