@@ -30,6 +30,10 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspS
        DROP PROCEDURE uspSMReplicationDropPublication;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMReplicationAddSubscriptionForRemote'))
+       DROP PROCEDURE uspSMReplicationAddSubscriptionForRemote;
+GO
+
 
 
 
