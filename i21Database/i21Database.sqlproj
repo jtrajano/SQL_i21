@@ -3689,7 +3689,6 @@
     <Build Include="dbo\Functions\fnRKGetCurrencyConversionRate.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryReceiptView.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryShipmentView.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMSyncTables.sql" />
     <Build Include="dbo\Tables\tblARCustomerLicenseInformation.sql" />
     <Build Include="dbo\Tables\tblARCustomerLicenseModule.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateDiscountandShrink.sql" />
@@ -3994,7 +3993,6 @@
     <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
     <Build Include="dbo\Views\vyuETExportItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLicense.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMValidateRemoteDBServer.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeEMTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeSMTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeGRTables.sql" />
