@@ -9,10 +9,9 @@ BEGIN
 		@strEmails = coalesce(@strEmails + ',', '') +  b.strEmail
 	from
 		tblHDTimeEntryResources a
-		,tblEMEntity b
+	inner join tblEMEntity b on b.intEntityId = a.intResourcesEntityId
 	where
 		a.intEntityId = @intEntityId
-		and b.intEntityId = a.intResourcesEntityId
 		and b.strEmail is not null
 		and ltrim(rtrim(b.strEmail)) <> ''
 
