@@ -22,6 +22,10 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspS
        DROP PROCEDURE uspSMReplicationMainConfiguration;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMReplicationDropPullSubscription'))
+       DROP PROCEDURE uspSMReplicationDropPullSubscription;
+GO
+
 
 
 PRINT 'End Ticket Management Clean up Objects - Drop obsolete objects'
