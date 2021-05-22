@@ -14,6 +14,10 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspS
        DROP PROCEDURE uspSMReplicationRemoteConfiguration;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMReplicationPullSubscription'))
+       DROP PROCEDURE uspSMReplicationPullSubscription;
+GO
+
 
 
 
