@@ -4,7 +4,7 @@ CREATE TABLE [dbo].tblGLDeletedAccount(
 	[intAccountId] [int] NOT NULL,
 	[strAccountId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription] [nvarchar](255)  COLLATE Latin1_General_CI_AS NOT NULL,
-	[strNote] [ntext]  COLLATE Latin1_General_CI_AS NULL,
+	[strNote] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[intAccountGroupId] [int] NULL,
 	[ysnIsUsed] [bit] ,
 	[intConcurrencyId] [int] NOT NULL DEFAULT ((1)),
