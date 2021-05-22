@@ -4000,7 +4000,6 @@
     <Build Include="dbo\Stored Procedures\uspDMMergeGRTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeCTTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeLGTables.sql" />
-    <Build Include="dbo\Stored Procedures\uspDMMergeICTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeQMTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeSCTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeTables.sql" />
@@ -9373,6 +9372,7 @@
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
+    <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
