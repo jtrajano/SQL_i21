@@ -54,6 +54,7 @@ BEGIN TRY
 	DECLARE @strPackagingCategoryId NVARCHAR(Max)
 	DECLARE @intPlannedShiftId INT
 	DECLARE @strSavedWONo NVARCHAR(50)
+			,@intSubLocationId int
 
 	SELECT @dtmCurrentDateTime = GetDate()
 
@@ -354,6 +355,11 @@ BEGIN TRY
 	SELECT @strDemandNo = strDemandNo
 	FROM tblMFBlendRequirement
 	WHERE intBlendRequirementId = @intBlendRequirementId
+	
+	Select @intSubLocationId=NULL
+	Select @intSubLocationId=intSubLocationId
+	from tblMFManufacturingCell 
+	Where intManufacturingCellId = @intCellId
 
 	SELECT @strBlendItemNo = strItemNo
 		,@strBlendItemStatus = strStatus
@@ -916,6 +922,10 @@ BEGIN TRY
 			,intTransactionFrom
 			,intPlannedShiftId
 			,dtmPlannedDate
+			,intConcurrencyId
+			,intSubLocationId
+			,dtmOrderDate
+			,intSupervisorId 
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -949,6 +959,10 @@ BEGIN TRY
 			,1
 			,intPlannedShiftId
 			,dtmDueDate
+			,1 AS intConcurrencyId
+			,@intSubLocationId 
+			,GetDate()
+			,intUserId
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
