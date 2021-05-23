@@ -8,6 +8,8 @@ AS
 
 set nocount on
 
+return 
+
 declare @DeliverySheetNumber nvarchar(100)
 declare @StorageCost decimal(18, 6)
 declare @CurrentDate datetime
