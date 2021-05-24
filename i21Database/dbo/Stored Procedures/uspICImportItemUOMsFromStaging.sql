@@ -40,6 +40,82 @@ CREATE TABLE #tmp (
 	, intCreatedByUserId INT NULL
 )
 
+DECLARE @tblDuplicateUPCCodes TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200), strDescription NVARCHAR(MAX))
+DECLARE @tblInvalidStockUnitQuantities TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200), strDescription NVARCHAR(MAX))
+DECLARE @tblMissingUOMs TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200))
+DECLARE @tblMissingItems TABLE (strItemNo NVARCHAR(200))
+
+--Validate Records
+
+--Check missing Items
+
+INSERT INTO @tblMissingItems (
+	strItemNo
+)
+SELECT
+	s.strItemNo
+FROM 
+	tblICImportStagingUOM s	LEFT JOIN tblICItem i 
+		ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(s.strItemNo) COLLATE Latin1_General_CI_AS	
+WHERE
+	s.strImportIdentifier = @strIdentifier
+	AND i.intItemId IS NULL
+
+--Check missing UOMs
+
+INSERT INTO @tblMissingUOMs (
+	strItemNo
+	,strUOM
+)
+SELECT
+	s.strItemNo
+	,s.strUOM
+FROM 
+	tblICImportStagingUOM s	LEFT JOIN tblICUnitMeasure u 
+		ON RTRIM(LTRIM(u.strUnitMeasure)) COLLATE Latin1_General_CI_AS = LTRIM(s.strUOM) COLLATE Latin1_General_CI_AS
+WHERE
+	s.strImportIdentifier = @strIdentifier
+	AND u.intUnitMeasureId IS NULL
+
+--Check Duplicate UPC codes
+
+INSERT INTO @tblDuplicateUPCCodes (strItemNo, strUPCCode, strDescription)
+SELECT
+	x.strItemNo,
+	x.strUPCCode,
+	i.strDescription
+FROM tblICImportStagingUOM x
+INNER JOIN tblICItem i 
+ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(x.strItemNo) COLLATE Latin1_General_CI_AS
+OUTER APPLY (
+	SELECT TOP 1 intUpcCode
+	FROM tblICItemUOM
+	WHERE intUpcCode = case when x.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
+		AND NOT (x.strUPCCode like '%.%' OR x.strUPCCode like '%e%' OR x.strUPCCode like '%E%') then CONVERT([bigint],rtrim(ltrim(x.strUPCCode)),0) else CONVERT([bigint],NULL,0) end
+) upc
+LEFT JOIN @tblMissingUOMs missingUOM ON missingUOM.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
+WHERE upc.intUpcCode IS NOT NULL AND missingUOM.strItemNo IS NULL
+
+--Check invalid Stock Unit quantities
+
+INSERT INTO @tblInvalidStockUnitQuantities (strItemNo, strUOM, strDescription)
+SELECT
+	x.strItemNo,
+	x.strUOM,
+	i.strDescription
+FROM tblICImportStagingUOM x
+INNER JOIN tblICItem i 
+ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(x.strItemNo) COLLATE Latin1_General_CI_AS
+LEFT JOIN @tblMissingUOMs missingUOM 
+	ON missingUOM.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
+LEFT JOIN @tblMissingItems missingItem 
+	ON missingItem.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
+WHERE 
+	x.ysnIsStockUnit = 1 AND 
+	CONVERT(DECIMAL(38,20), x.dblUnitQty) <> 1 AND 
+	missingUOM.strItemNo IS NULL AND
+	missingItem.strItemNo IS NULL
+
 INSERT INTO #tmp (
 	intItemId, 
 	intUnitMeasureId, 
@@ -184,9 +260,22 @@ WHEN NOT MATCHED THEN
 	)
 	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
+DECLARE @intTotalUPCCodeDuplicates INT
+DECLARE @intTotalInvalidStockUnit INT
+
+DECLARE @intTotalMissingItem INT
+DECLARE @intTotalMissingUOM INT
+
+SELECT @intTotalUPCCodeDuplicates = COUNT(*) FROM @tblDuplicateUPCCodes 
+SELECT @intTotalInvalidStockUnit = COUNT(*) FROM @tblInvalidStockUnitQuantities
+SELECT @intTotalMissingItem = COUNT(*) FROM @tblMissingItems 
+SELECT @intTotalMissingUOM = COUNT(*) FROM @tblMissingUOMs
+
 UPDATE l
 SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
+	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE'),
+	l.intTotalWarnings = l.intTotalWarnings + @intTotalUPCCodeDuplicates + @intTotalInvalidStockUnit,
+	l.intTotalErrors = l.intTotalErrors + @intTotalMissingItem + @intTotalMissingUOM
 FROM tblICImportLog l
 WHERE l.strUniqueId = @strIdentifier
 
@@ -203,10 +292,78 @@ BEGIN
 	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
 END
 
+IF @intTotalMissingItem > 0
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT 
+		@LogId,
+		0,
+		'Import Failed.',
+		'Item No',
+		 'Missing item: "' + Items.strItemNo + '"',
+		'Failed',
+		'Error',
+		1
+	FROM @tblMissingItems Items
+END
+
+IF @intTotalMissingUOM > 0
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT 
+		@LogId,
+		0,
+		'Import Failed.',
+		'UOM',
+		'Missing unit of measure: "' + UOM.strUOM + '" on item "' + UOM.strItemNo + '"',
+		'Failed',
+		'Error',
+		1
+	FROM @tblMissingUOMs UOM
+END
+
+IF @intTotalUPCCodeDuplicates > 0
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT 
+		@LogId,
+		0,
+		'Import Finished.',
+		'UPC Code',
+		'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + ' and still uploaded UOM with empty UPC Code.',
+		'Success',
+		'Warning',
+		1
+	FROM @tblDuplicateUPCCodes Codes
+END
+
+IF @intTotalInvalidStockUnit > 0
+BEGIN
+	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT 
+		@LogId,
+		0,
+		'Import Finished.',
+		'UOM',
+		'Unit Qty for Stock Unit ' + UOMs.strUOM + ' of ' + UOMs.strItemNo + ' - ' + UOMs.strDescription + ' is greater than 1. Setting it to 1',
+		'Success',
+		'Warning',
+		1
+	FROM @tblInvalidStockUnitQuantities UOMs
+END
+
 DROP TABLE #tmp
 DROP TABLE #output
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier = @strIdentifier
+
+UPDATE ItemUOM 
+SET ItemUOM.dblUnitQty = 1 
+FROM tblICItemUOM ItemUOM
+INNER JOIN tblICItem Item
+	ON Item.intItemId = ItemUOM.intItemId
+INNER JOIN @tblInvalidStockUnitQuantities InvalidStockUnit
+	ON Item.strItemNo COLLATE Latin1_General_CI_AS = InvalidStockUnit.strItemNo COLLATE Latin1_General_CI_AS
 
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
