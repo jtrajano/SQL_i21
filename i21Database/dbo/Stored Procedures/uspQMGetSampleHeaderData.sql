@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspQMGetSampleHeaderData @intProductTypeId INT
 	,@intProductValueId INT
+	,@intLotId INT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -366,6 +367,8 @@ BEGIN
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
 		,@strContainerNumber AS strContainerNumber
+		,L.intStorageLocationId
+		,SL.strName AS strStorageLocationName
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.intLoadContainerId
@@ -382,10 +385,18 @@ BEGIN
 		,C.strItemSpecification
 	FROM tblICParentLot PL
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = PL.intLotStatusId
+		AND PL.intParentLotId = @intProductValueId
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	LEFT JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
-		AND L.intParentLotId = @intProductValueId
+		AND L.intLotId = (
+				CASE 
+					WHEN ISNULL(@intLotId, 0) > 0
+						THEN @intLotId
+					ELSE L.intLotId
+					END
+				)
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
