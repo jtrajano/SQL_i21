@@ -1,5 +1,8 @@
 CREATE PROCEDURE [dbo].[uspRestApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
+
+DECLARE @Date DATETIME = GETDATE()
+
 -- Validations
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	strError, strField, strLogLevel, strValue, intLineNumber,
@@ -148,14 +151,14 @@ WHERE term.intFreightTermId IS NULL
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT 
-    customer.intEntityId intCustomerId
+      customer.intEntityId intCustomerId
     , sc.dtmContractDate
     , sc.dtmExpirationDate
+	, sc.dtmDueDate
     , sc.strEntryContract
     , sc.strContract
     , sc.ysnIsSigned
     , sc.ysnIsPrinted
-    , sc.dtmDueDate
     , loc.intCompanyLocationId
     , currency.intCurrencyID
     , sp.intEntityId AS intSalespersonId
@@ -163,7 +166,7 @@ SELECT
     , t.intTermID
     , ct.intCountryID
     , ctext.intContractTextId
-    , lob.intLineOfBusinessId
+	, lob.intLineOfBusinessId
     , sc.strCustomerNo
     , sc.strCurrency
     , sc.strLocation
@@ -172,7 +175,7 @@ SELECT
     , sc.strTerms
     , sc.strSalesperson
     , sc.strContractText
-    , sc.strLineOfBusiness
+    , lob.strLineOfBusiness
 FROM tblRestApiSchemaItemContract sc
 INNER JOIN vyuARCustomer customer ON customer.strCustomerNumber = sc.strCustomerNo OR customer.strName = sc.strCustomerNo
 INNER JOIN tblSMCompanyLocation loc ON loc.strLocationName = sc.strLocation OR loc.strLocationNumber = sc.strLocation
@@ -182,17 +185,44 @@ LEFT JOIN tblSMFreightTerms ft ON ft.strFreightTerm = sc.strFreightTerm OR ft.st
 LEFT JOIN tblSMTerm t ON t.strTerm = sc.strTerms OR t.strTermCode = sc.strTerms
 LEFT JOIN tblSMCountry ct ON ct.strCountry = sc.strCountry OR ct.strCountryCode = sc.strCountry
 LEFT JOIN tblCTContractText ctext ON ctext.strTextCode = sc.strContractText
+	AND ctext.intContractType = 2
+	AND ctext.ysnActive = 1
+--OUTER APPLY (
+--	SELECT TOP 1 l.strLineOfBusiness, l.intLineOfBusinessId
+--	FROM tblSMLineOfBusiness l 
+--	WHERE l.strLineOfBusiness = sc.strLineOfBusiness
+--		AND NULLIF(sc.strLineOfBusiness, '') IS NOT NULL
+--) lob
 LEFT JOIN tblSMLineOfBusiness lob ON lob.strLineOfBusiness = sc.strLineOfBusiness
+--OUTER APPLY (
+--	SELECT TOP 1 sct.dtmDueDate
+--	FROM tblRestApiSchemaItemContract sct
+--	WHERE sct.dtmDueDate IS NOT NULL
+--		AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(sct.dtmContractDate, @Date)
+--        AND ISNULL(sc.dtmExpirationDate, @Date) = ISNULL(sct.dtmExpirationDate, @Date)
+--        AND ISNULL(sc.ysnIsSigned, 0) = ISNULL(sct.ysnIsSigned, 0)
+--        AND ISNULL(sc.ysnIsPrinted, 0) = ISNULL(sct.ysnIsPrinted, 0)
+--        AND ISNULL(sc.strContract, '') = ISNULL(sct.strContract, '')
+--        AND ISNULL(sc.strEntryContract, '') = ISNULL(sct.strEntryContract, '')
+--        AND ISNULL(sc.strCustomerNo, '') = ISNULL(sct.strCustomerNo, '')
+--        AND ISNULL(sc.strCurrency, '') = ISNULL(sct.strCurrency, '')
+--        AND ISNULL(sc.strLocation, '') = ISNULL(sct.strLocation, '')
+--        AND ISNULL(sc.strFreightTerm, '') = ISNULL(sct.strFreightTerm, '')
+--        AND ISNULL(sc.strCountry, '') = ISNULL(sct.strCountry, '')
+--        AND ISNULL(sc.strTerms, '') = ISNULL(sct.strTerms, '')
+--        AND ISNULL(sc.strSalesperson, '') = ISNULL(sct.strSalesperson, '')
+--        AND ISNULL(sc.strContractText, '') = ISNULL(sct.strContractText, '')
+--) dueDate
 WHERE sc.guiApiUniqueId = @guiApiUniqueId 
 GROUP BY
       customer.intEntityId
     , sc.dtmContractDate
     , sc.dtmExpirationDate
+	, sc.dtmDueDate
     , sc.strEntryContract
     , sc.strContract
     , sc.ysnIsSigned
     , sc.ysnIsPrinted
-    , sc.dtmDueDate
     , loc.intCompanyLocationId
     , currency.intCurrencyID
     , sp.intEntityId
@@ -200,7 +230,7 @@ GROUP BY
     , t.intTermID
     , ct.intCountryID
     , ctext.intContractTextId
-    , lob.intLineOfBusinessId
+	, lob.intLineOfBusinessId
     , sc.strCustomerNo
     , sc.strCurrency
     , sc.strLocation
@@ -209,7 +239,7 @@ GROUP BY
     , sc.strTerms
     , sc.strSalesperson
     , sc.strContractText
-    , sc.strLineOfBusiness
+	, lob.strLineOfBusiness
 
 DECLARE @intCustomerId INT
 DECLARE @dtmContractDate DATETIME
@@ -244,32 +274,30 @@ OPEN cur;
 
 FETCH NEXT FROM cur INTO 
       @intCustomerId
-    , @dtmContractDate
-    , @dtmExpirationDate
-    , @strEntryContract
-    , @strContract
-    , @ysnIsSigned
-    , @ysnIsPrinted
-    , @dtmDueDate
-    , @intCompanyLocationId
-    , @intCurrencyID
-    , @intSalespersonId
-    , @intFreightTermId
-    , @intTermID
-    , @intCountryID
-    , @intContractTextId
-    , @intLineOfBusinessId
-    , @strCustomerNo
-    , @strCurrency
-    , @strLocation
-    , @strFreightTerm
-    , @strCountry
-    , @strTerms
-    , @strSalesperson
-    , @strContractText
-    , @strLineOfBusiness
-
-DECLARE @Date DATETIME = GETDATE()
+	, @dtmContractDate
+	, @dtmExpirationDate
+	, @dtmDueDate
+	, @strEntryContract
+	, @strContract
+	, @ysnIsSigned
+	, @ysnIsPrinted
+	, @intCompanyLocationId
+	, @intCurrencyID
+	, @intSalespersonId
+	, @intFreightTermId
+	, @intTermID
+	, @intCountryID
+	, @intContractTextId
+	, @intLineOfBusinessId
+	, @strCustomerNo
+	, @strCurrency
+	, @strLocation
+	, @strFreightTerm
+	, @strCountry
+	, @strTerms
+	, @strSalesperson
+	, @strContractText
+	, @strLineOfBusiness
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -336,7 +364,6 @@ BEGIN
         AND i.intItemId IS NULL
         AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
         AND ISNULL(sc.dtmExpirationDate, @Date) = ISNULL(@dtmExpirationDate, @Date)
-        AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
         AND ISNULL(sc.ysnIsSigned, 0) = ISNULL(@ysnIsSigned, 0)
         AND ISNULL(sc.ysnIsPrinted, 0) = ISNULL(@ysnIsPrinted, 0)
         AND ISNULL(sc.strContract, '') = ISNULL(@strContract, '')
@@ -349,7 +376,8 @@ BEGIN
         AND ISNULL(sc.strTerms, '') = ISNULL(@strTerms, '')
         AND ISNULL(sc.strSalesperson, '') = ISNULL(@strSalesperson, '')
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
-        AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
 
     INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 		strError, strField, strLogLevel, strValue, intLineNumber,
@@ -374,7 +402,6 @@ BEGIN
         AND u.intItemUOMId IS NULL
         AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
         AND ISNULL(sc.dtmExpirationDate, @Date) = ISNULL(@dtmExpirationDate, @Date)
-        AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
         AND ISNULL(sc.ysnIsSigned, 0) = ISNULL(@ysnIsSigned, 0)
         AND ISNULL(sc.ysnIsPrinted, 0) = ISNULL(@ysnIsPrinted, 0)
         AND ISNULL(sc.strContract, '') = ISNULL(@strContract, '')
@@ -387,7 +414,8 @@ BEGIN
         AND ISNULL(sc.strTerms, '') = ISNULL(@strTerms, '')
         AND ISNULL(sc.strSalesperson, '') = ISNULL(@strSalesperson, '')
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
-        AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
 
     INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 		strError, strField, strLogLevel, strValue, intLineNumber,
@@ -410,7 +438,6 @@ BEGIN
         AND taxGroup.intTaxGroupId IS NULL
         AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
         AND ISNULL(sc.dtmExpirationDate, @Date) = ISNULL(@dtmExpirationDate, @Date)
-        AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
         AND ISNULL(sc.ysnIsSigned, 0) = ISNULL(@ysnIsSigned, 0)
         AND ISNULL(sc.ysnIsPrinted, 0) = ISNULL(@ysnIsPrinted, 0)
         AND ISNULL(sc.strContract, '') = ISNULL(@strContract, '')
@@ -423,7 +450,8 @@ BEGIN
         AND ISNULL(sc.strTerms, '') = ISNULL(@strTerms, '')
         AND ISNULL(sc.strSalesperson, '') = ISNULL(@strSalesperson, '')
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
-        AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
 
     INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 		strError, strField, strLogLevel, strValue, intLineNumber,
@@ -446,7 +474,6 @@ BEGIN
         AND s.intContractStatusId IS NULL
         AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
         AND ISNULL(sc.dtmExpirationDate, @Date) = ISNULL(@dtmExpirationDate, @Date)
-        AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
         AND ISNULL(sc.ysnIsSigned, 0) = ISNULL(@ysnIsSigned, 0)
         AND ISNULL(sc.ysnIsPrinted, 0) = ISNULL(@ysnIsPrinted, 0)
         AND ISNULL(sc.strContract, '') = ISNULL(@strContract, '')
@@ -459,7 +486,8 @@ BEGIN
         AND ISNULL(sc.strTerms, '') = ISNULL(@strTerms, '')
         AND ISNULL(sc.strSalesperson, '') = ISNULL(@strSalesperson, '')
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
-        AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
 
     INSERT INTO tblCTApiItemContractDetailStaging (
           intApiItemContractStagingId
@@ -488,7 +516,6 @@ BEGIN
     WHERE sc.guiApiUniqueId = @guiApiUniqueId
         AND ISNULL(sc.dtmContractDate, @Date) = ISNULL(@dtmContractDate, @Date)
         AND ISNULL(sc.dtmExpirationDate, @Date) = ISNULL(@dtmExpirationDate, @Date)
-        AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
         AND ISNULL(sc.ysnIsSigned, 0) = ISNULL(@ysnIsSigned, 0)
         AND ISNULL(sc.ysnIsPrinted, 0) = ISNULL(@ysnIsPrinted, 0)
         AND ISNULL(sc.strContract, '') = ISNULL(@strContract, '')
@@ -501,17 +528,18 @@ BEGIN
         AND ISNULL(sc.strTerms, '') = ISNULL(@strTerms, '')
         AND ISNULL(sc.strSalesperson, '') = ISNULL(@strSalesperson, '')
         AND ISNULL(sc.strContractText, '') = ISNULL(@strContractText, '')
-        AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.strLineOfBusiness, '') = ISNULL(@strLineOfBusiness, '')
+		AND ISNULL(sc.dtmDueDate, @Date) = ISNULL(@dtmDueDate, @Date)
     
     FETCH NEXT FROM cur INTO 
-          @intCustomerId
+		  @intCustomerId
 		, @dtmContractDate
 		, @dtmExpirationDate
+		, @dtmDueDate
 		, @strEntryContract
 		, @strContract
 		, @ysnIsSigned
 		, @ysnIsPrinted
-		, @dtmDueDate
 		, @intCompanyLocationId
 		, @intCurrencyID
 		, @intSalespersonId
