@@ -230,6 +230,7 @@ BEGIN
                     AND BD.intBookId = @BookId
                   
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
+                  EXEC uspFAFiscalAsset @i, @BookId --maps asset depreciation to fiscal period/year
                   DELETE FROM @IdIterate WHERE intId = @i
               END
       END  
@@ -288,6 +289,7 @@ BEGIN
                   AND BD.intBookId = @BookId
 
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
+                  EXEC uspFAFiscalAsset @i, @BookId --maps asset depreciation to fiscal period/year
                   DELETE FROM @IdIterate WHERE intId = @i
           END
         END  
