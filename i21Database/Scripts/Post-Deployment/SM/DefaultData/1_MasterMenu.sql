@@ -1723,9 +1723,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Production' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Blend Production', N'Inventory', @InventoryActivitiesParentMenuId, N'Blend Production', N'Activity', N'Screen', N'Manufacturing.view.BlendProduction', N'small-menu-activity', 1, 1, 0, 1, 6, 0)
+	VALUES (N'Blend Production', N'Inventory', @InventoryActivitiesParentMenuId, N'Blend Production', N'Activity', N'Screen', N'Manufacturing.view.BlendProduction?multiGrouping=true', N'small-menu-activity', 1, 1, 0, 1, 6, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Manufacturing.view.BlendProduction' WHERE strMenuName = 'Blend Production' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Manufacturing.view.BlendProduction?multiGrouping=true' WHERE strMenuName = 'Blend Production' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Categories' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -4340,9 +4340,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Production' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Blend Production', N'Manufacturing', @ManufacturingActivitiesParentMenuId, N'Blend Production', N'Activity', N'Screen', N'Manufacturing.view.BlendProduction', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
+	VALUES (N'Blend Production', N'Manufacturing', @ManufacturingActivitiesParentMenuId, N'Blend Production', N'Activity', N'Screen', N'Manufacturing.view.BlendProduction?multiGrouping=true', N'small-menu-activity', 0, 0, 0, 1, 4, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Manufacturing.view.BlendProduction' WHERE strMenuName = 'Blend Production' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Manufacturing.view.BlendProduction?multiGrouping=true' WHERE strMenuName = 'Blend Production' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Work Order Management' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
