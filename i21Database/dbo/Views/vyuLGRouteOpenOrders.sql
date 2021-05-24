@@ -469,6 +469,6 @@ LEFT JOIN tblICStatus ITS ON ITS.intStatusId = IT.intStatusId
 LEFT JOIN tblSMCompanyLocationSubLocation FromStrg ON FromStrg.intCompanyLocationSubLocationId = ITD.intFromSubLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation ToStrg ON ToStrg.intCompanyLocationSubLocationId = ITD.intToSubLocationId
 LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = I.intItemId AND OH.intLocationId = FromLoc.intCompanyLocationId
-WHERE IT.ysnPosted = 1 AND IT.intStatusId IN (1, 2)
+WHERE IT.intStatusId IN (1, 2)
 
 ) t1
