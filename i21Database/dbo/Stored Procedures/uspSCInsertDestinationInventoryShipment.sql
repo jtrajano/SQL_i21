@@ -224,8 +224,8 @@ BEGIN TRY
 	)
 	SELECT	
 		intInventoryShipmentId		= SC.intTransactionHeaderId 
-		,intContractId				= SC.intContractHeaderId 
-		,intContractDetailId		= SC.intContractDetailId 
+		,intContractId				= NULL
+		,intContractDetailId		= NULL
 		,intChargeId				= SCSetup.intDefaultFeeItemId
 		,strCostMethod				= IC.strCostMethod 
 		,dblRate					= CASE
