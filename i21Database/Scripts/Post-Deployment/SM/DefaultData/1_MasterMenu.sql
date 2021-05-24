@@ -12,7 +12,7 @@ GO
 
 
 
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'Transports.view.ImportLoadList' AND strModuleName = 'Transports')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr' AND strModuleName = 'IDP')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6818,9 +6818,9 @@ SELECT @IDPCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Documents' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Add Documents', N'IDP', @IDPCreateParentMenuId, N'Add Documents', 'Create', N'Screen', N'GlobalComponentEngine.view.AttachFile?type=ocr', N'small-menu-create', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Add Documents', N'IDP', @IDPCreateParentMenuId, N'Add Documents', 'Create', N'Screen', N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr', N'small-menu-create', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.AttachFile?type=ocr', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL WHERE strMenuName = 'Add Documents' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL WHERE strMenuName = 'Add Documents' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId
 
 
 
