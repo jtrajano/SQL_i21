@@ -37,7 +37,7 @@ SELECT intSrcId					= SRC.intTransactionId
 FROM tblARInvoice MAIN
 INNER JOIN @IIDs II ON MAIN.intInvoiceId = II.intHeaderId
 CROSS APPLY (
-	--FROM SO
+	--SALES ORDER
 	SELECT intTransactionId		= SO.intSalesOrderId
 		 , strTransactionNumber	= SO.strSalesOrderNumber
 		 , strTransactionType	= 'Sales Order'
@@ -50,7 +50,7 @@ CROSS APPLY (
 
 	UNION ALL
 
-	--FROM IS
+	--INVENTORY SHIPMENT
 	SELECT DISTINCT intTransactionId = ISS.intInventoryShipmentId
 			, strTransactionNumber	= ISS.strShipmentNumber 
 			, strTransactionType	= 'Inventory Shipment'
@@ -63,7 +63,7 @@ CROSS APPLY (
 
 	UNION ALL
 
-	--FROM CF
+	--CARD FUELING
 	SELECT intTransactionId		= CF.intTransactionId
 		 , strTransactionNumber	= ISNULL(CF.strInvoiceReportNumber, CF.strTransactionId)
 		 , strTransactionType	= INVOICE.strTransactionType
@@ -81,8 +81,9 @@ CROSS APPLY (
         , strTransactionType	= 'Meter Billing'
         , strModuleName        	= 'Meter Billing'
     FROM tblMBMeterReading MR
-    WHERE MR.intInvoiceId IS NOT NULL
-      AND MR.intInvoiceId = MAIN.intInvoiceId
+	INNER JOIN tblARInvoice INVOICE ON MR.intMeterReadingId = INVOICE.intMeterReadingId
+    WHERE INVOICE.intInvoiceId = MAIN.intInvoiceId
+	  AND INVOICE.strType = 'Meter Billing'
 
     UNION ALL
 
@@ -93,8 +94,21 @@ CROSS APPLY (
         , strModuleName        	= 'Transport'
     FROM tblTRLoadDistributionHeader DH
     INNER JOIN tblTRLoadHeader LH ON DH.intLoadHeaderId = LH.intLoadHeaderId
-    WHERE DH.intInvoiceId IS NOT NULL
-      AND DH.intInvoiceId = MAIN.intInvoiceId
+	INNER JOIN tblARInvoice INVOICE ON INVOICE.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+    WHERE INVOICE.intInvoiceId = MAIN.intInvoiceId
+	  AND INVOICE.strType = 'Transport Delivery'
+
+	UNION ALL
+
+	--PATRONAGE (ISSUE STOCK)
+	SELECT intTransactionId		= STK.intIssueStockId
+        , strTransactionNumber	= STK.strIssueNo
+        , strTransactionType	= 'Issue Stock'
+        , strModuleName        	= 'Patronage'
+    FROM tblPATIssueStock STK 
+	INNER JOIN tblARInvoice INVOICE ON INVOICE.intSourceId = STK.intIssueStockId
+    WHERE INVOICE.intInvoiceId = MAIN.intInvoiceId
+      AND INVOICE.strComments = STK.strCertificateNo
 ) SRC
 WHERE ISNULL(II.ysnForDelete, 0) = 0
 
