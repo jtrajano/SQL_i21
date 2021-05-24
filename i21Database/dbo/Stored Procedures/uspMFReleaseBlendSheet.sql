@@ -1050,6 +1050,17 @@ End
 	SET @strWorkOrderNoOut = @strNextWONo;
 	SET @intWorkOrderIdOut = @intWorkOrderId
 
+	INSERT INTO dbo.tblMFWorkOrderPreStage (
+		intWorkOrderId
+		,intWorkOrderStatusId
+		,intUserId
+		,strRowState
+		)
+	SELECT @intWorkOrderId
+		,9
+		,@intUserId
+		,'Added'
+
 	COMMIT TRAN
 
 	EXEC sp_xml_removedocument @idoc

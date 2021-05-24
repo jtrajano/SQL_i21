@@ -26,6 +26,8 @@
 	[intLoadDetailId]    INT             NULL,
 	[intLoadShipmentCostId]    INT             NULL,
 	[intLoadId]    INT             NULL,
+	[intWeightClaimId]    INT             NULL,
+	[intWeightClaimDetailId]    INT             NULL,
 	[intScaleTicketId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,
 	[intPrepayTypeId]    INT             NULL,

@@ -25,6 +25,7 @@ AS
 							FROM	 tblCTPriceFixationDetail WITH (NOLOCK)
 							GROUP BY intPriceFixationId
 						)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
+		where CH.intPricingTypeId <> 3
 	),
 	x as 
 	(
@@ -139,7 +140,7 @@ AS
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
-		WHERE		intPricingTypeId IN (2, 3, 8)
+		WHERE		intPricingTypeId IN (2, 8)
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		AND			CD.intContractStatusId <> 3

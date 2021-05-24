@@ -3,7 +3,7 @@ AS
 SELECT CP.intCommitmentPricingId
 	,CP.strPricingNumber
 	,C.strName
-	,C.strEntityNo AS strAliasName
+	,C.strExternalERPId AS strAliasName
 	,CP.dtmDeliveryFrom
 	,CP.dtmDeliveryTo
 	,UOM.strUnitMeasure

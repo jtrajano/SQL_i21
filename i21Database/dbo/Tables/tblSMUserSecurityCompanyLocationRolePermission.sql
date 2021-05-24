@@ -13,7 +13,10 @@
 	CONSTRAINT [FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) ON DELETE CASCADE, 
     CONSTRAINT [AK_tblSMUserSecurityCompanyLocationRolePermission_Column] UNIQUE ([intEntityUserSecurityId], [intUserRoleId], [intMultiCompanyId], [intCompanyLocationId])
 )
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblSMUserSecurityCompanyLocationRolePermission]
+	ON [dbo].[tblSMUserSecurityCompanyLocationRolePermission]([intEntityUserSecurityId] ASC);
 
 GO
 

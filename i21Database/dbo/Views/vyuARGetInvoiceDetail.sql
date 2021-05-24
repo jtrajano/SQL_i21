@@ -14,6 +14,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , intPriceUOMId						= INV.intPriceUOMId
 	 , dblItemWeight						= INV.dblItemWeight
 	 , intItemWeightUOMId					= INV.intItemWeightUOMId
+	 , dblStandardWeight					= INV.dblStandardWeight
 	 , dblDiscount							= INV.dblDiscount
 	 , dblItemTermDiscount					= INV.dblItemTermDiscount
 	 , strItemTermDiscountBy				= INV.strItemTermDiscountBy

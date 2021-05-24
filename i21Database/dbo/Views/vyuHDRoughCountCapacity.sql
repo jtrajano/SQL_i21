@@ -93,6 +93,7 @@
 			,dblTwelfthWeek
 			,dtmPlanDate = getdate()
 			,strFilterKey
+			,ysnBillable
 		from tblHDRoughCountCapacity
 		where 
 			dblPlanFirstWeek is not null

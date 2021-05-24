@@ -28,6 +28,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 	,@intItemId AS INT
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
+	,@ChargesAPClearing AS APClearing
 	,@intReturnValue AS INT
 DECLARE @dummyGLEntries AS RecapTableType
 
@@ -222,6 +223,8 @@ BEGIN
 
 	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
 	BEGIN 
+		EXEC uspLGRecalculateLoadCosts @intTransactionId, @intEntityUserSecurityId
+		
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -265,6 +268,52 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
+		--Insert AP Clearing
+		INSERT INTO @ChargesAPClearing (
+			intTransactionId
+			,strTransactionId
+			,intTransactionType
+			,strReferenceNumber
+			,dtmDate
+			,intEntityVendorId
+			,intLocationId
+			,intTransactionDetailId
+			,intAccountId
+			,intItemId
+			,intItemUOMId
+			,dblQuantity
+			,dblAmount
+			,intOffsetId
+			,strOffsetId
+			,intOffsetDetailId
+			,intOffsetDetailTaxId
+			,strCode)
+		SELECT DISTINCT
+			intTransactionId = L.intLoadId
+			,strTransactionId = L.strLoadNumber
+			,intTransactionType = 5
+			,strReferenceNumber = L.strBLNumber
+			,dtmDate = GL.dtmDate
+			,intEntityVendorId = LC.intVendorId
+			,intLocationId = IL.intLocationId
+			,intTransactionDetailId = LC.intLoadCostId
+			,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+			,intItemId = LC.intItemId
+			,intItemUOMId = NULL
+			,dblQuantity = CAST(1 AS NUMERIC(18, 6))
+			,dblAmount = LC.dblAmount
+			,intOffsetId = NULL
+			,strOffsetId = NULL
+			,intOffsetDetailId = NULL
+			,intOffsetDetailTaxId = NULL
+			,strCode = 'LG'
+		FROM tblLGLoad L
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
+			LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+			OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
+		WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
+			AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
 	END 
 
 	-- Get the items to post  
@@ -646,6 +695,56 @@ BEGIN
 				,@ysnPost
 				
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+			--Insert AP Clearing
+			INSERT INTO @ChargesAPClearing (
+				intTransactionId
+				,strTransactionId
+				,intTransactionType
+				,strReferenceNumber
+				,dtmDate
+				,intEntityVendorId
+				,intLocationId
+				,intTransactionDetailId
+				,intAccountId
+				,intItemId
+				,intItemUOMId
+				,dblQuantity
+				,dblAmount
+				,intOffsetId
+				,strOffsetId
+				,intOffsetDetailId
+				,intOffsetDetailTaxId
+				,strCode)
+			SELECT DISTINCT
+				intTransactionId = L.intLoadId
+				,strTransactionId = L.strLoadNumber
+				,intTransactionType = 5
+				,strReferenceNumber = L.strBLNumber
+				,dtmDate = GL.dtmDate
+				,intEntityVendorId = LC.intVendorId
+				,intLocationId = IL.intLocationId
+				,intTransactionDetailId = LC.intLoadCostId
+				,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+				,intItemId = LC.intItemId
+				,intItemUOMId = NULL
+				,dblQuantity = CAST(1 AS NUMERIC(18, 6))
+				,dblAmount = LC.dblAmount
+				,intOffsetId = NULL
+				,strOffsetId = NULL
+				,intOffsetDetailId = NULL
+				,intOffsetDetailTaxId = NULL
+				,strCode = 'LG'
+			FROM tblLGLoad L
+				INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+				INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
+				LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+				OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
+			WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
+				AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
+				AND EXISTS (SELECT TOP 1 1 FROM tblAPClearing APC 
+							WHERE APC.intTransactionDetailId = LC.intLoadCostId AND APC.intTransactionId = L.intLoadId 
+							AND APC.intTransactionType = 5 AND APC.ysnPostAction = 1)
 		END
 
 		-- Unpost the Taxes from the Other Charges
@@ -790,6 +889,9 @@ BEGIN
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
+
+		IF (@ENABLE_ACCRUALS_FOR_OUTBOUND = 1)
+			EXEC dbo.uspAPClearing @ChargesAPClearing, @ysnPost
 	END
 
 	UPDATE dbo.tblLGLoad

@@ -75,7 +75,7 @@ FROM (
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 	LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
-	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+	-- WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 	) MainQuery
 	UNION ALL
 	SELECT
@@ -132,8 +132,8 @@ FROM (
 	LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermId = T.intTermID
 	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
-	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
-	AND D.strAccountCategory = 'AP Account'
+	-- WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+	WHERE D.strAccountCategory = 'AP Account'
 	UNION ALL
   	SELECT *
 	   FROM (
@@ -185,7 +185,7 @@ FROM (
 		LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = IRE.intOrderId
 		LEFT JOIN dbo.tblLGLoad LG ON LG.intLoadId = APD.intLoadId
 		LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
-		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
+		-- WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		) MainQuery  
 GO
 

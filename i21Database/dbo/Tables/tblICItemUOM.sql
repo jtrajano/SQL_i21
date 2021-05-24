@@ -29,7 +29,8 @@ Type the overview for the table here.
 		[intDimensionUOMId] INT NULL,
 		[dblVolume] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intVolumeUOMId] INT NULL,
-		[dblMaxQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblMaxQty] NUMERIC(18, 6) NULL DEFAULT ((0)),
+        [dblStandardWeight] NUMERIC(38, 20) NULL DEFAULT ((0)),
 		[ysnStockUOM] BIT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
@@ -50,7 +51,7 @@ Type the overview for the table here.
 					ELSE 
 						CAST(NULL AS BIGINT) 
 				END
-			),
+			) PERSISTED,
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
@@ -90,6 +91,7 @@ Type the overview for the table here.
 
 		CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strLongUPCCode]
 		ON tblICItemUOM([strLongUPCCode])
+		INCLUDE(intUpcCode, intItemUOMId)
 		WHERE [strLongUPCCode] IS NOT NULL;
 	GO
 

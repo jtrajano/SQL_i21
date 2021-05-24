@@ -103,7 +103,7 @@ BEGIN TRY
 	BEGIN
 		INSERT	INTO	#tmpExtracted
 		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
-			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId
+			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,dtmM2MDate
 		)
 		SELECT	intContractTypeId	=	CASE WHEN SC.strInOutFlag = 'I' THEN 1 ELSE 2 END,
 				intEntityId			=	@intEntityId,		
@@ -125,7 +125,8 @@ BEGIN TRY
 				dblBalance			=	0,					dtmStartDate				=	SC.dtmTicketDateTime,
 				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
 				intConcurrencyId	=	1,					intCreatedById				=	@intUserId,
-				intUnitMeasureId	=	QU.intUnitMeasureId
+				intUnitMeasureId	=	QU.intUnitMeasureId,
+				dtmM2MDate			=	getdate()
 												
 		FROM	tblSCTicket					SC	CROSS 
 		JOIN	tblCTCompanyPreference		CP

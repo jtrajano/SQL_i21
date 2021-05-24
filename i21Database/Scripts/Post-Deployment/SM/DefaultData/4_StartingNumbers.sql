@@ -732,7 +732,7 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 77
-			,[strTransactionType]	= N'Adjustment1099'
+			,[strTransactionType]	= N'1099 Adjustment'
 			,[strPrefix]			= N'ADJ1099-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Payable'
@@ -1489,15 +1489,15 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
 	
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 153
-			,[strTransactionType]	= N'Container ID'
-			,[strPrefix]			= N''
-			,[intNumber]			= 1
-			,[strModule]			= 'Logistics'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
+	--UNION ALL
+	--SELECT	[intStartingNumberId]	= 153
+	--		,[strTransactionType]	= N'Container ID'
+	--		,[strPrefix]			= N''
+	--		,[intNumber]			= 1
+	--		,[strModule]			= 'Logistics'
+	--		,[ysnEnable]			= 1
+	--		,[intConcurrencyId]		= 1
+	--WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
 	
 	-- UNION ALL
 	-- SELECT	[intStartingNumberId]	= 154

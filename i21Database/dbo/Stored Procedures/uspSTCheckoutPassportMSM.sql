@@ -186,13 +186,21 @@ BEGIN
 			   -------------------------------------------------------------------------------------------------------------
 			   ---------------------------------------- CUSTOMER COUNT -----------------------------------------------------
 			   -------------------------------------------------------------------------------------------------------------
+			   --UPDATE dbo.tblSTCheckoutHeader
+			   --SET dblCustomerCount = (
+						--				   SELECT SUM(CAST(ISNULL(MSMSalesTotalsMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6))) 
+						--				   FROM #tempCheckoutInsert
+						--				   WHERE ISNULL(MiscellaneousSummaryCodesMiscellaneousSummaryCode, '')  = 'totalizer' 
+						--				   AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCode, '') = 'sales'
+						--				   AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCodeModifier, '') = 'sales'
+						--				 )
+			   --WHERE intCheckoutId = @intCheckoutId
+
 			   UPDATE dbo.tblSTCheckoutHeader
 			   SET dblCustomerCount = (
-										   SELECT SUM(CAST(ISNULL(MSMSalesTotalsMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6))) 
-										   FROM #tempCheckoutInsert
-										   WHERE ISNULL(MiscellaneousSummaryCodesMiscellaneousSummaryCode, '')  = 'totalizer' 
-										   AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCode, '') = 'sales'
-										   AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCodeModifier, '') = 'sales'
+										   SELECT SUM(CAST(ISNULL(intRegisterCount, 0) AS DECIMAL(18, 6))) 
+										   FROM tblSTCheckoutPaymentOptions
+										   WHERE intCheckoutId  = @intCheckoutId
 										 )
 			   WHERE intCheckoutId = @intCheckoutId
 			   -------------------------------------------------------------------------------------------------------------
@@ -344,11 +352,15 @@ BEGIN
 							UPDATE chkMet
 								SET chkMet.dblAmount = (		
 														-- SELECT SUM(CAST(MSMSalesTotalsMiscellaneousSummaryAmount AS DECIMAL(18, 6))) 
-														SELECT SUM(CAST(ISNULL(MSMSalesTotalsMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6))) 
-														FROM #tempCheckoutInsert
-														WHERE ISNULL(MiscellaneousSummaryCodesMiscellaneousSummaryCode, '')  = 'totalizer' 
-															AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCode, '') = 'sales'
-															AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCodeModifier, '') = 'sales'									 
+														--SELECT SUM(CAST(ISNULL(MSMSalesTotalsMiscellaneousSummaryCount, 0) AS DECIMAL(18, 6))) 
+														--FROM #tempCheckoutInsert
+														--WHERE ISNULL(MiscellaneousSummaryCodesMiscellaneousSummaryCode, '')  = 'totalizer' 
+														--	AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCode, '') = 'sales'
+														--	AND ISNULL(MiscellaneousSummaryCodesMiscellaneousSummarySubCodeModifier, '') = 'sales'	
+															
+														SELECT SUM(CAST(ISNULL(intRegisterCount, 0) AS DECIMAL(18, 6))) 
+														   FROM tblSTCheckoutPaymentOptions
+														   WHERE intCheckoutId  = @intCheckoutId
 												       )
 							FROM tblSTCheckoutMetrics chkMet
 							WHERE chkMet.intCheckoutId = @intCheckoutId 

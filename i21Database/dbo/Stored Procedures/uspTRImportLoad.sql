@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspTRImportLoad]
 	@guidImportIdentifier UNIQUEIDENTIFIER,
     @intUserId INT,
-	@return INT OUTPUT
+	@return INT OUTPUT,
+	@ysnReprocess BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,29 +35,60 @@ BEGIN
 			@strBillOfLading NVARCHAR(200) = NULL,
 			@dtmPullDate DATETIME = NULL
 	
-		DECLARE @CursorTran AS CURSOR
-
-		SET @CursorTran = CURSOR FOR
-		SELECT D.intImportLoadDetailId
-			, D.strTruck
-			, D.strTerminal
-			, D.strCarrier
-			, D.strDriver
-			, D.strTrailer
-			, D.strSupplier
-			, D.strDestination
-			, D.strPullProduct
-			, D.strDropProduct 
-			, D.ysnValid
-			, D.strMessage
-			, D.strBillOfLading
-			, D.dtmPullDate
-		FROM tblTRImportLoad L 
-		INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
-		WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
-
 		BEGIN TRANSACTION
 
+		DECLARE @CursorTran AS CURSOR
+
+		IF(@ysnReprocess = 1)
+		BEGIN
+			UPDATE D SET D.ysnValid = 1, D.strMessage = '' FROM tblTRImportLoadDetail D 
+				INNER JOIN tblTRImportLoad L
+					ON L.intImportLoadId = D.intImportLoadId
+			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 0 AND ISNULL(D.ysnProcess, 0) = 0
+
+			SET @CursorTran = CURSOR FOR
+			SELECT D.intImportLoadDetailId
+				, D.strTruck
+				, D.strTerminal
+				, D.strCarrier
+				, D.strDriver
+				, D.strTrailer
+				, D.strSupplier
+				, D.strDestination
+				, D.strPullProduct
+				, D.strDropProduct 
+				, D.ysnValid
+				, D.strMessage
+				, D.strBillOfLading
+				, D.dtmPullDate
+			FROM tblTRImportLoad L 
+			INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
+			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 AND ISNULL(D.ysnProcess, 0) = 0
+		END
+		ELSE
+		BEGIN
+			SET @CursorTran = CURSOR FOR
+			SELECT D.intImportLoadDetailId
+				, D.strTruck
+				, D.strTerminal
+				, D.strCarrier
+				, D.strDriver
+				, D.strTrailer
+				, D.strSupplier
+				, D.strDestination
+				, D.strPullProduct
+				, D.strDropProduct 
+				, D.ysnValid
+				, D.strMessage
+				, D.strBillOfLading
+				, D.dtmPullDate
+			FROM tblTRImportLoad L 
+			INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
+			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
+		END
+		
+
+		
 		OPEN @CursorTran
 		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate 
 		WHILE @@FETCH_STATUS = 0

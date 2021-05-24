@@ -96,6 +96,12 @@ BEGIN TRY
 				SET strFeedStatus = 'IGNORE'
 				WHERE intContractPreStageId = @intContractPreStageId
 
+				DELETE
+				FROM dbo.tblCTIntrCompApproval
+				WHERE intContractHeaderId = @intContractHeaderId
+				AND ysnApproval IN (0,1)
+				AND intPriceFixationId is NULL
+
 				GOTO NextContract
 			END
 		END

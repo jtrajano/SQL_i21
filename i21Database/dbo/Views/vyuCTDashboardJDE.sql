@@ -129,6 +129,13 @@ WITH lgLoad1 AS (
 		, ES.strReasonCodeDescription
 		, PD.strReasonCodeDescription
 		, LO.ysnDocumentsReceived)
+, cer AS (
+	SELECT cr.intContractDetailId
+		, cr.intContractCertificationId
+		, ce.strCertificationName	
+	FROM tblCTContractCertification cr
+	JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+)
 
 SELECT CD.intContractDetailId
 	, CH.strContractNumber
@@ -177,7 +184,7 @@ SELECT CD.intContractDetailId
 	, BK.strBook
 	, SK.strSubBook
 	, CD.strInvoiceNo
-	, CD.strCertifications AS strCertificationName
+	, cc.strCertifications AS strCertificationName
 	, CH.intContractHeaderId
 	, ISNULL(CD.dblScheduleQty, 0) AS dblScheduleQty
 	, ysnInvoice = CASE WHEN ISNULL(CD.ysnInvoice, 0) = 0 THEN 'N'
@@ -252,6 +259,16 @@ SELECT CD.intContractDetailId
 FROM tblCTContractDetail CD WITH(NOLOCK)
 JOIN tblCTContractHeader CH WITH(NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId
+LEFT JOIN (
+	SELECT DISTINCT c1.intContractDetailId
+		, strCertifications = SUBSTRING((SELECT ',' + c2.strCertificationName  AS [text()]
+										FROM cer c2
+										WHERE c2.intContractDetailId = c1.intContractDetailId
+										ORDER BY c2.intContractDetailId
+										FOR XML PATH ('')), 2, 1000)
+
+	FROM cer c1
+	) cc ON cc.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblICItem IM WITH(NOLOCK) ON IM.intItemId = CD.intItemId
 LEFT JOIN tblEMEntity PR WITH(NOLOCK) ON PR.intEntityId = ISNULL(CD.intProducerId, CH.intProducerId)
 LEFT JOIN tblSMCity LP WITH(NOLOCK) ON LP.intCityId = CD.intLoadingPortId

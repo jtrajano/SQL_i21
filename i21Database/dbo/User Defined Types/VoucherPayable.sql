@@ -74,6 +74,8 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intWeightClaimId]				INT NULL,
+	[intWeightClaimDetailId]		INT NULL,
 	[intPaycheckHeaderId]			INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId]			INT NULL,

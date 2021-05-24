@@ -58,6 +58,7 @@ BEGIN
 		AND RCat.intPatronageCategoryId = CV.intPatronageCategoryId
 		AND R.ysnPosted <> 1
 	WHERE RCat.dblVolume > (CV.dblVolume - CV.dblVolumeProcessed)
+	  AND R.intRefundId = @intRefundId
 
 END
 ELSE
@@ -118,63 +119,6 @@ BEGIN
 	GOTO Post_Rollback
 END
 ----------------------------------------------------------------------------------------
-
---=====================================================================================================================================
---  UNPOST AND DELETE VOUCHER
----------------------------------------------------------------------------------------------------------------------------------------
-
-DECLARE @voucheredRefunds INT = 0;
-SELECT @voucheredRefunds = COUNT(*) FROM #tmpRefundData WHERE intBillId IS NOT NULL;
-
-IF(ISNULL(@ysnPosted,0) = 0 AND ISNULL(@ysnRecap, 0) = 0 AND @voucheredRefunds > 0)
-BEGIN
-
-	BEGIN TRY
-	SET ANSI_WARNINGS ON;
-	DECLARE @voucherId AS NVARCHAR(MAX);
-	SELECT @voucherId = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intBillId) FROM #tmpRefundData
-	WHERE intBillId IS NOT NULL 
-	FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
-	SET ANSI_WARNINGS OFF;
-
-	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);
-
-	EXEC [dbo].[uspAPPostBill]
-		@batchId = NULL,
-		@billBatchId = NULL,
-		@transactionType = 'Credit Card',
-		@post = 0,
-		@recap = 0,
-		@isBatch = 0,
-		@param = @voucherId,
-		@userId = @intUserId,
-		@beginTransaction = NULL,
-		@endTransaction = NULL,
-		@success = @success OUTPUT,
-		@batchIdUsed = @batchIdUsedInBill OUTPUT;
-
-
-	END TRY
-	BEGIN CATCH
-		SET @error = ERROR_MESSAGE();
-		RAISERROR(@error, 16, 1);
-		GOTO Post_Rollback;
-	END CATCH
-	
-	IF(@success = 0)
-	BEGIN
-		SELECT TOP 1 @error = strMessage
-		FROM tblAPPostResult 
-		WHERE strBatchNumber = @batchIdUsedInBill;
-		
-		RAISERROR(@error, 16, 1);
-		GOTO Post_Rollback;
-	END
-
-	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));	
-END
-
----------------------------------------------------------------------------------------------------------------------------------------
 
 --=====================================================================================================================================
 -- 	CREATE GL ENTRIES
@@ -543,24 +487,26 @@ END CATCH
 		AND VolumeMaster.intFiscalYear = tempRefund.intFiscalYearId
 		AND VolumeMaster.intPatronageCategoryId = tempRefund.intPatronageCategoryId
 
-	--IF(@ysnPosted = 1)
-	--BEGIN
-	--	UPDATE CV
-	--	SET CV.intRefundCustomerId = tRD.intRefundCustomerId, CV.ysnRefundProcessed = 1
-	--	FROM tblPATCustomerVolume CV
-	--	INNER JOIN #tmpRefundData tRD
-	--		ON CV.intCustomerPatronId = tRD.intCustomerId AND CV.intFiscalYear = tRD.intFiscalYearId 
-	--	WHERE CV.ysnRefundProcessed = 0
-	--END
-	--ELSE
-	--BEGIN
-	--	UPDATE CV
-	--	--SET CV.intRefundCustomerId = null
-	--	SET ysnRefundProcessed = 0
-	--	FROM tblPATCustomerVolume CV
-	--	INNER JOIN #tmpRefundData tRD
-	--		ON CV.intRefundCustomerId = tRD.intRefundCustomerId
-	--END
+	UPDATE CV
+	SET ysnRefundProcessed = CASE WHEN @ysnPosted = 1 
+								THEN CASE WHEN CV.dblVolume - CV.dblVolumeProcessed <= 0 
+											THEN CAST(1 AS BIT) 
+											ELSE CAST(0 AS BIT) 
+									END
+								ELSE CAST(0 AS BIT) 
+							END
+	, intRefundCustomerId = CASE WHEN @ysnPosted = 1
+								THEN RCAT.intRefundCustomerId
+								ELSE NULL
+							END
+	FROM tblPATRefund R
+	INNER JOIN tblPATRefundCustomer RC ON R.intRefundId = RC.intRefundId
+	INNER JOIN tblPATRefundCategory RCAT ON RC.intRefundCustomerId = RCAT.intRefundCustomerId
+	INNER JOIN tblPATCustomerVolume CV ON CV.intFiscalYear = R.intFiscalYearId
+									AND CV.intCustomerPatronId = RC.intCustomerId
+									AND CV.intPatronageCategoryId = RCAT.intPatronageCategoryId
+	WHERE R.intRefundId = @intRefundId
+	  AND RC.ysnEligibleRefund = 1
 
 	--UPDATE tblPATCustomerVolume
 	--SET ysnRefundProcessed = @ysnPosted
@@ -578,6 +524,123 @@ END CATCH
 	SET ysnPosted = @ysnPosted
 	WHERE intRefundId = @intRefundId
 	
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--=====================================================================================================================================
+-- 	AP CLEARING
+---------------------------------------------------------------------------------------------------------------------------------------
+
+	DECLARE @APClearing APClearing
+	DECLARE @intLocationId	INT = NULL
+
+	SELECT @intLocationId = dbo.fnGetUserDefaultLocation(@intUserId)
+
+	INSERT INTO @APClearing (
+		[intTransactionId]
+		, [strTransactionId]
+		, [intTransactionType]
+		, [strReferenceNumber]
+		, [dtmDate]
+		, [intEntityVendorId]
+		, [intLocationId]
+		, [intTransactionDetailId]
+		, [intAccountId]
+		, [intItemId]
+		, [intItemUOMId]
+		, [dblQuantity]
+		, [dblAmount]
+		, [intOffsetId]
+		, [strOffsetId]
+		, [intOffsetDetailId]
+		, [intOffsetDetailTaxId]
+		, [strCode]
+		, [strRemarks]
+	)
+	SELECT [intTransactionId]		= R.intRefundId
+		, [strTransactionId]		= R.strRefundNo
+		, [intTransactionType]		= 9
+		, [strReferenceNumber]		= R.strRefundNo
+		, [dtmDate]					= R.dtmRefundDate
+		, [intEntityVendorId]		= RC.intCustomerId
+		, [intLocationId]			= @intLocationId
+		, [intTransactionDetailId]	= RC.intRefundCustomerId
+		, [intAccountId]			= E.intAPClearingGLAccount
+		, [intItemId]				= NULL
+		, [intItemUOMId]			= NULL
+		, [dblQuantity]				= 1
+		, [dblAmount]				= RC.dblCashRefund
+		, [intOffsetId]				= NULL
+		, [strOffsetId]				= NULL
+		, [intOffsetDetailId]		= NULL
+		, [intOffsetDetailTaxId]	= NULL	
+		, [strCode]					= 'PAT'
+		, [strRemarks]				= NULL
+	FROM tblPATRefund R
+	INNER JOIN tblPATRefundCustomer RC ON R.intRefundId = RC.intRefundId
+	INNER JOIN tblAPVendor V ON RC.intCustomerId = V.intEntityId
+	CROSS JOIN tblPATCompanyPreference E
+	WHERE R.intRefundId = @intRefundId
+
+	IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
+		EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
+	
+---------------------------------------------------------------------------------------------------------------------------------------
+
+--=====================================================================================================================================
+--  UNPOST AND DELETE VOUCHER
+---------------------------------------------------------------------------------------------------------------------------------------
+
+DECLARE @voucheredRefunds INT = 0;
+SELECT @voucheredRefunds = COUNT(*) FROM #tmpRefundData WHERE intBillId IS NOT NULL;
+
+IF(ISNULL(@ysnPosted,0) = 0 AND ISNULL(@ysnRecap, 0) = 0 AND @voucheredRefunds > 0)
+BEGIN
+
+	BEGIN TRY
+	SET ANSI_WARNINGS ON;
+	DECLARE @voucherId AS NVARCHAR(MAX);
+	SELECT @voucherId = STUFF((SELECT ',' + CONVERT(NVARCHAR(MAX),intBillId) FROM #tmpRefundData
+	WHERE intBillId IS NOT NULL 
+	FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
+	SET ANSI_WARNINGS OFF;
+
+	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);
+
+	EXEC [dbo].[uspAPPostBill]
+		@batchId = NULL,
+		@billBatchId = NULL,
+		@transactionType = 'Credit Card',
+		@post = 0,
+		@recap = 0,
+		@isBatch = 0,
+		@param = @voucherId,
+		@userId = @intUserId,
+		@beginTransaction = NULL,
+		@endTransaction = NULL,
+		@success = @success OUTPUT,
+		@batchIdUsed = @batchIdUsedInBill OUTPUT;
+
+
+	END TRY
+	BEGIN CATCH
+		SET @error = ERROR_MESSAGE();
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback;
+	END CATCH
+	
+	IF(@success = 0)
+	BEGIN
+		SELECT TOP 1 @error = strMessage
+		FROM tblAPPostResult 
+		WHERE strBatchNumber = @batchIdUsedInBill;
+		
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback;
+	END
+
+	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));	
+END
+
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 IF @@ERROR <> 0	GOTO Post_Rollback;

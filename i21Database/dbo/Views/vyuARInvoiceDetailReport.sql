@@ -36,6 +36,15 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , intDaysToPay				= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 								   	   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 							  	  END
+	 , intItemId				= ITEM.intItemId
+	 , strCategoryName			= CATEGORY.strCategoryCode
+	 , intCategoryId			= CATEGORY.intCategoryId
+	 , strSalespersonName		= ESP.strName
+	 , strShipToState			= RTRIM(strShipToState)
+	 , intEntitySalespersonId	= I.intEntitySalespersonId
+	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
+	 , intBillToLocationId		= I.intBillToLocationId
+	 , intShipToLocationId		= I.intShipToLocationId
 	 , strBinNumber				= ID.strBinNumber
 	 , strGroupNumber			= ID.strGroupNumber
 	 , strFeedDiet				= ID.strFeedDiet
@@ -60,6 +69,7 @@ INNER JOIN (
 		 , strGroupNumber
 		 , strFeedDiet
 		 , dblShipmentNetWt
+		 , intEntitySalespersonId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID
@@ -94,11 +104,35 @@ INNER JOIN (
 ) C ON I.intEntityCustomerId = C.intEntityId
 LEFT JOIN (
 	SELECT intItemId
+		 , intCategoryId
 		 , strItemNo
 		 , strDescription
 	FROM dbo.tblICItem WITH (NOLOCK)
 ) ITEM ON ID.intItemId = ITEM.intItemId
 
+LEFT JOIN (
+	SELECT intCategoryId
+		 , strCategoryCode
+	FROM dbo.tblICCategory WITH (NOLOCK)
+) CATEGORY ON ITEM.intCategoryId = CATEGORY.intCategoryId
+LEFT JOIN (
+	tblARSalesperson SP 
+	INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId
+) ON I.intEntitySalespersonId = SP.[intEntityId]
+OUTER APPLY (
+	 SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) COLLATE Latin1_General_CI_AS
+	 FROM (
+	  SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
+	  FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+	  INNER JOIN (
+	   SELECT intAccountStatusId
+		 , strAccountStatusCode
+	   FROM dbo.tblARAccountStatus WITH (NOLOCK)
+	  ) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+	  WHERE CAS.intEntityCustomerId = I.intEntityCustomerId
+	  FOR XML PATH ('')
+	 ) SC (strAccountStatusCode)
+) STATUSCODES
 LEFT JOIN (
 	SELECT CTH.intContractHeaderId
 		 , CTH.strContractNumber

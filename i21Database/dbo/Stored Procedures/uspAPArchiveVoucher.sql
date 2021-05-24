@@ -360,6 +360,8 @@ USING
 		,A.intLoadDetailId
 		,A.intLoadShipmentCostId
 		,A.intLoadId
+		,A.intWeightClaimId
+		,A.intWeightClaimDetailId
 		,A.intScaleTicketId
 		,A.intCCSiteDetailId
 		,A.intPrepayTypeId
@@ -447,6 +449,8 @@ INSERT
 	,intLoadDetailId
 	,intLoadShipmentCostId
 	,intLoadId
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId
 	,intCCSiteDetailId
 	,intPrepayTypeId
@@ -529,6 +533,8 @@ VALUES
 	,SourceData.intLoadDetailId
 	,SourceData.intLoadShipmentCostId
 	,SourceData.intLoadId
+	,SourceData.intWeightClaimId
+	,SourceData.intWeightClaimDetailId
 	,SourceData.intScaleTicketId
 	,SourceData.intCCSiteDetailId
 	,SourceData.intPrepayTypeId

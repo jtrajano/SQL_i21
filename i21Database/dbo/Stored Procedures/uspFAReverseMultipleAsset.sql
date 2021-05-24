@@ -34,6 +34,8 @@ BEGIN TRANSACTION;
    ,[ysnIsUnposted]  
    ,[intConcurrencyId]   
    ,[dblExchangeRate]  
+   ,[intCurrencyId]
+   ,[intJournalLineNo] 
    ,[intCurrencyExchangeRateTypeId]  
    ,[intUserId]  
    ,[intEntityId]  
@@ -47,9 +49,9 @@ BEGIN TRANSACTION;
   SELECT   
     [strTransactionId]  
    ,[intTransactionId]  
-   ,A.[intAccountId]     
+   ,[intAccountId]     
    ,[strDescription]  =  A.strJournalLineDescription  
-   ,A.[strReference]     
+   ,[strReference]     
    ,[dtmTransactionDate]   
    ,[dblDebit]    = A.[dblCredit]  
    ,[dblCredit]   = A.[dblDebit]   
@@ -59,8 +61,10 @@ BEGIN TRANSACTION;
    ,[dblCreditUnit]  = A.[dblDebitUnit]  
    ,dtmDate = ISNULL(@dtmDateReverse, A.dtmDate) -- If date is provided, use date reverse as the date for unposting the transaction.  
    ,[ysnIsUnposted] = 1   
-   ,A.[intConcurrencyId]    
+   ,[intConcurrencyId] = A.[intConcurrencyId]    
    ,[dblExchangeRate]  
+   ,[intCurrencyId]
+   ,[intJournalLineNo] 
    ,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]  
    ,[intUserId]   = 0  
    ,[intEntityId]   = @intEntityId  
@@ -74,6 +78,18 @@ BEGIN TRANSACTION;
   @Id B on B.intId = A.intGLDetailId
   AND ysnIsUnposted = 0  
   ORDER BY intGLDetailId  
+
+
+IF EXISTS(
+    SELECT TOP 1 1 FROM  @GLEntries
+    WHERE dbo.fnFAIsOpenAccountingDate(dtmDate) = 0
+)
+BEGIN
+  RAISERROR('This reversal can not impact closed periods so General ledger entries will be reflected in the current period', 16,1)
+  GOTO Post_Rollback
+  RETURN -1
+END
+
 
 
 

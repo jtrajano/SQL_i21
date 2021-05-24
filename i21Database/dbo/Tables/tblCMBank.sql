@@ -19,8 +19,7 @@
 	[ysnDelete]				BIT            NULL,
 	[dtmDateDeleted]		DATETIME	   NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([intBankId] ASC),
-    UNIQUE NONCLUSTERED ([strBankName] ASC)
+    CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([intBankId] ASC)
 );
 
 GO

@@ -10,6 +10,8 @@ BEGIN TRY
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
+
+	declare @dtmTransactionDate datetime;
 	
 	DECLARE @tblToProcess TABLE
 	(
@@ -207,6 +209,8 @@ BEGIN TRY
 					WHERE A.intInvoiceDetailId = @intTransactionDetailId
 		END
 
+		set @dtmTransactionDate = getdate();
+
 
 		-- INSERT HISTORY
 		EXEC uspCTItemContractCreateHistory 
@@ -222,7 +226,8 @@ BEGIN TRY
 				@dblNewApplied				=	@dblNewApplied,
 				@dblNewBalance				=	@dblNewBalance,
 				@intNewContractStatusId		=	@intNewContractStatusId,
-				@dtmNewLastDeliveryDate		=	@dtmNewLastDeliveryDate
+				@dtmNewLastDeliveryDate		=	@dtmNewLastDeliveryDate,
+				@dtmTransactionDate			=	@dtmTransactionDate
 
 
 		-- UPDATE ITEM CONTRACT

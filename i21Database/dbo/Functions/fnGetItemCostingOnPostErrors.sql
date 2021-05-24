@@ -531,6 +531,29 @@ RETURN (
 		WHERE 
 			storageUnit.intStorageLocationId = @intStorageLocationId
 			AND (storageUnit.intSubLocationId <> @intSubLocationId OR @intSubLocationId IS NULL) 
+			
+		-- 'The item type for %s is not "stockable". Costing is not allowed.'
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80264)
+
+							, Item.strItemNo
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						) 
+				,intErrorCode = 80264				
+		FROM	tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+				AND Item.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material')			
 
 	) AS Query		
 )

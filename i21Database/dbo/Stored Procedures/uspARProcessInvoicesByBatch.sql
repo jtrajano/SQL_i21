@@ -325,6 +325,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId]
 		,[intItemWeightUOMId]
 		,[dblItemWeight]
+		,[dblStandardWeight]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
@@ -474,6 +475,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId] = (CASE WHEN @GroupingOption = 0 THEN IE.[intShipmentPurchaseSalesContractId] ELSE NULL END)
 		,[intItemWeightUOMId]				= (CASE WHEN @GroupingOption = 0 THEN IE.[intItemWeightUOMId] ELSE NULL END)
 		,[dblItemWeight]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblItemWeight] ELSE NULL END)
+		,[dblStandardWeight]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblStandardWeight] ELSE NULL END)
 		,[dblShipmentGrossWt]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblShipmentGrossWt] ELSE NULL END)
 		,[dblShipmentTareWt]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblShipmentTareWt] ELSE NULL END)
 		,[dblShipmentNetWt]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblShipmentNetWt] ELSE NULL END)
@@ -655,6 +657,7 @@ BEGIN
 			,[dblItemTermDiscount]
 			,[strItemTermDiscountBy]
 			,[dblItemWeight]
+			,[dblStandardWeight]
 			,[intItemWeightUOMId]
 			,[dblPrice]
 			,[dblUnitPrice]
@@ -804,6 +807,7 @@ BEGIN
 			,[dblItemTermDiscount]					= ITG.[dblItemTermDiscount]
 			,[strItemTermDiscountBy]				= ITG.[strItemTermDiscountBy]
 			,[dblItemWeight]						= ITG.[dblItemWeight]
+			,[dblStandardWeight]					= ITG.[dblStandardWeight]
 			,[intItemWeightUOMId]					= ITG.[intItemWeightUOMId]
 			,[dblPrice]								= ITG.[dblPrice]
 			,[dblUnitPrice]							= ITG.[dblUnitPrice]
@@ -1318,6 +1322,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId]
 		,[intItemWeightUOMId]
 		,[dblItemWeight]
+		,[dblStandardWeight]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
@@ -1461,6 +1466,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId] = IE.[intShipmentPurchaseSalesContractId]
 		,[intItemWeightUOMId]				= IE.[intItemWeightUOMId]
 		,[dblItemWeight]					= IE.[dblItemWeight]
+		,[dblStandardWeight]				= IE.[dblStandardWeight]
 		,[dblShipmentGrossWt]				= IE.[dblShipmentGrossWt]
 		,[dblShipmentTareWt]				= IE.[dblShipmentTareWt]
 		,[dblShipmentNetWt]					= IE.[dblShipmentNetWt]

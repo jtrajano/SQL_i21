@@ -22,6 +22,7 @@
 	,@ShortExcessXML VARCHAR(MAX) = NULL
 	,@AdditionalForecastedConsumptionXML VARCHAR(MAX) = NULL
 	,@strExternalGroup NVARCHAR(50) = NULL
+	,@InventoryTransferXML VARCHAR(MAX) = NULL
 	)
 AS
 BEGIN TRY
@@ -202,6 +203,15 @@ BEGIN TRY
 		DROP TABLE #TempWeeksOfSupplyTarget
 
 	CREATE TABLE #TempWeeksOfSupplyTarget (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		,intLocationId INT
+		)
+	IF OBJECT_ID('tempdb..#TempInventoryTransfer') IS NOT NULL
+		DROP TABLE #TempInventoryTransfer
+
+	CREATE TABLE #TempInventoryTransfer (
 		[intItemId] INT
 		,[strName] NVARCHAR(50)
 		,[strValue] DECIMAL(24, 6)
@@ -769,6 +779,31 @@ BEGIN TRY
 			,[Value]
 			,LId
 		FROM OPENXML(@idoc, 'root/WST', 2) WITH (
+				[intItemId] INT
+				,[Name] NVARCHAR(50)
+				,[Value] DECIMAL(24, 6)
+				,LId INT
+				)
+
+		EXEC sp_xml_removedocument @idoc
+	END
+
+	IF @InventoryTransferXML <> ''
+	BEGIN
+		EXEC sp_xml_preparedocument @idoc OUTPUT
+			,@InventoryTransferXML
+
+		INSERT INTO #TempInventoryTransfer (
+			[intItemId]
+			,[strName]
+			,[strValue]
+			,intLocationId
+			)
+		SELECT [intItemId]
+			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
+			,[Value]
+			,LId
+		FROM OPENXML(@idoc, 'root/IT', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
@@ -1540,6 +1575,23 @@ BEGIN TRY
 		FROM #TempWeeksOfSupplyTarget
 	END
 
+	IF @InventoryTransferXML <> ''
+	BEGIN
+		INSERT INTO #tblMFDemand (
+			intItemId
+			,dblQty
+			,intAttributeId
+			,intMonthId
+			,intLocationId
+			)
+		SELECT intItemId
+			,strValue
+			,16 --Inventory Transfer
+			,[strName] AS intMonthId
+			,intLocationId
+		FROM #TempInventoryTransfer
+	END
+
 	INSERT INTO #tblMFDemand (
 		intItemId
 		,dblQty
@@ -1582,6 +1634,28 @@ BEGIN TRY
 			AND IL.intLocationId = D.intLocationId
 		WHERE intAttributeId = 2 --Opening Inventory
 			AND intMonthId > 0
+	END
+
+	IF EXISTS (
+			SELECT *
+			FROM @tblSMCompanyLocation
+			WHERE intCompanyLocationId = 9999
+			)
+	BEGIN
+		DELETE
+		FROM #tblMFDemand
+		WHERE intLocationId = 9999
+
+		INSERT INTO #tblMFDemand
+		SELECT intItemId
+			,SUM(dblQty)
+			,intAttributeId
+			,intMonthId
+			,9999
+		FROM #tblMFDemand
+		GROUP BY intItemId
+			,intAttributeId
+			,intMonthId
 	END
 
 	WHILE @intMonthId <= @intMonthsToView
@@ -2053,14 +2127,13 @@ BEGIN TRY
 										,15
 										,16
 										)
-								AND intLocationId = @intLocationId
+									AND intLocationId = @intLocationId
 								HAVING ABS(SUM(CASE 
 												WHEN intAttributeId = 16
 													AND dblQty > 0
 													THEN 0
 												ELSE dblQty
 												END)) > 0
-									
 								)
 						BEGIN
 							INSERT INTO #tblMFDemand (
@@ -2270,24 +2343,6 @@ BEGIN TRY
 		WHERE intAttributeId = 2;--Opening Inventory
 	END
 
-	IF EXISTS (
-			SELECT *
-			FROM @tblSMCompanyLocation
-			WHERE intCompanyLocationId = - 1
-			)
-	BEGIN
-		INSERT INTO #tblMFDemand
-		SELECT intItemId
-			,SUM(dblQty)
-			,intAttributeId
-			,intMonthId
-			,- 1
-		FROM #tblMFDemand
-		GROUP BY intItemId
-			,intAttributeId
-			,intMonthId
-	END
-
 	INSERT INTO #tblMFDemandList (
 		intItemId
 		,dblQty
@@ -2330,7 +2385,7 @@ BEGIN TRY
 			)
 		AND A.intReportMasterID = @intReportMasterID
 		AND L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
-		AND A.ysnVisible=1;
+		AND A.ysnVisible = 1;
 
 	WITH tblMFGenerateDemandData (intMonthId)
 	AS (
@@ -2374,7 +2429,7 @@ BEGIN TRY
 			,16 --Inventory Transfer
 			)
 		AND L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
-		AND A.ysnVisible=1;
+		AND A.ysnVisible = 1;
 
 	WITH tblMFGenerateDemandData (intMonthId)
 	AS (
@@ -2409,7 +2464,7 @@ BEGIN TRY
 			,15
 			) --Forecasted Consumption
 		AND L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
-		AND A.ysnVisible=1
+		AND A.ysnVisible = 1
 
 	DECLARE @intNoOfMonth INT
 
@@ -2540,16 +2595,16 @@ BEGIN TRY
 											CASE 
 												WHEN I.intItemId = MI.intItemId
 													OR MI.intItemId IS NULL
-													THEN I.strItemNo + ' - ' + I.strDescription+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
-												ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]'+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+													THEN I.strItemNo + ' - ' + I.strDescription + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+												ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]' + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
 												END
 											)
 								ELSE (
 										CASE 
 											WHEN I.intItemId = MI.intItemId
 												OR MI.intItemId IS NULL
-												THEN I.strItemNo+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
-											ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]'+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+												THEN I.strItemNo + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+											ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]' + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
 											END
 										)
 								END
@@ -2561,22 +2616,22 @@ BEGIN TRY
 										CASE 
 											WHEN I.intItemId = MI.intItemId
 												OR MI.intItemId IS NULL
-												THEN I.strItemNo + ' - ' + I.strDescription+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+												THEN I.strItemNo + ' - ' + I.strDescription + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
 											WHEN I.intItemId <> MI.intItemId
 												AND strBook IS NULL
-												THEN I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]'+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
-											ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ] Restricted [' + strBook + ']'+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+												THEN I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]' + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+											ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ] Restricted [' + strBook + ']' + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
 											END
 										)
 							ELSE (
 									CASE 
 										WHEN I.intItemId = MI.intItemId
 											OR MI.intItemId IS NULL
-											THEN I.strItemNo+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+											THEN I.strItemNo + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
 										WHEN I.intItemId <> MI.intItemId
 											AND strBook IS NULL
-											THEN I.strItemNo + ' [ ' + MI.strItemNo + ' ]'+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
-										ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ] Restricted [' + strBook + ']'+' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+											THEN I.strItemNo + ' [ ' + MI.strItemNo + ' ]' + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+										ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ] Restricted [' + strBook + ']' + ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
 										END
 									)
 							END
@@ -2643,10 +2698,10 @@ BEGIN TRY
 			,CASE 
 				WHEN I.intItemId = MI.intItemId
 					OR MI.intItemId IS NULL
-					THEN I.strItemNo+ ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
-				ELSE MI.strItemNo + ' [ ' + I.strItemNo + ' ]'+ ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+					THEN I.strItemNo + ' [ ' + IsNULL(L.strLocationName, 'ZZZZ') + ' ]'
+				ELSE MI.strItemNo + ' [ ' + I.strItemNo + ' ]' + ' [ ' + IsNULL(L.strLocationName, 'ZZZZ') + ' ]'
 				END AS strGroupByColumn
-			,IsNULL(L.intCompanyLocationId, 999) intLocationId
+			,IsNULL(L.intCompanyLocationId, 9999) intLocationId
 			,IsNULL(L.strLocationName, 'All') AS strLocationName
 			,A.ysnEditable
 		FROM #tblMFDemandList DL

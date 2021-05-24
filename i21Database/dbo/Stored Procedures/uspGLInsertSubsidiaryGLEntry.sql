@@ -283,3 +283,4 @@ DECLARE @fiscalErrorMsg NVARCHAR(MAX)
         FROM @tblGLDetail
     
     EXEC uspGLSummaryRecalculate
+    EXEC uspGLRecalcTrialBalance

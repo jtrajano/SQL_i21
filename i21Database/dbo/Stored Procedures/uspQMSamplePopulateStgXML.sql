@@ -99,6 +99,8 @@ BEGIN TRY
 		,NULL
 
 	---------------------------------------------Audit Log------------------------------------------
+	IF @strLogCondition IS NOT NULL
+	BEGIN
 	SELECT @strLogXML = NULL
 		,@strObjectName = NULL
 
@@ -120,6 +122,7 @@ BEGIN TRY
 		,@strAuditXML OUTPUT
 		,NULL
 		,NULL
+	END
 
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)

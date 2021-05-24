@@ -33,8 +33,8 @@ BEGIN
 		, d.intItemUOMId
 		, d.intItemWeightUOMId
 		, d.intContractHeaderId
-	FROM #ARPostInvoiceDetail d
-		INNER JOIN #ARPostInvoiceHeader h ON h.intInvoiceId = d.intInvoiceId
+	FROM ##ARPostInvoiceDetail d
+		INNER JOIN ##ARPostInvoiceHeader h ON h.intInvoiceId = d.intInvoiceId
 	WHERE h.strTransactionType = 'Credit Memo' AND d.intItemId <> NULL
 
 	EXEC uspICSubLedgerAddReportEntries @SubLedgerReportEntries = @InventorySubLedger, @intUserId = @intUserId
@@ -48,7 +48,7 @@ BEGIN
 		strSourceTransactionNo
 	)
 	SELECT h.strTransactionType, h.strInvoiceNumber
-	FROM #ARPostInvoiceHeader h
+	FROM ##ARPostInvoiceHeader h
 	WHERE h.strTransactionType = 'Credit Memo'
 
 	EXEC [dbo].[uspICSubLedgerRemoveReportEntries] @SubLedgerTransactions = @TransactionIds, @intUserId = @intUserId

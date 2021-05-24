@@ -460,7 +460,12 @@ BEGIN
 		INNER JOIN tblSCTicket G ON C.intTicketId = G.intTicketId
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		outer apply (
+			select dbo.fnGRCheckForSameTransfer( C.intCustomerStorageId, 'DP') as ysnSame
+
+		) as TransferFlow
 		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
+			and TransferFlow.ysnSame = 0
 
 		--DP STORAGES FROM THE DELIVERY SHEET
 		UNION ALL

@@ -316,11 +316,63 @@ END
 -- 	UPDATE DIVIDENDS TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 
-	UPDATE tblPATDividends 
-	   SET ysnPosted = ISNULL(@ysnPosted,0)
-	  FROM tblPATDividends R
-	 WHERE R.intDividendId = @intDividendId
+UPDATE tblPATDividends 
+SET ysnPosted = ISNULL(@ysnPosted,0)
+FROM tblPATDividends R
+WHERE R.intDividendId = @intDividendId
 
+--------------------- AP CLEARING -----------------------
+DECLARE @APClearing APClearing
+DECLARE @intLocationId	INT = NULL
+
+SELECT @intLocationId = dbo.fnGetUserDefaultLocation(@intUserId)
+
+INSERT INTO @APClearing (
+	  [intTransactionId]
+	, [strTransactionId]
+	, [intTransactionType]
+	, [strReferenceNumber]
+	, [dtmDate]
+	, [intEntityVendorId]
+	, [intLocationId]
+	, [intTransactionDetailId]
+	, [intAccountId]
+	, [intItemId]
+	, [intItemUOMId]
+	, [dblQuantity]
+	, [dblAmount]
+	, [intOffsetId]
+	, [strOffsetId]
+	, [intOffsetDetailId]
+	, [intOffsetDetailTaxId]
+	, [strCode]
+	, [strRemarks]
+)
+SELECT [intTransactionId]		= D.intDividendId
+	, [strTransactionId]		= D.strDividendNo
+	, [intTransactionType]		= 9
+	, [strReferenceNumber]		= D.strDividendNo
+	, [dtmDate]					= D.dtmProcessDate
+	, [intEntityVendorId]		= DC.intCustomerId
+	, [intLocationId]			= @intLocationId
+	, [intTransactionDetailId]	= DC.intDividendCustomerId
+	, [intAccountId]			= @intAPClearingId
+	, [intItemId]				= NULL
+	, [intItemUOMId]			= NULL
+	, [dblQuantity]				= 1
+	, [dblAmount]				= ROUND(DC.dblDividendAmount, 2)	
+	, [intOffsetId]				= NULL
+	, [strOffsetId]				= NULL
+	, [intOffsetDetailId]		= NULL
+	, [intOffsetDetailTaxId]	= NULL	
+	, [strCode]					= 'PAT'
+	, [strRemarks]				= NULL
+FROM tblPATDividends D
+INNER JOIN tblPATDividendsCustomer DC ON D.intDividendId = DC.intDividendId
+WHERE D.intDividendId = @intDividendId
+
+IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
+	EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

@@ -23,5 +23,4 @@
 	CONSTRAINT [FK_tblMFBlendDemand_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFBlendDemand_tblMFMachine_intMachineId] FOREIGN KEY ([intMachineId]) REFERENCES [tblMFMachine]([intMachineId]),
 	CONSTRAINT [FK_tblMFBlendDemand_tblMFBlendDemandStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [tblMFBlendDemandStatus]([intStatusId]),
-	CONSTRAINT [UQ_tblMFBlendDemand_strDemandNo_intLocationId] UNIQUE ([strDemandNo],[intLocationId])
 )

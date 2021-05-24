@@ -612,19 +612,19 @@ BEGIN TRY
 	-- ==========================================================================================
 	-- [START] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
 	-- ==========================================================================================
-	IF(@strCompanyLocationId IS NULL AND @Region IS NOT NULL AND @District IS NOT NULL AND @State IS NOT NULL)
+	IF(@strCompanyLocationId IS NULL AND (@Region IS NOT NULL OR @District IS NOT NULL OR @State IS NOT NULL))
 		BEGIN
 			
 			INSERT INTO #tmpUpdateItemForCStore_Location 
 			(
 				intLocationId
 			)
-			SELECT 
+			SELECT DISTINCT
 				intLocationId = intCompanyLocationId
 			FROM tblSTStore
-			WHERE strRegion		= @Region
-				AND strDistrict = @District
-				AND strState	= @State
+			WHERE strRegion		= ISNULL(@Region, strRegion)
+				AND strDistrict = ISNULL(@District, strDistrict)
+				AND strState	= ISNULL(@State, strState)
 
 		END
 	-- ==========================================================================================
@@ -637,24 +637,27 @@ BEGIN TRY
 			SET @strDescription		= NULLIF(@strDescription, '')
 			SET @intNewCategory		= NULLIF(@intNewCategory, '')
 			SET @strNewCountCode	= NULLIF(@strNewCountCode, '')
-
-			-- Item Update
-			EXEC [dbo].[uspICUpdateItemForCStore]
-					-- filter params	
-					@strDescription				= @strDescription 
-					,@dblRetailPriceFrom		= NULL  
-					,@dblRetailPriceTo			= NULL 
-					,@intItemId					= @intItemId 
-					,@intItemUOMId				= @intItemUOMId 
-					-- update params
-					,@intCategoryId				= @intNewCategory
-					,@strCountCode				= @strNewCountCode
-					,@strItemDescription		= NULL 	
-					,@strItemNo					= NULL 
-					,@strShortName				= NULL 
-					,@strUpcCode				= NULL 
-					,@strLongUpcCode			= NULL 
-					,@intEntityUserSecurityId	= @intCurrentEntityUserId
+			
+			IF (@intNewCategory IS NOT NULL OR @intNewCategory != '') OR (@strNewCountCode IS NOT NULL OR @strNewCountCode != '')
+				BEGIN
+					-- Item Update
+					EXEC [dbo].[uspICUpdateItemForCStore]
+							-- filter params	
+							@strDescription				= @strDescription 
+							,@dblRetailPriceFrom		= NULL  
+							,@dblRetailPriceTo			= NULL 
+							,@intItemId					= @intItemId 
+							,@intItemUOMId				= @intItemUOMId 
+							-- update params
+							,@intCategoryId				= @intNewCategory
+							,@strCountCode				= @strNewCountCode
+							,@strItemDescription		= NULL 	
+							,@strItemNo					= NULL 
+							,@strShortName				= NULL 
+							,@strUpcCode				= NULL 
+							,@strLongUpcCode			= NULL 
+							,@intEntityUserSecurityId	= @intCurrentEntityUserId
+				END
 
 			--EXEC [dbo].[uspICUpdateItemForCStore]
 			--		@strUpcCode					= @strUpcCode 
@@ -1019,7 +1022,7 @@ BEGIN TRY
 					WHEN [Changes].ysnDepositRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strDepositPLUId_Original			= [Changes].intDepositPLUId_Original
-			, strDepositPLU_Original			= ISNULL(PLUOriginal.strUpcCode, '') -- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
+			, strDepositPLU_Original			= ISNULL(PLUOriginal.strLongUPCCode, '') -- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -1094,7 +1097,7 @@ BEGIN TRY
 					WHEN [Changes].ysnDepositRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strDepositPLUId_New			= [Changes].intDepositPLUId_New
-			, strDepositPLU_New				= ISNULL(PLUNew.strUpcCode, '')	-- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
+			, strDepositPLU_New				= ISNULL(PLUNew.strLongUPCCode, '')	-- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -1158,7 +1161,7 @@ BEGIN TRY
 			, strVendorId_OldDataPreview			= ISNULL(VendorOriginal.strName, '')
 			, strStorageLocationId_OldDataPreview	= ISNULL(StorageLocOriginal.strSubLocationName, '')
 			, strCountGroupId_OldDataPreview		= ISNULL(CountGroup_Orig.strCountGroup, '')
-			, strDepositPLUId_OldDataPreview		= ISNULL(PLUOriginal.strUpcCode, '')
+			, strDepositPLUId_OldDataPreview		= ISNULL(PLUOriginal.strLongUPCCode, '')
 
 		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
 		INNER JOIN tblICItem I 
@@ -1998,7 +2001,7 @@ BEGIN TRY
 							[strPreviewOldData],
 							[intConcurrencyId]
 						)
-						SELECT 
+						SELECT DISTINCT
 							[intRevertHolderId]			= @intNewRevertHolderId,
 							[strTableName]				= strTableName,
 							[strTableColumnName]		= strTableColumnName,
@@ -2083,16 +2086,36 @@ BEGIN TRY
 	   ----------------------------- START Query Preview -------------------------------------
 	   ---------------------------------------------------------------------------------------
 	   -- Query Preview display
-	   SELECT DISTINCT 
-	          strLocation
-			  , strUpc
-			  , strItemDescription
-			  , strChangeDescription
-			  , strPreviewOldData AS strOldData
-			  , strPreviewNewData AS strNewData
-	   FROM @tblPreview
-	   WHERE ysnPreview = 1
-	   ORDER BY strItemDescription, strChangeDescription ASC
+	   SELECT  
+	          TES.strLocation
+			  , TES.strUpc
+			  , TES.strItemDescription
+			  , TES.strChangeDescription
+			  , TES.strPreviewOldData AS strOldData
+			  , TES.strPreviewNewData AS strNewData
+	   FROM (
+		SELECT DISTINCT 
+					@strGuid AS strGuid
+					, strLocation
+					, strUpc
+					, strItemDescription
+					, strChangeDescription
+					, strPreviewOldData
+					, strPreviewNewData
+
+					, intItemId
+					, intItemUOMId
+					, intItemLocationId
+					, intPrimaryKeyId
+					, strTableName
+					, strTableColumnName
+					, strTableColumnDataType
+					, ysnPreview
+					, 1 AS intConcurrencyId
+				FROM @tblPreview
+				WHERE ysnPreview = 1
+		) AS TES
+		ORDER BY strItemDescription, strChangeDescription ASC
 	   ---------------------------------------------------------------------------------------
 	   ----------------------------- END Query Preview ---------------------------------------
 	   ---------------------------------------------------------------------------------------

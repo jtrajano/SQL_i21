@@ -10,7 +10,7 @@ BEGIN
 	IF @inventoryChargeId > 0
 	BEGIN
 		SELECT
-			@allowed = CASE WHEN ysnInventoryCost = 0 THEN 1 ELSE 0 END
+			@allowed = CASE WHEN ysnInventoryCost = 1 THEN 1 ELSE 0 END
 		FROM tblICInventoryReceiptCharge A
 		WHERE intInventoryReceiptChargeId = @inventoryChargeId
 	END

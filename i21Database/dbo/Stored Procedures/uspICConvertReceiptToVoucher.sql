@@ -172,10 +172,10 @@ BEGIN
 		,GP.[dblQtyToBillUnitQty]				
 		,GP.[intQtyToBillUOMId]				
 		,[dblCost] = GP.dblUnitCost							
-		,GP.[dblCostUnitQty]					
+		,ISNULL(GP.[dblCostUnitQty], 1) 
 		,GP.[intCostUOMId]						
 		,GP.[dblNetWeight]						
-		,[dblWeightUnitQty]					
+		,ISNULL([dblWeightUnitQty], 1) 
 		,GP.[intWeightUOMId]					
 		,GP.[intCostCurrencyId]
 		,GP.[dblTax]							

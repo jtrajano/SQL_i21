@@ -61,6 +61,7 @@ SELECT intSalesOrderId					= SO.intSalesOrderId
 	 , strAddonDetailKey				= SODETAIL.strAddonDetailKey
 	 , ysnAddonParent					= SODETAIL.ysnAddonParent
 	 , dblAddOnQuantity					= SODETAIL.dblAddOnQuantity
+	 , dblStandardWeight				= SODETAIL.dblStandardWeight
 FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 INNER JOIN (
 	SELECT SOD.intSalesOrderId
@@ -103,6 +104,7 @@ INNER JOIN (
 		 , SOD.strAddonDetailKey
 		 , SOD.ysnAddonParent
 		 , SOD.dblAddOnQuantity
+		 , SOD.dblStandardWeight
 		 , ITEM.strItemNo
 		 , ITEM.strType
 		 , ITEM.strLotTracking
@@ -163,6 +165,7 @@ INNER JOIN (
 		 , SOD.strAddonDetailKey
 		 , SOD.ysnAddonParent
 		 , SOD.dblAddOnQuantity
+		 , SOD.dblStandardWeight
 		 , ITEMCOMP.strItemNo
 		 , ITEMCOMP.strType
 		 , ITEMCOMP.strLotTracking

@@ -715,6 +715,7 @@ DECLARE @cfPriceProfile TABLE
 			WHERE intItemId = @CFItemId
 			AND intSiteGroupId = @CFSiteGroupId
 			AND intNetworkId = @CFNetworkId
+			AND ISNULL(intSiteId,0) = 0
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
 		BEGIN
@@ -760,6 +761,7 @@ DECLARE @cfPriceProfile TABLE
 			WHERE intItemId = @CFItemId
 			AND intSiteGroupId = @CFSiteGroupId
 			AND intNetworkId = @CFNetworkId
+			AND ISNULL(intSiteId,0) = 0
 		END
 
 
@@ -774,6 +776,7 @@ DECLARE @cfPriceProfile TABLE
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
 			AND intNetworkId = @CFNetworkId
+			AND ISNULL(intSiteId,0) = 0
 			AND ISNULL(intItemId,0) = 0 -- ALL ITEMS
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
@@ -819,6 +822,7 @@ DECLARE @cfPriceProfile TABLE
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
 			AND intNetworkId = @CFNetworkId
+			AND ISNULL(intSiteId,0) = 0
 			AND ISNULL(intItemId,0) = 0 -- ALL ITEMS
 		END
 
@@ -834,6 +838,7 @@ DECLARE @cfPriceProfile TABLE
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
 			AND intItemId = @CFItemId
+			AND ISNULL(intSiteId,0) = 0
 			AND ISNULL(intNetworkId,0) = 0 -- ALL NETWORKS
 		END
 	IF (@cfMatchProfileCount != 0 AND @cfMatchProfileSkip = 0)
@@ -879,6 +884,7 @@ DECLARE @cfPriceProfile TABLE
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
 			AND intItemId = @CFItemId
+			AND ISNULL(intSiteId,0) = 0
 			AND ISNULL(intNetworkId,0) = 0 -- ALL NETWORKS
 		END
 
@@ -893,6 +899,7 @@ DECLARE @cfPriceProfile TABLE
 			SELECT @cfMatchProfileCount = Count(*) 
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
+			AND ISNULL(intSiteId,0) = 0
 			AND ISNULL(intItemId,0) = 0 -- ALL ITEMS
 			AND ISNULL(intNetworkId,0) = 0 -- ALL NETWORKS
 		END
@@ -938,6 +945,7 @@ DECLARE @cfPriceProfile TABLE
 				strIndexType		
 			FROM @cfPriceProfile 
 			WHERE intSiteGroupId = @CFSiteGroupId
+			AND ISNULL(intSiteId,0) = 0
 			AND ISNULL(intItemId,0) = 0 -- ALL ITEMS
 			AND ISNULL(intNetworkId,0) = 0 -- ALL NETWORKS
 

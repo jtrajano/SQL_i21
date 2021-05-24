@@ -8,6 +8,7 @@
 	,@dtmDate DATETIME = NULL
 	,@ysnBulkChange BIT = 0
 	,@strReferenceNo NVARCHAR(50) = NULL
+	,@intAdjustmentId INT = NULL Output
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -230,6 +231,8 @@ BEGIN TRY
 		,@intEntityUserSecurityId=@intUserId
 		,@intInventoryAdjustmentId=@intInventoryAdjustmentId OUTPUT
 		,@strDescription=@strDescription
+
+	SELECT @intAdjustmentId=@intInventoryAdjustmentId
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmDate
 		,@intTransactionTypeId = 10

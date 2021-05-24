@@ -58,7 +58,8 @@
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
 	,@ItemWeightUOMId				INT				= NULL	
-	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemWeight					NUMERIC(38,20)	= 0.000000	
+	,@ItemStandardWeight			NUMERIC(38,20)	= 0.000000
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000		
@@ -366,6 +367,7 @@ BEGIN TRY
 				,[intShipmentPurchaseSalesContractId]
 				,[intItemWeightUOMId]
 				,[dblItemWeight]
+				,[dblStandardWeight]
 				,[dblShipmentGrossWt]
 				,[dblShipmentTareWt]
 				,[dblShipmentNetWt]
@@ -484,6 +486,7 @@ BEGIN TRY
 				,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
 				,[intItemWeightUOMId]				= @ItemWeightUOMId
 				,[dblItemWeight]					= @ItemWeight
+				,[dblStandardWeight]				= @ItemStandardWeight
 				,[dblShipmentGrossWt]				= @ItemShipmentGrossWt
 				,[dblShipmentTareWt]				= @ItemShipmentTareWt
 				,[dblShipmentNetWt]					= @ItemShipmentNetWt

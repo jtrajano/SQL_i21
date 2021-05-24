@@ -2,7 +2,7 @@
 AS
 SELECT CP.intCommitmentPricingId
 	,C.strName
-	,C.strEntityNo AS strAliasName
+	,C.strExternalERPId AS strAliasName
 	,UOM.strUnitMeasure
 	,CUR.strCurrency
 	,MB.dtmM2MBasisDate

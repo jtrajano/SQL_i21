@@ -128,7 +128,7 @@ AS
 		dbo.fnICConvertUOMtoStockUnit(wcl.intItemId,wcl.intItemUOMId,wcl.dblQuantity) * ISNULL(l.dblLastCost,0),sl.strName,0
 		From tblMFWorkOrderConsumedLot wcl
 		Join tblICLot l on wcl.intLotId=l.intLotId 
-		JOIN tblICParentLot PL ON PL.intParentLotId = l.intLotId
+		JOIN tblICParentLot PL ON PL.intParentLotId = l.intParentLotId
 		Join tblICItem i on l.intItemId=i.intItemId
 		Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId

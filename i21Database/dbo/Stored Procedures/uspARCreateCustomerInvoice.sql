@@ -102,6 +102,7 @@
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
 	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemStandardWeight			NUMERIC(38,20)  = 0.000000
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
@@ -719,6 +720,7 @@ BEGIN TRY
 		,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 		,@ItemWeightUOMId				= @ItemWeightUOMId
 		,@ItemWeight					= @ItemWeight
+		,@ItemStandardWeight			= @ItemStandardWeight
 		,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 		,@ItemShipmentTareWt			= @ItemShipmentTareWt
 		,@ItemShipmentNetWt				= @ItemShipmentNetWt

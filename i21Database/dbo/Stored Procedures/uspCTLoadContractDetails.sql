@@ -36,9 +36,7 @@ BEGIN TRY
 			GROUP BY
 				ID.intOriginalInvoiceDetailId
 		) CM ON CM.intOriginalInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
-	WHERE
-		InvoiceDetail.strPricing = 'Contracts'
-		AND Invoice.ysnPosted = 1
+	WHERE Invoice.ysnPosted = 1
 		AND Invoice.strTransactionType = 'Invoice'
 		AND CD.intContractHeaderId = @intContractHeaderId
 	GROUP BY
@@ -366,17 +364,15 @@ BEGIN TRY
 									ELSE CASE WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
 											ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END * CD.dblQuantityPerLoad END
 		*/
-		  , dblAppliedLoadQty =  	CASE
-									WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)
-									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
-									WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
-									ELSE
-										CASE
-										WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
-										ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)
-										END
-										* CD.dblQuantityPerLoad
-									END
+	    , dblAppliedLoadQty = CASE WHEN CT.ysnLoad = 1
+									THEN CASE WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
+											WHEN Invoice.dblQuantity > 0 THEN Invoice.dblQuantity
+											WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity
+											ELSE (ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ) * CD.dblQuantityPerLoad END
+								ELSE CASE WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
+										WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
+										WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity
+										ELSE (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)) END END
 		, dblExchangeRate = dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0)
 		, IM.intProductTypeId
 		, ysnItemUOMIdExist = CAST(1 AS BIT)

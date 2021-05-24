@@ -453,3 +453,18 @@ BEGIN
 	')
 END
 GO
+
+/*
+* Update AP Claim/Voucher Detail reference to Weight Claims table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblAPBillDetail') AND name = 'intWeightClaimDetailId')
+BEGIN
+	EXEC ('UPDATE BD
+			SET intWeightClaimId = WD.intWeightClaimId
+				,intWeightClaimDetailId = WD.intWeightClaimDetailId 
+			FROM tblAPBillDetail BD
+			INNER JOIN tblLGWeightClaimDetail WD ON WD.intBillId = BD.intBillId AND WD.intItemId = BD.intItemId
+			WHERE BD.intWeightClaimDetailId IS NULL
+	')
+END
+GO

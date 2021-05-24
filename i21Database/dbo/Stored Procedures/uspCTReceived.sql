@@ -146,6 +146,39 @@ BEGIN TRY
 				INNER JOIN tblLGLoad l ON l.intLoadId = ri.intLoadShipmentId
 				WHERE ISNULL(ch.ysnLoad, 0) = 1
 			END
+			ELSE
+			BEGIN
+				INSERT	INTO @tblToProcess (
+					intInventoryReceiptDetailId
+					,intContractDetailId
+					,intItemUOMId
+					,dblQty
+					,intContainerId
+					,ysnLoad
+					,intPricingTypeId
+					,intSourceId
+					,intInventoryReceiptId
+					,intToItemUOMId
+				)
+				SELECT 	
+					intInventoryReceiptDetailId
+					,CD.intContractDetailId
+					,IR.intItemUOMId
+					,CASE WHEN ISNULL(CH.ysnLoad, 0) =1 THEN IR.intLoadReceive ELSE dblQty END
+					,intContainerId
+					,ysnLoad = ISNULL(CH.ysnLoad, 0)
+					,CD.intPricingTypeId
+					,IR.intSourceId
+					,IR.intInventoryReceiptId
+					,CD.intItemUOMId
+				FROM	
+					@ItemsFromInventoryReceipt	IR
+					JOIN tblCTContractDetail CD	ON	CD.intContractDetailId	=	IR.intLineNo
+					JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+				WHERE
+					ISNULL(intLineNo, 0) > 0
+					AND ISNULL(CH.ysnLoad, 0) = 1
+			END
 
 			INSERT	INTO @tblToProcess (
 				intInventoryReceiptDetailId

@@ -231,6 +231,7 @@ BEGIN
 			, strAllocatePriceBy
 			, strChargesLink
 			, intConcurrencyId
+			, ysnAddPayable 
 	)
 	SELECT 
 			sc.intInventoryShipmentId
@@ -250,6 +251,7 @@ BEGIN
 			, ISNULL(sc.strAllocatePriceBy, 'Unit') 
 			, sc.strChargesLink 
 			, intConcurrencyId = 1
+			, sc.ysnAddPayable 
 	FROM	@ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 				ON sc.intInventoryShipmentId = s.intInventoryShipmentId 
 			-- Get the SM forex rate. 
@@ -350,6 +352,12 @@ BEGIN
 
 			IF @intReturnValue < 0 GOTO _ExitWithError
 		END 
+
+		-- Add the other charges to the Add Payables. 
+		EXEC dbo.uspICProcessPayables 
+			@intShipmentId = @intShipmentId
+			,@ysnPost = @ysnPost
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 		-- Create the audit log. 
 		SELECT @actionType = 'Destination Posted'
@@ -484,6 +492,12 @@ BEGIN
 					AND GLEntries.strTransactionType = @strTransactionType
 					AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 		END 
+
+		-- Remove the other charges to the Add Payables. 
+		EXEC dbo.uspICProcessPayables 
+			@intShipmentId = @intShipmentId
+			,@ysnPost = @ysnPost
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
 		
 		-- Create the audit log. 
 		BEGIN 

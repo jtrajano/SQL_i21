@@ -31,6 +31,7 @@
 	,ysnAllowInvoice BIT NULL
 	,intItemContractHeaderId INT NULL
 	,intItemContractDetailId INT NULL
+	,ysnAddPayable BIT NULL
 
 	-- Fields for Internal Use Only
 	,intHeaderId INT NULL

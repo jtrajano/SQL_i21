@@ -37,12 +37,13 @@ FROM vyuICItemStockUOM sm
 	)
 		ON il.intItemId = sm.intItemId
 		AND il.intItemLocationId = sm.intItemLocationId
-	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
+	LEFT JOIN tblICStorageLocation sl 
+		ON sl.intStorageLocationId = sm.intStorageLocationId
 		AND sl.intLocationId = il.intLocationId
-	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
-	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
+	LEFT JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
+	LEFT JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
 	
-	LEFT OUTER JOIN (
+	LEFT JOIN (
 		SELECT 
 			  dblAirSpaceReading						= SUM(ISNULL(mrc.dblAirSpaceReading, 0))
 			, intItemId									= mrc.intItemId
@@ -62,7 +63,7 @@ FROM vyuICItemStockUOM sm
 	) mrc ON mrc.intItemId = i.intItemId
 		AND mrc.intStorageLocationId = sm.intStorageLocationId
 		AND mrc.intCommodityId = i.intCommodityId
-	LEFT OUTER JOIN (
+	LEFT JOIN (
 		SELECT
 			  intLocationId						= smr.intLocationId
 			, dtmReadingDate					= MAX(smr.dtmDate)
@@ -72,7 +73,7 @@ FROM vyuICItemStockUOM sm
 		GROUP BY smr.intLocationId, smr.intStorageMeasurementReadingId
 	) smr ON smr.intLocationId = il.intLocationId
 		AND mrc.intStorageMeasurementReadingId = smr.intStorageMeasurementReadingId
-	LEFT OUTER JOIN tblGRDiscountId grd ON grd.intDiscountId = mrc.intDiscountSchedule
+	LEFT JOIN tblGRDiscountId grd 
+		ON grd.intDiscountId = mrc.intDiscountSchedule
 WHERE 
-	i.strType = 'Inventory'
-	--AND sl.intStorageLocationId IS NOT NULL
+	i.strType = 'Inventory'	

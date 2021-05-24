@@ -48,7 +48,7 @@ SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPre
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
 
 --Header
-INSERT #ARPostInvoiceHeader
+INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -377,7 +377,7 @@ LEFT OUTER JOIN (
     SELECT [intTransactionId] FROM vyuARForApprovalTransction  WITH (NOLOCK) WHERE [strScreenName] = 'Invoice'
 ) FAT ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 WHERE
-	NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])
+	NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])
     AND (
             (
 				RTRIM(LTRIM(ISNULL(@Param,''))) <> ''
@@ -402,7 +402,7 @@ WHERE
             )
         )
 
-INSERT #ARPostInvoiceHeader
+INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -724,7 +724,7 @@ FROM
     SELECT LD.[intInvoiceId], LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM tblARInvoiceIntegrationLogDetail LD
     WHERE 
         LD.[intIntegrationLogId] = @IntegrationLogId
-        AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE LD.[intInvoiceId] = IH.[intInvoiceId])
+        AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intInvoiceId] = IH.[intInvoiceId])
         AND LD.[ysnHeader] = 1
 		AND ISNULL(LD.[ysnPosted],0) <> @Post
         AND LD.[ysnPost] = @Post
@@ -749,7 +749,7 @@ LEFT OUTER JOIN
     ) FAT
         ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 
-INSERT #ARPostInvoiceHeader
+INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1070,7 +1070,7 @@ FROM
     (
     SELECT LD.[intHeaderId] AS 'intInvoiceId', LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM @InvoiceIds LD
     WHERE 
-        NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE LD.[intHeaderId] = IH.[intInvoiceId])
+        NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intHeaderId] = IH.[intInvoiceId])
 		AND LD.[ysnPost] IS NOT NULL 
         AND LD.[ysnPost] = @Post
     ) ARILD
@@ -1095,7 +1095,7 @@ LEFT OUTER JOIN
         ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 
 --Detail
-INSERT #ARPostInvoiceDetail
+INSERT ##ARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1398,8 +1398,7 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
-    
-FROM #ARPostInvoiceHeader ARI
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN (
@@ -1436,7 +1435,7 @@ LEFT OUTER JOIN (
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 1
 
-INSERT #ARPostInvoiceDetail
+INSERT ##ARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1798,7 +1797,7 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
-FROM #ARPostInvoiceHeader ARI
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN (
@@ -1824,7 +1823,7 @@ LEFT OUTER JOIN (
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 0
 
-INSERT #ARPostInvoiceDetail
+INSERT ##ARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -2118,7 +2117,7 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
-FROM #ARPostInvoiceHeader ARI
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN (
@@ -2131,12 +2130,12 @@ WHERE ARID.[intItemId] IS NULL
 UPDATE ID
 SET dblTaxesAddToCost       = IDD.dblTaxesAddToCost
   , dblBaseTaxesAddToCost   = IDD.dblBaseTaxesAddToCost
-FROM #ARPostInvoiceDetail ID
+FROM ##ARPostInvoiceDetail ID
 INNER JOIN (
     SELECT dblTaxesAddToCost       = SUM(TAXES.dblTaxesAddToCost)
          , dblBaseTaxesAddToCost   = SUM(TAXES.dblBaseTaxesAddToCost)
          , intInvoiceDetailId      = ID.intInvoiceDetailId
-    FROM #ARPostInvoiceDetail ID
+    FROM ##ARPostInvoiceDetail ID
     CROSS APPLY (
         SELECT dblTaxesAddToCost        = ISNULL(dblAdjustedTax, 0)
             , dblBaseTaxesAddToCost     = ISNULL(dblBaseAdjustedTax, 0)

@@ -41,7 +41,7 @@ BEGIN
 			r.intInventoryReceiptId = @intInventoryReceiptId
 			AND r.strReceiptType IN ('Purchase Contract', 'Direct')
 			AND r.intSourceType IN (0, 2) -- (0): None (2): Inbound Shipment
-			AND ch.intPricingTypeId = 2 -- (2): Basis
+			AND cd.intPricingTypeId = 2 -- (2): Basis
 
 
 		IF EXISTS (SELECT TOP 1 1 FROM @contracts)

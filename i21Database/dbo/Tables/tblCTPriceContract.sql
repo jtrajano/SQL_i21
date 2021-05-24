@@ -12,7 +12,7 @@
 	intConcurrencyId INT NOT NULL,
 	intCompanyId INT,
 	intPriceContractRefId INT,
-
+	ysnReadOnlyInterCoPrice BIT NULL DEFAULT 0,
 	CONSTRAINT [PK_tblCTPriceContract_intPriceContractId] PRIMARY KEY CLUSTERED (intPriceContractId ASC),
 	CONSTRAINT [UQ_tblCTPriceContract_strPriceContractNo] UNIQUE (strPriceContractNo), 
 	CONSTRAINT [FK_tblCTPriceContract_tblICCommodityUnitMeasure_intFinalPriceUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intFinalPriceUOMId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId]),

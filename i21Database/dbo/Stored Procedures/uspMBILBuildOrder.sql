@@ -23,7 +23,7 @@ SELECT intDispatchId = Dispatch.intDispatchID
 	, dtmRequestedDate = Dispatch.dtmRequestedDate
 	, intItemId = Item.intItemId
 	, ItemUOM.intItemUOMId
-	, intEntityId = Site.intCustomerID
+	, intEntityId = Customer.intEntityId
 	, intSiteId = Site.intSiteID
 	, intContractDetailId = Dispatch.intContractId
 	, dblQuantity = CASE WHEN ISNULL(Dispatch.dblMinimumQuantity,0) = 0 THEN Dispatch.dblQuantity ELSE Dispatch.dblMinimumQuantity END
@@ -40,11 +40,15 @@ SELECT intDispatchId = Dispatch.intDispatchID
 INTO #Dispatch
 FROM tblTMDispatch Dispatch
 INNER JOIN tblTMSite Site ON Dispatch.intSiteID = Site.intSiteID
+INNER JOIN tblTMCustomer B
+	ON Site.intCustomerID = B.intCustomerID
+INNER JOIN tblEMEntity C
+	ON B.intCustomerNumber = C.intEntityId
 LEFT JOIN tblLGRoute K ON Dispatch.intRouteId = K.intRouteId
 LEFT JOIN tblLGRouteOrder L ON K.intRouteId = L.intRouteId AND Dispatch.intDispatchID = L.intDispatchID
 LEFT JOIN tblICItem Item ON Item.intItemId = Site.intProduct
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1
-LEFT JOIN tblARCustomer Customer ON Customer.intEntityId = Site.intCustomerID
+LEFT JOIN tblARCustomer Customer ON Customer.intEntityId =  C.intEntityId
 WHERE Dispatch.strOrderNumber NOT IN (select strOrderNumber from tblMBILOrder)
 
 -- ++++++ CREATE DRIVER's ORDER LIST ++++++ --
@@ -75,7 +79,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Generated','Dispatched')
+WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Generated','Dispatched','Routed')
 		AND intTermId IN (SELECT intTermID from tblSMTerm)
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --

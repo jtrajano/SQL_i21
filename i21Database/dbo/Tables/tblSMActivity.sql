@@ -36,7 +36,11 @@
 	[intActivitySourceId]		[int] NULL,
 	[strInterCompanyCreatedBy]	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[strInterCompanyAssignedTo]	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	[ysnForTheWeekOf]			[bit] NULL,
+	[dblNumberOfHours]			NUMERIC (10, 2) NULL,
+	[ysnBillable]				[bit] NULL,
 	[intConcurrencyId]			[int] NOT NULL DEFAULT ((1)), 
+
     CONSTRAINT [FK_tblSMActivity_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMActivity_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 	CONSTRAINT [UC_tblSMActivity] UNIQUE (strActivityNo)
