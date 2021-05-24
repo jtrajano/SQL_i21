@@ -331,7 +331,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal) --ICIT.[dblQty]
+	,[dblQty]						= - ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], CASE WHEN ARID.[strType] = 'Provisional' THEN LG.[dblQuantity] ELSE ARID.[dblShipmentNetWt] END), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -358,6 +358,7 @@ INNER JOIN (
 		 , LGD.[intSCompanyLocationId] 
 		 , LGL.[intPurchaseSale]
 		 , LGL.[strLoadNumber]
+		 , LGD.[dblQuantity]
 	FROM tblLGLoadDetail LGD WITH (NOLOCK) 
 	INNER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGD.[intLoadId] = LGL.[intLoadId] 
 ) LG ON LG.[intLoadDetailId] = ARID.[intLoadDetailId]
@@ -624,7 +625,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal) --ICIT.[dblQty]
+	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], LG.[dblQuantity]), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -677,6 +678,7 @@ INNER JOIN (
 		 , LGD.[intSCompanyLocationId] 
 		 , LGL.[intPurchaseSale]
 		 , LGL.[strLoadNumber]
+		 , LGD.[dblQuantity]
 	FROM tblLGLoadDetail LGD WITH (NOLOCK) 
 	INNER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGD.[intLoadId] = LGL.[intLoadId] 
 ) LG ON LG.[intLoadDetailId] = ARID.[intLoadDetailId]
@@ -722,7 +724,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= -ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], CASE WHEN ARID.[dblShipmentNetWt] > ARID.[dblShipmentNetWtProvisional] THEN ARID.[dblShipmentNetWtProvisional] ELSE ARID.[dblShipmentNetWt] END), @ZeroDecimal)
+	,[dblQty]						= -ISNULL(CASE WHEN ARID.[dblShipmentNetWt] > ARID.[dblShipmentNetWtProvisional] THEN LG.[dblQuantity] ELSE [dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ARID.[intOrderUOMId], ARID.[dblShipmentNetWt]) END, @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -766,6 +768,7 @@ FROM
 	, INVD.intItemWeightUOMId
 	, ARPID.dblShipmentNetWt
 	, dblShipmentNetWtProvisional = INVD.dblShipmentNetWt
+	, INVD.intOrderUOMId
 FROM tblARInvoiceDetail INVD
 INNER JOIN ##ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -776,6 +779,7 @@ INNER JOIN (
 		 , LGD.[intSCompanyLocationId] 
 		 , LGL.[intPurchaseSale]
 		 , LGL.[strLoadNumber]
+		 , LGD.[dblQuantity]
 	FROM tblLGLoadDetail LGD WITH (NOLOCK) 
 	INNER JOIN tblLGLoad LGL WITH (NOLOCK) ON LGD.[intLoadId] = LGL.[intLoadId] 
 ) LG ON LG.[intLoadDetailId] = ARID.[intLoadDetailId]
