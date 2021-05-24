@@ -2626,6 +2626,64 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 
 	EXEC uspTFUpgradeValidDestinationStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidDestinationStates = @ValidDestinationStates
 
+-- Reporting Component - Configuration
+/* Generate script for Reporting Component - Configurations. Specify Tax Authority Id to filter out specific Reporting Component - Configurations only.
+select 'UNION ALL SELECT intReportTemplateId = ' + CAST(0 AS NVARCHAR(10))
+	+ CASE WHEN RC.strFormCode IS NULL THEN ', strFormCode = NULL' ELSE ', strFormCode = ''' + RC.strFormCode + ''''  END
+	+ CASE WHEN RC.strScheduleCode IS NULL THEN ', strScheduleCode = NULL' ELSE ', strScheduleCode = ''' + RC.strScheduleCode + ''''  END
+	+ CASE WHEN RC.strType IS NULL THEN ', strType = NULL' ELSE ', strType = ''' + RC.strType + '''' END
+	+ CASE WHEN strTemplateItemId IS NULL THEN ', strTemplateItemId = NULL' ELSE ', strTemplateItemId = ''' + strTemplateItemId + ''''  END
+	+ CASE WHEN strReportSection IS NULL THEN ', strReportSection = NULL' ELSE ', strReportSection = ''' + strReportSection + ''''  END
+	+ CASE WHEN intReportItemSequence IS NULL THEN ', intReportItemSequence = NULL' ELSE ', intReportItemSequence = ''' + CAST(intReportItemSequence AS NVARCHAR(10)) + ''''  END
+	+ CASE WHEN intTemplateItemNumber IS NULL THEN ', intTemplateItemNumber = NULL' ELSE ', intTemplateItemNumber = ''' + CAST(intTemplateItemNumber AS NVARCHAR(10)) + ''''  END
+	+ CASE WHEN strDescription IS NULL THEN ', strDescription = NULL' ELSE ', strDescription = ''' + REPLACE(strDescription, '''', '''''') + ''''  END
+	+ CASE WHEN Config.strScheduleCode IS NULL THEN ', strScheduleList = NULL' ELSE ', strScheduleList = ''' + Config.strScheduleCode + ''''  END
+	+ CASE WHEN strConfiguration IS NULL THEN ', strConfiguration = NULL' ELSE ', strConfiguration = ''' + strConfiguration + ''''  END
+	+ CASE WHEN ysnConfiguration IS NULL THEN ', ysnConfiguration = NULL' ELSE ', ysnConfiguration = ''' + CAST(ysnConfiguration AS NVARCHAR(5)) + ''''  END
+	+ CASE WHEN ysnUserDefinedValue IS NULL THEN ', ysnUserDefinedValue = NULL' ELSE ', ysnUserDefinedValue = ''' + CAST(ysnUserDefinedValue AS NVARCHAR(5)) + ''''  END
+	+ CASE WHEN strLastIndexOf IS NULL THEN ', strLastIndexOf = NULL' ELSE ', strLastIndexOf = ''' + strLastIndexOf + ''''  END
+	+ CASE WHEN strSegment IS NULL THEN ', strSegment = NULL' ELSE ', strSegment = ''' + strSegment + ''''  END
+	+ CASE WHEN intConfigurationSequence IS NULL THEN ', intConfigurationSequence = NULL' ELSE ', intConfigurationSequence = ''' + CAST(intConfigurationSequence AS NVARCHAR(10)) + ''''  END
+	+ CASE WHEN ysnOutputDesigner IS NULL THEN ', ysnOutputDesigner = NULL' ELSE ', ysnOutputDesigner = ' + CAST(ysnOutputDesigner AS NVARCHAR(5)) + ''  END
+	+ CASE WHEN strInputType IS NULL THEN ', strInputType = NULL' ELSE ', strInputType = ''' + strInputType + ''''  END
+--	+ ', intMasterId = ' + CAST((CASE WHEN ISNULL(Config.intMasterId, '') = '' THEN intReportingComponentConfigurationId ELSE Config.intMasterId END) AS NVARCHAR(20)) -- Old Format
+	+ ', intMasterId = ' + CASE WHEN Config.intMasterId IS NULL THEN CAST(@TaxAuthorityId AS NVARCHAR(20)) + CAST(intReportingComponentConfigurationId AS NVARCHAR(20)) ELSE CAST(Config.intMasterId AS NVARCHAR(20)) END -- First 2 digit for TaxAuthorityCodeID
+from tblTFReportingComponentConfiguration Config
+left join tblTFReportingComponent RC ON RC.intReportingComponentId = Config.intReportingComponentId
+WHERE RC.intTaxAuthorityId = @TaxAuthorityId
+*/
+	DECLARE @ReportingComponentConfigurations AS TFReportingComponentConfigurations
+
+	INSERT INTO @ReportingComponentConfigurations(
+		intReportTemplateId
+		, strFormCode
+		, strScheduleCode
+		, strType
+		, strTemplateItemId
+		, strReportSection
+		, intReportItemSequence
+		, intTemplateItemNumber
+		, strDescription
+		, strScheduleList
+		, strConfiguration
+		, ysnConfiguration
+		, ysnUserDefinedValue
+		, strLastIndexOf
+		, strSegment
+		, intSort
+		, ysnOutputDesigner
+		, strInputType
+		, intMasterId
+	)
+	SELECT intReportTemplateId = 0, strFormCode = 'MFT-Efile', strScheduleCode = 'AL_Efile', strType = '', strTemplateItemId = 'ALXML-NextTransmissionId', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Next Transmission Id', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = NULL, strInputType = 'integer', intMasterId = 100001
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-Efile', strScheduleCode = 'AL_Efile', strType = '', strTemplateItemId = 'ALXML-EFIN', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'EFIN (6 digits)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '2', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 100002
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-Efile', strScheduleCode = 'AL_Efile', strType = '', strTemplateItemId = 'ALXML-ProcessType', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Process Type (T or P)', strScheduleList = NULL, strConfiguration = 'T', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '3', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 100003
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-Efile', strScheduleCode = 'AL_Efile', strType = '', strTemplateItemId = 'ALXML-OriginatorEFIN', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Originator EFIN (6 digits)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '4', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 100004
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-Efile', strScheduleCode = 'AL_Efile', strType = '', strTemplateItemId = 'ALXML-OriginatorTypeCd', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Originator Type Cd', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '5', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 100005
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-Efile', strScheduleCode = 'AL_Efile', strType = '', strTemplateItemId = 'ALXML-FilerFEIN', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Filer FEIN (9 digits)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '6', ysnOutputDesigner = NULL, strInputType = NULL, intMasterId = 100006
+
+	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
+
 
 -- Reporting Component - Output Designer
 /* Generate script for Reporting Component - Output Designer. Specify Tax Authority Id to filter out specific Reporting Component - Output Designer only.
