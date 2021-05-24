@@ -464,7 +464,7 @@ BEGIN
 									,[intHeaderId]
 									,[dtmDate]
 						)
-						SELECT
+						SELECT DISTINCT
 									 [intId] = CPT.intPumpTotalsId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
@@ -660,7 +660,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
@@ -906,7 +906,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
