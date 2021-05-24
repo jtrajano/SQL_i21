@@ -4,9 +4,7 @@ GO
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMReplicatonDropPublication'))
        DROP PROCEDURE uspSMReplicatonDropPublication;
 GO
-IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateAuditLogMigrationPlan'))
-       DROP PROCEDURE uspSMCreateAuditLogMigrationPlan;
-GO
+
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMReplicationDropPublication'))
        DROP PROCEDURE uspSMReplicationDropPublication;
 GO
@@ -16,6 +14,12 @@ GO
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateReIndexMaintenancePlan'))
        DROP PROCEDURE uspSMCreateReIndexMaintenancePlan;
 GO
+
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMValidateRemoteDBServer'))
+       DROP PROCEDURE uspSMValidateRemoteDBServer;
+GO
+
+
 
 PRINT 'End SM Clean up Objects - Drop obsolete objects'
 GO

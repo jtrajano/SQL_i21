@@ -26,8 +26,7 @@ begin
 	begin
 		if not exists
 		(
-			select
-				* 
+			select top 1 1 
 			from
 				tblARCustomerFreightXRef a
 				,tblICItem b 

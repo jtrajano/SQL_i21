@@ -694,11 +694,16 @@ IF @IsCancel = 0
 		END CATCH
 
 		BEGIN TRY
-			UPDATE tblARInvoice 
+			UPDATE ARI 
 			SET ysnRecurring =  CASE WHEN @OldInvoiceRecurring = 1 AND @ForRecurring = 1 THEN 0 ELSE @OldInvoiceRecurring  END
 			, intOriginalInvoiceId = @InvoiceId 
 			, ysnImpactInventory = @IsImpactInventory
 			, dblTotalWeight = @TotalWeight
+			, dblTotalStandardWeight = T.dblTotalStandardWeight 
+			FROM tblARInvoice ARI
+			OUTER APPLY(
+				SELECT dblTotalStandardWeight FROM tblARInvoice WHERE intInvoiceId=@InvoiceId
+			)T
 			WHERE intInvoiceId = @NewInvoiceId
 		END TRY
 		BEGIN CATCH

@@ -3689,7 +3689,6 @@
     <Build Include="dbo\Functions\fnRKGetCurrencyConversionRate.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryReceiptView.sql" />
     <Build Include="dbo\Views\vyuSCTicketInventoryShipmentView.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMSyncTables.sql" />
     <Build Include="dbo\Tables\tblARCustomerLicenseInformation.sql" />
     <Build Include="dbo\Tables\tblARCustomerLicenseModule.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCalculateDiscountandShrink.sql" />
@@ -3994,13 +3993,11 @@
     <Build Include="dbo\Views\vyuHDCrmKeywordValue.sql" />
     <Build Include="dbo\Views\vyuETExportItem.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateLicense.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMValidateRemoteDBServer.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeEMTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeSMTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeGRTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeCTTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeLGTables.sql" />
-    <Build Include="dbo\Stored Procedures\uspDMMergeICTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeQMTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeSCTables.sql" />
     <Build Include="dbo\Stored Procedures\uspDMMergeTables.sql" />
@@ -7196,10 +7193,6 @@
     <Build Include="dbo\Views\vyuARTaxDetailMCPReport.sql" />
     <Build Include="dbo\Tables\tblARPOSEndOfDay.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceMainReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationAddSubscriptionForRemote.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationPullSubscription.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationMainConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationRemoteConfiguration.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageMeasurementReading.sql" />
     <None Include="Scripts\Post-Deployment\EM\041_FixVendorNo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTraceabilityLotMergeDetail.sql" />
@@ -7222,7 +7215,6 @@
     <None Include="Scripts\Post-Deployment\AP\FixStartingNumbers.sql" />
     <Build Include="dbo\Functions\fnRKGetSourcingCurrencyConversion.sql" />
     <Build Include="dbo\Tables\tblSTCheckoutErrorLogs.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMReplicationDropPullSubscription.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutErrorLogPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspRKLOptionPSTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSOptionPSTransaction.sql" />
@@ -8915,7 +8907,6 @@
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTAllowDPContractClosure.sql" />
     <Build Include="dbo\Tables\tblLGPendingClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddPendingClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
@@ -9373,6 +9364,9 @@
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
+    <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
+    <None Include="Scripts\Post-Deployment\CT\2_CleanupObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
