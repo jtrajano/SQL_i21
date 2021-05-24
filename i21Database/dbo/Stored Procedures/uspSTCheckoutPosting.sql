@@ -464,7 +464,7 @@ BEGIN
 									,[intHeaderId]
 									,[dtmDate]
 						)
-						SELECT
+						SELECT DISTINCT
 									 [intId] = CPT.intPumpTotalsId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
@@ -660,7 +660,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
@@ -731,7 +731,7 @@ BEGIN
 
 										,[dblDiscount]				= 0
 										
-										,[dblPrice]					= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -906,7 +906,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
