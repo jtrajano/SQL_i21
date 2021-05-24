@@ -9415,6 +9415,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
