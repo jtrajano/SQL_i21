@@ -361,8 +361,8 @@ SELECT
 	  A.dtmDatePaid AS dtmDate 
 	, ISNULL(B.intBillId ,B.intOrigBillId) AS intBillId  
 	, C.strBillId
-	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  
-		* (CASE WHEN C.intTransactionType = 3 THEN -1 ELSE 1 END) AS dblAmountPaid     
+	, CAST(B.dblPayment * prepaidDetail.dblRate AS DECIMAL(18,2))  AS dblAmountPaid   
+		--* (CASE WHEN C.intTransactionType = 3 THEN -1 ELSE 1 END) AS dblAmountPaid     
 	, dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld

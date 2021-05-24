@@ -9,7 +9,7 @@ BEGIN
 	from 
 		tblARCustomerLicenseInformation a
 	inner join tblARCustomerLicenseModule b on b.intCustomerLicenseInformationId = a.intCustomerLicenseInformationId
-	inner join tblSMModule c on and c.intModuleId = b.intModuleId
+	inner join tblSMModule c on c.intModuleId = b.intModuleId
 	where
 		a.intEntityCustomerId = @intEntityCustomerId
 		and a.strCompanyId = @strCompanyId
