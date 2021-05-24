@@ -24,7 +24,7 @@ DECLARE @Rows INT
 WHILE @i < @totalMonths
 BEGIN
 	 SELECT @dtmDep = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1, @dtmPlacedInService)) + @i,0))
-	 INSERT INTO tblFAFiscalAsset (intFiscalYear, intFiscalPeriod, intAssetId, intBookId )
+	 INSERT INTO tblFAFiscalAsset (intFiscalYearId, intFiscalPeriodId, intAssetId, intBookId )
 	 SELECT  intFiscalYearId, intGLFiscalYearPeriodId , @intAssetId, @intBookId
 	 FROM tblGLFiscalYearPeriod WHERE @dtmDep BETWEEN dtmStartDate AND dtmEndDate
 	SET @i = @i+1
