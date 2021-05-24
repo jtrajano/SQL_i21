@@ -20,6 +20,7 @@ SELECT CD.intContractDetailId
 	,CH.intEntityId
 	,CD.intContractStatusId
 	,CH.ysnEnableFutures
+	,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intRefFuturesItemUOMId,CD.dblRefFuturesQty)*100 dblRefPriceInPriceUOM
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId
