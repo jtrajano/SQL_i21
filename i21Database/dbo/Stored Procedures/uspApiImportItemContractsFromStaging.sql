@@ -19,6 +19,7 @@ SELECT
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = s.intCompanyLocationId
 WHERE c.intCompanyLocationId IS NULL
+	AND s.guiApiUniqueId = @guiApiUniqueId
 
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	strError, strField, strLogLevel, strValue, intLineNumber,
@@ -38,6 +39,7 @@ SELECT
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
 WHERE e.intEntityId IS NULL
+	AND s.guiApiUniqueId = @guiApiUniqueId
 
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	strError, strField, strLogLevel, strValue, intLineNumber,
@@ -55,8 +57,36 @@ SELECT
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
 FROM tblCTApiItemContractDetailStaging s
+JOIN tblCTApiItemContractStaging ps ON ps.intApiItemContractStagingId = s.intApiItemContractStagingId
 LEFT JOIN tblICItem i ON i.intItemId = s.intItemId
 WHERE i.intItemId IS NULL
+	AND ps.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'The item ''' + i.strItemNo + ''' is not set up for the company location: ''' + pr.strLocationName + '''',
+	strField = 'itemId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intItemId AS NVARCHAR(50)) + ' (' + i.strItemNo + ')',
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
+FROM tblCTApiItemContractDetailStaging s
+JOIN tblCTApiItemContractStaging ps ON ps.intApiItemContractStagingId = s.intApiItemContractStagingId
+JOIN tblICItem i ON i.intItemId = s.intItemId
+LEFT JOIN tblICItemLocation il ON il.intItemId = i.intItemId
+	AND il.intLocationId = ps.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = il.intLocationId
+	AND c.intCompanyLocationId = ps.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocation pr ON pr.intCompanyLocationId = ps.intCompanyLocationId
+WHERE ps.guiApiUniqueId = @guiApiUniqueId
+	AND c.intCompanyLocationId IS NULL
 
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	strError, strField, strLogLevel, strValue, intLineNumber,
@@ -74,8 +104,10 @@ SELECT
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
 FROM tblCTApiItemContractDetailStaging s
+JOIN tblCTApiItemContractStaging ps ON ps.intApiItemContractStagingId = s.intApiItemContractStagingId
 INNER JOIN tblICItem i ON i.intItemId = s.intItemId
 WHERE i.strStatus IN ('Discontinued', 'Phased Out')
+	AND ps.guiApiUniqueId = @guiApiUniqueId 
 
 -- Transformation
 DECLARE @intContractType INT
@@ -239,9 +271,11 @@ BEGIN
 		-- , ds.dtmLastDeliveryDate
 		, i.strDescription
 	FROM tblCTApiItemContractDetailStaging ds
+	JOIN tblCTApiItemContractStaging ps ON ps.intApiItemContractStagingId = ds.intApiItemContractStagingId
 	LEFT JOIN tblCTContractStatus s ON s.strContractStatus = ds.strContractStatus
 	LEFT JOIN tblICItem i ON i.intItemId = ds.intItemId
 	WHERE ds.intApiItemContractStagingId = @intStagingId
+		AND ps.guiApiUniqueId = @guiApiUniqueId
 
 	FETCH NEXT FROM cur INTO
 	  @intStagingId
