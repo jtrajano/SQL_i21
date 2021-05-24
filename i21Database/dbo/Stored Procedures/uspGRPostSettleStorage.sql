@@ -1891,7 +1891,9 @@ BEGIN TRY
 																		ELSE NULL
 																END
 													END
-					,[intCustomerStorageId]			= a.[intCustomerStorageId]
+					,[intCustomerStorageId]   = CASE 
+													WHEN RI.intInventoryReceiptId IS NULL OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL) THEN a.[intCustomerStorageId] 
+													ELSE NULL END
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
 														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intInventoryItemStockUOMId, CD.dblQuantity),6) 
@@ -1953,7 +1955,12 @@ BEGIN TRY
 															END
 														end				
 															
-					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
+					,[dblOldCost]					=  case WHEN @ysnFromPriceBasisContract = 0 THEN
+																CASE
+																	WHEN ST.ysnDPOwnedType = 1 AND a.intItemType = 1
+																	THEN ISNULL(CS.dblSettlementPrice, 0) + ISNULL(CS.dblBasis, 0)
+																	ELSE NULL
+																END
 														else 
 															case 
 															when (a.intContractHeaderId is not null and a.intPricingTypeId = 1 and CH.intPricingTypeId <> 2) or
