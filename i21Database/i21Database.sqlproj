@@ -9416,6 +9416,7 @@
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
