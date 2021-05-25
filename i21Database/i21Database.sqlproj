@@ -9655,6 +9655,7 @@
     <None Include="Scripts\Post-Deployment\AR\01_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_CreateIDPGridLayout.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
