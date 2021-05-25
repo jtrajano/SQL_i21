@@ -28,6 +28,21 @@ BEGIN
 	RETURN; 
 END 
 
+-- If Inventory is closed in the Fiscal Year Period, then exit immediately. 
+IF EXISTS (
+	SELECT TOP 1 1 
+	FROM 
+		tblICInventoryValuationSummaryLog (NOLOCK) l INNER JOIN tblGLFiscalYearPeriod fyp
+			ON l.strPeriod = fyp.strPeriod 
+	WHERE 
+		l.strPeriod = @strPeriod
+		AND fyp.ysnINVOpen = 0
+)
+AND @ysnForceRebuild <> 1
+BEGIN 
+	RETURN;
+END 
+
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryValuationSummaryLog WHERE strPeriod = @strPeriod)
 BEGIN 
 	INSERT INTO tblICInventoryValuationSummaryLog (
