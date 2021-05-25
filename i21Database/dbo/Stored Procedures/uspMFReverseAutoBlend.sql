@@ -154,9 +154,15 @@ INSERT INTO @GLEntries (
 		,@strWorkOrderNo
 		,@strBatchId
 		,@intUserId	
-
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
+		
+		IF EXISTS (
+				SELECT *
+				FROM @GLEntries
+				)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+		END
 
 Update tblMFWorkOrderProducedLot Set ysnProductionReversed=1 Where intWorkOrderId=@intWorkOrderId
 
