@@ -35,6 +35,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[ysnDisposed]				BIT NULL,	
 	[ysnImported]				BIT NULL,
 	[dtmImportedDepThru]		DATETIME NULL,
+	[dblImportDepToDate]		DECIMAL(18,6) NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
