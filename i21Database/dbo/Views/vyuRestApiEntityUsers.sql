@@ -9,7 +9,9 @@ SELECT
 	EntityContact.ysnPortalAdmin, 
 	Security.ysnAdmin, 
 	Contact.ysnActive,
-	EntityContact.intEntityLocationId
+	EntityContact.intEntityLocationId,
+	Security.ysnDisabled,
+	Security.ysnLockedOut
 FROM tblEMEntityToContact EntityContact
 JOIN tblEMEntity Contact ON EntityContact.intEntityContactId = Contact.intEntityId
 JOIN tblSMUserSecurity Security ON EntityContact.intEntityId = Security.intEntityId

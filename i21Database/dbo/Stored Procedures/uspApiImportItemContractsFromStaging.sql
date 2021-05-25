@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspApiImportItemContractsFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER)
+ALTER PROCEDURE [dbo].[uspApiImportItemContractsFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
 
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
@@ -39,6 +39,27 @@ SELECT
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
 WHERE e.intEntityId IS NULL
+	AND s.guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'The customer ''' + CAST(e.strName AS NVARCHAR(50)) + ''' is inactive.',
+	strField = 'entityId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intEntityId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
+FROM tblCTApiItemContractStaging s
+INNER JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
+INNER JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
+WHERE ISNULL(c.ysnActive, 0) = 0
 	AND s.guiApiUniqueId = @guiApiUniqueId
 
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
