@@ -9230,6 +9230,7 @@
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
