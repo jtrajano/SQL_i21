@@ -408,8 +408,8 @@ BEGIN
 		from #tmpCalculatedAverage
 		where intProductTypeId = @intProductType
 
-		SET @monthsCovered = @dblPosition / @dblTotalAvgConsumption
-		SET @optionsCovered = @dblOption / @dblTotalAvgConsumption
+		SET @monthsCovered = @dblPosition / NULLIF(@dblTotalAvgConsumption,0)
+		SET @optionsCovered = @dblOption / NULLIF(@dblTotalAvgConsumption,0)
 
 		UPDATE @FinalTable
 		SET dblMonthsCovered = @monthsCovered
