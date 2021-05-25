@@ -9370,6 +9370,7 @@
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
     <None Include="Scripts\Post-Deployment\CT\2_CleanupObjects.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
