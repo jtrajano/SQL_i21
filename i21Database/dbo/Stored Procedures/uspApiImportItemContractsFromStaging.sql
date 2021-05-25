@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspApiImportItemContractsFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER)
+CREATE PROCEDURE [dbo].[uspApiImportItemContractsFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
 
 INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
