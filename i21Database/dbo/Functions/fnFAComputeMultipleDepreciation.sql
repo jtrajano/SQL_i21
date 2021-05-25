@@ -22,7 +22,7 @@ DECLARE @tblAssetInfo TABLE (
 	dblBasis DECIMAL (18,6), 
 	dtmPlacedInService DATETIME,
 	dblYear DECIMAL(18,6),
-	dblImportDepToDate DECIMAL(18,6),
+	dblImportGAAPDepToDate DECIMAL(18,6),
 	strError NVARCHAR(100),
 	intYear INT,
 	intMonth INT,
@@ -51,7 +51,7 @@ INSERT INTO  @tblAssetInfo(
 	dblBasis, 
 	dtmPlacedInService,
 	dblYear,
-	dblImportDepToDate,
+	dblImportGAAPDepToDate,
 	strError
 )
 SELECT 
@@ -61,7 +61,7 @@ strConvention,
 BD.dblCost - BD.dblSalvageValue,
 BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
-A.dblImportDepToDate,
+A.dblImportGAAPDepToDate,
 NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
@@ -118,7 +118,7 @@ WHERE strError IS NULL
 UPDATE T
 SET 
 dblMonth = 
-CASE WHEN dblMonth >= ISNULL( dblImportDepToDate,0) 
+CASE WHEN dblMonth >= ISNULL( dblImportGAAPDepToDate,0) 
 THEN 
 
 	CASE 

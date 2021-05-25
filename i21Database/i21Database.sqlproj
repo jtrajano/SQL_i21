@@ -192,6 +192,7 @@
     <Folder Include="Scripts\Post-Deployment\GL\StoredProcedures\" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
     <Folder Include="Scripts\Post-Deployment\AG\" />
+    <Folder Include="Scripts\Post-Deployment\FA\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
