@@ -217,6 +217,8 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@SubCurrencyRate				NUMERIC(18,6)
 		,@TermDiscountExempt			BIT
 		,@TermDiscountRate				NUMERIC(18,6)
+		,@intContractDetailId			INT = @ContractDetailId
+		,@intContractHeaderId			INT = @ContractHeaderId
 
 BEGIN TRY
 SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
@@ -229,8 +231,8 @@ EXEC dbo.[uspARGetItemPrice]
 		,@Quantity						= @ItemQtyShipped
 		,@Price							= @SpecialPrice					OUTPUT
 		,@Pricing						= @Pricing						OUTPUT
-		,@ContractHeaderId				= @ContractHeaderId				OUTPUT
-		,@ContractDetailId				= @ContractDetailId				OUTPUT
+		,@ContractHeaderId				= @intContractDetailId			OUTPUT
+		,@ContractDetailId				= @intContractHeaderId			OUTPUT
 		,@ContractNumber				= @ContractNumber				OUTPUT
 		,@ContractSeq					= @ContractSeq					OUTPUT
 		,@TermDiscount					= @ItemTermDiscount				OUTPUT
@@ -265,6 +267,8 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			SET @ItemCurrencyExchangeRate		= ISNULL(@CurrencyExchangeRate, 1.000000)
 			SET @ItemSubCurrencyId				= @SubCurrencyId
 			SET @ItemSubCurrencyRate			= ISNULL(@SubCurrencyRate, 1.000000)
+			SET @ContractDetailId				= @intContractDetailId
+			SET @ContractHeaderId				= @intContractHeaderId
 		END
 	END
 		
