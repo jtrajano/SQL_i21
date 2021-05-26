@@ -2222,7 +2222,7 @@ BEGIN TRY
 								and availableQtyForVoucher.dblAvailableQuantity > 0)
 					)
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
-				and (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType IN (1,2)))
+				-- and (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType IN (1,2)))
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType				
 				 
@@ -2363,7 +2363,7 @@ BEGIN TRY
 						AND CU.ysnStockUnit = 1
 				JOIN tblSCScaleSetup ScaleSetup 
 					ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
-						--AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+						AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
 				LEFT JOIN tblICItemLocation CL
 					ON CL.intItemId = Item.intItemId
 						AND CL.intLocationId = @LocationId
