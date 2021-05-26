@@ -1,33 +1,34 @@
-CREATE VIEW [dbo].[vyuAGProductMixerView]
-AS
-SELECT 
-    PM.intProductMixerId
-    ,PM.intConcurrencyId
-    ,PM.intLocationId
-    ,CL.strLocationName
-    ,PM.strMixerNumber
-    ,PM.strDescription
-    ,PM.strType
-    ,PM.strRestrictedBatches
-    
-    ,PM.dblSize
-    ,PM.intSizeUOMId
-    ,[strSizeUOM] = SIZE_UOM.strUnitMeasure
+CREATE VIEW [dbo].[vyuAGProductMixerView]  
+AS  
+SELECT   
+    PM.intProductMixerId  
+    ,PM.intConcurrencyId  
+    ,PM.intLocationId  
+    ,CL.strLocationName  
+    ,PM.strMixerNumber  
+    ,PM.strDescription  
+    ,PM.strType  
+    ,PM.strRestrictedBatches  
+      
+    ,PM.dblSize  
+    ,PM.intSizeUOMId  
+    ,[strSizeUOM] = SIZE_AGUOM.strUnitMeasure  
+  
+    ,PM.dblVolume  
+    ,PM.intVolumeUOMId  
+    ,[strVolumeUOM] = VOLUME_AGUOM.strUnitMeasure  
+  
+    ,PM.dblMaxBatchSize  
+    ,PM.intMaxBatchSizeUOMId  
+    ,[strMaxBatchSizeUOM] = MBS_AGUOM.strUnitMeasure
 
-    ,PM.dblVolume
-    ,PM.intVolumeUOMId
-    ,[strVolumeUOM] = VOLUME_UOM.strUnitMeasure
-
-    ,PM.dblMaxBatchSize
-    ,PM.intMaxBatchSizeUOMId
-    ,[strMaxBatchSizeUOM] = MBS_UOM.strUnitMeasure
-
-FROM tblAGProductMixer PM
-INNER JOIN tblSMCompanyLocation CL
-    ON CL.intCompanyLocationId = PM.intLocationId
-INNER JOIN tblICUnitMeasure SIZE_UOM
-    ON SIZE_UOM.intUnitMeasureId = PM.intSizeUOMId
-INNER JOIN tblICUnitMeasure VOLUME_UOM
-    ON VOLUME_UOM.intUnitMeasureId = PM.intVolumeUOMId
-INNER JOIN tblICUnitMeasure MBS_UOM
-    ON MBS_UOM.intUnitMeasureId = PM.intMaxBatchSizeUOMId
+  
+FROM tblAGProductMixer PM  
+INNER JOIN tblSMCompanyLocation CL  
+    ON CL.intCompanyLocationId = PM.intLocationId  
+LEFT JOIN tblAGUnitMeasure SIZE_AGUOM  
+    ON SIZE_AGUOM.intAGUnitMeasureId = PM.intSizeUOMId  
+LEFT JOIN tblAGUnitMeasure VOLUME_AGUOM  
+    ON VOLUME_AGUOM.intAGUnitMeasureId = PM.intVolumeUOMId  
+LEFT JOIN tblAGUnitMeasure MBS_AGUOM  
+    ON MBS_AGUOM.intAGUnitMeasureId = PM.intMaxBatchSizeUOMId
