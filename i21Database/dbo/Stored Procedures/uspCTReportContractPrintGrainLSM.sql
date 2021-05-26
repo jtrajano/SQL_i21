@@ -275,10 +275,10 @@ BEGIN TRY
 		   ,CH.strFreightTerm
 		   ,LGMContractSubmitByParentSignature	= @blbParentSubmitSignature
 		   ,LGMContractSubmitSignature			= @blbChildSubmitSignature
-		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  =  1 THEN NULL ELSE @FirstApprovalSign END
-		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId  =  1 THEN NULL ELSE @SecondApprovalSign END 
-		   ,blbPurchaseContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
-		   ,blbPurchaseParentApproveSignature		=  CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END 
+		   ,blbSalesContractFirstApproverSignature	= CASE WHEN CH.intContractTypeId  IN (1,2) THEN @FirstApprovalSign ELSE NULL END
+		   ,blbSalesParentApproverSignature		=  CASE WHEN CH.intContractTypeId IN (1,2) THEN @SecondApprovalSign ELSE NULL END 
+		   ,blbPurchaseContractFirstApproverSignature	= NULL--CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @FirstApprovalSign END
+		   ,blbPurchaseParentApproveSignature		= NULL-- CASE WHEN CH.intContractTypeId  =  2 THEN NULL ELSE @SecondApprovalSign END 
 	FROM	vyuCTContractHeaderView CH
 	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
