@@ -323,6 +323,7 @@ BEGIN TRY
 			, intTransactionReferenceId
 			, intTransactionReferenceDetailId
 		FROM dbo.fnRKGetBucketContractBalance(@dtmToDate, @intCommodityId, @intVendorId) f
+		WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
 	)t
 
 	--=============================
@@ -1595,6 +1596,7 @@ BEGIN TRY
 		, strContractNumber
 	INTO #tblDelayedPricing
 	FROM dbo.fnRKGetBucketDelayedPricing(@dtmToDate, @intCommodityId, @intVendorId) t
+	WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
 
 	INSERT INTO @ListInventory (intSeqId
 		, strSeqHeader
@@ -2002,7 +2004,7 @@ BEGIN TRY
 		, strTransactionType
 	FROM @ListInventory f
 	WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId --AND ISNULL(Strg.ysnDPOwnedType, 0) = 0
-		AND strReceiptNumber NOT IN (SELECT strTransactionNumber FROM #tempTransfer)
+		--AND strReceiptNumber NOT IN (SELECT strTransactionNumber FROM #tempTransfer)
 		
 	INSERT INTO @ListInventory(intSeqId
 		, strSeqHeader
@@ -3035,6 +3037,7 @@ BEGIN TRY
 		FROM dbo.fnRKGetBucketDerivatives(@dtmToDate, @intCommodityId, @intVendorId) t
 		LEFT JOIN tblRKFutureMarket fMar ON fMar.intFutureMarketId = t.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = fMar.intUnitMeasureId AND cum.intCommodityId = t.intCommodityId
+		WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
 		GROUP BY
 			  t.intFutOptTransactionId
 			, t.intCommodityId
@@ -6155,8 +6158,8 @@ BEGIN TRY
 			, strContractNumber
 			, strCustomer
 		FROM #invQty
+		
 
-	 
 
 		--Collateral
 		INSERT INTO @InventoryStock(strCommodityCode
