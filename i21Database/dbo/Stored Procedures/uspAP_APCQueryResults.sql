@@ -30,6 +30,7 @@ AND A.intCustomerStorageId IS NULL
 AND A.intLoadDetailId IS NULL
 AND A.intInventoryReceiptChargeId IS NULL
 AND A.intInventoryShipmentChargeId IS NULL
+AND gl.ysnIsUnposted = 0
 AND ISNULL(A.strMiscDescription,'') NOT LIKE '%Patronage%'
 AND (B.intAccountCategoryId = 45 OR glAccnt.intAccountCategoryId = 45)
 
@@ -2324,7 +2325,8 @@ SELECT
 	--	END)
 	--END),0) AS dblTotalDiff,
 	glReceiptItem.dblReceiptClearing - glVoucherItem.dblVoucherClearing AS dblTotalDiff,
-	ISNULL(NULLIF(A2.dblNet,0), A2.dblOpenReceive) - ISNULL(NULLIF(A.dblNetWeight,0), A.dblQtyReceived)
+	(ISNULL(NULLIF(A2.dblNet,0), A2.dblOpenReceive) * (CASE WHEN A4.intTransactionType = 3 THEN -1 ELSE 1 END))
+	- ISNULL(NULLIF(A.dblNetWeight,0), A.dblQtyReceived)
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill A4 ON A.intBillId = A4.intBillId
 INNER JOIN (tblICInventoryReceiptItem A2 INNER JOIN tblICInventoryReceipt A3 ON A2.intInventoryReceiptId = A3.intInventoryReceiptId)
@@ -2357,7 +2359,8 @@ OUTER APPLY (
 ) voucherCount
 LEFT JOIN tblICItemLocation itemLoc ON A.intItemId = itemLoc.intItemId AND itemLoc.intLocationId = A4.intShipToId
 WHERE 
-	ISNULL(NULLIF(A.dblNetWeight,0), A.dblQtyReceived) <> ISNULL(NULLIF(A2.dblNet,0), A2.dblOpenReceive)
+	(ISNULL(NULLIF(A.dblNetWeight,0), A.dblQtyReceived)  * (CASE WHEN A4.intTransactionType = 3 THEN -1 ELSE 1 END))
+	<> ISNULL(NULLIF(A2.dblNet,0), A2.dblOpenReceive)
 AND voucherCount.intCountVoucher = 1
 AND A.dblTotal <> A2.dblLineTotal
 --INVRCT-2421 HAVE .01 DIFFERENCE, BUT THE ISSUE IN NET WEIGHT EXISTS
@@ -4577,7 +4580,7 @@ SELECT * FROM #apc17
 SELECT * FROM @tmpAPC17
 
 --PRINT 'APC18 Results'
-
+/* TEMPORARILY REMOVE APC18 AS IT CATERS ALL ISSUES WITH VOUCHER CHARGE ITEM
 DECLARE @tmpAPC18 TABLE 
 (
 	dtmDate DATETIME,
@@ -4875,7 +4878,7 @@ BEGIN CATCH
 	DECLARE @error_APC18 NVARCHAR(200) = ERROR_MESSAGE()
 	PRINT @error_APC18
 END CATCH
-
+*/
 --PRINT 'APC19 Results'
 
 DECLARE @tmpAPC19 TABLE
@@ -5719,6 +5722,8 @@ WHERE
 --	dblAdjustment <> dblGLAdjustment
 --AND 
 ABS(dblAdjustment - dblGLAdjustment ) = .01
+AND dblAdjustment != 0
+AND dblGLAdjustment != 0
 
 INSERT INTO @tmpAPC21
 SELECT A.* 
@@ -5876,6 +5881,7 @@ WHERE
 ) tmp
 --WHERE ABS(dblDiff) = .01
 --OR ABS(dblDiff) = .02
+WHERE dblDiff <> 0
 
 SELECT TOP 1 @noAccount = 'There are no Inventory Adjustment account setup for the item ' + A.strItemNo + ' on ' + A.strBillId
 FROM @thirtyeight A
@@ -7751,10 +7757,12 @@ WHERE
 		 ABS(glReceiptItem.dblReceiptClearing - glVoucherItem.dblVoucherClearing) = .01
 		 )
 ) tmp
-WHERE ABS(dblDiff) = .01
+WHERE 
+	(ABS(dblDiff) = .01
 OR ABS(dblDiff) = .02
 OR ABS(dblGLDiff) = .01
-OR ABS(dblMultiTotal) = .01
+OR ABS(dblMultiTotal) = .01)
+AND (dblReceiptClearing - dblVoucherClearing) != 0 --THERe ARE ACTUALLY .01 DIFF WITh ADJUSTMENT, EXCLUDE THIS
 
 --SELECT * FROM @eighteen
 
@@ -8056,9 +8064,9 @@ FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 INNER JOIN (tblICInventoryReceipt C INNER JOIN tblICInventoryReceiptCharge C2 ON C.intInventoryReceiptId = C2.intInventoryReceiptId)
 	ON B.intInventoryReceiptChargeId = C2.intInventoryReceiptChargeId 
-INNER JOIN (tblGLDetail D INNER JOIN vyuGLAccountDetail D2 ON D.intAccountId = D2.intAccountId)
+INNER JOIN (tblGLDetail D INNER JOIN vyuGLAccountDetail D2 ON D.intAccountId = D2.intAccountId AND D.ysnIsUnposted = 0)
 	ON D.intJournalLineNo = B.intBillDetailId AND D.strTransactionId = A.strBillId
-INNER JOIN (tblGLDetail E INNER JOIN vyuGLAccountDetail E2 ON E.intAccountId = E2.intAccountId)
+INNER JOIN (tblGLDetail E INNER JOIN vyuGLAccountDetail E2 ON E.intAccountId = E2.intAccountId AND E.ysnIsUnposted = 0)
 	ON E.intJournalLineNo = C2.intInventoryReceiptChargeId AND E.strTransactionId = C.strReceiptNumber
 WHERE 
 	D.ysnIsUnposted = 0
@@ -8246,10 +8254,10 @@ BEGIN
 	SELECT * INTO ##tmpAPC17 FROM @tmpAPC17
 END
 
-IF EXISTS(SELECT 1 FROM @tmpAPC18) 
-BEGIN
-	SELECT * INTO ##tmpAPC18 FROM @tmpAPC18
-END
+--IF EXISTS(SELECT 1 FROM @tmpAPC18) 
+--BEGIN
+--	SELECT * INTO ##tmpAPC18 FROM @tmpAPC18
+--END
 
 IF EXISTS(SELECT 1 FROM @tmpAPC19) 
 BEGIN
