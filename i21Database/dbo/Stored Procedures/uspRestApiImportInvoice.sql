@@ -66,6 +66,28 @@ WHERE guiUniqueId = @guiUniqueId
 	AND NULLIF(IE.intEntityId, 0) IS NOT NULL
 
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT DISTINCT 'The customer, ''' + E.strName + ''' with Customer No. ''' + C.strCustomerNumber + ''', is inactive.', 'customerId', 'Error', IE.strCustomerNumber
+FROM tblRestApiInvoiceStaging IE 
+LEFT JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber))
+LEFT JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
+WHERE guiUniqueId = @guiUniqueId
+	AND C.intEntityId IS NOT NULL
+	AND ISNULL(C.ysnActive, 0) = 0
+	AND NULLIF(IE.intEntityId, 0) IS NULL
+	AND NULLIF(IE.strCustomerNumber, '') IS NOT NULL
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT DISTINCT 'The customer, ''' + E.strName + ''' with Customer No. ''' + C.strCustomerNumber + ''', is inactive.', 'entityId', 'Error', CAST(IE.intEntityId AS NVARCHAR(200))
+FROM tblRestApiInvoiceStaging IE 
+LEFT JOIN tblARCustomer C ON NULLIF(IE.intEntityId, 0) = C.intEntityId
+LEFT JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
+WHERE guiUniqueId = @guiUniqueId
+	AND C.intEntityId IS NOT NULL
+	AND ISNULL(C.ysnActive, 0) = 0
+	AND NULLIF(IE.strCustomerNumber, '') IS NULL
+	AND NULLIF(IE.intEntityId, 0) IS NOT NULL
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT DISTINCT 'The location does not exists.', 'strCompanyLocation', 'Error', IE.strCompanyLocation
 FROM tblRestApiInvoiceStaging IE
 LEFT JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)) 
