@@ -64,9 +64,8 @@ ORDER BY intAssetDepreciationId DESC)
 	END
 	IF @strConvention = 'Actual Days'
 	BEGIN
-		DECLARE @intDaysInFirstMonth INT = DAY(EOMONTH(@dtmPlacedInService))
+		DECLARE @intDaysInFirstMonth INT =DAY(DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1, @dtmPlacedInService)),0)))
 		DECLARE @intDaysRemainingFirstMonth INT =  @intDaysInFirstMonth - DAY(@dtmPlacedInService)
-
 		IF @intMonth = 1 
 		BEGIN
 			SET @dblMonth =  @dblMonth * (@intDaysRemainingFirstMonth/ CAST(@intDaysInFirstMonth AS FLOAT))
