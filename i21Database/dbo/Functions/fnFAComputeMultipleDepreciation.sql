@@ -111,7 +111,8 @@ WHERE strError IS NULL
 
 UPDATE T
 SET dblMonth = dblAnnualDep/ intMonthDivisor,
-intDaysInFirstMonth= DAY(EOMONTH(dtmPlacedInService))
+intDaysInFirstMonth= 
+DAY(DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1, dtmPlacedInService)),0)))
 FROM @tblAssetInfo T
 WHERE strError IS NULL
 
