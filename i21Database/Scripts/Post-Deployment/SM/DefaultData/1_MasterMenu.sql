@@ -12,7 +12,7 @@ GO
 
 
 
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr' AND strModuleName = 'IDP')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'Agronomy.view.ProductMixer?showSearch=true' AND strModuleName = 'Agronomy')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6687,6 +6687,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy 
 	VALUES (N'Agronomy Unit Measure', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Agronomy Unit Measure', N'Activity', N'Screen', N'Agronomy.view.AgronomyUOM', N'small-menu-activity', 1, 0, 0, 1, 3, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.AgronomyUOM' WHERE strMenuName = 'Agronomy Unit Measure' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Product Mixers' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Product Mixers', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Product Mixers', N'Activity', N'Screen', N'Agronomy.view.ProductMixer?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 4, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.ProductMixer?showSearch=true' WHERE strMenuName = 'Product Mixers' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
 
 
 
