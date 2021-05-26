@@ -347,10 +347,95 @@ BEGIN
 		,[strSourceTransactionId] 
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
-	FROM dbo.fnAPCreateReceiptItemCostAdjustment(@voucherIds, @intFunctionalCurrencyId)
+	FROM dbo.fnAPCreateReceiptItemCostAdjustment(
+			@voucherIds
+			, @intFunctionalCurrencyId
+	)
+
+	--CHARGES COST ADJUSTMENT
+	DECLARE @ChargesToAdjust as OtherChargeCostAdjustmentTableType
+	INSERT INTO @ChargesToAdjust 
+	(
+		[intInventoryReceiptChargeId] 
+		,[dblNewValue] 
+		,[dtmDate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+	)
+	SELECT 
+		[intInventoryReceiptChargeId] = rc.intInventoryReceiptChargeId
+		,[dblNewValue] = --B.dblCost - B.dblOldCost
+				CASE 
+				WHEN ISNULL(rc.dblForexRate, 1) <> 1 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. convert to sub currency cents. 
+				-- 3. and then convert into functional currency. 
+					CAST(
+					((B.dblQtyReceived * B.dblCost)
+						/ ISNULL(r.intSubCurrencyCents, 1) 
+						* ISNULL(rc.dblForexRate, 1)) 
+					AS DECIMAL(18,2))
+					- 
+					CAST(
+					((rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
+						/ ISNULL(r.intSubCurrencyCents, 1) 
+						* ISNULL(rc.dblForexRate, 1) )
+					AS DECIMAL(18,2))
+				WHEN ISNULL(rc.ysnSubCurrency, 0) = 1 THEN 
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+				-- 2. and then convert into functional currency. 
+				CAST(
+					(
+						(B.dblQtyReceived * B.dblCost)
+						/ ISNULL(r.intSubCurrencyCents, 1) )  
+				AS DECIMAL(18,2))
+					- 
+					CAST(
+					(
+						(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0)) 
+						/ ISNULL(r.intSubCurrencyCents, 1))
+					AS DECIMAL(18,2))
+				ELSE
+				-- Formula: 
+				-- 1. {Voucher Other Charge} minus {IR Other Charge} 
+					CAST(
+					(B.dblQtyReceived * B.dblCost )  
+					AS DECIMAL(18,2))
+					- 
+					CAST(
+					(rc.dblAmount - ISNULL(rc.dblAmountBilled, 0))
+					AS DECIMAL(18,2))
+				END  
+		,[dtmDate] = A.dtmDate
+		,[intTransactionId] = A.intBillId
+		,[intTransactionDetailId] = B.intBillDetailId
+		,[strTransactionId] = A.strBillId
+	FROM 
+		tblAPBill A INNER JOIN tblAPBillDetail B
+			ON A.intBillId = B.intBillId
+		INNER JOIN (
+			tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptCharge rc 
+				ON r.intInventoryReceiptId = rc.intInventoryReceiptId
+		)
+			ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	WHERE 
+		A.intBillId = @intBillId 
+		AND B.intInventoryReceiptChargeId IS NOT NULL 
+		AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+		AND (
+			(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
+			OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
+		)
+		AND A.intTransactionReversed IS NULL
 
 	-- Remove zero cost adjustments. 
 	DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 2) = 0 
+
+	-- Remove zero cost adjustments. 
+	DELETE FROM @ChargesToAdjust WHERE ROUND(dblNewValue, 2) = 0 
 
 	IF EXISTS(SELECT TOP 1 1 FROM @adjustedEntries)
 	BEGIN
@@ -411,7 +496,69 @@ BEGIN
 				,@strTransactionId = @strBillId
 		END 
 	END
-	ELSE 
+
+	IF EXISTS(SELECT TOP 1 1 FROM @ChargesToAdjust)
+	BEGIN 
+		EXEC @intReturnValue = uspICPostCostAdjustmentFromOtherCharge 
+			@ChargesToAdjust = @ChargesToAdjust 
+			,@strBatchId = @strBatchId 
+			,@intEntityUserSecurityId = @intEntityUserSecurityId 
+			,@ysnPost = 1
+			,@strTransactionType = DEFAULT 
+
+		IF @intReturnValue <> 0 
+		BEGIN 
+			SELECT	TOP 1 
+					@ErrorMessage = strMessage
+			FROM	tblICPostResult
+			WHERE	strBatchNumber = @strBatchId
+
+			RAISERROR(@ErrorMessage, 11, 1);
+			GOTO _Exit
+		END 
+		ELSE 
+		BEGIN 
+			INSERT INTO @billGLEntries (
+				dtmDate						
+				,strBatchId					
+				,intAccountId				
+				,dblDebit					
+				,dblCredit					
+				,dblDebitUnit				
+				,dblCreditUnit				
+				,strDescription				
+				,strCode					
+				,strReference				
+				,intCurrencyId				
+				,dblExchangeRate			
+				,dtmDateEntered				
+				,dtmTransactionDate			
+				,strJournalLineDescription  
+				,intJournalLineNo			
+				,ysnIsUnposted				
+				,intUserId					
+				,intEntityId				
+				,strTransactionId			
+				,intTransactionId			
+				,strTransactionType			
+				,strTransactionForm			
+				,strModuleName				
+				,intConcurrencyId			
+				,dblDebitForeign			
+				,dblDebitReport				
+				,dblCreditForeign			
+				,dblCreditReport			
+				,dblReportingRate			
+				,dblForeignRate						
+			)
+			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+				@strBatchId = @strBatchId
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+				,@strTransactionId = @strBillId
+		END 			
+	END 
+	
+	IF NOT EXISTS (SELECT TOP 1 1 FROM @adjustedEntries) AND NOT EXISTS (SELECT TOP 1 1 FROM @ChargesToAdjust)
 	BEGIN 			
 		-- 'Cost adjustment for {Transaction Id} is missing. Stock rebuild will abort.'
 		EXEC uspICRaiseError 80265, @strBillId; 	
