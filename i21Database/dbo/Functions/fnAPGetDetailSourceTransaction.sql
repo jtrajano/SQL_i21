@@ -4,6 +4,7 @@
 	@intInventoryReceiptChargeId INT,
 	@intInventoryShipmentChargeId INT,
 	@intLoadDetailId INT,
+	@intLoadShipmentCostId INT,
 	@intCustomerStorageId INT,
 	@intSettleStorageId INT,
 	@intBillId INT,
@@ -47,15 +48,14 @@ BEGIN
 	SELECT L.intLoadId, L.strLoadNumber, @intLoadDetailId, 4, NULL, NULL, NULL
 	FROM tblLGLoadDetail LD
 	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-	WHERE LD.intLoadDetailId = @intLoadDetailId AND LD.intItemId = @intItemId
+	WHERE LD.intLoadDetailId = @intLoadDetailId AND LD.intItemId = @intItemId AND @intLoadShipmentCostId IS NULL
 
 	UNION ALL
 	--LOAD COST
-	SELECT L.intLoadId, L.strLoadNumber, @intLoadDetailId, 5, NULL, NULL, NULL
-	FROM tblLGLoadDetail LD
-	INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-	INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId
-	WHERE LD.intLoadDetailId = @intLoadDetailId AND LC.intItemId = @intItemId
+	SELECT L.intLoadId, L.strLoadNumber, @intLoadShipmentCostId, 5, NULL, NULL, NULL
+	FROM tblLGLoadCost LC
+	INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+	WHERE LC.intLoadCostId = @intLoadShipmentCostId AND LC.intItemId = @intItemId
 
 	UNION ALL
 	--GRAIN SETTLE
