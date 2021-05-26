@@ -728,7 +728,7 @@ BEGIN
 				,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
 				,intItemId = LC.intItemId
 				,intItemUOMId = NULL
-				,dblQuantity = CAST(1 AS NUMERIC(18, 6))
+				,dblQuantity = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
 				,dblAmount = LC.dblAmount
 				,intOffsetId = NULL
 				,strOffsetId = NULL
