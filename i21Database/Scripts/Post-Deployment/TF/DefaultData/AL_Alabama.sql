@@ -2714,7 +2714,6 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-SR', strScheduleCode = 'MFT-SR', strType = '', strTemplateItemId = 'MFT_SR-Line13D', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Line 13D', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = NULL, strInputType = 'double', intMasterId = 100037
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-SR', strScheduleCode = 'MFT-SR', strType = '', strTemplateItemId = 'MFT_SR-Line13E', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Line 13E', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = NULL, strInputType = 'double', intMasterId = 100038
 	
-
 	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
 
 
