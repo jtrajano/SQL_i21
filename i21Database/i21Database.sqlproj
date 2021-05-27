@@ -9417,7 +9417,8 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
-	<Build Include="dbo\Stored Procedures\uspTFGenerateALSR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALSR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALEXPR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
