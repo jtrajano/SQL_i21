@@ -202,7 +202,12 @@ AS
 					CA.strDescription  AS strProductType,
 					--CB.strContractBasis,
 					strContractBasis = CB.strFreightTerm,
-					CS.strContractStatus
+					CS.strContractStatus,
+					ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS,
+					ce.strCertificationName,
+					strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS,
+					strOrigin = ISNULL(RY.strCountry, OG.strCountry),
+					strShipper = PR.strName
 
 			FROM	tblCTContractDetail		CD
 			JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
@@ -227,6 +232,15 @@ AS
 	LEFT	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId	
 	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'
+	left join tblCTContractCertification cr on cr.intContractDetailId = CD.intContractDetailId
+	left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+
+
+	LEFT JOIN tblSMCountry RY WITH(NOLOCK) ON RY.intCountryID = IC.intCountryId
+	LEFT JOIN tblICCommodityAttribute CA2 WITH(NOLOCK) ON CA2.intCommodityAttributeId = IM.intOriginId AND CA2.strType = 'Origin'
+	LEFT JOIN tblSMCountry OG WITH(NOLOCK) ON OG.intCountryID = CA2.intCountryID
+	LEFT JOIN tblEMEntity PR WITH(NOLOCK) ON PR.intEntityId = ISNULL(CD.intProducerId, CH.intProducerId)
+
 	WHERE CD.dtmStartDate between ISNULL(@StartFromDate,CD.dtmStartDate) and ISNULL(@StartToDate,CD.dtmStartDate)
 	AND convert(date,CD.dtmStartDate) = isnull(@EqualStartDate,convert(date,CD.dtmStartDate))
 	AND CD.dtmEndDate between ISNULL(@EndFromDate,CD.dtmEndDate) and ISNULL(@EndToDate,CD.dtmEndDate)
@@ -268,7 +282,12 @@ AS
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
-				CD.strContractStatus
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
 
 		FROM	CTEDetail	CD
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
@@ -306,7 +325,12 @@ AS
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
-				CD.strContractStatus
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
 
 		FROM	CTEDetail	CD
 
@@ -341,7 +365,12 @@ AS
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
-				CD.strContractStatus
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
 
 		FROM	CTEDetail	CD
 	)t

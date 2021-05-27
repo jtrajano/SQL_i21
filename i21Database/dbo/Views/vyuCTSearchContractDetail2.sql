@@ -312,6 +312,8 @@ SELECT a.intContractDetailId
 	, intHeaderSubBookId = b.intSubBookId
 	, intDetailBookId = a.intBookId
 	, intDetailSubBookId = a.intSubBookId
+	--, b.ysnStrategic
+	, strStrategic = (case when isnull(b.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
