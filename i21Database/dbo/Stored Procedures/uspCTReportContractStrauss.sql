@@ -240,7 +240,7 @@ BEGIN TRY
 		select
 			ysnIsParent = (case when isnull(b.intMultiCompanyParentId,0) = 0 then convert(bit,1) else convert(bit,0) end)
 			,intParentSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @StraussContractSubmitId else d.intEntityId end)
-			,intParentApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @FirstApprovalId else f.intEntityId end)
+			,intParentApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @FirstApprovalId else ISNULL(f.intEntityId,k.intEntityId) end)
 			,intChildSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then d.intEntityId else @StraussContractSubmitId end)
 			,intChildApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then f.intEntityId else @FirstApprovalId end)
 		from
@@ -250,6 +250,8 @@ BEGIN TRY
 			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
 			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and e.ysnApproval = 1
 			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
+			left join tblCTIntrCompApproval j on j.intContractHeaderId = a.intContractHeaderId and j.strScreen =  'Contract' and j.ysnApproval = 1
+			left join tblSMUserSecurity k on lower(k.strUserName) = lower(j.strUserName)
 		where
 			a.intContractHeaderId = @intContractHeaderId
 		) t
