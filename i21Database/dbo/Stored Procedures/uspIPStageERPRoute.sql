@@ -103,29 +103,6 @@ BEGIN TRY
 			FROM tblIPItemRouteStage IR
 			JOIN tblIPItemRouteDetailStage IRD ON IRD.intParentTrxSequenceNo = IR.intTrxSequenceNo
 
-			INSERT INTO tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedByUser
-				,3
-				,1
-				,'Success'
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedByUser NVARCHAR(50)
-					)
-
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
