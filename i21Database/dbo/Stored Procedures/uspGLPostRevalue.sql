@@ -31,7 +31,7 @@ DECLARE @strMessage NVARCHAR(100)
 					RAISERROR ('The transaction is already posted.',11,1)
 					RETURN
 				END
-			EXEC [dbo].uspGLGetNewID 3, @strPostBatchId OUTPUT
+				EXEC uspSMGetStartingNumber 3, @strPostBatchId OUTPUT		
 			END
 		ELSE
 			SELECT @strPostBatchId =  NEWID()
@@ -185,7 +185,7 @@ DECLARE @strMessage NVARCHAR(100)
 			BEGIN
 				DECLARE @strReverseRevalueId NVARCHAR(100)
 				DECLARE @intReverseID INT
-				EXEC [dbo].uspGLGetNewID 3, @strReversePostBatchId OUTPUT 		
+				EXEC uspSMGetStartingNumber 3, @strReversePostBatchId OUTPUT
 				--EXEC [dbo].uspGLGetNewID 116, @strReverseRevalueId OUTPUT 	
 
 
