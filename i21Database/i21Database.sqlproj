@@ -9371,7 +9371,8 @@
     <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
     <None Include="Scripts\Post-Deployment\CT\2_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
-	<Build Include="dbo\Stored Procedures\uspTFGenerateALSR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALSR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALEXPR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
