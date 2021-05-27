@@ -75,29 +75,6 @@ BEGIN TRY
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strPricingNo, '') + ','
 			FROM @tblIPCommitmentPricing
 
-			INSERT INTO tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedByUser
-				,18
-				,1
-				,'Success'
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedByUser NVARCHAR(50)
-					)
-
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml

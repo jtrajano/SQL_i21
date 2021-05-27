@@ -116,7 +116,7 @@ BEGIN TRY
 
 			SELECT @strXML += '<CreatedDate>' + CONVERT(VARCHAR(30), GETDATE(), 126) + '</CreatedDate>'
 
-			SELECT @strXML += '<CreatedByUser>' + @strCreatedBy + '</CreatedByUser>'
+			SELECT @strXML += '<CreatedByUser>' + ISNULL(@strCreatedBy, '') + '</CreatedByUser>'
 
 			SELECT @strXML += '<MessageTypeId>' + ISNULL(CONVERT(VARCHAR, @intMessageTypeId), '') + '</MessageTypeId>'
 
