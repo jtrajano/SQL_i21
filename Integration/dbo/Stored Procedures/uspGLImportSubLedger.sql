@@ -266,8 +266,7 @@ ALTER PROCEDURE [dbo].[uspGLImportSubLedger]
     		FETCH NEXT FROM cursor_postdate INTO @postdate,@glije_src_sys,@glije_src_no
     		WHILE @@FETCH_STATUS =0
     		BEGIN
-
-    			EXEC  dbo.uspGLGetNewID 2, @strJournalId  OUTPUT
+				EXEC uspSMGetStartingNumber 2, @strJournalId OUTPUT
 				SET @headerDescription = ''Imported from '' + REPLACE(@glije_src_sys,'' '','''') +  '' '' + REPLACE(@glije_src_no,'' '' ,'''') + '' on '' + CONVERT (varchar(10), GETDATE(), 101) 
 				INSERT INTO tblGLJournal(intCompanyId, strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
     			strSourceId, strSourceType)
