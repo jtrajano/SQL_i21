@@ -38,6 +38,7 @@ INSERT INTO tblAREACustomerExport (
 	, dblShipToLongitude
 	, dtmDateCreated
 	, dtmDateModified
+	, strAccountType
 )
 SELECT intEntityId			= intId
 	, strEntityNo			= LTRIM(RTRIM(Id))
@@ -71,6 +72,7 @@ SELECT intEntityId			= intId
 	, dblShipToLongitude	= ShipToLongitude
 	, dtmDateCreated		= DateCreated
 	, dtmDateModified		= DateModified
+	, strAccountType		= AccountType
 FROM vyuEMEAExportCustomer 
 WHERE (CAST(ModifiedDate AS DATE) BETWEEN @dtmFrom AND @dtmTo) OR (@dtmFrom IS NULL OR @dtmTo IS NULL)
 
