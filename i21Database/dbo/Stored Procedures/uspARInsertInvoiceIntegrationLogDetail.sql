@@ -60,28 +60,15 @@ SET ANSI_WARNINGS OFF
 		@IntegrationLogEntries
 
 	UPDATE ARILD
-	SET
-		ARILD.[ysnSuccess] = 0
-		,ARILD.[strPostingMessage] = FT.[strMessage]
-	FROM
-		[tblARInvoiceIntegrationLogDetail] ARILD
-	CROSS APPLY
-		(
-		SELECT TOP 1
-			 FR.[intInvoiceId]
-			,FR.[strMessage]
-		FROM
-			@IntegrationLogEntries FR
-		WHERE
-			FR.[intIntegrationLogId] = ARILD.[intIntegrationLogId]
-			AND FR.[intInvoiceId] = ARILD.[intInvoiceId]
-			AND FR.[ysnHeader] = 0
-			AND FR.[ysnSuccess] = 0
-		
-		) FT
-	WHERE
-		ARILD.[ysnHeader] = 1
-		AND ARILD.[ysnPost] = 1
+	SET ARILD.[ysnSuccess] = 0
+	  , ARILD.[strPostingMessage] = FR.[strMessage]
+	FROM [tblARInvoiceIntegrationLogDetail] ARILD
+	INNER JOIN @IntegrationLogEntries FR ON FR.[intIntegrationLogId] = ARILD.[intIntegrationLogId]
+										AND FR.[intInvoiceId] = ARILD.[intInvoiceId]	
+	WHERE ARILD.[ysnHeader] = 1
+	  AND ARILD.[ysnPost] = 1
+	  AND ISNULL(FR.[ysnHeader], 0) = 0
+	  AND ISNULL(FR.[ysnSuccess], 0) = 0
 	
 RETURN 1
 END
