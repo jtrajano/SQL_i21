@@ -76,6 +76,7 @@ SELECT DISTINCT
 	, CUSTOMER.ysnApplySalesTax
 	, dblShipToLongitude			= shipLocation.dblLongitude
 	, dblShipToLatitude			= shipLocation.dblLatitude
+	, strAccountType = NULLIF(CUSTOMER.strType, '')
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
