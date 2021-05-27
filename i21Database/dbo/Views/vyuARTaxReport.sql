@@ -95,6 +95,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblQtyTonShipped			= DETAIL.dblQtyTonShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , strFederalTaxId 			= CUSTOMER.strFederalTaxId
 	 , strStateTaxId			= CUSTOMER.strStateTaxId
+	 , dblInvoiceTotal          = INVOICE.dblInvoiceTotal
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
