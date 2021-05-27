@@ -90,6 +90,18 @@ SELECT @strPurchaseSales='Purchase'
 END
 END
 
+DECLARE @strLocationName NVARCHAR(150)
+
+IF isnull(@intLocationId,0) <> 0
+BEGIN
+	SELECT  @strLocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intLocationId
+
+END
+ELSE
+BEGIN
+	SET @strLocationName = 'All'
+END
+
 DECLARE @FinalTable AS TABLE (intRow INT
 		, intSeqId INT
 		, strSeqHeader NVARCHAR(100)
@@ -242,6 +254,7 @@ SELECT   intRow
 			, ysnPreCrush = ysnCrush
 FROM tblRKDPRInventory
 WHERE intDPRHeaderId = @intDPRHeaderId 
+AND	 strLocationName = CASE WHEN @strLocationName = 'All' THEN strLocationName ELSE @strLocationName END
 
 SELECT intSeqId
 	, strSeqHeader
