@@ -52,6 +52,8 @@
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
 	,@ItemContractHeaderId			INT				= NULL
 	,@ItemContractDetailId			INT				= NULL
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
 	,@ItemItemContractHeaderId		INT				= NULL
 	,@ItemItemContractDetailId		INT				= NULL
 	,@ItemItemContract				BIT				= 0			
@@ -204,9 +206,7 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@ContractSeq					INT
 		,@InvoiceType					NVARCHAR(200)
 		,@TermId						INT
-		,@Pricing						NVARCHAR(250)	= NULL
-		,@ContractHeaderId				INT				= NULL
-		,@ContractDetailId				INT				= NULL
+		,@Pricing						NVARCHAR(250)	= NULL		
 		,@SpecialPrice					NUMERIC(18,6)	= 0.000000
 		,@ContractUOMId					INT
 		,@PriceUOMId					INT
