@@ -712,7 +712,7 @@ BEGIN
 
 										,[dblDiscount]				= 0
 										
-										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity, 5) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - CAST(Tax.[dblAdjustedTax] AS DECIMAL(18,8))) / CAST(CPT.dblQuantity AS DECIMAL(18,8)),6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -789,7 +789,7 @@ BEGIN
 								AND Tax.strSourceTransaction = @strtblSTCheckoutPumpTotals01
 							WHERE CPT.intCheckoutId = @intCheckoutId
 								AND CPT.dblAmount > 0
-							
+
 
 						-- Insert Department Total Item with Pump Total negative amount 
 						-- If DT.intCategoryId = PT.intCategoryId AND DT.dblTotalSalesAmount = 0 AND CPT.dblAmount > 0
