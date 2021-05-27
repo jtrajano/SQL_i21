@@ -12,7 +12,7 @@ GO
 
 
 
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'Agronomy.view.ProductMixer?showSearch=true' AND strModuleName = 'Agronomy')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Form Training Tool' AND strModuleName = 'IDP')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6795,24 +6795,13 @@ ELSE
 DECLARE @IDPMaintenanceParentMenuId INT
 SELECT @IDPMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Connection Setting' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Connection Setting', N'IDP', @IDPMaintenanceParentMenuId, N'Connection Setting', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrFormTool?menu=connections', N'small-menu-maintenance', 1, 1, 0, 1, 0, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.OcrFormTool?menu=connections' WHERE strMenuName = N'Connection Setting' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Custom Document Models' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Custom Document Models', N'IDP', @IDPMaintenanceParentMenuId, N'Custom Document Models', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrFormTool', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GlobalComponentEngine.view.OcrFormTool' WHERE strMenuName = N'Custom Document Models' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Default Values' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Default Values', N'IDP', @IDPMaintenanceParentMenuId, N'Default Values', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrDefaultValues', N'small-menu-maintenance', 1, 1, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GlobalComponentEngine.view.OcrDefaultValues' WHERE strMenuName = N'Default Values' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId
 
+--CREATE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
 	VALUES (N'Create', N'IDP', @IDPParentMenuId, N'Create', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1, 1)
@@ -6828,11 +6817,40 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Docum
 ELSE
 	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.OCRAddDocuments?type=ocr', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL WHERE strMenuName = 'Add Documents' AND strModuleName = 'IDP' AND intParentMenuID = @IDPCreateParentMenuId
 
+--FORM TRAINING TOOL
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Form Training Tool' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Form Training Tool', N'IDP', @IDPParentMenuId, N'Form Training Tool', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2, intRow = 0 WHERE strMenuName = 'Form Training Tool' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId
+
+DECLARE @IDPFormTrainingToolParentMenuId INT
+SELECT @IDPFormTrainingToolParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Form Training Tool' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Connections' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Connections', N'IDP', @IDPFormTrainingToolParentMenuId, N'Connections', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrFormTool?menu=connections', N'small-menu-maintenance', 1, 1, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.OcrFormTool?menu=connections' WHERE strMenuName = N'Connections' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Custom Models' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Custom Models', N'IDP', @IDPFormTrainingToolParentMenuId, N'Custom Models', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrFormTool', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GlobalComponentEngine.view.OcrFormTool' WHERE strMenuName = N'Custom Models' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Settings' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Settings', N'IDP', @IDPFormTrainingToolParentMenuId, N'Settings', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrFormTool?menu=settings', N'small-menu-maintenance', 1, 1, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.OcrFormTool?menu=settings' WHERE strMenuName = N'Settings' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId
 
 
 
 DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Integrated Document Processing'
 DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Document Processing (IDP)'
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Connection Setting' AND intParentMenuID = @IDPMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Custom Document Models' AND intParentMenuID = @IDPMaintenanceParentMenuId
 
 
 
