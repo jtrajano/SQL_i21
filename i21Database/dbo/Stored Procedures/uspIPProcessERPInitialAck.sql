@@ -193,6 +193,7 @@ BEGIN TRY
 								END
 							)
 						,strMessage = @StatusText
+						,strERPPONumber = @ERPCONumber
 					WHERE intContractFeedId = @TrxSequenceNo
 
 					--Update the PO Details in modified sequences

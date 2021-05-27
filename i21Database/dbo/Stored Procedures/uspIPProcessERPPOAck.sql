@@ -171,8 +171,8 @@ BEGIN TRY
 					,1
 					,'Success'
 
-				IF @StatusId = 1
-				BEGIN
+				--IF @StatusId = 1
+				--BEGIN
 					UPDATE tblCTContractFeed
 					SET intStatusId = 6
 						,strMessage = 'Success'
@@ -210,28 +210,28 @@ BEGIN TRY
 						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
 						,@ERPPONumber
 						)
-				END
-				ELSE
-				BEGIN
-					UPDATE tblCTContractFeed
-					SET intStatusId = 5
-						,strMessage = @StatusText
-						,strFeedStatus = 'Ack Rcvd'
-					WHERE intContractFeedId = @OriginalTrxSequenceNo
+				--END
+				--ELSE
+				--BEGIN
+				--	UPDATE tblCTContractFeed
+				--	SET intStatusId = 5
+				--		,strMessage = @StatusText
+				--		,strFeedStatus = 'Ack Rcvd'
+				--	WHERE intContractFeedId = @OriginalTrxSequenceNo
 
-					INSERT INTO @tblMessage (
-						strMessageType
-						,strMessage
-						,strInfo1
-						,strInfo2
-						)
-					VALUES (
-						'PO Ack'
-						,@StatusText
-						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
-						,@ERPPONumber
-						)
-				END
+				--	INSERT INTO @tblMessage (
+				--		strMessageType
+				--		,strMessage
+				--		,strInfo1
+				--		,strInfo2
+				--		)
+				--	VALUES (
+				--		'PO Ack'
+				--		,@StatusText
+				--		,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
+				--		,@ERPPONumber
+				--		)
+				--END
 
 				SELECT @intMinRowNo = MIN(intRowNo)
 				FROM @tblAcknowledgement

@@ -9278,7 +9278,6 @@
     <Build Include="dbo\Stored Procedures\uspIPValidateERPContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPOAck.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPCO.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessERPCOAck.sql" />
     <Build Include="dbo\Tables\tblMFProductionPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPProduction.sql" />
     <Build Include="dbo\Tables\tblICAPClearing.sql" />
@@ -9297,7 +9296,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPGoodsReceipt.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptFeed.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceiptAck.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesTrendReport.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
@@ -9308,7 +9306,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPServiceOrderAck.sql" />
     <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPVoucher.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucherAck.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostAPClearingTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToDP.sql" />
     <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToOS.sql" />

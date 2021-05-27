@@ -173,8 +173,8 @@ BEGIN TRY
 					,1
 					,'Success'
 
-				IF @StatusId = 1
-				BEGIN
+				--IF @StatusId = 1
+				--BEGIN
 					UPDATE tblMFCommitmentPricingStage
 					SET intStatusId = 6
 						,strMessage = 'Success'
@@ -205,30 +205,30 @@ BEGIN TRY
 						,@PricingNo + ' / ' + ISNULL(@ERPRefNo, '')
 						,@ERPBlend
 						)
-				END
-				ELSE
-				BEGIN
-					UPDATE tblMFCommitmentPricingStage
-					SET intStatusId = 5
-						,strMessage = @StatusText
-						,strFeedStatus = 'Ack Rcvd'
-					WHERE intCommitmentPricingStageId = @OriginalTrxSequenceNo
+				--END
+				--ELSE
+				--BEGIN
+				--	UPDATE tblMFCommitmentPricingStage
+				--	SET intStatusId = 5
+				--		,strMessage = @StatusText
+				--		,strFeedStatus = 'Ack Rcvd'
+				--	WHERE intCommitmentPricingStageId = @OriginalTrxSequenceNo
 
-					--WHERE intCommitmentPricingId = @intCommitmentPricingId
-					--	AND intStatusId = 2
-					INSERT INTO @tblMessage (
-						strMessageType
-						,strMessage
-						,strInfo1
-						,strInfo2
-						)
-					VALUES (
-						'Commitment Pricing Ack'
-						,@StatusText
-						,@PricingNo + ' / ' + ISNULL(@ERPRefNo, '')
-						,@ERPBlend
-						)
-				END
+				--	--WHERE intCommitmentPricingId = @intCommitmentPricingId
+				--	--	AND intStatusId = 2
+				--	INSERT INTO @tblMessage (
+				--		strMessageType
+				--		,strMessage
+				--		,strInfo1
+				--		,strInfo2
+				--		)
+				--	VALUES (
+				--		'Commitment Pricing Ack'
+				--		,@StatusText
+				--		,@PricingNo + ' / ' + ISNULL(@ERPRefNo, '')
+				--		,@ERPBlend
+				--		)
+				--END
 
 				SELECT @intMinRowNo = MIN(intRowNo)
 				FROM @tblAcknowledgement
