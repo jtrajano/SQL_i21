@@ -7839,6 +7839,7 @@
     <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
