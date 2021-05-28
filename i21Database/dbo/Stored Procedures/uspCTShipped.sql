@@ -126,12 +126,15 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			EXEC	uspCTUpdateSequenceBalance
-					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblConvertedQty,
-					@intUserId				=	@intUserId,
-					@intExternalId			=	@intInventoryShipmentItemId,
-					@strScreenName			=	@strScreenName
+			IF not(@intSourceType = -1 and @strScreenName = 'Load Schedule')
+			BEGIN
+				EXEC	uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblConvertedQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInventoryShipmentItemId,
+						@strScreenName			=	@strScreenName
+			END
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
@@ -144,12 +147,15 @@ BEGIN TRY
 								   
 			IF @intSourceType IN (-1,0,1,2,3,5)
 			BEGIN					
-				EXEC	uspCTUpdateScheduleQuantity
-						@intContractDetailId	=	@intContractDetailId,
-						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
-						@intUserId				=	@intUserId,
-						@intExternalId			=	@intInventoryShipmentItemId,
-						@strScreenName			=	@strScreenName
+				if not(@intSourceType = -1 and @strScreenName = 'Load Schedule')
+				begin
+					EXEC	uspCTUpdateScheduleQuantity
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInventoryShipmentItemId,
+							@strScreenName			=	@strScreenName
+				end
 
 				IF	@ysnReduceScheduleByLogisticsLoad = 1 AND @intSourceType = 1 AND @intOrderType = 1 AND ISNULL(@ysnLoad,0) = 0
 				BEGIN
