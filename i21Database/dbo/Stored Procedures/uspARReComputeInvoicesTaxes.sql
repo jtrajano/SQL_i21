@@ -154,25 +154,18 @@ CROSS APPLY
 	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, 0, IDs.[intItemUOMId], IDs.[intCurrencyId], IDs.[intCurrencyExchangeRateTypeId], IDs.[dblCurrencyExchangeRate]) TD
 WHERE
 	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
-		
 
-UPDATE
-	tblARInvoiceDetail 
-SET
-	[intTaxGroupId]	= DT.[intTaxGroupId]
-FROM
-	@InvoiceDetail IDs
-INNER JOIN
-	(
-	SELECT MAX([intTaxGroupId]) [intTaxGroupId], [intInvoiceDetailId] FROM [tblARInvoiceDetailTax] WITH (NOLOCK) GROUP BY [intInvoiceDetailId]
-	) DT
-		ON IDs.[intInvoiceDetailId] = DT.[intInvoiceDetailId]
-WHERE
-	tblARInvoiceDetail.[intInvoiceDetailId] = IDs.intInvoiceDetailId
-	AND NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
-
-	
-
+UPDATE ID 
+SET intTaxGroupId = DT.intTaxGroupId
+FROM tblARInvoiceDetail ID 
+INNER JOIN @InvoiceDetail IDs ON ID.intInvoiceDetailId = IDs.intInvoiceDetailId
+INNER JOIN (
+	SELECT intInvoiceDetailId
+		 , intTaxGroupId	=  MAX(intTaxGroupId)
+	FROM tblARInvoiceDetailTax WITH (NOLOCK) 
+	GROUP BY intInvoiceDetailId
+) DT ON IDs.[intInvoiceDetailId] = DT.[intInvoiceDetailId]
+WHERE NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 
 IF ISNULL(@SkipRecompute, 0) = 0
 	BEGIN
