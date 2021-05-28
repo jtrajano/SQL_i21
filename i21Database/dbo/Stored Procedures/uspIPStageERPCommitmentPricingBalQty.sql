@@ -62,11 +62,11 @@ BEGIN TRY
 				,ERPRefNo
 				,BalanceQty
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					parentId INT '@parentId'
+					parentId BIGINT '@parentId'
 					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
 					,CreatedDate DATETIME '../CreatedDate'
 					,CreatedByUser NVARCHAR(50) '../CreatedByUser'
-					,TrxSequenceNo INT
+					,TrxSequenceNo BIGINT
 					,PricingNo NVARCHAR(50)
 					,ERPRefNo NVARCHAR(100)
 					,BalanceQty NUMERIC(18, 6)
@@ -119,7 +119,7 @@ BEGIN TRY
 				,0
 				,@ErrMsg
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedByUser NVARCHAR(50)

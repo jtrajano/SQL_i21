@@ -1,7 +1,7 @@
 ﻿CREATE TABLE tblIPStorageLocationError (
 	intStorageLocationErrorId INT identity(1, 1)
 	,intStorageLocationStageId INT
-	,intTrxSequenceNo INT
+	,intTrxSequenceNo BIGINT
 	,strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS
 	,intActionId INT
 	,dtmCreatedDate DATETIME

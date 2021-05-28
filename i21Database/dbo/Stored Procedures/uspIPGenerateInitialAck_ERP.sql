@@ -15,7 +15,7 @@ BEGIN TRY
 		,@strInfo1 NVARCHAR(MAX) = ''
 	DECLARE @intMinRowNo INT
 		,@intInitialAckId INT
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@dtmCreatedDate DATETIME
 		,@strCreatedBy NVARCHAR(50)
@@ -27,7 +27,7 @@ BEGIN TRY
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intInitialAckId INT
-		,intTrxSequenceNo INT
+		,intTrxSequenceNo BIGINT
 		,strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS
 		,dtmCreatedDate DATETIME
 		,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS

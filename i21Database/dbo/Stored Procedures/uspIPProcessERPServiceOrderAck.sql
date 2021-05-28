@@ -10,7 +10,7 @@ BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@strMessage NVARCHAR(MAX)
-		,@TrxSequenceNo INT
+		,@TrxSequenceNo BIGINT
 		,@CompanyLocation NVARCHAR(6)
 		,@CreatedDate DATETIME
 		,@CreatedBy NVARCHAR(50)
@@ -25,7 +25,7 @@ BEGIN TRY
 		,@ERPServicePONo NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
-		,TrxSequenceNo INT
+		,TrxSequenceNo BIGINT
 		,CompanyLocation NVARCHAR(6)
 		,CreatedDate DATETIME
 		,CreatedBy NVARCHAR(50)
@@ -87,7 +87,7 @@ BEGIN TRY
 				,StatusId
 				,StatusText
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
@@ -130,8 +130,8 @@ BEGIN TRY
 				WHERE intWorkOrderPreStageId = @TrxSequenceNo
 
 				UPDATE tblMFWorkOrderPreStage
-				SET intStatusId = (Case When @StatusId=1 Then 6 Else 5 End)
-					,strMessage=@StatusText
+				SET intStatusId = 6
+					,strMessage='Success'
 				WHERE intWorkOrderPreStageId = @TrxSequenceNo
 
 				UPDATE tblMFWorkOrder
@@ -142,9 +142,9 @@ BEGIN TRY
 				UPDATE RMD
 				SET strERPServicePOLineNo = ERPServicePOlineNo
 				FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-						TrxSequenceNo INT
+						TrxSequenceNo BIGINT
 						,ERPServicePOlineNo NVARCHAR(50)
-						,parentId INT '@parentId'
+						,parentId BIGINT '@parentId'
 						) x
 				JOIN dbo.tblMFWorkOrderWarehouseRateMatrixDetail RMD ON RMD.intWorkOrderWarehouseRateMatrixDetailId = x.TrxSequenceNo
 				WHERE RMD.intWorkOrderId = @intWorkOrderId and parentId=@TrxSequenceNo

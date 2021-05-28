@@ -23,7 +23,7 @@
 	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dtmTransactionDate DATETIME NULL  DEFAULT((getdate())),
 	ysnMailSent BIT DEFAULT 0,
-	intTrxSequenceNo INT,
+	intTrxSequenceNo BIGINT,
 	strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS,
 	intActionId INT,
 	strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS,
