@@ -1831,6 +1831,7 @@ BEGIN TRY
 							,@intSettleStorageId
 							,@strBatchId
 							,@intCreatedUserId
+							,@dtmClientPostDate
 							,@ysnPosted
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
