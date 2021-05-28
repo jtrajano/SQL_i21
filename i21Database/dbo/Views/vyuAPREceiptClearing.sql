@@ -713,10 +713,166 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
+outer apply
+	( 
+		select top 1 (cast(1 as bit)) as ysnExists from tblGRCustomerStorage Storage
+			join tblSCDeliverySheet Sheet
+				on Storage.intDeliverySheetId = Sheet.intDeliverySheetId
+			where Storage.intCustomerStorageId = StorageReceipt.intCustomerStorageId
+	) tblSCDeliverySheetShrinkInvolment
 WHERE 
 	StorageReceipt.intSettleStorageId is not null 
 and bill.ysnPosted = 1
 AND Receipt.strReceiptType != 'Transfer Order'
+and (tblSCDeliverySheetShrinkInvolment.ysnExists is null or tblSCDeliverySheetShrinkInvolment.ysnExists = 0)
+
+union all
+SELECT
+    bill.intEntityVendorId
+    ,bill.dtmDate AS dtmDate
+    ,Receipt.strReceiptNumber
+    ,Receipt.intInventoryReceiptId
+    ,bill.intBillId
+    ,bill.strBillId
+    ,billDetail.intBillDetailId
+    ,StorageReceipt.intInventoryReceiptItemId
+    ,billDetail.intItemId
+    ,billDetail.intUnitOfMeasureId AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
+    ,StorageReceipt.dblTransactionUnits * ReceiptItem.dblUnitCost as dblVoucherTotal	
+    ,StorageReceipt.dblTransactionUnits AS dblVoucherQty
+    ,0 AS dblReceiptTotal
+    ,0 AS dblReceiptQty
+   
+    ,Receipt.intLocationId
+    ,compLoc.strLocationName
+    ,CAST(1 AS BIT) ysnAllowVoucher
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
+	--tblSCD
+
+	--,tblSCDeliverySheetShrinkInvolment.ysnExists
+
+	--
+FROM tblGRStorageInventoryReceipt StorageReceipt
+	join ( 
+
+				select  Item.intInventoryReceiptId, Tickets.intTicketId from (
+					select strTicketNumber, intTicketId, intItemId from tblSCTicket where intInventoryReceiptId is not null and intDeliverySheetId > 0
+					) Tickets
+					join tblICInventoryReceiptItem Item
+						on Item.intSourceId = Tickets.intTicketId				
+					--join tblQMTicketDiscount TicketDiscount
+					--	on TicketDiscount.intTicketId = Tickets.intTicketId
+					--join tblGRDiscountScheduleCode DiscountScheduleCode
+					--	on DiscountScheduleCode.intDiscountScheduleCodeId = TicketDiscount.intDiscountScheduleCodeId
+					--join tblICInventoryReceiptCharge Charge
+					--	on Item.intInventoryReceiptId = Charge.intInventoryReceiptId				
+					--		and Charge.intChargeId = DiscountScheduleCode.intItemId		
+						
+		) TicketLinking			
+			on StorageReceipt.intInventoryReceiptId = TicketLinking.intInventoryReceiptId
+					
+		join tblICInventoryReceipt Receipt
+			on Receipt.intInventoryReceiptId = TicketLinking.intInventoryReceiptId
+		join tblICInventoryReceiptItem ReceiptItem
+			on Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId			
+			and ReceiptItem.intInventoryReceiptItemId = StorageReceipt.intInventoryReceiptItemId
+join tblAPBillDetail billDetail
+			on  billDetail.intCustomerStorageId = StorageReceipt.intCustomerStorageId
+				and ReceiptItem.intItemId = billDetail.intItemId
+				and billDetail.intSettleStorageId = StorageReceipt.intSettleStorageId
+		INNER JOIN tblAPBill bill ON billDetail.intBillId = bill.intBillId
+INNER JOIN tblSMCompanyLocation compLoc
+    ON Receipt.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN vyuGLAccountDetail APClearing
+    ON APClearing.intAccountId = billDetail.intAccountId AND APClearing.intAccountCategoryId = 45
+LEFT JOIN tblSMFreightTerms ft
+    ON ft.intFreightTermId = Receipt.intFreightTermId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
+outer apply
+	( 
+		select top 1 (cast(1 as bit)) as ysnExists from tblGRCustomerStorage Storage
+			join tblSCDeliverySheet Sheet
+				on Storage.intDeliverySheetId = Sheet.intDeliverySheetId
+			where Storage.intCustomerStorageId = StorageReceipt.intCustomerStorageId
+	) tblSCDeliverySheetShrinkInvolment
+WHERE 
+	StorageReceipt.intSettleStorageId is not null 
+and bill.ysnPosted = 1
+AND Receipt.strReceiptType != 'Transfer Order'
+and (tblSCDeliverySheetShrinkInvolment.ysnExists is not null or tblSCDeliverySheetShrinkInvolment.ysnExists = 1)
+
+/*
+(Sheet.ysnInvolvedWithShrinkage is not null 
+					and Sheet.ysnInvolvedWithShrinkage = 1
+				)
+			and 
+			*/
+union all
+SELECT
+    Sheet.intEntityId
+    ,GLDetail.dtmDate AS dtmDate
+	,Receipt.strReceiptNumber
+    ,Receipt.intInventoryReceiptId
+    ,null --Sheet.intDeliverySheetId
+    ,null --Sheet.strDeliverySheetNumber
+    ,null --Storage.intCustomerStorageId
+    ,ReceiptItem.intInventoryReceiptItemId
+    ,ReceiptItem.intItemId
+    ,UOM.intItemUOMId AS intItemUOMId --check this
+    ,unitMeasure.strUnitMeasure AS strUOM
+    ,SheetShrink.dblComputedShrinkPerIR * ReceiptItem.dblUnitCost  as dblVoucherTotal	
+    ,SheetShrink.dblComputedShrinkPerIR AS dblVoucherQty
+    ,0 AS dblReceiptTotal
+    ,0 AS dblReceiptQty
+   
+    ,Sheet.intCompanyLocationId
+    ,compLoc.strLocationName
+    ,CAST(1 AS BIT) ysnAllowVoucher
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
+	--tblSCD
+
+	
+
+		--
+	FROM tblSCDeliverySheetShrinkReceiptDistribution SheetShrink
+		join tblSCDeliverySheet Sheet
+		on Sheet.intDeliverySheetId = SheetShrink.intDeliverySheetId
+			and (Sheet.ysnInvolvedWithShrinkage is not null 
+					and Sheet.ysnInvolvedWithShrinkage = 1
+				)	
+	
+		join tblICInventoryReceipt Receipt
+			on Receipt.intInventoryReceiptId = SheetShrink.intInventoryReceiptId
+		join tblICInventoryReceiptItem ReceiptItem
+			on Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId			
+				and ReceiptItem.intInventoryReceiptItemId = SheetShrink.intInventoryReceiptItemId
+				
+		INNER JOIN tblSMCompanyLocation compLoc
+			ON Receipt.intLocationId = compLoc.intCompanyLocationId
+		join tblGLDetail GLDetail
+			on GLDetail.intTransactionId = Sheet.intDeliverySheetId 
+				and GLDetail.ysnIsUnposted = 0 
+				and GLDetail.strCode = 'SC' 
+				and GLDetail.strTransactionType = 'Delivery Sheet'
+		INNER JOIN vyuGLAccountDetail APClearing
+			ON APClearing.intAccountId = GLDetail.intAccountId 
+				AND APClearing.intAccountCategoryId = 45
+
+		left join tblICItemUOM UOM
+			on UOM.intItemId = ReceiptItem.intItemId
+				and UOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+		left JOIN tblICUnitMeasure unitMeasure
+			ON unitMeasure.intUnitMeasureId = UOM.intUnitMeasureId
+	WHERE 
+	Receipt.strReceiptType != 'Transfer Order'
 
 
 GO
