@@ -12,7 +12,7 @@ GO
 
 
 
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Form Training Tool' AND strModuleName = 'IDP')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'Agronomy.view.ApplicationMethod?showSearch=true' AND strModuleName = 'Agronomy')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6694,6 +6694,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Product M
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.ProductMixer?showSearch=true' WHERE strMenuName = 'Product Mixers' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Application Method' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Application Method', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Application Method', N'Activity', N'Screen', N'Agronomy.view.ApplicationMethod?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.ApplicationMethod?showSearch=true' WHERE strMenuName = 'Application Method' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
 
 
 

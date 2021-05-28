@@ -9417,6 +9417,10 @@
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALSR.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALEXPR.sql" />
+    <Build Include="dbo\Tables\tblAGApplicationMethod.sql" />
+    <Build Include="dbo\Tables\tblAGApplicationMethodDetail.sql" />
+    <Build Include="dbo\Views\vyuAGGetApplicationMethodDetail.sql" />
+    <Build Include="dbo\Views\vyuAGGetStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
