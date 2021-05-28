@@ -14,7 +14,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@dtmDateCreated DATETIME = GETDATE()
 		,@strError NVARCHAR(MAX)
-	DECLARE @intTrxSequenceNo INT
+	DECLARE @intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@intActionId INT
 		,@dtmCreatedDate DATETIME

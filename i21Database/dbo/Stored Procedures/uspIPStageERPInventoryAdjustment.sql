@@ -92,7 +92,7 @@ BEGIN TRY
 				,NewStorageLocation
 				,NewStorageUnit
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -167,7 +167,7 @@ BEGIN TRY
 				,0 AS intStatusId
 				,@ErrMsg AS strStatusText
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)

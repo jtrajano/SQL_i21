@@ -72,7 +72,7 @@ BEGIN TRY
 				,DefaultLocation
 				,TaxNo
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -128,8 +128,8 @@ BEGIN TRY
 				,TermsCode
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					VendorName NVARCHAR(100) COLLATE Latin1_General_CI_AS '../VendorName'
-					,TrxSequenceNo INT
-					,parentId INT '@parentId'
+					,TrxSequenceNo BIGINT
+					,parentId BIGINT '@parentId'
 					,ActionId INT
 					,LineType INT
 					,LocationName NVARCHAR(200)
@@ -192,7 +192,7 @@ BEGIN TRY
 				,0
 				,@ErrMsg
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedByUser NVARCHAR(50)

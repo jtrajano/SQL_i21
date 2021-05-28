@@ -58,7 +58,7 @@ BEGIN TRY
 				,CreatedByUser
 				,ItemNo
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -94,8 +94,8 @@ BEGIN TRY
 					,ManufacturingCell NVARCHAR(50)
 					,StorageLocation NVARCHAR(50)
 					,ManufacturingGroup NVARCHAR(50)
-					,TrxSequenceNo INT
-					,parentId INT '@parentId'
+					,TrxSequenceNo BIGINT
+					,parentId BIGINT '@parentId'
 					) x
 
 			UPDATE IRD
@@ -147,7 +147,7 @@ BEGIN TRY
 				,0
 				,@ErrMsg
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedByUser NVARCHAR(50)
