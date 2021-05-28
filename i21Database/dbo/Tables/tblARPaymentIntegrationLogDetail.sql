@@ -22,4 +22,6 @@
 	[intConcurrencyId]					INT CONSTRAINT [DF_tblARPaymentIntegrationLogDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARPaymentIntegrationLogDetail_intIntegrationLogDetailId] PRIMARY KEY CLUSTERED ([intIntegrationLogDetailId] ASC)
 	--,CONSTRAINT [FK_tblARInvoiceIntegrationLogDetail_tblARInvoiceIntegrationLog] FOREIGN KEY ([intIntegrationLogId]) REFERENCES [dbo].[tblARInvoiceIntegrationLog] ([intIntegrationLogId]) ON DELETE CASCADE
-)
+);
+GO
+CREATE INDEX [idx_tblARPaymentIntegrationLogDetail] ON [dbo].[tblARPaymentIntegrationLogDetail] (intIntegrationLogId, intIntegrationLogDetailId)
