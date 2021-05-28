@@ -4,6 +4,7 @@
 	,@intSettleStorageId INT
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT	
+	,@dtmClientPostDate AS DATETIME
 	,@ysnPost AS BIT 
 AS
 BEGIN TRY
@@ -568,7 +569,7 @@ BEGIN
 		,strICCCostType					
 	)
 	SELECT 
-		 dtmDate						 = GETDATE()
+		 dtmDate						 = @dtmClientPostDate
 		,intItemId						 = @InventoryItemId
 		,strItemNo						 = CS.strItemNo
 		,intChargeId					 = CS.intChargeId
