@@ -452,48 +452,6 @@ BEGIN
 			RAISERROR(@ErrorMessage, 11, 1);
 			GOTO _Exit
 		END 
-		ELSE 
-		BEGIN 
-			INSERT INTO @billGLEntries (
-				dtmDate						
-				,strBatchId					
-				,intAccountId				
-				,dblDebit					
-				,dblCredit					
-				,dblDebitUnit				
-				,dblCreditUnit				
-				,strDescription				
-				,strCode					
-				,strReference				
-				,intCurrencyId				
-				,dblExchangeRate			
-				,dtmDateEntered				
-				,dtmTransactionDate			
-				,strJournalLineDescription  
-				,intJournalLineNo			
-				,ysnIsUnposted				
-				,intUserId					
-				,intEntityId				
-				,strTransactionId			
-				,intTransactionId			
-				,strTransactionType			
-				,strTransactionForm			
-				,strModuleName				
-				,intConcurrencyId			
-				,dblDebitForeign			
-				,dblDebitReport				
-				,dblCreditForeign			
-				,dblCreditReport			
-				,dblReportingRate			
-				,dblForeignRate				
-				,intSourceEntityId
-				,intCommodityId
-			)
-			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
-				@strBatchId = @strBatchId
-				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@strTransactionId = @strBillId
-		END 
 	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM @ChargesToAdjust)
@@ -514,46 +472,6 @@ BEGIN
 
 			RAISERROR(@ErrorMessage, 11, 1);
 			GOTO _Exit
-		END 
-		ELSE 
-		BEGIN 
-			INSERT INTO @billGLEntries (
-				dtmDate						
-				,strBatchId					
-				,intAccountId				
-				,dblDebit					
-				,dblCredit					
-				,dblDebitUnit				
-				,dblCreditUnit				
-				,strDescription				
-				,strCode					
-				,strReference				
-				,intCurrencyId				
-				,dblExchangeRate			
-				,dtmDateEntered				
-				,dtmTransactionDate			
-				,strJournalLineDescription  
-				,intJournalLineNo			
-				,ysnIsUnposted				
-				,intUserId					
-				,intEntityId				
-				,strTransactionId			
-				,intTransactionId			
-				,strTransactionType			
-				,strTransactionForm			
-				,strModuleName				
-				,intConcurrencyId			
-				,dblDebitForeign			
-				,dblDebitReport				
-				,dblCreditForeign			
-				,dblCreditReport			
-				,dblReportingRate			
-				,dblForeignRate						
-			)
-			EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
-				@strBatchId = @strBatchId
-				,@intEntityUserSecurityId = @intEntityUserSecurityId
-				,@strTransactionId = @strBillId
 		END 			
 	END 
 	
@@ -562,6 +480,49 @@ BEGIN
 		-- 'Cost adjustment for {Transaction Id} is missing. Stock rebuild will abort.'
 		EXEC uspICRaiseError 80265, @strBillId; 	
 		RETURN -80265;
+	END 
+
+	-- Create the GL entries for the cost adjustment. 
+	BEGIN 
+		INSERT INTO @billGLEntries (
+			dtmDate						
+			,strBatchId					
+			,intAccountId				
+			,dblDebit					
+			,dblCredit					
+			,dblDebitUnit				
+			,dblCreditUnit				
+			,strDescription				
+			,strCode					
+			,strReference				
+			,intCurrencyId				
+			,dblExchangeRate			
+			,dtmDateEntered				
+			,dtmTransactionDate			
+			,strJournalLineDescription  
+			,intJournalLineNo			
+			,ysnIsUnposted				
+			,intUserId					
+			,intEntityId				
+			,strTransactionId			
+			,intTransactionId			
+			,strTransactionType			
+			,strTransactionForm			
+			,strModuleName				
+			,intConcurrencyId			
+			,dblDebitForeign			
+			,dblDebitReport				
+			,dblCreditForeign			
+			,dblCreditReport			
+			,dblReportingRate			
+			,dblForeignRate				
+			,intSourceEntityId
+			,intCommodityId
+		)
+		EXEC dbo.uspICCreateGLEntriesOnCostAdjustment 
+			@strBatchId = @strBatchId
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@strTransactionId = @strBillId
 	END 
 END 
 
