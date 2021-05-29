@@ -485,7 +485,7 @@ LEFT JOIN (
 		 , P.intPaymentId
 		 , strRecordNumber	= strPaymentRecordNum
 		 , P.dtmDatePaid
-		 , dblTotalPayment	= (ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)) * -1
+		 , dblTotalPayment	= ABS((ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)))
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
@@ -495,7 +495,8 @@ LEFT JOIN (
 		WHERE ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	) P ON PD.intPaymentId = P.intPaymentId
-
+	WHERE PD.intInvoiceId IS NOT NULL
+	
 	UNION ALL
 
 	SELECT intInvoiceId			= intOriginalInvoiceId
