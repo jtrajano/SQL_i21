@@ -380,8 +380,11 @@ BEGIN
 	WHILE EXISTS(SELECT 1 FROM @tmpReverseJournals)
 	BEGIN
 		DECLARE @intJournalId INT = (SELECT TOP 1 intJournalId FROM @tmpReverseJournals)
+		
 		DECLARE @strJournalId NVARCHAR(100) = ''
-		EXEC uspSMGetStartingNumber 5, @strJournalId OUTPUT
+				
+		EXEC [dbo].uspGLGetNewID 5, @strJournalId OUTPUT 		
+		
 		INSERT INTO tblGLJournal (
 				 [dtmReverseDate]
 				,[strJournalId]
