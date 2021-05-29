@@ -9424,6 +9424,7 @@
     <Build Include="dbo\Views\vyuAGGetStorageLocation.sql" />
     <Build Include="dbo\Views\vyuAPDiscrepancy.sql" />
     <Build Include="dbo\Views\vyuAPClearingDiscrepancy.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUnfixedPurchaseContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
