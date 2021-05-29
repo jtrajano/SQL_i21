@@ -24,18 +24,20 @@ BEGIN
 	RETURN
 END
 	
+
+
 DECLARE @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT,@strJournalId NVARCHAR(100)
 
-EXEC uspSMGetStartingNumber 5, @strJournalId OUTPUT		
+EXEC uspGLGetNewID 5, @strJournalId OUTPUT
 
 INSERT INTO [tblGLJournal]
            ([intCompanyId]
-	     ,[strJournalId]
+		   ,[strJournalId]
            ,[strTransactionType]
            ,[dtmDate]
            ,[strReverseLink]
            ,[intCurrencyId]
-	     ,[intCurrencyExchangeRateId]
+		   ,[intCurrencyExchangeRateId]
            ,[dblExchangeRate]
            ,[strDescription]
            ,[ysnPosted]
@@ -51,12 +53,12 @@ INSERT INTO [tblGLJournal]
            ,[intFiscalYearId]
            ,[intJournalIdToReverse])
 	SELECT  intCompanyId
-	     ,@strJournalId
+		   ,@strJournalId
            ,[strTransactionType]
            ,GETDATE()
            ,[strReverseLink]
            ,[intCurrencyId]
-		,[intCurrencyExchangeRateId]
+		   ,[intCurrencyExchangeRateId]
            ,[dblExchangeRate]
            ,'Reversing transaction for ' + strJournalId
            ,0
