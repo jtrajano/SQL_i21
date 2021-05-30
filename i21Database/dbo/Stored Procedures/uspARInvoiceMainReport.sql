@@ -161,7 +161,7 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , strRequestId			= @strRequestId
 	 , strType				= INVOICE.strType
 	 , ysnStretchLogo		= @ysnStretchLogo
-	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
+	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard', 'Service Charge') THEN 
 	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN @strGrainInvoiceFormat
 											 ELSE @strInvoiceReportName
 										END
