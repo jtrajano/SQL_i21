@@ -176,7 +176,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
 	 , dblContractBalance		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.dblBalance ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END				
-	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
+	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN INVOICEDETAIL.strItemDescription ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN
@@ -267,7 +267,6 @@ LEFT JOIN (
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , ID.dblTotal
 		 , ID.strVFDDocumentNumber
-		 , ID.strSCInvoiceNumber
 		 , UOM.strUnitMeasure
 		 , CONTRACTS.dblBalance
 		 , CONTRACTS.strContractNumber
@@ -275,7 +274,7 @@ LEFT JOIN (
 		 , ITEM.strItemNo
 		 , ITEM.strInvoiceComments
 		 , strItemType			= ITEM.strType
-		 , strItemDescription	= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
+		 , strItemDescription	= ISNULL(ISNULL(NULLIF(ID.strItemDescription, '') ,ITEM.strDescription), ID.strSCInvoiceNumber)
 		 , SO.strBOLNumber
 		 , ITEM.ysnListBundleSeparately
 		 , RECIPE.intRecipeId
