@@ -216,7 +216,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblContractBalance		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.dblBalance ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END
 	 , strContractNoSeq			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber + ' - ' + CAST(INVOICEDETAIL.intContractSeq AS NVARCHAR(100)) ELSE NULL END
-	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
+	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN INVOICEDETAIL.strItemDescription ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
@@ -309,8 +309,7 @@ LEFT JOIN (
 		 , dblComputedGrossPrice	= ID.dblComputedGrossPrice	
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , dblTotal					= ID.dblTotal
-		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber
-		 , strSCInvoiceNumber		= ID.strSCInvoiceNumber
+		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber		 
 		 , strUnitMeasure			= UOM.strUnitMeasure
 		 , intContractSeq			= CONTRACTS.intContractSeq
 		 , dblBalance				= CONTRACTS.dblBalance
@@ -319,7 +318,7 @@ LEFT JOIN (
 		 , strItemNo				= ITEM.strItemNo
 		 , strInvoiceComments		= ITEM.strInvoiceComments
 		 , strItemType				= ITEM.strType
-		 , strItemDescription		= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
+		 , strItemDescription    	= ISNULL(ISNULL(NULLIF(ID.strItemDescription, '') ,ITEM.strDescription), ID.strSCInvoiceNumber)
 		 , strBOLNumber				= SO.strBOLNumber
 		 , ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
 		 , intRecipeId				= RECIPE.intRecipeId
