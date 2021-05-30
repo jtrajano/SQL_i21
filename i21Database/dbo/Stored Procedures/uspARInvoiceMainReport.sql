@@ -136,7 +136,7 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , strRequestId			= @strRequestId
 	 , strType				= INVOICE.strType
 	 , ysnStretchLogo		= ISNULL(COMPANYPREFERENCE.ysnStretchLogo, 0)
-	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN 
+	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard', 'Service Charge') THEN 
 	 									CASE WHEN ISNULL(TICKET.intTicketId, 0) <> 0 THEN ISNULL(COMPANYPREFERENCE.strGrainInvoiceFormat, 'Standard')
 											 ELSE CASE WHEN INVOICE.strTransactionType <> 'Credit Memo' THEN 
 															CASE WHEN ISNULL(COMPANYPREFERENCE.strInvoiceReportName, 'Standard') = 'Format 3 - Swink' THEN 'Meter Billing'
