@@ -17,10 +17,6 @@ FROM (
 		FROM vyuAPPayables
 		GROUP BY intBillId, strBillId
 		UNION ALL
-		SELECT intBillId, CAST((SUM(dblTotal) + SUM(dblInterest) - SUM(dblAmountPaid) - SUM(dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue 
-		FROM vyuAPPayablesForeign
-		GROUP BY intBillId
-		UNION ALL
 		SELECT intBillId, CAST((SUM(dblTotal) + SUM(dblInterest) - SUM(dblAmountPaid) - SUM(dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 		FROM vyuAPPrepaidPayables
 		GROUP BY intBillId
