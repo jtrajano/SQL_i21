@@ -235,7 +235,7 @@ FROM tblSMCompanySetup A,
 		*
 	FROM DIV1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 5 THEN 1 ELSE 0 END)
 ) Data1099
-,tblAP1099Threshold B
+inner join tblAP1099Threshold B on 1=1
 GROUP BY intYear
 ,strEin  
 ,strAddress  
