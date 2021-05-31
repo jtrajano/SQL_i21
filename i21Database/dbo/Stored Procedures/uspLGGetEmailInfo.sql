@@ -367,4 +367,50 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
+	ELSE IF (@strReportName LIKE 'BOLReport%')
+	BEGIN
+		SELECT @strLoadNumber = strLoadNumber,
+				@intPurchaseSaleId = intPurchaseSale
+		FROM tblLGLoad
+		WHERE intLoadId = @intTransactionId
+
+		IF(@strInstoreTo = 'Vendor')
+		BEGIN
+			SELECT @intEntityId = intVendorEntityId FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId		
+		END
+		ELSE 
+		BEGIN
+			SELECT @intEntityId = intCustomerEntityId FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId	
+		END
+
+		SELECT @strEntityName = strName
+		FROM tblEMEntity
+		WHERE intEntityId = @intEntityId
+
+		SELECT @strIds = STUFF((
+					SELECT DISTINCT '|^| ' + LTRIM(intEntityContactId)
+					FROM vyuCTEntityToContact
+					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
+					FOR XML PATH('')
+					), 1, 3, '')
+		FROM vyuCTEntityToContact CH
+		WHERE intEntityId = @intEntityId
+
+		SET @Subject = 'Load/Shipment Schedule - Bill of Lading - ' + @strLoadNumber
+		SET @body += '<!DOCTYPE html>'
+		SET @body += '<html>'
+		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
+		SET @body += 'Please see your bill of lading in the attachments tab. <br><br>'
+		SET @body += 'Thank you for your business. <br><br>'
+		SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
+		SET @body += '</html>'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+
+		SELECT @Subject AS strSubject
+			,@Filter AS strFilters
+			,@body AS strMessage
+	END
 END
