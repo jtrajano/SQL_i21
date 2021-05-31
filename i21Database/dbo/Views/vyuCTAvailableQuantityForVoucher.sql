@@ -13,9 +13,9 @@ with summ as (
 		,pfd.dblQuantity
 	from
 		tblCTPriceFixation pf
-		,tblCTPriceFixationDetail pfd
-	where
-		pfd.intPriceFixationId = pf.intPriceFixationId
+		inner join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+
+		
 ),
 bill as (
 	select
