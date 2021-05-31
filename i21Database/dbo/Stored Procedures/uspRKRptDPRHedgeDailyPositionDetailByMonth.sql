@@ -232,9 +232,12 @@ END
 			, ysnPreCrush = ysnCrush
 		FROM tblRKDPRContractHedgeByMonth
 		WHERE intDPRHeaderId = @intDPRHeaderId
+		AND	 strLocationName = CASE WHEN @strLocationName = 'All' THEN strLocationName ELSE @strLocationName END
 
-
-
+	IF (@strCommodityCode IS NULL) 
+	BEGIN
+		SELECT TOP 1 @strCommodityCode = strCommodityCode FROM @List
+	END
 
 	DECLARE @ctr as int
 	SELECT @ctr = COUNT(intRowNumber) FROM @List 

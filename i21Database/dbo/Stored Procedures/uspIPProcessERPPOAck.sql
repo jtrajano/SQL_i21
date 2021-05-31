@@ -10,7 +10,7 @@ BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@strMessage NVARCHAR(MAX)
-		,@TrxSequenceNo INT
+		,@TrxSequenceNo BIGINT
 		,@CompanyLocation NVARCHAR(6)
 		,@CreatedDate DATETIME
 		,@CreatedBy NVARCHAR(50)
@@ -28,7 +28,7 @@ BEGIN TRY
 		,@ERPPOlineNo NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
-		,TrxSequenceNo INT
+		,TrxSequenceNo BIGINT
 		,CompanyLocation NVARCHAR(6)
 		,CreatedDate DATETIME
 		,CreatedBy NVARCHAR(50)
@@ -96,7 +96,7 @@ BEGIN TRY
 				,ERPPONumber
 				,ERPPOlineNo
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					TrxSequenceNo INT '../TrxSequenceNo'
+					TrxSequenceNo BIGINT '../TrxSequenceNo'
 					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
 					,CreatedDate DATETIME '../CreatedDate'
 					,CreatedByUser NVARCHAR(50) '../CreatedByUser'
@@ -171,8 +171,8 @@ BEGIN TRY
 					,1
 					,'Success'
 
-				IF @StatusId = 1
-				BEGIN
+				--IF @StatusId = 1
+				--BEGIN
 					UPDATE tblCTContractFeed
 					SET intStatusId = 6
 						,strMessage = 'Success'
@@ -210,28 +210,28 @@ BEGIN TRY
 						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
 						,@ERPPONumber
 						)
-				END
-				ELSE
-				BEGIN
-					UPDATE tblCTContractFeed
-					SET intStatusId = 5
-						,strMessage = @StatusText
-						,strFeedStatus = 'Ack Rcvd'
-					WHERE intContractFeedId = @OriginalTrxSequenceNo
+				--END
+				--ELSE
+				--BEGIN
+				--	UPDATE tblCTContractFeed
+				--	SET intStatusId = 5
+				--		,strMessage = @StatusText
+				--		,strFeedStatus = 'Ack Rcvd'
+				--	WHERE intContractFeedId = @OriginalTrxSequenceNo
 
-					INSERT INTO @tblMessage (
-						strMessageType
-						,strMessage
-						,strInfo1
-						,strInfo2
-						)
-					VALUES (
-						'PO Ack'
-						,@StatusText
-						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
-						,@ERPPONumber
-						)
-				END
+				--	INSERT INTO @tblMessage (
+				--		strMessageType
+				--		,strMessage
+				--		,strInfo1
+				--		,strInfo2
+				--		)
+				--	VALUES (
+				--		'PO Ack'
+				--		,@StatusText
+				--		,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
+				--		,@ERPPONumber
+				--		)
+				--END
 
 				SELECT @intMinRowNo = MIN(intRowNo)
 				FROM @tblAcknowledgement

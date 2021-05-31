@@ -72,7 +72,7 @@ BEGIN TRY
 				,DefaultLocation
 				,TaxNo
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -128,8 +128,8 @@ BEGIN TRY
 				,TermsCode
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					VendorName NVARCHAR(100) COLLATE Latin1_General_CI_AS '../VendorName'
-					,TrxSequenceNo INT
-					,parentId INT '@parentId'
+					,TrxSequenceNo BIGINT
+					,parentId BIGINT '@parentId'
 					,ActionId INT
 					,LineType INT
 					,LocationName NVARCHAR(200)
@@ -147,29 +147,6 @@ BEGIN TRY
 			SET ET.intStageEntityId = E.intStageEntityId
 			FROM tblIPEntityStage E
 			JOIN tblIPEntityTermStage ET ON ET.intParentTrxSequenceNo = E.intTrxSequenceNo
-
-			INSERT INTO tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedByUser
-				,5
-				,1
-				,'Success'
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedByUser NVARCHAR(50)
-					)
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
@@ -215,7 +192,7 @@ BEGIN TRY
 				,0
 				,@ErrMsg
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedByUser NVARCHAR(50)

@@ -238,6 +238,7 @@ DECLARE  @strCompanyName NVARCHAR(500)
      ,dblTotaPurchasePrice = CAST((SC.dblUnitPrice * SC.dblNetUnits) AS DECIMAL(18,2))
      ,@dblCheckOff AS dblCheckOff
      ,@dblNetAmtPayable AS dblNetAmtPayable
+     ,SC.dtmTicketDateTime AS dtmTicketDateTime
   
   
  FROM tblSCTicket SC  

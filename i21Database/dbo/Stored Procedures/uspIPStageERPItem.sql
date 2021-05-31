@@ -86,7 +86,7 @@ BEGIN TRY
 				,Origin
 				,ProductType
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -137,8 +137,8 @@ BEGIN TRY
 					ItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS '../ItemNo'
 					,UOM NVARCHAR(50)
 					,UnitQty NUMERIC(18, 6)
-					,TrxSequenceNo INT
-					,parentId INT '@parentId'
+					,TrxSequenceNo BIGINT
+					,parentId BIGINT '@parentId'
 					,IsStockUOM INT
 					) x
 
@@ -147,29 +147,6 @@ BEGIN TRY
 			FROM tblIPItemStage I
 			JOIN tblIPItemUOMStage IUOM ON IUOM.intParentTrxSequenceNo = I.intTrxSequenceNo
 			
-			INSERT INTO tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedByUser
-				,1
-				,1
-				,'Success'
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedByUser NVARCHAR(50)
-					)
-
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
@@ -214,7 +191,7 @@ BEGIN TRY
 				,0
 				,@ErrMsg
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedByUser NVARCHAR(50)

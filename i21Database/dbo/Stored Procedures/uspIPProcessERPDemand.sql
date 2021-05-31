@@ -13,12 +13,12 @@ BEGIN TRY
 	DECLARE @intUserId INT
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 		,@strError NVARCHAR(MAX)
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 		,@intActionId INT
 		,@dtmCreatedDate DATETIME
 		,@strCreatedBy NVARCHAR(50)
 		,@strDemandName NVARCHAR(50)
-		,@intLineTrxSequenceNo INT
+		,@intLineTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
 		,@dblQuantity NUMERIC(18, 6)

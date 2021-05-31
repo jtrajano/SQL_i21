@@ -5007,7 +5007,6 @@
     <Build Include="dbo\Views\vyuARInvoicesForPayment.sql" />
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
-    <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
@@ -5023,6 +5022,7 @@
     <Build Include="dbo\Tables\tblRestApiReceiptItemLotStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
     <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
+    <Build Include="dbo\Views\vyuRestApiVendors.sql" />
     <Build Include="dbo\Views\vyuRestApiEntityUsers.sql" />
     <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
     <Build Include="dbo\Stored Procedures\uspRestApiImportInvoice.sql" />
@@ -9278,7 +9278,6 @@
     <Build Include="dbo\Stored Procedures\uspIPValidateERPContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPOAck.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPCO.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessERPCOAck.sql" />
     <Build Include="dbo\Tables\tblMFProductionPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPProduction.sql" />
     <Build Include="dbo\Tables\tblICAPClearing.sql" />
@@ -9297,7 +9296,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPGoodsReceipt.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptFeed.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceiptAck.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesTrendReport.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
@@ -9308,7 +9306,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPServiceOrderAck.sql" />
     <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPVoucher.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucherAck.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostAPClearingTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToDP.sql" />
     <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToOS.sql" />
@@ -9366,11 +9363,20 @@
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryTransferTransaction.sql" />
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
     <None Include="Scripts\Post-Deployment\CT\2_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALSR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALEXPR.sql" />
+    <Build Include="dbo\Tables\tblAGApplicationMethod.sql" />
+    <Build Include="dbo\Tables\tblAGApplicationMethodDetail.sql" />
+    <Build Include="dbo\Views\vyuAGGetApplicationMethodDetail.sql" />
+    <Build Include="dbo\Views\vyuAGGetStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUnfixedPurchaseContract.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

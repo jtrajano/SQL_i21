@@ -15,7 +15,7 @@ BEGIN TRY
 	DECLARE @strUserName NVARCHAR(100)
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 		,@ItemsForPost AS ItemCostingTableType
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@intActionId INT
 		,@dtmCreatedDate DATETIME
