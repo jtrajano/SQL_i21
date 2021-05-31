@@ -1683,6 +1683,7 @@ BEGIN TRY
 		, strEntityName
 		, intContractSeq
 		, intContractDetailId
+		, strTransactionReference
 	INTO #tempBasisDelivery
 	FROM dbo.fnRKGetBucketBasisDeliveries(@dtmToDate, @intCommodityId, @intVendorId) t
 	WHERE intLocationId = ISNULL(@intLocationId, intLocationId)
@@ -1796,36 +1797,46 @@ BEGIN TRY
 		, intTransactionRecordId)
 	SELECT intSeqId = 14
 		, strSeqHeader = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
-		, strCommodityCode
+		, tbd.strCommodityCode
 		, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
-		, dblTotal
-		, intCommodityId
-		, strLocationName
-		, intItemId
-		, strItemNo
-		, strCategoryCode
-		, dtmTicketDateTime
-		, strDistributionOption
+		, tbd.dblTotal
+		, tbd.intCommodityId
+		, tbd.strLocationName
+		, tbd.intItemId
+		, tbd.strItemNo
+		, tbd.strCategoryCode
+		, tbd.dtmTicketDateTime
+		, tbd.strDistributionOption
 		, intUnitMeasureId = NULL
-		, intLocationId
-		, strDPAReceiptNo
-		, intContractHeaderId
-		, strContractNumber
-		, intInventoryShipmentId = intTransactionReferenceId
-		, strShipmentNumber = strTransactionReferenceNo
-		, strTicketNumber = ''
-		, intTicketId = NULL
-		, intFutureMarketId
-		, intFutureMonthId
-		, strFutureMarket
-		, strFutureMonth
-		, strContractEndMonth
-		, strDeliveryDate
-		, strTransactionType
-		, strTransactionReferenceNo
-		, intTransactionReferenceId
-		, intTransactionReferenceDetailId
-	FROM #tempBasisDelivery
+		, tbd.intLocationId
+		, tbd.strDPAReceiptNo
+		, tbd.intContractHeaderId
+		, tbd.strContractNumber
+		, intInventoryShipmentId = tbd.intTransactionReferenceId
+		, strShipmentNumber = tbd.strTransactionReferenceNo
+		, strTicketNumber = CASE WHEN tbd.strTransactionReference = 'Inventory Shipment' THEN t.strTicketNumber ELSE t2.strTicketNumber END
+		, intTicketId = CASE WHEN tbd.strTransactionReference = 'Inventory Shipment' THEN t.intTicketId ELSE t2.intTicketId END
+		, tbd.intFutureMarketId
+		, tbd.intFutureMonthId
+		, tbd.strFutureMarket
+		, tbd.strFutureMonth
+		, tbd.strContractEndMonth
+		, tbd.strDeliveryDate
+		, tbd.strTransactionType
+		, tbd.strTransactionReferenceNo
+		, tbd.intTransactionReferenceId
+		, tbd.intTransactionReferenceDetailId
+	FROM #tempBasisDelivery tbd
+	LEFT JOIN tblSCTicket t
+		ON	tbd.strTransactionReference = 'Inventory Shipment' 
+		AND tbd.intTransactionReferenceId = t.intInventoryShipmentId
+	LEFT JOIN tblARInvoiceDetail arid
+		ON	tbd.strTransactionReference = 'Invoice' 
+		AND tbd.intTransactionReferenceId = arid.intInvoiceId
+		AND tbd.intTransactionReferenceDetailId = arid.intInvoiceDetailId
+	LEFT JOIN tblSCTicket t2
+		ON	tbd.strTransactionReference = 'Invoice'
+		AND arid.intTicketId = t2.intTicketId
 	WHERE strContractType = 'Sale'
 
 	INSERT INTO @ListInventory(intSeqId
