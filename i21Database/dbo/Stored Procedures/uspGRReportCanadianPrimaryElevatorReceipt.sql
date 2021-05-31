@@ -157,7 +157,7 @@ BEGIN TRY
 		  AS strEntityAddress
 		,@strReceiptNumber AS strReceiptNumer
 		,LTRIM(Year(SC.dtmTicketDateTime)) AS strYear
-		,LTRIM(Month(SC.dtmTicketDateTime)) AS strMonth
+		,SC.dtmTicketDateTime AS strMonth
 		,LTRIM(Day(SC.dtmTicketDateTime)) AS strDay
 		,[dbo].[fnRemoveTrailingZeroes](@dblGrossWeight) AS dblGrossWeight
 		,[dbo].[fnRemoveTrailingZeroes](@dblTareWeight) AS dblTareWeight
