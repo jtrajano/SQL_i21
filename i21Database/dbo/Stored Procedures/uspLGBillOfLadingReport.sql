@@ -8,7 +8,10 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 	IF ISNULL(@xmlParam, '') = ''
 	BEGIN
-		SELECT '' AS 'intInventoryShipmentId'
+		SELECT 
+			'' AS 'strLoadNumber'
+			,'' AS 'dtmScheduledDate'
+			,'' AS 'intInventoryShipmentId'
 			,'' AS 'strShipToAddress'
 			,'' AS 'strShipmentNumber'
 			,'' AS 'strShipFromAddress'
@@ -47,7 +50,20 @@ BEGIN TRY
 			,'' AS 'strBOLInstructions'
 			,'' AS 'strContainerNumbers'
 			,'' AS 'strCarrier'
-			
+			,'' AS 'strOrderType'
+			,'' AS 'strCompanyHeaderInfo'
+			,'' AS 'strCompanyHeaderContact'
+			,'' AS 'strCompanyLocationName'
+			,'' AS 'strCompanyLocationAddress'
+			,'' AS 'strCompanyLocationCity' 
+			,'' AS 'strCompanyLocationState' 
+			,'' AS 'strCompanyLocationZip'
+			,'' AS 'strCompanyLocationPhone'
+			,'' AS 'strCompanyLocationEmail'
+			,'' AS 'strManufacturer'
+			,'' AS 'strCommodityInfo'
+			,'' AS 'strShipperInfo'
+			,'' AS 'strConsigneeInfo'
 		RETURN
 	END
 
@@ -102,6 +118,8 @@ BEGIN TRY
 		FROM tblLGLoad
 		WHERE strLoadNumber = @strShipmentNo
 
+		IF (@strOrderType IS NULL) SET @strOrderType = 'Outbound'
+
 		-- Taking 'Customer PO No' value from custom tab
 		SELECT @strCustomCustomerPO = FV.strValue
 		FROM tblSMTabRow TR
@@ -118,52 +136,17 @@ BEGIN TRY
 		FROM (
 			SELECT L.intLoadId
 				,L.strLoadNumber
-				,strShipFromAddress = LTRIM(RTRIM(CASE 
-							WHEN ISNULL(CL.strAddress, '') = ''
-								THEN ''
-							ELSE CL.strAddress + CHAR(13)
-							END + CASE 
-							WHEN ISNULL(CL.strCity, '') = ''
-								THEN ''
-							ELSE CL.strCity + ', '
-							END + CASE 
-							WHEN ISNULL(CL.strStateProvince, '') = ''
-								THEN ''
-							ELSE CL.strStateProvince + ', '
-							END + CASE 
-							WHEN ISNULL(CL.strZipPostalCode, '') = ''
-								THEN ''
-							ELSE CL.strZipPostalCode + ', '
-							END + CASE 
-							WHEN ISNULL(CL.strCountry, '') = ''
-								THEN ''
-							ELSE CL.strCountry
-							END))
-				,strShipToAddress = LTRIM(RTRIM(CASE 
-							WHEN ISNULL(EL.strLocationName, '') = ''
-								THEN ''
-							ELSE EL.strLocationName + ' '
-							END + CASE 
-							WHEN ISNULL(EL.strAddress, '') = ''
-								THEN ''
-							ELSE EL.strAddress + CHAR(13)
-							END + CASE 
-							WHEN ISNULL(EL.strCity, '') = ''
-								THEN ''
-							ELSE EL.strCity + ', '
-							END + CASE 
-							WHEN ISNULL(EL.strState, '') = ''
-								THEN ''
-							ELSE EL.strState + ', '
-							END + CASE 
-							WHEN ISNULL(EL.strZipCode, '') = ''
-								THEN ''
-							ELSE EL.strZipCode + ', '
-							END + CASE 
-							WHEN ISNULL(EL.strCountry, '') = ''
-								THEN ''
-							ELSE EL.strCountry
-							END))
+				,strShipFromAddress = LTRIM(RTRIM(CASE WHEN ISNULL(CL.strAddress, '') = '' THEN '' ELSE CL.strAddress + CHAR(13) END 
+					+ CASE WHEN ISNULL(CL.strCity, '') = '' THEN '' ELSE CL.strCity + ', ' END 
+					+ CASE WHEN ISNULL(CL.strStateProvince, '') = '' THEN '' ELSE CL.strStateProvince + ', ' END 
+					+ CASE WHEN ISNULL(CL.strZipPostalCode, '') = '' THEN '' ELSE CL.strZipPostalCode + ', ' END 
+					+ CASE WHEN ISNULL(CL.strCountry, '') = '' THEN '' ELSE CL.strCountry END))
+				,strShipToAddress = LTRIM(RTRIM(CASE WHEN ISNULL(EL.strLocationName, '') = '' THEN '' ELSE EL.strLocationName + ' ' END 
+					+ CASE WHEN ISNULL(EL.strAddress, '') = '' THEN '' ELSE EL.strAddress + CHAR(13) END 
+					+ CASE WHEN ISNULL(EL.strCity, '') = '' THEN '' ELSE EL.strCity + ', ' END 
+					+ CASE WHEN ISNULL(EL.strState, '') = '' THEN '' ELSE EL.strState + ', ' END 
+					+ CASE WHEN ISNULL(EL.strZipCode, '') = '' THEN '' ELSE EL.strZipCode + ', ' END 
+					+ CASE WHEN ISNULL(EL.strCountry, '') = '' THEN '' ELSE EL.strCountry END))
 				,L.strBLNumber
 				,L.strBookingReference
 				,strOrderNumber = ''
@@ -197,33 +180,14 @@ BEGIN TRY
 						SUM(ISNULL(LoadDetail.dblGross, 0) - ISNULL(LoadDetail.dblTare, 0)) OVER () 
 					END
 				,intWarehouseInstructionHeaderId = 0
-				,strCompanyName = (
-					SELECT TOP 1 strCompanyName
-					FROM tblSMCompanySetup
-					)
-				,strCompanyAddress = LTRIM(RTRIM(CASE 
-							WHEN ISNULL(CL.strAddress, '') = ''
-								THEN ''
-							ELSE CL.strAddress + ', '
-							END + CASE 
-							WHEN ISNULL(CL.strCity, '') = ''
-								THEN ''
-							ELSE CL.strCity + ', '
-							END + CASE 
-							WHEN ISNULL(CL.strStateProvince, '') = ''
-								THEN ''
-							ELSE CL.strStateProvince + ', '
-							END + CASE 
-							WHEN ISNULL(CL.strZipPostalCode, '') = ''
-								THEN ''
-							ELSE CL.strZipPostalCode + ', '
-							END + CASE 
-							WHEN ISNULL(CL.strCountry, '') = ''
-								THEN ''
-							ELSE CL.strCountry
-							END))
+				,strCompanyName = CS.strCompanyName
+				,strCompanyAddress = LTRIM(RTRIM(CASE WHEN ISNULL(CL.strAddress, '') = '' THEN '' ELSE CL.strAddress + ', ' END 
+					+ CASE WHEN ISNULL(CL.strCity, '') = '' THEN '' ELSE CL.strCity + ', ' END 
+					+ CASE WHEN ISNULL(CL.strStateProvince, '') = '' THEN '' ELSE CL.strStateProvince + ', ' END 
+					+ CASE WHEN ISNULL(CL.strZipPostalCode, '') = '' THEN '' ELSE CL.strZipPostalCode + ', ' END 
+					+ CASE WHEN ISNULL(CL.strCountry, '') = '' THEN '' ELSE CL.strCountry END))
 				,ParentLot.strParentLotNumber
-				,strCustomerName = Entity.strName
+				,strCustomerName = E.strName
 				,strShipFromLocation = CL.strLocationName
 				,strReferenceNumber = L.strExternalLoadNumber
 				,L.strMVessel
@@ -240,6 +204,47 @@ BEGIN TRY
 				,LoadDetail.strLoadDirectionMsg
 				,LoadDetail.strContainerNumbers
 				,strCarrier = CASE WHEN (ISNULL(L.strGenerateLoadHauler, '') <> '') THEN L.strGenerateLoadHauler ELSE Via.strName END
+				,strOrderType = CASE WHEN (E.intEntityId = LoadDetail.intVendorEntityId) THEN 'Inbound' ELSE 'Outbound' END
+				,strCompanyHeaderInfo = CASE WHEN ISNULL(CS.strWebSite, '') = '' THEN '' ELSE CS.strWebSite + CHAR(13) END 
+					+ CASE WHEN ISNULL(CS.strAddress, '') = '' THEN '' ELSE CS.strAddress + CHAR(13) END
+					+ CASE WHEN ISNULL(CS.strCity, '') = '' THEN '' ELSE CS.strCity + CASE WHEN ISNULL(CS.strState, '') = '' THEN CHAR(13) ELSE ', ' END END
+					+ CASE WHEN ISNULL(CS.strState, '') = '' THEN '' ELSE CS.strState + CHAR(13) END
+					+ CASE WHEN ISNULL(CS.strZip, '') = '' THEN '' ELSE CS.strZip END
+				,strCompanyHeaderContact = CASE WHEN ISNULL(CS.strPhone, '') = '' THEN '' ELSE 'Phone: ' + CS.strPhone + CHAR(13) END
+					+ CASE WHEN ISNULL(CS.strFax, '') = '' THEN '' ELSE 'Fax: ' + CS.strFax + CHAR(13) END
+					+ CASE WHEN ISNULL(CS.strEmail, '') = '' THEN '' ELSE CS.strEmail + CHAR(13) END
+				,strCompanyLocationName = CL.strLocationName
+				,strCompanyLocationAddress = CL.strAddress
+				,strCompanyLocationCity = CL.strCity
+				,strCompanyLocationState = CL.strStateProvince
+				,strCompanyLocationZip = CL.strZipPostalCode
+				,strCompanyLocationPhone = CL.strPhone
+				,strCompanyLocationEmail = CL.strEmail
+				,strManufacturer = Manu.strManufacturer
+				,strCommodityInfo = dbo.fnICFormatNumber(LoadDetail.dblQuantity) + ' ' + UOM.strUnitMeasure + ' of ' + Item.strItemNo
+				,strShipperInfo = CASE WHEN (E.intEntityId = LoadDetail.intVendorEntityId) 
+					THEN E.strName + CHAR(13)
+						+ 'Contact:' + EC.strName + ' ' + EC.strPhone + CHAR(13)
+						+ CASE WHEN ISNULL(EL.strAddress, '') = '' THEN '' ELSE EL.strAddress + CHAR(13) END
+						+ CASE WHEN ISNULL(EL.strCity, '') = '' THEN '' ELSE EL.strCity + CASE WHEN ISNULL(EL.strState, '') = '' THEN '' ELSE ', ' END END
+						+ CASE WHEN ISNULL(EL.strState, '') = '' THEN '' ELSE EL.strState END
+					ELSE CS.strCompanyName + CHAR(13)
+						+ CL.strLocationName + CASE WHEN ISNULL(CL.strAddress, '') = '' THEN CHAR(13) ELSE ' / ' END
+						+ CASE WHEN ISNULL(CL.strAddress, '') = '' THEN '' ELSE CL.strAddress + CHAR(13) END
+						+ CASE WHEN ISNULL(CL.strCity, '') = '' THEN '' ELSE CL.strCity + CASE WHEN ISNULL(CL.strStateProvince, '') = '' THEN '' ELSE ', ' END END
+						+ CASE WHEN ISNULL(CL.strStateProvince, '') = '' THEN '' ELSE CL.strStateProvince END
+					END
+				,strConsigneeInfo = CASE WHEN (E.intEntityId = LoadDetail.intVendorEntityId) 
+					THEN CS.strCompanyName + CHAR(13)
+						+ CL.strLocationName + CASE WHEN ISNULL(CL.strAddress, '') = '' THEN CHAR(13) ELSE ' / ' END
+						+ CASE WHEN ISNULL(CL.strAddress, '') = '' THEN '' ELSE CL.strAddress + CHAR(13) END
+						+ CASE WHEN ISNULL(CL.strCity, '') = '' THEN '' ELSE CL.strCity + CASE WHEN ISNULL(CL.strStateProvince, '') = '' THEN '' ELSE ', ' END END
+						+ CASE WHEN ISNULL(CL.strStateProvince, '') = '' THEN '' ELSE CL.strStateProvince END
+					ELSE E.strName + CHAR(13)
+						+ CASE WHEN ISNULL(EL.strAddress, '') = '' THEN '' ELSE EL.strAddress + CHAR(13) END
+						+ CASE WHEN ISNULL(EL.strCity, '') = '' THEN '' ELSE EL.strCity + CASE WHEN ISNULL(EL.strState, '') = '' THEN '' ELSE ', ' END END
+						+ CASE WHEN ISNULL(EL.strState, '') = '' THEN '' ELSE EL.strState END
+					END
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = L.intLoadId
 			LEFT JOIN tblLGLoadDetailLot LoadDetailLot ON LoadDetailLot.intLoadDetailId = LoadDetail.intLoadDetailId
@@ -257,15 +262,22 @@ BEGIN TRY
 			LEFT JOIN tblICParentLot ParentLot ON Lot.intParentLotId = ParentLot.intParentLotId
 			LEFT JOIN tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
 			LEFT JOIN tblICUnitMeasure LWUOM ON LWUOM.intUnitMeasureId = LotWeightUOM.intUnitMeasureId
+			LEFT JOIN tblICManufacturer Manu ON Manu.intManufacturerId = Item.intManufacturerId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LoadDetail.intSCompanyLocationId
-			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LoadDetail.intCustomerEntityLocationId
-			LEFT JOIN tblEMEntity Entity ON Entity.intEntityId = LoadDetail.intCustomerEntityId
+			LEFT JOIN tblEMEntity E ON  
+					(@strOrderType = 'Outbound' AND E.intEntityId = LoadDetail.intCustomerEntityId)
+					OR (@strOrderType = 'Inbound' AND E.intEntityId = LoadDetail.intVendorEntityId)
+					OR (@strOrderType = 'Drop Ship' AND E.intEntityId IN (LoadDetail.intCustomerEntityId, LoadDetail.intVendorEntityId))
+			LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = CASE WHEN (E.intEntityId = LoadDetail.intVendorEntityId) THEN LoadDetail.intVendorEntityId ELSE LoadDetail.intCustomerEntityId END
+				AND EL.intEntityLocationId = CASE WHEN (E.intEntityId = LoadDetail.intVendorEntityId) THEN LoadDetail.intVendorEntityLocationId ELSE LoadDetail.intCustomerEntityLocationId END	
+			LEFT JOIN tblEMEntityToContact ETC ON ETC.intEntityId = E.intEntityId AND ETC.ysnDefaultContact = 1
+			LEFT JOIN tblEMEntity EC ON EC.intEntityId = ETC.intEntityContactId
 			LEFT JOIN tblEMEntity Via ON Via.intEntityId = L.intHaulerEntityId
 			LEFT JOIN tblSMFreightTerms FreightTerm ON FreightTerm.intFreightTermId = L.intFreightTermId
-				AND L.intPurchaseSale = 2 -- 'Outbound Order'
+			CROSS APPLY tblSMCompanySetup CS
 			CROSS APPLY tblLGCompanyPreference CP
 			) AS a
-		WHERE strLoadNumber =  @strShipmentNo
+		WHERE intLoadId = @intLoadId
 	END
 END TRY
 
