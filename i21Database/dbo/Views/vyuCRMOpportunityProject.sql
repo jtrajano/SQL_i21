@@ -57,6 +57,8 @@
 		,b.intProductId
 		,b.dtmGoLive
 		,strOpportunityName = c.strName
-	from tblCRMOpportunityProject a, vyuHDProjectSearch b, tblCRMOpportunity c
-	where b.intProjectId = a.intProjectId
-	and c.intOpportunityId = a.intOpportunityId
+	from 
+		tblCRMOpportunityProject a
+		inner join vyuHDProjectSearch b on b.intProjectId = a.intProjectId
+		inner join tblCRMOpportunity c on c.intOpportunityId = a.intOpportunityId
+
