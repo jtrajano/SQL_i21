@@ -9,7 +9,7 @@
 		,tblHDProject.intCustomerId
 	from
 		tblHDProject
-		,tblEMEntity
+		inner join tblEMEntity on 1=1
 	where
 		tblHDProject.dtmWinLossDate is not null
 		and tblEMEntity.intEntityId = tblHDProject.intCustomerId
