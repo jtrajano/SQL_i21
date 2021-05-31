@@ -87,16 +87,12 @@
 			,strContact = (select top 1 strName from tblEMEntity where intEntityId = tblSOSalesOrder.intEntityContactId)
 		from
 			tblSOSalesOrder
-			,tblSOSalesOrderDetail
-			,tblICItem
-			,tblEMEntity
-			,tblARCustomer
+			inner join tblSOSalesOrderDetail on tblSOSalesOrderDetail.intSalesOrderId = tblSOSalesOrder.intSalesOrderId
+			inner join tblICItem on tblICItem.intItemId = tblSOSalesOrderDetail.intItemId
+			inner join tblEMEntity on tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
+			inner join tblARCustomer on tblARCustomer.intEntityId = tblEMEntity.intEntityId
 		where
 			tblSOSalesOrder.strTransactionType = 'Order'
-			and tblSOSalesOrderDetail.intSalesOrderId = tblSOSalesOrder.intSalesOrderId
-			and tblICItem.intItemId = tblSOSalesOrderDetail.intItemId
-			and tblEMEntity.intEntityId = tblSOSalesOrder.intEntityCustomerId
-			and tblARCustomer.intEntityId = tblEMEntity.intEntityId
 		group by
 			tblSOSalesOrder.intEntityCustomerId
 			,tblEMEntity.strName
@@ -160,17 +156,11 @@
 				,strContact = (select top 1 strName from tblEMEntity where intEntityId = b.intEntityContactId)
 			from
 				tblCTContractDetail a
-				,tblCTContractHeader b
-				,tblICCommodity g
-				,tblICItem h
-				,tblEMEntity c
-				,tblARCustomer f
-			where
-				b.intContractHeaderId = a.intContractHeaderId
-				and g.intCommodityId = b.intCommodityId
-				and h.intItemId = a.intItemId
-				and c.intEntityId = b.intEntityId
-				and f.intEntityId = c.intEntityId
+				inner join tblCTContractHeader b on  b.intContractHeaderId = a.intContractHeaderId
+				inner join tblICCommodity g on g.intCommodityId = b.intCommodityId
+				inner join tblICItem h on h.intItemId = a.intItemId
+				inner join tblEMEntity c on c.intEntityId = b.intEntityId
+				inner join tblARCustomer f on f.intEntityId = c.intEntityId
 			group by
 				c.intEntityId
 				,c.strName
