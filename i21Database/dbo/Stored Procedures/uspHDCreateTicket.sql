@@ -92,10 +92,9 @@ begin
 		,@intEntityCurrencyId = a.intCurrencyId
 	from
 		tblARCustomer a
-		,tblEMEntityToContact b
+		inner join tblEMEntityToContact b on b.intEntityId = a.intEntityId
 	where
 		lower(rtrim(ltrim(a.strCustomerNumber))) = lower(rtrim(ltrim(@CustomerNumber)))
-		and b.intEntityId = a.intEntityId
 		and b.ysnDefaultContact = convert(bit,1)
 
 	if (@intEntityId is null or @intEntityId < 1)
@@ -114,10 +113,9 @@ begin
 				,@intEntityCurrencyId = a.intCurrencyId
 			from
 				tblARCustomer a
-				,tblEMEntityToContact b
+				inner join tblEMEntityToContact b on b.intEntityId = a.intEntityId
 			where
 				lower(rtrim(ltrim(a.strCustomerNumber))) = lower(rtrim(ltrim(@CustomerNumber)))
-				and b.intEntityId = a.intEntityId
 		end
 	end
 
