@@ -304,19 +304,20 @@ BEGIN TRY
 					OR @intControlPointId = 2
 					)
 			BEGIN
-				SELECT @intContractDetailId = NULL
+				SELECT TOP 1 @intContractDetailId = NULL
 					,@intContractHeaderId = NULL
 					,@intLocationId = NULL
 					,@intProductTypeId = 2 -- Item
 					,@intProductValueId = IM.intItemId
 					,@intItemContractId = NULL
-					,@intItemBundleId = NULL
+					,@intItemBundleId = IB.intItemId
 					,@intCountryID = CA.intCountryID
 					,@strCountry = CA.strDescription
 					,@intBookId = NULL
 					,@intSubBookId = NULL
 				FROM tblICItem IM WITH (NOLOCK)
 				LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
+				LEFT JOIN tblICItemBundle IB ON IB.intBundleItemId = IM.intItemId
 				WHERE IM.intItemId = @intItemId
 
 				SELECT TOP 1 @intLocationId = t.intCompanyLocationId
