@@ -21,9 +21,11 @@ sum(dblDebit-dblCredit) dblAmount,
 F.intGLFiscalYearPeriodId  intGLFiscalYearPeriodId,
 1,
 @dtmDate
-FROM  @GLEntries,  tblGLFiscalYearPeriod F 
-JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = F.intFiscalYearId
-where dtmDate BETWEEN F.dtmStartDate AND F.dtmEndDate
+FROM  @GLEntries 
+    INNER JOIN tblGLFiscalYearPeriod F on 1=1
+    JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = F.intFiscalYearId
+where 
+    dtmDate BETWEEN F.dtmStartDate AND F.dtmEndDate
 GROUP BY intAccountId, intGLFiscalYearPeriodId, strTransactionId
 
 -- NON -RETAINED EARNING 
