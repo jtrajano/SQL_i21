@@ -35,6 +35,8 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[ysnDisposed]				BIT NULL,	
 	[ysnImported]				BIT NULL,
 	[dtmImportedDepThru]		DATETIME NULL,
+	[dblImportGAAPDepToDate]	DECIMAL(18,6) NULL,
+	[dblImportTaxDepToDate]	DECIMAL(18,6) NULL,
     [intConcurrencyId]          INT DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFAFixedAsset] PRIMARY KEY CLUSTERED ([intAssetId] ASC),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount1] FOREIGN KEY ([intAssetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -43,4 +45,3 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount4] FOREIGN KEY ([intAccumulatedAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId]) REFERENCES [dbo].[tblFADepreciationMethod] ([intDepreciationMethodId])
 );
-

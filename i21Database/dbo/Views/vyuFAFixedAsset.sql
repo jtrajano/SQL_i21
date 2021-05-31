@@ -33,6 +33,8 @@ FA.strModelNumber,
 FA.ysnAcquired,
 FA.ysnImported,
 FA.dtmImportedDepThru,
+FA.dblImportGAAPDepToDate,
+FA.dblImportTaxDepToDate,
 ysnTaxDepreciated = ISNULL(FA.ysnTaxDepreciated,0),
 ysnDepreciated = ISNULL(FA.ysnDepreciated, 0) | ISNULL(FA.ysnTaxDepreciated, 0),
 FA.ysnDisposed,     
@@ -46,15 +48,13 @@ GLExpense.strAccountId strExpenseAccountId,
 GLDepreciation.strAccountId strDepreciationAccountId,      
 GLAccumulation.strAccountId strAccumulatedAccountId,      
 GLGainLoss.strAccountId strGainLossAccountId,      
-D.dblDepreciationToDate dblGAAPDepToDate,      
-T.dblDepreciationToDate dblTaxDepToDate,   
 Company.strLocationName strCompanyLocation,      
 Currency.strCurrency,
-ysnFullyDepreciated =
+ysnFullyDepreciated = 
  CASE WHEN (BDFD.Cnt > 0 AND BDCnt.Cnt > 0) OR BDCnt.Cnt = 0
  THEN CAST(0 AS BIT)
-
- ELSE
+ 
+ ELSE 
     CAST(1 AS BIT)
     END,
 FA.intConcurrencyId
@@ -78,31 +78,13 @@ OUTER APPLY(
  FROM tblFADepreciationMethod dm JOIN 
  tblFABookDepreciation bd ON dm.intDepreciationMethodId=bd.intDepreciationMethodId
  WHERE bd.intDepreciationMethodId  = BD.intDepreciationMethodId  
-)DM  
-OUTER APPLY(      
- SELECT TOP 1 
- dblDepreciationToDate 
- FROM tblFAFixedAssetDepreciation
- WHERE
- intAssetId =FA.intAssetId
- AND intBookId=1
- ORDER BY intAssetDepreciationId DESC          
-)D
-OUTER APPLY(      
- SELECT TOP 1 
- dblDepreciationToDate 
- FROM tblFAFixedAssetDepreciation
- WHERE
- intAssetId =FA.intAssetId
- AND intBookId=2
- ORDER BY intAssetDepreciationId DESC          
-)T
+)DM
 OUTER APPLY(
-    SELECT COUNT(*)Cnt FROM tblFABookDepreciation
+    SELECT COUNT(*)Cnt FROM tblFABookDepreciation 
     WHERE intAssetId = FA.intAssetId
 )BDCnt
 OUTER APPLY(
-    SELECT COUNT(*)Cnt  FROM tblFABookDepreciation
+    SELECT COUNT(*)Cnt  FROM tblFABookDepreciation 
     WHERE intAssetId = FA.intAssetId
     AND ISNULL(ysnFullyDepreciated,0) = 0
 )BDFD
