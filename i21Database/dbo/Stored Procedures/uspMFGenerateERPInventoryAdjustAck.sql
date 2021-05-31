@@ -9,7 +9,7 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strXML NVARCHAR(MAX) = ''
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 		,@dtmCreatedDate DATETIME
 		,@strCreatedBy NVARCHAR(50)
 		,@strLotNo NVARCHAR(50)

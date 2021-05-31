@@ -176,6 +176,8 @@ BEGIN
 			,[intSourceCustomerStorageId]
 			,[dblUnitQty]
 			,[dblSplitPercent]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)	
 		SELECT 
 			[intEntityId]						= TransferStorageSplit.intEntityId
@@ -220,6 +222,8 @@ BEGIN
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
 			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
+			,[intShipFromLocationId]			= CS.intShipFromLocationId
+			,[intShipFromEntityId]				= CS.intShipFromEntityId
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -280,6 +284,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		VALUES
 		(
@@ -323,6 +329,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,

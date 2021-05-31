@@ -130,13 +130,13 @@ BEGIN TRY
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
-			strStraussPrice			= CASE WHEN CD.intPricingTypeId = 2 THEN 'Price to be fixed basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + 
+			strStraussPrice			= CASE WHEN CD.intPricingTypeId = 2 THEN 'PTBF basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + 
 												CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END +
-													BCU.strCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/'+ BUM.strUnitMeasure +' at '+ CD.strFixationBy + '''s option prior to first notice day of ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + ' or on presentation of documents,whichever is earlier.'
+													BCU.strCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/'+ BUM.strUnitMeasure +' at '+ CD.strFixationBy + '''s option prior to FND of ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + ' or on presentation of documents,whichever is earlier.'
 										   ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
 									   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		= CONVERT(VARCHAR, CD.dtmStartDate, 103) + ' - ' + CONVERT(VARCHAR, CD.dtmEndDate, 103),
+			strStraussShipment		= FORMAT( CD.dtmStartDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')) + ' - ' + FORMAT( CD.dtmEndDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')),
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
@@ -172,6 +172,7 @@ BEGIN TRY
 	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId
 		
 	CROSS JOIN tblCTCompanyPreference   CP
+	CROSS JOIN tblSMCompanyPreference SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractStatusId <> 3
 

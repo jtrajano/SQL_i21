@@ -27,130 +27,83 @@ DECLARE @strSrcTransactionType AS NVARCHAR(100)
 DECLARE @intDestId AS INT
 DECLARE @strDestTransactionNo AS NVARCHAR(100)
 
-DECLARE @transactionCursor CURSOR
-
 --Wipe all data 
 IF @ysnWillWipe = 1
 
 BEGIN
 
 	--Wipe all Inventory Transaction Links
-	TRUNCATE TABLE dbo.tblICTransactionLinks
+	--TRUNCATE TABLE dbo.tblICTransactionLinks
 	DELETE FROM dbo.tblICTransactionLinks WHERE strSrcModuleName LIKE '%Inventory%' OR strDestModuleName LIKE '%Inventory%'
+	DELETE FROM dbo.tblICTransactionNodes WHERE strModuleName LIKE '%Inventory%'
 
 	--Inventory Reciept Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Receipt Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
 	SELECT
-		intDestId = ReceiptItemSource.intInventoryReceiptId,
-		strDestTransactionNo = Receipt.strReceiptNumber,
+		'Create',
 		intSrcId = ReceiptItemSource.intOrderId, 
-		strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber), 
+		strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber, 'Missing Transaction No'), 
 		strSrcModuleName = ReceiptItemSource.strSourceType, 
-		strSrcTransactionType = ReceiptItemSource.strSourceType
+		strSrcTransactionType = ReceiptItemSource.strSourceType,
+		intDestId = ReceiptItemSource.intInventoryReceiptId,
+		strDestTransactionNo = COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'),
+		'Inventory',
+		'Inventory Receipt'
     FROM dbo.tblICInventoryReceipt Receipt
 	INNER JOIN dbo.vyuICGetReceiptItemSource ReceiptItemSource
 	ON Receipt.intInventoryReceiptId = ReceiptItemSource.intInventoryReceiptId
 	WHERE ReceiptItemSource.intOrderId IS NOT NULL
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Receipt'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Transfer Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Transfer Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
 	SELECT
-		intDestId = TransferDetailSource.intInventoryTransferId,
-		strDestTransactionNo = Transfer.strTransferNo,
+		'Create',
 		intSrcId = TransferDetailSource.intSourceId, 
-		strSrcTransactionNo = TransferDetailSource.strSourceTransactionNo, 
+		strSrcTransactionNo = COALESCE(TransferDetailSource.strSourceTransactionNo, 'Missing Transaction No'), 
 		strSrcModuleName = TransferDetailSource.strSourceModule, 
-		strSrcTransactionType = TransferDetailSource.strSourceScreen
+		strSrcTransactionType = TransferDetailSource.strSourceScreen,
+		intDestId = TransferDetailSource.intInventoryTransferId,
+		strDestTransactionNo = COALESCE(Transfer.strTransferNo, 'Missing Transaction No'),
+		'Inventory',
+		'Inventory Transfer'
     FROM dbo.tblICInventoryTransfer Transfer
 	INNER JOIN dbo.vyuICGetTransferDetailSource TransferDetailSource
 	ON Transfer.intInventoryTransferId = TransferDetailSource.intInventoryTransferId
 	WHERE TransferDetailSource.intSourceId IS NOT NULL
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Transfer'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Shipment Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Shipment Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
 	SELECT
-		intDestId = Shipment.intInventoryShipmentId,
-		strDestTransactionNo = Shipment.strShipmentNumber,
+		'Create',
 		intSrcId = ShipmentItemSource.intOrderId, 
-		strSrcTransactionNo = ShipmentItemSource.strOrderNumber, 
+		strSrcTransactionNo = COALESCE(ShipmentItemSource.strOrderNumber, 'Missing Transaction No'), 
 		strSrcModuleName = 
 		CASE 
 			WHEN Shipment.intOrderType = 0 THEN 'None'
@@ -172,6 +125,11 @@ BEGIN
 			WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
 			WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
 		END COLLATE Latin1_General_CI_AS
+		,
+		intDestId = Shipment.intInventoryShipmentId,
+		strDestTransactionNo = COALESCE(Shipment.strShipmentNumber, 'Missing Transaction No'),
+		'Inventory',
+		'Inventory Shipment'
     FROM dbo.tblICInventoryShipment Shipment
 	INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 	ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
@@ -179,146 +137,64 @@ BEGIN
 	ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemSource.intInventoryShipmentItemId
 	WHERE ShipmentItemSource.intOrderId IS NOT NULL
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Shipment'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Adjustment Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Adjustment Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
 	SELECT
-		intDestId = AdjustmentDetailSource.intInventoryAdjustmentId,
-		strDestTransactionNo = Adjustment.strAdjustmentNo,
+		'Create',
 		intSrcId = AdjustmentDetailSource.intSourceId, 
-		strSrcTransactionNo = AdjustmentDetailSource.strSourceTransactionNo, 
+		strSrcTransactionNo = COALESCE(AdjustmentDetailSource.strSourceTransactionNo, 'Missing Transaction No'), 
 		strSrcModuleName =  'None', 
-		strSrcTransactionType = 'None'
+		strSrcTransactionType = 'None',
+		intDestId = AdjustmentDetailSource.intInventoryAdjustmentId,
+		strDestTransactionNo = COALESCE(Adjustment.strAdjustmentNo, 'Missing Transaction No'),
+		'Inventory',
+		'Inventory Adjustment'
     FROM dbo.tblICInventoryAdjustment Adjustment
 	INNER JOIN dbo.vyuICGetAdjustmentDetailSource AdjustmentDetailSource
 	ON Adjustment.intInventoryAdjustmentId = AdjustmentDetailSource.intInventoryAdjustmentId
 	WHERE AdjustmentDetailSource.intSourceId IS NOT NULL
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Adjustment'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Receipt Voucher Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Receipt Voucher Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
 	SELECT
-		intDestId = ReceiptItemVoucherDestination.intDestinationId,
-		strDestTransactionNo = ReceiptItemVoucherDestination.strDestinationNo,
-		intSrcId = Receipt.intInventoryReceiptId, 
-		strSrcTransactionNo = Receipt.strReceiptNumber, 
-		strSrcModuleName =  'Inventory', 
-		strSrcTransactionType = 'Inventory Receipt'
+		'Create',
+		Receipt.intInventoryReceiptId, 
+		COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'), 
+		'Inventory', 
+		'Inventory Receipt',
+		ReceiptItemVoucherDestination.intDestinationId,
+		COALESCE(ReceiptItemVoucherDestination.strDestinationNo, 'Missing Transaction No'),
+		'Purchasing',
+		'Voucher'
     FROM dbo.tblICInventoryReceipt Receipt
 	INNER JOIN dbo.vyuICGetReceiptItemVoucherDestination ReceiptItemVoucherDestination
 	ON Receipt.intInventoryReceiptId = ReceiptItemVoucherDestination.intInventoryReceiptId
 	WHERE ReceiptItemVoucherDestination.intDestinationId IS NOT NULL
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, COALESCE(@strDestTransactionNo, 'Missing Transaction No'), 'Purchasing', 'Voucher'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
-
+	--Successful Exit
 	GOTO Patch_Exit
 END
 
@@ -329,20 +205,32 @@ BEGIN
 
 	--Inventory Reciept Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
-	SELECT * 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Receipt Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
+	SELECT 
+		Records.strOperation, -- Operation
+		Records.intSrcId, Records.strSrcTransactionNo, Records.strSrcModuleName, Records.strSrcTransactionType, -- Source Transaction
+		Records.intDestId, Records.strDestTransactionNo, Records.strDestModuleName, Records.strDestTransactionType	-- Destination Transaction 
 	FROM 
 	(
-		SELECT intDestId = ReceiptItemSource.intInventoryReceiptId,
-			strDestTransactionNo = Receipt.strReceiptNumber,
-			intSrcId = ReceiptItemSource.intOrderId, 
-			strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber), 
-			strSrcModuleName = ReceiptItemSource.strSourceType, 
-			strSrcTransactionType = ReceiptItemSource.strSourceType
+		SELECT
+		strOperation = 'Create',
+		intSrcId = ReceiptItemSource.intOrderId, 
+		strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber, 'Missing Transaction No'), 
+		strSrcModuleName = ReceiptItemSource.strSourceType, 
+		strSrcTransactionType = ReceiptItemSource.strSourceType,
+		intDestId = ReceiptItemSource.intInventoryReceiptId,
+		strDestTransactionNo = COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'),
+		strDestModuleName = 'Inventory',
+		strDestTransactionType = 'Inventory Receipt'
 		FROM dbo.tblICInventoryReceipt Receipt
 		INNER JOIN dbo.vyuICGetReceiptItemSource ReceiptItemSource
-		ON Receipt.intInventoryReceiptId = ReceiptItemSource.intInventoryReceiptId 
+		ON Receipt.intInventoryReceiptId = ReceiptItemSource.intInventoryReceiptId
 		WHERE ReceiptItemSource.intOrderId IS NOT NULL
 
 	) Records
@@ -358,56 +246,34 @@ BEGIN
 		Links.intSrcId IS NULL AND
 		(Links.strSrcTransactionNo IS NULL OR Links.strSrcTransactionNo LIKE '%Missing Transaction No%')
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Receipt'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Transfer Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
-	SELECT * 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Transfer Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
+	SELECT 
+		Records.strOperation, -- Operation
+		Records.intSrcId, Records.strSrcTransactionNo, Records.strSrcModuleName, Records.strSrcTransactionType, -- Source Transaction
+		Records.intDestId, Records.strDestTransactionNo, Records.strDestModuleName, Records.strDestTransactionType	-- Destination Transaction  
 	FROM 
 	(
 		SELECT
-			intDestId = TransferDetailSource.intInventoryTransferId,
-			strDestTransactionNo = Transfer.strTransferNo,
+			strOperation = 'Create',
 			intSrcId = TransferDetailSource.intSourceId, 
-			strSrcTransactionNo = TransferDetailSource.strSourceTransactionNo, 
+			strSrcTransactionNo = COALESCE(TransferDetailSource.strSourceTransactionNo, 'Missing Transaction No'), 
 			strSrcModuleName = TransferDetailSource.strSourceModule, 
-			strSrcTransactionType = TransferDetailSource.strSourceScreen
+			strSrcTransactionType = TransferDetailSource.strSourceScreen,
+			intDestId = TransferDetailSource.intInventoryTransferId,
+			strDestTransactionNo = COALESCE(Transfer.strTransferNo, 'Missing Transaction No'),
+			strDestModuleName = 'Inventory',
+			strDestTransactionType = 'Inventory Transfer'
 		FROM dbo.tblICInventoryTransfer Transfer
 		INNER JOIN dbo.vyuICGetTransferDetailSource TransferDetailSource
 		ON Transfer.intInventoryTransferId = TransferDetailSource.intInventoryTransferId
@@ -426,54 +292,28 @@ BEGIN
 		Links.intSrcId IS NULL AND
 		(Links.strSrcTransactionNo IS NULL OR Links.strSrcTransactionNo LIKE '%Missing Transaction No%')
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Receipt'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Shipment Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
-	SELECT * 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Shipment Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
+	SELECT
+		Records.strOperation, -- Operation
+		Records.intSrcId, Records.strSrcTransactionNo, Records.strSrcModuleName, Records.strSrcTransactionType, -- Source Transaction
+		Records.intDestId, Records.strDestTransactionNo, Records.strDestModuleName, Records.strDestTransactionType	-- Destination Transaction 
 	FROM 
 	(
 		SELECT
-			intDestId = Shipment.intInventoryShipmentId,
-			strDestTransactionNo = Shipment.strShipmentNumber,
+			strOperation = 'Create',
 			intSrcId = ShipmentItemSource.intOrderId, 
-			strSrcTransactionNo = ShipmentItemSource.strOrderNumber, 
+			strSrcTransactionNo = COALESCE(ShipmentItemSource.strOrderNumber, 'Missing Transaction No'), 
 			strSrcModuleName = 
 			CASE 
 				WHEN Shipment.intOrderType = 0 THEN 'None'
@@ -495,6 +335,11 @@ BEGIN
 				WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
 				WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
 			END COLLATE Latin1_General_CI_AS
+			,
+			intDestId = Shipment.intInventoryShipmentId,
+			strDestTransactionNo = COALESCE(Shipment.strShipmentNumber, 'Missing Transaction No'),
+			strDestModuleName = 'Inventory',
+			strDestTransactionType = 'Inventory Shipment'
 		FROM dbo.tblICInventoryShipment Shipment
 		INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 		ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
@@ -515,56 +360,34 @@ BEGIN
 		Links.intSrcId IS NULL AND
 		(Links.strSrcTransactionNo IS NULL OR Links.strSrcTransactionNo LIKE '%Missing Transaction No%')
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Receipt'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Adjustment Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
-	SELECT * 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Adjustment Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
+	SELECT
+		Records.strOperation, -- Operation
+		Records.intSrcId, Records.strSrcTransactionNo, Records.strSrcModuleName, Records.strSrcTransactionType, -- Source Transaction
+		Records.intDestId, Records.strDestTransactionNo, Records.strDestModuleName, Records.strDestTransactionType	-- Destination Transaction 
 	FROM 
 	(
 		SELECT
-			intDestId = AdjustmentDetailSource.intInventoryAdjustmentId,
-			strDestTransactionNo = Adjustment.strAdjustmentNo,
+			strOperation = 'Create',
 			intSrcId = AdjustmentDetailSource.intSourceId, 
-			strSrcTransactionNo = AdjustmentDetailSource.strSourceTransactionNo, 
+			strSrcTransactionNo = COALESCE(AdjustmentDetailSource.strSourceTransactionNo, 'Missing Transaction No'), 
 			strSrcModuleName =  'None', 
-			strSrcTransactionType = 'None'
+			strSrcTransactionType = 'None',
+			intDestId = AdjustmentDetailSource.intInventoryAdjustmentId,
+			strDestTransactionNo = COALESCE(Adjustment.strAdjustmentNo, 'Missing Transaction No'),
+			strDestModuleName = 'Inventory',
+			strDestTransactionType = 'Inventory Adjustment'
 		FROM dbo.tblICInventoryAdjustment Adjustment
 		INNER JOIN dbo.vyuICGetAdjustmentDetailSource AdjustmentDetailSource
 		ON Adjustment.intInventoryAdjustmentId = AdjustmentDetailSource.intInventoryAdjustmentId
@@ -583,56 +406,34 @@ BEGIN
 		Links.intSrcId IS NULL AND
 		(Links.strSrcTransactionNo IS NULL OR Links.strSrcTransactionNo LIKE '%Missing Transaction No%')
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
-
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Receipt'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
 	--Inventory Receipt Voucher Patch
 
-	--Set Transaction Cursor
-	SET @transactionCursor = CURSOR FOR 
-	SELECT * 
+	DELETE FROM @TransactionLink
+	--Insert Inventory Receipt Voucher Data to Transaction Link variable		
+	INSERT INTO @TransactionLink (
+		strOperation, -- Operation
+		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	)
+	SELECT 
+		Records.strOperation, -- Operation
+		Records.intSrcId, Records.strSrcTransactionNo, Records.strSrcModuleName, Records.strSrcTransactionType, -- Source Transaction
+		Records.intDestId, Records.strDestTransactionNo, Records.strDestModuleName, Records.strDestTransactionType	-- Destination Transaction  
 	FROM 
 	(
 		SELECT
-			intDestId = ReceiptItemVoucherDestination.intDestinationId,
-			strDestTransactionNo = ReceiptItemVoucherDestination.strDestinationNo,
+			strOperation = 'Create',
 			intSrcId = Receipt.intInventoryReceiptId, 
-			strSrcTransactionNo = Receipt.strReceiptNumber, 
-			strSrcModuleName =  'Inventory', 
-			strSrcTransactionType = 'Inventory Receipt'
+			strSrcTransactionNo = COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'), 
+			strSrcModuleName = 'Inventory', 
+			strSrcTransactionType = 'Inventory Receipt',
+			intDestId = ReceiptItemVoucherDestination.intDestinationId,
+			strDestTransactionNo = COALESCE(ReceiptItemVoucherDestination.strDestinationNo, 'Missing Transaction No'),
+			strDestModuleName = 'Purchasing',
+			strDestTransactionType = 'Voucher'
 		FROM dbo.tblICInventoryReceipt Receipt
 		INNER JOIN dbo.vyuICGetReceiptItemVoucherDestination ReceiptItemVoucherDestination
 		ON Receipt.intInventoryReceiptId = ReceiptItemVoucherDestination.intInventoryReceiptId
@@ -651,48 +452,17 @@ BEGIN
 		Links.intSrcId IS NULL AND
 		(Links.strSrcTransactionNo IS NULL OR Links.strSrcTransactionNo LIKE '%Missing Transaction No%')
 
-	--Open Transaction Cursor
-	OPEN @transactionCursor
+	--Execute Add Transaction Link SP
+	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 
-	--Fetch Data from Cursor
-	FETCH NEXT FROM @transactionCursor INTO 
-	@intDestId, @strDestTransactionNo, 
-	@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-
-	--Begin Inventory Receipt Cursor Loop
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		
-		--Insert Cursor Data to Transaction Link variable
-		INSERT INTO @TransactionLink (
-			strOperation, -- Operation
-			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-		)
-		VALUES (
-			'Create',
-			@intSrcId, COALESCE(@strSrcTransactionNo, 'Missing Transaction No'), @strSrcModuleName, @strSrcTransactionType,
-			@intDestId, @strDestTransactionNo, 'Inventory', 'Inventory Receipt'
-		)
-
-		--Execute Add Transaction Link SP
-		EXEC dbo.uspICAddTransactionLinks @TransactionLink
-
-		FETCH NEXT FROM @transactionCursor INTO 
-		@intDestId, @strDestTransactionNo, 
-		@intSrcId, @strSrcTransactionNo, @strSrcModuleName, @strSrcTransactionType
-	END
-
-	--Close and Deallocate Cursor
-	CLOSE @transactionCursor
-	DEALLOCATE @transactionCursor
-
+	--Successful Exit
 	GOTO Patch_Exit
 END
 END TRY
 
 BEGIN CATCH
 
+	--Rollback Exit
 	GOTO Patch_Rollback_Exit
 
 END CATCH

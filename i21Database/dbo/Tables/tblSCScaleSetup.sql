@@ -87,6 +87,7 @@
     [intStorageLocationId] INT NULL,
     [intSubLocationId] INT NULL,
     [strDriver] NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
+    [intRequireTrailerId] INT NOT NULL DEFAULT(2),
 
 
     [intConcurrencyId] INT NULL, 

@@ -51,11 +51,11 @@ AND ISNULL(ysnError,0) = 1
 
 IF @tCount = 1
 BEGIN
-	IF EXISTS (SELECT 1 FROM tblFADepreciateLogDetail A JOIN tblFADepreciateLog B
+	IF EXISTS (SELECT 1 FROM tblFADepreciateLogDetail A JOIN tblFADepreciateLog B 
 		ON A.intLogId = B.intLogId
-		WHERE strBook = 'GAAP'
+		WHERE strBook = 'GAAP' 
 		AND strResult ='Asset already fully depreciated.' )
-
+	
 		RETURN 1
 
 	DECLARE @strResult NVARCHAR(200)

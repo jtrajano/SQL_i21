@@ -1,7 +1,6 @@
 CREATE TABLE [dbo].[tblAGProductMixer]
 (
     [intProductMixerId] INT NOT NULL IDENTITY,
-    [intConcurrencyId] INT NOT NULL,
     [intLocationId] INT NOT NULL,
     [strMixerNumber] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription] NVARCHAR(45) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -13,6 +12,8 @@ CREATE TABLE [dbo].[tblAGProductMixer]
     [dblMaxBatchSize] NUMERIC(18, 6) NULL DEFAULT 0,
     [intMaxBatchSizeUOMId] INT NULL,
     [strRestrictedBatches] NVARCHAR(45) COLLATE Latin1_General_CI_AS NULL,
+    [intConcurrencyId] INT NOT NULL,
+    CONSTRAINT [UK_tblAGProductMixer_strType] UNIQUE([strMixerNumber]),
     CONSTRAINT [PK_tblAGProductMixer_intProductMixerId] PRIMARY KEY ([intProductMixerId]), 
     CONSTRAINT [FK_tblAGProductMixer_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
 )

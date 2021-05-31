@@ -57,16 +57,16 @@ BEGIN TRY
 				,CompanyLocation
 				,ActionId
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,ItemNo
 				,Price
 				,Currency
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					,ItemNo NVARCHAR(50)
 					,Price NUMERIC(18, 6)
 					,Currency NVARCHAR(50)
@@ -74,29 +74,6 @@ BEGIN TRY
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strItemNo, '') + ','
 			FROM @tblIPItem
-
-			INSERT INTO tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedBy
-				,2
-				,1
-				,'Success'
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
-					)
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
@@ -137,15 +114,15 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,2
 				,0
 				,@ErrMsg
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 
 			--Move to Error

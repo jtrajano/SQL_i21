@@ -17,9 +17,9 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
---IC Reserve Stock
-IF @Recap = @ZeroBit	
-	EXEC dbo.uspARPostItemResevation
+-- --IC Reserve Stock
+-- IF @Recap = @ZeroBit	
+-- 	EXEC dbo.uspARPostItemResevation
 
 DECLARE @ItemsForContracts					[InvoicePostingTable]
 DECLARE @GLEntries							[RecapTableType]
@@ -2101,7 +2101,7 @@ BEGIN
 	FROM 
 		[dbo].[fnMFGetInvalidInvoicesForPosting](@PostInvoiceDataFromIntegration, @OneBit)
 
-	-- IC Costing
+	-- IC Costing Negative inventory
 	DELETE FROM @ItemsForCosting	
 	INSERT INTO @ItemsForCosting
 		([intItemId]
@@ -2135,6 +2135,61 @@ BEGIN
 		,[intItemUOMId]
 		,[dtmDate]
 		,CASE WHEN [strType] IN ('CF Tran') THEN ABS([dblQty]) ELSE [dblQty] END
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+	FROM ##ARItemsForCosting
+
+	-- IC Costing Zero Cost
+	INSERT INTO @ItemsForCosting
+		([intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate])
+	SELECT
+		 [intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,CASE WHEN [strType] IN ('POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -3071,10 +3126,28 @@ SELECT DISTINCT
 	, [strTransactionType]	= I.[strTransactionType] 
 	, [intInvoiceDetailId]	= NULL
 	, [intItemId]			= NULL
-	, [strBatchId]			= I.[strBatchId]
-	, [strPostingError]		= [strText]
-FROM [dbo].[fnARGetInvalidGLEntries](@GLEntries, @Post) GL
-INNER JOIN ##ARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber
+	, [strBatchId]			= II.[strBatchId]
+	, [strPostingError]		= I.strInvoiceNumber + ' has discrepancy on ' + GL.strAccountCategory + ' of ' + LTRIM(STR(ISNULL(I.dblBaseInvoiceTotal, 0), 16, 2))
+FROM tblARInvoice I
+INNER JOIN ##ARPostInvoiceHeader II ON I.intInvoiceId = II.intInvoiceId AND I.strInvoiceNumber = II.strInvoiceNumber
+INNER JOIN (
+	SELECT intTransactionId		= GL.intTransactionId
+	     , strTransactionId		= GL.strTransactionId
+		 , strAccountCategory	= GLAD.strAccountCategory
+	     , dblAmount			= SUM(dblDebit - dblCredit)
+	FROM tblGLDetail GL
+	INNER JOIN vyuGLAccountDetail GLAD ON GL.intAccountId = GLAD.intAccountId
+	INNER JOIN ##ARPostInvoiceHeader IH ON IH.intInvoiceId = GL.intTransactionId AND IH.strInvoiceNumber = GL.strTransactionId	
+	WHERE GLAD.strAccountCategory IN ('AR Account', 'Undeposited Funds')
+	  AND GL.ysnIsUnposted = 0
+	  AND GL.strCode = 'AR'
+	  AND IH.ysnPost = 1
+	GROUP BY GL.intTransactionId, GL.strTransactionId, GLAD.strAccountCategory
+	HAVING SUM(dblDebit - dblCredit) <> 0 
+) GL ON I.intInvoiceId = GL.intTransactionId
+    AND I.strInvoiceNumber = GL.strTransactionId
+	AND ((I.strTransactionType <> 'Cash' AND GL.strAccountCategory = 'AR Account') OR (I.strTransactionType = 'Cash' AND GL.strAccountCategory = 'Undeposited Funds'))	
+WHERE II.ysnPost = 1
 
 UPDATE ##ARInvalidInvoiceData
 SET [strBatchId] = @BatchId

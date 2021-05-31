@@ -311,6 +311,12 @@ BEGIN
 					ON InvTransfer.intInventoryTransferId = InvDetail.intInventoryTransferId
 		WHERE	InvTransfer.intInventoryTransferId = @inventoryTransferId
 
+		-- Link Inventory Transfer Transaction
+		BEGIN
+			EXEC dbo.uspICLinkInventoryTransferTransaction
+				@inventoryTransferId,
+				true
+		END
 		-- Create an Audit Log
 		BEGIN 
 			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Transfer'

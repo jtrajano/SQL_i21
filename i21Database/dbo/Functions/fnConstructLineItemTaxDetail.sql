@@ -46,6 +46,7 @@ RETURNS @returntable TABLE
 	,[ysnTaxOnly]					BIT
 	,[ysnInvalidSetup]				BIT
 	,[strNotes]						NVARCHAR(500)
+	,[dblExemptionAmount]			NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -75,6 +76,7 @@ BEGIN
 		,[intUnitMeasureId]				INT
 		,[ysnComputed]					BIT
 		,[ysnTaxableFlagged]			BIT
+		,[dblExemptionAmount]			NUMERIC(18,6)
 		)
 
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM @LineItemTaxEntries)
@@ -213,7 +215,6 @@ BEGIN
 		tblSMTaxCode SMTC
 			ON LITE.[intTaxCodeId] = SMTC.[intTaxCodeId]
 		
-		
 	DECLARE @TotalUnitTax			NUMERIC(18,6)
 			,@UnitTax				NUMERIC(18,6)
 			,@CheckOffUnitTax		NUMERIC(18,6)
@@ -223,9 +224,38 @@ BEGIN
 			,@CheckOffRate			NUMERIC(18,6)
 			,@TaxableByOtherRate	NUMERIC(18,6)
 			,@ItemPrice				NUMERIC(18,6)
+			,@NetPrice				NUMERIC(18,6)
 	
+	DECLARE @StateExciseTax NUMERIC(18,6)
+	DECLARE @StateSalesTax		NUMERIC(18,6)
+	DECLARE @FederalExciseTax	NUMERIC(18,6)
+	DECLARE @DistrictTax	NUMERIC(18,6)
+
+	SELECT @StateExciseTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%State Excise Tax%'
+
+	SELECT @StateSalesTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%State Sales Tax%'
 	
-	
+	SELECT @FederalExciseTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%Federal Excise Tax%'
+
+	SELECT @DistrictTax = SUM(ISNULL(dblRate, 0))
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%District Tax%'
+
+	SET @NetPrice = ((4.024 - @StateExciseTax) / (1 + (@DistrictTax/@HundredDecimal) + (@StateSalesTax/@HundredDecimal))) - @FederalExciseTax
 
 	IF ISNULL(@IsReversal,0) = 0
 		BEGIN
@@ -693,16 +723,36 @@ BEGIN
 				
 			
 			DECLARE @ItemTaxAmount NUMERIC(18,6) = @ZeroDecimal
+			DECLARE @ItemExemptedTaxAmount NUMERIC(18,6) = @ZeroDecimal
+
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal) AND @DisregardExemptionSetup = 0
-				SET @ItemTaxAmount = @ZeroDecimal;
+			IF(@TaxExempt = 1 AND @DisregardExemptionSetup = 0)
+			BEGIN
+				IF(@ExemptionPercent = 0)
+				BEGIN
+					SET @ItemExemptedTaxAmount = 0
+					SET @ItemTaxAmount = 0
+				END
+				ELSE
+				BEGIN
+					IF ISNULL(@IsReversal,0) = 0
+					BEGIN
+						SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+						SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
+					END
+					ELSE
+					BEGIN
+						DECLARE @StateSalesTaxTotal NUMERIC(18,6) = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal) OR @DisregardExemptionSetup = 1
-				SET @ItemTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal);
+						SET @ItemExemptedTaxAmount = (@StateSalesTaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
+						SET @ItemTaxAmount = (@StateSalesTaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
+					END
+				END
+			END
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
@@ -713,8 +763,9 @@ BEGIN
 			UPDATE
 				@ItemTaxes
 			SET
-				dblTax			= ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
+				 dblTax			= ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
 				,dblAdjustedTax = ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
+				,dblExemptionAmount = ROUND(ROUND(@ItemExemptedTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
 				,ysnComputed	= 1 
 			WHERE
 				[Id] = @Id				
@@ -737,6 +788,7 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
+		,[dblExemptionAmount]
 	)
 	SELECT
 		 [intTaxGroupId]
@@ -755,6 +807,7 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
+		,[dblExemptionAmount]
 	FROM
 		@ItemTaxes 	
 	RETURN		

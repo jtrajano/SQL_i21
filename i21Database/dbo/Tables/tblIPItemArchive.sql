@@ -84,7 +84,7 @@
 	,strLoggedOnUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemArchive_strLoggedOnUserName] DEFAULT((HOST_NAME()))
 	,dtmTransactionDate DATETIME NULL CONSTRAINT [DF_tblMFItemArchive_dtmTransactionDate] DEFAULT((getdate()))
 	,strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	,intTrxSequenceNo INT
+	,intTrxSequenceNo BIGINT
 	,strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS
 	,intActionId INT
 	,ysnFairTradeCompliance BIT DEFAULT 0

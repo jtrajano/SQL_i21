@@ -323,6 +323,7 @@ BEGIN TRY
 			, intTransactionReferenceId
 			, intTransactionReferenceDetailId
 		FROM dbo.fnRKGetBucketContractBalance(@dtmToDate, @intCommodityId, @intVendorId) f
+		WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
 	)t
 
 	--=============================
@@ -399,40 +400,44 @@ BEGIN TRY
 		, strTransactionNumber
 	INTO #tblCustomerOwned
 	FROM #tblCustomerOwnedAll
-	WHERE ISNULL(ysnExternal, 0) = 0
+	--WHERE ISNULL(ysnExternal, 0) = 0
 
 	SELECT intRowNum
 		, strDistributionType
-		, intLocationId
+		, a.intLocationId
 		, strLocationName
 		, strContractEndMonth
 		, strDeliveryDate
-		, intEntityId
+		, a.intEntityId
 		, strCustomerName
 		, dblBalance
-		, intCommodityId
+		, a.intCommodityId
 		, strCommodityCode
 		, strOwnedPhysicalStock
 		, strStorageTypeDescription
 		, ysnReceiptedStorage
 		, ysnActive
-		, intItemId
+		, a.intItemId
 		, strItemNo
 		, intCategoryId
 		, strCategoryCode
 		, intOrigUOMId
 		, dtmTransactionDate
-		, intTicketId
+		, a.intTicketId
 		, strTransactionType
-		, strTicketNumber
-		, strContractNumber
+		, a.strTicketNumber
+		, a.strContractNumber
 		, intTypeId 
-		, intContractHeaderId
+		, a.intContractHeaderId
 		, intTransactionRecordId
 		, strTransactionNumber
 	INTO #tblOffSite
-	FROM #tblCustomerOwnedAll
-	WHERE ISNULL(ysnExternal, 0) = 1
+	FROM #tblCustomerOwnedAll a
+	INNER JOIN tblICInventoryReceipt r on r.strReceiptNumber = a.strTransactionNumber and a.strTransactionType = 'Inventory Receipt'
+	INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	INNER JOIN tblSCTicket sc ON sc.intTicketId = ri.intSourceId
+	LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = sc.intSubLocationId AND sl.intCompanyLocationId = sc.intProcessingLocationId
+	WHERE ISNULL(sl.ysnExternal, 0) = 1 AND strOwnedPhysicalStock = 'Customer' AND ysnReceiptedStorage = 1
 
 
 	--FROM (
@@ -1591,6 +1596,7 @@ BEGIN TRY
 		, strContractNumber
 	INTO #tblDelayedPricing
 	FROM dbo.fnRKGetBucketDelayedPricing(@dtmToDate, @intCommodityId, @intVendorId) t
+	WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
 
 	INSERT INTO @ListInventory (intSeqId
 		, strSeqHeader
@@ -1683,13 +1689,13 @@ BEGIN TRY
 		AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 	--DELETE NEGATIVE BASIS DELIVERIES
-	DELETE FROM #tempBasisDelivery
-	WHERE intContractDetailId IN (
-		SELECT intContractDetailId
-		FROM #tempBasisDelivery
-		GROUP BY intContractDetailId
-		HAVING SUM(dblTotal) < 0
-	)
+	--DELETE FROM #tempBasisDelivery
+	--WHERE intContractDetailId IN (
+	--	SELECT intContractDetailId
+	--	FROM #tempBasisDelivery
+	--	GROUP BY intContractDetailId
+	--	HAVING SUM(dblTotal) < 0
+	--)
 
 		
 	INSERT INTO @ListInventory (intSeqId
@@ -1998,7 +2004,7 @@ BEGIN TRY
 		, strTransactionType
 	FROM @ListInventory f
 	WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId --AND ISNULL(Strg.ysnDPOwnedType, 0) = 0
-		AND strReceiptNumber NOT IN (SELECT strTransactionNumber FROM #tempTransfer)
+		--AND strReceiptNumber NOT IN (SELECT strTransactionNumber FROM #tempTransfer)
 		
 	INSERT INTO @ListInventory(intSeqId
 		, strSeqHeader
@@ -3031,6 +3037,7 @@ BEGIN TRY
 		FROM dbo.fnRKGetBucketDerivatives(@dtmToDate, @intCommodityId, @intVendorId) t
 		LEFT JOIN tblRKFutureMarket fMar ON fMar.intFutureMarketId = t.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = fMar.intUnitMeasureId AND cum.intCommodityId = t.intCommodityId
+		WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
 		GROUP BY
 			  t.intFutOptTransactionId
 			, t.intCommodityId
@@ -3278,6 +3285,7 @@ BEGIN TRY
 			AND intLocationId = ISNULL(@intLocationId, intLocationId)
 			AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 			AND ISNULL(t.ysnPreCrush, 0) = 0
+			AND t.strInstrumentType = 'Options'
 
 				
 		IF @ysnPreCrush = 1 AND ISNULL(@strPositionBy,'') <> ''
@@ -6150,8 +6158,8 @@ BEGIN TRY
 			, strContractNumber
 			, strCustomer
 		FROM #invQty
+		
 
-	 
 
 		--Collateral
 		INSERT INTO @InventoryStock(strCommodityCode

@@ -62,7 +62,7 @@ BEGIN TRY
 				,CompanyLocation
 				,ActionId
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,[Status]
 				,VendorAccountNumber
 				,VendorName
@@ -72,11 +72,11 @@ BEGIN TRY
 				,DefaultLocation
 				,TaxNo
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					,[Status] NVARCHAR(50)
 					,VendorAccountNumber NVARCHAR(50)
 					,VendorName NVARCHAR(100)
@@ -128,8 +128,8 @@ BEGIN TRY
 				,TermsCode
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					VendorName NVARCHAR(100) COLLATE Latin1_General_CI_AS '../VendorName'
-					,TrxSequenceNo INT
-					,parentId INT '@parentId'
+					,TrxSequenceNo BIGINT
+					,parentId BIGINT '@parentId'
 					,ActionId INT
 					,LineType INT
 					,LocationName NVARCHAR(200)
@@ -147,29 +147,6 @@ BEGIN TRY
 			SET ET.intStageEntityId = E.intStageEntityId
 			FROM tblIPEntityStage E
 			JOIN tblIPEntityTermStage ET ON ET.intParentTrxSequenceNo = E.intTrxSequenceNo
-
-			INSERT INTO tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedBy
-				,5
-				,1
-				,'Success'
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
-					)
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
@@ -210,15 +187,15 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
 				,5
 				,0
 				,@ErrMsg
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
+					,CreatedByUser NVARCHAR(50)
 					)
 			
 			--Move to Error

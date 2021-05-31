@@ -19,7 +19,7 @@ BEGIN TRY
 		,@strCreatedBy NVARCHAR(50)
 		,@intCompanyLocationSubLocationId INT
 		,@strError NVARCHAR(MAX)
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 		,@strItemNo NVARCHAR(50)
 		,@intItemId INT
 		,@intUnitMeasureId INT

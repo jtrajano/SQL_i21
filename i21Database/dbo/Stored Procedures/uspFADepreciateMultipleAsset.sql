@@ -96,10 +96,10 @@ BEGIN
             ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
-
+            
             UPDATE BD SET ysnFullyDepreciated  =0
-            FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId
-
+            FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId  
+            
         END
      
 END  
@@ -215,7 +215,7 @@ BEGIN
                     BD.dtmPlacedInService,
                     NULL,  
                     BD.dtmPlacedInService,  
-                    0,  
+                    F.dblImportGAAPDepToDate,  
                     BD.dblSalvageValue,  
                     'Place in service',  
                     @strTransactionId,  
@@ -230,6 +230,7 @@ BEGIN
                     AND BD.intBookId = @BookId
                   
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
+                  EXEC uspFAFiscalAsset @i, @BookId --maps asset depreciation to fiscal period/year
                   DELETE FROM @IdIterate WHERE intId = @i
               END
       END  
@@ -266,7 +267,19 @@ BEGIN
                   BD.dtmPlacedInService,  
                   NULL,  
 				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
-                  E.dblDepre,  
+
+                  CASE WHEN ISNULL(F.dblImportGAAPDepToDate,0) > 0
+                    THEN
+					CASE WHEN
+                        DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) >
+                        DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (F.dtmImportedDepThru)) + 1, 0))
+                    THEN E.dblDepre
+					ELSE
+						F.dblImportGAAPDepToDate END
+
+                  ELSE E.dblDepre END
+                  
+                  ,  
                   BD.dblSalvageValue,  
                   'Depreciation',  
                   @strTransactionId,  
@@ -288,6 +301,7 @@ BEGIN
                   AND BD.intBookId = @BookId
 
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
+                  EXEC uspFAFiscalAsset @i, @BookId --maps asset depreciation to fiscal period/year
                   DELETE FROM @IdIterate WHERE intId = @i
           END
         END  
@@ -487,11 +501,11 @@ END
 
 -- THIS WILL REFLECT IN THE ASSET SCREEN ysnFullyDepreciated FLAG
 
-UPDATE BD  SET ysnFullyDepreciated  =1
-  FROM tblFABookDepreciation BD  JOIN @tblDepComputation B ON BD.intAssetId = B.intAssetId
+UPDATE BD  SET ysnFullyDepreciated  =1  
+  FROM tblFABookDepreciation BD  JOIN @tblDepComputation B ON BD.intAssetId = B.intAssetId  
   WHERE B.ysnFullyDepreciated = 1
   AND BD.intBookId  = @BookId
-
+  
 UPDATE A  SET A.ysnDepreciated  =1  
   FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
   WHERE B.ysnDepreciated = 1  AND 1 = @BookId
@@ -574,5 +588,3 @@ END
 
   
 END  
-  
---RETURN 0;  

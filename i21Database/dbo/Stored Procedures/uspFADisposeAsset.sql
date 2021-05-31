@@ -49,7 +49,7 @@ NULL
 FROM #AssetID A 
 JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
 OUTER APPLY(
-	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate
+	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate 
 	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
 	ORDER BY dtmDepreciationToDate DESC
 )D

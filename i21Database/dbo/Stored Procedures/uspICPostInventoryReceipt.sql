@@ -2081,31 +2081,51 @@ BEGIN
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END	
 
+	-- Process the decimal discrepancy
 	BEGIN 
-			
-		DECLARE @TransactionLinks udtICTransactionLinks
-		DELETE FROM @TransactionLinks
-		
-		IF EXISTS (SELECT intOrderId FROM dbo.vyuICGetReceiptItemSource WHERE intInventoryReceiptId = @intTransactionId AND intOrderId IS NOT NULL)
-		BEGIN
-		
-			INSERT INTO @TransactionLinks (
-				strOperation, -- Operation
-				intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
-				intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
-			)
-			SELECT 'Create',
-				Receipt.intOrderId, 
-				COALESCE(Receipt.strOrderNumber, Receipt.strSourceNumber, 'Missing Transaction No'), 
-				Receipt.strSourceType, 
-				Receipt.strSourceType,
-				@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Receipt'
-			FROM dbo.vyuICGetReceiptItemSource Receipt
-			WHERE intInventoryReceiptId = @intTransactionId
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+		)
+		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+			@strReceiptNumber = @strTransactionId
+			,@strBatchId = @strBatchId
+			,@GLEntries = @GLEntries
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
-			EXEC dbo.uspICAddTransactionLinks @TransactionLinks
-
-		END
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 END   
 

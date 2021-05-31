@@ -41,7 +41,7 @@ AS
 				intCent
 		FROM
 		(
-				SELECT	SY.intAssignFuturesToContractSummaryId,
+				SELECT	intAssignFuturesToContractSummaryId = FT.intFutOptTransactionId,
 						ISNULL(SY.intContractDetailId,CD.intContractDetailId)	AS	intContractDetailId,
 						FT.strInternalTradeNo,
 						FT.dtmTransactionDate,
@@ -59,7 +59,13 @@ AS
 				FROM	dbo.tblCTContractDetail CD
 				LEFT JOIN	dbo.tblRKAssignFuturesToContractSummary					SY	ON	SY.intContractHeaderId		=	CD.intContractHeaderId
 																	AND SY.intContractDetailId		=	CD.intContractDetailId
-				JOIN	dbo.tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId
+				left join (
+					select pf.intContractDetailId, pfd.intFutOptTransactionId
+					from tblCTPriceFixation pf
+					join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+				) price on price.intContractDetailId = CD.intContractDetailId
+				
+				JOIN	dbo.tblRKFutOptTransaction				FT	ON	FT.intFutOptTransactionId	=	SY.intFutOptTransactionId or FT.intFutOptTransactionId = price.intFutOptTransactionId
 				JOIN	dbo.tblRKFutureMarket					MA	ON	MA.intFutureMarketId		=	FT.intFutureMarketId
 				JOIN	dbo.tblRKFuturesMonth					MO	ON	MO.intFutureMonthId			=	FT.intFutureMonthId
 				JOIN	dbo.tblSMCurrency						CY	ON	CY.intCurrencyID			=	FT.intCurrencyId		

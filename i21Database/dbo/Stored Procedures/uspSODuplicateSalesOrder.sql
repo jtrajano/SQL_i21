@@ -90,6 +90,7 @@ BEGIN
 		   ,[dblTotalTermDiscount]
 		   ,[intLineOfBusinessId]
 		   ,[intDocumentMaintenanceId]
+		   ,[dblTotalStandardWeight]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -162,6 +163,7 @@ BEGIN
 		   ,[dblTotalTermDiscount]
 		   ,[intLineOfBusinessId]
 		   ,@intDocumentMaintenanceId
+		   ,[dblTotalStandardWeight]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
@@ -238,6 +240,7 @@ BEGIN
 				   ,[strAddonDetailKey]
 				   ,[ysnAddonParent]
 		           ,[dblAddOnQuantity]
+				   ,[dblStandardWeight]
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -288,6 +291,7 @@ BEGIN
 				   ,[strAddonDetailKey]
 				   ,[ysnAddonParent]
 			       ,[dblAddOnQuantity]
+				   ,[dblStandardWeight]
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

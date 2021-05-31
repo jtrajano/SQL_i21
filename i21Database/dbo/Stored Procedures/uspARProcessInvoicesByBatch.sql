@@ -575,17 +575,13 @@ BEGIN
 		
 	IF (EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1  AND ISNULL([ysnInsert], 0) = 1) AND @GroupingOption > 0)
 	BEGIN
-
 		UPDATE EFP
 		SET EFP.[intInvoiceId] = IL.[intInvoiceId]
-		FROM
-			#EntriesForProcessing EFP
-		INNER JOIN
-			(SELECT [intId], [intInvoiceId], [ysnSuccess], [ysnHeader] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) IL
-				ON EFP.[intId] = IL.[intId]
-				AND ISNULL(IL.[ysnHeader], 0) = 1
-				AND ISNULL(IL.[ysnSuccess], 0) = 1		
-			
+		FROM #EntriesForProcessing EFP
+		INNER JOIN tblARInvoiceIntegrationLogDetail IL WITH (NOLOCK) ON EFP.intId = IL.intId 
+		WHERE IL.intIntegrationLogId = @IntegrationLogId
+		  AND ISNULL(IL.[ysnHeader], 0) = 1
+		  AND ISNULL(IL.[ysnSuccess], 0) = 1			
 		
 		DECLARE @LineItems InvoiceStagingTable
 		INSERT INTO @LineItems

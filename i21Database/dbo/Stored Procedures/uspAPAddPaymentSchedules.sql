@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPAddPaymentSchedules]
-@paySchedules AS PaymentSchedule READONLY,
+	@paySchedules AS PaymentSchedule READONLY,
 	@error NVARCHAR(500) OUTPUT
 AS
 

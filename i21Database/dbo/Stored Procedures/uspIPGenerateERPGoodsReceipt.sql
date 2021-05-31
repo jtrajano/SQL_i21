@@ -406,7 +406,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<ItemNo>' + ISNULL(@strItemNo, '') + '</ItemNo>'
 
-			SELECT @strItemXML += '<ReceiptQty>' + LTRIM(@dblReceiptQty) + '</ReceiptQty>'
+			SELECT @strItemXML += '<ReceiptQty>' + LTRIM(ISNULL(@dblReceiptQty, 0)) + '</ReceiptQty>'
 
 			SELECT @strItemXML += '<ReceiptQtyUOM>' + ISNULL(@strReceiptQtyUOM, '') + '</ReceiptQtyUOM>'
 
@@ -451,7 +451,7 @@ BEGIN TRY
 				+ '<TrxSequenceNo>' + LTRIM(RIL.intInventoryReceiptItemLotId) + '</TrxSequenceNo>'
 				+ '<MotherLotNo>' + RIL.strParentLotNumber + '</MotherLotNo>'
 				+ '<LotNo>' + RIL.strLotNumber + '</LotNo>'
-				+ '<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), RIL.dblQuantity)) + '</Quantity>'
+				+ '<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), ISNULL(RIL.dblQuantity, 0))) + '</Quantity>'
 				+ '<QuantityUOM>' + UOM.strUnitMeasure + '</QuantityUOM>'
 				+ '<GrossWeight>' + LTRIM(CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblGrossWeight), 0))) + '</GrossWeight>'
 				+ '<TareWeight>' + LTRIM(CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RIL.dblTareWeight), 0))) + '</TareWeight>'

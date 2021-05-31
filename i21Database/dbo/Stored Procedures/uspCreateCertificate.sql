@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCreateCertificate]
 	@directory nvarchar(max) = null
-WITH ENCRYPTION
+--WITH ENCRYPTION
 AS
 BEGIN
   IF EXISTS (SELECT TOP 1 1 FROM sys.certificates WHERE name = 'iRelyi21Certificate')

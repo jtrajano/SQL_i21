@@ -45,3 +45,4 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount4] FOREIGN KEY ([intAccumulatedAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId]) REFERENCES [dbo].[tblFADepreciationMethod] ([intDepreciationMethodId])
 );
+

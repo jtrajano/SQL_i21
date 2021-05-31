@@ -139,7 +139,7 @@ END
 		, intFromCommodityUnitMeasureId int
 		, intToCommodityUnitMeasureId int
 		, strAccountNumber NVARCHAR(100)
-		, strTranType NVARCHAR(20)
+		, strTranType NVARCHAR(100)
 		, dblNoOfLot NUMERIC(24, 10)
 		, dblDelta NUMERIC(24, 10)
 		, intBrokerageAccountId int
@@ -232,9 +232,12 @@ END
 			, ysnPreCrush = ysnCrush
 		FROM tblRKDPRContractHedgeByMonth
 		WHERE intDPRHeaderId = @intDPRHeaderId
+		AND	 strLocationName = CASE WHEN @strLocationName = 'All' THEN strLocationName ELSE @strLocationName END
 
-
-
+	IF (@strCommodityCode IS NULL) 
+	BEGIN
+		SELECT TOP 1 @strCommodityCode = strCommodityCode FROM @List
+	END
 
 	DECLARE @ctr as int
 	SELECT @ctr = COUNT(intRowNumber) FROM @List 
