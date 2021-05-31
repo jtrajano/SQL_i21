@@ -8841,6 +8841,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
     <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
+    <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
