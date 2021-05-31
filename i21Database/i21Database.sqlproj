@@ -472,7 +472,7 @@
     <Build Include="dbo\Views\vyuFALastDepDate.sql" />
     <Build Include="dbo\Views\vyuFANextDepreciation.sql" />
     <Build Include="dbo\Views\vyuFAFixedAssetHistory.sql" />
-    <Build Include="dbo\Views\vyuFAClosedPeriodAsset.sql" />
+    <Build Include="dbo\Views\vyuFAUndepreciatedAssetAllPeriods.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
