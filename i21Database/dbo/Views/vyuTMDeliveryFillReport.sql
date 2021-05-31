@@ -86,8 +86,9 @@ SELECT
 	, strDriverName = J.strName  
 	, strDriverId = J.strEntityNo
 	, F.dtmRequestedDate
-	, dblQuantity = (CASE WHEN COALESCE(F.dblMinimumQuantity,0.0) <> 0 THEN F.dblMinimumQuantity
-						ELSE COALESCE(F.dblQuantity,0.0) END) 
+	--, dblQuantity = (CASE WHEN COALESCE(F.dblMinimumQuantity,0.0) <> 0 THEN F.dblMinimumQuantity
+	--					ELSE COALESCE(F.dblQuantity,0.0) END) 
+	, dblQuantity = ISNULL(NULLIF(ISNULL(F.dblMinimumQuantity, 0), 0), ISNULL(F.dblQuantity,0))
 	, strProductId = G.strItemNo
 	, strProductDescription = G.strDescription
 	, O.strRouteId
