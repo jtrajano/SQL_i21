@@ -24,10 +24,11 @@ SELECT distinct * FROM
  ,dblScheduleQty = isnull(b.dblScheduleQty,a.dblNetUnits)
  ,dblLoad = (case when isnull(contracts.ysnLoad,0) = 0 then 0.00 else (case when isnull(b.dblScheduleQty,a.dblNetUnits)/contracts.dblQuantityPerLoad < 1 then 1 else convert(int,isnull(b.dblScheduleQty,a.dblNetUnits)/contracts.dblQuantityPerLoad) end) end)
  ,contracts.ysnLoad
- FROM vyuSCTicketInventoryShipmentView a, tblSCTicket b, contracts
- where b.intTicketId = a.intTicketId
- and b.intContractId = a.intContractId
- and contracts.intContractDetailId = b.intContractId
+ FROM vyuSCTicketInventoryShipmentView a
+ inner join tblSCTicket b on b.intTicketId = a.intTicketId
+ inner join contracts on contracts.intContractDetailId = b.intContractId
+ where b.intContractId = a.intContractId
+ 
    
  UNION ALL  
    
@@ -45,11 +46,11 @@ SELECT distinct * FROM
  ,dblScheduleQty = isnull(b.dblScheduleQty,a.dblNetUnits)
  ,dblLoad = (case when isnull(contracts.ysnLoad,0) = 0 then 0.00 else (case when isnull(b.dblScheduleQty,a.dblNetUnits)/contracts.dblQuantityPerLoad < 1 then 1 else convert(int,isnull(b.dblScheduleQty,a.dblNetUnits)/contracts.dblQuantityPerLoad) end) end)
  ,contracts.ysnLoad
- FROM vyuSCTicketInventoryReceiptView a, tblSCTicket b, contracts
- where b.intTicketId = a.intTicketId
- and b.intContractId = a.intContractId
- and contracts.intContractDetailId = b.intContractId
-  
+ FROM vyuSCTicketInventoryReceiptView a 
+ inner join tblSCTicket b on b.intTicketId = a.intTicketId
+ inner join contracts on contracts.intContractDetailId = b.intContractId
+ where b.intContractId = a.intContractId
+   
 ) tbl
 
 /*
