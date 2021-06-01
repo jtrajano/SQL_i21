@@ -110,7 +110,7 @@ BEGIN TRY
 		JOIN dbo.tblICItem I ON I.intItemId = WC.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WC.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WC.intStorageLocationId
+		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 		WHERE WC.intWorkOrderId = @intWorkOrderId
 
 		SELECT @strDetailXML = @strDetailXML + '<line  id="' + ltrim(WP.intWorkOrderProducedLotId) + '" parentId="' + ltrim(@intProductionPreStageId) + '">'
