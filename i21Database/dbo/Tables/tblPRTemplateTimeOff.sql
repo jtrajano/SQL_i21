@@ -10,6 +10,7 @@
     [dblMaxEarned]         NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [dtmEligible]          DATETIME        DEFAULT (getdate()) NULL,
     [intSort]              INT             NULL,
+    [dblMaxBalance]        NUMERIC (18, 6) NULL,
     [intConcurrencyId]     INT             DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblPRTemplateTimeOff] PRIMARY KEY CLUSTERED ([intTemplateTimeOffId] ASC),
 	CONSTRAINT [FK_tblPRTemplateTimeOff_tblPRTemplate] FOREIGN KEY ([intTemplateId]) REFERENCES [tblPRTemplate]([intTemplateId]) ON DELETE CASCADE
