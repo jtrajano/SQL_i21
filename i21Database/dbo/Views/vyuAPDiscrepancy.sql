@@ -3,7 +3,7 @@ AS
 
 SELECT ISNULL(AP.intBillId, GL.intTransactionId) intTransactionId,
 	   ISNULL(AP.strBillId, GL.strTransactionId) strTransactionId,
-	   GL.dtmTransactionDate,
+	   ISNULL(GL.dtmTransactionDate, AP.dtmBillDate) dtmTransactionDate,
 	   ISNULL(E.strName, 'Unknown') strVendorName,
 	   ISNULL(AP.dtmDate, GL.dtmDate) dtmDate,
 	   ISNULL(GL.dblAmountDue, 0) dblGLAmount,
@@ -11,7 +11,7 @@ SELECT ISNULL(AP.intBillId, GL.intTransactionId) intTransactionId,
 	   (ISNULL(GL.dblAmountDue, 0) - ISNULL(AP.dblAmountDue, 0)) dblDifference,
 	   ISNULL(E2.strName, 'Unknown') strUserName
 FROM (
-	SELECT P.intBillId, B.strBillId, B.ysnOrigin, B.dtmDate, P.dblAmountDue
+	SELECT P.intBillId, B.strBillId, B.dtmBillDate, B.intEntityVendorId, B.dtmDate, P.dblAmountDue, B.intEntityId, B.ysnOrigin
 	FROM (
 		SELECT intBillId, CAST((SUM(dblTotal) + SUM(dblInterest) - SUM(dblAmountPaid) - SUM(dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 		FROM vyuAPPayables
@@ -23,7 +23,7 @@ FROM (
 	) P
 	INNER JOIN tblAPBill B ON B.intBillId = P.intBillId
 	UNION ALL
-	SELECT P.intInvoiceId, I.strInvoiceNumber, 0 ysnOrigin, I.dtmPostDate, P.dblAmountDue
+	SELECT P.intInvoiceId, I.strInvoiceNumber, I.dtmDate, I.intEntityCustomerId, I.dtmPostDate, P.dblAmountDue, I.intEntityId, 0 ysnOrigin
 	FROM (
 		SELECT intInvoiceId, CAST((SUM(dblTotal) + SUM(dblInterest) - SUM(dblAmountPaid) - SUM(dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 		FROM vyuAPSalesForPayables
@@ -121,6 +121,6 @@ FULL OUTER JOIN (
 	LEFT JOIN tblARInvoice I ON I.strReceiptNumber = A2.strTransactionId
 	WHERE A2.dblAmountDue != 0
 ) GL ON GL.intTransactionId = AP.intBillId AND GL.strTransactionId = AP.strBillId
-LEFT JOIN tblEMEntity E ON E.intEntityId = GL.intEntityId
-LEFT JOIN tblEMEntity E2 ON E2.intEntityId = GL.intUserId
-WHERE ISNULL(AP.dblAmountDue, 0) <> ISNULL(GL.dblAmountDue, 0) AND AP.ysnOrigin <> 0 AND GL.ysnOrigin = 0
+LEFT JOIN tblEMEntity E ON E.intEntityId = ISNULL(GL.intEntityId, AP.intEntityVendorId)
+LEFT JOIN tblEMEntity E2 ON E2.intEntityId = ISNULL(GL.intUserId, AP.intEntityId)
+WHERE ISNULL(AP.dblAmountDue, 0) <> ISNULL(GL.dblAmountDue, 0) AND ISNULL(AP.ysnOrigin, 0) = 0 AND ISNULL(GL.ysnOrigin, 0) = 0
