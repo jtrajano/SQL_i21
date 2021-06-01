@@ -59,7 +59,7 @@ INSERT INTO @InvoiceDetail
 	,[strItemType]
 	,[intSiteId]
 	,[intItemUOMId])
-SELECT
+SELECT DISTINCT
 	 [intInvoiceDetailId]				= ARID.[intInvoiceDetailId]
 	,[intInvoiceId]						= ARI.[intInvoiceId]
 	,[intItemId]						= ARID.[intItemId]
