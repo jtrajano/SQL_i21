@@ -718,6 +718,30 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	--DEBIT MEMO(S) ALREADY PAID IN FULL
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = P.[strTransactionNumber] + ' already paid in full.'
+	FROM
+		#ARPostPaymentDetail P
+    WHERE
+           P.[ysnPost] = @OneBit
+          AND P.[intInvoiceId] IS NULL
+          AND P.[dblPayment] <> @ZeroDecimal
+		  AND @Recap = @ZeroBit
+		  AND @Post = @OneBit
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--over the transaction''s amount due'
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
