@@ -9425,8 +9425,9 @@
     <Build Include="dbo\Views\vyuAPDiscrepancy.sql" />
     <Build Include="dbo\Views\vyuAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUnfixedPurchaseContract.sql" />
-	  <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
+    <Build Include="dbo\Functions\fnAPFormatBillGLDescription.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
