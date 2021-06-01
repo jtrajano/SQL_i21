@@ -242,8 +242,8 @@ BEGIN TRY
 										WHEN IC.strCostMethod = 'Per Unit' THEN 0
 										WHEN IC.strCostMethod = 'Amount' THEN 
 										CASE
-											WHEN @ysnDeductFeesCusVen = 0 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2)
-											WHEN @ysnDeductFeesCusVen = 1 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2) * -1
+											WHEN @ysnDeductFeesCusVen = 0 THEN ROUND(SC.dblTicketFees, 2)
+											WHEN @ysnDeductFeesCusVen = 1 THEN ROUND(SC.dblTicketFees, 2) * -1
 										END
 									END
 		,intEntityVendorId			= null
