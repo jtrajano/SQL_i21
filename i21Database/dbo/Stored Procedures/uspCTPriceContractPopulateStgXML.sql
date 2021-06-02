@@ -74,7 +74,7 @@ BEGIN TRY
 	Select Top 1 @intLogId=intLogId
 	from dbo.tblSMLog
 	Where intTransactionId=@intTransactionId
-	Order by 1 desc
+	Order by intLogId desc
 
 	-------------------------PriceContract-----------------------------------------------------------
 	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
