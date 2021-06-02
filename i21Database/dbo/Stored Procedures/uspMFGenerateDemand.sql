@@ -1491,8 +1491,8 @@ BEGIN TRY
 		,M.intMonthId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateInventoryRow M
-		,@tblMFItem I
-		,@tblSMCompanyLocation L
+		inner join @tblMFItem I on 1=1
+		inner join @tblSMCompanyLocation L  on 1=1
 	WHERE NOT EXISTS (
 			SELECT *
 			FROM #tblMFDemand D
