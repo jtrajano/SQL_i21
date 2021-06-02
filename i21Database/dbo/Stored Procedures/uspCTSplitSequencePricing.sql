@@ -128,11 +128,10 @@ BEGIN TRY
 					@intNewPriceFixationId = pf.intPriceFixationId
 				from
 					tblCTContractDetail cd
-					,tblCTPriceFixation pf
+					inner join tblCTPriceFixation pf on pf.intContractHeaderId = cd.intContractHeaderId and pf.intContractDetailId = cd.intContractDetailId
 				where
 					cd.intContractDetailId = 1129
-					and pf.intContractHeaderId = cd.intContractHeaderId
-					and pf.intContractDetailId = cd.intContractDetailId
+
 
 				if (@intNewPriceFixationId is null)
 				BEGIN
