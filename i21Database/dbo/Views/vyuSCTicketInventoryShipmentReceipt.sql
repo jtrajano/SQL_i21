@@ -5,8 +5,7 @@ with contracts as
 select
 b.intContractHeaderId, a.intContractDetailId, b.ysnLoad, b.dblQuantityPerLoad
 from
-tblCTContractDetail a, tblCTContractHeader b
-where b.intContractHeaderId = a.intContractHeaderId
+tblCTContractDetail a inner join tblCTContractHeader b on b.intContractHeaderId = a.intContractHeaderId
 )
 SELECT distinct * FROM   
 (  
