@@ -2,8 +2,8 @@
 	AS
 		select w.intTicketWatcherId, w.intTicketId, w.strTicketNumber, w.intUserId, w.intUserEntityId, w.intConcurrencyId, wc.strName, wc.strRoleName
 		from
-			tblHDTicketWatcher w,
-			(
+			tblHDTicketWatcher w
+			inner join (
 				select intEntityId, strName, strRoleName = isnull(strRoleName, '<font color="red"><i>No i21 access</i></font>') COLLATE Latin1_General_CI_AS from
 				(
 					select a.intEntityId, strName = a.strName, strRoleName = (select top 1 c.strName from tblSMUserRole c where c.intUserRoleID = b.intUserRoleID)
@@ -19,5 +19,4 @@
 						inner join tblEMEntity a on a.intEntityId = d.intEntityContactId
 					
 				) as role
-			) as wc
-		where wc.intEntityId = w.intUserEntityId
+			) as wc on wc.intEntityId = w.intUserEntityId
