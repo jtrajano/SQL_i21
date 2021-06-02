@@ -9433,7 +9433,8 @@
     <Build Include="dbo\Tables\tblIPInvReceiptItemLotArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPGoodsReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceipt.sql" />
-	<Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
