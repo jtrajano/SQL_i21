@@ -198,7 +198,7 @@ BEGIN TRY
 			CH.strContractNumber,
 			CH.strCustomerContract,
 			strDescription = IM.strDescription,
-			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + UM.strUnitMeasure,
+			strQuantity = dbo.fnCTChangeNumericScale(dbo.fnRemoveTrailingZeroes(CD.dblQuantity) , ISNULL(CP.intQuantityDecimals,2))+ ' ' + UM.strUnitMeasure,
 			strPeriod = datename(dd,CD.dtmStartDate)
 						+ ' '
 						+ datename(mm,CD.dtmStartDate)
@@ -215,10 +215,10 @@ BEGIN TRY
 								ELSE	'This confirms that the above contract has been partially priced as follows:'
 						END,
 			dblLotsUnFixed = dbo.fnCTChangeNumericScale(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0),1),
-			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,4) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
-			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),4) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
-			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,4) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
 			strSummary = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	'All lot(s) are fixed.'
 								ELSE	''
@@ -342,7 +342,7 @@ BEGIN TRY
 	JOIN	tblICItemUOM				FU	ON	FU.intItemUOMId					=	CD.intFXPriceUOMId		LEFT
 	JOIN	tblICCommodityUnitMeasure	FC	ON	FC.intCommodityId				=	CH.intCommodityId		AND FC.intUnitMeasureId				=	FU.intUnitMeasureId		LEFT	
 	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId
-
+	CROSS 	APPLY	tblCTCompanyPreference 		CP
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 
