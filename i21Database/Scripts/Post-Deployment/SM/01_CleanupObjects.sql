@@ -24,5 +24,15 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspS
 GO
 
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMReplicatonDropPublication'))
+       DROP PROCEDURE uspSMReplicatonDropPublication;
+GO
+
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMValidateRemoteDBServer'))
+       DROP PROCEDURE uspSMValidateRemoteDBServer;
+GO
+
+
+
 PRINT 'End SM Clean up Objects - Drop obsolete objects'
 GO
