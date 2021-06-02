@@ -68,7 +68,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 				  WHEN (ISNULL(a.gastl_rec_type, '''') = ''J'' and isnumeric(a.gastl_adj_ckoff_amt) <> 0 and ISNULL(b.gacom_ckoff_desc, '''') = '''') THEN ''CKOFF=''+convert(varchar,a.gastl_adj_ckoff_amt)
 			else ''''
 			END AS recType, a.A4GLIdentity
-			FROM gastlmst a, gacommst b where b.gacom_com_cd = a.gastl_com_cd and a.gastl_pur_sls_ind = ''P''
+			FROM gastlmst a inner join gacommst b on b.gacom_com_cd = a.gastl_com_cd where a.gastl_pur_sls_ind = ''P''
 		),
 		GAS4
 		as
@@ -92,7 +92,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 				  WHEN ISNULL(a.gastl_rec_type, '''') = ''7'' THEN (select top 1 isnull(e.ecctl_ga_stor_desc_7, '''') from ecctlmst e)
 				  WHEN ISNULL(a.gastl_rec_type, '''') = ''8'' THEN (select top 1 isnull(e.ecctl_ga_stor_desc_8, '''') from ecctlmst e)
 			END AS recType, a.A4GLIdentity
-			FROM gastlmst a, gacommst b where b.gacom_com_cd = a.gastl_com_cd and a.gastl_pur_sls_ind = ''P''
+			FROM gastlmst a inner join gacommst b on b.gacom_com_cd = a.gastl_com_cd where a.gastl_pur_sls_ind = ''P''
 		)
 		select
 			a.A4GLIdentity
