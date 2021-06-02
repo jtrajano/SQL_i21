@@ -24,10 +24,9 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBNa
 			,a.agstm_un_prc * (a.agstm_pkg_ship * a.agstm_un_per_pak) as agstm_amount
 		from
 			agstmmst a
-			,agitmmst b
+			inner join agitmmst b on a.agstm_itm_no = b.agitm_no
 		where
-			a.agstm_itm_no = b.agitm_no
-			and (a.agstm_rec_type = 5)
+			a.agstm_rec_type = 5
 		')
 GO
 
