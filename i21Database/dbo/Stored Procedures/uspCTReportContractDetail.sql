@@ -136,7 +136,7 @@ BEGIN TRY
 										   ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
 									   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		= FORMAT( CD.dtmStartDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')) + ' - ' + FORMAT( CD.dtmEndDate, ISNULL(SM.strReportDateFormat,'MM/DD/YYYY')),
+			strStraussShipment		= CONVERT(NVARCHAR, CD.dtmStartDate, ISNULL(SM.intConversionId, 101)) + ' - ' + CONVERT(NVARCHAR, CD.dtmEndDate, ISNULL(SM.intConversionId, 101)),
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
@@ -172,7 +172,19 @@ BEGIN TRY
 	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId
 		
 	CROSS JOIN tblCTCompanyPreference   CP
-	CROSS JOIN tblSMCompanyPreference SM
+	CROSS JOIN (
+		SELECT strReportDateFormat
+			, intConversionId = CASE WHEN strReportDateFormat = 'M/d/yyyy' THEN 101
+									WHEN strReportDateFormat = 'M/d/yy' THEN 1
+									WHEN strReportDateFormat = 'MM/dd/yy' THEN 1
+									WHEN strReportDateFormat = 'MM/dd/yyyy' THEN 101
+									WHEN strReportDateFormat = 'yy/MM/dd' THEN 11
+									WHEN strReportDateFormat = 'yyyy/MM/dd' THEN 111
+									WHEN strReportDateFormat = 'dd-MM-yyyy' THEN 105
+									WHEN strReportDateFormat = 'dd/MM/yyyy' THEN 103
+									WHEN strReportDateFormat = 'dd-MMM-yyyy' THEN 106 END
+		FROM tblSMCompanyPreference
+	) SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractStatusId <> 3
 
