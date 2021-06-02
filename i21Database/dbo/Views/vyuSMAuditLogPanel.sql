@@ -1,36 +1,23 @@
 ﻿CREATE VIEW [dbo].[vyuSMAuditLogPanel]
 AS
---SELECT 
---intAuditLogId,
---en.strName,
---[dbo].[fnSMAddSpaceToTitleCase](right(strTransactionType, CHARINDEX('.', REVERSE(strTransactionType)) - 1), 0) COLLATE Latin1_General_CI_AS as strTransactionType,
---strActionType + ' a record' COLLATE Latin1_General_CI_AS as strActionType,
---strRecordNo
---strDescription,
---strRoute,
---dtmDate,
---strRecordNo,
---auditLog.intEntityId
---FROM tblSMAuditLog auditLog
---inner join tblEMEntity en on en.intEntityId = auditLog.intEntityId
+
 SELECT 
-tblSMAudit.intAuditId as 'intAuditLogId',
-tblSMLog.strName,
-tblSMScreen.strNamespace as strScreenNamespace,
-tblSMScreen.strScreenName as strTransactionType,
-tblSMAudit.strAction + ' a record' COLLATE Latin1_General_CI_AS as strActionType,
-CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX))
-strDescription,
-strRoute,
-tblSMLog.dtmDate,
-CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX)) as strRecordNo,
-tblSMLog.intEntityId,
-case when tblSMTransaction.strTransactionNo is null then CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX))
-else tblSMTransaction.strTransactionNo end as 'strReference',
-tblSMTransaction.dtmDate as 'dtmTransactionDate',
-tblSMTransaction.strName as 'strAuditName',
-tblSMTransaction.strDescription as 'strAuditDescription',
-strEntityType
+	tblSMAudit.intAuditId as 'intAuditLogId',
+	tblSMLog.strName,
+	tblSMScreen.strNamespace as strScreenNamespace,
+	tblSMScreen.strScreenName as strTransactionType,
+	tblSMAudit.strAction + ' a record' COLLATE Latin1_General_CI_AS as strActionType,
+	CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX))
+	strDescription,
+	strRoute,
+	tblSMLog.dtmDate,
+	CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX)) as strRecordNo,
+	tblSMLog.intEntityId,
+	ISNULL(tblSMTransaction.strTransactionNo, '') as strTransactionNo,
+	tblSMTransaction.dtmDate as 'dtmTransactionDate',
+	tblSMTransaction.strName as 'strAuditName',
+	tblSMTransaction.strDescription as 'strAuditDescription',
+	strEntityType
 FROM (select 
 		intLogId, 
 		dtmDate, 
