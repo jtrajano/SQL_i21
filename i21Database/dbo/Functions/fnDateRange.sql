@@ -23,7 +23,7 @@ RETURN (
 		,dtmDate = D 
 	FROM  
 		cte3
-		,cte0 
+		inner join cte0 on 1=1
 	WHERE 
 		D <= @R2
 )
