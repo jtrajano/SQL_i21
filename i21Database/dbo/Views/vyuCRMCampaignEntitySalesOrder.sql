@@ -46,7 +46,8 @@
 				d.strTransactionType = 'Order'
 			group by
 				d.intEntityContactId
-			) as result, opportunity
+			) as result
+			inner join opportunity on 1=1
 		where
 			opportunity.intOpportunityId = result.intOpportunityId
 		group by
