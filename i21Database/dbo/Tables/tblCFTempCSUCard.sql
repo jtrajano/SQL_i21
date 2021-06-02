@@ -97,13 +97,11 @@ SELECT @PKCols = COALESCE(@PKCols + ' and', ' on')
 -- Get primary key select for insert
 SELECT @PKSelect = 'convert(varchar(100),
 coalesce(i.' + COLUMN_NAME +',d.' + COLUMN_NAME + '))'
-       FROM    INFORMATION_SCHEMA.TABLE_CONSTRAINTS pk ,
-               INFORMATION_SCHEMA.KEY_COLUMN_USAGE c
+       FROM    INFORMATION_SCHEMA.TABLE_CONSTRAINTS pk
+               inner join INFORMATION_SCHEMA.KEY_COLUMN_USAGE c on c.TABLE_NAME = pk.TABLE_NAME AND c.CONSTRAINT_NAME = pk.CONSTRAINT_NAME
        WHERE   pk.TABLE_NAME = @TableName
        AND     CONSTRAINT_TYPE = 'PRIMARY KEY'
-       AND     c.TABLE_NAME = pk.TABLE_NAME
-       AND     c.CONSTRAINT_NAME = pk.CONSTRAINT_NAME
-
+       
 IF @PKCols IS NULL
 BEGIN
        RAISERROR('no PK on table %s', 16, -1, @TableName)
@@ -212,12 +210,11 @@ SELECT @PKCols = COALESCE(@PKCols + ' and', ' on')
 -- Get primary key select for insert
 SELECT @PKSelect = 'convert(varchar(100),
 coalesce(i.' + COLUMN_NAME +',d.' + COLUMN_NAME + '))'
-       FROM    INFORMATION_SCHEMA.TABLE_CONSTRAINTS pk ,
-               INFORMATION_SCHEMA.KEY_COLUMN_USAGE c
+       FROM    INFORMATION_SCHEMA.TABLE_CONSTRAINTS pk
+               INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE c ON c.TABLE_NAME = pk.TABLE_NAME AND c.CONSTRAINT_NAME = pk.CONSTRAINT_NAME
        WHERE   pk.TABLE_NAME = @TableName
        AND     CONSTRAINT_TYPE = 'PRIMARY KEY'
-       AND     c.TABLE_NAME = pk.TABLE_NAME
-       AND     c.CONSTRAINT_NAME = pk.CONSTRAINT_NAME
+       
 
 IF @PKCols IS NULL
 BEGIN

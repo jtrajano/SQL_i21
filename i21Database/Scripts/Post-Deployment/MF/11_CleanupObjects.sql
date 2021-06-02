@@ -1,10 +1,11 @@
-﻿PRINT 'Begin Contract Management Clean up Objects - Drop obsolete objects'
+﻿PRINT 'Begin Manufacturing Clean up Objects - Drop obsolete objects'
 GO
 
-IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspCTAllowDPContractClosure'))
-       DROP PROCEDURE uspCTAllowDPContractClosure;
-GO
+IF OBJECT_ID('uspMFGErrorMessages', 'P') IS NOT NULL 
+BEGIN
+	EXEC('DROP PROCEDURE uspMFGErrorMessages') 
+END
 
 
-PRINT 'End Contract Management Clean up Objects - Drop obsolete objects'
+PRINT 'End Manufacturing Clean up Objects - Drop obsolete objects'
 GO
