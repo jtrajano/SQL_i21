@@ -139,10 +139,9 @@ as
 			,pfd.dblLoadAppliedAndPriced = case when pfd.dblLoadPriced > pp.dblCorrectLoadAppliedAndPriced then pp.dblCorrectLoadAppliedAndPriced else pfd.dblLoadPriced end
 		from
 			tblCTPriceFixationDetail pfd
-			,@PurchasePricing pp
+			inner join @PurchasePricing pp on pfd.intPriceFixationDetailId = pp.intPriceFixationDetailId
 		where
-			pfd.intPriceFixationDetailId = pp.intPriceFixationDetailId
-			and (
+			 (
 					pp.dblQuantityAppliedAndPriced <> pp.dblCorrectQuantityAppliedAndPriced
 					or pp.dblLoadAppliedAndPriced <> pp.dblCorrectLoadAppliedAndPriced
 				)

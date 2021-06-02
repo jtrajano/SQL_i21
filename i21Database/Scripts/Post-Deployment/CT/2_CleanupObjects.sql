@@ -14,6 +14,11 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspC
        DROP PROCEDURE uspCTErrorMessages;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspCTImportContractText'))
+       DROP PROCEDURE uspCTImportContractText;
+GO
+
+
 
 
 PRINT 'End Contract Management Clean up Objects - Drop obsolete objects'
