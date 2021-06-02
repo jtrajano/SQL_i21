@@ -9375,7 +9375,8 @@
     <Build Include="dbo\Views\vyuAGGetApplicationMethodDetail.sql" />
     <Build Include="dbo\Views\vyuAGGetStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUnfixedPurchaseContract.sql" />
-	<Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
