@@ -74,9 +74,9 @@ WITH shipmentstatus AS (
 	SELECT jjj.intContractHeaderId
 		, intRecordCount = COUNT(*)
 	FROM tblAPBillDetail jjj WITH(NOLOCK)
-		, tblAPBill kkk WITH(NOLOCK)
-	WHERE kkk.intBillId = jjj.intBillId
-		AND kkk.intTransactionType = 2
+		inner join tblAPBill kkk WITH(NOLOCK) on kkk.intBillId = jjj.intBillId
+	WHERE 
+		kkk.intTransactionType = 2
 	GROUP BY jjj.intContractHeaderId)
 
 , hedge AS (
