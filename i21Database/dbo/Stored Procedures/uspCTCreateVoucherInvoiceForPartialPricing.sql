@@ -1502,18 +1502,13 @@ BEGIN TRY
 							,ContractDetailItemId = d.intItemId
 						from
 							tblCTPriceFixation a
-							,tblCTPriceFixationDetail b
-							,tblCTPriceContract c
-							,tblCTContractDetail d with (nolock)
-							,tblICCommodityUnitMeasure e
-							,tblICItemUOM f
+							inner join tblCTPriceFixationDetail b on b.intPriceFixationId = a.intPriceFixationId
+							inner join tblCTPriceContract c on c.intPriceContractId = a.intPriceContractId
+							inner join tblCTContractDetail d with (nolock) on d.intContractDetailId = a.intContractDetailId
+							inner join tblICCommodityUnitMeasure e on e.intCommodityUnitMeasureId	=	b.intPricingUOMId
+							inner join tblICItemUOM f on f.intItemId = d.intItemId
 						where
 							a.intPriceContractId = @intPriceContractId
-							and b.intPriceFixationId = a.intPriceFixationId
-							and c.intPriceContractId = a.intPriceContractId
-							and d.intContractDetailId = a.intContractDetailId
-							and e.intCommodityUnitMeasureId	=	b.intPricingUOMId
-							and f.intItemId = d.intItemId
 							and f.intUnitMeasureId = e.intUnitMeasureId
 							and a.intContractDetailId = @intContractDetailId
 	   						and b.dblQuantity >= 0
