@@ -10,7 +10,7 @@
     [strQueueType]          [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
     [strJsonData]           NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strStatus]             [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
-    [strMessage]            [text] COLLATE Latin1_General_CI_AS NULL,
+    [strMessage]            [varchar](MAX) COLLATE Latin1_General_CI_AS NULL,
     [intTotalColumns]       [int] NULL,
     [intTotalRecords]       [int] NULL,
     [dblExecutionTime]      [float] NULL,
