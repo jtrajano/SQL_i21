@@ -967,7 +967,7 @@ BEGIN TRY
 			,2 AS intAttributeId --Opening Inventory
 			,- 1 AS intMonthId
 		FROM @tblMFItem I
-			,@tblSMCompanyLocation L
+			inner join @tblSMCompanyLocation L on 1=1
 		WHERE L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
 	END
 
