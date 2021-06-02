@@ -9,8 +9,8 @@ BEGIN
 
 	IF @intFormat IS NULL OR @intFormat = 0 OR @intFormat = 1
 	BEGIN
-		SELECT TOP 1 @description = TRIM(A.strDescription) + 
-								' - Item: ' + TRIM(I.strItemNo) + 
+		SELECT TOP 1 @description = LTRIM(RTRIM(A.strDescription)) + 
+								' - Item: ' + LTRIM(RTRIM(I.strItemNo)) + 
 								', Qty: ' + dbo.fnFormatNumber(CAST(BD.dblQtyReceived AS NVARCHAR(55))) + 
 								', Cost: ' + dbo.fnFormatNumber(CAST(ISNULL(BD.dblOldCost, BD.dblCost) AS NVARCHAR(55)))
 		FROM tblAPBillDetail BD
@@ -21,8 +21,8 @@ BEGIN
 
 	IF @intFormat = 2
 	BEGIN
-		SELECT TOP 1 @description = TRIM(A.strDescription) + 
-								', ' + TRIM(I.strItemNo)
+		SELECT TOP 1 @description = LTRIM(RTRIM(A.strDescription)) + 
+								', ' + LTRIM(RTRIM(I.strItemNo))
 		FROM tblAPBillDetail BD
 		INNER JOIN tblGLAccount A ON A.intAccountId = BD.intAccountId
 		INNER JOIN tblICItem I ON I.intItemId = BD.intItemId
@@ -31,8 +31,8 @@ BEGIN
 
 	IF @intFormat = 3
 	BEGIN
-		SELECT TOP 1 @description = TRIM(A.strDescription) + 
-									', Charges from ' + TRIM(I.strItemNo)
+		SELECT TOP 1 @description = LTRIM(RTRIM(A.strDescription)) + 
+									', Charges from ' + LTRIM(RTRIM(I.strItemNo))
 		FROM tblAPBillDetail BD
 		INNER JOIN tblGLAccount A ON A.intAccountId = BD.intAccountId
 		INNER JOIN tblICItem I ON I.intItemId = BD.intItemId
