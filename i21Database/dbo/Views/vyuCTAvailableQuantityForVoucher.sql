@@ -23,13 +23,11 @@ bill as (
 		,dblQtyReceived = sum(a.dblQtyReceived)
 	from
 	  	tblAPBillDetail a
-	  	,tblICItem b
-	  	,tblAPBill c
+	  	inner join tblICItem b on b.intItemId = a.intItemId
+	  	inner join tblAPBill c on c.intBillId = a.intBillId
 	where
-	  	b.intItemId = a.intItemId
-	  	and b.strType = 'Inventory'
+	  	b.strType = 'Inventory'
 	  	and c.intTransactionType = 1
-	  	and c.intBillId = a.intBillId
 	group by
 		a.intContractDetailId
 ),
