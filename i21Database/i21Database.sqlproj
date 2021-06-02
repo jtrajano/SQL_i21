@@ -9414,6 +9414,7 @@
     <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALSR.sql" />
