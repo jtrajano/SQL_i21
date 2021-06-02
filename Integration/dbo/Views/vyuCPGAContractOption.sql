@@ -46,20 +46,12 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 			,a.gacnt_pur_sls_ind
 		from
 			gacntmst a
-			,gacommst b
-			,gaoptmst c
-			,agcusmst d
+			inner join gacommst b on a.gacnt_com_cd = b.gacom_com_cd
+			inner join gaoptmst c on c.gaopt_cus_no = a.gacnt_cus_no
+			inner join agcusmst d on d.agcus_key = a.gacnt_cus_no
 		where
-			a.gacnt_com_cd = b.gacom_com_cd
-			and d.agcus_key = a.gacnt_cus_no
-			and c.gaopt_cus_no = a.gacnt_cus_no
 			and c.gaopt_pur_sls_ind = a.gacnt_pur_sls_ind
 			and c.gaopt_com_cd = a.gacnt_com_cd
-			--and (a.gacnt_seq_no = ''1'') 
-			--and (a.gacnt_loc_no = ''001'') 
-	--and (a.gacnt_cnt_no = ''00001195'') 
-	--and (a.gacnt_cus_no = ''0000000505'') 
-	--and (a.gacnt_com_cd = ''C'') 
-	--and (a.gacnt_pur_sls_ind = ''S'')
+
 		')
 GO
