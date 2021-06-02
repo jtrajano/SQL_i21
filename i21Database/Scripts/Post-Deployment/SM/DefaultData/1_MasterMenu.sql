@@ -10,7 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'Tax vs Book' AND strModuleName = 'Fixed Assets')
+	
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -2100,6 +2101,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Voucher C
 	VALUES (N'Voucher Checkoff', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Voucher Checkoff', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Purchasing&report=VoucherCheckOff&direct=true&showCriteria=true', N'small-menu-report', 1, 0, 0, 1, 10, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Reporting.view.ReportManager?group=Purchasing&report=VoucherCheckOff&direct=true&showCriteria=true', intSort = 10, strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Voucher Checkoff' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Out of Balance', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Out of Balance', N'Report', N'Screen', N'AccountsPayable.search.OutOfBalance?showSearch-true', N'small-menu-report', 1, 0, 0, 1, 10, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.search.OutOfBalance?showSearch=true', intSort = 10, strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '1099' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableMaintenanceParentMenuId)
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = '1099' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableMaintenanceParentMenuId
