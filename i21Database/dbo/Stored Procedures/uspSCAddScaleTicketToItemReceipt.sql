@@ -346,22 +346,23 @@ END
 	,[dblAmount]						= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
 											WHEN IC.strCostMethod = 'Amount' THEN 
-											CASE 
-												WHEN RE.ysnIsStorage = 1 THEN 0
-												WHEN RE.ysnIsStorage = 0 THEN
-												CASE
-													WHEN QM.dblDiscountAmount < 0 THEN 
+												ROUND(
+												CASE 
+													WHEN RE.ysnIsStorage = 1 THEN 0
+													WHEN RE.ysnIsStorage = 0 THEN
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)
-													END 
-													WHEN QM.dblDiscountAmount > 0 THEN 
-													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)
-														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost)
-													END 
-												END
-											END
+														WHEN QM.dblDiscountAmount < 0 THEN 
+														CASE
+															WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)
+															ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)
+														END 
+														WHEN QM.dblDiscountAmount > 0 THEN 
+														CASE
+															WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)
+															ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost)
+														END 
+													END
+												END,2)
 										END
 	,[intContractHeaderId]				= RE.intContractHeaderId
 	,[intContractDetailId]				= RE.intContractDetailId
@@ -675,10 +676,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
-																		CASE
-																			WHEN RE.ysnIsStorage = 1 THEN 0
-																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
-																		END
+																		ROUND(CASE
+																				WHEN RE.ysnIsStorage = 1 THEN 0
+																				WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																			END,2)
 																		ELSE 0
 																	END
 								,[intContractHeaderId]				= RE.intContractHeaderId
@@ -746,7 +747,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN RE.ysnIsStorage = 1 THEN 0
-																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																			WHEN RE.ysnIsStorage = 0 THEN ROUND(ContractCost.dblRate,2)
 																		END
 																		ELSE 0
 																	END
@@ -1031,12 +1032,12 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	CASE
 																		WHEN RE.ysnIsStorage = 1 THEN 0
 																		WHEN RE.ysnIsStorage = 0 THEN 
-																		CASE 
-																			WHEN ISNULL(CT.intContractCostId,0) = 0 THEN 
-																				(RE.dblQty / SC.dblNetUnits * SC.dblFreightRate)
-																			ELSE 
-																				ROUND ((RE.dblQty / SC.dblNetUnits * CT.dblRate), 2)
-																		END
+																		ROUND (CASE 
+																					WHEN ISNULL(CT.intContractCostId,0) = 0 THEN 
+																						(RE.dblQty / SC.dblNetUnits * SC.dblFreightRate)
+																					ELSE 
+																						(RE.dblQty / SC.dblNetUnits * CT.dblRate)
+																				END, 2)
 																	END
 																	ELSE 0
 																END
