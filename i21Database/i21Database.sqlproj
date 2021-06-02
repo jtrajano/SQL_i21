@@ -9376,8 +9376,9 @@
     <Build Include="dbo\Views\vyuAGGetApplicationMethodDetail.sql" />
     <Build Include="dbo\Views\vyuAGGetStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUnfixedPurchaseContract.sql" />
-	  <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
