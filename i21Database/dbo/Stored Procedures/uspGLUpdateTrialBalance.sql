@@ -46,8 +46,8 @@ sum(dblDebit-dblCredit) dblAmount,
 F1.intGLFiscalYearPeriodId,
 1,
 @dtmDate
-FROM @GLEntries A JOIN tblGLFiscalYearPeriod F ON dtmDate BETWEEN F.dtmStartDate AND F.dtmEndDate,
-tblGLFiscalYearPeriod F1 
+FROM @GLEntries A JOIN tblGLFiscalYearPeriod F ON dtmDate BETWEEN F.dtmStartDate AND F.dtmEndDate
+inner join tblGLFiscalYearPeriod F1  on 1=1
 WHERE F1.dtmEndDate > F.dtmEndDate
 AND A.intAccountId NOT IN ( SELECT intRetainAccount FROM tblGLFiscalYear)
 GROUP BY intAccountId ,  F1.intGLFiscalYearPeriodId,strTransactionId
