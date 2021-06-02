@@ -1137,7 +1137,12 @@ BEGIN TRY
 							goto SkipShipmentLoop; 
 						end
 
-						select @intTotalLoadPriced = sum(df.dblLoadPriced) from tblCTPriceFixation f, tblCTPriceFixationDetail df where f.intContractDetailId = @intContractDetailId and df.intPriceFixationId = f.intPriceFixationId;
+						select @intTotalLoadPriced = sum(df.dblLoadPriced) 
+						from 
+							tblCTPriceFixation f
+							inner join tblCTPriceFixationDetail df on df.intPriceFixationId = f.intPriceFixationId
+						where 
+							f.intContractDetailId = @intContractDetailId; 
 
 						if (@intShipmentCount <= @intPricedLoad)
 						begin
