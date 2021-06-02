@@ -19,6 +19,9 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspS
        DROP PROCEDURE uspSMValidateRemoteDBServer;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMErrorMessages'))
+       DROP PROCEDURE uspSMErrorMessages;
+GO
 
 
 PRINT 'End SM Clean up Objects - Drop obsolete objects'
