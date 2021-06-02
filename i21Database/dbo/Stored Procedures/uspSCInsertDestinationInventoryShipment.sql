@@ -184,10 +184,10 @@ BEGIN TRY
 												CASE
 													WHEN SC.ysnIsStorage = 0 THEN 0
 													ELSE
-													CASE
+													ROUND(CASE
 														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId,SC.dblCost, 0) * -1)
 														ELSE (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId,SC.dblCost) * -1)
-													END
+													END,2)
 												END 
 											END
 	,[intOtherChargeEntityVendorId]		= NULL
