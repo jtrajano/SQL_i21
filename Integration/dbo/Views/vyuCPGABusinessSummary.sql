@@ -170,7 +170,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 			,Chk_Ins = (SELECT TOP 1 chkIns FROM GAS2 where A4GLIdentity = a.A4GLIdentity)
 		from
 			gastlmst a
-			,gacommst b
+			inner join gacommst b on 1=1
 		where
 			(a.gastl_pur_sls_ind = ''P'')
 			and (a.gastl_com_cd = b.gacom_com_cd)
