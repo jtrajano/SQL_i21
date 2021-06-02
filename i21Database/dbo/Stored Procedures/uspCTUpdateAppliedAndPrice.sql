@@ -42,10 +42,10 @@ as
 			,@intSequenceAppliedLoad = (cd.intNoOfLoad - convert(int,@dblBalance))
 		from
 			tblCTContractDetail cd
-			,tblCTContractHeader ch
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 		where
 			cd.intContractDetailId = @intContractDetailId
-			and ch.intContractHeaderId = cd.intContractHeaderId
+			
 
 		insert into @PurchasePricing (
 			intPriceFixationDetailId
