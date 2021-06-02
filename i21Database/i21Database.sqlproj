@@ -9208,6 +9208,7 @@
     <Build Include="dbo\Stored Procedures\uspICAfterPostInventoryTransferIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
 <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
   </ItemGroup>
   <ItemGroup>
