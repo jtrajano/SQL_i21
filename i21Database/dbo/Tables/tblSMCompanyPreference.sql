@@ -70,5 +70,7 @@
     [strADUserName]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strADPassword]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnEnableUserActivityLog]						BIT NOT NULL DEFAULT 0,
+	[strIDPDefaultModel]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strIDPDefaultModelId]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]								INT NOT NULL DEFAULT 1
 )
