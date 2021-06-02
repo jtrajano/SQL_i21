@@ -9381,6 +9381,7 @@
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
     <Build Include="Scripts\Post-Deployment\CM\9_CleanupObjects.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
