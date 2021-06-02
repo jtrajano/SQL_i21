@@ -224,7 +224,12 @@ begin
 	begin
 		if (@intTicketProductId is not null and @intTicketProductId > 0)
 		begin
-			select top 1 @intModuleId = a.intModuleId, @intGroupId = a.intTicketGroupId from tblHDModule a, tblSMModule b where a.intTicketProductId = @intTicketProductId and b.intModuleId = a.intSMModuleId and b.strModule = lower(rtrim(ltrim(@Module)));
+			select top 1 @intModuleId = a.intModuleId, @intGroupId = a.intTicketGroupId 
+			from 
+				tblHDModule a
+				inner join tblSMModule b on b.intModuleId = a.intSMModuleId 
+			where a.intTicketProductId = @intTicketProductId and b.strModule = lower(rtrim(ltrim(@Module)));
+
 			if (@intModuleId is null or @intModuleId < 1)
 			begin
 				set @intErrorCount = @intErrorCount + 1;
