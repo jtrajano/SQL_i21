@@ -2104,9 +2104,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Out of Balance', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Out of Balance', N'Report', N'Screen', N'AccountsPayable.search.OutOfBalance?showSearch-true', N'small-menu-report', 1, 0, 0, 1, 10, 1)
+	VALUES (N'Out of Balance', N'Accounts Payable', @AccountsPayableReportParentMenuId, N'Out of Balance', N'Report', N'Screen', N'AccountsPayable.view.OutOfBalance?showSearch-true', N'small-menu-report', 1, 0, 0, 1, 10, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.search.OutOfBalance?showSearch=true', intSort = 10, strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.OutOfBalance?showSearch=true', intSort = 10, strCategory = N'Report', strType = 'Screen' WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableReportParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '1099' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableMaintenanceParentMenuId)
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = '1099' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableMaintenanceParentMenuId
