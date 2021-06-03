@@ -2385,6 +2385,7 @@
     <Build Include="dbo\Stored Procedures\uspSCFullSheetDistributionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCFullSheetFooterDetail.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddInventoryTransfer.sql" />
@@ -8924,7 +8925,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
-    <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
     <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
     <Build Include="dbo\Views\vyuCTContractOptionView.sql" />
