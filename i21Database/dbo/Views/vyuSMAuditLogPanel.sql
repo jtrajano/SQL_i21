@@ -20,6 +20,7 @@ SELECT
 	strEntityType
 FROM (SELECT 
 		intLogId, 
+		intOriginalScreenId,
 		dtmDate, 
 		e.intEntityId, 
 		e.intTransactionId, 
@@ -35,5 +36,5 @@ FROM (SELECT
 inner join tblSMAudit tblSMAudit on tblSMAudit.intLogId = tblSMLog.intLogId
 inner join tblSMTransaction tblSMTransaction on tblSMTransaction.intTransactionId = tblSMLog.intTransactionId
 inner join tblSMScreen on tblSMScreen.intScreenId = tblSMTransaction.intScreenId
-left join tblSMScreen B on B.intScreenId = tblSMTransaction.intOriginalScreenId
+left join tblSMScreen B on B.intScreenId = tblSMLog.intOriginalScreenId
 where tblSMAudit.intParentAuditId IS NULL  --parent only 
