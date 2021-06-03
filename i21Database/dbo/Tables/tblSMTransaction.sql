@@ -2,7 +2,6 @@
 (
 	[intTransactionId]		INT													NOT NULL  IDENTITY,
 	[intScreenId]			[int]												NOT NULL DEFAULT ((1)),
-	[intOriginalScreenId]	[int]												NULL,
 	[strTransactionNo]		[nvarchar](500)	COLLATE Latin1_General_CI_AS		NULL,
 	[intEntityId]			[int]												NULL, 
 	[dtmDate]				DATETIME											NULL, 
