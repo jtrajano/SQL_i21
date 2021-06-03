@@ -2358,7 +2358,7 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM @tblMFItem I
-		,@tblSMCompanyLocation L
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
 
 	INSERT INTO #tblMFDemandList (
