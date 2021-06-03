@@ -2412,9 +2412,9 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
-		,@tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+		inner join @tblMFItem I on 1=1
+		inner join tblCTReportAttribute A on 1=1
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE A.intReportAttributeID IN (
 			2 --Opening Inventory
 			,4 --Existing Purchases
@@ -2456,9 +2456,9 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
-		,@tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+		inner join @tblMFItem I on 1=1
+		inner join tblCTReportAttribute A on 1=1
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE A.intReportAttributeID IN (
 			8
 			,15
