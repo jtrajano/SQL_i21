@@ -274,7 +274,7 @@ BEGIN
 
 				DECLARE @intDDPullProductId INT = NULL,
 					@intDDDropProductId INT = NULL,
-					@dblDDDropGross NUMERIC(16,6) = NULL,
+					@dblDDDropGross NUMERIC(18,6) = NULL,
 					@dblDDDropNet NUMERIC(18,6) = NULL,
 					@strDDBillOfLading NVARCHAR(50) = NULL,
 					@intDDLoadReceiptId INT = NULL,
@@ -446,7 +446,7 @@ BEGIN
 				
 				DECLARE @intNonBlendPullProductId INT = NULL,
 					@intNonBlendDropProductId INT = NULL,
-					@dblNonBlendDropGross NUMERIC(16,6) = NULL,
+					@dblNonBlendDropGross NUMERIC(18,6) = NULL,
 					@dblNonBlendDropNet NUMERIC(18,6) = NULL,
 					@strNonBlendBillOfLading NVARCHAR(50) = NULL,
 					@strNonBlendReceiptLink NVARCHAR(50) = NULL,
