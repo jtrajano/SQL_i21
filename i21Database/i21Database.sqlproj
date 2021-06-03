@@ -504,6 +504,7 @@
     <Build Include="dbo\Stored Procedures\uspCMImportBankAccountsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankTransactionsFromOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBankReconciliationFromOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUploadAttachment.sql" />
     <Build Include="dbo\Tables\tblCMDataImportStatus.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityFRPermission.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityReportPermission.sql" />
