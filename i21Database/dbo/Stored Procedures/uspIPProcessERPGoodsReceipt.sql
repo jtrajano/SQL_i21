@@ -65,6 +65,7 @@ BEGIN TRY
 		,@intLotStatusId INT
 		,@intParentLotId INT
 		,@strParentLotNumber NVARCHAR(50)
+	DECLARE @InventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -287,6 +288,9 @@ BEGIN TRY
 
 			BEGIN TRAN
 
+			DELETE
+			FROM @InventoryTransferDetail
+
 			SELECT @intStageReceiptItemLotId = MIN(intStageReceiptItemLotId)
 			FROM tblIPInvReceiptItemLotStage WITH (NOLOCK)
 			WHERE intStageReceiptId = @intStageReceiptId
@@ -343,14 +347,44 @@ BEGIN TRY
 				JOIN tblIPInvReceiptItemStage RIS WITH (NOLOCK) ON RIS.intTrxSequenceNo = RILS.intParentTrxSequenceNo
 				WHERE RILS.intStageReceiptItemLotId = @intStageReceiptItemLotId
 
-				SELECT @intLotId = t.intLotId
-				FROM tblICLot t WITH (NOLOCK)
-				WHERE t.strLotNumber = @strLotNo
+				IF @dblNetWeight <= 0
+				BEGIN
+					RAISERROR (
+							'Invalid Net Weight. '
+							,16
+							,1
+							)
+				END
+
+				SELECT TOP 1 @intInventoryTransferDetailId = ITD.intInventoryTransferDetailId
+					,@dblQuantity = ISNULL(ITD.dblQuantity, 0)
+					,@intQtyItemUOMId = ITD.intItemUOMId
+					,@intQtyUnitMeasureId = IUOM.intUnitMeasureId
+					,@intLotId = L.intLotId
+				FROM tblICInventoryTransferDetail ITD
+				JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
+					AND ITD.intInventoryTransferId = @intInventoryTransferId
+				JOIN tblICLot L ON L.intLotId = ITD.intLotId
+					AND L.strLotNumber = @strLotNo
+				WHERE ITD.intInventoryTransferDetailId NOT IN (
+						SELECT ISNULL(intInventoryTransferDetailId, 0)
+						FROM @InventoryTransferDetail
+						)
+				ORDER BY ABS(ITD.dblNet - @dblNetWeight)
 
 				IF ISNULL(@intLotId, 0) = 0
 				BEGIN
 					RAISERROR (
 							'Invalid Lot No. '
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@intInventoryTransferDetailId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Lot is not available in the Transfer Order Items.'
 							,16
 							,1
 							)
@@ -363,24 +397,6 @@ BEGIN TRY
 				FROM tblICLot L
 				JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				WHERE L.intLotId = @intLotId
-
-				SELECT @intInventoryTransferDetailId = ITD.intInventoryTransferDetailId
-					,@dblQuantity = ISNULL(ITD.dblQuantity, 0)
-					,@intQtyItemUOMId = ITD.intItemUOMId
-					,@intQtyUnitMeasureId = IUOM.intUnitMeasureId
-				FROM tblICInventoryTransferDetail ITD
-				JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
-				WHERE ITD.intInventoryTransferId = @intInventoryTransferId
-					AND ITD.intLotId = @intLotId
-
-				IF ISNULL(@intInventoryTransferDetailId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Lot is not available in the Transfer Order Items.'
-							,16
-							,1
-							)
-				END
 
 				SELECT @intItemId = t.intItemId
 				FROM tblICItem t WITH (NOLOCK)
@@ -412,6 +428,7 @@ BEGIN TRY
 				SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
 				FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
 				WHERE t.strSubLocationName = @strSubLocationName
+					AND t.intCompanyLocationId = @intCompanyLocationId
 
 				IF ISNULL(@intSubLocationId, 0) = 0
 				BEGIN
@@ -425,6 +442,7 @@ BEGIN TRY
 				SELECT @intStorageLocationId = t.intStorageLocationId
 				FROM tblICStorageLocation t WITH (NOLOCK)
 				WHERE t.strName = @strStorageLocationName
+					AND t.intSubLocationId = @intSubLocationId
 
 				IF ISNULL(@intStorageLocationId, 0) = 0
 				BEGIN
@@ -457,15 +475,6 @@ BEGIN TRY
 				BEGIN
 					RAISERROR (
 							'Invalid Gross Weight. '
-							,16
-							,1
-							)
-				END
-
-				IF @dblNetWeight <= 0
-				BEGIN
-					RAISERROR (
-							'Invalid Net Weight. '
 							,16
 							,1
 							)
@@ -618,6 +627,8 @@ BEGIN TRY
 					,intLineNo
 					,intOrderId
 					,intSourceId
+					,intInventoryTransferId
+					,intInventoryTransferDetailId
 					,intItemId
 					,intSubLocationId
 					,intStorageLocationId
@@ -639,6 +650,8 @@ BEGIN TRY
 					)
 				SELECT 1
 					,@intInventoryReceiptId
+					,@intInventoryTransferDetailId
+					,@intInventoryTransferId
 					,@intInventoryTransferDetailId
 					,@intInventoryTransferId
 					,@intInventoryTransferDetailId
@@ -730,6 +743,10 @@ BEGIN TRY
 					,@intUserId
 				FROM tblICInventoryReceiptItem RI
 				WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+					AND RI.intLineNo = @intInventoryTransferDetailId
+
+				INSERT INTO @InventoryTransferDetail (intInventoryTransferDetailId)
+				SELECT @intInventoryTransferDetailId
 
 				SELECT @intStageReceiptItemLotId = MIN(intStageReceiptItemLotId)
 				FROM tblIPInvReceiptItemLotStage WITH (NOLOCK)
