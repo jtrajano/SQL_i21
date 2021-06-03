@@ -1708,11 +1708,10 @@ BEGIN TRY
 								top 1 @intInvoiceId = c.intInvoiceId, @intInvoiceDetailId = b.intInvoiceDetailId
 							from
 								tblICInventoryShipmentItem a with (nolock)
-								,tblARInvoiceDetail b with (nolock), tblARInvoice c with (nolock)
+								inner join tblARInvoiceDetail b with (nolock) on b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
+								inner join tblARInvoice c with (nolock) on c.intInvoiceId = b.intInvoiceId
 							where
 								a.intInventoryShipmentId = @intInventoryShipmentId
-								and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
-								and c.intInvoiceId = b.intInvoiceId
 								and isnull(c.ysnPosted,0) = 0
 								and c.strTransactionType = 'Invoice'
 
