@@ -258,7 +258,7 @@ AND APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
 UNION ALL
 /*START ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
-SELECT DISTINCT	
+SELECT	
 	'3'  collate Latin1_General_CI_AS AS TEST,
     CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intEntityVendorId ELSE CS_TO.intEntityId END AS intEntityVendorId
     ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TS.dtmTransferStorageDate END AS dtmDate
@@ -340,7 +340,7 @@ AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
 AND (
     (ST_TO.ysnDPOwnedType = 0 AND ST_FROM.ysnDPOwnedType = 1) --DP to OS
-	OR (ST_TO.ysnDPOwnedType = 1 AND ST_FROM.ysnDPOwnedType = 0) --OS to DP
+	-- OR (ST_TO.ysnDPOwnedType = 1 AND ST_FROM.ysnDPOwnedType = 0) --OS to DP
 )
 UNION ALL
 --Transfer Storages
@@ -408,7 +408,7 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
 WHERE (ST_TO.ysnDPOwnedType = 0 AND ST.ysnDPOwnedType = 1) --DP to OS
-		OR (ST_TO.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 0) --OS to DP
+		-- OR (ST_TO.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 0) --OS to DP
         AND APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 UNION ALL
@@ -672,7 +672,7 @@ INNER JOIN tblGRCustomerStorage CS_TO
 	ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
 INNER JOIN tblGRStorageType ST_TO
 	ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
-		AND ST_TO.ysnDPOwnedType = 0
+		-- AND ST_TO.ysnDPOwnedType = 0
 INNER JOIN tblSMCompanyLocation CL_TO
     ON CL_TO.intCompanyLocationId = CS_TO.intCompanyLocationId
 INNER JOIN tblGRTransferStorage TS_TO
