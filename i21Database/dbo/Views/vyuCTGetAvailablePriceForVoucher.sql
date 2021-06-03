@@ -81,7 +81,8 @@
 					left join tblAPBill b on b.intBillId = bd1.intBillId and b.intTransactionType = 1
                     left join tblAPBillDetail bd on bd.intContractDetailId = cd.intContractDetailId and isnull(bd.intSettleStorageId,0) = 0 and bd.intBillId = b.intBillId
                 where
-					not exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceContract pc where pc.intPriceContractId = pf.intPriceContractId and pf.intContractDetailId = cd.intContractDetailId)
+                	cd.dblCashPrice is not null
+					and not exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceContract pc where pc.intPriceContractId = pf.intPriceContractId and pf.intContractDetailId = cd.intContractDetailId)
                 group by        
                     cd.intContractDetailId        
                     ,cd.dblQuantity        
