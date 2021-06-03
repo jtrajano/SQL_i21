@@ -97,6 +97,9 @@ GO
 IF OBJECT_ID('vyuCPDatabaseDate','v') IS NOT NULL
 	DROP VIEW vyuCPDatabaseDate;
 GO
+IF OBJECT_ID('vyuCPGABusinessSummary','v') IS NOT NULL
+	DROP VIEW vyuCPGABusinessSummary;
+GO
 IF OBJECT_ID('vyuCPGAContractOption','v') IS NOT NULL
 	DROP VIEW vyuCPGAContractOption;
 GO
