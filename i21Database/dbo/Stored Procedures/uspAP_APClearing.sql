@@ -168,3 +168,9 @@ BEGIN
 	PRINT 'APC29 Result'
 	SELECT * FROM ##tmpAPC29
 END
+
+IF OBJECT_ID('tempdb..##tmpAPBalance') IS NOT NULL
+BEGIN
+	PRINT 'AP Account Balance Result'
+	SELECT * FROM ##tmpAPBalance
+END
