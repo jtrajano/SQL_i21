@@ -2376,8 +2376,8 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM @tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+		inner join tblCTReportAttribute A on 1=1
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE A.intReportAttributeID IN (
 			4 --Existing Purchases
 			,13 --Open Purchases
