@@ -178,7 +178,7 @@ BEGIN
 			OUTER APPLY
             (
                 SELECT R.intBillDetailId,
-					1 intFormat,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
 					(R.dblTotal) AS dblTotal, 
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
