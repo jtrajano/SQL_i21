@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspAGCreateInvoiceFromShipment]
 	,@OnlyUseShipmentPrice 			AS BIT  = 0
 	,@IgnoreNoAvailableItemError 	AS BIT  = 0
 	,@dtmShipmentDate				AS DATETIME = NULL
+	,@intAGWorkOrderId AS INT 
 AS
 
 BEGIN
@@ -117,7 +118,8 @@ SELECT [strSourceTransaction]			= strTransactionType
 	,[dblCurrencyExchangeRate]			= dblCurrencyExchangeRate
 	,[intSubCurrencyId] 				= intSubCurrencyId
 FROM vyuAGWorkOrderForInvoice
-WHERE intInventoryShipmentId = @ShipmentId
+WHERE intWorkOrderId = @intAGWorkOrderId  
+--WHERE intInventoryShipmentId = @ShipmentId
  
 EXEC [dbo].[uspARProcessInvoices] @InvoiceEntries		= @EntriesForInvoice
 								, @LineItemTaxEntries	= @LineItemTaxEntries
