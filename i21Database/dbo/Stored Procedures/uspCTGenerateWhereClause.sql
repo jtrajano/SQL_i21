@@ -160,7 +160,7 @@ BEGIN TRY
 
 	IF (@strClause LIKE '% AND ')
 	BEGIN
-		SET @strClause = SUBSTRING(@strClause, 0, LEN(@strClause) - 4)
+		SET @strClause = SUBSTRING(@strClause, 0, LEN(@strClause) - 3)
 	END
 
 END TRY
