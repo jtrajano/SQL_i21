@@ -2,10 +2,10 @@
 AS
 
 SELECT 
-	tblSMAudit.intAuditId as 'intAuditLogId',
+	tblSMAudit.intAuditId as intAuditLogId,
 	tblSMLog.strName,
-	tblSMScreen.strNamespace as strScreenNamespace,
-	tblSMScreen.strScreenName as strTransactionType,
+	ISNULL(B.strNamespace, tblSMScreen.strNamespace) as strScreenNamespace,
+	ISNULL(B.strScreenName, tblSMScreen.strScreenName) as strTransactionType,
 	tblSMAudit.strAction + ' a record' COLLATE Latin1_General_CI_AS as strActionType,
 	CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX))
 	strDescription,
@@ -14,11 +14,11 @@ SELECT
 	CAST(tblSMTransaction.intRecordId AS NVARCHAR(MAX)) as strRecordNo,
 	tblSMLog.intEntityId,
 	ISNULL(tblSMTransaction.strTransactionNo, '') as strTransactionNo,
-	tblSMTransaction.dtmDate as 'dtmTransactionDate',
-	tblSMTransaction.strName as 'strAuditName',
-	tblSMTransaction.strDescription as 'strAuditDescription',
+	tblSMTransaction.dtmDate as dtmTransactionDate,
+	tblSMTransaction.strName as strAuditName,
+	tblSMTransaction.strDescription as strAuditDescription,
 	strEntityType
-FROM (select 
+FROM (SELECT 
 		intLogId, 
 		dtmDate, 
 		e.intEntityId, 
@@ -35,4 +35,5 @@ FROM (select
 inner join tblSMAudit tblSMAudit on tblSMAudit.intLogId = tblSMLog.intLogId
 inner join tblSMTransaction tblSMTransaction on tblSMTransaction.intTransactionId = tblSMLog.intTransactionId
 inner join tblSMScreen on tblSMScreen.intScreenId = tblSMTransaction.intScreenId
+left join tblSMScreen B on B.intScreenId = tblSMTransaction.intOriginalScreenId
 where tblSMAudit.intParentAuditId IS NULL  --parent only 
