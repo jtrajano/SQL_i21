@@ -104,23 +104,23 @@ BEGIN TRY
 				BEGIN
 					SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
 					SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
-					SET @strClause += @strClause +  ' ('+@strFromField+' BETWEEN ''' + @strFrom  + ''' AND ''' + @strTo +''') '
+					SET @strClause += @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) BETWEEN ''' + @strFrom  + ''' AND ''' + @strTo +''') '
 				END
 				ELSE IF @strFrom IS NOT NULL AND @strTo IS NULL
 				BEGIN
 					SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
 					IF	@strFromField = @strToField
-						SET @strClause += @strClause +  ' ('+@strFromField+' = ''' + @strFrom + ''') '
+						SET @strClause += @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) = ''' + @strFrom + ''') '
 					ELSE	
-						SET @strClause = @strClause +  ' (' + @strFromField  + ' BETWEEN '''+@strFrom+''' AND '''+@strFrom +''')'
+						SET @strClause = @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) BETWEEN '''+@strFrom+''' AND '''+@strFrom +''')'
 				END
 				ELSE IF @strFrom IS  NULL AND @strTo IS NOT NULL
 				BEGIN
 					SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
 					IF	@strFromField = @strToField
-						SET @strClause += @strClause +  ' ('+@strFromField+' = ''' + @strTo + ''') '
+						SET @strClause += @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) = ''' + @strTo + ''') '
 					ELSE
-						SET @strClause = @strClause + ' (' + @strToField  + ' BETWEEN '''+@strTo+''' AND '''+@strTo +''')'  
+						SET @strClause = @strClause + ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) BETWEEN '''+@strTo+''' AND '''+@strTo +''')'  
 				END
 				ELSE
 				BEGIN
