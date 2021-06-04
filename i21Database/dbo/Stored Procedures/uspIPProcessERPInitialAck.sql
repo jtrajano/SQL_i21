@@ -302,7 +302,6 @@ BEGIN TRY
 					UPDATE tblAPBillPreStage
 					SET strERPVoucherNo = @ERPVoucherNo
 					WHERE intBillId = @intBillId
-						AND ISNULL(intStatusId, 1) = 1
 
 					UPDATE tblAPBill
 					SET intConcurrencyId = intConcurrencyId + 1

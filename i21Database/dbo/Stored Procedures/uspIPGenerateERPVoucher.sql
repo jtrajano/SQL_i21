@@ -177,7 +177,6 @@ BEGIN TRY
 			,@dblTax = CONVERT(NUMERIC(18, 6), A.dblTax)
 			,@dblTotal = CONVERT(NUMERIC(18, 6), A.dblTotal)
 			,@strRemarks = A.strRemarks
-			,@strERPVoucherNo = A.strComment
 		FROM dbo.tblAPBill A
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(@intUserId, A.intEntityId)
 		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = A.intEntityVendorId
@@ -267,6 +266,11 @@ BEGIN TRY
 
 		IF @intActionId <> 1
 		BEGIN
+			SELECT @strERPVoucherNo = strERPVoucherNo
+			FROM dbo.tblAPBillPreStage
+			WHERE intBillId = @intBillId
+				AND intBillPreStageId < @intBillPreStageId
+
 			IF ISNULL(@strERPVoucherNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
