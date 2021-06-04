@@ -371,7 +371,7 @@ SELECT
 	,dblOnHand = OH.dblUnitOnHand
 	,dblOrderedQty = SOD.dblQtyOrdered
 	,dblQuantity = SOD.dblQtyOrdered
-	,dblStandardWeight = SOD.dblStandardWeight
+	,dblStandardWeight = ROUND(SOD.dblQtyOrdered * SOD.dblStandardWeight, 2)
 	,strCustomerReference = SO.strPONumber
 	,strOrderComments = SOD.strComments
 	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
@@ -445,7 +445,7 @@ SELECT
 	,dblOnHand = OH.dblUnitOnHand
 	,dblOrderedQty = 0.0
 	,dblQuantity = ITD.dblQuantity
-	,dblStandardWeight = ITD.dblStandardWeight
+	,dblStandardWeight = ROUND(ITD.dblQuantity * ITD.dblStandardWeight, 2)
 	,strCustomerReference = NULL
 	,strOrderComments = ITD.strComment
 	,strLocationType = 'Delivery' COLLATE Latin1_General_CI_AS
