@@ -350,7 +350,7 @@ AS
 	'<mappings>
 		<mapping><fieldname>ContractDate</fieldname><fromField>dtmContractDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>StartDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
-		<mapping><fieldname>EndDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>EndDate</fieldname><fromField>dtmEndDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>Position</fieldname><fromField>strPosition</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>Vendor</fieldname><fromField>strCustomerVendor</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>ProductType</fieldname><fromField>strProductType</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
