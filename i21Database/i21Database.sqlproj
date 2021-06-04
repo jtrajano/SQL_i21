@@ -9428,6 +9428,8 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
+    <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailExemptReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
