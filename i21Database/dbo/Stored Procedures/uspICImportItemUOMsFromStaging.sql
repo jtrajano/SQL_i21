@@ -1,4 +1,7 @@
-CREATE PROCEDURE uspICImportItemUOMsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemUOMsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @ysnAllowOverwrite BIT = 0
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
@@ -19,26 +22,6 @@ DELETE FROM cte WHERE RowNumber > 1;
 	AND NULLIF(RTRIM(LTRIM(strUPCCode)), '') IS NOT NULL
 )
 DELETE FROM cte WHERE RowNumber > 1;
-
-CREATE TABLE #tmp (
-	  intId INT IDENTITY(1, 1) PRIMARY KEY
-	, intItemId INT NULL
-	, intUnitMeasureId INT NULL
-	, strLongUPCCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, strUpcCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, dblUnitQty NUMERIC(38, 20) NULL
-	, dblHeight NUMERIC(38, 20) NULL
-	, dblWidth NUMERIC(38, 20) NULL
-	, dblLength NUMERIC(38, 20) NULL
-	, dblMaxQty NUMERIC(38, 20) NULL
-	, dblVolume NUMERIC(38, 20) NULL
-	, dblWeight NUMERIC(38, 20) NULL
-	, ysnStockUnit BIT NULL
-	, ysnAllowPurchase BIT NULL
-	, ysnAllowSale BIT NULL
-	, dtmDateCreated DATETIME NULL
-	, intCreatedByUserId INT NULL
-)
 
 DECLARE @tblDuplicateUPCCodes TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200), strDescription NVARCHAR(MAX))
 DECLARE @tblInvalidStockUnitQuantities TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200), strDescription NVARCHAR(MAX))
@@ -116,6 +99,26 @@ WHERE
 	missingUOM.strItemNo IS NULL AND
 	missingItem.strItemNo IS NULL
 
+CREATE TABLE #tmp (
+	  intId INT IDENTITY(1, 1) PRIMARY KEY
+	, intItemId INT NULL
+	, intUnitMeasureId INT NULL
+	, strLongUPCCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strUpcCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, dblUnitQty NUMERIC(38, 20) NULL
+	, dblHeight NUMERIC(38, 20) NULL
+	, dblWidth NUMERIC(38, 20) NULL
+	, dblLength NUMERIC(38, 20) NULL
+	, dblMaxQty NUMERIC(38, 20) NULL
+	, dblVolume NUMERIC(38, 20) NULL
+	, dblWeight NUMERIC(38, 20) NULL
+	, ysnStockUnit BIT NULL
+	, ysnAllowPurchase BIT NULL
+	, ysnAllowSale BIT NULL
+	, dtmDateCreated DATETIME NULL
+	, intCreatedByUserId INT NULL
+)
+
 INSERT INTO #tmp (
 	intItemId, 
 	intUnitMeasureId, 
@@ -167,7 +170,12 @@ FROM tblICImportStagingUOM x
 			AND intItemId = i.intItemId
 			AND ysnStockUnit = 1
 	) stock
-WHERE x.strImportIdentifier = @strIdentifier
+	LEFT JOIN @tblMissingItems v1 ON v1.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo  COLLATE Latin1_General_CI_AS	
+	LEFT JOIN @tblMissingUOMs v2 ON v2.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS	
+WHERE 
+	x.strImportIdentifier = @strIdentifier
+	AND v1.strItemNo IS NULL 
+	AND v2.strItemNo IS NULL 
 
 CREATE TABLE #output (
 	  intItemIdDeleted INT NULL
@@ -195,12 +203,14 @@ USING
 		, dtmDateCreated
 		, intCreatedByUserId
 	FROM #tmp s
-) AS source ON (target.intUnitMeasureId = source.intUnitMeasureId AND target.intItemId = source.intItemId)
-	OR RTRIM(LTRIM(target.strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(source.strLongUPCCode) COLLATE Latin1_General_CI_AS
-WHEN MATCHED THEN
+) AS source 
+	ON (target.intUnitMeasureId = source.intUnitMeasureId AND target.intItemId = source.intItemId)
+	--OR RTRIM(LTRIM(target.strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(source.strLongUPCCode) COLLATE Latin1_General_CI_AS -- Comment this one. It can cause bugs. 
+
+WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 	UPDATE SET 
-		intItemId = source.intItemId,
-		intUnitMeasureId = source.intUnitMeasureId,
+		--intItemId = source.intItemId, -- Do not update the item id. Why update it when it is the on used in the source-target as linking keys. 
+		--intUnitMeasureId = source.intUnitMeasureId, -- Do not update the unit measure id. Why update it when it is the on used in the source-target as linking keys. 
 		strLongUPCCode = source.strLongUPCCode,
 		strUpcCode = source.strUpcCode,
 		dblUnitQty = source.dblUnitQty,
@@ -260,96 +270,128 @@ WHEN NOT MATCHED THEN
 	)
 	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
-DECLARE @intTotalUPCCodeDuplicates INT
-DECLARE @intTotalInvalidStockUnit INT
+-- Logs 
+BEGIN 
+	DECLARE 
+		@intRowsImported AS INT 
+		,@intRowsUpdated AS INT
+		,@intRowsSkipped AS INT
 
-DECLARE @intTotalMissingItem INT
-DECLARE @intTotalMissingUOM INT
+	DECLARE @intTotalUPCCodeDuplicates INT
+	DECLARE @intTotalInvalidStockUnit INT
 
-SELECT @intTotalUPCCodeDuplicates = COUNT(*) FROM @tblDuplicateUPCCodes 
-SELECT @intTotalInvalidStockUnit = COUNT(*) FROM @tblInvalidStockUnitQuantities
-SELECT @intTotalMissingItem = COUNT(*) FROM @tblMissingItems 
-SELECT @intTotalMissingUOM = COUNT(*) FROM @tblMissingUOMs
+	SELECT @intTotalUPCCodeDuplicates = COUNT(*) FROM @tblDuplicateUPCCodes 
+	SELECT @intTotalInvalidStockUnit = COUNT(*) FROM @tblInvalidStockUnitQuantities
 
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE'),
-	l.intTotalWarnings = l.intTotalWarnings + @intTotalUPCCodeDuplicates + @intTotalInvalidStockUnit,
-	l.intTotalErrors = l.intTotalErrors + @intTotalMissingItem + @intTotalMissingUOM
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
-
-DECLARE @TotalImported INT
-DECLARE @LogId INT
-
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
-WHERE strUniqueId = @strIdentifier
-
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
-END
-
-IF @intTotalMissingItem > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	SELECT @intRowsImported = COUNT(*) FROM #output WHERE strAction = 'INSERT'
+	SELECT @intRowsUpdated = COUNT(*) FROM #output WHERE strAction = 'UPDATE'
 	SELECT 
-		@LogId,
-		0,
-		'Import Failed.',
-		'Item No',
-		 'Missing item: "' + Items.strItemNo + '"',
-		'Failed',
-		'Error',
-		1
-	FROM @tblMissingItems Items
-END
+		@intRowsSkipped = COUNT(1) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0) 
+	FROM 
+		tblICImportStagingUOM s
+	WHERE
+		s.strImportIdentifier = @strIdentifier
 
-IF @intTotalMissingUOM > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intRowsUpdated] 
+		,[intRowsSkipped]
+		,[intTotalWarnings]
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = ISNULL(@intRowsImported, 0)
+		,intRowsUpdated = ISNULL(@intRowsUpdated, 0) 
+		,intRowsSkipped = ISNULL(@intRowsSkipped, 0)
+		,intTotalWarnings = ISNULL(ISNULL(@intTotalUPCCodeDuplicates, 0) + ISNULL(@intTotalInvalidStockUnit, 0), 0)
+	-- Log Detail for missing items and uoms
+	INSERT INTO tblICImportLogDetailFromStaging(
+		strUniqueId
+		, strField
+		, strAction
+		, strValue
+		, strMessage
+		, strStatus
+		, strType
+		, intConcurrencyId
+	)
 	SELECT 
-		@LogId,
-		0,
-		'Import Failed.',
-		'UOM',
-		'Missing unit of measure: "' + UOM.strUOM + '" on item "' + UOM.strItemNo + '"',
-		'Failed',
-		'Error',
-		1
-	FROM @tblMissingUOMs UOM
-END
+		@strIdentifier
+		, 'Item No.'
+		, 'Import Failed.'
+		, strItemNo
+		, 'Missing item: "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		@tblMissingItems
 
-IF @intTotalUPCCodeDuplicates > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+	UNION ALL
 	SELECT 
-		@LogId,
-		0,
-		'Import Finished.',
-		'UPC Code',
-		'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + ' and still uploaded UOM with empty UPC Code.',
-		'Success',
-		'Warning',
-		1
-	FROM @tblDuplicateUPCCodes Codes
-END
+		@strIdentifier
+		, 'UOM'
+		, 'Import Failed.'
+		, strUOM
+		, 'Missing unit of measure: "' + strUOM + '" on item "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		@tblMissingUOMs
 
-IF @intTotalInvalidStockUnit > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT 
-		@LogId,
-		0,
-		'Import Finished.',
-		'UOM',
-		'Unit Qty for Stock Unit ' + UOMs.strUOM + ' of ' + UOMs.strItemNo + ' - ' + UOMs.strDescription + ' is greater than 1. Setting it to 1',
-		'Success',
-		'Warning',
-		1
-	FROM @tblInvalidStockUnitQuantities UOMs
+	-- Check if there are UPC duplicates to log as warning
+
+	IF @intTotalUPCCodeDuplicates > 0
+	BEGIN
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier,
+			'UPC Code',
+			'Import Finished.',
+			Codes.strUPCCode,
+			'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + ' and still uploaded UOM with empty UPC Code.',
+			'Success',
+			'Warning',
+			1
+		FROM @tblDuplicateUPCCodes Codes
+	END
+
+	-- Check if there are invalid stock unit quantity to log as warning
+
+	IF @intTotalInvalidStockUnit > 0
+	BEGIN
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier,
+			'UOM',
+			'Import Finished.',
+			UOMs.strUOM,
+			'Unit Qty for Stock Unit ' + UOMs.strUOM + ' of ' + UOMs.strItemNo + ' - ' + UOMs.strDescription + ' is greater than 1. Setting it to not stock unit',
+			'Success',
+			'Warning',
+			1
+		FROM @tblInvalidStockUnitQuantities UOMs
+	END
 END
 
 DROP TABLE #tmp
