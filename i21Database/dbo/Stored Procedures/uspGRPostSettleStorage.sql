@@ -499,7 +499,7 @@ BEGIN TRY
 			SELECT TOP 1 
 				@intStorageChargeItemId = intItemId
 				,@StorageChargeItemDescription = strDescription
-				,@ysnInventoryCost_StorageChargeItem = ysnInventoryCost
+				,@ysnInventoryCost_StorageChargeItem = 0
 			FROM tblICItem
 			WHERE strType = 'Other Charge' 
 				AND strCostType = 'Storage Charge' 
@@ -1548,10 +1548,8 @@ BEGIN TRY
 					SELECT 
 						ISNULL(SUM(ROUND((SV2.dblCashPrice * SV2.dblUnits), 2)),0) AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV2
-					INNER JOIN tblICItem I
-						ON I.intItemId = SV2.intItemId
-							AND I.ysnInventoryCost = 1
-							and SV.intItemType = 3
+					where SV2.ysnInventoryCost = 1 
+							and SV2.intItemType = 3
 							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost			
 
@@ -1616,9 +1614,7 @@ BEGIN TRY
 					SELECT 
 						ISNULL(SUM(ROUND((SV2.dblCashPrice * SV2.dblUnits), 2)),0) AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV2
-					INNER JOIN tblICItem I
-						ON I.intItemId = SV2.intItemId
-							AND I.ysnInventoryCost = 1
+					where SV2.ysnInventoryCost = 1 
 							and SV2.intItemType = 3
 							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
@@ -2223,7 +2219,7 @@ BEGIN TRY
 																WHEN a.intPricingTypeId in (1, 6) AND @ysnFromPriceBasisContract = 1 
 																	THEN a.dblUnits -- @dblTotalVoucheredQuantity
 																WHEN @ysnFromPriceBasisContract = 1 AND (intItemType = 2 OR intItemType = 3)
-																	THEN ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits, 15)
+																	THEN a.dblUnits
 																ELSE 
 																	CASE 
 																		WHEN @ysnFromPriceBasisContract = 1 AND  availableQtyForVoucher.intContractDetailId IS NULL  AND c.strType = 'Inventory' 
@@ -2949,6 +2945,55 @@ BEGIN TRY
 				,intBillId = @createdVouchersId
 			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
 		--END
+
+	--8 Book AP clearing for Customer Owned storage settlement
+	IF @strOwnedPhysicalStock ='Customer' AND @ysnFromPriceBasisContract = 0
+	BEGIN		
+		DECLARE @APClearing AS APClearing;
+		DELETE FROM @APClearing;
+		INSERT INTO @APClearing
+		(
+			[intTransactionId],
+			[strTransactionId],
+			[intTransactionType],
+			[strReferenceNumber],
+			[dtmDate],
+			[intEntityVendorId],
+			[intLocationId],
+			--DETAIL
+			[intTransactionDetailId],
+			[intAccountId],
+			[intItemId],
+			[intItemUOMId],
+			[dblQuantity],
+			[dblAmount],
+			--OTHER INFORMATION
+			[strCode]
+		)
+		SELECT
+			-- HEADER
+			[intTransactionId]          = V.intSettleStorageId
+			,[strTransactionId]         = V.strTransactionNumber
+			,[intTransactionType]       = 6 -- GRAIN
+			,[strReferenceNumber]       = ''
+			,[dtmDate]                  = V.dtmDate
+			,[intEntityVendorId]        = V.intEntityVendorId
+			,[intLocationId]            = V.intLocationId
+			-- DETAIL
+			,[intTransactionDetailId]   = V.intCustomerStorageId
+			,[intAccountId]             = V.intAccountId
+			,[intItemId]                = V.intItemId
+			,[intItemUOMId]             = V.intItemUOMId
+			,[dblQuantity]              = V.dblSettleStorageQty
+			,[dblAmount]                = V.dblSettleStorageAmount
+			,[strCode]                  = 'STR'
+		FROM vyuAPGrainClearing V
+		WHERE V.strTransactionNumber = @strSettleTicket
+		AND V.intSettleStorageId = @intSettleStorageId
+		AND V.dblSettleStorageAmount <> 0
+
+		EXEC uspAPClearing @APClearing = @APClearing, @post = 1;
+	END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage	
