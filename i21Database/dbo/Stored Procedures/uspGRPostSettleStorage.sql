@@ -2978,18 +2978,23 @@ BEGIN TRY
 	WHERE SS.intSettleStorageId = @intParentSettleStorageId
 
 	DECLARE @intVoucherId2 AS INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
-	BEGIN 
-		SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
-		EXEC [dbo].[uspAPPostBill] 
-			@post = 1
-			,@recap = 0
-			,@isBatch = 0
-			,@param = @intVoucherId2
-			,@userId = @intCreatedUserId
-			,@transactionType = 'Settle Storage'
-			,@success = @success OUTPUT
-		DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
+	IF (SELECT ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @EntityId) = 1
+		OR (SELECT strCompanyName FROM tblSMCompanySetup) <> 'MID COLUMBIA PRODUCERS, INC.'
+	BEGIN
+		WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
+		BEGIN 
+			SET @intVoucherId2 = NULL
+			SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
+			EXEC [dbo].[uspAPPostBill] 
+				@post = 1
+				,@recap = 0
+				,@isBatch = 0
+				,@param = @intVoucherId2
+				,@userId = @intCreatedUserId
+				,@transactionType = 'Settle Storage'
+				,@success = @success OUTPUT
+			DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
+		END
 	END
 
 	if isnull(@intVoucherId, 0) > 0 
