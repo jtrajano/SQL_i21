@@ -705,12 +705,12 @@ BEGIN
         ,[strError]                 = P.[strTransactionNumber] + ' already paid in full.'
 	FROM
 		#ARPostPaymentDetail P
-		INNER JOIN tblAPPaymentDetail APPD ON APPD.intBillId = P.intBillId
-		INNER JOIN tblAPPayment APP ON	 APP.intPaymentId=APPD.intPaymentId
     WHERE
-          APP.[ysnPosted] = @OneBit
+           P.[ysnPost] = @OneBit
           AND P.[intInvoiceId] IS NULL
-		  AND APPD.dblAmountDue = @ZeroDecimal
+          AND P.[dblPayment] <> @ZeroDecimal
+		  AND @Recap = @ZeroBit
+		  AND @Post = @OneBit
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
