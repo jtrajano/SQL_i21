@@ -92,10 +92,9 @@ begin
 		,@intEntityCurrencyId = a.intCurrencyId
 	from
 		tblARCustomer a
-		,tblEMEntityToContact b
+		inner join tblEMEntityToContact b on b.intEntityId = a.intEntityId
 	where
 		lower(rtrim(ltrim(a.strCustomerNumber))) = lower(rtrim(ltrim(@CustomerNumber)))
-		and b.intEntityId = a.intEntityId
 		and b.ysnDefaultContact = convert(bit,1)
 
 	if (@intEntityId is null or @intEntityId < 1)
@@ -114,10 +113,9 @@ begin
 				,@intEntityCurrencyId = a.intCurrencyId
 			from
 				tblARCustomer a
-				,tblEMEntityToContact b
+				inner join tblEMEntityToContact b on b.intEntityId = a.intEntityId
 			where
 				lower(rtrim(ltrim(a.strCustomerNumber))) = lower(rtrim(ltrim(@CustomerNumber)))
-				and b.intEntityId = a.intEntityId
 		end
 	end
 
@@ -226,7 +224,12 @@ begin
 	begin
 		if (@intTicketProductId is not null and @intTicketProductId > 0)
 		begin
-			select top 1 @intModuleId = a.intModuleId, @intGroupId = a.intTicketGroupId from tblHDModule a, tblSMModule b where a.intTicketProductId = @intTicketProductId and b.intModuleId = a.intSMModuleId and b.strModule = lower(rtrim(ltrim(@Module)));
+			select top 1 @intModuleId = a.intModuleId, @intGroupId = a.intTicketGroupId 
+			from 
+				tblHDModule a
+				inner join tblSMModule b on b.intModuleId = a.intSMModuleId 
+			where a.intTicketProductId = @intTicketProductId and b.strModule = lower(rtrim(ltrim(@Module)));
+
 			if (@intModuleId is null or @intModuleId < 1)
 			begin
 				set @intErrorCount = @intErrorCount + 1;

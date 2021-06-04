@@ -14,9 +14,16 @@ BEGIN
 END
 GO
 
+
 IF OBJECT_ID('uspICRepostBillCostAdjustment', 'P') IS NOT NULL 
 BEGIN
 	EXEC('DROP PROCEDURE uspICRepostBillCostAdjustment') 
+END
+GO
+
+IF OBJECT_ID('uspICErrorMessages', 'P') IS NOT NULL 
+BEGIN
+	EXEC('DROP PROCEDURE uspICErrorMessages') 
 END
 GO
 

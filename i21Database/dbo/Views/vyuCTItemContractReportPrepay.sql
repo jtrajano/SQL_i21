@@ -31,7 +31,7 @@
 					LEFT JOIN vyuCTItemContractDetail E ON E.intItemContractHeaderId = A.intItemContractHeaderId
 					LEFT JOIN tblICItemUOM	F ON F.intItemUOMId = E.intItemUOMId
 					LEFT JOIN tblICUnitMeasure G ON G.intUnitMeasureId = F.intUnitMeasureId
-			,(SELECT TOP 1
+			inner join (SELECT TOP 1
 					strCompanyName
 					,strAddress AS strCompanyAddress
 					,strCity + ' ' + strState + ' ' + strZip AS strCompanyStateAddress
@@ -39,7 +39,7 @@
 					,strState AS strCompanyState
 					,strZip AS strCompanyZip
 				FROM tblSMCompanySetup
-			) tblSMCompanySetup
+			) tblSMCompanySetup on 1=1
 		WHERE C.intEntityLocationId = CASE
 										WHEN D.intShipToId IS NOT NULL
 											THEN D.intShipToId

@@ -36,7 +36,7 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 			,a.gaphs_pur_sls_ind
 		from
 			gacommst c
-			,gaphsmst a
+			inner join gaphsmst a on 1=1
 		left outer join
 			sssplmst b 
 			on a.gaphs_cus_no = b.ssspl_bill_to_cus

@@ -233,9 +233,10 @@ LEFT OUTER JOIN (SELECT intTransactionId,
                         AND ( strTaxClass <> 'SST' ) 
                 GROUP  BY intTransactionId) AS LCTaxes_1 
     ON cfTransaction.intTransactionId = LCTaxes_1.intTransactionId 
-	 ,(  
-  SELECT TOP 1 COUNT(*) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0  
- ) AS cfDuplicateUnpostedTransaction
+inner join 
+	(  
+  SELECT TOP 1 COUNT(1) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0  
+ ) AS cfDuplicateUnpostedTransaction on 1=1
  
 
 GO

@@ -669,9 +669,15 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\MB\ImportFileDefault.sql
 
 -- Clean up i21 database objects
+:r .\SM\01_CleanupObjects.sql
 :r .\IC\29_CleanupObjects.sql
 :r .\RM\03_CleanupObjects.sql
 :r .\IP\2_CleanupObjects.sql
 :r .\AR\01_CleanupObjects.sql
+:r .\GR\3_CleanupObjects.sql
+:r .\CM\9_CleanupObjects.sql
+:r .\CT\2_CleanupObjects.sql
+:r .\MF\11_CleanupObjects.sql
+
 
 print 'END POST DEPLOYMENT'

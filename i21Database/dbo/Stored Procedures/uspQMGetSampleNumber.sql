@@ -67,7 +67,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Parent Lot'
 	END
 
@@ -94,7 +94,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No'
 	END
 
@@ -126,7 +126,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	END
 
@@ -152,7 +152,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Container'
 	END
 
@@ -178,7 +178,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Work Order'
 	END
 
@@ -206,7 +206,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Item & Parent Lot'
 	END
 
@@ -287,7 +287,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			INNER JOIN tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No'
 	END
 
@@ -319,7 +319,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Warehouse Ref No & Parent Lot'
 	END
 
@@ -345,7 +345,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Container'
 	END
 
@@ -371,7 +371,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Work Order'
 	END
 
@@ -398,7 +398,7 @@ BEGIN
 		SELECT L.strLotNumber
 			,ST.intSampleTypeId
 		FROM @tblMFLot L
-			,tblQMSampleType ST
+			inner join tblQMSampleType ST on 1=1
 		WHERE ST.strApprovalBase = 'Item & Parent Lot'
 	END
 

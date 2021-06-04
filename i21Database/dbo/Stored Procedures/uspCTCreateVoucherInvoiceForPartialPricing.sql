@@ -981,18 +981,13 @@ BEGIN TRY
 					,ContractDetailItemId = d.intItemId
 				from
 					tblCTPriceFixation a
-					,tblCTPriceFixationDetail b
-					,tblCTPriceContract c
-					,tblCTContractDetail d with (nolock)
-					,tblICCommodityUnitMeasure e
-					,tblICItemUOM f
+					inner join tblCTPriceFixationDetail b on b.intPriceFixationId = a.intPriceFixationId
+					inner join tblCTPriceContract c on c.intPriceContractId = a.intPriceContractId
+					inner join tblCTContractDetail d with (nolock)  on d.intContractDetailId = a.intContractDetailId
+					inner join tblICCommodityUnitMeasure e on e.intCommodityUnitMeasureId	=	b.intPricingUOMId
+					inner join tblICItemUOM f on f.intItemId = d.intItemId
 				where
 					a.intPriceContractId = @intPriceContractId
-					and b.intPriceFixationId = a.intPriceFixationId
-					and c.intPriceContractId = a.intPriceContractId
-					and d.intContractDetailId = a.intContractDetailId
-					and e.intCommodityUnitMeasureId	=	b.intPricingUOMId
-					and f.intItemId = d.intItemId
 					and f.intUnitMeasureId = e.intUnitMeasureId
 					and a.intContractDetailId = @intContractDetailId
 	 				and b.dblLoadPriced >= 0
@@ -1142,7 +1137,12 @@ BEGIN TRY
 							goto SkipShipmentLoop; 
 						end
 
-						select @intTotalLoadPriced = sum(df.dblLoadPriced) from tblCTPriceFixation f, tblCTPriceFixationDetail df where f.intContractDetailId = @intContractDetailId and df.intPriceFixationId = f.intPriceFixationId;
+						select @intTotalLoadPriced = sum(df.dblLoadPriced) 
+						from 
+							tblCTPriceFixation f
+							inner join tblCTPriceFixationDetail df on df.intPriceFixationId = f.intPriceFixationId
+						where 
+							f.intContractDetailId = @intContractDetailId; 
 
 						if (@intShipmentCount <= @intPricedLoad)
 						begin
@@ -1502,18 +1502,13 @@ BEGIN TRY
 							,ContractDetailItemId = d.intItemId
 						from
 							tblCTPriceFixation a
-							,tblCTPriceFixationDetail b
-							,tblCTPriceContract c
-							,tblCTContractDetail d with (nolock)
-							,tblICCommodityUnitMeasure e
-							,tblICItemUOM f
+							inner join tblCTPriceFixationDetail b on b.intPriceFixationId = a.intPriceFixationId
+							inner join tblCTPriceContract c on c.intPriceContractId = a.intPriceContractId
+							inner join tblCTContractDetail d with (nolock) on d.intContractDetailId = a.intContractDetailId
+							inner join tblICCommodityUnitMeasure e on e.intCommodityUnitMeasureId	=	b.intPricingUOMId
+							inner join tblICItemUOM f on f.intItemId = d.intItemId
 						where
 							a.intPriceContractId = @intPriceContractId
-							and b.intPriceFixationId = a.intPriceFixationId
-							and c.intPriceContractId = a.intPriceContractId
-							and d.intContractDetailId = a.intContractDetailId
-							and e.intCommodityUnitMeasureId	=	b.intPricingUOMId
-							and f.intItemId = d.intItemId
 							and f.intUnitMeasureId = e.intUnitMeasureId
 							and a.intContractDetailId = @intContractDetailId
 	   						and b.dblQuantity >= 0
@@ -1595,11 +1590,10 @@ BEGIN TRY
 											top 1 1
 										from
 											tblICInventoryShipmentItem a with (nolock)
-											,tblARInvoiceDetail b with (nolock), tblARInvoice c with (nolock)
+											inner join tblARInvoiceDetail b with (nolock) on b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
+											inner join  tblARInvoice c with (nolock) on c.intInvoiceId = b.intInvoiceId
 										where
 											a.intInventoryShipmentId = @intInventoryShipmentId
-											and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
-											and c.intInvoiceId = b.intInvoiceId
 											and isnull(c.ysnPosted,0) = 0
 											and c.strTransactionType = 'Invoice'
 									  )
@@ -1714,11 +1708,10 @@ BEGIN TRY
 								top 1 @intInvoiceId = c.intInvoiceId, @intInvoiceDetailId = b.intInvoiceDetailId
 							from
 								tblICInventoryShipmentItem a with (nolock)
-								,tblARInvoiceDetail b with (nolock), tblARInvoice c with (nolock)
+								inner join tblARInvoiceDetail b with (nolock) on b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
+								inner join tblARInvoice c with (nolock) on c.intInvoiceId = b.intInvoiceId
 							where
 								a.intInventoryShipmentId = @intInventoryShipmentId
-								and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
-								and c.intInvoiceId = b.intInvoiceId
 								and isnull(c.ysnPosted,0) = 0
 								and c.strTransactionType = 'Invoice'
 

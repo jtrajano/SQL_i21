@@ -243,7 +243,7 @@ AS SELECT
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 	,tblSCTicketFormat.ysnSuppressCashPrice
-	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')  COLLATE Latin1_General_CI_AS
+	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')  --COLLATE Latin1_General_CI_AS
 	,EMScaleOps.strTimezone
 	,SC.strTrailerId
 	,tblSCTicketPrintOption.intTicketPrintOptionId

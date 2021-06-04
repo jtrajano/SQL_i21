@@ -8,14 +8,13 @@ BEGIN
 		@strModules = COALESCE(@strModules + ', ', '') + '(' + c.strApplicationName + ') ' + (case when c.strPrefix is null or rtrim(ltrim(c.strPrefix)) = '' then '' else c.strPrefix + ' - ' end) + c.strModule
 	from 
 		tblARCustomerLicenseInformation a
-		,tblARCustomerLicenseModule b
-		,tblSMModule c
+	inner join tblARCustomerLicenseModule b on b.intCustomerLicenseInformationId = a.intCustomerLicenseInformationId
+	inner join tblSMModule c on c.intModuleId = b.intModuleId
 	where
-		b.intCustomerLicenseInformationId = a.intCustomerLicenseInformationId
-		and a.intEntityCustomerId = @intEntityCustomerId
+		a.intEntityCustomerId = @intEntityCustomerId
 		and a.strCompanyId = @strCompanyId
 		and b.ysnEnabled = convert(bit,1)
-		and c.intModuleId = b.intModuleId
+		
 
 	RETURN @strModules
 

@@ -15,12 +15,10 @@ begin try
         top 1 1
     from
         tblICInventoryReceipt ir
-        ,tblICInventoryReceiptItem ri
-        ,@voucherPayables vp
+        inner join tblICInventoryReceiptItem ri on ir.intInventoryReceiptId = ri.intInventoryReceiptId
+        inner join @voucherPayables vp on ri.intInventoryReceiptItemId = vp.intInventoryReceiptItemId
     where
-        ri.intInventoryReceiptItemId = vp.intInventoryReceiptItemId
-        and ir.intInventoryReceiptId = ri.intInventoryReceiptId
-        and (ir.strReceiptType <> 'Purchase Contract' or isnull(vp.intContractDetailId,0) = 0)
+        (ir.strReceiptType <> 'Purchase Contract' or isnull(vp.intContractDetailId,0) = 0)
     )
     begin
 
@@ -223,7 +221,12 @@ begin try
 			select @intInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intInventoryReceiptItemId;
 
 			--Check if Load base contract
-			select @ysnLoad = ysnLoad from tblCTContractDetail cd, tblCTContractHeader ch where cd.intContractDetailId = @intContractDetailId and ch.intContractHeaderId = cd.intContractHeaderId;
+			select @ysnLoad = ysnLoad 
+			from
+				tblCTContractDetail cd
+				inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			where cd.intContractDetailId = @intContractDetailId;
+
 			if (isnull(@ysnLoad,0) = 1)
 			begin
 				select @dblTransactionQuantity = count(distinct bd.intBillId) from tblAPBillDetail bd where bd.intInventoryReceiptItemId = @intInventoryReceiptItemId;

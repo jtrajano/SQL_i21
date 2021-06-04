@@ -967,7 +967,7 @@ BEGIN TRY
 			,2 AS intAttributeId --Opening Inventory
 			,- 1 AS intMonthId
 		FROM @tblMFItem I
-			,@tblSMCompanyLocation L
+			inner join @tblSMCompanyLocation L on 1=1
 		WHERE L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
 	END
 
@@ -1491,8 +1491,8 @@ BEGIN TRY
 		,M.intMonthId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateInventoryRow M
-		,@tblMFItem I
-		,@tblSMCompanyLocation L
+		inner join @tblMFItem I on 1=1
+		inner join @tblSMCompanyLocation L  on 1=1
 	WHERE NOT EXISTS (
 			SELECT *
 			FROM #tblMFDemand D
@@ -2358,7 +2358,7 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM @tblMFItem I
-		,@tblSMCompanyLocation L
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
 
 	INSERT INTO #tblMFDemandList (
@@ -2376,8 +2376,8 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM @tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+		inner join tblCTReportAttribute A on 1=1
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE A.intReportAttributeID IN (
 			4 --Existing Purchases
 			,13 --Open Purchases
@@ -2412,9 +2412,9 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
-		,@tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+		inner join @tblMFItem I on 1=1
+		inner join tblCTReportAttribute A on 1=1
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE A.intReportAttributeID IN (
 			2 --Opening Inventory
 			,4 --Existing Purchases
@@ -2456,9 +2456,9 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
-		,@tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+		inner join @tblMFItem I on 1=1
+		inner join tblCTReportAttribute A on 1=1
+		inner join @tblSMCompanyLocation L on 1=1
 	WHERE A.intReportAttributeID IN (
 			8
 			,15

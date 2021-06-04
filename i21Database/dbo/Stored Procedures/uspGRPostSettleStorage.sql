@@ -213,7 +213,7 @@ BEGIN TRY
 	BEGIN
 		DECLARE @CustomerStorageIds AS Id
 		DECLARE @intId AS INT
-		DECLARE @dblSettlementTotal AS DECIMAL(24,10)
+		DECLARE @dblSettlementTotal AS DECIMAL(24,10)		
 
 		DELETE FROM @CustomerStorageIds
 		INSERT INTO @CustomerStorageIds
@@ -239,10 +239,7 @@ BEGIN TRY
 
 			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.1
 			BEGIN
-				--DECLARE @strMsg as nvarchar(max)
-				--set @strMsg = CAST(@dblSettlementTotal AS nvarchar(50)) + ' aa ' + CAST(@dblTotalUnits AS nvarchar(50))
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
-				--RAISERROR(@strMsg,16,1,1)
 				RETURN;
 			END
 			DELETE FROM @CustomerStorageIds WHERE intId = @intId
@@ -502,7 +499,7 @@ BEGIN TRY
 			SELECT TOP 1 
 				@intStorageChargeItemId = intItemId
 				,@StorageChargeItemDescription = strDescription
-				,@ysnInventoryCost_StorageChargeItem = 0
+				,@ysnInventoryCost_StorageChargeItem = ysnInventoryCost
 			FROM tblICItem
 			WHERE strType = 'Other Charge' 
 				AND strCostType = 'Storage Charge' 
@@ -1551,8 +1548,10 @@ BEGIN TRY
 					SELECT 
 						ISNULL(SUM(ROUND((SV2.dblCashPrice * SV2.dblUnits), 2)),0) AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV2
-					where SV2.ysnInventoryCost = 1 
-							and SV2.intItemType = 3
+					INNER JOIN tblICItem I
+						ON I.intItemId = SV2.intItemId
+							AND I.ysnInventoryCost = 1
+							and SV.intItemType = 3
 							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost			
 
@@ -1617,7 +1616,9 @@ BEGIN TRY
 					SELECT 
 						ISNULL(SUM(ROUND((SV2.dblCashPrice * SV2.dblUnits), 2)),0) AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV2
-					where SV2.ysnInventoryCost = 1 
+					INNER JOIN tblICItem I
+						ON I.intItemId = SV2.intItemId
+							AND I.ysnInventoryCost = 1
 							and SV2.intItemType = 3
 							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
@@ -2063,10 +2064,10 @@ BEGIN TRY
 					,[intInventoryReceiptItemId] =  CASE 
 														WHEN ST.ysnDPOwnedType = 0 THEN NULL
 														ELSE 
-																CASE 
-																		WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
-																		ELSE NULL
-																END
+															CASE 
+																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
+																ELSE NULL
+															END
 													END
 					,[intInventoryReceiptChargeId]	= CASE 
 														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
@@ -2076,11 +2077,9 @@ BEGIN TRY
 																		ELSE NULL
 																END
 													END
-					,[intCustomerStorageId]			= CASE WHEN RI.intInventoryReceiptId IS NULL
-														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL)
-															THEN a.[intCustomerStorageId] 
-															ELSE NULL END
-					-- ,[intCustomerStorageId]			= a.[intCustomerStorageId]
+					,[intCustomerStorageId]   = CASE 
+													WHEN RI.intInventoryReceiptId IS NULL OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL) THEN a.[intCustomerStorageId] 
+													ELSE NULL END
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
 														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, b.intItemUOMId, CD.dblQuantity),6) 
@@ -2159,8 +2158,7 @@ BEGIN TRY
 															END
 														end					
 															
-					,[dblOldCost]					=  CASE 
-															WHEN @ysnFromPriceBasisContract = 0 THEN
+					,[dblOldCost]					=  CASE WHEN @ysnFromPriceBasisContract = 0 THEN
 																CASE
 																	WHEN ST.ysnDPOwnedType = 1 AND a.intItemType = 1
 																	THEN ISNULL(CS.dblSettlementPrice, 0) + ISNULL(CS.dblBasis, 0)
@@ -2224,8 +2222,8 @@ BEGIN TRY
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																WHEN a.intPricingTypeId in (1, 6) AND @ysnFromPriceBasisContract = 1 
 																	THEN a.dblUnits -- @dblTotalVoucheredQuantity
-																WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
-																	THEN a.dblUnits
+																WHEN @ysnFromPriceBasisContract = 1 AND (intItemType = 2 OR intItemType = 3)
+																	THEN ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits, 15)
 																ELSE 
 																	CASE 
 																		WHEN @ysnFromPriceBasisContract = 1 AND  availableQtyForVoucher.intContractDetailId IS NULL  AND c.strType = 'Inventory' 
@@ -2330,7 +2328,7 @@ BEGIN TRY
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType
-					
+				 
 				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
 				 ---we should delete priced contracts that has a voucher already
 					delete from @voucherPayable 
@@ -2951,55 +2949,6 @@ BEGIN TRY
 				,intBillId = @createdVouchersId
 			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
 		--END
-
-	--8 Book AP clearing for Customer Owned storage settlement
-	IF @strOwnedPhysicalStock ='Customer' AND @ysnFromPriceBasisContract = 0
-	BEGIN		
-		DECLARE @APClearing AS APClearing;
-		DELETE FROM @APClearing;
-		INSERT INTO @APClearing
-		(
-			[intTransactionId],
-			[strTransactionId],
-			[intTransactionType],
-			[strReferenceNumber],
-			[dtmDate],
-			[intEntityVendorId],
-			[intLocationId],
-			--DETAIL
-			[intTransactionDetailId],
-			[intAccountId],
-			[intItemId],
-			[intItemUOMId],
-			[dblQuantity],
-			[dblAmount],
-			--OTHER INFORMATION
-			[strCode]
-		)
-		SELECT
-			-- HEADER
-			[intTransactionId]          = V.intSettleStorageId
-			,[strTransactionId]         = V.strTransactionNumber
-			,[intTransactionType]       = 6 -- GRAIN
-			,[strReferenceNumber]       = ''
-			,[dtmDate]                  = V.dtmDate
-			,[intEntityVendorId]        = V.intEntityVendorId
-			,[intLocationId]            = V.intLocationId
-			-- DETAIL
-			,[intTransactionDetailId]   = V.intCustomerStorageId
-			,[intAccountId]             = V.intAccountId
-			,[intItemId]                = V.intItemId
-			,[intItemUOMId]             = V.intItemUOMId
-			,[dblQuantity]              = V.dblSettleStorageQty
-			,[dblAmount]                = V.dblSettleStorageAmount
-			,[strCode]                  = 'STR'
-		FROM vyuAPGrainClearing V
-		WHERE V.strTransactionNumber = @strSettleTicket
-		AND V.intSettleStorageId = @intSettleStorageId
-		AND V.dblSettleStorageAmount <> 0
-
-		EXEC uspAPClearing @APClearing = @APClearing, @post = 1;
-	END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage	
