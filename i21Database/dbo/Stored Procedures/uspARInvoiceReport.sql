@@ -94,6 +94,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblInvoiceSubtotal
 	 , dblShipping
 	 , dblTax
+	 , dblTaxExempt
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , strItemNo
@@ -209,6 +210,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblInvoiceSubtotal		= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
+	 , dblTaxExempt				= ISNULL(INVOICEDETAIL.dblTaxExempt, 0)
 	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
@@ -341,6 +343,7 @@ LEFT JOIN (
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
 		 , strLotNumber				= LOT.strLotNumbers
 		 , strSubFormula			= ID.strSubFormula
+		 , dblTaxExempt				= TER.dblTaxExempt
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -439,6 +442,12 @@ LEFT JOIN (
 		WHERE ysnApplied = 1
 	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
 			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId	
+	OUTER APPLY (
+		SELECT ISNULL(SUM(dblRate), 0) AS dblTaxExempt
+		FROM vyuARTaxDetailExemptReport
+		WHERE intTransactionDetailId = ID.intInvoiceDetailId
+		AND intTransactionId = ID.intInvoiceId
+	) TER
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
