@@ -9381,6 +9381,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
     <None Include="Scripts\Post-Deployment\CM\9_CleanupObjects.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailExemptReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
