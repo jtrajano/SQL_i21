@@ -9387,6 +9387,7 @@
     <Build Include="dbo\Tables\tblIPPaymentStatusStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPaymentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPPaymentStatus.sql" />
+    <Build Include="dbo\Tables\tblSMIDPProcessResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
