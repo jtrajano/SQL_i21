@@ -11,8 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'Agronomy.view.ApplicationMethod?showSearch=true' AND strModuleName = 'Agronomy')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'GlobalComponentEngine.view.OcrProcessedDocumentsLog' AND strModuleName = 'IDP')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6805,6 +6804,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Default 
 	VALUES (N'Default Values', N'IDP', @IDPMaintenanceParentMenuId, N'Default Values', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrDefaultValues', N'small-menu-maintenance', 1, 1, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GlobalComponentEngine.view.OcrDefaultValues' WHERE strMenuName = N'Default Values' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Processed Documents Log' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Processed Documents Log', N'IDP', @IDPMaintenanceParentMenuId, N'Processed Documents Log', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrProcessedDocumentsLog', N'small-menu-maintenance', 1, 1, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GlobalComponentEngine.view.OcrProcessedDocumentsLog' WHERE strMenuName = N'Processed Documents Log' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId
 
 --CREATE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId)

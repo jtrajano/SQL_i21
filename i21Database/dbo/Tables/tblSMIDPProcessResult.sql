@@ -7,6 +7,8 @@
     [intRecordNo]						INT NULL,
     [intEntityId]						INT NULL,
 	[dblTotal]							DECIMAL (18, 6) NOT NULL DEFAULT 0,
+	[intUserId]							INT NULL,
+	[dtmDateTime]						DATETIME NULL,
     [intConcurrencyId]					INT DEFAULT (1) NOT NULL,
 
     CONSTRAINT [PK_tblSMIDPProcessResult] PRIMARY KEY CLUSTERED ([intIDPProcessResultId] ASC),
