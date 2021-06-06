@@ -18,6 +18,9 @@ IF OBJECT_ID('vyuARCustomerStatementDetailReport','v') IS NOT NULL
 	DROP VIEW vyuARCustomerStatementDetailReport;
 GO
 
+IF OBJECT_ID('vyuARCustomerBalancesForET','v') IS NOT NULL
+	DROP VIEW vyuARCustomerBalancesForET;
+GO
 
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspARErrorMessages'))
        DROP PROCEDURE uspARErrorMessages;
