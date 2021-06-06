@@ -10,8 +10,8 @@ AS
 			L.strZipCode		AS strEntityZipCode,
 			L.strCountry		AS strEntityCountry,
 			T.strPhone			AS strEntityPhone,
-			L.intEntityLocationId	AS	 intDefaultLocationId,
-			L.strLocationName	AS	strDefaultLocation,
+			LL.intEntityLocationId	AS	 intDefaultLocationId,
+			LL.strLocationName	AS	strDefaultLocation,
 			CASE	WHEN Y.strType IN('Vendor','Shipping Line','Producer') THEN V.ysnPymtCtrlActive 
 					WHEN Y.strType = 'Customer' THEN U.ysnActive
 					WHEN Y.strType = 'Salesperson' THEN P.ysnActive
@@ -28,11 +28,17 @@ AS
 			MY.strCurrency		AS	strMainCurrency,
 			ISNULL(V.strFLOId,U.strFLOId) AS strFLOId,
 			NULL AS intContainerTypeId,
-			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer
+			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer,
+			strAddressName = L.strLocationName,
+			strMainAddress = LL.strLocationName,
+			intEntitySelectedLocationId = L.intEntityLocationId
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
+	CROSS APPLY	(SELECT TOP 1 * FROM tblCTCompanyPreference) CTCP
 	LEFT JOIN	[tblEMEntityLocation]	L	ON	E.intEntityId			=	L.intEntityId 
-											AND L.ysnDefaultLocation	=	1
+											AND L.ysnDefaultLocation	=	(case when isnull(CTCP.ysnListAllCustomerVendorLocations,0) = 0 then 1 else L.ysnDefaultLocation end)
+	LEFT JOIN	[tblEMEntityLocation]	LL	ON	E.intEntityId			=	LL.intEntityId 
+											AND LL.ysnDefaultLocation	=	1
 	LEFT JOIN	[tblEMEntityType]		Y	ON	Y.intEntityId			=	E.intEntityId
 	LEFT JOIN	[tblEMEntityToContact]	C	ON	C.intEntityId			=	E.intEntityId 
 											AND C.ysnDefaultContact		=	1

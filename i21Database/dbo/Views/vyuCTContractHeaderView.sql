@@ -41,7 +41,9 @@ AS
 								
 			CASE WHEN NM.strINCOLocationType = 'City' THEN NM.strINCOLocation ELSE NM.strSubLocationName	END	AS	strINCOLocation,
 			dbo.fnCTGetContractStatuses(CH.intContractHeaderId) COLLATE Latin1_General_CI_AS AS	strStatuses,
-			SP.intAttachmentSignatureId
+			SP.intAttachmentSignatureId,
+			CH.intEntitySelectedLocationId,
+			NM.strEntitySelectedLocation
 			
 	FROM	tblCTContractHeader					CH	
 	jOIN	vyuCTContractHeaderNotMapped		NM	ON	NM.intContractHeaderId				=		CH.intContractHeaderId
