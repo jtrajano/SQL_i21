@@ -9677,6 +9677,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
     <None Include="Scripts\Post-Deployment\MF\11_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\TR\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\AP\01_CleanupObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
