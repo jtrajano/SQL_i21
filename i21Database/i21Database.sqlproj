@@ -9436,6 +9436,10 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPaymentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPPaymentStatus.sql" />
     <Build Include="dbo\Tables\tblSMIDPProcessResult.sql" />
+    <Build Include="dbo\Tables\tblIPBillStage.sql" />
+    <Build Include="dbo\Tables\tblIPBillDetailStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
