@@ -22,6 +22,10 @@ IF OBJECT_ID('vyuCTPriceContract','v') IS NOT NULL
 	DROP VIEW vyuCTPriceContract;
 GO
 
+IF OBJECT_ID('vyuCTContractDetails','v') IS NOT NULL
+	DROP VIEW vyuCTContractDetails;
+GO
+
 
 
 
