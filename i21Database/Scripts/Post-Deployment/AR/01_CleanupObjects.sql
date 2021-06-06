@@ -14,6 +14,11 @@ IF OBJECT_ID('vyuARPOSAvailableDrawer','v') IS NOT NULL
 	DROP VIEW vyuARPOSAvailableDrawer;
 GO
 
+IF OBJECT_ID('vyuARCustomerStatementDetailReport','v') IS NOT NULL
+	DROP VIEW vyuARCustomerStatementDetailReport;
+GO
+
+
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspARErrorMessages'))
        DROP PROCEDURE uspARErrorMessages;
 GO
