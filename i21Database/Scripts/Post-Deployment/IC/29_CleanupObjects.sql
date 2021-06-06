@@ -7,6 +7,13 @@ BEGIN
 END
 GO
 
+IF object_id('fnGetItemCostingOnPostCustodyErrors ', 'FN') IS NOT NULL
+BEGIN
+    DROP FUNCTION [dbo].fnGetItemCostingOnPostCustodyErrors
+END
+GO
+
+
 IF OBJECT_ID('uspICRepostBillCostAdjustment', 'P') IS NOT NULL AND OBJECT_ID('uspAPRepostBillCostAdjustment', 'P') IS NULL
 BEGIN
 	-- Rename uspICRepostBillCostAdjustment to uspAPRepostBillCostAdjustment so that ownership and maintenance of this sp will be now in AP. 
