@@ -9680,6 +9680,7 @@
     <None Include="Scripts\Post-Deployment\AP\01_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\TF\01_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\LG\3_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\ET\01_CleanupObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
