@@ -18,6 +18,12 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspC
        DROP PROCEDURE uspCTImportContractText;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspCTAllowDPContractClosure'))
+       DROP PROCEDURE uspCTAllowDPContractClosure;
+GO
+
+
+
 IF OBJECT_ID('vyuCTPriceContract','v') IS NOT NULL
 	DROP VIEW vyuCTPriceContract;
 GO
