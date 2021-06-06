@@ -27,13 +27,14 @@ GO
 IF OBJECT_ID('vyuCTPriceContract','v') IS NOT NULL
 	DROP VIEW vyuCTPriceContract;
 GO
-
 IF OBJECT_ID('vyuCTContractDetails','v') IS NOT NULL
 	DROP VIEW vyuCTContractDetails;
 GO
-
 IF OBJECT_ID('vyuCTContractDetailGrid','v') IS NOT NULL
 	DROP VIEW vyuCTContractDetailGrid;
+GO
+IF OBJECT_ID('vyuCTContractDetailView2','v') IS NOT NULL
+	DROP VIEW vyuCTContractDetailView2;
 GO
 
 
