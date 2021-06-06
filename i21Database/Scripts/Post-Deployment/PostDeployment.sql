@@ -682,5 +682,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\01_CleanupObjects.sql
 :r .\AP\01_CleanupObjects.sql
 :r .\ET\01_CleanupObjects.sql
+:r .\PAT\6_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'
