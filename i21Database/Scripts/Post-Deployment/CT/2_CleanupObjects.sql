@@ -32,7 +32,9 @@ IF OBJECT_ID('vyuCTContractDetails','v') IS NOT NULL
 	DROP VIEW vyuCTContractDetails;
 GO
 
-
+IF OBJECT_ID('vyuCTContractDetailGrid','v') IS NOT NULL
+	DROP VIEW vyuCTContractDetailGrid;
+GO
 
 
 PRINT 'End Contract Management Clean up Objects - Drop obsolete objects'
