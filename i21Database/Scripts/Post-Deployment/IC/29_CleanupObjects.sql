@@ -37,6 +37,10 @@ GO
 IF OBJECT_ID('vyuICBEExportProductPrice','v') IS NOT NULL
 	DROP VIEW vyuICBEExportProductPrice;
 GO
+IF OBJECT_ID('vyuICShipmentInvoice2ByLocation','v') IS NOT NULL
+	DROP VIEW vyuICShipmentInvoice2ByLocation;
+GO
+
 
 PRINT 'End IC Clean up Objects - Drop obsolete objects'
 GO
