@@ -97,6 +97,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , strStateTaxId			= CUSTOMER.strStateTaxId
 	 , dblInvoiceTotal          = INVOICE.dblInvoiceTotal
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
+	 , intFreightTermId			= INVOICE.intFreightTermId
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
