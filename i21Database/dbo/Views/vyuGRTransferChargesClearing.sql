@@ -175,9 +175,12 @@ AND ReceiptCharge.ysnAccrue = 1
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
 UNION ALL      
+
+
+
 --Transfer for Receipt Charges
 SELECT DISTINCT '4',
-    CS.intEntityId AS intEntityVendorId
+    CS_Tomorrow.intEntityId AS intEntityVendorId
     ,TS.dtmTransferStorageDate AS dtmDate      
     ,TS.strTransferStorageTicket
 	,IR.intInventoryReceiptId
@@ -191,7 +194,7 @@ SELECT DISTINCT '4',
     ,0 AS dblTransferTotal      
     ,0 AS dblTransferQty  
     ,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) * -1 dblReceiptChargeTotal  
-    ,ISNULL(IRC.dblQuantity,0) * -1 AS dblReceiptChargeQty 
+    ,(ISNULL(IRC.dblQuantity,0) * (SR.dblSplitPercent / 100 )) * -1 AS dblReceiptChargeQty 
     ,CS.intCompanyLocationId      
     ,CL.strLocationName      
     ,0
@@ -206,6 +209,8 @@ INNER JOIN tblGRTransferStorageReference SR
 	ON SR.intTransferStorageId = TS.intTransferStorageId
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
+INNER JOIN tblGRCustomerStorage CS_Tomorrow
+        ON CS_Tomorrow.intCustomerStorageId = SR.intToCustomerStorageId
 INNER JOIN tblSMCompanyLocation CL      
     ON CL.intCompanyLocationId = CS.intCompanyLocationId
 INNER JOIN (
@@ -241,6 +246,11 @@ LEFT JOIN
 )  
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE GL.strDescription LIKE '%Charges from %'
+
+
+
+
+
 UNION ALL
 SELECT DISTINCT '4.1',
    CS.intEntityId AS intEntityVendorId
@@ -558,6 +568,8 @@ OUTER APPLY
 				AND intAccountId = GD.intAccountId
 				AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
 	)
+
+
 ) GLDetail
 LEFT JOIN   
 (  
@@ -571,6 +583,77 @@ WHERE GL.strCode = 'IC'
 AND QM.dblDiscountDue <> 0
 AND GLDetail.intAccountId IS NOT NULL
 --AND TS.dtmTransferStorageDate between '03/03/2021' and '03/04/2021'
+
+
+
+
+
+
+
+
+
+UNION ALL
+---Vouchered Charges
+SELECT DISTINCT '8' AS TEST,
+    Receipt.intEntityVendorId AS intEntityVendorId      
+    ,Receipt.dtmReceiptDate AS dtmDate      
+    ,TransferReference.strTransferStorageTicket  AS strTransactionNumber     
+    ,null as intInventoryReceiptId      
+    ,TransferReference.intTransferStorageId AS intTransferStorageId
+    ,TransferReference.strTransferStorageTicket AS strTransferStorageTicket
+    ,TransferReference.intTransferStorageReferenceId AS intTransferStorageReferenceId
+    ,ReceiptCharge.intInventoryReceiptChargeId      
+    ,ReceiptCharge.intChargeId AS intItemId     
+    ,ReceiptCharge.intCostUOMId  AS intItemUOMId  
+    ,unitMeasure.strUnitMeasure AS strUOM   
+    ,ISNULL(BillDetail.dblTotal ,0) AS dblTransferTotal      
+    ,ISNULL(BillDetail.dblQtyReceived, 0) AS dblTransferQty      
+    ,0 AS dblReceiptChargeTotal      
+    ,0  AS dblReceiptChargeQty      
+    ,Receipt.intLocationId      
+    ,compLoc.strLocationName      
+    ,0 AS '1'
+FROM tblICInventoryReceiptCharge ReceiptCharge      
+INNER JOIN tblICInventoryReceipt Receipt       
+    ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
+INNER JOIN tblSMCompanyLocation compLoc      
+    ON Receipt.intLocationId = compLoc.intCompanyLocationId
+join tblSCTicket Ticket
+	on ReceiptCharge.intInventoryReceiptId= Ticket.intInventoryReceiptId
+
+JOIN tblAPBillDetail BillDetail
+	on ReceiptCharge.intInventoryReceiptId = Ticket.intInventoryReceiptId
+		and BillDetail.intItemId = ReceiptCharge.intChargeId	
+	
+	join tblGRCustomerStorage Storage
+			on BillDetail.intCustomerStorageId = Storage.intCustomerStorageId
+				and Storage.ysnTransferStorage = 1	
+				and Storage.intDeliverySheetId is null
+	join (select distinct TransferStorage.strTransferStorageTicket
+						,TransferStorage.intTransferStorageId
+						,TransferStorageReference.intTransferStorageReferenceId
+						,TransferStorageReference.intToCustomerStorageId  as intCustomerStorageId
+					from tblGRTransferStorageReference TransferStorageReference
+						join tblGRTransferStorage TransferStorage
+							on TransferStorageReference.intTransferStorageId = TransferStorage.intTransferStorageId
+					--where TransferStorageReference.intToCustomerStorageId = BillDetail.intCustomerStorageId
+	) TransferReference
+		on TransferReference.intCustomerStorageId = BillDetail.intCustomerStorageId
+
+
+LEFT JOIN   
+(  
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+)  
+    ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId 
+WHERE       
+    Receipt.ysnPosted = 1        
+AND ReceiptCharge.ysnPrice = 1   
+
+
+
+
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl

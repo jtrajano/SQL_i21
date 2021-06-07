@@ -8,14 +8,24 @@ AS
 
 set nocount on
 
-return 
+--return 
 
 declare @DeliverySheetNumber nvarchar(100)
+declare @DPOwned BIT
 declare @StorageCost decimal(18, 6)
+declare @dblDSShrink NUMERIC(38, 20)
+declare @dblTotalDSShrink NUMERIC(38, 20)
 declare @CurrentDate datetime
 
 select @DeliverySheetNumber =  strDeliverySheetNumber 
-	from tblSCDeliverySheet where intDeliverySheetId = @DeliverySheetId
+		,@dblDSShrink = dblShrink
+		,@DPOwned = ysnDPOwnedType
+	from tblSCDeliverySheet  DeliverySheet
+		join tblGRStorageScheduleRule ScheduleRule
+			on DeliverySheet.intStorageScheduleRuleId = ScheduleRule.intStorageScheduleRuleId
+		join tblGRStorageType StorageType
+			on ScheduleRule.intStorageType = StorageType.intStorageScheduleTypeId
+	where intDeliverySheetId = @DeliverySheetId
 
 select @StorageCost = isnull(dblBasis, 0) + isnull(dblSettlementPrice, 0)
 	from tblGRCustomerStorage 
@@ -24,8 +34,66 @@ select @StorageCost = isnull(dblBasis, 0) + isnull(dblSettlementPrice, 0)
 select @CurrentDate = getdate()
 
 
+UPDATE tblSCDeliverySheet
+		set ysnInvolvedWithShrinkage = @ysnPost
+	where intDeliverySheetId = @DeliverySheetId 
+
+--
+delete 
+	from tblSCDeliverySheetShrinkReceiptDistribution
+		where intDeliverySheetId = @DeliverySheetId
+
 if @ysnPost = 1
 begin
+
+	if @DPOwned = 1 
+	begin
+		insert into tblSCDeliverySheetShrinkReceiptDistribution
+		( intDeliverySheetId, intInventoryReceiptId, intInventoryReceiptItemId,  dblDSShrink, dblIRNet, dblComputedShrinkPerIR)
+		select 
+			Sheet.intDeliverySheetId	
+			, ReceiptItem.intInventoryReceiptId
+			, ReceiptItem.intInventoryReceiptItemId
+			, Sheet.dblShrink
+			, ReceiptItem.dblNet
+			, (Sheet.dblShrink / (Sheet.dblNet + Sheet.dblShrink)) * ReceiptItem.dblNet 
+		
+		
+			from tblSCDeliverySheet Sheet
+			join tblSCTicket Ticket
+				on Ticket.intDeliverySheetId = Sheet.intDeliverySheetId
+			join tblSCTicketSplit Split
+				on Ticket.intTicketId = Split.intTicketId
+			join tblICInventoryReceiptItem ReceiptItem
+				on ReceiptItem.intSourceId = Ticket.intTicketId
+			join tblICInventoryReceipt Receipt
+				on ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+					and Receipt.intSourceType = 1
+					and Receipt.intEntityVendorId = Split.intCustomerId
+			where 
+				Sheet.dblShrink <> 0
+				and Sheet.intDeliverySheetId = @DeliverySheetId
+
+			select @dblTotalDSShrink = sum(dblComputedShrinkPerIR) 
+				from tblSCDeliverySheetShrinkReceiptDistribution 
+					where intDeliverySheetId = @DeliverySheetId
+						and intInventoryReceiptItemId is not null
+
+			if @dblTotalDSShrink <> @dblDSShrink
+			begin
+				insert into tblSCDeliverySheetShrinkReceiptDistribution
+				( intDeliverySheetId, intInventoryReceiptId, intInventoryReceiptItemId,  dblDSShrink, dblIRNet, dblComputedShrinkPerIR)
+				values(
+					@DeliverySheetId, null, null, @dblDSShrink, 0, @dblDSShrink- @dblTotalDSShrink
+				)
+
+			end
+	end
+
+
+	
+
+
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 			,@InventoryTransactionTypeId_AutoNegative AS INT = 1
 			,@InventoryTransactionTypeId_WriteOffSold AS INT = 2
