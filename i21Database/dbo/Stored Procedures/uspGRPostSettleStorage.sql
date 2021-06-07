@@ -2972,7 +2972,6 @@ BEGIN TRY
 
 	DECLARE @intVoucherId2 AS INT
 	IF (SELECT ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @EntityId) = 1
-		OR (SELECT strCompanyName FROM tblSMCompanySetup) <> 'MID COLUMBIA PRODUCERS, INC.'
 	BEGIN
 		WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
 		BEGIN 
