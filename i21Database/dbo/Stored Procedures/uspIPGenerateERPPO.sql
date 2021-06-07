@@ -49,6 +49,7 @@ BEGIN TRY
 		,strERPPONumber NVARCHAR(100)
 		)
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
+	DECLARE @strLocationName NVARCHAR(50)
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -62,15 +63,30 @@ BEGIN TRY
 	DELETE
 	FROM @tblCTContractFeed
 
+	--INSERT INTO @tblCTContractFeed (intContractFeedId)
+	--SELECT TOP 50 CF.intContractFeedId
+	--FROM tblCTContractFeed CF
+	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+	--	AND CF.intStatusId IS NULL
+	--	AND CH.intContractTypeId = 1
+	--	AND CF.strRowState <> 'Delete'
+	--JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
+	--JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+	--	AND CL.strLotOrigin = @strCompanyLocation
+
+	SELECT @intCompanyLocationId = intCompanyLocationId
+		,@strLocationName = strLocationName
+	FROM dbo.tblSMCompanyLocation
+	WHERE strLotOrigin = @strCompanyLocation
+
 	INSERT INTO @tblCTContractFeed (intContractFeedId)
 	SELECT TOP 50 CF.intContractFeedId
 	FROM tblCTContractFeed CF
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CF.intStatusId IS NULL
 		AND CH.intContractTypeId = 1
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
-	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-		AND CL.strLotOrigin = @strCompanyLocation
+		--AND CF.strRowState = 'Delete'
+		AND CF.strLocationName = @strLocationName
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
@@ -316,6 +332,7 @@ BEGIN TRY
 				SELECT @strDetailXML = '<line id="' + LTRIM(@intContractFeedId) + '" parentId="' + ltrim(@intContractFeedId) + '">' + 
 					'<TrxSequenceNo>' + LTRIM(@intContractFeedId) + '</TrxSequenceNo>' + 
 					'<ActionId>' + LTRIM(@intActionId) + '</ActionId>' + 
+					'<Status>' + LTRIM(3) + '</Status>' + 
 					'<SequenceNo>' + LTRIM(CF.intContractSeq) + '</SequenceNo>' + 
 					'<ItemNo>' + CF.strItemNo + '</ItemNo>' + 
 					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblQuantity)) + '</Quantity>' + 
