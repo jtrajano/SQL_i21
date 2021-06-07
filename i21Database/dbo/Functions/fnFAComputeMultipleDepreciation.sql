@@ -40,10 +40,6 @@ DECLARE @tblAssetInfo TABLE (
 
 ) 
 
-
-
-
-
 INSERT INTO  @tblAssetInfo(
 	intAssetId,
 	intDepreciationMethodId, 
@@ -61,7 +57,7 @@ strConvention,
 BD.dblCost - BD.dblSalvageValue,
 BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
-A.dblImportGAAPDepToDate,
+IIF(@BookId = 1,  A.dblImportGAAPDepToDate, A.dblImportTaxDepToDate),
 NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
@@ -107,8 +103,6 @@ OUTER APPLY(
 )E
 WHERE strError IS NULL
 
-
-
 UPDATE T
 SET dblMonth = dblAnnualDep/ intMonthDivisor,
 intDaysInFirstMonth= 
@@ -119,9 +113,8 @@ WHERE strError IS NULL
 UPDATE T
 SET 
 dblMonth = 
-CASE WHEN dblMonth >= ISNULL( dblImportGAAPDepToDate,0) 
+CASE WHEN dblMonth >= ISNULL( dblImportGAAPDepToDate,0)
 THEN 
-
 	CASE 
 	WHEN strConvention = 'Actual Days' THEN
 		dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))

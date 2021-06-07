@@ -215,7 +215,7 @@ BEGIN
                     BD.dtmPlacedInService,
                     NULL,  
                     BD.dtmPlacedInService,  
-                    F.dblImportGAAPDepToDate,  
+                    IIF(@BookId = 1, F.dblImportGAAPDepToDate, F.dblImportTaxDepToDate),
                     BD.dblSalvageValue,  
                     'Place in service',  
                     @strTransactionId,  
@@ -267,19 +267,19 @@ BEGIN
                   BD.dtmPlacedInService,  
                   NULL,  
 				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
-
-                  CASE WHEN ISNULL(F.dblImportGAAPDepToDate,0) > 0
+                  CASE WHEN ISNULL(F.dblImportGAAPDepToDate,0) + ISNULL(F.dblImportTaxDepToDate,0) > 0
                     THEN
-					CASE WHEN
+					            CASE WHEN
                         DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) >
                         DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (F.dtmImportedDepThru)) + 1, 0))
-                    THEN E.dblDepre
-					ELSE
-						F.dblImportGAAPDepToDate END
+                      THEN E.dblDepre
+					            ELSE
+						            IIF(@BookId = 1, F.dblImportGAAPDepToDate , F.dblImportTaxDepToDate)
+                      END
 
-                  ELSE E.dblDepre END
-                  
-                  ,  
+                  ELSE
+                    E.dblDepre 
+                  END,  
                   BD.dblSalvageValue,  
                   'Depreciation',  
                   @strTransactionId,  
