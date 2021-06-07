@@ -2,36 +2,40 @@
 AS
 
 SELECT 
-	CustomerStatus.strAccountStatusCode, 
-	tblARCustomer.strCustomerNumber--, 
-	strDisplayName,
-	strShipToLocationAddress,
-	strLocationName,
-	vyuARTaxReport.strInvoiceNumber,
-	dtmDate,
-	vyuARTaxReport.strItemNo, 
-	tblICItem.strDescription,
-	dblQtyShipped,
-	dblUnitPrice,
-	strItemCategory,
-	SUM(dblRate)[dblRate],
-	sum(dblNonTaxable)[dblNonTaxable],
-	SUM(dblTaxable)[dblTaxable],
-	SUM(dblAdjustedTax)[dblAdjustedTax],
-	SUM(dblTax)[dblTax],
-	SUM(dblTotalAdjustedTax)[dblTotalAdjustedTax],
-	SUM(dblTotalTax)[dblTotalTax], 
-	SUM(dblTaxDifference)[dblTaxDifference],
-	SUM(dblTaxAmount)[dblTaxAmount], 
-	SUM(dblTotalSales)[dblTotalSales],
-	SUM(dblTaxCollected)[dblTaxCollected],
-	dblQtyShipped * dblUnitPrice [dblQtyShippedxUnitPrice],
-	dblInvoiceTotal,
+	strAccountStatusCode		 = CustomerStatus.strAccountStatusCode, 
+	strCustomerNumber			 = tblARCustomer.strCustomerNumber, 
+	strDisplayName				 = vyuARTaxReport.strDisplayName,
+	strShipToLocationAddress     = vyuARTaxReport.strShipToLocationAddress,
+	strLocationName				 = CASE WHEN freight.strFobPoint = 'Destination' THEN  locship.strLocationName ELSE   loc.strLocationName END,
+	strInvoiceNumber			 = vyuARTaxReport.strInvoiceNumber,
+	dtmDate						 = vyuARTaxReport.dtmDate,
+	strItemNo					 = vyuARTaxReport.strItemNo, 
+	strDescription				 = tblICItem.strDescription,
+	dblQtyShipped                = vyuARTaxReport.dblQtyShipped,
+	dblUnitPrice				 = vyuARTaxReport.dblUnitPrice,
+	strItemCategory				 = vyuARTaxReport.strItemCategory,
+	strCity						 = CASE WHEN freight.strFobPoint = 'Destination' THEN  locship.strCity  ELSE   loc.strCity END,
+	strState					 = CASE WHEN freight.strFobPoint = 'Destination' THEN  locship.strState ELSE   loc.strState END,
+	dblRate						 = SUM(dblRate),
+	dblNonTaxable			     = SUM(dblNonTaxable),
+	dblTaxable					 = SUM(dblTaxable),
+	dblAdjustedTax				 = SUM(dblAdjustedTax),
+	dblTax						 = SUM(dblTax),
+	dblTotalAdjustedTax			 = SUM(dblTotalAdjustedTax),
+	dblTotalTax                  = SUM(dblTotalTax), 
+	dblTaxDifference             = SUM(dblTaxDifference),
+	dblTaxAmount                 = SUM(dblTaxAmount), 
+	dblTotalSales                = SUM(dblTotalSales),
+	dblTaxCollected              = SUM(dblTaxCollected),
+	dblQtyShippedxUnitPrice      = vyuARTaxReport.dblQtyShipped * vyuARTaxReport.dblUnitPrice ,
+	dblInvoiceTotal				 = vyuARTaxReport.dblInvoiceTotal,
 	[FETG], [FETCD], [ARSG], [ARSDD], [ILSCD], [ILST], [ILL], [ILEIF], [FL], [ILPPG], [ARPEV], [ARSCD], [MOSCD], [ILSG], [MOSG], [ILSDD], [MOSDD], [ARST], [INST], [MOST], [ILPPD], [ERG], [ERD], [MOIF], [MOTF], [MODD], [MODG], [ERB11C], [ERB11D], [ERGH], [ERB5D], [ERB20D], [ERB50D], [ERB5C], [ERB20C], [ERB50C], [ERB2C], [ERB2D], [ERC], [ILStateSalesTaxZero]
-
 FROM vyuARTaxReport  
 INNER JOIN tblARCustomer  ON vyuARTaxReport.strCustomerNumber = tblARCustomer.strCustomerNumber
 INNER JOIN tblICItem ON tblICItem.strItemNo = vyuARTaxReport.strItemNo
+LEFT JOIN tblSMFreightTerms freight  ON freight.intFreightTermId= vyuARTaxReport.intFreightTermId
+LEFT JOIN tblEMEntityLocation locship ON locship.intEntityLocationId = vyuARTaxReport.intShipToLocationId
+LEFT JOIN tblEMEntityLocation loc ON loc.intEntityLocationId = vyuARTaxReport.intCompanyLocationId
 OUTER APPLY(
 	SELECT-- strAccountStatusCode, intEntityCustomerId 
 	strAccountStatusCode = STUFF((SELECT  ',' + strAccountStatusCode
@@ -69,11 +73,17 @@ pivot
 
 	GROUP BY
 	strItemCategory,
+	locship.strCity,
+	locship.strState,
+	loc.strCity,
+	loc.strState,
+	freight.strFobPoint,
 	CustomerStatus.strAccountStatusCode, 
 	tblARCustomer.strCustomerNumber, 
 	strDisplayName,
 	strShipToLocationAddress,
-	strLocationName,
+	locship.strLocationName,
+	loc.strLocationName,
 	vyuARTaxReport.strInvoiceNumber,
 	dtmDate,
 	vyuARTaxReport.strItemNo, 

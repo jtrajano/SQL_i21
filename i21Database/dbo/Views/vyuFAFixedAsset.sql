@@ -66,18 +66,12 @@ LEFT JOIN tblGLAccount GLAccumulation ON GLAccumulation.intAccountId = FA.intAcc
 LEFT JOIN tblGLAccount GLGainLoss ON GLGainLoss.intAccountId = FA.intGainLossAccountId      
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID=FA.intCurrencyId      
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId      
-OUTER APPLY(  
- SELECT TOP 1 intDepreciationMethodId
- FROM tblFABookDepreciation  
- WHERE intAssetId = FA.intAssetId
- AND intBookId = 1
-)BD  
-OUTER APPLY(  
- SELECT TOP 1 dm.intDepreciationMethodId,
- strDepreciationMethodId,strConvention,strDepreciationType  
- FROM tblFADepreciationMethod dm JOIN 
- tblFABookDepreciation bd ON dm.intDepreciationMethodId=bd.intDepreciationMethodId
- WHERE bd.intDepreciationMethodId  = BD.intDepreciationMethodId  
+OUTER APPLY(    
+ SELECT dm.intDepreciationMethodId,  
+ strDepreciationMethodId,strConvention,strDepreciationType    
+ FROM tblFADepreciationMethod dm LEFT JOIN   
+ tblFABookDepreciation bd ON dm.intDepreciationMethodId=bd.intDepreciationMethodId  
+ WHERE dm.intDepreciationMethodId = FA.intDepreciationMethodId    
 )DM
 OUTER APPLY(
     SELECT COUNT(*)Cnt FROM tblFABookDepreciation 
