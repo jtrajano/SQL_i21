@@ -322,6 +322,10 @@ BEGIN TRY
 
 				SELECT TOP 1 @intLocationId = t.intCompanyLocationId
 				FROM tblSMCompanyLocation t WITH (NOLOCK)
+
+				SELECT @intBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'BOOK_ID')
+
+				SELECT @intSubBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'SUB_BOOK_ID')
 			END
 			ELSE
 			BEGIN
@@ -448,6 +452,7 @@ BEGIN TRY
 			IF ISNULL(@strVendor, '') <> ''
 			BEGIN
 				SELECT @intEntityId = t.intEntityId
+					,@strVendor = t.strName
 				FROM tblEMEntity t WITH (NOLOCK)
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
@@ -618,7 +623,7 @@ BEGIN TRY
 					intConcurrencyId
 					,intSampleTypeId
 					,strSampleNumber
-					,strSampleRefNo
+					--,strSampleRefNo
 					,intProductTypeId
 					,intProductValueId
 					,intSampleStatusId
@@ -662,7 +667,7 @@ BEGIN TRY
 				SELECT 1
 					,@intSampleTypeId
 					,@strSampleNumber
-					,@strSampleRefNo
+					--,@strSampleRefNo
 					,@intProductTypeId
 					,@intProductValueId
 					,@intSampleStatusId
@@ -847,7 +852,7 @@ BEGIN TRY
 				UPDATE tblQMSample
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intSampleTypeId = @intSampleTypeId
-					,strSampleRefNo = @strSampleRefNo
+					--,strSampleRefNo = @strSampleRefNo
 					,intProductValueId = @intProductValueId
 					,intSampleStatusId = @intSampleStatusId
 					,intPreviousSampleStatusId = @intPreviousSampleStatusId
@@ -1003,8 +1008,8 @@ BEGIN TRY
 						IF (@strOldQuantityUOM <> @strQuantityUOM)
 							SET @strDetails += '{"change":"strRepresentingUOM","iconCls":"small-gear","from":"' + LTRIM(@strOldQuantityUOM) + '","to":"' + LTRIM(@strQuantityUOM) + '","leaf":true,"changeDescription":"Representing Qty UOM"},'
 
-						IF (@strOldSampleRefNo <> @strSampleRefNo)
-							SET @strDetails += '{"change":"strSampleRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleRefNo) + '","to":"' + LTRIM(@strSampleRefNo) + '","leaf":true,"changeDescription":"Sample Ref No"},'
+						--IF (@strOldSampleRefNo <> @strSampleRefNo)
+						--	SET @strDetails += '{"change":"strSampleRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleRefNo) + '","to":"' + LTRIM(@strSampleRefNo) + '","leaf":true,"changeDescription":"Sample Ref No"},'
 
 						IF (@strOldSampleNote <> @strSampleNote)
 							SET @strDetails += '{"change":"strSampleNote","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleNote) + '","to":"' + LTRIM(@strSampleNote) + '","leaf":true,"changeDescription":"Sample Note"},'
