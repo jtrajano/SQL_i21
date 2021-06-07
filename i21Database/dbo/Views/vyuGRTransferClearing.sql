@@ -3,22 +3,37 @@ AS
 /*START ====>>> ***DELIVERY SHEETS*** FOR DP TO OP/DP*/
 --SELECT * FROM (
 --Receipt item
-SELECT	--'1.1' AS TEST,
-    CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN CS_TO.intEntityId ELSE receipt.intEntityVendorId END AS intEntityVendorId
-    ,CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TS.dtmTransferStorageDate ELSE receipt.dtmReceiptDate END AS dtmDate
-    ,CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TS.strTransferStorageTicket ELSE receipt.strReceiptNumber END AS strTransactionNumber
-    ,CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TS.intTransferStorageId ELSE receipt.intInventoryReceiptId END AS intInventoryReceiptId
-    ,NULL AS intTransferStorageId
-    ,NULL AS strTransferStorageTicket
+SELECT	
+
+	'1.1'  collate Latin1_General_CI_AS AS strMark,
+    CASE WHEN ( isFullyTransferred = 1  OR CS_TO.dblOpenBalance = 0) AND ST.ysnDPOwnedType = 1 and 1 = 0 THEN CS_TO.intEntityId ELSE receipt.intEntityVendorId END AS intEntityVendorId
+    ,CASE WHEN ( isFullyTransferred = 1 OR CS_TO.dblOpenBalance = 0) AND ST.ysnDPOwnedType = 1 and 1 = 0 THEN TS.dtmTransferStorageDate ELSE receipt.dtmReceiptDate END AS dtmDate
+    ,CASE WHEN ( isFullyTransferred = 1 OR CS_TO.dblOpenBalance = 0) AND ST.ysnDPOwnedType = 1 and 1 = 0 THEN TS.strTransferStorageTicket ELSE receipt.strReceiptNumber END AS strTransactionNumber
+    ,CASE WHEN ( isFullyTransferred = 1 OR CS_TO.dblOpenBalance = 0) AND ST.ysnDPOwnedType = 1 and 1 = 0 THEN TS.intTransferStorageId ELSE receipt.intInventoryReceiptId END AS intInventoryReceiptId
+    ,null AS intTransferStorageId
+    ,'' AS strTransferStorageTicket
     ,NULL AS intTransferStorageReferenceId
-    ,CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN SIR.intTransferStorageReferenceId ELSE receiptItem.intInventoryReceiptItemId END AS intInventoryReceiptItemId
+    ,CASE WHEN ( isFullyTransferred = 1 OR CS_TO.dblOpenBalance = 0)  and 1 = 0 THEN SIR.intTransferStorageReferenceId ELSE receiptItem.intInventoryReceiptItemId END AS intInventoryReceiptItemId
     ,receiptItem.intItemId
     ,receiptItem.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblTransferTotal
     ,0 AS dblTransferQty
     ,ROUND(
-        ISNULL(CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TRANSFER_TRAN.dblTransferredUnits ELSE receiptItem.dblOpenReceive END, 0) --
+        (
+			ISNULL(
+				CASE 
+					WHEN isnull(CheckingForMultipleTransfer.intDataCount,0) > 1 
+						then 
+						CheckingForMultipleTransfer.dblUnits * (case when Shrek.ysnFlag is not null then ((receiptItem.dblOpenReceive + S.dblShrinkage)  / receiptItem.dblOpenReceive  ) else 1 end )
+						--(SIR.dblTransactionUnits + ((SIR.dblTransactionUnits / S.dblNetUnits) * ABS(S.dblShrinkage)))			
+						-- The purpose of this checking is to know if an IR is split into different transfer. When that happens, we should use the units and not the whole IR unit
+					WHEN ( isFullyTransferred = 1 OR CS_TO.dblOpenBalance = 0) AND ST.ysnDPOwnedType = 1  and 1 = 0 THEN 
+						TRANSFER_TRAN.dblTransferredUnits * (case when Shrek.ysnFlag is not null then ((receiptItem.dblOpenReceive + S.dblShrinkage)  / receiptItem.dblOpenReceive  ) else 1 end )
+					ELSE receiptItem.dblOpenReceive - isnull(StorageRunningQuantity.dblQty, 0) - isnull(Shrek.dblComputedShrink, 0) END
+			, 0) --
+					
+		)
 		--ISNULL(CASE WHEN (SIR.dblTransactionUnits + ABS(SIR.dblShrinkage)) <= receiptItem.dblOpenReceive THEN receiptItem.dblOpenReceive ELSE (SIR.dblTransactionUnits + ABS(SIR.dblShrinkage)) END, 0) 
         * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
         * (
@@ -32,7 +47,16 @@ SELECT	--'1.1' AS TEST,
     +
     receiptItem.dblTax
     AS dblReceiptTotal
-    ,ISNULL(CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TRANSFER_TRAN.dblTransferredUnits ELSE receiptItem.dblOpenReceive END, 0) AS dblReceiptQty
+    ,ISNULL(CASE 
+			WHEN isnull(CheckingForMultipleTransfer.intDataCount,0) > 1 
+					then 
+					CheckingForMultipleTransfer.dblUnits * (case when Shrek.ysnFlag is not null then ((receiptItem.dblOpenReceive + S.dblShrinkage)  / receiptItem.dblOpenReceive  ) else 1 end )
+			WHEN ( isFullyTransferred = 1 OR CS_TO.dblOpenBalance = 0) AND ST.ysnDPOwnedType = 1  and 1 = 0 THEN 
+					TRANSFER_TRAN.dblTransferredUnits 
+					* (case when Shrek.ysnFlag is not null then ((receiptItem.dblOpenReceive + S.dblShrinkage)  / receiptItem.dblOpenReceive  ) else 1 end )		
+			ELSE receiptItem.dblOpenReceive - isnull(StorageRunningQuantity.dblQty, 0) - isnull(Shrek.dblComputedShrink, 0) END, 0) 
+				
+	AS dblReceiptQty
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,CAST(0 AS BIT) ysnAllowVoucher
@@ -128,12 +152,37 @@ OUTER APPLY (
     AND receipt.intInventoryReceiptId = gl.intTransactionId
     AND (gl.dblCredit != 0 OR gl.dblDebit != 0)   
 ) gl
+
+
+
+outer apply (
+
+	select top 1 
+		dblReceiptRunningUnits  as dblQty
+from tblGRStorageInventoryReceipt 
+	where intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
+	 and intInventoryReceiptId = receiptItem.intInventoryReceiptId 
+	 and ysnUnposted = 0
+	order by intStorageInventoryReceipt desc
+
+) StorageRunningQuantity
+
+left join (
+	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId, 1 as ysnFlag
+		from tblSCDeliverySheetShrinkReceiptDistribution
+	group by intInventoryReceiptItemId
+
+) Shrek
+	on Shrek.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+
 WHERE 
     receiptItem.dblUnitCost != 0
 	AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 	AND receipt.strReceiptType != 'Transfer Order'
 	AND receiptItem.intOwnershipType != 2
 	AND receipt.ysnPosted = 1
+
+
 
 UNION ALL
 --Transfer Storages
@@ -150,8 +199,8 @@ SELECT --'2.2' AS TEST,
     ,IRI.intItemId
     ,IRI.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,ISNULL(CAST(A.dblTotalTransfer * (IRI.dblUnitCost)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
-    ,ROUND(A.dblTotalTransfer,2) AS dblTransferQty
+    ,ISNULL(CAST(( case when Shrek.ysnFlag is not null then SIR.dblTransactionUnits else A.dblTotalTransfer end ) * (IRI.dblUnitCost)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    ,ROUND(( case when Shrek.ysnFlag is not null then SIR.dblTransactionUnits else A.dblTotalTransfer end),2) AS dblTransferQty -- - isnull(Shrek.dblComputedShrink, 0)
     ,0 AS dblReceiptTotal
     ,0 AS dblReceiptQty
     ,IR.intLocationId
@@ -211,6 +260,16 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
+
+left join (
+	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId, 1 as ysnFlag
+		from tblSCDeliverySheetShrinkReceiptDistribution
+	group by intInventoryReceiptItemId
+
+) Shrek
+	on Shrek.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+
+
 WHERE SIR.ysnUnposted = 0
     --AND IR.dtmReceiptDate >= '08-17-2020'
 /*END ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
@@ -232,7 +291,10 @@ SELECT
     ,0 AS dblTransferTotal
     ,0 AS dblTransferQty
     ,ROUND(
-        ISNULL(CASE WHEN (CS.dblOpenBalance = 0 AND ST_FROM.ysnDPOwnedType = 1) THEN CS_TO.dblOriginalBalance ELSE receiptItem.dblOpenReceive END, 0) 
+        (
+			ISNULL(CASE WHEN (CS.dblOpenBalance = 0 AND ST_FROM.ysnDPOwnedType = 1) THEN CS_TO.dblOriginalBalance ELSE receiptItem.dblOpenReceive END, 0) 
+
+		)
         * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
         * (
             CASE 
@@ -415,7 +477,9 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE NOT EXISTS (SELECT intSourceCustomerStorageId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
+WHERE APClearing.intAccountId IS NOT NULL
+	
+-- WHERE NOT EXISTS (SELECT intSourceCustomerStorageId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
 UNION ALL
 -- Bill for Transfer Settlement
 SELECT 
@@ -551,3 +615,6 @@ WHERE APClearing.intAccountId IS NOT NULL
 --) A 
 --WHERE dtmDate between '2021-03-03' and '2021-03-04'
 --AND strTransactionNumber LIKE 'TRA%'
+GO
+
+
