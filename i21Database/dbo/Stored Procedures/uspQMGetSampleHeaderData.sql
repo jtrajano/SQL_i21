@@ -260,8 +260,8 @@ BEGIN
 			) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 		,UOM.strUnitMeasure AS strRepresentingUOM
-		,I.intOriginId AS intCountryId
-		,CA.strDescription AS strCountry
+		,ISNULL(C.intItemContractOriginId, I.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, CA.strDescription) AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
@@ -314,8 +314,10 @@ BEGIN
 
 	SELECT @dblRepresentingQty = SUM(CASE 
 				WHEN IU.intItemUOMId = L.intWeightUOMId
-					THEN ISNULL(L.dblWeight, L.dblQty)
-				ELSE L.dblQty
+					THEN ISNULL(L.dblWeight, 0)
+				WHEN IU.intItemUOMId = L.intItemUOMId
+					THEN ISNULL(L.dblQty, 0)
+				ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, L.dblQty)
 				END)
 		,@intRepresentingUOMId = MAX(IU.intUnitMeasureId)
 		,@strRepresentingUOM = MAX(UOM.strUnitMeasure)
@@ -360,8 +362,8 @@ BEGIN
 		,@dblRepresentingQty AS dblRepresentingQty
 		,@intRepresentingUOMId AS intRepresentingUOMId
 		,@strRepresentingUOM AS strRepresentingUOM
-		,I.intOriginId AS intCountryId
-		,CA.strDescription AS strCountry
+		,ISNULL(C.intItemContractOriginId, I.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, CA.strDescription) AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
@@ -369,6 +371,8 @@ BEGIN
 		,@strContainerNumber AS strContainerNumber
 		,L.intStorageLocationId
 		,SL.strName AS strStorageLocationName
+		,CL.intCompanyLocationSubLocationId
+		,CL.strSubLocationName
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.intLoadContainerId
@@ -397,6 +401,7 @@ BEGIN
 					END
 				)
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = L.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
