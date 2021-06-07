@@ -15,7 +15,7 @@ SELECT
 	dblUnitPrice				 = vyuARTaxReport.dblUnitPrice,
 	strItemCategory				 = vyuARTaxReport.strItemCategory,
 	strCity						 = CASE WHEN freight.strFobPoint = 'Destination' THEN  locship.strCity  ELSE   loc.strCity END,
-	strState					 = CASE WHEN freight.strFobPoint = 'Destination' THEN  locship.strState ELSE   loc.strState END,
+	strState					 = CASE WHEN freight.strFobPoint = 'Destination' THEN  locship.strState ELSE   loc.strStateProvince END,
 	dblRate						 = SUM(dblRate),
 	dblNonTaxable			     = SUM(dblNonTaxable),
 	dblTaxable					 = SUM(dblTaxable),
@@ -35,15 +35,14 @@ INNER JOIN tblARCustomer  ON vyuARTaxReport.strCustomerNumber = tblARCustomer.st
 INNER JOIN tblICItem ON tblICItem.strItemNo = vyuARTaxReport.strItemNo
 LEFT JOIN tblSMFreightTerms freight  ON freight.intFreightTermId= vyuARTaxReport.intFreightTermId
 LEFT JOIN tblEMEntityLocation locship ON locship.intEntityLocationId = vyuARTaxReport.intShipToLocationId
-LEFT JOIN tblEMEntityLocation loc ON loc.intEntityLocationId = vyuARTaxReport.intCompanyLocationId
+LEFT JOIN tblSMCompanyLocation loc	ON  loc.intCompanyLocationId = vyuARTaxReport.intCompanyLocationId
 OUTER APPLY(
-	SELECT-- strAccountStatusCode, intEntityCustomerId 
+	SELECT
 	strAccountStatusCode = STUFF((SELECT  ',' + strAccountStatusCode
 	FROM tblARCustomerAccountStatus customerstatus
 	LEFT JOIN tblARAccountStatus accountstatus ON customerstatus.intAccountStatusId=accountstatus.intAccountStatusId
 	WHERE tblARCustomer.intEntityId=customerstatus.intEntityCustomerId
 	ORDER BY intCustomerAccountStatusId DESC
-
 			  FOR XML PATH('')), 1, 1, '')
 )CustomerStatus
 
@@ -76,7 +75,7 @@ pivot
 	locship.strCity,
 	locship.strState,
 	loc.strCity,
-	loc.strState,
+	loc.strStateProvince,
 	freight.strFobPoint,
 	CustomerStatus.strAccountStatusCode, 
 	tblARCustomer.strCustomerNumber, 
