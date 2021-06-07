@@ -215,7 +215,7 @@ BEGIN
                     BD.dtmPlacedInService,
                     NULL,  
                     BD.dtmPlacedInService,  
-                    IIF(@BookId = 1, F.dblImportGAAPDepToDate, F.dblImportTaxDepToDate),
+                    CASE WHEN @BookId = 1 THEN F.dblImportGAAPDepToDate ELSE F.dblImportTaxDepToDate END,
                     BD.dblSalvageValue,  
                     'Place in service',  
                     @strTransactionId,  
