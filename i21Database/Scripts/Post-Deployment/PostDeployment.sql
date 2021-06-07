@@ -579,6 +579,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\RM\01_MasterScript.sql
 :R .\RM\02_DataFix.sql
 :R .\RM\fnRKGetBucketBasisDeliveriesAboveR2.sql
+:R .\RM\uspRKDPRCompareBasisDeliveriesAboveR2.sql
 
 -- Scale Ticket
 :R .\SC\Populate_Risk_Summary_Log.sql
