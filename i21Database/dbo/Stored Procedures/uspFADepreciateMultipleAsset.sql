@@ -274,9 +274,8 @@ BEGIN
                         DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (F.dtmImportedDepThru)) + 1, 0))
                       THEN E.dblDepre
 					            ELSE
-						            IIF(@BookId = 1, F.dblImportGAAPDepToDate , F.dblImportTaxDepToDate)
+						            CASE WHEN @BookId = 1 THEN F.dblImportGAAPDepToDate ELSE F.dblImportTaxDepToDate END
                       END
-
                   ELSE
                     E.dblDepre 
                   END,  
