@@ -9440,6 +9440,8 @@
     <Build Include="dbo\Tables\tblIPBillDetailStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPStockFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPStockFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
