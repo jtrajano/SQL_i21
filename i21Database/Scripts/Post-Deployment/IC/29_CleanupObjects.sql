@@ -7,7 +7,7 @@ BEGIN
 END
 GO
 
-IF object_id('fnGetItemCostingOnPostCustodyErrors ', 'FN') IS NOT NULL
+IF object_id('fnGetItemCostingOnPostCustodyErrors ', 'IF') IS NOT NULL
 BEGIN
     DROP FUNCTION [dbo].fnGetItemCostingOnPostCustodyErrors
 END
