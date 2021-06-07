@@ -133,7 +133,6 @@ BEGIN
 				, dblTotalRun1
 				, dblTotalRun2
 				, dblDifference = ISNULL(dblTotalRun2, 0) - ISNULL(dblTotalRun1, 0)
-				, dblContractTotal = SUM(ISNULL(dblTotalRun2, 0) - ISNULL(dblTotalRun1, 0)) OVER(PARTITION BY strContractNumber ORDER BY intContractHeaderId)
 				, strComment
 				, strCommodityCode = @strCommodityCode
 				, strVendorCustomer = strEntityName
@@ -211,7 +210,7 @@ BEGIN
 		FROM	result_tbl rta
 		INNER JOIN	
 			( SELECT z.strContractNumber
-					, dblContractTotal = SUM (ISNULL(z.dblTotalRun2, 0) - ISNULL(z.dblTotalRun1, 0)) 
+					, dblContractTotal = SUM(dblDifference) 
 				FROM	result_tbl z 
 				GROUP BY z.strContractNumber
 			) rtb
