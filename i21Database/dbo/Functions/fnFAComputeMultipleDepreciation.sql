@@ -57,7 +57,7 @@ strConvention,
 BD.dblCost - BD.dblSalvageValue,
 BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
-IIF(@BookId = 1,  A.dblImportGAAPDepToDate, A.dblImportTaxDepToDate),
+CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
 NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId

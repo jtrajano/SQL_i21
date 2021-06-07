@@ -215,7 +215,7 @@ BEGIN
                     BD.dtmPlacedInService,
                     NULL,  
                     BD.dtmPlacedInService,  
-                    IIF(@BookId = 1, F.dblImportGAAPDepToDate, F.dblImportTaxDepToDate),
+                    CASE WHEN @BookId = 1 THEN F.dblImportGAAPDepToDate ELSE F.dblImportTaxDepToDate END,
                     BD.dblSalvageValue,  
                     'Place in service',  
                     @strTransactionId,  
@@ -274,9 +274,8 @@ BEGIN
                         DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (F.dtmImportedDepThru)) + 1, 0))
                       THEN E.dblDepre
 					            ELSE
-						            IIF(@BookId = 1, F.dblImportGAAPDepToDate , F.dblImportTaxDepToDate)
+						            CASE WHEN @BookId = 1 THEN F.dblImportGAAPDepToDate ELSE F.dblImportTaxDepToDate END
                       END
-
                   ELSE
                     E.dblDepre 
                   END,  
