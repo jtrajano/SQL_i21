@@ -194,29 +194,6 @@ BEGIN TRY
 			FROM tblSMCurrency
 			WHERE strCurrency = @strCurrency
 
-			IF @strBook IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblCTBook B
-					WHERE B.strBook = @strBooks
-					)
-			BEGIN
-				IF @strErrorMessage <> ''
-				BEGIN
-					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Book ' + @strBook + ' is not available.'
-				END
-				ELSE
-				BEGIN
-					SELECT @strErrorMessage = 'Book ' + @strBook + ' is not available.'
-				END
-			END
-
-			SELECT @intBookId = NULL
-
-			SELECT @intBookId = intBookId
-			FROM tblCTBook
-			WHERE strBook = @strBook
-
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -578,6 +555,7 @@ BEGIN TRY
 				,dblWeight
 				,intWeightUOMId
 				,strVendorOrderNumber
+				,dtmVoucherDate 
 				,intBillId
 				,ysnStage
 				,intLoadShipmentId
@@ -601,7 +579,8 @@ BEGIN TRY
 				,dblShipmentNetWt
 				,dblItemWeight
 				,intWeightUnitMeasureId
-				,@strInvoiceNumber
+				,@strInvoiceNo
+				,@dtmInvoiceDate 
 				,@intBillId
 				,0
 				,intLoadId
@@ -622,6 +601,13 @@ BEGIN TRY
 			SELECT @strBillId = strBillId
 			FROM tblAPBill
 			WHERE intBillId = @intBillInvoiceId
+
+			Select @intContractHeaderId =intContractHeaderId
+			FROM @tblIPFinalInvoiceDetail 
+
+			Select @intBookId=intBookId
+			from tblCTContractHeader
+			Where intContractHeaderId =@intContractHeaderId
 
 			UPDATE tblAPBill
 			SET intBookId = @intBookId
