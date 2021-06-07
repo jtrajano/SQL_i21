@@ -319,7 +319,7 @@ BEGIN
 			,strTerm
 			,strPurchasingGroup
 			,strContractNumber
-			,strERPPONumber
+			,NULL
 			,intContractSeq
 			,strItemNo
 			,strStorageLocation
@@ -345,7 +345,7 @@ BEGIN
 			,strTermCode
 			,strContractItemNo
 			,strContractItemName
-			,strERPItemNumber
+			,NULL
 			,strERPBatchNumber
 			,strLoadingPoint
 			,strPackingDescription
