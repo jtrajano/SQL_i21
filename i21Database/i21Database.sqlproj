@@ -9442,6 +9442,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStockFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStockFeed.sql" />
+    <Build Include="dbo\Functions\fnICGetPromotionalCostByEffectiveDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

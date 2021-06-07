@@ -354,22 +354,25 @@ SELECT
 	, dblRunningAvailableQtyNoReserved = ROUND(ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0), 6) 
 	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
 	, dblCost = 
-			CASE 
-				-- Get the average cost. 
-				WHEN CostMethod.intCostingMethodId = 1 THEN 				
-					dbo.fnCalculateCostBetweenUOM(
-						@intStockUOMId
-						, ItemUOM.intItemUOMId
-						, COALESCE(EffectivePricing.dblCost, dbo.[fnICGetMovingAverageCost](
-							t.intItemId
-							, t.intItemLocationId
-							, @intLastInventoryTransactionId
-						))
-					)
-				-- Otherwise, get the last cost 
-				ELSE 
-					COALESCE(EffectivePricing.dblCost, t.dblCost)
-			END
+			COALESCE(
+				dbo.fnICGetPromotionalCostByEffectiveDate(i.intItemId, t.intItemLocationId, @dtmDate), 
+				CASE 
+					-- Get the average cost. 
+					WHEN CostMethod.intCostingMethodId = 1 THEN 				
+						dbo.fnCalculateCostBetweenUOM(
+							@intStockUOMId
+							, ItemUOM.intItemUOMId
+							, COALESCE(EffectivePricing.dblCost, dbo.[fnICGetMovingAverageCost](
+								t.intItemId
+								, t.intItemLocationId
+								, @intLastInventoryTransactionId
+							))
+						)
+					-- Otherwise, get the last cost 
+					ELSE 
+						COALESCE(EffectivePricing.dblCost, t.dblCost)
+				END
+			)
 	, intDecimalPlaces = iUOM.intDecimalPlaces
 	, ItemUOM.ysnAllowPurchase
 	, ItemUOM.ysnAllowSale
