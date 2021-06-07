@@ -96,7 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 :r .\SM\2110_CreateIDPGridLayout.sql
-
+:r .\SM\2110_UpdateAuditLogs.sql
 
 
 -- Canned Report
