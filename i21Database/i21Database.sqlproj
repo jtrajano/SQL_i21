@@ -8958,6 +8958,7 @@
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
     <Build Include="dbo\Views\vyuARTaxDetailExemptReport.sql" />
+    <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
