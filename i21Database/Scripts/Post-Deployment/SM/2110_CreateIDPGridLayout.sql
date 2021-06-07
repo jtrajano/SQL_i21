@@ -12,8 +12,9 @@ Create TABLE #TempIDPEntity
 )
 
 INSERT INTO #TempIDPEntity
-SELECT DISTINCT entity.intEntityId from tblSMUserSecurity entity INNER JOIN tblSMGridLayout layout on entity.intEntityId = layout.intUserId
-WHERE layout.strGridLayoutName != 'IDP' and entity.ysnDisabled <> 1
+SELECT DISTINCT entity.intEntityId from tblSMUserSecurity entity 
+WHERE intEntityId not in (select intUserId from tblSMGridLayout where strGridLayoutName = 'IDP') 
+and entity.ysnDisabled <> 1
 
 
 DECLARE @intEntityId int
