@@ -60,6 +60,8 @@ BEGIN TRY
 		RETURN
 	END
 
+	EXEC uspIPValidateERPContractFeed
+
 	DELETE
 	FROM @tblCTContractFeed
 
@@ -350,7 +352,7 @@ BEGIN TRY
 				SELECT @strDetailXML = '<line id="' + LTRIM(@intContractFeedId) + '" parentId="' + ltrim(@intContractFeedId) + '">' + 
 					'<TrxSequenceNo>' + LTRIM(@intContractFeedId) + '</TrxSequenceNo>' + 
 					'<ActionId>' + LTRIM(@intActionId) + '</ActionId>' + 
-					'<Status>' + LTRIM(CD.intContractStatusId) + '</Status>' + 
+					'<Status>' + CASE WHEN @intActionId = 3 THEN LTRIM(3) ELSE LTRIM(CD.intContractStatusId) END + '</Status>' + 
 					'<SequenceNo>' + LTRIM(CF.intContractSeq) + '</SequenceNo>' + 
 					'<StartDate>' + ISNULL(CONVERT(VARCHAR, CF.dtmStartDate, 112), '') + '</StartDate>' + 
 					'<EndDate>' + ISNULL(CONVERT(VARCHAR, CF.dtmEndDate, 112), '') + '</EndDate>' + 
