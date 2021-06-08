@@ -235,6 +235,7 @@ BEGIN TRY
 								END
 							)
 						,strMessage = @StatusText
+						,strFeedStatus = 'Ack Rcvd'
 					WHERE intContractFeedId = @TrxSequenceNo
 				END
 				ELSE IF @MessageTypeId = 3 -- Goods Receipt
