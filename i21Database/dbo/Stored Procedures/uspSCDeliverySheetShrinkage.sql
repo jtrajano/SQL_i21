@@ -144,14 +144,15 @@ begin
 		
 			from tblSCDeliverySheetShrinkReceiptDistribution Shrink
 				join tblSCDeliverySheet DeliverySheet
-					on Shrink.intDeliverySheetId = DeliverySheet.intDeliverySheetId
-				join tblGRCustomerStorage CustomerStorage
-					on CustomerStorage.intDeliverySheetId = DeliverySheet.intDeliverySheetId
-						and CustomerStorage.ysnTransferStorage = 0
+					on Shrink.intDeliverySheetId = DeliverySheet.intDeliverySheetId				
 				join tblICInventoryReceipt Receipt
 					on Receipt.intInventoryReceiptId = Shrink.intInventoryReceiptId
 				join tblICInventoryReceiptItem ReceiptItem
 					on ReceiptItem.intInventoryReceiptItemId = Shrink.intInventoryReceiptItemId
+				join tblGRCustomerStorage CustomerStorage
+					on CustomerStorage.intDeliverySheetId = DeliverySheet.intDeliverySheetId
+						and CustomerStorage.ysnTransferStorage = 0
+						and Receipt.intEntityVendorId = CustomerStorage.intEntityId
 
 			OUTER APPLY (
 				SELECT [intAccountId] = dbo.fnGetItemGLAccount(DeliverySheet.intItemId, DeliverySheet.intCompanyLocationId, 'AP Clearing')
