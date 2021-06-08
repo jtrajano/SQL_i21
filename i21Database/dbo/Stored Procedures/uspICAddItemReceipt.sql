@@ -932,6 +932,7 @@ BEGIN
 				,intLoadShipmentId
 				,intLoadShipmentDetailId
 				,ysnAddPayable
+				,strImportDescription
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -1030,6 +1031,7 @@ BEGIN
 				,RawData.intLoadShipmentId
 				,RawData.intLoadShipmentDetailId
 				,ysnAddPayable					= RawData.ysnAddPayable
+				,strImportDescription			= RawData.strImportDescription
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
