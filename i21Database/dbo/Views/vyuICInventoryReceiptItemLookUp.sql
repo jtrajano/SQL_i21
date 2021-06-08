@@ -4,7 +4,13 @@ AS
 SELECT	ReceiptItem.intInventoryReceiptId
 		, ReceiptItem.intInventoryReceiptItemId
 		, Item.strItemNo
-		, strItemDescription = Item.strDescription
+		, strItemDescription = 
+			CASE 
+				WHEN Item.strDescription = 'Item Not Found' THEN 
+					ReceiptItem.strImportDescription
+				ELSE 
+					Item.strDescription
+			END 
 		, Item.strLotTracking
 		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
 		, intItemUOMId = ItemUnitMeasure.intUnitMeasureId
