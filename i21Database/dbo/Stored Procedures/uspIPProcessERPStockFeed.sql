@@ -31,9 +31,15 @@ BEGIN TRY
 		,@intNetWeightUnitMeasureId INT
 		,@intNetWeightItemUOMId INT
 		,@intStockItemUOMId INT
+		,@intQtyItemUOMId INT
+		,@intOriginId INT
 		,@intItemLocationId INT
 		,@intBatchId INT
 		,@intInventoryAdjustmentId INT
+		,@dblQty NUMERIC(38, 20)
+		,@dblUnitQty NUMERIC(38, 20)
+		,@dblOrgQty NUMERIC(38, 20)
+		,@dblAdjustByQuantity NUMERIC(38, 20)
 	DECLARE @tblLotTable TABLE (
 		intLotRecordId INT IDENTITY(1, 1)
 		,intItemId INT
@@ -41,8 +47,6 @@ BEGIN TRY
 		,intSubLocationId INT
 		,intStorageLocationId INT
 		)
-	DECLARE @intMinRecordLotId INT
-		,@ysnResetLotQtyOnce BIT = 1
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -76,63 +80,6 @@ BEGIN TRY
 	WHILE (@intStageLotId IS NOT NULL)
 	BEGIN
 		BEGIN TRY
-			-- Resetting all the available lot qty to 0
-			IF @ysnResetLotQtyOnce = 1
-			BEGIN
-				SELECT @ysnResetLotQtyOnce = 0
-
-				DELETE
-				FROM @tblLotTable
-
-				INSERT INTO @tblLotTable
-				SELECT DISTINCT intItemId
-					,intLocationId
-					,intSubLocationId
-					,intStorageLocationId
-				FROM tblICLot WITH (NOLOCK)
-				WHERE dblQty > 0
-					AND intSubLocationId IS NOT NULL
-					AND intStorageLocationId IS NOT NULL
-
-				SELECT @intMinRecordLotId = MIN(intLotRecordId)
-				FROM @tblLotTable
-
-				BEGIN TRAN
-
-				WHILE (ISNULL(@intMinRecordLotId, 0) > 0)
-				BEGIN
-					SELECT @intItemId = NULL
-						,@intCompanyLocationId = NULL
-						,@intSubLocationId = NULL
-						,@intStorageLocationId = NULL
-
-					SELECT @intItemId = intItemId
-						,@intCompanyLocationId = intLocationId
-						,@intSubLocationId = intSubLocationId
-						,@intStorageLocationId = intStorageLocationId
-					FROM @tblLotTable
-					WHERE intLotRecordId = @intMinRecordLotId
-
-					EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
-						,@intItemId = @intItemId
-						,@strLotNumber = 'FIFO'
-						,@intLocationId = @intCompanyLocationId
-						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
-						,@intItemUOMId = NULL
-						,@dblNewQty = 0
-						,@dblCost = NULL
-						,@intEntityUserId = @intUserId
-						,@intSourceId = 1
-
-					SELECT @intMinRecordLotId = MIN(intLotRecordId)
-					FROM @tblLotTable
-					WHERE intLotRecordId > @intMinRecordLotId
-				END
-
-				COMMIT TRAN
-			END
-
 			SELECT @intTrxSequenceNo = NULL
 				,@strCompanyLocation = NULL
 				,@dtmCreatedDate = NULL
@@ -153,9 +100,15 @@ BEGIN TRY
 				,@intNetWeightUnitMeasureId = NULL
 				,@intNetWeightItemUOMId = NULL
 				,@intStockItemUOMId = NULL
+				,@intQtyItemUOMId = NULL
+				,@intOriginId = NULL
 				,@intItemLocationId = NULL
 				,@intBatchId = NULL
 				,@intInventoryAdjustmentId = NULL
+				,@dblQty = NULL
+				,@dblUnitQty = NULL
+				,@dblOrgQty = NULL
+				,@dblAdjustByQuantity = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -199,6 +152,7 @@ BEGIN TRY
 			END
 
 			SELECT @intItemId = t.intItemId
+				,@intOriginId = t.intOriginId
 			FROM tblICItem t WITH (NOLOCK)
 			WHERE t.strItemNo = @strItemNo
 
@@ -297,6 +251,9 @@ BEGIN TRY
 			END
 
 			SELECT @intLotId = L.intLotId
+				,@dblOrgQty = L.dblQty
+				,@dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+				,@intQtyItemUOMId = L.intItemUOMId
 			FROM tblICLot L WITH (NOLOCK)
 			WHERE L.strLotNumber = @strLotNumber
 				AND L.intItemId = @intItemId
@@ -308,6 +265,15 @@ BEGIN TRY
 			-- Lot Create / Update
 			IF ISNULL(@intLotId, 0) = 0
 			BEGIN
+				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
+					,@intQtyItemUOMId = L.intItemUOMId
+				FROM tblICLot L WITH (NOLOCK)
+				WHERE L.strLotNumber = @strLotNumber
+					AND L.intItemId = @intItemId
+					AND L.intSubLocationId = @intSubLocationId
+
+				SELECT @dblUnitQty = @dblNetWeight / @dblQty
+
 				EXEC uspMFGeneratePatternId @intCategoryId = NULL
 					,@intItemId = NULL
 					,@intManufacturingId = NULL
@@ -328,9 +294,9 @@ BEGIN TRY
 					,@intStorageLocationId
 					,@dblNetWeight
 					,@intNetWeightItemUOMId
-					,NULL
-					,NULL
-					,NULL
+					,@dblUnitQty
+					,@dblQty
+					,@intQtyItemUOMId
 					,@strLotNumber
 					,@strLotNumber
 					,@intBatchId
@@ -349,36 +315,29 @@ BEGIN TRY
 					,1
 					,NULL
 					,NULL
-					,NULL
+					,@intOriginId
 			END
 			ELSE
 			BEGIN
-				--EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
-				--,@intItemId = @intItemId
-				--,@strLotNumber = 'FIFO'
-				--,@intLocationId = @intCompanyLocationId
-				--,@intSubLocationId = @intSubLocationId
-				--,@intStorageLocationId = @intStorageLocationId
-				--,@intItemUOMId = @intNetWeightItemUOMId
-				--,@dblNewQty = @dblNetWeight
-				--,@dblCost = NULL
-				--,@intEntityUserId = @intUserId
-				--,@intSourceId = 1
-				
-				EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
-					,@dtmDate = NULL
-					,@intLocationId = @intCompanyLocationId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = @strLotNumber
-					,@dblAdjustByQuantity = @dblNetWeight
-					,@dblNewUnitCost = NULL
-					,@intItemUOMId = @intNetWeightItemUOMId
-					,@intSourceId = 1
-					,@intSourceTransactionTypeId = 8
-					,@intEntityUserSecurityId = @intUserId
-					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
-					,@strDescription = 'Adjusted from external system'
+				IF @dblOrgQty <> @dblQty
+				BEGIN
+					SELECT @dblAdjustByQuantity = @dblQty - @dblOrgQty
+
+					EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
+						,@dtmDate = NULL
+						,@intLocationId = @intCompanyLocationId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@strLotNumber = @strLotNumber
+						,@dblAdjustByQuantity = @dblAdjustByQuantity
+						,@dblNewUnitCost = NULL
+						,@intItemUOMId = @intQtyItemUOMId
+						,@intSourceId = 1
+						,@intSourceTransactionTypeId = 8
+						,@intEntityUserSecurityId = @intUserId
+						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+						,@strDescription = 'Adjusted from external system'
+				END
 			END
 
 			INSERT INTO tblIPInitialAck (
