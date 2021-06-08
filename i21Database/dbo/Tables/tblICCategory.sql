@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intCategoryId] INT NOT NULL IDENTITY , 
 		[strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strDescription] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL, 
 		[strInventoryType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strInventoryItemType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intLineOfBusinessId] INT NULL, 
