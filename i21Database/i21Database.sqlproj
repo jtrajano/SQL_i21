@@ -9391,6 +9391,7 @@
     <Build Include="dbo\Tables\tblSMIDPProcessResult.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStockFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStockFeed.sql" />
+    <None Include="Scripts\Post-Deployment\DropEncryptionCertificateAndSymmetricKey.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
