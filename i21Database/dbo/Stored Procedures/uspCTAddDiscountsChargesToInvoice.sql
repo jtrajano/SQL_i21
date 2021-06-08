@@ -226,8 +226,8 @@ begin try
 				,@ItemRecipeQty							=	@ItemRecipeQty
 				,@ItemSalesOrderDetailId				=	@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber					=	@ItemSalesOrderNumber
-				,@ItemContractHeaderId					=	@ItemContractHeaderId
-				,@ItemContractDetailId					=	@ItemContractDetailId
+				,@ContractHeaderId						=	@ItemContractHeaderId
+				,@ContractDetailId						=	@ItemContractDetailId
 				,@ItemShipmentId						=	@ItemShipmentId
 				,@ItemWeightUOMId                       =	@ItemWeightUOMId
 				,@ItemWeight                            =	@ItemWeight
