@@ -27,8 +27,8 @@ SELECT
   WO.dtmEndTime,
   WO.strSeason,
   WO.strWindDirection,
-  CONCAT(ISNULL(CAST(WO.dblWindSpeed AS INT),''),' ',WO.strWindSpeedUOM) AS strWindSpeed,
-  CONCAT(ISNULL(CAST(WO.dblTemperature AS INT),''),' ', WO.strTemperatureUOM) AS strTemperature,
+  CONVERT(NVARCHAR(255),ISNULL(CAST(WO.dblWindSpeed AS INT),0)) + (' ') + ISNULL(WO.strWindSpeedUOM,'') AS strWindSpeed,
+  CONVERT(NVARCHAR(255),ISNULL(CAST(WO.dblTemperature AS INT),0)) + (' ') + ISNULL(WO.strTemperatureUOM,'') AS strTemperature,
 
 
   --details
