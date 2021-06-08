@@ -318,8 +318,9 @@ FROM tblICImportStagingItem s
 		) x WHERE LOWER(x.strLotTracking) = RTRIM(LTRIM(LOWER(ISNULL(s.strLotTracking, 'No'))))
 	) lotTrackTypes
 	LEFT OUTER JOIN tblICManufacturer m ON LOWER(m.strManufacturer) = LTRIM(RTRIM(LOWER(s.strManufacturer)))
-	LEFT OUTER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
-		AND c.strInventoryType = invTypes.strType
+	LEFT OUTER JOIN tblICCategory c 
+		ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
+		--AND c.strInventoryType = invTypes.strType
 	LEFT OUTER JOIN tblICCommodity cm ON LOWER(cm.strCommodityCode) = LTRIM(RTRIM(LOWER(s.strCommodity)))
 	LEFT OUTER JOIN tblICBrand b ON LOWER(b.strBrandCode) = LTRIM(RTRIM(LOWER(s.strBrand)))
 	LEFT OUTER JOIN tblPATPatronageCategory p ON LOWER(p.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strPatronageCategory)))
@@ -333,7 +334,7 @@ FROM tblICImportStagingItem s
 	LEFT JOIN #tmp_commodityChange v3 ON v3.strItemNo = s.strItemNo
 WHERE 
 	s.strImportIdentifier = @strIdentifier
-	AND (LTRIM(RTRIM(LOWER(invTypes.strType))) = LTRIM(RTRIM(LOWER(c.strInventoryType))) OR c.strInventoryType IS NULL)
+	--AND (LTRIM(RTRIM(LOWER(invTypes.strType))) = LTRIM(RTRIM(LOWER(c.strInventoryType))) OR c.strInventoryType IS NULL)
 	AND (
 		v1.strItemNo IS NULL 
 		AND v2.strItemNo IS NULL 
@@ -705,24 +706,24 @@ BEGIN
 		, strType
 		, intConcurrencyId
 	)
-	SELECT 
-		@strIdentifier
-		, 1
-		, 'Category'
-		, 'Import Failed.'
-		, ISNULL(c.strCategoryCode, '')
-		, 'Invalid category type "' + ISNULL(c.strInventoryType, '') + '" for item "' + ISNULL(s.strItemNo, '') + '"'
-		, 'Failed'
-		, 'Error'
-		, 1
-	FROM 
-		tblICImportStagingItem s INNER JOIN tblICCategory c 
-			ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
-	WHERE 
-		s.strImportIdentifier = @strIdentifier
-		AND LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory')))) <> LTRIM(RTRIM(LOWER(c.strInventoryType)))
+	--SELECT 
+	--	@strIdentifier
+	--	, 1
+	--	, 'Category'
+	--	, 'Import Failed.'
+	--	, ISNULL(c.strCategoryCode, '')
+	--	, 'Invalid category type "' + ISNULL(c.strInventoryType, '') + '" for item "' + ISNULL(s.strItemNo, '') + '"'
+	--	, 'Failed'
+	--	, 'Error'
+	--	, 1
+	--FROM 
+	--	tblICImportStagingItem s INNER JOIN tblICCategory c 
+	--		ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
+	--WHERE 
+	--	s.strImportIdentifier = @strIdentifier
+	--	AND LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory')))) <> LTRIM(RTRIM(LOWER(c.strInventoryType)))
 
-	UNION ALL 
+	--UNION ALL 
 	SELECT 
 		@strIdentifier
 		, 1
