@@ -982,7 +982,7 @@ BEGIN
 			,[intTransactionTypeId]				= 3
 			,[strPaidDescription]				= 'Generated from Transfer Storage'
 			,[strType]							= 'From Transfer'
-			,[intInventoryReceiptId]			= SourceHistory.intInventoryReceiptId
+			,[intInventoryReceiptId]			= case when FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1 then SourceHistory.intInventoryReceiptId else null end
 			,[intTransferStorageReferenceId]	= SR.intTransferStorageReferenceId
       		,[strTransferTicket] = TS.strTransferStorageTicket
 		FROM tblGRTransferStorageReference SR
@@ -993,6 +993,12 @@ BEGIN
 		INNER JOIN tblGRCustomerStorage ToStorage
 			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
 				AND FromStorage.intTicketId IS NOT NULL --SCALE TICKET ONLY
+		
+		INNER JOIN tblGRStorageType FromType
+			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+		INNER JOIN tblGRStorageType ToType
+			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+
 		INNER JOIN tblGRTransferStorageSplit TSS
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblGRStorageHistory SourceHistory
