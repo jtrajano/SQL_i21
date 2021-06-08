@@ -75,6 +75,10 @@ GO
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateAttachmentFromFile'))
        DROP PROCEDURE uspSMCreateAttachmentFromFile;
 GO
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSPAuditLogs'))
+       DROP PROCEDURE uspSPAuditLogs;
+GO
+
 
 
 PRINT 'End SM Clean up Objects - Drop obsolete objects'
