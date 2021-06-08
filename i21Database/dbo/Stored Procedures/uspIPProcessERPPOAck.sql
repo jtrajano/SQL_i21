@@ -202,6 +202,7 @@ BEGIN TRY
 						,strERPItemNumber = @ERPPOlineNo
 					WHERE intContractDetailId = @intContractDetailId
 						AND intStatusId IS NULL
+						AND strRowState <> 'Added'
 
 					UPDATE tblCTContractDetail
 					SET strERPPONumber = @ERPPONumber
