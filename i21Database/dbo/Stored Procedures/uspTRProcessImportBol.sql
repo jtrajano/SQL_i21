@@ -56,7 +56,7 @@ BEGIN
 			
 			SET @intLoadHeaderId = @@identity
 
-			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId
+			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId, strStatus = 'Success'
 			WHERE intImportLoadId = @intImportLoadId 
 			AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)
 			AND intCarrierId = @intCarrierId 

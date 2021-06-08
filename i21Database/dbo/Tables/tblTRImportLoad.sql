@@ -6,7 +6,8 @@
 	[intUserId] INT NOT NULL,
 	[dtmImportDate] DATETIME NOT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
-    [strSource] NVARCHAR(50) NULL,
+    [strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strIntegrationLogId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     CONSTRAINT [PK_tblTRImportLoad] PRIMARY KEY ([intImportLoadId]),
 	CONSTRAINT [FK_tblTRImportLoad_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )
