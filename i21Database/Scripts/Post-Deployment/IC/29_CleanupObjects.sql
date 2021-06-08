@@ -13,6 +13,12 @@ BEGIN
 END
 GO
 
+IF object_id('fnGetItemCostingOnUnpostCustodyErrors ', 'IF') IS NOT NULL
+BEGIN
+    DROP FUNCTION [dbo].fnGetItemCostingOnUnpostCustodyErrors
+END
+GO
+
 
 IF OBJECT_ID('uspICRepostBillCostAdjustment', 'P') IS NOT NULL AND OBJECT_ID('uspAPRepostBillCostAdjustment', 'P') IS NULL
 BEGIN
