@@ -1,0 +1,164 @@
+﻿CREATE PROCEDURE [dbo].[uspTRProcessImportBolImage]
+	@guidImportIdentifier UNIQUEIDENTIFIER,
+    @intUserId INT,
+	@strFilePath NVARCHAR(1000),
+	@return INT OUTPUT
+AS
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
+BEGIN
+
+	DECLARE @ErrorMessage NVARCHAR(4000)
+	DECLARE @ErrorSeverity INT
+	DECLARE @ErrorState INT
+
+	BEGIN TRY
+
+		DECLARE @intImportAttachmentId INT,
+			@intImportAttachmentDetailId INT = NULL,
+			@strSupplier NVARCHAR(100) = NULL,
+			@strBillOfLading NVARCHAR(100) = NULL,
+			@dtmLoadDateTime DATETIME = NULL,
+		    @ysnValid BIT = NULL,
+			@strMessage NVARCHAR(MAX) = NULL,
+			@strSource NVARCHAR(20) = NULL,
+			@strFileName NVARCHAR(300) = NULL,
+			@strFileExtension NVARCHAR(50) = NULL
+	
+		BEGIN TRANSACTION
+
+		DECLARE @CursorTran AS CURSOR
+		SET @CursorTran = CURSOR FOR
+		SELECT D.intImportAttachmentDetailId
+			, D.strSupplier
+			, D.strBillOfLading
+			, D.dtmLoadDateTime
+			, D.ysnValid
+			, D.strMessage
+			, L.strSource
+			, D.strFileName
+			, D.strFileExtension
+		FROM tblTRImportAttachment L 
+		INNER JOIN tblTRImportAttachmentDetail D ON D.intImportAttachmentId = L.intImportAttachmentId
+		WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1
+
+		OPEN @CursorTran
+		FETCH NEXT FROM @CursorTran INTO @intImportAttachmentDetailId, @strSupplier, @strBillOfLading, @dtmLoadDateTime, @ysnValid, @strMessage, @strSource, @strFileName, @strFileExtension
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+
+			-- SUPLLIER / VENDOR
+            DECLARE @intVendorId INT = NULL,
+				@intSupplyPointId INT = NULL,
+				@intVendorCompanyLocationId INT = NULL
+			
+			SELECT @intVendorId = CRB.intSupplierId, @intSupplyPointId = CRB.intSupplyPointId, @intVendorCompanyLocationId = CRB.intCompanyLocationId
+			FROM tblTRCrossReferenceBol CRB 
+			WHERE CRB.strType = 'Supplier' AND CRB.strImportValue = @strSupplier
+			
+			IF (@intVendorId IS NULL)
+			BEGIN
+				IF (@intVendorCompanyLocationId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supplier')
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportAttachmentDetail SET intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId
+				END
+			END
+			ELSE
+			BEGIN
+				IF(@intSupplyPointId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Supply Point')
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportAttachmentDetail SET intVendorId = @intVendorId, intSupplyPointId = @intSupplyPointId, intVendorCompanyLocationId = @intVendorCompanyLocationId WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId
+				END
+			END
+
+			IF(ISNULL(@strMessage, '') != '')
+			BEGIN
+				UPDATE tblTRImportAttachmentDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+			END	
+
+			IF(@intVendorId IS NOT NULL AND @intSupplyPointId IS NOT NULL AND @intVendorCompanyLocationId IS NOT NULL AND ISNULL(@strMessage, '') = '')
+			BEGIN
+
+				DECLARE @intLoadHeaderId INT = NULL,
+					@intAttachmentId INT = NULL,
+					@attachmentErrorMessage NVARCHAR(MAX) = NULL,
+					@strTransactionNumber NVARCHAR(100) = NULL,
+					@intTransactionId INT = NULL
+
+				-- GET TRANSPORT LOAD THAT MATCHED THE IMAGE
+				SELECT TOP 1 @intLoadHeaderId = L.intLoadHeaderId, @strTransactionNumber = L.strTransaction
+				FROM tblTRLoadHeader L INNER JOIN tblTRLoadReceipt R 
+					ON R.intLoadHeaderId = L.intLoadHeaderId
+				WHERE L.dtmLoadDateTime = @dtmLoadDateTime 
+				AND R.intTerminalId = @intVendorId 
+				AND R.intSupplyPointId = @intSupplyPointId 
+				AND R.intCompanyLocationId = @intVendorCompanyLocationId
+				AND R.strBillOfLading = @strBillOfLading
+
+				IF(@intLoadHeaderId IS NOT NULL)
+				BEGIN
+					
+					SELECT @intTransactionId = intTransactionId FROM tblSMTransaction a
+					INNER JOIN tblSMScreen b ON a.intScreenId = b.intScreenId
+					WHERE intRecordId = @intLoadHeaderId
+						AND b.strNamespace = 'Transports.view.TransportLoads'
+
+					EXEC [uspSMCreateAttachmentFromFile]   
+						@transactionId = @intTransactionId												-- the intTransactionId
+						,@fileName = @strFileName														-- file name
+						,@fileExtension = @strFileExtension                                             -- extension
+						,@filePath = @strFilePath														-- path
+						,@screenNamespace = 'Transports.view.TransportLoads'                            -- screen type or namespace
+						,@useDocumentWatcher = 0                                                        -- flag if the file was uploaded using document wacther
+						,@throwError = 1
+						,@attachmentId = @intAttachmentId OUTPUT
+						,@error = @attachmentErrorMessage OUTPUT
+
+					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, strMessage = @strTransactionNumber WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportAttachmentDetail SET strMessage = 'Does not matched to any existing Transport Load' WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+				END
+
+			END
+
+			FETCH NEXT FROM @CursorTran INTO @intImportAttachmentDetailId, @strSupplier, @strBillOfLading, @dtmLoadDateTime, @ysnValid, @strMessage, @strSource, @strFileName, @strFileExtension
+		END
+
+		COMMIT TRANSACTION
+
+		SELECT @return = intImportAttachmentId FROM tblTRImportAttachment WHERE guidImportIdentifier = @guidImportIdentifier
+
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRANSACTION
+		SELECT 
+			@ErrorMessage = ERROR_MESSAGE(),
+			@ErrorSeverity = ERROR_SEVERITY(),
+			@ErrorState = ERROR_STATE();
+
+		-- Use RAISERROR inside the CATCH block to return error
+		-- information about the original error that caused
+		-- execution to jump to the CATCH block.
+		RAISERROR (
+			@ErrorMessage, -- Message text.
+			@ErrorSeverity, -- Severity.
+			@ErrorState -- State.
+		)
+	END CATCH
+
+END
