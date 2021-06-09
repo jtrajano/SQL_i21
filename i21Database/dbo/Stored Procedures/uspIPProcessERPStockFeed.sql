@@ -272,6 +272,12 @@ BEGIN TRY
 					AND L.intItemId = @intItemId
 					AND L.intSubLocationId = @intSubLocationId
 
+				IF @dblQty IS NULL
+				BEGIN
+					SELECT @dblQty = @dblNetWeight
+						,@intQtyItemUOMId = @intNetWeightItemUOMId
+				END
+				
 				SELECT @dblUnitQty = @dblNetWeight / @dblQty
 
 				EXEC uspMFGeneratePatternId @intCategoryId = NULL
@@ -310,7 +316,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,NULL
+					,0
 					,'Created from external system'
 					,1
 					,NULL
