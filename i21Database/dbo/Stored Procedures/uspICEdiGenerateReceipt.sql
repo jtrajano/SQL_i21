@@ -504,7 +504,7 @@ FROM
 	tblICImportLogDetail 
 WHERE 
 	intImportLogId = @LogId 
-	AND strType IN ('Error', 'Warning') 
+	AND strType IN ('Error') 
 
 DECLARE @WarningCount AS INT = 0 
 SELECT 
@@ -523,21 +523,34 @@ SELECT @TotalRowsImported = COUNT(*) FROM @ReceiptStagingTable
 DECLARE @ElapsedInMs INT = DATEDIFF(MILLISECOND, @Start, DATEADD(SECOND, 3, GETDATE())) -- Add 3 seconds for importing to staging table
 DECLARE @ElapsedInSec FLOAT = CAST(@ElapsedInMs / 1000.00 AS FLOAT)
 
-IF @ErrorCount > 0
+IF @ErrorCount > 0 OR @WarningCount > 0 
 BEGIN
 	UPDATE tblICImportLog SET 
-		strDescription = 'Import finished with ' + CAST(@ErrorCount AS NVARCHAR(50))+ ' error(s).',
-		intTotalErrors = @ErrorCount,
-		intTotalRows = @TotalRows,
-		intTotalWarnings = @WarningCount,
-		intRowsImported = @TotalRowsImported,
-		dblTimeSpentInSeconds = @ElapsedInSec,
-		intRowsUpdated = 0 --CASE WHEN (@TotalRows - @ErrorCount) < 0 THEN 0 ELSE @TotalRows - @ErrorCount END
+		strDescription = 
+			dbo.fnICFormatErrorMessage (
+				'Import finished with %i error(s) and %i warning(s).'
+				,@ErrorCount 
+				,@WarningCount 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+			) 	
+		,intTotalErrors = @ErrorCount
+		,intTotalRows = @TotalRows
+		,intTotalWarnings = @WarningCount
+		,intRowsImported = @TotalRowsImported
+		,dblTimeSpentInSeconds = @ElapsedInSec
+		,intRowsUpdated = 0 
 	WHERE 
 		intImportLogId = @LogId
 END
 
-IF(@TotalRows <= 0 AND @ErrorCount <= 0)
+IF(@TotalRows = 0 AND @ErrorCount = 0 AND @WarningCount = 0)
 BEGIN
 	UPDATE tblICImportLog 
 	SET 
@@ -547,13 +560,13 @@ BEGIN
 END
 ELSE
 BEGIN
-	IF @ErrorCount <= 0
+	IF @ErrorCount = 0 AND @WarningCount = 0 
 	BEGIN
 		UPDATE tblICImportLog SET 
 			strDescription = 'Import Receipts successful.',
 			intTotalErrors = @ErrorCount,
 			intTotalRows = @TotalRows,
-			intTotalWarnings = 0,
+			intTotalWarnings = @WarningCount,
 			intRowsImported = @TotalRowsImported,
 			dblTimeSpentInSeconds = @ElapsedInSec,
 			intRowsUpdated = 0 --CASE WHEN (@TotalRows - @ErrorCount) < 0 THEN 0 ELSE @TotalRows - @ErrorCount END
