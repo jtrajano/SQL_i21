@@ -230,7 +230,51 @@ BEGIN TRY
 	BEGIN
 		SELECT TOP 1 @intContractHeaderId = intContractHeaderId
 			, @intContractDetailId = intContractDetailId
-		FROM @contractDetail
+		FROM @contractDetail;
+
+		WITH CTE AS (
+			SELECT intRowNo = ROW_NUMBER() OVER (PARTITION BY intPricingTypeId ORDER BY dtmTransactionDate DESC)
+				, strBatchId = @strBatchId
+				, dtmTransactionDate
+				, strTransactionType = 'Contract Balance'
+				, strTransactionReference = strTransactionType
+				, intTransactionReferenceId = intContractHeaderId
+				, intTransactionReferenceDetailId = intContractDetailId
+				, strTransactionReferenceNo = strContractNumber
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber		
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId = NULL
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes = ''
+				, intUserId
+				, intActionId = 44
+				, strProcess = @strProcess
+			FROM tblCTContractBalanceLog
+			WHERE intContractDetailId = @intContractDetailId
+				AND intContractHeaderId = @intContractHeaderId
+				AND strTransactionType = 'Contract Balance'
+		)
 
 		INSERT INTO @cbLogCurrent (strBatchId
 			, dtmTransactionDate
@@ -308,14 +352,14 @@ BEGIN TRY
 			, intActionId
 			, strProcess
 		FROM (
-			SELECT intRowNo = ROW_NUMBER() OVER (PARTITION BY intPricingTypeId ORDER BY dtmTransactionDate DESC)
-				, strBatchId = @strBatchId
+			SELECT intRowNo
+				, strBatchId
 				, dtmTransactionDate
-				, strTransactionType = 'Contract Balance'
-				, strTransactionReference = strTransactionType
-				, intTransactionReferenceId = intContractHeaderId
-				, intTransactionReferenceDetailId = intContractDetailId
-				, strTransactionReferenceNo = strContractNumber
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
 				, strContractNumber		
@@ -331,24 +375,21 @@ BEGIN TRY
 				, dblBasis
 				, dblFutures
 				, intQtyUOMId
-				, intQtyCurrencyId = NULL
+				, intQtyCurrencyId
 				, intBasisUOMId
 				, intBasisCurrencyId
 				, intPriceUOMId
 				, dtmStartDate
 				, dtmEndDate
-				, dblQty = SUM(dblQty) OVER (PARTITION BY intPricingTypeId ORDER BY dtmTransactionDate DESC)
+				, dblQty = (SELECT SUM(dblQty) FROM CTE Sub WHERE Main.intPricingTypeId = Sub.intPricingTypeId AND Main.intRowNo <= Sub.intRowNo)
 				, intContractStatusId
 				, intBookId
 				, intSubBookId
-				, strNotes = ''
+				, strNotes
 				, intUserId
-				, intActionId = 44
-				, strProcess = @strProcess
-			FROM tblCTContractBalanceLog
-			WHERE intContractDetailId = @intContractDetailId
-				AND intContractHeaderId = @intContractHeaderId
-				AND strTransactionType = 'Contract Balance'
+				, intActionId
+				, strProcess
+			FROM CTE Main
 		) tbl
 		WHERE intRowNo = 1
 
