@@ -31,7 +31,8 @@ AS
 			CAST(0 AS DECIMAL(18,6)) AS dblTotalCostPerContainer,
 			strAddressName = L.strLocationName,
 			strMainAddress = LL.strLocationName,
-			intEntitySelectedLocationId = L.intEntityLocationId
+			intEntitySelectedLocationId = L.intEntityLocationId,
+			ysnDefaultLocation = isnull(L.ysnDefaultLocation,0)
 	FROM	tblEMEntity				E
 	CROSS APPLY	(SELECT TOP 1 * FROM tblSMCompanyPreference) SC	
 	CROSS APPLY	(SELECT TOP 1 * FROM tblCTCompanyPreference) CTCP
@@ -103,4 +104,4 @@ AS
 				) defaultCurrency
 		WHERE	CY.intCurrencyID = COALESCE(vendorCurrency.intCurrencyID, customerCurrency.intCurrencyID, defaultCurrency.intCurrencyID)
 	) CY 	
-	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId		
+	LEFT JOIN	tblSMCurrency			MY	ON MY.intCurrencyID			=	CY.intMainCurrencyId
