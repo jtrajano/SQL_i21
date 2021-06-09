@@ -2366,7 +2366,7 @@ BEGIN TRY
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
-							where b.intItemType in (2 , 3)
+							where b.intItemType = 2
 					end
 
 				---Adding Freight Charges.
