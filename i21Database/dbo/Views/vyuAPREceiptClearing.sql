@@ -178,6 +178,7 @@ LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
 left join (
 	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId
 		from tblSCDeliverySheetShrinkReceiptDistribution
+            where intInventoryReceiptItemId is not null
 	group by intInventoryReceiptItemId
 
 ) Shrek
@@ -332,6 +333,7 @@ join (
 left join (
 	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId
 		from tblSCDeliverySheetShrinkReceiptDistribution
+            where intInventoryReceiptItemId is not null
 	group by intInventoryReceiptItemId
 
 ) Shrek
@@ -931,6 +933,7 @@ LEFT JOIN
 left join (
 	select distinct intInventoryReceiptItemId, 1 as ysnFlag
 		from tblSCDeliverySheetShrinkReceiptDistribution
+            where intInventoryReceiptItemId is not null
 
 ) Shrek
 	on Shrek.intInventoryReceiptItemId = StorageReceipt.intInventoryReceiptItemId
