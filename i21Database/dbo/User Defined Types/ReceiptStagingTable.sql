@@ -57,6 +57,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[dblUnitRetail] NUMERIC(38, 20) NULL 
 	,[ysnAllowVoucher] BIT NULL
 	,[ysnAddPayable] BIT NULL
+	,[strImportDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
