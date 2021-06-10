@@ -1052,6 +1052,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
 				,[strTransferTicket]
 			)
@@ -1066,6 +1067,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
 				,[strTransferTicket]
 			FROM @StorageHistoryStagingTable
