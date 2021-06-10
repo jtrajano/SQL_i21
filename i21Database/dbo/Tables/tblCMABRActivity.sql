@@ -22,6 +22,7 @@ CREATE TABLE [dbo].[tblCMABRActivity]
     [dtmLastModified] DATETIME NULL,
     [intConcurrencyId] INT NULL,
     [ysnSuccess] BIT NULL,
+    [intImportBankStatementLogId] [int] NULL,
 	CONSTRAINT [FK_tblCMABRActivity] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
     CONSTRAINT [PK_tblCMABRActivity] PRIMARY KEY ([intABRActivityId]), 
 )
