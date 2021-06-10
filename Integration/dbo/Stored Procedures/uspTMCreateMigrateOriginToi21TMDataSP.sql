@@ -79,7 +79,7 @@ BEGIN
 						, vwcus_key
 						, VC.A4GLIdentity
 						, CustomerA4GLIdentity = Z.A4GLIdentity
-						, CustomerA4GLIdentity1 = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate Latin1_General_CI_AS )
+						, CustomerA4GLIdentity1 = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS)
 						, TC.intCustomerID
 						, CustomerID = (SELECT TOP 1 intCustomerID FROM tblTMCustomer WHERE intCustomerNumber = Z.A4GLIdentity)
 					INTO #tmpOriginCustomerWithShipto
@@ -89,9 +89,9 @@ BEGIN
 					INNER JOIN vwcusmst VC 
 						ON VC.A4GLIdentity=TC.intCustomerNumber
 					CROSS APPLY (
-						(SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate Latin1_General_CI_AS )
+						(SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS)
 					)Z
-					WHERE vwcus_bill_to  <> vwcus_key collate Latin1_General_CI_AS 
+					WHERE vwcus_bill_to  <> vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS
 						
 
 					
@@ -117,7 +117,6 @@ BEGIN
 						AND A.CustomerID IS NOT NULL
 
 					---TODO correction of current sitenumber for customer and sitenumber of sites
-
 					INSERT INTO @tmpMigrationResult(
 							strError
 							,strTable
@@ -129,8 +128,8 @@ BEGIN
 						,intRecordId = C.intCustomerID
 					FROM vwcusmst 
 					INNER JOIN tblTMCustomer C ON C.intCustomerNumber = vwcusmst.A4GLIdentity
-					where vwcus_key <> vwcus_bill_to
-                    and vwcus_key in (select vwcus_bill_to from vwcusmst where vwcus_key <> vwcus_bill_to)
+					WHERE vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS <> vwcus_bill_to
+                    AND vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS in (select vwcus_bill_to from vwcusmst where vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS  <> vwcus_bill_to)
 
 					IF NOT EXISTS(SELECT TOP 1 1 FROM @tmpMigrationResult WHERE strError = ''Invalid customer bill/ships'')
 					BEGIN
