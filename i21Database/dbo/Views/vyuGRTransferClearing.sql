@@ -199,6 +199,7 @@ from tblGRStorageInventoryReceipt
 left join (
 	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId, 1 as ysnFlag
 		from tblSCDeliverySheetShrinkReceiptDistribution
+            where intInventoryReceiptItemId is not null
 	group by intInventoryReceiptItemId
 
 ) Shrek
@@ -298,6 +299,7 @@ LEFT JOIN
 left join (
 	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId, 1 as ysnFlag
 		from tblSCDeliverySheetShrinkReceiptDistribution
+            where intInventoryReceiptItemId is not null
 	group by intInventoryReceiptItemId
 
 ) Shrek
