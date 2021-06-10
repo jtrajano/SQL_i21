@@ -12,7 +12,7 @@ set nocount on
 
 
 declare @DeliverySheetNumber nvarchar(100)
-declare @DPOwned BIT
+declare @DPOwned BIT = 1
 declare @StorageCost decimal(18, 6)
 declare @dblDSShrink NUMERIC(38, 20)
 declare @dblTotalDSShrink NUMERIC(38, 20)
@@ -21,13 +21,8 @@ DECLARE @APClearing AS APClearing;
 
 
 select @DeliverySheetNumber =  strDeliverySheetNumber 
-		,@dblDSShrink = dblShrink
-		,@DPOwned = ysnDPOwnedType
-	from tblSCDeliverySheet  DeliverySheet
-		join tblGRStorageScheduleRule ScheduleRule
-			on DeliverySheet.intStorageScheduleRuleId = ScheduleRule.intStorageScheduleRuleId
-		join tblGRStorageType StorageType
-			on ScheduleRule.intStorageType = StorageType.intStorageScheduleTypeId
+		,@dblDSShrink = dblShrink		
+	from tblSCDeliverySheet  DeliverySheet		
 	where intDeliverySheetId = @DeliverySheetId
 
 select @StorageCost = isnull(dblBasis, 0) + isnull(dblSettlementPrice, 0)
@@ -68,8 +63,12 @@ begin
 				on Ticket.intDeliverySheetId = Sheet.intDeliverySheetId
 			join tblSCTicketSplit Split
 				on Ticket.intTicketId = Split.intTicketId
+			join tblGRStorageType StorageType
+				on Split.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId
+					and StorageType.ysnDPOwnedType = 1						
 			join tblICInventoryReceiptItem ReceiptItem
 				on ReceiptItem.intSourceId = Ticket.intTicketId
+					and ReceiptItem.intOwnershipType = 1
 			join tblICInventoryReceipt Receipt
 				on ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 					and Receipt.intSourceType = 1

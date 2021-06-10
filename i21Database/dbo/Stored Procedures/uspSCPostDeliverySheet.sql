@@ -327,7 +327,7 @@ BEGIN TRY
 
 
 			
-			if @intInventoryAdjustmentId > 0
+			if @intInventoryAdjustmentId > 0 and @intOwnershipType = 1
 				exec uspSCDeliverySheetShrinkage @DeliverySheetId = @intDeliverySheetId
 														, @InventoryAdjustmentId = @intInventoryAdjustmentId
 														, @intEntityUserSecurityId = @intUserId
