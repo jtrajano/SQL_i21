@@ -79,7 +79,7 @@ BEGIN
 						, vwcus_key
 						, VC.A4GLIdentity
 						, CustomerA4GLIdentity = Z.A4GLIdentity
-						, CustomerA4GLIdentity1 = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate SQL_Latin1_General_CP1_CS_AS )
+						, CustomerA4GLIdentity1 = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate Latin1_General_CI_AS )
 						, TC.intCustomerID
 						, CustomerID = (SELECT TOP 1 intCustomerID FROM tblTMCustomer WHERE intCustomerNumber = Z.A4GLIdentity)
 					INTO #tmpOriginCustomerWithShipto
@@ -89,9 +89,9 @@ BEGIN
 					INNER JOIN vwcusmst VC 
 						ON VC.A4GLIdentity=TC.intCustomerNumber
 					CROSS APPLY (
-						(SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate SQL_Latin1_General_CP1_CS_AS )
+						(SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate Latin1_General_CI_AS )
 					)Z
-					WHERE vwcus_bill_to  <> vwcus_key collate SQL_Latin1_General_CP1_CS_AS 
+					WHERE vwcus_bill_to  <> vwcus_key collate Latin1_General_CI_AS 
 						
 
 					
