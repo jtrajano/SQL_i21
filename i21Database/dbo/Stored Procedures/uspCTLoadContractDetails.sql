@@ -465,6 +465,7 @@ BEGIN TRY
 		, ysnContractAllocated = CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
 		, strFreightBasisUOM = FBUM.strUnitMeasure
 		, strFreightBasisBaseUOM = FBBUM.strUnitMeasure
+		, ysnWithPriceFix = case when isnull(CT.intPriceContractId,0) = 0 then convert(bit,0) else convert(bit,1) end
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
