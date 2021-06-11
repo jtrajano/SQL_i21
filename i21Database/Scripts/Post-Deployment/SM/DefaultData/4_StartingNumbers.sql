@@ -1568,6 +1568,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 161
+			,[strTransactionType]	= N'Bank Clearing Activity'
+			,[strPrefix]			= N'BC-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Clearing Activity' AND strModule = 'Cash Management')
 
 
 
