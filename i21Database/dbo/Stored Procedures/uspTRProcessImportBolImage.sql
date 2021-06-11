@@ -96,10 +96,11 @@ BEGIN
 					@intAttachmentId INT = NULL,
 					@attachmentErrorMessage NVARCHAR(MAX) = NULL,
 					@strTransactionNumber NVARCHAR(100) = NULL,
-					@intTransactionId INT = NULL
+					@intTransactionId INT = NULL,
+					@ysnPosted BIT = NULL
 
 				-- GET TRANSPORT LOAD THAT MATCHED THE IMAGE
-				SELECT TOP 1 @intLoadHeaderId = L.intLoadHeaderId, @strTransactionNumber = L.strTransaction
+				SELECT TOP 1 @intLoadHeaderId = L.intLoadHeaderId, @strTransactionNumber = L.strTransaction, @ysnPosted = L.ysnPosted
 				FROM tblTRLoadHeader L INNER JOIN tblTRLoadReceipt R 
 					ON R.intLoadHeaderId = L.intLoadHeaderId
 				WHERE L.dtmLoadDateTime = @dtmLoadDateTime 
@@ -127,7 +128,55 @@ BEGIN
 						,@attachmentId = @intAttachmentId OUTPUT
 						,@error = @attachmentErrorMessage OUTPUT
 
-					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, strMessage = @strTransactionNumber WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @strTransactionNumber)	
+
+					IF(@ysnPosted = 1)
+					BEGIN
+						DECLARE @intInvoiceId INT = NULL,
+							@intInvoiceTransactionId INT = NULL,
+							@intInvoiceAttachmentId INT = NULL,
+							@strInvoiceNumber NVARCHAR(100) = NULL
+
+						DECLARE @CursorInvoiceTran AS CURSOR
+						SET @CursorInvoiceTran = CURSOR FOR
+							SELECT DISTINCT ID.intInvoiceId, strInvoiceNumber
+							FROM tblTRLoadDistributionHeader DH INNER JOIN tblTRLoadHeader L ON L.intLoadHeaderId = DH.intLoadHeaderId
+							INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceId = DH.intInvoiceId
+							INNER JOIN tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
+							WHERE DH.intLoadHeaderId = @intLoadHeaderId
+							AND ID.strBOLNumberDetail = @strBillOfLading
+
+						OPEN @CursorInvoiceTran
+						FETCH NEXT FROM @CursorInvoiceTran INTO @intInvoiceId, @strInvoiceNumber
+						WHILE @@FETCH_STATUS = 0
+						BEGIN
+
+							SELECT @intInvoiceTransactionId = intTransactionId FROM tblSMTransaction a
+							INNER JOIN tblSMScreen b ON a.intScreenId = b.intScreenId
+							WHERE intRecordId = @intInvoiceId
+								AND b.strNamespace = 'AccountsReceivable.view.Invoice'
+
+							EXEC [uspSMCreateAttachmentFromFile]   
+								@transactionId = @intInvoiceTransactionId										-- the intTransactionId
+								,@fileName = @strFileName														-- file name
+								,@fileExtension = @strFileExtension                                             -- extension
+								,@filePath = @strFilePath														-- path
+								,@screenNamespace = 'AccountsReceivable.Invoice'                                -- screen type or namespace
+								,@useDocumentWatcher = 0                                                        -- flag if the file was uploaded using document wacther
+								,@throwError = 1
+								,@attachmentId = @intAttachmentId OUTPUT
+								,@error = @attachmentErrorMessage OUTPUT
+							
+							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,@strInvoiceNumber)
+
+							FETCH NEXT FROM @CursorInvoiceTran INTO @intInvoiceId, @strInvoiceNumber
+						END
+
+						CLOSE @CursorInvoiceTran  
+						DEALLOCATE @CursorInvoiceTran
+					END
+
+					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
 				END
 				ELSE
 				BEGIN
@@ -138,6 +187,9 @@ BEGIN
 
 			FETCH NEXT FROM @CursorTran INTO @intImportAttachmentDetailId, @strSupplier, @strBillOfLading, @dtmLoadDateTime, @ysnValid, @strMessage, @strSource, @strFileName, @strFileExtension
 		END
+
+		CLOSE @CursorTran  
+		DEALLOCATE @CursorTran
 
 		COMMIT TRANSACTION
 
