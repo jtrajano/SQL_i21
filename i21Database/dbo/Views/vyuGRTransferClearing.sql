@@ -260,21 +260,20 @@ UNION ALL
 /*START ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 SELECT	
 	'3'  collate Latin1_General_CI_AS AS TEST,
-    CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intEntityVendorId ELSE CS_TO.intEntityId END AS intEntityVendorId
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TS.dtmTransferStorageDate END AS dtmDate
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.strReceiptNumber ELSE TS.strTransferStorageTicket END AS strTransactionNumber
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intInventoryReceiptId ELSE TS.intTransferStorageId END AS intInventoryReceiptId
+    receipt.intEntityVendorId AS intEntityVendorId
+    ,receipt.dtmReceiptDate AS dtmDate
+    ,receipt.strReceiptNumber AS strTransactionNumber
+    ,receipt.intInventoryReceiptId AS intInventoryReceiptId
     ,NULL AS intTransferStorageId
     ,NULL AS strTransferStorageTicket
     ,NULL AS intTransferStorageReferenceId
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receiptItem.intInventoryReceiptItemId ELSE TSR.intTransferStorageReferenceId END AS intInventoryReceiptItemId
+    ,receiptItem.intInventoryReceiptItemId
     ,receiptItem.intItemId
     ,receiptItem.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblTransferTotal
     ,0 AS dblTransferQty
-    ,ROUND(
-        ISNULL(CASE WHEN (CS.dblOpenBalance = 0 AND ST_FROM.ysnDPOwnedType = 1) THEN CS_TO.dblOriginalBalance ELSE receiptItem.dblOpenReceive END, 0) 
+    ,ROUND((ISNULL(receiptItem.dblOpenReceive, 0))
         * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
         * (
             CASE 
@@ -289,8 +288,7 @@ SELECT
     +
     receiptItem.dblTax
     AS dblReceiptTotal
-    ,ISNULL(CASE WHEN (CS.dblOpenBalance = 0 AND ST_FROM.ysnDPOwnedType = 1) THEN CS_TO.dblOriginalBalance ELSE receiptItem.dblOpenReceive END, 0)
-    AS dblReceiptQty
+    ,ISNULL(receiptItem.dblOpenReceive, 0) AS dblReceiptQty
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,0
@@ -340,7 +338,7 @@ AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
 AND (
     (ST_TO.ysnDPOwnedType = 0 AND ST_FROM.ysnDPOwnedType = 1) --DP to OS
-	-- OR (ST_TO.ysnDPOwnedType = 1 AND ST_FROM.ysnDPOwnedType = 0) --OS to DP
+	OR (ST_TO.ysnDPOwnedType = 1 AND ST_FROM.ysnDPOwnedType = 1) --DP to DP
 )
 UNION ALL
 --Transfer Storages
@@ -407,8 +405,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
-WHERE (ST_TO.ysnDPOwnedType = 0 AND ST.ysnDPOwnedType = 1) --DP to OS
-		-- OR (ST_TO.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 0) --OS to DP
+WHERE ((ST_TO.ysnDPOwnedType = 0 AND ST.ysnDPOwnedType = 1) --DP to OS
+		OR (ST_TO.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 1)) --DP to DP
         AND APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 UNION ALL
@@ -622,6 +620,158 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 Where Bill.ysnPosted = 1
+AND APClearing.intAccountId IS NOT NULL
+
+-- Voucher for IR (DP)
+UNION ALL
+SELECT DISTINCT '5.97' AS TEST,
+    bill.intEntityVendorId      
+    ,bill.dtmDate AS dtmDate      
+    ,receipt.strReceiptNumber      
+    ,receipt.intInventoryReceiptId      
+    ,bill.intBillId      
+    ,bill.strBillId      
+    ,NULL AS intTransferStorageReferenceId
+    ,billDetail.intInventoryReceiptItemId      
+    ,billDetail.intItemId      
+    ,billDetail.intUnitOfMeasureId AS intItemUOMId  
+    ,unitMeasure.strUnitMeasure AS strUOM  
+    ,ROUND(ISNULL(CAST((billDetail.dblQtyReceived) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1, 2) AS dblTransferTotal  --Orig Calculation	    
+    ,billDetail.dblQtyReceived AS dblTransferQty   
+    ,0 AS dblReceiptChargeTotal
+    ,0 AS dblReceiptChargeQty 
+    ,receipt.intLocationId      
+    ,compLoc.strLocationName      
+    ,0
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
+FROM tblAPBill bill      
+INNER JOIN tblAPBillDetail billDetail      
+    ON bill.intBillId = billDetail.intBillId    
+INNER JOIN tblICInventoryReceiptItem receiptItem
+    ON receiptItem.intInventoryReceiptItemId  = billDetail.intInventoryReceiptItemId
+    AND billDetail.intItemId = receiptItem.intItemId
+INNER JOIN tblICInventoryReceipt receipt
+    ON receipt.intInventoryReceiptId  = receiptItem.intInventoryReceiptId
+INNER JOIN tblSMCompanyLocation compLoc      
+    ON receipt.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN tblGRStorageHistory SH
+    ON SH.intInventoryReceiptId = receipt.intInventoryReceiptId
+INNER JOIN tblGRCustomerStorage CS
+    ON CS.intCustomerStorageId = SH.intCustomerStorageId
+    AND CS.ysnTransferStorage = 0
+    AND CS.intTicketId IS NOT NULL
+INNER JOIN tblGRSettleStorageBillDetail SSBD
+    ON SSBD.intBillId = bill.intBillId
+INNER JOIN tblGRSettleStorage SS
+    ON SS.intSettleStorageId = SSBD.intSettleStorageId
+INNER JOIN tblGRSettleStorageTicket SST
+    ON SST.intSettleStorageId = SS.intSettleStorageId
+    AND CS.intCustomerStorageId = SST.intCustomerStorageId
+LEFT JOIN   
+(  
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+)  
+    ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = receipt.strReceiptNumber
+    AND gl.intTransactionId = receipt.intInventoryReceiptId
+    AND gl.strCode = 'IC'
+) APClearing
+WHERE       
+    billDetail.intInventoryReceiptItemId IS NOT NULL
+AND EXISTS (
+    SELECT TOP 1 1
+    FROM tblGRTransferStorageReference TSR
+    WHERE TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
+)
+-- AND receiptCharge.ysnInventoryCost = 0
+AND bill.ysnPosted = 1
+AND APClearing.intAccountId IS NOT NULL
+
+-- Voucher for Transfer Storage - DP(From IR) to DP
+UNION ALL
+SELECT DISTINCT '5.96' AS TEST,
+    bill.intEntityVendorId      
+    ,bill.dtmDate AS dtmDate      
+    ,TS.strTransferStorageTicket   
+    ,TS.intTransferStorageId  
+    ,bill.intBillId      
+    ,bill.strBillId      
+    ,NULL    
+    ,TSR.intTransferStorageReferenceId
+    ,billDetail.intItemId      
+    ,billDetail.intUnitOfMeasureId AS intItemUOMId  
+    ,unitMeasure.strUnitMeasure AS strUOM  
+    ,ROUND(ISNULL(CAST((billDetail.dblQtyReceived) * (CS_TO.dblBasis + CS_TO.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1, 2) AS dblTransferTotal  --Orig Calculation	    
+    ,billDetail.dblQtyReceived AS dblTransferQty
+    ,0 AS dblReceiptChargeTotal
+    ,0 AS dblReceiptChargeQty 
+    ,receipt.intLocationId      
+    ,compLoc.strLocationName      
+    ,0
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
+FROM tblAPBill bill      
+INNER JOIN tblAPBillDetail billDetail      
+    ON bill.intBillId = billDetail.intBillId    
+INNER JOIN tblICInventoryReceiptItem receiptItem
+    ON receiptItem.intInventoryReceiptItemId  = billDetail.intInventoryReceiptItemId
+    AND billDetail.intItemId = receiptItem.intItemId
+INNER JOIN tblICInventoryReceipt receipt
+    ON receipt.intInventoryReceiptId  = receiptItem.intInventoryReceiptId
+INNER JOIN tblSMCompanyLocation compLoc      
+    ON receipt.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN tblGRStorageHistory SH
+    ON SH.intInventoryReceiptId = receipt.intInventoryReceiptId
+INNER JOIN tblGRCustomerStorage CS_FROM
+    ON CS_FROM.intCustomerStorageId = SH.intCustomerStorageId
+    AND CS_FROM.ysnTransferStorage = 0
+    AND CS_FROM.intTicketId IS NOT NULL
+INNER JOIN tblGRTransferStorageReference TSR
+    ON TSR.intSourceCustomerStorageId = CS_FROM.intCustomerStorageId
+INNER JOIN tblGRTransferStorage TS
+    ON TSR.intTransferStorageId = TS.intTransferStorageId
+INNER JOIN tblGRCustomerStorage CS_TO
+    ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+INNER JOIN tblGRSettleStorageBillDetail SSBD
+    ON SSBD.intBillId = bill.intBillId
+INNER JOIN tblGRSettleStorage SS
+    ON SS.intSettleStorageId = SSBD.intSettleStorageId
+INNER JOIN tblGRSettleStorageTicket SST
+    ON SST.intSettleStorageId = SS.intSettleStorageId
+    AND CS_TO.intCustomerStorageId = SST.intCustomerStorageId
+LEFT JOIN   
+(  
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+)  
+    ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
+OUTER APPLY (
+    SELECT TOP 1 gl.intAccountId, gla.strAccountId
+    FROM tblGLDetail gl
+    INNER JOIN vyuGLAccountDetail gla
+        ON gl.intAccountId = gla.intAccountId
+        AND gla.intAccountCategoryId = 45
+    WHERE gl.strTransactionId = TS.strTransferStorageTicket
+    AND gl.intTransactionId = TSR.intTransferStorageId
+    AND gl.strCode = 'IC'
+) APClearing
+WHERE       
+    billDetail.intInventoryReceiptItemId IS NOT NULL
+-- AND EXISTS (
+--     SELECT TOP 1 1
+--     FROM tblGRTransferStorageReference TSR
+--     WHERE TSR.intSourceCustomerStorageId = CS_FROM.intCustomerStorageId
+-- )
+-- AND receiptCharge.ysnInventoryCost = 0
+AND bill.ysnPosted = 1
 AND APClearing.intAccountId IS NOT NULL
 ----
 

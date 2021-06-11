@@ -163,138 +163,258 @@ AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
 AND transferClr.intInventoryReceiptItemId IS NULL
 AND transferClrDP.intInventoryReceiptItemId IS NULL
--- AND receipt.intSourceType != 7 --NOT STORE
--- UNION ALL
--- SELECT	
---     receipt.intEntityVendorId
---     ,receipt.dtmReceiptDate AS dtmDate
---     ,receipt.strReceiptNumber AS strTransactionNumber
---     ,receipt.intInventoryReceiptId
---     ,NULL AS intBillId
---     ,NULL AS strBillId
---     ,NULL AS intBillDetailId
---     ,receiptItem.intInventoryReceiptItemId
---     ,receiptItem.intItemId
---     ,ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId) AS intItemUOMId
---     ,unitMeasure.strUnitMeasure AS strUOM
---     ,0 AS dblVoucherTotal
---     ,0 AS dblVoucherQty
---     ,ROUND(
---         CASE	
---             WHEN receiptItem.intWeightUOMId IS NULL THEN 
---                 ISNULL(receiptItem.dblOpenReceive, 0) 
---             ELSE 
---                 CASE 
---                     WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
---                         ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
---                     ELSE 
---                         CASE WHEN intSourceType = 2 
---                             THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
---                         ELSE ISNULL(receiptItem.dblNet, 0) 
---                         END
---                 END 
---         END
---         * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
---         * (
---             CASE 
---                 WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
---                     1 / ISNULL(receipt.intSubCurrencyCents, 1) 
---                 ELSE 
---                     1 
---             END 
---         )
---         , 2
---     ) 
---     *
---     (
---         CASE
---         WHEN receipt.strReceiptType = 'Inventory Return'
---         THEN -1
---         ELSE 1
---         END
---     )
---     +
---     receiptItem.dblTax
---     AS dblReceiptTotal
---     ,CASE	
---         WHEN receiptItem.intWeightUOMId IS NULL THEN 
---             ISNULL(receiptItem.dblOpenReceive, 0) 
---         ELSE 
---             CASE 
---                 WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
---                     ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, ISNULL(receiptItem.dblOpenReceive, 0)), 0)
---                 ELSE 
---                     ISNULL(receiptItem.dblNet, 0) 
---             END 
---     END 
---     *
---     (
---         CASE
---         WHEN receipt.strReceiptType = 'Inventory Return'
---         THEN -1
---         ELSE 1
---         END
---     )
---     AS dblReceiptQty
---     ,receipt.intLocationId
---     ,compLoc.strLocationName
---     ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
---     ,APClearing.intAccountId
--- 	,APClearing.strAccountId
--- FROM tblICInventoryReceipt receipt 
--- INNER JOIN tblICInventoryReceiptItem receiptItem
--- 	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
--- INNER JOIN tblSMCompanyLocation compLoc
---     ON receipt.intLocationId = compLoc.intCompanyLocationId
--- LEFT JOIN tblSMFreightTerms ft
---     ON ft.intFreightTermId = receipt.intFreightTermId
--- LEFT JOIN 
--- (
---     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
---         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
--- )
---     ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
--- LEFT JOIN (
--- 	SELECT 
---     --TOP 1
---         ga.strAccountId
---         ,ga.intAccountId
---         ,t.strTransactionId
---         ,t.intTransactionDetailId
---         ,t.intTransactionId
---         ,t.intItemId
--- 	FROM 
--- 		tblICInventoryTransaction t INNER JOIN tblGLDetail gd
--- 			ON t.strTransactionId = gd.strTransactionId
--- 			AND t.strBatchId = gd.strBatchId
--- 			AND t.intInventoryTransactionId = gd.intJournalLineNo
--- 		INNER JOIN tblGLAccount ga
--- 			ON ga.intAccountId = gd.intAccountId
--- 		INNER JOIN vyuGLAccountDetail ad
--- 			ON ga.intAccountId = ad.intAccountId
--- 	WHERE
--- 		--t.strTransactionId = receipt.strReceiptNumber
--- 		--AND t.intTransactionId = receipt.intInventoryReceiptId
--- 		--AND t.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
--- 		--AND t.intItemId = receiptItem.intItemId
--- 		--AND ag.strAccountType = 'Liability'
--- 		--AND t.ysnIsUnposted = 0 
--- 			ad.intAccountCategoryId = 45
--- 		AND t.ysnIsUnposted = 0 
--- ) APClearing
--- 	ON		APClearing.strTransactionId = receipt.strReceiptNumber
--- 		AND APClearing.intTransactionId = receipt.intInventoryReceiptId
--- 		AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
--- 		AND APClearing.intItemId = receiptItem.intItemId
--- WHERE 
---     receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
--- --DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
--- --CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
--- AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
--- AND receipt.strReceiptType != 'Transfer Order'
--- AND receiptItem.intOwnershipType != 2
--- AND receipt.ysnPosted = 1
--- AND receipt.intSourceType = 7 --STORE TYPE
+UNION ALL
+
+
+--Receipt item,
+SELECT	
+	
+	'1.2' as strMark,
+    receipt.intEntityVendorId
+    ,receipt.dtmReceiptDate AS dtmDate
+    ,receipt.strReceiptNumber AS strTransactionNumber
+    ,receipt.intInventoryReceiptId
+    ,NULL AS intBillId
+    ,NULL AS strBillId
+    ,NULL AS intBillDetailId
+    ,receiptItem.intInventoryReceiptItemId
+    ,receiptItem.intItemId
+    ,receiptItem.intUnitMeasureId AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
+    ,0 AS dblVoucherTotal
+    ,0 AS dblVoucherQty
+    ,(ROUND(
+        (
+			CASE	
+				WHEN receiptItem.intWeightUOMId IS NULL THEN 
+					ISNULL(receiptItem.dblOpenReceive, 0) 
+				ELSE 
+					CASE 
+						WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
+							ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
+						ELSE 
+							CASE WHEN intSourceType = 2 
+								THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
+							ELSE ISNULL(receiptItem.dblNet, 0) 
+							END
+					END 
+				END				
+				- isnull(Shrek.dblComputedShrink, 0)			
+				- isnull(StorageTransfer.dblTransactionUnits, 0)
+		)
+        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
+        * (
+            CASE 
+                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
+                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
+                ELSE 
+                    1 
+            END 
+        )
+        , 2
+    ) 
+    +
+    --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
+    ISNULL(clearingTax.dblTax,0))
+    *
+    (
+        CASE
+        WHEN receipt.strReceiptType = 'Inventory Return'
+        THEN -1
+        ELSE 1
+        END
+    )
+    AS dblReceiptTotal
+    ,( 
+		( ISNULL(receiptItem.dblOpenReceive, 0)
+				*
+			(
+				CASE
+					WHEN receipt.strReceiptType = 'Inventory Return'
+						THEN -1
+					ELSE 1
+				END
+			)
+		)
+
+		- isnull(Shrek.dblComputedShrink, 0)
+		
+		- isnull(StorageTransfer.dblTransactionUnits, 0)
+	)		
+		
+	 
+    AS dblReceiptQty
+    ,receipt.intLocationId
+    ,compLoc.strLocationName
+    ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
+FROM tblICInventoryReceipt receipt 
+INNER JOIN tblICInventoryReceiptItem receiptItem
+	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+INNER JOIN tblSMCompanyLocation compLoc
+    ON receipt.intLocationId = compLoc.intCompanyLocationId
+LEFT JOIN tblSMFreightTerms ft
+    ON ft.intFreightTermId = receipt.intFreightTermId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
+LEFT JOIN vyuAPReceiptClearingGL APClearing
+    ON APClearing.strTransactionId = receipt.strReceiptNumber
+        AND APClearing.intItemId = receiptItem.intItemId
+        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+LEFT JOIN (
+    --SINCE WE REVERSE IN GL THOSE TAX DETAIL THAT DOES NOT HAVE VOUCHER
+    --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
+    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
+    --IF NO VOUCHER JUST TAKE THE TAX
+    SELECT intInventoryReceiptItemId, SUM(dblTax) dblTax
+    FROM (
+        SELECT RI.intInventoryReceiptItemId, RIT.dblTax, ROW_NUMBER() OVER(PARTITION BY RI.intInventoryReceiptItemId, RIT.dblTax ORDER BY RI.intInventoryReceiptItemId, RIT.dblTax) intDuplicate
+        FROM tblICInventoryReceiptItem RI
+        INNER JOIN tblICInventoryReceiptItemTax RIT ON RIT.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+        LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
+        LEFT JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId AND BDT.intTaxCodeId = RIT.intTaxCodeId AND BDT.intTaxClassId = RIT.intTaxClassId
+        WHERE 1 = CASE WHEN BD.intBillDetailId IS NULL THEN 1 ELSE (CASE WHEN BDT.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END) END
+    ) tmpTax
+    WHERE intDuplicate = 1
+    GROUP BY intInventoryReceiptItemId
+) clearingTax
+	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+
+--receipts in storage that were transferred
+join (
+		select sum(dblTransactionUnits) dblTransactionUnits
+		 , intInventoryReceiptId
+		 , intInventoryReceiptItemId
+		from tblGRStorageInventoryReceipt 
+			where intTransferStorageReferenceId is not null
+		group by intInventoryReceiptId
+		 , intInventoryReceiptItemId
+	) StorageTransfer
+	--AND transferClr.strMark = '1.1'
+	on StorageTransfer.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+		and StorageTransfer.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+left join (
+	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId
+		from tblSCDeliverySheetShrinkReceiptDistribution
+            where intInventoryReceiptItemId is not null
+	group by intInventoryReceiptItemId
+
+) Shrek
+	on Shrek.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+
+WHERE 
+    receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
+--DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
+--CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
+AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
+AND receipt.strReceiptType != 'Transfer Order'
+AND receiptItem.intOwnershipType != 2
+AND receipt.ysnPosted = 1
+
+
+--UNION ALL
+---- Delivery Sheet posting with shrinkage
+--SELECT	
+	
+--	'1.4' as strMark,
+--    receipt.intEntityVendorId
+--    ,receipt.dtmReceiptDate AS dtmDate
+--    ,receipt.strReceiptNumber AS strTransactionNumber
+--    ,receipt.intInventoryReceiptId
+--    ,NULL AS intBillId
+--    ,NULL AS strBillId
+--    ,NULL AS intBillDetailId
+--    ,receiptItem.intInventoryReceiptItemId
+--    ,receiptItem.intItemId
+--    ,receiptItem.intUnitMeasureId AS intItemUOMId
+--    ,unitMeasure.strUnitMeasure AS strUOM
+--    ,0 AS dblVoucherTotal
+--    ,0 AS dblVoucherQty
+--    ,(ROUND(
+--		-isnull(Shrek.dblComputedShrink, 0)
+--        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
+--        * (
+--            CASE 
+--                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
+--                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
+--                ELSE 
+--                    1 
+--            END 
+--        ) 
+--        , 2)
+--    )     
+--    AS dblReceiptTotal
+--    ,-isnull(Shrek.dblComputedShrink, 0) AS dblReceiptQty
+--    ,receipt.intLocationId
+--    ,compLoc.strLocationName
+--    ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
+--    ,APClearing.intAccountId
+--	,APClearing.strAccountId
+
+	
+--FROM tblICInventoryReceipt receipt 
+--INNER JOIN tblICInventoryReceiptItem receiptItem
+--	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+--INNER JOIN tblSMCompanyLocation compLoc
+--    ON receipt.intLocationId = compLoc.intCompanyLocationId
+--LEFT JOIN tblSMFreightTerms ft
+--    ON ft.intFreightTermId = receipt.intFreightTermId
+--LEFT JOIN 
+--(
+--    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+--        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+--)
+--    ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
+--LEFT JOIN vyuAPReceiptClearingGL APClearing
+--    ON APClearing.strTransactionId = receipt.strReceiptNumber
+--        AND APClearing.intItemId = receiptItem.intItemId
+--        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+--LEFT JOIN (   
+--    SELECT intInventoryReceiptItemId, SUM(dblTax) dblTax
+--    FROM (
+--        SELECT RI.intInventoryReceiptItemId, RIT.dblTax, ROW_NUMBER() OVER(PARTITION BY RI.intInventoryReceiptItemId, RIT.dblTax ORDER BY RI.intInventoryReceiptItemId, RIT.dblTax) intDuplicate
+--        FROM tblICInventoryReceiptItem RI
+--        INNER JOIN tblICInventoryReceiptItemTax RIT ON RIT.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+--        LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
+--        LEFT JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId AND BDT.intTaxCodeId = RIT.intTaxCodeId AND BDT.intTaxClassId = RIT.intTaxClassId
+--        WHERE 1 = CASE WHEN BD.intBillDetailId IS NULL THEN 1 ELSE (CASE WHEN BDT.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END) END
+--    ) tmpTax
+--    WHERE intDuplicate = 1
+--    GROUP BY intInventoryReceiptItemId
+--) clearingTax
+--	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+
+--join tblSCTicket Ticket
+--	on Ticket.intInventoryReceiptId = receipt.intInventoryReceiptId
+--		and Ticket.intDeliverySheetId is not null
+
+--join tblSCDeliverySheet DeliverySheet
+--	on DeliverySheet.intDeliverySheetId = Ticket.intDeliverySheetId	
+--		and (DeliverySheet.ysnInvolvedWithShrinkage is not null and DeliverySheet.ysnInvolvedWithShrinkage = 1)
+
+--join (
+--	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId
+--		from tblSCDeliverySheetShrinkReceiptDistribution
+--	group by intInventoryReceiptItemId
+
+--) Shrek
+--	on Shrek.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+
+--WHERE 
+--    receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
+----DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
+----CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
+--AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
+--AND receipt.strReceiptType != 'Transfer Order'
+--AND receiptItem.intOwnershipType != 2
+--AND receipt.ysnPosted = 1
+
+
 UNION ALL
 --Vouchers for receipt items
 SELECT
