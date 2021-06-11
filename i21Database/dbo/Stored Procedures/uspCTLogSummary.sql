@@ -4005,7 +4005,14 @@ BEGIN TRY
 					BEGIN
 						IF (@TotalBasis < @dblOrigQty)
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1
+							if exists (select top 1 1 from @cbLogSpecific where strTransactionType = 'Contract Balance' and strTransactionReference Like 'Inventory%') and @TotalPriced = 0
+							begin
+								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
+							end
+							else
+							begin
+								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1
+							end
 						END
 						ELSE
 						BEGIN
