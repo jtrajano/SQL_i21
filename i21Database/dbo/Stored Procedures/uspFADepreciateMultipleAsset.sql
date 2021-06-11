@@ -98,8 +98,11 @@ BEGIN
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
             
             UPDATE BD SET ysnFullyDepreciated  =0
-            FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId  
+            FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId 
             
+            --remove from undepreciated
+            DELETE A FROM tblFAFiscalAsset A JOIN
+            @IdGood B on B.intId = A.intAssetId
         END
      
 END  
@@ -230,7 +233,6 @@ BEGIN
                     AND BD.intBookId = @BookId
                   
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
-                  EXEC uspFAFiscalAsset @i, @BookId --maps asset depreciation to fiscal period/year
                   DELETE FROM @IdIterate WHERE intId = @i
               END
       END  
@@ -298,9 +300,7 @@ BEGIN
                   )Depreciation
                   WHERE F.intAssetId = @i
                   AND BD.intBookId = @BookId
-
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
-                  EXEC uspFAFiscalAsset @i, @BookId --maps asset depreciation to fiscal period/year
                   DELETE FROM @IdIterate WHERE intId = @i
           END
         END  
