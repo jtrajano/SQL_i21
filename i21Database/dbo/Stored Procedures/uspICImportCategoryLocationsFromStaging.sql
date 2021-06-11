@@ -1,4 +1,6 @@
-CREATE PROCEDURE uspICImportCategoryLocationsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportCategoryLocationsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingCategoryLocation WHERE strImportIdentifier <> @strIdentifier
@@ -131,8 +133,11 @@ SELECT
 FROM tblICImportStagingCategoryLocation x
 	INNER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LOWER(LTRIM(RTRIM(x.strCategory)))
 		OR LOWER(c.strDescription) = LOWER(LTRIM(RTRIM(x.strCategory)))
-	INNER JOIN tblSMCompanyLocation l ON LOWER(l.strLocationName) = LOWER(LTRIM(RTRIM(x.strLocation)))
+	--INNER JOIN tblSMCompanyLocation l ON LOWER(l.strLocationName) = LOWER(LTRIM(RTRIM(x.strLocation)))
+	INNER JOIN vyuSMGetCompanyLocationSearchList l 
+		ON LOWER(l.strLocationName) = LOWER(LTRIM(RTRIM(x.strLocation)))
 		OR LOWER(l.strLocationNumber) = LOWER(LTRIM(RTRIM(x.strLocation)))
+		OR LOWER(l.strCode) = LOWER(LTRIM(RTRIM(x.strLocation)))
 	LEFT OUTER JOIN tblSTSubcategoryRegProd p ON LOWER(p.strRegProdCode) = LOWER(LTRIM(RTRIM(x.strProductCode)))
 		OR LOWER(p.strRegProdDesc) = LOWER(LTRIM(RTRIM(x.strProductCode)))
 	LEFT OUTER JOIN tblSTSubcategory f ON (LOWER(f.strSubcategoryId) = LOWER(LTRIM(RTRIM(x.strFamily)))
