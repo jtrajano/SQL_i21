@@ -378,6 +378,10 @@ tblFAFixedAsset A
 JOIN @tblAsset B ON B.intAssetId = A.intAssetId
 
 
+--remove from undepreciated
+DELETE A FROM tblFAFiscalAsset A JOIN
+@tblAsset B on B.intAssetId = A.intAssetId
+
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
 
