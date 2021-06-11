@@ -894,6 +894,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 					  , @intPriceFixationId				INT = NULL
 					  , @intContractDetailToDeleteId    INT = NULL
 					  , @ysnLoad						BIT = 0
+					  , @intContractDetailId			INT = NULL
 
 				SELECT TOP 1 @intInvoiceEntriesId			= intInvoiceEntriesId 
 						   , @dblQtyShipped					= dblQtyShipped
@@ -901,6 +902,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 						   , @intPriceFixationId			= intPriceFixationId
 						   , @intContractDetailToDeleteId	= intContractDetailId
 						   , @ysnLoad						= ysnLoad
+						   , @intContractDetailId			= intContractDetailId
 				FROM #CONTRACTSPRICING 
 				ORDER BY intInvoiceEntriesId
 
@@ -934,10 +936,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									END
 
 								UPDATE @EntriesForInvoice
-								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN dblQtyOrdered ELSE @dblOriginalQtyShipped END
-								  , dblPrice		= @dblFinalPrice
+								SET dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
-								  ,  intPriceFixationDetailId	= @intPriceFixationDetailId
+								  , intPriceFixationDetailId	= @intPriceFixationDetailId
+								WHERE intId = @intInvoiceEntriesId OR intContractDetailId = @intContractDetailId
+
+								UPDATE @EntriesForInvoice
+								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN dblQtyOrdered ELSE @dblOriginalQtyShipped END
 								WHERE intId = @intInvoiceEntriesId
 
 								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
