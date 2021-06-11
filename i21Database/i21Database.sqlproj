@@ -388,7 +388,6 @@
     <Build Include="dbo\Stored Procedures\uspSMUnSubmitTransaction.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepartment.sql" />
     <Build Include="dbo\Stored Procedures\uspFADeleteImportedAssets.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPUpdatePlannedAvailabilityDate.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSite.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSite.sql" />
     <Build Include="dbo\Functions\fnTFCoalesceCardFuelingSite.sql" />
@@ -406,7 +405,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetShortTermPlanningViewDetail.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeePaycheck.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEmployeePaycheck.sql" />
     <Build Include="dbo\Stored Procedures\uspPRGetPaycheckEmployeeEarnings.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchyParam.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_FixUserSecurityAdminData.sql" />

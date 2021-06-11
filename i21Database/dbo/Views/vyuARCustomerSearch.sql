@@ -75,6 +75,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , strCreditCode			= CUSTOMER.strCreditCode
 	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached
 	 , intCreditLimitReached	= DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
+	 , intInterCompanyId		= CUSTOMER.intInterCompanyId
 	 , dblHighestDueAR			= CUSTOMER.dblHighestDueAR
      , dblHighestAR             = CUSTOMER.dblHighestAR
      , dtmHighestARDate         = CUSTOMER.dtmHighestARDate
@@ -114,6 +115,7 @@ INNER JOIN (
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached
+		 , intInterCompanyId	= intInterCompanyId
 		 , dblHighestDueAR
          , dblHighestAR
          , dtmHighestARDate
