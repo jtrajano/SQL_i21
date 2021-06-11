@@ -88,7 +88,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	ysnEnableFutures BIT NULL DEFAULT 0,
 
     [ysnStrategic] BIT NULL DEFAULT 0, 
-    [intEntitySelectedLocationId] INT NULL, 
+    [intEntitySelectedLocationId] INT NULL,  -- CT-5315
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
