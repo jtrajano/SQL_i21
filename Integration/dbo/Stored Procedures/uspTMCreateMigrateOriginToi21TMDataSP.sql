@@ -131,7 +131,7 @@ BEGIN
 					WHERE vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS <> vwcus_bill_to
                     AND vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS in (select vwcus_bill_to from vwcusmst where vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS  <> vwcus_bill_to)
 
-					IF NOT EXISTS(SELECT TOP 1 1 FROM @tmpMigrationResult WHERE strError = ''Invalid customer bill/ships'')
+					IF NOT EXISTS(SELECT TOP 1 1 FROM @tmpMigrationResult WHERE strError = ''Invalid Customer bill to/ship to'')
 					BEGIN
 					----Delete tblTMCustomer record
 						DELETE FROM tblTMCustomer
