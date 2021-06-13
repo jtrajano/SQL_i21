@@ -73,6 +73,13 @@ BEGIN TRY
 		,@isPresent INT = 0
 		,@newAttachmentId INT
 		,@message NVARCHAR(1000)
+		,@dblTotalCost NUMERIC(18, 6)
+		,@dblTotal NUMERIC(18, 6)
+		,@config AS ApprovalConfigurationType
+		,@strFileName NVARCHAR(50)
+		,@strVendorInvoiceFilePath NVARCHAR(500)
+		,@intFinancingCostItemId INT
+		,@intFreightCostItemId INT
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -129,6 +136,11 @@ BEGIN TRY
 		RETURN
 	END
 
+	SELECT @strVendorInvoiceFilePath = strVendorInvoiceFilePath
+		,@intFinancingCostItemId = intFinancingCostItemId
+		,@intFreightCostItemId = intFreightCostItemId
+	FROM tblIPCompanyPreference
+
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen
 	WHERE strNamespace = 'AccountsPayable.view.Voucher'
@@ -146,7 +158,29 @@ BEGIN TRY
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
 
-			------------------Header------------------------------------------------------
+			SELECT @strVendorAccountNo = NULL
+				,@strVendorName = NULL
+				,@ysnInvoiceCredit = NULL
+				,@strInvoiceNo = NULL
+				,@dtmInvoiceDate = NULL
+				,@strPaymentTerms = NULL
+				,@dtmDueDate = NULL
+				,@strCurrency = NULL
+				,@strWeightTerms = NULL
+				,@strINCOTerms = NULL
+				,@strRemarks = NULL
+				,@dblTotalDiscount = NULL
+				,@dblTotalTax = NULL
+				,@dblVoucherTotal = NULL
+				,@strLIBORrate = NULL
+				,@dblFinanceChargeAmount = NULL
+				,@strSalesOrderReference = NULL
+				,@dblFreightCharges = NULL
+				,@strBLNumber = NULL
+				,@dblMiscCharges = NULL
+				,@strMiscChargesDescription = NULL
+				,@strFileName = NULL
+
 			SELECT @strVendorAccountNo = strVendorAccountNo
 				,@strVendorName = strVendorName
 				,@ysnInvoiceCredit = ysnInvoiceCredit
@@ -168,6 +202,7 @@ BEGIN TRY
 				,@strBLNumber = strBLNumber
 				,@dblMiscCharges = dblMiscCharges
 				,@strMiscChargesDescription = strMiscChargesDescription
+				,@strFileName = strFileName
 			FROM tblIPBillStage
 			WHERE intBillStageId = @intBillStageId
 
@@ -303,12 +338,15 @@ BEGIN TRY
 					,@intItemLocationId = NULL
 					,@intAccountId = NULL
 					,@strSubCurrency = NULL
+					,@dblTotalCost = 0
+					,@dblTotal = 0
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
 					,@strWeightUnitMeasure = strWeightUnitMeasure
 					,@strOrderUnitMeasure = strOrderUnitMeasure
 					,@strSubCurrency = strCurrency
+					,@dblTotal = dblTotal
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -449,6 +487,7 @@ BEGIN TRY
 				END
 
 				SELECT @intLocationId = intCompanyLocationId
+					,@dblTotalCost = dblTotalCost
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
@@ -555,7 +594,7 @@ BEGIN TRY
 				,dblWeight
 				,intWeightUOMId
 				,strVendorOrderNumber
-				,dtmVoucherDate 
+				,dtmVoucherDate
 				,intBillId
 				,ysnStage
 				,intLoadShipmentId
@@ -580,7 +619,7 @@ BEGIN TRY
 				,dblItemWeight
 				,intWeightUnitMeasureId
 				,@strInvoiceNo
-				,@dtmInvoiceDate 
+				,@dtmInvoiceDate
 				,@intBillId
 				,0
 				,intLoadId
@@ -590,6 +629,116 @@ BEGIN TRY
 				,intCurrencyId
 				,ysnSubCurrency
 			FROM @tblIPFinalInvoiceDetail FID
+
+			IF @dblFinanceChargeAmount > 0
+			BEGIN
+				INSERT INTO @voucherNonInvDetails (
+					intEntityVendorId
+					,intTransactionType
+					,intShipToId
+					,intItemId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblOrderQty
+					,intOrderUOMId
+					,dblQuantityToBill
+					,intQtyToBillUOMId
+					,dblCost
+					,dblNetWeight
+					,dblWeight
+					,intWeightUOMId
+					,strVendorOrderNumber
+					,dtmVoucherDate
+					,intBillId
+					,ysnStage
+					,intLoadShipmentId
+					,intLoadShipmentDetailId
+					,intLineNo
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					)
+				SELECT @intEntityId
+					,1
+					,@intLocationId
+					,@intFinancingCostItemId
+					,NULL AS intContractHeaderId
+					,NULL AS intContractDetailId
+					,NULL AS dblQtyOrdered
+					,NULL AS intOrderItemUOMId
+					,NULL AS dblQtyShipped
+					,NULL AS intUnitMeasureId
+					,@dblFinanceChargeAmount AS dblPrice
+					,NULL AS dblShipmentNetWt
+					,NULL AS dblItemWeight
+					,NULL AS intWeightUnitMeasureId
+					,@strInvoiceNo
+					,@dtmInvoiceDate
+					,@intBillId
+					,0
+					,NULL AS intLoadId
+					,NULL AS intLoadDetailId
+					,NULL AS intFinalInvoiceDetailId
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+				FROM @tblIPFinalInvoiceDetail FID
+			END
+
+			IF @dblFreightCharges > 0
+			BEGIN
+				INSERT INTO @voucherNonInvDetails (
+					intEntityVendorId
+					,intTransactionType
+					,intShipToId
+					,intItemId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblOrderQty
+					,intOrderUOMId
+					,dblQuantityToBill
+					,intQtyToBillUOMId
+					,dblCost
+					,dblNetWeight
+					,dblWeight
+					,intWeightUOMId
+					,strVendorOrderNumber
+					,dtmVoucherDate
+					,intBillId
+					,ysnStage
+					,intLoadShipmentId
+					,intLoadShipmentDetailId
+					,intLineNo
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					)
+				SELECT @intEntityId
+					,1
+					,@intLocationId
+					,@intFreightCostItemId
+					,NULL AS intContractHeaderId
+					,NULL AS intContractDetailId
+					,NULL AS dblQtyOrdered
+					,NULL AS intOrderItemUOMId
+					,NULL AS dblQtyShipped
+					,NULL AS intUnitMeasureId
+					,@dblFreightCharges AS dblPrice
+					,NULL AS dblShipmentNetWt
+					,NULL AS dblItemWeight
+					,NULL AS intWeightUnitMeasureId
+					,@strInvoiceNo
+					,@dtmInvoiceDate
+					,@intBillId
+					,0
+					,NULL AS intLoadId
+					,NULL AS intLoadDetailId
+					,NULL AS intFinalInvoiceDetailId
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+				FROM @tblIPFinalInvoiceDetail FID
+			END
 
 			EXEC uspAPCreateVoucher @voucherPayables = @voucherNonInvDetails
 				,@userId = @intUserId
@@ -602,12 +751,12 @@ BEGIN TRY
 			FROM tblAPBill
 			WHERE intBillId = @intBillInvoiceId
 
-			Select @intContractHeaderId =intContractHeaderId
-			FROM @tblIPFinalInvoiceDetail 
+			SELECT @intContractHeaderId = intContractHeaderId
+			FROM @tblIPFinalInvoiceDetail
 
-			Select @intBookId=intBookId
-			from tblCTContractHeader
-			Where intContractHeaderId =@intContractHeaderId
+			SELECT @intBookId = intBookId
+			FROM tblCTContractHeader
+			WHERE intContractHeaderId = @intContractHeaderId
 
 			UPDATE tblAPBill
 			SET intBookId = @intBookId
@@ -636,10 +785,65 @@ BEGIN TRY
 				) DetailTotal
 			WHERE A.intBillId = @intBillInvoiceId
 
+			IF @dblTotalCost = @dblTotal
+			BEGIN
+				EXEC uspSMSubmitTransaction @type = 'AccountsPayable.view.Voucher'
+					,@recordId = @intBillInvoiceId
+					,@transactionNo = @strBillId
+					,@transactionEntityId = @intEntityId
+					,@currentUserEntityId = @intUserId
+					,@amount = 0
+					,@approverConfiguration = @config
+					--SELECT intTransactionId = intTransactionId
+					--FROM tblSMTransaction
+					--WHERE intRecordId = @intBillInvoiceId
+					--	AND intScreenId = @intScreenId
+					--IF intTransactionId IS NULL
+					--BEGIN
+					--	INSERT INTO tblSMTransaction (
+					--		intScreenId
+					--		,intRecordId
+					--		,strTransactionNo
+					--		,intEntityId
+					--		,strApprovalStatus
+					--		,intConcurrencyId
+					--		)
+					--	SELECT @intScreenId
+					--		,intTransactionId
+					--		,@strBillId
+					--		,@intEntityId
+					--		,'Waiting for Submit'
+					--		,1
+					--	SELECT intTransactionId = SCOPE_IDENTITY()
+					--	INSERT INTO tblSMApproval (
+					--		dtmDate
+					--		,dblAmount
+					--		,dtmDueDate
+					--		,intSubmittedById
+					--		,strStatus
+					--		,ysnCurrent
+					--		,intScreenId
+					--		,ysnVisible
+					--		,intOrder
+					--		,intTransactionId
+					--		)
+					--	SELECT GETUTCDATE()
+					--		,0
+					--		,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+					--		,@intUserId
+					--		,'Waiting for Submit'
+					--		,1
+					--		,@intScreenId
+					--		,1
+					--		,1
+					--		,intTransactionId
+					--END
+			END
+
 			BEGIN TRY
 				SELECT @isPresent = 0
 
-				EXEC [uspSMCheckPendingAttachmentFileIfPresent] @fullFileName = 'ATTACHMENT_UPLOAD_TEST1.txt'
+				EXEC [uspSMCheckPendingAttachmentFileIfPresent] @fullFileName = @strFileName
 					,@isPresent = @isPresent OUTPUT
 
 				SELECT @isPresent
@@ -652,9 +856,9 @@ BEGIN TRY
 						AND intScreenId = @intScreenId
 
 					EXEC [uspSMCreateAttachmentFromFile] @transactionId = @intTransactionId -- the intTransactionId
-						,@fileName = N'ATTACHMENT_UPLOAD_TEST1' -- file name
-						,@fileExtension = 'txt' -- extension
-						,@filePath = 'D:\' -- path
+						,@fileName = @strFileName -- file name
+						,@fileExtension = 'pdf' -- extension
+						,@filePath = @strVendorInvoiceFilePath -- path
 						,@screenNamespace = 'AccountsPayable.Bill' -- screen type or namespace
 						,@useDocumentWatcher = 1 -- flag if the file was uploaded using document wacther
 						,@throwError = 1
@@ -673,8 +877,8 @@ BEGIN TRY
 
 			UPDATE tblIPBillStage
 			SET intStatusId = 1
-				,intBillId = @intBillId
-				,strVoucherNumber = @strVoucherNumber
+				,intBillId = @intBillInvoiceId
+				,strVoucherNumber = @strBillId
 			WHERE intBillStageId = @intBillStageId
 				AND intStatusId = - 1
 

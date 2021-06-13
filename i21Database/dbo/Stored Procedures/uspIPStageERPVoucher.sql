@@ -40,6 +40,7 @@ BEGIN TRY
 		,@intPriceUOMId INT
 		,@intItemId INT
 		,@strItemNo NVARCHAR(50)
+		,@strFileName NVARCHAR(50)
 	DECLARE @VoucherDetail TABLE (
 		Name NVARCHAR(50)
 		,[Text] NVARCHAR(50)
@@ -75,6 +76,11 @@ BEGIN TRY
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strXml
 
+			SELECT @strFileName = [Filename]
+			FROM OPENXML(@idoc, 'Batches/Batch/Documents/Document', 2) WITH (
+					[Filename] NVARCHAR(50)
+					)
+
 			SELECT @strVendorAccountNo = ExternalId
 				,@strVendorName = Name
 			FROM OPENXML(@idoc, 'Batches/Batch/Documents/Document/Parties/Party', 2) WITH (
@@ -106,6 +112,7 @@ BEGIN TRY
 				,strBLNumber
 				,dblMiscCharges
 				,strMiscChargesDescription
+				,strFileName
 				)
 			SELECT @strVendorAccountNo
 				,@strVendorName
@@ -132,6 +139,7 @@ BEGIN TRY
 						ELSE [Misc Charges]
 						END)
 				,[Misc Charges Description]
+				,@strFileName
 			FROM (
 				SELECT *
 				FROM OPENXML(@idoc, 'Batches/Batch/Documents/Document/HeaderFields/HeaderField', 2) WITH (
