@@ -88,6 +88,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strLocationNumber
 	 , strSalesOrderNumber
 	 , strPaymentInfo
+	 , dtmCreated
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -163,6 +164,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strLocationNumber		= [LOCATION].strLocationNumber
 	 , strSalesOrderNumber		= SO.strSalesOrderNumber
 	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
+	 , dtmCreated				= GETDATE()
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (
