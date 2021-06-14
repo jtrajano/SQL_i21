@@ -3821,6 +3821,13 @@ BEGIN TRY
 						SET @_priced = (CASE WHEN @dblQty > ISNULL(@TotalPriced, 0) THEN ISNULL(@TotalPriced, 0) ELSE @dblQty END)
 						UPDATE @cbLogSpecific SET dblQty = @_priced * - 1, intPricingTypeId = 1, intActionId = CASE WHEN intContractTypeId = 1 THEN 47 ELSE 46 END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+						
+						if exists (select top 1 1 from @cbLogSpecific where intPricingTypeId = 1 and dblQty < 0 and dblOrigQty - abs(dblQty) > 0)
+						begin
+							UPDATE @cbLogSpecific SET dblQty = (dblOrigQty - abs(dblQty)) * - 1, intPricingTypeId = 2
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						end
 						
 						SET @_dblActual = @dblActual;
 
