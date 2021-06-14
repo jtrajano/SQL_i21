@@ -10,8 +10,7 @@
 --------------------------------------------------------------------------------------
 */
 
--- Fixes the Kill State Error. Applicable only for SQL Server 2019 or higher
-:r .\4_SM\2010_Kill_State_Error_Fix.sql
+
 
 --EM
 :r .\12_EM\17_DropDependencies_RenameTable.sql
