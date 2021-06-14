@@ -1052,6 +1052,8 @@
     <Build Include="dbo\Tables\tblSTPromotionItemListDetail.sql" />
     <Build Include="dbo\Tables\tblSTPaymentOption.sql" />
     <Build Include="dbo\Tables\tblSTRegister.sql" />
+    <Build Include="dbo\Tables\tblSTStoreGroup.sql" />
+    <Build Include="dbo\Tables\tblSTStoreGroupDetail.sql" />
     <Build Include="dbo\Tables\tblSCScaleSetup.sql" />
     <Build Include="dbo\Tables\tblSCTicket.sql" />
     <Build Include="dbo\Tables\tblSCTicketPrintOption.sql" />
@@ -1346,6 +1348,7 @@
     <Build Include="dbo\Stored Procedures\uspSTCopyCostItemPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyPriceItemPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRetailChangeReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTDuplicateStoreGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCommanderTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemDiscontinued.sql" />
     <Build Include="dbo\Stored Procedures\uspSTPurgePromotions.sql" />
