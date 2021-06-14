@@ -20,6 +20,7 @@ CREATE TABLE tblGLAccountImportDataStaging2
  [strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,  
  [strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,  
  [strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,  
+ [strRawString] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
  [intAccountId] [int] NULL,  
  [strAccountId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL,  
  [ysnMissingSegment] [bit] NULL,  
@@ -35,13 +36,15 @@ CREATE TABLE tblGLAccountImportDataStaging2
  strError NVARCHAR(MAX)  
 )
   
-INSERT INTO tblGLAccountImportDataStaging2([strPrimarySegment],[strLocationSegment],[strLOBSegment],[strDescription],[strUOM])  
+INSERT INTO tblGLAccountImportDataStaging2([strPrimarySegment],[strLocationSegment],[strLOBSegment],[strDescription],[strUOM], strRawString)  
 SELECT   
 REPLACE(LTRIM(RTRIM([strPrimarySegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strLocationSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strLOBSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strDescription])),'"','')  
-,REPLACE(LTRIM(RTRIM([strUOM])),'"','') FROM tblGLAccountImportDataStaging  
+,REPLACE(LTRIM(RTRIM([strUOM])),'"','')
+,strRawString
+FROM tblGLAccountImportDataStaging  
 WHERE strGUID=@strGUID
  
 CREATE UNIQUE INDEX indunique  
@@ -195,12 +198,13 @@ INSERT INTO tblGLCOAImportLog(strEvent, intEntityId, intConcurrencyId, intUserId
  SELECT @m, @intEntityId, 1, @intEntityId, GETDATE(), @intInvalidCount, @intValidCount, @strVersion,'glaccount'  
  SELECT @importLogId = SCOPE_IDENTITY()  
   
-INSERT INTO tblGLCOAImportLogDetail(intImportLogId, strEventDescription, strExternalId,strLineNumber)  
+INSERT INTO tblGLCOAImportLogDetail(intImportLogId, strEventDescription, strRawString, strExternalId,strLineNumber)  
  SELECT   
   @importLogId,  
   CASE WHEN ISNULL(ysnInvalid,0) = 1 THEN strError ELSE 'GL Account created. '
   + ISNULL( strError,'') 
    END,   
+  strRawString,
   strAccountId,   
   CAST([intImportStagingId] AS nvarchar(4))  
  FROM tblGLAccountImportDataStaging2
