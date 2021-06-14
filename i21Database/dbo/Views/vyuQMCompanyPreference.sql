@@ -18,6 +18,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.strTestReportComments
 	,CP.strSampleImportDateTimeFormat
 	,CP.ysnCaptureItemInProperty
+	,CP.ysnEnableAssignContractsInSample
 	,LS.strSecondaryStatus AS strApprovalLotStatus
 	,LS1.strSecondaryStatus AS strRejectionLotStatus
 FROM tblQMCompanyPreference CP

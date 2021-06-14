@@ -1212,6 +1212,10 @@ UPDATE tblQMCompanyPreference
 SET ysnAllowReversalSampleEntry = 0
 WHERE ysnAllowReversalSampleEntry IS NULL
 GO
+UPDATE tblQMCompanyPreference
+SET ysnEnableAssignContractsInSample = 0
+WHERE ysnEnableAssignContractsInSample IS NULL
+GO
 
 GO
 UPDATE tblQMSample
@@ -1227,4 +1231,9 @@ GO
 UPDATE tblQMSample
 SET ysnIgnoreContract = 0
 WHERE ysnIgnoreContract IS NULL
+GO
+
+UPDATE tblQMSampleType
+SET ysnMultipleContractSeq = 0
+WHERE ysnMultipleContractSeq IS NULL
 GO
