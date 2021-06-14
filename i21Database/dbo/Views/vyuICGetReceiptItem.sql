@@ -63,7 +63,7 @@ LEFT JOIN (
 	tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
 		ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 )
-	ON ItemUOM.intItemId = Item.intItemId AND COALESCE(ItemUOM.strLongUPCCode, ItemUOM.strUpcCode) IS NOT NULL
+	ON ItemUOM.intItemId = Item.intItemId
 
 LEFT JOIN tblICItemPricing ItemPricing 
 	ON ItemLocation.intItemId = ItemPricing.intItemId 
@@ -86,3 +86,19 @@ OUTER APPLY(
 	WHERE ItemAddOn.intItemId = Item.intItemId
 	AND ChargeItem.strType = 'Other Charge'
 ) AddOnOtherCharge
+WHERE 
+COALESCE(ItemUOM.strLongUPCCode, ItemUOM.strUpcCode) IS NOT NULL 
+OR
+(
+	(SELECT COUNT(*) FROM tblICItemUOM WHERE intItemId = Item.intItemId AND COALESCE(strLongUPCCode, strUpcCode) IS NOT NULL) = 0
+	AND
+	ItemUOM.ysnStockUnit = 1
+)
+OR
+(
+	(SELECT COUNT(*) FROM tblICItemUOM WHERE intItemId = Item.intItemId) = 1
+	AND
+	ItemUOM.ysnStockUnit = 1
+)
+OR
+ItemUOM.ysnStockUnit = 1
