@@ -544,6 +544,7 @@
     <Build Include="dbo\Stored Procedures\uspSMBuildSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
     <Build Include="dbo\Stored Procedures\uspCMABRCheckClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
