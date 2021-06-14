@@ -1,0 +1,92 @@
+CREATE PROCEDURE uspCMABRCheckClearing
+    @intBankAccountId INT,
+    @intEntityId INT
+AS
+DECLARE @dtmCurrent DATETIME = GETDATE()
+DECLARE @intABRDaysNoRef INT
+
+IF OBJECT_ID('tempdb..##tempActivityMatched') IS NOT NULL
+			DROP TABLE ##tempActivityMatched
+
+CREATE TABLE ##tempActivityMatched
+(
+	intABRActivityId INT NULL,
+	intTransactionId INT NULL
+)
+
+SELECT @intABRDaysNoRef=ISNULL(intABRDaysNoRef,0)
+FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId
+
+;WITH matching as(
+    SELECT intABRActivityId, intTransactionId
+    FROM tblCMABRActivity ABR 
+OUTER APPLY(
+	SELECT 
+	TOP 1
+	intTransactionId
+	FROM tblCMBankTransaction 
+	WHERE
+	intBankAccountId = @intBankAccountId
+	AND ysnPosted = 1
+	AND ysnCheckVoid = 0
+    AND ysnClr = 0
+	AND RTRIM(LTRIM(strReferenceNo)) = 
+		CASE WHEN ABR.strReferenceNo = '' 
+			AND @dtmCurrent<= DATEADD(DAY,@intABRDaysNoRef, dtmDate)
+			THEN RTRIM(LTRIM(strReferenceNo))
+		ELSE
+			ABR.strReferenceNo
+		END
+	AND ABS(dblAmount) = ABS(ABR.dblAmount)
+	AND ABR.strDebitCredit  = 'C'
+    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit = 'C')
+	ORDER BY dtmDate
+)CM
+UNION ALL
+SELECT intABRActivityId, intTransactionId
+FROM tblCMABRActivity ABR
+OUTER APPLY(
+	SELECT 
+	TOP 1
+	intTransactionId
+	FROM tblCMBankTransaction 
+	WHERE
+	intBankAccountId = @intBankAccountId
+	AND ysnPosted = 1
+	AND ysnCheckVoid = 0
+    AND ysnClr = 0
+	AND RTRIM(LTRIM(strReferenceNo)) = 
+		CASE WHEN ABR.strReferenceNo = '' 
+			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
+			THEN RTRIM(LTRIM(strReferenceNo))
+		ELSE
+			ABR.strReferenceNo
+		END
+	AND ABS(dblAmount) = ABS(ABR.dblAmount)
+	AND ABR.strDebitCredit  = 'D'
+    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit = 'D')
+	ORDER BY dtmDate
+)CM
+)
+INSERT INTO ##tempActivityMatched (intABRActivityId, intTransactionId)
+SELECT  intABRActivityId, intTransactionId FROM matching WHERE intTransactionId IS NOT NULL
+
+UPDATE CM
+SET ysnClr = 1
+FROM
+tblCMBankTransaction CM JOIN
+##tempActivityMatched T ON
+T.intTransactionId = CM.intTransactionId
+
+UPDATE ABR
+SET intImportStatus = 1
+FROM
+tblCMABRActivity ABR JOIN
+##tempActivityMatched T ON
+T.intABRActivityId = ABR.intABRActivityId
+
+INSERT INTO tblCMABRActivityMatched(intABRActivityId, intTransactionId, dtmDateEntered, intEntityId)
+SELECT intABRActivityId, intTransactionId, @dtmCurrent, 1 FROM ##tempActivityMatched
+
+
+
