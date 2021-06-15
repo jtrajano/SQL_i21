@@ -52,10 +52,6 @@ BEGIN
 	BEGIN
 		SET @intSubBookId = NULL
 	END
-	IF ISNULL(@strBuySell, 0) = 0
-	BEGIN
-		SET @strBuySell = NULL
-	END
 
 	SELECT *
 	INTO #UnrealizedSettlePrice

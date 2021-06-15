@@ -47,10 +47,6 @@ BEGIN
 	BEGIN
 		SET @intSelectedInstrumentTypeId = NULL
 	END
-	IF ISNULL(@strBuySell, 0) = 0
-	BEGIN
-		SET @strBuySell = NULL
-	END
 
 	SET @dtmFromDate = CAST(FLOOR(CAST(@dtmFromDate AS FLOAT)) AS DATETIME)
 	SET @dtmToDate = CAST(FLOOR(CAST(@dtmToDate AS FLOAT)) AS DATETIME)
