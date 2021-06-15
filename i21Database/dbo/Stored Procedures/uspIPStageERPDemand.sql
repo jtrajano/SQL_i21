@@ -19,7 +19,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'Demand'
+	WHERE strType = 'Raw Demand Forecast'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -161,7 +161,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Demand'
+			AND strType = 'Raw Demand Forecast'
 	END
 
 	IF ISNULL(@strInfo1, '') <> ''

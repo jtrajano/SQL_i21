@@ -57,6 +57,7 @@ BEGIN TRY
 		,@intCompanyLocationNewSubLocationId INT
 		,@intNewStorageLocationId INT
 		,@intNewLotId INT
+		,@intLotItemUOMId INT
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -339,6 +340,7 @@ BEGIN TRY
 
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
+				,@intLotItemUOMId = intItemUOMId
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
@@ -347,6 +349,10 @@ BEGIN TRY
 
 			IF @intTransactionTypeId = 20
 			BEGIN
+				SELECT @dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intLotItemUOMId, @dblQuantity)
+
+				SELECT @intItemUOMId = @intLotItemUOMId
+
 				EXEC dbo.uspMFLotMove @intLotId = @intLotId
 					,@intNewSubLocationId = @intCompanyLocationNewSubLocationId
 					,@intNewStorageLocationId = @intNewStorageLocationId
@@ -368,7 +374,6 @@ BEGIN TRY
 				SELECT @strAdjustmentNo = strAdjustmentNo
 				FROM dbo.tblICInventoryAdjustment
 				WHERE intInventoryAdjustmentId = @intAdjustmentId
-
 			END
 			ELSE IF @intTransactionTypeId = 10
 			BEGIN
