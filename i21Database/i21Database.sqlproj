@@ -9455,6 +9455,7 @@
 	<Build Include="dbo\Tables\tblTRImportAttachmentDetail.sql" />
     <Build Include="dbo\Tables\tblTRImportAttachment.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessImportBolImage.sql" />
+    <Build Include="dbo\Functions\fnStripHtmlAndFixSpecial.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
