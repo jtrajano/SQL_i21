@@ -6469,6 +6469,7 @@ BEGIN TRY
 			FROM #tblInTransit
 			WHERE strType = 'Purchase'
 			GROUP BY strLocationName
+				,strTransactionType
 
 			INSERT INTO @InventoryStock(strCommodityCode
 				, dblTotal
@@ -6488,6 +6489,7 @@ BEGIN TRY
 			WHERE strType = 'Sales'
 			GROUP BY strLocationName
 				, intCommodityId
+				, strTransactionType
 		END
 
 		UPDATE @ListCrushAll
