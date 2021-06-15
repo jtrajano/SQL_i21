@@ -522,6 +522,36 @@ BEGIN TRY
 			,dtmLastModified DATETIME
 			)
 
+	INSERT INTO dbo.tblQMSampleContractSequence (
+		intConcurrencyId
+		,intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT 1
+		,@intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
+			,intCreatedUserId INT
+			,dtmCreated DATETIME
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			)
+
 	INSERT INTO dbo.tblQMTestResult (
 		intConcurrencyId
 		,intSampleId

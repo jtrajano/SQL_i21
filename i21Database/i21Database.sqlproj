@@ -9452,10 +9452,11 @@
     <Build Include="dbo\Functions\fnICGetPromotionalCostByEffectiveDate.sql" />
     <Build Include="dbo\Views\vyuAGApplicationMethod.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
-	<Build Include="dbo\Tables\tblTRImportAttachmentDetail.sql" />
+    <Build Include="dbo\Tables\tblTRImportAttachmentDetail.sql" />
     <Build Include="dbo\Tables\tblTRImportAttachment.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessImportBolImage.sql" />
     <Build Include="dbo\Functions\fnStripHtmlAndFixSpecial.sql" />
+    <Build Include="dbo\Tables\tblQMSampleContractSequence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

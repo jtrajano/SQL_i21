@@ -324,6 +324,71 @@ BEGIN TRY
 				AND x.strRowState = 'DELETE'
 			)
 
+	-- Sample Contract Sequences Create, Update, Delete
+	INSERT INTO dbo.tblQMSampleContractSequence (
+		intConcurrencyId
+		,intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+		)
+	SELECT 1
+		,@intSampleId
+		,intContractDetailId
+		,dblQuantity
+		,intUnitMeasureId
+		,intCreatedUserId
+		,dtmCreated
+		,intLastModifiedUserId
+		,dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
+			,intCreatedUserId INT
+			,dtmCreated DATETIME
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.strRowState = 'ADDED'
+
+	UPDATE dbo.tblQMSampleContractSequence
+	SET intContractDetailId = x.intContractDetailId
+		,dblQuantity = x.dblQuantity
+		,intUnitMeasureId = x.intUnitMeasureId
+		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+		,intLastModifiedUserId = x.intLastModifiedUserId
+		,dtmLastModified = x.dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+			intSampleContractSequenceId INT
+			,intContractDetailId INT
+			,dblQuantity NUMERIC(18, 6)
+			,intUnitMeasureId INT
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intSampleContractSequenceId = dbo.tblQMSampleContractSequence.intSampleContractSequenceId
+		AND x.strRowState = 'MODIFIED'
+
+	DELETE
+	FROM dbo.tblQMSampleContractSequence
+	WHERE intSampleId = @intSampleId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+					intSampleContractSequenceId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intSampleContractSequenceId = dbo.tblQMSampleContractSequence.intSampleContractSequenceId
+				AND x.strRowState = 'DELETE'
+			)
+
 	-- Test Result Create, Update, Delete
 	INSERT INTO dbo.tblQMTestResult (
 		intConcurrencyId
