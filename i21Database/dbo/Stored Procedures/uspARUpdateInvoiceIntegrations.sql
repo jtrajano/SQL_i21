@@ -28,8 +28,8 @@ DECLARE @intInvoiceId				INT
 DECLARE @dblValueToUpdate NUMERIC(18, 6),
 		@intTransactionDetailId INT,
 		@strScreenName NVARCHAR(50) = 'Prepayment',
-		@strRowState  NVARCHAR(50)
-
+		@strRowState  NVARCHAR(50),
+		@PreStageInvoice InvoiceId
 
 SET @intTranCount = @@trancount;
 
@@ -69,6 +69,8 @@ BEGIN TRY
 	WHERE intInvoiceId = @intInvoiceId
 	AND intItemContractHeaderId IS NOT NULL	
 
+	DELETE FROM @PreStageInvoice
+
 	IF @ForDelete = 1
 		BEGIN
 			--IF PREPAID ITEM CONTRACT--Use FOR UPDATING PREPAID CONTRACT
@@ -80,7 +82,10 @@ BEGIN TRY
 
 			IF ISNULL(@intSalesOrderId, 0) <> 0
 				EXEC dbo.uspSOUpdateReservedStock @intSalesOrderId, 0
-			EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Deleted', @intUserId
+
+			INSERT INTO @PreStageInvoice (intHeaderId, strTransactionType)
+			SELECT intHeaderId			= @intInvoiceId
+				 , strTransactionType	= 'Deleted'			
 		END
 	ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Deleted')
 		BEGIN
@@ -89,15 +94,24 @@ BEGIN TRY
 
 			IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Added')
 			BEGIN
-				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Modified', @intUserId
+				INSERT INTO @PreStageInvoice (intHeaderId, strTransactionType)
+				SELECT intHeaderId			= @intInvoiceId
+					, strTransactionType	= 'Modified'
+				
 				SET @strRowState = 'update'
 			END
 			ELSE
 			BEGIN
-				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Added', @intUserId
+				INSERT INTO @PreStageInvoice (intHeaderId, strTransactionType)
+				SELECT intHeaderId			= @intInvoiceId
+					, strTransactionType	= 'Added'
+				
 				SET @strRowState = 'add'
 			END
 		END
+
+	--INTER COMPANY PRE-STAGE
+	EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice = @PreStageInvoice, @intUserId = @intUserId
 
 	--Update Invoice for ID
 	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
@@ -113,8 +127,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, @ForDelete
 	EXEC dbo.[uspARUpdateLineItemLotDetail] @intInvoiceId
 	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
-	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId
-	EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
+	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId	
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
 	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
@@ -166,4 +179,3 @@ BEGIN CATCH
 
 END CATCH
 
-GO
