@@ -1,6 +1,4 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInTransitDirect]
-	 @TransactionId		INT
-	,@Negate			BIT	= 0
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -12,45 +10,36 @@ BEGIN
 	DECLARE @ItemsToIncreaseInTransitDirect InTransitTableType
 
 	INSERT INTO @ItemsToIncreaseInTransitDirect (
-		  [intItemId]
-		, [intItemLocationId]
-		, [intItemUOMId]
-		, [intLotId]
-		, [intSubLocationId]
-		, [intStorageLocationId]
-		, [dblQty]
-		, [intTransactionId]
-		, [strTransactionId]
-		, [intTransactionTypeId]
-		, [intFOBPointId]
+		  intItemId
+		, intItemLocationId
+		, intItemUOMId
+		, intLotId
+		, intSubLocationId
+		, intStorageLocationId
+		, dblQty
+		, intTransactionId
+		, strTransactionId
+		, intTransactionTypeId
+		, intFOBPointId
 	) 
-	SELECT ID.intItemId
-		, IL.intItemLocationId
-		, ID.intItemUOMId
-		, ID.intLotId
-		, ID.intCompanyLocationSubLocationId
-		, ID.[intStorageLocationId]
-		, ID.dblQtyShipped
-		, I.intInvoiceId
-		, I.strInvoiceNumber
-		, 6
-		, fp.intFobPointId
-	FROM tblARInvoiceDetail ID
-	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
-	INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
+	SELECT intItemId						= ID.intItemId
+		, intItemLocationId					= ID.intItemLocationId
+		, intItemUOMId						= ID.intItemUOMId
+		, intLotId							= ID.intLotId
+		, intCompanyLocationSubLocationId	= ID.intSubLocationId
+		, intStorageLocationId				= ID.intStorageLocationId
+		, dblQty							= ID.dblQtyShipped * CASE WHEN ID.ysnPost = 1 THEN -1 ELSE 0 END
+		, intInvoiceId						= ID.intInvoiceId
+		, strInvoiceNumber					= ID.strInvoiceNumber
+		, intTransactionTypeId				= 6
+		, intFOBPointId						= FP.intFobPointId
+	FROM ##ARPostInvoiceDetail ID
 	INNER JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
-	LEFT JOIN tblSMFreightTerms ft
-		ON I.intFreightTermId = ft.intFreightTermId
-	LEFT JOIN tblICFobPoint fp
-		ON fp.strFobPoint = ft.strFobPoint
-	WHERE ID.intInvoiceId = @TransactionId
-	  AND (T.intTicketTypeId = 9 OR (T.intTicketType = 6 AND T.strInOutFlag = 'O'))
+	LEFT JOIN tblSMFreightTerms FT ON ID.intFreightTermId = FT.intFreightTermId
+	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+	WHERE (T.intTicketTypeId = 9 OR (T.intTicketType = 6 AND T.strInOutFlag = 'O'))
 	  AND ISNULL(ID.intTicketId, 0) <> 0 
 					
-	UPDATE @ItemsToIncreaseInTransitDirect
-	SET dblQty = CASE WHEN @Negate = 0 THEN dblQty ELSE -dblQty END
-
-	EXEC dbo.uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect
+	IF EXISTS(SELECT TOP 1 NULL FROM @ItemsToIncreaseInTransitDirect)
+		EXEC dbo.uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect
 END
-
-GO
