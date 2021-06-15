@@ -101,6 +101,7 @@ IF OBJECT_ID('tempdb..#tmpEffectiveCostForCStore_AuditLog') IS NULL
 		,dblNewCost NUMERIC(38, 20) NULL
 		,dtmOldEffectiveDate DATETIME NULL
 		,dtmNewEffectiveDate DATETIME NULL
+		,strAction NVARCHAR(50) NULL
 	)
 ;
 
@@ -113,6 +114,7 @@ IF OBJECT_ID('tempdb..#tmpEffectivePriceForCStore_AuditLog') IS NULL
 		,dblNewPrice NUMERIC(38, 20) NULL
 		,dtmOldEffectiveDate DATETIME NULL
 		,dtmNewEffectiveDate DATETIME NULL
+		,strAction NVARCHAR(50) NULL
 	)
 ;
 
@@ -125,6 +127,7 @@ IF OBJECT_ID('tempdb..#tmpPricingLevelForCStore_AuditLog') IS NULL
 		,dblNewPrice NUMERIC(38, 20) NULL
 		,dtmOldEffectiveDate DATETIME NULL
 		,dtmNewEffectiveDate DATETIME NULL
+		,strAction NVARCHAR(50) NULL
 	)
 ;
 
@@ -338,13 +341,16 @@ BEGIN
 			USING (
 				SELECT 
 					u.*
+					,p.intItemLocationId
 				FROM 
 					#tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
+					INNER JOIN tblICItemPricing p
+						ON u.intItemPricingId = p.intItemPricingId 
 					INNER JOIN tblICItem i	
 						ON i.intItemId = u.intItemId 
 					INNER JOIN tblICItemLocation il
-						ON il.intItemId = i.intItemId
-						AND il.intItemLocationId = u.intItemLocationId 
+						ON il.intItemId = p.intItemId
+						AND il.intItemLocationId = p.intItemLocationId 
 			) AS u
 				ON e.intItemId = u.intItemId
 				AND e.intItemLocationId = u.intItemLocationId
@@ -403,8 +409,8 @@ BEGIN
 			, intItemLocationId
 			, dblOldCost
 			, dblNewCost
-			, dblOldEffectiveDate
-			, dblNewEffectiveDate				
+			, dtmOldEffectiveDate
+			, dtmNewEffectiveDate				
 		)
 		SELECT 
 			strAction 
@@ -412,8 +418,8 @@ BEGIN
 			, intItemLocationId
 			, dblOldCost
 			, dblNewCost
-			, dblOldEffectiveDate
-			, dblNewEffectiveDate		
+			, dtmOldEffectiveDate
+			, dtmNewEffectiveDate		
 		FROM (
 			MERGE	
 			INTO	dbo.tblICEffectiveItemCost 
@@ -430,7 +436,7 @@ BEGIN
 					INNER JOIN tblICItem i	
 						ON u.intItemId = i.intItemId 
 					INNER JOIN tblICItemLocation il
-						ON il.intItemId = i.intItemId
+						ON il.intItemId = u.intItemId
 						AND il.intItemLocationId = u.intItemLocationId 
 				WHERE
 					p.intItemPricingId = @intItemPricingId
@@ -483,8 +489,8 @@ BEGIN
 				, intItemLocationId
 				, dblOldCost
 				, dblNewCost
-				, dblOldEffectiveDate
-				, dblNewEffectiveDate				
+				, dtmOldEffectiveDate
+				, dtmNewEffectiveDate				
 		);		
 	END   
 END
@@ -597,7 +603,9 @@ BEGIN
 				SELECT 
 					u.*
 				FROM 
-					#tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
+					tblICItemPricing p
+					INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
+						ON p.intItemPricingId = u.intItemPricingId
 					INNER JOIN tblICItem i	
 						ON i.intItemId = u.intItemId 
 					INNER JOIN tblICItemLocation il
@@ -661,8 +669,8 @@ BEGIN
 			, intItemLocationId
 			, dblOldPrice
 			, dblNewPrice
-			, dblOldEffectiveDate
-			, dblNewEffectiveDate				
+			, dtmOldEffectiveDate
+			, dtmNewEffectiveDate				
 		)
 		SELECT 
 			strAction 
@@ -670,8 +678,8 @@ BEGIN
 			, intItemLocationId
 			, dblOldPrice
 			, dblNewPrice
-			, dblOldEffectiveDate
-			, dblNewEffectiveDate		
+			, dtmOldEffectiveDate
+			, dtmNewEffectiveDate		
 		FROM (
 			MERGE	
 			INTO	dbo.tblICEffectiveItemPrice 
@@ -741,8 +749,8 @@ BEGIN
 				, intItemLocationId
 				, dblOldPrice
 				, dblNewPrice 
-				, dblOldEffectiveDate
-				, dblNewEffectiveDate				
+				, dtmOldEffectiveDate
+				, dtmNewEffectiveDate				
 		);		
 	END   
 END
