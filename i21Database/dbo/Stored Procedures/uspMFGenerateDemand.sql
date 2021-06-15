@@ -112,9 +112,9 @@ BEGIN TRY
 		SELECT 9999 AS intCompanyLocationId
 	END
 
-	SELECT @intRemainingDay = DAY(EOMONTH(GETDATE())) - DAY(GETDATE()) + 1
+	SELECT @intRemainingDay = DATEDIFF(day, getdate(), DATEADD(s, - 1, DATEADD(mm, DATEDIFF(m, 0, GETDATE()) + 1, 0))) + 1
 
-	SELECT @intNoOfDays = DAY(EOMONTH(GETDATE()))
+	SELECT @intNoOfDays = datediff(dd, getdate(), dateadd(mm, 1, getdate()))
 
 	SELECT @intContainerTypeId = intContainerTypeId
 		,@ysnCalculateNoOfContainerByBagQty = ysnCalculateNoOfContainerByBagQty
@@ -208,6 +208,7 @@ BEGIN TRY
 		,[strValue] DECIMAL(24, 6)
 		,intLocationId INT
 		)
+
 	IF OBJECT_ID('tempdb..#TempInventoryTransfer') IS NOT NULL
 		DROP TABLE #TempInventoryTransfer
 
@@ -967,7 +968,7 @@ BEGIN TRY
 			,2 AS intAttributeId --Opening Inventory
 			,- 1 AS intMonthId
 		FROM @tblMFItem I
-			,@tblSMCompanyLocation L
+		INNER JOIN @tblSMCompanyLocation L ON 1 = 1
 		WHERE L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
 	END
 
@@ -1491,8 +1492,8 @@ BEGIN TRY
 		,M.intMonthId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateInventoryRow M
-		,@tblMFItem I
-		,@tblSMCompanyLocation L
+	INNER JOIN @tblMFItem I ON 1 = 1
+	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
 	WHERE NOT EXISTS (
 			SELECT *
 			FROM #tblMFDemand D
@@ -2358,7 +2359,7 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM @tblMFItem I
-		,@tblSMCompanyLocation L
+	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
 	WHERE L.intCompanyLocationId = IsNULL(@intCompanyLocationId, L.intCompanyLocationId)
 
 	INSERT INTO #tblMFDemandList (
@@ -2376,8 +2377,8 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM @tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+	INNER JOIN tblCTReportAttribute A ON 1 = 1
+	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
 	WHERE A.intReportAttributeID IN (
 			4 --Existing Purchases
 			,13 --Open Purchases
@@ -2412,9 +2413,9 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
-		,@tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+	INNER JOIN @tblMFItem I ON 1 = 1
+	INNER JOIN tblCTReportAttribute A ON 1 = 1
+	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
 	WHERE A.intReportAttributeID IN (
 			2 --Opening Inventory
 			,4 --Existing Purchases
@@ -2456,9 +2457,9 @@ BEGIN TRY
 		,I.intMainItemId
 		,L.intCompanyLocationId
 	FROM tblMFGenerateDemandData
-		,@tblMFItem I
-		,tblCTReportAttribute A
-		,@tblSMCompanyLocation L
+	INNER JOIN @tblMFItem I ON 1 = 1
+	INNER JOIN tblCTReportAttribute A ON 1 = 1
+	INNER JOIN @tblSMCompanyLocation L ON 1 = 1
 	WHERE A.intReportAttributeID IN (
 			8
 			,15
