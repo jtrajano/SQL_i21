@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------------------
 */
 
--- Fixes the Kill State Error. Applicable only for SQL Server 2019 or higher
+-- Resolves the Kill State error during Upgrade for SQL Server 2019 or later
 :r .\4_SM\2010_Kill_State_Error_Fix.sql
 
 --EM

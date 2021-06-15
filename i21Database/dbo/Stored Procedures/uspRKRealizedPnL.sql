@@ -47,7 +47,7 @@ BEGIN
 	BEGIN
 		SET @intSelectedInstrumentTypeId = NULL
 	END
-	IF ISNULL(@strBuySell, 0) = 0
+	IF @strBuySell = '0'
 	BEGIN
 		SET @strBuySell = NULL
 	END

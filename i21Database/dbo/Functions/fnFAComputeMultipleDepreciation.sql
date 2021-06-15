@@ -23,6 +23,7 @@ DECLARE @tblAssetInfo TABLE (
 	dtmPlacedInService DATETIME,
 	dblYear DECIMAL(18,6),
 	dblImportGAAPDepToDate DECIMAL(18,6),
+	dtmImportedDepThru DATETIME,
 	strError NVARCHAR(100),
 	intYear INT,
 	intMonth INT,
@@ -48,6 +49,7 @@ INSERT INTO  @tblAssetInfo(
 	dtmPlacedInService,
 	dblYear,
 	dblImportGAAPDepToDate,
+	dtmImportedDepThru,
 	strError
 )
 SELECT 
@@ -58,6 +60,7 @@ BD.dblCost - BD.dblSalvageValue,
 BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
 CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
+DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmImportedDepThru)) + 1, 0)),
 NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
@@ -113,19 +116,16 @@ WHERE strError IS NULL
 UPDATE T
 SET 
 dblMonth = 
-CASE WHEN dblMonth >= ISNULL( dblImportGAAPDepToDate,0)
-THEN 
-	CASE 
-	WHEN strConvention = 'Actual Days' THEN
-		dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
-	WHEN strConvention= 'Mid Month' THEN
-		dblMonth *.50
-	ELSE
-		dblMonth
-	END
+
+CASE 
+WHEN strConvention = 'Actual Days' THEN
+	dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
+WHEN strConvention= 'Mid Month' THEN
+	dblMonth *.50
 ELSE
-	dblMonth 
+	dblMonth
 END
+
 FROM @tblAssetInfo T
 WHERE strError IS NULL AND intMonth = 1 
 
@@ -190,8 +190,35 @@ WHERE dblDepre > (BD.dblCost - BD.dblSalvageValue)
 AND strError IS NULL 
 
 
-
-
+--imported assets
+UPDATE 
+A
+SET dblDepre =
+CASE 
+	WHEN A.dtmImportedDepThru > Dep.dtmDepreciationToDate	THEN 0 
+	WHEN 
+		A.dtmImportedDepThru = Dep.dtmDepreciationToDate	
+		THEN
+			CASE 
+				WHEN strTransaction = 'Place in service'  THEN 0
+			ELSE		
+				ISNULL(dblImportGAAPDepToDate,0)  + ISNULL(dblMonth,0)
+			END
+	ELSE 
+		dblDepre
+END
+FROM
+@tblAssetInfo A 
+OUTER APPLY
+(
+	SELECT TOP 1
+	dtmDepreciationToDate,
+	dblDepreciationToDate,
+	strTransaction
+	FROM tblFAFixedAssetDepreciation
+	WHERE intAssetId = A.intAssetId
+	ORDER BY dtmDepreciationToDate DESC
+)Dep
    
 INSERT INTO @tbl(
 	intAssetId,
