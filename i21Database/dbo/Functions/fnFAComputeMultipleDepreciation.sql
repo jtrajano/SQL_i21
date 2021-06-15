@@ -196,28 +196,29 @@ A
 SET dblDepre =
 CASE 
 	WHEN A.dtmImportedDepThru > Dep.dtmDepreciationToDate	THEN 0 
-	WHEN A.dtmImportedDepThru = Dep.dtmDepreciationToDate	THEN ISNULL(dblImportGAAPDepToDate,0)  + ISNULL(dblMonth,0)
-	ELSE dblDepre
+	WHEN 
+		A.dtmImportedDepThru = Dep.dtmDepreciationToDate	
+		THEN
+			CASE 
+				WHEN strTransaction = 'Place in service'  THEN 0
+			ELSE		
+				ISNULL(dblImportGAAPDepToDate,0)  + ISNULL(dblMonth,0)
+			END
+	ELSE 
+		dblDepre
 END
 FROM
 @tblAssetInfo A 
 OUTER APPLY
 (
-
-	SELECT TOP 1 dtmDepreciationToDate,
-	dblDepreciationToDate
+	SELECT TOP 1
+	dtmDepreciationToDate,
+	dblDepreciationToDate,
+	strTransaction
 	FROM tblFAFixedAssetDepreciation
 	WHERE intAssetId = A.intAssetId
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
-
-
-
-
-
-
-
-
    
 INSERT INTO @tbl(
 	intAssetId,
