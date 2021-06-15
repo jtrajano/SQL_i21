@@ -322,8 +322,8 @@ BEGIN
 			, intItemLocationId
 			, dblOldCost
 			, dblNewCost
-			, dblOldEffectiveDate
-			, dblNewEffectiveDate				
+			, dtmOldEffectiveDate
+			, dtmNewEffectiveDate				
 		)
 		SELECT 
 			strAction 
@@ -427,26 +427,21 @@ BEGIN
 			AS		e
 			USING (
 				SELECT 
-					u.*
+					u.*,
+					p.intItemLocationId
 				FROM 
-					tblICItemPricing p 
-					INNER JOIN tblICEffectiveItemCost u 
-						ON u.intItemId = p.intItemId
-						AND u.intItemLocationId = p.intItemLocationId 
+					tblICItemPricing p
+					INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
+						ON p.intItemPricingId = u.intItemPricingId
 					INNER JOIN tblICItem i	
-						ON u.intItemId = i.intItemId 
+						ON i.intItemId = u.intItemId 
 					INNER JOIN tblICItemLocation il
-						ON il.intItemId = u.intItemId
-						AND il.intItemLocationId = u.intItemLocationId 
-				WHERE
-					p.intItemPricingId = @intItemPricingId
-					AND u.intItemId = @intItemId 
-					AND (
-						u.dtmEffectiveCostDate = @dtmEffectiveDate 
-						OR intEffectiveItemCostId = @intEffectiveItemCostId 
-					)
+						ON il.intItemId = i.intItemId
+						AND il.intItemLocationId = p.intItemLocationId 
 			) AS u
-				ON e.intEffectiveItemCostId = u.intEffectiveItemCostId
+				ON e.intItemId = u.intItemId 
+					AND e.intItemLocationId = u.intItemLocationId
+					AND e.dtmEffectiveCostDate = @dtmEffectiveDate
 
 			-- If matched, update the effective cost.
 			WHEN MATCHED THEN 
@@ -583,8 +578,8 @@ BEGIN
 			, intItemLocationId
 			, dblOldPrice
 			, dblNewPrice
-			, dblOldEffectiveDate
-			, dblNewEffectiveDate				
+			, dtmOldEffectiveDate
+			, dtmNewEffectiveDate				
 		)
 		SELECT 
 			strAction 
@@ -601,7 +596,8 @@ BEGIN
 			AS		e
 			USING (
 				SELECT 
-					u.*
+					u.*,
+					p.intItemLocationId
 				FROM 
 					tblICItemPricing p
 					INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
@@ -610,11 +606,11 @@ BEGIN
 						ON i.intItemId = u.intItemId 
 					INNER JOIN tblICItemLocation il
 						ON il.intItemId = i.intItemId
-						AND il.intItemLocationId = u.intItemLocationId 
+						AND il.intItemLocationId = p.intItemLocationId 
 			) AS u
 				ON e.intItemId = u.intItemId
 				AND e.intItemLocationId = u.intItemLocationId
-				AND e.dtmEffectiveCostDate = @dtmEffectiveDate
+				AND e.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
 
 			-- If matched, update the effective cost.
 			WHEN MATCHED THEN 
@@ -687,26 +683,21 @@ BEGIN
 			AS		e
 			USING (
 				SELECT 
-					u.*
+					u.*,
+					p.intItemLocationId
 				FROM 
-					tblICItemPricing p 
-					INNER JOIN tblICEffectiveItemPrice u 
-						ON u.intItemId = p.intItemId
-						AND u.intItemLocationId = p.intItemLocationId 
+					tblICItemPricing p
+					INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
+						ON p.intItemPricingId = u.intItemPricingId
 					INNER JOIN tblICItem i	
-						ON u.intItemId = i.intItemId 
+						ON i.intItemId = u.intItemId 
 					INNER JOIN tblICItemLocation il
 						ON il.intItemId = i.intItemId
-						AND il.intItemLocationId = u.intItemLocationId 
-				WHERE
-					p.intItemPricingId = @intItemPricingId
-					AND u.intItemId = @intItemId 
-					AND (
-						u.dtmEffectiveRetailPriceDate = @dtmEffectiveDate 
-						OR intEffectiveItemPriceId = @intEffectiveItemPriceId 
-					)
+						AND il.intItemLocationId = p.intItemLocationId 
 			) AS u
-				ON e.intEffectiveItemPriceId = u.intEffectiveItemPriceId
+				ON e.intItemId = u.intItemId 
+					AND e.intItemLocationId = u.intItemLocationId
+					AND e.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
 
 			-- If matched, update the effective cost.
 			WHEN MATCHED THEN 
