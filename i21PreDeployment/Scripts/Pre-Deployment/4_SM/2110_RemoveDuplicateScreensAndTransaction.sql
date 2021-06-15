@@ -24,7 +24,6 @@
 		INSERT INTO @DuplicateScreen (strNamespace)
 			SELECT strNamespace 
 			FROM tblSMScreen
-			WHERE ysnSearch = 0
 				GROUP BY strNamespace
 				HAVING COUNT(*) > 1
 
