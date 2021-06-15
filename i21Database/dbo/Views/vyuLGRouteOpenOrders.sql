@@ -1,7 +1,7 @@
 CREATE VIEW vyuLGRouteOpenOrders
 AS
 
-SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intSourceType)) as intKeyColumn,*  FROM (
+SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intSourceType, dtmScheduledDate DESC)) as intKeyColumn,*  FROM (
 SELECT 
 	intSourceType = 2 /* TM Orders */
 	,intOrderId = TMO.intDispatchId
@@ -59,8 +59,10 @@ SELECT
 	,strFillMethod = TMO.strFillMethod
 	,ysnHold = TMO.ysnHold
 	,ysnRoutingAlert = TMO.ysnRoutingAlert
-	,strRoute = CAST(NULL AS NVARCHAR(500))
+	,strRoute = TMR.strRouteId
 FROM vyuTMGeneratedCallEntry TMO 
+LEFT JOIN tblTMSite TMS ON TMS.intSiteID = TMO.intSiteID
+LEFT JOIN tblTMRoute TMR ON TMR.intRouteId = TMS.intRouteId
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = TMO.intCompanyLocationId
 WHERE TMO.strOrderStatus <> 'Delivered' AND TMO.strOrderStatus <> 'Routed'
 
@@ -257,7 +259,7 @@ SELECT
 	,strFillMethod = ''
 	,ysnHold = Cast(0 as Bit)
 	,ysnRoutingAlert = Cast(0 as Bit)
-	,strRoute = CAST(NULL AS NVARCHAR(500))
+	,strRoute = TMO.strRoute
 FROM vyuTMCustomerConsumptionSiteInfo TMO WHERE TMO.ysnActive = 1
 
 UNION ALL
@@ -396,6 +398,8 @@ LEFT JOIN tblSMCompanyLocationSubLocation ToStrg ON ToStrg.intCompanyLocationSub
 LEFT JOIN vyuARCustomerInquiryReport CB ON CB.intEntityCustomerId = E.intEntityId
 LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = I.intItemId AND OH.intLocationId = CompLoc.intCompanyLocationId
 WHERE SO.strTransactionType = 'Order' AND SO.strOrderStatus NOT IN ('Closed')
+AND NOT EXISTS (SELECT 1 FROM tblLGRouteOrder RO INNER JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
+				WHERE R.intSourceType = 6 AND R.ysnPosted = 1 AND RO.strOrderNumber = SO.strSalesOrderNumber)
 
 UNION ALL
 
@@ -470,5 +474,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation FromStrg ON FromStrg.intCompanyLocatio
 LEFT JOIN tblSMCompanyLocationSubLocation ToStrg ON ToStrg.intCompanyLocationSubLocationId = ITD.intToSubLocationId
 LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = I.intItemId AND OH.intLocationId = FromLoc.intCompanyLocationId
 WHERE IT.intStatusId IN (1, 2)
+AND NOT EXISTS (SELECT 1 FROM tblLGRouteOrder RO INNER JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
+				WHERE R.intSourceType = 6 AND R.ysnPosted = 1 AND RO.strOrderNumber = IT.strTransferNo)
 
 ) t1
