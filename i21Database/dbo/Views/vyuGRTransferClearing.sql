@@ -312,7 +312,7 @@ AND APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
 UNION ALL
 /*START ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
-SELECT	
+SELECT DISTINCT	
 	'3'  collate Latin1_General_CI_AS AS TEST,
     receipt.intEntityVendorId AS intEntityVendorId
     ,receipt.dtmReceiptDate AS dtmDate

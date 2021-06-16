@@ -735,6 +735,8 @@ BEGIN TRY
 							,'AWO'
 							,@LineItems
 
+						
+						set @intOrderId = 6
 						----------Remove the reservation from WorkOrder for the Item in ticket
 
 						EXEC [uspSCUpdateAGWorkOrderItemReservation] @intTicketAGWorkOrderId, @intTicketId,@intItemId, 1
@@ -743,6 +745,7 @@ BEGIN TRY
 				END
 			END
 		END
+			
 
 	SELECT @strWhereFinalizedWeight = strWeightFinalized
 		 , @strWhereFinalizedGrade = strGradeFinalized

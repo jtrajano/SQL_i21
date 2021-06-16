@@ -64,10 +64,30 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspS
        DROP PROCEDURE uspSMValidateRemoteDBServer;
 GO
 
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspIUAuditLogs'))
+       DROP PROCEDURE uspIUAuditLogs;
+GO
+
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateReIndexMaintenancePlan'))
+       DROP PROCEDURE uspSMCreateReIndexMaintenancePlan;
+GO
+
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateAttachmentFromFile'))
+       DROP PROCEDURE uspSMCreateAttachmentFromFile;
+GO
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSPAuditLogs'))
+       DROP PROCEDURE uspSPAuditLogs;
+GO
+IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateAuditLogMigrationPlan'))
+       DROP PROCEDURE uspSMCreateAuditLogMigrationPlan;
+GO
+
 
 
 PRINT 'End SM Clean up Objects - Drop obsolete objects'
 GO
+
+
 
 PRINT 'Begin Customer Portal Clean up Objects - Drop obsolete objects'
 GO
@@ -167,5 +187,5 @@ GO
 
 
 
-PRINT 'End SM Clean up Objects - Drop obsolete objects'
+PRINT 'End Customer Portal Clean up Objects - Drop obsolete objects'
 GO

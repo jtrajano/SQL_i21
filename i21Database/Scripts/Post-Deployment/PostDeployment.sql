@@ -96,7 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 :r .\SM\2110_CreateIDPGridLayout.sql
-
+:r .\SM\2110_UpdateAuditLogs.sql
 
 
 -- Canned Report
@@ -663,7 +663,7 @@ print 'BEGIN POST DEPLOYMENT'
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
 --:r .\SM\1830_ReIndexTables.sql
-:r .\SM\1830_CreateReIndexMaintenancePlan.sql
+--:r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
 -- MB - Meter Billing
@@ -679,6 +679,13 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\9_CleanupObjects.sql
 :r .\CT\2_CleanupObjects.sql
 :r .\MF\11_CleanupObjects.sql
-
+:r .\TR\01_CleanupObjects.sql
+:r .\LG\3_CleanupObjects.sql
+:r .\GL\01_CleanupObjects.sql
+:r .\AP\01_CleanupObjects.sql
+:r .\ET\01_CleanupObjects.sql
+:r .\PAT\6_CleanupObjects.sql
+:r .\TF\01_CleanupObjects.sql
+:r .\MF\13_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'
