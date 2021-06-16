@@ -18,6 +18,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intDirectType AS INT = 3
+DECLARE @AGWorkOrderType AS INT = 59
 DECLARE @intTicketStorageScheduleTypeId AS INT
 
 
@@ -112,7 +113,7 @@ BEGIN TRY
 						,intTransactionId = ScaleTicket.intTicketId
 						,intTransactionDetailId = NULL
 						,strTransactionId = ScaleTicket.strTicketNumber
-						,intTransactionTypeId = @intDirectType 
+						,intTransactionTypeId = @AGWorkOrderType --@intDirectType 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
