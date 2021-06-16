@@ -1026,25 +1026,15 @@ begin try
 					--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
 					if (isnull(@intCreatedPriceFixationDetailId,0) > 0)
 					begin
-						INSERT INTO tblCTPriceFixationDetailAPAR(
-							intPriceFixationDetailId
-							,intBillId
-							,intBillDetailId
-							,intSourceId
-							,dblQuantity
-							,dtmCreatedDate
-							,ysnMarkDelete
-							,intConcurrencyId  
-						)  
-						SELECT   
-							intPriceFixationDetailId = @intCreatedPriceFixationDetailId  
-							,intBillId = @intCreatedBillId  
-							,intBillDetailId = @intCreatedBillDetailId 
-							,intSourceId = @intCreatedInventoryReceiptItemId
-							,dblQuantity = @dblCreatedQtyReceived
-							,dtmCreatedDate = getdate()
-							,ysnMarkDelete = null
-							,intConcurrencyId = 1
+
+						exec uspCTCreatePricingAPARLink
+							@intPriceFixationDetailId = @intCreatedPriceFixationDetailId
+							,@intHeaderId = @intCreatedBillId
+							,@intDetailId = @intCreatedBillDetailId
+							,@intSourceHeaderId = null
+							,@intSourceDetailId = @intCreatedInventoryReceiptItemId
+							,@dblQuantity = @dblCreatedQtyReceived
+							,@strScreen = 'Voucher'
 					end
 
 					--4. Apply PrePay

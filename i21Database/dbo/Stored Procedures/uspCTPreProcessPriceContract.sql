@@ -413,8 +413,9 @@ BEGIN
 				insert into @ValidateResult  
 				exec uspCTValidatePricingUpdateDelete    
 					@intPriceFixationDetailId = @intPriceFixationDetailId    
-					,@dblPricedQuantity = @dblTransactionQuantity    
-					,@strTransaction = @strPriceFixationDetailState    
+					,@dblPricedQuantity = @dblTransactionQuantity 
+					,@strTransaction = @strPriceFixationDetailState
+					,@dblFuturePrice = @dblFuturePrice 
 
 				if exists (select top 1 1 from @ValidateResult where strMessage <> 'success')    
 				begin    
