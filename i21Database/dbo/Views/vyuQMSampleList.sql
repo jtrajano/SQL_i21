@@ -5,6 +5,8 @@ SELECT S.intSampleId
 	,S.strSampleRefNo
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
+	,CH1.strContractNumber AS strContract
+	,dbo.fnQMGetAssignedSequences(S.intSampleId) COLLATE Latin1_General_CI_AS AS strAssignedSequences
 	,CY.strCommodityCode
 	,CY.strDescription AS strCommodityDescription
 	,CH.strCustomerContract
@@ -36,7 +38,8 @@ SELECT S.intSampleId
 	,S.dtmSamplingEndDate
 	,S.intContractDetailId
 	,ST.intSampleTypeId
-	,CH.intContractHeaderId
+	,CH.intContractHeaderId AS intLinkContractHeaderId
+	,CH1.intContractHeaderId
 	,I.intItemId
 	,S.intItemBundleId
 	,SH.intLoadId
@@ -78,6 +81,7 @@ JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
 LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN dbo.tblCTContractHeader CH1 ON CH1.intContractHeaderId = S.intContractHeaderId
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem I1 ON I1.intItemId = S.intItemBundleId

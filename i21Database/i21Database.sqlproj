@@ -9460,6 +9460,8 @@
     <None Include="Scripts\Post-Deployment\SM\2110_UpdateAuditLogs.sql" />
     <None Include="Scripts\Post-Deployment\DropEncryptionCertificateAndSymmetricKey.sql" />
     <None Include="Scripts\Post-Deployment\MF\13_CleanupObjects.sql" />
+    <Build Include="dbo\Views\vyuQMSampleContractSequenceNotMapped.sql" />
+    <Build Include="dbo\Functions\fnQMGetAssignedSequences.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -6,6 +6,7 @@ SELECT S.intSampleId
 	,IR.strReceiptNumber
 	,INVS.strShipmentNumber
 	,CH.intContractTypeId
+	,CD.intContractHeaderId AS intLinkContractHeaderId
 	,ST.strSampleTypeName
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strSequenceNumber
 	,L.strLoadNumber
