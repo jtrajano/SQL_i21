@@ -130,10 +130,16 @@ BEGIN TRY
 			
 	);  
 
-	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(pfd.dblQuantity, 0)), 0)
-	FROM tblCTPriceFixation pf
-	JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
-	WHERE intContractHeaderId = @intContractHeaderId 
+	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+	FROM (
+		SELECT dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, tCum.intUnitMeasureId, fCum.intUnitMeasureId, ISNULL(pfd.dblQuantity, 0))
+		FROM tblCTPriceFixation pf
+		JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
+		JOIN tblICCommodityUnitMeasure fCum ON fCum.intCommodityUnitMeasureId = @intCommodityUOMId
+		JOIN tblICItemUOM tCum ON tCum.intItemUOMId = pfd.intQtyItemUOMId
+		WHERE intContractHeaderId = @intContractHeaderId 
+	) tbl
+	
 
 	IF @RowState = 'Added'
 	BEGIN
