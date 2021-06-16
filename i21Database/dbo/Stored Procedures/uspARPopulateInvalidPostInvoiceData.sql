@@ -2683,16 +2683,20 @@ INNER JOIN ##ARPostInvoiceHeader II ON I.intInvoiceId = II.intInvoiceId AND I.st
 INNER JOIN (
 	SELECT intTransactionId		= GL.intTransactionId
 	     , strTransactionId		= GL.strTransactionId
-		 , strAccountCategory	= GLAD.strAccountCategory
+		 , strAccountCategory	= GLAC.strAccountCategory
 	     , dblAmount			= SUM(dblDebit - dblCredit)
 	FROM tblGLDetail GL
-	INNER JOIN vyuGLAccountDetail GLAD ON GL.intAccountId = GLAD.intAccountId
+	INNER JOIN tblGLAccount GLA ON GL.intAccountId = GLA.intAccountId
+	INNER JOIN tblGLAccountSegmentMapping GLSM ON GLA.intAccountId = GLSM.intAccountId
+	INNER JOIN tblGLAccountSegment GLS ON GLSM.intAccountSegmentId = GLS.intAccountSegmentId
+	INNER JOIN tblGLAccountStructure GLAST ON GLS.intAccountStructureId = GLAST.intAccountStructureId AND GLAST.strType = 'Primary'
+	INNER JOIN tblGLAccountCategory GLAC ON GLS.intAccountCategoryId = GLAC.intAccountCategoryId
 	INNER JOIN ##ARPostInvoiceHeader IH ON IH.intInvoiceId = GL.intTransactionId AND IH.strInvoiceNumber = GL.strTransactionId	
-	WHERE GLAD.strAccountCategory IN ('AR Account', 'Undeposited Funds')
+	WHERE GLAC.strAccountCategory IN ('AR Account', 'Undeposited Funds')
 	  AND GL.ysnIsUnposted = 0
 	  AND GL.strCode = 'AR'
 	  AND IH.ysnPost = 1
-	GROUP BY GL.intTransactionId, GL.strTransactionId, GLAD.strAccountCategory
+	GROUP BY GL.intTransactionId, GL.strTransactionId, GLAC.strAccountCategory
 	HAVING SUM(dblDebit - dblCredit) <> 0 
 ) GL ON I.intInvoiceId = GL.intTransactionId
     AND I.strInvoiceNumber = GL.strTransactionId
