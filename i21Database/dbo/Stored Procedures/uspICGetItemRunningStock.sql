@@ -355,7 +355,7 @@ SELECT
 	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
 	, dblCost = 
 			COALESCE(
-				dbo.fnICGetPromotionalCostByEffectiveDate(i.intItemId, t.intItemLocationId, @dtmDate), 
+				dbo.fnICGetPromotionalCostByEffectiveDate(i.intItemId, t.intItemLocationId, ItemUOM.intItemUOMId, @dtmDate), 
 				CASE 
 					-- Get the average cost. 
 					WHEN CostMethod.intCostingMethodId = 1 THEN 				

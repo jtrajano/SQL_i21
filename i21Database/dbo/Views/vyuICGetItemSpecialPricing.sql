@@ -12,6 +12,7 @@ SELECT	intItemSpecialPricingId		= SpecialPricing.intItemSpecialPricingId
 		,strCategory				= Category.strCategoryCode
 		,strLotTracking				= Item.strLotTracking			
 		,intLocationId				= ItemLocation.intLocationId
+		,intItemLocationId			= SpecialPricing.intItemLocationId
 		,strLocationName			= CompanyLocation.strLocationName
 		,intItemUnitMeasureId		= SpecialPricing.intItemUnitMeasureId
 		,strUnitMeasure				= um.strUnitMeasure

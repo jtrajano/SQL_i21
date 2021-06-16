@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnICGetPromotionalCostByEffectiveDate] (
 	@intItemId INT,
 	@intItemLocationId INT,
+	@intItemUnitMeasureId INT,
 	@dtmTransactionDate DATETIME
 )
 RETURNS NUMERIC(18, 6)
@@ -12,7 +13,8 @@ BEGIN
 	SELECT TOP 1 @dblPromotionalCost = dblCost 
 	FROM tblICItemSpecialPricing
 	WHERE intItemId = @intItemId
-		AND intItemLocationId = @intItemLocationId 
+		AND intItemLocationId = @intItemLocationId
+		AND intItemUnitMeasureId = @intItemUnitMeasureId
 		AND 
 		(
 			dtmBeginDate <= @dtmTransactionDate AND
