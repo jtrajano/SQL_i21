@@ -212,7 +212,7 @@ BEGIN TRY
 						)
 			END
 
-			IF @dblNetWeight <= 0
+			IF @dblNetWeight < 0
 			BEGIN
 				RAISERROR (
 						'Invalid Net Weight. '
@@ -259,6 +259,18 @@ BEGIN TRY
 				AND L.intItemId = @intItemId
 				AND L.intSubLocationId = @intSubLocationId
 				AND L.intStorageLocationId = @intStorageLocationId
+
+			IF ISNULL(@intLotId, 0) = 0
+			BEGIN
+				IF @dblNetWeight <= 0
+				BEGIN
+					RAISERROR (
+							'Net Weight cannot be 0. '
+							,16
+							,1
+							)
+				END
+			END
 
 			BEGIN TRAN
 
