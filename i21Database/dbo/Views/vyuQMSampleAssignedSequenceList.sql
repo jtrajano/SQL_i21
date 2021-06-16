@@ -1,15 +1,15 @@
-﻿CREATE VIEW vyuQMSampleList
+﻿CREATE VIEW vyuQMSampleAssignedSequenceList
 AS
 SELECT S.intSampleId
 	,S.strSampleNumber
 	,S.strSampleRefNo
 	,ST.strSampleTypeName
-	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
+	--,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS strContractNumber
 	,CH1.strContractNumber AS strContract
-	,dbo.fnQMGetAssignedSequences(S.intSampleId) COLLATE Latin1_General_CI_AS AS strAssignedSequences
+	--,dbo.fnQMGetAssignedSequences(S.intSampleId) COLLATE Latin1_General_CI_AS AS strAssignedSequences
 	,CY.strCommodityCode
 	,CY.strDescription AS strCommodityDescription
-	,CH.strCustomerContract
+	,CH1.strCustomerContract
 	,IC.strContractItemName
 	,I1.strItemNo AS strBundleItemNo
 	,I.strItemNo
@@ -38,7 +38,7 @@ SELECT S.intSampleId
 	,S.dtmSamplingEndDate
 	,S.intContractDetailId
 	,ST.intSampleTypeId
-	,CH.intContractHeaderId AS intLinkContractHeaderId
+	--,CH.intContractHeaderId AS intLinkContractHeaderId
 	,CH1.intContractHeaderId
 	,I.intItemId
 	,S.intItemBundleId
@@ -60,7 +60,7 @@ SELECT S.intSampleId
 	,S.strComment
 	,ISNULL(ito1.intOwnerId, ito2.intOwnerId) AS intEntityId
 	,S1.strSampleNumber AS strParentSampleNo
-	,CD.strItemSpecification
+	--,CD.strItemSpecification
 	,SL.strName AS strStorageLocationName
 	,B.strBook
 	,SB.strSubBook
@@ -75,15 +75,17 @@ SELECT S.intSampleId
 			THEN CL1.strLocationName
 		ELSE E2.strName
 		END AS strSentByValue
-	,NULL AS strSequenceNumber
-	,NULL AS dblAssignedQty
-	,NULL AS strAssignedQtyUOM
+	,LTRIM(CD.intContractSeq) AS strSequenceNumber
+	,SCS.dblQuantity AS dblAssignedQty
+	,UOM.strUnitMeasure AS strAssignedQtyUOM
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
-LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+JOIN dbo.tblQMSampleContractSequence SCS ON SCS.intSampleId = S.intSampleId
+JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = SCS.intContractDetailId
+LEFT JOIN dbo.tblICUnitMeasure UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId
+--LEFT JOIN dbo.tblCTContractDetail AS CD ON CD.intContractDetailId = S.intContractDetailId
 LEFT JOIN dbo.tblCTContractHeader CH1 ON CH1.intContractHeaderId = S.intContractHeaderId
 LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
@@ -110,7 +112,7 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblICInventoryShipment INVS ON INVS.intInventoryShipmentId = S.intInventoryShipmentId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
-LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH.intCommodityId
+LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH1.intCommodityId
 LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
 LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById

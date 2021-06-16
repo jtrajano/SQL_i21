@@ -9462,6 +9462,8 @@
     <None Include="Scripts\Post-Deployment\MF\13_CleanupObjects.sql" />
     <Build Include="dbo\Views\vyuQMSampleContractSequenceNotMapped.sql" />
     <Build Include="dbo\Functions\fnQMGetAssignedSequences.sql" />
+    <Build Include="dbo\Views\vyuQMSampleAssignedSequenceList.sql" />
+    <Build Include="dbo\Views\vyuQMSampleAssignedSequenceListUserRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
