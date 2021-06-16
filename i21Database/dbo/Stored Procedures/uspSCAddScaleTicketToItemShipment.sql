@@ -45,6 +45,7 @@ DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
 		@intLotType INT;
 
+DECLARE @AGWorkOrderType AS INT = 59
 SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intLoadId = SC.intLoadId
 , @intContractDetailId = SC.intContractId 
@@ -254,7 +255,7 @@ BEGIN
 		,intOrderId					=  CASE WHEN ISNULL(@splitDistribution,'') <> 'ICN' THEN CNT.intContractHeaderId ELSE NULL END
 		,dtmShipDate				= SC.dtmTicketDateTime
 		,intSourceId				= SC.intTicketId
-		,intSourceType				= 1
+		,intSourceType				= CASE WHEN LI.intTransactionTypeId = @AGWorkOrderType THEN @AGWorkOrderType ELSE 1 END 
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					=  CASE 
