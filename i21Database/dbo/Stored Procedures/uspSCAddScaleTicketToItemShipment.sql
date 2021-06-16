@@ -255,7 +255,7 @@ BEGIN
 		,intOrderId					=  CASE WHEN ISNULL(@splitDistribution,'') <> 'ICN' THEN CNT.intContractHeaderId ELSE NULL END
 		,dtmShipDate				= SC.dtmTicketDateTime
 		,intSourceId				= SC.intTicketId
-		,intSourceType				= CASE WHEN LI.intTransactionTypeId = @AGWorkOrderType THEN @AGWorkOrderType ELSE 1 END 
+		,intSourceType				= 1
 		,strSourceScreenName		= 'Scale Ticket'
 		,strChargesLink				= 'CL-'+ CAST (LI.intId AS nvarchar(MAX)) 
 		,dblGross					=  CASE 
