@@ -9464,6 +9464,8 @@
     <Build Include="dbo\Functions\fnQMGetAssignedSequences.sql" />
     <Build Include="dbo\Views\vyuQMSampleAssignedSequenceList.sql" />
     <Build Include="dbo\Views\vyuQMSampleAssignedSequenceListUserRole.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
