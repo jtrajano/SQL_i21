@@ -9397,6 +9397,8 @@
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
     <None Include="Scripts\Post-Deployment\MF\13_CleanupObjects.sql" />
     <Build Include="dbo\Functions\fnStripHtmlAndFixSpecial.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
