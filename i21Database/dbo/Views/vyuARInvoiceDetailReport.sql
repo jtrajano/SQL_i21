@@ -84,8 +84,7 @@ LEFT JOIN (
 			 , intContractSeq
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 	) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
-) CT ON ID.intContractHeaderId = CT.intContractHeaderId
-	AND ID.intContractDetailId = CT.intContractDetailId
+) CT ON ID.intContractDetailId = CT.intContractDetailId
 LEFT OUTER JOIN(
 	SELECT intCompanyLocationId
 		 , strLocationName 
