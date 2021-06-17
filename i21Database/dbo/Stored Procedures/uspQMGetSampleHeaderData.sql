@@ -303,6 +303,7 @@ BEGIN
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
 	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	LEFT JOIN vyuLGLoadContainerReceiptContracts S ON S.intPContractDetailId = C.intContractDetailId
+		AND S.intLoadContainerId <> -1
 	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
 	WHERE L.intLotId = @intProductValueId
 END
@@ -409,6 +410,7 @@ BEGIN
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
 	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	LEFT JOIN vyuLGLoadContainerReceiptContracts S ON S.intPContractDetailId = C.intContractDetailId
+		AND S.intLoadContainerId <> -1
 	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
 	WHERE PL.intParentLotId = @intProductValueId
 END
