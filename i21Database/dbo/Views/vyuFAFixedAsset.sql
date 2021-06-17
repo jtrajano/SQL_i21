@@ -35,6 +35,8 @@ FA.ysnImported,
 FA.dtmImportedDepThru,  
 FA.dblImportGAAPDepToDate,  
 FA.dblImportTaxDepToDate,  
+dblGAAPDepToDate = ISNULL(GAAPDepreciation.dblDepreciationToDate,0),
+dblTaxDepToDate = ISNULL(TaxDepreciation.dblDepreciationToDate,0),
 ysnTaxDepreciated = ISNULL(FA.ysnTaxDepreciated,0),  
 ysnDepreciated = ISNULL(FA.ysnDepreciated, 0) | ISNULL(FA.ysnTaxDepreciated, 0),  
 FA.ysnDisposed,       
@@ -76,3 +78,19 @@ OUTER APPLY(
     WHERE intAssetId = FA.intAssetId  
     AND ISNULL(ysnFullyDepreciated,0) = 0  
 )BDFD
+OUTER APPLY (
+    SELECT 
+    MAX(dblDepreciationToDate) dblDepreciationToDate
+    FROM tblFAFixedAssetDepreciation
+    WHERE intAssetId = FA.intAssetId
+    AND intBookId =1
+    
+)GAAPDepreciation
+OUTER APPLY (
+    SELECT 
+    MAX(dblDepreciationToDate) dblDepreciationToDate
+    FROM tblFAFixedAssetDepreciation
+    WHERE intAssetId = FA.intAssetId
+    AND intBookId =2
+    
+)TaxDepreciation
