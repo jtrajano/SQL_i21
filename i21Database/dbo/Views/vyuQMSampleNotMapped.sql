@@ -33,6 +33,7 @@ SELECT S.intSampleId
 		ELSE E2.strName
 		END AS strSentByValue
 	,ST.ysnPartyMandatory
+	,ST.ysnMultipleContractSeq
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
