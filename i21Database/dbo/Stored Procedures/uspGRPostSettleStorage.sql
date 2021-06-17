@@ -2352,15 +2352,16 @@ BEGIN TRY
 							JOIN tblICItem b
 									ON b.intItemId = a.intItemId and b.strType = 'Inventory'
 
-
+				
 						update  a set 
-								dblQuantityToBill = isnull(@total_units_for_voucher, dblQuantityToBill), 
-								dblNetWeight = isnull(@total_units_for_voucher, dblNetWeight),
-								dblOrderQty =  isnull(@total_units_for_voucher, dblOrderQty)
+								dblQuantityToBill = case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblQuantityToBill) end, 
+								dblNetWeight = case when b.ysnDiscountFromGrossWeight = 1 then dblNetWeight else isnull(@total_units_for_voucher, dblNetWeight) end,
+								dblOrderQty =  case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblOrderQty) end
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
-							where b.intItemType = 2
+							where b.intItemType in (2, 3)
+													
 					end
 
 				---Adding Freight Charges.
