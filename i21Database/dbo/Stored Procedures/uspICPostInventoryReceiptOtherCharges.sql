@@ -1,4 +1,4 @@
-﻿alter PROCEDURE [dbo].[uspICPostInventoryReceiptOtherCharges]
+﻿CREATE PROCEDURE [dbo].[uspICPostInventoryReceiptOtherCharges]
 	@intInventoryReceiptId AS INT 
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
