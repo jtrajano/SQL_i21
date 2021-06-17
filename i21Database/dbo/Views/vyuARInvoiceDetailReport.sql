@@ -61,26 +61,22 @@ INNER JOIN (
 		FROM tblARCustomer WITH (NOLOCK)
 	) ARC ON EME.intEntityId = ARC.intEntityId
 ) C ON I.intEntityCustomerId = C.intEntityId
-LEFT JOIN (SELECT intItemId
-				, strItemNo
-				, strDescription
-		   FROM 
-			dbo.tblICItem WITH (NOLOCK)
-			) ITEM ON ID.intItemId = ITEM.intItemId
-LEFT JOIN (SELECT CTH.intContractHeaderId
-				, CTH.strContractNumber
-				, CTD.intContractDetailId
-				, CTD.intContractSeq
-		   FROM 
-			dbo.tblCTContractHeader CTH WITH (NOLOCK)
-		   INNER JOIN (SELECT intContractHeaderId
-							, intContractDetailId
-							, intContractSeq
-					   FROM 
-						dbo.tblCTContractDetail WITH (NOLOCK)
-					 ) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
-			) CT ON ID.intContractHeaderId = CT.intContractHeaderId
-				AND ID.intContractDetailId = CT.intContractDetailId
+LEFT JOIN (
+	SELECT intItemId
+		 , strItemNo
+		 , strDescription
+	FROM dbo.tblICItem WITH (NOLOCK)
+) ITEM ON ID.intItemId = ITEM.intItemId
+LEFT JOIN (
+	SELECT CTH.intContractHeaderId
+		 , CTH.strContractNumber
+		 , CTD.intContractDetailId
+		 , CTD.intContractSeq
+	FROM dbo.tblCTContractHeader CTH WITH (NOLOCK)
+	INNER JOIN tblCTContractDetail CTD WITH (NOLOCK) ON CTH.intContractHeaderId = CTD.intContractHeaderId
+) CT ON ID.intContractDetailId = CT.intContractDetailId
 LEFT OUTER JOIN(
-	SELECT intCompanyLocationId, strLocationName FROM tblSMCompanyLocation WITH (NOLOCK)
+	SELECT intCompanyLocationId
+	     , strLocationName 
+	FROM tblSMCompanyLocation WITH (NOLOCK)
 ) L ON I.intCompanyLocationId = L.intCompanyLocationId
