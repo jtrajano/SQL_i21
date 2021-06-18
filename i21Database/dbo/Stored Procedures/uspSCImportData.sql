@@ -72,6 +72,7 @@ BEGIN TRY
 				[intTicketType] INT NOT NULL, 
 				[strInOutFlag] NVARCHAR COLLATE Latin1_General_CI_AS NOT NULL, 
 				[dtmTicketDateTime] DATETIME NULL, 
+				[dtmTransactionDateTime] DATETIME NULL, 
 				[dtmTicketTransferDateTime] DATETIME NULL, 
 				[dtmTicketVoidDateTime] DATETIME NULL, 
 				[intProcessingLocationId] INT NULL, 
@@ -204,6 +205,7 @@ BEGIN TRY
 				[intTicketType] INT, 
 				[strInOutFlag] NVARCHAR, 
 				[dtmTicketDateTime] DATETIME, 
+				[dtmTransactionDateTime] DATETIME, 
 				[dtmTicketTransferDateTime] DATETIME, 
 				[dtmTicketVoidDateTime] DATETIME, 
 				[intProcessingLocationId] INT, 
@@ -725,6 +727,7 @@ BEGIN TRY
 					,[intTicketType] 
 					,[strInOutFlag]
 					,[dtmTicketDateTime]
+					,[dtmTransactionDateTime]
 					,[dtmTicketTransferDateTime]
 					,[dtmTicketVoidDateTime]
 					,[intProcessingLocationId] 
@@ -853,6 +856,7 @@ BEGIN TRY
 					,SCT.[intTicketType] 
 					,SCT.[strInOutFlag]
 					,SCT.[dtmTicketDateTime]
+					,SCT.[dtmTransactionDateTime]
 					,SCT.[dtmTicketTransferDateTime]
 					,SCT.[dtmTicketVoidDateTime]
 					,SCT.[intProcessingLocationId] 
@@ -1164,6 +1168,7 @@ BEGIN TRY
 					,SC.intTicketType							= SCT.intTicketType 
 					,SC.strInOutFlag							= SCT.strInOutFlag 
 					,SC.dtmTicketDateTime						= SCT.dtmTicketDateTime 
+					,SC.dtmTransactionDateTime					= SCT.dtmTransactionDateTime 
 					,SC.dtmTicketTransferDateTime				= SCT.dtmTicketTransferDateTime 
 					,SC.dtmTicketVoidDateTime					= SCT.dtmTicketVoidDateTime 
 					,SC.intProcessingLocationId					= SCT.intProcessingLocationId 
