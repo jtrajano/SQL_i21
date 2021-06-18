@@ -46,7 +46,7 @@ BEGIN
 				,A.intNextDeliveryDegreeDay
 				,K.strRouteId
 				,strItemNo = ISNULL(O.vwitm_no, I.vwitm_no) COLLATE Latin1_General_CI_AS
-				,strItemDescription = CASE WHEN O.strItemNo IS NULL THEN I.strDescription ELSE O.strDescription END
+				,strItemDescription = CASE WHEN O.vwitm_no IS NULL THEN I.vwitm_desc ELSE O.vwitm_desc END
 				,J.dtmRequestedDate
 				,strTerm = ISNULL(CAST(L.vwtrm_desc AS NVARCHAR(20)),'''')  COLLATE Latin1_General_CI_AS 
 				,dblARBalance = C.vwcus_balance 

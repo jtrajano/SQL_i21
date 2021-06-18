@@ -8960,6 +8960,8 @@
     <Build Include="dbo\Views\vyuARTaxDetailExemptReport.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <Build Include="dbo\Functions\fnStripHtmlAndFixSpecial.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9236,6 +9238,7 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
