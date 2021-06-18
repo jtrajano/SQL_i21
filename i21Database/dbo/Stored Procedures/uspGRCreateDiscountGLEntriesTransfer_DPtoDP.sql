@@ -191,13 +191,17 @@ CROSS APPLY dbo.fnGetCreditForeign(
 WHERE GL.strDescription LIKE '%Charges from%'
 	AND GL.ysnIsUnposted = 0
 	AND ForGLEntries_CTE.strTransactionType = 'Source'
+	AND (
+		(Debit.[Value] > 0 AND GL.dblDebit > 0)
+		OR (Credit.[Value] > 0 AND GL.dblCredit> 0)
+	)
 
 UNION ALL
 
 -------------------------------------------------------------------------------------------
 --OPEN CLEARING FOR NEW DP STORAGE
 -------------------------------------------------------------------------------------------
-SELECT	
+SELECT 
 	dtmDate						= ForGLEntries_CTE.dtmDate
 	,strBatchId					= @strBatchId
 	,intAccountId				= ForGLEntries_CTE.intAccountId
@@ -258,4 +262,8 @@ CROSS APPLY (SELECT strDescription FROM tblGLAccount GLA WHERE intAccountId = Fo
 WHERE GL.strDescription LIKE '%Charges from%'
 	AND GL.ysnIsUnposted = 0
 	AND ForGLEntries_CTE.strTransactionType = 'To'
+	AND (
+		(Debit.[Value] > 0 AND GL.dblDebit > 0)
+		OR (Credit.[Value] > 0 AND GL.dblCredit> 0)
+	)
 ;
