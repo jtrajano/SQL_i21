@@ -313,8 +313,301 @@ LEFT JOIN
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
-    ON itemUOM.intItemUOMId = CS_TO.intItemUOMId
-WHERE GL_TO.strDescription LIKE '%Charges from %' AND GL_FROM.strDescription LIKE '%Charges from %'
+    ON itemUOM.intItemUOMId = CS.intItemUOMId
+-- WHERE GL.strDescription NOT LIKE '%Charges from %'
+WHERE GL.strCode = 'IC'
+--AND TS.strTransferStorageTicket = 'TRA-563'
+AND QM.dblDiscountDue <> 0
+AND GLDetail.intAccountId IS NOT NULL
+--AND TS.dtmTransferStorageDate between '03/03/2021' and '03/04/2021'
+
+
+
+
+
+
+
+
+
+
+    -- Voucher for IR Charges
+    UNION ALL
+    SELECT DISTINCT '8' AS TEST,
+        bill.intEntityVendorId      
+        ,bill.dtmDate AS dtmDate      
+        ,receipt.strReceiptNumber      
+        ,receipt.intInventoryReceiptId      
+        ,bill.intBillId      
+        ,bill.strBillId      
+        ,NULL AS intTransferStorageReferenceId
+        ,billDetail.intInventoryReceiptChargeId      
+        ,billDetail.intItemId      
+        ,billDetail.intUnitOfMeasureId AS intItemUOMId  
+        ,unitMeasure.strUnitMeasure AS strUOM  
+        ,ROUND(
+            (
+                CASE WHEN ABS(billDetail.dblTotal) <> receiptCharge.dblAmount
+                    THEN (
+                    --IF THERE IS OLD COST, ASSUME THIS IS NOT PRORATED
+                    --PRO RATED SHOULD HAVE NO COST ADJUSTMENT
+                    CASE WHEN billDetail.dblOldCost IS NOT NULL
+                    THEN receiptCharge.dblAmount * (CASE WHEN billDetail.dblQtyReceived < 0 THEN -1 ELSE 1 END)
+                    ELSE billDetail.dblTotal
+                    END
+                    )
+                ELSE billDetail.dblTotal END
+            )
+        , 2) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        ) AS dblVoucherTotal      
+        ,ROUND(CASE       
+            WHEN billDetail.intWeightUOMId IS NULL THEN       
+                ISNULL(billDetail.dblQtyReceived, 0)       
+            ELSE       
+                CASE       
+                    WHEN ISNULL(billDetail.dblNetWeight, 0) = 0 THEN       
+                        ISNULL(dbo.fnCalculateQtyBetweenUOM(billDetail.intUnitOfMeasureId, billDetail.intWeightUOMId, ISNULL(billDetail.dblQtyReceived, 0)), 0)      
+                    ELSE       
+                        ISNULL(billDetail.dblNetWeight, 0)       
+                END      
+        END,2) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        ) AS dblVoucherQty      
+        ,0 AS dblReceiptChargeTotal
+        ,0 AS dblReceiptChargeQty 
+        ,receipt.intLocationId      
+        ,compLoc.strLocationName      
+        ,CAST(1 AS BIT) ysnAllowVoucher 
+    FROM tblAPBill bill      
+    INNER JOIN tblAPBillDetail billDetail      
+        ON bill.intBillId = billDetail.intBillId      
+    INNER JOIN tblICInventoryReceiptCharge receiptCharge      
+        ON billDetail.intInventoryReceiptChargeId  = receiptCharge.intInventoryReceiptChargeId      
+    INNER JOIN tblICInventoryReceipt receipt      
+        ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId      
+    INNER JOIN tblSMCompanyLocation compLoc      
+        ON receipt.intLocationId = compLoc.intCompanyLocationId
+    INNER JOIN tblGRStorageHistory SH
+        ON SH.intInventoryReceiptId = receipt.intInventoryReceiptId
+    INNER JOIN tblGRCustomerStorage CS
+        ON CS.intCustomerStorageId = SH.intCustomerStorageId
+        AND CS.ysnTransferStorage = 0
+        AND CS.intTicketId IS NOT NULL
+    INNER JOIN tblGRSettleStorageBillDetail SSBD
+        ON SSBD.intBillId = bill.intBillId
+    INNER JOIN tblGRSettleStorage SS
+        ON SS.intSettleStorageId = SSBD.intSettleStorageId
+    INNER JOIN tblGRSettleStorageTicket SST
+        ON SST.intSettleStorageId = SS.intSettleStorageId
+        AND CS.intCustomerStorageId = SST.intCustomerStorageId
+    LEFT JOIN   
+    (  
+        tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+            ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+    )  
+        ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
+    WHERE       
+        billDetail.intInventoryReceiptChargeId IS NOT NULL
+    AND EXISTS (
+        SELECT TOP 1 1
+        FROM tblGRTransferStorageReference TSR
+        WHERE TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
+    )
+    -- AND receiptCharge.ysnInventoryCost = 0
+    AND bill.ysnPosted = 1
+
+    -- Voucher for TRA (DP to DP) Charges using intInventoryReceiptItemId in Bill Detail
+    UNION ALL
+    SELECT DISTINCT '9' AS TEST,
+        bill.intEntityVendorId      
+        ,bill.dtmDate AS dtmDate      
+        ,TS.strTransferStorageTicket   
+        ,TS.intTransferStorageId  
+        ,bill.intBillId      
+        ,bill.strBillId      
+        ,NULL --billDetail.intInventoryReceiptChargeId
+        ,TSR.intTransferStorageReferenceId 
+        ,billDetail.intItemId      
+        ,billDetail.intUnitOfMeasureId AS intItemUOMId  
+        ,unitMeasure.strUnitMeasure AS strUOM  
+        ,ROUND(
+            (
+                CASE WHEN ABS(billDetail.dblTotal) <> receiptCharge.dblAmount
+                    THEN (
+                    --IF THERE IS OLD COST, ASSUME THIS IS NOT PRORATED
+                    --PRO RATED SHOULD HAVE NO COST ADJUSTMENT
+                    CASE WHEN billDetail.dblOldCost IS NOT NULL
+                    THEN receiptCharge.dblAmount * (CASE WHEN billDetail.dblQtyReceived < 0 THEN -1 ELSE 1 END)
+                    ELSE billDetail.dblTotal
+                    END
+                    )
+                ELSE billDetail.dblTotal END
+            )
+        , 2) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        ) AS dblVoucherTotal      
+        ,ROUND(CASE       
+            WHEN billDetail.intWeightUOMId IS NULL THEN       
+                ISNULL(billDetail.dblQtyReceived, 0)       
+            ELSE       
+                CASE       
+                    WHEN ISNULL(billDetail.dblNetWeight, 0) = 0 THEN       
+                        ISNULL(dbo.fnCalculateQtyBetweenUOM(billDetail.intUnitOfMeasureId, billDetail.intWeightUOMId, ISNULL(billDetail.dblQtyReceived, 0)), 0)      
+                    ELSE       
+                        ISNULL(billDetail.dblNetWeight, 0)       
+                END      
+        END,2) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        ) AS dblVoucherQty      
+        ,0 AS dblReceiptChargeTotal
+        ,0 AS dblReceiptChargeQty 
+        ,receipt.intLocationId      
+        ,compLoc.strLocationName      
+        ,CAST(1 AS BIT) ysnAllowVoucher 
+    FROM tblAPBill bill      
+    INNER JOIN tblAPBillDetail billDetail      
+        ON bill.intBillId = billDetail.intBillId      
+    INNER JOIN tblICInventoryReceiptCharge receiptCharge      
+        ON billDetail.intInventoryReceiptChargeId  = receiptCharge.intInventoryReceiptChargeId      
+    INNER JOIN tblICInventoryReceipt receipt      
+        ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId      
+    INNER JOIN tblSMCompanyLocation compLoc      
+        ON receipt.intLocationId = compLoc.intCompanyLocationId
+    INNER JOIN tblGRStorageHistory SH
+        ON SH.intInventoryReceiptId = receipt.intInventoryReceiptId
+    INNER JOIN tblGRCustomerStorage CS_FROM
+        ON CS_FROM.intCustomerStorageId = SH.intCustomerStorageId
+        AND CS_FROM.ysnTransferStorage = 0
+        AND CS_FROM.intTicketId IS NOT NULL
+    INNER JOIN tblGRTransferStorageReference TSR
+        ON TSR.intSourceCustomerStorageId = CS_FROM.intCustomerStorageId
+    INNER JOIN tblGRTransferStorage TS
+        ON TSR.intTransferStorageId = TS.intTransferStorageId
+    INNER JOIN tblGRCustomerStorage CS_TO
+        ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+    INNER JOIN tblGRSettleStorageBillDetail SSBD
+        ON SSBD.intBillId = bill.intBillId
+    INNER JOIN tblGRSettleStorage SS
+        ON SS.intSettleStorageId = SSBD.intSettleStorageId
+    INNER JOIN tblGRSettleStorageTicket SST
+        ON SST.intSettleStorageId = SS.intSettleStorageId
+        AND CS_TO.intCustomerStorageId = SST.intCustomerStorageId
+    LEFT JOIN   
+    (  
+        tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+            ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+    )  
+        ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
+    WHERE       
+        billDetail.intInventoryReceiptChargeId IS NOT NULL
+    AND bill.ysnPosted = 1
+
+    -- Voucher for TRA (DP to DP) Charges using intCustomerStorageId in Bill Detail
+    UNION ALL
+    SELECT DISTINCT '9.1' AS TEST,
+        bill.intEntityVendorId      
+        ,bill.dtmDate AS dtmDate      
+        ,TS.strTransferStorageTicket   
+        ,TS.intTransferStorageId  
+        ,bill.intBillId      
+        ,bill.strBillId      
+        ,NULL --billDetail.intInventoryReceiptChargeId
+        ,TSR.intTransferStorageReferenceId 
+        ,billDetail.intItemId      
+        ,billDetail.intUnitOfMeasureId AS intItemUOMId  
+        ,unitMeasure.strUnitMeasure AS strUOM  
+        ,ROUND(billDetail.dblTotal, 2) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        ) AS dblVoucherTotal      
+        ,ROUND(CASE       
+            WHEN billDetail.intWeightUOMId IS NULL THEN       
+                ISNULL(billDetail.dblQtyReceived, 0)       
+            ELSE       
+                CASE       
+                    WHEN ISNULL(billDetail.dblNetWeight, 0) = 0 THEN       
+                        ISNULL(dbo.fnCalculateQtyBetweenUOM(billDetail.intUnitOfMeasureId, billDetail.intWeightUOMId, ISNULL(billDetail.dblQtyReceived, 0)), 0)      
+                    ELSE       
+                        ISNULL(billDetail.dblNetWeight, 0)       
+                END      
+        END,2) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        ) AS dblVoucherQty      
+        ,0 AS dblReceiptChargeTotal
+        ,0 AS dblReceiptChargeQty 
+        ,TS.intCompanyLocationId      
+        ,compLoc.strLocationName      
+        ,CAST(1 AS BIT) ysnAllowVoucher 
+    FROM tblAPBill bill      
+    INNER JOIN tblAPBillDetail billDetail      
+        ON bill.intBillId = billDetail.intBillId
+    INNER JOIN tblGRCustomerStorage CS_TO
+        ON CS_TO.intCustomerStorageId = billDetail.intCustomerStorageId
+    INNER JOIN tblGRTransferStorageReference TSR
+        ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+    INNER JOIN tblGRCustomerStorage CS_FROM
+        ON TSR.intSourceCustomerStorageId = CS_FROM.intCustomerStorageId
+    INNER JOIN tblGRTransferStorage TS
+        ON TSR.intTransferStorageId = TS.intTransferStorageId
+    INNER JOIN tblSMCompanyLocation compLoc      
+        ON TS.intCompanyLocationId = compLoc.intCompanyLocationId
+    INNER JOIN tblGRSettleStorageBillDetail SSBD
+        ON SSBD.intBillId = bill.intBillId
+    INNER JOIN tblGRSettleStorage SS
+        ON SS.intSettleStorageId = SSBD.intSettleStorageId
+    INNER JOIN tblGRSettleStorageTicket SST
+        ON SST.intSettleStorageId = SS.intSettleStorageId
+        AND CS_TO.intCustomerStorageId = SST.intCustomerStorageId
+    INNER JOIN tblQMTicketDiscount QM	
+        ON QM.intTicketFileId = CS_TO.intCustomerStorageId	
+        AND QM.strSourceType = 'Storage'
+        AND QM.dblDiscountDue <> 0
+    INNER JOIN tblGRDiscountScheduleCode DSC
+        ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+        AND DSC.intItemId = billDetail.intItemId
+    LEFT JOIN   
+    (  
+        tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+            ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+    )  
+        ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
+    WHERE bill.ysnPosted = 1
+
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl

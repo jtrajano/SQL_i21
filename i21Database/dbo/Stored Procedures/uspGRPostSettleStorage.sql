@@ -2070,19 +2070,24 @@ BEGIN TRY
 														WHEN ST.ysnDPOwnedType = 0 THEN NULL
 														ELSE 
 															CASE 
-																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
+																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
 																ELSE NULL
 															END
 													END
-					,[intInventoryReceiptChargeId] =  CASE 
-															WHEN ST.ysnDPOwnedType = 0 THEN NULL
-															ELSE 
-																	CASE 
-																			WHEN a.intItemType = 3 THEN RC.intInventoryReceiptChargeId
-																			ELSE NULL
-																	END
+					,[intInventoryReceiptChargeId]	= CASE 
+														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
+														ELSE 
+																CASE 
+																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RC.intInventoryReceiptChargeId
+																		ELSE NULL
+																END
 													END
-					,[intCustomerStorageId]			= a.[intCustomerStorageId]
+					,[intCustomerStorageId]   = CASE 
+													WHEN RI.intInventoryReceiptId IS NULL
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL)
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.ysnTransferStorage = 1)
+													THEN a.[intCustomerStorageId] 
+													ELSE NULL END
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
 														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, b.intItemUOMId, CD.dblQuantity),6) 
