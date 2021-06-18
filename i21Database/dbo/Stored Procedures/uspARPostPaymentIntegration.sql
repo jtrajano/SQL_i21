@@ -385,7 +385,7 @@ SELECT DISTINCT
 FROM
 	#ARPostPaymentHeader
 
-EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @IPaymentLog
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @IPaymentLog, @intUserId = @UserId
 
 --Insert Successfully unposted/posted transactions.
 IF ISNULL(@IntegrationLogId, 0) = 0

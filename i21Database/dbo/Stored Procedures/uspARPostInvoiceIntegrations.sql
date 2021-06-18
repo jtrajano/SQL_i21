@@ -1028,7 +1028,7 @@ SELECT DISTINCT
 	,[strDetails]				= NULL
 FROM ##ARPostInvoiceHeader
 
---EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 
 END TRY
 BEGIN CATCH
