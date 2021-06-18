@@ -62,6 +62,8 @@ INCLUDE (
 	,intInventoryShipmentId
 	,intBillId
 	,intContractHeaderId
+	,intTransferStorageId
+	,intTransferStorageReferenceId
 ) 
 GO 
 
