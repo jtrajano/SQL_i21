@@ -180,6 +180,6 @@ SELECT  intId, 'Vendor', 0
         WHERE C.intId not in (SELECT intEntityId FROM tblEMEntityType WHERE strType = 'Vendor')
 
 
-EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @VendorLog
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @VendorLog, @intUserId = @UserId
 
 END
