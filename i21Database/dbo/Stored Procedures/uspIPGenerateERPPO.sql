@@ -201,6 +201,7 @@ BEGIN TRY
 			,@intDestinationPortId = intDestinationPortId
 			,@intShipperId = intShipperId
 			,@intCompanyLocationId = intCompanyLocationId
+			,@intContractStatusId = intContractStatusId
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -319,6 +320,17 @@ BEGIN TRY
 							END
 						)
 
+			IF @intContractStatusId = 1 -- Open
+				SET @intContractStatusId = 1
+			ELSE IF @intContractStatusId = 5 -- Complete
+				SET @intContractStatusId = 2
+			ELSE IF @intContractStatusId = 3 -- Cancelled
+				SET @intContractStatusId = 3
+			ELSE IF @intContractStatusId = 6 -- Short Close
+				SET @intContractStatusId = 4
+			ELSE IF @intContractStatusId = 4 -- Re-Open
+				SET @intContractStatusId = 5
+
 			SELECT TOP 1 @dtmFixationDate = PFD.dtmFixationDate
 			FROM tblCTPriceFixation PF
 			JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationId = PF.intPriceFixationId
@@ -352,14 +364,14 @@ BEGIN TRY
 				SELECT @strDetailXML = '<line id="' + LTRIM(@intContractFeedId) + '" parentId="' + ltrim(@intContractFeedId) + '">' + 
 					'<TrxSequenceNo>' + LTRIM(@intContractFeedId) + '</TrxSequenceNo>' + 
 					'<ActionId>' + LTRIM(@intActionId) + '</ActionId>' + 
-					'<Status>' + CASE WHEN @intActionId = 3 THEN LTRIM(3) ELSE LTRIM(CD.intContractStatusId) END + '</Status>' + 
+					'<Status>' + CASE WHEN @intActionId = 3 THEN LTRIM(3) ELSE LTRIM(@intContractStatusId) END + '</Status>' + 
 					'<SequenceNo>' + LTRIM(CF.intContractSeq) + '</SequenceNo>' + 
 					'<StartDate>' + ISNULL(CONVERT(VARCHAR, CF.dtmStartDate, 112), '') + '</StartDate>' + 
 					'<EndDate>' + ISNULL(CONVERT(VARCHAR, CF.dtmEndDate, 112), '') + '</EndDate>' + 
 					'<PlannedAvailabilityDate>' + ISNULL(CONVERT(VARCHAR, @dtmPlannedAvailabilityDate, 112), '') + '</PlannedAvailabilityDate>' + 
 					'<UpdatedAvailabilityDate>' + ISNULL(CONVERT(VARCHAR, @dtmUpdatedAvailabilityDate, 112), '') + '</UpdatedAvailabilityDate>' + 
-					'<StorageLocation>' + @strSubLocation + '</StorageLocation>' + 
-					'<StorageUnit>' + ISNULL(CF.strStorageLocation, '') + '</StorageUnit>' + 
+					'<StorageLocation>' + CASE WHEN @intActionId = 3 THEN '' ELSE @strSubLocation END + '</StorageLocation>' + 
+					'<StorageUnit>' + CASE WHEN @intActionId = 3 THEN '' ELSE ISNULL(CF.strStorageLocation, '') END + '</StorageUnit>' + 
 					'<ItemNo>' + CF.strItemNo + '</ItemNo>' + 
 					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblQuantity)) + '</Quantity>' + 
 					'<QuantityUOM>' + CF.strQuantityUOM + '</QuantityUOM>' + 
