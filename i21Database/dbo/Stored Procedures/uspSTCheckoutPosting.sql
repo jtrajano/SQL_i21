@@ -225,6 +225,11 @@ BEGIN
 			ysnPosted BIT,
 			strTransactionType NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CS_AS
 		)
+		
+		DECLARE @tblInventoryReceiptIds TABLE
+		(
+			strReceiptId VARCHAR(40)
+		)
 
 		DECLARE @tblTempRank TABLE
 		(
@@ -6392,23 +6397,31 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				IF EXISTS(SELECT TOP 1 intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId)
 				BEGIN
 
-					--UNPOST IR--
-					DECLARE @strIRTransactionIds NVARCHAR(MAX) 
-					SELECT @strIRTransactionIds = COALESCE(@strIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId) 
-					Select @strIRTransactionIds
-
-
-					DECLARE	@intIRLotteryUnpostProcessReturnValue int,
+					DECLARE	@intIRLotteryUnpostProcessReturnValue int = 0,
 							@strIRLotteryUnpostBatchId nvarchar(40)
 
-					EXEC	@intIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
-							@ysnPost = 0,
-							@ysnRecap = 0,
-							@strTransactionId = @strIRTransactionIds,
-							@intEntityUserSecurityId = @intCurrentUserId,
-							@strBatchId = @strIRLotteryUnpostBatchId OUTPUT
-							
+					--UNPOST IR--
+					DECLARE @strIRTransactionId NVARCHAR(MAX) 
+					--SELECT @strIRTransactionIds = COALESCE(@strIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId) 
 
+					INSERT INTO @tblInventoryReceiptIds 
+					SELECT strReceiptNumber AS strReceiptId FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId)
+					
+					WHILE EXISTS (SELECT TOP 1 strReceiptId FROM @tblInventoryReceiptIds)
+					BEGIN
+
+						SELECT TOP 1 @strIRTransactionId = strReceiptId FROM @tblInventoryReceiptIds
+						
+						EXEC	@intIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
+								@ysnPost = 0,
+								@ysnRecap = 0,
+								@strTransactionId = @strIRTransactionId,
+								@intEntityUserSecurityId = @intCurrentUserId,
+								@strBatchId = @strIRLotteryUnpostBatchId OUTPUT
+								
+						DELETE FROM @tblInventoryReceiptIds WHERE strReceiptId = @strIRTransactionId
+					END
+							
 
 					IF(@intIRLotteryUnpostProcessReturnValue = 0)
 					BEGIN
