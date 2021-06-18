@@ -2075,7 +2075,7 @@ BEGIN TRY
 														WHEN ST.ysnDPOwnedType = 0 THEN NULL
 														ELSE 
 															CASE 
-																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
+																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
 																ELSE NULL
 															END
 													END
@@ -2083,12 +2083,15 @@ BEGIN TRY
 														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
 														ELSE 
 																CASE 
-																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL THEN RC.intInventoryReceiptChargeId
+																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RC.intInventoryReceiptChargeId
 																		ELSE NULL
 																END
 													END
 					,[intCustomerStorageId]   = CASE 
-													WHEN RI.intInventoryReceiptId IS NULL OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL) THEN a.[intCustomerStorageId] 
+													WHEN RI.intInventoryReceiptId IS NULL
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL)
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.ysnTransferStorage = 1)
+													THEN a.[intCustomerStorageId] 
 													ELSE NULL END
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
