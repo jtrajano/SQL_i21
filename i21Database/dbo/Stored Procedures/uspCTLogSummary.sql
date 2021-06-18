@@ -3646,6 +3646,13 @@ BEGIN TRY
 		BEGIN
 			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo', 'Create Voucher', 'Delete Voucher')
 			BEGIN
+				UPDATE @cbLogSpecific SET intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+										WHEN @strProcess = 'Create Credit Memo' THEN 64
+										WHEN @strProcess = 'Delete Invoice' THEN 63
+										WHEN @strProcess = 'Delete Credit Memo' THEN 65
+										WHEN @strProcess = 'Create Voucher' THEN 15
+										WHEN @strProcess = 'Delete Voucher' THEN 62
+										ELSE intActionId END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 
 				SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
@@ -3653,8 +3660,13 @@ BEGIN TRY
 			END
 
 			IF @ysnInvoice = 1
-			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = 16
+			BEGIN				
+				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
+					, intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+										WHEN @strProcess = 'Create Credit Memo' THEN 64
+										WHEN @strProcess = 'Delete Invoice' THEN 63
+										WHEN @strProcess = 'Delete Credit Memo' THEN 65
+										ELSE intActionId END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @ysnReturn = 1
