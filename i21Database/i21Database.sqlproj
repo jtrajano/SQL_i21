@@ -9466,6 +9466,9 @@
     <Build Include="dbo\Views\vyuQMSampleAssignedSequenceListUserRole.sql" />
     <Build Include="dbo\User Defined Types\BatchAuditLogParam.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBatchAuditLog.sql" />
+    <Build Include="dbo\Tables\tblSMAdvancePermission.sql" />
+    <Build Include="dbo\Tables\tblSMUserRoleAdvancePermission.sql" />
+    <Build Include="dbo\Views\vyuSMAdvancePermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
