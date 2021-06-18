@@ -43,6 +43,8 @@ BEGIN TRY
 	DECLARE @intRepresentingUOMId INT
 		,@dblRepresentingQty NUMERIC(18, 6)
 		,@dblConvertedSampleQty NUMERIC(18, 6)
+		,@intContractHeaderId INT
+		,@ysnMultipleContractSeq BIT
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
@@ -60,6 +62,7 @@ BEGIN TRY
 		,@intPreviousSampleStatusId = intSampleStatusId
 		,@intItemId = intItemId
 		,@intCreatedUserId = intCreatedUserId
+		,@intContractHeaderId = intContractHeaderId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			strSampleNumber NVARCHAR(30)
 			,strLotNumber NVARCHAR(50)
@@ -77,6 +80,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intCreatedUserId INT
+			,intContractHeaderId INT
 			)
 
 	-- Quantity Check
@@ -263,6 +267,7 @@ BEGIN TRY
 	END
 
 	SELECT @ysnAdjustInventoryQtyBySampleQty = ysnAdjustInventoryQtyBySampleQty
+		,@ysnMultipleContractSeq = ysnMultipleContractSeq
 	FROM tblQMSampleType
 	WHERE intSampleTypeId = @intSampleTypeId
 
@@ -286,6 +291,25 @@ BEGIN TRY
 		END
 	END
 
+	-- Contract Sequences check for Assign Contract to Multiple Sequences scenario
+	IF @ysnMultipleContractSeq = 1
+		AND ISNULL(@intContractHeaderId, 0) > 0
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (intContractDetailId INT) x
+				JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = x.intContractDetailId
+				WHERE CD.intContractHeaderId <> @intContractHeaderId
+				)
+		BEGIN
+			RAISERROR (
+					'Assigned Sequences should belongs to the same Contract. '
+					,16
+					,1
+					)
+		END
+	END
+
 	BEGIN TRAN
 
 	INSERT INTO dbo.tblQMSample (
@@ -300,7 +324,7 @@ BEGIN TRY
 		,intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
-		--,intContractHeaderId
+		,intContractHeaderId
 		,intContractDetailId
 		--,intShipmentBLContainerContractId
 		--,intShipmentId
@@ -369,7 +393,7 @@ BEGIN TRY
 		,@intPreviousSampleStatusId
 		,intItemId
 		,intItemContractId
-		--,intContractHeaderId
+		,intContractHeaderId
 		,intContractDetailId
 		--,intShipmentBLContainerContractId
 		--,intShipmentId
@@ -435,7 +459,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
-			--,intContractHeaderId INT
+			,intContractHeaderId INT
 			,intContractDetailId INT
 			--,intShipmentBLContainerId INT
 			--,intShipmentBLContainerContractId INT

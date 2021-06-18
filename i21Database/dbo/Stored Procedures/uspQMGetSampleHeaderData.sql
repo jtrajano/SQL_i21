@@ -100,6 +100,7 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
 	FROM vyuCTContractDetailView C
 	JOIN tblICItem I ON I.intItemId = C.intItemId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
@@ -155,6 +156,7 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
@@ -206,6 +208,7 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
@@ -285,6 +288,7 @@ BEGIN
 		,S.strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,C.intContractHeaderId
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		AND L.intLotId = @intProductValueId
@@ -388,6 +392,7 @@ BEGIN
 		,S.strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,C.intContractHeaderId
 	FROM tblICParentLot PL
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = PL.intLotStatusId
 		AND PL.intParentLotId = @intProductValueId

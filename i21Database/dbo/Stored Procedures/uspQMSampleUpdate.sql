@@ -37,6 +37,8 @@ BEGIN TRY
 	DECLARE @intRepresentingUOMId INT
 		,@dblRepresentingQty NUMERIC(18, 6)
 		,@dblConvertedSampleQty NUMERIC(18, 6)
+		,@intContractHeaderId INT
+		,@ysnMultipleContractSeq BIT
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblQMCompanyPreference
@@ -49,6 +51,8 @@ BEGIN TRY
 		,@dblRepresentingQty = dblRepresentingQty
 		,@intRepresentingUOMId = intRepresentingUOMId
 		,@intItemId = intItemId
+		,@intSampleTypeId = intSampleTypeId
+		,@intContractHeaderId = intContractHeaderId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,strMarks NVARCHAR(100)
@@ -58,6 +62,8 @@ BEGIN TRY
 			,dblRepresentingQty NUMERIC(18, 6)
 			,intRepresentingUOMId INT
 			,intItemId INT
+			,intSampleTypeId INT
+			,intContractHeaderId INT
 			)
 
 	IF NOT EXISTS (
@@ -117,6 +123,33 @@ BEGIN TRY
 		END
 	END
 
+	SELECT @ysnMultipleContractSeq = ysnMultipleContractSeq
+	FROM tblQMSampleType
+	WHERE intSampleTypeId = @intSampleTypeId
+
+	-- Contract Sequences check for Assign Contract to Multiple Sequences scenario
+	IF @ysnMultipleContractSeq = 1
+		AND ISNULL(@intContractHeaderId, 0) > 0
+	BEGIN
+		IF EXISTS (
+				SELECT 1
+				FROM OPENXML(@idoc, 'root/SampleContractSequence', 2) WITH (
+						intContractDetailId INT
+						,strRowState NVARCHAR(50)
+						) x
+				JOIN dbo.tblCTContractDetail CD ON CD.intContractDetailId = x.intContractDetailId
+					AND x.strRowState <> 'DELETE'
+				WHERE CD.intContractHeaderId <> @intContractHeaderId
+				)
+		BEGIN
+			RAISERROR (
+					'Assigned Sequences should belongs to the same Contract. '
+					,16
+					,1
+					)
+		END
+	END
+
 	BEGIN TRAN
 
 	SELECT @dblOldSampleQty = dblSampleQty
@@ -134,7 +167,7 @@ BEGIN TRY
 		,intSampleStatusId = x.intSampleStatusId
 		,intItemId = x.intItemId
 		,intItemContractId = x.intItemContractId
-		--,intContractHeaderId = x.intContractHeaderId
+		,intContractHeaderId = x.intContractHeaderId
 		,intContractDetailId = x.intContractDetailId
 		--,intShipmentBLContainerContractId = x.intShipmentBLContainerContractId
 		--,intShipmentId = x.intShipmentId
@@ -194,7 +227,7 @@ BEGIN TRY
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
-			--,intContractHeaderId INT
+			,intContractHeaderId INT
 			,intContractDetailId INT
 			--,intShipmentBLContainerId INT
 			--,intShipmentBLContainerContractId INT
