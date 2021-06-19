@@ -579,7 +579,14 @@ DECLARE
 			,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
 			,[dblQtyOrdered]						= CASE WHEN @intPricingTypeId = 2 THEN ISNULL(CP.[dblQuantity], ARSI.[dblQtyOrdered]) ELSE ARSI.[dblQtyOrdered] END
 			,[intItemUOMId]							= ARSI.[intItemUOMId] 
-			,[dblQtyShipped]						= CASE WHEN @intPricingTypeId = 2 THEN dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], CP.[dblQuantity]) ELSE ARSI.[dblShipmentQuantity] END
+			,[dblQtyShipped]						= CASE WHEN @intPricingTypeId = 2 
+														THEN 
+															CASE WHEN (ARSI.[dblShipmentQuantity] < dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], CP.dblCurRunningQuantity))
+																THEN ARSI.[dblShipmentQuantity] - dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], ISNULL(CP.dblPrevRunningQuantity, 0)) 
+															ELSE 
+																dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], CP.dblQuantity)
+															END
+														ELSE ARSI.[dblShipmentQuantity] END
 			,[dblDiscount]							= ARSI.[dblDiscount] 
 			,[dblItemWeight]						= ARSI.[dblWeight]  
 			,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
@@ -634,10 +641,18 @@ DECLARE
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 		FROM vyuARShippedItems ARSI
-			LEFT JOIN #tmpLGContractPrice CP ON CP.intContractDetailId = ARSI.intContractDetailId
+			OUTER APPLY (
+				SELECT cp.* 
+					,dblPrevRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice prcp
+											WHERE prcp.intIdentityId < cp.intIdentityId
+												AND cp.intContractDetailId = ARSI.intContractDetailId)
+					,dblCurRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice crcp 
+											WHERE crcp.intIdentityId <= cp.intIdentityId
+												AND cp.intContractDetailId = ARSI.intContractDetailId)
+				FROM #tmpLGContractPrice cp
+				WHERE cp.intContractDetailId = ARSI.intContractDetailId) CP
 		WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 		  AND ARSI.[intLoadId] = @intLoadId
-
 	
 	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice ARI
 		JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = ARI.intInvoiceId
