@@ -1,5 +1,5 @@
 ﻿CREATE PROC [dbo].[uspRKM2MGLUnpost]  
-		@intM2MInquiryId INT
+		@intM2MHeaderId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -103,8 +103,8 @@ BEGIN TRANSACTION
 		,[intUserId]  
 		,[intSourceLocationId]
 		,[intSourceUOMId]
-	FROM tblRKM2MPostRecap
-	WHERE intM2MInquiryId = @intM2MInquiryId
+	FROM tblRKM2MPostPreview
+	WHERE intM2MHeaderId = @intM2MHeaderId
 
 	EXEC dbo.uspGLBookEntries @GLEntries,0 --@ysnPost
 
@@ -112,7 +112,7 @@ BEGIN TRANSACTION
 	DECLARE @strOldBatchId NVARCHAR(50),
 			@strOldReversalBatchId NVARCHAR(50)
 
-	SELECT @strOldBatchId = strBatchId, @strOldReversalBatchId = strReversalBatchId FROM tblRKM2MPostRecap WHERE intM2MInquiryId = @intM2MInquiryId
+	SELECT @strOldBatchId = strBatchId, @strOldReversalBatchId = strReversalBatchId FROM tblRKM2MPostPreview WHERE intM2MHeaderId = @intM2MHeaderId
 
 
 	--Upost reversal transaction
@@ -180,8 +180,8 @@ BEGIN TRANSACTION
 
 
 	UPDATE	tblGLDetail SET	ysnIsUnposted = 1 WHERE	strBatchId IN( @strOldBatchId ,@strOldReversalBatchId)
-	UPDATE tblRKM2MPostRecap SET ysnIsUnposted=0,strBatchId=null WHERE intM2MInquiryId = @intM2MInquiryId
-	UPDATE tblRKM2MInquiry SET ysnPost=0,dtmPostedDateTime=null,strBatchId=null,dtmUnpostedDateTime=getdate() WHERE intM2MInquiryId = @intM2MInquiryId
+	UPDATE tblRKM2MPostPreview SET ysnIsUnposted=0,strBatchId=null WHERE intM2MHeaderId = @intM2MHeaderId
+	UPDATE tblRKM2MHeader SET ysnPosted=0,dtmPostDate=null,strBatchId=null,dtmUnpostDate=getdate() WHERE intM2MHeaderId = @intM2MHeaderId
 
 	COMMIT TRAN	
 END TRY
