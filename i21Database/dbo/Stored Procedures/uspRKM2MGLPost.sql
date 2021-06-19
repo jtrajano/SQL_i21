@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspRKM2MGLPost
-	@intM2MInquiryId INT
+	@intM2MHeaderId INT
 
 AS
 
@@ -24,20 +24,20 @@ BEGIN TRY
 		, @strCommodityCode NVARCHAR(100)
 
 	SELECT @intCommodityId = intCommodityId
-		, @dtmCurrenctGLPostDate = dtmGLPostDate
-		, @dtmGLReverseDate = dtmGLReverseDate 
-		, @intLocationId = intCompanyLocationId
-	FROM tblRKM2MInquiry 
-	WHERE intM2MInquiryId = @intM2MInquiryId
+		, @dtmCurrenctGLPostDate = dtmPostDate
+		, @dtmGLReverseDate = dtmReverseDate 
+		, @intLocationId = intLocationId
+	FROM tblRKM2MHeader
+	WHERE intM2MHeaderId = @intM2MHeaderId
 
 	SELECT @strCommodityCode = strCommodityCode
 	FROM tblICCommodity WHERE intCommodityId = @intCommodityId
 
-	SELECT TOP 1 @dtmPreviousGLPostDate = dtmGLPostDate
-		, @dtmPreviousGLReverseDate = dtmGLReverseDate
-	FROM tblRKM2MInquiry 
-	WHERE ysnPost = 1 AND intCommodityId = @intCommodityId
-	ORDER BY dtmGLPostDate DESC
+	SELECT TOP 1 @dtmPreviousGLPostDate = dtmPostDate
+		, @dtmPreviousGLReverseDate = dtmReverseDate
+	FROM tblRKM2MHeader 
+	WHERE ysnPosted = 1 AND intCommodityId = @intCommodityId
+	ORDER BY dtmPostDate DESC
 
 	IF (@dtmGLReverseDate IS NULL)
 	BEGIN
@@ -62,8 +62,8 @@ BEGIN TRY
 	-- SETUP VALIDATION
 	--=============================================================
 	SELECT * INTO #tmpPostRecap
-	FROM tblRKM2MPostRecap 
-	WHERE intM2MInquiryId = @intM2MInquiryId
+	FROM tblRKM2MPostPreview 
+	WHERE intM2MHeaderId = @intM2MHeaderId
 
 	DECLARE @tblResult TABLE (Result NVARCHAR(200))
 
@@ -73,7 +73,7 @@ BEGIN TRY
 			, @intTransactionId INT
 			, @strContractNumber NVARCHAR(50)
 			, @intContractSeq NVARCHAR(20)
-			, @intM2MTransactionId INT
+			, @intM2MPostPreviewId INT
 			, @strTransactionType NVARCHAR(100)
 			, @dblAmount NUMERIC(18, 6)
 			, @intAccountId INT
@@ -81,7 +81,7 @@ BEGIN TRY
 			, @ysnHasError BIT
 			, @strErrorMessage NVARCHAR(MAX)
 		
-		SELECT TOP 1 @intM2MTransactionId = intM2MTransactionId
+		SELECT TOP 1 @intM2MPostPreviewId = intM2MPostPreviewId
 			, @strTransactionId = strTransactionId
 			, @intTransactionId = intTransactionId
 			, @strTransactionType = strTransactionType
@@ -268,13 +268,13 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			UPDATE tblRKM2MPostRecap
+			UPDATE tblRKM2MPostPreview
 			SET intAccountId = @intAccountId
 				, strAccountId = @strAccountNo
-			WHERE intM2MTransactionId = @intM2MTransactionId
+			WHERE intM2MPostPreviewId = @intM2MPostPreviewId
 		END
 
-		DELETE FROM #tmpPostRecap WHERE intM2MTransactionId = @intM2MTransactionId
+		DELETE FROM #tmpPostRecap WHERE intM2MPostPreviewId = @intM2MPostPreviewId
 	END
 
 	IF (SELECT COUNT(Result) FROM @tblResult) > 0  
@@ -344,13 +344,13 @@ BEGIN TRY
 			,[intUserId]  
 			,[intSourceLocationId]
 			,[intSourceUOMId]
-		FROM tblRKM2MPostRecap
-		WHERE intM2MInquiryId = @intM2MInquiryId
+		FROM tblRKM2MPostPreview
+		WHERE intM2MHeaderId = @intM2MHeaderId
 
 		EXEC dbo.uspGLBookEntries @GLEntries,1 --@ysnPost
 
-		UPDATE tblRKM2MPostRecap SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MInquiryId = @intM2MInquiryId
-		UPDATE tblRKM2MInquiry SET ysnPost=1,dtmPostedDateTime=getdate(),strBatchId=@batchId,dtmUnpostedDateTime=null WHERE intM2MInquiryId = @intM2MInquiryId
+		UPDATE tblRKM2MPostPreview SET ysnIsUnposted=1,strBatchId=@strBatchId WHERE intM2MHeaderId = @intM2MHeaderId
+		UPDATE tblRKM2MHeader SET ysnPosted=1,dtmPostDate=getdate(),strBatchId=@batchId,dtmUnpostDate=null WHERE intM2MHeaderId = @intM2MHeaderId
 
 
 		--Post Reversal using the reversal date
@@ -411,12 +411,12 @@ BEGIN TRY
 			,[intUserId]  
 			,[intSourceLocationId]
 			,[intSourceUOMId]
-		FROM tblRKM2MPostRecap
-		WHERE intM2MInquiryId = @intM2MInquiryId
+		FROM tblRKM2MPostPreview
+		WHERE intM2MHeaderId = @intM2MHeaderId
 
 		EXEC dbo.uspGLBookEntries @ReverseGLEntries,1 
 	
-		UPDATE tblRKM2MPostRecap SET strReversalBatchId = @strReversalBatchId WHERE intM2MInquiryId = @intM2MInquiryId
+		UPDATE tblRKM2MPostPreview SET strReversalBatchId = @strReversalBatchId WHERE intM2MHeaderId = @intM2MHeaderId
 	
 
 	COMMIT TRAN	
