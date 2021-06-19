@@ -585,7 +585,7 @@ DECLARE
 			,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
 			,[dblPrice]								= CASE WHEN @intPricingTypeId = 2 THEN CP.[dblPrice] ELSE ARSI.[dblPrice] END
 			,[intPriceUOMId]						= ARSI.[intPriceUOMId]
-			,[dblUnitPrice]							= CASE WHEN @intPricingTypeId = 2 THEN dbo.fnCalculateQtyBetweenUOM(ARSI.[intWeightUOMId], ARSI.[intItemUOMId], CP.[dblPrice]) ELSE ARSI.[dblShipmentUnitPrice] END
+			,[dblUnitPrice]							= CASE WHEN @intPricingTypeId = 2 THEN dbo.fnCalculateQtyBetweenUOM(ARSI.[intItemUOMId], ARSI.[intPriceUOMId], CP.[dblPrice]) ELSE ARSI.[dblShipmentUnitPrice] END
 			,[strPricing]							= 'Inventory Shipment Item Price'
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= NULL
