@@ -9469,6 +9469,7 @@
     <Build Include="dbo\Tables\tblSMAdvancePermission.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleAdvancePermission.sql" />
     <Build Include="dbo\Views\vyuSMAdvancePermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractWalterMatter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
