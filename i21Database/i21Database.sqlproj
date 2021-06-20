@@ -8967,6 +8967,7 @@
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <Build Include="dbo\User Defined Types\BatchAuditLogParam.sql" />
     <Build Include="dbo\Stored Procedures\uspSMBatchAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractWalterMatter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
