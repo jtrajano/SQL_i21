@@ -268,7 +268,9 @@ BEGIN
 					, strCurrency
 					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), CD.dtmSeqEndDate, 106), 8)
 				FROM tblCTContractBalance CD
-				WHERE convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate
+				WHERE CD.intContractHeaderId IN (SELECT DISTINCT intContractHeaderId FROM tblRKCollateral)
+				AND CD.intContractStatusId <> 3
+				AND convert(DATETIME, CONVERT(VARCHAR(10), dtmContractDate, 110), 110) <= @dtmToDate 
 			)t
 
 			--=============================
@@ -330,8 +332,12 @@ BEGIN
 					, intTransactionTypeId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
+					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+					AND ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 				JOIN tblICItem i ON i.intItemId = a.intItemId
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+
 				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
 				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
@@ -340,10 +346,14 @@ BEGIN
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				JOIN tblICCommodity CM ON CM.intCommodityId = i.intCommodityId
 				LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
-				WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
+					AND ISNULL(strTicketStatus, '') <> 'V'
+				WHERE 
+					--ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND 
+					--ISNULL(strTicketStatus, '') <> 'V' and 
+					gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
-					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+					--AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+					--AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 				
 				UNION ALL
 				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intStorageHistoryId ASC)
@@ -401,8 +411,11 @@ BEGIN
 					, intTransactionTypeId
 				FROM tblGRStorageHistory gh
 				JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
+					AND ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0
+					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 				JOIN tblICItem i ON i.intItemId = a.intItemId
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
 				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
 				JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
 				JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
@@ -410,10 +423,11 @@ BEGIN
 				JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				JOIN tblICCommodity CM ON CM.intCommodityId = i.intCommodityId
-				WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
+				WHERE --ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND 
+					gh.intTransactionTypeId IN (1,3,4,5,9)
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
-					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+					--AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+					--AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 			)t
 		
 			--=============================
@@ -470,19 +484,25 @@ BEGIN
 				FROM tblICInventoryReceipt r
 				JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 				JOIN tblSCTicket sc ON sc.intTicketId = ri.intSourceId
+					AND ISNULL(strTicketStatus, '') <> 'V'
+
 				LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = sc.intSubLocationId AND sl.intCompanyLocationId = sc.intProcessingLocationId
 				JOIN tblICItem i ON i.intItemId = sc.intItemId
+					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+
 				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
 				JOIN tblGRStorageHistory sh ON sh.intTicketId = sc.intTicketId
 				JOIN tblGRCustomerStorage a ON a.intCustomerStorageId = sh.intCustomerStorageId
+					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+
 				JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId AND b.ysnCustomerStorage = 1
 				JOIN tblICCommodity CM ON CM.intCommodityId = i.intCommodityId
 				JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 				LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-					AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
-					AND ISNULL(strTicketStatus, '') <> 'V'
-					AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+					--AND i.intCommodityId = ISNULL(@intCommodityId, i.intCommodityId)
+					--AND ISNULL(strTicketStatus, '') <> 'V'
+					--AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 			) t WHERE t.intRowNum = 1
 		
 			--=============================
@@ -534,6 +554,12 @@ BEGIN
 					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
 				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToDate) InTran
 					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+						AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+						AND Inv.strTransactionType = 'Inventory Shipment'
+						AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId)
+						AND Inv.intLocationId IN (SELECT intLocationId FROM #LicensedLocation)
+
 					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
 					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
 					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
@@ -541,9 +567,11 @@ BEGIN
 					INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
 					INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 					JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = Com.intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
-				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
-					AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
-					AND Inv.strTransactionType = 'Inventory Shipment'
+				--WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+				--	AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+				--	AND Inv.strTransactionType = 'Inventory Shipment'
+				--	AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId)
+				--	AND Inv.intLocationId IN (SELECT intLocationId FROM #LicensedLocation)
 
 				UNION ALL
 				SELECT 
@@ -570,6 +598,12 @@ BEGIN
 					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = LG.intSContractHeaderId)
 				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToDate) InTran
 					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+						AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+						AND Inv.strTransactionType = 'Outbound Shipment'
+						AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId)
+						AND Inv.intLocationId IN (SELECT intLocationId FROM #LicensedLocation)
+
 					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
 					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
 					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
@@ -577,9 +611,11 @@ BEGIN
 					INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
 					INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 					JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = Com.intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
-				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
-					AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
-					AND Inv.strTransactionType = 'Outbound Shipment'
+				--WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+				--	AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+				--	AND Inv.strTransactionType = 'Outbound Shipment'
+				--	AND Inv.intLocationId = ISNULL(@intLocationId, Inv.intLocationId)
+				--	AND Inv.intLocationId IN (SELECT intLocationId FROM #LicensedLocation)
 				
 			)t
 		
@@ -637,7 +673,7 @@ BEGIN
 				--, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
 				, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 				, s.strLocationName
-				, i.intItemId
+				, s.intItemId
 				, s.strItemNo
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
@@ -659,16 +695,16 @@ BEGIN
 				, strFutureMonth = fmnt.strFutureMonth
 			INTO #invQty
 			FROM vyuRKGetInventoryValuation s
-			JOIN tblICItem i ON i.intItemId = s.intItemId
 			JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 			JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intCommodityStockUOMId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
+				AND ISNULL(strTicketStatus, '') <> 'V'
 			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = s.intTransactionDetailId 
 			LEFT JOIN tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
 			LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
-			WHERE i.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
+			WHERE s.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
-				AND ISNULL(strTicketStatus, '') <> 'V'
+				--AND ISNULL(strTicketStatus, '') <> 'V'
 				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 0
@@ -682,7 +718,7 @@ BEGIN
 				--, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
 				, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 				, s.strLocationName
-				, i.intItemId
+				, s.intItemId
 				, s.strItemNo
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
@@ -703,16 +739,16 @@ BEGIN
 				, strContractNumber = ch.strContractNumber
 				, strFutureMonth = fmnt.strFutureMonth
 			FROM vyuRKGetInventoryValuation s
-			JOIN tblICItem i ON i.intItemId = s.intItemId
 			JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 			JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intCommodityStockUOMId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
+				AND ISNULL(strTicketStatus, '') <> 'V'
 			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = s.intTransactionDetailId 
 			LEFT JOIN tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
 			LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
-			WHERE i.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
+			WHERE s.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
-				AND ISNULL(strTicketStatus, '') <> 'V'
+				--AND ISNULL(strTicketStatus, '') <> 'V'
 				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 0
@@ -728,7 +764,7 @@ BEGIN
 				--, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
 				, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
 				, s.strLocationName
-				, i.intItemId
+				, s.intItemId
 				, s.strItemNo
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
@@ -750,22 +786,23 @@ BEGIN
 				, strFutureMonth = fmnt.strFutureMonth
 			INTO #tempTransfer
 			FROM vyuRKGetInventoryValuation s
-			JOIN tblICItem i ON i.intItemId = s.intItemId
 			JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 			JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intCommodityStockUOMId
 			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
+				AND ISNULL(strTicketStatus, '') <> 'V'
 			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = s.intTransactionDetailId 
 			LEFT JOIN tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
 			LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
 			LEFT JOIN tblICInventoryReceiptItem IRI ON s.intTransactionId = IRI.intInventoryTransferId --Join here to determine if an IT has a corresponding transfer in
-			WHERE i.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
+				AND IRI.intInventoryReceiptItemId IS NULL
+			WHERE s.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
 				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
-				AND ISNULL(strTicketStatus, '') <> 'V'
+				--AND ISNULL(strTicketStatus, '') <> 'V'
 				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 1
 				AND strTransactionForm IN('Inventory Transfer')
-				AND IRI.intInventoryReceiptItemId IS NULL
+				--AND IRI.intInventoryReceiptItemId IS NULL
 				AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 			--=============================
@@ -802,10 +839,12 @@ BEGIN
 				JOIN tblEMEntity e on e.intEntityId= st.intEntityId
 				JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId and st.strDistributionOption='HLD'
 				JOIN tblICItem i1 on i1.intItemId=st.intItemId
+					AND i1.intCommodityId  = @intCommodityId 
 				JOIN tblICCategory Category ON Category.intCategoryId = i1.intCategoryId
 				JOIN tblICItemUOM iuom on i1.intItemId=iuom.intItemId and ysnStockUnit=1
 				JOIN tblICCommodityUnitMeasure ium on ium.intCommodityId=i1.intCommodityId AND iuom.intUnitMeasureId=ium.intUnitMeasureId 
-				WHERE i1.intCommodityId  = @intCommodityId and isnull(st.intDeliverySheetId,0) =0
+				WHERE --i1.intCommodityId  = @intCommodityId and 
+					isnull(st.intDeliverySheetId,0) =0
 					AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
 					AND ISNULL(st.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(st.intEntityId, 0))
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), st.dtmTicketDateTime, 110), 110) <= CONVERT(DATETIME, @dtmToDate)

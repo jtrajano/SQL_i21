@@ -406,20 +406,28 @@ BEGIN
 			, strFutureMonth = '' COLLATE Latin1_General_CI_AS
 		FROM tblGRStorageHistory gh
 		JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
+			AND ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0
+			AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 		JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 		JOIN tblICItem i ON i.intItemId = a.intItemId
+			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 		JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
 		JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
 		LEFT JOIN tblGRStorageScheduleRule c1 ON c1.intStorageScheduleRuleId = a.intStorageScheduleId
 		JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
+			AND c.intCompanyLocationId = ISNULL(@intLocationId, c.intCompanyLocationId)
+			AND c.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 		JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = gh.intTicketId
-		WHERE ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND ISNULL(strTicketStatus, '') <> 'V' and gh.intTransactionTypeId IN (1,3,4,5,9)
+			AND ISNULL(strTicketStatus, '') <> 'V'
+		WHERE --ISNULL(a.strStorageType, '') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) = 0 AND 
+			--ISNULL(strTicketStatus, '') <> 'V' and 
+			gh.intTransactionTypeId IN (1,3,4,5,9)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-			AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+			--AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+			--AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 				
 		UNION ALL
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY gh.intStorageHistoryId ORDER BY gh.intStorageHistoryId ASC)
@@ -474,8 +482,11 @@ BEGIN
 			, strFutureMonth = '' COLLATE Latin1_General_CI_AS
 		FROM tblGRStorageHistory gh
 		JOIN tblGRCustomerStorage a ON gh.intCustomerStorageId = a.intCustomerStorageId
+			AND ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 
+			AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 		JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 		JOIN tblICItem i ON i.intItemId = a.intItemId
+			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 		JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
 		JOIN tblICItemUOM iuom ON i.intItemId = iuom.intItemId AND ysnStockUnit = 1
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = i.intCommodityId AND iuom.intUnitMeasureId = ium.intUnitMeasureId
@@ -483,33 +494,34 @@ BEGIN
 		JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId
 		JOIN tblEMEntity E ON E.intEntityId = a.intEntityId
 		JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
-		WHERE ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND gh.intTransactionTypeId IN (1,3,4,5,9)
+		WHERE --ISNULL(a.strStorageType,'') <> 'ITR' AND ISNULL(a.intDeliverySheetId, 0) <> 0 AND 
+			gh.intTransactionTypeId IN (1,3,4,5,9)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-			AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
-			AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
+			--AND i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+			--AND ISNULL(a.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(a.intEntityId, 0))
 	)t
 	
 	SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
 		, t.strTicketNumber
 		, s.strLocationName
 		, s.strItemNo
-		, i.intCommodityId
+		, s.intCommodityId
 		, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
 		, s.intLocationId
 		, strTransactionId
 		, strTransactionType
-		, i.intItemId
+		, s.intItemId
 		, s.intCategoryId
 		, s.strCategory
 		, s.strCurrency
 	INTO #invQty
 	FROM vyuRKGetInventoryValuation s
-	JOIN tblICItem i ON i.intItemId = s.intItemId
-	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+	--JOIN tblICItem i ON i.intItemId = s.intItemId
+	JOIN tblICCommodityUnitMeasure cuom ON s.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
 	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
 	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
-	WHERE i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+	WHERE s.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 		AND ysnInTransit = 0 AND ISNULL(s.dblQuantity, 0) <> 0
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
@@ -521,22 +533,22 @@ BEGIN
 		, t.strTicketNumber
 		, s.strLocationName
 		, s.strItemNo
-		, i.intCommodityId
+		, s.intCommodityId
 		, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
 		, s.intLocationId
 		, strTransactionId
 		, strTransactionType
-		, i.intItemId
+		, s.intItemId
 		, s.intCategoryId
 		, s.strCategory
 		, s.strCurrency
 	FROM vyuRKGetInventoryValuation s
-	JOIN tblICItem i ON i.intItemId = s.intItemId
-	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+	--JOIN tblICItem i ON i.intItemId = s.intItemId
+	JOIN tblICCommodityUnitMeasure cuom ON s.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
 	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
 	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
 	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
-	WHERE i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+	WHERE s.intCommodityId IN (SELECT intCommodity FROM @Commodity)
 		AND ysnInTransit = 0 AND ISNULL(s.dblQuantity, 0) <> 0
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
@@ -658,6 +670,8 @@ BEGIN
 					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = SI.intLineNo)
 				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToDate) InTran
 					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+						AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END			
 					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
 					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
 					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
@@ -665,8 +679,8 @@ BEGIN
 					INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
 					INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 					JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = Com.intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
-				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
-					AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END				
+				--WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+				--	AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END				
 			)t
 
 
@@ -816,15 +830,18 @@ BEGIN
 						, t.ysnPreCrush
 					FROM @tblGetOpenFutureByDate t
 					JOIN tblICCommodity th ON th.strCommodityCode = t.strCommodityCode
+						AND th.intCommodityId = @intCommodityId
 					JOIN tblSMCompanyLocation l ON l.strLocationName = t.strLocationName
+						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
+						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 					JOIN tblRKFutureMarket m ON m.strFutMarketName = t.strFutureMarket
 					JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 					JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId = @intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 					INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
-					WHERE th.intCommodityId = @intCommodityId
-						AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
-						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
-						AND ISNULL(t.ysnPreCrush, 0) = 0
+					WHERE --th.intCommodityId = @intCommodityId
+						-- AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
+						-- AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+						ISNULL(t.ysnPreCrush, 0) = 0
 				) t
 				
 				-- Option NetHEdge
@@ -888,21 +905,27 @@ BEGIN
 					, t.ysnPreCrush
 				FROM @tblGetOpenFutureByDate t
 				JOIN tblICCommodity th ON th.strCommodityCode = t.strCommodityCode
+					AND th.intCommodityId = @intCommodityId
 				JOIN tblSMCompanyLocation l ON l.strLocationName = t.strLocationName
+					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
+					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 				JOIN tblRKFutureMarket m ON m.strFutMarketName = t.strFutureMarket
 				JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 				JOIN tblRKOptionsMonth om ON om.strOptionMonth = t.strOptionMonth
 				INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
-				WHERE th.intCommodityId = @intCommodityId
-					AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
-					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
+				WHERE --th.intCommodityId = @intCommodityId
+					-- AND intCompanyLocationId = ISNULL(@intLocationId, intCompanyLocationId)
+					t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExercisedAssigned)
 					AND t.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKOptionsPnSExpired)
-					AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+					-- AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 					AND ISNULL(t.ysnPreCrush, 0) = 0
 
 				
 				IF @ysnPreCrush = 1 AND ISNULL(@strPositionBy,'') <> ''
 				BEGIN
+
+					DECLARE @currentDate DATETIME = GETDATE();
+
 					--Crush Records
 					INSERT INTO @tempFinal(strCommodityCode
 						, strInternalTradeNo
@@ -955,12 +978,12 @@ BEGIN
 							, oc.strInternalTradeNo
 							, oc.intFutOptTransactionHeaderId
 							, th.intCommodityId
-							, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
+							, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), @currentDate, 110), 110)) then 'Near By'
 									else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS dtmFutureMonthsDate
 							, dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc1.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, CASE WHEN oc.strNewBuySell = 'Buy' THEN ISNULL(dblOpenContract, 0)
 																																			ELSE ISNULL(dblOpenContract, 0) END * m.dblContractSize) AS HedgedQty
 							, l.strLocationName
-							, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), getdate(), 110), 110)) then 'Near By'
+							, case when CONVERT(DATETIME, '01 ' + fm.strFutureMonth) < CONVERT(DATETIME, convert(DATETIME, CONVERT(VARCHAR(10), @currentDate, 110), 110)) then 'Near By'
 									else left(fm.strFutureMonth, 4) + '20' + convert(NVARCHAR(2), intYear) end COLLATE Latin1_General_CI_AS strFutureMonth
 							, m.intUnitMeasureId
 							, oc.strBroker + '-' + oc.strBrokerAccount COLLATE Latin1_General_CI_AS strAccountNumber
@@ -976,16 +999,19 @@ BEGIN
 							, oc.ysnPreCrush
 						FROM @tblGetOpenFutureByDate oc
 						JOIN tblICCommodity th ON th.strCommodityCode = oc.strCommodityCode
+							AND th.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
 						JOIN tblSMCompanyLocation l ON l.strLocationName = oc.strLocationName
+							AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
+							AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
 						JOIN tblRKFutureMarket m ON m.strFutMarketName = oc.strFutureMarket
 						JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 						JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c) AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 						LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cuc1.intUnitMeasureId
 						INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = oc.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
-						WHERE th.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
-							AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
-							AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
-							AND ISNULL(oc.ysnPreCrush, 0) = 1) t
+						WHERE --th.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
+							--AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
+							--AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+							ISNULL(oc.ysnPreCrush, 0) = 1) t
 
 					----Include Crush in Price Risk
 					--INSERT INTO @tempFinal(strCommodityCode
