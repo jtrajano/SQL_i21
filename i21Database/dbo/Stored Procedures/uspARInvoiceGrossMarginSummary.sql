@@ -24,6 +24,21 @@ IF ISNULL(@ysnRebuild, 0) = 1
 	END
 ELSE
 BEGIN
+	DECLARE @InvoiceMarginSummary TABLE (
+		  intInvoiceId	INT
+		, strType		NVARCHAR(100)
+		, dblAmount		NUMERIC(18, 6)
+		, dtmDate		DATETIME
+	)
+	
+	INSERT INTO @InvoiceMarginSummary (
+		  intInvoiceId
+		, strType
+		, dblAmount
+		, dtmDate
+	)
+	EXEC dbo.uspARInvoiceGrossMargin @InvoiceId
+
     INSERT INTO tblARInvoiceGrossMarginSummary (
 		  strType
 		, intInvoiceId
@@ -31,15 +46,10 @@ BEGIN
 		, dtmDate
 		, intConcurrencyId
 	)
-    SELECT strType				= IGM.strType 
-	    , intInvoiceId			= IGM.intInvoiceId
-		, dblAmount				= SUM(IGM.dblAmount) * CASE WHEN II.ysnPost = 1 THEN 1 ELSE - 1 END
-		, dtmDate				= CASE WHEN II.ysnPost = 1 THEN IGM.dtmDate ELSE '01-01-1900'END
-		, intConcurrencyId		= 1  
-	FROM vyuARInvoiceGrossMargin IGM
-	INNER JOIN @InvoiceId II ON IGM.intInvoiceId = II.intHeaderId
-	GROUP BY IGM.strType
-		   , IGM.dtmDate
-		   , IGM.intInvoiceId       
-		   , II.ysnPost
+    SELECT strType
+		, intInvoiceId
+		, dblAmount
+		, dtmDate
+		, intConcurrencyId	= 1
+	FROM @InvoiceMarginSummary
 END

@@ -9246,6 +9246,7 @@
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
