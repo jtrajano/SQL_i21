@@ -720,6 +720,12 @@ BEGIN TRY
 	JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 	join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
 	WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+
+	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+	UPDATE tblSCTicket
+	SET dblDWGOriginalNetUnits = dblNetUnits
+	WHERE intTicketId = @intTicketId
+
 	
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
