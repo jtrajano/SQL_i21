@@ -9,6 +9,11 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
+	DELETE 
+	FROM tblAPBillPreStage
+	WHERE strRowState = @strRowState
+		AND ISNULL(intStatusId, 1) = 1
+
 	INSERT INTO dbo.tblAPBillPreStage (
 		intBillId
 		,strRowState
