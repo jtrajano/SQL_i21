@@ -421,6 +421,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql
 :R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
 :R .\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql
+:R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

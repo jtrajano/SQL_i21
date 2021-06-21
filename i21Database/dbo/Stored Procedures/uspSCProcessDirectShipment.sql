@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCProcessDirectShipment]
-	@intTicketId INT,
+	@ScaleDWGAllocation ScaleDWGAllocation READONLY
+	,@intTicketId INT,
 	@intEntityId INT,
 	@intLocationId INT,
 	@dtmScaleDate DATETIME,
@@ -329,7 +330,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 1
+			EXEC dbo.uspSCInsertDestinationInventoryShipment @ScaleDWGAllocation,@intTicketId, @intUserId, 1
 
 			SELECT TOP 1 
 				@InventoryShipmentId = intInventoryShipmentId 

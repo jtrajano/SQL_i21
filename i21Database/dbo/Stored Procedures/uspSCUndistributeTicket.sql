@@ -1539,6 +1539,11 @@ BEGIN TRY
 				exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId, @ysnUndistribute = 1
 		END
 
+		-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+		UPDATE tblSCTicket
+		SET dblDWGOriginalNetUnits = 0
+		WHERE intTicketId = @intTicketId
+
 		--Audit Log
 		EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId						-- Primary Key Value of the Ticket. 
