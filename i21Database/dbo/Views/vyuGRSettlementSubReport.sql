@@ -157,7 +157,7 @@ FROM
 			AND t3.intBillId = t1.intBillId
 	WHERE t3.intItemId IS NOT NULL
 
-	UNION 
+	UNION ALL
 
 	--CONTRACT
 	SELECT 
