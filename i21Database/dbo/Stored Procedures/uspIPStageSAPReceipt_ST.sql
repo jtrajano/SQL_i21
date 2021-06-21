@@ -218,7 +218,7 @@ BEGIN TRY
 					,CONTAINER_NO NVARCHAR(100)
 					,TRACKING_NO INT
 					) x
-			WHERE ISNULL(x.PO_NUMBER, '') <> ''
+			--WHERE ISNULL(x.PO_NUMBER, '') <> ''
 
 			SELECT @strInfo2 = @strInfo2 + ISNULL(strERPPONumber, '') + ' / ' + LTRIM(intContractSeq) + ','
 			FROM @tblReceiptItem
