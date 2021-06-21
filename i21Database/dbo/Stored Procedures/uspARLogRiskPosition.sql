@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARLogRiskPosition]
 	  @tblInvoiceId		InvoiceId READONLY
 	, @intUserId		INT
+    , @Post             BIT = 0
 AS
  
 SET QUOTED_IDENTIFIER OFF
@@ -306,7 +307,7 @@ BEGIN
           AND INV.strInvoiceOriginId = I.strInvoiceNumber
           AND INV.intOriginalInvoiceId = I.intInvoiceId
       ) RI
-    WHERE SL.strTransactionType = 'Credit Memo'
+    WHERE SL.strTransactionType = 'Credit Memo' AND @Post=0
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
     BEGIN
