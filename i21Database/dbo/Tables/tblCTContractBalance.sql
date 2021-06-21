@@ -61,3 +61,6 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblCTContractBalance_intContractDetailId]
 	ON [dbo].[tblCTContractBalance] ([intContractDetailId] DESC)
 GO
+CREATE NONCLUSTERED INDEX [IX_tblCTContractBalance_intContractHeaderId]
+	ON [dbo].[tblCTContractBalance] ([intContractHeaderId]);   
+GO  
