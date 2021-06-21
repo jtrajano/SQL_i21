@@ -155,7 +155,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
-		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
+		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
 
 	IF @ForDelete = 1
 		BEGIN
