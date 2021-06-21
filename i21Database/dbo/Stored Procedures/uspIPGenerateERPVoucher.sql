@@ -220,11 +220,6 @@ BEGIN TRY
 			SELECT @strError = @strError + 'Due Date cannot be blank. '
 		END
 
-		IF ISNULL(@strReference, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Reference cannot be blank. '
-		END
-
 		IF ISNULL(@strCurrency, '') = ''
 		BEGIN
 			SELECT @strError = @strError + 'Currency cannot be blank. '
@@ -233,11 +228,6 @@ BEGIN TRY
 		IF ISNULL(@dblTotal, 0) = 0
 		BEGIN
 			SELECT @strError = @strError + 'Voucher Total should be greater than 0. '
-		END
-
-		IF ISNULL(@strRemarks, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Remarks cannot be blank. '
 		END
 
 		IF @strError <> ''
