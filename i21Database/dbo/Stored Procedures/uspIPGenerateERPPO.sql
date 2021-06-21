@@ -40,6 +40,7 @@ BEGIN TRY
 		,@intDestinationPortId INT
 		,@intShipperId INT
 		,@intCompanyLocationId INT
+		,@intOrgContractStatusId INT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intContractFeedId INT
@@ -50,6 +51,8 @@ BEGIN TRY
 		)
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @strLocationName NVARCHAR(50)
+
+	EXEC uspIPValidateERPOtherFieldsContractFeed
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -139,6 +142,7 @@ BEGIN TRY
 			,@intDestinationPortId = NULL
 			,@intShipperId = NULL
 			,@intCompanyLocationId = NULL
+			,@intOrgContractStatusId = NULL
 
 		SELECT @intContractDetailId = intContractDetailId
 			,@intContractHeaderId = intContractHeaderId
@@ -202,6 +206,7 @@ BEGIN TRY
 			,@intShipperId = intShipperId
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intContractStatusId = intContractStatusId
+			,@intOrgContractStatusId = intContractStatusId
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -421,6 +426,7 @@ BEGIN TRY
 					,intDestinationPortId
 					,intCompanyLocationId
 					,intHeaderBookId
+					,intContractStatusId
 					)
 				SELECT @intContractHeaderId
 					,@intContractDetailId
@@ -429,6 +435,7 @@ BEGIN TRY
 					,@intDestinationPortId
 					,@intCompanyLocationId
 					,@intBookId
+					,@intOrgContractStatusId
 			END
 			ELSE
 			BEGIN

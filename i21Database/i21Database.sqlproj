@@ -9405,6 +9405,7 @@
     <Build Include="dbo\Views\vyuSCInventoryShipmentDetail.sql" />
     <None Include="Scripts\Post-Deployment\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql" />
     <Build Include="dbo\User Defined Types\ScaleDWGAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPValidateERPOtherFieldsContractFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9918,4 +9919,3 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
   </ItemGroup>
 </Project>
-
