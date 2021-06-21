@@ -313,181 +313,90 @@ END
 ----------------------------------------------------------------------------
 IF @dtmEffectiveDate IS NOT NULL AND @dblStandardCost IS NOT NULL 
 BEGIN 	
-	--Feature on this IF statement is designed for Update Item Pricing and Revert Mass Pricebook Changes screens only
-	IF @strScreen = 'UpdateItemPricing' AND EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog) 
-	BEGIN 
-		INSERT INTO #tmpEffectiveCostForCStore_AuditLog (
-			strAction 
-			, intItemId 
-			, intItemLocationId
-			, dblOldCost
-			, dblNewCost
-			, dtmOldEffectiveDate
-			, dtmNewEffectiveDate				
-		)
-		SELECT 
+	INSERT INTO #tmpEffectiveCostForCStore_AuditLog (
+		strAction 
+		, intItemId 
+		, intItemLocationId
+		, dblOldCost
+		, dblNewCost
+		, dtmOldEffectiveDate
+		, dtmNewEffectiveDate				
+	)
+	SELECT 
+		strAction 
+		, intItemId 
+		, intItemLocationId
+		, dblOldCost
+		, dblNewCost
+		, dblOldEffectiveDate
+		, dblNewEffectiveDate		
+	FROM (
+		MERGE	
+		INTO	dbo.tblICEffectiveItemCost 
+		WITH	(HOLDLOCK) 
+		AS		e
+		USING (
+			SELECT 
+				u.*
+				,p.intItemLocationId
+			FROM 
+				#tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
+				INNER JOIN tblICItemPricing p
+					ON u.intItemPricingId = p.intItemPricingId 
+				INNER JOIN tblICItem i	
+					ON i.intItemId = u.intItemId 
+				INNER JOIN tblICItemLocation il
+					ON il.intItemId = p.intItemId
+					AND il.intItemLocationId = p.intItemLocationId 
+		) AS u
+			ON e.intItemId = u.intItemId
+			AND e.intItemLocationId = u.intItemLocationId
+			AND e.dtmEffectiveCostDate = @dtmEffectiveDate
+
+		-- If matched, update the effective cost.
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET 
+				e.dblCost = @dblStandardCost
+				,e.dtmDateModified = GETDATE()
+				,e.intModifiedByUserId = @intEntityUserSecurityId
+		
+		-- If none found, insert a new Effective Item Cost
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				intItemId
+				, intItemLocationId
+				, dblCost
+				, dtmDateCreated
+				, dtmEffectiveCostDate
+				, intCreatedByUserId
+			)
+			VALUES (
+				u.intItemId
+				, u.intItemLocationId
+				, u.dblNewStandardCost
+				, GETUTCDATE()
+				, @dtmEffectiveDate
+				, @intEntityUserSecurityId
+			)
+
+		OUTPUT 
+			$action
+			, inserted.intItemId 
+			, inserted.intItemLocationId 
+			, deleted.dblCost 
+			, inserted.dblCost
+			, deleted.dtmEffectiveCostDate
+			, inserted.dtmEffectiveCostDate
+	) AS [Changes] (
 			strAction 
 			, intItemId 
 			, intItemLocationId
 			, dblOldCost
 			, dblNewCost
 			, dblOldEffectiveDate
-			, dblNewEffectiveDate		
-		FROM (
-			MERGE	
-			INTO	dbo.tblICEffectiveItemCost 
-			WITH	(HOLDLOCK) 
-			AS		e
-			USING (
-				SELECT 
-					u.*
-					,p.intItemLocationId
-				FROM 
-					#tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
-					INNER JOIN tblICItemPricing p
-						ON u.intItemPricingId = p.intItemPricingId 
-					INNER JOIN tblICItem i	
-						ON i.intItemId = u.intItemId 
-					INNER JOIN tblICItemLocation il
-						ON il.intItemId = p.intItemId
-						AND il.intItemLocationId = p.intItemLocationId 
-			) AS u
-				ON e.intItemId = u.intItemId
-				AND e.intItemLocationId = u.intItemLocationId
-				AND e.dtmEffectiveCostDate = @dtmEffectiveDate
-
-			-- If matched, update the effective cost.
-			WHEN MATCHED THEN 
-				UPDATE 
-				SET 
-					e.dblCost = @dblStandardCost
-					,e.dtmDateModified = GETDATE()
-					,e.intModifiedByUserId = @intEntityUserSecurityId
-		
-			-- If none found, insert a new Effective Item Cost
-			WHEN NOT MATCHED THEN 
-				INSERT (
-					intItemId
-					, intItemLocationId
-					, dblCost
-					, dtmDateCreated
-					, dtmEffectiveCostDate
-					, intCreatedByUserId
-				)
-				VALUES (
-					u.intItemId
-					, u.intItemLocationId
-					, u.dblNewStandardCost
-					, GETUTCDATE()
-					, @dtmEffectiveDate
-					, @intEntityUserSecurityId
-				)
-
-			OUTPUT 
-				$action
-				, inserted.intItemId 
-				, inserted.intItemLocationId 
-				, deleted.dblCost 
-				, inserted.dblCost
-				, deleted.dtmEffectiveCostDate
-				, inserted.dtmEffectiveCostDate
-		) AS [Changes] (
-				strAction 
-				, intItemId 
-				, intItemLocationId
-				, dblOldCost
-				, dblNewCost
-				, dblOldEffectiveDate
-				, dblNewEffectiveDate				
-		);
-	END 		
-	ELSE
-	BEGIN
-		INSERT INTO #tmpEffectiveCostForCStore_AuditLog (
-			strAction 
-			, intItemId 
-			, intItemLocationId
-			, dblOldCost
-			, dblNewCost
-			, dtmOldEffectiveDate
-			, dtmNewEffectiveDate				
-		)
-		SELECT 
-			strAction 
-			, intItemId 
-			, intItemLocationId
-			, dblOldCost
-			, dblNewCost
-			, dtmOldEffectiveDate
-			, dtmNewEffectiveDate		
-		FROM (
-			MERGE	
-			INTO	dbo.tblICEffectiveItemCost 
-			WITH	(HOLDLOCK) 
-			AS		e
-			USING (
-				SELECT 
-					u.*,
-					p.intItemLocationId
-				FROM 
-					tblICItemPricing p
-					INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
-						ON p.intItemPricingId = u.intItemPricingId
-					INNER JOIN tblICItem i	
-						ON i.intItemId = u.intItemId 
-					INNER JOIN tblICItemLocation il
-						ON il.intItemId = i.intItemId
-						AND il.intItemLocationId = p.intItemLocationId 
-			) AS u
-				ON e.intItemId = u.intItemId 
-					AND e.intItemLocationId = u.intItemLocationId
-					AND e.dtmEffectiveCostDate = @dtmEffectiveDate
-
-			-- If matched, update the effective cost.
-			WHEN MATCHED THEN 
-				UPDATE 
-				SET 
-					e.dblCost = @dblStandardCost
-					,e.dtmDateModified = GETDATE()
-					,e.intModifiedByUserId = @intEntityUserSecurityId
-		
-			-- If none found, insert a new Effective Item Cost
-			WHEN NOT MATCHED THEN 
-				INSERT (
-					intItemId
-					, intItemLocationId
-					, dblCost
-					, dtmDateCreated
-					, dtmEffectiveCostDate
-					, intCreatedByUserId
-				)
-				VALUES (
-					u.intItemId
-					, u.intItemLocationId
-					, @dblStandardCost
-					, GETUTCDATE()
-					, @dtmEffectiveDate
-					, @intEntityUserSecurityId
-				)
-
-			OUTPUT 
-				$action
-				, inserted.intItemId 
-				, inserted.intItemLocationId 
-				, deleted.dblCost 
-				, inserted.dblCost
-				, deleted.dtmEffectiveCostDate
-				, inserted.dtmEffectiveCostDate
-		) AS [Changes] (
-				strAction 
-				, intItemId 
-				, intItemLocationId
-				, dblOldCost
-				, dblNewCost
-				, dtmOldEffectiveDate
-				, dtmNewEffectiveDate				
-		);		
-	END   
+			, dblNewEffectiveDate				
+	);
 END
 
 -- Audit log for the Item Cost with Effective Date.
@@ -562,6 +471,8 @@ BEGIN
 	END 
 	CLOSE loopAuditLog;
 	DEALLOCATE loopAuditLog;
+
+	DROP TABLE #tmpEffectiveCostForCStore_AuditLog
 END
 
 ----------------------------------------------------------------------------
@@ -569,181 +480,90 @@ END
 ----------------------------------------------------------------------------
 IF @dtmEffectiveDate IS NOT NULL AND @dblRetailPrice IS NOT NULL 
 BEGIN 	
-	--Feature on this IF statement is designed for Update Item Pricing and Revert Mass Pricebook Changes screens only
-	IF @strScreen = 'UpdateItemPricing' AND EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog) 
-	BEGIN 
-		INSERT INTO #tmpEffectivePriceForCStore_AuditLog (
+	INSERT INTO #tmpEffectivePriceForCStore_AuditLog (
+		strAction 
+		, intItemId 
+		, intItemLocationId
+		, dblOldPrice
+		, dblNewPrice
+		, dtmOldEffectiveDate
+		, dtmNewEffectiveDate				
+	)
+	SELECT 
+		strAction 
+		, intItemId 
+		, intItemLocationId
+		, dblOldPrice
+		, dblNewPrice
+		, dblOldEffectiveDate
+		, dblNewEffectiveDate		
+	FROM (
+		MERGE	
+		INTO	dbo.tblICEffectiveItemPrice 
+		WITH	(HOLDLOCK) 
+		AS		e
+		USING (
+			SELECT DISTINCT
+				u.*,
+				p.intItemLocationId
+			FROM 
+				#tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
+				INNER JOIN tblICItemPricing p
+					ON u.intItemPricingId = p.intItemPricingId
+				INNER JOIN tblICItem i	
+					ON i.intItemId = u.intItemId 
+				INNER JOIN tblICItemLocation il
+					ON il.intItemId = i.intItemId
+					AND il.intItemLocationId = p.intItemLocationId 
+		) AS u
+			ON e.intItemId = u.intItemId
+			AND e.intItemLocationId = u.intItemLocationId
+			AND e.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
+
+		-- If matched, update the effective cost.
+		WHEN MATCHED THEN 
+			UPDATE 
+			SET 
+				e.dblRetailPrice = @dblRetailPrice
+				,e.dtmDateModified = GETDATE()
+				,e.intModifiedByUserId = @intEntityUserSecurityId
+		
+		-- If none found, insert a new Effective Item Cost
+		WHEN NOT MATCHED THEN 
+			INSERT (
+				intItemId
+				, intItemLocationId
+				, dblRetailPrice
+				, dtmDateCreated
+				, dtmEffectiveRetailPriceDate
+				, intCreatedByUserId
+			)
+			VALUES (
+				u.intItemId
+				, u.intItemLocationId
+				, u.dblNewSalePrice
+				, GETUTCDATE()
+				, @dtmEffectiveDate
+				, @intEntityUserSecurityId
+			)
+
+		OUTPUT 
+			$action
+			, inserted.intItemId 
+			, inserted.intItemLocationId 
+			, deleted.dblRetailPrice 
+			, inserted.dblRetailPrice
+			, deleted.dtmEffectiveRetailPriceDate
+			, inserted.dtmEffectiveRetailPriceDate
+	) AS [Changes] (
 			strAction 
 			, intItemId 
 			, intItemLocationId
 			, dblOldPrice
-			, dblNewPrice
-			, dtmOldEffectiveDate
-			, dtmNewEffectiveDate				
-		)
-		SELECT 
-			strAction 
-			, intItemId 
-			, intItemLocationId
-			, dblOldPrice
-			, dblNewPrice
+			, dblNewPrice 
 			, dblOldEffectiveDate
-			, dblNewEffectiveDate		
-		FROM (
-			MERGE	
-			INTO	dbo.tblICEffectiveItemPrice 
-			WITH	(HOLDLOCK) 
-			AS		e
-			USING (
-				SELECT 
-					u.*,
-					p.intItemLocationId
-				FROM 
-					tblICItemPricing p
-					INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
-						ON p.intItemPricingId = u.intItemPricingId
-					INNER JOIN tblICItem i	
-						ON i.intItemId = u.intItemId 
-					INNER JOIN tblICItemLocation il
-						ON il.intItemId = i.intItemId
-						AND il.intItemLocationId = p.intItemLocationId 
-			) AS u
-				ON e.intItemId = u.intItemId
-				AND e.intItemLocationId = u.intItemLocationId
-				AND e.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
-
-			-- If matched, update the effective cost.
-			WHEN MATCHED THEN 
-				UPDATE 
-				SET 
-					e.dblRetailPrice = @dblRetailPrice
-					,e.dtmDateModified = GETDATE()
-					,e.intModifiedByUserId = @intEntityUserSecurityId
-		
-			-- If none found, insert a new Effective Item Cost
-			WHEN NOT MATCHED THEN 
-				INSERT (
-					intItemId
-					, intItemLocationId
-					, dblRetailPrice
-					, dtmDateCreated
-					, dtmEffectiveRetailPriceDate
-					, intCreatedByUserId
-				)
-				VALUES (
-					u.intItemId
-					, u.intItemLocationId
-					, @dblRetailPrice
-					, GETUTCDATE()
-					, @dtmEffectiveDate
-					, @intEntityUserSecurityId
-				)
-
-			OUTPUT 
-				$action
-				, inserted.intItemId 
-				, inserted.intItemLocationId 
-				, deleted.dblRetailPrice 
-				, inserted.dblRetailPrice
-				, deleted.dtmEffectiveRetailPriceDate
-				, inserted.dtmEffectiveRetailPriceDate
-		) AS [Changes] (
-				strAction 
-				, intItemId 
-				, intItemLocationId
-				, dblOldPrice
-				, dblNewPrice 
-				, dblOldEffectiveDate
-				, dblNewEffectiveDate				
-		);
-	END 		
-	ELSE
-	BEGIN
-		INSERT INTO #tmpEffectivePriceForCStore_AuditLog (
-			strAction 
-			, intItemId 
-			, intItemLocationId
-			, dblOldPrice
-			, dblNewPrice
-			, dtmOldEffectiveDate
-			, dtmNewEffectiveDate				
-		)
-		SELECT 
-			strAction 
-			, intItemId 
-			, intItemLocationId
-			, dblOldPrice
-			, dblNewPrice
-			, dtmOldEffectiveDate
-			, dtmNewEffectiveDate		
-		FROM (
-			MERGE	
-			INTO	dbo.tblICEffectiveItemPrice 
-			WITH	(HOLDLOCK) 
-			AS		e
-			USING (
-				SELECT 
-					u.*,
-					p.intItemLocationId
-				FROM 
-					tblICItemPricing p
-					INNER JOIN #tmpUpdateItemPricingForCStore_ItemPricingAuditLog u 
-						ON p.intItemPricingId = u.intItemPricingId
-					INNER JOIN tblICItem i	
-						ON i.intItemId = u.intItemId 
-					INNER JOIN tblICItemLocation il
-						ON il.intItemId = i.intItemId
-						AND il.intItemLocationId = p.intItemLocationId 
-			) AS u
-				ON e.intItemId = u.intItemId 
-					AND e.intItemLocationId = u.intItemLocationId
-					AND e.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
-
-			-- If matched, update the effective cost.
-			WHEN MATCHED THEN 
-				UPDATE 
-				SET 
-					e.dblRetailPrice = @dblRetailPrice 
-					,e.dtmDateModified = GETDATE()
-					,e.intModifiedByUserId = @intEntityUserSecurityId
-		
-			-- If none found, insert a new Effective Item Cost
-			WHEN NOT MATCHED THEN 
-				INSERT (
-					intItemId
-					, intItemLocationId
-					, dblRetailPrice
-					, dtmDateCreated
-					, dtmEffectiveRetailPriceDate
-					, intCreatedByUserId
-				)
-				VALUES (
-					u.intItemId
-					, u.intItemLocationId
-					, @dblRetailPrice
-					, GETUTCDATE()
-					, @dtmEffectiveDate
-					, @intEntityUserSecurityId
-				)
-
-			OUTPUT 
-				$action
-				, inserted.intItemId 
-				, inserted.intItemLocationId 
-				, deleted.dblRetailPrice 
-				, inserted.dblRetailPrice
-				, deleted.dtmEffectiveRetailPriceDate
-				, inserted.dtmEffectiveRetailPriceDate
-		) AS [Changes] (
-				strAction 
-				, intItemId 
-				, intItemLocationId
-				, dblOldPrice
-				, dblNewPrice 
-				, dtmOldEffectiveDate
-				, dtmNewEffectiveDate				
-		);		
-	END   
+			, dblNewEffectiveDate				
+	);
 END
 
 -- Audit log for the Item Price with Effective Date.
@@ -817,6 +637,8 @@ BEGIN
 	END 
 	CLOSE loopAuditLog;
 	DEALLOCATE loopAuditLog;
+
+	DROP TABLE #tmpEffectivePriceForCStore_AuditLog
 END
 
 ----------------------------------------------------------------------------
@@ -979,4 +801,8 @@ BEGIN
 	WHERE	pl.strPricingMethod = 'Discount Retail Price'
 			AND pl.dtmEffectiveDate >= ep.dtmEffectiveRetailPriceDate
 			AND pl.dtmEffectiveDate IS NOT NULL
+	IF ISNULL(@strScreen, '') != 'UpdateItemPricing'
+	BEGIN
+		DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+	END
 END 
