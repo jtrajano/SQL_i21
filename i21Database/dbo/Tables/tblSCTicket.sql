@@ -157,6 +157,7 @@
     [ysnExportRailXML] BIT NOT NULL DEFAULT 0,
     [strTrailerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [intTransferWeight] INT NOT NULL DEFAULT 1, 
+    [dblDWGOriginalNetUnits] NUMERIC(38, 20) NULL,
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
