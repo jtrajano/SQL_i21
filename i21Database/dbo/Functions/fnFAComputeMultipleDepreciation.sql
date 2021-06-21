@@ -194,10 +194,13 @@ AND strError IS NULL
 UPDATE 
 A
 SET dblDepre =
+
 CASE 
-	WHEN A.dtmImportedDepThru > Dep.dtmDepreciationToDate	THEN 0 
+	WHEN A.dtmImportedDepThru > Dep.dtmDepreciationToDate
+		
+		THEN 0 
 	WHEN 
-		A.dtmImportedDepThru = Dep.dtmDepreciationToDate	
+		A.dtmImportedDepThru = Dep.dtmDepreciationToDate 
 		THEN
 			CASE 
 				WHEN strTransaction = 'Place in service'  THEN 0
@@ -207,6 +210,7 @@ CASE
 	ELSE 
 		dblDepre
 END
+
 FROM
 @tblAssetInfo A 
 OUTER APPLY
@@ -217,6 +221,7 @@ OUTER APPLY
 	strTransaction
 	FROM tblFAFixedAssetDepreciation
 	WHERE intAssetId = A.intAssetId
+	AND intBookId = @BookId
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
    
