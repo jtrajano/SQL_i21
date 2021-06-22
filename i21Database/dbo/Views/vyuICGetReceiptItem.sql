@@ -10,6 +10,7 @@ SELECT
 	Item.intCommodityId,
 	Item.intLifeTime,
 	Item.strLifeTimeType,
+	Item.strLotTracking,
 	Item.ysnLotWeightsRequired,
 	dblLastCost = COALESCE(ItemPricing.dblLastCost, 0),
 	dblStandardCost = COALESCE(ItemPricing.dblStandardCost, 0),
