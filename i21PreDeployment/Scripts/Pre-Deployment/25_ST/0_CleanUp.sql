@@ -367,26 +367,7 @@ IF EXISTS(SELECT * FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTRet
 			')
 	END
 
-
-----------------------------------------------------------------------------------------------------------------------------------
--- Start: Remove records from tblSTTranslogRebates if intCheckoutId is not Existing on tblSTCheckoutHeader
-----------------------------------------------------------------------------------------------------------------------------------
-IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblSTTranslogRebates') 
-	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblSTTranslogRebates WHERE intCheckoutId NOT IN (SELECT intCheckoutId FROM tblSTCheckoutHeader))
-			BEGIN
-				PRINT(N'There are transaction logs that has no Checkout existing. Removing transaction logs...')
-				EXEC('
-						DELETE FROM tblSTTranslogRebates WHERE intCheckoutId NOT IN (SELECT intCheckoutId FROM tblSTCheckoutHeader)
-					')
-			END
-	END
-----------------------------------------------------------------------------------------------------------------------------------
--- End: Remove records from tblSTTranslogRebates if intCheckoutId is not Existing on tblSTCheckoutHeader
-----------------------------------------------------------------------------------------------------------------------------------
-
-
-
+	   	 
 ----------------------------------------------------------------------------------------------------------------------------------
 -- [START] - Change datatype of tblSTTranslogRebates
 ----------------------------------------------------------------------------------------------------------------------------------
