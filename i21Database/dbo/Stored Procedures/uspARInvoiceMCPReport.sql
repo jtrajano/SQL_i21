@@ -144,7 +144,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , intTicketId				= ISNULL(TICKETDETAILS.intTicketId, 0)
 	 , strTicketNumbers			= TICKETDETAILS.strTicketNumbers
 	 , dtmLoadedDate			= INV.dtmShipDate
-	 , dtmScaleDate				= TICKETDETAILS.dtmScaleDate
+	 , dtmScaleDate				= INV.dtmPostDate
 	 , strCommodity				= TICKETDETAILS.strCommodity
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
