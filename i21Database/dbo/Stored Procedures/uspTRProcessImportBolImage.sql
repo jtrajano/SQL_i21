@@ -130,8 +130,8 @@ BEGIN
 
 					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @strTransactionNumber)	
 
-					IF(@ysnPosted = 1)
-					BEGIN
+					-- IF(@ysnPosted = 1)
+					-- BEGIN
 						DECLARE @intInvoiceId INT = NULL,
 							@intInvoiceTransactionId INT = NULL,
 							@intInvoiceAttachmentId INT = NULL,
@@ -174,7 +174,7 @@ BEGIN
 
 						CLOSE @CursorInvoiceTran  
 						DEALLOCATE @CursorInvoiceTran
-					END
+					-- END
 
 					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
 				END
