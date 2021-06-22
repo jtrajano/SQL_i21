@@ -72,9 +72,6 @@ OUTER APPLY(
 )Depreciation
 
 
-
-
-
 UPDATE @tblAssetInfo SET strError =  'Fixed asset should be disposed' 
 	WHERE ROUND(dblYear,2) >=  ROUND(dblBasis,2)
 
@@ -95,16 +92,37 @@ dblPercentage = E.dblPercentage,
 dblAnnualDep = (E.dblPercentage *.01) * dblBasis
 FROM @tblAssetInfo T JOIN
 tblFADepreciationMethod  M ON  M.intDepreciationMethodId = T.intDepreciationMethodId
-JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= M.intDepreciationMethodId AND BD.intBookId =@BookId
+JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= M.intDepreciationMethodId AND BD.intBookId =@BookId  and BD.intAssetId = T.intAssetId
 OUTER APPLY(
-	SELECT COUNT(1) intMonth FROM tblFAFixedAssetDepreciation B
+	SELECT COUNT (*) + 1 intMonth
+	FROM tblFAFixedAssetDepreciation B
 	WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = @BookId
+	AND strTransaction = 'Depreciation'
 ) D
 OUTER APPLY(
 	SELECT ISNULL(dblPercentage,1) dblPercentage FROM tblFADepreciationMethodDetail 
-		WHERE M.[intDepreciationMethodId] = intDepreciationMethodId and intYear =   CEILING(D.intMonth/12.0)
+		WHERE M.[intDepreciationMethodId] = intDepreciationMethodId and
+		 intYear = CEILING(D.intMonth  /12.0)
+			
 )E
 WHERE strError IS NULL
+
+
+UPDATE T SET 
+dblPercentage = F.dblPercentage,
+dblAnnualDep = (F.dblPercentage *.01) * dblBasis,
+intYear = F.intYear
+FROM
+@tblAssetInfo T
+outer apply(
+	select TOP 1 intYear, dblPercentage, strConvention from tblFADepreciationMethodDetail A 
+	JOIN tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+	WHERE A.intDepreciationMethodId = T.intDepreciationMethodId
+	order by intYear desc
+)F
+WHERE intMonth > totalMonths
+and F.strConvention <> 'Full Month'
+
 
 UPDATE T
 SET dblMonth = dblAnnualDep/ intMonthDivisor,
@@ -121,50 +139,13 @@ CASE
 WHEN strConvention = 'Actual Days' THEN
 	dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
 WHEN strConvention= 'Mid Month' THEN
-	dblMonth *.50
+	dblMonth *.50 
 ELSE
 	dblMonth
 END
 
 FROM @tblAssetInfo T
-WHERE strError IS NULL AND intMonth = 1 
-
-
-UPDATE T
-SET
-dblPercentage = FirstDep.dblPercentage,
-dblMonth = (dblBasis * (FirstDep.dblPercentage *.01))/ 
-	CASE 
-		WHEN ISNULL( intServiceYear,0) > 0 
-			THEN 12 
-		ELSE intExcessMonth 
-		END
-FROM @tblAssetInfo T
-OUTER APPLY(
-	SELECT TOP 1 dblPercentage FROM tblFADepreciationMethodDetail WHERE T.[intDepreciationMethodId] = intDepreciationMethodId and intYear =  1
-) FirstDep
-WHERE strError IS NULL AND intMonth > totalMonths 
-
-
--- UPDATE T
--- SET ysnFullyDepreciated = 1
--- FROM @tblAssetInfo T
--- WHERE strError IS NULL AND intMonth = totalMonths AND strConvention = 'Full Month'
-
-
-UPDATE T
-SET
-dblMonth = dblMonth *
-CASE 
-	WHEN strConvention = 'Actual Days' THEN
-	(DAY(dtmPlacedInService) - 1)/ CAST(intDaysInFirstMonth AS FLOAT)
-	WHEN strConvention = 'Mid Month'
-		THEN .50
-	END
---ysnFullyDepreciated = 1
-FROM @tblAssetInfo T
-WHERE strError IS NULL AND intMonth > totalMonths 
-
+WHERE strError IS NULL AND intMonth = 1 --First Depreciation
 
 UPDATE T SET dblDepre = dblMonth  + ISNULL(dblYear, 0)
 FROM @tblAssetInfo T
@@ -188,6 +169,8 @@ OUTER APPLY(
 ) U
 WHERE dblDepre > (BD.dblCost - BD.dblSalvageValue)
 AND strError IS NULL 
+
+
 
 
 --imported assets
@@ -224,6 +207,39 @@ OUTER APPLY
 	AND intBookId = @BookId
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
+
+
+UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
+dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
+FROM @tblAssetInfo B JOIN
+tblFABookDepreciation BD 
+ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
+OUTER APPLY(
+	SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
+	tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+
+) U
+WHERE dblDepre < (BD.dblCost - BD.dblSalvageValue)
+AND intMonth = totalMonths
+AND strConvention = 'Full Month'
+AND strError IS NULL
+
+
+UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
+dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
+FROM @tblAssetInfo B JOIN
+tblFABookDepreciation BD 
+ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
+OUTER APPLY(
+	SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
+	tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+
+) U
+WHERE dblDepre < (BD.dblCost - BD.dblSalvageValue)
+AND intMonth > totalMonths
+AND strConvention <> 'Full Month'
+AND ISNULL(BD.ysnFullyDepreciated,0) = 0
+
    
 INSERT INTO @tbl(
 	intAssetId,
@@ -246,4 +262,3 @@ INSERT INTO @tbl(
 	
 	RETURN
 END
-
