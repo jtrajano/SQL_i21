@@ -296,10 +296,10 @@ BEGIN
 		,TS.intTransferStorageId
 		,TSR.intTransferStorageReferenceId
 		,TS.strTransferStorageTicket
-		,TRA.dblUnitQty
+		,TSR.dblUnitQty
 		,UOM.dblUnitQty
 		,CS_FROM.dblBasis + CS_FROM.dblSettlementPrice
-		,dblValue	= TRA.dblUnitQty * (CS_FROM.dblBasis + CS_FROM.dblSettlementPrice)
+		,dblValue	= TSR.dblUnitQty * (CS_FROM.dblBasis + CS_FROM.dblSettlementPrice)
 		,ISNULL(CS_FROM.intCurrencyId, @DefaultCurrencyId) intCurrencyId
 		,I.strItemNo
 		,NULL
@@ -327,7 +327,6 @@ BEGIN
 	OUTER APPLY (
 		SELECT A.intTransferStorageId
 			,A.strTransferStorageTicket
-			,B.dblUnitQty
 		FROM tblGRTransferStorage A
 		INNER JOIN tblGRTransferStorageReference B
 			ON B.intTransferStorageId = A.intTransferStorageId
@@ -628,12 +627,12 @@ SELECT DISTINCT
 	,dtmDateEntered				= GETDATE()
 	,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
     ,strJournalLineDescription  = '' 
-	,intJournalLineNo			= ForGLEntries_CTE.intSourceTransactionDetailId -- temporary workaround as source transaction and transaction fields are swapped in tblGRTransferGLEntriesCTE
+	,intJournalLineNo			= ForGLEntries_CTE.intTransactionDetailId
 	,ysnIsUnposted				= 0
 	,intUserId					= @intEntityUserSecurityId
 	,intEntityId				= GL.intEntityId 
-	,strTransactionId			= ForGLEntries_CTE.strSourceTransactionId -- temporary workaround as source transaction and transaction fields are swapped in tblGRTransferGLEntriesCTE
-	,intTransactionId			= ForGLEntries_CTE.intSourceTransactionId -- temporary workaround as source transaction and transaction fields are swapped in tblGRTransferGLEntriesCTE
+	,strTransactionId			= ForGLEntries_CTE.strTransactionId
+	,intTransactionId			= ForGLEntries_CTE.intTransactionId
 	,strTransactionType			= 'Transfer Storage'
 	,strTransactionForm			= 'Transfer Storage'
 	,strModuleName				= @ModuleName
@@ -653,7 +652,6 @@ INNER JOIN tblGLDetail GL
 	ON GL.intTransactionId = ForGLEntries_CTE.intTransactionId
 		AND GL.intAccountId = GLAccounts.intInventoryId
 		AND GL.intJournalLineNo = ForGLEntries_CTE.intTransactionDetailId
-		AND GL.strCode = 'IC'
 		AND GL.ysnIsUnposted = 0
 INNER JOIN dbo.tblGLAccount
 	ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
