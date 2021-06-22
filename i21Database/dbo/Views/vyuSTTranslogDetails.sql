@@ -29,6 +29,8 @@ FROM
 	   , CAST(TR.intCashierSysId AS INT) AS intCashierSysId
 	   , TR.strCashier
 	   , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
+	   , CAST(Right(intCashierPosNum , 1) AS INT) as intRegister
+	   , CAST(iif(len(strTrlFuelBasePrice)>0,1,0) as bit)  as ysnFuel
 	   --, USec.intEntityId
 	FROM tblSTTranslogRebates TR
 	JOIN tblSTStore ST 
@@ -37,4 +39,5 @@ FROM
 	-- INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
 		-- ON USec.intEntityId = RolePerm.intEntityId
 		-- AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
+	 WHERE (strTransRollback IS NULL) AND (strTransFuelPrepayCompletion IS NULL)
 ) x
