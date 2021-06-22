@@ -28,7 +28,8 @@ BEGIN TRY
 				@dblFutures				NUMERIC(18,6),
 				@dblBasis				NUMERIC(18,6),
 				@dblCashPrice			NUMERIC(18,6),
-				@strTransactionType		NVARCHAR(20) 
+				@strTransactionType		NVARCHAR(20),
+				@strScreenName			NVARCHAR(20)
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -61,6 +62,9 @@ BEGIN TRY
 			intPriceItemUOMId			   INT
 		)
 		
+
+		SELECT TOP 1 @strScreenName = strScreenName FROM tblCTSequenceUsageHistory WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
+
 		DECLARE	@SCOPE_IDENTITY TABLE (intSequenceHistoryId INT)
 
 		IF @intContractHeaderId IS NULL AND @intContractDetailId IS NOT NULL
@@ -343,15 +347,17 @@ BEGIN TRY
 				end
 		END
 
-
-		-- CONTRACT BALANCE LOG
-		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
-		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							 @intContractDetailId 	= 	@intContractDetailId,
-							 @strSource			 	= 	@strSource,
-							 @strProcess		 	= 	@strProcess,
-							 @contractDetail 		= 	@contractDetails,		
-							 @intUserId				=	@intUserId
+		IF NOT (ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory')
+		BEGIN
+			-- CONTRACT BALANCE LOG
+			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								 @intContractDetailId 	= 	@intContractDetailId,
+								 @strSource			 	= 	@strSource,
+								 @strProcess		 	= 	@strProcess,
+								 @contractDetail 		= 	@contractDetails,		
+								 @intUserId				=	@intUserId
+		END
 
 
 		SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
