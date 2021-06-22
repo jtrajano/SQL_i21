@@ -402,7 +402,6 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
 :R .\GR\StorageInventoryReceipt.sql
 :R .\GR\Fix_NULL_SSId_in_voucher_details.sql
-:R .\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql
 :R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
 
 --Manufacturing

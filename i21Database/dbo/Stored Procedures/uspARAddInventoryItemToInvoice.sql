@@ -50,11 +50,13 @@
 	,@ItemSubFormula				NVARCHAR(50)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
-	,@ContractHeaderId				INT				= NULL
-	,@ContractDetailId				INT				= NULL
 	,@ItemContractHeaderId			INT				= NULL
 	,@ItemContractDetailId			INT				= NULL
-	,@ItemContract					BIT				= 0			
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
+	,@ItemItemContractHeaderId		INT				= NULL
+	,@ItemItemContractDetailId		INT				= NULL
+	,@ItemItemContract				BIT				= 0			
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
 	,@ItemWeightUOMId				INT				= NULL	
@@ -204,7 +206,7 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@ContractSeq					INT
 		,@InvoiceType					NVARCHAR(200)
 		,@TermId						INT
-		,@Pricing						NVARCHAR(250)	= NULL
+		,@Pricing						NVARCHAR(250)	= NULL		
 		,@SpecialPrice					NUMERIC(18,6)	= 0.000000
 		,@ContractUOMId					INT
 		,@PriceUOMId					INT
@@ -252,7 +254,8 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 		SET @ItemPrice = @SpecialPrice
 		SET @ItemUnitPrice = @SpecialPrice
 		SET @ItemPricing = @Pricing
-
+		SET @ItemContractHeaderId = @ContractHeaderId
+		SET @ItemContractDetailId = @ContractDetailId
 		IF ISNULL(@ContractDetailId,0) <> 0
 		BEGIN
 			SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
@@ -476,11 +479,11 @@ BEGIN TRY
 				,[dblRecipeQuantity]				= @ItemRecipeQty
 				,[intSalesOrderDetailId]			= @ItemSalesOrderDetailId 
 				,[strSalesOrderNumber]				= @ItemSalesOrderNumber 
-				,[intContractHeaderId]				= @ContractHeaderId
-				,[intContractDetailId]				= @ContractDetailId
-				,[intItemContractHeaderId]			= @ItemContractHeaderId
-			    ,[intItemContractDetailId]			= @ItemContractDetailId
-				,[ysnItemContract]					= ISNULL(@ItemContract, 0)
+				,[intContractHeaderId]				= @ItemContractHeaderId
+				,[intContractDetailId]				= @ItemContractDetailId
+				,[intItemContractHeaderId]			= @ItemItemContractHeaderId
+			    ,[intItemContractDetailId]			= @ItemItemContractDetailId
+				,[ysnItemContract]					= ISNULL(@ItemItemContract, 0)
 				,[intShipmentId]					= @ItemShipmentId
 				,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
 				,[intItemWeightUOMId]				= @ItemWeightUOMId
