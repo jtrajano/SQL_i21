@@ -80,6 +80,7 @@ BEGIN TRY
 		,@strVendorInvoiceFilePath NVARCHAR(500)
 		,@intFinancingCostItemId INT
 		,@intFreightCostItemId INT
+		,@intTermID INT
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -205,6 +206,12 @@ BEGIN TRY
 				,@strFileName = strFileName
 			FROM tblIPBillStage
 			WHERE intBillStageId = @intBillStageId
+
+			SELECT @intTermID = NULL
+
+			SELECT @intTermID = intTermID
+			FROM tblSMTerm
+			WHERE strTerm = @strPaymentTerms
 
 			IF @strCurrency IS NOT NULL
 				AND NOT EXISTS (
@@ -340,6 +347,8 @@ BEGIN TRY
 					,@strSubCurrency = NULL
 					,@dblTotalCost = 0
 					,@dblTotal = 0
+					,@intContractHeaderId=NULL
+					,@intContractDetailId=NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
@@ -347,8 +356,34 @@ BEGIN TRY
 					,@strOrderUnitMeasure = strOrderUnitMeasure
 					,@strSubCurrency = strCurrency
 					,@dblTotal = dblTotal
+					,@intContractHeaderId=intContractHeaderId
+					,@intContractDetailId=intContractDetailId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
+
+				IF @intContractHeaderId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Contract Number cannot be blank.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Contract Number cannot be blank.'
+					END
+				END
+
+				IF @intContractHeaderId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Contract Sequence cannot be blank.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Contract Sequence cannot be blank.'
+					END
+				END
 
 				SELECT @intItemId = NULL
 
@@ -603,6 +638,8 @@ BEGIN TRY
 				,intAccountId
 				,intCurrencyId
 				,ysnSubCurrency
+				,dtmDueDate
+				,intTermId
 				)
 			SELECT @intEntityId
 				,1
@@ -628,6 +665,8 @@ BEGIN TRY
 				,intAccountId
 				,intCurrencyId
 				,ysnSubCurrency
+				,@dtmDueDate
+				,@intTermID
 			FROM @tblIPFinalInvoiceDetail FID
 
 			IF @dblFinanceChargeAmount > 0
@@ -657,6 +696,8 @@ BEGIN TRY
 					,intAccountId
 					,intCurrencyId
 					,ysnSubCurrency
+					,dtmDueDate
+					,intTermId
 					)
 				SELECT @intEntityId
 					,1
@@ -664,13 +705,13 @@ BEGIN TRY
 					,@intFinancingCostItemId
 					,NULL AS intContractHeaderId
 					,NULL AS intContractDetailId
-					,NULL AS dblQtyOrdered
+					,0 AS dblQtyOrdered
 					,NULL AS intOrderItemUOMId
-					,NULL AS dblQtyShipped
+					,0 AS dblQtyShipped
 					,NULL AS intUnitMeasureId
 					,@dblFinanceChargeAmount AS dblPrice
-					,NULL AS dblShipmentNetWt
-					,NULL AS dblItemWeight
+					,0 AS dblShipmentNetWt
+					,0 AS dblItemWeight
 					,NULL AS intWeightUnitMeasureId
 					,@strInvoiceNo
 					,@dtmInvoiceDate
@@ -682,6 +723,8 @@ BEGIN TRY
 					,intAccountId
 					,intCurrencyId
 					,ysnSubCurrency
+					,@dtmDueDate
+					,@intTermID
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 
@@ -712,6 +755,8 @@ BEGIN TRY
 					,intAccountId
 					,intCurrencyId
 					,ysnSubCurrency
+					,dtmDueDate
+					,intTermId
 					)
 				SELECT @intEntityId
 					,1
@@ -719,13 +764,13 @@ BEGIN TRY
 					,@intFreightCostItemId
 					,NULL AS intContractHeaderId
 					,NULL AS intContractDetailId
-					,NULL AS dblQtyOrdered
+					,0 AS dblQtyOrdered
 					,NULL AS intOrderItemUOMId
-					,NULL AS dblQtyShipped
+					,0 AS dblQtyShipped
 					,NULL AS intUnitMeasureId
 					,@dblFreightCharges AS dblPrice
-					,NULL AS dblShipmentNetWt
-					,NULL AS dblItemWeight
+					,0 AS dblShipmentNetWt
+					,0 AS dblItemWeight
 					,NULL AS intWeightUnitMeasureId
 					,@strInvoiceNo
 					,@dtmInvoiceDate
@@ -737,6 +782,8 @@ BEGIN TRY
 					,intAccountId
 					,intCurrencyId
 					,ysnSubCurrency
+					,@dtmDueDate
+					,@intTermID
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 
@@ -762,6 +809,8 @@ BEGIN TRY
 			SET intBookId = @intBookId
 				,intEntityId = @intEntityId
 				,intTransactionType = 1
+				,dtmDueDate = IsNULL(@dtmDueDate, dtmDueDate)
+				,intTermsId = IsNULL(@intTermID, intTermsId)
 			WHERE intBillId = @intBillInvoiceId
 
 			UPDATE tblAPBillDetail
