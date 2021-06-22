@@ -2075,7 +2075,7 @@ BEGIN TRY
 															END
 													END
 					,[intInventoryReceiptChargeId]	= CASE 
-														WHEN ST.ysnDPOwnedType = 0 OR CS.intDeliverySheetId IS NOT NULL THEN NULL
+														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
 														ELSE 
 																CASE 
 																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RC.intInventoryReceiptChargeId
