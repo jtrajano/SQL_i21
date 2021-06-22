@@ -3,6 +3,7 @@
 	,@dblQuantityToPrice numeric(18,6)
 	,@dblFutures numeric(18,6)
 	,@intUserId int
+	,@ysnAllowToPriceRemainingQtyToPrice bit = 0
 AS
 
 declare
@@ -103,6 +104,11 @@ begin try
 
 	if (@dblSequenceQuantity <= @dblTotalPricedQuantity)
 	begin
+		if (@ysnAllowToPriceRemainingQtyToPrice = 1)
+		begin
+			return
+		end
+
 		set @ysnWithError = 1;
 		set @ErrorMsg = 'There''s no available quantity to price for contract ' + @strContractNumber + ', sequence ' + convert(nvarchar(20),@intContractSeq) + '.';
 		RAISERROR (@ErrorMsg,18,1,'WITH NOWAIT')
@@ -110,9 +116,16 @@ begin try
 
 	if ((@dblSequenceQuantity - @dblTotalPricedQuantity) < @dblQuantityToPrice)
 	begin
-		set @ysnWithError = 1;
-		set @ErrorMsg = 'There''s only ' + convert(nvarchar(50),(@dblSequenceQuantity - @dblTotalPricedQuantity)) + ' available quantity for pricing for contract ' + @strContractNumber + ', sequence ' + convert(nvarchar(20),@intContractSeq) + '' + '.';
-		RAISERROR (@ErrorMsg,18,1,'WITH NOWAIT')
+		if (@ysnAllowToPriceRemainingQtyToPrice = 1)
+		begin
+			set @dblQuantityToPrice = @dblSequenceQuantity - @dblTotalPricedQuantity
+		end
+		else
+		begin
+			set @ysnWithError = 1;
+			set @ErrorMsg = 'There''s only ' + convert(nvarchar(50),(@dblSequenceQuantity - @dblTotalPricedQuantity)) + ' available quantity for pricing for contract ' + @strContractNumber + ', sequence ' + convert(nvarchar(20),@intContractSeq) + '' + '.';
+			RAISERROR (@ErrorMsg,18,1,'WITH NOWAIT')
+		end
 	end
 
 	if (isnull(@intPriceContractId,0) > 0)

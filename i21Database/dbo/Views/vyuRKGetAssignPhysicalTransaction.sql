@@ -35,6 +35,8 @@ FROM (
 			, B.strBook
 			, SB.strSubBook
 			, CD.intContractStatusId
+			, ysnEnableFutures = ISNULL(CH.ysnEnableFutures,0)
+			, CD.intPricingTypeId
 		FROM tblCTContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId <> 3
 		JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
@@ -78,6 +80,8 @@ FROM (
 			, B.strBook
 			, SB.strSubBook
 			, CD.intContractStatusId
+			, ysnEnableFutures = ISNULL(CH.ysnEnableFutures,0)
+			, CH.intPricingTypeId
 		FROM tblCTContractHeader CH
 		INNER JOIN (SELECT DISTINCT intContractHeaderId, intContractStatusId FROM tblCTContractDetail) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId

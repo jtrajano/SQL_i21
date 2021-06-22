@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKAssignFuturesToContractSummarySave]
 	@strXml NVARCHAR(MAX)
+	,@ysnAllowDerivativeAssignToMultipleContracts BIT = NULL
 
 AS
 
@@ -59,17 +60,9 @@ BEGIN TRY
 	SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	
 	---------------Matched Record Insert ----------------
-	INSERT INTO tblRKAssignFuturesToContractSummary (intAssignFuturesToContractHeaderId
-		, intConcurrencyId
-		, intContractHeaderId
-		, intContractDetailId
-		, dtmMatchDate
-		, intFutOptTransactionId
-		, dblAssignedLots
-		, dblHedgedLots
-		, ysnIsHedged)
-	SELECT @intAssignFuturesToContractHeaderId
-		, 1
+	SELECT intRowNum  = ROW_NUMBER() OVER(ORDER BY intContractDetailId)
+		, intAssignFuturesToContractHeaderId =  @intAssignFuturesToContractHeaderId
+		, intConcurrencyId = 1
 		, CASE WHEN ISNULL(intContractHeaderId,0) = 0 THEN NULL ELSE intContractHeaderId END intContractHeaderId
 		, CASE WHEN ISNULL(intContractDetailId,0) = 0 THEN NULL ELSE intContractDetailId END intContractDetailId
 		, dtmMatchDate
@@ -77,6 +70,12 @@ BEGIN TRY
 		, dblAssignedLots
 		, dblHedgedLots
 		, ysnIsHedged
+		, dblAssignedLotsToSContract
+		, dblAssignedLotsToPContract
+		, dblPrice
+		, intUserId
+		, ysnAutoPrice
+	INTO #tempAssignFuturesToContractSummary
 	FROM OPENXML(@idoc,'root/Transaction', 2)
 	WITH (intContractHeaderId INT
 		, intContractDetailId INT
@@ -84,7 +83,79 @@ BEGIN TRY
 		, intFutOptTransactionId INT
 		, dblAssignedLots NUMERIC(16, 10)
 		, dblHedgedLots NUMERIC(18, 6)
-		, ysnIsHedged BIT)
+		, ysnIsHedged BIT
+		, dblAssignedLotsToSContract NUMERIC(16, 10)
+		, dblAssignedLotsToPContract NUMERIC(16, 10)
+		, dblPrice NUMERIC(16,10)
+		, intUserId INT
+		, ysnAutoPrice BIT)
+
+	DECLARE @intRowNum INT
+		,@dblAssignedLotsToSContract  NUMERIC(16, 10)
+		,@dblAssignedLotsToPContract  NUMERIC(16, 10)
+		,@dblPrice  NUMERIC(16, 10)
+		,@intUserId INT
+		,@dblContractSize NUMERIC(16, 10)
+		,@dblQuantityToPrice  NUMERIC(16, 10)
+		,@ysnAutoPrice BIT
+		
+
+	WHILE EXISTS (SELECT TOP 1 * FROM #tempAssignFuturesToContractSummary)
+	BEGIN
+		
+		SELECT  TOP 1 @intRowNum = intRowNum 
+			, @intContractDetailId = intContractDetailId
+			, @dblAssignedLots = dblAssignedLots
+			, @dblAssignedLotsToSContract = dblAssignedLotsToSContract
+			, @dblAssignedLotsToPContract = dblAssignedLotsToPContract
+			, @dblPrice = dblPrice
+			, @intUserId = intUserId
+			, @ysnAutoPrice = ysnAutoPrice
+		FROM #tempAssignFuturesToContractSummary
+
+		INSERT INTO tblRKAssignFuturesToContractSummary (intAssignFuturesToContractHeaderId
+			, intConcurrencyId
+			, intContractHeaderId
+			, intContractDetailId
+			, dtmMatchDate
+			, intFutOptTransactionId
+			, dblAssignedLots
+			, dblHedgedLots
+			, ysnIsHedged
+			, dblAssignedLotsToSContract
+			, dblAssignedLotsToPContract)
+		SELECT intAssignFuturesToContractHeaderId
+			,intConcurrencyId
+			, intContractHeaderId
+			, intContractDetailId
+			, dtmMatchDate
+			, intFutOptTransactionId
+			, dblAssignedLots
+			, dblHedgedLots
+			, ysnIsHedged
+			, dblAssignedLotsToSContract
+			, dblAssignedLotsToPContract
+		FROM #tempAssignFuturesToContractSummary WHERE intRowNum = @intRowNum
+
+		DELETE FROM #tempAssignFuturesToContractSummary WHERE intRowNum = @intRowNum
+	
+		IF @ysnAllowDerivativeAssignToMultipleContracts = 1 AND @ysnAutoPrice = 1
+		BEGIN
+			
+			SELECT @dblContractSize = dblContractSize 
+			FROM tblCTContractDetail CD 
+			INNER JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId
+			WHERE CD.intContractDetailId = @intContractDetailId
+
+			SET @dblQuantityToPrice = @dblAssignedLots * @dblContractSize
+
+			EXEC uspCTCreatePrice @intContractDetailId, @dblQuantityToPrice, @dblPrice, @intUserId, 1
+		END
+	
+	
+	END
+
+
 	
 	COMMIT TRAN
 	
