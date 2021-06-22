@@ -235,8 +235,9 @@ GO
 IF NOT EXISTS(SELECT * FROM tblIPStepType WHERE intStepTypeId = 15)
 BEGIN
     INSERT INTO tblIPStepType(intStepTypeId,strName)
-    VALUES(15,'Web API Endpoint')
+    VALUES(15,'i21 Web API Endpoint')
 END
+UPDATE tblIPStepType SET strName = 'i21 Web API Endpoint' WHERE intStepTypeId = 15 AND strName = 'Web API Endpoint'
 GO
 IF NOT EXISTS (
 		SELECT *
