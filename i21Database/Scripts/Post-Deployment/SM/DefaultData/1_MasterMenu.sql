@@ -10,8 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Process Payments' AND strModuleName = 'Cash Management')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transports (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = 0)
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -7800,6 +7799,36 @@ BEGIN
 END
 
 --
+
+
+/* Transports */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transports (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Transports (Portal)', N'Transports', 0, N'Transports (Portal)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 2, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, intRow = 2 WHERE strMenuName = 'Transports (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = 0
+
+DECLARE @TransportsPortalParentMenuId INT
+SELECT @TransportsPortalParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Transports (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TransportsPortalParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TransportsPortalParentMenuId, 1)
+
+-- QUOTES
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quotes (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Quotes (Portal)', N'Transports', @TransportsPortalParentMenuId, N'Quotes (Portal)', N'Portal Menu', N'Screen', N'Transports.view.Quote?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Transports.view.Quote?showSearch=true' WHERE strMenuName = 'Quotes (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsPortalParentMenuId
+
+DECLARE @TRQuotesMenuId INT
+SELECT  @TRQuotesMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Quotes (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quotes (Portal)' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @TRQuotesMenuId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TRQuotesMenuId, 1)
+END
+
 
 GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
