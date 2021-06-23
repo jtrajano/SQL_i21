@@ -70,6 +70,18 @@ BEGIN
 					GOTO Exit_Routine
 				END
 		END
+	ELSE
+		BEGIN
+			SELECT @intCompanyLocationId = intPaymentsLocationId
+			FROM tblSMCompanyPreference
+
+			IF ISNULL(@intCompanyLocationId, 0) = 0
+				BEGIN
+					SET @ErrorMessage = 'Payments Location is required when processing Credit Card!'
+					RAISERROR(@ErrorMessage, 16, 1);
+					GOTO Exit_Routine
+				END
+		END
 
 	IF ISNULL(@intCompanyLocationId, 0) = 0
 		BEGIN
