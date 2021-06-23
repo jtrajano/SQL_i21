@@ -286,7 +286,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @strTransactionId = strTransactionId, @intTransactionId = intTransactionId FROM @ItemsForInTransitCosting
 					EXEC dbo.uspICUnpostCosting @intTransactionId, @strTransactionId , @strBatchId, NULL, @intUserId
-					UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
+					UPDATE tblSCTicket SET strTicketStatus = 'R', dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 				END
 			END
 

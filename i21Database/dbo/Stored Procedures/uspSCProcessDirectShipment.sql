@@ -143,7 +143,7 @@ BEGIN TRY
 
 				UPDATE tblSCTicket
 				SET intDiscountId = A.intDiscountId
-					,intDiscountSchedule = A.intDiscountSchedule
+					,intDiscountSchedule = A.intDiscountSchedule, dtmDateModifiedUtc = GETUTCDATE()
 				FROM (SELECT TOP 1 intDiscountId 
 							,intDiscountSchedule
 						FROM tblSCTicket

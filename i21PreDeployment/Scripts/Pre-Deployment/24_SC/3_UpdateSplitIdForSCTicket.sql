@@ -8,7 +8,7 @@ GO
 		 AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSCTicket' and [COLUMN_NAME] = 'intSplitId')
 		BEGIN
 			PRINT 'Start - Update split that does not exist in the entity split table'
-			EXEC('update tblSCTicket set intSplitId = null where intSplitId not in (select intSplitId from tblEMEntitySplit) ')
+			EXEC('update tblSCTicket set intSplitId = null, dtmDateModifiedUtc = GETUTCDATE() where intSplitId not in (select intSplitId from tblEMEntitySplit) ')
 		END
 
 	
