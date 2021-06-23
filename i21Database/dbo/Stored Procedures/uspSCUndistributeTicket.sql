@@ -586,7 +586,7 @@ BEGIN TRY
                         end
 
 						UPDATE tblSCTicket
-						SET ysnSpecialGradePosted = 0
+						SET ysnSpecialGradePosted = 0, dtmDateModifiedUtc = GETUTCDATE()
 						WHERE intTicketId = @intTicketId
 					END
 					ELSE
@@ -668,7 +668,7 @@ BEGIN TRY
 									EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 							END
 
-							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+							UPDATE tblSCTicket SET intMatchTicketId = null, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 							DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 							DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 						END
@@ -690,7 +690,7 @@ BEGIN TRY
 								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 							END
-						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+						UPDATE tblSCTicket SET intMatchTicketId = null, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 						DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 						DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 
@@ -1252,7 +1252,7 @@ BEGIN TRY
 							DEALLOCATE intListCursor 
 
 							UPDATE tblSCTicket
-							SET intInventoryShipmentId = NULL
+							SET intInventoryShipmentId = NULL, dtmDateModifiedUtc = GETUTCDATE()
 							WHERE intTicketId = @intTicketId
 
 							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;

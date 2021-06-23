@@ -41,6 +41,7 @@ BEGIN TRY
 					, ysnFarmerPaysFreight = ISNULL(CT.ysnPrice,SC.ysnFarmerPaysFreight)
 					, intWeightId = CT.intWeightId
 					, intGradeId  = CT.intGradeId
+					, dtmDateModifiedUtc = GETUTCDATE()
 					FROM tblSCTicket SC
 					INNER JOIN tblSCScaleSetup SCS ON SCS.intScaleSetupId = SC.intScaleSetupId
 					OUTER APPLY(
@@ -80,6 +81,7 @@ BEGIN TRY
 			, strContractNumber = CT.strContractNumber
 			, intContractSequence = CT.intContractSeq
 			, strContractLocation = CT.strLocationName
+			, dtmDateModifiedUtc = GETUTCDATE()
 			FROM tblSCTicket SC
 				OUTER APPLY(
 					SELECT
