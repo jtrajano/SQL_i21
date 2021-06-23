@@ -11,12 +11,7 @@ AS
 	DECLARE @newFileIdentifier NVARCHAR(50)	
 	DECLARE @dtmDateEntered DATETIME = GETDATE()
 	SELECT @newFileIdentifier = NEWID()
-	
-	IF EXISTS (SELECT * FROM tblSMAttachment WHERE strRecordNo = @strRecordNo
-	AND strScreen = @strScreen AND strName = @strFileName)
-		RETURN
 
-	-- DUPLICATE tblSMAttachment
 	INSERT INTO tblSMAttachment(
 		strName, 
 		strFileType, 
