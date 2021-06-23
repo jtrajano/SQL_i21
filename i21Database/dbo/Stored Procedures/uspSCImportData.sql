@@ -845,7 +845,8 @@ BEGIN TRY
 					,[ysnReadyToTransfer]
 					,[ysnExport] 
 					,[intConcurrencyId]
-					,dtmImportedDate						
+					,dtmImportedDate
+					,dtmDateCreatedUtc
 				)
 				SELECT 
 					SCT.[strTicketStatus]
@@ -975,6 +976,7 @@ BEGIN TRY
 					,SCT.[ysnExport] 
 					,1
 					,dtmImportedDate = GETDATE()
+					,dtmDateCreatedUtc = GETUTCDATE()
 				FROM #insertedTicket SCT
 				LEFT JOIN (
 					SELECT DS.intDeliverySheetId,SCD.intDeliverySheetId AS dsId,SCD.intEntityId FROM @temp_xml_deliverysheet_sc SCD
@@ -1034,7 +1036,7 @@ BEGIN TRY
 							SET @_dblNetUnits  = @_dblAvailableQtyInItemStockUOM
 							
 							UPDATE tblSCTicket
-							SET dblScheduleQty = @_dblNetUnits
+							SET dblScheduleQty = @_dblNetUnits, dtmDateModifiedUtc = GETUTCDATE()
 							WHERE intTicketId = @_intTicketId	
 						END
 
