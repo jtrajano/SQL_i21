@@ -11,6 +11,7 @@ FROM
 	   , TR.strTrlDept
 	   , TR.strTrlNetwCode
 	   , TR.strTrlUPC
+	   , dbo.fnSTUPCRemoveLeadingZero(strTrlUPC) AS strTrlUpcWithoutLeadingZero -- 12 digit UPC code
 	   , TR.strTrpPaycode
 	   , TR.strTrpCardInfoTrpcCCName
 	   , TR.strTrlDesc
