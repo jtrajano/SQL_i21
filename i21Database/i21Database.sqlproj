@@ -6106,6 +6106,7 @@
     <Build Include="dbo\Stored Procedures\uspGLErrorMessages.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSummaryReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringToColumns.sql" />
+    <Build Include="dbo\Functions\fnSTUPCRemoveLeadingZero.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTags.sql" />
     <None Include="Scripts\Post-Deployment\PAT\2_MigrateStockRecords.sql" />
     <None Include="Scripts\Post-Deployment\PAT\3_UpdateIssueStockNo.sql" />
