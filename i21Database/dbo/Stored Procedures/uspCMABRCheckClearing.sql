@@ -39,7 +39,8 @@ OUTER APPLY(
 		END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit  = 'C'
-    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit = 'C')
+    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit IN('C','DC'))
+	AND dblAmount > 0
 	ORDER BY dtmDate
 )CM
 UNION ALL
@@ -64,7 +65,8 @@ OUTER APPLY(
 		END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit  = 'D'
-    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit = 'D')
+    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit  IN('C','DC'))
+	AND dblAmount < 0
 	ORDER BY dtmDate
 )CM
 )
@@ -85,8 +87,14 @@ tblCMABRActivity ABR JOIN
 ##tempActivityMatched T ON
 T.intABRActivityId = ABR.intABRActivityId
 
-INSERT INTO tblCMABRActivityMatched(intABRActivityId, intTransactionId, dtmDateEntered, intEntityId)
-SELECT intABRActivityId, intTransactionId, @dtmCurrent, 1 FROM ##tempActivityMatched
+DECLARE @bankMatchingId NVARCHAR(20)
+EXEC uspSMGetStartingNumber 162,  @bankMatchingId OUT
+
+INSERT INTO tblCMABRActivityMatched( strActivityMatched, dtmDateEntered, intEntityId)
+SELECT @bankMatchingId, @dtmCurrent, @intEntityId
+
+INSERT INTO tblCMABRActivityMatchedDetail(intABRActivityMatchedId, intABRActivityId, intTransactionId)
+SELECT SCOPE_IDENTITY(), intABRActivityId, intTransactionId FROM ##tempActivityMatched
 
 
 

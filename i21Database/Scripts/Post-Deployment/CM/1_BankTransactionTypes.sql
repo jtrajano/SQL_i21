@@ -13,7 +13,7 @@ GO
 	WITH	(HOLDLOCK) 
 	AS		BankTransactionTypeTable
 	USING	(
-			SELECT id = 5,		name = 'Bank Transaction'		,debitCredit = NULL	UNION ALL 
+			SELECT id = 5,		name = 'Bank Transaction'		,debitCredit ='DC'	UNION ALL 
 			SELECT id = 1,		name = 'Bank Deposit'			,debitCredit ='C'	UNION ALL 
 			SELECT id = 2,		name = 'Bank Withdrawal'		,debitCredit ='D'	UNION ALL 
 			SELECT id = 3,		name = 'Misc Checks'			,debitCredit ='D'	UNION ALL 
