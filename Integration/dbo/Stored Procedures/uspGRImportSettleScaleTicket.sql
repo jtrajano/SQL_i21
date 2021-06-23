@@ -122,6 +122,7 @@ BEGIN
 	,intItemUOMIdFrom
 	,intItemUOMIdTo
 	,ysnCusVenPaysFees
+	,dtmDateCreatedUtc
 	)
 	 SELECT	 
 	 intConcurrencyId 		   =  A4GLIdentity
@@ -209,6 +210,7 @@ BEGIN
 	,intItemUOMIdFrom		   = IU.intItemUOMId
 	,intItemUOMIdTo			   = IU.intItemUOMId
 	,ysnCusVenPaysFees		   = CAST(0 AS BIT)
+	,dtmDateCreatedUtc		   = GETUTCDATE()
 
 	FROM	gastlmst GT
 	JOIN (

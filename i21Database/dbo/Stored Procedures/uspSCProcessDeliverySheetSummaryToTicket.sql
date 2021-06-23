@@ -309,6 +309,7 @@ BEGIN TRY
 		-- ,SC.strDistributionOption = CASE WHEN StagingTable.splitCount > 1 THEN 'SPL' ELSE StagingTable.strDistributionOption END
 		-- ,SC.intStorageScheduleId = CASE WHEN StagingTable.splitCount > 1 THEN NULL ELSE StagingTable.intStorageScheduleId END
 			,SC.intConcurrencyId = ISNULL(SC.intConcurrencyId,0) + 1
+			, dtmDateModifiedUtc = GETUTCDATE()
 		FROM tblSCTicket SC
 		-- OUTER APPLY(
 		-- 	SELECT (SELECT COUNT(intTicketId) FROM @splitTable) AS splitCount,intStorageScheduleTypeId,intStorageScheduleId,strDistributionOption

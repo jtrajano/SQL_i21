@@ -923,6 +923,7 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,[dtmDateCreatedUtc]
 				)
 			SELECT 
 				[strTicketStatus] = 'O'
@@ -1064,6 +1065,7 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,GETUTCDATE()
 			FROM tblSCTicket
 			WHERE intTicketId = @intTicketId
 
