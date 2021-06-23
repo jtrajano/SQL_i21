@@ -28,12 +28,12 @@ LEFT JOIN (
 				intShiftId, SUM(dblFuelGallonsDelievered) as dblFuelGallonsDelievered, SUM(dblFuelSales) as dblFuelSales
 			FROM (
 					SELECT 
-						intShiftId, SUM(dblQuantity) as dblFuelGallonsDelievered, SUM(dblQuantity) * dblPrice as dblFuelSales
+						intShiftId, SUM(dblQuantity) as dblFuelGallonsDelievered,  (ISNULL(dblItemTotal,0) + ISNULL(dblTaxTotal,0)) as dblFuelSales
 					FROM 
 						vyuMBILInvoiceItem InvoiceItem
 						INNER JOIN tblICItem Item ON Item.intItemId = InvoiceItem.intItemId
 						WHERE Item.strType = 'Inventory' and Item.ysnAvailableTM = 1
-						GROUP BY intShiftId, dblQuantity, dblPrice
+						GROUP BY intShiftId, dblQuantity, dblItemTotal, dblTaxTotal
 				) tblTotalItem
 				GROUP BY intShiftId
 		) Items ON Items.intShiftId = Shift.intShiftId
