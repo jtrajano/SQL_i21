@@ -586,7 +586,7 @@ BEGIN TRY
                         end
 
 						UPDATE tblSCTicket
-						SET ysnSpecialGradePosted = 0
+						SET ysnSpecialGradePosted = 0, dtmDateModifiedUtc = GETUTCDATE()
 						WHERE intTicketId = @intTicketId
 					END
 					ELSE
@@ -657,8 +657,8 @@ BEGIN TRY
 								END
 							END
 
-							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
-							UPDATE tblSCTicket SET ysnHasGeneratedTicketNumber = 0 WHERE intTicketId = @intMatchTicketId
+							UPDATE tblSCTicket SET intMatchTicketId = null, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
+							UPDATE tblSCTicket SET ysnHasGeneratedTicketNumber = 0, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intMatchTicketId
 							DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 							DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 						END
@@ -750,7 +750,7 @@ BEGIN TRY
 							EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 						END
 
-						UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
+						UPDATE tblSCTicket SET strTicketStatus = 'R', dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 
 
                         set @intInventoryAdjustmentId = null
@@ -1278,7 +1278,7 @@ BEGIN TRY
 							DEALLOCATE intListCursor 
 
 							UPDATE tblSCTicket
-							SET intInventoryShipmentId = NULL
+							SET intInventoryShipmentId = NULL, dtmDateModifiedUtc = GETUTCDATE()
 							WHERE intTicketId = @intTicketId
 
 							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
@@ -1545,7 +1545,7 @@ BEGIN TRY
 
 		-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
 		UPDATE tblSCTicket
-		SET dblDWGOriginalNetUnits = 0
+		SET dblDWGOriginalNetUnits = 0, dtmDateModifiedUtc = GETUTCDATE()
 		WHERE intTicketId = @intTicketId
 
 		--Audit Log

@@ -723,7 +723,7 @@ BEGIN TRY
 
 	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
 	UPDATE tblSCTicket
-	SET dblDWGOriginalNetUnits = dblNetUnits
+	SET dblDWGOriginalNetUnits = dblNetUnits, dtmDateModifiedUtc = GETUTCDATE()
 	WHERE intTicketId = @intTicketId
 
 	

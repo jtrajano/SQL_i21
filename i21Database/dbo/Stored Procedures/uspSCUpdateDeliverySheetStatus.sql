@@ -30,7 +30,7 @@ BEGIN
 				THEN 1 --Post
 			WHEN @status = 1
 				THEN 0 --Unpost
-		END) 
+		END) , dtmDateModifiedUtc = GETUTCDATE()
 		WHERE intDeliverySheetId = @dsId
 		AND strTicketStatus = 'C'
 	END

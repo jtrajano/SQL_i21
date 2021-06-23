@@ -157,6 +157,7 @@ BEGIN
 		,intItemUOMIdTo
 		,ysnCusVenPaysFees
 		,intStorageLocationId
+		,dtmDateCreatedUtc
 	)
 	SELECT	
 	 intConcurrencyId 		   = 1
@@ -252,6 +253,7 @@ BEGIN
 	,intItemUOMIdTo			   = IU.intItemUOMId
 	,ysnCusVenPaysFees		   = CAST(0 AS BIT)
 	,intStorageLocationId	   =ICSL.intStorageLocationId
+	,dtmDateCreatedUtc		   = GETUTCDATE()
 	FROM	gasctmst GT
 			JOIN	tblSCScaleSetup			SS	ON	LTRIM(RTRIM(SS.strStationShortDescription)) collate Latin1_General_CI_AS = LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))
 			JOIN    tblSCTicketPool         TP  ON TP.intTicketPoolId=SS.intTicketPoolId --AND TP.strTicketPool  collate Latin1_General_CI_AS =LTRIM(RTRIM(GT.gasct_loc_no)) + LTRIM(RTRIM(GT.gasct_scale_id))---Added
