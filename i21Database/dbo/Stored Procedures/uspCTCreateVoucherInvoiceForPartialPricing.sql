@@ -1364,7 +1364,7 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+					dblShipped = isnull((dbo.fnCTConvertQtyToTargetItemUOM(
 																	RI.intItemUOMId
 																	,@intItemUOMId
 																	,(
@@ -1374,7 +1374,7 @@ BEGIN TRY
 																			else ISNULL(RI.dblQuantity,0)
 																			end
 																	  )
-																  ) - isnull(rt.dblQtyShipped,0),
+																  ) - isnull(inv.dblQtyShipped,0)) - rt.dblQtyShipped,0),
 					intInvoiceDetailId = ARD.intInvoiceDetailId,
 					intItemUOMId = @intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
@@ -1401,6 +1401,15 @@ BEGIN TRY
 									and ARD.intInventoryShipmentChargeId is null
 									and isnull(ARD.ysnReturned,0) = 1
 								) rt
+				OUTER APPLY (
+								select dblQtyShipped = sum(dblQtyShipped)
+								from
+									tblARInvoiceDetail ARD with (nolock)
+								WHERE
+									ARD.intContractDetailId = @intContractDetailId
+									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
+									and ARD.intInventoryShipmentChargeId is null
+								) inv
 								
 				WHERE
 					RI.intLineNo = @intContractDetailId	
