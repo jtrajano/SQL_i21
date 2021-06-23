@@ -54,7 +54,7 @@ SELECT DE.intFutOptTransactionId
 	, strHedgeContract = CASE WHEN PF.intPriceContractId IS NOT NULL THEN PriceHeader.strContractNumber + ISNULL('-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10)), '')
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + ISNULL('-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10)), '')
 							ELSE NULL END COLLATE Latin1_General_CI_AS
-	, dblAvailableContract = (ISNULL(GOC.dblMaxOpenContract, 0.00)) * CASE WHEN DE.strBuySell = 'Sell' THEN - 1 ELSE 1 END
+	, dblAvailableContract = (DE.dblNoOfContract -  ISNULL(AFC.dblSumAssignedLots, 0.00)) * CASE WHEN DE.strBuySell = 'Sell' THEN - 1 ELSE 1 END
 	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
 	, DE.intOrigSliceTradeId
 	, strOriginalTradeNo = ST.strInternalTradeNo
@@ -93,3 +93,10 @@ LEFT JOIN (
 	FROM vyuRKGetOpenContract
 	GROUP BY intFutOptTransactionId
 ) GOC ON DE.intFutOptTransactionId = GOC.intFutOptTransactionId
+OUTER APPLY (
+	SELECT intFutOptTransactionId
+		, dblSumAssignedLots = SUM(ISNULL(dblAssignedLotsToPContract,0))
+	FROM tblRKAssignFuturesToContractSummary
+	WHERE intFutOptTransactionId = DE.intFutOptTransactionId
+	GROUP BY intFutOptTransactionId
+) AFC 
