@@ -75,7 +75,7 @@ BEGIN TRY
 		WHERE [strTransactionType] = N'CPE Receipt'
 
 		UPDATE tblSCTicket
-		SET strElevatorReceiptNumber=@strReceiptNumber, @dtmDateModifiedUtc = GETUTCDATE()
+		SET strElevatorReceiptNumber=@strReceiptNumber, dtmDateModifiedUtc = GETUTCDATE()
 		WHERE intTicketId = @intScaleTicketId
 				
 	END
