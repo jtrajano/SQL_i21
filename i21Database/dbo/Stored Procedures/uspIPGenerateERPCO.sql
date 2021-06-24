@@ -80,8 +80,8 @@ BEGIN TRY
 		AND CF.intStatusId IS NULL
 		AND CH.intContractTypeId = 2
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
-	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-		AND CL.strLotOrigin = @strCompanyLocation
+	JOIN tblARCustomer C ON C.intEntityId = CH.intEntityId
+		AND ISNULL(C.strLinkCustomerNumber, '') = @strCompanyLocation
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
@@ -288,6 +288,10 @@ BEGIN TRY
 			IF @strRowState <> 'Added'
 				AND IsNULL(@strERPCONumber, '') = ''
 			BEGIN
+				UPDATE dbo.tblCTContractFeed
+				SET strMessage = 'ERP PO Number is not available. '
+				WHERE intContractFeedId = @intContractFeedId
+
 				GOTO NextPO
 			END
 
@@ -297,13 +301,18 @@ BEGIN TRY
 					FROM tblCTContractFeed CF
 					JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
 						AND CD.intContractDetailId = @intContractDetailId
-					JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-						AND CL.strLotOrigin = @strCompanyLocation
+					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+					JOIN tblARCustomer C ON C.intEntityId = CH.intEntityId
+						AND ISNULL(C.strLinkCustomerNumber, '') = @strCompanyLocation
 						AND CF.intContractFeedId < @intContractFeedId
 						AND intStatusId = 2
 					ORDER BY CF.intContractFeedId DESC
 					)
 			BEGIN
+				UPDATE dbo.tblCTContractFeed
+				SET strMessage = 'Previous feed is waiting for acknowledgement. '
+				WHERE intContractFeedId = @intContractFeedId
+
 				GOTO NextPO
 			END
 

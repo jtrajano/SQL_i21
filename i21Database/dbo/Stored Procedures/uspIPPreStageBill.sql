@@ -11,7 +11,8 @@ BEGIN TRY
 
 	DELETE 
 	FROM tblAPBillPreStage
-	WHERE strRowState = @strRowState
+	WHERE intBillId IN (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@strBillId, ','))
+		AND strRowState = @strRowState
 		AND ISNULL(intStatusId, 1) = 1
 
 	INSERT INTO dbo.tblAPBillPreStage (

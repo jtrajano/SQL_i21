@@ -61,11 +61,6 @@ BEGIN TRY
 		,strERPRefNo NVARCHAR(100)
 		)
 
-	IF @strCompanyLocation <> '10'
-	BEGIN
-		RETURN
-	END
-
 	IF NOT EXISTS (
 			SELECT 1
 			FROM tblMFCommitmentPricingStage
@@ -82,7 +77,9 @@ BEGIN TRY
 	SELECT TOP 50 CPS.intCommitmentPricingStageId
 	FROM tblMFCommitmentPricingStage CPS
 	JOIN tblMFCommitmentPricing CP ON CP.intCommitmentPricingId = CPS.intCommitmentPricingId
-	WHERE CPS.intStatusId IS NULL
+		AND CPS.intStatusId IS NULL
+	JOIN tblARCustomer C ON C.intEntityId = CP.intEntityId
+		AND ISNULL(C.strLinkCustomerNumber, '') = @strCompanyLocation
 
 	SELECT @intCommitmentPricingStageId = MIN(intCommitmentPricingStageId)
 	FROM @tblMFCommitmentPricingStage
@@ -234,11 +231,17 @@ BEGIN TRY
 				FROM tblMFCommitmentPricingStage CPS
 				JOIN tblMFCommitmentPricing CP ON CP.intCommitmentPricingId = CPS.intCommitmentPricingId
 					AND CP.intCommitmentPricingId = @intCommitmentPricingId
+				JOIN tblARCustomer C ON C.intEntityId = CP.intEntityId
+						AND ISNULL(C.strLinkCustomerNumber, '') = @strCompanyLocation
 					AND CPS.intCommitmentPricingStageId < @intCommitmentPricingStageId
 					AND CPS.intStatusId = 2
 				ORDER BY CPS.intCommitmentPricingStageId DESC
 				)
 		BEGIN
+			UPDATE tblMFCommitmentPricingStage
+			SET strMessage = 'Previous feed is waiting for acknowledgement. '
+			WHERE intCommitmentPricingStageId = @intCommitmentPricingStageId
+
 			GOTO NextRec
 		END
 
