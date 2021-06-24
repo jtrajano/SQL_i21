@@ -135,7 +135,8 @@ BEGIN
 						DECLARE @intInvoiceId INT = NULL,
 							@intInvoiceTransactionId INT = NULL,
 							@intInvoiceAttachmentId INT = NULL,
-							@strInvoiceNumber NVARCHAR(100) = NULL
+							@strInvoiceNumber NVARCHAR(100) = NULL,
+							@strInvoiceId NVARCHAR(300) = NULL
 
 						DECLARE @CursorInvoiceTran AS CURSOR
 						SET @CursorInvoiceTran = CURSOR FOR
@@ -169,6 +170,8 @@ BEGIN
 							
 							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,@strInvoiceNumber)
 
+							SELECT @strInvoiceId = dbo.fnTRMessageConcat(@strInvoiceId,@intInvoiceId)
+
 							FETCH NEXT FROM @CursorInvoiceTran INTO @intInvoiceId, @strInvoiceNumber
 						END
 
@@ -176,7 +179,7 @@ BEGIN
 						DEALLOCATE @CursorInvoiceTran
 					-- END
 
-					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, intLoadHeaderId = @intLoadHeaderId, strInvoiceId = @strInvoiceId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
 				END
 				ELSE
 				BEGIN
