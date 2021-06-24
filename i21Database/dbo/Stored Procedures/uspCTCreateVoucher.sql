@@ -52,7 +52,7 @@ begin try
 		,@intPayToAddressId				INT
 		,@intCurrencyId					INT
 		,@dtmDate						DATETIME
-		,@dtmVoucherDate				DATETIME = getdate()
+		,@dtmVoucherDate				DATETIME
 		,@dtmDueDate					DATETIME
 		,@strVendorOrderNumber			NVARCHAR (MAX)
 		,@strReference					NVARCHAR(400)
@@ -417,8 +417,8 @@ begin try
 					,intShipFromEntityId = vp.intShipFromEntityId
 					,intPayToAddressId = vp.intPayToAddressId
 					,intCurrencyId = vp.intCurrencyId
-					,dtmDate = (case when @dtmVoucherDate > vp.dtmDate then @dtmVoucherDate else vp.dtmDate end)
-					,dtmVoucherDate = (case when @dtmVoucherDate > vp.dtmVoucherDate then @dtmVoucherDate else vp.dtmVoucherDate end)
+					,dtmDate = getdate()
+					,dtmVoucherDate = getdate()
 					,dtmDueDate = vp.dtmDueDate
 					,strVendorOrderNumber = vp.strVendorOrderNumber
 					,strReference = vp.strReference
@@ -833,8 +833,8 @@ begin try
 			,intShipFromEntityId = vp.intShipFromEntityId
 			,intPayToAddressId = vp.intPayToAddressId
 			,intCurrencyId = vp.intCurrencyId
-			,dtmDate = (case when @dtmVoucherDate > vp.dtmDate then @dtmVoucherDate else vp.dtmDate end)
-			,dtmVoucherDate = (case when @dtmVoucherDate > vp.dtmVoucherDate then @dtmVoucherDate else vp.dtmVoucherDate end)
+			,dtmDate = getdate()
+			,dtmVoucherDate = getdate()
 			,dtmDueDate = vp.dtmDueDate
 			,strVendorOrderNumber = vp.strVendorOrderNumber
 			,strReference = vp.strReference
