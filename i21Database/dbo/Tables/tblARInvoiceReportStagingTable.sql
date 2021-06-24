@@ -126,5 +126,10 @@
 	[dtmScaleDate]						DATETIME		NULL,
 	[blbLogo]							VARBINARY (MAX) NULL,
 	[blbSignature]						VARBINARY (MAX) NULL,
-	[dtmCreated]						DATETIME		NULL
+	[dtmCreated]						DATETIME		NULL,
+
+	[intDaysOld]						INT				NULL,
+	[strServiceChargeItem]				NVARCHAR(100)	NULL,
+	[strServiceChareInvoiceNumber]		NVARCHAR(100)	NULL,
+	[dtmDateSC]							DATETIME		NULL
 );

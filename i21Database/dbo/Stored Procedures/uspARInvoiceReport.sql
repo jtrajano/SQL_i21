@@ -155,6 +155,10 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , ysnStretchLogo
 	 , strSubFormula
 	 , dtmCreated
+	 , strServiceChargeItem
+	 , intDaysOld
+	 , strServiceChareInvoiceNumber
+	 , dtmDateSC
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -274,7 +278,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dtmCreated				= GETDATE()
 	 , strServiceChargeItem		= CASE WHEN SELECTEDINV.strInvoiceFormat 
 										IN ('By Customer Balance', 'By Invoice') 
-										THEN 'Service Charge on Past Due' + CHAR(13) + 'Balance as of: ' +  CAST(CAST(INV.dtmDate AS DATE) AS VARCHAR)
+										THEN 'Service Charge on Past Due' + CHAR(13) + 'Balance as of: ' +  cast(CAST(GETDATE() AS DATE) as varchar)
 										ELSE
 										''
 										END
@@ -356,6 +360,8 @@ LEFT JOIN (
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
 		 , strLotNumber				= LOT.strLotNumbers
 		 , strSubFormula			= ID.strSubFormula
+		 , strSCInvoiceNumber		= INVSC.strInvoiceNumber
+		 , dtmDateSC				= INVSC.dtmDate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -366,6 +372,9 @@ LEFT JOIN (
 			 , ysnListBundleSeparately
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
+	LEFT JOIN  (
+		Select dtmDate,intInvoiceId,strInvoiceNumber from tblARInvoice
+	)INVSC  ON  INVSC.intInvoiceId = ID.intSCInvoiceId
 	LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId
