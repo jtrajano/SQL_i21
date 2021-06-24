@@ -225,7 +225,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 												ELSE 
 													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
 														THEN ISI.dblQuantity + CTD.dblBalance
-														ELSE ID.dblQtyShipped
+														ELSE ISI.dblDestinationQuantity
 													END
 											END
 									, ISI.dblQuantity)
