@@ -44,7 +44,8 @@
     [strGrossNet] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
     [strPONumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
     [strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[ysnProcess] BIT NULL, 
+	[ysnProcess] BIT NULL,
+    [ysnDelete] BIT NULL,
     CONSTRAINT [PK_tblTRImportLoadDetail] PRIMARY KEY ([intImportLoadDetailId]),
     CONSTRAINT [FK_tblTRImportLoadDetail_tblTRImportLoad_intImportLoadId] FOREIGN KEY ([intImportLoadId]) REFERENCES [dbo].[tblTRImportLoad] ([intImportLoadId]) ON DELETE CASCADE
 )
