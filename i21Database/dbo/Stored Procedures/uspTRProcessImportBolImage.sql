@@ -183,7 +183,7 @@ BEGIN
 				END
 				ELSE
 				BEGIN
-					UPDATE tblTRImportAttachmentDetail SET strMessage = 'Does not matched to any existing Transport Load' WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+					UPDATE tblTRImportAttachmentDetail SET strMessage = 'Does not matched to any existing Transport Load', ysnValid = 0 WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
 				END
 
 			END
