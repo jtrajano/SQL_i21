@@ -126,6 +126,7 @@ BEGIN
 		, intLineOfBusinessId
 		, dtmDueDate
 		, dblDollarValue
+		, dblRemainingDollarValue
 		, strContractNumber
 		, guiApiUniqueId)
 	SELECT 1
@@ -148,6 +149,7 @@ BEGIN
 		, @intOpportunityNameId 
 		, @intLineOfBusinessId 
 		, @dtmDueDate 
+		, @dblDollarValue
 		, @dblDollarValue
 		, @strDollarContractNumber
 		, @guiUniqueId
