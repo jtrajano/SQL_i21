@@ -10,8 +10,6 @@ CREATE PROCEDURE uspSCGetContractsAndAllocate
 	@ysnAutoDistribution	BIT = 1,
 	@strDistributionOption AS NVARCHAR(3)	 = ''
 	,@intLoadDetailId		INT = NULL
-	,@intFutureMarketId		INT = NULL
-	,@intFutureMonthId		INT = NULL
 AS
 
 BEGIN TRY
@@ -222,7 +220,7 @@ BEGIN TRY
 				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
 					DROP TABLE #FutureAndBasisPrice						
 
-				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,@intFutureMarketId,@intFutureMonthId,@locationId,null,0,@intItemId,null)
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,@locationId,null,0,@intItemId,null)
 
 				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
 				BEGIN
