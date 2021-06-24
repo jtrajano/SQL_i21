@@ -821,120 +821,121 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'VA_WH', strScheduleCode = '17B', strType = 'Undyed Diesel', intMasterId = 4600448
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'VA_WH', strScheduleCode = '17B', strType = 'Other', intMasterId = 4600449
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'VA_WH', strScheduleCode = '17B', strType = 'Other', intMasterId = 4600450
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600451
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600452
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '078', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600453
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '079', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600454
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600455
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600456
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600457
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600458
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600459
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600460
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600461
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600462
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600463
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Aviation Jet Fuel', intMasterId = 4600464
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Aviation Gasoline', intMasterId = 4600465
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600466
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600467
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600468
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600469
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600470
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600471
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Kerosene', intMasterId = 4600472
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Kerosene', intMasterId = 4600473
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Kerosene', intMasterId = 4600474
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Heating Oil', intMasterId = 4600475
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600476
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600477
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600478
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600479
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600480
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600481
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600482
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600483
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600484
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '175', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600485
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '241', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600486
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '243', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600487
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600488
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600489
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600490
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '078', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600491
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '079', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600492
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600493
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600494
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600495
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600496
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600497
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600498
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600499
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600500
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600501
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Aviation Jet Fuel', intMasterId = 4600502
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Aviation Gasoline', intMasterId = 4600503
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600504
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600505
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600506
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600507
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600508
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600509
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Kerosene', intMasterId = 4600510
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Kerosene', intMasterId = 4600511
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Kerosene', intMasterId = 4600512
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Heating Oil', intMasterId = 4600513
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600514
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600515
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600516
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600517
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600518
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600519
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600520
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600521
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600522
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '175', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600523
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '241', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600524
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '243', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600525
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600526  
-	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600527
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600528
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '078', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600529
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '079', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600530
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600531
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600532
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600533
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600534
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600535
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600536
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600537
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600538
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600539
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Aviation Jet Fuel', intMasterId = 4600540
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Aviation Gasoline', intMasterId = 4600541
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600542
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600543
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600544
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600545
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600546
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600547
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Kerosene', intMasterId = 4600548
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Kerosene', intMasterId = 4600549
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Kerosene', intMasterId = 4600550
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Heating Oil', intMasterId = 4600551
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600552
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600553
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600554
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600555
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600556
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600557
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600558
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600559
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600560
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '175', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600561
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '241', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600562
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '243', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600563
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600564
+
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600451
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600452
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '078', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600453
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '079', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600454
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Gasoline', intMasterId = 4600455
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600456
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600457
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600458
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600459
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600460
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600461
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600462
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Undyed Diesel', intMasterId = 4600463
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Aviation Jet Fuel', intMasterId = 4600464
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Aviation Gasoline', intMasterId = 4600465
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600466
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600467
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600468
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600469
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600470
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Dyed Diesel', intMasterId = 4600471
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Kerosene', intMasterId = 4600472
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Kerosene', intMasterId = 4600473
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Kerosene', intMasterId = 4600474
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Heating Oil', intMasterId = 4600475
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600476
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600477
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600478
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600479
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600480
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600481
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600482
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600483
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600484
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '175', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600485
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '241', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600486
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '243', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600487
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'VA_DS', strScheduleCode = '1_DS', strType = 'Other', intMasterId = 4600488
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600489
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600490
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '078', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600491
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '079', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600492
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Gasoline', intMasterId = 4600493
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600494
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600495
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600496
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600497
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600498
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600499
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600500
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Undyed Diesel', intMasterId = 4600501
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Aviation Jet Fuel', intMasterId = 4600502
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Aviation Gasoline', intMasterId = 4600503
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600504
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600505
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600506
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600507
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600508
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Dyed Diesel', intMasterId = 4600509
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Kerosene', intMasterId = 4600510
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Kerosene', intMasterId = 4600511
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Kerosene', intMasterId = 4600512
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Heating Oil', intMasterId = 4600513
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600514
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600515
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600516
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600517
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600518
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600519
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600520
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600521
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600522
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '175', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600523
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '241', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600524
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '243', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600525
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'VA_DS', strScheduleCode = '2_DS', strType = 'Other', intMasterId = 4600526  
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600527
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '071', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600528
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '078', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600529
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '079', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600530
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Gasoline', intMasterId = 4600531
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600532
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '154', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600533
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600534
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600535
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600536
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '282', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600537
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '283', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600538
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Undyed Diesel', intMasterId = 4600539
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Aviation Jet Fuel', intMasterId = 4600540
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'VA_DS', strScheduleCode = '2D_DS', strType = 'Aviation Gasoline', intMasterId = 4600541
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '153', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600542
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600543
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600544
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600545
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600546
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '231', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Dyed Diesel', intMasterId = 4600547
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Kerosene', intMasterId = 4600548
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Kerosene', intMasterId = 4600549
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '147', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Kerosene', intMasterId = 4600550
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Heating Oil', intMasterId = 4600551
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '279', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600552
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '280', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600553
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600554
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600555
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '074', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600556
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600557
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '100', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600558
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '122', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600559
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '123', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600560
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '175', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600561
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '241', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600562
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '243', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600563
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600564
 
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 
