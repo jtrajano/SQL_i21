@@ -345,7 +345,7 @@ BEGIN TRY
 			,dblSelectedUnits			= @dblTotalUnitsForSettle
 			,dblUnpaidUnits				= CASE WHEN @strType = 'Basis' THEN @dblTotalUnitsForSettle ELSE 0 END
 			,dblSettleUnits				= CASE WHEN @strType <> 'Basis' THEN @dblTotalUnitsForSettle ELSE 0 END
-			,dblDiscountsDue			= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblDiscountsDue
+			,dblDiscountsDue			= 0
 			,dblNetSettlement			= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblNetSettlement
 			,ysnPosted					= 0
 			,intCommodityId				= intCommodityId
