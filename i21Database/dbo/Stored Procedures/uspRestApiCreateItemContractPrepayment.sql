@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspRestApiCreateItemContractPrepayment] (
+CREATE PROCEDURE [dbo].[uspRestApiCreateItemContractPrepayment] (
 	@guiUniqueId UNIQUEIDENTIFIER,
 	@intItemContractHeaderId INT
 )
