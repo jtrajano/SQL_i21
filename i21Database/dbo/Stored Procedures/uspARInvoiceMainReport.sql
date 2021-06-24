@@ -130,6 +130,7 @@ DECLARE @strInvoiceReportName			NVARCHAR(100) = NULL
 	  , @strCreditMemoReportName		NVARCHAR(100) = NULL
 	  , @strOtherChargeInvoiceReport	NVARCHAR(100) = NULL
 	  , @strOtherChargeCreditMemoReport	NVARCHAR(100) = NULL
+	  , @strServiceChargeFormat		    NVARCHAR(100) = NULL
 	  , @ysnStretchLogo					BIT = 0
 
 SELECT TOP 1 @strInvoiceReportName				= ISNULL(strInvoiceReportName, 'Standard')
@@ -140,6 +141,7 @@ SELECT TOP 1 @strInvoiceReportName				= ISNULL(strInvoiceReportName, 'Standard')
 		   , @strCreditMemoReportName			= ISNULL(strCreditMemoReportName, ISNULL(strInvoiceReportName, 'Standard'))
 		   , @strOtherChargeInvoiceReport		= ISNULL(strOtherChargeInvoiceReportName, ISNULL(strInvoiceReportName, 'Standard'))
 		   , @strOtherChargeCreditMemoReport	= ISNULL(strOtherChargeCreditMemoReportName, ISNULL(strCreditMemoReportName, 'Standard'))
+		   , @strServiceChargeFormat			= ISNULL(strServiceChargeFormat, ISNULL(strInvoiceReportName, 'Standard'))
 		   , @ysnStretchLogo					= ISNULL(ysnStretchLogo, 0)
 FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 
@@ -149,6 +151,7 @@ SET @strTransportsInvoiceFormat = ISNULL(@strTransportsInvoiceFormat, 'Standard'
 SET @strGrainInvoiceFormat = ISNULL(@strGrainInvoiceFormat, 'Standard')
 SET @strMeterBillingInvoiceFormat = ISNULL(@strMeterBillingInvoiceFormat, 'Standard')
 SET @strCreditMemoReportName = ISNULL(@strInvoiceReportName, 'Standard')
+SET @strServiceChargeFormat = ISNULL(@strServiceChargeFormat, 'Standard')
 SET @ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
 
 --GET INVOICES WITH FILTERS
@@ -165,7 +168,7 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 	 , strRequestId			= @strRequestId
 	 , strType				= INVOICE.strType
 	 , ysnStretchLogo		= @ysnStretchLogo
-	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard', 'Service Charge') THEN
+	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN
 	 									CASE WHEN ISNULL(INVENTORY.intInvoiceId, 0) <> 0 THEN 
 												CASE WHEN ISNULL(TICKET.intInvoiceId, 0) <> 0 
 													 THEN @strGrainInvoiceFormat
@@ -177,6 +180,7 @@ SELECT intInvoiceId			= INVOICE.intInvoiceId
 													 ELSE @strOtherChargeCreditMemoReport
 												END
 										END
+								   WHEN INVOICE.strType IN ('Service Charge') THEN @strServiceChargeFormat
 								   WHEN INVOICE.strType IN ('Tank Delivery') THEN @strTankDeliveryInvoiceFormat
 								   WHEN INVOICE.strType IN ('Transport Delivery') THEN @strTransportsInvoiceFormat
 								   WHEN INVOICE.strType IN ('Meter Billing') THEN @strMeterBillingInvoiceFormat
