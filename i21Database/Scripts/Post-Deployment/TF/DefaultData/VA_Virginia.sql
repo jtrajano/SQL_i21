@@ -935,7 +935,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '241', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600562
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '243', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600563
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '259', strFormCode = 'VA_DS', strScheduleCode = '3A_DS', strType = 'Other', intMasterId = 4600564
-
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 
 
