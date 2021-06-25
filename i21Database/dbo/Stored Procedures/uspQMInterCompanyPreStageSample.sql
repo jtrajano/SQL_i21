@@ -7,6 +7,14 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblIPMultiCompany
+			)
+	BEGIN
+		RETURN
+	END
+
 	DELETE
 	FROM tblQMSamplePreStage
 	WHERE ISNULL(strFeedStatus, '') IN ('', 'HOLD')

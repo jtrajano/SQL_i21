@@ -9480,6 +9480,7 @@
     <Build Include="dbo\Stored Procedures\uspIPValidateERPOtherFieldsContractFeed.sql" />
     <Build Include="dbo\Views\vyuQMGetOriginCountries.sql" />
     <Build Include="dbo\Views\vyuQMGetSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMPreStageSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
