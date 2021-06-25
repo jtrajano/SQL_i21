@@ -1,0 +1,25 @@
+CREATE TABLE dbo.tblCTApiItemContractStaging
+(
+	intApiItemContractStagingId INT NOT NULL IDENTITY(1, 1),
+	guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
+	intEntityId INT NOT NULL,
+	intCompanyLocationId INT NOT NULL,
+	dtmContractDate DATETIME NOT NULL,
+	intSalespersonId INT NOT NULL,
+	strContractType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+	intCountryId INT NULL,
+	strCPContract NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strEntryContract NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	intCurrencyId INT NULL,
+	dtmExpirationDate DATETIME NULL,
+	dtmDueDate DATETIME NULL,
+	intFreightTermId INT NULL,
+	ysnPrinted BIT NULL,
+	ysnSigned BIT NULL,
+	intOpportunityNameId INT NULL,
+	intContractTextId INT NULL,
+	intTermId INT NULL,
+	intLineOfBusinessId INT NULL,
+	dblDollarValue NUMERIC(18,6) NULL,
+	CONSTRAINT PK_tblCTApiItemContractStaging_intApiItemContractStagingId PRIMARY KEY (intApiItemContractStagingId)
+)
