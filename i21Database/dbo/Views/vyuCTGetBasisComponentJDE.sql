@@ -71,3 +71,4 @@ LEFT JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = CD.intFutureMont
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblSMFreightTerms ST ON ST.intFreightTermId = ISNULL(CH.intFreightTermId, CD.intFreightTermId)
 LEFT JOIN tblICCommodityAttribute PT ON	PT.intCommodityAttributeId = IT.intProductTypeId AND PT.strType = 'ProductType'
+WHERE CD.intContractStatusId <> 3

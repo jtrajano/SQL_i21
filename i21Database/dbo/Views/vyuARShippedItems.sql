@@ -105,6 +105,8 @@ SELECT id							= NEWID()
 	 , strBook						= BOOK.strBook
 	 , strSubBook					= SUBBOOK.strSubBook
 	 , ysnShowForShipment			= isnull(SCALETICKET.ysnShowForShipment, 1)
+	 , intItemContractHeaderId		= SHIPPEDITEMS.intItemContractHeaderId
+	 , intItemContractDetailId		= SHIPPEDITEMS.intItemContractDetailId
 FROM (
 	--IS FROM SO
 	SELECT strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
@@ -185,6 +187,8 @@ FROM (
 		 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	INNER JOIN (
 		SELECT *
@@ -309,9 +313,8 @@ FROM (
 													ELSE
 														dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 												END)
-	     --, dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
-		 , dblQtyOrdered					= CASE WHEN ARCC.ysnLoad = 1
-													THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+		 , dblQtyOrdered					= CASE	WHEN ARCC.ysnLoad = 1 THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+													WHEN ISNULL(ITEMCONTRACT.intItemContractHeaderId, 0) > 0 THEN ISNULL(ITEMCONTRACT.dblContracted, 0)
 													ELSE ARCC.dblDetailQuantity
 												END
 	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL AND ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 1
@@ -369,6 +372,8 @@ FROM (
 	     , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= ITEMCONTRACT.intItemContractHeaderId
+		 , intItemContractDetailId			= ITEMCONTRACT.intItemContractDetailId
 	FROM (
 		SELECT 
 			dblForexRate,
@@ -427,8 +432,15 @@ FROM (
 		SELECT intTicketId
 			 , intItemUOMIdTo
 			 , dblNetUnits
+			 , intItemContractDetailId
 		FROM dbo.tblSCTicket T WITH (NOLOCK)
 	) TICKET ON ICISI.intSourceId = TICKET.intTicketId
+	LEFT JOIN (
+		SELECT    intItemContractHeaderId
+				, intItemContractDetailId
+				, dblContracted
+		FROM dbo.tblCTItemContractDetail WITH (NOLOCK)
+	) ITEMCONTRACT ON TICKET.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 			 , dblGrossWeight	= SUM(dblGrossWeight)
@@ -616,6 +628,8 @@ FROM (
 		 , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM dbo.tblICInventoryShipmentCharge ICISC WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -745,6 +759,8 @@ FROM (
 		 , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(0, SO.intSalesOrderId) MFG
 	LEFT OUTER JOIN (
@@ -857,6 +873,8 @@ FROM (
 		 , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(ICISI.intInventoryShipmentItemId, 0) MFG	
 	INNER JOIN (
@@ -965,6 +983,8 @@ FROM (
 	     , dblSubCurrencyRate				= dblSubCurrencyRate
 		 , intBookId						= intBookId
 		 , intSubBookId						= intSubBookId
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM 
 		vyuLGLoadScheduleForInvoice
 	 
@@ -1048,6 +1068,8 @@ FROM (
 	     , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM (
 		SELECT intLoadDetailId
 			 , intCurrencyId
@@ -1167,6 +1189,8 @@ FROM (
 	     , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM (
 		SELECT intLoadId
 		     , intLoadDetailId
@@ -1283,6 +1307,8 @@ FROM (
 		 , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
 	FROM (
 		SELECT intLoadId
 			 , intLoadDetailId

@@ -437,22 +437,23 @@ BEGIN TRY
 										WHEN ISNULL(UM.intUnitMeasureId,0) = 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, SC.intItemUOMIdTo)
 										WHEN ISNULL(UM.intUnitMeasureId,0) > 0 THEN dbo.fnGetMatchingItemUOMId(GR.intItemId, UM.intItemUOMId)
 									END
-				,[dblQtyOrdered] = CASE
+				,[dblQtyOrdered] = (CASE
 									WHEN ICI.strCostMethod = 'Per Unit' THEN SC.dblNetUnits
 									WHEN ICI.strCostMethod = 'Amount' THEN 1
-								END
-				,[dblQtyShipped] = CASE
+								END) 
+				,[dblQtyShipped] = (CASE
 									WHEN ICI.strCostMethod = 'Per Unit' THEN SC.dblNetUnits
 									WHEN ICI.strCostMethod = 'Amount' THEN 1
-								END
+								END) 
 				,[dblDiscount] = 0
 				,[dblPrice] = CASE
-								WHEN ICI.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
+								WHEN ICI.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount  * (CASE WHEN QM.dblDiscountAmount < 0 THEN 1 ELSE -1 END)
 								WHEN ICI.strCostMethod = 'Amount' THEN 
-								CASE 
-									WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, CP.dblQuantity, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1)
-									WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, CP.dblQuantity, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis)))
-								END
+								-- CASE 
+								-- 	WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, CP.dblQuantity, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1)
+								-- 	WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, CP.dblQuantity, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis)))
+								-- END
+								dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, CP.dblQuantity, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1
 							END
 				,[ysnRefreshPrice] = 0
 				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
@@ -787,10 +788,11 @@ BEGIN TRY
 			,[dblPrice] = CASE
 							WHEN ICI.strCostMethod = 'Per Unit' THEN QM.dblDiscountAmount
 							WHEN ICI.strCostMethod = 'Amount' THEN 
-							CASE 
-								WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1)
-								WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis)))
-							END
+							-- CASE 
+							-- 	WHEN QM.dblDiscountAmount < 0 THEN (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1)
+							-- 	WHEN QM.dblDiscountAmount > 0 THEN dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis)))
+							-- END
+							dbo.fnSCCalculateDiscount(SC.intTicketId, QM.intTicketDiscountId, SC.dblNetUnits, GR.intUnitMeasureId, ISNULL(CNT.dblSeqPrice, (SC.dblUnitPrice + SC.dblUnitBasis))) * -1
 						END
 			,[ysnRefreshPrice] = 0
 			,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)

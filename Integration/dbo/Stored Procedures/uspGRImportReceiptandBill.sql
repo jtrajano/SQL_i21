@@ -346,7 +346,7 @@ BEGIN TRY
 			 JOIN tblICItemUOM UOM ON UOM.intItemId = CD.intItemId AND UOM.ysnStockUnit =1
 			 WHERE SC.intTicketId = @intScaleTicketId	
 			
-			UPDATE tblSCTicket SET intInventoryReceiptId = @InventoryReceiptId
+			UPDATE tblSCTicket SET intInventoryReceiptId = @InventoryReceiptId, dtmDateModifiedUtc = GETUTCDATE()
 			WHERE  intTicketId = @intScaleTicketId
 
 		 END
@@ -985,7 +985,7 @@ BEGIN TRY
 
 		END
 
-		UPDATE tblSCTicket SET strFieldNumber    = ''
+		UPDATE tblSCTicket SET strFieldNumber    = '', dtmDateModifiedUtc = GETUTCDATE()
 		WHERE  intTicketId = @intScaleTicketId
 
 	   SELECT @intNonScaleTicketKey = MIN(intNonScaleTicketKey)

@@ -233,8 +233,8 @@ BEGIN TRY
 				,@ItemRecipeQty							=	@ItemRecipeQty
 				,@ItemSalesOrderDetailId				=	@ItemSalesOrderDetailId
 				,@ItemSalesOrderNumber					=	@ItemSalesOrderNumber
-				,@ItemContractHeaderId					=	@ItemContractHeaderId
-				,@ItemContractDetailId					=	@ItemContractDetailId
+				,@ContractHeaderId						=	@ItemContractHeaderId
+				,@ContractDetailId						=	@ItemContractDetailId
 				,@ItemShipmentId						=	@ItemShipmentId
 				,@ItemShipmentPurchaseSalesContractId	=	@ItemShipmentPurchaseSalesContractId
 				,@ItemWeightUOMId                       =	@ItemWeightUOMId

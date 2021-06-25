@@ -15,6 +15,7 @@ SELECT
 	,A.intNextDeliveryDegreeDay
 	,K.strRouteId
 	,strItemNo = ISNULL(O.strItemNo, I.strItemNo)
+	,strItemDescription = CASE WHEN O.strItemNo IS NULL THEN I.strDescription ELSE O.strDescription END
 	,J.dtmRequestedDate
 	,strTerm = ISNULL(L.strTerm ,'')  COLLATE Latin1_General_CI_AS 
 	,dblARBalance = ISNULL(Cus.dblARBalance,0.0)
@@ -67,6 +68,7 @@ SELECT
 	,ysnTaxable = ISNULL(A.ysnTaxable,0)
 	,strSiteDescription = ISNULL(A.strDescription,'')
 	,strSiteRecurringPO = ISNULL(A.strRecurringPONumber,'')
+	,Driver.strEntityNo AS strDriverNumber
 FROM tblTMSite A
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
@@ -127,5 +129,6 @@ LEFT JOIN (
 	GROUP BY intSiteId,intCurrentSeasonYear,intSeasonYear
 )HH
 	ON A.intSiteID = HH.intSiteId
-
+LEFT JOIN tblEMEntity Driver
+	ON Driver.intEntityId = A.intDriverID
 GO

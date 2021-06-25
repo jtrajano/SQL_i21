@@ -97,8 +97,10 @@
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
 	,@ItemContractHeaderId			INT				= NULL
-	,@ItemContractDetailId			INT				= NULL			
+	,@ItemContractDetailId			INT				= NULL
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
 	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
@@ -562,7 +564,7 @@ BEGIN TRY
 		,[intShipmentId]				= @ShipmentId 
 		,[intTransactionId]				= @TransactionId
 		,[intMeterReadingId]			= @MeterReadingId
-		,[intContractHeaderId]			= @ItemContractHeaderId
+		,[intContractHeaderId]			= @ContractHeaderId
 		,[intOriginalInvoiceId]			= @OriginalInvoiceId
 		,[intLoadId]                    = @LoadId
 		,[intEntityId]					= @EntityId
@@ -713,6 +715,8 @@ BEGIN TRY
 		,@ItemRecipeQty					= @ItemRecipeQty		
 		,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 		,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+		,@ContractHeaderId				= @ContractHeaderId
+		,@ContractDetailId				= @ContractDetailId
 		,@ItemContractHeaderId			= @ItemContractHeaderId
 		,@ItemContractDetailId			= @ItemContractDetailId
 		,@ItemShipmentId				= @ShipmentId

@@ -29,7 +29,7 @@ AS
 			END
 			ELSE
 			BEGIN
-				UPDATE tblSCTicket set strTicketStatus = @strUberStatusCode where intTicketId = @intTicketId
+				UPDATE tblSCTicket set strTicketStatus = @strUberStatusCode, dtmDateModifiedUtc = GETUTCDATE() where intTicketId = @intTicketId
 				INSERT INTO tblSCTicketUberScaleStatusUpdate(intTicketId, dtmTransactionDate, strUberStatusCode)
 				SELECT @intTicketId, getdate(), @strUberStatusCode
 			END

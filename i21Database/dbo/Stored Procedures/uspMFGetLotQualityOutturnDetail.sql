@@ -16,11 +16,11 @@ WHERE intCurrencyID = @intCurrencyId
 
 IF @ysnSubCurrency = 1
 BEGIN
-	SELECT @intSubCurrency = 100
+	SELECT @intSubCurrency = 1
 END
 ELSE
 BEGIN
-	SELECT @intSubCurrency = 1
+	SELECT @intSubCurrency = 100
 END
 
 DECLARE @tblMFLot TABLE (
@@ -151,19 +151,19 @@ SELECT intPropertyId
 	,Convert(NUMERIC(38, 4), IsNULL(strActualOutput, 0)) AS dblActualOutput
 	,Convert(NUMERIC(38, 4), (
 			CASE 
-				WHEN dblCoEfficient = 0
+				WHEN IsNULL(dblCoEfficient,0) = 0
 					THEN NULL
 				ELSE (
 						CASE 
 							WHEN Sum(CASE 
-										WHEN dblCoEfficient = 0
+										WHEN IsNULL(dblCoEfficient,0) = 0
 											THEN 0
 										ELSE [strActualOutput]
 										END) OVER () = 0
 								THEN 0
 							ELSE (
 									[strActualOutput] / Sum(CASE 
-											WHEN dblCoEfficient = 0
+											WHEN IsNULL(dblCoEfficient,0) = 0
 												THEN 0
 											ELSE [strActualOutput]
 											END) OVER ()
@@ -183,12 +183,12 @@ SELECT intPropertyId
 	,Convert(NUMERIC(38, 2), CASE 
 			WHEN PS.ysnZeroCost = 1
 				THEN NULL
-			ELSE dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
+			ELSE (dblGradeDiff/ @intSubCurrency)  / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))
 			END) AS dblMarketDifferential
 	,Convert(NUMERIC(38, 2), CASE 
 			WHEN PS.ysnZeroCost = 1
 				THEN NULL
-			ELSE ((dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1)) + dblGradeDiff / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1))) * IsNULL(WP.dblQuantity, - S.dblQty)
+			ELSE ((dblMarketRate / @intSubCurrency) / (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1)) + ((dblGradeDiff /@intSubCurrency)/ (dbo.[fnCTConvertQuantityToTargetItemUOM](G.intItemId, PS.intMarketRatePerUnitId, @intUnitMeasureId, 1)))) * IsNULL(WP.dblQuantity, - S.dblQty)
 			END) AS dblMTMPL
 FROM #GRN G
 LEFT JOIN tblICItem I ON I.intItemId = G.intItemId
