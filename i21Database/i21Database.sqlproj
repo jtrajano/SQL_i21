@@ -9478,6 +9478,8 @@
     <None Include="Scripts\Post-Deployment\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql" />
     <Build Include="dbo\User Defined Types\ScaleDWGAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPValidateERPOtherFieldsContractFeed.sql" />
+    <Build Include="dbo\Views\vyuQMGetOriginCountries.sql" />
+    <Build Include="dbo\Views\vyuQMGetSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
