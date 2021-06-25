@@ -436,6 +436,7 @@ BEGIN
               AND ISNULL(intBookId,1) = @BookId
               ORDER BY B.intAssetDepreciationId DESC
           )FAD
+          WHERE B.dblMonth > 0
           
           UNION ALL  
           SELECT   
@@ -480,10 +481,14 @@ BEGIN
               AND ISNULL(intBookId,1) = @BookId
               ORDER BY B.intAssetDepreciationId DESC
           )FAD
-            
-          DECLARE @PostResult INT  
-          EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1  
-          IF @@ERROR <> 0 OR @PostResult <> 0 RETURN --1  
+          WHERE B.dblMonth > 0
+
+          IF EXISTS(SELECT TOP 1 1 FROM @GLEntries)  
+          BEGIN
+            DECLARE @PostResult INT  
+            EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1  
+            IF @@ERROR <> 0 OR @PostResult <> 0 RETURN --1  
+          END
       END
 END  
 
