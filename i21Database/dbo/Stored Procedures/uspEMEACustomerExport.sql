@@ -20,6 +20,7 @@ INSERT INTO tblAREACustomerExport (
 	, strFirstName
 	, strAddress1
 	, strAddress2
+	, strCountry
 	, strCity
 	, strStateProv
 	, strPostalCode
@@ -31,6 +32,13 @@ INSERT INTO tblAREACustomerExport (
 	, strComment
 	, strLicenseApplicator
 	, dtmLicenseExpirationDate
+	, dblARBalance
+	, dblCreditLimit
+	, dblShipToLatitude
+	, dblShipToLongitude
+	, dtmDateCreated
+	, dtmDateModified
+	, strAccountType
 )
 SELECT intEntityId			= intId
 	, strEntityNo			= LTRIM(RTRIM(Id))
@@ -46,6 +54,7 @@ SELECT intEntityId			= intId
 	, strFirstName			= LTRIM(RTRIM(FirstName))
 	, strAddress1			= LTRIM(RTRIM(Address1))
 	, strAddress2			= LTRIM(RTRIM(Address2))
+	, strCountry			= LTRIM(RTRIM(Country))
 	, strCity				= LTRIM(RTRIM(City))
 	, strStateProv			= LTRIM(RTRIM(StateProv))
 	, strPostalCode			= LTRIM(RTRIM(PostalCode))
@@ -57,6 +66,13 @@ SELECT intEntityId			= intId
 	, strComment			= LTRIM(RTRIM(Comment))
 	, strLicenseApplicator  = LicenseApplicator
 	, dtmLicenseExpirationDate = LicenseExpirationDate
+	, dblARBalance			= ARBalance
+	, dblCreditLimit		= CreditLimit
+	, dblShipToLatitude		= ShipToLatitude
+	, dblShipToLongitude	= ShipToLongitude
+	, dtmDateCreated		= DateCreated
+	, dtmDateModified		= DateModified
+	, strAccountType		= AccountType
 FROM vyuEMEAExportCustomer 
 WHERE (CAST(ModifiedDate AS DATE) BETWEEN @dtmFrom AND @dtmTo) OR (@dtmFrom IS NULL OR @dtmTo IS NULL)
 

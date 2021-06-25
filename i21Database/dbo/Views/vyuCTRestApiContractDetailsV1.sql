@@ -1,0 +1,3 @@
+CREATE VIEW dbo.vyuCTRestApiContractDetailsV1
+AS
+SELECT * FROM vyuCTRestApiContractDetails
