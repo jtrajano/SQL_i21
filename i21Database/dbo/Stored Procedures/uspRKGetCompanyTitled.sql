@@ -377,13 +377,13 @@ BEGIN
 						AND BD.intInventoryReceiptChargeId IS NULL
 				inner join tblAPBill B on BD.intBillId = B.intBillId
 				left join tblGRCustomerStorage CS ON BD.intCustomerStorageId = CS.intCustomerStorageId
+					AND ISNULL(CS.intStorageTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
 				left join tblGRStorageType ST ON CS.intStorageTypeId = ST.intStorageScheduleTypeId
 				left join vyuSCTicketView TV on BD.intScaleTicketId = TV.intTicketId
 				left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
 				left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
 				where 
 					Inv.strTransactionType = 'Inventory Receipt'
-					AND ISNULL(CS.intStorageTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
 			) t
 			UNION ALL
 			SELECT --INVENTORY RECEIPT W/O VOUCHER (NOT DELIVERY SHEET)
@@ -409,9 +409,10 @@ BEGIN
 				inner join tblICInventoryReceiptItem IRI on Inv.intTransactionDetailId = IRI.intInventoryReceiptItemId
 				left join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId and BD.intInventoryReceiptChargeId IS NULL
 				left join vyuSCTicketView TV on IRI.intSourceId = TV.intTicketId
+					AND ISNULL(TV.strDistributionOption,'NULL') <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '' ELSE 'DP' END
 				where Inv.strTransactionType = 'Inventory Receipt'
 					AND BD.intBillDetailId IS NULL
-					AND ISNULL(TV.strDistributionOption,'NULL') <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '' ELSE 'DP' END
+					--AND ISNULL(TV.strDistributionOption,'NULL') <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '' ELSE 'DP' END
 					--AND TV.intDeliverySheetId IS NULL
 				group by Inv.dtmDate
 					,IR.strReceiptNumber
@@ -443,12 +444,15 @@ BEGIN
 				inner join tblICInventoryReceiptItem IRI on Inv.intTransactionDetailId = IRI.intInventoryReceiptItemId
 				inner join tblGRStorageHistory SH on SH.intInventoryReceiptId = IR.intInventoryReceiptId
 				inner join tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
-				inner join tblGRStorageType ST on ST.intStorageScheduleTypeId = CS.intStorageTypeId 
-				left join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId and BD.intInventoryReceiptChargeId IS NULL
-				where Inv.strTransactionType = 'Inventory Receipt'
-					AND BD.intBillDetailId IS NULL
-					AND ISNULL(ST.intStorageScheduleTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
 					AND CS.intDeliverySheetId IS NOT NULL
+				inner join tblGRStorageType ST on ST.intStorageScheduleTypeId = CS.intStorageTypeId 
+					AND ISNULL(ST.intStorageScheduleTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
+				left join tblAPBillDetail BD on Inv.intTransactionDetailId = BD.intInventoryReceiptItemId and BD.intInventoryReceiptChargeId IS NULL
+					AND BD.intBillDetailId IS NULL
+				where Inv.strTransactionType = 'Inventory Receipt'
+					--AND BD.intBillDetailId IS NULL
+					--AND ISNULL(ST.intStorageScheduleTypeId,100) <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN 0 ELSE 2 END
+					--AND CS.intDeliverySheetId IS NOT NULL
 			) t
 			UNION ALL
 			SELECT
@@ -581,6 +585,7 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
 				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
+					AND ISI.ysnDestinationWeightsAndGrades = 0
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
 						AND ID.intInventoryShipmentChargeId IS NULL
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
@@ -588,7 +593,7 @@ BEGIN
 				left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
 				left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = ID.intItemId
 				where Inv.strTransactionType = 'Inventory Shipment'
-				AND ISI.ysnDestinationWeightsAndGrades = 0
+				--AND ISI.ysnDestinationWeightsAndGrades = 0
 
 				UNION ALL
 				select distinct
@@ -602,6 +607,7 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
 				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
+					AND ISI.ysnDestinationWeightsAndGrades = 1
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
 						AND ID.intInventoryShipmentChargeId IS NULL
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId and I.strTransactionType = 'Invoice'
@@ -609,7 +615,7 @@ BEGIN
 				left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
 				left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = ID.intItemId
 				where Inv.strTransactionType = 'Inventory Shipment'
-				AND ISI.ysnDestinationWeightsAndGrades = 1
+				--AND ISI.ysnDestinationWeightsAndGrades = 1
 
 						
 			) t
@@ -637,10 +643,11 @@ BEGIN
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
 				left join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
 						AND ID.intInventoryShipmentChargeId IS NULL
+						and ID.intInvoiceDetailId IS NULL
 				left join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
 				left join vyuSCTicketView TV on Inv.intSourceId = TV.intTicketId
 				where Inv.strTransactionType = 'Inventory Shipment'
-					and ID.intInvoiceDetailId IS NULL
+					--and ID.intInvoiceDetailId IS NULL
 					and @ysnIncludeInTransitInCompanyTitled = 0
 			) t
 
@@ -667,8 +674,9 @@ BEGIN
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInvoiceDetailId 
 						AND ID.intInventoryShipmentChargeId IS NULL
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
-				where Inv.strTransactionType IN( 'Invoice','Cash')
 					AND I.ysnPosted = 1
+				where Inv.strTransactionType IN( 'Invoice','Cash')
+					--AND I.ysnPosted = 1
 						
 			) t
 
@@ -694,8 +702,9 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInvoiceDetailId 
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
-				where Inv.strTransactionType = 'Credit Memo'
 					AND I.ysnPosted = 1
+				where Inv.strTransactionType = 'Credit Memo'
+					--AND I.ysnPosted = 1
 						
 			) t
 
@@ -720,8 +729,9 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryCountDetail ID on Inv.intTransactionDetailId = ID.intInventoryCountDetailId 
 				inner join tblICInventoryCount I on ID.intInventoryCountId = I.intInventoryCountId
-				where Inv.strTransactionType = 'Inventory Count'
 					AND I.ysnPosted = 1
+				where Inv.strTransactionType = 'Inventory Count'
+					--AND I.ysnPosted = 1
 						
 			) t
 
@@ -746,9 +756,11 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryAdjustmentDetail ID on Inv.intTransactionDetailId = ID.intInventoryAdjustmentDetailId 
 				inner join tblICInventoryAdjustment I on ID.intInventoryAdjustmentId = I.intInventoryAdjustmentId
-				where Inv.strTransactionType LIKE 'Inventory Adjustment%'
 					AND I.ysnPosted = 1
 					AND (I.intSourceTransactionTypeId IS NULL OR I.intSourceTransactionTypeId = 8)
+				where Inv.strTransactionType LIKE 'Inventory Adjustment%'
+					--AND I.ysnPosted = 1
+					--AND (I.intSourceTransactionTypeId IS NULL OR I.intSourceTransactionTypeId = 8)
 						
 			) t
 
@@ -773,8 +785,9 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryTransferDetail ID on Inv.intTransactionDetailId = ID.intInventoryTransferDetailId 
 				inner join tblICInventoryTransfer I on ID.intInventoryTransferId = I.intInventoryTransferId
-				where Inv.strTransactionType = 'Inventory Transfer'
 					AND I.ysnPosted = 1
+				where Inv.strTransactionType = 'Inventory Transfer'
+					--AND I.ysnPosted = 1
 						
 			) t
 
