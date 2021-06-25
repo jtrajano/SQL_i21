@@ -82,8 +82,9 @@ BEGIN TRY
 
 	SELECT @strInfo1 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ', '
-	FROM @tblIPInventoryAdjustmentStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strLotNo, '') + ', '
+	FROM @tblIPInventoryAdjustmentStage a
+	JOIN tblIPInventoryAdjustmentStage b on a.intInventoryAdjustmentStageId=b.intInventoryAdjustmentStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
