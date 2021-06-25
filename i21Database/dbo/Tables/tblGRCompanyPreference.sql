@@ -50,7 +50,7 @@
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_FactorId] FOREIGN KEY ([intGRRItemFactorId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_ProteinId] FOREIGN KEY ([intGRRItemProteinId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MoistureId] FOREIGN KEY ([intGRRItemMoistureId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_SplitId] FOREIGN KEY ([intGRRSplitItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_SplitId] FOREIGN KEY ([intGRRItemSplitId]) REFERENCES [tblICItem]([intItemId]),
 
 
 
