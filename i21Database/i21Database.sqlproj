@@ -9481,6 +9481,8 @@
     <Build Include="dbo\Views\vyuQMGetOriginCountries.sql" />
     <Build Include="dbo\Views\vyuQMGetSample.sql" />
     <Build Include="dbo\Stored Procedures\uspQMPreStageSample.sql" />
+    <Build Include="dbo\Views\vyuQMGetSampleType.sql" />
+    <Build Include="dbo\Tables\tblIPSampleType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
