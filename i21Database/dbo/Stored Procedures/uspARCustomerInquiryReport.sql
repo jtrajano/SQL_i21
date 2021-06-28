@@ -317,4 +317,27 @@ SET dblHighestDueAR = ISNULL(dblHighestDueAR, 0)
   , dblLastPayment = ISNULL(dblLastPayment, 0)
   , dblHighestAR = ISNULL(dblHighestAR, 0)
 
+UPDATE CI
+SET intAveragePaymentDays = ISNULL(intDaysToPay, 0)
+FROM #CUSTOMERINQUIRY CI
+INNER JOIN (
+	SELECT intEntityCustomerId	= I.intEntityCustomerId
+		 , intDaysToPay = AVG(CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
+								   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
+						      END)
+	FROM tblARInvoice I
+	CROSS APPLY (
+		SELECT TOP 1 P.dtmDatePaid
+		FROM tblARPaymentDetail PD
+		INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+		WHERE PD.intInvoiceId = I.intInvoiceId
+		AND P.ysnPosted = 1
+		AND P.ysnInvoicePrepayment = 0
+		ORDER BY P.dtmDatePaid DESC
+	) FULLPAY
+	WHERE I.ysnPosted = 1
+	  AND I.ysnPaid = 1
+	GROUP BY I.intEntityCustomerId
+) DAYSTOPAY ON DAYSTOPAY.intEntityCustomerId = CI.intEntityCustomerId
+
 SELECT * FROM #CUSTOMERINQUIRY
