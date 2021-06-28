@@ -367,7 +367,7 @@ BEGIN
 								ELSE 
 									ISNULL(DetailLot.intItemUOMId, 0)
 								END
-			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+			,dtmDate = dbo.fnRemoveTimeOnDate(L.dtmScheduledDate)
 			,dblQty = -1 * COALESCE(DetailLot.dblLotQuantity, LoadDetail.dblQuantity, 0)
 			,dblUOMQty = ISNULL(LotItemUOM.dblUnitQty, ItemUOM.dblUnitQty)
 			,dblCost = ISNULL(CASE 
@@ -966,7 +966,7 @@ BEGIN
 		,[strShipmentId] = L.strLoadNumber
 		,[intOrderType] = 1
 		,[intSourceType] = -1
-		,[dtmDate] = GETDATE()
+		,[dtmDate] = L.dtmScheduledDate
 		,[intCurrencyId] = NULL
 		,[dblExchangeRate] = 1
 		,[intEntityCustomerId] = LD.intCustomerEntityId
