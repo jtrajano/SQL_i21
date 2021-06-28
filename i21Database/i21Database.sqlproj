@@ -8958,6 +8958,7 @@
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
+    <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
