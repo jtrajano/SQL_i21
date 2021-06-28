@@ -9382,6 +9382,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
     <Build Include="dbo\Tables\tblSMIDPProcessResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptDetailSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

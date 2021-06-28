@@ -879,13 +879,6 @@ BEGIN
 	SET intShipmentId = @CurrentShipmentId
 	WHERE intHeaderId = @intId
 
-	-- Link Inventory Shipment Transaction
-		BEGIN
-			EXEC dbo.uspICLinkInventoryShipmentTransaction
-				@CurrentShipmentId,
-				true
-		END
-
 	-- Create an Audit Log
 	BEGIN 
 		DECLARE @StrDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Shipment'
@@ -1131,7 +1124,15 @@ BEGIN
 		-- Calculate the surcharges
 		EXEC @intResult = dbo.uspICCalculateInventoryShipmentSurchargeOnOtherCharges @intShipmentId
 		IF @intResult <> 0 RETURN @intResult
-	END 	
+	END 
+
+	-- Link Inventory Shipment Transaction
+	BEGIN
+		EXEC dbo.uspICLinkInventoryShipmentTransaction
+			@intShipmentId,
+			true
+	END
+
 	FETCH NEXT FROM cur INTO @intShipmentId
 END
 
