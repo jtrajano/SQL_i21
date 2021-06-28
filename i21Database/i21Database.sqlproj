@@ -9487,6 +9487,12 @@
     <Build Include="dbo\Stored Procedures\uspIPTransferOrderWithoutBOL.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptDetailSource.sql" />
+    <Build Include="dbo\Tables\tblIPTestResultStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMTransferERPTestResult.sql" />
+    <Build Include="dbo\Tables\tblIPERPDetail.sql" />
+    <Build Include="dbo\Tables\tblIPTestResultError.sql" />
+    <Build Include="dbo\Tables\tblIPTestResultArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMProcessERPTestResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
