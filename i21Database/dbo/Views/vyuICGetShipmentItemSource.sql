@@ -4,6 +4,7 @@ AS
 SELECT
 	ShipmentItem.intInventoryShipmentItemId,
 	ShipmentItem.intOrderId,
+	ShipmentItem.intSourceId,
 	intContractSeq = CASE Shipment.intOrderType WHEN 1 THEN ContractView.intContractSeq ELSE NULL END,
 	strOrderNumber = 
 		(
