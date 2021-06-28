@@ -311,7 +311,7 @@ BEGIN
 		AND strType = 'ProductType'
 		AND (Balance.dblContracts IS NOT NULL AND Balance.dblInTransit IS NOT NULL AND Balance.dblStock IS NOT NULL AND Balance.dblFutures IS NOT NULL)
 	
-	SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY intProductTypeId, dtmDemandDate)
+	SELECT intRowNum = ROW_NUMBER() OVER(PARTITION BY intProductTypeId,intItemId ORDER BY  dtmDemandDate)
 		, intCommodityId
 		, dtmDemandDate
 		, intProductTypeId
@@ -385,6 +385,7 @@ BEGIN
 		into #tmpDemandQuantity
 		from #DemandDetail
 		where intProductTypeId = @intProductType
+		and intRowNum <> 1
 		group by intItemId, intProductTypeId
 
 		--b.	Calculate number of months = Count Demand month group by item number

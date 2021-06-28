@@ -814,7 +814,6 @@ BEGIN TRY
 
 		EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
 	END
-	
 
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog
@@ -842,15 +841,12 @@ BEGIN TRY
 		,[strFromValue]				= IL.[strSourceId]
 		,[strToValue]				= ARP.[strRecordNumber]
 		,[strDetails]				= NULL
-	 FROM @IntegrationLog IL
-	INNER JOIN
-		(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
-			ON IL.[intPaymentId] = ARP.[intPaymentId]
-	 WHERE
-		[ysnSuccess] = 1 
-		AND [ysnInsert] = 1
+	FROM @IntegrationLog IL
+	INNER JOIN tblARPayment ARP ON IL.[intPaymentId] = ARP.[intPaymentId]
+	WHERE [ysnSuccess] = 1 
+	  AND [ysnInsert] = 1
 
-	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
+	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 
 END TRY
 BEGIN CATCH

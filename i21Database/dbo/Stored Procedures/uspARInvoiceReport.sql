@@ -94,6 +94,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblInvoiceSubtotal
 	 , dblShipping
 	 , dblTax
+	 , dblTaxExempt
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , strItemNo
@@ -155,6 +156,10 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , ysnStretchLogo
 	 , strSubFormula
 	 , dtmCreated
+	 , strServiceChargeItem
+	 , intDaysOld
+	 , strServiceChareInvoiceNumber
+	 , dtmDateSC
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -209,6 +214,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblInvoiceSubtotal		= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
+	 , dblTaxExempt				= ISNULL(INVOICEDETAIL.dblTaxExempt, 0)
 	 , dblInvoiceTotal			= (dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END 
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
@@ -216,7 +222,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblContractBalance		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.dblBalance ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END
 	 , strContractNoSeq			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber + ' - ' + CAST(INVOICEDETAIL.intContractSeq AS NVARCHAR(100)) ELSE NULL END
-	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
+	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN INVOICEDETAIL.strItemDescription ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
@@ -272,6 +278,20 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , strSubFormula			= INVOICEDETAIL.strSubFormula
 	 , dtmCreated				= GETDATE()
+	 , strServiceChargeItem		= CASE WHEN SELECTEDINV.strInvoiceFormat 
+										IN ('By Customer Balance', 'By Invoice') 
+										THEN 'Service Charge on Past Due' + CHAR(13) + 'Balance as of: ' +  cast(CAST(GETDATE() AS DATE) as varchar)
+										ELSE
+										''
+										END
+	 , intDaysOld               = CASE WHEN SELECTEDINV.strInvoiceFormat 
+										IN ('By Customer Balance', 'By Invoice') 
+										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmDateSC, CAST(GETDATE() AS DATE))
+										ELSE
+										0
+										END
+	 , strServiceChareInvoiceNumber = INVOICEDETAIL.strSCInvoiceNumber
+	 , dtmDateSC				 =  INVOICEDETAIL.dtmDateSC
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
@@ -309,8 +329,7 @@ LEFT JOIN (
 		 , dblComputedGrossPrice	= ID.dblComputedGrossPrice	
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , dblTotal					= ID.dblTotal
-		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber
-		 , strSCInvoiceNumber		= ID.strSCInvoiceNumber
+		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber		 
 		 , strUnitMeasure			= UOM.strUnitMeasure
 		 , intContractSeq			= CONTRACTS.intContractSeq
 		 , dblBalance				= CONTRACTS.dblBalance
@@ -319,7 +338,7 @@ LEFT JOIN (
 		 , strItemNo				= ITEM.strItemNo
 		 , strInvoiceComments		= ITEM.strInvoiceComments
 		 , strItemType				= ITEM.strType
-		 , strItemDescription		= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
+		 , strItemDescription    	= ISNULL(ISNULL(NULLIF(ID.strItemDescription, '') ,ITEM.strDescription), ID.strSCInvoiceNumber)
 		 , strBOLNumber				= SO.strBOLNumber
 		 , ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
 		 , intRecipeId				= RECIPE.intRecipeId
@@ -342,6 +361,9 @@ LEFT JOIN (
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
 		 , strLotNumber				= LOT.strLotNumbers
 		 , strSubFormula			= ID.strSubFormula
+		 , dblTaxExempt				= TER.dblTaxExempt
+		 , strSCInvoiceNumber		= INVSC.strInvoiceNumber
+		 , dtmDateSC				= INVSC.dtmDate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -352,6 +374,9 @@ LEFT JOIN (
 			 , ysnListBundleSeparately
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
+	LEFT JOIN  (
+		Select dtmDate,intInvoiceId,strInvoiceNumber from tblARInvoice
+	)INVSC  ON  INVSC.intInvoiceId = ID.intSCInvoiceId
 	LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId
@@ -440,6 +465,12 @@ LEFT JOIN (
 		WHERE ysnApplied = 1
 	) PRICING ON ID.intInvoiceId = PRICING.intTransactionId
 			 AND ID.intInvoiceDetailId = PRICING.intTransactionDetailId	
+	OUTER APPLY (
+		SELECT ISNULL(SUM(dblRate), 0) AS dblTaxExempt
+		FROM vyuARTaxDetailExemptReport
+		WHERE intTransactionDetailId = ID.intInvoiceDetailId
+		AND intTransactionId = ID.intInvoiceId
+	) TER
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
