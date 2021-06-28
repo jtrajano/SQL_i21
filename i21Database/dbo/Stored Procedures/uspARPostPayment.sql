@@ -432,7 +432,7 @@ BEGIN
 		) P
 			ON A.[intPaymentId] = P.[intTransactionId]
 	WHERE
-		(A.[dblAmountPaid]) > (SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId])
+		(A.[dblAmountPaid]) > (SELECT SUM([dblPayment] + [dblCreditCardFee]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId])
 		AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)
 		OR @ysnForFinalInvoice = 1
 					
