@@ -29,19 +29,16 @@ BEGIN
 	)
 	SELECT
 		'Create',
-		intSrcId = ReceiptItemSource.intOrderId, 
-		strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber, 'Missing Transaction No'), 
-		strSrcModuleName = ReceiptItemSource.strSourceType, 
-		strSrcTransactionType = ReceiptItemSource.strSourceType,
-		intDestId = ReceiptItemSource.intInventoryReceiptId,
-		strDestTransactionNo = COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'),
+		intSrcId = Source.intSourceTransactionId, 
+		strSrcTransactionNo = COALESCE(Source.strSourceTransactionNumber, 'Missing Transaction No'), 
+		strSrcModuleName = Source.strSourceModule, 
+		strSrcTransactionType = Source.strSourceScreen,
+		intDestId = Source.intReceiptId,
+		strDestTransactionNo = COALESCE(Source.strReceiptNumber, 'Missing Transaction No'),
 		'Inventory',
 		'Inventory Receipt'
-    FROM dbo.tblICInventoryReceipt Receipt
-	INNER JOIN dbo.vyuICGetReceiptItemSource ReceiptItemSource
-	ON Receipt.intInventoryReceiptId = ReceiptItemSource.intInventoryReceiptId
-	WHERE ReceiptItemSource.intOrderId IS NOT NULL 
-	AND Receipt.intInventoryReceiptId = @intReceiptId
+    FROM vyuICGetReceiptDetailSource Source
+	WHERE Source.intReceiptId = @intReceiptId
 
 	EXEC dbo.uspICAddTransactionLinks @TransactionLink
 

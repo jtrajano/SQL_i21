@@ -9407,6 +9407,8 @@
     <None Include="Scripts\Post-Deployment\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql" />
     <Build Include="dbo\User Defined Types\ScaleDWGAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPValidateERPOtherFieldsContractFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptDetailSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
