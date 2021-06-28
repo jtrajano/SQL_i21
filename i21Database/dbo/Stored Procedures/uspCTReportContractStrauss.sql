@@ -140,7 +140,7 @@ BEGIN TRY
 	BEGIN
 		DECLARE @dtmApproveDate DATETIME
 		
-		SELECT TOP 1 @dtmApproveDate = CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, A.dtmDate), DATENAME(TzOffset, SYSDATETIMEOFFSET())))
+		SELECT TOP 1 @dtmApproveDate = A.dtmDate
 		FROM tblSMApproval A
 		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
 		WHERE T.intScreenId = @intScreenId
@@ -246,9 +246,9 @@ BEGIN TRY
 		from
 			tblCTContractHeader a
 			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
-			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and c.ysnApproval = 0
+			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen IN ('Amendment and Approvals', 'Contract') AND ISNULL(c.intPriceFixationId, 0) = 0 and c.ysnApproval = 0
 			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
-			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and e.ysnApproval = 1
+			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen IN ('Amendment and Approvals', 'Contract') AND ISNULL(c.intPriceFixationId, 0) = 0 and e.ysnApproval = 1
 			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
 			left join tblCTIntrCompApproval j on j.intContractHeaderId = a.intContractHeaderId and j.strScreen =  'Contract' and j.ysnApproval = 1
 			left join tblSMUserSecurity k on lower(k.strUserName) = lower(j.strUserName)
