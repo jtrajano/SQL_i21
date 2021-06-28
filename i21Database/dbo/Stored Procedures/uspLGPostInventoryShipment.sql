@@ -328,7 +328,7 @@ BEGIN
 								ELSE 
 									ISNULL(DetailLot.intItemUOMId, 0)
 								END
-			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+			,dtmDate = dbo.fnRemoveTimeOnDate(LOAD.dtmScheduledDate)
 			,dblQty = -1 * (
 				CASE 
 					WHEN Lot.intLotId IS NULL THEN 
