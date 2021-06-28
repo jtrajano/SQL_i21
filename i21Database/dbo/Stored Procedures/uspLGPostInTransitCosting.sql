@@ -123,7 +123,7 @@ BEGIN TRY
 			intItemId = LD.intItemId
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-			,dtmDate = GETDATE()
+			,dtmDate = L.dtmScheduledDate
 			,dblQty = LD.dblQuantity
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = dbo.fnDivide(
@@ -419,7 +419,7 @@ BEGIN
 		,[strInventoryReceiptId]  = L.strLoadNumber
 		,[strReceiptType] = 'Purchase Contract'
 		,[intSourceType] = -1
-		,[dtmDate] = GETDATE()
+		,[dtmDate] = L.dtmScheduledDate
 		,[intCurrencyId] = NULL
 		,[dblExchangeRate] = 1
 		-- Detail 
