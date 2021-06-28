@@ -144,6 +144,7 @@ BEGIN TRY
 					FROM tblAPBillPreStage
 					WHERE intBillId = @intBillId
 						AND intBillPreStageId < @intBillPreStageId
+						AND strERPVoucherNo IS NOT NULL
 					)
 				SELECT @intActionId = 2
 		END
@@ -251,6 +252,10 @@ BEGIN TRY
 				ORDER BY BPS.intBillPreStageId DESC
 				)
 		BEGIN
+			UPDATE tblAPBillPreStage
+			SET strMessage = 'Previous feed is waiting for acknowledgement. '
+			WHERE intBillPreStageId = @intBillPreStageId
+
 			GOTO NextRec
 		END
 
@@ -402,7 +407,13 @@ BEGIN TRY
 				,@strItemNo = I.strItemNo
 				,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId, @intItemUOMId, BD.dblQtyReceived), 0))
 				,@strDetailCurrency = C.strCurrency
-				,@dblDetailCost = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intCostUOMId, @intItemUOMId, BD.dblCost), 0))
+				,@dblDetailCost = (
+					CASE 
+						WHEN I.strType = 'Other Charge'
+							THEN CONVERT(NUMERIC(18, 6), ISNULL(BD.dblCost, 0))
+						ELSE CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intCostUOMId, @intItemUOMId, BD.dblCost), 0))
+						END
+					)
 				,@dblDetailDiscount = CONVERT(NUMERIC(18, 6), BD.dblDiscount)
 				,@dblDetailTotal = CONVERT(NUMERIC(18, 6), BD.dblTotal)
 				,@dblDetailTax = CONVERT(NUMERIC(18, 6), BD.dblTax)

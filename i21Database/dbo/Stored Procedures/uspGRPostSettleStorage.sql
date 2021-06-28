@@ -927,6 +927,17 @@ BEGIN TRY
 						,intItemType           = 2
 						,IsProcessed           = 0
 						,ysnInventoryCost	   = @ysnInventoryCost_StorageChargeItem
+
+					UPDATE SS
+					SET dblStorageDue = ROUND(ABS(SF.dblUnits * SF.dblCashPrice),6)
+					FROM tblGRSettleStorage SS
+					OUTER APPLY (
+						SELECT dblUnits
+							,dblCashPrice
+						FROM @SettleVoucherCreate
+						WHERE intItemType = 2 --Storage Fee
+					) SF
+					WHERE SS.intSettleStorageId = @intSettleStorageId
 				END
 
 				IF ISNULL(@DPContractHeaderId, 0) > 0

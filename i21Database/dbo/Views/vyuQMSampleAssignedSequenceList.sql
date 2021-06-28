@@ -78,6 +78,10 @@ SELECT S.intSampleId
 	,LTRIM(CD.intContractSeq) AS strSequenceNumber
 	,SCS.dblQuantity AS dblAssignedQty
 	,UOM.strUnitMeasure AS strAssignedQtyUOM
+	,S.dtmCreated
+	,CE.strName AS strCreatedUserName
+	,S.dtmLastModified AS dtmLastUpdated
+	,UE.strName AS strUpdatedUserName
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1
@@ -112,8 +116,10 @@ LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = S.intSubBookId
 LEFT JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = S.intInventoryReceiptId
 LEFT JOIN tblICInventoryShipment INVS ON INVS.intInventoryShipmentId = S.intInventoryShipmentId
 LEFT JOIN tblMFWorkOrder WO ON WO.intWorkOrderId = S.intWorkOrderId
-LEFT JOIN tblICCommodity CY ON CY.intCommodityId = CH1.intCommodityId
+LEFT JOIN tblICCommodity CY ON CY.intCommodityId = ISNULL(CH1.intCommodityId, I.intCommodityId)
 LEFT JOIN tblQMSample S1 ON S1.intSampleId = S.intParentSampleId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = S.intForwardingAgentId
 LEFT JOIN tblEMEntity E2 ON E2.intEntityId = S.intSentById
 LEFT JOIN tblSMCompanyLocation CL1 ON CL1.intCompanyLocationId = S.intSentById
+LEFT JOIN tblEMEntity CE ON CE.intEntityId = S.intCreatedUserId
+LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId

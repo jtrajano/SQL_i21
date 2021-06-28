@@ -80,7 +80,7 @@ IF EXISTS(select TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 't
 				ALTER TABLE tblSCTicket ADD strTicketNumber NVARCHAR(40) NULL
 			');
 			EXEC('
-				UPDATE tblSCTicket SET strTicketNumber = intTicketNumber, dtmDateModifiedUtc = GETUTCDATE()
+				UPDATE tblSCTicket SET strTicketNumber = intTicketNumber
 				ALTER TABLE tblSCTicket ALTER COLUMN strTicketNumber NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL
 			');
 		END

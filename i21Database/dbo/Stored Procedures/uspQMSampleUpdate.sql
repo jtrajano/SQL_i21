@@ -39,10 +39,25 @@ BEGIN TRY
 		,@dblConvertedSampleQty NUMERIC(18, 6)
 		,@intContractHeaderId INT
 		,@ysnMultipleContractSeq BIT
+	DECLARE @intOrgSampleTypeId INT
+		,@intOrgItemId INT
+		,@intOrgCountryID INT
+		,@intOrgCompanyLocationSubLocationId INT
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblQMCompanyPreference
 
+	SELECT @intOrgSampleTypeId = intSampleTypeId
+		,@intOrgItemId = intItemId
+		,@intOrgCountryID = intCountryID
+		,@intOrgCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intSampleTypeId INT
+			,intItemId INT
+			,intCountryID INT
+			,intCompanyLocationSubLocationId INT
+			)
+	
 	SELECT @intSampleId = intSampleId
 		,@strMarks = strMarks
 		,@intPreviousSampleStatusId = intSampleStatusId
@@ -676,6 +691,14 @@ BEGIN TRY
 	END
 
 	EXEC uspQMInterCompanyPreStageSample @intSampleId
+
+	EXEC uspQMPreStageSample @intSampleId
+		,'Modified'
+		,@strSampleNumber
+		,@intOrgSampleTypeId
+		,@intOrgItemId
+		,@intOrgCountryID
+		,@intOrgCompanyLocationSubLocationId
 
 	COMMIT TRAN
 END TRY

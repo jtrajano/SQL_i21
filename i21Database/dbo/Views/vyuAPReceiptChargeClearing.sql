@@ -81,7 +81,7 @@ SELECT
         --IF WE DON'T HAVE *-1 IN TAX THE TOTAL WOULD BE
         --(CHARGE 100 * -1QTY) + TAX -10 = -110
         --TO ACCOMPLISH THIS CHECKOFF TAX MUST BE CONSISTENTLY NEGATIVE
-        + ISNULL(dblTax * -1,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
+        + ISNULL(ReceiptCharge.dblTax * -1,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
     ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) * -1 AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
@@ -91,6 +91,9 @@ SELECT
 FROM tblICInventoryReceiptCharge ReceiptCharge      
 INNER JOIN tblICInventoryReceipt Receipt       
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
+INNER JOIN tblICInventoryReceiptItem ReceiptItem
+    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId  
 LEFT JOIN   
@@ -119,15 +122,22 @@ AND ReceiptCharge.ysnPrice = 1
 AND NOT EXISTS (
     SELECT TOP 1 1
     FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
     INNER JOIN tblGRCustomerStorage CS
         ON CS.intCustomerStorageId = SH.intCustomerStorageId
         AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
     INNER JOIN tblGRTransferStorageReference TSR
         ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
     WHERE IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
     AND IR.strReceiptNumber = Receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
 )
 -- AND NOT EXISTS (
 --     SELECT intInventoryReceiptChargeId
@@ -150,7 +160,7 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM     
     ,0 AS dblVoucherTotal      
     ,0 AS dblVoucherQty      
-    ,CAST((ISNULL(dblAmount,0) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
+    ,CAST((ISNULL(dblAmount,0) + ISNULL(ReceiptCharge.dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
     ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
@@ -161,6 +171,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt       
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
         AND ReceiptCharge.ysnAccrue = 1       
+INNER JOIN tblICInventoryReceiptItem ReceiptItem
+    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId     
 LEFT JOIN   
@@ -191,15 +204,22 @@ AND ISNULL(Receipt.intEntityVendorId, 0) = ISNULL(ReceiptCharge.intEntityVendorI
 AND NOT EXISTS (
     SELECT TOP 1 1
     FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
     INNER JOIN tblGRCustomerStorage CS
         ON CS.intCustomerStorageId = SH.intCustomerStorageId
         AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
     INNER JOIN tblGRTransferStorageReference TSR
         ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
     WHERE IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
     AND IR.strReceiptNumber = Receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
 )
 -- AND NOT EXISTS (
 --     SELECT intInventoryReceiptChargeId
@@ -222,7 +242,7 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM     
     ,0 AS dblVoucherTotal      
     ,0 AS dblVoucherQty      
-    ,CAST((ISNULL(dblAmount,0) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
+    ,CAST((ISNULL(dblAmount,0) + ISNULL(ReceiptCharge.dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
     ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
@@ -233,6 +253,9 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt       
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
         AND ReceiptCharge.ysnAccrue = 1       
+INNER JOIN tblICInventoryReceiptItem ReceiptItem
+    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId    
 LEFT JOIN   
@@ -265,15 +288,22 @@ AND ReceiptCharge.intEntityVendorId != ISNULL(Receipt.intEntityVendorId, 0) --ma
 AND NOT EXISTS (
     SELECT TOP 1 1
     FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
     INNER JOIN tblGRCustomerStorage CS
         ON CS.intCustomerStorageId = SH.intCustomerStorageId
         AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
     INNER JOIN tblGRTransferStorageReference TSR
         ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
     WHERE IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
     AND IR.strReceiptNumber = Receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
 )
 -- AND NOT EXISTS (
 --     SELECT intInventoryReceiptChargeId
@@ -355,6 +385,9 @@ INNER JOIN tblICInventoryReceiptCharge receiptCharge
     ON billDetail.intInventoryReceiptChargeId  = receiptCharge.intInventoryReceiptChargeId      
 INNER JOIN tblICInventoryReceipt receipt      
     ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId      
+INNER JOIN tblICInventoryReceiptItem receiptItem
+    ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
+    AND receiptCharge.strChargesLink = receiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON receipt.intLocationId = compLoc.intCompanyLocationId    
 LEFT JOIN   
@@ -375,15 +408,22 @@ AND bill.ysnPosted = 1
 AND NOT EXISTS (
     SELECT TOP 1 1
     FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
     INNER JOIN tblGRCustomerStorage CS
         ON CS.intCustomerStorageId = SH.intCustomerStorageId
         AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
     INNER JOIN tblGRTransferStorageReference TSR
         ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
     WHERE IR.intInventoryReceiptId = receipt.intInventoryReceiptId
     AND IR.strReceiptNumber = receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
 )
 ) charges  
 OUTER APPLY (

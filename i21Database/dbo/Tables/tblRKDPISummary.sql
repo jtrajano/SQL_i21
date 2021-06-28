@@ -64,3 +64,8 @@
     , CONSTRAINT [PK_tblRKDPISummary] PRIMARY KEY ([intDPISummaryId])
 	, CONSTRAINT [FK_tblRKDPISummary_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKDPISummary_intDPIHeaderId]
+	ON [dbo].[tblRKDPISummary] ([intDPIHeaderId]);   
+GO  

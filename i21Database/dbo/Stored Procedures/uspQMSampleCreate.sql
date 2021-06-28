@@ -45,7 +45,22 @@ BEGIN TRY
 		,@dblConvertedSampleQty NUMERIC(18, 6)
 		,@intContractHeaderId INT
 		,@ysnMultipleContractSeq BIT
+	DECLARE @intOrgSampleTypeId INT
+		,@intOrgItemId INT
+		,@intOrgCountryID INT
+		,@intOrgCompanyLocationSubLocationId INT
 
+	SELECT @intOrgSampleTypeId = intSampleTypeId
+		,@intOrgItemId = intItemId
+		,@intOrgCountryID = intCountryID
+		,@intOrgCompanyLocationSubLocationId = intCompanyLocationSubLocationId
+	FROM OPENXML(@idoc, 'root', 2) WITH (
+			intSampleTypeId INT
+			,intItemId INT
+			,intCountryID INT
+			,intCompanyLocationSubLocationId INT
+			)
+	
 	SELECT @strSampleNumber = strSampleNumber
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
@@ -768,6 +783,14 @@ BEGIN TRY
 	END
 
 	EXEC uspQMInterCompanyPreStageSample @intSampleId
+
+	EXEC uspQMPreStageSample @intSampleId
+		,'Added'
+		,@strSampleNumber
+		,@intOrgSampleTypeId
+		,@intOrgItemId
+		,@intOrgCountryID
+		,@intOrgCompanyLocationSubLocationId
 
 	EXEC sp_xml_removedocument @idoc
 

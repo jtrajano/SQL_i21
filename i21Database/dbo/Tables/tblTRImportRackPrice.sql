@@ -10,6 +10,7 @@
     [strMessage] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
     [strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intUserId] INT NULL,
+    [ysnDelete] BIT NULL,
     CONSTRAINT [PK_tblTRImportRackPrice] PRIMARY KEY ([intImportRackPriceId]), 
     CONSTRAINT [FK_tblTRImportRackPrice_tblSMImportFileHeader] FOREIGN KEY ([intFieldMappingId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )

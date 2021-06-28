@@ -29,7 +29,7 @@ SELECT intId					= ROW_NUMBER() OVER(ORDER BY ECI.intEntityCardInfoId) + (SELECT
 									   WHEN UPPER(ECI.strCardType) = 'DINERS CLUB' THEN CAST(ISNULL(dblDinersClubPercentage, 0) AS NUMERIC(18, 6))
 									   WHEN UPPER(ECI.strCardType) = 'CHINA UNION PAY' THEN CAST(ISNULL(dblChinaUnionPayPercentage, 0) AS NUMERIC(18, 6))
 								  END
-	 , strConvenienceFeeType	= 'Percentage'
+	 , strConvenienceFeeType	= CP.strCreditCardConvenienceFee
 	 , ysnExemptCreditCardFee	= ISNULL(C.ysnExemptCreditCardFee, 0)
 FROM tblEMEntityCardInformation ECI
 INNER JOIN tblARCustomer C ON ECI.intEntityId = C.intEntityId
@@ -40,6 +40,7 @@ OUTER APPLY (
 			   , dblDiscoverPercentage
 			   , dblDinersClubPercentage
 			   , dblChinaUnionPayPercentage
+			   , strCreditCardConvenienceFee
 	FROM tblSMCompanyPreference
 ) CP
 WHERE ECI.strToken IS NOT NULL

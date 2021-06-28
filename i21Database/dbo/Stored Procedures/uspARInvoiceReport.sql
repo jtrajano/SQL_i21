@@ -156,6 +156,10 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , ysnStretchLogo
 	 , strSubFormula
 	 , dtmCreated
+	 , strServiceChargeItem
+	 , intDaysOld
+	 , strServiceChareInvoiceNumber
+	 , dtmDateSC
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -274,6 +278,20 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , strSubFormula			= INVOICEDETAIL.strSubFormula
 	 , dtmCreated				= GETDATE()
+	 , strServiceChargeItem		= CASE WHEN SELECTEDINV.strInvoiceFormat 
+										IN ('By Customer Balance', 'By Invoice') 
+										THEN 'Service Charge on Past Due' + CHAR(13) + 'Balance as of: ' +  cast(CAST(GETDATE() AS DATE) as varchar)
+										ELSE
+										''
+										END
+	 , intDaysOld               = CASE WHEN SELECTEDINV.strInvoiceFormat 
+										IN ('By Customer Balance', 'By Invoice') 
+										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmDateSC, CAST(GETDATE() AS DATE))
+										ELSE
+										0
+										END
+	 , strServiceChareInvoiceNumber = INVOICEDETAIL.strSCInvoiceNumber
+	 , dtmDateSC				 =  INVOICEDETAIL.dtmDateSC
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
@@ -344,6 +362,8 @@ LEFT JOIN (
 		 , strLotNumber				= LOT.strLotNumbers
 		 , strSubFormula			= ID.strSubFormula
 		 , dblTaxExempt				= TER.dblTaxExempt
+		 , strSCInvoiceNumber		= INVSC.strInvoiceNumber
+		 , dtmDateSC				= INVSC.dtmDate
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -354,6 +374,9 @@ LEFT JOIN (
 			 , ysnListBundleSeparately
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
+	LEFT JOIN  (
+		Select dtmDate,intInvoiceId,strInvoiceNumber from tblARInvoice
+	)INVSC  ON  INVSC.intInvoiceId = ID.intSCInvoiceId
 	LEFT JOIN (
 		SELECT intItemUOMId
 			 , intItemId

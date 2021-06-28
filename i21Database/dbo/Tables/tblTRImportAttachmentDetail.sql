@@ -14,6 +14,9 @@
 	[ysnValid] BIT,
 	[intAttachmentId] INT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
+	[intLoadHeaderId] INT NULL,
+	[strInvoiceId] NVARCHAR(300) NULL,
+	[ysnDelete] BIT NULL,
 	CONSTRAINT [PK_tblTRImportAttachmentDetail] PRIMARY KEY (intImportAttachmentDetailId),
 	CONSTRAINT [FK_tblTRImportAttachmentDetail_tblTRImportAttachment_intImportAttachmentId] FOREIGN KEY ([intImportAttachmentId]) REFERENCES [dbo].[tblTRImportAttachment] ([intImportAttachmentId]) ON DELETE CASCADE
 )

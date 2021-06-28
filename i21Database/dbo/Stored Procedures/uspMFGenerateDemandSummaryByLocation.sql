@@ -13,7 +13,7 @@ BEGIN
 		,@ysnAllItem BIT
 		,@intCategoryId INT
 		,@intMonthsToView INT = 12
-		,@intMonthId INT
+		,@intMonthId INT= 1
 		,@intLocationId INT
 		,@dblSupplyTarget INT
 		,@dblDecimalPart NUMERIC(18, 6)
@@ -117,11 +117,6 @@ BEGIN
 		,intMonthId INT
 		,dblQty NUMERIC(18, 6)
 		)
-	DECLARE @tblSMCompanyLocation TABLE (intLocationId INT)
-
-	INSERT INTO @tblSMCompanyLocation
-	SELECT DISTINCT intLocationId
-	FROM @tblCTInvPlngReportAttributeValue
 
 	INSERT INTO @tblCTInvPlngReportAttributeValue (
 		intInvPlngReportMasterID
@@ -152,6 +147,7 @@ BEGIN
 		AND s.intReportAttributeID IN (
 			2
 			,5
+			,4
 			,6
 			,8
 			,9
@@ -165,6 +161,12 @@ BEGIN
 		,intReportAttributeID
 		,strFieldName
 		,intLocationId
+
+	DECLARE @tblSMCompanyLocation TABLE (intLocationId INT)
+
+	INSERT INTO @tblSMCompanyLocation
+	SELECT DISTINCT intLocationId
+	FROM @tblCTInvPlngReportAttributeValue
 
 	IF (
 			SELECT Count(*)
@@ -231,11 +233,31 @@ BEGIN
 	WHERE s.intInvPlngReportMasterID = @intInvPlngReportMasterID
 		AND s.intReportAttributeID = 1
 
+	INSERT INTO @tblCTInvPlngReportAttributeValue (
+		intInvPlngReportMasterID
+		,intReportAttributeID
+		,strFieldName
+		,strValue
+		,intLocationId
+		)
+	SELECT intInvPlngReportMasterID
+		,intReportAttributeID
+		,strFieldName
+		,MAX(strValue)
+		,intLocationId
+	FROM dbo.tblCTInvPlngReportAttributeValue s
+	WHERE s.intInvPlngReportMasterID = @intInvPlngReportMasterID
+		AND s.intReportAttributeID = 11
+		Group by intInvPlngReportMasterID
+		,intReportAttributeID
+		,strFieldName
+		,intLocationId
+
 	WHILE @intMonthId <= @intMonthsToView
 	BEGIN
 		SELECT @intLocationId = NULL
 
-		SELECT @intLocationId = intLocationId
+		SELECT @intLocationId = MIN(intLocationId)
 		FROM @tblSMCompanyLocation
 
 		WHILE @intLocationId IS NOT NULL
@@ -247,13 +269,17 @@ BEGIN
 					,@dblDecimalPart = NULL
 					,@intIntegerPart = NULL
 					,@dblTotalConsumptionQty = NULL
-					,@intLocationId = NULL
 
 				SELECT @dblSupplyTarget = MAX(dblQty)
 				FROM @tblCTInvPlngReportAttributeValue
 				WHERE intReportAttributeID = 11 --Weeks of Supply Target
 					AND intMonthId = @intMonthId
 					AND intLocationId = @intLocationId
+
+				if @dblSupplyTarget is null
+				Begin
+					Select @dblSupplyTarget=0
+				End
 
 				SELECT @dblDecimalPart = @dblSupplyTarget % 1
 
@@ -356,7 +382,7 @@ BEGIN
 					SELECT @intConsumptionAvlMonth = @intMonthsToView
 
 				WHILE @intConsumptionMonth <= 12
-					AND @dblEndInventory > 0
+					--AND @dblEndInventory > 0
 				BEGIN
 					SELECT @dblRemainingConsumptionQty = NULL
 
@@ -483,6 +509,7 @@ BEGIN
 					END
 					ELSE
 					BEGIN
+						if @dblConsumptionQty>0
 						SELECT @dblWeeksOfSsupply = @dblWeeksOfSsupply + (@dblEndInventory / @dblConsumptionQty)
 
 						SELECT @dblEndInventory = 0
@@ -507,7 +534,7 @@ BEGIN
 				NextMonth:
 			END
 
-			SELECT @intLocationId = intLocationId
+			SELECT @intLocationId = Min(intLocationId)
 			FROM @tblSMCompanyLocation
 			WHERE intLocationId > @intLocationId
 		END
@@ -581,6 +608,6 @@ BEGIN
 	JOIN dbo.tblCTReportAttribute RA ON RA.intReportAttributeID = Ext.intReportAttributeID
 		AND RA.ysnVisible = 1
 	LEFT JOIN dbo.tblSMCompanyLocation L ON L.intCompanyLocationId = Ext.intLocationId
-	ORDER BY strGroupByColumn
+	ORDER BY intLocationId, strGroupByColumn
 		,RA.intDisplayOrder
 END
