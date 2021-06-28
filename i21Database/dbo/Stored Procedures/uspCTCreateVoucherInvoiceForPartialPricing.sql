@@ -1374,7 +1374,7 @@ BEGIN TRY
 																			else ISNULL(RI.dblQuantity,0)
 																			end
 																	  )
-																  ) - isnull(inv.dblQtyShipped,0)) - rt.dblQtyShipped,0),
+																  ) - isnull(inv.dblQtyShipped,0)) - isnull(rt.dblQtyShipped,0),0),
 					intInvoiceDetailId = ARD.intInvoiceDetailId,
 					intItemUOMId = @intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
