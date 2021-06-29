@@ -8206,6 +8206,9 @@
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
