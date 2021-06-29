@@ -144,7 +144,9 @@ SELECT DISTINCT
 					THEN InventoryReturn.strReceiptNumber
 				ELSE 'Checkout - ' + CAST(Store.intStoreNo AS NVARCHAR(50)) + ' - ' + 
 					CheckoutHeader.strDescription + ' - ' + 
-					FORMAT(CheckoutHeader.dtmCheckoutDate, 'M/dd/yyyy') + ' - ' +  
+					CAST(MONTH(CheckoutHeader.dtmCheckoutDate) AS VARCHAR(2)) + '/' + 
+					CAST(DAY(CheckoutHeader.dtmCheckoutDate) AS VARCHAR(2)) + '/' + 
+					CAST(YEAR(CheckoutHeader.dtmCheckoutDate) AS VARCHAR(4)) + ' - ' +  
 					CAST(CheckoutHeader.intShiftNo AS NVARCHAR(50))
 				END
 		ELSE NULL
