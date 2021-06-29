@@ -82,15 +82,18 @@ BEGIN
             SET @resultAsHTML += N'</table>'; 
         END
 
-        -- Send the email 
-		EXEC msdb.dbo.sp_send_dbmail
-			@profile_name = @emailProfileName
-			,@recipients = @recipients
-			,@subject = 'AP Balance Compare'
-			,@body = @resultAsHTML
-			,@body_format = 'HTML'			
+        IF @resultAsHTML != ''
+        BEGIN
+            -- Send the email 
+            EXEC msdb.dbo.sp_send_dbmail
+                @profile_name = @emailProfileName
+                ,@recipients = @recipients
+                ,@subject = 'AP Balance Compare'
+                ,@body = @resultAsHTML
+                ,@body_format = 'HTML'			
 
-		PRINT 'Email Sent to Queue.'
+            PRINT 'Email Sent to Queue.'
+        END
     END
 
 END
