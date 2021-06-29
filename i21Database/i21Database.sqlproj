@@ -8998,6 +8998,9 @@
     <Build Include="dbo\Tables\tblRestApiTransformationLog.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
