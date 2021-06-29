@@ -8,6 +8,8 @@ SELECT
 	,s.strArchiveFolder
 	,strSchedule = schedule.strDescription
 	,strTemplate = template.strName
+	,s.intEdiMapTemplateId
+	,s.intScheduleId 
 FROM
 	tblICImportSetup s LEFT JOIN tblSCHSchedule schedule 
 		ON s.intScheduleId = schedule.intScheduleId
