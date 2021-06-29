@@ -9368,6 +9368,7 @@
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
+    <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
@@ -9410,6 +9411,10 @@
     <Build Include="dbo\Stored Procedures\uspIPValidateERPOtherFieldsContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptDetailSource.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractDetailsV1.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractHeaderV1.sql" />
+    <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

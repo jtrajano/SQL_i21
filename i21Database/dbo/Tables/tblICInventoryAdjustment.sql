@@ -25,6 +25,7 @@
 	[intInventoryReceiptId] INT NULL,
 	[intTicketId] INT NULL,
 	[intInvoiceId] INT NULL,
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 	[strIntegrationDocNo] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblICInventoryAdjustment] PRIMARY KEY ([intInventoryAdjustmentId]), 
