@@ -6918,10 +6918,10 @@ BEGIN
 		FROM tblCFTransaction
 		LEFT JOIN tblCFCard 
 		ON tblCFCard.intCardId = tblCFTransaction.intCardId
-		WHERE intNetworkId = @intNetworkId
+		WHERE tblCFTransaction.intNetworkId = @intNetworkId
 		AND intSiteId = @intSiteId
 		AND dtmTransactionDate = @dtmTransactionDate
-		AND (ISNULL(strForeignCardId,'') = ISNULL(@ForeignCardId,'') OR ISNULL(tblCFCard.strCardId,'') = ISNULL(@ForeignCardId,''))
+		AND (ISNULL(strForeignCardId,'') = ISNULL(@ForeignCardId,'') OR ISNULL(tblCFCard.strCardNumber,'') = ISNULL(@ForeignCardId,''))
 		AND intProductId = @ProductId
 		AND intPumpNumber = @PumpId
 		AND intTransactionId != @intTransactionId
