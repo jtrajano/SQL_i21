@@ -9013,6 +9013,7 @@
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
