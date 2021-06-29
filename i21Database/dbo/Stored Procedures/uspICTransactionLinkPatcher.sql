@@ -37,7 +37,7 @@ BEGIN
 	DELETE FROM dbo.tblICTransactionLinks WHERE strSrcModuleName LIKE '%Inventory%' OR strDestModuleName LIKE '%Inventory%'
 	DELETE FROM dbo.tblICTransactionNodes WHERE strModuleName LIKE '%Inventory%'
 
-	--Inventory Reciept Patch
+	--Inventory Receipt Patch
 
 	DELETE FROM @TransactionLink
 	--Insert Inventory Receipt Data to Transaction Link variable		
@@ -48,18 +48,15 @@ BEGIN
 	)
 	SELECT
 		'Create',
-		intSrcId = ReceiptItemSource.intOrderId, 
-		strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber, 'Missing Transaction No'), 
-		strSrcModuleName = ReceiptItemSource.strSourceType, 
-		strSrcTransactionType = ReceiptItemSource.strSourceType,
-		intDestId = ReceiptItemSource.intInventoryReceiptId,
-		strDestTransactionNo = COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'),
+		intSrcId = Source.intSourceTransactionId, 
+		strSrcTransactionNo = COALESCE(Source.strSourceTransactionNumber, 'Missing Transaction No'), 
+		strSrcModuleName = Source.strSourceModule, 
+		strSrcTransactionType = Source.strSourceScreen,
+		intDestId = Source.intReceiptId,
+		strDestTransactionNo = COALESCE(Source.strReceiptNumber, 'Missing Transaction No'),
 		'Inventory',
 		'Inventory Receipt'
-    FROM dbo.tblICInventoryReceipt Receipt
-	INNER JOIN dbo.vyuICGetReceiptItemSource ReceiptItemSource
-	ON Receipt.intInventoryReceiptId = ReceiptItemSource.intInventoryReceiptId
-	WHERE ReceiptItemSource.intOrderId IS NOT NULL
+    FROM vyuICGetReceiptDetailSource Source
 
 	--Execute Add Transaction Link SP
 	EXEC dbo.uspICAddTransactionLinks @TransactionLink
@@ -100,42 +97,135 @@ BEGIN
 		intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
 		intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
 	)
-	SELECT
-		'Create',
-		intSrcId = ShipmentItemSource.intOrderId, 
-		strSrcTransactionNo = COALESCE(ShipmentItemSource.strOrderNumber, 'Missing Transaction No'), 
-		strSrcModuleName = 
-		CASE 
-			WHEN Shipment.intOrderType = 0 THEN 'None'
-			WHEN Shipment.intOrderType = 1 THEN 'Sales Contract'
-			WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
-			WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
-			WHEN Shipment.intOrderType = 4 THEN 'Direct'
-			WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
-			WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
-		END COLLATE Latin1_General_CI_AS
-		, 
-		strSrcTransactionType = 
-		CASE 
-			WHEN Shipment.intOrderType = 0 THEN 'None'
-			WHEN Shipment.intOrderType = 1 THEN 'Sales Contract'
-			WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
-			WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
-			WHEN Shipment.intOrderType = 4 THEN 'Direct'
-			WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
-			WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
-		END COLLATE Latin1_General_CI_AS
-		,
-		intDestId = Shipment.intInventoryShipmentId,
-		strDestTransactionNo = COALESCE(Shipment.strShipmentNumber, 'Missing Transaction No'),
-		'Inventory',
-		'Inventory Shipment'
-    FROM dbo.tblICInventoryShipment Shipment
-	INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
-	ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-	INNER JOIN dbo.vyuICGetShipmentItemSource ShipmentItemSource
-	ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemSource.intInventoryShipmentItemId
-	WHERE ShipmentItemSource.intOrderId IS NOT NULL
+	SELECT DISTINCT * 
+	FROM
+	(
+		SELECT
+			strOperation = 'Create',
+			intSrcId = 
+			CASE 
+				WHEN Shipment.intSourceType = 0
+					THEN ISNULL(ShipmentItemSource.intOrderId, 0)
+				WHEN Shipment.intSourceType = 1
+					THEN CASE
+						WHEN Shipment.intOrderType = 4 
+							THEN CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN ShipmentItemSource.intSourceId
+								ELSE 0
+							END
+						ELSE CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN ShipmentItemSource.intSourceId
+								WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+									THEN ShipmentItemSource.intSourceId
+								ELSE 0
+							END
+					END
+				ELSE 0
+			END
+			,
+			strSrcTransactionNo = 
+			CASE 
+				WHEN Shipment.intSourceType = 0
+					THEN ISNULL(ShipmentItemSource.strOrderNumber, 'Missing Transaction No')
+				WHEN Shipment.intSourceType = 1
+					THEN CASE
+						WHEN Shipment.intOrderType = 4 
+							THEN CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN ShipmentItemSource.strSourceNumber
+								ELSE 'Missing Transaction No'
+							END
+						ELSE CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN ShipmentItemSource.strSourceNumber
+								WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+									THEN ShipmentItemSource.strOrderNumber
+								ELSE 'Missing Transaction No'
+							END
+					END
+				ELSE 'Missing Transaction No' 
+			END COLLATE Latin1_General_CI_AS
+			,
+			strSrcModuleName = 
+			CASE 
+				WHEN Shipment.intSourceType = 0
+					THEN CASE
+						WHEN Shipment.intOrderType = 0 THEN 'None'
+						WHEN Shipment.intOrderType = 1 THEN 'Contract Management'
+						WHEN Shipment.intOrderType = 2 THEN 'Sales (A/R)'
+						WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+						WHEN Shipment.intOrderType = 4 THEN 'Direct'
+						WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+						WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+					END
+				WHEN Shipment.intSourceType = 1
+					THEN CASE
+						WHEN Shipment.intOrderType = 0 THEN 'None'
+						WHEN Shipment.intOrderType = 1
+							THEN CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN 'Ticket Management'
+								WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+									THEN 'Contract Management'
+							END
+						WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
+						WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+						WHEN Shipment.intOrderType = 4 
+							THEN CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN 'Ticket Management'
+							END
+						WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+						WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+					END
+			END COLLATE Latin1_General_CI_AS
+			,
+			strSrcTransactionType = 
+			CASE WHEN Shipment.intSourceType = 0
+					THEN CASE
+						WHEN Shipment.intOrderType = 0 THEN 'None'
+						WHEN Shipment.intOrderType = 1 THEN 'Contract'
+						WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
+						WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+						WHEN Shipment.intOrderType = 4 THEN 'Direct'
+						WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+						WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+					END
+				WHEN Shipment.intSourceType = 1
+					THEN CASE
+						WHEN Shipment.intOrderType = 0 THEN 'None'
+						WHEN Shipment.intOrderType = 1
+							THEN CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN 'Ticket'
+								WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+									THEN 'Contract'
+							END
+						WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
+						WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+						WHEN Shipment.intOrderType = 4 
+							THEN CASE 
+								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+									THEN 'Ticket'
+							END
+						WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+						WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+					END
+			END COLLATE Latin1_General_CI_AS
+			,
+			intDestId = Shipment.intInventoryShipmentId,
+			strDestTransactionNo = COALESCE(Shipment.strShipmentNumber, 'Missing Transaction No'),
+			strDestModuleName = 'Inventory',
+			strDestTransactionType ='Inventory Shipment'
+		FROM dbo.tblICInventoryShipment Shipment
+		INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
+		ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+		INNER JOIN dbo.vyuICGetShipmentItemSource ShipmentItemSource
+		ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemSource.intInventoryShipmentItemId
+	) AS ShipmentLinks
+	WHERE intSrcId <> 0
 
 	--Execute Add Transaction Link SP
 	EXEC dbo.uspICAddTransactionLinks @TransactionLink
@@ -219,19 +309,16 @@ BEGIN
 	FROM 
 	(
 		SELECT
-		strOperation = 'Create',
-		intSrcId = ReceiptItemSource.intOrderId, 
-		strSrcTransactionNo = COALESCE(ReceiptItemSource.strOrderNumber, ReceiptItemSource.strSourceNumber, 'Missing Transaction No'), 
-		strSrcModuleName = ReceiptItemSource.strSourceType, 
-		strSrcTransactionType = ReceiptItemSource.strSourceType,
-		intDestId = ReceiptItemSource.intInventoryReceiptId,
-		strDestTransactionNo = COALESCE(Receipt.strReceiptNumber, 'Missing Transaction No'),
-		strDestModuleName = 'Inventory',
-		strDestTransactionType = 'Inventory Receipt'
-		FROM dbo.tblICInventoryReceipt Receipt
-		INNER JOIN dbo.vyuICGetReceiptItemSource ReceiptItemSource
-		ON Receipt.intInventoryReceiptId = ReceiptItemSource.intInventoryReceiptId
-		WHERE ReceiptItemSource.intOrderId IS NOT NULL
+			strOperation = 'Create',
+			intSrcId = Source.intSourceTransactionId, 
+			strSrcTransactionNo = COALESCE(Source.strSourceTransactionNumber, 'Missing Transaction No'), 
+			strSrcModuleName = Source.strSourceModule, 
+			strSrcTransactionType = Source.strSourceScreen,
+			intDestId = Source.intReceiptId,
+			strDestTransactionNo = COALESCE(Source.strReceiptNumber, 'Missing Transaction No'),
+			strDestModuleName = 'Inventory',
+			strDestTransactionType = 'Inventory Receipt'
+		FROM vyuICGetReceiptDetailSource Source
 
 	) Records
 	LEFT JOIN tblICTransactionLinks Links
@@ -310,42 +397,135 @@ BEGIN
 		Records.intDestId, Records.strDestTransactionNo, Records.strDestModuleName, Records.strDestTransactionType	-- Destination Transaction 
 	FROM 
 	(
-		SELECT
-			strOperation = 'Create',
-			intSrcId = ShipmentItemSource.intOrderId, 
-			strSrcTransactionNo = COALESCE(ShipmentItemSource.strOrderNumber, 'Missing Transaction No'), 
-			strSrcModuleName = 
-			CASE 
-				WHEN Shipment.intOrderType = 0 THEN 'None'
-				WHEN Shipment.intOrderType = 1 THEN 'Sales Contract'
-				WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
-				WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
-				WHEN Shipment.intOrderType = 4 THEN 'Direct'
-				WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
-				WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
-			END COLLATE Latin1_General_CI_AS
-			, 
-			strSrcTransactionType = 
-			CASE 
-				WHEN Shipment.intOrderType = 0 THEN 'None'
-				WHEN Shipment.intOrderType = 1 THEN 'Sales Contract'
-				WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
-				WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
-				WHEN Shipment.intOrderType = 4 THEN 'Direct'
-				WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
-				WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
-			END COLLATE Latin1_General_CI_AS
-			,
-			intDestId = Shipment.intInventoryShipmentId,
-			strDestTransactionNo = COALESCE(Shipment.strShipmentNumber, 'Missing Transaction No'),
-			strDestModuleName = 'Inventory',
-			strDestTransactionType = 'Inventory Shipment'
-		FROM dbo.tblICInventoryShipment Shipment
-		INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
-		ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
-		INNER JOIN dbo.vyuICGetShipmentItemSource ShipmentItemSource
-		ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemSource.intInventoryShipmentItemId
-		WHERE ShipmentItemSource.intOrderId IS NOT NULL
+		SELECT DISTINCT * 
+		FROM
+		(
+			SELECT
+				strOperation = 'Create',
+				intSrcId = 
+				CASE 
+					WHEN Shipment.intSourceType = 0
+						THEN ISNULL(ShipmentItemSource.intOrderId, 0)
+					WHEN Shipment.intSourceType = 1
+						THEN CASE
+							WHEN Shipment.intOrderType = 4 
+								THEN CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN ShipmentItemSource.intSourceId
+									ELSE 0
+								END
+							ELSE CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN ShipmentItemSource.intSourceId
+									WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+										THEN ShipmentItemSource.intSourceId
+									ELSE 0
+								END
+						END
+					ELSE 0
+				END
+				,
+				strSrcTransactionNo = 
+				CASE 
+					WHEN Shipment.intSourceType = 0
+						THEN ISNULL(ShipmentItemSource.strOrderNumber, 'Missing Transaction No')
+					WHEN Shipment.intSourceType = 1
+						THEN CASE
+							WHEN Shipment.intOrderType = 4 
+								THEN CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN ShipmentItemSource.strSourceNumber
+									ELSE 'Missing Transaction No'
+								END
+							ELSE CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN ShipmentItemSource.strSourceNumber
+									WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+										THEN ShipmentItemSource.strOrderNumber
+									ELSE 'Missing Transaction No'
+								END
+						END
+					ELSE 'Missing Transaction No' 
+				END COLLATE Latin1_General_CI_AS
+				,
+				strSrcModuleName = 
+				CASE 
+					WHEN Shipment.intSourceType = 0
+						THEN CASE
+							WHEN Shipment.intOrderType = 0 THEN 'None'
+							WHEN Shipment.intOrderType = 1 THEN 'Contract Management'
+							WHEN Shipment.intOrderType = 2 THEN 'Sales (A/R)'
+							WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+							WHEN Shipment.intOrderType = 4 THEN 'Direct'
+							WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+							WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+						END
+					WHEN Shipment.intSourceType = 1
+						THEN CASE
+							WHEN Shipment.intOrderType = 0 THEN 'None'
+							WHEN Shipment.intOrderType = 1
+								THEN CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN 'Ticket Management'
+									WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+										THEN 'Contract Management'
+								END
+							WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
+							WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+							WHEN Shipment.intOrderType = 4 
+								THEN CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN 'Ticket Management'
+								END
+							WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+							WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+						END
+				END COLLATE Latin1_General_CI_AS
+				,
+				strSrcTransactionType = 
+				CASE WHEN Shipment.intSourceType = 0
+						THEN CASE
+							WHEN Shipment.intOrderType = 0 THEN 'None'
+							WHEN Shipment.intOrderType = 1 THEN 'Contract'
+							WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
+							WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+							WHEN Shipment.intOrderType = 4 THEN 'Direct'
+							WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+							WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+						END
+					WHEN Shipment.intSourceType = 1
+						THEN CASE
+							WHEN Shipment.intOrderType = 0 THEN 'None'
+							WHEN Shipment.intOrderType = 1
+								THEN CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN 'Ticket'
+									WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
+										THEN 'Contract'
+								END
+							WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
+							WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+							WHEN Shipment.intOrderType = 4 
+								THEN CASE 
+									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
+										THEN 'Ticket'
+								END
+							WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+							WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+						END
+				END COLLATE Latin1_General_CI_AS
+				,
+				intDestId = Shipment.intInventoryShipmentId,
+				strDestTransactionNo = COALESCE(Shipment.strShipmentNumber, 'Missing Transaction No'),
+				strDestModuleName = 'Inventory',
+				strDestTransactionType ='Inventory Shipment'
+			FROM dbo.tblICInventoryShipment Shipment
+			INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
+			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
+			INNER JOIN dbo.vyuICGetShipmentItemSource ShipmentItemSource
+			ON ShipmentItem.intInventoryShipmentItemId = ShipmentItemSource.intInventoryShipmentItemId
+		) AS ShipmentLinks
+		WHERE intSrcId <> 0
 
 	) Records
 	LEFT JOIN tblICTransactionLinks Links

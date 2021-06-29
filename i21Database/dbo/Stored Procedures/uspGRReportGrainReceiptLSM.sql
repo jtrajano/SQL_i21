@@ -84,7 +84,7 @@ ELSE
     WHERE [strTransactionType] = N'Grain Receipt'    
     
     UPDATE tblSCTicket    
-    SET strGrainReceiptNumber = @strReceiptNumber    
+    SET strGrainReceiptNumber = @strReceiptNumber, dtmDateModifiedUtc = GETUTCDATE()
     WHERE intTicketId = @intScaleTicketId    
  END         
 

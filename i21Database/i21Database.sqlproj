@@ -1074,6 +1074,7 @@
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForAdjustment.sql" />
     <Build Include="dbo\Tables\tblGLAccountCategory.sql" />
+    <Build Include="dbo\Tables\tblGLAccountCategoryType.sql" />
     <Build Include="dbo\Tables\tblHDTicketHistory.sql" />
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocation.sql" />
@@ -9484,6 +9485,18 @@
     <Build Include="dbo\Views\vyuQMGetSampleType.sql" />
     <Build Include="dbo\Tables\tblIPSampleType.sql" />
     <Build Include="dbo\Stored Procedures\uspIPTransferOrderWithoutBOL.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
+    <Build Include="dbo\Views\vyuICGetReceiptDetailSource.sql" />
+    <Build Include="dbo\Tables\tblIPTestResultStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMTransferERPTestResult.sql" />
+    <Build Include="dbo\Tables\tblIPERPDetail.sql" />
+    <Build Include="dbo\Tables\tblIPTestResultError.sql" />
+    <Build Include="dbo\Tables\tblIPTestResultArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMProcessERPTestResult.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractDetailsV1.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractHeaderV1.sql" />
+    <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

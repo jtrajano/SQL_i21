@@ -21,12 +21,12 @@ AS
 		,C.intEntityId
 		,B.intItemId
 		,dblRatePerUnit = P.dblRate
-		,strCharge = N.[strCharge]
+		,strCharge = N.strCharge
 		,M.intProgramId
 		,M.strProgramId
 		,dblReimbursementAmount = CAST((P.dblRate * B.dblQtyShipped) AS NUMERIC(18,6))
 		,intProgramRateId = P.intProgramRateId
-		,dblItemCost = ISNULL(Q.dblCost,0.0)
+		,dblItemCost = 	ISNULL(CED.dblCost, ISNULL(Q.dblCost, 0))
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
@@ -62,6 +62,7 @@ AS
 		AND A.strInvoiceNumber = Q.strTransactionId
 		AND Q.ysnIsUnposted = 0
 	OUTER APPLY dbo.fnBBGetChargeRates(N.intProgramChargeId,D.intEntityLocationId,B.intItemId,J.intUnitMeasureId,A.dtmDate) P
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(A.dtmDate, Q.intItemId, Q.intItemLocationId, DEFAULT) CED
 	WHERE B.dblPrice = 0
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackDetail WHERE intInvoiceDetailId = B.intInvoiceDetailId)
 		AND NOT EXISTS(SELECT TOP 1 1 FROM tblBBBuybackExcluded WHERE intInvoiceDetailId = B.intInvoiceDetailId)

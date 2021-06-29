@@ -32,6 +32,8 @@ SELECT Invoice.intInvoiceId
 	, stri21InvoiceNo = i21Invoice.strInvoiceNumber
 	, Invoice.intConcurrencyId
 	, strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS
+	, isnull(tax.dblTaxTotal,0) dblTotalTaxAmount  
+	, isnull(tax.dblItemTotal,0) dblTotalBefTax 
 FROM tblMBILInvoice Invoice
 --LEFT JOIN tblMBILInvoiceItem InvoiceItem ON InvoiceItem.intInvoiceId = Invoice.intInvoiceId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Invoice.intEntityCustomerId
@@ -41,3 +43,7 @@ LEFT JOIN tblMBILShift InvoiceShift ON InvoiceShift.intShiftId = Invoice.intShif
 LEFT JOIN tblMBILOrder InvoiceOrder ON InvoiceOrder.intOrderId = Invoice.intOrderId
 LEFT JOIN tblSMTerm Term ON Term.intTermID = InvoiceOrder.intTermId
 LEFT JOIN tblARInvoice i21Invoice ON i21Invoice.intInvoiceId = Invoice.inti21InvoiceId
+LEFT JOIN (    
+  SELECT item.intInvoiceId,SUM(isnull(dblItemTotal,0))dblItemTotal,SUM(isnull(dblTaxTotal,0))dblTaxTotal
+  FROM tblMBILInvoiceItem item      
+  GROUP BY item.intInvoiceId) tax ON Invoice.intInvoiceId = tax.intInvoiceId
