@@ -188,7 +188,7 @@ IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 		--LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
 	END 
 
-WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS) AND @dblQtyOverAged <> 0
+WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 	BEGIN
 		DECLARE @intInvoiceDetailId			INT	= NULL
 			  , @intCompanyLocationId		INT = NULL
