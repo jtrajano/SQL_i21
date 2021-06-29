@@ -586,7 +586,7 @@ BEGIN
 				,@AdjustedTax		= [dblAdjustedTax]
 				,@Tax				= [dblTax]
 				,@Rate				= [dblRate]
-				,@ExemptionPercent	= [dblExemptionPercent]
+				,@ExemptionPercent	= CASE WHEN ISNULL([dblExemptionPercent], 0) = 0 THEN 100 ELSE [dblExemptionPercent] END
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
@@ -706,11 +706,29 @@ BEGIN
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal) AND @DisregardExemptionSetup = 0
-				SET @ItemTaxAmount = @ZeroDecimal;
+			IF(@TaxExempt = 1 AND @DisregardExemptionSetup = 0)
+			BEGIN
+				IF(@CalculationMethod = 'Percentage')
+				BEGIN
+					IF ISNULL(@IsReversal,0) = 0
+					BEGIN
+						SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+						SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
+					END
+					ELSE
+					BEGIN
+						DECLARE @TaxTotal NUMERIC(18,6) = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal) OR @DisregardExemptionSetup = 1
-				SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal) );
+						SET @ItemExemptedTaxAmount = (@TaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
+						SET @ItemTaxAmount = (@TaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
+					END
+				END
+				ELSE 
+				BEGIN
+					SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+					SET @ItemTaxAmount = @ItemTaxAmount - @ItemExemptedTaxAmount
+				END
+			END
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
