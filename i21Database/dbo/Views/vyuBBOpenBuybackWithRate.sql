@@ -26,10 +26,7 @@ AS
 		,M.strProgramId
 		,dblReimbursementAmount = CAST((P.dblRate * B.dblQtyShipped) AS NUMERIC(18,6))
 		,intProgramRateId = P.intProgramRateId
-		,dblItemCost = 	CASE WHEN N.strCharge = 'Inventory' 
-							THEN ISNULL(CED.dblCost, ISNULL(Q.dblCost, 0))
-							ELSE ISNULL(Q.dblCost, 0)
-						END
+		,dblItemCost = 	ISNULL(CED.dblCost, ISNULL(Q.dblCost, 0))
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
