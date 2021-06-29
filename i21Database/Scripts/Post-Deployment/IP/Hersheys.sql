@@ -683,6 +683,23 @@ GO
 
 GO
 DECLARE @intCommodityId INT
+SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = 'Wheat'
+
+IF NOT EXISTS (
+	SELECT 1 FROM tblIPSAPAccount WHERE intCommodityId = @intCommodityId AND ysnGLAccount = 0
+	) AND (ISNULL(@intCommodityId, 0) > 0)
+	INSERT INTO tblIPSAPAccount (strSAPAccountNo,intCommodityId,ysnGLAccount)
+	SELECT '115507',@intCommodityId,0
+
+IF NOT EXISTS (
+	SELECT 1 FROM tblIPSAPAccount WHERE intCommodityId = @intCommodityId AND ysnGLAccount = 1
+	) AND (ISNULL(@intCommodityId, 0) > 0)
+	INSERT INTO tblIPSAPAccount (strSAPAccountNo,intCommodityId,ysnGLAccount)
+	SELECT '439289',@intCommodityId,1
+GO
+
+GO
+DECLARE @intCommodityId INT
 SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = 'Sugar'
 
 IF NOT EXISTS (SELECT 1 FROM tblIPSAPInternalOrder WHERE intCommodityId = @intCommodityId) AND (ISNULL(@intCommodityId, 0) > 0)
@@ -800,6 +817,26 @@ BEGIN
 
 	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
 	SELECT '7001367',@intCommodityId,3
+END
+GO
+
+GO
+DECLARE @intCommodityId INT
+SELECT @intCommodityId = intCommodityId FROM tblICCommodity WHERE strCommodityCode = 'Wheat'
+
+IF NOT EXISTS (SELECT 1 FROM tblIPSAPInternalOrder WHERE intCommodityId = @intCommodityId) AND (ISNULL(@intCommodityId, 0) > 0)
+BEGIN
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079042',@intCommodityId,0
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079043',@intCommodityId,1
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079044',@intCommodityId,2
+
+	INSERT INTO tblIPSAPInternalOrder (strSAPInternalOrderNo,intCommodityId,intYearDiff)
+	SELECT '7079045',@intCommodityId,3
 END
 GO
 */

@@ -20,7 +20,7 @@ BEGIN
 		UPDATE A SET A.strTicketStatus = 
 		CASE
 			WHEN @status = 1 THEN 'R'
-		END
+		END, dtmDateModifiedUtc = GETUTCDATE()
 		FROM tblSCTicket A
 		WHERE A.intTicketId = @scId
 

@@ -226,7 +226,51 @@ BEGIN TRY
 	BEGIN
 		SELECT TOP 1 @intContractHeaderId = intContractHeaderId
 			, @intContractDetailId = intContractDetailId
-		FROM @contractDetail
+		FROM @contractDetail;
+
+		WITH CTE AS (
+			SELECT intRowNo = ROW_NUMBER() OVER (PARTITION BY intPricingTypeId ORDER BY dtmTransactionDate DESC)
+				, strBatchId = @strBatchId
+				, dtmTransactionDate
+				, strTransactionType = 'Contract Balance'
+				, strTransactionReference = strTransactionType
+				, intTransactionReferenceId = intContractHeaderId
+				, intTransactionReferenceDetailId = intContractDetailId
+				, strTransactionReferenceNo = strContractNumber
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber		
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId = NULL
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes = ''
+				, intUserId
+				, intActionId = 44
+				, strProcess = @strProcess
+			FROM tblCTContractBalanceLog
+			WHERE intContractDetailId = @intContractDetailId
+				AND intContractHeaderId = @intContractHeaderId
+				AND strTransactionType = 'Contract Balance'
+		)
 
 		INSERT INTO @cbLogCurrent (strBatchId
 			, dtmTransactionDate
@@ -304,14 +348,14 @@ BEGIN TRY
 			, intActionId
 			, strProcess
 		FROM (
-			SELECT intRowNo = ROW_NUMBER() OVER (PARTITION BY intPricingTypeId ORDER BY dtmTransactionDate DESC)
-				, strBatchId = @strBatchId
+			SELECT intRowNo
+				, strBatchId
 				, dtmTransactionDate
-				, strTransactionType = 'Contract Balance'
-				, strTransactionReference = strTransactionType
-				, intTransactionReferenceId = intContractHeaderId
-				, intTransactionReferenceDetailId = intContractDetailId
-				, strTransactionReferenceNo = strContractNumber
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
 				, strContractNumber		
@@ -327,24 +371,21 @@ BEGIN TRY
 				, dblBasis
 				, dblFutures
 				, intQtyUOMId
-				, intQtyCurrencyId = NULL
+				, intQtyCurrencyId
 				, intBasisUOMId
 				, intBasisCurrencyId
 				, intPriceUOMId
 				, dtmStartDate
 				, dtmEndDate
-				, dblQty = SUM(dblQty) OVER (PARTITION BY intPricingTypeId ORDER BY dtmTransactionDate DESC)
+				, dblQty = (SELECT SUM(dblQty) FROM CTE Sub WHERE Main.intPricingTypeId = Sub.intPricingTypeId AND Main.intRowNo <= Sub.intRowNo)
 				, intContractStatusId
 				, intBookId
 				, intSubBookId
-				, strNotes = ''
+				, strNotes
 				, intUserId
-				, intActionId = 44
-				, strProcess = @strProcess
-			FROM tblCTContractBalanceLog
-			WHERE intContractDetailId = @intContractDetailId
-				AND intContractHeaderId = @intContractHeaderId
-				AND strTransactionType = 'Contract Balance'
+				, intActionId
+				, strProcess
+			FROM CTE Main
 		) tbl
 		WHERE intRowNo = 1
 
@@ -3587,8 +3628,11 @@ BEGIN TRY
 					-- If Reassign prices, do not bring back Basis qty
 					IF (@ysnReassign = 0)
 					BEGIN
+
+						declare @intHeaderPricingTypeId int;
+						select top 1 @intHeaderPricingTypeId = intHeaderPricingTypeId from @tmpContractDetail
 						-- Increase basis, qtyDiff is negative so multiply to -1
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 
@@ -3602,6 +3646,13 @@ BEGIN TRY
 		BEGIN
 			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo', 'Create Voucher', 'Delete Voucher')
 			BEGIN
+				UPDATE @cbLogSpecific SET intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+										WHEN @strProcess = 'Create Credit Memo' THEN 64
+										WHEN @strProcess = 'Delete Invoice' THEN 63
+										WHEN @strProcess = 'Delete Credit Memo' THEN 65
+										WHEN @strProcess = 'Create Voucher' THEN 15
+										WHEN @strProcess = 'Delete Voucher' THEN 62
+										ELSE intActionId END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 
 				SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
@@ -3609,8 +3660,13 @@ BEGIN TRY
 			END
 
 			IF @ysnInvoice = 1
-			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = 16
+			BEGIN				
+				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
+					, intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+										WHEN @strProcess = 'Create Credit Memo' THEN 64
+										WHEN @strProcess = 'Delete Invoice' THEN 63
+										WHEN @strProcess = 'Delete Credit Memo' THEN 65
+										ELSE intActionId END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @ysnReturn = 1
@@ -3894,6 +3950,15 @@ BEGIN TRY
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
 							end
 						END
+						ELSE IF (@strTransactionReference = 'Inventory Receipt')  
+						BEGIN  
+							if (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix,0) = 1)  
+							begin  
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0   
+							end  
+
+						END 
 
 					END				
 					ELSE IF ISNULL(@dblBasis, 0) > 0

@@ -3,7 +3,9 @@
 	,@ForDelete			BIT = 0    
 	,@UserId			INT = NULL
 	,@InvoiceDetailId 	INT = NULL
-	,@ysnLogRisk		BIT = 1     
+	,@ysnLogRisk		BIT = 1
+	,@Post				BIT	= 0
+	,@Recap				BIT	= 1
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -103,10 +105,16 @@ BEGIN TRY
 	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
 
 	--UPDATE PREPAID ITEM CONTRACT
-	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0 AND @strTransactionType != 'Customer Prepayment')
+	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0 AND @strTransactionType != 'Customer Prepayment' AND @Recap = 0)
 	BEGIN
-		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId,  @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
-	END	
+		IF(@Post = 0)
+		BEGIN
+			SET @dblValueToUpdate = @dblValueToUpdate * -1
+		END
+
+		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId, @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
+	END
+
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 	EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
 	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
@@ -134,7 +142,7 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
-		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
+		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
 
 	IF @ForDelete = 1
 		BEGIN

@@ -735,6 +735,8 @@ BEGIN TRY
 							,'AWO'
 							,@LineItems
 
+						
+						set @intOrderId = 6
 						----------Remove the reservation from WorkOrder for the Item in ticket
 
 						EXEC [uspSCUpdateAGWorkOrderItemReservation] @intTicketAGWorkOrderId, @intTicketId,@intItemId, 1
@@ -743,6 +745,7 @@ BEGIN TRY
 				END
 			END
 		END
+			
 
 	SELECT @strWhereFinalizedWeight = strWeightFinalized
 		 , @strWhereFinalizedGrade = strGradeFinalized
@@ -920,6 +923,7 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,[dtmDateCreatedUtc]
 				)
 			SELECT 
 				[strTicketStatus] = 'O'
@@ -1061,6 +1065,7 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,GETUTCDATE()
 			FROM tblSCTicket
 			WHERE intTicketId = @intTicketId
 

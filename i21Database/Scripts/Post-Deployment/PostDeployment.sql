@@ -95,6 +95,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2010_RemoveF9Shortcut.sql
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
+:r .\SM\2110_CreateIDPGridLayout.sql
+
 
 
 -- Canned Report
@@ -285,6 +287,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultData\Categories1099.sql
 :r .\AP\DefaultData\Categories1099PATR.sql
 :r .\AP\DefaultData\Categories1099DIV.sql
+:r .\AP\DefaultData\Categories1099K.sql
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
@@ -582,6 +585,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\DC_DistrictColumbia.sql
 :r .\TF\DefaultData\GA_Georgia.sql
 :r .\TF\DefaultData\FL_Florida.sql
+:r .\TF\DefaultData\AL_Alabama.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
@@ -597,6 +601,8 @@ print 'BEGIN POST DEPLOYMENT'
 --RiskManagement
 :R .\RM\01_MasterScript.sql
 :R .\RM\02_DataFix.sql
+:R .\RM\fnRKGetBucketBasisDeliveriesAboveR2.sql
+:R .\RM\uspRKDPRCompareBasisDeliveriesAboveR2.sql
 
 -- Scale Ticket
 :R .\SC\Populate_Risk_Summary_Log.sql
@@ -661,5 +667,12 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
+
+-- Clean up i21 database objects
+:r .\IC\29_CleanupObjects.sql
+:r .\RM\03_CleanupObjects.sql
+:r .\IP\2_CleanupObjects.sql
+:r .\AR\01_CleanupObjects.sql
+:r .\GR\3_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'

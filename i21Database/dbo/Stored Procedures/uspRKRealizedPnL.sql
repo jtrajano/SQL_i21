@@ -47,7 +47,7 @@ BEGIN
 	BEGIN
 		SET @intSelectedInstrumentTypeId = NULL
 	END
-	IF ISNULL(@strBuySell, 0) = 0
+	IF @strBuySell = '0'
 	BEGIN
 		SET @strBuySell = NULL
 	END
@@ -72,7 +72,7 @@ BEGIN
 		, strLBrokerTradeNo
 		, strSBrokerTradeNo
 		, dblContractSize
-		, dblFutCommission = - ABS(dblFutCommission)
+		, dblFutCommission
 		, strFutureMarket
 		, strFutureMonth
 		, intMatchNo
@@ -114,7 +114,7 @@ BEGIN
 					, strSBrokerTradeNo = ot1.strInternalTradeNo
 					, ot.dblContractSize
 					, intConcurrencyId = 0
-					, dblFutCommission = CASE WHEN ISNULL(bc.intFuturesRateType, 2) = 2 THEN ISNULL(bc.dblFutCommission, 0) * ISNULL(psd.dblMatchQty, 0) * 2 ELSE ISNULL(bc.dblFutCommission, 0) * ISNULL(psd.dblMatchQty, 0) END
+					, dblFutCommission = ISNULL(psd.dblFutCommission, 0) 
 					, ot.strFutureMarket
 					, ot.strFutureMonth
 					, psh.intMatchNo
@@ -147,7 +147,6 @@ BEGIN
 				JOIN fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', GETDATE(), 1) ot ON psd.intLFutOptTransactionId = ot.intFutOptTransactionId
 				JOIN tblSMCurrency c ON c.intCurrencyID = ot.intCurrencyId
 				JOIN fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', GETDATE(), 1) ot1 ON psd.intSFutOptTransactionId = ot1.intFutOptTransactionId
-				JOIN tblRKBrokerageCommission bc ON bc.intFutureMarketId = psh.intFutureMarketId AND psh.intBrokerageAccountId = bc.intBrokerageAccountId
 				WHERE ISNULL(ot.intCommodityId, 0) = ISNULL(@intCommodityId, ISNULL(ot.intCommodityId, 0))
 					AND ISNULL(ot.intFutureMarketId, 0) = ISNULL(@intFutureMarketId, ISNULL(ot.intFutureMarketId, 0))
 					AND ISNULL(ot.intBookId, 0) = ISNULL(@intBookId, ISNULL(ot.intBookId, 0))

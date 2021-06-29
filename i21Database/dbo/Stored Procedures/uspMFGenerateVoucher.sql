@@ -37,7 +37,7 @@ BEGIN TRY
 
 	Select @intUnitMeasureId=1
 
-	SELECT @intAPAccount = ISNULL(intAPAccount, 0)
+	SELECT @intAPAccount = ISNULL(intServiceCharges, 0)
 	FROM tblSMCompanyLocation CL
 	WHERE intCompanyLocationId = @intLocationId
 
@@ -76,7 +76,8 @@ BEGIN TRY
 		,intCostCurrencyId 
 		,dblWeight 
 		,dblNetWeight 
-		,intWeightUOMId 
+		,intWeightUOMId
+		,strReference
 		)
 	SELECT 1 AS intPartitionId
 		,RH.intVendorEntityId
@@ -106,6 +107,7 @@ BEGIN TRY
 		,@intLocationId
 		,W.intSubLocationId
 		,strWorkOrderNo,IU.intItemUOMId,IU.intItemUOMId  ,@intCurrencyId,WRD.dblProcessedQty,WRD.dblProcessedQty,IU.intItemUOMId
+		,strWorkOrderNo
 	FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WRD.intWorkOrderId
 	JOIN dbo.tblLGWarehouseRateMatrixHeader RH ON RH.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId

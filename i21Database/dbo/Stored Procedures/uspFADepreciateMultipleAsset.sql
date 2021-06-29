@@ -96,10 +96,13 @@ BEGIN
             ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
-
+            
             UPDATE BD SET ysnFullyDepreciated  =0
-            FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId
-
+            FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId 
+            
+            --remove from undepreciated
+            DELETE A FROM tblFAFiscalAsset A JOIN
+            @IdGood B on B.intId = A.intAssetId
         END
      
 END  
@@ -215,7 +218,7 @@ BEGIN
                     BD.dtmPlacedInService,
                     NULL,  
                     BD.dtmPlacedInService,  
-                    0,  
+                    0,
                     BD.dblSalvageValue,  
                     'Place in service',  
                     @strTransactionId,  
@@ -266,7 +269,7 @@ BEGIN
                   BD.dtmPlacedInService,  
                   NULL,  
 				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
-                  E.dblDepre,  
+                  E.dblDepre ,  
                   BD.dblSalvageValue,  
                   'Depreciation',  
                   @strTransactionId,  
@@ -286,7 +289,6 @@ BEGIN
                   )Depreciation
                   WHERE F.intAssetId = @i
                   AND BD.intBookId = @BookId
-
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId, ysnDepreciated = 1 WHERE intAssetId = @i
                   DELETE FROM @IdIterate WHERE intId = @i
           END
@@ -487,11 +489,11 @@ END
 
 -- THIS WILL REFLECT IN THE ASSET SCREEN ysnFullyDepreciated FLAG
 
-UPDATE BD  SET ysnFullyDepreciated  =1
-  FROM tblFABookDepreciation BD  JOIN @tblDepComputation B ON BD.intAssetId = B.intAssetId
+UPDATE BD  SET ysnFullyDepreciated  =1  
+  FROM tblFABookDepreciation BD  JOIN @tblDepComputation B ON BD.intAssetId = B.intAssetId  
   WHERE B.ysnFullyDepreciated = 1
   AND BD.intBookId  = @BookId
-
+  
 UPDATE A  SET A.ysnDepreciated  =1  
   FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
   WHERE B.ysnDepreciated = 1  AND 1 = @BookId
@@ -574,5 +576,3 @@ END
 
   
 END  
-  
---RETURN 0;  

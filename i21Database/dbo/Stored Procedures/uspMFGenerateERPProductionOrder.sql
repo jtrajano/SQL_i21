@@ -124,15 +124,15 @@ BEGIN TRY
 				+'<CreatedBy>'+	US.strUserName +'</CreatedBy>'
 				+'<StorageLocation>'+	IsNULL(SL.strSubLocationName,'')  +'</StorageLocation>'
 				+'<ProcessName>'+	MP.strProcessName   +'</ProcessName>'
-				+'<WorkOrderType>'+	(Case When SL.ysnExternal =1 Then 'Offsite' Else 'Inhouse' End)   +'</WorkOrderType>'
+				+'<WorkOrderType>'+	(Case When IsNULL(SL.ysnExternal,0) =1 Then 'Offsite' Else 'Inhouse' End)   +'</WorkOrderType>'
 				+'<VendorAccountNo>'+	IsNULL(V.strVendorAccountNum,'')   +'</VendorAccountNo>'
 				+'<WorkOrderNo>'+	W.strWorkOrderNo    +'</WorkOrderNo>'
 				+'<ItemNo>'+	I.strItemNo     +'</ItemNo>'
-				+'<FormulaNumber>'+	IsNULL(WR.strERPRecipeNo,'')     +'</FormulaNumber>'
+				+'<FormulaNumber>'+	IsNULL(IsNULL(WR.strERPRecipeNo,R.strERPRecipeNo),'')     +'</FormulaNumber>'
 				+'<Quantity>'+	ltrim(W.dblQuantity)    +'</Quantity>'
 				+'<QuantityUOM>'+	UM.strUnitMeasure    +'</QuantityUOM>'
 				+'<ManufacturingCell>'+	MC.strCellName     +'</ManufacturingCell>'
-				+'<DueDate>'+	IsNULL(convert(varchar, W.dtmPlannedDate, 112),'')    +'</DueDate>'
+				+'<DueDate>'+	IsNULL(convert(varchar, IsNULL(W.dtmPlannedDate,W.dtmExpectedDate), 112),'')    +'</DueDate>'
 				+'<Machine>'+	IsNULL(M.strName,'')    +'</Machine>'
 				+'<ERPShopOrderNo>'+	IsNULL(W.strERPOrderNo,'')     +'</ERPShopOrderNo>'
 			FROM dbo.tblMFWorkOrder W
@@ -145,11 +145,16 @@ BEGIN TRY
 			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
 			JOIN dbo.tblMFWorkOrderRecipe WR ON WR.intItemId = W.intItemId
 				AND WR.intWorkOrderId = W.intWorkOrderId
+			LEFT JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
+				AND R.intLocationId = W.intLocationId
+				AND R.ysnActive = 1
+				AND R.intSubLocationId = SL.intCompanyLocationSubLocationId
 			JOIN dbo.tblSMUserSecurity US ON US.intEntityId = W.intCreatedUserId
 			LEFT JOIN tblMFMachine M ON M.intMachineId = W.intMachineId
 			LEFT JOIN dbo.tblLGWarehouseRateMatrixHeader WRM ON WRM.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId
 			LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = WRM.intVendorEntityId
 			WHERE W.intWorkOrderId = @intWorkOrderId
+
 
 			SELECT @strDetailXML = ''
 

@@ -2052,7 +2052,7 @@ BEGIN TRY
 														WHEN a.intItemType <> 1 AND @ysnDPOwnedType = 0 THEN 
 															case WHEN @ysnFromPriceBasisContract = 1 and a.intItemType = 2 then 'Other Charge Expense' else  'AP Clearing' end 
 														WHEN a.intItemType = 1 THEN 'AP Clearing'
-														WHEN @ysnDPOwnedType = 1 and a.intItemType = 3 then 'AP Clearing'
+														WHEN @ysnDPOwnedType = 1 and a.intItemType = 3 AND CS.intTicketId IS NOT NULL then 'AP Clearing'
 														ELSE 'Other Charge Expense' 
 													END
 																				)
@@ -2359,15 +2359,16 @@ BEGIN TRY
 							JOIN tblICItem b
 									ON b.intItemId = a.intItemId and b.strType = 'Inventory'
 
-
+				
 						update  a set 
-								dblQuantityToBill = isnull(@total_units_for_voucher, dblQuantityToBill), 
-								dblNetWeight = isnull(@total_units_for_voucher, dblNetWeight),
-								dblOrderQty =  isnull(@total_units_for_voucher, dblOrderQty)
+								dblQuantityToBill = case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblQuantityToBill) end, 
+								dblNetWeight = case when b.ysnDiscountFromGrossWeight = 1 then dblNetWeight else isnull(@total_units_for_voucher, dblNetWeight) end,
+								dblOrderQty =  case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblOrderQty) end
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
-							where b.intItemType = 2
+							where b.intItemType in (2, 3)
+													
 					end
 
 				---Adding Freight Charges.

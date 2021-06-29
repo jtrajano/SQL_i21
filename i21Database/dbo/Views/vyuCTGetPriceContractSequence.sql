@@ -69,7 +69,8 @@ AS
 				CD.dblAppliedQty,
 				CD.strBook,
 				CD.strSubBook,
-				CD.dblFutures
+				CD.dblFutures,
+				CD.ysnReadOnlyInterCoContract
 
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -123,7 +124,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				CD.dblAppliedQty,
 				BK.strBook,
 				SB.strSubBook,
-				CD.dblFutures
+				CD.dblFutures,
+				CH.ysnReadOnlyInterCoContract
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId

@@ -3,6 +3,7 @@ AS
 SELECT
 		commonData.*
 		,strContractNumber		=	ContractHeader.strContractNumber
+		,strVendorRef			=	ISNULL(ContractHeader.strCustomerContract, '')
 		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
 												AND ContractDetail.intItemContractId > 0
 												AND DMDetails.intContractCostId IS NULL
@@ -48,8 +49,8 @@ SELECT
 		,strShipVia				=	shipVia.strShipVia
 		,ysnPaid				=	DM.ysnPaid
 		,strContractNumberSeq	=	CASE WHEN ContractHeader.intContractHeaderId > 0 THEN ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq) ELSE '' END
-		,dblDetailTotalWithTax	=	FORMAT((DMDetails.dblTotal + DMDetails.dblTax), 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
-		,dblHeaderTotal			=	FORMAT(DM.dblTotal, 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
+		,dblDetailTotalWithTax	=	CAST((DMDetails.dblTotal + DMDetails.dblTax) AS DECIMAL(18, 2))
+		,dblHeaderTotal			=	CAST(DM.dblTotal AS DECIMAL(18, 2))
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId

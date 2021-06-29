@@ -49,7 +49,7 @@ NULL
 FROM #AssetID A 
 JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
 OUTER APPLY(
-	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate
+	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate 
 	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
 	ORDER BY dtmDepreciationToDate DESC
 )D
@@ -377,6 +377,10 @@ FROM
 tblFAFixedAsset A
 JOIN @tblAsset B ON B.intAssetId = A.intAssetId
 
+
+--remove from undepreciated
+DELETE A FROM tblFAFiscalAsset A JOIN
+@tblAsset B on B.intAssetId = A.intAssetId
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

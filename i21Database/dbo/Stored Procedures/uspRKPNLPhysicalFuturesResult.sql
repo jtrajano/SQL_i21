@@ -64,7 +64,7 @@ BEGIN
 		, dblTranValue
 		, intSort
 		, ysnPosted = CAST(ysnPosted AS BIT)
-		, dblTransactionValue = CASE WHEN strType IN ('Invoice') THEN dblAccounting
+		, dblTransactionValue = CASE WHEN strType IN ('2 Invoice') THEN dblAccounting
 									WHEN strType IN ('Amount', 'Per Unit') THEN dblTranValue
 									WHEN strType IN ('4 Supp. Invoice') AND strDescription <> 'Supp. Invoice' THEN dblPrice * -1
 									WHEN strType IN ('4 Supp. Invoice') AND strDescription = 'Supp. Invoice' THEN dblTranValue * -1
@@ -81,14 +81,14 @@ BEGIN
 			, dblAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intWeightUOMId, AD.dblPAllocatedQty) * -1
 			, dblAllocatedQtyPrice = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intUnitMeasureId, AD.dblPAllocatedQty) * -1
 			, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
-													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,MA.intUnitMeasureId,dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId,CD.intFutureMonthId)))))
+													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,MA.intUnitMeasureId,dbo.fnCTCalculateAmountBetweenCurrency(MA.intCurrencyId,@intCurrencyId,dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId),0)))))
 													/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId, PU.intUnitMeasureId, CD.dblConvertedBasis)
 					ELSE dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblCashPrice) END
 				* CASE WHEN CD.intCurrencyId = CY.intCurrencyID THEN 1
 						WHEN CY.ysnSubCurrency = 1 THEN 100
 						ELSE 0.01 END
 			, strCurrency= ISNULL(MY.strCurrency, CY.strCurrency)
-			, dblFX = ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0), 1)
+			, dblFX = CASE WHEN @intCurrencyId <>  CD.intCurrencyId THEN ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0), 1) ELSE 1 END
 			, dblBooked = NULL
 			, dblBookedPrice = NULL
 			, dblAccounting = NULL
@@ -205,14 +205,14 @@ BEGIN
 				, dblAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty)
 				, dblAllocatedQtyPrice = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty)
 				, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
-																	* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, MA.intUnitMeasureId, dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId)))))
+																	* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, MA.intUnitMeasureId, dbo.fnCTCalculateAmountBetweenCurrency(MA.intCurrencyId,@intCurrencyId,dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId),0)))))
 																	/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblConvertedBasis)
 									ELSE dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblCashPrice) END
 							* CASE WHEN CD.intCurrencyId = CY.intCurrencyID THEN 1
 									WHEN CY.ysnSubCurrency = 1 THEN 100
 									ELSE 0.01 END
 				, strCurrency = ISNULL(MY.strCurrency, CY.strCurrency)
-				, dblFX = ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0), 1)
+				, dblFX = CASE WHEN @intCurrencyId <>  CD.intCurrencyId THEN ISNULL(dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0), 1) ELSE 1 END
 				, dblBooked = NULL
 				, dblBookedPrice = NULL
 				, dblAccounting = NULL
@@ -271,7 +271,7 @@ BEGIN
 									WHEN OY.ysnSubCurrency = 1 THEN 100
 									ELSE 0.01 END * -1
 				, strCurrency = ISNULL(MY.strCurrency,CY.strCurrency)
-				, dblFX = ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId, 1), 1)
+				, dblFX = CASE WHEN @intCurrencyId <>  CC.intCurrencyId THEN ISNULL(dbo.fnCTGetCurrencyExchangeRate(CC.intContractCostId, 1), 1) ELSE 1 END
 				, dblBooked = NULL
 				, dblBookedPrice = NULL
 				, dblAccounting = (BL.dblAccounting / (CD.dblQuantity / AD.dblPAllocatedQty)) * -1

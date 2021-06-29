@@ -97,6 +97,14 @@ BEGIN TRY
 				FETCH NEXT FROM ticketCursor INTO @strTransactionId, @intInventoryAdjustmentId
 				WHILE @@FETCH_STATUS = 0  
 				BEGIN
+
+					if @intInventoryAdjustmentId > 0
+						exec uspSCDeliverySheetShrinkage @DeliverySheetId = @intDeliverySheetId
+														, @InventoryAdjustmentId = @intInventoryAdjustmentId
+														, @intEntityUserSecurityId = @intUserId
+														, @ysnPost = 0
+
+
 					EXEC uspICPostInventoryAdjustment 0, 0, @strTransactionId,@intUserId, @strBatchId OUTPUT
 
 					SELECT @dblAdjustByQuantity = dblNewQuantity FROM tblICInventoryAdjustmentDetail WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
@@ -195,7 +203,7 @@ BEGIN TRY
 				FETCH NEXT FROM splitCursor INTO @intEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId, @intItemId, @intLocationId, @intStorageScheduleTypeId;  
 				WHILE @@FETCH_STATUS = 0  
 				BEGIN
-					SET @dblFinalSplitQty =  ROUND((@dblQuantity * @dblSplitPercent) / 100, @currencyDecimal);
+					SET @dblFinalSplitQty =  ROUND(dbo.fnDivide((dbo.fnMultiply(@dblQuantity,@dblSplitPercent)), 100), @currencyDecimal);
 					IF @dblTempSplitQty > @dblFinalSplitQty
 						SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
 					ELSE
@@ -204,6 +212,8 @@ BEGIN TRY
 					SELECT @intCustomerStorageId = intCustomerStorageId FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId
 
 					UPDATE tblGRCustomerStorage SET dblOpenBalance = 0 , dblOriginalBalance = 0 WHERE intCustomerStorageId = @intCustomerStorageId
+
+					SET @dblFinalSplitQty = ROUND(@dblFinalSplitQty,6) --- customer storage can only cater up to 6 decimals
 
 					EXEC uspGRCustomerStorageBalance
 							@intEntityId = NULL

@@ -7,8 +7,9 @@ AS
 DECLARE @strInvoiceNumber NVARCHAR(200)
 DECLARE @intInvoiceId INT
 DECLARE @intCompanyLocationId INT
+DECLARE @strContractCategoryId NVARCHAR(50)
 
-SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
+SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId, @strContractCategoryId = strContractCategoryId
 FROM tblCTItemContractHeader
 WHERE intItemContractHeaderId = @intItemContractHeaderId
 
@@ -66,6 +67,7 @@ INSERT dbo.tblARInvoice
 	, intPeriodsToAccrue
 	, strContractApplyTo
 	, dtmPostDate
+	, dtmDateCreated
 )
 SELECT TOP 1
       @guiUniqueId
@@ -106,6 +108,7 @@ SELECT TOP 1
 	, intPeriodsToAccrue = 1
 	, strContractApplyTo = 'Contract'
 	, dtmPostDate = GETDATE()
+	, dtmDateCreated = GETUTCDATE()
 FROM vyuARPrepaymentContractDefault cpd
 LEFT JOIN tblCTItemContractHeader h ON h.intItemContractHeaderId = cpd.intItemContractHeaderId
 LEFT JOIN tblARCustomer c ON c.intEntityId = h.intEntityId
@@ -116,6 +119,7 @@ SET @intInvoiceId = SCOPE_IDENTITY()
 INSERT INTO dbo.tblARInvoiceDetail
 (
 	  intInvoiceId
+	, intItemContractHeaderId
 	, intItemCategoryId
 	, intCategoryId
 	, intItemId
@@ -135,9 +139,12 @@ INSERT INTO dbo.tblARInvoiceDetail
 	, strPricing
 	, intDestinationGradeId
 	, intDestinationWeightId
+	, ysnItemContract
+	, ysnRestricted
 )
 SELECT
 	  @intInvoiceId
+	, @intItemContractHeaderId
 	, cpd.intItemCategoryId
 	, cpd.intCategoryId
 	, cpd.intItemId
@@ -154,15 +161,17 @@ SELECT
 	, intPrepayTypeId = 2
 	, cpd.intSubCurrencyId
 	, cpd.dblSubCurrencyRate
-	, strPricing = 'Contracts - Customer Pricing'
+	, strPricing = CASE WHEN @strContractCategoryId = 'Item' THEN 'Inventory - Standard Pricing' ELSE 'Contracts - Customer Pricing' END
 	, cpd.intDestinationGradeId
 	, cpd.intDestinationWeightId
+	, CAST(1 AS BIT)
+	, CAST(1 AS BIT)
 FROM vyuARPrepaymentContractDefault cpd
 WHERE cpd.intItemContractHeaderId = @intItemContractHeaderId
 
 exec uspARInsertTransactionDetail @InvoiceId = @intInvoiceId, @UserId = 1
-exec uspARUpdateInvoiceIntegrations @InvoiceId = 1807, @ForDelete = 0, @UserId = 1
+exec uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @ForDelete = 0, @UserId = 1
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6) NULL, intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 SELECT * FROM @Logs

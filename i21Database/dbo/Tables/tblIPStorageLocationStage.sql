@@ -1,6 +1,6 @@
 ﻿CREATE TABLE tblIPStorageLocationStage (
 	intStorageLocationStageId INT identity(1, 1)
-	,intTrxSequenceNo INT
+	,intTrxSequenceNo BIGINT
 	,strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS
 	,intActionId INT
 	,dtmCreatedDate DATETIME

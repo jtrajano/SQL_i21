@@ -166,6 +166,8 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intSalesOrderDetailId]				INT												NULL		-- Key Value from tblSOSalesOrderDetail (Sales Order)
 	,[strSalesOrderNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Sales Order Number (Sales Order)
 	,[intContractDetailId]					INT												NULL		-- Key Value from tblCTContractDetail (Sales Contract)
+	,[intItemContractHeaderId]				INT												NULL		-- Key Value from tblCTItemContractHeader (Sales Item Contract)
+	,[intItemContractDetailId]				INT												NULL		-- Key Value from tblCTItemContractDetail (Sales Item Contract)
 	,[intShipmentPurchaseSalesContractId]	INT												NULL		-- Key Value from tblLGShipmentPurchaseSalesContract (Inbound Shipment)
 	,[dblShipmentGrossWt]					NUMERIC(38, 20)									NULL
 	,[dblShipmentTareWt]					NUMERIC(38, 20)									NULL

@@ -13,6 +13,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Derivative Entry'
 	WHERE strTransactionType = N'FutOpt Transaction'
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Grain Receipt', strModule = 'Ticket Management'
+	WHERE strTransactionType = 'Canadian Grain Receipt'
+
 GO
 	PRINT N'BEGIN RENAME OF TRANSACTION'
 
@@ -1556,6 +1559,17 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pricing Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 160
+			,[strTransactionType]	= N'Grain Receipt'
+			,[strPrefix]			= N'GR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Ticket Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
+
+
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
@@ -1646,7 +1660,7 @@ GO
 GO
 	PRINT N'BEGIN CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO
-	--EXEC uspAPFixStartingNumbers
+	EXEC uspAPFixStartingNumbers
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO

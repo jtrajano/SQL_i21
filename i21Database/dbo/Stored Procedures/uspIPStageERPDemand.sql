@@ -69,12 +69,12 @@ BEGIN TRY
 				,QuantityUOM
 				,DemandDate
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					parentId INT '@parentId'
+					parentId BIGINT '@parentId'
 					,ActionId INT '../ActionId'
 					,CreatedDate DATETIME '../CreatedDate'
 					,CreatedBy NVARCHAR(50) '../CreatedBy'
 					,DemandName NVARCHAR(50) '../DemandName'
-					,TrxSequenceNo INT
+					,TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ItemNo NVARCHAR(50)
 					,Quantity NUMERIC(18, 6)
@@ -151,7 +151,7 @@ BEGIN TRY
 				,0 AS intStatusId
 				,@ErrMsg AS strStatusText
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)

@@ -30,7 +30,7 @@ BEGIN TRY
 		,@dtmDateCreated DATETIME = GETDATE()
 		,@intStorageLocationId INT
 		,@strError NVARCHAR(MAX)
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 	DECLARE @tblICStorageLocation TABLE (
 		strOldDescription NVARCHAR(100)
 		,strNewDescription NVARCHAR(100)

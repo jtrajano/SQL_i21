@@ -47,6 +47,30 @@ FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
 
+DECLARE @tblInvoiceIds InvoiceId
+DELETE FROM @tblInvoiceIds
+
+--FILTERED BY ALL
+INSERT INTO @tblInvoiceIds (intHeaderId)
+SELECT intInvoiceId
+FROM tblARInvoice ARI WITH (NOLOCK)
+WHERE ARI.ysnPosted = 0
+  AND UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) = 'ALL'
+  AND (UPPER(@TransType) = 'ALL' OR ARI.[strTransactionType] = @TransType)
+  AND (@BeginDate IS NULL OR ARI.dtmDate >= @BeginDate)
+  AND (@EndDate IS NULL OR ARI.dtmDate <= @EndDate)
+  AND (@BeginTransaction IS NULL OR ARI.intInvoiceId >= @BeginTransaction)
+  AND (@EndTransaction IS NULL OR ARI.intInvoiceId >= @EndTransaction)
+
+--FILTERED BY PARAM
+IF UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) <> 'ALL' AND RTRIM(LTRIM(ISNULL(@Param,''))) <> '' 
+	BEGIN
+		INSERT INTO @tblInvoiceIds (intHeaderId)
+		SELECT intInvoiceId
+		FROM tblARInvoice ARI WITH (NOLOCK)
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@Param) DV ON DV.[intID] = ARI.[intInvoiceId]  		 		  
+	END
+
 --Header
 INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]
@@ -366,41 +390,19 @@ SELECT
     ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
     ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 FROM tblARInvoice ARI
+INNER JOIN @tblInvoiceIds ID ON ARI.intInvoiceId = ID.intHeaderId
 INNER JOIN (
     SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit], [strInterCompanyVendorId], [strInterCompanyLocationId], [intInterCompanyId], [intInterCompanyVendorId] FROM tblARCustomer C WITH(NoLock)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
 ) ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
-LEFT OUTER JOIN (
+INNER JOIN (
     SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
 ) SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN (
     SELECT [intTransactionId] FROM vyuARForApprovalTransction  WITH (NOLOCK) WHERE [strScreenName] = 'Invoice'
 ) FAT ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 WHERE
-	NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])
-    AND (
-            (
-				RTRIM(LTRIM(ISNULL(@Param,''))) <> ''
-				AND
-				(
-					(UPPER(@Param) = 'ALL' AND ARI.[ysnPosted] = 0 AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all'))
-					OR
-					(UPPER(@Param) <> 'ALL' AND EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@Param2) DV WHERE DV.[intID] = ARI.[intInvoiceId]))
-				)
-            )
-			OR
-            (
-				@BeginDate IS NOT NULL
-				AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all')					
-				AND CAST(ARI.[dtmDate] AS DATE) BETWEEN CAST(@BeginDate AS DATE) AND CAST(@EndDate AS DATE)
-            )
-			OR
-            (
-				@BeginTransaction IS NOT NULL
-				AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all')
-				AND ARI.[intInvoiceId] BETWEEN @BeginTransaction AND @EndTransaction
-            )
-        )
+	NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])    
 
 INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]

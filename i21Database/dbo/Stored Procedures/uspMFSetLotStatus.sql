@@ -265,7 +265,7 @@ BEGIN TRY
 			,strLotNo
 			,strStorageUnit
 			,strAdjustmentNo
-			,dtmNewExpiryDate
+			,strNewStatus
 			,strReasonCode
 			,strNotes
 			)

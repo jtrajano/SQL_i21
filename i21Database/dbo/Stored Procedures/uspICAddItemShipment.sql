@@ -1124,7 +1124,15 @@ BEGIN
 		-- Calculate the surcharges
 		EXEC @intResult = dbo.uspICCalculateInventoryShipmentSurchargeOnOtherCharges @intShipmentId
 		IF @intResult <> 0 RETURN @intResult
-	END 	
+	END 
+
+	-- Link Inventory Shipment Transaction
+	BEGIN
+		EXEC dbo.uspICLinkInventoryShipmentTransaction
+			@intShipmentId,
+			true
+	END
+
 	FETCH NEXT FROM cur INTO @intShipmentId
 END
 

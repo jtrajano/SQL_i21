@@ -10,10 +10,11 @@ BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@strMessage NVARCHAR(MAX)
-		,@TrxSequenceNo INT
+		,@TrxSequenceNo BIGINT
 		,@CompanyLocation NVARCHAR(6)
 		,@CreatedDate DATETIME
 		,@CreatedBy NVARCHAR(50)
+		,@OriginalTrxSequenceNo INT
 		,@ContractNo NVARCHAR(50)
 		,@StatusId INT
 		,@StatusText NVARCHAR(2048)
@@ -27,10 +28,11 @@ BEGIN TRY
 		,@ERPPOlineNo NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
-		,TrxSequenceNo INT
+		,TrxSequenceNo BIGINT
 		,CompanyLocation NVARCHAR(6)
 		,CreatedDate DATETIME
 		,CreatedBy NVARCHAR(50)
+		,OriginalTrxSequenceNo INT
 		,ContractNo NVARCHAR(50)
 		,StatusId INT
 		,StatusText NVARCHAR(2048)
@@ -74,6 +76,7 @@ BEGIN TRY
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
+				,OriginalTrxSequenceNo
 				,ContractNo
 				,StatusId
 				,StatusText
@@ -84,7 +87,8 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
-				,CreatedBy
+				,CreatedByUser
+				,OriginalTrxSequenceNo
 				,ContractNo
 				,StatusId
 				,StatusText
@@ -92,10 +96,11 @@ BEGIN TRY
 				,ERPPONumber
 				,ERPPOlineNo
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					TrxSequenceNo INT '../TrxSequenceNo'
+					TrxSequenceNo BIGINT '../TrxSequenceNo'
 					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
 					,CreatedDate DATETIME '../CreatedDate'
-					,CreatedBy NVARCHAR(50) '../CreatedBy'
+					,CreatedByUser NVARCHAR(50) '../CreatedByUser'
+					,OriginalTrxSequenceNo INT '../OriginalTrxSequenceNo'
 					,ContractNo NVARCHAR(50) '../ContractNo'
 					,StatusId INT '../StatusId'
 					,StatusText NVARCHAR(2048) '../StatusText'
@@ -113,6 +118,7 @@ BEGIN TRY
 					,@CompanyLocation = NULL
 					,@CreatedDate = NULL
 					,@CreatedBy = NULL
+					,@OriginalTrxSequenceNo = NULL
 					,@ContractNo = NULL
 					,@StatusId = NULL
 					,@StatusText = NULL
@@ -126,6 +132,7 @@ BEGIN TRY
 					,@CompanyLocation = CompanyLocation
 					,@CreatedDate = CreatedDate
 					,@CreatedBy = CreatedBy
+					,@OriginalTrxSequenceNo = OriginalTrxSequenceNo
 					,@ContractNo = ContractNo
 					,@StatusId = StatusId
 					,@StatusText = StatusText
@@ -135,30 +142,44 @@ BEGIN TRY
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
-				--SELECT @intContractDetailId = intContractDetailId
+				SELECT @intContractDetailId = intContractDetailId
+					,@intContractHeaderId = intContractHeaderId
+				FROM tblCTContractFeed
+				WHERE intContractFeedId = @OriginalTrxSequenceNo
+
+				--SELECT TOP 1 @intContractDetailId = intContractDetailId
 				--	,@intContractHeaderId = intContractHeaderId
+				--	,@TrxSequenceNo = intContractFeedId
 				--FROM tblCTContractFeed
-				--WHERE intContractFeedId = @TrxSequenceNo
+				--WHERE intStatusId = 2
 				--	AND strContractNumber = @ContractNo
 				--	AND intContractSeq = @SequenceNo
+				INSERT INTO tblIPInitialAck (
+					intTrxSequenceNo
+					,strCompanyLocation
+					,dtmCreatedDate
+					,strCreatedBy
+					,intMessageTypeId
+					,intStatusId
+					,strStatusText
+					)
+				SELECT @TrxSequenceNo
+					,@CompanyLocation
+					,@CreatedDate
+					,@CreatedBy
+					,19
+					,1
+					,'Success'
 
-				SELECT TOP 1 @intContractDetailId = intContractDetailId
-					,@intContractHeaderId = intContractHeaderId
-					,@TrxSequenceNo = intContractFeedId
-				FROM tblCTContractFeed
-				WHERE intStatusId = 2
-					AND strContractNumber = @ContractNo
-					AND intContractSeq = @SequenceNo
-
-				IF @StatusId = 1
-				BEGIN
+				--IF @StatusId = 1
+				--BEGIN
 					UPDATE tblCTContractFeed
 					SET intStatusId = 6
 						,strMessage = 'Success'
 						,strFeedStatus = 'Ack Rcvd'
 						,strERPPONumber = @ERPPONumber
 						,strERPItemNumber = @ERPPOlineNo
-					WHERE intContractFeedId = @TrxSequenceNo
+					WHERE intContractFeedId = @OriginalTrxSequenceNo
 
 					--Update the PO Details in modified sequences
 					UPDATE tblCTContractFeed
@@ -189,28 +210,28 @@ BEGIN TRY
 						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
 						,@ERPPONumber
 						)
-				END
-				ELSE
-				BEGIN
-					UPDATE tblCTContractFeed
-					SET intStatusId = 5
-						,strMessage = @StatusText
-						,strFeedStatus = 'Ack Rcvd'
-					WHERE intContractFeedId = @TrxSequenceNo
+				--END
+				--ELSE
+				--BEGIN
+				--	UPDATE tblCTContractFeed
+				--	SET intStatusId = 5
+				--		,strMessage = @StatusText
+				--		,strFeedStatus = 'Ack Rcvd'
+				--	WHERE intContractFeedId = @OriginalTrxSequenceNo
 
-					INSERT INTO @tblMessage (
-						strMessageType
-						,strMessage
-						,strInfo1
-						,strInfo2
-						)
-					VALUES (
-						'PO Ack'
-						,@StatusText
-						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
-						,@ERPPONumber
-						)
-				END
+				--	INSERT INTO @tblMessage (
+				--		strMessageType
+				--		,strMessage
+				--		,strInfo1
+				--		,strInfo2
+				--		)
+				--	VALUES (
+				--		'PO Ack'
+				--		,@StatusText
+				--		,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
+				--		,@ERPPONumber
+				--		)
+				--END
 
 				SELECT @intMinRowNo = MIN(intRowNo)
 				FROM @tblAcknowledgement

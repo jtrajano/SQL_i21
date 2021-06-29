@@ -14,7 +14,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@dtmDateCreated DATETIME = GETDATE()
 		,@strError NVARCHAR(MAX)
-	DECLARE @intTrxSequenceNo INT
+	DECLARE @intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@intActionId INT
 		,@dtmCreatedDate DATETIME
@@ -421,6 +421,23 @@ BEGIN TRY
 
 			MOVE_TO_ARCHIVE:
 
+			INSERT INTO tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,8 AS intMessageTypeId
+				,1 AS intStatusId
+				,'Success' AS strStatusText
+
 			INSERT INTO tblIPCurrencyRateArchive (
 				intTrxSequenceNo
 				,strCompanyLocation
@@ -462,6 +479,23 @@ BEGIN TRY
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+
+			INSERT INTO tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,8 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
 
 			INSERT INTO tblIPCurrencyRateError (
 				intTrxSequenceNo

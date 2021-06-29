@@ -92,7 +92,7 @@ BEGIN TRY
 				,Active
 				,StorageLocation
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6) collate Latin1_General_CI_AS
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -165,7 +165,7 @@ BEGIN TRY
 				,TrxSequenceNo
 				,parentId
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,[Version] INT '../Version'
 					,ActionId INT
 					,ItemNo NVARCHAR(50)
@@ -178,7 +178,7 @@ BEGIN TRY
 					,ValidFrom DATETIME
 					,ValidTo DATETIME
 					,YearValidation INT
-					,parentId INT '@parentId'
+					,parentId BIGINT '@parentId'
 					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation' 
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
@@ -232,7 +232,7 @@ BEGIN TRY
 				,0 AS intStatusId
 				,@ErrMsg AS strStatusText
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)

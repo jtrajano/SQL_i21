@@ -33,7 +33,8 @@ BEGIN
 		    @ysnValid BIT = NULL,
 			@strMessage NVARCHAR(MAX) = NULL,
 			@strBillOfLading NVARCHAR(200) = NULL,
-			@dtmPullDate DATETIME = NULL
+			@dtmPullDate DATETIME = NULL,
+			@strSource NVARCHAR(20) = NULL
 	
 		BEGIN TRANSACTION
 
@@ -61,6 +62,7 @@ BEGIN
 				, D.strMessage
 				, D.strBillOfLading
 				, D.dtmPullDate
+				, L.strSource
 			FROM tblTRImportLoad L 
 			INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
 			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 AND ISNULL(D.ysnProcess, 0) = 0
@@ -82,6 +84,7 @@ BEGIN
 				, D.strMessage
 				, D.strBillOfLading
 				, D.dtmPullDate
+				, L.strSource
 			FROM tblTRImportLoad L 
 			INNER JOIN tblTRImportLoadDetail D ON D.intImportLoadId = L.intImportLoadId
 			WHERE L.guidImportIdentifier = @guidImportIdentifier AND D.ysnValid = 1 
@@ -90,7 +93,7 @@ BEGIN
 
 		
 		OPEN @CursorTran
-		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate 
+		FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate, @strSource 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN	
 
@@ -104,9 +107,17 @@ BEGIN
 
 			-- SHIP VIA / CARRIER
 			DECLARE @intCarrierId INT = NULL
-			SELECT @intCarrierId = CRB.intCarrierId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Carrier' AND CRB.strImportValue = @strCarrier
+			IF(@strSource = 'API')
+			BEGIN
+				SELECT TOP 1 @intCarrierId = intEntityId 
+				FROM tblSMShipVia WHERE strShipVia = @strCarrier
+			END
+			ELSE
+			BEGIN
+				SELECT @intCarrierId = CRB.intCarrierId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Carrier' AND CRB.strImportValue = @strCarrier
+			END
 
 			IF(@intCarrierId IS NULL)
 			BEGIN
@@ -119,9 +130,18 @@ BEGIN
 
 			 -- DRIVER
             DECLARE @intDriverId INT = NULL
-			SELECT @intDriverId = CRB.intDriverId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Driver' AND CRB.strImportValue = @strDriver
+			IF(@strSource = 'API')
+			BEGIN
+				SELECT TOP 1 @intDriverId = E.intEntityId FROM tblARSalesperson S 
+				INNER JOIN tblEMEntity E ON E.intEntityId = S.intEntityId 
+				WHERE E.strName = @strDriver 
+			END
+			ELSE
+			BEGIN
+				SELECT @intDriverId = CRB.intDriverId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Driver' AND CRB.strImportValue = @strDriver
+			END		
 
             IF (@intDriverId IS NULL)
 			BEGIN
@@ -136,10 +156,20 @@ BEGIN
 			IF(@strTruck != '')
 			BEGIN
 				DECLARE @intTruckId INT = NULL
-				SELECT @intTruckId  = CRB.intTruckId
-				FROM tblTRCrossReferenceBol CRB 
-				WHERE CRB.strType = 'Truck' AND CRB.strImportValue = @strTruck
 
+				IF(@strSource = 'API')
+				BEGIN
+					SELECT TOP 1 @intTruckId = E.intEntityId FROM tblSCTruckDriverReference D 
+					INNER JOIN tblEMEntity E ON E.intEntityId = D.intEntityId 
+					WHERE E.strName = @strTruck
+				END
+				ELSE
+				BEGIN
+					SELECT @intTruckId = CRB.intTruckId
+					FROM tblTRCrossReferenceBol CRB 
+					WHERE CRB.strType = 'Truck' AND CRB.strImportValue = @strTruck
+				END
+				
 				IF (@intTruckId IS NULL)
 				BEGIN
 					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Truck')	
@@ -154,9 +184,18 @@ BEGIN
 			IF(@strTrailer != '')
 			BEGIN
 				DECLARE @intTrailerId INT = NULL
-				SELECT @intTrailerId  = CRB.intTrailerId
-				FROM tblTRCrossReferenceBol CRB 
-				WHERE CRB.strType = 'Trailer' AND CRB.strImportValue = @strTrailer
+				IF(@strSource = 'API')
+				BEGIN
+					SELECT TOP 1 @intTrailerId = intEntityShipViaTrailerId 
+					FROM tblSMShipViaTrailer 
+					WHERE strTrailerNumber = @strTrailer
+				END
+				ELSE
+				BEGIN
+					SELECT @intTrailerId = CRB.intTrailerId
+					FROM tblTRCrossReferenceBol CRB 
+					WHERE CRB.strType = 'Trailer' AND CRB.strImportValue = @strTrailer
+				END			
 
 				IF (@intTrailerId IS NULL)
 				BEGIN
@@ -172,10 +211,26 @@ BEGIN
             DECLARE @intVendorId INT = NULL
 			DECLARE @intSupplyPointId INT = NULL
 			DECLARE @intVendorCompanyLocationId INT = NULL
-			
-			SELECT @intVendorId = CRB.intSupplierId, @intSupplyPointId = CRB.intSupplyPointId, @intVendorCompanyLocationId = CRB.intCompanyLocationId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Supplier' AND CRB.strImportValue = @strSupplier
+			IF(@strSource = 'API')
+			BEGIN
+				SELECT TOP 1 @intVendorId = V.intEntityId, @intSupplyPointId = S.intSupplyPointId, @intVendorCompanyLocationId = C.intCompanyLocationId FROM tblAPVendor V INNER JOIN tblEMEntity E ON E.intEntityId = V.intEntityId
+				INNER JOIN tblTRSupplyPoint S ON S.intEntityVendorId = E.intEntityId
+				INNER JOIN tblEMEntityLocation L ON L.intEntityLocationId = S.intEntityLocationId AND L.intEntityId = E.intEntityId
+				CROSS APPLY tblSMCompanyLocation C
+				WHERE  E.strName + '_' + L.strLocationName + '_' + C.strLocationName = @strSupplier
+				IF(@intVendorId IS NULL)
+				BEGIN
+					SELECT TOP 1 @intVendorCompanyLocationId = intCompanyLocationId 
+					FROM tblSMCompanyLocation 
+					WHERE strLocationName = @strSupplier
+				END
+			END
+			ELSE
+			BEGIN
+				SELECT @intVendorId = CRB.intSupplierId, @intSupplyPointId = CRB.intSupplyPointId, @intVendorCompanyLocationId = CRB.intCompanyLocationId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Supplier' AND CRB.strImportValue = @strSupplier
+			END
 
             IF (@intVendorId IS NULL)
 			BEGIN
@@ -205,9 +260,26 @@ BEGIN
 			DECLARE @intShipToId INT = NULL
 			DECLARE @intCustomerCompanyLocationId INT = NULL
 
-			SELECT @intCustomerId = CRB.intCustomerId, @intShipToId = CRB.intCustomerLocationId, @intCustomerCompanyLocationId = CRB.intCompanyLocationId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Destination' AND CRB.strImportValue = @strDestination
+			IF(@strSource = 'API')
+			BEGIN
+				SELECT TOP 1 @intCustomerId = C.intEntityId, @intShipToId = L.intEntityLocationId, @intCustomerCompanyLocationId = CL.intCompanyLocationId
+				FROM tblARCustomer C INNER JOIN tblEMEntity E ON E.intEntityId = C.intEntityId
+				INNER JOIN tblEMEntityLocation L ON L.intEntityId = C.intEntityId
+				CROSS APPLY tblSMCompanyLocation CL
+				WHERE E.strName + '_' + L.strLocationName + '_' + CL.strLocationName = @strDestination
+				IF (@intCustomerId IS NULL)
+				BEGIN
+					SELECT TOP 1 @intCustomerCompanyLocationId = intCompanyLocationId 
+					FROM tblSMCompanyLocation 
+					WHERE strLocationName = @strDestination
+				END
+			END
+			ELSE
+			BEGIN
+				SELECT @intCustomerId = CRB.intCustomerId, @intShipToId = CRB.intCustomerLocationId, @intCustomerCompanyLocationId = CRB.intCompanyLocationId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Destination' AND CRB.strImportValue = @strDestination
+			END
 
             IF (@intCustomerId IS NULL)
 			BEGIN
@@ -218,7 +290,6 @@ BEGIN
 				ELSE
 				BEGIN
 					UPDATE tblTRImportLoadDetail SET intCustomerCompanyLocationId = @intCustomerCompanyLocationId WHERE intImportLoadDetailId = @intImportLoadDetailId
-					
 				END
 			END
 			ELSE
@@ -237,9 +308,17 @@ BEGIN
             -- PULLED PRODUCT
             DECLARE @intPullProductId INT = NULL
 
-            SELECT @intPullProductId = CRB.intItemId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Item' AND CRB.strImportValue = @strPullProduct
+			IF(@strSource = 'API')
+			BEGIN
+				SELECT TOP 1 @intPullProductId = intItemId 
+				FROM tblICItem WHERE strItemNo = @strPullProduct
+			END
+			ELSE
+			BEGIN
+				SELECT @intPullProductId = CRB.intItemId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Item' AND CRB.strImportValue = @strPullProduct
+			END
 
             IF (@intPullProductId IS NULL)
 			BEGIN
@@ -254,9 +333,18 @@ BEGIN
 			-- DROPPED PRODUCT
             DECLARE @intDropProductId INT = NULL
 
-            SELECT @intDropProductId = CRB.intItemId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Item' AND CRB.strImportValue = @strDropProduct
+			IF(@strSource = 'API')
+			BEGIN
+				SELECT TOP 1 @intDropProductId = intItemId 
+				FROM tblICItem WHERE strItemNo = @strDropProduct
+			END
+			ELSE
+			BEGIN
+				SELECT @intDropProductId = CRB.intItemId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Item' AND CRB.strImportValue = @strDropProduct
+			END
+            
 
             IF (@intDropProductId IS NULL)
 			BEGIN
@@ -279,7 +367,7 @@ BEGIN
 				UPDATE tblTRImportLoadDetail SET strMessage = @strMessage, ysnValid = 0 WHERE intImportLoadDetailId = @intImportLoadDetailId
 			END
 
-			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate
+			FETCH NEXT FROM @CursorTran INTO @intImportLoadDetailId, @strTruck, @strTerminal, @strCarrier, @strDriver, @strTrailer, @strSupplier, @strDestination, @strPullProduct, @strDropProduct, @ysnValid, @strMessage, @strBillOfLading, @dtmPullDate, @strSource
 		END
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran

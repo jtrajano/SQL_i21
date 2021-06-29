@@ -11,6 +11,7 @@ FROM
 	   , TR.strTrlDept
 	   , TR.strTrlNetwCode
 	   , TR.strTrlUPC
+	   , dbo.fnSTUPCRemoveLeadingZero(strTrlUPC) AS strTrlUpcWithoutLeadingZero -- 12 digit UPC code
 	   , TR.strTrpPaycode
 	   , TR.strTrpCardInfoTrpcCCName
 	   , TR.strTrlDesc
@@ -29,6 +30,11 @@ FROM
 	   , CAST(TR.intCashierSysId AS INT) AS intCashierSysId
 	   , TR.strCashier
 	   , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
+	   , CAST(Right(intCashierPosNum , 1) AS INT) as intRegister
+	   , CAST((CASE WHEN LEN(strTrlFuelBasePrice) > 0
+				THEN 1
+				ELSE 0
+				END) AS BIT)  as ysnFuel
 	   --, USec.intEntityId
 	FROM tblSTTranslogRebates TR
 	JOIN tblSTStore ST 
@@ -37,4 +43,5 @@ FROM
 	-- INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
 		-- ON USec.intEntityId = RolePerm.intEntityId
 		-- AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
+	 WHERE (strTransRollback IS NULL) AND (strTransFuelPrepayCompletion IS NULL)
 ) x
