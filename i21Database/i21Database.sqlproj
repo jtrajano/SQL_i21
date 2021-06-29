@@ -9497,6 +9497,7 @@
     <Build Include="dbo\Views\vyuCTRestApiContractHeaderV1.sql" />
     <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
