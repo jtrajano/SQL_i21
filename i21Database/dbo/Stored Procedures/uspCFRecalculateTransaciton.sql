@@ -6838,6 +6838,8 @@ BEGIN
 	DECLARE @ysnDuplicate BIT = 0
 	DECLARE @intParentId INT = 0
 
+	
+
 	IF (@strTransactionType != 'Foreign Sale')
 	BEGIN
 		SELECT @intDupTransCount = COUNT(*)
@@ -6861,10 +6863,12 @@ BEGIN
 
 		SELECT @intDupTransCount = COUNT(*)
 		FROM tblCFTransaction
+		LEFT JOIN tblCFCard 
+		ON tblCFCard.intCardId = tblCFTransaction.intCardId
 		WHERE intNetworkId = @intNetworkId
 		AND intSiteId = @intSiteId
 		AND dtmTransactionDate = @dtmTransactionDate
-		AND ISNULL(strForeignCardId,'') = ISNULL(@ForeignCardId,'')
+		AND (ISNULL(strForeignCardId,'') = ISNULL(@ForeignCardId,'') OR ISNULL(tblCFCard.strCardId,'') = ISNULL(@ForeignCardId,''))
 		AND intProductId = @ProductId
 		AND intPumpNumber = @PumpId
 		AND intTransactionId != @intTransactionId
