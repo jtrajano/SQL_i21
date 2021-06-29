@@ -9498,6 +9498,8 @@
     <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionsReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetFuturesReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
