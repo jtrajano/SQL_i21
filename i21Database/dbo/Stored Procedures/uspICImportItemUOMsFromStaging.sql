@@ -27,8 +27,77 @@ DECLARE @tblDuplicateUPCCodes TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR
 DECLARE @tblInvalidStockUnitQuantities TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200), strDescription NVARCHAR(MAX))
 DECLARE @tblMissingUOMs TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200))
 DECLARE @tblMissingItems TABLE (strItemNo NVARCHAR(200))
+DECLARE @tblDuplicateUPCImported TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200));
 
 --Validate Records
+
+--Check Imported UPC duplicates
+
+INSERT INTO @tblDuplicateUPCImported (
+	strItemNo,
+	strUPCCode
+)
+SELECT 
+	strItemNo,
+	strUPCCode
+FROM
+(
+	SELECT
+	strItemNo,
+	strUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strUPCCode
+						ORDER BY strUPCCode) AS RowNumber 
+FROM tblICImportStagingUOM 
+) AS ROWS
+WHERE RowNumber > 1 AND strUPCCode IS NOT NULL
+
+--Make Imported UPC duplicates NULL
+
+UPDATE UOM
+SET UOM.strUPCCode = NULL
+FROM
+(
+	SELECT
+	strUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strUPCCode
+						ORDER BY strUPCCode) AS RowNumber 
+	FROM tblICImportStagingUOM
+) UOM
+WHERE UOM.RowNumber > 1
+
+--Check Imported Short UPC duplicates
+
+INSERT INTO @tblDuplicateUPCImported (
+	strItemNo,
+	strUPCCode
+)
+SELECT 
+	strItemNo,
+	strShortUPCCode
+FROM
+(
+	SELECT
+	strItemNo,
+	strShortUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode
+						ORDER BY strShortUPCCode) AS RowNumber 
+FROM tblICImportStagingUOM 
+) AS ROWS
+WHERE RowNumber > 1 AND strShortUPCCode IS NOT NULL
+
+--Make Imported Short UPC duplicates NULL
+
+UPDATE UOM
+SET UOM.strShortUPCCode = NULL
+FROM
+(
+	SELECT
+	strShortUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode
+						ORDER BY strShortUPCCode) AS RowNumber 
+	FROM tblICImportStagingUOM
+) UOM
+WHERE UOM.RowNumber > 1
 
 --Check missing Items
 
@@ -65,7 +134,7 @@ WHERE
 INSERT INTO @tblDuplicateUPCCodes (strItemNo, strUPCCode, strDescription)
 SELECT
 	x.strItemNo,
-	x.strUPCCode,
+	COALESCE(x.strUPCCode, shortUPC.strUpcCode),
 	i.strDescription
 FROM tblICImportStagingUOM x
 INNER JOIN tblICItem i 
@@ -76,8 +145,15 @@ OUTER APPLY (
 	WHERE intUpcCode = case when x.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
 		AND NOT (x.strUPCCode like '%.%' OR x.strUPCCode like '%e%' OR x.strUPCCode like '%E%') then CONVERT([bigint],rtrim(ltrim(x.strUPCCode)),0) else CONVERT([bigint],NULL,0) end
 ) upc
-LEFT JOIN @tblMissingUOMs missingUOM ON missingUOM.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
-WHERE upc.intUpcCode IS NOT NULL AND missingUOM.strItemNo IS NULL
+OUTER APPLY (
+	SELECT TOP 1 strUpcCode 
+	FROM tblICItemUOM shortUPC
+	INNER JOIN tblICItem iUPC 
+	ON shortUPC.intItemId = iUPC.intItemId
+	WHERE iUPC.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
+) shortUPC
+LEFT JOIN @tblMissingUOMs missingUOM ON missingUOM.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
+WHERE (upc.intUpcCode IS NOT NULL OR shortUPC.strUpcCode IS NOT NULL) AND missingUOM.strItemNo IS NULL
 
 --Check invalid Stock Unit quantities
 
@@ -203,6 +279,8 @@ USING
 		, dtmDateCreated
 		, intCreatedByUserId
 	FROM #tmp s
+	WHERE (SELECT COUNT(*) FROM @tblDuplicateUPCCodes WHERE strUPCCode COLLATE Latin1_General_CI_AS = s.strLongUPCCode COLLATE Latin1_General_CI_AS 
+	OR strUPCCode COLLATE Latin1_General_CI_AS = s.strUpcCode COLLATE Latin1_General_CI_AS) = 0
 ) AS source 
 	ON (target.intUnitMeasureId = source.intUnitMeasureId AND target.intItemId = source.intItemId)
 	--OR RTRIM(LTRIM(target.strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(source.strLongUPCCode) COLLATE Latin1_General_CI_AS -- Comment this one. It can cause bugs. 
@@ -211,8 +289,20 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 	UPDATE SET 
 		--intItemId = source.intItemId, -- Do not update the item id. Why update it when it is the on used in the source-target as linking keys. 
 		--intUnitMeasureId = source.intUnitMeasureId, -- Do not update the unit measure id. Why update it when it is the on used in the source-target as linking keys. 
-		strLongUPCCode = source.strLongUPCCode,
-		strUpcCode = source.strUpcCode,
+		strLongUPCCode = 
+		CASE
+			WHEN (SELECT COUNT(*) FROM tblICItemUOM WHERE strLongUPCCode = source.strLongUPCCode) = 0
+				THEN source.strLongUPCCode
+			ELSE 
+				NULL
+		END,
+		strUpcCode =  
+		CASE
+			WHEN (SELECT COUNT(*) FROM tblICItemUOM WHERE strUpcCode = source.strUpcCode) = 0
+				THEN source.strUpcCode
+			ELSE 
+				NULL
+		END,
 		dblUnitQty = source.dblUnitQty,
 		dblHeight = source.dblHeight,
 		dblWidth = source.dblWidth,
@@ -278,9 +368,11 @@ BEGIN
 		,@intRowsSkipped AS INT
 
 	DECLARE @intTotalUPCCodeDuplicates INT
+	DECLARE @intTotalUPCImportDuplicates INT
 	DECLARE @intTotalInvalidStockUnit INT
 
 	SELECT @intTotalUPCCodeDuplicates = COUNT(*) FROM @tblDuplicateUPCCodes 
+	SELECT @intTotalUPCImportDuplicates = COUNT(*) FROM @tblDuplicateUPCImported 
 	SELECT @intTotalInvalidStockUnit = COUNT(*) FROM @tblInvalidStockUnitQuantities
 
 	SELECT @intRowsImported = COUNT(*) FROM #output WHERE strAction = 'INSERT'
@@ -304,7 +396,7 @@ BEGIN
 		,intRowsImported = ISNULL(@intRowsImported, 0)
 		,intRowsUpdated = ISNULL(@intRowsUpdated, 0) 
 		,intRowsSkipped = ISNULL(@intRowsSkipped, 0)
-		,intTotalWarnings = ISNULL(ISNULL(@intTotalUPCCodeDuplicates, 0) + ISNULL(@intTotalInvalidStockUnit, 0), 0)
+		,intTotalWarnings = ISNULL(ISNULL(@intTotalUPCCodeDuplicates, 0) + ISNULL(@intTotalUPCImportDuplicates, 0) + ISNULL(@intTotalInvalidStockUnit, 0), 0)
 	-- Log Detail for missing items and uoms
 	INSERT INTO tblICImportLogDetailFromStaging(
 		strUniqueId
@@ -365,6 +457,32 @@ BEGIN
 			'Warning',
 			1
 		FROM @tblDuplicateUPCCodes Codes
+	END
+
+	-- Check if there are UPC imported duplicates to log as warning
+
+	IF @intTotalUPCImportDuplicates > 0
+	BEGIN
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier,
+			'UPC Code',
+			'Import Finished.',
+			Codes.strUPCCode,
+			'Duplicate on CSV file imported on UPC Code  - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' and still uploaded UOM with empty UPC Code.',
+			'Success',
+			'Warning',
+			1
+		FROM @tblDuplicateUPCImported Codes
 	END
 
 	-- Check if there are invalid stock unit quantity to log as warning

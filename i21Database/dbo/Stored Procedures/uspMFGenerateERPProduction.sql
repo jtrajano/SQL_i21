@@ -79,7 +79,7 @@ BEGIN TRY
 		SELECT @strXML = @strXML + '<header id="' + ltrim(@intProductionPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(@intProductionPreStageId) +'</TrxSequenceNo>'
 			+'<CompanyLocation>'+CL.strLotOrigin +'</CompanyLocation>'
-			+'<ActionId>'+Ltrim(Case When W.intTransactionFrom =1 then 1 else 2 End) +'</ActionId>'
+			+'<ActionId>1</ActionId>'
 			+'<CreatedDate>'+CONVERT(VARCHAR(33), GetDate(), 126) +'</CreatedDate>'
 			+'<CreatedBy>'+	US.strUserName +'</CreatedBy>'
 			+'<StorageLocation>'+	IsNULL(SL.strSubLocationName,'')  +'</StorageLocation>'
