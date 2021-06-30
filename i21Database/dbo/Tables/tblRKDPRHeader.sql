@@ -16,3 +16,8 @@
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKDPRHeader] PRIMARY KEY ([intDPRHeaderId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKDPRHeader_imgReportId]
+	ON [dbo].[tblRKDPRHeader] ([imgReportId]);   
+GO  

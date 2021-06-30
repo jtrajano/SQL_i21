@@ -54,3 +54,8 @@
     CONSTRAINT [PK_tblRKDPRDetail] PRIMARY KEY ([intDPRInventoryId]), 
     CONSTRAINT [FK_tblRKDPRDetail_tblRKDPRHeader] FOREIGN KEY ([intDPRHeaderId]) REFERENCES [tblRKDPRHeader]([intDPRHeaderId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKDPRInventory_intDPRHeaderId]
+	ON [dbo].[tblRKDPRInventory] ([intDPRHeaderId]);   
+GO  
