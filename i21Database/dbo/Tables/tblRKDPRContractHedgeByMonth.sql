@@ -38,3 +38,8 @@
     CONSTRAINT [PK_tblRKDPRContractHedgeByMonth] PRIMARY KEY ([intDPRContractHedgeByMonthId]), 
     CONSTRAINT [FK_tblRKDPRContractHedgeByMonth_tblRKDPRHeader] FOREIGN KEY ([intDPRHeaderId]) REFERENCES [tblRKDPRHeader]([intDPRHeaderId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKDPRContractHedgeByMonth_intDPRHeaderId]
+	ON [dbo].[tblRKDPRContractHedgeByMonth] ([intDPRHeaderId]);   
+GO  
