@@ -198,7 +198,7 @@ JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailI
 JOIN dbo.tblCTContractHeader PH ON PH.intContractHeaderId = P.intContractHeaderId
 JOIN dbo.tblCTContractDetail S ON S.intContractDetailId = AD.intSContractDetailId
 JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
-WHERE P.dtmStartDate <> S.dtmStartDate
+WHERE Convert(CHAR(10), P.dtmStartDate, 126) <> Convert(CHAR(10), S.dtmStartDate, 126)
 	AND (
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
@@ -217,7 +217,7 @@ JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailI
 JOIN dbo.tblCTContractHeader PH ON PH.intContractHeaderId = P.intContractHeaderId
 JOIN dbo.tblCTContractDetail S ON S.intContractDetailId = AD.intSContractDetailId
 JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
-WHERE P.dtmEndDate <> S.dtmEndDate
+WHERE Convert(CHAR(10), P.dtmEndDate, 126) <> Convert(CHAR(10), S.dtmEndDate, 126)
 	AND (
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
