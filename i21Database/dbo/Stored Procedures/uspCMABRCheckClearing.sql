@@ -18,15 +18,14 @@ SELECT @intABRDaysNoRef=ISNULL(intABRDaysNoRef,0)
 FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId
 
 ;WITH matching as(
-    SELECT intABRActivityId, intTransactionId
+    SELECT intABRActivityId, intTransactionId, intBankAccountId
     FROM tblCMABRActivity ABR 
 OUTER APPLY(
 	SELECT 
 	TOP 1
 	intTransactionId
 	FROM tblCMBankTransaction 
-	WHERE
-	intBankAccountId = @intBankAccountId
+	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
@@ -44,15 +43,14 @@ OUTER APPLY(
 	ORDER BY dtmDate
 )CM
 UNION ALL
-SELECT intABRActivityId, intTransactionId
+SELECT intABRActivityId, intTransactionId, intBankAccountId
 FROM tblCMABRActivity ABR
 OUTER APPLY(
 	SELECT 
 	TOP 1
 	intTransactionId
 	FROM tblCMBankTransaction 
-	WHERE
-	intBankAccountId = @intBankAccountId
+	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
     AND ysnClr = 0

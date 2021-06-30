@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[tblCMABRActivityMatchedDetail]
     [intABRActivityMatchedId] INT NOT NULL,
 	[intABRActivityId] INT NOT NULL,
     [intTransactionId] INT NOT NULL,
+	[intConcurrencyId] INT NULL,
 	CONSTRAINT [FK_tblCMABRActivityMatchedDetail] FOREIGN KEY ([intABRActivityId]) REFERENCES [dbo].[tblCMABRActivity] ([intABRActivityId]),
 	CONSTRAINT [FK_tblCMABRActivityMatchedDetail_BankTransation] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblCMBankTransaction] ([intTransactionId]),
     CONSTRAINT [PK_tblCMABRActivityMatchedDetail] PRIMARY KEY ([intABRActivityMatchedDetailId]), 

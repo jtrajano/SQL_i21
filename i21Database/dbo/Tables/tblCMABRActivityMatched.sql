@@ -5,5 +5,6 @@ CREATE TABLE [dbo].[tblCMABRActivityMatched]
 	[intABRActivityMatchedId] INT IDENTITY(1,1) NOT NULL,
     [dtmDateEntered] DATETIME,
     [intEntityId] INT NOT NULL,
+    [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblCMABRActivityMatched] PRIMARY KEY ([intABRActivityMatchedId]), 
 )
