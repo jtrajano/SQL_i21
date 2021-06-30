@@ -35,8 +35,13 @@ BEGIN TRY
 	--, @intUserId INT  = 1
 	--, @ysnLogDPR BIT = 1
 
-
 	
+	--BATCH TRANSACT PARAMETERS
+	DECLARE @batchSize INT = 4000 -- RECORD LIMIT TO OPERATE PER BATCH
+	DECLARE @idControl INT
+	DECLARE @results INT
+	--------------------------------------------------------------------
+
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		, @intDPRHeaderId INT
 		, @intDPRRunLogId INT
@@ -68,14 +73,41 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT TOP 1 @intDPRHeaderId = intDPRHeaderId FROM tblRKDPRHeader WHERE CAST(imgReportId AS NVARCHAR(100)) = CAST(@GUID AS NVARCHAR(100))
+		SELECT TOP 1 @intDPRHeaderId = intDPRHeaderId FROM tblRKDPRHeader WITH(NOLOCK) WHERE imgReportId = @GUID 
 
 		IF (ISNULL(@intDPRHeaderId, '') <> '')
 		BEGIN
-			DELETE FROM tblRKDPRInventory WHERE intDPRHeaderId = @intDPRHeaderId
-			DELETE FROM tblRKDPRContractHedge WHERE intDPRHeaderId = @intDPRHeaderId
-			DELETE FROM tblRKDPRContractHedgeByMonth WHERE intDPRHeaderId = @intDPRHeaderId
-			DELETE FROM tblRKDPRYearToDate WHERE intDPRHeaderId = @intDPRHeaderId
+			SET @results = 1
+			WHILE @results > 0
+			BEGIN
+				DELETE TOP(@batchSize) tblRKDPRInventory WITH(ROWLOCK) WHERE intDPRHeaderId = @intDPRHeaderId
+
+				SET @results = @@ROWCOUNT
+			END
+			
+			SET @results = 1
+			WHILE @results > 0
+			BEGIN
+				
+				DELETE TOP(@batchSize) tblRKDPRContractHedge WITH(ROWLOCK) WHERE intDPRHeaderId = @intDPRHeaderId
+				SET @results = @@ROWCOUNT
+			END
+			
+			SET @results = 1
+			WHILE @results > 0
+			BEGIN
+				
+				DELETE TOP(@batchSize) tblRKDPRContractHedgeByMonth WITH(ROWLOCK) WHERE intDPRHeaderId = @intDPRHeaderId
+				SET @results = @@ROWCOUNT
+			END
+
+			SET @results = 1
+			WHILE @results > 0
+			BEGIN
+				
+				DELETE TOP(@batchSize) tblRKDPRYearToDate WITH(ROWLOCK) WHERE intDPRHeaderId = @intDPRHeaderId
+				SET @results = @@ROWCOUNT
+			END
 		END
 		ELSE 
 		BEGIN
@@ -165,13 +197,13 @@ BEGIN TRY
 			SET @intDPRRunLogId = SCOPE_IDENTITY()
 
 			--Set the DPR Run Number so that it can be shown in the report
-			UPDATE tblRKDPRHeader SET intDPRRunNumber = @intRunNumber WHERE intDPRHeaderId = @intDPRHeaderId
+			UPDATE tblRKDPRHeader WITH (ROWLOCK) SET intDPRRunNumber = @intRunNumber WHERE intDPRHeaderId = @intDPRHeaderId
 
 	END
 	ELSE
 	BEGIN
 		--Set the DPR Run Number to null when it is not logging
-		UPDATE tblRKDPRHeader SET intDPRRunNumber = NULL WHERE intDPRHeaderId = @intDPRHeaderId
+		UPDATE tblRKDPRHeader WITH (ROWLOCK) SET intDPRRunNumber = NULL WHERE intDPRHeaderId = @intDPRHeaderId
 	END
 
 
@@ -2624,270 +2656,334 @@ BEGIN TRY
 						, strDeliveryDate = NULL
 	WHERE ISNULL(intContractHeaderId, '') = ''
 
+	
 	IF (@strByType = 'ByLocation')
 	BEGIN
-		INSERT INTO tblRKDPRInventory(intDPRHeaderId
-			, strCommodityCode
-			, strUnitMeasure
-			, strSeqHeader
-			, dblTotal
-			, intCommodityId
-			, strLocationName
-			, strTransactionType)
-		SELECT @intDPRHeaderId
-			, strCommodityCode
-			, strUnitMeasure
-			, strSeqHeader
-			, dblTotal = SUM(dblTotal)
-			, intCommodityId
-			, strLocationName
-			, strTransactionType
-		FROM @FinalInventory
-		WHERE strSeqHeader IN ('Company Titled Stock', 'In-House')
-		GROUP BY strCommodityCode
-			, strUnitMeasure
-			, strSeqHeader
-			, intCommodityId
-			, strLocationName
-			, strTransactionType
+
+		-- START BATCH INSERT
+		SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+		SET @idControl = 0		-- CURRENT BATCH
+		
+		WHILE (@results > 0) 
+		BEGIN
+			INSERT INTO tblRKDPRInventory WITH(ROWLOCK) (intDPRHeaderId
+				, strCommodityCode
+				, strUnitMeasure
+				, strSeqHeader
+				, dblTotal
+				, intCommodityId
+				, strLocationName
+				, strTransactionType) 
+			SELECT @intDPRHeaderId
+				, strCommodityCode
+				, strUnitMeasure
+				, strSeqHeader
+				, dblTotal = SUM(dblTotal)
+				, intCommodityId
+				, strLocationName
+				, strTransactionType
+			FROM @FinalInventory
+			WHERE strSeqHeader IN ('Company Titled Stock', 'In-House')
+				AND intRow > @idControl
+				AND intRow <= @idControl + @batchSize
+			GROUP BY strCommodityCode
+				, strUnitMeasure
+				, strSeqHeader
+				, intCommodityId
+				, strLocationName
+				, strTransactionType
+			OPTION (LOOP JOIN)
+
+			SET @results = @@ROWCOUNT
+		    SET @idControl = @idControl + @batchSize
+		END
+		-- END BATCH INSERT
+
 	END
 	ELSE IF (@strByType = 'ByCommodity')
 	BEGIN
-		INSERT INTO tblRKDPRInventory(intDPRHeaderId
-			, strCommodityCode
-			, strUnitMeasure
-			, strSeqHeader
-			, dblTotal
-			, intCommodityId
-			, strTransactionType)
-		SELECT @intDPRHeaderId
-			, strCommodityCode
-			, strUnitMeasure
-			, strSeqHeader
-			, dblTotal = SUM(dblTotal)
-			, intCommodityId
-			, strTransactionType
-		FROM @FinalInventory
-		WHERE strSeqHeader IN ('Company Titled Stock', 'In-House')
-		GROUP BY strCommodityCode
-			, strUnitMeasure
-			, strSeqHeader
-			, intCommodityId
-			, strTransactionType
+		
+		-- START BATCH INSERT
+		SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+		SET @idControl = 0		-- CURRENT BATCH
+		
+		WHILE (@results > 0) 
+		BEGIN
+			INSERT INTO tblRKDPRInventory WITH(ROWLOCK) (intDPRHeaderId
+				, strCommodityCode
+				, strUnitMeasure
+				, strSeqHeader
+				, dblTotal
+				, intCommodityId
+				, strTransactionType)
+			SELECT @intDPRHeaderId
+				, strCommodityCode
+				, strUnitMeasure
+				, strSeqHeader
+				, dblTotal = SUM(dblTotal)
+				, intCommodityId
+				, strTransactionType
+			FROM @FinalInventory
+			WHERE strSeqHeader IN ('Company Titled Stock', 'In-House')
+				AND intRow > @idControl
+				AND intRow <= @idControl + @batchSize
+			GROUP BY strCommodityCode
+				, strUnitMeasure
+				, strSeqHeader
+				, intCommodityId
+				, strTransactionType
+			OPTION (LOOP JOIN)
+		
+			SET @results = @@ROWCOUNT
+		    SET @idControl = @idControl + @batchSize
+		END
+		-- END BATCH INSERT
+
 	END
 	ELSE
 	BEGIN
 		IF ISNULL(@intVendorId, 0) = 0
 		BEGIN
-			INSERT INTO tblRKDPRInventory(intDPRHeaderId
-				, intRow
-				, intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, strUnitMeasure
-				, intCollateralId
-				, strLocationName
-				, strCustomerName
-				, strReceiptNo
-				, intContractHeaderId
-				, strContractNumber
-				, dtmOpenDate
-				, dblOriginalQuantity
-				, dblRemainingQuantity
-				, intCommodityId
-				, strCustomerReference
-				, strDistributionOption
-				, strDPAReceiptNo
-				, dblDiscDue
-				, dblStorageDue
-				, dtmLastStorageAccrueDate
-				, strScheduleId
-				, intTicketId
-				, strTicketType
-				, strTicketNumber
-				, strContractEndMonth
-				, strDeliveryDate
-				, dtmTicketDateTime
-				, intItemId
-				, strItemNo
-				, strTruckName
-				, strDriverName
-				, intInventoryReceiptId
-				, strReceiptNumber
-				, strShipmentNumber
-				, intInventoryShipmentId
-				, strTransactionType
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnCrush
-			)
-			SELECT @intDPRHeaderId
-				, intRow
-				, intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, strUnitMeasure
-				, intCollateralId
-				, strLocationName
-				, strCustomerName
-				, strReceiptNo
-				, intContractHeaderId
-				, strContractNumber
-				, dtmOpenDate
-				, dblOriginalQuantity
-				, dblRemainingQuantity
-				, intCommodityId
-				, strCustomerReference
-				, strDistributionOption
-				, strDPAReceiptNo
-				, dblDiscDue
-				, dblStorageDue
-				, dtmLastStorageAccrueDate
-				, strScheduleId
-				, intTicketId
-				, strTicketType
-				, strTicketNumber = ISNULL(strTicketNumber, '')
-				, strContractEndMonth
-				, strDeliveryDate
-				, dtmTicketDateTime
-				, intItemId
-				, strItemNo
-				, strTruckName
-				, strDriverName
-				, intInventoryReceiptId
-				, strReceiptNumber = ISNULL(strReceiptNumber, '')
-				, strShipmentNumber = ISNULL(strShipmentNumber, '')
-				, intInventoryShipmentId
-				, strTransactionType
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM @FinalInventory
-			ORDER BY strCommodityCode
-				, intSeqId ASC
-				, intContractHeaderId DESC
+			
+			-- START BATCH INSERT
+			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			SET @idControl = 0		-- CURRENT BATCH
+		
+			WHILE (@results > 0) 
+			BEGIN
+				INSERT INTO tblRKDPRInventory WITH(ROWLOCK) (intDPRHeaderId
+					, intRow
+					, intSeqId
+					, strSeqHeader
+					, strCommodityCode
+					, strType
+					, dblTotal
+					, strUnitMeasure
+					, intCollateralId
+					, strLocationName
+					, strCustomerName
+					, strReceiptNo
+					, intContractHeaderId
+					, strContractNumber
+					, dtmOpenDate
+					, dblOriginalQuantity
+					, dblRemainingQuantity
+					, intCommodityId
+					, strCustomerReference
+					, strDistributionOption
+					, strDPAReceiptNo
+					, dblDiscDue
+					, dblStorageDue
+					, dtmLastStorageAccrueDate
+					, strScheduleId
+					, intTicketId
+					, strTicketType
+					, strTicketNumber
+					, strContractEndMonth
+					, strDeliveryDate
+					, dtmTicketDateTime
+					, intItemId
+					, strItemNo
+					, strTruckName
+					, strDriverName
+					, intInventoryReceiptId
+					, strReceiptNumber
+					, strShipmentNumber
+					, intInventoryShipmentId
+					, strTransactionType
+					, intCategoryId
+					, strCategory
+					, intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnCrush
+				)
+				SELECT @intDPRHeaderId
+					, intRow
+					, intSeqId
+					, strSeqHeader
+					, strCommodityCode
+					, strType
+					, dblTotal
+					, strUnitMeasure
+					, intCollateralId
+					, strLocationName
+					, strCustomerName
+					, strReceiptNo
+					, intContractHeaderId
+					, strContractNumber
+					, dtmOpenDate
+					, dblOriginalQuantity
+					, dblRemainingQuantity
+					, intCommodityId
+					, strCustomerReference
+					, strDistributionOption
+					, strDPAReceiptNo
+					, dblDiscDue
+					, dblStorageDue
+					, dtmLastStorageAccrueDate
+					, strScheduleId
+					, intTicketId
+					, strTicketType
+					, strTicketNumber = ISNULL(strTicketNumber, '')
+					, strContractEndMonth
+					, strDeliveryDate
+					, dtmTicketDateTime
+					, intItemId
+					, strItemNo
+					, strTruckName
+					, strDriverName
+					, intInventoryReceiptId
+					, strReceiptNumber = ISNULL(strReceiptNumber, '')
+					, strShipmentNumber = ISNULL(strShipmentNumber, '')
+					, intInventoryShipmentId
+					, strTransactionType
+					, intCategoryId
+					, strCategory
+					, intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnPreCrush
+				FROM @FinalInventory
+				WHERE intRow > @idControl
+					AND intRow <= @idControl + @batchSize
+				ORDER BY strCommodityCode
+					, intSeqId ASC
+					, intContractHeaderId DESC
+				OPTION (LOOP JOIN)
+		
+				SET @results = @@ROWCOUNT
+			    SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
 		END
 		ELSE
 		BEGIN
-			INSERT INTO tblRKDPRInventory(intDPRHeaderId
-				, intRow
-				, intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, strUnitMeasure
-				, intCollateralId
-				, strLocationName
-				, strCustomerName
-				, strReceiptNo
-				, intContractHeaderId
-				, strContractNumber
-				, dtmOpenDate
-				, dblOriginalQuantity
-				, dblRemainingQuantity
-				, intCommodityId
-				, strCustomerReference
-				, strDistributionOption
-				, strDPAReceiptNo
-				, dblDiscDue
-				, dblStorageDue
-				, dtmLastStorageAccrueDate
-				, strScheduleId
-				, intTicketId
-				, strTicketType
-				, strTicketNumber
-				, strContractEndMonth
-				, strDeliveryDate
-				, dtmTicketDateTime
-				, intItemId
-				, strItemNo
-				, strTruckName
-				, strDriverName
-				, intInventoryReceiptId
-				, strReceiptNumber
-				, strShipmentNumber
-				, intInventoryShipmentId
-				, strTransactionType
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnCrush)
-			SELECT @intDPRHeaderId
-				, intRow
-				, intSeqId
-				, strSeqHeader
-				, strCommodityCode
-				, strType
-				, dblTotal
-				, strUnitMeasure
-				, intCollateralId
-				, strLocationName
-				, strCustomerName
-				, strReceiptNo
-				, intContractHeaderId
-				, strContractNumber
-				, dtmOpenDate
-				, dblOriginalQuantity
-				, dblRemainingQuantity
-				, intCommodityId
-				, strCustomerReference
-				, strDistributionOption
-				, strDPAReceiptNo
-				, dblDiscDue
-				, dblStorageDue
-				, dtmLastStorageAccrueDate
-				, strScheduleId
-				, intTicketId
-				, strTicketType
-				, strTicketNumber = ISNULL(strTicketNumber, '')
-				, strContractEndMonth
-				, strDeliveryDate
-				, dtmTicketDateTime
-				, intItemId
-				, strItemNo
-				, strTruckName
-				, strDriverName
-				, intInventoryReceiptId
-				, strReceiptNumber = ISNULL(strReceiptNumber, '')
-				, strShipmentNumber = ISNULL(strShipmentNumber, '')
-				, intInventoryShipmentId
-				, strTransactionType
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM @FinalInventory 
-			WHERE strSeqHeader NOT IN ('Company Titled Stock','Sales In-Transit')
-				AND strType <> 'Receipt' 
-				-- and strType not like '%'+@strPurchaseSales+'%'
-			ORDER BY strCommodityCode, intSeqId ASC, intContractHeaderId DESC
+			
+			-- START BATCH INSERT
+			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			SET @idControl = 0		-- CURRENT BATCH
+		
+			WHILE (@results > 0) 
+			BEGIN
+
+				INSERT INTO tblRKDPRInventory WITH(ROWLOCK) (intDPRHeaderId
+					, intRow
+					, intSeqId
+					, strSeqHeader
+					, strCommodityCode
+					, strType
+					, dblTotal
+					, strUnitMeasure
+					, intCollateralId
+					, strLocationName
+					, strCustomerName
+					, strReceiptNo
+					, intContractHeaderId
+					, strContractNumber
+					, dtmOpenDate
+					, dblOriginalQuantity
+					, dblRemainingQuantity
+					, intCommodityId
+					, strCustomerReference
+					, strDistributionOption
+					, strDPAReceiptNo
+					, dblDiscDue
+					, dblStorageDue
+					, dtmLastStorageAccrueDate
+					, strScheduleId
+					, intTicketId
+					, strTicketType
+					, strTicketNumber
+					, strContractEndMonth
+					, strDeliveryDate
+					, dtmTicketDateTime
+					, intItemId
+					, strItemNo
+					, strTruckName
+					, strDriverName
+					, intInventoryReceiptId
+					, strReceiptNumber
+					, strShipmentNumber
+					, intInventoryShipmentId
+					, strTransactionType
+					, intCategoryId
+					, strCategory
+					, intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnCrush)
+				SELECT @intDPRHeaderId
+					, intRow
+					, intSeqId
+					, strSeqHeader
+					, strCommodityCode
+					, strType
+					, dblTotal
+					, strUnitMeasure
+					, intCollateralId
+					, strLocationName
+					, strCustomerName
+					, strReceiptNo
+					, intContractHeaderId
+					, strContractNumber
+					, dtmOpenDate
+					, dblOriginalQuantity
+					, dblRemainingQuantity
+					, intCommodityId
+					, strCustomerReference
+					, strDistributionOption
+					, strDPAReceiptNo
+					, dblDiscDue
+					, dblStorageDue
+					, dtmLastStorageAccrueDate
+					, strScheduleId
+					, intTicketId
+					, strTicketType
+					, strTicketNumber = ISNULL(strTicketNumber, '')
+					, strContractEndMonth
+					, strDeliveryDate
+					, dtmTicketDateTime
+					, intItemId
+					, strItemNo
+					, strTruckName
+					, strDriverName
+					, intInventoryReceiptId
+					, strReceiptNumber = ISNULL(strReceiptNumber, '')
+					, strShipmentNumber = ISNULL(strShipmentNumber, '')
+					, intInventoryShipmentId
+					, strTransactionType
+					, intCategoryId
+					, strCategory
+					, intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnPreCrush
+				FROM @FinalInventory 
+				WHERE strSeqHeader NOT IN ('Company Titled Stock','Sales In-Transit')
+					AND strType <> 'Receipt' 
+					AND intRow > @idControl
+					AND intRow <= @idControl + @batchSize
+					-- and strType not like '%'+@strPurchaseSales+'%'
+				ORDER BY strCommodityCode, intSeqId ASC, intContractHeaderId DESC
+				OPTION (LOOP JOIN)
+		
+				SET @results = @@ROWCOUNT
+				SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
 		END
 	END
 
@@ -2897,7 +2993,7 @@ BEGIN TRY
 
 	DECLARE @CrushReport BIT = 1
 	
-	DECLARE @ListContractHedge AS TABLE (intRow INT IDENTITY
+	DECLARE @ListContractHedge AS TABLE (intRow INT IDENTITY PRIMARY KEY
 		, intContractHeaderId INT
 		, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, intFutOptTransactionHeaderId INT
@@ -2955,7 +3051,7 @@ BEGIN TRY
 		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strDeliveryDate NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
-	DECLARE @FinalContractHedge AS TABLE (intRow INT IDENTITY
+	DECLARE @FinalContractHedge AS TABLE (intRow INT IDENTITY PRIMARY KEY
 		, intContractHeaderId INT
 		, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		, intFutOptTransactionHeaderId INT
@@ -4568,310 +4664,369 @@ BEGIN TRY
 	
 	IF (@strByType = 'ByCommodity')
 	BEGIN
-		INSERT INTO tblRKDPRContractHedge(intDPRHeaderId
-			, strCommodityCode
-			, strUnitMeasure
-			, strType
-			, dblTotal)
-		SELECT DISTINCT @intDPRHeaderId
-			, c.strCommodityCode
-			, strUnitMeasure
-			, strType
-			, dblTotal = SUM(dblTotal)
-			--, c.intCommodityId
-		FROM @FinalContractHedge f
-		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-		--WHERE dblTotal <> 0
-		GROUP BY c.strCommodityCode
-			, strUnitMeasure
-			, strType
-			--, c.intCommodityId
+		-- START BATCH INSERT
+		SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+		SET @idControl = 0		-- CURRENT BATCH
+		
+		WHILE (@results > 0) 
+		BEGIN
+			INSERT INTO tblRKDPRContractHedge WITH(ROWLOCK) (intDPRHeaderId
+				, strCommodityCode
+				, strUnitMeasure
+				, strType
+				, dblTotal)
+			SELECT DISTINCT @intDPRHeaderId
+				, c.strCommodityCode
+				, strUnitMeasure
+				, strType
+				, dblTotal = SUM(dblTotal)
+				--, c.intCommodityId
+			FROM @FinalContractHedge f
+			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
+
+			WHERE	intRow > @idControl
+				AND intRow <= @idControl + @batchSize
+			--WHERE dblTotal <> 0
+			GROUP BY c.strCommodityCode
+				, strUnitMeasure
+				, strType
+				--, c.intCommodityId
+			OPTION (LOOP JOIN)
+			
+			SET @results = @@ROWCOUNT
+			
+		   SET @idControl = @idControl + @batchSize
+		END
+		-- END BATCH INSERT
 	END
 	ELSE IF(@strByType = 'ByLocation')
 	BEGIN
-		INSERT INTO tblRKDPRContractHedge(intDPRHeaderId
-			, strCommodityCode
-			, strUnitMeasure
-			, strType
-			, dblTotal
-			, strLocationName)
-		SELECT DISTINCT @intDPRHeaderId
-			, c.strCommodityCode
-			, strUnitMeasure
-			, strType
-			, dblTotal = SUM(dblTotal)
-			--, c.intCommodityId
-			, strLocationName
-		FROM @FinalContractHedge f
-		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-		--WHERE dblTotal <> 0
-		GROUP BY c.strCommodityCode
-			, strUnitMeasure
-			, strType
-			--, c.intCommodityId
-			, strLocationName
+		-- START BATCH INSERT
+		SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+		SET @idControl = 0		-- CURRENT BATCH
+		
+		WHILE (@results > 0) 
+		BEGIN
+			INSERT INTO tblRKDPRContractHedge WITH(ROWLOCK) (intDPRHeaderId
+				, strCommodityCode
+				, strUnitMeasure
+				, strType
+				, dblTotal
+				, strLocationName)
+			SELECT DISTINCT @intDPRHeaderId
+				, c.strCommodityCode
+				, strUnitMeasure
+				, strType
+				, dblTotal = SUM(dblTotal)
+				--, c.intCommodityId
+				, strLocationName
+			FROM @FinalContractHedge f
+			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
+			where	intRow > @idControl
+				AND intRow <= @idControl + @batchSize
+			--WHERE dblTotal <> 0
+			GROUP BY c.strCommodityCode
+				, strUnitMeasure
+				, strType
+				--, c.intCommodityId
+				, strLocationName
+			OPTION (LOOP JOIN)
+			
+			SET @results = @@ROWCOUNT
+			
+		   SET @idControl = @idControl + @batchSize
+		END
+		-- END BATCH INSERT
 	END
 	ELSE
 	BEGIN 
 		IF ISNULL(@intVendorId, 0) = 0
 		BEGIN
-			INSERT INTO tblRKDPRContractHedge(intDPRHeaderId
-				, intSeqNo
-				, intRow
-				, strCommodityCode
-				, intContractHeaderId
-				, strContractNumber
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strContractType
-				, strContractEndMonth
-				, dblTotal
-				, strUnitMeasure
-				, intInventoryReceiptItemId
-				, strLocationName
-				, intTicketId
-				, strTicketType
-				, strTicketNumber
-				, dtmTicketDateTime
-				, strCustomerReference
-				, strDistributionOption
-				, dblUnitCost
-				, dblQtyReceived
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, dblInvQty
-				, dblPurBasisDelivary
-				, dblOpenPurQty
-				, dblOpenSalQty
-				, dblCollateralSales
-				, dblSlsBasisDeliveries
-				, dblCompanyTitled
-				, dblNoOfContract
-				, dblContractSize
-				, strCurrency
-				, intInvoiceId
-				, strInvoiceNumber
-				, intBillId
-				, strBillId
-				, intInventoryReceiptId
-				, strReceiptNumber
-				, intInventoryShipmentId
-				, strShipmentNumber
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, f.intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnCrush
-				, strEntityName
-				, strDeliveryDate
-			)
-			SELECT @intDPRHeaderId
-				, intSeqNo
-				, intRow
-				, c.strCommodityCode
-				, intContractHeaderId
-				, strContractNumber
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strContractType
-				, strContractEndMonth
-				, dblTotal
-				, strUnitMeasure
-				, intInventoryReceiptItemId
-				, strLocationName
-				, intTicketId
-				, strTicketType = ISNULL(strTicketType, '')
-				, strTicketNumber = ISNULL(strTicketNumber,'' )
-				, dtmTicketDateTime
-				, strCustomerReference
-				, strDistributionOption
-				, dblUnitCost
-				, dblQtyReceived
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, 0.0 invQty
-				, 0.0 PurBasisDelivary
-				, 0.0 OpenPurQty
-				, 0.0 OpenSalQty
-				, 0.0 dblCollatralSales
-				, 0.0 SlsBasisDeliveries
-				, 0.0 CompanyTitled
-				, dblNoOfContract
-				, dblContractSize
-				, strCurrency
-				, intInvoiceId
-				, strInvoiceNumber = ISNULL(strInvoiceNumber,'')
-				, intBillId
-				, strBillId = ISNULL(strBillId,'')
-				, intInventoryReceiptId
-				, strReceiptNumber = ISNULL(strReceiptNumber,'')
-				, intInventoryShipmentId
-				, strShipmentNumber = ISNULL(strShipmentNumber,'')
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, f.intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-				, strEntityName
-				, strDeliveryDate
-			FROM @FinalContractHedge f
-			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-			--WHERE dblTotal <> 0
-			ORDER BY intSeqNo
-				, strType ASC
-				, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
+			-- START BATCH INSERT
+			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			SET @idControl = 0		-- CURRENT BATCH
+		
+				WHILE (@results > 0) 
+				BEGIN
+				INSERT INTO tblRKDPRContractHedge WITH(ROWLOCK) (intDPRHeaderId
+					, intSeqNo
+					, intRow
+					, strCommodityCode
+					, intContractHeaderId
+					, strContractNumber
+					, strInternalTradeNo
+					, intFutOptTransactionHeaderId
+					, strType
+					, strContractType
+					, strContractEndMonth
+					, dblTotal
+					, strUnitMeasure
+					, intInventoryReceiptItemId
+					, strLocationName
+					, intTicketId
+					, strTicketType
+					, strTicketNumber
+					, dtmTicketDateTime
+					, strCustomerReference
+					, strDistributionOption
+					, dblUnitCost
+					, dblQtyReceived
+					, strAccountNumber
+					, strTranType
+					, dblNoOfLot
+					, dblDelta
+					, intBrokerageAccountId
+					, strInstrumentType
+					, dblInvQty
+					, dblPurBasisDelivary
+					, dblOpenPurQty
+					, dblOpenSalQty
+					, dblCollateralSales
+					, dblSlsBasisDeliveries
+					, dblCompanyTitled
+					, dblNoOfContract
+					, dblContractSize
+					, strCurrency
+					, intInvoiceId
+					, strInvoiceNumber
+					, intBillId
+					, strBillId
+					, intInventoryReceiptId
+					, strReceiptNumber
+					, intInventoryShipmentId
+					, strShipmentNumber
+					, intItemId
+					, strItemNo
+					, intCategoryId
+					, strCategory
+					, f.intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnCrush
+					, strEntityName
+					, strDeliveryDate
+				)
+				SELECT @intDPRHeaderId
+					, intSeqNo
+					, intRow
+					, c.strCommodityCode
+					, intContractHeaderId
+					, strContractNumber
+					, strInternalTradeNo
+					, intFutOptTransactionHeaderId
+					, strType
+					, strContractType
+					, strContractEndMonth
+					, dblTotal
+					, strUnitMeasure
+					, intInventoryReceiptItemId
+					, strLocationName
+					, intTicketId
+					, strTicketType = ISNULL(strTicketType, '')
+					, strTicketNumber = ISNULL(strTicketNumber,'' )
+					, dtmTicketDateTime
+					, strCustomerReference
+					, strDistributionOption
+					, dblUnitCost
+					, dblQtyReceived
+					, strAccountNumber
+					, strTranType
+					, dblNoOfLot
+					, dblDelta
+					, intBrokerageAccountId
+					, strInstrumentType
+					, 0.0 invQty
+					, 0.0 PurBasisDelivary
+					, 0.0 OpenPurQty
+					, 0.0 OpenSalQty
+					, 0.0 dblCollatralSales
+					, 0.0 SlsBasisDeliveries
+					, 0.0 CompanyTitled
+					, dblNoOfContract
+					, dblContractSize
+					, strCurrency
+					, intInvoiceId
+					, strInvoiceNumber = ISNULL(strInvoiceNumber,'')
+					, intBillId
+					, strBillId = ISNULL(strBillId,'')
+					, intInventoryReceiptId
+					, strReceiptNumber = ISNULL(strReceiptNumber,'')
+					, intInventoryShipmentId
+					, strShipmentNumber = ISNULL(strShipmentNumber,'')
+					, intItemId
+					, strItemNo
+					, intCategoryId
+					, strCategory
+					, f.intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnPreCrush
+					, strEntityName
+					, strDeliveryDate
+				FROM @FinalContractHedge f
+				JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
+				WHERE 	intRow > @idControl
+					AND intRow <= @idControl + @batchSize
+				--WHERE dblTotal <> 0
+				ORDER BY intSeqNo
+					, strType ASC
+					, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
+				OPTION (LOOP JOIN)
+			
+				SET @results = @@ROWCOUNT
+				SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
 		END
 		ELSE
 		BEGIN
-			INSERT INTO tblRKDPRContractHedge(intDPRHeaderId
-				, intSeqNo
-				, intRow
-				, strCommodityCode
-				, intContractHeaderId
-				, strContractNumber
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strContractType
-				, strContractEndMonth
-				, dblTotal
-				, strUnitMeasure
-				, intInventoryReceiptItemId
-				, strLocationName
-				, intTicketId
-				, strTicketType
-				, strTicketNumber
-				, dtmTicketDateTime
-				, strCustomerReference
-				, strDistributionOption
-				, dblUnitCost
-				, dblQtyReceived
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, dblInvQty
-				, dblPurBasisDelivary
-				, dblOpenPurQty
-				, dblOpenSalQty
-				, dblCollateralSales
-				, dblSlsBasisDeliveries
-				, dblCompanyTitled
-				, dblNoOfContract
-				, dblContractSize
-				, strCurrency
-				, intInvoiceId
-				, strInvoiceNumber
-				, intBillId
-				, strBillId
-				, intInventoryReceiptId
-				, strReceiptNumber
-				, intInventoryShipmentId
-				, strShipmentNumber
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, f.intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnCrush
-				, strEntityName
-				, strDeliveryDate
-			)
-			SELECT @intDPRHeaderId
-				, intSeqNo
-				, intRow
-				, c.strCommodityCode
-				, intContractHeaderId
-				, strContractNumber
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strContractType
-				, strContractEndMonth
-				, dblTotal
-				, strUnitMeasure
-				, intInventoryReceiptItemId
-				, strLocationName
-				, intTicketId
-				, strTicketType = ISNULL(strTicketType, '')
-				, strTicketNumber = ISNULL(strTicketNumber,'' )
-				, dtmTicketDateTime
-				, strCustomerReference
-				, strDistributionOption
-				, dblUnitCost
-				, dblQtyReceived
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, 0.0 invQty
-				, 0.0 PurBasisDelivary
-				, 0.0 OpenPurQty
-				, 0.0 OpenSalQty
-				, 0.0 dblCollatralSales
-				, 0.0 SlsBasisDeliveries
-				, 0.0 CompanyTitled
-				, dblNoOfContract
-				, dblContractSize
-				, strCurrency
-				, intInvoiceId
-				, strInvoiceNumber = ISNULL(strInvoiceNumber,'')
-				, intBillId
-				, strBillId = ISNULL(strBillId,'')
-				, intInventoryReceiptId
-				, strReceiptNumber = ISNULL(strReceiptNumber,'')
-				, intInventoryShipmentId
-				, strShipmentNumber = ISNULL(strShipmentNumber,'')
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, f.intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-				, strEntityName
-				, strDeliveryDate
-			FROM @FinalContractHedge f
-			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-			WHERE strSubType NOT LIKE '%' + @strPurchaseSales + '%'
-			ORDER BY intSeqNo
-				, strType ASC
-				, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
+			-- START BATCH INSERT
+			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			SET @idControl = 0		-- CURRENT BATCH
+		
+			WHILE (@results > 0) 
+			BEGIN
+				INSERT INTO tblRKDPRContractHedge WITH(ROWLOCK) (intDPRHeaderId
+					, intSeqNo
+					, intRow
+					, strCommodityCode
+					, intContractHeaderId
+					, strContractNumber
+					, strInternalTradeNo
+					, intFutOptTransactionHeaderId
+					, strType
+					, strContractType
+					, strContractEndMonth
+					, dblTotal
+					, strUnitMeasure
+					, intInventoryReceiptItemId
+					, strLocationName
+					, intTicketId
+					, strTicketType
+					, strTicketNumber
+					, dtmTicketDateTime
+					, strCustomerReference
+					, strDistributionOption
+					, dblUnitCost
+					, dblQtyReceived
+					, strAccountNumber
+					, strTranType
+					, dblNoOfLot
+					, dblDelta
+					, intBrokerageAccountId
+					, strInstrumentType
+					, dblInvQty
+					, dblPurBasisDelivary
+					, dblOpenPurQty
+					, dblOpenSalQty
+					, dblCollateralSales
+					, dblSlsBasisDeliveries
+					, dblCompanyTitled
+					, dblNoOfContract
+					, dblContractSize
+					, strCurrency
+					, intInvoiceId
+					, strInvoiceNumber
+					, intBillId
+					, strBillId
+					, intInventoryReceiptId
+					, strReceiptNumber
+					, intInventoryShipmentId
+					, strShipmentNumber
+					, intItemId
+					, strItemNo
+					, intCategoryId
+					, strCategory
+					, f.intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnCrush
+					, strEntityName
+					, strDeliveryDate
+				)
+				SELECT @intDPRHeaderId
+					, intSeqNo
+					, intRow
+					, c.strCommodityCode
+					, intContractHeaderId
+					, strContractNumber
+					, strInternalTradeNo
+					, intFutOptTransactionHeaderId
+					, strType
+					, strContractType
+					, strContractEndMonth
+					, dblTotal
+					, strUnitMeasure
+					, intInventoryReceiptItemId
+					, strLocationName
+					, intTicketId
+					, strTicketType = ISNULL(strTicketType, '')
+					, strTicketNumber = ISNULL(strTicketNumber,'' )
+					, dtmTicketDateTime
+					, strCustomerReference
+					, strDistributionOption
+					, dblUnitCost
+					, dblQtyReceived
+					, strAccountNumber
+					, strTranType
+					, dblNoOfLot
+					, dblDelta
+					, intBrokerageAccountId
+					, strInstrumentType
+					, 0.0 invQty
+					, 0.0 PurBasisDelivary
+					, 0.0 OpenPurQty
+					, 0.0 OpenSalQty
+					, 0.0 dblCollatralSales
+					, 0.0 SlsBasisDeliveries
+					, 0.0 CompanyTitled
+					, dblNoOfContract
+					, dblContractSize
+					, strCurrency
+					, intInvoiceId
+					, strInvoiceNumber = ISNULL(strInvoiceNumber,'')
+					, intBillId
+					, strBillId = ISNULL(strBillId,'')
+					, intInventoryReceiptId
+					, strReceiptNumber = ISNULL(strReceiptNumber,'')
+					, intInventoryShipmentId
+					, strShipmentNumber = ISNULL(strShipmentNumber,'')
+					, intItemId
+					, strItemNo
+					, intCategoryId
+					, strCategory
+					, f.intFutureMarketId
+					, strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strBrokerTradeNo
+					, strNotes
+					, ysnPreCrush
+					, strEntityName
+					, strDeliveryDate
+				FROM @FinalContractHedge f
+				JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
+				WHERE strSubType NOT LIKE '%' + @strPurchaseSales + '%'
+					AND intRow > @idControl
+					AND intRow <= @idControl + @batchSize
+				ORDER BY intSeqNo
+					, strType ASC
+					, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
+				OPTION (LOOP JOIN)
+					
+				SET @results = @@ROWCOUNT
+		   		SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
 		END
 	END
 
@@ -4881,7 +5036,7 @@ BEGIN TRY
 		------- Contract Hedge By Month ----------
 		------------------------------------------
 
-		DECLARE @ListHedgeByMonth AS TABLE (intRowNumber INT IDENTITY
+		DECLARE @ListHedgeByMonth AS TABLE (intRowNumber INT IDENTITY PRIMARY KEY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intContractSeq INT
@@ -4918,7 +5073,7 @@ BEGIN TRY
 			, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, ysnPreCrush BIT)
 
-		DECLARE @FinalHedgeByMonth AS TABLE (intRowNumber INT IDENTITY
+		DECLARE @FinalHedgeByMonth AS TABLE (intRowNumber INT IDENTITY PRIMARY KEY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intContractSeq INT
@@ -5540,89 +5695,17 @@ BEGIN TRY
 
 		IF (ISNULL(@intVendorId, 0) = 0)
 		BEGIN
-			INSERT INTO tblRKDPRContractHedgeByMonth(intDPRHeaderId
-				, intSeqNo
-				, intRowNumber
-				, strCommodityCode
-				, strContractNumber
-				, intContractHeaderId
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strLocationName
-				, strContractEndMonth
-				, strContractEndMonthNearBy
-				, dblTotal
-				, strUnitMeasure
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, strEntityName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strDeliveryDate
-				, strBrokerTradeNo
-				, strNotes
-				, ysnCrush)
-			SELECT @intDPRHeaderId
-				, intSeqNo
-				, intRowNumber
-				, strCommodityCode
-				, strContractNumber
-				, intContractHeaderId
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strLocationName
-				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
-				, strContractEndMonthNearBy
-				, dblTotal
-				, strUnitMeasure
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, strEntityName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM @FinalHedgeByMonth
-			WHERE dblTotal IS NULL OR dblTotal <> 0
-			ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
-				, intSeqNo
-				, strType
-
-
-			--=====================================
-			-- Insert into DPR Run Log Detail table
-			--=====================================
-			IF (ISNULL(@ysnLogDPR, 0) = 1)
-			BEGIN
+			-- START BATCH INSERT
+			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			SET @idControl = 0		-- CURRENT BATCH
 		
-				INSERT INTO tblRKDPRRunLogDetail (
-					intDPRRunLogId
-					, strContractNumber
+			WHILE (@results > 0) 
+			BEGIN
+				INSERT INTO tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
 					, intSeqNo
+					, intRowNumber
+					, strCommodityCode
+					, strContractNumber
 					, intContractHeaderId
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
@@ -5639,33 +5722,29 @@ BEGIN TRY
 					, intBrokerageAccountId
 					, strInstrumentType
 					, strEntityName
-					, intOrderId
 					, intItemId
 					, strItemNo
 					, intCategoryId
 					, strCategory
 					, intFutureMarketId
-					, strFutMarketName
+					, strFutureMarket
 					, intFutureMonthId
 					, strFutureMonth
 					, strDeliveryDate
 					, strBrokerTradeNo
 					, strNotes
-					, ysnPreCrush
-					, strTransactionReferenceId 
-					, intTransactionReferenceId 
-					, intTransactionReferenceDetailId 
-				)
-				SELECT 
-					intDPRRunLogId = @intDPRRunLogId
-					, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
+					, ysnCrush)
+				SELECT @intDPRHeaderId
 					, intSeqNo
+					, intRowNumber
+					, strCommodityCode
+					, strContractNumber
 					, intContractHeaderId
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
 					, strType
 					, strLocationName
-					, strContractEndMonth
+					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy
 					, dblTotal
 					, strUnitMeasure
@@ -5676,117 +5755,146 @@ BEGIN TRY
 					, intBrokerageAccountId
 					, strInstrumentType
 					, strEntityName
-					, intOrderId = 16
 					, intItemId
 					, strItemNo
 					, intCategoryId
 					, strCategory
 					, intFutureMarketId
-					, strFutMarketName = strFutureMarket
+					, strFutureMarket
 					, intFutureMonthId
 					, strFutureMonth
 					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
 					, strBrokerTradeNo
 					, strNotes
 					, ysnPreCrush
-					, strTransactionReferenceId = NULL
-					, intTransactionReferenceId = NULL
-					, intTransactionReferenceDetailId = NULL
 				FROM @FinalHedgeByMonth
 				WHERE dblTotal IS NULL OR dblTotal <> 0
+					AND intRowNumber > @idControl
+					AND intRowNumber <= @idControl + @batchSize
 				ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
 					, intSeqNo
 					, strType
+				OPTION (LOOP JOIN)
+					
+				SET @results = @@ROWCOUNT
+		   		SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
+
+			--=====================================
+			-- Insert into DPR Run Log Detail table
+			--=====================================
+			IF (ISNULL(@ysnLogDPR, 0) = 1)
+			BEGIN
+				
+				-- START BATCH INSERT
+				SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+				SET @idControl = 0		-- CURRENT BATCH
+		
+				WHILE (@results > 0) 
+				BEGIN
+					INSERT INTO tblRKDPRRunLogDetail WITH(ROWLOCK)  (
+						intDPRRunLogId
+						, strContractNumber
+						, intSeqNo
+						, intContractHeaderId
+						, strInternalTradeNo
+						, intFutOptTransactionHeaderId
+						, strType
+						, strLocationName
+						, strContractEndMonth
+						, strContractEndMonthNearBy
+						, dblTotal
+						, strUnitMeasure
+						, strAccountNumber
+						, strTranType
+						, dblNoOfLot
+						, dblDelta
+						, intBrokerageAccountId
+						, strInstrumentType
+						, strEntityName
+						, intOrderId
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFutureMarketId
+						, strFutMarketName
+						, intFutureMonthId
+						, strFutureMonth
+						, strDeliveryDate
+						, strBrokerTradeNo
+						, strNotes
+						, ysnPreCrush
+						, strTransactionReferenceId 
+						, intTransactionReferenceId 
+						, intTransactionReferenceDetailId 
+					)
+					SELECT 
+						intDPRRunLogId = @intDPRRunLogId
+						, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
+						, intSeqNo
+						, intContractHeaderId
+						, strInternalTradeNo
+						, intFutOptTransactionHeaderId
+						, strType
+						, strLocationName
+						, strContractEndMonth
+						, strContractEndMonthNearBy
+						, dblTotal
+						, strUnitMeasure
+						, strAccountNumber
+						, strTranType
+						, dblNoOfLot
+						, dblDelta
+						, intBrokerageAccountId
+						, strInstrumentType
+						, strEntityName
+						, intOrderId = 16
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFutureMarketId
+						, strFutMarketName = strFutureMarket
+						, intFutureMonthId
+						, strFutureMonth
+						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+						, strBrokerTradeNo
+						, strNotes
+						, ysnPreCrush
+						, strTransactionReferenceId = NULL
+						, intTransactionReferenceId = NULL
+						, intTransactionReferenceDetailId = NULL
+					FROM @FinalHedgeByMonth
+					WHERE dblTotal IS NULL OR dblTotal <> 0
+						AND intRowNumber > @idControl
+						AND intRowNumber <= @idControl + @batchSize
+					ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
+						, intSeqNo
+						, strType
+					OPTION (LOOP JOIN)
+
+					SET @results = @@ROWCOUNT
+		   			SET @idControl = @idControl + @batchSize
+				END
+				-- END BATCH INSERT
 			END
 
 		END
 		ELSE
 		BEGIN
-			INSERT tblRKDPRContractHedgeByMonth(intDPRHeaderId
-				, intSeqNo
-				, intRowNumber
-				, strCommodityCode
-				, strContractNumber
-				, intContractHeaderId
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strLocationName
-				, strContractEndMonth
-				, strContractEndMonthNearBy
-				, dblTotal
-				, strUnitMeasure
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, strEntityName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strDeliveryDate
-				, strBrokerTradeNo
-				, strNotes
-				, ysnCrush)
-			SELECT @intDPRHeaderId
-				, intSeqNo
-				, intRowNumber
-				, strCommodityCode
-				, strContractNumber
-				, intContractHeaderId
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strLocationName
-				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) COLLATE Latin1_General_CI_AS
-				, strContractEndMonthNearBy
-				, dblTotal
-				, strUnitMeasure
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, strEntityName
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-			FROM @FinalHedgeByMonth
-			WHERE (dblTotal IS NULL
-				OR dblTotal <> 0)
-				AND strType NOT LIKE '%' + @strPurchaseSales + '%'
-				AND strType <> 'Net Hedge'
-			ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
-				, intSeqNo
-				, strType
-
-			--=====================================
-			-- Insert into DPR Run Log Detail table
-			--=====================================
-			IF (ISNULL(@ysnLogDPR, 0) = 1)
-			BEGIN
+			-- START BATCH INSERT
+			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			SET @idControl = 0		-- CURRENT BATCH
 		
-				INSERT INTO tblRKDPRRunLogDetail (
-					intDPRRunLogId
-					, strContractNumber
+			WHILE (@results > 0) 
+			BEGIN
+				INSERT tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
 					, intSeqNo
+					, intRowNumber
+					, strCommodityCode
+					, strContractNumber
 					, intContractHeaderId
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
@@ -5803,33 +5911,29 @@ BEGIN TRY
 					, intBrokerageAccountId
 					, strInstrumentType
 					, strEntityName
-					, intOrderId
 					, intItemId
 					, strItemNo
 					, intCategoryId
 					, strCategory
 					, intFutureMarketId
-					, strFutMarketName
+					, strFutureMarket
 					, intFutureMonthId
 					, strFutureMonth
 					, strDeliveryDate
 					, strBrokerTradeNo
 					, strNotes
-					, ysnPreCrush
-					, strTransactionReferenceId 
-					, intTransactionReferenceId 
-					, intTransactionReferenceDetailId 
-				)
-				SELECT 
-					intDPRRunLogId = @intDPRRunLogId
-					, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
+					, ysnCrush)
+				SELECT @intDPRHeaderId
 					, intSeqNo
+					, intRowNumber
+					, strCommodityCode
+					, strContractNumber
 					, intContractHeaderId
 					, strInternalTradeNo
 					, intFutOptTransactionHeaderId
 					, strType
 					, strLocationName
-					, strContractEndMonth
+					, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11),strContractEndMonth,106),8) COLLATE Latin1_General_CI_AS
 					, strContractEndMonthNearBy
 					, dblTotal
 					, strUnitMeasure
@@ -5840,30 +5944,135 @@ BEGIN TRY
 					, intBrokerageAccountId
 					, strInstrumentType
 					, strEntityName
-					, intOrderId = 16
 					, intItemId
 					, strItemNo
 					, intCategoryId
 					, strCategory
 					, intFutureMarketId
-					, strFutMarketName = strFutureMarket
+					, strFutureMarket
 					, intFutureMonthId
 					, strFutureMonth
 					, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
 					, strBrokerTradeNo
 					, strNotes
 					, ysnPreCrush
-					, strTransactionReferenceId = NULL
-					, intTransactionReferenceId = NULL
-					, intTransactionReferenceDetailId = NULL
 				FROM @FinalHedgeByMonth
 				WHERE (dblTotal IS NULL
 					OR dblTotal <> 0)
 					AND strType NOT LIKE '%' + @strPurchaseSales + '%'
 					AND strType <> 'Net Hedge'
+					AND intRowNumber > @idControl
+					AND intRowNumber <= @idControl + @batchSize
 				ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
 					, intSeqNo
 					, strType
+					
+				SET @results = @@ROWCOUNT
+		   		SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
+
+			--=====================================
+			-- Insert into DPR Run Log Detail table
+			--=====================================
+			IF (ISNULL(@ysnLogDPR, 0) = 1)
+			BEGIN
+				-- START BATCH INSERT
+				SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+				SET @idControl = 0		-- CURRENT BATCH
+		
+				WHILE (@results > 0) 
+				BEGIN
+					INSERT INTO tblRKDPRRunLogDetail WITH(ROWLOCK)  (
+						intDPRRunLogId
+						, strContractNumber
+						, intSeqNo
+						, intContractHeaderId
+						, strInternalTradeNo
+						, intFutOptTransactionHeaderId
+						, strType
+						, strLocationName
+						, strContractEndMonth
+						, strContractEndMonthNearBy
+						, dblTotal
+						, strUnitMeasure
+						, strAccountNumber
+						, strTranType
+						, dblNoOfLot
+						, dblDelta
+						, intBrokerageAccountId
+						, strInstrumentType
+						, strEntityName
+						, intOrderId
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFutureMarketId
+						, strFutMarketName
+						, intFutureMonthId
+						, strFutureMonth
+						, strDeliveryDate
+						, strBrokerTradeNo
+						, strNotes
+						, ysnPreCrush
+						, strTransactionReferenceId 
+						, intTransactionReferenceId 
+						, intTransactionReferenceDetailId 
+					)
+					SELECT 
+						intDPRRunLogId = @intDPRRunLogId
+						, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
+						, intSeqNo
+						, intContractHeaderId
+						, strInternalTradeNo
+						, intFutOptTransactionHeaderId
+						, strType
+						, strLocationName
+						, strContractEndMonth
+						, strContractEndMonthNearBy
+						, dblTotal
+						, strUnitMeasure
+						, strAccountNumber
+						, strTranType
+						, dblNoOfLot
+						, dblDelta
+						, intBrokerageAccountId
+						, strInstrumentType
+						, strEntityName
+						, intOrderId = 16
+						, intItemId
+						, strItemNo
+						, intCategoryId
+						, strCategory
+						, intFutureMarketId
+						, strFutMarketName = strFutureMarket
+						, intFutureMonthId
+						, strFutureMonth
+						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), strContractEndMonth, 106), 8) COLLATE Latin1_General_CI_AS
+						, strBrokerTradeNo
+						, strNotes
+						, ysnPreCrush
+						, strTransactionReferenceId = NULL
+						, intTransactionReferenceId = NULL
+						, intTransactionReferenceDetailId = NULL
+					FROM @FinalHedgeByMonth
+					WHERE (dblTotal IS NULL
+						OR dblTotal <> 0)
+						AND strType NOT LIKE '%' + @strPurchaseSales + '%'
+						AND strType <> 'Net Hedge'
+						AND intRowNumber > @idControl
+						AND intRowNumber <= @idControl + @batchSize
+					ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME,'01 ' + strContractEndMonth) END
+						, intSeqNo
+						, strType
+					OPTION (LOOP JOIN)
+
+				SET @results = @@ROWCOUNT
+		   		SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
+
 			END
 		END
 	END
@@ -5873,7 +6082,7 @@ BEGIN TRY
 		-------------- Pre Crush -----------------
 		------------------------------------------
 	
-		DECLARE @ListCrushDetail AS TABLE (intRowNumber INT IDENTITY
+		DECLARE @ListCrushDetail AS TABLE (intRowNumber INT IDENTITY PRIMARY KEY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intContractSeq INT
@@ -5916,7 +6125,7 @@ BEGIN TRY
 			, intTransactionRecordId INT
 			, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 
-		DECLARE @ListCrushAll AS TABLE (intRowNumber INT IDENTITY
+		DECLARE @ListCrushAll AS TABLE (intRowNumber INT IDENTITY PRIMARY KEY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intContractSeq INT
@@ -7207,7 +7416,7 @@ BEGIN TRY
 		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
 		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,26 intOrderId,'Price Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 16) AND @ysnExchangeTraded = 1
 
-		DECLARE @FinalCrush AS TABLE (intRowNumber1 INT IDENTITY
+		DECLARE @FinalCrush AS TABLE (intRowNumber1 INT IDENTITY PRIMARY KEY
 			, intRowNumber INT
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -7513,161 +7722,189 @@ BEGIN TRY
 		FROM @FinalCrush
 		WHERE intOrderId IS NOT NULL
 
-		INSERT INTO tblRKDPRContractHedgeByMonth(intDPRHeaderId
-			, intSeqNo
-			, intRowNumber
-			, strCommodityCode
-			, strContractNumber
-			, intContractHeaderId
-			, strInternalTradeNo
-			, intFutOptTransactionHeaderId
-			, strType
-			, strLocationName
-			, strContractEndMonth
-			, strContractEndMonthNearBy
-			, dblTotal
-			, strUnitMeasure
-			, strAccountNumber
-			, strTranType
-			, dblNoOfLot
-			, dblDelta
-			, intBrokerageAccountId
-			, strInstrumentType
-			, strEntityName
-			, intItemId
-			, strItemNo
-			, intCategoryId
-			, strCategory
-			, intFutureMarketId
-			, strFutureMarket
-			, intFutureMonthId
-			, strFutureMonth
-			, strDeliveryDate
-			, strBrokerTradeNo
-			, strNotes
-			, ysnCrush)
-		SELECT @intDPRHeaderId
-			, intSeqNo = intOrderId
-			, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
-			, strCommodityCode
-			, strContractNumber
-			, intContractHeaderId
-			, strInternalTradeNo
-			, intFutOptTransactionHeaderId
-			, strType
-			, strLocationName
-			, strContractEndMonth
-			, strContractEndMonthNearBy
-			, dblTotal
-			, strUnitMeasure
-			, strAccountNumber
-			, strTranType
-			, dblNoOfLot
-			, dblDelta
-			, intBrokerageAccountId
-			, strInstrumentType
-			, strEntityName
-			, intItemId
-			, strItemNo
-			, intCategoryId
-			, strCategory
-			, intFutureMarketId
-			, strFutureMarket
-			, intFutureMonthId
-			, strFutureMonth
-			, strDeliveryDate
-			, strBrokerTradeNo
-			, strNotes
-			, ysnPreCrush
-		FROM @FinalCrush WHERE ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
-		ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
-			, intSeqNo
-			, strType
+		
+		-- START BATCH INSERT
+		SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+		SET @idControl = 0		-- CURRENT BATCH
+		
+		WHILE (@results > 0) 
+		BEGIN
+			INSERT INTO tblRKDPRContractHedgeByMonth WITH(ROWLOCK) (intDPRHeaderId
+				, intSeqNo
+				, intRowNumber
+				, strCommodityCode
+				, strContractNumber
+				, intContractHeaderId
+				, strInternalTradeNo
+				, intFutOptTransactionHeaderId
+				, strType
+				, strLocationName
+				, strContractEndMonth
+				, strContractEndMonthNearBy
+				, dblTotal
+				, strUnitMeasure
+				, strAccountNumber
+				, strTranType
+				, dblNoOfLot
+				, dblDelta
+				, intBrokerageAccountId
+				, strInstrumentType
+				, strEntityName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intFutureMarketId
+				, strFutureMarket
+				, intFutureMonthId
+				, strFutureMonth
+				, strDeliveryDate
+				, strBrokerTradeNo
+				, strNotes
+				, ysnCrush)
+			SELECT @intDPRHeaderId
+				, intSeqNo = intOrderId
+				, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
+				, strCommodityCode
+				, strContractNumber
+				, intContractHeaderId
+				, strInternalTradeNo
+				, intFutOptTransactionHeaderId
+				, strType
+				, strLocationName
+				, strContractEndMonth
+				, strContractEndMonthNearBy
+				, dblTotal
+				, strUnitMeasure
+				, strAccountNumber
+				, strTranType
+				, dblNoOfLot
+				, dblDelta
+				, intBrokerageAccountId
+				, strInstrumentType
+				, strEntityName
+				, intItemId
+				, strItemNo
+				, intCategoryId
+				, strCategory
+				, intFutureMarketId
+				, strFutureMarket
+				, intFutureMonthId
+				, strFutureMonth
+				, strDeliveryDate
+				, strBrokerTradeNo
+				, strNotes
+				, ysnPreCrush
+			FROM @FinalCrush WHERE ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
+				AND intRowNumber1 > @idControl
+				AND intRowNumber1 <= @idControl + @batchSize
+			ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+				, intSeqNo
+				, strType
+			OPTION (LOOP JOIN)
+
+			SET @results = @@ROWCOUNT
+		   	SET @idControl = @idControl + @batchSize
+		END
+		-- END BATCH INSERT
 
 		--=====================================
 		-- Insert into DPR Run Log Detail table
 		--=====================================
 		IF (ISNULL(@ysnLogDPR, 0) = 1)
 		BEGIN
+			-- START BATCH INSERT
+			SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+			SET @idControl = 0		-- CURRENT BATCH
 		
-			INSERT INTO tblRKDPRRunLogDetail (
-				intDPRRunLogId
-				, strContractNumber
-				, intSeqNo
-				, intContractHeaderId
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strLocationName
-				, strContractEndMonth
-				, strContractEndMonthNearBy
-				, dblTotal
-				, strUnitMeasure
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, strEntityName
-				, intOrderId
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutMarketName
-				, intFutureMonthId
-				, strFutureMonth
-				, strDeliveryDate
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-				, strTransactionReferenceId 
-				, intTransactionReferenceId 
-				, intTransactionReferenceDetailId 
-			)
-			SELECT 
-				intDPRRunLogId = @intDPRRunLogId
-				, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
-				, intSeqNo
-				, intContractHeaderId
-				, strInternalTradeNo
-				, intFutOptTransactionHeaderId
-				, strType
-				, strLocationName
-				, strContractEndMonth
-				, strContractEndMonthNearBy
-				, dblTotal
-				, strUnitMeasure
-				, strAccountNumber
-				, strTranType
-				, dblNoOfLot
-				, dblDelta
-				, intBrokerageAccountId
-				, strInstrumentType
-				, strEntityName
-				, intOrderId
-				, intItemId
-				, strItemNo
-				, intCategoryId
-				, strCategory
-				, intFutureMarketId
-				, strFutMarketName = strFutureMarket
-				, intFutureMonthId
-				, strFutureMonth
-				, strDeliveryDate
-				, strBrokerTradeNo
-				, strNotes
-				, ysnPreCrush
-				, strTransactionReferenceId = strTransactionNumber
-				, intTransactionReferenceId = intTransactionRecordHeaderId
-				, intTransactionReferenceDetailId = intTransactionRecordId
-			FROM @FinalCrush
-			WHERE intOrderId IS NOT NULL
-				AND ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
-				AND dblTotal IS NOT NULL
-			ORDER BY intOrderId
+			WHILE (@results > 0) 
+			BEGIN
+				INSERT INTO tblRKDPRRunLogDetail WITH(ROWLOCK) (
+					intDPRRunLogId
+					, strContractNumber
+					, intSeqNo
+					, intContractHeaderId
+					, strInternalTradeNo
+					, intFutOptTransactionHeaderId
+					, strType
+					, strLocationName
+					, strContractEndMonth
+					, strContractEndMonthNearBy
+					, dblTotal
+					, strUnitMeasure
+					, strAccountNumber
+					, strTranType
+					, dblNoOfLot
+					, dblDelta
+					, intBrokerageAccountId
+					, strInstrumentType
+					, strEntityName
+					, intOrderId
+					, intItemId
+					, strItemNo
+					, intCategoryId
+					, strCategory
+					, intFutureMarketId
+					, strFutMarketName
+					, intFutureMonthId
+					, strFutureMonth
+					, strDeliveryDate
+					, strBrokerTradeNo
+					, strNotes
+					, ysnPreCrush
+					, strTransactionReferenceId 
+					, intTransactionReferenceId 
+					, intTransactionReferenceDetailId 
+				)
+				SELECT 
+					intDPRRunLogId = @intDPRRunLogId
+					, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
+					, intSeqNo
+					, intContractHeaderId
+					, strInternalTradeNo
+					, intFutOptTransactionHeaderId
+					, strType
+					, strLocationName
+					, strContractEndMonth
+					, strContractEndMonthNearBy
+					, dblTotal
+					, strUnitMeasure
+					, strAccountNumber
+					, strTranType
+					, dblNoOfLot
+					, dblDelta
+					, intBrokerageAccountId
+					, strInstrumentType
+					, strEntityName
+					, intOrderId
+					, intItemId
+					, strItemNo
+					, intCategoryId
+					, strCategory
+					, intFutureMarketId
+					, strFutMarketName = strFutureMarket
+					, intFutureMonthId
+					, strFutureMonth
+					, strDeliveryDate
+					, strBrokerTradeNo
+					, strNotes
+					, ysnPreCrush
+					, strTransactionReferenceId = strTransactionNumber
+					, intTransactionReferenceId = intTransactionRecordHeaderId
+					, intTransactionReferenceDetailId = intTransactionRecordId
+				FROM @FinalCrush
+				WHERE intOrderId IS NOT NULL
+					AND ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
+					AND dblTotal IS NOT NULL
+					AND intRowNumber1 > @idControl
+					AND intRowNumber1 <= @idControl + @batchSize
+				ORDER BY intOrderId
+				OPTION (LOOP JOIN)
+				
+				SET @results = @@ROWCOUNT
+		   		SET @idControl = @idControl + @batchSize
+			END
+			-- END BATCH INSERT
 		END
 	END
 
@@ -8121,25 +8358,39 @@ BEGIN TRY
 		WHERE FieldName NOT IN('Paid')
 			AND ISNULL(dblTotal, 0) != 0 --Remove all the fields that has 0 value
 		ORDER BY intSorting
+
+		-- START BATCH INSERT
+		SET @results = 1		-- STORES ROW COUNT AFTER EACH SUCCESSFUL BATCH
+		SET @idControl = 0		-- CURRENT BATCH
 		
-		INSERT INTO tblRKDPRYearToDate(intDPRHeaderId
-			, intRowNumber
-			, strType
-			, intEntityId
-			, intCommodityId
-			, strCommodityCode
-			, strFieldName
-			, dblTotal)
-		SELECT @intDPRHeaderId
-			, intRowNumber
-			, strType
-			, intEntityId
-			, intCommodityId
-			, strCommodityCode
-			, FieldName
-			, dblTotal
-		FROM #tmpYearToDate
-		WHERE strType <> @strPurchaseSales
+		WHILE (@results > 0) 
+		BEGIN
+			INSERT INTO tblRKDPRYearToDate WITH(ROWLOCK) (intDPRHeaderId
+				, intRowNumber
+				, strType
+				, intEntityId
+				, intCommodityId
+				, strCommodityCode
+				, strFieldName
+				, dblTotal)
+			SELECT @intDPRHeaderId
+				, intRowNumber
+				, strType
+				, intEntityId
+				, intCommodityId
+				, strCommodityCode
+				, FieldName
+				, dblTotal
+			FROM #tmpYearToDate
+			WHERE strType <> @strPurchaseSales
+				AND intRowNumber > @idControl
+				AND intRowNumber <= @idControl + @batchSize
+			OPTION (LOOP JOIN)
+
+			SET @results = @@ROWCOUNT
+		    SET @idControl = @idControl + @batchSize
+		END
+		-- END BATCH INSERT
 	END
 
 
