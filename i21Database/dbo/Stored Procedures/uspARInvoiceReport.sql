@@ -187,7 +187,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dtmDate					= CAST(INV.dtmDate AS DATE)
 	 , dtmPostDate				= INV.dtmPostDate
 	 , strCurrency				= CURRENCY.strCurrency	 	 
-	 , strInvoiceNumber			= INV.strInvoiceNumber
+	 , strInvoiceNumber			= CASE WHEN INV.strType = 'Service Charge'  THEN  'Invoice : ' + INV.strInvoiceNumber ELSE INV.strInvoiceNumber END
 	 , strBillToLocationName	= INV.strBillToLocationName
 	 , strBillTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, ENTITYLOCATION.strCheckPayeeName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 	 , strShipTo				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
