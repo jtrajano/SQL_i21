@@ -231,7 +231,9 @@ SELECT
     ) 
     +
     --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
-    ISNULL(clearingTax.dblTax,0))
+    -- ISNULL(clearingTax.dblTax,0)
+    0 -- Setting clearing tax to 0 as IRs from Delivery Sheet do not have taxes.
+    )
     *
     (
         CASE
@@ -282,24 +284,6 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-LEFT JOIN (
-    --SINCE WE REVERSE IN GL THOSE TAX DETAIL THAT DOES NOT HAVE VOUCHER
-    --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
-    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
-    --IF NO VOUCHER JUST TAKE THE TAX
-    SELECT intInventoryReceiptItemId, SUM(dblTax) dblTax
-    FROM (
-        SELECT RI.intInventoryReceiptItemId, RIT.dblTax, ROW_NUMBER() OVER(PARTITION BY RI.intInventoryReceiptItemId, RIT.dblTax ORDER BY RI.intInventoryReceiptItemId, RIT.dblTax) intDuplicate
-        FROM tblICInventoryReceiptItem RI
-        INNER JOIN tblICInventoryReceiptItemTax RIT ON RIT.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
-        LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
-        LEFT JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId AND BDT.intTaxCodeId = RIT.intTaxCodeId AND BDT.intTaxClassId = RIT.intTaxClassId
-        WHERE 1 = CASE WHEN BD.intBillDetailId IS NULL THEN 1 ELSE (CASE WHEN BDT.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END) END
-    ) tmpTax
-    WHERE intDuplicate = 1
-    GROUP BY intInventoryReceiptItemId
-) clearingTax
-	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 
 --receipts in storage that were transferred
 join (
