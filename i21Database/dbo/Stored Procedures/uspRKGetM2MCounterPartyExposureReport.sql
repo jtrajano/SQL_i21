@@ -71,10 +71,13 @@ BEGIN TRY
 						
 		SELECT @dtmBasisEntryAsOf = CAST(@dummyDate AS DATETIME)
 		
-		SELECT  @dummyDate = SUBSTRING(@strSettlemntPriceDate, 4, 2) + '/' -- Month
-						+ LEFT(@strSettlemntPriceDate, 2) + '/' -- Day
-						+ SUBSTRING(@strSettlemntPriceDate, 7, 13)
-		SELECT @dtmSettlemntPriceDate = CAST(@dummyDate AS DATETIME)
+		IF ISNULL(@strSettlemntPriceDate, '') <> ''
+		BEGIN
+			SELECT  @dummyDate = SUBSTRING(@strSettlemntPriceDate, 4, 2) + '/' -- Month
+							+ LEFT(@strSettlemntPriceDate, 2) + '/' -- Day
+							+ SUBSTRING(@strSettlemntPriceDate, 7, 13)
+			SELECT @dtmSettlemntPriceDate = CAST(@dummyDate AS DATETIME)
+		END
 		
 		SELECT  @dummyDate = SUBSTRING(@strEndDate, 4, 2) + '/' -- Month
 						+ LEFT(@strEndDate, 2) + '/' -- Day
@@ -94,10 +97,13 @@ BEGIN TRY
 	SELECT	@intM2MBasisId = intM2MBasisId FROM tblRKM2MBasis 
 	WHERE	strPricingType = 'Mark to Market' 
 			AND CONVERT(varchar, dtmM2MBasisDate, 0) =  CONVERT(varchar, @dtmBasisEntryAsOf, 0)
+			
+	IF ISNULL(@strSettlemntPriceDate, '') <> ''
+	BEGIN
+		SELECT	@intFutureSettlementPriceId = intFutureSettlementPriceId FROM tblRKFuturesSettlementPrice 
+		WHERE	CONVERT(varchar, dtmPriceDate, 0) = CONVERT(varchar, @dtmSettlemntPriceDate, 0)
+	END
 
-	SELECT	@intFutureSettlementPriceId = intFutureSettlementPriceId FROM tblRKFuturesSettlementPrice 
-	WHERE	CONVERT(varchar, dtmPriceDate, 0) = CONVERT(varchar, @dtmSettlemntPriceDate, 0)
-	
 	SELECT @intQuantityUOMId = intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = @strQuantityUOM
 	SELECT @intPriceUOMId = intUnitMeasureId FROM tblICUnitMeasure WHERE strUnitMeasure = @strPriceUOM
 	SELECT @intCurrencyId = intCurrencyID FROM tblSMCurrency WHERE strCurrency = @strCurrency
@@ -2780,7 +2786,7 @@ BEGIN TRY
 		)t4
 
 END TRY
-
+	
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	SET @ErrMsg = @ErrMsg
