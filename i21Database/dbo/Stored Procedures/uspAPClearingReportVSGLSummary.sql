@@ -1604,6 +1604,6 @@ WHERE A.ysnIsUnposted = 0 AND B.intAccountCategoryId = 45
 SELECT
   A.dblBalance AS dblReportBalance,
   B.dblBalance AS dblGLBalance,
-  A.dblBalance - B.dblBalance AS dblDifference
+  A.dblBalance + B.dblBalance AS dblDifference
 FROM tmpAPClearingBalance A
 CROSS APPLY tmpAPClearingGLBalance B
