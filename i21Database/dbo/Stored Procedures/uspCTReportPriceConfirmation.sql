@@ -125,9 +125,9 @@ BEGIN TRY
 	LEFT JOIN tblSMReportTranslation	rtrt9 on rtrt9.intLanguageId = @intLaguageId and rtrt9.intTransactionId = rtt9.intTransactionId and rtrt9.strFieldName = 'Country'
 
 	SELECT @ContractSalesPersonSign =  b.blbFile
-	from tblARSalesperson a, tblSMUpload b
+	from tblARSalesperson a inner join tblSMUpload b on b.intAttachmentId = a.intAttachmentSignatureId
 	where a.intEntityId = @intSalespersonId
-	and b.intAttachmentId = a.intAttachmentSignatureId
+	
 
 	/*Declared variables for translating expression*/
 	declare @strStatus1 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'This confirms that the above contract has been priced as follows:'), 'This confirms that the above contract has been priced as follows:');

@@ -75,10 +75,35 @@ BEGIN TRY
 				,ShortName
 				,CommodityCode
 				,CategoryCode
-				,LotTracking
+				,CASE 
+					WHEN LotTracking = '1'
+						THEN 'Yes - Manual'
+					WHEN LotTracking = '2'
+						THEN 'Yes - Serial Number'
+					WHEN LotTracking = '3'
+						THEN 'Yes - Manual/Serial Number'
+					WHEN LotTracking = '4'
+						THEN 'No'
+					END AS LotTracking
 				,[LifeTime]
-				,LifeTimeUnit
-				,[Status]
+				,CASE 
+					WHEN LifeTimeUnit = '1'
+						THEN 'Days'
+					WHEN LifeTimeUnit = '2'
+						THEN 'Months'
+					WHEN LifeTimeUnit = '3'
+						THEN 'Years'
+					END AS LifeTimeUnit
+				,(
+					CASE 
+						WHEN [Status] = '1'
+							THEN 'Active'
+						WHEN [Status] = '2'
+							THEN 'Phased Out'
+						WHEN [Status] = '3'
+							THEN 'Discontinued'
+						END
+					)
 				,FairTradeCompliance
 				,OrganicItem
 				,RainForestCertified
@@ -146,7 +171,7 @@ BEGIN TRY
 			SET IUOM.intStageItemId = I.intStageItemId
 			FROM tblIPItemStage I
 			JOIN tblIPItemUOMStage IUOM ON IUOM.intParentTrxSequenceNo = I.intTrxSequenceNo
-			
+
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml

@@ -126,7 +126,7 @@ BEGIN TRY
 		
 		-- Transaction
 		INSERT INTO @transaction (strFormCode, strScheduleCode, strType, dblReceived)
-		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblQtyShipped, 0.00))
+		SELECT strFormCode, strScheduleCode, strType, dblReceived = SUM(ISNULL(dblBillQty, 0.00))
 		FROM vyuTFGetTransaction Trans
 		WHERE Trans.uniqTransactionGuid = @Guid
 		GROUP BY strFormCode, strScheduleCode, strType

@@ -170,11 +170,8 @@ union all
 			,ysnTimeOff = convert(bit,1)
 		from
 			tblHDTimeOffRequest a
-			,tblPRTimeOffRequest b
-			,tblPRTypeTimeOff c
-			,tblEMEntity d
-		where
-			b.intTimeOffRequestId = a.intPRTimeOffRequestId
-			and c.intTypeTimeOffId = b.intTypeTimeOffId
-			and d.intEntityId = a.intPREntityEmployeeId
+			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
+			inner join tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
+			inner join tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
+						
 ) as rawData

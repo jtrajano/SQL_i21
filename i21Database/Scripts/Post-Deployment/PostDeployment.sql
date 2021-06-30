@@ -96,7 +96,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 :r .\SM\2110_CreateIDPGridLayout.sql
-
+:r .\SM\2110_UpdateAuditLogs.sql
 
 
 -- Canned Report
@@ -419,6 +419,9 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\StorageInventoryReceipt.sql
 :R .\GR\Fix_NULL_SSId_in_voucher_details.sql
 :R .\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql
+:R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
+:R .\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql
+:R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -662,17 +665,29 @@ print 'BEGIN POST DEPLOYMENT'
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
 --:r .\SM\1830_ReIndexTables.sql
-:r .\SM\1830_CreateReIndexMaintenancePlan.sql
+--:r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
 
 -- Clean up i21 database objects
+:r .\SM\01_CleanupObjects.sql
 :r .\IC\29_CleanupObjects.sql
 :r .\RM\03_CleanupObjects.sql
 :r .\IP\2_CleanupObjects.sql
 :r .\AR\01_CleanupObjects.sql
 :r .\GR\3_CleanupObjects.sql
+:r .\CM\9_CleanupObjects.sql
+:r .\CT\2_CleanupObjects.sql
+:r .\MF\11_CleanupObjects.sql
+:r .\TR\01_CleanupObjects.sql
+:r .\LG\3_CleanupObjects.sql
+:r .\GL\01_CleanupObjects.sql
+:r .\AP\01_CleanupObjects.sql
+:r .\ET\01_CleanupObjects.sql
+:r .\PAT\6_CleanupObjects.sql
+:r .\TF\01_CleanupObjects.sql
+:r .\MF\13_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'

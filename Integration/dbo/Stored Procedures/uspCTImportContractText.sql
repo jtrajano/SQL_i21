@@ -31,7 +31,10 @@ IF OBJECT_ID('tempdb..#sstxtmst_where') IS NOT NULL
 
 SELECT ROW_NUMBER() OVER (ORDER BY sstxt_pur_sls_ind,sstxt_type_ind,sstxt_txt_id ASC) id,*
 INTO #sstxtmst_where
-FROM #sstxtmst__sstxt_pur_sls_ind,#sstxtmst__sstxt_type_ind,#sstxtmst__sstxt_txt_id ORDER BY sstxt_pur_sls_ind,sstxt_type_ind,sstxt_txt_id
+FROM #sstxtmst__sstxt_pur_sls_ind
+	inner join #sstxtmst__sstxt_type_ind on 1=1
+	inner join #sstxtmst__sstxt_txt_id  on 1=1
+ORDER BY sstxt_pur_sls_ind,sstxt_type_ind,sstxt_txt_id
 
 
 DECLARE @id INT,

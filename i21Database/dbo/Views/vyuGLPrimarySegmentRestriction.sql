@@ -6,8 +6,8 @@ S.strCode,
 SM.intEntityId,
 SM.strUserName,
 SM.intUserRoleID
-FROM vyuGLSegmentDetail S,
-tblSMUserSecurity SM
+FROM vyuGLSegmentDetail S
+inner join tblSMUserSecurity SM on 1=1
 WHERE strType = 'Primary'
 )
 SELECT 

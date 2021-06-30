@@ -132,41 +132,41 @@ BEGIN TRY
 		SELECT @line6E = ISNULL(NULLIF(strConfiguration, ''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MFT_IMR-Line6E'
 	
 
-		SELECT @line9A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '3B' AND strType = 'Gasoline'
-		SELECT @line9B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '3B' AND strType = 'Undyed Diesel'
-		SELECT @line9D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '3B' AND strType = 'Dyed Diesel'
-		SELECT @line9D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '3B' AND strType = 'Aviation Gas'
-		SELECT @line9E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '3B' AND strType = 'Jet Fuel'
+		SELECT @line9A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '3B' AND strType = 'Gasoline'
+		SELECT @line9B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '3B' AND strType = 'Undyed Diesel'
+		SELECT @line9C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '3B' AND strType = 'Dyed Diesel'
+		SELECT @line9D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '3B' AND strType = 'Aviation Gas'
+		SELECT @line9E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '3B' AND strType = 'Jet Fuel'
 
-		SELECT @line10A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Gasoline'
-		SELECT @line10B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Undyed Diesel'
-		SELECT @line10C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Dyed Diesel'
-		SELECT @line10D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Aviation Gas'
-		SELECT @line10E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Jet Fuel'
+		SELECT @line10A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Gasoline'
+		SELECT @line10B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Undyed Diesel'
+		SELECT @line10C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Dyed Diesel'
+		SELECT @line10D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Aviation Gas'
+		SELECT @line10E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Jet Fuel'
 	
-		SELECT @line10A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Gasoline'
-		SELECT @line10B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Undyed Diesel'
-		SELECT @line10C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Dyed Diesel'
-		SELECT @line10D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Aviation Gas'
-		SELECT @line10E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '11B' AND strType = 'Jet Fuel'
+		SELECT @line10A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Gasoline'
+		SELECT @line10B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Undyed Diesel'
+		SELECT @line10C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Dyed Diesel'
+		SELECT @line10D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Aviation Gas'
+		SELECT @line10E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '11B' AND strType = 'Jet Fuel'
 
 		SET @line11A = @line9A + @line10A 
 		SET @line11B = @line9B + @line10B
-		SET @line11C = @line9C + @line10B		
+		SET @line11C = @line9C + @line10C		
 		SET @line11D = @line9D + @line10D
 		SET @line11E = @line9E + @line10E
 
-		SELECT @line12A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '1A' AND strType = 'Gasoline'
-		SELECT @line12B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '1A' AND strType = 'Undyed Diesel'
-		SELECT @line12C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '1A' AND strType = 'Dyed Diesel'
-		SELECT @line12D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '1A' AND strType = 'Aviation Gas'
-		SELECT @line12E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMP' AND strScheduleCode = '1A' AND strType = 'Jet Fuel'
+		SELECT @line12A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1A' AND strType = 'Gasoline'
+		SELECT @line12B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1A' AND strType = 'Undyed Diesel'
+		SELECT @line12C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1A' AND strType = 'Dyed Diesel'
+		SELECT @line12D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1A' AND strType = 'Aviation Gas'
+		SELECT @line12E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1A' AND strType = 'Jet Fuel'
 
-		SELECT @line13A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-EXPR' AND strScheduleCode = '1C' AND strType = 'Gasoline'
-		SELECT @line13B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-EXPR' AND strScheduleCode = '1C' AND strType = 'Undyed Diesel'
-		SELECT @line13C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-EXPR' AND strScheduleCode = '1C' AND strType = 'Dyed Diesel'
-		SELECT @line13D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-EXPR' AND strScheduleCode = '1C' AND strType = 'Aviation Gas'
-		SELECT @line13E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-EXPR' AND strScheduleCode = '1C' AND strType = 'Jet Fuel'
+		SELECT @line13A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1C' AND strType = 'Gasoline'
+		SELECT @line13B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1C' AND strType = 'Undyed Diesel'
+		SELECT @line13C = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1C' AND strType = 'Dyed Diesel'
+		SELECT @line13D = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1C' AND strType = 'Aviation Gas'
+		SELECT @line13E = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-IMR' AND strScheduleCode = '1C' AND strType = 'Jet Fuel'
 
 		SET @line3A = @line11A * @line2A
 		SET @line3B = @line11B * @line2B

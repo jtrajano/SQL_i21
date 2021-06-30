@@ -6,7 +6,7 @@ AS
 	select
 		tic.intTicketId
 		,tic.strTicketNumber
-		,tic.strSubject
+		,strSubject = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strSubject), '&nbsp', ' ')
 		,typ.strType
 		,sta.strStatus
 		,strStatusIcon = sta.strIcon
@@ -46,8 +46,8 @@ AS
 		,strLastCommentedBy = lastcomment.strName --(select top 1 strName from tblEMEntity where intEntityId = tic.intLastCommentedByEntityId)
 		,strCompanyLocation = camloc.strLocationName
 		,strEntityLocation = enloc.strLocationName
-		,strDescription = dbo.fnStripHtml(tic.strDescription)
-		,strResolution = dbo.fnStripHtml(tic.strResolution)
+		,strDescription = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strDescription), '&nbsp', ' ')
+		,strResolution = REPLACE(dbo.fnStripHtmlAndFixSpecial(tic.strResolution), '&nbsp', ' ')
 		,tic.strImageId
 		,tic.strFeedbackComment
 		,strCampaignName = null

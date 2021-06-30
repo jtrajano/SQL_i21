@@ -1072,6 +1072,17 @@ BEGIN TRY
 			SET @intNewTicketId = SCOPE_IDENTITY()
 		END
 		
+	SELECT @intInvoiceId = id.intInvoiceId
+	FROM tblICInventoryShipment s 
+	JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+	join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+	WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intSourceType = 1
+
+	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+	UPDATE tblSCTicket
+	SET dblDWGOriginalNetUnits = dblNetUnits
+	WHERE intTicketId = @intTicketId
+
 		--Update Work order Shipped Quantity for the Ticket Item
 		IF(ISNULL(@InventoryShipmentId,0) > 0)
 		BEGIN

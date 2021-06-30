@@ -7,8 +7,5 @@
 			,a.ysnDisabled
 		from
 			tblSMUserSecurity a
-			,tblEMEntityCredential b
-			,tblEMEntity c
-		where
-			b.intEntityId = a.[intEntityId]
-			and c.intEntityId = b.intEntityId
+			inner join tblEMEntityCredential b on b.intEntityId = a.[intEntityId]
+			inner join tblEMEntity c on c.intEntityId = b.intEntityId

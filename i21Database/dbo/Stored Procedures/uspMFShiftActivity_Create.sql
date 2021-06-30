@@ -270,7 +270,7 @@ BEGIN TRY
 				,@intLastModifiedUserId
 				,GETDATE()
 			FROM dbo.tblMFShift S
-				,dbo.tblMFManufacturingCell MC
+				inner join dbo.tblMFManufacturingCell MC on 1=1
 			WHERE S.intShiftId = @intShiftId
 				AND MC.intManufacturingCellId = @intManufacturingCellId
 				AND MC.ysnIncludeEfficiency = 1

@@ -179,7 +179,9 @@ A
 SET dblDepre =
 
 CASE 
-	WHEN A.dtmImportedDepThru > Dep.dtmDepreciationToDate
+	
+		
+	WHEN A.dtmImportedDepThru > Dep.dtmDepreciationToDate OR  Dep.dtmDepreciationToDate IS NULL
 		
 		THEN 0 
 	WHEN 
@@ -192,6 +194,24 @@ CASE
 			END
 	ELSE 
 		dblDepre
+END,
+dblMonth =
+
+CASE 
+	WHEN A.dtmImportedDepThru > Dep.dtmDepreciationToDate OR Dep.dtmDepreciationToDate IS NULL
+		
+		THEN 0 
+	WHEN 
+		A.dtmImportedDepThru = Dep.dtmDepreciationToDate 
+		THEN
+			CASE 
+				WHEN strTransaction = 'Place in service'  THEN 0
+			ELSE		
+				ISNULL(dblImportGAAPDepToDate,0)  + ISNULL(dblMonth,0)
+				
+			END
+	ELSE 
+		dblMonth
 END
 
 FROM
@@ -257,8 +277,5 @@ INSERT INTO @tbl(
 	ysnFullyDepreciated ,
 	strError
 	FROM @tblAssetInfo 
-
-	
-	
 	RETURN
 END

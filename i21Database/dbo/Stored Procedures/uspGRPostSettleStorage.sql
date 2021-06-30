@@ -213,7 +213,7 @@ BEGIN TRY
 	BEGIN
 		DECLARE @CustomerStorageIds AS Id
 		DECLARE @intId AS INT
-		DECLARE @dblSettlementTotal AS DECIMAL(24,10)
+		DECLARE @dblSettlementTotal AS DECIMAL(24,10)		
 
 		DELETE FROM @CustomerStorageIds
 		INSERT INTO @CustomerStorageIds
@@ -239,10 +239,7 @@ BEGIN TRY
 
 			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.1
 			BEGIN
-				--DECLARE @strMsg as nvarchar(max)
-				--set @strMsg = CAST(@dblSettlementTotal AS nvarchar(50)) + ' aa ' + CAST(@dblTotalUnits AS nvarchar(50))
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
-				--RAISERROR(@strMsg,16,1,1)
 				RETURN;
 			END
 			DELETE FROM @CustomerStorageIds WHERE intId = @intId
@@ -929,6 +926,17 @@ BEGIN TRY
 						,intItemType           = 2
 						,IsProcessed           = 0
 						,ysnInventoryCost	   = @ysnInventoryCost_StorageChargeItem
+
+					UPDATE SS
+					SET dblStorageDue = ROUND(ABS(SF.dblUnits * SF.dblCashPrice),6)
+					FROM tblGRSettleStorage SS
+					OUTER APPLY (
+						SELECT dblUnits
+							,dblCashPrice
+						FROM @SettleVoucherCreate
+						WHERE intItemType = 2 --Storage Fee
+					) SF
+					WHERE SS.intSettleStorageId = @intSettleStorageId
 				END
 
 				IF ISNULL(@DPContractHeaderId, 0) > 0
@@ -1830,6 +1838,7 @@ BEGIN TRY
 							,@intSettleStorageId
 							,@strBatchId
 							,@intCreatedUserId
+							,@dtmClientPostDate
 							,@ysnPosted
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
@@ -2061,24 +2070,25 @@ BEGIN TRY
 					,[intInventoryReceiptItemId] =  CASE 
 														WHEN ST.ysnDPOwnedType = 0 THEN NULL
 														ELSE 
-																CASE 
-																		WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
-																		ELSE NULL
-																END
+															CASE 
+																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
+																ELSE NULL
+															END
 													END
 					,[intInventoryReceiptChargeId]	= CASE 
 														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
 														ELSE 
 																CASE 
-																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL THEN RC.intInventoryReceiptChargeId
+																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RC.intInventoryReceiptChargeId
 																		ELSE NULL
 																END
 													END
-					,[intCustomerStorageId]			= CASE WHEN RI.intInventoryReceiptId IS NULL
+					,[intCustomerStorageId]   = CASE 
+													WHEN RI.intInventoryReceiptId IS NULL
 														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL)
-															THEN a.[intCustomerStorageId] 
-															ELSE NULL END
-					-- ,[intCustomerStorageId]			= a.[intCustomerStorageId]
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.ysnTransferStorage = 1)
+													THEN a.[intCustomerStorageId] 
+													ELSE NULL END
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
 														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, b.intItemUOMId, CD.dblQuantity),6) 
@@ -2157,8 +2167,7 @@ BEGIN TRY
 															END
 														end					
 															
-					,[dblOldCost]					=  CASE 
-															WHEN @ysnFromPriceBasisContract = 0 THEN
+					,[dblOldCost]					=  CASE WHEN @ysnFromPriceBasisContract = 0 THEN
 																CASE
 																	WHEN ST.ysnDPOwnedType = 1 AND a.intItemType = 1
 																	THEN ISNULL(CS.dblSettlementPrice, 0) + ISNULL(CS.dblBasis, 0)
@@ -2222,7 +2231,7 @@ BEGIN TRY
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																WHEN a.intPricingTypeId in (1, 6) AND @ysnFromPriceBasisContract = 1 
 																	THEN a.dblUnits -- @dblTotalVoucheredQuantity
-																WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
+																WHEN @ysnFromPriceBasisContract = 1 AND (intItemType = 2 OR intItemType = 3)
 																	THEN a.dblUnits
 																ELSE 
 																	CASE 
@@ -2328,7 +2337,7 @@ BEGIN TRY
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType
-					
+				 
 				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
 				 ---we should delete priced contracts that has a voucher already
 					delete from @voucherPayable 
@@ -3029,18 +3038,22 @@ BEGIN TRY
 	WHERE SS.intSettleStorageId = @intParentSettleStorageId
 
 	DECLARE @intVoucherId2 AS INT
-	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
-	BEGIN 
-		SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
-		EXEC [dbo].[uspAPPostBill] 
-			@post = 1
-			,@recap = 0
-			,@isBatch = 0
-			,@param = @intVoucherId2
-			,@userId = @intCreatedUserId
-			,@transactionType = 'Settle Storage'
-			,@success = @success OUTPUT
-		DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
+	IF (SELECT ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @EntityId) = 1
+	BEGIN
+		WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
+		BEGIN 
+			SET @intVoucherId2 = NULL
+			SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
+			EXEC [dbo].[uspAPPostBill] 
+				@post = 1
+				,@recap = 0
+				,@isBatch = 0
+				,@param = @intVoucherId2
+				,@userId = @intCreatedUserId
+				,@transactionType = 'Settle Storage'
+				,@success = @success OUTPUT
+			DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
+		END
 	END
 
 	if isnull(@intVoucherId, 0) > 0 

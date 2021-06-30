@@ -21,61 +21,27 @@ BEGIN
 		,@strOldBook NVARCHAR(100)
 		,@intContractFeedLogId INT
 		,@intContractFeedId INT
+		,@intOrgContractFeedId INT
 	DECLARE @tblCTContractDetail TABLE (
 		intContractDetailId INT
 		,intContractHeaderId INT
 		)
 
-	SELECT TOP 1 @intContractDetailId = L.intContractDetailId
-		,@intContractHeaderId = L.intContractHeaderId
+	DELETE
+	FROM @tblCTContractDetail
+
+	INSERT INTO @tblCTContractDetail (
+		intContractDetailId
+		,intContractHeaderId
+		)
+	SELECT DISTINCT L.intContractDetailId
+		,L.intContractHeaderId
 	FROM tblIPContractFeedLog L
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
 		AND CD.intContractStatusId = 1
 	WHERE IsNULL(L.intCompanyLocationId, 0) <> IsNULL(CD.intCompanyLocationId, 0)
-
-	DELETE
-	FROM @tblCTContractDetail
-
-	IF @intContractDetailId IS NOT NULL
-	BEGIN
-		INSERT INTO @tblCTContractDetail (
-			intContractDetailId
-			,intContractHeaderId
-			)
-		SELECT @intContractDetailId
-			,@intContractHeaderId
-	END
-
-	SELECT @intContractDetailId = NULL
-		,@intContractHeaderId = NULL
-
-	SELECT TOP 1 @intContractDetailId = L.intContractDetailId
-		,@intContractHeaderId = L.intContractHeaderId
-	FROM tblIPContractFeedLog L
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
-		AND CD.intContractStatusId = 1
-	WHERE IsNULL(L.intHeaderBookId, 0) <> IsNULL(CH.intBookId, 0)
-
-	IF @intContractHeaderId IS NOT NULL
-	BEGIN
-		INSERT INTO @tblCTContractDetail (
-			intContractDetailId
-			,intContractHeaderId
-			)
-		SELECT CL.intContractDetailId
-			,CL.intContractHeaderId
-		FROM tblCTContractHeader CH
-		JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-			AND CD.intContractStatusId = 1
-			AND CD.intContractHeaderId = @intContractHeaderId
-		JOIN tblIPContractFeedLog CL ON CL.intContractDetailId = CD.intContractDetailId
-		WHERE CD.intContractDetailId NOT IN (
-				SELECT intContractDetailId
-				FROM @tblCTContractDetail
-				)
-	END
+		OR IsNULL(L.intHeaderBookId, 0) <> IsNULL(CH.intBookId, 0)
 
 	SELECT @intContractDetailId = NULL
 		,@intContractHeaderId = NULL
@@ -122,9 +88,19 @@ BEGIN
 		FROM dbo.tblCTBook
 		WHERE intBookId = @intOldBookId
 
+		SELECT TOP 1 @intOrgContractFeedId = intContractFeedId
+		FROM dbo.tblCTContractFeed
+		WHERE intContractDetailId = @intContractDetailId
+		ORDER BY intContractFeedId DESC
+
 		IF ISNULL(@intOldCompanyLocationId, 0) > 0
 			OR ISNULL(@intOldBookId, 0) > 0
 		BEGIN
+			UPDATE tblCTContractFeed
+			SET strFeedStatus = 'NOT SEND'
+				,intStatusId = 6
+			WHERE intContractFeedId = @intOrgContractFeedId
+
 			INSERT INTO tblCTContractFeed (
 				intContractHeaderId
 				,intContractDetailId
@@ -203,7 +179,7 @@ BEGIN
 				,strCurrency
 				,dblUnitCashPrice
 				,strPriceUOM
-				,'DELETE'
+				,'Delete'
 				,dtmContractDate
 				,dtmStartDate
 				,dtmEndDate
@@ -228,7 +204,7 @@ BEGIN
 				,strSalespersonExternalERPId
 				,strProducer
 				,intItemId
-				,'IGNORE'
+				,'SEND'
 			FROM vyuCTContractFeed
 			WHERE intContractDetailId = @intContractDetailId
 
@@ -247,7 +223,7 @@ BEGIN
 					)
 				SELECT @intContractFeedId
 					,strERPPONumber
-					,'DELETE'
+					,'Delete'
 					,@strOldBook
 				FROM vyuCTContractFeed
 				WHERE intContractDetailId = @intContractDetailId
@@ -319,7 +295,7 @@ BEGIN
 			,strTerm
 			,strPurchasingGroup
 			,strContractNumber
-			,strERPPONumber
+			,NULL
 			,intContractSeq
 			,strItemNo
 			,strStorageLocation
@@ -345,7 +321,7 @@ BEGIN
 			,strTermCode
 			,strContractItemNo
 			,strContractItemName
-			,strERPItemNumber
+			,NULL
 			,strERPBatchNumber
 			,strLoadingPoint
 			,strPackingDescription
@@ -356,7 +332,7 @@ BEGIN
 			,strSalespersonExternalERPId
 			,strProducer
 			,intItemId
-			,'IGNORE'
+			,'SEND'
 		FROM vyuCTContractFeed
 		WHERE intContractDetailId = @intContractDetailId
 

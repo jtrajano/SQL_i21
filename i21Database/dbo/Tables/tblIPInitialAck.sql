@@ -10,5 +10,6 @@
 	,strFeedStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strReceiptNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strAdjustmentNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,dtmTransactionDate DATETIME DEFAULT(GETDATE())
 	,CONSTRAINT PK_tblIPInitialAck PRIMARY KEY (intInitialAckId)
 	)

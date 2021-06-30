@@ -42,10 +42,10 @@ as
 			,@intSequenceAppliedLoad = (cd.intNoOfLoad - convert(int,@dblBalance))
 		from
 			tblCTContractDetail cd
-			,tblCTContractHeader ch
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 		where
 			cd.intContractDetailId = @intContractDetailId
-			and ch.intContractHeaderId = cd.intContractHeaderId
+			
 
 		insert into @PurchasePricing (
 			intPriceFixationDetailId
@@ -139,10 +139,9 @@ as
 			,pfd.dblLoadAppliedAndPriced = case when pfd.dblLoadPriced > pp.dblCorrectLoadAppliedAndPriced then pp.dblCorrectLoadAppliedAndPriced else pfd.dblLoadPriced end
 		from
 			tblCTPriceFixationDetail pfd
-			,@PurchasePricing pp
+			inner join @PurchasePricing pp on pfd.intPriceFixationDetailId = pp.intPriceFixationDetailId
 		where
-			pfd.intPriceFixationDetailId = pp.intPriceFixationDetailId
-			and (
+			 (
 					pp.dblQuantityAppliedAndPriced <> pp.dblCorrectQuantityAppliedAndPriced
 					or pp.dblLoadAppliedAndPriced <> pp.dblCorrectLoadAppliedAndPriced
 				)
