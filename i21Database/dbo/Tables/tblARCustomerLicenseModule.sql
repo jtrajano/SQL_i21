@@ -6,6 +6,7 @@
 	[strModuleName]							NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnEnabled]							BIT NOT NULL DEFAULT 0,
 	[intCompanyId]							INT NULL,
+	[ysnAddonComponent]						BIT NOT NULL DEFAULT 0,
     [intConcurrencyId]						INT CONSTRAINT [DF_tblARCustomerLicenseModule_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
 	CONSTRAINT [PK_tblARCustomerLicenseModule] PRIMARY KEY CLUSTERED ([intCustomerLicenseModuleId] ASC),
