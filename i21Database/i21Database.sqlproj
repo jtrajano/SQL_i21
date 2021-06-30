@@ -8843,6 +8843,8 @@
     <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
     <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionsReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetFuturesReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
