@@ -63,7 +63,7 @@ DECLARE
 	SELECT @intEntityId = intEntityId FROM tblEMEntity 
 	WHERE strName = @broker
 	AND intEntityId IN (SELECT intEntityId FROM tblEMEntityType WHERE strType = 'Futures Broker')
-	SELECT @intBrokerageAccountId = intBrokerageAccountId FROM tblRKBrokerageAccount WHERE strAccountNumber = @brokerage_account
+	SELECT @intBrokerageAccountId = intBrokerageAccountId FROM tblRKBrokerageAccount WHERE strAccountNumber = @brokerage_account AND intEntityId = @intEntityId
 
 	SELECT @intSelectedInstrumentTypeId = CASE WHEN @instrument = 'Exchange Traded' THEN 1
 											   WHEN @instrument = 'OTC' THEN 2
