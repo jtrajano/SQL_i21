@@ -9013,6 +9013,12 @@
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetFuturesReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionsReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutures360RealizedPnLReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetM2MCounterPartyExposureReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
