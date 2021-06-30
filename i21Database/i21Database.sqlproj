@@ -9010,6 +9010,8 @@
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetFuturesReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionsReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
