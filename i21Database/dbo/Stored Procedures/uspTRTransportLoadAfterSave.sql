@@ -13,6 +13,57 @@ AS
 
 BEGIN
 
+	-- START TR-1611 - Sub ledger Transaction traceability
+	IF (ISNULL(@ForDelete, 0) = 0)
+	BEGIN
+		DECLARE @tblTransactionLinks udtICTransactionLinks
+		
+		INSERT INTO @tblTransactionLinks (
+			strOperation
+			, intSrcId
+			, strSrcTransactionNo
+			, strSrcTransactionType
+			, strSrcModuleName
+			, intDestId
+			, strDestTransactionNo
+			, strDestTransactionType
+			, strDestModuleName
+		)	
+		SELECT strOperation	= 'Create'
+			, intSrcId = CH.intContractHeaderId
+			, strSrcTransactionNo = CH.strContractNumber
+			, strSrcTransactionType = 'Purchase Contract'
+			, strSrcModuleName	= 'Contract'
+			, intDestId	= LH.intLoadHeaderId
+			, strDestTransactionNo = LH.strTransaction
+			, strDestTransactionType = 'Transport'
+			, strDestModuleName = 'Transport'
+		FROM tblTRLoadHeader LH
+		INNER JOIN tblTRLoadReceipt LR ON LR.intLoadHeaderId = LH.intLoadHeaderId
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LR.intContractDetailId
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE LH.intLoadHeaderId = @LoadHeaderId
+		UNION ALL
+		SELECT strOperation	= 'Create'
+			, intSrcId = CH.intContractHeaderId
+			, strSrcTransactionNo = CH.strContractNumber
+			, strSrcTransactionType = 'Sale Contract'
+			, strSrcModuleName	= 'Contract'
+			, intDestId	= LH.intLoadHeaderId
+			, strDestTransactionNo = LH.strTransaction
+			, strDestTransactionType = 'Transport'
+			, strDestModuleName = 'Transport'
+		FROM tblTRLoadHeader LH
+		INNER JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+		INNER JOIN tblTRLoadDistributionDetail DD ON DD.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = DD.intContractDetailId
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE LH.intLoadHeaderId = @LoadHeaderId
+
+		EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+	END
+	-- END TR-1611
+
 	DECLARE @TransactionType_TransportLoad NVARCHAR(50) = 'Transport Load'
 
 	DECLARE @SourceType_InventoryReceipt NVARCHAR(50) = 'Inventory Receipt'
