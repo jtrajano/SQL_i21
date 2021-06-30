@@ -4120,15 +4120,15 @@ BEGIN TRY
 			FROM(
 				SELECT fd.intContractHeaderId
 					, fd.strContractSeq
-					, strEntityName = ISNULL(fd.strProducer, fd.strEntityName)
-					, intEntityId = ISNULL(fd.intProducerId, fd.intEntityId)
+					, strEntityName = ISNULL(strProducer, strEntityName)
+					, e.intEntityId
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
 					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 							WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 							ELSE strPriOrNotPriOrParPriced END)
-					, dblPValueQty = 0.0
+					, dblPValueQty = 0.0 
 					, dblPContractBasis = ISNULL(fd.dblContractBasis, 0)
 					, dblPFutures = ISNULL(fd.dblFutures, 0)
 					, dblQtyPrice = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
@@ -4149,6 +4149,7 @@ BEGIN TRY
 																										, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																										, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + (select top 1 isnull(dblFuturePrice,0) from #tblSettlementPrice where intContractDetailId = fd.intContractDetailId))))
 				FROM #tmpCPE fd
+				LEFT JOIN tblAPVendor e ON e.intEntityId = fd.intProducerId
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
 			) t
 		END
