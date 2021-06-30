@@ -284,7 +284,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 										END
 	 , intDaysOld               = CASE WHEN SELECTEDINV.strInvoiceFormat 
 										IN ('By Customer Balance', 'By Invoice') 
-										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmDateSC, CAST(GETDATE() AS DATE))
+										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmToCalculate, CAST(INV.dtmDate AS DATE))
 										ELSE
 										0
 										END
@@ -363,6 +363,7 @@ LEFT JOIN (
 		 , dblTaxExempt				= TER.dblTaxExempt
 		 , strSCInvoiceNumber		= INVSC.strInvoiceNumber
 		 , dtmDateSC				= INVSC.dtmDate
+		 , dtmToCalculate			= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -374,7 +375,7 @@ LEFT JOIN (
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN  (
-		Select dtmDate,intInvoiceId,strInvoiceNumber from tblARInvoice
+		SELECT dtmDate,intInvoiceId,strInvoiceNumber,dtmCalculated,ysnForgiven,ysnCalculated,dtmDueDate FROM tblARInvoice
 	)INVSC  ON  INVSC.intInvoiceId = ID.intSCInvoiceId
 	LEFT JOIN (
 		SELECT intItemUOMId
