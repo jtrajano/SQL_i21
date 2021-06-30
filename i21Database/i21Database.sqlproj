@@ -9384,6 +9384,7 @@
     <Build Include="dbo\Tables\tblSMIDPProcessResult.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptDetailSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
