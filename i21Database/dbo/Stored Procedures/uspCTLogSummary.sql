@@ -2641,11 +2641,13 @@ BEGIN TRY
 					, cd.intContractDetailId
 					, cd.intContractSeq
 					, cd.intContractTypeId
-					, dblQty = CASE WHEN @ysnLoadBased = 1 THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
-									ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0) END
+					, dblQty = CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 0 -- When change of price only.
+									ELSE CASE WHEN @ysnLoadBased = 1 THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
+										ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0) END END
 					, dblOrigQty = pfd.dblQuantity
-					, dblDynamic =  CASE WHEN @ysnLoadBased = 1 THEN ISNULL(pfd.dblLoadAppliedAndPriced, 0) * cd.dblQuantityPerLoad
-										ELSE ISNULL(dblQuantityAppliedAndPriced, 0) END
+					, dblDynamic =  CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 0 -- When change of price only.
+										ELSE (CASE WHEN @ysnLoadBased = 1 THEN ISNULL(pfd.dblLoadAppliedAndPriced, 0) * cd.dblQuantityPerLoad
+											ELSE ISNULL(dblQuantityAppliedAndPriced, 0) END) END
 					, intQtyUOMId = cd.intCommodityUOMId
 					, intPricingTypeId = 1
 					, strPricingType = 'Priced'
@@ -2670,10 +2672,10 @@ BEGIN TRY
 					, cd.intSubBookId
 					, intOrderBy = 1
 					, intUserId = @intUserId
-					, intActionId = 17
+					, intActionId = CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 67 ELSE 17 END
 					, strNotes = (CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity
 										THEN (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Quantity. Change Futures Price.' ELSE 'Change Quantity.' END)
-										ELSE (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Quantity' ELSE NULL END) END)
+										ELSE (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Futures Price' ELSE NULL END) END)
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
@@ -3546,6 +3548,10 @@ BEGIN TRY
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
+			BEGIN
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			END
+			ELSE IF @strNotes = 'Change Futures Price'
 			BEGIN
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
