@@ -3782,8 +3782,24 @@ BEGIN TRY
 					BEGIN						
 						IF  @dblQty <> 0
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
-							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							--During posting of DWG, don't log the Sales Basis Delivery when there's no changes in the quantity because it's already logged during distribution of the ticket.
+							if not exists (
+								select top 1 1
+								from
+									@cbLogPrev lp
+									join @cbLogSpecific ls
+									on
+									lp.strTransactionType = 'Sales Basis Deliveries'
+									and lp.strTransactionReference = ls.strTransactionReference
+									and lp.intTransactionReferenceDetailId = ls.intTransactionReferenceDetailId
+									and lp.intTransactionReferenceId = ls.intTransactionReferenceId
+									and lp.dblQty = @dblQty
+									and lp.strProcess = 'Update Sequence Balance'
+								) and @strProcess = 'Update Sequence Balance - DWG'
+							begin
+								UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							end
 						END
 					END
 					ELSE IF (@currPricingTypeId = 1)
