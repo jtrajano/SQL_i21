@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuCTRestApiContractDetails]
 AS
 SELECT
-	cd.intContractDetailId
+	  cd.intContractDetailId
 	, cd.intSplitFromId
 	, cd.intParentDetailId
 	, cd.ysnSlice
