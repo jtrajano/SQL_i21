@@ -3,8 +3,10 @@
 */
 CREATE PROCEDURE [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 	@dblPromotionalSalesPrice AS NUMERIC(38, 20) = NULL 
+	,@dblPromotionalCost AS NUMERIC(38, 20) = NULL 
 	,@dtmBeginDate AS DATETIME = NULL 
 	,@dtmEndDate AS DATETIME = NULL 
+	,@strUpcCode AS VARCHAR(30) = NULL 
 	,@intItemSpecialPricingId AS INT = NULL 
 	,@intEntityUserSecurityId AS INT 
 AS
@@ -47,9 +49,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog'
 		intItemId INT 
 		,intItemSpecialPricingId INT 
 		,dblOldUnitAfterDiscount NUMERIC(38, 20) NULL 
+		,dblOldCost NUMERIC(38, 20) NULL 
 		,dtmOldBeginDate DATETIME NULL 
 		,dtmOldEndDate DATETIME NULL 
 		,dblNewUnitAfterDiscount NUMERIC(38, 20) NULL 
+		,dblNewCost NUMERIC(38, 20) NULL 
 		,dtmNewBeginDate DATETIME NULL
 		,dtmNewEndDate DATETIME NULL 		
 	)
@@ -61,18 +65,22 @@ BEGIN
 		intItemId
 		,intItemSpecialPricingId 
 		,dblOldUnitAfterDiscount
+		,dblOldCost
 		,dtmOldBeginDate
 		,dtmOldEndDate
 		,dblNewUnitAfterDiscount
+		,dblNewCost
 		,dtmNewBeginDate
 		,dtmNewEndDate
 	)
 	SELECT	[Changes].intItemId
 			,[Changes].intItemSpecialPricingId
 			,[Changes].dblOldUnitAfterDiscount
+			,[Changes].dblOldCost
 			,[Changes].dtmOldBeginDate
 			,[Changes].dtmOldEndDate
 			,[Changes].dblNewUnitAfterDiscount
+			,[Changes].dblNewCost
 			,[Changes].dtmNewBeginDate
 			,[Changes].dtmNewEndDate
 	FROM	(
@@ -109,6 +117,15 @@ BEGIN
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class WHERE intClassId = il.intClassId )			
 								)
+								AND (
+									@strUpcCode IS NULL 
+									OR EXISTS (
+										SELECT TOP 1 1 
+										FROM	tblICItemUOM uom 
+										WHERE	uom.intItemId = i.intItemId 
+												AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
+									)
+								)
 					) AS Source_Query  
 						ON itemSpecialPricing.intItemSpecialPricingId = Source_Query.intItemSpecialPricingId					
 					
@@ -116,6 +133,7 @@ BEGIN
 					WHEN MATCHED THEN 
 						UPDATE 
 						SET		dblUnitAfterDiscount = ISNULL(@dblPromotionalSalesPrice, itemSpecialPricing.dblUnitAfterDiscount)
+								,dblCost = ISNULL(@dblPromotionalCost, itemSpecialPricing.dblCost)
 								,dtmBeginDate = ISNULL(@dtmBeginDate, itemSpecialPricing.dtmBeginDate)
 								,dtmEndDate = ISNULL(@dtmEndDate, itemSpecialPricing.dtmEndDate)
 								,dtmDateModified = GETUTCDATE()
@@ -125,9 +143,11 @@ BEGIN
 						, inserted.intItemId
 						, inserted.intItemSpecialPricingId
 						, deleted.dblUnitAfterDiscount
+						, deleted.dblCost
 						, deleted.dtmBeginDate
 						, deleted.dtmEndDate
 						, inserted.dblUnitAfterDiscount
+						, inserted.dblCost
 						, inserted.dtmBeginDate
 						, inserted.dtmEndDate
 			) AS [Changes] (
@@ -135,9 +155,11 @@ BEGIN
 				, intItemId
 				, intItemSpecialPricingId
 				, dblOldUnitAfterDiscount
+				, dblOldCost
 				, dtmOldBeginDate
 				, dtmOldEndDate
 				, dblNewUnitAfterDiscount
+				, dblNewCost
 				, dtmNewBeginDate
 				, dtmNewEndDate
 			)
@@ -162,6 +184,13 @@ BEGIN
 			,strNew = dblNewUnitAfterDiscount
 	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog auditLog
 	WHERE	ISNULL(dblOldUnitAfterDiscount, 0) <> ISNULL(dblNewUnitAfterDiscount, 0)
+	UNION ALL 
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the Promotional Cost'
+			,strOld = dblOldCost
+			,strNew = dblNewCost
+	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog auditLog
+	WHERE	ISNULL(dblOldCost, 0) <> ISNULL(dblNewCost, 0)
 	UNION ALL 
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the Promotional Begin Date'
