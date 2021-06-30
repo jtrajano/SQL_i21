@@ -171,7 +171,7 @@ LEFT JOIN tblCTContractDetail CD_Transfer
 LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
 LEFT JOIN (
-	SELECT GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId 
+	SELECT DISTINCT GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId 
 	FROM tblGRStorageHistory GSH
 	JOIN tblCTContractHeader GCH
 		ON GCH.intContractHeaderId = GSH.intContractHeaderId

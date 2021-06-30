@@ -156,7 +156,7 @@
     [ysnCertOfAnalysisPosted] BIT NOT NULL DEFAULT 0,
     [ysnExportRailXML] BIT NOT NULL DEFAULT 0,
     [strTrailerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-    [intTransferWeight] INT NOT NULL DEFAULT 1, 
+    [intTransferWeight] INT NOT NULL DEFAULT 1,
     [strGrainReceiptNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [dblDWGOriginalNetUnits] NUMERIC(38, 20) NULL, 
 	[dtmDateCreatedUtc] DATETIME2 NULL,

@@ -47,6 +47,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId    
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 -- OUTER APPLY (    
 --  SELECT TOP 1    
 --   ga.strAccountId    
@@ -64,19 +66,7 @@ LEFT JOIN
 WHERE       
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnPrice = 1   
-AND NOT EXISTS (
-    SELECT TOP 1 1
-    FROM tblICInventoryReceipt IR
-    INNER JOIN tblGRStorageHistory SH
-        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
-    INNER JOIN tblGRCustomerStorage CS
-        ON CS.intCustomerStorageId = SH.intCustomerStorageId
-        AND CS.ysnTransferStorage = 0
-    INNER JOIN tblGRTransferStorageReference TSR
-        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
-    WHERE IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND IR.strReceiptNumber = Receipt.strReceiptNumber
-)
+AND transferClr.intInventoryReceiptChargeId IS NULL
 -- AND NOT EXISTS (
 --     SELECT intInventoryReceiptChargeId
 --     FROM vyuGRTransferChargesClearing transferClr
@@ -117,6 +107,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId     
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 -- OUTER APPLY (    
 --  SELECT TOP 1    
 --   ga.strAccountId    
@@ -136,19 +128,7 @@ WHERE
 AND ReceiptCharge.ysnAccrue = 1      
 --HANDLE RECEIPT WHICH intEntityVendorId IS NULL
 AND ISNULL(Receipt.intEntityVendorId, 0) = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only
-AND NOT EXISTS (
-    SELECT TOP 1 1
-    FROM tblICInventoryReceipt IR
-    INNER JOIN tblGRStorageHistory SH
-        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
-    INNER JOIN tblGRCustomerStorage CS
-        ON CS.intCustomerStorageId = SH.intCustomerStorageId
-        AND CS.ysnTransferStorage = 0
-    INNER JOIN tblGRTransferStorageReference TSR
-        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
-    WHERE IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND IR.strReceiptNumber = Receipt.strReceiptNumber
-)
+AND transferClr.intInventoryReceiptChargeId IS NULL
 -- AND NOT EXISTS (
 --     SELECT intInventoryReceiptChargeId
 --     FROM vyuGRTransferChargesClearing transferClr
@@ -189,6 +169,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
 )  
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId     
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 -- OUTER APPLY (    
 --  SELECT TOP 1    
 --   ga.strAccountId    
@@ -210,19 +192,7 @@ AND ReceiptCharge.ysnAccrue = 1
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
 --HANDLE RECEIPT WHICH intEntityVendorId IS NULL
 AND ReceiptCharge.intEntityVendorId != ISNULL(Receipt.intEntityVendorId, 0) --make sure that the result would be for third party vendor only    
-AND NOT EXISTS (
-    SELECT TOP 1 1
-    FROM tblICInventoryReceipt IR
-    INNER JOIN tblGRStorageHistory SH
-        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
-    INNER JOIN tblGRCustomerStorage CS
-        ON CS.intCustomerStorageId = SH.intCustomerStorageId
-        AND CS.ysnTransferStorage = 0
-    INNER JOIN tblGRTransferStorageReference TSR
-        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
-    WHERE IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND IR.strReceiptNumber = Receipt.strReceiptNumber
-)
+AND transferClr.intInventoryReceiptChargeId IS NULL
 -- AND NOT EXISTS (
 --     SELECT intInventoryReceiptChargeId
 --     FROM vyuGRTransferChargesClearing transferClr
@@ -305,6 +275,8 @@ INNER JOIN tblICInventoryReceipt receipt
     ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId      
 INNER JOIN tblSMCompanyLocation compLoc      
     ON receipt.intLocationId = compLoc.intCompanyLocationId    
+LEFT JOIN vyuGRTransferChargesClearing transferClr
+    ON transferClr.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -313,6 +285,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
 WHERE       
     billDetail.intInventoryReceiptChargeId IS NOT NULL      
+    AND transferClr.intInventoryReceiptChargeId IS NULL
 -- AND receiptCharge.ysnInventoryCost = 0
 AND bill.ysnPosted = 1  
 -- AND NOT EXISTS (
@@ -320,19 +293,6 @@ AND bill.ysnPosted = 1
 --     FROM vyuGRTransferChargesClearing transferClr
 --     WHERE transferClr.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
 -- )  
-AND NOT EXISTS (
-    SELECT TOP 1 1
-    FROM tblICInventoryReceipt IR
-    INNER JOIN tblGRStorageHistory SH
-        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
-    INNER JOIN tblGRCustomerStorage CS
-        ON CS.intCustomerStorageId = SH.intCustomerStorageId
-        AND CS.ysnTransferStorage = 0
-    INNER JOIN tblGRTransferStorageReference TSR
-        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
-    WHERE IR.intInventoryReceiptId = receipt.intInventoryReceiptId
-    AND IR.strReceiptNumber = receipt.strReceiptNumber
-)
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl

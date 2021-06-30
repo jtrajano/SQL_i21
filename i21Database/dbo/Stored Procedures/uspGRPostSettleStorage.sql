@@ -1842,6 +1842,7 @@ BEGIN TRY
 							,@intSettleStorageId
 							,@strBatchId
 							,@intCreatedUserId
+							,@dtmClientPostDate
 							,@ysnPosted
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
@@ -1988,15 +1989,15 @@ BEGIN TRY
 					AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
 					and a.intItemType = 1
 
-					IF @ysnFromPriceBasisContract = 1
-					BEGIN
-						UPDATE SVC
-						SET SVC.dblUnits = CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (@dblTotalUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity ELSE @dblTotalUnits END
-						FROM @SettleVoucherCreate SVC
-						INNER JOIN tblGRCustomerStorage CS
-							ON CS.intCustomerStorageId = SVC.intCustomerStorageId
-						WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
-					END
+					-- IF @ysnFromPriceBasisContract = 1
+					-- BEGIN
+					-- 	UPDATE SVC
+					-- 	SET SVC.dblUnits = CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (@dblTotalUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity ELSE @dblTotalUnits END
+					-- 	FROM @SettleVoucherCreate SVC
+					-- 	INNER JOIN tblGRCustomerStorage CS
+					-- 		ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					-- 	WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
+					-- END
 					
 				
 				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
@@ -2362,15 +2363,16 @@ BEGIN TRY
 							JOIN tblICItem b
 									ON b.intItemId = a.intItemId and b.strType = 'Inventory'
 
-
+				
 						update  a set 
-								dblQuantityToBill = isnull(@total_units_for_voucher, dblQuantityToBill), 
-								dblNetWeight = isnull(@total_units_for_voucher, dblNetWeight),
-								dblOrderQty =  isnull(@total_units_for_voucher, dblOrderQty)
+								dblQuantityToBill = case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblQuantityToBill) end, 
+								dblNetWeight = case when b.ysnDiscountFromGrossWeight = 1 then dblNetWeight else isnull(@total_units_for_voucher, dblNetWeight) end,
+								dblOrderQty =  case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblOrderQty) end
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
-							where b.intItemType = 2
+							where b.intItemType in (2, 3)
+													
 					end
 
 				---Adding Freight Charges.

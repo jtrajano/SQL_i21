@@ -3,9 +3,11 @@ AS
 
 MERGE tblApiMonthlyRequestUsage WITH (HOLDLOCK) AS TARGET
 USING (
-	SELECT * 
+	SELECT guiSubscriptionId, strName, strMethod, strPath, intMonth, strMonth, intYear, 
+		MAX(strLastStatus) strLastStatus, MAX(dtmDateLastUpdated) dtmDateLastUpdated, SUM(intCount) intCount
 	FROM tblApiMonthlyRequestUsageStaging 
 	WHERE guiStagingIdentifier = @guiStagingIdentifier
+	GROUP BY guiSubscriptionId, strName, strMethod, strPath, intMonth, strMonth, intYear
 ) AS SOURCE 
 ON (TARGET.strName = SOURCE.strName
 	AND TARGET.strMethod = SOURCE.strMethod

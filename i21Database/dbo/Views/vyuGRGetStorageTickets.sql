@@ -29,8 +29,7 @@ SELECT DISTINCT
     ,strReceiptNumber					= IR.strReceiptNumber
     ,ysnReadyForTransfer				= CAST(
 											CASE 
-												WHEN DeliverySheet.ysnPost = 1 THEN 1
-												WHEN CS.intTicketId IS NOT NULL THEN 1
+												WHEN DeliverySheet.ysnPost = 1 OR CS.intTicketId IS NOT NULL OR CS.ysnTransferStorage = 1 THEN 1
 												ELSE 0
 											END AS BIT
 										)

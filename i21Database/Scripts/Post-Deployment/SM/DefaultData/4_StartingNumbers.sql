@@ -13,6 +13,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Derivative Entry'
 	WHERE strTransactionType = N'FutOpt Transaction'
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Grain Receipt', strModule = 'Ticket Management'
+	WHERE strTransactionType = 'Canadian Grain Receipt'
+
 GO
 	PRINT N'BEGIN RENAME OF TRANSACTION'
 
@@ -1498,8 +1501,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Responsible Party Task' and strModule = 'Cash Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 157
+			,[strTransactionType]	= N'Grain Receipt'
+			,[strPrefix]			= N'GR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Ticket Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
 
-	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF

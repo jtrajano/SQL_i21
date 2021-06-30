@@ -14,7 +14,7 @@ A.intBillId
 				 + ISNULL(RTRIM(companySetup.strZip),'') + ' ' + ISNULL(RTRIM(companySetup.strCity), '') + ' ' + ISNULL(RTRIM(companySetup.strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(companySetup.strCountry) + CHAR(13) + char(10), '')
 ,strShipFrom = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone) COLLATE Latin1_General_CI_AS
-,strShipFrom2 = ISNULL(RTRIM(A.strShipFromAddress) + CHAR(13) + char(10), '')
+,strShipFromNoState = ISNULL(RTRIM(A.strShipFromAddress) + CHAR(13) + char(10), '')
 				+ ISNULL('' + RTRIM(A.strShipFromZipCode) + ' ', '')
 				+ ISNULL(RTRIM(A.strShipFromCity) + CHAR(10), '')
 				+ ISNULL(RTRIM(A.strShipFromState) + CHAR(13) + char(10), '')

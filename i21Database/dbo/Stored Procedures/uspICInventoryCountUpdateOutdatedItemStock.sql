@@ -12,4 +12,6 @@ FROM
 	tblICInventoryCountDetail cd
 	INNER JOIN vyuICGetInventoryCountOutdatedItemStock os 
 		ON os.intInventoryCountDetailId = cd.intInventoryCountDetailId
-WHERE cd.intInventoryCountId = @intInventoryCountId
+WHERE 
+	cd.intInventoryCountId = @intInventoryCountId
+

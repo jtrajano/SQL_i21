@@ -369,7 +369,7 @@ BEGIN TRY
 		,strStraussShipmentLabel				= (CASE WHEN PO.strPositionType = 'Spot' THEN 'DELIVERY' ELSE 'SHIPMENT' END)
 		,strStraussShipment						= CONVERT(VARCHAR, @dtmStartDate, 101) + ' - ' + CONVERT(VARCHAR, @dtmEndDate, 101)
 		,strDestinationPointName				= (CASE WHEN PO.strPositionType = 'Spot' THEN CT.strCity ELSE @strDestinationPort END)
-		,strStraussCondition     				= CB.strFreightTerm + '(' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
+		,strStraussCondition     				= CB.strFreightTerm + ' (' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'
