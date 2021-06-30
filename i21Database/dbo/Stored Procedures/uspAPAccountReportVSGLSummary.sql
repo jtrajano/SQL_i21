@@ -729,6 +729,6 @@ AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN '1/1/1900' AND @currentDateS
 SELECT 
     A.dblBalance AS dblReportBalance,
     B.dblBalance AS dblGLBalance,
-    A.dblBalance + B.dblBalance AS dblDifference
+    A.dblBalance - B.dblBalance AS dblDifference
 FROM tmpAPAccountBalance A
 CROSS APPLY tmpAPGLAccountBalance B
