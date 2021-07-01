@@ -145,7 +145,17 @@ BEGIN
 		FROM	vyuCTEntityToContact CH
 		WHERE	intEntityId = @intEntityId
 	END
+	IF EXISTS ( 
+	SELECT	DISTINCT	1 
+	FROM	vyuCTEntityToContact 
+	WHERE	intEntityId = @intEntityId
+	AND		ISNULL(strEmail,'') <> '' 
+	AND     strEmail NOT LIKE  '_%@__%.__%' )
 
+	BEGIN 
+		RAISERROR('Entity has invalid Email Address.', 16, 1);
+		RETURN;
+	END
 
 	SELECT	@strNumber	=	STUFF(															
 									(
