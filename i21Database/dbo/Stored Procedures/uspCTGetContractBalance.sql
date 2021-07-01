@@ -46,8 +46,8 @@ BEGIN
 		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY cb.intContractDetailId ORDER BY cb.dtmCreatedDate DESC)
 			, cb.intContractDetailId
 			, cb.intContractStatusId
-			, dblFutures = case when cd.intPricingTypeId = 1 then cd.dblFutures else (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) end
-			, dblBasis = case when cd.intPricingTypeId = 1 then cd.dblBasis else (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblBasis END) end
+			, dblFutures = CASE WHEN cb.intPricingTypeId IN (1, 3) THEN ISNULL(cb.dblFutures, cd.dblFutures) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) END
+			, dblBasis = CASE WHEN cb.intPricingTypeId IN (1, 2, 8) THEN ISNULL(cb.dblBasis, cd.dblBasis) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblBasis END) END
 		FROM tblCTContractBalanceLog cb
 		join tblCTContractDetail cd on cd.intContractDetailId = cb.intContractDetailId
 		WHERE dbo.fnRemoveTimeOnDate((case when @IntLocalTimeOffset is not null then dateadd(minute,@IntLocalTimeOffset,DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), cb.dtmTransactionDate)) else cb.dtmTransactionDate end)) <= @dtmEndDate
@@ -97,7 +97,7 @@ BEGIN
 		, intContractStatusId
 	FROM (
 		SELECT intContractBalanceId = MAX(intContractBalanceId)
-			, dtmTransactionDate		= MAX(dtmTransactionDate)
+			, dtmTransactionDate = MAX(dtmTransactionDate)
 			, intContractHeaderId
 			, strType
 			, Stat.intContractDetailId
@@ -121,20 +121,19 @@ BEGIN
 			, intFutureMonthId
 			, strDeliveryMonth
 			, strFutureMonth
-			, dblFutures 						=	CASE WHEN MAX(Stat.dblFutures) IS NOT NULL THEN MAX(Stat.dblFutures)
-														ELSE ROUND( (CASE WHEN ISNULL(MAX(cb.dblFutures), 0) = 0 THEN NULL
-																		ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM (CASE WHEN ISNULL(cb.dblFutures, 0) <> 0 THEN cb.dblFutures * dblOrigQty ELSE 0 END)
-																															/ SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6))
-																				ELSE NULL END
-																		END), 2)
-														END
-			, dblBasis 							= 	CASE WHEN MAX(Stat.dblBasis) IS NOT NULL THEN MAX(Stat.dblBasis)
-														ELSE ROUND( (CASE WHEN ISNULL(MAX(cb.dblBasis), 0) = 0 THEN NULL
-																		ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM (CASE WHEN ISNULL(cb.dblBasis, 0) <> 0 THEN cb.dblBasis * dblOrigQty ELSE 0 END)
-																															/ SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6))
-																				ELSE NULL END
-																		END), 2)
-														END
+			, dblFutures = CASE WHEN MAX(Stat.dblFutures) IS NOT NULL THEN MAX(Stat.dblFutures)
+								ELSE ROUND(( CASE WHEN ISNULL(MAX(cb.dblFutures), 0) = 0 THEN NULL
+												ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0
+															THEN CAST (SUM( CASE WHEN ISNULL(cb.dblFutures, 0) <> 0 THEN cb.dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6))
+														ELSE NULL END
+													END), 2) END
+				
+			, dblBasis = CASE WHEN MAX(Stat.dblBasis) IS NOT NULL THEN MAX(Stat.dblBasis)
+							ELSE ROUND(( CASE WHEN ISNULL(MAX(cb.dblBasis), 0) = 0 THEN NULL
+											ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0
+															THEN CAST (SUM( CASE WHEN ISNULL(cb.dblBasis, 0) <> 0 THEN cb.dblBasis * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6))
+													ELSE NULL END
+												END), 2) END
 			, strBasisUOM
 			, dblQuantity 						= CAST (SUM(dblQuantity) AS NUMERIC(20,6))
 			, strQuantityUOM
@@ -184,8 +183,9 @@ BEGIN
 				, strPrintOption				= 	@strPrintOption
 				, CBL.intContractTypeId
 				, CBL.intEntityId
-				, dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Load is%' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
-									ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Quantity is%' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
+				--, dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Load is%' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
+				--					ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Quantity is%' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
+				, CBL.dblOrigQty
 				, dblFutures					=	CASE WHEN CBL.intPricingTypeId IN (1, 3) AND CD.dblFutures IS NOT NULL THEN CD.dblFutures
 														ELSE (CASE WHEN CBL.intPricingTypeId = 1 THEN PF.dblPriceWORollArb ELSE NULL END) END  
 				, dblBasis						=	CASE WHEN CBL.intPricingTypeId = 3 THEN NULL ELSE CAST(isnull(CBL.dblBasis, 0) AS NUMERIC(20,6)) END
@@ -207,8 +207,7 @@ BEGIN
 			LEFT JOIN tblICUnitMeasure			BUOM		ON BUOM.intUnitMeasureId = BASISUOM.intUnitMeasureId
 			LEFT JOIN tblICItemUOM				PriceUOM	ON PriceUOM.intItemUOMId = CD.intPriceItemUOMId
 			LEFT JOIN tblICUnitMeasure			PUOM		ON PUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
-			LEFT JOIN tblCTPriceFixation 		PF 			ON PF.intContractDetailId = CD.intContractDetailId
-
+			LEFT JOIN tblCTPriceFixation 		PF 			ON PF.intContractDetailId = CD.intContractDetailId	
 			WHERE CBL.strTransactionType = 'Contract Balance'
 		) cb
 		INNER JOIN @tblStatus Stat ON cb.intContractDetailId = Stat.intContractDetailId
@@ -252,4 +251,5 @@ BEGIN
 			,Stat.intContractStatusId
 		HAVING SUM(dblQuantity) > 0
 	) tbl
+
 END
