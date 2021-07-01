@@ -458,7 +458,8 @@ BEGIN TRY
 		, dblShipmentQuantity = Shipment.dblQuantity
 		, dblBillQty = Bill.dblQuantity
 		, ysnOpenLoad = ISNULL(OL.ysnOpenLoad, 0)
-		, ysnContractAllocated = CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
+		--, ysnContractAllocated = CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
+        , ysnContractAllocated = CAST(CASE WHEN isnull(AD.dblAllocatedQty,0) > 0 THEN 1 ELSE 0 END AS BIT)
 		, strFreightBasisUOM = FBUM.strUnitMeasure
 		, strFreightBasisBaseUOM = FBBUM.strUnitMeasure
 		, CD.intRefFuturesMarketId
@@ -471,6 +472,7 @@ BEGIN TRY
 		, RefFuturesCurrency.strCurrency strRefFuturesCurrency
 		, RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure
 		, ysnWithPriceFix = case when isnull(CT.intPriceContractId,0) = 0 then convert(bit,0) else convert(bit,1) end
+        ,dblAllocatedQty = AD.dblAllocatedQty
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -501,7 +503,10 @@ BEGIN TRY
 	LEFT JOIN @tblInvoice Invoice ON Invoice.intContractDetailId = CD.intContractDetailId
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
+	--LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
+    outer apply (
+        select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
+    ) AD
 	LEFT JOIN tblICItemUOM FB ON FB.intItemUOMId = CD.intFreightBasisUOMId
 	LEFT JOIN tblICUnitMeasure FBUM ON FBUM.intUnitMeasureId = FB.intUnitMeasureId
 	LEFT JOIN tblICItemUOM FBB ON FBB.intItemUOMId = CD.intFreightBasisBaseUOMId
