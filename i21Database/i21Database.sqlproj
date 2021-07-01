@@ -9438,6 +9438,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
+    <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping_1.sql" />
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkInventoryAdjustmentTransaction.sql" />
