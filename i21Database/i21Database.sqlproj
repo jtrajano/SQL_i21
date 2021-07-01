@@ -9507,6 +9507,8 @@
     <Build Include="dbo\Tables\tblIPBillItem.sql" />
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping.sql" />
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping200.sql" />
+    <Build Include="dbo\Stored Procedures\uspVRAddTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspBBAddTransactionLinks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
