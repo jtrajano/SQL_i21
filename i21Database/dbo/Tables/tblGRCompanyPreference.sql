@@ -37,15 +37,6 @@
     --[ysnStorageChargeAccountUseIncome] BIT NOT NULL DEFAULT(0),
     
 
-    --Grain Receipt Report item binding
-    [intGRRItemMarketingFeeId] int null,
-    [intGRRItemTestWeightId] int null,
-    [intGRRItemCCFMId] int null,
-    [intGRRItemGradeId] int null,
-    [intGRRItemFactorId] int null,
-    [intGRRItemProteinId] int null,
-    [intGRRItemMoistureId] int null,
-    [intGRRItemSplitId] int null,
     
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MarketingFeeId] FOREIGN KEY ([intGRRItemMarketingFeeId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_TestWeightId] FOREIGN KEY ([intGRRItemTestWeightId]) REFERENCES [tblICItem]([intItemId]),
