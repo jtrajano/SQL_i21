@@ -797,6 +797,7 @@ BEGIN TRY
 						   (
 								intPromoSalesListId
 								, intPromoItemListId
+								, dblCost
 								, intQuantity
 								, dblPrice
 								, intConcurrencyId
@@ -804,6 +805,7 @@ BEGIN TRY
 						   SELECT 
 								 @intNewPromotionCOMBOListId AS intPromoSalesListId
 								 , ItemListTwo.intPromoItemListId
+								 , SalesListDetail.dblCost
 								 , SalesListDetail.intQuantity
 								 , SalesListDetail.dblPrice
 								 , SalesListDetail.intConcurrencyId
@@ -986,6 +988,7 @@ BEGIN TRY
 						   (
 								intPromoSalesListId
 								, intPromoItemListId
+								, dblCost
 								, intQuantity
 								, dblPrice
 								, intConcurrencyId
@@ -993,6 +996,7 @@ BEGIN TRY
 						   SELECT DISTINCT
 								 @intNewPromotionMIXMATCHListId AS intPromoSalesListId
 								 , ItemListTwo.intPromoItemListId
+								 , SalesListDetail.dblCost
 								 , SalesListDetail.intQuantity
 								 , SalesListDetail.dblPrice
 								 , SalesListDetail.intConcurrencyId
