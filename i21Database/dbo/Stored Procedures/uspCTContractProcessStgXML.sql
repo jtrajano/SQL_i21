@@ -1961,35 +1961,35 @@ BEGIN TRY
 					--		SELECT @strErrorMessage = 'Shipper ' + @strShipper + ' is not available.'
 					--	END
 					--END
-					SELECT @intShipToEntityId = NULL
+					--SELECT @intShipToEntityId = NULL
 
-					SELECT @intShipToId = NULL
+					--SELECT @intShipToId = NULL
 
-					SELECT @intPurchasingGroupId = NULL
+					--SELECT @intPurchasingGroupId = NULL
 
-					SELECT @intShipToEntityId = Customer.intEntityId
-					FROM tblEMEntity Customer
-					JOIN tblEMEntityType ET ON ET.intEntityId = Customer.intEntityId
-						AND ET.strType = 'Customer'
-					WHERE Customer.strName = @strShipToName
+					--SELECT @intShipToEntityId = Customer.intEntityId
+					--FROM tblEMEntity Customer
+					--JOIN tblEMEntityType ET ON ET.intEntityId = Customer.intEntityId
+					--	AND ET.strType = 'Customer'
+					--WHERE Customer.strName = @strShipToName
 
-					SELECT @intShipToId = intEntityLocationId
-					FROM tblEMEntityLocation
-					WHERE strLocationName = @strShipToLocationName
-						AND intEntityId = @intShipToEntityId
+					--SELECT @intShipToId = intEntityLocationId
+					--FROM tblEMEntityLocation
+					--WHERE strLocationName = @strShipToLocationName
+					--	AND intEntityId = @intShipToEntityId
 
-					IF @strShipToLocationName IS NOT NULL
-						AND @intShipToId IS NULL
-					BEGIN
-						IF @strErrorMessage <> ''
-						BEGIN
-							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ship To ' + @strShipToLocationName + ' is not available.'
-						END
-						ELSE
-						BEGIN
-							SELECT @strErrorMessage = 'Ship To ' + @strShipToLocationName + ' is not available.'
-						END
-					END
+					--IF @strShipToLocationName IS NOT NULL
+					--	AND @intShipToId IS NULL
+					--BEGIN
+					--	IF @strErrorMessage <> ''
+					--	BEGIN
+					--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ship To ' + @strShipToLocationName + ' is not available.'
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SELECT @strErrorMessage = 'Ship To ' + @strShipToLocationName + ' is not available.'
+					--	END
+					--END
 
 					SELECT @intPurchasingGroupId = intPurchasingGroupId
 					FROM tblSMPurchasingGroup
