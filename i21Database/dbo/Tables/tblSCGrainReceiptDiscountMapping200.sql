@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblSCGrainReceiptDiscountMapping]
+﻿CREATE TABLE [dbo].[tblSCGrainReceiptDiscountMapping200]
 (
 	[intGrainReceiptDiscountMapping200Id]	int not null identity(1,1)
 	,[intCommodityId]						int not null	   

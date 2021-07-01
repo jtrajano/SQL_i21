@@ -9506,7 +9506,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
     <Build Include="dbo\Tables\tblIPBillItem.sql" />
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping.sql" />
-    <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping_1.sql" />
+    <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping200.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
