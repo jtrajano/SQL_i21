@@ -14,8 +14,8 @@ CROSS APPLY (
 		strNamespace
 	FROM tblSMScreen 
 	WHERE 
-		REVERSE(SUBSTRING(REVERSE(strNamespace), 1, CHARINDEX('.', REVERSE(strNamespace)) - 1)) COLLATE Latin1_General_CI_AS = 
-		REVERSE(SUBSTRING(REVERSE(SUBSTRING(A.strRoute, 1, CHARINDEX('?', A.strRoute) - 1)), 1 , CHARINDEX('/', REVERSE(SUBSTRING(A.strRoute, 1, CHARINDEX('?', A.strRoute) - 1))) - 1)) COLLATE Latin1_General_CI_AS AND ysnSearch = 0
+		strRoute LIKE ('[#][/]%[/]' + REVERSE(SUBSTRING(REVERSE(strNamespace), 1, CHARINDEX('.', REVERSE(strNamespace)) - 1)) COLLATE Latin1_General_CI_AS + '[/|?]%')
+		AND ysnSearch = 0
 ) D
 WHERE ISNULL(A.intOriginalScreenId, 0) = 0 AND C.strNamespace = 'EntityManagement.view.Entity' AND ISNULL(A.strRoute, '') <> '' AND A.strRoute NOT LIKE '?activeTab%'
 
