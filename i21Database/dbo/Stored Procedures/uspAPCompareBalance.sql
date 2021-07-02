@@ -2,7 +2,8 @@
 (
     @asOfDate DATETIME = NULL,
     @emailProfileName NVARCHAR(200) = NULL,
-    @recipients NVARCHAR(MAX) = NULL
+    @recipients NVARCHAR(MAX) = NULL,
+    @emailSubject NVARCHAR(500)
 )
 AS
 BEGIN
@@ -10,6 +11,7 @@ BEGIN
     DECLARE 
 	@companyName AS NVARCHAR(MAX) 
  	,@resultAsHTML AS NVARCHAR(MAX) = '';
+    DECLARE @subject NVARCHAR(500) = ISNULL(@emailSubject, 'AP Balance Compare');
 
      SELECT TOP 1 @companyName = ISNULL(strCompanyName, '') FROM tblSMCompanySetup
 
@@ -88,7 +90,7 @@ BEGIN
             EXEC msdb.dbo.sp_send_dbmail
                 @profile_name = @emailProfileName
                 ,@recipients = @recipients
-                ,@subject = 'AP Balance Compare'
+                ,@subject = @subject
                 ,@body = @resultAsHTML
                 ,@body_format = 'HTML'			
 
