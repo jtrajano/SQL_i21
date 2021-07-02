@@ -3,7 +3,7 @@
     @asOfDate DATETIME = NULL,
     @emailProfileName NVARCHAR(200) = NULL,
     @recipients NVARCHAR(MAX) = NULL,
-    @emailSubject NVARCHAR(500)
+    @emailSubject NVARCHAR(500) = NULL
 )
 AS
 BEGIN
