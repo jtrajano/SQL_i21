@@ -2,7 +2,7 @@
 	,@intLotId INT = NULL
 	,@intUserSecurityId INT
 	,@dblPhysicalCount NUMERIC(18, 6)
-	,@intPhysicalCountUOMId INT
+	,@intPhysicalCountUOMId INT=NULL
 	,@intItemId INT = NULL
 	,@intItemLocationId INT = NULL
 	,@intItemUOMId INT = NULL
