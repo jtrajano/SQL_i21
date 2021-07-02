@@ -4,6 +4,34 @@ AS
 
 BEGIN
 
+	-- START TR-1611 - Sub ledger Transaction traceability
+	DECLARE @tblTransactionLinks udtICTransactionLinks 
+    INSERT INTO @tblTransactionLinks (
+        strOperation
+        , intSrcId
+        , strSrcTransactionNo
+        , strSrcTransactionType
+        , strSrcModuleName
+        , intDestId
+        , strDestTransactionNo
+        , strDestTransactionType
+        , strDestModuleName
+    )    
+    SELECT strOperation	= 'Create'
+        , intSrcId = MR.intMeterReadingId
+        , strSrcTransactionNo = MR.strTransactionId
+        , strSrcTransactionType = 'Meter Billing'
+        , strSrcModuleName  = 'Meter Billing'
+        , intDestId	= MR.intMeterReadingId
+        , strDestTransactionNo =  MR.strTransactionId
+        , strDestTransactionType = 'Meter Billing'
+        , strDestModuleName = 'Meter Billing'
+    FROM tblMBMeterReading MR
+	WHERE MR.intMeterReadingId = @TransactionId
+
+    EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+	-- END TR-1611
+
 	SELECT *
 	INTO #tmpMeterReading
 	FROM vyuMBGetMeterReadingDetail
