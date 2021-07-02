@@ -493,10 +493,9 @@ BEGIN TRY
 		,dblShipmentQuantity = Shipment.dblQuantity
 		,dblBillQty          = Bill.dblQuantity
 		,ISNULL(OL.ysnOpenLoad,0)	AS ysnOpenLoad
-		,CAST(CASE WHEN isnull(AD.dblAllocatedQty,0) > 0 THEN 1 ELSE 0 END AS BIT) AS ysnContractAllocated
+		,CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnContractAllocated
 		,strFreightBasisUOM = FBUM.strUnitMeasure
 		,strFreightBasisBaseUOM = FBBUM.strUnitMeasure
-		,dblAllocatedQty = AD.dblAllocatedQty
 
 	FROM			ContractDetail					CD
 			JOIN    CTE1							CT	ON CT.intContractDetailId				=		CD.intContractDetailId
@@ -538,10 +537,7 @@ BEGIN TRY
 	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
 	LEFT	JOIN	tblAPBillDetail					BD	ON	BD.intContractDetailId				=		CD.intContractDetailId
-	--LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intSContractDetailId = CD.intContractDetailId	
-	outer apply (
-		select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
-	) AD
+	LEFT	JOIN	tblLGAllocationDetail			AD	ON AD.intSContractDetailId = CD.intContractDetailId	
 	
 	LEFT	JOIN	tblICItemUOM					FB	ON	FB.intItemUOMId				=	CD.intFreightBasisUOMId		
 	LEFT	JOIN	tblICUnitMeasure				FBUM	ON FBUM.intUnitMeasureId	=	FB.intUnitMeasureId			
