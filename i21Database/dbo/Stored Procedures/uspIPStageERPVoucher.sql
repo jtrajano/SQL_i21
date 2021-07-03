@@ -77,9 +77,7 @@ BEGIN TRY
 				,@strXml
 
 			SELECT @strFileName = [Filename]
-			FROM OPENXML(@idoc, 'Batches/Batch/Documents/Document', 2) WITH (
-					[Filename] NVARCHAR(50)
-					)
+			FROM OPENXML(@idoc, 'Batches/Batch/Documents/Document', 2) WITH ([Filename] NVARCHAR(50))
 
 			SELECT @strVendorAccountNo = ExternalId
 				,@strVendorName = Name
@@ -414,7 +412,13 @@ BEGIN TRY
 						END
 					)
 				,Description
-				,Convert(NUMERIC(18, 6), Qty)
+				,Convert(NUMERIC(18, 6), (
+						CASE 
+							WHEN Qty = ''
+								THEN NULL
+							ELSE Replace(Qty,',','')
+							END
+						))
 				,(
 					CASE 
 						WHEN Uom = ''
@@ -422,7 +426,13 @@ BEGIN TRY
 						ELSE Uom
 						END
 					)
-				,Convert(NUMERIC(18, 6), UnitPrice)
+				,Convert(NUMERIC(18, 6), (
+						CASE 
+							WHEN UnitPrice = ''
+								THEN NULL
+							ELSE Replace(UnitPrice,',','')
+							END
+						))
 				,(
 					CASE 
 						WHEN [Unit Rate Per UOM] = ''
@@ -437,9 +447,21 @@ BEGIN TRY
 						ELSE [Unit Rate Currency]
 						END
 					)
-				,Convert(NUMERIC(18, 6), ExtAmt)
+				,Convert(NUMERIC(18, 6), (
+						CASE 
+							WHEN ExtAmt = ''
+								THEN NULL
+							ELSE Replace(ExtAmt,',','')
+							END
+						))
 				,[ICO Marks]
-				,Convert(NUMERIC(18, 6), [Net Weight])
+				,Convert(NUMERIC(18, 6), (
+						CASE 
+							WHEN [Net Weight] = ''
+								THEN NULL
+							ELSE Replace([Net Weight],',','')
+							END
+						))
 				,(
 					CASE 
 						WHEN [Quantity UOM] = ''
@@ -459,6 +481,7 @@ BEGIN TRY
 					,[Text]
 					,RecId
 				FROM @FinalVoucherDetail
+				Where RecId=1
 				) AS SourceTable
 			PIVOT(MAX([Text]) FOR Name IN (
 						ArticleNumber
