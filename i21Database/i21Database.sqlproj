@@ -9516,6 +9516,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetItemStockByUPCCode.sql" />
     <Build Include="dbo\Stored Procedures\uspMFItemAdjust.sql" />
     <Build Include="dbo\Stored Procedures\uspMFItemMove.sql" />
+    <Build Include="dbo\Tables\tblSCTicketAttachmentRemoteExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCInsertTicketAttachment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
