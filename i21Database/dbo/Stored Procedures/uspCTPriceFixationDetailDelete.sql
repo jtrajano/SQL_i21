@@ -92,7 +92,7 @@ BEGIN TRY
 				FROM vyuAPBillPayment a
 				JOIN tblAPPayment b on b.intPaymentId = a.intPaymentId
 				JOIN tblSMPaymentMethod c on c.intPaymentMethodID = b.intPaymentMethodId
-				WHERE a.intBillId = @Id and c.strPaymentMethod in ('Cash','Check','eCheck','ACH')
+				WHERE a.intBillId = @Id and c.strPaymentMethod in ('Cash','Check','eCheck')
 			)
 		begin
 			EXEC uspAPDeletePayment @Id, @intUserId
