@@ -142,6 +142,9 @@ BEGIN TRY
 		,@intFreightCostItemId = intFreightCostItemId
 	FROM tblIPCompanyPreference
 
+	if @strVendorInvoiceFilePath is null
+	Select @strVendorInvoiceFilePath=''
+
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen
 	WHERE strNamespace = 'AccountsPayable.view.Voucher'
@@ -347,8 +350,8 @@ BEGIN TRY
 					,@strSubCurrency = NULL
 					,@dblTotalCost = 0
 					,@dblTotal = 0
-					,@intContractHeaderId=NULL
-					,@intContractDetailId=NULL
+					,@intContractHeaderId = NULL
+					,@intContractDetailId = NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
@@ -356,8 +359,8 @@ BEGIN TRY
 					,@strOrderUnitMeasure = strOrderUnitMeasure
 					,@strSubCurrency = strCurrency
 					,@dblTotal = dblTotal
-					,@intContractHeaderId=intContractHeaderId
-					,@intContractDetailId=intContractDetailId
+					,@intContractHeaderId = intContractHeaderId
+					,@intContractDetailId = intContractDetailId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -834,6 +837,11 @@ BEGIN TRY
 				) DetailTotal
 			WHERE A.intBillId = @intBillInvoiceId
 
+			SELECT @intTransactionId = intTransactionId
+			FROM tblSMTransaction
+			WHERE intRecordId = @intBillInvoiceId
+				AND intScreenId = @intScreenId
+
 			IF @dblTotalCost = @dblTotal
 			BEGIN
 				EXEC uspSMSubmitTransaction @type = 'AccountsPayable.view.Voucher'
@@ -888,6 +896,51 @@ BEGIN TRY
 					--		,intTransactionId
 					--END
 			END
+			ELSE
+			BEGIN
+				IF @intTransactionId IS NULL
+				BEGIN
+					INSERT INTO tblSMTransaction (
+						intScreenId
+						,intRecordId
+						,strTransactionNo
+						,intEntityId
+						,strApprovalStatus
+						,intConcurrencyId
+						)
+					SELECT @intScreenId
+						,@intTransactionId
+						,@strBillId
+						,@intEntityId
+						,'Waiting for Submit'
+						,1
+
+					SELECT @intTransactionId = SCOPE_IDENTITY()
+				END
+
+				INSERT INTO tblSMApproval (
+					dtmDate
+					,dblAmount
+					,dtmDueDate
+					,intSubmittedById
+					,strStatus
+					,ysnCurrent
+					,intScreenId
+					,ysnVisible
+					,intOrder
+					,intTransactionId
+					)
+				SELECT GETUTCDATE()
+					,0
+					,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+					,@intUserId
+					,'Waiting for Submit'
+					,1
+					,@intScreenId
+					,1
+					,1
+					,@intTransactionId
+			END
 
 			BEGIN TRY
 				SELECT @isPresent = 0
@@ -899,10 +952,7 @@ BEGIN TRY
 
 				IF @isPresent = 1
 				BEGIN
-					SELECT @intTransactionId = intTransactionId
-					FROM tblSMTransaction
-					WHERE strTransactionNo = @strBillId
-						AND intScreenId = @intScreenId
+					SELECT @strFileName = Replace(@strFileName, '.pdf', '')
 
 					EXEC [uspSMCreateAttachmentFromFile] @transactionId = @intTransactionId -- the intTransactionId
 						,@fileName = @strFileName -- file name
