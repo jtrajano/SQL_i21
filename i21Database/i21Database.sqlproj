@@ -9483,6 +9483,8 @@
     <Build Include="dbo\Views\vyuICGetImportSetup.sql" />
     <Build Include="dbo\Tables\tblICImportSetup.sql" />
     <Build Include="dbo\Functions\fnCronDayOfWeek.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiGenerateReceiptFromRecurringJob.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiGenerateMappingObjectsRecurringJob.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

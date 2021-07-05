@@ -1,8 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspICEdiGenerateReceipt] 
-	@VendorId INT
-	, @LocationId INT
-	, @StoreLocations UdtCompanyLocations READONLY
-	, @UniqueId NVARCHAR(100)
+﻿CREATE PROCEDURE [dbo].[uspICEdiGenerateReceiptFromRecurringJob] 
+	 @UniqueId NVARCHAR(100)
 	, @UserId INT
 	, @ErrorCount INT OUTPUT
 	, @TotalRows INT OUTPUT
@@ -52,10 +49,10 @@ DECLARE @Charges TABLE(
 	, ItemDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS, RecordType NVARCHAR(50)
 )
 
-INSERT INTO @Stores EXEC [dbo].[uspICEdiGenerateMappingObjects] '0', @UniqueId
-INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjects] 'B', @UniqueId
-INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjects] 'A', @UniqueId
-INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjects] 'C', @UniqueId
+INSERT INTO @Stores EXEC [dbo].[uspICEdiGenerateMappingObjectsRecurringJob] '0', @UniqueId
+INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjectsRecurringJob] 'B', @UniqueId
+INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjectsRecurringJob] 'A', @UniqueId
+INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjectsRecurringJob] 'C', @UniqueId
 
 -- Implied decimal conversions
 UPDATE @Invoices 
@@ -97,35 +94,13 @@ BEGIN
 	SET @LogId = @@IDENTITY
 END
 
---DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
+DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
 
 -- It's needed to increment each store indices by 1 since the reset file index is now based on the invoice record.
 -- Need to equalize file indices of all groupings
 UPDATE @Stores SET FileIndex = FileIndex + 1
 
--- Regenerate missing stores using a default store. The number of invoices should be equal to the number of stores.
-INSERT INTO @Stores(
-	FileIndex
-	, RecordIndex
-	, RecordType
-	, StoreNumber
-)
-
-SELECT 
-	missing.FileIndex
-	, -1
-	, '0'
-	, CAST(st.intStoreNo AS NVARCHAR(500))
-FROM 
-	tblSTStore st
-	INNER JOIN @StoreLocations sl ON sl.intCompanyLocationId = st.intCompanyLocationId
-	CROSS JOIN (
-		SELECT FileIndex FROM @Invoices
-		EXCEPT
-		SELECT FileIndex FROM @Stores
-	) missing
-
-DEClARE @ReceiptStagingTable ReceiptStagingTable
+DECLARE @ReceiptStagingTable ReceiptStagingTable
 DECLARE @ReceiptOtherChargesTable ReceiptOtherChargesTableType
 DECLARE @ReceiptItemLotStagingTable ReceiptItemLotStagingTable
 
@@ -184,7 +159,7 @@ INSERT INTO @ReceiptStagingTable(
 )
 SELECT 
 	strReceiptType = 'Direct' 
-	,intEntityVendorId = @VendorId 
+	,intEntityVendorId = v.intEntityId 
 	,intShipFromId = el.intEntityLocationId 
 	,intLocationId = st.intLocationId 
 	,dtmDate = CASE WHEN ISDATE(inv.InvoiceDate) = 1 THEN CAST(inv.InvoiceDate AS DATETIME) ELSE NULL END
@@ -231,8 +206,16 @@ SELECT
 FROM 
 	@Invoices inv INNER JOIN @ReceiptStore st 
 		ON inv.FileIndex = st.FileIndex
-	INNER JOIN vyuAPVendor v 
-		ON v.intEntityId = @VendorId
+	CROSS APPLY (
+		SELECT TOP 1 
+			v.*
+		FROM 
+			vyuAPVendor v 
+		WHERE 			
+			SUBSTRING(v.strVendorId, PATINDEX('%[^0]%', v.strVendorId), LEN(v.strVendorId)) =
+			SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+			COLLATE SQL_Latin1_General_CP1_CS_AS
+	) v	
 	INNER JOIN @Items i 
 		ON i.FileIndex = inv.FileIndex
 	CROSS APPLY (
@@ -278,7 +261,7 @@ FROM
 				ON 1 = 1 
 	) it
 	LEFT OUTER JOIN tblEMEntityLocation el 
-		ON el.intEntityId = @VendorId
+		ON el.intEntityId = v.intEntityId
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
 	LEFT JOIN tblICItemLocation il 
@@ -316,7 +299,7 @@ INSERT INTO @ReceiptOtherChargesTable(
 	, dblAmount
 )
 SELECT 
-	intEntityVendorId = @VendorId 
+	intEntityVendorId = v.intEntityId
 	,strReceiptType = 'Direct'
 	,intLocationId = st.intLocationId 
 	,intShipViaId = v.intShipViaId 
@@ -326,17 +309,27 @@ SELECT
 	,strCostMethod = 'Amount'
 	,dblAmount = c.Amount
 FROM 
-	@Charges c INNER JOIN @ReceiptStore st 
+	@Charges c INNER JOIN @ReceiptStore st	
 		ON c.FileIndex = st.FileIndex
+	INNER JOIN @Invoices inv 
+		ON inv.FileIndex = c.FileIndex
 	INNER JOIN tblICItem i 
 		ON i.strItemNo = c.ItemDescription
-	INNER JOIN vyuAPVendor v 
-		ON v.intEntityId = @VendorId
+	CROSS APPLY (
+		SELECT TOP 1 
+			v.*
+		FROM 
+			vyuAPVendor v 
+		WHERE 			
+			SUBSTRING(v.strVendorId, PATINDEX('%[^0]%', v.strVendorId), LEN(v.strVendorId)) =
+			SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+			COLLATE SQL_Latin1_General_CP1_CS_AS
+	) v	
 	LEFT OUTER JOIN tblEMEntityLocation el 
-		ON el.intEntityId = @VendorId
+		ON el.intEntityId = v.intEntityId
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
-		AND ISNULL(c.Amount, 0) != 0
+		AND ISNULL(c.Amount, 0) <> 0
 
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
 	EXEC dbo.uspICAddItemReceipt 
@@ -420,7 +413,18 @@ SELECT
 	, 'Record imported.'
 	, 1
 FROM 
-	@Items i 
+	@Items i INNER JOIN @Invoices inv
+		ON i.FileIndex = inv.FileIndex
+	CROSS APPLY (
+		SELECT TOP 1 
+			v.*
+		FROM 
+			vyuAPVendor v 
+		WHERE 			
+			SUBSTRING(v.strVendorId, PATINDEX('%[^0]%', v.strVendorId), LEN(v.strVendorId)) =
+			SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+			COLLATE SQL_Latin1_General_CP1_CS_AS
+	) v	
 	OUTER APPLY (
 		SELECT 
 			intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
@@ -445,7 +449,7 @@ FROM
 				INNER JOIN tblEMEntity e
 					ON e.intEntityId = vendor.intEntityId
 			WHERE					
-				e.intEntityId = @VendorId
+				e.intEntityId = v.intEntityId
 				AND (
 					SUBSTRING(xref.strVendorProduct , PATINDEX('%[^0]%', xref.strVendorProduct +'.'), LEN(xref.strVendorProduct))					
 					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
