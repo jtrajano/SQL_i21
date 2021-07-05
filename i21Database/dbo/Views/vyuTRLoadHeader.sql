@@ -28,9 +28,9 @@ SELECT TL.intLoadHeaderId
 	, dblPrice = NULL
 	, dblCost = TR.dblUnitCost
 	, dblMargin = NULL
-	, dblTotalFreight = CASE WHEN SP.strGrossOrNet = 'Gross' THEN (dblGross * dblFreightRate * (1 + dblPurSurcharge / 100))
-						WHEN SP.strGrossOrNet = 'Net' THEN (dblNet * dblFreightRate * (1 + dblPurSurcharge / 100)) 
-						ELSE (dblGross * dblFreightRate * (1 + dblPurSurcharge / 100)) END
+	, dblTotalFreight = CASE WHEN SP.strGrossOrNet = 'Gross' THEN (TR.dblGross * TR.dblFreightRate * (1 + TR.dblPurSurcharge / 100))
+						WHEN SP.strGrossOrNet = 'Net' THEN (TR.dblNet * TR.dblFreightRate * (1 + TR.dblPurSurcharge / 100)) 
+						ELSE (TR.dblGross * TR.dblFreightRate * (1 + TR.dblPurSurcharge / 100)) END
 	, strDriver = Driver.strName
 	, dtmDateTime = TL.dtmLoadDateTime
 	, TL.ysnPosted
@@ -87,7 +87,7 @@ SELECT TL.intLoadHeaderId
 	, dblPrice = DD.dblPrice
 	, dblCost = Receipts.dblUnitCost
 	, dblMargin = DD.dblPrice - Receipts.dblUnitCost
-	, dblTotalFreight = (dblUnits * dblFreightRate * (1 + dblDistSurcharge / 100))
+	, dblTotalFreight = (DD.dblUnits * DD.dblFreightRate * (1 + DD.dblDistSurcharge / 100))
 	, strDriver = Driver.strName
 	, dtmDateTime = DH.dtmInvoiceDateTime
 	, TL.ysnPosted
