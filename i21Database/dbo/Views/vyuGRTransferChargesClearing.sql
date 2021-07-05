@@ -759,9 +759,20 @@ AND ReceiptCharge.ysnPrice = 1
             ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
     )  
         ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
+	OUTER APPLY (
+		SELECT TOP 1 gl.intAccountId, gla.strAccountId
+		FROM tblGLDetail gl
+		INNER JOIN vyuGLAccountDetail gla
+			ON gl.intAccountId = gla.intAccountId
+			AND gla.intAccountCategoryId = 45
+		WHERE gl.strTransactionId = TS.strTransferStorageTicket
+		AND gl.intTransactionId = TSR.intTransferStorageId
+		AND gl.strCode <> 'IC'
+	) APClearing
     WHERE       
         billDetail.intInventoryReceiptChargeId IS NOT NULL
     AND bill.ysnPosted = 1
+	AND APClearing.intAccountId IS NOT NULL
 
     -- Voucher for TRA (DP to DP) Charges using intCustomerStorageId in Bill Detail
     UNION ALL
@@ -843,7 +854,18 @@ AND ReceiptCharge.ysnPrice = 1
             ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
     )  
         ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
+	OUTER APPLY (
+		SELECT TOP 1 gl.intAccountId, gla.strAccountId
+		FROM tblGLDetail gl
+		INNER JOIN vyuGLAccountDetail gla
+			ON gl.intAccountId = gla.intAccountId
+			AND gla.intAccountCategoryId = 45
+		WHERE gl.strTransactionId = TS.strTransferStorageTicket
+		AND gl.intTransactionId = TSR.intTransferStorageId
+		AND gl.strCode <> 'IC'
+	) APClearing
     WHERE bill.ysnPosted = 1
+		AND APClearing.intAccountId IS NOT NULL
 
 ) charges  
 OUTER APPLY (
