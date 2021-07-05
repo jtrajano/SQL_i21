@@ -69,7 +69,14 @@ SELECT
 	,strSiteDescription = ISNULL(A.strDescription,'')
 	,strSiteRecurringPO = ISNULL(A.strRecurringPONumber,'')
 	,Driver.strEntityNo AS strDriverNumber
+	,CL.strLocationName AS strCompanyLocationName
+	,CL.strAddress AS strCompanyLocationAddress
+	,CL.strCity AS strCompanyLocationCity
+	,CL.strStateProvince AS strCompanyLocationState
+	,CL.strZipPostalCode AS strCompanyLocationZipCode
 FROM tblTMSite A
+INNER JOIN tblSMCompanyLocation CL
+	ON CL.intCompanyLocationId = A.intLocationId
 INNER JOIN tblTMCustomer B
 	ON A.intCustomerID = B.intCustomerID
 INNER JOIN tblEMEntity Ent
