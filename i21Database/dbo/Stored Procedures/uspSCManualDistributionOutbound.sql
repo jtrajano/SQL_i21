@@ -195,6 +195,7 @@ OPEN intListCursor;
 				SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
 			END
 			ELSE
+			BEGIN
 				IF(ISNULL(@_intLoadItemUOM,0) > 0)
 				BEGIN
 					SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@_intLoadItemUOM,@_intContractItemUom,@_dblTicketScheduleQuantity)

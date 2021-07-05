@@ -144,10 +144,24 @@ BEGIN
 
 END
 
+
+SELECT 
+	*
+INTO #tmpManualDistributionLineItem
+FROM @LineItem
+WHERE strDistributionOption = @strTicketDistributionOption
+
+INSERT INTO #tmpManualDistributionLineItem
+SELECT 
+	*
+FROM @LineItem
+WHERE strDistributionOption <> @strTicketDistributionOption
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, intLoadDetailId
-FROM @LineItem;
+FROM #tmpManualDistributionLineItem;
 
 OPEN intListCursor;
 
