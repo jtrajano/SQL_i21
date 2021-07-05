@@ -9838,6 +9838,7 @@
     <None Include="Scripts\Post-Deployment\SM\2120_AddUserPortalSettingsToContactImport.sql" />
     <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
+    <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
