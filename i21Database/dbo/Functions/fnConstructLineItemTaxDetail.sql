@@ -250,6 +250,7 @@ BEGIN
 	INNER JOIN tblSMTaxClass SMTC
 	ON IT.intTaxClassId = SMTC.intTaxClassId
 	WHERE strTaxClass Like '%Federal Excise Tax%'
+	AND ysnTaxExempt = 0
 	GROUP BY IT.strCalculationMethod
 
 	SELECT @DistrictTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
@@ -745,8 +746,14 @@ BEGIN
 					END
 					ELSE
 					BEGIN
-						DECLARE @TaxTotal NUMERIC(18,6) = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
+						DECLARE @TaxTotal NUMERIC(18,6)
 
+						IF(@GrossAmount = 0)
+						BEGIN
+							SET @NetPrice = @Price
+						END
+
+						SET @TaxTotal = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
 						SET @ItemExemptedTaxAmount = (@TaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
 						SET @ItemTaxAmount = (@TaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
 					END
