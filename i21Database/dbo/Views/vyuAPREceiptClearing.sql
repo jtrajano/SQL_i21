@@ -313,6 +313,7 @@ join (
 		 , intInventoryReceiptItemId
 		from tblGRStorageInventoryReceipt 
 			where intTransferStorageReferenceId is not null
+				and ysnUnposted = 0
 		group by intInventoryReceiptId
 		 , intInventoryReceiptItemId
 	) StorageTransfer
