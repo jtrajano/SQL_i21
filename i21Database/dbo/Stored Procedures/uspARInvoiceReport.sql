@@ -272,11 +272,11 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , blbSignature				= INV.blbSignature
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
-	 , strSubFormula			= INVOICEDETAIL.strSubFormula
+	 , strSubFormula			= INVOICEDETAIL.strSubFormula	
 	 , dtmCreated				= GETDATE()
 	 , strServiceChargeItem		= CASE WHEN SELECTEDINV.strInvoiceFormat 
 										IN ('By Customer Balance', 'By Invoice') 
-										THEN 'Service Charge on Past Due' + CHAR(13) + 'Balance as of: ' +  CAST(CAST(INV.dtmDate AS DATE) AS VARCHAR)
+										THEN 'Service Charge on Past Due ' + CHAR(13) + 'Balance as of: ' +  CONVERT(VARCHAR(10), INV.dtmDate, 101)
 										ELSE
 										''
 										END
