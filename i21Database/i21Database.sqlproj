@@ -9521,7 +9521,6 @@
     <Build Include="dbo\Views\vyuTRImportAttachmentDetail.sql" />
     <Build Include="dbo\Views\vyuTRQuote.sql" />
     <Build Include="dbo\Views\vyuTRAutomatedProcessStatusBol.sql" />
-    <Build Include="dbo\Tables\vyuTRImportRackPriceDetail.sql" />
     <Build Include="dbo\Views\vyuTRImportRackPriceDetail.sql" />
   </ItemGroup>
   <ItemGroup>
