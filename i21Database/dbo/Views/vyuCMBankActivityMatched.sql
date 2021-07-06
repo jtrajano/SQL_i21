@@ -2,7 +2,7 @@ CREATE VIEW vyuCMBankActivityMatched
 AS
 SELECT 
 Trans.intBankAccountId, --  FOR FILTERING
-A.intABRActivityMatchedDetailId intMatchedId,
+A.intABRActivityMatchedId intMatchedId,
 A.intABRActivityId,
 A.intTransactionId,
 Trans.strTransactionId,
@@ -16,7 +16,7 @@ Activity.strBankDescription,
 Activity.dblAmount dblActivityAmount,
 Activity.strDebitCredit
 FROM 
-tblCMABRActivityMatchedDetail A
+tblCMABRActivityMatched A
 CROSS APPLY(
 	SELECT
 	strABRActivityId,
