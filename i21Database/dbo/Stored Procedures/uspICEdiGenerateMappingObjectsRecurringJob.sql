@@ -8,8 +8,6 @@ DECLARE @ColumnName AS NVARCHAR(MAX)
 SELECT @ColumnName = ISNULL(@ColumnName + ',','') + QUOTENAME([Key])
 FROM (SELECT DISTINCT o.[Key] FROM tblICEdiMapObject o WHERE Identifier = @Identifier) AS Keys
 
-select @ColumnName
-
 SET @DynamicPivotQuery =
 N'
 SELECT 

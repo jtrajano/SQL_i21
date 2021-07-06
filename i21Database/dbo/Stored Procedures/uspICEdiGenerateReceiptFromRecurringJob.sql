@@ -54,6 +54,14 @@ INSERT INTO @Items EXEC [dbo].[uspICEdiGenerateMappingObjectsRecurringJob] 'B', 
 INSERT INTO @Invoices EXEC [dbo].[uspICEdiGenerateMappingObjectsRecurringJob] 'A', @UniqueId
 INSERT INTO @Charges EXEC [dbo].[uspICEdiGenerateMappingObjectsRecurringJob] 'C', @UniqueId
 
+SELECT 
+	@UserId = intEntityId
+FROM 
+	tblSMUserSecurity 
+WHERE 
+	NOT EXISTS (SELECT TOP 1 1 FROM tblSMUserSecurity u WHERE u.intEntityId = @UserId) 
+	AND strUserName = 'IRELYADMIN'
+
 -- Implied decimal conversions
 UPDATE @Invoices 
 SET InvoiceTotal = 
@@ -212,7 +220,7 @@ FROM
 		FROM 
 			vyuAPVendor v 
 		WHERE 			
-			SUBSTRING(v.strVendorId, PATINDEX('%[^0]%', v.strVendorId), LEN(v.strVendorId)) =
+			SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
 			SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
 			COLLATE SQL_Latin1_General_CP1_CS_AS
 	) v	
@@ -321,7 +329,7 @@ FROM
 		FROM 
 			vyuAPVendor v 
 		WHERE 			
-			SUBSTRING(v.strVendorId, PATINDEX('%[^0]%', v.strVendorId), LEN(v.strVendorId)) =
+			SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
 			SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
 			COLLATE SQL_Latin1_General_CP1_CS_AS
 	) v	
@@ -332,11 +340,13 @@ FROM
 		AND ISNULL(c.Amount, 0) <> 0
 
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
+BEGIN 
 	EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		, @ReceiptOtherChargesTable
 		, @UserId
 		, @ReceiptItemLotStagingTable
+END 
 ELSE
 BEGIN
 	INSERT INTO tblICImportLogDetail(
@@ -421,7 +431,7 @@ FROM
 		FROM 
 			vyuAPVendor v 
 		WHERE 			
-			SUBSTRING(v.strVendorId, PATINDEX('%[^0]%', v.strVendorId), LEN(v.strVendorId)) =
+			SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
 			SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
 			COLLATE SQL_Latin1_General_CP1_CS_AS
 	) v	
