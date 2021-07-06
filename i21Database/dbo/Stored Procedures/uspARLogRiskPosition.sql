@@ -314,6 +314,13 @@ BEGIN
         EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
     END
 
+    --DONT LOG ON CONTRACT BALANCE IF INVOICE POSTING
+    DELETE SL
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
+    WHERE INV.strTransactionType = 'Invoice' AND @Post = 1
+
     --CONTRACT BALANCE LOG  
     WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)  
     BEGIN  
