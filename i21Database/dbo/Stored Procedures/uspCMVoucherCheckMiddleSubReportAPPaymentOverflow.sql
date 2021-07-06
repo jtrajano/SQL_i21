@@ -79,12 +79,12 @@ WITH Invoices as(
 			,intTermsId = preBILL.intTermsId
 			,strComment = SUBSTRING(preBILL.strComment,1,25)
 			,dblAmount = PreAndDeb.dblAmountApplied	*
-				CASE WHEN (preBILL.intTransactionType IN (3,8,11)) 
+				CASE WHEN (preBILL.intTransactionType = 3) 
 					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
 				THEN -1 
 				ELSE 1 END
 			,dblDiscount = preBILL.dblDiscount *			
-				CASE WHEN  (preBILL.intTransactionType IN (3,8,11)) 
+				CASE WHEN  (preBILL.intTransactionType = 3) 
  					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
  				THEN -1 
 				ELSE 1 END
