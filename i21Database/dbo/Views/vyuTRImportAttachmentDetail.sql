@@ -1,16 +1,29 @@
 ﻿CREATE VIEW [dbo].[vyuTRImportAttachmentDetail]
-   AS
-SELECT IAD.intImportAttachmentDetailId
-, IA.intImportAttachmentId
-, IAD.strInvoiceId
-, IAD.ysnDelete
-, IAD.intConcurrencyId
-, IAD.ysnValid
-, IAD.strMessage
-, IA.dtmImportDate
-, IAD.intLoadHeaderId
-, IAD.strFileName
-, IA.strSource
-FROM dbo.tblTRImportAttachmentDetail AS IAD INNER JOIN
-dbo.tblTRImportAttachment AS IA ON IA.intImportAttachmentId = IAD.intImportAttachmentId INNER JOIN
-dbo.tblEMEntity AS EM ON EM.intEntityId = IA.intUserId
+AS
+SELECT        
+	  IAD.intImportAttachmentDetailId
+	, IA.intImportAttachmentId
+	, IAD.strInvoiceId
+	, IAD.ysnDelete
+	, IAD.intConcurrencyId
+	, IAD.ysnValid
+	, IAD.strMessage
+	, IA.dtmImportDate
+	, IAD.intLoadHeaderId
+	, IAD.strFileName
+	, IA.strSource
+	, TM.strName AS strVendorName
+	, EL.strLocationName AS strSupplyPoint
+	, (CASE
+		WHEN CHARINDEX(',',IAD.strInvoiceId) = 0 THEN (SELECT B.strName from tblARInvoice A INNER JOIN tblEMEntity B ON A.intEntityCustomerId = B. intEntityId WHERE A.intInvoiceId = CAST(IAD.strInvoiceId AS INT))
+		WHEN CHARINDEX(',',IAD.strInvoiceId) > 0 THEN (SELECT B.strName from tblARInvoice A INNER JOIN tblEMEntity B ON A.intEntityCustomerId = B. intEntityId WHERE A.intInvoiceId = CAST(SUBSTRING(IAD.strInvoiceId, 1, CHARINDEX(',',IAD.strInvoiceId)-1) AS INT))
+		ELSE IAD.strInvoiceId
+	  END) COLLATE Latin1_General_CI_AS AS strCustomerName 
+
+FROM
+		dbo.tblTRImportAttachmentDetail AS IAD 
+		INNER JOIN dbo.tblTRImportAttachment AS IA ON IA.intImportAttachmentId = IAD.intImportAttachmentId 
+		INNER JOIN dbo.tblEMEntity AS EM ON EM.intEntityId = IA.intUserId
+		LEFT JOIN vyuTRTerminal TM on TM.intEntityVendorId = IAD.intVendorId
+		LEFT JOIN tblTRSupplyPoint SP on IAD.intSupplyPointId = SP.intSupplyPointId
+		LEFT JOIN tblEMEntityLocation EL on EL.intEntityLocationId = SP.intEntityLocationId
