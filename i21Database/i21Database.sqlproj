@@ -9426,6 +9426,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryGrandTotalReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportCountDetailFromStaging.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
