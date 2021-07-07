@@ -396,6 +396,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\Create_fnCTFormatNumber.sql
 :R .\CT\2010_AddMissingHistory.sql
 :R .\CT\CTPreference.sql
+:R .\CT\DropUnusedObjects.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
