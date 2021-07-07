@@ -9522,6 +9522,9 @@
     <Build Include="dbo\Views\vyuTRQuote.sql" />
     <Build Include="dbo\Views\vyuTRAutomatedProcessStatusBol.sql" />
     <Build Include="dbo\Views\vyuTRImportRackPriceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryPositionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryGrandTotalReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
