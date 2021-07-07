@@ -130,6 +130,29 @@ INNER JOIN tblICItem i ON i.intItemId = s.intItemId
 WHERE i.strStatus IN ('Discontinued', 'Phased Out')
 	AND ps.guiApiUniqueId = @guiApiUniqueId 
 
+INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
+	strError, strField, strLogLevel, strValue, intLineNumber,
+	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
+SELECT
+	NEWID(),
+	strError = 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 
+	strField = 'termId', 
+	strLogLevel = 'Error', 
+	strValue = CAST(s.intTermId AS NVARCHAR(50)),
+	intLineNumber = NULL,
+	@guiApiUniqueId,
+	strIntegrationType = 'RESTfulAPI',
+	strTransactionType = 'Item Contracts',
+	strApiVersion = NULL,
+	guiSubscriptionId = NULL
+FROM tblCTApiItemContractStaging s
+LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
+WHERE t.intTermID IS NULL
+	AND s.guiApiUniqueId = @guiApiUniqueId
+
+IF EXISTS(SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId)
+	GOTO Logging
+
 -- Transformation
 DECLARE @intContractType INT
 DECLARE @intEntityId INT
@@ -171,8 +194,9 @@ SELECT s.intApiItemContractStagingId
 	, ISNULL(s.ysnPrinted, 0)
 	, s.intOpportunityNameId
 	, s.intLineOfBusinessId
-	, s.dtmDueDate
+	, COALESCE(s.dtmDueDate, t.dtmDueDate)
 FROM tblCTApiItemContractStaging s
+LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE s.guiApiUniqueId = @guiApiUniqueId
 
 OPEN CUR
@@ -513,6 +537,8 @@ END
 
 CLOSE dcur
 DEALLOCATE dcur
+
+Logging:
 
 DELETE FROM tblRestApiItemTaxes WHERE guiTaxesUniqueId = @guiTaxesUniqueId
 
