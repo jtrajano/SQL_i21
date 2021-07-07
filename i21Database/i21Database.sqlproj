@@ -9485,6 +9485,8 @@
     <Build Include="dbo\Functions\fnCronDayOfWeek.sql" />
     <Build Include="dbo\Stored Procedures\uspICEdiGenerateReceiptFromRecurringJob.sql" />
     <Build Include="dbo\Stored Procedures\uspICEdiGenerateMappingObjectsRecurringJob.sql" />
+    <Build Include="dbo\Views\vyuICGetImportedInventoryReceiptSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetImportedInventoryReceiptSearchByEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
