@@ -1360,6 +1360,7 @@ SELECT
 FROM tblGLDetail A
 INNER JOIN vyuGLAccountDetail B ON A.intAccountId = B.intAccountId
 WHERE A.ysnIsUnposted = 0 AND B.intAccountCategoryId = 45
+AND DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN '1/1/1900' AND @currentDateStr
 
 SELECT
   A.dblBalance AS dblReportBalance,
