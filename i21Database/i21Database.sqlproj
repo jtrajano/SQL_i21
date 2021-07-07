@@ -9425,6 +9425,9 @@
     <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryPositionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryGrandTotalReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
