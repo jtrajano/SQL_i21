@@ -9523,6 +9523,13 @@
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryGrandTotalReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryDetailReport.sql" />
+    <Build Include="dbo\Views\vyuICGetImportSetup.sql" />
+    <Build Include="dbo\Tables\tblICImportSetup.sql" />
+    <Build Include="dbo\Functions\fnCronDayOfWeek.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiGenerateReceiptFromRecurringJob.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiGenerateMappingObjectsRecurringJob.sql" />
+    <Build Include="dbo\Views\vyuICGetImportedInventoryReceiptSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetImportedInventoryReceiptSearchByEntity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
