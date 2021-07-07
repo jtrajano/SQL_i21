@@ -78,12 +78,21 @@ WITH Invoices as(
 			,dtmDueDate = preBILL.dtmDueDate
 			,intTermsId = preBILL.intTermsId
 			,strComment = SUBSTRING(preBILL.strComment,1,25)
-			,dblAmount = CASE WHEN preBILL.intTransactionType = 3
-						THEN preBILL.dblTotal * -1
-						ELSE preBILL.dblTotal
-						END
-			,dblDiscount = preBILL.dblDiscount
-			,dblNet = preBILL.dblTotal * -1
+			,dblAmount = PreAndDeb.dblAmountApplied	*
+				CASE WHEN (preBILL.intTransactionType = 3) 
+					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
+				THEN -1 
+				ELSE 1 END
+			,dblDiscount = preBILL.dblDiscount *			
+				CASE WHEN  (preBILL.intTransactionType = 3) 
+ 					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
+ 				THEN -1 
+				ELSE 1 END
+			,dblNet = PreAndDeb.dblAmountApplied *
+				CASE WHEN (preBILL.intTransactionType = 3) 
+					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
+				THEN -1 
+				ELSE 1 END
 			,strPaymentRecordNum  = PYMT.strPaymentRecordNum
 			,dblTotalAmount = F.dblAmount
 			,dtmCheckDate = F.dtmDate
