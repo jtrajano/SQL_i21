@@ -9697,7 +9697,9 @@
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspSMCheckPendingAttachmentFileIfPresent.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
