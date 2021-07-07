@@ -9509,6 +9509,7 @@
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping200.sql" />
     <Build Include="dbo\Stored Procedures\uspVRAddTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspBBAddTransactionLinks.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2120_MigrateAttachment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

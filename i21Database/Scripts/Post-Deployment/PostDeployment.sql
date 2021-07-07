@@ -664,6 +664,9 @@ print 'BEGIN POST DEPLOYMENT'
 --MIGRATE AUDIT LOGS
 :r .\SM\1910_MigrateAuditLog.sql
 
+--MIGRATE AUDIT LOGS
+:r .\SM\2120_MigrateAttachment.sql
+
 
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
