@@ -165,20 +165,20 @@ BEGIN TRY
 			-- 									+ ' per '
 			-- 									+ PU.strUnitMeasure
 			-- 						   END,
-			strStraussPrice			= 	'PTBF basis '
+			strStraussPrice			=	'PTBF basis '
 										+ MA.strFutMarketName
 										+ ' '
 										+ DATENAME(mm,MO.dtmFutureMonthsDate)
 										+ ' '
 										+ DATENAME(yyyy,MO.dtmFutureMonthsDate)
 										+ CASE
-												WHEN (ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0)) < 0
+												WHEN CD.dblBasis < 0
 												THEN ' minus '
 												ELSE ' plus '
-										  END
+												END
 										+ BCU.strCurrency
 										+ ' '
-										+ dbo.fnCTChangeNumericScale(abs((ISNULL(CD.dblBasis,0) + ISNULL(CD.dblFutures,0))),2)
+										+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2)
 										+ '/'
 										+ BUM.strUnitMeasure
 										+ ' at '
