@@ -9506,6 +9506,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
     <Build Include="dbo\Tables\tblSMLocalizationStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspSMImportLocalization.sql" />
+    <Build Include="dbo\Tables\tblSMLocalizationHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
