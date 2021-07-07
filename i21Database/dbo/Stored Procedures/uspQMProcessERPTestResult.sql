@@ -32,6 +32,35 @@ BEGIN TRY
 		,@intCuppingPropertyId INT
 		,@intGradingPropertyId INT
 		,@strXml NVARCHAR(MAX)
+		,@intProductTypeId INT
+		,@intProductValueId INT
+		,@intLotStatusId INT
+		,@dtmTestedOn DATETIME
+		,@intTestedById INT
+		,@dtmLastModified DATETIME
+		,@intLastModifiedUserId INT
+	DECLARE @strOldComment NVARCHAR(MAX)
+		,@strOldSampleStatus NVARCHAR(30)
+		,@dtmOldTestedOn DATETIME
+		,@strOldTestedUserName NVARCHAR(50)
+		,@dtmOldLastModified DATETIME
+		,@strOldModifiedUserName NVARCHAR(50)
+		,@strTestedUserName NVARCHAR(50)
+		,@strModifiedUserName NVARCHAR(50)
+	DECLARE @tblQMTestResultChanges TABLE (
+		strOldPropertyValue NVARCHAR(MAX)
+		,strOldResult NVARCHAR(20)
+		,strNewPropertyValue NVARCHAR(MAX)
+		,strNewResult NVARCHAR(20)
+		,intTestResultId INT
+		,strPropertyName NVARCHAR(100)
+		)
+	DECLARE @strOldPropertyValue NVARCHAR(MAX)
+		,@strOldResult NVARCHAR(20)
+		,@strNewPropertyValue NVARCHAR(MAX)
+		,@strNewResult NVARCHAR(20)
+		,@intTestResultId INT
+		,@strPropertyName NVARCHAR(100)
 	DECLARE @tblIPTestResultStage TABLE (intTestResultStageId INT)
 
 	IF NOT EXISTS (
@@ -83,6 +112,22 @@ BEGIN TRY
 				,@intCuppingPropertyId = NULL
 				,@intGradingPropertyId = NULL
 				,@strXml = NULL
+				,@intProductTypeId = NULL
+				,@intProductValueId = NULL
+				,@intLotStatusId = NULL
+				,@dtmTestedOn = NULL
+				,@intTestedById = NULL
+				,@dtmLastModified = NULL
+				,@intLastModifiedUserId = NULL
+
+			SELECT @strOldComment = NULL
+				,@strOldSampleStatus = NULL
+				,@dtmOldTestedOn = NULL
+				,@strOldTestedUserName = NULL
+				,@dtmOldLastModified = NULL
+				,@strOldModifiedUserName = NULL
+				,@strTestedUserName = NULL
+				,@strModifiedUserName = NULL
 
 			SELECT @strSampleNumber = strSampleNumber
 				,@strSampleStatus = ISNULL(strSampleStatus, '')
@@ -190,6 +235,39 @@ BEGIN TRY
 
 			BEGIN TRAN
 
+			SELECT @strOldComment = S.strComment
+				,@strOldSampleStatus = SS.strStatus
+				,@dtmOldTestedOn = S.dtmTestedOn
+				,@strOldTestedUserName = ISNULL(TE.strName, '')
+				,@dtmOldLastModified = S.dtmLastModified
+				,@strOldModifiedUserName = UE.strName
+			FROM tblQMSample S WITH (NOLOCK)
+			JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+			LEFT JOIN tblEMEntity TE ON TE.intEntityId = S.intTestedById
+			LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
+			WHERE S.intSampleId = @intSampleId
+
+			DELETE
+			FROM @tblQMTestResultChanges
+
+			INSERT INTO @tblQMTestResultChanges (
+				strOldPropertyValue
+				,strOldResult
+				,intTestResultId
+				,strPropertyName
+				)
+			SELECT TR.strPropertyValue
+				,TR.strResult
+				,TR.intTestResultId
+				,P.strPropertyName
+			FROM tblQMTestResult TR WITH (NOLOCK)
+			JOIN tblQMProperty P WITH (NOLOCK) ON P.intPropertyId = TR.intPropertyId
+				AND TR.intSampleId = @intSampleId
+				AND (
+					TR.intPropertyId = @intCuppingPropertyId
+					OR TR.intPropertyId = @intGradingPropertyId
+					)
+
 			IF @intPreviousSampleStatusId <> @intSampleStatusId
 			BEGIN
 				UPDATE tblQMSample
@@ -229,22 +307,198 @@ BEGIN TRY
 					OR TR.intPropertyId = @intGradingPropertyId
 					)
 
-			-- Construct Approve / reject XML
-			SELECT @strXml = ''
+			UPDATE @tblQMTestResultChanges
+			SET strNewPropertyValue = TR.strPropertyValue
+				,strNewResult = TR.strResult
+			FROM @tblQMTestResultChanges OLD
+			JOIN tblQMTestResult TR ON TR.intTestResultId = OLD.intTestResultId
 
-			IF ISNULL(@strXml, '') <> ''
+			SELECT @intProductTypeId = intProductTypeId
+				,@intProductValueId = intProductValueId
+				,@intLotStatusId = intLotStatusId
+				,@dtmTestedOn = dtmTestedOn
+				,@intTestedById = intTestedById
+				,@dtmLastModified = dtmLastModified
+				,@intLastModifiedUserId = intLastModifiedUserId
+				,@strTestedUserName = TE.strName
+				,@strModifiedUserName = UE.strName
+			FROM tblQMSample S
+			LEFT JOIN tblEMEntity TE ON TE.intEntityId = S.intTestedById
+			LEFT JOIN tblEMEntity UE ON UE.intEntityId = S.intLastModifiedUserId
+			WHERE S.intSampleId = @intSampleId
+
+			-- Construct Approve / reject XML
+			IF @intPreviousSampleStatusId <> @intSampleStatusId
 			BEGIN
-				IF @strSampleStatus = 'Approved'
+				SELECT @strXml = '<root>'
+
+				SELECT @strXml += '<intSampleId>' + LTRIM(@intSampleId) + '</intSampleId>'
+
+				SELECT @strXml += '<intProductTypeId>' + LTRIM(@intProductTypeId) + '</intProductTypeId>'
+
+				SELECT @strXml += '<intProductValueId>' + LTRIM(@intProductValueId) + '</intProductValueId>'
+
+				IF @intLotStatusId IS NOT NULL
+					SELECT @strXml += '<intLotStatusId>' + LTRIM(@intLotStatusId) + '</intLotStatusId>'
+
+				SELECT @strXml += '<intTestedById>' + LTRIM(@intTestedById) + '</intTestedById>'
+
+				SELECT @strXml += '<dtmTestedOn>' + CONVERT(VARCHAR(33), @dtmTestedOn, 126) + '</dtmTestedOn>'
+
+				SELECT @strXml += '<intLastModifiedUserId>' + LTRIM(@intLastModifiedUserId) + '</intLastModifiedUserId>'
+
+				SELECT @strXml += '<dtmLastModified>' + CONVERT(VARCHAR(33), @dtmLastModified, 126) + '</dtmLastModified>'
+
+				SELECT @strXml += '</root>'
+
+				IF ISNULL(@strXml, '') <> ''
 				BEGIN
-					EXEC uspQMSampleApprove @strXml
-				END
-				ELSE IF @strSampleStatus = 'Rejected'
-				BEGIN
-					EXEC uspQMSampleReject @strXml
+					IF @strSampleStatus = 'Approved'
+					BEGIN
+						EXEC uspQMSampleApprove @strXml
+					END
+					ELSE IF @strSampleStatus = 'Rejected'
+					BEGIN
+						EXEC uspQMSampleReject @strXml
+					END
 				END
 			END
 
 			-- Audit Log
+			IF (@intSampleId > 0)
+			BEGIN
+				DECLARE @strDetails NVARCHAR(MAX) = ''
+
+				IF (@strOldSampleStatus <> @strSampleStatus)
+					SET @strDetails += '{"change":"strSampleStatus","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleStatus) + '","to":"' + LTRIM(@strSampleStatus) + '","leaf":true,"changeDescription":"Sample Status"},'
+
+				IF (@strOldComment <> @strComments)
+					SET @strDetails += '{"change":"strComment","iconCls":"small-gear","from":"' + LTRIM(@strOldComment) + '","to":"' + LTRIM(@strComments) + '","leaf":true,"changeDescription":"Comments"},'
+
+				IF (@dtmOldTestedOn <> @dtmTestedOn)
+					SET @strDetails += '{"change":"dtmTestedOn","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldTestedOn, '')) + '","to":"' + LTRIM(ISNULL(@dtmTestedOn, '')) + '","leaf":true,"changeDescription":"Tested On"},'
+
+				IF (@strOldTestedUserName <> @strTestedUserName)
+					SET @strDetails += '{"change":"strTestedUserName","iconCls":"small-gear","from":"' + LTRIM(@strOldTestedUserName) + '","to":"' + LTRIM(@strTestedUserName) + '","leaf":true,"changeDescription":"Tested By"},'
+
+				IF (@dtmOldLastModified <> @dtmLastModified)
+					SET @strDetails += '{"change":"dtmLastModified","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldLastModified, '')) + '","to":"' + LTRIM(ISNULL(@dtmLastModified, '')) + '","leaf":true,"changeDescription":"Last Modified On"},'
+
+				IF (@strOldModifiedUserName <> @strModifiedUserName)
+					SET @strDetails += '{"change":"strModifiedUserName","iconCls":"small-gear","from":"' + LTRIM(@strOldModifiedUserName) + '","to":"' + LTRIM(@strModifiedUserName) + '","leaf":true,"changeDescription":"Last Modified By"},'
+
+				IF (LEN(@strDetails) > 1)
+				BEGIN
+					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+					EXEC uspSMAuditLog @keyValue = @intSampleId
+						,@screenName = 'Quality.view.QualitySample'
+						,@entityId = @intUserId
+						,@actionType = 'Updated'
+						,@actionIcon = 'small-tree-modified'
+						,@details = @strDetails
+				END
+
+				-- Test Result Audit Log
+				DECLARE @details NVARCHAR(MAX) = ''
+
+				WHILE EXISTS (
+						SELECT TOP 1 NULL
+						FROM @tblQMTestResultChanges
+						)
+				BEGIN
+					SELECT @strOldPropertyValue = NULL
+						,@strOldResult = NULL
+						,@strNewPropertyValue = NULL
+						,@strNewResult = NULL
+						,@intTestResultId = NULL
+						,@strPropertyName = NULL
+
+					SELECT TOP 1 @strOldPropertyValue = strOldPropertyValue
+						,@strOldResult = strOldResult
+						,@strNewPropertyValue = strNewPropertyValue
+						,@strNewResult = strNewResult
+						,@intTestResultId = intTestResultId
+						,@strPropertyName = strPropertyName
+					FROM @tblQMTestResultChanges
+
+					SET @details = '{  
+							"action":"Updated",
+							"change":"Updated - Record: ' + LTRIM(@intSampleId) + '",
+							"keyValue":' + LTRIM(@intSampleId) + ',
+							"iconCls":"small-tree-modified",
+							"children":[  
+								{  
+									"change":"tblQMTestResults",
+									"children":[  
+										{  
+										"action":"Updated",
+										"change":"Updated - Record: ' + LTRIM(@strPropertyName) + '",
+										"keyValue":' + LTRIM(@intTestResultId) + ',
+										"iconCls":"small-tree-modified",
+										"children":
+											[   
+												'
+
+					IF @strOldPropertyValue <> @strNewPropertyValue
+						SET @details = @details + '
+												{  
+												"change":"strPropertyValue",
+												"from":"' + LTRIM(@strOldPropertyValue) + '",
+												"to":"' + LTRIM(@strNewPropertyValue) + '",
+												"leaf":true,
+												"iconCls":"small-gear",
+												"isField":true,
+												"keyValue":' + LTRIM(@intTestResultId) + ',
+												"associationKey":"tblQMTestResults",
+												"changeDescription":"Actual Value",
+												"hidden":false
+												},'
+
+					IF @strOldResult <> @strNewResult
+						SET @details = @details + '
+												{  
+												"change":"strResult",
+												"from":"' + LTRIM(@strOldResult) + '",
+												"to":"' + LTRIM(@strNewResult) + '",
+												"leaf":true,
+												"iconCls":"small-gear",
+												"isField":true,
+												"keyValue":' + LTRIM(@intTestResultId) + ',
+												"associationKey":"tblQMTestResults",
+												"changeDescription":"Result",
+												"hidden":false
+												},'
+
+					IF RIGHT(@details, 1) = ','
+						SET @details = SUBSTRING(@details, 0, LEN(@details))
+					SET @details = @details + '
+										]
+									}
+								],
+								"iconCls":"small-tree-grid",
+								"changeDescription":"Test Detail"
+								}
+							]
+							}'
+
+					IF @strOldPropertyValue <> @strNewPropertyValue
+						OR @strOldResult <> @strNewResult
+					BEGIN
+						EXEC uspSMAuditLog @keyValue = @intSampleId
+							,@screenName = 'Quality.view.QualitySample'
+							,@entityId = @intUserId
+							,@actionType = 'Updated'
+							,@actionIcon = 'small-tree-modified'
+							,@details = @details
+					END
+
+					DELETE
+					FROM @tblQMTestResultChanges
+					WHERE intTestResultId = @intTestResultId
+				END
+			END
+
 			INSERT INTO tblIPTestResultArchive (
 				strSampleNumber
 				,strSampleStatus

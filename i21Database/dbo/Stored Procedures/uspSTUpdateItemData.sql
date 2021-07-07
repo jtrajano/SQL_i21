@@ -38,6 +38,7 @@ BEGIN TRY
 
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
 				@idoc					   INT,
+				@strStoreGroupId	 	   NVARCHAR(MAX),
 				@strCompanyLocationId 	   NVARCHAR(MAX),
 				@Region					   NVARCHAR(20),
 				@District				   NVARCHAR(20),
@@ -95,7 +96,7 @@ BEGIN TRY
 	                  
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
-		SELECT	
+		SELECT	@strStoreGroupId		=	StoreGroup,
 				@strCompanyLocationId	=	Location,
 				@strVendorId			=   Vendor,
 				@strCategoryId			=   Category,
@@ -152,6 +153,7 @@ BEGIN TRY
 		FROM	OPENXML(@idoc, 'root',2)
 		WITH
 		(
+				StoreGroup				  NVARCHAR(MAX),
 				Location 			      NVARCHAR(MAX),
 				Vendor                    NVARCHAR(MAX),
 				Category                  NVARCHAR(MAX),
@@ -529,6 +531,21 @@ BEGIN TRY
 					FROM [dbo].[fnGetRowsFromDelimitedValues](@strCompanyLocationId)
 				END
 		
+			IF(@strStoreGroupId IS NOT NULL AND @strStoreGroupId != '')
+				BEGIN
+					INSERT INTO #tmpUpdateItemForCStore_Location (
+						intLocationId
+					)
+					SELECT st.intCompanyLocationId AS intLocationId
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreGroupId)
+					INNER JOIN tblSTStoreGroup sg
+						ON sg.intStoreGroupId = intID
+					INNER JOIN tblSTStoreGroupDetail sgt
+						ON sgt.intStoreGroupId = sg.intStoreGroupId
+					INNER JOIN tblSTStore st
+						ON st.intStoreId = sgt.intStoreId
+				END
+
 			IF(@strVendorId IS NOT NULL AND @strVendorId != '')
 				BEGIN
 					INSERT INTO #tmpUpdateItemForCStore_Vendor (
@@ -606,14 +623,14 @@ BEGIN TRY
 
 		--		,@intEntityUserSecurityId = @intCurrentEntityUserId
 		--END
-
 		
-	-- SELECT strDistrict, strRegion, strState, * FROM tblSTStore
 	-- ==========================================================================================
 	-- [START] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
 	-- ==========================================================================================
-	IF(@strCompanyLocationId IS NULL AND (@Region IS NOT NULL OR @District IS NOT NULL OR @State IS NOT NULL))
+	IF(@strCompanyLocationId IS NULL AND ((@Region IS NOT NULL AND @Region != '') OR (@District IS NOT NULL AND @District != '') OR (@State IS NOT NULL AND @State != '')))
 		BEGIN
+
+			DELETE FROM #tmpUpdateItemForCStore_Location
 			
 			INSERT INTO #tmpUpdateItemForCStore_Location 
 			(
@@ -625,7 +642,25 @@ BEGIN TRY
 			WHERE strRegion		= ISNULL(@Region, strRegion)
 				AND strDistrict = ISNULL(@District, strDistrict)
 				AND strState	= ISNULL(@State, strState)
+				AND intCompanyLocationId IN (SELECT st.intCompanyLocationId AS intLocationId
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreGroupId)
+					INNER JOIN tblSTStoreGroup sg
+						ON sg.intStoreGroupId = intID
+					INNER JOIN tblSTStoreGroupDetail sgt
+						ON sgt.intStoreGroupId = sg.intStoreGroupId
+					INNER JOIN tblSTStore st
+						ON st.intStoreId = sgt.intStoreId) --To not allow duplicates
 
+			--To prevent defaulting to all stores if Region District and State did not return any rows
+			IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
+			INSERT INTO #tmpUpdateItemForCStore_Location 
+			(
+				intLocationId
+			)
+			VALUES
+			(
+				9999999999 --So that it will filter to null
+			)
 		END
 	-- ==========================================================================================
 	-- [END] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
@@ -1755,31 +1790,65 @@ BEGIN TRY
 		-- Remove values
 		DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')
 
-
-
-
 		
-		
+	   -- Handle Returned Table
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- START Query Preview -------------------------------------
+	   ---------------------------------------------------------------------------------------
+	 --  SELECT  
+	 --         TES.strLocation
+		--	  , TES.strUpc
+		--	  , TES.strItemDescription
+		--	  , TES.strChangeDescription
+		--	  , TES.strPreviewOldData AS strOldData
+		--	  , TES.strPreviewNewData AS strNewData
+	 --  FROM (
+		--SELECT DISTINCT 
+		--			@strGuid AS strGuid
+		--			, strLocation
+		--			, strUpc
+		--			, strItemDescription
+		--			, strChangeDescription
+		--			, strPreviewOldData
+		--			, strPreviewNewData
 
+		--			, intItemId
+		--			, intItemUOMId
+		--			, intItemLocationId
+		--			, intPrimaryKeyId
+		--			, strTableName
+		--			, strTableColumnName
+		--			, strTableColumnDataType
+		--			, ysnPreview
+		--			, 1 AS intConcurrencyId
+		--		FROM @tblPreview
+		--		WHERE ysnPreview = 1
+		--) AS TES
+		--ORDER BY strItemDescription, strChangeDescription ASC
 
-	   ---- Handle Returned Table
-	   -----------------------------------------------------------------------------------------
-	   ------------------------------- START Query Preview -------------------------------------
-	   -----------------------------------------------------------------------------------------
-	   ---- Query Preview display
-	   --SELECT DISTINCT 
-	   --       strLocation
-			 -- , strUpc
-			 -- , strItemDescription
-			 -- , strChangeDescription
-			 -- , strPreviewOldData AS strOldData
-			 -- , strPreviewNewData AS strNewData
-	   --FROM @tblPreview
-	   --WHERE ysnPreview = 1
-	   --ORDER BY strItemDescription, strChangeDescription ASC
-	   -----------------------------------------------------------------------------------------
-	   ------------------------------- END Query Preview ---------------------------------------
-	   -----------------------------------------------------------------------------------------
+		SELECT DISTINCT 
+			@strGuid
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strPreviewOldData AS strOldData
+			, strPreviewNewData	AS strNewData
+
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intPrimaryKeyId
+			, strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, 1
+		FROM @tblPreview
+		WHERE ysnPreview = 1
+		ORDER BY strItemDescription, strChangeDescription ASC
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- END Query Preview ---------------------------------------
+	   ---------------------------------------------------------------------------------------
 		
 
 
@@ -2081,44 +2150,6 @@ BEGIN TRY
 
 
 	   
-	   -- Handle Returned Table
-	   ---------------------------------------------------------------------------------------
-	   ----------------------------- START Query Preview -------------------------------------
-	   ---------------------------------------------------------------------------------------
-	   -- Query Preview display
-	   SELECT  
-	          TES.strLocation
-			  , TES.strUpc
-			  , TES.strItemDescription
-			  , TES.strChangeDescription
-			  , TES.strPreviewOldData AS strOldData
-			  , TES.strPreviewNewData AS strNewData
-	   FROM (
-		SELECT DISTINCT 
-					@strGuid AS strGuid
-					, strLocation
-					, strUpc
-					, strItemDescription
-					, strChangeDescription
-					, strPreviewOldData
-					, strPreviewNewData
-
-					, intItemId
-					, intItemUOMId
-					, intItemLocationId
-					, intPrimaryKeyId
-					, strTableName
-					, strTableColumnName
-					, strTableColumnDataType
-					, ysnPreview
-					, 1 AS intConcurrencyId
-				FROM @tblPreview
-				WHERE ysnPreview = 1
-		) AS TES
-		ORDER BY strItemDescription, strChangeDescription ASC
-	   ---------------------------------------------------------------------------------------
-	   ----------------------------- END Query Preview ---------------------------------------
-	   ---------------------------------------------------------------------------------------
 
 		-- Remove records
 		DELETE FROM @tblPreview

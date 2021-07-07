@@ -24,7 +24,7 @@ SELECT S.intSampleId
 	,S.strRefNo
 	,S.strSamplingMethod
 	,S.dtmTestedOn
-	,U.strUserName AS strTestedUserName
+	,U.strName AS strTestedUserName
 	,LS.strSecondaryStatus AS strLotStatus
 	,S.strCountry
 	,S.dblSampleQty
@@ -94,7 +94,7 @@ LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblICItem I1 ON I1.intItemId = S.intItemBundleId
 LEFT JOIN dbo.tblLGLoadContainer C ON C.intLoadContainerId = S.intLoadContainerId
 LEFT JOIN dbo.tblLGLoad SH ON SH.intLoadId = S.intLoadId
-LEFT JOIN dbo.tblSMUserSecurity U ON U.[intEntityId] = S.intTestedById
+LEFT JOIN dbo.tblEMEntity U ON U.intEntityId = S.intTestedById
 LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = S.intEntityId
 LEFT JOIN dbo.tblICLot L ON L.intLotId = S.intProductValueId
 	AND S.intProductTypeId = 6

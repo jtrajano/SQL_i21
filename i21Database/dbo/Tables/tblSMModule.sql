@@ -10,6 +10,7 @@
     [strVersionStart]		NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NOT NULL	DEFAULT '', 
     [strVersionEnd]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NOT NULL	DEFAULT '', 
 	[strPrefix]				NVARCHAR(30)	COLLATE Latin1_General_CI_AS	NOT NULL	DEFAULT '',
+	[ysnAddonComponent]		BIT												NOT NULL	DEFAULT 0,
     [intConcurrencyId]		INT												NOT NULL	DEFAULT 1, 
     CONSTRAINT [AK_tblSMModule_strApplicationName_strModule] UNIQUE ([strApplicationName], [strModule])
 )

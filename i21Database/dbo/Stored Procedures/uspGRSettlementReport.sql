@@ -2046,6 +2046,7 @@ BEGIN
 					) PartialPayment 
 					ON PartialPayment.intPaymentId = PYMT.intPaymentId
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
+				AND SC.intTicketType = 6 -- Direct In ticket
 				-- and INVRCPTITEM.intInventoryReceiptItemId is null
 				-- and InventoryReceipt.intSourceType = 1
 

@@ -55,9 +55,9 @@ begin
 			, ReceiptItem.intInventoryReceiptItemId
 			, Sheet.dblShrink
 			, ReceiptItem.dblNet
-			, (Sheet.dblShrink / (Sheet.dblNet + Sheet.dblShrink)) * ReceiptItem.dblNet 
-	
-	
+			, round(dbo.fnMultiply(dbo.fnDivide(Sheet.dblShrink, (Sheet.dblNet + Sheet.dblShrink)) ,ReceiptItem.dblNet), 6)
+		
+		
 			from tblSCDeliverySheet Sheet
 			join tblSCTicket Ticket
 				on Ticket.intDeliverySheetId = Sheet.intDeliverySheetId

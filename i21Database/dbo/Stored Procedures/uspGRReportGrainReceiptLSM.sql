@@ -29,7 +29,7 @@ BEGIN TRY
 	 ,@blbCompanyLogo VARBINARY(MAX)
 	 ,@intInventoryReceiptId int
 	 ,@intFeeItemId int   
-	           
+	 ,@intCommodityId int	           
 
 
   IF LTRIM(RTRIM(@xmlParam)) = ''    
@@ -84,7 +84,7 @@ ELSE
     WHERE [strTransactionType] = N'Grain Receipt'    
     
     UPDATE tblSCTicket    
-    SET strGrainReceiptNumber = @strReceiptNumber, dtmDateModifiedUtc = GETUTCDATE()
+    SET strGrainReceiptNumber = @strReceiptNumber    
     WHERE intTicketId = @intScaleTicketId    
  END         
 
@@ -98,6 +98,7 @@ ELSE
 
  ,@intInventoryReceiptId = SC.intInventoryReceiptId
  ,@intFeeItemId = SS.intDefaultFeeItemId
+ ,@intCommodityId = SC.intCommodityId
  FROM   tblICUnitMeasure UnitMeasure    
  JOIN   tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=UnitMeasure.intUnitMeasureId    
  JOIN   tblSCTicket SC ON SC.intItemUOMIdTo=ItemUOM.intItemUOMId    
@@ -310,24 +311,24 @@ select
 	,@GRRMoisture = Moisture.dblGradeReading
 	,@GRRSplit = Split.dblGradeReading
 
-from tblGRCompanyPreference Preference
+from tblSCGrainReceiptDiscountMapping Preference
 	--left join TicketDiscountInfo MarketingFee
 	--	on Preference.[intGRRItemMarketingFeeId] = MarketingFee.intItemId
 	left join TicketDiscountInfo TestWeight
-		on Preference.[intGRRItemTestWeightId] = TestWeight.intItemId
+		on Preference.[intTestWeightId] = TestWeight.intItemId
 	left join TicketDiscountInfo CCFM
-		on Preference.[intGRRItemCCFMId] = CCFM.intItemId
+		on Preference.[intCCFMId] = CCFM.intItemId
 	left join TicketDiscountInfo Grade
-		on Preference.[intGRRItemGradeId] = Grade.intItemId
+		on Preference.[intGradeId] = Grade.intItemId
 	left join TicketDiscountInfo Factor
-		on Preference.[intGRRItemFactorId] = Factor.intItemId
+		on Preference.[intFactorId] = Factor.intItemId
 	left join TicketDiscountInfo Protein
-		on Preference.[intGRRItemProteinId] = Protein.intItemId
+		on Preference.[intProteinId] = Protein.intItemId
 	left join TicketDiscountInfo Moisture
-		on Preference.[intGRRItemMoistureId] = Moisture.intItemId
+		on Preference.[intMoistureId] = Moisture.intItemId
 	left join TicketDiscountInfo Split
-		on Preference.[intGRRItemSplitId] = Split.intItemId
-
+		on Preference.[intSplitId] = Split.intItemId
+where Preference.intCommodityId = @intCommodityId
 		
 
 declare @dblComputedNetWeight decimal(24,10)

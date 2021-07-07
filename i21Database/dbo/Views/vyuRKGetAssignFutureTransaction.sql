@@ -43,4 +43,4 @@ SELECT * FROM(
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId
 	)t
-) t1 where dblBalanceLots >0
+) t1

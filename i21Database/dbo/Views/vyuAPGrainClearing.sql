@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPGrainClearing]
 AS 
 
-SELECT --'a',
+SELECT --'a' AS TEST,
 	CS.intEntityId AS intEntityVendorId
 	,SS.dtmCreated AS dtmDate
 	,SS.strStorageTicket AS strTransactionNumber
@@ -18,12 +18,15 @@ SELECT --'a',
 	,CASE 
 		WHEN SS.dblUnpaidUnits != 0 
 			THEN (
-				CASE WHEN SC.intSettleContractId IS NOT NULL THEN CAST(SC.dblUnits * SC.dblPrice as decimal(18, 4))
-				ELSE SS.dblNetSettlement
+				CASE 
+					WHEN PFD.intSettleContractId IS NOT NULL THEN CAST(PFD.dblUnits * PFD.dblCashPrice as decimal(18, 4))
+					WHEN SC.intSettleContractId IS NOT NULL THEN CAST(SC.dblUnits * SC.dblPrice as decimal(18, 4))
+					ELSE SS.dblNetSettlement
 				END
 			)
 		ELSE CAST(
 				CASE 
+					WHEN PFD.intSettleContractId IS NOT NULL THEN CAST(PFD.dblUnits * PFD.dblCashPrice as decimal(18, 4))
 					WHEN SC.intSettleContractId IS NULL 
 						THEN (SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) 
 					ELSE
@@ -31,13 +34,26 @@ SELECT --'a',
 				END						
 			AS DECIMAL(18,4))
 	END AS dblSettleStorageAmount
-	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE CASE WHEN SC.intSettleStorageId IS NOT NULL THEN SC.dblUnits ELSE SS.dblSettleUnits END END AS DECIMAL(18,4)) AS dblSettleStorageQty
+	,CAST(
+			CASE 
+				WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits 
+				ELSE 
+					CASE 
+						WHEN PFD.intSettleContractId IS NOT NULL THEN PFD.dblUnits
+						WHEN SC.intSettleStorageId IS NOT NULL THEN SC.dblUnits
+						ELSE SS.dblSettleUnits 
+					END 
+			END AS DECIMAL(18,4)
+	) AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
 	,GD.intAccountId
 	,AD.strAccountId
 FROM tblGRCustomerStorage CS
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblICItem IM
 	ON IM.intItemId = CS.intItemId
 INNER JOIN tblICCommodity CO
@@ -56,23 +72,38 @@ INNER JOIN tblGLDetail GD
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strTransactionType = 'Storage Settlement'
 		AND GD.ysnIsUnposted = 0
-		AND GD.strDescription LIKE '%Item: ' + IM.strItemNo + '%'
+		AND GD.strCode = 'IC'
+		AND ((GD.dblDebit <> 0 AND GD.dblCredit = 0) OR (GD.dblDebit = 0 AND GD.dblCredit <> 0))
  INNER JOIN vyuGLAccountDetail AD
  	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN tblGRSettleContract SC
 	ON SC.intSettleStorageId = SS.intSettleStorageId
 LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = SC.intContractDetailId
-left join tblCTContractHeader CH
-		on CH.intContractHeaderId = CT.intContractHeaderId
+LEFT JOIN tblCTContractHeader CH
+	ON CH.intContractHeaderId = CT.intContractHeaderId
+LEFT JOIN tblGRSettleContractPriceFixationDetail PFD --Basis has price already when it was used for settlement
+	ON PFD.intSettleContractId = SC.intSettleContractId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+OUTER APPLY (
+	SELECT ysnReversed = 1
+	FROM tblGLDetail 
+	WHERE strTransactionId = SS.strStorageTicket
+		AND intTransactionId = SS.intSettleStorageId
+		AND strTransactionType = 'Storage Settlement'
+		AND ysnIsUnposted = 0
+		AND strComments IN ('GRN-2604-REVERSAL','GRN-2741-REVERSAL')
+) GL
 WHERE SS.ysnPosted = 1
-UNION ALL
+	--and SS.strStorageTicket = 'STR-8294/3'
+	AND GL.ysnReversed IS NULL
+	--AND (GD.dblCredit <> 0 AND GD.dblDebit <> 0)
+UNION
 SELECT --'b',
 	bill.intEntityVendorId
 	,bill.dtmDate
@@ -128,7 +159,9 @@ INNER JOIN (tblGRCustomerStorage CS
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId 
-				AND SS.intParentSettleStorageId IS NOT NULL)
+				AND SS.intParentSettleStorageId IS NOT NULL
+				--AND SS.dblSpotUnits = 0
+				)
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = CS.intItemId
 		and billDetail.intSettleStorageId = SS.intSettleStorageId
 		--AND SS.intBillId = bill.intBillId
@@ -151,7 +184,7 @@ left join tblCTContractHeader CH
 WHERE bill.ysnPosted = 1
 AND glAccnt.intAccountCategoryId = 45
 ------- Charges
-
+--and SS.strStorageTicket = 'STR-1729/1'
 UNION ALL
 
 SELECT DISTINCT --'c',
@@ -176,7 +209,9 @@ SELECT DISTINCT --'c',
 	,GD.intAccountId
 	,AD.strAccountId
 FROM tblGRCustomerStorage CS
-
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblGRSettleStorageTicket SST
 	ON SST.intCustomerStorageId = CS.intCustomerStorageId
 INNER JOIN tblGRSettleStorage SS
@@ -191,7 +226,6 @@ INNER JOIN tblGLDetail GD
 		AND GD.strCode = 'STR'
 INNER JOIN vyuGLAccountDetail AD
 	on AD.intAccountId = GD.intAccountId and AD.intAccountCategoryId = 45
-
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = CS.intCommodityId
 INNER JOIN tblICItem IM
@@ -215,9 +249,24 @@ LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
 left join tblCTContractHeader CH
 		on CH.intContractHeaderId = CT.intContractHeaderId
+OUTER APPLY (
+	SELECT ysnReversed = CASE 
+							WHEN strComments IN ('Added from data fix to offset the orphan records; GRN-2513','GRN-2741-REVERSAL') THEN 1
+							WHEN strComments = 'Added from data fix to create STR GL entries for manually added items in voucher; GRN-2513' THEN 0
+						END
+	FROM tblGLDetail 
+	WHERE strTransactionId = SS.strStorageTicket
+		AND intTransactionId = SS.intSettleStorageId
+		AND strTransactionType = 'Storage Settlement'
+		AND ysnIsUnposted = 0
+		AND strComments IN ('Added from data fix to offset the orphan records; GRN-2513','Added from data fix to create STR GL entries for manually added items in voucher; GRN-2513','GRN-2741-REVERSAL')
+		AND strDescription = GD.strDescription
+) GL
 WHERE SS.ysnPosted = 1
+--and SS.strStorageTicket = 'STR-4248/1'
+AND ISNULL(GL.ysnReversed,0) = 0
 UNION ALL
-SELECT DISTINCT--'d',
+SELECT DISTINCT --'d',
 	bill.intEntityVendorId
 	,bill.dtmDate
 	,SS.strStorageTicket
@@ -292,10 +341,11 @@ left join tblCTContractHeader CH
 WHERE bill.ysnPosted = 1
 --AND SS.strStorageTicket = 'STR-49/3'
 AND glAccnt.intAccountCategoryId = 45
+--and SS.strStorageTicket = 'STR-1729/1'
 --AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 --DISCOUNTS
 UNION ALL
-SELECT DISTINCT--'e',
+SELECT DISTINCT --'e',
 	CS.intEntityId AS intEntityVendorId
 	,SS.dtmCreated
 	,SS.strStorageTicket
@@ -332,40 +382,23 @@ SELECT DISTINCT--'e',
 FROM tblQMTicketDiscount QM
 INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-INNER JOIN (tblGRCustomerStorage CS 
-			INNER JOIN tblGRStorageType STY 
-				ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId 
-					AND STY.ysnDPOwnedType = 0
-			INNER JOIN tblGRSettleStorageTicket SST
-				ON SST.intCustomerStorageId = CS.intCustomerStorageId
-			INNER JOIN tblGRSettleStorage SS
-				ON SST.intSettleStorageId = SS.intSettleStorageId
-					AND SS.intParentSettleStorageId IS NOT NULL
-					--AND SS.dblSpotUnits = 0
-			-- INNER JOIN tblQMTicketDiscount QM
-			-- 	ON QM.intTicketFileId = CS.intCustomerStorageId
-			-- LEFT JOIN tblGRSettleContract SC
-			-- 	ON SC.intSettleStorageId = SS.intSettleStorageId
-			-- LEFT JOIN tblCTContractDetail CD
-			-- 	ON CD.intContractDetailId = SC.intContractDetailId
-			)
+INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = QM.intTicketFileId
-		--and billDetail.intSettleStorageId = SS.intSettleStorageId
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblICItem IM
 	ON DSC.intItemId = IM.intItemId
 INNER JOIN tblGRDiscountSchedule DS
 	ON DS.intDiscountScheduleId = DSC.intDiscountScheduleId
--- INNER JOIN tblICCommodity CO
--- 	ON CO.intCommodityId = DS.intCommodityId
 INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = CS.intCompanyLocationId
---INNER JOIN tblGRSettleStorageTicket SST
---	ON SST.intCustomerStorageId = CS.intCustomerStorageId
---INNER JOIN tblGRSettleStorage SS
---	ON SST.intSettleStorageId = SS.intSettleStorageId
---		AND SS.intParentSettleStorageId IS NOT NULL
---		AND SS.ysnPosted = 1
-		--AND SS.dblSpotUnits = 0
+INNER JOIN tblGRSettleStorageTicket SST
+	ON SST.intCustomerStorageId = CS.intCustomerStorageId
+INNER JOIN tblGRSettleStorage SS
+	ON SST.intSettleStorageId = SS.intSettleStorageId
+		AND SS.intParentSettleStorageId IS NOT NULL
+		AND SS.ysnPosted = 1
 LEFT JOIN tblGRSettleContract SC
 		ON SC.intSettleStorageId = SS.intSettleStorageId
 --SETTLE FOR BASIS CONTRACT IS THE ONLY TRANSACTION THAT SHOULD SHOW ON CLEARING TAB
@@ -383,45 +416,37 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 OUTER APPLY
 (
-	SELECT GD.intAccountId, AD.strAccountId
+	SELECT GD.intAccountId, AD.strAccountId, GD.strDescription
 	FROM tblGLDetail GD
 	INNER JOIN vyuGLAccountDetail AD
 		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
-	OUTER APPLY (
-		SELECT TOP 1 [ysnAccountPosted] = 1
-		FROM tblGLDetail GD2
-		WHERE GD2.strTransactionId = GD.strTransactionId
-		AND GD2.intTransactionId = GD.intTransactionId
-		AND GD2.strCode = 'STR'
-		AND GD2.strDescription = GD.strDescription
-		AND GD2.ysnIsUnposted = 0
-		AND GD2.intAccountId = GD.intAccountId
-		AND (GD2.dblDebit = GD.dblCredit OR GD2.dblCredit = GD.dblDebit)
-	) GD2
 	WHERE GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
 		AND GD.strCode = 'STR'
 		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
 		AND GD.ysnIsUnposted = 0
-		AND GD2.ysnAccountPosted IS NULL
-	-- 	AND GD.intAccountId NOT IN (SELECT GD.intAccountId
-	-- FROM tblGLDetail		
-	-- WHERE strTransactionId = GD.strTransactionId
-	-- 	AND intTransactionId = GD.intTransactionId
-	-- 	AND strCode = 'STR'
-	-- 	AND strDescription = GD.strDescription
-	-- 	AND ysnIsUnposted = 0
-	-- 	AND intAccountId = GD.intAccountId
-	-- 	AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
-	-- )
 ) GLDetail
+OUTER APPLY (
+	SELECT ysnReversed = 1
+	FROM tblGLDetail 
+	WHERE strTransactionId = SS.strStorageTicket
+		AND intTransactionId = SS.intSettleStorageId
+		AND strTransactionType = 'Storage Settlement'
+		AND ysnIsUnposted = 0
+		AND strComments IN ('Added from data fix to offset the orphan records; GRN-2513','GRN-2741-REVERSAL')
+		AND strDescription = GLDetail.strDescription
+) GL
 WHERE 
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
 AND SS.ysnPosted = 1
 AND GLDetail.intAccountId IS NOT NULL
+--AND SS.strStorageTicket = 'STR-5175/1'
+AND GL.ysnReversed IS NULL
+
+--and SS.strStorageTicket = 'STR-1729/1'
 UNION ALL
-SELECT DISTINCT--'f',
+SELECT DISTINCT --'f',
 	bill.intEntityVendorId
 	,bill.dtmDate
 	,SS.strStorageTicket
@@ -504,13 +529,14 @@ LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
 left join tblCTContractHeader CH
 		on CH.intContractHeaderId = CT.intContractHeaderId
-WHERE bill.ysnPosted = 1
-AND EXISTS (
-	SELECT 1
+OUTER APPLY (
+	SELECT TOP 1 [ysnDiscountExists] = 1
 	FROM tblQMTicketDiscount QM
 	INNER JOIN tblGRDiscountScheduleCode DSC
 		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 		AND DSC.intItemId = billDetail.intItemId
 		AND billDetail.intCustomerStorageId = QM.intTicketFileId
-)
+) QM
+WHERE bill.ysnPosted = 1
+AND QM.ysnDiscountExists = 1
 AND glAccnt.intAccountCategoryId = 45

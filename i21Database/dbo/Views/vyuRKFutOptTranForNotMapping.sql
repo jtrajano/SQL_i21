@@ -43,7 +43,8 @@ SELECT DE.intFutOptTransactionId
 								WHERE (intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
 										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
 										OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
-										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)) 
+										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
+										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLotsToSContract,0) <> 0 OR ISNULL(dblAssignedLotsToPContract,0) <>  0)))
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
 	, strHedgeType = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN 'Price Contract'
 							WHEN CF.intContractFuturesId IS NOT NULL THEN 'Contract Futures'
@@ -54,7 +55,7 @@ SELECT DE.intFutOptTransactionId
 	, strHedgeContract = CASE WHEN PF.intPriceContractId IS NOT NULL THEN PriceHeader.strContractNumber + ISNULL('-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10)), '')
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + ISNULL('-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10)), '')
 							ELSE NULL END COLLATE Latin1_General_CI_AS
-	, dblAvailableContract = (DE.dblNoOfContract -  ISNULL(AFC.dblSumAssignedLots, 0.00)) * CASE WHEN DE.strBuySell = 'Sell' THEN - 1 ELSE 1 END
+	, dblAvailableContract = (DE.dblNoOfContract -  ISNULL(AFC.dblSumAssignedLots, 0.00))
 	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
 	, DE.intOrigSliceTradeId
 	, strOriginalTradeNo = ST.strInternalTradeNo

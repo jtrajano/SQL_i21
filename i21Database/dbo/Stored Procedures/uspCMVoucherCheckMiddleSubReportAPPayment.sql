@@ -82,9 +82,21 @@ Invoices AS(
 			,dtmDate = preBILL.dtmBillDate
 			,intTermsId = preBILL.intTermsId
 			,strComment = SUBSTRING(preBILL.strComment,1,25)
-			,dblAmount = PYMTDetail.dblTotal -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
-			,dblDiscount = preBILL.dblDiscount
-			,dblNet = PYMTDetail.dblPayment -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
+			,dblAmount = PreAndDeb.dblAmountApplied	*
+				CASE WHEN (preBILL.intTransactionType = 3) 
+					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
+				THEN -1 
+				ELSE 1 END
+			,dblDiscount = preBILL.dblDiscount *			
+				CASE WHEN  (preBILL.intTransactionType = 3) 
+ 					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
+ 				THEN -1 
+				ELSE 1 END
+			,dblNet = PreAndDeb.dblAmountApplied *
+				CASE WHEN (preBILL.intTransactionType = 3) 
+					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
+				THEN -1 
+				ELSE 1 END
 			,preBILL.intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
@@ -138,7 +150,7 @@ Invoices AS(
 SELECT
 Invoice.*
 ,InvoiceType.strTransactionType
-,Term.strTermCode
+,Term.strTerm
 ,Curr.strCurrency
 ,strDateFormat = CASE WHEN Curr.strCurrency = 'CAD' THEN NULL ELSE CompanyPref.strReportDateFormat END
 FROM Invoices Invoice

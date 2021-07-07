@@ -12,6 +12,7 @@ SELECT H.intQuoteHeaderId
 , H.strSource
 , H.strMessage
 , H.ysnDelete
+, H.intConcurrencyId
 
 FROM tblTRQuoteHeader H
 LEFT JOIN tblEMEntity C ON C.intEntityId = H.intEntityCustomerId
