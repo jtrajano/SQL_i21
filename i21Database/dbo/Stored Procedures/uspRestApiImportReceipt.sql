@@ -129,25 +129,25 @@ IF EXISTS(SELECT TOP 1 1 FROM @ReceiptEntries)
 BEGIN
    	EXEC dbo.[uspICImportReceipt] @ReceiptEntries, @OtherCharges, 1, @LotEntries, @guiUniqueId
 
-	-- DECLARE @intInventoryReceiptId INT
-	-- DECLARE cur CURSOR LOCAL FAST_FORWARD
-    -- FOR
-	-- SELECT r.intInventoryReceiptId
-	-- FROM tblICInventoryReceipt r
-	-- WHERE r.guiApiUniqueId = @guiUniqueId
+	 DECLARE @intInventoryReceiptId INT
+	 DECLARE cur CURSOR LOCAL FAST_FORWARD
+     FOR
+	 SELECT r.intInventoryReceiptId
+	 FROM tblICInventoryReceipt r
+	 WHERE r.guiApiUniqueId = @guiUniqueId
 
-	-- OPEN cur
+	 OPEN cur
 
-    -- FETCH NEXT FROM cur INTO @intInventoryReceiptId
+     FETCH NEXT FROM cur INTO @intInventoryReceiptId
 
-	-- WHILE @@FETCH_STATUS = 0
-    -- BEGIN
-   	-- 	EXEC dbo.uspICInventoryReceiptCalculateTotals @intInventoryReceiptId, 0
-	-- 	FETCH NEXT FROM cur INTO @intInventoryReceiptId
-	-- END
+	 WHILE @@FETCH_STATUS = 0
+     BEGIN
+   	 	EXEC dbo.uspICInventoryReceiptCalculateTotals @intInventoryReceiptId, 1
+	 	FETCH NEXT FROM cur INTO @intInventoryReceiptId
+	 END
 
-	-- CLOSE cur
-	-- DEALLOCATE cur
+	 CLOSE cur
+	 DEALLOCATE cur
 END
 
 DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
