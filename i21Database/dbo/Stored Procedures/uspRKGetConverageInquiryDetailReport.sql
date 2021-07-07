@@ -215,8 +215,7 @@ SELECT
 	,'Quantity / Price' = ROUND(dblQuantity, @intDecimal)
 	,'No. of Lots' = ROUND(ISNULL(dblNoOfLot,0), @intDecimal)
 FROM @tmpRawData 
-WHERE strAccountNumber IN ('Purchase - Unwashed Arabica','Purchase - Washed Arabica')
-AND strGroup = '1.Outright Coverage'
+WHERE strGroup = '1.Outright Coverage'
 AND PriceStatus = '1.Priced / Outright - (Outright position)'
 AND strFutureMonth NOT IN ('Total')
 AND dblQuantity <> 0
