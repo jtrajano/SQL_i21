@@ -36,7 +36,7 @@ SELECT
 	strLogLevel = 'Error', 
 	strValue = CAST(s.intTermId AS NVARCHAR(50)),
 	intLineNumber = NULL,
-	@guiApiUniqueId,
+	@guiUniqueId,
 	strIntegrationType = 'RESTfulAPI',
 	strTransactionType = 'Item Contracts',
 	strApiVersion = NULL,
@@ -44,9 +44,9 @@ SELECT
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE t.intTermID IS NULL
-	AND s.guiApiUniqueId = @guiApiUniqueId
+	AND s.guiApiUniqueId = @guiUniqueId
 
-IF EXISTS(SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId)
+IF EXISTS(SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiUniqueId)
 	GOTO Logging
 
 -- Transformation
