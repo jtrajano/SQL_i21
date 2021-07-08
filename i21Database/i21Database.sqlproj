@@ -9424,6 +9424,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
+    <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9722,6 +9723,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
     <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
