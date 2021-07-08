@@ -14,7 +14,7 @@ BEGIN TRANSACTION
 	USING tblSMLocalizationStaging B ON (A.strLabel = B.strLabel AND A.intLanguageId = @intLanguageId)
 	--When records are matched, update the records if there is any change
 	WHEN MATCHED AND A.strTranslation <> B.strTranslation
-	THEN UPDATE SET A.strTranslation = B.strTranslation
+	THEN UPDATE SET A.strTranslation = B.strTranslation, A.intConcurrencyId = A.intConcurrencyId + 1
 	--When no records are matched, insert the incoming records from source table to target table
 	WHEN NOT MATCHED BY TARGET 
 	THEN INSERT (strLabel, strTranslation, intLanguageId) 
