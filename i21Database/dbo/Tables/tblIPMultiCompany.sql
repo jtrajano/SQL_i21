@@ -11,5 +11,6 @@
 	,strDatabaseName nvarchar(max)
 	,strUserName nvarchar(max)
 	,strPassword nvarchar(max)
+	,ysnPandSContractPositionSame Bit 
 	,CONSTRAINT [PK_tblIPMultiCompany] PRIMARY KEY ([intMultiCompanyId])
 )
