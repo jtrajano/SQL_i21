@@ -2,8 +2,7 @@
 CREATE PROCEDURE uspCMReconcileBankRecords
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL,
-	@intUserId AS INT,
-	@dtmDateEntered AS DATETIME = NULL
+	@intUserId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -120,12 +119,12 @@ WHERE	intBankAccountId = @intBankAccountId
 		AND strLink NOT IN (SELECT strLink COLLATE Latin1_General_CI_AS  FROM #tmpOriginDepositTransaction) --This is to improved the query by not using fnIsDespositEntry
 
 UPDATE t
-SET dtmDateReconciled =  @dtmDateEntered
+SET dtmDateReconciled =  @dtmDate
 FROM  tblCMBankTransaction t 
 JOIN @Id i on i.intId = t.intTransactionId
 
 UPDATE t
-SET dtmDateReconciled =  @dtmDateEntered
+SET dtmDateReconciled =  @dtmDate
 FROM  tblCMABRActivityMatched t 
 JOIN @Id i on i.intId = t.intTransactionId
 
