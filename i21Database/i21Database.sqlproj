@@ -9538,6 +9538,7 @@
     <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemStockStorageUnitDetail.sql" />
     <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
+    <Build Include="Scripts\Post-Deployment\SM\2120_InsertLanguages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
