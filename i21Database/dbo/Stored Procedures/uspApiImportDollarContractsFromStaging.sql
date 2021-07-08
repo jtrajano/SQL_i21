@@ -26,27 +26,14 @@ LEFT JOIN tblICCategory e ON e.intCategoryId = s.intCategoryId
 WHERE e.intCategoryId IS NULL
 	AND c.guiApiUniqueId = @guiUniqueId
 
-INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
-	strError, strField, strLogLevel, strValue, intLineNumber,
-	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
-SELECT
-	NEWID(),
-	strError = 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 
-	strField = 'termId', 
-	strLogLevel = 'Error', 
-	strValue = CAST(s.intTermId AS NVARCHAR(50)),
-	intLineNumber = NULL,
-	@guiUniqueId,
-	strIntegrationType = 'RESTfulAPI',
-	strTransactionType = 'Item Contracts',
-	strApiVersion = NULL,
-	guiSubscriptionId = NULL
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 'termId', 'Error',  CAST(s.intTermId AS NVARCHAR(50))
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE t.intTermID IS NULL
 	AND s.guiApiUniqueId = @guiUniqueId
 
-IF EXISTS(SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiUniqueId)
+IF EXISTS(SELECT * FROM @Logs WHERE guiApiUniqueId = @guiUniqueId)
 	GOTO Logging
 
 -- Transformation
