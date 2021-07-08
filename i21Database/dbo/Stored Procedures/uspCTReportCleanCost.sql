@@ -50,11 +50,17 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intCleanCostId' 
 
-	SELECT	@blbFile	=	B.blbFile 
-	FROM	tblSMAttachment A 
-	JOIN	tblSMUpload		B ON A.intAttachmentId = B.intAttachmentId
-	WHERE	A.strScreen = 'SystemManager.CompanyPreference'
-	AND		A.strComment = 'Header'
+	SELECT		@blbFile	=	B.blbFile 
+	FROM		tblSMAttachment A 
+	JOIN		tblSMUpload		B 
+	ON			A.intAttachmentId = B.intAttachmentId
+	INNER JOIN	tblSMTransaction C
+	ON			A.intTransactionId = C.intTransactionId
+	INNER JOIN	tblSMScreen D
+	ON			C.intScreenId = D.intScreenId
+	WHERE		D.strNamespace = 'SystemManager.view.CompanyPreference'
+	AND			A.strComment = 'Header'
+
 
 	SELECT		CC.*,
 				CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq)  AS	strSequenceNumber,
