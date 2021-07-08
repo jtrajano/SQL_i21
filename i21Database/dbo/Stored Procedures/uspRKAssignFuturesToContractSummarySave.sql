@@ -46,6 +46,14 @@ BEGIN TRY
 	WHERE intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary
 									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete))
 	
+	UPDATE DER
+	SET DER.dblPContractBalanceLots = DER.dblPContractBalanceLots - dblAssignedLotsToPContract
+		,DER.dblSContractBalanceLots = DER.dblSContractBalanceLots - dblAssignedLotsToSContract
+	FROM tblRKFutOptTransaction DER
+	INNER JOIN (SELECT intFutOptTransactionId, dblAssignedLotsToPContract, dblAssignedLotsToSContract FROM tblRKAssignFuturesToContractSummary
+									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete)) AFC
+		ON AFC.intFutOptTransactionId = DER.intFutOptTransactionId
+
 	IF EXISTS(SELECT TOP 1 1 FROM @tblMatchedDelete)
 	BEGIN
 		DELETE FROM tblRKAssignFuturesToContractSummary
@@ -105,6 +113,7 @@ BEGIN TRY
 		
 		SELECT  TOP 1 @intRowNum = intRowNum 
 			, @intContractDetailId = intContractDetailId
+			, @intFutOptTransactionId = intFutOptTransactionId
 			, @dblAssignedLots = dblAssignedLots
 			, @dblAssignedLotsToSContract = dblAssignedLotsToSContract
 			, @dblAssignedLotsToPContract = dblAssignedLotsToPContract
@@ -139,17 +148,30 @@ BEGIN TRY
 
 		DELETE FROM #tempAssignFuturesToContractSummary WHERE intRowNum = @intRowNum
 	
-		IF @ysnAllowDerivativeAssignToMultipleContracts = 1 AND @ysnAutoPrice = 1
+		IF @ysnAllowDerivativeAssignToMultipleContracts = 1 
 		BEGIN
 			
-			SELECT @dblContractSize = dblContractSize 
-			FROM tblCTContractDetail CD 
-			INNER JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId
-			WHERE CD.intContractDetailId = @intContractDetailId
+			IF @dblAssignedLotsToPContract <> 0
+			BEGIN
+				EXEC uspRKUpdateDerivativeContractBalanceLots @intFutOptTransactionId,'Purchase',@dblAssignedLotsToPContract
+			END
+			ELSE
+			BEGIN
+				EXEC uspRKUpdateDerivativeContractBalanceLots @intFutOptTransactionId,'Sale',@dblAssignedLotsToSContract
+			END
 
-			SET @dblQuantityToPrice = @dblAssignedLots * @dblContractSize
+			IF @ysnAutoPrice = 1
+			BEGIN
+			
+				SELECT @dblContractSize = dblContractSize 
+				FROM tblCTContractDetail CD 
+				INNER JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId
+				WHERE CD.intContractDetailId = @intContractDetailId
 
-			EXEC uspCTCreatePrice @intContractDetailId, @dblQuantityToPrice, @dblPrice, @intUserId, 1
+				SET @dblQuantityToPrice = @dblAssignedLots * @dblContractSize
+
+				EXEC uspCTCreatePrice @intContractDetailId, @dblQuantityToPrice, @dblPrice, @intUserId, 1
+			END
 		END
 	
 	

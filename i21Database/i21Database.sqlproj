@@ -9539,6 +9539,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetItemStockStorageUnitDetail.sql" />
     <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
     <None Include="Scripts\Post-Deployment\SM\2120_InsertLanguages.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKUpdateDerivativeContractBalanceLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
