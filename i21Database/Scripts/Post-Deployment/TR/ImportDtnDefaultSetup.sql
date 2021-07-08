@@ -76,3 +76,37 @@ BEGIN
 	END
 END
 GO
+
+DECLARE @strImportSetupName NVARCHAR(100) = NULL
+DECLARE @intImportFileHeaderId_Header INT = NULL
+
+SET @strImportSetupName = 'iRely Enterprise Vendor Invoice Import Format'
+
+SELECT @intImportFileHeaderId_Header = intImportFileHeaderId FROM tblSMImportFileHeader 
+WHERE strLayoutTitle = 'iRely Enterprise Vendor Invoice Import Format'
+
+DECLARE @intDtnImportSetupId INT = 2
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblTRDtnImportSetup WHERE strImportSetupName = @strImportSetupName)
+BEGIN
+	PRINT ('Deploying - iRely Enterprise Vendor Invoice Import Format')
+
+	SET IDENTITY_INSERT tblTRDtnImportSetup ON
+
+	INSERT INTO tblTRDtnImportSetup (intDtnImportSetupId, strImportSetupName, intConcurrencyId)
+	VALUES (@intDtnImportSetupId, @strImportSetupName, 1)
+
+	SET IDENTITY_INSERT tblTRDtnImportSetup OFF
+END
+
+IF(@intImportFileHeaderId_Header IS NOT NULL)
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblTRDtnImportSetupDetail WHERE intImportFileHeaderId = @intImportFileHeaderId_Header)
+	BEGIN
+		INSERT INTO tblTRDtnImportSetupDetail (intDtnImportSetupId, strType, intImportFileHeaderId, intConcurrencyId) 
+		VALUES (@intDtnImportSetupId, 'Header', @intImportFileHeaderId_Header, 1)
+	END
+END
+GO
+
+
