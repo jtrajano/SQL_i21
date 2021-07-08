@@ -361,10 +361,11 @@ SET @strHeader2 = '<tr><th>&nbsp;SerialNo</th>
 						<th>&nbsp;Attribute</th>
 						<th>&nbsp;P-Contract Value</th>
 						<th>&nbsp;S-Contract Value</th>
+						<th>&nbsp;Book</th>
 					</tr>'
 
 SELECT @strDetail2 = @strDetail2 + '<tr><td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intRecordId), '') + '</td>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strAllocationNumber), '') + '</td>' + '<td>&nbsp;' + ISNULL(strPContractNumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + strPValue + '</td>' + '<td>&nbsp;' + strSValue + '</td> 
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strAllocationNumber), '') + '</td>' + '<td>&nbsp;' + ISNULL(strPContractNumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + strPValue + '</td>' + '<td>&nbsp;' + strSValue + '</td>' + '<td>&nbsp;' + strBook + '</td> 
 	</tr>'
 FROM @Data
 ORDER BY intRecordId
@@ -376,10 +377,11 @@ SET @strHeader = '<tr><th>&nbsp;SerialNo</th>
 						<th>&nbsp;Attribute</th>
 						<th>&nbsp;Quantity</th>
 						<th>&nbsp;Allocated Qty</th>
+						<th>&nbsp;Book</th>
 					</tr>'
 
 SELECT @strDetail = @strDetail + '<tr><td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intRecordId), '') + '</td>
-			<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + IsNULL(strPValue, '') + '</td>' + '<td>&nbsp;' + IsNULL(strSValue, '') + '</td> 
+			<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + IsNULL(strPValue, '') + '</td>' + '<td>&nbsp;' + IsNULL(strSValue, '') + '</td>'+ '<td>&nbsp;' + strBook + '</td>  
 	</tr>'
 FROM @Data2
 ORDER BY intRecordId
