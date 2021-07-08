@@ -9534,6 +9534,9 @@
     <Build Include="dbo\Stored Procedures\uspICEdiGenerateMappingObjectsRecurringJob.sql" />
     <Build Include="dbo\Views\vyuICGetImportedInventoryReceiptSearch.sql" />
     <Build Include="dbo\Views\vyuICGetImportedInventoryReceiptSearchByEntity.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportCountDetailFromStaging.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemStockStorageUnitDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
