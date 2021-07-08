@@ -99,6 +99,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_CreateIDPGridLayout.sql
 :r .\SM\2110_UpdateAuditLogs.sql
 :r .\SM\2120_AddUserPortalSettingsToContactImport.sql
+:r .\SM\2120_InsertLanguages.sql
 
 
 -- Canned Report
