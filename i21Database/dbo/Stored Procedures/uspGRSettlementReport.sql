@@ -137,12 +137,15 @@ SELECT
 FROM tblSMUpload
 WHERE intAttachmentId = 
 (
-	SELECT TOP 1
-		intAttachmentId
-	FROM tblSMAttachment
-	WHERE strScreen = 'SystemManager.CompanyPreference'
-		AND strComment = 'Header'
-	ORDER BY intAttachmentId DESC
+	SELECT		TOP 1 intAttachmentId
+	FROM		tblSMAttachment AS a
+	INNER JOIN	tblSMTransaction AS b
+	ON			a.intTransactionId = b.intTransactionId
+	INNER JOIN	tblSMScreen AS c
+	ON			b.intScreenId = c.intScreenId
+	WHERE		c.strNamespace = 'SystemManager.view.CompanyPreference'
+			AND a.strComment = 'Header'
+	ORDER BY	intAttachmentId DESC
 )
 
 INSERT INTO @temp_xml_table

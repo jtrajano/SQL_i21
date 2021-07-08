@@ -803,7 +803,7 @@ BEGIN
 			tblCRMOpportunity.intOpportunityId not in (select intRecordId from tblSMTransaction where intScreenId = (select top 1 intScreenId from tblSMScreen where strNamespace = ''CRM.view.Opportunity''))
 	)');
 
-	exec('update tblSMAttachment set strScreen = ''CRM.Opportunity'' where strScreen = ''HelpDesk.Project'' and strRecordNo in (select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity)');
+	exec('update tblSMAttachment set strScreen = ''CRM.view.Opportunity'' where strScreen = ''HelpDesk.view.Project'' and strRecordNo in (select convert(nvarchar(50),intOpportunityId) from tblCRMOpportunity)');
 
 END
 
@@ -1334,7 +1334,7 @@ END
 CLOSE @queryResultAct
 DEALLOCATE @queryResultAct
 
-update tblSMAttachment set tblSMAttachment.strScreen = 'GlobalComponentEngine.view.Activity', tblSMAttachment.strRecordNo = (select top 1 convert(nvarchar(50),tblCRMOpportunityActivityTmp.intActivityId) from tblCRMOpportunityActivityTmp where tblCRMOpportunityActivityTmp.intTicketIdId = convert(int,tblSMAttachment.strRecordNo)) where tblSMAttachment.strScreen = 'HelpDesk.Ticket' and tblSMAttachment.strRecordNo in (select convert(nvarchar(50),tblCRMOpportunityActivityTmp.intTicketIdId) from tblCRMOpportunityActivityTmp);
+update tblSMAttachment set tblSMAttachment.strScreen = 'GlobalComponentEngine.view.Activity', tblSMAttachment.strRecordNo = (select top 1 convert(nvarchar(50),tblCRMOpportunityActivityTmp.intActivityId) from tblCRMOpportunityActivityTmp where tblCRMOpportunityActivityTmp.intTicketIdId = convert(int,tblSMAttachment.strRecordNo)) where tblSMAttachment.strScreen = 'HelpDesk.view.Ticket' and tblSMAttachment.strRecordNo in (select convert(nvarchar(50),tblCRMOpportunityActivityTmp.intTicketIdId) from tblCRMOpportunityActivityTmp);
 
 PRINT N'Creating Activity Note from Activity Details...'
 

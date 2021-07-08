@@ -39,12 +39,15 @@ SELECT
 	,U.strCountry + ', ' + U.strCity + ' ' + U.strState AS strBankAddress
  	,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 	(	
-	  SELECT TOP 1
-	  intAttachmentId
-	  FROM tblSMAttachment
-	  WHERE strScreen = 'SystemManager.CompanyPreference'
-	  AND strComment = 'Footer'
-	  ORDER BY intAttachmentId DESC
+		SELECT		TOP 1 intAttachmentId
+		FROM		tblSMAttachment AS a
+		INNER JOIN	tblSMTransaction AS b
+		ON			a.intTransactionId = b.intTransactionId
+		INNER JOIN	tblSMScreen AS c
+		ON			b.intScreenId = c.intScreenId
+		WHERE		c.strNamespace = 'SystemManager.view.CompanyPreference'
+				AND a.strComment = 'Footer'
+		ORDER BY	intAttachmentId DESC
 	)) AS strFooter
 FROM tblAPBill A
 INNER JOIN (tblAPVendor B INNER JOIN tblEMEntity B2 ON B.[intEntityId] = B2.intEntityId) ON A.intEntityVendorId = B.[intEntityId]

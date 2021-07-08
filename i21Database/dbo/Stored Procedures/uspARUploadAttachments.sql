@@ -8,11 +8,15 @@ BEGIN
 	DROP TABLE #ATTACHMENTS
 END
 
-SELECT intAttachmentId
-INTO #ATTACHMENTS
-FROM tblSMAttachment
-WHERE strRecordNo = CAST(@intTransactionId AS NVARCHAR(50))
-  AND strScreen = 'AccountsReceivable.Invoice'
+SELECT		a.intAttachmentId
+INTO		#ATTACHMENTS
+FROM		tblSMAttachment AS a
+INNER JOIN	dbo.tblSMTransaction AS b
+ON			a.intTransactionId = b.intTransactionId
+INNER JOIN	dbo.tblSMScreen AS c
+ON			b.intScreenId = c.intScreenId
+WHERE		b.intRecordId = @intTransactionId
+		AND c.strNamespace = 'AccountsReceivable.view.Invoice'
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #ATTACHMENTS)
 	BEGIN
