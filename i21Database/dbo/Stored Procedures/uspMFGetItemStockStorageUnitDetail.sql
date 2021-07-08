@@ -18,17 +18,17 @@ BEGIN
 		AND IL.intLocationId = @intLocationId
 	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = SUOM.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SUOM.intSubLocationId
-	WHERE SL.strName = (
+	WHERE ISNULL(SL.strName, '') = (
 			CASE 
 				WHEN @strStorageLocationName = ''
-					THEN SL.strName
+					THEN ISNULL(SL.strName, '')
 				ELSE @strStorageLocationName
 				END
 			)
-		AND CSL.strSubLocationName = (
+		AND ISNULL(CSL.strSubLocationName, '') = (
 			CASE 
 				WHEN @strSubLocationName = ''
-					THEN CSL.strSubLocationName
+					THEN ISNULL(CSL.strSubLocationName, '')
 				ELSE @strSubLocationName
 				END
 			)

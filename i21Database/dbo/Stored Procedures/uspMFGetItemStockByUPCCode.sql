@@ -10,20 +10,20 @@ DECLARE @intItemUOMId INT
 	,@strUnitMeasure NVARCHAR(50)
 	,@intItemId INT
 	,@intItemLocationId INT
-	,@intItemStockUOMId int 
+	,@intItemStockUOMId INT
 
 SELECT @intItemUOMId = IU.intItemUOMId
 	,@strShortUpcCode = IsNULL(IUA.strUpcCode, IU.strUpcCode)
-
-	,@intItemId = intItemId
+	,@intItemId = IU.intItemId
+	,@intUnitMeasureId = IU.intUnitMeasureId
 FROM tblICItemUOM IU
 LEFT JOIN tblICItemUomUpc IUA ON IUA.intItemUOMId = IU.intItemUOMId
 WHERE IsNULL(IUA.strLongUpcCode, IU.strLongUPCCode) = @strUPCCode
 
-Select @intItemStockUOMId = intItemUOMId
-			,@intUnitMeasureId = intUnitMeasureId
-from tblICItemUOM
-Where intItemId = @intItemId and ysnStockUnit=1
+SELECT @intItemStockUOMId = intItemUOMId
+FROM tblICItemUOM
+WHERE intItemId = @intItemId
+	AND ysnStockUnit = 1
 
 SELECT @strUnitMeasure = strUnitMeasure
 FROM tblICUnitMeasure
@@ -38,22 +38,24 @@ IF @intStorageLocationId IS NOT NULL
 BEGIN
 	SELECT I.intItemId
 		,I.strItemNo
+		,I.strDescription
 		,@strUPCCode AS strUPCCode
 		,@strShortUpcCode AS strShortUpcCode
-		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblOnHand)
-		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblUnitReserved)
-		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblOnHand) - dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblUnitReserved) AS dblAvailableQty
+		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblOnHand) AS dblOnHandQty
+		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblUnitReserved) AS dblReservedQty
+		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblOnHand) - dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblUnitReserved) AS dblAvailableQty
+		,@intItemUOMId AS intItemUOMId
 		,@intUnitMeasureId AS intUnitMeasureId
 		,@strUnitMeasure AS strUnitMeasure
+		,SU.intStorageLocationId
 		,SL1.strName AS strStorageUnit
+		,SU.intSubLocationId
 		,SL.strSubLocationName AS strStorageLocation
-		,Count(I.intItemId) OVER (
-			) intItemCount
 	FROM tblICItemStockUOM SU
 	JOIN tblICItem I ON I.intItemId = SU.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = SU.intSubLocationId
 	LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = SU.intStorageLocationId
-	WHERE intItemUOMId = @intItemStockUOMId
+	WHERE SU.intItemUOMId = @intItemUOMId
 		AND SU.dblOnHand > 0
 		AND SU.intItemLocationId = @intItemLocationId
 		AND IsNULL(SU.intStorageLocationId, @intStorageLocationId) = @intStorageLocationId
@@ -62,22 +64,24 @@ ELSE
 BEGIN
 	SELECT I.intItemId
 		,I.strItemNo
+		,I.strDescription
 		,@strUPCCode AS strUPCCode
 		,@strShortUpcCode AS strShortUpcCode
-		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblOnHand)
-		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblUnitReserved)
-		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblOnHand) - dbo.fnMFConvertQuantityToTargetItemUOM(@intItemStockUOMId,@intItemUOMId,SU.dblUnitReserved) AS dblAvailableQty
+		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblOnHand) AS dblOnHandQty
+		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblUnitReserved) AS dblReservedQty
+		,dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblOnHand) - dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intItemUOMId, SU.dblUnitReserved) AS dblAvailableQty
+		,@intItemUOMId AS intItemUOMId
 		,@intUnitMeasureId AS intUnitMeasureId
 		,@strUnitMeasure AS strUnitMeasure
+		,SU.intStorageLocationId
 		,SL1.strName AS strStorageUnit
+		,SU.intSubLocationId
 		,SL.strSubLocationName AS strStorageLocation
-		,Count(I.intItemId) OVER (
-			) intItemCount
 	FROM tblICItemStockUOM SU
 	JOIN tblICItem I ON I.intItemId = SU.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = SU.intSubLocationId
 	LEFT JOIN tblICStorageLocation SL1 ON SL1.intStorageLocationId = SU.intStorageLocationId
-	WHERE intItemUOMId = @intItemStockUOMId
+	WHERE SU.intItemUOMId = @intItemUOMId
 		AND SU.dblOnHand > 0
 		AND SU.intItemLocationId = @intItemLocationId
 END

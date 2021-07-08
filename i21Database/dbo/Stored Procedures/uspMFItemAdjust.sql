@@ -26,8 +26,8 @@ BEGIN TRY
 	FROM tblICItemStockUOM
 	WHERE intItemId = @intItemId
 		AND intItemUOMId = @intItemUOMId
-		AND IsNULL(intSubLocationId, @intSubLocationId) = @intSubLocationId
-		AND isNULL(intStorageLocationId, @intStorageLocationId) = @intStorageLocationId
+		AND IsNULL(intSubLocationId, ISNULL(@intSubLocationId, 0)) = ISNULL(@intSubLocationId, 0)
+		AND isNULL(intStorageLocationId, ISNULL(@intStorageLocationId, 0)) = ISNULL(@intStorageLocationId, 0)
 		AND intItemLocationId = @intItemLocationId
 
 	SELECT @dblAdjustByQuantity = @dblQuantity - @dblOnHand
