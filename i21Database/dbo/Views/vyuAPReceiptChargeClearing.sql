@@ -39,11 +39,11 @@ SELECT
 FROM tblICInventoryReceiptCharge ReceiptCharge      
 INNER JOIN tblICInventoryReceipt Receipt       
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
-INNER JOIN tblICInventoryReceiptItem ReceiptItem
-    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId  
+LEFT JOIN tblICInventoryReceiptItem ReceiptItem
+    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -119,11 +119,11 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt       
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
         AND ReceiptCharge.ysnAccrue = 1       
-INNER JOIN tblICInventoryReceiptItem ReceiptItem
-    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId     
+LEFT JOIN tblICInventoryReceiptItem ReceiptItem
+    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -201,11 +201,11 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 INNER JOIN tblICInventoryReceipt Receipt       
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
         AND ReceiptCharge.ysnAccrue = 1       
-INNER JOIN tblICInventoryReceiptItem ReceiptItem
-    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId    
+LEFT JOIN tblICInventoryReceiptItem ReceiptItem
+    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -333,11 +333,11 @@ INNER JOIN tblICInventoryReceiptCharge receiptCharge
     ON billDetail.intInventoryReceiptChargeId  = receiptCharge.intInventoryReceiptChargeId      
 INNER JOIN tblICInventoryReceipt receipt      
     ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId      
-INNER JOIN tblICInventoryReceiptItem receiptItem
-    ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
-    AND receiptCharge.strChargesLink = receiptItem.strChargesLink
 INNER JOIN tblSMCompanyLocation compLoc      
     ON receipt.intLocationId = compLoc.intCompanyLocationId    
+LEFT JOIN tblICInventoryReceiptItem receiptItem
+    ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
+    AND receiptCharge.strChargesLink = receiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
