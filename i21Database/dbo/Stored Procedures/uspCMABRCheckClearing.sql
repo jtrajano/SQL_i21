@@ -24,7 +24,9 @@ OUTER APPLY(
 	SELECT 
 	TOP 1
 	intTransactionId
-	FROM tblCMBankTransaction 
+	FROM tblCMBankTransaction C
+	JOIN tblCMBankTransactionType T 
+	ON C.intBankTransactionTypeId=T.intBankTransactionTypeId
 	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
@@ -38,8 +40,10 @@ OUTER APPLY(
 		END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit  = 'C'
-    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit IN('C','DC'))
-	AND dblAmount > 0
+	AND
+    (
+		 strDebitCredit  ='C' OR  (strDebitCredit  ='DC' AND dblAmount > 0)
+	)
 	ORDER BY dtmDate
 )CM
 UNION ALL
@@ -49,7 +53,9 @@ OUTER APPLY(
 	SELECT 
 	TOP 1
 	intTransactionId
-	FROM tblCMBankTransaction 
+	FROM tblCMBankTransaction C
+	JOIN tblCMBankTransactionType T 
+	ON C.intBankTransactionTypeId=T.intBankTransactionTypeId
 	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
@@ -63,8 +69,11 @@ OUTER APPLY(
 		END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit  = 'D'
-    AND intBankTransactionTypeId in  (SELECT intBankTransactionTypeId FROM tblCMBankTransactionType WHERE strDebitCredit  IN('C','DC'))
-	AND dblAmount < 0
+	AND
+    (
+		 strDebitCredit  ='D' OR  (strDebitCredit  ='DC' AND dblAmount < 0)
+	)
+	
 	ORDER BY dtmDate
 )CM
 )
@@ -88,5 +97,5 @@ T.intABRActivityId = ABR.intABRActivityId
 DECLARE @bankMatchingId NVARCHAR(20)
 EXEC uspSMGetStartingNumber 162,  @bankMatchingId OUT
 
-INSERT INTO tblCMABRActivityMatched(intABRActivityMatchedId, intABRActivityId, intTransactionId, dtmDateEntered, intEntityId)
-SELECT SCOPE_IDENTITY(), intABRActivityId, intTransactionId,@dtmCurrent, @intEntityId FROM ##tempActivityMatched
+INSERT INTO tblCMABRActivityMatched(intABRActivityId, intTransactionId, dtmDateEntered, intEntityId, intConcurrencyId)
+SELECT intABRActivityId, intTransactionId,@dtmCurrent, @intEntityId,1 FROM ##tempActivityMatched
