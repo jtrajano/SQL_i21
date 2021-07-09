@@ -68,8 +68,21 @@ IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspI
        DROP PROCEDURE uspIUAuditLogs;
 GO
 
+--remove only for sql azure
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateReIndexMaintenancePlan'))
-       DROP PROCEDURE uspSMCreateReIndexMaintenancePlan;
+BEGIN
+	DECLARE @edition NVARCHAR(100)
+	SELECT @edition = CASE ServerProperty('Edition')
+        WHEN 'SQL Azure' THEN 'Azure'
+        WHEN 'Azure SQL Edge Developer' THEN 'Azure'
+        WHEN 'Azure SQL Edge' THEN 'Azure'
+        ELSE 'Normal'
+    END
+	 IF ISNULL(@edition, '') = 'Azure'
+	 BEGIN
+		DROP PROCEDURE uspSMCreateReIndexMaintenancePlan;
+	 END
+END
 GO
 
 IF EXISTS(SELECT top 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'dbo.uspSMCreateAttachmentFromFile'))
