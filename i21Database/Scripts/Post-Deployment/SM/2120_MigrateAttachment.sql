@@ -44,7 +44,10 @@ FROM
 		INNER JOIN tblSMScreen F ON E.strScreen = F.strNamespace
 	) A LEFT OUTER JOIN 
 	tblSMTransaction B ON A.intScreenId = B.intScreenId AND CAST(A.strRecordNo AS INT) = B.intRecordId 
-WHERE ISNULL(B.intRecordId, '') = '' AND ISNULL(A.strRecordNo, '') <> '' AND ISNULL(A.strRecordNo, '') <> 0 AND A.strScreen <> 'CashManagement.view.BankReconciliation'
+WHERE		ISNULL(B.intRecordId, '') = '' 
+		AND ISNULL(A.strRecordNo, '') <> '' 
+		AND ISNULL(A.strRecordNo, '') <> 0 
+		--AND A.strScreen <> 'CashManagement.view.BankReconciliation'
 -- END - Create tblSMTransaction records that are not existing
 
 -- START - Update intTransactionId column based on strScreen and strRecordNo
@@ -56,7 +59,8 @@ SET			intTransactionId = (SELECT		a.intTransactionId
 								WHERE		b.strNamespace = c.strScreen AND
 											a.intRecordId = c.strRecordNo)
 FROM		dbo.tblSMAttachment AS c
-WHERE		c.strScreen <> 'CashManagement.view.BankReconciliation'
+WHERE		c.intTransactionId = NULL
+		--AND c.strScreen <> 'CashManagement.view.BankReconciliation'
 -- END - Update intTransactionId column based on strScreen and strRecordNo
 
 END
