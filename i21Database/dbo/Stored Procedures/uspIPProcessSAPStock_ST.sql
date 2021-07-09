@@ -101,7 +101,7 @@ BEGIN TRY
 					,intSubLocationId
 					--,intStorageLocationId
 				FROM tblICLot WITH (NOLOCK)
-				WHERE dblQty > 0
+				WHERE dblQty <> 0
 					AND intSubLocationId IS NOT NULL
 					--AND intStorageLocationId IS NOT NULL
 
