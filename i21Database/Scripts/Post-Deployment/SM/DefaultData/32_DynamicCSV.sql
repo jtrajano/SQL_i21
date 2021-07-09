@@ -2188,9 +2188,7 @@ UPDATE tblSMCSVDynamicImport SET
 				SET @isactive = CONVERT(BIT,0)
 			END
 
-
-
-			
+			SET @longtitude = ISNULL(NULLIF(@longtitude, ''''), ''0'')
 			IF(TRY_PARSE(@longtitude AS NUMERIC(18,6)) IS NULL )
 			BEGIN
 				SET @IsValid = 0
@@ -2201,7 +2199,7 @@ UPDATE tblSMCSVDynamicImport SET
 				SET @longtitudeNo = CAST(@longtitude AS NUMERIC(18,6))
 			END
 		
-			
+			SET @latitude = ISNULL(NULLIF(@latitude, ''''), ''0'')
 			IF(TRY_PARSE(@latitude AS NUMERIC(18,6)) IS NULL )
 			BEGIN
 				SET @IsValid = 0
@@ -2382,7 +2380,7 @@ UPDATE tblSMCSVDynamicImport SET
 	'
 	WHERE intCSVDynamicImportId = @NewHeaderId
 
-
+DELETE FROM tblSMCSVDynamicImportParameter WHERE intCSVDynamicImportId = @NewHeaderId
 
 INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)
 	
@@ -2435,9 +2433,9 @@ INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName,
 	Union All
 	SELECT @NewHeaderId, 'active', 'active', 0
 	Union All
-	SELECT @NewHeaderId, 'longtitude', 'longtitude', 1
+	SELECT @NewHeaderId, 'longtitude', 'longtitude', 0
 	Union All
-	SELECT @NewHeaderId, 'latitude', 'latitude', 1
+	SELECT @NewHeaderId, 'latitude', 'latitude', 0
 	Union All
 	SELECT @NewHeaderId, 'timezone', 'timezone', 0
 

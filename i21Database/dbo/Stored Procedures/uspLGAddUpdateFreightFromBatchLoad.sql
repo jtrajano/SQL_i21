@@ -31,7 +31,9 @@ BEGIN
 			SET dblRate = @dblFreightRate
 				,dblAmount = CASE WHEN (intFreightUOMId IS NULL) THEN @dblFreightRate 
 							ELSE IsNull(dbo.[fnCalculateCostBetweenUOM](intFreightUOMId,FUOM.intItemUOMId,@dblFreightRate),0.0) * dblUnitsPerLoad END
+				,strCostMethod = CASE WHEN (intFreightUOMId IS NULL) THEN 'Amount' ELSE 'Per Unit' END
 				,intItemUOMId = BL.intFreightUOMId
+				,intCurrencyId = BL.intFreightCurrencyId
 				,intConcurrencyId = LC.intConcurrencyId + 1
 		FROM tblLGLoadCost LC
 			INNER JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId

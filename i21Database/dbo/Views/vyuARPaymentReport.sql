@@ -175,18 +175,28 @@ OUTER APPLY (
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) COMPANYPREF
 OUTER APPLY (
-	SELECT TOP 1 blbLogo = blbFile 
-	FROM tblSMUpload U
-	INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-	  AND A.strComment = 'Header'
+	SELECT		TOP 1 blbLogo = U.blbFile 
+	FROM		dbo.tblSMUpload AS U
+	INNER JOIN	tblSMAttachment AS A
+	ON			U.intAttachmentId = A.intAttachmentId
+	INNER JOIN	dbo.tblSMTransaction AS B
+	ON			A.intTransactionId = B.intTransactionId
+	INNER JOIN	dbo.tblSMScreen AS C
+	ON			B.intScreenId = C.intScreenId
+	WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+			AND A.strComment = 'Header'
 ) LOGO
 OUTER APPLY (
-	SELECT TOP 1 blbLogo = blbFile 
-	FROM tblSMUpload U
-	INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-	  AND A.strComment = 'Stretched Header'
+	SELECT		TOP 1 blbLogo = U.blbFile 
+	FROM		dbo.tblSMUpload AS U
+	INNER JOIN	tblSMAttachment AS A
+	ON			U.intAttachmentId = A.intAttachmentId
+	INNER JOIN	dbo.tblSMTransaction AS B
+	ON			A.intTransactionId = B.intTransactionId
+	INNER JOIN	dbo.tblSMScreen AS C
+	ON			B.intScreenId = C.intScreenId
+	WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+			AND A.strComment = 'Stretched Header'
 ) STRETCHEDLOGO
 OUTER APPLY (
 	SELECT dblPayment = SUM(ISNULL(dblAmountPaid, 0.00)) 

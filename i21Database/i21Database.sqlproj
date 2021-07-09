@@ -9542,6 +9542,7 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
     <None Include="Scripts\Post-Deployment\SM\2120_InsertLanguages.sql" />
     <Build Include="dbo\Stored Procedures\uspRKUpdateDerivativeContractBalanceLots.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2120_MigrateAttachment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

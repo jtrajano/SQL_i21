@@ -23,12 +23,15 @@ BankAccount.strSWIFT,
 Bank.strCountry + ', ' + Bank.strCity + ' ' + Bank.strState AS strBankAddress,
 (SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 	(	
-	  SELECT TOP 1
-	  intAttachmentId
-	  FROM tblSMAttachment
-	  WHERE strScreen = 'SystemManager.CompanyPreference'
-	  AND strComment = 'Footer'
-	  ORDER BY intAttachmentId DESC
+		SELECT		TOP 1 intAttachmentId
+		FROM		tblSMAttachment AS a
+		INNER JOIN	tblSMTransaction AS b
+		ON			a.intTransactionId = b.intTransactionId
+		INNER JOIN	tblSMScreen AS c
+		ON			b.intScreenId = c.intScreenId
+		WHERE		c.strNamespace = 'SystemManager.view.CompanyPreference'
+				AND a.strComment = 'Footer'
+		ORDER BY	intAttachmentId DESC
 	)) AS strFooter,
 Claim.* 
 FROM (
