@@ -9431,6 +9431,7 @@
     <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketSplitByDeliverySheetSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
