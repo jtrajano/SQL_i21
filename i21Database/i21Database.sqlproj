@@ -9022,6 +9022,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
+	<Build Include="dbo\Stored Procedures\uspSCUpdateTicketSplitByDeliverySheetSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
