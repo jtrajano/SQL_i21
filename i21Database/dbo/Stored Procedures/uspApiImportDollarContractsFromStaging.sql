@@ -33,7 +33,7 @@ LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE t.intTermID IS NULL
 	AND s.guiApiUniqueId = @guiUniqueId
 
-IF EXISTS(SELECT * FROM @Logs WHERE guiApiUniqueId = @guiUniqueId)
+IF EXISTS(SELECT * FROM @Logs)
 	GOTO Logging
 
 -- Transformation
