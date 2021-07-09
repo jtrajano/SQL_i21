@@ -9023,6 +9023,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryGrandTotalReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketSplitByDeliverySheetSplit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
