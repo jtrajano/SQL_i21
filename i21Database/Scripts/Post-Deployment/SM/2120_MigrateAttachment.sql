@@ -7,6 +7,13 @@ SET			strScreen = STUFF(strScreen, CHARINDEX('.', strScreen), 0, '.view')
 WHERE		LEN(strScreen) - LEN(REPLACE(strScreen, '.', '')) < 2
 -- END - Insert 'view' to strScreen
 
+-- START - Datafix for incorrect strRecordNo in BankReconciliation records
+UPDATE		dbo.tblSMAttachment
+SET			strRecordNo = SUBSTRING(REPLACE(strRecordNo, 'BankRec-', ''), 0, CHARINDEX('-',REPLACE(strRecordNo, 'BankRec-', '')))
+WHERE		strScreen = 'CashManagement.view.BankReconciliation'
+		AND	strRecordNo LIKE 'BankRec%'
+-- END - Datafix for incorrect strRecordNo in BankReconciliation records
+
 -- START - Create tblSMScreen records that are not existing
 INSERT INTO tblSMScreen (strNamespace, strScreenId, strScreenName, strModule)
 	SELECT				DISTINCT strScreen AS strNamespace,
