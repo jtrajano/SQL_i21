@@ -59,7 +59,7 @@ SET			intTransactionId = (SELECT		a.intTransactionId
 								WHERE		b.strNamespace = c.strScreen AND
 											a.intRecordId = c.strRecordNo)
 FROM		dbo.tblSMAttachment AS c
-WHERE		c.intTransactionId = NULL
+WHERE		c.intTransactionId IS NULL
 		--AND c.strScreen <> 'CashManagement.view.BankReconciliation'
 -- END - Update intTransactionId column based on strScreen and strRecordNo
 
