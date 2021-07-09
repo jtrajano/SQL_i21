@@ -336,7 +336,7 @@ LEFT JOIN(
 	WHERE  ysnAddonParent = 0
 ) ADDON ON INV.intInvoiceId = ADDON.intInvoiceId AND ADDON.strAddonDetailKey =  INVOICEDETAIL.strAddonDetailKey
 OUTER APPLY (
-	SELECT		TOP 1 @blbLogo = U.blbFile 
+	SELECT		TOP 1 blbLogo = U.blbFile 
 	FROM		dbo.tblSMUpload AS U
 	INNER JOIN	tblSMAttachment AS A
 	ON			U.intAttachmentId = A.intAttachmentId
@@ -348,7 +348,7 @@ OUTER APPLY (
 			AND A.strComment = 'Header'
 ) LOGO
 OUTER APPLY (
-	SELECT		TOP 1 @blbLogo = U.blbFile 
+	SELECT		TOP 1 blbLogo = U.blbFile 
 	FROM		dbo.tblSMUpload AS U
 	INNER JOIN	tblSMAttachment AS A
 	ON			U.intAttachmentId = A.intAttachmentId
