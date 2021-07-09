@@ -14,7 +14,8 @@ Activity.strABRActivityId,
 Activity.dtmClear,
 Activity.strBankDescription,
 Activity.dblAmount dblActivityAmount,
-Activity.strDebitCredit
+Activity.strDebitCredit,
+A.dtmDateReconciled
 FROM 
 tblCMABRActivityMatched A
 CROSS APPLY(
@@ -23,10 +24,10 @@ CROSS APPLY(
 	dtmClear, 
     strBankDescription,
     dblAmount , 
-    strDebitCredit 
+    strDebitCredit,
+	intImportStatus
     FROM tblCMABRActivity 
     WHERE intABRActivityId = A.intABRActivityId
-    AND intImportStatus = 1 -- ONLY MATCHED ACTIVITY
 ) Activity
 CROSS APPLY(
 	SELECT 
@@ -38,5 +39,4 @@ CROSS APPLY(
 	strBankTransactionTypeName 
     FROM vyuCMBankTransaction 
     WHERE intTransactionId = A.intTransactionId
-    AND dtmDateReconciled IS NULL -- NON-RECONCILED ONLY
 ) Trans

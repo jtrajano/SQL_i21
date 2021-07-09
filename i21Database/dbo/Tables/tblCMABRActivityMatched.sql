@@ -4,6 +4,7 @@ CREATE TABLE [dbo].[tblCMABRActivityMatched]
 	[intABRActivityId] INT NOT NULL,
     [intTransactionId] INT NOT NULL,
 	[dtmDateEntered] DATETIME NULL,
+	[dtmDateReconciled] DATETIME NULL,
     [intEntityId] INT NOT NULL,
 	[intConcurrencyId] INT NULL,
 	CONSTRAINT [FK_tblCMABRActivityMatched] FOREIGN KEY ([intABRActivityId]) REFERENCES [dbo].[tblCMABRActivity] ([intABRActivityId]),

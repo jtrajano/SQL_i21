@@ -19,10 +19,8 @@ SELECT * FROM(
 						 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblAssignedLots1
 				 ,IsNull((SELECT SUM(AD.dblHedgedLots)	FROM tblRKAssignFuturesToContractSummary AD 
 				 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblHedgedLots1
-				,IsNull((SELECT SUM(ISNULL(AD.dblAssignedLotsToSContract,0))	FROM tblRKAssignFuturesToContractSummary AD 
-						WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblAssignedLotsToSContract
-				,IsNull((SELECT SUM(ISNULL(AD.dblAssignedLotsToPContract,0))	FROM tblRKAssignFuturesToContractSummary AD 
-						WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblAssignedLotsToPContract
+				,IsNull(ot.dblSContractBalanceLots,0)  As dblAssignedLotsToSContract
+				,IsNull(ot.dblPContractBalanceLots, 0)  As dblAssignedLotsToPContract
 				,fm.strFutMarketName
 				,fmh.strFutureMonth
 				,ba.strAccountNumber

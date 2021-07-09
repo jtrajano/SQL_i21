@@ -57,6 +57,8 @@
 	[ysnPreCrush] BIT NULL,
 	[ysnSlicedTrade] BIT NULL DEFAULT((0)),
 	[intOrigSliceTradeId] INT NULL,
+	[dblSContractBalanceLots] NUMERIC(18,6) NULL,
+	[dblPContractBalanceLots] NUMERIC(18,6) NULL,
 
     CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),

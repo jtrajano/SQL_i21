@@ -9537,6 +9537,11 @@
     <Build Include="dbo\Stored Procedures\uspICImportCountDetailFromStaging.sql" />
     <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemStockStorageUnitDetail.sql" />
+    <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2120_InsertLanguages.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKUpdateDerivativeContractBalanceLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9839,6 +9844,7 @@
     <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
