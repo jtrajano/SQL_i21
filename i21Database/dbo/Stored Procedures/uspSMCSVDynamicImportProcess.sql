@@ -38,7 +38,7 @@ BEGIN
 
 	INSERT INTO @ImportData(strData, intSort, intLinkedId)
 	SELECT 
-		ISNULL(strData, '') + ','
+		REPLACE(ISNULL(strData, ''), '''', '''''') + ','
 		,intSort
 		,intCSVDynamicImportLogDetailId
 		FROM tblSMCSVDynamicImportLogDetail 
