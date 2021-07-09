@@ -175,7 +175,7 @@ OUTER APPLY (
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) COMPANYPREF
 OUTER APPLY (
-	SELECT		TOP 1 @blbLogo = U.blbFile 
+	SELECT		TOP 1 blbLogo = U.blbFile 
 	FROM		dbo.tblSMUpload AS U
 	INNER JOIN	tblSMAttachment AS A
 	ON			U.intAttachmentId = A.intAttachmentId
@@ -187,7 +187,7 @@ OUTER APPLY (
 			AND A.strComment = 'Header'
 ) LOGO
 OUTER APPLY (
-	SELECT		TOP 1 @blbLogo = U.blbFile 
+	SELECT		TOP 1 blbLogo = U.blbFile 
 	FROM		dbo.tblSMUpload AS U
 	INNER JOIN	tblSMAttachment AS A
 	ON			U.intAttachmentId = A.intAttachmentId
