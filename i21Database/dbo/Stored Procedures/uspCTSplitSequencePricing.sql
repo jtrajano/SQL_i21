@@ -127,12 +127,9 @@ BEGIN TRY
 				select
 					@intNewPriceFixationId = pf.intPriceFixationId
 				from
-					tblCTContractDetail cd
-					,tblCTPriceFixation pf
+					tblCTPriceFixation pf
 				where
-					cd.intContractDetailId = 1129
-					and pf.intContractHeaderId = cd.intContractHeaderId
-					and pf.intContractDetailId = cd.intContractDetailId
+					pf.intContractDetailId = @intChildContractDetailId
 
 				if (@intNewPriceFixationId is null)
 				BEGIN
@@ -180,7 +177,7 @@ BEGIN TRY
 
 				UPDATE	tblCTContractDetail SET intSplitFromId = NULL WHERE intContractDetailId =@intChildContractDetailId
 
-				SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
+				SELECT	@intChildContractDetailId = MIN(intContractDetailId), @intNewPriceFixationId = null
 				FROM	tblCTContractDetail 
 				WHERE	intSplitFromId		=	@intContractDetailId
 				AND intPricingTypeId = 1
