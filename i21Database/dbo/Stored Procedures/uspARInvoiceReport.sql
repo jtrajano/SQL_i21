@@ -272,6 +272,20 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , strSubFormula			= INVOICEDETAIL.strSubFormula	
 	 , dtmCreated				= GETDATE()
+	 , strServiceChargeItem		= CASE WHEN SELECTEDINV.strInvoiceFormat 
+										IN ('By Customer Balance', 'By Invoice') 
+										THEN 'Service Charge on Past Due' + CHAR(13) + 'Balance as of: ' +  CAST(CAST(INV.dtmDate AS DATE) AS VARCHAR)
+										ELSE
+										''
+										END
+	 , intDaysOld               = CASE WHEN SELECTEDINV.strInvoiceFormat 
+										IN ('By Customer Balance', 'By Invoice') 
+										THEN DATEDIFF(DAYOFYEAR, INVOICEDETAIL.dtmDateSC, CAST(GETDATE() AS DATE))
+										ELSE
+										0
+										END
+	 , strServiceChareInvoiceNumber = INVOICEDETAIL.strSCInvoiceNumber
+	 , dtmDateSC				 =  INVOICEDETAIL.dtmDateSC
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
