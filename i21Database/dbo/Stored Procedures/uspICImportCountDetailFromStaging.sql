@@ -693,7 +693,7 @@ BEGIN
 	DECLARE @intTotalRows INT
 
 	SELECT @intRowsImported = COUNT(*) FROM @tblInventoryCountDetails
-	SELECT DISTINCT @intRowsSkipped = COUNT(intStagingId) FROM @tblErrors
+	SELECT @intRowsSkipped = COUNT(DISTINCT intStagingId) FROM @tblErrors
 	SELECT @intTotalErrors = COUNT(*) FROM @tblErrors 
 	SELECT @intTotalWarnings = COUNT(*) FROM @tblWarnings
 	SELECT @intTotalRows = COUNT(*) FROM tblICImportStagingCountDetail WHERE strImportIdentifier = @strIdentifier
