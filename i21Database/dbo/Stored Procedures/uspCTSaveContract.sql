@@ -262,10 +262,10 @@ BEGIN TRY
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	@CDTableUpdate
-				SET		dblFutures			=	NULL,
-						dblCashPrice		=	NULL,
-						dblTotalCost		=	NULL,
-						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 2 END
+				SET		dblFutures			=	dblFutures,
+						dblCashPrice		=	dblCashPrice,
+						dblTotalCost		=	dblTotalCost,
+						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE intPricingTypeId END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
