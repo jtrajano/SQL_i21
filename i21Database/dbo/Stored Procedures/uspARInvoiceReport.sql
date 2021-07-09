@@ -270,7 +270,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , blbSignature				= INV.blbSignature
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
-	 , strSubFormula			= INVOICEDETAIL.strSubFormula	
+	 , strSubFormula			= INVOICEDETAIL.strSubFormula
 	 , dtmCreated				= GETDATE()
 	 , strServiceChargeItem		= CASE WHEN SELECTEDINV.strInvoiceFormat 
 										IN ('By Customer Balance', 'By Invoice') 
