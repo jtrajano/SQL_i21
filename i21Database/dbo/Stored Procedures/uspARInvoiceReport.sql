@@ -326,7 +326,6 @@ LEFT JOIN (
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , dblTotal					= ID.dblTotal
 		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber
-		 , strSCInvoiceNumber		= ID.strSCInvoiceNumber
 		 , strUnitMeasure			= UOM.strUnitMeasure
 		 , intContractSeq			= CONTRACTS.intContractSeq
 		 , dblBalance				= CONTRACTS.dblBalance
