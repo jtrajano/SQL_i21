@@ -196,7 +196,7 @@ BEGIN
 		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], (SELECT [strCalculationMethod] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)))
 		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], (SELECT [dblRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate))), @ZeroDecimal)
 		,[dblBaseRate]				= ISNULL(ISNULL(LITE.[dblBaseRate], (SELECT [dblBaseRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate))), @ZeroDecimal)
-		,[dblExemptionPercent]		= @ZeroDecimal
+		,[dblExemptionPercent]		= ISNULL(TAXEXEMPT.dblExemptionPercent, @ZeroDecimal)
 		,[dblTax]					= LITE.[dblTax]
 		,[dblAdjustedTax]			= LITE.[dblAdjustedTax]
 		,[intTaxAccountId]			= ISNULL(LITE.[intTaxAccountId], SMTC.[intSalesTaxAccountId])
@@ -214,6 +214,34 @@ BEGIN
 	INNER JOIN
 		tblSMTaxCode SMTC
 			ON LITE.[intTaxCodeId] = SMTC.[intTaxCodeId]
+	OUTER APPLY (
+		SELECT intCategoryId
+		FROM tblICItem 
+		WHERE intItemId = @ItemId
+	) ITEM 
+	CROSS APPLY
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails]
+		(
+		 @EntityCustomerId				--@CustomerId				
+		,@TransactionDate				--@TransactionDate			
+		,NULL							--@TaxGroupId				
+		,SMTC.intTaxCodeId				--@TaxCodeId					
+		,SMTC.intTaxClassId				--@TaxClassId				
+		,SMTC.strState					--@TaxState					
+		,@ItemId						--@ItemId					
+		,ITEM.intCategoryId				--@ItemCategoryId			
+		,@ShipToLocationId				--@ShipToLocationId			
+		,NULL							--@IsCustomerSiteTaxable		
+		,@CardId						--@CardId					
+		,@VehicleId						--@VehicleId					
+		,NULL							--@SiteId					
+		,@DisregardExemptionSetup		--@DisregardExemptionSetup	
+		,@CompanyLocationId				--@CompanyLocationId			
+		,@FreightTermId					--@FreightTermId				
+		,@CFSiteId						--@CFSiteId					
+		,0								--@IsDeliver					
+		,0								--@IsCFQuote					
+		) TAXEXEMPT
 		
 	DECLARE @TotalUnitTax			NUMERIC(18,6)
 			,@UnitTax				NUMERIC(18,6)
@@ -250,6 +278,7 @@ BEGIN
 	INNER JOIN tblSMTaxClass SMTC
 	ON IT.intTaxClassId = SMTC.intTaxClassId
 	WHERE strTaxClass Like '%Federal Excise Tax%'
+	AND ysnTaxExempt = 0
 	GROUP BY IT.strCalculationMethod
 
 	SELECT @DistrictTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
@@ -745,8 +774,14 @@ BEGIN
 					END
 					ELSE
 					BEGIN
-						DECLARE @TaxTotal NUMERIC(18,6) = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
+						DECLARE @TaxTotal NUMERIC(18,6)
 
+						IF(@GrossAmount = 0)
+						BEGIN
+							SET @NetPrice = @Price
+						END
+
+						SET @TaxTotal = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
 						SET @ItemExemptedTaxAmount = (@TaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
 						SET @ItemTaxAmount = (@TaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
 					END

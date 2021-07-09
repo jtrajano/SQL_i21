@@ -88,11 +88,5 @@ T.intABRActivityId = ABR.intABRActivityId
 DECLARE @bankMatchingId NVARCHAR(20)
 EXEC uspSMGetStartingNumber 162,  @bankMatchingId OUT
 
-INSERT INTO tblCMABRActivityMatched( strActivityMatched, dtmDateEntered, intEntityId)
-SELECT @bankMatchingId, @dtmCurrent, @intEntityId
-
-INSERT INTO tblCMABRActivityMatchedDetail(intABRActivityMatchedId, intABRActivityId, intTransactionId)
-SELECT SCOPE_IDENTITY(), intABRActivityId, intTransactionId FROM ##tempActivityMatched
-
-
-
+INSERT INTO tblCMABRActivityMatched(intABRActivityMatchedId, intABRActivityId, intTransactionId, dtmDateEntered, intEntityId)
+SELECT SCOPE_IDENTITY(), intABRActivityId, intTransactionId,@dtmCurrent, @intEntityId FROM ##tempActivityMatched

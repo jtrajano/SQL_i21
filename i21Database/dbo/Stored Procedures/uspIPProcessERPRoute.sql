@@ -43,6 +43,7 @@ BEGIN TRY
 		,strRowState NVARCHAR(50)
 		)
 	DECLARE @strLocationName NVARCHAR(50)
+	DECLARE @tblDeleteManufacturingCell TABLE (intManufacturingCellId INT)
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -298,6 +299,59 @@ BEGIN TRY
 					WHERE intItemRouteDetailStageId > @intItemRouteDetailStageId
 						AND intItemRouteStageId = @intItemRouteStageId
 				END
+
+				DELETE
+				FROM @tblDeleteManufacturingCell
+
+				INSERT INTO @tblDeleteManufacturingCell (intManufacturingCellId)
+				SELECT IFMC.intManufacturingCellId
+				FROM tblICItemFactoryManufacturingCell IFMC
+				JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = IFMC.intManufacturingCellId
+				WHERE IFMC.intItemFactoryId = @intItemFactoryId
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblIPItemRouteDetailStage IRDS
+						WHERE IRDS.intItemRouteStageId = @intItemRouteStageId
+							AND IRDS.strManufacturingCell = MC.strCellName
+						)
+
+				INSERT INTO @tblICItemFactoryManufacturingCell (
+					intItemFactoryManufacturingCellId
+					,intItemFactoryId
+					,intManufacturingCellId
+					,strRowState
+					)
+				SELECT IFMC.intItemFactoryManufacturingCellId
+					,IFMC.intItemFactoryId
+					,IFMC.intManufacturingCellId
+					,'Deleted'
+				FROM tblICItemFactoryManufacturingCell IFMC
+				JOIN @tblDeleteManufacturingCell DEL ON DEL.intManufacturingCellId = IFMC.intManufacturingCellId
+					AND IFMC.intItemFactoryId = @intItemFactoryId
+
+				DELETE IFMC
+				FROM tblICItemFactoryManufacturingCell IFMC
+				JOIN @tblDeleteManufacturingCell DEL ON DEL.intManufacturingCellId = IFMC.intManufacturingCellId
+					AND IFMC.intItemFactoryId = @intItemFactoryId
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblICItemFactoryManufacturingCell IFMC
+						WHERE IFMC.intItemFactoryId = @intItemFactoryId
+							AND IFMC.ysnDefault = 1
+						)
+				BEGIN
+					UPDATE IFMC
+					SET ysnDefault = 1
+					FROM tblICItemFactoryManufacturingCell IFMC
+					WHERE IFMC.intItemFactoryId = @intItemFactoryId
+						AND IFMC.intManufacturingCellId IN (
+							SELECT TOP 1 intManufacturingCellId
+							FROM tblICItemFactoryManufacturingCell
+							WHERE intItemFactoryId = @intItemFactoryId
+							ORDER BY intItemFactoryManufacturingCellId
+							)
+				END
 			END
 
 			DECLARE @strDetails NVARCHAR(MAX) = ''
@@ -342,6 +396,7 @@ BEGIN TRY
 					SELECT 1
 					FROM @tblICItemFactoryManufacturingCell
 					WHERE strRowState = 'Added'
+						OR strRowState = 'Deleted'
 					)
 			BEGIN
 				SET @strDetails = '{
@@ -361,6 +416,11 @@ BEGIN TRY
 				FROM @tblICItemFactoryManufacturingCell FMC
 				JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = FMC.intManufacturingCellId
 				WHERE strRowState = 'Added'
+
+				SELECT @strDetails += '{"action":"Deleted","change":"Deleted - Record: ' + MC.strCellName + '","keyValue":' + LTRIM(intItemFactoryManufacturingCellId) + ',"iconCls":"small-new-minus","leaf":true},'
+				FROM @tblICItemFactoryManufacturingCell FMC
+				JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = FMC.intManufacturingCellId
+				WHERE strRowState = 'Deleted'
 
 				SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
 

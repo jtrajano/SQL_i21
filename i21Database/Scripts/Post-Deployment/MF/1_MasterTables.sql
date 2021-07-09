@@ -4135,3 +4135,7 @@ BEGIN
 			)
 END
 Go
+UPDATE tblMFCompanyPreference
+SET ysnEnableItemMenuOnHandheld = 0
+WHERE ysnEnableItemMenuOnHandheld IS NULL
+GO

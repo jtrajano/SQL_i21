@@ -95,5 +95,6 @@
 	intNoofdaystoconsiderforDemandBatches INT,
 	intDemandAnalysisMonthlyCutOffDay INT,
 	ysnForecastedConsumptionByRemainingDays BIT,
+	ysnEnableItemMenuOnHandheld BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

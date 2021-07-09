@@ -10,6 +10,7 @@
 	[ysnSelected] BIT NOT NULL DEFAULT ((1)),
 	[ysnValid] BIT NOT NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
+    [ysnDelete] BIT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblTRImportRackPriceDetail] PRIMARY KEY ([intImportRackPriceDetailId]), 
     CONSTRAINT [FK_tblTRImportRackPriceDetail_tblTRImportRackPrice] FOREIGN KEY ([intImportRackPriceId]) REFERENCES [tblTRImportRackPrice]([intImportRackPriceId]) ON DELETE CASCADE
 )

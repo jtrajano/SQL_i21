@@ -1,11 +1,15 @@
 ﻿CREATE PROCEDURE uspMFCreateInventoryCountDetail @strInventoryCountNo NVARCHAR(50)
-	,@intLotId INT
+	,@intLotId INT = NULL
 	,@intUserSecurityId INT
 	,@dblPhysicalCount NUMERIC(18, 6)
-	,@intPhysicalCountUOMId INT
+	,@intPhysicalCountUOMId INT=NULL
+	,@intItemId INT = NULL
+	,@intItemLocationId INT = NULL
+	,@intItemUOMId INT = NULL
+	,@intStorageLocationId INT = NULL
+	,@intStorageUnitId INT = NULL
 AS
 BEGIN
-	DECLARE @intItemUOMId INT
 	DECLARE @dblWeightPerQty NUMERIC(18, 6)
 
 	SELECT @intItemUOMId = L.intItemUOMId
@@ -17,16 +21,23 @@ BEGIN
 	FROM tblICLot L
 	WHERE L.intLotId = @intLotId
 
-	IF @intPhysicalCountUOMId <> @intItemUOMId
+	IF @intLotId IS NOT NULL
 	BEGIN
-		SELECT @dblPhysicalCount = @dblPhysicalCount / @dblWeightPerQty
+		IF @intPhysicalCountUOMId <> @intItemUOMId
+		BEGIN
+			SELECT @dblPhysicalCount = @dblPhysicalCount / @dblWeightPerQty
+		END
 	END
 
 	EXEC dbo.uspICUpdateInventoryPhysicalCount @strCountNo = @strInventoryCountNo
 		,@dblPhysicalCount = @dblPhysicalCount
 		,@intLotId = @intLotId
 		,@intUserSecurityId = @intUserSecurityId
-
+		,@intItemId = @intItemId
+		,@intItemLocationId = @intItemLocationId
+		,@intItemUOMId = @intItemUOMId
+		,@intStorageLocationId = @intStorageLocationId
+		,@intStorageUnitId = @intStorageUnitId
 		/*DECLARE @intLocationId INT
 	DECLARE @intSubLocationId INT
 	DECLARE @intStorageLocationId INT

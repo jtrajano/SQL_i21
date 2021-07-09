@@ -26,6 +26,16 @@ LEFT JOIN tblICCategory e ON e.intCategoryId = s.intCategoryId
 WHERE e.intCategoryId IS NULL
 	AND c.guiApiUniqueId = @guiUniqueId
 
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 'termId', 'Error',  CAST(s.intTermId AS NVARCHAR(50))
+FROM tblCTApiItemContractStaging s
+LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
+WHERE t.intTermID IS NULL
+	AND s.guiApiUniqueId = @guiUniqueId
+
+IF EXISTS(SELECT * FROM @Logs)
+	GOTO Logging
+
 -- Transformation
 DECLARE @intContractType INT
 DECLARE @intEntityId INT
@@ -187,6 +197,8 @@ END
 
 CLOSE cur
 DEALLOCATE cur
+
+Logging:
 
 INSERT INTO @Logs (intLineNumber, dblTotalAmount, strLogLevel, strField)
 SELECT h.intItemContractHeaderId, h.dblDollarValue, 'Ids', h.strContractNumber

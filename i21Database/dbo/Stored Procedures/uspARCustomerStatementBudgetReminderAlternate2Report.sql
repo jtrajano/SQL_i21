@@ -43,12 +43,15 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @intEntityUserIdLocal				AS INT				= NULLIF(@intEntityUserId, 0)
 	  , @intCompanyLocationId				AS INT				= NULL
 	  , @ARBalance							NUMERIC(18,6)		= 0.00
-
+	  , @query								AS NVARCHAR(MAX)	= NULL
+	  , @queryRunningBalance				AS NVARCHAR(MAX)	= NULL
+	  , @strEntityUserIdLocal				AS NVARCHAR(MAX)	= NULL
 
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmBalanceForwardDateLocal	= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmBalanceForwardDateLocal)))
 SET @dtmDateFromLocal			= DATEADD(DAYOFYEAR, 1, @dtmBalanceForwardDateLocal)
+SET @strEntityUserIdLocal		= CAST(@intEntityUserIdLocal AS NVARCHAR(MAX))
 
 SELECT @blbLogo = dbo.fnSMGetCompanyLogo('Header')
 SELECT TOP 1 @strCompanyName	= strCompanyName
@@ -780,15 +783,23 @@ IF @ysnPrintCreditBalanceLocal = 0
 		  )
 	END
 
+IF (@@version NOT LIKE '%2008%')
+	BEGIN
+		SET @queryRunningBalance = ' ORDER BY intRowId'
+	END
+
+SET @query = CAST('' AS NVARCHAR(MAX)) + '
 UPDATE CSST
 SET  CSST.dblBalance = CSST_RUNNING_BALANCE.dblRunningBalance
-	,CSST.dblTotalAmount = CASE strTransactionType WHEN 'Balance Forward' THEN dblBalance WHEN 'Invoice' THEN dblAmountDue WHEN 'Applied Payment' THEN dblAmountPaid ELSE 0 END
+	,CSST.dblTotalAmount = CASE strTransactionType WHEN ''Balance Forward'' THEN dblBalance WHEN ''Invoice'' THEN dblAmountDue WHEN ''Applied Payment'' THEN dblAmountPaid ELSE 0 END
 FROM tblARCustomerStatementStagingTable CSST
 INNER JOIN (
-	SELECT intRowId, dblRunningBalance = SUM(CASE strTransactionType WHEN 'Balance Forward' THEN dblBalance WHEN 'Invoice' THEN dblAmountDue WHEN 'Applied Payment' THEN dblAmountPaid ELSE 0 END) OVER (PARTITION BY strStatementFormat ORDER BY intRowId)
+	SELECT intRowId, dblRunningBalance = SUM(CASE strTransactionType WHEN ''Balance Forward'' THEN dblBalance WHEN ''Invoice'' THEN dblAmountDue WHEN ''Applied Payment'' THEN dblAmountPaid ELSE 0 END) OVER (PARTITION BY strStatementFormat' + ISNULL(@queryRunningBalance, '') +')
 	FROM tblARCustomerStatementStagingTable
 ) CSST_RUNNING_BALANCE
 ON CSST.intRowId = CSST_RUNNING_BALANCE.intRowId
-WHERE CSST.intEntityUserId = @intEntityUserIdLocal 
-  AND CSST.strStatementFormat = 'Budget Reminder Alternate 2'
- -- AND CSST.intRowId > 1
+WHERE CSST.intEntityUserId = '+ @strEntityUserIdLocal +'
+  AND CSST.strStatementFormat = ''Budget Reminder Alternate 2'''
+ -- AND CSST.intRowId > 1'
+
+ EXEC sp_executesql @query
