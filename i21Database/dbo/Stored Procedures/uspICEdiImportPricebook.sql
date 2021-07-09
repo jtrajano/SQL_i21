@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspICEdiImportPricebook] @intUserId INT, @intVendorId INT, @Locations UdtCompanyLocations READONLY, @ErrorCount INT OUTPUT, @TotalRows INT OUTPUT
+﻿CREATE PROCEDURE [dbo].[uspICEdiImportPricebook] 
+	@intUserId INT
+	, @intVendorId INT = NULL 
+	, @Locations UdtCompanyLocations READONLY
+	, @ErrorCount INT OUTPUT
+	, @TotalRows INT OUTPUT
 AS
 
 DECLARE @LogId INT
@@ -17,27 +22,98 @@ SET	  i.intBrandId = ISNULL(b.intBrandId, i.intBrandId)
 	, i.strDescription = ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription)
 	, i.strShortName = ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName)
 	, i.strItemNo = p.strSellingUpcNumber
-FROM tblICEdiPricebook p
-	INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
-	LEFT OUTER JOIN tblICBrand b ON b.strBrandName = p.strManufacturersBrandName
+FROM 
+	tblICEdiPricebook p
+	INNER JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	INNER JOIN tblICItem i 
+		ON i.intItemId = u.intItemId
+	LEFT OUTER JOIN tblICBrand b 
+		ON b.strBrandName = p.strManufacturersBrandName
+
+-------------------------------------------------
+-- BEGIN Validation 
+-------------------------------------------------
 
 -- Log UPCs that don't have corresponding items
-INSERT INTO tblICImportLogDetail(intImportLogId, strType, intRecordNo, strField, strValue, strMessage, strStatus, strAction, intConcurrencyId)
-SELECT @LogId, 'Error', p.intRecordNumber, 'SellingUpcNumber', p.strSellingUpcNumber, 'Cannot find the item that matches the UPC: ' + p.strSellingUpcNumber, 'Skipped', 'Record not imported.', 1
-FROM tblICEdiPricebook p
-	LEFT OUTER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-	LEFT JOIN tblICItem i ON i.intItemId = u.intItemId
-WHERE i.intItemId IS NULL
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, p.intRecordNumber
+	, 'SellingUpcNumber'
+	, p.strSellingUpcNumber
+	, 'Cannot find the item that matches the UPC: ' + p.strSellingUpcNumber
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+	LEFT OUTER JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	LEFT JOIN tblICItem i 
+		ON i.intItemId = u.intItemId
+WHERE 
+	i.intItemId IS NULL
+
+-- Log the records with invalid Vendor Ids. 
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, p.intRecordNumber
+	, 'strVendorId'
+	, p.strVendorId
+	, 'Cannot find the Vendor that matches: ' + p.strVendorId
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN vyuAPVendor v
+		ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+		OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+WHERE 
+	v.intEntityId IS NULL 
+
+-------------------------------------------------
+-- END Validation 
+-------------------------------------------------
+
 	
 -- Update UOM
 UPDATE u
 SET u.intUnitMeasureId = ISNULL(ISNULL(m.intUnitMeasureId, s.intUnitMeasureId), u.intUnitMeasureId)
-FROM tblICEdiPricebook p
-	INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
-	LEFT OUTER JOIN tblICUnitMeasure m ON m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
-	LEFT OUTER JOIN tblICUnitMeasure s ON s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+FROM 
+	tblICEdiPricebook p
+	INNER JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	INNER JOIN tblICItem i 
+		ON i.intItemId = u.intItemId
+	LEFT OUTER JOIN tblICUnitMeasure m 
+		ON m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+	LEFT OUTER JOIN tblICUnitMeasure s 
+		ON s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
 	
 -- Update Item Location
 UPDATE l
@@ -62,17 +138,23 @@ SET   l.intClassId = ISNULL(ISNULL(sc.intSubcategoryId, catLoc.intClassId), l.in
 	, l.ysnIdRequiredCigarette = ISNULL(l.ysnIdRequiredCigarette, catLoc.ysnIdRequiredCigarette)
 	, l.ysnIdRequiredLiquor = ISNULL(l.ysnIdRequiredLiquor, catLoc.ysnIdRequiredLiquor)
 	, l.intMinimumAge = ISNULL(l.intMinimumAge, catLoc.intMinimumAge)
-
 FROM tblICEdiPricebook p
-	INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
-	INNER JOIN tblICItemLocation l ON l.intItemId = i.intItemId
-	LEFT OUTER JOIN tblSTSubcategory sc ON sc.strSubcategoryId = NULLIF(p.strProductClass, '')
+	INNER JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	INNER JOIN tblICItem i 
+		ON i.intItemId = u.intItemId
+	INNER JOIN tblICItemLocation l 
+		ON l.intItemId = i.intItemId
+	LEFT OUTER JOIN tblSTSubcategory sc 
+		ON sc.strSubcategoryId = NULLIF(p.strProductClass, '')
 		AND sc.strSubcategoryType = 'C'
-	LEFT OUTER JOIN tblSTSubcategory sf on sf.strSubcategoryId = NULLIF(p.strProductFamily, '')
+	LEFT OUTER JOIN tblSTSubcategory sf 
+		ON sf.strSubcategoryId = NULLIF(p.strProductFamily, '')
 		AND sf.strSubcategoryType = 'F'
-	LEFT OUTER JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
-	LEFT OUTER JOIN tblICCategoryLocation catLoc ON catLoc.intCategoryId = cat.intCategoryId
+	LEFT OUTER JOIN tblICCategory cat 
+		ON cat.intCategoryId = i.intCategoryId
+	LEFT OUTER JOIN tblICCategoryLocation catLoc 
+		ON catLoc.intCategoryId = cat.intCategoryId
 		AND catLoc.intLocationId = l.intLocationId
 
 -- Update Standard Pricing
@@ -101,21 +183,21 @@ FROM tblICEdiPricebook p
 		AND catV.intVendorId = @intVendorId
 WHERE catV.ysnUpdatePrice = 1
 
-SELECT cat.strCategoryCode, catV.intVendorId
-FROM tblICEdiPricebook p
-	INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
-	INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
-	INNER JOIN @Locations loc ON loc.intCompanyLocationId = il.intLocationId
-	INNER JOIN tblICItemPricing price ON price.intItemId = i.intItemId
-		AND il.intItemLocationId = price.intItemLocationId
-	INNER JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
-	INNER JOIN tblICCategoryLocation catLoc ON catLoc.intCategoryId = cat.intCategoryId
-		AND catLoc.intLocationId = il.intLocationId
-	INNER JOIN tblICCategoryVendor catV ON catV.intCategoryLocationId = catLoc.intCategoryLocationId
-		AND catV.intVendorId = @intVendorId
-WHERE catV.intVendorId = @intVendorId
-	AND catV.ysnUpdatePrice = 1
+--SELECT cat.strCategoryCode, catV.intVendorId
+--FROM tblICEdiPricebook p
+--	INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+--	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
+--	INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
+--	INNER JOIN @Locations loc ON loc.intCompanyLocationId = il.intLocationId
+--	INNER JOIN tblICItemPricing price ON price.intItemId = i.intItemId
+--		AND il.intItemLocationId = price.intItemLocationId
+--	INNER JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
+--	INNER JOIN tblICCategoryLocation catLoc ON catLoc.intCategoryId = cat.intCategoryId
+--		AND catLoc.intLocationId = il.intLocationId
+--	INNER JOIN tblICCategoryVendor catV ON catV.intCategoryLocationId = catLoc.intCategoryLocationId
+--		AND catV.intVendorId = @intVendorId
+--WHERE catV.intVendorId = @intVendorId
+--	AND catV.ysnUpdatePrice = 1
 	
 -- Update Special Pricing
 UPDATE price
@@ -136,6 +218,81 @@ FROM tblICEdiPricebook p
 		AND catV.intVendorId = @intVendorId
 WHERE catV.intVendorId = @intVendorId
 	AND catV.ysnUpdatePrice = 1
+
+-- Upsert the Vendor XRef (Cross Reference)
+MERGE	
+INTO	dbo.tblICItemVendorXref 
+WITH	(HOLDLOCK) 
+AS		ItemVendorXref
+USING (
+		SELECT 
+			i.intItemId 
+			,il.intItemLocationId 
+			,v.intEntityId 
+			,p.strSellingUpcNumber
+			,p.strVendorsItemNumberForOrdering
+			,p.strSellingUpcLongDescription
+			,u.intItemUOMId 
+			,u.dblUnitQty
+		FROM 
+			tblICEdiPricebook p 
+			INNER JOIN tblICItemUOM u 
+				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+			INNER JOIN tblICItem i 
+				ON i.intItemId = u.intItemId
+			INNER JOIN tblICItemLocation il 
+				ON il.intItemId = i.intItemId
+			INNER JOIN @Locations loc 
+				ON loc.intCompanyLocationId = il.intLocationId
+			INNER JOIN vyuAPVendor v
+				ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+				OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+				
+) AS Source_Query  
+	ON ItemVendorXref.intItemId = Source_Query.intItemId
+	AND ItemVendorXref.intItemLocationId = Source_Query.intItemLocationId 
+	AND ItemVendorXref.intVendorId = Source_Query.intEntityId 				
+	   
+-- If matched, update the In-Transit Inbound qty 
+WHEN MATCHED THEN 
+	UPDATE 
+	SET		
+		strVendorProduct = Source_Query.strVendorsItemNumberForOrdering
+		,strProductDescription = Source_Query.strSellingUpcLongDescription
+
+-- If none is found, insert a new vendor xref
+WHEN NOT MATCHED THEN 
+	INSERT (		
+		intItemId
+		,intItemLocationId
+		,intVendorId
+		,strVendorProduct
+		,strProductDescription
+		,dblConversionFactor
+		,intItemUnitMeasureId
+		,intConcurrencyId
+		,dtmDateCreated
+		,dtmDateModified
+		,intCreatedByUserId
+		,intModifiedByUserId
+		,intDataSourceId		
+	)
+	VALUES (
+		Source_Query.intItemId --intItemId
+		,Source_Query.intItemLocationId --,intItemLocationId
+		,Source_Query.intEntityId --,intVendorId
+		,Source_Query.strVendorsItemNumberForOrdering --,strVendorProduct
+		,Source_Query.strSellingUpcLongDescription --,strProductDescription
+		,Source_Query.dblUnitQty --,dblConversionFactor
+		,Source_Query.intItemUOMId --,intItemUnitMeasureId
+		,1--,intConcurrencyId
+		,GETDATE()--,dtmDateCreated
+		,NULL--,dtmDateModified
+		,@intUserId--,intCreatedByUserId
+		,NULL--,intModifiedByUserId
+		,2--,intDataSourceId		
+	)		
+;
 
 SELECT @ErrorCount = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error'
 SELECT @TotalRows = COUNT(*) FROM tblICEdiPricebook WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICImportLogDetail WHERE intImportLogId = @LogId)
