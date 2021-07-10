@@ -1,10 +1,27 @@
 ﻿CREATE PROCEDURE uspMFGetItemUPCCode (@strUPCCode NVARCHAR(50))
 AS
-SELECT IU.intItemId
-	,IU.intItemUOMId
-	,IU.intUnitMeasureId
-	,IsNULL(IUA.strLongUpcCode, IU.strLongUPCCode) strLongUPCCode
-	,IsNULL(IUA.strUpcCode, IU.strUpcCode) AS strUpcCode
-FROM tblICItemUOM IU
-LEFT JOIN tblICItemUomUpc IUA ON IUA.intItemUOMId = IU.intItemUOMId
-WHERE IsNULL(IUA.strLongUpcCode, IU.strLongUPCCode) = @strUPCCode
+IF EXISTS (
+		SELECT 1
+		FROM tblICItemUomUpc IUA
+		WHERE IUA.strLongUpcCode = @strUPCCode
+		)
+BEGIN
+	SELECT IU.intItemId
+		,IU.intItemUOMId
+		,IU.intUnitMeasureId
+		,IUA.strLongUpcCode
+		,IUA.strUpcCode
+	FROM tblICItemUOM IU
+	JOIN tblICItemUomUpc IUA ON IUA.intItemUOMId = IU.intItemUOMId
+	WHERE IUA.strLongUpcCode = @strUPCCode
+END
+ELSE
+BEGIN
+	SELECT IU.intItemId
+		,IU.intItemUOMId
+		,IU.intUnitMeasureId
+		,IU.strLongUPCCode
+		,IU.strUpcCode
+	FROM tblICItemUOM IU
+	WHERE IU.strLongUPCCode = @strUPCCode
+END

@@ -9544,6 +9544,10 @@
     <Build Include="dbo\Stored Procedures\uspRKUpdateDerivativeContractBalanceLots.sql" />
     <None Include="Scripts\Post-Deployment\SM\2120_MigrateAttachment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateTicketSplitByDeliverySheetSplit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPO.sql" />
+    <Build Include="dbo\Tables\tblMFPODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPODetailConfirm.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

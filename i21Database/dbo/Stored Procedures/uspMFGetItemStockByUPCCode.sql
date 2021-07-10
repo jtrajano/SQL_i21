@@ -12,13 +12,29 @@ DECLARE @intItemUOMId INT
 	,@intItemLocationId INT
 	,@intItemStockUOMId INT
 
-SELECT @intItemUOMId = IU.intItemUOMId
-	,@strShortUpcCode = IsNULL(IUA.strUpcCode, IU.strUpcCode)
-	,@intItemId = IU.intItemId
-	,@intUnitMeasureId = IU.intUnitMeasureId
-FROM tblICItemUOM IU
-LEFT JOIN tblICItemUomUpc IUA ON IUA.intItemUOMId = IU.intItemUOMId
-WHERE IsNULL(IUA.strLongUpcCode, IU.strLongUPCCode) = @strUPCCode
+IF EXISTS (
+		SELECT 1
+		FROM tblICItemUomUpc IUA
+		WHERE IUA.strLongUpcCode = @strUPCCode
+		)
+BEGIN
+	SELECT @intItemUOMId = IU.intItemUOMId
+			,@strShortUpcCode = IUA.strUpcCode
+			,@intItemId = IU.intItemId
+			,@intUnitMeasureId = IU.intUnitMeasureId
+	FROM tblICItemUOM IU
+	JOIN tblICItemUomUpc IUA ON IUA.intItemUOMId = IU.intItemUOMId
+	WHERE IUA.strLongUpcCode = @strUPCCode
+END
+ELSE
+BEGIN
+	SELECT @intItemUOMId = IU.intItemUOMId
+			,@strShortUpcCode = IU.strUpcCode
+			,@intItemId = IU.intItemId
+			,@intUnitMeasureId = IU.intUnitMeasureId
+	FROM tblICItemUOM IU
+	WHERE IU.strLongUPCCode = @strUPCCode
+END
 
 SELECT @intItemStockUOMId = intItemUOMId
 FROM tblICItemUOM
