@@ -24,7 +24,7 @@ DECLARE @intKeyValue INT = (SELECT CAST(@keyValue AS INT))
 
 EXEC uspSMInsertTransaction @screenNamespace = @screenName, @intKeyValue = @intKeyValue, @output = @intTransactionId OUTPUT
 
-/* Inser Log */ 
+/* Insert Log */ 
 
 INSERT INTO tblSMLog (strType, dtmDate, intEntityId, intTransactionId, intConcurrencyId) 
 VALUES('Audit', GETUTCDATE(), @entityId, @intTransactionId, 1)
