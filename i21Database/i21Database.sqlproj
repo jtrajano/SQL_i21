@@ -9548,6 +9548,9 @@
     <Build Include="dbo\Tables\tblMFPODetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPODetailConfirm.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessInventoryReceipt.sql" />
+    <Build Include="dbo\Functions\fnSMGetAuditsFromDetails.sql" />
+    <Build Include="dbo\Functions\fnSMGetParentAuditChangeDescription.sql" />
+    <Build Include="dbo\User Defined Types\AuditLogDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9851,6 +9854,7 @@
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
+    <None Include="DEV2120.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
