@@ -1,4 +1,4 @@
-CREATE PROCEDURE dbo.uspRKGetConverageInquiryGrandTotalReport
+CREATE PROCEDURE dbo.uspRKGetCoverageInquiryDetailReport
 --====================================================================
 -- These variables are the filter fields on Coverage Inquiry screen. 
 -- Kindly fill out with the desired value.
@@ -70,6 +70,11 @@ END
 IF @DateFormat = 'MM/dd/yyyy'	
 BEGIN
 	SET @dtmPositionAsOf = CONVERT(DATETIME,@PositionAsOf,101) 
+END
+
+IF @intUOMId IS NULL AND @strUomType = 'By Lot'
+BEGIN
+	SET @intUOMId = 0
 END
 
 IF ISNULL(@ForecastWeeklyConsumption,0) <> 0
@@ -186,10 +191,6 @@ EXEC uspRKRiskPositionInquiryBySummary
 	, @strUomType
 
 
-select distinct strFutureMonth, dblQuantity = 0.00 
-into #tempFutureMonth
-from @tmpRawData
-where strFutureMonth not in ('Total')
 --====================================
 -- Actual data gathering ends here
 --=====================================
@@ -199,59 +200,33 @@ where strFutureMonth not in ('Total')
 --																								Results Ouput
 --===========================================================================================================================================================================================================
 
-
-
---==================
--- GRAND TOTAL
---==================
+--============================================
+-- DETAIL 
+--============================================
 SELECT 
-	'Description' = replace(replace(strGroup, '2.', ''),'1.','')  
-	,'Month' = strFutureMonth
-	,'Value' = ROUND(SUM(dblQuantity),@intDecimal)
-FROM (
-
-	select 
-		 strGroup
-		,strFutureMonth
-		,dblQuantity =  sum(dblNoOfContract)
-	from @tmpRawData
-	where strFutureMonth NOT IN ('Previous', 'Total')
-	and Selection IN ( '6.Total - Net Position','5.Total - Market coverage')
-	group by strGroup,  strFutureMonth
-
-	union all
-	select distinct
-		 strGroup
-		,FM.strFutureMonth
-		,FM.dblQuantity 
-	from @tmpRawData RD
-	CROSS APPLY #tempFutureMonth FM
-	where FM.strFutureMonth NOT IN ('Previous', 'Total')
-	and Selection IN ( '6.Total - Net Position','5.Total - Market coverage')
-
-	union all
-	select
-		strGroup 
-		,strFutureMonth
-		,dblQuantity=  sum(dblNoOfContract)
-	from (
-		select 
-			strGroup 
-			, strFutureMonth =  'Total'
-			,dblNoOfContract=  sum(dblNoOfContract)
-		from @tmpRawData
-		where strFutureMonth NOT IN ('Previous', 'Total')
-		and Selection IN ( '6.Total - Net Position','5.Total - Market coverage')
-		group by strGroup,  strFutureMonth
-	) t
-	group by strGroup, strFutureMonth
-
-) t
-GROUP BY strGroup, strFutureMonth
-ORDER BY strGroup,  CASE WHEN strFutureMonth = 'Total' THEN '01/01/9999' ELSE CONVERT(DATETIME, '01 ' + strFutureMonth) END
+	'TradeNo / PO/SO Ref No' = ISNULL(strTradeNo,'')
+	,'Transaction Date' = dbo.fnRKFormatDate(TransactionDate, @DateFormat)
+	,'Description' = strGroup
+	,'Position' = PriceStatus
+	,'Type' = strAccountNumber
+	,'Transaction Type' = TranType
+	,'Customer/Vendor' = ISNULL(CustVendor,'')
+	,'Product Type' = ISNULL(strProductType,'')
+	,'Product Line' = ISNULL(strProductLine,'')
+	,'Shipment Period' = ISNULL(strShipmentPeriod,'')
+	,'Location' = ISNULL(strLocation,'')
+	,'Origin' = ISNULL(strOrigin,'')
+	,'Item Description' = ISNULL(strItemDescription,'')
+	,'Quantity / Price' = ROUND(dblQuantity, @intDecimal)
+	,'No. of Lots' = ROUND(ISNULL(dblNoOfLot,0), @intDecimal)
+FROM @tmpRawData 
+WHERE strGroup = '1.Outright Coverage'
+AND PriceStatus = '1.Priced / Outright - (Outright position)'
+AND strFutureMonth NOT IN ('Total')
+AND (CASE WHEN @UOMType = 'By Lot' THEN ISNULL(dblNoOfLot,0) ELSE  dblQuantity  END) <> 0
+ORDER BY strAccountNumber,TranType, strTradeNo
 
 
-DROP TABLE #tempFutureMonth
 END TRY
 
 BEGIN CATCH
