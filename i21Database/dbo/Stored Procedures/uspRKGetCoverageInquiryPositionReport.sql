@@ -72,6 +72,11 @@ BEGIN
 	SET @dtmPositionAsOf = CONVERT(DATETIME,@PositionAsOf,101) 
 END
 
+IF @intUOMId IS NULL AND @strUomType = 'By Lot'
+BEGIN
+	SET @intUOMId = 0
+END
+
 IF ISNULL(@ForecastWeeklyConsumption,0) <> 0
 BEGIN
 	SET @intForecastWeeklyConsumption = @ForecastWeeklyConsumption
@@ -113,7 +118,7 @@ BEGIN
 	SET @strCustomErrorMsg = @strCustomErrorMsg + 'UOM Type is invalid. It is either By Quantity or By Lot only.' + CHAR(10);
 END
 
-IF @intUOMId IS NULL AND @strUomType = 'By Quantity'
+IF @intUOMId IS NULL
 BEGIN
 	SET @strCustomErrorMsg = @strCustomErrorMsg + 'UOM is invalid.' + CHAR(10);
 END
