@@ -15,7 +15,8 @@ Activity.dtmClear,
 Activity.strBankDescription,
 Activity.dblAmount dblActivityAmount,
 Activity.strDebitCredit,
-A.dtmDateReconciled
+A.dtmDateReconciled,
+A.intConcurrencyId
 FROM 
 tblCMABRActivityMatched A
 CROSS APPLY(
