@@ -102,6 +102,25 @@ WHERE
 -- END Validation 
 -------------------------------------------------
 
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemVendorXref') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICItemVendorXref (
+		intItemId INT
+		,intItemLocationId INT 
+		,strAction NVARCHAR(50) NULL
+		,intVendorId_Old INT NULL 
+		,intVendorId_New INT NULL 
+		,strVendorProduct_Old NVARCHAR(50) NULL
+		,strVendorProduct_New NVARCHAR(50) NULL 
+		,strProductDescription_Old NVARCHAR(50) NULL
+		,strProductDescription_New NVARCHAR(50) NULL
+	)
+;
+
+DECLARE 
+	@TotalRowsUpdated AS INT = 0 
+	,@TotalRowsInserted AS INT = 0 
+
 	
 -- Update UOM
 UPDATE u
@@ -116,6 +135,8 @@ FROM
 		ON m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
 	LEFT OUTER JOIN tblICUnitMeasure s 
 		ON s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+
+SET @TotalRowsUpdated = ISNULL(@TotalRowsUpdated, 0) + @@ROWCOUNT; 
 	
 -- Update Item Location
 UPDATE l
@@ -159,6 +180,8 @@ FROM tblICEdiPricebook p
 		ON catLoc.intCategoryId = cat.intCategoryId
 		AND catLoc.intLocationId = l.intLocationId
 
+SET @TotalRowsUpdated = ISNULL(@TotalRowsUpdated, 0) + @@ROWCOUNT; 
+
 -- Update Standard Pricing
 UPDATE price
 SET   price.dblSalePrice = CAST(CASE WHEN ISNUMERIC(p.strRetailPrice) = 1 THEN p.strRetailPrice ELSE price.dblSalePrice END AS NUMERIC(38, 20))
@@ -184,6 +207,8 @@ FROM tblICEdiPricebook p
 	LEFT OUTER JOIN tblICCategoryVendor catV ON catV.intCategoryLocationId = catLoc.intCategoryLocationId
 		AND catV.intVendorId = @intVendorId
 WHERE catV.ysnUpdatePrice = 1
+
+SET @TotalRowsUpdated = ISNULL(@TotalRowsUpdated, 0) + @@ROWCOUNT; 
 
 --SELECT cat.strCategoryCode, catV.intVendorId
 --FROM tblICEdiPricebook p
@@ -221,92 +246,155 @@ FROM tblICEdiPricebook p
 WHERE catV.intVendorId = @intVendorId
 	AND catV.ysnUpdatePrice = 1
 
--- Upsert the Vendor XRef (Cross Reference)
-MERGE	
-INTO	dbo.tblICItemVendorXref 
-WITH	(HOLDLOCK) 
-AS		ItemVendorXref
-USING (
-		SELECT 
-			i.intItemId 
-			,il.intItemLocationId 
-			,v.intEntityId 
-			,p.strSellingUpcNumber
-			,p.strVendorsItemNumberForOrdering
-			,p.strSellingUpcLongDescription
-			,u.intItemUOMId 
-			,u.dblUnitQty
-		FROM 
-			tblICEdiPricebook p 
-			INNER JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
-			INNER JOIN tblICItem i 
-				ON i.intItemId = u.intItemId
-			INNER JOIN tblICItemLocation il 
-				ON il.intItemId = i.intItemId
-			INNER JOIN @Locations loc 
-				ON loc.intCompanyLocationId = il.intLocationId
-			INNER JOIN vyuAPVendor v
-				ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-				OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-				
-) AS Source_Query  
-	ON ItemVendorXref.intItemId = Source_Query.intItemId
-	AND ItemVendorXref.intItemLocationId = Source_Query.intItemLocationId 
-	AND ItemVendorXref.intVendorId = Source_Query.intEntityId 				
-	   
--- If matched, update the In-Transit Inbound qty 
-WHEN MATCHED THEN 
-	UPDATE 
-	SET		
-		strVendorProduct = Source_Query.strVendorsItemNumberForOrdering
-		,strProductDescription = Source_Query.strSellingUpcLongDescription
+SET @TotalRowsUpdated = ISNULL(@TotalRowsUpdated, 0) + @@ROWCOUNT; 
 
--- If none is found, insert a new vendor xref
-WHEN NOT MATCHED THEN 
-	INSERT (		
-		intItemId
-		,intItemLocationId
-		,intVendorId
-		,strVendorProduct
-		,strProductDescription
-		,dblConversionFactor
-		,intItemUnitMeasureId
-		,intConcurrencyId
-		,dtmDateCreated
-		,dtmDateModified
-		,intCreatedByUserId
-		,intModifiedByUserId
-		,intDataSourceId		
-	)
-	VALUES (
-		Source_Query.intItemId --intItemId
-		,Source_Query.intItemLocationId --,intItemLocationId
-		,Source_Query.intEntityId --,intVendorId
-		,Source_Query.strVendorsItemNumberForOrdering --,strVendorProduct
-		,Source_Query.strSellingUpcLongDescription --,strProductDescription
-		,Source_Query.dblUnitQty --,dblConversionFactor
-		,Source_Query.intItemUOMId --,intItemUnitMeasureId
-		,1--,intConcurrencyId
-		,GETDATE()--,dtmDateCreated
-		,NULL--,dtmDateModified
-		,@intUserId--,intCreatedByUserId
-		,NULL--,intModifiedByUserId
-		,2--,intDataSourceId		
-	)		
-;
+-- Upsert the Vendor XRef (Cross Reference)
+INSERT INTO #tmpICEdiImportPricebook_tblICItemVendorXref (
+	intItemId
+	,intItemLocationId
+	,strAction
+	,intVendorId_Old
+	,intVendorId_New
+	,strVendorProduct_Old
+	,strVendorProduct_New
+	,strProductDescription_Old
+	,strProductDescription_New
+)
+SELECT 
+	[Changes].intItemId
+	,[Changes].intItemLocationId
+	,[Changes].strAction
+	,[Changes].intVendorId_Old
+	,[Changes].intVendorId_New
+	,[Changes].strVendorProduct_Old
+	,[Changes].strVendorProduct_New
+	,[Changes].strProductDescription_Old
+	,[Changes].strProductDescription_New
+FROM (
+	MERGE	
+	INTO	dbo.tblICItemVendorXref 
+	WITH	(HOLDLOCK) 
+	AS		ItemVendorXref
+	USING (
+			SELECT 
+				i.intItemId 
+				,il.intItemLocationId 
+				,v.intEntityId 
+				,p.strSellingUpcNumber
+				,p.strVendorsItemNumberForOrdering
+				,p.strSellingUpcLongDescription
+				,u.intItemUOMId 
+				,u.dblUnitQty
+			FROM 
+				tblICEdiPricebook p 
+				INNER JOIN tblICItemUOM u 
+					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				INNER JOIN tblICItem i 
+					ON i.intItemId = u.intItemId
+				INNER JOIN tblICItemLocation il 
+					ON il.intItemId = i.intItemId
+				INNER JOIN @Locations loc 
+					ON loc.intCompanyLocationId = il.intLocationId
+				INNER JOIN vyuAPVendor v
+					ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+					OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+				
+	) AS Source_Query  
+		ON ItemVendorXref.intItemId = Source_Query.intItemId
+		AND ItemVendorXref.intItemLocationId = Source_Query.intItemLocationId 
+		AND ItemVendorXref.intVendorId = Source_Query.intEntityId 				
+	   
+	-- If matched, update the In-Transit Inbound qty 
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET		
+			strVendorProduct = Source_Query.strVendorsItemNumberForOrdering
+			,strProductDescription = Source_Query.strSellingUpcLongDescription
+
+	-- If none is found, insert a new vendor xref
+	WHEN NOT MATCHED THEN 
+		INSERT (		
+			intItemId
+			,intItemLocationId
+			,intVendorId
+			,strVendorProduct
+			,strProductDescription
+			,dblConversionFactor
+			,intItemUnitMeasureId
+			,intConcurrencyId
+			,dtmDateCreated
+			,dtmDateModified
+			,intCreatedByUserId
+			,intModifiedByUserId
+			,intDataSourceId		
+		)
+		VALUES (
+			Source_Query.intItemId --intItemId
+			,Source_Query.intItemLocationId --,intItemLocationId
+			,Source_Query.intEntityId --,intVendorId
+			,Source_Query.strVendorsItemNumberForOrdering --,strVendorProduct
+			,Source_Query.strSellingUpcLongDescription --,strProductDescription
+			,Source_Query.dblUnitQty --,dblConversionFactor
+			,Source_Query.intItemUOMId --,intItemUnitMeasureId
+			,1--,intConcurrencyId
+			,GETDATE()--,dtmDateCreated
+			,NULL--,dtmDateModified
+			,@intUserId--,intCreatedByUserId
+			,NULL--,intModifiedByUserId
+			,2--,intDataSourceId		
+		)		
+
+		OUTPUT 
+			$action
+			, inserted.intItemId 
+			, inserted.intItemLocationId
+			, deleted.strVendorProduct
+			, inserted.strVendorProduct
+			, deleted.strProductDescription
+			, inserted.strProductDescription
+			, deleted.intVendorId
+			, inserted.intVendorId
+
+) AS [Changes] (
+	strAction
+	, intItemId 
+	, intItemLocationId
+	, strVendorProduct_Old
+	, strVendorProduct_New
+	, strProductDescription_Old
+	, strProductDescription_New 
+	, intVendorId_Old
+	, intVendorId_New
+);
+
+SELECT @TotalRowsUpdated = ISNULL(@TotalRowsUpdated, 0) + COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'UPDATE'
+SELECT @TotalRowsInserted = ISNULL(@TotalRowsInserted, 0) + COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'INSERTED'
 
 SELECT @ErrorCount = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error'
 SELECT @TotalRows = COUNT(*) FROM tblICEdiPricebook WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICImportLogDetail WHERE intImportLogId = @LogId)
 
 IF @ErrorCount > 0
 BEGIN
-	UPDATE tblICImportLog SET 
+	UPDATE tblICImportLog 
+	SET 
 		strDescription = 'Import finished with ' + CAST(@ErrorCount AS NVARCHAR(50))+ ' error(s).',
 		intTotalErrors = @ErrorCount,
 		intTotalRows = @TotalRows,
-		intRowsUpdated = CASE WHEN (@TotalRows - @ErrorCount) < 0 THEN 0 ELSE @TotalRows - @ErrorCount END
-	WHERE intImportLogId = @LogId
+		intRowsUpdated = @TotalRowsUpdated, 
+		intRowsImported = @TotalRowsInserted
+	WHERE 
+		intImportLogId = @LogId
 END
+ELSE 
+BEGIN 
+	UPDATE tblICImportLog 
+	SET 
+		intTotalErrors = @ErrorCount,
+		intTotalRows = @TotalRows,
+		intRowsUpdated = @TotalRowsUpdated, 
+		intRowsImported = @TotalRowsInserted
+	WHERE 
+		intImportLogId = @LogId
+END 
 
 DELETE FROM tblICEdiPricebook
