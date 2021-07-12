@@ -1,4 +1,4 @@
-CREATE PROCEDURE dbo.uspRKGetConverageInquiryPositionReport
+CREATE PROCEDURE dbo.uspRKGetCoverageInquiryPositionReport
 --====================================================================
 -- These variables are the filter fields on Coverage Inquiry screen. 
 -- Kindly fill out with the desired value.
@@ -113,7 +113,7 @@ BEGIN
 	SET @strCustomErrorMsg = @strCustomErrorMsg + 'UOM Type is invalid. It is either By Quantity or By Lot only.' + CHAR(10);
 END
 
-IF @intUOMId IS NULL
+IF @intUOMId IS NULL AND @strUomType = 'By Quantity'
 BEGIN
 	SET @strCustomErrorMsg = @strCustomErrorMsg + 'UOM is invalid.' + CHAR(10);
 END

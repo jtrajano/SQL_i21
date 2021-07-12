@@ -1,4 +1,4 @@
-CREATE PROCEDURE dbo.uspRKGetConverageInquiryDetailReport
+CREATE PROCEDURE dbo.uspRKGetCoverageInquiryDetailReport
 --====================================================================
 -- These variables are the filter fields on Coverage Inquiry screen. 
 -- Kindly fill out with the desired value.
@@ -113,7 +113,7 @@ BEGIN
 	SET @strCustomErrorMsg = @strCustomErrorMsg + 'UOM Type is invalid. It is either By Quantity or By Lot only.' + CHAR(10);
 END
 
-IF @intUOMId IS NULL
+IF @intUOMId IS NULL AND @strUomType = 'By Quantity'
 BEGIN
 	SET @strCustomErrorMsg = @strCustomErrorMsg + 'UOM is invalid.' + CHAR(10);
 END
@@ -218,7 +218,7 @@ FROM @tmpRawData
 WHERE strGroup = '1.Outright Coverage'
 AND PriceStatus = '1.Priced / Outright - (Outright position)'
 AND strFutureMonth NOT IN ('Total')
-AND dblQuantity <> 0
+AND (CASE WHEN @UOMType = 'By Lot' THEN ISNULL(dblNoOfLot,0) ELSE  dblQuantity  END) <> 0
 ORDER BY strAccountNumber,TranType, strTradeNo
 
 
