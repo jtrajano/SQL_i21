@@ -13,6 +13,9 @@ SELECT H.intQuoteHeaderId
 , H.strMessage
 , H.ysnDelete
 , H.intConcurrencyId
+, (SELECT TOP 1 CG.strGroupName FROM tblARCustomer CS
+INNER JOIN tblARCustomerGroupDetail CGD ON CGD.intEntityId = CS.intEntityId
+INNER JOIN tblARCustomerGroup CG ON CG.intCustomerGroupId = CGD.intCustomerGroupId where CGD.intEntityId = H.intEntityCustomerId) as strCustomerGroupName
 
 FROM tblTRQuoteHeader H
 LEFT JOIN tblEMEntity C ON C.intEntityId = H.intEntityCustomerId
