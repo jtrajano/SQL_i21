@@ -9418,11 +9418,11 @@
     <Build Include="dbo\Stored Procedures\uspRKGetM2MCounterPartyExposureReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFutures360RealizedPnLReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryPositionReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryGrandTotalReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportCountDetailFromStaging.sql" />
     <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

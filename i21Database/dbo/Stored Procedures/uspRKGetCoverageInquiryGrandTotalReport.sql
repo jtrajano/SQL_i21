@@ -1,4 +1,4 @@
-CREATE PROCEDURE dbo.uspRKGetConverageInquiryPositionReport
+CREATE PROCEDURE dbo.uspRKGetCoverageInquiryGrandTotalReport
 --====================================================================
 -- These variables are the filter fields on Coverage Inquiry screen. 
 -- Kindly fill out with the desired value.
@@ -70,6 +70,11 @@ END
 IF @DateFormat = 'MM/dd/yyyy'	
 BEGIN
 	SET @dtmPositionAsOf = CONVERT(DATETIME,@PositionAsOf,101) 
+END
+
+IF @intUOMId IS NULL AND @strUomType = 'By Lot'
+BEGIN
+	SET @intUOMId = 0
 END
 
 IF ISNULL(@ForecastWeeklyConsumption,0) <> 0
@@ -200,41 +205,55 @@ where strFutureMonth not in ('Total')
 --===========================================================================================================================================================================================================
 
 
---==================
--- POSITION REPORT
---==================
-SELECT
-	 [Description]
-	 , [Position]
-	 , [Type] 
-	 , [Month]
-	 , 'Value' = SUM([Value])
-FROM (
-SELECT 
-	'Description' = strGroup 
-	,'Position' = PriceStatus
-	,'Type' = strAccountNumber
-	,'Month' = strFutureMonth
-	,'Value' =  ROUND(SUM(dblNoOfContract), @intDecimal)
-FROM @tmpRawData
-WHERE PriceStatus NOT IN ('Total')
-GROUP BY strGroup, PriceStatus, strAccountNumber, strFutureMonth
 
-UNION ALL
-SELECT DISTINCT
-	'Description' = strGroup 
-	,'Position' = PriceStatus
-	,'Type' = strAccountNumber
-	,'Month' = FM.strFutureMonth
-	,'Value' =  FM.dblQuantity
-FROM @tmpRawData RD
-CROSS APPLY #tempFutureMonth FM
-WHERE PriceStatus NOT IN ('Total')
+--==================
+-- GRAND TOTAL
+--==================
+SELECT 
+	'Description' = replace(replace(strGroup, '2.', ''),'1.','')  
+	,'Month' = strFutureMonth
+	,'Value' = ROUND(SUM(dblQuantity),@intDecimal)
+FROM (
+
+	select 
+		 strGroup
+		,strFutureMonth
+		,dblQuantity =  sum(dblNoOfContract)
+	from @tmpRawData
+	where strFutureMonth NOT IN ('Previous', 'Total')
+	and Selection IN ( '6.Total - Net Position','5.Total - Market coverage')
+	group by strGroup,  strFutureMonth
+
+	union all
+	select distinct
+		 strGroup
+		,FM.strFutureMonth
+		,FM.dblQuantity 
+	from @tmpRawData RD
+	CROSS APPLY #tempFutureMonth FM
+	where FM.strFutureMonth NOT IN ('Previous', 'Total')
+	and Selection IN ( '6.Total - Net Position','5.Total - Market coverage')
+
+	union all
+	select
+		strGroup 
+		,strFutureMonth
+		,dblQuantity=  sum(dblNoOfContract)
+	from (
+		select 
+			strGroup 
+			, strFutureMonth =  'Total'
+			,dblNoOfContract=  sum(dblNoOfContract)
+		from @tmpRawData
+		where strFutureMonth NOT IN ('Previous', 'Total')
+		and Selection IN ( '6.Total - Net Position','5.Total - Market coverage')
+		group by strGroup,  strFutureMonth
+	) t
+	group by strGroup, strFutureMonth
 
 ) t
-GROUP BY [Description], [Position], [Type], [Month]
-ORDER BY  [Description], [Position], [Type], CASE WHEN [Month] = 'Previous' THEN '01/01/1900' WHEN [Month] = 'Total' THEN '01/01/9999' ELSE CONVERT(DATETIME, '01 ' + [Month]) END
-
+GROUP BY strGroup, strFutureMonth
+ORDER BY strGroup,  CASE WHEN strFutureMonth = 'Total' THEN '01/01/9999' ELSE CONVERT(DATETIME, '01 ' + strFutureMonth) END
 
 
 DROP TABLE #tempFutureMonth
