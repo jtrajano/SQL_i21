@@ -1272,7 +1272,12 @@ BEGIN
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount GLAccount
-			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
+			ON GLAccount.intAccountId =case when @ysnStorageChargeAccountUseIncome = 1
+										then 
+											OtherChargesGLAccounts.intOtherChargeIncome
+										else 
+											OtherChargesGLAccounts.intOtherChargeExpense
+										end
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1
