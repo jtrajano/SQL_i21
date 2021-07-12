@@ -55,3 +55,4 @@ FROM
 	(
 		SELECT TOP 1 dtmDate, strResult FROM tblSMUserLogin u WHERE u.intEntityId = c.[intEntityId] ORDER BY dtmDate DESC
 	) u
+	where ISNULL(g.strEmail, '') <> ''
