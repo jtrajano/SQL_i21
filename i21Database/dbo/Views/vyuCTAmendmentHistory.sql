@@ -58,7 +58,7 @@ FROM
 		JOIN tblCTContractHeader		   CH  ON CH.intContractHeaderId     = SAL.intContractHeaderId
 		JOIN tblEMEntity				   EY  ON EY.intEntityId		     = CH.intEntityId
 		JOIN tblCTContractType			   TP  ON TP.intContractTypeId       = CH.intContractTypeId
-		JOIN tblCTAmendmentApproval        AMP ON AMP.intAmendmentApprovalId = SAL.intAmendmentApprovalId  AND ISNULL(AMP.ysnAmendment,0) = 1
+		JOIN tblCTAmendmentApproval        AMP ON AMP.intAmendmentApprovalId = SAL.intAmendmentApprovalId  AND ISNULL(AMP.ysnAmendment,0) = ( case when SAL.strItemChanged in ('Partial Price Qty','Full Price Qty','Partial Price Fixation','Full Price Fixation') then ISNULL(AMP.ysnAmendment,0) else 1 end)
 		LEFT JOIN tblCTContractDetail	   CD  ON CD.intContractDetailId     = SAL.intContractDetailId
 		LEFT JOIN tblICCommodity	       CO  ON CO.intCommodityId			 = CH.intCommodityId
 		LEFT JOIN tblSMCompanyLocation	   CL  ON CL.intCompanyLocationId    = CD.intCompanyLocationId
