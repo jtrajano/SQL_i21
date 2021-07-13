@@ -33,7 +33,7 @@ BEGIN
 		BEGIN TRANSACTION
 
 		DECLARE @CursorTran AS CURSOR
-		SET @CursorTran = CURSOR FOR
+		SET @CursorTran = CURSOR FAST_FORWARD FOR
 		SELECT D.intImportAttachmentDetailId
 			, D.strSupplier
 			, D.strBillOfLading
@@ -130,16 +130,24 @@ BEGIN
 
 					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @strTransactionNumber)	
 
-					-- IF(@ysnPosted = 1)
-					-- BEGIN
-						DECLARE @intInvoiceId INT = NULL,
-							@intInvoiceTransactionId INT = NULL,
-							@intInvoiceAttachmentId INT = NULL,
-							@strInvoiceNumber NVARCHAR(100) = NULL,
-							@strInvoiceId NVARCHAR(300) = NULL
+					DECLARE @intInvoiceId INT = NULL,
+						@intInvoiceTransactionId INT = NULL,
+						@intInvoiceAttachmentId INT = NULL,
+						@strInvoiceNumber NVARCHAR(100) = NULL,
+						@strInvoiceId NVARCHAR(300) = NULL,
+						@intInvoiceCount INT = NULL
 
+					SELECT @intInvoiceCount = COUNT(DISTINCT ID.intInvoiceId)
+						FROM tblTRLoadDistributionHeader DH INNER JOIN tblTRLoadHeader L ON L.intLoadHeaderId = DH.intLoadHeaderId
+						INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceId = DH.intInvoiceId
+						INNER JOIN tblARInvoice I ON I.intInvoiceId = ID.intInvoiceId
+						WHERE DH.intLoadHeaderId = @intLoadHeaderId
+						AND ID.strBOLNumberDetail = @strBillOfLading
+
+					IF(@intInvoiceCount = 1)
+					BEGIN
 						DECLARE @CursorInvoiceTran AS CURSOR
-						SET @CursorInvoiceTran = CURSOR FOR
+						SET @CursorInvoiceTran = CURSOR FAST_FORWARD FOR
 							SELECT DISTINCT ID.intInvoiceId, strInvoiceNumber
 							FROM tblTRLoadDistributionHeader DH INNER JOIN tblTRLoadHeader L ON L.intLoadHeaderId = DH.intLoadHeaderId
 							INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceId = DH.intInvoiceId
@@ -162,7 +170,7 @@ BEGIN
 								,@fileName = @strFileName														-- file name
 								,@fileExtension = @strFileExtension                                             -- extension
 								,@filePath = @strFilePath														-- path
-								,@screenNamespace = 'AccountsReceivable.Invoice'                                -- screen type or namespace
+								,@screenNamespace = 'AccountsReceivable.view.Invoice'                           -- screen type or namespace
 								,@useDocumentWatcher = 0                                                        -- flag if the file was uploaded using document wacther
 								,@throwError = 1
 								,@attachmentId = @intAttachmentId OUTPUT
@@ -177,7 +185,7 @@ BEGIN
 
 						CLOSE @CursorInvoiceTran  
 						DEALLOCATE @CursorInvoiceTran
-					-- END
+					END
 
 					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, intLoadHeaderId = @intLoadHeaderId, strInvoiceId = @strInvoiceId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
 				END
