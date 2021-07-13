@@ -20,5 +20,9 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblGRTransferStorageReference_intToCustomerStorageId]
 ON [dbo].[tblGRTransferStorageReference]([intToCustomerStorageId])
-INCLUDE(intCostBucketCustomerStorageId)
+INCLUDE (
+	intSourceCustomerStorageId
+	,intTransferStorageSplitId
+	,intTransferStorageId
+)
 GO
