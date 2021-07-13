@@ -32,8 +32,8 @@ SELECT DISTINCT
 	,strScheduleId				  	= SR.strScheduleDescription
 	,strDPARecieptNumber		  	= CS.strDPARecieptNumber
 	,strCustomerReference		  	= ISNULL(CS.strCustomerReference,'')  
-	,dblOriginalBalance			  	= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
-	,dblOpenBalance				  	= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOpenBalance) 
+	,dblOriginalBalance			  	= dbo.fnCalculateQtyBetweenUOM (CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
+	,dblOpenBalance				  	= dbo.fnCalculateQtyBetweenUOM (CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOpenBalance) 
 	,dtmDeliveryDate			  	= CS.dtmDeliveryDate
 	,strDiscountComment			  	= CS.strDiscountComment
 	,dblInsuranceRate			  	= ISNULL(CS.dblInsuranceRate,0)
@@ -161,9 +161,10 @@ LEFT JOIN (
 		tblGRTransferStorageSplit TSS
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = TSS.intTransferStorageId
-		LEFT JOIN tblGRTransferStorageReference TSR
+		INNER JOIN tblGRTransferStorageReference TSR
 			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
-	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
+			AND TSR.intTransferStorageId = TS.intTransferStorageId
+	) ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
 		AND TS.strTransferStorageTicket NOT LIKE '%-R'
 LEFT JOIN tblCTContractDetail CD_Transfer
     ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
