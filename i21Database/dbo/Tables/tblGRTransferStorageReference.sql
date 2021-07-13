@@ -24,5 +24,6 @@ INCLUDE (
 	intSourceCustomerStorageId
 	,intTransferStorageSplitId
 	,intTransferStorageId
+	,intCostBucketCustomerStorageId
 )
 GO
