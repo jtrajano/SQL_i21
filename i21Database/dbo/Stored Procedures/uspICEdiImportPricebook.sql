@@ -2,6 +2,8 @@
 	@intUserId INT
 	, @intVendorId INT = NULL 
 	, @Locations UdtCompanyLocations READONLY
+	, @strFileName NVARCHAR(500) = NULL 
+	, @strFileType NVARCHAR(50) = NULL 
 	, @ErrorCount INT OUTPUT
 	, @TotalRows INT OUTPUT
 AS
@@ -12,7 +14,7 @@ SELECT @LogId = intImportLogId FROM tblICImportLog WHERE strUniqueId = (SELECT T
 IF(@LogId IS NULL)
 BEGIN
 	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, intConcurrencyId)
-	SELECT 'Import Pricebook successful', 'EDI', 'txt', 'Pricebook.txt', GETDATE(), @intUserId, 1
+	SELECT 'Import Pricebook successful', 'EDI', @strFileType, @strFileName, GETDATE(), @intUserId, 1
 	SET @LogId = @@IDENTITY
 END
 
