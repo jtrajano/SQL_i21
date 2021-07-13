@@ -92,7 +92,6 @@ begin try
 		,@intCCSiteDetailId				INT
 		,@intInvoiceId					INT
 		,@intBuybackChargeId			INT
-		,@intTicketId					INT
 		,@dblOrderQty					DECIMAL(38,15)
 		,@dblOrderUnitQty				DECIMAL(38,20)
 		,@intOrderUOMId					INT
@@ -1035,32 +1034,6 @@ begin try
 							,@intSourceDetailId = @intCreatedInventoryReceiptItemId
 							,@dblQuantity = @dblCreatedQtyReceived
 							,@strScreen = 'Voucher'
-					end
-
-					--4. Apply PrePay
-					select @intTicketId = intTicketId from tblSCTicket where intInventoryReceiptId = @intCreatedInventoryReceiptId;
-
-					declare @prePayId Id;
-					delete from @prePayId
-
-					insert into
-						@prePayId([intId])
-					select distinct
-						BD.intBillId
-					from
-						tblAPBillDetail BD
-						join tblAPBill BL ON BL.intBillId = BD.intBillId
-						join tblSCTicket TK ON TK.intTicketId = BD.intScaleTicketId
-					where
-						BD.intContractDetailId = @intContractDetailId 
-						and BD.intScaleTicketId = @intTicketId 
-						and BL.intTransactionType in(2, 13)
-						and BL.ysnPosted = 1
-						and BL.ysnPaid = 0
-
-					if exists(select top 1 1 from @prePayId)
-					begin
-						EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
 					end
 						
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
