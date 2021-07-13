@@ -40,3 +40,8 @@ CREATE NONCLUSTERED INDEX IX_tblGRSettleStorage_intParentSettleStorageId
 	ON tblGRSettleStorage (intParentSettleStorageId ASC);
 	
 GO
+
+CREATE NONCLUSTERED INDEX IX_tblGRSettleStorage_intItemId
+	ON tblGRSettleStorage (intItemId ASC);
+	
+GO
