@@ -260,6 +260,10 @@ AND intMonth > totalMonths
 AND strConvention <> 'Full Month'
 AND ISNULL(BD.ysnFullyDepreciated,0) = 0
 
+UPDATE @tblAssetInfo
+set dblMonth = ROUND(dblMonth, 2),
+dblDepre =  ROUND(dblDepre, 2)
+
    
 INSERT INTO @tbl(
 	intAssetId,
