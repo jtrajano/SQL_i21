@@ -34,6 +34,8 @@ BEGIN TRY
 		,@ysnAdjustInventoryQtyBySampleQty Bit
 		,@intLastModifiedUserId int
 		,@dblOldSampleQty NUMERIC(18, 6)
+		,@intConcurrencyId INT
+		,@intCurrentConcurrencyId INT
 	DECLARE @intRepresentingUOMId INT
 		,@dblRepresentingQty NUMERIC(18, 6)
 		,@dblConvertedSampleQty NUMERIC(18, 6)
@@ -68,6 +70,7 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@intSampleTypeId = intSampleTypeId
 		,@intContractHeaderId = intContractHeaderId
+		,@intConcurrencyId = intConcurrencyId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,strMarks NVARCHAR(100)
@@ -79,6 +82,7 @@ BEGIN TRY
 			,intItemId INT
 			,intSampleTypeId INT
 			,intContractHeaderId INT
+			,intConcurrencyId INT
 			)
 
 	IF NOT EXISTS (
@@ -168,9 +172,18 @@ BEGIN TRY
 	BEGIN TRAN
 
 	SELECT @dblOldSampleQty = dblSampleQty
+		,@intCurrentConcurrencyId = intConcurrencyId
 	FROM tblQMSample
 	WHERE intSampleId = @intSampleId
 
+	IF ISNULL(@intConcurrencyId, 0) < ISNULL(@intCurrentConcurrencyId, 0)
+	BEGIN
+		RAISERROR (
+				'Sample is already modified by other user. Please refresh.'
+				,16
+				,1
+				)
+	END
 
 	-- Sample Header Update
 	UPDATE tblQMSample

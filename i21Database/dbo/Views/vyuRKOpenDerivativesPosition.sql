@@ -3,8 +3,6 @@
 AS
 
 SELECT *
-	,dblPContractBalance = CASE WHEN strBuySell = 'Buy' THEN dblBalanceLots ELSE 0 END
-	,dblSContractBalance = CASE WHEN strBuySell = 'Sell' THEN dblBalanceLots ELSE 0 END
 FROM (
 	SELECT *
 		,dblBalanceLots = dblLots - (dblAssignedLots + dblHedgedLots) 
@@ -31,6 +29,8 @@ FROM (
 				,ot.intFutOptTransactionHeaderId
 				,ot.dtmCreateDateTime
 				,strNotes = ot.strReference      		   
+				,dblPContractBalance = ot.dblNoOfContract - ISNULL(ot.dblPContractBalanceLots,0)
+				,dblSContractBalance = ot.dblNoOfContract - ISNULL(ot.dblSContractBalanceLots,0)
 		FROM tblRKFutOptTransaction ot
 		JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 		JOIN tblRKFuturesMonth fmh on ot.intFutureMonthId=fmh.intFutureMonthId and ot.intFutureMarketId=fmh.intFutureMarketId

@@ -216,7 +216,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				   , @strDocumentNumber				= strDocumentNumber
 		FROM #INVOICEDETAILS
 
-		IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0 AND @intContractDetailId IS NOT NULL
+		IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0 AND @intContractDetailId IS NOT NULL AND @dblQtyOverAged > 0
 			BEGIN
 				UPDATE ID
 				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 

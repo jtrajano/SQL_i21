@@ -35,7 +35,6 @@ FROM (
 			, B.strBook
 			, SB.strSubBook
 			, CD.intContractStatusId
-			, ysnEnableFutures = ISNULL(CH.ysnEnableFutures,0)
 			, CD.intPricingTypeId
 		FROM tblCTContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId AND CD.intContractStatusId <> 3
@@ -47,7 +46,9 @@ FROM (
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 		JOIN tblICUnitMeasure UC ON CD.intUnitMeasureId = UC.intUnitMeasureId
 		LEFT JOIN tblCTBook B ON CD.intBookId = B.intBookId
-		LEFT JOIN tblCTSubBook SB ON CD.intSubBookId = SB.intSubBookId WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 0
+		LEFT JOIN tblCTSubBook SB ON CD.intSubBookId = SB.intSubBookId 
+		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 0
+		AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
 	
 	UNION ALL SELECT *
@@ -80,7 +81,6 @@ FROM (
 			, B.strBook
 			, SB.strSubBook
 			, CD.intContractStatusId
-			, ysnEnableFutures = ISNULL(CH.ysnEnableFutures,0)
 			, CH.intPricingTypeId
 		FROM tblCTContractHeader CH
 		INNER JOIN (SELECT DISTINCT intContractHeaderId, intContractStatusId FROM tblCTContractDetail) CD ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -95,6 +95,7 @@ FROM (
 		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = (SELECT TOP 1 intSubBookId FROM tblCTContractDetail CD WHERE CD.intContractHeaderId = CH.intContractHeaderId)
 		WHERE ISNULL(CH.ysnMultiplePriceFixation, 0) = 1
 			AND CH.intContractHeaderId <> (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail CCD WHERE CCD.intContractStatusId <> 3)
+			AND ISNULL(CH.ysnEnableFutures,0) = CASE WHEN (SELECT ysnAllowDerivativeAssignToMultipleContracts FROM tblRKCompanyPreference) = 1 AND CT.strContractType = 'Sale' THEN 1 ELSE ISNULL(CH.ysnEnableFutures,0) END
 	) t
 )t1
 WHERE intContractStatusId NOT IN (3, 5, 6)

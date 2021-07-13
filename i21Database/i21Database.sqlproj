@@ -9524,9 +9524,6 @@
     <Build Include="dbo\Views\vyuTRQuote.sql" />
     <Build Include="dbo\Views\vyuTRAutomatedProcessStatusBol.sql" />
     <Build Include="dbo\Views\vyuTRImportRackPriceDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryPositionReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryGrandTotalReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetConverageInquiryDetailReport.sql" />
     <Build Include="dbo\Views\vyuICGetImportSetup.sql" />
     <Build Include="dbo\Tables\tblICImportSetup.sql" />
     <Build Include="dbo\Functions\fnCronDayOfWeek.sql" />
@@ -9551,6 +9548,10 @@
     <Build Include="dbo\Functions\fnSMGetAuditsFromDetails.sql" />
     <Build Include="dbo\Functions\fnSMGetParentAuditChangeDescription.sql" />
     <Build Include="dbo\User Defined Types\AuditLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
