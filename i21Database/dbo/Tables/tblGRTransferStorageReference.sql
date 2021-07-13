@@ -10,3 +10,13 @@ CREATE TABLE tblGRTransferStorageReference
 	dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE()),
 	CONSTRAINT [FK_tblGRTransferStorageReference_tblGRTransferStorage_intTransferStorageId] FOREIGN KEY ([intTransferStorageId]) REFERENCES [dbo].[tblGRTransferStorage] ([intTransferStorageId]) ON DELETE CASCADE,	
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGRTransferStorageReference_intToCustomerStorageId]
+ON [dbo].[tblGRTransferStorageReference]([intToCustomerStorageId])
+INCLUDE (
+	intSourceCustomerStorageId
+	,intTransferStorageSplitId
+	,intTransferStorageId
+)
+GO
