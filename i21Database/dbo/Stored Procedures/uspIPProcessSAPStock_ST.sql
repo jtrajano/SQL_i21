@@ -371,7 +371,7 @@ BEGIN TRY
 			IF ISNULL(@intSubLocationId, 0) = 0
 			BEGIN
 				RAISERROR (
-						'Invalid Sub Location. '
+						'Invalid Storage Location. '
 						,16
 						,1
 						)
@@ -385,7 +385,7 @@ BEGIN TRY
 			IF ISNULL(@intStorageLocationId, 0) = 0
 			BEGIN
 				RAISERROR (
-						'Invalid Storage Location. '
+						'Invalid Storage Unit. '
 						,16
 						,1
 						)
