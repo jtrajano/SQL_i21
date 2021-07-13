@@ -351,7 +351,7 @@ select
   bo.strPricingLevelName, 
   b.strPrintableRemarks, 
   b.ysnPrinted, 
-  strProducer = bp.strName, 
+  strProducer = bp2.strName, 
   strProductType = bq.strDescription, 
   b.ysnProvisional, 
   b.dblProvisionalInvoicePct, 
@@ -488,6 +488,7 @@ from
   left join prepaid bn on bn.intContractHeaderId = b.intContractHeaderId 
   left join tblSMCompanyLocationPricingLevel bo  with (nolock) on bo.intCompanyLocationPricingLevelId = b.intCompanyLocationPricingLevelId 
   left join tblEMEntity bp  with (nolock) on bp.intEntityId = b.intProducerId 
+  LEFT JOIN tblEMEntity bp2 WITH(NOLOCK) ON bp2.intEntityId = a.intProducerId
   left join tblICCommodityAttribute bq  with (nolock) on bq.intCommodityAttributeId = c.intProductTypeId 
   									   and bq.strType = 'ProductType' 
   left join tblSMPurchasingGroup br  with (nolock) on br.intPurchasingGroupId = a.intPurchasingGroupId 
