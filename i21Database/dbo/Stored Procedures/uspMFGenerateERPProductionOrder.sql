@@ -143,7 +143,7 @@ BEGIN TRY
 			JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 			LEFT JOIN dbo.tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = IsNULL(W.intSubLocationId, MC.intSubLocationId)
 			JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
-			JOIN dbo.tblMFWorkOrderRecipe WR ON WR.intItemId = W.intItemId
+			Left JOIN dbo.tblMFWorkOrderRecipe WR ON WR.intItemId = W.intItemId
 				AND WR.intWorkOrderId = W.intWorkOrderId
 			LEFT JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 				AND R.intLocationId = W.intLocationId
