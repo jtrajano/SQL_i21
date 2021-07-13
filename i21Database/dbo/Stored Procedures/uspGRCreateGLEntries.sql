@@ -37,6 +37,7 @@ BEGIN
 	,@intInventoryItemUOMId			INT
 	,@intCSInventoryItemUOMId		INT
 	,@StorageChargeItemDescription  NVARCHAR(100)
+	,@ysnStorageChargeAccountUseIncome BIT = 0
 	
 	declare @EntityNo nvarchar(100)
 
@@ -65,6 +66,11 @@ BEGIN
 	WHERE strType = 'Other Charge' 
 	  AND strCostType = 'Storage Charge' 
 	  AND intCommodityId = @IntCommodityId
+
+
+	
+	select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
+
 
 	IF @intStorageChargeItemId IS NULL
 	BEGIN
