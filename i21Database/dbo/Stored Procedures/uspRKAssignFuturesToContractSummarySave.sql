@@ -47,8 +47,8 @@ BEGIN TRY
 									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete))
 	
 	UPDATE DER
-	SET DER.dblPContractBalanceLots = DER.dblPContractBalanceLots - dblAssignedLotsToPContract
-		,DER.dblSContractBalanceLots = DER.dblSContractBalanceLots - dblAssignedLotsToSContract
+	SET DER.dblPContractBalanceLots = DER.dblPContractBalanceLots + dblAssignedLotsToPContract
+		,DER.dblSContractBalanceLots = DER.dblSContractBalanceLots + dblAssignedLotsToSContract
 	FROM tblRKFutOptTransaction DER
 	INNER JOIN (SELECT intFutOptTransactionId, dblAssignedLotsToPContract, dblAssignedLotsToSContract FROM tblRKAssignFuturesToContractSummary
 									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete)) AFC
