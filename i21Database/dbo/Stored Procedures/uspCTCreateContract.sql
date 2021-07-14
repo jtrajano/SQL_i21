@@ -283,7 +283,7 @@ BEGIN TRY
 				dblTotalCost		=	CI.dblCashPrice * CI.dblQuantity,
 				intCurrencyId		=	CY.intCurrencyID,
 				intUnitMeasureId	=	QU.intUnitMeasureId,
-				dtmM2MDate 			= 	CI.dtmM2MDate
+				dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate())
 
 		FROM	tblCTContractImport			CI	LEFT
 		JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
