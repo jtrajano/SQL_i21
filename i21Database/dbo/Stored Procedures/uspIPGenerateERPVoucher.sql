@@ -207,7 +207,8 @@ BEGIN TRY
 
 		IF ISNULL(@strInvoiceNo, '') = ''
 		BEGIN
-			SELECT @strError = @strError + 'Invoice No. cannot be blank. '
+			--SELECT @strError = @strError + 'Invoice No. cannot be blank. '
+			SELECT @strInvoiceNo = @strBillId
 		END
 
 		IF @dtmInvoiceDate IS NULL

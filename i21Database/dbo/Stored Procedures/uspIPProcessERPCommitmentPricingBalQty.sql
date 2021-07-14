@@ -21,6 +21,7 @@ BEGIN TRY
 		,@strPricingNo NVARCHAR(50)
 		,@strERPRefNo NVARCHAR(100)
 		,@dblBalanceQty NUMERIC(18, 6)
+		,@intLineTrxSequenceNo BIGINT
 	DECLARE @intCommitmentPricingId INT
 		,@intNewCommitmentPricingBalQtyStageId INT
 	DECLARE @tblMFCommitmentPricing TABLE (
@@ -65,6 +66,7 @@ BEGIN TRY
 			SELECT @strPricingNo = NULL
 				,@strERPRefNo = NULL
 				,@dblBalanceQty = NULL
+				,@intLineTrxSequenceNo = NULL
 
 			SELECT @intCommitmentPricingId = NULL
 				,@intNewCommitmentPricingBalQtyStageId = NULL
@@ -76,16 +78,17 @@ BEGIN TRY
 				,@strPricingNo = strPricingNo
 				,@strERPRefNo = strERPRefNo
 				,@dblBalanceQty = dblBalanceQty
+				,@intLineTrxSequenceNo = intLineTrxSequenceNo
 			FROM tblIPCommitmentPricingBalQtyStage
 			WHERE intCommitmentPricingBalQtyStageId = @intCommitmentPricingBalQtyStageId
 
 			IF EXISTS (
 					SELECT 1
 					FROM tblIPCommitmentPricingBalQtyArchive
-					WHERE intTrxSequenceNo = @intTrxSequenceNo
+					WHERE intLineTrxSequenceNo = @intLineTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo is exists in i21.'
+				SELECT @strError = 'Line TrxSequenceNo ' + LTRIM(@intLineTrxSequenceNo) + ' is already processed in i21.'
 
 				RAISERROR (
 						@strError
