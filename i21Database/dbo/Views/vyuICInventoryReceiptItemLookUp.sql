@@ -6,7 +6,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, Item.strItemNo
 		, strItemDescription = 
 			CASE 
-				WHEN Item.strDescription = 'Item Not Found' THEN 
+				WHEN placeHolderItem.intItemId IS NOT NULL THEN 
 					ReceiptItem.strImportDescription
 				ELSE 
 					Item.strDescription
@@ -255,6 +255,11 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON ReceiptItem.intForexRateTypeId = forexType.intCurrencyExchangeRateTypeId
 		LEFT JOIN tblICItem Item 
 			ON Item.intItemId = ReceiptItem.intItemId
+		LEFT JOIN (
+			tblICItem placeHolderItem INNER JOIN tblICCompanyPreference pref
+				ON placeHolderItem.intItemId = pref.intItemIdHolderForReceiptImport
+		)
+			ON placeHolderItem.intItemId = ReceiptItem.intItemId
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
 			ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
 		LEFT JOIN tblICStorageLocation StorageLocation 

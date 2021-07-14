@@ -8528,7 +8528,7 @@
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionTransferAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutOptTransactionProcessAckXML.sql" />
-    <Build Include="dbo\Views\vyuICGetCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuICSearchCompanyPreference.sql" />
     <None Include="Scripts\Post-Deployment\CT\2010_AddMissingHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCollateralCategories.sql" />

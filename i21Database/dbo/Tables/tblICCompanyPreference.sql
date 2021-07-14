@@ -25,5 +25,6 @@
     [ysnIsCountSheetMultiFilter] BIT NULL DEFAULT(1),
 	[ysnPriceFixWarningInReceipt] BIT NULL DEFAULT(0),
     [ysnValidateReceiptTotal] BIT NULL DEFAULT(0),
+	[intItemIdHolderForReceiptImport] INT NULL, 
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
