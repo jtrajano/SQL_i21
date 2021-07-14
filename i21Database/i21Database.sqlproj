@@ -9851,9 +9851,8 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
     <None Include="Scripts\Post-Deployment\SM\2120_AddUserPortalSettingsToContactImport.sql" />
-    <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
-    <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
   </ItemGroup>
   <ItemGroup>
