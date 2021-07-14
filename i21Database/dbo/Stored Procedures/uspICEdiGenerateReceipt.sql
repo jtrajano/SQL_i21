@@ -271,9 +271,8 @@ FROM
 				SELECT TOP 1 
 					item.intItemId
 				FROM 
-					tblICItem item 
-				WHERE
-					item.strItemNo = 'Item Not Found'
+					tblICItem item inner join tblICCompanyPreference pref
+						ON item.intItemId = pref.intItemIdHolderForReceiptImport
 			) itemNotFound
 				ON 1 = 1 
 	) it
@@ -363,7 +362,15 @@ BEGIN
 		, -1
 		, NULL
 		, NULL
-		, 'Unable to generate receipts. Possible reasons: (1) No store headers found in file and no selected location. (2) Store headers found but the locations do not exists in the system. (3) Items are not in the store location(s).'
+		, 'Unable to generate receipts. 
+		Possible reasons: 
+		<ul>
+			<li>No store headers found in file and no selected location.</li>
+			<li>Store headers found but the locations do not exists in the system.</li>
+			<li>Items are not in the store location(s).</li>
+			<li>Placeholder item for Receipt Import is missing in the Company Configuration -> Inventory.</li>
+		</ul>
+		'
 		, 'Failed'
 		, 'No record(s) imported.'
 		, 1 
