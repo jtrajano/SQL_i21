@@ -9552,6 +9552,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCopyAttachments.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
