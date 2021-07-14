@@ -378,8 +378,8 @@ BEGIN TRY
 		, ysnItemUOMIdExist = CAST(1 AS BIT)
 		, strSubLocationName = dbo.[fnCTGetSeqDisplayField](CD.intSubLocationId, 'tblSMCompanyLocationSubLocation')
 		, strStorageLocationName = dbo.[fnCTGetSeqDisplayField](CD.intStorageLocationId, 'tblICStorageLocation')
-		, strLoadingPoint = dbo.[fnCTGetSeqDisplayField](CD.intLoadingPortId, 'tblSMCity')
-		, strDestinationPoint = dbo.[fnCTGetSeqDisplayField](CD.intDestinationPortId, 'tblSMCity')
+		, strLoadingPoint = LoadingPort.strCity
+		, strDestinationPoint = DestinationPort.strCity
 		, dblMarketContractSize = MA.dblContractSize
 		, intMarketUnitMeasureId = MA.intUnitMeasureId
 		, intMarketCurrencyId = MA.intCurrencyId
@@ -472,7 +472,14 @@ BEGIN TRY
 		, RefFuturesCurrency.strCurrency strRefFuturesCurrency
 		, RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure
 		, ysnWithPriceFix = case when isnull(CT.intPriceContractId,0) = 0 then convert(bit,0) else convert(bit,1) end
-        ,dblAllocatedQty = AD.dblAllocatedQty
+        , dblAllocatedQty = AD.dblAllocatedQty
+		, ysnCalculateUpdatedAvailability = CASE WHEN CT.intContractTypeId = 1 THEN Pref.ysnUpdatedAvailabilityPurchase ELSE Pref.ysnUpdatedAvailabilitySales END
+		, ysnCalculatePlannedAvailability = CASE WHEN CT.intContractTypeId = 1 THEN Pref.ysnCalculatePlannedAvailabilityPurchase ELSE Pref.ysnCalculatePlannedAvailabilitySale END
+		, intLoadingLeadTime = ISNULL(LoadingPort.intLeadTime, 0)
+		, intLoadingLeadTimeSource = ISNULL(LoadingPort.intLeadTimeAtSource, 0)
+		, intDestinationLeadTime = ISNULL(DestinationPort.intLeadTime, 0)
+		, intDestinationLeadTimeSource = ISNULL(DestinationPort.intLeadTimeAtSource, 0)
+		, intFreightRateMatrixLeadTime = ISNULL(FRM.intLeadTime, 0)
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -492,6 +499,8 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrency CC ON CC.intCurrencyID = CD.intConvPriceCurrencyId
 	LEFT JOIN tblSMCurrency IY ON IY.intCurrencyID = CD.intInvoiceCurrencyId
 	LEFT JOIN tblSMCurrency MY ON MY.intCurrencyID = MA.intCurrencyId
+	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
+	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intDestinationPortId
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
@@ -501,6 +510,9 @@ BEGIN TRY
 	LEFT JOIN @tblBill Bill ON Bill.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN @OpenLoad OL ON OL.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN @tblInvoice Invoice ON Invoice.intContractDetailId = CD.intContractDetailId
+	LEFT JOIN tblLGFreightRateMatrix FRM ON FRM.strOriginPort = LoadingPort.strCity
+		AND FRM.strDestinationCity = DestinationPort.strCity
+		AND FRM.intType = 2 -- General type
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
 	--LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
@@ -517,6 +529,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrency RefFuturesCurrency ON RefFuturesCurrency.intCurrencyID = CD.intRefFuturesCurrencyId
 	LEFT JOIN tblICItemUOM RefFuturesItemUOMId ON RefFuturesItemUOMId.intItemUOMId = CD.intRefFuturesItemUOMId
 	LEFT JOIN tblICUnitMeasure RefFturesUnitMeasure ON RefFturesUnitMeasure.intUnitMeasureId = RefFuturesItemUOMId.intUnitMeasureId
+	CROSS APPLY (SELECT TOP 1 * FROM tblCTCompanyPreference) Pref
 	OUTER APPLY (
 		SELECT TOP 1 a.intContractHeaderId
 			, a.intContractDetailId
