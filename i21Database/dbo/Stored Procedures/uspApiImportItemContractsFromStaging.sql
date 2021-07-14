@@ -135,7 +135,7 @@ INSERT INTO tblRestApiTransformationLog (guiTransformationLogId,
 	guiApiUniqueId, strIntegrationType, strTransactionType, strApiVersion, guiSubscriptionId)
 SELECT
 	NEWID(),
-	strError = 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 
+	strError = 'Cannot find the terms with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 
 	strField = 'termId', 
 	strLogLevel = 'Error', 
 	strValue = CAST(s.intTermId AS NVARCHAR(50)),
@@ -146,8 +146,9 @@ SELECT
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
 FROM tblCTApiItemContractStaging s
-LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
-WHERE t.intTermID IS NULL
+INNER JOIN tblSMTerm t ON t.intTermID = s.intTermId
+WHERE t.intTermID IS NULL 
+	AND s.intTermId IS NOT NULL
 	AND s.guiApiUniqueId = @guiApiUniqueId
 
 IF EXISTS(SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId)

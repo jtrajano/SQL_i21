@@ -42,7 +42,7 @@ SELECT
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
 FROM tblCTApiItemContractStaging s
-LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
+INNER JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE t.intTermID IS NULL
 	AND s.guiApiUniqueId = @guiUniqueId
 
