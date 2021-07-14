@@ -44,7 +44,7 @@ SELECT
             END 
         )
         , 2
-    )
+    ) 
     +
     --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
     ISNULL(clearingTax.dblTax,0))
@@ -451,8 +451,7 @@ SELECT
     ,billDetail.intItemId
     ,billDetail.intUnitOfMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,(
-    --billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
+    ,--billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
@@ -529,11 +528,6 @@ SELECT
                     * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             END),0)	
-    +
-    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
-    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
-    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
-    )
     *
     (
         CASE 
@@ -542,19 +536,12 @@ SELECT
         ELSE 1
         END
     )
+    +
+    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
+    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
+    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
     AS dblVoucherTotal
-    ,ISNULL(CASE WHEN 
-                receiptItem.dblNet <> 0 AND 
-                receiptItem.dblNet <> receiptItem.dblOpenReceive AND
-                receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
-                receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
-            THEN receiptItem.dblNet
-             --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
-            WHEN billDetail.dblNetWeight <> 0
-            THEN billDetail.dblNetWeight
-            ELSE billDetail.dblQtyReceived
-            END, 0) 
+    ,ISNULL(billDetail.dblQtyReceived, 0) 
     *
     (
         CASE 
@@ -631,17 +618,7 @@ OUTER APPLY (
     SELECT
         SUM(dblTax) AS dblTax --dblAdjustedTax is the new cost
     FROM tblAPBillDetailTax taxes
-    WHERE 
-        taxes.intBillDetailId = billDetail.intBillDetailId
-    AND EXISTS (
-        --MAKE SURE TAX CODE IS ALSO PART OF RECEIPT TAX DETAILS TO DETERMINE IT USES CLEARING
-        SELECT 1
-        FROM tblICInventoryReceiptItemTax rctTax
-        WHERE
-            rctTax.intInventoryReceiptItemId = billDetail.intInventoryReceiptItemId
-        AND rctTax.intTaxClassId = taxes.intTaxClassId
-        AND rctTax.intTaxCodeId = taxes.intTaxCodeId
-    )
+    WHERE taxes.intBillDetailId = billDetail.intBillDetailId
 ) oldCostTax
 
 --receipts in storage that were FULLY transferred from DP to DP only
@@ -852,6 +829,5 @@ and bill.ysnPosted = 1
 AND Receipt.strReceiptType != 'Transfer Order'
 and (CustomerStorage.intCustomerStorageId is null or CustomerStorage.ysnTransferStorage = 0)
 GO
-
 
 
