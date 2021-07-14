@@ -29,7 +29,7 @@ WHERE e.intCategoryId IS NULL
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 'termId', 'Error',  CAST(s.intTermId AS NVARCHAR(50))
 FROM tblCTApiItemContractStaging s
-LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
+INNER JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE t.intTermID IS NULL
 	AND s.guiApiUniqueId = @guiUniqueId
 
