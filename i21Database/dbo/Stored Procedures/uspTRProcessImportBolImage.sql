@@ -128,7 +128,7 @@ BEGIN
 						,@attachmentId = @intAttachmentId OUTPUT
 						,@error = @attachmentErrorMessage OUTPUT
 
-					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @strTransactionNumber)	
+					--SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @strTransactionNumber)	
 
 					DECLARE @intInvoiceId INT = NULL,
 						@intInvoiceTransactionId INT = NULL,
@@ -176,7 +176,7 @@ BEGIN
 								,@attachmentId = @intAttachmentId OUTPUT
 								,@error = @attachmentErrorMessage OUTPUT
 							
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,@strInvoiceNumber)
+							--SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,@strInvoiceNumber)
 
 							SELECT @strInvoiceId = dbo.fnTRMessageConcat(@strInvoiceId,@intInvoiceId)
 
