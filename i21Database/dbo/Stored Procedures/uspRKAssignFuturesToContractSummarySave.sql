@@ -115,8 +115,8 @@ BEGIN TRY
 			, @intContractDetailId = intContractDetailId
 			, @intFutOptTransactionId = intFutOptTransactionId
 			, @dblAssignedLots = dblAssignedLots
-			, @dblAssignedLotsToSContract = dblAssignedLotsToSContract
-			, @dblAssignedLotsToPContract = dblAssignedLotsToPContract
+			, @dblAssignedLotsToSContract = dblAssignedLotsToSContract * -1
+			, @dblAssignedLotsToPContract = dblAssignedLotsToPContract * -1
 			, @dblPrice = dblPrice
 			, @intUserId = intUserId
 			, @ysnAutoPrice = ysnAutoPrice
