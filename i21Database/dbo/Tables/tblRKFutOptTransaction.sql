@@ -57,6 +57,7 @@
 	[ysnPreCrush] BIT NULL,
 	[ysnSlicedTrade] BIT NULL DEFAULT((0)),
 	[intOrigSliceTradeId] INT NULL,
+	[dblOrigPSliceLots] NUMERIC(18,6) NULL,
 	[dblSContractBalanceLots] NUMERIC(18,6) NULL,
 	[dblPContractBalanceLots] NUMERIC(18,6) NULL,
 
