@@ -9010,6 +9010,7 @@
     <Build Include="dbo\Tables\tblCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLogActivityDetail.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
