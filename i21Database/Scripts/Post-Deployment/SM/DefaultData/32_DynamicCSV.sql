@@ -2875,6 +2875,7 @@ UPDATE tblSMCSVDynamicImport SET
 	'
 	WHERE intCSVDynamicImportId = @NewHeaderId
 
+	DELETE FROM tblSMCSVDynamicImportParameter WHERE intCSVDynamicImportId = @NewHeaderId
 
 
 INSERT INTO tblSMCSVDynamicImportParameter(intCSVDynamicImportId, strColumnName, strDisplayName, ysnRequired)
