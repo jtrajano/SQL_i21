@@ -154,10 +154,12 @@ BEGIN TRY
 			IF @dblAssignedLotsToPContract <> 0
 			BEGIN
 				EXEC uspRKUpdateDerivativeContractBalanceLots @intFutOptTransactionId,'Purchase',@dblAssignedLotsToPContract
+				SET @dblAssignedLots = ABS(@dblAssignedLotsToPContract)
 			END
 			ELSE
 			BEGIN
 				EXEC uspRKUpdateDerivativeContractBalanceLots @intFutOptTransactionId,'Sale',@dblAssignedLotsToSContract
+				SET @dblAssignedLots = ABS(@dblAssignedLotsToSContract)
 			END
 
 			IF @ysnAutoPrice = 1
