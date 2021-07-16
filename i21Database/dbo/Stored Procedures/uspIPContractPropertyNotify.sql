@@ -168,6 +168,54 @@ INSERT INTO @Data
 SELECT strAllocationNumber
 	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
 	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
+	,'Book'
+	,IsNULL(PB.strBook,'')
+	,IsNULL(SB.strBook,'')
+	,B.strBook
+FROM dbo.tblLGAllocationDetail AD
+JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
+JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailId
+JOIN dbo.tblCTContractHeader PH ON PH.intContractHeaderId = P.intContractHeaderId
+JOIN dbo.tblCTContractDetail S ON S.intContractDetailId = AD.intSContractDetailId
+JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
+LEFT JOIN dbo.tblCTBook PB ON PB.intBookId = P.intBookId
+LEFT JOIN dbo.tblCTBook SB ON SB.intBookId = S.intBookId
+JOIN tblCTBook B ON B.intBookId = SH.intBookId
+WHERE P.intBookId <> S.intBookId
+	AND (
+		P.intContractStatusId = 1
+		OR S.intContractStatusId = 1
+		)
+
+INSERT INTO @Data
+SELECT strAllocationNumber
+	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
+	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
+	,'Subbook'
+	,isNULL(PSB.strSubBook,'')
+	,IsNULL(SSB.strSubBook,'')
+	,B.strBook
+FROM dbo.tblLGAllocationDetail AD
+JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
+JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailId
+JOIN dbo.tblCTContractHeader PH ON PH.intContractHeaderId = P.intContractHeaderId
+JOIN dbo.tblCTContractDetail S ON S.intContractDetailId = AD.intSContractDetailId
+JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
+LEFT JOIN dbo.tblCTSubBook PSB ON PSB.intSubBookId = P.intSubBookId
+LEFT JOIN dbo.tblCTSubBook SSB ON SSB.intSubBookId = S.intSubBookId
+JOIN tblCTBook B ON B.intBookId = SH.intBookId
+WHERE IsNULL(P.intSubBookId,0) <> IsNULL(S.intSubBookId,0)
+	AND (
+		P.intContractStatusId = 1
+		OR S.intContractStatusId = 1
+		)
+
+
+
+INSERT INTO @Data
+SELECT strAllocationNumber
+	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
+	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'Position'
 	,PP.strPosition
 	,SP.strPosition
