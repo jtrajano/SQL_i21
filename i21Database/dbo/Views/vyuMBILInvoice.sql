@@ -24,7 +24,7 @@ SELECT Invoice.intInvoiceId
 	, ISNULL(dblTotal,0) as dblTotal
 	, Invoice.intTermId
 	, Term.strTerm
-	, Invoice.ysnPosted
+	, i21Invoice.ysnPosted
 	, Invoice.ysnVoided
 	, Invoice.dtmPostedDate
 	, Invoice.dtmVoidedDate
