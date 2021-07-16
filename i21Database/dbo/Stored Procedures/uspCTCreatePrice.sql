@@ -35,6 +35,7 @@ declare
 	,@intStartingNumberId int
 	,@strTradeNo nvarchar(50)
 	,@intNumber int
+	,@ysnMultiplePriceFixation bit
 	;
 
 begin try
@@ -67,7 +68,7 @@ begin try
 		,@intCommodityId = ch.intCommodityId
 		,@intItemId = cd.intItemId
 		,@intItemUOMId = cd.intPriceItemUOMId
-		,@intFinalPriceUOMId = ium.intUnitMeasureId
+		,@intFinalPriceUOMId = comm.intCommodityUnitMeasureId
 		,@intFinalCurrencyId = cd.intCurrencyId
 		,@intOriginalFutureMarketId =  cd.intFutureMarketId
 		,@intOriginalFutureMonthId = cd.intFutureMonthId
@@ -76,12 +77,14 @@ begin try
 		,@dblLotsFixed = @dblTotalLots
 		,@intQtyItemUOMId = cd.intItemUOMId
 		,@dblQuantityPerLot = cd.dblQuantity / (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)
+		,@ysnMultiplePriceFixation = isnull(ch.ysnMultiplePriceFixation,0)
 	from
 		tblCTContractDetail cd
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 		left join tblCTPriceFixation pf on pf.intContractDetailId = cd.intContractDetailId
 		left join tblCTPriceContract pc on pc.intPriceContractId = pf.intPriceContractId
 		left join tblICItemUOM ium on ium.intItemUOMId = cd.intPriceItemUOMId
+		left join tblICCommodityUnitMeasure comm on comm.intUnitMeasureId = ium.intUnitMeasureId and comm.intCommodityId = ch.intCommodityId
 		cross apply (
 			select dblTotalPricedQuantity = sum(pfd.dblQuantity) from tblCTPriceFixationDetail pfd where pfd.intPriceFixationId = pf.intPriceFixationId
 		) pfd
@@ -263,7 +266,7 @@ begin try
 			intPriceContractId = @intPriceContractId
 			,intConcurrencyId = 1
 			,intContractHeaderId = @intContractHeaderId
-			,intContractDetailId = @intContractDetailId
+			,intContractDetailId = (case when @ysnMultiplePriceFixation = 0 then @intContractDetailId else null end)
 			,intOriginalFutureMarketId = @intOriginalFutureMarketId
 			,intOriginalFutureMonthId = @intOriginalFutureMonthId
 			,dblOriginalBasis = @dblOriginalBasis
