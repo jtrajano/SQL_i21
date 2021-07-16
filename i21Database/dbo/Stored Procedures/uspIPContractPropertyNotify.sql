@@ -186,7 +186,7 @@ SELECT strAllocationNumber
 	,'Book'
 	,IsNULL(PB.strBook,'')
 	,IsNULL(SB.strBook,'')
-	--,B.strBook
+	,B.strBook
 FROM dbo.tblLGAllocationDetail AD
 JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailId
@@ -209,7 +209,7 @@ SELECT strAllocationNumber
 	,'Subbook'
 	,isNULL(PSB.strSubBook,'')
 	,IsNULL(SSB.strSubBook,'')
-	--,B.strBook
+	,B.strBook
 FROM dbo.tblLGAllocationDetail AD
 JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailId
