@@ -42,3 +42,12 @@
 )
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKSummaryLog_intTransactionRecordId] ON [dbo].[tblRKSummaryLog]
+(
+	[intTransactionRecordId]
+)
+INCLUDE (
+	intTransactionRecordHeaderId
+)
+GO
