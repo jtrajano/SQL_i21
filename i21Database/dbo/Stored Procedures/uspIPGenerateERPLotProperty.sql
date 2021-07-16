@@ -32,6 +32,7 @@ BEGIN TRY
 	SELECT TOP 20 intLotPropertyFeedId
 	FROM dbo.tblIPLotPropertyFeed
 	WHERE strCompanyLocation = @strCompanyLocation
+	AND intStatusId IS NULL
 
 	SELECT @intLotPropertyFeedId = MIN(intLotPropertyFeedId)
 	FROM @tblIPLotPropertyFeed
@@ -56,7 +57,7 @@ BEGIN TRY
 		 +'<ActionId>1</ActionId>'  
 		 +'<CreatedDate>'+CONVERT(VARCHAR(33), dtmCreatedDate, 126) +'</CreatedDate>'  
 		 +'<TransactionTypeId>'+ ltrim(intTransactionTypeId) +'</TransactionTypeId>'  
-		  +'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
+		  --+'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<ItemNo>'+ IsNULL(strItemNo,'')  +'</ItemNo>'  
 		 +'<MotherLotNo>'+ IsNULL(strMotherLotNo,'')  +'</MotherLotNo>'  
