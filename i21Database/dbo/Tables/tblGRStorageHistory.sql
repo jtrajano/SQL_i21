@@ -64,3 +64,19 @@ INCLUDE (
 	,intContractHeaderId
 ) 
 GO 
+
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intInventoryReceiptId] ON [dbo].[tblGRStorageHistory]
+(
+	[intInventoryReceiptId] DESC
+)
+INCLUDE (
+	intCustomerStorageId
+	,intTicketId
+	,intContractHeaderId
+)
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intTicketId] ON [dbo].[tblGRStorageHistory]
+(
+	[intTicketId] ASC
+)
+GO 
