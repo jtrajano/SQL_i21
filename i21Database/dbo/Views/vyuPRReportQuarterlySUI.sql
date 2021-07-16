@@ -17,7 +17,7 @@ SELECT DISTINCT intEntityId = tblPRPaycheck.intEntityEmployeeId
 
 	,dblTaxable = SUM(vyuPRPaycheckTax.dblTaxableAmount) OVER (PARTITION BY tblPRPaycheck.intEntityEmployeeId, tblPRPaycheck.intYear, tblPRPaycheck.intQuarter)
 	,dblRate = SUM(vyuPRPaycheckTax.dblAmount) OVER (PARTITION BY tblPRPaycheck.intEntityEmployeeId, tblPRPaycheck.intYear, tblPRPaycheck.intQuarter)
-	,dblLimit = vyuPRPaycheckTax.dblLimit
+	,dblLimit = NULL --vyuPRPaycheckTax.dblLimit
 	,dblTotal = SUM(vyuPRPaycheckTax.dblTotal) OVER (PARTITION BY tblPRPaycheck.intEntityEmployeeId, tblPRPaycheck.intYear, tblPRPaycheck.intQuarter)
 	,vyuPRPaycheckTax.strTaxId
 
@@ -69,7 +69,7 @@ INNER JOIN(SELECT
 			,dblAmount = SUM(dblAmount)
 			,dblTaxableAmount = SUM(dblTaxableAmount)
 			,dblTotal = SUM(dblTotal)
-			,dblLimit
+			--,dblLimit
 			,strTaxId
 		FROM vyuPRPaycheckTax 
 		WHERE strCalculationType = 'USA SUTA' 
@@ -79,7 +79,7 @@ INNER JOIN(SELECT
 			,YEAR(dtmPayDate)
 			,DATEPART(QQ, dtmPayDate)
 			,strTaxId
-			,dblLimit
+			--,dblLimit
 	)PT ON PE.intPaycheckId = PT.intPaycheckId
 		AND PE.intEntityEmployeeId = PT.intEntityEmployeeId
 		AND PE.intYear = PT.intYear 
@@ -118,7 +118,7 @@ GROUP BY
 	,tblPRPaycheck.intYear
 	,tblPRPaycheck.intQuarter
 	,vyuPRPaycheckTax.dblAmount
-	,vyuPRPaycheckTax.dblLimit
+	--,vyuPRPaycheckTax.dblLimit
 	,vyuPRPaycheckTax.strTaxId
 	,vyuPRPaycheckTax.dblTaxableAmount
 	,vyuPRPaycheckTax.dblTotal
