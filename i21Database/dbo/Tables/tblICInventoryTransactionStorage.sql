@@ -62,3 +62,8 @@ This tables holds all inventory transactions for storage/custody items (not comp
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionStorage_intItemId_intItemLocationId]
 		ON [dbo].[tblICInventoryTransactionStorage]([intItemId] ASC, [intItemLocationId] ASC);
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionStorage_intTransactionId]
+		ON [dbo].[tblICInventoryTransactionStorage]([intTransactionId] ASC, [intTransactionTypeId] ASC);
+	GO
