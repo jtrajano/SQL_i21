@@ -18,6 +18,8 @@ BEGIN TRY
 		,@dtmExpectedDate DATETIME
 		,@intSubLocationId INT
 		,@intManufacturingCellId INT
+		,@strSubLocationName NVARCHAR(50)
+		,@ysnRecipeBySite INT
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intWorkOrderRecipeItemId INT
 		,[intWorkOrderId] INT
@@ -84,6 +86,9 @@ BEGIN TRY
 		,dtmLastModified DATETIME
 		,intConcurrencyId INT
 		)
+
+	SELECT @ysnRecipeBySite = IsNULL(ysnRecipeBySite, 0)
+	FROM tblMFCompanyPreference
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@dtmExpectedDate = dtmExpectedDate
@@ -266,12 +271,32 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderRecipe
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	SELECT @intRecipeId = intRecipeId
-	FROM dbo.tblMFRecipe
-	WHERE intItemId = @intItemId
-		AND intLocationId = @intLocationId
-		AND ysnActive = 1
-		AND intSubLocationId = @intSubLocationId
+	IF @ysnRecipeBySite = 1
+	BEGIN
+		SELECT @strSubLocationName = Left(strSubLocationName, 2)
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+		SELECT @intSubLocationId = intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE strSubLocationName = @strSubLocationName
+
+		SELECT @intRecipeId = intRecipeId
+		FROM dbo.tblMFRecipe
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND intSubLocationId = @intSubLocationId
+	END
+	ELSE
+	BEGIN
+		SELECT @intRecipeId = intRecipeId
+		FROM dbo.tblMFRecipe
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND intSubLocationId = @intSubLocationId
+	END
 
 	IF @intRecipeId IS NULL
 	BEGIN
