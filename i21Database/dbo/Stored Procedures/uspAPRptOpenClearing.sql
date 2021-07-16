@@ -1495,6 +1495,7 @@ INNER JOIN (
    ,B.intLocationId  
    ,B.strLocationName
   FROM grainTransferChargeClearing B  
+  WHERE strTransactionNumber NOT LIKE ''TRA%''
   GROUP BY   
    intInventoryReceiptChargeId
    ,strTransactionNumber  
@@ -1513,7 +1514,6 @@ INNER JOIN tblICInventoryReceiptCharge rc
   ON r.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
 WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
-	AND tmpAPOpenClearing.strTransactionNumber NOT LIKE ''TRA%''
 UNION ALL --TRANSFER CHARGES
   SELECT  
   r.strTransferStorageTicket 
@@ -1546,7 +1546,7 @@ UNION ALL --TRANSFER CHARGES
  FROM    
  (  
   SELECT  
-  B.intInventoryReceiptChargeId
+  B.intTransferStorageReferenceId
    ,B.strTransactionNumber  
    ,SUM(B.dblTransferTotal) AS dblTransferTotal
    ,SUM(B.dblTransferQty) AS dblTransferQty  
@@ -1558,7 +1558,7 @@ UNION ALL --TRANSFER CHARGES
    ,B.strLocationName
   FROM grainTransferChargeClearing B  
   GROUP BY   
-   intInventoryReceiptChargeId
+   intTransferStorageReferenceId
    ,strTransactionNumber  
    ,intItemId  
    ,intLocationId  
@@ -1568,7 +1568,7 @@ UNION ALL --TRANSFER CHARGES
   -- OR  (SUM(B.dblTransferTotal) - SUM(B.dblReceiptChargeTotal)) != 0
  ) tmpAPOpenClearing  
 INNER JOIN tblGRTransferStorageReference rc  
-  ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intTransferStorageReferenceId
+  ON tmpAPOpenClearing.intTransferStorageReferenceId = rc.intTransferStorageReferenceId
  INNER JOIN tblGRTransferStorage r  
   ON r.intTransferStorageId = rc.intTransferStorageId  
   INNER JOIN tblGRCustomerStorage CS
