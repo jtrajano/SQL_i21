@@ -688,7 +688,7 @@ BEGIN TRY
 				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Producer'
 					--AND t.ysnActive = 1
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 					AND t.strName = @strPartyName
 
 				IF ISNULL(@intShipperId, 0) = 0

@@ -867,7 +867,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strUserName
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intUserId IS NULL
 			BEGIN
@@ -2009,7 +2009,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'Customer'
 				WHERE EY.strName = @strCustomer
-					AND EY.strEntityNo <> ''
+					--AND EY.strEntityNo <> ''
 
 				SELECT @intCustomerLocationId = EL.intEntityLocationId
 				FROM tblEMEntityLocation EL
@@ -3548,7 +3548,7 @@ BEGIN TRY
 				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-					AND E.strEntityNo <> ''
+					--AND E.strEntityNo <> ''
 				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 					AND ET.strType = 'Vendor'
 				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -3596,7 +3596,7 @@ BEGIN TRY
 				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-					AND E.strEntityNo <> ''
+					--AND E.strEntityNo <> ''
 				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 					AND ET.strType = 'Vendor'
 				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -4258,7 +4258,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strAuditUserName
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intAuditLogUserId IS NULL
 			BEGIN

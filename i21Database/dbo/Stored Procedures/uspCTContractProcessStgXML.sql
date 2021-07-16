@@ -1042,7 +1042,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strCreatedBy
-					AND CE.strEntityNo <> ''
+					--AND CE.strEntityNo <> ''
 
 				IF @intUserId IS NULL
 				BEGIN
@@ -3623,7 +3623,7 @@ BEGIN TRY
 					JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 						AND ET.strType = 'Vendor'
 					WHERE EY.strName = @strVendorName
-						AND EY.strEntityNo <> ''
+						--AND EY.strEntityNo <> ''
 
 					SELECT @intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
 					FROM tblSMCurrencyExchangeRateType RT
@@ -4342,7 +4342,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strUserName
-					AND CE.strEntityNo <> ''
+					--AND CE.strEntityNo <> ''
 
 				IF @intAuditLogUserId IS NULL
 				BEGIN
