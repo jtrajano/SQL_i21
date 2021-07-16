@@ -101,6 +101,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
 :r .\SM\2120_AddUserPortalSettingsToContactImport.sql
 :r .\SM\2120_InsertLanguages.sql
+:r .\SM\2120_UpdateAddonComponents.sql
 
 
 -- Canned Report

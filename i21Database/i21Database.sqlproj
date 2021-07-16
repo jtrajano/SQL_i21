@@ -9557,6 +9557,7 @@
     <Build Include="dbo\Stored Procedures\uspSMCopyAttachments.sql" />
     <Build Include="dbo\Views\vyuCCGetPortalSiteHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetCurrentImportSetup.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2120_UpdateAddonComponents.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
