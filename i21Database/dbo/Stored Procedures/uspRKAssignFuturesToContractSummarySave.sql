@@ -46,13 +46,16 @@ BEGIN TRY
 	WHERE intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary
 									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete))
 	
-	UPDATE DER
-	SET DER.dblPContractBalanceLots = DER.dblPContractBalanceLots + dblAssignedLotsToPContract
-		,DER.dblSContractBalanceLots = DER.dblSContractBalanceLots + dblAssignedLotsToSContract
-	FROM tblRKFutOptTransaction DER
-	INNER JOIN (SELECT intFutOptTransactionId, SUM(dblAssignedLotsToPContract) as dblAssignedLotsToPContract, SUM(dblAssignedLotsToSContract) as dblAssignedLotsToSContract FROM tblRKAssignFuturesToContractSummary
-									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete) GROUP BY intFutOptTransactionId) AFC
-		ON AFC.intFutOptTransactionId = DER.intFutOptTransactionId
+	IF @ysnAllowDerivativeAssignToMultipleContracts = 1
+	BEGIN
+		UPDATE DER
+		SET DER.dblPContractBalanceLots = DER.dblPContractBalanceLots + dblAssignedLotsToPContract
+			,DER.dblSContractBalanceLots = DER.dblSContractBalanceLots + dblAssignedLotsToSContract
+		FROM tblRKFutOptTransaction DER
+		INNER JOIN (SELECT intFutOptTransactionId, SUM(dblAssignedLotsToPContract) as dblAssignedLotsToPContract, SUM(dblAssignedLotsToSContract) as dblAssignedLotsToSContract FROM tblRKAssignFuturesToContractSummary
+										WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete) GROUP BY intFutOptTransactionId) AFC
+			ON AFC.intFutOptTransactionId = DER.intFutOptTransactionId
+	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM @tblMatchedDelete)
 	BEGIN
