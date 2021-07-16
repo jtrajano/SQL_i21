@@ -55,6 +55,8 @@ BEGIN
 		,@ysnIRCorrection BIT
 	DECLARE @tblICLot TABLE (intLotId INT)
 
+	SELECT @strParentLotNumber=LTRIM(RTRIM(@strParentLotNumber))
+
 	SELECT @strLifeTimeType = strLifeTimeType
 		,@intLifeTime = intLifeTime
 		,@intCategoryId = intCategoryId
