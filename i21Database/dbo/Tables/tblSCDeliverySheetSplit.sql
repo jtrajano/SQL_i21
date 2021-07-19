@@ -16,15 +16,6 @@
 )
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblSCDeliverySheetSplit_intDeliverySheetId] ON [dbo].[tblSCDeliverySheetSplit]
-(
-	[intDeliverySheetId] ASC
-)
-INCLUDE (
-	dblSplitPercent
-) 
-
-GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Column',
     @level0type = N'SCHEMA',
