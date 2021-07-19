@@ -1,13 +1,15 @@
 CREATE PROCEDURE [dbo].[uspGRInsertStorageHistoryRecord]
 (
 	@StorageHistoryData AS StorageHistoryStagingTable READONLY,
-    @intStorageHistoryId AS INT OUTPUT
+    @intStorageHistoryId AS INT OUTPUT,
+	@strStorageHistoryIds as nvarchar(max) = '' output
 )
 AS
 BEGIN TRY   
      DECLARE @ErrMsg NVARCHAR(MAX)
 	 DECLARE @StorageHistoryDataDummy AS StorageHistoryStagingTable
 	 DECLARE @intId INT
+	 DECLARE @intIds Id
 
 	 INSERT INTO @StorageHistoryDataDummy
 	 (
@@ -118,6 +120,7 @@ BEGIN TRY
 			[strVoucher],
 			[intTransferStorageReferenceId]
 		) 
+		OUTPUT INSERTED.intStorageHistoryId INTO @intIds(intId)
 		SELECT 
 			[intCustomerStorageId]          = SH.intCustomerStorageId,
 			[intSettleStorageId]            = SH.intSettleStorageId,
@@ -151,6 +154,10 @@ BEGIN TRY
 		WHERE intId = @intId
 
 		SELECT @intStorageHistoryId = SCOPE_IDENTITY();
+
+
+		select @strStorageHistoryIds =  @strStorageHistoryIds + cast(intId as nvarchar) + ',' from @intIds
+
 
 		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,5,3) OR (intTransactionTypeId = 4 AND strType = 'Settlement')))
 		BEGIN
