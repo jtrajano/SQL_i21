@@ -9019,7 +9019,6 @@
     <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping.sql" />
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping200.sql" />
-    <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping_1.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetM2MCounterPartyExposureReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
