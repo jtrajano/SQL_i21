@@ -2580,19 +2580,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@customer_id AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblSMCompanyLocation
+			    Where strLocationNumber = @customer_location
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_id should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''customer_location id :'' + CAST(@intCustomerLocationId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intEntityCustomerId = CONVERT(INT,@customer_id)
-				IF NOT EXISTS(Select TOP 1 1 from tblARCustomer Where intEntityId = @intEntityCustomerId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''intEntityCustomerId :''+CAST(@intEntityCustomerId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intCustomerLocationId =   (Select intCompanyLocationId from tblSMCompanyLocation  where strLocationNumber  = @customer_location)
 			END
 		END
 
@@ -2602,19 +2605,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@customer_location AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblSMCompanyLocation
+			    Where strLocationNumber = @customer_location
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''customer_location id :'' + CAST(@intCustomerLocationId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intCustomerLocationId = CONVERT(INT,@customer_location)
-				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intCustomerLocationId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''customer_location id :''+CAST(@intCustomerLocationId AS NVARCHAR(100) ) +'' is not Exist''
-				END
+				SET @intCustomerLocationId =   (Select intCompanyLocationId from tblSMCompanyLocation  where strLocationNumber  = @customer_location)
 			END
 		END
 
@@ -2624,19 +2630,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@origin_vendor_no AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblAPVendor
+			    Where strVendorAccountNum = @origin_vendor_no
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''origin_vendor_no  :'' + CAST(@intEntityVendorId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intEntityVendorId = CONVERT(INT,@origin_vendor_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblAPVendor Where intEntityId = @intEntityVendorId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_no  :''+CAST(@intEntityVendorId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intEntityVendorId =   (Select intEntityId from tblAPVendor  where strVendorAccountNum  = @origin_vendor_no)
 			END
 		END
 
@@ -2646,19 +2655,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@origin_vendor_location AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblSMCompanyLocation
+			    Where strLocationNumber = @origin_vendor_location
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_location should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''origin_vendor_location  :'' + CAST(@intEntityLocationId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intEntityLocationId = CONVERT(INT,@origin_vendor_location)
-				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intEntityLocationId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''origin_vendor_location  :''+CAST(@intEntityLocationId AS NVARCHAR(100) )+'' is not Exist''
-				END
+					SET @intRackLocationId =   (Select intCompanyLocationId from tblSMCompanyLocation  where  strLocationNumber = @origin_vendor_location)
 			END
 		END
 
@@ -2668,19 +2680,15 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@item_no AS INT) IS NULL )
+			IF NOT EXISTS (Select TOP 1 1 from tblICItem Where strItemNo = @item_no)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''item_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''item_no  :'' + CAST(@intItemId AS NVARCHAR(100)) + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intItemId = CONVERT(INT,@item_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intItemId = @intItemId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''item_no  :''+CAST(@intItemId AS NVARCHAR(100) )+'' is not Exist''
-				END
+				SET @intItemId =   (Select intItemId from tblICItem  where  strItemNo = @item_no)
 			END
 		END
 
@@ -2690,19 +2698,21 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@item_category AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblICCategory
+			    Where strCategoryCode = @item_category
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''item_category should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''item_no  :'' + CAST(@intCategoryId AS NVARCHAR(100)) + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intCategoryId = CONVERT(INT,@item_category)
-				IF NOT EXISTS(Select TOP 1 1 from tblICCategory Where intCategoryId = @intCategoryId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''item_no  :''+CAST(@intCategoryId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intCategoryId =  (Select intCategoryId from tblICCategory  where  strCategoryCode = @item_category)
 			END
 		END
 
@@ -2767,19 +2777,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@fixed_rack_vendor_no AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblAPVendor
+			    Where strVendorId = @fixed_rack_vendor_no
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''fixed_rack_vendor_no :'' + CAST(@intRackVendorId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
 			ELSE 
 			BEGIN
-				SET @intRackVendorId = CONVERT(INT,@fixed_rack_vendor_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblAPVendor Where intEntityId = @intRackVendorId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_no :''+CAST(@intRackVendorId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intRackVendorId =  (Select intEntityId from tblAPVendor  where  strVendorId = @fixed_rack_vendor_no)
 			END
 		END
 
@@ -2789,19 +2802,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@fixed_rack_no AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblICItem
+			    Where strItemNo = @fixed_rack_no
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_no should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''fixed_rack_no :'' + CAST(@intRackItemId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intRackItemId = CONVERT(INT,@fixed_rack_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblICItem Where intItemId = @intRackItemId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_no :''+CAST(@intRackItemId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intRackItemId =  (Select intItemId from tblICItem  where  strItemNo = @fixed_rack_no)
 			END
 		END
 
@@ -2811,19 +2827,22 @@ UPDATE tblSMCSVDynamicImport SET
 		END
 		ELSE
 		BEGIN
-			IF(TRY_PARSE(@fixed_rack_vendor_location AS INT) IS NULL )
+			IF NOT EXISTS
+			(
+			    Select TOP 1
+			        1
+			    from tblSMCompanyLocation
+			    Where strLocationNumber = @fixed_rack_vendor_location
+			)
 			BEGIN
-				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_location should be numeric''
+			    SET @IsValid = 0
+			    SET @ValidationMessage
+			        = @ValidationMessage + '' '' + ''fixed_rack_vendor_location :'' + CAST(@intRackLocationId AS NVARCHAR(100))
+			          + '' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @intRackLocationId = CONVERT(INT,@fixed_rack_vendor_location)
-				IF NOT EXISTS(Select TOP 1 1 from tblSMCompanyLocation Where intCompanyLocationId = @intRackLocationId )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''fixed_rack_vendor_location :''+CAST(@intRackLocationId AS NVARCHAR(100))+'' is not Exist''
-				END
+				SET @intRackItemId =  (Select intItemId from tblICItem  where  strItemNo = @fixed_rack_no)
 			END
 		END
 
