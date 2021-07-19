@@ -212,7 +212,8 @@ BEGIN TRY
 		, intPricingTypeId = CASE WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval') THEN CD.intPricingTypeId
 								WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus <> 'Approved' AND AP.strApprovalStatus <> 'No Need for Approval') THEN CT.intHeaderPricingTypeId
 								ELSE CD.intPricingTypeId END
-		, dblFutures = CASE WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval') THEN CD.dblFutures
+		, dblFutures = CASE WHEN CD.intPricingTypeId IN (1, 3) THEN CD.dblFutures
+							WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval') THEN CD.dblFutures
 							WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus <> 'Approved' AND AP.strApprovalStatus <> 'No Need for Approval') THEN NULL
 							ELSE CD.dblFutures END
 		, strPricingType = CASE WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval') THEN PT.strPricingType
