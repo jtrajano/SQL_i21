@@ -52,12 +52,12 @@ IF ISNULL(@intCurrentTransactionId, 0) <> 0 AND ISNULL(@intReferenceTransactionI
 BEGIN
 
 	--WE NEED TO CHECK IF THE TRANSACTION ID IS EXISTING
-	IF not exists(SELECT TOP 1 1 FROM tblSMTransaction where intTransactionId = @intCurrentTransactionId and ISNULL(@intReferenceCompanyId, 0) = 0)
+	IF not exists(SELECT TOP 1 1 FROM tblSMTransaction where intTransactionId = @intCurrentTransactionId) and ISNULL(@intReferenceCompanyId, 0) = 0
 	begin
 		print 'current transaction does not exists in the current database'
 		return 1;
 	end
-	IF not exists(SELECT TOP 1 1 FROM tblSMTransaction where intTransactionId = @intReferenceTransactionId and ISNULL(@intReferenceCompanyId, 0) = 0)
+	IF not exists(SELECT TOP 1 1 FROM tblSMTransaction where intTransactionId = @intReferenceTransactionId) and ISNULL(@intReferenceCompanyId, 0) = 0
 	begin
 		print 'reference transaction does not exists in the current database'
 		return 1;
