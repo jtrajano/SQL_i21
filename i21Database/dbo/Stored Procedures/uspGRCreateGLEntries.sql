@@ -1278,7 +1278,7 @@ BEGIN
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount GLAccount
-			ON GLAccount.intAccountId =case when @ysnStorageChargeAccountUseIncome = 1
+			ON GLAccount.intAccountId =case when @ysnStorageChargeAccountUseIncome = 1 and NonInventoryCostCharges.strICCCostType = 'Storage Charge'
 										then 
 											OtherChargesGLAccounts.intOtherChargeIncome
 										else 
