@@ -41,5 +41,6 @@ FROM (
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId
 		WHERE ysnExpired = 0
+		AND (ISNULL(ot.dblSContractBalanceLots,0) <> 0 OR ISNULL(ot.dblPContractBalanceLots,0) <> 0)
 	) a
-) b where dblBalanceLots > 0
+) b
