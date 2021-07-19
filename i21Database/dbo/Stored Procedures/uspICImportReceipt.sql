@@ -604,7 +604,7 @@ BEGIN
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
 				/*dtmReceiptDate*/				,ISNULL(IntegrationData.dtmDate, GETDATE())
-				/*intEntityVendorId*/			,IntegrationData.intEntityVendorId
+				/*intEntityVendorId*/			,(SELECT intEntityId FROM tblAPVendor WHERE intEntityId = IntegrationData.intEntityVendorId)
 				/*strReceiptType*/				,IntegrationData.strReceiptType
 				/*intSourceType*/				,IntegrationData.intSourceType
 				/*intBlanketRelease*/			,NULL
