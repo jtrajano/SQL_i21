@@ -9028,6 +9028,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
+    <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
