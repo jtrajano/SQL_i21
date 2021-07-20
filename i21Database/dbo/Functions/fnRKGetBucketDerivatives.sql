@@ -181,6 +181,7 @@ BEGIN
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 			AND intFutOptTransactionId NOT IN (SELECT intTransactionRecordId FROM OptionsLifecycle)
+			AND isnull(c.ysnNegate,0) = 0
 
 	) t WHERE intRowNum = 1
 
