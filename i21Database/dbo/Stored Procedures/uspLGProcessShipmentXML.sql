@@ -1377,7 +1377,7 @@ BEGIN TRY
 						,dtmCreatedOn DATETIME
 						,intLastUpdateById INT
 						,dtmLastUpdateOn DATETIME
-						,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+						,strBatchId NVARCHAR(40) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,ysnDocumentsReceived BIT
@@ -1705,7 +1705,7 @@ BEGIN TRY
 						,dtmCreatedOn DATETIME
 						,intLastUpdateById INT
 						,dtmLastUpdateOn DATETIME
-						,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+						,strBatchId NVARCHAR(40) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,ysnDocumentsReceived BIT
