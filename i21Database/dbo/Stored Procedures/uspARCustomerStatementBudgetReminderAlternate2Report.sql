@@ -367,8 +367,7 @@ WHERE I.ysnPosted = 1
   AND I.ysnCancelled = 0
   AND I.ysnProcessedToNSF = 0
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))		
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= @dtmDateToLocal
+  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND  @dtmDateToLocal
 		AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId FROM #PAYMENTDETAILS WHERE dtmDatePaid <= @dtmDateToLocal))
 		    OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId FROM #PAYMENTDETAILS WHERE dtmDatePaid > @dtmDateTo)))
       )
@@ -397,8 +396,7 @@ OUTER APPLY (
 INNER JOIN #CUSTOMERS C ON ARI.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #GLACCOUNTS GL ON ARI.intAccountId = GL.intAccountId
 WHERE ARPAC.ysnApplied = 1	
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmPostDate))) <= @dtmDateToLocal)
+  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal)
   AND (@intCompanyLocationId IS NULL OR ARI.intCompanyLocationId = @intCompanyLocationId)
 
 
