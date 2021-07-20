@@ -1528,7 +1528,7 @@ BEGIN TRY
 					,intETAPOLReasonCodeId = @intETAPOLReasonCodeId
 					,intETSPOLReasonCodeId = @intETSPOLReasonCodeId
 					,intETAPODReasonCodeId = @intETAPODReasonCodeId
-					,intFreightTermId = @intFreightTermId
+					--,intFreightTermId = @intFreightTermId
 					,intCurrencyId = @intCurrencyId
 					,intCreatedById = x.intCreatedById
 					,dtmCreatedOn = x.dtmCreatedOn
