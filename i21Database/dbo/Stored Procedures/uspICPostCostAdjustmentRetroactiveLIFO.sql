@@ -18,7 +18,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveLIFO]
 	,@intSourceTransactionId AS INT
 	,@intSourceTransactionDetailId AS INT 
 	,@strSourceTransactionId AS NVARCHAR(20)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT
 	,@intRelatedInventoryTransactionId AS INT = NULL 
