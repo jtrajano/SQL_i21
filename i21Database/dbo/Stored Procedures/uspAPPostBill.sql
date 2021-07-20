@@ -26,13 +26,21 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
--- Start the transaction 
-BEGIN TRANSACTION
 
 IF @userId IS NULL
 BEGIN
 	RAISERROR('User is required', 16, 1);
+	RETURN;
 END
+
+IF NULLIF(@param, '') IS NULL
+BEGIN
+	RAISERROR('@param is empty. No voucher to post.', 16, 1);
+	RETURN;
+END
+
+-- Start the transaction 
+BEGIN TRANSACTION
 
 --DECLARE @success BIT
 --DECLARE @successfulCount INT
@@ -152,6 +160,12 @@ WHERE B.intId IS NULL
 SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
+
+IF NULLIF(@billIds, '') IS NULL
+BEGIN
+	RAISERROR('Posting is already in process.', 16, 1);
+	GOTO Post_Rollback
+END
 
 --Update the prepay and debit memo
 EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
