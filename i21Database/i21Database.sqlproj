@@ -9425,6 +9425,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
     <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
+    <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
