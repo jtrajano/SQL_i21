@@ -155,7 +155,8 @@ BEGIN TRY
 			, CH.intCommodityId
 			, CH.intContractTypeId
 			, CH.ysnLoad
-			, CH.intCommodityUOMId
+			, CH.intCommodityUOMId			
+			, CH.ysnMultiplePriceFixation
 		FROM #tmpContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		OUTER APPLY (
@@ -536,11 +537,10 @@ BEGIN TRY
 			, a.intContractDetailId
 			, c.strApprovalStatus
 		FROM tblCTPriceFixation a
-		INNER JOIN tblCTContractHeader b ON a.intContractHeaderId = b.intContractHeaderId
 		LEFT JOIN tblSMTransaction c ON c.intRecordId = a.intPriceContractId AND c.strApprovalStatus IS NOT NULL
 		LEFT JOIN tblSMScreen d ON d.strNamespace = 'ContractManagement.view.PriceContracts' AND d.intScreenId = c.intScreenId AND d.ysnApproval = 1
-		WHERE b.intContractHeaderId = a.intContractHeaderId
-			AND CASE WHEN b.ysnMultiplePriceFixation = 1 AND a.intContractDetailId = CD.intContractDetailId THEN 1 ELSE 1 END = 1
+		WHERE a.intContractHeaderId = @intContractHeaderId
+			AND ISNULL(a.intContractDetailId, 0) = CASE WHEN CT.ysnMultiplePriceFixation = 1 THEN ISNULL(a.intContractDetailId, 0) ELSE ISNULL(CD.intContractDetailId, 0) END
 		ORDER BY c.intTransactionId DESC
 	) AP
 	ORDER BY CD.intContractSeq
