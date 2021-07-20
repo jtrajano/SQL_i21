@@ -18,7 +18,7 @@ SELECT TR.intLoadHeaderId
 FROM tblTRLoadDistributionHeader DH
 JOIN tblTRLoadDistributionDetail DD ON DH.intLoadDistributionHeaderId = DD.intLoadDistributionHeaderId
 LEFT JOIN tblTRLoadReceipt TR ON DH.intLoadHeaderId = TR.intLoadHeaderId
-	AND TR.strReceiptLine IN (SELECT Item FROM fnTRSplit(DD.strReceiptLink,','))
+	AND TR.strReceiptLine = DD.strReceiptLink --IN (CASE WHEN SELECT Item FROM fnTRSplit(DD.strReceiptLink,','))
 LEFT JOIN vyuTRTerminal Terminal ON Terminal.intEntityVendorId = TR.intTerminalId
 LEFT JOIN vyuTRSupplyPointView SP ON SP.intSupplyPointId = TR.intSupplyPointId
 LEFT JOIN tblICInventoryReceipt Receipt ON TR.intInventoryReceiptId = Receipt.intInventoryReceiptId
