@@ -9560,6 +9560,7 @@
     <None Include="Scripts\Post-Deployment\SM\2120_UpdateAddonComponents.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAxxisExportVendorLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAxxisExportVendor.sql" />
+    <Build Include="dbo\Views\vyuARCustomerLocationExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
