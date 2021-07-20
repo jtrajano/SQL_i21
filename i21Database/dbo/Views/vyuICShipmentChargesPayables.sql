@@ -64,7 +64,6 @@ SELECT
 	,[intTaxGroupId]							=	ShipmentCharge.intTaxGroupId
 	,intForexRateTypeId							=	ShipmentCharge.intForexRateTypeId
 	,dblForexRate								=	ShipmentCharge.dblForexRate
-	,ShipmentCharge.ysnAddPayable
 	,ScaleTicket.strLoadNumber
 	,ScaleTicket.intLoadId
 	,ScaleTicket.intLoadDetailId
