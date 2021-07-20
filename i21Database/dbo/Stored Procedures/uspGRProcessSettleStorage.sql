@@ -900,7 +900,7 @@
 -- 	DECLARE @voucherDetailStorage AS [VoucherDetailStorage] 	
 -- 	DECLARE @ItemsToStorage AS ItemCostingTableType
 -- 		   ,@ItemsToPost  AS ItemCostingTableType		   
--- 		   ,@strBatchId AS NVARCHAR(20)		   
+-- 		   ,@strBatchId AS NVARCHAR(40)		   
 -- 		   ,@intReceiptId AS INT
 -- 		   ,@intInventoryReceiptItemId AS INT
 -- 		   ,@intScaleTicketId AS INT

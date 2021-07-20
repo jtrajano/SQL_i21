@@ -14,7 +14,7 @@ DECLARE
 DECLARE		
 	-- Variables used by uspICPostStorage			
 	@ItemsToStorage AS ItemCostingTableType 
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	
 	--  Variables used by uspICAddItemReceipt
 	,@ReceiptStagingTable ReceiptStagingTable 
