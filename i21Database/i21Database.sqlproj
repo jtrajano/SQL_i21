@@ -9567,6 +9567,7 @@
     <Build Include="dbo\Stored Procedures\uspAPAxxisExportVendor.sql" />
     <Build Include="dbo\Views\vyuARCustomerLocationExport.sql" />
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
