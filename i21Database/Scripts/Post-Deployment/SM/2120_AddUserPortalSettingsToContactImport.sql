@@ -153,7 +153,7 @@ SET strCommand = N'
 		BEGIN
    			SET @ValidationMessage = @ValidationMessage + '',''
 		END
-		SET @ValidationMessage = @ValidationMessage + '',The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
+		SET @ValidationMessage = @ValidationMessage + ''The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
 	END
 
 	IF ISNUMERIC(@RankStr) = 1
