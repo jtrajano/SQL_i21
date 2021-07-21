@@ -203,58 +203,29 @@ BEGIN TRY
            uom.strLongUPCCode AS strLongUPCCode,
            um.strUnitMeasure AS strUnit,
            uom.dblUnitQty AS intQuantity,
-           CASE WHEN @RetailRounding ='true' 
-			THEN 
-				dbo.fnSTRetailRounding(ROUND(CAST(
-					   CASE
-						   WHEN (GETDATE() >
-								(
-									SELECT TOP 1
-										dtmEffectiveRetailPriceDate
-									FROM tblICEffectiveItemPrice EIP
-									WHERE EIP.intItemLocationId = il.intItemLocationId
-										  AND GETDATE() >= dtmEffectiveRetailPriceDate
-									ORDER BY dtmEffectiveRetailPriceDate ASC
-								)
-								) THEN
-						   (
-							   SELECT TOP 1
-								   dblRetailPrice
-							   FROM tblICEffectiveItemPrice EIP
-							   WHERE EIP.intItemLocationId = il.intItemLocationId
-									 AND GETDATE() >= dtmEffectiveRetailPriceDate
-							   ORDER BY dtmEffectiveRetailPriceDate ASC
-						   ) --Effective Retail Price
-						   ELSE
-							   ipr.dblSalePrice 
-							END 
-					AS FLOAT),2))
-				ELSE
-					ROUND(CAST(
-						   CASE
-							   WHEN (GETDATE() >
-									(
-										SELECT TOP 1
-											dtmEffectiveRetailPriceDate
-										FROM tblICEffectiveItemPrice EIP
-										WHERE EIP.intItemLocationId = il.intItemLocationId
-											  AND GETDATE() >= dtmEffectiveRetailPriceDate
-										ORDER BY dtmEffectiveRetailPriceDate ASC
-									)
-									) THEN
-							   (
-								   SELECT TOP 1
-									   dblRetailPrice
-								   FROM tblICEffectiveItemPrice EIP
-								   WHERE EIP.intItemLocationId = il.intItemLocationId
-										 AND GETDATE() >= dtmEffectiveRetailPriceDate
-								   ORDER BY dtmEffectiveRetailPriceDate ASC
-							   ) --Effective Retail Price
-							   ELSE
-								   ipr.dblSalePrice 
-								END 
-						AS FLOAT),2)
-				END
+				ROUND(CAST(CASE
+					WHEN (GETDATE() >
+						(
+							SELECT TOP 1
+								dtmEffectiveRetailPriceDate
+							FROM tblICEffectiveItemPrice EIP
+							WHERE EIP.intItemLocationId = il.intItemLocationId
+									AND GETDATE() >= dtmEffectiveRetailPriceDate
+							ORDER BY dtmEffectiveRetailPriceDate ASC
+						)
+						) THEN
+					(
+						SELECT TOP 1
+							dblRetailPrice
+						FROM tblICEffectiveItemPrice EIP
+						WHERE EIP.intItemLocationId = il.intItemLocationId
+								AND GETDATE() >= dtmEffectiveRetailPriceDate
+						ORDER BY dtmEffectiveRetailPriceDate ASC
+					) --Effective Retail Price
+					ELSE
+						ipr.dblSalePrice 
+					END 
+			AS FLOAT),2)
 			AS dblPrice,
            cat.strCategoryCode AS strCategory,
            catloc.dblTargetGrossProfit AS dblCategoryMargin, -- TO CONFIRM
