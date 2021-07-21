@@ -448,10 +448,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , dblBalance					= TRANSACTIONS.dblBalance
 	 , dblARBalance					= C.dblARBalance
 	 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
-	 , dtmCreated					= CASE WHEN TRANSACTIONS.intPaymentId = 0 AND TRANSACTIONS.strTransactionType = 'Applied Payment' AND TRANSACTIONS.strPaymentInfo = '' 
-										   THEN DATEADD(hh, 1, LOGDATETIME.dtmDateEntered) 
-										   ELSE LOGDATETIME.dtmDateEntered 
-									  END
+	 , dtmCreated					= LOGDATETIME.dtmDateEntered
 FROM #CUSTOMERS C
 LEFT JOIN (
 	SELECT intInvoiceId			= I.intInvoiceId
@@ -474,9 +471,14 @@ LEFT JOIN (
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
-		 , strBatchId			= I.strBatchId
+		 , strBatchId			= ISNULL(I.strBatchId, BATCHCPP.strBatchId)
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
+	OUTER APPLY (
+		SELECT TOP 1 strBatchId
+		FROM tblARPayment
+		WHERE intPaymentId = I.intPaymentId
+	) BATCHCPP
 
 	UNION ALL
 
@@ -528,7 +530,7 @@ LEFT JOIN (
 		 , strRecordNumber		= P.strRecordNumber + ' - ' + ISNULL(DETAILS.strInvoiceNumber , '')
 		 , strPaymentInfo		= 'PAYMENT REF: ' + ISNULL(P.strPaymentInfo, '')
 		 , strTransactionType	= 'Applied Payment'
-		 , dblAmountDue			= DETAILS.dblAmountDue
+		 , dblAmountDue			= 0.00
 		 , dblBalance			= 0.00
 		 , dblPayment			= SUM(DETAILS.dblPayment)
 		 , dtmDate				= P.dtmDatePaid
@@ -564,9 +566,9 @@ LEFT JOIN (
 	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes, DETAILS.dblAmountDue
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 OUTER APPLY (
-	-- Add 1 second when a prepayment was applied using invoice screen. This is to ensure that invoice are presented first before the prepayment.
-	SELECT TOP 1 dtmDateEntered = CASE WHEN TRANSACTIONS.intPaymentId = 0 AND TRANSACTIONS.strTransactionType = 'Applied Payment' AND TRANSACTIONS.strPaymentInfo = '' 
-									   THEN DATEADD(ss, 1, dtmDateEntered) 
+	-- Add 1 second to applied payment. This is to ensure that payments and invoices are presented first before the applied payment.
+	SELECT TOP 1 dtmDateEntered = CASE WHEN CAST(dtmDateEnteredMin AS DATE) <> CAST(dtmDate AS DATE) THEN CAST(dtmDate AS DATE)
+									   WHEN TRANSACTIONS.strTransactionType = 'Applied Payment' THEN DATEADD(ss, 1, dtmDateEntered) 
 									   ELSE dtmDateEntered 
 							      END 
 	FROM tblGLDetail
