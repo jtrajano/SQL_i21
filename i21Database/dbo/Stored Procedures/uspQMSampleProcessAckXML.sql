@@ -19,6 +19,7 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+		,@intScreenId int
 	DECLARE @tblQMSampleAcknowledgementStage TABLE (intSampleAcknowledgementStageId INT)
 
 	INSERT INTO @tblQMSampleAcknowledgementStage (intSampleAcknowledgementStageId)
@@ -35,6 +36,10 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
+
+	SELECT @intScreenId = intScreenId
+	FROM tblSMScreen WITH (NOLOCK)
+	WHERE strNamespace = 'Quality.view.QualitySample'
 
 	UPDATE t
 	SET t.strFeedStatus = 'In-Progress'
@@ -184,6 +189,8 @@ BEGIN TRY
 				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 					,@referenceTransactionId = @intTransactionRefId
 					,@referenceCompanyId = @intCompanyRefId
+					,@screenId=@intScreenId
+					,@populatedByInterCompany=1
 			END
 		END
 

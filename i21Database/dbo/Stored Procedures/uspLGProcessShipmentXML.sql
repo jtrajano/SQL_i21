@@ -4242,6 +4242,8 @@ BEGIN TRY
 			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
+				,@screenId=@intLoadScreenId
+				,@populatedByInterCompany=1
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLogXML
