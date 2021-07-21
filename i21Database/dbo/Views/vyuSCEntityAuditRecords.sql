@@ -62,7 +62,7 @@ AS
 -- --     SELECT intLogId FROM tblSCEntityGeneratedLog  
 -- -- )  
 SELECT DISTINCT
-    intRecordId = intEntityId
+    intRecordId = A.intEntityId
     ,intLogId  = 0
     ,dtmDate = GETUTCDATE()
 FROM tblEMEntity A
