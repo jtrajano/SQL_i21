@@ -165,7 +165,7 @@ SET strCommand = N'
 		SET @ValidationMessage = @ValidationMessage + '',Rank ['' + @RankStr + ''] should be a number''
 	END
 
-	IF @VaidationMessage != ''''
+	IF @ValidationMessage != ''''
 	BEGIN
 		RAISERROR(@ValidationMessage, 16, 1);
 	END
