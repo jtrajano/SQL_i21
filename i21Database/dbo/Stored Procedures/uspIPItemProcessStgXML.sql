@@ -8184,6 +8184,8 @@ BEGIN TRY
 				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 					,@referenceTransactionId = @intTransactionId
 					,@referenceCompanyId = @intCompanyId
+					,@screenId=@intItemScreenId
+					,@populatedByInterCompany=1
 			END
 
 			INSERT INTO tblICItemAcknowledgementStage (

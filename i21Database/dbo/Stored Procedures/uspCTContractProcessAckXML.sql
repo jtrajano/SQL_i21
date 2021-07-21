@@ -28,6 +28,7 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+		,@intScreenId INT
 	DECLARE @tblCTContractAcknowledgementStage TABLE (intContractAcknowledgementStageId INT)
 
 	INSERT INTO @tblCTContractAcknowledgementStage
@@ -43,6 +44,9 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
+	SELECT @intScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'ContractManagement.view.Contract'
 
 	UPDATE tblCTContractAcknowledgementStage
 	SET strFeedStatus = 'In-Progress'
@@ -217,6 +221,8 @@ BEGIN TRY
 		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 			,@referenceTransactionId = @intTransactionRefId
 			,@referenceCompanyId = @intCompanyRefId
+			,@screenId=@intScreenId
+			,@populatedByInterCompany=1
 
 		SELECT @intContractAcknowledgementStageId = MIN(intContractAcknowledgementStageId)
 		FROM @tblCTContractAcknowledgementStage
