@@ -324,20 +324,22 @@ FROM (
 					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 				INNER JOIN tblICItem i 
 					ON i.intItemId = u.intItemId
-				INNER JOIN tblICItemLocation il 
-					ON il.intItemId = i.intItemId
-				INNER JOIN @Locations loc 
-					ON loc.intCompanyLocationId = il.intLocationId
 				INNER JOIN vyuAPVendor v
 					ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
 					OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-				
+				LEFT JOIN tblICItemLocation il 
+					ON il.intItemId = i.intItemId
+				LEFT JOIN @Locations loc 
+					ON loc.intCompanyLocationId = il.intLocationId
 	) AS Source_Query  
-		ON ItemVendorXref.intItemId = Source_Query.intItemId
-		AND ItemVendorXref.intItemLocationId = Source_Query.intItemLocationId 
+		ON ItemVendorXref.intItemId = Source_Query.intItemId		
 		AND ItemVendorXref.intVendorId = Source_Query.intEntityId 				
+		AND (
+			ItemVendorXref.intItemLocationId = Source_Query.intItemLocationId 
+			OR (ItemVendorXref.intItemLocationId IS NULL AND Source_Query.intItemLocationId IS NULL )
+		)
 	   
-	-- If matched, update the In-Transit Inbound qty 
+	-- If matched, update the existing vendor xref 
 	WHEN MATCHED THEN 
 		UPDATE 
 		SET		
@@ -401,7 +403,7 @@ FROM (
 );
 
 SELECT @updatedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'UPDATE'
-SELECT @insertedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'INSERTED'
+SELECT @insertedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'INSERT'
 
 SELECT @ErrorCount = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error'
 SELECT @TotalRows = COUNT(*) FROM tblICEdiPricebook WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICImportLogDetail WHERE intImportLogId = @LogId)
@@ -409,19 +411,19 @@ SELECT @TotalRows = COUNT(*) FROM tblICEdiPricebook WHERE strUniqueId = (SELECT 
 SET @TotalRowsUpdated = @TotalRowsUpdated + @updatedItems + @updatedItemUOM + @updatedItemPricing + @updatedItemLocation + @updatedSpecialItemPricing + @updatedVendorXRef
 SET @TotalRowsInserted = @TotalRowsInserted + @insertedVendorXRef 
 
-IF @ErrorCount > 0
-BEGIN
-	UPDATE tblICImportLog 
-	SET 
-		strDescription = 'Import finished with ' + CAST(@ErrorCount AS NVARCHAR(50))+ ' error(s).',
-		intTotalErrors = @ErrorCount,
-		intTotalRows = @TotalRows,
-		intRowsUpdated = @TotalRowsUpdated, 
-		intRowsImported = @TotalRowsInserted
-	WHERE 
-		intImportLogId = @LogId
-END
-ELSE 
+--IF @ErrorCount > 0
+--BEGIN
+--	UPDATE tblICImportLog 
+--	SET 
+--		strDescription = 'Import finished with ' + CAST(@ErrorCount AS NVARCHAR(50))+ ' error(s).',
+--		intTotalErrors = @ErrorCount,
+--		intTotalRows = @TotalRows,
+--		intRowsUpdated = @TotalRowsUpdated, 
+--		intRowsImported = @TotalRowsInserted
+--	WHERE 
+--		intImportLogId = @LogId
+--END
+--ELSE 
 BEGIN 
 	UPDATE tblICImportLog 
 	SET 
@@ -432,6 +434,12 @@ BEGIN
 	WHERE 
 		intImportLogId = @LogId
 
+	UPDATE tblICImportLog 
+	SET 
+		strDescription = 'Import finished with ' + CAST(@ErrorCount AS NVARCHAR(50))+ ' error(s).'
+	WHERE 
+		intImportLogId = @LogId
+		AND @ErrorCount > 0
 
 	-- Log the updated items. 
 	IF @updatedItems <> 0 
