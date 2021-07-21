@@ -12,6 +12,16 @@ AS
 
 BEGIN
 
+
+	-- START TR-1611 - Sub ledger Transaction traceability
+	IF (ISNULL(@ForDelete, 0) = 1)
+	BEGIN
+		DECLARE @strTransaction NVARCHAR(100) = NULL
+		SELECT @strTransaction = strTransaction FROM tblTRLoadHeader WHERE intLoadHeaderId = @TransactionId
+		EXEC dbo.[uspICDeleteTransactionLinks] @TransactionId, @strTransaction, 'Transport', 'Transport'
+	END
+	-- END TR-1611
+
 	DECLARE @TransactionType_TransportLoad NVARCHAR(50) = 'Transport Load'
 
 	DECLARE @SourceType_InventoryReceipt NVARCHAR(50) = 'Inventory Receipt'
