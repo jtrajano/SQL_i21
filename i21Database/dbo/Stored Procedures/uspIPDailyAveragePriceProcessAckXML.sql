@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+		,@intScreenId int
 	DECLARE @tblRKDailyAveragePriceAckStage TABLE (intDailyAveragePriceAckStageId INT)
 
 	INSERT INTO @tblRKDailyAveragePriceAckStage (intDailyAveragePriceAckStageId)
@@ -33,6 +34,10 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
+
+	SELECT @intScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'RiskManagement.view.DailyAveragePrice'
 
 	UPDATE t
 	SET t.strFeedStatus = 'In-Progress'
@@ -150,6 +155,8 @@ BEGIN TRY
 				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 					,@referenceTransactionId = @intTransactionRefId
 					,@referenceCompanyId = @intCompanyRefId
+					,@screenId=@intScreenId
+					,@populatedByInterCompany=1
 			END
 		END
 
