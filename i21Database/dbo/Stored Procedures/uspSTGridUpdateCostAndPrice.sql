@@ -24,8 +24,8 @@ AS
 			DECLARE @tblGridCostAndPriceToUpdate TABLE (
 				[intItemId]		[int] NULL,
 				[intItemLocationId]	[int] NULL,
-				[dblNewCost]	[numeric](38, 20) NULL,
-				[dblNewPrice]	[numeric](38, 20) NULL,
+				[dblNewCost]	[numeric](38, 2) NULL,
+				[dblNewPrice]	[numeric](38, 2) NULL,
 				[dtmStartDate]	[datetime] NULL,
 				[dtmEndDate]	[datetime] NULL
 			)
@@ -56,8 +56,8 @@ AS
 	
 			DECLARE @intLoopItemId					AS INT
 					, @intLoopItemLocationId		AS INT
-					, @dblLoopNewCost				AS NUMERIC(38,20)
-					, @dblLoopNewPrice				AS NUMERIC(38,20)
+					, @dblLoopNewCost				AS NUMERIC(38,2)
+					, @dblLoopNewPrice				AS NUMERIC(38,2)
 					, @dtmLoopStartDate				AS DATETIME
 					, @dtmLoopEndDate				AS DATETIME
 
@@ -115,8 +115,8 @@ AS
 				[strUpcCode]			[varchar](250) NULL,
 				[intItemId]				[int] NULL,
 				[intCompanyLocationId]	[int] NULL,
-				[dblNewCost]			[numeric](38, 6) NULL,
-				[dblNewPrice]			[numeric](38, 6) NULL,
+				[dblNewCost]			[numeric](38, 2) NULL,
+				[dblNewPrice]			[numeric](38, 2) NULL,
 				[dtmStartDate]			[datetime] NULL,
 				[dtmEndDate]			[datetime] NULL
 			)
@@ -222,8 +222,8 @@ AS
 						ISNULL([strUpcCode], '')								= ISNULL(@strPromoLoopUpcCode, '')
 						AND [intItemId]									= @intPromoLoopItemId
 						AND [intCompanyLocationId]						= @intPromoLoopCompanyLocationId
-						AND CAST([dblNewCost] AS NUMERIC(18,6))			= CAST(@dblLoopNewCost AS NUMERIC(18,6))		
-						AND CAST([dblNewPrice] AS NUMERIC(18,6))		= CAST(@dblLoopNewPrice	 AS NUMERIC(18,6))	
+						AND CAST([dblNewCost] AS NUMERIC(18,6))			= CAST(@dblLoopNewCost AS NUMERIC(18,2))		
+						AND CAST([dblNewPrice] AS NUMERIC(18,6))		= CAST(@dblLoopNewPrice	 AS NUMERIC(18,2))	
 						AND [dtmStartDate]								= @dtmLoopStartDate		
 						AND [dtmEndDate]								= @dtmLoopEndDate	
 						
