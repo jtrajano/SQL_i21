@@ -9569,6 +9569,7 @@
     <Build Include="dbo\Views\vyuARCustomerLocationExport.sql" />
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAddTransactionLinks.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
