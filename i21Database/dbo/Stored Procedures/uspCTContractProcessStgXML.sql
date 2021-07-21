@@ -4530,6 +4530,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intContractScreenId
+						,@populatedByInterCompany=1
 				END
 
 				--------------------------------------------------------------------------------------------------------------------------
