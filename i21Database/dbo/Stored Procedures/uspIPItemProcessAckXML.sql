@@ -9,6 +9,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intItemAcknowledgementStageId int
+		,@intScreenId int
 
 	SELECT @intItemAcknowledgementStageId = MIN(intItemAcknowledgementStageId)
 	FROM tblICItemAcknowledgementStage
@@ -29,9 +30,15 @@ BEGIN TRY
 		FROM tblICItemAcknowledgementStage
 		WHERE intItemAcknowledgementStageId = @intItemAcknowledgementStageId
 
+		SELECT @intScreenId = intScreenId
+		FROM tblSMScreen
+		WHERE strNamespace = 'Inventory.view.Item'
+
 		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 			,@referenceTransactionId = @intTransactionRefId
 			,@referenceCompanyId = @intCompanyRefId
+			,@screenId=@intScreenId
+			,@populatedByInterCompany=1
 
 		Update tblICItemAcknowledgementStage
 		Set strFeedStatus='Ack Processed'

@@ -875,6 +875,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intWeightClaimScreenId
+						,@populatedByInterCompany=1
 				END TRY
 
 				BEGIN CATCH
