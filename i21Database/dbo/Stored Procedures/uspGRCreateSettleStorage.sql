@@ -340,12 +340,12 @@ BEGIN TRY
 			,strStorageAdjustment		= strStorageAdjustment
 			,dtmCalculateStorageThrough = dtmCalculateStorageThrough
 			,dblAdjustPerUnit		    = dblAdjustPerUnit
-			,dblStorageDue				= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblStorageDue
+			,dblStorageDue				= 0
 			,strStorageTicket			= strStorageTicket + '/' + LTRIM(@intSettleStorageKey)
 			,dblSelectedUnits			= @dblTotalUnitsForSettle
 			,dblUnpaidUnits				= CASE WHEN @strType = 'Basis' THEN @dblTotalUnitsForSettle ELSE 0 END
 			,dblSettleUnits				= CASE WHEN @strType <> 'Basis' THEN @dblTotalUnitsForSettle ELSE 0 END
-			,dblDiscountsDue			= 0
+			,dblDiscountsDue			= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblDiscountsDue
 			,dblNetSettlement			= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblNetSettlement
 			,ysnPosted					= 0
 			,intCommodityId				= intCommodityId
