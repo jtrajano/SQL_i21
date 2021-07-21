@@ -165,6 +165,11 @@ SET strCommand = N'
 		SET @ValidationMessage = @ValidationMessage + '',Rank ['' + @RankStr + ''] should be a number''
 	END
 
+	IF @VaidationMessage != ''''
+	BEGIN
+		RAISERROR(@ValidationMessage, 16, 1);
+	END
+
 	SELECT @EntityId = intEntityId
 		FROM tblEMEntity
 			where strEntityNo LIKE ''%'' + ''@entityCustomerId@''
