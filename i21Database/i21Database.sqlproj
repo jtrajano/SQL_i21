@@ -8909,6 +8909,10 @@
     <Build Include="dbo\Stored Procedures\uspICRebuildStocksWithCategoryChange.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
     <Build Include="dbo\Tables\tblICBackupDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
+    <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9183,6 +9187,7 @@
     <Build Include="dbo\Views\vyuSCInventoryShipmentDetail.sql" />
     <None Include="Scripts\Post-Deployment\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql" />
     <Build Include="dbo\User Defined Types\ScaleDWGAllocation.sql" />
+    <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
