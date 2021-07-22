@@ -5774,7 +5774,6 @@ DECLARE @TransportsParentMenuId INT
 SELECT @TransportsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Transports' AND strModuleName = 'Transports' AND intParentMenuID = 0
 
 
-
 /* CATEGORY FOLDERS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
@@ -5810,9 +5809,6 @@ ELSE
 	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0, intRow = 1 WHERE strMenuName = 'Create' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsParentMenuId
 
 
-
-
-
 DECLARE @TransportsCreateParentMenuId INT
 SELECT @TransportsCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsParentMenuId
 
@@ -5824,6 +5820,10 @@ UPDATE tblSMMasterMenu SET intParentMenuID = @TransportsMaintenanceParentMenuId 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transport Load' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = N'Transport Loads', strDescription = N'Transport Loads' WHERE strMenuName = 'Transport Load' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId
 /* END OF PLURALIZING  */
+
+/* START OF RENAMING */
+UPDATE tblSMMasterMenu SET strMenuName = 'Import Vendor Invoice', strDescription = 'Import Vendor Invoice' WHERE strMenuName = 'Import Vendor Invoice - DTN' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
+/* END OF RENAMING*/
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transport Loads' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -5899,11 +5899,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Bi
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportLoad', intSort = 0 WHERE strMenuName = 'Import Bill Of Lading' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Vendor Invoice - DTN' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Vendor Invoice' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Import Vendor Invoice - DTN', N'Transports', @TransportsImportParentMenuId, N'Import Vendor Invoice - DTN', N'Import', N'Screen', N'Transports.view.ImportDtnOutboundInvoice', N'small-menu-import', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Import Vendor Invoice', N'Transports', @TransportsImportParentMenuId, N'Import Vendor Invoice', N'Import', N'Screen', N'Transports.view.ImportDtnOutboundInvoice', N'small-menu-import', 0, 0, 0, 1, 2, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportDtnOutboundInvoice', intSort = 0 WHERE strMenuName = 'Import Vendor Invoice - DTN' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Transports.view.ImportDtnOutboundInvoice', intSort = 0 WHERE strMenuName = 'Import Vendor Invoice' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Transport Load - Pending' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsImportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
