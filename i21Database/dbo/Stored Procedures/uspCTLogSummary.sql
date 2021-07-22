@@ -950,7 +950,6 @@ BEGIN TRY
 				, intActionId = 16
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId
@@ -1038,7 +1037,6 @@ BEGIN TRY
 				, intActionId = 17
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Invoice' AND pLog.strProcess = 'Create Invoice' AND pLog.intTransactionReferenceDetailId = @intTransactionId
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
@@ -1124,7 +1122,6 @@ BEGIN TRY
 				, intActionId = 64
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId
@@ -1212,7 +1209,6 @@ BEGIN TRY
 				, intActionId = 65
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Credit Memo' AND pLog.strProcess = 'Create Credit Memo' AND pLog.intTransactionReferenceDetailId = @intTransactionId
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
@@ -1298,7 +1294,6 @@ BEGIN TRY
 				, intActionId = 15
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
 			INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
 			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
@@ -1387,7 +1382,6 @@ BEGIN TRY
 				, intActionId = 62
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Voucher' AND pLog.strProcess = 'Create Voucher' AND pLog.intTransactionReferenceDetailId = @intTransactionId
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
