@@ -9570,6 +9570,7 @@
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAddTransactionLinks.sql" />
+	<Build Include="dbo\Stored Procedures\uspCCTransactionLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
