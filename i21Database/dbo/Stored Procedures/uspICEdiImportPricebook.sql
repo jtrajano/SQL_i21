@@ -536,36 +536,42 @@ FROM (
 						,price.dblAverageCost
 					)
 				)
+			,catV.ysnUpdatePrice
 		FROM tblICEdiPricebook p
 			INNER JOIN tblICItemUOM u 
 				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 			INNER JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
-			INNER JOIN vyuAPVendor v
+			LEFT JOIN vyuAPVendor v
 				ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
 				OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-			INNER JOIN tblICCategory cat 
+			OUTER APPLY (
+				SELECT 
+					loc.intCompanyLocationId 
+					,l.*
+				FROM 						
+					@Locations loc INNER JOIN tblICItemLocation l 
+						ON l.intItemId = i.intItemId
+						AND loc.intCompanyLocationId = l.intLocationId
+			) il
+			LEFT JOIN tblICCategory cat 
 				ON cat.intCategoryId = i.intCategoryId
-			INNER JOIN tblICItemLocation il 
-				ON il.intItemId = i.intItemId
-			INNER JOIN @Locations loc 
-				ON loc.intCompanyLocationId = il.intLocationId
-			INNER JOIN tblICCategoryLocation catLoc 
+			LEFT JOIN tblICCategoryLocation catLoc 
 				ON catLoc.intCategoryId = cat.intCategoryId
 				AND catLoc.intLocationId = il.intLocationId
-			INNER JOIN tblICCategoryVendor catV 
+			LEFT JOIN tblICCategoryVendor catV 
 				ON catV.intCategoryLocationId = catLoc.intCategoryLocationId
 				AND catV.intVendorId = v.intEntityId
 			LEFT JOIN tblICItemPricing price 
 				ON price.intItemId = i.intItemId
-				AND il.intItemLocationId = price.intItemLocationId
-		WHERE 
-			catV.ysnUpdatePrice = 1			
+				AND price.intItemLocationId = il.intItemLocationId
 	) AS Source_Query  
 		ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
 	   
 	-- If matched, update the existing item pricing
-	WHEN MATCHED THEN 
+	WHEN MATCHED 
+		AND Source_Query.ysnUpdatePrice = 1	
+	THEN 
 		UPDATE 
 		SET   
 			ItemPricing.dblSalePrice = Source_Query.dblSalePrice
@@ -577,7 +583,10 @@ FROM (
 			,ItemPricing.intModifiedByUserId = @intUserId
 
 	-- If none is found, insert a new item pricing
-	WHEN NOT MATCHED AND Source_Query.intItemId IS NOT NULL AND Source_Query.intItemLocationId IS NOT NULL THEN 
+	WHEN NOT MATCHED 
+		AND Source_Query.intItemId IS NOT NULL 
+		AND Source_Query.intItemLocationId IS NOT NULL 
+	THEN 
 		INSERT (		
 			intItemId
 			,intItemLocationId
@@ -625,7 +634,7 @@ FROM (
 			,2--,intDataSourceId
 			,DEFAULT--,intImportFlagInternal
 			,DEFAULT--,ysnAvgLocked
-		)		
+		)
 
 		OUTPUT 
 			$action
@@ -670,18 +679,28 @@ FROM (
 			,dblUnitAfterDiscount = CAST(CASE WHEN ISNUMERIC(p.strSalePrice) = 1 THEN p.strSalePrice ELSE price.dblUnitAfterDiscount END AS NUMERIC(38, 20))
 			,dtmBeginDate = CAST(CASE WHEN ISDATE(p.strSaleStartDate) = 1 THEN p.strSaleStartDate ELSE price.dtmBeginDate END AS DATETIME)
 			,dtmEndDate = CAST(CASE WHEN ISDATE(p.strSaleEndingDate) = 1 THEN p.strSaleEndingDate ELSE price.dtmEndDate END AS DATETIME)
+			,catV.ysnUpdatePrice 
 		FROM tblICEdiPricebook p
 			INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 			INNER JOIN tblICItem i ON i.intItemId = u.intItemId
-			INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
-			INNER JOIN @Locations loc ON loc.intCompanyLocationId = il.intLocationId
-			INNER JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
-			INNER JOIN tblICCategoryLocation catLoc ON catLoc.intCategoryId = cat.intCategoryId
+			LEFT JOIN tblICCategory cat 
+				ON cat.intCategoryId = i.intCategoryId
+			OUTER APPLY (
+				SELECT 
+					loc.intCompanyLocationId 
+					,l.*
+				FROM 						
+					@Locations loc INNER JOIN tblICItemLocation l 
+						ON l.intItemId = i.intItemId
+						AND loc.intCompanyLocationId = l.intLocationId
+			) il
+			LEFT JOIN tblICCategoryLocation catLoc 
+				ON catLoc.intCategoryId = cat.intCategoryId
 				AND catLoc.intLocationId = il.intLocationId
-			INNER JOIN vyuAPVendor v
+			LEFT JOIN vyuAPVendor v
 				ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
 				OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-			INNER JOIN tblICCategoryVendor catV 
+			LEFT JOIN tblICCategoryVendor catV 
 				ON catV.intCategoryLocationId = catLoc.intCategoryLocationId
 				AND catV.intVendorId = v.intEntityId
 			LEFT JOIN tblICItemSpecialPricing price 
@@ -690,8 +709,6 @@ FROM (
 			OUTER APPLY (
 				SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference
 			) companyPref
-		WHERE 
-			catV.ysnUpdatePrice = 1		
 	) AS Source_Query  
 		ON ItemSpecialPricing.intItemSpecialPricingId = Source_Query.intItemSpecialPricingId 
 		AND ItemSpecialPricing.dtmBeginDate = Source_Query.dtmBeginDate 
@@ -699,13 +716,20 @@ FROM (
 		AND ItemSpecialPricing.strPromotionType = 'Discount'
 	   
 	-- If matched, update the existing special pricing
-	WHEN MATCHED THEN 
+	WHEN MATCHED 
+		AND Source_Query.ysnUpdatePrice = 1
+	THEN 
 		UPDATE 
 		SET   
 			dblUnitAfterDiscount = Source_Query.dblUnitAfterDiscount
 
 	-- If none is found, insert a new special pricing
-	WHEN NOT MATCHED AND Source_Query.intItemId IS NOT NULL AND Source_Query.intItemLocationId IS NOT NULL THEN 
+	WHEN NOT MATCHED 
+		AND Source_Query.intItemId IS NOT NULL 
+		AND Source_Query.intItemLocationId IS NOT NULL 
+		AND Source_Query.dtmBeginDate IS NOT NULL
+		AND Source_Query.dtmEndDate IS NOT NULL 
+	THEN 
 		INSERT (		
 			intItemId
 			,intItemLocationId
