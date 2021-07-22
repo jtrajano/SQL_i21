@@ -9029,6 +9029,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMat.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
