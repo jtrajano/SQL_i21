@@ -150,7 +150,7 @@ Invoices AS(
 SELECT
 Invoice.*
 ,InvoiceType.strTransactionType
-,Term.strTermCode
+,Term.strTerm
 ,Curr.strCurrency
 ,strDateFormat = CASE WHEN Curr.strCurrency = 'CAD' THEN NULL ELSE CompanyPref.strReportDateFormat END
 FROM Invoices Invoice
