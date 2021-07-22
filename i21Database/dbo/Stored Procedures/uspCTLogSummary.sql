@@ -33,7 +33,8 @@ BEGIN TRY
 			@ysnMultiPrice			BIT = 0,
 			@ysnDWGPriceOnly		BIT = 0,
 			@ysnReassign			BIT = 0,
-			@intCurrStatusId		INT = 0;
+			@intCurrStatusId		INT = 0,
+   			@ysnWithPriceFix BIT;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -99,6 +100,7 @@ BEGIN TRY
 		, dblBasis NUMERIC(18, 6)
 		, intBookId INT
 		, intSubBookId INT
+  		, ysnWithPriceFix bit
 	)
 
 	-- Get Contract Details
@@ -133,6 +135,7 @@ BEGIN TRY
 		, cd.dblBasis
 		, cd.intBookId
 		, cd.intSubBookId
+  		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then 0 else 1 end
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
@@ -391,7 +394,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @intCurrStatusId = intContractStatusId FROM @tmpContractDetail
+	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @ysnWithPriceFix = ysnWithPriceFix, @intCurrStatusId = intContractStatusId FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
 				FROM tblCTContractHeader ch
@@ -3649,24 +3652,17 @@ BEGIN TRY
 		BEGIN
 			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo', 'Create Voucher', 'Delete Voucher')
 			BEGIN
-				IF (@TotalPriced >= ABS(@dblQty) AND @strTransactionType LIKE '%Basis Deliveries')
-				BEGIN
-					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
-					CONTINUE
-				END
-				ELSE
-				BEGIN
-					UPDATE @cbLogSpecific SET intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+				UPDATE @cbLogSpecific SET intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
 										WHEN @strProcess = 'Create Credit Memo' THEN 64
 										WHEN @strProcess = 'Delete Invoice' THEN 63
 										WHEN @strProcess = 'Delete Credit Memo' THEN 65
 										WHEN @strProcess = 'Create Voucher' THEN 15
 										WHEN @strProcess = 'Delete Voucher' THEN 62
 										ELSE intActionId END
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
-					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
-					CONTINUE
-				END
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+
+				SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
+				CONTINUE
 			END
 
 			IF @ysnInvoice = 1
@@ -3967,22 +3963,32 @@ BEGIN TRY
 						END
 
 						-- Increase SBD upon creation of IS
-						IF (@strTransactionReference IN ('Inventory Shipment', 'Inventory Receipt'))
+						IF (@strTransactionReference = 'Inventory Shipment')
 						BEGIN
-							IF (@currPricingTypeId <> 1)
-							BEGIN
-								IF (@TotalPriced < @dblActual)
-								BEGIN
-									UPDATE @cbLogSpecific
-									SET dblQty = @_dblActual
-										, intPricingTypeId = 1
-										, strTransactionType = CASE WHEN @strTransactionReference = 'Inventory Shipment' THEN 'Sales Basis Deliveries'
-																	WHEN @strTransactionReference = 'Inventory Receipt' THEN 'Purchase Basis Deliveries' END
-
+							if (@currPricingTypeId = 1)
+							begin
+								if (isnull(@ysnWithPriceFix,0) = 1 )
+								begin
+									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
 									EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-								END
-							END
+								end
+							end
+							else
+							begin
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+							end
 						END
+						ELSE IF (@strTransactionReference = 'Inventory Receipt')  
+						BEGIN  
+							if (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix,0) = 1)  
+							begin  
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0   
+							end  
+
+						END 
+
 					END				
 					ELSE IF ISNULL(@dblBasis, 0) > 0
 					BEGIN
