@@ -825,7 +825,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						--LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId				
 						left join tblGRDiscountCrossReference GRD_CROSS_REF on ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId) = GRD_CROSS_REF.intDiscountId
-						left join tblGRDiscountCrossReference ICC_GRD_CROSS_REF on ICC.intScheduleDiscountId = GRD_CROSS_REF.intDiscountId
+						left join tblGRDiscountCrossReference ICC_GRD_CROSS_REF on ICC.intScheduleDiscountId = ICC_GRD_CROSS_REF.intDiscountId
 						OUTER APPLY (
 							SELECT TOP 1 intLoadId, intLoadDetailId,
 								intContractDetailId = case 
