@@ -9,10 +9,7 @@
 	[intNumberOfUser]		INT NOT NULL,
 	[strCompanyId]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDescription]		NVARCHAR(150) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strType]				NVARCHAR(300) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
-	[strURL]				NVARCHAR(300) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '',
 	[strUniqueId]			NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
-	[ysnExternalAccess]		BIT NOT NULL DEFAULT 0,
     [intConcurrencyId]		INT CONSTRAINT [DF_tblSMLicense_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
     CONSTRAINT [PK_tblSMLicense] PRIMARY KEY CLUSTERED ([intLicenseId] ASC),
