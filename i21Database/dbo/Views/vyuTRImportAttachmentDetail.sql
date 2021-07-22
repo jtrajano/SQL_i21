@@ -19,9 +19,9 @@ SELECT
 		WHEN CHARINDEX(',',IAD.strInvoiceId) > 0 THEN (SELECT B.strName from tblARInvoice A INNER JOIN tblEMEntity B ON A.intEntityCustomerId = B. intEntityId WHERE A.intInvoiceId = CAST(SUBSTRING(IAD.strInvoiceId, 1, CHARINDEX(',',IAD.strInvoiceId)-1) AS INT))
 		ELSE IAD.strInvoiceId
 	  END) COLLATE Latin1_General_CI_AS AS strCustomerName
-	,STUFF((SELECT ', ' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId IN (SELECT * FROM [dbo].[fnTRSplit] (IAD.strInvoiceId,','))
+	,CASE WHEN IAD.strInvoiceId IS NULL THEN IAD.strMessage ELSE STUFF((SELECT ', ' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId IN (SELECT * FROM [dbo].[fnTRSplit] (IAD.strInvoiceId,','))
 		FOR XML PATH('')),1,1,''
-	)  AS strInvoiceNumber
+	) END  AS strInvoiceNumber
 	, LH.strTransaction AS strTransportLoadNumber
 FROM
 		dbo.tblTRImportAttachmentDetail AS IAD 

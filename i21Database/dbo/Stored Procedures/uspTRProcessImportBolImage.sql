@@ -111,7 +111,11 @@ BEGIN
 
 				IF(@intLoadHeaderId IS NOT NULL)
 				BEGIN
-					
+					--CHECK IF HAS SAME FILE NAME ATTACH ON TR - IF EXISTS DONT ATTACH
+					-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMAttachment WHERE strRecordNo = @intLoadHeaderId
+					-- 	AND strScreen = 'Transports.view.TransportLoads'
+					-- 	AND strName = @strFileName + @strFileExtension)
+					-- BEGIN
 					SELECT @intTransactionId = intTransactionId FROM tblSMTransaction a
 					INNER JOIN tblSMScreen b ON a.intScreenId = b.intScreenId
 					WHERE intRecordId = @intLoadHeaderId
@@ -127,6 +131,7 @@ BEGIN
 						,@throwError = 1
 						,@attachmentId = @intAttachmentId OUTPUT
 						,@error = @attachmentErrorMessage OUTPUT
+					-- END
 
 					--SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, @strTransactionNumber)	
 
@@ -159,25 +164,31 @@ BEGIN
 						FETCH NEXT FROM @CursorInvoiceTran INTO @intInvoiceId, @strInvoiceNumber
 						WHILE @@FETCH_STATUS = 0
 						BEGIN
+							--CHECK IF HAS SAME FILE NAME ATTACH ON SI - IF EXISTS DONT ATTACH
+							IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMAttachment WHERE strRecordNo = @intInvoiceId
+								AND strScreen = 'AccountsReceivable.view.Invoice'
+								AND strName = @strFileName + @strFileExtension)
+							BEGIN
+								
+								SELECT @intInvoiceTransactionId = intTransactionId FROM tblSMTransaction a
+								INNER JOIN tblSMScreen b ON a.intScreenId = b.intScreenId
+								WHERE intRecordId = @intInvoiceId
+									AND b.strNamespace = 'AccountsReceivable.view.Invoice'
 
-							SELECT @intInvoiceTransactionId = intTransactionId FROM tblSMTransaction a
-							INNER JOIN tblSMScreen b ON a.intScreenId = b.intScreenId
-							WHERE intRecordId = @intInvoiceId
-								AND b.strNamespace = 'AccountsReceivable.view.Invoice'
-
-							EXEC [uspSMCreateAttachmentFromFile]   
-								@transactionId = @intInvoiceTransactionId										-- the intTransactionId
-								,@fileName = @strFileName														-- file name
-								,@fileExtension = @strFileExtension                                             -- extension
-								,@filePath = @strFilePath														-- path
-								,@screenNamespace = 'AccountsReceivable.view.Invoice'                           -- screen type or namespace
-								,@useDocumentWatcher = 0                                                        -- flag if the file was uploaded using document wacther
-								,@throwError = 1
-								,@attachmentId = @intAttachmentId OUTPUT
-								,@error = @attachmentErrorMessage OUTPUT
+								EXEC [uspSMCreateAttachmentFromFile]   
+									@transactionId = @intInvoiceTransactionId										-- the intTransactionId
+									,@fileName = @strFileName														-- file name
+									,@fileExtension = @strFileExtension                                             -- extension
+									,@filePath = @strFilePath														-- path
+									,@screenNamespace = 'AccountsReceivable.view.Invoice'                           -- screen type or namespace
+									,@useDocumentWatcher = 0                                                        -- flag if the file was uploaded using document wacther
+									,@throwError = 1
+									,@attachmentId = @intInvoiceAttachmentId OUTPUT
+									,@error = @attachmentErrorMessage OUTPUT
+								
+								--SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,@strInvoiceNumber)		
+							END
 							
-							--SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,@strInvoiceNumber)
-
 							SELECT @strInvoiceId = dbo.fnTRMessageConcat(@strInvoiceId,@intInvoiceId)
 
 							FETCH NEXT FROM @CursorInvoiceTran INTO @intInvoiceId, @strInvoiceNumber
@@ -186,12 +197,20 @@ BEGIN
 						CLOSE @CursorInvoiceTran  
 						DEALLOCATE @CursorInvoiceTran
 					END
+					ELSE IF(@intInvoiceCount > 1)
+					BEGIN 
+						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,'Multiple Distributions/Invoices')
+					END
+					ELSE
+					BEGIN
+						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,'SI not yet created or not distributed to a Customer')
+					END
 
-					UPDATE tblTRImportAttachmentDetail SET intAttachmentId = @intAttachmentId, intLoadHeaderId = @intLoadHeaderId, strInvoiceId = @strInvoiceId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+					UPDATE tblTRImportAttachmentDetail SET intLoadHeaderId = @intLoadHeaderId, strInvoiceId = @strInvoiceId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
 				END
 				ELSE
 				BEGIN
-					UPDATE tblTRImportAttachmentDetail SET strMessage = 'Does not matched to any existing Transport Load', ysnValid = 0 WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
+					UPDATE tblTRImportAttachmentDetail SET strMessage = 'Not matched to any existing Transport Load', ysnValid = 0 WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
 				END
 
 			END
