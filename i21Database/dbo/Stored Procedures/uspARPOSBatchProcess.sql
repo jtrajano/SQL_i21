@@ -130,7 +130,10 @@ BEGIN
 	DROP TABLE #POSPAYMENTS
 END
 
-
+IF(OBJECT_ID('tempdb..#INVOICESTODELETE') IS NOT NULL)
+BEGIN
+	DROP TABLE #INVOICESTODELETE
+END
 
 CREATE TABLE #POSTRANSACTIONS (
 	  intPOSId			INT
@@ -544,15 +547,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 											   , @ErrorMessage			= @strErrorMsg OUT
 											   , @LogId					= @intInvoiceLogId OUT
 
-
-
 			--UPDATE POS BATCH LOG
-			IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0 AND strPostingMessage IS NOT NULL)
+			IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0 AND strPostingMessage IS NOT NULL) AND ISNULL(@intPOSId, 0) <> 0
 			BEGIN				
 				SET @intProcessLogId = @intInvoiceLogId
 				GOTO Exit_With_Rollback_ProcessInvoices
 			END
-
 
 			INSERT INTO tblARPOSBatchProcessLog (
 				   intPOSId
@@ -561,13 +561,41 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDateProcessed
 			) 
 			SELECT intPOSId				= POS.intPOSId
-				 , strMessage			= 'Successfully Processed.'
+				 , strMessage			= CASE WHEN I.ysnSuccess = 1 THEN 'Successfully Processed.' 
+											   ELSE 
+													CASE WHEN I.strMessage = 'Invoice was successfully created.' 
+													     THEN I.strPostingMessage
+														 ELSE I.strMessage
+													END
+										  END
 				 , ysnSuccess			= ISNULL(ysnSuccess, 0)
 				 , dtmDateProcessed		= GETDATE()
 			FROM tblARPOS POS
 			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
-			WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 1
+			WHERE intIntegrationLogId = @intInvoiceLogId 
 			  AND ISNULL(ysnHeader, 0) = 1
+
+			--DELETE INVOICES THAT FAILED IN POSTING
+			SELECT I.intInvoiceId
+			INTO #INVOICESTODELETE
+			FROM tblARInvoice I 
+			INNER JOIN tblARInvoiceIntegrationLogDetail ILOG ON I.intInvoiceId = ILOG.intInvoiceId			
+			WHERE I.ysnPosted = 0
+			  AND ILOG.intIntegrationLogId = @intInvoiceLogId 
+			  AND ISNULL(ysnHeader, 0) = 1
+			  AND ISNULL(ILOG.ysnSuccess, 0) = 0
+
+			WHILE EXISTS(SELECT TOP 1 NULL FROM #INVOICESTODELETE)
+			BEGIN
+				DECLARE @intInvoiceToDeleteId	INT = NULL
+
+				SELECT TOP 1 @intInvoiceToDeleteId = intInvoiceId 
+				FROM #INVOICESTODELETE
+
+				EXEC dbo.uspARDeleteInvoice @InvoiceId = @intInvoiceToDeleteId, @UserId = @intEntityUserId
+
+				DELETE FROM #INVOICESTODELETE WHERE intInvoiceId = @intInvoiceToDeleteId
+			END
 
 			--UPDATE INVOICE REFERENCE TO POS
 			UPDATE POS
@@ -820,50 +848,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			  AND INV.ysnPosted = 1
 			  AND INV.ysnPaid = 0
 			  AND RT.strPOSType = 'Mixed'
-
-			-- UNION ALL
-
-			-- SELECT intId							= POS.intPOSId + 10000
-			-- 	 , strSourceTransaction				= 'Direct'
-			-- 	 , intSourceId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intInvoiceId ELSE CM.intInvoiceId END
-			-- 	 , strSourceId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strInvoiceNumber ELSE CM.strInvoiceNumber END
-			-- 	 , intEntityCustomerId				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intEntityCustomerId ELSE CM.intEntityCustomerId END
-			-- 	 , intCompanyLocationId				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intCompanyLocationId ELSE CM.intCompanyLocationId END
-			-- 	 , intCurrencyId					= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intCurrencyId ELSE CM.intCurrencyId END
-			-- 	 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
-			-- 	 , intPaymentMethodId				= @intCashPaymentMethodId
-			-- 	 , strPaymentMethod					= 'Cash'
-			-- 	 , strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
-			-- 	 , strNotes							= POS.strReceiptNumber
-			-- 	 , intBankAccountId					= BA.intBankAccountId
-			-- 	 , dblAmountPaid					= INV.dblAmountDue - CM.dblAmountDue
-			-- 	 , intEntityId						= @intEntityUserId
-			-- 	 , intInvoiceId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intInvoiceId ELSE CM.intInvoiceId END
-			-- 	 , strTransactionType				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strTransactionType ELSE CM.strTransactionType END
-			-- 	 , strTransactionNumber				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strInvoiceNumber ELSE CM.strInvoiceNumber END
-			-- 	 , intTermId						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intTermId ELSE CM.intTermId END
-			-- 	 , intInvoiceAccountId				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.intAccountId ELSE CM.intAccountId END
-			-- 	 , dblInvoiceTotal					= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblInvoiceTotal ELSE CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType) END
-			-- 	 , dblBaseInvoiceTotal				= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblBaseInvoiceTotal ELSE CM.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) END
-			-- 	 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblAmountDue - CM.dblAmountDue ELSE CM.dblAmountDue - INV.dblAmountDue END
-			-- 	 , dblAmountDue						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblInvoiceTotal ELSE CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType) END
-			-- 	 , dblBaseAmountDue					= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblInvoiceTotal ELSE CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType) END
-			-- 	 , strInvoiceReportNumber			= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.strInvoiceNumber ELSE CM.strInvoiceNumber END
-			-- 	 , dblCurrencyExchangeRate			= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN INV.dblCurrencyExchangeRate ELSE CM.dblCurrencyExchangeRate END
-			-- 	 , ysnPost							= CAST(1 AS BIT)
-			-- FROM tblARPOS POS 
-			-- INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
-			-- INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
-			-- INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
-			-- INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
-			-- LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
-			-- WHERE POS.intCreditMemoId IS NOT NULL
-			--   AND POS.intInvoiceId IS NOT NULL			  
-			--   AND INV.ysnPosted = 1
-			--   AND INV.ysnPaid = 0
-			--   AND CM.dblAmountDue <> INV.dblAmountDue 
-			--   AND RT.strPOSType = 'Mixed'
-			
 
 			--GET PAYMENTS for SETTLE AMOUNT DUE FOR INVOICE > CREDIT MEMO
 			INSERT INTO @EntriesForPayment (
