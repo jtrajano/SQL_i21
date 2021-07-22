@@ -3,7 +3,8 @@
 	@srcRecordId	INT,
 	@destNamespace	NVARCHAR(150),
 	@destRecordId	INT,
-	@ErrorMessage	NVARCHAR(MAX) OUTPUT
+	@ErrorMessage	NVARCHAR(MAX) OUTPUT,
+	@srcIntAttachmentId INT = NULL
 AS
 BEGIN TRY
 
@@ -109,6 +110,7 @@ BEGIN TRY
 	ON			b.intScreenId = c.intScreenId
 	WHERE		c.strNamespace = @srcNamespace
 			AND	b.intRecordId = @srcRecordId
+			AND (@srcIntAttachmentId IS NULL OR a.intAttachmentId = @srcIntAttachmentId)
 	-- END - COPY ATTACHMENTS		
 
 	COMMIT TRANSACTION
