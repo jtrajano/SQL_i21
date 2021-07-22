@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSMImportLocalization]  
+﻿CREATE PROCEDURE [dbo].[uspSMImportLanguageTranslation]  
 	@intLanguageId INT
 AS  
   
@@ -10,8 +10,8 @@ SET ANSI_WARNINGS OFF
   
 BEGIN TRANSACTION  
 
-	MERGE INTO tblSMLocalization A
-	USING tblSMLocalizationStaging B ON (A.strLabel = B.strLabel AND A.intLanguageId = @intLanguageId)
+	MERGE INTO [tblSMLanguageTranslation] A
+	USING [tblSMLanguageTranslationStaging] B ON (A.strLabel = B.strLabel AND A.intLanguageId = @intLanguageId)
 	--When records are matched, update the records if there is any change
 	WHEN MATCHED AND A.strTranslation <> B.strTranslation
 	THEN UPDATE SET A.strTranslation = B.strTranslation, A.intConcurrencyId = A.intConcurrencyId + 1
@@ -20,19 +20,19 @@ BEGIN TRANSACTION
 	THEN INSERT (strLabel, strTranslation, intLanguageId) 
 	VALUES (B.strLabel, B.strTranslation, @intLanguageId);
 
-	IF NOT EXISTS (SELECT 1 FROM tblSMLocalizationHistory WHERE intLanguageId = @intLanguageId)
+	IF NOT EXISTS (SELECT 1 FROM [tblSMLanguageTranslationHistory] WHERE intLanguageId = @intLanguageId)
 		BEGIN
-			INSERT INTO tblSMLocalizationHistory (intLanguageId, strUnique, dtmUpdated, intConcurrencyId)
+			INSERT INTO [tblSMLanguageTranslationHistory] (intLanguageId, strUnique, dtmUpdated, intConcurrencyId)
 			SELECT @intLanguageId, NEWID(), GETUTCDATE(), 1
 		END
 	ELSE 
 		BEGIN
-			UPDATE tblSMLocalizationHistory
+			UPDATE [tblSMLanguageTranslationHistory]
 			SET strUnique = NEWID(), dtmUpdated = GETUTCDATE()
 			WHERE intLanguageId = @intLanguageId
 		END
 
 	-- Delete screen(s) staging that doesn't have conflicts
-	DELETE FROM tblSMLocalizationStaging
+	DELETE FROM [tblSMLanguageTranslationStaging]
 
 COMMIT TRANSACTION
