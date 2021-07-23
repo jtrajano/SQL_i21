@@ -247,6 +247,7 @@ BEGIN TRY
 				,@intLocationId = @intLocationId
 				,@dtmDate = NULL
 				,@intShiftId = NULL
+				,@ysnUpdateOnlyParentLot=1
 
 			EXEC uspMFAdjustInventory @dtmDate = @dtmDate
 				,@intTransactionTypeId = 107

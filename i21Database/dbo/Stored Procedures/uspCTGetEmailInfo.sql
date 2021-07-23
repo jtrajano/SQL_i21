@@ -125,7 +125,17 @@ BEGIN
 		FROM	vyuCTEntityToContact CH
 		WHERE	intEntityId = @intEntityId
 	END
+	IF EXISTS ( 
+	SELECT	DISTINCT	1 
+	FROM	vyuCTEntityToContact 
+	WHERE	intEntityId = @intEntityId
+	AND		ISNULL(strEmail,'') <> '' 
+	AND     strEmail NOT LIKE  '_%@__%.__%' )
 
+	BEGIN 
+		RAISERROR('Entity has invalid Email Address.', 16, 1);
+		RETURN;
+	END
 
 	SELECT	@strNumber	=	STUFF(															
 									(
@@ -142,13 +152,13 @@ BEGIN
 
 	IF @strMailType = 'Sample Instruction'
 	BEGIN
-		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SELECT @strCustomerContract = isnull(strCustomerContract,'') FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Sample Instruction - Your ref. no. ' + @strCustomerContract
 	END
 
 	IF @strMailType = 'Release Instruction'
 	BEGIN
-		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SELECT @strCustomerContract = isnull(strCustomerContract,'') FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Release Instruction - Your ref. no. ' + @strCustomerContract
 	END
 

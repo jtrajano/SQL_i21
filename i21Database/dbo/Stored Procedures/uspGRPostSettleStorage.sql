@@ -116,7 +116,7 @@ BEGIN TRY
 	DECLARE @createdVouchersId NVARCHAR(MAX)
 	DECLARE @ysnDPOwnedType AS BIT
 	DECLARE @ysnFromTransferStorage AS BIT
-
+	DECLARE @IdOutputs nvarchar(max)
 	--Get vouchered quantity
 	DECLARE @dblTotalVoucheredQuantity AS DECIMAL(24,10)
 	-- THIS IS THE STORAGE UNIT
@@ -2075,7 +2075,7 @@ BEGIN TRY
 														WHEN ST.ysnDPOwnedType = 0 THEN NULL
 														ELSE 
 															CASE 
-																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
+																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
 																ELSE NULL
 															END
 													END
@@ -2083,11 +2083,16 @@ BEGIN TRY
 														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
 														ELSE 
 																CASE 
-																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL THEN RC.intInventoryReceiptChargeId
+																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RC.intInventoryReceiptChargeId
 																		ELSE NULL
 																END
 													END
-					,[intCustomerStorageId]			= a.[intCustomerStorageId]
+					,[intCustomerStorageId]   = CASE 
+													WHEN RI.intInventoryReceiptId IS NULL
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL)
+														OR (RI.intInventoryReceiptId IS NOT NULL AND CS.ysnTransferStorage = 1)
+													THEN a.[intCustomerStorageId] 
+													ELSE NULL END
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
 														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, b.intItemUOMId, CD.dblQuantity),6) 
@@ -2166,8 +2171,12 @@ BEGIN TRY
 															END
 														end					
 															
-					,[dblOldCost]					=  CASE 
-															WHEN @ysnFromPriceBasisContract = 0 THEN NULL 
+					,[dblOldCost]					=  CASE WHEN @ysnFromPriceBasisContract = 0 THEN
+																CASE
+																	WHEN ST.ysnDPOwnedType = 1 AND a.intItemType = 1
+																	THEN ISNULL(CS.dblSettlementPrice, 0) + ISNULL(CS.dblBasis, 0)
+																	ELSE NULL
+																END
 															ELSE 
 																CASE 
 																	WHEN (a.intContractHeaderId IS NOT NULL AND a.intPricingTypeId = 1 AND CH.intPricingTypeId <> 2) OR (@origdblSpotUnits > 0) 
@@ -2215,19 +2224,18 @@ BEGIN TRY
 																END
 														ELSE
 															CASE 
-																WHEN (a.intPricingTypeId = 2 OR a.intPricingTypeId in (1, 6) ) AND availableQtyForVoucher.intContractDetailId IS NOT NULL AND availableQtyForVoucher.dblAvailableQuantity > 0
+																WHEN (a.intPricingTypeId = 2 OR a.intPricingTypeId IN (1, 6) ) AND availableQtyForVoucher.intContractDetailId IS NOT NULL AND availableQtyForVoucher.dblAvailableQuantity > 0
 																	THEN 
 																		CASE 
-																			WHEN intItemType = 1 
-																				THEN availableQtyForVoucher.dblAvailableQuantity 
-																			ELSE ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits,6)
+																			WHEN intItemType = 1 THEN availableQtyForVoucher.dblAvailableQuantity 
+																			ELSE ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits, 15)
 																		END
 																WHEN @origdblSpotUnits > 0 
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 																WHEN a.intPricingTypeId in (1, 6) AND @ysnFromPriceBasisContract = 1 
 																	THEN a.dblUnits -- @dblTotalVoucheredQuantity
 																WHEN @ysnFromPriceBasisContract = 1 AND (intItemType = 2 OR intItemType = 3)
-																	THEN ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits, 15)
+																	THEN a.dblUnits
 																ELSE 
 																	CASE 
 																		WHEN @ysnFromPriceBasisContract = 1 AND  availableQtyForVoucher.intContractDetailId IS NULL  AND c.strType = 'Inventory' 
@@ -2236,8 +2244,7 @@ BEGIN TRY
 																			THEN a.dblUnits - @dblTotalVoucheredQuantity
 																		WHEN @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
 																			THEN @dblQtyFromCt - a.dblUnits
-																		ELSE 
-																			a.dblUnits
+																		ELSE a.dblUnits
 																	END
 															END
 														END																							
@@ -2943,10 +2950,18 @@ BEGIN TRY
 						AND IU.ysnStockUnit = 1
 				WHERE SV.intItemType = 1
 
-				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+				
+				SET @IdOutputs = ''
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT, @IdOutputs OUTPUT
 
-				INSERT INTO @intStorageHistoryIds
-				SELECT @intStorageHistoryId
+				if @IdOutputs <> '' and @IdOutputs like '%,%'
+				begin
+					INSERT INTO @intStorageHistoryIds
+					select distinct cast(Record as int) from dbo.fnCFSplitString(@IdOutputs , ',')		
+				end
+				else
+					INSERT INTO @intStorageHistoryIds
+					SELECT @intStorageHistoryId
 			END
 
 			UPDATE tblGRSettleStorage

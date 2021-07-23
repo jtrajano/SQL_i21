@@ -981,6 +981,41 @@ INNER JOIN (
 	ON transferreference.intTransferStorageReferenceId = tmpAPOpenClearing.intInventoryReceiptItemId
  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY transferstorage.dtmTransferStorageDate, cs.intEntityId--receipt.intEntityVendorId
+ UNION ALL
+  SELECT  
+ r.intEntityVendorId
+  ,	CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
+		ELSE 0 
+	END AS dbl1, 
+	CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>30 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=60
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl30, 
+	CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>60 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=90 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl60,
+	CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>90  
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) ELSE 0 
+	END AS dbl90
+ FROM    
+ (  
+  SELECT  
+   B.intInventoryReceiptChargeId
+   ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
+   ,SUM(B.dblReceiptChargeTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
+  FROM grainTransferChargeClearing B  
+	WHERE strTransactionNumber NOT LIKE ''TRA%''
+  GROUP BY   
+   B.intInventoryReceiptChargeId
+ ) tmpAPOpenClearing  
+INNER JOIN tblICInventoryReceiptCharge rc  
+  ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
+ INNER JOIN tblICInventoryReceipt r  
+  ON r.intInventoryReceiptId = rc.intInventoryReceiptId 
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
+ GROUP BY r.dtmReceiptDate, r.intEntityVendorId--receipt.intEntityVendorId
  UNION ALL 
  --TRANSFER CHARGE
  SELECT  
@@ -1012,10 +1047,10 @@ INNER JOIN (
  ) tmpAPOpenClearing  
 INNER JOIN tblGRTransferStorageReference tsr
     ON tmpAPOpenClearing.intTransferStorageReferenceId = tsr.intTransferStorageReferenceId
-INNER JOIN tblGRCustomerStorage cs
-  ON tsr.intToCustomerStorageId = cs.intCustomerStorageId
 INNER JOIN tblGRTransferStorage ts
   ON ts.intTransferStorageId = tsr.intTransferStorageId
+INNER JOIN tblGRCustomerStorage cs
+  ON tsr.intToCustomerStorageId = cs.intCustomerStorageId
  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY ts.dtmTransferStorageDate, cs.intEntityId--receipt.intEntityVendorId
  UNION ALL 

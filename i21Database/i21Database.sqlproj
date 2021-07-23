@@ -4914,8 +4914,8 @@
     <Build Include="dbo\Views\vyuARInvoicesForPayment.sql" />
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
-    <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Views\vyuApiSubscriptionHealthStatus.sql" />
+    <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
@@ -8627,8 +8627,6 @@
     <Build Include="dbo\Views\vyuRKGetDPRCommodityLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceBalance.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceQuantity.sql" />
     <Build Include="dbo\User Defined Types\SCTicketDestinationWeightsAndGradesPosting.sql" />
     <Build Include="dbo\User Defined Types\SCDiscountDestinationWeightsAndGradesPosting.sql" />
     <Build Include="dbo\Tables\tblRKM2MUnrealized.sql" />
@@ -8954,10 +8952,21 @@
     <Build Include="dbo\Stored Procedures\uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
-	<Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
+    <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
+    <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTReportContractWalterMatter.sql" />
+    <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailExemptReport.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
+    <Build Include="dbo\Functions\fnStripHtmlAndFixSpecial.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractWalterMatter.sql" />
+    <Build Include="dbo\Views\vyuSCInventoryShipmentDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql" />
+    <Build Include="dbo\User Defined Types\ScaleDWGAllocation.sql" />
     <Build Include="dbo\Views\vyuCTApiContractText.sql" />
     <Build Include="dbo\Views\vyuCTApiDollarContract.sql" />
     <Build Include="dbo\Views\vyuCTApiItemContract.sql" />
@@ -8999,11 +9008,24 @@
     <Build Include="dbo\Tables\tblRestApiTransformationLog.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetFuturesReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionsReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetM2MCounterPartyExposureReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutures360RealizedPnLReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
-
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
 	<Build Include="dbo\Stored Procedures\uspSCUpdateTicketSplitByDeliverySheetSplit.sql" />
+    <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMat.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9280,8 +9302,12 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceipt.sql" />
     <None Include="Scripts\Post-Deployment\AP\DefaultData\Categories1099K.sql" />
-    <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateStrCodeInTransferStorageGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
+    <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

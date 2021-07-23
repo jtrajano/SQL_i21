@@ -461,7 +461,7 @@ BEGIN TRY
 						,'Customer'
 						)
 					AND V.strVendorAccountNum = @strVendor
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 
 			IF ISNULL(@intEntityId, 0) = 0
@@ -510,7 +510,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'User'
 					AND t.strName = @strCreatedBy
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 					--IF ISNULL(@intCreatedUserId, 0) = 0
 					--BEGIN
 					--	RAISERROR (

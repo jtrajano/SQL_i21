@@ -8321,3 +8321,19 @@ IF EXISTS(SELECT 1 FROM @tmpAPC29)
 BEGIN
 	SELECT * INTO ##tmpAPC29 FROM @tmpAPC29
 END
+
+--AP Account
+DECLARE @apBalResult TABLE(
+	strBillId NVARCHAR(50),
+	ysnOrigin BIT,
+	dblAmountDue DECIMAL(18,2),
+	dblGLAmountDue DECIMAL(18,2),
+	dblDifference DECIMAL(18,2)
+)
+EXEC uspAPShowBalanceDifference
+
+IF EXISTS(SELECT 1 FROM @apBalResult) 
+BEGIN
+	SELECT * INTO ##tmpAPBalance FROM @apBalResult
+	WHERE ysnOrigin = 0
+END

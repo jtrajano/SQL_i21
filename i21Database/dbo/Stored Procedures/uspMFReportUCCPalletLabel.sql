@@ -20,6 +20,15 @@ BEGIN TRY
 			,'' AS 'strBarCodeLabel'
 			,'' AS 'strBarCode'
 			,'' AS 'strReferenceNumber'
+			,'' AS 'strShipToPostalCode'
+			,'' AS 'strShipmentNumber'
+			,'' AS 'strProNumber'
+			,'' AS 'strHEBItemNo'
+			,'' AS 'dblQty'
+			,'' AS 'strGTIN'
+			,'' AS 'strDescription'
+			,'' AS 'dtmExpiryDate'
+			,'' AS 'dblNetWeight'
 
 		RETURN
 	END
@@ -178,6 +187,22 @@ BEGIN TRY
 		,OML.strSSCCNo AS strBarCodeLabel
 		,OML.strSSCCNo AS strBarCode
 		,S.strReferenceNumber
+		,'(420) ' + EL.strZipCode AS strShipToPostalCode
+		,S.strShipmentNumber
+		,S.strProNumber
+		,'' AS strHEBItemNo
+		,CONVERT(NUMERIC(18, 0), ISNULL(T.dblQty, L.dblQty)) AS dblQty
+		,(
+			CASE 
+				WHEN ISNULL(OD.strOrderGTIN, '') = ''
+					THEN I.strGTIN
+				ELSE OD.strOrderGTIN
+				END
+			) AS strGTIN
+		,I.strDescription
+		,dbo.fnConvertDateToReportDateFormat(L.dtmExpiryDate, 0) AS dtmExpiryDate
+		--,CONVERT(NUMERIC(18, 0), ISNULL(T.dblQty, L.dblQty) * I.dblWeight) AS dblNetWeight
+		,'' AS dblNetWeight
 	FROM tblMFOrderManifest OM
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
@@ -191,6 +216,9 @@ BEGIN TRY
 		AND OML.ysnPrinted = 0
 		AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
 	LEFT JOIN tblSMShipVia SV ON SV.intEntityId = S.intShipViaId
+	LEFT JOIN tblICLot L ON L.intLotId = OM.intLotId
+	LEFT JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
+		AND T.intLotId = OM.intLotId
 	WHERE OM.intOrderManifestId IN (
 			SELECT *
 			FROM dbo.fnSplitString(@strOrderManifestId, '^')

@@ -860,7 +860,7 @@ BEGIN TRY
 					JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 					WHERE ET.strType = 'Forwarding Agent'
 						AND t.strName = @strForwardingAgentName
-						AND t.strEntityNo <> ''
+						--AND t.strEntityNo <> ''
 					)
 			BEGIN
 				SELECT @strErrorMessage = 'Forwarding Agent ' + @strForwardingAgentName + ' is not available.'
@@ -900,7 +900,7 @@ BEGIN TRY
 							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'Forwarding Agent'
 								AND t.strName = @strSentByValue
-								AND t.strEntityNo <> ''
+								--AND t.strEntityNo <> ''
 							)
 					BEGIN
 						SELECT @strErrorMessage = 'Sent By Agent ' + @strSentByValue + ' is not available.'
@@ -920,7 +920,7 @@ BEGIN TRY
 							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'Vendor'
 								AND t.strName = @strSentByValue
-								AND t.strEntityNo <> ''
+								--AND t.strEntityNo <> ''
 							)
 					BEGIN
 						SELECT @strErrorMessage = 'Sent By Seller ' + @strSentByValue + ' is not available.'
@@ -940,7 +940,7 @@ BEGIN TRY
 							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'User'
 								AND t.strName = @strSentByValue
-								AND t.strEntityNo <> ''
+								--AND t.strEntityNo <> ''
 							)
 					BEGIN
 						SELECT @strErrorMessage = 'Sent By User ' + @strSentByValue + ' is not available.'
@@ -1188,7 +1188,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strTestedByName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intTestedById IS NULL
 			BEGIN
@@ -1261,7 +1261,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'Forwarding Agent'
 				AND t.strName = @strForwardingAgentName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @strSentBy = 'Self'
 			BEGIN
@@ -1283,7 +1283,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Forwarding Agent'
 					AND t.strName = @strSentByValue
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 			ELSE IF @strSentBy = 'Seller'
 			BEGIN
@@ -1292,7 +1292,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Vendor'
 					AND t.strName = @strSentByValue
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 			ELSE IF @strSentBy = 'Users'
 			BEGIN
@@ -1301,7 +1301,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'User'
 					AND t.strName = @strSentByValue
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 
 			IF @intProductTypeId = 2
@@ -1416,7 +1416,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strCreatedUser
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intCreatedUserId IS NULL
 			BEGIN
@@ -1438,7 +1438,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strLastModifiedUser
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -2520,7 +2520,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strUserName
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intAuditLogUserId IS NULL
 			BEGIN
@@ -2721,6 +2721,8 @@ BEGIN TRY
 						EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 							,@referenceTransactionId = @intTransactionId
 							,@referenceCompanyId = @intCompanyId
+							,@screenId=@intScreenId
+							,@populatedByInterCompany=1
 					--END TRY
 					--BEGIN CATCH
 					--END CATCH
