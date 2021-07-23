@@ -2,6 +2,9 @@ CREATE PROCEDURE [dbo].uspICAddTransactionLinks(@TransactionLinks udtICTransacti
 AS
 BEGIN
 
+IF (dbo.fnSMCheckIfLicensed('Transaction Traceability') = 1)
+BEGIN
+
 DECLARE @GraphId UNIQUEIDENTIFIER = NEWID()
 DECLARE @LinkDate DATE = GETUTCDATE()
 
@@ -89,6 +92,8 @@ OUTER APPLY (
 	WHERE nodes.strTransactionNo = l.strSrcTransactionNo
 ) related
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICTransactionNodes WHERE strTransactionNo = l.strDestTransactionNo)
+
+END
 
 END
 
