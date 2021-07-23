@@ -1033,6 +1033,11 @@ BEGIN
 		DELETE FROM tblAPPaymentDetail
 		WHERE intPaymentId IN (SELECT intId FROM @payments)
 		AND dblPayment = 0
+
+		SELECT @paymentIds = COALESCE(@paymentIds + ', ', '') + CONVERT(VARCHAR(12), intId) FROM @payments
+
+		EXEC uspAPAddTransactionLinks 2, @paymentIds, 2
+		EXEC uspAPAddTransactionLinks 2, @paymentIds, 1
 	END
 
 	DECLARE @voucherHistory AS Id
