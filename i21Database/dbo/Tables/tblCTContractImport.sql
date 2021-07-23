@@ -36,5 +36,7 @@
 	[intContractHeaderId] [int] NULL,
 	[xmlInput] [xml] NULL,
 	[intSession] [bigint],
+	[guiUniqueId] UNIQUEIDENTIFIER NULL,
+	[ysnIsProcessed] BIT NULL,
 	CONSTRAINT [PK_tblCTContractImport_intContractImportId] PRIMARY KEY CLUSTERED (intContractImportId ASC)
 )
