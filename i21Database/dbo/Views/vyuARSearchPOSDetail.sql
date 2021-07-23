@@ -1,42 +1,49 @@
 ﻿CREATE VIEW [dbo].[vyuARSearchPOSDetail]
 AS 
-SELECT intPOSId					= POS.intPOSId
-	 , intEntityCustomerId		= POS.intEntityCustomerId
-	 , intBillToId				= CUSTOMER.intBillToId
-	 , intShipToId				= CUSTOMER.intShipToId
-	 , intCompanyLocationId		= POS.intCompanyLocationId
-	 , dtmDate					= POS.dtmDate
-	 , strReceiptNumber			= POS.strReceiptNumber
-	 , strCustomerName			= CUSTOMER.strName
-	 , strUserName				= USERNAME.strName
-	 , strBillToLocationName	= CUSTOMER.strBillToLocationName
-	 , strBillToAddress			= CUSTOMER.strBillToAddress
-	 , strBillToCity			= CUSTOMER.strBillToCity
-	 , strBillToCountry			= CUSTOMER.strBillToCountry
-	 , strBillToState			= CUSTOMER.strBillToState
-	 , strBillToZipCode			= CUSTOMER.strBillToZipCode
-	 , dblTotal					= POS.dblTotal
-	 , dblCreditLimit			= CUSTOMER.dblCreditLimit
-	 , dblARBalance				= CUSTOMER.dblARBalance
-	 , ysnHold					= POS.ysnHold
-	 , ysnReturn				= POS.ysnReturn
-	 , intPOSDetailId			= POSDetail.intPOSDetailId
-	 , intItemId				= POSDetail.intItemId
-	 , strItemNo				= POSDetail.strItemNo
-	 , strItemDescription		= POSDetail.strItemDescription
-	 , dblQuantity				= POSDetail.dblQuantity
-	 , intItemUOMId				= POSDetail.intItemUOMId
-	 , strItemUOM				= POSDetail.strItemUOM
-	 , dblDiscount				= POSDetail.dblDiscount
-	 , dblDiscountPercent		= POSDetail.dblDiscountPercent
-	 , dblPrice					= POSDetail.dblPrice
-	 , dblTax					= POSDetail.dblTax
-	 , dblExtendedPrice			= POSDetail.dblExtendedPrice
-	 , ysnPaid					= CASE WHEN POS.intInvoiceId IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-	 , dtmPOSDate				= POS.dtmDate
-	 , strInvoiceNumber			= INV.strInvoiceNumber
-	 , strCustomerNumber		= CUSTOMER.strCustomerNumber
+SELECT intPOSId							= POS.intPOSId
+	 , intEntityCustomerId				= POS.intEntityCustomerId
+	 , intBillToId						= CUSTOMER.intBillToId
+	 , intShipToId						= CUSTOMER.intShipToId
+	 , intCompanyLocationId				= POS.intCompanyLocationId
+	 , dtmDate							= POS.dtmDate
+	 , strReceiptNumber					= POS.strReceiptNumber
+	 , strCustomerName					= CUSTOMER.strName
+	 , strUserName						= USERNAME.strName
+	 , strBillToLocationName			= CUSTOMER.strBillToLocationName
+	 , strBillToAddress					= CUSTOMER.strBillToAddress
+	 , strBillToCity					= CUSTOMER.strBillToCity
+	 , strBillToCountry					= CUSTOMER.strBillToCountry
+	 , strBillToState					= CUSTOMER.strBillToState
+	 , strBillToZipCode					= CUSTOMER.strBillToZipCode
+	 , dblTotal							= POS.dblTotal
+	 , dblCreditLimit					= CUSTOMER.dblCreditLimit
+	 , dblARBalance						= CUSTOMER.dblARBalance
+	 , ysnHold							= POS.ysnHold
+	 , ysnReturn						= POS.ysnReturn
+	 , intPOSDetailId					= POSDetail.intPOSDetailId
+	 , intItemId						= POSDetail.intItemId
+	 , strItemNo						= POSDetail.strItemNo
+	 , strItemDescription				= POSDetail.strItemDescription
+	 , dblQuantity						= POSDetail.dblQuantity
+	 , intItemUOMId						= POSDetail.intItemUOMId
+	 , strItemUOM						= POSDetail.strItemUOM
+	 , dblDiscount						= POSDetail.dblDiscount
+	 , dblDiscountPercent				= POSDetail.dblDiscountPercent
+	 , dblPrice							= POSDetail.dblPrice
+	 , dblTax							= POSDetail.dblTax
+	 , dblExtendedPrice					= POSDetail.dblExtendedPrice
+	 , ysnPaid							= CASE WHEN POS.intInvoiceId IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	 , dtmPOSDate						= POS.dtmDate
+	 , strInvoiceNumber					= INV.strInvoiceNumber
+	 , strCustomerNumber				= CUSTOMER.strCustomerNumber
+	 , intPOSEndOfDayId					= EOD.intPOSEndOfDayId
+	 , intCompanyLocationPOSDrawerId	= EOD.intCompanyLocationPOSDrawerId
+	 , strEODNo							= EOD.strEODNo
+	 , strPOSDrawerName					= PD.strPOSDrawerName
 FROM dbo.tblARPOS POS WITH (NOLOCK)
+INNER JOIN tblARPOSLog PLOG ON POS.intPOSLogId = PLOG.intPOSLogId
+INNER JOIN tblARPOSEndOfDay EOD ON PLOG.intPOSEndOfDayId = EOD.intPOSEndOfDayId
+LEFT JOIN tblSMCompanyLocationPOSDrawer PD ON PD.intCompanyLocationPOSDrawerId = EOD.intCompanyLocationPOSDrawerId
 INNER JOIN (
 	SELECT intEntityCustomerId
 		 , intBillToId
@@ -74,6 +81,8 @@ INNER JOIN (
 			dblExtendedPrice
 	FROM dbo.tblARPOSDetail
 ) POSDetail ON POS.intPOSId = POSDetail.intPOSId
-
-left join ( select intInvoiceId, strInvoiceNumber from tblARInvoice) INV
-	on INV.intInvoiceId = POS.intInvoiceId
+LEFT JOIN ( 
+	SELECT intInvoiceId
+	 	 , strInvoiceNumber
+	FROM tblARInvoice
+) INV on INV.intInvoiceId = ISNULL(POS.intInvoiceId, POS.intCreditMemoId)
