@@ -7187,6 +7187,7 @@
     <Build Include="dbo\Stored Procedures\uspCTValidateContractCost.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessImportContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTImportContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTImportContractFromCsv.sql" />
     <Build Include="dbo\Views\vyuSTStoreAppRegistered.sql" />
     <Build Include="dbo\Stored Procedures\uspTMCreateSite.sql" />
     <None Include="Scripts\Post-Deployment\ST\16_FileFieldMapping_Passport_TLM_340.sql" />
