@@ -101,9 +101,14 @@ OUTER APPLY(
 ) D
 OUTER APPLY(
 	SELECT ISNULL(dblPercentage,1) dblPercentage FROM tblFADepreciationMethodDetail 
-		WHERE M.[intDepreciationMethodId] = intDepreciationMethodId and
-		 intYear = CEILING(D.intMonth  /12.0)
-			
+		WHERE M.[intDepreciationMethodId] = intDepreciationMethodId AND
+		  intYear = CEILING(
+		 	CASE 
+			 	WHEN D.intMonth > ISNULL(M.intServiceYear,0)* 12 + ISNULL(M.intMonth ,0) 
+			 	THEN ISNULL(M.intServiceYear,0)* 12 + ISNULL(M.intMonth ,0)
+		  	ELSE
+		  		D.intMonth -- IF MONTH IS OUT OF RANGE, THIS WILL GET THE LAST PERCENTAGE OF MONTH
+		  	END/12.0)
 )E
 WHERE strError IS NULL
 
@@ -227,22 +232,6 @@ OUTER APPLY
 	AND intBookId = @BookId
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
-
-
-UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
-dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
-FROM @tblAssetInfo B JOIN
-tblFABookDepreciation BD 
-ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
-OUTER APPLY(
-	SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
-	tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
-
-) U
-WHERE dblDepre < (BD.dblCost - BD.dblSalvageValue)
-AND intMonth = totalMonths
-AND strConvention = 'Full Month'
-AND strError IS NULL
 
 
 UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
