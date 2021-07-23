@@ -9570,10 +9570,12 @@
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAddTransactionLinks.sql" />
-	<Build Include="dbo\Stored Procedures\uspCCTransactionLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCCTransactionLink.sql" />
     <Build Include="dbo\Functions\fnSMCheckIfLicensed.sql" />
     <Build Include="dbo\Tables\tblSMLicense.sql" />
     <Build Include="dbo\Tables\tblSMLicenseModule.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMat.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
