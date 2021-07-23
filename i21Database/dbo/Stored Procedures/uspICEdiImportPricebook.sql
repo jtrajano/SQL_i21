@@ -2,6 +2,7 @@
 	@intUserId INT
 	, @intVendorId INT = NULL 
 	, @Locations UdtCompanyLocations READONLY
+	, @UniqueId NVARCHAR(100)
 	, @strFileName NVARCHAR(500) = NULL 
 	, @strFileType NVARCHAR(50) = NULL 
 	, @ErrorCount INT OUTPUT
@@ -11,14 +12,17 @@ AS
 SET @intVendorId = NULLIF(@intVendorId, '0') 
 
 DECLARE @LogId INT
-SELECT @LogId = intImportLogId FROM tblICImportLog WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICEdiPricebook)
+SELECT @LogId = intImportLogId FROM tblICImportLog WHERE strUniqueId = @UniqueId
 
-IF(@LogId IS NULL)
+IF(@LogId IS NULL AND @UniqueId IS NOT NULL)
 BEGIN
-	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, intConcurrencyId)
-	SELECT 'Import Pricebook successful', 'EDI', @strFileType, @strFileName, GETDATE(), @intUserId, 1
+	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, strUniqueId, intConcurrencyId)
+	SELECT 'Import Pricebook successful', 'EDI', @strFileType, @strFileName, GETDATE(), @intUserId, @UniqueId, 1
 	SET @LogId = @@IDENTITY
 END
+
+-- Remove the bad records from previous import
+DELETE tblICEdiPricebook WHERE strUniqueId <> @UniqueId OR strUniqueId IS NULL
 
 DECLARE 
 	@updatedItems AS INT = 0
@@ -31,6 +35,26 @@ DECLARE
 	,@insertedVendorXRef AS INT = 0 
 	,@updatedItemLocation AS INT = 0
 	,@insertedItemLocation AS INT = 0 
+	
+-- Remove the duplicate records in tblICEdiPricebook
+;WITH deleteDuplicate_CTE (
+	intEdiPricebookId
+	,strSellingUpcNumber
+	,dblDuplicateCount
+)
+AS (
+	
+	SELECT 
+		p.intEdiPricebookId
+		,p.strSellingUpcNumber
+		,dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strSellingUpcNumber ORDER BY p.intEdiPricebookId, p.strSellingUpcNumber)
+	FROM 
+		tblICEdiPricebook p
+	WHERE 
+		p.strUniqueId = @UniqueId
+)
+DELETE FROM deleteDuplicate_CTE
+WHERE dblDuplicateCount > 1;
 
 --Update Item
 UPDATE i
@@ -46,6 +70,8 @@ FROM
 		ON i.intItemId = u.intItemId
 	LEFT OUTER JOIN tblICBrand b 
 		ON b.strBrandName = p.strManufacturersBrandName
+WHERE
+	p.strUniqueId = @UniqueId
 
 SET @updatedItems = @@ROWCOUNT; 
 
@@ -83,6 +109,7 @@ FROM
 		ON i.intItemId = u.intItemId
 WHERE 
 	i.intItemId IS NULL
+	AND p.strUniqueId = @UniqueId
 
 -- Log the records with invalid Vendor Ids. 
 INSERT INTO tblICImportLogDetail(
@@ -113,6 +140,7 @@ FROM
 		OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
 WHERE 
 	v.intEntityId IS NULL 
+	AND p.strUniqueId = @UniqueId
 
 -------------------------------------------------
 -- END Validation 
@@ -182,6 +210,8 @@ FROM
 		ON m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
 	LEFT OUTER JOIN tblICUnitMeasure s 
 		ON s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+WHERE
+	p.strUniqueId = @UniqueId
 
 SET @updatedItemUOM = @@ROWCOUNT;
 	
@@ -258,6 +288,8 @@ FROM (
 				LEFT JOIN tblICCategoryLocation catLoc 
 					ON catLoc.intCategoryId = cat.intCategoryId
 					AND catLoc.intLocationId = l.intLocationId
+			WHERE
+				p.strUniqueId = @UniqueId
 	) AS Source_Query  
 		ON ItemLocation.intItemLocationId = Source_Query.intItemLocationId
 	   
@@ -565,6 +597,8 @@ FROM (
 			LEFT JOIN tblICItemPricing price 
 				ON price.intItemId = i.intItemId
 				AND price.intItemLocationId = il.intItemLocationId
+		WHERE
+			p.strUniqueId = @UniqueId
 	) AS Source_Query  
 		ON ItemPricing.intItemPricingId = Source_Query.intItemPricingId 
 	   
@@ -709,6 +743,8 @@ FROM (
 			OUTER APPLY (
 				SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference
 			) companyPref
+		WHERE
+			p.strUniqueId = @UniqueId
 	) AS Source_Query  
 		ON ItemSpecialPricing.intItemSpecialPricingId = Source_Query.intItemSpecialPricingId 
 		AND ItemSpecialPricing.dtmBeginDate = Source_Query.dtmBeginDate 
@@ -836,9 +872,12 @@ FROM (
 				INNER JOIN vyuAPVendor v
 					ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
 					OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+			WHERE
+				p.strUniqueId = @UniqueId
 	) AS Source_Query  
 		ON ItemVendorXref.intItemId = Source_Query.intItemId		
-		AND ItemVendorXref.intVendorId = Source_Query.intEntityId 				
+		AND ItemVendorXref.intVendorId = Source_Query.intEntityId
+		AND ItemVendorXref.intItemLocationId IS NULL 
 	   
 	-- If matched, update the existing vendor xref 
 	WHEN MATCHED THEN 
@@ -903,7 +942,7 @@ SELECT @updatedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVend
 SELECT @insertedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'INSERT'
 
 SELECT @ErrorCount = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error'
-SELECT @TotalRows = COUNT(*) FROM tblICEdiPricebook WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICImportLogDetail WHERE intImportLogId = @LogId)
+SELECT @TotalRows = COUNT(*) FROM tblICEdiPricebook WHERE strUniqueId = @UniqueId
 
 SET @TotalRowsUpdated = @TotalRowsUpdated + @updatedItems + @updatedItemUOM + @updatedItemPricing + @updatedItemLocation + @updatedSpecialItemPricing + @updatedVendorXRef
 SET @TotalRowsInserted = @TotalRowsInserted + @insertedItemLocation + @insertedItemPricing + @insertedSpecialItemPricing + @insertedVendorXRef 
@@ -1206,4 +1245,4 @@ BEGIN
 	END
 END 
 
-DELETE FROM tblICEdiPricebook
+DELETE FROM tblICEdiPricebook WHERE strUniqueId = @UniqueId
