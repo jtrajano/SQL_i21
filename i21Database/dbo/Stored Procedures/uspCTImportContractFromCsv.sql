@@ -396,6 +396,10 @@ BEGIN
 			AND ISNULL(intPositionId, 0) = ISNULL(@intPositionId, 0)
 			AND ISNULL(intPricingTypeId, 0) = ISNULL(@intPricingTypeId, 0)
 
+		UPDATE tblCTContractHeader
+		SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
+		WHERE intContractHeaderId = @intContractHeaderId
+
 		EXEC uspCTCreateDetailHistory	@intContractHeaderId = @intContractHeaderId, 
 										@intContractDetailId = NULL,
 										@strSource			 = 'Contract',
