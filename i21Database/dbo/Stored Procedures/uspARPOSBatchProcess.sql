@@ -879,8 +879,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strInvoiceReportNumber
 				,dblCurrencyExchangeRate
 				,ysnPost
+				,strPaymentOriginalId
 			)
-			SELECT intId						= POSPAYMENTS.intPOSPaymentId
+			SELECT intId						= POSPAYMENTS.intPOSPaymentId + CREDITMEMO.intInvoiceId
 			    ,strSourceTransaction			= 'Direct'
 				,intSourceId					= IFP.intInvoiceId
 				,strSourceId					= IFP.strInvoiceNumber
@@ -908,6 +909,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strInvoiceReportNumber			= IFP.strInvoiceNumber
 				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
 				,ysnPost						= CAST(1 AS BIT)
+				,strPaymentOriginalId			= IFP.strInvoiceNumber
 			FROM #POSPAYMENTS POSPAYMENTS
 			INNER JOIN tblARPOS POS ON POSPAYMENTS.intPOSId = POS.intPOSId
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
@@ -965,6 +967,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strInvoiceReportNumber
 				,dblCurrencyExchangeRate
 				,ysnPost
+				,strPaymentOriginalId
 			)
 			SELECT intId						= POSPAYMENTS.intPOSPaymentId
 			    ,strSourceTransaction			= 'Direct'
@@ -994,6 +997,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strInvoiceReportNumber			= IFP.strInvoiceNumber
 				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
 				,ysnPost						= CAST(1 AS BIT)
+				,strPaymentOriginalId			= IFP.strInvoiceNumber
 			FROM #POSPAYMENTS POSPAYMENTS
 			INNER JOIN tblARPOS POS ON POSPAYMENTS.intPOSId = POS.intPOSId
 			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
@@ -1020,15 +1024,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			  AND ISNULL(II.ysnPosted, 0) = 1
 			  AND IFP.dblInvoiceTotal > INVOICES.dblInvoiceTotal
 			  AND RT.strPOSType = 'Mixed'
-			
-		
 
-
-			
 			--PROCESS TO RCV
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
 											, @UserId			= @intEntityUserId
-											, @GroupingOption	= 7
+											, @GroupingOption	= 8
 											, @RaiseError		= 0
 											, @ErrorMessage		= @strErrorMsg OUTPUT
 											, @LogId			= @intPaymentLogId OUTPUT
