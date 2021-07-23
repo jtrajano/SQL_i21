@@ -163,7 +163,7 @@ CREATE TABLE #TempMBILInvoice (
 		)
 	SELECT 
 		 [intInvoiceId]
-		,[strTransactionType] = 'Invoice'
+		,[strTransactionType] = InvoiceItem.strType
 		,[strType] = 'Tank Delivery'
 		,[strSourceTransaction] = 'Mobile Billing'
 		,[intSourceId] = InvoiceItem.intInvoiceId
