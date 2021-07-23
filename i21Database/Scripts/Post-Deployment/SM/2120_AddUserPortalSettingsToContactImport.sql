@@ -140,14 +140,20 @@ SET strCommand = N'
 	END
 	ELSE
 	BEGIN
-		SET @ValidationMessage = @ValidationMessage + '',The User Role of '' + @PortalUserRole + '' was not found in the Portal User Role. Please add this Role from the System Manager screen and re-attempt the upload''
-		RAISERROR(@ValidationMessage, 16, 1);
+		IF @ValidationMessage != ''''
+		BEGIN
+   			SET @ValidationMessage = @ValidationMessage + '',''
+		END
+		SET @ValidationMessage = @ValidationMessage + ''The User Role of '' + @PortalUserRole + '' was not found in the Portal User Role. Please add this Role from the System Manager screen and re-attempt the upload''
 	END
 
 	IF (@Email IS NULL OR @Email = '''')
 	BEGIN
-		SET @ValidationMessage = @ValidationMessage + '',The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
-		RAISERROR(@ValidationMessage, 16, 1);
+		IF @ValidationMessage != ''''
+		BEGIN
+   			SET @ValidationMessage = @ValidationMessage + '',''
+		END
+		SET @ValidationMessage = @ValidationMessage + ''The Portal Username and Contact Email will be identical.  Please provide a valid email to use as the Portal Username and re-attempt the upload.''
 	END
 
 	IF ISNUMERIC(@RankStr) = 1
@@ -157,6 +163,11 @@ SET strCommand = N'
 	ELSE
 	BEGIN
 		SET @ValidationMessage = @ValidationMessage + '',Rank ['' + @RankStr + ''] should be a number''
+	END
+
+	IF @ValidationMessage != ''''
+	BEGIN
+		RAISERROR(@ValidationMessage, 16, 1);
 	END
 
 	SELECT @EntityId = intEntityId

@@ -5,8 +5,6 @@ SELECT * FROM(
 	SELECT 
 		*
 		,dblLots-(dblAssignedLots1+dblHedgedLots1) as dblBalanceLots 
-		,dblSContractBalanceLots = dblLots - dblAssignedLotsToSContract
-		,dblPContractBalanceLots = dblLots - dblAssignedLotsToPContract
 	FROM(
 		SELECT 
 				ot.intFutOptTransactionId,
@@ -19,8 +17,8 @@ SELECT * FROM(
 						 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblAssignedLots1
 				 ,IsNull((SELECT SUM(AD.dblHedgedLots)	FROM tblRKAssignFuturesToContractSummary AD 
 				 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblHedgedLots1
-				,IsNull(ot.dblSContractBalanceLots,0)  As dblAssignedLotsToSContract
-				,IsNull(ot.dblPContractBalanceLots, 0)  As dblAssignedLotsToPContract
+				,IsNull(ot.dblSContractBalanceLots,0)  As dblSContractBalanceLots
+				,IsNull(ot.dblPContractBalanceLots, 0)  As dblPContractBalanceLots
 				,fm.strFutMarketName
 				,fmh.strFutureMonth
 				,ba.strAccountNumber

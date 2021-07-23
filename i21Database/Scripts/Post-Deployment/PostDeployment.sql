@@ -101,6 +101,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
 :r .\SM\2120_AddUserPortalSettingsToContactImport.sql
 :r .\SM\2120_InsertLanguages.sql
+:r .\SM\2120_UpdateAddonComponents.sql
 
 
 -- Canned Report
@@ -245,6 +246,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\6_InsertDefaultDataSync.sql
 :r .\CM\7_AlterCashProjectionView.sql
 :r .\CM\8_FlagCCTransaction.sql
+:r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql

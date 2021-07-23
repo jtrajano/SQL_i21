@@ -18,8 +18,11 @@ SELECT
 		WHEN CHARINDEX(',',IAD.strInvoiceId) = 0 THEN (SELECT B.strName from tblARInvoice A INNER JOIN tblEMEntity B ON A.intEntityCustomerId = B. intEntityId WHERE A.intInvoiceId = CAST(IAD.strInvoiceId AS INT))
 		WHEN CHARINDEX(',',IAD.strInvoiceId) > 0 THEN (SELECT B.strName from tblARInvoice A INNER JOIN tblEMEntity B ON A.intEntityCustomerId = B. intEntityId WHERE A.intInvoiceId = CAST(SUBSTRING(IAD.strInvoiceId, 1, CHARINDEX(',',IAD.strInvoiceId)-1) AS INT))
 		ELSE IAD.strInvoiceId
-	  END) COLLATE Latin1_General_CI_AS AS strCustomerName 
-
+	  END) COLLATE Latin1_General_CI_AS AS strCustomerName
+	,CASE WHEN IAD.strInvoiceId IS NULL THEN IAD.strMessage ELSE STUFF((SELECT ', ' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId IN (SELECT * FROM [dbo].[fnTRSplit] (IAD.strInvoiceId,','))
+		FOR XML PATH('')),1,1,''
+	) END  AS strInvoiceNumber
+	, LH.strTransaction AS strTransportLoadNumber
 FROM
 		dbo.tblTRImportAttachmentDetail AS IAD 
 		INNER JOIN dbo.tblTRImportAttachment AS IA ON IA.intImportAttachmentId = IAD.intImportAttachmentId 
@@ -27,3 +30,4 @@ FROM
 		LEFT JOIN vyuTRTerminal TM on TM.intEntityVendorId = IAD.intVendorId
 		LEFT JOIN tblTRSupplyPoint SP on IAD.intSupplyPointId = SP.intSupplyPointId
 		LEFT JOIN tblEMEntityLocation EL on EL.intEntityLocationId = SP.intEntityLocationId
+		LEFT JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = IAD.intLoadHeaderId

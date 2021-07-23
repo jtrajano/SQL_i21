@@ -20,14 +20,14 @@ BEGIN
 			strOperation
 		)
 		SELECT
-			B.intBuybackId,
-			B.strReimbursementNo,
-			'Buybacks',
-			'Buybacks',
 			I.intInvoiceId,
 			I.strInvoiceNumber,
-			'Invoices',
+			'Invoice',
 			'Accounts Receivable',
+			B.intBuybackId,
+			B.strReimbursementNo,
+			'Buyback',
+			'Buybacks',
 			'Submit'
 		FROM dbo.fnGetRowsFromDelimitedValues(@strBuybackIds) IDS
 		INNER JOIN tblBBBuyback B ON B.intBuybackId = IDS.intID
@@ -40,20 +40,20 @@ BEGIN
 	ELSE
 	BEGIN
 		DECLARE @ID AS TABLE (intID INT)
-		DECLARE @intSrcId INT, @strSrcTransactionNo NVARCHAR(100)
+		DECLARE @intDestId INT, @strDestTransactionNo NVARCHAR(100)
 
 		INSERT INTO @ID
 		SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strBuybackIds)
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @ID)
 		BEGIN
-			SELECT TOP 1 @intSrcId = B.intBuybackId, @strSrcTransactionNo = B.strReimbursementNo
+			SELECT TOP 1 @intDestId = B.intBuybackId, @strDestTransactionNo = B.strReimbursementNo
 			FROM @ID ID
 			INNER JOIN tblBBBuyback B ON B.intBuybackId = ID.intID
 
-			EXEC uspICDeleteTransactionLinks @intSrcId, @strSrcTransactionNo, 'Buybacks', 'Buybacks'
+			EXEC uspICDeleteTransactionLinks @intDestId, @strDestTransactionNo, 'Buyback', 'Buybacks'
 
-			DELETE FROM @ID WHERE intID = @intSrcId
+			DELETE FROM @ID WHERE intID = @intDestId
 		END
 	END
 END

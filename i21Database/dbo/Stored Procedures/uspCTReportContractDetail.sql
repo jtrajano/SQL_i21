@@ -126,7 +126,7 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 
-			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure,
+			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END),
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
@@ -243,7 +243,7 @@ BEGIN TRY
 		FROM tblSMCompanyPreference
 	) SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
-	AND		CD.intContractStatusId <> 3
+	--AND		CD.intContractStatusId <> 3
 
 END TRY
 

@@ -4,6 +4,8 @@
 	, @StoreLocations UdtCompanyLocations READONLY
 	, @UniqueId NVARCHAR(100)
 	, @UserId INT
+	, @strFileName NVARCHAR(500) = NULL 
+	, @strFileType NVARCHAR(50) = NULL 
 	, @ErrorCount INT OUTPUT
 	, @TotalRows INT OUTPUT
 AS
@@ -93,7 +95,7 @@ WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICEdiPricebook)
 IF(@LogId IS NULL)
 BEGIN
 	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, intConcurrencyId)
-	SELECT 'Import Receipts successful', 'EDI', 'Plain Text', '', GETDATE(), @UserId, 1
+	SELECT 'Import Receipts successful', 'EDI', @strFileType, @strFileName, GETDATE(), @UserId, 1
 	SET @LogId = @@IDENTITY
 END
 
@@ -271,9 +273,8 @@ FROM
 				SELECT TOP 1 
 					item.intItemId
 				FROM 
-					tblICItem item 
-				WHERE
-					item.strItemNo = 'Item Not Found'
+					tblICItem item inner join tblICCompanyPreference pref
+						ON item.intItemId = pref.intItemIdHolderForReceiptImport
 			) itemNotFound
 				ON 1 = 1 
 	) it
@@ -363,7 +364,15 @@ BEGIN
 		, -1
 		, NULL
 		, NULL
-		, 'Unable to generate receipts. Possible reasons: (1) No store headers found in file and no selected location. (2) Store headers found but the locations do not exists in the system. (3) Items are not in the store location(s).'
+		, 'Unable to generate receipts. 
+		Possible reasons: 
+		<ul>
+			<li>No store headers found in file and no selected location.</li>
+			<li>Store headers found but the locations do not exists in the system.</li>
+			<li>Items are not in the store location(s).</li>
+			<li>Placeholder item for Receipt Import is missing in the Company Configuration -> Inventory.</li>
+		</ul>
+		'
 		, 'Failed'
 		, 'No record(s) imported.'
 		, 1 

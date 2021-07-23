@@ -2,7 +2,9 @@
 CREATE PROCEDURE uspSMInterCompanyUpdateMapping
 @currentTransactionId INT,
 @referenceTransactionId INT,
-@referenceCompanyId INT = NULL --if not exist reverse
+@referenceCompanyId INT = NULL, --if not exist reverse
+@screenId INT = NULL,
+@populatedByInterCompany BIT = NULL
 AS
 
 BEGIN
@@ -22,6 +24,16 @@ if(exists(select top 1 1 from tblSMInterCompanyMapping where intCurrentTransacti
 		print 'Entry already exists'
 		return;
 	end
+if not exists(select top 1 1 from tblSMTransaction where intTransactionId = @currentTransactionId) and ISNULL(@referenceCompanyId, '') = ''
+begin
+	print 'current transaction does not exists in the current database'
+	return;
+end
+if not exists(select top 1 1 from tblSMTransaction where intTransactionId = @referenceTransactionId) and ISNULL(@referenceCompanyId, '') = ''
+begin
+	print 'reference transaction does not exists in the current database'
+	return;
+end
 /***** End Validations *****/
 
 
@@ -31,8 +43,20 @@ begin try
 	begin
 		if (not exists(select * from tblSMInterCompanyMapping where intCurrentTransactionId = @currentTransactionId and intReferenceTransactionId = @referenceTransactionId))
 		begin
-				insert into tblSMInterCompanyMapping (intCurrentTransactionId, intReferenceTransactionId)
-					values(@currentTransactionId, @referenceTransactionId)
+				insert into tblSMInterCompanyMapping (
+					intCurrentTransactionId
+					, intReferenceTransactionId
+					, intScreenId
+					, ysnPopulatedByInterCompany
+					, dtmDate
+				)
+				values(
+					@currentTransactionId
+					, @referenceTransactionId
+					, @screenId
+					, @populatedByInterCompany
+					, GETDATE()
+				)
 					
 			end
 	end
@@ -40,8 +64,22 @@ begin try
 		begin
 			if(isnull(@currentTransactionId,'') <> '' and isnull(@referenceTransactionId,'') <> '')
 				begin
-					insert into tblSMInterCompanyMapping (intCurrentTransactionId, intReferenceTransactionId, intReferenceCompanyId)
-								values (@currentTransactionId, @referenceTransactionId, @referenceCompanyId)
+					insert into tblSMInterCompanyMapping (
+						intCurrentTransactionId
+						, intReferenceTransactionId
+						, intReferenceCompanyId
+						, intScreenId
+						, ysnPopulatedByInterCompany
+						, dtmDate
+					)
+					values (
+						@currentTransactionId
+						, @referenceTransactionId
+						, @referenceCompanyId
+						, @screenId
+						, @populatedByInterCompany
+						, GETDATE()
+					)
 				end
 		end
 

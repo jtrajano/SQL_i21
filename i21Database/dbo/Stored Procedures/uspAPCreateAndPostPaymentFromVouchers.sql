@@ -452,6 +452,8 @@ BEGIN
 		,@actionType = 'Created'										-- Action Type
 	END
 
+	EXEC uspAPAddTransactionLinks 2, @createdPaymentIds, 1
+
 	BEGIN TRY
 		EXEC uspAPPostPayment @userId = @userId,
 				@recap = @recap,

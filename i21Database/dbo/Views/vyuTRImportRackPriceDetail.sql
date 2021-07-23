@@ -13,8 +13,7 @@ SELECT
 	, IRD.intConcurrencyId
 	, IRD.dtmEffectiveDate
 	, IRD.ysnDelete
-	, IR.strMessage
-
+	, IRD.strMessage
 FROM            
 	dbo.tblTRImportRackPriceDetail AS IRD 
 	INNER JOIN dbo.tblTRImportRackPrice AS IR ON IRD.intImportRackPriceId = IR.intImportRackPriceId

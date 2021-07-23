@@ -11,6 +11,7 @@
 	[ysnValid] BIT NOT NULL DEFAULT ((0)),
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     [ysnDelete] BIT NULL DEFAULT ((0)), 
+	[strMessage] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTRImportRackPriceDetail] PRIMARY KEY ([intImportRackPriceDetailId]), 
     CONSTRAINT [FK_tblTRImportRackPriceDetail_tblTRImportRackPrice] FOREIGN KEY ([intImportRackPriceId]) REFERENCES [tblTRImportRackPrice]([intImportRackPriceId]) ON DELETE CASCADE
 )

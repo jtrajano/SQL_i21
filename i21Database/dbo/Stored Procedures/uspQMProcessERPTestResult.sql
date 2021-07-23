@@ -191,7 +191,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'User'
 					AND t.strName = @strCuppedBy
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 
 			IF ISNULL(@strUpdatedBy, '') <> ''
@@ -201,7 +201,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'User'
 					AND t.strName = @strUpdatedBy
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 
 			SET @strInfo1 = ISNULL(@strSampleNumber, '')

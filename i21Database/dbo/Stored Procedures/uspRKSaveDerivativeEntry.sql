@@ -328,6 +328,7 @@ BEGIN
 			, intFutOptTransactionId
 			, intCommodityId
 			, intLocationId
+			, strInOut
 			, intCurrencyId
 			, intBookId
 			, intSubBookId
@@ -356,6 +357,7 @@ BEGIN
 			, intFutOptTransactionId = der.intTransactionRecordId
 			, intCommodityId = der.intCommodityId
 			, intLocationId = der.intLocationId
+			, strInOut = CASE WHEN UPPER(strBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
 			, intCurrencyId = der.intCurrencyId
 			, intBookId = der.intBookId
 			, intSubBookId = der.intSubBookId

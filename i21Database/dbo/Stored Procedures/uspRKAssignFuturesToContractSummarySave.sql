@@ -46,13 +46,16 @@ BEGIN TRY
 	WHERE intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary
 									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete))
 	
-	UPDATE DER
-	SET DER.dblPContractBalanceLots = DER.dblPContractBalanceLots - dblAssignedLotsToPContract
-		,DER.dblSContractBalanceLots = DER.dblSContractBalanceLots - dblAssignedLotsToSContract
-	FROM tblRKFutOptTransaction DER
-	INNER JOIN (SELECT intFutOptTransactionId, dblAssignedLotsToPContract, dblAssignedLotsToSContract FROM tblRKAssignFuturesToContractSummary
-									WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete)) AFC
-		ON AFC.intFutOptTransactionId = DER.intFutOptTransactionId
+	IF @ysnAllowDerivativeAssignToMultipleContracts = 1
+	BEGIN
+		UPDATE DER
+		SET DER.dblPContractBalanceLots = DER.dblPContractBalanceLots + dblAssignedLotsToPContract
+			,DER.dblSContractBalanceLots = DER.dblSContractBalanceLots + dblAssignedLotsToSContract
+		FROM tblRKFutOptTransaction DER
+		INNER JOIN (SELECT intFutOptTransactionId, SUM(dblAssignedLotsToPContract) as dblAssignedLotsToPContract, SUM(dblAssignedLotsToSContract) as dblAssignedLotsToSContract FROM tblRKAssignFuturesToContractSummary
+										WHERE intAssignFuturesToContractSummaryId IN (SELECT intAssignFuturesToContractSummaryId FROM @tblMatchedDelete) GROUP BY intFutOptTransactionId) AFC
+			ON AFC.intFutOptTransactionId = DER.intFutOptTransactionId
+	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM @tblMatchedDelete)
 	BEGIN
@@ -115,8 +118,8 @@ BEGIN TRY
 			, @intContractDetailId = intContractDetailId
 			, @intFutOptTransactionId = intFutOptTransactionId
 			, @dblAssignedLots = dblAssignedLots
-			, @dblAssignedLotsToSContract = dblAssignedLotsToSContract
-			, @dblAssignedLotsToPContract = dblAssignedLotsToPContract
+			, @dblAssignedLotsToSContract = dblAssignedLotsToSContract * -1
+			, @dblAssignedLotsToPContract = dblAssignedLotsToPContract * -1
 			, @dblPrice = dblPrice
 			, @intUserId = intUserId
 			, @ysnAutoPrice = ysnAutoPrice
@@ -154,10 +157,12 @@ BEGIN TRY
 			IF @dblAssignedLotsToPContract <> 0
 			BEGIN
 				EXEC uspRKUpdateDerivativeContractBalanceLots @intFutOptTransactionId,'Purchase',@dblAssignedLotsToPContract
+				SET @dblAssignedLots = ABS(@dblAssignedLotsToPContract)
 			END
 			ELSE
 			BEGIN
 				EXEC uspRKUpdateDerivativeContractBalanceLots @intFutOptTransactionId,'Sale',@dblAssignedLotsToSContract
+				SET @dblAssignedLots = ABS(@dblAssignedLotsToSContract)
 			END
 
 			IF @ysnAutoPrice = 1

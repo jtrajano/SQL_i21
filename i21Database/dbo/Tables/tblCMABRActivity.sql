@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblCMABRActivity]
     [strBankAccountNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [strBankDescription] nvarchar(MAX) COLLATE Latin1_General_CI_AS NULL,
     [dblAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+    [dblBalance] NUMERIC(18, 6) NULL DEFAULT 0, 
     [dblDepositAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblWithdrawalAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0,	
 	[intImportStatus] INT NULL DEFAULT 0, 

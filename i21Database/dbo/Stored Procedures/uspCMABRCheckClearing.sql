@@ -31,12 +31,12 @@ OUTER APPLY(
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
-	AND RTRIM(LTRIM(strReferenceNo)) = 
-		CASE WHEN ABR.strReferenceNo = '' 
-			AND @dtmCurrent<= DATEADD(DAY,@intABRDaysNoRef, dtmDate)
-			THEN RTRIM(LTRIM(strReferenceNo))
+	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
+		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
+			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
+			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
 		ELSE
-			ABR.strReferenceNo
+			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
 		END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit  = 'C'
@@ -60,12 +60,12 @@ OUTER APPLY(
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
-	AND RTRIM(LTRIM(strReferenceNo)) = 
-		CASE WHEN ABR.strReferenceNo = '' 
+	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
+		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
 			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
-			THEN RTRIM(LTRIM(strReferenceNo))
+			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
 		ELSE
-			ABR.strReferenceNo
+			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
 		END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit  = 'D'

@@ -13,7 +13,7 @@ Trans.strBankTransactionTypeName,
 Activity.strABRActivityId,
 Activity.dtmClear,
 Activity.strBankDescription,
-Activity.dblAmount dblActivityAmount,
+Activity.dblAmount * CASE WHEN strDebitCredit = 'D' THEN -1 ELSE 1 END dblActivityAmount,
 Activity.strDebitCredit,
 A.dtmDateReconciled,
 A.intConcurrencyId

@@ -154,7 +154,7 @@ SELECT
 	  intId					= I.intRestApiInvoiceStagingId
 	, strTransactionType	= I.strTransactionType
 	, strType				= I.strType
-	, strSourceTransaction	= I.strSourceTransaction
+	, strSourceTransaction	= CASE I.strSourceTransaction WHEN 'Invoice' THEN 'Direct' ELSE I.strSourceTransaction END
 	, strSourceId			= I.strSourceId
 	, intEntityCustomerId	= C.intEntityId
 	, intCompanyLocationId	= COALESCE(CLL.intCompanyLocationId, CL.intCompanyLocationId)

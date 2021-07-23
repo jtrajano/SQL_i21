@@ -20,14 +20,14 @@ BEGIN
 			strOperation
 		)
 		SELECT
-			R.intRebateId,
-			P.strProgram,
-			'Rebates',
-			'Vendor Rebates',
 			I.intInvoiceId,
 			I.strInvoiceNumber,
-			'Invoices',
+			'Invoice',
 			'Accounts Receivable',
+			R.intRebateId,
+			P.strProgram,
+			'Rebate',
+			'Vendor Rebates',
 			'Submit'
 		FROM dbo.fnGetRowsFromDelimitedValues(@strRebateIds) IDS
 		INNER JOIN tblVRRebate R ON R.intRebateId = IDS.intID
@@ -40,21 +40,21 @@ BEGIN
 	ELSE
 	BEGIN
 		DECLARE @ID AS TABLE (intID INT)
-		DECLARE @intSrcId INT, @strSrcTransactionNo NVARCHAR(100)
+		DECLARE @intDestId INT, @strSrcTransactionNo NVARCHAR(100)
 
 		INSERT INTO @ID
 		SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@strRebateIds)
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @ID)
 		BEGIN
-			SELECT TOP 1 @intSrcId = R.intRebateId, @strSrcTransactionNo = P.strProgram
+			SELECT TOP 1 @intDestId = R.intRebateId, @strSrcTransactionNo = P.strProgram
 			FROM @ID ID
 			INNER JOIN tblVRRebate R ON R.intRebateId = ID.intID
 			INNER JOIN tblVRProgram P ON P.intProgramId = R.intProgramId
 
-			EXEC uspICDeleteTransactionLinks @intSrcId, @strSrcTransactionNo, 'Rebates', 'Vendor Rebates'
+			EXEC uspICDeleteTransactionLinks @intDestId, @strSrcTransactionNo, 'Rebate', 'Vendor Rebates'
 
-			DELETE FROM @ID WHERE intID = @intSrcId
+			DELETE FROM @ID WHERE intID = @intDestId
 		END
 	END
 END

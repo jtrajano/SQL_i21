@@ -64,7 +64,7 @@ BEGIN TRY
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3	
 	DECLARE @ItemsToStorage AS ItemCostingTableType
 	DECLARE @ItemsToPost AS ItemCostingTableType
-	DECLARE @strBatchId AS NVARCHAR(20)
+	DECLARE @strBatchId AS NVARCHAR(40)
 	DECLARE @intReceiptId AS INT
 	DECLARE @intInventoryReceiptItemId AS INT
 	DECLARE @intScaleTicketId AS INT
@@ -116,7 +116,7 @@ BEGIN TRY
 	DECLARE @createdVouchersId NVARCHAR(MAX)
 	DECLARE @ysnDPOwnedType AS BIT
 	DECLARE @ysnFromTransferStorage AS BIT
-
+	DECLARE @IdOutputs nvarchar(max)
 	--Get vouchered quantity
 	DECLARE @dblTotalVoucheredQuantity AS DECIMAL(24,10)
 	-- THIS IS THE STORAGE UNIT
@@ -2953,10 +2953,18 @@ BEGIN TRY
 						AND IU.ysnStockUnit = 1
 				WHERE SV.intItemType = 1
 
-				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+				
+				SET @IdOutputs = ''
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT, @IdOutputs OUTPUT
 
-				INSERT INTO @intStorageHistoryIds
-				SELECT @intStorageHistoryId
+				if @IdOutputs <> '' and @IdOutputs like '%,%'
+				begin
+					INSERT INTO @intStorageHistoryIds
+					select distinct cast(Record as int) from dbo.fnCFSplitString(@IdOutputs , ',')		
+				end
+				else
+					INSERT INTO @intStorageHistoryIds
+					SELECT @intStorageHistoryId
 			END
 
 			UPDATE tblGRSettleStorage

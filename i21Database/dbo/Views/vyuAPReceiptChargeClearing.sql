@@ -1,75 +1,23 @@
-﻿CREATE VIEW [dbo].[vyuAPReceiptChargeClearing]    
-AS     
-
- SELECT
-    charges.*
-    ,APClearing.intAccountId
-    ,APClearing.strAccountId
-FROM (   
---BILL ysnPrice = 1/Charge Entity    
-SELECT    
-    Receipt.intEntityVendorId AS intEntityVendorId    
-    ,Receipt.dtmReceiptDate AS dtmDate    
-    ,Receipt.strReceiptNumber  AS strTransactionNumber   
-    ,Receipt.intInventoryReceiptId    
-    ,NULL AS intBillId    
-    ,NULL AS strBillId    
-    ,NULL AS intBillDetailId    
-    ,ReceiptCharge.intInventoryReceiptChargeId    
-    ,ReceiptCharge.intChargeId AS intItemId   
-    ,ReceiptCharge.intCostUOMId  AS intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM 
-    ,0 AS dblVoucherTotal    
-    ,0 AS dblVoucherQty    
-    ,CAST((ISNULL(dblAmount * -1,0) --multiple the amount to reverse if ysnPrice = 1    
-        + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal    
-    ,ISNULL(ReceiptCharge.dblQuantity,0) * -1 AS dblReceiptChargeQty    
-    ,Receipt.intLocationId    
-    ,compLoc.strLocationName    
-    ,CAST(1 AS BIT) ysnAllowVoucher    
-    -- ,APClearing.intAccountId  
-    -- ,APClearing.strAccountId  
-FROM tblICInventoryReceiptCharge ReceiptCharge    
-INNER JOIN tblICInventoryReceipt Receipt     
-    ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId     
-INNER JOIN tblSMCompanyLocation compLoc    
-    ON Receipt.intLocationId = compLoc.intCompanyLocationId
-LEFT JOIN 
-(
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
-)
-    ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId  
--- OUTER APPLY (  
---  SELECT TOP 1  
---   ga.strAccountId  
---   ,ga.intAccountId  
---  FROM   
---   tblGLDetail gd INNER JOIN tblGLAccount ga  
---    ON ga.intAccountId = gd.intAccountId  
---   INNER JOIN tblGLAccountGroup ag  
---    ON ag.intAccountGroupId = ga.intAccountGroupId  
---  WHERE  
---   gd.strTransactionId = Receipt.strReceiptNumber  
---   AND ag.strAccountType = 'Liability'  
---   AND gd.ysnIsUnposted = 0   
--- ) APClearing  
-WHERE     
-    Receipt.ysnPosted = 1      
-AND ReceiptCharge.ysnPrice = 1    
-UNION ALL    
---BILL ysnAccrue = 1/There is a vendor selected, receipt vendor  
-SELECT    
-    ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId    
-    ,Receipt.dtmReceiptDate AS dtmDate    
-    ,Receipt.strReceiptNumber  AS strTransactionNumber  
-    ,Receipt.intInventoryReceiptId    
-    ,NULL AS intBillId    
-    ,NULL AS strBillId    
-    ,NULL AS intBillDetailId    
-    ,ReceiptCharge.intInventoryReceiptChargeId    
-    ,ReceiptCharge.intChargeId AS intItemId  
-    ,ReceiptCharge.intCostUOMId  AS intItemUOMId
+﻿CREATE VIEW [dbo].[vyuAPReceiptChargeClearing]      
+AS       
+  
+ SELECT  
+    charges.*  
+    ,APClearing.intAccountId  
+    ,APClearing.strAccountId  
+FROM (     
+--BILL ysnPrice = 1/Charge Entity      
+SELECT      
+    Receipt.intEntityVendorId AS intEntityVendorId      
+    ,Receipt.dtmReceiptDate AS dtmDate      
+    ,Receipt.strReceiptNumber  AS strTransactionNumber     
+    ,Receipt.intInventoryReceiptId      
+    ,NULL AS intBillId      
+    ,NULL AS strBillId      
+    ,NULL AS intBillDetailId      
+    ,ReceiptCharge.intInventoryReceiptChargeId      
+    ,ReceiptCharge.intChargeId AS intItemId     
+    ,ReceiptCharge.intCostUOMId  AS intItemUOMId  
     ,unitMeasure.strUnitMeasure AS strUOM   
     ,0 AS dblVoucherTotal      
     ,0 AS dblVoucherQty      
@@ -93,9 +41,6 @@ INNER JOIN tblICInventoryReceipt Receipt
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId       
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId  
-LEFT JOIN tblICInventoryReceiptItem ReceiptItem
-    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -124,7 +69,10 @@ AND NOT EXISTS (
     FROM tblICInventoryReceipt IR
     INNER JOIN tblICInventoryReceiptItem IRI
         ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-        AND IRI.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+    INNER JOIN tblICInventoryReceiptCharge IRC
+        ON IRC.intInventoryReceiptId = Receipt.intInventoryReceiptId
+        AND IRC.strChargesLink = IRI.strChargesLink
+        AND IRC.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
         AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
@@ -173,9 +121,6 @@ INNER JOIN tblICInventoryReceipt Receipt
         AND ReceiptCharge.ysnAccrue = 1       
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId     
-LEFT JOIN tblICInventoryReceiptItem ReceiptItem
-    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -206,7 +151,10 @@ AND NOT EXISTS (
     FROM tblICInventoryReceipt IR
     INNER JOIN tblICInventoryReceiptItem IRI
         ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-        AND IRI.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+    INNER JOIN tblICInventoryReceiptCharge IRC
+        ON IRC.intInventoryReceiptId = Receipt.intInventoryReceiptId
+        AND IRC.strChargesLink = IRI.strChargesLink
+        AND IRC.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
         AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
@@ -255,9 +203,6 @@ INNER JOIN tblICInventoryReceipt Receipt
         AND ReceiptCharge.ysnAccrue = 1       
 INNER JOIN tblSMCompanyLocation compLoc      
     ON Receipt.intLocationId = compLoc.intCompanyLocationId    
-LEFT JOIN tblICInventoryReceiptItem ReceiptItem
-    ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-    AND ReceiptCharge.strChargesLink = ReceiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -290,7 +235,10 @@ AND NOT EXISTS (
     FROM tblICInventoryReceipt IR
     INNER JOIN tblICInventoryReceiptItem IRI
         ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-        AND IRI.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+    INNER JOIN tblICInventoryReceiptCharge IRC
+        ON IRC.intInventoryReceiptId = Receipt.intInventoryReceiptId
+        AND IRC.strChargesLink = IRI.strChargesLink
+        AND IRC.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
         AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
@@ -387,9 +335,6 @@ INNER JOIN tblICInventoryReceipt receipt
     ON receipt.intInventoryReceiptId  = receiptCharge.intInventoryReceiptId      
 INNER JOIN tblSMCompanyLocation compLoc      
     ON receipt.intLocationId = compLoc.intCompanyLocationId    
-LEFT JOIN tblICInventoryReceiptItem receiptItem
-    ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
-    AND receiptCharge.strChargesLink = receiptItem.strChargesLink
 LEFT JOIN   
 (  
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
@@ -410,7 +355,10 @@ AND NOT EXISTS (
     FROM tblICInventoryReceipt IR
     INNER JOIN tblICInventoryReceiptItem IRI
         ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-        AND IRI.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+    INNER JOIN tblICInventoryReceiptCharge IRC
+        ON IRC.intInventoryReceiptId = receipt.intInventoryReceiptId
+        AND IRC.strChargesLink = IRI.strChargesLink
+        AND IRC.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
     INNER JOIN tblGRStorageHistory SH
         ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
         AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)

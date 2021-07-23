@@ -286,21 +286,10 @@ begin try
 				--Set @dblTransactionQuantity = @dblQuantityToBill by default (this is also correct quantity for Load Based)
 				set @dblTransactionQuantity = @dblQuantityToBill;
 
-				DECLARE @ysnIsNotLoadMultiplePrice bit = 0
-
 				if (isnull(@ysnLoad,0) = 0 and @dblTransactionQuantity > @dblAvailablePriceQuantity)
 				begin
 					--If not load based and the @dblAvailablePriceQuantity is less than the @dblQuantityToBill, price quantity should be the quantity to bill
 					set @dblTransactionQuantity = @dblAvailablePriceQuantity;
-					
-					if(
-					@intPricingTypeId = 1 and --if priced contract
-					EXISTS(SELECT TOP 1 1 FROM @voucherPayables WHERE strLoadShipmentNumber like '%LS-%') and --if load shipment
-					@intPriceFixationId is null --if not has multiple PriceFixation
-					)
-					BEGIN
-						SET @ysnIsNotLoadMultiplePrice = 1
-					END
 				end
 				else
 				begin
@@ -467,9 +456,7 @@ begin try
 					,dblOrderQty = vp.dblOrderQty
 					,dblOrderUnitQty = vp.dblOrderUnitQty
 					,intOrderUOMId = vp.intOrderUOMId
-
-					,dblQuantityToBill = CASE WHEN @ysnIsNotLoadMultiplePrice = 1 THEN vp.dblQuantityToBill ELSE @dblTransactionQuantity END
-
+					,dblQuantityToBill = @dblTransactionQuantity
 					,dblQtyToBillUnitQty = vp.dblQtyToBillUnitQty
 					,intQtyToBillUOMId = vp.intQtyToBillUOMId
 					,dblCost = @dblFinalPrice
@@ -478,9 +465,7 @@ begin try
 					,intCostUOMId = vp.intCostUOMId
 					,intCostCurrencyId = vp.intCostCurrencyId
 					,dblWeight = vp.dblWeight
-					
-					,dblNetWeight = CASE WHEN @ysnIsNotLoadMultiplePrice = 1 THEN vp.dblNetWeight ELSE @dblTransactionQuantity END
-
+					,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(vp.intQtyToBillUOMId,vp.intWeightUOMId,@dblTransactionQuantity)
 					,dblWeightUnitQty = vp.dblWeightUnitQty
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId

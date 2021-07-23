@@ -165,7 +165,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -639,6 +639,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intScreenId
+						,@populatedByInterCompany=1
 				END
 			END
 

@@ -68,5 +68,7 @@ CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_intItemId]
 	ON [dbo].[tblGRCustomerStorage] ([intItemId])
 	INCLUDE ([intEntityId],[intCommodityId],[intStorageScheduleId],[intStorageTypeId],[intCompanyLocationId],[dtmDeliveryDate],[strDPARecieptNumber],[dtmLastStorageAccrueDate],[dblStorageDue],[dblDiscountsDue],[strCustomerReference],[strStorageType],[strStorageTicketNumber],[intDeliverySheetId])
 GO
+CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_intEntityId] ON [dbo].[tblGRCustomerStorage]([intEntityId] ASC);
+GO
 
 

@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 	,@dtmBeginDate AS DATETIME = NULL 
 	,@dtmEndDate AS DATETIME = NULL 
 	,@strUpcCode AS VARCHAR(30) = NULL 
+	,@intItemId AS INT = NULL 
 	,@intItemSpecialPricingId AS INT = NULL 
 	,@intEntityUserSecurityId AS INT 
 AS
@@ -126,6 +127,7 @@ BEGIN
 												AND (uom.strUpcCode = @strUpcCode OR uom.strLongUPCCode = @strUpcCode)
 									)
 								)
+								AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 					) AS Source_Query  
 						ON itemSpecialPricing.intItemSpecialPricingId = Source_Query.intItemSpecialPricingId					
 					
