@@ -274,7 +274,7 @@ FROM (
 		, a.intTicketId
 	FROM #tempFinalFirstRun a
 	INNER JOIN #tempFinalSecondRun b ON b.strTransactionReferenceId = a.strTransactionReferenceId
-
+	AND (a.dblTotal - b.dblTotal) <> 0
 
 	UNION ALL
 	SELECT 
