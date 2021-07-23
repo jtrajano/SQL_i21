@@ -1626,6 +1626,7 @@ BEGIN TRY
 		, intTransactionRecordId
 		, intContractHeaderId
 		, strContractNumber
+		, strEntityName
 	INTO #tblDelayedPricing
 	FROM dbo.fnRKGetBucketDelayedPricing(@dtmToDate, @intCommodityId, @intVendorId) t
 	WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) 
@@ -6425,7 +6426,9 @@ BEGIN TRY
 				, intTransactionRecordHeaderId
 				, intTransactionRecordId
 				, intContractHeaderId
-				, strContractNumber)
+				, strContractNumber
+				, strEntityName
+				)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
@@ -6440,6 +6443,7 @@ BEGIN TRY
 				, intTransactionRecordId
 				, intContractHeaderId
 				, strContractNumber
+				, strEntityName
 			FROM (
 				SELECT DISTINCT intTicketId
 					, strTicketType = strDistributionType
@@ -6461,6 +6465,7 @@ BEGIN TRY
 					, intTransactionRecordId
 					, intContractHeaderId
 					, strContractNumber
+					, strEntityName
 				FROM #tblDelayedPricing ch
 				)t
 			GROUP BY strCommodityCode
@@ -6475,6 +6480,7 @@ BEGIN TRY
 				, intTransactionRecordId
 				, intContractHeaderId
 				, strContractNumber
+				, strEntityName
 		END
 		ELSE
 		BEGIN
