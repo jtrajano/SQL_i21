@@ -194,7 +194,8 @@ BEGIN TRY
         strGuid,
         intConcurrencyId
     )
-    SELECT DISTINCT it.strItemNo AS strVendorItemNumber,
+    SELECT DISTINCT 
+		   ISNULL((SELECT TOP 1 strVendorProduct FROM tblICItemVendorXref WHERE intItemId = it.intItemId), '') AS strVendorItemNumber,
            it.intItemId AS intItemId,
            it.strDescription AS strDescription,
            0 AS dblNewCost,
@@ -203,27 +204,21 @@ BEGIN TRY
            uom.strLongUPCCode AS strLongUPCCode,
            um.strUnitMeasure AS strUnit,
            uom.dblUnitQty AS intQuantity,
-				ROUND(CAST(CASE
-					WHEN (GETDATE() >
-						(
-							SELECT TOP 1
-								dtmEffectiveRetailPriceDate
-							FROM tblICEffectiveItemPrice EIP
-							WHERE EIP.intItemLocationId = il.intItemLocationId
-									AND GETDATE() >= dtmEffectiveRetailPriceDate
-							ORDER BY dtmEffectiveRetailPriceDate ASC
-						)
-						) THEN
-					(
-						SELECT TOP 1
-							dblRetailPrice
-						FROM tblICEffectiveItemPrice EIP
-						WHERE EIP.intItemLocationId = il.intItemLocationId
-								AND GETDATE() >= dtmEffectiveRetailPriceDate
-						ORDER BY dtmEffectiveRetailPriceDate ASC
-					) --Effective Retail Price
-					ELSE
-						ipr.dblSalePrice 
+				ROUND(CAST(
+					CASE
+						WHEN (@StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate)
+							THEN spr.dblUnitAfterDiscount 
+						WHEN (@StartDate > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
+													WHERE EIP.intItemLocationId = il.intItemLocationId
+													AND @StartDate >= dtmEffectiveRetailPriceDate
+													ORDER BY dtmEffectiveRetailPriceDate ASC))
+							THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
+													WHERE EIP.intItemLocationId = il.intItemLocationId
+													AND @StartDate >= dtmEffectiveRetailPriceDate
+													ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
+						WHEN ISNULL(ipr.intItemPricingId, 0) != 0
+							THEN ipr.dblSalePrice
+						ELSE 0
 					END 
 			AS FLOAT),2)
 			AS dblPrice,
@@ -233,16 +228,14 @@ BEGIN TRY
            class.strSubcategoryDesc AS strClass,
            @strGuid,
            1
-    FROM tblICItemPricing ipr
-        JOIN tblICItem it
-            ON ipr.intItemId = it.intItemId
+    FROM tblICItem it
+        JOIN tblICItemLocation il
+            ON it.intItemId = il.intItemId
         JOIN tblICItemUOM uom
             ON it.intItemId = uom.intItemId
                AND uom.ysnStockUnit = 1
         JOIN tblICUnitMeasure um
             ON uom.intUnitMeasureId = um.intUnitMeasureId
-        JOIN tblICItemLocation il
-            ON ipr.intItemLocationId = il.intItemLocationId
         JOIN tblICCategory cat
             ON it.intCategoryId = cat.intCategoryId
         LEFT JOIN tblICCategoryLocation catloc
@@ -251,6 +244,12 @@ BEGIN TRY
             ON il.intFamilyId = fam.intSubcategoryId
         LEFT JOIN tblSTSubcategory class
             ON il.intClassId = class.intSubcategoryId
+        LEFT JOIN tblICItemPricing ipr
+            ON ipr.intItemLocationId = il.intItemLocationId
+        LEFT JOIN tblICItemSpecialPricing spr
+            ON spr.intItemLocationId = il.intItemLocationId
+        LEFT JOIN (SELECT * FROM tblICItemVendorXref W) xref
+            ON spr.intItemLocationId = il.intItemLocationId
         JOIN tblSMCompanyLocation ill
             ON il.intLocationId = ill.intCompanyLocationId
         JOIN tblSTStore st
@@ -307,6 +306,7 @@ BEGIN TRY
         WHERE intClassId = il.intClassId
     )
               )
+	AND it.strStatus != 'Discontinued'
 
 
     IF OBJECT_ID('tempdb..#tmpUpdateGridCostAndPrice_Location') IS NOT NULL
