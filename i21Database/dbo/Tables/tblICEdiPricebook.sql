@@ -51,3 +51,8 @@
     intModifiedByUserId INT NULL,
 	intConcurrencyId INT NULL
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICEdiPricebook_strUniqueId]
+	ON [dbo].[tblICEdiPricebook]([strUniqueId] ASC)
+GO
