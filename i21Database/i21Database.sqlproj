@@ -9577,6 +9577,7 @@
     <Build Include="dbo\Tables\tblSMLicenseModule.sql" />
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFMoveItemValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
