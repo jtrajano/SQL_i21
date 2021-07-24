@@ -112,6 +112,10 @@ BEGIN
 	VALUES ('Italiano', 0, 1)
 END
 
+UPDATE tblSMUserSecurity
+SET intLanguageId = (SELECT TOP 1 intLanguageId FROM tblSMLanguage WHERE strLanguage = 'English')
+WHERE ISNULL(intLanguageId, 0) = 0
+
 print('/*******************  END INSERTING LANGUAGES  *******************/')
 
 GO
