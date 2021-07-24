@@ -49,7 +49,7 @@
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
 	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
-    CONSTRAINT [FK_UserSecurity_Language] FOREIGN KEY (intLanguageId]) REFERENCES [dbo].[tblSMLanguage] ([intLanguageId]),
+    CONSTRAINT [FK_UserSecurity_Language] FOREIGN KEY ([intLanguageId]) REFERENCES [dbo].[tblSMLanguage] ([intLanguageId]),
     CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName]) --this use in an sp named uspEMMergeEntity, any change in name should also be applied there MCG
 );
 
