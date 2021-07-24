@@ -14,11 +14,11 @@ BEGIN TRANSACTION
 	USING [tblSMLanguageTranslationStaging] B ON (A.strLabel = B.strLabel AND A.intLanguageId = @intLanguageId)
 	--When records are matched, update the records if there is any change
 	WHEN MATCHED AND A.strTranslation <> B.strTranslation
-	THEN UPDATE SET A.strTranslation = TRIM(B.strTranslation), A.intConcurrencyId = A.intConcurrencyId + 1
+	THEN UPDATE SET A.strTranslation = RTRIM(LTRIM(B.strTranslation)), A.intConcurrencyId = A.intConcurrencyId + 1
 	--When no records are matched, insert the incoming records from source table to target table
 	WHEN NOT MATCHED BY TARGET 
 	THEN INSERT (strLabel, strTranslation, intLanguageId) 
-	VALUES (TRIM(B.strLabel), TRIM(B.strTranslation), @intLanguageId);
+	VALUES (RTRIM(LTRIM(B.strLabel)), RTRIM(LTRIM(B.strTranslation)), @intLanguageId);
 
 	IF NOT EXISTS (SELECT 1 FROM [tblSMLanguageTranslationHistory] WHERE intLanguageId = @intLanguageId)
 		BEGIN
