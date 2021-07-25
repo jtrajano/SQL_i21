@@ -2324,7 +2324,7 @@ UPDATE tblSMCSVDynamicImport SET
 			)
 			SELECT
 				@entityId,		
-				@location_name,
+				@location_name,				
 				@address,				
 				@city, 
 				@country,				
@@ -2353,7 +2353,7 @@ UPDATE tblSMCSVDynamicImport SET
 				@latitudeNo,
 				@timezone,	
 				
-				@check_payee_name,
+				ISNULL(NULLIF(@check_payee_name, ''''), @location_name),
 				@defaultcurrencyId,
 				@vendorlinkId,
 				@location_description,	
