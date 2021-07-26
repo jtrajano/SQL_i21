@@ -61,7 +61,7 @@ END
 DECLARE @temp_xml_table TABLE (
 	id INT IDENTITY(1,1)
 	,[fieldname] NVARCHAR(50)
-	,condition NVARCHAR(20)      
+	,condition NVARCHAR(40)      
 	,[from] NVARCHAR(50)
 	,[to] NVARCHAR(50)
 	,[join] NVARCHAR(10)
@@ -77,7 +77,7 @@ SELECT *
 FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (
 	[fieldname] nvarchar(50)
-	, [condition] nvarchar(20)
+	, [condition] nvarchar(40)
 	, [from] nvarchar(50)
 	, [to] nvarchar(50)
 	, [join] nvarchar(10)

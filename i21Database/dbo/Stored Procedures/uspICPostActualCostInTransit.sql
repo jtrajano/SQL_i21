@@ -16,7 +16,7 @@ CREATE PROCEDURE [dbo].[uspICPostActualCostInTransit]
 	--,@dblExchangeRate AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
-	,@strTransactionId AS NVARCHAR(20)
+	,@strTransactionId AS NVARCHAR(40)
 	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)
