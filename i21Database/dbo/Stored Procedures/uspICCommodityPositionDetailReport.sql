@@ -14,7 +14,7 @@ BEGIN
 	) AS C
 	
 	DECLARE @sql AS NVARCHAR(MAX)
-	DECLARE @top as nvarchar(20)
+	DECLARE @top as nvarchar(40)
 	
 	SET @top = ''
 	SET @strLocationName = LTRIM(RTRIM(ISNULL(@strLocationName, '')))

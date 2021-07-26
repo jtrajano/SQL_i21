@@ -14,10 +14,10 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
 	,@dblNewValue AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
-	,@strTransactionId AS NVARCHAR(20)
+	,@strTransactionId AS NVARCHAR(40)
 	,@intSourceTransactionId AS INT
 	,@intSourceTransactionDetailId AS INT 
-	,@strSourceTransactionId AS NVARCHAR(20)
+	,@strSourceTransactionId AS NVARCHAR(40)
 	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT
