@@ -244,11 +244,16 @@ FROM
 		,dblDifference = /* Difference = P-Terminal Price - S-Terminal Price */
 							ISNULL(PCD.dblFutures, 0) - ISNULL(SCD.dblFutures, 0)
 		,dblDifferenceInFC = (ISNULL(PCD.dblFutures, 0) / ISNULL(PCUR.intCent, 1)) - (ISNULL(SCD.dblFutures, 0) / ISNULL(SCUR.intCent, 1))
-		,dblLots = /* Lots */
-					PCD.dblNoOfLots
-		,dblLotContractSize = /* Lots Contract Size = Lots x Contract Size*/
-							PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)
-		,dblLotContractSizeInPriceUOM = PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
+		,dblLots = /* Lots = Invoice or Allocated Weight / Contract Weight */
+					ROUND(dbo.fnDivide(CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN INVC.dblNetShippedWt 
+									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
+									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
+		,dblLotContractSize = /* Invoice or Allocated Weight */
+							CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN INVC.dblNetShippedWt 
+								 ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END
+		,dblLotContractSizeInPriceUOM = /* Invoice or Allocated Weight in Sales Price Unit */
+							CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, SCD.intPriceItemUOMId, INVC.dblNetShippedWt)
+								ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, SCD.intPriceItemUOMId, ALD.dblSAllocatedQty) END
 		,dblReservesARateTotal = RA.dblReservesARateTotal
 		,dblReservesAValueTotal = RA.dblReservesAValueTotal * -1
 		,dblReservesBRateTotal = RB.dblReservesBRateTotal
@@ -320,7 +325,8 @@ FROM
 			FROM 
 				(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
 					,dblTotal = bld.dblTotal * CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
-					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (intUnitOfMeasureId, ToWUOM.intItemUOMId, dblQtyReceived) 
+					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, ToWUOM.intItemUOMId, 
+										CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 ELSE bld.dblNetWeight END) 
 									* CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
 					FROM tblAPBillDetail bld
 					INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD
