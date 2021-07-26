@@ -81,7 +81,7 @@ begin try
 	from
 		tblCTContractDetail cd
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-		left join tblCTPriceFixation pf on pf.intContractDetailId = cd.intContractDetailId
+		left join tblCTPriceFixation pf on isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end) and pf.intContractHeaderId = cd.intContractHeaderId
 		left join tblCTPriceContract pc on pc.intPriceContractId = pf.intPriceContractId
 		left join tblICItemUOM ium on ium.intItemUOMId = cd.intPriceItemUOMId
 		left join tblICCommodityUnitMeasure comm on comm.intUnitMeasureId = ium.intUnitMeasureId and comm.intCommodityId = ch.intCommodityId
