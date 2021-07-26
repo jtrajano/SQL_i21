@@ -87,6 +87,7 @@
 	ysnAutoCompleteDPDeliveryDate bit not null default 0,
 	intPricingDecimals INT NOT NULL DEFAULT 2,
 	strContractApprovalIncrements NVARCHAR(150) COLLATE Latin1_General_CI_AS,
+	ysnAllowBasisSequencePriceChangeWhenPartiallyPriced bit null,
 	ysnStayAsDraftContractUntilApproved bit not null default 0,
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),

@@ -10,6 +10,7 @@
 	,@intLocationId INT = NULL
 	,@dtmDate DATETIME = NULL
 	,@intShiftId INT = NULL
+	,@ysnUpdateOnlyParentLot BIT=0
 AS
 BEGIN
 	DECLARE @ErrMsg NVARCHAR(Max)
@@ -280,6 +281,9 @@ BEGIN
 		WHERE intLotId = @intLotId
 	END
 
+	if @ysnUpdateOnlyParentLot=0
+	Begin
+
 	IF @intSplitFromLotId IS NULL
 		AND @strCondition = 'Damaged'
 	BEGIN
@@ -544,4 +548,5 @@ BEGIN
 		SET ysnStatus = 0
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
 	END
+	End
 END

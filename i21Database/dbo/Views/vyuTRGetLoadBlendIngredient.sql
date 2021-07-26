@@ -24,4 +24,4 @@ SELECT LoadIngredient.intLoadBlendIngredientId
 FROM tblTRLoadBlendIngredient LoadIngredient
 LEFT JOIN tblTRLoadDistributionDetail LoadDetail ON LoadDetail.intLoadDistributionDetailId = LoadIngredient.intLoadDistributionDetailId
 LEFT JOIN vyuMFGetRecipeItem Recipe ON Recipe.intRecipeItemId = LoadIngredient.intRecipeItemId
-LEFT JOIN tblICItem Item ON LoadIngredient.intSubstituteItemId = Item.intItemId
+LEFT JOIN tblICItem Item ON LoadIngredient.intRecipeItemId = Item.intItemId

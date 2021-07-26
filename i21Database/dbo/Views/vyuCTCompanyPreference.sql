@@ -98,6 +98,7 @@ AS
 			,CP.ysnAutoCompleteDPDeliveryDate
 			,CP.intPricingDecimals
 			,CP.strContractApprovalIncrements
+			,CP.ysnAllowBasisSequencePriceChangeWhenPartiallyPriced
 			,CP.ysnStayAsDraftContractUntilApproved
 	FROM	tblCTCompanyPreference		CP LEFT
 	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT

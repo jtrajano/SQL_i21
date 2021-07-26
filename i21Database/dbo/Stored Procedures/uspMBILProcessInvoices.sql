@@ -158,6 +158,8 @@ CREATE TABLE #TempMBILInvoice (
 			, [ysnRecomputeTax]
 			, [intContractDetailId]
 			, [intSiteId] 
+			, [strInvoiceOriginId]
+			, [ysnUseOriginIdAsInvoiceNumber]
 		)
 	SELECT 
 		 [intInvoiceId]
@@ -197,6 +199,8 @@ CREATE TABLE #TempMBILInvoice (
 		,[ysnRecomputeTax] = 1
 		,[intContractDetailId] = InvoiceItem.intContractDetailId
 		,[intSiteId] = InvoiceItem.intSiteId
+		,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
+		,[ysnUseOriginIdAsInvoiceNumber] = 1
 
 	FROM vyuMBILInvoiceItem InvoiceItem
 	WHERE inti21InvoiceId IS NULL and intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
@@ -282,12 +286,12 @@ CREATE TABLE #TempMBILInvoice (
 
 			DELETE FROM #TempMBILInvoice WHERE intInvoiceId = @intInvoiceId
 
-			UPDATE tblARInvoice 
-				SET strInvoiceNumber = (SELECT TOP 1 strInvoiceNo FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
-				WHERE intInvoiceId   = (SELECT TOP 1 intInvoiceId FROM tblARInvoice A
-										WHERE A.intEntityCustomerId = (SELECT TOP 1 intEntityCustomerId FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
-										AND A.intSourceId = @intInvoiceId 
-										AND A.strType = 'Tank Delivery' order by dtmDateCreated desc)
+			--UPDATE tblARInvoice 
+			--	SET strInvoiceNumber = (SELECT TOP 1 strInvoiceNo FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
+			--	WHERE intInvoiceId   = (SELECT TOP 1 intInvoiceId FROM tblARInvoice A
+			--							WHERE A.intEntityCustomerId = (SELECT TOP 1 intEntityCustomerId FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
+			--							AND A.intSourceId = @intInvoiceId 
+			--							AND A.strType = 'Tank Delivery' order by dtmDateCreated desc)
 		END
 
 	END

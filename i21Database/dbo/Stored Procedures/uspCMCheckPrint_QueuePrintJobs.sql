@@ -8,7 +8,7 @@
 CREATE PROCEDURE [dbo].[uspCMCheckPrint_QueuePrintJobs]
 	@intBankAccountId INT = NULL,
 	@strTransactionIds NVARCHAR(max) = NULL,
-	@strBatchId NVARCHAR(20) = NULL,
+	@strBatchId NVARCHAR(40) = NULL,
 	@intTransactionType INT,
 	@intUserId	INT = NULL
 AS
