@@ -2,7 +2,7 @@ CREATE PROCEDURE uspCMABRCheckClearing
     @intBankAccountId INT,
     @intEntityId INT
 AS
-DECLARE @dtmCurrent DATETIME = GETDATE()
+DECLARE @dtmCurrent DATETIME =  CAST(FLOOR(CAST(GETDATE() AS float)) AS DATETIME)
 DECLARE @intABRDaysNoRef INT
 
 IF OBJECT_ID('tempdb..##tempActivityMatched') IS NOT NULL
@@ -32,7 +32,7 @@ OUTER APPLY(
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
 	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
-		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
+		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' AND @intABRDaysNoRef > 0
 			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
 			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
 		ELSE
@@ -61,7 +61,7 @@ OUTER APPLY(
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
 	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
-		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
+		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' AND @intABRDaysNoRef > 0
 			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
 			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
 		ELSE
