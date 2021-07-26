@@ -23,7 +23,7 @@ DECLARE	@OWNERSHIP_TYPE_Own AS INT = 1
 DECLARE	@ItemId				INT
 		,@LocationId		INT
 		,@TransactionDate	DATETIME
-		,@TransactionType	NVARCHAR(20) = 'Purchase'
+		,@TransactionType	NVARCHAR(40) = 'Purchase'
 		,@EntityId			INT	
 		,@TaxMasterId		INT	
 		,@InventoryReceiptItemId INT
