@@ -37,7 +37,7 @@ BEGIN
 	,@intInventoryItemUOMId			INT
 	,@intCSInventoryItemUOMId		INT
 	,@StorageChargeItemDescription  NVARCHAR(100)
-	,@ysnStorageChargeAccountUseIncome BIT = 0
+	,@ysnStorageChargeAccountUseIncome BIT = 1
 	
 	declare @EntityNo nvarchar(100)
 
@@ -69,7 +69,7 @@ BEGIN
 
 
 	
-	select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
+	-- select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
 
 
 	IF @intStorageChargeItemId IS NULL
