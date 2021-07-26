@@ -532,8 +532,8 @@ LEFT JOIN (
 		 , strTransactionType	= 'Applied Payment'
 		 , dblAmountDue			= 0.00
 		 , dblBalance			= 0.00
-		 , dblPayment			= SUM(DETAILS.dblPayment)
-		 , dtmDate				= P.dtmDatePaid
+		 , dblPayment			= SUM(DETAILS.dblPayment) -- Add 1 second to applied payment. This is to ensure that payments and invoices are presented first before the applied payment.
+		 , dtmDate				= DATEADD(ss, 1, P.dtmDatePaid)
 		 , dtmDueDate			= NULL
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= NULL
@@ -566,15 +566,13 @@ LEFT JOIN (
 	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes, DETAILS.dblAmountDue
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 OUTER APPLY (
-	-- Add 1 second to applied payment. This is to ensure that payments and invoices are presented first before the applied payment.
 	SELECT TOP 1 dtmDateEntered = CASE WHEN CAST(dtmDateEnteredMin AS DATE) <> CAST(dtmDate AS DATE) THEN CAST(dtmDate AS DATE)
-									   WHEN TRANSACTIONS.strTransactionType = 'Applied Payment' THEN DATEADD(ss, 1, dtmDateEntered) 
 									   ELSE dtmDateEntered 
 							      END 
 	FROM tblGLDetail
 	WHERE strBatchId = TRANSACTIONS.strBatchId
 ) LOGDATETIME
-ORDER BY LOGDATETIME.dtmDateEntered
+ORDER BY TRANSACTIONS.dtmDate, LOGDATETIME.dtmDateEntered
 
 --BUDGET
 IF @ysnIncludeBudgetLocal = 1
@@ -808,7 +806,6 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, dblAmountPaid				= CASE WHEN SR.strTransactionType IN ('Customer Prepayment', 'Credit Memo') THEN SR.dblPayment WHEN SR.strTransactionType = 'Payment' THEN ABS(SR.dblPayment) * -1 ELSE 0 END
 	, intRowId					= CASE WHEN SR.strTransactionType = 'Balance Forward' THEN 1 ELSE SR.intId END
 FROM #STATEMENTREPORT SR
-ORDER BY dtmCreated
 
 UPDATE tblARCustomerStatementStagingTable
 SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')  
