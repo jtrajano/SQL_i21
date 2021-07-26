@@ -182,9 +182,9 @@ BEGIN TRY
 	DECLARE @dblTotalUnits AS DECIMAL(24,10)
 
 	DECLARE @ysnDeliverySheet AS BIT
-		,@ysnStorageChargeAccountUseIncome BIT = 0
+		,@ysnStorageChargeAccountUseIncome BIT = 1
 	
-	select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
+	--select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
 
 	/*	intItemType
 		------------
