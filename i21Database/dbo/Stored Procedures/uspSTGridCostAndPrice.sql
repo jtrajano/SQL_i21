@@ -206,8 +206,14 @@ BEGIN TRY
            uom.dblUnitQty AS intQuantity,
 				ROUND(CAST(
 					CASE
-						WHEN (@StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate)
-							THEN spr.dblUnitAfterDiscount 
+						WHEN (SELECT TOP 1 dblUnitAfterDiscount 
+								FROM tblICItemSpecialPricing spr 
+								WHERE @StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate
+									AND spr.intItemId = it.intItemId) != 0
+							THEN (SELECT TOP 1 dblUnitAfterDiscount 
+								FROM tblICItemSpecialPricing spr 
+								WHERE @StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate
+									AND spr.intItemId = it.intItemId)
 						WHEN (@StartDate > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
 													WHERE EIP.intItemLocationId = il.intItemLocationId
 													AND @StartDate >= dtmEffectiveRetailPriceDate
@@ -246,10 +252,6 @@ BEGIN TRY
             ON il.intClassId = class.intSubcategoryId
         LEFT JOIN tblICItemPricing ipr
             ON ipr.intItemLocationId = il.intItemLocationId
-        LEFT JOIN tblICItemSpecialPricing spr
-            ON spr.intItemLocationId = il.intItemLocationId
-        LEFT JOIN (SELECT * FROM tblICItemVendorXref W) xref
-            ON spr.intItemLocationId = il.intItemLocationId
         JOIN tblSMCompanyLocation ill
             ON il.intLocationId = ill.intCompanyLocationId
         JOIN tblSTStore st

@@ -85,9 +85,8 @@ AS
 
 					END TRY
 					BEGIN CATCH
-						SELECT 'Error encountered while updating pricebook item' + @@ERROR
 						SET @ysnSuccess = 'false'
-						SET @strResultMsg = 'Error encountered while updating pricebook item' + @@ERROR
+						SET @strResultMsg = 'Error encountered while updating pricing with effective date on item: ' + ERROR_MESSAGE()
 
 						GOTO ExitWithRollback;
 					END CATCH
@@ -114,6 +113,7 @@ AS
 			DECLARE @tblGridCostAndPriceToUpdatePromotional TABLE (
 				[strUpcCode]			[varchar](250) NULL,
 				[intItemId]				[int] NULL,
+				[intLocationId]				[int] NULL,
 				[intCompanyLocationId]	[int] NULL,
 				[dblNewCost]			[numeric](38, 2) NULL,
 				[dblNewPrice]			[numeric](38, 2) NULL,
@@ -125,6 +125,7 @@ AS
 			(
 				[strUpcCode]	
 				, [intItemId]	
+				, [intLocationId]
 				, [intCompanyLocationId]	--This will be the company location for this table
 				, [dblNewCost]	
 				, [dblNewPrice]	
@@ -134,6 +135,7 @@ AS
 			SELECT DISTINCT
 				[strUpcCode]				= uom.strLongUPCCode
 				, [intItemId]				= udt.intItemId
+				, [intLocationId]			= il.intItemLocationId
 				, [intCompanyLocationId]	= st.intCompanyLocationId
 				, [dblNewCost]				= udt.dblNewCost
 				, [dblNewPrice]				= udt.dblNewPrice
@@ -151,7 +153,9 @@ AS
 
 	
 			DECLARE @strPromoLoopUpcCode				AS VARCHAR(250)
+					, @strTESTResult  					AS VARCHAR(250)
 					, @intPromoLoopItemId				AS INT
+					, @intPromoLoopItemLocationId		AS INT
 					, @intPromoLoopCompanyLocationId	AS INT
 					, @dblPromoLoopNewCost				AS NUMERIC(38,6)
 					, @dblPromoLoopNewPrice				AS NUMERIC(38,6)
@@ -163,11 +167,12 @@ AS
 					SELECT TOP 1
 						@strPromoLoopUpcCode				= temp.[strUpcCode]
 						, @intPromoLoopItemId				= temp.[intItemId]
+						, @intPromoLoopItemLocationId		= temp.[intLocationId]
 						, @intPromoLoopCompanyLocationId	= temp.[intCompanyLocationId]
 						, @dblLoopNewCost					= temp.[dblNewCost]
 						, @dblLoopNewPrice					= temp.[dblNewPrice]
-						, @dtmLoopStartDate					= temp.[dtmStartDate]
-						, @dtmLoopEndDate					= temp.[dtmEndDate]
+						, @dtmLoopStartDate					= CONVERT(DATETIME, CONVERT(DATE, temp.[dtmStartDate])) --Get the Date only
+						, @dtmLoopEndDate					= CONVERT(DATETIME, CONVERT(DATE, temp.[dtmEndDate])) --Get the Date only
 					FROM @tblGridCostAndPriceToUpdatePromotional temp
 
 					DELETE FROM #tmpUpdateItemPricingForCStore_Location
@@ -186,7 +191,6 @@ AS
 
 					BEGIN TRY
 					
-
 						-- ITEM SPECIAL PRICING
 						EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 							@dblPromotionalSalesPrice		= @dblLoopNewPrice 
@@ -195,13 +199,14 @@ AS
 							,@dtmEndDate					= @dtmLoopEndDate 
 							,@strUpcCode					= @strPromoLoopUpcCode
 							,@intItemId						= @intPromoLoopItemId
+							,@intLocationId					= @intPromoLoopItemLocationId
 							,@intEntityUserSecurityId		= @intEntityId
 						
 						
 					END TRY
 					BEGIN CATCH
 						SET @ysnSuccess = 'false'
-						SET @strResultMsg = 'Error encountered while updating pricebook item' + @@ERROR
+						SET @strResultMsg = 'Error encountered while updating promotion on item: ' + ERROR_MESSAGE()
 
 						GOTO ExitWithRollback;
 					END CATCH
@@ -210,22 +215,26 @@ AS
 					SELECT TOP 1
 						@strPromoLoopUpcCode				= temp.[strUpcCode]
 						, @intPromoLoopItemId				= temp.[intItemId]
+						, @intPromoLoopItemLocationId		= temp.[intLocationId]
 						, @intPromoLoopCompanyLocationId	= temp.[intCompanyLocationId]
 						, @dblLoopNewCost					= temp.[dblNewCost]
 						, @dblLoopNewPrice					= temp.[dblNewPrice]
 						, @dtmLoopStartDate					= temp.[dtmStartDate]
 						, @dtmLoopEndDate					= temp.[dtmEndDate]
 					FROM @tblGridCostAndPriceToUpdatePromotional temp
+					
 
 					DELETE FROM @tblGridCostAndPriceToUpdatePromotional
 					WHERE  
-						ISNULL([strUpcCode], '')								= ISNULL(@strPromoLoopUpcCode, '')
+						ISNULL([strUpcCode], '')						= ISNULL(@strPromoLoopUpcCode, '')
 						AND [intItemId]									= @intPromoLoopItemId
+						AND [intLocationId]								= @intPromoLoopItemLocationId
 						AND [intCompanyLocationId]						= @intPromoLoopCompanyLocationId
 						AND CAST([dblNewCost] AS NUMERIC(18,6))			= CAST(@dblLoopNewCost AS NUMERIC(18,2))		
 						AND CAST([dblNewPrice] AS NUMERIC(18,6))		= CAST(@dblLoopNewPrice	 AS NUMERIC(18,2))	
 						AND [dtmStartDate]								= @dtmLoopStartDate		
 						AND [dtmEndDate]								= @dtmLoopEndDate	
+
 						
 						
 				END
@@ -237,10 +246,8 @@ AS
 		
 	END TRY
 	BEGIN CATCH
-
-		SELECT 'Error encountered while updating pricebook item' + @@ERROR
 		SET @ysnSuccess = 'false'
-		SET @strResultMsg = 'Error encountered while updating pricebook item' + @@ERROR
+		SET @strResultMsg = 'Error encountered while updating pricebook item' + ERROR_MESSAGE()
 
 		GOTO ExitWithRollback;
 	END CATCH
@@ -249,7 +256,6 @@ SET @ysnSuccess = 'true'
 SET @strResultMsg = 'Success'
 
 ExitWithCommit:
-
 	COMMIT TRANSACTION
 	GOTO ExitPost
 
