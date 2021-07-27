@@ -9579,6 +9579,7 @@
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
     <Build Include="dbo\Stored Procedures\uspMFMoveItemValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMAxxisSyncWholesaleTransportDriverExport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9881,6 +9882,7 @@
     <Build Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
+    <None Include="i21DatabaseTest.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
