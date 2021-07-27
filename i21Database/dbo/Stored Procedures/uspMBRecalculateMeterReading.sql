@@ -5,31 +5,19 @@ AS
 BEGIN
 
 	-- START TR-1611 - Sub ledger Transaction traceability
-	DECLARE @tblTransactionLinks udtICTransactionLinks 
-    INSERT INTO @tblTransactionLinks (
-        strOperation
-        , intSrcId
-        , strSrcTransactionNo
-        , strSrcTransactionType
-        , strSrcModuleName
-        , intDestId
-        , strDestTransactionNo
-        , strDestTransactionType
-        , strDestModuleName
-    )    
-    SELECT strOperation	= 'Create'
-        , intSrcId = MR.intMeterReadingId
-        , strSrcTransactionNo = MR.strTransactionId
-        , strSrcTransactionType = 'Meter Billing'
-        , strSrcModuleName  = 'Meter Billing'
-        , intDestId	= MR.intMeterReadingId
-        , strDestTransactionNo =  MR.strTransactionId
-        , strDestTransactionType = 'Meter Billing'
-        , strDestModuleName = 'Meter Billing'
-    FROM tblMBMeterReading MR
+	DECLARE @intCreateLinkTransactionId INT, 
+		@strCreateLinkTransactionNo NVARCHAR(50),
+		@strCreateLinkTransactionType NVARCHAR(100),
+		@strCreateLinkModuleName NVARCHAR(100)
+
+	SELECT @intCreateLinkTransactionId = MR.intMeterReadingId
+		, @strCreateLinkTransactionNo = MR.strTransactionId
+		, @strCreateLinkTransactionType  = 'Meter Billing'
+		, @strCreateLinkModuleName = 'Meter Billing'
+	FROM tblMBMeterReading MR
 	WHERE MR.intMeterReadingId = @TransactionId
 
-    EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+	EXEC dbo.uspICAddTransactionLinkOrigin @intCreateLinkTransactionId, @strCreateLinkTransactionNo, @strCreateLinkTransactionType, @strCreateLinkModuleName
 	-- END TR-1611
 
 	SELECT *
