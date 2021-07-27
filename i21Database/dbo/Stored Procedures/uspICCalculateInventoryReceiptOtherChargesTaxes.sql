@@ -14,7 +14,7 @@ BEGIN
 			DECLARE	@ItemId				INT
 					,@LocationId		INT
 					,@TransactionDate	DATETIME
-					,@TransactionType	NVARCHAR(20) = 'Purchase' -- "Purchase" is used for Receipt while "Sale" for Shipment
+					,@TransactionType	NVARCHAR(40) = 'Purchase' -- "Purchase" is used for Receipt while "Sale" for Shipment
 					,@EntityId			INT	
 					,@TaxMasterId		INT	
 					,@InventoryReceiptChargeId INT

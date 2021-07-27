@@ -2,6 +2,7 @@
 (
 	@intSettleStorageId INT
 	,@UserId INT	
+	,@dtmClientPostDate DATETIME = NULL
 )
 AS
 BEGIN TRY
@@ -13,7 +14,7 @@ BEGIN TRY
 	DECLARE @dblUnitsUnposted DECIMAL(24, 10)
 	DECLARE @intCustomerStorageId AS INT
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
-	DECLARE @strBatchId AS NVARCHAR(20)
+	DECLARE @strBatchId AS NVARCHAR(40)
 	DECLARE @TicketNo NVARCHAR(50)
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
@@ -35,6 +36,8 @@ BEGIN TRY
 	DECLARE @BillIdParams NVARCHAR(MAX)
 	DECLARE @billList AS Id
 	DECLARE @billListForDeletion AS Id
+
+	DECLARE @dtmDate DATETIME = ISNULL(@dtmClientPostDate, GETDATE())
 
 	DECLARE @tblContractIncrement AS TABLE 
 	(
@@ -390,6 +393,7 @@ BEGIN TRY
 					,@intSettleStorageId
 					,@strBatchId
 					,@UserId
+					,@dtmDate
 					,0
 
 				UPDATE @GLEntries 

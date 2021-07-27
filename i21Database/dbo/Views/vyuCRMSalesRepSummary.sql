@@ -8,13 +8,12 @@
 				,c.strType
 			from
 				tblCRMOpportunity a
-				,tblSMTransaction b
-				,tblSMActivity c
+				inner join tblSMTransaction b on b.intRecordId = a.intOpportunityId
+				inner join tblSMActivity c on c.intTransactionId = b.intTransactionId
 			where
 				a.intInternalSalesPerson is not null
-				and b.intRecordId = a.intOpportunityId
 				and b.intScreenId = (select top 1 d.intScreenId from tblSMScreen d where d.strNamespace = 'CRM.view.Opportunity')
-				and c.intTransactionId = b.intTransactionId
+				
 		),
 		so as
 		(
@@ -30,11 +29,8 @@
 				,c.dblAmountDue
 			from
 				tblCRMOpportunity a
-				,tblCRMOpportunityQuote b
-				,tblSOSalesOrder c
-			where
-				b.intOpportunityId = a.intOpportunityId
-				and c.intSalesOrderId = b.intSalesOrderId
+				inner join tblCRMOpportunityQuote b on b.intOpportunityId = a.intOpportunityId
+				inner join tblSOSalesOrder c on c.intSalesOrderId = b.intSalesOrderId
 		)
 
 				Select distinct

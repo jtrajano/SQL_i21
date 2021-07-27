@@ -13,14 +13,10 @@
 		,imgPhoto = null
 	from
 		tblEMEntity a
-		,tblEMEntityType b
-		,tblARSalesperson c
-		,tblEMEntityToContact d
-		,tblEMEntity e
+		inner join tblEMEntityType b on b.intEntityId = a.intEntityId
+		inner join tblARSalesperson c on c.intEntityId = a.intEntityId
+		inner join tblEMEntityToContact d on d.intEntityId = a.intEntityId
+		inner join tblEMEntity e on e.intEntityId = d.intEntityContactId
 	where
-		b.intEntityId = a.intEntityId
-		and b.strType = 'Salesperson'
-		and c.intEntityId = a.intEntityId
+		b.strType = 'Salesperson'
 		and c.ysnActive = convert(bit, 1)
-		and d.intEntityId = a.intEntityId
-		and e.intEntityId = d.intEntityContactId

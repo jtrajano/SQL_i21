@@ -296,7 +296,7 @@ BEGIN
     WHERE
             P.[ysnPost] = @OneBit
         AND P.[strPaymentMethod]  = 'ACH'
-        AND P.[dblAmountPaid] <= @ZeroDecimal
+        AND P.[dblAmountPaid] = @ZeroDecimal
 
  --   This is being handled by [uspGLValidateGLEntries]
  --   INSERT INTO #ARInvalidPaymentData
@@ -710,6 +710,30 @@ BEGIN
         AND P.[ysnTransactionPaid] = @OneBit
 		AND @Recap = @ZeroBit
 		AND @Post = @OneBit
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--DEBIT MEMO(S) ALREADY PAID IN FULL
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = P.[strTransactionNumber] + ' already paid in full.'
+	FROM
+		#ARPostPaymentDetail P
+		INNER JOIN tblAPPaymentDetail APPD ON APPD.intBillId = P.intBillId
+		INNER JOIN tblAPPayment APP ON	 APP.intPaymentId=APPD.intPaymentId
+    WHERE
+          APP.[ysnPosted] = @OneBit
+          AND P.[intInvoiceId] IS NULL
+		  AND APPD.dblAmountDue = @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]

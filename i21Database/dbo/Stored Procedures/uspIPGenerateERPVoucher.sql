@@ -144,6 +144,7 @@ BEGIN TRY
 					FROM tblAPBillPreStage
 					WHERE intBillId = @intBillId
 						AND intBillPreStageId < @intBillPreStageId
+						AND strERPVoucherNo IS NOT NULL
 					)
 				SELECT @intActionId = 2
 		END
@@ -177,7 +178,6 @@ BEGIN TRY
 			,@dblTax = CONVERT(NUMERIC(18, 6), A.dblTax)
 			,@dblTotal = CONVERT(NUMERIC(18, 6), A.dblTotal)
 			,@strRemarks = A.strRemarks
-			,@strERPVoucherNo = A.strComment
 		FROM dbo.tblAPBill A
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(@intUserId, A.intEntityId)
 		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = A.intEntityVendorId
@@ -203,7 +203,8 @@ BEGIN TRY
 
 		IF ISNULL(@strInvoiceNo, '') = ''
 		BEGIN
-			SELECT @strError = @strError + 'Invoice No. cannot be blank. '
+			--SELECT @strError = @strError + 'Invoice No. cannot be blank. '
+			SELECT @strInvoiceNo = @strBillId
 		END
 
 		IF @dtmInvoiceDate IS NULL
@@ -221,11 +222,6 @@ BEGIN TRY
 			SELECT @strError = @strError + 'Due Date cannot be blank. '
 		END
 
-		IF ISNULL(@strReference, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Reference cannot be blank. '
-		END
-
 		IF ISNULL(@strCurrency, '') = ''
 		BEGIN
 			SELECT @strError = @strError + 'Currency cannot be blank. '
@@ -234,11 +230,6 @@ BEGIN TRY
 		IF ISNULL(@dblTotal, 0) = 0
 		BEGIN
 			SELECT @strError = @strError + 'Voucher Total should be greater than 0. '
-		END
-
-		IF ISNULL(@strRemarks, '') = ''
-		BEGIN
-			SELECT @strError = @strError + 'Remarks cannot be blank. '
 		END
 
 		IF @strError <> ''
@@ -262,11 +253,20 @@ BEGIN TRY
 				ORDER BY BPS.intBillPreStageId DESC
 				)
 		BEGIN
+			UPDATE tblAPBillPreStage
+			SET strMessage = 'Previous feed is waiting for acknowledgement. '
+			WHERE intBillPreStageId = @intBillPreStageId
+
 			GOTO NextRec
 		END
 
 		IF @intActionId <> 1
 		BEGIN
+			SELECT @strERPVoucherNo = strERPVoucherNo
+			FROM dbo.tblAPBillPreStage
+			WHERE intBillId = @intBillId
+				AND intBillPreStageId < @intBillPreStageId
+
 			IF ISNULL(@strERPVoucherNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
@@ -408,7 +408,13 @@ BEGIN TRY
 				,@strItemNo = I.strItemNo
 				,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId, @intItemUOMId, BD.dblQtyReceived), 0))
 				,@strDetailCurrency = C.strCurrency
-				,@dblDetailCost = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intCostUOMId, @intItemUOMId, BD.dblCost), 0))
+				,@dblDetailCost = (
+					CASE 
+						WHEN I.strType = 'Other Charge'
+							THEN CONVERT(NUMERIC(18, 6), ISNULL(BD.dblCost, 0))
+						ELSE CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intCostUOMId, @intItemUOMId, BD.dblCost), 0))
+						END
+					)
 				,@dblDetailDiscount = CONVERT(NUMERIC(18, 6), BD.dblDiscount)
 				,@dblDetailTotal = CONVERT(NUMERIC(18, 6), BD.dblTotal)
 				,@dblDetailTax = CONVERT(NUMERIC(18, 6), BD.dblTax)

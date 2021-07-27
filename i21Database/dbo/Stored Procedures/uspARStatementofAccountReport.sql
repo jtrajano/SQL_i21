@@ -286,6 +286,25 @@ ELSE IF @strStatementFormat = 'Budget Reminder'
 			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
 			, @intEntityUserId				= @intEntityUserId
 	END
+ELSE IF @strStatementFormat = 'Budget Reminder Alternate 2'
+	BEGIN
+		EXEC dbo.uspARCustomerStatementBudgetReminderAlternate2Report
+			  @dtmDateTo					= @dtmDateTo
+			, @dtmDateFrom					= @dtmDateFrom
+			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+			, @ysnIncludeBudget				= @ysnIncludeBudget
+			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+			, @ysnActiveCustomers			= @ysnActiveCustomers
+			, @strCustomerNumber			= @strCustomerNumber
+			, @strAccountStatusCode			= @strAccountStatusCode
+			, @strLocationName				= @strLocationName
+			, @strCustomerName				= @strCustomerName
+			, @strCustomerIds				= @strCustomerIds
+			, @ysnEmailOnly					= @ysnEmailOnly
+			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
+			, @intEntityUserId				= @intEntityUserId
+	END
 ELSE IF @strStatementFormat = 'Honstein Oil'
 	BEGIN
 		EXEC dbo.uspARCustomerStatementHonsteinReport

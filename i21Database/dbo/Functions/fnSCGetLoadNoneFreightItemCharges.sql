@@ -114,6 +114,7 @@ BEGIN
 			ON IC.intItemId = LoadCost.intItemId
 		WHERE LoadCost.dblRate != 0 
 			AND ISNULL(@intFreightItemId, 0) != CASE WHEN  ISNULL(@intFreightItemId, 0) = 0 THEN 1 ELSE LoadCost.intItemId END 
+			AND LoadCost.ysnAccrue = 1
 	END
 	ELSE
 	BEGIN
@@ -195,6 +196,7 @@ BEGIN
 			ON IC.intItemId = ContractCost.intItemId
 		WHERE ContractCost.dblRate != 0
 			AND ISNULL(@intFreightItemId, 0) != CASE WHEN  ISNULL(@intFreightItemId, 0) = 0 THEN 1 ELSE ContractCost.intItemId END 
+			AND ISNULL(ContractCost.ysnBasis,0) = 0
 	END
 	RETURN
 END

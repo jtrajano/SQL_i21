@@ -15,12 +15,10 @@ begin try
         top 1 1
     from
         tblICInventoryReceipt ir
-        ,tblICInventoryReceiptItem ri
-        ,@voucherPayables vp
+        inner join tblICInventoryReceiptItem ri on ir.intInventoryReceiptId = ri.intInventoryReceiptId
+        inner join @voucherPayables vp on ri.intInventoryReceiptItemId = vp.intInventoryReceiptItemId
     where
-        ri.intInventoryReceiptItemId = vp.intInventoryReceiptItemId
-        and ir.intInventoryReceiptId = ri.intInventoryReceiptId
-        and (ir.strReceiptType <> 'Purchase Contract' or isnull(vp.intContractDetailId,0) = 0)
+        (ir.strReceiptType <> 'Purchase Contract' or isnull(vp.intContractDetailId,0) = 0)
     )
     begin
 
@@ -52,7 +50,7 @@ begin try
 		,@intPayToAddressId				INT
 		,@intCurrencyId					INT
 		,@dtmDate						DATETIME
-		,@dtmVoucherDate				DATETIME
+		,@dtmVoucherDate				DATETIME = getdate()
 		,@dtmDueDate					DATETIME
 		,@strVendorOrderNumber			NVARCHAR (MAX)
 		,@strReference					NVARCHAR(400)
@@ -223,7 +221,12 @@ begin try
 			select @intInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intInventoryReceiptItemId;
 
 			--Check if Load base contract
-			select @ysnLoad = ysnLoad from tblCTContractDetail cd, tblCTContractHeader ch where cd.intContractDetailId = @intContractDetailId and ch.intContractHeaderId = cd.intContractHeaderId;
+			select @ysnLoad = ysnLoad 
+			from
+				tblCTContractDetail cd
+				inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			where cd.intContractDetailId = @intContractDetailId;
+
 			if (isnull(@ysnLoad,0) = 1)
 			begin
 				select @dblTransactionQuantity = count(distinct bd.intBillId) from tblAPBillDetail bd where bd.intInventoryReceiptItemId = @intInventoryReceiptItemId;
@@ -283,21 +286,10 @@ begin try
 				--Set @dblTransactionQuantity = @dblQuantityToBill by default (this is also correct quantity for Load Based)
 				set @dblTransactionQuantity = @dblQuantityToBill;
 
-				DECLARE @ysnIsNotLoadMultiplePrice bit = 0
-
 				if (isnull(@ysnLoad,0) = 0 and @dblTransactionQuantity > @dblAvailablePriceQuantity)
 				begin
 					--If not load based and the @dblAvailablePriceQuantity is less than the @dblQuantityToBill, price quantity should be the quantity to bill
 					set @dblTransactionQuantity = @dblAvailablePriceQuantity;
-					
-					if(
-					@intPricingTypeId = 1 and --if priced contract
-					EXISTS(SELECT TOP 1 1 FROM @voucherPayables WHERE strLoadShipmentNumber like '%LS-%') and --if load shipment
-					@intPriceFixationId is null --if not has multiple PriceFixation
-					)
-					BEGIN
-						SET @ysnIsNotLoadMultiplePrice = 1
-					END
 				end
 				else
 				begin
@@ -417,8 +409,8 @@ begin try
 					,intShipFromEntityId = vp.intShipFromEntityId
 					,intPayToAddressId = vp.intPayToAddressId
 					,intCurrencyId = vp.intCurrencyId
-					,dtmDate = getdate()
-					,dtmVoucherDate = getdate()
+					,dtmDate = (case when @dtmVoucherDate > vp.dtmDate then @dtmVoucherDate else vp.dtmDate end)
+					,dtmVoucherDate = (case when @dtmVoucherDate > vp.dtmVoucherDate then @dtmVoucherDate else vp.dtmVoucherDate end)
 					,dtmDueDate = vp.dtmDueDate
 					,strVendorOrderNumber = vp.strVendorOrderNumber
 					,strReference = vp.strReference
@@ -464,9 +456,7 @@ begin try
 					,dblOrderQty = vp.dblOrderQty
 					,dblOrderUnitQty = vp.dblOrderUnitQty
 					,intOrderUOMId = vp.intOrderUOMId
-
-					,dblQuantityToBill = CASE WHEN @ysnIsNotLoadMultiplePrice = 1 THEN vp.dblQuantityToBill ELSE @dblTransactionQuantity END
-
+					,dblQuantityToBill = @dblTransactionQuantity
 					,dblQtyToBillUnitQty = vp.dblQtyToBillUnitQty
 					,intQtyToBillUOMId = vp.intQtyToBillUOMId
 					,dblCost = @dblFinalPrice
@@ -475,9 +465,7 @@ begin try
 					,intCostUOMId = vp.intCostUOMId
 					,intCostCurrencyId = vp.intCostCurrencyId
 					,dblWeight = vp.dblWeight
-					
-					,dblNetWeight = CASE WHEN @ysnIsNotLoadMultiplePrice = 1 THEN vp.dblNetWeight ELSE @dblTransactionQuantity END
-
+					,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(vp.intQtyToBillUOMId,vp.intWeightUOMId,@dblTransactionQuantity)
 					,dblWeightUnitQty = vp.dblWeightUnitQty
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
@@ -833,8 +821,8 @@ begin try
 			,intShipFromEntityId = vp.intShipFromEntityId
 			,intPayToAddressId = vp.intPayToAddressId
 			,intCurrencyId = vp.intCurrencyId
-			,dtmDate = getdate()
-			,dtmVoucherDate = getdate()
+			,dtmDate = (case when @dtmVoucherDate > vp.dtmDate then @dtmVoucherDate else vp.dtmDate end)
+			,dtmVoucherDate = (case when @dtmVoucherDate > vp.dtmVoucherDate then @dtmVoucherDate else vp.dtmVoucherDate end)
 			,dtmDueDate = vp.dtmDueDate
 			,strVendorOrderNumber = vp.strVendorOrderNumber
 			,strReference = vp.strReference

@@ -125,6 +125,25 @@ BEGIN
 	END
 END
 
+
+-- Check if associated Sales Contract is priced
+BEGIN
+	DECLARE @strUnpricedContractSequence NVARCHAR(500) = NULL
+	SELECT TOP 1 @strUnpricedContractSequence = 'Contract ' + CH.strContractNumber + '/' + CAST(CD.intContractSeq AS NVARCHAR(10)) 
+		+ ' is not yet priced. Please price the contract to proceed.'
+	FROM tblLGLoad L INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	WHERE L.intLoadId = @intTransactionId AND CH.intPricingTypeId = 3 AND CD.intPricingTypeId <> 1
+
+	IF (@strUnpricedContractSequence IS NOT NULL)
+	BEGIN
+		RAISERROR (@strUnpricedContractSequence,16,1)
+		GOTO Post_Exit
+	END
+
+END
+
 -- Check if the Shipment quantity matches the total Quantity in the Lot
 BEGIN
 	SET @strItemNo = NULL
@@ -348,7 +367,7 @@ BEGIN
 								ELSE 
 									ISNULL(DetailLot.intItemUOMId, 0)
 								END
-			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+			,dtmDate = dbo.fnRemoveTimeOnDate(L.dtmScheduledDate)
 			,dblQty = -1 * COALESCE(DetailLot.dblLotQuantity, LoadDetail.dblQuantity, 0)
 			,dblUOMQty = ISNULL(LotItemUOM.dblUnitQty, ItemUOM.dblUnitQty)
 			,dblCost = ISNULL(CASE 
@@ -947,7 +966,7 @@ BEGIN
 		,[strShipmentId] = L.strLoadNumber
 		,[intOrderType] = 1
 		,[intSourceType] = -1
-		,[dtmDate] = GETDATE()
+		,[dtmDate] = L.dtmScheduledDate
 		,[intCurrencyId] = NULL
 		,[dblExchangeRate] = 1
 		,[intEntityCustomerId] = LD.intCustomerEntityId

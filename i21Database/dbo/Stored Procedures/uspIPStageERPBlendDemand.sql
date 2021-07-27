@@ -65,7 +65,7 @@ BEGIN TRY
 				,StorageLocation
 				,DemandType
 				,OrderNo
-				,Item
+				,ItemNo
 				,Quantity
 				,QuantityUOM
 				,WorkCenter
@@ -80,7 +80,7 @@ BEGIN TRY
 					,StorageLocation NVARCHAR(50)
 					,DemandType NVARCHAR(50)
 					,OrderNo NVARCHAR(50)
-					,Item NVARCHAR(50)
+					,ItemNo NVARCHAR(50)
 					,Quantity NUMERIC(18, 6)
 					,QuantityUOM NVARCHAR(50)
 					,WorkCenter NVARCHAR(50)

@@ -33,9 +33,9 @@
 		strJIRAUserName = (select strJIRAUserName from tblSMUserSecurity where intEntityId = us.intEntityId),
 		ysnVendor = (select case when count(*) < 1 then convert(bit,0) else convert(bit,1) end from tblEMEntityType where intEntityId = us.intEntityId and strType = 'Vendor')
 	from
-		tblARSalesperson us, [tblEMEntityToContact] etc, tblEMEntity en, [tblEMEntityCredential] ec
+		tblARSalesperson us
+		inner join tblEMEntityToContact etc on etc.intEntityId = us.intEntityId
+		inner join tblEMEntity en on en.intEntityId = etc.intEntityContactId
+		inner join tblEMEntityCredential ec on ec.intEntityId = etc.intEntityContactId
 	where
 		us.[intEntityId] is not null
-		and etc.intEntityId = us.[intEntityId]
-		and en.intEntityId = etc.intEntityContactId
-		and ec.intEntityId = etc.intEntityContactId

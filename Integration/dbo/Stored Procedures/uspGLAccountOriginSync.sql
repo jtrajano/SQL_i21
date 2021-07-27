@@ -110,8 +110,8 @@ BEGIN
 					(CASE WHEN ysnActive = 0 THEN ''N'' ELSE ''Y'' END) as glact_active_yn,
 					(CASE WHEN ysnSystem = 0 THEN ''N'' ELSE ''Y'' END) as glact_sys_acct_yn,
 					(CASE WHEN (SELECT TOP 1 1 FROM tblGLAccountSegment WHERE intAccountSegmentId = (select TOP 1 intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = ''Primary'')))) > 0
-								THEN (SELECT TOP 1 LEFT(tblGLAccountSegment.strDescription,9) FROM tblGLAccountSegment WHERE intAccountSegmentId = (select TOP 1 intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = ''Primary''))))
-							ELSE LEFT(tblGLAccount.strDescription,9) END) as DescriptionLookUp,
+								THEN (SELECT TOP 1 LEFT(tblGLAccountSegment.strDescription,8) FROM tblGLAccountSegment WHERE intAccountSegmentId = (select TOP 1 intAccountSegmentId from tblGLAccountSegmentMapping where intAccountId = @Id_update AND intAccountSegmentId IN (select intAccountSegmentId from tblGLAccountSegment where intAccountStructureId = (select TOP 1 intAccountStructureId from tblGLAccountStructure where strType = ''Primary''))))
+							ELSE LEFT(tblGLAccount.strDescription,8) END) as DescriptionLookUp,
 					'''',
 					'''',
 					@intUserId,

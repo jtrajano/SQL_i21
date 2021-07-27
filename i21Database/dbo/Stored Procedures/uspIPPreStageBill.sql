@@ -8,16 +8,56 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
+	DECLARE @tblAPBill TABLE (intBillId INT)
+	DECLARE @intBillId INT
 
-	INSERT INTO dbo.tblAPBillPreStage (
-		intBillId
-		,strRowState
-		,intUserId
-		)
+	DELETE
+	FROM @tblAPBill
+
+	INSERT INTO @tblAPBill (intBillId)
 	SELECT Item Collate Latin1_General_CI_AS
-		,@strRowState
-		,@intUserId
 	FROM [dbo].[fnSplitString](@strBillId, ',')
+
+	SELECT @intBillId = MIN(intBillId)
+	FROM @tblAPBill
+
+	WHILE @intBillId IS NOT NULL
+	BEGIN
+		-- Voucher exists / feed sent
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tblAPBillPreStage
+				WHERE intBillId = @intBillId
+					AND (
+						strERPVoucherNo IS NOT NULL
+						OR intStatusId IN (
+							2
+							,4
+							,6
+							)
+						)
+				)
+		BEGIN
+			DELETE
+			FROM tblAPBillPreStage
+			WHERE intBillId = @intBillId
+				AND ISNULL(intStatusId, 1) = 1
+				AND strERPVoucherNo IS NULL
+		END
+
+		INSERT INTO dbo.tblAPBillPreStage (
+			intBillId
+			,strRowState
+			,intUserId
+			)
+		SELECT @intBillId
+			,@strRowState
+			,@intUserId
+
+		SELECT @intBillId = MIN(intBillId)
+		FROM @tblAPBill
+		WHERE intBillId > @intBillId
+	END
 END TRY
 
 BEGIN CATCH

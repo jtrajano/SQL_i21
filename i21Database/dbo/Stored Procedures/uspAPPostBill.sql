@@ -467,7 +467,7 @@ A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 AND B.intInventoryReceiptChargeId IS NOT NULL 
 AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 AND (
-	(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
+	(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
 	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
 )
 AND A.intTransactionReversed IS NULL
@@ -1289,9 +1289,10 @@ BEGIN
 		-- END
 
 		UPDATE tblGLDetail
-			SET ysnIsUnposted = 1
-		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
-				(SELECT intBillId FROM #tmpPostBillData))
+		SET ysnIsUnposted = 1
+		WHERE 
+			tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+			AND strCode <> 'ICA'
 
 		--Update Inventory Item Receipt
 		--  UPDATE A

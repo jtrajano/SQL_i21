@@ -39,6 +39,7 @@ BEGIN
 		,strDeliveryInstructions
 		,strApproxValue
 		,strDescription
+		,strCondition = CAST(NULL AS NVARCHAR(MAX)) 
 	FROM 
 		vyuICGetInventoryTransferDetailReportMPCT 
 	WHERE 
@@ -49,7 +50,7 @@ END
 DECLARE @temp_xml_table TABLE (
 	id INT IDENTITY(1,1)
 	,[fieldname] NVARCHAR(50)
-	,condition NVARCHAR(20)      
+	,condition NVARCHAR(40)      
 	,[from] NVARCHAR(50)
 	,[to] NVARCHAR(50)
 	,[join] NVARCHAR(10)
@@ -65,7 +66,7 @@ SELECT *
 FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
 WITH (
 	[fieldname] nvarchar(50)
-	, [condition] nvarchar(20)
+	, [condition] nvarchar(40)
 	, [from] nvarchar(50)
 	, [to] nvarchar(50)
 	, [join] nvarchar(10)
@@ -96,6 +97,17 @@ IF EXISTS(SELECT TOP 1 1 FROM vyuSMCompanyLogo WHERE strComment = 'HeaderLogo')
 ELSE
 	SET @HasHeaderLogo = 0
 
+DECLARE @strCondition AS NVARCHAR(MAX) 
+SELECT 
+	@strCondition = ISNULL(@strCondition, '') + ISNULL(c.strDescription, '') 
+FROM 
+	tblICInventoryTransfer t INNER JOIN tblICInventoryTransferCondition c
+		ON t.intInventoryTransferId = c.intInventoryTransferId
+WHERE
+	t.strTransferNo = @strTransferNo
+ORDER BY
+	c.intInventoryTransferConditionId ASC 
+	
 SELECT 
 	strTransferNo
 	,dtmTransferDate
@@ -120,6 +132,7 @@ SELECT
 	,strDeliveryInstructions
 	,strApproxValue
 	,strDescription
+	,strCondition = @strCondition
 FROM 
 	vyuICGetInventoryTransferDetailReportMPCT v
 WHERE 

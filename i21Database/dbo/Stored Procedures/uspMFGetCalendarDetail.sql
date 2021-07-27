@@ -235,7 +235,7 @@ BEGIN
 			,CD.intShiftId
 			,MD.Item
 		FROM dbo.#tblMFCalendarDetail CD
-			,dbo.fnSplitString(@strMachineId, ',') MD
+			inner join dbo.fnSplitString(@strMachineId, ',') MD on 1=1
 		WHERE CD.intCalendarDetailId IS NULL
 			AND CD.ysnHoliday = 0
 			AND NOT EXISTS (
@@ -260,7 +260,7 @@ BEGIN
 			,CD.intShiftId
 			,MD.Item
 		FROM dbo.#tblMFCalendarDetail CD
-			,dbo.fnSplitString(@strMachineId, ',') MD
+			inner join dbo.fnSplitString(@strMachineId, ',') MD on 1=1
 		WHERE CD.intCalendarDetailId IS NULL
 			AND CD.ysnHoliday = 0
 			AND NOT EXISTS (

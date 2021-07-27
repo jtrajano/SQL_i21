@@ -79,7 +79,7 @@ BEGIN TRY
 					WHERE intTrxSequenceNo = @intTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + 'is already processsed in i21.'
+				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processed in i21.'
 
 				RAISERROR (
 						@strError

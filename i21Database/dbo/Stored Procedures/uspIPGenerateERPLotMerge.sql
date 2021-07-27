@@ -56,6 +56,7 @@ BEGIN TRY
 		 +'<ActionId>1</ActionId>'  
 		 +'<CreatedDate>'+CONVERT(VARCHAR(33), dtmCreatedDate, 126) +'</CreatedDate>'  
 		 +'<CreatedByUser>'+ strCreatedByUser +'</CreatedByUser>'  
+		 +'<TransactionTypeId>19</TransactionTypeId>' 
 		 +'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<ItemNo>'+ IsNULL(strItemNo,'')  +'</ItemNo>'  
 		 +'<MotherLotNo>'+ IsNULL(strMotherLotNo,'')  +'</MotherLotNo>'  

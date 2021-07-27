@@ -36,17 +36,23 @@
 	strVendorDiscountEndDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strVendorDiscountThruQuantity NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strVendorDiscountThruAmount NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strVendorDiscountAmountUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strRebate1BeginDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strRebate1EndDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strRebate1AmountUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strRebate2BeginDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strRebate2EndDate NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strRebate2AmountUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strActiveInactiveDeleteIndicator NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strBottleDepositNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strInventoryGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dtmDateCreated DATETIME NULL,
     dtmDateModified DATETIME NULL,
     intCreatedByUserId INT NULL,
     intModifiedByUserId INT NULL,
 	intConcurrencyId INT NULL
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICEdiPricebook_strUniqueId]
+	ON [dbo].[tblICEdiPricebook]([strUniqueId] ASC)
+GO

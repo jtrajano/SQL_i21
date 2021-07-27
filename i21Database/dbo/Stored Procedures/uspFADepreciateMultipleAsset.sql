@@ -233,6 +233,9 @@ BEGIN
                     AND BD.intBookId = @BookId
                   
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
+
+
+
                   DELETE FROM @IdIterate WHERE intId = @i
               END
       END  
@@ -480,10 +483,17 @@ BEGIN
               AND ISNULL(intBookId,1) = @BookId
               ORDER BY B.intAssetDepreciationId DESC
           )FAD
-            
-          DECLARE @PostResult INT  
-          EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1  
-          IF @@ERROR <> 0 OR @PostResult <> 0 RETURN --1  
+
+		  DECLARE @GLEntries2 RecapTableType
+		  INSERT INTO @GLEntries2 SELECT * FROM @GLEntries 
+		  DELETE FROM @GLEntries2 WHERE dblDebit = 0 AND dblCredit = 0
+
+      IF EXISTS(SELECT TOP 1 1 FROM @GLEntries2)  
+          BEGIN
+            DECLARE @PostResult INT  
+            EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries2, @ysnPost = @ysnPost, @SkipICValidation = 1  
+            IF @@ERROR <> 0 OR @PostResult <> 0 RETURN --1  
+          END
       END
 END  
 
@@ -521,19 +531,16 @@ BEGIN
   SELECT @intLogId = SCOPE_IDENTITY()
 END
 
-
-
-
- 
   ;WITH Q as(
       SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult,
       'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError 
-      FROM tblGLDetail C WHERE @strBatchId = strBatchId
+      FROM @GLEntries C WHERE @strBatchId = strBatchId
       AND ysnIsUnposted = 0  AND @BookId = 1
       AND strModuleName ='Fixed Assets'
       GROUP by strReference, strTransactionId, dtmDate
     UNION
-      SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) FROM  tblFAFixedAssetDepreciation A 
+      SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
     UNION
@@ -548,17 +555,6 @@ END
   INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate,ysnError) 
   SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate, ysnError FROM Q 
 
-
-
-
--- IF @ysnSingleMode = 1 AND EXISTS (SELECT TOP 1 1 FROM @tblError)
--- BEGIN
---   DECLARE @strError NVARCHAR(200)
---   SELECT TOP 1 @strError = strError FROM @tblError
---   RAISERROR (@strError,16,1)  
---   RETURN -1
--- END
-
 DECLARE @intGLEntry INT
 
 IF @BookId = 1
@@ -572,7 +568,4 @@ BEGIN
   JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId WHERE @strBatchId = strBatchId AND intBookId <> 1
 END
 
-
-
-  
 END  

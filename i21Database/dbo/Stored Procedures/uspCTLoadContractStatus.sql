@@ -212,21 +212,23 @@ BEGIN TRY
 		SELECT	CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId ASC) AS INT) intUniqueId,*
 		FROM
 		(			
-				SELECT	CQ.intPContractDetailId intContractDetailId,
+				SELECT	intContractDetailId = CASE WHEN (SH.intPurchaseSale = 2) THEN CQ.intSContractDetailId ELSE CQ.intPContractDetailId END,
 						SH.strLoadNumber,
-						IU.intItemUOMId,
-						dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNet)	AS dblNetWeight,
-						IM.strUnitMeasure,
+						ISNULL(IU.intItemUOMId,ISNULL(CQ.intItemUOMId, LP.intWeightUOMId) ) AS intItemUOMId,
+						ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CQ.intItemId,IU.intUnitMeasureId,LP.intWeightUOMId,CQ.dblNet),0)	AS dblNetWeight,
+						ISNULL(IM.strUnitMeasure,LPM.strUnitMeasure) AS strUnitMeasure,
 						SH.intShipmentType,
 						SH.intLoadId,
 						'intLoadId' AS strIdColumn
 				FROM	tblLGLoadDetail	CQ
-				JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
-														AND	CQ.intPContractDetailId	=	@intContractDetailId
-				JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CQ.intItemId	
-														AND IU.intUnitMeasureId		=	SH.intWeightUnitMeasureId
-				JOIN	tblICUnitMeasure			IM	ON	IM.intUnitMeasureId		=	IU.intUnitMeasureId		CROSS	
+				LEFT JOIN	tblLGLoad					SH	ON	SH.intLoadId			=	CQ.intLoadId 
+														--AND	CQ.intPContractDetailId	=	@intContractDetailId
+				LEFT JOIN	tblICItemUOM				IU	ON	IU.intItemId			=	CQ.intItemId	
+														AND IU.intUnitMeasureId		=	ISNULL(SH.intWeightUnitMeasureId, CQ.intItemUOMId)
+				LEFT JOIN	tblICUnitMeasure			IM	ON	IM.intUnitMeasureId		=	IU.intUnitMeasureId		CROSS	
 				APPLY	tblLGCompanyPreference		LP 	
+				INNER JOIN tblICUnitMeasure LPM ON  LPM.intUnitMeasureId = LP.intWeightUOMId
+				WHERE  (CASE WHEN (SH.intPurchaseSale = 2) THEN CQ.intSContractDetailId ELSE CQ.intPContractDetailId END) = @intContractDetailId
 
 				UNION ALL
 

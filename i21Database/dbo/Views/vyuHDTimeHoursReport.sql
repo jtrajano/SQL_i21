@@ -99,14 +99,11 @@
 			,strMileStone = null
 		from
 			tblHDTimeOffRequest a
-			,tblPRTimeOffRequest b
-			,tblPRTypeTimeOff c
-			,tblEMEntity d
-			,tblSMTransaction e
+			inner join tblPRTimeOffRequest b on b.intTimeOffRequestId = a.intPRTimeOffRequestId
+			inner join tblPRTypeTimeOff c on c.intTypeTimeOffId = b.intTypeTimeOffId
+			inner join tblEMEntity d on d.intEntityId = a.intPREntityEmployeeId
+			inner join tblSMTransaction e on 1=1
 		where
-			b.intTimeOffRequestId = a.intPRTimeOffRequestId
-			and c.intTypeTimeOffId = b.intTypeTimeOffId
-			and d.intEntityId = a.intPREntityEmployeeId
-			and (e.intScreenId = (select intScreenId from tblSMScreen where strNamespace = 'Payroll.view.TimeOffRequest') 
+			(e.intScreenId = (select intScreenId from tblSMScreen where strNamespace = 'Payroll.view.TimeOffRequest') 
 				 and e.intRecordId = a.intPRTimeOffRequestId 
 				 and (e.strApprovalStatus = 'Approved' or e.strApprovalStatus = 'Approved with Modification'))
