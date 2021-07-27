@@ -83,7 +83,7 @@ INSERT	INTO #tmpExtracted
 	intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId, dtmM2MDate
 )
 SELECT	DISTINCT CI.intContractImportId,			intContractTypeId	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 1 ELSE 2 END,
-		intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmStartDate,
+		intEntityId			=	EY.intEntityId,			dtmContractDate				=	CI.dtmContractDate,
 		intCommodityId		=	CM.intCommodityId,		intCommodityUOMId			=	CU.intCommodityUnitMeasureId,
 		dblHeaderQuantity	=	CI.dblQuantity,			intSalespersonId			=	SY.intEntityId,	
 		ysnSigned			=	0,						strContractNumber			=	CI.strContractNumber,
@@ -164,11 +164,10 @@ BEGIN
 
 	DECLARE cur CURSOR LOCAL FAST_FORWARD
 	FOR
-	SELECT DISTINCT	MAX(intContractImportId), intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,MAX(dblHeaderQuantity),intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,1, 0, 0
+	SELECT DISTINCT	MAX(intContractImportId), intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,MAX(dblHeaderQuantity),intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,MAX(intCreatedById),MAX(dtmCreated),1, 0, 0
 	FROM	#tmpExtracted
 	GROUP BY intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,
-		intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,
-		intCreatedById, dtmCreated
+		intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId
 
 	OPEN cur
 
