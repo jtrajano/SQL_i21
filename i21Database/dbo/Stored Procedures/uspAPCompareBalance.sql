@@ -50,7 +50,7 @@ BEGIN
     IF @emailProfileName IS NOT NULL AND @recipients IS NOT NULL
     BEGIN
 
-        IF EXISTS(SELECT 1 FROM #tmpAPClearingBalanceCompare WHERE dblDifference != 0)
+        IF EXISTS(SELECT 1 FROM #tmpAPClearingBalanceCompare WHERE dblDifference > 1 OR dblDifference < -1)
         BEGIN
             SET @resultAsHTML += 
 				N'<h1>AP Clearing vs GL Result for ' + @companyName +'</h1>'+
@@ -67,7 +67,7 @@ BEGIN
             SET @resultAsHTML += N'</table>'; 
         END
 
-        IF EXISTS(SELECT 1 FROM #tmpAPClearingGLBalanceCompare WHERE dblDifference != 0)
+        IF EXISTS(SELECT 1 FROM #tmpAPClearingGLBalanceCompare WHERE dblDifference > 1 OR dblDifference < -1)
         BEGIN
             SET @resultAsHTML += 
 				N'<h1>AP Account vs GL Result for ' + @companyName +'</h1>'+
