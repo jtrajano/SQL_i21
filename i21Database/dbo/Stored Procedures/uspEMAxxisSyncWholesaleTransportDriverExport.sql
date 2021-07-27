@@ -22,6 +22,7 @@ INSERT INTO @tblDriver
 SELECT A.intEntityId, A.strName, NULL, A.strEmail, NULL, NULL FROM tblEMEntity A
 	INNER JOIN tblEMEntityLineOfBusiness B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblSMLineOfBusiness C ON B.intLineOfBusinessId = C.intLineOfBusinessId
+	INNER JOIN tblARSalesperson D ON  A.intEntityId = D.intEntityId AND D.strType = 'Driver'
 	WHERE C.strLineOfBusiness = 'Wholesale Transports'
 
 MERGE @tblDriver AS driver
