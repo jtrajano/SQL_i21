@@ -39,4 +39,7 @@ SELECT strName, strContactName, strEmail, strEmailUserName, ISNULL(strShipVia, '
 INTO tmpAxxisDriver
 FROM @tblDriver
 
+SELECT strName AS Name, strContactName AS ContactName, strEmail AS Email, strEmailUserName AS EmailUserName, ISNULL(strShipVia, '') AS ShipVia 
+FROM @tblDriver
+
 END
