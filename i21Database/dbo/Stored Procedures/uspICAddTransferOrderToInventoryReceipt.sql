@@ -11,7 +11,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
-DECLARE @ReceiptNumber AS NVARCHAR(20)
+DECLARE @ReceiptNumber AS NVARCHAR(40)
 
 DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 

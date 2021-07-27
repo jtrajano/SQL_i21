@@ -11,7 +11,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
-DECLARE @ReceiptNumber AS NVARCHAR(20)
+DECLARE @ReceiptNumber AS NVARCHAR(40)
 
 DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
@@ -178,7 +178,7 @@ BEGIN
 	DECLARE	@ItemId				INT
 			,@LocationId		INT
 			,@TransactionDate	DATETIME
-			,@TransactionType	NVARCHAR(20) = 'Purchase'
+			,@TransactionType	NVARCHAR(40) = 'Purchase'
 			,@EntityId			INT	
 			,@TaxMasterId		INT	
 			,@InventoryReceiptItemId INT

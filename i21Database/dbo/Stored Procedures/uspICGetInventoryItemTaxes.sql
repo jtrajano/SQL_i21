@@ -7,7 +7,7 @@ CREATE PROCEDURE [dbo].[uspICGetInventoryItemTaxes]
 	 @ItemId					INT				= NULL
 	,@LocationId				INT
 	,@TransactionDate			DATETIME
-	,@TransactionType			NVARCHAR(20) -- Purchase/Sale
+	,@TransactionType			NVARCHAR(40) -- Purchase/Sale
 	,@EntityId					INT				= NULL
 	,@TaxGroupId				INT				= NULL
 	,@BillShipToLocationId		INT				= NULL

@@ -2225,12 +2225,11 @@ BEGIN TRY
 																END
 														ELSE
 															CASE 
-																WHEN (a.intPricingTypeId = 2 OR a.intPricingTypeId in (1, 6) ) AND availableQtyForVoucher.intContractDetailId IS NOT NULL AND availableQtyForVoucher.dblAvailableQuantity > 0
+																WHEN (a.intPricingTypeId = 2 OR a.intPricingTypeId IN (1, 6) ) AND availableQtyForVoucher.intContractDetailId IS NOT NULL AND availableQtyForVoucher.dblAvailableQuantity > 0
 																	THEN 
 																		CASE 
-																			WHEN intItemType = 1 
-																				THEN availableQtyForVoucher.dblAvailableQuantity 
-																			ELSE ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits,6)
+																			WHEN intItemType = 1 THEN availableQtyForVoucher.dblAvailableQuantity 
+																			ELSE ROUND((availableQtyForVoucher.dblAvailableQuantity / a.dblSettleContractUnits) * a.dblUnits, 15)
 																		END
 																WHEN @origdblSpotUnits > 0 
 																	THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
@@ -2246,8 +2245,7 @@ BEGIN TRY
 																			THEN a.dblUnits - @dblTotalVoucheredQuantity
 																		WHEN @ysnFromPriceBasisContract = 1  AND (@dblQtyFromCt + @dblTotalVoucheredQuantity) < a.dblUnits 
 																			THEN @dblQtyFromCt - a.dblUnits
-																		ELSE 
-																			a.dblUnits
+																		ELSE a.dblUnits
 																	END
 															END
 														END																							

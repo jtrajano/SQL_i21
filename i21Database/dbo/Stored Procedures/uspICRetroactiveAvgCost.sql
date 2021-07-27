@@ -9,7 +9,7 @@ CREATE PROCEDURE [dbo].[uspICRetroactiveAvgCost]
 	,@dblNewValue AS NUMERIC(38,20)
 	,@intSourceTransactionId AS INT
 	,@intSourceTransactionDetailId AS INT 
-	,@strSourceTransactionId AS NVARCHAR(20)
+	,@strSourceTransactionId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT
 	,@dblResult AS NUMERIC(38, 20) OUTPUT 
