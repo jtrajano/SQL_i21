@@ -9580,6 +9580,7 @@
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
     <Build Include="dbo\Stored Procedures\uspMFMoveItemValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspEMAxxisSyncWholesaleTransportDriverExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
