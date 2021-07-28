@@ -1,18 +1,17 @@
 ﻿CREATE PROCEDURE [dbo].[uspEMAxxisSyncShipViaExport]
 AS
 BEGIN
-
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET ANSI_WARNINGS OFF
 
-	IF OBJECT_ID(N'tmpShipVia') IS NOT NULL DROP TABLE tmpShipVia
+	IF OBJECT_ID(N'tmpSMShipVia') IS NOT NULL DROP TABLE tmpSMShipVia
 	IF OBJECT_ID(N'tmpSMShipViaTrailer') IS NOT NULL DROP TABLE tmpSMShipViaTrailer
 	IF OBJECT_ID(N'tmpSMShipViaTruck') IS NOT NULL DROP TABLE tmpSMShipViaTruck
 
 	SELECT A.intEntityId,
-		'H' AS HDCode,
+		'H' COLLATE Latin1_General_CI_AS AS HDCode,
 		ISNULL(B.strExternalERPId, '') AS SCAC,
 		ISNULL(B.strName, '') AS strName, 
 		B.strName AS strContactName,
@@ -30,16 +29,16 @@ BEGIN
 		ISNULL(B.strInternalNotes, '') AS strInternalNotes,
 		ISNULL(A.strShipVia, '') AS strShipVia,
 		ISNULL(A.strFederalId, '') AS strFederalId,
-		A.ysnCompanyOwnedCarrier
-	INTO tmpShipVia
+		CONVERT(NVARCHAR(10), ISNULL(A.ysnCompanyOwnedCarrier, '')) COLLATE Latin1_General_CI_AS AS ysnCompanyOwnedCarrier
+	INTO tmpSMShipVia
 	FROM tblSMShipVia A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON C.intEntityId = A.intEntityId AND C.ysnDefaultLocation = 1
 
-	MERGE tmpShipVia AS shipVia
+	MERGE tmpSMShipVia AS shipVia
 	USING 
 	(
-		SELECT A.intEntityId, B.intEntityContactId FROM tmpShipVia A INNER JOIN tblEMEntityToContact B ON A.intEntityId = B.intEntityId AND B.ysnDefaultContact = 1
+		SELECT A.intEntityId, B.intEntityContactId FROM tmpSMShipVia A INNER JOIN tblEMEntityToContact B ON A.intEntityId = B.intEntityId AND B.ysnDefaultContact = 1
 	) AS contact
 	ON shipVia.intEntityId = contact.intEntityId
 	WHEN MATCHED THEN
@@ -81,7 +80,7 @@ BEGIN
 		   strShipVia AS ShipVia,
 		   strFederalId AS FederalID,
 		   ysnCompanyOwnedCarrier AS CompanyOwned
-	FROM tmpShipVia
+	FROM tmpSMShipVia
 	SELECT HDCode, strShipVia AS ShipVia, strTruckNumber AS TruckNumber FROM tmpSMShipViaTruck
 	SELECT HDCode, strShipVia AS ShipVia, strTrailerNumber AS TrailerNumber, strTrailerDescription AS TrailerDescription FROM tmpSMShipViaTrailer
 END
