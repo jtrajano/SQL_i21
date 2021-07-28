@@ -187,7 +187,7 @@ BEGIN
 			, @strInstrumentType = strInstrumentType
 			, @strBrokerAccount = strBrokerAccount
 			, @strBroker = strBroker
-			, @ysnPreCrush = ysnPreCrush
+			, @ysnPreCrush = ISNULL(ysnPreCrush,0)
 			, @strBrokerTradeNo = strBrokerTradeNo
 			, @strBuySell = strBuySell
 			, @intCommodityId = intCommodityId

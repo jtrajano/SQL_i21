@@ -100,7 +100,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
 		CROSS APPLY
 		(
-			SELECT CASE WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
+			SELECT CASE WHEN CHARINDEX('ysnPreCrush', SL.strMiscField) = 0 THEN 0 WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
 		)
 		mf --dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
 		WHERE strTransactionType IN ('Derivative Entry')
@@ -142,7 +142,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 			left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
 			CROSS APPLY
 			(
-				SELECT CASE WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
+				SELECT CASE WHEN CHARINDEX('ysnPreCrush', SL.strMiscField) = 0 THEN 0  WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
 			)
 			mf --dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
 			WHERE strTransactionType IN ('Match Derivatives')
@@ -212,7 +212,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 			left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
 			CROSS APPLY
 			(
-				SELECT CASE WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
+				SELECT CASE WHEN CHARINDEX('ysnPreCrush', SL.strMiscField) = 0 THEN 0 WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
 			)
 			mf --dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
 			WHERE strTransactionType IN ('Derivative Entry')
