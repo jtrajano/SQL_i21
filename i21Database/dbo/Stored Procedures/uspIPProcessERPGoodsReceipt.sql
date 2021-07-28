@@ -65,6 +65,7 @@ BEGIN TRY
 		,@intLotStatusId INT
 		,@intParentLotId INT
 		,@strParentLotNumber NVARCHAR(50)
+		,@strLotCondition NVARCHAR(50)
 	DECLARE @InventoryTransferDetail TABLE (intInventoryTransferDetailId INT)
 
 	SELECT @intUserId = intEntityId
@@ -330,6 +331,7 @@ BEGIN TRY
 					,@intLotStatusId = NULL
 					,@intParentLotId = NULL
 					,@strParentLotNumber = NULL
+					,@strLotCondition = NULL
 
 				SELECT @strItemNo = RIS.strItemNo
 					,@strSubLocationName = RIS.strSubLocationName
@@ -361,6 +363,7 @@ BEGIN TRY
 					,@intQtyItemUOMId = ITD.intItemUOMId
 					,@intQtyUnitMeasureId = IUOM.intUnitMeasureId
 					,@intLotId = L.intLotId
+					,@strLotCondition = ISNULL(ITD.strLotCondition, 'Sound/Full')
 				FROM tblICInventoryTransferDetail ITD
 				JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
 					AND ITD.intInventoryTransferId = @intInventoryTransferId
@@ -733,7 +736,7 @@ BEGIN TRY
 					,@dblTareWeight
 					,0
 					,@strContainerNumber
-					,'Sound/Full'
+					,@strLotCondition
 					,@dtmExpiryDate
 					,@intParentLotId
 					,@strParentLotNumber
