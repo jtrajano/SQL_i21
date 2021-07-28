@@ -614,6 +614,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'License T
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.LicenseType', intSort = 1 WHERE strMenuName = 'License Types' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerLicensingParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Licenses' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerLicensingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Customer Licenses', N'System Manager', @SystemManagerLicensingParentMenuId, N'CRM Customer Licenses', N'Licensing', N'Screen', N'CRM.view.CustomerLicense?showSearch=true&searchCommand=CustomerLicense', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CRM.view.CustomerLicense?showSearch=true&searchCommand=CustomerLicense' WHERE strMenuName = 'Customer Licenses' AND strModuleName = 'System Manager' AND intParentMenuID = @SystemManagerLicensingParentMenuId
 --/* Start of Remodule*/
 --IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'i21 Updates' AND strModuleName = 'Service Pack' AND intParentMenuID = @UtilitiesParentMenuId)
 --UPDATE tblSMMasterMenu SET strModuleName = N'System Manager' WHERE strMenuName = 'i21 Updates' AND strModuleName = 'Service Pack' AND intParentMenuID = @UtilitiesParentMenuId
@@ -5519,6 +5524,7 @@ ELSE
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Create Activity' AND strModuleName = 'CRM' AND intParentMenuID = @CRMActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Sales Entity Contacts' AND strModuleName = 'CRM' AND intParentMenuID = @CRMActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Lines of Business' AND strModuleName = 'CRM' AND intParentMenuID = @CRMActivitiesParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Customer Licenses' AND strModuleName = 'CRM' AND intParentMenuID = @CRMMaintenanceParentMenuId
 /* END OF DELETING */
 
 /* HELP DESK */
