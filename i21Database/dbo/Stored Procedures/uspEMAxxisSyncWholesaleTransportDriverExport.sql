@@ -1,46 +1,43 @@
 ﻿CREATE PROCEDURE [dbo].[uspEMAxxisSyncWholesaleTransportDriverExport]
 AS
-	DECLARE @tblDriver AS TABLE 
-(
-	intEntityId INT,
-	strName NVARCHAR(MAX) ,
-	strContactName NVARCHAR(MAX),
-	strEmail NVARCHAR(MAX),
-	strEmailUserName NVARCHAR(MAX),
-	strShipVia NVARCHAR(MAX)
-)
 BEGIN
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET ANSI_WARNINGS OFF
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET ANSI_WARNINGS OFF
+	IF OBJECT_ID(N'tmpEMAxxisDriver') IS NOT NULL DROP TABLE tmpEMAxxisDriver
 
-IF OBJECT_ID(N'tmpAxxisDriver') IS NOT NULL DROP TABLE tmpAxxisDriver
-
-INSERT INTO @tblDriver
-SELECT A.intEntityId, A.strName, NULL, A.strEmail, NULL, NULL FROM tblEMEntity A
+	SELECT 
+		A.intEntityId, 
+		ISNULL(A.strName, '') AS strName, 
+		A.strName AS strContactName, 
+		A.strEmail, 
+		A.strEmail AS strEmailUserName, 
+		ISNULL(NULL, '') COLLATE Latin1_General_CI_AS AS strShipVia 
+	INTO tmpEMAxxisDriver
+	FROM tblEMEntity A
 	INNER JOIN tblEMEntityLineOfBusiness B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblSMLineOfBusiness C ON B.intLineOfBusinessId = C.intLineOfBusinessId
 	INNER JOIN tblARSalesperson D ON  A.intEntityId = D.intEntityId AND D.strType = 'Driver'
 	WHERE C.strLineOfBusiness = 'Wholesale Transports'
 
-MERGE @tblDriver AS driver
-USING 
-(
-	SELECT A.intEntityId, B.intEntityContactId FROM @tblDriver A INNER JOIN tblEMEntityToContact B ON A.intEntityId = B.intEntityId
-) AS contact
-ON driver.intEntityId = contact.intEntityId
-WHEN MATCHED THEN
-UPDATE SET driver.strContactName = (SELECT strName FROM tblEMEntity where intEntityId = contact.intEntityContactId),
-		   driver.strEmail = (SELECT strEmail FROM tblEMEntity where intEntityId = contact.intEntityContactId),
-		   driver.strEmailUserName = (SELECT strEmail FROM tblEMEntity where intEntityId = contact.intEntityContactId);
+	MERGE tmpEMAxxisDriver AS driver
+	USING 
+	(
+		SELECT A.intEntityId, B.intEntityContactId FROM tmpEMAxxisDriver A INNER JOIN tblEMEntityToContact B ON A.intEntityId = B.intEntityId AND B.ysnDefaultContact = 1
+	) AS contact
+	ON driver.intEntityId = contact.intEntityId
+	WHEN MATCHED THEN
+	UPDATE SET driver.strContactName = (SELECT ISNULL(strName, '') FROM tblEMEntity where intEntityId = contact.intEntityContactId),
+			   driver.strEmail = (SELECT ISNULL(strEmail, '') FROM tblEMEntity where intEntityId = contact.intEntityContactId),
+			   driver.strEmailUserName = (SELECT ISNULL(strEmail, '') FROM tblEMEntity where intEntityId = contact.intEntityContactId),
+			   driver.strShipVia = ISNULL((SELECT ISNULL(strShipVia, '') FROM tblSMShipVia where intEntityId = driver.intEntityId), '');
 
-SELECT strName, strContactName, strEmail, strEmailUserName, ISNULL(strShipVia, '') AS strShipVia 
-INTO tmpAxxisDriver
-FROM @tblDriver
-
-SELECT strName AS Name, strContactName AS ContactName, strEmail AS Email, strEmailUserName AS EmailUserName, ISNULL(strShipVia, '') AS ShipVia 
-FROM @tblDriver
-
+	SELECT strName AS Name, 
+		   strContactName AS ContactName, 
+		   strEmail AS Email, 
+		   strEmailUserName AS EmailUserName, 
+		   strShipVia AS ShipVia 
+	FROM tmpEMAxxisDriver
 END
