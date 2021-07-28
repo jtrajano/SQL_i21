@@ -58,6 +58,7 @@ BEGIN TRY
 		,@intCurrencyId INT
 		,@ysnSubCurrency BIT
 		,@strSubCurrency NVARCHAR(50)
+		,@intDetailCurrencyId int
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -98,6 +99,7 @@ BEGIN TRY
 		,intAccountId INT
 		,intCurrencyId INT
 		,ysnSubCurrency INT
+		,intCostCurrencyId INT
 		)
 	DECLARE @tblARInvoiceStage TABLE (intInvoiceStageId INT)
 
@@ -610,9 +612,10 @@ BEGIN TRY
 							,1
 							)
 				END
-				SELECT @ysnSubCurrency = NULL
+				SELECT @ysnSubCurrency = NULL,@intDetailCurrencyId=NULL
 
 				SELECT @ysnSubCurrency = ysnSubCurrency
+						,@intDetailCurrencyId=intCurrencyID
 				FROM tblSMCurrency
 				WHERE strCurrency = @strSubCurrency
 
@@ -636,6 +639,7 @@ BEGIN TRY
 					,intAccountId
 					,intCurrencyId
 					,ysnSubCurrency
+					,intCostCurrencyId
 					)
 				SELECT @intItemId
 					,@intContractHeaderId
@@ -655,6 +659,7 @@ BEGIN TRY
 					,@intAccountId
 					,@intCurrencyId
 					,@ysnSubCurrency
+					,@intDetailCurrencyId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -701,6 +706,7 @@ BEGIN TRY
 				,intAccountId
 				,intCurrencyId
 				,ysnSubCurrency
+				,intCostCurrencyId
 				)
 			SELECT @intEntityId
 				,1
@@ -726,6 +732,7 @@ BEGIN TRY
 				,intAccountId
 				,intCurrencyId
 				,ysnSubCurrency
+				,intCostCurrencyId
 			FROM @tblIPFinalInvoiceDetail FID
 
 			SELECT @intLoadId = NULL
@@ -762,7 +769,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				UPDATE BD
-				SET dblTotal = VD.dblQuantityToBill * VD.dblCost
+				SET dblTotal = (Case When BD.ysnSubCurrency=1 Then  VD.dblQuantityToBill * VD.dblCost/100 Else VD.dblQuantityToBill * VD.dblCost End)
 					,dblQtyReceived = VD.dblQuantityToBill
 					,dblCost = VD.dblCost
 					,intUnitOfMeasureId = VD.intQtyToBillUOMId

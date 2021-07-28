@@ -50,6 +50,11 @@ BEGIN
 	,@strCode								NVARCHAR(10) = 'TRA'
 	,@strTransactionId						NVARCHAR(30)
 
+	DECLARE @dtmTransferStorageDate DATETIME;
+	SELECT @dtmTransferStorageDate = dtmTransferStorageDate
+	FROM tblGRTransferStorage
+	WHERE intTransferStorageId = @intTransferStorageId
+
 	SELECT @strTransactionId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -441,7 +446,7 @@ BEGIN
 		,strICCCostType					
 	)
 	SELECT 
-		 dtmDate						 = GETDATE()
+		 dtmDate						 = @dtmTransferStorageDate
 		,intItemId						 = @InventoryItemId
 		,strItemNo						 = CS.strItemNo
 		,intChargeId					 = CS.intChargeId

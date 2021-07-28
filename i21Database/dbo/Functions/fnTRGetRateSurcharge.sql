@@ -29,11 +29,10 @@ begin
 			select top 1 1 
 			from
 				tblARCustomerFreightXRef a
-				,tblICItem b 
+				inner join tblICItem b on a.intCategoryId = b.intCategoryId
 			where
 				a.intEntityCustomerId = @intEntityCustomerId
 				and a.strZipCode = @strBulkZipCode
-				and a.intCategoryId = b.intCategoryId
 				and b.intItemId = @intItemId
 		)
 		begin

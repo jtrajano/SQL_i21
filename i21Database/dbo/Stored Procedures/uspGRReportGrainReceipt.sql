@@ -238,6 +238,7 @@ DECLARE  @strCompanyName NVARCHAR(500)
      ,dblTotaPurchasePrice = CAST((SC.dblUnitPrice * SC.dblNetUnits) AS DECIMAL(18,2))
      ,@dblCheckOff AS dblCheckOff
      ,@dblNetAmtPayable AS dblNetAmtPayable
+     ,SC.dtmTicketDateTime AS dtmTicketDateTime
   
   
  FROM tblSCTicket SC  
@@ -249,7 +250,8 @@ DECLARE  @strCompanyName NVARCHAR(500)
  LEFT JOIN tblCTWeightGrade ctGrade ON ctGrade.intWeightGradeId = SC.intGradeId
  LEFT JOIN tblGLAccount  glAccount ON glAccount.intAccountId = ctGrade.intAccountId
  LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityId = SC.intEntityId
- LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = SC.intContractId
+ LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SC.intContractId  
+ LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = CTD.intContractHeaderId
  WHERE SC.intTicketId = @intScaleTicketId   
 
 

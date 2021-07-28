@@ -5,9 +5,9 @@ SELECT *,
 	dblBalance = (dblOriginalQty - (dblAllocatedQty + dblReservedQty)), 
 	dblAvailToSell = CASE WHEN (((dblAllocatedQty + dblReservedQty) > 0) AND (dblUnPickedQty > (dblOriginalQty - (dblAllocatedQty + dblReservedQty)))) 
 						THEN (dblOriginalQty - (dblAllocatedQty + dblReservedQty)) ELSE dblUnPickedQty END,
-	dblNetWeight = (dblNetWeightFull / dblQty) * dblUnPickedQty,
-	dblGrossWeight = (dblGrossWeightFull / dblQty) * dblUnPickedQty,
-	dblTareWeight = (dblTareWeightFull / dblQty) * dblUnPickedQty
+	dblNetWeight = dbo.fnMultiply(dbo.fnDivide(dblNetWeightFull, dblQty), dblUnPickedQty),
+	dblGrossWeight = dbo.fnMultiply(dbo.fnDivide(dblGrossWeightFull, dblQty), dblUnPickedQty),
+	dblTareWeight = dbo.fnMultiply(dbo.fnDivide(dblTareWeightFull, dblQty), dblUnPickedQty)
 FROM (
 	SELECT 
 		intLotId = Lot.intLotId
@@ -46,12 +46,12 @@ FROM (
        ,intParentLotId = Lot.intParentLotId
        ,intSplitFromLotId = Lot.intSplitFromLotId
        ,dblGrossWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
-                                                       IsNull((((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty) + Lot.dblWeight), 0.0) 
+                                                       IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty) + Lot.dblWeight, 0.0) 
                                                   ELSE
                                                        ISNULL(Lot.dblGrossWeight, ISNULL(Lot.dblWeight, 0.0)) - ISNULL(PC.dblPickedContainerGrossWt, 0)
                                                   END
        ,dblTareWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
-                                                      IsNull(((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty), 0.0) - ISNULL(PC.dblPickedContainerNetWt, 0)
+                                                      IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty), 0.0) - ISNULL(PC.dblPickedContainerNetWt, 0)
                                                ELSE
                                                       0.0
                                                END

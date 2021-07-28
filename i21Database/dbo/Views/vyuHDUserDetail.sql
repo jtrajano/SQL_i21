@@ -26,10 +26,8 @@
 			,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
 			,intCustomerCount = NULL
 		from
-			tblSMUserSecurity us,
-			tblSMUserRole ur
-		where
-			ur.intUserRoleID = us.intUserRoleID
+			tblSMUserSecurity us
+			inner join tblSMUserRole ur on ur.intUserRoleID = us.intUserRoleID
 		
 		union all
 

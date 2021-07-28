@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPRepostBillCostAdjustment]
+﻿CREATE PROCEDURE [dbo].[uspICRepostBillCostAdjustment]
 	@strBillId AS NVARCHAR(50)
 	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
@@ -191,26 +191,21 @@ BEGIN
 	--												Cost Adjustment Value = 
 	--												[Voucher Qty x Voucher Cost] - [Voucher Qty x Receipt Cost]												
 	--											*/
-	--											ROUND(
-	--												dbo.fnMultiply(
-	--													--[Voucher Qty]
-	--													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
-	--													--[Voucher Cost]
-	--													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
-	--															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
-	--																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-	--																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
-	--														ELSE 
-	--															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
-	--																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-	--																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
-	--													END 													
-	--												)
-	--												,2 
+	--											dbo.fnMultiply(
+	--												--[Voucher Qty]
+	--												CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+	--												--[Voucher Cost]
+	--												,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
+	--														dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
+	--															COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+	--															(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
+	--													ELSE 
+	--														dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+	--															COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+	--															(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+	--												END 													
 	--											)
-	--											- 
-	--											ROUND(
-	--												dbo.fnMultiply(
+	--											- dbo.fnMultiply(
 	--												--[Voucher Qty]
 	--												CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
 													
@@ -248,9 +243,7 @@ BEGIN
 	--															) 
 	--													END 
 	--												END
-	--												)
-	--												,2
-	--											) 
+	--											)
 	--		,[intCurrencyId] 					=	A.intCurrencyId
 	--		--,[dblExchangeRate] 					=	0
 	--		,[intTransactionId]					=	A.intBillId
@@ -261,7 +254,7 @@ BEGIN
 	--		,[intSubLocationId] 				=	E2.intSubLocationId
 	--		,[intStorageLocationId] 			=	E2.intStorageLocationId
 	--		,[ysnIsStorage] 					=	0
-	--		,[strActualCostId] 					=	E2.strActualCostId
+	--		,[strActualCostId] 					=	E1.strActualCostId
 	--		,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
 	--		,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
 	--		,[strSourceTransactionId] 			=	E1.strReceiptNumber
@@ -306,20 +299,22 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[intCostUOMId] 
+		--,[dblVoucherCost] 
 		,[dblNewValue]
 		,[intCurrencyId] 
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[intSourceTransactionDetailId]
-		,[strSourceTransactionId]	
+		--,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[intSourceTransactionDetailId] 
+		,[strSourceTransactionId] 
 		,[intFobPointId]
 		,[intInTransitSourceLocationId]
 	)
@@ -331,8 +326,10 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[intCostUOMId] 
+		--,[dblVoucherCost] 
 		,[dblNewValue]
 		,[intCurrencyId] 
+		--,[dblExchangeRate] 
 		,[intTransactionId] 
 		,[intTransactionDetailId] 
 		,[strTransactionId] 
@@ -426,7 +423,7 @@ BEGIN
 		AND B.intInventoryReceiptChargeId IS NOT NULL 
 		AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 		AND (
-			(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
+			(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
 			OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
 		)
 		AND A.intTransactionReversed IS NULL
@@ -475,7 +472,7 @@ BEGIN
 
 			RAISERROR(@ErrorMessage, 11, 1);
 			GOTO _Exit
-		END 		
+		END 			
 	END 
 	
 	IF NOT EXISTS (SELECT TOP 1 1 FROM @adjustedEntries) AND NOT EXISTS (SELECT TOP 1 1 FROM @ChargesToAdjust)
@@ -498,7 +495,7 @@ BEGIN
 			,strDescription				
 			,strCode					
 			,strReference				
-			,intCurrencyId			
+			,intCurrencyId				
 			,dblExchangeRate			
 			,dtmDateEntered				
 			,dtmTransactionDate			
@@ -518,7 +515,7 @@ BEGIN
 			,dblCreditForeign			
 			,dblCreditReport			
 			,dblReportingRate			
-			,dblForeignRate
+			,dblForeignRate				
 			,intSourceEntityId
 			,intCommodityId
 		)
@@ -526,7 +523,7 @@ BEGIN
 			@strBatchId = @strBatchId
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
 			,@strTransactionId = @strBillId
-	END
+	END 
 END 
 
 -- Create the g/l entries 

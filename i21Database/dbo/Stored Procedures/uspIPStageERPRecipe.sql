@@ -184,7 +184,7 @@ BEGIN TRY
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
 
 			UPDATE RI
-			SET strRecipeHeaderItemNo = R.strItemNo
+			SET strRecipeHeaderItemNo = R.strItemNo,strRecipeName=R.strItemNo
 			FROM tblMFRecipeStage R
 			JOIN tblMFRecipeItemStage RI ON RI.intParentTrxSequenceNo = R.intTrxSequenceNo
 

@@ -235,9 +235,9 @@ FROM 	tblICInventoryTransaction t
 					AND ld.intItemId = t.intItemId		
 					AND ty.intTransactionTypeId IN (22,46)
 		) loadShipmentSchedule 
-		LEFT JOIN tblGRSettleStorage settleStorage 
-			ON settleStorage.intSettleStorageId = t.intTransactionId
-			AND settleStorage.intSettleStorageId = t.intTransactionDetailId
+		LEFT JOIN tblGRSettleStorage settleStorage1 
+			ON settleStorage1.intSettleStorageId = t.intTransactionId
+			AND settleStorage1.intSettleStorageId = t.intTransactionDetailId
 			AND t.strTransactionForm IN ('Settle Storage', 'Storage Settlement')
 			AND ty.intTransactionTypeId = 44 
 
@@ -259,7 +259,7 @@ FROM 	tblICInventoryTransaction t
 				, bill.intEntityVendorId
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
-				, settleStorage.intEntityId
+				, settleStorage1.intEntityId
 				, adjustmentItem.intEntityId
 			)
 

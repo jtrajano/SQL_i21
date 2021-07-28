@@ -93,7 +93,7 @@ BEGIN
                               (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))    
                             ) THEN 1     
                    ELSE 
-                        CASE WHEN CONVERT(DATE ,GETDATE()) >= CONVERT(DATE,dtmNextAward) THEN
+                        CASE WHEN CONVERT(DATE ,GETDATE()) >= CONVERT(DATE,dtmNextAward)  AND CONVERT(DATE,dtmLastAward) < CONVERT(DATE,dtmNextAward) THEN
                             1
                          ELSE
                             0 
@@ -173,23 +173,23 @@ BEGIN
     
   --Update Earned Hours    
   UPDATE tblPREmployeeTimeOff    
-   SET dblHoursEarned =       CASE WHEN (T.ysnForReset = 1) THEN    
-		                                CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN    
-					                                CASE WHEN (dblMaxBalance IS NOT NULL AND Carryover + T.dblEarnedHours > dblMaxBalance) THEN    
-						                                dblMaxBalance - ((T.dblEarnedHours + Carryover) - dblMaxBalance)    
-					                                ELSE    
-						                                dblMaxEarned
-					                                END    
-			                                ELSE    
-					                                CASE WHEN (dblMaxBalance IS NOT NULL AND Carryover + T.dblEarnedHours > dblMaxBalance) THEN    
-							                                dblMaxBalance - ((T.dblEarnedHours + Carryover) - dblMaxBalance)    
-						                                ELSE    
-						                                (dblHoursEarned + T.dblEarnedHours)    
-					                                END    
-			                                END    
-                                Else    
-	                                dblHoursEarned
-                                END    
+   SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN          
+                            CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN          
+								CASE WHEN (dblMaxBalance IS NOT NULL  AND T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover > dblMaxBalance) THEN
+									T.dblEarnedHours - (((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned) + Carryover - dblMaxBalance)
+								ELSE
+									T.dblEarnedHours - ((dblHoursEarned + T.dblEarnedHours) - dblMaxEarned)
+								END
+                            ELSE          
+								CASE WHEN (dblMaxBalance IS NOT NULL AND Carryover + T.dblEarnedHours > dblMaxBalance) THEN          
+									T.dblEarnedHours - ((T.dblEarnedHours + Carryover) - dblMaxBalance)  
+								ELSE          
+									(dblHoursEarned + T.dblEarnedHours)          
+								END          
+                            END          
+						Else          
+							dblHoursEarned      
+                        END     
             
     ,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END     
     ,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN    

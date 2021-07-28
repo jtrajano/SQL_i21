@@ -162,13 +162,13 @@ BEGIN
 
 	IF @strMailType = 'Sample Instruction'
 	BEGIN
-		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SELECT @strCustomerContract = isnull(strCustomerContract,'') FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Sample Instruction - Your ref. no. ' + @strCustomerContract
 	END
 
 	IF @strMailType = 'Release Instruction'
 	BEGIN
-		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SELECT @strCustomerContract = isnull(strCustomerContract,'') FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Release Instruction - Your ref. no. ' + @strCustomerContract
 	END
 

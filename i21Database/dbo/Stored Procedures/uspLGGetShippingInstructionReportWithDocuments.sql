@@ -180,7 +180,7 @@ BEGIN
 			+ CASE WHEN ISNULL(strThirdNotifyText, '') = '' THEN '' ELSE strThirdNotifyText END)) 
 		,strBOLInstructionText = @strBOLInstructionText
 		,strContainerTypePackingDescription = strContainerType + ' in ' + strPackingDescription
-		,strQuantityPackingDescription = @strContainerQtyUOM + CASE WHEN (ISNULL(@strPackingUOM, '') <> '') THEN ' in ' + @strPackingUOM ELSE '' END
+		,strQuantityPackingDescription = @strContainerQtyUOM
 		,strFullName = @strFullName
 		,strUserPhoneNo = @strUserPhoneNo 
 		,strUserEmailId = @strUserEmailId

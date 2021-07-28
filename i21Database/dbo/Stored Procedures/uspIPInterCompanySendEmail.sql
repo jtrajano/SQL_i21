@@ -203,7 +203,7 @@ BEGIN
 	IF @strStatus = 'Success'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strPriceContractNo, '') + '</td>' + 
+			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
 			   '<td>&nbsp;' + 'Success' + '</td>

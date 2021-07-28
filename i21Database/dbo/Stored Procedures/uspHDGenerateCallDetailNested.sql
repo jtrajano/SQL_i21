@@ -25,14 +25,13 @@ with closedCalls as
 		,intClosedCalls = count(a.intTicketId)
 	from
 		tblHDTicket a
-		,tblHDTicketType c
-		,tblHDTicketPriority d
+		inner join tblHDTicketType c on c.intTicketTypeId = a.intTicketTypeId
+		inner join tblHDTicketPriority d on d.intTicketPriorityId = a.intTicketPriorityId
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
 		and a.intTicketStatusId = (select top 1 intTicketStatusId from tblHDTicketStatus where strStatus = 'Closed')
-		and c.intTicketTypeId = a.intTicketTypeId
-		and d.intTicketPriorityId = a.intTicketPriorityId
+		
 	group by
 		a.intAssignedToEntity
 		,convert(int, convert(nvarchar(8), a.dtmCreated, 112))
@@ -53,14 +52,13 @@ openCalls as
 		,intOpenCalls = count(a.intTicketId)
 	from
 		tblHDTicket a
-		,tblHDTicketType c
-		,tblHDTicketPriority d
+		inner join tblHDTicketType c on c.intTicketTypeId = a.intTicketTypeId
+		inner join tblHDTicketPriority d on d.intTicketPriorityId = a.intTicketPriorityId
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
 		and a.intTicketStatusId <> (select top 1 intTicketStatusId from tblHDTicketStatus where strStatus = 'Closed')
-		and c.intTicketTypeId = a.intTicketTypeId
-		and d.intTicketPriorityId = a.intTicketPriorityId
+
 	group by
 		 a.intAssignedToEntity
 		,convert(int, convert(nvarchar(8), a.dtmCreated, 112))
@@ -81,13 +79,11 @@ totalCalls as
 		,intTotalCalls = count(a.intTicketId)
 	from
 		tblHDTicket a
-		,tblHDTicketType c
-		,tblHDTicketPriority d
+		inner join tblHDTicketType c on c.intTicketTypeId = a.intTicketTypeId
+		inner join tblHDTicketPriority d on d.intTicketPriorityId = a.intTicketPriorityId
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
-		and c.intTicketTypeId = a.intTicketTypeId
-		and d.intTicketPriorityId = a.intTicketPriorityId
 	group by
 		 a.intAssignedToEntity
 		,convert(int, convert(nvarchar(8), a.dtmCreated, 112))
@@ -108,17 +104,15 @@ reopenCalls as
 		,intReopenCalls = count(c.strNewValue)
 	from
 		tblHDTicket a
-		,tblHDTicketHistory c
-		,tblHDTicketStatus d
-		,tblHDTicketType e
-		,tblHDTicketPriority f
+		inner join tblHDTicketHistory c on a.intTicketId = c.intTicketId
+		inner join tblHDTicketStatus d on a.intTicketStatusId = d.intTicketStatusId
+		inner join tblHDTicketType e on e.intTicketTypeId = a.intTicketTypeId
+		inner join tblHDTicketPriority f on f.intTicketPriorityId = a.intTicketPriorityId
 	where
 		a.intAssignedToEntity is not null
 		and a.strType = 'HD'
 		and d.strStatus = 'Reopen'
-		and c.intTicketId = a.intTicketId and c.strField = 'intTicketStatusId' and convert(int,c.strNewValue) = d.intTicketStatusId
-		and e.intTicketTypeId = a.intTicketTypeId
-		and f.intTicketPriorityId = a.intTicketPriorityId
+		and c.strField = 'intTicketStatusId' and convert(int,c.strNewValue) = d.intTicketStatusId
 	group by
 		a.intAssignedToEntity
 		,convert(int, convert(nvarchar(8), a.dtmCreated, 112))
@@ -140,16 +134,13 @@ billedhours as
 		,dblTotalBillableAmount = sum(isnull(b.intHours,0.00)*isnull(b.dblRate,0.00))
 	from
 		tblHDTicket a
-		,tblHDTicketHoursWorked b
-		,tblHDTicketType c
-		,tblHDTicketPriority d
+		inner join tblHDTicketHoursWorked b on b.intTicketId = a.intTicketId
+		inner join tblHDTicketType c on c.intTicketTypeId = a.intTicketTypeId
+		inner join tblHDTicketPriority d on d.intTicketPriorityId = a.intTicketPriorityId
 	where
 		b.intAgentEntityId is not null
 		and a.strType = 'HD'
-		and b.intTicketId = a.intTicketId
 		and b.ysnBillable = convert(bit,1)
-		and c.intTicketTypeId = a.intTicketTypeId
-		and d.intTicketPriorityId = a.intTicketPriorityId
 	group by
 		b.intAgentEntityId
 		,convert(int, convert(nvarchar(8), b.dtmDate, 112))
@@ -261,16 +252,13 @@ select distinct
 		,intConcurrencyId = 1
 from
 		tblHDTicket a
-		,tblEMEntity b
-		,tblHDTicketType c
-		,tblHDTicketPriority d
+		inner join tblEMEntity b on b.intEntityId = a.intAssignedToEntity
+		inner join tblHDTicketType c on c.intTicketTypeId = a.intTicketTypeId
+		inner join tblHDTicketPriority d on d.intTicketPriorityId = a.intTicketPriorityId 
 where
 		a.intAssignedToEntity is not null
 		and a.intAssignedToEntity = (case when @EntityId = 0 then a.intAssignedToEntity else @EntityId end)
 		and a.strType = 'HD'
-		and b.intEntityId = a.intAssignedToEntity
-		and c.intTicketTypeId = a.intTicketTypeId
-		and d.intTicketPriorityId = a.intTicketPriorityId
 		and convert(int, convert(nvarchar(8), a.dtmCreated, 112)) between @DateFrom and @DateTo
 ) as result
 order by

@@ -354,7 +354,7 @@ BEGIN
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			INSERT INTO tblGRTransferStorageReference
-			SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds WHERE intId = @intId
+			SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate,null FROM @newCustomerStorageIds WHERE intId = @intId
 
 			SET @intTransferStorageReferenceId = CASE WHEN ISNULL(@intTransferStorageReferenceId,0) = 0 THEN @@ROWCOUNT ELSE @intTransferStorageReferenceId + 1 END
 
@@ -738,6 +738,27 @@ BEGIN
 						AND intTransactionTypeId = 1
 				END
 
+				-- Copy the intOrigCostCustomerStorageId from the source DP to DP transaction(if it exists).
+				UPDATE TSR
+				SET TSR.intCostBucketCustomerStorageId = TSR_SOURCE.intCostBucketCustomerStorageId
+				FROM tblGRTransferStorageReference TSR
+				INNER JOIN tblGRTransferStorageReference TSR_SOURCE
+					ON TSR_SOURCE.intToCustomerStorageId = TSR.intSourceCustomerStorageId
+				WHERE TSR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+				AND TSR_SOURCE.intCostBucketCustomerStorageId IS NOT NULL
+
+				-- If the intCostBucketCustomerStorageId is still blank, it means that this is the first DP to DP transaction
+				IF(EXISTS(
+					SELECT TOP 1 1 FROM tblGRTransferStorageReference
+					WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
+					AND intCostBucketCustomerStorageId IS NULL)
+				)
+				BEGIN
+					UPDATE tblGRTransferStorageReference
+					SET intCostBucketCustomerStorageId = @intSourceCustomerStorageId
+					WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
+				END
+
 				--inventory items
 				DELETE FROM @GLEntries
 				INSERT INTO @GLEntries 
@@ -982,7 +1003,7 @@ BEGIN
 			,[intTransactionTypeId]				= 3
 			,[strPaidDescription]				= 'Generated from Transfer Storage'
 			,[strType]							= 'From Transfer'
-			,[intInventoryReceiptId]			= SourceHistory.intInventoryReceiptId
+			,[intInventoryReceiptId]			= case when FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1 then SourceHistory.intInventoryReceiptId else null end
 			,[intTransferStorageReferenceId]	= SR.intTransferStorageReferenceId
       		,[strTransferTicket] = TS.strTransferStorageTicket
 		FROM tblGRTransferStorageReference SR
@@ -993,6 +1014,12 @@ BEGIN
 		INNER JOIN tblGRCustomerStorage ToStorage
 			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
 				AND FromStorage.intTicketId IS NOT NULL --SCALE TICKET ONLY
+		
+		INNER JOIN tblGRStorageType FromType
+			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+		INNER JOIN tblGRStorageType ToType
+			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+
 		INNER JOIN tblGRTransferStorageSplit TSS
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblGRStorageHistory SourceHistory
@@ -1046,6 +1073,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
 				,[strTransferTicket]
 			)
@@ -1060,6 +1088,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
 				,[strTransferTicket]
 			FROM @StorageHistoryStagingTable

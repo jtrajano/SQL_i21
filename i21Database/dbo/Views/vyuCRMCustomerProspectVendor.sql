@@ -8,10 +8,9 @@
 			,ysnActive = b.ysnActive
 		from
 			tblEMEntityType a
-			,tblEMEntity b
+			inner join tblEMEntity b on b.intEntityId = a.intEntityId
 		where
 			a.strType in ('Customer','Vendor','Prospect','Competitor','Partner','Employee')
-			and b.intEntityId = a.intEntityId
 		/*
 		select
 			intEntityCustomerId

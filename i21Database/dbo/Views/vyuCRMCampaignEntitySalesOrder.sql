@@ -19,17 +19,12 @@
 				,strOpportunityName = null
 			from
 				tblCRMCampaign a
-				,tblCRMOpportunity b
-				,tblCRMOpportunityQuote c
-				,tblSOSalesOrder d
-				,opportunity e
+				inner join tblCRMOpportunity b on b.intCampaignId = a.intCampaignId
+				inner join tblCRMOpportunityQuote c on c.intOpportunityId = b.intOpportunityId
+				inner join tblSOSalesOrder d on d.intSalesOrderId = c.intSalesOrderId
+				inner join opportunity e on e.intCustomerContactId = d.intEntityContactId and e.intCampaignId = a.intCampaignId
 			where
-				b.intCampaignId = a.intCampaignId
-				and c.intOpportunityId = b.intOpportunityId
-				and d.intSalesOrderId = c.intSalesOrderId
-				and d.strTransactionType = 'Quote'
-				and e.intCustomerContactId = d.intEntityContactId
-				and e.intCampaignId = a.intCampaignId
+				d.strTransactionType = 'Quote'
 			group by
 				d.intEntityContactId
 
@@ -43,19 +38,16 @@
 				,strOpportunityName = null
 			from
 				tblCRMCampaign a
-				,tblCRMOpportunity b
-				,tblCRMOpportunityQuote c
-				,tblSOSalesOrder d
-				,opportunity e
+				inner join tblCRMOpportunity b on b.intCampaignId = a.intCampaignId
+				inner join tblCRMOpportunityQuote c on c.intOpportunityId = b.intOpportunityId
+				inner join tblSOSalesOrder d on d.intSalesOrderId = c.intSalesOrderId
+				inner join opportunity e on e.intCustomerContactId = d.intEntityContactId and e.intCampaignId = a.intCampaignId
 			where
-				b.intCampaignId = a.intCampaignId
-				and c.intOpportunityId = b.intOpportunityId
-				and d.intSalesOrderId = c.intSalesOrderId
-				and d.strTransactionType = 'Order'
-				and e.intCustomerContactId = d.intEntityContactId and e.intCampaignId = a.intCampaignId
+				d.strTransactionType = 'Order'
 			group by
 				d.intEntityContactId
-			) as result, opportunity
+			) as result
+			inner join opportunity on 1=1
 		where
 			opportunity.intOpportunityId = result.intOpportunityId
 		group by

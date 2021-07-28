@@ -160,6 +160,7 @@
     [intAGWorkOrderId] INT NULL, 
     [ysnMultipleTicket] BIT NOT NULL DEFAULT 0,
     [strGrainReceiptNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [dblDWGOriginalNetUnits] NUMERIC(38, 20) NULL, 
 	[dtmDateCreatedUtc] DATETIME2 NULL,
 	[dtmDateModifiedUtc] DATETIME2 NULL,
 	[dtmDateLastUpdatedUtc] AS COALESCE(dtmDateModifiedUtc, dtmDateCreatedUtc),

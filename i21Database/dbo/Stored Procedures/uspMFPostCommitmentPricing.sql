@@ -7,6 +7,12 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
+	DELETE
+	FROM tblMFCommitmentPricingStage
+	WHERE intCommitmentPricingId = @intCommitmentPricingId
+		AND ysnPost = @ysnPost
+		AND ISNULL(intStatusId, 1) = 1
+
 	INSERT INTO tblMFCommitmentPricingStage (
 		intCommitmentPricingId
 		,ysnPost

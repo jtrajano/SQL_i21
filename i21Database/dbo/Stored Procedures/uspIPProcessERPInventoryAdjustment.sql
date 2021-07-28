@@ -57,18 +57,34 @@ BEGIN TRY
 		,@intCompanyLocationNewSubLocationId INT
 		,@intNewStorageLocationId INT
 		,@intNewLotId INT
+		,@intLotItemUOMId INT
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intInventoryAdjustmentStageId = MIN(intInventoryAdjustmentStageId)
+	DECLARE @tblIPInventoryAdjustmentStage TABLE (intInventoryAdjustmentStageId INT)
+
+	INSERT INTO @tblIPInventoryAdjustmentStage
+	SELECT intInventoryAdjustmentStageId
 	FROM tblIPInventoryAdjustmentStage
+	Where intStatusId IS NULL
+
+	UPDATE tblIPInventoryAdjustmentStage
+	SET intStatusId=-1
+	WHERE intInventoryAdjustmentStageId IN (
+			SELECT intInventoryAdjustmentStageId
+			FROM @tblIPInventoryAdjustmentStage 
+			)
+
+	SELECT @intInventoryAdjustmentStageId = MIN(intInventoryAdjustmentStageId)
+	FROM @tblIPInventoryAdjustmentStage
 
 	SELECT @strInfo1 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ', '
-	FROM tblIPInventoryAdjustmentStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strLotNo, '') + ', '
+	FROM @tblIPInventoryAdjustmentStage a
+	JOIN tblIPInventoryAdjustmentStage b on a.intInventoryAdjustmentStageId=b.intInventoryAdjustmentStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -124,7 +140,7 @@ BEGIN TRY
 					WHERE intTrxSequenceNo = @intTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processsed in i21.'
+				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processed in i21.'
 
 				RAISERROR (
 						@strError
@@ -339,6 +355,7 @@ BEGIN TRY
 
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
+				,@intLotItemUOMId = intItemUOMId
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
@@ -347,6 +364,10 @@ BEGIN TRY
 
 			IF @intTransactionTypeId = 20
 			BEGIN
+				SELECT @dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intLotItemUOMId, @dblQuantity)
+
+				SELECT @intItemUOMId = @intLotItemUOMId
+
 				EXEC dbo.uspMFLotMove @intLotId = @intLotId
 					,@intNewSubLocationId = @intCompanyLocationNewSubLocationId
 					,@intNewStorageLocationId = @intNewStorageLocationId
@@ -368,7 +389,6 @@ BEGIN TRY
 				SELECT @strAdjustmentNo = strAdjustmentNo
 				FROM dbo.tblICInventoryAdjustment
 				WHERE intInventoryAdjustmentId = @intAdjustmentId
-
 			END
 			ELSE IF @intTransactionTypeId = 10
 			BEGIN
@@ -742,9 +762,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intInventoryAdjustmentStageId = MIN(intInventoryAdjustmentStageId)
-		FROM tblIPInventoryAdjustmentStage
+		FROM @tblIPInventoryAdjustmentStage
 		WHERE intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
 	END
+
+	UPDATE tblIPInventoryAdjustmentStage
+	SET intStatusId=NULL
+	WHERE intInventoryAdjustmentStageId IN (
+			SELECT intInventoryAdjustmentStageId
+			FROM @tblIPInventoryAdjustmentStage 
+			)
+		AND intStatusId=-1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

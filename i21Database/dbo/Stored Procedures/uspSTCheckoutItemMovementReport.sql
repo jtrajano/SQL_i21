@@ -36,7 +36,7 @@ SELECT
 		ELSE 0
 	 END AS dblAveragePrice
 
-	 , (tblIMQty.dblUnitCost * tblIMQty.intQtySoldSum) AS dblTotalCost
+	 , tblIMQty.dblTotalCost AS dblTotalCost
 	 
 	 , CASE
 		WHEN tblIMQty.intQtySoldSum <> 0
@@ -47,12 +47,12 @@ SELECT
 	 , tblIMQty.dblUnitCost AS dblCurrentCost
 
 	 -- Formula: Gross Margin $ = Totals Sales - (Qty * Item Movement Item Cost)
-	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblUnitCost * tblIMQty.intQtySoldSum) AS dblGrossMarginDollar
+	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - tblIMQty.dblTotalCost  AS dblGrossMarginDollar
 
 	 -- Formula: Gross Margin % = Total Sales - (Qty * Item Movement Item Cost) / Total Sales
 	 , CASE 
 		WHEN (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) <> 0
-			THEN (( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblUnitCost * tblIMQty.intQtySoldSum) )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum)) * 100
+			THEN (( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - tblIMQty.dblTotalCost )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum)) * 100
 		ELSE 0
 	 END AS dblGrossMarginPercent
 FROM
@@ -73,6 +73,7 @@ FROM
 		, MIN(CH.dtmCheckoutDate) AS dtmCheckoutDateMin
 		, MAX(CH.dtmCheckoutDate) AS dtmCheckoutDateMax
 		, AVG(SAR.dblUnitCost) AS dblUnitCost
+		, SUM(ROUND(ISNULL(IM.intQtySold, 0) * ISNULL(SAR.dblUnitCost, 0),2)) AS dblTotalCost
 	FROM tblSTCheckoutItemMovements IM
 	INNER JOIN tblSTCheckoutHeader CH
 		ON IM.intCheckoutId = CH.intCheckoutId

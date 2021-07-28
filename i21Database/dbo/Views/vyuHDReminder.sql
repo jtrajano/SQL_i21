@@ -12,9 +12,7 @@
 		,r.intEntityId
 	from
 		tblHDReminder r
-		,tblHDTicket t
-		,tblEMEntity e
+		inner join tblHDTicket t on t.intTicketId = r.intTicketId
+		inner join tblEMEntity e on e.intEntityId = t.intCustomerId
 	where
-		t.intTicketId = r.intTicketId
-		and e.intEntityId = t.intCustomerId
-		and r.ysnActive = 1
+		r.ysnActive = 1

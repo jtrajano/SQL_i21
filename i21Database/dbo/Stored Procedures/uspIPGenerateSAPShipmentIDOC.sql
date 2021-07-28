@@ -181,7 +181,11 @@ Begin
 
 	--Donot send any feed if the Load is Cancelled
 	If UPPER(@strHeaderRowState)<>'DELETE' AND (Select intShipmentStatus from tblLGLoad Where intLoadId=@intLoadId)=10
+	BEGIN
+		Update tblLGLoadStg Set strFeedStatus='Ack Rcvd',strMessage='Shipment is already cancelled' Where intLoadStgId = @intLoadStgId
+
 		GOTO NEXT_SHIPMENT
+	END
 
 	Update tblLGLoadStg Set strMessageState=@strHeaderRowState  Where intLoadStgId=@intLoadStgId
 

@@ -163,7 +163,16 @@ BEGIN
 		,@EntityCustomerId			= LD.intCustomerEntityId
 		,@CompanyLocationId			= LD.intSCompanyLocationId 	
 		,@AccountId					= NULL
-		,@CurrencyId				= CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) ELSE L.intCurrencyId END
+		,@CurrencyId				= CASE WHEN (CD.ysnUseFXPrice = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND 
+													CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL) 
+											THEN CD.intInvoiceCurrencyId 
+										ELSE 
+											CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 
+													(SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = intSeqCurrencyId)
+												ELSE 
+													AD.intSeqCurrencyId 
+												END
+											END
 		,@TermId					= NULL
 		,@SourceId					= @intLoadId
 		,@PeriodsToAccrue			= 1
@@ -224,7 +233,7 @@ BEGIN
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
 	INNER JOIN [tblARCustomer] ARC ON LD.intCustomerEntityId = ARC.[intEntityId]
 	WHERE L.intLoadId = @intLoadId
 

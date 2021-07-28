@@ -260,6 +260,7 @@ BEGIN TRY
 					, intEntityId
 					, intUserId
 					, intLocationId
+					, strInOut
 					, intCommodityUOMId
 					, strNotes
 					, strMiscFields)
@@ -284,6 +285,7 @@ BEGIN TRY
 					, intEntityId = der.intEntityId
 					, intUserId = der.intUserId
 					, der.intLocationId
+					, strInOut = CASE WHEN UPPER(der.strNewBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
 					, cUOM.intCommodityUnitMeasureId
 					, strNotes = strNotes
 					, strMiscFields = '{intOptionMonthId = "' + ISNULL(CAST(intOptionMonthId AS NVARCHAR), '') +'"}'

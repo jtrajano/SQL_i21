@@ -39,6 +39,7 @@ BEGIN
 		,strDeliveryInstructions
 		,strApproxValue
 		,strDescription
+		,strCondition = CAST(NULL AS NVARCHAR(MAX)) 
 	FROM 
 		vyuICGetInventoryTransferDetailReportMPCT 
 	WHERE 
@@ -96,6 +97,17 @@ IF EXISTS(SELECT TOP 1 1 FROM vyuSMCompanyLogo WHERE strComment = 'HeaderLogo')
 ELSE
 	SET @HasHeaderLogo = 0
 
+DECLARE @strCondition AS NVARCHAR(MAX) 
+SELECT 
+	@strCondition = ISNULL(@strCondition, '') + ISNULL(c.strDescription, '') 
+FROM 
+	tblICInventoryTransfer t INNER JOIN tblICInventoryTransferCondition c
+		ON t.intInventoryTransferId = c.intInventoryTransferId
+WHERE
+	t.strTransferNo = @strTransferNo
+ORDER BY
+	c.intInventoryTransferConditionId ASC 
+	
 SELECT 
 	strTransferNo
 	,dtmTransferDate
@@ -120,6 +132,7 @@ SELECT
 	,strDeliveryInstructions
 	,strApproxValue
 	,strDescription
+	,strCondition = @strCondition
 FROM 
 	vyuICGetInventoryTransferDetailReportMPCT v
 WHERE 

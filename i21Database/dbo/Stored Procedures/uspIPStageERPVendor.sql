@@ -63,7 +63,7 @@ BEGIN TRY
 				,ActionId
 				,CreatedDate
 				,CreatedByUser
-				,[Status]
+				,(Case When [Status]='1' then 'Active' else 'In-active' End)
 				,VendorAccountNumber
 				,VendorName
 				,TermsCode

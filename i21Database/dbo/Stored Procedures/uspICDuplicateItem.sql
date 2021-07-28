@@ -12,7 +12,7 @@ BEGIN
 		@NewItemNo NVARCHAR(50),
 		@NewItemNoWithCounter NVARCHAR(50),
 		@counter INT
-	SELECT @ItemNo = strItemNo, @NewItemNo = strItemNo + '-copy' FROM tblICItem WHERE intItemId = @ItemId
+	SELECT @ItemNo = strItemNo, @NewItemNo = LEFT(strItemNo, 40) + '-copy' FROM tblICItem WHERE intItemId = @ItemId
 	IF EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = @NewItemNo)
 	BEGIN
 		SET @counter = 1

@@ -34,16 +34,13 @@ begin try
 		,@intPriceFixationId = pf.intPriceFixationId
 	from
 		tblCTPriceFixationDetailAPAR ar
-		,tblCTPriceFixationDetail pfd
-		,tblCTPriceFixation pf
-		,tblCTContractHeader ch
-		,tblCTContractDetail cd
+		inner join tblCTPriceFixationDetail pfd on pfd.intPriceFixationDetailId = ar.intPriceFixationDetailId
+		inner join tblCTPriceFixation pf on pf.intPriceFixationId = pfd.intPriceFixationId
+		inner join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
+		inner join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
 	where
 		ar.intInvoiceDetailId = @intInvoiceDetailId
-		and pfd.intPriceFixationDetailId = ar.intPriceFixationDetailId
-		and pf.intPriceFixationId = pfd.intPriceFixationId
-		and ch.intContractHeaderId = pf.intContractHeaderId
-		and cd.intContractDetailId = pf.intContractDetailId
+		
 
 	if (isnull(@intPriceFixationDetailId,0) = 0)
 	begin

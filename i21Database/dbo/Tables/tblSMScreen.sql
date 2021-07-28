@@ -16,7 +16,8 @@
     [intConcurrencyId] INT CONSTRAINT [DF__tblSMScreen] DEFAULT ((1)) NOT NULL,
     [ysnAvailable] BIT NOT NULL DEFAULT 1, 
     [strGroupName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-    CONSTRAINT [PK_tblSMScreen] PRIMARY KEY CLUSTERED ([intScreenId] ASC)
+    CONSTRAINT [PK_tblSMScreen] PRIMARY KEY CLUSTERED ([intScreenId] ASC),
+    CONSTRAINT [UK_dbo.tblSMScreen_strNamespace] UNIQUE (strNamespace)
 );
 
 

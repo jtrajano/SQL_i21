@@ -32,6 +32,16 @@ WITH payables (
 		) tmpAPPayables 
 		GROUP BY intBillId
 		UNION ALL
+		SELECT   
+		intBillId  
+		,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue  
+		FROM   
+		(  
+			SELECT * FROM dbo.vyuAPPayablesForeign
+			WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @start AND @end
+		) tmpAPPayables   
+		GROUP BY intBillId  
+		UNION ALL
 		SELECT 
 		intBillId
 		,CAST((SUM(tmpAPPayables2.dblTotal) + SUM(tmpAPPayables2.dblInterest) - SUM(tmpAPPayables2.dblAmountPaid) - SUM(tmpAPPayables2.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
@@ -81,6 +91,20 @@ glPayables (
 			AND A.strTransactionForm = 'Bill' AND intJournalLineNo = 1
 			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
 			GROUP BY A.strTransactionId
+						UNION ALL --POSTED VOUCHER IMPORTED FROM ORIGIN NO GL
+			--POSTED VOUCHER
+			SELECT
+				A.strBillId
+				,A.dblTotal 
+					* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) AS dblTotal --DISCOUNT IS ALREADY PART OF THIS
+				,0 AS dblPayment
+			FROM tblAPBill A
+			WHERE DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
+			AND A.ysnOrigin = 1
+			AND NOT EXISTS (
+				SELECT 1 FROM tblGLDetail WHERE strTransactionId = A.strBillId
+			)
+			-- GROUP BY A.strBillId, A.intTransactionType
 			UNION ALL
 			--POSTED INVOICE
 			SELECT
@@ -146,8 +170,8 @@ glPayables (
 			INNER JOIN tblAPBill C ON A.strTransactionId = C.strBillId
 			INNER JOIN tblAPAppliedPrepaidAndDebit C2 ON C.intBillId = C2.intBillId AND C2.intTransactionId = A.intJournalLineNo AND (A.dblDebit - A.dblCredit) = CAST(C2.dblAmountApplied AS DECIMAL(18,2))  
 			INNER JOIN tblAPBill C3 ON C2.intTransactionId = C3.intBillId
-			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
-			AND A.strJournalLineDescription IN ('Applied Debit Memo','Applied Vendor Prepayment','Applied Basis Advance')    
+			WHERE D.intAccountCategoryId IN (@intPayablesCategory)
+			AND A.strJournalLineDescription IN ('Applied Debit Memo','Applied Vendor Prepayment')
 			AND A.dblDebit != 0 --GET THE PAYMENT FOR THE TRANSACTION ONLY
 			AND A.ysnIsUnposted = 0
 			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
@@ -165,7 +189,7 @@ glPayables (
 			INNER JOIN tblAPAppliedPrepaidAndDebit C2 ON C.intBillId = C2.intBillId AND C2.intTransactionId = A.intJournalLineNo
 			INNER JOIN tblAPBill C3 ON C2.intTransactionId = C3.intBillId
 			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
-			AND A.strJournalLineDescription IN ('Applied Debit Memo','Applied Vendor Prepayment','Applied Basis Advance')    
+			AND A.strJournalLineDescription IN ('Applied Vendor Prepayment','Applied Debit Memo')
 			AND A.dblCredit != 0 --GET THE PAYMENT FOR THE TRANSACTION ONLY
 			AND A.ysnIsUnposted = 0
 			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
@@ -274,7 +298,7 @@ FROM (
 		,ISNULL(payables.dblAmountDue,0) - ISNULL(glPayables.dblGLAmountDue,0) dblDifference
 	FROM payables
 	FULL OUTER JOIN glPayables ON payables.strBillId = glPayables.strGLBillId
-	LEFT JOIN tblAPBill voucher ON voucher.strBillId = payables.strBillId
+	LEFT JOIN tblAPBill voucher ON voucher.strBillId = ISNULL(payables.strBillId,glPayables.strGLBillId)
 	WHERE (payables.strBillId IS NOT NULL OR glPayables.strGLBillId IS NOT NULL)
 ) payables
 WHERE dblAmountDue != dblGLAmountDue

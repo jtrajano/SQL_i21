@@ -271,11 +271,11 @@ BEGIN TRY
 			SET @ErrMsg = 'Created date is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END		
-		IF	@dtmNewM2MDate IS NULL AND @intNewPricingTypeId <> 5
-		BEGIN
-			SET @ErrMsg = 'M2M Date is missing while creating contract.'
-			RAISERROR(@ErrMsg,16,1)
-		END
+		-- IF	@dtmNewM2MDate IS NULL AND @intNewPricingTypeId <> 5
+		-- BEGIN
+		-- 	SET @ErrMsg = 'M2M Date is missing while creating contract.'
+		-- 	RAISERROR(@ErrMsg,16,1)
+		-- END
 		IF	@dblNewQuantity > 9999999999.999999
 		BEGIN
 			SET @ErrMsg = 'Quantity cannot be greater than 99999999.999999.'

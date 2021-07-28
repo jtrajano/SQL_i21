@@ -2,19 +2,21 @@
 	AS
 		select w.intTicketWatcherId, w.intTicketId, w.strTicketNumber, w.intUserId, w.intUserEntityId, w.intConcurrencyId, wc.strName, wc.strRoleName
 		from
-			tblHDTicketWatcher w,
-			(
+			tblHDTicketWatcher w
+			inner join (
 				select intEntityId, strName, strRoleName = isnull(strRoleName, '<font color="red"><i>No i21 access</i></font>') COLLATE Latin1_General_CI_AS from
 				(
 					select a.intEntityId, strName = a.strName, strRoleName = (select top 1 c.strName from tblSMUserRole c where c.intUserRoleID = b.intUserRoleID)
-					from tblEMEntity a, tblSMUserSecurity b
-					where
-					b.intEntityId = a.intEntityId
+					from 
+						tblEMEntity a
+						inner join tblSMUserSecurity b on b.intEntityId = a.intEntityId
+					
 					union all
+
 					select a.intEntityId, strName = a.strName, strRoleName = (select top 1 c.strName from tblSMUserRole c where c.intUserRoleID = d.intEntityRoleId)
-					from tblEMEntityToContact d, tblEMEntity a
-					where
-					a.intEntityId = d.intEntityContactId
+					from 
+						tblEMEntityToContact d
+						inner join tblEMEntity a on a.intEntityId = d.intEntityContactId
+					
 				) as role
-			) as wc
-		where wc.intEntityId = w.intUserEntityId
+			) as wc on wc.intEntityId = w.intUserEntityId

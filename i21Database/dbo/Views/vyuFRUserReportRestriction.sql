@@ -3,7 +3,7 @@ AS
 
 WITH reports AS (
 SELECT intEntityId , strReportName, strUserName,intUserRoleID,  intReportId
-FROM tblFRReport A , tblSMUserSecurity C 
+FROM tblFRReport A inner join tblSMUserSecurity C on 1=1
 )
 SELECT 
 ROW_NUMBER() OVER (ORDER BY A.intReportId asc) rowId,

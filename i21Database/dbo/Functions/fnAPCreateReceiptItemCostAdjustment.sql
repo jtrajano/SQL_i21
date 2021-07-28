@@ -456,6 +456,8 @@ BEGIN
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
 		INNER JOIN tblGRTransferStorageSplit TSS on TSS.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 0
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
@@ -469,6 +471,90 @@ BEGIN
 		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 			and TransferFlow.ysnSame = 0
 		AND B.dblQtyReceived > 0
+
+		UNION ALL
+		--TRANSFER STORAGE - DP to DP
+		-- Note: Delivery sheet is excluded in this query
+		--ITEM 
+		SELECT
+			[intItemId]							=	C.intItemId
+			,[intItemLocationId]				=	E.intItemLocationId
+			,[intItemUOMId]						=	F.intItemUOMId
+			,[dtmDate]							=	A.dtmDate
+			,[dblQty] 							=	CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END 
+			,[dblUOMQty] 						=	F.dblUnitQty
+			,[intCostUOMId]						=	B.intUnitOfMeasureId 
+			,[dblNewValue]						=	CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
+																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
+																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
+															ELSE 
+																dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+																	COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+																	(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+														END 													
+													)
+													AS DECIMAL(18,2)) 
+													- CAST(
+													dbo.fnMultiply(
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END --[Voucher Qty]
+														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Transfer Cost]
+													) AS DECIMAL(18,2)) 
+			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+			,[intTransactionId]					=	A.intBillId
+			,[intTransactionDetailId] 			=	B.intBillDetailId
+			,[strTransactionId] 				=	A.strBillId
+			,[intTransactionTypeId] 			=	27
+			,[intLotId] 						=	NULL 
+			,[intSubLocationId] 				=	C.intCompanyLocationSubLocationId
+			,[intStorageLocationId] 			=	C.intStorageLocationId
+			,[ysnIsStorage] 					=	0
+			,[strActualCostId] 					=	NULL
+			,[intSourceTransactionId] 			=	ISNULL(IR.intInventoryReceiptId, TS2.intTransferStorageId)
+			,[intSourceTransactionDetailId] 	=	ISNULL(IRI.intInventoryReceiptItemId, TSR2.intTransferStorageReferenceId) --TSR.intTransferStorageReferenceId
+			,[strSourceTransactionId] 			=	ISNULL(IR.strReceiptNumber, TS2.strTransferStorageTicket)
+			,[intFobPointId]					=	NULL
+			,[intInTransitSourceLocationId]		=	NULL
+		FROM @voucherIds ids
+		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
+		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
+		INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
+		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
+		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
+		INNER JOIN tblGRTransferStorageSplit TSS on TSS.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
+		-- CS_COSTBUCKET is the original customer storage that contains a cost bucket
+		INNER JOIN tblGRCustomerStorage CS_COSTBUCKET ON CS_COSTBUCKET.intCustomerStorageId = TSR.intCostBucketCustomerStorageId
+		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
+		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
+		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
+		INNER JOIN tblSCTicket G ON C.intTicketId = G.intTicketId
+		-- Source transaction of the DP if it came from IR (Ticket)
+		LEFT JOIN (
+			tblGRStorageHistory SH
+			INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SH.intCustomerStorageId
+			INNER JOIN tblICInventoryReceipt IR ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+			INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId AND IRI.intItemId = CS.intItemId
+		) ON SH.intCustomerStorageId = CS_COSTBUCKET.intCustomerStorageId AND CS_COSTBUCKET.ysnTransferStorage = 0
+		-- Source transaction of the DP if it came from Transfer storage (OS to DP)
+		LEFT JOIN (
+			tblGRTransferStorageReference TSR2
+			INNER JOIN tblGRTransferStorage TS2 ON TS2.intTransferStorageId = TSR2.intTransferStorageId
+		) ON TSR2.intToCustomerStorageId = CS_COSTBUCKET.intCustomerStorageId AND CS_COSTBUCKET.ysnTransferStorage = 1
+		LEFT JOIN tblICItemUOM voucherCostUOM
+			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
+		AND B.dblQtyReceived > 0
+		AND (CS_COSTBUCKET.ysnTransferStorage = 1 OR (CS_COSTBUCKET.ysnTransferStorage = 0 AND CS_COSTBUCKET.intDeliverySheetId IS NULL))
 		--DP STORAGES FROM THE DELIVERY SHEET
 		UNION ALL
 		
@@ -677,7 +763,7 @@ BEGIN
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
 		INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
-		LEFT JOIN tblGRTransferStorageReference TSR_FROM ON TSR_FROM.intToCustomerStorageId = CS_FROM.intCustomerStorageId
+		LEFT JOIN tblGRTransferStorageReference TSR_FROM ON TSR_FROM.intToCustomerStorageId = TSR.intCostBucketCustomerStorageId
 		LEFT JOIN tblGRTransferStorage TS_FROM ON TS_FROM.intTransferStorageId = TSR_FROM.intTransferStorageId
 		INNER JOIN tblGRStorageType ST_FROM ON ST.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
 		OUTER APPLY (

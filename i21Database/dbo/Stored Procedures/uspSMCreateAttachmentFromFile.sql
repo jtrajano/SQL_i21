@@ -201,6 +201,7 @@ BEGIN
 
 				--check if file exist
 				EXEC master..xp_sprintf @fullFilePath OUTPUT, '%s\%s.%s', @filePath, @fileName, @fileExtension
+				--SELECT @fullFilePath = FORMATMESSAGE('%s\%s.%s', @filePath, @fileName, @fileExtension); 
 
 				IF ISNULL(@fullFilePath, '') = ''
 				BEGIN

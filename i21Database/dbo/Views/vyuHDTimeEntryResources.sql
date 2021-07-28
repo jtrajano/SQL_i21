@@ -8,6 +8,11 @@
 	,a.intConcurrencyId
 	,strResourcesEntityName = b.strName
 	,strResourcesEntityEmail = d.strEmail
-from tblHDTimeEntryResources a, tblEMEntity b, tblEMEntityToContact c, tblEMEntity d
-where b.intEntityId = a.intResourcesEntityId and c.intEntityId = a.intResourcesEntityId and c.ysnDefaultContact = convert(bit,1) and d.intEntityId = c.intEntityContactId
+from 
+	tblHDTimeEntryResources a
+	inner join tblEMEntity b on b.intEntityId = a.intResourcesEntityId 
+	inner join tblEMEntityToContact c on c.intEntityId = a.intResourcesEntityId 
+	inner join tblEMEntity d on d.intEntityId = c.intEntityContactId
+where 
+	c.ysnDefaultContact = convert(bit,1) 
 

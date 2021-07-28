@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[tblICInventoryTransferCondition]
 	[intInventoryTransferConditionId] INT IDENTITY(1, 1) NOT NULL,
 	[intInventoryTransferId] INT NOT NULL,
 	[strName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strDescription] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId] INT NULL,
 	[dtmDateModified] DATETIME NULL,
 	[dtmDateCreated] DATETIME NULL,

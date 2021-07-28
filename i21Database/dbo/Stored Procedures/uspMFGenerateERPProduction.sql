@@ -79,7 +79,7 @@ BEGIN TRY
 		SELECT @strXML = @strXML + '<header id="' + ltrim(@intProductionPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(@intProductionPreStageId) +'</TrxSequenceNo>'
 			+'<CompanyLocation>'+CL.strLotOrigin +'</CompanyLocation>'
-			+'<ActionId>'+Ltrim(Case When W.intTransactionFrom =1 then 1 else 2 End) +'</ActionId>'
+			+'<ActionId>1</ActionId>'
 			+'<CreatedDate>'+CONVERT(VARCHAR(33), GetDate(), 126) +'</CreatedDate>'
 			+'<CreatedBy>'+	US.strUserName +'</CreatedBy>'
 			+'<StorageLocation>'+	IsNULL(SL.strSubLocationName,'')  +'</StorageLocation>'
@@ -110,7 +110,7 @@ BEGIN TRY
 		JOIN dbo.tblICItem I ON I.intItemId = WC.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WC.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WC.intStorageLocationId
+		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 		WHERE WC.intWorkOrderId = @intWorkOrderId
 
 		SELECT @strDetailXML = @strDetailXML + '<line  id="' + ltrim(WP.intWorkOrderProducedLotId) + '" parentId="' + ltrim(@intProductionPreStageId) + '">'

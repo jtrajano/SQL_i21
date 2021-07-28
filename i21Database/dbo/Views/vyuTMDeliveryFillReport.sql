@@ -86,8 +86,9 @@ SELECT
 	, strDriverName = J.strName  
 	, strDriverId = J.strEntityNo
 	, F.dtmRequestedDate
-	, dblQuantity = (CASE WHEN COALESCE(F.dblMinimumQuantity,0.0) <> 0 THEN F.dblMinimumQuantity
-						ELSE COALESCE(F.dblQuantity,0.0) END) 
+	--, dblQuantity = (CASE WHEN COALESCE(F.dblMinimumQuantity,0.0) <> 0 THEN F.dblMinimumQuantity
+	--					ELSE COALESCE(F.dblQuantity,0.0) END) 
+	, dblQuantity = ISNULL(NULLIF(ISNULL(F.dblMinimumQuantity, 0), 0), ISNULL(F.dblQuantity,0))
 	, strProductId = G.strItemNo
 	, strProductDescription = G.strDescription
 	, O.strRouteId
@@ -164,9 +165,9 @@ LEFT JOIN tblTMFillMethod P
 	ON C.intFillMethodId = P.intFillMethodId
 LEFT JOIN tblTMGlobalJulianCalendar R
 	ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
-,(SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) Q
-,(SELECT TOP 1 intFillMethodId FROM tblTMFillMethod WHERE strFillMethod = 'Julian Calendar') U
-,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
+inner join (SELECT TOP 1 ysnUseDeliveryTermOnCS FROM tblTMPreferenceCompany) Q on 1=1
+inner join (SELECT TOP 1 intFillMethodId FROM tblTMFillMethod WHERE strFillMethod = 'Julian Calendar') U on 1=1
+inner join (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z on 1=1
 WHERE B.vwcus_active_yn = 'Y' and C.ysnActive = 1
 
 GO

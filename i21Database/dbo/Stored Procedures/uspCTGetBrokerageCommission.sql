@@ -24,7 +24,8 @@ AS
 		SELECT 'Due' AS strStatus UNION ALL
 		SELECT 'Requested' AS strStatus UNION ALL
 		SELECT 'Received/Paid' AS strStatus
-	)t,tblSMCurrency
+	)t
+	inner join tblSMCurrency on 1=1
 
 	IF OBJECT_ID('tempdb..#BrkgDetail') IS NOT NULL  					
 		DROP TABLE #BrkgDetail					

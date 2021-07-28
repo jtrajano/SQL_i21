@@ -32,6 +32,7 @@ BEGIN TRY
 	SELECT TOP 20 intLotItemChangeFeedId
 	FROM dbo.tblIPLotItemChangeFeed
 	WHERE strCompanyLocation = @strCompanyLocation
+	AND intStatusId IS NULL
 
 	SELECT @intLotItemChangeFeedId = MIN(intLotItemChangeFeedId)
 	FROM @tblIPLotItemChangeFeed
@@ -56,6 +57,7 @@ BEGIN TRY
 		 +'<ActionId>1</ActionId>'  
 		 +'<CreatedDate>'+CONVERT(VARCHAR(33), dtmCreatedDate, 126) +'</CreatedDate>'  
 		 +'<CreatedByUser>'+ strCreatedByUser +'</CreatedByUser>'  
+		 +'<TransactionTypeId>15</TransactionTypeId>' 
 		 +'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<NewItemNo>'+ IsNULL(strNewItemNo,'')  +'</NewItemNo>'  
 		  +'<OldItemNo>'+ IsNULL(strOldItemNo,'')  +'</OldItemNo>'  

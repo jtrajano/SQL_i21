@@ -121,7 +121,7 @@ LEFT JOIN tblSMCompanyLocationPricingLevel Q
 	ON C.intCompanyLocationPricingLevelId = Q.intCompanyLocationPricingLevelId
 LEFT JOIN tblTMGlobalJulianCalendar R
 	ON C.intGlobalJulianCalendarId = R.intGlobalJulianCalendarId
-,(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z
+LEFT JOIN (SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)Z ON 1=1
 WHERE H.strCurrentSeason IS NOT NULL 
 	AND vwcus_active_yn = 'Y' 
 	AND C.ysnActive = 1

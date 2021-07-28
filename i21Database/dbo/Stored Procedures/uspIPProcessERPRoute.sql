@@ -104,7 +104,7 @@ BEGIN TRY
 					WHERE intTrxSequenceNo = @intTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo is exists in i21.'
+				SELECT @strError = 'TrxSequenceNo ' + LTRIM(@intTrxSequenceNo) + ' is already processed in i21.'
 
 				RAISERROR (
 						@strError
@@ -135,7 +135,7 @@ BEGIN TRY
 
 			IF @intItemId IS NULL
 			BEGIN
-				SELECT @strError = 'Item No not found.'
+				SELECT @strError = 'Item No "' + @strItemNo + '" not found.'
 
 				RAISERROR (
 						@strError
@@ -233,7 +233,7 @@ BEGIN TRY
 
 					IF @intSubLocationId IS NULL
 					BEGIN
-						SELECT @strError = 'Storage Location not found.'
+						SELECT @strError = 'Storage Location "' + @strSubLocationName + '" not found.'
 
 						RAISERROR (
 								@strError

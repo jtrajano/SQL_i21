@@ -387,7 +387,7 @@ LEFT JOIN (
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 ) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(LG.[intPurchaseSale], 0) = 2
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
 	AND ARID.[strTransactionType] <> 'Credit Memo'
     AND ARID.[intTicketId] IS NULL
@@ -477,7 +477,7 @@ LEFT JOIN (
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 ) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(LG.[intPurchaseSale], 0) = 2
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
 	AND ARID.[strTransactionType] <> 'Credit Memo'
 
@@ -545,7 +545,7 @@ INNER JOIN (
 	  AND ICIT.[strTransactionId] = ARRETURN.[strInvoiceNumber] 			 
 	  AND ICIT.[intItemId] = ARRETURN.[intItemId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(LG.[intPurchaseSale], 0) = 2
 	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
 	AND ARID.[strTransactionType] = 'Credit Memo'
     AND ARID.[intTicketId] IS NULL
@@ -613,7 +613,7 @@ INNER JOIN (
 	  AND ICIT.[intItemId] = ARRETURN.[intItemId]
 	  AND ICIT.[intLotId] = ARRETURN.[intLotId]
 WHERE ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(LG.[intPurchaseSale], 0) = 2
 	AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0
 	AND ARID.[strTransactionType] = 'Credit Memo'
 
@@ -711,7 +711,7 @@ WHERE
 	AND ARID.[ysnFromProvisional] = 1 
 	AND ARID.[ysnProvisionalWithGL] = 1
 	AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
-	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(LG.[intPurchaseSale], 0) = 2
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
     AND ARID.[intTicketId] IS NULL
     AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
@@ -812,7 +812,7 @@ WHERE
 	AND ARID.[ysnFromProvisional] = 1 
 	AND ARID.[ysnProvisionalWithGL] = 1
 	AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
-	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(LG.[intPurchaseSale], 0) = 2
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
     AND ARID.[intTicketId] IS NULL
     AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0

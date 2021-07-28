@@ -777,8 +777,8 @@ BEGIN
                 , MIN(dblPrice) AS dblPrice
                 , MIN(dblTotalTax) AS dblTotalTax
                 , MIN(dblTotal) AS dblTotal
-                , MIN(intTaxGroupId) AS intTaxGroupId
-                , MIN(strTaxGroup) AS strTaxGroup
+                , MIN(TG.intTaxGroupId) AS intTaxGroupId
+                , MIN(TG.strTaxGroup) AS strTaxGroup
                 , SUM(dblCheckoffTax) AS dblCheckoffTax
                 , SUM(dblCitySalesTax) AS dblCitySalesTax
                 , SUM(dblCityExciseTax) AS dblCityExciseTax

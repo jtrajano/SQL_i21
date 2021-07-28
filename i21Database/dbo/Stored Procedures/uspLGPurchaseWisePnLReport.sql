@@ -320,7 +320,8 @@ FROM
 			FROM 
 				(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
 					,dblTotal = bld.dblTotal * CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
-					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (intUnitOfMeasureId, ToWUOM.intItemUOMId, dblQtyReceived) 
+					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, ToWUOM.intItemUOMId, 
+										CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 ELSE bld.dblNetWeight END) 
 									* CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
 					FROM tblAPBillDetail bld
 					INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD

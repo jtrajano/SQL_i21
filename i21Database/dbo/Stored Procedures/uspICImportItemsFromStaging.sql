@@ -6,13 +6,25 @@ AS
 
 DELETE FROM tblICImportStagingItem WHERE strImportIdentifier <> @strIdentifier
 
-;WITH cte AS
+DECLARE @tblDuplicateItemNo TABLE(strItemNo NVARCHAR(200))
+
+INSERT INTO @tblDuplicateItemNo (strItemNo)
+SELECT strItemNo FROM
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo) AS RowNumber
+	SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo) AS RowNumber
    FROM tblICImportStagingItem
    WHERE strImportIdentifier = @strIdentifier
-)
-DELETE FROM cte WHERE RowNumber > 1;
+) AS DuplicateCounter
+WHERE RowNumber > 1
+
+DELETE DuplicateCounter
+FROM
+(
+	SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo) AS RowNumber
+	FROM tblICImportStagingItem
+	WHERE strImportIdentifier = @strIdentifier
+) DuplicateCounter
+WHERE RowNumber > 1
 
 CREATE TABLE #output (
 	  strItemNoDeleted NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
@@ -672,11 +684,13 @@ BEGIN
 		@intRowsImported AS INT 
 		,@intRowsUpdated AS INT
 		,@intRowsSkipped AS INT
+		,@intRowDuplicates AS INT
 
 	SELECT @intRowsImported = COUNT(*) FROM #output WHERE strAction = 'INSERT'
 	SELECT @intRowsUpdated = COUNT(*) FROM #output WHERE strAction = 'UPDATE'
+	SELECT @intRowDuplicates = COUNT(*) FROM @tblDuplicateItemNo
 	SELECT 
-		@intRowsSkipped = COUNT(1) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0) 
+		@intRowsSkipped = ISNULL(@intRowDuplicates, 0) + (COUNT(1) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0))
 	FROM 
 		tblICImportStagingItem s
 	WHERE
@@ -764,6 +778,19 @@ BEGIN
 		, 1
 	FROM 
 		#tmp_commodityChange
+	UNION ALL
+	SELECT 
+		@strIdentifier
+		, 1
+		, 'Item No'
+		, 'Import Failed.'
+		, strItemNo
+		, 'Duplicate Item No "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		@tblDuplicateItemNo
 END
 
 DROP TABLE #tmp

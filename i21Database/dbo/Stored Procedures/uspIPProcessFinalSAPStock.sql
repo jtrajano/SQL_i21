@@ -82,7 +82,7 @@ BEGIN TRY
 			,dblQuantity
 			,strSessionId
 			)
-		SELECT strItemNo
+		SELECT TOP 50 strItemNo
 			,strSubLocation
 			,SUM(ISNULL(dblQuantity, 0))
 			,strSessionId
@@ -144,7 +144,7 @@ BEGIN TRY
 			IF @strStockType = 'WB'
 				SET @dblQuantity = @dblQuantity + @dblInTransitQuantity + @dblBlockedQuantity
 
-			--Add Qty from LK,KB
+			--Add Qty from LK,KB  
 			SELECT @dblQuantity = @dblQuantity + SUM(ISNULL(dblQuantity, 0))
 			FROM tblIPStockStage
 			WHERE strSessionId = @strSessionId
@@ -179,7 +179,7 @@ BEGIN TRY
 				,@intEntityUserId = @intEntityUserId
 				,@intSourceId = @intSourceId
 
-			--Adjust Qty in SubLocation in other Location as 0
+			--Adjust Qty in SubLocation in other Location as 0  
 			SELECT @intMinRowNo1 = MIN(intCompanyLocationId)
 			FROM tblSMCompanyLocation
 			WHERE intCompanyLocationId <> @intLocationId
@@ -220,7 +220,7 @@ BEGIN TRY
 					AND intCompanyLocationId > @intMinRowNo1
 			END
 
-			--Move to Archive
+			--Move to Archive  
 			INSERT INTO tblIPStockArchive (
 				strItemNo
 				,strSubLocation
@@ -269,7 +269,7 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
-			--Move to Error
+			--Move to Error  
 			INSERT INTO tblIPStockError (
 				strItemNo
 				,strSubLocation
@@ -338,4 +338,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-

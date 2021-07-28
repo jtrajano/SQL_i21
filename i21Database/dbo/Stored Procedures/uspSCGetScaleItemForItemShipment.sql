@@ -115,8 +115,8 @@ BEGIN TRY
 						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @AGWorkOrderType --@intDirectType 
 						,intLotId = NULL 
-						,intSubLocationId = ScaleTicket.intSubLocationId
-						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,intSubLocationId = WOD.intSubLocationId -- DEV NOTE Since these fields are not available in Ticket screen we should use the one saved in the Work Order
+						,intStorageLocationId = WOD.intStorageLocationId -- DEV NOTE Since these fields are not available in Ticket screen we should use the one saved in the Work Order
 						,ysnIsStorage = 0
 						,ysnAllowInvoice = 1
 				FROM	dbo.tblSCTicket ScaleTicket

@@ -239,14 +239,14 @@ BEGIN TRY
 		,@blbParentSubmitSignature = h.blbDetail
 		,@blbParentApproveSignature = j.blbDetail
 		,@blbChildSubmitSignature = 
-			CASE WHEN @thisContractStatus = 'Approved' AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus = 'Approved' THEN l.blbDetail 
+			CASE WHEN @thisContractStatus IN ('Approved', 'Approved with Modifications') AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus IN ('Approved', 'Approved with Modifications') THEN l.blbDetail 
 			ELSE 
-				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved') AND t.ysnIsParent = 0 THEN l.blbDetail ELSE NULL END 
+				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved', 'Approved with Modifications') AND t.ysnIsParent = 0 THEN l.blbDetail ELSE NULL END 
 			END
 		,@blbChildApproveSignature = 
-			CASE WHEN @thisContractStatus = 'Approved' AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus = 'Approved' THEN n.blbDetail
+			CASE WHEN @thisContractStatus IN ('Approved', 'Approved with Modifications') AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus IN ('Approved', 'Approved with Modifications') THEN n.blbDetail
 			ELSE
-				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved') AND t.ysnIsParent = 0 THEN n.blbDetail ELSE NULL END
+				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved', 'Approved with Modifications') AND t.ysnIsParent = 0 THEN n.blbDetail ELSE NULL END
 			END
 	from
 		(

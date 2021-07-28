@@ -22,6 +22,16 @@ if(exists(select top 1 1 from tblSMInterCompanyMapping where intCurrentTransacti
 		print 'Entry already exists'
 		return;
 	end
+if not exists(select top 1 1 from tblSMTransaction where intTransactionId = @currentTransactionId) and ISNULL(@referenceCompanyId, '') = ''
+begin
+	print 'current transaction does not exists in the current database'
+	return;
+end
+if not exists(select top 1 1 from tblSMTransaction where intTransactionId = @referenceTransactionId) and ISNULL(@referenceCompanyId, '') = ''
+begin
+	print 'reference transaction does not exists in the current database'
+	return;
+end
 /***** End Validations *****/
 
 

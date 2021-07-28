@@ -2391,51 +2391,12 @@ BEGIN TRY
 		,[strFromValue]				= IL.[strSourceId]
 		,[strToValue]				= ARI.[strInvoiceNumber]
 		,[strDetails]				= NULL
-	 FROM @IntegrationLog IL
-	INNER JOIN
-		(SELECT [intInvoiceId], [strInvoiceNumber] FROM tblARInvoice) ARI
-			ON IL.[intInvoiceId] = ARI.[intInvoiceId]
-	 WHERE
-		[ysnSuccess] = 1 
-		AND [ysnInsert] = 1
+	FROM @IntegrationLog IL
+	INNER JOIN tblARInvoice ARI ON IL.[intInvoiceId] = ARI.[intInvoiceId]
+	WHERE [ysnSuccess] = 1 
+	  AND [ysnInsert] = 1
 
-	
-	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceLog)
-	BEGIN
-		DECLARE  @ActionType NVARCHAR(50)
-				,@SourceScreen NVARCHAR(100)
-				,@KeyValueId NVARCHAR(MAX)
-				,@EntityId INT
-				,@ChangeDescription  VARCHAR(50)
-				,@strFromValue  VARCHAR(50)
-				,@strToValue  VARCHAR(50)
-
-		SELECT TOP 1 
-			 @KeyValueId   =  CAST([intKeyValueId] AS NVARCHAR(MAX))
-			,@SourceScreen = [strScreenName]
-			,@EntityId     = [intEntityId]
-			,@ActionType   = [strActionType]
-			,@ChangeDescription = [strChangeDescription]
-			,@strFromValue		= strFromValue
-			,@strToValue	= strToValue
-		FROM @InvoiceLog
-		ORDER BY intKeyValueId	
-
-		EXEC dbo.uspSMAuditLog 
-			 @screenName		 = @SourceScreen	                -- Screen Namespace
-			,@keyValue			 = @KeyValueId						-- Primary Key Value of the Invoice. 
-			,@entityId			 = @EntityId						-- Entity Id.
-			,@actionType		 = @ActionType						-- Action Type
-			,@changeDescription  = @ChangeDescription				-- Description
-			,@fromValue			 = @strFromValue					-- Previous Value
-			,@toValue			 = @strToValue						-- New Value	
-
-		DELETE FROM @InvoiceLog WHERE intKeyValueId = @KeyValueId
-	END
-
-	--EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
-
-
+	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

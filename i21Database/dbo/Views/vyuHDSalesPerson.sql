@@ -11,9 +11,8 @@
 			,ysnActiveEntity = tblEMEntity.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
 			,strSalesPersonType = 'Sales Rep Entity' COLLATE Latin1_General_CI_AS
-	from tblARSalesperson, tblEMEntity
-	where
-		tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
+	from tblARSalesperson
+		inner join tblEMEntity on tblEMEntity.intEntityId = tblARSalesperson.[intEntityId]
 
 	union all
 
@@ -28,7 +27,9 @@
 			,ysnActiveEntity = e.ysnActive
 			,ysnActiveSalesPerson = tblARSalesperson.ysnActive
 			,strSalesPersonType = 'Sales Rep Contact' COLLATE Latin1_General_CI_AS
-	from tblARSalesperson, tblEMEntity e, tblEMEntityToContact
+	from tblARSalesperson 
+		inner join tblEMEntity e on 1=1
+		inner join tblEMEntityToContact on e.intEntityId = tblEMEntityToContact.intEntityContactId
 	where
 		tblEMEntityToContact.intEntityId = tblARSalesperson.[intEntityId]
-		and e.intEntityId = tblEMEntityToContact.intEntityContactId
+		

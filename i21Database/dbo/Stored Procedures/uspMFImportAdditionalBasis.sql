@@ -124,6 +124,7 @@ BEGIN TRY
 			,@intCreatedUserId = NULL
 			,@dtmCreated = NULL
 			,@strOldComment = NULL
+		,@intAdditionalBasisId = NULL
 
 		SELECT @dtmAdditionalBasisDate = dtmAdditionalBasisDate
 			,@strComment = strComment
@@ -221,6 +222,7 @@ BEGIN TRY
 				,@intCurrencyId = NULL
 				,@intUnitMeasureId = NULL
 				,@strDetailErrorMessage = ''
+				,@intAdditionalBasisDetailId = NULL
 
 			SELECT @strItemNo = strItemNo
 				,@strCurrency = strCurrency
@@ -354,6 +356,8 @@ BEGIN TRY
 				SELECT @strOtherChargeItemNo = NULL
 					,@dblBasis = NULL
 					,@intOtherChargeItemId = NULL
+
+				SELECT @intAdditionalBasisOtherChargesId =NULL
 
 				SELECT @strOtherChargeItemNo = strOtherChargeItemNo
 					,@dblBasis = dblBasis

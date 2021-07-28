@@ -74,7 +74,7 @@ BEGIN TRY
 	SELECT TOP 1 @intLogId = intLogId
 	FROM dbo.tblSMLog
 	WHERE intTransactionId = @intTransactionId
-	ORDER BY 1 DESC
+	ORDER BY intLogId DESC
 
 	IF @strRowState = 'Delete'
 	BEGIN

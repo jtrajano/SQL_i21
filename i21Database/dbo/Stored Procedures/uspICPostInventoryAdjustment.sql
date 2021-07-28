@@ -744,6 +744,7 @@ BEGIN
 		WHEN 9 THEN 'Inventory Adjustment - Lot Owner Change'
 		WHEN 10 THEN 'Inventory Adjustment - Opening Inventory'
 		WHEN 11 THEN 'Inventory Adjustment - Change Lot Weight'
+		WHEN 12 THEN 'Inventory Adjustment - Closing Balance'
 		ELSE NULL END
 	IF @ysnPost = 1
 	BEGIN

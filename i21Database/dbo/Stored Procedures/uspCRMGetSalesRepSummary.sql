@@ -55,15 +55,12 @@ SET ANSI_WARNINGS OFF
 			,Date = cast(convert(varchar(8),c.dtmCreated,112) as int)
 		from
 			tblCRMOpportunity a
-			,tblSMTransaction b
-			,tblSMActivity c
-			,tblEMEntity d
+			inner join tblSMTransaction b on b.intRecordId = a.intOpportunityId
+			inner join tblSMActivity c on c.intTransactionId = b.intTransactionId
+			inner join tblEMEntity d on d.intEntityId = a.intInternalSalesPerson
 		where
 			a.intInternalSalesPerson is not null
-			and b.intRecordId = a.intOpportunityId
 			and b.intScreenId = (select top 1 d.intScreenId from tblSMScreen d where d.strNamespace = 'CRM.view.Opportunity')
-			and c.intTransactionId = b.intTransactionId
-			and d.intEntityId = a.intInternalSalesPerson
 
 		union all
 
@@ -81,15 +78,13 @@ SET ANSI_WARNINGS OFF
 			,[Date] = cast(convert(varchar(8),tblSOSalesOrder.dtmDate,112) as int)
 		from
 			tblCRMOpportunity
-			,tblEMEntity
-			,tblCRMOpportunityQuote
-			,tblSOSalesOrder
+			inner join tblEMEntity on tblEMEntity.intEntityId = tblCRMOpportunity.intInternalSalesPerson
+			inner join tblCRMOpportunityQuote on tblCRMOpportunityQuote.intOpportunityId = tblCRMOpportunity.intOpportunityId
+			inner join tblSOSalesOrder on tblSOSalesOrder.intSalesOrderId = tblCRMOpportunityQuote.intSalesOrderId 
 		where
 			tblCRMOpportunity.intInternalSalesPerson is not null 
 			and tblCRMOpportunity.intInternalSalesPerson > 0
-			and tblEMEntity.intEntityId = tblCRMOpportunity.intInternalSalesPerson
-			and tblCRMOpportunityQuote.intOpportunityId = tblCRMOpportunity.intOpportunityId
-			and tblSOSalesOrder.intSalesOrderId = tblCRMOpportunityQuote.intSalesOrderId and tblSOSalesOrder.strTransactionType in ('Quote', 'Order')
+			and tblSOSalesOrder.strTransactionType in ('Quote', 'Order')
 	) as Result
 	where [Date] between @DateFrom and @DateTo
 	group by RepId ,RepName

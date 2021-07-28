@@ -235,6 +235,7 @@ BEGIN TRY
 								END
 							)
 						,strMessage = @StatusText
+						,strFeedStatus = 'Ack Rcvd'
 					WHERE intContractFeedId = @TrxSequenceNo
 				END
 				ELSE IF @MessageTypeId = 3 -- Goods Receipt
@@ -302,7 +303,6 @@ BEGIN TRY
 					UPDATE tblAPBillPreStage
 					SET strERPVoucherNo = @ERPVoucherNo
 					WHERE intBillId = @intBillId
-						AND ISNULL(intStatusId, 1) = 1
 
 					UPDATE tblAPBill
 					SET intConcurrencyId = intConcurrencyId + 1

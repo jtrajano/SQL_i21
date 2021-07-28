@@ -76,7 +76,7 @@ AS
 				1 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition AS Position,
+				ISNULL(CD.strPosition, '') AS Position,
 				CD.dtmPlannedAvailabilityDate
 
 		FROM	vyuCTSearchContractDetail	CD
@@ -198,7 +198,7 @@ AS
 					MO.strFutureMonth,
 					CU.strCurrency,
 					U2.strUnitMeasure AS strPriceUOM,
-					PO.strPosition,
+					strPosition = ISNULL(PO.strPosition, ''),
 					CA.strDescription  AS strProductType,
 					--CB.strContractBasis,
 					strContractBasis = CB.strFreightTerm,
@@ -231,8 +231,8 @@ AS
 	AND convert(date,CD.dtmStartDate) = isnull(@EqualStartDate,convert(date,CD.dtmStartDate))
 	AND CD.dtmEndDate between ISNULL(@EndFromDate,CD.dtmEndDate) and ISNULL(@EndToDate,CD.dtmEndDate)
 	AND convert(date,CD.dtmEndDate) = ISNULL(@EqualEndDate,convert(date,CD.dtmEndDate))
-	AND CA.strDescription = ISNULL(@strProductType,CA.strDescription)
-	AND		PO.strPosition = ISNULL(@strPosition,PO.strPosition)
+	AND ISNULL(CA.strDescription, '') = ISNULL(@strProductType, ISNULL(CA.strDescription, ''))
+	AND	ISNULL(PO.strPosition, '') = ISNULL(@strPosition, ISNULL(PO.strPosition, ''))
 	)
 
 	SELECT	* 
@@ -264,7 +264,7 @@ AS
 				1 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition,
+				strPosition = ISNULL(CD.strPosition, ''),
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
@@ -302,7 +302,7 @@ AS
 				2 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition,
+				strPosition = ISNULL(CD.strPosition, ''),
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
@@ -337,7 +337,7 @@ AS
 				3 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition,
+				strPosition = ISNULL(CD.strPosition, ''),
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
@@ -350,7 +350,7 @@ AS
 	'<mappings>
 		<mapping><fieldname>ContractDate</fieldname><fromField>dtmContractDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>StartDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
-		<mapping><fieldname>EndDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>EndDate</fieldname><fromField>dtmEndDate</fromField><toField>dtmStartDate</toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>Position</fieldname><fromField>strPosition</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>Vendor</fieldname><fromField>strCustomerVendor</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>ProductType</fieldname><fromField>strProductType</fromField><toField></toField><ignoreTime></ignoreTime></mapping>

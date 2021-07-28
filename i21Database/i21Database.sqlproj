@@ -543,6 +543,7 @@
     <Build Include="dbo\Stored Procedures\uspSMBuildSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserRoleMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserSecurityMenus.sql" />
     <Build Include="dbo\Tables\tblHDEmailSetup.sql" />
@@ -1066,6 +1067,7 @@
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspNRGetDetailsForAdjustment.sql" />
     <Build Include="dbo\Tables\tblGLAccountCategory.sql" />
+    <Build Include="dbo\Tables\tblGLAccountCategoryType.sql" />
     <Build Include="dbo\Tables\tblHDTicketHistory.sql" />
     <Build Include="dbo\Views\vyuHDTicketHistory.sql" />
     <Build Include="dbo\Tables\tblSMCompanyLocationSubLocation.sql" />
@@ -1231,7 +1233,7 @@
     <Build Include="dbo\Tables\tblICInventoryLotTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryLotTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendSheetReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFCompleteBlendsheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCompleteBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFConsumeWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetAvailableLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetItems.sql" />
@@ -8755,8 +8757,6 @@
     <Build Include="dbo\Views\vyuRKGetDPRCommodityLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceBalance.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceQuantity.sql" />
     <Build Include="dbo\User Defined Types\SCTicketDestinationWeightsAndGradesPosting.sql" />
     <Build Include="dbo\User Defined Types\SCDiscountDestinationWeightsAndGradesPosting.sql" />
     <Build Include="dbo\Tables\tblRKM2MUnrealized.sql" />
@@ -9300,7 +9300,6 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPGoodsReceipt.sql" />
     <Build Include="dbo\Tables\tblIPInvReceiptFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesTrendReport.sql" />
-    <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherDTN.sql" />
     <Build Include="dbo\Functions\fnTRGetFreightSurcharge.sql" />
@@ -9367,6 +9366,7 @@
     <Build Include="dbo\Tables\tblEMRelatedEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherItemCostAdjGLEntryNegative.sql" />
     <Build Include="dbo\Views\vyuARSalesTaxReportForDashboard.sql" />
+    <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
@@ -9381,11 +9381,52 @@
     <Build Include="dbo\Views\vyuAGGetStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUnfixedPurchaseContract.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateALIMR.sql" />
+    <Build Include="dbo\Functions\fnCTCoalesceCertificates.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateALTRPR.sql" />
+    <None Include="Scripts\Post-Deployment\CM\9_CleanupObjects.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptItem.sql" />
+    <Build Include="dbo\Views\vyuARTaxDetailExemptReport.sql" />
+    <Build Include="dbo\Tables\tblIPPaymentStatusArchive.sql" />
+    <Build Include="dbo\Tables\tblIPPaymentStatusError.sql" />
+    <Build Include="dbo\Tables\tblIPPaymentStatusStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPPaymentStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPPaymentStatus.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_UpdateAuditLogs.sql" />
     <Build Include="dbo\Tables\tblSMIDPProcessResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPStockFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPStockFeed.sql" />
+    <None Include="Scripts\Post-Deployment\DropEncryptionCertificateAndSymmetricKey.sql" />
+    <Build Include="dbo\Views\vyuAGApplicationMethod.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
+    <None Include="Scripts\Post-Deployment\MF\13_CleanupObjects.sql" />
+    <Build Include="dbo\Functions\fnStripHtmlAndFixSpecial.sql" />
+    <Build Include="dbo\User Defined Types\BatchAuditLogParam.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMBatchAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractWalterMatter.sql" />
+    <Build Include="dbo\Views\vyuSCInventoryShipmentDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql" />
+    <Build Include="dbo\User Defined Types\ScaleDWGAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPValidateERPOtherFieldsContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspICLinkShipmentToInvoice.sql" />
     <Build Include="dbo\Views\vyuICGetReceiptDetailSource.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractDetailsV1.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractHeaderV1.sql" />
+    <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetFuturesReport.sql" />
+    <Build Include="dbo\Views\vyuRKGetOptionsReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetM2MCounterPartyExposureReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutures360RealizedPnLReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportCountDetailFromStaging.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
+    <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
+    <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9673,6 +9714,18 @@
     <Build Include="dbo\Stored Procedures\uspGRReportCanadianScaleTicketReceipt.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_CreateIDPGridLayout.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReportGrainReceiptLSM.sql" />
+    <None Include="Scripts\Post-Deployment\MF\11_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\TR\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\AP\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\TF\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\LG\3_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\ET\01_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\PAT\6_CleanupObjects.sql" />
+    <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
+    <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
+    <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

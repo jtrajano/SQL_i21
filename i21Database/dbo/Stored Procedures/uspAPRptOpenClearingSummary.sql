@@ -174,7 +174,7 @@ SET @query = '
 		'+ @filterPerItem +'
 		GROUP BY intTransactionType, intTransactionDetailId, intItemId, strVendorIdName, strTransactionId
 	) detailedClearing
-	WHERE detailedClearing.dblClearingAmount <> 0 AND detailedClearing.dblQuantity <> 0
+	WHERE detailedClearing.dblClearingAmount <> 0 AND detailedClearing.dblClearingQuantity <> 0
 '
 
 --GROUP BY VENDOR

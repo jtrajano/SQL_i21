@@ -221,7 +221,7 @@ BEGIN
 								,A.intInventoryReceiptItemId
 								,B.intContractDetailId
 								,A.dblUnits
-								,dblShrinkage = CASE WHEN A.ysnExists = 0 THEN (@dblShrinkage / (@dblOriginalBalance + ABS(@dblShrinkage))) * A.dblUnits ELSE NULL END
+								,dblShrinkage = CASE WHEN A.ysnExists = 0 THEN round(dbo.fnMultiply(dbo.fnDivide(@dblShrinkage ,(@dblOriginalBalance + ABS(@dblShrinkage))), A.dblUnits), 6) ELSE NULL END
 								,dblSettledUnits = B.dblUnits
 								,R.dblReceiptRunningUnits
 							FROM (
@@ -344,7 +344,7 @@ BEGIN
 									A.intInventoryReceiptId
 									,A.intInventoryReceiptItemId
 									,A.dblUnits
-									,dblShrinkage = CASE WHEN A.ysnExists = 0 THEN (@dblShrinkage / (@dblOriginalBalance + ABS(@dblShrinkage))) * A.dblUnits ELSE NULL END
+									,dblShrinkage = CASE WHEN A.ysnExists = 0 THEN round(dbo.fnMultiply(dbo.fnDivide(@dblShrinkage, (@dblOriginalBalance + ABS(@dblShrinkage))) , A.dblUnits),6) ELSE NULL END
 									,dblTransferredUnits = B.dblUnitQty - ISNULL(TotalTransfer.dblTotalTransactionUnits,0)
 									,R.dblReceiptRunningUnits
 								FROM (

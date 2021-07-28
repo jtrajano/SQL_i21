@@ -467,7 +467,7 @@ BEGIN
 	BEGIN
 		--Invalid Detail Item
 		UPDATE tblMFRecipeItemStage
-		SET strMessage = 'Missing Recipe Detail Item'
+		SET strMessage = 'Input Item '''+strRecipeItemNo+''' is not configured in i21.'
 			,intStatusId=2
 		WHERE ISNULL(strRecipeItemNo, '') NOT IN (
 				SELECT strItemNo
@@ -854,7 +854,7 @@ BEGIN
 
 	--Invalid Header Item
 	UPDATE tblMFRecipeItemStage
-	SET strMessage = 'Invalid Recipe Header Item'
+	SET strMessage = 'Output Item '''+strRecipeHeaderItemNo+''' is not configured in i21.'
 		,intStatusId=2
 	WHERE strRecipeHeaderItemNo NOT IN (
 			SELECT strItemNo

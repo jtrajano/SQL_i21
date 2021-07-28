@@ -40,6 +40,7 @@ BEGIN TRY
 		,@intDestinationPortId INT
 		,@intShipperId INT
 		,@intCompanyLocationId INT
+		,@intOrgContractStatusId INT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intContractFeedId INT
@@ -49,6 +50,9 @@ BEGIN TRY
 		,strERPPONumber NVARCHAR(100)
 		)
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
+	DECLARE @strLocationName NVARCHAR(50)
+
+	EXEC uspIPValidateERPOtherFieldsContractFeed
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -59,8 +63,26 @@ BEGIN TRY
 		RETURN
 	END
 
+	EXEC uspIPValidateERPContractFeed
+
 	DELETE
 	FROM @tblCTContractFeed
+
+	--INSERT INTO @tblCTContractFeed (intContractFeedId)
+	--SELECT TOP 50 CF.intContractFeedId
+	--FROM tblCTContractFeed CF
+	--JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
+	--	AND CF.intStatusId IS NULL
+	--	AND CH.intContractTypeId = 1
+	--	AND CF.strRowState <> 'Delete'
+	--JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
+	--JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+	--	AND CL.strLotOrigin = @strCompanyLocation
+
+	SELECT @intCompanyLocationId = intCompanyLocationId
+		,@strLocationName = strLocationName
+	FROM dbo.tblSMCompanyLocation
+	WHERE strLotOrigin = @strCompanyLocation
 
 	INSERT INTO @tblCTContractFeed (intContractFeedId)
 	SELECT TOP 50 CF.intContractFeedId
@@ -68,9 +90,8 @@ BEGIN TRY
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		AND CF.intStatusId IS NULL
 		AND CH.intContractTypeId = 1
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
-	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
-		AND CL.strLotOrigin = @strCompanyLocation
+		--AND CF.strRowState = 'Delete'
+		AND CF.strLocationName = @strLocationName
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
@@ -121,6 +142,7 @@ BEGIN TRY
 			,@intDestinationPortId = NULL
 			,@intShipperId = NULL
 			,@intCompanyLocationId = NULL
+			,@intOrgContractStatusId = NULL
 
 		SELECT @intContractDetailId = intContractDetailId
 			,@intContractHeaderId = intContractHeaderId
@@ -183,6 +205,8 @@ BEGIN TRY
 			,@intDestinationPortId = intDestinationPortId
 			,@intShipperId = intShipperId
 			,@intCompanyLocationId = intCompanyLocationId
+			,@intContractStatusId = intContractStatusId
+			,@intOrgContractStatusId = intContractStatusId
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -301,6 +325,17 @@ BEGIN TRY
 							END
 						)
 
+			IF @intContractStatusId = 1 -- Open
+				SET @intContractStatusId = 1
+			ELSE IF @intContractStatusId = 5 -- Complete
+				SET @intContractStatusId = 2
+			ELSE IF @intContractStatusId = 3 -- Cancelled
+				SET @intContractStatusId = 3
+			ELSE IF @intContractStatusId = 6 -- Short Close
+				SET @intContractStatusId = 4
+			ELSE IF @intContractStatusId = 4 -- Re-Open
+				SET @intContractStatusId = 5
+
 			SELECT TOP 1 @dtmFixationDate = PFD.dtmFixationDate
 			FROM tblCTPriceFixation PF
 			JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationId = PF.intPriceFixationId
@@ -316,6 +351,7 @@ BEGIN TRY
 				SELECT @strDetailXML = '<line id="' + LTRIM(@intContractFeedId) + '" parentId="' + ltrim(@intContractFeedId) + '">' + 
 					'<TrxSequenceNo>' + LTRIM(@intContractFeedId) + '</TrxSequenceNo>' + 
 					'<ActionId>' + LTRIM(@intActionId) + '</ActionId>' + 
+					'<Status>' + LTRIM(3) + '</Status>' + 
 					'<SequenceNo>' + LTRIM(CF.intContractSeq) + '</SequenceNo>' + 
 					'<ItemNo>' + CF.strItemNo + '</ItemNo>' + 
 					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblQuantity)) + '</Quantity>' + 
@@ -333,14 +369,14 @@ BEGIN TRY
 				SELECT @strDetailXML = '<line id="' + LTRIM(@intContractFeedId) + '" parentId="' + ltrim(@intContractFeedId) + '">' + 
 					'<TrxSequenceNo>' + LTRIM(@intContractFeedId) + '</TrxSequenceNo>' + 
 					'<ActionId>' + LTRIM(@intActionId) + '</ActionId>' + 
-					'<Status>' + LTRIM(CD.intContractStatusId) + '</Status>' + 
+					'<Status>' + CASE WHEN @intActionId = 3 THEN LTRIM(3) ELSE LTRIM(@intContractStatusId) END + '</Status>' + 
 					'<SequenceNo>' + LTRIM(CF.intContractSeq) + '</SequenceNo>' + 
 					'<StartDate>' + ISNULL(CONVERT(VARCHAR, CF.dtmStartDate, 112), '') + '</StartDate>' + 
 					'<EndDate>' + ISNULL(CONVERT(VARCHAR, CF.dtmEndDate, 112), '') + '</EndDate>' + 
 					'<PlannedAvailabilityDate>' + ISNULL(CONVERT(VARCHAR, @dtmPlannedAvailabilityDate, 112), '') + '</PlannedAvailabilityDate>' + 
 					'<UpdatedAvailabilityDate>' + ISNULL(CONVERT(VARCHAR, @dtmUpdatedAvailabilityDate, 112), '') + '</UpdatedAvailabilityDate>' + 
-					'<StorageLocation>' + @strSubLocation + '</StorageLocation>' + 
-					'<StorageUnit>' + ISNULL(CF.strStorageLocation, '') + '</StorageUnit>' + 
+					'<StorageLocation>' + CASE WHEN @intActionId = 3 THEN '' ELSE @strSubLocation END + '</StorageLocation>' + 
+					'<StorageUnit>' + CASE WHEN @intActionId = 3 THEN '' ELSE ISNULL(CF.strStorageLocation, '') END + '</StorageUnit>' + 
 					'<ItemNo>' + CF.strItemNo + '</ItemNo>' + 
 					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblQuantity)) + '</Quantity>' + 
 					'<QuantityUOM>' + CF.strQuantityUOM + '</QuantityUOM>' + 
@@ -390,6 +426,7 @@ BEGIN TRY
 					,intDestinationPortId
 					,intCompanyLocationId
 					,intHeaderBookId
+					,intContractStatusId
 					)
 				SELECT @intContractHeaderId
 					,@intContractDetailId
@@ -398,6 +435,7 @@ BEGIN TRY
 					,@intDestinationPortId
 					,@intCompanyLocationId
 					,@intBookId
+					,@intOrgContractStatusId
 			END
 			ELSE
 			BEGIN
@@ -415,6 +453,7 @@ BEGIN TRY
 			UPDATE tblCTContractFeed
 			SET intStatusId = 2
 				,strMessage = NULL
+				,strFeedStatus = 'Awt Ack'
 			WHERE intContractFeedId = @intContractFeedId
 		END
 

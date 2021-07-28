@@ -78,7 +78,7 @@ INNER JOIN(
 															ELSE 
 															  0
 															END
-													WHEN TOR.intYear IS NOT NULL AND (YEAR(GETDATE())  >=  YEAR(dtmLastAward) AND  TOR.dtmDateFrom > T.dtmLastAward )
+													WHEN TOR.intYear IS NOT NULL AND (TOR.intYear =  YEAR(dtmLastAward))
 															THEN TOR.dblHoursTOR
 													ELSE
 														0
@@ -110,7 +110,7 @@ INNER JOIN(
 				ON PCTimeOff.intEntityEmployeeId = E.intEntityId 
 				AND PCTimeOff.intTypeTimeoffId = T.intTypeTimeOffId
    
-   		LEFT JOIN (	SELECT
+   			LEFT JOIN (	SELECT
 						intYear  = YEAR(dtmDateFrom)
 						,dtmDateFrom
 						,intEntityEmployeeId

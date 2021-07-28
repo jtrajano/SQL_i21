@@ -30,6 +30,7 @@ BEGIN TRY
 		,@strDemandNo NVARCHAR(50)
 		,@intItemUOMId INT
 		,@intDemandHeaderId INT
+		,@intCounter INT = 1
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
 	FROM tblIPDemandStage
@@ -73,10 +74,10 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT 1
 					FROM dbo.tblIPDemandArchive
-					WHERE intTrxSequenceNo = @intTrxSequenceNo
+					WHERE intLineTrxSequenceNo = @intLineTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processsed in i21.'
+				SELECT @strError = 'Line TrxSequenceNo ' + ltrim(@intLineTrxSequenceNo) + ' is already processed in i21.'
 
 				RAISERROR (
 						@strError
@@ -230,9 +231,15 @@ BEGIN TRY
 				WHERE strDemandName = @strDemandName
 			END
 
-			DELETE
-			FROM dbo.tblMFDemandDetail
-			WHERE intDemandHeaderId = @intDemandHeaderId
+			IF @intCounter = 1
+			BEGIN
+				DELETE
+				FROM dbo.tblMFDemandDetail
+				WHERE intDemandHeaderId = @intDemandHeaderId
+					AND intCompanyLocationId = @intLocationId
+
+				SELECT @intCounter = @intCounter + 1
+			END
 
 			INSERT INTO dbo.tblMFDemandDetail (
 				intConcurrencyId
@@ -275,6 +282,7 @@ BEGIN TRY
 				,9 AS intMessageTypeId
 				,1 AS intStatusId
 				,'Success' AS strStatusText
+
 			--Move to Archive
 			INSERT INTO dbo.tblIPDemandArchive (
 				intTrxSequenceNo
@@ -335,6 +343,7 @@ BEGIN TRY
 				,9 AS intMessageTypeId
 				,0 AS intStatusId
 				,@ErrMsg AS strStatusText
+
 			INSERT INTO dbo.tblIPDemandError (
 				intTrxSequenceNo
 				,intActionId

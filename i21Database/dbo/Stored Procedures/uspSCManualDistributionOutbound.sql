@@ -569,6 +569,12 @@ END
 
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
+	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+	UPDATE tblSCTicket
+	SET dblDWGOriginalNetUnits = dblNetUnits
+	WHERE intTicketId = @intTicketId
+
+
 	EXEC uspSCProcessShipmentToInvoice 
 		@intTicketId = @intTicketId
 		,@intInventoryShipmentId = @InventoryShipmentId

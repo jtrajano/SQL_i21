@@ -44,12 +44,12 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPVoucher @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
-	ELSE IF @strType = 'Service Order'
+	ELSE IF @strType = 'Service PO'
 	BEGIN
 		EXEC dbo.uspMFGenerateERPServiceOrder @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
-	ELSE IF @strType = 'Production'
+	ELSE IF @strType = 'Production And Consumption'
 	BEGIN
 		EXEC dbo.uspMFGenerateERPProduction @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
@@ -69,7 +69,7 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPLotSplit @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
-	ELSE IF @strType = 'Lot Item Change'
+	ELSE IF @strType = 'Item Change'
 	BEGIN
 		EXEC dbo.uspIPGenerateERPLotItemChange @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1

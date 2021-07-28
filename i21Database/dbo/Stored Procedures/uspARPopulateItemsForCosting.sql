@@ -181,16 +181,16 @@ INSERT INTO ##ARItemsForCosting
 	,[strType]
 )
 SELECT
-	 [intItemId]				= ARIC.[intComponentItemId]
+	 [intItemId]				= ARIC.[intBundleItemId]
 	,[intItemLocationId]		= IST.intItemLocationId
-	,[intItemUOMId]				= dbo.fnGetMatchingItemUOMId(ARIC.[intComponentItemId], ARIC.intItemUnitMeasureId)
+	,[intItemUOMId]				= dbo.fnGetMatchingItemUOMId(ARIC.[intBundleItemId], ARIC.intItemUnitMeasureId)
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= ((ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ICIUOM.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
-	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.[intItemLocationId]) = @AVERAGECOST THEN 
-																							dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) 
+	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE	WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @AVERAGECOST THEN 
+																							dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) 
 																						ELSE 
 																							IST.[dblLastCost]  
 																				END 
@@ -213,29 +213,24 @@ SELECT
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
     ,[dblUnitRetail]			= CASE WHEN IST.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= IST.[intCategoryId]
-	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
+	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
-FROM
-	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
-INNER JOIN
-	##ARPostInvoiceDetail ARID
-		ON ARIC.[intItemId] = ARID.[intItemId]
-		AND ARIC.[intCompanyLocationId] = ARID.[intCompanyLocationId]	
-INNER JOIN
-	(SELECT [intItemId], [ysnAutoBlend], [strType] FROM tblICItem WITH (NOLOCK)) ICI
-		ON ARIC.[intComponentItemId] = ICI.[intItemId]
+FROM ##ARPostInvoiceDetail ARID
+INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
+INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ARIC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
+INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.[intBundleItemId] = ICI.[intItemId]
 LEFT OUTER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
 		ON ARIC.[intItemUnitMeasureId] = ICIUOM.[intItemUOMId]
 LEFT OUTER JOIN
 	(SELECT [intItemId], [intItemLocationId], intLocationId, dblLastCost, [intCategoryId], ysnRetailValuation FROM vyuICGetItemStock WITH (NOLOCK)) IST
-		ON ARIC.[intComponentItemId] = IST.[intItemId]
+		ON ARIC.[intBundleItemId] = IST.[intItemId]
 		AND ARID.[intCompanyLocationId] = IST.[intLocationId]	
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
 		ON LGL.[intLoadId] = ARID.[intLoadId]				 				 
 WHERE
-	((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intComponentItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
+	((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARIC.[intBundleItemId], IST.[intItemLocationId], ARIC.[intItemUnitMeasureId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (
 		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0) AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR
@@ -243,9 +238,8 @@ WHERE
 		)
     AND ARID.[ysnImpactInventory] = @OneBit
 	AND ARID.[intItemId] IS NOT NULL
-	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-	AND ARID.[strTransactionType] <> 'Debit Memo'
-	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
+	AND ISNULL(ARIC.[intBundleItemId],0) <> 0
+	AND ARID.[strTransactionType] <> 'Debit Memo'	
 	AND ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 	AND ICI.[strType] NOT IN ('Non-Inventory')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	

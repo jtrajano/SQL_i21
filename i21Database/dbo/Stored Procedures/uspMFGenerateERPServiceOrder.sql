@@ -92,7 +92,7 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrderPreStage
 		WHERE intWorkOrderPreStageId = @intWorkOrderPreStageId
 
-		IF @strRowState = 'Delete'
+		IF @strRowState = 'Deleted'
 		BEGIN
 			SELECT @strXML = @strXML + '<header TrxSequenceNo="' + ltrim(@intWorkOrderPreStageId) + '">'
 				+'<TrxSequenceNo>'+ltrim(@intWorkOrderPreStageId) +'</TrxSequenceNo>'
