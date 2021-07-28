@@ -302,7 +302,9 @@ BEGIN TRY
 			,[intContractDetailId]
 			,[intContractSeqId]
 			,[intLoadShipmentId]
+			,[intLoadShipmentDetailId]
 			,[strLoadShipmentNumber]
+			,[strBillOfLading]
 			,[intWeightClaimId]
 			,[intWeightClaimDetailId]
 			,[intItemId]
@@ -347,7 +349,9 @@ BEGIN TRY
 			,[intContractDetailId] = VDD.intContractDetailId
 			,[intContractSeqId] = CD.intContractSeq
 			,[intLoadShipmentId] = WC.intLoadId
+			,[intLoadShipmentDetailId] = LD.intLoadDetailId
 			,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
+			,[strBillOfLading] = L.strBLNumber
 			,[intWeightClaimId] = VDD.intWeightClaimId
 			,[intWeightClaimDetailId] = VDD.intWeightClaimDetailId
 			,[intItemId] = VDD.intItemId
@@ -389,6 +393,11 @@ BEGIN TRY
 			LEFT JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
 			LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
 			LEFT JOIN tblAPVendor V ON VDD.intPartyEntityId = V.intEntityId
+			OUTER APPLY (SELECT TOP 1 ld.intLoadDetailId FROM tblLGLoadDetail ld 
+						 LEFT JOIN tblLGLoadDetailContainerLink ldcl on ldcl.intLoadDetailId = ld.intLoadDetailId
+						 WHERE ld.intLoadId = L.intLoadId 
+							AND (WCD.intLoadContainerId IS NULL 
+							 OR (WCD.intLoadContainerId IS NOT NULL AND WCD.intLoadContainerId = ldcl.intLoadContainerId))) LD
 		WHERE VDD.intPartyEntityId = @intVendorEntityId
 
 		EXEC uspAPCreateVoucher 
