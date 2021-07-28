@@ -27,7 +27,8 @@ INSERT INTO @ReceiptEntries(
 	, intGrossNetUOMId
 	, intForexRateTypeId
 	, intCostUOMId
-	, dblUnitRetail)
+	, dblUnitRetail
+	, strWarehouseRefNo)
 SELECT 
 	  'Direct'
 	, 0
@@ -51,6 +52,7 @@ SELECT
 	, ri.intForexRateType
 	, ri.intCostUOMId
 	, ri.dblUnitRetail
+	, r.strWarehouseRefNo
 FROM tblRestApiReceiptStaging r
 	INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
 	INNER JOIN tblICItemLocation il ON il.intItemId = ri.intItemId
