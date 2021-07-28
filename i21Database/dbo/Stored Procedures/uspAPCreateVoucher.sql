@@ -58,6 +58,11 @@ BEGIN TRY
 	--IF NO ACCOUNT PROVIDED, MAKE SURE THERE IS A DEFAULT LOCATION SETUP FOR THE USER
 	IF (
 		EXISTS(SELECT TOP 1 1 FROM @voucherPayables A WHERE (A.intAPAccount = 0 OR A.intAPAccount IS NULL) AND A.intLocationId IS NULL)
+		AND NULLIF((
+			SELECT TOP 1 B.intCompanyLocationId FROM tblSMUserSecurity B
+			LEFT JOIN tblSMCompanyLocationId C ON B.intCompanyLocationId = C.intCompanyLocationId
+			WHERE B.intEntityId = @userId
+		),0) IS NULL
 	)
 	BEGIN
 		SET @error =  'Please setup default Location for user.';
