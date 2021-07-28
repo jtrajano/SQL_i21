@@ -262,10 +262,10 @@ BEGIN TRY
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	@CDTableUpdate
-				SET		dblFutures			=	NULL,
-						dblCashPrice		=	NULL,
-						dblTotalCost		=	NULL,
-						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 2 END
+				SET		dblFutures			=	dblFutures,
+						dblCashPrice		=	dblCashPrice,
+						dblTotalCost		=	dblTotalCost,
+						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE intPricingTypeId END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
@@ -440,11 +440,11 @@ BEGIN TRY
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
 
-		UPDATE b SET dblNoOfLots = (b.dblQuantity / d.dblContractSize)
+		UPDATE b SET dblNoOfLots = b.dblQuantity / (c.dblQuantity/c.dblNoOfLots)--(b.dblQuantity / d.dblContractSize)
 		FROM tblCTPriceFixation a
 		INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationId =  b.intPriceFixationId
 		INNER JOIN tblCTContractDetail c ON a.intContractDetailId = c.intContractDetailId
-		INNER JOIN vyuRKMarketDetail d ON c.intFutureMarketId = d.intFutureMarketId
+		--INNER JOIN vyuRKMarketDetail d ON c.intFutureMarketId = d.intFutureMarketId
 		WHERE a.intContractHeaderId = @intContractHeaderId
 	END
 	ELSE

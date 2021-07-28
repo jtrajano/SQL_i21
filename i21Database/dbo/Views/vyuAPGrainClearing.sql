@@ -73,6 +73,7 @@ INNER JOIN tblGLDetail GD
 		AND GD.strTransactionType = 'Storage Settlement'
 		AND GD.ysnIsUnposted = 0
 		AND GD.strCode = 'IC'
+		AND ((GD.dblDebit <> 0 AND GD.dblCredit = 0) OR (GD.dblDebit = 0 AND GD.dblCredit <> 0))
  INNER JOIN vyuGLAccountDetail AD
  	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN tblGRSettleContract SC
@@ -89,9 +90,20 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+OUTER APPLY (
+	SELECT ysnReversed = 1
+	FROM tblGLDetail 
+	WHERE strTransactionId = SS.strStorageTicket
+		AND intTransactionId = SS.intSettleStorageId
+		AND strTransactionType = 'Storage Settlement'
+		AND ysnIsUnposted = 0
+		AND strComments IN ('GRN-2604-REVERSAL','GRN-2741-REVERSAL')
+) GL
 WHERE SS.ysnPosted = 1
-	--and SS.strStorageTicket = 'STR-1729/1'
-UNION ALL
+	--and SS.strStorageTicket = 'STR-8294/3'
+	AND GL.ysnReversed IS NULL
+	--AND (GD.dblCredit <> 0 AND GD.dblDebit <> 0)
+UNION
 SELECT --'b',
 	bill.intEntityVendorId
 	,bill.dtmDate
@@ -237,8 +249,22 @@ LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
 left join tblCTContractHeader CH
 		on CH.intContractHeaderId = CT.intContractHeaderId
+OUTER APPLY (
+	SELECT ysnReversed = CASE 
+							WHEN strComments IN ('Added from data fix to offset the orphan records; GRN-2513','GRN-2741-REVERSAL') THEN 1
+							WHEN strComments = 'Added from data fix to create STR GL entries for manually added items in voucher; GRN-2513' THEN 0
+						END
+	FROM tblGLDetail 
+	WHERE strTransactionId = SS.strStorageTicket
+		AND intTransactionId = SS.intSettleStorageId
+		AND strTransactionType = 'Storage Settlement'
+		AND ysnIsUnposted = 0
+		AND strComments IN ('Added from data fix to offset the orphan records; GRN-2513','Added from data fix to create STR GL entries for manually added items in voucher; GRN-2513','GRN-2741-REVERSAL')
+		AND strDescription = GD.strDescription
+) GL
 WHERE SS.ysnPosted = 1
---and SS.strStorageTicket = 'STR-1729/1'
+--and SS.strStorageTicket = 'STR-4248/1'
+AND ISNULL(GL.ysnReversed,0) = 0
 UNION ALL
 SELECT DISTINCT --'d',
 	bill.intEntityVendorId
@@ -365,8 +391,6 @@ INNER JOIN tblICItem IM
 	ON DSC.intItemId = IM.intItemId
 INNER JOIN tblGRDiscountSchedule DS
 	ON DS.intDiscountScheduleId = DSC.intDiscountScheduleId
--- INNER JOIN tblICCommodity CO
--- 	ON CO.intCommodityId = DS.intCommodityId
 INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = CS.intCompanyLocationId
 INNER JOIN tblGRSettleStorageTicket SST
@@ -375,7 +399,6 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		AND SS.ysnPosted = 1
-		--AND SS.dblSpotUnits = 0
 LEFT JOIN tblGRSettleContract SC
 		ON SC.intSettleStorageId = SS.intSettleStorageId
 --SETTLE FOR BASIS CONTRACT IS THE ONLY TRANSACTION THAT SHOULD SHOW ON CLEARING TAB
@@ -393,7 +416,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 OUTER APPLY
 (
-	SELECT GD.intAccountId, AD.strAccountId
+	SELECT GD.intAccountId, AD.strAccountId, GD.strDescription
 	FROM tblGLDetail GD
 	INNER JOIN vyuGLAccountDetail AD
 		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
@@ -403,11 +426,24 @@ OUTER APPLY
 		AND IM.strItemNo = REPLACE(SUBSTRING(GD.strDescription, CHARINDEX('Charges from ', GD.strDescription), LEN(GD.strDescription) -1),'Charges from ','')
 		AND GD.ysnIsUnposted = 0
 ) GLDetail
+OUTER APPLY (
+	SELECT ysnReversed = 1
+	FROM tblGLDetail 
+	WHERE strTransactionId = SS.strStorageTicket
+		AND intTransactionId = SS.intSettleStorageId
+		AND strTransactionType = 'Storage Settlement'
+		AND ysnIsUnposted = 0
+		AND strComments IN ('Added from data fix to offset the orphan records; GRN-2513','GRN-2741-REVERSAL')
+		AND strDescription = GLDetail.strDescription
+) GL
 WHERE 
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
 AND SS.ysnPosted = 1
 AND GLDetail.intAccountId IS NOT NULL
+--AND SS.strStorageTicket = 'STR-5175/1'
+AND GL.ysnReversed IS NULL
+
 --and SS.strStorageTicket = 'STR-1729/1'
 UNION ALL
 SELECT DISTINCT --'f',
@@ -504,4 +540,3 @@ OUTER APPLY (
 WHERE bill.ysnPosted = 1
 AND QM.ysnDiscountExists = 1
 AND glAccnt.intAccountCategoryId = 45
---and SS.strStorageTicket = 'STR-1729/1'

@@ -85,9 +85,14 @@ DECLARE @ysnLoadContract BIT
 DECLARE @_dblQuantityPerLoad NUMERIC(18,6)
 DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strReceiptNumber NVARCHAR(50)
+DECLARE @_dblQtyToCompare NUMERIC (38,20)  
+DECLARE @_intLoadItemUOM INT
+dECLARE @intTicketLoadDetailId INT
+DECLARE @_intContractItemUom  INT
+DECLARE @_dblContractScheduledQty NUMERIC (38,20)  
 
 SELECT	
-	@intTicketItemUOMId = UOM.intItemUOMId
+	@intTicketItemUOMId = SC.intItemUOMIdTo
 	, @intLoadId = SC.intLoadId
 	, @intItemId = SC.intItemId
 	, @dblGrossUnits = SC.dblGrossUnits
@@ -100,8 +105,10 @@ SELECT
 	, @ysnTicketHasSpecialDiscount = SC.ysnHasSpecialDiscount
 	, @ysnTicketSpecialGradePosted = SC.ysnSpecialGradePosted
 	, @strTicketStatus = SC.strTicketStatus
-FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+	, @intTicketLoadDetailId = SC.intLoadDetailId
+FROM dbo.tblSCTicket SC 
+WHERE SC.intTicketId = @intTicketId 
+
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -137,10 +144,24 @@ BEGIN
 
 END
 
+
+SELECT 
+	*
+INTO #tmpManualDistributionLineItem
+FROM @LineItem
+WHERE strDistributionOption = @strTicketDistributionOption
+
+INSERT INTO #tmpManualDistributionLineItem
+SELECT 
+	*
+FROM @LineItem
+WHERE strDistributionOption <> @strTicketDistributionOption
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, intLoadDetailId
-FROM @LineItem;
+FROM #tmpManualDistributionLineItem;
 
 OPEN intListCursor;
 
@@ -166,7 +187,10 @@ OPEN intListCursor;
 							WHERE intLoadDetailId = @intLoadDetailId 
 
 							SET @ysnLoadContract = 0
-							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0)
+							SELECT TOP 1 
+								@ysnLoadContract = ISNULL(ysnLoad,0)
+								,@_intContractItemUom = B.intItemUOMId
+								,@_dblContractScheduledQty = B.dblScheduleQty
 							FROM tblCTContractHeader A
 							INNER JOIN tblCTContractDetail B
 								ON A.intContractHeaderId = B.intContractHeaderId
@@ -178,14 +202,29 @@ OPEN intListCursor;
 								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
 							END  
 							
-					
 							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
 
 							-- Adjust the contract Scheduled quantity based on the difference between the quantity/load and the units allocated
 							IF(@ysnLoadContract = 0)
 							BEGIN
+
+								SELECT TOP 1 
+									@_intLoadItemUOM = intItemUOMId
+								FROM tblLGLoadDetail WITH(NOLOCK)
+								WHERE intLoadDetailId = @intLoadDetailId
+
+								SET @_dblContractScheduledQty = dbo.fnCalculateQtyBetweenUOM(@_intContractItemUom,@intTicketItemUOMId,@_dblContractScheduledQty)
 								
-								SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQuantityPerLoad 
+								SET @_dblQtyToCompare = dbo.fnCalculateQtyBetweenUOM(@_intLoadItemUOM,@intTicketItemUOMId,@_dblQuantityPerLoad)	
+								IF (@_dblContractScheduledQty <  @_dblQtyToCompare)
+								BEGIN
+									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblContractScheduledQty
+								END
+								ELSE
+								BEGIN
+									
+									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQtyToCompare
+								END
 								IF(@dblLoopAdjustedScheduleQuantity <> 0)
 								BEGIN
 									EXEC	uspCTUpdateScheduleQuantityUsingUOM 

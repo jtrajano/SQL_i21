@@ -25,6 +25,7 @@ BEGIN TRY
 		,@intBillId INT
 		,@intActionId INT
 		,@intTransactionType INT
+		,@intOrgTransactionType INT
 		,@strBillId NVARCHAR(50)
 		,@dtmDate DATETIME
 		,@strVendorAccountNum NVARCHAR(50)
@@ -50,6 +51,7 @@ BEGIN TRY
 		,@strERPServicePONumber NVARCHAR(50)
 		,@strERPServicePOLineNo NVARCHAR(50)
 		,@strItemNo NVARCHAR(50)
+		,@strMapItemNo NVARCHAR(50)
 		,@dblDetailQuantity NUMERIC(18, 6)
 		,@strDetailCurrency NVARCHAR(40)
 		,@dblDetailCost NUMERIC(18, 6)
@@ -110,6 +112,7 @@ BEGIN TRY
 
 		SELECT @intActionId = NULL
 			,@intTransactionType = NULL
+			,@intOrgTransactionType = NULL
 			,@strBillId = NULL
 			,@dtmDate = NULL
 			,@strVendorAccountNum = NULL
@@ -154,6 +157,7 @@ BEGIN TRY
 		END
 
 		SELECT @strUserName = US.strUserName
+			,@intOrgTransactionType = A.intTransactionType
 			,@intTransactionType = (
 				CASE A.intTransactionType
 					WHEN 1
@@ -355,6 +359,7 @@ BEGIN TRY
 				,@strERPServicePONumber = NULL
 				,@strERPServicePOLineNo = NULL
 				,@strItemNo = NULL
+				,@strMapItemNo = NULL
 				,@dblDetailQuantity = NULL
 				,@strDetailCurrency = NULL
 				,@dblDetailCost = NULL
@@ -439,6 +444,17 @@ BEGIN TRY
 			--AND MD.intItemId = BD.intItemId
 			WHERE BD.intBillDetailId = @intBillDetailId
 
+			IF @intOrgTransactionType <> 1
+			BEGIN
+				SELECT TOP 1 @strMapItemNo = I.strItemNo
+				FROM tblIPBillItem BI
+				JOIN tblICItem I ON I.intItemId = BI.intItemId
+				WHERE BI.intTransactionType = @intOrgTransactionType
+
+				IF ISNULL(@strMapItemNo, '') <> ''
+					SELECT @strItemNo = @strMapItemNo
+			END
+			
 			IF ISNULL(@strItemNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Item No cannot be blank. '

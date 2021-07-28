@@ -759,7 +759,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'User'
 				WHERE EY.strName = @strCreatedBy
-					AND EY.strEntityNo <> ''
+					--AND EY.strEntityNo <> ''
 
 				IF @intCreatedById IS NULL
 				BEGIN
@@ -781,7 +781,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'User'
 				WHERE EY.strName = @strLastModifiedBy
-					AND EY.strEntityNo <> ''
+					--AND EY.strEntityNo <> ''
 
 				IF @intLastModifiedById IS NULL
 				BEGIN
@@ -1932,7 +1932,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strUserName
-					AND CE.strEntityNo <> ''
+					--AND CE.strEntityNo <> ''
 
 				IF @intAuditLogUserId IS NULL
 				BEGIN
@@ -2112,6 +2112,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intContractScreenId
+						,@populatedByInterCompany=1
 				END
 
 				UPDATE tblCTPriceContractStage

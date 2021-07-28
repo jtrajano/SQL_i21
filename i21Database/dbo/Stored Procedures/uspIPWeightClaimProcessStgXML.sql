@@ -216,7 +216,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strCreatedBy
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intUserId IS NULL
 			BEGIN
@@ -875,6 +875,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intWeightClaimScreenId
+						,@populatedByInterCompany=1
 				END TRY
 
 				BEGIN CATCH

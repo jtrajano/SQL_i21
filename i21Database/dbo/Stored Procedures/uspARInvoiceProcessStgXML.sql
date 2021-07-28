@@ -319,7 +319,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strCreatedBy
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intUserId IS NULL
 			BEGIN

@@ -29,7 +29,9 @@ BEGIN TRY
 				@dblBasis				NUMERIC(18,6),
 				@dblCashPrice			NUMERIC(18,6),
 				@strTransactionType		NVARCHAR(20),
-				@strScreenName			NVARCHAR(20)
+				@strScreenName			NVARCHAR(20),
+				@ysnStayAsDraftContractUntilApproved BIT,
+                @ysnAddAmendmentForNonDraftContract BIT = 0
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -74,7 +76,7 @@ BEGIN TRY
 		
 		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
 		SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor with (nolock) WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
-		SELECT @ysnAmdWoAppvl	    = ISNULL(ysnAmdWoAppvl,0) FROM tblCTCompanyPreference
+		SELECT @ysnAmdWoAppvl       = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0) FROM tblCTCompanyPreference
 
 		DELETE FROM @tblHeader
 		DELETE FROM @tblDetail
@@ -363,7 +365,39 @@ BEGIN TRY
 		SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND (ISNULL(ysnPrinted,0)=1 OR ISNULL(ysnSigned,0)=1))
+    if exists (
+        select
+            top 1 1
+        from
+            tblSMScreen scr
+            left join tblSMTransaction txn on txn.intScreenId = scr.intScreenId and txn.intRecordId = @intContractHeaderId
+            left join tblSMApproval ap on ap.intTransactionId = txn.intTransactionId
+        where
+            scr.strNamespace = 'ContractManagement.view.Contract'
+            and ap.strStatus = 'Approved'
+            and @ysnStayAsDraftContractUntilApproved = 1
+    )
+    begin
+        set @ysnAddAmendmentForNonDraftContract = 1;
+    end
+
+	IF EXISTS(
+        SELECT TOP 1 1
+        FROM tblCTContractHeader
+        WHERE intContractHeaderId = @intContractHeaderId
+        AND (
+                (
+                    isnull(@ysnStayAsDraftContractUntilApproved,0)=0
+                    and
+                    (
+                        ISNULL(ysnPrinted,0)=1
+                        OR ISNULL(ysnSigned,0)=1                
+                    )
+                )
+
+            OR isnull(@ysnAddAmendmentForNonDraftContract,0)=1
+        )
+	)
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId ) OR (@ysnAmdWoAppvl = 1)
 		BEGIN

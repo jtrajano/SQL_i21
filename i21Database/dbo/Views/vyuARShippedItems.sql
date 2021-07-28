@@ -315,10 +315,9 @@ FROM (
 													ELSE
 														dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 												END)
-		 , dblQtyOrdered					= CASE	WHEN ARCC.ysnLoad = 1 THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
-													WHEN ISNULL(ITEMCONTRACT.intItemContractHeaderId, 0) > 0 THEN ISNULL(ITEMCONTRACT.dblContracted, 0)
-													ELSE ARCC.dblDetailQuantity
-												END
+		 , dblQtyOrdered					= (CASE WHEN ISNULL(ITEMCONTRACT.intItemContractHeaderId, 0) > 0 THEN ISNULL(ITEMCONTRACT.dblContracted, 0)
+													ELSE ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+											    END)
 	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL AND ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 1
 														THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0))
 													ELSE

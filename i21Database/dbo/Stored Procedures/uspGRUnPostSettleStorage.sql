@@ -61,6 +61,11 @@ BEGIN TRY
 		,ysnDPOwnedType BIT
 		,intContractDetailId INT NULL
 	)	
+	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+	BEGIN
+		DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+		EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+	END
 		
 	--check first if the settle storage being deleted is the parent, then its children should be deleted first
 	SELECT @isParentSettleStorage = CASE WHEN MIN(intSettleStorageId) > 0 THEN 1 ELSE 0 END
