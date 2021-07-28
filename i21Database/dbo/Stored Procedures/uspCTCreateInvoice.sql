@@ -23,6 +23,7 @@ BEGIN TRY
 		,@shipment cursor
 		,@intInventoryShipmentId int
 		,@intInventoryShipmentItemId int
+		,@strShipmentNumber NVARCHAR(50)
 		,@dblShipped numeric(18,6)
 		,@intInvoiceDetailId int
 		,@dblInventoryShipmentItemLoadApplied numeric(18,6)
@@ -48,6 +49,7 @@ BEGIN TRY
 		,@intWeightGradeId int
 		,@ysnLoad bit = 0
 		,@intPriceContractId int
+		,@strPriceContractNo NVARCHAR(50)
 		,@intItemUOMId int
 		,@ysnDestinationWeightsGrades bit
 		,@intPricingTypeId int
@@ -137,6 +139,7 @@ BEGIN TRY
 				,dblFinalPrice = dbo.fnCTConvertToSeqFXCurrency(a.intContractDetailId,c.intFinalCurrencyId,f.intItemUOMId,b.dblFinalPrice)
 				,ContractPriceItemUOMId = intPricingUOMId
 				,ContractDetailItemId = d.intItemId
+				,strPriceContractNo = c.strPriceContractNo
 			from
 				tblCTPriceFixation a
 				,tblCTPriceFixationDetail b
@@ -168,6 +171,7 @@ BEGIN TRY
 			,@dblFinalPrice
 			,@ContractPriceUnitMeasureId
 			,@ContractDetailItemId
+			,@strPriceContractNo
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN			
@@ -184,6 +188,7 @@ BEGIN TRY
 					,intInvoiceDetailId
 					,intItemUOMId
 					,intLoadShipped
+					,strShipmentNumber
 				from
 				(
 					SELECT
@@ -202,7 +207,8 @@ BEGIN TRY
 																		),
 						intInvoiceDetailId = null,
 						intItemUOMId = @intItemUOMId,
-						intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
+						intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
+						IR.strShipmentNumber
 					FROM
 						tblICInventoryShipmentItem RI with (nolock)
 						JOIN tblICInventoryShipment IR with (nolock) ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
@@ -228,7 +234,8 @@ BEGIN TRY
 																		),
 						intInvoiceDetailId = ARD.intInvoiceDetailId,
 						intItemUOMId = @intItemUOMId,
-						intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
+						intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
+						IR.strShipmentNumber
 					FROM tblICInventoryShipmentItem RI with (nolock)
 					JOIN tblICInventoryShipment IR with (nolock) ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
 					OUTER APPLY (
@@ -260,6 +267,7 @@ BEGIN TRY
 					,@intInvoiceDetailId
 					,@intItemUOMId
 					,@dblInventoryShipmentItemLoadApplied
+					,@strShipmentNumber
 
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
@@ -336,6 +344,32 @@ BEGIN TRY
 						--Allow Shipment Item to create Invoice
 						UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
 						--Create Invoice for Shipment Item
+
+						IF (ISNULL(@intPriceContractId, 0) <> 0 )
+						BEGIN
+							-- Traceability Feature - CT-5847
+							DECLARE @TransactionLink udtICTransactionLinks
+							INSERT INTO @TransactionLink (strOperation
+								, intSrcId
+								, strSrcTransactionNo
+								, strSrcModuleName
+								, strSrcTransactionType
+								, intDestId
+								, strDestTransactionNo
+								, strDestModuleName
+								, strDestTransactionType)
+							SELECT 'Price Contract'
+								, intSrcId = @intInventoryShipmentId
+								, strSrcTransactionNo = @strShipmentNumber
+								, strSrcModuleName = 'Inventory'
+								, strSrcTransactionType = 'Inventory Shipment'
+								, intDestId = @intPriceContractId
+								, strDestTransactionNo = @strPriceContractNo
+								, 'Contract Management'
+								, 'Price Contract'
+					
+							EXEC dbo.uspICAddTransactionLinks @TransactionLink
+						END
 
 						print 'create new invoice';
 

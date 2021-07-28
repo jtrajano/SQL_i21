@@ -152,6 +152,8 @@ begin try
 		,intPricingTypeId int
 		,intFreightTermId int
 		,intCompanyLocationId int
+		,intPriceContractId int
+		,strPriceContractNo NVARCHAR(50)
 	);
 
 	declare 
@@ -168,12 +170,15 @@ begin try
 		,@dblTransactionQuantity numeric(18,6)
 		,@ysnLoad bit = 0
 		,@intInventoryReceiptId int
+		,@strReceiptNo NVARCHAR(50)
 		,@ysnSuccessBillPosting bit
 		,@intId int
 		,@intPriceItemUOMId int
 		,@intPricingTypeId int
 		,@intFreightTermId int
 		,@intCompanyLocationId int
+		,@intPriceContractId int
+		,@strPriceContractNo NVARCHAR(50)
 		;
 
 	declare @CreatedVoucher as table(
@@ -217,7 +222,10 @@ begin try
 				intVoucherPayableId = @intVoucherPayableId
 
 			--Get Receipt Id
-			select @intInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intInventoryReceiptItemId;
+			select @intInventoryReceiptId = ir.intInventoryReceiptId, @strReceiptNo = ir.strReceiptNumber
+			FROM tblICInventoryReceiptItem iri
+			JOIN tblICInventoryReceipt ir ON ir.intInventoryReceiptId = iri.intInventoryReceiptId
+			where intInventoryReceiptItemId = @intInventoryReceiptItemId;
 
 			--Check if Load base contract
 			select @ysnLoad = ysnLoad 
@@ -253,6 +261,8 @@ begin try
 				,intPricingTypeId = intPricingTypeId
 				,intFreightTermId = intFreightTermId
 				,intCompanyLocationId = intCompanyLocationId
+				,intPriceContractId = intPriceContractId
+				,strPriceContractNo = strPriceContractNo
 			from  
 				vyuCTGetAvailablePriceForVoucher  
 			where  
@@ -277,10 +287,38 @@ begin try
 					,@intPricingTypeId = intPricingTypeId
 					,@intFreightTermId = intFreightTermId
 					,@intCompanyLocationId = intCompanyLocationId
+					,@intPriceContractId = intPriceContractId
+					,@strPriceContractNo = strPriceContractNo
 				from  
 					@availablePrice  
 				where  
 					intId = @intId
+
+				IF (ISNULL(@intPriceContractId, 0) <> 0 )
+				BEGIN
+					-- Traceability Feature - CT-5847
+					DECLARE @TransactionLink udtICTransactionLinks
+					INSERT INTO @TransactionLink (strOperation
+						, intSrcId
+						, strSrcTransactionNo
+						, strSrcModuleName
+						, strSrcTransactionType
+						, intDestId
+						, strDestTransactionNo
+						, strDestModuleName
+						, strDestTransactionType)
+					SELECT 'Price Contract'
+						, intSrcId = @intInventoryReceiptId
+						, strSrcTransactionNo = @strReceiptNo
+						, strSrcModuleName = 'Inventory'
+						, strSrcTransactionType = 'Inventory Receipt'
+						, intDestId = @intPriceContractId
+						, strDestTransactionNo = @strPriceContractNo
+						, 'Contract Management'
+						, 'Price Contract'
+					
+					EXEC dbo.uspICAddTransactionLinks @TransactionLink
+				END
 
 				--Set @dblTransactionQuantity = @dblQuantityToBill by default (this is also correct quantity for Load Based)
 				set @dblTransactionQuantity = @dblQuantityToBill;
