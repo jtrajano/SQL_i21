@@ -67,6 +67,7 @@ BEGIN
 		,SL1.strName AS strStorageUnit
 		,SU.intSubLocationId
 		,SL.strSubLocationName AS strStorageLocation
+		,SU.intItemLocationId
 	FROM tblICItemStockUOM SU
 	JOIN tblICItem I ON I.intItemId = SU.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = SU.intSubLocationId
@@ -93,6 +94,7 @@ BEGIN
 		,SL1.strName AS strStorageUnit
 		,SU.intSubLocationId
 		,SL.strSubLocationName AS strStorageLocation
+		,SU.intItemLocationId
 	FROM tblICItemStockUOM SU
 	JOIN tblICItem I ON I.intItemId = SU.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = SU.intSubLocationId
