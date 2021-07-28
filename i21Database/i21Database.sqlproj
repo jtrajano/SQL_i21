@@ -401,7 +401,7 @@
     <Build Include="dbo\Functions\fnGetRowsFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspCMAddDeposit.sql" />
     <Build Include="dbo\Stored Procedures\uspCMAddPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMAddPrintTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUpdateTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
