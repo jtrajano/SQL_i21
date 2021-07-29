@@ -48,9 +48,14 @@ BEGIN TRY
 		,@strContainerNumber NVARCHAR(100)
 		,@strERPPONumber NVARCHAR(100)
 		,@strERPItemNumber NVARCHAR(100)
+		,@strCommodityCode NVARCHAR(50)
+		,@intPricingTypeId INT
+		,@intParentLotId INT
+		,@strParentLotNumber NVARCHAR(50)
+		,@intSampleStatusId INT
 	DECLARE @tblICInventoryReceipt TABLE (intInventoryReceiptId INT)
 	DECLARE @tblICInventoryReceiptItem TABLE (intInventoryReceiptItemId INT)
-	DECLARE @tblICInventoryReceiptItemLot TABLE (intInventoryReceiptItemLotId INT)
+	DECLARE @tblICInventoryReceiptItemParentLot TABLE (intParentLotId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intInventoryReceiptId INT
@@ -250,9 +255,6 @@ BEGIN TRY
 		SELECT @strXML += '<ERPTransferOrderNo>' + ISNULL(@strERPTransferOrderNo, '') + '</ERPTransferOrderNo>'
 
 		DELETE
-		FROM @tblICInventoryReceiptItemLot
-
-		DELETE
 		FROM @tblICInventoryReceiptItem
 
 		SELECT @strLineXML = ''
@@ -288,6 +290,11 @@ BEGIN TRY
 				,@strContainerNumber = NULL
 				,@strERPPONumber = NULL
 				,@strERPItemNumber = NULL
+				,@strCommodityCode = NULL
+				,@intPricingTypeId = NULL
+				,@intParentLotId = NULL
+				,@strParentLotNumber = NULL
+				,@intSampleStatusId = NULL
 
 			SELECT @intItemId = RI.intItemId
 			FROM tblICInventoryReceiptItem RI
@@ -340,6 +347,8 @@ BEGIN TRY
 				,@strContainerNumber = ISNULL(LC.strContainerNumber, '')
 				,@strERPPONumber = ISNULL(CD.strERPPONumber, '')
 				,@strERPItemNumber = ISNULL(CD.strERPItemNumber, '')
+				,@strCommodityCode = C.strCommodityCode
+				,@intPricingTypeId = CD.intPricingTypeId
 			FROM tblICInventoryReceiptItem RI
 			JOIN tblICItem I ON I.intItemId = RI.intItemId
 			JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RI.intUnitMeasureId
@@ -347,6 +356,7 @@ BEGIN TRY
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intContractDetailId
 				AND RI.intInventoryReceiptItemId = @intInventoryReceiptItemId
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			LEFT JOIN tblICCommodity C ON C.intCommodityId = CH.intCommodityId
 			LEFT JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = RI.intSubLocationId
 			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = RI.intStorageLocationId
 			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
@@ -379,6 +389,14 @@ BEGIN TRY
 				IF @strERPItemNumber = ''
 				BEGIN
 					SELECT @strError = @strError + 'ERP PO Line No. cannot be blank. '
+				END
+
+				IF UPPER(@strCommodityCode) = 'COFFEE'
+				BEGIN
+					IF @intPricingTypeId <> 1
+					BEGIN
+						SELECT @strError = @strError + 'Contract Seq is not yet priced. '
+					END
 				END
 			END
 
@@ -436,6 +454,60 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblIPInvReceiptFeed
 				SET strMessage = 'Receipt Item XML not available. '
+					,intStatusId = 1
+				WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+				GOTO NextRec
+			END
+
+			DELETE
+			FROM @tblICInventoryReceiptItemParentLot
+
+			IF @intActionId = 1
+				AND UPPER(@strCommodityCode) = 'COFFEE'
+			BEGIN
+				INSERT INTO @tblICInventoryReceiptItemParentLot (intParentLotId)
+				SELECT DISTINCT RIL.intParentLotId
+				FROM tblICInventoryReceiptItemLot RIL
+				WHERE RIL.intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+				SELECT @intParentLotId = MIN(intParentLotId)
+				FROM @tblICInventoryReceiptItemParentLot
+
+				WHILE @intParentLotId IS NOT NULL
+				BEGIN
+					SELECT @intSampleStatusId = NULL
+						,@strParentLotNumber = NULL
+
+					SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+					FROM tblQMSample S
+					WHERE S.intProductTypeId = 11
+						AND S.intProductValueId = @intParentLotId
+					ORDER BY S.intSampleId DESC
+
+					SELECT @strParentLotNumber = strParentLotNumber
+					FROM tblICParentLot
+					WHERE intParentLotId = @intParentLotId
+
+					IF @intSampleStatusId IS NULL
+					BEGIN
+						SELECT @strError = @strError + 'Sample is not available for receipt lot "' + @strParentLotNumber + '". '
+					END
+					ELSE IF @intSampleStatusId <> 3
+					BEGIN
+						SELECT @strError = @strError + 'Approved Sample is not available for receipt lot "' + @strParentLotNumber + '". '
+					END
+
+					SELECT @intParentLotId = MIN(intParentLotId)
+					FROM @tblICInventoryReceiptItemParentLot
+					WHERE intParentLotId > @intParentLotId
+				END
+			END
+
+			IF @strError <> ''
+			BEGIN
+				UPDATE tblIPInvReceiptFeed
+				SET strMessage = @strError
 					,intStatusId = 1
 				WHERE intInventoryReceiptId = @intInventoryReceiptId
 
