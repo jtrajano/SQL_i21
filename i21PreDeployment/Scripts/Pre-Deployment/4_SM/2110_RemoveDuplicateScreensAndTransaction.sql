@@ -1,6 +1,11 @@
 ﻿GO
 	PRINT N'START REMOVE DUPLICATE SCREENS & TRANSACTIONS'
 	BEGIN
+		IF  NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblSMScreen]')) 
+		BEGIN 
+			RETURN
+		END
+
 		SET NOCOUNT ON
 
 		DECLARE @DuplicateScreen TABLE (
