@@ -5,7 +5,7 @@ IF EXISTS (SELECT 1 FROM tblSMModule WHERE strModule = 'Language Translation')
 BEGIN
 	UPDATE		tblSMModule
 	SET			ysnAddonComponent = 1, strModule = 'Multi-Language'
-	WHERE		strModule = 'Multi-Language'
+	WHERE		strModule = 'Language Translation'
 END
 
 IF EXISTS (SELECT 1 FROM tblSMModule WHERE strModule = 'Transaction Traceability')
