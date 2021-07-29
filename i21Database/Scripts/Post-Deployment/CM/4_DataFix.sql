@@ -200,12 +200,12 @@ GO
 DELETE from tblSMGridLayout where 
 strScreen = 'CashManagement.view.ProcessPayments'
 AND strGrid = 'grdArchiveFile'
-AND CHARINDEX('defaultSort', strGridLayoutFields   ) = 0
+AND CHARINDEX('colBatchId', strGridLayoutFields) = 0
 
 DELETE from tblSMCompanyGridLayout where
 strScreen = 'CashManagement.view.ProcessPayments'
 AND strGrid = 'grdArchiveFile'
-AND CHARINDEX('defaultSort', strGridLayoutFields   ) = 0
+AND CHARINDEX('colBatchId', strGridLayoutFields) = 0
 GO
 
 PRINT ('Finished removing Grid Layouts in Process Payments archive grid without batch id column')
