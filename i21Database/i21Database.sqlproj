@@ -9583,7 +9583,8 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspEMAxxisSyncShipViaExport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeletePrice.sql" />
-	<Build Include="dbo\Views\vyuTRShipViaTariff.sql" />
+    <Build Include="dbo\Views\vyuTRShipViaTariff.sql" />
+    <Build Include="dbo\Views\vyuSMLabels.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
