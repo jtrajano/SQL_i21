@@ -69,5 +69,6 @@
     [strADUserName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strADPassword] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnEnableUserActivityLog] BIT NOT NULL DEFAULT 0,
+	[strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
