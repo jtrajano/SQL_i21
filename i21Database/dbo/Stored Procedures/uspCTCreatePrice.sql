@@ -3,6 +3,7 @@
 	,@dblQuantityToPrice numeric(18,6)
 	,@dblFutures numeric(18,6)
 	,@intUserId int
+	,@intAssignFuturesToContractSummaryId int
 	,@ysnAllowToPriceRemainingQtyToPrice bit = 0
 AS
 
@@ -167,6 +168,7 @@ begin try
 			,dblFinalPrice
 			,strNotes
 			,ysnToBeDeleted
+			,intAssignFuturesToContractSummaryId
 			,intConcurrencyId
 		)
 		select 
@@ -190,6 +192,7 @@ begin try
 			,dblFinalPrice = @dblFutures + @dblBasis
 			,strNotes = ''
 			,ysnToBeDeleted = 0
+			,intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 			,intConcurrencyId = 1
 
 
@@ -314,6 +317,7 @@ begin try
 			,dblFinalPrice
 			,strNotes
 			,ysnToBeDeleted
+			,intAssignFuturesToContractSummaryId
 			,intConcurrencyId
 		)
 		select 
@@ -337,6 +341,7 @@ begin try
 			,dblFinalPrice = @dblFutures + @dblBasis
 			,strNotes = ''
 			,ysnToBeDeleted = 0
+			,intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 			,intConcurrencyId = 1
 
 
@@ -349,8 +354,7 @@ begin try
 		select @dblTotalPricedQuantity = sum(dblQuantity) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId;
 		update tblCTPriceFixation set dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot where  intPriceFixationId = @intPriceFixationId;
 
-		--exec dbo.uspCTUpdateAppliedAndPrice @intContractDetailId = @intContractDetailId, @dblBalance = @dblBalance;
-		EXEC uspCTSavePriceContract @intPriceContractId = @intPriceContractId, @strXML = '', @dtmLocalDate = default;
+		EXEC uspCTPostProcessPriceContract @intPriceContractId = @intPriceContractId, @intUserId = @intUserId, @dtmLocalDate = default;
 
 	end
 

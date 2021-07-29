@@ -9582,6 +9582,7 @@
     <Build Include="dbo\Stored Procedures\uspEMAxxisSyncWholesaleTransportDriverExport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspEMAxxisSyncShipViaExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeletePrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
