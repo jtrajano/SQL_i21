@@ -92,6 +92,8 @@ BEGIN TRY
 		AND CH.intContractTypeId = 1
 		--AND CF.strRowState = 'Delete'
 		AND CF.strLocationName = @strLocationName
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
+		AND ISNULL(CD.ysnRiskToProducer, 0) = 0
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
