@@ -2065,6 +2065,9 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
+		-- Update the receipt sub total. 
+		EXEC uspICInventoryReceiptCalculateTotals @inventoryReceiptId, 1 
+
 		-- Update Cost UOM Id if null
 		UPDATE tblICInventoryReceiptItem
 		SET intCostUOMId = intUnitMeasureId
