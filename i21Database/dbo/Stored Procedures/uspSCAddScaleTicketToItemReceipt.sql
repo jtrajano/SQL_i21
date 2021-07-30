@@ -328,7 +328,7 @@ END
 	,[intForexRateTypeId]				= RE.intForexRateTypeId
 	,[dblForexRate]						= RE.dblForexRate
 	,[ysnInventoryCost]					= IC.ysnInventoryCost
-	,[strCostMethod]					= case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
+	,[strCostMethod]					= IC.strCostMethod --case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE 
