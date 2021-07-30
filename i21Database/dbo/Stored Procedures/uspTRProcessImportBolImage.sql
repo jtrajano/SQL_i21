@@ -203,7 +203,7 @@ BEGIN
 					END
 					ELSE
 					BEGIN
-						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,'SI not yet created or not distributed to a Customer')
+						SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage,'SI not yet created or distributed to Bulk Plant')
 					END
 
 					UPDATE tblTRImportAttachmentDetail SET intLoadHeaderId = @intLoadHeaderId, strInvoiceId = @strInvoiceId, strMessage = @strMessage WHERE intImportAttachmentDetailId = @intImportAttachmentDetailId 
