@@ -1,4 +1,7 @@
-CREATE PROCEDURE uspICImportItemUOMsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemUOMsFromStaging 
+	@strIdentifier NVARCHAR(100), 
+	@ysnAllowOverwrite BIT = 0,
+	@intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
@@ -11,41 +14,82 @@ DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier <> @strIdentifier
 )
 DELETE FROM cte WHERE RowNumber > 1;
 
-;WITH cte AS
-(
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY strUPCCode ORDER BY strUPCCode) AS RowNumber
-   FROM tblICImportStagingUOM
-   WHERE strImportIdentifier = @strIdentifier
-	AND NULLIF(RTRIM(LTRIM(strUPCCode)), '') IS NOT NULL
-)
-DELETE FROM cte WHERE RowNumber > 1;
-
-CREATE TABLE #tmp (
-	  intId INT IDENTITY(1, 1) PRIMARY KEY
-	, intItemId INT NULL
-	, intUnitMeasureId INT NULL
-	, strLongUPCCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, strUpcCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, dblUnitQty NUMERIC(38, 20) NULL
-	, dblHeight NUMERIC(38, 20) NULL
-	, dblWidth NUMERIC(38, 20) NULL
-	, dblLength NUMERIC(38, 20) NULL
-	, dblMaxQty NUMERIC(38, 20) NULL
-	, dblVolume NUMERIC(38, 20) NULL
-	, dblWeight NUMERIC(38, 20) NULL
-	, ysnStockUnit BIT NULL
-	, ysnAllowPurchase BIT NULL
-	, ysnAllowSale BIT NULL
-	, dtmDateCreated DATETIME NULL
-	, intCreatedByUserId INT NULL
-)
-
 DECLARE @tblDuplicateUPCCodes TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200), strDescription NVARCHAR(MAX))
 DECLARE @tblInvalidStockUnitQuantities TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200), strDescription NVARCHAR(MAX))
 DECLARE @tblMissingUOMs TABLE(strItemNo NVARCHAR(200), strUOM NVARCHAR(200))
 DECLARE @tblMissingItems TABLE (strItemNo NVARCHAR(200))
+DECLARE @tblDuplicateUPCImported TABLE(strItemNo NVARCHAR(200), strUPCCode NVARCHAR(200))
+
 
 --Validate Records
+
+--Check Imported UPC duplicates
+
+INSERT INTO @tblDuplicateUPCImported (
+	strItemNo,
+	strUPCCode
+)
+SELECT 
+	strItemNo,
+	strUPCCode
+FROM
+(
+	SELECT
+	strItemNo,
+	strUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strUPCCode
+						ORDER BY strUPCCode) AS RowNumber 
+FROM tblICImportStagingUOM 
+) AS ROWS
+WHERE RowNumber > 1 AND strUPCCode IS NOT NULL
+
+--Make Imported UPC duplicates NULL
+
+UPDATE UOM
+SET UOM.strUPCCode = NULL
+FROM
+(
+	SELECT
+	strUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strUPCCode
+						ORDER BY strUPCCode) AS RowNumber 
+	FROM tblICImportStagingUOM
+) UOM
+WHERE UOM.RowNumber > 1 AND UOM.strUPCCode IS NOT NULL
+
+--Check Imported Short UPC duplicates
+
+INSERT INTO @tblDuplicateUPCImported (
+	strItemNo,
+	strUPCCode
+)
+SELECT 
+	strItemNo,
+	strShortUPCCode
+FROM
+(
+	SELECT
+	strItemNo,
+	strShortUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode
+						ORDER BY strShortUPCCode) AS RowNumber 
+FROM tblICImportStagingUOM 
+) AS ROWS
+WHERE RowNumber > 1 AND strShortUPCCode IS NOT NULL
+
+--Make Imported Short UPC duplicates NULL
+
+UPDATE UOM
+SET UOM.strShortUPCCode = NULL
+FROM
+(
+	SELECT
+	strShortUPCCode,
+	ROW_NUMBER() OVER (PARTITION BY strShortUPCCode
+						ORDER BY strShortUPCCode) AS RowNumber 
+	FROM tblICImportStagingUOM
+) UOM
+WHERE UOM.RowNumber > 1 AND UOM.strShortUPCCode IS NOT NULL
 
 --Check missing Items
 
@@ -88,13 +132,43 @@ FROM tblICImportStagingUOM x
 INNER JOIN tblICItem i 
 ON RTRIM(LTRIM(i.strItemNo)) COLLATE Latin1_General_CI_AS = LTRIM(x.strItemNo) COLLATE Latin1_General_CI_AS
 OUTER APPLY (
-	SELECT TOP 1 intUpcCode
+	SELECT TOP 1 intUpcCode, intUnitMeasureId, intItemId
 	FROM tblICItemUOM
-	WHERE intUpcCode = case when x.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
-		AND NOT (x.strUPCCode like '%.%' OR x.strUPCCode like '%e%' OR x.strUPCCode like '%E%') then CONVERT([bigint],rtrim(ltrim(x.strUPCCode)),0) else CONVERT([bigint],NULL,0) end
+	WHERE 
+		intUpcCode = CASE 
+						WHEN x.strUPCCode IS NOT NULL AND isnumeric(rtrim(ltrim(strUPCCode)))=(1) 
+						AND NOT (x.strUPCCode like '%.%' OR x.strUPCCode like '%e%' OR x.strUPCCode like '%E%') 
+							THEN CONVERT([bigint],rtrim(ltrim(x.strUPCCode)),0) 
+						ELSE CONVERT([bigint],NULL,0) 
+					END
 ) upc
+OUTER APPLY (
+	SELECT TOP 1 shortUPC.strUpcCode, shortUPC.intUnitMeasureId, shortUPC.intItemId
+	FROM tblICItemUOM shortUPC
+	INNER JOIN tblICItem iUPC 
+	ON shortUPC.intItemId = iUPC.intItemId
+	WHERE iUPC.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
+) shortUPC
 LEFT JOIN @tblMissingUOMs missingUOM ON missingUOM.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
-WHERE upc.intUpcCode IS NOT NULL AND missingUOM.strItemNo IS NULL
+LEFT JOIN @tblMissingItems missingItem ON missingItem.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
+WHERE 
+(
+	(
+		upc.intUpcCode IS NOT NULL 
+		AND 
+		i.intItemId <> upc.intItemId
+	)
+	OR
+	(
+		shortUPC.strUpcCode IS NOT NULL 
+		AND 
+		i.intItemId <> shortUPC.intItemId
+	)
+)
+AND 
+missingUOM.strItemNo IS NULL
+AND
+missingItem.strItemNo IS NULL
 
 --Check invalid Stock Unit quantities
 
@@ -115,6 +189,26 @@ WHERE
 	CONVERT(DECIMAL(38,20), x.dblUnitQty) <> 1 AND 
 	missingUOM.strItemNo IS NULL AND
 	missingItem.strItemNo IS NULL
+
+CREATE TABLE #tmp (
+	  intId INT IDENTITY(1, 1) PRIMARY KEY
+	, intItemId INT NULL
+	, intUnitMeasureId INT NULL
+	, strLongUPCCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strUpcCode NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, dblUnitQty NUMERIC(38, 20) NULL
+	, dblHeight NUMERIC(38, 20) NULL
+	, dblWidth NUMERIC(38, 20) NULL
+	, dblLength NUMERIC(38, 20) NULL
+	, dblMaxQty NUMERIC(38, 20) NULL
+	, dblVolume NUMERIC(38, 20) NULL
+	, dblWeight NUMERIC(38, 20) NULL
+	, ysnStockUnit BIT NULL
+	, ysnAllowPurchase BIT NULL
+	, ysnAllowSale BIT NULL
+	, dtmDateCreated DATETIME NULL
+	, intCreatedByUserId INT NULL
+)
 
 INSERT INTO #tmp (
 	intItemId, 
@@ -137,8 +231,16 @@ INSERT INTO #tmp (
 SELECT
 	  i.intItemId
 	, u.intUnitMeasureId
-	, strLongUPCCode = CASE WHEN upc.intUpcCode IS NOT NULL THEN NULL ELSE x.strUPCCode END
-	, strShortUPCCode
+	, strLongUPCCode = CASE 
+							WHEN v3.strUPCCode IS NOT NULL AND v3.strUPCCode COLLATE Latin1_General_CI_AS = x.strUPCCode COLLATE Latin1_General_CI_AS
+							THEN NULL
+							ELSE x.strUPCCode 
+						END
+	, strShortUPCCode =	CASE 
+							WHEN v3.strUPCCode IS NOT NULL AND v3.strUPCCode COLLATE Latin1_General_CI_AS = x.strShortUPCCode COLLATE Latin1_General_CI_AS
+							THEN NULL
+							ELSE x.strShortUPCCode 
+						END
 	, x.dblUnitQty
 	, x.dblHeight
 	, x.dblWidth
@@ -167,100 +269,216 @@ FROM tblICImportStagingUOM x
 			AND intItemId = i.intItemId
 			AND ysnStockUnit = 1
 	) stock
+	LEFT JOIN @tblMissingItems v1 ON v1.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo  COLLATE Latin1_General_CI_AS	
+	LEFT JOIN @tblMissingUOMs v2 ON v2.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
+	LEFT JOIN @tblDuplicateUPCCodes v3 ON v3.strItemNo COLLATE Latin1_General_CI_AS = x.strItemNo COLLATE Latin1_General_CI_AS
 WHERE x.strImportIdentifier = @strIdentifier
+AND v1.strItemNo IS NULL 
+AND v2.strItemNo IS NULL
 
-CREATE TABLE #output (
-	  intItemIdDeleted INT NULL
-	, strAction NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, intItemIdInserted INT NULL)
+DECLARE @intItemId INT 
+DECLARE @intUnitMeasureId INT 
+DECLARE @strLongUPCCode NVARCHAR(200)
+DECLARE @strUpcCode NVARCHAR(200)
+DECLARE @dblUnitQty NUMERIC(38, 20) 
+DECLARE @dblHeight NUMERIC(38, 20) 
+DECLARE @dblWidth NUMERIC(38, 20) 
+DECLARE @dblLength NUMERIC(38, 20) 
+DECLARE @dblMaxQty NUMERIC(38, 20) 
+DECLARE @dblVolume NUMERIC(38, 20) 
+DECLARE @dblWeight NUMERIC(38, 20) 
+DECLARE @ysnStockUnit BIT 
+DECLARE @ysnAllowPurchase BIT 
+DECLARE @ysnAllowSale BIT 
+DECLARE @dtmDateCreated DATETIME 
+DECLARE @intCreatedByUserId INT 
+DECLARE @intRowsImported INT = 0
+DECLARE @intRowsUpdated INT = 0
 
-;MERGE INTO tblICItemUOM AS target
-USING
-(
-	SELECT
-		  intItemId
-		, intUnitMeasureId
-		, strLongUPCCode
-		, strUpcCode
-		, dblUnitQty
-		, dblHeight
-		, dblWidth
-		, dblLength
-		, dblMaxQty
-		, dblVolume
-		, dblWeight
-		, ysnStockUnit
-		, ysnAllowPurchase
-		, ysnAllowSale
-		, dtmDateCreated
-		, intCreatedByUserId
-	FROM #tmp s
-) AS source ON (target.intUnitMeasureId = source.intUnitMeasureId AND target.intItemId = source.intItemId)
-	OR RTRIM(LTRIM(target.strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(source.strLongUPCCode) COLLATE Latin1_General_CI_AS
-WHEN MATCHED THEN
-	UPDATE SET 
-		intItemId = source.intItemId,
-		intUnitMeasureId = source.intUnitMeasureId,
-		strLongUPCCode = source.strLongUPCCode,
-		strUpcCode = source.strUpcCode,
-		dblUnitQty = source.dblUnitQty,
-		dblHeight = source.dblHeight,
-		dblWidth = source.dblWidth,
-		dblLength = source.dblLength,
-		dblMaxQty = source.dblMaxQty,
-		dblVolume = source.dblVolume,
-		dblWeight = source.dblWeight,
-		ysnStockUnit = source.ysnStockUnit,
-		ysnAllowPurchase = source.ysnAllowPurchase,
-		ysnAllowSale = source.ysnAllowSale,
-		dtmDateCreated = source.dtmDateCreated,
-		dtmDateModified = GETUTCDATE(),
-		intModifiedByUserId = source.intCreatedByUserId,
-		intCreatedByUserId = source.intCreatedByUserId
-WHEN NOT MATCHED THEN
-	INSERT
-	(
-		intItemId, 
-		intUnitMeasureId, 
-		strLongUPCCode,
-		strUpcCode,
-		dblUnitQty,
-		dblHeight,
-		dblWidth,
-		dblLength,
-		dblMaxQty,
-		dblVolume,
-		dblWeight,
-		ysnStockUnit,
-		ysnAllowPurchase,
-		ysnAllowSale,
-		dtmDateCreated, 
-		intCreatedByUserId,
-		intDataSourceId
-	)
-	VALUES
-	(
-		intItemId, 
-		intUnitMeasureId, 
-		strLongUPCCode,
-		strUpcCode,
-		dblUnitQty,
-		dblHeight,
-		dblWidth,
-		dblLength,
-		dblMaxQty,
-		dblVolume,
-		dblWeight,
-		ysnStockUnit,
-		ysnAllowPurchase,
-		ysnAllowSale,
-		dtmDateCreated, 
-		intCreatedByUserId,
-		@intDataSourceId
-	)
-	OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
+DECLARE uom_cursor CURSOR FOR 
+SELECT
+	intItemId
+	,intUnitMeasureId
+	,strLongUPCCode
+	,strUpcCode
+	,dblUnitQty
+	,dblHeight
+	,dblWidth
+	,dblLength
+	,dblMaxQty
+	,dblVolume
+	,dblWeight
+	,ysnStockUnit
+	,ysnAllowPurchase
+	,ysnAllowSale
+	,dtmDateCreated
+	,intCreatedByUserId
+FROM #tmp
+
+OPEN uom_cursor  
+FETCH NEXT FROM uom_cursor INTO 
+	@intItemId
+	,@intUnitMeasureId
+	,@strLongUPCCode
+	,@strUpcCode
+	,@dblUnitQty
+	,@dblHeight
+	,@dblWidth
+	,@dblLength
+	,@dblMaxQty
+	,@dblVolume
+	,@dblWeight
+	,@ysnStockUnit
+	,@ysnAllowPurchase
+	,@ysnAllowSale
+	,@dtmDateCreated
+	,@intCreatedByUserId  
+
+WHILE @@FETCH_STATUS = 0  
+BEGIN  
+      
+	
+	UPDATE tblICItemUOM 
+	SET 
+		intItemId = @intItemId
+		,intUnitMeasureId = @intUnitMeasureId
+		,strLongUPCCode = @strLongUPCCode
+		,strUpcCode = @strUpcCode
+		,dblUnitQty = @dblUnitQty
+		,dblHeight = @dblHeight
+		,dblWidth = @dblWidth
+		,dblLength = @dblLength
+		,dblMaxQty = @dblMaxQty
+		,dblVolume = @dblVolume
+		,dblWeight = @dblWeight
+		,ysnStockUnit = @ysnStockUnit
+		,ysnAllowPurchase = @ysnAllowPurchase
+		,ysnAllowSale = @ysnAllowSale
+		,dtmDateCreated = @dtmDateCreated
+		,intCreatedByUserId = @intCreatedByUserId
+	WHERE 
+		(intUnitMeasureId = @intUnitMeasureId AND intItemId = @intItemId)
+		OR
+		(
+			RTRIM(LTRIM(strLongUPCCode)) COLLATE Latin1_General_CI_AS = LTRIM(@strLongUPCCode) COLLATE Latin1_General_CI_AS 
+			AND 
+			@strLongUPCCode IS NOT NULL
+			AND
+			intItemId = @intItemId
+		)
+		OR
+		(
+			RTRIM(LTRIM(strUpcCode)) COLLATE Latin1_General_CI_AS = LTRIM(@strUpcCode) COLLATE Latin1_General_CI_AS 
+			AND 
+			@strUpcCode IS NOT NULL
+			AND
+			intItemId = @intItemId
+		)
+	IF (@@ROWCOUNT > 0)
+	BEGIN
+		SET @intRowsUpdated = @intRowsUpdated + 1
+	END
+	ELSE
+	BEGIN
+		INSERT INTO tblICItemUOM
+		(
+			intItemId, 
+			intUnitMeasureId, 
+			strLongUPCCode,
+			strUpcCode,
+			dblUnitQty,
+			dblHeight,
+			dblWidth,
+			dblLength,
+			dblMaxQty,
+			dblVolume,
+			dblWeight,
+			ysnStockUnit,
+			ysnAllowPurchase,
+			ysnAllowSale,
+			dtmDateCreated, 
+			intCreatedByUserId,
+			intDataSourceId
+		)
+		SELECT 
+			RowItem.intItemId, 
+			RowItem.intUnitMeasureId, 
+			RowItem.strLongUPCCode,
+			RowItem.strUpcCode,
+			RowItem.dblUnitQty,
+			RowItem.dblHeight,
+			RowItem.dblWidth,
+			RowItem.dblLength,
+			RowItem.dblMaxQty,
+			RowItem.dblVolume,
+			RowItem.dblWeight,
+			RowItem.ysnStockUnit,
+			RowItem.ysnAllowPurchase,
+			RowItem.ysnAllowSale,
+			RowItem.dtmDateCreated, 
+			RowItem.intCreatedByUserId,
+			RowItem.intDataSourceId
+		FROM
+		(
+			SELECT
+			intItemId = @intItemId
+			,intUnitMeasureId = @intUnitMeasureId
+			,strLongUPCCode = @strLongUPCCode
+			,strUpcCode = @strUpcCode
+			,dblUnitQty = @dblUnitQty
+			,dblHeight = @dblHeight
+			,dblWidth = @dblWidth
+			,dblLength = @dblLength
+			,dblMaxQty = @dblMaxQty
+			,dblVolume = @dblVolume
+			,dblWeight = @dblWeight
+			,ysnStockUnit = @ysnStockUnit
+			,ysnAllowPurchase = @ysnAllowPurchase
+			,ysnAllowSale = @ysnAllowSale
+			,dtmDateCreated = @dtmDateCreated
+			,intCreatedByUserId = @intCreatedByUserId
+			,intDataSourceId = @intDataSourceId
+		) AS RowItem
+		LEFT JOIN 
+		tblICItemUOM ItemUOM
+		ON 
+		RowItem.intItemId = ItemUOM.intItemId
+		AND
+		RowItem.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		WHERE
+		ItemUOM.intItemUOMId IS NULL
+
+		IF (@@ROWCOUNT > 0)
+		BEGIN
+			SET @intRowsImported = @intRowsImported + 1
+		END
+	END
+
+
+	FETCH NEXT FROM uom_cursor INTO 
+		@intItemId
+		,@intUnitMeasureId
+		,@strLongUPCCode
+		,@strUpcCode
+		,@dblUnitQty
+		,@dblHeight
+		,@dblWidth
+		,@dblLength
+		,@dblMaxQty
+		,@dblVolume
+		,@dblWeight
+		,@ysnStockUnit
+		,@ysnAllowPurchase
+		,@ysnAllowSale
+		,@dtmDateCreated
+		,@intCreatedByUserId   
+END 
+
+CLOSE uom_cursor  
+DEALLOCATE uom_cursor 
 
 DECLARE @intTotalUPCCodeDuplicates INT
+DECLARE @intTotalUPCImportDuplicates INT
 DECLARE @intTotalInvalidStockUnit INT
 
 DECLARE @intTotalMissingItem INT
@@ -270,11 +488,12 @@ SELECT @intTotalUPCCodeDuplicates = COUNT(*) FROM @tblDuplicateUPCCodes
 SELECT @intTotalInvalidStockUnit = COUNT(*) FROM @tblInvalidStockUnitQuantities
 SELECT @intTotalMissingItem = COUNT(*) FROM @tblMissingItems 
 SELECT @intTotalMissingUOM = COUNT(*) FROM @tblMissingUOMs
+SELECT @intTotalUPCImportDuplicates = COUNT(*) FROM @tblDuplicateUPCImported 
 
 UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE'),
-	l.intTotalWarnings = l.intTotalWarnings + @intTotalUPCCodeDuplicates + @intTotalInvalidStockUnit,
+SET l.intRowsImported = @intRowsImported
+	, l.intRowsUpdated = @intRowsUpdated,
+	l.intTotalWarnings = l.intTotalWarnings + @intTotalUPCCodeDuplicates + @intTotalInvalidStockUnit + @intTotalUPCImportDuplicates,
 	l.intTotalErrors = l.intTotalErrors + @intTotalMissingItem + @intTotalMissingUOM
 FROM tblICImportLog l
 WHERE l.strUniqueId = @strIdentifier
@@ -292,68 +511,52 @@ BEGIN
 	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
 END
 
-IF @intTotalMissingItem > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT 
-		@LogId,
-		0,
-		'Import Failed.',
-		'Item No',
-		 'Missing item: "' + Items.strItemNo + '"',
-		'Failed',
-		'Error',
-		1
-	FROM @tblMissingItems Items
-END
-
-IF @intTotalMissingUOM > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT 
-		@LogId,
-		0,
-		'Import Failed.',
-		'UOM',
-		'Missing unit of measure: "' + UOM.strUOM + '" on item "' + UOM.strItemNo + '"',
-		'Failed',
-		'Error',
-		1
-	FROM @tblMissingUOMs UOM
-END
-
-IF @intTotalUPCCodeDuplicates > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT 
-		@LogId,
-		0,
-		'Import Finished.',
-		'UPC Code',
-		'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + ' and still uploaded UOM with empty UPC Code.',
-		'Success',
-		'Warning',
-		1
-	FROM @tblDuplicateUPCCodes Codes
-END
-
-IF @intTotalInvalidStockUnit > 0
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT 
-		@LogId,
-		0,
-		'Import Finished.',
-		'UOM',
-		'Unit Qty for Stock Unit ' + UOMs.strUOM + ' of ' + UOMs.strItemNo + ' - ' + UOMs.strDescription + ' is greater than 1. Setting it to 1',
-		'Success',
-		'Warning',
-		1
-	FROM @tblInvalidStockUnitQuantities UOMs
-END
+INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+SELECT 
+	@LogId,
+	0,
+	'Import Failed.',
+	'Item No',
+		'Missing item: "' + Items.strItemNo + '"',
+	'Failed',
+	'Error',
+	1
+FROM @tblMissingItems Items
+UNION ALL
+SELECT 
+	@LogId,
+	0,
+	'Import Failed.',
+	'UOM',
+	'Missing unit of measure: "' + UOM.strUOM + '" on item "' + UOM.strItemNo + '"',
+	'Failed',
+	'Error',
+	1
+FROM @tblMissingUOMs UOM
+UNION ALL
+SELECT 
+	@LogId,
+	0,
+	'Import Finished.',
+	'UPC Code',
+	'Duplicate UPC Code - ' + Codes.strUPCCode + ' on Item ' + Codes.strItemNo + ' - ' + Codes.strDescription + ' and still uploaded UOM with empty UPC Code.',
+	'Success',
+	'Warning',
+	1
+FROM @tblDuplicateUPCCodes Codes
+UNION ALL
+SELECT 
+	@LogId,
+	0,
+	'Import Finished.',
+	'UOM',
+	'Unit Qty for Stock Unit ' + UOMs.strUOM + ' of ' + UOMs.strItemNo + ' - ' + UOMs.strDescription + ' is greater than 1. Setting it to 1',
+	'Success',
+	'Warning',
+	1
+FROM @tblInvalidStockUnitQuantities UOMs
 
 DROP TABLE #tmp
-DROP TABLE #output
 
 DELETE FROM tblICImportStagingUOM WHERE strImportIdentifier = @strIdentifier
 
