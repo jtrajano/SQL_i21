@@ -1285,6 +1285,9 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		123,
 		   [strPrefix]						=		N'IDP'
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021')
+		DELETE FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021'
 	
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
