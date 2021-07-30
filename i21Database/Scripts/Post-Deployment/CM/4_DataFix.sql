@@ -193,5 +193,23 @@ GO
 PRINT('Finished linking CM transactions to AP')
 GO
 
+--GL-8169
+PRINT ('Start removing Grid Layouts in Process Payments archive grid without batch id column')
+GO
+
+DELETE from tblSMGridLayout where 
+strScreen = 'CashManagement.view.ProcessPayments'
+AND strGrid = 'grdArchiveFile'
+AND CHARINDEX('colBatchId', strGridLayoutFields) = 0
+
+DELETE from tblSMCompanyGridLayout where
+strScreen = 'CashManagement.view.ProcessPayments'
+AND strGrid = 'grdArchiveFile'
+AND CHARINDEX('colBatchId', strGridLayoutFields) = 0
+GO
+
+PRINT ('Finished removing Grid Layouts in Process Payments archive grid without batch id column')
+GO
+
 PRINT('/*******************  END Cash Management Data Fixess *******************/')
 GO
