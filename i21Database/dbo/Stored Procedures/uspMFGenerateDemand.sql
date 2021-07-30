@@ -287,6 +287,9 @@ BEGIN TRY
 	IF @intCompanyLocationId = 0
 		SELECT @intCompanyLocationId = NULL
 
+	IF @intCategoryId = 0
+		SELECT @intCategoryId = NULL
+
 	IF @MaterialKeyXML <> ''
 	BEGIN
 		IF @ysnAllItem = 0
