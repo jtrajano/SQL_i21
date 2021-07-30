@@ -10,6 +10,7 @@ SELECT
 	, Store.intStoreNo
 	, CompanyLoc.strLocationName
 	, xref.strVendorProduct
+	, xref.strProductDescription
 	, xref.intConcurrencyId
 FROM dbo.tblICItemVendorXref xref
 INNER JOIN dbo.tblICItem Item
