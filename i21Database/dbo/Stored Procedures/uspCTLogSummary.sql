@@ -34,7 +34,8 @@ BEGIN TRY
 			@ysnDWGPriceOnly		BIT = 0,
 			@ysnReassign			BIT = 0,
 			@intCurrStatusId		INT = 0,
-   			@ysnWithPriceFix BIT;
+   			@ysnWithPriceFix 		BIT,
+   			@intPricingTypeId       int;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -540,6 +541,26 @@ BEGIN TRY
 			WHERE intSequenceUsageHistoryId IS NULL
 		) tbl
 		WHERE Row_Num = 1
+
+		select
+			@intPricingTypeId = intPricingTypeId
+		from (
+			SELECT
+				Row_Num = ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.intSequenceHistoryId DESC)
+				,sh.intPricingTypeId
+			FROM
+				tblCTSequenceHistory sh
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			WHERE
+				intSequenceUsageHistoryId IS NULL
+		) tbl
+		where
+			Row_Num = 2
+
+		if not (@intPricingTypeId is null)
+		begin
+			update @cbLogTemp set intPricingTypeId = @intPricingTypeId;
+		end
 
 		IF (SELECT COUNT(*) FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) >= 1
 		BEGIN
@@ -3558,13 +3579,13 @@ BEGIN TRY
 
 				SET @dblRunningQty += @dblOrigQty
 
-				SELECT TOP 1 @prevOrigQty = ISNULL(dblOrigQty, 0)
-					, @qtyDiff = @dblOrigQty - ISNULL(dblOrigQty, 0)
-				FROM @cbLogPrev
-				WHERE strProcess = 'Price Fixation'
-					AND strTransactionType = 'Contract Balance'
-					AND intTransactionReferenceDetailId = @intPriceFixationDetailId
-				ORDER BY intId DESC
+				SELECT TOP 1
+					@prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
+					,@qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
+				FROM
+					tblCTPriceFixationDetail    
+				WHERE
+					intPriceFixationDetailId = @intPriceFixationDetailId
 
 				IF (@intContractTypeId = 1)
 				BEGIN
