@@ -43,6 +43,7 @@ SELECT CHK.dtmDate
 			+ ' on ' + 
 			CONVERT(varchar(11), PYMT.dtmDatePaid,106)
 		, PYMTDTL.intPaymentDetailId
+		, ISNULL(GLPref.dtmClient, GETDATE()) dtmCurrent
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
 INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
@@ -63,4 +64,7 @@ OUTER APPLY (
 	AND dtmEffectiveDate < = DATEADD(dd, DATEDIFF (dd, 0, GETDATE ()), 0) 
 	AND intEntityId = ENTITY.intEntityId ORDER BY dtmEffectiveDate desc
 ) F 
+OUTER APPLY(
+	SELECT TOP 1 dtmClient FROM tblGLCompanyPreferenceOption
+) GLPref
 WHERE CHK.intBankTransactionTypeId IN (22, 23, 123)
