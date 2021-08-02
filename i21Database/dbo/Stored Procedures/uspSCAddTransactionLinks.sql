@@ -15,10 +15,12 @@ BEGIN
 	declare @strDistributionOption nvarchar(50)
 	declare @intDeliverySheetId int
 	declare @intContractId int
-
+	declare @intLoadId int
+	
 	select top 1 @strDistributionOption  = strDistributionOption  
 		,@intDeliverySheetId = intDeliverySheetId
 		,@intContractId = intContractId
+		,@intLoadId = intLoadId
 		,@strDestTransactionNo = strTicketNumber
 		,@strTicketStatus = strTicketStatus
 		from tblSCTicket 
@@ -118,7 +120,7 @@ BEGIN
 
 				
 							
-				if(@intContractId is not null)
+				if @strDistributionOption = 'CNT' AND (@intContractId is not null)
 				begin
 					
 					BEGIN
@@ -145,8 +147,8 @@ BEGIN
 						--Source
 						ContractHeader.intContractHeaderId,
 						ContractHeader.strContractNumber,
+						'Contracts',
 						'Contract',
-						ContractType.strContractType,
 
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
@@ -272,7 +274,7 @@ BEGIN
 			if @strTicketStatus <> 'V'
 			begin
 				--start checking if contract id is not null
-				if(@intContractId is not null)
+				if @strDistributionOption = 'CNT' AND (@intContractId is not null)
 				begin
 
 					INSERT INTO @TransactionLinks (
@@ -291,8 +293,8 @@ BEGIN
 						--Source
 						ContractHeader.intContractHeaderId,
 						ContractHeader.strContractNumber,
+						'Contracts',
 						'Contract',
-						ContractType.strContractType,
 
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
@@ -310,7 +312,44 @@ BEGIN
 							
 					EXEC uspICAddTransactionLinks @TransactionLinks
 				end
-				--start checking if contract id is not null
+				--end checking if contract id is not null
+				-- start checking if lod distribution
+				else if @strDistributionOption = 'LOD' AND (@intLoadId is not null)
+				begin
+
+					INSERT INTO @TransactionLinks (
+						intSrcId,
+						strSrcTransactionNo,
+						strSrcModuleName,
+						strSrcTransactionType,
+				
+						intDestId,
+						strDestTransactionNo,
+						strDestTransactionType,
+						strDestModuleName,
+						strOperation
+					)
+					SELECT
+						--Source
+						LoadShipment.intLoadId,
+						LoadShipment.strLoadNumber,
+						'Logistics',
+						'Load Shipment',
+
+						Ticket.intTicketId,
+						Ticket.strTicketNumber,
+						'Ticket',
+						'Ticket Management',
+						'Create'
+					from tblSCTicket Ticket				
+						join tblLGLoad LoadShipment
+							on Ticket.intLoadId = LoadShipment.intLoadId
+						where Ticket.intTicketId = @intTransactionId
+							
+					EXEC uspICAddTransactionLinks @TransactionLinks
+				end
+
+				--end checking if lod distribution
 
 			end
 			--end checking for void status
@@ -383,10 +422,9 @@ BEGIN
 			ELSE
 			--start other distirbution option
 			BEGIN
-
 				
-							
-				if(@intContractId is not null)
+				-- start cnt distribution			
+				if @strDistributionOption = 'CNT' and (@intContractId is not null)
 				begin
 					
 					BEGIN
@@ -413,8 +451,8 @@ BEGIN
 						--Source
 						ContractHeader.intContractHeaderId,
 						ContractHeader.strContractNumber,
+						'Contracts',
 						'Contract',
-						ContractType.strContractType,
 
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
@@ -467,10 +505,7 @@ BEGIN
 						where Ticket.intTicketId = @intTransactionId
 
 				end
-
-				
-				
-
+				--end
 			END
 			--end other distributin		
 				
