@@ -11,5 +11,7 @@ CREATE TABLE [dbo].[tblICInventoryTransferCondition]
 	[intModifiedByUserId] INT NULL,
 	[intCompanyId] INT NULL,
 	CONSTRAINT [PK_tblICInventoryTransferCondition_intInventoryTransferConditionId] PRIMARY KEY([intInventoryTransferConditionId]),
-	CONSTRAINT [FK_tblICInventoryTransferCondition_tblICInventoryTransfer_intInventoryTransferId] FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer] ([intInventoryTransferId])
+	CONSTRAINT [FK_tblICInventoryTransferCondition_tblICInventoryTransfer_intInventoryTransferId]
+		FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer] ([intInventoryTransferId])
+		ON DELETE CASCADE
 )

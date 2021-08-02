@@ -29,6 +29,7 @@
 	[dtmDateModified] DATETIME NULL,
 	[intCreatedByUserId] INT NULL,
 	[intModifiedByUserId] INT NULL,
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblICInventoryTransfer] PRIMARY KEY ([intInventoryTransferId]), 
     CONSTRAINT [AK_tblICInventoryTransfer_strTransferNo] UNIQUE ([strTransferNo]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblEMEntity_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES tblEMEntity([intEntityId]), 
