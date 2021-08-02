@@ -515,6 +515,7 @@ END
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId
 	
+	exec uspSCAddTransactionLinks @intTransactionType = 1, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 
 	UPDATE	SC
