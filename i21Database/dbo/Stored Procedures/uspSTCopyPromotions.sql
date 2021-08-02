@@ -195,8 +195,8 @@ BEGIN TRY
 			, intPromoItemListNo
 	 FROM tblSTPromotionItemList 
 	 WHERE intPromoItemListNo BETWEEN @intBeginningItemsListNo AND @intEndingItemsListNo
-		AND intPromoItemListId IN (SELECT intPromoItemListId FROM tblSTPromotionSalesList WHERE intPromoSalesId IN (SELECT intPromoComboSalesId FROM @temptblPromoCOMBOList))
-		AND intPromoItemListId IN (SELECT intPromoItemListId FROM tblSTPromotionSalesList WHERE intPromoSalesId IN (SELECT intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList))
+		--AND intPromoItemListId IN (SELECT intPromoItemListId FROM tblSTPromotionSalesList WHERE intPromoSalesId IN (SELECT intPromoComboSalesId FROM @temptblPromoCOMBOList))
+		--AND intPromoItemListId IN (SELECT intPromoItemListId FROM tblSTPromotionSalesList WHERE intPromoSalesId IN (SELECT intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList))
 		AND intStoreId = @intFromStoreId
 	
 	-- =========================================================================
@@ -538,10 +538,7 @@ BEGIN TRY
 		   SELECT @intStoreId = intStoreId  
 		   FROM @temptblStore
 		   WHERE intPrimaryID = @intPrimaryID
-
----- TEST
---SELECT 'intStoreId', @intStoreId, 'Primary ID', @intPrimaryID
-
+		   
 --PRINT '[START] - ITEM LIST PROMOTIONS'
 		   -- ======================================================================================
 		   -- [START] - ITEM LIST PROMOTIONS
@@ -672,8 +669,7 @@ BEGIN TRY
 																INNER JOIN tblSTPromotionSalesList t
 																ON s.intPromoSalesListId = t.intPromoSalesListId
 																WHERE t.intStoreId = @intStoreId)
-									  AND (intStoreId != @intStoreId 
-											AND intPromoItemListNo NOT IN (SELECT intPromoItemListNo FROM tblSTPromotionItemList WHERE intStoreId = @intStoreId))
+									  AND (intStoreId != @intStoreId)
 
 
 								END
@@ -833,7 +829,7 @@ BEGIN TRY
 									, dblPrice
 									, intConcurrencyId
 							   )
-							   SELECT 
+							   SELECT DISTINCT
 									 @intNewPromotionCOMBOListId AS intPromoSalesListId
 									 , ItemListTwo.intPromoItemListId
 									 , SalesListDetail.dblCost
@@ -845,6 +841,7 @@ BEGIN TRY
 									ON ItemList.intPromoItemListId = SalesListDetail.intPromoItemListId
 							   INNER JOIN tblSTPromotionSalesList SalesList
 									ON SalesListDetail.intPromoSalesListId = SalesList.intPromoSalesListId
+									AND SalesList.strPromoType = 'C'
 							   INNER JOIN
 							   (
 									SELECT *
@@ -852,7 +849,8 @@ BEGIN TRY
 									WHERE intStoreId = @intStoreId
 							   ) AS ItemListTwo
 									ON ItemList.intPromoItemListNo = ItemListTwo.intPromoItemListNo
-							   WHERE SalesList.intPromoSalesId = @intPromotionComboListId
+							   WHERE SalesList.intPromoSalesId = @intPromotionComboListId 
+							   
 						   END
 
 
@@ -1033,6 +1031,7 @@ BEGIN TRY
 									ON ItemList.intPromoItemListId = SalesListDetail.intPromoItemListId
 								INNER JOIN tblSTPromotionSalesList SalesList
 									ON SalesListDetail.intPromoSalesListId = SalesList.intPromoSalesListId
+									AND SalesList.strPromoType = 'M'
 								INNER JOIN
 								(
 									SELECT *
