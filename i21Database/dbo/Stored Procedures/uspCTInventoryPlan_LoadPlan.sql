@@ -15,12 +15,14 @@ BEGIN
 		,@ysnDisplayDemandWithItemNoAndDescription BIT
 		,@strSupplyTarget NVARCHAR(50)
 		,@strContainerType NVARCHAR(50)
-		,@intContainerTypeId INT,@ysnDisplayRestrictedBookInDemandView bit
+		,@intContainerTypeId INT
+		,@ysnDisplayRestrictedBookInDemandView BIT
+		,@strExternalGroup NVARCHAR(50)
 
 	SELECT @ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
 		,@strSupplyTarget = strSupplyTarget
 		,@intContainerTypeId = intContainerTypeId
-		,@ysnDisplayRestrictedBookInDemandView=IsNULL(ysnDisplayRestrictedBookInDemandView,0)
+		,@ysnDisplayRestrictedBookInDemandView = IsNULL(ysnDisplayRestrictedBookInDemandView, 0)
 	FROM tblMFCompanyPreference
 
 	IF @ysnDisplayDemandWithItemNoAndDescription IS NULL
@@ -57,62 +59,61 @@ BEGIN
 		,strBook NVARCHAR(MAX)
 		)
 
-		if @ysnDisplayRestrictedBookInDemandView=1
-	Begin
-
-	DECLARE @intItemId INT
-		,@intItemBookId INT
-		,@intId int
-		,@strBook nvarchar(MAX)
-
-	INSERT INTO #tblMFItemBook (intItemId)
-	SELECT distinct intItemId
-	FROM tblCTInvPlngReportAttributeValue
-	WHERE intItemId <> IsNULL(intMainItemId, intItemId)
-	and intInvPlngReportMasterID=@intInvPlngReportMasterID
-
-	SELECT @intId = MIN(intId)
-	FROM #tblMFItemBook
-
-	WHILE @intId IS NOT NULL
+	IF @ysnDisplayRestrictedBookInDemandView = 1
 	BEGIN
-		SELECT @intItemBookId = NULL
-			,@strBook = ''
+		DECLARE @intItemId INT
+			,@intItemBookId INT
+			,@intId INT
+			,@strBook NVARCHAR(MAX)
 
-		SELECT @intItemBookId = intItemId
-		FROM #tblMFItemBook
-		WHERE intId = @intId
-
-		SELECT @strBook = @strBook + strBook + ','
-		FROM tblCTBook B
-		WHERE NOT EXISTS (
-				SELECT intBookId
-				FROM tblICItemBook IB
-				WHERE IB.intItemId = @intItemBookId
-					AND IB.intBookId = B.intBookId
-				)
-
-		IF @strBook IS NULL
-			SELECT @strBook = ''
-
-		IF len(@strBook) > 0
-		BEGIN
-			SELECT @strBook = left(@strBook, Len(@strBook) - 1)
-
-			UPDATE #tblMFItemBook
-			SET strBook = @strBook
-			WHERE intId = @intId
-		END
+		INSERT INTO #tblMFItemBook (intItemId)
+		SELECT DISTINCT intItemId
+		FROM tblCTInvPlngReportAttributeValue
+		WHERE intItemId <> IsNULL(intMainItemId, intItemId)
+			AND intInvPlngReportMasterID = @intInvPlngReportMasterID
 
 		SELECT @intId = MIN(intId)
 		FROM #tblMFItemBook
-		WHERE intId > @intId
-	END
 
-	End
+		WHILE @intId IS NOT NULL
+		BEGIN
+			SELECT @intItemBookId = NULL
+				,@strBook = ''
+
+			SELECT @intItemBookId = intItemId
+			FROM #tblMFItemBook
+			WHERE intId = @intId
+
+			SELECT @strBook = @strBook + strBook + ','
+			FROM tblCTBook B
+			WHERE NOT EXISTS (
+					SELECT intBookId
+					FROM tblICItemBook IB
+					WHERE IB.intItemId = @intItemBookId
+						AND IB.intBookId = B.intBookId
+					)
+
+			IF @strBook IS NULL
+				SELECT @strBook = ''
+
+			IF len(@strBook) > 0
+			BEGIN
+				SELECT @strBook = left(@strBook, Len(@strBook) - 1)
+
+				UPDATE #tblMFItemBook
+				SET strBook = @strBook
+				WHERE intId = @intId
+			END
+
+			SELECT @intId = MIN(intId)
+			FROM #tblMFItemBook
+			WHERE intId > @intId
+		END
+	END
 
 	SELECT @ysnAllItem = ysnAllItem
 		,@intCategoryId = intCategoryId
+		,@strExternalGroup=strExternalGroup
 	FROM tblCTInvPlngReportMaster
 	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
 
@@ -147,23 +148,46 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SET @Txt1 = ''
+		IF @intCategoryId IS NOT NULL
+		BEGIN
+			SET @Txt1 = ''
 
-		SELECT @Txt1 = @Txt1 + CAST(intItemId AS VARCHAR(20)) + ','
-		FROM tblICItem
-		WHERE intCategoryId = @intCategoryId
+			SELECT @Txt1 = @Txt1 + CAST(intItemId AS VARCHAR(20)) + ','
+			FROM tblICItem
+			WHERE intCategoryId = @intCategoryId
 
-		IF Len(@Txt1) > 0
-			SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
+			IF Len(@Txt1) > 0
+				SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
 
-		SET @Txt1 = ''
+			SET @Txt1 = ''
 
-		SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
-		FROM tblICItem I
-		WHERE intCategoryId = @intCategoryId
+			SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
+			FROM tblICItem I
+			WHERE intCategoryId = @intCategoryId
 
-		IF Len(@Txt1) > 0
-			SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
+			IF Len(@Txt1) > 0
+				SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
+		END
+		ELSE
+		BEGIN
+			SET @Txt1 = ''
+
+			SELECT @Txt1 = @Txt1 + CAST(intItemId AS VARCHAR(20)) + ','
+			FROM tblICItem
+			WHERE strExternalGroup =@strExternalGroup
+
+			IF Len(@Txt1) > 0
+				SELECT @intItemIdList = LEFT(@Txt1, LEN(@Txt1) - 1)
+
+			SET @Txt1 = ''
+
+			SELECT @Txt1 = @Txt1 + CAST(I.strItemNo AS VARCHAR(50)) + '^' -- ItemNo can contain ,
+			FROM tblICItem I
+			WHERE strExternalGroup =@strExternalGroup
+
+			IF Len(@Txt1) > 0
+				SELECT @strItemNoList = LEFT(@Txt1, LEN(@Txt1) - 1)
+		END
 	END
 
 	SELECT RM.*
@@ -222,9 +246,10 @@ BEGIN
 	SET @SQL = @SQL + ' INSERT INTO @Table 
 						SELECT Ext.intItemId
 						,CASE 
-				WHEN '+Ltrim(@ysnDisplayRestrictedBookInDemandView) +'= 0 and IsNULL(strBook,'''')=''''
+				WHEN ' + Ltrim(@ysnDisplayRestrictedBookInDemandView) + '= 0 and IsNULL(strBook,'''')=''''
 					THEN (CASE 
-						WHEN ' + Ltrim(@ysnDisplayDemandWithItemNoAndDescription) + ' = 1
+						WHEN ' + Ltrim(@ysnDisplayDemandWithItemNoAndDescription) + 
+		' = 1
 							THEN (
 									CASE 
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
@@ -242,7 +267,8 @@ BEGIN
 						END )
 				ELSE (
 						CASE 
-							WHEN '+Ltrim(@ysnDisplayDemandWithItemNoAndDescription)+' = 1
+							WHEN ' + Ltrim(@ysnDisplayDemandWithItemNoAndDescription) + 
+		' = 1
 								THEN (
 										CASE 
 											WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
@@ -267,11 +293,11 @@ BEGIN
 						, Ext.intReportAttributeID [AttributeId]
 						, CASE 
 				WHEN RA.intReportAttributeID = 10
-					AND ''' + @strSupplyTarget + ''' = ''Monthly''
+					AND ''' 
+		+ @strSupplyTarget + ''' = ''Monthly''
 					THEN ''Months of Supply''
 				WHEN RA.intReportAttributeID = 11
-					AND ''' + @strSupplyTarget + 
-		''' = ''Monthly''
+					AND ''' + @strSupplyTarget + ''' = ''Monthly''
 					THEN ''Months of Supply Target''
 				WHEN RA.intReportAttributeID IN (
 						5
@@ -286,8 +312,8 @@ BEGIN
 						, MI.strItemNo
 						, CASE 
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
-											THEN M.strItemNo+ '' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]''
-										Else MI.strItemNo + '' [ '' + M.strItemNo + '' ]''+'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
+											THEN M.strItemNo+ '' [ '' + IsNULL(L.strLocationName, ''ZZZZ'') + '' ]''
+										Else MI.strItemNo + '' [ '' + M.strItemNo + '' ]''+'' [ '' + IsNULL(L.strLocationName, ''ZZZZ'') + '' ]'' 
 										END	AS strGroupByColumn 
 										,IsNULL(L.intCompanyLocationId, 999) intLocationId
 										,IsNULL(L.strLocationName, ''All'') AS strLocationName
