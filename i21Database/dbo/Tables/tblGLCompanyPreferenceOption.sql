@@ -12,6 +12,7 @@
 	[ysnHistoricalJournalImported] BIT NULL,
 	[ysnShowAccountingPeriod] BIT NULL,
 	[strSubsidiaryCompanyJson] NVARCHAR(MAX),
+	[dtmClient] DATETIME NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO
