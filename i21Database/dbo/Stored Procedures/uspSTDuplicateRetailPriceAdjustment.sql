@@ -88,6 +88,7 @@ BEGIN
 	(
 		intRetailPriceAdjustmentId,
 		intCompanyLocationId,
+		intStoreGroupId,
 		strRegion,
 		strDistrict,
 		strState,
@@ -116,6 +117,7 @@ BEGIN
 	SELECT 
 		@NewRetailPriceAdjustmentId,
 		intCompanyLocationId,
+		intStoreGroupId,
 		strRegion,
 		strDistrict,
 		strState,
