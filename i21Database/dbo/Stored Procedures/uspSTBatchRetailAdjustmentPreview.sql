@@ -456,7 +456,7 @@ BEGIN
 					END
 
 					-- Return Preview
-					SELECT  tp.strItemDescription		AS strDescription
+					SELECT DISTINCT  tp.strItemDescription		AS strDescription
 							, tp.strLongUPCCode		AS strUpc
 							, tp.strLocationName		AS strLocation
 							, tp.strChangeDescription
