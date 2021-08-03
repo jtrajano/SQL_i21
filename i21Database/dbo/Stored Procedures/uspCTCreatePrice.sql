@@ -56,7 +56,7 @@ begin try
 	end
 
 	select
-		@dblSequenceQuantity = cd.dblQuantity
+		@dblSequenceQuantity = CASE WHEN isnull(ch.ysnMultiplePriceFixation,0)  = 1 THEN ch.dblQuantity ELSE cd.dblQuantity  END
 		,@dblBalance = cd.dblBalance
 		,@dblBasis = cd.dblBasis
 		,@intPriceContractId = pc.intPriceContractId
