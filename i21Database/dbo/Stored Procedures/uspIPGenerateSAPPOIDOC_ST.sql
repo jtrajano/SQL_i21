@@ -53,6 +53,7 @@ BEGIN
 		UPDATE CF
 		SET CF.strMessage = 'Destination Port is empty.'
 			,CF.strFeedStatus = 'IGNORE'
+			,ysnMailSent =0
 		FROM dbo.tblCTContractFeed CF
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
 		WHERE IsNULL(CF.strFeedStatus, '') = ''
@@ -249,6 +250,7 @@ BEGIN
 				,RN = ROW_NUMBER() OVER (
 					PARTITION BY intContractDetailId ORDER BY intContractFeedId DESC
 					)
+					,ysnMailSent
 			FROM dbo.tblCTContractFeed CF
 			WHERE CF.intContractHeaderId = @intContractHeaderId
 				AND IsNULL(CF.strFeedStatus, '') = ''
@@ -257,6 +259,7 @@ BEGIN
 		UPDATE CTE
 		SET strFeedStatus = 'IGNORE'
 			,strMessage = 'Duplicate Entry.'
+			,ysnMailSent=1
 		WHERE RN > 1
 
 		DELETE
