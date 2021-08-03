@@ -9594,6 +9594,8 @@
     <Build Include="dbo\Views\vyuTRShipViaTariff.sql" />
     <Build Include="dbo\Views\vyuSMLabels.sql" />
     <Build Include="dbo\Views\vyuTRShipViaTariffMileage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPONo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPODetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

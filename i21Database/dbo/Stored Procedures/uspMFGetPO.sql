@@ -4,15 +4,16 @@
 	)
 AS
 SELECT PD.intPurchaseDetailId
+	,P.intPurchaseId
 	,P.strPurchaseOrderNumber
-	,E.strName strVendor
 	,sl.strName strStorageUnit
 	,subl.strSubLocationName strStorageLocation
-	,'ITEM # ' + i.strItemNo + ' ' + '<br />' + i.strDescription + '<br />' + 'QTY : ' + LTRIM(CONVERT(NUMERIC(38, 3), dblQtyOrdered - dblQtyReceived)) + ' ' + um.strUnitMeasure + '<br />' + CASE 
+	,PD.intPurchaseDetailId AS intTaskId
+	,'ITEM # : ' + i.strItemNo + '<br />' + i.strDescription + '<br />' + 'QTY : ' + LTRIM(CONVERT(NUMERIC(38, 3), dblQtyOrdered - dblQtyReceived)) + ' ' + um.strUnitMeasure + '<br />' + CASE 
 		WHEN sl.strName IS NULL
 			THEN ''
-		ELSE 'S-UNIT : ' + sl.strName
-		END + '<br />' + CASE 
+		ELSE 'S-UNIT : ' + sl.strName + '<br />'
+		END + CASE 
 		WHEN strSubLocationName IS NULL
 			THEN ''
 		ELSE 'S-LOC : ' + strSubLocationName
