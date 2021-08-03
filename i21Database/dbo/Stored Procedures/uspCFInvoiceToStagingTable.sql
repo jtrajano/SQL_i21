@@ -33,6 +33,8 @@ BEGIN
 
 	DELETE tblCFInvoiceStagingTable					WHERE strUserId is null
 	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null AND strStatementFormat = @strStatementFormat
+	
+	DELETE FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId  
 
 BEGIN TRY
 
@@ -109,6 +111,26 @@ BEGIN TRY
 		@strCustomerNumber = ISNULL([from],'')
 	FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
 
+
+	DECLARE @ysnInvoiceBillingCycleFee BIT
+	SELECT TOP 1
+			@ysnInvoiceBillingCycleFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnBillingCycle'
+
+	DECLARE @ysnInvoiceMonthyFee BIT
+	SELECT TOP 1
+			@ysnInvoiceMonthyFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnMonthly'
+
+	DECLARE @ysnInvoiceAnnualFee BIT
+	SELECT TOP 1
+			@ysnInvoiceAnnualFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnInvoiceAnnualFee'
+
+	
+
+
+
 		
 	SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
 
@@ -145,6 +167,17 @@ BEGIN TRY
 
 	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId 
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @UserId = @UserId , @StatementType = @StatementType
+	
+
+	DELETE FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId  
+	EXEC [uspCFInvoiceReportTieredUnitDiscount] 
+		 @InvoiceDate = @dtmInvoiceDate
+		,@UserId = @UserId
+		,@StatementType = @StatementType
+		,@ysnInvoiceBillingCycleFee =  @ysnInvoiceBillingCycleFee
+		,@ysnInvoiceMonthyFee = @ysnInvoiceMonthyFee
+		,@ysnInvoiceAnnualFee = @ysnInvoiceAnnualFee
+	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------

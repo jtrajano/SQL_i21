@@ -22,7 +22,9 @@
     [dtmStartDate]           DATETIME        NULL,
     [dtmEndDate]             DATETIME        NULL,
     [strGuid]                NVARCHAR (MAX) COLLATE Latin1_General_CI_AS  NULL,
-    [strUserId]              NVARCHAR (MAX) COLLATE Latin1_General_CI_AS  NULL
+    [strUserId]              NVARCHAR (MAX) COLLATE Latin1_General_CI_AS  NULL,
+    [intFeeProfileId]        INT             NULL,
+    [strFeeProfileDescription]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 );
 
 
