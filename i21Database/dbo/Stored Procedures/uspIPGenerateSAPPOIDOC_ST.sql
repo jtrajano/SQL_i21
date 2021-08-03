@@ -195,7 +195,7 @@ BEGIN
 		IF NOT EXISTS (
 				SELECT TOP 1 1
 				FROM tblSMTransaction
-				WHERE strApprovalStatus = 'Approved'
+				WHERE strApprovalStatus IN ('Approved', 'Approved with Modifications')
 					AND intRecordId = @intContractHeaderId
 					AND intScreenId = 15
 				)
@@ -220,7 +220,7 @@ BEGIN
 			IF NOT EXISTS (
 					SELECT TOP 1 1
 					FROM tblSMTransaction
-					WHERE strApprovalStatus = 'Approved'
+					WHERE strApprovalStatus IN ('Approved', 'Approved with Modifications')
 						AND intRecordId = @intPriceContractId
 						AND intScreenId = 123
 					)
