@@ -7869,6 +7869,34 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@TRQuotesMenuId, 1)
 END
 
+/* Dealer Credit Card */
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Credit Card (Portal)' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Dealer Credit Card (Portal)', N'Credit Card Recon', 0, N'Dealer Credit Card (Portal)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 2, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, intRow = 3 WHERE strMenuName = 'Dealer Credit Card (Portal)' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
+
+DECLARE @DCCPortalParentMenuId INT
+SELECT @DCCPortalParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Dealer Credit Card (Portal)' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @DCCPortalParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@DCCPortalParentMenuId, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transactions (Portal)' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DCCPortalParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Transactions (Portal)', N'Credit Card Recon', @DCCPortalParentMenuId, N'Transactions (Portal)', N'Portal Menu', N'Screen', N'CreditCardRecon.view.CreditCardReconciliation?showSearch=true', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CreditCardRecon.view.CreditCardReconciliation?showSearch=true' WHERE strMenuName = 'Transactions (Portal)' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DCCPortalParentMenuId
+
+DECLARE @DCCTransactionsId INT
+SELECT  @DCCTransactionsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = N'Transactions (Portal)' AND strModuleName = N'Credit Card Recon' AND intParentMenuID = @DCCPortalParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Transactions (Portal)' AND strModuleName = N'Credit Card Recon' AND intParentMenuID = @DCCPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @DCCTransactionsId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@DCCTransactionsId, 1)
+END
 
 GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
