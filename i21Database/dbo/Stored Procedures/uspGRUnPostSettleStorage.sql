@@ -539,6 +539,12 @@ BEGIN TRY
 			WHERE intSettleStorageId = @intSettleStorageId
 
 			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			--Remove Transaction linking
+			exec uspSCAddTransactionLinks 
+				@intTransactionType = 4
+				,@intTransactionId = @intSettleStorageId
+				,@intAction = 2
 		END
 
 		--get first the parent settle storage id before the deletion

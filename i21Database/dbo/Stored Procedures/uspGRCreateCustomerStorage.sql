@@ -159,6 +159,12 @@ BEGIN TRY
 		FROM	@CustomerStorageStagingTable CS
 
 		SELECT @intCustomerStorageId = SCOPE_IDENTITY()
+
+		exec uspSCAddTransactionLinks 
+			@intTransactionType = 5
+			,@intTransactionId = @intCustomerStorageId
+			,@intAction = 1
+
 	END
 
 	IF @intCustomerStorageId IS NULL 
