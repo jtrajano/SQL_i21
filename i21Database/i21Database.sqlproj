@@ -193,6 +193,7 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
     <Folder Include="Scripts\Post-Deployment\AG\" />
     <Folder Include="Scripts\Post-Deployment\FA\" />
+    <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3018,6 +3019,7 @@
     <Build Include="dbo\Tables\tblICStagingCountDetail.sql" />
     <Build Include="dbo\Tables\tblICStagingReorderPoint.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningStockQty.sql" />
+    <Build Include="dbo\Functions\fnICGetItemRunningStockLotQty.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateLocationBinsReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateReorderPointFromStaging.sql" />
@@ -4983,6 +4985,7 @@
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportDollarContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportInventoryTransferFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICApplyLocationsToItems.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemLocationsFromStaging.sql" />
@@ -5025,6 +5028,8 @@
     <Build Include="dbo\Tables\tblRestApiReceiptItemStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptItemLotStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
+    <Build Include="dbo\Tables\tblApiInventoryTransferStaging.sql" />
+    <Build Include="dbo\Tables\tblApiInventoryTransferDetailStaging.sql" />
     <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Views\vyuRestApiVendors.sql" />
     <Build Include="dbo\Views\vyuRestApiEntityUsers.sql" />
@@ -9441,6 +9446,7 @@
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9743,6 +9749,7 @@
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
+    <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

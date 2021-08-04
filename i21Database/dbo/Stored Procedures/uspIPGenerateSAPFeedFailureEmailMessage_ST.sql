@@ -299,8 +299,7 @@ BEGIN
 	IF EXISTS (
 		SELECT *
 		FROM dbo.tblCTContractFeed   WITH (NOLOCK)
-		WHERE strFeedStatus = 'Ack Rcvd'
-			and strMessage is not null
+		WHERE strMessage is not null
 			AND ysnMailSent =0
 		)
 	BEGIN
@@ -308,8 +307,7 @@ BEGIN
 			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strContractNumber), '') + '</td>' + '<td>&nbsp;' + ISNULL(Ltrim(intContractSeq), '') + '</td>' + '<td>&nbsp;' + ISNULL(strERPPONumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
 	</tr>'
 		FROM dbo.tblCTContractFeed WITH (NOLOCK)
-		WHERE strFeedStatus = 'Ack Rcvd'
-			and strMessage is not null
+		WHERE strMessage is not null
 			AND ysnMailSent =0
 
 		UPDATE tblCTContractFeed

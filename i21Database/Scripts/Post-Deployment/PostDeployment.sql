@@ -207,6 +207,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\6_PanelOwnerMigration.sql
 :r .\DB\7_Create_BusinessInsights.sql
 
+-- Fixed Assets
+:r .\FA\DefaultData\FixedAssetGroup.sql
+
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
 :r .\GL\DefaultData\1a_AccountStructure.sql
