@@ -47,7 +47,7 @@ BEGIN
         , intCurrencyId
     )
     --INVOICE HEADER ADD/DELETE 
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -94,7 +94,7 @@ BEGIN
     UNION ALL
 
     --ADD LINE ITEM 
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -144,7 +144,7 @@ BEGIN
     UNION ALL
 
     --DELETE LINE ITEM
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = TD.intTransactionDetailId
@@ -194,7 +194,7 @@ BEGIN
     UNION ALL
 
     --UPDATE LINE ITEM (RETURN ORGINAL QTY)
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -242,7 +242,7 @@ BEGIN
     UNION ALL
 
     --UPDATE LINE ITEM (DEDUCT ACTUAL QTY)
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
