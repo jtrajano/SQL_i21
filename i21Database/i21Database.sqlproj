@@ -9586,6 +9586,7 @@
     <Build Include="dbo\Stored Procedures\uspCTDeletePrice.sql" />
     <Build Include="dbo\Views\vyuTRShipViaTariff.sql" />
     <Build Include="dbo\Views\vyuSMLabels.sql" />
+    <Build Include="Scripts\Post-Deployment\SM\2120_InsertOtherLabels.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
