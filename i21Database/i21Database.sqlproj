@@ -9209,7 +9209,8 @@
     <Build Include="dbo\Stored Procedures\uspSCDeliverySheetShrinkage.sql" />
     <Build Include="dbo\Functions\fnGRGetStorageTicket.sql" />
     <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
-<Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
+    <Build Include="dbo\Views\vyuCTGetBasisComponentJDE.sql" />
+    <Build Include="dbo\Stored Procedures\uspICEdiGenerateReceiptFromRecurringJob.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
