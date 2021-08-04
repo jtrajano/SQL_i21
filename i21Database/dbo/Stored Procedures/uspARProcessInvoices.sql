@@ -1205,6 +1205,15 @@ BEGIN
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
+	IF ISNULL(@NewSourceId, 0) = 16
+	BEGIN
+		EXEC uspARPostInvoice 
+				 @post=1
+				,@recap=1
+				,@param=@NewInvoiceId
+				,@raiseError=@RaiseError
+				,@userId=@EntityId
+	END
 END
 
 END TRY
