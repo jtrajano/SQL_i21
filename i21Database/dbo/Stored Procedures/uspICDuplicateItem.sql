@@ -382,7 +382,8 @@ BEGIN
 	-----------------------------------
 	-- Duplicate Item Location table --
 	-----------------------------------
-	INSERT INTO tblICItemLocation(intItemId,
+	INSERT INTO tblICItemLocation(
+		intItemId,
 		intLocationId,
 		intVendorId,
 		strDescription,
@@ -443,7 +444,8 @@ BEGIN
 		ysnCountedDaily,
 		intSort,
 		ysnStorageUnitRequired,
-		intCostAdjustmentType
+		intCostAdjustmentType,
+		intAllowZeroCostTypeId
 	)
 	SELECT @NewItemId,
 		intLocationId,
@@ -506,7 +508,8 @@ BEGIN
 		ysnCountedDaily,
 		intSort,
 		ysnStorageUnitRequired,
-		intCostAdjustmentType
+		intCostAdjustmentType,
+		intAllowZeroCostTypeId
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------
