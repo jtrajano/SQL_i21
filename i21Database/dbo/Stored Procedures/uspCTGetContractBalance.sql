@@ -158,7 +158,7 @@ BEGIN
 				, CBL.intContractDetailId
 				, strCompanyName				=	@strCompanyName
 				, blbHeaderLogo					=	@blbHeaderLogo
-				, strDate						=	LTRIM(DATEPART(mm,GETDATE())) + '-' + LTRIM(DATEPART(dd,GETDATE())) + '-' + RIGHT(LTRIM(DATEPART(yyyy,GETDATE())),2)			
+				, strDate						=	CONVERT(VARCHAR(20), CASE WHEN @IntLocalTimeOffset IS NOT NULL THEN DATEADD(MINUTE, @IntLocalTimeOffset, CH.dtmCreated) ELSE CH.dtmCreated END, 101)
 				, strContractType				=	CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 				, CBL.intCommodityId
 				, strCommodityCode				=	CM.strCommodityCode
