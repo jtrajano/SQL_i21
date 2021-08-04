@@ -10,7 +10,7 @@ SELECT PD.intPurchaseDetailId
 	,um.strUnitMeasure
 	,iu.intItemUOMId
 	,iu.strLongUPCCode
-	,iu.strUpcCode
+	,iu.strUpcCode AS strShortUpcCode
 FROM dbo.tblPOPurchase P
 JOIN dbo.tblPOPurchaseDetail PD ON PD.intPurchaseId = P.intPurchaseId
 	AND PD.intPurchaseDetailId = @intPurchaseDetailId

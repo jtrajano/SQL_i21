@@ -448,6 +448,7 @@ BEGIN TRY
 			UPDATE tblCTContractFeed
 			SET intStatusId = 2
 				,strMessage = NULL
+				,strFeedStatus = 'Awt Ack'
 			WHERE intContractFeedId = @intContractFeedId
 		END
 
