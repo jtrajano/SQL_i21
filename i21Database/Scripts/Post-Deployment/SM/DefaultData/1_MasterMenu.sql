@@ -10,8 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Demand' AND strModuleName = 'Manufacturing')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strCommand = N'FixedAssets.view.FixedAssetGroups' AND strModuleName = 'Fixed Assets')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6505,6 +6504,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Depreciat
 	VALUES (N'Depreciation Methods', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Depreciation Methods', N'Maintenance', N'Screen', N'FixedAssets.view.DepreciationMethods?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.DepreciationMethods?showSearch=true' WHERE strMenuName = 'Depreciation Methods' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Asset Groups' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Fixed Asset Groups', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Fixed Asset Groups', N'Maintenance', N'Screen', N'FixedAssets.view.FixedAssetGroups', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssetGroups' WHERE strMenuName = 'Fixed Asset Groups' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
 
 
 /* VENDOR REBATES */
