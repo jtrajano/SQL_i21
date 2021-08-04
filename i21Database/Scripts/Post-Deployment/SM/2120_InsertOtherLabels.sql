@@ -457,6 +457,12 @@ BEGIN
 	VALUES ('Fax', 1)
 END
 
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Filter Columns')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Filter Columns', 1)
+END
+
 PRINT('/*******************  END INSERT OTHER LABELS  *******************/')
 
 GO
