@@ -32,6 +32,7 @@ BEGIN TRY
 		,@intInventoryTransferId INT
 		,@intInventoryReceiptId INT
 		,@intNewStageReceiptId INT
+		,@intFreightTermId INT
 	DECLARE @strItemNo NVARCHAR(50)
 		,@dblQuantity NUMERIC(18, 6)
 		,@dblGrossWeight NUMERIC(18, 6)
@@ -120,6 +121,7 @@ BEGIN TRY
 				,@intInventoryTransferId = NULL
 				,@intInventoryReceiptId = NULL
 				,@intNewStageReceiptId = NULL
+				,@intFreightTermId = NULL
 
 			SELECT @intStageReceiptItemLotId = NULL
 
@@ -161,6 +163,14 @@ BEGIN TRY
 			SELECT @intInventoryTransferId = intInventoryTransferId
 			FROM dbo.tblICInventoryTransfer WITH (NOLOCK)
 			WHERE strTransferNo = @strTransferOrderNo
+
+			IF @intFreightTermId IS NULL
+			BEGIN
+				SELECT @intFreightTermId = intFreightTermId
+				FROM tblSMFreightTerms WITH (NOLOCK)
+				WHERE strFreightTerm = 'Deliver'
+					AND strFobPoint = 'Destination'
+			END
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -364,6 +374,7 @@ BEGIN TRY
 					,@intQtyUnitMeasureId = IUOM.intUnitMeasureId
 					,@intLotId = L.intLotId
 					,@strLotCondition = ISNULL(ITD.strLotCondition, 'Sound/Full')
+					,@dblCost = (dbo.fnMultiply(ITD.dblQuantity, ISNULL(ITD.dblCost, 0)) / ITD.dblNet) -- Line Total / Net Wt
 				FROM tblICInventoryTransferDetail ITD
 				JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
 					AND ITD.intInventoryTransferId = @intInventoryTransferId
@@ -513,37 +524,45 @@ BEGIN TRY
 				END
 
 				IF @dblCost >= 0
-					AND ISNULL(@strCostUOM, '') <> ''
 				BEGIN
-					SELECT @intCostUnitMeasureId = t.intUnitMeasureId
-					FROM tblICUnitMeasure t WITH (NOLOCK)
-					WHERE t.strUnitMeasure = @strCostUOM
-
-					IF ISNULL(@intCostUnitMeasureId, 0) = 0
-					BEGIN
-						RAISERROR (
-								'Invalid Cost UOM. '
-								,16
-								,1
-								)
-					END
-					ELSE
-					BEGIN
-						SELECT @intCostItemUOMId = intItemUOMId
-						FROM tblICItemUOM t WITH (NOLOCK)
-						WHERE t.intItemId = @intItemId
-							AND t.intUnitMeasureId = @intCostUnitMeasureId
-
-						IF ISNULL(@intCostItemUOMId, 0) = 0
-						BEGIN
-							RAISERROR (
-									'Cost UOM does not belongs to the Item. '
-									,16
-									,1
-									)
-						END
-					END
+					SELECT @intCostItemUOMId = t.intItemUOMId
+					FROM tblICItemUOM t WITH (NOLOCK)
+					WHERE t.intItemId = @intItemId
+						AND t.ysnStockUnit = 1
 				END
+				
+				--IF @dblCost >= 0
+				--	AND ISNULL(@strCostUOM, '') <> ''
+				--BEGIN
+				--	SELECT @intCostUnitMeasureId = t.intUnitMeasureId
+				--	FROM tblICUnitMeasure t WITH (NOLOCK)
+				--	WHERE t.strUnitMeasure = @strCostUOM
+
+				--	IF ISNULL(@intCostUnitMeasureId, 0) = 0
+				--	BEGIN
+				--		RAISERROR (
+				--				'Invalid Cost UOM. '
+				--				,16
+				--				,1
+				--				)
+				--	END
+				--	ELSE
+				--	BEGIN
+				--		SELECT @intCostItemUOMId = intItemUOMId
+				--		FROM tblICItemUOM t WITH (NOLOCK)
+				--		WHERE t.intItemId = @intItemId
+				--			AND t.intUnitMeasureId = @intCostUnitMeasureId
+
+				--		IF ISNULL(@intCostItemUOMId, 0) = 0
+				--		BEGIN
+				--			RAISERROR (
+				--					'Cost UOM does not belongs to the Item. '
+				--					,16
+				--					,1
+				--					)
+				--		END
+				--	END
+				--END
 
 				SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId
 				FROM tblSMCompanyPreference t WITH (NOLOCK)
@@ -586,6 +605,7 @@ BEGIN TRY
 						,intLocationId
 						,strReceiptNumber
 						,dtmReceiptDate
+						,intFreightTermId
 						,intCurrencyId
 						,intShipViaId
 						,dblInvoiceAmount
@@ -605,6 +625,7 @@ BEGIN TRY
 						,IT.intToLocationId
 						,@strReceiptNo
 						,@dtmReceiptDate
+						,@intFreightTermId
 						,@intCurrencyId
 						,IT.intShipViaId
 						,0.0

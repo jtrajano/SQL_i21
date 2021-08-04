@@ -1093,7 +1093,7 @@ END
 
 IF EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @intInvoiceLogId AND ysnSuccess = 0 AND strPostingMessage IS NOT NULL)
 BEGIN				
-	SET @strMessage = 'There are unprocessed Transaction/s'
+	SET @strMessage = 'Batch Process completed with errors.'
 END
 
 GOTO PROCESS_EXIT

@@ -6,7 +6,7 @@
 	[intReportMasterID] INT NOT NULL,
 	[intNoOfMonths] INT NOT NULL,
 	[ysnIncludeInventory] BIT NOT NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_ysnIncludeInventory] DEFAULT 0, 
-	[intCategoryId] INT NOT NULL,
+	[intCategoryId] INT NULL,
 	intCompanyLocationId INT,
 	intUnitMeasureId INT,
 	intDemandHeaderId INT,

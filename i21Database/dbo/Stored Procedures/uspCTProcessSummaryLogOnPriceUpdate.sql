@@ -27,6 +27,8 @@ BEGIN TRY
 	where
 		pfd.intPriceFixationDetailId = @intPriceFixationDetailId;
 
+	update tblCTPriceFixationDetail set dblPreviousQty = dblQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+
 	IF (@ysnDWG = 1)
 	BEGIN
 		EXEC uspCTLogSummary

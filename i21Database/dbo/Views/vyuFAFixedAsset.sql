@@ -44,7 +44,10 @@ FA.dblCost - FA.dblSalvageValue dblBasis,
 DM.intDepreciationMethodId,        
 DM.strDepreciationMethodId,        
 DM.strConvention,        
-DM.strDepreciationType,        
+DM.strDepreciationType,
+AssetGroup.intAssetGroupId,
+AssetGroup.strGroupCode,
+AssetGroup.strGroupDescription,
 GLAsset.strAccountId strAssetAccountId,        
 GLExpense.strAccountId strExpenseAccountId,        
 GLDepreciation.strAccountId strDepreciationAccountId,        
@@ -69,6 +72,7 @@ LEFT JOIN tblGLAccount GLGainLoss ON GLGainLoss.intAccountId = FA.intGainLossAcc
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID=FA.intCurrencyId        
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId        
 LEFT JOIN tblFADepreciationMethod DM on DM.intDepreciationMethodId = FA.intDepreciationMethodId
+LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = FA.intAssetGroupId
 OUTER APPLY(  
     SELECT COUNT(*)Cnt FROM tblFABookDepreciation   
     WHERE intAssetId = FA.intAssetId  

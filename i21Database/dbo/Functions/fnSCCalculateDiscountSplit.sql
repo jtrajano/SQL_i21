@@ -27,7 +27,8 @@ BEGIN
 	,@dblUOMQty AS NUMERIC(38, 20)
 	,@intItemId AS NUMERIC(38, 20)
 	,@dblQtyToDistribute AS NUMERIC(38, 20)
-	,@strDiscountChargeType NVARCHAR(10);
+	,@strDiscountChargeType NVARCHAR(10)
+	,@dblQtyBasedOnPassedQty AS NUMERIC(18, 6);
 
 	IF @ysnDeliverySheet = 0
 	BEGIN
@@ -39,6 +40,10 @@ BEGIN
 		FROM tblQMTicketDiscount WHERE intTicketDiscountId = @intTicketDiscountId
 
 		SELECT @dblSplitPercent = dblSplitPercent FROM tblSCTicketSplit WHERE intCustomerId = @intEntityId AND intTicketId = @intTicketId
+
+		
+		set @dblQtyBasedOnPassedQty = dbo.fnMultiply(@dblTicketNetUnits, dbo.fnDivide(@dblSplitPercent, 100) )
+
 	END
 	ELSE
 	BEGIN
@@ -62,21 +67,33 @@ BEGIN
 	IF @strDiscountCalculationOptionId = '1' --NET WEIGHT
 	BEGIN
 		SET @dblQtyToDistribute = @dblTicketNetUnits * @dblSplitPercent
+		if(@dblQtyBasedOnPassedQty > 0 )
+			SET @dblQtyToDistribute = dbo.fnMultiply(dbo.fnDivide(@dblUnitQty, @dblQtyBasedOnPassedQty), @dblQtyToDistribute)
 		SET @calculatedValue = (@dblQtyToDistribute/ @dblUOMQty) * @dblDiscountAmount
 	END
 	ELSE IF  @strDiscountCalculationOptionId = '2' --WET WEIGHT
 	BEGIN
 		SELECT @dblGrossShrinkPercentage = SUM(dblShrinkPercent) FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strShrinkWhat = 'Gross Weight'
 		SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
+
+		if(@dblQtyBasedOnPassedQty > 0 )
+			SET @dblQtyToDistribute = dbo.fnMultiply(dbo.fnDivide(@dblUnitQty, @dblQtyBasedOnPassedQty), @dblQtyToDistribute)
+
 		SET @dblGrossShrink = @dblQtyToDistribute * ISNULL(@dblGrossShrinkPercentage,0);
 		SET @dblGrossShrink = @dblGrossShrink / 100;
 		SET @dblTicketWetUnits = (@dblQtyToDistribute / @dblUOMQty) - @dblGrossShrink
 		SET @calculatedValue =  @dblDiscountAmount * @dblTicketWetUnits
 	END
 	ELSE 
+	begin
 		SET @dblQtyToDistribute = @dblTicketGrossUnit * @dblSplitPercent
+		
+		if(@dblQtyBasedOnPassedQty > 0 )
+			SET @dblQtyToDistribute = dbo.fnMultiply(dbo.fnDivide(@dblUnitQty, @dblQtyBasedOnPassedQty), @dblQtyToDistribute)
+
 		SET @calculatedValue =  (@dblQtyToDistribute / @dblUOMQty) * @dblDiscountAmount
-	
+	end
+
 	IF @strDiscountChargeType = 'Percent'
 		RETURN (@calculatedValue * @dblCost)
 	

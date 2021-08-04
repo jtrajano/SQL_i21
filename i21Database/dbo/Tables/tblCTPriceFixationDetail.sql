@@ -41,6 +41,7 @@
 	[dblLoadApplied]				NUMERIC(18,6) NULL,
 	[ysnToBeDeleted]				BIT NOT NULL DEFAULT 0,
 	[intAssignFuturesToContractSummaryId] INT NULL,
+	[dblPreviousQty]				NUMERIC(18,6) NULL,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),

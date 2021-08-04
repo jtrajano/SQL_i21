@@ -107,3 +107,8 @@ BEGIN
 		ON [dbo].[tblCFAccount]([intCustomerId] ASC) WITH (FILLFACTOR = 70);
 	END
 END
+
+
+
+--CF-2715
+UPDATE tblCFFeeProfile SET strDescription = 'Fees'

@@ -193,6 +193,7 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
     <Folder Include="Scripts\Post-Deployment\AG\" />
     <Folder Include="Scripts\Post-Deployment\FA\" />
+    <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -3029,6 +3030,7 @@
     <Build Include="dbo\Tables\tblICStagingCountDetail.sql" />
     <Build Include="dbo\Tables\tblICStagingReorderPoint.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningStockQty.sql" />
+    <Build Include="dbo\Functions\fnICGetItemRunningStockLotQty.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateLocationBinsReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateReorderPointFromStaging.sql" />
@@ -4993,6 +4995,7 @@
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportDollarContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportInventoryTransferFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICApplyLocationsToItems.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemLocationsFromStaging.sql" />
@@ -5035,6 +5038,8 @@
     <Build Include="dbo\Tables\tblRestApiReceiptItemStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptItemLotStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
+    <Build Include="dbo\Tables\tblApiInventoryTransferStaging.sql" />
+    <Build Include="dbo\Tables\tblApiInventoryTransferDetailStaging.sql" />
     <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Views\vyuRestApiVendors.sql" />
     <Build Include="dbo\Views\vyuRestApiEntityUsers.sql" />
@@ -5399,9 +5404,11 @@
     <Build Include="dbo\Tables\tblCFInvoiceStagingTable.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceReportTempTable.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceFeeStagingTable.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceReportTieredUnitDiscountTempTable.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceDiscountTempTable.sql" />
     <Build Include="dbo\Views\vyuCFCalculatedInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceToStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportTieredUnitDiscount.sql" />
     <Build Include="dbo\Views\vyuAPQuickVoucherSearch.sql" />
     <Build Include="dbo\Tables\tblICSearchShipmentInvoice.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentInvoiceItems.sql" />
@@ -9581,12 +9588,17 @@
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
     <Build Include="dbo\Stored Procedures\uspMFMoveItemValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspEMAxxisSyncWholesaleTransportDriverExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspEMAxxisSyncShipViaExport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeletePrice.sql" />
     <Build Include="dbo\Views\vyuTRShipViaTariff.sql" />
     <Build Include="dbo\Views\vyuSMLabels.sql" />
     <Build Include="Scripts\Post-Deployment\SM\2120_InsertOtherLabels.sql" />
+    <Build Include="dbo\Views\vyuTRShipViaTariffMileage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPONo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPODetail.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9890,6 +9902,7 @@
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
+    <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

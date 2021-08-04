@@ -801,7 +801,7 @@ BEGIN
 	WHERE	pl.strPricingMethod = 'Discount Retail Price'
 			AND pl.dtmEffectiveDate >= ep.dtmEffectiveRetailPriceDate
 			AND pl.dtmEffectiveDate IS NOT NULL
-	IF ISNULL(@strScreen, '') != 'UpdateItemPricing'
+	IF ISNULL(@strScreen, '') != 'UpdateItemPricing' AND ISNULL(@strScreen, '') != 'RetailPriceAdjustment'
 	BEGIN
 		DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
 	END

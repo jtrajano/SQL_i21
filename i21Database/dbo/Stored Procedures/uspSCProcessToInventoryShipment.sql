@@ -757,6 +757,7 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	
+	exec uspSCAddTransactionLinks @intTransactionType = 3, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
 	IF(@intTicketStorageScheduleTypeId <> -9)

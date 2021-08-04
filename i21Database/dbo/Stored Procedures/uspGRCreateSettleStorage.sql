@@ -418,6 +418,12 @@ BEGIN TRY
 	
 	DELETE FROM @MainSettleStorageToSave
 	DELETE FROM @SettleStorageToSave
+
+	exec uspSCAddTransactionLinks 
+		@intTransactionType = 4
+		,@intTransactionId = @intSettleStorageId
+		,@intAction = 1
+
 END TRY
 
 BEGIN CATCH

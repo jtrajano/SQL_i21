@@ -1248,6 +1248,14 @@ BEGIN
 		CLOSE CC; DEALLOCATE CC;
 		-- End booking AP clearing
 
+
+
+		-- Adding Transaction links
+		exec [uspSCAddTransactionLinks]
+			@intTransactionType = 7
+			,@intTransactionId = @intTransferStorageId
+			,@intAction = 1
+
 		--RISK SUMMARY LOG
 		EXEC [dbo].[uspGRRiskSummaryLog2]
 			@StorageHistoryIds = @HistoryIds
