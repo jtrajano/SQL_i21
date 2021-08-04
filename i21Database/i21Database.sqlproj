@@ -193,6 +193,7 @@
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
     <Folder Include="Scripts\Post-Deployment\AG\" />
     <Folder Include="Scripts\Post-Deployment\FA\" />
+    <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -9596,6 +9597,7 @@
     <Build Include="dbo\Views\vyuTRShipViaTariffMileage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPONo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPODetail.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9899,6 +9901,7 @@
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
+    <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
