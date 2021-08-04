@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspICEdiGenerateReceiptFromRecurringJob] 
 	 @UniqueId NVARCHAR(100)
 	, @UserId INT
+	, @strFileName NVARCHAR(500) = NULL 
+	, @strFileType NVARCHAR(50) = NULL 
 	, @ErrorCount INT OUTPUT
 	, @TotalRows INT OUTPUT
 AS
@@ -98,7 +100,7 @@ WHERE strUniqueId = (SELECT TOP 1 strUniqueId FROM tblICEdiPricebook)
 IF(@LogId IS NULL)
 BEGIN
 	INSERT INTO tblICImportLog(strDescription, strType, strFileType, strFileName, dtmDateImported, intUserEntityId, intConcurrencyId)
-	SELECT 'Import Receipts successful', 'EDI', 'Plain Text', '', GETDATE(), @UserId, 1
+	SELECT 'Import Receipts successful', 'EDI', @strFileType, @strFileName, GETDATE(), @UserId, 1
 	SET @LogId = @@IDENTITY
 END
 
