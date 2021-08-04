@@ -100,3 +100,14 @@ CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblCMBankTransaction]
 	[strTransactionId] ASC
 )
 INCLUDE ( 	[intBankTransactionTypeId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [idx_tblCMBankTransaction_RunningBalance] ON [dbo].[tblCMBankTransaction]
+(
+	[ysnPosted] ASC
+)
+INCLUDE ([intBankTransactionTypeId],
+	[intBankAccountId],
+	[dtmDate],
+	[dblAmount]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+
