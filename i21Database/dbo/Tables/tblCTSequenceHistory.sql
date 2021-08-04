@@ -89,3 +89,11 @@ CREATE NONCLUSTERED INDEX [IX_tblCTSequenceHistory]
 	ON [dbo].[tblCTSequenceHistory]([intContractHeaderId] ASC, intContractDetailId ASC)
 	
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTSequenceHistory_intSequenceUsageHistoryId] ON [dbo].[tblCTSequenceHistory] ([intSequenceUsageHistoryId])
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTSequenceHistory_intContractDetailId] ON [dbo].[tblCTSequenceHistory] ([intContractDetailId])
+
+GO
