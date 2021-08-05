@@ -9602,6 +9602,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetPONo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPODetail.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
+    <Build Include="dbo\Views\vyuTRCustomerFreightRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
