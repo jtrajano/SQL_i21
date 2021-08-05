@@ -356,9 +356,9 @@ BEGIN TRY
 					'<Status>' + LTRIM(3) + '</Status>' + 
 					'<SequenceNo>' + LTRIM(CF.intContractSeq) + '</SequenceNo>' + 
 					'<ItemNo>' + CF.strItemNo + '</ItemNo>' + 
-					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 4), CF.dblQuantity)) + '</Quantity>' + 
+					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblQuantity)) + '</Quantity>' + 
 					'<QuantityUOM>' + CF.strQuantityUOM + '</QuantityUOM>' + 
-					'<NetWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), CF.dblNetWeight)) + '</NetWeight>' + 
+					'<NetWeight>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblNetWeight)) + '</NetWeight>' + 
 					'<NetWeightUOM>' + CF.strNetWeightUOM + '</NetWeightUOM>' + 
 					'<ERPPONumber>' + ISNULL(CF.strERPPONumber, '') + '</ERPPONumber>' + 
 					'<ERPPOlineNo>' + ISNULL(CF.strERPItemNumber, '') + '</ERPPOlineNo>' + 
@@ -380,14 +380,14 @@ BEGIN TRY
 					'<StorageLocation>' + CASE WHEN @intActionId = 3 THEN '' ELSE @strSubLocation END + '</StorageLocation>' + 
 					'<StorageUnit>' + CASE WHEN @intActionId = 3 THEN '' ELSE ISNULL(CF.strStorageLocation, '') END + '</StorageUnit>' + 
 					'<ItemNo>' + CF.strItemNo + '</ItemNo>' + 
-					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 4), CF.dblQuantity)) + '</Quantity>' + 
+					'<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblQuantity)) + '</Quantity>' + 
 					'<QuantityUOM>' + CF.strQuantityUOM + '</QuantityUOM>' + 
-					'<NetWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), CF.dblNetWeight)) + '</NetWeight>' + 
+					'<NetWeight>' + LTRIM(CONVERT(NUMERIC(18, 6), CF.dblNetWeight)) + '</NetWeight>' + 
 					'<NetWeightUOM>' + CF.strNetWeightUOM + '</NetWeightUOM>' + 
 					'<PricingType>' + @strPricingType + '</PricingType>' + 
 					'<FuturesMarket>' + ISNULL(FM.strFutMarketName, '') + '</FuturesMarket>' + 
 					'<FuturesMonth>' + ISNULL(FMO.strFutureMonth, '') + '</FuturesMonth>' + 
-					'<CashPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, IUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblCashPrice, NULL), 0))) + '</CashPrice>' + 
+					'<CashPrice>' + LTRIM(CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, IUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblCashPrice, NULL), 0))) + '</CashPrice>' + 
 					'<PriceUOM>' + ISNULL(UOM.strUnitMeasure, '') + '</PriceUOM>' + 
 					'<PriceCurrency>' + ISNULL(@strCurrency, '') + '</PriceCurrency>' + 
 					'<FixationDate>' + ISNULL(CONVERT(VARCHAR, @dtmFixationDate, 112), '') + '</FixationDate>' + 

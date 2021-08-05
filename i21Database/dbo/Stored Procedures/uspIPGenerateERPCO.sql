@@ -366,7 +366,7 @@ BEGIN TRY
 
 			SELECT @strXML += '<EndDate>' + ISNULL(CONVERT(VARCHAR, @dtmEndDate, 112), '') + '</EndDate>'
 
-			SELECT @strXML += '<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 4), @dblQuantity)) + '</Quantity>'
+			SELECT @strXML += '<Quantity>' + LTRIM(@dblQuantity) + '</Quantity>'
 
 			SELECT @strXML += '<QuantityUOM>' + @strQuantityUOM + '</QuantityUOM>'
 
@@ -376,13 +376,13 @@ BEGIN TRY
 
 			SELECT @strXML += '<Lots>' + LTRIM(@intNoOfLots) + '</Lots>'
 
-			SELECT @strXML += '<FuturesPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), @dblFuturesPrice)) + '</FuturesPrice>'
+			SELECT @strXML += '<FuturesPrice>' + LTRIM(@dblFuturesPrice) + '</FuturesPrice>'
 
 			SELECT @strXML += '<PriceUOM>' + @strQuantityUOM + '</PriceUOM>'
 
 			SELECT @strXML += '<PriceCurrency>' + @strDefaultCurrency + '</PriceCurrency>'
 
-			SELECT @strXML += '<FXRate>' + LTRIM(CONVERT(NUMERIC(18, 4), @dblFXRate)) + '</FXRate>'
+			SELECT @strXML += '<FXRate>' + LTRIM(@dblFXRate) + '</FXRate>'
 
 			SELECT @strXML += '<FXCurrency>' + ISNULL(@strFXCurrency, '') + '</FXCurrency>'
 
@@ -390,7 +390,7 @@ BEGIN TRY
 
 			SELECT @strXML += '<ReferenceFuturesMonth>' + ISNULL(@strRefFuturesMonth, '') + '</ReferenceFuturesMonth>'
 
-			SELECT @strXML += '<ReferenceFuturesPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), @dblRefFuturesPrice)) + '</ReferenceFuturesPrice>'
+			SELECT @strXML += '<ReferenceFuturesPrice>' + LTRIM(@dblRefFuturesPrice) + '</ReferenceFuturesPrice>'
 
 			SELECT @strXML += '<ReferencePriceUOM>' + @strQuantityUOM + '</ReferencePriceUOM>'
 
@@ -400,7 +400,7 @@ BEGIN TRY
 
 			SELECT @strXML += '<Sub-Book>' + ISNULL(@strSubBook, '') + '</Sub-Book>'
 
-			SELECT @strXML += '<QuantityPerLot>' + LTRIM(CONVERT(NUMERIC(18, 4), @dblQuantityPerLot)) + '</QuantityPerLot>'
+			SELECT @strXML += '<QuantityPerLot>' + LTRIM(@dblQuantityPerLot) + '</QuantityPerLot>'
 
 			SELECT @strXML += '<QuantityPerLotUOM>' + @strQuantityUOM + '</QuantityPerLotUOM>'
 
