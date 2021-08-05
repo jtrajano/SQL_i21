@@ -249,6 +249,12 @@ BEGIN TRY
 
 		IF @intConcurrencyId = 1
 		BEGIN
+			-- Newly created sequence - CT-5847
+			EXEC uspICAddTransactionLinkOrigin @intTransactionId = @intContractHeaderId
+				, @strTransactionNo = @strContractNumber
+				, @strTransactionType = 'Contract'
+				, @strModuleName = 'Contract Management'
+
 			UPDATE @CDTableUpdate SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
 		END
 

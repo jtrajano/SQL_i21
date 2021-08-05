@@ -2,6 +2,7 @@ CREATE TYPE [dbo].[StagingRetailAdjustment] AS TABLE(
 	[intRetailPriceAdjustmentDetailId] [int] NULL,
 	[intRetailPriceAdjustmentId] [int] NULL,
 	[intItemPricingId] [int] NULL,
+	[intStoreGroupId] [int] NULL,
 	[intCompanyLocationId] [int] NULL,
 	[strRegion] [nvarchar](max) NULL,
 	[strDistrict] [nvarchar](max) NULL,
@@ -28,5 +29,3 @@ CREATE TYPE [dbo].[StagingRetailAdjustment] AS TABLE(
 	[intModifiedByUserId] [int] NULL,
 	[intConcurrencyId] [int] NULL
 )
-
-

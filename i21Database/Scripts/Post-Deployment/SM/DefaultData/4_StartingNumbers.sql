@@ -1571,6 +1571,24 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 161
+			,[strTransactionType]	= N'Bank Activity'
+			,[strPrefix]			= N'BACT-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Activity' AND strModule = 'Cash Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 162
+			,[strTransactionType]	= N'Bank Clearing'
+			,[strPrefix]			= N'BCLR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Clearing' AND strModule = 'Cash Management')
 
 
 
@@ -1651,6 +1669,10 @@ GO
 			WHERE strTransactionType = N'Derivative Entry'
 		END
 	END 
+
+	UPDATE tblSMStartingNumber SET strPrefix = 'BACT' 
+	WHERE intStartingNumberId = 161 AND strPrefix = 'BC'
+	AND strModule = 'Cash Management'
 
 GO
 	PRINT N'BEGIN RENAME S'

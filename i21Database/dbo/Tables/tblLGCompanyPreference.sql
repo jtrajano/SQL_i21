@@ -78,6 +78,8 @@
 [intPurchaseContractBasisItemId] INT NULL,
 [intDefaultPickType] INT NULL,
 [ysnIncludeOpenContractsOnInventoryView] BIT NULL DEFAULT ((0)),
+[ysnIncludeArrivedInPortStatus] BIT NULL DEFAULT ((0)),
+[ysnIncludeStrippingInstructionStatus] BIT NULL DEFAULT ((0)),
 [ysnWeightClaimsByContainer] BIT NULL DEFAULT ((0)),
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 

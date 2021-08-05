@@ -34,10 +34,13 @@ BEGIN
 			@strTransactionNumber NVARCHAR(50) = NULL,
 			@intLoadHeaderId INT = NULL,
 			@intSellerId INT = NULL,
-			@intFreightItemId INT = NULL
+			@intFreightItemId INT = NULL,
+			@intUserId INT = NULL
 
 		-- GET DEFAULT SELLER
 		SELECT TOP 1 @intSellerId = intSellerId, @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference 
+
+		SELECT TOP 1 @intUserId = intUserId FROM tblTRImportLoad WHERE intImportLoadId = @intImportLoadId
 
 		BEGIN TRANSACTION
 
@@ -51,12 +54,23 @@ BEGIN
 			EXEC uspSMGetStartingNumber 54, @strTransactionNumber OUT
 			
 			-- TR HEADER
-			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckDriverReferenceId, intTrailerId, strTransaction, intFreightItemId, intConcurrencyId)
-			VALUES (@dtmPullDate, @intCarrierId, @intSellerId, @intDriverId, @intTruckId, @intTrailerId, @strTransactionNumber, @intFreightItemId, 1)
+			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckDriverReferenceId, intTrailerId, strTransaction, intFreightItemId, intConcurrencyId, intUserId)
+			VALUES (@dtmPullDate, @intCarrierId, @intSellerId, @intDriverId, @intTruckId, @intTrailerId, @strTransactionNumber, @intFreightItemId, 1, @intUserId)
 			
 			SET @intLoadHeaderId = @@identity
 
-			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId
+			DECLARE @intOutput INT = NULL
+
+			-- INSERT INTO tblSMTransaction
+			EXEC uspSMInsertTransaction
+				@screenNamespace = 'Transports.view.TransportLoads',
+				@strTransactionNo = @strTransactionNumber,
+				@intEntityId = @intUserId,
+				@intKeyValue = @intLoadHeaderId,
+				@dtmDate = NULL,
+				@output = @intOutput OUTPUT
+
+			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId, strStatus = 'Success'
 			WHERE intImportLoadId = @intImportLoadId 
 			AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)
 			AND intCarrierId = @intCarrierId 

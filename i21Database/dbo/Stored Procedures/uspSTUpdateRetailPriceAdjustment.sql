@@ -104,6 +104,7 @@ BEGIN
 					intRetailPriceAdjustmentDetailId	INT,
 					ysnOneTimeUse						BIT,
 					intCompanyLocationId				INT NULL,
+					intStoreGroupId						INT NULL,
 					intCategoryId						INT NULL,
 				    intFamilyId							INT NULL,
 					intClassId							INT NULL,
@@ -126,6 +127,7 @@ BEGIN
 					intRetailPriceAdjustmentDetailId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
+					intStoreGroupId,
 					intCategoryId,
 				    intFamilyId,
 					intClassId,
@@ -145,6 +147,7 @@ BEGIN
 					pad.intRetailPriceAdjustmentDetailId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
+					intStoreGroupId,
 					intCategoryId,
 				    intFamilyId,
 					intClassId,
@@ -169,6 +172,7 @@ BEGIN
 					BEGIN
 
 						DECLARE @intLocationId						INT = NULL
+							, @intStoreGroupId						INT = NULL
 							, @intVendorId							INT = NULL
 							, @intCategoryId						INT = NULL
 							, @intFamilyId							INT = NULL
@@ -196,6 +200,7 @@ BEGIN
 									@intRetailPriceAdjustmentDetailId	= intRetailPriceAdjustmentDetailId,
 									@ysnOneTimeUse						= ysnOneTimeUse,
 									@intLocationId						= intCompanyLocationId,
+									@intStoreGroupId					= intStoreGroupId,
 									@intCategoryId						= intCategoryId,
 									@intFamilyId						= intFamilyId,
 									@intClassId							= intClassId,
@@ -238,7 +243,12 @@ BEGIN
 								INNER JOIN tblICCategory CAT ON CAT.intCategoryId = I.intCategoryId
 								LEFT JOIN tblSTSubcategory FAMILY ON FAMILY.intSubcategoryId = itemLoc.intFamilyId
 								LEFT JOIN tblSTSubcategory CLASS ON CLASS.intSubcategoryId = itemLoc.intClassId
-								WHERE (@intLocationId IS NULL OR (CL.intCompanyLocationId = @intLocationId))
+								WHERE 
+								(@intLocationId IS NULL OR (CL.intCompanyLocationId = @intLocationId))
+								AND (@intStoreGroupId IS NULL OR (CL.intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSTStore st
+																								INNER JOIN tblSTStoreGroupDetail stgd
+																									ON st.intStoreId = stgd.intStoreId
+																								WHERE stgd.intStoreGroupId = @intStoreGroupId)))
 								AND (@intVendorId IS NULL OR (Vendor.intEntityId = @intVendorId))
 								AND (@strRegion = '' OR (ST.strRegion = @strRegion))
 								AND (@strDistrict = '' OR (ST.strDistrict = @strDistrict))
@@ -314,6 +324,7 @@ BEGIN
 											-- filter params
 											@strUpcCode					= @strProcessLongUpcCode 
 											,@strDescription			= @strProcessDescription 
+											,@strScreen					= 'RetailPriceAdjustment' 
 											,@intItemId					= @intProcessItemId
 											,@intItemPricingId			= @intProcessItemPricingId 
 											-- update params

@@ -43,6 +43,7 @@ BEGIN
 					,[ysnSeqSubCurrency]
 					,[dblSeqPriceInWeightUOM]
 					,[dblSeqPriceConversionFactoryWeightUOM]
+					,[dtmReceiptDate]
 					,[dtmDateAdded]
 					)
 				SELECT 
@@ -74,6 +75,7 @@ BEGIN
 					,[ysnSeqSubCurrency]
 					,[dblSeqPriceInWeightUOM]
 					,[dblSeqPriceConversionFactoryWeightUOM]
+					,[dtmReceiptDate]
 					,[dtmDateAdded] = GETDATE()
 				FROM 
 					(SELECT 
@@ -115,6 +117,7 @@ BEGIN
 						,intItemId = LD.intItemId
 						,intContractDetailId = CD.intContractDetailId
 						,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
+						,dtmReceiptDate = IRD.dtmReceiptDate
 					FROM tblLGLoad L
 						JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 						JOIN tblCTContractDetail CD ON CD.intContractDetailId = intPContractDetailId
@@ -133,6 +136,12 @@ BEGIN
 						OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = L.intWeightUnitMeasureId) WUI
 						OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 						OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
+						OUTER APPLY (SELECT TOP 1 IR.dtmReceiptDate FROM tblICInventoryReceipt IR
+										INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+										WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
+											AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
+											AND IRI.intContainerId = LC.intLoadContainerId
+										ORDER BY IR.dtmReceiptDate DESC) IRD
 						CROSS APPLY (SELECT intLoadContainerId, dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink 
 										WHERE intLoadDetailId = LD.intLoadDetailId 
 											AND intLoadContainerId = LC.intLoadContainerId AND ISNULL(dblReceivedQty, 0) >= dblQuantity
@@ -188,6 +197,7 @@ BEGIN
 						,[ysnSeqSubCurrency]
 						,[dblSeqPriceInWeightUOM]
 						,[dblSeqPriceConversionFactoryWeightUOM]
+						,[dtmReceiptDate]
 						,[dtmDateAdded]
 						)
 					SELECT 
@@ -218,6 +228,7 @@ BEGIN
 						,[ysnSeqSubCurrency]
 						,[dblSeqPriceInWeightUOM]
 						,[dblSeqPriceConversionFactoryWeightUOM]
+						,[dtmReceiptDate]
 						,[dtmDateAdded] = GETDATE()
 					FROM 
 						(SELECT 
@@ -257,6 +268,7 @@ BEGIN
 							,intItemId = LD.intItemId
 							,intContractDetailId = CD.intContractDetailId
 							,dblSeqPriceConversionFactoryWeightUOM = (WUI.dblUnitQty / PUI.dblUnitQty)
+							,dtmReceiptDate = IRD.dtmReceiptDate
 						FROM tblLGLoad L
 							JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 							JOIN tblCTContractDetail CD ON CD.intContractDetailId = intPContractDetailId
@@ -274,6 +286,11 @@ BEGIN
 							OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 							OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 							OUTER APPLY (SELECT dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
+							OUTER APPLY (SELECT TOP 1 IR.dtmReceiptDate FROM tblICInventoryReceipt IR
+										INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+										WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
+											AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
+										ORDER BY IR.dtmReceiptDate DESC) IRD
 							CROSS APPLY (SELECT dblNet = SUM(ISNULL(IRI.dblNet,0)),dblGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 											JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 											WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId

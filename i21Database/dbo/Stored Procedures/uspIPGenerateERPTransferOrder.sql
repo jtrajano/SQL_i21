@@ -47,7 +47,7 @@ BEGIN TRY
 		,@strMarks NVARCHAR(400)
 		,@dblTransferPrice NUMERIC(18, 6)
 		,@strCurrency NVARCHAR(40)
-		,@strComment NVARCHAR(50)
+		,@strComment NVARCHAR(1000)
 		,@dblGross NUMERIC(18, 6)
 		,@dblTare NUMERIC(18, 6)
 		,@dblNet NUMERIC(18, 6)
@@ -120,7 +120,7 @@ BEGIN TRY
 			,@dtmBolDate = IT.dtmBolDate
 			,@dtmBolReceivedDate = IT.dtmBolReceivedDate
 			,@strBroker = E.strName
-			,@strTrailerId = '' -- Change it in 21.2
+			,@strTrailerId = IT.strTrailerId
 			,@strFromLocation = FCL.strLotOrigin
 			,@strToLocation = TCL.strLotOrigin
 		FROM dbo.tblICInventoryTransfer IT
@@ -318,7 +318,7 @@ BEGIN TRY
 				,@strMarks = ISNULL(ITD.strMarks, '')
 				,@dblTransferPrice = CONVERT(NUMERIC(18, 6), ITD.dblTransferPrice)
 				,@strCurrency = ISNULL(C.strCurrency, '')
-				,@strComment = '' -- Change it in 21.2
+				,@strComment = ISNULL(ITD.strComment, '')
 				,@dblGross = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblGross), 0))
 				,@dblTare = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblTare), 0))
 				,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(ITD.intGrossNetUOMId, @intItemUOMId, ITD.dblNet), 0))
@@ -416,7 +416,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<LotNo>' + ISNULL(@strLotNumber, '') + '</LotNo>'
 
-			SELECT @strItemXML += '<TransferQty>' + LTRIM(ISNULL(@dblQuantity, 0)) + '</TransferQty>'
+			SELECT @strItemXML += '<TransferQty>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblQuantity, 0))) + '</TransferQty>'
 
 			SELECT @strItemXML += '<TransferQtyUOM>' + ISNULL(@strQtyUOM, '') + '</TransferQtyUOM>'
 
@@ -430,17 +430,17 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<Marks>' + ISNULL(@strMarks, '') + '</Marks>'
 
-			SELECT @strItemXML += '<TransferPrice>' + LTRIM(ISNULL(@dblTransferPrice, 0)) + '</TransferPrice>'
+			SELECT @strItemXML += '<TransferPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTransferPrice, 0))) + '</TransferPrice>'
 
 			SELECT @strItemXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
 			SELECT @strItemXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
 
-			SELECT @strItemXML += '<GrossWeight>' + LTRIM(ISNULL(@dblGross, 0)) + '</GrossWeight>'
+			SELECT @strItemXML += '<GrossWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblGross, 0))) + '</GrossWeight>'
 
-			SELECT @strItemXML += '<TareWeight>' + LTRIM(ISNULL(@dblTare, 0)) + '</TareWeight>'
+			SELECT @strItemXML += '<TareWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTare, 0))) + '</TareWeight>'
 
-			SELECT @strItemXML += '<NetWeight>' + LTRIM(ISNULL(@dblNet, 0)) + '</NetWeight>'
+			SELECT @strItemXML += '<NetWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblNet, 0))) + '</NetWeight>'
 
 			SELECT @strItemXML += '<WeightUOM>' + ISNULL(@strQuantityUOM, '') + '</WeightUOM>'
 

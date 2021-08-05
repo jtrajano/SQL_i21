@@ -47,7 +47,7 @@ v.intKey
 , v.strReceieveLongUPC
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblReceiveSalePrice) dblReceiveSalePrice
 , v.dblReceiveMSRPPrice
-, COALESCE(EffectiveCost.dblCost, v.dblReceiveLastCost) dblReceiveLastCost
+, COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(v.intItemId, v.intItemLocationId, intReceiveUOMId, tsession.dtmTransactionDate), EffectiveCost.dblCost, v.dblReceiveLastCost) dblReceiveLastCost
 , v.dblReceiveStandardCost
 , v.dblReceiveAverageCost
 , v.dblReceiveEndMonthCost
@@ -58,7 +58,7 @@ v.intKey
 , v.strIssueLongUPC
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblIssueSalePrice) dblIssueSalePrice
 , v.dblIssueMSRPPrice
-, COALESCE(EffectiveCost.dblCost, v.dblIssueLastCost) dblIssueLastCost
+, COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(v.intItemId, v.intItemLocationId, intIssueUOMId, tsession.dtmTransactionDate), EffectiveCost.dblCost, v.dblIssueLastCost) dblIssueLastCost
 , v.dblIssueStandardCost
 , v.dblIssueAverageCost
 , v.dblIssueEndMonthCost
@@ -89,7 +89,7 @@ v.intKey
 , COALESCE(EffectivePrice.dblRetailPrice, v.dblSalePrice) dblSalePrice
 , v.dblMSRPPrice
 , v.strPricingMethod
-, COALESCE(EffectiveCost.dblCost, v.dblLastCost) dblLastCost
+, COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(v.intItemId, v.intItemLocationId, intStockUOMId, tsession.dtmTransactionDate), EffectiveCost.dblCost, v.dblLastCost) dblLastCost
 , v.dblStandardCost
 , v.dblAverageCost
 , v.dblEndMonthCost

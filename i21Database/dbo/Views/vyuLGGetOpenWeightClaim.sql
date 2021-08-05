@@ -5,7 +5,7 @@ SELECT
 	,PC.intPurchaseSale
 	,strType = CASE WHEN PC.intPurchaseSale = 2 THEN 'Outbound' ELSE 'Inbound' END COLLATE Latin1_General_CI_AS
 	,strContractNumber = CH.strContractNumber
-	,intAging = DATEDIFF(DD, (CASE WHEN (PC.intPurchaseSale = 2) THEN INV.dtmDate ELSE IR.dtmReceiptDate END), GETDATE())
+	,intAging = DATEDIFF(DD, (CASE WHEN (PC.intPurchaseSale = 2) THEN INV.dtmDate ELSE ISNULL(PC.dtmReceiptDate, IR.dtmReceiptDate) END), GETDATE())
 	,intContractTypeId = CH.intContractTypeId
 	,intContractSeq = CD.intContractSeq
 	,strEntityName = EM.strName
@@ -83,6 +83,7 @@ SELECT
 	,intPurchasingGroupId = CD.intPurchasingGroupId
 	,strPurchasingGroupName = PG.strName
 	,strPurchasingGroupDesc = PG.strDescription
+	,dtmReceiptDate = ISNULL(PC.dtmReceiptDate, IR.dtmReceiptDate)
 FROM tblLGPendingClaim PC
 	JOIN tblLGLoad L ON L.intLoadId = PC.intLoadId
 	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
@@ -116,10 +117,11 @@ FROM tblLGPendingClaim PC
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
 	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = PC.intLoadContainerId
 	OUTER APPLY (SELECT TOP 1 IR.dtmReceiptDate FROM tblICInventoryReceipt IR
-					INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-					WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
-						AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
-						AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)) IR
+				INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+				WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
+					AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
+					AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
+					ORDER BY IR.dtmReceiptDate DESC) IR
 	OUTER APPLY (SELECT TOP 1 IV.dtmDate FROM tblARInvoice IV
 					INNER JOIN tblARInvoiceDetail IVD ON IVD.intInvoiceId = IV.intInvoiceId
 					WHERE IV.ysnPosted = 1 AND IVD.intContractDetailId = CD.intContractDetailId

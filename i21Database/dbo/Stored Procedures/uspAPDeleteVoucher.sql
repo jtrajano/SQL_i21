@@ -130,6 +130,8 @@ BEGIN TRY
 		EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
 	END
 
+	EXEC uspAPAddTransactionLinks 1, @intBillId, 2
+
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
 

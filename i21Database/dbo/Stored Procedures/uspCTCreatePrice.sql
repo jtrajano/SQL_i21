@@ -3,6 +3,8 @@
 	,@dblQuantityToPrice numeric(18,6)
 	,@dblFutures numeric(18,6)
 	,@intUserId int
+	,@intAssignFuturesToContractSummaryId int
+	,@ysnAllowToPriceRemainingQtyToPrice bit = 0
 AS
 
 declare
@@ -34,6 +36,7 @@ declare
 	,@intStartingNumberId int
 	,@strTradeNo nvarchar(50)
 	,@intNumber int
+	,@ysnMultiplePriceFixation bit
 	;
 
 begin try
@@ -53,7 +56,7 @@ begin try
 	end
 
 	select
-		@dblSequenceQuantity = cd.dblQuantity
+		@dblSequenceQuantity = CASE WHEN isnull(ch.ysnMultiplePriceFixation,0)  = 1 THEN ch.dblQuantity ELSE cd.dblQuantity  END
 		,@dblBalance = cd.dblBalance
 		,@dblBasis = cd.dblBasis
 		,@intPriceContractId = pc.intPriceContractId
@@ -66,21 +69,23 @@ begin try
 		,@intCommodityId = ch.intCommodityId
 		,@intItemId = cd.intItemId
 		,@intItemUOMId = cd.intPriceItemUOMId
-		,@intFinalPriceUOMId = ium.intUnitMeasureId
+		,@intFinalPriceUOMId = comm.intCommodityUnitMeasureId
 		,@intFinalCurrencyId = cd.intCurrencyId
 		,@intOriginalFutureMarketId =  cd.intFutureMarketId
 		,@intOriginalFutureMonthId = cd.intFutureMonthId
 		,@dblOriginalBasis = cd.dblOriginalBasis
-		,@dblTotalLots = cd.dblNoOfLots
+		,@dblTotalLots = (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)
 		,@dblLotsFixed = @dblTotalLots
 		,@intQtyItemUOMId = cd.intItemUOMId
-		,@dblQuantityPerLot = cd.dblQuantity / cd.dblNoOfLots
+		,@dblQuantityPerLot = cd.dblQuantity / (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)
+		,@ysnMultiplePriceFixation = isnull(ch.ysnMultiplePriceFixation,0)
 	from
 		tblCTContractDetail cd
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-		left join tblCTPriceFixation pf on pf.intContractDetailId = cd.intContractDetailId
+		left join tblCTPriceFixation pf on isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end) and pf.intContractHeaderId = cd.intContractHeaderId
 		left join tblCTPriceContract pc on pc.intPriceContractId = pf.intPriceContractId
 		left join tblICItemUOM ium on ium.intItemUOMId = cd.intPriceItemUOMId
+		left join tblICCommodityUnitMeasure comm on comm.intUnitMeasureId = ium.intUnitMeasureId and comm.intCommodityId = ch.intCommodityId
 		cross apply (
 			select dblTotalPricedQuantity = sum(pfd.dblQuantity) from tblCTPriceFixationDetail pfd where pfd.intPriceFixationId = pf.intPriceFixationId
 		) pfd
@@ -103,6 +108,11 @@ begin try
 
 	if (@dblSequenceQuantity <= @dblTotalPricedQuantity)
 	begin
+		if (@ysnAllowToPriceRemainingQtyToPrice = 1)
+		begin
+			return
+		end
+
 		set @ysnWithError = 1;
 		set @ErrorMsg = 'There''s no available quantity to price for contract ' + @strContractNumber + ', sequence ' + convert(nvarchar(20),@intContractSeq) + '.';
 		RAISERROR (@ErrorMsg,18,1,'WITH NOWAIT')
@@ -110,9 +120,16 @@ begin try
 
 	if ((@dblSequenceQuantity - @dblTotalPricedQuantity) < @dblQuantityToPrice)
 	begin
-		set @ysnWithError = 1;
-		set @ErrorMsg = 'There''s only ' + convert(nvarchar(50),(@dblSequenceQuantity - @dblTotalPricedQuantity)) + ' available quantity for pricing for contract ' + @strContractNumber + ', sequence ' + convert(nvarchar(20),@intContractSeq) + '' + '.';
-		RAISERROR (@ErrorMsg,18,1,'WITH NOWAIT')
+		if (@ysnAllowToPriceRemainingQtyToPrice = 1)
+		begin
+			set @dblQuantityToPrice = @dblSequenceQuantity - @dblTotalPricedQuantity
+		end
+		else
+		begin
+			set @ysnWithError = 1;
+			set @ErrorMsg = 'There''s only ' + convert(nvarchar(50),(@dblSequenceQuantity - @dblTotalPricedQuantity)) + ' available quantity for pricing for contract ' + @strContractNumber + ', sequence ' + convert(nvarchar(20),@intContractSeq) + '' + '.';
+			RAISERROR (@ErrorMsg,18,1,'WITH NOWAIT')
+		end
 	end
 
 	if (isnull(@intPriceContractId,0) > 0)
@@ -151,6 +168,7 @@ begin try
 			,dblFinalPrice
 			,strNotes
 			,ysnToBeDeleted
+			,intAssignFuturesToContractSummaryId
 			,intConcurrencyId
 		)
 		select 
@@ -174,6 +192,7 @@ begin try
 			,dblFinalPrice = @dblFutures + @dblBasis
 			,strNotes = ''
 			,ysnToBeDeleted = 0
+			,intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 			,intConcurrencyId = 1
 
 
@@ -250,7 +269,7 @@ begin try
 			intPriceContractId = @intPriceContractId
 			,intConcurrencyId = 1
 			,intContractHeaderId = @intContractHeaderId
-			,intContractDetailId = @intContractDetailId
+			,intContractDetailId = (case when @ysnMultiplePriceFixation = 0 then @intContractDetailId else null end)
 			,intOriginalFutureMarketId = @intOriginalFutureMarketId
 			,intOriginalFutureMonthId = @intOriginalFutureMonthId
 			,dblOriginalBasis = @dblOriginalBasis
@@ -298,6 +317,7 @@ begin try
 			,dblFinalPrice
 			,strNotes
 			,ysnToBeDeleted
+			,intAssignFuturesToContractSummaryId
 			,intConcurrencyId
 		)
 		select 
@@ -321,6 +341,7 @@ begin try
 			,dblFinalPrice = @dblFutures + @dblBasis
 			,strNotes = ''
 			,ysnToBeDeleted = 0
+			,intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
 			,intConcurrencyId = 1
 
 
@@ -333,8 +354,7 @@ begin try
 		select @dblTotalPricedQuantity = sum(dblQuantity) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId;
 		update tblCTPriceFixation set dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot where  intPriceFixationId = @intPriceFixationId;
 
-		--exec dbo.uspCTUpdateAppliedAndPrice @intContractDetailId = @intContractDetailId, @dblBalance = @dblBalance;
-		EXEC uspCTSavePriceContract @intPriceContractId = @intPriceContractId, @strXML = '', @dtmLocalDate = default;
+		EXEC uspCTPostProcessPriceContract @intPriceContractId = @intPriceContractId, @intUserId = @intUserId, @dtmLocalDate = default;
 
 	end
 

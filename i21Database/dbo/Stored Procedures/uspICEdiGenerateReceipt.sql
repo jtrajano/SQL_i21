@@ -99,7 +99,7 @@ BEGIN
 	SET @LogId = @@IDENTITY
 END
 
-DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
+--DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
 
 -- It's needed to increment each store indices by 1 since the reset file index is now based on the invoice record.
 -- Need to equalize file indices of all groupings

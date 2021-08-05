@@ -195,7 +195,7 @@ SELECT s.intApiItemContractStagingId
 	, ISNULL(s.ysnPrinted, 0)
 	, s.intOpportunityNameId
 	, s.intLineOfBusinessId
-	, COALESCE(s.dtmDueDate, DATEADD(DAY, t.intBalanceDue, s.dtmContractDate))
+	, COALESCE(s.dtmDueDate, t.dtmDueDate)
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMTerm t ON t.intTermID = s.intTermId
 WHERE s.guiApiUniqueId = @guiApiUniqueId

@@ -16,6 +16,9 @@ SAVE TRAN InventoryTransactionLink
 --Start Try Statement
 BEGIN TRY
 
+IF (dbo.fnSMCheckIfLicensed('Transaction Traceability') = 1)
+BEGIN
+
 --User Define Type Variable
 DECLARE @TransactionLink udtICTransactionLinks
 
@@ -59,6 +62,8 @@ BEGIN
 		'Inventory'
 
 	GOTO Link_Exit
+END
+
 END
 
 END TRY

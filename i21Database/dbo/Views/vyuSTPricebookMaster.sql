@@ -6,6 +6,10 @@ SELECT DISTINCT
 	, Item.strItemNo
 	, Item.strShortName
 	, Item.strDescription
+	, Item.intManufacturerId
+	, Item.strStatus
+	, Item.strNACSCategory
+	, Manufacturer.strManufacturer
 	, Uom.strLongUPCCode
 	, Uom.strUpcCode
 	, Item.intConcurrencyId
@@ -56,6 +60,8 @@ INNER JOIN tblSMCompanyLocation CompanyLoc
 	ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 INNER JOIN dbo.tblICCategory Category
 	ON Item.intCategoryId = Category.intCategoryId
+LEFT JOIN dbo.tblICManufacturer Manufacturer
+	ON Item.intManufacturerId = Manufacturer.intManufacturerId
 
 LEFT JOIN dbo.tblICItemPricing Pricing
 	ON ItemLoc.intItemLocationId = Pricing.intItemLocationId

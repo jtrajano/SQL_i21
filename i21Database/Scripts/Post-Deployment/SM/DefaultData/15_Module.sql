@@ -1297,6 +1297,31 @@ GO
 	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021')
 		DELETE FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021'
 	
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Language Translation')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Language Translation'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Multi-Language')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		126,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Multi-Language',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		124,
+		   [strPrefix]						=		N'ML',
+		   [ysnAddonComponent]              =       1
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Transaction Traceability')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		127,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Transaction Traceability',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		125,
+		   [strPrefix]						=		N'TT',
+		   [ysnAddonComponent]              =       1
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO

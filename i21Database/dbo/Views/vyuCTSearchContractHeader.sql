@@ -78,7 +78,8 @@ SELECT	CH.intContractHeaderId,
 
 		CH.strExternalEntity,
 		CH.strExternalContractNumber,
-		CH.ysnReceivedSignedFixationLetter
+		CH.ysnReceivedSignedFixationLetter, -- CT-5315
+		strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 
 FROM	tblCTContractHeader					CH	WITH (NOLOCK)
 JOIN	tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=		CH.intContractTypeId
@@ -119,3 +120,4 @@ JOIN	tblCTCropYear						YR	WITH (NOLOCK) ON	YR.intCropYearId					=		CH.intCropYe
 JOIN	tblCTBook							BK	WITH (NOLOCK) ON	BK.intBookId						=		CH.intBookId						LEFT
 JOIN	tblCTSubBook						SB	WITH (NOLOCK) ON	SB.intSubBookId						=		CH.intSubBookId						LEFT
 JOIN	tblSMFreightTerms					FT	WITH (NOLOCK) ON	FT.intFreightTermId					=		CH.intFreightTermId
+LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = CH.intEntitySelectedLocationId -- CT-5315

@@ -27,28 +27,22 @@ BEGIN
 			@strCompanyName			NVARCHAR(500),
 			@intPricingDecimals		INT
 		
-	SELECT	@strCompanyName	=	CASE 
-									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
-									ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) 
-								END
+	SELECT	@strCompanyName	= CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL
+								ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
 	FROM	tblSMCompanySetup
 
-	select top 1 @intPricingDecimals = intPricingDecimals from tblCTCompanyPreference
+	SELECT TOP 1 @intPricingDecimals = intPricingDecimals FROM tblCTCompanyPreference
 
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 
-	DECLARE @tblStatus TABLE
-	(
-		intContractDetailId INT,
-		intContractStatusId INT,
-		dblFutures NUMERIC(18, 6),
-		dblBasis NUMERIC(18, 6)
-	)
+	DECLARE @tblStatus TABLE (intContractDetailId INT
+		, intContractStatusId INT
+		, dblFutures NUMERIC(18, 6)
+		, dblBasis NUMERIC(18, 6))
 
 	INSERT INTO @tblStatus(intContractDetailId, intContractStatusId, dblFutures, dblBasis)
 	SELECT intContractDetailId, intContractStatusId, dblFutures, dblBasis
-	FROM
-	(
+	FROM (
 		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY cb.intContractDetailId ORDER BY cb.dtmCreatedDate DESC)
 			, cb.intContractDetailId
 			, cb.intContractStatusId
@@ -170,7 +164,7 @@ BEGIN
 				, strCustomer					=	EY.strEntityName
 				, strContract					=	CBL.strContractNumber + '-' + LTRIM(CBL.intContractSeq)
 				, CBL.intPricingTypeId
-				, strPricingType				=	CASE WHEN CBL.intPricingTypeId = 1 THEN 'P' ELSE 'B' END
+				, strPricingType				=	PT.strPricingType
 				, strContractDate				=	LEFT(CONVERT(NVARCHAR,CH.dtmContractDate,101),5)
 				, strShipMethod					=	FT.strFreightTerm
 				, strShipmentPeriod				=	LTRIM(DATEPART(mm,CD.dtmStartDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmStartDate)) + ' - ' + LTRIM(DATEPART(mm,CD.dtmEndDate)) + '/' + LTRIM(DATEPART(dd,CD.dtmEndDate))
@@ -206,6 +200,7 @@ BEGIN
 			INNER JOIN tblCTContractDetail		CD			ON CD.intContractDetailId = CBL.intContractDetailId
 			INNER JOIN tblICItemUOM				ItemUOM		ON ItemUOM.intItemUOMId = CD.intItemUOMId
 			INNER JOIN tblICUnitMeasure			IUM			ON IUM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			JOIN tblCTPricingType				PT			ON PT.intPricingTypeId = CBL.intPricingTypeId
 			LEFT JOIN tblSMFreightTerms			FT			ON FT.intFreightTermId = CD.intFreightTermId
 			LEFT JOIN tblRKFuturesMonth			FH			ON FH.intFutureMonthId = CD.intFutureMonthId
 			LEFT JOIN tblICItemUOM				BASISUOM	ON BASISUOM.intItemUOMId = CBL.intBasisUOMId

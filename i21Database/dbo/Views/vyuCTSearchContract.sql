@@ -84,7 +84,8 @@ AS
 			CH.strFreightTerm,
 			CH.strExternalEntity,
 			CH.strExternalContractNumber,
-			CH.ysnReceivedSignedFixationLetter
+			CH.ysnReceivedSignedFixationLetter, -- CT-5315
+			CH.strEntitySelectedLocation -- CT-5315
 
 	FROM	[vyuCTSearchContractHeader]  CH	WITH (NOLOCK) LEFT
 	JOIN

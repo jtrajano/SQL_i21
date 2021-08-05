@@ -47,7 +47,14 @@
 				(
 				select
 					proj.intOpportunityId
-					,intAttachment = (select count(tblSMAttachment.intAttachmentId) from tblSMAttachment where tblSMAttachment.strScreen in ('CRM.view.Opportunity','CRM.Opportunity') and tblSMAttachment.strRecordNo = convert(nvarchar(20), proj.intOpportunityId))
+					,intAttachment = (	SELECT		COUNT(a.intAttachmentId) 
+										FROM		tblSMAttachment AS a
+										INNER JOIN	tblSMTransaction AS b
+										ON			a.intTransactionId = b.intTransactionId
+										INNER JOIN	tblSMScreen AS c
+										ON			b.intScreenId = c.intScreenId
+										WHERE		c.strNamespace = 'CRM.view.Opportunity'
+												AND b.intRecordId = proj.intOpportunityId)
 					,proj.strName
 					,strSalesPipeStatus = pipe.strStatus
 					,proj.dtmLastDescriptionModified

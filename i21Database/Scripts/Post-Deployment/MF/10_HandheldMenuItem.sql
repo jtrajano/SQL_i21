@@ -185,6 +185,61 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'PO To Receipt'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('PO To Receipt')
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'SO To Shipment'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('SO To Shipment')
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'Inventory Transfer'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Inventory Transfer')
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'Transfer Receipt'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Transfer Receipt')
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'Production'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('Production')
+END
+GO
+
 --INSERT INTO tblMFHaldheldUserMenuItemMap
 --SELECT b.intEntityId
 -- ,intHandheldMenuItemId

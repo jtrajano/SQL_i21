@@ -159,6 +159,12 @@ BEGIN
 				,ysnPosted				= 0
 				,intEntityId			= @intEntityUserSecurityId
 				,strActualCostId		= IntegrationData.strActualCostId
+				,intBrokerId			= IntegrationData.intBrokerId
+				,strBolNumber			= IntegrationData.strBolNumber
+				,dtmBolDate				= IntegrationData.dtmBolDate
+				,dtmBolReceivedDate		= IntegrationData.dtmBolReceivedDate
+				,strTrailerId			= IntegrationData.strTrailerId
+				,strERPTransferNo		= IntegrationData.strERPTransferNo
 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -177,6 +183,12 @@ BEGIN
 				,ysnPosted			
 				,intEntityId
 				,strActualCostId
+				,intBrokerId
+				,strBolNumber
+				,dtmBolDate
+				,dtmBolReceivedDate
+				,strTrailerId
+				,strERPTransferNo
 			)
 			VALUES (
 				/*strTransferNo*/			@inventoryTransferNumber		
@@ -194,6 +206,12 @@ BEGIN
 				/*ysnPosted*/				,0
 				/*intEntityId*/				,@intEntityUserSecurityId
 				/*strActualCostId*/			,IntegrationData.strActualCostId
+				/*intBrokerId*/				,IntegrationData.intBrokerId
+				/*strBolNumber*/			,IntegrationData.strBolNumber
+				/*dtmBolDate*/				,IntegrationData.dtmBolDate
+				/*dtmBolReceivedDate*/		,IntegrationData.dtmBolReceivedDate
+				/*strTrailerId*/			,IntegrationData.strTrailerId
+				/*strERPTransferNo*/		,IntegrationData.strERPTransferNo
 			)			
 		;
 				

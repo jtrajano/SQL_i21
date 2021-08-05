@@ -210,7 +210,7 @@ begin
 		join tblICInventoryReceiptCharge ReceiptCharge
 			on Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				and DiscountCode.intItemId = ReceiptCharge.intChargeId
-				and (@intFeeItemId is null and ReceiptCharge.intChargeId <> @intFeeItemId)
+				and (@intFeeItemId is null or ReceiptCharge.intChargeId <> @intFeeItemId)
 	where Ticket.intTicketId = @intScaleTicketId
 
 	
@@ -252,8 +252,6 @@ begin
 
 	set @GRRMarketingFee = abs(@GRRMarketingFee)
 end
-
-
 
 
 declare @SettleStorageTickets nvarchar(250)

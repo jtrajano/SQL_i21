@@ -182,6 +182,9 @@ BEGIN TRY
 	DECLARE @dblTotalUnits AS DECIMAL(24,10)
 
 	DECLARE @ysnDeliverySheet AS BIT
+		,@ysnStorageChargeAccountUseIncome BIT = 1
+	
+	--select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
 
 	/*	intItemType
 		------------
@@ -296,12 +299,14 @@ BEGIN TRY
 		DELETE FROM @tblDepletion
 		DELETE FROM @SettleVoucherCreate
 
+		select @TicketNo = dbo.fnGRGetStorageTicket(@intSettleStorageId)
+
 		SELECT 
 			@intCreatedUserId 				= intCreatedUserId
 			,@EntityId 						= intEntityId
 			,@LocationId 					= intCompanyLocationId
 			,@ItemId 						= intItemId
-			,@TicketNo 						= strStorageTicket
+			,@TicketNo 						= case when isnull(@TicketNo , '') = '' then strStorageTicket else @TicketNo end 
 			,@strStorageAdjustment 			= strStorageAdjustment
 			,@dtmCalculateStorageThrough 	= dtmCalculateStorageThrough
 			,@dblAdjustPerUnit 				= dblAdjustPerUnit
@@ -562,8 +567,7 @@ BEGIN TRY
 				outer apply (
 					select sum(dblQtyReceived) as dblTotal
 						from tblAPBillDetail 
-							where intBillId in 
-								(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+							where intSettleStorageId = @intSettleStorageId
 							and intContractDetailId = a.intContractDetailId
 				) total_bill
 					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
@@ -597,8 +601,8 @@ BEGIN TRY
 
 						 select @cur_billed_per_contract_id = sum(ISNULL(dblQtyReceived,0))
 							from tblAPBillDetail 
-								where intBillId in 
-									(select intBillId from tblAPBill where strVendorOrderNumber = (select strStorageTicket from tblGRSettleStorage where intSettleStorageId = @intSettleStorageId)) 
+								where 
+								intSettleStorageId = @intSettleStorageId
 								and intContractDetailId = @cur_contract_id
 
 						--select '@cur_billed_per_contract_id',@cur_billed_per_contract_id
@@ -1534,7 +1538,7 @@ BEGIN TRY
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
 					,intTransactionDetailId		=  case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
-					,strTransactionId			= @TicketNo
+					,strTransactionId			= @strSettleTicket--@TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
@@ -1606,7 +1610,7 @@ BEGIN TRY
 					,dblExchangeRate			= 1
 					,intTransactionId			= @intSettleStorageId
 					,intTransactionDetailId		= case when SC.intContractDetailId is not null then SC.intSettleContractId else @intSettleStorageTicketId end
-					,strTransactionId			= @TicketNo
+					,strTransactionId			= @strSettleTicket--@TicketNo
 					,intTransactionTypeId		= 44
 					,intLotId					= @intLotId
 					,intSubLocationId			= CS.intCompanyLocationSubLocationId
@@ -2052,7 +2056,7 @@ BEGIN TRY
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
 					,[intShipFromId]				= @intShipFrom	
-					,[intShipFromEntityId]			= @shipFromEntityId
+					,[intShipFromEntityId]			= @shipFromEntityId					
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription]			= c.[strItemNo]
 					,[intItemId]					= a.[intItemId]
@@ -2062,6 +2066,7 @@ BEGIN TRY
 															case WHEN @ysnFromPriceBasisContract = 1 and a.intItemType = 2 then 'Other Charge Expense' else  'AP Clearing' end 
 														WHEN a.intItemType = 1 THEN 'AP Clearing'
 														WHEN @ysnDPOwnedType = 1 and a.intItemType = 3 AND CS.intTicketId IS NOT NULL then 'AP Clearing'
+														WHEN @ysnDPOwnedType = 1 and a.intItemType = 2 and @ysnStorageChargeAccountUseIncome = 1 THEN 'Other Charge Income'
 														ELSE 'Other Charge Expense' 
 													END
 																				)
@@ -2350,7 +2355,7 @@ BEGIN TRY
 										and a.intSettleStorageId = c.intSettleStorageId
 								join tblAPBill d
 									on c.intBillId = d.intBillId
-										and d.strVendorOrderNumber = @TicketNo
+										
 							)
 							
 				---we should update the voucher payable to remove the contract detail that has a null contract header
@@ -2419,7 +2424,7 @@ BEGIN TRY
 					,[intLocationId]				= @LocationId
 					,[intShipToId]					= @LocationId
 					,[intShipFromId]				= @intShipFrom	
-					,[intShipFromEntityId]			= @shipFromEntityId
+					,[intShipFromEntityId]			= @shipFromEntityId					
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription] 			= Item.[strItemNo]
 					,[intItemId] 					= ReceiptCharge.[intChargeId]
@@ -2539,7 +2544,7 @@ BEGIN TRY
 					,[intLocationId]		= @LocationId
 					,[intShipToId]			= @LocationId
 					,[intShipFromId]		= @intShipFrom	
-					,[intShipFromEntityId]	= @shipFromEntityId
+					,[intShipFromEntityId]	= @shipFromEntityId					
 					,[strVendorOrderNumber]	= @TicketNo
 					,[strMiscDescription]	= Item.[strItemNo]
 					,[intItemId]			= CC.[intItemId]
@@ -2945,8 +2950,7 @@ BEGIN TRY
 					INNER JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
 						AND IU.ysnStockUnit = 1
 				WHERE SV.intItemType = 1
-
-				
+			   				
 				SET @IdOutputs = ''
 				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT, @IdOutputs OUTPUT
 
@@ -2958,6 +2962,16 @@ BEGIN TRY
 				else
 					INSERT INTO @intStorageHistoryIds
 					SELECT @intStorageHistoryId
+
+							
+
+				--Add traceability for contract settlement transaction
+				exec uspSCAddTransactionLinks 
+					@intTransactionType = 6
+					,@intTransactionId = @intSettleStorageId
+					,@intAction = 1
+
+
 			END
 
 			UPDATE tblGRSettleStorage

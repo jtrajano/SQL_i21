@@ -254,6 +254,7 @@ AND intMonth > totalMonths
 AND strConvention <> 'Full Month'
 AND ISNULL(BD.ysnFullyDepreciated,0) = 0
 
+--ROUND OFF TO NEAREAST HUNDREDTHS
 UPDATE @tblAssetInfo
 set dblMonth = ROUND(dblMonth, 2),
 dblDepre =  ROUND(dblDepre, 2)

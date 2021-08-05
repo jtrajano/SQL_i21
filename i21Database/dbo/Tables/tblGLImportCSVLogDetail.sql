@@ -11,7 +11,7 @@ CREATE TABLE [dbo].[tblGLImportCSVLogDetail](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[tblGLImportCSVLogDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblGLImportCSVLogDetail_tblGLImportCSVLog] FOREIGN KEY([intImportLogId])
+ALTER TABLE [dbo].[tblGLImportCSVLogDetail] ADD  CONSTRAINT [FK_tblGLImportCSVLogDetail_tblGLImportCSVLog] FOREIGN KEY([intImportLogId])
 REFERENCES [dbo].[tblGLImportCSVLog] ([intImportLogId])
 GO
 

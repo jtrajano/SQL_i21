@@ -7,6 +7,7 @@ INSERT INTO tblARCustomerLicenseModule (intCustomerLicenseInformationId, intModu
 	FROM (SELECT DISTINCT(intCustomerLicenseInformationId) FROM tblARCustomerLicenseModule) A
 	WHERE dbo.fnARCheckCustomerLicenseModuleExists(A.intCustomerLicenseInformationId, 125) = 0
 
+
 print('/*******************  END UPDATING IDP TO CUSTOMER LICENSE MODULE *******************/')
 
 GO

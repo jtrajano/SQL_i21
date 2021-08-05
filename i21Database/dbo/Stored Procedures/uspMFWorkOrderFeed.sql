@@ -11,8 +11,8 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
-	Insert into dbo.tblMFWorkOrderPreStage(intWorkOrderId,intWorkOrderStatusId,intUserId)
-	Select @intWorkOrderId,@intStatusId,@intUserId
+	Insert into dbo.tblMFWorkOrderPreStage(intWorkOrderId,intWorkOrderStatusId,intUserId,strRowState)
+	Select @intWorkOrderId,@intStatusId,@intUserId, (Case When @intStatusId=9 then 'Added' Else 'Modified' End)
 	
 END TRY
 

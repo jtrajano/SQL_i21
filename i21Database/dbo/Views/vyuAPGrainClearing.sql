@@ -128,7 +128,7 @@ SELECT --'b',
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS DECIMAL(18,4)) as dblVoucherTotal	
+		END AS DECIMAL(18,2)) as dblVoucherTotal	
     ,CAST(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
@@ -139,7 +139,7 @@ SELECT --'b',
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS DECIMAL(18,4)) AS dblVoucherQty
+		END AS DECIMAL(18,2)) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount

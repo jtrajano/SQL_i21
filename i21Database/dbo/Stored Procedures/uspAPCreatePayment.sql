@@ -498,4 +498,6 @@ BEGIN
 	,@keyValue = @createdPaymentId									-- Primary Key Value
 	,@entityId = @userId											-- Entity Id
 	,@actionType = 'Created'										-- Action Type
+
+	EXEC uspAPAddTransactionLinks 2, @createdPaymentId, 1
 END

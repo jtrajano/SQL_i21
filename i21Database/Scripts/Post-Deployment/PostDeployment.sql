@@ -82,6 +82,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\40_DisconnectedReplicationTable.sql 
 :r .\SM\DefaultData\41_TaxReportType.sql 
 :r .\SM\DefaultData\42_InterCompanyMasterScreen.sql
+:r .\SM\DefaultData\43_UserRoleAdvancePermission.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
@@ -99,6 +100,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2110_CreateIDPGridLayout.sql
 :r .\SM\2110_UpdateAuditLogs.sql
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
+:r .\SM\2120_AddUserPortalSettingsToContactImport.sql
+:r .\SM\2120_InsertLanguages.sql
+:r .\SM\2120_UpdateAddonComponents.sql
+:r .\SM\2120_InsertOtherLabels.sql
 
 
 -- Canned Report
@@ -359,6 +364,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\26_LockAvgCost.sql 
 :r .\IC\27_ActivateItemLocations.sql 
 :r .\IC\28_PopulateICAPClearing.sql 
+:r .\IC\29_CleanupObjects.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -667,6 +673,9 @@ print 'BEGIN POST DEPLOYMENT'
 
 --MIGRATE AUDIT LOGS
 :r .\SM\1910_MigrateAuditLog.sql
+
+--MIGRATE AUDIT LOGS
+:r .\SM\2120_MigrateAttachment.sql
 
 
 --SM - this should always be the last to execute

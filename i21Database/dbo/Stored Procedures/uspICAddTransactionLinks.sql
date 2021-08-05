@@ -2,13 +2,16 @@ CREATE PROCEDURE [dbo].uspICAddTransactionLinks(@TransactionLinks udtICTransacti
 AS
 BEGIN
 
+IF (dbo.fnSMCheckIfLicensed('Transaction Traceability') = 1)
+BEGIN
+
 DECLARE @GraphId UNIQUEIDENTIFIER = NEWID()
 DECLARE @LinkDate DATE = GETUTCDATE()
 
 
 ;MERGE INTO tblICTransactionLinks AS TARGET
 USING (
-	SELECT 
+	SELECT
 		COALESCE(related.guiTransactionGraphId, @GraphId) AS guiTransactionGraphId, 
 		@LinkDate AS dtmLinkUtcDate, 
 		link.strOperation AS strOperation,
@@ -19,7 +22,8 @@ USING (
 		link.intDestId AS intDestId, 
 		link.strDestTransactionNo AS strDestTransactionNo, 
 		link.strDestModuleName AS strDestModuleName, 
-		link.strDestTransactionType AS strDestTransactionType
+		link.strDestTransactionType AS strDestTransactionType,
+		ROW_NUMBER() OVER(PARTITION BY link.intDestId, link.strDestTransactionNo, link.strDestModuleName, link.strDestTransactionType ORDER BY link.strOperation) AS RowNumber
 	FROM @TransactionLinks link
 	OUTER APPLY (
 		SELECT TOP 1 nodes.guiTransactionGraphId
@@ -41,8 +45,12 @@ ON
 	TARGET.strDestModuleName = SOURCE.strDestModuleName 
 	AND 
 	TARGET.strDestTransactionType = SOURCE.strDestTransactionType
-) 
-WHEN MATCHED AND TARGET.intSrcId IS NULL THEN
+	AND
+	TARGET.intSrcId IS NULL
+	AND 
+	SOURCE.RowNumber = 1
+)
+WHEN MATCHED THEN
 UPDATE SET 
 	TARGET.intSrcId = SOURCE.intSrcId, 
 	TARGET.strSrcTransactionNo = SOURCE.strSrcTransactionNo, 
@@ -89,6 +97,8 @@ OUTER APPLY (
 	WHERE nodes.strTransactionNo = l.strSrcTransactionNo
 ) related
 WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICTransactionNodes WHERE strTransactionNo = l.strDestTransactionNo)
+
+END
 
 END
 

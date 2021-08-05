@@ -37,6 +37,7 @@ BEGIN
 	,@intInventoryItemUOMId			INT
 	,@intCSInventoryItemUOMId		INT
 	,@StorageChargeItemDescription  NVARCHAR(100)
+	,@ysnStorageChargeAccountUseIncome BIT = 1
 	
 	declare @EntityNo nvarchar(100)
 
@@ -65,6 +66,11 @@ BEGIN
 	WHERE strType = 'Other Charge' 
 	  AND strCostType = 'Storage Charge' 
 	  AND intCommodityId = @IntCommodityId
+
+
+	
+	-- select @ysnStorageChargeAccountUseIncome = ysnStorageChargeAccountUseIncome from tblGRCompanyPreference
+
 
 	IF @intStorageChargeItemId IS NULL
 	BEGIN
@@ -1272,7 +1278,12 @@ BEGIN
 			ON NonInventoryCostCharges.intChargeId = OtherChargesGLAccounts.intChargeId
 				AND NonInventoryCostCharges.intChargeItemLocation = OtherChargesGLAccounts.intItemLocationId
 		INNER JOIN dbo.tblGLAccount GLAccount
-			ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
+			ON GLAccount.intAccountId =case when @ysnStorageChargeAccountUseIncome = 1 and NonInventoryCostCharges.strICCCostType = 'Storage Charge'
+										then 
+											OtherChargesGLAccounts.intOtherChargeIncome
+										else 
+											OtherChargesGLAccounts.intOtherChargeExpense
+										end
 		CROSS APPLY dbo.fnGetDebit(NonInventoryCostCharges.dblCost) DebitForeign
 		CROSS APPLY dbo.fnGetCredit(NonInventoryCostCharges.dblCost) CreditForeign
 		WHERE ISNULL(NonInventoryCostCharges.ysnPrice, 0) = 1

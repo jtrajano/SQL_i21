@@ -92,7 +92,6 @@ begin try
 		,@intCCSiteDetailId				INT
 		,@intInvoiceId					INT
 		,@intBuybackChargeId			INT
-		,@intTicketId					INT
 		,@dblOrderQty					DECIMAL(38,15)
 		,@dblOrderUnitQty				DECIMAL(38,20)
 		,@intOrderUOMId					INT
@@ -153,6 +152,8 @@ begin try
 		,intPricingTypeId int
 		,intFreightTermId int
 		,intCompanyLocationId int
+		,intPriceContractId int
+		,strPriceContractNo NVARCHAR(50)
 	);
 
 	declare 
@@ -169,12 +170,15 @@ begin try
 		,@dblTransactionQuantity numeric(18,6)
 		,@ysnLoad bit = 0
 		,@intInventoryReceiptId int
+		,@strReceiptNo NVARCHAR(50)
 		,@ysnSuccessBillPosting bit
 		,@intId int
 		,@intPriceItemUOMId int
 		,@intPricingTypeId int
 		,@intFreightTermId int
 		,@intCompanyLocationId int
+		,@intPriceContractId int
+		,@strPriceContractNo NVARCHAR(50)
 		;
 
 	declare @CreatedVoucher as table(
@@ -218,7 +222,10 @@ begin try
 				intVoucherPayableId = @intVoucherPayableId
 
 			--Get Receipt Id
-			select @intInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intInventoryReceiptItemId;
+			select @intInventoryReceiptId = ir.intInventoryReceiptId, @strReceiptNo = ir.strReceiptNumber
+			FROM tblICInventoryReceiptItem iri
+			JOIN tblICInventoryReceipt ir ON ir.intInventoryReceiptId = iri.intInventoryReceiptId
+			where intInventoryReceiptItemId = @intInventoryReceiptItemId;
 
 			--Check if Load base contract
 			select @ysnLoad = ysnLoad 
@@ -254,6 +261,8 @@ begin try
 				,intPricingTypeId = intPricingTypeId
 				,intFreightTermId = intFreightTermId
 				,intCompanyLocationId = intCompanyLocationId
+				,intPriceContractId = intPriceContractId
+				,strPriceContractNo = strPriceContractNo
 			from  
 				vyuCTGetAvailablePriceForVoucher  
 			where  
@@ -278,10 +287,38 @@ begin try
 					,@intPricingTypeId = intPricingTypeId
 					,@intFreightTermId = intFreightTermId
 					,@intCompanyLocationId = intCompanyLocationId
+					,@intPriceContractId = intPriceContractId
+					,@strPriceContractNo = strPriceContractNo
 				from  
 					@availablePrice  
 				where  
 					intId = @intId
+
+				IF (ISNULL(@intPriceContractId, 0) <> 0 )
+				BEGIN
+					-- Traceability Feature - CT-5847
+					DECLARE @TransactionLink udtICTransactionLinks
+					INSERT INTO @TransactionLink (strOperation
+						, intSrcId
+						, strSrcTransactionNo
+						, strSrcModuleName
+						, strSrcTransactionType
+						, intDestId
+						, strDestTransactionNo
+						, strDestModuleName
+						, strDestTransactionType)
+					SELECT 'Price Contract'
+						, intSrcId = @intInventoryReceiptId
+						, strSrcTransactionNo = @strReceiptNo
+						, strSrcModuleName = 'Inventory'
+						, strSrcTransactionType = 'Inventory Receipt'
+						, intDestId = @intPriceContractId
+						, strDestTransactionNo = @strPriceContractNo
+						, 'Contract Management'
+						, 'Price Contract'
+					
+					EXEC dbo.uspICAddTransactionLinks @TransactionLink
+				END
 
 				--Set @dblTransactionQuantity = @dblQuantityToBill by default (this is also correct quantity for Load Based)
 				set @dblTransactionQuantity = @dblQuantityToBill;
@@ -1026,51 +1063,15 @@ begin try
 					--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
 					if (isnull(@intCreatedPriceFixationDetailId,0) > 0)
 					begin
-						INSERT INTO tblCTPriceFixationDetailAPAR(
-							intPriceFixationDetailId
-							,intBillId
-							,intBillDetailId
-							,intSourceId
-							,dblQuantity
-							,dtmCreatedDate
-							,ysnMarkDelete
-							,intConcurrencyId  
-						)  
-						SELECT   
-							intPriceFixationDetailId = @intCreatedPriceFixationDetailId  
-							,intBillId = @intCreatedBillId  
-							,intBillDetailId = @intCreatedBillDetailId 
-							,intSourceId = @intCreatedInventoryReceiptItemId
-							,dblQuantity = @dblCreatedQtyReceived
-							,dtmCreatedDate = getdate()
-							,ysnMarkDelete = null
-							,intConcurrencyId = 1
-					end
 
-					--4. Apply PrePay
-					select @intTicketId = intTicketId from tblSCTicket where intInventoryReceiptId = @intCreatedInventoryReceiptId;
-
-					declare @prePayId Id;
-					delete from @prePayId
-
-					insert into
-						@prePayId([intId])
-					select distinct
-						BD.intBillId
-					from
-						tblAPBillDetail BD
-						join tblAPBill BL ON BL.intBillId = BD.intBillId
-						join tblSCTicket TK ON TK.intTicketId = BD.intScaleTicketId
-					where
-						BD.intContractDetailId = @intContractDetailId 
-						and BD.intScaleTicketId = @intTicketId 
-						and BL.intTransactionType in(2, 13)
-						and BL.ysnPosted = 1
-						and BL.ysnPaid = 0
-
-					if exists(select top 1 1 from @prePayId)
-					begin
-						EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
+						exec uspCTCreatePricingAPARLink
+							@intPriceFixationDetailId = @intCreatedPriceFixationDetailId
+							,@intHeaderId = @intCreatedBillId
+							,@intDetailId = @intCreatedBillDetailId
+							,@intSourceHeaderId = null
+							,@intSourceDetailId = @intCreatedInventoryReceiptItemId
+							,@dblQuantity = @dblCreatedQtyReceived
+							,@strScreen = 'Voucher'
 					end
 						
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId

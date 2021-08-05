@@ -60,6 +60,7 @@ SELECT DISTINCT
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CAST(0 AS BIT)--CUSTOMER.ysnCreditHold
+	, ysnExemptCreditCardFee = CAST(0 AS BIT)
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
 	, strFobPoint			= fTerms.strFobPoint

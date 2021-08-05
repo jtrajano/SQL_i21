@@ -56,6 +56,5 @@
 	dblShipToLatitude NUMERIC(18, 6) NULL,
 	dblShipToLongitude NUMERIC(18, 6) NULL,
 	dtmDateCreated DATETIME2 NULL,
-	dtmDateModified DATETIME2 NULL,
-	dtmDateLastUpdated AS COALESCE(dtmDateModified, dtmDateCreated)
+	dtmDateModified DATETIME2 NULL
 )

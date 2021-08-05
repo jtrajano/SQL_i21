@@ -567,10 +567,11 @@ BEGIN TRY
 			,@fromValue = ''									-- Previous Value
 			,@toValue = ''									-- New Value
 
-
 	SET @billCounter = @billCounter + 1
 	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId
 	END
+
+	EXEC uspAPAddTransactionLinks 1, @createdVouchersId, 1
 
 	IF @transCount = 0 COMMIT TRANSACTION;
 

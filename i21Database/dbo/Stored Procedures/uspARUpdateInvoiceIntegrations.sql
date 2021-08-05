@@ -6,6 +6,7 @@
 	,@ysnLogRisk		BIT = 1
 	,@Post				BIT	= 0
 	,@Recap				BIT	= 1
+	,@FromPosting		BIT = 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -134,7 +135,7 @@ BEGIN TRY
 	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
 	EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, @ForDelete
 	EXEC dbo.[uspARUpdateLineItemLotDetail] @intInvoiceId
-	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
+	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, @FromPosting
 	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId	
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
 	IF @Post = 0 EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
@@ -161,6 +162,9 @@ BEGIN TRY
 		BEGIN
 			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
 		END
+	
+	--INSERT TO TRANSACTION LINKS
+	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 

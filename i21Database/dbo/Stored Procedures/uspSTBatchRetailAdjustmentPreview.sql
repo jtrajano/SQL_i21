@@ -81,9 +81,10 @@ BEGIN
 				DECLARE @tblRetailPriceAdjustmentDetailIds TABLE 
 				(
 					intRetailPriceAdjustmentDetailId	INT,
-					intRetailPriceAdjustmentId	INT,
+					intRetailPriceAdjustmentId			INT,
 					ysnOneTimeUse						BIT,
 					intCompanyLocationId				INT NULL,
+					intStoreGroupId						INT NULL,
 					intCategoryId						INT NULL,
 				    intFamilyId							INT NULL,
 					intClassId							INT NULL,
@@ -96,7 +97,7 @@ BEGIN
 					intItemUOMId						INT NULL,
  					dblPrice							NUMERIC(18,6) NULL, 
 					dblLastCost							NUMERIC(18,6) NULL,
-					dblFactor						NUMERIC(18,6) NULL
+					dblFactor							NUMERIC(18,6) NULL
 				)
 
 				-- INSERT to Temp Table
@@ -106,6 +107,7 @@ BEGIN
 					intRetailPriceAdjustmentId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
+					intStoreGroupId,
 					intCategoryId,
 				    intFamilyId,
 					intClassId,
@@ -125,6 +127,7 @@ BEGIN
 					pad.intRetailPriceAdjustmentId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
+					intStoreGroupId,
 					intCategoryId,
 				    intFamilyId,
 					intClassId,
@@ -148,6 +151,7 @@ BEGIN
 				BEGIN
 
 					DECLARE @intLocationId						INT = NULL
+						, @intStoreGroupId						INT = NULL
 						, @intVendorId							INT = NULL
 						, @intCategoryId						INT = NULL
 						, @intFamilyId							INT = NULL
@@ -174,6 +178,7 @@ BEGIN
 								@intRetailPriceAdjustmentDetailId	= intRetailPriceAdjustmentDetailId,
 								@intRetailPriceAdjustmentId			= intRetailPriceAdjustmentId,
 								@intLocationId						= intCompanyLocationId,
+								@intStoreGroupId					= intStoreGroupId,
 								@intCategoryId						= intCategoryId,
 								@intFamilyId						= intFamilyId,
 								@intClassId							= intClassId,
@@ -215,6 +220,10 @@ BEGIN
 							LEFT JOIN tblSTSubcategory FAMILY ON FAMILY.intSubcategoryId = itemLoc.intFamilyId
 							LEFT JOIN tblSTSubcategory CLASS ON CLASS.intSubcategoryId = itemLoc.intClassId
 							WHERE (@intLocationId IS NULL OR (CL.intCompanyLocationId = @intLocationId))
+							AND (@intStoreGroupId IS NULL OR (CL.intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSTStore st
+																							INNER JOIN tblSTStoreGroupDetail stgd
+																								ON st.intStoreId = stgd.intStoreId
+																							WHERE stgd.intStoreGroupId = @intStoreGroupId)))
 							AND (@intVendorId IS NULL OR (Vendor.intEntityId = @intVendorId))
 							AND (@strRegion = '' OR (ST.strRegion = @strRegion))
 							AND (@strDistrict = '' OR (ST.strDistrict = @strDistrict))
@@ -289,6 +298,7 @@ BEGIN
 										-- filter params
 										@strUpcCode					= @strProcessLongUpcCode 
 										,@strDescription			= @strProcessDescription 
+										,@strScreen					= 'RetailPriceAdjustment' 
 										,@intItemId					= @intProcessItemId
 										,@intItemPricingId			= @intProcessItemPricingId 
 										-- update params
@@ -446,7 +456,7 @@ BEGIN
 					END
 
 					-- Return Preview
-					SELECT  tp.strItemDescription		AS strDescription
+					SELECT DISTINCT  tp.strItemDescription		AS strDescription
 							, tp.strLongUPCCode		AS strUpc
 							, tp.strLocationName		AS strLocation
 							, tp.strChangeDescription

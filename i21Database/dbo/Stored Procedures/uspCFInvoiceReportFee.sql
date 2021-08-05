@@ -277,6 +277,8 @@ BEGIN
 				,dtmInvoiceDate			DATETIME
 				,intItemId					INT
 				,intARLocationId			INT
+				,intFeeProfileId			INT
+				,strFeeProfileDescription	NVARCHAR(MAX)
 			)
 
 			-------------VARIABLES------------
@@ -457,6 +459,8 @@ BEGIN
 				INNER JOIN tblCFFee cff
 				ON cffpd.intFeeId = cff.intFeeId
 				WHERE cffp.intFeeProfileId = @intFeeProfileId
+
+				
 					----------GET FEE DETAILS------------
 					WHILE (EXISTS(SELECT 1 FROM @tblCFInvoiceFeeDetail))
 					BEGIN
@@ -792,6 +796,8 @@ BEGIN
 
 								
 						END
+
+
 						
 
 
@@ -813,6 +819,9 @@ BEGIN
 						,dtmInvoiceDate
 						,intItemId
 						,intARLocationId
+						,intFeeProfileId			
+						,strFeeProfileDescription	
+						,dblQuantity
 					)
 					SELECT 
 						 @intFeeLoopId
@@ -821,7 +830,7 @@ BEGIN
 						,dblFeeRate
 						,dtmStartDate
 						,dtmEndDate
-						,strFeeDescription
+						,strFeeProfileDetailDescription
 						,strFee
 						,strInvoiceFormat
 						,dblFeeAmount = 
@@ -908,6 +917,31 @@ BEGIN
 						,@dtmInvoiceDate	
 						,intItemId	
 						,@intARLocationId
+						,intFeeProfileId			
+						,strFeeProfileDescription
+						,dblQuantity = 
+									CASE 
+											 WHEN cffee.strCalculationType = 'Transaction' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ISNULL(@intTotalTransaction,0)
+											 WHEN cffee.strCalculationType = 'Unit' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ISNULL(@dblTotalQuantity,0)
+											 WHEN cffee.strCalculationType = 'Billed Cards'  AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ISNULL(@intTotalBilledCard,0)
+											 WHEN cffee.strCalculationType = 'Active Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ISNULL(@intTotalActiveCard,0)
+											 WHEN cffee.strCalculationType = 'New Cards' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN ISNULL(@intTotalNewCard,0)
+											 WHEN cffee.strCalculationType = 'Flat' 
+											 AND ((cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Annual' AND @ysnInvoiceAnnualFee = 1)
+											 OR (cffee.strCalculationFrequency = 'Monthly' AND @ysnInvoiceMonthyFee = 1)
+											 )
+												THEN 1
+											 WHEN cffee.strCalculationType = 'Percentage' AND (cffee.strCalculationFrequency = 'Billing Cycle' AND @ysnInvoiceBillingCycleFee = 1)
+												THEN 1
+											 ELSE
+												NULL
+										END
 						FROM @tblCFInvoiceFeeDetail cffee
 						WHERE intFeeId = @intFeeLoopId
 						GROUP BY 
@@ -915,11 +949,13 @@ BEGIN
 						,cffee.dblFeeRate
 						,cffee.dtmStartDate
 						,cffee.dtmEndDate
-						,cffee.strFeeDescription
+						,cffee.strFeeProfileDetailDescription
 						,cffee.strFee
 						,cffee.strCalculationFrequency
 						,cffee.strInvoiceFormat
 						,cffee.intItemId
+						,cffee.intFeeProfileId			
+						,cffee.strFeeProfileDescription
 
 
 						DELETE FROM @tblCFInvoiceFeeDetail WHERE intFeeId = @intFeeLoopId
@@ -935,6 +971,19 @@ BEGIN
 				
 			END
 			
+
+			UPDATE @tblCFInvoiceFeeOutput 
+			SET  dblFeeRate = tblCFInvoiceReportTieredUnitDiscountTempTable.dblRate
+				,dblFeeAmount = (ABS(tblCFInvoiceReportTieredUnitDiscountTempTable.dblAmount) * -1 )
+				,dblQuantity = tblCFInvoiceReportTieredUnitDiscountTempTable.dblQuantity
+			FROM tblCFInvoiceReportTieredUnitDiscountTempTable
+			WHERE [@tblCFInvoiceFeeOutput].intAccountId  = tblCFInvoiceReportTieredUnitDiscountTempTable.intAccountId
+			AND [@tblCFInvoiceFeeOutput].intFeeLoopId = tblCFInvoiceReportTieredUnitDiscountTempTable.intFeeId
+
+			DELETE FROM @tblCFInvoiceFeeOutput
+			WHERE ISNULL(dblFeeAmount,0) = 0
+			
+
 			-------------SET GROUP VOLUME TO OUTPUT---------------
 
 
@@ -967,7 +1016,9 @@ BEGIN
 				,dtmInvoiceDate			
 				,dtmStartDate			
 				,dtmEndDate		
-				,strUserId		
+				,intFeeProfileId			
+				,strFeeProfileDescription		
+				,strUserId
 			)
 			SELECT
 			 tbl1.intFeeLoopId			
@@ -992,6 +1043,8 @@ BEGIN
 			,tbl1.dtmInvoiceDate			
 			,tbl1.dtmStartDate			
 			,tbl1.dtmEndDate
+			,tbl1.intFeeProfileId			
+			,tbl1.strFeeProfileDescription
 			,@UserId
 			FROM @tblCFInvoiceFeeOutput AS tbl1
 			inner join 

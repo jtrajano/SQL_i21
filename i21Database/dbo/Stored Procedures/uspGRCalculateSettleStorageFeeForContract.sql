@@ -141,12 +141,15 @@ BEGIN TRY
 		DELETE FROM @tblDepletion
 		DELETE FROM @SettleVoucherCreate
 
+		
+		select @TicketNo = dbo.fnGRGetStorageTicket(@intSettleStorageId)
+
 		SELECT 
 			@intCreatedUserId 				= intCreatedUserId
 			,@EntityId 						= intEntityId
 			,@LocationId 					= intCompanyLocationId
 			,@ItemId 						= intItemId
-			,@TicketNo 						= strStorageTicket
+			,@TicketNo 						= case when isnull(@TicketNo , '') = '' then strStorageTicket else @TicketNo end 
 			,@strStorageAdjustment 			= strStorageAdjustment
 			,@dtmCalculateStorageThrough 	= dtmCalculateStorageThrough
 			,@dblAdjustPerUnit 				= dblAdjustPerUnit
@@ -158,7 +161,7 @@ BEGIN TRY
 			,@origdblSpotUnits				= dblSpotUnits
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
-	
+
 		SELECT
 			@intFutureMarketId 	= ISNULL(Com.intFutureMarketId,0)
 			,@strItemNo 		= Item.strItemNo
@@ -899,6 +902,7 @@ BEGIN TRY
 					,[intShipToId]					= @LocationId
 					,[intShipFromId]				= @intShipFrom	
 					,[intShipFromEntityId]			= @shipFromEntityId
+					--Mon
 					,[strVendorOrderNumber]			= @TicketNo
 					,[strMiscDescription]			= c.[strItemNo]
 					,[intItemId]					= a.[intItemId]

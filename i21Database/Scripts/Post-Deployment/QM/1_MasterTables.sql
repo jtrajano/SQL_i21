@@ -1173,6 +1173,15 @@ BEGIN
 	VALUES('Offer Sample Label','OfferSampleLabel',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblQMSampleLabel WHERE strReportName = 'SampleLabelMP')
+BEGIN
+	INSERT INTO tblQMSampleLabel(strSampleLabelName,strReportName,intControlPointId,intConcurrencyId)
+	SELECT 'Sample Label - MP','SampleLabelMP',intControlPointId,1
+	FROM tblQMControlPoint
+	WHERE intControlPointId NOT IN (3, 11, 12, 13, 14)
+	ORDER BY intControlPointId
+END
+GO
 
 UPDATE tblQMSampleType
 SET ysnAdjustInventoryQtyBySampleQty = 0
@@ -1203,6 +1212,10 @@ UPDATE tblQMCompanyPreference
 SET ysnAllowReversalSampleEntry = 0
 WHERE ysnAllowReversalSampleEntry IS NULL
 GO
+UPDATE tblQMCompanyPreference
+SET ysnEnableAssignContractsInSample = 0
+WHERE ysnEnableAssignContractsInSample IS NULL
+GO
 
 GO
 UPDATE tblQMSample
@@ -1218,4 +1231,9 @@ GO
 UPDATE tblQMSample
 SET ysnIgnoreContract = 0
 WHERE ysnIgnoreContract IS NULL
+GO
+
+UPDATE tblQMSampleType
+SET ysnMultipleContractSeq = 0
+WHERE ysnMultipleContractSeq IS NULL
 GO

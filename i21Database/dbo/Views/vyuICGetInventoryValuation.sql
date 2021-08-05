@@ -73,7 +73,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,dblBeginningQtyBalance		= CAST(0 AS NUMERIC(38, 20)) 
 		,dblQuantity				= ISNULL(t.dblQty, 0)
 		,dblRunningQtyBalance		= CAST(0 AS NUMERIC(38, 20))
-		,dblCost					= ISNULL(t.dblCost, 0)
+		,dblCost					= COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(i.intItemId, t.intItemLocationId, t.intItemUOMId, GETDATE()) ,t.dblCost, 0)
 		,dblBeginningBalance		= CAST(0 AS NUMERIC(38, 20))
 		,dblValue					= 
 									--ISNULL(dbo.fnMultiply(t.dblQty, t.dblCost), 0) + ISNULL(t.dblValue, 0)
@@ -87,7 +87,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strUOM						= umTransUOM.strUnitMeasure
 		,strStockUOM				= iuStock.strUnitMeasure
 		,dblQuantityInStockUOM		= ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty), 0)
-		,dblCostInStockUOM			= ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblCost), 0)
+		,dblCostInStockUOM			= COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(i.intItemId, t.intItemLocationId, t.intItemUOMId, GETDATE()), dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblCost), 0)
 		,dblPrice					= ISNULL(ItemPricing.dblSalePrice ,0)
 		,strBOLNumber				= CAST (
 											CASE	ty.intTransactionTypeId 

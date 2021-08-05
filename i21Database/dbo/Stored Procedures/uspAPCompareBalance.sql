@@ -3,7 +3,8 @@
     @asOfDate DATETIME = NULL,
     @emailProfileName NVARCHAR(200) = NULL,
     @recipients NVARCHAR(MAX) = NULL,
-    @emailSubject NVARCHAR(500) = NULL
+    @emailSubject NVARCHAR(500) = NULL,
+    @htmlResult NVARCHAR(MAX) OUTPUT
 )
 AS
 BEGIN
@@ -84,18 +85,19 @@ BEGIN
             SET @resultAsHTML += N'</table>'; 
         END
 
-        IF @resultAsHTML != ''
-        BEGIN
-            -- Send the email 
-            EXEC msdb.dbo.sp_send_dbmail
-                @profile_name = @emailProfileName
-                ,@recipients = @recipients
-                ,@subject = @subject
-                ,@body = @resultAsHTML
-                ,@body_format = 'HTML'			
+        SET @htmlResult = @resultAsHTML;
+        -- IF @resultAsHTML != ''
+        -- BEGIN
+        --     -- Send the email 
+        --     EXEC msdb.dbo.sp_send_dbmail
+        --         @profile_name = @emailProfileName
+        --         ,@recipients = @recipients
+        --         ,@subject = @subject
+        --         ,@body = @resultAsHTML
+        --         ,@body_format = 'HTML'			
 
-            PRINT 'Email Sent to Queue.'
-        END
+        --     PRINT 'Email Sent to Queue.'
+        -- END
     END
 
 END

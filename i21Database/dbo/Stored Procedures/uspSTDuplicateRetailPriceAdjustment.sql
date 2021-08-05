@@ -88,6 +88,7 @@ BEGIN
 	(
 		intRetailPriceAdjustmentId,
 		intCompanyLocationId,
+		intStoreGroupId,
 		strRegion,
 		strDistrict,
 		strState,
@@ -101,6 +102,8 @@ BEGIN
 		ysnPromo,
 		strPriceMethod,
 		dblFactor,
+		strRoundPrice,
+		strPriceEndingDigit,
 		dblPrice,
 		dblLastCost,
 		-- ysnActive,
@@ -116,6 +119,7 @@ BEGIN
 	SELECT 
 		@NewRetailPriceAdjustmentId,
 		intCompanyLocationId,
+		intStoreGroupId,
 		strRegion,
 		strDistrict,
 		strState,
@@ -129,6 +133,8 @@ BEGIN
 		ysnPromo,
 		strPriceMethod,
 		dblFactor,
+		strRoundPrice,
+		strPriceEndingDigit,
 		dblPrice,
 		dblLastCost,
 		-- ysnActive,

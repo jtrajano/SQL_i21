@@ -43,12 +43,14 @@ SELECT
 	, t.strTransactionId
 	, t.strTransactionForm
 	, ' + @TopSelect + '
+	, t.intTransactionNodeId
 FROM (
 	SELECT
 		  n.guiTransactionGraphId
 		, gl.intTransactionId
 		, gl.strTransactionId
 		, gl.strTransactionForm
+		, n.intTransactionNodeId
 		, ' + @Select + '
 	FROM tblGLDetail gl
 	INNER JOIN tblGLAccount a ON a.intAccountId = gl.intAccountId
@@ -57,13 +59,15 @@ FROM (
 		AND tn.strTransactionType = n.strTransactionType
 	WHERE tn.guiIdentifier = ''' + @identifier + '''
 		AND gl.ysnIsUnposted = 0
-	GROUP BY n.guiTransactionGraphId, gl.intTransactionId, gl.strTransactionId, gl.strTransactionForm, a.strAccountId
+	GROUP BY n.guiTransactionGraphId, gl.intTransactionId, gl.strTransactionId, gl.strTransactionForm, a.strAccountId, n.intTransactionNodeId
 ) t
 GROUP BY 
 	  t.guiTransactionGraphId
 	, t.intTransactionId
 	, t.strTransactionId
 	, t.strTransactionForm
+	, t.intTransactionNodeId
+ORDER BY t.intTransactionNodeId
 ';
 
 EXECUTE sp_executesql @Query;

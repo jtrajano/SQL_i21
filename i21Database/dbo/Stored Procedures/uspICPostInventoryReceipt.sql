@@ -2033,7 +2033,7 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
-
+	
 	-- Process the decimal discrepancy
 	BEGIN 
 		INSERT INTO @GLEntries (
@@ -2079,7 +2079,7 @@ BEGIN
 			,@intEntityUserSecurityId = @intEntityUserSecurityId
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
-	END
+	END	
 END   
 
 --------------------------------------------------------------------------------------------  

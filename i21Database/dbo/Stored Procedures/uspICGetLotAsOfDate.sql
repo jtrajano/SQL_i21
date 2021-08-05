@@ -179,6 +179,8 @@ SELECT
 	,Lot.strContainerNo
 	,Lot.strMarkings
 	,ItemUOM.dblStandardWeight
+	,dblReservedQty					= ISNULL(Reserve.dblTotalQty, 0)
+	,dblAvailableQty				= ISNULL(Lot.dblQty, 0) - ISNULL(Reserve.dblTotalQty, 0)
 FROM 
 	@tblInventoryTransaction t 
 	INNER JOIN tblICItem i 
@@ -210,6 +212,28 @@ FROM
 		ON ItemOwner.intItemOwnerId = Lot.intItemOwnerId
 	LEFT JOIN tblEMEntity LotEntity
 		ON LotEntity.intEntityId = ItemOwner.intOwnerId
+	LEFT JOIN (
+		SELECT intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intSubLocationId
+			, intStorageLocationId
+			, intLotId
+			, dblTotalQty = SUM(dblQty)
+		FROM tblICStockReservation
+		WHERE ysnPosted = 0
+		GROUP BY intItemId
+			, intItemLocationId
+			, intItemUOMId
+			, intSubLocationId
+			, intStorageLocationId
+			, intLotId
+	) Reserve ON Reserve.intItemId = Lot.intItemId
+	AND Reserve.intItemLocationId = Lot.intItemLocationId
+	AND Reserve.intItemUOMId = Lot.intItemUOMId
+	AND Reserve.intSubLocationId = Lot.intSubLocationId
+	AND Reserve.intStorageLocationId = Lot.intStorageLocationId
+	AND Reserve.intLotId = Lot.intLotId
 GROUP BY i.intItemId
 		,i.strItemNo
 		,ItemUOM.intItemUOMId
@@ -233,6 +257,7 @@ GROUP BY i.intItemId
 		,Lot.intWeightUOMId
 		,Lot.strContainerNo
 		,Lot.strMarkings
+		,Lot.dblQty
 		,wUOM.strUnitMeasure
 		,LotWeightUOM.dblUnitQty
 		,Lot.intLotStatusId
@@ -246,5 +271,6 @@ GROUP BY i.intItemId
 		,Lot.strWarehouseRefNo
 		,Lot.strCondition
 		,ItemUOM.dblStandardWeight
+		,Reserve.dblTotalQty
 HAVING	(@ysnHasStockOnly = 1 AND (SUM(t.dblQty) <> 0 OR SUM(t.dblUnitStorage) <> 0))
 		OR @ysnHasStockOnly = 0
