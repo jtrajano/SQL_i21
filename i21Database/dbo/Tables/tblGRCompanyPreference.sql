@@ -38,14 +38,14 @@
     
 
     
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MarketingFeeId] FOREIGN KEY ([intGRRItemMarketingFeeId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_TestWeightId] FOREIGN KEY ([intGRRItemTestWeightId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_CCFMId] FOREIGN KEY ([intGRRItemCCFMId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_GradeId] FOREIGN KEY ([intGRRItemGradeId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_FactorId] FOREIGN KEY ([intGRRItemFactorId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_ProteinId] FOREIGN KEY ([intGRRItemProteinId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MoistureId] FOREIGN KEY ([intGRRItemMoistureId]) REFERENCES [tblICItem]([intItemId]),
-	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_SplitId] FOREIGN KEY ([intGRRSplitItemId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MarketingFeeId] FOREIGN KEY ([intGRRItemMarketingFeeId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_TestWeightId] FOREIGN KEY ([intGRRItemTestWeightId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_CCFMId] FOREIGN KEY ([intGRRItemCCFMId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_GradeId] FOREIGN KEY ([intGRRItemGradeId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_FactorId] FOREIGN KEY ([intGRRItemFactorId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_ProteinId] FOREIGN KEY ([intGRRItemProteinId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_MoistureId] FOREIGN KEY ([intGRRItemMoistureId]) REFERENCES [tblICItem]([intItemId]),
+	--CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_SplitId] FOREIGN KEY ([intGRRSplitItemId]) REFERENCES [tblICItem]([intItemId]),
 
 
 
