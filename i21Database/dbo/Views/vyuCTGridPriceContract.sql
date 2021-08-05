@@ -2,7 +2,20 @@
 
 AS
 
-	SELECT	 PC.*
+	SELECT
+			PC.intPriceContractId
+			,PC.strPriceContractNo
+			,PC.intCommodityId
+			,PC.intFinalPriceUOMId
+			,PC.intFinalCurrencyId
+			,PC.intCreatedById
+			,PC.dtmCreated
+			,PC.intLastModifiedById
+			,PC.dtmLastModified
+			,PC.intConcurrencyId
+			,PC.intCompanyId
+			,PC.intPriceContractRefId
+			,PC.ysnReadOnlyInterCoPrice
 			,UM.strUnitMeasure	AS	strFinalPriceUOM
 			,CY.strCurrency		AS	strFinalCurrency
 			,CY.ysnSubCurrency

@@ -31,11 +31,24 @@ BEGIN TRY
 	DECLARE @transCount INT;
 	DECLARE @voucherBillDetailIds AS Id;
 	DECLARE @vendorOrderNumber NVARCHAR(100);
+
+	IF(NOT EXISTS(SELECT 1 FROM dbo.tblAPBill WHERE intBillId = @intBillId))
+	BEGIN
+		RAISERROR('Voucher already deleted.',16,1)
+		RETURN;
+	END
+
 	SET @transCount = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
 
 	INSERT INTO @voucherBillDetailIds
 	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
+
+	IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
+	BEGIN
+		RAISERROR('Voucher details already deleted.',16,1)
+		RETURN;
+	END
 
 	SELECT @vendorOrderNumber = strVendorOrderNumber FROM tblAPBill WHERE intBillId = @intBillId
 
@@ -116,6 +129,8 @@ BEGIN TRY
 	BEGIN
 		EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
 	END
+
+	EXEC uspAPAddTransactionLinks 1, @intBillId, 2
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)

@@ -18,7 +18,8 @@ AS
 			,intInventoryReceiptChargeId = BillDtl.intInventoryReceiptChargeId
 		FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
-				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+				ON PYMT.intPaymentId = PYMTDTL.intPaymentId					
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill	
 				ON PYMTDTL.intBillId = Bill.intBillId --and intTransactionType = 1
 			JOIN tblAPBillDetail BillDtl

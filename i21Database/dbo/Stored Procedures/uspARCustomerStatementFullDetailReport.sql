@@ -385,6 +385,39 @@ LEFT JOIN (
 	  AND P.intPaymentId NOT IN (SELECT I.intPaymentId FROM dbo.tblARInvoice I WITH (NOLOCK) WHERE I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId IS NOT NULL AND I.ysnPosted = 1)
 	  AND ISNULL(NULLIF(P.strPaymentInfo, ''), '') NOT LIKE 'CFSI-%'
 
+	UNION ALL
+
+	SELECT intInvoiceId				= NULL
+		 , intPaymentId				= P.intPaymentId
+		 , intInvoiceDetailId		= NULL
+		 , intEntityCustomerId		= P.intEntityVendorId
+		 , strTransactionNumber		= NULL
+		 , strPONumber				= NULL
+		 , strTransactionType		= 'Payment'
+		 , strInvoiceType			= 'Payment'
+		 , strType					= NULL
+		 , strItemNo				= NULL
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
+		 , dblAmount				= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
+		 , dblQuantity				= NULL
+		 , dblInvoiceDetailTotal	= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
+		 , dtmDate					= P.dtmDatePaid
+		 , dtmDueDate				= P.dtmDatePaid
+	FROM dbo.tblAPPayment P WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intPaymentId
+			 , dblPayment				= SUM(ISNULL(PD.dblPayment, 0))
+			 , dblDiscount 				= SUM(ISNULL(PD.dblDiscount, 0))
+			 , dblInterest 				= SUM(ISNULL(PD.dblInterest, 0))			 
+		FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
+		WHERE PD.intInvoiceId IS NOT NULL
+		GROUP BY PD.intPaymentId
+	) PD ON P.intPaymentId = PD.intPaymentId
+	INNER JOIN #COMPANYLOCATIONS CL ON P.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE P.ysnPosted = 1	  
+	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
+
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
 --INCLUDE BUDGET

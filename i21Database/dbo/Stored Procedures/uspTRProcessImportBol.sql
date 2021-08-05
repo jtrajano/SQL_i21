@@ -24,7 +24,7 @@ BEGIN
 			LD.intDriverId, 
 			LD.intTrailerId, 
 			LD.dtmPullDate
-		FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intImportLoadId = @intImportLoadId
+		FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 AND LD.intImportLoadId = @intImportLoadId AND ISNULL(ysnProcess, 0) = 0
 
 		DECLARE @intTruckId INT = NULL,
 			@intCarrierId INT = NULL,
@@ -34,10 +34,13 @@ BEGIN
 			@strTransactionNumber NVARCHAR(50) = NULL,
 			@intLoadHeaderId INT = NULL,
 			@intSellerId INT = NULL,
-			@intFreightItemId INT = NULL
+			@intFreightItemId INT = NULL,
+			@intUserId INT = NULL
 
 		-- GET DEFAULT SELLER
 		SELECT TOP 1 @intSellerId = intSellerId, @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference 
+
+		SELECT TOP 1 @intUserId = intUserId FROM tblTRImportLoad WHERE intImportLoadId = @intImportLoadId
 
 		BEGIN TRANSACTION
 
@@ -51,12 +54,23 @@ BEGIN
 			EXEC uspSMGetStartingNumber 54, @strTransactionNumber OUT
 			
 			-- TR HEADER
-			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckDriverReferenceId, intTrailerId, strTransaction, intFreightItemId, intConcurrencyId)
-			VALUES (@dtmPullDate, @intCarrierId, @intSellerId, @intDriverId, @intTruckId, @intTrailerId, @strTransactionNumber, @intFreightItemId, 1)
+			INSERT INTO tblTRLoadHeader (dtmLoadDateTime, intShipViaId, intSellerId, intDriverId, intTruckDriverReferenceId, intTrailerId, strTransaction, intFreightItemId, intConcurrencyId, intUserId)
+			VALUES (@dtmPullDate, @intCarrierId, @intSellerId, @intDriverId, @intTruckId, @intTrailerId, @strTransactionNumber, @intFreightItemId, 1, @intUserId)
 			
 			SET @intLoadHeaderId = @@identity
 
-			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId
+			DECLARE @intOutput INT = NULL
+
+			-- INSERT INTO tblSMTransaction
+			EXEC uspSMInsertTransaction
+				@screenNamespace = 'Transports.view.TransportLoads',
+				@strTransactionNo = @strTransactionNumber,
+				@intEntityId = @intUserId,
+				@intKeyValue = @intLoadHeaderId,
+				@dtmDate = NULL,
+				@output = @intOutput OUTPUT
+
+			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId, strStatus = 'Success'
 			WHERE intImportLoadId = @intImportLoadId 
 			AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)
 			AND intCarrierId = @intCarrierId 
@@ -274,7 +288,7 @@ BEGIN
 
 				DECLARE @intDDPullProductId INT = NULL,
 					@intDDDropProductId INT = NULL,
-					@dblDDDropGross NUMERIC(16,6) = NULL,
+					@dblDDDropGross NUMERIC(18,6) = NULL,
 					@dblDDDropNet NUMERIC(18,6) = NULL,
 					@strDDBillOfLading NVARCHAR(50) = NULL,
 					@intDDLoadReceiptId INT = NULL,
@@ -446,7 +460,7 @@ BEGIN
 				
 				DECLARE @intNonBlendPullProductId INT = NULL,
 					@intNonBlendDropProductId INT = NULL,
-					@dblNonBlendDropGross NUMERIC(16,6) = NULL,
+					@dblNonBlendDropGross NUMERIC(18,6) = NULL,
 					@dblNonBlendDropNet NUMERIC(18,6) = NULL,
 					@strNonBlendBillOfLading NVARCHAR(50) = NULL,
 					@strNonBlendReceiptLink NVARCHAR(50) = NULL,
@@ -571,6 +585,16 @@ BEGIN
 			END
 			CLOSE @CursorDistributionTran
 			DEALLOCATE @CursorDistributionTran
+
+			UPDATE tblTRImportLoadDetail SET ysnProcess = 1
+			WHERE intImportLoadId = @intImportLoadId 
+			AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)
+			AND intCarrierId = @intCarrierId 
+			AND intDriverId = @intDriverId 
+			AND ISNULL(intTrailerId, 0) =  ISNULL(@intTrailerId, 0) 
+			AND dtmPullDate = @dtmPullDate
+			AND ysnValid = 1
+			AND strMessage = @strTransactionNumber
 
 			FETCH NEXT FROM @CursorHeaderTran INTO @intTruckId, @intCarrierId, @intDriverId, @intTrailerId, @dtmPullDate
 		END

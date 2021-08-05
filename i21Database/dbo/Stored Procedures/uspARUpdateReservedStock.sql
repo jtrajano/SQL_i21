@@ -72,7 +72,7 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
   AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 1
   AND ARI.[intInvoiceId] = @InvoiceId
   AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-  AND ARI.strType NOT IN ('Transport Delivery')
+  AND ARI.strType NOT IN ('Transport Delivery', 'POS')
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intLoadDetailId] IS NULL		
   AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
@@ -126,7 +126,7 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
   AND [dbo].[fnIsStockTrackingItem](ARID.[intItemId]) = 0
   AND ARI.[intInvoiceId] = @InvoiceId
   AND ARI.[strTransactionType] IN ('Invoice', 'Cash')
-  AND ARI.strType NOT IN ('Transport Delivery')
+  AND ARI.strType NOT IN ('Transport Delivery', 'POS')
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intLoadDetailId] IS NULL  
   AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
@@ -196,5 +196,3 @@ IF ISNULL(@FromPosting, 0 ) = 1
 										     , @ysnPosted				= @Post
 	 
 END
-
-GO

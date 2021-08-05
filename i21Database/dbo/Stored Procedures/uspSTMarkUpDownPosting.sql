@@ -552,11 +552,13 @@ BEGIN TRY
 						END
 				END
 
-
-			--Update Mark Up/Down
-			Update tblSTMarkUpDown
-			SET ysnIsPosted = @ysnPost
-			WHERE intMarkUpDownId = @intMarkUpDownId
+			if @ysnRecap = 0 
+			BEGIN
+				--Update Mark Up/Down
+				Update tblSTMarkUpDown
+				SET ysnIsPosted = @ysnPost
+				WHERE intMarkUpDownId = @intMarkUpDownId
+			END
 
 			SET @ysnIsPosted = @ysnPost
 			SET @strStatusMsg = 'Success'
@@ -632,11 +634,14 @@ BEGIN TRY
 							ROLLBACK TRANSACTION @SavedPointTransaction;
 						END
 					END
-
-				-- Update Mark Up/Down
-				Update tblSTMarkUpDown
-				SET ysnIsPosted = @ysnPost
-				WHERE intMarkUpDownId = @intMarkUpDownId
+					 
+				if @ysnRecap = 0 
+				BEGIN
+					--Update Mark Up/Down
+					Update tblSTMarkUpDown
+					SET ysnIsPosted = @ysnPost
+					WHERE intMarkUpDownId = @intMarkUpDownId
+				END
 
 				SET @ysnIsPosted = @ysnPost
 				SET @strStatusMsg = 'Success'

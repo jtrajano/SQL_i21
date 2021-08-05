@@ -18,7 +18,7 @@ BEGIN TRY
 
 	DECLARE @temp_xml_table TABLE (
 		[fieldname] NVARCHAR(50)
-		,condition NVARCHAR(20)
+		,condition NVARCHAR(40)
 		,[from] NVARCHAR(50)
 		,[to] NVARCHAR(50)
 		,[join] NVARCHAR(10)
@@ -34,7 +34,7 @@ BEGIN TRY
 	SELECT *
 	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2) WITH (
 			[fieldname] NVARCHAR(50)
-			,condition NVARCHAR(20)
+			,condition NVARCHAR(40)
 			,[from] NVARCHAR(50)
 			,[to] NVARCHAR(50)
 			,[join] NVARCHAR(10)

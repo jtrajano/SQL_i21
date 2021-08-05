@@ -105,6 +105,9 @@ SELECT id							= NEWID()
 	 , strBook						= BOOK.strBook
 	 , strSubBook					= SUBBOOK.strSubBook
 	 , ysnShowForShipment			= isnull(SCALETICKET.ysnShowForShipment, 1)
+	 , intItemContractHeaderId		= SHIPPEDITEMS.intItemContractHeaderId
+	 , intItemContractDetailId		= SHIPPEDITEMS.intItemContractDetailId
+	 , dblStandardWeight			= SHIPPEDITEMS.dblStandardWeight
 FROM (
 	--IS FROM SO
 	SELECT strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
@@ -185,6 +188,9 @@ FROM (
 		 , dblSubCurrencyRate				= SOD.dblSubCurrencyRate
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= SOD.dblStandardWeight
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	INNER JOIN (
 		SELECT *
@@ -309,11 +315,9 @@ FROM (
 													ELSE
 														dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 												END)
-	     --, dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
-		 , dblQtyOrdered					= CASE WHEN ARCC.ysnLoad = 1
-													THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
-													ELSE ARCC.dblDetailQuantity
-												END
+		 , dblQtyOrdered					= (CASE WHEN ISNULL(ITEMCONTRACT.intItemContractHeaderId, 0) > 0 THEN ISNULL(ITEMCONTRACT.dblContracted, 0)
+													ELSE ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
+											    END)
 	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL AND ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 1
 														THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0))
 													ELSE
@@ -369,6 +373,9 @@ FROM (
 	     , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= ITEMCONTRACT.intItemContractHeaderId
+		 , intItemContractDetailId			= ITEMCONTRACT.intItemContractDetailId
+		 , dblStandardWeight				= 0.000000
 	FROM (
 		SELECT 
 			dblForexRate,
@@ -427,8 +434,15 @@ FROM (
 		SELECT intTicketId
 			 , intItemUOMIdTo
 			 , dblNetUnits
+			 , intItemContractDetailId
 		FROM dbo.tblSCTicket T WITH (NOLOCK)
 	) TICKET ON ICISI.intSourceId = TICKET.intTicketId
+	LEFT JOIN (
+		SELECT    intItemContractHeaderId
+				, intItemContractDetailId
+				, dblContracted
+		FROM dbo.tblCTItemContractDetail WITH (NOLOCK)
+	) ITEMCONTRACT ON TICKET.intItemContractDetailId = ITEMCONTRACT.intItemContractDetailId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 			 , dblGrossWeight	= SUM(dblGrossWeight)
@@ -616,6 +630,9 @@ FROM (
 		 , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 	FROM dbo.tblICInventoryShipmentCharge ICISC WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -745,6 +762,9 @@ FROM (
 		 , dblSubCurrencyRate				= 1
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(0, SO.intSalesOrderId) MFG
 	LEFT OUTER JOIN (
@@ -857,6 +877,9 @@ FROM (
 		 , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(ICISI.intInventoryShipmentItemId, 0) MFG	
 	INNER JOIN (
@@ -965,6 +988,9 @@ FROM (
 	     , dblSubCurrencyRate				= dblSubCurrencyRate
 		 , intBookId						= intBookId
 		 , intSubBookId						= intSubBookId
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 	FROM 
 		vyuLGLoadScheduleForInvoice
 	 
@@ -1048,6 +1074,9 @@ FROM (
 	     , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 	FROM (
 		SELECT intLoadDetailId
 			 , intCurrencyId
@@ -1167,6 +1196,9 @@ FROM (
 	     , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 	FROM (
 		SELECT intLoadId
 		     , intLoadDetailId
@@ -1283,6 +1315,9 @@ FROM (
 		 , dblSubCurrencyRate				= NULL
 		 , intBookId						= NULL
 		 , intSubBookId						= NULL
+		 , intItemContractHeaderId			= NULL
+		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 	FROM (
 		SELECT intLoadId
 			 , intLoadDetailId

@@ -340,7 +340,7 @@ BEGIN TRY
 			,strStorageAdjustment		= strStorageAdjustment
 			,dtmCalculateStorageThrough = dtmCalculateStorageThrough
 			,dblAdjustPerUnit		    = dblAdjustPerUnit
-			,dblStorageDue				= (@dblTotalUnitsForSettle / dblSelectedUnits) * dblStorageDue
+			,dblStorageDue				= 0
 			,strStorageTicket			= strStorageTicket + '/' + LTRIM(@intSettleStorageKey)
 			,dblSelectedUnits			= @dblTotalUnitsForSettle
 			,dblUnpaidUnits				= CASE WHEN @strType = 'Basis' THEN @dblTotalUnitsForSettle ELSE 0 END
@@ -418,6 +418,12 @@ BEGIN TRY
 	
 	DELETE FROM @MainSettleStorageToSave
 	DELETE FROM @SettleStorageToSave
+
+	exec uspSCAddTransactionLinks 
+		@intTransactionType = 4
+		,@intTransactionId = @intSettleStorageId
+		,@intAction = 1
+
 END TRY
 
 BEGIN CATCH

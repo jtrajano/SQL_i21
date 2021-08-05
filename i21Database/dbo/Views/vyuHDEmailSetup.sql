@@ -14,4 +14,4 @@
 		,intConcurrencyId = tblSMCompanyPreference.intConcurrencyId
 	from
 		tblHDSetting
-		,tblSMCompanyPreference
+		inner join tblSMCompanyPreference on 1=1

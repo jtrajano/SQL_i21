@@ -53,6 +53,16 @@ BEGIN
 		INSERT INTO @loop
 		SELECT intContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
 	END
+	ELSE IF @strMailType = 'Sequence'
+	BEGIN
+		
+		SET @routeScreen = 'Contract'
+		INSERT INTO @loop
+		SELECT CD.intContractHeaderId,CH.intEntityId,CH.strContractNumber +'-'+ CAST(CD.intContractSeq AS NVARCHAR(10)) ,CH.intSalespersonId 
+		FROM tblCTContractDetail CD
+		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE CD.intContractDetailId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+	END
 	ELSE IF @strMailType = 'Sample Instruction'
 	BEGIN
 		--SET @routeScreen = 'Contract'
@@ -135,7 +145,17 @@ BEGIN
 		FROM	vyuCTEntityToContact CH
 		WHERE	intEntityId = @intEntityId
 	END
+	IF EXISTS ( 
+	SELECT	DISTINCT	1 
+	FROM	vyuCTEntityToContact 
+	WHERE	intEntityId = @intEntityId
+	AND		ISNULL(strEmail,'') <> '' 
+	AND     strEmail NOT LIKE  '_%@__%.__%' )
 
+	BEGIN 
+		RAISERROR('Entity has invalid Email Address.', 16, 1);
+		RETURN;
+	END
 
 	SELECT	@strNumber	=	STUFF(															
 									(
@@ -152,13 +172,13 @@ BEGIN
 
 	IF @strMailType = 'Sample Instruction'
 	BEGIN
-		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SELECT @strCustomerContract = isnull(strCustomerContract,'') FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Sample Instruction - Your ref. no. ' + @strCustomerContract
 	END
 
 	IF @strMailType = 'Release Instruction'
 	BEGIN
-		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SELECT @strCustomerContract = isnull(strCustomerContract,'') FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Release Instruction - Your ref. no. ' + @strCustomerContract
 	END
 
@@ -166,6 +186,12 @@ BEGIN
 	BEGIN
 		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Release Instruction - Your ref. no. ' + @strCustomerContract
+	END
+
+	IF @strMailType = 'Sequence'
+	BEGIN
+		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SET @Subject = 'Contract' + ' - ' + @strNumber + ' -  Your ref. no. ' + @strCustomerContract
 	END
 
 	IF	@strDefaultContractReport	=	'ContractJDE' AND @strMailType = 'Price Contract'

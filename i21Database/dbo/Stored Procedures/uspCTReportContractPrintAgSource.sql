@@ -66,18 +66,25 @@ BEGIN TRY
 			@strCountry		=	CASE WHEN LTRIM(RTRIM(strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END
 	FROM	tblSMCompanySetup
 
-	SELECT	@strCompanyName + CHAR(13)+CHAR(10) +
+	SELECT	--@strCompanyName + CHAR(13)+CHAR(10) +
 			ISNULL(@strAddress,'') + CHAR(13)+CHAR(10) +
 			ISNULL(@strCity,'') +ISNULL(', '+@strState,'') + ISNULL('  '+@strZip,'') + CHAR(13)+CHAR(10) +  
 			ISNULL(@strCountry,'')
 			AS	strA,
-			LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
+			--LTRIM(RTRIM(CH.strEntityName))+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'')+ CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
 			ISNULL('  '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
 			ISNULL(CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 			AS	strB,
+			LTRIM(RTRIM(CH.strEntityName)) AS strCustomerName,
+			@strCompanyName AS strCompanyName,
+			ISNULL(@strAddress,'') AS strCompanyAddress,
+			ISNULL(@strCity, '') AS strCompanyCity,
+			ISNULL(@strState, '') AS strCompanyState,
+			ISNULL(@strZip, '') AS strCompanyZipCode,
+			ISNULL(@strCountry, '') AS strCompanyCountry,
 			CH.dtmContractDate,
 			CH.strContractNumber,
 			CH.intContractHeaderId,
@@ -116,7 +123,7 @@ BEGIN TRY
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
 			strPrintableRemarks,
 			CH.strTerm
-		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref :' ELSE 'Customer Ref :' END
+		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref' ELSE 'Customer Ref' END
 		   ,strCustomerContract					=   ISNULL(CH.strCustomerContract,'')
 		   ,CH.strFreightTerm
 		   ,CH.strSalesperson

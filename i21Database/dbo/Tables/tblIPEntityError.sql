@@ -23,5 +23,11 @@
 	[strSessionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	dtmTransactionDate DATETIME NULL  DEFAULT((getdate())),
 	ysnMailSent BIT DEFAULT 0,
+	intTrxSequenceNo BIGINT,
+	strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS,
+	intActionId INT,
+	strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strDefaultLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+
 	CONSTRAINT [PK_tblIPEntityError_intStageEntityId] PRIMARY KEY ([intStageEntityId])
 )

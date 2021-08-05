@@ -7,7 +7,7 @@ BEGIN TRY
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+	SET ANSI_WARNINGS ON
 
 	DECLARE @intMinRowNo INT
 		,@ErrMsg NVARCHAR(MAX)
@@ -175,10 +175,56 @@ BEGIN TRY
 		intLoadContainerId INT
 		,strContainerNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @tblIPLoadStage TABLE (intStageLoadId INT)
+	DECLARE @tblIPLoadStageDuplicate TABLE (
+		intStageLoadId INT
+		,intRecordId INT
+		)
 
-	SELECT @intMinRowNo = Min(intStageLoadId)
+	IF NOT EXISTS (
+			SELECT 1
+			FROM tblIPLoadStage
+			WHERE strTransactionType = 'Shipment'
+			)
+	BEGIN
+		RETURN
+	END
+
+	DELETE
+	FROM @tblIPLoadStageDuplicate
+
+	INSERT INTO @tblIPLoadStageDuplicate
+	SELECT intStageLoadId
+		,ROW_NUMBER() OVER (
+			PARTITION BY strFileName
+			,strCustomerReference
+			,strERPPONumber ORDER BY dtmTransactionDate DESC
+			) intRecordId
+	FROM tblIPLoadStage
+	WHERE strTransactionType = 'Shipment'
+
+	DELETE LS
+	FROM tblIPLoadStage LS
+	JOIN @tblIPLoadStageDuplicate LS1 ON LS1.intStageLoadId = LS.intStageLoadId
+		AND LS1.intRecordId > 1
+
+	DELETE
+	FROM @tblIPLoadStage
+
+	INSERT INTO @tblIPLoadStage
+	SELECT TOP 50 intStageLoadId
 	FROM tblIPLoadStage WITH (NOLOCK)
 	WHERE ISNULL(strTransactionType, '') = 'Shipment'
+		AND strImportStatus IS NULL
+	ORDER BY intStageLoadId
+
+	UPDATE t
+	SET t.strImportStatus = 'In-Progress'
+	FROM tblIPLoadStage t
+	JOIN @tblIPLoadStage pt ON pt.intStageLoadId = t.intStageLoadId
+
+	SELECT @intMinRowNo = Min(intStageLoadId)
+	FROM @tblIPLoadStage
 
 	WHILE (@intMinRowNo IS NOT NULL)
 	BEGIN
@@ -320,7 +366,6 @@ BEGIN TRY
 				AND LD.intPContractDetailId = @intContractDetailId
 				AND L.intShipmentType = 2
 				AND L.intShipmentStatus <> 10
-				--AND L.strCustomerReference = @strCustomerReference
 
 			IF ISNULL(@intLoadShippingInstructionId, 0) = 0
 			BEGIN
@@ -448,7 +493,6 @@ BEGIN TRY
 				AND L.intShipmentType = 1
 				AND LD.intPContractDetailId = @intContractDetailId
 				AND L.intShipmentStatus <> 10
-				--AND L.strCustomerReference = @strCustomerReference
 
 			SELECT @intShipmentType = 1
 				,@intShipmentStatus = 1
@@ -775,10 +819,8 @@ BEGIN TRY
 
 					--IF (@dtmOldStartDate <> @dtmStartDate)
 					--	SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
-
 					--IF (@dtmOldEndDate <> @dtmEndDate)
 					--	SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
-
 					IF (@dtmOldPlannedAvailabilityDate <> @dtmPlannedAvailabilityDate)
 						SET @strDetails += '{"change":"dtmPlannedAvailabilityDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldPlannedAvailabilityDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmPlannedAvailabilityDate, '')) + '","leaf":true,"changeDescription":"Planned Availability"},'
 
@@ -802,6 +844,19 @@ BEGIN TRY
 
 			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
 			SET @strInfo2 = ISNULL(@strLoadNumber, '')
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPLoadDetailStage
+					WHERE intStageLoadId = @intMinRowNo
+					)
+			BEGIN
+				RAISERROR (
+						'Commodity Item block is required. '
+						,16
+						,1
+						)
+			END
 
 			-- Load Detail
 			IF @strRowState = 'Added'
@@ -975,9 +1030,7 @@ BEGIN TRY
 
 					SELECT @intVendorEntityId = CH.intEntityId
 						,@intCompanyLocationId = CD.intCompanyLocationId
-						--,CD.dblQuantity
 						,@intItemUOMId = CD.intItemUOMId
-						--,CD.dblNetWeight
 						,@intWeightItemUOMId = CD.intNetWeightUOMId
 						,@strPriceStatus = PT.strPricingType
 						,@dblUnitPrice = CD.dblCashPrice
@@ -1375,7 +1428,6 @@ BEGIN TRY
 					--			)
 					--	BEGIN
 					--		SET @ErrMsg = 'Container No. ' + @strContainerNumber + ' already exists. '
-
 					--		RAISERROR (
 					--				@ErrMsg
 					--				,16
@@ -1383,7 +1435,6 @@ BEGIN TRY
 					--				)
 					--	END
 					--END
-
 					IF @dblGrossWt <= 0
 					BEGIN
 						RAISERROR (
@@ -1906,7 +1957,6 @@ BEGIN TRY
 					BEGIN
 						IF RIGHT(@AllCondetails, 1) = ','
 							SET @AllCondetails = SUBSTRING(@AllCondetails, 0, LEN(@AllCondetails))
-
 						SET @Condetails = '{  
 								"action":"Updated",
 								"change":"Updated - Record: ' + LTRIM(@intLoadId) + '",
@@ -1936,7 +1986,7 @@ BEGIN TRY
 						END
 					END
 				END
-			END		
+			END
 			ELSE IF ISNULL(@ysnPosted, 0) = 1
 				AND EXISTS (
 					SELECT 1
@@ -1948,48 +1998,67 @@ BEGIN TRY
 
 				-- Container table with Staging container table
 				IF EXISTS (
-					SELECT strContainerNumber
-						,ISNULL(dblQuantity, 0) dblQuantity
-						,ISNULL(dblGrossWt, 0) dblGrossWt
-						,ISNULL(dblTareWt, 0) dblTareWt
-					FROM tblLGLoadContainer LC
-					WHERE LC.intLoadId = @intLoadId
-
-					EXCEPT
-
-					SELECT strContainerNumber
-						,ISNULL(dblQuantity, 0) dblQuantity
-						,ISNULL(dblGrossWt, 0) dblGrossWt
-						,ISNULL(dblTareWt, 0) dblTareWt
-					FROM tblIPLoadContainerStage
-					WHERE intStageLoadId = @intMinRowNo
-					)
+						SELECT strContainerNumber
+							,ISNULL(dblQuantity, 0) dblQuantity
+							,ISNULL(dblGrossWt, 0) dblGrossWt
+							,ISNULL(dblTareWt, 0) dblTareWt
+						FROM tblLGLoadContainer LC
+						WHERE LC.intLoadId = @intLoadId
+						
+						EXCEPT
+						
+						SELECT strContainerNumber
+							,ISNULL(dblQuantity, 0) dblQuantity
+							,ISNULL(dblGrossWt, 0) dblGrossWt
+							,ISNULL(dblTareWt, 0) dblTareWt
+						FROM tblIPLoadContainerStage
+						WHERE intStageLoadId = @intMinRowNo
+						)
 				BEGIN
 					SELECT @strContainerErrMsg = 'Container mismatch is there. '
 				END
 
 				-- Staging container table with Container table
 				IF EXISTS (
-					SELECT strContainerNumber
-						,ISNULL(dblQuantity, 0) dblQuantity
-						,ISNULL(dblGrossWt, 0) dblGrossWt
-						,ISNULL(dblTareWt, 0) dblTareWt
-					FROM tblIPLoadContainerStage
-					WHERE intStageLoadId = @intMinRowNo
-
-					EXCEPT
-
-					SELECT strContainerNumber
-						,ISNULL(dblQuantity, 0) dblQuantity
-						,ISNULL(dblGrossWt, 0) dblGrossWt
-						,ISNULL(dblTareWt, 0) dblTareWt
-					FROM tblLGLoadContainer LC
-					WHERE LC.intLoadId = @intLoadId
-					)
+						SELECT strContainerNumber
+							,ISNULL(dblQuantity, 0) dblQuantity
+							,ISNULL(dblGrossWt, 0) dblGrossWt
+							,ISNULL(dblTareWt, 0) dblTareWt
+						FROM tblIPLoadContainerStage
+						WHERE intStageLoadId = @intMinRowNo
+						
+						EXCEPT
+						
+						SELECT strContainerNumber
+							,ISNULL(dblQuantity, 0) dblQuantity
+							,ISNULL(dblGrossWt, 0) dblGrossWt
+							,ISNULL(dblTareWt, 0) dblTareWt
+						FROM tblLGLoadContainer LC
+						WHERE LC.intLoadId = @intLoadId
+						)
 				BEGIN
 					SELECT @strContainerErrMsg = 'Container mismatch is there. '
 				END
 			END
+
+			UPDATE LD
+			SET strContainerNumbers = STUFF((
+						SELECT ', ' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
+						FROM tblLGLoadContainer LC
+						INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
+						WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
+						FOR XML PATH('')
+							,TYPE
+						).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
+			FROM tblLGLoadDetail LD
+			WHERE LD.intLoadId = @intLoadId
+				AND strContainerNumbers IS NULL
+				AND EXISTS (
+					SELECT TOP 1 1
+					FROM tblLGLoadContainer LC
+					INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
+					WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
+					)
 
 			-- To set Contract Planned Availability Date and send Contract feed to SAP
 			-- Also it sends Shipment feed to SAP
@@ -2237,10 +2306,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intMinRowNo = Min(intStageLoadId)
-		FROM tblIPLoadStage WITH (NOLOCK)
+		FROM @tblIPLoadStage
 		WHERE intStageLoadId > @intMinRowNo
-			AND ISNULL(strTransactionType, '') = 'Shipment'
 	END
+
+	UPDATE t
+	SET t.strImportStatus = NULL
+	FROM tblIPLoadStage t
+	JOIN @tblIPLoadStage pt ON pt.intStageLoadId = t.intStageLoadId
+		AND t.strImportStatus = 'In-Progress'
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

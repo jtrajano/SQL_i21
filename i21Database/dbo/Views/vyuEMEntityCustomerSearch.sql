@@ -49,8 +49,8 @@ SELECT DISTINCT
 	, strBillToState		= billLocation.strState
 	, strBillToZipCode		= billLocation.strZipCode
 	, strBillToCountry		= billLocation.strCountry
-	, intShipToId			= CUSTOMER.intShipToId
-	, intBillToId			= CUSTOMER.intBillToId
+	, intShipToId			= shipLocation.intEntityLocationId
+	, intBillToId			= billLocation.intEntityLocationId
 	, dblARBalance			= CUSTOMER.dblARBalance
 	, strTerm				= custTerm.strTerm
 	, intCurrencyId			= CUSTOMER.intCurrencyId
@@ -59,6 +59,7 @@ SELECT DISTINCT
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CUSTOMER.ysnCreditHold
+	, ysnExemptCreditCardFee = CUSTOMER.ysnExemptCreditCardFee
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
 	, strFobPoint			= fTerms.strFobPoint
@@ -76,6 +77,7 @@ SELECT DISTINCT
 	, CUSTOMER.ysnApplySalesTax
 	, dblShipToLongitude			= shipLocation.dblLongitude
 	, dblShipToLatitude			= shipLocation.dblLatitude
+	, strAccountType = NULLIF(CUSTOMER.strType, '')
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1

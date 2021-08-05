@@ -9,7 +9,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-DECLARE @IIDs 			AS InvoiceId
+DECLARE @IIDs 				InvoiceId
+DECLARE @PaymentStaging		PaymentIntegrationStagingTable
 
 IF EXISTS(SELECT NULL FROM @InvoiceIds WHERE [strSourceTransaction] IN ('Card Fueling Transaction','CF Tran','CF Invoice'))
 BEGIN
@@ -53,9 +54,11 @@ EXEC dbo.[uspARUpdateProvisionalOnStandardInvoices] @IIDs
 
 EXEC dbo.[uspARUpdateLineItemsCommitted] @IIDs
 
-EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @IIDs
+EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @IIDs, NULL, 0, @PaymentStaging
 
-EXEC [dbo].[uspARLogRiskPosition] @IIDs, @UserId
+EXEC dbo.[uspARLogRiskPosition] @IIDs, @UserId
+
+EXEC dbo.[uspARInsertInvoiceTransactionLink] @IIDs
 
 DELETE FROM ARTD
 FROM tblARTransactionDetail ARTD WITH (NOLOCK)
@@ -66,6 +69,5 @@ INNER JOIN (
 	FROM tblARInvoice WITH (NOLOCK)
 ) ARI ON II.[intHeaderId] = ARI.[intInvoiceId] 
 	 AND ARTD .[strTransactionType] = ARI.[strTransactionType] 
-
 
 GO

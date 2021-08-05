@@ -119,6 +119,19 @@ BEGIN TRY
 						)
 			END
 
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPInvReceiptItemStage
+					WHERE intStageReceiptId = @intMinRowNo
+					)
+			BEGIN
+				RAISERROR (
+						'Receipt Item is required. '
+						,16
+						,1
+						)
+			END
+
 			SET @strInfo1 = ISNULL(@strReceiptNumber, '')
 			SET @strInfo2 = ISNULL(CONVERT(VARCHAR(10), @dtmReceiptDate, 121), '')
 
@@ -264,6 +277,7 @@ BEGIN TRY
 				SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
 				FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
 				WHERE t.strSubLocationName = @strSubLocationName
+					AND t.intCompanyLocationId = @intLocationId
 
 				IF ISNULL(@intSubLocationId, 0) = 0
 				BEGIN
@@ -277,6 +291,7 @@ BEGIN TRY
 				SELECT @intStorageLocationId = t.intStorageLocationId
 				FROM tblICStorageLocation t WITH (NOLOCK)
 				WHERE t.strName = @strStorageLocationName
+					AND t.intSubLocationId = @intSubLocationId
 
 				IF ISNULL(@intStorageLocationId, 0) = 0
 				BEGIN
@@ -445,24 +460,11 @@ BEGIN TRY
 							--SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
 				END
 
-				SELECT @intLoadId = L.intLoadId
-					,@intLoadDetailId = LD.intLoadDetailId
-				FROM tblLGLoad L WITH (NOLOCK)
-				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
-					AND L.intShipmentType = 1
-					AND LD.intPContractDetailId = @intContractDetailId
-					AND L.intShipmentStatus <> 10
+				SELECT @intLoadContainerId = intLoadContainerId
+				FROM tblLGLoadContainer t WITH (NOLOCK)
+				WHERE t.strContainerNumber = @strContainerNumber
 
-				IF ISNULL(@intLoadId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Invalid Load. '
-							,16
-							,1
-							)
-				END
-
-				IF ISNULL(@strContainerNumber, '') = ''
+				IF ISNULL(@intLoadContainerId, 0) = 0
 				BEGIN
 					RAISERROR (
 							'Invalid Container No. '
@@ -471,15 +473,22 @@ BEGIN TRY
 							)
 				END
 
-				SELECT @intLoadContainerId = intLoadContainerId
-				FROM tblLGLoadContainer t WITH (NOLOCK)
-				WHERE t.intLoadId = @intLoadId
-					AND t.strContainerNumber = @strContainerNumber
+				SELECT @intLoadId = L.intLoadId
+					,@intLoadDetailId = LD.intLoadDetailId
+					,@intLoadContainerId = LC.intLoadContainerId
+				FROM tblLGLoad L WITH (NOLOCK)
+				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+					AND L.intShipmentType = 1
+					AND LD.intPContractDetailId = @intContractDetailId
+					AND L.intShipmentStatus <> 10
+				JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+				JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+					AND LC.strContainerNumber = @strContainerNumber
 
-				IF ISNULL(@intLoadContainerId, 0) = 0
+				IF ISNULL(@intLoadId, 0) = 0
 				BEGIN
 					RAISERROR (
-							'Container No is not matching with Load Shipment Container. '
+							'Invalid Load. '
 							,16
 							,1
 							)
@@ -507,6 +516,8 @@ BEGIN TRY
 						,intLocationId
 						,strReceiptNumber
 						,dtmReceiptDate
+						,strVendorRefNo
+						,intFreightTermId
 						,intCurrencyId
 						,intReceiverId
 						,dblInvoiceAmount
@@ -518,6 +529,7 @@ BEGIN TRY
 						,intEntityId
 						,intBookId
 						,intSubBookId
+						,intConcurrencyId
 						)
 					SELECT TOP 1 'Purchase Contract'
 						,2
@@ -525,6 +537,8 @@ BEGIN TRY
 						,@intLocationId
 						,@strReceiptNo
 						,@dtmReceiptDate
+						,@strReceiptNumber
+						,L.intFreightTermId
 						,L.intCurrencyId
 						,@intEntityId
 						,0.0
@@ -536,6 +550,7 @@ BEGIN TRY
 						,@intEntityId
 						,L.intBookId
 						,L.intSubBookId
+						,1
 					FROM tblIPInvReceiptItemStage RI
 					JOIN tblICItem I ON RI.strItemNo = I.strItemNo
 						AND RI.intStageReceiptItemId = @intStageReceiptItemId

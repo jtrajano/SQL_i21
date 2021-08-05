@@ -146,6 +146,14 @@ BEGIN
 		WHERE A.intBankAccountId = @intBankAccountId
 		AND B.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
 
+
+		--UPDATE LINKS
+		DECLARE @BankTransactionIds Id
+		INSERT INTO @BankTransactionIds 
+		SELECT intTransactionId from tblCMBankTransaction WHERE strTransactionId IN(
+		SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionIds))
+		EXEC uspCMUpdateTransactionLinks @BankTransactionIds
+
 		--Update the reference no of other module's transaction
 		--AP
 		UPDATE tblAPPayment SET strPaymentInfo = B.strReferenceNo 

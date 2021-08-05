@@ -3,7 +3,10 @@
 	,@ForDelete			BIT = 0    
 	,@UserId			INT = NULL
 	,@InvoiceDetailId 	INT = NULL
-	,@ysnLogRisk		BIT = 1     
+	,@ysnLogRisk		BIT = 1
+	,@Post				BIT	= 0
+	,@Recap				BIT	= 1
+	,@FromPosting		BIT = 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -28,8 +31,8 @@ DECLARE @intInvoiceId				INT
 DECLARE @dblValueToUpdate NUMERIC(18, 6),
 		@intTransactionDetailId INT,
 		@strScreenName NVARCHAR(50) = 'Prepayment',
-		@strRowState  NVARCHAR(50)
-
+		@strRowState  NVARCHAR(50),
+		@PreStageInvoice InvoiceId
 
 SET @intTranCount = @@trancount;
 
@@ -69,6 +72,8 @@ BEGIN TRY
 	WHERE intInvoiceId = @intInvoiceId
 	AND intItemContractHeaderId IS NOT NULL	
 
+	DELETE FROM @PreStageInvoice
+
 	IF @ForDelete = 1
 		BEGIN
 			--IF PREPAID ITEM CONTRACT--Use FOR UPDATING PREPAID CONTRACT
@@ -80,7 +85,10 @@ BEGIN TRY
 
 			IF ISNULL(@intSalesOrderId, 0) <> 0
 				EXEC dbo.uspSOUpdateReservedStock @intSalesOrderId, 0
-			EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Deleted', @intUserId
+
+			INSERT INTO @PreStageInvoice (intHeaderId, strTransactionType)
+			SELECT intHeaderId			= @intInvoiceId
+				 , strTransactionType	= 'Deleted'			
 		END
 	ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Deleted')
 		BEGIN
@@ -89,34 +97,48 @@ BEGIN TRY
 
 			IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoicePreStage WHERE intInvoiceId = @intInvoiceId AND strRowState = 'Added')
 			BEGIN
-				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Modified', @intUserId
+				INSERT INTO @PreStageInvoice (intHeaderId, strTransactionType)
+				SELECT intHeaderId			= @intInvoiceId
+					, strTransactionType	= 'Modified'
+				
 				SET @strRowState = 'update'
 			END
 			ELSE
 			BEGIN
-				EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, 'Added', @intUserId
+				INSERT INTO @PreStageInvoice (intHeaderId, strTransactionType)
+				SELECT intHeaderId			= @intInvoiceId
+					, strTransactionType	= 'Added'
+				
 				SET @strRowState = 'add'
 			END
 		END
+
+	--INTER COMPANY PRE-STAGE
+	EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice = @PreStageInvoice, @intUserId = @intUserId
 
 	--Update Invoice for ID
 	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
 
 	--UPDATE PREPAID ITEM CONTRACT
-	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0 AND @strTransactionType != 'Customer Prepayment')
+	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0 AND @strTransactionType != 'Customer Prepayment' AND @Recap = 0)
 	BEGIN
+		IF(@Post = 0)
+		BEGIN
+			SET @dblValueToUpdate = @dblValueToUpdate * -1
+		END
+
 		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId, @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
-	END	
+	END
+
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 	EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
 	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
 	EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, @ForDelete
 	EXEC dbo.[uspARUpdateLineItemLotDetail] @intInvoiceId
-	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
-	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId
-	EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
+	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, @FromPosting
+	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId	
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
-	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
+	IF @Post = 0 EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
 	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
@@ -134,12 +156,15 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
 	
 	IF ISNULL(@ysnLogRisk, 0) = 1
-		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
+		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
 
 	IF @ForDelete = 1
 		BEGIN
 			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
 		END
+	
+	--INSERT TO TRANSACTION LINKS
+	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
@@ -165,5 +190,3 @@ BEGIN CATCH
 	EXEC sp_executesql @strThrow
 
 END CATCH
-
-GO

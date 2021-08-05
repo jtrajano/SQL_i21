@@ -201,6 +201,7 @@ BEGIN
 
 				--check if file exist
 				EXEC master..xp_sprintf @fullFilePath OUTPUT, '%s\%s.%s', @filePath, @fileName, @fileExtension
+				--SELECT @fullFilePath = FORMATMESSAGE('%s\%s.%s', @filePath, @fileName, @fileExtension); 
 
 				IF ISNULL(@fullFilePath, '') = ''
 				BEGIN
@@ -323,6 +324,7 @@ BEGIN
 					, strRecordNo
 					, dtmDateModified
 					, intSize
+					, intEntityId
 					, intConcurrencyId
 				)
 				SELECT doc.strName
@@ -332,6 +334,7 @@ BEGIN
 					, @recordId
 					, GETDATE()
 					, doc.intSize
+					, doc.intEntityId
 					, 1
 				FROM tblSMNewDocument doc 
 				INNER JOIN tblSMUpload upload ON doc.intUploadId = upload.intUploadId

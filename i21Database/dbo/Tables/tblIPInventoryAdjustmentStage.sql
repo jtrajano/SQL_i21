@@ -1,6 +1,6 @@
 ﻿CREATE TABLE tblIPInventoryAdjustmentStage (
 	intInventoryAdjustmentStageId INT identity(1, 1)
-	,intTrxSequenceNo INT
+	,intTrxSequenceNo BIGINT
 	,strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS
 	,intActionId INT
 	,dtmCreatedDate DATETIME
@@ -15,5 +15,8 @@
 	,strQuantityUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strReasonCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strNotes NVARCHAR(2048) COLLATE Latin1_General_CI_AS
+	,strNewStorageLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,strNewStorageUnit NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	,intStatusId int
 	,CONSTRAINT PK_tblIPInventoryAdjustmentStage PRIMARY KEY (intInventoryAdjustmentStageId)
 	)

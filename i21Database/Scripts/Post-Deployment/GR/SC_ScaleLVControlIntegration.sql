@@ -1347,7 +1347,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 										where intTicketLVStagingId = @newLVTicket
 							 
 								update tblSCTicket 
-										set ysnHasGeneratedTicketNumber = 0 
+										set ysnHasGeneratedTicketNumber = 0, dtmDateModifiedUtc = GETUTCDATE() 
 											where intTicketLVStagingId = @newLVTicket
 
 								delete from tblQMTicketDiscount 

@@ -1277,7 +1277,7 @@ FROM
 LEFT OUTER JOIN
     (
     SELECT
-         [dblUnitQtyShipped]	= SUM(ISNULL(dbo.fnARCalculateQtyBetweenUOM(ID.[intItemUOMId], ICSUOM.[intItemUOMId], ID.[dblShipmentNetWt] - IDP.[dblShipmentNetWt], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)) -- SUM(ISNULL([dblUnitQtyShipped], @ZeroDecimal) - ISNULL(dbo.fnARCalculateQtyBetweenUOM(IDP.[intItemUOMId], ICSUOM.[intItemUOMId], IDP.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal))
+         [dblUnitQtyShipped]	= SUM(ISNULL(dbo.fnARCalculateQtyBetweenUOM(IDP.[intItemWeightUOMId], IDP.[intOrderUOMId], ID.[dblShipmentNetWt] - IDP.[dblShipmentNetWt], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)) -- SUM(ISNULL([dblUnitQtyShipped], @ZeroDecimal) - ISNULL(dbo.fnARCalculateQtyBetweenUOM(IDP.[intItemUOMId], ICSUOM.[intItemUOMId], IDP.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal))
 		,[dblTotal]				= SUM(ID.[dblTotal] - IDP.[dblTotal])
         ,[intInvoiceId]			= ID.[intInvoiceId]
 		,[intSourceType]		= LG.[intSourceType]
@@ -1413,7 +1413,7 @@ FROM
 LEFT OUTER JOIN
     (
     SELECT
-         [dblUnitQtyShipped]	= SUM(ISNULL(dbo.fnARCalculateQtyBetweenUOM(ID.[intItemUOMId], ICSUOM.[intItemUOMId], ID.[dblShipmentNetWt] - IDP.[dblShipmentNetWt], ICI.[intItemId], ICI.[strType]), @ZeroDecimal)) -- SUM(ISNULL([dblUnitQtyShipped], @ZeroDecimal) - ISNULL(dbo.fnARCalculateQtyBetweenUOM(IDP.[intItemUOMId], ICSUOM.[intItemUOMId], IDP.[dblQtyShipped], ICI.[intItemId], ICI.[strType]), @ZeroDecimal))
+         [dblUnitQtyShipped]	= SUM(ISNULL(dbo.fnARCalculateQtyBetweenUOM(IDP.[intItemWeightUOMId], IDP.[intOrderUOMId], ID.[dblShipmentNetWt] - IDP.[dblShipmentNetWt], ICI.[intItemId], ICI.[strType]), @ZeroDecimal))
 		,[dblTotal]				= SUM(ID.[dblTotal] - IDP.[dblTotal])
         ,[intInvoiceId]			= ID.[intInvoiceId]
 		,[intSourceType]		= LG.[intSourceType]
@@ -2001,6 +2001,7 @@ FROM (
 		 , IDT.[dblBaseAdjustedTax]
 		 , [ysnAddToCost]  = ISNULL(TC.[ysnAddToCost], 0)
 		 , [ysnTaxExempt]  = ISNULL(IDT.[ysnTaxExempt], 0)
+         , [ysnInvalidSetup]  = ISNULL(IDT.[ysnInvalidSetup], 0)
 		 , IDT.[dblRate]
     FROM tblARInvoiceDetailTax IDT WITH (NOLOCK)
 	INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
@@ -2008,7 +2009,7 @@ FROM (
 INNER JOIN ##ARPostInvoiceDetail I ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE I.[intPeriodsToAccrue] <= 1
   AND (ARIDT.[dblAdjustedTax] <> @ZeroDecimal
-  OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1))
+  OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 AND [ysnInvalidSetup] = 0))
 
 --TAX DETAIL CREDIT
 INSERT ##ARInvoiceGLEntries
@@ -2143,6 +2144,7 @@ FROM (
 		 , IDT.[dblBaseAdjustedTax]
 		 , [ysnAddToCost]  = ISNULL(TC.[ysnAddToCost], 0)
 		 , [ysnTaxExempt]  = ISNULL(IDT.[ysnTaxExempt], 0)
+         , [ysnInvalidSetup]  = ISNULL(IDT.[ysnInvalidSetup], 0)
 		 , IDT.[dblRate]
     FROM tblARInvoiceDetailTax IDT WITH (NOLOCK)
 	INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
@@ -2156,6 +2158,7 @@ WHERE I.[intPeriodsToAccrue] <= 1
   AND [intSalesTaxExemptionAccountId] > 0 
   AND [ysnAddToCost] = 1
   AND [ysnTaxExempt] = 1
+  AND [ysnInvalidSetup] = 0
 
 --SALES DISCOUNT
 INSERT ##ARInvoiceGLEntries

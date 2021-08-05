@@ -448,7 +448,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	 									END
 	,dtmHistoryDate						= CASE 
 											WHEN SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice' THEN SH.dtmDistributionDate
-											ELSE SH.dtmHistoryDate
+											ELSE SH2.dtmHistoryDate
 										END
 	,dblPaidAmount						= case when ISNULL(CH.intPricingTypeId, 0) = 2 then 0 else ISNULL(SH.dblPaidAmount,0) end
 	,strPaidDescription					= CASE 

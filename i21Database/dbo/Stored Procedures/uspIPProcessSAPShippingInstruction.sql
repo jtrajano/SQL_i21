@@ -219,6 +219,7 @@ BEGIN TRY
 		intLoadDocumentId INT
 		,strDocumentName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @strFileName NVARCHAR(MAX)
 
 	-- To reprocess all LSI / LS / LSI_Cancel deadlock feeds
 	IF @ysnProcessDeadLockEntry = 1
@@ -246,6 +247,27 @@ BEGIN TRY
 		WHILE @intStageLoadId IS NOT NULL
 		BEGIN
 			SELECT @intNewDLStageLoadId = NULL
+				,@strFileName = NULL
+				,@strERPPONumber = NULL
+
+			SELECT @strFileName = strFileName
+				,@strERPPONumber = strERPPONumber
+			FROM tblIPLoadError WITH (NOLOCK)
+			WHERE intStageLoadId = @intStageLoadId
+
+			IF EXISTS (
+				SELECT 1 FROM tblIPLoadStage
+				WHERE strFileName = @strFileName
+					AND strERPPONumber = @strERPPONumber
+				)
+			BEGIN
+				UPDATE tblIPLoadError
+				SET strAckStatus = 'Ack Sent'
+					,ysnDeadlockError = 0
+				WHERE intStageLoadId = @intStageLoadId
+
+				GOTO NextRec
+			END
 
 			INSERT INTO tblIPLoadStage (
 				strCustomerReference
@@ -387,6 +409,8 @@ BEGIN TRY
 			DELETE
 			FROM tblIPLoadError
 			WHERE intStageLoadId = @intStageLoadId
+
+			NextRec:
 
 			SELECT @intStageLoadId = MIN(intStageLoadId)
 			FROM @DeadlockRecords
@@ -664,7 +688,7 @@ BEGIN TRY
 				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Producer'
 					--AND t.ysnActive = 1
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 					AND t.strName = @strPartyName
 
 				IF ISNULL(@intShipperId, 0) = 0
@@ -1060,6 +1084,19 @@ BEGIN TRY
 
 			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
 			SET @strInfo2 = ISNULL(@strLoadNumber, '')
+
+			IF NOT EXISTS (
+				SELECT 1
+				FROM tblIPLoadDetailStage
+				WHERE intStageLoadId = @intMinRowNo
+				)
+			BEGIN
+				RAISERROR (
+						'Commodity Item block is required. '
+						,16
+						,1
+						)
+			END
 
 			-- Load Detail
 			IF @strRowState = 'Added'

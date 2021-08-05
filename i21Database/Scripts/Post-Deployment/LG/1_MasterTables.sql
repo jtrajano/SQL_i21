@@ -454,24 +454,49 @@ BEGIN
 END
 GO
 
-/* 
-* Populate Pending Claims table Receipt Date field
+/*
+* Update AP Claim/Voucher Detail reference to Weight Claims table
 */
-IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGPendingClaim') AND name = 'dtmReceiptDate')
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblAPBillDetail') AND name = 'intWeightClaimDetailId')
 BEGIN
-	EXEC('
-		UPDATE PC
-			SET dtmReceiptDate = IR.dtmReceiptDate
-		FROM tblLGPendingClaim PC
-		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = PC.intContractDetailId
-		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		OUTER APPLY (SELECT TOP 1 IR.dtmReceiptDate FROM tblICInventoryReceipt IR
-							INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
-							WHERE IR.ysnPosted = 1 AND IRI.intLineNo = PC.intContractDetailId
-								AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> ''Inventory Return''
-								AND (PC.intLoadContainerId IS NULL OR IRI.intContainerId = PC.intLoadContainerId)
-							ORDER BY IR.dtmReceiptDate DESC) IR
-		WHERE PC.intPurchaseSale = 1 AND IR.dtmReceiptDate IS NOT NULL AND PC.dtmReceiptDate IS NULL
+	EXEC ('UPDATE BD
+			SET intWeightClaimId = WD.intWeightClaimId
+				,intWeightClaimDetailId = WD.intWeightClaimDetailId 
+			FROM tblAPBillDetail BD
+			INNER JOIN tblLGWeightClaimDetail WD ON WD.intBillId = BD.intBillId AND WD.intItemId = BD.intItemId
+			WHERE BD.intWeightClaimDetailId IS NULL
+	')
+END
+GO
+
+/*
+* Update Freight Rate field on Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'dblFreightRate')
+BEGIN
+	EXEC ('UPDATE L
+			SET dblFreightRate = FR.dblRate
+			FROM tblLGLoad L
+			OUTER APPLY (SELECT TOP 1 intDefaultFreightItemId FROM tblLGCompanyPreference) FI
+			OUTER APPLY (SELECT TOP 1 dblRate FROM tblLGLoadCost LC 
+						 WHERE LC.intLoadId = L.intLoadId AND LC.intItemId = FI.intDefaultFreightItemId) FR
+			WHERE FI.intDefaultFreightItemId IS NOT NULL AND FR.dblRate IS NOT NULL AND dblFreightRate <> FR.dblRate
+	')
+END
+GO
+
+/*
+* Update Surcharge field on Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'dblSurcharge')
+BEGIN
+	EXEC ('UPDATE L
+			SET dblSurcharge = SR.dblRate
+			FROM tblLGLoad L
+			OUTER APPLY (SELECT TOP 1 intDefaultSurchargeItemId FROM tblLGCompanyPreference) SI
+			OUTER APPLY (SELECT TOP 1 dblRate FROM tblLGLoadCost LC 
+						 WHERE LC.intLoadId = L.intLoadId AND LC.intItemId = SI.intDefaultSurchargeItemId) SR
+			WHERE SI.intDefaultSurchargeItemId IS NOT NULL AND SR.dblRate IS NOT NULL AND dblSurcharge <> SR.dblRate
 	')
 END
 GO

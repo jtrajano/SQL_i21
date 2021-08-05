@@ -26,13 +26,21 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
--- Start the transaction 
-BEGIN TRANSACTION
 
 IF @userId IS NULL
 BEGIN
 	RAISERROR('User is required', 16, 1);
+	RETURN;
 END
+
+IF NULLIF(@param, '') IS NULL
+BEGIN
+	RAISERROR('@param is empty. No voucher to post.', 16, 1);
+	RETURN;
+END
+
+-- Start the transaction 
+BEGIN TRANSACTION
 
 --DECLARE @success BIT
 --DECLARE @successfulCount INT
@@ -154,6 +162,12 @@ SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
 
+-- IF NULLIF(@billIds, '') IS NULL
+-- BEGIN
+-- 	RAISERROR('Posting is already in process.', 16, 1);
+-- 	GOTO Post_Rollback
+-- END
+
 --Update the prepay and debit memo
 EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
@@ -213,14 +227,14 @@ BEGIN
 		,intTransactionId
 		,26
 	FROM dbo.fnCCValidateAssociatedTransaction(@billIds, 1, @transactionType)
-	UNION ALL
-	SELECT
-		strError
-		,strTransactionType
-		,strTransactionNo
-		,intTransactionId
-		,27
-	FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
+	-- UNION ALL
+	-- SELECT
+	-- 	strError
+	-- 	,strTransactionType
+	-- 	,strTransactionNo
+	-- 	,intTransactionId
+	-- 	,27
+	-- FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
@@ -465,9 +479,9 @@ ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE 
 A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 AND B.intInventoryReceiptChargeId IS NOT NULL 
--- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 AND (
-	(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
+	(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
 	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
 )
 AND A.intTransactionReversed IS NULL
@@ -1173,6 +1187,27 @@ BEGIN
 				GOTO Post_Rollback
 			END CATCH
 		END
+
+		--LOG TO tblAPClearing
+		BEGIN TRY
+			DECLARE @clearingIds AS Id
+			DECLARE @APClearing AS APClearing
+
+			INSERT INTO @clearingIds
+			SELECT intBillId FROM #tmpPostBillData
+
+			INSERT INTO @APClearing
+			SELECT * FROM fnAPClearing(@clearingIds)
+
+			EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+		END TRY
+		BEGIN CATCH
+				DECLARE @errorClearing NVARCHAR(200) = ERROR_MESSAGE()
+				SET @invalidCount = @invalidCount + 1;
+				SET @totalRecords = @totalRecords - 1;
+				RAISERROR(@errorClearing, 16, 1);
+				GOTO Post_Rollback
+		END CATCH
 	END
 	ELSE
 	BEGIN
@@ -1268,9 +1303,10 @@ BEGIN
 		-- END
 
 		UPDATE tblGLDetail
-			SET ysnIsUnposted = 1
-		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
-				(SELECT intBillId FROM #tmpPostBillData))
+		SET ysnIsUnposted = 1
+		WHERE 
+			tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+			AND strCode <> 'ICA'
 
 		--Update Inventory Item Receipt
 		--  UPDATE A

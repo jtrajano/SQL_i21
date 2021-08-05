@@ -75,13 +75,13 @@ WHERE UPPER(fieldname) = UPPER('dtmAsOfDate')
 
 SET @dtmAsOfDate	= CAST(ISNULL(@dtmAsOfDate, GETDATE()) AS DATE)
 
-SELECT dblDSO			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (ANNUALSALES.dblAnnualSales / 365)), 2)
-     , dblBPDSO			= dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / CREDITSALES.dblCreditSales), 2)
-	 , dblADD			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (ANNUALSALES.dblAnnualSales / 365)), 2) - dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / (CREDITSALES.dblCreditSales / 365)), 2)
-	 , dblCEI			= dbo.fnRoundBanker(((BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblTotalAR) / (BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblCurrent)), 2) * 100
-	 , dblART			= dbo.fnRoundBanker(CREDITSALES.dblCreditSales / ((LASTYEARRECEIVABLES.dblTotalAR + ENDINGRECEIVABLES.dblTotalAR) / 2), 2)
+SELECT dblDSO			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (NULLIF(ANNUALSALES.dblAnnualSales, 0) / 365)), 2)
+     , dblBPDSO			= dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / NULLIF(CREDITSALES.dblCreditSales, 0)), 2)
+	 , dblADD			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (NULLIF(ANNUALSALES.dblAnnualSales, 0) / 365)), 2) - dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / (NULLIF(CREDITSALES.dblCreditSales, 0) / 365)), 2)
+	 , dblCEI			= dbo.fnRoundBanker(((BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblTotalAR) / NULLIF((BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblCurrent), 0)), 2)
+	 , dblART			= dbo.fnRoundBanker(CREDITSALES.dblCreditSales / (NULLIF((LASTYEARRECEIVABLES.dblTotalAR + ENDINGRECEIVABLES.dblTotalAR), 0) / 2), 2)
 	 , strCompanyName	= COMPANY.strCompanyName COLLATE Latin1_General_CI_AS
-	, strCompanyAddress	= COMPANY.strCompanyAddress COLLATE Latin1_General_CI_AS
+	 , strCompanyAddress	= COMPANY.strCompanyAddress COLLATE Latin1_General_CI_AS
 	 , dtmAsOfDate		= @dtmAsOfDate
 FROM (
 	SELECT dblCreditSales = ISNULL(SUM(I.dblInvoiceTotal * CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -1 ELSE 1 END), 0)
@@ -91,30 +91,37 @@ FROM (
 	  AND I.strTransactionType IN ('Invoice', 'Credit Memo')
 	  AND CAST(I.dtmPostDate AS DATE) BETWEEN CAST(DATEADD(YY, - 1, @dtmAsOfDate) AS DATE) AND CAST(@dtmAsOfDate AS DATE)	  
 	  AND ((I.strType = 'Service Charge' AND (CAST(@dtmAsOfDate AS DATE) < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate))))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-) CREDITSALES, (
+) CREDITSALES
+inner join (
 	SELECT dblCreditSales = ISNULL(SUM(I.dblInvoiceTotal * CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -1 ELSE 1 END), 0)
 	FROM tblARInvoice I
 	WHERE I.ysnPosted = 1
 	  AND I.ysnCancelled = 0
 	  AND CAST(I.dtmPostDate AS DATE) BETWEEN DATEADD(MM, DATEDIFF(MM, 0, @dtmAsOfDate), 0) AND DATEADD(DD, - 1, DATEADD(MM, DATEDIFF(MM, 0, @dtmAsOfDate) + 1, 0))
-) MONTHLYCREDITSALES, (
+)  MONTHLYCREDITSALES on 1=1
+inner join 
+(
 	SELECT dblAnnualSales = ISNULL(SUM(I.dblInvoiceTotal * CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -1 ELSE 1 END), 0) 
 	FROM tblARInvoice I
 	WHERE I.ysnPosted = 1
 	  AND I.ysnCancelled = 0
 	  AND CAST(I.dtmPostDate AS DATE) BETWEEN CAST(DATEADD(YY, - 1, @dtmAsOfDate) AS DATE) AND CAST(@dtmAsOfDate AS DATE)
-) ANNUALSALES,(
+) ANNUALSALES on 1=1
+inner join (
 	SELECT dblTotalAR = ISNULL(SUM(dblTotalAR), 0) 
 	FROM dbo.fnARCustomerAgingReport(CAST(DATEADD(DAY, -(DAY(@dtmAsOfDate)), @dtmAsOfDate) AS DATE), 0)
-) BEGINNINGRECEIVABLES, (
+) BEGINNINGRECEIVABLES on 1=1
+inner join (
 	SELECT dblTotalAR = ISNULL(SUM(dblTotalAR), 0) 
 		 , dblCurrent = ISNULL(SUM(dbl0Days), 0) 
 	FROM dbo.fnARCustomerAgingReport(CAST(@dtmAsOfDate AS DATE), 1)
-) ENDINGRECEIVABLES, (
+) ENDINGRECEIVABLES on 1=1
+inner join (
 	SELECT dblTotalAR = ISNULL(SUM(dblTotalAR), 0) 
 	FROM dbo.fnARCustomerAgingReport(CAST(DATEADD(YY, - 1, @dtmAsOfDate) AS DATE), 0)
-) LASTYEARRECEIVABLES, (
+) LASTYEARRECEIVABLES on 1=1
+inner join (
 	SELECT TOP 1 strCompanyName
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-) COMPANY
+) COMPANY on 1=1

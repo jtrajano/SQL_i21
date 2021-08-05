@@ -309,15 +309,20 @@ END
 
 IF @ysnPost = 0
 BEGIN
-	SELECT @strAdjustmentNo = strAdjustmentNo
-	FROM tblICInventoryAdjustment
-	WHERE intSourceId = @intSourceId
+	SELECT 
+		@strAdjustmentNo = strAdjustmentNo
+	FROM 
+		tblICInventoryAdjustment
+	WHERE 
+		intSourceId = @intSourceId
+		AND intSourceTransactionTypeId = @intSourceTransactionTypeId
 	
 	EXEC dbo.uspICPostInventoryAdjustment
-			@ysnPost = 0
-			,@ysnRecap = 0
-			,@strTransactionId = @strAdjustmentNo
-			,@intEntityUserSecurityId = @intEntityUserSecurityId
+		@ysnPost = 0
+		,@ysnRecap = 0
+		,@strTransactionId = @strAdjustmentNo
+		,@intEntityUserSecurityId = @intEntityUserSecurityId
+
 	DELETE FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo
 END
 

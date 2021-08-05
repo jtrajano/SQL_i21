@@ -17,13 +17,12 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
---IC Reserve Stock
-IF @Recap = @ZeroBit	
-	EXEC dbo.uspARPostItemResevation
+-- --IC Reserve Stock
+-- IF @Recap = @ZeroBit	
+-- 	EXEC dbo.uspARPostItemResevation
 
 DECLARE @ItemsForContracts					[InvoicePostingTable]
-DECLARE @GLEntries							[RecapTableType]
-EXEC [dbo].[uspARPopulateContractDetails] @Post
+EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
 
 DECLARE @strDatabaseName NVARCHAR(50)
 DECLARE @strCompanyName NVARCHAR(50)
@@ -566,7 +565,34 @@ BEGIN
 	WHERE ISNULL(SMT.strApprovalStatus, '') <> 'Approved'
 	AND VI.ysnHasCreditApprover = 0
     AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
-    AND ((I.dblInvoiceTotal + VI.dblARBalance >= VI.dblCreditLimit) OR ISNULL(VI.dblCreditStopDays, 0) >= 0)
+    AND ((I.dblInvoiceTotal + VI.dblARBalance > VI.dblCreditLimit) OR ISNULL(VI.dblCreditStopDays, 0) > 0)
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Approval
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]            = I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= ISNULL(SMT.strApprovalStatus, 'Not Yet Approved')
+	FROM 
+		##ARPostInvoiceHeader I 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
+	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
+	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
+	WHERE ISNULL(SMT.strApprovalStatus, '') IN  ('Waiting for Approval', 'Waiting for Submit')
+	AND VI.ysnHasCreditApprover = 1	
+    AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -586,8 +612,7 @@ BEGIN
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'UOM is required for item ' + ISNULL(NULLIF(I.[strItemDescription], ''), I.[strItemNo]) + '.'
 	FROM ##ARPostInvoiceDetail I	
-	WHERE
-		I.[strTransactionType] = 'Invoice'	
+	WHERE I.[strTransactionType] = 'Invoice'	
 		AND (I.[intItemUOMId] IS NULL OR I.[intItemUOMId] = 0) 
 		AND (I.[intInventoryShipmentItemId] IS NULL OR I.[intInventoryShipmentItemId] = 0)
 		AND (I.[intSalesOrderDetailId] IS NULL OR I.[intSalesOrderDetailId] = 0)
@@ -937,30 +962,6 @@ BEGIN
 	  AND INV.strTransactionType = 'Cash'
 	  AND ISNULL(INV.strPaymentInfo, '') = ''
 
-	--INSERT INTO @returntable(
-	--	 [intInvoiceId]
-	--	,[strInvoiceNumber]
-	--	,[strTransactionType]
-	--	,[intInvoiceDetailId]
-	--	,[intItemId]
-	--	,[strBatchId]
-	--	,[strPostingError])
-	----Accrual Not in Fiscal Year
-	--SELECT
-	--	 [intInvoiceId]			= I.[intInvoiceId]
-	--	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-	--	,[strTransactionType]	= I.[strTransactionType]
-	--	,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-	--	,[intItemId]			= I.[intItemId]
-	--	,[strBatchId]			= I.[strBatchId]
-	--	,[strPostingError]		= I.[strInvoiceNumber] + ' has an Accrual setup up to ' + CONVERT(NVARCHAR(30),DATEADD(mm, (ISNULL(I.[intPeriodsToAccrue],1) - 1), ISNULL(I.[dtmPostDate], I.[dtmDate])), 101) + ' which does not fall into a valid Fiscal Period.'
-	--FROM 
-	--	#ARPostInvoiceData I
-	--WHERE
-	--	ISNULL(I.[intPeriodsToAccrue],0) > 1  
-	--	AND ISNULL(dbo.isOpenAccountingDate(DATEADD(mm, (ISNULL(I.[intPeriodsToAccrue],1) - 1), ISNULL(I.[dtmPostDate], I.[dtmDate]))), 0) = 0
-
-
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -1122,14 +1123,8 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The Maintenance Type of item - ' + I.[strItemNo] + ' is not valid.'
-	FROM 
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]											
-	WHERE
-		I.[strItemType] = 'Software'	
+	FROM ##ARPostInvoiceDetail I
+	WHERE I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') NOT IN ('License/Maintenance', 'Maintenance Only', 'SaaS', 'License Only')
 
 
@@ -1150,12 +1145,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The Maintenance Frequency of item - ' + I.[strItemNo] + ' is not valid.'
-	FROM 
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]											
+	FROM ##ARPostInvoiceDetail I
 	WHERE
 		ISNULL(I.[strItemType],'') = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
@@ -1178,12 +1168,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The Maintenance Start Date of item - ' + I.[strItemNo] + ' is required.'
-	FROM 
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]											
+	FROM ##ARPostInvoiceDetail I
 	WHERE
 		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
@@ -1207,12 +1192,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The License Amount of item - ' + I.[strItemNo] + ' does not match the Price.'
-	FROM 
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]											
+	FROM ##ARPostInvoiceDetail I
 	WHERE
 		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License Only')
@@ -1237,12 +1217,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The Maintenance Amount of item - ' + I.[strItemNo] + ' does not match the Price.'
-	FROM 
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]											
+	FROM ##ARPostInvoiceDetail I
 	WHERE
 		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('Maintenance Only', 'SaaS')
@@ -1267,12 +1242,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The Maintenance Amount + License Amount of item - ' + I.[strItemNo] + ' does not match the Price.'
-	FROM 
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail  ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN tblICItem  ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]											
+	FROM ##ARPostInvoiceDetail I
 	WHERE
 		I.[strItemType] = 'Software'	
 		AND ISNULL(I.[strMaintenanceType], '') IN ('License/Maintenance')
@@ -1307,8 +1277,6 @@ BEGIN
 		I.[strItemType] = 'Software'	
 		AND I.[strMaintenanceType] IN ('License/Maintenance', 'Maintenance Only', 'SaaS')
 		AND (ISNULL(Acct.[intMaintenanceSalesAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
-			
-
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1338,8 +1306,6 @@ BEGIN
 		I.[strItemType] = 'Software'	
 		AND I.[strMaintenanceType] IN ('License/Maintenance', 'License Only')
 		AND (ISNULL(Acct.[intGeneralAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
-			
-
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1422,10 +1388,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Sales Account of line item - ' + I.[strItemDescription] + ' is not valid.' ELSE 'The Sales Account of line item - ' + I.[strItemDescription] + ' was not specified.' END
-	FROM 
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
+	FROM ##ARPostInvoiceDetail I
 	LEFT OUTER JOIN tblGLAccount GLA
 			ON I.[intSalesAccountId] = GLA.[intAccountId]
 	WHERE
@@ -1623,30 +1586,17 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The COGS Account of component - ' + ARIA.[strItemNo] + ' is not valid.' ELSE 'The COGS Account of component - ' + ARIA.[strItemNo] + ' was not specified.' END	
-	FROM
-		vyuARGetItemComponents ARIC
-	INNER JOIN			
-		##ARPostInvoiceDetail I
-			ON ARIC.[intItemId] = I.[intItemId]
-			AND ARIC.[intCompanyLocationId] = I.[intCompanyLocationId]
-	INNER JOIN tblICItem ICI
-			ON ARIC.[intComponentItemId] = ICI.[intItemId]
-	LEFT OUTER JOIN  ##ARInvoiceItemAccount ARIA
-			ON ARIC.[intComponentItemId] = ARIA.[intItemId] 
-			AND I.[intCompanyLocationId] = ARIA.[intLocationId] 	
-	LEFT OUTER JOIN  tblGLAccount  GLA
-			ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	 
-	WHERE
-		I.[dblTotal] <> @ZeroDecimal
+	FROM tblICItemBundle ARIC
+	INNER JOIN ##ARPostInvoiceDetail I ON ARIC.[intItemId] = I.[intItemId]			
+	INNER JOIN tblICItem ICI ON ARIC.[intBundleItemId] = ICI.[intItemId]
+	LEFT OUTER JOIN ##ARInvoiceItemAccount ARIA ON ARIC.[intBundleItemId] = ARIA.[intItemId] AND I.[intCompanyLocationId] = ARIA.[intLocationId] 	
+	LEFT OUTER JOIN tblGLAccount GLA ON ARIA.[intCOGSAccountId] = GLA.[intAccountId]	 
+	WHERE I.[dblTotal] <> @ZeroDecimal
         AND I.[intInventoryShipmentItemId] IS NULL
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
 		AND I.[intItemId] IS NOT NULL
-		AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-		AND I.[strTransactionType] <> 'Debit Memo'	
-		AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
+		AND I.[strTransactionType] <> 'Debit Memo'			
 		AND (ISNULL(ARIA.[intCOGSAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)			
-
-					
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1698,28 +1648,16 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= CASE WHEN GLA.[intAccountId] IS NULL THEN 'The Inventory In-Transit Account of item - ' + ARIA.[strItemNo] + ' is not valid.' ELSE 'The Inventory In-Transit Account of item - ' + ARIA.[strItemNo] + ' was not specified.' END	
-	FROM 
-		vyuARGetItemComponents ARIC
-	INNER JOIN			
-		##ARPostInvoiceDetail I
-			ON ARIC.[intItemId] = I.[intItemId]
-			AND ARIC.[intCompanyLocationId] = I.[intCompanyLocationId]
-	INNER JOIN tblICItem ICI
-			ON ARIC.[intComponentItemId] = ICI.[intItemId]
-	LEFT OUTER JOIN ##ARInvoiceItemAccount ARIA
-			ON ARIC.[intComponentItemId] = ARIA.[intItemId] 
-			AND I.[intCompanyLocationId] = ARIA.[intLocationId]
-	LEFT OUTER JOIN tblGLAccount GLA
-			ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId] 		 		 
-	WHERE
-		I.[dblTotal] <> @ZeroDecimal
+	FROM tblICItemBundle ARIC
+	INNER JOIN ##ARPostInvoiceDetail I ON ARIC.[intItemId] = I.[intItemId]
+	INNER JOIN tblICItem ICI ON ARIC.[intBundleItemId] = ICI.[intItemId]
+	LEFT OUTER JOIN ##ARInvoiceItemAccount ARIA ON ARIC.[intBundleItemId] = ARIA.[intItemId] AND I.[intCompanyLocationId] = ARIA.[intLocationId]
+	LEFT OUTER JOIN tblGLAccount GLA ON ARIA.[intInventoryInTransitAccountId] = GLA.[intAccountId] 		 		 
+	WHERE I.[dblTotal] <> @ZeroDecimal
 		AND (ISNULL(I.[intInventoryShipmentItemId],0) <> 0 OR ISNULL(I.[intLoadDetailId],0) <> 0)
 		AND I.[intItemId] IS NOT NULL
-		AND ISNULL(ARIC.[intComponentItemId],0) <> 0
-		AND I.[strTransactionType] <> 'Debit Memo'																		
-		AND (ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment') OR ICI.[ysnAutoBlend] <> 1)
-		AND (ISNULL(ARIA.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)			
-
+		AND I.[strTransactionType] <> 'Debit Memo'
+		AND (ISNULL(ARIA.[intInventoryInTransitAccountId], 0) = 0 OR GLA.[intAccountId] IS NULL)
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1738,13 +1676,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The contract item - ' + I.[strItemNo] + ' price cannot be zero.'
-	FROM 					
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN
-	--	(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge') ) ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]
+	FROM ##ARPostInvoiceDetail I
 	INNER JOIN
 		(SELECT [intContractHeaderId], [intContractDetailId], [strPricingType] FROM vyuCTCustomerContract WITH (NOLOCK)) CTCD
 			ON I.[intContractHeaderId] = CTCD.[intContractHeaderId] 
@@ -1774,16 +1706,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'The contract item - ' + I.[strItemNo] + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(I.[dblUnitPrice],@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY),2) + ').'
-	FROM 					
-		##ARPostInvoiceDetail I
-	--INNER JOIN tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--INNER JOIN
-	--	(SELECT [intItemId], [strItemNo] FROM tblICItem WITH (NOLOCK) WHERE strType NOT IN ('Other Charge')) ICI
-	--		ON ARID.[intItemId] = ICI.[intItemId]
-	--INNER JOIN 
-	--	(SELECT [intInvoiceId], intOriginalInvoiceId FROM tblARInvoice WITH (NOLOCK) WHERE intOriginalInvoiceId IS NULL) ARI
-	--		ON I.[intInvoiceId] = ARI.[intInvoiceId]
+	FROM ##ARPostInvoiceDetail I
 	INNER JOIN vyuCTCustomerContract ARCC
 			ON I.[intContractHeaderId] = ARCC.[intContractHeaderId] 
 			AND I.[intContractDetailId] = ARCC.[intContractDetailId] 			 				
@@ -1875,57 +1798,6 @@ BEGIN
 	WHERE
 		I.strTransactionType = 'Cash Refund'
 		AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
-
-	DECLARE @strItemBlankStorageLocation NVARCHAR(MAX) = NULL;
-
-	SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
-	FROM 					
-		##ARPostInvoiceDetail I
-	WHERE ISNULL(I.intStorageLocationId, 0) > 0
-	AND	ISNULL(I.intSubLocationId, 0) = 0
-
-	IF (@strItemBlankStorageLocation IS NOT NULL)
-	BEGIN
-		INSERT INTO ##ARInvalidInvoiceData
-			([intInvoiceId]
-			,[strInvoiceNumber]
-			,[strTransactionType]
-			,[intInvoiceDetailId]
-			,[intItemId]
-			,[strBatchId]
-			,[strPostingError])
-		--CASH REFUND AMOUNT IS NOT EQUAL TO PREPAIDS
-		SELECT
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-			,[intItemId]			= I.[intItemId]
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
-		FROM 					
-			##ARPostInvoiceDetail I
-	END
-
-	-- INSERT INTO ##ARInvalidInvoiceData
-	-- 	([intInvoiceId]
-	-- 	,[strInvoiceNumber]
-	-- 	,[strTransactionType]
-	-- 	,[intInvoiceDetailId]
-	-- 	,[intItemId]
-	-- 	,[strBatchId]
-	-- 	,[strPostingError])
-	-- --FISCAL PERIOD CLOSED AR
-	-- SELECT
-	-- 	 [intInvoiceId]			= I.[intInvoiceId]
-	-- 	,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-	-- 	,[strTransactionType]	= I.[strTransactionType]
-	-- 	,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-	-- 	,[intItemId]			= I.[intItemId]
-	-- 	,[strBatchId]			= I.[strBatchId]
-	-- 	,[strPostingError]		= 'Unable to find an open fiscal year period for Accounts Receivable module to match the transaction date.'
-	-- FROM ##ARPostInvoiceHeader I
-	-- WHERE dbo.isOpenAccountingDateByModule(ISNULL(dtmPostDate, dtmDate), 'Accounts Receivable') = 0  
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2918,6 +2790,94 @@ BEGIN
 				AND I.[ysnImportedAsPosted] = @OneBit 
 				AND I.[ysnImportedFromOrigin] = @OneBit												
 		END
+
+	INSERT INTO ##ARInvoiceGLEntries
+        ([dtmDate]
+        ,[strBatchId]
+        ,[intAccountId]
+        ,[dblDebit]
+        ,[dblCredit]
+        ,[dblDebitUnit]
+        ,[dblCreditUnit]
+        ,[strDescription]
+        ,[strCode]
+        ,[strReference]
+        ,[intCurrencyId]
+        ,[dblExchangeRate]
+        ,[dtmDateEntered]
+        ,[dtmTransactionDate]
+        ,[strJournalLineDescription]
+        ,[intJournalLineNo]
+        ,[ysnIsUnposted]
+        ,[intUserId]
+        ,[intEntityId]
+        ,[strTransactionId]
+        ,[intTransactionId]
+        ,[strTransactionType]
+        ,[strTransactionForm]
+        ,[strModuleName]
+        ,[intConcurrencyId]
+        ,[dblDebitForeign]
+        ,[dblDebitReport]
+        ,[dblCreditForeign]
+        ,[dblCreditReport]
+        ,[dblReportingRate]
+        ,[dblForeignRate]
+        ,[strDocument]
+        ,[strComments]
+        ,[strSourceDocumentId]
+        ,[intSourceLocationId]
+        ,[intSourceUOMId]
+        ,[dblSourceUnitDebit]
+        ,[dblSourceUnitCredit]
+        ,[intCommodityId]
+        ,[intSourceEntityId])
+    SELECT 
+         [dtmDate]						= GLD.[dtmDate]
+        ,[strBatchId]					= @BatchId
+        ,[intAccountId]					= GLD.[intAccountId]
+        ,[dblDebit]						= GLD.[dblCredit]
+        ,[dblCredit]					= GLD.[dblDebit]
+        ,[dblDebitUnit]					= GLD.[dblCreditUnit]
+        ,[dblCreditUnit]				= GLD.[dblDebitUnit]
+        ,[strDescription]				= GLD.[strDescription]
+        ,[strCode]						= GLD.[strCode]
+        ,[strReference]					= GLD.[strReference]
+        ,[intCurrencyId]				= GLD.[intCurrencyId]
+        ,[dblExchangeRate]				= GLD.[dblExchangeRate]
+        ,[dtmDateEntered]				= PID.[dtmDatePosted]
+        ,[dtmTransactionDate]			= GLD.[dtmTransactionDate]
+        ,[strJournalLineDescription]	= REPLACE(GLD.[strJournalLineDescription], 'Posted ', 'Unposted ')
+        ,[intJournalLineNo]				= GLD.[intJournalLineNo]
+        ,[ysnIsUnposted]				= 1
+        ,[intUserId]					= GLD.[intUserId]
+        ,[intEntityId]					= GLD.[intUserId]
+        ,[strTransactionId]				= GLD.[strTransactionId]
+        ,[intTransactionId]				= GLD.[intTransactionId]
+        ,[strTransactionType]			= GLD.[strTransactionType]
+        ,[strTransactionForm]			= GLD.[strTransactionForm]
+        ,[strModuleName]				= GLD.[strModuleName]
+        ,[intConcurrencyId]				= 1
+        ,[dblDebitForeign]				= GLD.[dblCreditForeign]
+        ,[dblDebitReport]				= GLD.[dblCreditReport]
+        ,[dblCreditForeign]				= GLD.[dblDebitForeign]
+        ,[dblCreditReport]				= GLD.[dblDebitReport]
+        ,[dblReportingRate]				= GLD.[dblReportingRate]
+        ,[dblForeignRate]				= GLD.[dblForeignRate]
+        ,[strDocument]					= GLD.[strDocument]
+        ,[strComments]					= GLD.[strComments]
+        ,[strSourceDocumentId]			= GLD.[strSourceDocumentId]
+        ,[intSourceLocationId]			= GLD.[intSourceLocationId]
+        ,[intSourceUOMId]				= GLD.[intSourceUOMId]
+        ,[dblSourceUnitDebit]			= GLD.[dblSourceUnitCredit]
+        ,[dblSourceUnitCredit]			= GLD.[dblSourceUnitDebit]
+        ,[intCommodityId]				= GLD.[intCommodityId]
+        ,[intSourceEntityId]			= GLD.[intSourceEntityId]
+    FROM ##ARPostInvoiceHeader PID
+    INNER JOIN tblGLDetail GLD ON PID.[intInvoiceId] = GLD.[intTransactionId]
+                              AND PID.[strInvoiceNumber] = GLD.[strTransactionId]							 
+    WHERE GLD.[ysnIsUnposted] = 0
+    ORDER BY GLD.[intGLDetailId]
 END
 
 --Contract Schedule/Balance Validation
@@ -2976,93 +2936,27 @@ SELECT [intInvoiceId]
 FROM dbo.fnCTValidateInvoiceContract(@ItemsForContracts)
 
 --VALIDATE INVOICE GL ENTRIES
-INSERT INTO @GLEntries (
-	  [dtmDate]
-	, [strBatchId]
-	, [intAccountId]
-	, [dblDebit]
-	, [dblCredit]
-	, [dblDebitUnit]
-	, [dblCreditUnit]
-	, [strDescription]
-	, [strCode]
-	, [strReference]
-	, [intCurrencyId]
-	, [dblExchangeRate]
-	, [dtmDateEntered]
-	, [dtmTransactionDate]
-	, [strJournalLineDescription]
-	, [intJournalLineNo]
-	, [ysnIsUnposted]
-	, [intUserId]
-	, [intEntityId]
-	, [strTransactionId]
-	, [intTransactionId]
+INSERT INTO ##ARInvalidInvoiceData (
+	  [intInvoiceId]
+	, [strInvoiceNumber]
 	, [strTransactionType]
-	, [strTransactionForm]
-	, [strModuleName]
-	, [intConcurrencyId]
-	, [dblDebitForeign]
-	, [dblDebitReport]
-	, [dblCreditForeign]
-	, [dblCreditReport]
-	, [dblReportingRate]
-	, [dblForeignRate]
-	, [strRateType]
-	, [strDocument]
-	, [strComments]
-	, [strSourceDocumentId]
-	, [intSourceLocationId]
-	, [intSourceUOMId]
-	, [dblSourceUnitDebit]
-	, [dblSourceUnitCredit]
-	, [intCommodityId]
-	, [intSourceEntityId]
-	, [ysnRebuild]
+	, [intInvoiceDetailId]
+	, [intItemId]
+	, [strBatchId]
+	, [strPostingError]
 )
-SELECT [dtmDate]
-	 , [strBatchId]
-	 , [intAccountId]
-	 , [dblDebit]
-	 , [dblCredit]
-	 , [dblDebitUnit]
-	 , [dblCreditUnit]
-	 , [strDescription]
-	 , [strCode]
-	 , [strReference]
-	 , [intCurrencyId]
-	 , [dblExchangeRate]
-	 , [dtmDateEntered]
-	 , [dtmTransactionDate]
-	 , [strJournalLineDescription]
-	 , [intJournalLineNo]
-	 , [ysnIsUnposted]
-	 , [intUserId]
-	 , [intEntityId]
-	 , [strTransactionId]
-	 , [intTransactionId]
-	 , [strTransactionType]
-	 , [strTransactionForm]
-	 , [strModuleName]
-	 , [intConcurrencyId]
-	 , [dblDebitForeign]
-	 , [dblDebitReport]
-	 , [dblCreditForeign]
-	 , [dblCreditReport]
-	 , [dblReportingRate]
-	 , [dblForeignRate]
-	 , [strRateType]
-	 , [strDocument]
-	 , [strComments]
-	 , [strSourceDocumentId]
-	 , [intSourceLocationId]
-	 , [intSourceUOMId]
-	 , [dblSourceUnitDebit]
-	 , [dblSourceUnitCredit]
-	 , [intCommodityId]
-	 , [intSourceEntityId]
-	 , [ysnRebuild]
-FROM ##ARInvoiceGLEntries
+SELECT DISTINCT
+	  [intInvoiceId]		= I.[intInvoiceId]
+	, [strInvoiceNumber]	= I.[strInvoiceNumber]
+	, [strTransactionType]	= I.[strTransactionType] 
+	, [intInvoiceDetailId]	= NULL
+	, [intItemId]			= NULL
+	, [strBatchId]			= I.[strBatchId]
+	, [strPostingError]		= 'Debit and credit amounts are not balanced.'
+FROM ##ARInvoiceGLEntries GL
+INNER JOIN ##ARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber AND GL.intTransactionId = I.intInvoiceId
+GROUP BY I.intInvoiceId, I.strInvoiceNumber, I.strTransactionType, I.strBatchId
+HAVING SUM(GL.dblDebit) - SUM(GL.dblCredit) <> 0
 
 INSERT INTO ##ARInvalidInvoiceData (
 	  [intInvoiceId]
@@ -3080,9 +2974,11 @@ SELECT DISTINCT
 	, [intInvoiceDetailId]	= NULL
 	, [intItemId]			= NULL
 	, [strBatchId]			= I.[strBatchId]
-	, [strPostingError]		= [strText]
-FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @Post) GL
-INNER JOIN ##ARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber
+	, [strPostingError]		= 'Foreign Debit and credit amounts are not balanced.'
+FROM ##ARInvoiceGLEntries GL
+INNER JOIN ##ARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber AND GL.intTransactionId = I.intInvoiceId
+GROUP BY I.intInvoiceId, I.strInvoiceNumber, I.strTransactionType, I.strBatchId
+HAVING SUM(GL.dblDebitForeign) - SUM(GL.dblCreditForeign) <> 0
 
 INSERT INTO ##ARInvalidInvoiceData (
 	  [intInvoiceId]
@@ -3100,9 +2996,54 @@ SELECT DISTINCT
 	, [intInvoiceDetailId]	= NULL
 	, [intItemId]			= NULL
 	, [strBatchId]			= I.[strBatchId]
-	, [strPostingError]		= [strText]
-FROM [dbo].[fnARGetInvalidGLEntries](@GLEntries, @Post) GL
-INNER JOIN ##ARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber
+	, [strPostingError]		= 'Unable to find an open fiscal year period for Accounts Receivable module to match the transaction date.'
+FROM ##ARInvoiceGLEntries GL
+INNER JOIN ##ARPostInvoiceHeader I ON GL.strTransactionId = I.strInvoiceNumber AND GL.intTransactionId = I.intInvoiceId
+INNER JOIN tblGLFiscalYearPeriod FYP ON GL.dtmDate BETWEEN FYP.dtmStartDate AND FYP.dtmEndDate
+WHERE FYP.ysnAROpen = 0
+GROUP BY I.intInvoiceId, I.strInvoiceNumber, I.strTransactionType, I.strBatchId
+
+INSERT INTO ##ARInvalidInvoiceData (
+	  [intInvoiceId]
+	, [strInvoiceNumber]
+	, [strTransactionType]
+	, [intInvoiceDetailId]
+	, [intItemId]
+	, [strBatchId]
+	, [strPostingError]
+)
+SELECT DISTINCT
+	  [intInvoiceId]		= I.[intInvoiceId]
+	, [strInvoiceNumber]	= I.[strInvoiceNumber]
+	, [strTransactionType]	= I.[strTransactionType] 
+	, [intInvoiceDetailId]	= NULL
+	, [intItemId]			= NULL
+	, [strBatchId]			= II.[strBatchId]
+	, [strPostingError]		= I.strInvoiceNumber + ' has discrepancy on ' + GL.strAccountCategory + ' of ' + LTRIM(STR(ISNULL(I.dblBaseInvoiceTotal, 0), 16, 2))
+FROM tblARInvoice I
+INNER JOIN ##ARPostInvoiceHeader II ON I.intInvoiceId = II.intInvoiceId AND I.strInvoiceNumber = II.strInvoiceNumber
+INNER JOIN (
+	SELECT intTransactionId		= GL.intTransactionId
+	     , strTransactionId		= GL.strTransactionId
+		 , strAccountCategory	= GLAC.strAccountCategory
+	     , dblAmount			= SUM(dblDebit - dblCredit)
+	FROM tblGLDetail GL
+	INNER JOIN tblGLAccount GLA ON GL.intAccountId = GLA.intAccountId
+	INNER JOIN tblGLAccountSegmentMapping GLSM ON GLA.intAccountId = GLSM.intAccountId
+	INNER JOIN tblGLAccountSegment GLS ON GLSM.intAccountSegmentId = GLS.intAccountSegmentId
+	INNER JOIN tblGLAccountStructure GLAST ON GLS.intAccountStructureId = GLAST.intAccountStructureId AND GLAST.strType = 'Primary'
+	INNER JOIN tblGLAccountCategory GLAC ON GLS.intAccountCategoryId = GLAC.intAccountCategoryId
+	INNER JOIN ##ARPostInvoiceHeader IH ON IH.intInvoiceId = GL.intTransactionId AND IH.strInvoiceNumber = GL.strTransactionId	
+	WHERE GLAC.strAccountCategory IN ('AR Account', 'Undeposited Funds')
+	  AND GL.ysnIsUnposted = 0
+	  AND GL.strCode = 'AR'
+	  AND IH.ysnPost = 1
+	GROUP BY GL.intTransactionId, GL.strTransactionId, GLAC.strAccountCategory
+	HAVING SUM(dblDebit - dblCredit) <> 0 
+) GL ON I.intInvoiceId = GL.intTransactionId
+    AND I.strInvoiceNumber = GL.strTransactionId
+	AND ((I.strTransactionType <> 'Cash' AND GL.strAccountCategory = 'AR Account') OR (I.strTransactionType = 'Cash' AND GL.strAccountCategory = 'Undeposited Funds'))	
+WHERE II.ysnPost = 1
 
 UPDATE ##ARInvalidInvoiceData
 SET [strBatchId] = @BatchId

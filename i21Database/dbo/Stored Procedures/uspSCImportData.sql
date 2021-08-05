@@ -845,7 +845,8 @@ BEGIN TRY
 					,[ysnReadyToTransfer]
 					,[ysnExport] 
 					,[intConcurrencyId]
-					,dtmImportedDate						
+					,dtmImportedDate
+					,dtmDateCreatedUtc
 				)
 				SELECT 
 					SCT.[strTicketStatus]
@@ -975,6 +976,7 @@ BEGIN TRY
 					,SCT.[ysnExport] 
 					,1
 					,dtmImportedDate = GETDATE()
+					,dtmDateCreatedUtc = GETUTCDATE()
 				FROM #insertedTicket SCT
 				LEFT JOIN (
 					SELECT DS.intDeliverySheetId,SCD.intDeliverySheetId AS dsId,SCD.intEntityId FROM @temp_xml_deliverysheet_sc SCD
@@ -1034,7 +1036,7 @@ BEGIN TRY
 							SET @_dblNetUnits  = @_dblAvailableQtyInItemStockUOM
 							
 							UPDATE tblSCTicket
-							SET dblScheduleQty = @_dblNetUnits
+							SET dblScheduleQty = @_dblNetUnits, dtmDateModifiedUtc = GETUTCDATE()
 							WHERE intTicketId = @_intTicketId	
 						END
 
@@ -1474,6 +1476,12 @@ BEGIN TRY
 
 			IF ISNULL(@ysnUpdateData, 0) = 0
 			BEGIN
+
+				SELECT *    
+				INTO #finalDeliverySheetRecordImport    
+				FROM @temp_xml_deliverysheet DSI    
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM  tblSCDeliverySheet A WHERE A.strDeliverySheetNumber = DSI.strDeliverySheetNumber)    
+
 				INSERT INTO tblSCDeliverySheet (
 					[intEntityId]
 					,[intCompanyLocationId]
@@ -1521,7 +1529,7 @@ BEGIN TRY
 					,[strCountyProducer]					= SCD.strCountyProducer
 					,[intConcurrencyId]						= 1
 					,dtmImportedDate						= GETDATE()
-				FROM @temp_xml_deliverysheet SCD 
+				FROM #finalDeliverySheetRecordImport    SCD 
 				LEFT JOIN tblSCDeliverySheet DSDestination 
 					ON DSDestination.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				WHERE DSDestination.strDeliverySheetNumber IS NULL
@@ -1543,7 +1551,7 @@ BEGIN TRY
 						intMainId					= MDS.intDeliverySheetId
 						,intRemoteId				= RDS.intDeliverySheetId
 						,intRemoteLocationId		= @intRemoteLocationId
-					FROM @temp_xml_deliverysheet RDS
+					FROM #finalDeliverySheetRecordImport    RDS
 					INNER JOIN tblSCDeliverySheet MDS 
 						ON MDS.strDeliverySheetNumber = RDS.strDeliverySheetNumber
 					LEFT JOIN tblSCRemoteXrefDeliverySheet XREF
@@ -1593,7 +1601,7 @@ BEGIN TRY
 					,[strDiscountChargeType]			= QM.strDiscountChargeType
 					,[intConcurrencyId]					= 1
 				FROM @temp_xml_qmdstable QM
-				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
+				INNER JOIN #finalDeliverySheetRecordImport    SCD ON SCD.intDeliverySheetId = QM.intTicketFileId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
 				WHERE QM.strSourceType = 'Delivery Sheet'
 					AND DS.intDeliverySheetId IS NULL
@@ -1617,7 +1625,7 @@ BEGIN TRY
 					,[intStorageScheduleRuleId]		= SCDS.intStorageScheduleRuleId
 					,[intConcurrencyId]				= 1
 				FROM @temp_xml_splitdstable SCDS
-				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
+				INNER JOIN #finalDeliverySheetRecordImport SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
 				--WHERE DS.intDeliverySheetId IS NULL
 				ORDER BY SCDS.intDeliverySheetSplitId  ASC

@@ -6,7 +6,6 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 		
 		SELECT * FROM vyuARTransactionSummary
-
 		
   		OUTER APPLY (
 		SELECT TOP 1 strCompanyName
@@ -22,14 +21,15 @@ DECLARE @dtmBeginningDateTo				DATETIME
 	  , @dtmEndingDateTo				DATETIME
       , @dtmEndingDateFrom				DATETIME
 	  , @intEntityCustomerId			INT	= NULL
-	  , @strSalesPersonIds					NVARCHAR(100)
+	  , @strSalesPersonIds				NVARCHAR(100)
 	  , @strName						NVARCHAR(MAX)
-	  , @strCustomerIds				NVARCHAR(MAX)
-	  , @strAccountStatusCode			NVARCHAR(MAX)
+	  , @strCustomerIds					NVARCHAR(MAX)
+	  , @strAccountStatusCodes			NVARCHAR(MAX)
 	  , @strCategoryCodeIds				NVARCHAR(300)
 	  , @strItemIds						NVARCHAR(300)
-	  , @strCompanyLocationIds				NVARCHAR(300)
-	  , @strSource						NVARCHAR(300)
+	  , @strItemDescriptions			NVARCHAR(MAX)
+	  , @strCompanyLocationIds			NVARCHAR(300)
+	  , @strSources						NVARCHAR(MAX)
 	  , @intCompanyLocationId			INT = NULL
 	  , @xmlDocumentId					INT
 
@@ -93,13 +93,17 @@ SELECT  @strItemIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'strItemIds'
 
-SELECT  @strAccountStatusCode = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT  @strItemDescriptions = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAccountStatusCodeIds'
+WHERE	[fieldname] = 'strItemDescriptions'
 
-SELECT  @strSource = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT  @strAccountStatusCodes = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
-WHERE	[fieldname] = 'strSource'
+WHERE	[fieldname] = 'strAccountStatusCodes'
+
+SELECT  @strSources = REPLACE(ISNULL([from], ''), '''''', '''')
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strSources'
 
 SELECT  @strCompanyLocationIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM	@temp_xml_table
@@ -167,7 +171,7 @@ SELECT
 	 , strCompanyAddress		= strCompanyAddress
 
  FROM (
-      SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
+      SELECT dtmBeginDate		= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
      , dtmEndingDate			= CONVERT(VARCHAR(10), @dtmEndingDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmEndingDateTo, 101) 
 	 , dtmTransactionDate		= dtmTransactionDate
 	 , dtmTransactionDateEnding	= dtmTransactionDateEnding
@@ -199,9 +203,17 @@ WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
+  AND (intItemId IN (
+		SELECT intItemId
+		FROM tblICItem
+		WHERE strDescription IN (
+			SELECT strDescription
+			FROM tblICItem
+			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
+		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
-  AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
+  AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
+  AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
 
 UNION ALL
 
@@ -237,9 +249,17 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
   AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
   AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
   AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
+  AND (intItemId IN (
+		SELECT intItemId
+		FROM tblICItem
+		WHERE strDescription IN (
+			SELECT strDescription
+			FROM tblICItem
+			WHERE intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemDescriptions, '|^|', ',')))
+		)) OR ISNULL(@strItemDescriptions, '') = '')
   AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
-  AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
-  AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
+  AND (@strAccountStatusCodes + '|^|' LIKE '%' + strAccountStatusCode + '|^|%' OR ISNULL(@strAccountStatusCodes, '') = '' OR @strAccountStatusCodes = strAccountStatusCode)
+  AND (@strSources + '|^|' LIKE '%' + strSource + '|^|%' OR ISNULL(@strSources, '') = '' OR @strSources = strSource)
   ) SUMMARY
    	OUTER APPLY (
 	SELECT TOP 1 strCompanyName
@@ -249,5 +269,4 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 	) COMPANY
 
-
-  GROUP BY strName, strCustomerNumber, strItemNo ,strCompanyName,strCompanyAddress
+GROUP BY strName, strCustomerNumber, strItemNo ,strCompanyName,strCompanyAddress

@@ -6,13 +6,13 @@
 	,@intManufacturingCellId INT
 	,@strComment NVARCHAR(Max)
 	,@intUserId INT
-	,@strReferenceNo nvarchar(50)=NULL
-	,@strLotAlias nvarchar(50)=NULL
-	,@strVesselNo nvarchar(50)=NULL
-	,@dblActualQuantity Numeric(18,6)=NULL
-	,@dblNoOfUnits Numeric(18,6)=NULL
-	,@intNoOfUnitsItemUOMId int=NULL
-	,@dtmPlannedDate Datetime=NULL
+	,@strReferenceNo NVARCHAR(50) = NULL
+	,@strLotAlias NVARCHAR(50) = NULL
+	,@strVesselNo NVARCHAR(50) = NULL
+	,@dblActualQuantity NUMERIC(18, 6) = NULL
+	,@dblNoOfUnits NUMERIC(18, 6) = NULL
+	,@intNoOfUnitsItemUOMId INT = NULL
+	,@dtmPlannedDate DATETIME = NULL
 AS
 DECLARE @intCurrentExecutionOrder INT
 DECLARE @dtmCurrentDueDate DATETIME
@@ -121,13 +121,13 @@ BEGIN
 		,intExecutionOrder = @intExecutionOrder
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
-		,strReferenceNo=@strReferenceNo
-		,strLotAlias=@strLotAlias
-		,strVesselNo=@strVesselNo
-		,dblActualQuantity=@dblActualQuantity
-		,dblNoOfUnits=@dblNoOfUnits
-		,intNoOfUnitsItemUOMId=@intNoOfUnitsItemUOMId
-		,dtmPlannedDate=@dtmPlannedDate
+		,strReferenceNo = @strReferenceNo
+		,strLotAlias = @strLotAlias
+		,strVesselNo = @strVesselNo
+		,dblActualQuantity = @dblActualQuantity
+		,dblNoOfUnits = @dblNoOfUnits
+		,intNoOfUnitsItemUOMId = @intNoOfUnitsItemUOMId
+		,dtmPlannedDate = @dtmPlannedDate
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	IF (
@@ -138,6 +138,23 @@ BEGIN
 		SET a.intExecutionOrder = b.intExecNo
 		FROM tblMFWorkOrder a
 		JOIN @tblWO b ON a.intWorkOrderId = b.intWOId
+
+	DELETE
+	FROM tblMFWorkOrderPreStage
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND strRowState = 'Modified'
+		AND intStatusId IS NULL
+
+	INSERT INTO dbo.tblMFWorkOrderPreStage (
+		intWorkOrderId
+		,intWorkOrderStatusId
+		,intUserId
+		,strRowState
+		)
+	SELECT @intWorkOrderId
+		,9
+		,@intUserId
+		,'Modified'
 END
 ELSE
 BEGIN
@@ -146,12 +163,29 @@ BEGIN
 		,strComment = @strComment
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
-		,strReferenceNo=@strReferenceNo
-		,strLotAlias=@strLotAlias
-		,strVesselNo=@strVesselNo
-		,dblActualQuantity=@dblActualQuantity
-		,dblNoOfUnits=@dblNoOfUnits
-		,intNoOfUnitsItemUOMId=@intNoOfUnitsItemUOMId
-		,dtmPlannedDate=@dtmPlannedDate
+		,strReferenceNo = @strReferenceNo
+		,strLotAlias = @strLotAlias
+		,strVesselNo = @strVesselNo
+		,dblActualQuantity = @dblActualQuantity
+		,dblNoOfUnits = @dblNoOfUnits
+		,intNoOfUnitsItemUOMId = @intNoOfUnitsItemUOMId
+		,dtmPlannedDate = @dtmPlannedDate
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	DELETE
+	FROM tblMFWorkOrderPreStage
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND strRowState = 'Modified'
+		AND intStatusId IS NULL
+
+	INSERT INTO dbo.tblMFWorkOrderPreStage (
+		intWorkOrderId
+		,intWorkOrderStatusId
+		,intUserId
+		,strRowState
+		)
+	SELECT @intWorkOrderId
+		,@intStatusId
+		,@intUserId
+		,'Modified'
 END

@@ -39,17 +39,19 @@ BEGIN
         JOIN @Id I on I.intId =  A.intAssetId
         JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId AND BD.intBookId = @BookId
         OUTER APPLY(
-            SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate
+            SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate 
             FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId
             ORDER BY dtmDepreciationToDate DESC
         )D
-        WHERE D.dblDepreciationToDate >=(ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0)) OR ISNULL(BD.ysnFullyDepreciated,0) = 1 AND ISNULL(A.ysnDisposed, 0) = 0
+        WHERE (D.dblDepreciationToDate >=(ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0)) 
+        OR  ISNULL(BD.ysnFullyDepreciated,0) = 1 )
+        AND ISNULL(A.ysnDisposed, 0) = 0
 
         IF EXISTS(SELECT TOP 1 1 FROM @tbl)
             RETURN
 
         INSERT INTO @tbl
-        SELECT A.intId, 'Missing Depreciation Method' FROM @Id A
+        SELECT A.intId, 'Missing Depreciation Method' FROM @Id A 
         LEFT JOIN tblFABookDepreciation BD on BD.intAssetId = A.intId AND BD.intBookId= @BookId
         WHERE BD.intAssetId IS NULL
 

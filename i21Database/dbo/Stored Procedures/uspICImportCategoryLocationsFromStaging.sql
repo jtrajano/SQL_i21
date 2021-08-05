@@ -1,11 +1,15 @@
-CREATE PROCEDURE uspICImportCategoryLocationsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportCategoryLocationsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @ysnAllowOverwrite BIT = 0
+	--, @intDataSourceId INT = 2
+	, @ysnImportResultFailed BIT = 0 OUTPUT 
 AS
 
 DELETE FROM tblICImportStagingCategoryLocation WHERE strImportIdentifier <> @strIdentifier
 
 ;WITH cte AS
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY strCategory, strLocation ORDER BY strCategory, strLocation) AS RowNumber
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY strCategory, strLocationName ORDER BY strCategory, strLocationName) AS RowNumber
    FROM tblICImportStagingCategoryLocation
    WHERE strImportIdentifier = @strIdentifier
 )
@@ -131,8 +135,11 @@ SELECT
 FROM tblICImportStagingCategoryLocation x
 	INNER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LOWER(LTRIM(RTRIM(x.strCategory)))
 		OR LOWER(c.strDescription) = LOWER(LTRIM(RTRIM(x.strCategory)))
-	INNER JOIN tblSMCompanyLocation l ON LOWER(l.strLocationName) = LOWER(LTRIM(RTRIM(x.strLocation)))
-		OR LOWER(l.strLocationNumber) = LOWER(LTRIM(RTRIM(x.strLocation)))
+	--INNER JOIN tblSMCompanyLocation l ON LOWER(l.strLocationName) = LOWER(LTRIM(RTRIM(x.strLocation)))
+	INNER JOIN vyuSMGetCompanyLocationSearchList l 
+		ON LOWER(l.strLocationName) = LOWER(LTRIM(RTRIM(x.strLocationName)))
+		--OR LOWER(l.strLocationNumber) = LOWER(LTRIM(RTRIM(x.strLocationName)))
+		--OR LOWER(l.strCode) = LOWER(LTRIM(RTRIM(x.strLocation)))
 	LEFT OUTER JOIN tblSTSubcategoryRegProd p ON LOWER(p.strRegProdCode) = LOWER(LTRIM(RTRIM(x.strProductCode)))
 		OR LOWER(p.strRegProdDesc) = LOWER(LTRIM(RTRIM(x.strProductCode)))
 	LEFT OUTER JOIN tblSTSubcategory f ON (LOWER(f.strSubcategoryId) = LOWER(LTRIM(RTRIM(x.strFamily)))
@@ -192,7 +199,7 @@ USING
 		, intCreatedByUserId
 	FROM #tmp s
 ) AS source ON (target.intCategoryId = source.intCategoryId AND target.intLocationId = source.intLocationId)
-WHEN MATCHED THEN
+WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 	UPDATE SET 
 		intCategoryId = source.intCategoryId,
 		intLocationId = source.intLocationId,
@@ -310,24 +317,129 @@ WHEN NOT MATCHED THEN
 	)
 	OUTPUT deleted.intCategoryId, $action, inserted.intCategoryId INTO #output;
 
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
+-- Logs
+BEGIN 
+	DECLARE 
+		@intRowsImported AS INT 
+		,@intRowsUpdated AS INT
+		,@intRowsSkipped AS INT
 
-DECLARE @TotalImported INT
-DECLARE @LogId INT
+	SELECT @intRowsImported = COUNT(*) FROM #output WHERE strAction = 'INSERT'
+	SELECT @intRowsUpdated = COUNT(*) FROM #output WHERE strAction = 'UPDATE'
 
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
-WHERE strUniqueId = @strIdentifier
+	SELECT 
+		@intRowsSkipped = COUNT(1) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0) 
+	FROM 
+		tblICImportStagingCategoryLocation s
+	WHERE
+		s.strImportIdentifier = @strIdentifier
 
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
-END
+	DECLARE @isExisting AS INT 
+		,@intImportLogId AS INT 
+
+	SELECT @intImportLogId = intImportLogId
+	FROM tblICImportLog l
+	WHERE l.strUniqueId = @strIdentifier
+
+	UPDATE l
+	SET 
+		l.intRowsImported = ISNULL(@intRowsImported, 0)
+		,l.intRowsUpdated = ISNULL(@intRowsUpdated, 0) 
+		,l.intRowsSkipped = ISNULL(@intRowsSkipped, 0)
+		,@intImportLogId = l.intImportLogId
+	FROM tblICImportLog l
+	WHERE
+		l.intImportLogId = @intImportLogId
+
+	IF @intImportLogId IS NOT NULL 
+	BEGIN 
+		-- Log Detail for missing location
+		INSERT INTO tblICImportLogDetail(
+			intImportLogId
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@intImportLogId
+			, 'Location Name.'
+			, 'Import Failed.'
+			, x.strLocationName
+			, dbo.fnFormatMessage(
+				'Unable to find company location %s for category %s.'
+				,x.strLocationName
+				,x.strCategory
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+			)
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			tblICImportStagingCategoryLocation x
+			INNER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LOWER(LTRIM(RTRIM(x.strCategory)))
+				OR LOWER(c.strDescription) = LOWER(LTRIM(RTRIM(x.strCategory)))
+			LEFT JOIN vyuSMGetCompanyLocationSearchList l 
+				ON LOWER(l.strLocationName) = LOWER(LTRIM(RTRIM(x.strLocationName)))
+		WHERE
+			l.intCompanyLocationId IS NULL 
+
+		-- Log Detail for missing category
+		INSERT INTO tblICImportLogDetail(
+			intImportLogId
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@intImportLogId
+			, 'Category.'
+			, 'Import Failed.'
+			, x.strCategory
+			, 'Unable to find the category'
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			tblICImportStagingCategoryLocation x
+			LEFT JOIN tblICCategory c 
+				ON LOWER(c.strCategoryCode) = LOWER(LTRIM(RTRIM(x.strCategory)))
+				OR LOWER(c.strDescription) = LOWER(LTRIM(RTRIM(x.strCategory)))
+		WHERE
+			c.intCategoryId IS NULL 
+	END
+
+	SET @ysnImportResultFailed = 0 
+	IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail WHERE intImportLogId = @intImportLogId AND strStatus <> 'Success')
+	BEGIN
+		DECLARE @intErrors AS INT 
+		SELECT	@intErrors = COUNT(1) 
+		FROM	tblICImportLogDetail 
+		WHERE	intImportLogId = @intImportLogId
+				AND strStatus <> 'Success'
+
+		UPDATE tblICImportLog
+		SET strDescription = 'Import Failed'
+			,intTotalErrors = @intErrors
+		WHERE intImportLogId = @intImportLogId
+
+		SET @ysnImportResultFailed = 1
+	END 
+END 
 
 DROP TABLE #tmp
 DROP TABLE #output

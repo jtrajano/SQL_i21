@@ -4,6 +4,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Delivery Notice'
 	WHERE strModule = 'Logistics' AND strTransactionType = 'Weight Claims' AND intStartingNumberId = 86
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Batch Load'
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Generate Loads' AND intStartingNumberId = 40
+
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Document Maintenance'
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
 
@@ -12,6 +15,9 @@
 
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Derivative Entry'
 	WHERE strTransactionType = N'FutOpt Transaction'
+
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Grain Receipt', strModule = 'Ticket Management'
+	WHERE strTransactionType = 'Canadian Grain Receipt'
 
 GO
 	PRINT N'BEGIN RENAME OF TRANSACTION'
@@ -409,13 +415,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Schedule')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 40
-			,[strTransactionType]	= N'Generate Loads'
-			,[strPrefix]			= N'GL-'
+			,[strTransactionType]	= N'Batch Load'
+			,[strPrefix]			= N'BLS-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Generate Loads')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Load')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 41
 			,[strTransactionType]	= N'Inventory Transfer'
@@ -732,7 +738,7 @@ GO
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 77
-			,[strTransactionType]	= N'Adjustment1099'
+			,[strTransactionType]	= N'1099 Adjustment'
 			,[strPrefix]			= N'ADJ1099-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Accounts Payable'
@@ -1489,15 +1495,15 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
 	
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 153
-			,[strTransactionType]	= N'Container ID'
-			,[strPrefix]			= N''
-			,[intNumber]			= 1
-			,[strModule]			= 'Logistics'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
+	--UNION ALL
+	--SELECT	[intStartingNumberId]	= 153
+	--		,[strTransactionType]	= N'Container ID'
+	--		,[strPrefix]			= N''
+	--		,[intNumber]			= 1
+	--		,[strModule]			= 'Logistics'
+	--		,[ysnEnable]			= 1
+	--		,[intConcurrencyId]		= 1
+	--WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
 	
 	-- UNION ALL
 	-- SELECT	[intStartingNumberId]	= 154
@@ -1558,13 +1564,31 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pricing Number')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 160
-			,[strTransactionType]	= N'Canadian Grain Receipt'
+			,[strTransactionType]	= N'Grain Receipt'
 			,[strPrefix]			= N'GR-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Ticket Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Canadian Grain Receipt' AND strModule = 'Ticket Management')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Grain Receipt' AND strModule = 'Ticket Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 161
+			,[strTransactionType]	= N'Bank Activity'
+			,[strPrefix]			= N'BACT-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Activity' AND strModule = 'Cash Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 162
+			,[strTransactionType]	= N'Bank Clearing'
+			,[strPrefix]			= N'BCLR-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Clearing' AND strModule = 'Cash Management')
 
 
 
@@ -1646,6 +1670,10 @@ GO
 		END
 	END 
 
+	UPDATE tblSMStartingNumber SET strPrefix = 'BACT' 
+	WHERE intStartingNumberId = 161 AND strPrefix = 'BC'
+	AND strModule = 'Cash Management'
+
 GO
 	PRINT N'BEGIN RENAME S'
 
@@ -1657,7 +1685,7 @@ GO
 GO
 	PRINT N'BEGIN CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO
-	--EXEC uspAPFixStartingNumbers
+	EXEC uspAPFixStartingNumbers
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR ACCOUNTS PAYABLE'
 GO

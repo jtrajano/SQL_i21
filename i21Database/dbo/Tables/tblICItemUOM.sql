@@ -51,7 +51,7 @@ Type the overview for the table here.
 					ELSE 
 						CAST(NULL AS BIGINT) 
 				END
-			),
+			) PERSISTED,
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
@@ -91,6 +91,7 @@ Type the overview for the table here.
 
 		CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strLongUPCCode]
 		ON tblICItemUOM([strLongUPCCode])
+		INCLUDE(intUpcCode, intItemUOMId)
 		WHERE [strLongUPCCode] IS NOT NULL;
 	GO
 

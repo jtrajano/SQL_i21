@@ -641,9 +641,21 @@ BEGIN
 	--					AUTO CREATE SITE
 	-- if transaction is remote or ext remote				  --
 	------------------------------------------------------------
+	
+	DECLARE @intTaxGroupByState INT = NULL
+	IF(@intTaxGroupByState IS NULL)
+	BEGIN
+		SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
+	END
+
+	IF(@intTaxGroupByState IS NULL)
+	BEGIN
+		SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
+	END
+
 	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R') AND @strNetworkType = 'PacPride')
 	BEGIN 
-			
+		
 			INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -658,7 +670,8 @@ BEGIN
 				,intPPHostId		
 				,strPPSiteType		
 				,strSiteType
-				,strAllowExemptionsOnExtAndRetailTrans
+				,strAllowExemptionsOnExtAndRetailTrans  
+				,intTaxGroupId
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -690,6 +703,7 @@ BEGIN
 												THEN 'Extended Remote'
 											END)
 				,@strAllowExemptionsOnExtAndRetailTrans
+				,@intTaxGroupByState
 
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
@@ -697,17 +711,6 @@ BEGIN
 	END
 	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Voyager')
 	BEGIN
-		DECLARE @intTaxGroupByState INT = NULL
-
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
-		END
-		
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
-		END
 
 		INSERT INTO tblCFSite
 			(
@@ -748,6 +751,17 @@ BEGIN
 		DECLARE @CFNState	NVARCHAR(MAX) = NULL
 		SELECT TOP 1 @CFNState = strPostalCode FROM tblCFStateCode where strStateName = @strSiteTaxLocation
 
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @CFNState
+		END
+
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
+		END
+
+
 		INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -759,6 +773,7 @@ BEGIN
 				,strTaxState			
 				,strSiteType
 				,strAllowExemptionsOnExtAndRetailTrans
+				,intTaxGroupId			
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -774,6 +789,7 @@ BEGIN
 											ELSE @strTransactionType
 											END)
 				,@strAllowExemptionsOnExtAndRetailTrans
+				,@intTaxGroupByState
 				
 
 			SET @intSiteId = SCOPE_IDENTITY();
@@ -781,18 +797,7 @@ BEGIN
 	END
 	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Wright Express')
 	BEGIN
-		DECLARE @intWEXTaxGroupByState INT = NULL
-
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intWEXTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
-		END
 		
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intWEXTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
-		END
-
 		INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -819,7 +824,7 @@ BEGIN
 				,strSiteAddress			= @strSiteAddress	
 				,strSiteCity			= @strSiteCity	
 				,strSiteType			= 'Extended Remote'
-				,intTaxGroupId			= @intWEXTaxGroupByState
+				,intTaxGroupId			= @intTaxGroupByState
 				,@strAllowExemptionsOnExtAndRetailTrans
 				
 
@@ -1011,6 +1016,11 @@ BEGIN
 			WHERE C.strCardNumber = @strCardId
 			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 		END
+	END
+
+	IF(LOWER(@strTransactionType) LIKE '%foreign%')
+	BEGIN
+		SET @intCardId = NULL
 	END
 
 	IF (@intCardId = 0)

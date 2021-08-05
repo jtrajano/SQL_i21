@@ -311,7 +311,7 @@ WHERE ysnPosted = 1
 					WHERE (strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND strAccountCategory = 'AP Account'))
 		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 	)
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
@@ -350,30 +350,34 @@ IF (@ysnPrintFromCFLocal = 1)
 
 --#CASHREFUNDS
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
-     , dblRefundTotal		= I.dblInvoiceTotal
+		,strDocumentNumber = ID.strDocumentNumber
+		, dblRefundTotal		= SUM(ID.dblTotal)
 INTO #CASHREFUNDS
-FROM tblARInvoice I
+FROM tblARInvoiceDetail ID
+INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
-  AND ISNULL(I.intOriginalInvoiceId, '') <> ''
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY I.intOriginalInvoiceId, I.dblInvoiceTotal
+  AND (ISNULL(I.intOriginalInvoiceId, '') <> '' OR ISNULL(ID.strDocumentNumber, '') <> '')
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
+GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
 --#CASHRETURNS
-SELECT intInvoiceId
-	 , intOriginalInvoiceId
-	 , dblInvoiceTotal
-	 , strInvoiceOriginId
+SELECT I.intInvoiceId
+	 , I.intOriginalInvoiceId
+	 , I.dblInvoiceTotal
+	 , I.strInvoiceOriginId
 INTO #CASHRETURNS	 
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-WHERE ysnPosted = 1
-  AND ysnRefundProcessed = 1
-  AND strTransactionType = 'Credit Memo'
-  AND intOriginalInvoiceId IS NOT NULL
-  AND ISNULL(strInvoiceOriginId, '') <> ''
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+LEFT JOIN tblARInvoice RI ON I.intOriginalInvoiceId = RI.intInvoiceId AND I.strInvoiceOriginId = RI.strInvoiceNumber
+WHERE I.ysnPosted = 1
+  AND I.ysnRefundProcessed = 1
+  AND I.strTransactionType = 'Credit Memo'
+  AND I.intOriginalInvoiceId IS NOT NULL
+  AND ISNULL(I.strInvoiceOriginId, '') <> ''
+  AND ISNULL(RI.ysnReturned, 0) = 0
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 --REMOVE SERVICE CHARGE THAT WAS ALREADY CAUGHT IN BALANCE FORWARD
 -- IF (@ysnFromBalanceForward = 0 AND @dtmBalanceForwardDate IS NOT NULL)
@@ -523,9 +527,9 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
 
 UNION ALL
 
@@ -541,9 +545,9 @@ SELECT I.intInvoiceId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType = 'Customer Prepayment'
+	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType = 'Customer Prepayment'
 WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType = 'Customer Prepayment') OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))    
-    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
+    AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal    		
 	                                          
 UNION ALL
             
@@ -567,7 +571,7 @@ LEFT JOIN (
 	UNION ALL 
 
 	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= (SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))) * -1
+		 , dblTotalPayment		= ABS((SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))))
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
@@ -575,6 +579,7 @@ LEFT JOIN (
 		WHERE ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	) P ON PD.intPaymentId = P.intPaymentId
+	WHERE PD.intInvoiceId IS NOT NULL
 	GROUP BY PD.intInvoiceId
 
 	UNION ALL

@@ -23,8 +23,10 @@ BEGIN
 	DECLARE @_intStorageHistoryId INT
 	DECLARE @ysnFromDS BIT
 	DECLARE @GLForItem AS GLForItem
-	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
+	DECLARE @ysnIsStorage BIT
 
+	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
+	
 	SELECT @strTransferStorageId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTransferCustomerStorage') IS NOT NULL
@@ -43,22 +45,6 @@ BEGIN
 	ON TSR.intTransferStorageSplitId = TSS.intTransferStorageSplitId
 	WHERE TSS.intTransferStorageId = @intTransferStorageId   AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
 
-	--IF (SELECT SUM(A.dblOpenBalance)
-	--		FROM tblGRCustomerStorage A 
-	--		INNER JOIN #tmpTransferCustomerStorage B 
-	--		ON B.intToCustomerStorage = A.intCustomerStorageId) <>	
-	--	(SELECT  sum(B.dblOpenBalance)
-	--		FROM tblGRCustomerStorage B
-	--		OUTER APPLY (
-	--			SELECT dblUnitQty = SUM(dblUnitQty)
-	--				,intTransferStorageId
-	--			FROM tblGRTransferStorageReference
-	--			WHERE intTransferStorageId = @intTransferStorageId
-	--				AND intToCustomerStorageId = B.intCustomerStorageId
-	--			GROUP BY intToCustomerStorageId,intTransferStorageId
-	--		) F
-	--		WHERE F.intTransferStorageId = @intTransferStorageId AND F.dblUnitQty <> B.dblOpenBalance
-	--)
 	BEGIN
 		DECLARE @TicketNo VARCHAR(50)
 
@@ -69,18 +55,6 @@ BEGIN
 				ON F.intToCustomerStorageId = A.intCustomerStorageId
 			WHERE A.dblOriginalBalance <> A.dblOpenBalance
 				AND F.intTransferStorageId = @intTransferStorageId
-			-- FROM tblGRCustomerStorage A 
-			-- INNER JOIN (
-			-- 	SELECT dblUnitQty = SUM(dblUnitQty)
-			-- 		,intTransferStorageId
-			-- 		,intToCustomerStorageId
-			-- 	FROM tblGRTransferStorageReference
-			-- 	WHERE intTransferStorageId = @intTransferStorageId
-			-- 		--AND intToCustomerStorageId = A.intCustomerStorageId
-			-- 	GROUP BY intToCustomerStorageId,intTransferStorageId
-			-- ) F
-			-- 	ON F.intToCustomerStorageId = A.intCustomerStorageId
-			-- WHERE F.dblUnitQty <> A.dblOpenBalance
 			FOR XML PATH('')
 		),1,1,'')
 		
@@ -179,20 +153,6 @@ BEGIN
 		EXEC [dbo].[uspGRRiskSummaryLog2]
 			@StorageHistoryIds = @StorageHistoryIds
 			,@strAction = 'UNPOST'
-		-- DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-		-- FOR
-		-- SELECT intStorageHistoryId FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
-		-- OPEN c;
-		-- FETCH c INTO @_intStorageHistoryId;
-
-		-- WHILE @@FETCH_STATUS = 0
-		-- BEGIN
-		-- 	EXEC [dbo].[uspGRRiskSummaryLog]
-		-- 		@intStorageHistoryId = @_intStorageHistoryId
-		-- 		,@strAction = 'UNPOST';
-		-- 	FETCH c INTO @_intStorageHistoryId;
-		-- END
-		-- CLOSE c; DEALLOCATE c;	
 
 		--DELETE HISTORY
 		DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
@@ -269,7 +229,7 @@ BEGIN
 		DECLARE @ItemsToPost AS ItemCostingTableType
 		INSERT INTO @ItemsToPost 
 		(
-				intItemId
+			intItemId
 			,intItemLocationId
 			,intItemUOMId
 			,dtmDate
@@ -331,6 +291,7 @@ BEGIN
 					
 		DECLARE @strBatchId AS NVARCHAR(40);
 		DECLARE @GLEntries AS RecapTableType;
+		DECLARE @GLEntriesCharges AS RecapTableType;
 		DECLARE @cursorId INT					
 		DECLARE @intTransactionDetailId INT
 
@@ -341,10 +302,10 @@ BEGIN
 
 		DECLARE _CURSOR CURSOR
 		FOR
-		SELECT intId, intTransactionDetailId FROM @ItemsToPost
+		SELECT intId, intTransactionDetailId,ysnIsStorage FROM @ItemsToPost
 
 		OPEN _CURSOR
-		FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
+		FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId, @ysnIsStorage
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			--Check if Transfer is DP To Other Storage (Disregard Risk Error)
@@ -354,9 +315,11 @@ BEGIN
 				ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
 			WHERE SR.intTransferStorageReferenceId = @intTransactionDetailId	
 
+			DELETE FROM @GLEntriesCharges
+
 			IF @ysnFromDS = 0						
 			BEGIN
-				INSERT INTO @GLEntries 
+				INSERT INTO @GLEntriesCharges 
 				(
 					[dtmDate] 
 					,[strBatchId]
@@ -396,20 +359,66 @@ BEGIN
 					,@intTransactionDetailId = @intTransactionDetailId
 					,@strBatchId = @strBatchId
 					,@dblCost = 0
-					,@ysnPost = 1
+					,@ysnPost = 0
+
+				IF @ysnIsStorage = 1
+				BEGIN
+					UPDATE @GLEntriesCharges
+					SET dblDebit		= dblCredit
+						,dblDebitUnit	= dblCreditUnit
+						,dblCredit		= dblDebit
+						,dblCreditUnit  = dblDebitUnit
+				END
+
+				INSERT INTO @GLEntries
+				(
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]	
+					,[dblDebitReport]	
+					,[dblCreditForeign]	
+					,[dblCreditReport]	
+					,[dblReportingRate]	
+					,[dblForeignRate]
+					,[strRateType]
+				)
+				SELECT [dtmDate], [strBatchId], [intAccountId], [dblDebit], [dblCredit], [dblDebitUnit], [dblCreditUnit]
+					,[strDescription], [strCode], [strReference], [intCurrencyId], [dblExchangeRate], [dtmDateEntered]
+					,[dtmTransactionDate], [strJournalLineDescription], [intJournalLineNo], [ysnIsUnposted], [intUserId]
+					,[intEntityId], [strTransactionId], [intTransactionId], [strTransactionType], [strTransactionForm]
+					,[strModuleName], [intConcurrencyId], [dblDebitForeign], [dblDebitReport], [dblCreditForeign]
+					,[dblCreditReport], [dblReportingRate], [dblForeignRate], [strRateType]
+				FROM @GLEntriesCharges
 			END
 			/*UNPOST STORAGE*/						
 			
-		FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
+		FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId, @ysnIsStorage
 		END
 		CLOSE _CURSOR;
-		DEALLOCATE _CURSOR;
-
-		UPDATE @GLEntries 
-		SET dblDebit		= dblCredit
-			,dblDebitUnit	= dblCreditUnit
-			,dblCredit		= dblDebit
-			,dblCreditUnit  = dblDebitUnit
+		DEALLOCATE _CURSOR;	
 
 		INSERT INTO @GLEntries 
 		(
@@ -491,7 +500,9 @@ BEGIN
 			,@AccountCategory_ContraInventory = 'AP Clearing'
 			,@intEntityUserSecurityId = @intUserId
 			,@ysnUnpostInvAdj = 1
-		--SELECT '@GLEntries',* FROM @GLEntries
+		
+		-- SELECT '@GLEntries',* FROM @GLEntries
+		-- SELECT * FROM tblICInventoryTransaction WHERE strBatchId = @strBatchId
 								
 		EXEC dbo.uspICUnpostStorage @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0
 
@@ -542,6 +553,15 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 		--/*end === FOR DP to DP only*/
+
+		-- Unpost AP clearing entries from tblAPClearing
+		EXEC uspGRUnpostAPClearingTransfer @intTransferStorageId;
+
+		-- Removing Transaction links
+		exec [uspSCAddTransactionLinks]
+			@intTransactionType = 7
+			,@intTransactionId = @intTransferStorageId
+			,@intAction = 2
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)

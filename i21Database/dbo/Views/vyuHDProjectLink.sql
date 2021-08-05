@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuHDProjectLink]
 	AS
 		with parentproject as (
-			select intProjectId = a.intDetailProjectId, intParentProjectId = a.intProjectId, strParentProjectName = b.strProjectName from tblHDProjectDetail a, tblHDProject b where b.intProjectId = a.intProjectId
+			select intProjectId = a.intDetailProjectId, intParentProjectId = a.intProjectId, strParentProjectName = b.strProjectName 
+			from tblHDProjectDetail a inner join tblHDProject b on b.intProjectId = a.intProjectId
 		)
 		select
 			a.intProjectId

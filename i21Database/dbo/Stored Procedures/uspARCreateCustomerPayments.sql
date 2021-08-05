@@ -65,6 +65,7 @@ INSERT INTO @PaymentsToGenerate (
 	,[ysnPost]
 	,[ysnRecap]
 	,[intEntityId]
+	,[intEntityCardInfoId]
 	,[intPaymentDetailId]
 	,[intInvoiceId]
 	,[intBillId]
@@ -78,6 +79,7 @@ INSERT INTO @PaymentsToGenerate (
 	,[dblBaseWriteOffAmount]
 	,[dblInterest]
 	,[dblPayment]
+	,[dblCreditCardFee]
 	,[strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]
@@ -116,6 +118,7 @@ SELECT
 	,[ysnPost]								= [ysnPost]
 	,[ysnRecap]								= [ysnRecap]
 	,[intEntityId]							= [intEntityId]
+	,[intEntityCardInfoId]					= [intEntityCardInfoId]
 	,[intPaymentDetailId]					= [intPaymentDetailId]
 	,[intInvoiceId]							= [intInvoiceId]
 	,[intBillId]							= [intBillId]
@@ -129,6 +132,7 @@ SELECT
 	,[dblBaseWriteOffAmount]				= [dblBaseWriteOffAmount]
 	,[dblInterest]							= [dblInterest]
 	,[dblPayment]							= [dblPayment]
+	,[dblCreditCardFee]						= [dblCreditCardFee]
 	,[strInvoiceReportNumber]				= [strInvoiceReportNumber]
 	,[intCurrencyExchangeRateTypeId]		= [intCurrencyExchangeRateTypeId]
 	,[intCurrencyExchangeRateId]			= [intCurrencyExchangeRateId]
@@ -283,44 +287,9 @@ FROM
 WHERE
 	NOT EXISTS(SELECT NULL FROM tblSMPaymentMethod SMPM WITH (NOLOCK) WHERE SMPM.[intPaymentMethodID] = ITG.[intPaymentMethodId] AND ISNULL(SMPM.[ysnActive], 0) = 1)
 
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'This will create a prepayment which has not been allowed!'
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE	
---	ITG.[ysnAllowPrepayment] = 0
---	AND ITG.[intInvoiceId] IS NULL
---	AND ITG.[dblAmountPaid] > @ZeroDecimal
-
-
---UNION ALL
-
---SELECT
---	 [intId]				= ITG.[intId]
---	,[strMessage]			= 'This will create a overpayment which has not been allowed!'
---	,[strSourceTransaction]	= ITG.[strSourceTransaction]
---	,[intSourceId]			= ITG.[intSourceId]
---	,[strSourceId]			= ITG.[strSourceId]
---	,[intPaymentId]			= ITG.[intPaymentId]
---FROM
---	@PaymentsToGenerate ITG --WITH (NOLOCK)
---WHERE	
---	ITG.[ysnAllowOverpayment] = 0
---	AND ITG.[intInvoiceId] IS NOT NULL
---	AND ITG.[dblAmountPaid] > ([dblPayment] + [dblDiscount] - [dblInterest])
-
-
 DELETE FROM V
 FROM @PaymentsToGenerate V
 WHERE EXISTS(SELECT NULL FROM @InvalidRecords I WHERE V.[intId] = I.[intId])
-
 
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
@@ -456,6 +425,7 @@ USING
 		,[ysnImportedFromOrigin]			= ITG.[ysnImportedFromOrigin]
 		,[ysnImportedAsPosted]				= ITG.[ysnImportedAsPosted]
 		,[intEntityId]						= ITG.[intEntityId]
+		,[intEntityCardInfoId]				= ITG.[intEntityCardInfoId]
 		,[intWriteOffAccountId]				= ITG.[intWriteOffAccountId]
 		,[strPaymentMethod]					= ITG.[strPaymentMethod]
 		,[dblTotalAR]						= @ZeroDecimal
@@ -468,14 +438,7 @@ USING
 		,[ysnRecap]							= ITG.[ysnRecap]
 		,[intPaymentId]						= ITG.[intPaymentId]
 		,[ysnPosted]						= ITG.[ysnImportedAsPosted]	
-	FROM	
-		@PaymentsToGenerate ITG --WITH (NOLOCK)
-	-- INNER JOIN
-	-- 	(SELECT intId FROM @PaymentsToGenerate) ITG2  --WITH (NOLOCK)) ITG2
-	-- 		ON ITG.[intId] = ITG2.[intId]
-	--INNER JOIN
-	--	(SELECT [intEntityId], [dblARBalance], [intCurrencyId] FROM tblARCustomer WITH (NOLOCK)) ARC
-	--		ON ITG.[intEntityCustomerId] = ARC.[intEntityId] 	
+	FROM @PaymentsToGenerate ITG
 	)
 AS Source
 ON Target.[intPaymentId] = Source.[intPaymentId]
@@ -508,6 +471,7 @@ INSERT(
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
 	,[intEntityId]
+	,[intEntityCardInfoId]
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
@@ -541,6 +505,7 @@ VALUES(
 	,[ysnImportedFromOrigin]
 	,[ysnImportedAsPosted]
 	,[intEntityId]
+	,[intEntityCardInfoId]
 	,[intWriteOffAccountId]
 	,[strPaymentMethod]
 	,[dblTotalAR]
@@ -687,6 +652,7 @@ BEGIN TRY
 		,[dblBaseWriteOffAmount]
 		,[dblInterest]
 		,[dblPayment]
+		,[dblCreditCardFee]
 		,[strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]
@@ -739,6 +705,7 @@ BEGIN TRY
 		,[dblBaseWriteOffAmount]			= ITG.[dblBaseWriteOffAmount]
 		,[dblInterest]						= ITG.[dblInterest]
 		,[dblPayment]						= ITG.[dblPayment]
+		,[dblCreditCardFee]					= ITG.[dblCreditCardFee]
 		,[strInvoiceReportNumber]			= ITG.[strInvoiceReportNumber]
 		,[intCurrencyExchangeRateTypeId]	= ITG.[intCurrencyExchangeRateTypeId]
 		,[intCurrencyExchangeRateId]		= ITG.[intCurrencyExchangeRateId]
@@ -814,7 +781,6 @@ BEGIN TRY
 
 		EXEC [dbo].[uspARReComputePaymentAmounts] @PaymentIds = @CreatedPaymentIds
 	END
-	
 
 	DECLARE @InvoiceLog AuditLogStagingTable	
 	DELETE FROM @InvoiceLog
@@ -842,15 +808,12 @@ BEGIN TRY
 		,[strFromValue]				= IL.[strSourceId]
 		,[strToValue]				= ARP.[strRecordNumber]
 		,[strDetails]				= NULL
-	 FROM @IntegrationLog IL
-	INNER JOIN
-		(SELECT [intPaymentId], [strRecordNumber] FROM tblARPayment) ARP
-			ON IL.[intPaymentId] = ARP.[intPaymentId]
-	 WHERE
-		[ysnSuccess] = 1 
-		AND [ysnInsert] = 1
+	FROM @IntegrationLog IL
+	INNER JOIN tblARPayment ARP ON IL.[intPaymentId] = ARP.[intPaymentId]
+	WHERE [ysnSuccess] = 1 
+	  AND [ysnInsert] = 1
 
-	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
+	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 
 END TRY
 BEGIN CATCH

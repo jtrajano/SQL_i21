@@ -103,6 +103,12 @@ DECLARE @_strAuditDescription NVARCHAR(500)
 DECLARE @ItemReservationTableType AS ItemReservationTableType
 
 BEGIN TRY
+		-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+		BEGIN
+			DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+			EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+		END
+		
 		SELECT TOP 1
 			@intTicketItemUOMId = SC.intItemUOMIdTo
 			,@strDistributionOption = SC.strDistributionOption
@@ -586,7 +592,7 @@ BEGIN TRY
                         end
 
 						UPDATE tblSCTicket
-						SET ysnSpecialGradePosted = 0
+						SET ysnSpecialGradePosted = 0, dtmDateModifiedUtc = GETUTCDATE()
 						WHERE intTicketId = @intTicketId
 					END
 					ELSE
@@ -668,7 +674,7 @@ BEGIN TRY
 									EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 							END
 
-							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+							UPDATE tblSCTicket SET intMatchTicketId = null, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 							DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 							DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 						END
@@ -690,7 +696,7 @@ BEGIN TRY
 								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 							END
-						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+						UPDATE tblSCTicket SET intMatchTicketId = null, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 						DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 						DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 
@@ -1252,7 +1258,7 @@ BEGIN TRY
 							DEALLOCATE intListCursor 
 
 							UPDATE tblSCTicket
-							SET intInventoryShipmentId = NULL
+							SET intInventoryShipmentId = NULL, dtmDateModifiedUtc = GETUTCDATE()
 							WHERE intTicketId = @intTicketId
 
 							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
@@ -1538,6 +1544,11 @@ BEGIN TRY
 
 				exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId, @ysnUndistribute = 1
 		END
+
+		-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+		UPDATE tblSCTicket
+		SET dblDWGOriginalNetUnits = 0
+		WHERE intTicketId = @intTicketId
 
 		--Audit Log
 		EXEC dbo.uspSMAuditLog 

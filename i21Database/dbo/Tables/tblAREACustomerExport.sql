@@ -5,6 +5,7 @@
 	[strEntityNo]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,	
 	--Description
     [strName]				NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
+    [strAccountType]		NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
 	--GroupRequired
 	[ysnGroupRequired]		BIT NOT NULL DEFAULT(1),
 	--LocationRequired
@@ -55,6 +56,5 @@
 	dblShipToLatitude NUMERIC(18, 6) NULL,
 	dblShipToLongitude NUMERIC(18, 6) NULL,
 	dtmDateCreated DATETIME2 NULL,
-	dtmDateModified DATETIME2 NULL,
-	dtmDateLastUpdated AS COALESCE(dtmDateModified, dtmDateCreated)
+	dtmDateModified DATETIME2 NULL
 )

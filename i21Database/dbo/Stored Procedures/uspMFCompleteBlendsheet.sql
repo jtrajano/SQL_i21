@@ -775,6 +775,20 @@ BEGIN TRY
 		WHERE intId > @intId
 	END
 
+	IF NOT EXISTS(SELECT *
+					FROM dbo.tblMFProductionPreStage
+					WHERE intWorkOrderId = @intWorkOrderId)
+	BEGIN
+		INSERT INTO dbo.tblMFProductionPreStage (
+				intWorkOrderId
+				,intProductionStatusId
+				,intUserId
+				)
+		SELECT @intWorkOrderId
+			,13
+			,@intUserId
+	END
+
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc

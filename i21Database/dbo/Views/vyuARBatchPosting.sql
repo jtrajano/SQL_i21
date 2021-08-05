@@ -23,7 +23,7 @@ WHERE
 	AND (ISNULL(intTransactionId, 0) = 0 AND I.strType <> 'CF Tran') 
 	AND ISNULL(ysnRecurring,0) = 0 
 	AND ((I.strType = 'Service Charge' AND ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND ysnForgiven = 0)))
-    AND strCreditCode <> 'Reject Orders'
+    AND ISNULL(strCreditCode,'') <> 'Reject Orders'
 
 UNION ALL
 

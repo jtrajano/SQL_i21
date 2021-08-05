@@ -34,6 +34,7 @@
 	[ysnIncludeInvoiceAttachments]			BIT	NOT NULL CONSTRAINT [DF_tblARCompanyPreference_ysnIncludeInvoiceAttachments] DEFAULT ((0)),
 	[strCreditOverridePassword] 			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]						INT NOT NULL DEFAULT 1,
+	[strServiceChargeFormat]				NVARCHAR (100) NULL,
 	[strIBMMessage]							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[strICSMessage]							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[strQBMMessage]							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',

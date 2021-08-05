@@ -3,6 +3,8 @@
 	[intItemSubstitutionDetailId] INT NOT NULL IDENTITY(1,1),
 	[intItemSubstitutionId] INT NOT NULL,
 	[intItemId] INT NOT NULL, 
+	ysnComplianceItem BIT NOT NULL CONSTRAINT [DF_tblMFItemSubstitutionDetail_ysnComplianceItem] DEFAULT 0,
+	dblCompliancePercent NUMERIC(18, 6),
 	[dtmValidFrom] DATETIME NULL, 
     [dtmValidTo] DATETIME NULL,
 	[ysnYearValidationRequired] BIT NOT NULL CONSTRAINT [DF_tblMFItemSubstitutionDetail_ysnYearValidationRequired] DEFAULT 0, 

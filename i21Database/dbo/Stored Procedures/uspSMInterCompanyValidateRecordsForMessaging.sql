@@ -43,6 +43,17 @@ BEGIN
 		
 	IF ISNULL(@intCurrentTransactionId, 0) <> 0 AND ISNULL(@intReferenceTransactionId, 0) <> 0
 	BEGIN
+		--WE NEED TO CHECK IF THE TRANSACTION ID IS EXISTING
+		IF not exists(SELECT TOP 1 1 FROM tblSMTransaction where intTransactionId = @intCurrentTransactionId) and ISNULL(@intReferenceCompanyId, 0) = 0
+		begin
+			print 'current transaction does not exists in the current database'
+			return 1;
+		end
+		IF not exists(SELECT TOP 1 1 FROM tblSMTransaction where intTransactionId = @intReferenceTransactionId) and ISNULL(@intReferenceCompanyId, 0) = 0
+		begin
+			print 'reference transaction does not exists in the current database'
+			return 1;
+		end
 		--WE NEED TO CHECK IF THE TRANSACTION SCRREN ID IS CORRECT OR EXISTS IN THE tblSMInterCompanyMasterScreen
 		SELECT @intCurrentTransactionScreenId = intScreenId FROM tblSMTransaction WHERE intTransactionId = @intCurrentTransactionId
 		SELECT @intReferenceTransactionScreenId = intScreenId FROM tblSMTransaction WHERE intTransactionId = @intReferenceTransactionId

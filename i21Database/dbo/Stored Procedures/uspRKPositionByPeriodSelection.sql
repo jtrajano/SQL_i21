@@ -248,7 +248,7 @@ BEGIN TRY
 									ELSE dbo.[fnRKGetCurrencyConversionRate](MainView.intContractDetailId, @intCurrencyID1, @intUnitMeasureId, ISNULL(MainView.dblFutures, 0), NULL) END
 			FROM vyuRKPositionByPeriodContDetView MainView
 			JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = MainView.intCurrencyId) cd
-		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId <> 3
+		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId NOT IN (3,5,6)
 		JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId AND cd.intPricingTypeId IN (1, 2, 3, 5)
@@ -374,7 +374,7 @@ BEGIN TRY
 									ELSE dbo.[fnRKGetCurrencyConversionRate](MainView.intContractDetailId, @intCurrencyID1, @intUnitMeasureId, ISNULL(MainView.dblFutures, 0), NULL) END
 			FROM vyuRKPositionByPeriodContDetView MainView
 			JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = MainView.intCurrencyId) cd
-		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId <> 3
+		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId NOT IN (3,5,6)
 		JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId AND cd.intPricingTypeId IN (1, 2, 3, 5)
@@ -503,7 +503,7 @@ BEGIN TRY
 									ELSE dbo.[fnRKGetCurrencyConversionRate](MainView.intContractDetailId, @intCurrencyID1, @intUnitMeasureId, ISNULL(MainView.dblFutures, 0), NULL) END
 			FROM vyuRKPositionByPeriodContDetView MainView
 			JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = MainView.intCurrencyId) cd
-		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId <> 3
+		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId NOT IN (3,5,6)
 		JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId=@intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId AND cd.intPricingTypeId IN (1, 2, 3, 5)
@@ -633,7 +633,7 @@ BEGIN TRY
 									ELSE dbo.[fnRKGetCurrencyConversionRate](MainView.intContractDetailId, @intCurrencyID1, @intUnitMeasureId, ISNULL(MainView.dblFutures, 0), NULL) END
 			FROM vyuRKPositionByPeriodContDetView MainView
 			JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = MainView.intCurrencyId) cd
-		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId <> 3
+		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId AND cd.intContractStatusId NOT IN (3,5,6)
 		JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = cd.intContractHeaderId
 		INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = cd.intPricingTypeId AND cd.intPricingTypeId IN (1, 2, 3, 5)

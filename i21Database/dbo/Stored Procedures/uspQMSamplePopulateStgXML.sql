@@ -58,7 +58,7 @@ BEGIN TRY
 	SELECT TOP 1 @intLogId = intLogId
 	FROM tblSMLog
 	WHERE intTransactionId = @intTransactionId
-	ORDER BY 1 DESC
+	ORDER BY intLogId DESC
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intSampleId)
@@ -99,6 +99,8 @@ BEGIN TRY
 		,NULL
 
 	---------------------------------------------Audit Log------------------------------------------
+	IF @strLogCondition IS NOT NULL
+	BEGIN
 	SELECT @strLogXML = NULL
 		,@strObjectName = NULL
 
@@ -120,6 +122,7 @@ BEGIN TRY
 		,@strAuditXML OUTPUT
 		,NULL
 		,NULL
+	END
 
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)

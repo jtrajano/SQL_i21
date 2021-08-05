@@ -21,6 +21,8 @@
 	[dblBaseAmountDue]				NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblBaseAmountDue] DEFAULT ((0)) NULL,
     [dblPayment]					NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblPayment] DEFAULT ((0)) NULL,	
 	[dblBasePayment]				NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblBasePayment] DEFAULT ((0)) NULL,	
+	[dblCreditCardFee]				NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblCreditCardFee] DEFAULT ((0)) NULL,
+	[dblBaseCreditCardFee]			NUMERIC (18, 6) CONSTRAINT [DF_tblARPaymentDetail_dblBaseCreditCardFee] DEFAULT ((0)) NULL,
 	[strInvoiceReportNumber]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intCurrencyExchangeRateTypeId]	INT				NULL,
 	[intCurrencyExchangeRateId]		INT				NULL,
@@ -36,6 +38,10 @@
 	CONSTRAINT [FK_tblARPaymentDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 	--CONSTRAINT [FK_tblARPaymentDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId])
 );
+
+GO
+CREATE NONCLUSTERED INDEX [NC_Index_tblARPaymentDetail]
+ON [dbo].[tblARPaymentDetail]([intPaymentId]) INCLUDE ([dblDiscount], [dblInterest], [dblPayment], [intInvoiceId]);
 
 GO
 CREATE TRIGGER trg_tblARPaymentDetailUpdate

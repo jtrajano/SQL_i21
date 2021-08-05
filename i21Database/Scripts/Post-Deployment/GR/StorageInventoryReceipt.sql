@@ -29,6 +29,13 @@ BEGIN
     	,CONSTRAINT [FK_tblGRStorageInventoryReceiptItem_tblICInventoryReceiptItem_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [dbo].[tblICInventoryReceiptItem] ([intInventoryReceiptItemId])
     	,CONSTRAINT [FK_tblGRStorageInventoryReceiptItem_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
     )
+
+	CREATE NONCLUSTERED INDEX [IX_tblGRStorageInventoryReceipt_intCustomerStorageId]
+		ON [dbo].[tblGRStorageInventoryReceipt]([intCustomerStorageId] DESC)
+		INCLUDE ([intInventoryReceiptId],[intInventoryReceiptItemId],[dblUnits]);
+
+	CREATE NONCLUSTERED INDEX [IX_tblGRStorageInventoryReceipt_intInventoryReceiptItemId]
+		ON [dbo].[tblGRStorageInventoryReceipt]([intInventoryReceiptItemId] DESC);
 END
 
 DECLARE @CustomerStorage AS TABLE

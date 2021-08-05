@@ -2,17 +2,15 @@
 CREATE PROCEDURE uspGLImportGLAccountCSVUI
 (  
  @strGUID NVARCHAR(40),
- @intEntityId INT,
+ @intEntityId INT ,
  @strVersion NVARCHAR(100),
- @importLogId INT OUT 
+ @importLogId INT OUT
 )  
 AS  
-  
 
 IF object_id('tblGLAccountImportDataStaging2') IS NOT NULL   
  DROP TABLE dbo.tblGLAccountImportDataStaging2  
-  
-  
+
 --Check the content of the table.  
 CREATE TABLE tblGLAccountImportDataStaging2  
 (  
@@ -22,6 +20,7 @@ CREATE TABLE tblGLAccountImportDataStaging2
  [strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,  
  [strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,  
  [strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,  
+ [strRawString] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
  [intAccountId] [int] NULL,  
  [strAccountId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL,  
  [ysnMissingSegment] [bit] NULL,  
@@ -37,45 +36,33 @@ CREATE TABLE tblGLAccountImportDataStaging2
  strError NVARCHAR(MAX)  
 )
   
-INSERT INTO tblGLAccountImportDataStaging2([strPrimarySegment],[strLocationSegment],[strLOBSegment],[strDescription],[strUOM])  
+INSERT INTO tblGLAccountImportDataStaging2([strPrimarySegment],[strLocationSegment],[strLOBSegment],[strDescription],[strUOM], strRawString)  
 SELECT   
 REPLACE(LTRIM(RTRIM([strPrimarySegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strLocationSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strLOBSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strDescription])),'"','')  
-,REPLACE(LTRIM(RTRIM([strUOM])),'"','') FROM tblGLAccountImportDataStaging  
+,REPLACE(LTRIM(RTRIM([strUOM])),'"','')
+,strRawString
+FROM tblGLAccountImportDataStaging  
 WHERE strGUID=@strGUID
-  
-  
+ 
 CREATE UNIQUE INDEX indunique  
   ON [tblGLAccountImportDataStaging2]([strAccountId])  
   WHERE [strAccountId] IS NOT NULL  
-  
-     
-  
+
 -- REPLACE WITH ENTITY/USER ID  
 DECLARE @withLOB BIT = 0, @separator nchar(1) = ''  
 SELECT @separator = strMask FROM tblGLAccountStructure WHERE strType = 'Divider'  
 SELECT @withLOB = 1 FROM tblGLAccountStructure WHERE strStructureName = 'LOB'  
   
-
-
-UPDATE [tblGLAccountImportDataStaging2] SET ysnNoDescription = 1 WHERE RTRIM(LTRIM(ISNULL([strDescription],''))) = ''  
+UPDATE [tblGLAccountImportDataStaging2] SET ysnNoDescription = 1 
+WHERE RTRIM(LTRIM(ISNULL([strDescription],''))) = ''  
 UPDATE [tblGLAccountImportDataStaging2] SET [ysnMissingLOBSegment] = CAST(0 AS BIT)
-   
-  
--- UPDATE EXISTING GL ACCOUNT  
-UPDATE T SET [ysnGLAccountExist] = CAST(1 AS BIT), ysnInvalid = CAST(1 AS BIT )
-FROM  [tblGLAccountImportDataStaging2] T   
-JOIN tblGLAccount A ON A.strAccountId COLLATE Latin1_General_CI_AS = T.strAccountId COLLATE Latin1_General_CI_AS  
-  
+
 UPDATE T SET intAccountUnitId = A.intAccountUnitId  
 FROM  [tblGLAccountImportDataStaging2] T   
 LEFT JOIN tblGLAccountUnit A ON LOWER(A.strUOMCode) COLLATE Latin1_General_CI_AS = LOWER(RTRIM(LTRIM(ISNULL(T.strUOM,'')))) COLLATE Latin1_General_CI_AS  
-  
-  
-
-
 
 UPDATE T SET   
 intPrimarySegmentId = A.intAccountSegmentId  
@@ -122,7 +109,18 @@ UPDATE T set strDescription = T.strDescription + '-' + ISNULL(S.strChartDesc,'')
 JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strLOBSegment))   
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId   
 WHERE  ST.strStructureName = 'LOB'AND ISNULL(ysnInvalid,0) = 0 AND  ISNULL(T.[ysnNoDescription],0)  = 1  
-  
+   
+UPDATE [tblGLAccountImportDataStaging2]   
+SET strAccountId = RTRIM(LTRIM(strPrimarySegment)) + @separator + RTRIM(LTRIM(strLocationSegment)) +    
+CASE WHEN RTRIM(LTRIM(ISNULL(strLOBSegment,''))) = ''  THEN '' ELSE @separator + strLOBSegment  END  
+WHERE ISNULL(ysnInvalid,0) = 0  
+
+ -- UPDATE EXISTING GL ACCOUNT  
+UPDATE T SET [ysnGLAccountExist] = CAST(1 AS BIT), ysnInvalid = CAST(1 AS BIT)
+FROM  [tblGLAccountImportDataStaging2] T   
+JOIN tblGLAccount A ON A.strAccountId 
+COLLATE Latin1_General_CI_AS = T.strAccountId COLLATE Latin1_General_CI_AS  
+
 UPDATE [tblGLAccountImportDataStaging2] SET   
 strError =  
 CASE WHEN ISNULL([ysnGLAccountExist],0) = 1 THEN  'Error : GL Account exists |' ELSE '' END +  
@@ -130,29 +128,23 @@ CASE WHEN intPrimarySegmentId IS NULL THEN  ' Error : Missing or invalid Primary
 CASE WHEN intLocationSegmentId IS NULL THEN  'Error : Missing or invalid Location Segment |' ELSE '' END +  
 CASE WHEN intLOBSegmentId IS NULL AND @withLOB = 1 THEN  ' Error : Missing or invalid LOB Segment |' ELSE '' END +  
 CASE WHEN intAccountUnitId IS NULL THEN  'Warning : Missing or invalid UOM Code |' ELSE '' END  
- 
- UPDATE [tblGLAccountImportDataStaging2]   
-SET strAccountId = RTRIM(LTRIM(strPrimarySegment)) + @separator + RTRIM(LTRIM(strLocationSegment)) +    
- CASE WHEN RTRIM(LTRIM(ISNULL(strLOBSegment,''))) = ''   
- THEN ''    
- ELSE @separator + strLOBSegment  END  
- WHERE isnull(ysnInvalid,0) = 0  
-
   
 INSERT intO tblGLAccount   
 ([strAccountId],[strDescription], [intAccountGroupId],[ysnSystem],[ysnActive],intCurrencyID,intAccountUnitId,  intConcurrencyId, intEntityIdLastModified)  
-SELECT S.strAccountId,S.strDescription,SG.intAccountGroupId,0,1,3,intAccountUnitId ,1,@intEntityId FROM  [tblGLAccountImportDataStaging2] S  
+SELECT S.strAccountId,S.strDescription,SG.intAccountGroupId,0,1,3,intAccountUnitId ,1,@intEntityId 
+FROM  [tblGLAccountImportDataStaging2] S  
 JOIN tblGLAccountSegment SG ON SG.intAccountSegmentId = S.[intPrimarySegmentId]  
-WHERE isnull(ysnInvalid,0) = 0  
-  
-UPDATE ST SET intAccountId = GL.intAccountId FROM [tblGLAccountImportDataStaging2] ST join tblGLAccount GL ON GL.strAccountId = ST.strAccountId   
-  
-  
-  
+WHERE ISNULL(ysnInvalid,0) = 0 
+
+UPDATE ST SET intAccountId = GL.intAccountId 
+FROM [tblGLAccountImportDataStaging2] ST 
+JOIN tblGLAccount GL ON GL.strAccountId = ST.strAccountId  
+WHERE ISNULL(ysnInvalid,0) = 0 
+    
 ;WITH Segments AS(  
- SELECT intAccountId, intPrimarySegmentId SegmentId FROM [tblGLAccountImportDataStaging2]  WHERE isnull(ysnInvalid,0) = 0 UNION ALL  
- SELECT intAccountId, [intLocationSegmentId] FROM [tblGLAccountImportDataStaging2]  WHERE isnull(ysnInvalid,0) = 0 UNION ALL  
- SELECT intAccountId, [intLOBSegmentId] FROM [tblGLAccountImportDataStaging2]  WHERE isnull(ysnInvalid,0) = 0  
+ SELECT intAccountId, intPrimarySegmentId SegmentId FROM [tblGLAccountImportDataStaging2]  WHERE ISNULL(ysnInvalid,0) = 0 UNION ALL  
+ SELECT intAccountId, [intLocationSegmentId] FROM [tblGLAccountImportDataStaging2]  WHERE ISNULL(ysnInvalid,0) = 0 UNION ALL  
+ SELECT intAccountId, [intLOBSegmentId] FROM [tblGLAccountImportDataStaging2]  WHERE ISNULL(ysnInvalid,0) = 0  
 )  
 INSERT intO tblGLAccountSegmentMapping(intAccountSegmentId, intAccountId, intConcurrencyId)  
 SELECT SegmentId, intAccountId, 1  FROM Segments
@@ -179,22 +171,18 @@ WHERE A.strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE s
  FROM tblGLCOACrossReference C Join tblGLAccount A on A.intAccountId = C.inti21Id   
  JOIN [tblGLAccountImportDataStaging2] D  on D.intAccountId = A.intAccountId  
  join glactmst G on G.A4GLIdentity = C.intLegacyReferenceId  
- where isnull(ysnNoDescription,0) = 0
- and isnull(ysnInvalid,0) = 0 
+ where ISNULL(ysnNoDescription,0) = 0
+ and ISNULL(ysnInvalid,0) = 0 
  ')  
  SET ANSI_WARNINGS  ON
 END  
-  
-  
---checking  
   
 DECLARE @intInvalidCount INT = 0, @intValidCount INT = 0, @intStagedCount INT=0  
 SELECT @intStagedCount = COUNT(*) FROM tblGLAccountImportDataStaging  
 SELECT @intInvalidCount = count(*) FROM tblGLAccountImportDataStaging2 where ISNULL(ysnInvalid,0) = 1  
 SELECT @intValidCount=COUNT(*) FROM tblGLAccount A JOIN tblGLAccountImportDataStaging2 B on B.intAccountId = A.intAccountId   
 WHERE ISNULL(ysnInvalid,0) = 0  
-  
-  
+   
 DECLARE @m NVARCHAR(MAX)  
   
 IF @intValidCount > 0 and @intInvalidCount >0  
@@ -210,12 +198,13 @@ INSERT INTO tblGLCOAImportLog(strEvent, intEntityId, intConcurrencyId, intUserId
  SELECT @m, @intEntityId, 1, @intEntityId, GETDATE(), @intInvalidCount, @intValidCount, @strVersion,'glaccount'  
  SELECT @importLogId = SCOPE_IDENTITY()  
   
-INSERT INTO tblGLCOAImportLogDetail(intImportLogId, strEventDescription, strExternalId,strLineNumber)  
+INSERT INTO tblGLCOAImportLogDetail(intImportLogId, strEventDescription, strRawString, strExternalId,strLineNumber)  
  SELECT   
   @importLogId,  
-  CASE WHEN isnull(ysnInvalid,0) = 1 THEN strError ELSE 'GL Account created. '
+  CASE WHEN ISNULL(ysnInvalid,0) = 1 THEN strError ELSE 'GL Account created. '
   + ISNULL( strError,'') 
    END,   
+  strRawString,
   strAccountId,   
   CAST([intImportStagingId] AS nvarchar(4))  
  FROM tblGLAccountImportDataStaging2

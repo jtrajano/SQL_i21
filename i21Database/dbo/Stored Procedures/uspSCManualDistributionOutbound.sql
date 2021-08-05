@@ -76,6 +76,7 @@ DECLARE @_dblContractScheduledQty NUMERIC(18,6)
 DECLARE @_dblConvertedLoopQty NUMERIC(18,6)
 DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strShipmentNumber NVARCHAR(50)
+DECLARE @_intLoadItemUOM INT
 
 
 
@@ -111,7 +112,10 @@ SELECT @intTicketItemUOMId = intItemUOMIdTo
 	, @intTicketItemContractDetailId = intItemContractDetailId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
-
+SELECT TOP 1 
+	@_intLoadItemUOM = intItemUOMId
+FROM tblLGLoadDetail WITH(NOLOCK)
+WHERE intLoadDetailId = ISNULL(@intTicketLoadDetailId,0)
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -188,7 +192,18 @@ OPEN intListCursor;
 			FROM tblCTContractDetail
 			WHERE intContractDetailId = @intLoopContractId
 
-			SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
+			IF(@strDistributionOption <> 'LOD')
+			BEGIN
+				SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
+			END
+			ELSE
+			BEGIN
+				IF(ISNULL(@_intLoadItemUOM,0) > 0)
+				BEGIN
+					SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@_intLoadItemUOM,@_intContractItemUom,@_dblTicketScheduleQuantity)
+				END
+			END
+			
 			SET @_dblConvertedLoopQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@dblLoopContractUnits)
 
 			IF @ysnIsStorage = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
@@ -603,7 +618,14 @@ END
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 
+	exec uspSCAddTransactionLinks @intTransactionType = 3, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
+
+	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+	UPDATE tblSCTicket
+	SET dblDWGOriginalNetUnits = dblNetUnits
+	WHERE intTicketId = @intTicketId
+
 
 	EXEC uspSCProcessShipmentToInvoice 
 		@intTicketId = @intTicketId

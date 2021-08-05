@@ -81,6 +81,36 @@ BEGIN TRY
 
 	EXEC sp_xml_removedocument @idoc
 
+	DECLARE @tblMFRecipeItem TABLE (
+		intRecipeId INT
+		,intItemId INT
+		,intRecipeItemId INT
+		,intRecipeItemTypeId INT
+		,dblCalculatedQuantity NUMERIC(18, 6)
+		,intVirtualRecipeId INT
+		)
+
+	INSERT INTO @tblMFRecipeItem (
+		intRecipeId
+		,intItemId
+		,intRecipeItemId
+		,intRecipeItemTypeId
+		,dblCalculatedQuantity
+		,intVirtualRecipeId 
+		)
+	SELECT VA.intRecipeId
+		,RI.intItemId
+		,RI.intRecipeItemId
+		,RI.intRecipeItemTypeId
+		,RI.dblCalculatedQuantity
+		,VA.intVirtualRecipeId
+	FROM dbo.tblMFVirtualRecipeMap VA
+	JOIN tblMFRecipeItem RI on RI.intRecipeId =VA.intRecipeId 
+	WHERE VA.intVirtualRecipeId IN (
+			SELECT Item COLLATE Latin1_General_CI_AS
+			FROM [dbo].[fnSplitString](@strVirtualRecipe, ',')
+			)
+
 	SELECT intRowNumber
 		,intVirtualRecipeId
 		,intVirtualRecipeItemId
@@ -159,16 +189,16 @@ BEGIN TRY
 				END
 			) AS dblActualTotalCost
 		,intRecipeItemTypeId
-		,'' AS strItemProductType
+		,strProductType AS strItemProductType
 	FROM (
 		SELECT ROW_NUMBER() OVER (
-				ORDER BY VRI.intRecipeId
+				ORDER BY IsNULL(VRI.intRecipeId,ARI.intVirtualRecipeId)
 					,VRI.intRecipeItemId
 				) intRowNumber
-			,VRI.intRecipeId AS intVirtualRecipeId
+			,IsNULL(VRI.intRecipeId,ARI.intVirtualRecipeId) AS intVirtualRecipeId
 			,VRI.intRecipeItemId AS intVirtualRecipeItemId
 			,VRI.intItemId AS intVirtualItemId
-			,ARI.intRecipeId AS intActualRecipeId
+			,IsNULL(ARI.intRecipeId,VA.intRecipeId) AS intActualRecipeId
 			,ARI.intRecipeItemId AS intActualRecipeItemId
 			,ARI.intItemId AS intActualItemId
 			,CASE 
@@ -201,20 +231,20 @@ BEGIN TRY
 			,C.dblCost4 AS dblCost4
 			,C.dblCost5 AS dblCost5
 			,ISNULL(VRI.intRecipeItemTypeId, ARI.intRecipeItemTypeId) AS intRecipeItemTypeId
+			,CA.strDescription AS strProductType
 		FROM dbo.tblMFVirtualRecipeMap VA
 		JOIN dbo.tblMFRecipeItem VRI ON VRI.intRecipeId = VA.intVirtualRecipeId
 		JOIN dbo.tblICItem VI ON VI.intItemId = VRI.intItemId
-		FULL OUTER JOIN dbo.tblMFRecipeItem ARI ON ARI.intRecipeId = VA.intRecipeId
+		JOIN [dbo].[fnSplitString](@strVirtualRecipe, ',') VR on VR.Item=VA.intVirtualRecipeId
+		FULL OUTER JOIN @tblMFRecipeItem ARI ON ARI.intRecipeId = VA.intRecipeId
 			AND ARI.intItemId = VRI.intItemId
 		LEFT JOIN dbo.tblICItem AI ON AI.intItemId = ARI.intItemId
 		LEFT JOIN @MarketBasis VB ON VB.intItemId = VI.intItemId
 		LEFT JOIN @MarketBasis AB ON AB.intItemId = AI.intItemId
 		LEFT JOIN @Cost C ON C.intRecipeId = VA.intVirtualRecipeId
 			AND C.intItemId = ISNULL(VI.intItemId, AI.intItemId)
-		WHERE VA.intVirtualRecipeId IN (
-				SELECT Item COLLATE Latin1_General_CI_AS
-				FROM [dbo].[fnSplitString](@strVirtualRecipe, ',')
-				)
+			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = ISNULL(VI.intCommodityId,AI.intCommodityId )
+			AND CA.intCommodityAttributeId = ISNULL(VI.intProductTypeId,AI.intProductTypeId)
 		) AS DT
 	ORDER BY ISNULL(DT.intVirtualRecipeId, DT.intActualRecipeId)
 		,DT.intRecipeItemTypeId DESC

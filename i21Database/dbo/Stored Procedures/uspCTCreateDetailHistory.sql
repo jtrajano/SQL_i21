@@ -28,7 +28,10 @@ BEGIN TRY
 				@dblFutures				NUMERIC(18,6),
 				@dblBasis				NUMERIC(18,6),
 				@dblCashPrice			NUMERIC(18,6),
-				@strTransactionType		NVARCHAR(20) 
+				@strTransactionType		NVARCHAR(20),
+				@strScreenName			NVARCHAR(20),
+				@ysnStayAsDraftContractUntilApproved BIT,
+                @ysnAddAmendmentForNonDraftContract BIT = 0
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -61,6 +64,9 @@ BEGIN TRY
 			intPriceItemUOMId			   INT
 		)
 		
+
+		SELECT TOP 1 @strScreenName = strScreenName FROM tblCTSequenceUsageHistory WHERE intSequenceUsageHistoryId = @intSequenceUsageHistoryId
+
 		DECLARE	@SCOPE_IDENTITY TABLE (intSequenceHistoryId INT)
 
 		IF @intContractHeaderId IS NULL AND @intContractDetailId IS NOT NULL
@@ -70,7 +76,7 @@ BEGIN TRY
 		
 		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
 		SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor with (nolock) WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
-		SELECT @ysnAmdWoAppvl	    = ISNULL(ysnAmdWoAppvl,0) FROM tblCTCompanyPreference
+		SELECT @ysnAmdWoAppvl       = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0) FROM tblCTCompanyPreference
 
 		DELETE FROM @tblHeader
 		DELETE FROM @tblDetail
@@ -233,6 +239,10 @@ BEGIN TRY
 				  )					FD  ON  FD.intPriceFixationId	  =	 PF.intPriceFixationId
 		WHERE   CD.intContractHeaderId  =   @intContractHeaderId
 		AND		CD.intContractDetailId	=   ISNULL(@intContractDetailId,CD.intContractDetailId)
+
+	declare
+		@intSequenceHistoryCount int
+		,@intValidSequenceHistoryCount int;
     
 	SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY
 	WHILE	ISNULL(@intSequenceHistoryId,0) > 0
@@ -251,113 +261,143 @@ BEGIN TRY
 					@dblFutures = dblFutures,@dblBasis = dblBasis,@dblCashPrice = dblCashPrice
 			FROM	tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
 
-			IF ISNULL(@dblPrevQty,0) <> ISNULL(@dblQuantity,0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty,ysnQtyChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
-			END
-			IF ISNULL(@dblPrevBal,0) <> ISNULL(@dblBalance,0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal,ysnBalanceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
-			END
-			IF ISNULL(@intPrevStatusId,0) <> ISNULL(@intContractStatusId,0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId,ysnStatusChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
-			END
+			if (OBJECT_ID('tempdb..#tempSequenceHistoryCompare') is not null)
+			begin
+				DROP TABLE #tempSequenceHistoryCompare;
+			end
 
-			IF ISNULL(@dblPrevFutures,0) <> ISNULL(@dblFutures,0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldFutures = @dblPrevFutures,ysnFuturesChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
-			END
-			IF ISNULL(@dblPrevBasis,0) <> ISNULL(@dblBasis,0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldBasis = @dblPrevBasis,ysnBasisChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
-			END
-			IF ISNULL(@dblPrevCashPrice,0) <> ISNULL(@dblCashPrice,0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice,ysnCashPriceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
-			END
+			select top 2
+			intContractStatusId
+			,intCompanyLocationId
+			,intPricingTypeId
+			,intFutureMarketId
+			,intFutureMonthId
+			,intCurrencyId
+			,intDtlQtyInCommodityUOMId
+			,intDtlQtyUnitMeasureId
+			,intCurrencyExchangeRateId
+			,intBookId
+			,intSubBookId
+			,dtmStartDate
+			,dtmEndDate
+			,dblQuantity
+			,dblBalance
+			,dblScheduleQty
+			,dblFutures
+			,dblBasis
+			,dblCashPrice
+			,dblLotsPriced
+			,dblLotsUnpriced
+			,dblQtyPriced
+			,dblQtyUnpriced
+			,dblFinalPrice
+			,dblRatio
+			,dtmFXValidFrom
+			,dtmFXValidTo
+			,dblRate
+			,strPricingType
+			,strPricingStatus
+			,strCurrencypair
+			,strBook
+			,strSubBook
+			,intPriceItemUOMId
+			into #tempSequenceHistoryCompare
+			from tblCTSequenceHistory where intContractDetailId = @intContractDetailId order by intSequenceHistoryId desc
 
-			/*Chek if the new created sequence history has a difference from previous record*/
-			declare @ysnWithChanges bit =0;
-			select @ysnWithChanges =  case when
-				she.intContractStatusId <> shn.intContractStatusId or (she.intContractStatusId  is null and  shn.intContractStatusId is not null) or (she.intContractStatusId is not null  and  shn.intContractStatusId is null)
-				or she.intCompanyLocationId <> shn.intCompanyLocationId or (she.intCompanyLocationId  is null and  shn.intCompanyLocationId is not null) or (she.intCompanyLocationId is not null  and  shn.intCompanyLocationId is null)
-				or she.intItemId <> shn.intItemId or (she.intItemId  is null and  shn.intItemId is not null) or (she.intItemId is not null  and  shn.intItemId is null)
-				or she.intPricingTypeId <> shn.intPricingTypeId or (she.intPricingTypeId  is null and  shn.intPricingTypeId is not null) or (she.intPricingTypeId is not null  and  shn.intPricingTypeId is null)
-				or she.intFutureMarketId <> shn.intFutureMarketId or (she.intFutureMarketId  is null and  shn.intFutureMarketId is not null) or (she.intFutureMarketId is not null  and  shn.intFutureMarketId is null)
-				or she.intFutureMonthId <> shn.intFutureMonthId or (she.intFutureMonthId  is null and  shn.intFutureMonthId is not null) or (she.intFutureMonthId is not null  and  shn.intFutureMonthId is null)
-				or she.intDtlQtyInCommodityUOMId <> shn.intDtlQtyInCommodityUOMId or (she.intDtlQtyInCommodityUOMId  is null and  shn.intDtlQtyInCommodityUOMId is not null) or (she.intDtlQtyInCommodityUOMId is not null  and  shn.intDtlQtyInCommodityUOMId is null)
-				or she.intDtlQtyUnitMeasureId <> shn.intDtlQtyUnitMeasureId or (she.intDtlQtyUnitMeasureId  is null and  shn.intDtlQtyUnitMeasureId is not null) or (she.intDtlQtyUnitMeasureId is not null  and  shn.intDtlQtyUnitMeasureId is null)
-				or she.intCurrencyExchangeRateId <> shn.intCurrencyExchangeRateId or (she.intCurrencyExchangeRateId  is null and  shn.intCurrencyExchangeRateId is not null) or (she.intCurrencyExchangeRateId is not null  and  shn.intCurrencyExchangeRateId is null)
-				or she.intBookId <> shn.intBookId or (she.intBookId  is null and  shn.intBookId is not null) or (she.intBookId is not null  and  shn.intBookId is null)
-				or she.intSubBookId <> shn.intSubBookId or (she.intSubBookId  is null and  shn.intSubBookId is not null) or (she.intSubBookId is not null  and  shn.intSubBookId is null)
-				or she.dtmStartDate <> shn.dtmStartDate or (she.dtmStartDate  is null and  shn.dtmStartDate is not null) or (she.dtmStartDate is not null  and  shn.dtmStartDate is null)
-				or she.dtmEndDate <> shn.dtmEndDate or (she.dtmEndDate  is null and  shn.dtmEndDate is not null) or (she.dtmEndDate is not null  and  shn.dtmEndDate is null)
-				or she.dblQuantity <> shn.dblQuantity or (she.dblQuantity  is null and  shn.dblQuantity is not null) or (she.dblQuantity is not null  and  shn.dblQuantity is null)
-				or she.dblBalance <> shn.dblBalance or (she.dblBalance  is null and  shn.dblBalance is not null) or (she.dblBalance is not null  and  shn.dblBalance is null)
-				or she.dblScheduleQty <> shn.dblScheduleQty or (she.dblScheduleQty  is null and  shn.dblScheduleQty is not null) or (she.dblScheduleQty is not null  and  shn.dblScheduleQty is null)
-				or she.dblFutures <> shn.dblFutures or (she.dblFutures  is null and  shn.dblFutures is not null) or (she.dblFutures is not null  and  shn.dblFutures is null)
-				or she.dblBasis <> shn.dblBasis or (she.dblBasis  is null and  shn.dblBasis is not null) or (she.dblBasis is not null  and  shn.dblBasis is null)
-				or she.dblCashPrice <> shn.dblCashPrice or (she.dblCashPrice  is null and  shn.dblCashPrice is not null) or (she.dblCashPrice is not null  and  shn.dblCashPrice is null)
-				or she.dblLotsPriced <> shn.dblLotsPriced or (she.dblLotsPriced  is null and  shn.dblLotsPriced is not null) or (she.dblLotsPriced is not null  and  shn.dblLotsPriced is null)
-				or she.dblLotsUnpriced <> shn.dblLotsUnpriced or (she.dblLotsUnpriced  is null and  shn.dblLotsUnpriced is not null) or (she.dblLotsUnpriced is not null  and  shn.dblLotsUnpriced is null)
-				or she.dblQtyPriced <> shn.dblQtyPriced or (she.dblQtyPriced  is null and  shn.dblQtyPriced is not null) or (she.dblQtyPriced is not null  and  shn.dblQtyPriced is null)
-				or she.dblQtyUnpriced <> shn.dblQtyUnpriced or (she.dblQtyUnpriced  is null and  shn.dblQtyUnpriced is not null) or (she.dblQtyUnpriced is not null  and  shn.dblQtyUnpriced is null)
-				or she.dblFinalPrice <> shn.dblFinalPrice or (she.dblFinalPrice  is null and  shn.dblFinalPrice is not null) or (she.dblFinalPrice is not null  and  shn.dblFinalPrice is null)
-				or she.dblRatio <> shn.dblRatio or (she.dblRatio  is null and  shn.dblRatio is not null) or (she.dblRatio is not null  and  shn.dblRatio is null)
-				or she.dtmFXValidFrom <> shn.dtmFXValidFrom or (she.dtmFXValidFrom  is null and  shn.dtmFXValidFrom is not null) or (she.dtmFXValidFrom is not null  and  shn.dtmFXValidFrom is null)
-				or she.dtmFXValidTo <> shn.dtmFXValidTo or (she.dtmFXValidTo  is null and  shn.dtmFXValidTo is not null) or (she.dtmFXValidTo is not null  and  shn.dtmFXValidTo is null)
-				or she.intContractSeq <> shn.intContractSeq or (she.intContractSeq  is null and  shn.intContractSeq is not null) or (she.intContractSeq is not null  and  shn.intContractSeq is null)
-				or she.strPricingStatus <> shn.strPricingStatus or (she.strPricingStatus  is null and  shn.strPricingStatus is not null) or (she.strPricingStatus is not null  and  shn.strPricingStatus is null)
-				or she.strCurrencypair <> shn.strCurrencypair or (she.strCurrencypair  is null and  shn.strCurrencypair is not null) or (she.strCurrencypair is not null  and  shn.strCurrencypair is null)
-				or she.intGradeId <> shn.intGradeId or (she.intGradeId  is null and  shn.intGradeId is not null) or (she.intGradeId is not null  and  shn.intGradeId is null)
-				or she.intItemUOMId <> shn.intItemUOMId or (she.intItemUOMId  is null and  shn.intItemUOMId is not null) or (she.intItemUOMId is not null  and  shn.intItemUOMId is null)
-				or she.intPositionId <> shn.intPositionId or (she.intPositionId  is null and  shn.intPositionId is not null) or (she.intPositionId is not null  and  shn.intPositionId is null)
-				or she.intPriceItemUOMId <> shn.intPriceItemUOMId or (she.intPriceItemUOMId  is null and  shn.intPriceItemUOMId is not null) or (she.intPriceItemUOMId is not null  and  shn.intPriceItemUOMId is null)
-				or she.intTermId <> shn.intTermId or (she.intTermId  is null and  shn.intTermId is not null) or (she.intTermId is not null  and  shn.intTermId is null)
-				or she.intWeightId <> shn.intWeightId or (she.intWeightId  is null and  shn.intWeightId is not null) or (she.intWeightId is not null  and  shn.intWeightId is null)
-				or she.strAmendmentComment <> shn.strAmendmentComment or (she.strAmendmentComment  is null and  shn.strAmendmentComment is not null) or (she.strAmendmentComment is not null  and  shn.strAmendmentComment is null)
-				or she.dblOldQuantity <> shn.dblOldQuantity or (she.dblOldQuantity  is null and  shn.dblOldQuantity is not null) or (she.dblOldQuantity is not null  and  shn.dblOldQuantity is null)
-				or she.dblOldBalance <> shn.dblOldBalance or (she.dblOldBalance  is null and  shn.dblOldBalance is not null) or (she.dblOldBalance is not null  and  shn.dblOldBalance is null)
-				or she.intOldStatusId <> shn.intOldStatusId or (she.intOldStatusId  is null and  shn.intOldStatusId is not null) or (she.intOldStatusId is not null  and  shn.intOldStatusId is null)
-				or she.ysnQtyChange <> shn.ysnQtyChange or (she.ysnQtyChange  is null and  shn.ysnQtyChange is not null) or (she.ysnQtyChange is not null  and  shn.ysnQtyChange is null)
-				or she.ysnStatusChange <> shn.ysnStatusChange or (she.ysnStatusChange  is null and  shn.ysnStatusChange is not null) or (she.ysnStatusChange is not null  and  shn.ysnStatusChange is null)
-				or she.ysnBalanceChange <> shn.ysnBalanceChange or (she.ysnBalanceChange  is null and  shn.ysnBalanceChange is not null) or (she.ysnBalanceChange is not null  and  shn.ysnBalanceChange is null)
-				or she.dblOldFutures <> shn.dblOldFutures or (she.dblOldFutures  is null and  shn.dblOldFutures is not null) or (she.dblOldFutures is not null  and  shn.dblOldFutures is null)
-				or she.dblOldBasis <> shn.dblOldBasis or (she.dblOldBasis  is null and  shn.dblOldBasis is not null) or (she.dblOldBasis is not null  and  shn.dblOldBasis is null)
-				or she.dblOldCashPrice <> shn.dblOldCashPrice or (she.dblOldCashPrice  is null and  shn.dblOldCashPrice is not null) or (she.dblOldCashPrice is not null  and  shn.dblOldCashPrice is null)
-				or she.ysnFuturesChange <> shn.ysnFuturesChange or (she.ysnFuturesChange  is null and  shn.ysnFuturesChange is not null) or (she.ysnFuturesChange is not null  and  shn.ysnFuturesChange is null)
-				or she.ysnBasisChange <> shn.ysnBasisChange or (she.ysnBasisChange  is null and  shn.ysnBasisChange is not null) or (she.ysnBasisChange is not null  and  shn.ysnBasisChange is null)
-				or she.ysnCashPriceChange <> shn.ysnCashPriceChange or (she.ysnCashPriceChange  is null and  shn.ysnCashPriceChange is not null) or (she.ysnCashPriceChange is not null  and  shn.ysnCashPriceChange is null)
-				or she.dtmDateAdded <> shn.dtmDateAdded or (she.dtmDateAdded  is null and  shn.dtmDateAdded is not null) or (she.dtmDateAdded is not null  and  shn.dtmDateAdded is null)
-				or she.intFreightTermId <> shn.intFreightTermId or (she.intFreightTermId  is null and  shn.intFreightTermId is not null) or (she.intFreightTermId is not null  and  shn.intFreightTermId is null)
-				then 1 else 0 end
-				from 
-				tblCTSequenceHistory she
-				left join tblCTSequenceHistory shn on shn.intSequenceHistoryId = @intPrevHistoryId
-				where she.intSequenceHistoryId = @intSequenceHistoryId
+			select @intSequenceHistoryCount = count(*) from #tempSequenceHistoryCompare
 
-				if (@ysnWithChanges = 0)
+			select @intValidSequenceHistoryCount = count(*) from (
+				select distinct * from #tempSequenceHistoryCompare
+			)tbl
+
+			if (@intSequenceHistoryCount = 2 and @intValidSequenceHistoryCount = 1)
+			begin
+				DELETE
+				FROM tblCTSequenceHistory
+				WHERE intSequenceHistoryId = @intSequenceHistoryId;
+			end
+			else
+			begin
+			
+				IF ISNULL(@dblPrevQty,0) <> ISNULL(@dblQuantity,0)
 				BEGIN
-					delete from tblCTSequenceHistory where intSequenceHistoryId = @intSequenceHistoryId
-				end
+					UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty,ysnQtyChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+				END
+				IF ISNULL(@dblPrevBal,0) <> ISNULL(@dblBalance,0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal,ysnBalanceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+				END
+				IF ISNULL(@intPrevStatusId,0) <> ISNULL(@intContractStatusId,0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId,ysnStatusChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+				END
+
+				IF ISNULL(@dblPrevFutures,0) <> ISNULL(@dblFutures,0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldFutures = @dblPrevFutures,ysnFuturesChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+				END
+				IF ISNULL(@dblPrevBasis,0) <> ISNULL(@dblBasis,0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldBasis = @dblPrevBasis,ysnBasisChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+				END
+				IF ISNULL(@dblPrevCashPrice,0) <> ISNULL(@dblCashPrice,0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice,ysnCashPriceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
+				END
+
+			end
+
 		END
 
-
-		-- CONTRACT BALANCE LOG
-		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
-		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							 @intContractDetailId 	= 	@intContractDetailId,
-							 @strSource			 	= 	@strSource,
-							 @strProcess		 	= 	@strProcess,
-							 @contractDetail 		= 	@contractDetails,		
-							 @intUserId				=	@intUserId
+		IF NOT (ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory')
+		BEGIN
+			-- CONTRACT BALANCE LOG
+			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								 @intContractDetailId 	= 	@intContractDetailId,
+								 @strSource			 	= 	@strSource,
+								 @strProcess		 	= 	@strProcess,
+								 @contractDetail 		= 	@contractDetails,		
+								 @intUserId				=	@intUserId
+		END
 
 
 		SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND (ISNULL(ysnPrinted,0)=1 OR ISNULL(ysnSigned,0)=1))
+    if exists (
+        select
+            top 1 1
+        from
+            tblSMScreen scr
+            left join tblSMTransaction txn on txn.intScreenId = scr.intScreenId and txn.intRecordId = @intContractHeaderId
+            left join tblSMApproval ap on ap.intTransactionId = txn.intTransactionId
+        where
+            scr.strNamespace = 'ContractManagement.view.Contract'
+            and ap.strStatus = 'Approved'
+            and @ysnStayAsDraftContractUntilApproved = 1
+    )
+    begin
+        set @ysnAddAmendmentForNonDraftContract = 1;
+    end
+
+	IF EXISTS(
+        SELECT TOP 1 1
+        FROM tblCTContractHeader
+        WHERE intContractHeaderId = @intContractHeaderId
+        AND (
+                (
+                    isnull(@ysnStayAsDraftContractUntilApproved,0)=0
+                    and
+                    (
+                        ISNULL(ysnPrinted,0)=1
+                        OR ISNULL(ysnSigned,0)=1                
+                    )
+                )
+
+            OR isnull(@ysnAddAmendmentForNonDraftContract,0)=1
+        )
+	)
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId ) OR (@ysnAmdWoAppvl = 1)
 		BEGIN

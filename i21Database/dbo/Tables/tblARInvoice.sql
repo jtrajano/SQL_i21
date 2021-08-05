@@ -134,6 +134,7 @@
 	[strReceiptNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
 	[ysnInterCompany]					BIT												NULL DEFAULT ((0)),
 	[ysnImportFromCSV] 					BIT											    NULL	CONSTRAINT [DF_tblARInvoice_ysnImportFromCSV] DEFAULT ((0)),
+	[guiApiUniqueId]					UNIQUEIDENTIFIER NULL
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),

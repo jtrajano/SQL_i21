@@ -111,7 +111,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
  
 	-- Update the Inventory Transfer Key to the Transaction Table
 	UPDATE	SC
-	SET		SC.intInventoryTransferId = addResult.intInventoryTransferId
+	SET		SC.intInventoryTransferId = addResult.intInventoryTransferId, SC.dtmDateModifiedUtc = GETUTCDATE()
 	FROM	dbo.tblSCTicket SC INNER JOIN #tmpAddInventoryTransferResult addResult
 				ON SC.intTicketId = addResult.intSourceId;
 _PostOrUnPost:

@@ -49,7 +49,8 @@ BEGIN TRY
 			@intFutureMonthId			INT,
 			@dblFutures					NUMERIC(18, 6),
 			@ysnUniqueEntityReference	BIT,
-			@ysnUsed					BIT = 0
+			@ysnUsed					BIT = 0,
+			@dblTotalPriced				NUMERIC(18, 6) = 0
 
 	SELECT	@ysnUniqueEntityReference = ysnUniqueEntityReference FROM tblCTCompanyPreference
 	--SELECT	@XML	=	dbo.[fnCTRemoveStringXMLTag](@XML,'strAmendmentLog')
@@ -128,6 +129,17 @@ BEGIN TRY
 			dblFutures					NUMERIC(18,6)
 			
 	);  
+
+	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+	FROM (
+		SELECT dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, tCum.intUnitMeasureId, fCum.intUnitMeasureId, ISNULL(pfd.dblQuantity, 0))
+		FROM tblCTPriceFixation pf
+		JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
+		JOIN tblICCommodityUnitMeasure fCum ON fCum.intCommodityUnitMeasureId = @intCommodityUOMId
+		JOIN tblICItemUOM tCum ON tCum.intItemUOMId = pfd.intQtyItemUOMId
+		WHERE intContractHeaderId = @intContractHeaderId 
+	) tbl
+	
 
 	IF @RowState = 'Added'
 	BEGIN
@@ -249,7 +261,12 @@ BEGIN TRY
 				SET @ErrMsg = 'No Of Lots is missing while creating contract.'
 				RAISERROR(@ErrMsg,16,1)
 			END
-
+			
+			IF (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0))
+			BEGIN
+				SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+				RAISERROR(@ErrMsg,16,1)
+			END
 		END
 
 		IF	@strContractNumber IS NULL
@@ -385,6 +402,12 @@ BEGIN TRY
 				SET @ErrMsg = 'Cannot reduce number of lots to '+LTRIM(CAST(@dblNoOfLots AS INT)) + '. As '+LTRIM(CAST(@dblLotsFixed AS INT)) + ' lots are price fixed.'
 				RAISERROR(@ErrMsg,16,1)
 			END
+		END
+
+		IF (@ysnMultiplePriceFixation = 1) AND (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0))
+		BEGIN
+			SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+			RAISERROR(@ErrMsg,16,1)
 		END
 	END
 

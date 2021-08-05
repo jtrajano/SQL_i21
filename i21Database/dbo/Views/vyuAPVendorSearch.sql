@@ -55,6 +55,8 @@ SELECT
 	a.ysnPymtCtrlEFTActive,
 	a.ysnPymtCtrlHold,
 	a.ysnOneBillPerPayment,
+	a.dtmCreated,
+	a.dtmLastModified,
 	EC.strClass
 	FROM tblAPVendor a
 	join tblEMEntity b

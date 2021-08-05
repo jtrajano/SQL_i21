@@ -48,6 +48,7 @@ DECLARE @dblMatchTicketScheduleQty NUMERIC(38,20)
 DECLARE @intMatchTicketItemUOMIdTo INT
 DECLARE @dblMatchTicketNetUnits NUMERIC(38,20)
 DECLARE @dblUnits NUMERIC(38,20)
+DECLARE @ScaleDWGAllocation ScaleDWGAllocation
 --DECLARE @intReversedBillId INT
 
 BEGIN TRY
@@ -158,7 +159,7 @@ BEGIN TRY
 			EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 		END
 
-		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
+		EXEC dbo.uspSCInsertDestinationInventoryShipment @ScaleDWGAllocation,@intTicketId, @intUserId, 0
 	END
 	ELSE
 	BEGIN
@@ -213,7 +214,7 @@ BEGIN TRY
 				EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 			END
 		END
-		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
+		EXEC dbo.uspSCInsertDestinationInventoryShipment @ScaleDWGAllocation,@intTicketId, @intUserId, 0
 	END
 
 	EXEC dbo.uspSMAuditLog 

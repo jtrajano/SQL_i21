@@ -93,6 +93,11 @@ BEGIN
     DROP TABLE #CUSTOMERS
 END
 
+IF(OBJECT_ID('tempdb..#GLACCOUNTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #GLACCOUNTS
+END
+
 SELECT intEntityCustomerId			= intEntityId
 	 , strCustomerNumber			= CAST(strCustomerNumber COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
 	 , strCustomerName				= CAST('' COLLATE Latin1_General_CI_AS AS NVARCHAR(200))
@@ -197,6 +202,13 @@ ELSE
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 END
+
+--#GLACCOUNTS
+SELECT intAccountId
+	 , strAccountCategory
+INTO #GLACCOUNTS
+FROM vyuGLAccountDetail
+WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
 
 IF @strAccountStatusCodeLocal IS NOT NULL
     BEGIN
@@ -322,6 +334,7 @@ FROM (
 			 , ysnImportedFromOrigin
 			 , strTicketNumbers	= SCALETICKETS.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
 		OUTER APPLY (
 			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
 			FROM (
@@ -338,29 +351,9 @@ FROM (
 			) INV (strTicketNumber)
 		) SCALETICKETS
 		WHERE ysnPosted  = 1		
-		AND ysnCancelled = 0
-		AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
-		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +'
-		AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId 
-													FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
-													INNER JOIN (
-														SELECT intPaymentId
-														FROM dbo.tblARPayment WITH (NOLOCK)
-														WHERE ysnPosted = 1
-															AND strPaymentMethod  = ''Write Off''
-															AND ISNULL(ysnProcessedToNSF, 0) = 0
-															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'																	
-													) P ON PD.intPaymentId = P.intPaymentId))
-		OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
-													FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-													INNER JOIN (
-														SELECT intPaymentId
-														FROM dbo.tblARPayment WITH (NOLOCK)
-														WHERE ysnPosted = 1	
-															AND ISNULL(ysnProcessedToNSF, 0) = 0
-															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
-													) P ON PD.intPaymentId = P.intPaymentId AND I.strInvoiceNumber =PD.strTransactionNumber))))
-		AND intAccountId IN (SELECT intAccountId FROM dbo.vyuGLAccountDetail WITH (NOLOCK) WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))
+		  AND ysnCancelled = 0
+		  AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
+		  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))  BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +')				
 	) I ON I.intEntityCustomerId = C.intEntityId		
 	LEFT JOIN (
 		SELECT intPaymentId	
@@ -402,6 +395,7 @@ FROM (
 			 , strLocationName
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 	) CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE I.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
 ) MainQuery'
  
 IF ISNULL(@filter,'') != ''

@@ -24,11 +24,10 @@
 			,intConcurrencyId = 1
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = us.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
+			,intCustomerCount = NULL
 		from
-			tblSMUserSecurity us,
-			tblSMUserRole ur
-		where
-			ur.intUserRoleID = us.intUserRoleID
+			tblSMUserSecurity us
+			inner join tblSMUserRole ur on ur.intUserRoleID = us.intUserRoleID
 		
 		union all
 
@@ -56,6 +55,7 @@
 			,intConcurrencyId = 1
 			,strFullName2 = ec.strName
 			,strEntityType = (select top 1 et.strType from [tblEMEntityType] et where et.intEntityId = cus.[intEntityId] and et.strType in ('Customer','Prospect'))
+			,intCustomerCount = (select count(*)  from tblEMEntityToContact where intEntityContactId = ec.intEntityId)
 		from
 			tblEMEntity ec
 			inner join tblARCustomer cus on cus.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])
@@ -86,6 +86,7 @@
 			,intConcurrencyId = 1
 			,strFullName2 = (select top 1 strName from vyuEMEntityContact where intEntityId = sp.[intEntityId] and ysnDefaultContact = 1)
 			,strEntityType = 'Agent' COLLATE Latin1_General_CI_AS
+			,intCustomerCount = NULL
 		from
 			tblEMEntity ec
 			inner join tblARSalesperson sp on sp.[intEntityId] = (select top 1 et.[intEntityId] from [tblEMEntityToContact] et where et.[intEntityContactId] = ec.[intEntityId])

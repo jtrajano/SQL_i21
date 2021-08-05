@@ -42,6 +42,8 @@ SELECT CHK.dtmDate
 						AND intEntityId = ENTITY.intEntityId ORDER BY dtmEffectiveDate desc), '') 
 			+ ' on ' + 
 			CONVERT(varchar(11), PYMT.dtmDatePaid,106)
+		, PYMTDTL.intPaymentDetailId
+		, GETUTCDATE() dtmCurrent
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
 INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 

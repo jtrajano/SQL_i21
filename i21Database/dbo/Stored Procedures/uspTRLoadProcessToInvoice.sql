@@ -65,7 +65,7 @@ BEGIN TRY
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))
 														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-													END) END
+													END) END COLLATE Latin1_General_CI_AS
 		/*
 		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
 														(CASE WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
@@ -205,7 +205,7 @@ BEGIN TRY
 		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
 		AND BlendIngredient.strType != 'Other Charge'
-	) BlendingIngredient ON BlendingIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = ''
+	) BlendingIngredient ON BlendingIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = '' AND BlendingIngredient.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
 			AND CustomerFreight.intCategoryId = Item.intCategoryId
@@ -1317,6 +1317,46 @@ BEGIN TRY
 		END
 			
 		DROP TABLE #tmpBlendItems
+	END
+
+	
+	-- COPY THE ATTACHMENT FROM TR TO INVOICE
+	IF ((SELECT COUNT(intEntityCustomerId) FROM tblTRLoadDistributionHeader DH 
+		WHERE DH.intLoadHeaderId = @intLoadHeaderId AND DH.strDestination = 'Customer') = 1)
+	BEGIN
+		DECLARE @intTransportAttachmentId INT = NULL,
+			@intAttachmentInvoiceId INT = NULL
+
+		DECLARE @CursorAttachmentTran AS CURSOR
+		SET @CursorAttachmentTran = CURSOR FAST_FORWARD FOR
+			SELECT TA.intAttachmentId, I.intInvoiceId
+		FROM tblTRLoadDistributionHeader DH INNER JOIN tblTRLoadHeader LH ON LH.intLoadHeaderId = DH.intLoadHeaderId 
+		INNER JOIN tblSMAttachment TA ON TA.strRecordNo = LH.intLoadHeaderId
+		LEFT JOIN tblARInvoice I ON I.intInvoiceId = DH.intInvoiceId
+		LEFT JOIN tblSMAttachment IA ON IA.strRecordNo = DH.intInvoiceId AND IA.strScreen = 'AccountsReceivable.view.Invoice' AND IA.strName = TA.strName
+		WHERE LH.intLoadHeaderId = @intLoadHeaderId
+		AND DH.intInvoiceId IS NOT NULL
+		AND TA.strScreen = 'Transports.view.TransportLoads'
+		AND IA.strName IS NULL
+		AND DH.strDestination = 'Customer'
+
+		OPEN @CursorAttachmentTran
+		FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			DECLARE @strAttachmentErrorMessage NVARCHAR(MAX) = NULL
+			
+			EXEC dbo.uspSMCopyAttachments @srcNamespace = 'Transports.view.TransportLoads'
+				, @srcRecordId =  @intLoadHeaderId
+				, @destNamespace = 'AccountsReceivable.view.Invoice'
+				, @destRecordId = @intAttachmentInvoiceId
+				, @ErrorMessage = @strAttachmentErrorMessage OUTPUT
+				, @srcIntAttachmentId = @intTransportAttachmentId
+				
+			FETCH NEXT FROM @CursorAttachmentTran INTO @intTransportAttachmentId, @intAttachmentInvoiceId
+		END
+		CLOSE @CursorAttachmentTran  
+		DEALLOCATE @CursorAttachmentTran
 	END
 
 	IF (@ErrorMessage IS NULL)

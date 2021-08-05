@@ -24,7 +24,7 @@ BEGIN
 	USING (
 		SELECT	
 			ItemTransactionStorage.intItemId
-			,ItemTransactionStorage.intItemUOMId
+			,stockUOM.intItemUOMId
 			,ItemTransactionStorage.intItemLocationId
 			,Qty = SUM(
 					dbo.fnCalculateQtyBetweenUOM(
@@ -37,7 +37,7 @@ BEGIN
 			tblICInventoryTransactionStorage ItemTransactionStorage 
 			INNER JOIN tblICItemUOM ItemUOM
 				ON ItemTransactionStorage.intItemUOMId = ItemUOM.intItemUOMId
-			OUTER APPLY (
+			CROSS APPLY (
 				SELECT TOP 1 
 					stockUOM.intItemUOMId
 				FROM 
@@ -49,7 +49,7 @@ BEGIN
 				
 		GROUP BY 
 			ItemTransactionStorage.intItemId
-			,ItemTransactionStorage.intItemUOMId
+			,stockUOM.intItemUOMId
 			,ItemTransactionStorage.intItemLocationId
 	) AS StockToUpdate
 		ON ItemStock.intItemId = StockToUpdate.intItemId

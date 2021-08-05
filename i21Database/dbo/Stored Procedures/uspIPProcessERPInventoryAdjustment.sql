@@ -15,7 +15,7 @@ BEGIN TRY
 	DECLARE @strUserName NVARCHAR(100)
 	DECLARE @strFinalErrMsg NVARCHAR(MAX) = ''
 		,@ItemsForPost AS ItemCostingTableType
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 		,@strCompanyLocation NVARCHAR(6)
 		,@intActionId INT
 		,@dtmCreatedDate DATETIME
@@ -48,18 +48,43 @@ BEGIN TRY
 		,@STARTING_NUMBER_BATCH AS INT = 3
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Work In Progress'
 		,@strBatchId AS NVARCHAR(40)
+		,@intInventoryReceiptItemId INT
+		,@intInventoryReceiptId INT
+		,@intLoadContainerId INT
+		,@intLoadId INT
+		,@strNewStorageLocation NVARCHAR(50)
+		,@strNewStorageUnit NVARCHAR(50)
+		,@intCompanyLocationNewSubLocationId INT
+		,@intNewStorageLocationId INT
+		,@intNewLotId INT
+		,@intLotItemUOMId INT
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intInventoryAdjustmentStageId = MIN(intInventoryAdjustmentStageId)
+	DECLARE @tblIPInventoryAdjustmentStage TABLE (intInventoryAdjustmentStageId INT)
+
+	INSERT INTO @tblIPInventoryAdjustmentStage
+	SELECT intInventoryAdjustmentStageId
 	FROM tblIPInventoryAdjustmentStage
+	Where intStatusId IS NULL
+
+	UPDATE tblIPInventoryAdjustmentStage
+	SET intStatusId=-1
+	WHERE intInventoryAdjustmentStageId IN (
+			SELECT intInventoryAdjustmentStageId
+			FROM @tblIPInventoryAdjustmentStage 
+			)
+
+	SELECT @intInventoryAdjustmentStageId = MIN(intInventoryAdjustmentStageId)
+	FROM @tblIPInventoryAdjustmentStage
 
 	SELECT @strInfo1 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ', '
-	FROM tblIPInventoryAdjustmentStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(b.strLotNo, '') + ', '
+	FROM @tblIPInventoryAdjustmentStage a
+	JOIN tblIPInventoryAdjustmentStage b on a.intInventoryAdjustmentStageId=b.intInventoryAdjustmentStageId
 
 	IF Len(@strInfo1) > 0
 	BEGIN
@@ -84,6 +109,10 @@ BEGIN TRY
 				,@strQuantityUOM = NULL
 				,@strReasonCode = NULL
 				,@strNotes = NULL
+				,@strNewStorageLocation = NULL
+				,@strNewStorageUnit = NULL
+				,@intCompanyLocationNewSubLocationId = NULL
+				,@intNewStorageLocationId = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -100,6 +129,8 @@ BEGIN TRY
 				,@strQuantityUOM = strQuantityUOM
 				,@strReasonCode = strReasonCode
 				,@strNotes = strNotes
+				,@strNewStorageLocation = strNewStorageLocation
+				,@strNewStorageUnit = strNewStorageUnit
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
 
@@ -109,7 +140,8 @@ BEGIN TRY
 					WHERE intTrxSequenceNo = @intTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processsed in i21.'
+				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processed in i21.'
+
 				RAISERROR (
 						@strError
 						,16
@@ -203,6 +235,65 @@ BEGIN TRY
 						)
 			END
 
+			IF @intTransactionTypeId = 20
+			BEGIN
+				IF @strNewStorageLocation IS NULL
+					OR @strNewStorageLocation = ''
+				BEGIN
+					SELECT @strError = 'New Storage Location cannot be blank.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
+				SELECT @intCompanyLocationNewSubLocationId = intCompanyLocationSubLocationId
+				FROM dbo.tblSMCompanyLocationSubLocation
+				WHERE strSubLocationName = @strNewStorageLocation
+					AND intCompanyLocationId = @intCompanyLocationId
+
+				IF @intCompanyLocationNewSubLocationId IS NULL
+				BEGIN
+					SELECT @strError = 'New Storage Location ' + @strNewStorageLocation + ' is not available.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
+				IF @strNewStorageUnit IS NULL
+					OR @strNewStorageUnit = ''
+				BEGIN
+					SELECT @strError = 'New Storage Unit cannot be blank.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
+				SELECT @intNewStorageLocationId = intStorageLocationId
+				FROM dbo.tblICStorageLocation
+				WHERE strName = @strNewStorageUnit
+					AND intSubLocationId = @intCompanyLocationNewSubLocationId
+
+				IF @intNewStorageLocationId IS NULL
+				BEGIN
+					SELECT @strError = 'New Storage Unit ' + @strNewStorageUnit + ' is not available.'
+
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+			END
+
 			IF @strItemNo IS NULL
 				OR @strItemNo = ''
 			BEGIN
@@ -264,13 +355,42 @@ BEGIN TRY
 
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
+				,@intLotItemUOMId = intItemUOMId
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
 
 			BEGIN TRAN
 
-			IF @intTransactionTypeId = 10
+			IF @intTransactionTypeId = 20
+			BEGIN
+				SELECT @dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intLotItemUOMId, @dblQuantity)
+
+				SELECT @intItemUOMId = @intLotItemUOMId
+
+				EXEC dbo.uspMFLotMove @intLotId = @intLotId
+					,@intNewSubLocationId = @intCompanyLocationNewSubLocationId
+					,@intNewStorageLocationId = @intNewStorageLocationId
+					,@dblMoveQty = @dblQuantity
+					,@intMoveItemUOMId = @intItemUOMId
+					,@intUserId = @intUserId
+					,@blnValidateLotReservation = 1
+					,@blnInventoryMove = 0
+					,@dtmDate = NULL
+					,@strReasonCode = @strReasonCode
+					,@strNotes = @strNotes
+					,@ysnBulkChange = 0
+					,@ysnSourceLotEmptyOut = 0
+					,@ysnDestinationLotEmptyOut = 0
+					,@intNewLotId = @intNewLotId OUTPUT
+					,@intWorkOrderId = NULL
+					,@intAdjustmentId = @intAdjustmentId OUTPUT
+
+				SELECT @strAdjustmentNo = strAdjustmentNo
+				FROM dbo.tblICInventoryAdjustment
+				WHERE intInventoryAdjustmentId = @intAdjustmentId
+			END
+			ELSE IF @intTransactionTypeId = 10
 			BEGIN
 				EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
 					,@dblNewLotQty = @dblQuantity
@@ -287,6 +407,96 @@ BEGIN TRY
 				SELECT @strAdjustmentNo = strAdjustmentNo
 				FROM dbo.tblICInventoryAdjustment
 				WHERE intInventoryAdjustmentId = @intAdjustmentId
+
+				IF @strReasonCode = 30
+				BEGIN
+					IF NOT EXISTS (
+							SELECT *
+							FROM tblIPInventoryAdjustment
+							WHERE strLotNumber = @strLotNo
+							)
+					BEGIN
+						SELECT TOP 1 @intInventoryReceiptItemId = intInventoryReceiptItemId
+						FROM tblICInventoryReceiptItemLot
+						WHERE strLotNumber = @strLotNo
+						ORDER BY intInventoryReceiptItemLotId ASC
+
+						SELECT @intInventoryReceiptId = intInventoryReceiptId
+							,@intLoadContainerId = intContainerId
+						FROM tblICInventoryReceiptItem
+						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+						SELECT @intLoadId = intLoadId
+						FROM tblLGLoadContainer
+						WHERE intLoadContainerId = @intLoadContainerId
+
+						INSERT INTO tblIPInventoryAdjustment (
+							dtmCreatedDate
+							,intContractHeaderId
+							,intContractDetailId
+							,intLoadId
+							,intLoadDetailId
+							,intLoadContainerId
+							,intInventoryReceiptId
+							,strLotNumber
+							,dblNet
+							,dblGross
+							)
+						SELECT GETDATE() AS dtmCreatedDate
+							,RI.intOrderId AS intContractHeaderId
+							,RI.intLineNo AS intContractDetailId
+							,@intLoadId
+							,RI.intSourceId AS intLoadDetailId
+							,RI.intContainerId AS intLoadContainerId
+							,RI.intInventoryReceiptId
+							,RL.strLotNumber
+							,CASE 
+								WHEN RL.strLotNumber = @strLotNo
+									THEN @dblQuantity
+								ELSE RL.dblGrossWeight - RL.dblTareWeight
+								END AS dblNet
+							,CASE 
+								WHEN RL.strLotNumber = @strLotNo
+									THEN @dblQuantity
+								ELSE RL.dblGrossWeight - RL.dblTareWeight
+								END AS dblGrossWeight
+						FROM tblICInventoryReceiptItemLot RL
+						JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
+						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+
+						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
+							,@intPurchaseSale = 1
+							,@intLoadContainerId = @intLoadContainerId
+							,@ysnAddClaim = 1
+					END
+					ELSE
+					BEGIN
+						SELECT TOP 1 @intInventoryReceiptItemId = intInventoryReceiptItemId
+						FROM tblICInventoryReceiptItemLot
+						WHERE strLotNumber = @strLotNo
+						ORDER BY intInventoryReceiptItemLotId ASC
+
+						SELECT @intInventoryReceiptId = intInventoryReceiptId
+							,@intLoadContainerId = intContainerId
+						FROM tblICInventoryReceiptItem
+						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+						UPDATE tblIPInventoryAdjustment
+						SET dblNet = @dblQuantity
+							,dblGross = @dblQuantity
+						WHERE intInventoryReceiptId = @intInventoryReceiptId
+							AND strLotNumber = @strLotNo
+
+						SELECT @intLoadId = intLoadId
+						FROM tblLGLoadContainer
+						WHERE intLoadContainerId = @intLoadContainerId
+
+						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
+							,@intPurchaseSale = 1
+							,@intLoadContainerId = @intLoadContainerId
+							,@ysnAddClaim = 1
+					END
+				END
 			END
 			ELSE IF @intTransactionTypeId = 8
 			BEGIN
@@ -409,6 +619,7 @@ BEGIN TRY
 				,intMessageTypeId
 				,intStatusId
 				,strStatusText
+				,strAdjustmentNo
 				)
 			SELECT @intTrxSequenceNo
 				,@strCompanyLocation
@@ -416,17 +627,20 @@ BEGIN TRY
 				,@strCreatedBy
 				,(
 					CASE 
+						WHEN @intTransactionTypeId = 8
+							THEN 11
 						WHEN @intTransactionTypeId = 10
 							THEN 15
-						WHEN @intTransactionTypeId = 11
-							THEN 8
+						WHEN @intTransactionTypeId = 20
+							THEN 14
 						END
 					) AS intMessageTypeId
 				,1 AS intStatusId
 				,'Success' AS strStatusText
+				,@strAdjustmentNo
 
 			--Move to Ack
-			INSERT INTO tblIPInventoryAdjustmentAck (
+			INSERT INTO tblIPInventoryAdjustmentArchive (
 				intTrxSequenceNo
 				,strCompanyLocation
 				,intActionId
@@ -443,8 +657,6 @@ BEGIN TRY
 				,strReasonCode
 				,strNotes
 				,strAdjustmentNo
-				,intStatusId
-				,strStatusText
 				)
 			SELECT intTrxSequenceNo
 				,strCompanyLocation
@@ -462,8 +674,6 @@ BEGIN TRY
 				,strReasonCode
 				,strNotes
 				,@strAdjustmentNo
-				,1 AS intStatusId
-				,'Success' AS strStatusText
 			FROM tblIPInventoryAdjustmentStage
 			WHERE intInventoryAdjustmentStageId = @intInventoryAdjustmentStageId
 
@@ -495,7 +705,16 @@ BEGIN TRY
 				,@strCompanyLocation
 				,@dtmCreatedDate
 				,@strCreatedBy
-				,15 AS intMessageTypeId
+				,(
+					CASE 
+						WHEN @intTransactionTypeId = 8
+							THEN 11
+						WHEN @intTransactionTypeId = 10
+							THEN 15
+						WHEN @intTransactionTypeId = 20
+							THEN 14
+						END
+					) AS intMessageTypeId
 				,0 AS intStatusId
 				,@ErrMsg AS strStatusText
 
@@ -543,9 +762,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intInventoryAdjustmentStageId = MIN(intInventoryAdjustmentStageId)
-		FROM tblIPInventoryAdjustmentStage
+		FROM @tblIPInventoryAdjustmentStage
 		WHERE intInventoryAdjustmentStageId > @intInventoryAdjustmentStageId
 	END
+
+	UPDATE tblIPInventoryAdjustmentStage
+	SET intStatusId=NULL
+	WHERE intInventoryAdjustmentStageId IN (
+			SELECT intInventoryAdjustmentStageId
+			FROM @tblIPInventoryAdjustmentStage 
+			)
+		AND intStatusId=-1
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (

@@ -71,10 +71,7 @@ BEGIN TRY
 				,[Version]
 				,ValidFrom
 				,ValidTo
-				,IsNULL(ProcessName, (
-						SELECT TOP 1 strProcessName
-						FROM tblMFManufacturingProcess
-						))
+				,IsNULL(ProcessName, MP.strProcessName )
 				,CreatedDate
 				,CreatedBy
 				,TrxSequenceNo
@@ -92,7 +89,7 @@ BEGIN TRY
 				,Active
 				,StorageLocation
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6) collate Latin1_General_CI_AS
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -109,6 +106,10 @@ BEGIN TRY
 					,Active INT
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
+			LEFT JOIN tblICItem I on I.strItemNo =x.ItemNo Collate Latin1_General_CI_AS
+			LEFT JOIN tblIPCommodityManufacturingProcess CP on CP.intCommodityId=I.intCommodityId
+			LEFT JOIN tblMFManufacturingProcess MP on MP.intManufacturingProcessId=CP.intManufacturingProcessId
+
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strERPRecipeNo, '') + ','
 			FROM @tblIPRecipeName
@@ -163,9 +164,9 @@ BEGIN TRY
 					END AS RowState
 				,NULL AS ItemGroupName
 				,TrxSequenceNo
-				,ParentTrxSequenceNo
+				,parentId
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,[Version] INT '../Version'
 					,ActionId INT
 					,ItemNo NVARCHAR(50)
@@ -178,13 +179,14 @@ BEGIN TRY
 					,ValidFrom DATETIME
 					,ValidTo DATETIME
 					,YearValidation INT
-					,ParentTrxSequenceNo INT '@ParentTrxSequenceNo'
+					,parentId BIGINT '@parentId'
 					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation' 
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
 
 			UPDATE RI
-			SET strRecipeHeaderItemNo = R.strItemNo
+			SET strRecipeHeaderItemNo = R.strItemNo,strRecipeName=R.strItemNo
+				,strValidFrom=R.strValidFrom,strValidTo=R.strValidTo
 			FROM tblMFRecipeStage R
 			JOIN tblMFRecipeItemStage RI ON RI.intParentTrxSequenceNo = R.intTrxSequenceNo
 
@@ -214,6 +216,29 @@ BEGIN TRY
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,4 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo BIGINT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
 
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (

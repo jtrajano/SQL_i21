@@ -52,11 +52,11 @@
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
 	,@ItemContractHeaderId			INT				= NULL
 	,@ItemContractDetailId			INT				= NULL
-	,@ItemItemContractHeaderId		INT				= NULL
-	,@ItemItemContractDetailId		INT				= NULL
-	,@ItemItemContract				BIT				= 0
+	,@ItemContract					BIT				= 0
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
@@ -203,11 +203,11 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemSubFormula				= @ItemSubFormula
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+			,@ContractHeaderId				= @ContractHeaderId
+			,@ContractDetailId				= @ContractDetailId
 			,@ItemContractHeaderId			= @ItemContractHeaderId
 			,@ItemContractDetailId			= @ItemContractDetailId
-			,@ItemItemContractHeaderId		= @ItemItemContractHeaderId
-			,@ItemItemContractDetailId		= @ItemItemContractDetailId
-			,@ItemItemContract				= @ItemItemContract
+			,@ItemContract					= @ItemContract
 			,@ItemShipmentId				= @ItemShipmentId
 			,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
@@ -291,8 +291,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@InvoiceType					NVARCHAR(200)
 				,@TermId						INT
 				,@Pricing						NVARCHAR(250)	= NULL
-				,@ContractHeaderId				INT				= NULL
-				,@ContractDetailId				INT				= NULL
 				,@EntityCustomerId				INT
 				,@InvoiceDate					DATETIME
 				,@SpecialPrice					NUMERIC(18,6)	= 0.000000
@@ -372,8 +370,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				SET @ItemPrice				= @SpecialPrice
 				SET @ItemUnitPrice			= @SpecialPrice
 				SET @ItemPricing			= @Pricing
-				SET @ItemContractHeaderId	= @ContractHeaderId
-				SET @ItemContractDetailId	= @ContractDetailId
+
 				IF ISNULL(@ContractDetailId,0) <> 0
 				BEGIN
 					SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
@@ -482,11 +479,11 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemOrderUOMId
 				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,@ItemPriceUOMId
+				,@ContractHeaderId
+				,@ContractDetailId
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
-				,@ItemItemContractHeaderId
-				,@ItemItemContractDetailId
-				,@ItemItemContract
+				,@ItemContract
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemUnitQuantity

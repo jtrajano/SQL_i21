@@ -509,6 +509,7 @@ BEGIN TRY
 					UPDATE CD
 					SET CD.strERPPONumber = x.strERPPONumber
 						,CD.strERPItemNumber = x.strERPItemNumber
+						,CD.intConcurrencyId = CD.intConcurrencyId + 1
 					FROM OPENXML(@idoc, 'vyuIPContractDetailERPInfoViews/vyuIPContractDetailERPInfoView', 2) WITH (
 							strERPPONumber NVARCHAR(100) Collate Latin1_General_CI_AS
 							,strERPItemNumber NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -1041,8 +1042,8 @@ BEGIN TRY
 				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strCreatedBy
-					AND CE.strEntityNo <> ''
 
+				--AND CE.strEntityNo <> ''
 				IF @intUserId IS NULL
 				BEGIN
 					IF EXISTS (
@@ -1960,36 +1961,30 @@ BEGIN TRY
 					--		SELECT @strErrorMessage = 'Shipper ' + @strShipper + ' is not available.'
 					--	END
 					--END
-					SELECT @intShipToEntityId = NULL
-
-					SELECT @intShipToId = NULL
-
-					SELECT @intPurchasingGroupId = NULL
-
-					SELECT @intShipToEntityId = Customer.intEntityId
-					FROM tblEMEntity Customer
-					JOIN tblEMEntityType ET ON ET.intEntityId = Customer.intEntityId
-						AND ET.strType = 'Customer'
-					WHERE Customer.strName = @strShipToName
-
-					SELECT @intShipToId = intEntityLocationId
-					FROM tblEMEntityLocation
-					WHERE strLocationName = @strShipToLocationName
-						AND intEntityId = @intShipToEntityId
-
-					IF @strShipToLocationName IS NOT NULL
-						AND @intShipToId IS NULL
-					BEGIN
-						IF @strErrorMessage <> ''
-						BEGIN
-							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ship To ' + @strShipToLocationName + ' is not available.'
-						END
-						ELSE
-						BEGIN
-							SELECT @strErrorMessage = 'Ship To ' + @strShipToLocationName + ' is not available.'
-						END
-					END
-
+					--SELECT @intShipToEntityId = NULL
+					--SELECT @intShipToId = NULL
+					--SELECT @intPurchasingGroupId = NULL
+					--SELECT @intShipToEntityId = Customer.intEntityId
+					--FROM tblEMEntity Customer
+					--JOIN tblEMEntityType ET ON ET.intEntityId = Customer.intEntityId
+					--	AND ET.strType = 'Customer'
+					--WHERE Customer.strName = @strShipToName
+					--SELECT @intShipToId = intEntityLocationId
+					--FROM tblEMEntityLocation
+					--WHERE strLocationName = @strShipToLocationName
+					--	AND intEntityId = @intShipToEntityId
+					--IF @strShipToLocationName IS NOT NULL
+					--	AND @intShipToId IS NULL
+					--BEGIN
+					--	IF @strErrorMessage <> ''
+					--	BEGIN
+					--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ship To ' + @strShipToLocationName + ' is not available.'
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SELECT @strErrorMessage = 'Ship To ' + @strShipToLocationName + ' is not available.'
+					--	END
+					--END
 					SELECT @intPurchasingGroupId = intPurchasingGroupId
 					FROM tblSMPurchasingGroup
 					WHERE strName = @strPurchasingGroupName
@@ -3096,7 +3091,13 @@ BEGIN TRY
 											AND ysnApproval = 1
 										)
 									THEN CD.intContractStatusId
-								ELSE CD1.intContractStatusId
+								ELSE (
+										CASE 
+											WHEN CD1.intContractStatusId = 3--Cancelled
+												THEN CD1.intContractStatusId
+											ELSE CD.intContractStatusId
+											END
+										)
 								END
 							,intCompanyLocationId = CD1.intCompanyLocationId
 							,intShipToId = CD1.intShipToId
@@ -3622,8 +3623,8 @@ BEGIN TRY
 					JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 						AND ET.strType = 'Vendor'
 					WHERE EY.strName = @strVendorName
-						AND EY.strEntityNo <> ''
 
+					--AND EY.strEntityNo <> ''
 					SELECT @intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
 					FROM tblSMCurrencyExchangeRateType RT
 					WHERE RT.strCurrencyExchangeRateType = @strCurrencyExchangeRateType
@@ -4341,8 +4342,8 @@ BEGIN TRY
 				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strUserName
-					AND CE.strEntityNo <> ''
 
+				--AND CE.strEntityNo <> ''
 				IF @intAuditLogUserId IS NULL
 				BEGIN
 					SELECT TOP 1 @intAuditLogUserId = intEntityId
@@ -4454,7 +4455,7 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT 1
-						FROM master.dbo.sysdatabases
+						FROM sys.databases
 						WHERE name = @strDatabaseName
 						)
 				BEGIN
@@ -4529,6 +4530,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intContractScreenId
+						,@populatedByInterCompany=1
 				END
 
 				--------------------------------------------------------------------------------------------------------------------------

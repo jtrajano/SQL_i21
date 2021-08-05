@@ -31,6 +31,8 @@ BEGIN TRY
 		,@strLogXML NVARCHAR(MAX)
 		,@strAuditXML NVARCHAR(MAX)
 		,@intLogId int
+		,@intContractHeaderId int
+		,@strContractNumber nvarchar(50)
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
@@ -62,6 +64,14 @@ BEGIN TRY
 	FROM tblCTPriceContract
 	WHERE intPriceContractId = @intPriceContractId
 
+	SELECT @intContractHeaderId = intContractHeaderId
+	FROM tblCTPriceFixation
+	WHERE intPriceContractId = @intPriceContractId
+
+	SELECT @strContractNumber = strContractNumber
+	FROM tblCTContractHeader
+	WHERE intContractHeaderId = @intContractHeaderId
+
 	SELECT @intContractScreenId = intScreenId
 	FROM tblSMScreen
 	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
@@ -74,7 +84,7 @@ BEGIN TRY
 	Select Top 1 @intLogId=intLogId
 	from dbo.tblSMLog
 	Where intTransactionId=@intTransactionId
-	Order by 1 desc
+	Order by intLogId desc
 
 	-------------------------PriceContract-----------------------------------------------------------
 	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
@@ -208,7 +218,7 @@ End
 
 	IF EXISTS (
 			SELECT 1
-			FROM master.dbo.sysdatabases
+			FROM sys.databases
 			WHERE name = @strDatabaseName
 			)
 	BEGIN
@@ -228,6 +238,7 @@ End
 		,strSubmittedByXML
 		,strLogXML
 		,strAuditXML
+		,strContractNumber
 		)
 	SELECT intPriceContractId = @intPriceContractId
 		,strPriceContractNo = @strPriceContractNo
@@ -243,7 +254,8 @@ End
 		,intCompanyId =@intCompanyId
 		,strSubmittedByXML=@strSubmittedByXML
 		,strLogXML=@strLogXML
-		,strAuditXML=@strAuditXML'
+		,strAuditXML=@strAuditXML
+		,strContractNumber=@strContractNumber'
 
 		EXEC sp_executesql @strSQL
 			,N'@intPriceContractId int, 
@@ -260,7 +272,8 @@ End
 			@intCompanyId int,
 			@strSubmittedByXML nvarchar(MAX),
 			@strLogXML nvarchar(MAX),
-			@strAuditXML nvarchar(MAX)'
+			@strAuditXML nvarchar(MAX),
+			@strContractNumber nvarchar(50)'
 			,@intPriceContractId
 			,@strPriceContractNo
 			,@strPriceContractXML
@@ -276,6 +289,7 @@ End
 			,@strSubmittedByXML
 			,@strLogXML
 			,@strAuditXML
+			,@strContractNumber
 	END
 END TRY
 

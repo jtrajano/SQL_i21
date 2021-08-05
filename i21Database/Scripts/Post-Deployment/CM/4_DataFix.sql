@@ -101,21 +101,6 @@ AND GL.intTransactionId IS NULL
 DELETE FROM tblGLDetailRecap 
 WHERE intTransactionId IS NULL
 
---FIX BAD ACCOUNT CATEGORY FOR GL BANKACCOUNT
-DECLARE @CashAccount INT
-SELECT TOP 1 @CashAccount = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Cash Account'
-
-UPDATE S SET intAccountCategoryId =  @CashAccount
-FROM tblCMBankAccount BA
-JOIN tblGLAccountSegmentMapping SM ON SM.intAccountId = BA.intGLAccountId
-JOIN tblGLAccountSegment S ON S.intAccountSegmentId = SM.intAccountSegmentId
-JOIN tblGLAccountGroup G ON G.intAccountGroupId = S.intAccountGroupId
-JOIN tblGLAccountStructure STRUC  ON STRUC.intAccountStructureId = S.intAccountStructureId
-WHERE STRUC.strType = 'Primary'
-AND G.strAccountType IN ('Asset', 'Liability')
-AND S.intAccountCategoryId <> @CashAccount
-
-
 UPDATE tblCMBankTransaction set ysnCheckToBePrinted = 0 WHERE ISNULL(ysnCheckToBePrinted,0) = 1
 
 --This will fix all old transaction to be included as one batch in the Archive File tab of Process Payment. This is related to this jira key CM-1904
@@ -212,6 +197,24 @@ JOIN  tblAPPayment AP ON AP.strPaymentRecordNum = CM.strTransactionId
 WHERE strTransactionId like 'PAY-%'
 GO
 PRINT('Finished linking CM transactions to AP')
+GO
+
+--GL-8169
+PRINT ('Start removing Grid Layouts in Process Payments archive grid without batch id column')
+GO
+
+DELETE from tblSMGridLayout where 
+strScreen = 'CashManagement.view.ProcessPayments'
+AND strGrid = 'grdArchiveFile'
+AND CHARINDEX('defaultSort', strGridLayoutFields   ) = 0
+
+DELETE from tblSMCompanyGridLayout where
+strScreen = 'CashManagement.view.ProcessPayments'
+AND strGrid = 'grdArchiveFile'
+AND CHARINDEX('defaultSort', strGridLayoutFields   ) = 0
+GO
+
+PRINT ('Finished removing Grid Layouts in Process Payments archive grid without batch id column')
 GO
 
 PRINT('/*******************  END Cash Management Data Fixess *******************/')

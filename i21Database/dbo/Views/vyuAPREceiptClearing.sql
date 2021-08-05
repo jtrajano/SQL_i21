@@ -44,7 +44,7 @@ SELECT
             END 
         )
         , 2
-    )
+    ) 
     +
     --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
     ISNULL(clearingTax.dblTax,0))
@@ -89,35 +89,24 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-OUTER APPLY (
+LEFT JOIN (
     --SINCE WE REVERSE IN GL THOSE TAX DETAIL THAT DOES NOT HAVE VOUCHER
     --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
     --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
     --IF NO VOUCHER JUST TAKE THE TAX
-    SELECT SUM(dblTax) AS dblTax
+    SELECT intInventoryReceiptItemId, SUM(dblTax) dblTax
     FROM (
-        SELECT DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
-            rctTax.intInventoryReceiptItemId,
-            rctTax.intInventoryReceiptItemTaxId,
-            rctTax.dblTax AS dblTax
-        FROM tblICInventoryReceiptItemTax rctTax
-        LEFT JOIN tblAPBillDetail billDetail 
-            ON billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-            AND billDetail.intInventoryReceiptChargeId IS NULL
-        LEFT JOIN tblAPBillDetailTax billDetailTax
-                ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
-                AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
-                AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
-        WHERE 
-            rctTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
-        AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
-                ELSE (
-                    CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
-                )
-                END
+        SELECT RI.intInventoryReceiptItemId, RIT.dblTax, ROW_NUMBER() OVER(PARTITION BY RI.intInventoryReceiptItemId, RIT.dblTax ORDER BY RI.intInventoryReceiptItemId, RIT.dblTax) intDuplicate
+        FROM tblICInventoryReceiptItem RI
+        INNER JOIN tblICInventoryReceiptItemTax RIT ON RIT.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+        LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
+        LEFT JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId AND BDT.intTaxCodeId = RIT.intTaxCodeId AND BDT.intTaxClassId = RIT.intTaxClassId
+        WHERE 1 = CASE WHEN BD.intBillDetailId IS NULL THEN 1 ELSE (CASE WHEN BDT.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END) END
     ) tmpTax
-
+    WHERE intDuplicate = 1
+    GROUP BY intInventoryReceiptItemId
 ) clearingTax
+	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 -- OUTER APPLY (
 --     --DO NOT ADD TAX FOR RECEIPT IF THERE IS NO TAX (NO TAX DETAILS) ON VOUCHER TO REMOVE DATA ON CLEARING REPORT
 --     --FOR MATCHING WITH GL, WE HAVE DATA FIXES FOR GL
@@ -165,14 +154,30 @@ OUTER APPLY (
 -- 		--AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- 		--AND APClearing.intItemId = receiptItem.intItemId
 
---receipts in storage that were transferred
-LEFT JOIN vyuGRTransferClearing transferClr
-    ON transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-    AND transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-    AND transferClr.strTransactionNumber = receipt.strReceiptNumber
 --receipts in storage that were FULLY transferred from DP to DP only
 LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
     ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+--receipts in storage that were transferred
+OUTER APPLY (
+    SELECT TOP 1 [ysnExists] = 1
+    FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+    INNER JOIN tblGRStorageHistory SH
+        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
+    INNER JOIN tblGRCustomerStorage CS
+        ON CS.intCustomerStorageId = SH.intCustomerStorageId
+        AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+    INNER JOIN tblGRTransferStorageReference TSR
+        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
+    WHERE IR.intInventoryReceiptId = receipt.intInventoryReceiptId
+    AND IR.strReceiptNumber = receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
+) transferClr
 
 
 left join (
@@ -193,7 +198,7 @@ AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
-AND transferClr.intInventoryReceiptItemId IS NULL
+AND transferClr.ysnExists IS NULL
 AND transferClrDP.intInventoryReceiptItemId IS NULL
 UNION ALL
 
@@ -247,7 +252,9 @@ SELECT
     ) 
     +
     --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
-    ISNULL(clearingTax.dblTax,0))
+    -- ISNULL(clearingTax.dblTax,0)
+    0 -- Setting clearing tax to 0 as IRs from Delivery Sheet do not have taxes.
+    )
     *
     (
         CASE
@@ -298,24 +305,6 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-LEFT JOIN (
-    --SINCE WE REVERSE IN GL THOSE TAX DETAIL THAT DOES NOT HAVE VOUCHER
-    --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
-    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
-    --IF NO VOUCHER JUST TAKE THE TAX
-    SELECT intInventoryReceiptItemId, SUM(dblTax) dblTax
-    FROM (
-        SELECT RI.intInventoryReceiptItemId, RIT.dblTax, ROW_NUMBER() OVER(PARTITION BY RI.intInventoryReceiptItemId, RIT.dblTax ORDER BY RI.intInventoryReceiptItemId, RIT.dblTax) intDuplicate
-        FROM tblICInventoryReceiptItem RI
-        INNER JOIN tblICInventoryReceiptItemTax RIT ON RIT.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
-        LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
-        LEFT JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId AND BDT.intTaxCodeId = RIT.intTaxCodeId AND BDT.intTaxClassId = RIT.intTaxClassId
-        WHERE 1 = CASE WHEN BD.intBillDetailId IS NULL THEN 1 ELSE (CASE WHEN BDT.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END) END
-    ) tmpTax
-    WHERE intDuplicate = 1
-    GROUP BY intInventoryReceiptItemId
-) clearingTax
-	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 
 --receipts in storage that were transferred
 join (
@@ -349,94 +338,6 @@ AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
 
-UNION ALL
-
-
---Scale Transfer DP to DP
-SELECT	
-	
-	'1.3' as strMark,
-    receipt.intEntityVendorId
-    ,receipt.dtmReceiptDate AS dtmDate
-    ,receipt.strReceiptNumber AS strTransactionNumber
-    ,receipt.intInventoryReceiptId
-    ,NULL AS intBillId
-    ,NULL AS strBillId
-    ,NULL AS intBillDetailId
-    ,receiptItem.intInventoryReceiptItemId
-    ,receiptItem.intItemId
-    ,receiptItem.intUnitMeasureId AS intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM
-    ,TransferStorageOffset.dblTransferUnits * (isnull(Storage.dblBasis,0) + isnull(Storage.dblSettlementPrice,0)) AS dblVoucherTotal
-    ,TransferStorageOffset.dblTransferUnits AS dblVoucherQty
-    ,0 AS dblReceiptTotal
-    ,0 AS dblReceiptQty
-    ,receipt.intLocationId
-    ,compLoc.strLocationName
-    ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
-    ,APClearing.intAccountId
-	,APClearing.strAccountId
-FROM tblICInventoryReceipt receipt 
-INNER JOIN tblICInventoryReceiptItem receiptItem
-	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-INNER JOIN tblSMCompanyLocation compLoc
-    ON receipt.intLocationId = compLoc.intCompanyLocationId
-LEFT JOIN tblSMFreightTerms ft
-    ON ft.intFreightTermId = receipt.intFreightTermId
-LEFT JOIN 
-(
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
-)
-    ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
-LEFT JOIN vyuAPReceiptClearingGL APClearing
-    ON APClearing.strTransactionId = receipt.strReceiptNumber
-        AND APClearing.intItemId = receiptItem.intItemId
-        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-LEFT JOIN (
-    --SINCE WE REVERSE IN GL THOSE TAX DETAIL THAT DOES NOT HAVE VOUCHER
-    --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
-    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
-    --IF NO VOUCHER JUST TAKE THE TAX
-    SELECT intInventoryReceiptItemId, SUM(dblTax) dblTax
-    FROM (
-        SELECT RI.intInventoryReceiptItemId, RIT.dblTax, ROW_NUMBER() OVER(PARTITION BY RI.intInventoryReceiptItemId, RIT.dblTax ORDER BY RI.intInventoryReceiptItemId, RIT.dblTax) intDuplicate
-        FROM tblICInventoryReceiptItem RI
-        INNER JOIN tblICInventoryReceiptItemTax RIT ON RIT.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
-        LEFT JOIN tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL
-        LEFT JOIN tblAPBillDetailTax BDT ON BDT.intBillDetailId = BD.intBillDetailId AND BDT.intTaxCodeId = RIT.intTaxCodeId AND BDT.intTaxClassId = RIT.intTaxClassId
-        WHERE 1 = CASE WHEN BD.intBillDetailId IS NULL THEN 1 ELSE (CASE WHEN BDT.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END) END
-    ) tmpTax
-    WHERE intDuplicate = 1
-    GROUP BY intInventoryReceiptItemId
-) clearingTax
-	ON clearingTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-
-join tblSCTicket Ticket
-	on Ticket.intInventoryReceiptId = receipt.intInventoryReceiptId
-join tblGRCustomerStorage Storage
-	on Storage.intTicketId = Ticket.intTicketId
-		and ysnTransferStorage = 0
-join tblGRStorageType StorageType
-	on Storage.intStorageTypeId = StorageType.intStorageScheduleTypeId
-		and StorageType.ysnDPOwnedType = 1
-outer apply (
-	select sum(dblOriginalBalance) as dblTransferUnits
-		from tblGRCustomerStorage
-			where intTicketId = Ticket.intTicketId
-				and ysnTransferStorage = 1
-
-
-) TransferStorageOffset
-
-WHERE 
-    receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
---DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
---CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
-AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
-AND receipt.strReceiptType != 'Transfer Order'
-AND receiptItem.intOwnershipType != 2
-AND receipt.ysnPosted = 1
 
 --UNION ALL
 ---- Delivery Sheet posting with shrinkage
@@ -551,8 +452,7 @@ SELECT
     ,billDetail.intItemId
     ,billDetail.intUnitOfMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,(
-    --billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
+    ,--billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
@@ -565,7 +465,8 @@ SELECT
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 --SOME VOUCHER CREATED USING INCORRECT NET WEIGHT BUT TOTAL IS THE SAME
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                             --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
                             WHEN billDetail.dblNetWeight <> 0
@@ -581,7 +482,8 @@ SELECT
                                 receiptItem.dblNet <> receiptItem.dblOpenReceive AND
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                             WHEN billDetail.dblNetWeight <> 0
                             THEN billDetail.dblNetWeight
@@ -598,7 +500,8 @@ SELECT
                                 receiptItem.dblNet <> receiptItem.dblOpenReceive AND
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                             --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
                             WHEN billDetail.dblNetWeight <> 0
@@ -614,7 +517,8 @@ SELECT
                                 receiptItem.dblNet <> receiptItem.dblOpenReceive AND
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                             --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
                             WHEN billDetail.dblNetWeight <> 0
@@ -625,11 +529,6 @@ SELECT
                     * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             END),0)	
-    +
-    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
-    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
-    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
-    )
     *
     (
         CASE 
@@ -638,19 +537,12 @@ SELECT
         ELSE 1
         END
     )
+    +
+    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
+    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
+    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
     AS dblVoucherTotal
-    ,ISNULL(CASE WHEN 
-                receiptItem.dblNet <> 0 AND 
-                receiptItem.dblNet <> receiptItem.dblOpenReceive AND
-                receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
-                receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
-            THEN receiptItem.dblNet
-             --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
-            WHEN billDetail.dblNetWeight <> 0
-            THEN billDetail.dblNetWeight
-            ELSE billDetail.dblQtyReceived
-            END, 0) 
+    ,ISNULL(billDetail.dblQtyReceived, 0) 
     *
     (
         CASE 
@@ -727,17 +619,7 @@ OUTER APPLY (
     SELECT
         SUM(dblTax) AS dblTax --dblAdjustedTax is the new cost
     FROM tblAPBillDetailTax taxes
-    WHERE 
-        taxes.intBillDetailId = billDetail.intBillDetailId
-    AND EXISTS (
-        --MAKE SURE TAX CODE IS ALSO PART OF RECEIPT TAX DETAILS TO DETERMINE IT USES CLEARING
-        SELECT 1
-        FROM tblICInventoryReceiptItemTax rctTax
-        WHERE
-            rctTax.intInventoryReceiptItemId = billDetail.intInventoryReceiptItemId
-        AND rctTax.intTaxClassId = taxes.intTaxClassId
-        AND rctTax.intTaxCodeId = taxes.intTaxCodeId
-    )
+    WHERE taxes.intBillDetailId = billDetail.intBillDetailId
 ) oldCostTax
 
 --receipts in storage that were FULLY transferred from DP to DP only
@@ -750,10 +632,13 @@ AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
-AND NOT EXISTS (
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+AND transferClrDP.intInventoryReceiptItemId IS NULL
+--receipts in storage that were transferred
+AND NOT EXISTS(
+	SELECT TOP 1 1
+	FROM vyuGRTransferClearing transferClr
+    WHERE transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+	AND transferClr.strTransactionNumber = receipt.strReceiptNumber
 )
 --AND receipt.dtmReceiptDate >= '2020-09-09'GO
 
@@ -945,4 +830,5 @@ and bill.ysnPosted = 1
 AND Receipt.strReceiptType != 'Transfer Order'
 and (CustomerStorage.intCustomerStorageId is null or CustomerStorage.ysnTransferStorage = 0)
 GO
+
 

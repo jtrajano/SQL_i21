@@ -185,7 +185,7 @@ SELECT LD.intLoadDetailId
 	, L.intTransUsedBy
 	, strTransUsedBy = CASE WHEN L.intTransUsedBy = 1 THEN 'None'
 							WHEN L.intTransUsedBy = 2 THEN 'Scale Ticket'
-							WHEN L.intTransUsedBy = 3 THEN 'Transport L' END COLLATE Latin1_General_CI_AS
+							WHEN L.intTransUsedBy = 3 THEN 'Transport Load' END COLLATE Latin1_General_CI_AS
 	, L.intSourceType
 	, L.ysnPosted
 	, intInboundTaxGroupId = VendorTax.intTaxGroupId

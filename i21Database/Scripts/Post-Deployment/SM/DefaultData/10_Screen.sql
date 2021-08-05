@@ -543,8 +543,8 @@ GO
 UPDATE tblSMScreen SET strScreenName = N'Weight Grade',strNamespace = 'ContractManagement.view.WeightGrade' 
 WHERE strNamespace = 'ContractManagement.view.WeightsGrades' AND strModule = N'Contract Management'
 
-UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
-WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
+--UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
+--WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
 
 UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New','Price Contracts')
 AND strModule = 'Contract Management'
@@ -1076,8 +1076,12 @@ GO
 			
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher') 
 	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
-		VALUES (N'Vouchers', N'Vouchers', N'AccountsPayable.view.Voucher', N'Accounts Payable', 'tblAPBill', 1, N'Accounts Payable')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName], [ysnIDP])
+		VALUES (N'Vouchers', N'Vouchers', N'AccountsPayable.view.Voucher', N'Accounts Payable', 'tblAPBill', 1, N'Accounts Payable', 1)
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET ysnIDP = 1 WHERE strNamespace = 'AccountsPayable.view.Voucher'
 	END
 
 	------------------------ END REPLICATION SCREEN ------------------------

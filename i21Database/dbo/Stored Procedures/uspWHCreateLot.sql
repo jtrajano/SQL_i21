@@ -190,7 +190,8 @@ BEGIN
 												@intEntityUserSecurityId =@intUserId,
 												@intLotId=@intLotId,
 												@intSubLocationId=@intSubLocationId,
-												@intLocationId=@intLocationId
+												@intLocationId=@intLocationId,
+												@ysnUpdateOnlyParentLot=1
 
 END
 

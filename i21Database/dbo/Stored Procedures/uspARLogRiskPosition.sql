@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARLogRiskPosition]
 	  @tblInvoiceId		InvoiceId READONLY
 	, @intUserId		INT
+    , @Post             BIT = 0
 AS
  
 SET QUOTED_IDENTIFIER OFF
@@ -46,7 +47,7 @@ BEGIN
         , intCurrencyId
     )
     --INVOICE HEADER ADD/DELETE 
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -93,7 +94,7 @@ BEGIN
     UNION ALL
 
     --ADD LINE ITEM 
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -143,7 +144,7 @@ BEGIN
     UNION ALL
 
     --DELETE LINE ITEM
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = TD.intTransactionDetailId
@@ -193,7 +194,7 @@ BEGIN
     UNION ALL
 
     --UPDATE LINE ITEM (RETURN ORGINAL QTY)
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -241,7 +242,7 @@ BEGIN
     UNION ALL
 
     --UPDATE LINE ITEM (DEDUCT ACTUAL QTY)
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -306,12 +307,19 @@ BEGIN
           AND INV.strInvoiceOriginId = I.strInvoiceNumber
           AND INV.intOriginalInvoiceId = I.intInvoiceId
       ) RI
-    WHERE SL.strTransactionType = 'Credit Memo'
+    WHERE SL.strTransactionType = 'Credit Memo' AND @Post=0
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
     BEGIN
         EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
     END
+
+    --DONT LOG ON CONTRACT BALANCE IF INVOICE POSTING
+    DELETE SL
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
+    WHERE INV.strTransactionType = 'Invoice' AND @Post = 1
 
     --CONTRACT BALANCE LOG  
     WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)  

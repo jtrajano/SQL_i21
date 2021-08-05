@@ -46,6 +46,7 @@ RETURNS @returntable TABLE
 	,[ysnTaxOnly]					BIT
 	,[ysnInvalidSetup]				BIT
 	,[strNotes]						NVARCHAR(500)
+	,[dblExemptionAmount]			NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -75,6 +76,7 @@ BEGIN
 		,[intUnitMeasureId]				INT
 		,[ysnComputed]					BIT
 		,[ysnTaxableFlagged]			BIT
+		,[dblExemptionAmount]			NUMERIC(18,6)
 		)
 
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM @LineItemTaxEntries)
@@ -194,7 +196,7 @@ BEGIN
 		,[strCalculationMethod]		= ISNULL(LITE.[strCalculationMethod], (SELECT [strCalculationMethod] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)))
 		,[dblRate]					= ISNULL(ISNULL(LITE.[dblRate], (SELECT [dblRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate))), @ZeroDecimal)
 		,[dblBaseRate]				= ISNULL(ISNULL(LITE.[dblBaseRate], (SELECT [dblBaseRate] FROM [dbo].[fnGetTaxCodeRateDetails](LITE.[intTaxCodeId], @TransactionDate, @ItemUOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate))), @ZeroDecimal)
-		,[dblExemptionPercent]		= @ZeroDecimal
+		,[dblExemptionPercent]		= ISNULL(TAXEXEMPT.dblExemptionPercent, @ZeroDecimal)
 		,[dblTax]					= LITE.[dblTax]
 		,[dblAdjustedTax]			= LITE.[dblAdjustedTax]
 		,[intTaxAccountId]			= ISNULL(LITE.[intTaxAccountId], SMTC.[intSalesTaxAccountId])
@@ -212,7 +214,34 @@ BEGIN
 	INNER JOIN
 		tblSMTaxCode SMTC
 			ON LITE.[intTaxCodeId] = SMTC.[intTaxCodeId]
-		
+	OUTER APPLY (
+		SELECT intCategoryId
+		FROM tblICItem 
+		WHERE intItemId = @ItemId
+	) ITEM 
+	CROSS APPLY
+		[dbo].[fnGetCustomerTaxCodeExemptionDetails]
+		(
+		 @EntityCustomerId				--@CustomerId				
+		,@TransactionDate				--@TransactionDate			
+		,NULL							--@TaxGroupId				
+		,SMTC.intTaxCodeId				--@TaxCodeId					
+		,SMTC.intTaxClassId				--@TaxClassId				
+		,SMTC.strState					--@TaxState					
+		,@ItemId						--@ItemId					
+		,ITEM.intCategoryId				--@ItemCategoryId			
+		,@ShipToLocationId				--@ShipToLocationId			
+		,NULL							--@IsCustomerSiteTaxable		
+		,@CardId						--@CardId					
+		,@VehicleId						--@VehicleId					
+		,NULL							--@SiteId					
+		,@DisregardExemptionSetup		--@DisregardExemptionSetup	
+		,@CompanyLocationId				--@CompanyLocationId			
+		,@FreightTermId					--@FreightTermId				
+		,@CFSiteId						--@CFSiteId					
+		,0								--@IsDeliver					
+		,0								--@IsCFQuote					
+		) TAXEXEMPT
 		
 	DECLARE @TotalUnitTax			NUMERIC(18,6)
 			,@UnitTax				NUMERIC(18,6)
@@ -223,9 +252,43 @@ BEGIN
 			,@CheckOffRate			NUMERIC(18,6)
 			,@TaxableByOtherRate	NUMERIC(18,6)
 			,@ItemPrice				NUMERIC(18,6)
+			,@NetPrice				NUMERIC(18,6)
 	
+	DECLARE @StateExciseTax		NUMERIC(18,6) = 0
+	DECLARE @StateSalesTax		NUMERIC(18,6) = 0
+	DECLARE @FederalExciseTax	NUMERIC(18,6) = 0
+	DECLARE @DistrictTax		NUMERIC(18,6) = 0
+
+	SELECT @StateExciseTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%State Excise Tax%'
+	GROUP BY IT.strCalculationMethod
+
+	SELECT @StateSalesTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%State Sales Tax%'
+	GROUP BY IT.strCalculationMethod
 	
-	
+	SELECT @FederalExciseTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%Federal Excise Tax%'
+	AND ysnTaxExempt = 0
+	GROUP BY IT.strCalculationMethod
+
+	SELECT @DistrictTax = CASE WHEN IT.strCalculationMethod = 'Percentage' THEN SUM(ISNULL(dblRate, 0)) / @HundredDecimal ELSE SUM(ISNULL(dblRate, 0)) END
+	FROM @ItemTaxes IT
+	INNER JOIN tblSMTaxClass SMTC
+	ON IT.intTaxClassId = SMTC.intTaxClassId
+	WHERE strTaxClass Like '%District Tax%'
+	GROUP BY IT.strCalculationMethod
+
+	SET @NetPrice = (((@GrossAmount / @Quantity) - @StateExciseTax) / (1 + @DistrictTax + @StateSalesTax)) - @FederalExciseTax
 
 	IF ISNULL(@IsReversal,0) = 0
 		BEGIN
@@ -586,7 +649,7 @@ BEGIN
 				,@AdjustedTax		= [dblAdjustedTax]
 				,@Tax				= [dblTax]
 				,@Rate				= [dblRate]
-				,@ExemptionPercent	= [dblExemptionPercent]
+				,@ExemptionPercent	= CASE WHEN ISNULL([dblExemptionPercent], 0) = 0 THEN 100 ELSE [dblExemptionPercent] END
 				,@CalculationMethod	= [strCalculationMethod]
 				,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
 				,@TaxExempt			= ISNULL([ysnTaxExempt],0)
@@ -693,16 +756,42 @@ BEGIN
 				
 			
 			DECLARE @ItemTaxAmount NUMERIC(18,6) = @ZeroDecimal
+			DECLARE @ItemExemptedTaxAmount NUMERIC(18,6) = @ZeroDecimal
+
 			IF(@CalculationMethod = 'Percentage')
 				SET @ItemTaxAmount = (@TaxableAmount * (@Rate/@HundredDecimal));
 			ELSE
 				SET @ItemTaxAmount = (@Quantity * @Rate);
 				
-			IF(@TaxExempt = 1 AND @ExemptionPercent = @ZeroDecimal) AND @DisregardExemptionSetup = 0
-				SET @ItemTaxAmount = @ZeroDecimal;
+			IF(@TaxExempt = 1 AND @DisregardExemptionSetup = 0)
+			BEGIN
+				IF(@CalculationMethod = 'Percentage')
+				BEGIN
+					IF ISNULL(@IsReversal,0) = 0
+					BEGIN
+						SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+						SET @ItemTaxAmount = @ItemTaxAmount - (@ItemTaxAmount * (@ExemptionPercent/@HundredDecimal))
+					END
+					ELSE
+					BEGIN
+						DECLARE @TaxTotal NUMERIC(18,6)
 
-			IF(@TaxExempt = 1 AND @ExemptionPercent <> @ZeroDecimal) OR @DisregardExemptionSetup = 1
-				SET @ItemTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal);
+						IF(@GrossAmount = 0)
+						BEGIN
+							SET @NetPrice = @Price
+						END
+
+						SET @TaxTotal = (@NetPrice + @FederalExciseTax) * (@Rate/@HundredDecimal)
+						SET @ItemExemptedTaxAmount = (@TaxTotal * (@ExemptionPercent/@HundredDecimal)) * @Quantity
+						SET @ItemTaxAmount = (@TaxTotal * (1 - (@ExemptionPercent/@HundredDecimal))) * @Quantity
+					END
+				END
+				ELSE 
+				BEGIN
+					SET @ItemExemptedTaxAmount = @ItemTaxAmount * (@ExemptionPercent/@HundredDecimal)
+					SET @ItemTaxAmount = @ItemTaxAmount - @ItemExemptedTaxAmount
+				END
+			END
 				
 			IF(@CheckoffTax = 1)
 				SET @ItemTaxAmount = @ItemTaxAmount * -1;
@@ -713,8 +802,9 @@ BEGIN
 			UPDATE
 				@ItemTaxes
 			SET
-				dblTax			= ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
+				 dblTax			= ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
 				,dblAdjustedTax = ROUND(ROUND(@ItemTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
+				,dblExemptionAmount = ROUND(ROUND(@ItemExemptedTaxAmount,3),[dbo].[fnARGetDefaultDecimal]())
 				,ysnComputed	= 1 
 			WHERE
 				[Id] = @Id				
@@ -737,6 +827,7 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
+		,[dblExemptionAmount]
 	)
 	SELECT
 		 [intTaxGroupId]
@@ -755,6 +846,7 @@ BEGIN
 		,[ysnTaxOnly]
 		,[ysnInvalidSetup]
 		,[strNotes]
+		,[dblExemptionAmount]
 	FROM
 		@ItemTaxes 	
 	RETURN		

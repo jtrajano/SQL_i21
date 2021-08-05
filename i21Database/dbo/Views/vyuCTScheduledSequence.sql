@@ -12,10 +12,9 @@ AS
 			,l.intLoadId
 		from
 			tblARInvoiceDetail ivd
-			,tblLGLoad l
+			inner join tblLGLoad l on l.intTicketId = ivd.intTicketId
 		where
-			l.intTicketId = ivd.intTicketId
-			and ivd.intContractDetailId is not null
+			ivd.intContractDetailId is not null
 	),
 	schedule_raw as
 	(

@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE uspRKDPRCompareBasisDeliveries
+﻿-- WHEN MAKING CHANGES
+-- ALSO UPDATE Post-Deployment > RM > uspRKDPRCompareBasisDeliveriesAboveR2 
+
+CREATE PROCEDURE uspRKDPRCompareBasisDeliveries
 	@intDPRRun1 INT
 	, @intDPRRun2 INT
 	, @strBucketType NVARCHAR(100)
@@ -119,71 +122,102 @@ BEGIN
 			, strLocationName
 	) t;
 	
+	WITH 
+	result_tbl
+	AS
+	(
+		SELECT intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strContractNumber ASC))
+				, strBucketType = @strBucketType
+				, strContractNumber
+				, intContractHeaderId
+				, dblTotalRun1
+				, dblTotalRun2
+				, dblDifference = ISNULL(dblTotalRun2, 0) - ISNULL(dblTotalRun1, 0)
+				, strComment
+				, strCommodityCode = @strCommodityCode
+				, strVendorCustomer = strEntityName
+				, strLocationName
+				, strTransactionId = strTransactionReferenceId
+				, intTransactionReferenceId
+				, strTranType
+				, dtmRunDateTime1 = @dtmRunDateTime1
+				, dtmRunDateTime2 = @dtmRunDateTime2
+				, dtmDPRDate1 = @dtmDPRDate1
+				, dtmDPRDate2 = @dtmDPRDate2
+			FROM (
+				SELECT a.strContractNumber
+					, a.intContractHeaderId
+					, dblTotalRun1 = a.dblTotal
+					, dblTotalRun2 = b.dblTotal
+					, strComment = 'Balance Difference'
+					, a.strEntityName
+					, a.strLocationName
+					, a.strTransactionReferenceId
+					, a.intTransactionReferenceId
+					, a.strTranType
+				FROM #tempFirstToSecond a
+				INNER JOIN #tempSecondToFirst b ON a.strTransactionReferenceId = b.strTransactionReferenceId
+			
+				UNION ALL SELECT a.strContractNumber
+					, a.intContractHeaderId
+					, dblTotalRun1 = a.dblTotal
+					, dblTotalRun2 = NULL
+					, strComment = 'Missing in Run 2'
+					, a.strEntityName
+					, a.strLocationName
+					, a.strTransactionReferenceId
+					, a.intTransactionReferenceId
+					, a.strTranType
+				FROM #tempFirstToSecond a
+				WHERE a.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempSecondToFirst)
+			
+				UNION ALL SELECT b.strContractNumber
+					, b.intContractHeaderId
+					, dblTotalRun1 = NULL
+					, dblTotalRun2 = b.dblTotal
+					, strComment = 'Missing in Run 1'
+					, b.strEntityName
+					, b.strLocationName
+					, b.strTransactionReferenceId
+					, b.intTransactionReferenceId
+					, b.strTranType
+				FROM #tempSecondToFirst b
+				WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFirstToSecond)
+			) t
+	)
+
 	SELECT *
 	FROM (
-		SELECT intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strContractNumber ASC))
-			, strBucketType = @strBucketType
-			, strContractNumber
-			, intContractHeaderId
-			, dblTotalRun1
-			, dblTotalRun2
-			, dblDifference = ISNULL(dblTotalRun2, 0) - ISNULL(dblTotalRun1, 0)
-			, dblContractTotal = SUM(ISNULL(dblTotalRun2, 0) - ISNULL(dblTotalRun1, 0)) OVER(PARTITION BY strContractNumber ORDER BY intContractHeaderId)
-			, strComment
-			, strCommodityCode = @strCommodityCode
-			, strVendorCustomer = strEntityName
-			, strLocationName
-			, strTransactionId = strTransactionReferenceId
-			, intTransactionReferenceId
-			, strTranType
-			, dtmRunDateTime1 = @dtmRunDateTime1
-			, dtmRunDateTime2 = @dtmRunDateTime2
-			, dtmDPRDate1 = @dtmDPRDate1
-			, dtmDPRDate2 = @dtmDPRDate2
-		FROM (
-			SELECT a.strContractNumber
-				, a.intContractHeaderId
-				, dblTotalRun1 = a.dblTotal
-				, dblTotalRun2 = b.dblTotal
-				, strComment = 'Balance Difference'
-				, a.strEntityName
-				, a.strLocationName
-				, a.strTransactionReferenceId
-				, a.intTransactionReferenceId
-				, a.strTranType
-			FROM #tempFirstToSecond a
-			INNER JOIN #tempSecondToFirst b ON a.strTransactionReferenceId = b.strTransactionReferenceId
-			
-			UNION ALL SELECT a.strContractNumber
-				, a.intContractHeaderId
-				, dblTotalRun1 = a.dblTotal
-				, dblTotalRun2 = NULL
-				, strComment = 'Missing in Run 2'
-				, a.strEntityName
-				, a.strLocationName
-				, a.strTransactionReferenceId
-				, a.intTransactionReferenceId
-				, a.strTranType
-			FROM #tempFirstToSecond a
-			WHERE a.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempSecondToFirst)
-			
-			UNION ALL SELECT b.strContractNumber
-				, b.intContractHeaderId
-				, dblTotalRun1 = NULL
-				, dblTotalRun2 = b.dblTotal
-				, strComment = 'Missing in Run 1'
-				, b.strEntityName
-				, b.strLocationName
-				, b.strTransactionReferenceId
-				, b.intTransactionReferenceId
-				, b.strTranType
-			FROM #tempSecondToFirst b
-			WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFirstToSecond)
-		) t
+		SELECT	  rta.intRowNumber
+				, rta.strBucketType
+				, rta.strContractNumber
+				, rta.intContractHeaderId
+				, rta.dblTotalRun1
+				, rta.dblTotalRun2
+				, rta.dblDifference 
+				, rtb.dblContractTotal
+				, rta.strComment
+				, rta.strCommodityCode 
+				, rta.strVendorCustomer
+				, rta.strLocationName
+				, rta.strTransactionId 
+				, rta.intTransactionReferenceId
+				, rta.strTranType
+				, rta.dtmRunDateTime1 
+				, rta.dtmRunDateTime2
+				, rta.dtmDPRDate1 
+				, rta.dtmDPRDate2  
+		FROM	result_tbl rta
+		INNER JOIN	
+			( SELECT z.strContractNumber
+					, dblContractTotal = SUM(dblDifference) 
+				FROM	result_tbl z 
+				GROUP BY z.strContractNumber
+			) rtb
+		ON	rta.strContractNumber = rtb.strContractNumber
 	) tbl
 	WHERE dblContractTotal <> 0 AND dblDifference <> 0
-	
-	DROP TABLE #tmpResult;
+
 	DROP TABLE #FirstRun;
 	DROP TABLE #SecondRun;
 	DROP TABLE #tempFirstToSecond;

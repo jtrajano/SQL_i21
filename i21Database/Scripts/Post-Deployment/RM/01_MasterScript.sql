@@ -194,9 +194,9 @@ BEGIN
 		UNION ALL SELECT 62, 'Deleted Voucher', 'Deleted Voucher.'
 		UNION ALL SELECT 63, 'Deleted Invoice', 'Deleted Invoice.'
 		UNION ALL SELECT 64, 'Created Credit Memo', 'Created Credit Memo.'
-        UNION ALL SELECT 65, 'Deleted Credit Memo', 'Deleted Credit Memo.'
-        UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
-
+		UNION ALL SELECT 65, 'Deleted Credit Memo', 'Deleted Credit Memo.'
+		UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
+		UNION ALL SELECT 67, 'Price Updated', 'Price Updated.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 

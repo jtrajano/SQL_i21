@@ -24,7 +24,7 @@ SELECT
 	,strWarehouse = fromStorageLocation.strSubLocationName
 	,strDeliveryInstructions = 
 		dbo.fnICFormatErrorMessage (
-			'Coffee to be delivered to %s%s%s%s.'
+			'Commodity to be delivered to %s%s%s%s.'
 			,ISNULL(toStorageLocation.strSubLocationName, '')
 			,ISNULL(toStorageLocation.strCity, '')
 			,ISNULL(toStorageLocation.strState, '') 

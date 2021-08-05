@@ -23,8 +23,8 @@ BEGIN
 				WHEN 'DateTime'
 					THEN
 						CASE UPPER(@condition)
-						WHEN UPPER('Between') THEN ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
 						WHEN UPPER('Equal To') THEN ' = ''' + @from + ''''
+						ELSE ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
 						END
 				WHEN 'String'
 					THEN

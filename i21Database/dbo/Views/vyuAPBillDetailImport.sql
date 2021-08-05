@@ -61,7 +61,7 @@ OUTER APPLY(
  	WHERE C.intPurchaseDetailId = B.intPurchaseDetailId
 )Purchase
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherForm1099]() where intId = B.int1099Form) Form1099
-OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherCategories1099]() WHERE intId = B.int1099Category) Category1099
+OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherCategories1099](B.int1099Form) WHERE intId = B.int1099Category) Category1099
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherPrepayType]() WHERE intId = B.intPrepayTypeId) Prepay
 
 

@@ -616,7 +616,7 @@ INSERT INTO @TaxCategoryVA(
 SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Gasoline', intMasterId = 460001
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Alternative Fuels', intMasterId = 460002
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Undyed Diesel', intMasterId = 460003
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Avaition Jet Fuel', intMasterId = 460004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Aviation Jet Fuel', intMasterId = 460004
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Aviation Gasoline', intMasterId = 460005
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Dyed Diesel', intMasterId = 460006
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Kerosene', intMasterId = 460007
@@ -695,4 +695,48 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Loc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'FL', @TaxCategories = @TaxCategoryFL
 
 DELETE @TaxCategoryFL
+GO
+
+
+PRINT ('Deploying AL Tax Category')
+GO
+
+DECLARE @TaxCategoryAL AS TFTaxCategory
+
+INSERT INTO @TaxCategoryAL(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Gasoline', intMasterId = 10001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Diesel Fuel', intMasterId = 10002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Aviation Gasoline', intMasterId = 10003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Jet Fuel', intMasterId = 10004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise CNG', intMasterId = 10005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise LNG', intMasterId = 10006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'AL', strTaxCategory = 'AL Excise Lubricating Oil', intMasterId = 10007
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'AL', @TaxCategories = @TaxCategoryAL
+
+DELETE @TaxCategoryAL
+GO
+
+PRINT ('Deploying MO Tax Category')
+
+DECLARE @TaxCategoryMO AS TFTaxCategory
+
+INSERT INTO @TaxCategoryMO(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Motor Fuel Tax', intMasterId = 250001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Agriculture Inspection Fee', intMasterId = 250002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MO', strTaxCategory = 'MO Transport Load Fee', intMasterId = 250003
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MO', @TaxCategories = @TaxCategoryMO
+
+DELETE @TaxCategoryMO
 GO

@@ -38,6 +38,7 @@
     [intConcurrencyId]				INT	DEFAULT (1) NOT NULL,
 	[intEntityIdOld]				INT NULL,
 	[intUserSecurityIdOld]			INT NULL,
+    [intLanguageId]			        INT NULL,
 	[ysnSecurityPolicyUpdated]		BIT DEFAULT ((0)) NOT NULL,
 	[ysnOverrideDistribution]		BIT DEFAULT ((0)) NOT NULL,
     [strActiveDirectorySID]         NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
@@ -48,6 +49,7 @@
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
 	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+    CONSTRAINT [FK_UserSecurity_Language] FOREIGN KEY ([intLanguageId]) REFERENCES [dbo].[tblSMLanguage] ([intLanguageId]),
     CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName]) --this use in an sp named uspEMMergeEntity, any change in name should also be applied there MCG
 );
 

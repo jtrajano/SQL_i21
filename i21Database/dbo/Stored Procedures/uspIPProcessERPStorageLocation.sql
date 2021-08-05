@@ -30,7 +30,7 @@ BEGIN TRY
 		,@dtmDateCreated DATETIME = GETDATE()
 		,@intStorageLocationId INT
 		,@strError NVARCHAR(MAX)
-		,@intTrxSequenceNo INT
+		,@intTrxSequenceNo BIGINT
 	DECLARE @tblICStorageLocation TABLE (
 		strOldDescription NVARCHAR(100)
 		,strNewDescription NVARCHAR(100)
@@ -103,7 +103,7 @@ BEGIN TRY
 					WHERE intTrxSequenceNo = @intTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo is exists in i21.'
+				SELECT @strError = 'TrxSequenceNo ' + LTRIM(@intTrxSequenceNo) + ' is already processed in i21.'
 
 				RAISERROR (
 						@strError
@@ -302,6 +302,23 @@ BEGIN TRY
 
 			MOVE_TO_ARCHIVE:
 
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,7 AS intMessageTypeId
+				,1 AS intStatusId
+				,'Success' AS strStatusText
+
 			--Move to Archive
 			INSERT INTO tblIPStorageLocationArchive (
 				intTrxSequenceNo
@@ -341,6 +358,22 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,7 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
 			--Move to Error
 			INSERT INTO tblIPStorageLocationError (
 				intTrxSequenceNo

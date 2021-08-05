@@ -1,4 +1,7 @@
-﻿CREATE FUNCTION [dbo].[fnRKGetBucketBasisDeliveries]
+﻿-- WHEN MAKING CHANGES
+-- ALSO UPDATE Post-Deployment > RM > fnRKGetBucketBasisDeliveriesAboveR2 
+
+CREATE FUNCTION [dbo].[fnRKGetBucketBasisDeliveries]
 (
 	@dtmDate DATETIME,
 	@intCommodityId INT,
@@ -88,51 +91,12 @@ BEGIN
 	--	AND tbl.intRowId = 1
 	--WHERE tbl.intPricingTypeId = 2
 	--AND tbl.intContractStatusId = 1
-
-	INSERT @returntable	
-	SELECT
-		 dtmTransactionDate
-		, dtmCreatedDate 
-		, strTransactionType
-		, strTransactionReference
-		, intTransactionReferenceId
-		, intTransactionReferenceDetailId
-		, strTransactionReferenceNo
-		, intContractDetailId
-		, intContractHeaderId
-		, strContractNumber
-		, intContractSeq
-		, intContractTypeId
-		, strContractType
-		, intEntityId
-		, strEntityName
-		, intCommodityId
-		, strCommodityCode
-		, intItemId
-		, strItemNo
-		, intCategoryId
-		, strCategoryCode
-		, intLocationId 
-		, strLocationName
-		, intPricingTypeId
-		, strPricingType
-		, dblQty
-		, intQtyUOMId
-		, intContractStatusId
-		, intFutureMarketId
-		, strFutureMarket
-		, intFutureMonthId
-		, strFutureMonth
-		, dtmEndDate
-		, intCurrencyId
-		, strCurrency
-		, strNotes
-		, intUserId
-		, strUserName
-		, strAction
-	FROM (
-		SELECT 
-			 dtmTransactionDate
+	;
+	WITH
+	CTCBL
+	AS
+	(
+		SELECT dtmTransactionDate
 			, dtmCreatedDate 
 			, strTransactionType
 			, strTransactionReference
@@ -179,7 +143,7 @@ BEGIN
 			, cb.intUserId
 			, strUserName = u.strName
 			, cb.strAction
-			, dblTotal = SUM(dblQty) OVER(PARTITION BY cb.intContractDetailId ORDER BY cb.intContractDetailId)
+			, dblTotal = dblQty -- SUM(dblQty) OVER(PARTITION BY cb.intContractDetailId ORDER BY cb.intContractDetailId)
 		FROM tblCTContractBalanceLog cb
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
 		INNER JOIN tblICItem i ON i.intItemId = cb.intItemId
@@ -197,16 +161,109 @@ BEGIN
 			-- AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cb.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(cb.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(cb.intEntityId, 0))
+	)
+
+	INSERT @returntable	
+	SELECT dtmTransactionDate
+		, dtmCreatedDate 
+		, strTransactionType
+		, strTransactionReference
+		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
+		, strTransactionReferenceNo
+		, intContractDetailId
+		, intContractHeaderId
+		, strContractNumber
+		, intContractSeq
+		, intContractTypeId
+		, strContractType
+		, intEntityId
+		, strEntityName
+		, intCommodityId
+		, strCommodityCode
+		, intItemId
+		, strItemNo
+		, intCategoryId
+		, strCategoryCode
+		, intLocationId 
+		, strLocationName
+		, intPricingTypeId
+		, strPricingType
+		, dblQty
+		, intQtyUOMId
+		, intContractStatusId
+		, intFutureMarketId
+		, strFutureMarket
+		, intFutureMonthId
+		, strFutureMonth
+		, dtmEndDate
+		, intCurrencyId
+		, strCurrency
+		, strNotes
+		, intUserId
+		, strUserName
+		, strAction
+	FROM (
+		SELECT a.dtmTransactionDate
+			, a.dtmCreatedDate 
+			, a.strTransactionType
+			, a.strTransactionReference
+			, a.intTransactionReferenceId
+			, a.intTransactionReferenceDetailId
+			, a.strTransactionReferenceNo
+			, a.intContractDetailId
+			, a.intContractHeaderId
+			, a.strContractNumber
+			, a.intContractSeq
+			, a.intContractTypeId
+			, a.strContractType
+			, a.intEntityId
+			, a.strEntityName
+			, a.intCommodityId
+			, a.strCommodityCode
+			, a.intItemId
+			, a.strItemNo
+			, a.intCategoryId
+			, a.strCategoryCode
+			, a.intLocationId 
+			, a.strLocationName
+			, a.intPricingTypeId
+			, a.strPricingType
+			, a.intFutureMarketId
+			, a.strFutureMarket
+			, a.intFutureMonthId
+			, a.strFutureMonth
+			, a.dtmStartDate
+			, a.dtmEndDate
+			, a.dblQty
+			, a.intQtyUOMId
+			, a.dblFutures
+			, a.dblBasis
+			, a.intBasisUOMId
+			, a.intBasisCurrencyId
+			, a.intPriceUOMId
+			, a.intContractStatusId
+			, a.intCurrencyId
+			, a.strCurrency
+			, a.intBookId
+			, a.intSubBookId
+			, a.strNotes
+			, a.intUserId
+			, a.strUserName 
+			, a.strAction
+			, b.dblTotal 
+			
+			FROM CTCBL a
+			INNER JOIN
+				(	SELECT z.intContractDetailId,
+							SUM(z.dblTotal) AS dblTotal
+					FROM	CTCBL z
+					GROUP BY z.intContractDetailId
+				) b
+			ON	a.intContractDetailId = b.intContractDetailId
+
 	) t
 	WHERE dblTotal >= 0
-
-	--DELETE FROM @returntable
-	--WHERE intContractDetailId IN (
-	--	SELECT intContractDetailId
-	--	FROM @returntable
-	--	GROUP BY intContractDetailId
-	--	HAVING SUM(dblQty) < 0
-	--)
 
 	--DELETE FROM @returntable
 	--WHERE intContractDetailId IN (

@@ -2,6 +2,7 @@
 (
 	@intSettleStorageId INT
 	,@UserId INT	
+	,@dtmClientPostDate DATETIME = NULL
 )
 AS
 BEGIN TRY
@@ -13,7 +14,7 @@ BEGIN TRY
 	DECLARE @dblUnitsUnposted DECIMAL(24, 10)
 	DECLARE @intCustomerStorageId AS INT
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
-	DECLARE @strBatchId AS NVARCHAR(20)
+	DECLARE @strBatchId AS NVARCHAR(40)
 	DECLARE @TicketNo NVARCHAR(50)
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
@@ -35,6 +36,8 @@ BEGIN TRY
 	DECLARE @BillIdParams NVARCHAR(MAX)
 	DECLARE @billList AS Id
 	DECLARE @billListForDeletion AS Id
+
+	DECLARE @dtmDate DATETIME = ISNULL(@dtmClientPostDate, GETDATE())
 
 	DECLARE @tblContractIncrement AS TABLE 
 	(
@@ -58,6 +61,11 @@ BEGIN TRY
 		,ysnDPOwnedType BIT
 		,intContractDetailId INT NULL
 	)	
+	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+	BEGIN
+		DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+		EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+	END
 		
 	--check first if the settle storage being deleted is the parent, then its children should be deleted first
 	SELECT @isParentSettleStorage = CASE WHEN MIN(intSettleStorageId) > 0 THEN 1 ELSE 0 END
@@ -390,6 +398,7 @@ BEGIN TRY
 					,@intSettleStorageId
 					,@strBatchId
 					,@UserId
+					,@dtmDate
 					,0
 
 				UPDATE @GLEntries 
@@ -449,6 +458,52 @@ BEGIN TRY
 			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
 			BEGIN 
 				EXEC dbo.uspGLBookEntries @GLEntries, 0 
+
+				-- Unpost AP Clearing
+				DECLARE @APClearing AS APClearing;
+				DELETE FROM @APClearing
+				INSERT INTO @APClearing
+				(
+					[intTransactionId],
+					[strTransactionId],
+					[intTransactionType],
+					[strReferenceNumber],
+					[dtmDate],
+					[intEntityVendorId],
+					[intLocationId],
+					--DETAIL
+					[intTransactionDetailId],
+					[intAccountId],
+					[intItemId],
+					[intItemUOMId],
+					[dblQuantity],
+					[dblAmount],
+					--OTHER INFORMATION
+					[strCode]
+				)
+				SELECT
+					-- HEADER
+					[intTransactionId]
+					,[strTransactionId]
+					,[intTransactionType]
+					,[strReferenceNumber]
+					,[dtmDate]
+					,[intEntityVendorId]
+					,[intLocationId]
+					-- DETAIL
+					,[intTransactionDetailId]
+					,[intAccountId]
+					,[intItemId]
+					,[intItemUOMId]
+					,[dblQuantity]
+					,[dblAmount]
+					,[strCode]
+				FROM tblAPClearing
+				WHERE intTransactionId = @intSettleStorageId
+				AND intTransactionType = 6 --Grain
+				AND intOffsetId IS NULL
+
+				EXEC uspAPClearing @APClearing = @APClearing, @post = 0;
 			END
 		END
 
@@ -484,6 +539,12 @@ BEGIN TRY
 			WHERE intSettleStorageId = @intSettleStorageId
 
 			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
+
+			--Remove Transaction linking
+			exec uspSCAddTransactionLinks 
+				@intTransactionType = 4
+				,@intTransactionId = @intSettleStorageId
+				,@intAction = 2
 		END
 
 		--get first the parent settle storage id before the deletion

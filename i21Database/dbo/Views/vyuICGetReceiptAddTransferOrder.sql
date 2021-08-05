@@ -137,7 +137,7 @@ FROM (
 			, strLotTracking			= item.strLotTracking
 			, intCommodityId			= item.intCommodityId
 			, intContainerId			= CAST(NULL AS INT)
-			, strContainer				= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+			--, strContainer			= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 			, intSubLocationId			= toSubLocation.intCompanyLocationSubLocationId
 			, strSubLocationName		= toSubLocation.strSubLocationName 
 			, intStorageLocationId		= toStorageLocation.intStorageLocationId
@@ -164,6 +164,8 @@ FROM (
 			, strParentLotNumber		= LotItem.strParentLotNumber
 			, intLotStatusId			= d.intNewLotStatusId
 			, strLotCondition			= d.strLotCondition			
+			, strContainer				= d.strContainerNumber 
+			, strMarkings				= d.strMarks
 			, strCertificate			= LotItem.strCertificate
 			, intProducerId				= LotItem.intProducerId
 			, strProducer				= LotItem.strProducer

@@ -43,7 +43,7 @@ RETURNS TABLE AS RETURN
 		,ISNULL(NULLIF(B.dblRate,0),1) AS dblRate
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-	LEFT JOIN tblICInventoryReceiptItem E
+	LEFT JOIN (tblICInventoryReceiptItem E INNER JOIN tblICInventoryReceipt E2 ON E.intInventoryReceiptId = E2.intInventoryReceiptId)
 		ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 	LEFT JOIN (tblICInventoryReceiptCharge charges INNER JOIN tblICInventoryReceipt r ON charges.intInventoryReceiptId = r.intInventoryReceiptId)
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId

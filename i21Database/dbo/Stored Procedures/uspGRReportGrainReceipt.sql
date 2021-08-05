@@ -26,7 +26,11 @@ DECLARE  @strCompanyName NVARCHAR(500)
 		,@GrainUnloadedDecimal DECIMAL(24,10)  
 		,@NetWeightDecimal DECIMAL(24,10)
 		,@strScaleTicketNo NVARCHAR(50)
-		,@strDeliveryLocation NVARCHAR(MAX)    
+		,@strDeliveryLocation NVARCHAR(MAX)  
+		,@dblCheckOff DECIMAL(24,2)
+		,@dblNetAmtPayable DECIMAL(24,2)
+		,@intCommodityId int	
+	  
 	
   
 
@@ -76,14 +80,14 @@ DECLARE  @strCompanyName NVARCHAR(500)
 	BEGIN
 		  SELECT @strReceiptNumber = (strPrefix + [dbo].[fnAddZeroPrefixes](intNumber, 5))  
 		  FROM tblSMStartingNumber  
-		  WHERE [strTransactionType] = N'Canadian Grain Receipt'  
+		  WHERE [strTransactionType] = N'Grain Receipt'  
   
 		  UPDATE tblSMStartingNumber  
 		  SET intNumber = intNumber + 1  
-		  WHERE [strTransactionType] = N'Canadian Grain Receipt'  
+		  WHERE [strTransactionType] = N'Grain Receipt'  
   
 		  UPDATE tblSCTicket  
-		  SET strGrainReceiptNumber = @strReceiptNumber  
+		  SET strGrainReceiptNumber = @strReceiptNumber, dtmDateModifiedUtc = GETUTCDATE()
 		  WHERE intTicketId = @intScaleTicketId  
 	END  
   
@@ -96,6 +100,8 @@ DECLARE  @strCompanyName NVARCHAR(500)
  @dblDockagePercent = ROUND((SC.dblShrink*100.0/(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)))),2),  
  @dblNetWeight=ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight))-SC.dblShrink,3),
  @strScaleTicketNo = SC.strTicketNumber  
+
+ ,@intCommodityId = SC.intCommodityId
  FROM   tblICUnitMeasure UnitMeasure  
  JOIN   tblICItemUOM ItemUOM ON ItemUOM.intUnitMeasureId=UnitMeasure.intUnitMeasureId  
  JOIN   tblSCTicket SC ON SC.intItemUOMIdTo=ItemUOM.intItemUOMId  
@@ -106,6 +112,31 @@ DECLARE  @strCompanyName NVARCHAR(500)
  SET @GrainUnloadedDecimal=ROUND(@dblUnloadedGrain-FLOOR(@dblUnloadedGrain),3)  
  SET @NetWeightDecimal=ROUND(@dblNetWeight-FLOOR(@dblNetWeight),3)  
 
+ 
+--Grain Receipt item Mapping
+declare 
+	@GRRGrade DECIMAL(24,10)
+	
+;with TicketDiscountInfo as (
+select 
+		DiscountCode.intItemId
+		, Discount.intTicketId
+		, Discount.dblGradeReading
+	from tblQMTicketDiscount Discount
+		join tblGRDiscountScheduleCode DiscountCode
+			on Discount.intDiscountScheduleCodeId = DiscountCode.intDiscountScheduleCodeId
+
+		where intTicketId = @intScaleTicketId
+
+)
+select 
+	@GRRGrade = Grade.dblGradeReading
+	
+from tblSCGrainReceiptDiscountMapping200 Preference	
+	left join TicketDiscountInfo Grade
+		on Preference.[intGradeId] = Grade.intItemId
+	
+where Preference.intCommodityId = @intCommodityId
 
  SELECT @strCompanyName =   
    CASE   
@@ -137,6 +168,13 @@ DECLARE  @strCompanyName NVARCHAR(500)
    ELSE LTRIM(RTRIM(strZip))  
    END  
  FROM tblSMCompanySetup  
+
+  SELECT TOP 1
+	  @dblCheckOff = CAST(RI.dblTax AS DECIMAL(18,2)) 
+   ,@dblNetAmtPayable = CAST((RI.dblLineTotal + RI.dblTax) AS DECIMAL(18,2))
+ FROM tblICInventoryReceipt IR
+ INNER JOIN tblICInventoryReceiptItem RI on IR.intInventoryReceiptId = RI.intInventoryReceiptId
+ INNER JOIN tblSCTicket c on c.intTicketId = RI.intSourceId AND c.intTicketId = @intScaleTicketId AND IR.intSourceType = 1 --SCALE
 
 
   SELECT DISTINCT  
@@ -195,7 +233,7 @@ DECLARE  @strCompanyName NVARCHAR(500)
     ELSE ''  
    END      
   + ' '+@strItemStockUOM AS strNetWeightInWords
-  ,ctGrade.strWeightGradeDesc    
+  
   ,@strScaleTicketNo AS  strScaleTicketNo
   ,strShipToLocationAddress = LTRIM(RTRIM(CASE   
        WHEN ISNULL(ShipToLocation.strLocationName, '') = ''  
@@ -223,7 +261,14 @@ DECLARE  @strCompanyName NVARCHAR(500)
        ELSE ShipToLocation.strCountry  
        END)) 
 	   ,strContractNumber =  ISNULL(CT.strContractNumber,'')
-	    
+
+     ,dblPricePerNetTonne = CAST(SC.dblUnitPrice AS DECIMAL(18,2))
+     ,dblTotaPurchasePrice = CAST((SC.dblUnitPrice * SC.dblNetUnits) AS DECIMAL(18,2))
+     ,@dblCheckOff AS dblCheckOff
+     ,@dblNetAmtPayable AS dblNetAmtPayable
+     ,SC.dtmTicketDateTime AS dtmTicketDateTime
+  ,ctGrade.strWeightGradeDesc    
+  ,@GRRGrade as dblGrade
   
  FROM tblSCTicket SC  
  JOIN vyuCTEntity EY ON EY.intEntityId = SC.intEntityId  
@@ -234,7 +279,8 @@ DECLARE  @strCompanyName NVARCHAR(500)
  LEFT JOIN tblCTWeightGrade ctGrade ON ctGrade.intWeightGradeId = SC.intGradeId
  LEFT JOIN tblGLAccount  glAccount ON glAccount.intAccountId = ctGrade.intAccountId
  LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityId = SC.intEntityId
- LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = SC.intContractId  
+ LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SC.intContractId  
+ LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = CTD.intContractHeaderId
  WHERE SC.intTicketId = @intScaleTicketId   
 
 

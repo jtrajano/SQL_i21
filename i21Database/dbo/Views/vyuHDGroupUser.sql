@@ -13,14 +13,9 @@
 			,intGroupUserConfigId = gc.intGroupUserConfigId
 		from
 			tblHDTicketGroup g
-			,tblHDGroupUserConfig gc
-			,tblSMUserSecurity u
-			--,tblEMEntity e
-			,vyuEMEntityContact e
-			,[tblEMEntityCredential] c
+			inner join tblHDGroupUserConfig gc on gc.intTicketGroupId = g.intTicketGroupId
+			inner join tblSMUserSecurity u on u.[intEntityId] = gc.intUserSecurityId
+			inner join vyuEMEntityContact e on e.intEntityId = u.[intEntityId]
+			inner join tblEMEntityCredential c on c.intEntityId = u.[intEntityId]
 		where
-			gc.intTicketGroupId = g.intTicketGroupId
-			and u.[intEntityId] = gc.intUserSecurityId
-			and e.intEntityId = u.[intEntityId]
-			and c.intEntityId = u.[intEntityId]
-			and e.ysnDefaultContact = 1
+			e.ysnDefaultContact = 1

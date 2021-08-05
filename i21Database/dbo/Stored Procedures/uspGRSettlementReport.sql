@@ -137,12 +137,15 @@ SELECT
 FROM tblSMUpload
 WHERE intAttachmentId = 
 (
-	SELECT TOP 1
-		intAttachmentId
-	FROM tblSMAttachment
-	WHERE strScreen = 'SystemManager.CompanyPreference'
-		AND strComment = 'Header'
-	ORDER BY intAttachmentId DESC
+	SELECT		TOP 1 intAttachmentId
+	FROM		tblSMAttachment AS a
+	INNER JOIN	tblSMTransaction AS b
+	ON			a.intTransactionId = b.intTransactionId
+	INNER JOIN	tblSMScreen AS c
+	ON			b.intScreenId = c.intScreenId
+	WHERE		c.strNamespace = 'SystemManager.view.CompanyPreference'
+			AND a.strComment = 'Header'
+	ORDER BY	intAttachmentId DESC
 )
 
 INSERT INTO @temp_xml_table
@@ -2046,8 +2049,9 @@ BEGIN
 					) PartialPayment 
 					ON PartialPayment.intPaymentId = PYMT.intPaymentId
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
-				and INVRCPTITEM.intInventoryReceiptItemId is null
-				and InventoryReceipt.intSourceType = 1
+				AND SC.intTicketType = 6 -- Direct In ticket
+				-- and INVRCPTITEM.intInventoryReceiptItemId is null
+				-- and InventoryReceipt.intSourceType = 1
 
 			/*-------------------------------------------------------
 			*****Temporary Settlement FROM SETTLE STORAGE*******

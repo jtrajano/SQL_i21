@@ -275,6 +275,9 @@ CREATE VIEW [dbo].[vyuSCRestApiTickets]
 	,SCT.ysnMultipleTicket
 	,strAGWorkOrderNumber  = AWO.strOrderNumber
    	,strAGWorkOrderLocation = AWOL.strLocationName
+	,SCT.dtmDateLastUpdatedUtc
+	,SCT.dtmDateCreatedUtc
+	,SCT.dtmDateModifiedUtc
   FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId

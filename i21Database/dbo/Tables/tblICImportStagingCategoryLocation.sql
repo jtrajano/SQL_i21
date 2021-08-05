@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[tblICImportStagingCategoryLocation]
 	[intImportStagingCategoryLocationId] INT NOT NULL IDENTITY,
 	[strImportIdentifier] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCategory] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strLocation] [nvarchar](200) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strLocationName] [nvarchar](200) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intCashRegisterDepartment] INT NULL,
 	[ysnUpdatePrices] BIT NULL DEFAULT ((0)),
 	[ysnUseTaxFlag1] BIT NULL DEFAULT ((0)),

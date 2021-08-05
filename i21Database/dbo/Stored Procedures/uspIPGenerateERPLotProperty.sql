@@ -32,6 +32,7 @@ BEGIN TRY
 	SELECT TOP 20 intLotPropertyFeedId
 	FROM dbo.tblIPLotPropertyFeed
 	WHERE strCompanyLocation = @strCompanyLocation
+	AND intStatusId IS NULL
 
 	SELECT @intLotPropertyFeedId = MIN(intLotPropertyFeedId)
 	FROM @tblIPLotPropertyFeed
@@ -56,14 +57,14 @@ BEGIN TRY
 		 +'<ActionId>1</ActionId>'  
 		 +'<CreatedDate>'+CONVERT(VARCHAR(33), dtmCreatedDate, 126) +'</CreatedDate>'  
 		 +'<TransactionTypeId>'+ ltrim(intTransactionTypeId) +'</TransactionTypeId>'  
-		  +'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
+		  --+'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<StorageLocation>'+ IsNULL(strStorageLocation,'')  +'</StorageLocation>'  
 		 +'<ItemNo>'+ IsNULL(strItemNo,'')  +'</ItemNo>'  
 		 +'<MotherLotNo>'+ IsNULL(strMotherLotNo,'')  +'</MotherLotNo>'  
 		 +'<LotNo>'+ IsNULL(strLotNo,'')  +'</LotNo>'  
 		 +'<StorageUnit>'+ IsNULL(strStorageUnit,'')  +'</StorageUnit>'  
 		 +'<AdjustmentNo>'+ IsNULL(strAdjustmentNo,'')  +'</AdjustmentNo>'  
-		 +'<NewExpiryDate>'+ IsNULL(dtmNewExpiryDate,'')  +'</NewExpiryDate>'  
+		 +'<NewExpiryDate>'+ IsNULL(convert(VARCHAR, dtmNewExpiryDate,112),'')  +'</NewExpiryDate>'  
 		 +'<NewStatus>'+ IsNULL(strNewStatus,'')  +'</NewStatus>'  
 		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  
 		 +'<Notes>'+ IsNULL(strNotes,'')  +'</Notes>'  

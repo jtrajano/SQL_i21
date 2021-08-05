@@ -59,17 +59,14 @@ WITH shipmentstatus AS (
 										WHEN ISNULL(eee.dblUnitQty, 0) = ISNULL(fff.dblUnitQty, 0) THEN ddd.dblRepresentingQty
 										ELSE ddd.dblRepresentingQty * (ISNULL(eee.dblUnitQty, 0) / ISNULL(fff.dblUnitQty, 0)) END)
 		FROM tblCTContractDetail ccc WITH(NOLOCK)
-			, tblQMSample ddd WITH(NOLOCK)
-			, tblICItemUOM eee WITH(NOLOCK)
-			, tblICItemUOM fff WITH(NOLOCK)
+			inner join tblQMSample ddd WITH(NOLOCK) on ddd.intProductValueId = ccc.intContractDetailId
+			inner join tblICItemUOM eee WITH(NOLOCK) on eee.intUnitMeasureId = ddd.intRepresentingUOMId
+			inner join tblICItemUOM fff WITH(NOLOCK) on fff.intItemId = ccc.intItemId and fff.intUnitMeasureId = ccc.intUnitMeasureId
 			
-		WHERE ddd.intProductValueId = ccc.intContractDetailId
-			AND intProductTypeId = 8
+		WHERE 
+			intProductTypeId = 8
 			AND intSampleStatusId = 3
-			AND eee.intUnitMeasureId = ddd.intRepresentingUOMId
 			AND eee.intItemId = ccc.intItemId
-			AND fff.intUnitMeasureId = ccc.intUnitMeasureId
-			AND fff.intItemId = ccc.intItemId
 	) AS qasample
 	GROUP BY intContractDetailId, dblQuantity)
 
@@ -77,9 +74,9 @@ WITH shipmentstatus AS (
 	SELECT jjj.intContractHeaderId
 		, intRecordCount = COUNT(*)
 	FROM tblAPBillDetail jjj WITH(NOLOCK)
-		, tblAPBill kkk WITH(NOLOCK)
-	WHERE kkk.intBillId = jjj.intBillId
-		AND kkk.intTransactionType = 2
+		inner join tblAPBill kkk WITH(NOLOCK) on kkk.intBillId = jjj.intBillId
+	WHERE 
+		kkk.intTransactionType = 2
 	GROUP BY jjj.intContractHeaderId)
 
 , hedge AS (
@@ -312,6 +309,9 @@ SELECT a.intContractDetailId
 	, intHeaderSubBookId = b.intSubBookId
 	, intDetailBookId = a.intBookId
 	, intDetailSubBookId = a.intSubBookId
+	--, b.ysnStrategic
+	, strStrategic = (case when isnull(b.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
+	, strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 FROM tblCTContractDetail a WITH(NOLOCK)
 JOIN tblCTContractHeader b WITH(NOLOCK) ON b.intContractHeaderId = a.intContractHeaderId
 LEFT JOIN tblICItem c WITH(NOLOCK) ON c.intItemId = a.intItemId
@@ -408,6 +408,7 @@ LEFT JOIN tblCTWeightGrade cl WITH(NOLOCK) ON cl.intWeightGradeId = b.intWeightI
 LEFT JOIN tblICItemUOM cm WITH(NOLOCK) ON cm.intItemUOMId = a.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMeasureId
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
+LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = a.intShipToId -- CT-5315
 OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
 LEFT JOIN (
     SELECT *

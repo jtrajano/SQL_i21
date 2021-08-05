@@ -931,6 +931,8 @@ BEGIN
 				,strActualCostId
 				,intLoadShipmentId
 				,intLoadShipmentDetailId
+				,ysnAddPayable
+				,strImportDescription
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -1028,6 +1030,8 @@ BEGIN
 				,strActualCostId				= RawData.strActualCostId
 				,RawData.intLoadShipmentId
 				,RawData.intLoadShipmentDetailId
+				,ysnAddPayable					= RawData.ysnAddPayable
+				,strImportDescription			= RawData.strImportDescription
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -2061,6 +2065,9 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 
+		-- Update the receipt sub total. 
+		EXEC uspICInventoryReceiptCalculateTotals @inventoryReceiptId, 1 
+
 		-- Update Cost UOM Id if null
 		UPDATE tblICInventoryReceiptItem
 		SET intCostUOMId = intUnitMeasureId
@@ -2086,13 +2093,13 @@ BEGIN
 		END 
 
 		-- Validate the receipt total. Do not allow negative receipt total. 
-		-- However, allow it if source type is a 'STORE'
+		-- However, allow it if the source type is a 'Store' or 'None'
 		IF EXISTS (
 			SELECT 1
 			FROM	tblICInventoryReceipt r
 			WHERE	r.intInventoryReceiptId = @inventoryReceiptId
 					AND dbo.fnICGetReceiptTotals(@inventoryReceiptId, 6) < 0
-					AND r.intSourceType <> @SourceType_STORE 
+					AND r.intSourceType NOT IN (@SourceType_NONE, @SourceType_STORE) 
 		) 
 		BEGIN
 			-- Unable to create the Inventory Receipt. The receipt total is going to be negative.
@@ -2111,6 +2118,13 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @inventoryReceiptId
 		
+		-- Link Inventory Receipt Transaction
+		BEGIN
+			EXEC dbo.uspICLinkInventoryReceiptTransaction
+				@inventoryReceiptId,
+				true
+		END
+
 		-- Create an Audit Log
 		BEGIN 
 			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'

@@ -17,6 +17,9 @@ BEGIN TRY
 		,@strAttributeValue NVARCHAR(50)
 		,@dtmExpectedDate DATETIME
 		,@intSubLocationId INT
+		,@intManufacturingCellId INT
+		,@strSubLocationName NVARCHAR(50)
+		,@ysnRecipeBySite INT
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intWorkOrderRecipeItemId INT
 		,[intWorkOrderId] INT
@@ -84,11 +87,22 @@ BEGIN TRY
 		,intConcurrencyId INT
 		)
 
+	SELECT @ysnRecipeBySite = IsNULL(ysnRecipeBySite, 0)
+	FROM tblMFCompanyPreference
+
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@dtmExpectedDate = dtmExpectedDate
 		,@intSubLocationId = intSubLocationId
+		,@intManufacturingCellId = intManufacturingCellId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	IF @intSubLocationId IS NULL
+	BEGIN
+		SELECT @intSubLocationId = intSubLocationId
+		FROM tblMFManufacturingCell
+		WHERE intManufacturingCellId = @intManufacturingCellId
+	END
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute
@@ -257,12 +271,32 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderRecipe
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	SELECT @intRecipeId = intRecipeId
-	FROM dbo.tblMFRecipe
-	WHERE intItemId = @intItemId
-		AND intLocationId = @intLocationId
-		AND ysnActive = 1
-		AND intSubLocationId = @intSubLocationId
+	IF @ysnRecipeBySite = 1
+	BEGIN
+		SELECT @strSubLocationName = Left(strSubLocationName, 2)
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+		SELECT @intSubLocationId = intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE strSubLocationName = @strSubLocationName
+
+		SELECT @intRecipeId = intRecipeId
+		FROM dbo.tblMFRecipe
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND intSubLocationId = @intSubLocationId
+	END
+	ELSE
+	BEGIN
+		SELECT @intRecipeId = intRecipeId
+		FROM dbo.tblMFRecipe
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND intSubLocationId = @intSubLocationId
+	END
 
 	IF @intRecipeId IS NULL
 	BEGIN
@@ -295,6 +329,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dtmLastModified
 		,intConcurrencyId
+		,strERPRecipeNo
 		)
 	SELECT intRecipeId
 		,intItemId
@@ -316,6 +351,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dtmLastModified
 		,intConcurrencyId
+		,strERPRecipeNo
 	FROM dbo.tblMFRecipe
 	WHERE intRecipeId = @intRecipeId
 

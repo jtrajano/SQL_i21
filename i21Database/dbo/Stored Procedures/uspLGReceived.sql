@@ -114,6 +114,21 @@ SET ANSI_WARNINGS OFF
 
 				UPDATE tblLGLoadDetail SET dblDeliveredQuantity = (@dblContractQty + @dblQty), dblDeliveredGross = @dblNetWeight, dblDeliveredNet = @dblNetWeight WHERE intLoadDetailId = @intSourceId
 	
+				/*Update Pick Containers*/
+				IF EXISTS (SELECT TOP 1 1 FROM tblLGPickLotDetail PLC LEFT JOIN tblLGPickLotHeader PL ON PL.intPickLotHeaderId = PLC.intPickLotHeaderId 
+							WHERE PL.intType = 2 AND PLC.intLotId IS NULL AND PLC.intContainerId = @intContainerId)
+				BEGIN
+					UPDATE PLC
+					SET intLotId = CASE WHEN (@dblQty > 0) THEN @intLotId ELSE NULL END
+						,intConcurrencyId = PLC.intConcurrencyId + 1
+					FROM tblLGPickLotDetail PLC
+						LEFT JOIN tblLGPickLotHeader PL ON PL.intPickLotHeaderId = PLC.intPickLotHeaderId
+					WHERE PL.intType = 2
+						AND PLC.intLotId IS NULL
+						AND PL.intPickLotHeaderId NOT IN (SELECT ISNULL(intParentPickLotHeaderId, 0) FROM tblLGPickLotHeader WHERE intType = 1)
+						AND PLC.intContainerId = @intContainerId
+				END
+
 				SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
 
 				SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId

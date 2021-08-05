@@ -76,7 +76,7 @@ AS
 				1 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition AS Position,
+				ISNULL(CD.strPosition, '') AS Position,
 				CD.dtmPlannedAvailabilityDate
 
 		FROM	vyuCTSearchContractDetail	CD
@@ -198,11 +198,16 @@ AS
 					MO.strFutureMonth,
 					CU.strCurrency,
 					U2.strUnitMeasure AS strPriceUOM,
-					PO.strPosition,
+					strPosition = ISNULL(PO.strPosition, ''),
 					CA.strDescription  AS strProductType,
 					--CB.strContractBasis,
 					strContractBasis = CB.strFreightTerm,
-					CS.strContractStatus
+					CS.strContractStatus,
+					ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS,
+					ce.strCertificationName,
+					strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS,
+					strOrigin = ISNULL(RY.strCountry, OG.strCountry),
+					strShipper = PR.strName
 
 			FROM	tblCTContractDetail		CD
 			JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
@@ -227,12 +232,21 @@ AS
 	LEFT	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId	
 	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'
+	left join tblCTContractCertification cr on cr.intContractDetailId = CD.intContractDetailId
+	left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+
+
+	LEFT JOIN tblSMCountry RY WITH(NOLOCK) ON RY.intCountryID = IC.intCountryId
+	LEFT JOIN tblICCommodityAttribute CA2 WITH(NOLOCK) ON CA2.intCommodityAttributeId = IM.intOriginId AND CA2.strType = 'Origin'
+	LEFT JOIN tblSMCountry OG WITH(NOLOCK) ON OG.intCountryID = CA2.intCountryID
+	LEFT JOIN tblEMEntity PR WITH(NOLOCK) ON PR.intEntityId = ISNULL(CD.intProducerId, CH.intProducerId)
+
 	WHERE CD.dtmStartDate between ISNULL(@StartFromDate,CD.dtmStartDate) and ISNULL(@StartToDate,CD.dtmStartDate)
 	AND convert(date,CD.dtmStartDate) = isnull(@EqualStartDate,convert(date,CD.dtmStartDate))
 	AND CD.dtmEndDate between ISNULL(@EndFromDate,CD.dtmEndDate) and ISNULL(@EndToDate,CD.dtmEndDate)
 	AND convert(date,CD.dtmEndDate) = ISNULL(@EqualEndDate,convert(date,CD.dtmEndDate))
-	AND CA.strDescription = ISNULL(@strProductType,CA.strDescription)
-	AND		PO.strPosition = ISNULL(@strPosition,PO.strPosition)
+	AND ISNULL(CA.strDescription, '') = ISNULL(@strProductType, ISNULL(CA.strDescription, ''))
+	AND	ISNULL(PO.strPosition, '') = ISNULL(@strPosition, ISNULL(PO.strPosition, ''))
 	)
 
 	SELECT	* 
@@ -264,11 +278,16 @@ AS
 				1 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition,
+				strPosition = ISNULL(CD.strPosition, ''),
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
-				CD.strContractStatus
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
 
 		FROM	CTEDetail	CD
 		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
@@ -302,11 +321,16 @@ AS
 				2 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition,
+				strPosition = ISNULL(CD.strPosition, ''),
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
-				CD.strContractStatus
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
 
 		FROM	CTEDetail	CD
 
@@ -337,11 +361,16 @@ AS
 				3 AS intDisplayOrder,
 				CD.strInternalComment,
 				CD.intContractDetailId,
-				CD.strPosition,
+				strPosition = ISNULL(CD.strPosition, ''),
 				CD.dtmPlannedAvailabilityDate,
 				CD.strProductType,
 				CD.strContractBasis,
-				CD.strContractStatus
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
 
 		FROM	CTEDetail	CD
 	)t
@@ -350,7 +379,7 @@ AS
 	'<mappings>
 		<mapping><fieldname>ContractDate</fieldname><fromField>dtmContractDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>StartDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
-		<mapping><fieldname>EndDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>EndDate</fieldname><fromField>dtmEndDate</fromField><toField>dtmStartDate</toField><ignoreTime>1</ignoreTime></mapping>
 		<mapping><fieldname>Position</fieldname><fromField>strPosition</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>Vendor</fieldname><fromField>strCustomerVendor</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
 		<mapping><fieldname>ProductType</fieldname><fromField>strProductType</fromField><toField></toField><ignoreTime></ignoreTime></mapping>

@@ -24,7 +24,7 @@ SELECT
 	bill.dtmDueDate,
 	bill.strVendorOrderNumber strInvoiceNo,
 	bill.intTransactionType,
-	bill.intEntityVendorId intEntityId,
+	entity.intEntityId,
 	bill.dblWithheld,
 	bill.strReference,
 	bill.strComment,

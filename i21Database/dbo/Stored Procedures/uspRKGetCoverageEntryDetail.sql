@@ -194,6 +194,7 @@ BEGIN
 
 	SELECT intCommodityId
 		, intProductTypeId
+		, dblSettlementPrice = MAX(dblSettlementPrice)
 		, dblFuturesM2M = SUM(dblFuturesM2M)
 		, dblFuturesM2MPlus = SUM(dblFuturesM2MPlus)
 		, dblFuturesM2MMinus = SUM(dblFuturesM2MMinus)
@@ -223,35 +224,18 @@ BEGIN
 	GROUP BY intCommodityId, intProductTypeId
 
 	SELECT DER.intCommodityId
-		, dblQty = SUM(dbo.fnCTConvertQtyToTargetCommodityUOM(DER.intCommodityId, FM.intUnitMeasureId, @intUnitMeasureId, 
-						CASE WHEN strOptionType = 'Put' THEN DER.dblOpenContract * -1 ELSE DER.dblOpenContract END
-						* DER.dblContractSize))
+		, dblQty = SUM(dbo.fnCTConvertQtyToTargetCommodityUOM(DER.intCommodityId, FM.intUnitMeasureId, @intUnitMeasureId, DER.dblOpenContract * DER.dblContractSize))
 		, MAT.strCommodityAttributeId
 	INTO #OptionsTotal
 	FROM vyuRKFutOptTransaction DER
 	JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = DER.intFutureMarketId
 	JOIN tblRKCommodityMarketMapping MAT ON MAT.intFutureMarketId = DER.intFutureMarketId
-	LEFT JOIN (
-		SELECT * FROM (
-			SELECT intRowNo = ROW_NUMBER() OVER(PARTITION BY SP.intFutureMarketId, SPD.intFutureMonthId, CMM.intCommodityId ORDER BY SP.dtmPriceDate DESC)
-				, SPD.intFutSettlementPriceMonthId
-				, SPD.intFutureSettlementPriceId
-				, SP.intFutureMarketId
-				, SPD.intFutureMonthId
-				, CMM.intCommodityId
-				, dblLastSettle
-				, SP.dtmPriceDate
-			FROM tblRKFutSettlementPriceMarketMap SPD
-			JOIN tblRKFuturesSettlementPrice SP ON SP.intFutureSettlementPriceId = SPD.intFutureSettlementPriceId
-			JOIN tblRKCommodityMarketMapping CMM ON CMM.intCommodityMarketId = SP.intCommodityMarketId
-		) t WHERE intRowNo = 1
-	) sp ON sp.intFutureMarketId = DER.intFutureMarketId
-		AND sp.intFutureMonthId = DER.intFutureMonthId
-		AND sp.intCommodityId = DER.intCommodityId
+	LEFT JOIN #DapSettlement DS ON DS.intCommodityId = MAT.intCommodityId
+		AND DS.intProductTypeId = CAST(MAT.strCommodityAttributeId AS INT)
 	WHERE strInstrumentType = 'Options'
 		AND dblOpenContract <> 0
-		AND ((strOptionType = 'Call' AND dblLastSettle > dblStrike) OR
-			(strOptionType = 'Put' AND dblLastSettle < dblStrike))
+		AND ((strOptionType = 'Call' AND dblSettlementPrice > dblStrike) OR
+			(strOptionType = 'Put' AND dblSettlementPrice < dblStrike))
 		AND ISNULL(DER.intBookId, 0) = ISNULL(@BookId, ISNULL(DER.intBookId, 0))
 		AND ISNULL(DER.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DER.intSubBookId, 0))
 	GROUP BY DER.intCommodityId, MAT.strCommodityAttributeId
@@ -327,7 +311,7 @@ BEGIN
 		AND strType = 'ProductType'
 		AND (Balance.dblContracts IS NOT NULL AND Balance.dblInTransit IS NOT NULL AND Balance.dblStock IS NOT NULL AND Balance.dblFutures IS NOT NULL)
 	
-	SELECT intRowNum = ROW_NUMBER() OVER(ORDER BY intProductTypeId, dtmDemandDate)
+	SELECT intRowNum = ROW_NUMBER() OVER(PARTITION BY intProductTypeId,intItemId ORDER BY  dtmDemandDate)
 		, intCommodityId
 		, dtmDemandDate
 		, intProductTypeId
@@ -401,6 +385,7 @@ BEGIN
 		into #tmpDemandQuantity
 		from #DemandDetail
 		where intProductTypeId = @intProductType
+		and intRowNum <> 1
 		group by intItemId, intProductTypeId
 
 		--b.	Calculate number of months = Count Demand month group by item number
@@ -424,8 +409,8 @@ BEGIN
 		from #tmpCalculatedAverage
 		where intProductTypeId = @intProductType
 
-		SET @monthsCovered = @dblPosition / @dblTotalAvgConsumption
-		SET @optionsCovered = @dblOption / @dblTotalAvgConsumption
+		SET @monthsCovered = @dblPosition / NULLIF(@dblTotalAvgConsumption,0)
+		SET @optionsCovered = @dblOption / NULLIF(@dblTotalAvgConsumption,0)
 
 		UPDATE @FinalTable
 		SET dblMonthsCovered = @monthsCovered

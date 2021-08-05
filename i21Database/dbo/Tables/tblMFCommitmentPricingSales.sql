@@ -12,6 +12,7 @@
 	dblFutures NUMERIC(18, 6),
 	dblFXPrice NUMERIC(18, 6),
 	dblRefPrice NUMERIC(18, 6),
+	dblRefPriceInPriceUOM NUMERIC(18, 6),
 	intBookId INT,
 	intSubBookId INT,
 	intSequenceNo INT,

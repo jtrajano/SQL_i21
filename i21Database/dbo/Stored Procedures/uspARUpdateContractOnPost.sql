@@ -24,6 +24,7 @@ BEGIN TRY
 				  , @dblRemainingQty			NUMERIC(18, 6) = 0
 				  , @dblQtyToReturn				NUMERIC(18, 6) = 0
 				  , @ysnFromReturn				BIT = 0
+				  , @strTransactionType			NVARCHAR(100) = NULL
 
 			SELECT TOP 1 @intInvoiceId					= intInvoiceId
 					   , @intInvoiceDetailId			= intInvoiceDetailId
@@ -35,6 +36,7 @@ BEGIN TRY
 					   , @dblSheduledQty				= dblSheduledQty
 					   , @dblRemainingQty				= dblRemainingQty
 					   , @ysnFromReturn					= ysnFromReturn
+					   , @strTransactionType			= strTransactionType
 			FROM ##ARItemsForContracts
 
 			IF @strType = 'Contract Balance' AND @dblBalanceQty <> 0
@@ -43,7 +45,7 @@ BEGIN TRY
 													  , @dblQuantityToUpdate = @dblBalanceQty
 													  , @intUserId			 = @intUserId
 													  , @intExternalId		 = @intInvoiceDetailId
-													  , @strScreenName		 = 'Invoice'
+													  , @strScreenName		 = @strTransactionType
 													  , @ysnFromInvoice 	 = 1
 
 					IF ISNULL(@ysnFromReturn, 0) = 1 AND @intOriginalInvoiceDetailId IS NOT NULL
@@ -64,7 +66,7 @@ BEGIN TRY
 													  , @dblQuantityToUpdate = @dblSheduledQty
 													  , @intUserId			 = @intUserId
 													  , @intExternalId		 = @intInvoiceDetailId
-													  , @strScreenName		 = 'Invoice'
+													  , @strScreenName		 = @strTransactionType
 				END
 
 			DELETE FROM ##ARItemsForContracts 

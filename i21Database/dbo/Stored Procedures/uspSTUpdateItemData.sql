@@ -38,6 +38,7 @@ BEGIN TRY
 
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
 				@idoc					   INT,
+				@strStoreGroupId	 	   NVARCHAR(MAX),
 				@strCompanyLocationId 	   NVARCHAR(MAX),
 				@Region					   NVARCHAR(20),
 				@District				   NVARCHAR(20),
@@ -95,7 +96,7 @@ BEGIN TRY
 	                  
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
-		SELECT	
+		SELECT	@strStoreGroupId		=	StoreGroup,
 				@strCompanyLocationId	=	Location,
 				@strVendorId			=   Vendor,
 				@strCategoryId			=   Category,
@@ -152,6 +153,7 @@ BEGIN TRY
 		FROM	OPENXML(@idoc, 'root',2)
 		WITH
 		(
+				StoreGroup				  NVARCHAR(MAX),
 				Location 			      NVARCHAR(MAX),
 				Vendor                    NVARCHAR(MAX),
 				Category                  NVARCHAR(MAX),
@@ -529,6 +531,21 @@ BEGIN TRY
 					FROM [dbo].[fnGetRowsFromDelimitedValues](@strCompanyLocationId)
 				END
 		
+			IF(@strStoreGroupId IS NOT NULL AND @strStoreGroupId != '')
+				BEGIN
+					INSERT INTO #tmpUpdateItemForCStore_Location (
+						intLocationId
+					)
+					SELECT st.intCompanyLocationId AS intLocationId
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreGroupId)
+					INNER JOIN tblSTStoreGroup sg
+						ON sg.intStoreGroupId = intID
+					INNER JOIN tblSTStoreGroupDetail sgt
+						ON sgt.intStoreGroupId = sg.intStoreGroupId
+					INNER JOIN tblSTStore st
+						ON st.intStoreId = sgt.intStoreId
+				END
+
 			IF(@strVendorId IS NOT NULL AND @strVendorId != '')
 				BEGIN
 					INSERT INTO #tmpUpdateItemForCStore_Vendor (
@@ -606,26 +623,44 @@ BEGIN TRY
 
 		--		,@intEntityUserSecurityId = @intCurrentEntityUserId
 		--END
-
 		
-	-- SELECT strDistrict, strRegion, strState, * FROM tblSTStore
 	-- ==========================================================================================
 	-- [START] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
 	-- ==========================================================================================
-	IF(@strCompanyLocationId IS NULL AND @Region IS NOT NULL AND @District IS NOT NULL AND @State IS NOT NULL)
+	IF(@strCompanyLocationId IS NULL AND ((@Region IS NOT NULL AND @Region != '') OR (@District IS NOT NULL AND @District != '') OR (@State IS NOT NULL AND @State != '')))
 		BEGIN
+
+			DELETE FROM #tmpUpdateItemForCStore_Location
 			
 			INSERT INTO #tmpUpdateItemForCStore_Location 
 			(
 				intLocationId
 			)
-			SELECT 
+			SELECT DISTINCT
 				intLocationId = intCompanyLocationId
 			FROM tblSTStore
-			WHERE strRegion		= @Region
-				AND strDistrict = @District
-				AND strState	= @State
+			WHERE strRegion		= ISNULL(@Region, strRegion)
+				AND strDistrict = ISNULL(@District, strDistrict)
+				AND strState	= ISNULL(@State, strState)
+				AND intCompanyLocationId IN (SELECT st.intCompanyLocationId AS intLocationId
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreGroupId)
+					INNER JOIN tblSTStoreGroup sg
+						ON sg.intStoreGroupId = intID
+					INNER JOIN tblSTStoreGroupDetail sgt
+						ON sgt.intStoreGroupId = sg.intStoreGroupId
+					INNER JOIN tblSTStore st
+						ON st.intStoreId = sgt.intStoreId) --To not allow duplicates
 
+			--To prevent defaulting to all stores if Region District and State did not return any rows
+			IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Location)
+			INSERT INTO #tmpUpdateItemForCStore_Location 
+			(
+				intLocationId
+			)
+			VALUES
+			(
+				9999999999 --So that it will filter to null
+			)
 		END
 	-- ==========================================================================================
 	-- [END] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
@@ -637,24 +672,27 @@ BEGIN TRY
 			SET @strDescription		= NULLIF(@strDescription, '')
 			SET @intNewCategory		= NULLIF(@intNewCategory, '')
 			SET @strNewCountCode	= NULLIF(@strNewCountCode, '')
-
-			-- Item Update
-			EXEC [dbo].[uspICUpdateItemForCStore]
-					-- filter params	
-					@strDescription				= @strDescription 
-					,@dblRetailPriceFrom		= NULL  
-					,@dblRetailPriceTo			= NULL 
-					,@intItemId					= @intItemId 
-					,@intItemUOMId				= @intItemUOMId 
-					-- update params
-					,@intCategoryId				= @intNewCategory
-					,@strCountCode				= @strNewCountCode
-					,@strItemDescription		= NULL 	
-					,@strItemNo					= NULL 
-					,@strShortName				= NULL 
-					,@strUpcCode				= NULL 
-					,@strLongUpcCode			= NULL 
-					,@intEntityUserSecurityId	= @intCurrentEntityUserId
+			
+			IF (@intNewCategory IS NOT NULL OR @intNewCategory != '') OR (@strNewCountCode IS NOT NULL OR @strNewCountCode != '')
+				BEGIN
+					-- Item Update
+					EXEC [dbo].[uspICUpdateItemForCStore]
+							-- filter params	
+							@strDescription				= @strDescription 
+							,@dblRetailPriceFrom		= NULL  
+							,@dblRetailPriceTo			= NULL 
+							,@intItemId					= @intItemId 
+							,@intItemUOMId				= @intItemUOMId 
+							-- update params
+							,@intCategoryId				= @intNewCategory
+							,@strCountCode				= @strNewCountCode
+							,@strItemDescription		= NULL 	
+							,@strItemNo					= NULL 
+							,@strShortName				= NULL 
+							,@strUpcCode				= NULL 
+							,@strLongUpcCode			= NULL 
+							,@intEntityUserSecurityId	= @intCurrentEntityUserId
+				END
 
 			--EXEC [dbo].[uspICUpdateItemForCStore]
 			--		@strUpcCode					= @strUpcCode 
@@ -1019,7 +1057,7 @@ BEGIN TRY
 					WHEN [Changes].ysnDepositRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strDepositPLUId_Original			= [Changes].intDepositPLUId_Original
-			, strDepositPLU_Original			= ISNULL(PLUOriginal.strUpcCode, '') -- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
+			, strDepositPLU_Original			= ISNULL(PLUOriginal.strLongUPCCode, '') -- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_Original), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_Original = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -1094,7 +1132,7 @@ BEGIN TRY
 					WHEN [Changes].ysnDepositRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
 			, strDepositPLUId_New			= [Changes].intDepositPLUId_New
-			, strDepositPLU_New				= ISNULL(PLUNew.strUpcCode, '')	-- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
+			, strDepositPLU_New				= ISNULL(PLUNew.strLongUPCCode, '')	-- ISNULL((SELECT strUpcCode FROM tblICItemUOM WHERE intItemUOMId = [Changes].intDepositPLUId_New), '')
 			, CASE 
 					WHEN [Changes].ysnQuantityRequired_New = 1 THEN @strTRUE ELSE @strFALSE
 			  END
@@ -1158,7 +1196,7 @@ BEGIN TRY
 			, strVendorId_OldDataPreview			= ISNULL(VendorOriginal.strName, '')
 			, strStorageLocationId_OldDataPreview	= ISNULL(StorageLocOriginal.strSubLocationName, '')
 			, strCountGroupId_OldDataPreview		= ISNULL(CountGroup_Orig.strCountGroup, '')
-			, strDepositPLUId_OldDataPreview		= ISNULL(PLUOriginal.strUpcCode, '')
+			, strDepositPLUId_OldDataPreview		= ISNULL(PLUOriginal.strLongUPCCode, '')
 
 		FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog [Changes]
 		INNER JOIN tblICItem I 
@@ -1752,31 +1790,65 @@ BEGIN TRY
 		-- Remove values
 		DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')
 
-
-
-
 		
-		
+	   -- Handle Returned Table
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- START Query Preview -------------------------------------
+	   ---------------------------------------------------------------------------------------
+	 --  SELECT  
+	 --         TES.strLocation
+		--	  , TES.strUpc
+		--	  , TES.strItemDescription
+		--	  , TES.strChangeDescription
+		--	  , TES.strPreviewOldData AS strOldData
+		--	  , TES.strPreviewNewData AS strNewData
+	 --  FROM (
+		--SELECT DISTINCT 
+		--			@strGuid AS strGuid
+		--			, strLocation
+		--			, strUpc
+		--			, strItemDescription
+		--			, strChangeDescription
+		--			, strPreviewOldData
+		--			, strPreviewNewData
 
+		--			, intItemId
+		--			, intItemUOMId
+		--			, intItemLocationId
+		--			, intPrimaryKeyId
+		--			, strTableName
+		--			, strTableColumnName
+		--			, strTableColumnDataType
+		--			, ysnPreview
+		--			, 1 AS intConcurrencyId
+		--		FROM @tblPreview
+		--		WHERE ysnPreview = 1
+		--) AS TES
+		--ORDER BY strItemDescription, strChangeDescription ASC
 
-	   ---- Handle Returned Table
-	   -----------------------------------------------------------------------------------------
-	   ------------------------------- START Query Preview -------------------------------------
-	   -----------------------------------------------------------------------------------------
-	   ---- Query Preview display
-	   --SELECT DISTINCT 
-	   --       strLocation
-			 -- , strUpc
-			 -- , strItemDescription
-			 -- , strChangeDescription
-			 -- , strPreviewOldData AS strOldData
-			 -- , strPreviewNewData AS strNewData
-	   --FROM @tblPreview
-	   --WHERE ysnPreview = 1
-	   --ORDER BY strItemDescription, strChangeDescription ASC
-	   -----------------------------------------------------------------------------------------
-	   ------------------------------- END Query Preview ---------------------------------------
-	   -----------------------------------------------------------------------------------------
+		SELECT DISTINCT 
+			@strGuid
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strPreviewOldData AS strOldData
+			, strPreviewNewData	AS strNewData
+
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intPrimaryKeyId
+			, strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, 1
+		FROM @tblPreview
+		WHERE ysnPreview = 1
+		ORDER BY strItemDescription, strChangeDescription ASC
+	   ---------------------------------------------------------------------------------------
+	   ----------------------------- END Query Preview ---------------------------------------
+	   ---------------------------------------------------------------------------------------
 		
 
 
@@ -1998,7 +2070,7 @@ BEGIN TRY
 							[strPreviewOldData],
 							[intConcurrencyId]
 						)
-						SELECT 
+						SELECT DISTINCT
 							[intRevertHolderId]			= @intNewRevertHolderId,
 							[strTableName]				= strTableName,
 							[strTableColumnName]		= strTableColumnName,
@@ -2078,24 +2150,6 @@ BEGIN TRY
 
 
 	   
-	   -- Handle Returned Table
-	   ---------------------------------------------------------------------------------------
-	   ----------------------------- START Query Preview -------------------------------------
-	   ---------------------------------------------------------------------------------------
-	   -- Query Preview display
-	   SELECT DISTINCT 
-	          strLocation
-			  , strUpc
-			  , strItemDescription
-			  , strChangeDescription
-			  , strPreviewOldData AS strOldData
-			  , strPreviewNewData AS strNewData
-	   FROM @tblPreview
-	   WHERE ysnPreview = 1
-	   ORDER BY strItemDescription, strChangeDescription ASC
-	   ---------------------------------------------------------------------------------------
-	   ----------------------------- END Query Preview ---------------------------------------
-	   ---------------------------------------------------------------------------------------
 
 		-- Remove records
 		DELETE FROM @tblPreview

@@ -6,5 +6,8 @@
 	strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	dblNumerator NUMERIC(38,20),
 	dblDenominator NUMERIC(38,20),
+	intTrxSequenceNo BIGINT,
+	intParentTrxSequenceNo BIGINT,
+	ysnStockUnit BIT DEFAULT 0,
 	CONSTRAINT [PK_tblIPItemUOMArchive_intStageItemUOMId] PRIMARY KEY ([intStageItemUOMId]) 
 )

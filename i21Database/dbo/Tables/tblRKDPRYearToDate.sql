@@ -13,3 +13,8 @@
     CONSTRAINT [PK_tblRKDPRYearToDate] PRIMARY KEY ([intDPRYearToDateId]), 
     CONSTRAINT [FK_tblRKDPRYearToDate_tblRKDPRHeader] FOREIGN KEY ([intDPRHeaderId]) REFERENCES [tblRKDPRHeader]([intDPRHeaderId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKDPRYearToDate_intDPRHeaderId]
+	ON [dbo].[tblRKDPRYearToDate] ([intDPRHeaderId]);   
+GO 

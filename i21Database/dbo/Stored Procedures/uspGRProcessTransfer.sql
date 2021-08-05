@@ -176,6 +176,8 @@ BEGIN
 			,[intSourceCustomerStorageId]
 			,[dblUnitQty]
 			,[dblSplitPercent]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)	
 		SELECT 
 			[intEntityId]						= TransferStorageSplit.intEntityId
@@ -220,6 +222,8 @@ BEGIN
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
 			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
+			,[intShipFromLocationId]			= CS.intShipFromLocationId
+			,[intShipFromEntityId]				= CS.intShipFromEntityId
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -280,6 +284,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		VALUES
 		(
@@ -323,6 +329,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,
@@ -346,7 +354,7 @@ BEGIN
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			INSERT INTO tblGRTransferStorageReference
-			SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds WHERE intId = @intId
+			SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate,null FROM @newCustomerStorageIds WHERE intId = @intId
 
 			SET @intTransferStorageReferenceId = CASE WHEN ISNULL(@intTransferStorageReferenceId,0) = 0 THEN @@ROWCOUNT ELSE @intTransferStorageReferenceId + 1 END
 
@@ -730,6 +738,27 @@ BEGIN
 						AND intTransactionTypeId = 1
 				END
 
+				-- Copy the intOrigCostCustomerStorageId from the source DP to DP transaction(if it exists).
+				UPDATE TSR
+				SET TSR.intCostBucketCustomerStorageId = TSR_SOURCE.intCostBucketCustomerStorageId
+				FROM tblGRTransferStorageReference TSR
+				INNER JOIN tblGRTransferStorageReference TSR_SOURCE
+					ON TSR_SOURCE.intToCustomerStorageId = TSR.intSourceCustomerStorageId
+				WHERE TSR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+				AND TSR_SOURCE.intCostBucketCustomerStorageId IS NOT NULL
+
+				-- If the intCostBucketCustomerStorageId is still blank, it means that this is the first DP to DP transaction
+				IF(EXISTS(
+					SELECT TOP 1 1 FROM tblGRTransferStorageReference
+					WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
+					AND intCostBucketCustomerStorageId IS NULL)
+				)
+				BEGIN
+					UPDATE tblGRTransferStorageReference
+					SET intCostBucketCustomerStorageId = @intSourceCustomerStorageId
+					WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
+				END
+
 				--inventory items
 				DELETE FROM @GLEntries
 				INSERT INTO @GLEntries 
@@ -1044,6 +1073,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
 				,[strTransferTicket]
 			)
@@ -1058,6 +1088,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
 				,[strTransferTicket]
 			FROM @StorageHistoryStagingTable
@@ -1173,6 +1204,58 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 		
+		-- Start Booking AP Clearing to tblAPClearing
+		DECLARE
+			@intTransferStorageReferenceId3 INT
+			,@ysnIsSourceDP BIT
+			,@ysnIsTargetDP BIT;
+
+		DECLARE CC CURSOR LOCAL FAST_FORWARD
+		FOR
+		SELECT TSR.intTransferStorageReferenceId, ST_FROM.ysnDPOwnedType, ST_TO.ysnDPOwnedType
+		FROM tblGRTransferStorageReference TSR
+		INNER JOIN tblGRTransferStorage TS
+			ON TSR.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage CS_FROM
+			ON TSR.intSourceCustomerStorageId = CS_FROM.intCustomerStorageId
+		INNER JOIN tblGRStorageType ST_FROM
+			ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId
+		INNER JOIN tblGRCustomerStorage  CS_TO
+			ON TSR.intToCustomerStorageId = CS_TO.intCustomerStorageId
+		INNER JOIN tblGRStorageType ST_TO
+			ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+		WHERE TS.intTransferStorageId = @intTransferStorageId
+		
+		OPEN CC;
+		FETCH CC INTO @intTransferStorageReferenceId3, @ysnIsSourceDP, @ysnIsTargetDP
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			-- DP to OS
+			IF @ysnIsSourceDP = 1 AND @ysnIsTargetDP = 0
+				EXEC uspGRBookAPClearingTransferToOS @intTransferStorageReferenceId3
+			-- OS to DP
+			ELSE IF @ysnIsSourceDP = 0 AND @ysnIsTargetDP = 1
+				EXEC uspGRBookAPClearingTransferToDP @intTransferStorageReferenceId3
+			-- DP to DP
+			ELSE IF @ysnIsSourceDP = 1 AND @ysnIsTargetDP = 1
+			BEGIN
+				EXEC uspGRBookAPClearingTransferToOS @intTransferStorageReferenceId3 -- Offset APC from source vendor
+				EXEC uspGRBookAPClearingTransferToDP @intTransferStorageReferenceId3 -- Book APC to target vendor
+			END
+			FETCH CC INTO @intTransferStorageReferenceId3, @ysnIsSourceDP, @ysnIsTargetDP
+		END
+		CLOSE CC; DEALLOCATE CC;
+		-- End booking AP clearing
+
+
+
+		-- Adding Transaction links
+		exec [uspSCAddTransactionLinks]
+			@intTransactionType = 7
+			,@intTransactionId = @intTransferStorageId
+			,@intAction = 1
+
 		--RISK SUMMARY LOG
 		EXEC [dbo].[uspGRRiskSummaryLog2]
 			@StorageHistoryIds = @HistoryIds

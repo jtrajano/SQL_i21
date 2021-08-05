@@ -575,17 +575,13 @@ BEGIN
 		
 	IF (EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1  AND ISNULL([ysnInsert], 0) = 1) AND @GroupingOption > 0)
 	BEGIN
-
 		UPDATE EFP
 		SET EFP.[intInvoiceId] = IL.[intInvoiceId]
-		FROM
-			#EntriesForProcessing EFP
-		INNER JOIN
-			(SELECT [intId], [intInvoiceId], [ysnSuccess], [ysnHeader] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) IL
-				ON EFP.[intId] = IL.[intId]
-				AND ISNULL(IL.[ysnHeader], 0) = 1
-				AND ISNULL(IL.[ysnSuccess], 0) = 1		
-			
+		FROM #EntriesForProcessing EFP
+		INNER JOIN tblARInvoiceIntegrationLogDetail IL WITH (NOLOCK) ON EFP.intId = IL.intId 
+		WHERE IL.intIntegrationLogId = @IntegrationLogId
+		  AND ISNULL(IL.[ysnHeader], 0) = 1
+		  AND ISNULL(IL.[ysnSuccess], 0) = 1			
 		
 		DECLARE @LineItems InvoiceStagingTable
 		INSERT INTO @LineItems
@@ -1784,10 +1780,6 @@ BEGIN TRY
 			,@TransType			= N'all'
 			,@RaiseError		= @RaiseError
 
-
-
-
-
 	DECLARE @NewIdsForPostingRecap InvoiceId
 	INSERT INTO @NewIdsForPostingRecap(
 		 [intHeaderId]
@@ -1815,23 +1807,39 @@ BEGIN TRY
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
-
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
-		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBatchId --NULL #mark 101
-			,@Post				= 1
-			,@Recap				= 1
-			,@UserId			= @UserId
-			,@InvoiceIds		= @NewIdsForPostingRecap
-			,@IntegrationLogId	= @IntegrationLogId
-			,@BeginDate			= NULL
-			,@EndDate			= NULL
-			,@BeginTransaction	= NULL
-			,@EndTransaction	= NULL
-			,@Exclude			= NULL
-			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError
+		BEGIN 
+			EXEC [dbo].[uspARPostInvoiceNew]
+				@BatchId			= @NewBatchId --NULL #mark 101
+				,@Post				= 1
+				,@Recap				= 1
+				,@UserId			= @UserId
+				,@InvoiceIds		= @NewIdsForPostingRecap
+				,@IntegrationLogId	= @IntegrationLogId
+				,@BeginDate			= NULL
+				,@EndDate			= NULL
+				,@BeginTransaction	= NULL
+				,@EndTransaction	= NULL
+				,@Exclude			= NULL
+				,@TransType			= N'all'
+				,@RaiseError		= @RaiseError
+
+			UPDATE @NewIdsForPostingRecap SET ysnForDelete = 1
+
+			UPDATE MBIL 
+			SET inti21InvoiceId = NULL
+			FROM tblMBILInvoice MBIL
+			INNER JOIN @NewIdsForPostingRecap RECAP ON MBIL.inti21InvoiceId = RECAP.intHeaderId
+
+			EXEC dbo.uspARUpdateInvoicesIntegrations @InvoiceIds = @InsertedInvoiceIds
+													,@UserId	 = @UserId
+				
+			DELETE I
+			FROM tblARInvoice I
+			INNER JOIN @NewIdsForPostingRecap RECAP ON I.intInvoiceId = RECAP.intHeaderId
+		
+		END
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
@@ -1941,7 +1949,7 @@ BEGIN TRY
 			,@EndTransaction	= NULL
 			,@Exclude			= NULL
 			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError
+			,@RaiseError		= @RaiseError	
 
 END TRY
 BEGIN CATCH

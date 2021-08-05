@@ -70,6 +70,18 @@ BEGIN
 					GOTO Exit_Routine
 				END
 		END
+	ELSE
+		BEGIN
+			SELECT @intCompanyLocationId = intPaymentsLocationId
+			FROM tblSMCompanyPreference
+
+			IF ISNULL(@intCompanyLocationId, 0) = 0
+				BEGIN
+					SET @ErrorMessage = 'Payments Location is required when processing Credit Card!'
+					RAISERROR(@ErrorMessage, 16, 1);
+					GOTO Exit_Routine
+				END
+		END
 
 	IF ISNULL(@intCompanyLocationId, 0) = 0
 		BEGIN
@@ -100,15 +112,17 @@ BEGIN
 			SELECT strInvoiceNumber	= INVOICENUM.POS COLLATE Latin1_General_CI_AS
 				, dblPayment		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, PAYMENT.POS + 1, DISCOUNT.POS - PAYMENT.POS - 1))
 				, dblDiscount		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, DISCOUNT.POS + 1, INTEREST.POS - DISCOUNT.POS -1))
-				, dblInterest		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, INTEREST.POS + 1, 100))
+				, dblInterest		= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, INTEREST.POS + 1, CREDITCARDFEE.POS - INTEREST.POS -1))
+				, dblCreditCardFee	= CONVERT(NUMERIC(18,6), SUBSTRING(strRawValue, CREDITCARDFEE.POS + 1, 100))
 			INTO #INVOICEANDPAYMENT
 			FROM #RAWVALUE
 			CROSS APPLY (SELECT LEFT(strRawValue, CHARINDEX('|', strRawValue) - 1)) AS INVOICENUM(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue))) AS PAYMENT(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, PAYMENT.POS+1))) AS DISCOUNT(POS)
 			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, DISCOUNT.POS+1))) AS INTEREST(POS)
+			CROSS APPLY (SELECT (CHARINDEX('|', strRawValue, INTEREST.POS+1))) AS CREDITCARDFEE(POS)
 
-			SELECT @dblTotalPayment = SUM(ISNULL(dblPayment, 0)) 
+			SELECT @dblTotalPayment = SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblCreditCardFee, 0))
 			FROM #INVOICEANDPAYMENT
 			
 			INSERT INTO @EntriesForPayment (
@@ -130,6 +144,7 @@ BEGIN
 				, dblAmountPaid
 				, ysnPost
 				, intEntityId
+				, intEntityCardInfoId
 				, intInvoiceId
 				, strTransactionType
 				, strTransactionNumber
@@ -144,6 +159,7 @@ BEGIN
 				, dblBaseWriteOffAmount
 				, dblInterest
 				, dblPayment
+				, dblCreditCardFee
 				, dblAmountDue
 				, dblBaseAmountDue
 				, strInvoiceReportNumber
@@ -172,6 +188,7 @@ BEGIN
 				, dblAmountPaid					= ISNULL(@dblTotalPayment, 0)
 				, ysnPost						= CASE WHEN ISNULL(@strCreditCardNumber, '') = '' AND ISNULL(@intEntityCardInfoId, 0) = 0 AND ISNULL(@intPaymentMethodId, 0) <> 0 THEN 1 ELSE 0 END
 				, intEntityId					= @intUserId
+				, intEntityCardInfoId			= NULLIF(@intEntityCardInfoId, 0)
 				, intInvoiceId					= INVOICE.intInvoiceId
 				, strTransactionType			= INVOICE.strTransactionType
 				, strTransactionNumber			= INVOICE.strTransactionNumber
@@ -186,6 +203,7 @@ BEGIN
 				, dblBaseWriteOffAmount			= 0
 				, dblInterest					= PAYMENTS.dblInterest
 				, dblPayment					= PAYMENTS.dblPayment
+				, dblCreditCardFee				= PAYMENTS.dblCreditCardFee
 				, dblAmountDue					= (INVOICE.dblAmountDue + PAYMENTS.dblInterest) - PAYMENTS.dblPayment - PAYMENTS.dblDiscount
 				, dblBaseAmountDue				= (INVOICE.dblBaseAmountDue + PAYMENTS.dblInterest) - PAYMENTS.dblPayment - PAYMENTS.dblDiscount
 				, strInvoiceReportNumber		= INVOICE.strInvoiceReportNumber
@@ -286,6 +304,11 @@ END
 --================================================================
 IF @strAction = 'Post'
 BEGIN
+	UPDATE tblARPayment 
+	SET ysnProcessCreditCard = 1
+	  , intCurrentStatus = 5
+	WHERE intPaymentId = @intPaymentId
+
 	EXEC [dbo].[uspARPostPayment]
 			@batchId = NULL,
 			@post = 1,
@@ -305,7 +328,7 @@ BEGIN
 	--Set the Card Info Id and Process Credit Card
 	UPDATE tblARPayment 
 	SET intEntityCardInfoId = @intEntityCardInfoId
-	  , ysnProcessCreditCard = 1 
+	  --, ysnProcessCreditCard = 1 
 	  , intCurrentStatus = 5
 	WHERE intPaymentId = @intPaymentId
 

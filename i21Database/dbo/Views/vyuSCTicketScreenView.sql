@@ -254,6 +254,7 @@
    	,strAGWorkOrderLocation = AWOL.strLocationName
 	,strShipToLocationName = EL.strLocationName
 	,intShipToLocationId	= EL.intEntityLocationId
+	,SCT.dblDWGOriginalNetUnits
   FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
@@ -341,7 +342,8 @@
 		INNER JOIN tblAPPaymentDetail APPayDtl WITH(NOLOCK) ON AP.intBillId = APPayDtl.intBillId
 		INNER JOIN tblAPPayment APPay WITH(NOLOCK) ON APPayDtl.intPaymentId = APPay.intPaymentId
 		INNER JOIN tblCMBankTransaction BankTran WITH(NOLOCK) ON APPay.strPaymentRecordNum = BankTran.strTransactionId
-		WHERE ISNULL(APD.intScaleTicketId,0) <> 0 
+		WHERE APD.intScaleTicketId <> 0 
+		AND APD.intScaleTicketId IS NOT NULL
 		 AND BankTran.ysnCheckVoid = 0
 		AND APPay.ysnPosted = 1
 		GROUP BY intScaleTicketId

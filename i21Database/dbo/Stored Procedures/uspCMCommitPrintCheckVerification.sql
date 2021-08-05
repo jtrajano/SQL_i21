@@ -2,7 +2,7 @@
 CREATE PROCEDURE uspCMCommitPrintCheckVerification
 	@intBankAccountId INT = NULL,
 	@strTransactionId NVARCHAR(40) = NULL,
-	@strBatchId NVARCHAR(20) = NULL,
+	@strBatchId NVARCHAR(40) = NULL,
 	@intUserId INT,
 	@intErrorCode INT OUTPUT
 AS

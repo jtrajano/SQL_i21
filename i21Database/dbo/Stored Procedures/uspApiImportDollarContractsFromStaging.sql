@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspApiImportDollarContractsFromStaging] (@guiUniqueId UNIQUEIDENTIFIER)
 AS
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 -- Validations
 INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
@@ -9,18 +9,32 @@ SELECT 'Cannot find the location with a companyLocationId ''' + CAST(s.intCompan
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = s.intCompanyLocationId
 WHERE c.intCompanyLocationId IS NULL
+	AND s.guiApiUniqueId = @guiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strvalue)
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the customer with an entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
 WHERE e.intEntityId IS NULL
+	AND s.guiApiUniqueId = @guiUniqueId
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strvalue)
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the category with a categoryId ''' + CAST(s.intCategoryId AS NVARCHAR(50)) + '''', 'categoryId', 'Error',  CAST(s.intCategoryId AS NVARCHAR(50))
 FROM tblCTApiDollarContractDetailStaging s
+INNER JOIN tblCTApiItemContractStaging c ON c.intApiItemContractStagingId = s.intApiItemContractStagingId
 LEFT JOIN tblICCategory e ON e.intCategoryId = s.intCategoryId
 WHERE e.intCategoryId IS NULL
+	AND c.guiApiUniqueId = @guiUniqueId
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'Cannot find the term with termId ''' + CAST(s.intTermId AS NVARCHAR(50)) + '''', 'termId', 'Error',  CAST(s.intTermId AS NVARCHAR(50))
+FROM tblCTApiItemContractStaging s
+INNER JOIN tblSMTerm t ON t.intTermID = s.intTermId
+WHERE t.intTermID IS NULL
+	AND s.guiApiUniqueId = @guiUniqueId
+
+IF EXISTS(SELECT * FROM @Logs)
+	GOTO Logging
 
 -- Transformation
 DECLARE @intContractType INT
@@ -47,7 +61,7 @@ DECLARE @intStagingId INT
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT s.intApiItemContractStagingId
-	, CASE s.strContractType WHEN 'Sale' THEN 2 ELSE 1 END
+	, 2
 	, s.intEntityId
 	, s.intCurrencyId
 	, s.intCompanyLocationId
@@ -122,6 +136,7 @@ BEGIN
 		, intLineOfBusinessId
 		, dtmDueDate
 		, dblDollarValue
+		, dblRemainingDollarValue
 		, strContractNumber
 		, guiApiUniqueId)
 	SELECT 1
@@ -144,6 +159,7 @@ BEGIN
 		, @intOpportunityNameId 
 		, @intLineOfBusinessId 
 		, @dtmDueDate 
+		, @dblDollarValue
 		, @dblDollarValue
 		, @strDollarContractNumber
 		, @guiUniqueId
@@ -181,6 +197,13 @@ END
 
 CLOSE cur
 DEALLOCATE cur
+
+Logging:
+
+INSERT INTO @Logs (intLineNumber, dblTotalAmount, strLogLevel, strField)
+SELECT h.intItemContractHeaderId, h.dblDollarValue, 'Ids', h.strContractNumber
+FROM tblCTItemContractHeader h
+WHERE h.guiApiUniqueId = @guiUniqueId
 
 SELECT * FROM @Logs
 

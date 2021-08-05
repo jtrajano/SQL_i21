@@ -58,6 +58,7 @@
 	[strReprocessSQL] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL DEFAULT '',
 	[intDelayTime] INT NULL DEFAULT 0,
 	[ysnSkip] BIT NULL DEFAULT 0,
+	strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	[intConcurrencyId] INT NULL DEFAULT 0,
 	CONSTRAINT [PK_tblIPStep_intStepId] PRIMARY KEY ([intStepId]),
 	CONSTRAINT [UQ_tblIPStep_strStepName] UNIQUE ([intProcessId],[strStepName]),

@@ -291,6 +291,22 @@ BEGIN TRY
 
 	IF @post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]	
+
+	DECLARE @InvoicesForIntegration Id
+
+	INSERT INTO @InvoicesForIntegration
+	SELECT intValue FROM fnCreateTableFromDelimitedValues(@param, ',')
+
+	WHILE EXISTS(SELECT 1 FROM @InvoicesForIntegration)
+	BEGIN
+		DECLARE @intInvoiceForIntegration INT
+
+		SELECT @intInvoiceForIntegration = intId FROM @InvoicesForIntegration
+
+		EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @intInvoiceForIntegration, @ForDelete = 0, @UserId = @userId, @Post = @post, @Recap = @recap, @FromPosting= 1
+
+		DELETE FROM @InvoicesForIntegration WHERE intId = @intInvoiceForIntegration
+	END
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					

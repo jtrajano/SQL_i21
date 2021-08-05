@@ -753,7 +753,7 @@ BEGIN TRY
 		  ,ARI.[intOriginalInvoiceId]			= ITG.[intOriginalInvoiceId]
 		  ,ARI.[intLoadId]						= ITG.[intLoadId]
 		  ,ARI.[intEntityId]					= ITG.[intEntityId]
-		  ,ARI.[intEntityContactId]				= ITG.[intEntityContactId]
+		  ,ARI.[intEntityContactId]				= CASE  WHEN ITG.[intEntityContactId] IS NULL THEN ARI.intEntityContactId ELSE  ITG.[intEntityContactId] END
 		  --,ARI.[dblTotalWeight]				= ARI.[dblTotalWeight]
 		  ,ARI.[intDocumentMaintenanceId]		= ITG.[intDocumentMaintenanceId]
 		  --,ARI.[dblTotalTermDiscount]			= ARI.[dblTotalTermDiscount]
@@ -1528,7 +1528,7 @@ BEGIN TRY
 		IL.[ysnSuccess] = 1 
 		AND IL.[ysnInsert] = 0
 
-	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
+	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 
 END TRY
 BEGIN CATCH

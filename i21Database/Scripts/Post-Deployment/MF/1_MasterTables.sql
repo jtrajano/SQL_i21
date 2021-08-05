@@ -542,6 +542,12 @@ BEGIN
     VALUES(2,'Packed')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId = 3)
+BEGIN
+    INSERT INTO tblMFMachineIssuedUOMType(intIssuedUOMTypeId,strName)
+    VALUES(3,'Hybrid')
+END
+GO
 IF NOT EXISTS(SELECT * FROM tblMFBlendValidationMessageType WHERE intMessageTypeId = 1)
 BEGIN
     INSERT INTO tblMFBlendValidationMessageType(intMessageTypeId,strName)
@@ -2696,6 +2702,12 @@ BEGIN
     VALUES('LidlUCCPalletLabelWithoutWeight',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'HEBPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('HEBPalletLabel',1,1)
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFInventoryShipmentRestrictionType
@@ -4123,3 +4135,7 @@ BEGIN
 			)
 END
 Go
+UPDATE tblMFCompanyPreference
+SET ysnEnableItemMenuOnHandheld = 0
+WHERE ysnEnableItemMenuOnHandheld IS NULL
+GO

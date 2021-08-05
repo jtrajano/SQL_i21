@@ -13,17 +13,27 @@ SET ANSI_WARNINGS OFF
 DECLARE @blbLogo 			VARBINARY (MAX) = NULL
       , @blbStretchedLogo 	VARBINARY (MAX) = NULL
 
-SELECT TOP 1 @blbLogo = U.blbFile 
-FROM tblSMUpload U
-INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-  AND A.strComment = 'Header'
+SELECT		TOP 1 @blbLogo = U.blbFile 
+FROM		dbo.tblSMUpload AS U
+INNER JOIN	tblSMAttachment AS A
+ON			U.intAttachmentId = A.intAttachmentId
+INNER JOIN	dbo.tblSMTransaction AS B
+ON			A.intTransactionId = B.intTransactionId
+INNER JOIN	dbo.tblSMScreen AS C
+ON			B.intScreenId = C.intScreenId
+WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+		AND A.strComment = 'Header'
 
-SELECT TOP 1 @blbStretchedLogo = U.blbFile 
-FROM tblSMUpload U
-INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-  AND A.strComment = 'Stretched Header'
+SELECT		TOP 1 @blbLogo = U.blbFile 
+FROM		dbo.tblSMUpload AS U
+INNER JOIN	tblSMAttachment AS A
+ON			U.intAttachmentId = A.intAttachmentId
+INNER JOIN	dbo.tblSMTransaction AS B
+ON			A.intTransactionId = B.intTransactionId
+INNER JOIN	dbo.tblSMScreen AS C
+ON			B.intScreenId = C.intScreenId
+WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+		AND A.strComment = 'Stretched Header'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
@@ -90,6 +100,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strLocationNumber
 	 , strSalesOrderNumber
 	 , strPaymentInfo
+	 , dtmCreated
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -158,8 +169,8 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , intTicketId				= ISNULL(TICKETDETAILS.intTicketId, 0)
 	 , strTicketNumbers			= TICKETDETAILS.strTicketNumbers
-	 , dtmLoadedDate			= TICKETDETAILS.dtmLoadedDate
-	 , dtmScaleDate				= TICKETDETAILS.dtmScaleDate
+	 , dtmLoadedDate			= INV.dtmShipDate
+	 , dtmScaleDate				= INV.dtmPostDate
 	 , strCommodity				= TICKETDETAILS.strCommodity
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , blbSignature				= INV.blbSignature
@@ -167,6 +178,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strLocationNumber		= [LOCATION].strLocationNumber
 	 , strSalesOrderNumber		= SO.strSalesOrderNumber
 	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
+	 , dtmCreated				= GETDATE()
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (

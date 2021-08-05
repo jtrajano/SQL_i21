@@ -35,6 +35,7 @@ BEGIN
 	,@ysnIsStorage					BIT
 	,@IntCommodityId				INT
 	,@intStorageChargeItemId		INT
+	,@intTicketFeeItemId			INT
 	,@intInventoryItemUOMId			INT
 	,@intCSInventoryItemUOMId		INT
 	,@intCustomerStorageId			INT
@@ -49,6 +50,11 @@ BEGIN
 	,@strCode								NVARCHAR(10) = 'TRA'
 	,@strTransactionId						NVARCHAR(30)
 
+	DECLARE @dtmTransferStorageDate DATETIME;
+	SELECT @dtmTransferStorageDate = dtmTransferStorageDate
+	FROM tblGRTransferStorage
+	WHERE intTransferStorageId = @intTransferStorageId
+
 	SELECT @strTransactionId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 
 	SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -62,6 +68,30 @@ BEGIN
 	WHERE strType = 'Other Charge' 
 	  AND strCostType = 'Storage Charge' 
 	  AND intCommodityId = @IntCommodityId
+
+	SELECT TOP 1 @intTicketFeeItemId = IRC.intChargeId
+	FROM tblGRTransferStorageReference TSR
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = TSR.intToCustomerStorageId
+	INNER JOIN tblSCTicket SC
+		ON SC.intTicketId = CS.intTicketId
+	INNER JOIN tblSCScaleSetup SCS
+		ON SCS.intScaleSetupId = SC.intScaleSetupId
+	INNER JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intSourceId = SC.intTicketId
+	INNER JOIN tblICInventoryReceipt IR
+		ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		AND IR.intSourceType IN (1, 7) -- Scale Ticket
+	INNER JOIN tblICInventoryReceiptCharge IRC
+		ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
+		AND IRC.strChargesLink = IRI.strChargesLink
+	INNER JOIN vyuICGetCompactItem CI
+		ON CI.intItemId = IRC.intChargeId
+	WHERE TSR.intTransferStorageReferenceId = @intTransactionDetailId
+		AND IRC.intChargeId = ISNULL(SCS.intDefaultFeeItemId, IRC.intChargeId)
+		AND CI.strType = 'Other Charge'
+		AND CI.strCostType IS NOT NULL
+		AND CI.strCostType NOT IN ('Grain Discount', 'Storage Charge')
 
 	IF @intStorageChargeItemId IS NULL
 	BEGIN
@@ -87,16 +117,19 @@ BEGIN
 		,@intCurrencyId			= CS.intCurrencyId
 		,@InventoryItemId		= CS.intItemId  
 		,@dblUnits				= SR.dblUnitQty--dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, isnull(@intInventoryItemUOMId, CS.intItemUOMId) , SST.dblUnits) 
-		,@dblGrossUnits			= ( 
-									dbo.fnMultiply(
-											case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS.dblGrossQuantity) else  CS.dblGrossQuantity end
-										, dbo.fnDivide(isnull(SR.dblSplitPercent, 100),	100)
-										)
-									)
+		-- ,@dblGrossUnits			= ( 
+		-- 							dbo.fnMultiply(
+		-- 									case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS.dblGrossQuantity) else  CS.dblGrossQuantity end
+		-- 								, dbo.fnDivide(isnull(SR.dblSplitPercent, 100),	100)
+		-- 								)
+		-- 							)
+		,@dblGrossUnits			= case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS_TO.dblGrossQuantity) else  CS_TO.dblGrossQuantity end
 		,@intCSInventoryItemUOMId = CS.intItemUOMId
 	FROM tblGRTransferStorageReference SR
 	JOIN tblGRCustomerStorage CS 
 		ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
 	WHERE SR.intTransferStorageId = @intTransferStorageId AND SR.intTransferStorageReferenceId = @intTransactionDetailId
 
 	if @debug_awesome = 1 and 1 = 1
@@ -279,6 +312,46 @@ BEGIN
 		AND ISNULL(CS.dblStorageDue,0) > 0 
 		AND IC.intItemId = @intStorageChargeItemId
 
+	UNION
+	--Fees
+	SELECT
+		 [intItemId]						= IRI.intItemId
+		,[strItemNo]						= IC.strItemNo	
+		,[intEntityVendorId]				= NULL	
+		,[intCurrencyId]  					= @intCurrencyId
+		,[intCostCurrencyId]  				= @intCurrencyId
+		,[intChargeId]						= @intTicketFeeItemId
+		,[intForexRateTypeId]				= NULL
+		,[dblForexRate]						= NULL
+		,[ysnInventoryCost]					= IRC.ysnInventoryCost
+		,[strCostMethod]					= IRC.strCostMethod
+		,[dblRate]							= IRC.dblAmount / IRI.dblNet
+		,[intOtherChargeEntityVendorId]		= NULL
+		,[dblAmount]						= (IRC.dblAmount / IRI.dblNet) * @dblUnits
+		,[ysnAccrue]						= IRC.ysnAccrue
+		,[ysnPrice]							= IRC.ysnPrice
+		,[intTicketDiscountId]				= NULL
+		,[dblUnits]							= @dblUnits
+		,[dblConvertedUnits]				= @dblUnits
+	FROM tblGRCustomerStorage CS
+	INNER JOIN tblSCTicket SC
+		ON SC.intTicketId = CS.intTicketId
+	INNER JOIN tblSCScaleSetup SCS
+		ON SCS.intScaleSetupId = SC.intScaleSetupId
+	INNER JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intSourceId = SC.intTicketId
+	INNER JOIN tblICInventoryReceipt IR
+		ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		AND IR.intSourceType IN (1, 7) -- Scale Ticket
+		AND IR.intEntityVendorId = SC.intEntityId
+	INNER JOIN tblICInventoryReceiptCharge IRC
+		ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
+		AND IRC.strChargesLink = IRI.strChargesLink
+	INNER JOIN tblICItem IC
+		ON IC.intItemId = IRC.intChargeId
+	WHERE CS.intCustomerStorageId = @intCustomerStorageId
+		AND IRC.intChargeId = @intTicketFeeItemId
+
 	--print 'easdgs'
 	if @debug_awesome = 1 and 1 = 0
 	begin
@@ -373,7 +446,7 @@ BEGIN
 		,strICCCostType					
 	)
 	SELECT 
-		 dtmDate						 = GETDATE()
+		 dtmDate						 = @dtmTransferStorageDate
 		,intItemId						 = @InventoryItemId
 		,strItemNo						 = CS.strItemNo
 		,intChargeId					 = CS.intChargeId
@@ -466,6 +539,21 @@ BEGIN
 	WHERE CS.intCustomerStorageId = @intCustomerStorageId 
 	AND   ISNULL(CS.dblStorageDue,0) > 0 
 	AND   IC.intItemId = @intStorageChargeItemId
+
+	UNION
+	--Fees
+	SELECT  
+		 intItemId					= @intTicketFeeItemId
+		,intItemLocationId			= ItemLocation.intItemLocationId
+		,intItemType				= 2
+	FROM tblGRCustomerStorage CS
+	JOIN tblICItem IC ON 1 = 1
+	LEFT JOIN tblICItemLocation ItemLocation
+		ON ItemLocation.intItemId = IC.intItemId
+			AND ItemLocation.intLocationId = @LocationId 
+	WHERE CS.intCustomerStorageId = @intCustomerStorageId 
+	AND   ISNULL(CS.dblFeesDue,0) > 0 
+	AND   IC.intItemId = @intTicketFeeItemId
 
 	DECLARE @ItemGLAccounts			AS dbo.ItemGLAccount;	
 	--Inventory Item

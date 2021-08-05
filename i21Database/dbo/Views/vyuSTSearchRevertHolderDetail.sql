@@ -109,6 +109,8 @@ SELECT --DISTINCT
 										THEN CAST(CAST(ItemPricing_New.dblLastCost AS FLOAT) AS NVARCHAR(50))
 									WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
 										THEN CAST(CAST(ItemSpecialPricing_New.dblUnitAfterDiscount AS FLOAT) AS NVARCHAR(50))
+									WHEN RHD.strTableColumnName = 'dblCost'
+										THEN CAST(CAST(ItemSpecialPricing_New.dblCost AS FLOAT) AS NVARCHAR(50))
 
 									WHEN RHD.strTableColumnName = 'dtmBeginDate'
 										THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_New.dtmBeginDate AS DATE), 101) -- CAST(ItemSpecialPricing_Old.dtmBeginDate AS NVARCHAR(20))

@@ -207,41 +207,70 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin
 --items are repeated for location in origin. So pick only one item from the location to avoid duplicate entries 
 DECLARE @InsertedItemUOM table( intItemUOMId int);  
 
-INSERT INTO tblICItemUOM
-      (intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId)
+INSERT INTO tblICItemUOM(
+	intItemId
+	, intUnitMeasureId
+	, dblUnitQty
+	, strUpcCode
+	, ysnStockUnit
+	, ysnAllowPurchase
+	, ysnAllowSale
+	, intConcurrencyId
+)
 OUTPUT INSERTED.intItemUOMId INTO @InsertedItemUOM  
-SELECT distinct intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale, intConcurrencyId 
+SELECT DISTINCT 
+	intItemId
+	, intUnitMeasureId
+	, dblUnitQty
+	, strUpcCode
+	, ysnStockUnit
+	, ysnAllowPurchase
+	, ysnAllowSale
+	, intConcurrencyId 
 FROM (
-		SELECT intItemId , 
-		intUnitMeasureId = U.intUnitMeasureId , 
-		dblUnitQty = 1 ,
-		strUpcCode = 
-		CASE WHEN AgUPC.UpcDupCount > 1 THEN
-			AGItemUPC + '_Dup_' + CAST(I.intItemId as NVARCHAR(50)) 
-		ELSE
-			CASE WHEN ISNUMERIC(oi.agitm_upc_code) = 1 AND LEN(LTRIM(RTRIM(oi.agitm_upc_code))) >= 11 THEN  LTRIM(RTRIM(oi.agitm_upc_code)) ELSE NULL END    
-		END ,
-		ysnStockUnit = 1 ,
-		ysnAllowPurchase = 1 , 
-		ysnAllowSale = 1 , 
-		intConcurrencyId = 1
-		FROM tblICItem I 
-		JOIN agitmmst oi
-			
-			ON I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
-			AND agitm_phys_inv_ynbo <> 'O'
-		JOIN tblICUnitMeasure U 
-			ON UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(oi.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
-        LEFT JOIN (
-					 SELECT  rtrim(agitmUPC.agitm_upc_code) AGItemUPC , COUNT(agitmUPC.agitm_upc_code) UpcDupCount
-					 FROM agitmmst agitmUPC
-					 WHERE agitmUPC.agitm_phys_inv_ynbo <> 'O' AND RTRIM(agitmUPC.agitm_upc_code) <> ''
-					 GROUP BY rtrim(agitmUPC.agitm_upc_code) 
-                  ) AgUPC
-		ON oi.agitm_upc_code COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(AgUPC.AGItemUPC)  COLLATE SQL_Latin1_General_CP1_CS_AS
-		WHERE intItemId not in (select intItemId from tblICItemUOM)
+		SELECT 
+			intItemId
+			,intUnitMeasureId = U.intUnitMeasureId
+			,dblUnitQty = 1
+			,strUpcCode = 
+				CASE WHEN AgUPC.UpcDupCount > 1 THEN
+					AGItemUPC + '_Dup_' + CAST(I.intItemId as NVARCHAR(50)) 
+				ELSE
+					CASE WHEN ISNUMERIC(oi.agitm_upc_code) = 1 AND LEN(LTRIM(RTRIM(oi.agitm_upc_code))) >= 11 THEN  LTRIM(RTRIM(oi.agitm_upc_code)) ELSE NULL END    
+				END
+			,ysnStockUnit = 1
+			,ysnAllowPurchase = 1
+			,ysnAllowSale = 1
+			,intConcurrencyId = 1
+		FROM 
+			tblICItem I CROSS APPLY (
+				SELECT TOP 1 
+					*
+				FROM agitmmst oi			
+				WHERE	
+					I.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS = rtrim(oi.agitm_no) COLLATE SQL_Latin1_General_CP1_CS_AS 
+					AND agitm_phys_inv_ynbo <> 'O'
+			) oi
+			INNER JOIN tblICUnitMeasure U 
+				ON UPPER(U.strUnitMeasure) COLLATE SQL_Latin1_General_CP1_CS_AS = UPPER(oi.agitm_un_desc) COLLATE SQL_Latin1_General_CP1_CS_AS
+			LEFT JOIN (
+				SELECT  
+					rtrim(agitmUPC.agitm_upc_code) AGItemUPC 
+					,COUNT(agitmUPC.agitm_upc_code) UpcDupCount
+				FROM 
+					agitmmst agitmUPC
+				WHERE 
+					agitmUPC.agitm_phys_inv_ynbo <> 'O' 
+					AND RTRIM(agitmUPC.agitm_upc_code) <> ''
+				GROUP BY 
+					rtrim(agitmUPC.agitm_upc_code) 
+			) AgUPC
+				ON oi.agitm_upc_code COLLATE SQL_Latin1_General_CP1_CS_AS = RTRIM(AgUPC.AGItemUPC) COLLATE SQL_Latin1_General_CP1_CS_AS
+		WHERE 
+			intItemId NOT IN (SELECT intItemId FROM tblICItemUOM)
 	) a
-WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
+WHERE 
+	NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = a.intItemId AND intUnitMeasureId = a.intUnitMeasureId)
 
 ---------------------------------------------------
 --add lb as additional uom for items which has agitm_lbs_per_un set

@@ -90,6 +90,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.intNoofdaystoconsiderforDemandBatches
 	,CP.intDemandAnalysisMonthlyCutOffDay
 	,CP.ysnForecastedConsumptionByRemainingDays
+	,CP.ysnEnableItemMenuOnHandheld
 	,SL.strName AS strShipmentStagingLocation
 	,SL1.strName AS strShipmentDockDoorLocation
 	,LS.strSecondaryStatus AS strBondLotStatus

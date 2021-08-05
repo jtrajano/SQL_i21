@@ -77,7 +77,7 @@ CREATE TABLE [dbo].[tblAGWorkOrderDetail]
 	[intAGQtyUOMId] INT NULL,
 	[intAGAreaUOMId] INT NULL,
 	[intConcurrencyId] INT NULL,
-	CONSTRAINT [FK_tblAGWorkOrderDetail_tblAGWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [dbo].[tblAGWorkOrder] ([intWorkOrderId]),
+	CONSTRAINT [FK_tblAGWorkOrderDetail_tblAGWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [dbo].[tblAGWorkOrder] ([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblGLAccount_intAccountId] FOREIGN KEY([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 
 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblGLAccount_intCOGSAccountId] FOREIGN KEY ([intCOGSAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

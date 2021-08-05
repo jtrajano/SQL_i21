@@ -21,6 +21,7 @@ BEGIN TRY
 	WHERE strType IN (
 			'Quantity Adj'
 			,'Consumption'
+			,'Lot Move'
 			)
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
@@ -60,6 +61,8 @@ BEGIN TRY
 				,strQuantityUOM
 				,strReasonCode
 				,strNotes
+				,strNewStorageLocation
+				,strNewStorageUnit
 				)
 			OUTPUT INSERTED.strLotNo
 			INTO @tblIPLot
@@ -69,17 +72,27 @@ BEGIN TRY
 				,CreatedDate
 				,CreatedBy
 				,TransactionTypeId
-				,StorageLocation
+				,CASE 
+					WHEN TransactionTypeId = 20
+						THEN SourceStorageLocation
+					ELSE StorageLocation
+					END
 				,ItemNo
 				,MotherLotNo
 				,LotNo
-				,StorageUnit
+				,CASE 
+					WHEN TransactionTypeId = 20
+						THEN SourceStorageUnit
+					ELSE StorageUnit
+					END
 				,Quantity
 				,QuantityUOM
 				,ReasonCode
 				,Notes
+				,NewStorageLocation
+				,NewStorageUnit
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
+					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
@@ -94,33 +107,14 @@ BEGIN TRY
 					,QuantityUOM NVARCHAR(50)
 					,ReasonCode NVARCHAR(50)
 					,Notes NVARCHAR(2048)
+					,SourceStorageLocation NVARCHAR(50)
+					,SourceStorageUnit NVARCHAR(50)
+					,NewStorageLocation NVARCHAR(50)
+					,NewStorageUnit NVARCHAR(50)
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ','
 			FROM @tblIPLot
-
-			INSERT INTO dbo.tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedBy
-				,15 AS intMessageTypeId
-				,1 AS intStatusId
-				,'Success' AS strStatusText
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
-					)
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
@@ -149,6 +143,37 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,(CASE 
+					WHEN TransactionTypeId = 8--(Consume)
+							THEN 11
+					WHEN TransactionTypeId = 10 --Inventory Adjustment - Quantity
+						THEN 15
+					WHEN TransactionTypeId = 20--Inventory Adjustment - Lot Move
+						THEN 14
+					END) AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo BIGINT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					,TransactionTypeId int
+					)
+
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (
 				strXml
@@ -174,6 +199,7 @@ BEGIN TRY
 			AND strType IN (
 				'Quantity Adj'
 				,'Consumption'
+				,'Lot Move'
 				)
 	END
 

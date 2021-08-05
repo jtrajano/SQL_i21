@@ -66,82 +66,87 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strAction
 		,strNotes
 	FROM (
-		SELECT * FROM  (
-			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC)
-					,dtmTransactionDate
-					,dtmCreatedDate
-					,strCommodityCode
-					,strBucketType
-					,strTransactionType
-					,strTransactionNumber
-					,strContractNumber
-					,intContractSeq
-					,strContractType
-					,dblTransactionQty = dblOrigQty
-					,strTransactionUOM = origUM.strUnitMeasure
-					,dblStockQty = CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, dblOrigQty) AS NUMERIC(38, 15))
-					,strStockUOM = stckUM.strUnitMeasure
-					,strLocationName
-					,strEntityName
-					,SL.intCommodityId
-					,intTransactionRecordId
-					,intTransactionRecordHeaderId
-					,intContractHeaderId
-					,intContractDetailId
-					,intEntityId
-					,intLocationId
-					,intUserId
-					,strUserName 
-					,strAction
-					,strNotes
-				FROM vyuRKGetSummaryLog SL
-				left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
-				left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
-				left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
-				left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
-				CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
-				WHERE strTransactionType IN ('Derivative Entry')
-				AND ISNULL(mf.ysnPreCrush, 0) = 0
-		) t
+		SELECT --intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC),
+				dtmTransactionDate
+				,dtmCreatedDate
+				,strCommodityCode
+				,strBucketType
+				,strTransactionType
+				,strTransactionNumber
+				,strContractNumber
+				,intContractSeq
+				,strContractType
+				,dblTransactionQty = dblOrigQty
+				,strTransactionUOM = origUM.strUnitMeasure
+				,dblStockQty = CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, dblOrigQty) AS NUMERIC(38, 15))
+				,strStockUOM = stckUM.strUnitMeasure
+				,strLocationName
+				,strEntityName
+				,SL.intCommodityId
+				,intTransactionRecordId
+				,intTransactionRecordHeaderId
+				,intContractHeaderId
+				,intContractDetailId
+				,intEntityId
+				,intLocationId
+				,intUserId
+				,strUserName 
+				,strAction
+				,strNotes
+		FROM vyuRKGetSummaryLog SL
+		left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
+		left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
+		left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
+		left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
+		CROSS APPLY
+		(
+			SELECT CASE WHEN CHARINDEX('ysnPreCrush', SL.strMiscField) = 0 THEN 0 WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
+		)
+		mf --dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
+		WHERE strTransactionType IN ('Derivative Entry')
+		AND ISNULL(mf.ysnPreCrush, 0) = 0
 
 		UNION ALL
-		SELECT * FROM (
-			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC)
-					,dtmTransactionDate
-					,dtmCreatedDate
-					,strCommodityCode
-					,strBucketType
-					,strTransactionType
-					,strTransactionNumber
-					,strContractNumber
-					,intContractSeq
-					,strContractType
-					,dblTransactionQty = (dblOrigNoOfLots * dblContractSize)
-					,strTransactionUOM = origUM.strUnitMeasure
-					,dblStockQty = CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, (dblOrigNoOfLots  * dblContractSize)) AS NUMERIC(38, 15))
-					,strStockUOM = stckUM.strUnitMeasure
-					,strLocationName
-					,strEntityName
-					,SL.intCommodityId
-					,intTransactionRecordId
-					,intTransactionRecordHeaderId
-					,intContractHeaderId
-					,intContractDetailId
-					,intEntityId
-					,intLocationId
-					,intUserId
-					,strUserName 
-					,strAction
-					,strNotes
-				FROM vyuRKGetSummaryLog SL
-				left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
-				left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
-				left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
-				left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
-				CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
-				WHERE strTransactionType IN ('Match Derivatives')
-				AND ISNULL(mf.ysnPreCrush, 0) = 0
-		) t
+
+		SELECT --intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC), 
+					dtmTransactionDate
+				,dtmCreatedDate
+				,strCommodityCode
+				,strBucketType
+				,strTransactionType
+				,strTransactionNumber
+				,strContractNumber
+				,intContractSeq
+				,strContractType
+				,dblTransactionQty = (dblOrigNoOfLots * dblContractSize)
+				,strTransactionUOM = origUM.strUnitMeasure
+				,dblStockQty = CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, (dblOrigNoOfLots  * dblContractSize)) AS NUMERIC(38, 15))
+				,strStockUOM = stckUM.strUnitMeasure
+				,strLocationName
+				,strEntityName
+				,SL.intCommodityId
+				,intTransactionRecordId
+				,intTransactionRecordHeaderId
+				,intContractHeaderId
+				,intContractDetailId
+				,intEntityId
+				,intLocationId
+				,intUserId
+				,strUserName 
+				,strAction
+				,strNotes
+			FROM vyuRKGetSummaryLog SL
+			left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
+			left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
+			left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
+			left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
+			CROSS APPLY
+			(
+				SELECT CASE WHEN CHARINDEX('ysnPreCrush', SL.strMiscField) = 0 THEN 0  WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
+			)
+			mf --dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
+			WHERE strTransactionType IN ('Match Derivatives')
+			AND ISNULL(mf.ysnPreCrush, 0) = 0
 
 	) t
 
@@ -173,8 +178,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strAction 
 		,strNotes
 		FROM  (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC)
-				,dtmTransactionDate
+		SELECT  intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC),
+				 dtmTransactionDate
 				,dtmCreatedDate
 				,strCommodityCode
 				,strBucketType
@@ -205,10 +210,14 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 			left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
 			left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
 			left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
-			CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
+			CROSS APPLY
+			(
+				SELECT CASE WHEN CHARINDEX('ysnPreCrush', SL.strMiscField) = 0 THEN 0 WHEN 1 = SUBSTRING(SL.strMiscField, CHARINDEX('ysnPreCrush', SL.strMiscField) + 15, 1) THEN 1 ELSE 0 END AS ysnPreCrush
+			)
+			mf --dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
 			WHERE strTransactionType IN ('Derivative Entry')
 			AND ISNULL(mf.ysnPreCrush, 0) = 1
-	) t  WHERE intRowNum = 1
+		) t  WHERE intRowNum = 1
 
 
 	union all

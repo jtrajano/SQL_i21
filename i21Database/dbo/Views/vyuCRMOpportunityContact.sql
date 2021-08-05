@@ -15,10 +15,6 @@
 		,tblCRMOpportunityContact.intSort
 		,tblCRMOpportunityContact.intConcurrencyId
 	from tblCRMOpportunityContact
-		,tblEMEntity
-		,[tblEMEntityToContact]
-		,[tblEMEntityLocation]
-	where
-		tblEMEntity.intEntityId = tblCRMOpportunityContact.intEntityId
-		and [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId
-		and [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId
+		inner join tblEMEntity on tblEMEntity.intEntityId = tblCRMOpportunityContact.intEntityId
+		inner join [tblEMEntityToContact] on [tblEMEntityToContact].intEntityContactId = tblEMEntity.intEntityId
+		inner join [tblEMEntityLocation] on [tblEMEntityLocation].intEntityLocationId = [tblEMEntityToContact].intEntityLocationId

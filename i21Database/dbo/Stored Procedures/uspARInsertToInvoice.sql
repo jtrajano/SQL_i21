@@ -946,11 +946,11 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@OrderUOMId							INT,
 						@PriceUOMId							INT,
 						@ItemUOMId							INT,
+						@ContractHeaderId					INT,
+						@ContractDetailId					INT,
 						@ItemContractHeaderId				INT,
 						@ItemContractDetailId				INT,
-						@ItemItemContractHeaderId			INT,
-						@ItemItemContractDetailId			INT,
-						@ItemItemContract					BIT,
+						@ItemContract						BIT,
 						@ItemQtyOrdered						NUMERIC(38,20),
 						@ItemQtyShipped						NUMERIC(38,20),
 						@ItemDiscount						NUMERIC(18,6),
@@ -997,11 +997,11 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 						@OrderUOMId							= intItemUOMId,
 						@PriceUOMId							= intPriceUOMId,
 						@ItemUOMId							= intItemUOMId,
-						@ItemContractHeaderId				= intContractHeaderId,
-						@ItemContractDetailId				= intContractDetailId,
-						@ItemItemContractHeaderId			= intItemContractHeaderId,
-						@ItemItemContractDetailId			= intItemContractDetailId,
-						@ItemItemContract					= ysnItemContract,
+						@ContractHeaderId					= intContractHeaderId,
+						@ContractDetailId					= intContractDetailId,
+						@ItemContractHeaderId				= intItemContractHeaderId,
+						@ItemContractDetailId				= intItemContractDetailId,
+						@ItemContract						= ysnItemContract,
 						@ItemQtyOrdered						= dblQtyOrdered,
 						@ItemQtyShipped						= dblQtyRemaining,
 						@ItemDiscount						= dblDiscount,
@@ -1055,11 +1055,11 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemOrderUOMId					= @OrderUOMId
 							,@ItemPriceUOMId					= @PriceUOMId
 							,@ItemUOMId							= @ItemUOMId
+							,@ContractHeaderId					= @ContractHeaderId
+							,@ContractDetailId					= @ContractDetailId
 							,@ItemContractHeaderId				= @ItemContractHeaderId
 							,@ItemContractDetailId				= @ItemContractDetailId
-							,@ItemItemContractHeaderId			= @ItemItemContractHeaderId
-							,@ItemItemContractDetailId			= @ItemItemContractDetailId
-						    ,@ItemItemContract					= @ItemItemContract
+						    ,@ItemContract						= @ItemContract
 							,@ItemQtyOrdered					= @ItemQtyOrdered
 							,@ItemQtyShipped					= @ItemQtyShipped
 							,@ItemDiscount						= @ItemDiscount

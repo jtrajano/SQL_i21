@@ -98,21 +98,27 @@ IF EXISTS (
 )
 BEGIN 
 	-- Check the 'Inventory' Account
-	SELECT 
-		TOP 1 
-		@strAccountCategory = ac.strAccountCategory
-		,@strItemNo = i.strItemNo
+	SELECT TOP 1 
+		@strItemNo = items.strItemNo 
 		,@strAccountCategory = ac.strAccountCategory
-	FROM	
-		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-			ON t.intTransactionTypeId = ty.intTransactionTypeId			
-		INNER JOIN tblICItem i
-			ON i.intItemId = t.intItemId 
-		INNER JOIN @glTransactions gl
-			ON t.strTransactionId = gl.strTransactionId 
-			AND t.strBatchId = gl.strBatchId
-		INNER JOIN tblGLAccount ga
-			ON ga.intAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
+	FROM (
+			SELECT DISTINCT 
+				i.strItemNo
+				,i.intItemId 
+				,t.intItemLocationId 
+			FROM 
+				tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+					ON t.intTransactionTypeId = ty.intTransactionTypeId			
+				INNER JOIN tblICItem i
+					ON i.intItemId = t.intItemId 
+				INNER JOIN @glTransactions gl
+					ON t.strTransactionId = gl.strTransactionId 
+					AND t.strBatchId = gl.strBatchId
+			WHERE
+				t.intInTransitSourceLocationId IS NULL 
+		) items
+		CROSS APPLY dbo.fnGetItemGLAccountAsTable(items.intItemId, items.intItemLocationId, 'Inventory') itemAccount
+		INNER JOIN tblGLAccount ga ON ga.intAccountId = itemAccount.intAccountId 
 		INNER JOIN tblGLAccountSegmentMapping gs
 			ON gs.intAccountId = ga.intAccountId
 		INNER JOIN tblGLAccountSegment gm
@@ -122,9 +128,8 @@ BEGIN
 		INNER JOIN tblGLAccountStructure gst
 			ON gm.intAccountStructureId = gst.intAccountStructureId
 	WHERE
-		gst.strType = 'Primary'
+		gst.strType = 'Primary'		
 		AND ac.strAccountCategory NOT IN ('Inventory')
-		AND t.intInTransitSourceLocationId IS NULL 
 
 	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 

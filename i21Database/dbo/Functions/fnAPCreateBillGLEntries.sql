@@ -104,7 +104,7 @@ BEGIN
 													 ELSE Details.dblTotal END)  * ISNULL(NULLIF(Details.dblRate,0),1) AS DECIMAL(18,2)),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	ISNULL(Details.dblUnits,0),--ISNULL(units.dblTotalUnits,0),
-		[strDescription]				=	A.strReference,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(Details.intBillDetailId, Details.intFormat),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -177,7 +177,8 @@ BEGIN
 			-- ) Details
 			OUTER APPLY
             (
-                SELECT 
+                SELECT R.intBillDetailId,
+					CASE WHEN R.intInventoryReceiptChargeId > 0 THEN 3 ELSE 1 END intFormat,
 					(R.dblTotal) AS dblTotal, 
 					R.dblRate  AS dblRate, 
 					exRates.intCurrencyExchangeRateTypeId, 
@@ -202,7 +203,8 @@ BEGIN
 				) itemUOM
                 WHERE R.intBillId = A.intBillId
 				UNION ALL --taxes
-				SELECT 
+				SELECT R.intBillDetailId,
+					2 intFormat,
 					CASE WHEN R.intInventoryReceiptChargeId > 0 
 								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
 												AND charges.ysnPrice = 1
@@ -250,7 +252,7 @@ BEGIN
 		[dblCredit]						=	CAST(B.dblAmountApplied AS DECIMAL(18,2)) * ISNULL(NULLIF(ForexRate.dblRate,0),1),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
-		[strDescription]				=	C.strReference,
+		[strDescription]				=	NULL,
 		[strCode]						=	'AP',
 		[strReference]					=	D.strVendorId,
 		[intCurrencyId]					=	C.intCurrencyId,
@@ -316,7 +318,7 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
-		[strDescription]				=	C.strReference,
+		[strDescription]				=	NULL,
 		[strCode]						=	'AP',
 		[strReference]					=	D.strVendorId,
 		[intCurrencyId]					=	C.intCurrencyId,
@@ -381,7 +383,7 @@ BEGIN
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	ISNULL(voucherDetails.dblTotalUnits,0),
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strReference,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 1),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -494,7 +496,7 @@ BEGIN
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strReference,
+		[strDescription]				=	NULL,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -538,6 +540,59 @@ BEGIN
 				ON A.intEntityVendorId = C.[intEntityId]
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND voucherDetails.intBillDetailId IS NOT NULL
+	UNION ALL --NEGATIGE QTY
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	voucherDetails.intAccountId,
+		[dblDebit]						=	voucherDetails.dblTotal, 
+		[dblCredit]						=	0, -- Bill
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	A.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[intCurrencyExchangeRateTypeId] =	voucherDetails.intCurrencyExchangeRateTypeId,
+		[dblExchangeRate]				=	voucherDetails.dblRate,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Negative Qty Clearing Adjustment',
+		[intJournalLineNo]				=	voucherDetails.intBillDetailId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN intTransactionType = 1 THEN 'Bill'
+												WHEN intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN intTransactionType = 3 THEN 'Debit Memo'
+												WHEN intTransactionType = 13 THEN 'Basis Advance'
+												WHEN intTransactionType = 14 THEN 'Deferred Interest'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[dblDebitForeign]				=	voucherDetails.dblForeignTotal,       
+		[dblDebitReport]				=	0,
+		[dblCreditForeign]				=	0,
+		[dblCreditReport]				=	0,
+		[dblReportingRate]				=	0,
+		[dblForeignRate]				=	ISNULL(NULLIF(voucherDetails.dblRate, 0), 1),
+		[strRateType]					=	voucherDetails.strCurrencyExchangeRateType,
+		[strDocument]					=	A.strVendorOrderNumber,
+		[strComments]					=	D.strName,
+		[intConcurrencyId]				=	1,
+		[dblSourceUnitCredit]			=	0,
+		[dblSourceUnitDebit]			=	0,
+		[intCommodityId]				=	A.intCommodityId,
+		[intSourceLocationId]			=	A.intStoreLocationId,
+		[strSourceDocumentId]			=	A.strVendorOrderNumber
+	FROM	[dbo].tblAPBill A 
+			CROSS APPLY dbo.fnAPGetVoucherItemCostAdjGLEntryNegative(A.intBillId) voucherDetails
+			LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity D ON D.intEntityId = C.intEntityId)
+				ON A.intEntityVendorId = C.[intEntityId]
+	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND voucherDetails.intBillDetailId IS NOT NULL
 	--COST ADJUSTMENT STORAGE ITEM
 	UNION ALL 
 	SELECT	
@@ -551,7 +606,7 @@ BEGIN
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strReference,
+		[strDescription]				=	NULL,
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -607,7 +662,7 @@ BEGIN
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	voucherDetails.dblTotalUnits,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strReference,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 3),
 		[strCode]						=	'AP',
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -661,7 +716,7 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strReference,
+		[strDescription]				=	dbo.fnAPFormatBillGLDescription(voucherDetails.intBillDetailId, 2),
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -761,7 +816,7 @@ BEGIN
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
-		[strDescription]				=	A.strReference,
+		[strDescription]				=	NULL,
 		[strCode]						=	'AP',	
 		[strReference]					=	C.strVendorId,
 		[intCurrencyId]					=	A.intCurrencyId,
@@ -871,6 +926,7 @@ BEGIN
 		SET A.strDescription = B.strDescription
 	FROM @returntable A
 	INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
+	WHERE A.strDescription IS NULL
 	
 	RETURN
 END

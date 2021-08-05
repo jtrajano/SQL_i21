@@ -79,7 +79,7 @@ BEGIN
 						, vwcus_key
 						, VC.A4GLIdentity
 						, CustomerA4GLIdentity = Z.A4GLIdentity
-						, CustomerA4GLIdentity1 = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate SQL_Latin1_General_CP1_CS_AS )
+						, CustomerA4GLIdentity1 = (SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS)
 						, TC.intCustomerID
 						, CustomerID = (SELECT TOP 1 intCustomerID FROM tblTMCustomer WHERE intCustomerNumber = Z.A4GLIdentity)
 					INTO #tmpOriginCustomerWithShipto
@@ -89,9 +89,9 @@ BEGIN
 					INNER JOIN vwcusmst VC 
 						ON VC.A4GLIdentity=TC.intCustomerNumber
 					CROSS APPLY (
-						(SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key collate SQL_Latin1_General_CP1_CS_AS )
+						(SELECT TOP 1 A4GLIdentity FROM vwcusmst WHERE VC.vwcus_bill_to = vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS)
 					)Z
-					WHERE vwcus_bill_to  <> vwcus_key collate SQL_Latin1_General_CP1_CS_AS 
+					WHERE vwcus_bill_to  <> vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS
 						
 
 					
@@ -117,10 +117,26 @@ BEGIN
 						AND A.CustomerID IS NOT NULL
 
 					---TODO correction of current sitenumber for customer and sitenumber of sites
+					INSERT INTO @tmpMigrationResult(
+							strError
+							,strTable
+							,intRecordId
+						)
+					SELECT 
+						strError = ''Invalid Customer bill to/ship to''
+						,strTable = ''tblTMCustomer''
+						,intRecordId = C.intCustomerID
+					FROM vwcusmst 
+					INNER JOIN tblTMCustomer C ON C.intCustomerNumber = vwcusmst.A4GLIdentity
+					WHERE vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS <> vwcus_bill_to
+                    AND vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS in (select vwcus_bill_to from vwcusmst where vwcus_key COLLATE SQL_Latin1_General_CP1_CS_AS  <> vwcus_bill_to)
 
+					IF NOT EXISTS(SELECT TOP 1 1 FROM @tmpMigrationResult WHERE strError = ''Invalid Customer bill to/ship to'')
+					BEGIN
 					----Delete tblTMCustomer record
-					DELETE FROM tblTMCustomer
-					WHERE intCustomerNumber IN (SELECT A4GLIdentity FROM #tmpOriginCustomerWithShipto WHERE CustomerID IS NOT NULL)
+						DELETE FROM tblTMCustomer
+						WHERE intCustomerNumber IN (SELECT A4GLIdentity FROM #tmpOriginCustomerWithShipto WHERE CustomerID IS NOT NULL)
+					END
 
 					----------- End Customer Shipto
 					-----------------------------------------------------------------------------------------
@@ -414,15 +430,21 @@ BEGIN
 					--------------------------------------------
 					---Check for the delivery history order driver vs i21 record
 					----------------------------------------------------------------------
-					INSERT INTO @tmpMigrationResult(
-						strError
-						,strTable
-						,intRecordId
-					)
-					SELECT 
-						strError = ''No equivalent record in i21 for the delivery history order driver.''
-						,strTable = ''tblTMDeliveryHistory''
-						,intRecordId = intDeliveryHistoryID
+					-- INSERT INTO @tmpMigrationResult(
+					-- 	strError
+					-- 	,strTable
+					-- 	,intRecordId
+					-- )
+					-- SELECT 
+					-- 	strError = ''No equivalent record in i21 for the delivery history order driver.''
+					-- 	,strTable = ''tblTMDeliveryHistory''
+					-- 	,intRecordId = intDeliveryHistoryID
+					-- FROM tblTMDeliveryHistory A
+					-- WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpSalesPersonTable WHERE intOriginId = A.intWillCallDriverId)
+					-- 	AND A.intWillCallDriverId IS NOT NULL
+
+					-- No equivalent record in i21 for the delivery history order driver then set to NULL
+					UPDATE A SET A.intWillCallDriverId = NULL
 					FROM tblTMDeliveryHistory A
 					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpSalesPersonTable WHERE intOriginId = A.intWillCallDriverId)
 						AND A.intWillCallDriverId IS NOT NULL
@@ -439,19 +461,25 @@ BEGIN
 					--------------------------------------------
 					---Check for the work order performer vs i21 record
 					----------------------------------------------------------------------
-					INSERT INTO @tmpMigrationResult(
-						strError
-						,strTable
-						,intRecordId
-					)
-					SELECT 
-						strError = ''No equivalent record in i21 for the work order performer.''
-						,strTable = ''tblTMWorkOrder''
-						,intRecordId = intWorkOrderID
+					-- INSERT INTO @tmpMigrationResult(
+					-- 	strError
+					-- 	,strTable
+					-- 	,intRecordId
+					-- )
+					-- SELECT 
+					-- 	strError = ''No equivalent record in i21 for the work order performer.''
+					-- 	,strTable = ''tblTMWorkOrder''
+					-- 	,intRecordId = intWorkOrderID
+					-- FROM tblTMWorkOrder A
+					-- WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpSalesPersonTable WHERE intOriginId = A.intPerformerID)
+					-- 	AND A.intPerformerID IS NOT NULL
+
+					-- No equivalent record in i21 for the work order performer then set to null
+					UPDATE A SET A.intPerformerID = -1
 					FROM tblTMWorkOrder A
 					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpSalesPersonTable WHERE intOriginId = A.intPerformerID)
 						AND A.intPerformerID IS NOT NULL
-
+						
 					------------------------------------------------------------
 					-- Update tblTMWorkOrder
 					----------------------------------------------------------
@@ -604,15 +632,21 @@ BEGIN
 					--------------------------------------------
 					---Check for delivery history order term vs i21 record
 					----------------------------------------------------------------------
-					INSERT INTO @tmpMigrationResult(
-						strError
-						,strTable
-						,intRecordId
-					)
-					SELECT 
-						strError = ''No equivalent record in i21 for the delivery history order term.''
-						,strTable = ''tblTMDeliveryHistory''
-						,intRecordId = A.intDeliveryHistoryID
+					-- INSERT INTO @tmpMigrationResult(
+					-- 	strError
+					-- 	,strTable
+					-- 	,intRecordId
+					-- )
+					-- SELECT 
+					-- 	strError = ''No equivalent record in i21 for the delivery history order term.''
+					-- 	,strTable = ''tblTMDeliveryHistory''
+					-- 	,intRecordId = A.intDeliveryHistoryID
+					-- FROM tblTMDeliveryHistory A
+					-- WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpTermTable WHERE intOriginId = A.intWillCallDeliveryTermId)
+					-- 	AND A.intWillCallDeliveryTermId IS NOT NULL
+
+					-- No equivalent record in i21 for the delivery history order term then set to null
+					UPDATE A SET A.intWillCallDeliveryTermId = NULL
 					FROM tblTMDeliveryHistory A
 					WHERE NOT EXISTS(SELECT TOP 1 1 FROM #tmpTermTable WHERE intOriginId = A.intWillCallDeliveryTermId)
 						AND A.intWillCallDeliveryTermId IS NOT NULL

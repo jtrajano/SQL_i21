@@ -1322,14 +1322,15 @@ VALUES(
 		 , dblBalance			= ISNULL(CTD.dblBalance, 0)
 		 , dblScheduleQty		= ISNULL(CTD.dblScheduleQty, 0)
 		 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
-	FROM tblARInvoiceIntegrationLogDetail ILD
-	INNER JOIN tblARInvoiceDetail ID ON ILD.intInvoiceId = ID.intInvoiceId
-	INNER JOIN tblCTContractDetail CTD ON ID.[intContractDetailId] = CTD.[intContractDetailId]
-	INNER JOIN tblCTContractHeader CTH ON CTD.[intContractHeaderId] = CTH.[intContractHeaderId]
-	WHERE intIntegrationLogId = @IntegrationLogId
+	FROM tblARInvoice I 
+	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+	INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ILD.intInvoiceId = I.intInvoiceId AND ID.intInvoiceDetailId = ILD.intInvoiceDetailId	
+	INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
+	INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+	WHERE ILD.intIntegrationLogId = @IntegrationLogId
 	  AND ID.intContractDetailId IS NOT NULL
-	  AND ILD.strTransactionType = 'Invoice'
-	  AND ILD.strType = 'Tank Delivery'
+	  AND I.strTransactionType = 'Invoice'
+	  AND I.strType = 'Tank Delivery'
 	  AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
 
 	WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesContracts) 

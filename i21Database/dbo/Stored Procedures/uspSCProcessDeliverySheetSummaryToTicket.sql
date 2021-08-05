@@ -79,6 +79,23 @@ BEGIN TRY
 	DECLARE @TicketRowMaxCount INT
 
 	
+	IF OBJECT_ID (N'tempdb.dbo.#SCReceiptIds') IS NOT NULL
+			DROP TABLE #SCReceiptIds
+
+	SELECT DISTINCT
+		B.intInventoryReceiptId
+	INTO #SCReceiptIds
+	FROM tblICInventoryReceiptItem A
+	INNER JOIN tblICInventoryReceipt B
+		ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	INNER JOIN tblSCTicket C
+		ON A.intSourceId = C.intTicketId
+	INNER JOIN tblSCDeliverySheet D
+		ON C.intDeliverySheetId = D.intDeliverySheetId
+	WHERE B.intSourceType = 1
+		AND D.intDeliverySheetId = @intDeliverySheetId
+
+
 	--None reversal
 	BEGIN
 		SET @TicketCurrentRowCount = 1
@@ -107,6 +124,7 @@ BEGIN TRY
 		WHILE (@TicketCurrentRowCount <= @TicketRowMaxCount)
 		BEGIN
 			SELECT TOP 1 @intTicketId = intTicketId 
+				,@intEntityId = intEntityId
 			FROM @processTicket
 			WHERE cntId = @TicketCurrentRowCount
 
@@ -129,21 +147,7 @@ BEGIN TRY
 
 	---SUMMARY LOG 
 	BEGIN
-		IF OBJECT_ID (N'tempdb.dbo.#SCReceiptIds') IS NOT NULL
-			DROP TABLE #SCReceiptIds
-
-		SELECT DISTINCT
-			B.intInventoryReceiptId
-		INTO #SCReceiptIds
-		FROM tblICInventoryReceiptItem A
-		INNER JOIN tblICInventoryReceipt B
-			ON A.intInventoryReceiptId = B.intInventoryReceiptId
-		INNER JOIN tblSCTicket C
-			ON A.intSourceId = C.intTicketId
-		INNER JOIN tblSCDeliverySheet D
-			ON C.intDeliverySheetId = C.intDeliverySheetId
-		WHERE B.intSourceType = 1
-
+		
 		SET @_intInventoryReceiptId = ISNULL((SELECT MIN(intInventoryReceiptId) FROM #SCReceiptIds),0)
 
 		WHILE (ISNULL(@_intInventoryReceiptId,0) > 0)
@@ -305,6 +309,7 @@ BEGIN TRY
 		-- ,SC.strDistributionOption = CASE WHEN StagingTable.splitCount > 1 THEN 'SPL' ELSE StagingTable.strDistributionOption END
 		-- ,SC.intStorageScheduleId = CASE WHEN StagingTable.splitCount > 1 THEN NULL ELSE StagingTable.intStorageScheduleId END
 			,SC.intConcurrencyId = ISNULL(SC.intConcurrencyId,0) + 1
+			, dtmDateModifiedUtc = GETUTCDATE()
 		FROM tblSCTicket SC
 		-- OUTER APPLY(
 		-- 	SELECT (SELECT COUNT(intTicketId) FROM @splitTable) AS splitCount,intStorageScheduleTypeId,intStorageScheduleId,strDistributionOption

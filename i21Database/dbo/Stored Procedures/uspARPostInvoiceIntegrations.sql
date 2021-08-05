@@ -4,7 +4,7 @@
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
 AS  
-  
+
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
@@ -301,12 +301,30 @@ BEGIN
 		) REFUND
 		WHERE IH.strTransactionType <> 'Cash'
 		GROUP BY [intEntityCustomerId]
-	) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
+	) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]		
+
+	--UPDATE INVOICE TRANSACTION HISTORY
+	DELETE FROM @Invoices
+	
+	INSERT INTO @Invoices([intHeaderId]) 
+	SELECT [intInvoiceId]
+	FROM ##ARPostInvoiceHeader I
+
+	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 1
 
 	--PATRONAGE
 	DECLARE	@successfulCountP	INT
-		  , @strId				NVARCHAR(MAX)
+		  , @strId				NVARCHAR(MAX)	
 
+	SELECT @strId = COALESCE(@strId + ',' ,'') + CAST([intHeaderId] AS NVARCHAR(250)) FROM @Invoices
+
+	EXEC [dbo].[uspPATGatherVolumeForPatronage]
+		 @transactionIds	= @strId
+		,@post				= 1
+		,@type				= 2
+		,@successfulCount	= @successfulCountP OUTPUT
+
+	--LOAD SHIPMENT
 	DECLARE @IdsP TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
@@ -331,7 +349,7 @@ BEGIN
 		 , [ysnProvisionalWithGL]	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM ##ARPostInvoiceHeader I
-	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
+	INNER JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -340,22 +358,6 @@ BEGIN
 		AND I.strInvoiceOriginId = RET.strInvoiceNumber
 		AND I.intOriginalInvoiceId = RET.intInvoiceId
 	) RI
-
-	SELECT @strId = COALESCE(@strId + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250)) FROM @IdsP
-
-	EXEC [dbo].[uspPATGatherVolumeForPatronage]
-		 @transactionIds	= @strId
-		,@post				= 1
-		,@type				= 2
-		,@successfulCount	= @successfulCountP OUTPUT
-
-	--UPDATE INVOICE TRANSACTION HISTORY
-	DELETE FROM @Invoices
-	
-	INSERT INTO @Invoices([intHeaderId]) 
-	SELECT [intInvoiceId] FROM @IdsP
-
-    EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 1
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsP)
 	BEGIN
@@ -374,15 +376,6 @@ BEGIN
 				   , @ysnFromReturnP		= [ysnFromReturn]
 		FROM @IdsP 
 		ORDER BY [intInvoiceId]
-
-		--COMMITTED QTY
-		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
-
-		--IN TRANSIT OUTBOUND QTY
-		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDP, 1
-
-		--IN TRANSIT DIRECT QTY
-		EXEC dbo.[uspARUpdateInTransitDirect] @InvoiceIDP, 1
 
 		--LOAD SHIPMENT
         IF @FromProvisionalP = 0 OR @ProvisionalWithGLP = 0
@@ -638,12 +631,29 @@ BEGIN
 		) REFUND
 		WHERE IH.strTransactionType <> 'Cash'
 		GROUP BY [intEntityCustomerId]
-		) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
+	) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
+
+	--UPDATE INVOICE TRANSACTION HISTORY
+	DELETE FROM @Invoices
+	
+	INSERT INTO @Invoices([intHeaderId]) 
+	SELECT [intInvoiceId] 
+	FROM ##ARPostInvoiceHeader
+
+    EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 0
 
 	--PATRONAGE
 	DECLARE	@successfulCountU	INT
 		  , @strIdU				NVARCHAR(MAX)
 
+	SELECT @strIdU = COALESCE(@strIdU + ',' ,'') + CAST([intHeaderId] AS NVARCHAR(250)) FROM @Invoices
+
+	EXEC [dbo].[uspPATGatherVolumeForPatronage] @transactionIds		= @strIdU
+											  , @post				= 0
+											  , @type				= 2
+											  , @successfulCount	= @successfulCountU OUTPUT	
+
+	--LOAD SHIPMENT										  
 	DECLARE @IdsU TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
@@ -668,7 +678,7 @@ BEGIN
 		 , [ysnProvisionalWithGL] 	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM ##ARPostInvoiceHeader I
-	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
+	INNER JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -677,22 +687,6 @@ BEGIN
 		AND I.strInvoiceOriginId = RET.strInvoiceNumber
 		AND I.intOriginalInvoiceId = RET.intInvoiceId
 	) RI
-
-
-	SELECT @strIdU = COALESCE(@strIdU + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250)) FROM @IdsU
-
-	EXEC [dbo].[uspPATGatherVolumeForPatronage] @transactionIds		= @strIdU
-											  , @post				= 0
-											  , @type				= 2
-											  , @successfulCount	= @successfulCountU OUTPUT
-
-	--UPDATE INVOICE TRANSACTION HISTORY
-	DELETE FROM @Invoices
-	
-	INSERT INTO @Invoices([intHeaderId]) 
-	SELECT [intInvoiceId] FROM @IdsU
-
-    EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 0
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsU)
 	BEGIN
@@ -711,15 +705,6 @@ BEGIN
 				   , @ysnFromReturnU		= [ysnFromReturn]
 		FROM @IdsU 
 		ORDER BY [intInvoiceId]
-		
-		--COMMITTED QTY
-		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
-
-		--IN TRANSIT OUTBOUND QTY
-		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDU, 0
-
-		--IN TRANSIT DIRECT QTY
-		EXEC dbo.[uspARUpdateInTransitDirect] @InvoiceIDU, 0
 
 		--LOAD SHIPMENT
         IF @FromProvisionalU = 0 OR @ProvisionalWithGLU = 0
@@ -964,6 +949,15 @@ WHERE ID.intItemContractDetailId IS NOT NULL
 
 EXEC dbo.uspCTItemContractInvoicePosted @tblItemContracts, @UserId
 
+--UPDATE INVENTORY ITEM COMMITTED
+EXEC dbo.[uspARUpdateCommitted]
+
+--IN TRANSIT OUTBOUND QTY
+EXEC dbo.[uspARUpdateInTransit]
+
+--IN TRANSIT DIRECT QTY
+EXEC dbo.[uspARUpdateInTransitDirect]
+
 DELETE A
 FROM tblARPrepaidAndCredit A
 INNER JOIN ##ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId 
@@ -987,33 +981,21 @@ IF @IntegrationLogId IS NULL
 		FROM ##ARPostInvoiceHeader
 	END
 
-DECLARE @strRowState			NVARCHAR(50) = (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
-DECLARE @tblInvoicesToUpdate	AS Id
+DECLARE @tblInvoicesToUpdate	AS InvoiceId
 
-INSERT INTO @tblInvoicesToUpdate
-SELECT DISTINCT intInvoiceId
+INSERT INTO @tblInvoicesToUpdate (intHeaderId, ysnPost, strTransactionType)
+SELECT DISTINCT intHeaderId	= intInvoiceId
+			  , ysnPost 	= @Post
+			  , strTransactionType	= (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
 FROM ##ARPostInvoiceHeader
 
-WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesToUpdate)
-	BEGIN
-		DECLARE @intInvoiceId 	INT	= NULL
-			  , @dtmInvoiceDate	DATETIME = NULL
+--UPDATE GROSS MARGIN SUMMARY
+EXEC dbo.uspARInvoiceGrossMarginSummary @ysnRebuild = 0
+									  , @InvoiceId	= @tblInvoicesToUpdate
 
-		SELECT TOP 1 @intInvoiceId = intId
-				   , @dtmInvoiceDate = CASE WHEN @Post = 1 THEN NULL ELSE I.dtmPostDate END
-		FROM @tblInvoicesToUpdate U
-		INNER JOIN tblARInvoice I ON U.intId = I.intInvoiceId
-
-		--INTER COMPANY PRE-STAGE
-		EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, @strRowState, @UserId
-		--UPDATE GROSS MARGIN SUMMARY
-		EXEC dbo.uspARInvoiceGrossMarginSummary @ysnPosted 		= @Post
-    										  , @ysnRebuild 	= 0
-											  , @intInvoiceId 	= @intInvoiceId
-											  , @dtmDate	  	= @dtmInvoiceDate
-		
-		DELETE FROM @tblInvoicesToUpdate WHERE intId = @intInvoiceId
-	END
+--INTER COMPANY PRE-STAGE
+EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdate
+									    , @intUserId		= @UserId		
 
 --Create inventory receipt to another company
 EXEC [dbo].[uspARInterCompanyIntegrationSource] @BatchId = @BatchId, @Post = @Post
@@ -1046,7 +1028,7 @@ SELECT DISTINCT
 	,[strDetails]				= NULL
 FROM ##ARPostInvoiceHeader
 
-EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 
 END TRY
 BEGIN CATCH

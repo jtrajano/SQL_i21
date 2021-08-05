@@ -1,15 +1,30 @@
-CREATE PROCEDURE uspICImportItemsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @ysnAllowOverwrite BIT = 0
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItem WHERE strImportIdentifier <> @strIdentifier
 
-;WITH cte AS
+DECLARE @tblDuplicateItemNo TABLE(strItemNo NVARCHAR(200))
+
+INSERT INTO @tblDuplicateItemNo (strItemNo)
+SELECT strItemNo FROM
 (
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo) AS RowNumber
+	SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo) AS RowNumber
    FROM tblICImportStagingItem
    WHERE strImportIdentifier = @strIdentifier
-)
-DELETE FROM cte WHERE RowNumber > 1;
+) AS DuplicateCounter
+WHERE RowNumber > 1
+
+DELETE DuplicateCounter
+FROM
+(
+	SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo ORDER BY strItemNo) AS RowNumber
+	FROM tblICImportStagingItem
+	WHERE strImportIdentifier = @strIdentifier
+) DuplicateCounter
+WHERE RowNumber > 1
 
 CREATE TABLE #output (
 	  strItemNoDeleted NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
@@ -20,7 +35,7 @@ CREATE TABLE #tmp (
 	  intId INT IDENTITY(1, 1) PRIMARY KEY
 	, strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, strType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	, strStatus NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, intLifeTime INT NULL
 	, strShortName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
@@ -82,6 +97,75 @@ CREATE TABLE #tmp (
 	, dtmDateCreated DATETIME NULL
 	, intCreatedByUserId INT NULL
 )
+
+CREATE TABLE #tmp_lotTrackingChange (
+	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+)
+
+CREATE TABLE #tmp_itemTypeChange (
+	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+)
+
+CREATE TABLE #tmp_commodityChange (
+	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+)
+
+-- Validate records
+-- Check if lot tracking can be changed
+IF @ysnAllowOverwrite = 1
+BEGIN 
+	INSERT INTO #tmp_lotTrackingChange (
+		strItemNo
+	)
+	SELECT
+		s.strItemNo
+	FROM 
+		tblICImportStagingItem s INNER JOIN tblICItem i 
+			ON s.strItemNo = i.strItemNo
+	WHERE
+		s.strImportIdentifier = @strIdentifier
+		AND s.strLotTracking IS NOT NULL 		
+		AND LOWER(i.strLotTracking) <> RTRIM(LTRIM(LOWER(ISNULL(s.strLotTracking, 'No'))))	
+		AND dbo.fnAllowLotTrackingToChange(i.intItemId, i.strLotTracking) = 0
+END 
+
+-- Check if item type can be changed. 
+IF @ysnAllowOverwrite = 1
+BEGIN 
+	INSERT INTO #tmp_itemTypeChange (
+		strItemNo
+	)
+	SELECT
+		s.strItemNo
+	FROM 
+		tblICImportStagingItem s INNER JOIN tblICItem i 
+			ON s.strItemNo = i.strItemNo
+	WHERE
+		s.strImportIdentifier = @strIdentifier
+		AND s.strType IS NOT NULL 		
+		AND LOWER(i.strType) <> LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory'))))
+		AND dbo.fnAllowItemTypeChange(i.intItemId, i.strType) = 0
+END 
+
+-- Check if item type can be changed. 
+IF @ysnAllowOverwrite = 1
+BEGIN 
+	INSERT INTO #tmp_commodityChange (
+		strItemNo
+	)
+	SELECT
+		s.strItemNo
+	FROM 
+		tblICImportStagingItem s INNER JOIN tblICItem i 
+			ON s.strItemNo = i.strItemNo
+		INNER JOIN tblICCommodity cm
+			ON cm.intCommodityId = i.intCommodityId
+	WHERE
+		s.strImportIdentifier = @strIdentifier
+		AND s.strCommodity IS NOT NULL 		
+		AND LOWER(cm.strCommodityCode) <> LTRIM(RTRIM(LOWER(s.strCommodity)))
+		AND dbo.fnAllowCommodityToChange(i.intItemId, i.intCommodityId) = 0
+END
 
 INSERT INTO #tmp(
 	  strItemNo
@@ -246,8 +330,9 @@ FROM tblICImportStagingItem s
 		) x WHERE LOWER(x.strLotTracking) = RTRIM(LTRIM(LOWER(ISNULL(s.strLotTracking, 'No'))))
 	) lotTrackTypes
 	LEFT OUTER JOIN tblICManufacturer m ON LOWER(m.strManufacturer) = LTRIM(RTRIM(LOWER(s.strManufacturer)))
-	LEFT OUTER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
-		AND c.strInventoryType = invTypes.strType
+	LEFT OUTER JOIN tblICCategory c 
+		ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
+		--AND c.strInventoryType = invTypes.strType
 	LEFT OUTER JOIN tblICCommodity cm ON LOWER(cm.strCommodityCode) = LTRIM(RTRIM(LOWER(s.strCommodity)))
 	LEFT OUTER JOIN tblICBrand b ON LOWER(b.strBrandCode) = LTRIM(RTRIM(LOWER(s.strBrand)))
 	LEFT OUTER JOIN tblPATPatronageCategory p ON LOWER(p.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strPatronageCategory)))
@@ -256,8 +341,17 @@ FROM tblICImportStagingItem s
 	LEFT OUTER JOIN tblICTag med ON med.strTagNumber = s.strMedicationTag AND med.strType = 'Medication Tag'
 	LEFT OUTER JOIN tblICTag ing ON ing.strTagNumber = s.strIngredientTag AND ing.strType = 'Ingredient Tag'
 	LEFT OUTER JOIN tblICRinFuelCategory rin ON rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(s.strFuelCategory)))
-WHERE s.strImportIdentifier = @strIdentifier
-	AND (LTRIM(RTRIM(LOWER(invTypes.strType))) = LTRIM(RTRIM(LOWER(c.strInventoryType))) OR c.strInventoryType IS NULL)
+	LEFT JOIN #tmp_lotTrackingChange v1 ON v1.strItemNo = s.strItemNo
+	LEFT JOIN #tmp_itemTypeChange v2 ON v2.strItemNo = s.strItemNo
+	LEFT JOIN #tmp_commodityChange v3 ON v3.strItemNo = s.strItemNo
+WHERE 
+	s.strImportIdentifier = @strIdentifier
+	--AND (LTRIM(RTRIM(LOWER(invTypes.strType))) = LTRIM(RTRIM(LOWER(c.strInventoryType))) OR c.strInventoryType IS NULL)
+	AND (
+		v1.strItemNo IS NULL 
+		AND v2.strItemNo IS NULL 
+		AND v3.strItemNo IS NULL 
+	)
 
 ;MERGE INTO tblICItem AS target
 USING
@@ -327,14 +421,20 @@ USING
 		, dtmDateCreated
 		, intCreatedByUserId
 	FROM #tmp s
-) AS source ON LTRIM(RTRIM(target.strItemNo)) = LTRIM(RTRIM(source.strItemNo))
-WHEN MATCHED THEN
+) AS source 
+	ON LTRIM(RTRIM(target.strItemNo)) = LTRIM(RTRIM(source.strItemNo))
+
+WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 	UPDATE SET
 		  strItemNo = source.strItemNo
+		
 		, strInventoryTracking = 
 			CASE WHEN ISNULL(source.strLotTracking, 'No') = 'No' THEN 
 				CASE WHEN source.strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END 
 			ELSE 'Lot Level' END
+
+		--, intCommodityId = source.intCommodityId
+
 		, strDescription = source.strDescription
 		, strStatus = source.strStatus
 		, intLifeTime = source.intLifeTime
@@ -342,8 +442,7 @@ WHEN MATCHED THEN
 		, ysnLotWeightsRequired = source.ysnLotWeightsRequired
 		, ysnUseWeighScales = source.ysnUseWeighScales
 		, strBarcodePrint = source.strBarcodePrint
-		, intManufacturerId = source.intManufacturerId
-		, intCommodityId = source.intCommodityId
+		, intManufacturerId = source.intManufacturerId		
 		, intBrandId = source.intBrandId
 		, strModelNo = source.strModelNo
 		, intCategoryId = source.intCategoryId
@@ -534,47 +633,170 @@ WHEN NOT MATCHED THEN
 	)
 	OUTPUT deleted.strItemNo, $action, inserted.strItemNo INTO #output;
 ;
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
 
-/* LOGS */
+---- Update the Lot Tracking, Item Type, and Commodity
+--UPDATE i
+--SET		
+--	i.strLotTracking = ISNULL(s.strLotTracking, i.strLotTracking) 
+--	,i.strType = ISNULL(invTypes.strType, i.strType)
+--	,i.intCommodityId = ISNULL(cm.intCommodityId, i.intCommodityId) 
+--FROM 
+--	tblICImportStagingItem s INNER JOIN tblICItem i 
+--		ON s.strItemNo = i.strItemNo
+--	LEFT JOIN tblICCommodity cm 
+--		ON LOWER(cm.strCommodityCode) = LTRIM(RTRIM(LOWER(s.strCommodity)))
+--	OUTER APPLY (
+--		SElECT strType
+--		FROM (
+--			SELECT 'Bundle' strType UNION
+--			SELECT 'Inventory' strType UNION
+--			SELECT 'Non-Inventory' strType UNION
+--			SELECT 'Kit' strType UNION
+--			SELECT 'Finished Good' strType UNION
+--			SELECT 'Other Charge' strType UNION
+--			SELECT 'Raw Material' strType UNION
+--			SELECT 'Service' strType UNION
+--			SELECT 'Software' strType UNION
+--			SELECT 'Comment' strType
+--		) x 
+--		WHERE 
+--			LOWER(x.strType) = LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory'))))
+--	) invTypes
 
-DECLARE @TotalImported INT
-DECLARE @LogId INT
+--	LEFT JOIN #tmp_lotTrackingChange v1 
+--		ON v1.strItemNo = s.strItemNo
+--	LEFT JOIN #tmp_itemTypeChange v2 
+--		ON v2.strItemNo = s.strItemNo
+--	LEFT JOIN #tmp_commodityChange v3 
+--		ON v3.strItemNo = s.strItemNo
+--WHERE 
+--	s.strImportIdentifier = @strIdentifier
+--	AND (
+--		v1.strItemNo IS NULL 
+--		AND v2.strItemNo IS NULL 
+--		AND v3.strItemNo IS NULL 
+--	)
+--;
 
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0)
-FROM tblICImportLog
-WHERE strUniqueId = @strIdentifier
+-- Logs 
+BEGIN 
+	DECLARE 
+		@intRowsImported AS INT 
+		,@intRowsUpdated AS INT
+		,@intRowsSkipped AS INT
+		,@intRowDuplicates AS INT
 
--- Validate Incompatible inventory types of items vs. categories
-INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-SELECT @LogId, 1, 'Category', 'Import Failed.', ISNULL(c.strCategoryCode, ''), 'Invalid category type "' + ISNULL(c.strInventoryType, '') + '" for item "' + ISNULL(s.strItemNo, '') + '"', 'Failed', 'Error', 1
-FROM tblICImportStagingItem s
-	LEFT OUTER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
-WHERE s.strImportIdentifier = @strIdentifier
-	AND LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory')))) = LTRIM(RTRIM(LOWER(c.strInventoryType)))
+	SELECT @intRowsImported = COUNT(*) FROM #output WHERE strAction = 'INSERT'
+	SELECT @intRowsUpdated = COUNT(*) FROM #output WHERE strAction = 'UPDATE'
+	SELECT @intRowDuplicates = COUNT(*) FROM @tblDuplicateItemNo
+	SELECT 
+		@intRowsSkipped = ISNULL(@intRowDuplicates, 0) + (COUNT(1) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0))
+	FROM 
+		tblICImportStagingItem s
+	WHERE
+		s.strImportIdentifier = @strIdentifier
 
-UPDATE l
-SET l.intTotalErrors = x.Errors
-FROM tblICImportLog l
-INNER JOIN (
-	SELECT l.intImportLogId, COUNT(d.intImportLogDetailId) Errors
-	FROM tblICImportLog l
-		INNER JOIN tblICImportLogDetail d ON d.intImportLogId = l.intImportLogId
-	WHERE l.strUniqueId = @strIdentifier
-		AND d.strType = 'Error'
-	GROUP BY l.intImportLogId 
-) x ON l.intImportLogId = x.intImportLogId
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intRowsUpdated] 
+		,[intRowsSkipped]
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = ISNULL(@intRowsImported, 0)
+		,intRowsUpdated = ISNULL(@intRowsUpdated, 0) 
+		,intRowsSkipped = ISNULL(@intRowsSkipped, 0)
 
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Finished', 'Warning', 1
+	-- Validate Incompatible inventory types of items vs. categories
+	INSERT INTO tblICImportLogDetailFromStaging(
+		strUniqueId
+		, intRecordNo
+		, strField
+		, strAction
+		, strValue
+		, strMessage
+		, strStatus
+		, strType
+		, intConcurrencyId
+	)
+	--SELECT 
+	--	@strIdentifier
+	--	, 1
+	--	, 'Category'
+	--	, 'Import Failed.'
+	--	, ISNULL(c.strCategoryCode, '')
+	--	, 'Invalid category type "' + ISNULL(c.strInventoryType, '') + '" for item "' + ISNULL(s.strItemNo, '') + '"'
+	--	, 'Failed'
+	--	, 'Error'
+	--	, 1
+	--FROM 
+	--	tblICImportStagingItem s INNER JOIN tblICCategory c 
+	--		ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
+	--WHERE 
+	--	s.strImportIdentifier = @strIdentifier
+	--	AND LTRIM(RTRIM(LOWER(ISNULL(s.strType, 'Inventory')))) <> LTRIM(RTRIM(LOWER(c.strInventoryType)))
+
+	--UNION ALL 
+	SELECT 
+		@strIdentifier
+		, 1
+		, 'Lot Tracking'
+		, 'Import Failed.'
+		, strItemNo
+		, 'Item Type change is not allowed for item "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		#tmp_lotTrackingChange
+
+	UNION ALL 
+	SELECT 
+		@strIdentifier
+		, 1
+		, 'Lot Tracking'
+		, 'Import Failed.'
+		, strItemNo
+		, 'Item Type change is not allowed for item "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		#tmp_itemTypeChange
+
+	UNION ALL 
+	SELECT 
+		@strIdentifier
+		, 1
+		, 'Lot Tracking'
+		, 'Import Failed.'
+		, strItemNo
+		, 'Commodity change is not allowed for item "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		#tmp_commodityChange
+	UNION ALL
+	SELECT 
+		@strIdentifier
+		, 1
+		, 'Item No'
+		, 'Import Failed.'
+		, strItemNo
+		, 'Duplicate Item No "' + strItemNo + '"'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		@tblDuplicateItemNo
 END
+
 DROP TABLE #tmp
 DROP TABLE #output
+DROP TABLE #tmp_lotTrackingChange 
+DROP TABLE #tmp_itemTypeChange 
+DROP TABLE #tmp_commodityChange 
 
 DELETE FROM tblICImportStagingItem WHERE strImportIdentifier = @strIdentifier

@@ -20,7 +20,7 @@ BEGIN
 		UPDATE A SET A.strTicketStatus = 
 		CASE
 			WHEN @status = 1 THEN 'R'
-		END
+		END, dtmDateModifiedUtc = GETUTCDATE()
 		FROM tblSCTicket A
 		WHERE A.intTicketId = @scId
 
@@ -61,4 +61,16 @@ BEGIN
 			INNER JOIN tblSCTicket B
 				ON A.intTicketId = B.intTicketId
 	END
+
+
+
+	IF @status = 1
+	begin
+
+		EXEC uspSCAddTransactionLinks 
+				@intTransactionType = 2, 
+				@intTransactionId = @scId,
+				@intAction = 1
+
+	end 
 END

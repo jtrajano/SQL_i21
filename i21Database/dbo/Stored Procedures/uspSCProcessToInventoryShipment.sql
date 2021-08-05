@@ -757,6 +757,7 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryShipment ship	        
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	
+	exec uspSCAddTransactionLinks @intTransactionType = 3, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
 	IF(@intTicketStorageScheduleTypeId <> -9)
@@ -923,6 +924,7 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,[dtmDateCreatedUtc]
 				)
 			SELECT 
 				[strTicketStatus] = 'O'
@@ -1064,12 +1066,17 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,GETUTCDATE()
 			FROM tblSCTicket
 			WHERE intTicketId = @intTicketId
 
 			SET @intNewTicketId = SCOPE_IDENTITY()
 		END
 		
+		
+
+	
+
 		--Update Work order Shipped Quantity for the Ticket Item
 		IF(ISNULL(@InventoryShipmentId,0) > 0)
 		BEGIN
@@ -1088,6 +1095,17 @@ BEGIN TRY
 		END
 	END
 	
+	SELECT @intInvoiceId = id.intInvoiceId
+	FROM tblICInventoryShipment s 
+	JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+	join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+	WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intSourceType = 1
+
+	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+	UPDATE tblSCTicket
+	SET dblDWGOriginalNetUnits = dblNetUnits
+	WHERE intTicketId = @intTicketId
+
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
 		,@screenName		= 'Grain.view.Scale'		-- Screen Namespace

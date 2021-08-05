@@ -5,10 +5,10 @@ CREATE TABLE [dbo].[tblFABookDepreciation](
 	[dblCost] [numeric](18, 6) NOT NULL,
 	[dblSalvageValue] [numeric](18, 6) NOT NULL,
 	[dtmPlacedInService] [datetime] NOT NULL,
-	[ysnFullyDepreciated]		BIT NULL,
+	[ysnFullyDepreciated] BIT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intBookId] [int] NULL,
- CONSTRAINT [PK_tblFABookDepreciation] PRIMARY KEY CLUSTERED
+ CONSTRAINT [PK_tblFABookDepreciation] PRIMARY KEY CLUSTERED 
 (
 	[intBookDepreciationId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
@@ -24,6 +24,7 @@ GO
 
 ALTER TABLE [dbo].[tblFABookDepreciation]  WITH CHECK ADD  CONSTRAINT [FK_tblFABookDepreciation_tblFAFixedAsset] FOREIGN KEY([intAssetId])
 REFERENCES [dbo].[tblFAFixedAsset] ([intAssetId])
+ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblFABookDepreciation] CHECK CONSTRAINT [FK_tblFABookDepreciation_tblFAFixedAsset]

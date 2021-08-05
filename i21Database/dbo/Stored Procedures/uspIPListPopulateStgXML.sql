@@ -59,7 +59,7 @@ BEGIN TRY
 	JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 	WHERE ET.strType = 'User'
 		AND t.intEntityId = @intUserId
-		AND t.strEntityNo <> ''
+		--AND t.strEntityNo <> ''
 
 	IF @strLastModifiedUser IS NULL
 	BEGIN
@@ -105,7 +105,7 @@ BEGIN TRY
 		FROM tblIPMultiCompany WITH (NOLOCK)
 		WHERE intCompanyId = @intCompanyId
 
-		IF EXISTS (SELECT 1 FROM master.dbo.sysdatabases WHERE name = @strDatabaseName)
+		IF EXISTS (SELECT 1 FROM sys.databases WHERE name = @strDatabaseName)
 		BEGIN
 			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblQMListStage (
 				intListId

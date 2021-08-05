@@ -291,14 +291,8 @@ BEGIN TRY
 		,@strNewName NVARCHAR(50)
 		,@strParentLotNumber NVARCHAR(50)
 		,@strLotOrigin NVARCHAR(50)
+		,@intStockItemUOMId INT
 
-	SELECT @intUnitMeasureId = intUnitMeasureId
-	FROM tblICItemUOM
-	WHERE intItemUOMId = @intMergeItemUOMId
-
-	SELECT @strUnitMeasure = strUnitMeasure
-	FROM tblICUnitMeasure
-	WHERE intUnitMeasureId = @intUnitMeasureId
 
 	SELECT @strUserName = strUserName
 	FROM tblSMUserSecurity
@@ -331,6 +325,26 @@ BEGIN TRY
 	SELECT @strParentLotNumber = strParentLotNumber
 	FROM tblICParentLot
 	WHERE intParentLotId = @intParentLotId
+
+	SELECT @intStockItemUOMId = intItemUOMId
+	FROM tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
+
+	IF @intMergeItemUOMId <> @intStockItemUOMId
+	BEGIN
+		SELECT @dblMergeQty = dbo.fnMFConvertQuantityToTargetItemUOM(@intMergeItemUOMId, @intStockItemUOMId, @dblMergeQty)
+
+		SELECT @intMergeItemUOMId = @intStockItemUOMId
+	END
+
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intMergeItemUOMId
+
+	SELECT @strUnitMeasure = strUnitMeasure
+	FROM tblICUnitMeasure
+	WHERE intUnitMeasureId = @intUnitMeasureId
 
 	INSERT INTO tblIPLotMergeFeed (
 		strCompanyLocation

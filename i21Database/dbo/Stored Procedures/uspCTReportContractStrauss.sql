@@ -140,7 +140,7 @@ BEGIN TRY
 	BEGIN
 		DECLARE @dtmApproveDate DATETIME
 		
-		SELECT TOP 1 @dtmApproveDate = CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, A.dtmDate), DATENAME(TzOffset, SYSDATETIMEOFFSET())))
+		SELECT TOP 1 @dtmApproveDate = A.dtmDate
 		FROM tblSMApproval A
 		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
 		WHERE T.intScreenId = @intScreenId
@@ -226,14 +226,14 @@ BEGIN TRY
 		,@blbParentSubmitSignature = h.blbDetail
 		,@blbParentApproveSignature = j.blbDetail
 		,@blbChildSubmitSignature = 
-			CASE WHEN @thisContractStatus = 'Approved' AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus = 'Approved' THEN l.blbDetail 
+			CASE WHEN @thisContractStatus IN ('Approved', 'Approved with Modifications') AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus IN ('Approved', 'Approved with Modifications') THEN l.blbDetail 
 			ELSE 
-				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved') AND t.ysnIsParent = 0 THEN l.blbDetail ELSE NULL END 
+				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved', 'Approved with Modifications') AND t.ysnIsParent = 0 THEN l.blbDetail ELSE NULL END 
 			END
 		,@blbChildApproveSignature = 
-			CASE WHEN @thisContractStatus = 'Approved' AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus = 'Approved' THEN n.blbDetail
+			CASE WHEN @thisContractStatus IN ('Approved', 'Approved with Modifications') AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus IN ('Approved', 'Approved with Modifications') THEN n.blbDetail
 			ELSE
-				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved') AND t.ysnIsParent = 0 THEN n.blbDetail ELSE NULL END
+				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved', 'Approved with Modifications') AND t.ysnIsParent = 0 THEN n.blbDetail ELSE NULL END
 			END
 	from
 		(
@@ -246,9 +246,9 @@ BEGIN TRY
 		from
 			tblCTContractHeader a
 			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
-			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and c.ysnApproval = 0
+			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen IN ('Amendment and Approvals', 'Contract') AND ISNULL(c.intPriceFixationId, 0) = 0 and c.ysnApproval = 0
 			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
-			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and e.ysnApproval = 1
+			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen IN ('Amendment and Approvals', 'Contract') AND ISNULL(c.intPriceFixationId, 0) = 0 and e.ysnApproval = 1
 			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
 			left join tblCTIntrCompApproval j on j.intContractHeaderId = a.intContractHeaderId and j.strScreen =  'Contract' and j.ysnApproval = 1
 			left join tblSMUserSecurity k on lower(k.strUserName) = lower(j.strUserName)
@@ -369,7 +369,7 @@ BEGIN TRY
 		,strStraussShipmentLabel				= (CASE WHEN PO.strPositionType = 'Spot' THEN 'DELIVERY' ELSE 'SHIPMENT' END)
 		,strStraussShipment						= CONVERT(VARCHAR, @dtmStartDate, 101) + ' - ' + CONVERT(VARCHAR, @dtmEndDate, 101)
 		,strDestinationPointName				= (CASE WHEN PO.strPositionType = 'Spot' THEN CT.strCity ELSE @strDestinationPort END)
-		,strStraussCondition     				= CB.strFreightTerm + '(' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
+		,strStraussCondition     				= CB.strFreightTerm + ' (' + CB.strDescription + ')' + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(W1.strWeightGradeDesc, '')
 		,strTerm							    = TM.strTerm
 		,strStraussApplicableLaw				= @strApplicableLaw
 		,strStraussContract						= 'In accordance with ' + AN.strComment + ' (latest edition)'

@@ -36,9 +36,9 @@ BEGIN
 			SELECT	[intItemId]				= ITEM.intItemId
 					,[intItemLocationId]	= ICIL.intItemLocationId
 					,[intItemUOMId]			= WOD.intItemUOMId
-					,[intLotId]				= NULL
-					,[intSubLocationId]		= NULL
-					,[intStorageLocationId]	= NULL
+					,[intLotId]				= CASE WHEN (ISNULL(ITEM.strLotTracking,'') <> 'No') THEN LOT.intLotId ELSE NULL  END     
+					,[intSubLocationId]		= ISNULL(WOD.intSubLocationId,StorageLocation.intSubLocationId)  
+					,[intStorageLocationId]	= ISNULL(WOD.intStorageLocationId,StorageLocation.intStorageLocationId) 
 					,[dblQty]				= 
                                             CASE WHEN @toShip = 1 THEN
                                             (CASE WHEN (WOD.dblQtyOrdered - ISNULL(WOD.dblQtyShipped,0)) > 0 
@@ -60,6 +60,16 @@ BEGIN
 				ON ITEM.intItemId = WOD.intItemId
 			INNER JOIN tblICItemLocation ICIL
 				ON ICIL.intItemId = ITEM.intItemId AND ICIL.intLocationId = WO.intCompanyLocationId
+
+			LEFT JOIN tblICStorageLocation StorageLocation
+				ON StorageLocation.intStorageLocationId = WOD.intStorageLocationId  
+
+			    
+			LEFT JOIN tblICLot LOT     
+			ON LOT.intItemId = ITEM.intItemId    
+				AND LOT.intItemLocationId = ICIL.intItemLocationId     
+				AND ISNULL(LOT.intStorageLocationId,0) = ISNULL(WOD.intStorageLocationId,0)   
+				  
 			WHERE WO.intWorkOrderId = @AGWorkOrderId
 
 

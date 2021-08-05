@@ -129,7 +129,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 						) C (intCompanyLocationId)
 					END
 			END
-		ELSE IF @condition = 'Not Equal To'
+		ELSE IF UPPER(@condition) = UPPER('Not Equal To')
 			BEGIN
 				IF @fieldname = 'strCustomerName'
 					BEGIN
@@ -174,7 +174,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 						) C (intCompanyLocationId)
 					END
 			END
-		ELSE IF @condition = 'Between'
+		ELSE IF UPPER(@condition) = UPPER('Between')
 			BEGIN
 				IF @fieldname = 'strCustomerName'
 					BEGIN
@@ -428,7 +428,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 			DROP TABLE #CUSTOMERWITHBALANCES
 		END
 
-		SELECT intEntityCustomerId 
+		SELECT DISTINCT intEntityCustomerId 
 		INTO #CUSTOMERWITHBALANCES
 		FROM tblARCustomerAgingStagingTable
 		WHERE intEntityUserId = @intEntityUserId
@@ -458,11 +458,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 			OR  ((ISNULL(dbl121Days,0) <> 0  AND  NOT EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
 		)
 
-
-		DELETE FROM tblARCustomerAgingStagingTable
+		DELETE AGING 
+		FROM tblARCustomerAgingStagingTable AGING
+		LEFT JOIN #CUSTOMERWITHBALANCES BAL ON AGING.intEntityCustomerId = BAL.intEntityCustomerId
 		WHERE intEntityUserId = @intEntityUserId 
 		  AND strAgingType = 'Detail'
-		  AND intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM #CUSTOMERWITHBALANCES)
+		  AND ISNULL(BAL.intEntityCustomerId, 0) = 0
+		  AND strTransactionType NOT IN  ('Credit Memo','Customer Prepayment')  
 	END
 
 DELETE AGING
@@ -472,9 +474,9 @@ INNER JOIN (
 	FROM tblARCustomerAgingStagingTable 
 	WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 	GROUP BY intEntityCustomerId 
-	HAVING SUM(ISNULL(dblTotalAR, 0)) <= 0
-		AND SUM(ISNULL(dblCredits, 0)) <= 0
-		AND SUM(ISNULL(dblPrepayments, 0)) <= 0
+	HAVING SUM(ISNULL(dblTotalAR, 0)) = 0
+		AND SUM(ISNULL(dblCredits, 0)) = 0
+		AND SUM(ISNULL(dblPrepayments, 0)) = 0
 ) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
 WHERE AGING.intEntityUserId = @intEntityUserId
   AND AGING.strAgingType = 'Detail'
@@ -496,23 +498,27 @@ IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
 		AND AGING.strAgingType = 'Detail'
 	END
 
-INSERT INTO @temp_open_invoices
-SELECT DISTINCT intInvoiceId 
-FROM tblARCustomerAgingStagingTable 
-WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
-
+-- DELETE AGING
+-- FROM tblARCustomerAgingStagingTable AGING
+-- LEFT JOIN (
+-- 	SELECT DISTINCT intInvoiceId 
+-- 	FROM tblARCustomerAgingStagingTable 
+-- 	WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+-- 	GROUP BY intInvoiceId HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+-- ) UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
+-- WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+--   AND ISNULL(UNPAID.intInvoiceId, 0) = 0
 
 IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail')
 	BEGIN
 		UPDATE AGING
 		SET dblTotalCustomerAR = ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) + ISNULL(dbl120Days, 0) + ISNULL(dbl121Days, 0) + ISNULL(dblCredits, 0) + ISNULL(dblPrepayments, 0)
 		FROM tblARCustomerAgingStagingTable AGING
-		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+		WHERE intEntityUserId = @intEntityUserId 
+		  AND strAgingType = 'Detail'
 	END
-
-
-IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable AGING INNER JOIN @temp_open_invoices UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail')
+	
+IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable AGING WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail')
 	BEGIN
 		INSERT INTO tblARCustomerAgingStagingTable (
 			  strCompanyName
@@ -531,13 +537,9 @@ IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable AGING INNER
 					   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
 			FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 		) COMPANY
+	END
 
-		SELECT * FROM tblARCustomerAgingStagingTable AGING
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
-	END
-ELSE
-	BEGIN
-		SELECT AGING.* FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN @temp_open_invoices UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
-		WHERE AGING.intEntityUserId = @intEntityUserId AND AGING.strAgingType = 'Detail'
-	END
+SELECT AGING.* 
+FROM tblARCustomerAgingStagingTable AGING
+WHERE AGING.intEntityUserId = @intEntityUserId 
+  AND AGING.strAgingType = 'Detail'

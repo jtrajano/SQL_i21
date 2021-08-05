@@ -974,6 +974,7 @@ BEGIN TRY
 							DECLARE @tempITEMSPECIALPRICING TABLE (
 										intItemSpecialPricingId		INT NOT NULL
 										, dblUnitAfterDiscount		NUMERIC(38, 20) NULL
+										, dblCost					NUMERIC(38, 20) NULL
 										, dtmBeginDate				DATETIME
 										, dtmEndDate				DATETIME
 
@@ -989,6 +990,7 @@ BEGIN TRY
 							(
 								intItemSpecialPricingId
 								, dblUnitAfterDiscount
+								, dblCost
 								, dtmBeginDate
 								, dtmEndDate
 
@@ -1000,6 +1002,7 @@ BEGIN TRY
 							SELECT DISTINCT
 								intItemSpecialPricingId	= piv.intItemSpecialPricingId
 								, dblUnitAfterDiscount	= piv.dblUnitAfterDiscount
+								, dblCost				= piv.dblCost
 								, dtmBeginDate			= piv.dtmBeginDate
 								, dtmEndDate			= piv.dtmEndDate
 
@@ -1022,7 +1025,7 @@ BEGIN TRY
 									AND detail.strPreviewOldData != detail.strPreviewNewData
 							) src
 							PIVOT (
-								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dtmBeginDate, dtmEndDate)
+								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dblCost, dtmBeginDate, dtmEndDate)
 							) piv
 
 							-- Count records
@@ -1050,6 +1053,7 @@ BEGIN TRY
 											 , Item.strDescription
 											 , ItemSpecialPricing.intItemSpecialPricingId
 											 , ItemSpecialPricing.dblUnitAfterDiscount
+											 , ItemSpecialPricing.dblCost
 											 , ItemSpecialPricing.dtmBeginDate
 											 , ItemSpecialPricing.dtmEndDate
 									FROM tblICItemSpecialPricing ItemSpecialPricing
@@ -1074,6 +1078,7 @@ BEGIN TRY
 	
 									DECLARE  @intItemSpecialPricingId		INT
 											, @dblUnitAfterDiscount			DECIMAL(38, 20)
+											, @dblCost						DECIMAL(38, 20)
 											, @dtmBeginDate					DATETIME
 											, @dtmEndDate					DATETIME
 
@@ -1093,6 +1098,7 @@ BEGIN TRY
 																				
 
 											, @dblUnitAfterDiscount		= ISNULL(temp.dblUnitAfterDiscount, ItemSpecialPricing.dblUnitAfterDiscount)
+											, @dblCost					= ISNULL(temp.dblCost, ItemSpecialPricing.dblCost)
 											, @dtmBeginDate				= ISNULL(temp.dtmBeginDate, ItemSpecialPricing.dtmBeginDate)
 											, @dtmEndDate				= ISNULL(temp.dtmEndDate, ItemSpecialPricing.dtmEndDate)
 									FROM @tempITEMSPECIALPRICING temp
@@ -1114,6 +1120,7 @@ BEGIN TRY
 									-- UPDATE ITEM PECIAL PRICING
 									EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 											@dblPromotionalSalesPrice	= @dblUnitAfterDiscount 
+											, @dblPromotionalCost		= @dblCost 
 											, @dtmBeginDate				= @dtmBeginDate 
 											, @dtmEndDate 				= @dtmEndDate 
 											, @intItemSpecialPricingId  = @intItemSpecialPricingId
@@ -1139,6 +1146,7 @@ BEGIN TRY
 											 , Item.strDescription
 											 , ItemSpecialPricing.intItemSpecialPricingId
 											 , ItemSpecialPricing.dblUnitAfterDiscount
+											 , ItemSpecialPricing.dblCost
 											 , ItemSpecialPricing.dtmBeginDate
 											 , ItemSpecialPricing.dtmEndDate
 									FROM tblICItemSpecialPricing ItemSpecialPricing

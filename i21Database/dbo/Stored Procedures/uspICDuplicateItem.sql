@@ -12,7 +12,7 @@ BEGIN
 		@NewItemNo NVARCHAR(50),
 		@NewItemNoWithCounter NVARCHAR(50),
 		@counter INT
-	SELECT @ItemNo = strItemNo, @NewItemNo = strItemNo + '-copy' FROM tblICItem WHERE intItemId = @ItemId
+	SELECT @ItemNo = strItemNo, @NewItemNo = LEFT(strItemNo, 40) + '-copy' FROM tblICItem WHERE intItemId = @ItemId
 	IF EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo = @NewItemNo)
 	BEGIN
 		SET @counter = 1
@@ -382,7 +382,8 @@ BEGIN
 	-----------------------------------
 	-- Duplicate Item Location table --
 	-----------------------------------
-	INSERT INTO tblICItemLocation(intItemId,
+	INSERT INTO tblICItemLocation(
+		intItemId,
 		intLocationId,
 		intVendorId,
 		strDescription,
@@ -444,7 +445,8 @@ BEGIN
 		intSort,
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
-		ysnActive
+		ysnActive,
+		intAllowZeroCostTypeId
 	)
 	SELECT @NewItemId,
 		intLocationId,
@@ -508,7 +510,8 @@ BEGIN
 		intSort,
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
-		ysnActive
+		ysnActive,
+		intAllowZeroCostTypeId
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------
@@ -637,6 +640,7 @@ BEGIN
 		dblDiscountThruAmount,
 		dblAccumulatedQty,
 		dblAccumulatedAmount,
+		dblCost,
 		intSort )
 	SELECT @NewItemId,
 		dbo.fnICGetItemLocationIdFromDuplicateItem(intItemLocationId, @NewItemId),
@@ -652,6 +656,7 @@ BEGIN
 		dblDiscountThruAmount,
 		dblAccumulatedQty,
 		dblAccumulatedAmount,
+		dblCost,
 		intSort 
 	FROM tblICItemSpecialPricing
 	WHERE intItemId = @ItemId
