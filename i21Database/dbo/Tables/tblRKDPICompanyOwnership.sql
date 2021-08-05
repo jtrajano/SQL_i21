@@ -16,3 +16,8 @@
     , CONSTRAINT [PK_tblRKDPICompanyOwnership] PRIMARY KEY ([intDPICompanyOwnershipId])
 	, CONSTRAINT [FK_tblRKDPICompanyOwnership_tblRKDPIHeader] FOREIGN KEY ([intDPIHeaderId]) REFERENCES [tblRKDPIHeader]([intDPIHeaderId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKDPICompanyOwnership_intDPIHeaderId]
+	ON [dbo].[tblRKDPICompanyOwnership] ([intDPIHeaderId]);   
+GO  

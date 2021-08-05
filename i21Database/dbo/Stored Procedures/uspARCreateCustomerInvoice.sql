@@ -89,6 +89,7 @@
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT				= NULL
 	,@ItemCostTypeId				INT				= NULL
 	,@ItemMarginById				INT				= NULL
 	,@ItemCommentTypeId				INT				= NULL
@@ -96,11 +97,14 @@
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
 	,@ItemContractHeaderId			INT				= NULL
-	,@ItemContractDetailId			INT				= NULL			
+	,@ItemContractDetailId			INT				= NULL
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
 	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemStandardWeight			NUMERIC(38,20)  = 0.000000
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
@@ -201,7 +205,8 @@ END
 
 IF ISNULL(@EntityContactId, 0) = 0
 	BEGIN
-		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
+		--SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityId = @EntityCustomerId
 	END
 
 IF ISNULL(@TransactionType, '') = ''
@@ -371,7 +376,7 @@ IF (@TransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Ca
 		RETURN 0;
 	END
 
-IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund'))
+IF (@Type NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Cash Refund', 'Agronomy', 'Dealer Credit Card'))
 	BEGIN		
 		IF ISNULL(@RaiseError,0) = 1
 			RAISERROR('%s is not a valid invoice type!', 16, 1, @TransactionType);
@@ -560,7 +565,7 @@ BEGIN TRY
 		,[intShipmentId]				= @ShipmentId 
 		,[intTransactionId]				= @TransactionId
 		,[intMeterReadingId]			= @MeterReadingId
-		,[intContractHeaderId]			= @ItemContractHeaderId
+		,[intContractHeaderId]			= @ContractHeaderId
 		,[intOriginalInvoiceId]			= @OriginalInvoiceId
 		,[intLoadId]                    = @LoadId
 		,[intEntityId]					= @EntityId
@@ -703,6 +708,7 @@ BEGIN TRY
 		,@ItemRecipeItemId				= @ItemRecipeItemId
 		,@ItemRecipeId					= @ItemRecipeId
 		,@ItemSublocationId				= @ItemSublocationId
+		,@ItemPriceFixationDetailId		= @ItemPriceFixationDetailId
 		,@ItemCostTypeId				= @ItemCostTypeId
 		,@ItemMarginById				= @ItemMarginById
 		,@ItemCommentTypeId				= @ItemCommentTypeId
@@ -710,12 +716,15 @@ BEGIN TRY
 		,@ItemRecipeQty					= @ItemRecipeQty		
 		,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 		,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+		,@ContractHeaderId				= @ContractHeaderId
+		,@ContractDetailId				= @ContractDetailId
 		,@ItemContractHeaderId			= @ItemContractHeaderId
 		,@ItemContractDetailId			= @ItemContractDetailId
 		,@ItemShipmentId				= @ShipmentId
 		,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 		,@ItemWeightUOMId				= @ItemWeightUOMId
 		,@ItemWeight					= @ItemWeight
+		,@ItemStandardWeight			= @ItemStandardWeight
 		,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 		,@ItemShipmentTareWt			= @ItemShipmentTareWt
 		,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -745,6 +754,9 @@ BEGIN TRY
         ,@ItemAddonDetailKey            = @ItemAddonDetailKey
         ,@ItemAddonParent               = @ItemAddonParent
         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+		,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+		,@ItemCurrencyExchangeRateId		= @ItemCurrencyExchangeRateId
+		,@ItemCurrencyExchangeRate			= @ItemCurrencyExchangeRate
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN

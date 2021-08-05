@@ -598,6 +598,33 @@ BEGIN
 			,@strAdjustmentDescription
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		
+		-- BEGIN 
+			
+		-- 	DECLARE @TransactionLinks udtICTransactionLinks
+		-- 	DELETE FROM @TransactionLinks
+			
+		-- 	IF EXISTS (SELECT intSourceId FROM dbo.vyuICGetAdjustmentDetailSource WHERE intInventoryAdjustmentId = @intTransactionId AND intSourceId IS NOT NULL)
+		-- 	BEGIN
+			
+		-- 		INSERT INTO @TransactionLinks (
+		-- 			strOperation, -- Operation
+		-- 			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+		-- 			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+		-- 		)
+		-- 		SELECT 'Create',
+		-- 			Adjustment.intSourceId, 
+		-- 			COALESCE(Adjustment.strSourceTransactionNo, 'Missing Transaction No'), 
+		-- 			'None', 
+		-- 			'None',
+		-- 			@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Adjustment'
+		-- 		FROM dbo.vyuICGetAdjustmentDetailSource Adjustment
+		-- 		WHERE intInventoryAdjustmentId = @intTransactionId
+
+		-- 		EXEC dbo.uspICAddTransactionLinks @TransactionLinks
+
+		-- 	END
+		-- END
 	END 
 END   
 
@@ -717,6 +744,7 @@ BEGIN
 		WHEN 9 THEN 'Inventory Adjustment - Lot Owner Change'
 		WHEN 10 THEN 'Inventory Adjustment - Opening Inventory'
 		WHEN 11 THEN 'Inventory Adjustment - Change Lot Weight'
+		WHEN 12 THEN 'Inventory Adjustment - Closing Balance'
 		ELSE NULL END
 	IF @ysnPost = 1
 	BEGIN
@@ -734,16 +762,16 @@ BEGIN
 			,intItemUOMId
 		)
 		SELECT
-			  d.intItemId
-			, @strAdjustmentType
-			, a.dtmAdjustmentDate
-			, 'Inventory Adjustment'
-			, a.strAdjustmentNo
-			, COALESCE(d.dblNewCost, d.dblCost, u.dblUnitQty, 1) * COALESCE(d.dblNewQuantity, d.dblQuantity)
-			, COALESCE(d.dblNewQuantity, d.dblQuantity)
-			, COALESCE(d.dblNewWeight, d.dblWeight)
-			, COALESCE(d.dblNewCost, d.dblCost)
-			, d.intItemUOMId
+			intItemId = d.intItemId
+			,strSourceTransactionType = @strAdjustmentType
+			,dtmDate = a.dtmAdjustmentDate
+			,strInvoiceType = 'Inventory Adjustment'
+			,strInvoiceNo = a.strAdjustmentNo 
+			,dblInvoiceAmount = COALESCE(d.dblNewCost, d.dblCost, 0) * COALESCE(d.dblNewQuantity, d.dblQuantity, 0)
+			,dblQty = COALESCE(d.dblNewQuantity, d.dblQuantity, 0)
+			,dblPricePerUOM = COALESCE(d.dblNewCost, d.dblCost, 0)
+			,dblNetWeight = COALESCE(d.dblNewWeight, d.dblWeight)
+			,intItemUOMId = d.intItemUOMId
 		FROM tblICInventoryAdjustment a
 		INNER JOIN tblICInventoryAdjustmentDetail d ON d.intInventoryAdjustmentId = a.intInventoryAdjustmentId
 		INNER JOIN tblICItem i ON i.intItemId = d.intItemId

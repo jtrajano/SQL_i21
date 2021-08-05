@@ -273,7 +273,7 @@ BEGIN TRY
 						FROM dbo.fnSplitString(@strLotId, '^')
 						)
 				) AS DT
-				,@tblMFNoOfLabel
+				inner join @tblMFNoOfLabel on 1=1
 			ORDER BY DT.strParentLotNumber
 		END
 		ELSE
@@ -320,7 +320,7 @@ BEGIN TRY
 						)
 					AND l.dblQty > 0
 				) AS DT
-				,@tblMFNoOfLabel
+				inner join @tblMFNoOfLabel on 1=1
 			ORDER BY DT.strParentLotNumber
 		END
 	END

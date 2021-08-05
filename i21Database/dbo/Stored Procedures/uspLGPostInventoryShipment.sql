@@ -28,6 +28,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 	,@intItemId AS INT
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType
+	,@ChargesAPClearing AS APClearing
 	,@intReturnValue AS INT
 DECLARE @dummyGLEntries AS RecapTableType
 
@@ -122,6 +123,25 @@ BEGIN
 
 		GOTO Post_Exit
 	END
+END
+
+
+-- Check if associated Sales Contract is priced
+BEGIN
+	DECLARE @strUnpricedContractSequence NVARCHAR(500) = NULL
+	SELECT TOP 1 @strUnpricedContractSequence = 'Contract ' + CH.strContractNumber + '/' + CAST(CD.intContractSeq AS NVARCHAR(10)) 
+		+ ' is not yet priced. Please price the contract to proceed.'
+	FROM tblLGLoad L INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+	INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+	WHERE L.intLoadId = @intTransactionId AND CH.intPricingTypeId = 3 AND CD.intPricingTypeId <> 1
+
+	IF (@strUnpricedContractSequence IS NOT NULL)
+	BEGIN
+		RAISERROR (@strUnpricedContractSequence,16,1)
+		GOTO Post_Exit
+	END
+
 END
 
 -- Check if the Shipment quantity matches the total Quantity in the Lot
@@ -222,6 +242,8 @@ BEGIN
 
 	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
 	BEGIN 
+		EXEC uspLGRecalculateLoadCosts @intTransactionId, @intEntityUserSecurityId
+		
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -265,6 +287,52 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
+		--Insert AP Clearing
+		INSERT INTO @ChargesAPClearing (
+			intTransactionId
+			,strTransactionId
+			,intTransactionType
+			,strReferenceNumber
+			,dtmDate
+			,intEntityVendorId
+			,intLocationId
+			,intTransactionDetailId
+			,intAccountId
+			,intItemId
+			,intItemUOMId
+			,dblQuantity
+			,dblAmount
+			,intOffsetId
+			,strOffsetId
+			,intOffsetDetailId
+			,intOffsetDetailTaxId
+			,strCode)
+		SELECT DISTINCT
+			intTransactionId = L.intLoadId
+			,strTransactionId = L.strLoadNumber
+			,intTransactionType = 5
+			,strReferenceNumber = L.strBLNumber
+			,dtmDate = GL.dtmDate
+			,intEntityVendorId = LC.intVendorId
+			,intLocationId = IL.intLocationId
+			,intTransactionDetailId = LC.intLoadCostId
+			,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+			,intItemId = LC.intItemId
+			,intItemUOMId = NULL
+			,dblQuantity = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+			,dblAmount = LC.dblAmount
+			,intOffsetId = NULL
+			,strOffsetId = NULL
+			,intOffsetDetailId = NULL
+			,intOffsetDetailTaxId = NULL
+			,strCode = 'LG'
+		FROM tblLGLoad L
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
+			LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+			OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
+		WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
+			AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
 	END 
 
 	-- Get the items to post  
@@ -299,7 +367,7 @@ BEGIN
 								ELSE 
 									ISNULL(DetailLot.intItemUOMId, 0)
 								END
-			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+			,dtmDate = dbo.fnRemoveTimeOnDate(L.dtmScheduledDate)
 			,dblQty = -1 * COALESCE(DetailLot.dblLotQuantity, LoadDetail.dblQuantity, 0)
 			,dblUOMQty = ISNULL(LotItemUOM.dblUnitQty, ItemUOM.dblUnitQty)
 			,dblCost = ISNULL(CASE 
@@ -646,6 +714,56 @@ BEGIN
 				,@ysnPost
 				
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
+
+			--Insert AP Clearing
+			INSERT INTO @ChargesAPClearing (
+				intTransactionId
+				,strTransactionId
+				,intTransactionType
+				,strReferenceNumber
+				,dtmDate
+				,intEntityVendorId
+				,intLocationId
+				,intTransactionDetailId
+				,intAccountId
+				,intItemId
+				,intItemUOMId
+				,dblQuantity
+				,dblAmount
+				,intOffsetId
+				,strOffsetId
+				,intOffsetDetailId
+				,intOffsetDetailTaxId
+				,strCode)
+			SELECT DISTINCT
+				intTransactionId = L.intLoadId
+				,strTransactionId = L.strLoadNumber
+				,intTransactionType = 5
+				,strReferenceNumber = L.strBLNumber
+				,dtmDate = GL.dtmDate
+				,intEntityVendorId = LC.intVendorId
+				,intLocationId = IL.intLocationId
+				,intTransactionDetailId = LC.intLoadCostId
+				,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+				,intItemId = LC.intItemId
+				,intItemUOMId = NULL
+				,dblQuantity = CASE WHEN LC.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE LD.dblQuantity END
+				,dblAmount = LC.dblAmount
+				,intOffsetId = NULL
+				,strOffsetId = NULL
+				,intOffsetDetailId = NULL
+				,intOffsetDetailTaxId = NULL
+				,strCode = 'LG'
+			FROM tblLGLoad L
+				INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+				INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
+				LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+				OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
+			WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
+				AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
+				AND EXISTS (SELECT TOP 1 1 FROM tblAPClearing APC 
+							WHERE APC.intTransactionDetailId = LC.intLoadCostId AND APC.intTransactionId = L.intLoadId 
+							AND APC.intTransactionType = 5 AND APC.ysnPostAction = 1)
 		END
 
 		-- Unpost the Taxes from the Other Charges
@@ -790,6 +908,9 @@ BEGIN
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
+
+		IF (@ENABLE_ACCRUALS_FOR_OUTBOUND = 1)
+			EXEC dbo.uspAPClearing @ChargesAPClearing, @ysnPost
 	END
 
 	UPDATE dbo.tblLGLoad
@@ -845,7 +966,7 @@ BEGIN
 		,[strShipmentId] = L.strLoadNumber
 		,[intOrderType] = 1
 		,[intSourceType] = -1
-		,[dtmDate] = GETDATE()
+		,[dtmDate] = L.dtmScheduledDate
 		,[intCurrencyId] = NULL
 		,[dblExchangeRate] = 1
 		,[intEntityCustomerId] = LD.intCustomerEntityId
@@ -892,6 +1013,9 @@ BEGIN
 	EXEC dbo.uspICPostStockReservation @intTransactionId
 		,@INVENTORY_SHIPMENT_TYPE
 		,@ysnPost
+
+	-- Add/Remove Pending Claim entry
+	EXEC uspLGAddPendingClaim @intTransactionId, 2, @ysnPost
 
 	COMMIT TRAN @TransactionName
 END

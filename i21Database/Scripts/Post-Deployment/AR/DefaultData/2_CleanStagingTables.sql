@@ -14,3 +14,13 @@ TRUNCATE TABLE tblARProductRecapStagingTable
 
 GO
 print('/*******************  END - Truncating all AR staging tables  *******************/')
+
+print('/*******************  BEGIN - Default Custom Report Settings  *******************/')
+GO
+
+UPDATE tblARCompanyPreference
+SET strReportGroupName      = ISNULL(strReportGroupName, 'AccountsReceivable')
+  , strInvoiceReportName    = ISNULL(strInvoiceReportName, 'Standard')
+
+GO
+print('/*******************  END - Default Custom Report Settings  *******************/')

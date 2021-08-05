@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -44,6 +46,7 @@ SELECT
 ,cfAccount.ysnPrintMiscellaneous
 ,cfAccount.strPrintSiteAddress
 ,cfAccount.ysnSummaryByCard
+,cfAccount.ysnSummaryByDepartmentProduct
 ,cfAccount.ysnSummaryByDepartment
 ,cfAccount.ysnSummaryByMiscellaneous
 ,cfAccount.ysnSummaryByProduct
@@ -61,6 +64,7 @@ SELECT
 ,cfAccount.ysnShowDriverPinDescriptionOnly
 ,cfAccount.ysnPageBreakByPrimarySortOrder
 ,cfAccount.ysnSummaryByDeptDriverPinProd
+,cfAccount.strDepartmentGrouping
 ----------------------------------------------
 ,strCustomerName = emEntity.strName
 ,emEntity.strName
@@ -247,8 +251,29 @@ SELECT
 ,dblTotalTax				= cfTransTotalTax.dblTotalTax
 ,dblTotalSST				= cfTransSSTTax.dblTotalTax
 ,dblTaxExceptSST			= cfTransExceptSSTTax.dblTotalTax
-,strEmailDistributionOption = arCustomerContact.strEmailDistributionOption
+--,strEmailDistributionOption = arCustomerContact.strEmailDistributionOption
 ,strEmail					= arCustomerContact.strEmail
+--,strDocumentDelivery		= emEntity.strDocumentDelivery
+,strEmailDistributionOption = 
+	(SELECT (CASE 
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'print , email , CF Invoice'
+
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email , CF Invoice'
+
+		WHEN ( (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email , CF Invoice'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+	END))
 ,cfDriverPin.strDriverPinNumber
 ,cfDriverPin.strDriverDescription
 ,cfDriverPin.intDriverPinId
@@ -411,8 +436,13 @@ OUTER APPLY (
 	WHERE intEntityId = cfTrans.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '' AND ISNULL(ysnActive,0) = 1
 ) AS arCustomerContact
 -------------------------------------------------------------
-WHERE ISNULL(cfTrans.ysnPosted,0) = 1 
-AND ISNULL(cfTrans.ysnInvalid,0) = 0
+WHERE (ysnPosted = 1 AND ysnPosted IS NOT NULL) 
+AND (ysnInvalid = 0 OR ysnInvoiced IS NULL) 
+AND cfTrans.intTransactionId NOT IN (
+			SELECT tblCFTransaction.intTransactionId FROM tblCFTransaction
+			INNER JOIN tblCFNetwork ON tblCFTransaction.intNetworkId = tblCFNetwork.intNetworkId
+			 where strTransactionType = 'Foreign Sale' and (tblCFNetwork.ysnPostForeignSales = 0 OR tblCFNetwork.ysnPostForeignSales IS NULL))
+
 GO
 
 

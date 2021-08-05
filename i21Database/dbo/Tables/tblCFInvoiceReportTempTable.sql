@@ -71,6 +71,7 @@
     [dblInvoiceTotal]                 NUMERIC (18, 6) NULL,
     [ysnPrintMiscellaneous]           BIT             NULL,
     [ysnSummaryByCard]                BIT             NULL,
+    [ysnSummaryByDepartmentProduct]   BIT             NULL,
     [ysnSummaryByDepartment]          BIT             NULL,
     [ysnSummaryByMiscellaneous]       BIT             NULL,
     [ysnSummaryByProduct]             BIT             NULL,
@@ -100,6 +101,8 @@
     [ysnShowDriverPinDescriptionOnly] BIT             NULL,
 	[ysnPageBreakByPrimarySortOrder]  BIT			  NULL,
 	[ysnSummaryByDeptDriverPinProd]   BIT			  NULL,
+	[strDepartmentGrouping]           NVARCHAR(MAX)	  NULL,
+    
 );
 
 

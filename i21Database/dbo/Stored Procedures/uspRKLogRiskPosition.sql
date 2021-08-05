@@ -166,9 +166,11 @@ BEGIN
 			, @intUserId = intUserId
 			, @intEntityId = intEntityId
 			, @strNotes = strNotes
+			, @strInOut = strInOut
 			, @ysnDelete = ysnDelete
 			, @strMiscFields = strMiscFields
 		FROM #tmpSummaryLogs
+		ORDER BY dtmTransactionDate
 
 		IF OBJECT_ID('tempdb..#tmpPrevLog') IS NOT NULL
 			DROP TABLE #tmpPrevLog
@@ -182,7 +184,7 @@ BEGIN
 				AND strBucketType = @strBucketType
 				AND strTransactionType = @strTransactionType
 				AND strTransactionNumber = @strTransactionNumber
-				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType OR intFutureMarketId <> @intFutureMarketId)
 				AND ysnNegate IS NULL)
 			BEGIN
 				INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Fixing manual changes on derivative ' + ISNULL(@strTransactionNumber, '') + '.')
@@ -257,7 +259,7 @@ BEGIN
 					AND strBucketType = @strBucketType
 					AND strTransactionType = @strTransactionType
 					AND strTransactionNumber = @strTransactionNumber
-					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType OR intFutureMarketId <> @intFutureMarketId)
 					AND ysnNegate IS NULL
 
 
@@ -266,7 +268,7 @@ BEGIN
 					AND strBucketType = @strBucketType
 					AND strTransactionType = @strTransactionType
 					AND strTransactionNumber = @strTransactionNumber
-					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType OR intFutureMarketId <> @intFutureMarketId)
 					AND ysnNegate IS NULL
 			END
 		END
@@ -510,7 +512,7 @@ BEGIN
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = CASE WHEN UPPER(@strDistributionType) = 'BUY' THEN 'IN' ELSE 'OUT' END
+				, strInOut = @strInOut
 				, dblOrigNoOfLots = @dblNoOfLots 
 				, @dblContractSize
 				, dblOrigQty = ISNULL(@dblQty, @dblNoOfLots * @dblContractSize)

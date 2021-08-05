@@ -16,7 +16,8 @@ SELECT [Order].intOrderId
 	, Driver.strDriverNo
 	, Driver.strDriverName
 	, [Order].intRouteId
-	, Route.strRouteId
+	, [LGRoute].strRouteNumber as strRouteId
+	, [LGRouteOrder].intSequence
 	, [Order].intStopNumber
 	, [Order].intConcurrencyId
 	, [Order].intShiftId
@@ -25,5 +26,6 @@ FROM tblMBILOrder [Order]
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = [Order].intEntityId
 LEFT JOIN tblSMTerm Term ON Term.intTermID = [Order].intTermId
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = [Order].intDriverId
-LEFT JOIN tblTMRoute Route ON Route.intRouteId = [Order].intRouteId
+LEFT JOIN tblLGRouteOrder LGRouteOrder ON [LGRouteOrder].strOrderNumber = [Order].strOrderNumber
+LEFT JOIN tblLGRoute LGRoute ON [LGRoute].intRouteId = [LGRouteOrder].intRouteId and [LGRoute].ysnPosted = 1
 LEFT JOIN tblMBILShift Shift ON Shift.intShiftId = [Order].intShiftId

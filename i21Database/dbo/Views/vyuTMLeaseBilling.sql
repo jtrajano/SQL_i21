@@ -115,11 +115,11 @@ LEFT JOIN vyuTMSiteDeliveryHistoryTotal HH
 	ON A.intSiteID = HH.intSiteId AND HH.intCurrentSeasonYear = HH.intSeasonYear
 LEFT JOIN vyuTMSiteDeliveryHistoryTotal II
 	ON A.intSiteID = II.intSiteId AND (II.intCurrentSeasonYear - 1) = II.intSeasonYear
-,(	SELECT TOP 1 
+LEFT JOIN (SELECT TOP 1 
 		ysnEnableLeaseBillingAboveMinUse 
 		,strLeaseBillingIncentiveCalculation
 	FROM tblTMPreferenceCompany
-)Q
+)Q ON 1=1 
 WHERE O.ysnActive = 1
 	AND C.strLeaseStatus <> 'Inactive'
 	AND B.strOwnership <> 'Customer Owned'

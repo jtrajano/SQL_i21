@@ -1,9 +1,11 @@
 ﻿CREATE TABLE [tblSCDisconnectedScheduleCreationHistory]
 (
 [intHistoryId]		INT IDENTITY (1, 1) ,
+[intScheduleId]	    INT NULL,
 [strJobId]			NVARCHAR(MAX) NULL,
 [strStatus]			NVARCHAR(200) NULL,
 [strRemarks]		NVARCHAR(MAX) NULL,
+[ysnRecurring]      BIT NULL DEFAULT(0),
 [strTempJobId]		NVARCHAR(MAX) NULL,
 [dtmDateOfExecution] DATETIME NULL,
 [dtmDateCreated]	DATETIME NULL,

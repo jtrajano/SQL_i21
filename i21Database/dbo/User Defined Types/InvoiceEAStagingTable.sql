@@ -19,6 +19,7 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
 	,[strNutrientAnalysis]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strBillingMethod]						NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
 	,[strApplicatorLicense]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 
 	--Detail																																															
     ,[strItemNo]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL
@@ -33,4 +34,7 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
 	,[ysnRecomputeTax]						BIT												NULL		-- Indicate whether to recompute for Taxes based on the current Tax setup	
 	,[strSubFormula]	    				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	,[ysnConvertToStockUOM]					BIT                                             NULL		-- If true, intItemUOMId will be converted to Stock UOM
+	,[strBinNumber]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strGroupNumber]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strFeedDiet]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 )

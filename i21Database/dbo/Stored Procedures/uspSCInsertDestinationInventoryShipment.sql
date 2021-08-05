@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCInsertDestinationInventoryShipment]
-	@intTicketId INT,
-	@intUserId INT,
-	@ysnPost BIT
+	@ScaleDWGAllocation ScaleDWGAllocation READONLY
+	,@intTicketId INT
+	,@intUserId INT
+	,@ysnPost BIT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -37,8 +38,15 @@ DECLARE @DestinationItems AS DestinationShipmentItem
 		,@dtmScaleDate DATETIME
 		,@dblQuantity NUMERIC(38,20)
 		,@currencyDecimal INT;
+DECLARE @ysnHasISContract BIT = 0;
 
 BEGIN TRY
+
+	IF EXISTS(SELECT TOP 1 1 FROM @ScaleDWGAllocation)
+	BEGIN
+		SET @ysnHasISContract = 1
+	END
+
 	SELECT @dblQuantity = SUM(dblQuantity) FROM tblICInventoryShipmentItem ICSI 
 	LEFT JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 	WHERE ICSI.intSourceId = @intTicketId AND intSourceType = 1
@@ -91,7 +99,12 @@ BEGIN TRY
 		,[intItemLocationId]			= SC.intProcessingLocationId
 		,[intItemUOMId]					= SC.intItemUOMIdTo
 		,[dtmDate]						= SC.dtmTicketDateTime
-		,[dblQty]						= CASE WHEN @dblQuantity != SC.dblNetUnits THEN ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblNetUnits ELSE ICSI.dblQuantity END
+		,[dblQty]						= 	CASE WHEN @ysnHasISContract = 1
+										  	THEN 
+											  	ICSI.dblQuantity + ISNULL(DWGAlloc.dblUnitAdjustment,0)
+										  	ELSE
+										  		(CASE WHEN @dblQuantity != SC.dblNetUnits THEN ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblNetUnits ELSE ICSI.dblQuantity END)
+										  	END
 		,[dblUOMQty]					= SC.dblConvertedUOMQty
 		,[dblCost]						= ICSI.dblUnitPrice
 		,[intCurrencyId]				= SC.intCurrencyId
@@ -103,18 +116,36 @@ BEGIN TRY
 		,[intScaleSetupId]				= SC.intScaleSetupId
 		,[dblFreightRate]				= ISNULL(SC.dblFreightRate, 0)
 		,[dblTicketFees]				= SC.dblTicketFees
-		,[dblGross]						= CASE WHEN @dblQuantity != SC.dblNetUnits THEN ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblGrossUnits ELSE ICSI.dblGross END
-		,[dblTare]						= CASE 
-											WHEN @dblQuantity != SC.dblNetUnits 
-												THEN (ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblGrossUnits) - (ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblNetUnits)
-											ELSE ICSI.dblGross - ICSI.dblQuantity 
-										END
+		,[dblGross]						= 	CASE WHEN @ysnHasISContract = 1
+										  	THEN
+												CASE WHEN SC.dblNetUnits <> SC.dblDWGOriginalNetUnits
+												THEN
+													ROUND((ICSI.dblQuantity + ISNULL(DWGAlloc.dblUnitAdjustment,0))/SC.dblNetUnits,@currencyDecimal) * SC.dblGrossUnits
+												ELSE
+													ICSI.dblGross
+												END
+										  	ELSE
+												(CASE WHEN @dblQuantity != SC.dblNetUnits THEN ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblGrossUnits ELSE ICSI.dblGross END)
+											END
+		,[dblTare]						= 	CASE WHEN @ysnHasISContract = 1
+										  	THEN
+											  	CASE WHEN SC.dblNetUnits <> SC.dblDWGOriginalNetUnits
+													THEN (ROUND((ICSI.dblQuantity + ISNULL(DWGAlloc.dblUnitAdjustment,0.0))/SC.dblNetUnits,@currencyDecimal) * SC.dblGrossUnits) - (ROUND(((ICSI.dblQuantity + ISNULL(DWGAlloc.dblUnitAdjustment,0.0)) / SC.dblNetUnits),@currencyDecimal) * SC.dblNetUnits)
+												ELSE ICSI.dblGross - ICSI.dblQuantity 
+												END
+											ELSE
+												(CASE WHEN @dblQuantity != SC.dblNetUnits 
+													THEN (ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblGrossUnits) - (ROUND((ICSI.dblQuantity / @dblQuantity),@currencyDecimal) * SC.dblNetUnits)
+												ELSE ICSI.dblGross - ICSI.dblQuantity 
+												END)
+											END
 		,[strChargesLink]				= ICSI.strChargesLink
 		,[ysnIsStorage]					= CASE WHEN ICSI.intOwnershipType = 1 THEN 1 ELSE 0 END
 	FROM tblSCTicket SC 
 	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intSourceId = SC.intTicketId
 	LEFT JOIN tblICInventoryShipment ICS ON ICS.intInventoryShipmentId = ICSI.intInventoryShipmentId
 	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ICSI.intLineNo
+	LEFT JOIN @ScaleDWGAllocation DWGAlloc ON  ICSI.intInventoryShipmentItemId = DWGAlloc.intInventoryShipmentItemId
 	WHERE SC.intTicketId = @intTicketId AND ICS.intSourceType = 1 AND CASE WHEN CTD.intPricingTypeId = 2 THEN 1 ELSE CASE WHEN ISNULL(ICSI.ysnAllowInvoice,1) = 1 THEN 1 ELSE 0 END END = 1 
 
 	INSERT INTO @DestinationItems (
@@ -184,10 +215,10 @@ BEGIN TRY
 												CASE
 													WHEN SC.ysnIsStorage = 0 THEN 0
 													ELSE
-													CASE
+													ROUND(CASE
 														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SC.intTicketId, SC.intEntityId, QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId,SC.dblCost, 0) * -1)
 														ELSE (dbo.fnSCCalculateDiscount(SC.intTicketId,QM.intTicketDiscountId, SC.dblQty, GR.intUnitMeasureId,SC.dblCost) * -1)
-													END
+													END,2)
 												END 
 											END
 	,[intOtherChargeEntityVendorId]		= NULL
@@ -224,8 +255,8 @@ BEGIN TRY
 	)
 	SELECT	
 		intInventoryShipmentId		= SC.intTransactionHeaderId 
-		,intContractId				= SC.intContractHeaderId 
-		,intContractDetailId		= SC.intContractDetailId 
+		,intContractId				= NULL
+		,intContractDetailId		= NULL
 		,intChargeId				= SCSetup.intDefaultFeeItemId
 		,strCostMethod				= IC.strCostMethod 
 		,dblRate					= CASE
@@ -242,8 +273,8 @@ BEGIN TRY
 										WHEN IC.strCostMethod = 'Per Unit' THEN 0
 										WHEN IC.strCostMethod = 'Amount' THEN 
 										CASE
-											WHEN @ysnDeductFeesCusVen = 0 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2)
-											WHEN @ysnDeductFeesCusVen = 1 THEN ROUND(SC.dblQty * SC.dblTicketFees, 2) * -1
+											WHEN @ysnDeductFeesCusVen = 0 THEN ROUND(SC.dblTicketFees, 2)
+											WHEN @ysnDeductFeesCusVen = 1 THEN ROUND(SC.dblTicketFees, 2) * -1
 										END
 									END
 		,intEntityVendorId			= null
@@ -836,6 +867,11 @@ BEGIN TRY
 			WHERE ContractCost.intItemId != @intFreightItemId AND ContractCost.dblRate != 0 
 			AND SC.intTicketId = @intTicketId
 		END
+		
+	---Update ysnAddPayable. Do not add charges to payable if DWG is unposted
+	UPDATE @ShipmentCharges
+	SET ysnAddPayable = @ysnPost
+
 
 	-- Call the uspICPostDestinationInventoryShipment sp to post the following:
 	-- 1. Destination qty 

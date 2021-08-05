@@ -3,22 +3,29 @@ AS
 
 (
 	SELECT intWorkOrderId
-	, WO.strType
-	, WO.intItemId
-	, ITEM.strItemNo
-	, ENTITYLOCATION.intEntityLocationId
-	, ENTITYLOCATION.strLocationName
+	, WO.intApplicationTypeId
+	, TYPE.strType
+	, WO.intCropId
+	, CROP.strCrop
+	, COMPANYLOCATION.intCompanyLocationId
+	, COMPANYLOCATION.strLocationName
 	, WO.strStatus
 	, WO.strOrderNumber
 	, WO.intEntityCustomerId
+	, WO.intEntityApplicatorId
+	, APPLICATOR.strName AS strApplicatorName
 	, CUSTOMER.strName AS strCustomerName
 	, WO.intFarmFieldId
+	, WO.intTermId
 	, TERM.strTerm
 	, FARMLOCATION.strLocationName AS strFarmFieldName
 	, WO.dblAcres
+	, WO.dtmCreatedDate
+	, WO.dtmProcessDate
 	, WO.dtmApplyDate
 	, WO.dtmDueDate
-	, strApplicatorLicenseNumber
+	, WO.intApplicatorLicenseId
+	, LICENSE.strLicenseNumber AS strApplicatorLicenseNo
 	, WO.intOrderedById
 	, ORDEREDBY.strName  AS strOrderedBy
 	, WO.intEntitySalesRepId
@@ -42,19 +49,29 @@ AS
 	, WO.strTemperatureUOM
 	, WO.intApplicationTargetId
 	, TARGET.strTargetName
+	, WO.ysnShipped
+	, WO.ysnFinalized
+	, WO.dblWorkOrderTotal
+	, WO.dblWorkOrderSubtotal
+	, WO.dblTotalDiscount
+	, WO.strApplicationRateUOM
+	, WO.intAGQtyUOMId
+	, WO.intAGAreaUOMId
+	, QTYUOM.strSymbol AS strQtyUOM
+	, AREAUOM.strSymbol AS strAreaUOM
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 
 	LEFT JOIN (
-		SELECT intItemId 
-		, strItemNo
-		FROM tblICItem WITH(NOLOCK)  
-	) ITEM ON ITEM.intItemId = WO.intItemId
+		SELECT intCropId 
+		, strCrop
+		FROM tblAGCrop WITH(NOLOCK)  
+	) CROP ON CROP.intCropId = WO.intCropId
 	LEFT JOIN (
-		SELECT intEntityLocationId
+		SELECT intCompanyLocationId
 		, strLocationName
-		FROM tblEMEntityLocation WITH(NOLOCK)  
-	) ENTITYLOCATION ON ENTITYLOCATION.intEntityLocationId = WO.intEntityLocationId
+		FROM tblSMCompanyLocation WITH(NOLOCK)  
+	) COMPANYLOCATION ON COMPANYLOCATION.intCompanyLocationId = WO.intCompanyLocationId
 	LEFT JOIN (
 		SELECT  
 			strName
@@ -69,9 +86,9 @@ AS
 	LEFT JOIN (
 		SELECT  
 			strName
-			,intEntityCustomerId
-		FROM vyuARCustomerSearch WITH(NOLOCK)  
-	) ORDEREDBY ON ORDEREDBY.intEntityCustomerId = WO.intOrderedById
+			,intEntityId
+		FROM tblEMEntity WITH(NOLOCK)  
+	) ORDEREDBY ON ORDEREDBY.intEntityId = WO.intOrderedById
 	LEFT JOIN (
 		SELECT
 		 intEntityId
@@ -94,4 +111,30 @@ LEFT JOIN (
 	intApplicationTargetId FROM 
 	tblAGApplicationTarget WITH (NOLOCK)
 )   TARGET ON WO.intApplicationTargetId  = TARGET.intApplicationTargetId
+LEFT JOIN (
+	SELECT intApplicationTypeId,
+		strType
+		FROM tblAGApplicationType WITH (NOLOCK)
+) TYPE ON TYPE.intApplicationTypeId = WO.intApplicationTypeId
+LEFT JOIN (
+	SELECT strName,
+	intEntityId FROM
+	tblEMEntity WITH (NOLOCK)
+) APPLICATOR ON WO.intEntityApplicatorId = APPLICATOR.intEntityId
+LEFT JOIN (
+	SELECT intApplicatorLicenseId,
+	strLicenseNumber
+	FROM tblAGApplicatorLicense WITH (NOLOCK)
+
+) LICENSE ON WO.intApplicatorLicenseId = LICENSE.intApplicatorLicenseId
+LEFT JOIN (
+	SELECT intAGUnitMeasureId,
+			strSymbol
+	FROM tblAGUnitMeasure WITH(NOLOCK)  
+) QTYUOM ON WO.intAGQtyUOMId = QTYUOM.intAGUnitMeasureId
+LEFT JOIN (
+	SELECT intAGUnitMeasureId,
+			strSymbol
+	FROM tblAGUnitMeasure WITH(NOLOCK)   
+) AREAUOM ON WO.intAGAreaUOMId = AREAUOM.intAGUnitMeasureId
 ) 

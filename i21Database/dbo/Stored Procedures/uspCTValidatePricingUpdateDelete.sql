@@ -43,12 +43,11 @@ begin try
 		@ysnLoad = isnull(ch.ysnLoad,0)
 	from
 		tblCTPriceFixationDetail pfd
-		,tblCTPriceFixation pf
-		,tblCTContractHeader ch
+		inner join tblCTPriceFixation pf on pf.intPriceFixationId = pfd.intPriceFixationId
+		inner join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
 	where
 		pfd.intPriceFixationDetailId = @intPriceFixationDetailId
-		and pf.intPriceFixationId = pfd.intPriceFixationId
-		and ch.intContractHeaderId = pf.intContractHeaderId
+
 
 
 	if (@strTransaction = 'update')

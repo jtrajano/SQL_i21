@@ -14,11 +14,11 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveAvg]
 	,@dblNewValue AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
-	,@strTransactionId AS NVARCHAR(20)
+	,@strTransactionId AS NVARCHAR(40)
 	,@intSourceTransactionId AS INT
 	,@intSourceTransactionDetailId AS INT 
-	,@strSourceTransactionId AS NVARCHAR(20)
-	,@strBatchId AS NVARCHAR(20)
+	,@strSourceTransactionId AS NVARCHAR(40)
+	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT
 	,@intRelatedInventoryTransactionId AS INT = NULL 
@@ -1029,84 +1029,30 @@ END
 -- Create the auto-variance. 
 IF dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) = @AVERAGECOST 
 BEGIN 
-	INSERT INTO dbo.tblICInventoryTransaction (
-				[intItemId]
-				,[intItemLocationId]
-				,[intItemUOMId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dtmDate]
-				,[dblQty]
-				,[dblUOMQty]
-				,[dblCost]
-				,[dblValue]
-				,[dblSalesPrice]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[intTransactionId]
-				,[strTransactionId]
-				,[strBatchId]
-				,[intTransactionTypeId]
-				,[intLotId]
-				,[ysnIsUnposted]
-				,[intRelatedInventoryTransactionId]
-				,[intRelatedTransactionId]
-				,[strRelatedTransactionId]
-				,[strTransactionForm]
-				,[dtmCreated]
-				,[intCreatedEntityId]
-				,[intConcurrencyId]
-				,[intCostingMethod]
-				,[strDescription]
-				,[intForexRateTypeId]
-				,[dblForexRate]
-		)			
+		
+	DECLARE 
+		@dblAutoVariance AS NUMERIC(18, 6) 
+		,@strAutoVarianceDescription NVARCHAR(255) 
+
 	SELECT	
-			[intItemId]								= @intItemId
-			,[intItemLocationId]					= @intItemLocationId
-			,[intItemUOMId]							= NULL 
-			,[intSubLocationId]						= NULL 
-			,[intStorageLocationId]					= NULL 
-			,[dtmDate]								= @dtmDate
-			,[dblQty]								= 0
-			,[dblUOMQty]							= 0
-			,[dblCost]								= 0
-			,[dblValue]								= 
+			@dblAutoVariance = 
 					dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) 
 					- dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
-			,[dblSalesPrice]						= 0
-			,[intCurrencyId]						= NULL
-			,[dblExchangeRate]						= 1 
-			,[intTransactionId]						= @intTransactionId
-			,[strTransactionId]						= @strTransactionId
-			,[strBatchId]							= @strBatchId
-			,[intTransactionTypeId]					= @INV_TRANS_TYPE_Inventory_Auto_Variance
-			,[intLotId]								= NULL 
-			,[ysnIsUnposted]						= 0
-			,[intRelatedInventoryTransactionId]		= NULL 
-			,[intRelatedTransactionId]				= NULL 
-			,[strRelatedTransactionId]				= NULL 
-			,[strTransactionForm]					= @strTransactionForm
-			,[dtmCreated]							= GETDATE()
-			,[intCreatedEntityId]					= @intEntityUserSecurityId
-			,[intConcurrencyId]						= 1
-			,[intCostingMethod]						= @AVERAGECOST
-			,[strDescription]						= -- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
-														dbo.fnFormatMessage(
-														dbo.fnICGetErrorMessage(80078)
-														,dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
-														,Stock.dblUnitOnHand
-														,ItemPricing.dblAverageCost
-														,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
-														, DEFAULT
-														, DEFAULT
-														, DEFAULT
-														, DEFAULT
-														, DEFAULT
-														, DEFAULT
-													)
-			,[intForexRateTypeId]					= NULL 
-			,[dblForexRate]							= 1 
+			,@strAutoVarianceDescription = 
+					-- Inventory variance is created. The current item valuation is %s. The new valuation is (Qty x New Average Cost) %s x %s = %s. 
+					dbo.fnFormatMessage(
+						dbo.fnICGetErrorMessage(80078)
+						,dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId)
+						,Stock.dblUnitOnHand
+						,ItemPricing.dblAverageCost
+						,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+						, DEFAULT
+					)
 	FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 				ON ItemPricing.intItemId = Stock.intItemId
 				AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -1137,5 +1083,36 @@ BEGIN
 	WHERE	ItemPricing.intItemId = @intItemId
 			AND ItemPricing.intItemLocationId = @intItemLocationId			
 			AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId), 2) <> 0
+
+	EXEC [dbo].[uspICPostInventoryTransaction]
+			@intItemId = @intItemId
+			,@intItemLocationId = @intItemLocationId
+			,@intItemUOMId = NULL 
+			,@intSubLocationId = NULL
+			,@intStorageLocationId = NULL 
+			,@dtmDate = @dtmDate
+			,@dblQty  = @dblQty
+			,@dblUOMQty = 0
+			,@dblCost = 0
+			,@dblValue = @dblAutoVariance
+			,@dblSalesPrice = 0
+			,@intCurrencyId = NULL 
+			,@intTransactionId = @intTransactionId
+			,@intTransactionDetailId = @intTransactionDetailId
+			,@strTransactionId = @strTransactionId
+			,@strBatchId = @strBatchId
+			,@intTransactionTypeId = @INV_TRANS_TYPE_Inventory_Auto_Variance
+			,@intLotId = NULL 
+			,@intRelatedInventoryTransactionId = NULL 
+			,@intRelatedTransactionId = NULL 
+			,@strRelatedTransactionId = NULL 
+			,@strTransactionForm = @strTransactionForm
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+			,@intCostingMethod = @AVERAGECOST
+			,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
+			,@intForexRateTypeId = NULL
+			,@dblForexRate = 1
+			,@strDescription = @strAutoVarianceDescription 
+			,@intSourceEntityId = @intSourceEntityId
 			
 END

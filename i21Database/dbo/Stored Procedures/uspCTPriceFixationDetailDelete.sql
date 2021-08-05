@@ -92,7 +92,7 @@ BEGIN TRY
 				FROM vyuAPBillPayment a
 				JOIN tblAPPayment b on b.intPaymentId = a.intPaymentId
 				JOIN tblSMPaymentMethod c on c.intPaymentMethodID = b.intPaymentMethodId
-				WHERE a.intBillId = @Id and c.strPaymentMethod in ('Cash','Check','eCheck')
+				WHERE a.intBillId = @Id and c.strPaymentMethod in ('Cash','Check','eCheck','ACH')
 			)
 		begin
 			EXEC uspAPDeletePayment @Id, @intUserId
@@ -326,18 +326,37 @@ BEGIN TRY
 							@intUserId				= 	@intUserId,
 							@intTransactionId		= 	@intPriceFixationDetailId,
 							@dblTransactionQty		= 	@QtyToDelete
-	END
-	
-	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
-	if EXISTS (select top 1 1 from #ItemInvoice)
-	select @DetailId = MIN(DetailId) FROM #ItemInvoice
-	while (@DetailId is not null)
-	begin
-		
-		set @ParamDetailId = @DetailId;
 
-		select @Id = Id FROM #ItemInvoice where DetailId = @ParamDetailId;
-		select @Count = COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @Id
+		-- Summary Log
+		IF EXISTS 
+		(
+			select top 1 1 
+			from tblCTContractHeader ch
+			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+			and wg.strWhereFinalized = 'Destination'
+			where intContractHeaderId = @intContractHeaderId
+		)
+		BEGIN
+			declare @QtyToDeleteNegative numeric(18,6) = @QtyToDelete * -1;
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 	    = 	'Price Delete DWG',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@intUserId,
+								@intTransactionId		= 	@intPriceFixationDetailId,
+								@dblTransactionQty		= 	@QtyToDeleteNegative
+		END
+
+	END
+
+	IF ISNULL(@intPriceFixationDetailId,0) = 0 AND ISNULL(@intPriceFixationId, 0) <> 0
+	begin
+
+
+		SELECT @intContractHeaderId = intContractHeaderId
+			, @intContractDetailId = intContractDetailId
+		FROM tblCTPriceFixation WHERE intPriceFixationId = @intPriceFixationId
 
 		IF EXISTS 
 		(
@@ -348,30 +367,69 @@ BEGIN TRY
 			where intContractHeaderId = @intContractHeaderId
 		)
 		BEGIN
-			declare @_priceFixationDetailId int,
-					@_qtyShipped numeric(24, 10)
-			select @_priceFixationDetailId = intPriceFixationDetailId
-					,@_qtyShipped = detail.dblQtyShipped *-1
-			from tblCTPriceFixationDetailAPAR apar
-			inner join tblARInvoiceDetail detail on apar.intInvoiceDetailId = detail.intInvoiceDetailId
-			where apar.intInvoiceDetailId = @ParamDetailId
+			declare @intPriceFixationDetailIdToDelete int = 0;
+			
+			SELECT	@intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
+			WHILE	ISNULL(@intPriceFixationDetailIdToDelete,0) > 0
+			BEGIN
+				select @QtyToDelete = dblQuantity from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailIdToDelete;
 
-			-- Summary Log
-			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-								@intContractDetailId 	= 	@intContractDetailId,
-								@strSource			 	= 	'Pricing',
-								@strProcess		 	    = 	'Price Delete DWG',
-								@contractDetail 		= 	@contractDetails,
-								@intUserId				= 	@intUserId,
-								@intTransactionId		= 	@_priceFixationDetailId,
-								@dblTransactionQty		= 	@_qtyShipped
+				select @QtyToDeleteNegative = @QtyToDelete * -1;
+				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									@intContractDetailId 	= 	@intContractDetailId,
+									@strSource			 	= 	'Pricing',
+									@strProcess		 	    = 	'Price Delete DWG',
+									@contractDetail 		= 	@contractDetails,
+									@intUserId				= 	@intUserId,
+									@intTransactionId		= 	@intPriceFixationDetailIdToDelete,
+									@dblTransactionQty		= 	@QtyToDeleteNegative
+				 
+				SELECT	@intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailIdToDelete
+			END
 		END
+
+
+
+	end
+	
+	declare @strInvoiceDiscountsChargesIds nvarchar(500);
+	declare @InvoiceDiscountsChargesIds table (
+		intId nvarchar(20)
+	)
+	declare @intActiveId int = 0;
+
+	if EXISTS (select top 1 1 from #ItemInvoice)
+	select @DetailId = MIN(DetailId) FROM #ItemInvoice
+	while (@DetailId is not null)
+	begin
 		
+		set @ParamDetailId = @DetailId;
+
+		select @Id = Id FROM #ItemInvoice where DetailId = @ParamDetailId;
+		select @Count = COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @Id
+		
+		select @strInvoiceDiscountsChargesIds = strInvoiceDiscountsChargesIds from tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @ParamDetailId
 		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @ParamDetailId
 		
 		if (@Count = 1)
 		begin
 			set @ParamDetailId = null
+		end
+
+		/*THis will also delete the charges/discounts*/
+		if (isnull(@strInvoiceDiscountsChargesIds,'') <> '')
+		begin
+			insert into @InvoiceDiscountsChargesIds select Item from fnSplitString(@strInvoiceDiscountsChargesIds,',');
+			if exists (select top 1 1 from @InvoiceDiscountsChargesIds)
+			begin
+				select @intActiveId = min(convert(int,intId)) from @InvoiceDiscountsChargesIds where convert(int,intId) > @intActiveId;
+				while (@intActiveId is not null)
+				begin
+					EXEC uspARDeleteInvoice @Id,@intUserId,@intActiveId;
+					select @intActiveId = min(convert(int,intId)) from @InvoiceDiscountsChargesIds where convert(int,intId) > @intActiveId;
+				end
+			end
+
 		end
 
 		EXEC uspARDeleteInvoice @Id,@intUserId,@ParamDetailId

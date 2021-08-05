@@ -217,9 +217,9 @@ FROM (
 		,strWarehouseRefNo = '' COLLATE Latin1_General_CI_AS
 		,dtmReceiptDate = CAST(NULL AS DATETIME)
 		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(LCWUM.intWeightItemUOMId, LD.intWeightItemUOMId), PCD.intPriceItemUOMId, ISNULL(LDCL.dblLinkNetWt, LD.dblNet))) 
-										* dbo.fnCTGetSequencePrice(LD.intPContractDetailId,NULL),0) AS NUMERIC(18,6)) / CASE WHEN (BC.ysnSubCurrency = 1) THEN BC.intCent ELSE 1 END
+										* ISNULL(AD.dblSeqPrice, AD.dblSeqPartialPrice),0) AS NUMERIC(18,6)) / CASE WHEN (BC.ysnSubCurrency = 1) THEN BC.intCent ELSE 1 END
 		,dblFutures = PCD.dblFutures
-		,dblCashPrice = PCD.dblCashPrice
+		,dblCashPrice = ISNULL(AD.dblSeqPrice, AD.dblSeqPartialPrice)
 		,dblBasis = PCD.dblBasis
 		,strPricingType = CASE WHEN PCH.intPricingTypeId = 2 
 							THEN  CASE WHEN ISNULL(PF.dblTotalLots,0) > 0 AND ISNULL(PF.dblLotsFixed,0) = 0 THEN 'Unfixed'
@@ -263,6 +263,7 @@ FROM (
 		--Purchase
 		INNER JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
 		INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+		INNER JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = PCD.intContractDetailId
 		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PCD.intUnitMeasureId
 		LEFT JOIN tblEMEntity V ON V.intEntityId = LD.intVendorEntityId
 		LEFT JOIN tblSMCurrency BC ON BC.intCurrencyID = PCD.intBasisCurrencyId
@@ -358,7 +359,7 @@ FROM (
 		,intBookId = PCH.intBookId
 		,strBook = BK.strBook
 		,intSubBookId = PCH.intSubBookId
-		,strSubBook = SBK.strBook
+		,strSubBook = SBK.strSubBook
 		,intCropYear = PCH.intCropYearId
 		,strCropYear = CRY.strCropYear
 		,strProducer = PRO.strName
@@ -376,7 +377,7 @@ FROM (
 		LEFT JOIN tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = PCD.intSubLocationId
 		LEFT JOIN tblICStorageLocation WHU ON WHU.intStorageLocationId = PCD.intStorageLocationId
 		LEFT JOIN tblCTBook BK ON BK.intBookId = PCH.intBookId
-		LEFT JOIN tblCTBook SBK ON SBK.intBookId = PCH.intSubBookId
+		LEFT JOIN tblCTSubBook SBK ON SBK.intSubBookId = PCH.intSubBookId
 		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PCD.intUnitMeasureId
 		LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = PCD.intItemUOMId 
 		LEFT JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -387,7 +388,7 @@ FROM (
 		LEFT JOIN tblICItemUOM BIU ON BIU.intItemUOMId = PCD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure BUM ON BUM.intUnitMeasureId = BIU.intUnitMeasureId
 		LEFT JOIN tblICItem PBun ON PBun.intItemId = PCD.intItemBundleId
-		LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = PCH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = PCH.intFreightTermId
 		LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 		LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCH.intProducerId
 		LEFT JOIN tblSMTerm Term ON Term.intTermID = PCH.intTermId

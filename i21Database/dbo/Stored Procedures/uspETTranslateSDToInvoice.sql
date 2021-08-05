@@ -121,6 +121,7 @@ BEGIN
 		,intCntId = ROW_NUMBER() OVER (ORDER BY strCustomerNumber)
 	INTO #tmpUniqueInvoiceList
 	FROM #tmpSDToInvoice
+	WHERE ISNULL(ysnVoid,0) = 0
 	
 
 	
@@ -389,7 +390,7 @@ BEGIN
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
 						,@BOLNumber				   = @strInvoiceNumber
-						,@ItemContractDetailId     = @intContractDetailId
+						,@ContractDetailId     = @intContractDetailId
 						,@RaiseError			   = 0
 						,@UseOriginIdAsInvoiceNumber = 1
 						,@InvoiceOriginId         = @strInvoiceNumber
@@ -436,7 +437,7 @@ BEGIN
 						,@ItemTaxGroupId		   = NULL	
 						,@ItemDescription		   = @strItemDescription
 						,@ItemUOMId				   = @intItemUOMId
-						,@ItemContractDetailId     = @intContractDetailId
+						,@ContractDetailId     = @intContractDetailId
 						,@ItemCurrencyExchangeRateTypeId = NULL            
                         ,@ItemCurrencyExchangeRateId = NULL            
 						,@RecomputeTax			   = @ysnARCompute

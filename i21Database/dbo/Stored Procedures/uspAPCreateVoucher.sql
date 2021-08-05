@@ -53,6 +53,25 @@ BEGIN TRY
 	DECLARE @deferPref NVARCHAR(50);
 	DECLARE @adjStartNum INT = 0;
 	DECLARE @adjPref NVARCHAR(50);
+	DECLARE @hasSavePoint BIT = 0;
+
+	--IF NO ACCOUNT PROVIDED, MAKE SURE THERE IS A DEFAULT LOCATION SETUP FOR THE USER
+	IF (
+		EXISTS(SELECT TOP 1 1 FROM @voucherPayables A WHERE (A.intAPAccount = 0 OR A.intAPAccount IS NULL) AND A.intLocationId IS NULL)
+		AND NULLIF((
+			SELECT TOP 1 B.intCompanyLocationId FROM tblSMUserSecurity B
+			LEFT JOIN tblSMCompanyLocation C ON B.intCompanyLocationId = C.intCompanyLocationId
+			WHERE B.intEntityId = @userId
+		),0) IS NULL
+	)
+	BEGIN
+		SET @error =  'Please setup default Location for user.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
+	END
 
 	--Voucher Type
 	IF EXISTS(SELECT TOP 1 1
@@ -251,7 +270,11 @@ BEGIN TRY
 
 	DECLARE @transCount INT = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
-	ELSE SAVE TRAN @SavePoint
+	ELSE 
+	BEGIN
+		SET @hasSavePoint = 1;
+		SAVE TRAN @SavePoint
+	END
 
 	--Voucher Type
 	UPDATE A
@@ -500,20 +523,55 @@ BEGIN TRY
 	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
-	DECLARE @billDetailIds AS Id
-	INSERT INTO @billDetailIds
-	SELECT
-		A.intBillDetailId
-	FROM tblAPBillDetail A
-	INNER JOIN @voucherIds B ON A.intBillId = B.intId
-	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 0
+	-- DECLARE @billDetailIds AS Id
+	-- INSERT INTO @billDetailIds
+	-- SELECT
+	-- 	A.intBillDetailId
+	-- FROM tblAPBillDetail A
+	-- INNER JOIN @voucherIds B ON A.intBillId = B.intId
+	-- EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 0
 
 	SELECT @idsCreated = COALESCE(@idsCreated + ',', '') +  CONVERT(VARCHAR(12),intBillId) 
 	FROM @createdVouchers
 	
 	SET @createdVouchersId = @idsCreated 
 	SELECT @createdVouchersId
+
 	
+	DECLARE @strDescription AS NVARCHAR(100) 
+	,@actionType AS NVARCHAR(50)
+	,@billDetailId AS NVARCHAR(50);
+	DECLARE @billCounter INT = 0;
+	DECLARE @totalRecords INT;
+	DECLARE @billId INT;
+	DECLARE @tmpBillDetailDelete TABLE(intBillId INT)
+	SELECT @actionType = 'Deleted'
+
+	INSERT INTO @tmpBillDetailDelete
+	SELECT intId FROM @voucherIds
+
+	SELECT @totalRecords = COUNT(*) FROM @tmpBillDetailDelete
+
+	WHILE(@billCounter != (@totalRecords))
+	BEGIN
+
+		SELECT TOP(1) @billId = A.intBillId
+		FROM @tmpBillDetailDelete A
+			
+		EXEC dbo.uspSMAuditLog 
+			@screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
+			,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+			,@entityId = @userId									-- Entity Id.
+			,@actionType = 'Created'                        -- Action Type
+			,@changeDescription = 'Integration'				-- Description
+			,@fromValue = ''									-- Previous Value
+			,@toValue = ''									-- New Value
+
+
+	SET @billCounter = @billCounter + 1
+	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId
+	END
+
 	IF @transCount = 0 COMMIT TRANSACTION;
 
 	--@tblAPBill - How to retrieve records
@@ -556,7 +614,8 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	DECLARE @ErrorSeverity INT,
+	DECLARE @newError NVARCHAR(4000),
+			@ErrorSeverity INT,
 			@ErrorNumber   INT,
 			@ErrorMessage nvarchar(4000),
 			@ErrorState INT,
@@ -570,24 +629,23 @@ BEGIN CATCH
 	SET @ErrorLine     = ERROR_LINE()
 	SET @ErrorProc     = ERROR_PROCEDURE()
 
-	SET @ErrorMessage  = 'Error creating voucher.' + CHAR(13) + 
-		'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
-		' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
+	SET @newError  = 'Error creating voucher.' + CHAR(13) + @ErrorMessage
 
 	IF (XACT_STATE()) = -1
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	ELSE IF (XACT_STATE()) = 1 AND @transCount = 0
+	ELSE 
+	IF (XACT_STATE()) = 1 AND @transCount = 0
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	-- ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
-	-- BEGIN
-	-- 	ROLLBACK TRANSACTION  @SavePoint
-	-- END
+	ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
+	BEGIN
+		IF @hasSavePoint = 1 ROLLBACK TRANSACTION  @SavePoint
+	END
 
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	RAISERROR (@newError , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
 
 END

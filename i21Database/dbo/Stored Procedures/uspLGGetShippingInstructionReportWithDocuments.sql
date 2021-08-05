@@ -76,11 +76,11 @@ BEGIN
 	SELECT TOP 1 @strCompanyName = strCompanyName
 			,@strCompanyAddress = strAddress
 			,@strContactName = strContactName
-			,@strCounty = strCounty
-			,@strCity = strCity
-			,@strState = strState
-			,@strZip = strZip
-			,@strCountry = strCountry
+			,@strCounty = ISNULL(strCounty, '')
+			,@strCity = ISNULL(strCity, '')
+			,@strState = ISNULL(strState, '')
+			,@strZip = ISNULL(strZip, '')
+			,@strCountry = ISNULL(strCountry, '')
 			,@strPhone = strPhone
 	FROM tblSMCompanySetup
 	
@@ -180,7 +180,7 @@ BEGIN
 			+ CASE WHEN ISNULL(strThirdNotifyText, '') = '' THEN '' ELSE strThirdNotifyText END)) 
 		,strBOLInstructionText = @strBOLInstructionText
 		,strContainerTypePackingDescription = strContainerType + ' in ' + strPackingDescription
-		,strQuantityPackingDescription = @strContainerQtyUOM + CASE WHEN (ISNULL(@strPackingUOM, '') <> '') THEN ' in ' + @strPackingUOM ELSE '' END
+		,strQuantityPackingDescription = @strContainerQtyUOM
 		,strFullName = @strFullName
 		,strUserPhoneNo = @strUserPhoneNo 
 		,strUserEmailId = @strUserEmailId
@@ -193,8 +193,10 @@ BEGIN
 		,strCompanyZip = @strZip 
 		,strCompanyCountry = @strCountry 
 		,strCompanyPhone = @strPhone
-		,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
-		,strCityAndDate = @strCity + ', '+ dbo.fnConvertDateToReportDateFormat(GETDATE(), 0)
+		,strCityStateZip = CASE WHEN (@strCity = '') THEN '' ELSE @strCity + ', ' END 
+						+ CASE WHEN (@strState = '') THEN '' ELSE @strState + ', ' END 
+						+ @strZip + CASE WHEN (@strCity = '' AND @strState = '' AND @strZip = '') THEN '' ELSE ',' END
+		,strCityAndDate = CASE WHEN (@strCity = '') THEN '' ELSE @strCity + ', ' END + dbo.fnConvertDateToReportDateFormat(GETDATE(), 0)
 		,strShipmentPeriod
 		,strDestinationCity
 		,strMarkingInstruction
@@ -212,6 +214,8 @@ BEGIN
 			,L.dtmBLDate
 			,L.dtmDeliveredDate
 			,strContractNumber = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strContractNumber ELSE CH.strContractNumber END
+			,strContractNumberSeq = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strContractNumber + ' / ' + CAST(PCD.intContractSeq AS NVARCHAR(10)) 
+										ELSE CH.strContractNumber + ' / ' + CAST(CD.intContractSeq AS NVARCHAR(10)) END
 			,strCustomerContract = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strCustomerContract ELSE CH.strCustomerContract END 
 			,Item.strItemNo
 			,Item.strDescription AS strItemDescription
@@ -237,7 +241,8 @@ BEGIN
 			,strVendorCountry = VEL.strCountry
 			,strVendorState = VEL.strState
 			,strVendorZipCode = VEL.strZipCode
-			,strVendorCityStateZip = VEL.strCity  + ' ' + VEL.strState + ' ' + VEL.strZipCode
+			,strVendorCityStateZip = CASE WHEN (ISNULL(VEL.strCity, '') = '') THEN '' ELSE VEL.strCity  + ' ' END 
+				+ CASE WHEN (ISNULL(VEL.strState, '') = '') THEN '' ELSE VEL.strState  + ' ' END + VEL.strZipCode
 			,strCustomer = Customer.strName
 			,strCustomerContact = CETC.strName
 			,strOriginPort = ISNULL(L.strOriginPort, LoadingPort.strCity)
@@ -249,7 +254,7 @@ BEGIN
 			,SLSC.strFreightClause
 			,strShipper = Shipper.strName
 			,L.strPackingDescription
-			,L.intNumberOfContainers
+			,intNumberOfContainers = ISNULL(L.intNumberOfContainers, 0)
 			,strNumberOfContainers = CONVERT(NVARCHAR, L.intNumberOfContainers) + ' (' + L.strPackingDescription + ')'
 			,ContType.strContainerType
 			,L.strShippingMode

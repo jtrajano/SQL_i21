@@ -136,8 +136,8 @@ SELECT
 FROM @ItemEntries IT
 LEFT JOIN tblICItem ITEM ON IT.intItemId = ITEM.intItemId
 LEFT JOIN tblSMCompanyLocation CL ON IT.intCompanyLocationId = CL.intCompanyLocationId
-WHERE
-	NOT EXISTS(	SELECT NULL 
+WHERE ITEM.strType <> 'Comment'
+AND NOT EXISTS(	SELECT NULL 
 				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
 				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
@@ -411,6 +411,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intPriceUOMId]					INT												NULL
 	,[dblUnitQuantity]					NUMERIC(38,20)									NULL
 	,[dblItemWeight]					NUMERIC(38,20)									NULL
+	,[dblStandardWeight]				NUMERIC(28,20)									NULL
 	,[intItemWeightUOMId]				INT												NULL
 	,[dblDiscount]						NUMERIC(18, 6)									NULL
 	,[dblItemTermDiscount]				NUMERIC(18, 6)									NULL
@@ -508,6 +509,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intStorageScheduleTypeId]			INT												NULL
 	,[intDestinationGradeId]			INT												NULL
 	,[intDestinationWeightId]			INT												NULL
+	,[intPriceFixationDetailId]			INT												NULL
     ,[strAddonDetailKey]                NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[ysnAddonParent]                   BIT                                             NULL
     ,[dblAddOnQuantity]                 NUMERIC(38,20)                                  NULL
@@ -521,7 +523,10 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intSourceId]						INT												NULL
 	,[strSourceId]						NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
 	,[ysnPost]							BIT												NULL
-	,[intTempDetailIdForTaxes]			INT												NULL)
+	,[intTempDetailIdForTaxes]			INT												NULL
+	,[strBinNumber]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strGroupNumber]	    			NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strFeedDiet]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL)
 
 INSERT INTO #InvoiceInventoryItem
 	([intInvoiceId]
@@ -538,6 +543,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -635,6 +641,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
@@ -648,7 +655,10 @@ INSERT INTO #InvoiceInventoryItem
 	,[intSourceId]
 	,[strSourceId]
 	,[ysnPost]
-	,[intTempDetailIdForTaxes])
+	,[intTempDetailIdForTaxes]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet])
 SELECT
 	 [intInvoiceId]							= IE.[intInvoiceId]
 	,[intInvoiceDetailId]					= NULL
@@ -664,6 +674,7 @@ SELECT
 	,[intPriceUOMId]						= ISNULL(IP.[intPriceUOMId], ISNULL(IP.[intContractUOMId], ISNULL(ISNULL(IE.[intItemUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId]))))
 	,[dblUnitQuantity]						= ISNULL(IP.[dblPriceUOMQuantity], ISNULL(IE.[dblContractPriceUOMQty], 1.000000))
 	,[dblItemWeight]						= IE.[dblItemWeight]
+	,[dblStandardWeight]					= IE.[dblStandardWeight]
 	,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
 	,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
 	,[dblItemTermDiscount]					= ISNULL(ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount]), @ZeroDecimal)
@@ -777,6 +788,7 @@ SELECT
 	,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
 	,[intDestinationGradeId]				= IE.[intDestinationGradeId]
 	,[intDestinationWeightId]				= IE.[intDestinationWeightId]
+	,[intPriceFixationDetailId]				= IE.[intPriceFixationDetailId]
     ,[strAddonDetailKey]                    = IE.[strAddonDetailKey]
     ,[ysnAddonParent]                       = IE.[ysnAddonParent]
     ,[dblAddOnQuantity]                     = IE.[dblAddOnQuantity]
@@ -791,6 +803,9 @@ SELECT
 	,[strSourceId]							= IE.[strSourceId]
 	,[ysnPost]								= IE.[ysnPost]
 	,[intTempDetailIdForTaxes]				= IE.[intTempDetailIdForTaxes]
+	,[strBinNumber]							= IE.[strBinNumber]
+	,[strGroupNumber]						= IE.[strGroupNumber]
+	,[strFeedDiet]							= IE.[strFeedDiet]
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -880,6 +895,7 @@ USING
 		,[intPriceUOMId]
 		,[dblUnitQuantity]
 		,[dblItemWeight]
+		,[dblStandardWeight]
 		,[intItemWeightUOMId]
 		,[dblDiscount]
 		,[dblItemTermDiscount]
@@ -977,6 +993,7 @@ USING
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
         ,[dblAddOnQuantity]
@@ -991,6 +1008,9 @@ USING
 		,[strSourceId]
 		,[ysnPost]
 		,[intTempDetailIdForTaxes]
+		,[strBinNumber]
+		,[strGroupNumber]
+		,[strFeedDiet]
 	FROM
 		#InvoiceInventoryItem
 	)
@@ -1011,6 +1031,7 @@ INSERT(
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -1108,10 +1129,14 @@ INSERT(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 	)
 VALUES(
 	 [intInvoiceId]
@@ -1127,6 +1152,7 @@ VALUES(
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -1224,10 +1250,14 @@ VALUES(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 )
 	OUTPUT  
 		ISNULL(@IntegrationLogId, -9999)						--[intIntegrationLogId]
@@ -1292,14 +1322,15 @@ VALUES(
 		 , dblBalance			= ISNULL(CTD.dblBalance, 0)
 		 , dblScheduleQty		= ISNULL(CTD.dblScheduleQty, 0)
 		 , dblQtyShipped		= ISNULL(ID.dblQtyShipped, 0)
-	FROM tblARInvoiceIntegrationLogDetail ILD
-	INNER JOIN tblARInvoiceDetail ID ON ILD.intInvoiceId = ID.intInvoiceId
-	INNER JOIN tblCTContractDetail CTD ON ID.[intContractDetailId] = CTD.[intContractDetailId]
-	INNER JOIN tblCTContractHeader CTH ON CTD.[intContractHeaderId] = CTH.[intContractHeaderId]
-	WHERE intIntegrationLogId = @IntegrationLogId
+	FROM tblARInvoice I 
+	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
+	INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ILD.intInvoiceId = I.intInvoiceId AND ID.intInvoiceDetailId = ILD.intInvoiceDetailId	
+	INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
+	INNER JOIN tblCTContractHeader CTH ON CTD.intContractHeaderId = CTH.intContractHeaderId
+	WHERE ILD.intIntegrationLogId = @IntegrationLogId
 	  AND ID.intContractDetailId IS NOT NULL
-	  AND ILD.strTransactionType = 'Invoice'
-	  AND ILD.strType = 'Tank Delivery'
+	  AND I.strTransactionType = 'Invoice'
+	  AND I.strType = 'Tank Delivery'
 	  AND ISNULL(ID.[dblQtyShipped], 0) > ISNULL(CTD.dblBalance, 0) - ISNULL(CTD.dblScheduleQty, 0)
 
 	WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesContracts) 

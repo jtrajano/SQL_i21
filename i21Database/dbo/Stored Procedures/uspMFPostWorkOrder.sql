@@ -1066,7 +1066,7 @@ BEGIN TRY
 											AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
-							ORDER BY 1 DESC
+							ORDER BY intFutureMonthId DESC
 							), @dtmCurrentDateTime), 0)
 				,intMarketRatePerUnitId = IsNULL((
 						SELECT TOP 1 FM.intUnitMeasureId
@@ -1100,7 +1100,7 @@ BEGIN TRY
 											AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
-							ORDER BY 1 DESC
+							ORDER BY intFutureMonthId DESC
 							), @dtmCurrentDateTime), 0)
 				,dblGradeDiff = IsNULL(GD.dblGradeDiff, 0)
 				,dblCoEfficient = 0
@@ -1300,12 +1300,12 @@ BEGIN TRY
 
 			SELECT @dblVariance = IsNULL(@dblNewCost, 0) - IsNULL(@dblNewValue, 0)
 
-			IF @dblVariance < 1
+			IF @dblVariance < 1 and @strCostingByCoEfficient = 'False'
 			BEGIN
 				SELECT TOP 1 @intTransactionDetailId = intTransactionDetailId
 				FROM @adjustedEntries
 				WHERE IsNULL(dblNewValue, 0) > 0
-				ORDER BY 1 DESC
+				ORDER BY intId DESC
 
 				UPDATE @adjustedEntries
 				SET dblNewValue = dblNewValue + @dblVariance

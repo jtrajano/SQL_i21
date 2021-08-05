@@ -25,6 +25,8 @@
 	[intLastModifiedUserId] [int] NULL,
 	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblCTInvPlngReportMaster_dtmLastModified] DEFAULT GetDate(),
 	intInvPlngReportMasterRefID int,
+	strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intDayLeftInMonth int,
 	CONSTRAINT [PK_tblCTInvPlngReportMaster] PRIMARY KEY ([intInvPlngReportMasterID]),
 	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblCTReportMaster] FOREIGN KEY ([intReportMasterID]) REFERENCES [tblCTReportMaster]([intReportMasterID]),
 	CONSTRAINT [FK_tblCTInvPlngReportMaster_tblMFDemandHeader] FOREIGN KEY (intDemandHeaderId) REFERENCES [tblMFDemandHeader](intDemandHeaderId),

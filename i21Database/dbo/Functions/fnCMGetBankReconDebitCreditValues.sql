@@ -15,7 +15,7 @@ WITH A
         SELECT 1 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, 1 ysnClrOrig, 0 ysnCheckVoidOrig, 'PaymentClearedNotVoid' strDescription
             WHERE @strDescription = 'PaymentClearedNotVoid' or @strDescription  = 'All' or @strDescription = 'Debit'
         UNION
-            SELECT 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, 0 ysnClrOrig, 0 ysnCheckVoidOrig, 'PaymentNotClearedNotVoid' strDescription
+            SELECT 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, NULL ysnClrOrig, 0 ysnCheckVoidOrig, 'PaymentNotClearedNotVoid' strDescription
             WHERE @strDescription = 'PaymentNotClearedNotVoid' or @strDescription  = 'All'or @strDescription = 'Debit'
         UNION
             SELECT 1 ysnClr, 1 ysnCheckVoid, 1 ysnPayment, 1 ysnClrOrig, 1 ysnCheckVoidOrig, 'PaymentClearedVoid' strDescription
@@ -25,7 +25,7 @@ WITH A
             WHERE @strDescription = 'PaymentNotClearedNotVoidYet'or @strDescription  = 'All'or @strDescription = 'Debit'
 
         UNION
-            SELECT 0 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, 0 ysnClrOrig, 0 ysnCheckVoidOrig, 'DepositNotClearedNotVoid' strDescription
+            SELECT 0 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, NULL ysnClrOrig, 0 ysnCheckVoidOrig, 'DepositNotClearedNotVoid' strDescription
             WHERE @strDescription = 'DepositNotClearedNotVoid'or @strDescription  = 'All'or @strDescription = 'Credit'
         UNION
             SELECT 1 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, 1 ysnClrOrig, 0 ysnCheckVoidOrig, 'DepositClearedNotVoid' strDescription

@@ -5,9 +5,9 @@ SELECT *,
 	dblBalance = (dblOriginalQty - (dblAllocatedQty + dblReservedQty)), 
 	dblAvailToSell = CASE WHEN (((dblAllocatedQty + dblReservedQty) > 0) AND (dblUnPickedQty > (dblOriginalQty - (dblAllocatedQty + dblReservedQty)))) 
 						THEN (dblOriginalQty - (dblAllocatedQty + dblReservedQty)) ELSE dblUnPickedQty END,
-	dblNetWeight = (dblNetWeightFull / dblQty) * dblUnPickedQty,
-	dblGrossWeight = (dblGrossWeightFull / dblQty) * dblUnPickedQty,
-	dblTareWeight = (dblTareWeightFull / dblQty) * dblUnPickedQty
+	dblNetWeight = dbo.fnMultiply(dbo.fnDivide(dblNetWeightFull, dblQty), dblUnPickedQty),
+	dblGrossWeight = dbo.fnMultiply(dbo.fnDivide(dblGrossWeightFull, dblQty), dblUnPickedQty),
+	dblTareWeight = dbo.fnMultiply(dbo.fnDivide(dblTareWeightFull, dblQty), dblUnPickedQty)
 FROM (
 	SELECT 
 		intLotId = Lot.intLotId
@@ -27,7 +27,7 @@ FROM (
        ,strItemUOM = UOM.strUnitMeasure
        ,strItemUOMType = UOM.strUnitType
        ,dblItemUOMConv = ItemUOM.dblUnitQty
-	   ,strBundleItemNo = Bundle.strItemNo
+	   ,strBundleItemNo = ISNULL(ConBundle.strItemNo, Bundle.strBundleItemNo)
        ,strLotNumber = Lot.strLotNumber
        ,intSubLocationId = Lot.intSubLocationId
        ,strSubLocationName = SubLocation.strSubLocationName
@@ -46,12 +46,12 @@ FROM (
        ,intParentLotId = Lot.intParentLotId
        ,intSplitFromLotId = Lot.intSplitFromLotId
        ,dblGrossWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
-                                                       IsNull((((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty) + Lot.dblWeight), 0.0) 
+                                                       IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty) + Lot.dblWeight, 0.0) 
                                                   ELSE
                                                        ISNULL(Lot.dblGrossWeight, ISNULL(Lot.dblWeight, 0.0)) - ISNULL(PC.dblPickedContainerGrossWt, 0)
                                                   END
        ,dblTareWeightFull = CASE WHEN Lot.ysnProduced <> 1 THEN
-                                                      IsNull(((ReceiptLot.dblTareWeight / ReceiptLot.dblQuantity) * Lot.dblQty), 0.0) - ISNULL(PC.dblPickedContainerNetWt, 0)
+                                                      IsNull(dbo.fnMultiply(dbo.fnDivide(ReceiptLot.dblTareWeight, ReceiptLot.dblQuantity), Lot.dblQty), 0.0) - ISNULL(PC.dblPickedContainerNetWt, 0)
                                                ELSE
                                                       0.0
                                                END
@@ -108,7 +108,7 @@ FROM (
        ,strWarehouseRefNo = ISNULL(Receipt.strWarehouseRefNo,Lot.strWarehouseRefNo)
 	   ,dblFutures = CTDetail.dblFutures
 	   ,dblBasis = CTDetail.dblBasis
-	   ,dblCashPrice = CASE WHEN (CTDetail.dblCashPrice IS NOT NULL) THEN CTDetail.dblCashPrice ELSE dbo.fnCTGetSequencePrice(CTDetail.intContractDetailId,NULL) END
+	   ,dblCashPrice = ISNULL(AD.dblSeqPrice, AD.dblSeqPartialPrice)
 	   ,intPriceItemUOMId = CTDetail.intPriceItemUOMId
 	   ,strPriceBasis = CAST(BC.strCurrency as VARCHAR(100)) + '/' + CAST(BUM.strUnitMeasure as VARCHAR(100))
 	   ,dblTotalCost = CTDetail.dblTotalCost
@@ -139,6 +139,7 @@ FROM (
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
@@ -149,7 +150,7 @@ FROM (
 		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId   
 		LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
-		LEFT JOIN tblICItem Bundle ON Bundle.intItemId = CTDetail.intItemBundleId
+		LEFT JOIN tblICItem ConBundle ON ConBundle.intItemId = CTDetail.intItemBundleId
 		LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Lot.intLocationId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lot.intItemUOMId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -181,6 +182,9 @@ FROM (
 		LEFT JOIN tblCTContractDetail SCTDetail ON SCTDetail.intContractDetailId = LD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCTHeader ON SCTHeader.intContractHeaderId = SCTDetail.intContractHeaderId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+		OUTER APPLY (SELECT TOP 1 strBundleItemNo = BI.strItemNo FROM tblICItem BI 
+						INNER JOIN tblICItemBundle IB ON IB.intItemId = BI.intItemId
+					 WHERE IB.intBundleItemId = Item.intItemId) Bundle
 		OUTER APPLY (SELECT dblReservedQty = SUM(SR.dblQty) from tblICStockReservation SR
 					WHERE SR.intLotId = Lot.intLotId AND SR.ysnPosted <> 1) SR
 		OUTER APPLY (SELECT dblAllocatedQty = SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL 

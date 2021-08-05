@@ -36,6 +36,7 @@ DECLARE @intContractDetailId AS INT,
 		@intFreightTermId INT,
 		@strWhereFinalizedWeight NVARCHAR(20),
 		@strWhereFinalizedGrade NVARCHAR(20);
+DECLARE @ysnDestinationWeightGrade BIT = 0
 
 DECLARE @SALES_CONTRACT AS INT = 1
 		,@SALES_ORDER AS INT = 2
@@ -45,6 +46,7 @@ DECLARE @intTicketItemUOMId INT,
 		@intItemId INT,
 		@intLotType INT;
 
+DECLARE @AGWorkOrderType AS INT = 59
 SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @intLoadId = SC.intLoadId
 , @intContractDetailId = SC.intContractId 
@@ -56,6 +58,12 @@ SELECT	@intTicketItemUOMId = SC.intItemUOMIdTo
 , @strWhereFinalizedGrade = SC.strGradeFinalized
 FROM vyuSCTicketScreenView SC
 WHERE SC.intTicketId = @intTicketId
+
+IF(LOWER(ISNULL(@strWhereFinalizedWeight,'origin')) = 'destination' OR LOWER(ISNULL(@strWhereFinalizedGrade,'origin')) = 'destination' )
+BEGIN
+	SET @ysnDestinationWeightGrade  = 1
+END
+
 
 IF @ticketStatus = 'C'
 BEGIN
@@ -228,8 +236,8 @@ BEGIN
 											END
 										END
 		,intWeightUOMId				= CASE WHEN SC.intLotId > 0 THEN ICL.intItemUOMId ELSE LI.intItemUOMId END
-		,intSubLocationId			= SC.intSubLocationId
-		,intStorageLocationId		= SC.intStorageLocationId
+		,intSubLocationId			= case when SC.strDistributionOption = 'AWO' then LI.intSubLocationId else SC.intSubLocationId end 
+		,intStorageLocationId		= case when SC.strDistributionOption = 'AWO' then LI.intStorageLocationId else SC.intStorageLocationId end 
 		,intStorageScheduleTypeId	= CASE
 									  WHEN LI.ysnIsStorage = 0 THEN  
 										CASE 
@@ -346,7 +354,7 @@ BEGIN
 
 
 	----Item Contract
-
+/*
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
 		,intEntityCustomerId
@@ -437,7 +445,7 @@ BEGIN
 		ON CTD.intItemContractHeaderId = CTH.intItemContractHeaderId
 	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 		AND ISNULL(SC.intItemContractDetailId,0) > 0 
-
+*/
 
 	--SELECT * FROM @Items
 
@@ -502,6 +510,8 @@ END
 			,[ysnAccrue]
 			,[ysnPrice]
 			,[strChargesLink]
+			,ysnAllowVoucher
+			,ysnAddPayable
 		)
 		SELECT
 		[intOrderType]						= SE.intOrderType
@@ -544,6 +554,10 @@ END
 		,[ysnAccrue]						= 0
 		,[ysnPrice]							= 1
 		,[strChargesLink]					= SE.strChargesLink
+		,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+												THEN 0
+												ELSE 1 END
+		,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 		FROM @ShipmentStagingTable SE
 		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
@@ -577,6 +591,8 @@ END
 			,[ysnAccrue]
 			,[ysnPrice]
 			,[strChargesLink]
+			,ysnAllowVoucher
+			,ysnAddPayable
 		)
 		SELECT	
 		[intOrderType]						= SE.intOrderType
@@ -616,6 +632,10 @@ END
 		,[ysnAccrue]						= 0
 		,[ysnPrice]							= 1
 		,[strChargesLink]					= SE.strChargesLink
+		,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+												THEN 0
+												ELSE 1 END
+		,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 		FROM @ShipmentStagingTable SE
 		INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 		INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
@@ -681,6 +701,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -712,6 +734,10 @@ END
 									,[ysnAccrue]						= @ysnAccrue
 									,[ysnPrice]							= @ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblLGLoadDetail LoadDetail
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 									LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
@@ -746,6 +772,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -777,6 +805,10 @@ END
 									,[ysnAccrue]						= LoadCost.ysnAccrue
 									,[ysnPrice]							= LoadCost.ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblLGLoadDetail LoadDetail
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -811,6 +843,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -850,6 +884,10 @@ END
 									,[ysnAccrue]						= @ysnAccrue
 									,[ysnPrice]							= @ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblCTContractCost ContractCost
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -882,6 +920,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -921,6 +961,10 @@ END
 									,[ysnAccrue]						= ContractCost.ysnAccrue
 									,[ysnPrice]							= ContractCost.ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblCTContractCost ContractCost
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -953,6 +997,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -987,6 +1033,10 @@ END
 									,[ysnAccrue]						= CASE WHEN @intHaulerId = SE.intEntityCustomerId THEN 0 ELSE @ysnAccrue END
 									,[ysnPrice]							= @ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM @ShipmentStagingTable SE 
 									INNER JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 									LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -1018,6 +1068,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -1057,6 +1109,10 @@ END
 									,[ysnAccrue]						= ContractCost.ysnAccrue
 									,[ysnPrice]							= ContractCost.ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblCTContractCost ContractCost
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -1093,6 +1149,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -1124,6 +1182,10 @@ END
 									,[ysnAccrue]						= LoadCost.ysnAccrue
 									,[ysnPrice]							= LoadCost.ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblLGLoadDetail LoadDetail
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -1157,6 +1219,8 @@ END
 										,[ysnAccrue]
 										,[ysnPrice]
 										,[strChargesLink]
+										,ysnAllowVoucher
+										,ysnAddPayable
 									)
 									SELECT	
 									[intOrderType]						= SE.intOrderType
@@ -1197,6 +1261,10 @@ END
 									,[ysnAccrue]						= ContractCost.ysnAccrue
 									,[ysnPrice]							= ContractCost.ysnPrice
 									,[strChargesLink]					= SE.strChargesLink
+									,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																			THEN 0
+																			ELSE 1 END
+									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblCTContractCost ContractCost
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId 
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -1233,6 +1301,8 @@ END
 								,[ysnAccrue]
 								,[ysnPrice]
 								,[strChargesLink]
+								,ysnAllowVoucher
+								,ysnAddPayable
 							)
 							SELECT	
 							[intOrderType]						= SE.intOrderType
@@ -1267,6 +1337,10 @@ END
 							,[ysnAccrue]						= @ysnAccrue
 							,[ysnPrice]							= @ysnPrice
 							,[strChargesLink]					= SE.strChargesLink
+							,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																	THEN 0
+																	ELSE 1 END
+							,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 							FROM @ShipmentStagingTable SE 
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -1302,6 +1376,8 @@ END
 									,[ysnAccrue]
 									,[ysnPrice]
 									,[strChargesLink]
+									,ysnAllowVoucher
+									,ysnAddPayable
 								)
 								SELECT	
 								[intOrderType]				= SE.intOrderType
@@ -1348,6 +1424,10 @@ END
 								,[ysnAccrue]				= @ysnAccrue
 								,[ysnPrice]					= @ysnPrice
 								,[strChargesLink]			= SE.strChargesLink
+								,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																	THEN 0
+																	ELSE 1 END
+								,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 								FROM @ShipmentStagingTable SE
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -1386,6 +1466,8 @@ END
 									,[ysnAccrue]
 									,[ysnPrice]
 									,[strChargesLink]
+									,ysnAllowVoucher
+									,ysnAddPayable
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -1425,6 +1507,10 @@ END
 								,[ysnAccrue]						= CASE WHEN  ContractCost.intVendorId = SE.intEntityCustomerId THEN 0 ELSE ContractCost.ysnAccrue END
 								,[ysnPrice]							= ContractCost.ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
+								,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																	THEN 0
+																	ELSE 1 END
+								,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 								FROM tblCTContractCost ContractCost
 								LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -1457,6 +1543,8 @@ END
 									,[ysnAccrue]
 									,[ysnPrice]
 									,[strChargesLink]
+									,ysnAllowVoucher
+									,ysnAddPayable
 								)
 								SELECT	
 								[intOrderType]						= SE.intOrderType
@@ -1491,6 +1579,10 @@ END
 								,[ysnAccrue]						= CASE WHEN @intHaulerId = SE.intEntityCustomerId THEN 0 ELSE @ysnAccrue END
 								,[ysnPrice]							= @ysnPrice
 								,[strChargesLink]					= SE.strChargesLink
+								,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																	THEN 0
+																	ELSE 1 END
+								,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 								FROM @ShipmentStagingTable SE 
 								LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 								LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
@@ -1524,6 +1616,8 @@ END
 						,[ysnAccrue]
 						,[ysnPrice]
 						,[strChargesLink]
+						,ysnAllowVoucher
+						,ysnAddPayable
 					)
 					SELECT
 					[intOrderType]						= SE.intOrderType
@@ -1563,6 +1657,10 @@ END
 					,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 					,[ysnPrice]							= ContractCost.ysnPrice
 					,[strChargesLink]					= SE.strChargesLink
+					,ysnAllowVoucher					= CASE WHEN ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination' 
+																	THEN 0
+																	ELSE 1 END
+					,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 					FROM tblCTContractCost ContractCost
 					LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = ContractCost.intContractDetailId
 					LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -1573,10 +1671,12 @@ END
 	SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
 	IF(@checkContract > 0)
 		UPDATE @ShipmentStagingTable SET intOrderType = 1
+		WHERE intOrderType <> 5
 
 	SELECT @checkContract = COUNT(intOrderType) FROM @ShipmentStagingTable WHERE intOrderType = 1;
 	IF(@checkContract > 0)
 		UPDATE @ShipmentStagingTable SET intOrderType = 1
+		WHERE intOrderType <> 5
 
 	SELECT @total = COUNT(*) FROM @ShipmentStagingTable;
 	IF (@total = 0)

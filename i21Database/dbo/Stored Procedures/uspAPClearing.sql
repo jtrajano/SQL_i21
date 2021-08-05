@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPClearing]
 	@APClearing AS APClearing READONLY,
-	@post AS BIT = 1
+	@post AS BIT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -18,16 +18,19 @@ BEGIN TRY
 		intEntityVendorId,
 		intLocationId,
 		intTransactionDetailId,
+		intAccountId,
 		intItemId,
 		intItemUOMId,
 		dblQuantity,
 		dblAmount,
-		intBillId,
-		strBillId,
-		intBillDetailId,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
 		strCode,
 		ysnPostAction,
-		dtmDateEntered
+		dtmDateEntered,
+		strRemarks
 	)
 	SELECT
 		intTransactionId,
@@ -38,16 +41,19 @@ BEGIN TRY
 		intEntityVendorId,
 		intLocationId,
 		intTransactionDetailId,
+		intAccountId,
 		intItemId,
 		intItemUOMId,
-		CASE WHEN @post = 1 THEN dblQuantity ELSE dblQuantity * -1 END,
-		CASE WHEN @post = 1 THEN dblAmount ELSE dblAmount * -1 END,
-		intBillId,
-		strBillId,
-		intBillDetailId,
+		CASE WHEN @post = 0 THEN dblQuantity * -1 ELSE dblQuantity END,
+		CASE WHEN @post = 0 THEN dblAmount * -1 ELSE dblAmount END,
+		intOffsetId,
+		strOffsetId,
+		intOffsetDetailId,
+		intOffsetDetailTaxId,
 		strCode,
 		@post,
-		GETDATE()
+		GETDATE(),
+		strRemarks
 	FROM @APClearing
 END TRY
 

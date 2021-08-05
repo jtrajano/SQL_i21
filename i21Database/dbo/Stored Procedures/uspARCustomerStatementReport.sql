@@ -52,6 +52,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbStretchedLogo					AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @dblTotalAR							NUMERIC(18,6)		= NULL
 
 DECLARE @temp_statement_table TABLE(
 	 [intTempId]					INT IDENTITY(1,1)		
@@ -90,6 +91,11 @@ DECLARE @temp_cf_table TABLE(
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
 BEGIN
     DROP TABLE #CUSTOMERS
+END
+
+IF(OBJECT_ID('tempdb..#GLACCOUNTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #GLACCOUNTS
 END
 
 SELECT intEntityCustomerId			= intEntityId
@@ -196,6 +202,13 @@ ELSE
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND ISNULL(NULLIF(C.strStatementFormat, ''), 'Open Item') = @strStatementFormatLocal
 END
+
+--#GLACCOUNTS
+SELECT intAccountId
+	 , strAccountCategory
+INTO #GLACCOUNTS
+FROM vyuGLAccountDetail
+WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments')
 
 IF @strAccountStatusCodeLocal IS NOT NULL
     BEGIN
@@ -321,6 +334,7 @@ FROM (
 			 , ysnImportedFromOrigin
 			 , strTicketNumbers	= SCALETICKETS.strTicketNumbers
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
+		INNER JOIN #GLACCOUNTS GL ON I.intAccountId = GL.intAccountId
 		OUTER APPLY (
 			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
 			FROM (
@@ -337,30 +351,9 @@ FROM (
 			) INV (strTicketNumber)
 		) SCALETICKETS
 		WHERE ysnPosted  = 1		
-		AND ysnCancelled = 0
-		AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
-		AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +'
-		AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId 
-													FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
-													INNER JOIN (
-														SELECT intPaymentId
-														FROM dbo.tblARPayment WITH (NOLOCK)
-														WHERE ysnPosted = 1
-															AND strPaymentMethod  = ''Write Off''
-															AND ISNULL(ysnProcessedToNSF, 0) = 0
-															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'																	
-													) P ON PD.intPaymentId = P.intPaymentId))
-		OR (I.ysnPaid = 1 AND I.intInvoiceId IN (SELECT intInvoiceId 
-													FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
-													INNER JOIN (
-														SELECT intPaymentId
-														FROM dbo.tblARPayment WITH (NOLOCK)
-														WHERE ysnPosted = 1	
-															AND strPaymentMethod  = ''Write Off''
-															AND ISNULL(ysnProcessedToNSF, 0) = 0
-															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
-													) P ON PD.intPaymentId = P.intPaymentId))))
-		AND intAccountId IN (SELECT intAccountId FROM dbo.vyuGLAccountDetail WITH (NOLOCK) WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))
+		  AND ysnCancelled = 0
+		  AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
+		  AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))  BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +')				
 	) I ON I.intEntityCustomerId = C.intEntityId		
 	LEFT JOIN (
 		SELECT intPaymentId	
@@ -402,6 +395,7 @@ FROM (
 			 , strLocationName
 		FROM dbo.tblSMCompanyLocation WITH (NOLOCK) 
 	) CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE I.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
 ) MainQuery'
  
 IF ISNULL(@filter,'') != ''
@@ -483,8 +477,12 @@ IF @ysnPrintOnlyPastDueLocal = 1
 	END
 
 
+SELECT @dblTotalAR = SUM(dblTotalAR) FROM tblARCustomerAgingStagingTable
+
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
+		IF @dblTotalAR = 0 
+		BEGIN
 		DELETE FROM @temp_statement_table WHERE ((((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) <= 0) AND strTransactionType <> 'Customer Budget'
 		DELETE FROM tblARCustomerAgingStagingTable WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0) AND intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
 
@@ -494,6 +492,7 @@ IF @ysnPrintZeroBalanceLocal = 0
 						tblARCustomerAgingStagingTable 
 							where  intEntityUserId = @intEntityUserIdLocal 
 								AND strAgingType = 'Summary')
+		END
 	END
 
 INSERT INTO @temp_cf_table (

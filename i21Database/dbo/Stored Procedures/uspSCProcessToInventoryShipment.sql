@@ -68,6 +68,7 @@ DECLARE @dblLoopItemContractId int
 DECLARE @intTicketStorageScheduleTypeId INT
 DECLARE @strNewTicketNumber NVARCHAR(50)
 DECLARE @ysnTicketMultipleTicket BIT
+DECLARE @intTicketAGWorkOrderId INT
 
 
 DECLARE @loopLoadDetailId INT
@@ -75,6 +76,10 @@ DECLARE @strTicketStatus NVARCHAR(3)
 DECLARE @_strShipmentNumber NVARCHAR(50)
 DECLARE @strOwnedPhysicalStock NVARCHAR(20)
 DECLARE @OWNERSHIP_CUSTOMER NVARCHAR(20)
+DECLARE @dblAGWorkOrderReserveQuantity NUMERIC(38,20)
+DECLARE @strTicketNumber NVARCHAR(50)
+DECLARE @_strAuditDescription NVARCHAR(500)
+dECLARE @dblTicketNetUnits NUMERIC(38,20)
 
 SET @OWNERSHIP_CUSTOMER = 'CUSTOMER'
 
@@ -91,6 +96,9 @@ SELECT @intLoadId = intLoadId
 	,@strTicketStatus = strTicketStatus
 	,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
 	,@ysnTicketMultipleTicket = ysnMultipleTicket
+	,@intTicketAGWorkOrderId = intAGWorkOrderId
+	,@strTicketNumber = strTicketNumber
+	,@dblTicketNetUnits = dblNetUnits
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType
@@ -146,7 +154,7 @@ BEGIN TRY
 		
 		
 
- 		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1 ELSE 4 END
+ 		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1  WHEN @strDistributionOption = 'ICN' THEN 5 ELSE 4 END
 
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
@@ -726,10 +734,18 @@ BEGIN TRY
 							,NULL
 							,'AWO'
 							,@LineItems
+
+						
+						set @intOrderId = 6
+						----------Remove the reservation from WorkOrder for the Item in ticket
+
+						EXEC [uspSCUpdateAGWorkOrderItemReservation] @intTicketAGWorkOrderId, @intTicketId,@intItemId, 1
+
 					END
 				END
 			END
 		END
+			
 
 	SELECT @strWhereFinalizedWeight = strWeightFinalized
 		 , @strWhereFinalizedGrade = strGradeFinalized
@@ -907,6 +923,7 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,[dtmDateCreatedUtc]
 				)
 			SELECT 
 				[strTicketStatus] = 'O'
@@ -1048,14 +1065,46 @@ BEGIN TRY
 				,[strSourceType]
 				,[ysnHasSpecialDiscount]
 				,intAGWorkOrderId
+				,GETUTCDATE()
 			FROM tblSCTicket
 			WHERE intTicketId = @intTicketId
 
 			SET @intNewTicketId = SCOPE_IDENTITY()
 		END
 		
+		
+
+	
+
+		--Update Work order Shipped Quantity for the Ticket Item
+		IF(ISNULL(@InventoryShipmentId,0) > 0)
+		BEGIN
+			SELECT TOP 1
+				@dblAGWorkOrderReserveQuantity = ISNULL(dblQtyShipped,0) + @dblTicketNetUnits
+			FROM tblAGWorkOrderDetail
+			WHERE intWorkOrderId = @intTicketAGWorkOrderId
+				AND intItemId = @intItemId
+
+			IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) > 0)
+			BEGIN
+				SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
+				SET @_strAuditDescription = 'Distribution of Ticket - ' +  @strTicketNumber
+				EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intItemId, @dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
+			END
+		END
 	END
 	
+	SELECT @intInvoiceId = id.intInvoiceId
+	FROM tblICInventoryShipment s 
+	JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+	join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+	WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intSourceType = 1
+
+	-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+	UPDATE tblSCTicket
+	SET dblDWGOriginalNetUnits = dblNetUnits
+	WHERE intTicketId = @intTicketId
+
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
 		,@screenName		= 'Grain.view.Scale'		-- Screen Namespace

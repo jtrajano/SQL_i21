@@ -318,6 +318,63 @@ IF(@batchId IS NULL)
 		ON tEP.intCustomerEquityId = CE.intCustomerEquityId
 
 	---------------- END - UPDATE TABLES ------------------
+	
+	---------------- BEGIN - AP CLEARING ------------------	
+	DECLARE @APClearing APClearing
+	DECLARE @intLocationId	INT = NULL
+
+	SELECT @intLocationId = dbo.fnGetUserDefaultLocation(@intUserId)
+
+	INSERT INTO @APClearing (
+		[intTransactionId]
+		, [strTransactionId]
+		, [intTransactionType]
+		, [strReferenceNumber]
+		, [dtmDate]
+		, [intEntityVendorId]
+		, [intLocationId]
+		, [intTransactionDetailId]
+		, [intAccountId]
+		, [intItemId]
+		, [intItemUOMId]
+		, [dblQuantity]
+		, [dblAmount]
+		, [intOffsetId]
+		, [strOffsetId]
+		, [intOffsetDetailId]
+		, [intOffsetDetailTaxId]
+		, [strCode]
+		, [strRemarks]
+	)
+	SELECT [intTransactionId]		= P.intEquityPayId
+		, [strTransactionId]		= P.strPaymentNumber
+		, [intTransactionType]		= 9
+		, [strReferenceNumber]		= P.strPaymentNumber
+		, [dtmDate]					= P.dtmPaymentDate
+		, [intEntityVendorId]		= PS.intCustomerPatronId
+		, [intLocationId]			= @intLocationId
+		, [intTransactionDetailId]	= PS.intEquityPaySummaryId
+		, [intAccountId]			= E.intAPClearingGLAccount
+		, [intItemId]				= NULL
+		, [intItemUOMId]			= NULL
+		, [dblQuantity]				= 1
+		, [dblAmount]				= ROUND(EPD.dblEquityPay, 2)
+		, [intOffsetId]				= NULL
+		, [strOffsetId]				= NULL
+		, [intOffsetDetailId]		= NULL
+		, [intOffsetDetailTaxId]	= NULL	
+		, [strCode]					= 'PAT'
+		, [strRemarks]				= NULL
+	FROM tblPATEquityPay P
+	INNER JOIN tblPATEquityPaySummary PS ON P.intEquityPayId = PS.intEquityPayId
+	INNER JOIN tblPATEquityPayDetail EPD ON PS.intEquityPaySummaryId = EPD.intEquityPaySummaryId
+	CROSS JOIN tblPATCompanyPreference E
+	WHERE P.intEquityPayId = @intEquityPayId
+
+	IF EXISTS(SELECT TOP 1 NULL FROM @APClearing)
+		EXEC dbo.uspAPClearing @APClearing = @APClearing, @post = @ysnPosted
+
+	---------------- END - AP CLEARING ------------------
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF @@ERROR <> 0	GOTO Post_Rollback;
 

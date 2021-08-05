@@ -223,6 +223,7 @@ BEGIN TRY
 			AND ((SELECT COUNT(*) FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 				OR tblARAccountStatus.intAccountStatusId NOT IN (SELECT intAccountStatusId FROM tblTFReportingComponentAccountStatusCode WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
 			AND tblARInvoice.ysnPosted = 1
+			AND (CASE WHEN tblARInvoice.strType = 'Standard' AND tblARInvoice.strTransactionType = 'Customer Prepayment' THEN 'Invalid' ELSE 'Invoice' END) = 'Invoice'
 		)tblTransactions
 
 		SET @Count = (SELECT COUNT(intId) FROM @TFTransaction)			
@@ -706,7 +707,7 @@ BEGIN TRY
 		VALUES(@Guid
 			, @RCId
 			, 'No record found.'
-			, GETDATE()
+			, @DateFrom
 			, @DateFrom
 			, @DateTo
 			, 'Invoice')

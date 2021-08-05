@@ -120,7 +120,10 @@ SELECT --DISTINCT
 								END
 								
 							 WHEN revertHolder.intRevertType = 3
-								THEN 'Discontinued'
+								THEN CASE 
+									WHEN RHD.strTableColumnName = 'strStatus'
+										THEN ISNULL(Item.strStatus, '')
+								END
 
 							ELSE  
 								ISNULL(RHD.strNewData, '')
@@ -132,8 +135,10 @@ SELECT --DISTINCT
 									THEN  CAST(RHD.strOldData AS VARCHAR(20))
 								WHEN RHD.strOldData = 'true' THEN 'Yes'
 								WHEN RHD.strOldData = 'false' THEN 'No'
+								WHEN (RHD.strTableColumnDataType = 'INT' OR RHD.strTableColumnDataType LIKE '%NUMERIC%') AND RHD.strPreviewOldData NOT LIKE '%[A-Za-z]%'
+									THEN ISNULL(CAST(CAST(RHD.strPreviewOldData AS FLOAT) AS NVARCHAR(50)), RHD.strOldData)
 								ELSE
-									ISNULL(CAST(CAST(RHD.strPreviewOldData AS FLOAT) AS NVARCHAR(50)), RHD.strOldData)
+									ISNULL(CAST(RHD.strPreviewOldData AS NVARCHAR(50)), RHD.strOldData)
 						END COLLATE Latin1_General_CI_AS
 --, strPreviewOldData = CASE
 --							WHEN RHD.strTableColumnName = 'intCategoryId'
@@ -194,7 +199,7 @@ INNER JOIN tblICCategory Category
 LEFT JOIN tblICItemLocation ItemLoc
 	ON RHD.intItemLocationId = ItemLoc.intItemLocationId
 LEFT JOIN tblICItemUOM Uom
-	ON Item.intItemId = Uom.intItemId
+	ON Item.intItemId = Uom.intItemId AND Uom.ysnStockUnit = 1
 LEFT JOIN tblSMCompanyLocation CompanyLoc
 	ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_New

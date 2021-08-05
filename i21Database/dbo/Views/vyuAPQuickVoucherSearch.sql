@@ -28,7 +28,7 @@ SELECT
 	A.dblWithheld,
 	A.strReference,
 	A.strComment,
-	CASE WHEN A.dtmDateCreated IS NULL THEN A.dtmDate ELSE A.dtmDateCreated END AS dtmDateCreated,
+	CASE WHEN A.dtmDateCreated IS NULL THEN A.dtmDate ELSE DATEADD(dd, DATEDIFF(dd, 0,A.dtmDateCreated), 0) END AS dtmDateCreated,
 	A.dblTax,
 	B1.strName,
 	F.strUserName AS strUserId,

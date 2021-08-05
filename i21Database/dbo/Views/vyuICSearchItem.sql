@@ -3,6 +3,7 @@ AS
 
 SELECT Item.intItemId
 , Item.strItemNo
+, Item.ysnRestrictedChemical
 , Item.strType
 , Item.strDescription
 , strItemDescription = Item.strDescription

@@ -1,4 +1,5 @@
-﻿--UPDATE ALL EXISTING tblAPPaymentDetail RECORDS FOR NEW ysnOffset field.
+﻿PRINT N'START: UPDATING OFFSET FIELD'
+--UPDATE ALL EXISTING tblAPPaymentDetail RECORDS FOR NEW ysnOffset field.
 --all DM, VPRE, BA
 UPDATE A
 	SET A.ysnOffset = 1
@@ -37,3 +38,4 @@ CROSS APPLY
 WHERE 
 	B.intTransactionType IN (3)
 AND payDetails.intCount >= 1
+PRINT N'SUCCESS: UPDATING OFFSET FIELD'

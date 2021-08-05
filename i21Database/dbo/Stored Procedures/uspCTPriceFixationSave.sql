@@ -95,10 +95,9 @@ BEGIN TRY
 		@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
 	from
 		tblCTContractDetail cd
-		,tblCTContractHeader ch
+		inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 	where
 		cd.intContractDetailId = @intContractDetailId
-		and ch.intContractHeaderId = cd.intContractHeaderId
   		and ch.intContractTypeId = 2  
 
 	IF ISNULL(@intContractDetailId,0) > 0
@@ -628,13 +627,15 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		DECLARE @process NVARCHAR(20)
+		DECLARE @process NVARCHAR(50)
+			, @logProcess NVARCHAR(50)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
+		SELECT @logProcess = @process + CASE WHEN @strAction = 'Reassign' THEN ' - Reassign' ELSE '' END
 		
 		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
 							 @intContractDetailId 	= 	@intContractDetailId,
 							 @strSource			 	= 	'Pricing',
-							 @strProcess		 	= 	@process,
+							 @strProcess		 	= 	@logProcess,
 							 @contractDetail 		= 	@contractDetails,
 							 @intUserId				= 	@intUserId
 

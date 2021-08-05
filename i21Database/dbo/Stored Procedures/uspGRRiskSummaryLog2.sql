@@ -33,7 +33,7 @@ BEGIN TRY
 			,ysnDelete				
 			,intUserId
 			,strMiscFields
-			,strNotes
+			--,strNotes
 			,intActionId
 		)
 		--CUSTOMER OWNED STORAGE
@@ -94,7 +94,8 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
-			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+											+ CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END
+			 --,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= CASE 
 												WHEN intTransactionTypeId IN (1, 5, 8)
 													THEN CASE 
@@ -185,7 +186,8 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
-			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+											+ CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END
+			--,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= CASE 
 												WHEN intTransactionTypeId IN (1, 5)
 													THEN CASE 
@@ -239,8 +241,8 @@ BEGIN TRY
 			,intEntityId					= cs.intEntityId
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
-			,strMiscFields 					= NULL
-			,strNotes						= 'intStorageHistoryId = ' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,strMiscFields 					= CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END
+			--,strNotes						= 'intStorageHistoryId = ' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= 37
 		FROM @StorageHistoryIds Ids
 		INNER JOIN vyuGRStorageHistory sh
@@ -293,7 +295,8 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
-			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+											+ CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END
+			--,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= CASE 
 												WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 
 												ELSE CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
@@ -349,7 +352,8 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
-			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+											+ CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END
+			--,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= CASE 
 												WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
 												ELSE CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 
@@ -397,8 +401,8 @@ BEGIN TRY
 			,intEntityId					= cs.intEntityId
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
-			,strMiscFields 					= NULL
-			,strNotes						= 'intStorageHistoryId = ' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,strMiscFields 					= CASE WHEN ISNULL(sh.intStorageHistoryId, '') = '' THEN '' ELSE '{ intStorageHistoryId = "' + CAST(sh.intStorageHistoryId AS NVARCHAR) + '" }' END
+			--,strNotes						= 'intStorageHistoryId = ' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= CASE 
 												WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
 												ELSE CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 

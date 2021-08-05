@@ -233,7 +233,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
-				,ISNULL(gasct_open_close_ind, ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
+				,ISNULL(nullif(gasct_open_close_ind, ''''), ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
 				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
 				,gasct_com_cd COLLATE Latin1_General_CI_AS AS strItemNo
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
@@ -661,6 +661,10 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					declare @intScaleOperatorId int
 					declare @newLVTicket int
 					declare @IrelyAdminId int
+					declare @ysnUseItemCommodityDiscountOriginImport bit = 0
+
+					select @ysnUseItemCommodityDiscountOriginImport = ysnUseItemCommodityDiscountOriginImport 
+						from tblGRCompanyPreference 
 
 					select @IrelyAdminId = intEntityId from tblEMEntityCredential where strUserName = ''irelyadmin''
 
@@ -751,8 +755,16 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							,[dblTareWeight]				= SC.dblTareWeight
 							,[dtmTareDateTime]				= SC.dtmTareDateTime
 							,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
-							,[intDiscountId]				= ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId)
-							,[intDiscountScheduleId]		= GRD_CROSS_REF.intDiscountScheduleId -- consider review for redundancy. 
+							,[intDiscountId]				= case when @ysnUseItemCommodityDiscountOriginImport = 1 then 
+																ICC.intScheduleDiscountId
+															else
+																ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId)
+															end
+							,[intDiscountScheduleId]		= case when @ysnUseItemCommodityDiscountOriginImport = 1 then 
+																ICC_GRD_CROSS_REF.intDiscountScheduleId
+															else
+																GRD_CROSS_REF.intDiscountScheduleId 
+															end -- consider review for redundancy. 
 							,[dblFreightRate]				= SC.dblFreightRate
 							,[dblTicketFees]				= SC.dblTicketFees
 							,[ysnFarmerPaysFreight]			= SC.ysnFarmerPaysFreight
@@ -813,6 +825,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						--LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId				
 						left join tblGRDiscountCrossReference GRD_CROSS_REF on ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId) = GRD_CROSS_REF.intDiscountId
+						left join tblGRDiscountCrossReference ICC_GRD_CROSS_REF on ICC.intScheduleDiscountId = ICC_GRD_CROSS_REF.intDiscountId
 						OUTER APPLY (
 							SELECT TOP 1 intLoadId, intLoadDetailId,
 								intContractDetailId = case 
@@ -1334,7 +1347,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 										where intTicketLVStagingId = @newLVTicket
 							 
 								update tblSCTicket 
-										set ysnHasGeneratedTicketNumber = 0 
+										set ysnHasGeneratedTicketNumber = 0, dtmDateModifiedUtc = GETUTCDATE() 
 											where intTicketLVStagingId = @newLVTicket
 
 								delete from tblQMTicketDiscount 

@@ -13,7 +13,7 @@ RETURNS TABLE AS RETURN
 						CASE	WHEN B.intCustomerStorageId > 0 THEN  --COST ADJUSTMENT FOR SETTLE STORAGE ITEM
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
-										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((storageOldCost.dblOldCost * B.dblQtyReceived), 2) END
+										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((ISNULL(storageOldCost.dblOldCost, B.dblOldCost) * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
@@ -34,7 +34,7 @@ RETURNS TABLE AS RETURN
 						CASE	WHEN B.intCustomerStorageId > 0 THEN 
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
-										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((storageOldCost.dblOldCost * B.dblQtyReceived), 2) END
+										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((ISNULL(storageOldCost.dblOldCost, B.dblOldCost) * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
@@ -70,6 +70,8 @@ RETURNS TABLE AS RETURN
 		ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceiptCharge charges
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+	-- LEFT JOIN tblICInventoryShipmentCharge shipmentCharges
+	-- 	ON B.intInventoryShipmentChargeId = shipmentCharges.intInventoryShipmentChargeId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 		ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
 	LEFT JOIN tblICItem B2
@@ -88,8 +90,11 @@ RETURNS TABLE AS RETURN
 	) itemUOM
 	OUTER APPLY (
 		SELECT dblTotal = CAST (
-				CASE WHEN B.intInventoryReceiptChargeId > 0
-				THEN charges.dblAmount
+				CASE 
+				WHEN B.intInventoryReceiptChargeId > 0
+					THEN charges.dblAmount
+				-- WHEN B.intInventoryShipmentChargeId > 0
+				-- 	THEN shipmentCharges.dblAmount (PENDING)
 				ELSE (CASE	
 						-- If there is a Gross/Net UOM, compute by the net weight. 
 						WHEN E.intWeightUOMId IS NOT NULL THEN 
@@ -131,4 +136,5 @@ RETURNS TABLE AS RETURN
 	) storageOldCost
 	WHERE A.intBillId = @billId
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
 )

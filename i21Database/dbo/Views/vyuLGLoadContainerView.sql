@@ -25,8 +25,11 @@ SELECT   L.intLoadId
 		,LC.dblNetWt
 		,LC.dblQuantity
 		,LC.dblTareWt
-		,LC.dblTotalCost
-		,LC.dblUnitCost
+		,dblTotalCost = ROUND(
+							(WeightUOM.dblUnitQty / ISNULL(PriceUOM.dblUnitQty, 1)) * ISNULL(LD.dblUnitPrice, PDetail.dblCashPrice) 
+							* LC.dblNetWt / ISNULL(PBCur.intCent, 1)
+						,2)
+		,dblUnitCost = ISNULL(LD.dblUnitPrice, PDetail.dblCashPrice)
 		,LC.dtmUnloading
 		,LC.dtmCustoms
 		,LC.dtmFDA
@@ -88,21 +91,33 @@ SELECT   L.intLoadId
 								WHEN 1 THEN 'Scheduled'
 								WHEN 2 THEN 'Dispatched'
 								WHEN 3 THEN 
-									CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-											WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-											WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-											ELSE 'Inbound Transit' END
+									CASE WHEN (L.ysnDocumentsApproved = 1 
+											AND L.dtmDocumentsApproved IS NOT NULL
+											AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+											AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+											THEN 'Documents Approved'
+										WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+										WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+										ELSE 'Inbound Transit' END
 								WHEN 4 THEN 'Received'
 								WHEN 5 THEN 
-									CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-											WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-											WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-											ELSE 'Outbound Transit' END
+									CASE WHEN (L.ysnDocumentsApproved = 1 
+											AND L.dtmDocumentsApproved IS NOT NULL
+											AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+											AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+											THEN 'Documents Approved'
+										WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+										WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+										ELSE 'Outbound Transit' END
 								WHEN 6 THEN 
-									CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-											WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-											WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-											ELSE 'Delivered' END
+									CASE WHEN (L.ysnDocumentsApproved = 1 
+											AND L.dtmDocumentsApproved IS NOT NULL
+											AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+											AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+											THEN 'Documents Approved'
+										WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+										WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+										ELSE 'Delivered' END
 								WHEN 7 THEN 
 									CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
 											ELSE 'Shipping Instruction Created' END
@@ -148,6 +163,9 @@ LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPCo
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
+LEFT JOIN tblSMCurrency PBCur ON PBCur.intCurrencyID = PDetail.intBasisCurrencyId 
+LEFT JOIN tblICItemUOM PriceUOM ON PriceUOM.intItemUOMId = PDetail.intPriceItemUOMId
+LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId
 LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId

@@ -1278,6 +1278,25 @@ GO
 	       [intSort]						=		123,
 		   [strPrefix]						=		N'PBI'
 	
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Integrated Document Processing'
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)')
+	DELETE FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Document Processing (IDP)'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'IDP')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
+	SELECT [intModuleId]					=		125,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'IDP',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		123,
+		   [strPrefix]						=		N'IDP'
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021')
+		DELETE FROM tblSMModule WHERE strApplicationName = 'Test 07-27-2021' AND strModule = 'Test 07-27-2021'
+	
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO

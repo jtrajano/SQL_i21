@@ -3,7 +3,7 @@
     [intSubsidiaryCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
     [dtmDate]                   DATETIME         NOT NULL,
-    [strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
+    [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NOT NULL,
     [dblDebit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblDebit]  DEFAULT ((0)),
     [dblCredit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblCredit]  DEFAULT ((0)),
@@ -52,6 +52,7 @@
 	[strDocument] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
     [intFiscalPeriodId] INT NULL,
+    [intSubsidiaryGLDetailId] INT NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])

@@ -73,7 +73,7 @@ AS
 			CH.strSalesperson,
 			CH.strCPContract,
 			CH.strCounterParty,
-			ISNULL(TR.ysnOnceApproved,0) AS ysnApproved,
+			ISNULL(TR.ysnApproved,0) AS ysnApproved,
 			CH.intDefaultCommodityUnitMeasureId,
 			CH.ysnBrokerage,
 			CH.strBook,
@@ -108,7 +108,7 @@ AS
 		SELECT * FROM 
 		(
 			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
-					TR.intRecordId, TR.ysnOnceApproved 
+					TR.intRecordId, TR.ysnOnceApproved, ysnApproved = case when TR.strApprovalStatus = 'Approved' then convert(bit,1) else convert(bit,0) end 
 			FROM	tblSMTransaction	TR WITH (NOLOCK)
 			JOIN	tblSMScreen			SC	WITH (NOLOCK) ON	SC.intScreenId		=	TR.intScreenId
 			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',

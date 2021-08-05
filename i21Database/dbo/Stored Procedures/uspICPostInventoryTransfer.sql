@@ -322,16 +322,20 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 END 
 
--- insert into the temp table
-BEGIN 
-	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
-END 
-
 -- Check the locations if GL entries will be required. 
 SELECT	@ysnGLEntriesRequired = 1
 FROM	tblICInventoryTransfer 
 WHERE	intInventoryTransferId = @intTransactionId 
-		AND intFromLocationId <> intToLocationId
+		AND (
+			intFromLocationId <> intToLocationId
+			OR ysnShipmentRequired = 1
+		)
+
+-- Add to the "not-to-log" list if shipment is not required 
+IF @ysnShipmentRequired <> 1
+BEGIN 
+	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
+END 
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -912,7 +916,7 @@ BEGIN
 	END 
 
 
-	--IF @ysnGLEntriesRequired = 0
+	IF (@ysnShipmentRequired = 1 OR @ysnGLEntriesRequired = 0)
 	BEGIN 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -956,6 +960,33 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@strGLDescription		
 	END
+
+	-- BEGIN 
+			
+	-- 	DECLARE @TransactionLinks udtICTransactionLinks
+	-- 	DELETE FROM @TransactionLinks
+		
+	-- 	IF EXISTS (SELECT intSourceId FROM dbo.vyuICGetTransferDetailSource WHERE intInventoryTransferId = @intTransactionId AND intSourceId IS NOT NULL)
+	-- 	BEGIN
+		
+	-- 		INSERT INTO @TransactionLinks (
+	-- 			strOperation, -- Operation
+	-- 			intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+	-- 			intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+	-- 		)
+	-- 		SELECT 'Create',
+	-- 			Transfer.intSourceId, 
+	-- 			COALESCE(Transfer.strSourceTransactionNo, 'Missing Transaction No'), 
+	-- 			Transfer.strSourceModule, 
+	-- 			Transfer.strSourceScreen,
+	-- 			@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Transfer'
+	-- 		FROM dbo.vyuICGetTransferDetailSource Transfer
+	-- 		WHERE intInventoryTransferId = @intTransactionId
+
+	-- 		EXEC dbo.uspICAddTransactionLinks @TransactionLinks
+
+	-- 	END
+	-- END
 END   	
 
 --------------------------------------------------------------------------------------------  

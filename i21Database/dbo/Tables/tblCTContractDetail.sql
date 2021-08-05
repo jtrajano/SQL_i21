@@ -148,11 +148,23 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     dtmFinalPNL DATETIME NULL,
 	intPricingStatus INT,
 	dtmStartDateUTC datetime NULL,
+	-- Reference Pricing
+	dblRefFuturesQty NUMERIC(18, 6) NULL,
+	intRefFuturesItemUOMId INT NULL,
+	intRefFuturesCurrencyId INT NULL,
+	intRefFuturesMarketId INT NULL,
+	intRefFuturesMonthId INT NULL,
+	ysnAutoShortClosed BIT NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 
-	
+	-- Reference Pricing Constraints
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intRefFuturesItemUOMId_intItemUOMId] FOREIGN KEY (intRefFuturesItemUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intRefFuturesMarketId_intFutureMarketId] FOREIGN KEY ([intRefFuturesMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intRefFuturesMonthId_intFutureMonthId] FOREIGN KEY ([intRefFuturesMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intRefFuturesCurrencyId_intCurrencyId] FOREIGN KEY ([intRefFuturesCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
 
@@ -589,7 +601,10 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 
 	begin try
 
-		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity, @dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then i.dblBalance else i.dblBalanceLoad end) from inserted i, tblCTContractHeader ch where ch.intContractHeaderId = i.intContractHeaderId;  
+		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity, @dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then i.dblBalance else i.dblBalanceLoad end) 
+		from 
+			inserted i
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = i.intContractHeaderId;  
 
 		if (@intPricingTypeId = 1)
 		begin
@@ -605,11 +620,19 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 
 			if @ysnMultiPrice = 1
 			begin
-				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractHeaderId = @intActiveContractHeaderId and pfd.intPriceFixationId = pf.intPriceFixationId
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractHeaderId = @intActiveContractHeaderId 
 			end
 			else
 			begin
-				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf 
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractDetailId = @intActiveContractDetailId 
 			end			
 			
 			if (@dblPricedQuantity = 0)

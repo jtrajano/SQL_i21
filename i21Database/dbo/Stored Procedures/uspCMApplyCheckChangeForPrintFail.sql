@@ -2,7 +2,7 @@
 CREATE PROCEDURE uspCMApplyCheckChangeForPrintFail
 	@intBankAccountId INT = NULL,
 	@strTransactionId NVARCHAR(40) = NULL,
-	@strBatchId NVARCHAR(20) = NULL,
+	@strBatchId NVARCHAR(40) = NULL,
 	@ysnFail BIT = 0
 AS
 

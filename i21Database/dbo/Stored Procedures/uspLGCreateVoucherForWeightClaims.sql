@@ -303,6 +303,8 @@ BEGIN TRY
 			,[intContractSeqId]
 			,[intLoadShipmentId]
 			,[strLoadShipmentNumber]
+			,[intWeightClaimId]
+			,[intWeightClaimDetailId]
 			,[intItemId]
 			,[strMiscDescription]
 			,[dblOrderQty]
@@ -346,6 +348,8 @@ BEGIN TRY
 			,[intContractSeqId] = CD.intContractSeq
 			,[intLoadShipmentId] = WC.intLoadId
 			,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
+			,[intWeightClaimId] = VDD.intWeightClaimId
+			,[intWeightClaimDetailId] = VDD.intWeightClaimDetailId
 			,[intItemId] = VDD.intItemId
 			,[strMiscDescription] = I.strDescription
 			,[dblOrderQty] = VDD.dblQtyReceived

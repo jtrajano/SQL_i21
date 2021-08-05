@@ -386,21 +386,21 @@ BEGIN TRY
 			WHERE strLotNumber = @strLotNumber
 		END
 
-		IF @intLotId IS NOT NULL
-			AND @ysnMergeOnMove = 0
-		BEGIN
-			SELECT @strExistingStorageLocationName = strName
-			FROM dbo.tblICStorageLocation
-			WHERE intStorageLocationId = @intExistingStorageLocationId
+		--IF @intLotId IS NOT NULL
+		--	AND @ysnMergeOnMove = 0
+		--BEGIN
+		--	SELECT @strExistingStorageLocationName = strName
+		--	FROM dbo.tblICStorageLocation
+		--	WHERE intStorageLocationId = @intExistingStorageLocationId
 
-			RAISERROR (
-					'LotID ''%s'' already exists in this storage location ''%s''.'
-					,11
-					,1
-					,@strLotNumber
-					,@strExistingStorageLocationName
-					)
-		END
+		--	RAISERROR (
+		--			'LotID ''%s'' already exists in this storage location ''%s''.'
+		--			,11
+		--			,1
+		--			,@strLotNumber
+		--			,@strExistingStorageLocationName
+		--			)
+		--END
 	END
 
 	IF @ysnSubLotAllowed = 1

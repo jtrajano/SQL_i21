@@ -575,7 +575,7 @@ BEGIN TRY
 		,E.ID6 = T.ID6
 		,E.ID7 = T.ID7
 	FROM TestPvtEff E
-		,TEMP T
+		inner join TEMP T on 1=1
 
 	UPDATE TestPvtEff
 	SET strShiftIndicator = 'GROUP1'

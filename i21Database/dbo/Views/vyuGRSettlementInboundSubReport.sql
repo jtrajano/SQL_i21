@@ -18,7 +18,8 @@ AS
 			,intInventoryReceiptChargeId = BillDtl.intInventoryReceiptChargeId
 		FROM tblAPPayment PYMT
 			JOIN tblAPPaymentDetail PYMTDTL 
-				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+				ON PYMT.intPaymentId = PYMTDTL.intPaymentId					
+					and PYMTDTL.dblPayment <> 0
 			JOIN tblAPBill Bill	
 				ON PYMTDTL.intBillId = Bill.intBillId --and intTransactionType = 1
 			JOIN tblAPBillDetail BillDtl
@@ -33,7 +34,8 @@ AS
 			,strDiscountCodeDescription
 			,WeightedAverageReading	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE (SUM(WeightedAverageReading) / SUM(Net)) END
 			,WeightedAverageShrink	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE  (SUM(WeightedAverageShrink) / SUM(Net)) END
-			,Discount				= (dblDiscountAmount)
+			,Discount				= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE  (SUM(dblDiscountAmount) / SUM(Net)) END
+			-- ,Discount				= (dblDiscountAmount)
 			,Amount					= SUM(dblAmount)
 			,Tax					= SUM(dblTax)
 		FROM	(	
@@ -56,7 +58,7 @@ AS
 					intItemId, 
 					strDiscountCode, 
 					strDiscountCodeDescription, 
-					dblDiscountAmount, 
+					[dblDiscountAmount] = (isnull(S1.dblDiscountAmount, 0) * Net) + (isnull(S2.dblDiscountAmount, 0) * Net), 
 					dblAmount, 
 					dblTax, 
 					Net, 
@@ -71,6 +73,7 @@ AS
 					SELECT					
 						dblShrinkPercent			= ISNULL(ScaleDiscount.dblShrinkPercent, 0)
 						,dblGradeReading			= ISNULL(ScaleDiscount.dblGradeReading, 0)								
+						,dblDiscountAmount			= ISNULL(ScaleDiscount.dblDiscountAmount, 0)
 					FROM tblICInventoryReceiptCharge INVRCPTCHR 
 					LEFT JOIN tblICInventoryReceipt INVRCPT 
 						ON INVRCPTCHR.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
@@ -85,10 +88,13 @@ AS
 					LEFT JOIN (
 								SELECT 
 									QM.intTicketId
-								   ,DCode.intItemId
+								   ,isnull(QMII.intItemId, DCode.intItemId) as intItemId
 								   ,QM.dblGradeReading
 								   ,QM.dblShrinkPercent
-								FROM tblQMTicketDiscount QM
+								   ,QM.dblDiscountAmount
+								FROM tblQMTicketDiscount QM								
+								LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+									on QM.intTicketDiscountId = QMII.intTicketDiscountId
 								JOIN tblGRDiscountScheduleCode DCode 
 									ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 								WHERE QM.strSourceType = 'Scale'
@@ -103,14 +109,17 @@ AS
 					SELECT 
 						dblShrinkPercent			= ISNULL(StorageDiscount.dblShrinkPercent, 0)
 						,dblGradeReading			= ISNULL(StorageDiscount.dblGradeReading, 0)			
-					
+						,dblDiscountAmount			= ISNULL(StorageDiscount.dblDiscountAmount, 0)
 					FROM (
 								 SELECT 
 									 QM.intTicketFileId
-									,DCode.intItemId
+									,isnull(QMII.intItemId, DCode.intItemId) as intItemId
 									,QM.dblGradeReading
 									,QM.dblShrinkPercent
+									,QM.dblDiscountAmount
 								FROM tblQMTicketDiscount QM
+								LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+									on QM.intTicketDiscountId = QMII.intTicketDiscountId
 								JOIN tblGRDiscountScheduleCode DCode 
 									ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 								WHERE QM.strSourceType = 'Storage'
@@ -128,7 +137,7 @@ AS
 GROUP BY intPaymentId
 	,strDiscountCode
 	,strDiscountCodeDescription
-	,dblDiscountAmount
+	-- ,dblDiscountAmount
 /*SELECT 
 	intPaymentId
 	,strDiscountCode

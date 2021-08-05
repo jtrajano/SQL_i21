@@ -334,10 +334,12 @@ UPDATE  b SET ysnReversed = 1 FROM tblGLJournal j
 
 
 UPDATE j SET intFiscalPeriodId = f.intGLFiscalYearPeriodId, intFiscalYearId = f.intFiscalYearId
-	FROM tblGLJournal j, tblGLFiscalYearPeriod f, @tmpValidJournals t
+	FROM tblGLJournal j
+		inner join tblGLFiscalYearPeriod f on 1=1
+		inner join @tmpValidJournals t on t.intJournalId = j.intJournalId
 	WHERE j.dtmDate >= f.dtmStartDate and j.dtmDate <= f.dtmEndDate
 	AND j.ysnPosted = 1
-	AND t.intJournalId = j.intJournalId
+
 
 
 IF @@ERROR <> 0	GOTO Post_Rollback;

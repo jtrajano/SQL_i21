@@ -33,8 +33,7 @@ DECLARE @strTaxCode             NVARCHAR(100)
 	  , @strSubTotalBy          NVARCHAR(100)	= 'Tax Group'
 	  , @strIncludeExemptOnly   NVARCHAR(100)	= 'No'
 	  , @ysnInvoiceDetail       BIT
-	  , @xmlDocumentId          INT
-	  , @fieldname              NVARCHAR(50)
+	  , @xmlDocumentId          INT	  
       , @UserName               NVARCHAR(150)
 	  , @strCompanyName         NVARCHAR(100)
 	  , @strCompanyAddress      NVARCHAR(500)
@@ -51,7 +50,12 @@ DECLARE @strTaxCode             NVARCHAR(100)
 	  , @ZeroDecimal			DECIMAL(18, 6)	= CAST(0 AS DECIMAL(18,6))
 	  , @dtmDateFrom			DATETIME
 	  , @dtmDateTo				DATETIME
-	  , @strcondition			NVARCHAR(100)
+	  , @strCategoryCodeCondition	NVARCHAR(100)
+      , @fieldname				NVARCHAR(50)
+	  , @condition				NVARCHAR(20)
+	  , @id						INT 
+	  , @from					NVARCHAR(100)
+	  , @to						NVARCHAR(100)
 
 SELECT TOP 1 @strCompanyName    = strCompanyName
 		   , @strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
@@ -89,26 +93,6 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
-SELECT TOP 1 @strTaxCode = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strTaxCode'
-
-SELECT TOP 1 @strState = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strState'
-
-SELECT TOP 1 @strTaxClassType = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strTaxReportType'
-
-SELECT TOP 1 @strTaxClass = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strTaxClass'
-
-SELECT TOP 1 @strTaxGroup = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] = 'strTaxGroup'
-
 SELECT TOP 1 @strSubTotalBy = REPLACE(ISNULL([from], 'Tax Group'), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strSubTotalBy'
@@ -141,7 +125,8 @@ SELECT TOP 1 @strItemNo = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strItemNo'
 
-SELECT TOP 1 @strCategoryCode = REPLACE(ISNULL([from], ''), '''''', '''')
+SELECT TOP 1    @strCategoryCode = REPLACE(ISNULL([from], ''), '''''', '''')
+               ,@strCategoryCodeCondition = [condition]
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCategoryCode'
 
@@ -154,8 +139,7 @@ FROM @temp_xml_table
 WHERE [fieldname] = 'strInvoiceNumber'
 
 SELECT @dtmDateFrom		= CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
- 	 , @dtmDateTo		= CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)
-     , @strcondition	= [condition]
+ 	 , @dtmDateTo		= CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)     
 FROM @temp_xml_table 
 WHERE [fieldname] = 'dtmDate'
 
@@ -168,6 +152,189 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+
+--TEMP TABLES
+IF(OBJECT_ID('tempdb..#TAXCODES') IS NOT NULL)
+BEGIN
+    DROP TABLE #TAXCODES
+END
+CREATE TABLE #TAXCODES (
+      [intTaxCodeId]	INT             NOT NULL
+    , [strTaxCode]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
+)
+
+INSERT INTO #TAXCODES
+SELECT intTaxCodeId
+     , strTaxCode
+FROM tblSMTaxCode TC
+
+IF(OBJECT_ID('tempdb..#TAXCLASS') IS NOT NULL)
+BEGIN
+    DROP TABLE #TAXCLASS
+END
+CREATE TABLE #TAXCLASS (
+      [intTaxClassId]	INT             NOT NULL
+    , [strTaxClass]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
+)
+
+INSERT INTO #TAXCLASS
+SELECT intTaxClassId
+     , strTaxClass
+FROM tblSMTaxClass TC
+
+IF(OBJECT_ID('tempdb..#TAXGROUP') IS NOT NULL)
+BEGIN
+    DROP TABLE #TAXGROUP
+END
+CREATE TABLE #TAXGROUP (
+      [intTaxGroupId]	INT             NOT NULL
+    , [strTaxGroup]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
+)
+
+INSERT INTO #TAXGROUP
+SELECT intTaxGroupId
+     , strTaxGroup
+FROM tblSMTaxGroup TG
+
+IF(OBJECT_ID('tempdb..#TAXREPORTTYPE') IS NOT NULL)
+BEGIN
+    DROP TABLE #TAXREPORTTYPE
+END
+CREATE TABLE #TAXREPORTTYPE (
+      [intTaxReportTypeId]	INT             NOT NULL
+    , [strType]		        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
+)
+
+INSERT INTO #TAXREPORTTYPE
+SELECT intTaxReportTypeId
+     , strType
+FROM tblSMTaxReportType TRT
+
+IF(OBJECT_ID('tempdb..#TAXSTATE') IS NOT NULL)
+BEGIN
+    DROP TABLE #TAXSTATE
+END
+CREATE TABLE #TAXSTATE (
+      [strState]		NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL 
+)
+
+INSERT INTO #TAXSTATE
+SELECT DISTINCT strState
+FROM tblSMTaxCode TC
+
+WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strTaxCode', 'strState', 'strTaxReportType', 'strTaxClass', 'strTaxGroup'))
+    BEGIN
+        SELECT TOP 1 @condition = [condition]
+				   , @from		= REPLACE(ISNULL([from], ''), '''''', '''')
+				   , @to		= REPLACE(ISNULL([to], ''), '''''', '''')
+				   , @fieldname = [fieldname]
+				   , @id		= [id]
+		FROM @temp_xml_table 
+		WHERE [fieldname] IN ('strTaxCode', 'strState', 'strTaxReportType', 'strTaxClass', 'strTaxGroup')
+
+        IF @fieldname = 'strTaxCode' AND ISNULL(@from, '') <> ''
+            DELETE FROM #TAXCODES
+        ELSE IF @fieldname = 'strState' AND ISNULL(@from, '') <> ''
+            DELETE FROM #TAXSTATE
+        ELSE IF @fieldname = 'strTaxReportType' AND ISNULL(@from, '') <> ''
+            DELETE FROM #TAXREPORTTYPE
+        ELSE IF @fieldname = 'strTaxClass' AND ISNULL(@from, '') <> ''
+            DELETE FROM #TAXCLASS
+        ELSE IF @fieldname = 'strTaxGroup' AND ISNULL(@from, '') <> ''
+            DELETE FROM #TAXGROUP         
+
+        IF UPPER(@condition) = UPPER('Equal To')
+			BEGIN
+                IF @fieldname = 'strTaxCode'
+					BEGIN
+                        INSERT INTO #TAXCODES
+						SELECT intTaxCodeId
+                             , strTaxCode
+                        FROM tblSMTaxCode TC
+                        WHERE TC.strTaxCode = @from
+					END
+                ELSE IF @fieldname = 'strState'
+                    BEGIN
+                        INSERT INTO #TAXSTATE
+						SELECT DISTINCT strState
+                        FROM tblSMTaxCode TC
+                        WHERE TC.strState = @from
+					END
+                ELSE IF @fieldname = 'strTaxReportType'
+                    BEGIN
+                        INSERT INTO #TAXREPORTTYPE
+						SELECT intTaxReportTypeId
+                             , strType
+                        FROM tblSMTaxReportType TRT
+                        WHERE TRT.strType = @from
+					END
+                ELSE IF @fieldname = 'strTaxClass'
+                    BEGIN
+                        INSERT INTO #TAXCLASS
+                        SELECT intTaxClassId
+                             , strTaxClass
+                        FROM tblSMTaxClass TC
+                        WHERE TC.strTaxClass = @from
+                    END
+                ELSE IF @fieldname = 'strTaxGroup'
+                    BEGIN
+                        INSERT INTO #TAXGROUP
+                        SELECT intTaxGroupId
+                             , strTaxGroup
+                        FROM tblSMTaxGroup TG
+                        WHERE TG.strTaxGroup = @from
+                    END
+            END
+        ELSE IF UPPER(@condition) = UPPER('Not Equal To')
+			BEGIN
+                IF @fieldname = 'strTaxCode'
+					BEGIN
+                        INSERT INTO #TAXCODES
+						SELECT intTaxCodeId
+                             , strTaxCode
+                        FROM tblSMTaxCode TC
+                        WHERE TC.strTaxCode <> @from
+					END
+                ELSE IF @fieldname = 'strState'
+                    BEGIN
+                        INSERT INTO #TAXSTATE
+						SELECT DISTINCT strState
+                        FROM tblSMTaxCode TC
+                        WHERE TC.strState <> @from
+					END
+                ELSE IF @fieldname = 'strTaxReportType'
+                    BEGIN
+                        INSERT INTO #TAXREPORTTYPE
+						SELECT intTaxReportTypeId
+                             , strType
+                        FROM tblSMTaxReportType TRT
+                        WHERE TRT.strType <> @from
+					END
+                ELSE IF @fieldname = 'strTaxClass'
+                    BEGIN
+                        INSERT INTO #TAXCLASS
+                        SELECT intTaxClassId
+                             , strTaxClass
+                        FROM tblSMTaxClass TC
+                        WHERE TC.strTaxClass <> @from
+                    END
+                ELSE IF @fieldname = 'strTaxGroup'
+                    BEGIN
+                        INSERT INTO #TAXGROUP
+                        SELECT intTaxGroupId
+                             , strTaxGroup
+                        FROM tblSMTaxGroup TG
+                        WHERE TG.strTaxGroup <> @from
+                    END
+            END
+
+        DELETE FROM @temp_xml_table WHERE [fieldname] = @fieldname
+		SET @condition = NULL
+		SET @from = NULL
+		SET @to = NULL
+		SET @fieldname = NULL
+		SET @id =  NULL
+    END
 
 --#CUSTOMERS
 SELECT intEntityCustomerId  	= C.intEntityId 
@@ -208,7 +375,9 @@ SELECT intCategoryId
 	 , strDescription
 INTO #CATEGORIES
 FROM dbo.tblICCategory WITH (NOLOCK)
-WHERE (@strCategoryCode IS NULL OR strCategoryCode = @strCategoryCode)
+WHERE   @strCategoryCode IS NULL
+OR (strCategoryCode = @strCategoryCode AND @strCategoryCodeCondition = 'Equal To')
+OR (strCategoryCode <> @strCategoryCode AND @strCategoryCodeCondition = 'Not Equal To')
 
 --#ITEMS
 SELECT I.intItemId
@@ -315,8 +484,8 @@ BEGIN
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
       FROM (
-           SELECT intTaxGroupId
-			    , strTaxGroup
+           SELECT OTR.intTaxGroupId AS intTaxGroupId
+			    , OTR.strTaxGroup AS strTaxGroup
 				, intInvoiceDetailId
 				, intInvoiceId
                 , MIN(intEntityCustomerId) AS intEntityCustomerId
@@ -356,37 +525,34 @@ BEGIN
                 , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
-            FROM vyuAROutboundTaxReport WITH (NOLOCK)
-            WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
-              AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
-              AND (
+            FROM vyuAROutboundTaxReport OTR WITH (NOLOCK) 
+            INNER JOIN #TAXCODES TC ON OTR.strTaxCode = TC.strTaxCode
+            INNER JOIN #TAXSTATE TS ON OTR.strState = TS.strState
+            INNER JOIN #TAXGROUP TG ON OTR.strTaxGroup = TG.strTaxGroup
+            INNER JOIN #TAXCLASS TCC ON OTR.strTaxClass = TCC.strTaxClass
+            INNER JOIN #TAXREPORTTYPE TRT ON OTR.strType = TRT.strType
+            WHERE (
                        (
-			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'
-                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
-                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
-                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'                        
                         AND dblTotalTax <> @ZeroDecimal
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Code'
-                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   OR
                        (
-			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Class'
-                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
+			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Class'                        
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Report Type'
-                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   )
-            GROUP BY intTaxGroupId, strTaxGroup, intInvoiceDetailId, intInvoiceId
+            GROUP BY OTR.intTaxGroupId, OTR.strTaxGroup, intInvoiceDetailId, intInvoiceId
            ) OT
         INNER JOIN #INVOICES I ON OT.intInvoiceId = I.intInvoiceId
         INNER JOIN #ITEMS ITEM ON OT.[intItemId] = ITEM.[intItemId]
@@ -469,8 +635,8 @@ BEGIN
                 , MIN(dblPrice) AS dblPrice
                 , MIN(dblTotalTax) AS dblTotalTax
                 , MIN(dblTotal) AS dblTotal
-                , MIN(intTaxGroupId) AS intTaxGroupId
-                , MIN(strTaxGroup) AS strTaxGroup
+                , MIN(TG.intTaxGroupId) AS intTaxGroupId
+                , MIN(TG.strTaxGroup) AS strTaxGroup
                 , SUM(dblCheckoffTax) AS dblCheckoffTax
                 , SUM(dblCitySalesTax) AS dblCitySalesTax
                 , SUM(dblCityExciseTax) AS dblCityExciseTax
@@ -500,33 +666,30 @@ BEGIN
                 , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
-            FROM vyuAROutboundTaxReport WITH (NOLOCK)
-            WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
-              AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
-              AND (
+            FROM vyuAROutboundTaxReport OTR WITH (NOLOCK) 
+            INNER JOIN #TAXCODES TC ON OTR.strTaxCode = TC.strTaxCode
+            INNER JOIN #TAXSTATE TS ON OTR.strState = TS.strState
+            INNER JOIN #TAXGROUP TG ON OTR.strTaxGroup = TG.strTaxGroup
+            INNER JOIN #TAXCLASS TCC ON OTR.strTaxClass = TCC.strTaxClass
+            INNER JOIN #TAXREPORTTYPE TRT ON OTR.strType = TRT.strType
+            WHERE (
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'
-                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
-                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
-                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
                         AND dblTotalTax <> @ZeroDecimal
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Code'
-                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Class'
-                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Report Type'
-                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   )
@@ -602,8 +765,8 @@ BEGIN
          , [dblSSTOnStateOtherTax]        = OT.[dblSSTOnStateOtherTax]
          , [dblSSTOnTonnageTax]           = OT.[dblSSTOnTonnageTax]
       FROM (
-           SELECT intTaxCodeId
-				, strTaxCode
+           SELECT OTR.intTaxCodeId AS intTaxCodeId
+				, OTR.strTaxCode AS strTaxCode
 				, intInvoiceDetailId
 				, intInvoiceId
                 , MIN(intEntityCustomerId) AS intEntityCustomerId
@@ -614,8 +777,8 @@ BEGIN
                 , MIN(dblPrice) AS dblPrice
                 , MIN(dblTotalTax) AS dblTotalTax
                 , MIN(dblTotal) AS dblTotal
-                , MIN(intTaxGroupId) AS intTaxGroupId
-                , MIN(strTaxGroup) AS strTaxGroup
+                , MIN(TG.intTaxGroupId) AS intTaxGroupId
+                , MIN(TG.strTaxGroup) AS strTaxGroup
                 , SUM(dblCheckoffTax) AS dblCheckoffTax
                 , SUM(dblCitySalesTax) AS dblCitySalesTax
                 , SUM(dblCityExciseTax) AS dblCityExciseTax
@@ -645,37 +808,34 @@ BEGIN
                 , SUM(dblSSTOnStateExciseTax) AS dblSSTOnStateExciseTax
                 , SUM(dblSSTOnStateOtherTax) AS dblSSTOnStateOtherTax
                 , SUM(dblSSTOnTonnageTax) AS dblSSTOnTonnageTax
-            FROM vyuAROutboundTaxReport WITH (NOLOCK)
-            WHERE (@strState IS NULL OR strState LIKE '%'+ @strState +'%')
-              AND (@strTaxGroup IS NULL OR strTaxGroup LIKE '%' + @strTaxGroup + '%')
-              AND (
+            FROM vyuAROutboundTaxReport OTR WITH (NOLOCK) 
+            INNER JOIN #TAXCODES TC ON OTR.strTaxCode = TC.strTaxCode
+            INNER JOIN #TAXSTATE TS ON OTR.strState = TS.strState
+            INNER JOIN #TAXGROUP TG ON OTR.strTaxGroup = TG.strTaxGroup
+            INNER JOIN #TAXCLASS TCC ON OTR.strTaxClass = TCC.strTaxClass
+            INNER JOIN #TAXREPORTTYPE TRT ON OTR.strType = TRT.strType
+            WHERE (
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'No'
-                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
-                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
-                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
                         AND dblTotalTax <> @ZeroDecimal
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Code'
-                        AND (@strTaxCode IS NULL OR strTaxCode LIKE '%'+ @strTaxCode +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Class'
-                        AND (@strTaxClass IS NULL OR strTaxClass LIKE '%'+ @strTaxClass +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   OR
                        (
 			            ISNULL(@strIncludeExemptOnly, 'No') = 'By Tax Report Type'
-                        AND (@strTaxClassType IS NULL OR strType LIKE '%'+ @strTaxClassType +'%')
                         AND ((ysnInvalidSetup = @ZeroBit AND ysnTaxExempt = @OneBit) OR ysnManualTaxExempt = @OneBit)
 					   )
                   )
-				GROUP BY intTaxCodeId, strTaxCode, intInvoiceDetailId, intInvoiceId
+				GROUP BY OTR.intTaxCodeId, OTR.strTaxCode, intInvoiceDetailId, intInvoiceId
 			) OT
             INNER JOIN #INVOICES I ON OT.intInvoiceId = I.intInvoiceId
             INNER JOIN #ITEMS ITEM ON OT.[intItemId] = ITEM.[intItemId]

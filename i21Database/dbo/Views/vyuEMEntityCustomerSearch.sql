@@ -49,8 +49,8 @@ SELECT DISTINCT
 	, strBillToState		= billLocation.strState
 	, strBillToZipCode		= billLocation.strZipCode
 	, strBillToCountry		= billLocation.strCountry
-	, intShipToId			= CUSTOMER.intShipToId
-	, intBillToId			= CUSTOMER.intBillToId
+	, intShipToId			= shipLocation.intEntityLocationId
+	, intBillToId			= billLocation.intEntityLocationId
 	, dblARBalance			= CUSTOMER.dblARBalance
 	, strTerm				= custTerm.strTerm
 	, intCurrencyId			= CUSTOMER.intCurrencyId
@@ -73,6 +73,10 @@ SELECT DISTINCT
 	, ysnHasPastDueBalances	= CAST(0 AS BIT)
 	, strEntityType = CASE WHEN entityType.Prospect = 1 THEN 'Prospect' ELSE 'Customer' END COLLATE Latin1_General_CI_AS
 	, ysnHasCustomerCreditApprover	= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
+	, CUSTOMER.ysnApplySalesTax
+	, dblShipToLongitude			= shipLocation.dblLongitude
+	, dblShipToLatitude			= shipLocation.dblLatitude
+	, strAccountType = NULLIF(CUSTOMER.strType, '')
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1

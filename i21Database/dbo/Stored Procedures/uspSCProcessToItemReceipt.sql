@@ -652,7 +652,7 @@ BEGIN TRY
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 		
 	UPDATE	SC
-	SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
+	SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber, SC.dtmDateModifiedUtc = GETUTCDATE()
 	FROM	dbo.tblSCTicket SC 
 	INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
 	INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
@@ -706,6 +706,8 @@ BEGIN TRY
 	BEGIN
 		EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
 	END
+
+	--EXEC uspSCModifyTicketDiscountItemInfo @intTicketId
 
 	EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

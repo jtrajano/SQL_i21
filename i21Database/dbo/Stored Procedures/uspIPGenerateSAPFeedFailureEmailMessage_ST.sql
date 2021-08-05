@@ -286,6 +286,36 @@ BEGIN
 			AND ysnMailSent IS NULL
 	END
 END
+IF @strMessageType ='PO'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Contract Number</th>
+						<th>&nbsp;Contract Seq Number</th>
+						<th>&nbsp;ERP PO Number</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM dbo.tblCTContractFeed   WITH (NOLOCK)
+		WHERE strMessage is not null
+			AND ysnMailSent =0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strContractNumber), '') + '</td>' + '<td>&nbsp;' + ISNULL(Ltrim(intContractSeq), '') + '</td>' + '<td>&nbsp;' + ISNULL(strERPPONumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM dbo.tblCTContractFeed WITH (NOLOCK)
+		WHERE strMessage is not null
+			AND ysnMailSent =0
+
+		UPDATE tblCTContractFeed
+		SET ysnMailSent = 1
+		WHERE strMessage is not null
+			AND ysnMailSent =0
+	END
+END
 
 	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
 	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))

@@ -51,33 +51,32 @@ WITH shipmentstatus AS (
 
 , approved AS (
 	SELECT intContractDetailId
-		, dblRepresentingQty = SUM(dblRepresentingQty)
+		, dblRepresentingQty = CASE WHEN SUM(dblRepresentingQty) > dblQuantity THEN dblQuantity ELSE SUM(dblRepresentingQty) END
 	FROM (
 		SELECT ccc.intContractDetailId
+			,ccc.dblQuantity
 			, dblRepresentingQty = (CASE WHEN ISNULL(eee.dblUnitQty, 0) = 0 OR ISNULL(fff.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(eee.dblUnitQty, 0) = ISNULL(fff.dblUnitQty, 0) THEN ddd.dblRepresentingQty
 										ELSE ddd.dblRepresentingQty * (ISNULL(eee.dblUnitQty, 0) / ISNULL(fff.dblUnitQty, 0)) END)
 		FROM tblCTContractDetail ccc WITH(NOLOCK)
-			, tblQMSample ddd WITH(NOLOCK)
-			, tblICItemUOM eee WITH(NOLOCK)
-			, tblICItemUOM fff WITH(NOLOCK)
-		WHERE ddd.intProductValueId = ccc.intContractDetailId
-			AND intProductTypeId = 8
+			inner join tblQMSample ddd WITH(NOLOCK) on ddd.intProductValueId = ccc.intContractDetailId
+			inner join tblICItemUOM eee WITH(NOLOCK) on eee.intUnitMeasureId = ddd.intRepresentingUOMId
+			inner join tblICItemUOM fff WITH(NOLOCK) on fff.intItemId = ccc.intItemId and fff.intUnitMeasureId = ccc.intUnitMeasureId
+			
+		WHERE 
+			intProductTypeId = 8
 			AND intSampleStatusId = 3
-			AND eee.intUnitMeasureId = ddd.intRepresentingUOMId
 			AND eee.intItemId = ccc.intItemId
-			AND fff.intUnitMeasureId = ccc.intUnitMeasureId
-			AND fff.intItemId = ccc.intItemId
 	) AS qasample
-	GROUP BY intContractDetailId)
+	GROUP BY intContractDetailId, dblQuantity)
 
 , prepaid AS (
 	SELECT jjj.intContractHeaderId
 		, intRecordCount = COUNT(*)
 	FROM tblAPBillDetail jjj WITH(NOLOCK)
-		, tblAPBill kkk WITH(NOLOCK)
-	WHERE kkk.intBillId = jjj.intBillId
-		AND kkk.intTransactionType = 2
+		inner join tblAPBill kkk WITH(NOLOCK) on kkk.intBillId = jjj.intBillId
+	WHERE 
+		kkk.intTransactionType = 2
 	GROUP BY jjj.intContractHeaderId)
 
 , hedge AS (
@@ -169,7 +168,7 @@ SELECT a.intContractDetailId
 	, za.strApprovalBasis
 	--, strApprovalBasis = au.strWeightGradeDesc
 	, ysnApproved = ISNULL(TR.ysnOnceApproved, 0)
-	, dblApprovedQty = aa.dblRepresentingQty
+	, dblApprovedQty = QA.dblApprovedQty
 	, strAssociationName = zb.strName
 	, a.dblAssumedFX
 	, dblBalLotsToHedge = a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0)
@@ -259,7 +258,7 @@ SELECT a.intContractDetailId
 	, bo.strPricingLevelName
 	, b.strPrintableRemarks
 	, b.ysnPrinted
-	, strProducer = bp.strName
+	, strProducer = bp2.strName
 	, strProductType = bq.strDescription
 	, b.ysnProvisional
 	, b.dblProvisionalInvoicePct
@@ -382,6 +381,7 @@ LEFT JOIN tblCTPosition bm WITH(NOLOCK) ON bm.intPositionId = b.intPositionId
 LEFT JOIN prepaid bn ON bn.intContractHeaderId = b.intContractHeaderId
 LEFT JOIN tblSMCompanyLocationPricingLevel bo WITH(NOLOCK) ON bo.intCompanyLocationPricingLevelId = b.intCompanyLocationPricingLevelId
 LEFT JOIN tblEMEntity bp WITH(NOLOCK) ON bp.intEntityId = b.intProducerId
+LEFT JOIN tblEMEntity bp2 WITH(NOLOCK) ON bp2.intEntityId = a.intProducerId
 LEFT JOIN tblICCommodityAttribute bq WITH(NOLOCK) ON bq.intCommodityAttributeId = c.intProductTypeId AND bq.strType = 'ProductType'
 LEFT JOIN tblSMPurchasingGroup br WITH(NOLOCK) ON br.intPurchasingGroupId = a.intPurchasingGroupId
 LEFT JOIN tblICCommodityUnitMeasure bs WITH(NOLOCK) ON bs.intCommodityId = b.intCommodityId AND bs.ysnDefault = 1
@@ -405,6 +405,7 @@ LEFT JOIN tblCTWeightGrade cl WITH(NOLOCK) ON cl.intWeightGradeId = b.intWeightI
 LEFT JOIN tblICItemUOM cm WITH(NOLOCK) ON cm.intItemUOMId = a.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMeasureId
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
+OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
 LEFT JOIN (
     SELECT *
     FROM

@@ -17,7 +17,7 @@ SET @OneHundredDecimal = 100.000000
 
 EXEC dbo.[uspARInsertDefaultAccrual]  
 
-WHILE EXISTS(SELECT NULL FROM #ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.[intTransactionId],0) = 0)
+WHILE EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.[intTransactionId],0) = 0)
 BEGIN
     DECLARE  @InvoiceId							INT
             ,@AccrualPeriod						INT
@@ -32,17 +32,17 @@ BEGIN
             ,@UnitsRemainder					DECIMAL(18,6)
             ,@TaxRemainder						DECIMAL(18,6)
 
-    SELECT TOP 1 @InvoiceId = I.[intInvoiceId] FROM #ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.intTransactionId,0) = 0
+    SELECT TOP 1 @InvoiceId = I.[intInvoiceId] FROM ##ARPostInvoiceHeader I LEFT OUTER JOIN @GLEntries G ON I.[intInvoiceId] = G.[intTransactionId] WHERE I.[intPeriodsToAccrue] > 1 AND ISNULL(G.intTransactionId,0) = 0
 
     SELECT
         @AccrualPeriod = [intPeriodsToAccrue]
     FROM
-        #ARPostInvoiceHeader
+        ##ARPostInvoiceHeader
     WHERE
         [intInvoiceId] = @InvoiceId 
 
     --DEBIT AR
-	INSERT INTO #ARInvoiceGLEntries
+	INSERT INTO ##ARInvoiceGLEntries
 		([dtmDate]
         ,[strBatchId]
         ,[intAccountId]
@@ -130,14 +130,14 @@ BEGIN
         ,[intSourceEntityId]            = NULL
         ,[ysnRebuild]                   = NULL
     FROM
-        #ARPostInvoiceHeader I
+        ##ARPostInvoiceHeader I
     LEFT OUTER JOIN
         (
         SELECT
              [dblUnitQtyShipped]    = SUM([dblUnitQtyShipped])
             ,[intInvoiceId]         = [intInvoiceId]
         FROM
-            #ARPostInvoiceDetail
+            ##ARPostInvoiceDetail
         GROUP BY
             [intInvoiceId]
         ) ARID
@@ -191,7 +191,7 @@ BEGIN
         ,[intSourceEntityId]            = NULL
         ,[ysnRebuild]                   = NULL
     FROM
-        #ARPostInvoiceHeader I
+        ##ARPostInvoiceHeader I
     LEFT OUTER JOIN
         (
         SELECT
@@ -200,7 +200,7 @@ BEGIN
             ,[dblBaseDiscountAmount]    = SUM([dblBaseDiscountAmount])
             ,[intInvoiceId]             = [intInvoiceId]
         FROM
-            #ARPostInvoiceDetail
+            ##ARPostInvoiceDetail
         GROUP BY
             [intInvoiceId]
         ) ARID
@@ -235,7 +235,7 @@ BEGIN
         ,[dblLicenseAmount]     = @ZeroDecimal
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        #ARPostInvoiceDetail ARID
+        ##ARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId
         AND ARID.[dblTotal] <> @ZeroDecimal 
@@ -272,7 +272,7 @@ BEGIN
         ,[dblLicenseAmount]     = CASE WHEN ARID.[ysnAccrueLicense] = 1 THEN ARID.[dblLicenseAmount] ELSE @ZeroDecimal END
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        #ARPostInvoiceDetail ARID
+        ##ARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId 
         AND (ARID.[dblLicenseAmount] <> @ZeroDecimal OR ARID.[dblMaintenanceAmount] <> @ZeroDecimal) 
@@ -307,7 +307,7 @@ BEGIN
         ,[dblLicenseAmount]     = ARID.[dblLicenseAmount]
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        #ARPostInvoiceDetail ARID
+        ##ARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId 
         AND ARID.[dblLicenseAmount] <> @ZeroDecimal
@@ -343,7 +343,7 @@ BEGIN
         ,[dblLicenseAmount]     = @ZeroDecimal
         ,[strMaintenanceType]   = ARID.[strMaintenanceType]
     FROM
-        #ARPostInvoiceDetail ARID
+        ##ARPostInvoiceDetail ARID
     WHERE
         ARID.[intInvoiceId] = @InvoiceId 
         AND ARID.[dblMaintenanceAmount] <> @ZeroDecimal
@@ -513,7 +513,7 @@ BEGIN
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
         FROM
-            #ARPostInvoiceDetail I
+            ##ARPostInvoiceDetail I
         INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
@@ -609,12 +609,12 @@ BEGIN
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
         FROM
-            #ARPostInvoiceDetail I
+            ##ARPostInvoiceDetail I
         INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
-            #ARInvoiceItemAccount IA
+            ##ARInvoiceItemAccount IA
                 ON I.[intItemId] = IA.[intItemId] 
                 AND I.[intCompanyLocationId] = IA.[intLocationId]
         WHERE
@@ -708,12 +708,12 @@ BEGIN
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
         FROM
-            #ARPostInvoiceDetail I
+            ##ARPostInvoiceDetail I
         INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
-            #ARInvoiceItemAccount IA
+            ##ARInvoiceItemAccount IA
                 ON I.[intItemId] = IA.[intItemId] 
                 AND I.[intCompanyLocationId] = IA.[intLocationId]
         WHERE
@@ -805,12 +805,12 @@ BEGIN
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
         FROM
-            #ARPostInvoiceDetail I
+            ##ARPostInvoiceDetail I
         INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
-            #ARInvoiceItemAccount IA
+            ##ARInvoiceItemAccount IA
                 ON I.[intItemId] = IA.[intItemId] 
                 AND I.[intCompanyLocationId] = IA.[intLocationId]
         WHERE
@@ -902,12 +902,12 @@ BEGIN
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
         FROM
-            #ARPostInvoiceDetail I
+            ##ARPostInvoiceDetail I
         INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
-            #ARInvoiceItemAccount IA
+            ##ARInvoiceItemAccount IA
                 ON I.[intItemId] = IA.[intItemId] 
                 AND I.[intCompanyLocationId] = IA.[intLocationId]
         WHERE
@@ -998,12 +998,12 @@ BEGIN
             ,[intSourceEntityId]            = NULL
             ,[ysnRebuild]                   = NULL
         FROM
-            #ARPostInvoiceDetail I
+            ##ARPostInvoiceDetail I
         INNER JOIN
             tblARInvoiceAccrual ARIA
                 ON I.[intInvoiceDetailId] = ARIA.[intInvoiceDetailId]
         LEFT OUTER JOIN
-            #ARInvoiceItemAccount IA
+            ##ARInvoiceItemAccount IA
                 ON I.[intItemId] = IA.[intItemId] 
                 AND I.[intCompanyLocationId] = IA.[intLocationId]
         WHERE
@@ -1119,7 +1119,7 @@ FROM
     FROM tblARInvoiceDetailTax WITH (NOLOCK)
 	) ARITD
 INNER JOIN
-    #ARPostInvoiceDetail I
+    ##ARPostInvoiceDetail I
         ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE
     I.[intInvoiceId] = @InvoiceId
@@ -1182,7 +1182,7 @@ FROM
     FROM tblARInvoiceDetailTax WITH (NOLOCK)
 	) ARITD
 INNER JOIN
-    #ARPostInvoiceDetail I
+    ##ARPostInvoiceDetail I
         ON ARITD.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE
     I.[intInvoiceId] = @InvoiceId
@@ -1190,7 +1190,7 @@ WHERE
 
 END
 
-INSERT INTO #ARInvoiceGLEntries
+INSERT INTO ##ARInvoiceGLEntries
 	([dtmDate]
 	,[strBatchId]
 	,[intAccountId]

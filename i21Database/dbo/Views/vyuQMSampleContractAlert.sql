@@ -63,6 +63,6 @@ FROM (
 		AND a.intSampleStatusId <> 3
 		AND a.intSampleStatusId <> 4
 	) t
-	,tblCTEvent EV
+	inner join tblCTEvent EV on 1=1
 WHERE EV.strEventName = 'Unapproved Contract Samples'
 	AND t.dtmDate < (GETDATE() - EV.intDaysToRemind)

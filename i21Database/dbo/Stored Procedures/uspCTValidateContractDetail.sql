@@ -271,11 +271,11 @@ BEGIN TRY
 			SET @ErrMsg = 'Created date is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END		
-		IF	@dtmNewM2MDate IS NULL AND @intNewPricingTypeId <> 5
-		BEGIN
-			SET @ErrMsg = 'M2M Date is missing while creating contract.'
-			RAISERROR(@ErrMsg,16,1)
-		END
+		-- IF	@dtmNewM2MDate IS NULL AND @intNewPricingTypeId <> 5
+		-- BEGIN
+		-- 	SET @ErrMsg = 'M2M Date is missing while creating contract.'
+		-- 	RAISERROR(@ErrMsg,16,1)
+		-- END
 		IF	@dblNewQuantity > 9999999999.999999
 		BEGIN
 			SET @ErrMsg = 'Quantity cannot be greater than 99999999.999999.'
@@ -367,6 +367,8 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				select @dblOldScheduleQty = isnull(@dblOldScheduleQty,0);
+				
 				IF (@dblNewQuantity < @dblOldQuantity - @dblOldBalance + @dblOldScheduleQty)
 				BEGIN
 					SET @ErrMsg = 'Sequence ' + LTRIM(@intContractSeq) + ' quantity cannot be reduced below ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '. As current contract quantity is ' +  LTRIM(@dblOldQuantity) + ' and quantity in use is ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '.'

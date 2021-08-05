@@ -63,6 +63,7 @@ BEGIN TRY
     DECLARE @intTicketSclaeSetupId    INT
 	DECLARE @intFutureMarketId INT
 	DECLARE @intFutureMonthId INT
+	DECLARE @dblDPRiskCost NUMERIC(18,6)
 
 	DECLARE @strEntityNo NVARCHAR(200)
 	DECLARE @errorMessage NVARCHAR(500)
@@ -251,6 +252,11 @@ BEGIN TRY
 				BEGIN
 					RAISERROR ('Basis UOM in risk management is not available. Cannot create DP contract.',16,1,'WITH NOWAIT') 
 				END
+
+				SELECT TOP 1 
+					@dblDPRiskCost = ISNULL(dblSettlementPrice,0) + ISNULL(dblBasis,0)
+				FROM #FutureAndBasisPrice
+
 			END
 			IF	ISNULL(@intContractDetailId,0) = 0
 			BEGIN
@@ -390,7 +396,9 @@ BEGIN TRY
 
 			SELECT @dblNetUnits = dbo.fnCalculateQtyBetweenUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
 			
-			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost,0,NULL
+
+
+			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblDPRiskCost,0,NULL
 
 			SELECT	@dblNetUnits = 0
 

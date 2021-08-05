@@ -6,9 +6,9 @@
 -- JIRA Key:	GL-1923
 -- =============================================
 CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
- @intFiscalYearId INT,
- @intEntityId INT,
- @intFiscalYearPeriodId INT = 0,
+ 	@intFiscalYearId INT,
+ 	@intEntityId INT,
+ 	@intFiscalYearPeriodId INT = 0,
 	@strModule NVARCHAR(3),
 	@ysnUnpostedTrans  int OUT
 AS
@@ -40,11 +40,14 @@ BEGIN
 	-- BEGIN GETS THE DATE CRITERIA BASE ON THE FISCAL YEAR
 	DECLARE @dtmDateFrom DATETIME
 	DECLARE @dtmDateTo DATETIME
+	DECLARE @strPeriod NVARCHAR(30)
+	DECLARE @strFiscalYear NVARCHAR(30)
+
 	IF @intFiscalYearPeriodId > 0 
-		SELECT TOP 1 @dtmDateFrom= dtmStartDate,@dtmDateTo= dtmEndDate FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalYearPeriodId
+		SELECT TOP 1 @strPeriod =strPeriod, @dtmDateFrom= dtmStartDate,@dtmDateTo= dtmEndDate FROM tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intFiscalYearPeriodId
 	ELSE
-		SELECT TOP 1 @dtmDateFrom= dtmDateFrom,@dtmDateTo= dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId
-	-- END GETS THE DATE CRITERIA BASE ON THE FISCAL YEAR
+		SELECT TOP 1 @strFiscalYear= strFiscalYear, @dtmDateFrom= dtmDateFrom,@dtmDateTo= dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId
+	 --END GETS THE DATE CRITERIA BASE ON THE FISCAL YEAR
 	
 	-- BEGIN OPEN GL UNPOSTED SCREEN
 	-- EXCLUDED IC AND PR SINCE THEY DO NOT HAVE BATCH POSTING FEATURE
@@ -211,15 +214,38 @@ BEGIN
 
 			SELECT @msg = CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END  
 			SELECT TransactionType = @transactionType , message = @msg ,batchGUID = @guid 
-		SET @ysnUnpostedTrans = 1
+			SET @ysnUnpostedTrans = 1
+			RETURN
 		END
-
-		-- END OPEN BATCH POSTING SCREEN
-		ELSE
+		
+		IF(@strModule = 'FA' OR @strModule = 'GL')
 		BEGIN
-			-- ANY SCREEN IS NOT OPENED.
-			SELECT TransactionType = 'Empty'  , message = '' ,batchGUID = '' 
-		SET @ysnUnpostedTrans = 0
+			IF @intFiscalYearPeriodId > 0 
+			BEGIN	
+			
+		 		IF EXISTS(SELECT TOP 1 1 FROM vyuFAUndepreciatedAssetAllPeriods WHERE intFiscalPeriodId = @intFiscalYearPeriodId)
+				BEGIN
+					SELECT TransactionType = 'FixedAsset'  , message = @strPeriod ,batchGUID = '' 
+					SET @ysnUnpostedTrans = 1
+					RETURN
+				END
+			END
+			ELSE
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM vyuFAUndepreciatedAssetAllPeriods WHERE intFiscalYearId = @intFiscalYearId)
+				BEGIN
+					SELECT TransactionType = 'FixedAsset'  , message = @strFiscalYear ,batchGUID = '' 
+					SET @ysnUnpostedTrans = 1
+					RETURN
+			END
 		END
+		END
+		
+		-- END OPEN BATCH POSTING SCREEN
+		
+			-- ANY SCREEN IS NOT OPENED.
+		SELECT TransactionType = 'Empty'  , message = '' ,batchGUID = '' 
+		SET @ysnUnpostedTrans = 0
+		
 
 END

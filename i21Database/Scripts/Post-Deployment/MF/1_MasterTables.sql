@@ -2696,6 +2696,12 @@ BEGIN
     VALUES('LidlUCCPalletLabelWithoutWeight',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'HEBPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('HEBPalletLabel',1,1)
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFInventoryShipmentRestrictionType
@@ -4006,3 +4012,120 @@ GO
 
 UPDATE tblMFWorkOrder SET ysnDietarySupplements = 0 WHERE ysnDietarySupplements IS NULL
 GO
+
+UPDATE tblMFRecipe SET ysnVirtualRecipe = 0 WHERE ysnVirtualRecipe IS NULL
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblCTReportAttribute
+		WHERE strAttributeName = 'Forecasted Consumption - Additional'
+		)
+BEGIN
+	UPDATE tblCTReportAttribute
+	SET intDisplayOrder = intDisplayOrder + 1
+	WHERE intDisplayOrder >= 4
+
+	INSERT INTO tblCTReportAttribute (
+		intReportAttributeID
+		,intReportMasterID
+		,strAttributeName
+		,intDisplayOrder
+		,ysnVisible
+		,ysnEditable
+		)
+	SELECT 15
+		,1
+		,'Forecasted Consumption - Additional'
+		,4
+		,0
+		,1
+END
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblCTReportAttribute
+		WHERE strAttributeName = 'Inventory Transfer'
+		)
+BEGIN
+	UPDATE tblCTReportAttribute
+	SET intDisplayOrder = intDisplayOrder + 1
+	WHERE intDisplayOrder >= 12
+
+	INSERT INTO tblCTReportAttribute (
+		intReportAttributeID
+		,intReportMasterID
+		,strAttributeName
+		,intDisplayOrder
+		,ysnVisible
+		,ysnEditable
+		)
+	SELECT 16
+		,1
+		,'Inventory Transfer'
+		,12
+		,0
+		,1
+END
+GO
+
+UPDATE tblMFCompanyPreference
+SET ysnForecastedConsumptionByRemainingDays = 0
+WHERE ysnForecastedConsumptionByRemainingDays IS NULL
+GO
+
+IF EXISTS (
+		SELECT *
+		FROM tblCTReportAttribute
+		WHERE ysnEditable IS NULL
+		)
+BEGIN
+	UPDATE tblCTReportAttribute
+	SET ysnEditable = 0
+	WHERE strAttributeName NOT IN (
+			'Forecasted Consumption'
+			,'Weeks of Supply Target'
+			,'Forecasted Consumption - Additional'
+			,'Inventory Transfer'
+			,'Planned Purchases'
+			)
+
+	UPDATE tblCTReportAttribute
+	SET ysnEditable = 1
+	WHERE strAttributeName IN (
+			'Forecasted Consumption'
+			,'Weeks of Supply Target'
+			,'Forecasted Consumption - Additional'
+			,'Inventory Transfer'
+			,'Planned Purchases'
+			)
+END
+Go
+UPDATE AV
+SET AV.intLocationId = M.intCompanyLocationId
+FROM tblCTInvPlngReportAttributeValue AV
+JOIN tblCTInvPlngReportMaster M ON M.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
+WHERE AV.intLocationId IS NULL
+	AND M.intCompanyLocationId IS NOT NULL
+	AND M.ysnPost =0
+Go
+IF EXISTS (
+		SELECT *
+		FROM tblCTReportAttribute
+		WHERE ysnVisible IS NULL
+		)
+BEGIN
+	UPDATE tblCTReportAttribute
+	SET ysnVisible = 0
+	WHERE strAttributeName IN (
+			'Inventory Transfer'
+			,'Forecasted Consumption - Additional'
+			)
+
+	UPDATE tblCTReportAttribute
+	SET ysnVisible = 1
+	WHERE strAttributeName NOT IN (
+			'Inventory Transfer'
+			,'Forecasted Consumption - Additional'
+			)
+END
+Go

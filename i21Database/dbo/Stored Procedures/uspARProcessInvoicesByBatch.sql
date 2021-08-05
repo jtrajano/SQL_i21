@@ -325,6 +325,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId]
 		,[intItemWeightUOMId]
 		,[dblItemWeight]
+		,[dblStandardWeight]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
@@ -355,10 +356,14 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]
+		,[strBinNumber]
+		,[strGroupNumber]
+		,[strFeedDiet]
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -470,6 +475,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId] = (CASE WHEN @GroupingOption = 0 THEN IE.[intShipmentPurchaseSalesContractId] ELSE NULL END)
 		,[intItemWeightUOMId]				= (CASE WHEN @GroupingOption = 0 THEN IE.[intItemWeightUOMId] ELSE NULL END)
 		,[dblItemWeight]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblItemWeight] ELSE NULL END)
+		,[dblStandardWeight]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblStandardWeight] ELSE NULL END)
 		,[dblShipmentGrossWt]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblShipmentGrossWt] ELSE NULL END)
 		,[dblShipmentTareWt]				= (CASE WHEN @GroupingOption = 0 THEN IE.[dblShipmentTareWt] ELSE NULL END)
 		,[dblShipmentNetWt]					= (CASE WHEN @GroupingOption = 0 THEN IE.[dblShipmentNetWt] ELSE NULL END)
@@ -500,10 +506,14 @@ BEGIN
 		,[intStorageScheduleTypeId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intStorageScheduleTypeId] ELSE NULL END)
 		,[intDestinationGradeId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationGradeId] ELSE NULL END)
 		,[intDestinationWeightId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intDestinationWeightId] ELSE NULL END)
+		,[intPriceFixationDetailId]			= (CASE WHEN @GroupingOption = 0 THEN IE.[intPriceFixationDetailId] ELSE NULL END)
         ,[strAddonDetailKey]                = (CASE WHEN @GroupingOption = 0 THEN IE.[strAddonDetailKey] ELSE NULL END)
         ,[ysnAddonParent]                   = (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAddonParent] ELSE NULL END)
 		,[ysnConvertToStockUOM]				= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnConvertToStockUOM] ELSE NULL END)
         ,[dblAddOnQuantity]                 = (CASE WHEN @GroupingOption = 0 THEN IE.[dblAddOnQuantity] ELSE NULL END)
+		,[strBinNumber]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strBinNumber] ELSE NULL END)
+		,[strGroupNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strGroupNumber] ELSE NULL END)
+		,[strFeedDiet]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strFeedDiet] ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -565,17 +575,13 @@ BEGIN
 		
 	IF (EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId AND ISNULL([ysnSuccess],0) = 1 AND ISNULL([ysnHeader],0) = 1  AND ISNULL([ysnInsert], 0) = 1) AND @GroupingOption > 0)
 	BEGIN
-
 		UPDATE EFP
 		SET EFP.[intInvoiceId] = IL.[intInvoiceId]
-		FROM
-			#EntriesForProcessing EFP
-		INNER JOIN
-			(SELECT [intId], [intInvoiceId], [ysnSuccess], [ysnHeader] FROM tblARInvoiceIntegrationLogDetail WITH (NOLOCK) WHERE [intIntegrationLogId] = @IntegrationLogId) IL
-				ON EFP.[intId] = IL.[intId]
-				AND ISNULL(IL.[ysnHeader], 0) = 1
-				AND ISNULL(IL.[ysnSuccess], 0) = 1		
-			
+		FROM #EntriesForProcessing EFP
+		INNER JOIN tblARInvoiceIntegrationLogDetail IL WITH (NOLOCK) ON EFP.intId = IL.intId 
+		WHERE IL.intIntegrationLogId = @IntegrationLogId
+		  AND ISNULL(IL.[ysnHeader], 0) = 1
+		  AND ISNULL(IL.[ysnSuccess], 0) = 1			
 		
 		DECLARE @LineItems InvoiceStagingTable
 		INSERT INTO @LineItems
@@ -647,6 +653,7 @@ BEGIN
 			,[dblItemTermDiscount]
 			,[strItemTermDiscountBy]
 			,[dblItemWeight]
+			,[dblStandardWeight]
 			,[intItemWeightUOMId]
 			,[dblPrice]
 			,[dblUnitPrice]
@@ -719,10 +726,14 @@ BEGIN
 			,[intStorageScheduleTypeId]
 			,[intDestinationGradeId]
 			,[intDestinationWeightId]
+			,[intPriceFixationDetailId]
             ,[strAddonDetailKey]
             ,[ysnAddonParent]
 			,[ysnConvertToStockUOM]
-            ,[dblAddOnQuantity])
+            ,[dblAddOnQuantity]
+			,[strBinNumber]
+			,[strGroupNumber]
+			,[strFeedDiet])
 		SELECT
 			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
@@ -792,6 +803,7 @@ BEGIN
 			,[dblItemTermDiscount]					= ITG.[dblItemTermDiscount]
 			,[strItemTermDiscountBy]				= ITG.[strItemTermDiscountBy]
 			,[dblItemWeight]						= ITG.[dblItemWeight]
+			,[dblStandardWeight]					= ITG.[dblStandardWeight]
 			,[intItemWeightUOMId]					= ITG.[intItemWeightUOMId]
 			,[dblPrice]								= ITG.[dblPrice]
 			,[dblUnitPrice]							= ITG.[dblUnitPrice]
@@ -864,17 +876,21 @@ BEGIN
 			,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 			,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 			,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+			,[intPriceFixationDetailId]				= ITG.[intPriceFixationDetailId]
             ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
             ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 			,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
             ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
+			,[strBinNumber]							= ITG.[strBinNumber]
+			,[strGroupNumber]						= ITG.[strGroupNumber]
+			,[strFeedDiet]							= ITG.[strFeedDiet]
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN
 			#EntriesForProcessing EFP WITH (NOLOCK)
 				ON (ISNULL(ITG.[intId], 0) = ISNULL(EFP.[intId], 0) OR @GroupingOption > 0)
 				AND (ISNULL(ITG.[intEntityCustomerId], 0) = ISNULL(EFP.[intEntityCustomerId], 0) OR (EFP.[intEntityCustomerId] IS NULL AND @GroupingOption < 1))
-				AND (ISNULL(ITG.[intSourceId], 0) = ISNULL(EFP.[intSourceId], 0) OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR ITG.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+				AND (ISNULL(ITG.[intSourceId], 0) = ISNULL(EFP.[intSourceId], 0) OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR ITG.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 				AND (ISNULL(ITG.[intCompanyLocationId], 0) = ISNULL(EFP.[intCompanyLocationId], 0) OR (EFP.[intCompanyLocationId] IS NULL AND @GroupingOption < 3))
 				AND (ISNULL(ITG.[intCurrencyId],0) = ISNULL(EFP.[intCurrencyId],0) OR (EFP.[intCurrencyId] IS NULL AND @GroupingOption < 4))
 				AND (CAST(ISNULL(ITG.[dtmDate], @DateNow) AS DATE) = CAST(ISNULL(EFP.[dtmDate], @DateNow) AS DATE) OR (EFP.[dtmDate] IS NULL AND @GroupingOption < 5))
@@ -1302,6 +1318,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId]
 		,[intItemWeightUOMId]
 		,[dblItemWeight]
+		,[dblStandardWeight]
 		,[dblShipmentGrossWt]
 		,[dblShipmentTareWt]
 		,[dblShipmentNetWt]
@@ -1332,11 +1349,15 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]
+		,[strBinNumber]
+		,[strGroupNumber]
+		,[strFeedDiet]
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -1441,6 +1462,7 @@ BEGIN
 		,[intShipmentPurchaseSalesContractId] = IE.[intShipmentPurchaseSalesContractId]
 		,[intItemWeightUOMId]				= IE.[intItemWeightUOMId]
 		,[dblItemWeight]					= IE.[dblItemWeight]
+		,[dblStandardWeight]				= IE.[dblStandardWeight]
 		,[dblShipmentGrossWt]				= IE.[dblShipmentGrossWt]
 		,[dblShipmentTareWt]				= IE.[dblShipmentTareWt]
 		,[dblShipmentNetWt]					= IE.[dblShipmentNetWt]
@@ -1471,11 +1493,15 @@ BEGIN
 		,[intStorageScheduleTypeId]			= IE.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]			= IE.[intDestinationGradeId]
 		,[intDestinationWeightId]			= IE.[intDestinationWeightId]
+		,[intPriceFixationDetailId]			= IE.[intPriceFixationDetailId]
         ,[strAddonDetailKey]                = IE.[strAddonDetailKey]
         ,[ysnAddonParent]                   = IE.[ysnAddonParent]
 		,[ysnConvertToStockUOM]				= IE.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                 = IE.[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]			= IE.[intTempDetailIdForTaxes]
+		,[strBinNumber]						= IE.[strBinNumber]
+		,[strGroupNumber]					= IE.[strGroupNumber]
+		,[strFeedDiet]						= IE.[strFeedDiet]
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -1754,10 +1780,6 @@ BEGIN TRY
 			,@TransType			= N'all'
 			,@RaiseError		= @RaiseError
 
-
-
-
-
 	DECLARE @NewIdsForPostingRecap InvoiceId
 	INSERT INTO @NewIdsForPostingRecap(
 		 [intHeaderId]
@@ -1785,23 +1807,39 @@ BEGIN TRY
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
-
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
-		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBatchId --NULL #mark 101
-			,@Post				= 1
-			,@Recap				= 1
-			,@UserId			= @UserId
-			,@InvoiceIds		= @NewIdsForPostingRecap
-			,@IntegrationLogId	= @IntegrationLogId
-			,@BeginDate			= NULL
-			,@EndDate			= NULL
-			,@BeginTransaction	= NULL
-			,@EndTransaction	= NULL
-			,@Exclude			= NULL
-			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError
+		BEGIN 
+			EXEC [dbo].[uspARPostInvoiceNew]
+				@BatchId			= @NewBatchId --NULL #mark 101
+				,@Post				= 1
+				,@Recap				= 1
+				,@UserId			= @UserId
+				,@InvoiceIds		= @NewIdsForPostingRecap
+				,@IntegrationLogId	= @IntegrationLogId
+				,@BeginDate			= NULL
+				,@EndDate			= NULL
+				,@BeginTransaction	= NULL
+				,@EndTransaction	= NULL
+				,@Exclude			= NULL
+				,@TransType			= N'all'
+				,@RaiseError		= @RaiseError
+
+			UPDATE @NewIdsForPostingRecap SET ysnForDelete = 1
+
+			UPDATE MBIL 
+			SET inti21InvoiceId = NULL
+			FROM tblMBILInvoice MBIL
+			INNER JOIN @NewIdsForPostingRecap RECAP ON MBIL.inti21InvoiceId = RECAP.intHeaderId
+
+			EXEC dbo.uspARUpdateInvoicesIntegrations @InvoiceIds = @InsertedInvoiceIds
+													,@UserId	 = @UserId
+				
+			DELETE I
+			FROM tblARInvoice I
+			INNER JOIN @NewIdsForPostingRecap RECAP ON I.intInvoiceId = RECAP.intHeaderId
+		
+		END
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
@@ -1911,7 +1949,7 @@ BEGIN TRY
 			,@EndTransaction	= NULL
 			,@Exclude			= NULL
 			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError
+			,@RaiseError		= @RaiseError	
 
 END TRY
 BEGIN CATCH

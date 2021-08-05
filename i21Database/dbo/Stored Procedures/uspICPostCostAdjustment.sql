@@ -406,6 +406,7 @@ BEGIN
 				,@intOtherChargeItemId 
 				,@ysnUpdateItemCostAndPrice
 				,@IsEscalate
+				,@intSourceEntityId
 		END 
 		-- Do the retroactive average cost if cost adjustment is within a month. 
 		ELSE 
@@ -438,6 +439,7 @@ BEGIN
 				,@intOtherChargeItemId 
 				,@ysnUpdateItemCostAndPrice
 				,@IsEscalate
+				,@intSourceEntityId
 		END 
 	END TRY
 	BEGIN CATCH

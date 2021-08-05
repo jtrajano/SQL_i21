@@ -340,6 +340,9 @@ USING
 		,[strSourceId]							= IE.[strSourceId]
 		,[ysnPost]								= IE.[ysnPost]
 		,[intTempDetailIdForTaxes]				= IE.[intTempDetailIdForTaxes]
+		,[strBinNumber]							= IE.[strBinNumber]
+		,[strGroupNumber]						= IE.[strGroupNumber]
+		,[strFeedDiet]							= IE.[strFeedDiet]
 	FROM
 		@ItemEntries IE
 		
@@ -458,6 +461,9 @@ INSERT(
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 	)
 VALUES(
 	 [intInvoiceId]
@@ -570,6 +576,9 @@ VALUES(
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 )
 OUTPUT  
 			@IntegrationLogId						--[intIntegrationLogId]

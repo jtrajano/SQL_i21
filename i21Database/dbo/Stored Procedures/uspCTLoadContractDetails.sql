@@ -36,9 +36,8 @@ BEGIN TRY
 			GROUP BY
 				ID.intOriginalInvoiceDetailId
 		) CM ON CM.intOriginalInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
-	WHERE
-		InvoiceDetail.strPricing = 'Contracts'
-		AND Invoice.ysnPosted = 1
+	WHERE Invoice.ysnPosted = 1
+		AND Invoice.strTransactionType = 'Invoice'
 		AND CD.intContractHeaderId = @intContractHeaderId
 	GROUP BY
 		CD.intContractDetailId
@@ -365,17 +364,15 @@ BEGIN TRY
 									ELSE CASE WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
 											ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END * CD.dblQuantityPerLoad END
 		*/
-		  , dblAppliedLoadQty =  	CASE
-									WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)
-									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
-									WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
-									ELSE
-										CASE
-										WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
-										ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)
-										END
-										* CD.dblQuantityPerLoad
-									END
+	    , dblAppliedLoadQty = CASE WHEN CT.ysnLoad = 1
+									THEN CASE WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
+											WHEN Invoice.dblQuantity > 0 THEN Invoice.dblQuantity
+											WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity
+											ELSE (ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ) * CD.dblQuantityPerLoad END
+								ELSE CASE WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
+										WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
+										WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity
+										ELSE (ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0)) END END
 		, dblExchangeRate = dbo.fnCTGetCurrencyExchangeRate(CD.intContractDetailId, 0)
 		, IM.intProductTypeId
 		, ysnItemUOMIdExist = CAST(1 AS BIT)
@@ -461,9 +458,21 @@ BEGIN TRY
 		, dblShipmentQuantity = Shipment.dblQuantity
 		, dblBillQty = Bill.dblQuantity
 		, ysnOpenLoad = ISNULL(OL.ysnOpenLoad, 0)
-		, ysnContractAllocated = CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
+		--, ysnContractAllocated = CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
+        , ysnContractAllocated = CAST(CASE WHEN isnull(AD.dblAllocatedQty,0) > 0 THEN 1 ELSE 0 END AS BIT)
 		, strFreightBasisUOM = FBUM.strUnitMeasure
 		, strFreightBasisBaseUOM = FBBUM.strUnitMeasure
+		, CD.intRefFuturesMarketId
+		, CD.intRefFuturesMonthId
+		, CD.intRefFuturesItemUOMId
+		, CD.intRefFuturesCurrencyId
+		, CD.dblRefFuturesQty
+		, RefFuturesMarket.strFutMarketName  strRefFuturesMarket
+		, REPLACE(RefFuturesMonth.strFutureMonth, ' ', '(' + RefFuturesMonth.strSymbol + ') ') strRefFuturesMonth
+		, RefFuturesCurrency.strCurrency strRefFuturesCurrency
+		, RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure
+		, ysnWithPriceFix = case when isnull(CT.intPriceContractId,0) = 0 then convert(bit,0) else convert(bit,1) end
+        ,dblAllocatedQty = AD.dblAllocatedQty
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -494,11 +503,20 @@ BEGIN TRY
 	LEFT JOIN @tblInvoice Invoice ON Invoice.intContractDetailId = CD.intContractDetailId
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
+	--LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
+    outer apply (
+        select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
+    ) AD
 	LEFT JOIN tblICItemUOM FB ON FB.intItemUOMId = CD.intFreightBasisUOMId
 	LEFT JOIN tblICUnitMeasure FBUM ON FBUM.intUnitMeasureId = FB.intUnitMeasureId
 	LEFT JOIN tblICItemUOM FBB ON FBB.intItemUOMId = CD.intFreightBasisBaseUOMId
 	LEFT JOIN tblICUnitMeasure FBBUM ON FBBUM.intUnitMeasureId = FBB.intUnitMeasureId
+	-- Reference Pricing
+	LEFT JOIN tblRKFutureMarket RefFuturesMarket ON RefFuturesMarket.intFutureMarketId = CD.intRefFuturesMarketId
+	LEFT JOIN tblRKFuturesMonth RefFuturesMonth ON RefFuturesMonth.intFutureMonthId = CD.intRefFuturesMonthId
+	LEFT JOIN tblSMCurrency RefFuturesCurrency ON RefFuturesCurrency.intCurrencyID = CD.intRefFuturesCurrencyId
+	LEFT JOIN tblICItemUOM RefFuturesItemUOMId ON RefFuturesItemUOMId.intItemUOMId = CD.intRefFuturesItemUOMId
+	LEFT JOIN tblICUnitMeasure RefFturesUnitMeasure ON RefFturesUnitMeasure.intUnitMeasureId = RefFuturesItemUOMId.intUnitMeasureId
 	OUTER APPLY (
 		SELECT TOP 1 a.intContractHeaderId
 			, a.intContractDetailId

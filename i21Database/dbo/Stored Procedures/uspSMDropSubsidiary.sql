@@ -4,7 +4,7 @@ CREATE PROCEDURE [dbo].[uspSMDropSubsidiary]
 AS
 DECLARE @dropDB_SQL NVARCHAR(max)
 BEGIN	
-	IF EXISTS (SELECT name FROM master.sys.databases WHERE name =  @dbname) 
+	IF EXISTS (SELECT name FROM sys.databases WHERE name =  @dbname) 
 	BEGIN
 		print @dbname		
 		SET @dropDB_SQL = N'ALTER DATABASE [' +@dbname + N'] SET SINGLE_USER WITH ROLLBACK IMMEDIATE

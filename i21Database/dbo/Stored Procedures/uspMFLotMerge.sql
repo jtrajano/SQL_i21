@@ -54,6 +54,7 @@ BEGIN TRY
 		,@intDestinationProducerId INT
 		,@strDestinationCertificateId NVARCHAR(50)
 		,@strDestinationTrackingNumber NVARCHAR(255)
+		,@intParentLotId INT
 
 	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
 
@@ -164,6 +165,7 @@ BEGIN TRY
 		,@intDestinationProducerId = intProducerId
 		,@strDestinationCertificateId = strCertificateId
 		,@strDestinationTrackingNumber = strTrackingNumber
+		,@intParentLotId = intParentLotId
 	FROM tblICLot
 	WHERE intLotId = @intNewLotId
 
@@ -279,6 +281,107 @@ BEGIN TRY
 		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+	DECLARE @intUnitMeasureId INT
+		,@strUserName NVARCHAR(50)
+		,@strItemNo NVARCHAR(50)
+		,@strSubLocationName NVARCHAR(50)
+		,@strName NVARCHAR(50)
+		,@strNewSubLocationName NVARCHAR(50)
+		,@strNewName NVARCHAR(50)
+		,@strParentLotNumber NVARCHAR(50)
+		,@strLotOrigin NVARCHAR(50)
+		,@intStockItemUOMId INT
+
+
+	SELECT @strUserName = strUserName
+	FROM tblSMUserSecurity
+	WHERE intEntityId = @intUserId
+
+	SELECT @strItemNo = strItemNo
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+
+	SELECT @strLotOrigin = strLotOrigin
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = @intLocationId
+
+	SELECT @strSubLocationName = strSubLocationName
+	FROM tblSMCompanyLocationSubLocation
+	WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+	SELECT @strName = strName
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intStorageLocationId
+
+	SELECT @strNewSubLocationName = strSubLocationName
+	FROM tblSMCompanyLocationSubLocation
+	WHERE intCompanyLocationSubLocationId = @intNewSubLocationId
+
+	SELECT @strNewName = strName
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intNewStorageLocationId
+
+	SELECT @strParentLotNumber = strParentLotNumber
+	FROM tblICParentLot
+	WHERE intParentLotId = @intParentLotId
+
+	SELECT @intStockItemUOMId = intItemUOMId
+	FROM tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
+
+	IF @intMergeItemUOMId <> @intStockItemUOMId
+	BEGIN
+		SELECT @dblMergeQty = dbo.fnMFConvertQuantityToTargetItemUOM(@intMergeItemUOMId, @intStockItemUOMId, @dblMergeQty)
+
+		SELECT @intMergeItemUOMId = @intStockItemUOMId
+	END
+
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intMergeItemUOMId
+
+	SELECT @strUnitMeasure = strUnitMeasure
+	FROM tblICUnitMeasure
+	WHERE intUnitMeasureId = @intUnitMeasureId
+
+	INSERT INTO tblIPLotMergeFeed (
+		strCompanyLocation
+		,intActionId
+		,dtmCreatedDate
+		,strCreatedByUser
+		,intTransactionTypeId
+		,strStorageLocation
+		,strItemNo
+		,strMotherLotNo
+		,strLotNo
+		,strStorageUnit
+		,strDestinationStorageLocation
+		,strDestinationStorageUnit
+		,strDestinationLotNo
+		,dblQuantity
+		,strQuantityUOM
+		,strReasonCode
+		,strNotes
+		)
+	SELECT strCompanyLocation = @strLotOrigin
+		,intActionId = 1
+		,dtmCreatedDate = @dtmDate
+		,strCreatedByUser = @strUserName
+		,intTransactionTypeId = 19
+		,strStorageLocation = @strSubLocationName
+		,strItemNo = @strItemNo
+		,strMotherLotNo = @strParentLotNumber
+		,strLotNo = @strLotNumber
+		,strStorageUnit = @strName
+		,strDestinationStorageLocation = @strNewSubLocationName
+		,strDestinationStorageUnit = @strNewName
+		,strDestinationLotNo = @strNewLotNumber
+		,dblQuantity = @dblMergeQty
+		,strQuantityUOM = @strUnitMeasure
+		,strReasonCode = @strReasonCode
+		,strNotes = @strNotes
 
 	UPDATE tblICLot
 	SET intProducerId = @intSourceProducerId

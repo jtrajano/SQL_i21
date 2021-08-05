@@ -13,8 +13,6 @@
 		,tblHDTicket.strType
 	from
 		tblHDTicket
-		,tblEMEntity
-		,tblHDTicketStatus
-	where
-		tblEMEntity.intEntityId = tblHDTicket.intAssignedToEntity
-		and tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId
+		inner join tblEMEntity on tblEMEntity.intEntityId = tblHDTicket.intAssignedToEntity
+		inner join tblHDTicketStatus on tblHDTicketStatus.intTicketStatusId = tblHDTicket.intTicketStatusId
+	

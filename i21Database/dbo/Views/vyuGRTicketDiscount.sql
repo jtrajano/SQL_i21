@@ -20,13 +20,17 @@ SELECT
 	,QD.dblDefaultValue
 	,QD.intDiscountCalculationOptionId
 	,QD.intDiscountScheduleId
-	,QD.intItemId
+	,ISNULL(TDII.intItemId, QD.intItemId)  as intItemId
 	,QD.strDiscountChargeType
 	,QD.strDiscountCodeDescription
 	,QD.strDiscountDescription
-	,strDiscountCode = QD.strShortName
+	,strDiscountCode = ISNULL(Item.strShortName, QD.strShortName)
 	,DCO.strDiscountCalculationOption
 FROM tblQMTicketDiscount TD
+LEFT JOIN [tblGRTicketDiscountItemInfo] TDII
+	on TDII.intTicketDiscountId = TD.intTicketDiscountId
+LEFT JOIN tblICItem Item
+	on Item.intItemId = TDII.intItemId
 INNER JOIN vyuGRGetQualityDiscountCode QD
 	ON TD.intDiscountScheduleCodeId = QD.intDiscountScheduleCodeId 
 INNER JOIN tblGRDiscountCalculationOption DCO

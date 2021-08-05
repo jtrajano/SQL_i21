@@ -26,13 +26,21 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
--- Start the transaction 
-BEGIN TRANSACTION
 
 IF @userId IS NULL
 BEGIN
 	RAISERROR('User is required', 16, 1);
+	RETURN;
 END
+
+IF NULLIF(@param, '') IS NULL
+BEGIN
+	RAISERROR('@param is empty. No voucher to post.', 16, 1);
+	RETURN;
+END
+
+-- Start the transaction 
+BEGIN TRANSACTION
 
 --DECLARE @success BIT
 --DECLARE @successfulCount INT
@@ -154,6 +162,12 @@ SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
 
+-- IF NULLIF(@billIds, '') IS NULL
+-- BEGIN
+-- 	RAISERROR('Posting is already in process.', 16, 1);
+-- 	GOTO Post_Rollback
+-- END
+
 --Update the prepay and debit memo
 EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
@@ -167,7 +181,8 @@ BEGIN
 	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
 
-	IF @transactionType IS NULL
+	--.Net is sending default value if parameter is not provided
+	IF ISNULL(NULLIF(@transactionType,''),'') = ''
 	BEGIN
 		SET @transactionType = 'Voucher';
 	END
@@ -212,14 +227,14 @@ BEGIN
 		,intTransactionId
 		,26
 	FROM dbo.fnCCValidateAssociatedTransaction(@billIds, 1, @transactionType)
-	UNION ALL
-	SELECT
-		strError
-		,strTransactionType
-		,strTransactionNo
-		,intTransactionId
-		,27
-	FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
+	-- UNION ALL
+	-- SELECT
+	-- 	strError
+	-- 	,strTransactionType
+	-- 	,strTransactionNo
+	-- 	,intTransactionId
+	-- 	,27
+	-- FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
@@ -464,9 +479,9 @@ ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE 
 A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 AND B.intInventoryReceiptChargeId IS NOT NULL 
--- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 AND (
-	(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
+	(B.dblCost <> (CASE WHEN rc.strCostMethod IN ('Amount','Percentage') THEN rc.dblAmount ELSE rc.dblRate END))
 	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
 )
 AND A.intTransactionReversed IS NULL
@@ -1172,6 +1187,27 @@ BEGIN
 				GOTO Post_Rollback
 			END CATCH
 		END
+
+		--LOG TO tblAPClearing
+		BEGIN TRY
+			DECLARE @clearingIds AS Id
+			DECLARE @APClearing AS APClearing
+
+			INSERT INTO @clearingIds
+			SELECT intBillId FROM #tmpPostBillData
+
+			INSERT INTO @APClearing
+			SELECT * FROM fnAPClearing(@clearingIds)
+
+			EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+		END TRY
+		BEGIN CATCH
+				DECLARE @errorClearing NVARCHAR(200) = ERROR_MESSAGE()
+				SET @invalidCount = @invalidCount + 1;
+				SET @totalRecords = @totalRecords - 1;
+				RAISERROR(@errorClearing, 16, 1);
+				GOTO Post_Rollback
+		END CATCH
 	END
 	ELSE
 	BEGIN
@@ -1180,6 +1216,37 @@ BEGIN
 		RAISERROR(@postError, 16, 1);
 		GOTO Post_Rollback
 	END
+
+	BEGIN TRY
+		--POST INTEGRATION
+		DECLARE @postIntegrationError TABLE(intBillId INT, strBillId NVARCHAR(50), strError NVARCHAR(200));
+
+		--DECLARE THE TEMP TABLE HERE NOT IS SP AND RETURN, NESTED INSERT EXEC IS NOT ALLOWED
+		IF OBJECT_ID(N'tempdb..#tmpPostVoucherIntegrationError') IS NOT NULL DROP TABLE #tmpPostVoucherIntegrationError
+		CREATE TABLE #tmpPostVoucherIntegrationError(intBillId INT, strBillId NVARCHAR(50), strError NVARCHAR(200));
+		
+		DECLARE @voucherIdsIntegration AS Id;
+		INSERT INTO @voucherIdsIntegration
+		SELECT DISTINCT intBillId FROM #tmpPostBillData	
+
+		EXEC uspAPCallPostVoucherIntegration @billIds = @voucherIdsIntegration, @post = @post, @intUserId = @userId
+
+		IF EXISTS(SELECT 1 FROM #tmpPostVoucherIntegrationError)
+		BEGIN
+			--REMOVE FAILED POST VOUCHER INTEGRATION FROM UPDATING VOUCHER TABLE
+			DELETE A
+			FROM #tmpPostBillData A
+			INNER JOIN #tmpPostVoucherIntegrationError B ON A.intBillId = B.intBillId
+		END
+	END TRY
+	BEGIN CATCH
+		DECLARE @errorPostIntegration NVARCHAR(200) = ERROR_MESSAGE()
+		SET @invalidCount = @invalidCount + 1;
+		SET @totalRecords = @totalRecords - 1;
+		RAISERROR(@errorPostIntegration, 16, 1);
+		--ROLLBACK ALL IF UNKNOWN ERROR OCCURS
+		GOTO Post_Rollback
+	END CATCH
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -1236,9 +1303,10 @@ BEGIN
 		-- END
 
 		UPDATE tblGLDetail
-			SET ysnIsUnposted = 1
-		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
-				(SELECT intBillId FROM #tmpPostBillData))
+		SET ysnIsUnposted = 1
+		WHERE 
+			tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+			AND strCode <> 'ICA'
 
 		--Update Inventory Item Receipt
 		--  UPDATE A

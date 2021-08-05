@@ -117,10 +117,10 @@ BEGIN
 	SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
 		,@strCompanyAddress = tblSMCompanySetup.strAddress
 		,@strContactName = tblSMCompanySetup.strContactName
-		,@strCounty = tblSMCompanySetup.strCounty
-		,@strCity = tblSMCompanySetup.strCity
-		,@strState = tblSMCompanySetup.strState
-		,@strZip = tblSMCompanySetup.strZip
+		,@strCounty = ISNULL(tblSMCompanySetup.strCounty, '')
+		,@strCity = ISNULL(tblSMCompanySetup.strCity, '')
+		,@strState = ISNULL(tblSMCompanySetup.strState, '')
+		,@strZip = ISNULL(tblSMCompanySetup.strZip, '')
 		,@strCountry = isnull(rtCompanyTranslation.strTranslation, tblSMCompanySetup.strCountry)
 		,@strPhone = tblSMCompanySetup.strPhone
 	FROM tblSMCompanySetup
@@ -157,7 +157,8 @@ BEGIN
 		,Inv.strBillToCity
 		,Inv.strBillToState
 		,Inv.strBillToZipCode
-		,strCityStateZip = Inv.strBillToCity + ', ' + Inv.strBillToState + ', ' + Inv.strBillToZipCode
+		,strCityStateZip = CASE WHEN (ISNULL(Inv.strBillToCity, '') = '') THEN '' ELSE Inv.strBillToCity + ', ' END 
+			+ CASE WHEN (ISNULL(Inv.strBillToState, '') = '') THEN '' ELSE Inv.strBillToState + ', ' END + Inv.strBillToZipCode
 		,Inv.strBillToCountry
 		,Inv.strComments
 		,Inv.strFooterComments
@@ -233,8 +234,22 @@ BEGIN
 		,strTaxDescription = TaxG.strDescription
 		,intLineCount = 1
 		,FT.strFreightTerm
-		,strMVessel = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.strMVessel, L.strMVessel) ELSE L.strMVessel END
-		,strTransshipmentVessel = UPPER(L.strMVessel + ' VOY.' + L.strMVoyageNumber
+		,strMVessel = CASE WHEN L.intPurchaseSale = 2 THEN 
+						CASE WHEN PL.strMVessel IS NOT NULL THEN
+								CASE WHEN ISNULL(PL.strMVessel, '') = '' THEN PL.strVessel1 ELSE PL.strMVessel END
+							ELSE
+								CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END
+							END
+						ELSE CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END END
+		,strTransshipmentVessel = UPPER(
+									CASE WHEN L.intPurchaseSale = 2 THEN 
+										CASE WHEN PL.strMVessel IS NOT NULL THEN
+												CASE WHEN ISNULL(PL.strMVessel, '') = '' THEN PL.strVessel1 ELSE PL.strMVessel + ' VOY.' + PL.strMVoyageNumber END
+											ELSE
+												CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel + ' VOY.' + L.strMVoyageNumber END
+											END
+										ELSE CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel + ' VOY.' + L.strMVoyageNumber END 
+									END
 									+ CASE WHEN ISNULL(L.strVessel2, '') <> '' THEN ', ' + L.strVessel2 ELSE '' END 
 									+ CASE WHEN ISNULL(L.strVessel3, '') <> '' THEN ', ' + L.strVessel3 ELSE '' END 
 									+ CASE WHEN ISNULL(L.strVessel4, '') <> '' THEN ', ' + L.strVessel4 ELSE '' END)

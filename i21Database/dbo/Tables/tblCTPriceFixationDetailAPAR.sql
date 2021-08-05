@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	ysnMarkDelete					BIT,
 	ysnReturn						BIT null default 0,
 	ysnPreDeploymentFix				BIT null default 0,
+	strInvoiceDiscountsChargesIds	nvarchar(500) COLLATE Latin1_General_CI_AS,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),
@@ -40,16 +41,11 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 			,@dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then cd.dblBalance else cd.dblBalanceLoad end)
 		from
 			inserted i
-			,tblCTPriceFixationDetail pfd
-			,tblCTPriceFixation pf
-			,tblCTContractDetail cd
-			,tblCTContractHeader ch
-		where
-			pfd.intPriceFixationDetailId = i.intPriceFixationDetailId
-			and pf.intPriceFixationId = pfd.intPriceFixationId
-			and cd.intContractDetailId = pf.intContractDetailId
-			and ch.intContractHeaderId = pf.intContractHeaderId;  
-
+			inner join tblCTPriceFixationDetail pfd on pfd.intPriceFixationDetailId = i.intPriceFixationDetailId
+			inner join tblCTPriceFixation pf on pf.intPriceFixationId = pfd.intPriceFixationId
+			inner join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
+		
 		exec uspCTUpdateAppliedAndPrice
 			@intContractDetailId = @intActiveContractDetailId
 			,@dblBalance = @dblBalance

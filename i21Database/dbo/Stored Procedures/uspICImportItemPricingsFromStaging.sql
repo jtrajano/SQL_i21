@@ -1,4 +1,6 @@
-CREATE PROCEDURE uspICImportItemPricingsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemPricingsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItemPricing WHERE strImportIdentifier <> @strIdentifier
@@ -45,22 +47,23 @@ INSERT INTO #tmp
 	, intCreatedByUserId	
 )
 SELECT
-	  intItemId				 = i.intItemId
-	, intItemLocationId		 = il.intItemLocationId
-	, intCompanyLocationId	 = c.intCompanyLocationId
-	, dblAmountPercent		 = s.dblAmountPercent
-	, dblSalePrice			 = s.dblRetailPrice
-	, dblMSRPPrice			 = s.dblMSRP		
-	, strPricingMethod		 = s.strPricingMethod		
-	, dblLastCost			 = s.dblLastCost			
-	, dblStandardCost		 = s.dblStandardCost		
-	, dblAverageCost		 = s.dblAverageCost			
-	, dblDefaultGrossPrice	 = s.dblDefaultGrossPrice
-	, dtmDateCreated		 = s.dtmDateCreated		
-	, intCreatedByUserId	 = s.intCreatedByUserId	
+	  intItemId				= i.intItemId
+	, intItemLocationId		= il.intItemLocationId
+	, intCompanyLocationId	= c.intCompanyLocationId
+	, dblAmountPercent		= NULLIF(s.dblAmountPercent, 0)
+	, dblSalePrice			= NULLIF(s.dblRetailPrice, 0)
+	, dblMSRPPrice			= NULLIF(s.dblMSRP, 0)
+	, strPricingMethod		= ISNULL(s.strPricingMethod, 'None')
+	, dblLastCost			= NULLIF(s.dblLastCost, 0)
+	, dblStandardCost		= NULLIF(s.dblStandardCost, 0)
+	, dblAverageCost		= NULLIF(s.dblAverageCost, 0)
+	, dblDefaultGrossPrice	= NULLIF(s.dblDefaultGrossPrice, 0)
+	, dtmDateCreated		= s.dtmDateCreated		
+	, intCreatedByUserId	= s.intCreatedByUserId	
 FROM tblICImportStagingItemPricing s
 	INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo))) 
 	INNER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+		OR LOWER(c.strLocationNumber) = LTRIM(RTRIM(LOWER(s.strLocation)))
 	INNER JOIN tblICItemLocation il ON il.intLocationId = c.intCompanyLocationId
 		AND il.intItemId = i.intItemId
 WHERE s.strImportIdentifier = @strIdentifier
@@ -70,7 +73,7 @@ CREATE TABLE #output (
 	, strAction NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, intItemIdInserted INT NULL)
 
-;MERGE INTO tblICItemPricing AS target
+;MERGE INTO tblICItemPricing AS [target]
 USING
 (
 	SELECT
@@ -88,20 +91,21 @@ USING
 	, dtmDateCreated		
 	, intCreatedByUserId
 	FROM #tmp s
-) AS source ON target.intItemId = source.intItemId
-	AND target.intItemLocationId = source.intItemLocationId
+) AS 
+	source ON [target].intItemId = source.intItemId
+	AND [target].intItemLocationId = source.intItemLocationId
 WHEN MATCHED THEN
 	UPDATE SET
-		  intItemId				 = source.intItemId
-		, intItemLocationId		 = source.intItemLocationId
-		, dblAmountPercent		 = source.dblAmountPercent
-		, dblSalePrice			 = source.dblSalePrice
-		, dblMSRPPrice			 = source.dblMSRPPrice
-		, strPricingMethod		 = source.strPricingMethod
-		, dblLastCost			 = source.dblLastCost
-		, dblStandardCost		 = source.dblStandardCost
-		, dblAverageCost		 = source.dblAverageCost
-		, dblDefaultGrossPrice	 = source.dblDefaultGrossPrice
+		  intItemId				= source.intItemId
+		, intItemLocationId		= source.intItemLocationId
+		, dblAmountPercent		= ISNULL(source.dblAmountPercent, [target].dblAmountPercent)
+		, dblSalePrice			= ISNULL(source.dblSalePrice, [target].dblSalePrice)
+		, dblMSRPPrice			= ISNULL(source.dblMSRPPrice, [target].dblMSRPPrice)
+		, strPricingMethod		= ISNULL(source.strPricingMethod, 'None')
+		, dblLastCost			= ISNULL(source.dblLastCost, [target].dblLastCost)
+		, dblStandardCost		= ISNULL(source.dblStandardCost, [target].dblStandardCost)
+		, dblAverageCost		= ISNULL(source.dblAverageCost, [target].dblAverageCost)
+		, dblDefaultGrossPrice	= ISNULL(source.dblDefaultGrossPrice, [target].dblDefaultGrossPrice)
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
 		, intImportFlagInternal = 1
@@ -144,25 +148,6 @@ WHEN NOT MATCHED THEN
 
 EXEC dbo.uspICUpdateItemImportedPricingLevel
 
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
-
-DECLARE @TotalImported INT
-DECLARE @LogId INT
-
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
-WHERE strUniqueId = @strIdentifier
-
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
-END
-
 -- Sync Pricing to Location to make sure all locations have corresponding price
 DECLARE @intItemId INT
 DECLARE @intUserId INT
@@ -181,6 +166,19 @@ END
 
 CLOSE cur
 DEALLOCATE cur
+
+-- Logs 
+BEGIN 
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intRowsUpdated] 
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+		,intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
+END
 
 DROP TABLE #tmp
 DROP TABLE #output

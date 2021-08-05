@@ -69,7 +69,9 @@ BEGIN
 						WHERE (strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND strAccountCategory = 'AP Account'))
 			) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 		)
-	) INVOICES, (
+	) INVOICES
+	inner join 
+	(
 		SELECT dblRefundTotal	= SUM(I.dblInvoiceTotal) 
 			 , dblCurrentRefund	= SUM(CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateTo) <= 0 THEN I.dblInvoiceTotal ELSE 0 END)
 		FROM tblARInvoiceDetail ID
@@ -79,6 +81,7 @@ BEGIN
 		  AND I.dtmPostDate <= @dtmDateTo
 		  AND ISNULL(ID.strDocumentNumber, '') <> ''
 	) CASHREFUND
+	on 1=1
 	
 	RETURN
 			

@@ -184,6 +184,26 @@ BEGIN
         AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
         AND P.[strTransactionType] <> 'Claim'
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--CPP/COP/CREDIT MEMO HAS DISCOUNTS
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = P.strTransactionType + ' ' + P.[strTransactionNumber] + ' shouldn''t have discount.'
+	FROM #ARPostPaymentDetail P
+    WHERE P.[ysnPost] = @OneBit
+      AND P.strTransactionType IN ('Customer Prepayment','Credit Memo','Overpayment')
+	  AND P.dblDiscount <> 0
+
  --   INSERT INTO #ARInvalidPaymentData
  --       ([intTransactionId]
  --       ,[strTransactionId]
@@ -276,7 +296,7 @@ BEGIN
     WHERE
             P.[ysnPost] = @OneBit
         AND P.[strPaymentMethod]  = 'ACH'
-        AND P.[dblAmountPaid] <= @ZeroDecimal
+        AND P.[dblAmountPaid] = @ZeroDecimal
 
  --   This is being handled by [uspGLValidateGLEntries]
  --   INSERT INTO #ARInvalidPaymentData
@@ -362,6 +382,26 @@ BEGIN
       AND P.[intBillId] IS NOT NULL
       AND P.[dblDiscount] <> @ZeroDecimal
       AND ISNULL(P.[intDiscountAccount], 0) = 0
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Invalid base discount
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Base discount amount for ' + I.strInvoiceNumber + ' is invalid.'
+	FROM #ARPostPaymentDetail P
+    INNER JOIN tblARInvoice I ON P.intInvoiceId = I.intInvoiceId
+    WHERE P.[ysnPost] = @OneBit
+      AND ((P.[dblDiscount] <> @ZeroDecimal AND P.[dblBaseDiscount] = @ZeroDecimal) OR (P.[dblDiscount] = @ZeroDecimal AND P.[dblBaseDiscount] <> @ZeroDecimal))      
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -678,6 +718,30 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	--DEBIT MEMO(S) ALREADY PAID IN FULL
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = P.[strTransactionNumber] + ' already paid in full.'
+	FROM
+		#ARPostPaymentDetail P
+		INNER JOIN tblAPPaymentDetail APPD ON APPD.intBillId = P.intBillId
+		INNER JOIN tblAPPayment APP ON	 APP.intPaymentId=APPD.intPaymentId
+    WHERE
+          APP.[ysnPosted] = @OneBit
+          AND P.[intInvoiceId] IS NULL
+		  AND APPD.dblAmountDue = @ZeroDecimal
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--over the transaction''s amount due'
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
@@ -693,8 +757,8 @@ BEGIN
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[dblPayment] <> @ZeroDecimal
         AND P.[ysnTransactionPaid] = @ZeroBit
-        AND (P.[dblTransactionPayment] + P.[dblTransactionAmountDue] > P.[dblInvoiceTotal] + P.[dblTransactionInterest] - P.[dblTransactionDiscount]
-        OR P.[dblPayment] > P.[dblInvoiceTotal] + P.[dblInterest] - P.[dblDiscount])
+        AND (P.[dblTransactionPayment] + P.[dblTransactionAmountDue] > ABS(P.[dblInvoiceTotal]) + P.[dblTransactionInterest] - P.[dblTransactionDiscount]
+        OR ABS(P.[dblPayment]) > ABS(P.[dblInvoiceTotal] + P.[dblInterest] - P.[dblDiscount]))
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]

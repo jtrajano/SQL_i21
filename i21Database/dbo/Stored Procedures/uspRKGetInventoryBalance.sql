@@ -63,12 +63,15 @@ BEGIN
 			, 0.0 tranDSInQty
 		FROM tblICInventoryTransaction it 
 		JOIN tblICItem i ON i.intItemId = it.intItemId AND it.ysnIsUnposted = 0 AND it.intTransactionTypeId IN (4, 5, 15, 10, 23, 33, 45, 47)
+			AND i.intCommodityId = @intCommodityId 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 		JOIN tblICItemUOM u ON it.intItemId = u.intItemId AND u.intItemUOMId = it.intItemUOMId 
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = @intCommodityId AND u.intUnitMeasureId = ium.intUnitMeasureId 
 		JOIN tblICItemLocation il ON it.intItemLocationId = il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) AND ISNULL(il.strDescription,'') <> 'In-Transit'
-		WHERE i.intCommodityId = @intCommodityId 
-			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 			AND il.intLocationId = ISNULL(@intLocationId, il.intLocationId)
+		--WHERE i.intCommodityId = @intCommodityId 
+		--	AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+		--	AND il.intLocationId = ISNULL(@intLocationId, il.intLocationId)
 		GROUP BY dtmDate
 			, strTransactionId
 			, ium.intCommodityUnitMeasureId
@@ -89,12 +92,15 @@ BEGIN
 			, 0.0 tranDSInQty
 		FROM tblICInventoryTransaction it 
 		JOIN tblICItem i ON i.intItemId=it.intItemId AND it.ysnIsUnposted=0 AND it.intTransactionTypeId in(8,9,46)
+			AND i.intCommodityId=@intCommodityId 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 		JOIN tblICItemUOM u ON it.intItemId=u.intItemId AND u.intItemUOMId=it.intItemUOMId 
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblICItemLocation il ON it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) AND ISNULL(il.strDescription,'') <> 'In-Transit'
-		WHERE i.intCommodityId=@intCommodityId 
-			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 			AND il.intLocationId = ISNULL(@intLocationId, il.intLocationId)
+		--WHERE i.intCommodityId=@intCommodityId 
+		--	AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+		--	AND il.intLocationId = ISNULL(@intLocationId, il.intLocationId)
 		GROUP BY dtmDate
 			, intTransactionTypeId
 			, strTransactionId
@@ -116,12 +122,15 @@ BEGIN
 			, 0.0 tranDSInQty
 		FROM tblICInventoryTransaction it 
 		JOIN tblICItem i ON i.intItemId=it.intItemId AND it.ysnIsUnposted=0 AND it.intTransactionTypeId in(12)
+			AND i.intCommodityId=@intCommodityId 
+			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 		JOIN tblICItemUOM u ON it.intItemId=u.intItemId AND u.intItemUOMId=it.intItemUOMId 
 		JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId=@intCommodityId AND u.intUnitMeasureId=ium.intUnitMeasureId 
 		JOIN tblICItemLocation il ON it.intItemLocationId=il.intItemLocationId AND il.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation) AND ISNULL(il.strDescription,'') <> 'In-Transit'
-		WHERE i.intCommodityId=@intCommodityId 
-			AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 			AND il.intLocationId = ISNULL(@intLocationId, il.intLocationId)
+		--WHERE i.intCommodityId=@intCommodityId 
+		--	AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+		--	AND il.intLocationId = ISNULL(@intLocationId, il.intLocationId)
 
 		--Inventory Adjustment (Storage)
 		UNION ALL SELECT dtmDate
@@ -144,11 +153,14 @@ BEGIN
 				, IA.intInventoryAdjustmentId intInventoryAdjustmentId
 			FROM tblICInventoryAdjustment IA
 			INNER JOIN tblICInventoryAdjustmentDetail IAD ON IA.intInventoryAdjustmentId = IAD.intInventoryAdjustmentId
+				AND IAD.intOwnershipType = 2 --Storage
 			INNER JOIN tblICItem i ON i.intItemId=IAD.intItemId
-			WHERE IAD.intOwnershipType = 2 --Storage
-				AND IA.ysnPosted = 1
-				AND i.intCommodityId=@intCommodityId 
+				AND i.intCommodityId = @intCommodityId 
 				AND i.intItemId = ISNULL(@intItemId, i.intItemId)
+			WHERE --IAD.intOwnershipType = 2 AND --Storage
+				IA.ysnPosted = 1
+				--AND i.intCommodityId=@intCommodityId 
+				--AND i.intItemId = ISNULL(@intItemId, i.intItemId)
 				AND IA.intAdjustmentType <> 3
 				AND IA.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 		) a
@@ -173,15 +185,21 @@ BEGIN
 				, r.strReceiptNumber
 			FROM tblSCTicket st
 			JOIN tblICItem i ON i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND i.intCommodityId = @intCommodityId
+				AND i.intItemId = ISNULL(@intItemId, i.intItemId) 
+				AND ISNULL(strType,'') <> 'Other Charge'
 			JOIN tblICInventoryReceiptItem ri ON ri.intSourceId=st.intTicketId
 			JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId=ri.intInventoryReceiptId
-			JOIN tblGRStorageType gs ON gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
-			JOIN tblICItemUOM u ON st.intItemId=u.intItemId AND u.ysnStockUnit=1
-			WHERE i.intCommodityId = @intCommodityId
-				AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
-				AND gs.strOwnedPhysicalStock='Customer' AND gs.intStorageScheduleTypeId > 0 AND st.intDeliverySheetId IS NULL
-				AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
 				AND r.intSourceType = 1
+			JOIN tblGRStorageType gs ON gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
+				AND gs.strOwnedPhysicalStock='Customer' AND gs.intStorageScheduleTypeId > 0
+			JOIN tblICItemUOM u ON st.intItemId=u.intItemId AND u.ysnStockUnit=1
+			WHERE --i.intCommodityId = @intCommodityId
+				--AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
+				--AND gs.strOwnedPhysicalStock='Customer' AND gs.intStorageScheduleTypeId > 0 AND
+				st.intDeliverySheetId IS NULL
+				AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
+				--AND r.intSourceType = 1
 		) a
 
 		--Delivery Sheet
@@ -219,13 +237,17 @@ BEGIN
 				,r.strReceiptNumber
 			FROM tblSCTicket st
 			JOIN tblICItem i ON i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND i.intCommodityId= @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
 			JOIN tblICInventoryReceiptItem ri ON ri.intSourceId=st.intTicketId
+				AND ri.intOwnershipType = 2 
 			JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId=ri.intInventoryReceiptId 
-			JOIN tblICItemUOM u ON st.intItemId=u.intItemId AND u.ysnStockUnit=1
-			WHERE i.intCommodityId= @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
-				AND ri.intOwnershipType = 2 AND st.intStorageScheduleTypeId = -4 AND st.intDeliverySheetId IS NOT NULL
-				AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
 				AND r.intSourceType = 1 AND r.ysnPosted = 1
+			JOIN tblICItemUOM u ON st.intItemId=u.intItemId AND u.ysnStockUnit=1
+			WHERE --i.intCommodityId= @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
+				--AND ri.intOwnershipType = 2 AND 
+				st.intStorageScheduleTypeId = -4 AND st.intDeliverySheetId IS NOT NULL
+				AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
+				--AND r.intSourceType = 1 AND r.ysnPosted = 1
 		) a
 
 		--Shipment against customer storage	
@@ -250,13 +272,16 @@ BEGIN
 			ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
 			FROM tblSCTicket st
 			JOIN tblICItem i ON i.intItemId=st.intItemId AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND i.intCommodityId= @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
 			JOIN tblICInventoryShipmentItem ri ON ri.intSourceId=st.intTicketId
+				AND ri.intOwnershipType = 2 
 			JOIN tblICInventoryShipment r ON r.intInventoryShipmentId=ri.intInventoryShipmentId
 			JOIN tblGRStorageType gs ON gs.intStorageScheduleTypeId=st.intStorageScheduleTypeId 
+				AND gs.strOwnedPhysicalStock='Customer' 
 			JOIN tblICItemUOM u ON st.intItemId=u.intItemId AND u.ysnStockUnit=1
-			WHERE i.intCommodityId= @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
-				AND gs.strOwnedPhysicalStock='Customer' AND ri.intOwnershipType = 2
-				AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
+			WHERE --i.intCommodityId= @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
+				--AND gs.strOwnedPhysicalStock='Customer' AND ri.intOwnershipType = 2 AND
+				st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
 		) a
 
 		--Shipment against company owned (this is to get the Sales In Transit)
@@ -281,10 +306,13 @@ BEGIN
 			ELSE dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId,@intCommodityUnitMeasureId, case when ri.intOwnershipType = 1 then ri.dblQuantity else 0 end) END,6) dblSalesInTransit
 			FROM tblICInventoryShipment r
 			JOIN tblICInventoryShipmentItem ri ON ri.intInventoryShipmentId = r.intInventoryShipmentId
+				AND ri.intOwnershipType = 1 
 			JOIN tblICItem i ON i.intItemId = ri.intItemId AND r.intShipFromLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND i.intCommodityId = @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
 			JOIN tblICItemUOM u ON ri.intItemId=u.intItemId AND u.ysnStockUnit=1
-			WHERE i.intCommodityId = @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
-				AND ri.intOwnershipType = 1 AND r.intShipFromLocationId = ISNULL(@intLocationId, r.intShipFromLocationId)
+			WHERE --i.intCommodityId = @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
+				--AND ri.intOwnershipType = 1 AND 
+				r.intShipFromLocationId = ISNULL(@intLocationId, r.intShipFromLocationId)
 		) a
 
 		--On Hold without Delivery Sheet
@@ -328,8 +356,9 @@ BEGIN
 				, st.strTicketNumber AS ticketNumber
 			FROM tblSCTicket st
 			JOIN tblICItem i ON i.intItemId=st.intItemId
-			WHERE i.intCommodityId = @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
-				AND st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
+				AND i.intCommodityId = @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge'
+			WHERE --i.intCommodityId = @intCommodityId AND i.intItemId = ISNULL(@intItemId, i.intItemId) AND ISNULL(strType,'') <> 'Other Charge' AND 
+				st.intProcessingLocationId = ISNULL(@intLocationId, st.intProcessingLocationId)
 				AND st.intProcessingLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				AND st.intDeliverySheetId IS NULL AND st.strTicketStatus = 'H'
 		) t1
@@ -357,14 +386,17 @@ BEGIN
 				, SH.strSettleTicket
 			FROM tblGRCustomerStorage CS
 			INNER JOIN tblGRStorageHistory SH ON CS.intCustomerStorageId = SH.intCustomerStorageId
+				AND strType IN ('Settlement','Reverse Settlement')
+				AND SH.intSettleStorageId IS NULL
 			INNER JOIN tblGRStorageType S ON CS.intStorageTypeId = S.intStorageScheduleTypeId
+				AND S.ysnDPOwnedType <> 1
 			WHERE CS.intCommodityId = @intCommodityId
 				AND CS.intItemId = ISNULL(@intItemId, CS.intItemId)
 				AND CS.intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				AND CS.intCompanyLocationId = ISNULL(@intLocationId, CS.intCompanyLocationId)
-				AND strType IN ('Settlement','Reverse Settlement')
-				AND SH.intSettleStorageId IS NULL
-				AND S.ysnDPOwnedType <> 1
+				--AND strType IN ('Settlement','Reverse Settlement')
+				--AND SH.intSettleStorageId IS NULL
+				--AND S.ysnDPOwnedType <> 1
 		) a
 	) t
 

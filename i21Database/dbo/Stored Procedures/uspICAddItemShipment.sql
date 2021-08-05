@@ -611,6 +611,7 @@ INSERT INTO @ShipmentCharges(
 		, ysnAllowInvoice
 		, intItemContractHeaderId
 		, intItemContractDetailId
+		, ysnAddPayable
 )
 SELECT 
 		intOrderType
@@ -638,6 +639,7 @@ SELECT
 		, ysnAllowInvoice
 		, intItemContractHeaderId
 		, intItemContractDetailId
+		, ysnAddPayable
 FROM @Charges
 
 -- 3. Item Lots
@@ -1026,6 +1028,7 @@ INSERT INTO tblICInventoryShipmentCharge(
 	, ysnAllowInvoice
 	, intItemContractHeaderId
 	, intItemContractDetailId
+	, ysnAddPayable
 )
 SELECT 
 	sc.intShipmentId
@@ -1049,6 +1052,7 @@ SELECT
 	, sc.ysnAllowInvoice
 	, sc.intItemContractHeaderId
 	, sc.intItemContractDetailId
+	, sc.ysnAddPayable
 FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 		ON sc.intShipmentId = s.intInventoryShipmentId 
 	-- Get the SM forex rate. 
@@ -1120,7 +1124,15 @@ BEGIN
 		-- Calculate the surcharges
 		EXEC @intResult = dbo.uspICCalculateInventoryShipmentSurchargeOnOtherCharges @intShipmentId
 		IF @intResult <> 0 RETURN @intResult
-	END 	
+	END 
+
+	-- Link Inventory Shipment Transaction
+	BEGIN
+		EXEC dbo.uspICLinkInventoryShipmentTransaction
+			@intShipmentId,
+			true
+	END
+
 	FETCH NEXT FROM cur INTO @intShipmentId
 END
 

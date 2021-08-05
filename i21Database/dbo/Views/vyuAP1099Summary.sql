@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuAP1099Summary]
 AS
-SELECT DISTINCT
+SELECT --DISTINCT
       strVendorId = C.strVendorId
 	, intEntityVendorId = C.intEntityId
 	, strCompanyAddress = dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) COLLATE Latin1_General_CI_AS
@@ -15,9 +15,30 @@ SELECT DISTINCT
 					 CASE WHEN LEN(D.strState) <> 0 THEN ', ' + dbo.fnTrimX(D.strState) ELSE '' END +               
 					 CASE WHEN LEN(D.strZipCode) <> 0 THEN ', ' + dbo.fnTrimX(D.strZipCode) ELSE '' END)  COLLATE Latin1_General_CI_AS            
     , strFederalTaxId = C2.strFederalTaxId
-	, dbl1099Amount = (A.dblTotal + A.dblTax)
-	, dbl1099AmountPaid = (B.dblPayment)
-	, dblDifference = CASE WHEN (B.dblPayment) > 0 THEN  (A.dblTotal + A.dblTax) -  (B.dblPayment) ELSE 0 END
+	-- , dbl1099Amount = (A.dblTotal + A.dblTax)
+	, dbl1099Amount = (CASE WHEN patRef.intBillId IS NULL AND A.int1099Form = 4
+						THEN (A.dblTotal + A.dblTax) / B.dblTotal  --* ISNULL(B2.dblPayment,A.dbl1099)
+						ELSE A.dbl1099
+						END)
+						* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+	, dbl1099AmountPaid = --(B2.dblPayment)
+						(CASE WHEN patRef.intBillId IS NULL AND A.int1099Form = 4
+						THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+						ELSE A.dbl1099
+						END)
+	, dblDifference = CASE WHEN (B2.dblPayment) > 0 THEN  --(A.dblTotal + A.dblTax) 
+					(
+						(CASE WHEN patRef.intBillId IS NULL AND A.int1099Form = 4
+						THEN (A.dblTotal + A.dblTax) / B.dblTotal  --* ISNULL(B2.dblPayment,A.dbl1099)
+						ELSE A.dbl1099
+						END)
+						* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+					)
+					-  (CASE WHEN patRef.intBillId IS NULL AND A.int1099Form = 4
+						THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
+						ELSE A.dbl1099
+						END) 
+					ELSE 0 END
     , intYear = YEAR(ISNULL(B2.dtmDatePaid, B.dtmDate))
 	, A.int1099Form
 	, A.int1099Category
@@ -25,11 +46,22 @@ FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
 CROSS JOIN tblSMCompanySetup compSetup
-LEFT JOIN vyuAPBillPayment B2
-	ON B.intBillId = B2.intBillId   
+-- LEFT JOIN vyuAPBillPayment B2
+-- 	ON B.intBillId = B2.intBillId   
+LEFT JOIN (
+	SELECT
+		P2.intBillId
+		,P2.dblPayment
+		,P.dtmDatePaid
+	FROM tblAPPayment P
+	INNER JOIN tblAPPaymentDetail P2 ON P.intPaymentId = P2.intPaymentId
+	WHERE P.ysnPosted = 1
+) B2 ON B.intBillId = B2.intBillId
 LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.intEntityId = C2.intEntityId)
     ON C.intEntityId = B.intEntityVendorId
 LEFT JOIN [tblEMEntityLocation] D
 	ON C.intEntityId = D.intEntityId AND D.ysnDefaultLocation = 1     
-WHERE ((B.ysnPosted = 1) OR B.intTransactionType = 9) AND A.int1099Form <> 0
+LEFT JOIN tblPATRefundCustomer patRef ON patRef.intBillId = B.intBillId
+WHERE ((B.ysnPosted = 1 AND B2.dblPayment IS NOT NULL) OR B.intTransactionType = 9) AND A.int1099Form <> 0
+AND (C2.ysnPrint1099 = 1 OR patRef.intBillId IS NOT NULL)
 GO

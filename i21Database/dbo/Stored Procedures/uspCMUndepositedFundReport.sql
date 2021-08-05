@@ -73,9 +73,16 @@ BEGIN
 		SELECT @dtmCMDate = DATEADD( SECOND, 1, @dtmDateTo) 
 	END
 
-	DECLARE @intUserId INT
+	DECLARE @intUserId INT, @intBankAccountId INT
 	select TOP 1 @intUserId = intEntityId from tblSMConnectedUser order by dtmConnectDate desc
-	EXEC [dbo].[uspCMRefreshUndepositedFundsFromOrigin]	@intBankAccountId = NULL,@intUserId = @intUserId
+	SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount
+	IF @intBankAccountId IS NULL
+	BEGIN
+		RAISERROR('There are no bank accounts', 16, 1);
+		RETURN;
+	END
+		
+	EXEC [dbo].[uspCMRefreshUndepositedFundsFromOrigin]	@intBankAccountId = @intBankAccountId,@intUserId = @intUserId
 
 
 	DECLARE @strLocation NVARCHAR(50)
@@ -86,6 +93,7 @@ BEGIN
 	@dtmDateFrom as dtmDateFrom,
 	@dtmDateTo as dtmDateTo,
 	@dtmCMDate as dtmCMDateParam,
+	@strLocation as strLocationParam,
 	null as dtmDate,
 	'' AS strName,
 	'' AS strSourceTransactionId,
@@ -109,6 +117,7 @@ BEGIN
 	@dtmDateFrom as dtmDateFrom,
 	@dtmDateTo as dtmDateTo,
 	@dtmCMDate as dtmCMDateParam,
+	@strLocation as strLocationParam,
 	a.dtmDate,
 	a.strName,
 	a.strSourceTransactionId,
@@ -143,6 +152,7 @@ BEGIN
 	@dtmDateFrom as [dtmDateFrom],
 	@dtmDateTo as [dtmDateTo],
 	@dtmCMDate as dtmCMDateParam,
+	@strLocation as strLocationParam,
 	null as dtmDate,
 	'' AS strName,
 	'' AS strSourceTransactionId,

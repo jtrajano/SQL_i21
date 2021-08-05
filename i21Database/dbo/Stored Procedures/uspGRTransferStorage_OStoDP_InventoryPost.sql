@@ -3,8 +3,6 @@ CREATE PROCEDURE [dbo].[uspGRTransferStorage_OStoDP_InventoryPost]
 	@ItemsToPost AS ItemCostingTableType READONLY
 	,@intTransferStorageId INT
 	,@intUserId INT
-    ,@intFutureMarketId INT = NULL
-	,@intFutureMonthId INT = NULL
 )
 AS
 BEGIN
@@ -27,7 +25,7 @@ BEGIN
 			DECLARE @DummyGLEntries AS RecapTableType
 			DECLARE @dblInventoryItemCost AS DECIMAL(24,10)
 			DECLARE @dblOriginalCost AS DECIMAL(24,10)
-			DECLARE @dblDiscountCost AS DECIMAL(24,10)
+			DECLARE @dblGLCost AS DECIMAL(24,10)
 			DECLARE @dblUnits AS DECIMAL(24,10)
 			DECLARE @strBatchId AS NVARCHAR(40)
 			DECLARE @GLForItem AS GLForItem
@@ -79,6 +77,9 @@ BEGIN
 			WHERE intTransactionDetailId = @intTransactionDetailId
 
 			DECLARE @intItemId INT
+				,@intCommodityId INT
+				,@intFutureMarketId INT
+				,@intFutureMonthId INT
 				,@intLocationId INT
 				,@intSubLocationId INT
 				,@intStorageLocationId INT
@@ -105,6 +106,10 @@ BEGIN
 			INNER JOIN tblICItemLocation IL
 				ON IL.intItemLocationId = ITP.intItemLocationId
 			WHERE intId = @cursorId
+
+			SELECT @intCommodityId = intCommodityId FROM tblICItem WHERE intItemId = @intItemId
+			-- Get default futures market and month for the commodity
+			EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
 						
 			/*NOTE: OS to DP >> get the current basis and settlement price in Risk*/	
 			SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
@@ -195,7 +200,7 @@ BEGIN
 													dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
 											END
 				,dblExactCashPrice			= 0
-				,intItemId					= ITP.intItemId
+				,intItemId					= DSC.intItemId--ITP.intItemId
 				,intItemType				= 3 
 				,IsProcessed				= 0
 				,intTicketDiscountId		= QM.intTicketDiscountId
@@ -233,6 +238,15 @@ BEGIN
 			update @OtherChargesDetail set dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
 			/*end >> other charges*/
 
+			IF @dblOriginalCost <> @dblInventoryItemCost
+			BEGIN
+				SET @dblGLCost = (@dblOriginalCost - @dblInventoryItemCost) * (@dblUnits)
+			END
+			ELSE
+			BEGIN
+				SET @dblGLCost = NULL
+			END
+
 			DELETE FROM @GLEntries
 			DELETE FROM @GLForItem
 									
@@ -258,10 +272,10 @@ BEGIN
 				,ysnIsStorage
 				,intStorageScheduleTypeId
 			)
-			SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblDiscountCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+			SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblGLCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 			FROM @ItemsToPostCopy WHERE intId = @cursorId
-
-			UPDATE @ItemsToPostCopy SET dblCost = @dblInventoryItemCost
+			
+			UPDATE @ItemsToPostCopy SET dblCost = @dblInventoryItemCost			
 
 			EXEC dbo.uspICPostStorage @ItemsToPostCopy,@strBatchId,@intUserId
 
@@ -306,7 +320,7 @@ BEGIN
 				,[intCommodityId]
 			)
 			EXEC dbo.uspICPostCosting @ItemsToPostCopy,@strBatchId,'AP Clearing',@intUserId
-
+			--SELECT '@GLForItem',* FROM @GLForItem
 			--Used total discount cost on @GLForItem to get the correct decimal
 			--inventory items
 			INSERT INTO @GLEntries 

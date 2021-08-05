@@ -183,6 +183,7 @@ AS
    ,SCT.ysnMultipleTicket
    ,strAGWorkOrderNumber  = AWO.strOrderNumber
    ,strAGWorkOrderLocation = AWOL.strLocationName
+   ,SCT.dblDWGOriginalNetUnits
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -223,5 +224,5 @@ AS
 	) ContractsApplied
    LEFT JOIN tblAGWorkOrder AWO
       ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
-   LEFT JOIN tblEMEntityLocation AWOL
-		ON AWO.intEntityLocationId = AWOL.intEntityLocationId
+   LEFT JOIN tblSMCompanyLocation AWOL
+		ON AWO.intCompanyLocationId = AWOL.intCompanyLocationId

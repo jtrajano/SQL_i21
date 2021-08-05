@@ -478,6 +478,7 @@ BEGIN TRY
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
 		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
 		,ysnSummaryByMiscellaneous
 		,ysnSummaryByProduct
@@ -515,6 +516,7 @@ BEGIN TRY
 		,ysnSummaryByDriverPin
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
+		,strDepartmentGrouping
 	)
 	SELECT 
 		intCustomerGroupId
@@ -638,6 +640,7 @@ BEGIN TRY
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
 		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
 		,ysnSummaryByMiscellaneous
 		,ysnSummaryByProduct
@@ -675,6 +678,7 @@ BEGIN TRY
 		,ysnSummaryByDriverPin
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
+		,strDepartmentGrouping
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username

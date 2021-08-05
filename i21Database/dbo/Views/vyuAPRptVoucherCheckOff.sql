@@ -18,6 +18,7 @@ SELECT	DISTINCT
 			,PostDate = APB.dtmBillDate
 			,PaymentDate = Payment.dtmDatePaid
 			,ExemptUnits = APBD.dblQtyReceived 
+			,dblSubtotal = APBD.dblTotal
 			,dblTotal = APBD.dblTotal + APBD.dblTax
 			,APBD.dblTax
 			,0 AS dblCommodityTotal
@@ -29,6 +30,7 @@ SELECT	DISTINCT
 				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
 			,strCounty = TC.strCounty
 			,TC.strTaxCode + ' - ' + TC.strDescription as strTaxCode
+			,APBDT.intBillDetailTaxId
 	FROM	dbo.tblAPBill APB
 			INNER JOIN dbo.tblAPBillDetail APBD  
 				ON APBD.intBillId = APB.intBillId

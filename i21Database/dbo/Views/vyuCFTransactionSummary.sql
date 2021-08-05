@@ -60,6 +60,7 @@ END) AS strName
 ,ISNULL(cfTransaction.dblTransferCost,0) AS dblTransferCost
 
 ,ROUND(ISNULL(cfTransaction.dblCalculatedTotalPrice,0),2) AS dblSalesAmount
+,ROUND((ISNULL(cfTransaction.dblQuantity,0) * ISNULL(cfTransaction.dblTransferCost,0)),2) AS dblNetworkCost
 
 ,(CASE  
 		WHEN cfTransaction.strTransactionType IN ('Local/Network','Foreign Sale','Foreign Sales') AND ISNULL(cfTransaction.dblInventoryCost,0) > 0
@@ -77,6 +78,10 @@ END) AS dblCost
 ,cfSite.strSiteType
 ,ysnInvoiced = CAST((CASE WHEN ISNULL(cfTransaction.strInvoiceReportNumber,'') = '' THEN 0 ELSE 1 END) AS BIT)
 ,strSiteNumberName = cfSite.strSiteNumber + ' - ' + cfSite.strSiteName
+,dblTotalFET=ISNULL(FETTaxes_1.dblTaxCalculatedAmount, 0)         
+,dblTotalSET=ISNULL(SETTaxes_1.dblTaxCalculatedAmount, 0)         
+,dblTotalSST=ISNULL(SSTTaxes_1.dblTaxCalculatedAmount, 0)         
+,dblTotalLC =ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)      
 FROM         dbo.tblCFTransaction AS cfTransaction 
 INNER JOIN tblCFSite cfSite
 on cfSite.intSiteId = cfTransaction.intSiteId
@@ -154,6 +159,50 @@ AS tblCFTransactionTax_1
 ON cfTransaction.intTransactionId = tblCFTransactionTax_1.intTransactionId 
 LEFT JOIN tblARInvoice arinvoice
 	ON cfTransaction.intInvoiceId = arinvoice.intInvoiceId
+LEFT OUTER JOIN (
+	SELECT intTransactionId, 
+        ISNULL(Sum(dblTaxOriginalAmount), 0)   AS dblTaxOriginalAmount, 
+        ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount, 
+        ISNULL(Sum(dblTaxRate), 0)             AS dblTaxRate 
+        FROM   dbo.vyuCFTransactionTax AS FETTaxes 
+        WHERE  ( strTaxClass LIKE '%(FET)%' ) 
+        GROUP  BY intTransactionId) AS FETTaxes_1 
+	ON cfTransaction.intTransactionId = FETTaxes_1.intTransactionId 
+-------------------------------------------------------------
+LEFT OUTER JOIN (
+	SELECT intTransactionId, 
+		ISNULL(Sum(dblTaxOriginalAmount), 0)   AS dblTaxOriginalAmount, 
+        ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount, 
+        ISNULL(Sum(dblTaxRate), 0)             AS dblTaxRate 
+        FROM   dbo.vyuCFTransactionTax AS SETTaxes 
+        WHERE  ( strTaxClass LIKE '%(SET)%' ) 
+        GROUP  BY intTransactionId) AS SETTaxes_1 
+    ON cfTransaction.intTransactionId = SETTaxes_1.intTransactionId 
+-------------------------------------------------------------
+LEFT OUTER JOIN (
+	SELECT intTransactionId, 
+		ISNULL(Sum(dblTaxOriginalAmount), 0)   AS dblTaxOriginalAmount, 
+		ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount, 
+		ISNULL(Sum(dblTaxRate), 0)             AS dblTaxRate 
+		FROM   dbo.vyuCFTransactionTax AS SSTTaxes 
+		WHERE  ( strTaxClass LIKE '%(SST)%' ) 
+		GROUP  BY intTransactionId) AS SSTTaxes_1 
+	ON cfTransaction.intTransactionId = SSTTaxes_1.intTransactionId 
+-------------------------------------------------------------
+LEFT OUTER JOIN (
+	SELECT intTransactionId, 
+		ISNULL(Sum(dblTaxOriginalAmount), 0)   AS dblTaxOriginalAmount, 
+		ISNULL(Sum(dblTaxCalculatedAmount), 0) AS dblTaxCalculatedAmount, 
+		ISNULL(Sum(dblTaxRate), 0)             AS dblTaxRate 
+		FROM   dbo.vyuCFTransactionTax AS LCTaxes 
+		WHERE  ( strTaxClass NOT LIKE '%(SET)%' ) 
+		AND ( strTaxClass <> 'SET' ) 
+		AND ( strTaxClass NOT LIKE '%(FET)%' ) 
+		AND ( strTaxClass <> 'FET' ) 
+		AND ( strTaxClass NOT LIKE '%(SST)%' ) 
+		AND ( strTaxClass <> 'SST' ) 
+		GROUP  BY intTransactionId) AS LCTaxes_1 
+	ON cfTransaction.intTransactionId = LCTaxes_1.intTransactionId 
 
 
 			--WHERE ISNULL(cfTransaction.ysnPosted,0) = 1

@@ -403,7 +403,7 @@ SELECT intKey = CAST(ROW_NUMBER() OVER(ORDER BY intLocationId, [intEntityId], in
 			LEFT JOIN dbo.tblICUnitMeasure CostUnitMeasure
 				ON CostUnitMeasure.intUnitMeasureId = CostUOM.intUnitMeasureId
 			LEFT JOIN dbo.tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = TransferView.intToLocationId
-			,tblSMCompanyPreference
+			inner join tblSMCompanyPreference on 1=1
 
 	WHERE TransferView.ysnPosted = 1
 		AND TransferViewHeader.ysnShipmentRequired = 1

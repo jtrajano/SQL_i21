@@ -7,7 +7,10 @@ FROM (
 		SELECT 
 			 strBillId = Bill.strBillId
 			,strTaxClass = TaxClass.strTaxClass
-			,dblTax = Tax.dblTax   
+			,dblTax = CASE 
+						WHEN Tax.ysnTaxAdjusted = 1 THEN Tax.dblAdjustedTax
+						ELSE Tax.dblTax
+					END
 			,intInventoryReceiptItemId = ISNULL(BillDtl.intInventoryReceiptItemId, 0) 
 			,intContractDetailId = ISNULL(BillDtl.intContractDetailId, 0)
 			,strItemNo = Item.strItemNo

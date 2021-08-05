@@ -330,7 +330,7 @@ BEGIN
 								,@RaiseError			   = 0 
 								,@UseOriginIdAsInvoiceNumber = 1
 								,@InvoiceOriginId         = @strOriginInvoiceNumber
-								,@ItemContractDetailId		= @intContractDetailId
+								,@ContractDetailId		= @intContractDetailId
 								,@RecomputeTax = @ysnRecomputeTax
 
 								--GEt the created invoice number
@@ -362,7 +362,7 @@ BEGIN
 									,@ItemSiteId               = @intSiteId
 									,@ItemPercentFull		   = 0
 									,@ItemTaxGroupId		   = @intTaxGroupId	
-									,@ItemContractDetailId     = @intContractDetailId
+									,@ContractDetailId     = @intContractDetailId
 									,@RaiseError			   = 0 			
 									,@ItemCurrencyExchangeRateTypeId = NULL			
 									,@ItemCurrencyExchangeRateId = NULL			

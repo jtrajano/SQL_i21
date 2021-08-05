@@ -11,9 +11,10 @@ BEGIN TRY
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ItemsToPost ItemInTransitCostingTableType
 	DECLARE @GLEntries AS RecapTableType
+	DECLARE @APClearing AS APClearing
 	DECLARE @intReturnValue INT
 	DECLARE @STARTING_NUMBER_BATCH INT = 3
-	DECLARE @strBatchIdUsed NVARCHAR(20)
+	DECLARE @strBatchIdUsed NVARCHAR(40)
 	DECLARE @intFOBPointId INT
 	DECLARE @INBOUND_SHIPMENT_TYPE AS INT = 22
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -122,45 +123,41 @@ BEGIN TRY
 			intItemId = LD.intItemId
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-			,dtmDate = GETDATE()
-			,dblQty = 
-				CASE 
-					WHEN LD.intWeightItemUOMId IS NOT NULL THEN 
-						LD.dblNet
-					ELSE 
-						LD.dblQuantity
-				END
+			,dtmDate = L.dtmScheduledDate
+			,dblQty = LD.dblQuantity
 			,dblUOMQty = IU.dblUnitQty
-			,dblCost = dbo.fnMultiply(
-								dbo.fnCalculateCostBetweenUOM(
-									AD.intSeqPriceUOMId
-									, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-									, CASE 
-										WHEN (AD.dblSeqPrice IS NULL) THEN
-											CASE 
-												WHEN (LD.dblUnitPrice > 0) THEN 
-													LD.dblUnitPrice 
-													/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
-												ELSE 
-													dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
-													/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-											END
-										ELSE 
-											AD.dblSeqPrice 
-											/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
-										END) 
-								, CASE --if contract FX tab is setup
-									 WHEN AD.ysnValidFX = 1 THEN 
-										CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-												THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-											ELSE 1 END
-									 ELSE  --if contract FX tab is not setup
-										CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
-											THEN ISNULL(FX.dblFXRate, 1)
-											ELSE 1 END
-									 END
-								) 
-							
+			,dblCost = dbo.fnDivide(
+						dbo.fnMultiply(LD.dblNet,
+							dbo.fnMultiply(
+									dbo.fnCalculateCostBetweenUOM(
+										AD.intSeqPriceUOMId
+										, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+										, CASE 
+											WHEN (AD.dblSeqPrice IS NULL) THEN
+												CASE 
+													WHEN (LD.dblUnitPrice > 0) THEN 
+														LD.dblUnitPrice 
+														/ CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END
+													ELSE 
+														dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) 
+														/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+												END
+											ELSE 
+												AD.dblSeqPrice 
+												/ CASE WHEN (AD.ysnSeqSubCurrency = 1) THEN 100 ELSE 1 END
+											END) 
+									, CASE --if contract FX tab is setup
+										 WHEN AD.ysnValidFX = 1 THEN 
+											CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
+													THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
+												ELSE 1 END
+										 ELSE  --if contract FX tab is not setup
+											CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
+												THEN ISNULL(FX.dblFXRate, 1)
+												ELSE 1 END
+										 END
+									))
+								 , LD.dblQuantity)
 			,dblValue = 0
 			,dblSalesPrice = 0.0
 			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
@@ -206,7 +203,7 @@ BEGIN TRY
 		FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
-			JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+			JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
@@ -335,6 +332,55 @@ END
 ELSE
 BEGIN
 	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+
+	--Insert AP Clearing
+	INSERT INTO @APClearing (
+		intTransactionId
+		,strTransactionId
+		,intTransactionType
+		,strReferenceNumber
+		,dtmDate
+		,intEntityVendorId
+		,intLocationId
+		,intTransactionDetailId
+		,intAccountId
+		,intItemId
+		,intItemUOMId
+		,dblQuantity
+		,dblAmount
+		,intOffsetId
+		,strOffsetId
+		,intOffsetDetailId
+		,intOffsetDetailTaxId
+		,strCode)
+	SELECT DISTINCT
+		intTransactionId = GL.intTransactionId
+		,strTransactionId = GL.strTransactionId
+		,intTransactionType = 4
+		,strReferenceNumber = L.strBLNumber
+		,dtmDate = GL.dtmDate
+		,intEntityVendorId = LD.intVendorEntityId
+		,intLocationId = IL.intLocationId
+		,intTransactionDetailId = LD.intLoadDetailId
+		,intAccountId = GL.intAccountId
+		,intItemId = LD.intItemId
+		,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId)
+		,dblQuantity = ISNULL(LD.dblNet, LD.dblQuantity)
+		,dblAmount = ABS(GL.dblDebit - GL.dblCredit)
+		,intOffsetId = NULL
+		,strOffsetId = NULL
+		,intOffsetDetailId = NULL
+		,intOffsetDetailTaxId = NULL
+		,strCode = GL.strCode
+	FROM tblLGLoad L
+		INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		INNER JOIN tblICInventoryTransaction ICT ON ICT.intTransactionId = L.intLoadId AND ICT.intTransactionDetailId = LD.intLoadDetailId AND ICT.intTransactionTypeId = 22
+		INNER JOIN @GLEntries GL ON GL.intTransactionId = L.intLoadId AND GL.intJournalLineNo = ICT.intInventoryTransactionId
+		LEFT JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+	WHERE intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+
+	EXEC uspAPClearing @APClearing, @ysnPost
+
 	COMMIT TRAN @TransactionName
 END
 
@@ -373,7 +419,7 @@ BEGIN
 		,[strInventoryReceiptId]  = L.strLoadNumber
 		,[strReceiptType] = 'Purchase Contract'
 		,[intSourceType] = -1
-		,[dtmDate] = GETDATE()
+		,[dtmDate] = L.dtmScheduledDate
 		,[intCurrencyId] = NULL
 		,[dblExchangeRate] = 1
 		-- Detail 
@@ -394,7 +440,7 @@ BEGIN
 					ELSE -1 * LD.dblQuantity
 					END
 		,[dblUOMQty] = IU.dblUnitQty
-		,[dblCost] = CD.dblCashPrice
+		,[dblCost] = 0 --field is required but not used for updating contract balance
 		,[intLineNo] = ISNULL(LD.intPContractDetailId, 0)
 		,[ysnLoad] = CH.ysnLoad
 		,[intLoadReceive] = CASE WHEN CH.ysnLoad = 1 THEN 

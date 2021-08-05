@@ -59,7 +59,7 @@ INSERT INTO @InvoiceDetail
 	,[strItemType]
 	,[intSiteId]
 	,[intItemUOMId])
-SELECT
+SELECT DISTINCT
 	 [intInvoiceDetailId]				= ARID.[intInvoiceDetailId]
 	,[intInvoiceId]						= ARI.[intInvoiceId]
 	,[intItemId]						= ARID.[intItemId]
@@ -79,38 +79,23 @@ SELECT
 	,[strItemType]						= ICI.[strType]
 	,[intSiteId]						= ARID.[intSiteId]
 	,[intItemUOMId]						= ARID.[intItemUOMId] 
-FROM
-	tblARInvoiceDetail ARID WITH (NOLOCK)
-INNER JOIN
-	(SELECT [intEntityCustomerId], [intCompanyLocationId], [dtmDate], [intDistributionHeaderId], [intFreightTermId], [intBillToLocationId],[intShipToLocationId], [intInvoiceId], [intCurrencyId] FROM tblARInvoice WITH (NOLOCK)) ARI
-		ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
-LEFT OUTER JOIN
-	(SELECT [intFreightTermId], [strFobPoint] FROM tblSMFreightTerms WITH (NOLOCK)) SMFT
-		ON ARI.[intFreightTermId] = SMFT.[intFreightTermId]
-LEFT OUTER JOIN
-	(SELECT [intItemId], [strType] FROM tblICItem WITH (NOLOCK)) ICI
-		ON ARID.[intItemId] = ICI.[intItemId]	 
-WHERE
-	EXISTS(SELECT NULL FROM  @InvoiceIds IDs WHERE (IDs.[intHeaderId] = ARI.[intInvoiceId] AND ISNULL(IDs.[intDetailId],0) = 0) OR IDs.[intDetailId] = ARID.[intInvoiceDetailId])
-ORDER BY
-	ARID.[intInvoiceDetailId]
+FROM tblARInvoiceDetail ARID WITH (NOLOCK)
+INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
+INNER JOIN @InvoiceIds ID ON ID.[intHeaderId] = ARI.[intInvoiceId] --((ID.[intHeaderId] = ARI.[intInvoiceId] AND ISNULL(ID.[intDetailId],0) = 0) OR ID.[intDetailId] = ARID.[intInvoiceDetailId])
+LEFT OUTER JOIN tblSMFreightTerms SMFT WITH (NOLOCK) ON ARI.[intFreightTermId] = SMFT.[intFreightTermId]
+LEFT OUTER JOIN tblICItem ICI WITH (NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
+ORDER BY ARID.[intInvoiceDetailId]
 
+DELETE IDT 
+FROM tblARInvoiceDetailTax IDT
+INNER JOIN @InvoiceDetail ID ON ID.[intInvoiceDetailId] =  IDT.[intInvoiceDetailId]
 
-DELETE FROM 
-	tblARInvoiceDetailTax
-WHERE
-	EXISTS(SELECT NULL FROM @InvoiceDetail IDs WHERE IDs.[intInvoiceDetailId] =  tblARInvoiceDetailTax.[intInvoiceDetailId])
-
-UPDATE
-	tblARInvoiceDetail
-SET
-	 [dblTotalTax]		= @ZeroDecimal
-	,[intTaxGroupId]	= IDs.[intTaxGroupId]
-FROM
-	@InvoiceDetail IDs
-WHERE
-	tblARInvoiceDetail.[intInvoiceDetailId] = IDs.[intInvoiceDetailId]
-	AND (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
+UPDATE tblARInvoiceDetail
+SET [dblTotalTax]	= @ZeroDecimal
+  , [intTaxGroupId]	= IDs.[intTaxGroupId]
+FROM @InvoiceDetail IDs
+WHERE tblARInvoiceDetail.[intInvoiceDetailId] = IDs.[intInvoiceDetailId]
+  AND (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 
 
 INSERT INTO [tblARInvoiceDetailTax]
@@ -169,25 +154,18 @@ CROSS APPLY
 	[dbo].[fnGetItemTaxComputationForCustomer](IDs.[intItemId], IDs.[intEntityCustomerId], IDs.[dtmTransactionDate], IDs.[dblPrice], IDs.[dblQtyShipped], IDs.[intTaxGroupId], IDs.[intCompanyLocationId], IDs.[intCustomerLocationId], 1, 1, NULL, IDs.[intSiteId], IDs.[intFreightTermId], NULL, NULL, 0, 1, NULL, 1, 0, IDs.[intItemUOMId], IDs.[intCurrencyId], IDs.[intCurrencyExchangeRateTypeId], IDs.[dblCurrencyExchangeRate]) TD
 WHERE
 	NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
-		
 
-UPDATE
-	tblARInvoiceDetail 
-SET
-	[intTaxGroupId]	= DT.[intTaxGroupId]
-FROM
-	@InvoiceDetail IDs
-INNER JOIN
-	(
-	SELECT MAX([intTaxGroupId]) [intTaxGroupId], [intInvoiceDetailId] FROM [tblARInvoiceDetailTax] WITH (NOLOCK) GROUP BY [intInvoiceDetailId]
-	) DT
-		ON IDs.[intInvoiceDetailId] = DT.[intInvoiceDetailId]
-WHERE
-	tblARInvoiceDetail.[intInvoiceDetailId] = IDs.intInvoiceDetailId
-	AND NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
-
-	
-
+UPDATE ID 
+SET intTaxGroupId = DT.intTaxGroupId
+FROM tblARInvoiceDetail ID 
+INNER JOIN @InvoiceDetail IDs ON ID.intInvoiceDetailId = IDs.intInvoiceDetailId
+INNER JOIN (
+	SELECT intInvoiceDetailId
+		 , intTaxGroupId	=  MAX(intTaxGroupId)
+	FROM tblARInvoiceDetailTax WITH (NOLOCK) 
+	GROUP BY intInvoiceDetailId
+) DT ON IDs.[intInvoiceDetailId] = DT.[intInvoiceDetailId]
+WHERE NOT (ISNULL(IDs.[intDistributionHeaderId], 0) <> 0 AND ISNULL(IDs.[strItemType],'') = 'Other Charge') OR (ISNULL(IDs.[intDistributionHeaderId],0) <> 0 AND ISNULL(IDs.[dblPrice], 0) = 0)
 
 IF ISNULL(@SkipRecompute, 0) = 0
 	BEGIN

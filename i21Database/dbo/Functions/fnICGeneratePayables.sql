@@ -271,9 +271,9 @@ SELECT DISTINCT
 		END
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
-	,[dblWeightUnitQty]			=	CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
-	,[dblCostUnitQty]			=	CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
+	,[dblWeightUnitQty]			=	ItemWeightUOM.dblUnitQty --CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
+	,[dblCostUnitQty]			=	ItemCostUOM.dblUnitQty --CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
+	,[dblUnitQty]				=	ItemUOM.dblUnitQty --ISNULL(ItemUOM.dblUnitQty,1)
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId, companyPrefrence.intDefaultCurrencyId)
 	,[strCurrency]				=   H1.strCurrency
 	,[intCostCurrencyId]		=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
@@ -552,7 +552,10 @@ WHERE
 	AND B.intOwnershipType <> 2	
 	AND C.strType <> 'Bundle'
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
-	AND ISNULL(B.ysnAllowVoucher, 1) = 1
+	AND (
+		(@ysnForVoucher = 0 AND ISNULL(B.ysnAddPayable, 1) = 1) -- This condition determines if the item can be added into the Payable Staging table or not during posting. 
+		OR (@ysnForVoucher = 1 AND ISNULL(B.ysnAllowVoucher, 1) = 1) -- This condition determines if the item can be converted to Voucher or Debit Memo. 
+	)
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
 		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
@@ -646,16 +649,16 @@ SELECT DISTINCT
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	
-			--CAST(A.dblUnitCost AS DECIMAL(38,20))
-			CASE 
-				WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
-					A.dblUnitCost
-				ELSE 
-					CASE 
-						WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblUnitCost
-						ELSE A.dblUnitCost
-					END 
-			END
+			CAST(A.dblUnitCost AS DECIMAL(38,20))
+			--CASE 
+			--	WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
+			--		A.dblUnitCost
+			--	ELSE 
+			--		CASE 
+			--			WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblUnitCost
+			--			ELSE A.dblUnitCost
+			--		END 
+			--END
 		,[dblDiscount]								=	0
 		,[dblTax]									=	
 			ISNULL(
@@ -834,21 +837,42 @@ FROM
 			, BD.intInventoryReceiptChargeId
 
 	) Billed
+	OUTER APPLY (
+		SELECT TOP 1 
+			ri.ysnAddPayable
+		FROM 
+			tblICInventoryReceiptItem ri
+		WHERE
+			ri.intInventoryReceiptId = A.intInventoryReceiptId
+			AND A.intContractHeaderId = COALESCE(ri.intContractHeaderId, ri.intOrderId)
+			AND A.intContractDetailId = COALESCE(ri.intContractDetailId, ri.intLineNo) 
+	) contractItem 
 WHERE
 	-- This part is used to convert the IR to Voucher. It should not include the 3rd party vendors
 	(
 		@ysnForVoucher = 1 
 		AND A.intInventoryReceiptId = @intReceiptId 
-		AND (A.intEntityVendorId = IR.intEntityVendorId)		
+		AND (A.intEntityVendorId = IR.intEntityVendorId)
 		AND (
 			(
 				A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) 
 				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
 				OR Billed.dblQtyReceived IS NULL
 			)
-			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
-			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
-		)	
+			/*
+				1. Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
+						2: BASIS 
+						5: DELAYED PRICING 
+
+			*/
+			AND 1 = 
+				CASE 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND CD.intPricingTypeId IN (2, 5) THEN 
+						0 
+					ELSE 
+						1 
+				END 
+		)		
 		AND ISNULL(A.ysnAllowVoucher, 1) = 1
 	)
 	-- This condition is used to insert the other charges, including the 3rd party vendors, to the payable table. 
@@ -862,9 +886,25 @@ WHERE
 				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
 				OR Billed.dblQtyReceived IS NULL
 			)
-			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
-			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+			/*
+				1. Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
+						2: BASIS 
+						5: DELAYED PRICING 
+
+				2. Exclude the charge if contract item is set as ysnAddPayable = 0. 
+
+			*/
+			AND 1 = 
+				CASE 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND CD.intPricingTypeId IN (2, 5) THEN 
+						0 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND ISNULL(contractItem.ysnAddPayable, 1) = 0 THEN 
+						0
+					ELSE 
+						1 
+				END 
 		)
+
 		/*
 			IC-7556
 			If there's a contract involved and it already generated payables for costs/charges, don't re-generate them during posting but remove all of them during unposting.

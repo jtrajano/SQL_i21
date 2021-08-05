@@ -191,6 +191,9 @@ SELECT
 	,BO.strBook
 	,SB.strSubBook
 	,INC.intInsuranceCalculatorId
+	,L.ysnAllowReweighs
+	,L.dblFreightRate
+	,L.dblSurcharge
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId

@@ -36,7 +36,9 @@ USING
 		intVendorType			=	0,
 		strVendorType			=	'Both',
 		intEntityLocationId		=	vndLocStg.intEntityLocationId,
-		strLocationName			=	vndLocStg.strLocationName
+		strLocationName			=	vndLocStg.strLocationName,
+		dtmCreated				=	vndStg.dtmCreated,
+		dtmLastModified			=	vndStg.dtmLastModified
 	FROM tblEMEntityStaging entStg
 	INNER JOIN tblAPVendorStaging vndStg
 		ON entStg.intEntityId = vndStg.intEntityId
@@ -59,7 +61,9 @@ INSERT
 	intVendorType,
 	strVendorType,
 	intEntityLocationId,
-	strLocationName
+	strLocationName,
+	dtmCreated,
+	dtmLastModified
 )
 VALUES
 (
@@ -71,7 +75,9 @@ VALUES
 	intVendorType,
 	strVendorType,
 	intEntityLocationId,
-	strLocationName
+	strLocationName,
+	dtmCreated,
+	dtmLastModified
 )
 OUTPUT
 	inserted.intVendorStagingId,
@@ -107,7 +113,8 @@ USING
 		strMobile			=	ISNULL(cntcDataStg.strMobile,''),
 		strFax				=	ISNULL(cntcDataStg.strFax,''),
 		strEmail			=	ISNULL(cntcDataStg.strEmail,''),
-		strWebsite			=	ISNULL(cntcDataStg.strWebsite,'')
+		strWebsite			=	ISNULL(cntcDataStg.strWebsite,''),
+		strCountry			=	ISNULL(cntcLocDataStg.strCountry, '')
 	FROM @insertedData stg
 	INNER JOIN tblEMEntityStaging entStg
 		ON stg.intEntityId = entStg.intEntityId
@@ -139,7 +146,8 @@ INSERT
 	strMobile,
 	strFax,
 	strEmail,
-	strWebsite
+	strWebsite,
+	strCountry
 )
 VALUES
 (
@@ -156,7 +164,8 @@ VALUES
 	strMobile,
 	strFax,
 	strEmail,
-	strWebsite
+	strWebsite,
+	strCountry
 );
 
 

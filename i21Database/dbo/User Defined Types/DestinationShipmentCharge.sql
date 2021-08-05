@@ -21,4 +21,5 @@
 	,dblForexRate NUMERIC(18, 6) NULL
 	,strAllocatePriceBy NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,strChargesLink NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+	,ysnAddPayable BIT NULL
 )

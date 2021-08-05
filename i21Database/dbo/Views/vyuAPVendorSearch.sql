@@ -54,8 +54,10 @@ SELECT
 	a.ysnPymtCtrlAlwaysDiscount,
 	a.ysnPymtCtrlEFTActive,
 	a.ysnPymtCtrlHold,
-	a.ysnOneBillPerPayment
-	---
+	a.ysnOneBillPerPayment,
+	a.dtmCreated,
+	a.dtmLastModified,
+	EC.strClass
 	FROM tblAPVendor a
 	join tblEMEntity b
 		on b.intEntityId = a.[intEntityId]
@@ -92,6 +94,7 @@ SELECT
 		on ae.intEntityLocationId = a.intShipFromId
 	left join tblEMEntityPhoneNumber pn
 		on pn.intEntityId = d.intEntityId
+	LEFT JOIN tblEMEntityClass EC ON EC.intEntityClassId = b.intEntityClassId
 
 	
 

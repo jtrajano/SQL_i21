@@ -45,7 +45,7 @@ BEGIN
 		JOIN	tblICInventoryReceipt			HR	ON	HR.intInventoryReceiptId	=	DL.intInventoryReceiptId
 		WHERE	DL.intInventoryReceiptItemId	=	@intExternalId
 	END
-	ELSE IF @strScreenName = 'Invoice'
+	ELSE IF @strScreenName = 'Invoice' OR @strScreenName = 'Credit Memo'
 	BEGIN
 		SELECT	@intExternalHeaderId	=	HR.intInvoiceId,
 				@strNumber				=	HR.strInvoiceNumber,

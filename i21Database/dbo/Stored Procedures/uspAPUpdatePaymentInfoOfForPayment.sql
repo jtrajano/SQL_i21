@@ -18,43 +18,65 @@ BEGIN TRY
 	DECLARE @transCount INT = @@TRANCOUNT;
 	DECLARE @startNumber INT;
 	DECLARE @prefix NVARCHAR(50);
+	DECLARE @partitionNumber INT = 1;
 
 	INSERT INTO @ids
 	SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@voucherIds)
 
 	IF @transCount = 0 BEGIN TRANSACTION
 
-	IF NULLIF(@paymentInfo,'') IS NULL
-	BEGIN
-		SELECT TOP 1
-			@startNumber = payMethod.intNumber
-			,@prefix = payMethod.strPrefix
-		FROM tblSMPaymentMethod payMethod
-		WHERE LOWER(payMethod.strPaymentMethod) = 'echeck'
+	IF OBJECT_ID('tempdb..#tmpPartitionedVouchers') IS NOT NULL DROP TABLE  #tmpPartitionedVouchers
+	SELECT partitioned.*
+	INTO #tmpPartitionedVouchers 
+	FROM dbo.fnAPPartitonPaymentOfVouchers(@ids) partitioned
 
-		IF(@prefix = '' OR @prefix IS NULL)
-		BEGIN 
-			SET @paymentInfo = CAST(@startNumber AS NVARCHAR);
+	SELECT * FROM #tmpPartitionedVouchers 
+
+	WHILE (EXISTS(SELECT TOP 1 1 FROM #tmpPartitionedVouchers WHERE intPartitionId = @partitionNumber))
+	BEGIN
+		IF NULLIF(@paymentInfo,'') IS NULL
+		BEGIN
+			SELECT TOP 1 @paymentInfo = B.strTempPaymentInfo
+			FROM tblAPBill B
+			INNER JOIN #tmpPartitionedVouchers PV ON PV.intBillId = B.intBillId AND PV.intPartitionId = @partitionNumber
+			WHERE B.strTempPaymentInfo IS NOT NULL
 		END
-		ELSE 
-		SET @paymentInfo = @prefix + '-' + CAST(@startNumber AS NVARCHAR);
 
-		UPDATE payMethod
-			SET payMethod.intNumber = payMethod.intNumber + 1
-		FROM tblSMPaymentMethod payMethod
-		WHERE LOWER(payMethod.strPaymentMethod) = 'echeck'
+		IF NULLIF(@paymentInfo,'') IS NULL
+		BEGIN
+			SELECT TOP 1
+				@startNumber = payMethod.intNumber
+				,@prefix = payMethod.strPrefix
+			FROM tblSMPaymentMethod payMethod
+			WHERE LOWER(payMethod.strPaymentMethod) = 'echeck'
 
-		SET @newPaymentInfo = @paymentInfo
+			IF(@prefix = '' OR @prefix IS NULL)
+			BEGIN 
+				SET @paymentInfo = CAST(@startNumber AS NVARCHAR);
+			END
+			ELSE 
+			SET @paymentInfo = @prefix + '-' + CAST(@startNumber AS NVARCHAR);
+
+			UPDATE payMethod
+				SET payMethod.intNumber = payMethod.intNumber + 1
+			FROM tblSMPaymentMethod payMethod
+			WHERE LOWER(payMethod.strPaymentMethod) = 'echeck'
+
+			SET @newPaymentInfo = CASE WHEN @partitionNumber = 1 THEN @paymentInfo ELSE @newPaymentInfo END
+		END
+		ELSE
+		BEGIN
+			SET @newPaymentInfo = CASE WHEN @partitionNumber = 1 THEN @paymentInfo ELSE @newPaymentInfo END
+		END
+
+		UPDATE B
+		SET B.strTempPaymentInfo = @paymentInfo
+		FROM tblAPBill B
+		INNER JOIN #tmpPartitionedVouchers PV ON PV.intBillId = B.intBillId AND PV.intPartitionId = @partitionNumber
+
+		SET @paymentInfo = ''
+		SET @partitionNumber = @partitionNumber + 1
 	END
-	ELSE
-	BEGIN
-		SET @newPaymentInfo = @paymentInfo
-	END
-
-	UPDATE A
-		SET A.strTempPaymentInfo = @paymentInfo
-	FROM tblAPBill A
-	INNER JOIN @ids ids ON A.intBillId = ids.intId
 
 	IF @transCount = 0 COMMIT TRANSACTION
 	END TRY

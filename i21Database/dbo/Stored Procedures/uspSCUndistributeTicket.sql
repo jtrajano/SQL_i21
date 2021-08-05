@@ -92,8 +92,23 @@ DECLARE @intInventoryShipmentItemUsed INT
 DECLARE @intInventoryReceiptItemUsed INT
 DECLARE @intShipmentReceiptItemId INT
 DECLARE @_intStorageHistoryId INT
+DECLARE @intTicketStorageScheduleTypeId INT
+DECLARE @intTicketAGWorkOrderId INT
+DECLARE @dblTicketNetUnits NUMERIC(18,6)
+DECLARE @intTicketItemId INT
+DECLARE @dblAGWorkOrderReserveQuantity NUMERIC(38,20)
+DECLARE @strTicketNumber NVARCHAR(50)
+DECLARE @_strAuditDescription NVARCHAR(500)
+
+DECLARE @ItemReservationTableType AS ItemReservationTableType
 
 BEGIN TRY
+		-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+		BEGIN
+			DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+			EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+		END
+		
 		SELECT TOP 1
 			@intTicketItemUOMId = SC.intItemUOMIdTo
 			,@strDistributionOption = SC.strDistributionOption
@@ -102,6 +117,11 @@ BEGIN TRY
 			,@ysnTicketHasSpecialDiscount = ysnHasSpecialDiscount
 			,@intTicketLoadDetailId = intLoadDetailId
 			,@intTicketEntityId = intEntityId
+			,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
+			,@intTicketAGWorkOrderId = intAGWorkOrderId
+			,@dblTicketNetUnits = dblNetUnits
+			,@intTicketItemId = intItemId
+			,@strTicketNumber = strTicketNumber
 		FROM tblSCTicket SC
 		WHERE intTicketId = @intTicketId
 
@@ -168,7 +188,8 @@ BEGIN TRY
 							SET @strXml = '<root><intSettleStorageId>'+  CAST(@intSettleStorageId as nvarchar(20)) + '</intSettleStorageId>
 							<intEntityUserSecurityId>' + CAST(@intUserId as nvarchar(20)) + '</intEntityUserSecurityId></root>';
 
-							EXEC [dbo].[uspGRUnPostSettleStorage] @strXml;
+							--EXEC [dbo].[uspGRUnPostSettleStorage] @strXml;
+							EXEC [dbo].[uspGRUnPostSettleStorage] @intSettleStorageId, @intUserId
 
 							FETCH NEXT FROM settleStorageCursor INTO @intSettleStorageId;
 						END
@@ -571,7 +592,7 @@ BEGIN TRY
                         end
 
 						UPDATE tblSCTicket
-						SET ysnSpecialGradePosted = 0
+						SET ysnSpecialGradePosted = 0, dtmDateModifiedUtc = GETUTCDATE()
 						WHERE intTicketId = @intTicketId
 					END
 					ELSE
@@ -653,7 +674,7 @@ BEGIN TRY
 									EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
 							END
 
-							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+							UPDATE tblSCTicket SET intMatchTicketId = null, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 							DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 							DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 						END
@@ -675,7 +696,7 @@ BEGIN TRY
 								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 							END
-						UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
+						UPDATE tblSCTicket SET intMatchTicketId = null, dtmDateModifiedUtc = GETUTCDATE() WHERE intTicketId = @intTicketId
 						DELETE FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
 						DELETE FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 
@@ -1237,7 +1258,7 @@ BEGIN TRY
 							DEALLOCATE intListCursor 
 
 							UPDATE tblSCTicket
-							SET intInventoryShipmentId = NULL
+							SET intInventoryShipmentId = NULL, dtmDateModifiedUtc = GETUTCDATE()
 							WHERE intTicketId = @intTicketId
 
 							EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
@@ -1280,6 +1301,28 @@ BEGIN TRY
 								END
 							END
 
+						END
+
+						---WORK ORDER
+						IF(@intTicketStorageScheduleTypeId = -9)
+						BEGIN
+							--Update Work order Shipped Quantity for the Ticket Item
+							SELECT TOP 1
+								@dblAGWorkOrderReserveQuantity = CASE WHEN (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits) < 0 THEN 0 ELSE (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits)  END
+							FROM tblAGWorkOrderDetail
+							WHERE intWorkOrderId = @intTicketAGWorkOrderId
+								AND intItemId = @intTicketItemId
+
+							IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) > 0)
+							BEGIN
+								SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
+								SET @_strAuditDescription = 'Undistribution of Ticket - ' +  @strTicketNumber
+								EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intTicketItemId, @dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
+							END
+							
+
+							--Update Work Order reservation
+							EXEC [uspSCUpdateAGWorkOrderItemReservation] @intTicketAGWorkOrderId, @intTicketId,@intTicketItemId, 0
 						END
 					END
 				END
@@ -1501,6 +1544,11 @@ BEGIN TRY
 
 				exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId, @ysnUndistribute = 1
 		END
+
+		-- Update the DWG OriginalNetUnits, used for tracking the original units upon distribution
+		UPDATE tblSCTicket
+		SET dblDWGOriginalNetUnits = 0
+		WHERE intTicketId = @intTicketId
 
 		--Audit Log
 		EXEC dbo.uspSMAuditLog 

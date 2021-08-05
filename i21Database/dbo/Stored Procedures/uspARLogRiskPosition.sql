@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARLogRiskPosition]
 	  @tblInvoiceId		InvoiceId READONLY
 	, @intUserId		INT
+    , @Post             BIT = 0
 AS
  
 SET QUOTED_IDENTIFIER OFF
@@ -11,7 +12,6 @@ SET ANSI_WARNINGS OFF
  
 BEGIN
     DECLARE @tblSummaryLog          AS RKSummaryLog
-    DECLARE @tblContractBalanceLog  AS CTContractBalanceLog
     
     INSERT INTO @tblSummaryLog (
           strBatchId 
@@ -47,7 +47,7 @@ BEGIN
         , intCurrencyId
     )
     --INVOICE HEADER ADD/DELETE 
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -94,7 +94,7 @@ BEGIN
     UNION ALL
 
     --ADD LINE ITEM 
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -133,16 +133,18 @@ BEGIN
     INNER JOIN tblICCommodityUnitMeasure ICUM ON ICUM.intCommodityId = ITEM.intCommodityId AND ICUM.intUnitMeasureId = IUOM.intUnitMeasureId 
     LEFT JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
     INNER JOIN tblARTransactionDetail TD ON I.intInvoiceId = TD.intTransactionId AND I.strTransactionType = TD.strTransactionType
+    INNER JOIN tblICItem ITEM2 ON TD.intItemId = ITEM2.intItemId
     WHERE ID.intItemId IS NOT NULL
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail TDD WHERE I.intInvoiceId = TDD.intTransactionId AND ID.intInvoiceDetailId = TDD.intTransactionDetailId AND I.strTransactionType = TDD.strTransactionType) 
       AND ITEM.strType != 'Other Charge'
+      AND ITEM2.strType != 'Other Charge'
 
     UNION ALL
 
     --DELETE LINE ITEM
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = TD.intTransactionDetailId
@@ -181,16 +183,18 @@ BEGIN
     INNER JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = TD.intItemUOMId
     INNER JOIN tblICCommodityUnitMeasure ICUM ON ICUM.intCommodityId = ITEM.intCommodityId AND ICUM.intUnitMeasureId = IUOM.intUnitMeasureId 
     LEFT JOIN tblCTContractDetail CTD ON TD.intContractDetailId = CTD.intContractDetailId
+    INNER JOIN tblICItem ITEM2 ON TD.intItemId = ITEM2.intItemId
     WHERE TD.intItemId IS NOT NULL
       AND TD.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       --AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.intInvoiceDetailId IS NULL
       AND ITEM.strType != 'Other Charge'
+      AND ITEM2.strType != 'Other Charge'
 
     UNION ALL
 
     --UPDATE LINE ITEM (RETURN ORGINAL QTY)
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -238,7 +242,7 @@ BEGIN
     UNION ALL
 
     --UPDATE LINE ITEM (DEDUCT ACTUAL QTY)
-    SELECT strBatchId				            = II.strBatchId
+    SELECT DISTINCT strBatchId				            = II.strBatchId
         , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
         , intTransactionRecordId		    = ID.intInvoiceDetailId
@@ -283,107 +287,73 @@ BEGIN
       AND ID.dblQtyShipped <> TD.dblQtyShipped
       AND ITEM.strType != 'Other Charge'
 
-    --DELETE FROM PRICING
+    --POST/UNPOST DWG
+    DELETE FROM SL
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
+    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1   
+
+    --DELETE IF RETURN
     DELETE SL
     FROM @tblSummaryLog SL
     INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
-    INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
-    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
-      AND dblQty > 0
-
-    --DWG
-    UPDATE SL
-    SET dblQty    = 0
-      , strNotes  = 'Invoiced Quantity is ' + CONVERT(VARCHAR, CAST(dblQty * -1 AS MONEY), 1)
-    FROM @tblSummaryLog SL
-    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
-    INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
-    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
-      AND dblQty < 0   
-
-    --CONTRACT BALANCE LOG
-    INSERT INTO @tblContractBalanceLog (
-          strTransactionType
-        , strTransactionReference
-        , dtmTransactionDate
-        , dtmStartDate
-        , dtmEndDate
-		    , intContractHeaderId
-		    , intContractDetailId
-	    	, strContractNumber
-	    	, intContractSeq
-		    , intContractTypeId
-	    	, intContractStatusId
-		    , intCommodityId
-	    	, intItemId
-		    , intEntityId
-		    , intLocationId
-        , intBookId
-        , intSubBookId
-		    , dblQty
-        , dblBasis
-        , dblFutures
-		    , intQtyUOMId
-        , intBasisUOMId
-        , intBasisCurrencyId
-        , intPriceUOMId
-		    , intPricingTypeId		
-		    , intTransactionReferenceId
-			  , intTransactionReferenceDetailId
-	    	, strTransactionReferenceNo
-	    	, intFutureMarketId
-	    	, intFutureMonthId
-	    	, intUserId        
-        , intActionId
-        , strNotes
-    )
-    SELECT strTransactionType	      = 'Sales Basis Deliveries'
-        , strTransactionReference   = SL.strTransactionType
-        , dtmTransactionDate	      = SL.dtmTransactionDate
-        , dtmStartDate              = CD.dtmStartDate
-        , dtmEndDate                = CD.dtmEndDate
-		    , intContractHeaderId	      = SL.intContractHeaderId
-	    	, intContractDetailId	      = SL.intContractDetailId
-	    	, strContractNumber	        = CH.strContractNumber
-	    	, intContractSeq		        = CD.intContractSeq
-	    	, intContractTypeId	        = CH.intContractTypeId
-	    	, intContractStatusId	      = CD.intContractStatusId
-	    	, intCommodityId		        = SL.intCommodityId
-	    	, intItemId			            = SL.intItemId
-	    	, intEntityId			          = SL.intEntityId
-		    , intLocationId		          = SL.intLocationId
-        , intBookId                 = SL.intBookId
-        , intSubBookId              = SL.intSubBookId
-		    , dblQty				            = SL.dblQty
-        , dblBasis                  = CD.dblBasis
-        , dblFutures                = CD.dblFutures
-		    , intQtyUOMId			          = SL.intCommodityUOMId
-        , intBasisUOMId             = CD.intBasisUOMId
-        , intBasisCurrencyId        = CD.intBasisCurrencyId
-        , intPriceUOMId             = SL.intCommodityUOMId
-		    , intPricingTypeId		      = CD.intPricingTypeId		
-		    , intTransactionReferenceId = SL.intTransactionRecordHeaderId
-			  , intTransactionReferenceDetailId = SL.intTransactionRecordId
-		    , strTransactionReferenceNo = SL.strTransactionNumber
-		    , intFutureMarketId	        = SL.intFutureMarketId
-		    , intFutureMonthId		      = SL.intFutureMonthId
-		    , intUserId			            = SL.intUserId
-        , intActionId					      = SL.intActionId
-        , strNotes                  = SL.strNotes
-  FROM @tblSummaryLog SL
-	INNER JOIN tblCTContractHeader CH ON SL.intContractHeaderId = CH.intContractHeaderId
-	INNEr JOIN tblCTContractDetail CD ON SL.intContractDetailId = CD.intContractDetailId
-	WHERE SL.intContractDetailId IS NOT NULL
-	  AND SL.strTransactionType = 'Invoice'
-    AND CH.intPricingTypeId = 2
+    INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
+      CROSS APPLY (
+        SELECT TOP 1 intInvoiceId 
+        FROM tblARInvoice I
+        WHERE I.strTransactionType = 'Invoice'
+          AND I.ysnReturned = 1
+          AND INV.strInvoiceOriginId = I.strInvoiceNumber
+          AND INV.intOriginalInvoiceId = I.intInvoiceId
+      ) RI
+    WHERE SL.strTransactionType = 'Credit Memo' AND @Post=0
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
-        BEGIN
-            EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
-        END
+    BEGIN
+        EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
+    END
 
-    IF EXISTS (SELECT TOP 1 NULL FROM @tblContractBalanceLog)
-        BEGIN
-            EXEC dbo.uspCTLogContractBalance @tblContractBalanceLog, 0
-        END
+    --DONT LOG ON CONTRACT BALANCE IF INVOICE POSTING
+    DELETE SL
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
+    WHERE INV.strTransactionType = 'Invoice' AND @Post = 1
+
+    --CONTRACT BALANCE LOG  
+    WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)  
+    BEGIN  
+        DECLARE @intId                INT = NULL  
+              , @intContractHeaderId  INT = NULL  
+              , @intContractDetailId  INT = NULL       
+              , @intTransactionId     INT = NULL  
+              , @dblTransactionQty    NUMERIC(24, 10) = 0  
+              , @strSource            NVARCHAR(20) = NULL  
+              , @strProcess           NVARCHAR(50) = NULL  
+  
+        SELECT TOP 1 @intId    = intId  
+                , @intContractHeaderId = intContractHeaderId  
+                , @intContractDetailId = intContractDetailId  
+                , @intTransactionId  = intTransactionRecordId  
+                , @dblTransactionQty = dblQty  
+                , @strSource   = 'Inventory'  
+                , @strProcess   = CASE WHEN dblQty > 0 
+                                       THEN CASE WHEN strTransactionType <> 'Credit Memo' THEN 'Delete Invoice' ELSE 'Create Credit Memo' END
+                                       ELSE CASE WHEN strTransactionType <> 'Credit Memo' THEN 'Create Invoice' ELSE 'Delete Credit Memo' END
+                                  END  
+        FROM @tblSummaryLog  
+  
+        DECLARE @contractDetailList AS ContractDetailTable  
+        EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId  
+                                , @intContractDetailId = @intContractDetailId  
+                                , @strSource   = @strSource  
+                                , @strProcess   = @strProcess  
+                                , @contractDetail  = @contractDetailList  
+                                , @intUserId   = @intUserId  
+                                , @intTransactionId  = @intTransactionId  
+                                , @dblTransactionQty = @dblTransactionQty  
+  
+        DELETE FROM @tblSummaryLog WHERE intId = @intId  
+    END  
 END

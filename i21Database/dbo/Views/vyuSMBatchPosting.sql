@@ -18,7 +18,7 @@ FROM
 (
 	SELECT Journal.strJournalType as strTransactionType, Journal.intJournalId, Journal.strJournalId, Total.dblDebit as dblAmount, '' as strVendorInvoiceNumber, null as intEntityVendorId, Journal.intEntityId, Journal.dtmDate, Journal.strDescription, NULL AS intCompanyLocationId
 	FROM tblGLJournal Journal CROSS APPLY(SELECT SUM(dblDebit) dblDebit FROM tblGLJournalDetail Detail WHERE Detail.intJournalId = Journal.intJournalId) Total 
-	WHERE Journal.strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal', 'Reversal Journal') AND Journal.strTransactionType <> 'Recurring' AND Journal.ysnPosted = 0
+	WHERE Journal.strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal', 'Reversal Journal', 'CSV Journal') AND Journal.strTransactionType <> 'Recurring' AND Journal.ysnPosted = 0
 	UNION ALL
 	SELECT strTransactionType, intBillId, strBillId, dblTotal, strVendorOrderNumber, intEntityVendorId, intEntityId, dtmDate, strReference, intCompanyLocationId FROM vyuAPBatchPostTransaction
 	UNION ALL
@@ -37,6 +37,10 @@ FROM
 	SELECT TR.strTransactionType, TR.intTransactionId, TR.strTransactionId, TR.dblAmount, TR.strVendorInvoiceNumber, TR.intEntityVendorId, TR.intEntityId, TR.dtmDate, TR.strDescription, TR.intCompanyLocationId FROM vyuTRLoadBatchPostList TR WHERE TR.ysnPosted = 0
 	UNION ALL
 	SELECT vrpa.strTransactionType, vrpa.intTransactionId, vrpa.strTransactionId, vrpa.dblAmount, vrpa.strVendorInvoiceNumber, vrpa.intEntityVendorId, vrpa.intEntityId, vrpa.dtmDate, vrpa.strDescription, vrpa.intCompanyLocationId FROM vyuSTBatchPostingRetailPriceAdjustment vrpa WHERE vrpa.ysnPosted = 0
+	UNION ALL
+	SELECT 'Mobile Billing', intInvoiceId, strInvoiceNo, dblTotal, '' AS strVendorInvoiceNumber, intEntityCustomerId AS intEntityVendorId, intEntityCustomerId, dtmInvoiceDate, strComments, intLocationId AS intCompanyLocationId FROM vyuMBILInvoice WHERE ISNULL(ysnPosted, 0) = 0
+	UNION ALL
+	SELECT 'Mobile Billing', intPaymentId, strPaymentNo, dblPayment, '' AS strVendorInvoiceNumber, intEntityCustomerId AS intEntityVendorId, intEntityCustomerId, dtmDatePaid, strComments, intLocationId AS intCompanyLocationId FROM vyuMBILPayment WHERE ISNULL(ysnPosted, 0) = 0
 ) BatchPosting
 LEFT JOIN tblEMEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
 LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.[intEntityId]

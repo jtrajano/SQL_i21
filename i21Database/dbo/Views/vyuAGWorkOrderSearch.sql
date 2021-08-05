@@ -3,7 +3,8 @@ AS
 (
 	SELECT WO.intWorkOrderId
 	 ,WO.strOrderNumber
-	 ,WO.strType AS 'strCrop'
+	 ,CROP.strCrop
+	 --,WO.strType AS 'strCrop'
 	, FARMLOCATION.strLocationName AS 'strFarmField'
 	 ,TARGET.strTargetName
 	, SALESREP.strName as 'strSalesperson'
@@ -15,10 +16,11 @@ AS
 	, CUSTOMER.strCustomerNumber
 	, WO.intOrderedById
 	, WO.dtmApplyDate
-	, WO.intEntityLocationId
+	, WO.intCompanyLocationId
 	, LOCATION.strLocationName
 	, ENTITY.strName AS 'strOrderedBy'
 	, WO.strStatus
+	, APPLICATOR.strName AS 'strApplicator'
 	FROM tblAGWorkOrder WO
 	LEFT JOIN (
 		SELECT 
@@ -28,10 +30,10 @@ AS
 	) CUSTOMER on CUSTOMER.intEntityId = WO.intEntityCustomerId
 	LEFT JOIN (
 		SELECT 
-		intEntityLocationId,
+		intCompanyLocationId,
 		strLocationName
-		FROM tblEMEntityLocation  WITH(NOLOCK)  
-	) LOCATION ON LOCATION.intEntityLocationId = WO.intEntityLocationId
+		FROM tblSMCompanyLocation  WITH(NOLOCK)  
+	) LOCATION ON LOCATION.intCompanyLocationId = WO.intCompanyLocationId
    LEFT JOIN (
 	   SELECT 
 	   intEntityId,
@@ -59,5 +61,17 @@ AS
 		  intSplitId,      
 		  strSplitNumber      
 	 FROM tblEMEntitySplit WITH(NOLOCK)        
- ) SPLIT ON SPLIT.intSplitId = WO.intSplitId   
+ ) SPLIT ON SPLIT.intSplitId = WO.intSplitId
+ LEFT JOIN (
+	 SELECT
+	 	intCropId,
+		 strCrop
+	FROM tblAGCrop WITH(NOLOCK)
+ ) CROP ON CROP.intCropId = WO.intCropId
+ LEFT JOIN (
+	SELECT 
+		intEntityId,
+		strName
+	FROM tblEMEntity WITH(NOLOCK)
+ )  APPLICATOR ON APPLICATOR.intEntityId = WO.intEntityApplicatorId
 )

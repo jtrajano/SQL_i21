@@ -213,7 +213,8 @@ SELECT
 	,B.strContactName
 	,B.strContactPhone
 	,B.strContactEmail
-FROM tblSMCompanySetup A,
+FROM tblSMCompanySetup A
+inner join 
 (
 	SELECT 
 		*
@@ -234,8 +235,8 @@ FROM tblSMCompanySetup A,
 	SELECT 
 		*
 	FROM DIV1099 WHERE 1 = (CASE WHEN @form1099Param = 0 OR @form1099Param = 5 THEN 1 ELSE 0 END)
-) Data1099
-,tblAP1099Threshold B
+) Data1099 on 1=1
+inner join tblAP1099Threshold B on 1=1
 GROUP BY intYear
 ,strEin  
 ,strAddress  

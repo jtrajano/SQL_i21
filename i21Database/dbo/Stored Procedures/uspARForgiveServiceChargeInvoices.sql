@@ -19,7 +19,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 			  , @strErrorMsg					NVARCHAR(MAX)
 			  , @strCreatedCreditMemo			NVARCHAR(MAX)
 			  , @strCreatedInvoices				NVARCHAR(MAX)
-			  , @dtmDateToday 					DATETIME = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+			  , @dtmDateToday 					DATETIME 
 			  , @strBatchId 					VARCHAR(16)
 		
 		--GET BATCH NUMBER
@@ -29,6 +29,8 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 		BEGIN
 			DROP TABLE #SERVICECHARGETOFORGIVE
 		END
+
+		SELECT  @dtmDateToday = DV.dtmToday FROM @ServiceChargeParam DV
 
 		--GET SERVICE CHARGES TO FORGIVE
 		SELECT intInvoiceId		= SCI.intInvoiceId
@@ -139,7 +141,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 						, intCompanyLocationId		= INV.intCompanyLocationId
 						, intCurrencyId				= INV.intCurrencyId
 						, intTermId					= INV.intTermId
-						, dtmDate					= @dtmDateToday
+						, dtmDate					= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, dtmPostDate				= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, dtmShipDate				= @dtmDateToday
 						, intEntitySalespersonId	= INV.intEntitySalespersonId

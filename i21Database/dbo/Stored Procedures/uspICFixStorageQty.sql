@@ -13,6 +13,80 @@ SET dblUnitStorage = 0
 UPDATE tblICItemStockUOM
 SET dblUnitStorage = 0 
 
+-----------------------------------
+-- Update the Item Stock table
+-----------------------------------
+BEGIN 
+	MERGE	
+	INTO	dbo.tblICItemStock 
+	WITH	(HOLDLOCK) 
+	AS		ItemStock	
+	USING (
+		SELECT	
+			ItemTransactionStorage.intItemId
+			,stockUOM.intItemUOMId
+			,ItemTransactionStorage.intItemLocationId
+			,Qty = SUM(
+					dbo.fnCalculateQtyBetweenUOM(
+						ItemTransactionStorage.intItemUOMId
+						,stockUOM.intItemUOMId 
+						,ItemTransactionStorage.dblQty	
+					)				
+				)
+		FROM 
+			tblICInventoryTransactionStorage ItemTransactionStorage 
+			INNER JOIN tblICItemUOM ItemUOM
+				ON ItemTransactionStorage.intItemUOMId = ItemUOM.intItemUOMId
+			CROSS APPLY (
+				SELECT TOP 1 
+					stockUOM.intItemUOMId
+				FROM 
+					tblICItemUOM stockUOM
+				WHERE
+					stockUOM.intItemId = ItemTransactionStorage.intItemId
+					AND stockUOM.ysnStockUnit = 1
+			) stockUOM
+				
+		GROUP BY 
+			ItemTransactionStorage.intItemId
+			,stockUOM.intItemUOMId
+			,ItemTransactionStorage.intItemLocationId
+	) AS StockToUpdate
+		ON ItemStock.intItemId = StockToUpdate.intItemId
+		AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
+
+	-- If matched, update the unit on hand qty. 
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET		dblUnitStorage = ISNULL(ItemStock.dblUnitStorage, 0) + StockToUpdate.Qty
+
+	-- If none found, insert a new item stock record
+	WHEN NOT MATCHED THEN 
+		INSERT (
+			intItemId
+			,intItemLocationId
+			,dblUnitStorage
+			,dblUnitOnHand
+			,dblOrderCommitted
+			,dblOnOrder
+			,dblLastCountRetail
+			,intSort
+			,intConcurrencyId
+		)
+		VALUES (
+			StockToUpdate.intItemId
+			,StockToUpdate.intItemLocationId
+			,StockToUpdate.Qty -- dblUnitStorage
+			,0 
+			,0
+			,0
+			,0
+			,NULL 
+			,1	
+		)
+	;
+END	
+
 BEGIN 
 	BEGIN 
 		MERGE INTO dbo.tblICItemStockUOM 
@@ -24,12 +98,30 @@ BEGIN
 						,ItemTransactionStorage.intItemLocationId
 						,ItemTransactionStorage.intSubLocationId
 						,ItemTransactionStorage.intStorageLocationId
-						,Qty = SUM(ItemTransactionStorage.dblQty)
-				FROM dbo.tblICInventoryTransactionStorage ItemTransactionStorage 
-				INNER JOIN dbo.tblICItemUOM ItemUOM
-					ON ItemTransactionStorage.intItemUOMId = ItemUOM.intItemUOMId
-				WHERE ItemTransactionStorage.intLotId IS NULL 
-				GROUP BY ItemTransactionStorage.intItemId
+						,Qty = SUM(
+								dbo.fnCalculateQtyBetweenUOM(
+									ItemTransactionStorage.intItemUOMId
+									,stockUOM.intItemUOMId 
+									,ItemTransactionStorage.dblQty	
+								)				
+							)
+				FROM 
+					tblICInventoryTransactionStorage ItemTransactionStorage 
+					INNER JOIN tblICItemUOM ItemUOM
+						ON ItemTransactionStorage.intItemUOMId = ItemUOM.intItemUOMId
+					OUTER APPLY (
+						SELECT TOP 1 
+							stockUOM.intItemUOMId
+						FROM 
+							tblICItemUOM stockUOM
+						WHERE
+							stockUOM.intItemId = ItemTransactionStorage.intItemId
+							AND stockUOM.ysnStockUnit = 1
+					) stockUOM
+				WHERE 
+					ItemTransactionStorage.intLotId IS NULL 
+				GROUP BY 
+					ItemTransactionStorage.intItemId
 					,ItemTransactionStorage.intItemUOMId
 					,ItemTransactionStorage.intItemLocationId
 					,ItemTransactionStorage.intSubLocationId

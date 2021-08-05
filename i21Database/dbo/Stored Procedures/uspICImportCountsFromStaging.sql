@@ -20,7 +20,7 @@ DECLARE @dtmCountDate DATETIME
 DECLARE @ysnCountByLots BIT
 DECLARE @intCountId INT
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT, intLinePosition INT, strLogLevel NVARCHAR(50))
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 -- Log Invalid company locations
 INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
@@ -44,8 +44,8 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber 76, @strCountNo OUTPUT, @intLocationId
 	SET @I = @I + 1
-	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated, strDataSource)
-	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE(), @type)
+	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated, strDataSource, guiApiUniqueId)
+	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE(), @type, @identifier)
 
 	SET @intCountId = SCOPE_IDENTITY()
 
@@ -86,7 +86,7 @@ BEGIN
 		AND il.ysnActive = 1
 
 	UPDATE tblICInventoryCount
-	SET strCountNo = @strCountNo
+	SET strCountNo = @strCountNo, guiApiUniqueId = @identifier
 	WHERE intInventoryCountId = @intCountId
 
 	INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)

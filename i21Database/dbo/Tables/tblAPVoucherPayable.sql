@@ -37,6 +37,8 @@
 	[intLoadShipmentId]				INT NULL,
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
+	[intWeightClaimId]				INT NULL,
+	[intWeightClaimDetailId]		INT NULL,
 	[intCustomerStorageId]			INT NULL,
 	[intSettleStorageId]			INT NULL,
 	[intTicketId]					INT NULL,
@@ -124,6 +126,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
     ON [dbo].[tblAPVoucherPayable](intEntityVendorId
 								,intPurchaseDetailId
 								,intContractDetailId
+								,intContractCostId
 								,intScaleTicketId
 								,intInventoryReceiptChargeId
 								,intInventoryReceiptItemId
@@ -133,6 +136,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
 								,intSettleStorageId
 								,intLoadShipmentCostId
 								,intLoadShipmentDetailId
+								,intWeightClaimDetailId
 								,intItemId DESC);
 -- GO
 -- CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_intPurchaseDetailId]
@@ -163,6 +167,7 @@ INCLUDE (
 	,intInventoryShipmentChargeId
 	,intLoadShipmentDetailId
 	,intLoadShipmentCostId
+	,intWeightClaimDetailId
 	,intEntityVendorId
 	,intCustomerStorageId
 	,intSettleStorageId

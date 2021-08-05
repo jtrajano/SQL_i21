@@ -170,5 +170,5 @@ BEGIN
 					END
 				)
 		) t
-	ORDER BY 4
+	ORDER BY strLotCode
 END

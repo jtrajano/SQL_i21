@@ -47,8 +47,32 @@ FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
 
+DECLARE @tblInvoiceIds InvoiceId
+DELETE FROM @tblInvoiceIds
+
+--FILTERED BY ALL
+INSERT INTO @tblInvoiceIds (intHeaderId)
+SELECT intInvoiceId
+FROM tblARInvoice ARI WITH (NOLOCK)
+WHERE ARI.ysnPosted = 0
+  AND UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) = 'ALL'
+  AND (UPPER(@TransType) = 'ALL' OR ARI.[strTransactionType] = @TransType)
+  AND (@BeginDate IS NULL OR ARI.dtmDate >= @BeginDate)
+  AND (@EndDate IS NULL OR ARI.dtmDate <= @EndDate)
+  AND (@BeginTransaction IS NULL OR ARI.intInvoiceId >= @BeginTransaction)
+  AND (@EndTransaction IS NULL OR ARI.intInvoiceId >= @EndTransaction)
+
+--FILTERED BY PARAM
+IF UPPER(RTRIM(LTRIM(ISNULL(@Param,'')))) <> 'ALL' AND RTRIM(LTRIM(ISNULL(@Param,''))) <> '' 
+	BEGIN
+		INSERT INTO @tblInvoiceIds (intHeaderId)
+		SELECT intInvoiceId
+		FROM tblARInvoice ARI WITH (NOLOCK)
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@Param) DV ON DV.[intID] = ARI.[intInvoiceId]  		 		  
+	END
+
 --Header
-INSERT #ARPostInvoiceHeader
+INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -198,7 +222,13 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+    ,[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]
+    ,[intInterCompanyId]
+    ,[strReceiptNumber]
+    ,[ysnInterCompany]
+    ,[intInterCompanyVendorId])
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -353,45 +383,28 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
-    
+    ,[strInterCompanyVendorId]          = ARC.[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]        = ARC.[strInterCompanyLocationId]
+    ,[intInterCompanyId]                = ARC.[intInterCompanyId]
+    ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
+    ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
+    ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 FROM tblARInvoice ARI
+INNER JOIN @tblInvoiceIds ID ON ARI.intInvoiceId = ID.intHeaderId
 INNER JOIN (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH(NoLock)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit], [strInterCompanyVendorId], [strInterCompanyLocationId], [intInterCompanyId], [intInterCompanyVendorId] FROM tblARCustomer C WITH(NoLock)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
 ) ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
-LEFT OUTER JOIN (
+INNER JOIN (
     SELECT [intCompanyLocationId], [strLocationName], [intUndepositedFundsId], [intAPAccount], [intFreightIncome], [intProfitCenter], [intSalesAccount], [intSalesDiscounts] FROM tblSMCompanyLocation  WITH(NoLock)
 ) SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN (
     SELECT [intTransactionId] FROM vyuARForApprovalTransction  WITH (NOLOCK) WHERE [strScreenName] = 'Invoice'
 ) FAT ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 WHERE
-	NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])
-    AND (
-            (
-				RTRIM(LTRIM(ISNULL(@Param,''))) <> ''
-				AND
-				(
-					(UPPER(@Param) = 'ALL' AND ARI.[ysnPosted] = 0 AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all'))
-					OR
-					(UPPER(@Param) <> 'ALL' AND EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@Param2) DV WHERE DV.[intID] = ARI.[intInvoiceId]))
-				)
-            )
-			OR
-            (
-				@BeginDate IS NOT NULL
-				AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all')					
-				AND CAST(ARI.[dtmDate] AS DATE) BETWEEN CAST(@BeginDate AS DATE) AND CAST(@EndDate AS DATE)
-            )
-			OR
-            (
-				@BeginTransaction IS NOT NULL
-				AND (ARI.[strTransactionType] = @TransType OR @TransType = 'all')
-				AND ARI.[intInvoiceId] BETWEEN @BeginTransaction AND @EndTransaction
-            )
-        )
+	NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE IH.[intInvoiceId] = ARI.[intInvoiceId])    
 
-INSERT #ARPostInvoiceHeader
+INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -541,7 +554,13 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+    ,[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]
+    ,[intInterCompanyId]
+    ,[strReceiptNumber]
+    ,[ysnInterCompany]
+    ,[intInterCompanyVendorId])
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -696,13 +715,18 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
-    
+    ,[strInterCompanyVendorId]          = ARC.[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]        = ARC.[strInterCompanyLocationId]
+    ,[intInterCompanyId]                = ARC.[intInterCompanyId]
+    ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
+    ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
+    ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 FROM
     (
     SELECT LD.[intInvoiceId], LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM tblARInvoiceIntegrationLogDetail LD
     WHERE 
         LD.[intIntegrationLogId] = @IntegrationLogId
-        AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE LD.[intInvoiceId] = IH.[intInvoiceId])
+        AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intInvoiceId] = IH.[intInvoiceId])
         AND LD.[ysnHeader] = 1
 		AND ISNULL(LD.[ysnPosted],0) <> @Post
         AND LD.[ysnPost] = @Post
@@ -712,7 +736,7 @@ INNER JOIN
         ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit], [strInterCompanyVendorId], [strInterCompanyLocationId], [intInterCompanyId], [intInterCompanyVendorId] FROM tblARCustomer C WITH (NOLOCK)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
     ) ARC
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -727,7 +751,7 @@ LEFT OUTER JOIN
     ) FAT
         ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 
-INSERT #ARPostInvoiceHeader
+INSERT ##ARPostInvoiceHeader
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -877,7 +901,13 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+    ,[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]
+    ,[intInterCompanyId]
+    ,[strReceiptNumber]
+    ,[ysnInterCompany]
+    ,[intInterCompanyVendorId])
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -1032,12 +1062,17 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName , '')
                                             END		
-    
+    ,[strInterCompanyVendorId]          = ARC.[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]        = ARC.[strInterCompanyLocationId]
+    ,[intInterCompanyId]                = ARC.[intInterCompanyId]
+    ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
+    ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
+    ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 FROM
     (
     SELECT LD.[intHeaderId] AS 'intInvoiceId', LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM @InvoiceIds LD
     WHERE 
-        NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader IH WHERE LD.[intHeaderId] = IH.[intInvoiceId])
+        NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader IH WHERE LD.[intHeaderId] = IH.[intInvoiceId])
 		AND LD.[ysnPost] IS NOT NULL 
         AND LD.[ysnPost] = @Post
     ) ARILD
@@ -1046,7 +1081,7 @@ INNER JOIN
         ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit], [strInterCompanyVendorId], [strInterCompanyLocationId], [intInterCompanyId], [intInterCompanyVendorId] FROM tblARCustomer C WITH (NOLOCK)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
     ) ARC
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -1062,7 +1097,7 @@ LEFT OUTER JOIN
         ON ARI.[intInvoiceId] = FAT.[intTransactionId]
 
 --Detail
-INSERT #ARPostInvoiceDetail
+INSERT ##ARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1365,45 +1400,28 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
-    
-FROM #ARPostInvoiceHeader ARI
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-INNER JOIN (
-    SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NOLOCK)
-) ICI ON ARID.[intItemId] = ICI.[intItemId]
+INNER JOIN tblICItem ICI WITH(NOLOCK) ON ARID.[intItemId] = ICI.[intItemId]
+LEFT OUTER JOIN tblICCategory ICC WITH(NOLOCK) ON ICI.[intCategoryId] = ICC.[intCategoryId]
+INNER JOIN tblICItemLocation ICIL WITH(NOLOCK) ON ICI.[intItemId] = ICIL.[intItemId] AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
+LEFT OUTER JOIN tblICItemPricing ICIP WITH(NOLOCK) ON ICI.[intItemId] = ICIP.[intItemId] AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
+LEFT OUTER JOIN tblICItemUOM ICIU WITH(NOLOCK) ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
 LEFT OUTER JOIN (
-    SELECT [intCategoryId], [ysnRetailValuation] FROM tblICCategory WITH(NOLOCK)
-) ICC ON ICI.[intCategoryId] = ICC.[intCategoryId]
-INNER JOIN (
-    SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
-) ICIL ON ICI.[intItemId] = ICIL.[intItemId]
-      AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
-LEFT OUTER JOIN (
-    SELECT [intItemId], [intItemLocationId], [dblLastCost] FROM tblICItemPricing  WITH(NOLOCK)
-) ICIP ON ICI.[intItemId] = ICIP.[intItemId]
-      AND ICIL.[intItemLocationId] = ICIP.[intItemLocationId]
-LEFT OUTER JOIN (
-    SELECT [intItemId], [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH(NOLOCK)
-) ICIU ON ARID.[intItemUOMId] = ICIU.[intItemUOMId]
-OUTER APPLY (
-    SELECT TOP 1 [intItemId]
-               , [intItemUOMId] 
+    SELECT [intItemId]
+         , intItemUOMId	= MIN([intItemUOMId])
     FROM tblICItemUOM IUOM WITH(NOLOCK) 
     WHERE [ysnStockUnit] = 1
-      AND ICI.[intItemId] = IUOM.[intItemId]
-) ICSUOM 
-LEFT OUTER JOIN (
-    SELECT [intItemId], [intItemLocationId], [dblUnitOnHand] FROM tblICItemStock WITH(NOLOCK)
-) ICIS ON ICIL.[intItemId] = ICIS.[intItemId]
-      AND ICIL.[intItemLocationId] = ICIS.[intItemLocationId]
-LEFT OUTER JOIN (
-    SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NOLOCK)
-) SMCERT ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+	GROUP BY IUOM.[intItemId]
+) ICSUOM ON ICI.[intItemId] = ICSUOM.[intItemId]
+LEFT OUTER JOIN tblICItemStock ICIS WITH(NOLOCK) ON ICIL.[intItemId] = ICIS.[intItemId] AND ICIL.[intItemLocationId] = ICIS.[intItemLocationId]
+LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH(NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
-WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 1
+WHERE ICI.strType IN ('Inventory', 'Finished Good', 'Raw Material')
+--WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 1
 
-INSERT #ARPostInvoiceDetail
+INSERT ##ARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -1765,7 +1783,7 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
-FROM #ARPostInvoiceHeader ARI
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN (
@@ -1789,9 +1807,10 @@ LEFT OUTER JOIN (
     SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
 ) SMCERT ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
-WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 0
+--WHERE [dbo].[fnARIsStockTrackingItem](ICI.[strType], ICI.[intItemId]) = 0
+WHERE ICI.strType NOT IN ('Inventory', 'Finished Good', 'Raw Material')
 
-INSERT #ARPostInvoiceDetail
+INSERT ##ARPostInvoiceDetail
     ([intInvoiceId]
     ,[strInvoiceNumber]
     ,[strTransactionType]
@@ -2085,12 +2104,10 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
-FROM #ARPostInvoiceHeader ARI
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
-LEFT OUTER JOIN (
-    SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType WITH(NoLock)
-) SMCERT ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
+LEFT OUTER JOIN tblSMCurrencyExchangeRateType SMCERT WITH(NOLOCK) ON ARID.[intCurrencyExchangeRateTypeId] = SMCERT.[intCurrencyExchangeRateTypeId]
 LEFT OUTER JOIN tblGLAccount GL ON ARID.intSalesAccountId = GL.intAccountId
 WHERE ARID.[intItemId] IS NULL
    OR ARID.[intItemId] = 0
@@ -2098,12 +2115,12 @@ WHERE ARID.[intItemId] IS NULL
 UPDATE ID
 SET dblTaxesAddToCost       = IDD.dblTaxesAddToCost
   , dblBaseTaxesAddToCost   = IDD.dblBaseTaxesAddToCost
-FROM #ARPostInvoiceDetail ID
+FROM ##ARPostInvoiceDetail ID
 INNER JOIN (
     SELECT dblTaxesAddToCost       = SUM(TAXES.dblTaxesAddToCost)
          , dblBaseTaxesAddToCost   = SUM(TAXES.dblBaseTaxesAddToCost)
          , intInvoiceDetailId      = ID.intInvoiceDetailId
-    FROM #ARPostInvoiceDetail ID
+    FROM ##ARPostInvoiceDetail ID
     CROSS APPLY (
         SELECT dblTaxesAddToCost        = ISNULL(dblAdjustedTax, 0)
             , dblBaseTaxesAddToCost     = ISNULL(dblBaseAdjustedTax, 0)

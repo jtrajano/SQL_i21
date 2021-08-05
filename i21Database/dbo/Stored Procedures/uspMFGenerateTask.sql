@@ -88,6 +88,8 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@strWorkOrderNo NVARCHAR(50)
 		,@intRequiredWeightUOMId int
+		,@strPickByStorageLocation NVARCHAR(50)
+		,@intSubLocationId int
 
 	SELECT @strOrderType = OT.strOrderType
 		,@strOrderNo = OH.strOrderNo
@@ -106,8 +108,30 @@ BEGIN TRY
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@strWorkOrderNo = strWorkOrderNo
+		,@intSubLocationId=intSubLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strPickByStorageLocation = ISNULL(pa.strAttributeValue, '')
+	FROM tblMFManufacturingProcessAttribute pa
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND pa.intAttributeId=123
+
+	DECLARE @tblSourceSubLocation AS TABLE (intSubLocationId INT)
+
+	IF IsNULL(@strPickByStorageLocation,'')='True'
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT @intSubLocationId 
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationId = @intLocationId
+	END
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -573,6 +597,7 @@ BEGIN TRY
 					AND BS.strPrimaryStatus = 'Active'
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+				JOIN @tblSourceSubLocation SubLoc on SubLoc.intSubLocationId =L.intSubLocationId 
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
 					AND IsNULL(L.intStorageLocationId, 0) = (
 						CASE 
@@ -742,6 +767,7 @@ BEGIN TRY
 				JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 				JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 				JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
+				JOIN @tblSourceSubLocation SubLoc on SubLoc.intSubLocationId =L.intSubLocationId 
 				WHERE L.intLocationId = IsNULL(@intLocationId, L.intLocationId)
 					AND IsNULL(L.intStorageLocationId, 0) = (
 						CASE 

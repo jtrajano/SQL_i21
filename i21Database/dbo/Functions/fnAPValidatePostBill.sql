@@ -548,10 +548,7 @@ BEGIN
 			SELECT SUM(dblTax) AS dblTaxTotal
 			FROM (
 				SELECT 
-					(ISNULL(B.dblAdjustedTax,0) 
-						* (CASE WHEN (D.intInventoryReceiptChargeId IS NOT NULL 
-										AND A.intEntityVendorId = D2.intEntityVendorId 
-										AND D.ysnPrice = 1) THEN -1 ELSE 1 END)) 
+					ISNULL(B.dblAdjustedTax,0)
 				AS dblTax
 				FROM tblAPBillDetailTax B
 				WHERE B.intBillDetailId = A2.intBillDetailId
@@ -564,6 +561,20 @@ BEGIN
 			A2.dblTax <> ISNULL(taxDetails.dblTaxTotal,0)
 		)
 
+		
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			ISNULL(C.strItemNo, A2.strMiscDescription) + ' has incorrect cost. Cost cannot be negative.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			37
+		FROM tblAPBill A
+		INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
+		LEFT JOIN tblICItem C ON A2.intItemId = C.intItemId  
+		WHERE 
+			A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND A2.dblCost < 0
 
 	END
 	ELSE

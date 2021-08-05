@@ -1,13 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoicePrice]
-	 @InvoiceId			INT = NULL
-	,@InvoiceDetailId	INT
-	,@Price				NUMERIC(18,6)
-	,@ContractPrice		NUMERIC(18,6) = NULL
-	,@UserId			INT
+	 @InvoiceId					INT = NULL
+	,@InvoiceDetailId			INT
+	,@Price						NUMERIC(18,6)
+	,@ContractPrice				NUMERIC(18,6) = NULL
+	,@UserId					INT
+	,@intPriceFixationDetailId	INT = NULL
 AS
 
 BEGIN
-
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -30,16 +30,13 @@ BEGIN TRY
 	IF ISNULL(@InvoiceId,0) = 0
 		SELECT @InvoiceId = [intInvoiceId] FROM tblARInvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId
 	
-	UPDATE
-		tblARInvoiceDetail
-	SET
-		 [dblPrice]		= @Price
-		,[dblBasePrice]	= ISNULL(ISNULL(@Price, @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
-		,[dblUnitPrice]		= ISNULL(@ContractPrice, [dblUnitPrice])
-		,[dblBaseUnitPrice]	= ISNULL(ISNULL(@ContractPrice, [dblUnitPrice]) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
-	WHERE
-		[intInvoiceDetailId] = @InvoiceDetailId
-
+	UPDATE tblARInvoiceDetail
+	SET [dblPrice]					= @Price
+	  , [dblBasePrice]				= ISNULL(ISNULL(@Price, @ZeroDecimal) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+	  , [dblUnitPrice]				= ISNULL(@ContractPrice, [dblUnitPrice])
+	  , [dblBaseUnitPrice]			= ISNULL(ISNULL(@ContractPrice, [dblUnitPrice]) * (CASE WHEN ISNULL([dblCurrencyExchangeRate], @ZeroDecimal) = @ZeroDecimal THEN 1 ELSE [dblCurrencyExchangeRate] END), @ZeroDecimal)
+	  , [intPriceFixationDetailId]	= @intPriceFixationDetailId
+	WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
 	EXEC dbo.[uspARReComputeInvoiceAmounts] @InvoiceId = @InvoiceId
 

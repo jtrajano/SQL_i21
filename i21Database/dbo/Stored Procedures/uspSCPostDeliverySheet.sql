@@ -2,6 +2,7 @@
 	@intDeliverySheetId INT
 	,@intUserId INT
 	,@dblNetUnits NUMERIC(38,20)
+	,@dtmClientDate DATETIME = null
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -94,6 +95,10 @@ DECLARE @processTicket TABLE(
 BEGIN TRY
 	SET @dblTempSplitQty = @dblNetUnits;
 
+	IF(@dtmClientDate IS NULL)
+	BEGIN
+		SET @dtmClientDate = GETDATE();
+	END
 
 	SELECT TOP 1 
 		@intDSLocationId = intCompanyLocationId
@@ -257,7 +262,7 @@ BEGIN TRY
 	)
 	SELECT 
 		[intItemId]							= SCD.intItemId
-		,[dtmDate]							= dbo.fnRemoveTimeOnDate(GETDATE())
+		,[dtmDate]							= dbo.fnRemoveTimeOnDate(@dtmClientDate)
 		,[intLocationId]					= SCD.intCompanyLocationId
 		,[intSubLocationId]					= SC.intSubLocationId
 		,[intStorageLocationId]				= SC.intStorageLocationId
@@ -319,6 +324,16 @@ BEGIN TRY
 				,@intInventoryAdjustmentId OUTPUT
 				,@strAdjustmentDescription;
 		
+
+
+			
+			if @intInventoryAdjustmentId > 0 and @intOwnershipType = 1
+				exec uspSCDeliverySheetShrinkage @DeliverySheetId = @intDeliverySheetId
+														, @InventoryAdjustmentId = @intInventoryAdjustmentId
+														, @intEntityUserSecurityId = @intUserId
+														, @ysnPost = 1
+
+
 			SELECT @strDescription =  'Quantity Adjustment : ' + strAdjustmentNo, @strTransactionId = strAdjustmentNo  
 			FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -580,6 +595,8 @@ BEGIN TRY
 
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
+
+	--EXEC [dbo].[uspSCModifyTicketDiscountItemInfo] null, @intDeliverySheetId
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 

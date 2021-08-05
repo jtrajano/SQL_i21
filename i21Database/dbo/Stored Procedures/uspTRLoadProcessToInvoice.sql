@@ -57,15 +57,15 @@ BEGIN TRY
 		,[strBOLNumber]							= ISNULL(TR.strBillOfLading, DD.strBillOfLading)
 		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
 														(CASE 
-															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, ''))
-															WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-															WHEN BlendIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(BlendIngredient.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
+															WHEN BlendingIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(BlendingIngredient.strSupplyPoint, ''))
+															WHEN BlendingIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
+															WHEN BlendingIngredient.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(BlendingIngredient.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
 														END))
 													ELSE (CASE
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))
 														WHEN TR.intSupplyPointId IS NULL AND TL.intLoadId IS NOT NULL THEN 'Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
 														WHEN TR.intSupplyPointId IS NOT NULL AND TL.intLoadId IS NOT NULL THEN 'Origin:' + RTRIM(ISNULL(ee.strSupplyPoint, ''))  + ' Load #:' + RTRIM(ISNULL(LG.strExternalLoadNumber, ''))
-													END) END
+													END) END COLLATE Latin1_General_CI_AS
 		/*
 		,[strComments]							= CASE WHEN TR.intLoadReceiptId IS NULL THEN (
 														(CASE WHEN BlendIngredient.intSupplyPointId IS NULL AND TL.intLoadId IS NULL THEN RTRIM(ISNULL(DH.strComments, ''))
@@ -88,7 +88,7 @@ BEGIN TRY
 		,[ysnSplitted]							= 0
 		,[intPaymentId]							= NULL
 		,[intSplitId]							= NULL
-		,[strActualCostId]						= CASE WHEN ISNULL(DD.strReceiptLink, '') = '' THEN BlendIngredient.strActualCostId ELSE 
+		,[strActualCostId]						= CASE WHEN ISNULL(DD.strReceiptLink, '') = '' THEN BlendingIngredient.strActualCostId ELSE 
 													(CASE WHEN (TR.strOrigin) = 'Terminal' AND (DH.strDestination) = 'Customer'
 														THEN (TL.strTransaction)
 													WHEN (TR.strOrigin) = 'Location' AND (DH.strDestination) = 'Customer' AND (TR.intCompanyLocationId) = (DH.intCompanyLocationId)
@@ -155,7 +155,7 @@ BEGIN TRY
 		,intTruckDriverReferenceId = SC.intTruckDriverReferenceId
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
-		,ysnBlended = CASE WHEN BlendIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
+		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -204,11 +204,12 @@ BEGIN TRY
 		LEFT JOIN vyuTRGetLoadBlendIngredient BlendIngredient ON BlendIngredient.intLoadDistributionDetailId = DistItem.intLoadDistributionDetailId
 		LEFT JOIN vyuTRGetLoadReceipt Receipt ON Receipt.intLoadHeaderId = LoadHeader.intLoadHeaderId AND Receipt.intItemId = BlendIngredient.intIngredientItemId
 		WHERE ISNULL(DistItem.strReceiptLink, '') = ''
-	) BlendIngredient ON BlendIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = ''
+		AND BlendIngredient.strType != 'Other Charge'
+	) BlendingIngredient ON BlendingIngredient.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId AND ISNULL(DD.strReceiptLink, '') = '' AND BlendingIngredient.intLoadDistributionDetailId = DD.intLoadDistributionDetailId
 	LEFT JOIN tblARCustomerFreightXRef CustomerFreight ON CustomerFreight.intEntityCustomerId = DH.intEntityCustomerId
 			AND CustomerFreight.intEntityLocationId = DH.intShipToLocationId
 			AND CustomerFreight.intCategoryId = Item.intCategoryId
-			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendIngredient.strZipCode)
+			AND CustomerFreight.strZipCode = ISNULL(TR.strZipCode, BlendingIngredient.strZipCode)
 	WHERE TL.intLoadHeaderId = @intLoadHeaderId
 		AND DH.strDestination = 'Customer'
 

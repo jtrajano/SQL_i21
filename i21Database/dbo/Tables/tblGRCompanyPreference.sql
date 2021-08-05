@@ -29,7 +29,11 @@
     [ysnDoNotAllowUndistributePostedInvoice] BIT NOT NULL DEFAULT(0), 
     [intSettlementReportId] TINYINT NULL,
     [ysnRailXMLExport] BIT NOT NULL DEFAULT (0), 
-    [strRailXMLDocumentPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''), 
+    [strRailXMLDocumentPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''),
+    [ysnEnableCanadianGrainReceipt] BIT NOT NULL DEFAULT(0),
+    [strDefaultGrainReceiptReport] NVARCHAR(MAX) COLLATE  Latin1_General_CI_AS NULL,
+    [ysnUseItemCommodityDiscountOriginImport] BIT NOT NULL DEFAULT(0),
+    
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])

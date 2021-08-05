@@ -68,7 +68,7 @@ MERGE INTO tblSMLog USING (
 			INNER JOIN tblSMScreen F ON E.strTransactionType = F.strNamespace
 		) A LEFT OUTER JOIN 
 		tblSMTransaction B ON A.intScreenId = B.intScreenId AND CAST(A.strRecordNo AS INT) = B.intRecordId  --AND B.intTransactionId = 3716
-	WHERE ISNULL(B.intRecordId, '') <> '' AND ISNULL(A.strRecordNo, '') <> '' AND (ISNULL(ysnInit,'') = '' OR ysnInit = 0) --AND ISNULL(A.strJsonData, '') = '' AND ISNULL(A.strActionType, '') <> 'Updated'
+	WHERE ISNULL(B.intRecordId, '') <> '' AND ISNULL(A.strRecordNo, '') <> '' AND (ISNULL(ysnInit,'') = '' OR ysnInit = 0) AND A.intEntityId IS NOT NULL  --AND ISNULL(A.strJsonData, '') = '' AND ISNULL(A.strActionType, '') <> 'Updated'
 
 ) AS OldLog (dtmDate, intEntityId, intTransactionId, strActionType, intAuditLogId, strRoute) ON 1 = 0
 WHEN NOT MATCHED THEN

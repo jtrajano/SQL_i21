@@ -139,7 +139,7 @@ END
 		, intFromCommodityUnitMeasureId int
 		, intToCommodityUnitMeasureId int
 		, strAccountNumber NVARCHAR(100)
-		, strTranType NVARCHAR(20)
+		, strTranType NVARCHAR(100)
 		, dblNoOfLot NUMERIC(24, 10)
 		, dblDelta NUMERIC(24, 10)
 		, intBrokerageAccountId int
@@ -232,9 +232,12 @@ END
 			, ysnPreCrush = ysnCrush
 		FROM tblRKDPRContractHedgeByMonth
 		WHERE intDPRHeaderId = @intDPRHeaderId
+		AND	 strLocationName = CASE WHEN @strLocationName = 'All' THEN strLocationName ELSE @strLocationName END
 
-
-
+	IF (@strCommodityCode IS NULL) 
+	BEGIN
+		SELECT TOP 1 @strCommodityCode = strCommodityCode FROM @List
+	END
 
 	DECLARE @ctr as int
 	SELECT @ctr = COUNT(intRowNumber) FROM @List 
@@ -326,7 +329,7 @@ END
 			 
 
 					'
-
+					 
 		exec (@query)
 
 
@@ -337,6 +340,7 @@ END
 
 		 select @colCAST = STUFF((SELECT ',CAST(CONVERT(varchar,cast(round(' + QUOTENAME([name]) + ',2)as money),1) as nvarchar(max))'
 							from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strContractEndMonth')
+							ORDER BY column_id
 					FOR XML PATH(''), TYPE
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
@@ -345,6 +349,7 @@ END
 
 		 select @colSUM = STUFF((SELECT ',CAST(CONVERT(varchar,cast(sum(' + QUOTENAME([name]) + ')as money),1) as nvarchar(max))'
 							from tempdb.sys.columns where object_id = (SELECT object_id FROM tempdb.sys.objects WHERE name = '##tmpTry') and [name] not in ('col1','strContractEndMonth')
+							ORDER BY column_id
 					FOR XML PATH(''), TYPE
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')

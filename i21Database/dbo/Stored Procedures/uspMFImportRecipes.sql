@@ -28,6 +28,9 @@ DECLARE @dblRecipeDetailCalculatedQty NUMERIC(18, 6)
 DECLARE @dblRecipeDetailUpperTolerance NUMERIC(18, 6)
 DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@strRecipeItemType NVARCHAR(50)
+	,@strERPRecipeNo nvarchar(50)
+	,@strSubLocationName nvarchar(50)
+	,@intSubLocationId int
 
 --Recipe Delete
 IF @strImportType = 'Recipe Delete'
@@ -464,7 +467,7 @@ BEGIN
 	BEGIN
 		--Invalid Detail Item
 		UPDATE tblMFRecipeItemStage
-		SET strMessage = 'Missing Recipe Detail Item'
+		SET strMessage = 'Input Item '''+strRecipeItemNo+''' is not configured in i21.'
 			,intStatusId=2
 		WHERE ISNULL(strRecipeItemNo, '') NOT IN (
 				SELECT strItemNo
@@ -515,6 +518,9 @@ BEGIN
 		SET @intCustomerId = NULL
 		SET @strFarmNumber = NULL
 		SET @intFarmFieldId = NULL
+		Select @strERPRecipeNo=NULL
+		Select @strSubLocationName=NULL
+		Select @intSubLocationId=NULL
 
 		--Margin By
 		UPDATE tblMFRecipeStage
@@ -531,6 +537,8 @@ BEGIN
 			,@strLocationName = strLocationName
 			,@strCustomer = strCustomer
 			,@strFarmNumber = strFarm
+			,@strERPRecipeNo=strERPRecipeNo 
+			,@strSubLocationName=strSubLocationName
 		FROM tblMFRecipeStage
 		WHERE intRecipeStageId = @intMinId
 
@@ -541,6 +549,10 @@ BEGIN
 		SELECT @intLocationId = intCompanyLocationId
 		FROM tblSMCompanyLocation
 		WHERE strLocationName = @strLocationName
+
+		Select @intSubLocationId=intCompanyLocationSubLocationId
+		from tblSMCompanyLocationSubLocation 
+		Where strSubLocationName=@strSubLocationName
 
 		SELECT TOP 1 @intCustomerId = intEntityId
 		FROM vyuARCustomer
@@ -563,11 +575,22 @@ BEGIN
 		END
 
 		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
-			SELECT TOP 1 @intRecipeId = intRecipeId
-			FROM tblMFRecipe
-			WHERE intItemId = @intItemId
-				AND intVersionNo = @intVersionNo
-				AND intLocationId = @intLocationId
+		BEGIN
+			IF @strERPRecipeNo IS NOT NULL
+			BEGIN
+				SELECT @intRecipeId = intRecipeId 
+				FROM tblMFRecipe
+				WHERE strERPRecipeNo=@strERPRecipeNo
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intRecipeId = intRecipeId
+				FROM tblMFRecipe
+				WHERE intItemId = @intItemId
+					AND intVersionNo = @intVersionNo
+					AND intLocationId = @intLocationId
+			END
+		END
 		ELSE --Virtual Recipe
 			SELECT TOP 1 @intRecipeId = intRecipeId
 			FROM tblMFRecipe
@@ -575,6 +598,19 @@ BEGIN
 
 		IF @intRecipeId IS NULL --insert
 		BEGIN
+			if @intVersionNo is null
+			Begin
+				SELECT  @intVersionNo = Max(intVersionNo)
+				FROM tblMFRecipe
+				WHERE intItemId = @intItemId
+					AND intLocationId = @intLocationId
+					AND intSubLocationId = @intSubLocationId
+
+				if @intVersionNo is null
+				Select @intVersionNo=1
+				Else
+				Select @intVersionNo=@intVersionNo+1
+			End
 			INSERT INTO tblMFRecipe (
 				strName
 				,intItemId
@@ -599,13 +635,16 @@ BEGIN
 				,dtmLastModified
 				,dtmValidFrom
 				,dtmValidTo
+				,intSubLocationId
+				,strERPRecipeNo
+				,intConcurrencyId
 				)
 			SELECT TOP 1 s.strRecipeName
 				,i.intItemId
 				,s.[strQuantity]
 				,iu.intItemUOMId
 				,cl.intCompanyLocationId
-				,s.[strVersionNo]
+				,IsNULL(s.[strVersionNo],@intVersionNo)
 				,rt.intRecipeTypeId
 				,mp.intManufacturingProcessId
 				,0
@@ -623,6 +662,9 @@ BEGIN
 				,GETDATE()
 				,s.strValidFrom
 				,s.strValidTo
+				,@intSubLocationId
+				,@strERPRecipeNo
+				,1 As intConcurrencyId
 			FROM tblMFRecipeStage s
 			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
@@ -676,6 +718,7 @@ BEGIN
 					,dtmCreated
 					,intLastModifiedUserId
 					,dtmLastModified
+					,intConcurrencyId
 					)
 				SELECT TOP 1 @intRecipeId
 					,@intItemId
@@ -712,6 +755,7 @@ BEGIN
 					,GETDATE()
 					,@intUserId
 					,GETDATE()
+					,1 AS intConcurrencyId
 				FROM tblMFRecipeStage s
 				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
@@ -737,6 +781,7 @@ BEGIN
 				,r.dtmValidFrom = t.strValidFrom
 				,r.dtmValidTo = t.strValidTo
 				,r.intRecipeTypeId=t.intRecipeTypeId
+				,r.intConcurrencyId=r.intConcurrencyId+1
 			FROM tblMFRecipe r
 			CROSS JOIN (
 				SELECT TOP 1 s.strRecipeName
@@ -809,7 +854,7 @@ BEGIN
 
 	--Invalid Header Item
 	UPDATE tblMFRecipeItemStage
-	SET strMessage = 'Invalid Recipe Header Item'
+	SET strMessage = 'Output Item '''+strRecipeHeaderItemNo+''' is not configured in i21.'
 		,intStatusId=2
 	WHERE strRecipeHeaderItemNo NOT IN (
 			SELECT strItemNo
@@ -1360,6 +1405,7 @@ BEGIN
 				,dtmCreated
 				,intLastModifiedUserId
 				,dtmLastModified
+				,intConcurrencyId
 				)
 			SELECT @intRecipeId
 				,i.intItemId
@@ -1419,6 +1465,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,GETDATE()
+				,1 AS intConcurrencyId
 			FROM tblMFRecipeItemStage s
 			LEFT JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
 			LEFT JOIN tblICUnitMeasure um ON um.strUnitMeasure = s.strUOM
@@ -1466,6 +1513,7 @@ BEGIN
 				,ri.ysnPartialFillConsumption = t.ysnPartialFillConsumption
 				,ri.intLastModifiedUserId = @intUserId
 				,ri.dtmLastModified = GETDATE()
+				,ri.intConcurrencyId=ri.intConcurrencyId+1
 			FROM tblMFRecipeItem ri
 			CROSS JOIN (
 				SELECT TOP 1 i.intItemId
@@ -1789,6 +1837,7 @@ BEGIN
 				,dtmCreated
 				,intLastModifiedUserId
 				,dtmLastModified
+				,intConcurrencyId
 				)
 			SELECT @intRecipeItemId
 				,@intRecipeId
@@ -1805,6 +1854,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,GETDATE()
+				,1 AS intConcurrencyId
 			FROM tblMFRecipeSubstituteItemStage s
 			LEFT JOIN tblICItem i ON s.strSubstituteItemNo = i.strItemNo
 			WHERE s.intRecipeSubstituteItemStageId = @intMinId
@@ -1819,6 +1869,7 @@ BEGIN
 				,rs.dblCalculatedLowerTolerance = t.dblLowerTolerance
 				,rs.intLastModifiedUserId = @intUserId
 				,rs.dtmLastModified = GETDATE()
+				,rs.intConcurrencyId=1
 			FROM tblMFRecipeSubstituteItem rs
 			CROSS JOIN (
 				SELECT TOP 1 dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio]) dblQuantity

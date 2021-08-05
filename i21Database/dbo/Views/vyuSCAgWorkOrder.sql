@@ -7,11 +7,13 @@ AS
 		,strCustomerName = B.strName
 		,A.intWorkOrderId
 		,intEntityId = A.intEntityCustomerId
+		,A.ysnShipped
+		,A.ysnFinalized
 	FROM tblAGWorkOrder A
 	LEFT JOIN tblEMEntity B
 		ON A.intEntityCustomerId = B.intEntityId
-	LEFT JOIN tblEMEntityLocation C
-		ON A.intEntityLocationId = C.intEntityLocationId
+	LEFT JOIN tblSMCompanyLocation C
+		ON A.intCompanyLocationId = C.intCompanyLocationId
 	
 	
 GO

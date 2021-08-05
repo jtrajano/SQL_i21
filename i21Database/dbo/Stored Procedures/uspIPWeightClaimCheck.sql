@@ -1,22 +1,41 @@
 ﻿CREATE PROCEDURE uspIPWeightClaimCheck
 AS
 BEGIN
+	IF EXISTS (
+			SELECT *
+			FROM dbo.tblIPInventoryReceiptWeightClaim
+			WHERE IsNULL(ysnInProgress, 0) = 1
+			)
+	BEGIN
+		RETURN
+	END
+
 	DECLARE @intInventoryReceiptId INT
 		,@intLoadDetailId INT
 		,@intLoadId INT
 		,@intNewWeightClaimId INT
-		,@intInventoryReceiptWeightClaimId INT
 	DECLARE @tblIPInventoryReceipt TABLE (intInventoryReceiptId INT)
+
+	DELETE
+	FROM @tblIPInventoryReceipt
 
 	INSERT INTO @tblIPInventoryReceipt (intInventoryReceiptId)
 	SELECT intInventoryReceiptId
-	FROM tblICInventoryReceipt IR
+	FROM dbo.tblICInventoryReceipt IR
 	WHERE ysnPosted = 1
 		AND NOT EXISTS (
 			SELECT *
-			FROM tblIPInventoryReceiptWeightClaim IRWC
+			FROM dbo.tblIPInventoryReceiptWeightClaim IRWC
 			WHERE IRWC.intInventoryReceiptId = IR.intInventoryReceiptId
 			)
+
+	INSERT INTO dbo.tblIPInventoryReceiptWeightClaim (
+		intInventoryReceiptId
+		,ysnInProgress
+		)
+	SELECT intInventoryReceiptId
+		,1
+	FROM @tblIPInventoryReceipt
 
 	SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId)
 	FROM @tblIPInventoryReceipt
@@ -29,43 +48,35 @@ BEGIN
 
 		SELECT @intNewWeightClaimId = NULL
 
-		SELECT @intInventoryReceiptWeightClaimId = NULL
-
 		SELECT @intLoadDetailId = intSourceId
-		FROM tblICInventoryReceiptItem
+		FROM dbo.tblICInventoryReceiptItem
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 		SELECT @intLoadId = intLoadId
-		FROM tblLGLoadDetail
+		FROM dbo.tblLGLoadDetail
 		WHERE intLoadDetailId = @intLoadDetailId
 
-		INSERT INTO tblIPInventoryReceiptWeightClaim (
-			intInventoryReceiptId
-			,intLoadId
-			)
-		SELECT @intInventoryReceiptId
-			,@intLoadId
-
-		SELECT @intInventoryReceiptWeightClaimId = SCOPE_IDENTITY()
-
 		IF EXISTS (
-				SELECT *
-				FROM vyuIPGetOpenWeightClaim
+				/*SELECT *
+				FROM dbo.vyuIPGetOpenWeightClaim
 				WHERE intLoadId = @intLoadId
 					AND intContainerCount = intIRCount
-					AND IsNULL(dblClaimableWt, 0) + IsNULL(dblFranchiseWt, 0) < 0
+					AND IsNULL(dblClaimableWt, 0) + IsNULL(dblFranchiseWt, 0) < 0*/
+				SELECT *
+				FROM tblLGPendingClaim
+				WHERE intLoadId = @intLoadId
+					AND dblClaimableWt < 0
 				)
 		BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
 				,@intNewWeightClaimId = @intNewWeightClaimId OUTPUT
-
-			--EXEC [dbo].[uspIPWeightClaimPopulateStgXML] @intWeightClaimId = @intNewWeightClaimId
-			--	,@strRowState = 'Added'
-
-			UPDATE tblIPInventoryReceiptWeightClaim
-			SET intWeightClaimId = @intNewWeightClaimId
-			WHERE intInventoryReceiptWeightClaimId = @intInventoryReceiptWeightClaimId
 		END
+
+		UPDATE dbo.tblIPInventoryReceiptWeightClaim
+		SET intWeightClaimId = @intNewWeightClaimId
+			,intLoadId = @intLoadId
+			,ysnInProgress = 0
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 		SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId)
 		FROM @tblIPInventoryReceipt

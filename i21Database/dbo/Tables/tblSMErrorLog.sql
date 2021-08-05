@@ -13,3 +13,6 @@
 	CONSTRAINT [FK_dbo.tblSMAErrorLog_dbo.tblSMLog_intLogId] FOREIGN KEY ([intLogId]) REFERENCES [dbo].tblSMLog ([intLogId]) ON DELETE CASCADE,
     CONSTRAINT [PK_dbo.tblSMErrorLog] PRIMARY KEY CLUSTERED ([intErrorLogId] ASC)
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblSMErrorLog_intLogId] ON [dbo].[tblSMErrorLog] ([intLogId])
+GO

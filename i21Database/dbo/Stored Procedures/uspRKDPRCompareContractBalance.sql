@@ -30,19 +30,20 @@ FROM tblRKDPRRunLogDetail LD
 INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun2
 
-SELECT LD.*
+SELECT strContractNumber, intContractHeaderId, strEntityName, strLocationName, dblTotal = SUM(dblTotal)
 INTO #FirstRun
 FROM tblRKDPRRunLogDetail LD
 INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun1 and strType = @strBucketType
+GROUP BY strContractNumber, intContractHeaderId, strEntityName, strLocationName
 
 
-SELECT LD.*
+SELECT strContractNumber, intContractHeaderId, strEntityName, strLocationName, dblTotal = SUM(dblTotal)
 INTO #SecondRun
 FROM tblRKDPRRunLogDetail LD
 INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
-
+GROUP BY strContractNumber, intContractHeaderId, strEntityName, strLocationName
 
 
 SELECT * INTO #tempFirstToSecond FROM (
@@ -113,6 +114,7 @@ FROM (
 	FROM #tempSecondToFirst b
 	WHERE b.strContractNumber NOT IN (SELECT strContractNumber FROM #tempFirstToSecond)
 ) t
+WHERE  ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0) <> 0
 
 
 

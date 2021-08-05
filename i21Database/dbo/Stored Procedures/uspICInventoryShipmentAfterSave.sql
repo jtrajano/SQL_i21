@@ -21,6 +21,7 @@ DECLARE @ShipmentType_SalesContract AS INT = 1
 DECLARE @ShipmentType_SalesOrder AS INT = 2
 DECLARE @ShipmentType_TransferOrder AS INT = 3
 DECLARE @ShipmentType_Direct AS INT = 4
+DECLARE @ShipmentType_WorkOrder AS INT = 4
 
 DECLARE @SourceType_None AS INT = 0
 DECLARE @SourceType_Scale AS INT = 1

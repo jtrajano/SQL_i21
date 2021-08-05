@@ -20,5 +20,6 @@ SELECT  CT.intContainerTypeId
 	  ,'' COLLATE Latin1_General_CI_AS strCommodityCode 
 	  ,'' COLLATE Latin1_General_CI_AS strCommodityDescription
 	  ,UM.strUnitMeasure
+	  ,0.0 dblConversionFactor
 FROM tblLGContainerType CT
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CT.intWeightUnitMeasureId

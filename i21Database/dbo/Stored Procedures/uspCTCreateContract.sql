@@ -103,7 +103,7 @@ BEGIN TRY
 	BEGIN
 		INSERT	INTO	#tmpExtracted
 		(	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,
-			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId
+			intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPricingTypeId,dtmCreated,intConcurrencyId,intCreatedById,intUnitMeasureId,dtmM2MDate
 		)
 		SELECT	intContractTypeId	=	CASE WHEN SC.strInOutFlag = 'I' THEN 1 ELSE 2 END,
 				intEntityId			=	@intEntityId,		
@@ -125,7 +125,8 @@ BEGIN TRY
 				dblBalance			=	0,					dtmStartDate				=	SC.dtmTicketDateTime,
 				intPricingTypeId	=	5,					dtmCreated					=	GETDATE(),
 				intConcurrencyId	=	1,					intCreatedById				=	@intUserId,
-				intUnitMeasureId	=	QU.intUnitMeasureId
+				intUnitMeasureId	=	QU.intUnitMeasureId,
+				dtmM2MDate			=	getdate()
 												
 		FROM	tblSCTicket					SC	CROSS 
 		JOIN	tblCTCompanyPreference		CP
@@ -282,7 +283,7 @@ BEGIN TRY
 				dblTotalCost		=	CI.dblCashPrice * CI.dblQuantity,
 				intCurrencyId		=	CY.intCurrencyID,
 				intUnitMeasureId	=	QU.intUnitMeasureId,
-				dtmM2MDate 			= 	CI.dtmM2MDate
+				dtmM2MDate 			= 	ISNULL(CI.dtmM2MDate,getdate())
 
 		FROM	tblCTContractImport			CI	LEFT
 		JOIN	tblICItem					IM	ON	IM.strItemNo		=	CI.strItem				LEFT
@@ -297,7 +298,7 @@ BEGIN TRY
 		JOIN	tblCTCropYear				CP	ON	CP.strCropYear		=	CI.strCropYear			
 												AND	CP.intCommodityId	=	CM.intCommodityId		LEFT
 		JOIN	tblCTPosition				PN	ON	PN.strPosition		=	CI.strPosition			LEFT
-		JOIN	tblRKFutureMarket			MA	ON	MA.strFutMarketName	=	CI.strFutMarketName		LEFT
+		JOIN	tblRKFutureMarket			MA	ON	LTRIM(RTRIM(LOWER(MA.strFutMarketName))) =	LTRIM(RTRIM(LOWER(CI.strFutMarketName)))		LEFT
 		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
 												AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
 												AND	(YEAR(MO.dtmFutureMonthsDate) % 100) = CI.intYear		LEFT
@@ -312,15 +313,47 @@ BEGIN TRY
 
 	IF EXISTS(SELECT * FROM #tmpExtracted)
 	BEGIN
+		;WITH CTE AS 
+		(
+			SELECT intContractTypeId, strContractNumber, intEntityId, intCommodityId, ROW_NUMBER() OVER 
+			(
+				PARTITION BY intContractTypeId, strContractNumber, intEntityId, intCommodityId ORDER BY intContractTypeId, strContractNumber, intEntityId, intCommodityId
+			) RowNumber
+			FROM #tmpExtracted
+		)
+		DELETE
+		FROM CTE 
+		WHERE RowNumber > 1;
+
+		--HEADER DETAIL VALIDATION 
 		INSERT	INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter, ysnReadOnlyInterCoContract)
 		SELECT	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, 0, 0
 		FROM	#tmpExtracted
 		
 		EXEC	uspCTGetTableDataInXML '#tmpContractHeader',null,@strTblXML OUTPUT,'tblCTContractHeader'
 		EXEC	uspCTValidateContractHeader @strTblXML,'Added'
+	
+		INSERT	INTO #tmpContractDetail
+				(
+					intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
+					intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblNetWeight,intNetWeightUOMId,dtmM2MDate, ysnProvisionalPNL, ysnFinalPNL
+				)
+		SELECT	@intContractHeaderId,intItemId,intItemUOMId,intContractSeq,intStorageScheduleRuleId,dtmEndDate,intCompanyLocationId,dblQuantity,intContractStatusId,dblBalance,dtmStartDate,intPriceItemUOMId,dtmCreated,intConcurrencyId,intCreatedById,
+				intFutureMarketId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,strRemark,intPricingTypeId,dblTotalCost,intCurrencyId,intUnitMeasureId,dblQuantity,intItemUOMId,dtmM2MDate, 0, 0
+		FROM	#tmpExtracted
 		
+		EXEC	uspCTGetTableDataInXML '#tmpContractDetail',null,@strTblXML OUTPUT,'tblCTContractDetail'
+		EXEC	uspCTValidateContractDetail @strTblXML,'Added'
+
+		DELETE FROM #tmpContractDetail
+		DELETE FROM #tmpContractHeader
+
+		--CONTRACT INSERTION
+		INSERT	INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter, ysnReadOnlyInterCoContract)
+		SELECT	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, 0, 0
+		FROM	#tmpExtracted
 		
-		
+		EXEC	uspCTGetTableDataInXML '#tmpContractHeader',null,@strTblXML OUTPUT,'tblCTContractHeader'
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractHeader',@strTblXML,@intContractHeaderId OUTPUT
 		
 		INSERT	INTO #tmpContractDetail
@@ -333,8 +366,6 @@ BEGIN TRY
 		FROM	#tmpExtracted
 		
 		EXEC	uspCTGetTableDataInXML '#tmpContractDetail',null,@strTblXML OUTPUT,'tblCTContractDetail'
-		EXEC	uspCTValidateContractDetail @strTblXML,'Added'
-		
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@strTblXML,@intContractDetailId OUTPUT
 		EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL, 
 											@intContractDetailId = @intContractDetailId,

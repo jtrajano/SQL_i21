@@ -32,6 +32,7 @@ BEGIN TRY
 		SET @ysnSuccess = CAST(1 AS BIT)
 
 		DECLARE @intRevertType AS INT = (SELECT TOP 1 intRevertType FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
+		DECLARE @dtmEffectiveDate AS DATETIME = (SELECT TOP 1 dtmEffectiveDate FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
 
 		DECLARE @intRevertItemRecords INT = 0
 		DECLARE @intRevertItemLocationRecords INT = 0
@@ -891,7 +892,7 @@ BEGIN TRY
 									WHERE Uom.ysnStockUnit = 1
 									ORDER BY temp.intItemPricingId ASC
 										
-
+								
 
 									-- UPDATE ITEM PRICING
 									EXEC [dbo].[uspICUpdateItemPricingForCStore]
@@ -905,6 +906,7 @@ BEGIN TRY
 											,@dblStandardCost			= @dblStandardCost 
 											,@dblRetailPrice			= @dblSalePrice 
 											,@dblLastCost				= @dblLastCost
+											,@dtmEffectiveDate			= @dtmEffectiveDate
 											,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
 			
@@ -1175,23 +1177,24 @@ BEGIN TRY
 						 )
 					BEGIN
 					
-						IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Items') IS NULL 
-							BEGIN
-								CREATE TABLE #tmpUpdateItemForCStore_Items (
-									intItemId INT 
-								)
-							END
+						-- Create
+						DECLARE @tempITEMSTATUS TABLE (
+									intItemId				INT,
+									strStatus				NVARCHAR(20)
+						)
 
 
 						-- Insert
-						INSERT INTO #tmpUpdateItemForCStore_Items
+						INSERT INTO @tempITEMSTATUS
 						(
-							intItemId
+							intItemId,
+							strStatus
 						)
 						SELECT DISTINCT
-							intItemId		= src.intItemId
+							intItemId		= src.intItemId,
+							strStatus		= src.strOldData
 						FROM (
-							SELECT detail.intItemId
+							SELECT detail.intItemId, strOldData
 							FROM vyuSTSearchRevertHolderDetail detail
 							WHERE detail.strTableName = N'tblICItem'
 								AND detail.intRevertHolderId = @intRevertHolderId
@@ -1211,25 +1214,40 @@ BEGIN TRY
 																	AND detail.strPreviewOldData != detail.strPreviewNewData
 																	)
 
-						IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items))
+						IF (EXISTS (SELECT * FROM @tempITEMSTATUS))
 						BEGIN
-							-- This is where IC SP Executed for updating 
-							EXEC [uspICUpdateItemForCStore]
-									@strDescription					= NULL
-									,@dblRetailPriceFrom			= NULL
-									,@dblRetailPriceTo 				= NULL
-									,@intItemId 					= NULL
-									,@intItemUOMId 					= NULL
-									--update params				
-									,@intCategoryId 				= NULL
-									,@strCountCode 					= NULL
-									,@strItemDescription 			= NULL
-									,@strItemNo 					= NULL
-									,@strShortName 					= NULL
-									,@strUpcCode					= NULL
-									,@strLongUpcCode 				= NULL
-									,@strStatus 					= 'Active'
-									,@intEntityUserSecurityId		= @intEntityId
+							WHILE EXISTS (SELECT TOP 1 1 FROM @tempITEMSTATUS) 
+								BEGIN
+								
+									DECLARE  @intUpdateItemId		INT
+									DECLARE  @strUpdateStatus		VARCHAR(20)
+
+									SELECT TOP 1 
+										@intUpdateItemId = intItemId, 
+										@strUpdateStatus = strStatus
+									FROM @tempITEMSTATUS
+
+									-- This is where IC SP Executed for updating 
+									EXEC [uspICUpdateItemForCStore]
+											@strDescription					= NULL
+											,@dblRetailPriceFrom			= NULL
+											,@dblRetailPriceTo 				= NULL
+											,@intItemId 					= @intUpdateItemId
+											,@intItemUOMId 					= NULL
+											--update params				
+											,@intCategoryId 				= NULL
+											,@strCountCode 					= NULL
+											,@strItemDescription 			= NULL
+											,@strItemNo 					= NULL
+											,@strShortName 					= NULL
+											,@strUpcCode					= NULL
+											,@strLongUpcCode 				= NULL
+											,@strStatus 					= @strUpdateStatus
+											,@intEntityUserSecurityId		= @intEntityId
+											
+									-- Remove
+									DELETE FROM @tempITEMSTATUS WHERE intItemId = @intUpdateItemId
+								END
 						END
 					
 

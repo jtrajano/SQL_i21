@@ -450,6 +450,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		  AND (@strTransactionType IS NULL OR I.strType LIKE  '%' + @strTransactionType + '%')
 		  AND (@strPaymentIds IS NULL OR 0 = 1)
+		  AND (@ysnPrintDetail = 1 OR (@ysnPrintDetail = 0 AND I.strType <> 'CF Tran'))
 	END
 ELSE
 	BEGIN
@@ -462,6 +463,7 @@ ELSE
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		  AND (@strTransactionType IS NULL OR I.strType LIKE  '%' + @strTransactionType + '%')
 		  AND (@strPaymentIds IS NULL OR 0 = 1)
+		  AND (@ysnPrintDetail = 1 OR (@ysnPrintDetail = 0 AND I.strType <> 'CF Tran'))
 	END
 
 --FILTERED PAYMENTS
@@ -614,6 +616,14 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom		= @dtmDateFrom
 										, @dtmDateTo		= @dtmDateTo
 										, @strCustomerIds	= @strCustomerIds
 										, @intEntityUserId	= @intEntityUserId
+
+IF ISNULL(@ysnPrintDetail, 0) = 0
+	BEGIN
+		UPDATE tblARCustomerAgingStagingTable
+		SET dblFuture	= 0
+		  , dblTotalAR	= dblTotalAR - ISNULL(dblFuture, 0)
+		WHERE intEntityUserId = @intEntityUserId
+	END
 
 DELETE FROM tblARCustomerActivityStagingTable WHERE intEntityUserId = @intEntityUserId
 
@@ -815,6 +825,7 @@ IF @ysnPrintRecap = 1 OR @strFormattingOptions = 'Product Recap Totals Only'
 											  , @strTransactionType = @strTransactionType
 											  , @strFormattingOptions = @strFormattingOptions
 											  , @intEntityUserId = @intEntityUserId
+											  , @ysnPrintDetail	= @ysnPrintDetail
 	END
 
 IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Totals Only'

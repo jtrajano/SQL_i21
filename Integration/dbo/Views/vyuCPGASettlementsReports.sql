@@ -76,16 +76,8 @@ select
 		,a.gastl_tie_breaker
 from
 	gastlmst a
-	,gacommst b
-	,gacdcmst c
-where
-	a.gastl_com_cd = b.gacom_com_cd
-	and c.gacdc_com_cd = a.gastl_com_cd
-	--and (a.gastl_cus_no = ''0000000505'') 
-	--and (a.gastl_com_cd = ''C'') 
-	--and (a.gastl_tic_no = ''1224'') 
-	--and (a.gastl_pur_sls_ind = ''P'')
-	--and (a.gastl_rec_type = '''') 
-    --and (a.gastl_tie_breaker = '''')
+	inner join gacommst b on a.gastl_com_cd = b.gacom_com_cd
+	inner join gacdcmst c on c.gacdc_com_cd = a.gastl_com_cd
+
 		')
 GO

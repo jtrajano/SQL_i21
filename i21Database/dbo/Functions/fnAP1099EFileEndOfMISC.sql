@@ -122,28 +122,28 @@ BEGIN
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblBoatsProceeds,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
 		@controlTotal6 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblMedicalPayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblMedicalPayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
-		@controlTotal7 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblSubstitutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+		@controlTotal7 = REPLICATE('0',18)		,
+		@controlTotal8 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblSubstitutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblSubstitutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
-		@controlTotal8 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblCropInsurance,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+		@controlTotal9 = REPLICATE('0',18)		,
+		@controlTotalA = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblCropInsurance,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblCropInsurance,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
-		@controlTotal9 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblParachutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+		@controlTotalB = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblParachutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblParachutePayments,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,	
-		@controlTotalA = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblGrossProceedsAtty,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+		@controlTotalC = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblGrossProceedsAtty,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblGrossProceedsAtty,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
-		@controlTotalB = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblDeferrals,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+		@controlTotalD = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblDeferrals,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblDeferrals,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
-		@controlTotalC = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblDeferredCompensation,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+		@controlTotalE = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblDeferredCompensation,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblDeferredCompensation,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')			,
-		@controlTotalD = CASE WHEN @year < YEAR(GETDATE())
+		@controlTotalF = REPLICATE('0',18)		,
+		@controlTotalG = CASE WHEN @year < YEAR(GETDATE())
 							THEN
 								REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblNonemployeeCompensation,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 								+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblNonemployeeCompensation,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')
 							ELSE
 								REPLICATE('0',18)
-						END,
-		@controlTotalE = REPLICATE('0',18)		,
-		@controlTotalF = REPLICATE('0',18)		,
-		@controlTotalG = REPLICATE('0',18)		
+						END
 	FROM MISC1099 A
 
 	--PAGE 110

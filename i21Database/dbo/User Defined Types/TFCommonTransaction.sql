@@ -70,6 +70,7 @@
 	[strTransportNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intAccountStatusId] INT NULL,
 	[strImportVerificationNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intTaxAuthorityCountyLocationId] INT NULL,
 	PRIMARY KEY CLUSTERED ([intId] ASC) WITH (IGNORE_DUP_KEY = OFF),
 	UNIQUE NONCLUSTERED ([intId] ASC, [intTransactionDetailId] ASC)
 )

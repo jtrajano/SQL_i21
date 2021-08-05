@@ -42,6 +42,8 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULLIF(@intEntityUserId, 0)
 	  , @intCompanyLocationId				AS INT				= NULL
+	  , @ARBalance							NUMERIC(18,6)		= 0.00
+
 
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
@@ -415,28 +417,14 @@ LEFT JOIN (
 								  END
 		 , dblBalance			= CASE WHEN strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN I.dblInvoiceTotal * -1
 									   ELSE I.dblInvoiceTotal 
-								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
-		 , dblPayment			= CASE WHEN strTransactionType = 'Customer Prepayment' THEN I.dblInvoiceTotal 
-									   ELSE 
-											CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) 
-												 ELSE 0.00 
-											END
-								  END
+								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE 0.00 END
+		 , dblPayment			= 0.00
 		 , dtmDate				= I.dtmDate
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
-	LEFT JOIN (
-		SELECT intInvoiceId
-			 , dblPayment = SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
-		FROM #PAYMENTDETAILS
-		WHERE ysnInvoicePrepayment = 0
-		  AND dtmDatePaid <= @dtmDateTo
-		  AND @ysnPrintZeroBalance = 0
-		GROUP BY intInvoiceId
-	) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 
 	UNION ALL
 
@@ -474,7 +462,7 @@ LEFT JOIN (
 	) TOTALPAYMENT ON DETAILS.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	WHERE P.ysnInvoicePrepayment = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
-	  AND ((@ysnPrintZeroBalance = 0 AND DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0) OR @ysnPrintZeroBalance = 1)
+	  AND  (DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0  OR  DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) = 0)
 	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
@@ -589,10 +577,18 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 IF @ysnPrintOnlyPastDueLocal = 1
 	DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'        
 
-IF @ysnPrintZeroBalanceLocal = 0
-    DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR (ISNULL(dblBalance, 0) <= 0 OR ISNULL(dblARBalance,0) <=0)) AND ISNULL(strTransactionType, '') NOT IN ('Customer Budget')
+SELECT @ARBalance = SUM(dblTotalAR) FROM #BALANCEFORWARDAGING
 
+IF @ysnPrintZeroBalanceLocal = 0
+	BEGIN
+		IF @ARBalance = 0 
+		BEGIN	
+
+		DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR (ISNULL(dblBalance, 0) <= 0 OR ISNULL(dblARBalance,0) <=0)) AND ISNULL(strTransactionType, '') NOT IN ('Customer Budget')
+		END
+	END
 DELETE FROM #STATEMENTREPORT WHERE strTransactionType IS NULL
+
 
 DELETE SR
 FROM #STATEMENTREPORT SR

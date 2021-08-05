@@ -4,28 +4,28 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intSampleStageId INT
-	DECLARE @intSampleId INT
-	DECLARE @strSampleNumber NVARCHAR(MAX)
-	DECLARE @strNewSampleNumber NVARCHAR(MAX)
-	DECLARE @strHeaderXML NVARCHAR(MAX)
-	DECLARE @strDetailXML NVARCHAR(MAX)
-	DECLARE @strTestResultXML NVARCHAR(MAX)
-	DECLARE @strReference NVARCHAR(MAX)
-	DECLARE @strRowState NVARCHAR(MAX)
-	DECLARE @strFeedStatus NVARCHAR(MAX)
-	DECLARE @dtmFeedDate DATETIME
-	DECLARE @strMessage NVARCHAR(MAX)
-	DECLARE @intMultiCompanyId INT
-	DECLARE @intStgEntityId INT
-	DECLARE @intCompanyLocationId INT
-	DECLARE @strTransactionType NVARCHAR(MAX)
-	DECLARE @intSampleAcknowledgementStageId INT
-	DECLARE @strHeaderCondition NVARCHAR(MAX)
-	DECLARE @strAckHeaderXML NVARCHAR(MAX)
-	DECLARE @strAckDetailXML NVARCHAR(MAX)
-	DECLARE @strAckTestResultXML NVARCHAR(MAX)
-	DECLARE @idoc INT
+		,@intSampleStageId INT
+		,@intSampleId INT
+		,@strSampleNumber NVARCHAR(MAX)
+		,@strNewSampleNumber NVARCHAR(MAX)
+		,@strHeaderXML NVARCHAR(MAX)
+		,@strDetailXML NVARCHAR(MAX)
+		,@strTestResultXML NVARCHAR(MAX)
+		,@strReference NVARCHAR(MAX)
+		,@strRowState NVARCHAR(MAX)
+		,@strFeedStatus NVARCHAR(MAX)
+		,@dtmFeedDate DATETIME
+		,@strMessage NVARCHAR(MAX)
+		,@intMultiCompanyId INT
+		,@intStgEntityId INT
+		,@intCompanyLocationId INT
+		,@strTransactionType NVARCHAR(MAX)
+		,@intSampleAcknowledgementStageId INT
+		,@strHeaderCondition NVARCHAR(MAX)
+		,@strAckHeaderXML NVARCHAR(MAX)
+		,@strAckDetailXML NVARCHAR(MAX)
+		,@strAckTestResultXML NVARCHAR(MAX)
+		,@idoc INT
 		,@intTransactionCount INT
 		,@intSampleRefId INT
 		,@intNewSampleId INT
@@ -131,6 +131,22 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 	DECLARE @tblQMSampleStage TABLE (intSampleStageId INT)
+	DECLARE @intCurrentCompanyId INT
+		,@intParentCompanyId INT
+		,@ysnIgnoreContract BIT
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId INT
+		,@strUserName NVARCHAR(50)
+		,@intAuditLogUserId INT
+
+	SELECT @intCurrentCompanyId = intCompanyId
+	FROM tblIPMultiCompany WITH (NOLOCK)
+	WHERE ysnCurrentCompany = 1
+
+	SELECT @intParentCompanyId = intCompanyId
+	FROM tblIPMultiCompany WITH (NOLOCK)
+	WHERE ysnParent = 1
 
 	INSERT INTO @tblQMSampleStage (intSampleStageId)
 	SELECT intSampleStageId
@@ -153,27 +169,30 @@ BEGIN TRY
 
 	WHILE @intSampleStageId > 0
 	BEGIN
-		SET @intSampleId = NULL
-		SET @strSampleNumber = NULL
-		SET @strHeaderXML = NULL
-		SET @strDetailXML = NULL
-		SET @strTestResultXML = NULL
-		SET @strReference = NULL
-		SET @strRowState = NULL
-		SET @strFeedStatus = NULL
-		SET @dtmFeedDate = NULL
-		SET @strMessage = NULL
-		SET @intMultiCompanyId = NULL
-		SET @intStgEntityId = NULL
-		SET @intCompanyLocationId = NULL
-		SET @strTransactionType = NULL
-		SET @intToBookId = NULL
-		SET @strFromBook = NULL
+		SELECT @intSampleId = NULL
+			,@strSampleNumber = NULL
+			,@strHeaderXML = NULL
+			,@strDetailXML = NULL
+			,@strTestResultXML = NULL
+			,@strReference = NULL
+			,@strRowState = NULL
+			,@strFeedStatus = NULL
+			,@dtmFeedDate = NULL
+			,@strMessage = NULL
+			,@intMultiCompanyId = NULL
+			,@intStgEntityId = NULL
+			,@intCompanyLocationId = NULL
+			,@strTransactionType = NULL
+			,@intToBookId = NULL
+			,@strFromBook = NULL
 		SELECT @intTransactionId = NULL
 			,@intCompanyId = NULL
 			,@intScreenId = NULL
 			,@intTransactionRefId = NULL
 			,@intCompanyRefId = NULL
+			,@strLogXML = NULL
+			,@strAuditXML = NULL
+			,@intLogId = NULL
 
 		SELECT @intSampleId = intSampleId
 			,@strSampleNumber = strSampleNumber
@@ -192,6 +211,8 @@ BEGIN TRY
 			,@intToBookId = intToBookId
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
+			,@strLogXML = strLogXML
+			,@strAuditXML = strAuditXML
 		FROM tblQMSampleStage WITH (NOLOCK)
 		WHERE intSampleStageId = @intSampleStageId
 
@@ -243,6 +264,7 @@ BEGIN TRY
 				,@intOrgContractDetailId = NULL
 				,@intOrgLoadDetailContainerLinkId = NULL
 				,@intOrgLoadDetailId = NULL
+				,@ysnIgnoreContract = NULL
 
 			SELECT @strSampleTypeName = strSampleTypeName
 				,@strProductValue = strProductValue
@@ -277,6 +299,7 @@ BEGIN TRY
 				,@strLastModifiedUser = strLastModifiedUser
 				,@dtmLastModified = dtmLastModified
 				,@ysnParent = ysnParent
+				,@ysnIgnoreContract = ysnIgnoreContract
 				,@intOrgContractDetailId = intContractDetailId
 				,@intOrgLoadDetailContainerLinkId = intLoadDetailContainerLinkId
 				,@intOrgLoadDetailId = intLoadDetailId
@@ -314,6 +337,7 @@ BEGIN TRY
 					,strLastModifiedUser NVARCHAR(100) Collate Latin1_General_CI_AS
 					,dtmLastModified DATETIME
 					,ysnParent BIT
+					,ysnIgnoreContract BIT
 					,intContractDetailId INT
 					,intLoadDetailContainerLinkId INT
 					,intLoadDetailId INT
@@ -333,6 +357,28 @@ BEGIN TRY
 						,16
 						,1
 						)
+			END
+
+			IF @intContractDetailRefId IS NULL
+				AND @intOrgContractDetailId IS NOT NULL
+			BEGIN
+				IF @intProductTypeId = 8
+					OR @intProductTypeId = 9
+					OR @intProductTypeId = 10
+				BEGIN
+					IF @intCurrentCompanyId = @intParentCompanyId
+					BEGIN
+						SELECT @intProductTypeId = 2
+							,@strProductValue = @strItemNo
+							,@intOrgContractDetailId = NULL
+							,@intContractDetailRefId = NULL
+							,@intOrgLoadDetailContainerLinkId = NULL
+							,@intLoadDetailContainerLinkRefId = NULL
+							,@intOrgLoadDetailId = NULL
+							,@intLoadDetailRefId = NULL
+							,@ysnIgnoreContract = 1
+					END
+				END
 			END
 
 			IF @strProductValue IS NOT NULL
@@ -814,7 +860,7 @@ BEGIN TRY
 					JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 					WHERE ET.strType = 'Forwarding Agent'
 						AND t.strName = @strForwardingAgentName
-						AND t.strEntityNo <> ''
+						--AND t.strEntityNo <> ''
 					)
 			BEGIN
 				SELECT @strErrorMessage = 'Forwarding Agent ' + @strForwardingAgentName + ' is not available.'
@@ -854,7 +900,7 @@ BEGIN TRY
 							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'Forwarding Agent'
 								AND t.strName = @strSentByValue
-								AND t.strEntityNo <> ''
+								--AND t.strEntityNo <> ''
 							)
 					BEGIN
 						SELECT @strErrorMessage = 'Sent By Agent ' + @strSentByValue + ' is not available.'
@@ -874,7 +920,7 @@ BEGIN TRY
 							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'Vendor'
 								AND t.strName = @strSentByValue
-								AND t.strEntityNo <> ''
+								--AND t.strEntityNo <> ''
 							)
 					BEGIN
 						SELECT @strErrorMessage = 'Sent By Seller ' + @strSentByValue + ' is not available.'
@@ -894,7 +940,7 @@ BEGIN TRY
 							JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 							WHERE ET.strType = 'User'
 								AND t.strName = @strSentByValue
-								AND t.strEntityNo <> ''
+								--AND t.strEntityNo <> ''
 							)
 					BEGIN
 						SELECT @strErrorMessage = 'Sent By User ' + @strSentByValue + ' is not available.'
@@ -1142,7 +1188,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strTestedByName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intTestedById IS NULL
 			BEGIN
@@ -1215,7 +1261,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'Forwarding Agent'
 				AND t.strName = @strForwardingAgentName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @strSentBy = 'Self'
 			BEGIN
@@ -1237,7 +1283,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Forwarding Agent'
 					AND t.strName = @strSentByValue
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 			ELSE IF @strSentBy = 'Seller'
 			BEGIN
@@ -1246,7 +1292,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Vendor'
 					AND t.strName = @strSentByValue
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 			ELSE IF @strSentBy = 'Users'
 			BEGIN
@@ -1255,7 +1301,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'User'
 					AND t.strName = @strSentByValue
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 
 			IF @intProductTypeId = 2
@@ -1263,6 +1309,11 @@ BEGIN TRY
 				SELECT @intProductValueId = t.intItemId
 				FROM tblICItem t WITH (NOLOCK)
 				WHERE t.strItemNo = @strProductValue
+
+				SELECT @intEntityId = t.intEntityId
+				FROM tblEMEntity t
+				WHERE t.strName = @strPartyName
+					AND t.strEntityNo <> ''
 			END
 			ELSE IF @intProductTypeId = 3
 			BEGIN
@@ -1365,7 +1416,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strCreatedUser
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intCreatedUserId IS NULL
 			BEGIN
@@ -1387,7 +1438,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strLastModifiedUser
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -1520,6 +1571,7 @@ BEGIN TRY
 					,intSentById
 					,intSampleRefId
 					,ysnParent
+					,ysnIgnoreContract
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -1584,6 +1636,7 @@ BEGIN TRY
 					,@intSentById
 					,@intSampleRefId
 					,0
+					,@ysnIgnoreContract
 					,@intCreatedUserId
 					,dtmCreated
 					,@intLastModifiedUserId
@@ -1618,26 +1671,54 @@ BEGIN TRY
 						)
 
 				SELECT @intNewSampleId = SCOPE_IDENTITY()
+
+				IF ISNULL(@ysnIgnoreContract, 0) = 1
+				BEGIN
+					UPDATE tblQMSample
+					SET strShipmentNumber = ''
+						,strContainerNumber = ''
+					WHERE intSampleId = @intNewSampleId
+				END
 			END
 
 			IF @strRowState = 'Modified'
 			BEGIN
+				IF ISNULL(@ysnIgnoreContract, 0) = 0
+				BEGIN
+					UPDATE tblQMSample
+					SET intProductTypeId = @intProductTypeId
+						,intProductValueId = @intProductValueId
+						,intContractDetailId = @intContractDetailId
+						,strShipmentNumber = x.strShipmentNumber
+						,strContainerNumber = x.strContainerNumber
+						,intLoadContainerId = @intLoadContainerId
+						,intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
+						,intLoadId = @intLoadId
+						,intLoadDetailId = @intLoadDetailId
+					FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
+							strShipmentNumber NVARCHAR(30)
+							,strContainerNumber NVARCHAR(100)
+							) x
+					WHERE tblQMSample.intSampleRefId = @intSampleRefId
+						AND tblQMSample.intBookId = @intToBookId
+				END
+
 				UPDATE tblQMSample
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intSampleTypeId = @intSampleTypeId
 					,strSampleRefNo = @strSampleNumber
-					,intProductTypeId = @intProductTypeId
-					,intProductValueId = @intProductValueId
+					--,intProductTypeId = @intProductTypeId
+					--,intProductValueId = @intProductValueId
 					,intSampleStatusId = @intSampleStatusId
 					,intPreviousSampleStatusId = @intPreviousSampleStatusId
 					,intItemId = @intItemId
 					,intItemContractId = @intItemContractId
-					,intContractDetailId = @intContractDetailId
+					--,intContractDetailId = @intContractDetailId
 					,intCountryID = @intCountryID
 					,ysnIsContractCompleted = x.ysnIsContractCompleted
 					,intLotStatusId = @intLotStatusId
 					,intEntityId = ISNULL(@intEntityId, intEntityId)
-					,strShipmentNumber = x.strShipmentNumber
+					--,strShipmentNumber = x.strShipmentNumber
 					,strLotNumber = x.strLotNumber
 					,strSampleNote = x.strSampleNote
 					,dtmSampleReceivedDate = x.dtmSampleReceivedDate
@@ -1651,15 +1732,15 @@ BEGIN TRY
 					,dtmTestingEndDate = x.dtmTestingEndDate
 					,dtmSamplingEndDate = x.dtmSamplingEndDate
 					,strSamplingMethod = x.strSamplingMethod
-					,strContainerNumber = x.strContainerNumber
+					--,strContainerNumber = x.strContainerNumber
 					,strMarks = x.strMarks
 					,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
 					,strCountry = x.strCountry
 					,intItemBundleId = @intItemBundleId
-					,intLoadContainerId = @intLoadContainerId
-					,intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
-					,intLoadId = @intLoadId
-					,intLoadDetailId = @intLoadDetailId
+					--,intLoadContainerId = @intLoadContainerId
+					--,intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
+					--,intLoadId = @intLoadId
+					--,intLoadDetailId = @intLoadDetailId
 					,intInventoryReceiptId = @intInventoryReceiptId
 					,intInventoryShipmentId = @intInventoryShipmentId
 					,intWorkOrderId = @intWorkOrderId
@@ -1679,7 +1760,7 @@ BEGIN TRY
 					,dtmLastModified = @dtmLastModified
 				FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
 						ysnIsContractCompleted BIT
-						,strShipmentNumber NVARCHAR(30)
+						--,strShipmentNumber NVARCHAR(30)
 						,strLotNumber NVARCHAR(50)
 						,strSampleNote NVARCHAR(512)
 						,dtmSampleReceivedDate DATETIME
@@ -1691,7 +1772,7 @@ BEGIN TRY
 						,dtmTestingEndDate DATETIME
 						,dtmSamplingEndDate DATETIME
 						,strSamplingMethod NVARCHAR(50)
-						,strContainerNumber NVARCHAR(100)
+						--,strContainerNumber NVARCHAR(100)
 						,strMarks NVARCHAR(100)
 						,strCountry NVARCHAR(100)
 						,strComment NVARCHAR(MAX)
@@ -1719,6 +1800,9 @@ BEGIN TRY
 				,@strDetailXML
 
 			DECLARE @tblQMSampleDetail TABLE (intSampleDetailId INT)
+
+			DELETE
+			FROM @tblQMSampleDetail
 
 			INSERT INTO @tblQMSampleDetail (intSampleDetailId)
 			SELECT intSampleDetailId
@@ -1862,6 +1946,9 @@ BEGIN TRY
 				,@strTestResultXML
 
 			DECLARE @tblQMTestResult TABLE (intTestResultId INT)
+
+			DELETE
+			FROM @tblQMTestResult
 
 			INSERT INTO @tblQMTestResult (intTestResultId)
 			SELECT intTestResultId
@@ -2330,7 +2417,6 @@ BEGIN TRY
 					FROM @tblQMTestResult
 					)
 
-			--EXEC sp_xml_removedocument @idoc
 			SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
 
 			EXEC uspCTGetTableDataInXML 'tblQMSample'
@@ -2362,32 +2448,32 @@ BEGIN TRY
 					AND TC.intToBookId = @intToBookId
 				JOIN tblCTBook B WITH (NOLOCK) ON B.intBookId = TC.intFromBookId
 
-				IF @strRowState = 'Added'
-				BEGIN
-					SELECT @StrDescription = 'Created from ' + @strFromBook + ': ' + @strSampleNumber
+				--IF @strRowState = 'Added'
+				--BEGIN
+				--	SELECT @StrDescription = 'Created from ' + @strFromBook + ': ' + @strSampleNumber
 
-					EXEC uspSMAuditLog @keyValue = @intNewSampleId
-						,@screenName = 'Quality.view.QualitySample'
-						,@entityId = @intLastModifiedUserId
-						,@actionType = 'Created'
-						,@actionIcon = 'small-new-plus'
-						,@changeDescription = @StrDescription
-						,@fromValue = ''
-						,@toValue = @strNewSampleNumber
-				END
-				ELSE IF @strRowState = 'Modified'
-				BEGIN
-					SELECT @StrDescription = 'Updated from ' + @strFromBook + ': ' + @strSampleNumber
+				--	EXEC uspSMAuditLog @keyValue = @intNewSampleId
+				--		,@screenName = 'Quality.view.QualitySample'
+				--		,@entityId = @intLastModifiedUserId
+				--		,@actionType = 'Created'
+				--		,@actionIcon = 'small-new-plus'
+				--		,@changeDescription = @StrDescription
+				--		,@fromValue = ''
+				--		,@toValue = @strNewSampleNumber
+				--END
+				--ELSE IF @strRowState = 'Modified'
+				--BEGIN
+				--	SELECT @StrDescription = 'Updated from ' + @strFromBook + ': ' + @strSampleNumber
 
-					EXEC uspSMAuditLog @keyValue = @intNewSampleId
-						,@screenName = 'Quality.view.QualitySample'
-						,@entityId = @intLastModifiedUserId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@changeDescription = @StrDescription
-						,@fromValue = ''
-						,@toValue = @strNewSampleNumber
-				END
+				--	EXEC uspSMAuditLog @keyValue = @intNewSampleId
+				--		,@screenName = 'Quality.view.QualitySample'
+				--		,@entityId = @intLastModifiedUserId
+				--		,@actionType = 'Updated'
+				--		,@actionIcon = 'small-tree-modified'
+				--		,@changeDescription = @StrDescription
+				--		,@fromValue = ''
+				--		,@toValue = @strNewSampleNumber
+				--END
 			END
 
 			SELECT @intScreenId = intScreenId
@@ -2399,6 +2485,145 @@ BEGIN TRY
 			WHERE intRecordId = @intNewSampleId
 				AND intScreenId = @intScreenId
 
+			IF @intTransactionRefId IS NULL
+			BEGIN
+				INSERT INTO tblSMTransaction (
+					intScreenId
+					,intRecordId
+					,strTransactionNo
+					,intEntityId
+					,intConcurrencyId
+					)
+				SELECT @intScreenId
+					,@intNewSampleId
+					,@strNewSampleNumber
+					,@intLastModifiedUserId
+					,1
+
+				SELECT @intTransactionRefId = SCOPE_IDENTITY()
+			END
+
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strLogXML
+
+			SELECT @strUserName = NULL
+
+			SELECT @strUserName = strName
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS)
+
+			SELECT @intAuditLogUserId = NULL
+
+			SELECT @intAuditLogUserId = CE.intEntityId
+			FROM tblEMEntity CE
+			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+			WHERE ET1.strType = 'User'
+				AND CE.strName = @strUserName
+				--AND CE.strEntityNo <> ''
+
+			IF @intAuditLogUserId IS NULL
+			BEGIN
+				SELECT TOP 1 @intAuditLogUserId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = 'irelyadmin'
+			END
+
+			INSERT INTO tblSMLog (
+				dtmDate
+				,strRoute
+				,intTransactionId
+				,intConcurrencyId
+				,intEntityId
+				,strType
+				)
+			SELECT dtmDate
+				,strRoute
+				,@intTransactionRefId
+				,1
+				,@intAuditLogUserId
+				,'Audit'
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (
+					intLogId INT
+					,dtmDate DATETIME
+					,strRoute NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					)
+
+			SELECT @intLogId = SCOPE_IDENTITY();
+
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAuditXML
+
+			DECLARE @tblSMAudit TABLE (
+				intAuditId INT
+				,intAuditRefId INT
+				)
+
+			DELETE
+			FROM @tblSMAudit
+
+			INSERT INTO tblSMAudit (
+				intLogId
+				,strAction
+				,strChange
+				,strFrom
+				,strTo
+				,strAlias
+				,ysnField
+				,ysnHidden
+				,intKeyValue
+				--,intParentAuditId
+				,intConcurrencyId
+				)
+			OUTPUT inserted.intAuditId
+				,inserted.intKeyValue
+			INTO @tblSMAudit
+			SELECT @intLogId
+				,strAction
+				,strChange
+				,strFrom
+				,strTo
+				,strAlias
+				,ysnField
+				,ysnHidden
+				,intAuditId
+				--,(
+				--	SELECT TOP 1 A.intAuditId
+				--	FROM tblSMAudit A
+				--	WHERE intLogId = @intLogId
+				--		AND A.intKeyValue = x.intParentAuditId
+				--	)
+				,1
+			FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+					intLogId INT
+					,strAction NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strChange NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strFrom NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strTo NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strAlias NVARCHAR(205) Collate Latin1_General_CI_AS
+					,ysnField BIT
+					,ysnHidden BIT
+					,intAuditId INT
+					,intParentAuditId INT
+					) x
+
+			UPDATE A1
+			SET intParentAuditId = (
+					SELECT TOP 1 A2.intAuditId
+					FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+							intAuditId INT
+							,intParentAuditId INT
+							) x
+					JOIN @tblSMAudit A2 ON A2.intAuditRefId = x.intParentAuditId
+					WHERE x.intAuditId = A.intAuditRefId
+					)
+			FROM @tblSMAudit A
+			JOIN tblSMAudit A1 ON A.intAuditId = A1.intAuditId
+
+			EXEC sp_xml_removedocument @idoc
+			
 			IF @ysnParent = 1
 			BEGIN
 				SELECT TOP 1 @intMultiCompanyId = intCompanyId
@@ -2492,13 +2717,19 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-						,@referenceTransactionId = @intTransactionId
-						,@referenceCompanyId = @intCompanyId
+					--BEGIN TRY
+						EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+							,@referenceTransactionId = @intTransactionId
+							,@referenceCompanyId = @intCompanyId
+							,@screenId=@intScreenId
+							,@populatedByInterCompany=1
+					--END TRY
+					--BEGIN CATCH
+					--END CATCH
 				END
 			END
 
-			EXEC sp_xml_removedocument @idoc
+			--EXEC sp_xml_removedocument @idoc
 
 			UPDATE tblQMSampleStage
 			SET strFeedStatus = 'Processed'

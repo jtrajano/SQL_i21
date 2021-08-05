@@ -21,10 +21,10 @@ SELECT Invoice.intInvoiceId
 	, CASE WHEN InvoiceShift.intShiftNumber IS NULL THEN CONVERT(NVARCHAR(50),InvoiceShift.strShiftNo)  ELSE CONVERT(NVARCHAR(50),InvoiceShift.intShiftNumber) END as strShiftNo
 	, Invoice.strComments
 	, Invoice.strVoidComments
-	, 0.0 as dblTotal
+	, ISNULL(dblTotal,0) as dblTotal
 	, Invoice.intTermId
 	, Term.strTerm
-	, Invoice.ysnPosted
+	, i21Invoice.ysnPosted
 	, Invoice.ysnVoided
 	, Invoice.dtmPostedDate
 	, Invoice.dtmVoidedDate
@@ -32,6 +32,8 @@ SELECT Invoice.intInvoiceId
 	, stri21InvoiceNo = i21Invoice.strInvoiceNumber
 	, Invoice.intConcurrencyId
 	, strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS
+	, isnull(tax.dblTaxTotal,0) dblTotalTaxAmount  
+	, isnull(tax.dblItemTotal,0) dblTotalBefTax 
 FROM tblMBILInvoice Invoice
 --LEFT JOIN tblMBILInvoiceItem InvoiceItem ON InvoiceItem.intInvoiceId = Invoice.intInvoiceId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Invoice.intEntityCustomerId
@@ -39,5 +41,9 @@ LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Invoi
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Invoice.intDriverId
 LEFT JOIN tblMBILShift InvoiceShift ON InvoiceShift.intShiftId = Invoice.intShiftId
 LEFT JOIN tblMBILOrder InvoiceOrder ON InvoiceOrder.intOrderId = Invoice.intOrderId
-LEFT JOIN tblSMTerm Term ON Term.intTermID = InvoiceOrder.intTermId
+LEFT JOIN tblSMTerm Term ON Term.intTermID = Invoice.intTermId
 LEFT JOIN tblARInvoice i21Invoice ON i21Invoice.intInvoiceId = Invoice.inti21InvoiceId
+LEFT JOIN (    
+  SELECT item.intInvoiceId,SUM(isnull(dblItemTotal,0))dblItemTotal,SUM(isnull(dblTaxTotal,0))dblTaxTotal
+  FROM tblMBILInvoiceItem item      
+  GROUP BY item.intInvoiceId) tax ON Invoice.intInvoiceId = tax.intInvoiceId

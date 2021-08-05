@@ -50,7 +50,7 @@ BEGIN TRY
 		,@intTransactionId INT
 		,@ItemsToUnReserve AS dbo.ItemReservationTableType
 		,@dblTaskQty NUMERIC(38, 20)
-		,@intTaskItemUOMId int
+		,@intTaskItemUOMId INT
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -99,19 +99,23 @@ BEGIN TRY
 	IF @dtmDate IS NULL
 		SELECT @dtmDate = GETDATE()
 
-	SELECT @intTransactionId = intOrderHeaderId,@dblTaskQty=dblQty,@intTaskItemUOMId=intItemUOMId
+	SELECT @intTransactionId = intOrderHeaderId
+		,@dblTaskQty = dblQty
+		,@intTaskItemUOMId = intItemUOMId
 	FROM tblMFTask
 	WHERE intTaskId = @intTaskId
 
-	IF @intTaskId IS NOT NULL and dbo.fnMFConvertQuantityToTargetItemUOM(@intSplitItemUOMId,@intTaskItemUOMId,@dblSplitQty)>@dblTaskQty
+	IF @intTaskId IS NOT NULL
+		AND dbo.fnMFConvertQuantityToTargetItemUOM(@intSplitItemUOMId, @intTaskItemUOMId, @dblSplitQty) > @dblTaskQty
 	BEGIN
 		RAISERROR (
 				'Split qty cannot be more than task qty.'
 				,16
 				,1
 				)
-		Return
-	End
+
+		RETURN
+	END
 
 	SELECT @dblLotReservedQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(intItemUOMId, ISNULL(@intWeightUOMId, @intItemUOMId), ISNULL(dblQty, 0)))
 	FROM tblICStockReservation
@@ -346,6 +350,106 @@ BEGIN TRY
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
 
 	SELECT @strSplitLotNumber AS strSplitLotNumber
+
+	DECLARE @intUnitMeasureId INT
+		,@strUserName NVARCHAR(50)
+		,@strItemNo NVARCHAR(50)
+		,@strSubLocationName NVARCHAR(50)
+		,@strName NVARCHAR(50)
+		,@strNewSubLocationName NVARCHAR(50)
+		,@strNewName NVARCHAR(50)
+		,@strLotOrigin NVARCHAR(50)
+		,@strSplitUnitMeasure NVARCHAR(50)
+		,@intStockItemUOMId INT
+
+	SELECT @strUserName = strUserName
+	FROM tblSMUserSecurity
+	WHERE intEntityId = @intUserId
+
+	SELECT @strItemNo = strItemNo
+	FROM tblICItem
+	WHERE intItemId = @intItemId
+
+	SELECT @strLotOrigin = strLotOrigin
+	FROM tblSMCompanyLocation
+	WHERE intCompanyLocationId = @intLocationId
+
+	SELECT @strSubLocationName = strSubLocationName
+	FROM tblSMCompanyLocationSubLocation
+	WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+	SELECT @strName = strName
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intStorageLocationId
+
+	SELECT @strNewSubLocationName = strSubLocationName
+	FROM tblSMCompanyLocationSubLocation
+	WHERE intCompanyLocationSubLocationId = @intSplitSubLocationId
+
+	SELECT @strNewName = strName
+	FROM tblICStorageLocation
+	WHERE intStorageLocationId = @intSplitStorageLocationId
+
+	SELECT @strParentLotNumber = strParentLotNumber
+	FROM tblICParentLot
+	WHERE intParentLotId = @intParentLotId
+
+	SELECT @intStockItemUOMId = intItemUOMId
+	FROM tblICItemUOM
+	WHERE intItemId = @intItemId
+		AND ysnStockUnit = 1
+
+	IF @intSplitItemUOMId <> @intStockItemUOMId
+	BEGIN
+		SELECT @dblSplitQty = dbo.fnMFConvertQuantityToTargetItemUOM(@intSplitItemUOMId, @intStockItemUOMId, @dblSplitQty)
+
+		SELECT @intSplitItemUOMId = @intStockItemUOMId
+	END
+
+	SELECT @intUnitMeasureId = intUnitMeasureId
+	FROM tblICItemUOM
+	WHERE intItemUOMId = @intSplitItemUOMId
+
+	SELECT @strSplitUnitMeasure = strUnitMeasure
+	FROM tblICUnitMeasure
+	WHERE intUnitMeasureId = @intUnitMeasureId
+
+	INSERT INTO tblIPLotSplitFeed (
+		strCompanyLocation
+		,intActionId
+		,dtmCreatedDate
+		,strCreatedByUser
+		,intTransactionTypeId
+		,strStorageLocation
+		,strItemNo
+		,strMotherLotNo
+		,strLotNo
+		,strStorageUnit
+		,strSplitStorageLocation
+		,strSplitStorageUnit
+		,strSplitLotNo
+		,dblQuantity
+		,strQuantityUOM
+		,strReasonCode
+		,strNotes
+		)
+	SELECT strCompanyLocation = @strLotOrigin
+		,intActionId = 1
+		,dtmCreatedDate = @dtmDate
+		,strCreatedByUser = @strUserName
+		,intTransactionTypeId = 19
+		,strStorageLocation = @strSubLocationName
+		,strItemNo = @strItemNo
+		,strMotherLotNo = @strParentLotNumber
+		,strLotNo = @strLotNumber
+		,strStorageUnit = @strName
+		,strSplitStorageLocation = @strNewSubLocationName
+		,strSplitStorageUnit = @strNewName
+		,strSplitLotNo = @strSplitLotNumber
+		,dblQuantity = @dblSplitQty
+		,strQuantityUOM = @strSplitUnitMeasure
+		,strReasonCode = @strReasonCode
+		,strNotes = @strNote
 
 	IF EXISTS (
 			SELECT 1

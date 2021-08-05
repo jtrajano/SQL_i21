@@ -130,8 +130,10 @@ v.intKey
 , v.ysnHasAddOn
 , v.ysnHasSubstitute
 , v.ysnHasAddOnOtherCharge
+, v.dblReceiveStandardWeight
 , guiSessionId = tsession.guiSessionId
 , dtmSessionDate = tsession.dtmTransactionDate
+, v.dblStandardWeight
 FROM vyuICGetItemStock v
 OUTER APPLY tblICTransactionSession tsession
 OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectiveCost

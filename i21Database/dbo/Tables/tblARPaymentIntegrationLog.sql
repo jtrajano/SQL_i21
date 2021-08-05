@@ -19,4 +19,6 @@
 	[intRecapUnPostedExistingCount]		INT NOT NULL DEFAULT ((0)),
     [intConcurrencyId]					INT NOT NULL CONSTRAINT [DF_tblARPaymentIntegrationLog_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARPaymentIntegrationLog_intIntegrationLogId] PRIMARY KEY CLUSTERED ([intIntegrationLogId] ASC)
-)
+);
+GO
+CREATE INDEX [idx_tblARPaymentIntegrationLog] ON [dbo].[tblARPaymentIntegrationLog] (intIntegrationLogId)

@@ -17,8 +17,11 @@ SELECT
 		, ysnCheckoffTax
 		, ysnTaxOnly
 		, strTaxableByOtherTaxes
+		, TRT.strType
 		from tblSMTaxGroup TG
 	inner join tblSMTaxGroupCode TGC on TGC.intTaxGroupId = TG.intTaxGroupId
 	inner join tblSMTaxCode TC on TC.intTaxCodeId = TGC.intTaxCodeId
 	inner join tblSMTaxClass TCL on TCL.intTaxClassId = TC.intTaxClassId
+	inner join tblSMTaxReportType TRT on TRT.intTaxReportTypeId = TCL.intTaxReportTypeId
+	
 

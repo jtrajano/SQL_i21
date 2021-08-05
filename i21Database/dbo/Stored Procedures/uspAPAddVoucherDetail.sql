@@ -45,6 +45,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -64,6 +65,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
@@ -105,6 +107,8 @@ SELECT TOP 100 PERCENT
 	,intLoadDetailId					=	A.intLoadShipmentDetailId
 	,intLoadId							=	A.intLoadShipmentId
 	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
+	,intWeightClaimId					=	A.intWeightClaimId
+	,intWeightClaimDetailId				=	A.intWeightClaimDetailId
 	,intScaleTicketId					=	A.intScaleTicketId
 	,intTicketId						=	A.intTicketId
 	,intCCSiteDetailId					=	A.intCCSiteDetailId
@@ -382,7 +386,9 @@ INSERT
 	,intLocationId						
 	,intLoadDetailId
 	,intLoadShipmentCostId					
-	,intLoadId							
+	,intLoadId	
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					
@@ -474,7 +480,9 @@ VALUES
 	,intLocationId						
 	,intLoadDetailId	
 	,intLoadShipmentCostId				
-	,intLoadId							
+	,intLoadId				
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					
@@ -592,7 +600,7 @@ FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
 LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
-WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
+WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL OR A.intPriceFixationDetailId > 0
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 
@@ -604,6 +612,9 @@ EXEC uspAPUpdateVoucherPayable @voucherDetailIds = @voucherDetailIds, @decrease 
 
 --UPDATE AVAILABLE QTY
 EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
+
+--LOG RISK
+EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherDetailIds, @remove = 0
 
 IF @transCount = 0
 	BEGIN

@@ -20,6 +20,12 @@ BEGIN TRY
 	DECLARE @dblPContractDetailQty NUMERIC(18, 6)
 	DECLARE @strLotCondition NVARCHAR(50)
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
+	DECLARE @strFOBPoint AS NVARCHAR(50)
+
+	SELECT @strFOBPoint = FT.strFobPoint 
+	FROM tblLGLoad L
+	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId 
+	WHERE intLoadId = @intLoadId
 
 	SELECT TOP 1 @strLotCondition = strLotCondition
 	FROM tblICCompanyPreference
@@ -473,7 +479,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
 			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
-			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0) AND @strFOBPoint = 'Origin'
 		BEGIN
 			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
 		END
@@ -605,8 +611,8 @@ BEGIN TRY
 			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
 			JOIN tblICItemLocation IL ON IL.intItemId = CD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
 			JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId AND EL.ysnDefaultLocation = 1
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0
-			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId

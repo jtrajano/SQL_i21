@@ -81,6 +81,7 @@ SET
 	,[dblQtyShipped]					= ISNULL([dblQtyShipped], @ZeroDecimal)
 	,[dblDiscount]						= ISNULL([dblDiscount], @ZeroDecimal)
 	,[dblItemWeight]					= ISNULL([dblItemWeight], 1.00)
+	,[dblStandardWeight]				= ISNULL([dblStandardWeight], 0.00)
 	,[dblShipmentGrossWt]				= ISNULL([dblShipmentGrossWt], @ZeroDecimal)
 	,[dblShipmentTareWt]				= ISNULL([dblShipmentTareWt], @ZeroDecimal)
 	,[dblShipmentNetWt]					= ISNULL([dblShipmentGrossWt], @ZeroDecimal) - ISNULL([dblShipmentTareWt], @ZeroDecimal)		
@@ -272,6 +273,7 @@ SET
 	,[dblBaseInvoiceTotal]		= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseInvoiceTotal] END
 	,[dblAmountDue]				= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblAmountDue] END
 	,[dblBaseAmountDue]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseAmountDue] END
+	,[dblTotalStandardWeight]	= ISNULL(T.[dblTotalStandardWeight], @ZeroDecimal)
 FROM
 	(
 		SELECT 
@@ -279,6 +281,7 @@ FROM
 			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
 			,[dblTotal]					= SUM([dblTotal])
 			,[dblBaseTotal]				= SUM([dblBaseTotal])
+			,[dblTotalStandardWeight]	= SUM([dbo].fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()))
 			,[intInvoiceId]				= [intInvoiceId]
 		FROM
 			tblARInvoiceDetail
@@ -311,7 +314,7 @@ SET
 								ELSE 0
 								END
 FROM tblARInvoice ARI
-INNER JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
+LEFT JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
 WHERE
 	ARI.[intInvoiceId] = @InvoiceIdLocal
 

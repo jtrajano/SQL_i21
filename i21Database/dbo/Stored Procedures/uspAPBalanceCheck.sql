@@ -4,6 +4,7 @@
 	,@endDate DATETIME = NULL
 	,@intInterval INT = NULL
 	,@type INT = 0
+	,@account INT = NULL
 )
 AS
 
@@ -120,6 +121,8 @@ BEGIN
 		WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
 		AND A.ysnIsUnposted = 0
 		AND CONVERT(DATE, CAST(A.dtmDate AS CHAR(12)), 112) BETWEEN @beginDate AND @currentEndDate
+		AND 1 = CASE WHEN @account IS NOT NULL AND A.intAccountId = @account THEN 1 WHEN @account IS NULL THEN 1 
+		ELSE 0 END
 		-- AND 1 = (CASE WHEN @isOriginTransaction = 0 THEN 1
 		-- 				WHEN @isOriginTransaction = 1 
 		-- 						THEN (CASE WHEN A.strModuleName != 'Accounts Payable' THEN 1 ELSE 0 END)
@@ -161,6 +164,8 @@ BEGIN
 			FROM vyuAPPayables B1
 			INNER JOIN tblAPBill B ON B1.intBillId = B.intBillId
 			WHERE CONVERT(DATE, CAST(B1.dtmDate AS CHAR(12)), 112) BETWEEN @beginDate AND @currentEndDate
+			AND 1 = CASE WHEN @account IS NOT NULL AND B1.intAccountId = @account THEN 1 WHEN @account IS NULL THEN 1 
+			ELSE 0 END
 			-- AND 1 = (CASE WHEN @isOriginTransaction = 0 THEN 1
 			-- 		WHEN @isOriginTransaction = 1 
 			-- 				THEN (CASE WHEN B.ysnOrigin = 1 AND
@@ -194,6 +199,8 @@ BEGIN
 			FROM vyuAPPrepaidPayables B1
 			INNER JOIN tblAPBill B ON B1.intBillId = B.intBillId
 			WHERE CONVERT(DATE, CAST(B1.dtmDate AS CHAR(12)), 112) BETWEEN @beginDate AND @currentEndDate
+			AND 1 = CASE WHEN @account IS NOT NULL AND B1.intAccountId = @account THEN 1  WHEN @account IS NULL THEN 1 
+			ELSE 0 END
 			-- AND 1 = (CASE WHEN @isOriginTransaction = 0 THEN 1
 			-- 		WHEN @isOriginTransaction = 1 
 			-- 				THEN (CASE WHEN B.ysnOrigin = 1 AND
@@ -250,7 +257,30 @@ BEGIN
 		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
 		WHERE D.strAccountCategory = 'AP Account' --there are old data where cash refund have been posted to non AP account
 		AND CONVERT(DATE, CAST(A.dtmDate AS CHAR(12)), 112) BETWEEN @beginDate AND @currentEndDate
+		AND 1 = CASE WHEN @account IS NOT NULL AND A.intAccountId = @account THEN 1  WHEN @account IS NULL THEN 1 
+		ELSE 0 END
 		GROUP BY A.intInvoiceId
+		UNION ALL
+		SELECT 
+			intBillId
+			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+		FROM (
+			SELECT 
+				intBillId
+				,dblTotal
+				,dblAmountDue
+				,dblAmountPaid
+				,dblDiscount
+				,dblInterest
+				,dtmDate
+				,intCount
+				FROM dbo.vyuAPPayablesAgingDeleted
+				WHERE CONVERT(DATE, CAST(dtmDate AS CHAR(12)), 112) BETWEEN @beginDate AND @currentEndDate
+				AND 1 = CASE WHEN @account IS NOT NULL AND intAccountId = @account THEN 1  WHEN @account IS NULL THEN 1 
+				ELSE 0 END
+		) tmpAPPayables 
+		GROUP BY intBillId
+		HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
 		--WHERE 1 = (CASE WHEN @isOriginTransaction = 0 THEN 1
 		--				WHEN @isOriginTransaction = 1 
 		--						THEN (CASE WHEN B.ysnOrigin = 1 THEN 1 ELSE 0 END)

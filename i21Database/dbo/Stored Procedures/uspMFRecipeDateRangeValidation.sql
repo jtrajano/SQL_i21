@@ -91,4 +91,6 @@ BEGIN
 		AND intRecipeId <> @intRecipeId
 END
 
+SELECT @strVersionNo = ''
+
 SELECT @strVersionNo

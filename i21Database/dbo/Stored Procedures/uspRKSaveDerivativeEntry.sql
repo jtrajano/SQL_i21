@@ -62,6 +62,7 @@ BEGIN
 			, intUserId
 			, strNotes
 			, intCommodityUOMId
+			, strInOut
 			, strMiscFields
 			, intActionId)
 		SELECT TOP 1  strBucketType = 'Derivatives'
@@ -88,7 +89,8 @@ BEGIN
 			, intEntityId 
 			, intUserId = @intUserId
 			, strNotes 
-			, intOrigUOMId 
+			, intOrigUOMId
+			, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END 
 			, strMiscField
 			, intActionId = 57 --Delete Derivative
 		FROM tblRKSummaryLog 
@@ -141,8 +143,12 @@ BEGIN
 		, intFutOptTransactionHeaderId = der.intFutOptTransactionHeaderId
 		, ysnPreCrush = der.ysnPreCrush
 		, strBrokerTradeNo = der.strBrokerTradeNo
+		, der.intTraderId
 		, m.intCurrencyId
 		, cur.strCurrency
+		, der.strStatus
+		, der.dtmFilledDate
+		, der.intRollingMonthId
 	INTO #tmpDerivative
 	FROM tblRKFutOptTransaction der
 	JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
@@ -164,14 +170,33 @@ BEGIN
 			, @dblStrike NUMERIC(24, 10)
 			, @strOptionType NVARCHAR(50)
 			, @dblContractSize NUMERIC(24, 10)
+			, @dblNoOfLots NUMERIC(24, 10)
+			, @dblPrice NUMERIC(24, 10)
 			, @strInstrumentType NVARCHAR(50)
 			, @intBrokerageAccountId INT
 			, @strBrokerAccount NVARCHAR(50)
 			, @strBroker NVARCHAR(50)
 			, @ysnPreCrush BIT
 			, @strBrokerTradeNo NVARCHAR(50)
+			, @intCommodityId INT
+			, @intFutureMarketId INT
+			, @strTransactionNumber NVARCHAR(50)
+			, @strBatchId NVARCHAR(50)
+			, @intFutureMonthId INT
+			, @intBookId INT
+			, @intSubBookId INT
+			, @intLocationId INT
+			, @strNotes NVARCHAR(250)
+			, @intTraderId INT
+			, @strStatus NVARCHAR(250)
+			, @dtmFilledDate DATETIME
+			, @intRollingMonthId INT
+
+
 			
 		SELECT TOP 1 @dblContractSize = dblContractSize
+			, @dblNoOfLots = dblNoOfLots
+			, @dblPrice = dblPrice
 			, @intOptionMonthId = intOptionMonthId
 			, @strOptionMonth = strOptionMonth
 			, @dblStrike = dblStrike
@@ -179,8 +204,21 @@ BEGIN
 			, @strInstrumentType = strInstrumentType
 			, @strBrokerAccount = strBrokerAccount
 			, @strBroker = strBroker
-			, @ysnPreCrush = ysnPreCrush
+			, @ysnPreCrush = ISNULL(ysnPreCrush,0)
 			, @strBrokerTradeNo = strBrokerTradeNo
+			, @strBuySell = strBuySell
+			, @intCommodityId = intCommodityId
+			, @intFutureMarketId = intFutureMarketId
+			, @strTransactionNumber = strTransactionNumber
+			, @intFutureMonthId = intFutureMonthId
+			, @intBookId = intBookId
+			, @intSubBookId = intSubBookId
+			, @intLocationId = intLocationId
+			, @strNotes = strNotes
+			, @intTraderId = intTraderId
+			, @strStatus = strStatus
+			, @dtmFilledDate = dtmFilledDate
+			, @intRollingMonthId = intRollingMonthId
 		FROM #tmpDerivative der
 
 		INSERT INTO @LogHelper(intRowId, strFieldName, strValue)
@@ -195,6 +233,10 @@ BEGIN
 			UNION ALL SELECT 'strBroker', @strBroker
 			UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
 			UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
+			UNION ALL SELECT 'intTraderId', CAST(@intTraderId AS NVARCHAR)
+			UNION ALL SELECT 'strStatus', @strStatus
+			UNION ALL SELECT 'dtmFilledDate', CAST(@dtmFilledDate AS NVARCHAR)
+			UNION ALL SELECT 'intRollingMonthId', CAST(@intRollingMonthId AS NVARCHAR)
 		) t WHERE ISNULL(strValue, '') != ''
 
 		select @dblPreviousNoOfLots = sum(dblOrigNoOfLots)
@@ -202,7 +244,142 @@ BEGIN
 		where intTransactionRecordId = @intFutOptTransactionId
 		and strTransactionType = 'Derivative Entry'
 
-		INSERT INTO @SummaryLog(strBucketType
+		EXEC uspSMGetStartingNumber 148, @strBatchId OUTPUT
+
+		IF EXISTS(SELECT TOP 1 1
+			FROM tblRKSummaryLog
+			WHERE intTransactionRecordId = @intFutOptTransactionId
+				AND strBucketType = 'Derivatives'
+				AND strTransactionType = 'Derivative Entry'
+				AND strTransactionNumber = @strTransactionNumber
+				AND (intCommodityId <> @intCommodityId 
+					OR strDistributionType <> @strBuySell 
+					OR intFutureMarketId <> @intFutureMarketId 
+					OR dblOrigNoOfLots <> @dblNoOfLots
+					OR dblPrice <> @dblPrice
+					OR intFutureMonthId <> @intFutureMonthId
+					OR intBookId <> @intBookId
+					OR intSubBookId <> @intSubBookId
+					OR intLocationId <> @intLocationId
+					OR strNotes <> @strNotes
+					OR strMiscField <>  dbo.fnRKConvertMiscFieldString(@LogHelper)
+				)
+				AND ysnNegate IS NULL)
+		BEGIN
+				INSERT INTO tblRKSummaryLog(strBatchId
+					, dtmCreatedDate
+					, strBucketType
+					, intActionId
+					, strAction
+					, strTransactionType
+					, intTransactionRecordId
+					, intTransactionRecordHeaderId
+					, strDistributionType
+					, strTransactionNumber
+					, dtmTransactionDate
+					, intContractDetailId
+					, intContractHeaderId
+					, intFutureMarketId
+					, intFutureMonthId
+					, intFutOptTransactionId
+					, intCommodityId
+					, intLocationId
+					, intItemId
+					, intProductTypeId
+					, intOrigUOMId
+					, intBookId
+					, intSubBookId
+					, strInOut
+					, dblOrigNoOfLots
+					, dblContractSize
+					, dblOrigQty
+					, dblPrice
+					, intEntityId
+					, intTicketId
+					, intUserId
+					, strNotes
+					, ysnNegate
+					, intRefSummaryLogId
+					, strMiscField)
+				SELECT 
+					  @strBatchId
+					, dtmCreatedDate
+					, strBucketType
+					, intActionId = 56
+					, strAction = 'Updated Derivative'
+					, strTransactionType
+					, intTransactionRecordId
+					, intTransactionRecordHeaderId
+					, strDistributionType
+					, strTransactionNumber
+					, dtmTransactionDate
+					, intContractDetailId
+					, intContractHeaderId
+					, intFutureMarketId
+					, intFutureMonthId
+					, intFutOptTransactionId
+					, intCommodityId
+					, intLocationId
+					, intItemId
+					, intProductTypeId
+					, intOrigUOMId
+					, intBookId
+					, intSubBookId
+					, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END
+					, dblOrigNoOfLots * -1
+					, dblContractSize
+					, dblOrigQty * -1
+					, dblPrice
+					, intEntityId
+					, intTicketId
+					, intUserId
+					, strNotes
+					, ysnNegate = 1
+					, intRefSummaryLogId
+					, strMiscField
+				FROM tblRKSummaryLog
+				WHERE intTransactionRecordId = @intFutOptTransactionId
+					AND strBucketType = 'Derivatives'
+					AND strTransactionType = 'Derivative Entry'
+					AND strTransactionNumber = @strTransactionNumber
+						AND (intCommodityId <> @intCommodityId 
+						OR strDistributionType <> @strBuySell 
+						OR intFutureMarketId <> @intFutureMarketId 
+						OR dblOrigNoOfLots <> @dblNoOfLots
+						OR dblPrice <> @dblPrice
+						OR intFutureMonthId <> @intFutureMonthId
+						OR intBookId <> @intBookId
+						OR intSubBookId <> @intSubBookId
+						OR intLocationId <> @intLocationId
+						OR strNotes <> @strNotes
+						OR strMiscField <>  dbo.fnRKConvertMiscFieldString(@LogHelper)
+					)
+					AND ysnNegate IS NULL 
+
+				UPDATE tblRKSummaryLog SET ysnNegate = 1
+				WHERE intTransactionRecordId = @intFutOptTransactionId
+					AND strBucketType = 'Derivatives'
+					AND strTransactionType = 'Derivative Entry'
+					AND strTransactionNumber = @strTransactionNumber
+					AND (intCommodityId <> @intCommodityId 
+						OR strDistributionType <> @strBuySell 
+						OR intFutureMarketId <> @intFutureMarketId 
+						OR dblOrigNoOfLots <> @dblNoOfLots
+						OR dblPrice <> @dblPrice
+						OR intFutureMonthId <> @intFutureMonthId
+						OR intBookId <> @intBookId
+						OR intSubBookId <> @intSubBookId
+						OR intLocationId <> @intLocationId
+						OR strNotes <> @strNotes
+						OR strMiscField <>  dbo.fnRKConvertMiscFieldString(@LogHelper)
+					)
+					AND ysnNegate IS NULL 
+
+		END
+
+
+		INSERT INTO @SummaryLog(strBatchId
+			, strBucketType
 			, strTransactionType
 			, intTransactionRecordId
 			, intTransactionRecordHeaderId
@@ -214,6 +391,7 @@ BEGIN
 			, intFutOptTransactionId
 			, intCommodityId
 			, intLocationId
+			, strInOut
 			, intCurrencyId
 			, intBookId
 			, intSubBookId
@@ -229,7 +407,8 @@ BEGIN
 			, intCommodityUOMId
 			, strMiscFields
 			, intActionId)
-		SELECT strBucketType = 'Derivatives'
+		SELECT @strBatchId 
+			, strBucketType = 'Derivatives'
 			, strTransactionType = 'Derivative Entry'
 			, intTransactionRecordId = der.intTransactionRecordId
 			, intTransactionRecordHeaderId = der.intFutOptTransactionHeaderId
@@ -241,15 +420,16 @@ BEGIN
 			, intFutOptTransactionId = der.intTransactionRecordId
 			, intCommodityId = der.intCommodityId
 			, intLocationId = der.intLocationId
+			, strInOut = CASE WHEN UPPER(strBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
 			, intCurrencyId = der.intCurrencyId
 			, intBookId = der.intBookId
 			, intSubBookId = der.intSubBookId
 			, intFutureMarketId = der.intFutureMarketId
 			, intFutureMonthId = der.intFutureMonthId
-			, dblNoOfLots = CASE WHEN UPPER(strBuySell) = 'BUY' THEN (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) ELSE (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) * -1 END 
+			, dblNoOfLots = CASE WHEN UPPER(strBuySell) = 'BUY' THEN der.dblNoOfLots  ELSE der.dblNoOfLots  * -1 END 
 			, dblPrice = der.dblPrice
 			, dblContractSize = der.dblContractSize
-			, dblQty = (CASE WHEN UPPER(strBuySell) = 'BUY' THEN (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) ELSE (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) * -1 END ) * dblContractSize
+			, dblQty = (CASE WHEN UPPER(strBuySell) = 'BUY' THEN der.dblNoOfLots ELSE der.dblNoOfLots * -1 END ) * dblContractSize
 			, intEntityId = der.intEntityId
 			, intUserId = @intUserId
 			, strNotes = der.strNotes
@@ -257,6 +437,7 @@ BEGIN
 			, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
 			, intActionId = CASE WHEN @dblPreviousNoOfLots IS NULL THEN 34 ELSE 56 END
 		FROM #tmpDerivative der		
+		
 	END
 	ELSE
 	BEGIN
@@ -291,6 +472,7 @@ BEGIN
 			, intUserId
 			, strNotes
 			, intCommodityUOMId
+			, strInOut
 			, strMiscFields
 			, intActionId)
 		SELECT TOP 1  strBucketType = 'Derivatives'
@@ -318,6 +500,7 @@ BEGIN
 			, intUserId = @intUserId
 			, strNotes 
 			, intOrigUOMId 
+			, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END
 			, strMiscField
 			, intActionId = 57 --Delete Derivative
 		FROM tblRKSummaryLog 

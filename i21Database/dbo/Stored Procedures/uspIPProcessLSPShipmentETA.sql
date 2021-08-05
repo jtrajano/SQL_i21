@@ -110,7 +110,7 @@ Begin
 			SELECT TOP 1 @intApprovedById = intApprovedById
 			FROM tblCTApprovedContract
 			WHERE intContractDetailId = @intContractDetailId
-			ORDER BY 1 DESC
+			ORDER BY intApprovedContractId DESC
 
 			UPDATE tblCTContractDetail
 			SET dtmPlannedAvailabilityDate = @dtmETA

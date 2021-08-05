@@ -54,6 +54,7 @@ BEGIN TRY
 	Declare @strPackagingCategoryId NVARCHAR(Max)
 	Declare @intPlannedShiftId int
 	DECLARE @strSavedWONo NVARCHAR(50)
+			,@intSubLocationId int
 
 	SELECT @dtmCurrentDateTime = GetDate()
 	EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -73,6 +74,7 @@ BEGIN TRY
 		,strComment NVARCHAR(Max)
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
+		,ysnDietarySupplements BIT
 		,intLocationId INT
 		,intBlendRequirementId INT
 		,intItemUOMId INT
@@ -128,6 +130,7 @@ BEGIN TRY
 		,strComment
 		,ysnUseTemplate
 		,ysnKittingEnabled
+		,ysnDietarySupplements
 		,intLocationId
 		,intBlendRequirementId
 		,intItemUOMId
@@ -145,6 +148,7 @@ BEGIN TRY
 		,strComment
 		,ysnUseTemplate
 		,ysnKittingEnabled
+		,ysnDietarySupplements
 		,intLocationId
 		,intBlendRequirementId
 		,intItemUOMId
@@ -162,6 +166,7 @@ BEGIN TRY
 			,strComment NVARCHAR(Max)
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
+			,ysnDietarySupplements BIT
 			,intLocationId INT
 			,intBlendRequirementId INT
 			,intItemUOMId INT
@@ -305,6 +310,11 @@ End
 	SELECT @strDemandNo = strDemandNo
 	FROM tblMFBlendRequirement
 	WHERE intBlendRequirementId = @intBlendRequirementId
+	
+	Select @intSubLocationId=NULL
+	Select @intSubLocationId=intSubLocationId
+	from tblMFManufacturingCell 
+	Where intManufacturingCellId = @intCellId
 
 	SELECT @strBlendItemNo = strItemNo
 		,@strBlendItemStatus = strStatus
@@ -738,6 +748,7 @@ End
 			,ysnKittingEnabled
 			,intKitStatusId
 			,ysnUseTemplate
+			,ysnDietarySupplements
 			,strComment
 			,dtmCreated
 			,intCreatedUserId
@@ -748,6 +759,10 @@ End
 			,intTransactionFrom
 			,intPlannedShiftId
 			,dtmPlannedDate
+			,intConcurrencyId
+			,intSubLocationId
+			,dtmOrderDate
+			,intSupervisorId 
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -770,6 +785,7 @@ End
 			,ysnKittingEnabled
 			,@intKitStatusId
 			,ysnUseTemplate
+			,ysnDietarySupplements
 			,strComment
 			,GetDate()
 			,intUserId
@@ -780,6 +796,10 @@ End
 			,1
 			,intPlannedShiftId
 			,dtmDueDate
+			,1 AS intConcurrencyId
+			,@intSubLocationId 
+			,GetDate()
+			,intUserId
 		FROM @tblBlendSheet
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
@@ -998,6 +1018,17 @@ End
 		FROM @tblBSLot
 
 		SELECT @dblQtyToProduce = @dblQtyToProduce - @PerBlendSheetQty
+
+		INSERT INTO dbo.tblMFWorkOrderPreStage (
+			intWorkOrderId
+			,intWorkOrderStatusId
+			,intUserId
+			,strRowState
+			)
+		SELECT @intWorkOrderId
+			,9
+			,@intUserId
+			,'Added'
 
 		SET @intNoOfSheet = @intNoOfSheet - 1
 	END

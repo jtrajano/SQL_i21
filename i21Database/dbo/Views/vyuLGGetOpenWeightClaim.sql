@@ -5,6 +5,7 @@ SELECT
 	,PC.intPurchaseSale
 	,strType = CASE WHEN PC.intPurchaseSale = 2 THEN 'Outbound' ELSE 'Inbound' END COLLATE Latin1_General_CI_AS
 	,strContractNumber = CH.strContractNumber
+	,intAging = DATEDIFF(DD, (CASE WHEN (PC.intPurchaseSale = 2) THEN INV.dtmDate ELSE IR.dtmReceiptDate END), GETDATE())
 	,intContractTypeId = CH.intContractTypeId
 	,intContractSeq = CD.intContractSeq
 	,strEntityName = EM.strName
@@ -36,6 +37,9 @@ SELECT
 	,strWeightUOM = WUOM.strUnitMeasure
 	,intWeightId = PC.intWeightId
 	,strWeightGradeDesc = WG.strWeightGradeDesc
+	,intLoadContainerId = LC.intLoadContainerId
+	,strContainerNumber = LC.strContainerNumber
+	,strMarks = LC.strMarks
 	,dblShippedNetWt = PC.dblShippedNetWt
 	,dblReceivedNetWt = PC.dblReceivedNetWt
 	,dblReceivedGrossWt = PC.dblReceivedGrossWt
@@ -110,6 +114,18 @@ FROM tblLGPendingClaim PC
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = PC.intLoadContainerId
+	OUTER APPLY (SELECT TOP 1 IR.dtmReceiptDate FROM tblICInventoryReceipt IR
+					INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+					WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
+						AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
+						AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)) IR
+	OUTER APPLY (SELECT TOP 1 IV.dtmDate FROM tblARInvoice IV
+					INNER JOIN tblARInvoiceDetail IVD ON IVD.intInvoiceId = IV.intInvoiceId
+					WHERE IV.ysnPosted = 1 AND IVD.intContractDetailId = CD.intContractDetailId
+						AND IVD.intContractHeaderId = CH.intContractHeaderId AND IV.strType = 'Standard' AND strTransactionType = 'Invoice'
+						AND IVD.intLoadDetailId IN (SELECT intLoadDetailId FROM tblLGLoadDetail WHERE intLoadId = L.intLoadId)
+					) INV
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW 
 		JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 GO

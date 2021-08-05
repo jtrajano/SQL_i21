@@ -58,6 +58,12 @@ BEGIN TRY
 		,@strBook NVARCHAR(50)
 		,@strSubBook NVARCHAR(50)
 		,@intShipmentType int
+		,@strLogCondition nvarchar(50)
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId int
+
+	Select @strLogCondition = NULL
 
 	SELECT @strLoadNumber = strLoadNumber
 		,@intSourceType = intSourceType
@@ -322,6 +328,40 @@ BEGIN TRY
 	WHERE intRecordId = @intLoadId
 		AND intScreenId = @intLoadScreenId
 
+	Select Top 1 @intLogId=intLogId
+	from dbo.tblSMLog
+	Where intTransactionId=@intTransactionId
+	Order by intLogId desc
+
+	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
+
+	---------------------------------------------Audit Log------------------------------------------
+	IF @strLogCondition IS NOT NULL
+	BEGIN
+	SELECT @strLogXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPLogView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strLogXML OUTPUT
+		,NULL
+		,NULL
+
+	---------------------------------------------Audit Log------------------------------------------
+	SELECT @strAuditXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPAuditView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strAuditXML OUTPUT
+		,NULL
+		,NULL
+	END
+
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
 		,@strDatabaseName NVARCHAR(50)
@@ -342,7 +382,7 @@ BEGIN TRY
 	END
 	IF EXISTS (
 			SELECT 1
-			FROM master.dbo.sysdatabases
+			FROM sys.databases
 			WHERE name = @strDatabaseName
 			)
 	BEGIN
@@ -372,6 +412,8 @@ BEGIN TRY
 		,strBook
 		,strSubBook
 		,intShipmentType
+		,strLogXML
+		,strAuditXML
 		)
 	SELECT @intLoadId
 		,@strLoadNumber
@@ -396,7 +438,9 @@ BEGIN TRY
         ,@intCompanyId
 		,@strBook
 		,@strSubBook
-		,@intShipmentType'
+		,@intShipmentType
+		,@strLogXML
+		,@strAuditXML'
 
 		EXEC sp_executesql @strSQL
 			,N'@intLoadId int
@@ -422,7 +466,9 @@ BEGIN TRY
         ,@intCompanyId int
 		,@strBook nvarchar(50)
 		,@strSubBook nvarchar(50)
-		,@intShipmentType int'
+		,@intShipmentType int
+		,@strLogXML nvarchar(MAX)
+		,@strAuditXML nvarchar(MAX)'
 			,@intLoadId
 			,@strLoadNumber
 			,@strLoadXML
@@ -447,6 +493,8 @@ BEGIN TRY
 			,@strBook
 			,@strSubBook
 			,@intShipmentType
+			,@strLogXML
+			,@strAuditXML
 	END
 END TRY
 

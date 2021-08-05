@@ -14,6 +14,7 @@
 	,@ysnDestinationLotEmptyOut BIT = 0
 	,@intNewLotId INT = NULL OUTPUT
 	,@intWorkOrderId int=NULL
+	,@intAdjustmentId INT = NULL Output
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -578,6 +579,8 @@ BEGIN TRY
 		,@intUserId
 		,@intInventoryAdjustmentId OUTPUT
 		,@strDescription
+
+	SELECT @intAdjustmentId=@intInventoryAdjustmentId
 
 	SELECT @intNewLotId = intLotId
 	FROM dbo.tblICLot

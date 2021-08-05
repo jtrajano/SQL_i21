@@ -126,6 +126,106 @@ AS
 	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 
 		AND intSourceTransactionDetailId = @intTransactionDetailId
 		AND strTransactionType = 'Source'
+
+	-- Fees
+	UNION ALL
+
+	SELECT
+		intSourceTransactionId
+		,intSourceTransactionDetailId
+		,strSourceTransactionId
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,(IRC.dblAmount / IRI.dblNet)
+		,dblQty * (CASE WHEN IRC.ysnPrice = 1 THEN 1 ELSE -1 END)
+		,CS.intCurrencyId
+		,A.dblUOMQty
+		,A.strRateType
+		,A.dtmDate
+		,0
+		,A.strTransactionType
+		,ITEM.strItemNo
+	FROM tblGRTransferGLEntriesCTE A
+	INNER JOIN tblGRTransferStorageReference TSR
+		ON TSR.intTransferStorageReferenceId = A.intSourceTransactionDetailId
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
+	INNER JOIN tblSCTicket SC
+		ON SC.intTicketId = CS.intTicketId
+	INNER JOIN tblSCScaleSetup SCS
+		ON SCS.intScaleSetupId = SC.intScaleSetupId
+	INNER JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intSourceId = SC.intTicketId
+	INNER JOIN tblICInventoryReceipt IR
+		ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		AND IR.intSourceType IN (7, 1) -- Scale Ticket
+		AND IR.intEntityVendorId = SC.intEntityId
+	INNER JOIN tblICInventoryReceiptCharge IRC
+		ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
+		AND IRC.strChargesLink = IRI.strChargesLink
+	INNER JOIN tblICItem ITEM
+		ON ITEM.intItemId = IRC.intChargeId
+	INNER JOIN vyuICGetCompactItem CI
+		ON CI.intItemId = IRC.intChargeId
+	WHERE IRC.intChargeId = ISNULL(SCS.intDefaultFeeItemId, IRC.intChargeId)
+		AND CI.strType = 'Other Charge'
+		AND CI.strCostType IS NOT NULL
+		AND CI.strCostType NOT IN ('Grain Discount', 'Storage Charge')
+		AND intSourceTransactionDetailId = @intTransactionDetailId
+		AND strTransactionType = 'Source'
+
+	UNION ALL
+
+	SELECT
+		intSourceTransactionId
+		,intSourceTransactionDetailId
+		,strSourceTransactionId
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,(IRC.dblAmount / IRI.dblNet)
+		,dblQty * (CASE WHEN IRC.ysnPrice = 1 THEN 1 ELSE -1 END)
+		,CS.intCurrencyId
+		,A.dblUOMQty
+		,A.strRateType
+		,A.dtmDate
+		,dbo.fnGetItemGLAccount(IRC.intChargeId, IR.intLocationId, 'AP Clearing')
+		,'To'
+		,ITEM.strItemNo
+	FROM tblGRTransferGLEntriesCTE A
+	INNER JOIN tblGRTransferStorageReference TSR
+		ON TSR.intTransferStorageReferenceId = A.intSourceTransactionDetailId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
+	INNER JOIN tblSCTicket SC
+		ON SC.intTicketId = CS.intTicketId
+	INNER JOIN tblSCScaleSetup SCS
+		ON SCS.intScaleSetupId = SC.intScaleSetupId
+	INNER JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intSourceId = SC.intTicketId
+	INNER JOIN tblICInventoryReceipt IR
+		ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+		AND IR.intSourceType IN (7, 1) -- Scale Ticket
+		AND IR.intEntityVendorId = SC.intEntityId
+	INNER JOIN tblICInventoryReceiptCharge IRC
+		ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
+		AND IRC.strChargesLink = IRI.strChargesLink
+	INNER JOIN tblICItem ITEM
+		ON ITEM.intItemId = IRC.intChargeId
+	INNER JOIN tblICItemLocation IL
+		ON IL.intItemId = ITEM.intItemId
+		AND IL.intLocationId = CS_TO.intCompanyLocationId
+	INNER JOIN vyuICGetCompactItem CI
+		ON CI.intItemId = IRC.intChargeId
+	WHERE IRC.intChargeId = ISNULL(SCS.intDefaultFeeItemId, IRC.intChargeId)
+		AND CI.strType = 'Other Charge'
+		AND CI.strCostType IS NOT NULL
+		AND CI.strCostType NOT IN ('Grain Discount', 'Storage Charge')
+		AND intSourceTransactionDetailId = @intTransactionDetailId
+		AND strTransactionType = 'Source'
 )
 
 ------------------------------------------------------------------------------------------
@@ -137,8 +237,8 @@ SELECT
 	,intAccountId				= C.intAccountId
 	,dblDebit					= Credit.Value
 	,dblCredit					= Debit.Value
-	,dblDebitUnit				= DebitUnit.Value
-	,dblCreditUnit				= CreditUnit.Value
+	,dblDebitUnit				= CreditUnit.Value
+	,dblCreditUnit				= DebitUnit.Value
 	,strDescription				= GL.strDescription --+ ' A'--ISNULL(C.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strItemNo + ' a'
 	,strCode					= 'TRA'
 	,strReference				= '' 
@@ -147,12 +247,12 @@ SELECT
 	,dtmDateEntered				= GETDATE()
 	,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
     ,strJournalLineDescription  = '' 
-	,intJournalLineNo			= ForGLEntries_CTE.intTransactionDetailId
+	,intJournalLineNo			= ForGLEntries_CTE.intSourceTransactionDetailId
 	,ysnIsUnposted				= 0
 	,intUserId					= @intEntityUserSecurityId
 	,intEntityId				= GL.intEntityId 
-	,strTransactionId			= ForGLEntries_CTE.strTransactionId
-	,intTransactionId			= ForGLEntries_CTE.intTransactionId
+	,strTransactionId			= ForGLEntries_CTE.strSourceTransactionId
+	,intTransactionId			= ForGLEntries_CTE.intSourceTransactionId
 	,strTransactionType			= 'Transfer Storage'
 	,strTransactionForm			= 'Transfer Storage'
 	,strModuleName				= @ModuleName
@@ -191,13 +291,17 @@ CROSS APPLY dbo.fnGetCreditForeign(
 WHERE GL.strDescription LIKE '%Charges from%'
 	AND GL.ysnIsUnposted = 0
 	AND ForGLEntries_CTE.strTransactionType = 'Source'
+	AND (
+		(Debit.[Value] > 0 AND GL.dblDebit > 0)
+		OR (Credit.[Value] > 0 AND GL.dblCredit> 0)
+	)
 
 UNION ALL
 
 -------------------------------------------------------------------------------------------
 --OPEN CLEARING FOR NEW DP STORAGE
 -------------------------------------------------------------------------------------------
-SELECT	
+SELECT 
 	dtmDate						= ForGLEntries_CTE.dtmDate
 	,strBatchId					= @strBatchId
 	,intAccountId				= ForGLEntries_CTE.intAccountId
@@ -258,4 +362,8 @@ CROSS APPLY (SELECT strDescription FROM tblGLAccount GLA WHERE intAccountId = Fo
 WHERE GL.strDescription LIKE '%Charges from%'
 	AND GL.ysnIsUnposted = 0
 	AND ForGLEntries_CTE.strTransactionType = 'To'
+	AND (
+		(Debit.[Value] > 0 AND GL.dblDebit > 0)
+		OR (Credit.[Value] > 0 AND GL.dblCredit> 0)
+	)
 ;

@@ -40,6 +40,7 @@
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT				= NULL
 	,@ItemCostTypeId				INT				= NULL
 	,@ItemMarginById				INT				= NULL
 	,@ItemCommentTypeId				INT				= NULL
@@ -49,15 +50,16 @@
 	,@ItemSubFormula				NVARCHAR(50)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
 	,@ItemContractHeaderId			INT				= NULL
 	,@ItemContractDetailId			INT				= NULL
-	,@ItemItemContractHeaderId		INT				= NULL
-	,@ItemItemContractDetailId		INT				= NULL
-	,@ItemItemContract				BIT				= 0			
+	,@ItemContract					BIT				= 0			
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL
 	,@ItemWeightUOMId				INT				= NULL	
-	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemWeight					NUMERIC(38,20)	= 0.000000	
+	,@ItemStandardWeight			NUMERIC(38,20)	= 0.000000
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000		
@@ -111,7 +113,7 @@ DECLARE @ZeroDecimal			NUMERIC(18, 6)
 		,@CurrencyId			INT
 		,@InitTranCount			INT
 		,@Savepoint				NVARCHAR(32)
-
+		,@strItemType			NVARCHAR(50)
 		,@ItemName				NVARCHAR(50)
 		,@LocationName			NVARCHAR(50)
 		,@ItemLocationError		NVARCHAR(255)
@@ -146,7 +148,7 @@ END
 
 SET @ItemCurrencyExchangeRate = CASE WHEN ISNULL(@ItemCurrencyExchangeRate, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemCurrencyExchangeRate, 1.000000) END
 SET @ItemSubCurrencyRate = CASE WHEN ISNULL(@ItemSubCurrencyId, 0) = 0 THEN 1.000000 ELSE ISNULL(@ItemSubCurrencyRate, 1.000000) END
-	
+SET @strItemType = (SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @ItemId)	
 	
 IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
 	BEGIN		
@@ -166,7 +168,7 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 	
 IF NOT EXISTS(	SELECT NULL 
 				FROM tblICItem IC INNER JOIN tblICItemLocation IL ON IC.intItemId = IL.intItemId
-				WHERE IC.[intItemId] = @ItemId AND IL.[intLocationId] = @CompanyLocationId)
+				WHERE IC.[intItemId] = @ItemId AND IL.[intLocationId] = @CompanyLocationId) AND @strItemType <> 'Comment'
 	BEGIN		
 		IF (ISNULL(@RaiseError,0) = 1)
 		begin
@@ -204,8 +206,6 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@InvoiceType					NVARCHAR(200)
 		,@TermId						INT
 		,@Pricing						NVARCHAR(250)	= NULL
-		,@ContractHeaderId				INT				= NULL
-		,@ContractDetailId				INT				= NULL
 		,@SpecialPrice					NUMERIC(18,6)	= 0.000000
 		,@ContractUOMId					INT
 		,@PriceUOMId					INT
@@ -216,6 +216,8 @@ DECLARE  @ContractNumber				NVARCHAR(50)
 		,@SubCurrencyRate				NUMERIC(18,6)
 		,@TermDiscountExempt			BIT
 		,@TermDiscountRate				NUMERIC(18,6)
+		,@intContractDetailId			INT = @ContractDetailId
+		,@intContractHeaderId			INT = @ContractHeaderId
 
 BEGIN TRY
 SELECT TOP 1 @InvoiceType = strType, @TermId = intTermId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId 
@@ -228,8 +230,8 @@ EXEC dbo.[uspARGetItemPrice]
 		,@Quantity						= @ItemQtyShipped
 		,@Price							= @SpecialPrice					OUTPUT
 		,@Pricing						= @Pricing						OUTPUT
-		,@ContractHeaderId				= @ContractHeaderId				OUTPUT
-		,@ContractDetailId				= @ContractDetailId				OUTPUT
+		,@ContractHeaderId				= @intContractDetailId			OUTPUT
+		,@ContractDetailId				= @intContractHeaderId			OUTPUT
 		,@ContractNumber				= @ContractNumber				OUTPUT
 		,@ContractSeq					= @ContractSeq					OUTPUT
 		,@TermDiscount					= @ItemTermDiscount				OUTPUT
@@ -251,8 +253,7 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 		SET @ItemPrice = @SpecialPrice
 		SET @ItemUnitPrice = @SpecialPrice
 		SET @ItemPricing = @Pricing
-		SET @ItemContractHeaderId = @ContractHeaderId
-		SET @ItemContractDetailId = @ContractDetailId
+
 		IF ISNULL(@ContractDetailId,0) <> 0
 		BEGIN
 			SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
@@ -264,6 +265,8 @@ IF (ISNULL(@RefreshPrice,0) = 1)
 			SET @ItemCurrencyExchangeRate		= ISNULL(@CurrencyExchangeRate, 1.000000)
 			SET @ItemSubCurrencyId				= @SubCurrencyId
 			SET @ItemSubCurrencyRate			= ISNULL(@SubCurrencyRate, 1.000000)
+			SET @ContractDetailId				= @intContractDetailId
+			SET @ContractHeaderId				= @intContractHeaderId
 		END
 	END
 		
@@ -348,6 +351,7 @@ BEGIN TRY
 				,[intRecipeItemId] 
 				,[intRecipeId]
 				,[intSubLocationId]
+				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
 				,[intCommentTypeId]
@@ -364,6 +368,7 @@ BEGIN TRY
 				,[intShipmentPurchaseSalesContractId]
 				,[intItemWeightUOMId]
 				,[dblItemWeight]
+				,[dblStandardWeight]
 				,[dblShipmentGrossWt]
 				,[dblShipmentTareWt]
 				,[dblShipmentNetWt]
@@ -465,6 +470,7 @@ BEGIN TRY
 				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intRecipeId]						= @ItemRecipeId
 				,[intSubLocationId]					= @ItemSublocationId
+				,[intPriceFixationDetailId]			= @ItemPriceFixationDetailId
 				,[intCostTypeId]					= @ItemCostTypeId
 				,[intMarginById]					= @ItemMarginById
 				,[intCommentTypeId]					= @ItemCommentTypeId	
@@ -472,15 +478,16 @@ BEGIN TRY
 				,[dblRecipeQuantity]				= @ItemRecipeQty
 				,[intSalesOrderDetailId]			= @ItemSalesOrderDetailId 
 				,[strSalesOrderNumber]				= @ItemSalesOrderNumber 
-				,[intContractHeaderId]				= @ItemContractHeaderId
-				,[intContractDetailId]				= @ItemContractDetailId
-				,[intItemContractHeaderId]			= @ItemItemContractHeaderId
-			    ,[intItemContractDetailId]			= @ItemItemContractDetailId
-				,[ysnItemContract]					= ISNULL(@ItemItemContract, 0)
+				,[intContractHeaderId]				= @ContractHeaderId
+				,[intContractDetailId]				= @ContractDetailId
+				,[intItemContractHeaderId]			= @ItemContractHeaderId
+			    ,[intItemContractDetailId]			= @ItemContractDetailId
+				,[ysnItemContract]					= ISNULL(@ItemContract, 0)
 				,[intShipmentId]					= @ItemShipmentId
 				,[intShipmentPurchaseSalesContractId] =	@ItemShipmentPurchaseSalesContractId 
 				,[intItemWeightUOMId]				= @ItemWeightUOMId
 				,[dblItemWeight]					= @ItemWeight
+				,[dblStandardWeight]				= @ItemStandardWeight
 				,[dblShipmentGrossWt]				= @ItemShipmentGrossWt
 				,[dblShipmentTareWt]				= @ItemShipmentTareWt
 				,[dblShipmentNetWt]					= @ItemShipmentNetWt

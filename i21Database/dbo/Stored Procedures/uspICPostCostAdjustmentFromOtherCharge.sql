@@ -15,7 +15,7 @@
 */
 CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentFromOtherCharge]
 	@ChargesToAdjust AS OtherChargeCostAdjustmentTableType READONLY
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intEntityUserSecurityId AS INT
 	,@ysnPost AS BIT = 1
 	,@strTransactionType AS NVARCHAR(50) = 'Bill'

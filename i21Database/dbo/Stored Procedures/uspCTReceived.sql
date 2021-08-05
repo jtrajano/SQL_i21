@@ -83,8 +83,8 @@ BEGIN TRY
 				IR.intInventoryReceiptDetailId
 				,CD.intContractDetailId
 				,IR.intItemUOMId
-				,CASE WHEN CH.ysnLoad=1 THEN IR.intLoadReceive ELSE IR.dblQty END
-				,CH.ysnLoad
+				,CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN IR.intLoadReceive ELSE IR.dblQty END
+				,ysnLoad = ISNULL(CH.ysnLoad, 0)
 				,CD.intPricingTypeId
 				,IR.intSourceId
 				,IR.intInventoryReceiptId
@@ -98,6 +98,88 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			IF @intSourceType = 2
+			BEGIN
+				INSERT INTO @tblToProcess (
+					intInventoryReceiptDetailId
+					,intContractDetailId
+					,intItemUOMId
+					,dblQty
+					,intContainerId
+					,ysnLoad
+					,intPricingTypeId
+					,intSourceId
+					,intInventoryReceiptId
+					,intToItemUOMId
+				)
+				SELECT DISTINCT ri.intInventoryReceiptItemId
+					, cd.intContractDetailId
+					, ri.intUnitMeasureId
+					, intLoad = dbo.fnMinNumeric(ch.intNoOfLoad, ri.intLoadReceive) * CASE WHEN r.intLoadReceive >= 0 THEN 1 ELSE - 1 END
+					, ri.intContainerId
+					, ysnLoad = ISNULL(ch.ysnLoad, 0)
+					, cd.intPricingTypeId
+					, ri.intSourceId
+					, r.intInventoryReceiptId
+					, cd.intItemUOMId
+				FROM @ItemsFromInventoryReceipt r
+				CROSS APPLY (
+					SELECT intLoadReceive = SUM(recItem.intLoadReceive)
+						, intInventoryReceiptItemId = MIN(recItem.intInventoryReceiptItemId)
+						, intContainerId = MIN(recItem.intContainerId)
+						, recItem.intSourceId
+						, recItem.intContractHeaderId
+						, recItem.intContractDetailId
+						, recItem.intLoadShipmentId
+						, recItem.intUnitMeasureId
+					FROM tblICInventoryReceiptItem recItem
+					WHERE recItem.intInventoryReceiptItemId = r.intInventoryReceiptDetailId
+					GROUP BY recItem.intSourceId
+						, recItem.intContractHeaderId
+						, recItem.intContractDetailId
+						, recItem.intLoadShipmentId
+						, recItem.intUnitMeasureId
+				) ri
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intContractHeaderId
+				INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
+					AND cd.intContractDetailId = ri.intContractDetailId
+				INNER JOIN tblLGLoad l ON l.intLoadId = ri.intLoadShipmentId
+				WHERE ISNULL(ch.ysnLoad, 0) = 1
+			END
+			ELSE
+			BEGIN
+				INSERT	INTO @tblToProcess (
+					intInventoryReceiptDetailId
+					,intContractDetailId
+					,intItemUOMId
+					,dblQty
+					,intContainerId
+					,ysnLoad
+					,intPricingTypeId
+					,intSourceId
+					,intInventoryReceiptId
+					,intToItemUOMId
+				)
+				SELECT 	
+					intInventoryReceiptDetailId
+					,CD.intContractDetailId
+					,IR.intItemUOMId
+					,CASE WHEN ISNULL(CH.ysnLoad, 0) =1 THEN IR.intLoadReceive ELSE dblQty END
+					,intContainerId
+					,ysnLoad = ISNULL(CH.ysnLoad, 0)
+					,CD.intPricingTypeId
+					,IR.intSourceId
+					,IR.intInventoryReceiptId
+					,CD.intItemUOMId
+				FROM	
+					@ItemsFromInventoryReceipt	IR
+					JOIN tblCTContractDetail CD	ON	CD.intContractDetailId	=	IR.intLineNo
+					JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
+				WHERE
+					ISNULL(intLineNo, 0) > 0
+					AND ISNULL(CH.ysnLoad, 0) = 1
+			END
+
 			INSERT	INTO @tblToProcess (
 				intInventoryReceiptDetailId
 				,intContractDetailId
@@ -114,9 +196,9 @@ BEGIN TRY
 				intInventoryReceiptDetailId
 				,CD.intContractDetailId
 				,IR.intItemUOMId
-				,CASE WHEN CH.ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END
+				,CASE WHEN ISNULL(CH.ysnLoad, 0) =1 THEN IR.intLoadReceive ELSE dblQty END
 				,intContainerId
-				,CH.ysnLoad
+				,ysnLoad = ISNULL(CH.ysnLoad, 0)
 				,CD.intPricingTypeId
 				,IR.intSourceId
 				,IR.intInventoryReceiptId
@@ -125,8 +207,9 @@ BEGIN TRY
 				@ItemsFromInventoryReceipt	IR
 				JOIN tblCTContractDetail CD	ON	CD.intContractDetailId	=	IR.intLineNo
 				JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-			WHERE	
+			WHERE
 				ISNULL(intLineNo, 0) > 0
+				AND ISNULL(CH.ysnLoad, 0) = 0 -- CT-4969
 		END
 	END
 
@@ -269,4 +352,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH
- 

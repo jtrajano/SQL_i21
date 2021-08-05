@@ -14,6 +14,7 @@ BEGIN TRY
 		,@intPriceContractId INT
 		,@intContractHeaderId INT
 		,@ysnApproval BIT
+		,@intContractScreenId INT
 	DECLARE @tblCTPriceContractPreStage TABLE (intPriceContractPreStageId INT)
 
 	INSERT INTO @tblCTPriceContractPreStage
@@ -39,6 +40,12 @@ BEGIN TRY
 			FROM @tblCTPriceContractPreStage PS
 			)
 
+	SELECT @intContractScreenId = NULL
+
+	SELECT @intContractScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
 	WHILE @intPriceContractPreStageId IS NOT NULL
 	BEGIN
 		SELECT @intPriceContractId = NULL
@@ -55,6 +62,28 @@ BEGIN TRY
 			,@ysnApproval = ysnApproval
 		FROM tblCTPriceContractPreStage
 		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
+
+		IF @ysnApproval = 0
+		BEGIN
+			IF NOT EXISTS (
+					SELECT TOP 1 1
+					FROM dbo.tblSMTransaction
+					WHERE strApprovalStatus IN (
+							'Approved'
+							,'Approved with Modifications'
+							,'No Need for Approval'
+							)
+						AND intRecordId = @intPriceContractId
+						AND intScreenId = @intContractScreenId
+					)
+			BEGIN
+				UPDATE dbo.tblCTPriceContractPreStage
+				SET strFeedStatus = 'IGNORE'
+				WHERE intPriceContractPreStageId = @intPriceContractPreStageId
+
+				GOTO NextContract
+			END
+		END
 
 		SELECT @intContractHeaderId = intContractHeaderId
 		FROM tblCTPriceFixation
@@ -135,6 +164,8 @@ BEGIN TRY
 		UPDATE tblCTPriceContractPreStage
 		SET strFeedStatus = 'Processed'
 		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
+
+		NextContract:
 
 		SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
 		FROM @tblCTPriceContractPreStage

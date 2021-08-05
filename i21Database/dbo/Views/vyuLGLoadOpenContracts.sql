@@ -118,6 +118,7 @@ SELECT CD.intContractDetailId
 	,strShipTo = SH.strLocationName
 	,intHeaderBookId = CH.intBookId
 	,intHeaderSubBookId = CH.intSubBookId
+	,ysnAllowReweighs = WW.ysnPayablesOnShippedWeights
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
@@ -143,6 +144,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLoca
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblCTWeightGrade WW ON WW.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblCTPosition CTP ON CTP.intPositionId = CH.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
@@ -301,6 +303,7 @@ SELECT CD.intContractDetailId
 	,strShipTo = SH.strLocationName
 	,intHeaderBookId = CH.intBookId
 	,intHeaderSubBookId = CH.intSubBookId
+	,ysnAllowReweighs = WW.ysnPayablesOnShippedWeights
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
@@ -326,6 +329,7 @@ LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLoca
 LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intGradeId
+LEFT JOIN tblCTWeightGrade WW ON WW.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblCTPosition CTP ON CTP.intPositionId = CH.intPositionId
 LEFT JOIN tblCTBook BO ON BO.intBookId = CD.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
@@ -356,101 +360,3 @@ OUTER APPLY (
 	ORDER BY S.dtmTestingEndDate DESC, S.intSampleId DESC) S 
 CROSS APPLY tblLGCompanyPreference CP
 OUTER APPLY (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference) DC
-GROUP BY CD.intContractDetailId
-	,CD.intContractHeaderId
-	,CD.intContractSeq
-	,CD.intItemId
-	,Item.strDescription
-	,Item.strItemNo
-	,Item.intCommodityId
-	,CD.dblQuantity
-	,CD.intUnitMeasureId
-	,CD.intItemUOMId
-	,CD.intPriceItemUOMId
-	,U1.strUnitMeasure
-	,CD.intNetWeightUOMId
-	,U2.intUnitMeasureId
-	,U2.strUnitMeasure
-	,U3.strUnitMeasure
-	,CD.intCompanyLocationId
-	,CL.strLocationName
-	,CD.dblBalance
-	,CD.dblScheduleQty
-	,CH.intContractTypeId
-	,CH.intEntityId
-	,CH.strContractNumber
-	,CH.dtmContractDate
-	,E.strName
-	,CD.dtmStartDate
-	,CD.dtmEndDate
-	,CD.dtmPlannedAvailabilityDate
-	,E.intDefaultLocationId
-	,CH.strCustomerContract
-	,CD.intContractStatusId
-	,CH.ysnUnlimitedQuantity
-	,CH.ysnLoad
-	,CD.dblQuantityPerLoad
-	,CD.intNoOfLoad
-	,Item.strType
-	,CH.intPositionId
-	,CTP.strPositionType
-	,CD.intLoadingPortId
-	,CD.intDestinationPortId
-	,CD.intDestinationCityId
-	,LoadingPort.strCity
-	,DestCity.strCity
-	,DestPort.strCity
-	,CD.strPackingDescription
-	,CD.intShippingLineId
-	,ShipLine.strName
-	,CD.intNumberOfContainers
-	,CD.intContainerTypeId
-	,Cont.strContainerType
-	,CD.strVessel
-	,S.strSampleStatus
-	,S.strSampleNumber
-	,S.strContainerNumber
-	,S.strSampleTypeName
-	,S.dtmTestingStartDate
-	,S.dtmTestingEndDate
-	,S.intCompanyLocationSubLocationId
-	,S.strSubLocationName
-	,S.dblRepresentingQty
-	,CD.strERPPONumber
-	,ysnValidateExternalPONo
-	,CD.intSubLocationId
-	,CLSL.strSubLocationName
-	,SL.strName
-	,CD.intStorageLocationId
-	,WG.ysnSample
-	,CD.dblShippingInstructionQty
-	,CD.intFreightTermId
-	,CO.strCountry
-	,CO2.strCountry
-	,CD.intShipToId
-	,SH.strLocationName
-	,FT.strFreightTerm
-	,CD.intBookId
-	,BO.strBook
-	,CD.intSubBookId
-	,SB.strSubBook
-	,AD.dblSeqPrice
-	,PT.strPricingType
-	,AD.intSeqCurrencyId 
-	,AD.strSeqCurrency
-	,AD.intSeqPriceUOMId
-	,AD.strSeqPriceUOM
-	,PCU.ysnSubCurrency
-	,CD.intRateTypeId
-	,CD.dblRate
-	,CET.strCurrencyExchangeRateType
-	,CD.intInvoiceCurrencyId
-	,FXC.strCurrency
-	,CD.dblCashPrice
-	,CD.intCurrencyId
-	,CPCU.strCurrency
-	,CPCU.ysnSubCurrency
-	,AD.ysnValidFX
-	,DC.intDefaultCurrencyId
-	,CH.intBookId
-	,CH.intSubBookId

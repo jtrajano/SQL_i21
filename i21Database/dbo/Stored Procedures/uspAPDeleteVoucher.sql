@@ -31,11 +31,24 @@ BEGIN TRY
 	DECLARE @transCount INT;
 	DECLARE @voucherBillDetailIds AS Id;
 	DECLARE @vendorOrderNumber NVARCHAR(100);
+
+	IF(NOT EXISTS(SELECT 1 FROM dbo.tblAPBill WHERE intBillId = @intBillId))
+	BEGIN
+		RAISERROR('Voucher already deleted.',16,1)
+		RETURN;
+	END
+
 	SET @transCount = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
 
 	INSERT INTO @voucherBillDetailIds
 	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
+
+	IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
+	BEGIN
+		RAISERROR('Voucher details already deleted.',16,1)
+		RETURN;
+	END
 
 	SELECT @vendorOrderNumber = strVendorOrderNumber FROM tblAPBill WHERE intBillId = @intBillId
 
@@ -137,19 +150,22 @@ BEGIN TRY
 	--Update the tblAPBillBatch
 	EXEC uspAPUpdateBillBatch @billBatchId = @billBatchId
 
-	DELETE FROM dbo.tblSMTransaction
-	WHERE intRecordId = @intBillId 
-	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
+	--Removed - FRM-9293
+	--DELETE FROM dbo.tblSMTransaction
+	--WHERE intRecordId = @intBillId 
+	--AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
 	
-	--Audit Log          
-	EXEC dbo.uspSMAuditLog 
-		 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
-		,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
-		,@entityId			= @UserEntityID						-- Entity Id.
-		,@actionType		= 'Deleted'							-- Action Type
-		,@changeDescription	= ''								-- Description
-		,@fromValue			= ''								-- Previous Value
-		,@toValue			= ''								-- New Value
+	IF @callerModule <> 0
+	BEGIN
+		EXEC dbo.uspSMAuditLog 
+			 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
+			,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
+			,@entityId			= @UserEntityID						-- Entity Id.
+			,@actionType		= 'Deleted'							-- Action Type
+			,@changeDescription	= ''								-- Description
+			,@fromValue			= ''								-- Previous Value
+			,@toValue			= ''								-- New Value
+	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
 

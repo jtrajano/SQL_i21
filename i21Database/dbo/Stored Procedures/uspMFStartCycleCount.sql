@@ -1048,9 +1048,9 @@ BEGIN TRY
 
 	DELETE t1
 	FROM @tblICFinalItem t1
-		,@tblICFinalItem t2
-	WHERE t1.intItemId = t2.intItemId
-		AND t1.intMainItemId = t2.intMainItemId
+		inner join @tblICFinalItem t2 on t1.intItemId = t2.intItemId
+	WHERE 
+		t1.intMainItemId = t2.intMainItemId
 		AND t1.intStorageLocationId = t2.intStorageLocationId
 		AND t1.intMachineId = t2.intMachineId
 		AND t1.intRecordId > t2.intRecordId
@@ -1335,7 +1335,8 @@ BEGIN TRY
 			8
 			,9
 			)
-		AND I.intStorageLocationId = IsNULL(SR.intStorageLocationId,I.intStorageLocationId)
+		--AND I.intStorageLocationId = IsNULL(SR.intStorageLocationId,I.intStorageLocationId)
+		AND I.intStorageLocationId = SR.intStorageLocationId
 	GROUP BY I.intItemId
 		,I.intItemUOMId
 		,I.intStorageLocationId
@@ -1707,10 +1708,10 @@ BEGIN TRY
 			)
 		,I1.intMachineId
 	FROM @tblICFinalItem I
-		,(
+		inner join (
 			SELECT intMachineId
 			FROM @tblMFMachine
-			) I1
+			) I1 on 1=1
 	WHERE I.intMachineId IS NULL
 
 	UPDATE dbo.tblMFWorkOrder

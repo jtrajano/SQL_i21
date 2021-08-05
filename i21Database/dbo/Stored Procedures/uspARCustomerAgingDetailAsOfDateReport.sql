@@ -163,6 +163,16 @@ BEGIN
 	DROP TABLE #CASHRETURNS
 END
 
+IF(OBJECT_ID('tempdb..#AGINGSTAGING') IS NOT NULL)
+BEGIN
+	DROP TABLE #AGINGSTAGING
+END
+
+IF(OBJECT_ID('tempdb..#GLACCOUNTS') IS NOT NULL)
+BEGIN
+	DROP TABLE #GLACCOUNTS
+END
+
 --#ARPOSTEDPAYMENT
 SELECT intPaymentId
 	 , dtmDatePaid
@@ -183,6 +193,13 @@ SELECT dblPayment	= SUM(dblPayment) + SUM(ISNULL(dblWriteOffAmount, 0))
 INTO #INVOICETOTALPREPAYMENTS
 FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId AND P.ysnInvoicePrepayment = 0
 GROUP BY PD.intInvoiceId
+
+--#GLACCOUNTS
+SELECT intAccountId
+	 , strAccountCategory
+INTO #GLACCOUNTS
+FROM vyuGLAccountDetail
+WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments', 'AP Account')
 
 --#POSTEDINVOICES
 SELECT intInvoiceId			= I.intInvoiceId
@@ -205,62 +222,46 @@ INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN #GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 WHERE ysnPosted = 1
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND ysnCancelled = 0
 	AND strTransactionType <> 'Cash Refund'
-	AND ((strType = 'Service Charge' AND  @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate)))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))
-	AND I.intAccountId IN (
-		SELECT A.intAccountId
-		FROM dbo.tblGLAccount A WITH (NOLOCK)
-		INNER JOIN (SELECT intAccountSegmentId
-						 , intAccountId
-					FROM dbo.tblGLAccountSegmentMapping WITH (NOLOCK)
-		) ASM ON A.intAccountId = ASM.intAccountId
-		INNER JOIN (SELECT intAccountSegmentId
-						 , intAccountCategoryId
-						 , intAccountStructureId
-					FROM dbo.tblGLAccountSegment WITH (NOLOCK)
-		) GLAS ON ASM.intAccountSegmentId = GLAS.intAccountSegmentId
-		INNER JOIN (SELECT intAccountStructureId                 
-					FROM dbo.tblGLAccountStructure WITH (NOLOCK)
-					WHERE strType = 'Primary'
-		) AST ON GLAS.intAccountStructureId = AST.intAccountStructureId
-		INNER JOIN (SELECT intAccountCategoryId
-						 , strAccountCategory 
-					FROM dbo.tblGLAccountCategory WITH (NOLOCK)
-					WHERE (strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND strAccountCategory = 'AP Account'))
-		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
-	)
+	AND ((strType = 'Service Charge' AND  @dtmDateToLocal < CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmForgiveDate)))) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))	
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 --#CASHREFUNDS
 SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
-     , dblRefundTotal		= I.dblInvoiceTotal
+		,strDocumentNumber = ID.strDocumentNumber
+		, dblRefundTotal		= SUM(ID.dblTotal)
 INTO #CASHREFUNDS
-FROM tblARInvoice I
+FROM tblARInvoiceDetail ID
+INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
-  AND ISNULL(I.intOriginalInvoiceId, '') <> ''
+  AND (ISNULL(I.intOriginalInvoiceId, '') <> '' OR ISNULL(ID.strDocumentNumber, '') <> '')
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
+GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
 
 --#CASHRETURNS
-SELECT intInvoiceId
-	 , intOriginalInvoiceId
-	 , dblInvoiceTotal
-	 , strInvoiceOriginId
-	 , strInvoiceNumber
-	 , dtmPostDate
+SELECT I.intInvoiceId
+	 , I.intOriginalInvoiceId
+	 , I.dblInvoiceTotal
+	 , I.strInvoiceOriginId
+	 , I.strInvoiceNumber
+	 , I.dtmPostDate
 INTO #CASHRETURNS	 
 FROM dbo.tblARInvoice I WITH (NOLOCK)
-WHERE ysnPosted = 1
-  AND ysnRefundProcessed = 1
-  AND strTransactionType = 'Credit Memo'
-  AND intOriginalInvoiceId IS NOT NULL
-  AND ISNULL(strInvoiceOriginId, '') <> ''
+LEFT JOIN tblARInvoice RI ON I.intOriginalInvoiceId = RI.intInvoiceId AND I.strInvoiceOriginId = RI.strInvoiceNumber
+WHERE I.ysnPosted = 1
+  AND I.ysnRefundProcessed = 1
+  AND I.strTransactionType = 'Credit Memo'
+  AND I.intOriginalInvoiceId IS NOT NULL
+  AND ISNULL(I.strInvoiceOriginId, '') <> ''
+  AND ISNULL(RI.ysnReturned, 0) = 0
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
@@ -279,47 +280,6 @@ IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 		WHERE SALESPERSON.intSalespersonId IS NULL 
 	END
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
-INSERT INTO tblARCustomerAgingStagingTable (
-		  strCustomerName
-		, strCustomerNumber
-		, strCustomerInfo
-		, strInvoiceNumber
-		, strRecordNumber
-		, intInvoiceId
-		, intPaymentId
-		, strBOLNumber
-		, intEntityCustomerId
-		, intEntityUserId
-		, dblCreditLimit
-		, dblTotalAR
-		, dblTotalCustomerAR
-		, dblFuture
-		, dbl0Days
-		, dbl10Days
-		, dbl30Days
-		, dbl60Days
-		, dbl90Days
-		, dbl120Days
-		, dbl121Days
-		, dblTotalDue
-		, dblAmountPaid
-		, dblInvoiceTotal
-		, dblCredits
-		, dblPrepayments
-		, dblPrepaids
-		, dtmDate
-		, dtmDueDate
-		, dtmAsOfDate
-		, strSalespersonName
-		, intCompanyLocationId
-		, strSourceTransaction
-		, strType
-		, strTransactionType
-		, strCompanyName
-		, strCompanyAddress
-		, strAgingType
-)	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCustomerNumber	= CUSTOMER.strCustomerNumber
 	 , strCustomerInfo		= CUSTOMER.strCustomerName + CHAR(13) + CUSTOMER.strCustomerNumber
@@ -358,6 +318,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyName		= @strCompanyName
 	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Detail'
+INTO #AGINGSTAGING
 FROM
 (SELECT A.strInvoiceNumber
      , B.strRecordNumber
@@ -470,9 +431,9 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-AND ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) = 0
+AND  ISNULL(CR.dblRefundTotal, 0) = 0
 
 UNION ALL
 
@@ -490,9 +451,9 @@ SELECT I.intInvoiceId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
+	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 WHERE I.strTransactionType = 'Customer Prepayment'
-AND ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) = 0 
+AND  ISNULL(CR.dblRefundTotal, 0) = 0 
 
 						      
 UNION ALL      
@@ -525,7 +486,7 @@ LEFT JOIN (
 		 , P.intPaymentId
 		 , strRecordNumber	= strPaymentRecordNum
 		 , P.dtmDatePaid
-		 , dblTotalPayment	= -(ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0))
+		 , dblTotalPayment	= ABS((ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)))
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
@@ -535,7 +496,8 @@ LEFT JOIN (
 		WHERE ysnPosted = 1
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	) P ON PD.intPaymentId = P.intPaymentId
-
+	WHERE PD.intInvoiceId IS NOT NULL
+	
 	UNION ALL
 
 	SELECT intInvoiceId			= intOriginalInvoiceId
@@ -555,3 +517,55 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0) AS AGING
 INNER JOIN @tblCustomers CUSTOMER ON AGING.intEntityCustomerId = CUSTOMER.intEntityCustomerId
+
+TRUNCATE TABLE tblARCustomerAgingStagingTable
+DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
+INSERT INTO tblARCustomerAgingStagingTable (
+		  strCustomerName
+		, strCustomerNumber
+		, strCustomerInfo
+		, strInvoiceNumber
+		, strRecordNumber
+		, intInvoiceId
+		, intPaymentId
+		, strBOLNumber
+		, intEntityCustomerId
+		, intEntityUserId
+		, dblCreditLimit
+		, dblTotalAR
+		, dblTotalCustomerAR
+		, dblFuture
+		, dbl0Days
+		, dbl10Days
+		, dbl30Days
+		, dbl60Days
+		, dbl90Days
+		, dbl120Days
+		, dbl121Days
+		, dblTotalDue
+		, dblAmountPaid
+		, dblInvoiceTotal
+		, dblCredits
+		, dblPrepayments
+		, dblPrepaids
+		, dtmDate
+		, dtmDueDate
+		, dtmAsOfDate
+		, strSalespersonName
+		, intCompanyLocationId
+		, strSourceTransaction
+		, strType
+		, strTransactionType
+		, strCompanyName
+		, strCompanyAddress
+		, strAgingType
+)
+SELECT AGING.*
+FROM #AGINGSTAGING AGING
+LEFT JOIN (
+	SELECT DISTINCT intInvoiceId 
+	FROM #AGINGSTAGING 
+	GROUP BY intInvoiceId 
+	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+) UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
+WHERE ISNULL(UNPAID.intInvoiceId, 0) <> 0

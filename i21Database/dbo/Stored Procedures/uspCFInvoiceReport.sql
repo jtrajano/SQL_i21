@@ -423,9 +423,23 @@ BEGIN
 			DECLARE @temptable NVARCHAR(MAX)
 
 			SET @guid = @filterGuid
-			SET @tableName = 'vyuCFInvoiceReport'
+			
 			SET @field = 'intTransactionId'
 			SET @temptable = '##'+REPLACE(@guid,'-','')
+
+			IF(ISNULL(@ysnReprintInvoice,0) = 1 AND @dtmInvoiceDate IS NOT NULL)
+			BEGIN
+				SET @tableName = 'vyuCFInvoiceReportForReprint'
+			END
+			ELSE IF (ISNULL(@ysnIncludePrintedTransaction,0) = 1)
+			BEGIN
+				SET @tableName = 'vyuCFInvoiceReportAllTrans'
+			END
+			ELSE
+			BEGIN
+				SET @tableName = 'vyuCFInvoiceReportForNewPrint'
+			END
+
 
 			IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
 			BEGIN
@@ -550,6 +564,7 @@ BEGIN
 			,ysnPostedCSV						BIT
 			,ysnPrintMiscellaneous				BIT
 			,ysnSummaryByCard					BIT
+			,ysnSummaryByDepartmentProduct		BIT
 			,ysnSummaryByDepartment				BIT
 			,ysnSummaryByMiscellaneous			BIT
 			,ysnSummaryByProduct				BIT
@@ -568,6 +583,7 @@ BEGIN
 			,ysnShowDriverPinDescriptionOnly	BIT
 			,ysnPageBreakByPrimarySortOrder		BIT
 			,ysnSummaryByDeptDriverPinProd		BIT
+			,strDepartmentGrouping				NVARCHAR(MAX)
 		)
 		INSERT INTO @tblCFTempInvoiceReport(
 			intCustomerId				
@@ -655,6 +671,7 @@ BEGIN
 			,ysnPostedCSV				
 			,ysnPrintMiscellaneous		
 			,ysnSummaryByCard			
+			,ysnSummaryByDepartmentProduct
 			,ysnSummaryByDepartment		
 			,ysnSummaryByMiscellaneous	
 			,ysnSummaryByProduct		
@@ -673,6 +690,7 @@ BEGIN
 			,ysnShowDriverPinDescriptionOnly
 			,ysnPageBreakByPrimarySortOrder
 			,ysnSummaryByDeptDriverPinProd
+			,strDepartmentGrouping
 		)
 		SELECT
 		intCustomerId				
@@ -759,7 +777,8 @@ BEGIN
 			,ysnPosted					
 			,ysnPostedCSV				
 			,ysnPrintMiscellaneous		
-			,ysnSummaryByCard			
+			,ysnSummaryByCard		
+			,ysnSummaryByDepartmentProduct	
 			,ysnSummaryByDepartment		
 			,ysnSummaryByMiscellaneous	
 			,ysnSummaryByProduct		
@@ -778,6 +797,7 @@ BEGIN
 			,ysnShowDriverPinDescriptionOnly
 			,ysnPageBreakByPrimarySortOrder
 			,ysnSummaryByDeptDriverPinProd
+			,strDepartmentGrouping
 		FROM vyuCFInvoiceReport
 		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblCFTransactionIds)
 		
@@ -899,6 +919,7 @@ BEGIN
 		--,dblInvoiceTotal			
 		,ysnPrintMiscellaneous		
 		,ysnSummaryByCard			
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment		
 		,ysnSummaryByMiscellaneous	
 		,ysnSummaryByProduct		
@@ -925,6 +946,7 @@ BEGIN
 		,ysnShowDriverPinDescriptionOnly
 		,ysnPageBreakByPrimarySortOrder
 		,ysnSummaryByDeptDriverPinProd
+		,strDepartmentGrouping
 		,strStatementType
 		)
 		SELECT
@@ -1000,6 +1022,7 @@ BEGIN
 		--,dblInvoiceTotal			
 		,ysnPrintMiscellaneous		
 		,ysnSummaryByCard			
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment		
 		,ysnSummaryByMiscellaneous	
 		,ysnSummaryByProduct		
@@ -1026,6 +1049,7 @@ BEGIN
 		,ysnShowDriverPinDescriptionOnly
 		,ysnPageBreakByPrimarySortOrder
 		,ysnSummaryByDeptDriverPinProd
+		,strDepartmentGrouping
 		,@StatementType
 		FROM @tblCFTempInvoiceReport
 

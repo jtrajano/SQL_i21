@@ -28,7 +28,7 @@
 					LEFT JOIN tblARCustomer D ON A.intEntityId = D.intEntityId
 					LEFT JOIN vyuCTItemContractHeaderCategory E ON A.intItemContractHeaderId = E.intItemContractHeaderId
 					LEFT JOIN tblARInvoiceDetail F ON E.intItemContractHeaderId = F.intItemContractHeaderId and E.intItemCategoryId = F.intItemCategoryId
-			,(SELECT TOP 1
+			inner join (SELECT TOP 1
 					strCompanyName
 					,strAddress AS strCompanyAddress
 					,strCity + ' ' + strState + ' ' + strZip AS strCompanyStateAddress
@@ -36,7 +36,7 @@
 					,strState AS strCompanyState
 					,strZip AS strCompanyZip
 				FROM tblSMCompanySetup
-			) tblSMCompanySetup
+			) tblSMCompanySetup on 1=1
 		WHERE C.intEntityLocationId = CASE
 										WHEN D.intShipToId IS NOT NULL
 											THEN D.intShipToId

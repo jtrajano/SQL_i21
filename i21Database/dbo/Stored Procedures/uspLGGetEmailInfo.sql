@@ -17,8 +17,10 @@ BEGIN
 	DECLARE @ysnClaimsToProducer BIT
 	DECLARE @intProducerEntityId INT
 	DECLARE @strInstoreLetterName NVARCHAR(MAX)
+	DECLARE @strContractNumber NVARCHAR(200)
+	DECLARE @strCustomerContract NVARCHAR(200)
 
-	IF (@strReportName IN  ('ShippingInstruction','ShippingInstruction2','ShippingInstruction3','ShippingInstruction4','ShippingInstruction5'))
+	IF (@strReportName LIKE 'ShippingInstruction%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale
@@ -26,13 +28,15 @@ BEGIN
 		WHERE intLoadId = @intTransactionId
 
 		SELECT TOP 1 @ysnClaimsToProducer = ISNULL(CH.ysnClaimsToProducer, 0),
-					 @intProducerEntityId = CD.intProducerId
+					 @intProducerEntityId = CD.intProducerId,
+					 @strContractNumber = CH.strContractNumber + ' / ' + CAST(CD.intContractSeq AS NVARCHAR(10)),
+					 @strCustomerContract = CH.strCustomerContract
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-				WHEN L.intPurchaseSale = 1
-					THEN LD.intPContractDetailId
-				ELSE LD.intSContractDetailId
+				WHEN L.intPurchaseSale = 2
+					THEN LD.intSContractDetailId
+				ELSE LD.intPContractDetailId
 				END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE L.intLoadId = @intTransactionId
@@ -73,15 +77,19 @@ BEGIN
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
-		SET @Subject = 'Load/Shipment Schedule - Shipping Instruction - ' + @strLoadNumber
+		SET @Subject = @strContractNumber 
+			+ CASE WHEN (ISNULL(@strCustomerContract, '') <> '') THEN
+				' Vendor ref: ' + @strCustomerContract
+			  ELSE '' END 
+			+ ' Load/Shipment Schedule - Shipping Instruction - ' + @strLoadNumber
 		SET @body += '<!DOCTYPE html>'
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
-		SET @body += 'Please see your shipping instruction in the attachments tab. <br><br>'
+		SET @body += 'Please see your shipping instruction in the attachments. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
-		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
+		--SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -130,7 +138,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('DeliveryOrder','DeliveryOrder2','DeliveryOrder3'))
+	ELSE IF (@strReportName LIKE 'DeliveryOrder%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
@@ -173,7 +181,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('ShippingAdvice','ShippingAdvice2','ShippingAdvice3','ShippingAdvice4'))
+	ELSE IF (@strReportName LIKE 'ShippingAdvice%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale
@@ -204,11 +212,11 @@ BEGIN
 		SET @body += '<!DOCTYPE html>'
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
-		SET @body += 'Please see your shipping advice in the attachments tab. <br><br>'
+		SET @body += 'Please see your shipping advice in the attachments. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'
-		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
+		--SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 		SET @body += '</html>'
 		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
 
@@ -216,7 +224,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('In_store','In_store2','In_store3','In_store4'))
+	ELSE IF (@strReportName LIKE 'In_store%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
@@ -348,6 +356,52 @@ BEGIN
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
 		SET @body += 'Please see your carrier shipment order in the attachments tab. <br><br>'
+		SET @body += 'Thank you for your business. <br><br>'
+		SET @body += 'Sincerely, <br><br>'
+		SET @body += '#SIGNATURE#'
+		SET @body += '<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
+		SET @body += '</html>'
+		SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
+
+		SELECT @Subject AS strSubject
+			,@Filter AS strFilters
+			,@body AS strMessage
+	END
+	ELSE IF (@strReportName LIKE 'BOLReport%')
+	BEGIN
+		SELECT @strLoadNumber = strLoadNumber,
+				@intPurchaseSaleId = intPurchaseSale
+		FROM tblLGLoad
+		WHERE intLoadId = @intTransactionId
+
+		IF(@strInstoreTo = 'Vendor')
+		BEGIN
+			SELECT @intEntityId = intVendorEntityId FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId		
+		END
+		ELSE 
+		BEGIN
+			SELECT @intEntityId = intCustomerEntityId FROM tblLGLoadDetail WHERE intLoadId = @intTransactionId	
+		END
+
+		SELECT @strEntityName = strName
+		FROM tblEMEntity
+		WHERE intEntityId = @intEntityId
+
+		SELECT @strIds = STUFF((
+					SELECT DISTINCT '|^| ' + LTRIM(intEntityContactId)
+					FROM vyuCTEntityToContact
+					WHERE intEntityId = @intEntityId
+					AND           ISNULL(strEmail,'') <> ''
+					FOR XML PATH('')
+					), 1, 3, '')
+		FROM vyuCTEntityToContact CH
+		WHERE intEntityId = @intEntityId
+
+		SET @Subject = 'Load/Shipment Schedule - Bill of Lading - ' + @strLoadNumber
+		SET @body += '<!DOCTYPE html>'
+		SET @body += '<html>'
+		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
+		SET @body += 'Please see your bill of lading in the attachments tab. <br><br>'
 		SET @body += 'Thank you for your business. <br><br>'
 		SET @body += 'Sincerely, <br><br>'
 		SET @body += '#SIGNATURE#'

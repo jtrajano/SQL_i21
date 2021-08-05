@@ -86,12 +86,29 @@ DECLARE
 	,@OriginalInvoiceId			INT
 	,@intARAccountId			INT
 	,@isPosted					BIT
+	,@intContractHeaderId		INT
+	,@intContractDetailId		INT
+	,@intPricingTypeId			INT
+	,@dblQty					NUMERIC(18, 6)
 
 	SELECT TOP 1 @intARAccountId = ISNULL(intARAccountId,0) FROM tblARCompanyPreference
 	IF @intARAccountId = 0
 	BEGIN
 		RAISERROR('Please configure ''AR Account'' in company preference.',16,1)
 	END
+
+	IF OBJECT_ID (N'tempdb.dbo.#tmpLGContractPrice') IS NOT NULL DROP TABLE #tmpLGContractPrice
+	CREATE TABLE #tmpLGContractPrice (
+		intIdentityId INT
+		,intContractHeaderId int
+		,intContractDetailId int
+		,ysnLoad bit
+		,intPriceContractId int
+		,intPriceFixationId int
+		,intPriceFixationDetailId int
+		,dblQuantity numeric(18,6)
+		,dblPrice numeric(18,6)
+	)
 
 	SELECT
 		 @ShipmentNumber			= L.strLoadNumber
@@ -157,6 +174,10 @@ DECLARE
 		,@TransactionId				= NULL
 		,@OriginalInvoiceId			= NULL
 		,@isPosted					= ISNULL(L.ysnPosted, 0)
+		,@intContractHeaderId		= CH.intContractHeaderId
+		,@intContractDetailId		= CD.intContractDetailId
+		,@intPricingTypeId			= CH.intPricingTypeId
+		,@dblQty					= LD.dblQuantity
 	FROM [tblLGLoad] L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -402,6 +423,47 @@ DECLARE
 		WHERE L.intLoadId = @intLoadId
 
 	ELSE
+		IF(@intPricingTypeId = 2)
+		BEGIN
+			INSERT INTO #tmpLGContractPrice
+			EXEC uspCTGetContractPrice @intContractHeaderId,@intContractDetailId, @dblQty, 'Invoice'
+
+			IF NOT EXISTS (SELECT 1 FROM #tmpLGContractPrice HAVING SUM(dblPrice) <> 0)
+			BEGIN
+				RAISERROR('One or more contracts is not yet priced. Please price the contracts to proceed.', 16, 1);
+			END
+		END
+
+		IF ((SELECT TOP 1 ISNULL(ysnAllowInvoiceForPartialPriced, 0) FROM tblLGCompanyPreference) = 0)
+		BEGIN
+			IF EXISTS (SELECT TOP 1 1 FROM 
+						tblCTContractDetail CD
+						JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+						JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+						WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId IN (2)) AND @intType = 1
+			BEGIN
+				SELECT TOP 1 
+					@InvoiceNumber = CH.strContractNumber,
+					@ShipmentNumber = CAST(CD.intContractSeq AS nvarchar(10))
+				FROM tblCTContractDetail CD
+					JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+					LEFT JOIN tblCTPriceFixation PF ON PF.intContractDetailId = CD.intContractDetailId
+				WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId IN (2) AND (PF.dblTotalLots IS NULL OR PF.dblLotsFixed < PF.dblTotalLots)
+
+				DECLARE @ErrorMessageNotPriced NVARCHAR(250)
+
+				SET @ErrorMessageNotPriced = 'Contract No. ' + @InvoiceNumber + '/' + @ShipmentNumber + ' is not fully priced. Unable to create Direct Invoice.';
+
+				IF (@ErrorMessageNotPriced IS NOT NULL)
+				BEGIN
+					RAISERROR(@ErrorMessageNotPriced, 16, 1);
+					RETURN 0;
+				END
+			END
+		END
+
 		INSERT INTO @EntriesForInvoice
 			([strTransactionType]
 			,[strType]
@@ -550,15 +612,22 @@ DECLARE
 			,[strDocumentNumber]					= @ShipmentNumber 
 			,[strItemDescription]					= CASE WHEN ISNULL(ARSI.[strItemDescription],'') = '' THEN ARSI.strItemNo ELSE ARSI.strItemDescription END
 			,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-			,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
+			,[dblQtyOrdered]						= CASE WHEN @intPricingTypeId = 2 THEN ISNULL(CP.[dblQuantity], ARSI.[dblQtyOrdered]) ELSE ARSI.[dblQtyOrdered] END
 			,[intItemUOMId]							= ARSI.[intItemUOMId] 
-			,[dblQtyShipped]						= ARSI.[dblShipmentQuantity] 
+			,[dblQtyShipped]						= CASE WHEN @intPricingTypeId = 2 
+														THEN 
+															CASE WHEN (ARSI.[dblShipmentQuantity] < dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], CP.dblCurRunningQuantity))
+																THEN ARSI.[dblShipmentQuantity] - dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], ISNULL(CP.dblPrevRunningQuantity, 0)) 
+															ELSE 
+																dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], CP.dblQuantity)
+															END
+														ELSE ARSI.[dblShipmentQuantity] END
 			,[dblDiscount]							= ARSI.[dblDiscount] 
 			,[dblItemWeight]						= ARSI.[dblWeight]  
 			,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-			,[dblPrice]								= ARSI.[dblPrice] 
+			,[dblPrice]								= CASE WHEN @intPricingTypeId = 2 THEN CP.[dblPrice] ELSE ARSI.[dblPrice] END
 			,[intPriceUOMId]						= ARSI.[intPriceUOMId]
-			,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice]
+			,[dblUnitPrice]							= CASE WHEN @intPricingTypeId = 2 THEN dbo.fnCalculateQtyBetweenUOM(ARSI.[intItemUOMId], ARSI.[intPriceUOMId], CP.[dblPrice]) ELSE ARSI.[dblShipmentUnitPrice] END
 			,[strPricing]							= 'Inventory Shipment Item Price'
 			,[ysnRefreshPrice]						= 0
 			,[strMaintenanceType]					= NULL
@@ -584,9 +653,9 @@ DECLARE
 			,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
 			,[intContractDetailId]					= ARSI.[intContractDetailId] 
 			,[intShipmentPurchaseSalesContractId]	= NULL
-			,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
-			,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
-			,[dblShipmentNetWt]						= ARSI.[dblNetWt] 
+			,[dblShipmentGrossWt]					= CASE WHEN @intPricingTypeId = 2 THEN dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], CP.[dblQuantity]) ELSE ARSI.[dblGrossWt] END
+			,[dblShipmentTareWt]					= CASE WHEN @intPricingTypeId = 2 THEN 0 ELSE ARSI.[dblTareWt] END
+			,[dblShipmentNetWt]						= CASE WHEN @intPricingTypeId = 2 THEN dbo.fnCalculateQtyBetweenUOM(ARSI.[intOrderUOMId], ARSI.[intWeightUOMId], CP.[dblQuantity]) ELSE ARSI.[dblNetWt] END
 			,[intTicketId]							= ARSI.[intTicketId] 
 			,[intTicketHoursWorkedId]				= NULL
 			,[intOriginalInvoiceDetailId]			= NULL
@@ -607,9 +676,18 @@ DECLARE
 			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
 			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
 		FROM vyuARShippedItems ARSI
+			OUTER APPLY (
+				SELECT cp.* 
+					,dblPrevRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice prcp
+											WHERE prcp.intIdentityId < cp.intIdentityId
+												AND cp.intContractDetailId = ARSI.intContractDetailId)
+					,dblCurRunningQuantity = (SELECT SUM(dblQuantity) FROM #tmpLGContractPrice crcp 
+											WHERE crcp.intIdentityId <= cp.intIdentityId
+												AND cp.intContractDetailId = ARSI.intContractDetailId)
+				FROM #tmpLGContractPrice cp
+				WHERE cp.intContractDetailId = ARSI.intContractDetailId) CP
 		WHERE ARSI.[strTransactionType] = 'Load Schedule' 
 		  AND ARSI.[intLoadId] = @intLoadId
-
 	
 	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice ARI
 		JOIN tblARInvoiceDetail ARID ON ARID.intInvoiceId = ARI.intInvoiceId
@@ -653,34 +731,6 @@ DECLARE
 		RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
-
-	IF ((SELECT TOP 1 ISNULL(ysnAllowInvoiceForPartialPriced, 0) FROM tblLGCompanyPreference) = 0)
-	BEGIN
-		IF EXISTS (SELECT TOP 1 1 FROM 
-					tblCTContractDetail CD
-					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
-					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
-		BEGIN
-			SELECT TOP 1 
-				@InvoiceNumber = CH.strContractNumber,
-				@ShipmentNumber = CAST(CD.intContractSeq AS nvarchar(10))
-			FROM 
-			tblCTContractDetail CD
-			JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-			JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
-			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-			WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
-
-			DECLARE @ErrorMessageNotPriced NVARCHAR(250)
-
-			SET @ErrorMessageNotPriced = 'Contract No. ' + @InvoiceNumber + '/' + @ShipmentNumber + ' is not Priced. Unable to create Invoice.';
-
-			RAISERROR(@ErrorMessageNotPriced, 16, 1);
-			RETURN 0;
-
-		END
-	END
 	
 	DECLARE	 @LineItemTaxEntries	LineItemTaxDetailStagingTable
 			,@CurrentErrorMessage NVARCHAR(250)
@@ -699,7 +749,29 @@ DECLARE
 		,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
 
 		
-	SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))			
+	SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))		
+	
+	IF (@intType = 1 AND EXISTS(SELECT TOP 1 1 FROM #tmpLGContractPrice) AND EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice))
+	BEGIN
+		/* INSERT tblCTPriceFixationDetailAPAR */
+		INSERT INTO tblCTPriceFixationDetailAPAR (
+			intPriceFixationDetailId
+			, intInvoiceId
+			, intInvoiceDetailId
+			, intConcurrencyId
+		)
+		SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+			, intInvoiceId				= ID.intInvoiceId
+			, intInvoiceDetailId		= ID.intInvoiceDetailId
+			, intConcurrencyId			= 1
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #tmpLGContractPrice PRICE 
+			ON ID.intContractDetailId = PRICE.intContractDetailId 
+				AND ID.dblPrice = PRICE.dblPrice
+		WHERE ID.intInvoiceId = @NewInvoiceId
+		AND ID.intInventoryShipmentChargeId IS NULL
+			
+	END
          
 	RETURN @NewInvoiceId
 END

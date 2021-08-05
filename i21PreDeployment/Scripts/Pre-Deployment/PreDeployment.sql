@@ -10,7 +10,8 @@
 --------------------------------------------------------------------------------------
 */
 
-
+-- Resolves the Kill State error during Upgrade for SQL Server 2019 or later
+:r .\4_SM\2010_Kill_State_Error_Fix.sql
 
 --EM
 :r .\12_EM\17_DropDependencies_RenameTable.sql
@@ -65,6 +66,7 @@
 :r .\4_SM\1810_Fix_GL_Account.sql
 :r .\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql
 :r .\4_SM\12_MigrateRecentlyViewed.sql
+:r .\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
@@ -73,6 +75,7 @@
 :r .\6_GL\4_1440_to_1530.sql
 :r .\6_GL\5_1710.sql
 :r .\6_GL\6_1910.sql
+:r .\6_GL\7_2110.sql
 
 -- AR
 :r .\7_AR\00_DropTriggers.sql

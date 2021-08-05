@@ -1,14 +1,4 @@
-﻿IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKCompanyPreference')
-BEGIN
-	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference)
-	BEGIN
-		INSERT INTO tblRKCompanyPreference(intConcurrencyId, dblDecimals, dblRefreshRate, strM2MView, strDateTimeFormat, strEvaluationBy, strEvaluationByZone)
-		SELECT 1, 2, 60, 'Processor', 'MM DD YYYY HH:MI', 'Item', 'Location'
-	END
-END
-GO
-
-IF EXISTS (SELECT 1 FROM dbo.tblRKFutOptTransactionHeader WHERE dtmTransactionDate is null)
+﻿IF EXISTS (SELECT 1 FROM dbo.tblRKFutOptTransactionHeader WHERE dtmTransactionDate is null)
 BEGIN
 	UPDATE tblRKFutOptTransactionHeader
 	SET dtmTransactionDate = B.dtmTransactionDate,intSelectedInstrumentTypeId = B.intSelectedInstrumentTypeId,
@@ -203,6 +193,10 @@ BEGIN
 		UNION ALL SELECT 61, 'Re-opened Sequence', 'Re-opened Sequence.'
 		UNION ALL SELECT 62, 'Deleted Voucher', 'Deleted Voucher.'
 		UNION ALL SELECT 63, 'Deleted Invoice', 'Deleted Invoice.'
+		UNION ALL SELECT 64, 'Created Credit Memo', 'Created Credit Memo.'
+		UNION ALL SELECT 65, 'Deleted Credit Memo', 'Deleted Credit Memo.'
+		UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
+		UNION ALL SELECT 67, 'Price Updated', 'Price Updated.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 

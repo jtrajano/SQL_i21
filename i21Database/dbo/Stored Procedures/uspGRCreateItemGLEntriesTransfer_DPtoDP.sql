@@ -296,10 +296,10 @@ BEGIN
 		,TS.intTransferStorageId
 		,TSR.intTransferStorageReferenceId
 		,TS.strTransferStorageTicket
-		,TSR.dblUnitQty
+		,TRA.dblUnitQty
 		,UOM.dblUnitQty
 		,CS_FROM.dblBasis + CS_FROM.dblSettlementPrice
-		,dblValue	= TSR.dblUnitQty * (CS_FROM.dblBasis + CS_FROM.dblSettlementPrice)
+		,dblValue	= TRA.dblUnitQty * (CS_FROM.dblBasis + CS_FROM.dblSettlementPrice)
 		,ISNULL(CS_FROM.intCurrencyId, @DefaultCurrencyId) intCurrencyId
 		,I.strItemNo
 		,NULL
@@ -327,6 +327,7 @@ BEGIN
 	OUTER APPLY (
 		SELECT A.intTransferStorageId
 			,A.strTransferStorageTicket
+			,B.dblUnitQty
 		FROM tblGRTransferStorage A
 		INNER JOIN tblGRTransferStorageReference B
 			ON B.intTransferStorageId = A.intTransferStorageId
@@ -508,6 +509,9 @@ WITH ForGLEntries_CTE (
 	,strItemNo
 	,strRateType
 	,strTransactionType
+	,intSourceTransactionId
+	,intSourceTransactionDetailId
+	,strSourceTransactionId
 )
 AS
 (
@@ -526,6 +530,9 @@ AS
 		,strItemNo
 		,strRateType
 		,strTransactionType
+		,intSourceTransactionId
+		,intSourceTransactionDetailId
+		,strSourceTransactionId
 	FROM tblGRTransferGLEntriesCTE
 	WHERE (strBatchId = @strBatchId AND @ysnUnpost = 0)
 		OR (strBatchId = @strBatchId2 AND @ysnUnpost = 1)
@@ -544,19 +551,19 @@ SELECT
 	,dblDebitUnit				= CASE WHEN GL.dblDebitUnit = 0 THEN DebitUnit.Value ELSE 0 END
 	,dblCreditUnit				= CASE WHEN GL.dblCreditUnit = 0 THEN CreditUnit.Value ELSE 0 END
 	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' A'
-	,strCode					= 'TRA'
+	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= 1--GL.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
 	,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
     ,strJournalLineDescription  = '' 
-	,intJournalLineNo			= ForGLEntries_CTE.intTransactionDetailId
+	,intJournalLineNo			= ForGLEntries_CTE.intSourceTransactionDetailId
 	,ysnIsUnposted				= 0
 	,intUserId					= @intEntityUserSecurityId
 	,intEntityId				= GL.intEntityId 
-	,strTransactionId			= ForGLEntries_CTE.strTransactionId
-	,intTransactionId			= ForGLEntries_CTE.intTransactionId
+	,strTransactionId			= ForGLEntries_CTE.strSourceTransactionId
+	,intTransactionId			= ForGLEntries_CTE.intSourceTransactionId
 	,strTransactionType			= 'Transfer Storage'
 	,strTransactionForm			= 'Transfer Storage'
 	,strModuleName				= @ModuleName
@@ -614,19 +621,19 @@ SELECT DISTINCT
 	,dblDebitUnit				= CASE WHEN @ysnUnpost = 0 THEN CASE WHEN GL.dblDebitUnit = 0 THEN DebitUnit.Value ELSE 0 END ELSE DebitUnit.Value END
 	,dblCreditUnit				= CASE WHEN @ysnUnpost = 0 THEN CASE WHEN GL.dblCreditUnit = 0 THEN CreditUnit.Value ELSE 0 END ELSE CreditUnit.Value END
 	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' B'
-	,strCode					= 'TRA'
+	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= 1--GL.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
 	,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
     ,strJournalLineDescription  = '' 
-	,intJournalLineNo			= ForGLEntries_CTE.intTransactionDetailId
+	,intJournalLineNo			= ForGLEntries_CTE.intSourceTransactionDetailId -- temporary workaround as source transaction and transaction fields are swapped in tblGRTransferGLEntriesCTE
 	,ysnIsUnposted				= 0
 	,intUserId					= @intEntityUserSecurityId
 	,intEntityId				= GL.intEntityId 
-	,strTransactionId			= ForGLEntries_CTE.strTransactionId
-	,intTransactionId			= ForGLEntries_CTE.intTransactionId
+	,strTransactionId			= ForGLEntries_CTE.strSourceTransactionId -- temporary workaround as source transaction and transaction fields are swapped in tblGRTransferGLEntriesCTE
+	,intTransactionId			= ForGLEntries_CTE.intSourceTransactionId -- temporary workaround as source transaction and transaction fields are swapped in tblGRTransferGLEntriesCTE
 	,strTransactionType			= 'Transfer Storage'
 	,strTransactionForm			= 'Transfer Storage'
 	,strModuleName				= @ModuleName
@@ -646,6 +653,7 @@ INNER JOIN tblGLDetail GL
 	ON GL.intTransactionId = ForGLEntries_CTE.intTransactionId
 		AND GL.intAccountId = GLAccounts.intInventoryId
 		AND GL.intJournalLineNo = ForGLEntries_CTE.intTransactionDetailId
+		AND GL.strCode = 'IC'
 		AND GL.ysnIsUnposted = 0
 INNER JOIN dbo.tblGLAccount
 	ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
@@ -682,7 +690,7 @@ SELECT
 	,dblDebitUnit				= CreditUnit.Value
 	,dblCreditUnit				= DebitUnit.Value
 	,strDescription				= ISNULL(tblGLAccount.strDescription, '') + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, ForGLEntries_CTE.dblQty, ForGLEntries_CTE.dblCost) --+ ' C'
-	,strCode					= 'TRA'
+	,strCode					= 'IC'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= 1

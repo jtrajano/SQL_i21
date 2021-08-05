@@ -27,7 +27,7 @@ BEGIN TRANSACTION
 		strGroupName,
 		ysnSearch
 	FROM tblSMScreenStage
-	WHERE ISNULL(strChange, '') = 'Added'
+	WHERE ISNULL(strChange, '') = 'Added' AND strNamespace NOT IN (SELECT strNamespace FROM tblSMScreen)
 
 	-- DELETE custom tab
 	DELETE FROM tblSMCustomTab WHERE intScreenId IN 

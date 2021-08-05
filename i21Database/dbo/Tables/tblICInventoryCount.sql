@@ -46,6 +46,7 @@
 	[strCommoditiesFilter] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
 	[strCategoriesFilter] NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     [ysnIsMultiFilter] BIT NULL DEFAULT(1),
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblICInventoryCount] PRIMARY KEY ([intInventoryCountId]), 
 	CONSTRAINT [UN_tblICInventoryCount_strCountNo] UNIQUE NONCLUSTERED ([strCountNo] ASC),		
     CONSTRAINT [FK_tblICInventoryCount_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 

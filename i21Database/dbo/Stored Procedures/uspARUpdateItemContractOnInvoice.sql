@@ -48,6 +48,7 @@ BEGIN TRY
 	  AND ID.intSalesOrderDetailId IS NULL
 	  AND ID.intItemId = TD.intItemId
 	  AND (ID.intItemUOMId <> TD.intItemUOMId OR ID.dblQtyShipped <> TD.dblQtyShipped)
+	  AND ID.[intInventoryShipmentItemId] IS NULL
 		
 	UNION ALL
 
@@ -65,6 +66,7 @@ BEGIN TRY
 	  AND ID.intItemContractDetailId <> ISNULL(TD.intItemContractDetailId, 0)	  
 	  AND ID.intSalesOrderDetailId IS NULL
 	  AND ID.intItemId = TD.intItemId
+	  AND ID.[intInventoryShipmentItemId] IS NULL
 		
 	UNION ALL
 
@@ -82,6 +84,7 @@ BEGIN TRY
 	  AND ID.intItemContractDetailId <> ISNULL(TD.intItemContractDetailId, 0)
 	  AND ID.intSalesOrderDetailId IS NULL
 	  AND ID.intItemId = TD.intItemId
+	  AND ID.[intInventoryShipmentItemId] IS NULL
 		
 	UNION ALL
 		
@@ -98,6 +101,7 @@ BEGIN TRY
 	WHERE ID.intItemContractDetailId IS NULL
 	  AND TD.intItemContractDetailId IS NOT NULL
 	  AND ID.intSalesOrderDetailId IS NULL
+	  AND ID.[intInventoryShipmentItemId] IS NULL
 		
 	UNION ALL	
 
@@ -112,6 +116,7 @@ BEGIN TRY
 	  AND TD.intItemContractDetailId IS NOT NULL
 	  AND TD.intSalesOrderDetailId IS NULL
 	  AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
+	  AND TD.[intInventoryShipmentItemId] IS NULL
 		
 	UNION ALL
 		
@@ -127,6 +132,7 @@ BEGIN TRY
 	  AND ID.intItemContractDetailId IS NOT NULL
 	  AND ID.intSalesOrderDetailId IS NULL
 	  AND ID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @intInvoiceId)
+	  AND ID.[intInventoryShipmentItemId] IS NULL
 
 	SELECT @intUniqueId = MIN(intUniqueId) 
 	FROM @tblToProcess

@@ -555,6 +555,7 @@ BEGIN
 				THEN strLocationName
 			ELSE @strCompanyLocationName
 			END
+	AND ysnLocationActive=1
 
 	SET @dtmCurrentDate = dbo.fnGetBusinessDate(GETDATE(), @intCompanyLocationId)
 
@@ -791,6 +792,7 @@ BEGIN
 					THEN strLocationName
 				ELSE @strCompanyLocationName
 				END
+			AND ysnLocationActive=1
 	END
 
 	INSERT INTO @tblMFWIPItem_Initial
@@ -860,16 +862,16 @@ BEGIN
 		,CAST(NULL AS NUMERIC(38, 20)) dblDemandQty
 		,CAST(NULL AS NUMERIC(38, 20)) dbltDemandQty
 	FROM @tblMFRequiredItem RI
-		,@tblMFWIPRequiredDate RD
-		,tblSMCompanyLocation CL
+		inner join @tblMFWIPRequiredDate RD on 1=1
+		inner join tblSMCompanyLocation CL on  1=1
 	WHERE CL.strLocationName = CASE 
 			WHEN LTRIM(RTRIM(@strCompanyLocationName)) = ''
 				THEN strLocationName
 			ELSE @strCompanyLocationName
 			END
-	ORDER BY 1
-		,2
-		,3
+	ORDER BY RI.intItemId
+		,strItemNo
+		,strDescription
 
 	DECLARE @tblMFQtyOnHand TABLE (
 		intCompanyLocationId INT

@@ -67,8 +67,6 @@ IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'GR' and strDBNa
 			,a.gacnt_mkt_zone	
 		from
 			gacntmst a
-			,gacommst b
-		where
-			a.gacnt_com_cd = b.gacom_com_cd 
+			inner join gacommst b on a.gacnt_com_cd = b.gacom_com_cd 
 		')
 GO

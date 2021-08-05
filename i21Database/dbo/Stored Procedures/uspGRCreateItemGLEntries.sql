@@ -17,19 +17,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-	declare @debug_awesome_ness bit = 0
-	
-	--if exists( select top 1 1 from @SettleVoucherCreate where intSettleVoucherKey > 7)
-	--begin
-	--	set @debug_awesome_ness = 0
-	--end
-	if @debug_awesome_ness = 1	
-	begin
-		
-		select 'awesomeness begins [uspGRCreateItemGLEntries]'
-		--set @dblCashPriceFromCt = 9.55
-	end
-
 DECLARE @dblGrossUnits AS DECIMAL(24,10) = null
 
 -- Create the variables used by fnGetItemGLAccount
@@ -233,66 +220,18 @@ BEGIN
 END 
 ;
 
-
 if @ysnForRebuild = 0
 	exec uspGRHandleSettleVoucherCreateReferenceTable  @strBatchId, @SettleVoucherCreate
-
 ;
 
-select @dblGrossUnits = dblUnits from @SettleVoucherCreate where ysnDiscountFromGrossWeight = 1
+SELECT @dblGrossUnits = dblUnits FROM @SettleVoucherCreate WHERE ysnDiscountFromGrossWeight = 1
 
+IF @ysnForRebuild = 1
+BEGIN
+	SELECT @dblSelectedUnits = ISNULL(dblSettleContractUnits,dblUnits) FROM tblGRSettleVoucherCreateReferenceTable WHERE strBatchId = @strBatchId AND intItemType = 1
+	SELECT @dblGrossUnits = dblUnits FROM tblGRSettleVoucherCreateReferenceTable WHERE strBatchId = @strBatchId AND ysnDiscountFromGrossWeight = 1
+END;
 
-if @debug_awesome_ness = 1
-begin
-	select 'voucher create reference table ', * from tblGRSettleVoucherCreateReferenceTable where strBatchId = @strBatchId
-	select 'Settle voucher create', * from @SettleVoucherCreate
-	SELECT	'this is what the data will be the reference for'		
-		,DiscountCost.*
-		,@dblSelectedUnits as [selected units]
-		,dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) )
-		,t.dtmDate
-		,t.intItemId
-		,t.intItemLocationId
-		,t.intTransactionId
-		,t.strTransactionId
-		,t.dblQty
-		,t.dblUOMQty
-		,dblCost = t.dblCost - dbo.fnDivide(DiscountCost.dblTotalDiscountCost, t.dblQty ) 
-		,DiscountCost.dblTotalDiscountCost
-		, t.dblQty
-		,dblItemCost = t.dblCost
-		,t.dblValue
-		,t.intTransactionTypeId
-		,ISNULL(t.intCurrencyId, @DefaultCurrencyId) intCurrencyId
-		,t.dblExchangeRate
-		,t.intInventoryTransactionId
-		,strInventoryTransactionTypeName = TransType.strName
-		,t.strTransactionForm 
-		,t.strDescription
-		,t.dblForexRate
-		,i.strItemNo
-		,strRateType = currencyRateType.strCurrencyExchangeRateType
-	FROM dbo.tblICInventoryTransaction t 
-	INNER JOIN dbo.tblICInventoryTransactionType TransType
-		ON t.intTransactionTypeId = TransType.intTransactionTypeId
-	INNER JOIN tblICItem i
-		ON i.intItemId = t.intItemId
-	LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
-		ON currencyRateType.intCurrencyExchangeRateTypeId = t.intForexRateTypeId
-	OUTER APPLY (
-		SELECT 
-			ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
-		FROM tblGRSettleVoucherCreateReferenceTable SV	
-		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnItemInventoryCost = 1--DISCOUNTS
-	) DiscountCost
-	WHERE t.strBatchId = @strBatchId
-		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
-		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
-		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
-
-end
-
-;
 -- Generate the G/L Entries here: 
 WITH ForGLEntries_CTE (
 	dtmDate
@@ -326,11 +265,7 @@ AS
 		,t.strTransactionId
 		,t.dblQty
 		,t.dblUOMQty
-		,dblCost = t.dblCost 
-				- (
-					dbo.fnDivide(DiscountCost.dblTotalDiscountCost, isnull(@dblSelectedUnits, t.dblQty) ) 
-				  + dbo.fnDivide(DiscountCostGross.dblTotalDiscountCost, isnull(@dblGrossUnits, t.dblQty) ) 
-				  )
+		,dblCost = t.dblCost - (dbo.fnDivide(DiscountCost.dblTotalDiscountCost, t.dblQty)) 
 		,dblItemCost = t.dblCost
 		,t.dblValue
 		,t.intTransactionTypeId
@@ -355,45 +290,25 @@ AS
 			ISNULL(
 				SUM(
 					ROUND(
-						(SV.dblCashPrice * 
-							CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 
-								THEN
-									SV.dblSettleContractUnits												
-								ELSE 									
-									SV.dblUnits
+						(SV2.dblCashPrice * 
+							CASE WHEN ISNULL(SV2.dblSettleContractUnits,0) > 0 
+								THEN 
+									CASE WHEN SV2.ysnDiscountFromGrossWeight = 1 then  
+											((SV2.dblSettleContractUnits / @dblSelectedUnits) * @dblGrossUnits) 
+									else SV2.dblSettleContractUnits end
+												
+								ELSE SV2.dblUnits
 							END)									 
 					, 2) 
 				) 
-			,0)  AS  dblTotalDiscountCost
-			--ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
-		FROM tblGRSettleVoucherCreateReferenceTable SV		
-		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnItemInventoryCost = 1--DISCOUNTS
-			and SV.ysnDiscountFromGrossWeight = 0
+			,0) AS dblTotalDiscountCost
+		FROM tblGRSettleVoucherCreateReferenceTable SV2
+		INNER JOIN tblICItem I
+			ON I.intItemId = SV2.intItemId				
+				and SV2.intItemType = 3
+		WHERE SV2.strBatchId = t.strBatchId
+			AND isnull(SV2.ysnItemInventoryCost,I.ysnInventoryCost) = 1
 	) DiscountCost
-
-	OUTER APPLY (
-		SELECT 
-			ISNULL(
-				SUM(
-					ROUND(
-						(SV.dblCashPrice * 
-							CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 
-								THEN
-									((SV.dblSettleContractUnits / @dblSelectedUnits) * @dblGrossUnits ) 
-								ELSE
-									((SV.dblUnits  / @dblSelectedUnits) * @dblGrossUnits) 
-									
-							END)									 
-					, 2) 
-				) 
-			,0)  AS  dblTotalDiscountCost
-			--ISNULL(round(SUM(((SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)) ), 2),0)  AS dblTotalDiscountCost
-		FROM tblGRSettleVoucherCreateReferenceTable SV		
-		WHERE intItemType = 3 and SV.strBatchId = @strBatchId and SV.ysnItemInventoryCost = 1--DISCOUNTS
-			and SV.ysnDiscountFromGrossWeight = 1
-	) DiscountCostGross
-
-
 	WHERE t.strBatchId = @strBatchId
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
@@ -776,12 +691,3 @@ CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(dblQty, 0), ISNULL(dblUOMQ
 WHERE ForGLEntries_CTE.intTransactionTypeId  = @InventoryTransactionTypeId_AutoNegative
 	AND ROUND(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0), 2) <> 0 
 ;
-
-
-
-	if @debug_awesome_ness = 1	
-	begin
-		
-		select 'awesomeness ends [uspGRCreateItemGLEntries]'
-		--set @dblCashPriceFromCt = 9.55
-	end

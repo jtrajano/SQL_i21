@@ -1,9 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessTransfer]
 (
 	@intTransferStorageId INT,
-	@intUserId INT,
-	@intFutureMarketId INT = NULL,
-	@intFutureMonthId INT = NULL
+	@intUserId INT
 )
 AS
 BEGIN
@@ -178,6 +176,8 @@ BEGIN
 			,[intSourceCustomerStorageId]
 			,[dblUnitQty]
 			,[dblSplitPercent]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)	
 		SELECT 
 			[intEntityId]						= TransferStorageSplit.intEntityId
@@ -222,6 +222,8 @@ BEGIN
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
 			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
+			,[intShipFromLocationId]			= CS.intShipFromLocationId
+			,[intShipFromEntityId]				= CS.intShipFromEntityId
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
 			ON SourceStorage.intSourceCustomerStorageId = CS.intCustomerStorageId
@@ -282,6 +284,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		VALUES
 		(
@@ -325,6 +329,8 @@ BEGIN
 			,[intDeliverySheetId]
 			,[ysnTransferStorage]
 			,[dblGrossQuantity]
+			,[intShipFromLocationId]
+			,[intShipFromEntityId]
 		)
 		OUTPUT
 			inserted.intCustomerStorageId,
@@ -348,7 +354,7 @@ BEGIN
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
 			INSERT INTO tblGRTransferStorageReference
-			SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds WHERE intId = @intId
+			SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate,null FROM @newCustomerStorageIds WHERE intId = @intId
 
 			SET @intTransferStorageReferenceId = CASE WHEN ISNULL(@intTransferStorageReferenceId,0) = 0 THEN @@ROWCOUNT ELSE @intTransferStorageReferenceId + 1 END
 
@@ -369,6 +375,7 @@ BEGIN
 				,[strPaidDescription]
 				,[strType]
 				,[intTransferStorageReferenceId]
+				,[strTransferTicket]
 			)
 			SELECT
 				[intCustomerStorageId]				= TSR.intSourceCustomerStorageId
@@ -382,7 +389,10 @@ BEGIN
 				,[strPaidDescription]				= 'Generated from Transfer Storage'
 				,[strType]							= 'Transfer'
 				,[intTransferStorageReferenceId]	= @intInsertedId
+				,[strTransferTicket]				= TS.strTransferStorageTicket
 			FROM tblGRTransferStorageReference TSR
+			INNER JOIN tblGRTransferStorage TS
+				ON TS.intTransferStorageId = TSR.intTransferStorageId
 			INNER JOIN tblGRTransferStorageSourceSplit T_SOURCE
 				ON T_SOURCE.intTransferStorageId = TSR.intTransferStorageId
 					AND TSR.intSourceCustomerStorageId = T_SOURCE.intSourceCustomerStorageId
@@ -408,6 +418,7 @@ BEGIN
 					,[strPaidDescription]
 					,[strType]
 					,[intTransferStorageReferenceId]
+					,[strTransferTicket]
 				)
 				SELECT TOP 1
 					[intCustomerStorageId]
@@ -421,6 +432,7 @@ BEGIN
 					,[strPaidDescription]
 					,[strType]
 					,[intTransferStorageReferenceId]
+					,[strTransferTicket]
 				FROM @StorageHistoryStagingTable
 				WHERE intId = @intIdentityId
 
@@ -641,8 +653,6 @@ BEGIN
   				@ItemsToPost = @ItemsToPost_OStoDP
   				,@intTransferStorageId = @intTransferStorageId
   				,@intUserId = @intUserId
-  				,@intFutureMarketId = @intFutureMarketId
-  				,@intFutureMonthId = @intFutureMonthId
 
 			--/*start === FOR DP to DP only*/
 			DECLARE @strBatchId NVARCHAR(500)
@@ -726,6 +736,27 @@ BEGIN
 					FROM tblGRStorageHistory
 					WHERE intCustomerStorageId = @intSourceCustomerStorageId
 						AND intTransactionTypeId = 1
+				END
+
+				-- Copy the intOrigCostCustomerStorageId from the source DP to DP transaction(if it exists).
+				UPDATE TSR
+				SET TSR.intCostBucketCustomerStorageId = TSR_SOURCE.intCostBucketCustomerStorageId
+				FROM tblGRTransferStorageReference TSR
+				INNER JOIN tblGRTransferStorageReference TSR_SOURCE
+					ON TSR_SOURCE.intToCustomerStorageId = TSR.intSourceCustomerStorageId
+				WHERE TSR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+				AND TSR_SOURCE.intCostBucketCustomerStorageId IS NOT NULL
+
+				-- If the intCostBucketCustomerStorageId is still blank, it means that this is the first DP to DP transaction
+				IF(EXISTS(
+					SELECT TOP 1 1 FROM tblGRTransferStorageReference
+					WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
+					AND intCostBucketCustomerStorageId IS NULL)
+				)
+				BEGIN
+					UPDATE tblGRTransferStorageReference
+					SET intCostBucketCustomerStorageId = @intSourceCustomerStorageId
+					WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
 				END
 
 				--inventory items
@@ -972,7 +1003,7 @@ BEGIN
 			,[intTransactionTypeId]				= 3
 			,[strPaidDescription]				= 'Generated from Transfer Storage'
 			,[strType]							= 'From Transfer'
-			,[intInventoryReceiptId]			= SourceHistory.intInventoryReceiptId
+			,[intInventoryReceiptId]			= case when FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1 then SourceHistory.intInventoryReceiptId else null end
 			,[intTransferStorageReferenceId]	= SR.intTransferStorageReferenceId
       		,[strTransferTicket] = TS.strTransferStorageTicket
 		FROM tblGRTransferStorageReference SR
@@ -982,6 +1013,13 @@ BEGIN
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
 		INNER JOIN tblGRCustomerStorage ToStorage
 			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+				AND FromStorage.intTicketId IS NOT NULL --SCALE TICKET ONLY
+		
+		INNER JOIN tblGRStorageType FromType
+			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+		INNER JOIN tblGRStorageType ToType
+			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+
 		INNER JOIN tblGRTransferStorageSplit TSS
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblGRStorageHistory SourceHistory
@@ -990,6 +1028,33 @@ BEGIN
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
 		WHERE SR.intTransferStorageId = @intTransferStorageId
+		UNION ALL
+		SELECT
+			[intCustomerStorageId]				= A.intToCustomerStorageId
+			,[intTransferStorageId]				= TransferStorageSplit.intTransferStorageId
+			,[intContractHeaderId]				= CD.intContractHeaderId
+			,[dblUnits]							= A.dblUnitQty
+			,[dtmHistoryDate]					= GETDATE()
+			,[intUserId]						= @intUserId
+			,[ysnPost]							= 1
+			,[intTransactionTypeId]				= 3
+			,[strPaidDescription]				= 'Generated from Transfer Storage'
+			,[strType]							= 'From Transfer'
+			,[intInventoryReceiptId]			= NULL
+			,[intTransferStorageReferenceId] 	= TSR.intTransferStorageReferenceId  
+			,[strTransferTicket]				= TS.strTransferStorageTicket
+		FROM tblGRTransferStorageSplit TransferStorageSplit
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = TransferStorageSplit.intTransferStorageId
+		INNER JOIN @newCustomerStorageIds A
+			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId
+		INNER JOIN tblGRTransferStorageReference TSR
+			ON TSR.intToCustomerStorageId = A.intToCustomerStorageId
+		INNER JOIN tblGRCustomerStorage CS
+			ON CS.intCustomerStorageId = A.intSourceCustomerStorageId
+				AND CS.intTicketId IS NULL --DELIVERY SHEET ONLY
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
 
 		WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
 		BEGIN
@@ -1008,7 +1073,9 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
+				,[strTransferTicket]
 			)
 			SELECT TOP 1
 				[intCustomerStorageId]
@@ -1021,7 +1088,9 @@ BEGIN
 				,[intTransactionTypeId]
 				,[strPaidDescription]
 				,[strType]
+				,[intInventoryReceiptId]
 				,[intTransferStorageReferenceId]
+				,[strTransferTicket]
 			FROM @StorageHistoryStagingTable
 			WHERE intId = @intIdentityId
 
@@ -1135,6 +1204,50 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 		
+		-- Start Booking AP Clearing to tblAPClearing
+		DECLARE
+			@intTransferStorageReferenceId3 INT
+			,@ysnIsSourceDP BIT
+			,@ysnIsTargetDP BIT;
+
+		DECLARE CC CURSOR LOCAL FAST_FORWARD
+		FOR
+		SELECT TSR.intTransferStorageReferenceId, ST_FROM.ysnDPOwnedType, ST_TO.ysnDPOwnedType
+		FROM tblGRTransferStorageReference TSR
+		INNER JOIN tblGRTransferStorage TS
+			ON TSR.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage CS_FROM
+			ON TSR.intSourceCustomerStorageId = CS_FROM.intCustomerStorageId
+		INNER JOIN tblGRStorageType ST_FROM
+			ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId
+		INNER JOIN tblGRCustomerStorage  CS_TO
+			ON TSR.intToCustomerStorageId = CS_TO.intCustomerStorageId
+		INNER JOIN tblGRStorageType ST_TO
+			ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+		WHERE TS.intTransferStorageId = @intTransferStorageId
+		
+		OPEN CC;
+		FETCH CC INTO @intTransferStorageReferenceId3, @ysnIsSourceDP, @ysnIsTargetDP
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			-- DP to OS
+			IF @ysnIsSourceDP = 1 AND @ysnIsTargetDP = 0
+				EXEC uspGRBookAPClearingTransferToOS @intTransferStorageReferenceId3
+			-- OS to DP
+			ELSE IF @ysnIsSourceDP = 0 AND @ysnIsTargetDP = 1
+				EXEC uspGRBookAPClearingTransferToDP @intTransferStorageReferenceId3
+			-- DP to DP
+			ELSE IF @ysnIsSourceDP = 1 AND @ysnIsTargetDP = 1
+			BEGIN
+				EXEC uspGRBookAPClearingTransferToOS @intTransferStorageReferenceId3 -- Offset APC from source vendor
+				EXEC uspGRBookAPClearingTransferToDP @intTransferStorageReferenceId3 -- Book APC to target vendor
+			END
+			FETCH CC INTO @intTransferStorageReferenceId3, @ysnIsSourceDP, @ysnIsTargetDP
+		END
+		CLOSE CC; DEALLOCATE CC;
+		-- End booking AP clearing
+
 		--RISK SUMMARY LOG
 		EXEC [dbo].[uspGRRiskSummaryLog2]
 			@StorageHistoryIds = @HistoryIds
