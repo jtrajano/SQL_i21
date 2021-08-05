@@ -115,7 +115,7 @@ BEGIN TRY
 		SELECT @strUserName = US.strUserName
 			,@strTransferNo = IT.strTransferNo
 			,@dtmTransferDate = IT.dtmTransferDate
-			,@strShipVia = ShipVia.strShipVia
+			,@strShipVia = V.strVendorAccountNum
 			,@strBolNumber = IT.strBolNumber
 			,@dtmBolDate = IT.dtmBolDate
 			,@dtmBolReceivedDate = IT.dtmBolReceivedDate
@@ -127,7 +127,7 @@ BEGIN TRY
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(IT.intEntityId, IT.intCreatedUserId)
 		LEFT JOIN dbo.tblSMCompanyLocation FCL ON FCL.intCompanyLocationId = IT.intFromLocationId
 		LEFT JOIN dbo.tblSMCompanyLocation TCL ON TCL.intCompanyLocationId = IT.intToLocationId
-		LEFT JOIN dbo.tblSMShipVia ShipVia ON ShipVia.intEntityId = IT.intShipViaId
+		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = IT.intShipViaId
 		LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = IT.intBrokerId
 		WHERE IT.intInventoryTransferId = @intInventoryTransferId
 

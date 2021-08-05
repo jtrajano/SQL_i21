@@ -240,12 +240,12 @@ BEGIN TRY
 			,@strFuturesMarket = FM.strFutMarketName
 			,@strFuturesMonth = FMO.strFutureMonth
 			,@intNoOfLots = ISNULL(CONVERT(INT, CD.dblNoOfLots), 0)
-			,@dblFuturesPrice = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, @intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblFutures, CD.intContractDetailId), 0))
+			,@dblFuturesPrice = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, @intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblFutures, NULL), 0))
 			,@dblFXRate = ISNULL(CD.dblRate, 0)
 			,@strFXCurrency = C.strCurrency
 			,@strRefFuturesMarket = RFM.strFutMarketName
 			,@strRefFuturesMonth = RFMO.strFutureMonth
-			,@dblRefFuturesPrice = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intRefFuturesItemUOMId, @intItemUOMId, 1, CD.intRefFuturesCurrencyId, @intCurrencyId, CD.dblRefFuturesQty, CD.intContractDetailId), 0))
+			,@dblRefFuturesPrice = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intRefFuturesItemUOMId, @intItemUOMId, 1, CD.intRefFuturesCurrencyId, @intCurrencyId, CD.dblRefFuturesQty, NULL), 0))
 			,@strSubBook = SB.strSubBook
 			,@dblQuantityPerLot = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, FM.intUnitMeasureId, @intUnitMeasureId, RWC.dblQuantityPerLot), 0))
 			,@ERPCONumber = CF.strERPPONumber

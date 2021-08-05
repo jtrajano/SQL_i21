@@ -387,7 +387,7 @@ BEGIN TRY
 					'<PricingType>' + @strPricingType + '</PricingType>' + 
 					'<FuturesMarket>' + ISNULL(FM.strFutMarketName, '') + '</FuturesMarket>' + 
 					'<FuturesMonth>' + ISNULL(FMO.strFutureMonth, '') + '</FuturesMonth>' + 
-					'<CashPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, IUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblCashPrice, CD.intContractDetailId), 0))) + '</CashPrice>' + 
+					'<CashPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, IUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblCashPrice, NULL), 0))) + '</CashPrice>' + 
 					'<PriceUOM>' + ISNULL(UOM.strUnitMeasure, '') + '</PriceUOM>' + 
 					'<PriceCurrency>' + ISNULL(@strCurrency, '') + '</PriceCurrency>' + 
 					'<FixationDate>' + ISNULL(CONVERT(VARCHAR, @dtmFixationDate, 112), '') + '</FixationDate>' + 
