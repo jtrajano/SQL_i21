@@ -11,6 +11,8 @@ BEGIN
 	SET NOCOUNT ON;
 	BEGIN TRY 
 		
+		SET @UserId = LOWER(@UserId)
+		SET @StatementType = LOWER(@StatementType)
 		
 		DECLARE @tblTieredUnitDiscountFees TABLE 
 		(
@@ -127,10 +129,6 @@ BEGIN
 
 	
 
-
-	
-
-
 	INSERT INTO @tblCFGroupVolumeDisctinct
 	(
 		 intCustomerGroupId 
@@ -145,12 +143,18 @@ BEGIN
 	INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount 
 	ON cfInv.intAccountId = cfCardAccount.intAccountId 
 	AND cfInv.intCardId = cfCardAccount.intCardId
+	INNER JOIN @tblTieredUnitDiscountFees
+	ON [@tblTieredUnitDiscountFees].intFeeProfileId = cfCardAccount.intFeeProfileId
 	WHERE ISNULL(intInvoiceId,0) != 0
-	AND cfInv.strUserId = 'irelyadmin'
+	AND LOWER(cfInv.strUserId) = @UserId
 	AND ISNULL(cfInv.ysnExpensed,0) = 0
-	AND LOWER(cfInv.strStatementType) = 'invoice'
-	AND intFeeProfileId IN (SELECT intFeeProfileId FROM @tblTieredUnitDiscountFees WHERE strUserId = 'irelyadmin')
+	AND LOWER(cfInv.strStatementType) = @StatementType
 	AND (intCustomerGroupId IS NOT NULL AND intCustomerGroupId != 0)
+	AND ((strTransactionType = 'Local/Network' AND [@tblTieredUnitDiscountFees].ysnLocalTrans = 1)
+	OR (strTransactionType = 'Remote' AND [@tblTieredUnitDiscountFees].ysnRemotesTrans = 1)
+	OR (strTransactionType = 'Extended Remote' AND [@tblTieredUnitDiscountFees].ysnExtendedRemoteTrans = 1
+	OR (strTransactionType = 'Foreign Sale' AND [@tblTieredUnitDiscountFees].ysnForeignTrans = 1)))
+	AND (ISNULL([@tblTieredUnitDiscountFees].intNetworkId,0) = 0 OR ISNULL([@tblTieredUnitDiscountFees].intNetworkId,0) = cfCardAccount.intNetworkId)
 	GROUP BY intCustomerGroupId , [strGroupName]
 
 
@@ -166,12 +170,18 @@ BEGIN
 	INNER JOIN dbo.vyuCFCardAccount AS cfCardAccount 
 	ON cfInv.intAccountId = cfCardAccount.intAccountId 
 	AND cfInv.intCardId = cfCardAccount.intCardId
+	INNER JOIN @tblTieredUnitDiscountFees
+	ON [@tblTieredUnitDiscountFees].intFeeProfileId = cfCardAccount.intFeeProfileId
 	WHERE ISNULL(intInvoiceId,0) != 0
-	AND cfInv.strUserId = 'irelyadmin'
+	AND  LOWER(cfInv.strUserId) = @UserId
 	AND ISNULL(cfInv.ysnExpensed,0) = 0
-	AND LOWER(cfInv.strStatementType) = 'invoice'
-	AND intFeeProfileId IN (SELECT intFeeProfileId FROM @tblTieredUnitDiscountFees WHERE strUserId = 'irelyadmin')
+	AND LOWER(cfInv.strStatementType) = @StatementType
 	AND (intCustomerGroupId IS NULL OR intCustomerGroupId = 0)
+	AND ((strTransactionType = 'Local/Network' AND [@tblTieredUnitDiscountFees].ysnLocalTrans = 1)
+	OR (strTransactionType = 'Remote' AND [@tblTieredUnitDiscountFees].ysnRemotesTrans = 1)
+	OR (strTransactionType = 'Extended Remote' AND [@tblTieredUnitDiscountFees].ysnExtendedRemoteTrans = 1
+	OR (strTransactionType = 'Foreign Sale' AND [@tblTieredUnitDiscountFees].ysnForeignTrans = 1)))
+	AND (ISNULL([@tblTieredUnitDiscountFees].intNetworkId,0) = 0 OR ISNULL([@tblTieredUnitDiscountFees].intNetworkId,0) = cfCardAccount.intNetworkId)
 	GROUP BY cfCardAccount.intAccountId 
 
 
@@ -213,13 +223,14 @@ BEGIN
 	ON [@tblTieredUnitDiscountFees].intFeeProfileId = cfCardAccount.intFeeProfileId
 	AND cfInv.intCardId = cfCardAccount.intCardId
 	WHERE ISNULL(intInvoiceId,0) != 0
-	AND cfInv.strUserId = 'irelyadmin'
+	AND  LOWER(cfInv.strUserId) = @UserId
 	AND ISNULL(cfInv.ysnExpensed,0) = 0
-	AND LOWER(cfInv.strStatementType) = 'invoice'
+	AND LOWER(cfInv.strStatementType) = @StatementType
 	AND ((strTransactionType = 'Local/Network' AND [@tblTieredUnitDiscountFees].ysnLocalTrans = 1)
 	OR (strTransactionType = 'Remote' AND [@tblTieredUnitDiscountFees].ysnRemotesTrans = 1)
 	OR (strTransactionType = 'Extended Remote' AND [@tblTieredUnitDiscountFees].ysnExtendedRemoteTrans = 1
 	OR (strTransactionType = 'Foreign Sale' AND [@tblTieredUnitDiscountFees].ysnForeignTrans = 1)))
+	AND (ISNULL([@tblTieredUnitDiscountFees].intNetworkId,0) = 0 OR ISNULL([@tblTieredUnitDiscountFees].intNetworkId,0) = cfCardAccount.intNetworkId)
 
 	
 
