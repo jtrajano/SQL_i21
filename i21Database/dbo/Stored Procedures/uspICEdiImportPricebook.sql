@@ -35,6 +35,21 @@ DECLARE
 	,@insertedVendorXRef AS INT = 0 
 	,@updatedItemLocation AS INT = 0
 	,@insertedItemLocation AS INT = 0 
+
+	,@originalPricebookCount AS INT = 0 
+	,@duplicatePricebookCount AS INT = 0 
+	
+DECLARE 
+	@TotalRowsUpdated AS INT = 0 
+	,@TotalRowsInserted AS INT = 0 
+	,@TotalRowsSkipped AS INT = 0 
+
+-- Get the original record count. 
+SELECT @originalPricebookCount = COUNT(1) 
+FROM 
+	tblICEdiPricebook p
+WHERE 
+	p.strUniqueId = @UniqueId
 	
 -- Remove the duplicate records in tblICEdiPricebook
 ;WITH deleteDuplicate_CTE (
@@ -55,6 +70,13 @@ AS (
 )
 DELETE FROM deleteDuplicate_CTE
 WHERE dblDuplicateCount > 1;
+
+-- Get the duplicate count. 
+SELECT @duplicatePricebookCount = ISNULL(@originalPricebookCount, 0) - COUNT(1) 
+FROM 
+	tblICEdiPricebook p
+WHERE 
+	p.strUniqueId = @UniqueId
 
 --Update Item
 UPDATE i
@@ -142,6 +164,43 @@ WHERE
 	v.intEntityId IS NULL 
 	AND p.strUniqueId = @UniqueId
 
+-- Log the records with duplicate records
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, NULL
+	, NULL 
+	, NULL 
+	, dbo.fnFormatMessage(
+		'There are %i duplicate records(s) found in the file.'
+		,@duplicatePricebookCount
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+	)
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+WHERE 
+	@duplicatePricebookCount <> 0 
+
 -------------------------------------------------
 -- END Validation 
 -------------------------------------------------
@@ -192,10 +251,6 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL
 		,strAction NVARCHAR(50) NULL
 	)
 ;
-
-DECLARE 
-	@TotalRowsUpdated AS INT = 0 
-	,@TotalRowsInserted AS INT = 0 
 	   	
 -- Update UOM
 UPDATE u
@@ -943,6 +998,8 @@ SELECT @insertedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVen
 
 SELECT @ErrorCount = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error'
 SELECT @TotalRows = COUNT(*) FROM tblICEdiPricebook WHERE strUniqueId = @UniqueId
+SELECT @TotalRowsSkipped = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strStatus = 'Skipped'
+SELECT @TotalRowsSkipped = @TotalRowsSkipped - 1 + @duplicatePricebookCount WHERE @duplicatePricebookCount <> 0 
 
 SET @TotalRowsUpdated = @TotalRowsUpdated + @updatedItems + @updatedItemUOM + @updatedItemPricing + @updatedItemLocation + @updatedSpecialItemPricing + @updatedVendorXRef
 SET @TotalRowsInserted = @TotalRowsInserted + @insertedItemLocation + @insertedItemPricing + @insertedSpecialItemPricing + @insertedVendorXRef 
@@ -953,7 +1010,8 @@ BEGIN
 		intTotalErrors = @ErrorCount,
 		intTotalRows = @TotalRows,
 		intRowsUpdated = @TotalRowsUpdated, 
-		intRowsImported = @TotalRowsInserted
+		intRowsImported = @TotalRowsInserted,
+		intRowsSkipped = @TotalRowsSkipped
 	WHERE 
 		intImportLogId = @LogId
 
