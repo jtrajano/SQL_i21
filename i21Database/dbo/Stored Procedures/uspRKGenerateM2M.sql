@@ -724,7 +724,7 @@ BEGIN TRY
 					, CBL.dtmStartDate
 					, CBL.dtmEndDate
 					, dblQuantity = CBL.dblQty
-					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 THEN CBL.dblFutures ELSE NULL END
+					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 OR CBL.intPricingTypeId = 3 THEN CBL.dblFutures ELSE NULL END 
 					, dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
 					, dblCashPrice = CASE WHEN CBL.intPricingTypeId = 1 THEN ISNULL(CBL.dblFutures,0) + ISNULL(CBL.dblBasis,0) ELSE NULL END
 					, dblAmount = CASE WHEN CBL.intPricingTypeId = 1 THEN [dbo].[fnCTConvertQtyToStockItemUOM](CD.intItemUOMId, CBL.dblQty) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(CBL.dblFutures, 0) + ISNULL(CBL.dblBasis, 0))
@@ -3357,7 +3357,7 @@ BEGIN TRY
 						WHEN strPricingType = 'Priced' THEN ISNULL(dblFutures, 0)
 						ELSE dblCalculatedFutures END)
 				, dblCash --Contract Cash
-				, dblCosts = ABS(dblCosts)
+				, dblCosts = ABS(dblCosts) 
 				--Market Basis
 				, dblMarketBasis = (CASE WHEN strPricingType ! = 'HTA' THEN
 										CASE WHEN @ysnCanadianCustomer = 1 AND @strM2MCurrency = 'CAD'
