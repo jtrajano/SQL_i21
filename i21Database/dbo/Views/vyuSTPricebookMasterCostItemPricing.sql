@@ -41,7 +41,7 @@ FROM
 		, Store.intStoreId
 		, Store.intStoreNo
 		, ISNULL(CompanyLoc.strLocationName, '') AS strLocationName
-		, sp.dblUnitAfterDiscount
+		, sp.dblCost
 		, sp.dtmBeginDate
 		, 'P' AS strType
 		, sp.intConcurrencyId
