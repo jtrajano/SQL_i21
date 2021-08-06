@@ -44,26 +44,6 @@ BEGIN
 		
 				
 			-- ===========================================================================================================
-			-- START Create the filter tables
-			BEGIN
-				-- Create the temp table for the audit log. 
-				IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NULL  
-					CREATE TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog (
-						intItemId INT
-						,intItemPricingId INT 
-						,dblOldStandardCost NUMERIC(38, 20) NULL
-						,dblOldSalePrice NUMERIC(38, 20) NULL
-						,dblOldLastCost NUMERIC(38, 20) NULL
-						,dblNewStandardCost NUMERIC(38, 20) NULL
-						,dblNewSalePrice NUMERIC(38, 20) NULL
-						,dblNewLastCost NUMERIC(38, 20) NULL
-					)
-				;
-			END
-			-- END Create the filter tables
-			-- ===========================================================================================================
-			
-			-- ===========================================================================================================
 			-- START Create the batch posting table
 			BEGIN
 				-- Create the temp table for the audit log. 
@@ -167,6 +147,26 @@ BEGIN
 			END
 			-- END Validate if there is any future effective date on RPA
 			-- ===========================================================================================================
+			
+			-- ===========================================================================================================
+			-- START BACK UP Create the filter tables
+			BEGIN
+				-- Create the temp table for the audit log. 
+				IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup') IS NULL  
+					CREATE TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup (
+						intItemId INT
+						,intItemPricingId INT 
+						,dblOldStandardCost NUMERIC(38, 20) NULL
+						,dblOldSalePrice NUMERIC(38, 20) NULL
+						,dblOldLastCost NUMERIC(38, 20) NULL
+						,dblNewStandardCost NUMERIC(38, 20) NULL
+						,dblNewSalePrice NUMERIC(38, 20) NULL
+						,dblNewLastCost NUMERIC(38, 20) NULL
+					)
+				;
+			END
+			-- END BACK UP Create the filter tables
+			-- ===========================================================================================================
 
 
 
@@ -197,6 +197,27 @@ BEGIN
 
 					WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 						BEGIN
+							
+							-- ===========================================================================================================
+							-- START Create the filter tables
+							BEGIN
+								-- Create the temp table for the audit log. 
+								IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NULL  
+									CREATE TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog (
+										intItemId INT
+										,intItemPricingId INT 
+										,dblOldStandardCost NUMERIC(38, 20) NULL
+										,dblOldSalePrice NUMERIC(38, 20) NULL
+										,dblOldLastCost NUMERIC(38, 20) NULL
+										,dblNewStandardCost NUMERIC(38, 20) NULL
+										,dblNewSalePrice NUMERIC(38, 20) NULL
+										,dblNewLastCost NUMERIC(38, 20) NULL
+									)
+								;
+							END
+							-- END Create the filter tables
+							-- ===========================================================================================================
+
 							-- Get Primary Id
 							SELECT TOP 1 
 								@intRetailPriceAdjustmentDetailId	= intRetailPriceAdjustmentDetailId,
@@ -372,6 +393,21 @@ BEGIN
 							-- Flag as processed
 							DELETE FROM @tblRetailPriceAdjustmentDetailIds
 							WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
+
+							INSERT INTO #tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup
+							SELECT * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+							
+							-- Clean up 
+							BEGIN
+								IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
+									DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+
+								IF OBJECT_ID('tempdb..#tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog') IS NOT NULL  
+									DROP TABLE #tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog 
+						
+								IF OBJECT_ID('tempdb..#tmpUpdateItemCostForCStoreEffectiveDate_AuditLog') IS NOT NULL  
+									DROP TABLE #tmpUpdateItemCostForCStoreEffectiveDate_AuditLog 
+							END
 						END
 						
 
@@ -462,7 +498,7 @@ BEGIN
 									, CAST(CAST(dblNewStandardCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strStandardCost_New
 									, CAST(CAST(dblNewSalePrice AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strSalePrice_New
 									, CAST(CAST(dblNewLastCost AS DECIMAL(18,3))  AS NVARCHAR(50)) AS strLastCost_New
-								FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
+								FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog_Backup
 							) t
 							unpivot
 							(
@@ -510,20 +546,6 @@ BEGIN
 			-- [END] IF HAS PREVIEW REPORT
 			-- ==============================================================================================
 				
-
-
-			-- Clean up 
-			BEGIN
-				IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
-					DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
-
-				IF OBJECT_ID('tempdb..#tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog') IS NOT NULL  
-					DROP TABLE #tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog 
-						
-				IF OBJECT_ID('tempdb..#tmpUpdateItemCostForCStoreEffectiveDate_AuditLog') IS NOT NULL  
-					DROP TABLE #tmpUpdateItemCostForCStoreEffectiveDate_AuditLog 
-			END
-
 
 			IF(@ysnRecap = 0)
 				BEGIN
