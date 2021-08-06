@@ -9105,7 +9105,7 @@
     <Build Include="dbo\Tables\tblAGApplicationTarget.sql" />
     <Build Include="dbo\Views\vyuSCAgWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
-    <Build Include="dbo\Tables\tblSMUserRolePowerBIReport.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIUserRoleReport.sql" />
     <Build Include="dbo\Tables\tblSMPowerBIReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryValuationSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGetTestMsg.sql" />
@@ -9606,6 +9606,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetPODetail.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightRate.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBICredential.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
