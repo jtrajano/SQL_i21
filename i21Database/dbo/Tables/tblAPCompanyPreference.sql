@@ -18,6 +18,7 @@
 	[intVoucherInvoiceNoOption]     TINYINT NULL,
 	[intDebitMemoInvoiceNoOption]   TINYINT NULL,
     [intPaymentMethodID]            INT NULL DEFAULT 7,
-    [intConcurrencyId]              INT NOT NULL DEFAULT 0, 
+    [intImportTypeId]               INT NOT NULL DEFAULT 5,
+    [intConcurrencyId]              INT NOT NULL DEFAULT 0
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
 );
