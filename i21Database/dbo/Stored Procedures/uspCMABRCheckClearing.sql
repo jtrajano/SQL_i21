@@ -1,3 +1,4 @@
+
 CREATE PROCEDURE uspCMABRCheckClearing
     @intBankAccountId INT,
     @intEntityId INT
@@ -18,35 +19,7 @@ SELECT @intABRDaysNoRef=ISNULL(intABRDaysNoRef,0)
 FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId
 
 ;WITH matching as(
-    SELECT intABRActivityId, intTransactionId, intBankAccountId
-    FROM tblCMABRActivity ABR 
-OUTER APPLY(
-	SELECT 
-	TOP 1
-	intTransactionId
-	FROM tblCMBankTransaction C
-	JOIN tblCMBankTransactionType T 
-	ON C.intBankTransactionTypeId=T.intBankTransactionTypeId
-	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
-	AND ysnPosted = 1
-	AND ysnCheckVoid = 0
-    AND ysnClr = 0
-	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
-		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' AND @intABRDaysNoRef > 0
-			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
-			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
-		ELSE
-			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
-		END
-	AND ABS(dblAmount) = ABS(ABR.dblAmount)
-	AND ABR.strDebitCredit  = 'C'
-	AND
-    (
-		 strDebitCredit  ='C' OR  (strDebitCredit  ='DC' AND dblAmount > 0)
-	)
-	ORDER BY dtmDate
-)CM
-UNION ALL
+
 SELECT intABRActivityId, intTransactionId, intBankAccountId
 FROM tblCMABRActivity ABR
 OUTER APPLY(
@@ -68,12 +41,12 @@ OUTER APPLY(
 			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
 		END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
-	AND ABR.strDebitCredit  = 'D'
-	AND
-    (
-		 strDebitCredit  ='D' OR  (strDebitCredit  ='DC' AND dblAmount < 0)
-	)
-	
+	AND ABR.strDebitCredit =
+	CASE WHEN C.intBankTransactionTypeId = 5 THEN
+		CASE WHEN  dblAmount > 0 THEN 'C' ELSE 'D' END
+	ELSE
+		T.strDebitCredit
+	END
 	ORDER BY dtmDate
 )CM
 )
