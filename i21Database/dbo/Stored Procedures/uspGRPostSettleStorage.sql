@@ -230,7 +230,7 @@ BEGIN TRY
 
 			SELECT @dblTotalUnits = SUM(dblUnits)
 			FROM tblGRStorageHistory
-			WHERE intTransactionTypeId IN (5,1,9)
+			WHERE (intTransactionTypeId IN (5,1,9) OR (intTransactionTypeId = 3 AND strType = 'From Transfer'))
 				AND intCustomerStorageId = @intId
 			GROUP BY intCustomerStorageId
 
