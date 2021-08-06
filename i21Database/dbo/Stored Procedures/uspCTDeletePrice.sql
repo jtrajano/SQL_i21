@@ -74,7 +74,7 @@ begin try
 	end
 	else
 	begin
-		if (@intPriceFixationDetailId = 1)
+		if (@intFixationDetailCount = 1)
 		begin
 	        set @strXML = @strXML + '<intPriceContractId>0</intPriceContractId>';
 	        set @strXML = @strXML + '<strPriceContractState>Modified</strPriceContractState>';
@@ -116,7 +116,7 @@ begin try
 	end
 	else
 	begin
-		if (@intPriceFixationDetailId = 1)
+		if (@intFixationDetailCount = 1)
 		begin		
 			delete
 				pf
@@ -129,6 +129,16 @@ begin try
 		end
 		else
 		begin
+
+			update pf
+			set
+				pf.dblLotsFixed = pf.dblLotsFixed - pfd.dblNoOfLots
+			from
+				tblCTPriceFixationDetail pfd
+				join tblCTPriceFixation pf on pf.intPriceFixationId = pfd.intPriceFixationId
+			where
+				pfd.intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId;
+				
 			delete tblCTPriceFixationDetail
 			where
 				intAssignFuturesToContractSummaryId = @intAssignFuturesToContractSummaryId
