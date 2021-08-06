@@ -78,7 +78,7 @@ BEGIN TRY
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType = 'Invoice'
+			AND TD.strTransactionType IN ('Cash', 'Invoice')
 	INNER JOIN
 		tblCTContractDetail CD
 			ON D.intContractDetailId = CD.intContractDetailId
@@ -120,7 +120,7 @@ BEGIN TRY
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType = 'Invoice'
+			AND TD.strTransactionType IN ('Cash', 'Invoice')
 	INNER JOIN
 		tblCTContractDetail CD
 			ON D.intContractDetailId = CD.intContractDetailId
@@ -161,7 +161,7 @@ BEGIN TRY
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType = 'Invoice'
+			AND TD.strTransactionType IN ('Cash', 'Invoice')
 	INNER JOIN
 		tblCTContractDetail CD
 			ON TD.intContractDetailId = CD.intContractDetailId
@@ -202,7 +202,7 @@ BEGIN TRY
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
-			AND TD.strTransactionType = 'Invoice'
+			AND TD.strTransactionType IN ('Cash', 'Invoice')
 	INNER JOIN
 		tblCTContractDetail CD
 			ON TD.intContractDetailId = CD.intContractDetailId
@@ -240,7 +240,7 @@ BEGIN TRY
 			ON TD.intContractDetailId = CD.intContractDetailId
 	WHERE
 		TD.intTransactionId = @TransactionId 
-		AND TD.strTransactionType = 'Invoice'
+		AND TD.strTransactionType IN ('Cash', 'Invoice')
 		AND TD.intContractDetailId IS NOT NULL
 		AND TD.[intInventoryShipmentItemId] IS NULL
 		AND TD.[intSalesOrderDetailId] IS NULL
@@ -274,7 +274,7 @@ BEGIN TRY
 			ON Detail.intContractDetailId = CD.intContractDetailId
 	WHERE
 		Detail.intInvoiceId = @TransactionId 
-		AND Header.strTransactionType = 'Invoice'
+		AND Header.strTransactionType IN ('Cash', 'Invoice')
 		AND Detail.intContractDetailId IS NOT NULL
 		AND (Detail.[intInventoryShipmentItemId] IS NULL OR (Detail.[intInventoryShipmentItemId] IS NOT NULL AND Detail.strPricing = 'Subsystem - Direct'))
 		AND (Detail.intSalesOrderDetailId IS NULL OR (Detail.intSalesOrderDetailId IS NOT NULL AND Detail.strPricing = 'Subsystem - Direct'))
@@ -301,7 +301,7 @@ BEGIN TRY
     INNER JOIN tblICItem ITEM ON Detail.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
     INNER JOIN tblARInvoice Header ON Detail.intInvoiceId = Header.intInvoiceId 
     INNER JOIN tblCTContractDetail CD ON Detail.intContractDetailId = CD.intContractDetailId
-    WHERE Header.strTransactionType = 'Invoice'
+    WHERE Header.strTransactionType IN ('Cash', 'Invoice')
       AND Detail.intContractDetailId IS NOT NULL
       AND Detail.[intInventoryShipmentItemId] IS NULL
       AND Detail.[intSalesOrderDetailId] IS NULL
@@ -326,7 +326,7 @@ BEGIN TRY
 	INNER JOIN tblSCTicket T ON D.intTicketId = T.intTicketId
 	LEFT JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 									   AND D.intInvoiceId = TD.intTransactionId 
-									   AND TD.strTransactionType = 'Invoice'
+									   AND TD.strTransactionType IN ('Cash', 'Invoice')
 	INNER JOIN tblCTContractDetail CD ON D.intContractDetailId = CD.intContractDetailId
 	WHERE D.intContractDetailId IS NOT NULL
 		AND D.[intInventoryShipmentItemId] IS NULL
@@ -334,7 +334,7 @@ BEGIN TRY
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND TD.intId IS NULL
 		AND T.strDistributionOption = 'SO'
-		AND I.strTransactionType = 'Invoice'
+		AND I.strTransactionType IN ('Cash', 'Invoice')
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
