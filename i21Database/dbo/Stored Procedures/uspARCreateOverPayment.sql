@@ -193,11 +193,16 @@ SELECT TOP 1
 	,@ItemPerformerId					= NULL
 	,@ItemLeaseBilling					= 0
 	,@ItemVirtualMeterReading			= 0
+	,@ItemCurrencyExchangeRateTypeId 	= ARPD.intCurrencyExchangeRateTypeId
+ 	,@ItemCurrencyExchangeRateId  		= @ItemCurrencyExchangeRateId
+ 	,@ItemCurrencyExchangeRate   		= ARPD.dblCurrencyExchangeRate
 FROM
 	[tblARPayment] ARP
 INNER JOIN
 	[tblARCustomer] ARC
 		ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
+INNER JOIN tblARPaymentDetail ARPD 
+		ON ARP.intPaymentId = ARPD.intPaymentId
 WHERE 
 	ARP.[intPaymentId] = @PaymentId
 
