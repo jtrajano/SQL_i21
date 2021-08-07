@@ -1287,7 +1287,7 @@ BEGIN TRY
 			, intPricingTypeId
 			, strPricingType
 			, dblRatio
-			, dblContractBasis = CASE WHEN ISNULL(intPricingTypeId, 0) = 3 THEN dblMarketBasis1 ELSE dblContractBasis END
+			, dblContractBasis = CASE WHEN ISNULL(intPricingTypeId, 0) = 3 THEN 0 ELSE dblContractBasis END
 			, dblDummyContractBasis
 			, dblCash
 			, dblFuturesClosingPrice1
@@ -1363,7 +1363,7 @@ BEGIN TRY
 				, dblFutures = CASE WHEN cd.intPricingTypeId = 2 AND strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
 									ELSE CASE WHEN cd.intPricingTypeId IN (1, 3) THEN ISNULL(cd.dblFutures, 0) ELSE ISNULL(cd.dblFutures, 0) END END
 				, dblMarketRatio = ISNULL(basisDetail.dblRatio, 0)
-				, dblMarketBasis1 = ISNULL(CASE WHEN cd.strPricingType <> 'HTA' THEN basisDetail.dblMarketBasis ELSE 0 END, 0)
+				, dblMarketBasis1 = ISNULL(basisDetail.dblMarketBasis, 0)
 				, dblMarketCashPrice = ISNULL(CASE WHEN cd.strPricingType <> 'HTA' THEN basisDetail.dblMarketBasis ELSE 0 END, 0)
 				, intMarketBasisUOM = ISNULL(basisDetail.intMarketBasisUOM, 0)
 				, intMarketBasisCurrencyId = ISNULL(basisDetail.intMarketBasisCurrencyId, 0)
@@ -3379,7 +3379,7 @@ BEGIN TRY
 													ELSE ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0) END)
 										ELSE ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0) END
 
-									ELSE 0 END)
+									ELSE ISNULL(dblMarketBasis, 0) + ISNULL(dblInvMarketBasis, 0) END)
 				, dblMarketRatio
 				, dblFuturePrice = dblConvertedFuturePrice --Market Futures
 				, intContractTypeId
@@ -3415,7 +3415,7 @@ BEGIN TRY
 													--Can be used other currency exchange
 													ELSE ISNULL(dblMarketBasis, 0) + (dblConvertedFuturePrice * CASE WHEN ISNULL(dblMarketRatio, 0) = 0 THEN 1 ELSE dblMarketRatio END) + ISNULL(dblCashPrice, 0) END)
 										ELSE ISNULL(dblMarketBasis, 0) + (ISNULL(dblConvertedFuturePrice, 0) * CASE WHEN ISNULL(dblMarketRatio, 0) = 0 THEN 1 ELSE ISNULL(dblMarketRatio, 0) END) + ISNULL(dblCashPrice, 0) END
-				, dblResultBasis = dblResultBasis
+				, dblResultBasis = dblResultBasis 
 				, dblResultCash
 				--Contract Price
 				, dblContractPrice = (CASE WHEN @ysnCanadianCustomer = 1 AND @strM2MCurrency = 'CAD'
