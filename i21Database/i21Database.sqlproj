@@ -9604,6 +9604,10 @@
     <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightRate.sql" />
     <Build Include="dbo\Views\vyuFABookDepreciationReport.sql" />
+    <Build Include="dbo\Tables\tblMFSODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSODetailConfirm.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
