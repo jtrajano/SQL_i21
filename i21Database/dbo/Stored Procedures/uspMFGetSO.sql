@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFGetSO (
-	@strSalesOrderNumber NVARCHAR(50)
+	@strPickListNo NVARCHAR(50)
 	,@intLocationId INT
 	)
 AS
@@ -8,6 +8,7 @@ SELECT PD.intPickListDetailId
 	,SD.intSalesOrderDetailId
 	,S.intSalesOrderId
 	,S.strSalesOrderNumber
+	,P.strPickListNo
 	,sl.strName strStorageUnit
 	,subl.strSubLocationName strStorageLocation
 	,SD.intSalesOrderDetailId AS intTaskId
@@ -35,7 +36,7 @@ JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 JOIN dbo.tblEMEntity E ON E.intEntityId = S.intEntityCustomerId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation subl ON subl.intCompanyLocationSubLocationId = PD.intSubLocationId
 LEFT JOIN dbo.tblICStorageLocation sl ON sl.intStorageLocationId = PD.intStorageLocationId
-WHERE S.strSalesOrderNumber = @strSalesOrderNumber
+WHERE P.strPickListNo = @strPickListNo
 	AND S.intCompanyLocationId = @intLocationId
 	AND dblQtyOrdered - dblQtyShipped > 0
 	AND NOT EXISTS (
