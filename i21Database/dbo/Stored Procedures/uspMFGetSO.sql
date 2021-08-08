@@ -11,7 +11,7 @@ SELECT PD.intPickListDetailId
 	,P.strPickListNo
 	,sl.strName strStorageUnit
 	,subl.strSubLocationName strStorageLocation
-	,SD.intSalesOrderDetailId AS intTaskId
+	,PD.intPickListDetailId AS intTaskId
 	,'ITEM # : ' + i.strItemNo + '<br />' + i.strDescription + '<br />' + 'QTY : ' + LTRIM(CONVERT(NUMERIC(38, 3), PD.dblPickQuantity)) + ' ' + um.strUnitMeasure + '<br />' + CASE 
 		WHEN L.strLotNumber IS NULL
 			THEN ''
