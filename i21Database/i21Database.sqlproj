@@ -9451,6 +9451,8 @@
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
     <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
