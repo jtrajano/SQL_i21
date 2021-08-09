@@ -10135,4 +10135,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WV_WestVirginia.sql" />
+  </ItemGroup>
 </Project>
