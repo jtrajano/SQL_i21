@@ -9617,6 +9617,8 @@
     <Build Include="dbo\Tables\tblMFTOReceiptDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSONo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSODetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
