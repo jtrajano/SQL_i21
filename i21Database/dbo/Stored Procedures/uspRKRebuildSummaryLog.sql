@@ -2020,7 +2020,9 @@ BEGIN TRY
 				, intContractHeaderId = CASE WHEN v.strTransactionType = 'Inventory Shipment' THEN cd.intContractHeaderId
 											WHEN v.strTransactionType = 'Invoice' THEN cd.intContractHeaderId
 											WHEN v.strTransactionType = 'Outbound Shipment' THEN cd.intContractHeaderId END
-				, intTicketId = v.intTicketId
+				, intTicketId = CASE WHEN v.strTransactionType = 'Inventory Shipment' THEN v.intTicketId
+											WHEN v.strTransactionType = 'Invoice' THEN id.intTicketId
+											WHEN v.strTransactionType = 'Outbound Shipment' THEN v.intTicketId END
 				, intCommodityId = v.intCommodityId
 				, intCommodityUOMId = cum.intCommodityUnitMeasureId
 				, intItemId = t.intItemId
@@ -2061,6 +2063,7 @@ BEGIN TRY
 				, t.strTransactionId
 				, t.dtmDate
 				, v.intTicketId
+				, id.intTicketId
 				, v.intCommodityId
 				, cum.intCommodityUnitMeasureId
 				, t.intItemId
