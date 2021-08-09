@@ -463,6 +463,42 @@ BEGIN
 	VALUES ('Filter Columns', 1)
 END
 
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'selected')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('selected', 1)
+END
+
+
+--========================================== Messages =====================================================--
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Do you want to save the changes you made?')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Do you want to save the changes you made?', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Are you sure you want to delete this record?')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Are you sure you want to delete this record?', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'You are about to delete')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('You are about to delete', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Are you sure you want to continue?')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Are you sure you want to continue?', 1)
+END
+
+--======================================== End Messages ===================================================--
+
+
 PRINT('/*******************  END INSERT OTHER LABELS  *******************/')
 
 GO
