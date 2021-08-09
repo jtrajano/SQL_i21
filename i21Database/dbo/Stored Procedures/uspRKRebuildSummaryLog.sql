@@ -2063,6 +2063,7 @@ BEGIN TRY
 				, t.strTransactionId
 				, t.dtmDate
 				, v.intTicketId
+				, id.intTicketId
 				, v.intCommodityId
 				, cum.intCommodityUnitMeasureId
 				, t.intItemId
