@@ -9437,7 +9437,7 @@
     <None Include="Scripts\Post-Deployment\IC\29_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateDemandSummaryByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrainLSM.sql" />
-    <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />    
+    <Build Include="dbo\Tables\tblSCDeliverySheetShrinkReceiptDistribution.sql" />
     <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping200.sql" />
     <None Include="Scripts\Post-Deployment\GR\3_CleanupObjects.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAuditLogMigrationPlan.sql" />
@@ -9604,6 +9604,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetPODetail.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightRate.sql" />
+    <Build Include="dbo\Views\vyuICSearchCountByCategoryDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
