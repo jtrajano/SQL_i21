@@ -36,7 +36,7 @@ SELECT
 ,[strName]					=	D2.strName
 ,[strVendorId]				=	D1.strVendorId
 ,[strShipVia]				=	E.strShipVia
-,[strTerm]					=	CAST('' AS NVARCHAR) COLLATE Latin1_General_CI_AS
+,[strTerm]					=	CAST('' AS NVARCHAR)
 ,[strContractNumber]		=	F1.strContractNumber
 ,[strBillOfLading]			=	A.strBillOfLading
 ,[intContractHeaderId]		=	F1.intContractHeaderId

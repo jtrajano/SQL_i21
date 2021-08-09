@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageTest @intTestId INT
+	,@strTestName NVARCHAR(50) = NULL
 	,@strRowState NVARCHAR(50) = NULL
 	,@intUserId INT = NULL
 AS
@@ -14,12 +15,14 @@ BEGIN TRY
 
 	INSERT INTO tblQMTestPreStage (
 		intTestId
+		,strTestName
 		,strRowState
 		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intTestId
+		,@strTestName
 		,@strRowState
 		,@intUserId
 		,''

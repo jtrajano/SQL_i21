@@ -54,6 +54,7 @@ SELECT
 	,ysnShowDriverPinDescriptionOnly=ISNULL(ysnShowDriverPinDescriptionOnly,0)
 	,ysnPageBreakByPrimarySortOrder=ISNULL(ysnPageBreakByPrimarySortOrder,0)
 	,ysnSummaryByDeptDriverPinProd=ISNULL(ysnSummaryByDeptDriverPinProd,0)
+	,strDepartmentGrouping=ISNULL(strDepartmentGrouping,0)
 	,ysnActive=ISNULL(ysnActive,0)
 	,dtmBonusCommissionDate
 	,dtmLastBillingCycleDate

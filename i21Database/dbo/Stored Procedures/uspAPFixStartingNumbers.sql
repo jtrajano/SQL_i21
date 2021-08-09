@@ -124,3 +124,40 @@ BEGIN
 	SET @strPrefix = NULL 
 	SET @intNumber = NULL 
 END 
+
+-- 2 of 6: Fix the 1099 Adjustment. 
+IF(@intStartingNumberId IS NULL OR @intStartingNumberId = 77)
+BEGIN 
+	SET @strTransactionType = '1099 Adjustment'
+	SELECT	@strTransactionId = strPrefix + CAST(intNumber AS NVARCHAR(20)) 
+			,@intNumber = intNumber
+			,@strPrefix = strPrefix
+	FROM	dbo.tblSMStartingNumber
+	WHERE	intStartingNumberId = 77
+
+	IF EXISTS (SELECT TOP 1 1 FROM dbo.tblAPBill WHERE strBillId = @strTransactionId)
+	BEGIN 
+		-- Retrieve the Max transaction id. 
+		SET @strTransactionId = NULL
+		SELECT	@strTransactionId = MAX(CAST(REPLACE(strBillId, @strPrefix, '') AS INT))			
+		FROM	dbo.tblAPBill
+		WHERE intTransactionType = 9
+		
+		IF (@strTransactionId IS NOT NULL)	
+		BEGIN 	
+			-- Extract the number part in the transaction id. 
+			SET @intNumber = CAST(REPLACE(@strTransactionId, @strPrefix, '') AS INT) 
+			
+			-- Update the next transaction id. 
+			UPDATE	dbo.tblSMStartingNumber
+			SET		intNumber = @intNumber + 1 
+			WHERE	intStartingNumberId = 77
+		END 
+	END 
+
+	-- Clean-up 
+	SET @strTransactionId = NULL
+	SET @strTransactionType = NULL 
+	SET @strPrefix = NULL 
+	SET @intNumber = NULL 
+END 

@@ -16,6 +16,16 @@
 )
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSCTicketHistory_7_2016843093__K2_K3_K8_1_4_5_6_7_9] ON [dbo].[tblSCTicketHistory]
+(
+	[intTicketId] ASC,
+	[intEntityId] ASC,
+	[dtmTicketHistoryDate] ASC
+)
+INCLUDE([intTicketHistoryId],[intTicketSplitId],[dblSplitPercent],[dblQuantity],[intStorageScheduleTypeId],[intConcurrencyId])
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Column',
     @level0type = N'SCHEMA',

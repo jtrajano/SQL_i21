@@ -23,75 +23,171 @@ ELSE
 
 BEGIN TRY
 
-
---IF @post = 1 AND @recap = 0
---BEGIN
---	DECLARE @SplitInvoiceData TABLE([intInvoiceId] INT)
-
---	INSERT INTO @SplitInvoiceData
---	SELECT 
---		intInvoiceId
---	FROM
---		dbo.tblARInvoice ARI WITH (NOLOCK)
---	WHERE
---		ARI.[ysnSplitted] = 0 
---		AND ISNULL(ARI.[intSplitId], 0) > 0
---		AND EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
---		AND ARI.strTransactionType IN ('Invoice', 'Cash', 'Debit Memo')
-
---	WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
---		BEGIN
---			DECLARE @invoicesToAdd NVARCHAR(MAX) = NULL, @intSplitInvoiceId INT
-
---			SELECT TOP 1 @intSplitInvoiceId = intInvoiceId FROM @SplitInvoiceData ORDER BY intInvoiceId
-
---			EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @userId, @invoicesToAdd OUT
-
---			DELETE FROM @PostInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
-
---			IF (ISNULL(@invoicesToAdd, '') <> '')
---				BEGIN
---                    DELETE FROM @InvoiceIds
-
---                    INSERT INTO @InvoiceIds
---                        ([intHeaderId]
---                        ,[ysnPost]
---                        ,[ysnRecap]
---                        ,[strBatchId]
---                        ,[ysnAccrueLicense])
---                    SELECT
---                            [intHeaderId]      = ARI.[intInvoiceId]
---                        ,[ysnPost]          = @post
---                        ,[ysnRecap]         = @recap
---                        ,[strBatchId]       = @batchIdUsed
---                        ,[ysnAccrueLicense]	= @accrueLicense
---                    FROM
---                        tblARInvoice ARI
---                    WHERE
---                        EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@invoicesToAdd) DV WHERE DV.[intID] = ARI.[intInvoiceId])
---                        AND NOT EXISTS(SELECT NULL FROM @PostInvoiceData PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
-
---                    INSERT INTO @PostInvoiceData 
---                    SELECT *
---                    FROM [dbo].[fnARGetInvoiceDetailsForPosting]
---                        (@InvoiceIds        --@InvoiceIds
---                        ,@batchIdUsed       --@BatchId
---                        ,@userId            --@UserId
---                        ,NULL               --@IntegrationLogId
---                        )					
---				END
-
---			DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
---		END
---END
 DECLARE @ForInsertion NVARCHAR(MAX)
 DECLARE @ForDeletion NVARCHAR(MAX)
 
 DECLARE @SplitInvoiceData [InvoicePostingTable]
 INSERT INTO @SplitInvoiceData
-SELECT *
+SELECT 
+	[intInvoiceId]
+	,[strInvoiceNumber]
+	,[strTransactionType]
+	,[strType]
+	,[dtmDate]
+	,[dtmPostDate]
+	,[dtmShipDate]
+	,[intEntityCustomerId]
+	,[strCustomerNumber]
+	,[ysnCustomerActive]
+	,[dblCustomerCreditLimit]
+	,[intCompanyLocationId]
+	,[strCompanyLocationName]
+	,[intAccountId]
+	,[intAPAccount]
+	,[intFreightIncome]
+	,[intDeferredRevenueAccountId]
+	,[intUndepositedFundsId]
+	,[intProfitCenter]
+	,[intLocationSalesAccountId]
+	,[intCurrencyId]
+	,[dblAverageExchangeRate]
+	,[intTermId]
+	,[dblInvoiceTotal]
+	,[dblBaseInvoiceTotal]
+	,[dblShipping]
+	,[dblBaseShipping]
+	,[dblTax]
+	,[dblBaseTax]
+	,[dblAmountDue]
+	,[dblBaseAmountDue]
+	,[dblPayment]
+	,[dblBasePayment]
+	,[dblProvisionalAmount]
+	,[dblBaseProvisionalAmount]
+	,[strComments]
+	,[strImportFormat]
+	,[intSourceId]
+	,[intOriginalInvoiceId]
+	,[strInvoiceOriginId]
+	,[intDistributionHeaderId]
+	,[intLoadDistributionHeaderId]
+	,[intLoadId]
+	,[intFreightTermId]
+	,[strActualCostId]
+	,[intPeriodsToAccrue]
+	,[ysnAccrueLicense]
+	,[intSplitId]
+	,[dblSplitPercent]
+	,[ysnSplitted]
+	,[ysnPosted]
+	,[ysnRecurring]
+	,[ysnImpactInventory]
+	,[ysnImportedAsPosted]
+	,[ysnImportedFromOrigin]
+	,[dtmDatePosted]
+	,[strBatchId]
+	,[ysnPost]
+	,[ysnRecap]
+	,[intEntityId]
+	,[intUserId]
+	,[ysnUserAllowedToPostOtherTrans]
+	,[ysnWithinAccountingDate]
+	,[ysnForApproval]
+	,[ysnFromProvisional]
+	,[ysnProvisionalWithGL]
+	,[ysnExcludeInvoiceFromPayment]
+	,[ysnRefundProcessed]
+	,[ysnIsInvoicePositive]
+	,[ysnFromReturn]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[strItemNo]
+	,[strItemType]
+	,[strItemManufactureType]
+	,[strItemDescription]
+	,[intItemUOMId]
+	,[intItemWeightUOMId]
+	,[intItemAccountId]
+	,[intServiceChargeAccountId]
+	,[intSalesAccountId]
+	,[intCOGSAccountId]
+	,[intInventoryAccountId]
+	,[intLicenseAccountId]
+	,[intMaintenanceAccountId]
+	,[intConversionAccountId]
+	,[dblQtyShipped]
+	,[dblUnitQtyShipped]
+	,[dblShipmentNetWt]
+	,[dblUnitQty]
+	,[dblUnitOnHand]
+	,[intAllowNegativeInventory]
+	,[ysnStockTracking]
+	,[intItemLocationId]
+	,[dblLastCost]
+	,[intCategoryId]
+	,[ysnRetailValuation]
+	,[dblPrice]
+	,[dblBasePrice]
+	,[dblUnitPrice]
+	,[dblBaseUnitPrice]
+	,[strPricing]
+	,[dblDiscount]
+	,[dblDiscountAmount]
+	,[dblBaseDiscountAmount]
+	,[dblTotal]
+	,[dblBaseTotal]
+	,[dblLineItemGLAmount]
+	,[dblBaseLineItemGLAmount]
+	,[intCurrencyExchangeRateTypeId]
+	,[dblCurrencyExchangeRate]
+	,[strCurrencyExchangeRateType]
+	,[intLotId]
+	,[intOriginalInvoiceDetailId]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblLicenseAmount]
+	,[dblBaseLicenseAmount]
+	,[dblLicenseGLAmount]
+	,[dblBaseLicenseGLAmount]
+	,[dblMaintenanceAmount]
+	,[dblBaseMaintenanceAmount]
+	,[dblMaintenanceGLAmount]
+	,[dblBaseMaintenanceGLAmount]
+	,[dblTaxesAddToCost]
+	,[dblBaseTaxesAddToCost]
+	,[ysnTankRequired]
+	,[ysnLeaseBilling]
+	,[intSiteId]
+	,[intPerformerId]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intInventoryShipmentItemId]
+	,[intInventoryShipmentChargeId]
+	,[intSalesOrderDetailId]
+	,[intLoadDetailId]
+	,[intShipmentId]
+	,[intTicketId]
+	,[intDiscountAccountId]
+	,[intCustomerStorageId]
+	,[intStorageScheduleTypeId]
+	,[intSubLocationId]
+	,[intStorageLocationId]
+	,[ysnAutoBlend]
+	,[ysnBlended]
+	,[dblQuantity]
+	,[dblMaxQuantity]
+	,[strOptionType]
+	,[strSourceType]
+	,[strPostingMessage]
+	,[strDescription]
+	,[strInterCompanyVendorId]
+	,[strInterCompanyLocationId]
+	,[intInterCompanyId]
+	,[strReceiptNumber]
+	,[ysnInterCompany]
 FROM
-    #ARPostInvoiceHeader
+    ##ARPostInvoiceHeader
 WHERE
 	[ysnSplitted] = 0
     AND ISNULL([intSplitId], 0) > 0
@@ -156,10 +252,10 @@ END
 
 IF (ISNULL(@ForDeletion, '') <> '')
 	BEGIN
-        DELETE FROM #ARPostInvoiceHeader
+        DELETE FROM ##ARPostInvoiceHeader
         WHERE 
             [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
-        DELETE FROM #ARPostInvoiceDetail
+        DELETE FROM ##ARPostInvoiceDetail
         WHERE 
             [intInvoiceId] IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@ForDeletion))
 	END
@@ -185,17 +281,8 @@ IF (ISNULL(@ForInsertion, '') <> '')
             tblARInvoice ARI
         WHERE
             EXISTS(SELECT NULL FROM dbo.fnGetRowsFromDelimitedValues(@ForInsertion) DV WHERE DV.[intID] = ARI.[intInvoiceId])
-            AND NOT EXISTS(SELECT NULL FROM #ARPostInvoiceHeader PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
+            AND NOT EXISTS(SELECT NULL FROM ##ARPostInvoiceHeader PID WHERE PID.[intInvoiceId] = ARI.[intInvoiceId])
 
-        --INSERT INTO #ARPostInvoiceData 
-        --SELECT *
-        --FROM [dbo].[fnARGetInvoiceDetailsForPosting]
-        --        (@InvoiceIds   --@InvoiceIds
-        --        ,@BatchId      --@BatchId
-        --        ,@UserId       --@UserId
-        --        ,NULL          --@IntegrationLogId
-        --        )
-		--DELETE FROM @InvoiceIds		
 		EXEC [dbo].[uspARPopulateInvoiceDetailForPosting]
 			 @Param             = NULL
 			,@BeginDate         = NULL
@@ -211,10 +298,7 @@ IF (ISNULL(@ForInsertion, '') <> '')
 			,@AccrueLicense     = 0
 			,@TransType         = NULL
 			,@UserId            = @UserId	
-			
-
 	END
-
 
 END TRY
 BEGIN CATCH

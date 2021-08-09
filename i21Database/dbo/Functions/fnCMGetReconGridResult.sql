@@ -32,11 +32,13 @@ BEGIN
 	DECLARE @lastDateReconciled DATETIME
 	DECLARE @filterDate DATETIME
 
-	SET @filterDate = DATEADD(DAY,1,@dtmStatementDate)
-
 	SELECT @lastDateReconciled = MAX(dtmDateReconciled)
 	FROM tblCMBankReconciliation
 	WHERE intBankAccountId = @intBankAccountId
+	
+	SET @filterDate = DATEADD(SECOND,-1, (DATEADD(DAY ,1 , @dtmStatementDate)))
+	SET @lastDateReconciled = DATEADD(SECOND,-1, (DATEADD(DAY ,1 , @lastDateReconciled)))
+
 
 	--PAYMENT
 	;WITH BT 

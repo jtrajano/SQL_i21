@@ -1,7 +1,8 @@
-﻿PRINT ('TAX FORMS - Deployment')
+﻿PRINT ('TAX FORMS - Deployment - START')
+GO
 
 PRINT ('Deploying Tax Authority')
-
+GO
 -- Tax Authority
 /* Generate script for Tax Authority 
 select 'UNION ALL SELECT intTaxAuthorityId = ' + CAST(intTaxAuthorityId AS NVARCHAR(10)) 
@@ -67,6 +68,7 @@ UNION ALL SELECT intTaxAuthorityId = 48, strTaxAuthorityCode = 'WV', strDescript
 UNION ALL SELECT intTaxAuthorityId = 49, strTaxAuthorityCode = 'WI', strDescription = 'Wisconsin', ysnFilingForThisTA = 0, intMasterId = 49
 UNION ALL SELECT intTaxAuthorityId = 50, strTaxAuthorityCode = 'WY', strDescription = 'Wyoming', ysnFilingForThisTA = 0, intMasterId = 50
 UNION ALL SELECT intTaxAuthorityId = 51, strTaxAuthorityCode = 'US', strDescription = 'Federal Government', ysnFilingForThisTA = 0, intMasterId = 51
+UNION ALL SELECT intTaxAuthorityId = 52, strTaxAuthorityCode = 'DC', strDescription = 'District of Columbia', ysnFilingForThisTA = 0, intMasterId = 52
 ) tblPatch
 
 SET IDENTITY_INSERT tblTFTaxAuthority ON
@@ -114,10 +116,10 @@ WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpTaxAuthority)
 DROP TABLE #tmpTaxAuthority
 
 SET IDENTITY_INSERT tblTFTaxAuthority OFF
-
 GO
 
 PRINT ('Deploying Output Designer Fields')
+GO
 -- Output Designer Fields
 /*
 SELECT 'UNION ALL SELECT strColumnName = ''' + name + ''''
@@ -208,6 +210,7 @@ UNION ALL SELECT strColumnName = 'strDiversionNumber'
 UNION ALL SELECT strColumnName = 'strDiversionOriginalDestinationState'
 UNION ALL SELECT strColumnName = 'strTransactionType'
 UNION ALL SELECT strColumnName = 'strImportVerificationNumber'
+UNION ALL SELECT strColumnName = 'strReason'
 ) tblPatch
 
 MERGE	
@@ -233,10 +236,10 @@ WHEN NOT MATCHED BY SOURCE THEN
 	DELETE;
 
 DROP TABLE #tmpFields
-
 GO
 
 PRINT ('Deploying OriginDestination State')
+GO
 -- Origin/Destination State
 /* Generate script for Origin/Destination States.
 select 'UNION ALL SELECT intOriginDestinationStateId = ' + CAST(intOriginDestinationStateId AS NVARCHAR(10))
@@ -302,12 +305,14 @@ UNION ALL SELECT intOriginDestinationStateId = 47, strOriginDestinationState = '
 UNION ALL SELECT intOriginDestinationStateId = 48, strOriginDestinationState = 'WV', intMasterId = 48
 UNION ALL SELECT intOriginDestinationStateId = 49, strOriginDestinationState = 'WI', intMasterId = 49
 UNION ALL SELECT intOriginDestinationStateId = 50, strOriginDestinationState = 'WY', intMasterId = 50
+UNION ALL SELECT intOriginDestinationStateId = 51, strOriginDestinationState = 'DC', intMasterId = 51
 
 EXEC uspTFUpgradeOriginDestinationState @OriginDestinationStates = @OriginDestinationStates
-
 GO
 
 PRINT ('Deploying Component Types')
+GO
+
 -- Component Types
 SELECT * 
 INTO #tmpTypes
@@ -348,5 +353,4 @@ WHEN NOT MATCHED BY SOURCE THEN
 DROP TABLE #tmpTypes
 
 SET IDENTITY_INSERT tblTFComponentType OFF
-
 GO

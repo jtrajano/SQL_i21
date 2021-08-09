@@ -32,14 +32,14 @@ BEGIN TRY
 
 	SELECT @intContractDetailId = intContractDetailId FROM tblCTApprovedContract WHERE intApprovedContractId = @intApprovedContractId
 	
-	IF	EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = ISNULL(@intContractDetailId,0))
+	IF	EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractDetailId = ISNULL(@intContractDetailId,0))
 	BEGIN
 		SET @ysnFeedExist = 1
 		SELECT TOP 1 @intLastFeedId =  intContractFeedId FROM tblCTContractFeed WHERE intContractDetailId = ISNULL(@intContractDetailId,0) ORDER BY intContractFeedId DESC
 	END
 
 	IF	@ysnFeedExist = 0 OR 
-		EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN ('','Hold','IGNORE') AND strRowState = 'Added')
+		EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND ISNULL(strFeedStatus,'') IN ('','Hold','IGNORE') AND strRowState = 'Added')
 	BEGIN
 		SELECT @strRowState= 'Added'
 		DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
@@ -93,7 +93,7 @@ BEGIN TRY
 
         IF ISNULL(@strModifiedColumns,'') <> ''
         BEGIN  
-            IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND strRowState = 'Modified' AND ISNULL(strFeedStatus,'') IN ('','Hold','IGNORE'))
+            IF EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId AND strRowState = 'Modified' AND ISNULL(strFeedStatus,'') IN ('','Hold','IGNORE'))
             BEGIN
                 DELETE FROM tblCTContractFeed WHERE intContractFeedId = @intLastFeedId
 				SELECT TOP 1 @intLastFeedId =  intContractFeedId FROM tblCTContractFeed WHERE intContractDetailId = ISNULL(@intContractDetailId,0) ORDER BY intContractFeedId DESC

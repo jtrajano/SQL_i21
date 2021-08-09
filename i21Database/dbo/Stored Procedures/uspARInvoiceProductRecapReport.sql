@@ -6,6 +6,7 @@
 	, @strTransactionType	NVARCHAR(100) = NULL
 	, @strFormattingOptions	NVARCHAR(100) = NULL
 	, @intEntityUserId		INT = NULL
+	, @ysnPrintDetail		BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -134,6 +135,7 @@ FROM
 		  AND ARI.strType <> 'Service Charge'
 		  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+		  AND (@ysnPrintDetail = 1 OR (@ysnPrintDetail = 0 AND ARI.strType <> 'CF Tran'))
 		GROUP BY ARI.intEntityCustomerId
 			   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 			   , ARID.intItemId
@@ -206,6 +208,7 @@ FROM
 		  AND ARIDT.intTaxCodeId IS NOT NULL
 		  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)		
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+		  AND (@ysnPrintDetail = 1 OR (@ysnPrintDetail = 0 AND ARI.strType <> 'CF Tran'))
 		GROUP BY ARI.intEntityCustomerId
 			   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 			   , ARIDT.intTaxCodeId
@@ -259,6 +262,7 @@ FROM
 	  AND ARI.strTransactionType IN ('Debit Memo')
 	  AND (@strTransactionType IS NULL OR ARI.strType = @strTransactionType)
 	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), ARI.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
+	  AND (@ysnPrintDetail = 1 OR (@ysnPrintDetail = 0 AND ARI.strType <> 'CF Tran'))
 	GROUP BY ARI.intEntityCustomerId
 		   , CASE WHEN @strFormattingOptions <> 'Product Recap Consolidate All Locations' THEN ARI.intCompanyLocationId END
 		   , ARI.strTransactionType

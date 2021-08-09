@@ -64,6 +64,10 @@ BEGIN TRY
 		RETURN
 	END
 
+	SELECT @intUserId = intEntityId
+	FROM tblSMUserSecurity WITH (NOLOCK)
+	WHERE strUserName = 'IRELYADMIN'
+
 	IF ISNULL(@strSessionId, '') = ''
 		SELECT @intMinVendor = MIN(intStageEntityId)
 		FROM tblIPEntityStage
@@ -450,7 +454,7 @@ BEGIN TRY
 					) t2 ON t1.intRowNo = t2.intRowNo
 
 				--Add Audit Trail Record
-				SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intEntityId) + '","keyValue":' + CONVERT(VARCHAR, @intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
+				--SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intEntityId) + '","keyValue":' + CONVERT(VARCHAR, @intEntityId) + ',"iconCls":"small-new-plus","leaf":true}'
 
 				SELECT @dtmDate = DATEADD(ss, DATEDIFF(ss, GETDATE(), GETUTCDATE()), dtmCreated)
 				FROM tblIPEntityStage
@@ -463,34 +467,41 @@ BEGIN TRY
 				FROM tblIPEntityStage
 				WHERE intStageEntityId = @intStageEntityId
 
-				SELECT @intUserId = e.intEntityId
-				FROM tblEMEntity e
-				JOIN tblEMEntityType et ON e.intEntityId = et.intEntityId
-				WHERE e.strExternalERPId = @strUserName
-					AND et.strType = 'User'
+				--SELECT @intUserId = e.intEntityId
+				--FROM tblEMEntity e
+				--JOIN tblEMEntityType et ON e.intEntityId = et.intEntityId
+				--WHERE e.strExternalERPId = @strUserName
+				--	AND et.strType = 'User'
 
-				INSERT INTO tblSMAuditLog (
-					strActionType
-					,strTransactionType
-					,strRecordNo
-					,strDescription
-					,strRoute
-					,strJsonData
-					,dtmDate
-					,intEntityId
-					,intConcurrencyId
-					)
-				VALUES (
-					'Created'
-					,'EntityManagement.view.Entity'
-					,@intEntityId
-					,''
-					,''
-					,@strJson
-					,@dtmDate
-					,@intUserId
-					,1
-					)
+				--INSERT INTO tblSMAuditLog (
+				--	strActionType
+				--	,strTransactionType
+				--	,strRecordNo
+				--	,strDescription
+				--	,strRoute
+				--	,strJsonData
+				--	,dtmDate
+				--	,intEntityId
+				--	,intConcurrencyId
+				--	)
+				--VALUES (
+				--	'Created'
+				--	,'EntityManagement.view.Entity'
+				--	,@intEntityId
+				--	,''
+				--	,''
+				--	,@strJson
+				--	,@dtmDate
+				--	,@intUserId
+				--	,1
+				--	)
+
+				EXEC uspSMAuditLog @keyValue = @intEntityId
+					,@screenName = 'EntityManagement.view.Entity'
+					,@entityId = @intUserId
+					,@actionType = 'Created'
+					,@actionIcon = 'small-new-plus'
+					,@details = ''
 			END
 			ELSE
 			BEGIN --Update

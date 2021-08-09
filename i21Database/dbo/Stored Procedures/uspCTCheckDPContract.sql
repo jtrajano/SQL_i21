@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCheckDPContract]
+	@intContractHeader int = null
 AS
 BEGIN TRY
 
@@ -11,7 +12,8 @@ BEGIN TRY
 		WHERE dblBalance = 0
 		AND intPricingTypeId = 5
 		AND intContractStatusId = 1
-		AND GETDATE() > dtmEndDate
+		AND dbo.fnRemoveTimeOnDate(GETDATE()) > dbo.fnRemoveTimeOnDate(dtmEndDate)
+  		AND intContractHeaderId = (case when isnull(@intContractHeader,0) > 0 then @intContractHeader else intContractHeaderId end)
 	END
 
 END TRY      

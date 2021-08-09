@@ -53,6 +53,25 @@ BEGIN TRY
 	DECLARE @deferPref NVARCHAR(50);
 	DECLARE @adjStartNum INT = 0;
 	DECLARE @adjPref NVARCHAR(50);
+	DECLARE @hasSavePoint BIT = 0;
+
+	--IF NO ACCOUNT PROVIDED, MAKE SURE THERE IS A DEFAULT LOCATION SETUP FOR THE USER
+	IF (
+		EXISTS(SELECT TOP 1 1 FROM @voucherPayables A WHERE (A.intAPAccount = 0 OR A.intAPAccount IS NULL) AND A.intLocationId IS NULL)
+		AND NULLIF((
+			SELECT TOP 1 B.intCompanyLocationId FROM tblSMUserSecurity B
+			LEFT JOIN tblSMCompanyLocation C ON B.intCompanyLocationId = C.intCompanyLocationId
+			WHERE B.intEntityId = @userId
+		),0) IS NULL
+	)
+	BEGIN
+		SET @error =  'Please setup default Location for user.';
+		IF @throwError = 1
+		BEGIN
+			RAISERROR(@error, 16, 1);
+		END
+		RETURN;
+	END
 
 	--Voucher Type
 	IF EXISTS(SELECT TOP 1 1
@@ -251,7 +270,11 @@ BEGIN TRY
 
 	DECLARE @transCount INT = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
-	ELSE SAVE TRAN @SavePoint
+	ELSE 
+	BEGIN
+		SET @hasSavePoint = 1;
+		SAVE TRAN @SavePoint
+	END
 
 	--Voucher Type
 	UPDATE A
@@ -262,7 +285,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 9
 
 	UPDATE A
-		SET A.strBillId = @voucherPref + CAST(@voucherStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @voucherPref + CAST(@voucherStartNum AS NVARCHAR)
 		,@voucherStartNum = @voucherStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 1
@@ -276,7 +299,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 18
 
 	UPDATE A
-		SET A.strBillId = @debitMemoPref + CAST(@debitMemoStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @debitMemoPref + CAST(@debitMemoStartNum AS NVARCHAR)
 		,@debitMemoStartNum = @debitMemoStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 3
@@ -290,7 +313,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 101
 
 	UPDATE A
-		SET A.strBillId = @claimPref + CAST(@claimStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @claimPref + CAST(@claimStartNum AS NVARCHAR)
 		,@claimStartNum = @claimStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 11
@@ -304,7 +327,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 124
 
 	UPDATE A
-		SET A.strBillId = @baPref + CAST(@baStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @baPref + CAST(@baStartNum AS NVARCHAR)
 		,@baStartNum = @baStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 13
@@ -332,7 +355,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 132
 
 	UPDATE A
-		SET A.strBillId = @deferPref + CAST(@deferStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @deferPref + CAST(@deferStartNum AS NVARCHAR)
 		,@deferStartNum = @deferStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 14
@@ -346,7 +369,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 77
 
 	UPDATE A
-		SET A.strBillId = @adjPref + CAST(@adjStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @adjPref + CAST(@adjStartNum AS NVARCHAR)
 		,@adjStartNum = @adjStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 9
@@ -544,10 +567,11 @@ BEGIN TRY
 			,@fromValue = ''									-- Previous Value
 			,@toValue = ''									-- New Value
 
-
 	SET @billCounter = @billCounter + 1
 	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId
 	END
+
+	EXEC uspAPAddTransactionLinks 1, @createdVouchersId, 1
 
 	IF @transCount = 0 COMMIT TRANSACTION;
 
@@ -591,7 +615,8 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	DECLARE @ErrorSeverity INT,
+	DECLARE @newError NVARCHAR(4000),
+			@ErrorSeverity INT,
 			@ErrorNumber   INT,
 			@ErrorMessage nvarchar(4000),
 			@ErrorState INT,
@@ -605,24 +630,23 @@ BEGIN CATCH
 	SET @ErrorLine     = ERROR_LINE()
 	SET @ErrorProc     = ERROR_PROCEDURE()
 
-	SET @ErrorMessage  = 'Error creating voucher.' + CHAR(13) + 
-		'SQL Server Error Message is: ' + CAST(@ErrorNumber AS VARCHAR(10)) + 
-		' in procedure: ' + @ErrorProc + ' Line: ' + CAST(@ErrorLine AS VARCHAR(10)) + ' Error text: ' + @ErrorMessage
+	SET @newError  = 'Error creating voucher.' + CHAR(13) + @ErrorMessage
 
 	IF (XACT_STATE()) = -1
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	ELSE IF (XACT_STATE()) = 1 AND @transCount = 0
+	ELSE 
+	IF (XACT_STATE()) = 1 AND @transCount = 0
 	BEGIN
 		ROLLBACK TRANSACTION
 	END
-	-- ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
-	-- BEGIN
-	-- 	ROLLBACK TRANSACTION  @SavePoint
-	-- END
+	ELSE IF (XACT_STATE()) = 1 AND @transCount > 0
+	BEGIN
+		IF @hasSavePoint = 1 ROLLBACK TRANSACTION  @SavePoint
+	END
 
-	RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	RAISERROR (@newError , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
 
 END

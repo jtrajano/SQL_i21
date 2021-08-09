@@ -5,7 +5,7 @@ SELECT
 	Purchase.strPurchaseOrderNumber,
 	Item.strItemNo,
 	B.intPrepayTypeId,
-	Prepay.strText COLLATE Latin1_General_CI_AS AS strPrepayType,
+	Prepay.strText strPrepayType,
 	B.strMiscDescription,
 	ItemUOM.strUnitMeasure strUOM,
 	B.dblQtyContract,
@@ -36,8 +36,8 @@ CostUOM.strUnitMeasure strCostUOM,
 	B.dblVolume,
 	B.dtmExpectedDate,
 	SN.strSourceNumber,
-	Form1099.strText COLLATE Latin1_General_CI_AS AS str1099Form,
-	Category1099.strText COLLATE Latin1_General_CI_AS AS str1099Category,
+	Form1099.strText str1099Form,
+	Category1099.strText str1099Category,
 	A.intBillId
 	
 FROM dbo.tblAPBill A
@@ -61,7 +61,7 @@ OUTER APPLY(
  	WHERE C.intPurchaseDetailId = B.intPurchaseDetailId
 )Purchase
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherForm1099]() where intId = B.int1099Form) Form1099
-OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherCategories1099]() WHERE intId = B.int1099Category) Category1099
+OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherCategories1099](B.int1099Form) WHERE intId = B.int1099Category) Category1099
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherPrepayType]() WHERE intId = B.intPrepayTypeId) Prepay
 
 

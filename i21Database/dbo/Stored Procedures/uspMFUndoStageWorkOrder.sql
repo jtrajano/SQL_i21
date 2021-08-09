@@ -411,6 +411,13 @@ BEGIN TRY
 		,@intWorkOrderProducedLotId  = NULL
 		,@intWorkOrderId  = @intWorkOrderId
 
+		UPDATE WRD
+		SET WRD.dblProcessedQty = WRD.dblProcessedQty - @dblNewWeight
+			,WRD.dblActualAmount = (WRD.dblProcessedQty - @dblNewWeight) * dblUnitRate
+		FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
+		JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
+		WHERE WRD.intWorkOrderId = @intWorkOrderId
+
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
 

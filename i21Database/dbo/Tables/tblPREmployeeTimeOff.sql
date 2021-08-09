@@ -9,6 +9,7 @@
     [strAwardPeriod]       NVARCHAR (30)   COLLATE Latin1_General_CI_AS CONSTRAINT [DF__tblPREmpl__strAw__761085FC] DEFAULT ((0)) NULL,
     [dblMaxCarryover]      NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblMa__7704AA35] DEFAULT ((0)) NULL,
     [dblMaxEarned]         NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblMa__77F8CE6E] DEFAULT ((0)) NULL,
+    [dblMaxBalance]        NUMERIC (18, 6) NULL,
     [dtmLastAward]         DATETIME        NULL,
     [dblHoursAccrued]      NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__78ECF2A7] DEFAULT ((0)) NULL,
     [dblHoursEarned]       NUMERIC (18, 6) CONSTRAINT [DF__tblPREmpl__dblHo__79E116E0] DEFAULT ((0)) NULL,

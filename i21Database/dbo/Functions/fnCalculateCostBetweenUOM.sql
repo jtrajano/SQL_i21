@@ -87,11 +87,12 @@ BEGIN
 				FROM	dbo.tblICItemUOM ItemUOM 
 				WHERE	ItemUOM.intItemUOMId = @intItemUOMIdFrom
 			) ItemUOMFrom
-			, (
+			inner join (
 				SELECT	ItemUOM.dblUnitQty 
 				FROM	dbo.tblICItemUOM ItemUOM 
 				WHERE	ItemUOM.intItemUOMId = @intItemUOMIdTo
 			) ItemUOMTo
+			on 1=1
 
 	RETURN @result;	
 END

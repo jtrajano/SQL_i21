@@ -678,6 +678,19 @@ END
 GO
 
 GO
+IF EXISTS(select top 1 1 from tblCTAmendmentApproval WHERE strDataIndex = 'intContractBasisId' AND strDataField='INCO/Ship Term' AND strType = '1.Header')
+BEGIN
+	update tblCTAmendmentApproval set strDataIndex = 'intFreightTermId' WHERE strDataIndex = 'intContractBasisId' AND strDataField='INCO/Ship Term' AND strType = '1.Header';
+	declare @intUserId int;
+	select @intUserId = intEntityId from tblSMUserSecurity where lower(strUserName) = 'irelyadmin';
+	if (@intUserId is not null and @intUserId > 0)
+	begin
+		exec uspCTSaveAmendment @intUserId = @intUserId;
+	end
+END
+GO
+
+GO
 UPDATE tblCTAmendmentApproval SET ysnBulkChangeReadOnly =1 WHERE strDataIndex NOT IN (
 SELECT Item COLLATE Latin1_General_CI_AS FROM dbo.fnSplitString('intItemId,dblQuantity,intItemUOMId,dblBasis,intBookId,intSubBookId,dblRatio',','))
 GO

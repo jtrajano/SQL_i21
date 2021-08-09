@@ -60,7 +60,7 @@ BEGIN
 		FROM tblSMApproval
 		WHERE strStatus = 'Approved'
 			AND intTransactionId = @intTransactionId
-		ORDER BY 1 DESC
+		--ORDER BY 1 DESC
 
 		BEGIN TRY
 			UPDATE [tblCTSMTransactionApprovedLog]
@@ -122,7 +122,7 @@ BEGIN
 				BEGIN
 					IF NOT EXISTS (
 							SELECT *
-							FROM tblCTContractStage
+							FROM tblCTContractPreStage
 							WHERE intContractHeaderId = @recordId
 							)
 						INSERT INTO dbo.tblCTContractPreStage (

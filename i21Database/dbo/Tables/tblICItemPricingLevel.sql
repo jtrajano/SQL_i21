@@ -35,6 +35,7 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
+		[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
@@ -204,7 +205,7 @@ BEGIN
     SET NOCOUNT ON;
 
    UPDATE tblICItemPricingLevel
-      SET tblICItemPricingLevel.dtmDateChanged = GETDATE()
+      SET tblICItemPricingLevel.dtmDateChanged = GETUTCDATE()
      FROM   inserted
     WHERE tblICItemPricingLevel.intItemPricingLevelId = inserted.intItemPricingLevelId
 END

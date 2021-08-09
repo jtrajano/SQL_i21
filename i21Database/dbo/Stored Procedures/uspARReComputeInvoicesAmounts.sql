@@ -72,6 +72,7 @@ SET
 	,ARID.[dblQtyShipped]					= ISNULL(ARID.[dblQtyShipped], @ZeroDecimal)
 	,ARID.[dblDiscount]						= ISNULL(ARID.[dblDiscount], @ZeroDecimal)
 	,ARID.[dblItemWeight]					= ISNULL(ARID.[dblItemWeight], 1.000000)
+	,ARID.[dblStandardWeight]				= ISNULL(ARID.[dblStandardWeight], @ZeroDecimal)
 	,ARID.[dblShipmentGrossWt]				= ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal)
 	,ARID.[dblShipmentTareWt]				= ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
 	,ARID.[dblShipmentNetWt]				= ISNULL(ARID.[dblShipmentGrossWt], @ZeroDecimal) - ISNULL(ARID.[dblShipmentTareWt], @ZeroDecimal)
@@ -259,6 +260,7 @@ SET
 	,ARI.[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
 	,ARI.[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,ARI.[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
+	,ARI.[dblTotalStandardWeight]	= ISNULL(T.[dblTotalStandardWeight], @ZeroDecimal)
 FROM
 	tblARInvoice ARI
 LEFT OUTER JOIN
@@ -268,6 +270,7 @@ LEFT OUTER JOIN
 			,[dblBaseTotalTax]			= SUM([dblBaseTotalTax])
 			,[dblTotal]					= SUM([dblTotal])
 			,[dblBaseTotal]				= SUM([dblBaseTotal])
+			,[dblTotalStandardWeight]	= SUM([dbo].fnRoundBanker(([dblStandardWeight] * [dblQtyShipped]), [dbo].[fnARGetDefaultDecimal]()))
 			,[intInvoiceId]				= [intInvoiceId]
 		FROM
 			tblARInvoiceDetail

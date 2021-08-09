@@ -127,6 +127,7 @@ INSERT INTO @ReceiptStagingTable(
 		,[intLoadShipmentId] 
 		,[intLoadShipmentDetailId] 
 		,intTaxGroupId
+		,ysnAddPayable
 )	
 SELECT 
 		strReceiptType				= CASE 
@@ -157,11 +158,10 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= LI.intItemUOMId
-									/*CASE
-										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
+		,intGrossNetUOMId			= CASE
+										WHEN (IC.ysnLotWeightsRequired = 1 AND @intLotType != 0) THEN SC.intItemUOMIdFrom
 										ELSE LI.intItemUOMId
-									END*/
+									  END
 		,intCostUOMId				= LI.intItemUOMId
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
@@ -238,7 +238,17 @@ SELECT
 		,intShipFromEntityId		= SC.intEntityId
 		,[intLoadShipmentId] 		= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadId ELSE NULL END
 		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadDetailId ELSE NULL END
-		,intTaxGroupId				= CASE WHEN LI.strSourceTransactionId = 'DP' THEN -1 ELSE NULL END
+		,intTaxGroupId				= CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 
+										ELSE 
+											CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
+											THEN -1
+											ELSE NULL
+											END 
+										END
+		,ysnAddPayable				= CASE WHEN ISNULL(ConHeader.intPricingTypeId,0) = 2 OR ISNULL(ConHeader.intPricingTypeId,0) = 3 
+										THEN 0
+										ELSE NULL
+										END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
 	SELECT CTD.intContractHeaderId
@@ -280,6 +290,12 @@ LEFT JOIN tblEMEntityLocation VNDL
 		AND VNDL.ysnDefaultLocation = 1
 LEFT JOIN tblEMEntityLocation VNDSF
 	ON VND.intShipFromId = VNDSF.intEntityLocationId
+LEFT JOIN tblGRStorageType StorageType
+	ON LI.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId 
+LEFT JOIN tblCTContractDetail ConDetail
+	ON LI.intTransactionDetailId = ConDetail.intContractDetailId
+LEFT JOIN tblCTContractHeader ConHeader
+	ON ConDetail.intContractHeaderId = ConHeader.intContractHeaderId
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 
@@ -336,14 +352,30 @@ END
 	,[intForexRateTypeId]				= RE.intForexRateTypeId
 	,[dblForexRate]						= RE.dblForexRate
 	,[ysnInventoryCost]					= IC.ysnInventoryCost
-	,[strCostMethod]					= IC.strCostMethod
+	,[strCostMethod]					= IC.strCostMethod --case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE 
 												WHEN QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * -1)
 												WHEN QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
 											END
-											WHEN IC.strCostMethod = 'Amount' THEN 0
+											WHEN IC.strCostMethod = 'Amount' THEN --0
+										CASE
+											WHEN RE.ysnIsStorage = 1 THEN 0
+											WHEN RE.ysnIsStorage = 0 THEN
+										CASE 
+											WHEN QM.dblDiscountAmount < 0 THEN
+												CASE 
+													WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)    
+													ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)  
+												END
+											WHEN QM.dblDiscountAmount > 0 THEN 
+											CASE    
+											WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)    
+											ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) 
+												END  
+											END
+										END
 											ELSE 0
 										END
 	,[intCostUOMId]						= CASE
@@ -354,22 +386,23 @@ END
 	,[dblAmount]						= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 0
 											WHEN IC.strCostMethod = 'Amount' THEN 
-											CASE 
-												WHEN RE.ysnIsStorage = 1 THEN 0
-												WHEN RE.ysnIsStorage = 0 THEN
-												CASE
-													WHEN QM.dblDiscountAmount < 0 THEN 
+												ROUND(
+												CASE 
+													WHEN RE.ysnIsStorage = 1 THEN 0
+													WHEN RE.ysnIsStorage = 0 THEN
 													CASE
-														WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)
-														ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)
-													END 
-													WHEN QM.dblDiscountAmount > 0 THEN 
-													CASE
-														WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)
-														ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost)
-													END 
-												END
-											END
+														WHEN QM.dblDiscountAmount < 0 THEN 
+														CASE
+															WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0) * -1)
+															ELSE (dbo.fnSCCalculateDiscount(RE.intSourceId,QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost) * -1)
+														END 
+														WHEN QM.dblDiscountAmount > 0 THEN 
+														CASE
+															WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(RE.intSourceId, RE.intEntityVendorId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost, 0)
+															ELSE dbo.fnSCCalculateDiscount(RE.intSourceId, QM.intTicketDiscountId, RE.dblQty, GR.intUnitMeasureId, RE.dblCost)
+														END 
+													END
+												END,2)
 										END
 	,[intContractHeaderId]				= RE.intContractHeaderId
 	,[intContractDetailId]				= RE.intContractDetailId
@@ -399,6 +432,7 @@ END
 	) CNT ON CNT.intContractDetailId = RE.intContractDetailId
 	WHERE RE.intSourceId = @intTicketId AND (QM.dblDiscountAmount != 0 OR GR.ysnSpecialDiscountCode = 1) AND RE.ysnIsStorage = 0 AND ISNULL(intPricingTypeId,0) IN (0,1,2,5,6) 
 
+		and isnull(@intDeliverySheetId,0 ) = 0
 	--FOR FEE CHARGES
 	INSERT INTO @OtherCharges
 	(
@@ -519,7 +553,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 									,[intLocationId] 
 									,[intShipViaId] 
 									,[intShipFromId] 
-									,[intCurrencyId]
+									,[intCurrencyId]uspic
 									,[intCostCurrencyId]  	
 									,[intChargeId]
 									,[intForexRateTypeId]
@@ -690,10 +724,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[intOtherChargeEntityVendorId]		= ContractCost.intVendorId
 								,[dblAmount]						= CASE
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
-																		CASE
-																			WHEN RE.ysnIsStorage = 1 THEN 0
-																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
-																		END
+																		ROUND(CASE
+																				WHEN RE.ysnIsStorage = 1 THEN 0
+																				WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																			END,2)
 																		ELSE 0
 																	END
 								,[intContractHeaderId]				= RE.intContractHeaderId
@@ -759,7 +793,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 																		WHEN ContractCost.strCostMethod = 'Amount' THEN 
 																		CASE
 																			WHEN RE.ysnIsStorage = 1 THEN 0
-																			WHEN RE.ysnIsStorage = 0 THEN ContractCost.dblRate
+																			WHEN RE.ysnIsStorage = 0 THEN ROUND(ContractCost.dblRate,2)
 																		END
 																		ELSE 0
 																	END
@@ -912,7 +946,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 				---------------------------------------------------------------------------------------------------------
 
 				BEGIN
-					SELECT @intLoadContractId = LGLD.intPContractDetailId, @intLoadCostId = LGCOST.intLoadCostId FROM tblLGLoad LGL
+					SELECT TOP 1
+						@intLoadContractId = LGLD.intPContractDetailId
+						, @intLoadCostId = LGCOST.intLoadCostId 
+					FROM tblLGLoad LGL
 					INNER JOIN tblLGLoadDetail LGLD ON LGL.intLoadId = LGLD.intLoadId
 					INNER JOIN tblLGLoadCost LGCOST ON LGL.intLoadId = LGCOST.intLoadId  
 					WHERE LGL.intLoadId = @intLoadId
@@ -1107,8 +1144,12 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnAccrue]						= @ysnAccrue
 						,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 						,[strChargesLink]					= RE.strChargesLink
-						,[ysnAllowVoucher]				= CASE WHEN ISNULL(RE.ysnIsStorage,0) = 0 THEN
-																RE.ysnAllowVoucher
+						,[ysnAllowVoucher]				= CASE WHEN ISNULL(RE.ysnIsStorage,0) = 0 
+														  THEN
+																CASE WHEN ISNULL(@ysnAccrue,0) = 1 AND ISNULL(@intHaulerId,0) > 0 AND @intHaulerId <> RE.intEntityVendorId 
+																THEN 1 
+																ELSE RE.ysnAllowVoucher 
+																END
 														  ELSE
 																1 -- allow to be added in add payable for customer storage
 														  END
@@ -1183,12 +1224,12 @@ IF ISNULL(@intFreightItemId,0) = 0
 																	CASE
 																		WHEN RE.ysnIsStorage = 1 THEN 0
 																		WHEN RE.ysnIsStorage = 0 THEN 
-																		CASE 
-																			WHEN ISNULL(CT.intContractCostId,0) = 0 THEN 
-																				(RE.dblQty / SC.dblNetUnits * SC.dblFreightRate)
-																			ELSE 
-																				ROUND ((RE.dblQty / SC.dblNetUnits * CT.dblRate), 2)
-																		END
+																		ROUND (CASE 
+																					WHEN ISNULL(CT.intContractCostId,0) = 0 THEN 
+																						(RE.dblQty / SC.dblNetUnits * SC.dblFreightRate)
+																					ELSE 
+																						(RE.dblQty / SC.dblNetUnits * CT.dblRate)
+																				END, 2)
 																	END
 																	ELSE 0
 																END
@@ -1197,7 +1238,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnAccrue]						= @ysnAccrue
 							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
-							,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+							,[ysnAllowVoucher]				= CASE WHEN ISNULL(@intHaulerId,0) > 0 AND @intHaulerId <> RE.intEntityVendorId THEN 1 ELSE RE.ysnAllowVoucher END
 							,[intLoadShipmentId]			= RE.intLoadShipmentId 
 							,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 							,intTaxGroupId = RE.intTaxGroupId
@@ -1209,6 +1250,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								SELECT * FROM tblCTContractCost WHERE intContractDetailId = RE.intContractDetailId 
 								AND dblRate != 0 
 								AND intItemId = @intFreightItemId
+								AND ISNULL(ysnBasis,0) = 0
 							) CT
 							WHERE SC.dblFreightRate != 0
 						END
@@ -1272,7 +1314,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 							,[ysnAccrue]						= ContractCost.ysnAccrue
 							,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 							,[strChargesLink]					= RE.strChargesLink
-							,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+							,[ysnAllowVoucher]				= CASE WHEN ContractCost.ysnAccrue = 1 AND ContractCost.intVendorId <> RE.intEntityVendorId THEN 1 ELSE RE.ysnAllowVoucher END
 							,[intLoadShipmentId]			= RE.intLoadShipmentId 
 							,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 							,intTaxGroupId = RE.intTaxGroupId
@@ -1281,7 +1323,10 @@ IF ISNULL(@intFreightItemId,0) = 0
 							LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 							LEFT JOIN tblSCScaleSetup SCS ON SC.intScaleSetupId = SCS.intScaleSetupId
 							LEFT JOIN tblICItem IC ON IC.intItemId = SCS.intFreightItemId
-							WHERE ContractCost.intItemId = @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
+							WHERE ContractCost.intItemId = @intFreightItemId 
+								AND RE.intContractDetailId IS NOT NULL 
+								AND ContractCost.dblRate != 0
+								AND ISNULL(ContractCost.ysnBasis,0) = 0
 
 							INSERT INTO @OtherCharges
 							(
@@ -1344,7 +1389,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 								,[ysnAccrue]						= @ysnAccrue
 								,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 								,[strChargesLink]					= RE.strChargesLink
-								,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+								,[ysnAllowVoucher]				= CASE WHEN ISNULL(@intHaulerId,0) > 0 AND @intHaulerId <> RE.intEntityVendorId THEN 1 ELSE RE.ysnAllowVoucher END
 								,[intLoadShipmentId]			= RE.intLoadShipmentId 
 								,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 								,intTaxGroupId = RE.intTaxGroupId
@@ -1414,7 +1459,7 @@ IF ISNULL(@intFreightItemId,0) = 0
 				,[ysnAccrue]						= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0 THEN 1 ELSE 0 END
 				,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN ContractCost.ysnPrice ELSE 0 END
 				,[strChargesLink]					= RE.strChargesLink
-				,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+				,[ysnAllowVoucher]				= CASE WHEN ISNULL(ContractCost.intVendorId,0) > 0  AND ISNULL(ContractCost.intVendorId,0) <> RE.intEntityVendorId  THEN 1 ELSE RE.ysnAllowVoucher END 
 				,[intLoadShipmentId]			= RE.intLoadShipmentId 
 				,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 				,intTaxGroupId = RE.intTaxGroupId
@@ -1422,7 +1467,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 				LEFT JOIN @ReceiptStagingTable RE ON RE.intContractDetailId = ContractCost.intContractDetailId
 				LEFT JOIN tblSCTicket SC ON SC.intTicketId = RE.intSourceId
 				LEFT JOIN tblICItem IC ON IC.intItemId = ContractCost.intItemId
-				WHERE ContractCost.intItemId != @intFreightItemId AND RE.intContractDetailId IS NOT NULL AND ContractCost.dblRate != 0
+				WHERE ContractCost.intItemId != @intFreightItemId 
+					AND RE.intContractDetailId IS NOT NULL 
+					AND ContractCost.dblRate != 0
+					AND ISNULL(ContractCost.ysnBasis,0) = 0
+				
 			END
 	END
 
@@ -1596,6 +1645,8 @@ UPDATE	SC
 SET		SC.intInventoryReceiptId = addResult.intInventoryReceiptId
 FROM	dbo.tblSCTicket SC INNER JOIN #tmpAddItemReceiptResult addResult
 			ON SC.intTicketId = addResult.intSourceId
+
+exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
 
 _PostOrUnPost:
 -- Post the Inventory Receipts                                            

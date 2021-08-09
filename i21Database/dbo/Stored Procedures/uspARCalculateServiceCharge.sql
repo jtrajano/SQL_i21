@@ -446,6 +446,15 @@ AS
 					INNER JOIN #tmpCustomers C ON SC.intEntityCustomerId = C.intEntityId
 					WHERE C.ysnActive = 0 AND ISNULL(SC.dblTotalAmount, 0) <= 0
 
+				
+					IF @isIncludeBudget = 0 
+					BEGIN
+					DELETE SC
+					FROM @tempTblTypeServiceCharge SC
+					INNER JOIN #tmpCustomers C ON SC.intEntityCustomerId = C.intEntityId
+					WHERE intEntityCustomerId IN (SELECT  intEntityCustomerId FROM dbo.tblARCustomerBudget  WHERE intEntityCustomerId =@entityId)
+					END 
+
 					IF (@calculation = 'By Invoice')
 						BEGIN
 							--GET AMOUNT DUE PER INVOICE
@@ -497,6 +506,7 @@ AS
 							FROM @tempTblTypeServiceCharge 
 							WHERE ISNULL(dblAmountDue, 0) > @zeroDecimal 
 							  AND ISNULL(dblTotalAmount, 0) > @zeroDecimal
+
 						END
 
 					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue < @dblMinFinanceSC

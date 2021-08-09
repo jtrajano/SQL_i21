@@ -57,12 +57,20 @@ BEGIN TRY
 		,@intSubBookId INT
 		,@strBook NVARCHAR(50)
 		,@strSubBook NVARCHAR(50)
+		,@intShipmentType int
+		,@strLogCondition nvarchar(50)
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId int
+
+	Select @strLogCondition = NULL
 
 	SELECT @strLoadNumber = strLoadNumber
 		,@intSourceType = intSourceType
 		,@intCompanyId = intCompanyId
 		,@intBookId = intBookId
 		,@intSubBookId = intSubBookId
+		,@intShipmentType=intShipmentType
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -100,7 +108,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadDetail'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadDetailView'
+		SELECT @strObjectName = 'vyuIPLoadDetailView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDetailCondition
@@ -120,7 +128,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadDetailLot'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadDetailLotsView'
+		SELECT @strObjectName = 'vyuIPLoadDetailLotsView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDetailLotCondition
@@ -154,7 +162,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadNotifyParties'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadNotifyPartiesNotMapped'
+		SELECT @strObjectName = 'vyuIPLoadNotifyParties'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadNotifyPartyCondition
@@ -171,7 +179,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadContainer'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadContainerView'
+		SELECT @strObjectName = 'vyuIPLoadContainerView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadContainerCondition
@@ -217,7 +225,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadWarehouse'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadWarehouseView'
+		SELECT @strObjectName = 'vyuIPLoadWarehouseView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadWarehouseCondition
@@ -244,7 +252,7 @@ BEGIN TRY
 		IF @ysnReplication = 1
 			SELECT @strObjectName = 'tblLGLoadWarehouseServices'
 		ELSE
-			SELECT @strObjectName = 'vyuLGLoadWarehouseServices'
+			SELECT @strObjectName = 'vyuIPLoadWarehouseServices'
 
 		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 			,@strLoadWarehouseServicesCondition
@@ -286,7 +294,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadCost'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadCostView'
+		SELECT @strObjectName = 'vyuIPLoadCostView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadCostCondition
@@ -303,9 +311,9 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadStorageCost'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadStorageCostView'
+		SELECT @strObjectName = 'vyuIPLoadStorageCostView'
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadStorageCost'
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadStorageCostCondition
 		,@strLoadStorageCostXML OUTPUT
 		,NULL
@@ -320,18 +328,61 @@ BEGIN TRY
 	WHERE intRecordId = @intLoadId
 		AND intScreenId = @intLoadScreenId
 
+	Select Top 1 @intLogId=intLogId
+	from dbo.tblSMLog
+	Where intTransactionId=@intTransactionId
+	Order by intLogId desc
+
+	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
+
+	---------------------------------------------Audit Log------------------------------------------
+	IF @strLogCondition IS NOT NULL
+	BEGIN
+	SELECT @strLogXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPLogView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strLogXML OUTPUT
+		,NULL
+		,NULL
+
+	---------------------------------------------Audit Log------------------------------------------
+	SELECT @strAuditXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPAuditView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strAuditXML OUTPUT
+		,NULL
+		,NULL
+	END
+
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
 		,@strDatabaseName NVARCHAR(50)
 
-	SELECT @strServerName = strServerName
-		,@strDatabaseName = strDatabaseName
-	FROM tblIPMultiCompany
-	WHERE intBookId = @intToBookId
-
+	IF @strToTransactionType='Drop Shipment'
+	BEGIN
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE intCompanyId = @intToCompanyId
+	END
+	ELSE
+	BEGIN
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE intBookId = @intToBookId
+	END
 	IF EXISTS (
 			SELECT 1
-			FROM master.dbo.sysdatabases
+			FROM sys.databases
 			WHERE name = @strDatabaseName
 			)
 	BEGIN
@@ -360,6 +411,9 @@ BEGIN TRY
         ,intCompanyId 
 		,strBook
 		,strSubBook
+		,intShipmentType
+		,strLogXML
+		,strAuditXML
 		)
 	SELECT @intLoadId
 		,@strLoadNumber
@@ -383,7 +437,10 @@ BEGIN TRY
 		,@intTransactionId
         ,@intCompanyId
 		,@strBook
-		,@strSubBook'
+		,@strSubBook
+		,@intShipmentType
+		,@strLogXML
+		,@strAuditXML'
 
 		EXEC sp_executesql @strSQL
 			,N'@intLoadId int
@@ -408,7 +465,10 @@ BEGIN TRY
 		,@intTransactionId int
         ,@intCompanyId int
 		,@strBook nvarchar(50)
-		,@strSubBook nvarchar(50)'
+		,@strSubBook nvarchar(50)
+		,@intShipmentType int
+		,@strLogXML nvarchar(MAX)
+		,@strAuditXML nvarchar(MAX)'
 			,@intLoadId
 			,@strLoadNumber
 			,@strLoadXML
@@ -432,6 +492,9 @@ BEGIN TRY
 			,@intCompanyId
 			,@strBook
 			,@strSubBook
+			,@intShipmentType
+			,@strLogXML
+			,@strAuditXML
 	END
 END TRY
 

@@ -20,6 +20,7 @@ BEGIN TRY
 		,@strItemNo NVARCHAR(50)
 		,@strVendor NVARCHAR(50)
 		,@dblQuantity NUMERIC(18, 6)
+		,@dblOrgQuantity NUMERIC(18, 6)
 		,@strQuantityUOM NVARCHAR(50)
 		,@strSampleRefNo NVARCHAR(30)
 		,@strSampleNote NVARCHAR(512)
@@ -35,6 +36,8 @@ BEGIN TRY
 		,@dtmCreated DATETIME
 		,@strTransactionType NVARCHAR(50)
 	DECLARE @intContractDetailId INT
+		,@intContractHeaderId INT
+		,@intFromItemUOMId INT
 		,@intSampleTypeId INT
 		,@intItemId INT
 		,@intEntityId INT -- Vendor
@@ -51,6 +54,7 @@ BEGIN TRY
 		,@intProductTypeId INT
 		,@intProductValueId INT
 		,@intItemContractId INT
+		,@intItemBundleId INT
 		,@intCountryID INT
 		,@strCountry NVARCHAR(50)
 		,@intBookId INT
@@ -58,6 +62,8 @@ BEGIN TRY
 		,@dtmCurrentUTCDate DATETIME
 		,@dtmCurrentDate DATETIME
 		,@intPreviousSampleStatusId INT
+		,@intControlPointId INT
+		,@ysnPartyMandatory BIT
 	DECLARE @intNewStageSampleId INT
 	DECLARE @intValidDate INT
 	DECLARE @strDescription AS NVARCHAR(MAX)
@@ -114,6 +120,7 @@ BEGIN TRY
 				,@strItemNo = NULL
 				,@strVendor = NULL
 				,@dblQuantity = NULL
+				,@dblOrgQuantity = NULL
 				,@strQuantityUOM = NULL
 				,@strSampleRefNo = NULL
 				,@strSampleNote = NULL
@@ -130,6 +137,8 @@ BEGIN TRY
 				,@strTransactionType = NULL
 
 			SELECT @intContractDetailId = NULL
+				,@intContractHeaderId = NULL
+				,@intFromItemUOMId = NULL
 				,@intSampleTypeId = NULL
 				,@intItemId = NULL
 				,@intEntityId = NULL
@@ -146,6 +155,7 @@ BEGIN TRY
 				,@intProductTypeId = NULL
 				,@intProductValueId = NULL
 				,@intItemContractId = NULL
+				,@intItemBundleId = NULL
 				,@intCountryID = NULL
 				,@strCountry = NULL
 				,@intBookId = NULL
@@ -153,6 +163,8 @@ BEGIN TRY
 				,@dtmCurrentUTCDate = NULL
 				,@dtmCurrentDate = NULL
 				,@intPreviousSampleStatusId = NULL
+				,@intControlPointId = NULL
+				,@ysnPartyMandatory = NULL
 
 			SELECT @strDescription = NULL
 
@@ -177,12 +189,13 @@ BEGIN TRY
 				,@strNewContractNumber = NULL
 
 			SELECT @strERPPONumber = ISNULL(strERPPONumber, '')
-				,@strERPItemNumber = ISNULL(strERPItemNumber, '')
+				,@strERPItemNumber = strERPItemNumber
 				,@strSampleNumber = strSampleNumber
 				,@strSampleTypeName = strSampleTypeName
 				,@strItemNo = strItemNo
 				,@strVendor = strVendor
 				,@dblQuantity = dblQuantity
+				,@dblOrgQuantity = dblQuantity
 				,@strQuantityUOM = strQuantityUOM
 				,@strSampleRefNo = strSampleRefNo
 				,@strSampleNote = strSampleNote
@@ -199,6 +212,11 @@ BEGIN TRY
 				,@strTransactionType = strTransactionType
 			FROM tblIPSampleStage WITH (NOLOCK)
 			WHERE intStageSampleId = @intMinRowNo
+
+			IF @strERPItemNumber = ''
+				SELECT @strERPItemNumber = NULL
+			ELSE
+				SELECT @strERPItemNumber = dbo.fnRemoveTrailingZeroes(@strERPItemNumber)
 
 			SELECT @dtmCurrentUTCDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), GETDATE())
 				,@dtmCurrentDate = GETDATE()
@@ -217,6 +235,8 @@ BEGIN TRY
 			END
 
 			SELECT @intSampleTypeId = t.intSampleTypeId
+				,@intControlPointId = t.intControlPointId
+				,@ysnPartyMandatory = t.ysnPartyMandatory
 			FROM tblQMSampleType t WITH (NOLOCK)
 			WHERE t.strSampleTypeName = @strSampleTypeName
 
@@ -270,22 +290,42 @@ BEGIN TRY
 							,1
 							)
 				END
+
+				SELECT @intFromItemUOMId = intItemUOMId
+				FROM tblICItemUOM WITH (NOLOCK)
+				WHERE intItemId = @intItemId
+					AND intUnitMeasureId = @intRepresentingUOMId
 			END
 
-			IF LOWER(@strSampleTypeName) = LOWER('Offer Sample')
+			-- Offer / Approval(Pre-shipment) sample type
+			IF ISNULL(@strERPPONumber, '') = ''
+				AND (
+					@intControlPointId = 1
+					OR @intControlPointId = 2
+					)
 			BEGIN
-				SELECT @intContractDetailId = NULL
+				SELECT TOP 1 @intContractDetailId = NULL
+					,@intContractHeaderId = NULL
 					,@intLocationId = NULL
 					,@intProductTypeId = 2 -- Item
 					,@intProductValueId = IM.intItemId
 					,@intItemContractId = NULL
+					,@intItemBundleId = IB.intItemId
 					,@intCountryID = CA.intCountryID
 					,@strCountry = CA.strDescription
 					,@intBookId = NULL
 					,@intSubBookId = NULL
 				FROM tblICItem IM WITH (NOLOCK)
 				LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
+				LEFT JOIN tblICItemBundle IB ON IB.intBundleItemId = IM.intItemId
 				WHERE IM.intItemId = @intItemId
+
+				SELECT TOP 1 @intLocationId = t.intCompanyLocationId
+				FROM tblSMCompanyLocation t WITH (NOLOCK)
+
+				SELECT @intBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'BOOK_ID')
+
+				SELECT @intSubBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'SUB_BOOK_ID')
 			END
 			ELSE
 			BEGIN
@@ -298,58 +338,83 @@ BEGIN TRY
 							)
 				END
 
-				SELECT @intContractDetailId = CD.intContractDetailId
-				FROM tblCTContractDetail CD WITH (NOLOCK)
-				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
-				WHERE ISNULL(CH.strExternalContractNumber, '') = (@strERPPONumber + ' / ' + @strERPItemNumber)
+				SELECT @intContractHeaderId = CH.intContractHeaderId
+				FROM tblCTContractHeader CH WITH (NOLOCK)
+				WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/' + @strERPItemNumber) + '%'
 
-				IF ISNULL(@intContractDetailId, 0) = 0
+				IF ISNULL(@intContractHeaderId, 0) = 0
 				BEGIN
+					SELECT @intContractHeaderId = CH.intContractHeaderId
+					FROM tblCTContractHeader CH WITH (NOLOCK)
+					WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/') + '%'
+				END
+
+				IF ISNULL(@intContractHeaderId, 0) > 0
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblCTContractDetail t WITH (NOLOCK)
+							WHERE t.intContractHeaderId = @intContractHeaderId
+								AND t.intItemId = @intItemId
+							)
+					BEGIN
+						RAISERROR (
+								'Item No is not matching with Contract Sequence Item. '
+								,16
+								,1
+								)
+					END
+
 					IF (
 							SELECT COUNT(1)
 							FROM tblCTContractDetail CD WITH (NOLOCK)
-							JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+							WHERE CD.intContractHeaderId = @intContractHeaderId
 								AND CD.intItemId = @intItemId
-								AND CD.dblQuantity = @dblQuantity
-								AND CD.intUnitMeasureId = @intRepresentingUOMId
-							WHERE (
-									CASE 
-										WHEN CHARINDEX('/', CH.strExternalContractNumber) > 1
-											THEN RTRIM(SUBSTRING(CH.strExternalContractNumber, 0, CHARINDEX('/', CH.strExternalContractNumber)))
-										ELSE CH.strExternalContractNumber
-										END
-									) = @strERPPONumber
 							) > 1
 					BEGIN
-						RAISERROR (
-								'Multiple Contracts are matching. '
-								,16
-								,1
-								)
+						IF (
+								SELECT COUNT(1)
+								FROM tblCTContractDetail CD WITH (NOLOCK)
+								WHERE CD.intContractHeaderId = @intContractHeaderId
+									AND CD.intItemId = @intItemId
+									AND CD.dblNetWeight = @dblOrgQuantity
+								) > 1
+						BEGIN
+							RAISERROR (
+									'Multiple Contracts are matching. '
+									,16
+									,1
+									)
+						END
+						ELSE
+						BEGIN
+							SELECT @intContractDetailId = CD.intContractDetailId
+								,@intRepresentingUOMId = CD.intUnitMeasureId
+								,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intFromItemUOMId, CD.intItemUOMId, @dblOrgQuantity)
+							FROM tblCTContractDetail CD WITH (NOLOCK)
+							WHERE CD.intContractHeaderId = @intContractHeaderId
+								AND CD.intItemId = @intItemId
+								AND CD.dblNetWeight = @dblOrgQuantity
+						END
 					END
-
-					SELECT @intContractDetailId = CD.intContractDetailId
-					FROM tblCTContractDetail CD WITH (NOLOCK)
-					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
-						AND CD.intItemId = @intItemId
-						AND CD.dblQuantity = @dblQuantity
-						AND CD.intUnitMeasureId = @intRepresentingUOMId
-					WHERE (
-							CASE 
-								WHEN CHARINDEX('/', CH.strExternalContractNumber) > 1
-									THEN RTRIM(SUBSTRING(CH.strExternalContractNumber, 0, CHARINDEX('/', CH.strExternalContractNumber)))
-								ELSE CH.strExternalContractNumber
-								END
-							) = @strERPPONumber
-
-					IF ISNULL(@intContractDetailId, 0) = 0
+					ELSE
 					BEGIN
-						RAISERROR (
-								'Invalid Contract. '
-								,16
-								,1
-								)
+						SELECT @intContractDetailId = CD.intContractDetailId
+							,@intRepresentingUOMId = CD.intUnitMeasureId
+							,@dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intFromItemUOMId, CD.intItemUOMId, @dblOrgQuantity)
+						FROM tblCTContractDetail CD WITH (NOLOCK)
+						WHERE CD.intContractHeaderId = @intContractHeaderId
+							AND CD.intItemId = @intItemId
 					END
+				END
+
+				IF ISNULL(@intContractDetailId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Contract. '
+							,16
+							,1
+							)
 				END
 
 				SELECT @intContractDetailId = CD.intContractDetailId
@@ -357,6 +422,7 @@ BEGIN TRY
 					,@intProductTypeId = 8 -- Contract Line Item
 					,@intProductValueId = CD.intContractDetailId
 					,@intItemContractId = CD.intItemContractId
+					,@intItemBundleId = CD.intItemBundleId
 					,@intCountryID = ISNULL(CA.intCountryID, IC.intCountryId)
 					,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
 					,@intBookId = CD.intBookId
@@ -386,6 +452,7 @@ BEGIN TRY
 			IF ISNULL(@strVendor, '') <> ''
 			BEGIN
 				SELECT @intEntityId = t.intEntityId
+					,@strVendor = t.strName
 				FROM tblEMEntity t WITH (NOLOCK)
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
@@ -394,10 +461,11 @@ BEGIN TRY
 						,'Customer'
 						)
 					AND V.strVendorAccountNum = @strVendor
-					AND t.strEntityNo <> ''
+					--AND t.strEntityNo <> ''
 			END
 
 			IF ISNULL(@intEntityId, 0) = 0
+				AND @ysnPartyMandatory = 1
 			BEGIN
 				RAISERROR (
 						'Invalid Vendor. '
@@ -442,8 +510,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				WHERE ET.strType = 'User'
 					AND t.strName = @strCreatedBy
-					AND t.strEntityNo <> ''
-
+					--AND t.strEntityNo <> ''
 					--IF ISNULL(@intCreatedUserId, 0) = 0
 					--BEGIN
 					--	RAISERROR (
@@ -556,13 +623,14 @@ BEGIN TRY
 					intConcurrencyId
 					,intSampleTypeId
 					,strSampleNumber
-					,strSampleRefNo
+					--,strSampleRefNo
 					,intProductTypeId
 					,intProductValueId
 					,intSampleStatusId
 					,intPreviousSampleStatusId
 					,intItemId
 					,intItemContractId
+					,intItemBundleId
 					,intContractDetailId
 					,intCountryID
 					,intEntityId
@@ -599,13 +667,14 @@ BEGIN TRY
 				SELECT 1
 					,@intSampleTypeId
 					,@strSampleNumber
-					,@strSampleRefNo
+					--,@strSampleRefNo
 					,@intProductTypeId
 					,@intProductValueId
 					,@intSampleStatusId
 					,@intSampleStatusId
 					,@intItemId
 					,@intItemContractId
+					,@intItemBundleId
 					,@intContractDetailId
 					,@intCountryID
 					,@intEntityId
@@ -783,11 +852,12 @@ BEGIN TRY
 				UPDATE tblQMSample
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intSampleTypeId = @intSampleTypeId
-					,strSampleRefNo = @strSampleRefNo
+					--,strSampleRefNo = @strSampleRefNo
 					,intProductValueId = @intProductValueId
 					,intSampleStatusId = @intSampleStatusId
 					,intPreviousSampleStatusId = @intPreviousSampleStatusId
 					,intItemContractId = @intItemContractId
+					,intItemBundleId = @intItemBundleId
 					,intContractDetailId = @intContractDetailId
 					,intCountryID = @intCountryID
 					,intEntityId = @intEntityId
@@ -938,8 +1008,8 @@ BEGIN TRY
 						IF (@strOldQuantityUOM <> @strQuantityUOM)
 							SET @strDetails += '{"change":"strRepresentingUOM","iconCls":"small-gear","from":"' + LTRIM(@strOldQuantityUOM) + '","to":"' + LTRIM(@strQuantityUOM) + '","leaf":true,"changeDescription":"Representing Qty UOM"},'
 
-						IF (@strOldSampleRefNo <> @strSampleRefNo)
-							SET @strDetails += '{"change":"strSampleRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleRefNo) + '","to":"' + LTRIM(@strSampleRefNo) + '","leaf":true,"changeDescription":"Sample Ref No"},'
+						--IF (@strOldSampleRefNo <> @strSampleRefNo)
+						--	SET @strDetails += '{"change":"strSampleRefNo","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleRefNo) + '","to":"' + LTRIM(@strSampleRefNo) + '","leaf":true,"changeDescription":"Sample Ref No"},'
 
 						IF (@strOldSampleNote <> @strSampleNote)
 							SET @strDetails += '{"change":"strSampleNote","iconCls":"small-gear","from":"' + LTRIM(@strOldSampleNote) + '","to":"' + LTRIM(@strSampleNote) + '","leaf":true,"changeDescription":"Sample Note"},'

@@ -119,6 +119,7 @@ FROM (
 				+ ISNULL(qtySold.dblQty, 0) 
 				+ ISNULL(qtyItemMovements.dblQty, 0) 
 				+ ISNULL(qtyPumpTotals.dblQty, 0)
+				+ ISNULL(qtyConsumed.dblQty, 0) 
 			,intRank = ROW_NUMBER() OVER( PARTITION BY i.intItemId ORDER BY i.strItemNo DESC) 
 		FROM 
 			tblICItem i INNER JOIN tblICItemLocation il 
@@ -296,6 +297,41 @@ FROM (
 
 			OUTER APPLY (
 				SELECT 
+					consume.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									t.intItemUOMId
+									, sUOM.intItemUOMId
+									, -t.dblQty
+								) 
+							) 
+						FROM
+							tblICInventoryTransaction t 							
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = t.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							t.intItemId = i.intItemId
+							AND t.intItemLocationId = il.intItemLocationId
+							AND dbo.fnDateEquals(t.dtmDate, c.dtmCountDate) = 1
+							AND t.intTransactionTypeId = 8 -- Consume
+					) consume
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtyConsumed
+
+			OUTER APPLY (
+				SELECT 
 					itemMovements.* 
 				FROM 
 					tblICInventoryCount c
@@ -310,8 +346,6 @@ FROM (
 							) 
 						FROM
 							vyuSTUnpostedItemMovements v 
-							INNER JOIN tblICItem i 
-								ON i.intItemId = v.intItemId
 							CROSS APPLY (
 								SELECT TOP 1 
 									sUOM.intItemUOMId
@@ -347,8 +381,6 @@ FROM (
 							) 
 						FROM
 							vyuSTUnpostedPumpTotals v 
-							INNER JOIN tblICItem i 
-								ON i.intItemId = v.intItemId
 							CROSS APPLY (
 								SELECT TOP 1 
 									sUOM.intItemUOMId
@@ -437,6 +469,7 @@ FROM (
 				+ ISNULL(qtySold.dblQty, 0) 
 				+ ISNULL(qtyItemMovements.dblQty, 0) 
 				+ ISNULL(qtyPumpTotals.dblQty, 0)
+				+ ISNULL(qtyConsumed.dblQty, 0) 
 			,intRank = ROW_NUMBER() OVER( PARTITION BY countGroup.intCountGroupId ORDER BY countGroup.intCountGroupId DESC) 
 		FROM 
 			vyuICGetCountGroup countGroup
@@ -578,6 +611,46 @@ FROM (
 				WHERE
 					c.intInventoryCountId = @intInventoryCountId		
 			) qtySold
+
+			OUTER APPLY (
+				SELECT 
+					invoice.* 
+				FROM 
+					tblICInventoryCount c
+					OUTER APPLY (
+						SELECT 
+							dblQty = SUM (
+								dbo.fnCalculateQtyBetweenUOM(
+									t.intItemUOMId
+									, sUOM.intItemUOMId
+									, -t.dblQty
+								) 
+							) 
+						FROM
+							tblICInventoryTransaction t 
+							INNER JOIN tblICItem i 
+								ON i.intItemId = t.intItemId
+							INNER JOIN tblICItemLocation il
+								ON il.intItemId = i.intItemId								
+								AND t.intItemLocationId = il.intItemLocationId
+							CROSS APPLY (
+								SELECT TOP 1 
+									sUOM.intItemUOMId
+								FROM 
+									tblICItemUOM sUOM
+								WHERE
+									sUOM.intItemId = t.intItemId
+									AND sUOM.ysnStockUnit = 1				
+							) sUOM	
+						WHERE
+							il.intCountGroupId = countGroup.intCountGroupId							
+							AND dbo.fnDateEquals(t.dtmDate, c.dtmCountDate) = 1
+							AND t.intTransactionTypeId = 8 -- Consume
+
+					) invoice
+				WHERE
+					c.intInventoryCountId = @intInventoryCountId		
+			) qtyConsumed
 
 			OUTER APPLY (
 				SELECT 

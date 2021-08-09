@@ -73,7 +73,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,dblBeginningQtyBalance		= CAST(0 AS NUMERIC(38, 20)) 
 		,dblQuantity				= ISNULL(t.dblQty, 0)
 		,dblRunningQtyBalance		= CAST(0 AS NUMERIC(38, 20))
-		,dblCost					= ISNULL(t.dblCost, 0)
+		,dblCost					= COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(i.intItemId, t.intItemLocationId, t.intItemUOMId, GETDATE()) ,t.dblCost, 0)
 		,dblBeginningBalance		= CAST(0 AS NUMERIC(38, 20))
 		,dblValue					= 
 									--ISNULL(dbo.fnMultiply(t.dblQty, t.dblCost), 0) + ISNULL(t.dblValue, 0)
@@ -87,7 +87,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strUOM						= umTransUOM.strUnitMeasure
 		,strStockUOM				= iuStock.strUnitMeasure
 		,dblQuantityInStockUOM		= ISNULL(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblQty), 0)
-		,dblCostInStockUOM			= ISNULL(dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblCost), 0)
+		,dblCostInStockUOM			= COALESCE(dbo.fnICGetPromotionalCostByEffectiveDate(i.intItemId, t.intItemLocationId, t.intItemUOMId, GETDATE()), dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, iuStock.intItemUOMId, t.dblCost), 0)
 		,dblPrice					= ISNULL(ItemPricing.dblSalePrice ,0)
 		,strBOLNumber				= CAST (
 											CASE	ty.intTransactionTypeId 
@@ -235,11 +235,22 @@ FROM 	tblICInventoryTransaction t
 					AND ld.intItemId = t.intItemId		
 					AND ty.intTransactionTypeId IN (22,46)
 		) loadShipmentSchedule 
-		LEFT JOIN tblGRSettleStorage settleStorage 
-			ON settleStorage.intSettleStorageId = t.intTransactionId
-			AND settleStorage.intSettleStorageId = t.intTransactionDetailId
+		LEFT JOIN tblGRSettleStorage settleStorage1 
+			ON settleStorage1.intSettleStorageId = t.intTransactionId
+			AND settleStorage1.intSettleStorageId = t.intTransactionDetailId
 			AND t.strTransactionForm IN ('Settle Storage', 'Storage Settlement')
 			AND ty.intTransactionTypeId = 44 
+
+		LEFT JOIN tblICInventoryAdjustment adj
+			ON adj.intInventoryAdjustmentId = t.intTransactionId
+			AND adj.strAdjustmentNo = t.strTransactionId
+			AND ty.strTransactionForm = 'Inventory Adjustment'
+
+		LEFT JOIN tblICInventoryAdjustmentDetail adjustmentItem
+			ON adjustmentItem.intInventoryAdjustmentId = adj.intInventoryAdjustmentId
+			AND adjustmentItem.intInventoryAdjustmentDetailId = t.intTransactionDetailId
+			AND adjustmentItem.intItemId = t.intItemId
+
 		LEFT JOIN tblEMEntity e 
 			ON e.intEntityId = COALESCE(
 				receipt.intEntityVendorId
@@ -248,7 +259,8 @@ FROM 	tblICInventoryTransaction t
 				, bill.intEntityVendorId
 				, loadShipmentSchedule.intVendorEntityId
 				, loadShipmentSchedule.intCustomerEntityId
-				, settleStorage.intEntityId
+				, settleStorage1.intEntityId
+				, adjustmentItem.intEntityId
 			)
 
 		LEFT JOIN tblSCTicket ScaleView

@@ -25,6 +25,7 @@ BEGIN TRY
 	DECLARE @dtmPlannedAvailabilityDate DATETIME
 	DECLARE @intApprovedById INT
 	DECLARE @intShipmentStatus INT
+	DECLARE @intPurchaseSale INT
 
 	DECLARE @tblLoadDetail TABLE
 			(intDetailRecordId INT Identity(1, 1),
@@ -39,7 +40,8 @@ BEGIN TRY
 		   @strETAPODReasonCode = PODRC.strReasonCodeDescription,
 		   @strETSPOLReasonCode = POLRC.strReasonCodeDescription,
 		   @intShipmentStatus = L.intShipmentStatus,
-		   @intLeadTime = ISNULL(DPort.intLeadTime, 0)
+		   @intLeadTime = ISNULL(DPort.intLeadTime, 0),
+		   @intPurchaseSale = L.intPurchaseSale
 	FROM tblLGLoad L
 	LEFT JOIN tblLGReasonCode PODRC ON PODRC.intReasonCodeId = L.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode POLRC ON POLRC.intReasonCodeId = L.intETSPOLReasonCodeId
@@ -405,74 +407,50 @@ BEGIN TRY
 				,strChangeType
 				,strRowState
 				,strCommodityCode)
-			SELECT @intLoadLogId
-				,@intLoadId
-				,CASE 
-					WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
-						THEN LD.intLoadDetailId
-					ELSE LSID.intLoadDetailId
-					END AS intSIDetailId
+			SELECT intLoadLogId = @intLoadLogId
+				,intLoadId = @intLoadId
+				,intSIDetailId = ISNULL(LSID.intLoadDetailId, LD.intLoadDetailId)
 				,LD.intLoadDetailId
-				,Row_NUMBER() OVER (
+				,intRowNumber = Row_NUMBER() OVER (
 					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
-					) AS intRowNumber
-				,LD.strItemNo
-				,strSubLocationName = (
-					SELECT CLSL.strSubLocationName AS strStorageLocationName
-					FROM tblCTContractDetail CD
-					JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
-					WHERE CD.intContractDetailId = CASE 
-							WHEN LD.intPurchaseSale = 1
-								THEN LD.intPContractDetailId
-							ELSE LD.intSContractDetailId
-							END
 					)
-				,strStorageLocationName = (
-					SELECT SL.strName AS strStorageLocationName
-					FROM tblCTContractDetail CD
-					JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
-					WHERE CD.intContractDetailId = CASE 
-							WHEN LD.intPurchaseSale = 1
-								THEN LD.intPContractDetailId
-							ELSE LD.intSContractDetailId
-							END
-					)
-				,LD.strLoadNumber
-				,LD.dblQuantity
-				,LD.strItemUOM
-				,LD.dblGross
+				,I.strItemNo
+				,strSubLocationName = CLSL.strSubLocationName
+				,strStorageLocationName = SL.strName
+				,strBatchNumber = L.strLoadNumber
+				,dblDeliveredQty = LD.dblQuantity
+				,strItemUOM = IU.strUnitMeasure
 				,LD.dblNet
-				,LD.strWeightItemUOM
-				,Row_NUMBER() OVER (
+				,LD.dblGross
+				,strWeightItemUOM = WU.strUnitMeasure
+				,intHigherPositionRef = Row_NUMBER() OVER (
 					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
 					)
-				,'C' AS strDocumentCategory
-				,'001' AS strRefDataInfo
-				,0 AS strSeq
-				,LD.strLoadNumber
-				,CD.strERPPONumber
-				,CD.strERPItemNumber
-				,CD.strERPBatchNumber
-				,D.strExternalShipmentItemNumber
-				,D.strExternalBatchNo
-				,'QUA' AS strChangeType
-				,@strRowState AS strRowState
+				,strDocumentCategory = 'C'
+				,strRefDataInfo = '001'
+				,strSeq = 0
+				,L.strLoadNumber
+				,strExternalPONumber = CD.strERPPONumber
+				,strExternalPOItemNumber = CD.strERPItemNumber
+				,strExternalPOBatchNumber = CD.strERPBatchNumber
+				,strExternalShipmentItemNumber = LD.strExternalShipmentItemNumber
+				,strExternalBatchNo = LD.strExternalBatchNo
+				,strChangeType = 'QUA'
+				,strRowState = @strRowState
 				,C.strCommodityCode
-			FROM vyuLGLoadDetailView LD
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-					WHEN LD.intPurchaseSale = 1
-						THEN LD.intPContractDetailId
-					ELSE LD.intSContractDetailId
-					END
-			JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
-			JOIN tblICCommodity C ON C.intCommodityId = CASE 
-					WHEN LD.intPurchaseSale = 1
-						THEN LD.intPCommodityId
-					ELSE LD.intSCommodityId
-					END
-			LEFT JOIN tblLGLoad L ON L.intLoadId = D.intLoadId
+			FROM tblLGLoadDetail LD
+			LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+			LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
+			LEFT JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+			LEFT JOIN tblICUnitMeasure IU ON IU.intUnitMeasureId = IUOM.intUnitMeasureId
+			LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LD.intWeightItemUOMId
+			LEFT JOIN tblICUnitMeasure WU ON WU.intUnitMeasureId = WUOM.intUnitMeasureId
 			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
-			LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId AND D.intPContractDetailId = LSID.intPContractDetailId
+			LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId AND LD.intPContractDetailId = LSID.intPContractDetailId
 			WHERE LD.intLoadId = @intLoadId
 
 			INSERT INTO tblLGLoadContainerLog(
@@ -671,8 +649,6 @@ BEGIN TRY
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
-				UPDATE tblLGLoad SET dtmPlannedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) WHERE intLoadId = @intLoadId
-
 				DECLARE @ysnIsETAUpdated BIT = 0
 
 				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId AND intShipmentStatus <> 10)
@@ -683,32 +659,29 @@ BEGIN TRY
 						BEGIN
 							UPDATE tblCTContractDetail 
 							SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
-								,intConcurrencyId = intConcurrencyId + 1 
+								,intConcurrencyId = intConcurrencyId + 1
 							WHERE intContractDetailId = @intContractDetailId 
 
 							SELECT @ysnIsETAUpdated = 1
 						END
 
-						IF (ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
+						IF (@intShipmentType = 1 AND ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
 						BEGIN
 							UPDATE tblCTContractDetail 
 							SET dtmUpdatedAvailabilityDate = CASE WHEN (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) THEN DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
 																ELSE dtmUpdatedAvailabilityDate END
+								,intConcurrencyId = intConcurrencyId + 1
 							WHERE intContractDetailId = @intContractDetailId 
+								OR (@intPurchaseSale = 3 AND intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId))
 
 							SELECT @ysnIsETAUpdated = 1
 						END
 						
 						IF (@ysnIsETAUpdated = 1) 
 						BEGIN
-
 							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
 								@intApprovedById =  @intApprovedById, 
 								@intContractDetailId = @intContractDetailId
-
-							UPDATE tblCTContractDetail 
-							SET intConcurrencyId = intConcurrencyId + 1 
-							WHERE intContractDetailId = @intContractDetailId 
 						END
 					END
 				END

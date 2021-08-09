@@ -1,10 +1,10 @@
 -- clean FK in tblCMBankTransactionDetail WITH NO MATCHING RECORD IN tblCMUndepositedFund before applying foreign key
-IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = 'TBLCMBANKTRANSACTIONDETAIL')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME)  = 'TBLCMBANKTRANSACTIONDETAIL')
+AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME)  =  'TBLCMUNDEPOSITEDFUND')
 BEGIN
 EXEC('
-    IF NOT EXISTS(SELECT TOP 1 1 FROM tblCMDataFixLog WHERE strDescription =''Fix tblCMBankTransactionDetail orphan intUndepositedId on tblCMUndepositedFund'')
 	BEGIN
-		WITH BT as(
+		;WITH BT as(
 			SELECT intUndepositedFundId, intTransactionDetailId FROM  tblCMBankTransactionDetail 
 			WHERE intUndepositedFundId IS NOT NULL
 		),
@@ -16,7 +16,6 @@ EXEC('
 		)
 		UPDATE CM SET intUndepositedFundId = NULL 
 		FROM tblCMBankTransactionDetail CM JOIN idWithNoUndep U ON U.DetailId = CM.intUndepositedFundId 
-		INSERT INTO tblCMDataFixLog VALUES (GETDATE(), ''Fix tblCMBankTransactionDetail orphan intUndepositedId on tblCMUndepositedFund'' , @@ROWCOUNT)
 	END
 ')
 

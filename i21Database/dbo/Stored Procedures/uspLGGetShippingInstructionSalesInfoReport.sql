@@ -52,7 +52,8 @@ SELECT L.intLoadId,
 	   CH.strContractNumber + ' / ' + LTRIM(CD.intContractSeq) AS strContractNumberWithSeq,
 	   LTRIM(dbo.fnRemoveTrailingZeroes(LD.dblQuantity)) + ' ' + UM.strUnitMeasure AS strQtyInformation,
 	   CD.dtmStartDate,
-	   CD.dtmEndDate
+	   CD.dtmEndDate,
+	   strINCOTerms = FT.strFreightTerm
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -61,5 +62,6 @@ LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CH.intFreightTermId
 WHERE L.intLoadId = @xmlParam and L.intPurchaseSale IN (2,3)
 END

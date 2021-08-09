@@ -292,7 +292,8 @@ BEGIN
 				AND t.intSubLocationId = Lot.intSubLocationId
 				AND t.intStorageLocationId = Lot.intStorageLocationId
 				AND t.intLotId = Lot.intLotId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1		
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1		
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 		) LotTransactions 
 
 		-- last transaction
@@ -312,7 +313,8 @@ BEGIN
 				AND t.intLotId = Lot.intLotId
 				AND t.dblQty > 0 
 				AND ISNULL(t.ysnIsUnposted, 0) = 0 
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1	
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1	
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) LastLotTransaction 
@@ -328,7 +330,8 @@ BEGIN
 				AND ISNULL(sr.intLotId, 0) = ISNULL(Lot.intLotId, 0)
 				AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(Lot.intStorageLocationId, 0)
 				AND ISNULL(sr.intSubLocationId, 0) = ISNULL(Lot.intSubLocationId, 0)				
-				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), @AsOfDate) = 1
+				AND FLOOR(CAST(xt.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 		) reserved
 		LEFT JOIN @CategoryIds categoryFilter ON categoryFilter.intCategoryId = Item.intCategoryId
 		LEFT JOIN @CommodityIds commodityFilter ON commodityFilter.intCommodityId = Item.intCommodityId
@@ -346,6 +349,7 @@ BEGIN
 		AND Item.strType = 'Inventory'
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND Item.strStatus NOT IN ('Discontinued')
+		AND il.ysnActive = 1
 END
 
 ELSE IF @strCountBy = 'Pack'
@@ -389,11 +393,11 @@ BEGIN
 						dbo.fnCalculateCostBetweenUOM (
 							stockUOM.intItemUOMId
 							,itemUOM.intItemUOMId
-							,dbo.fnICGetMovingAverageCost(
+							, COALESCE(EffectivePricing.dblCost, dbo.fnICGetMovingAverageCost(
 								il.intItemId
 								,il.intItemLocationId
 								,lastTransaction.intInventoryTransactionId
-							)
+							))
 						)
 					ELSE 
 						ISNULL(
@@ -401,13 +405,13 @@ BEGIN
 							dbo.fnCalculateCostBetweenUOM(
 								lastCost.intItemUOMId 
 								, itemUOM.intItemUOMId
-								, lastCost.dblCost 
+								, COALESCE(EffectivePricing.dblCost, lastCost.dblCost)
 							)
 							-- last cost from item pricing
 							,dbo.fnCalculateCostBetweenUOM(
 								stockUOM.intItemUOMId
 								, itemUOM.intItemUOMId
-								, p.dblLastCost
+								, COALESCE(EffectivePricing.dblCost, p.dblLastCost)
 							)
 						)
 				END
@@ -475,7 +479,8 @@ BEGIN
 			WHERE
 				t.intItemId = i.intItemId
 				AND t.intItemLocationId = il.intItemLocationId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 				AND t.dblQty > 0 
 				AND t.ysnIsUnposted = 0 
 			ORDER BY
@@ -496,7 +501,8 @@ BEGIN
 			WHERE	
 					v.intItemId = i.intItemId
 					AND v.intItemLocationId = il.intItemLocationId
-					AND dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+					--AND dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+					AND FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			GROUP BY 
 					v.intItemId
 					,u.intItemUOMId
@@ -514,7 +520,8 @@ BEGIN
 			WHERE
 				t.intItemId = i.intItemId
 				AND t.intItemLocationId = il.intItemLocationId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 				AND t.dblQty <> 0 				
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
@@ -523,7 +530,8 @@ BEGIN
 		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
 		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
-		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1		 
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1	
+		OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@AsOfDate, i.intItemId, il.intItemLocationId, 0) EffectivePricing	 
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
 		AND i.strLotTracking = 'No'
@@ -540,6 +548,7 @@ BEGIN
 			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 			OR (lastTransaction.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
 		)
+		AND il.ysnActive = 1
 END
 
 ELSE
@@ -610,7 +619,7 @@ BEGIN
 					dbo.fnCalculateCostBetweenUOM (
 						stockUOM.intItemUOMId
 						,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-						,ISNULL(
+						,COALESCE(EffectivePricing.dblCost, ISNULL(
 							dbo.fnICGetMovingAverageCost(
 								i.intItemId
 								,il.intItemLocationId
@@ -618,7 +627,7 @@ BEGIN
 							
 							)
 							,p.dblLastCost
-						)					
+						))
 					)
 					
 				-- Or else, get the last cost. 
@@ -626,7 +635,7 @@ BEGIN
 					dbo.fnCalculateQtyBetweenUOM (
 						lastTransaction.intItemUOMId
 						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-						, lastTransaction.dblCost
+						, COALESCE(EffectivePricing.dblCost, lastTransaction.dblCost)
 					)
 			END 			
 
@@ -661,7 +670,8 @@ BEGIN
 					,intStorageLocationId
 					,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
 			FROM	vyuICGetItemStockSummary
-			WHERE	dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+			WHERE	--dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+					FLOOR(CAST(dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			GROUP BY 
 					intItemId,
 					intItemUOMId,
@@ -693,7 +703,8 @@ BEGIN
 					ON suom.intItemId = st.intItemId
 					AND suom.ysnStockUnit = 1
 			WHERE	
-				dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+				--dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
+				FLOOR(CAST(dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			GROUP BY 
 				st.intItemId
 				,st.intItemLocationId
@@ -738,7 +749,8 @@ BEGIN
 				AND t.intItemLocationId = il.intItemLocationId 
 				AND t.dblQty > 0 
 				AND ISNULL(t.ysnIsUnposted, 0) = 0 
-				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
+				--AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) lastTransaction 
@@ -748,16 +760,18 @@ BEGIN
 			FROM 
 				vyuICGetItemStockSummary v
 			WHERE 
-				dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
-				AND v.intItemId = i.intItemId
+				--dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+				v.intItemId = i.intItemId
 				AND v.intItemLocationId = il.intItemLocationId
 				AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
 				AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL)    
+				AND FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 		) hasExistingStock 
 		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
 		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
 		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1	
+		OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@AsOfDate, i.intItemId, il.intItemLocationId, 0) EffectivePricing	 
 	WHERE 
 		il.intLocationId = @intLocationId
 		AND ((COALESCE(stock.dblOnHand, stockUnit.dblOnHand) <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
@@ -775,4 +789,5 @@ BEGIN
 			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 			OR (hasExistingStock.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
 		)
+		AND il.ysnActive = 1
 END

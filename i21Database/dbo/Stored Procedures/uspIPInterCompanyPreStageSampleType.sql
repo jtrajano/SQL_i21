@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageSampleType @intSampleTypeId INT
+	,@strSampleTypeName NVARCHAR(50) = NULL
 	,@strRowState NVARCHAR(50) = NULL
 	,@intUserId INT = NULL
 AS
@@ -14,12 +15,14 @@ BEGIN TRY
 
 	INSERT INTO tblQMSampleTypePreStage (
 		intSampleTypeId
+		,strSampleTypeName
 		,strRowState
 		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intSampleTypeId
+		,@strSampleTypeName
 		,@strRowState
 		,@intUserId
 		,''

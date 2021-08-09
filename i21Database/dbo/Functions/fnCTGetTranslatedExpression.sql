@@ -14,10 +14,9 @@ BEGIN
 		@strCustomLabel = b.strCustomLabel
 	from
 		tblSMReportLabels a
-		,tblSMReportLabelDetail b
+	inner join tblSMReportLabelDetail b on b.intReportLabelsId = a.intReportLabelsId
 	where
-		b.intReportLabelsId = a.intReportLabelsId
-		and a.strName = isnull(@strLabelName, '')
+		a.strName = isnull(@strLabelName, '')
 		and a.intLanguageId = isnull(@intLanguageId, 0)
 		and b.strLabelName = isnull(@strExpression, '');
 

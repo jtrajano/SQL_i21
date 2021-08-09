@@ -43,24 +43,24 @@ BEGIN TRY
 			RETURN
 		END
 
-		IF	NOT EXISTS(SELECT * FROM tblCTPriceFixationDetail WHERE intPriceFixationId = ISNULL(@intPriceFixationId,0))
+		IF	NOT EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixationDetail WHERE intPriceFixationId = ISNULL(@intPriceFixationId,0))
 		BEGIN
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 			RETURN
 		END
 
-		IF NOT EXISTS(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intSplitFromId = @intContractDetailId)
 			RETURN 
 
 		IF	(SELECT COUNT(*) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId) > 1 AND 
-			EXISTS	(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
+			EXISTS	(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intSplitFromId = @intContractDetailId)
 		BEGIN
 			SET @ysnMultiSequencePricing = 1
 			--RAISERROR(110005,16,1,@strContractSeq,@strContractSeq)
 		END
 
-		IF	EXISTS	(	SELECT	*	FROM	tblCTPriceFixation	WHERE	intPriceFixationId	=	@intPriceFixationId AND dblTotalLots <> dblLotsFixed) AND 
-			EXISTS	(	SELECT	*	FROM	tblCTContractDetail WHERE	intSplitFromId		=	@intContractDetailId)
+		IF	EXISTS	(SELECT TOP 1 1 FROM tblCTPriceFixation	WHERE intPriceFixationId = @intPriceFixationId AND dblTotalLots <> dblLotsFixed) AND 
+			EXISTS	(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intSplitFromId = @intContractDetailId)
 		BEGIN
 			SET @ysnMultiSequencePricing = 1
 			--RAISERROR(110006,16,1,@strContractSeq,@strContractSeq)
@@ -127,12 +127,9 @@ BEGIN TRY
 				select
 					@intNewPriceFixationId = pf.intPriceFixationId
 				from
-					tblCTContractDetail cd
-					,tblCTPriceFixation pf
+					tblCTPriceFixation pf
 				where
-					cd.intContractDetailId = 1129
-					and pf.intContractHeaderId = cd.intContractHeaderId
-					and pf.intContractDetailId = cd.intContractDetailId
+					pf.intContractDetailId = @intChildContractDetailId
 
 				if (@intNewPriceFixationId is null)
 				BEGIN
@@ -180,7 +177,7 @@ BEGIN TRY
 
 				UPDATE	tblCTContractDetail SET intSplitFromId = NULL WHERE intContractDetailId =@intChildContractDetailId
 
-				SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
+				SELECT	@intChildContractDetailId = MIN(intContractDetailId), @intNewPriceFixationId = null
 				FROM	tblCTContractDetail 
 				WHERE	intSplitFromId		=	@intContractDetailId
 				AND intPricingTypeId = 1

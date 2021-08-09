@@ -106,7 +106,7 @@ FROM	(
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
 					UPDATE 
-					SET		ysnIsUnposted = 1, dtmDateModified = GETUTCDATE()
+					SET		ysnIsUnposted = 1
 
 				OUTPUT	$action
 						, inserted.intInventoryTransactionId

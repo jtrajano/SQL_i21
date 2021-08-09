@@ -2,6 +2,7 @@
 AS
 SELECT DISTINCT PL.intPickLotHeaderId
 	,PL.[strPickLotNumber]
+	,strType = CASE WHEN (PL.intType = 2) THEN 'Containers' ELSE 'Lots' END
 	,PL.dtmPickDate
 	,PL.intCustomerEntityId
 	,PL.intCompanyLocationId
@@ -26,8 +27,8 @@ JOIN tblLGPickLotDetail PLD ON PLD.intPickLotHeaderId = PL.intPickLotHeaderId
 JOIN tblEMEntity EN ON EN.intEntityId = PL.intCustomerEntityId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = PL.intCompanyLocationId
 JOIN tblICCommodity CO ON CO.intCommodityId = PL.intCommodityId
-JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PL.intSubLocationId
 JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = PL.intWeightUnitMeasureId
+LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PL.intSubLocationId
 LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PLD.intPickLotDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGPickLotHeader PPL ON PPL.intPickLotHeaderId = PL.intParentPickLotHeaderId

@@ -890,8 +890,8 @@ BEGIN TRY
 				,[strTransactionId] = W.strWorkOrderNo
 				,[intTransactionTypeId] = 9
 				,[intLotId] = IsNULL(PL.intProducedLotId, PL.intLotId)
-				,[intSubLocationId] = L.intSubLocationId
-				,[intStorageLocationId] = L.intStorageLocationId
+				,[intSubLocationId] = IsNULL(L.intSubLocationId,SL.intSubLocationId)
+				,[intStorageLocationId] =IsNULL(L.intStorageLocationId,PL.intStorageLocationId)
 				,[ysnIsStorage] = NULL
 				,[strActualCostId] = NULL
 				,[intSourceTransactionId] = intBatchId
@@ -903,7 +903,7 @@ BEGIN TRY
 			LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
 				AND IU.intUnitMeasureId = @intUnitMeasureId
 			LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
-			--JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			Left JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
 			LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 				AND RI.intItemId = PL.intItemId
 				AND RI.intRecipeItemTypeId = 2
@@ -1066,7 +1066,7 @@ BEGIN TRY
 											AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
-							ORDER BY 1 DESC
+							ORDER BY intFutureMonthId DESC
 							), @dtmCurrentDateTime), 0)
 				,intMarketRatePerUnitId = IsNULL((
 						SELECT TOP 1 FM.intUnitMeasureId
@@ -1100,7 +1100,7 @@ BEGIN TRY
 											AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
-							ORDER BY 1 DESC
+							ORDER BY intFutureMonthId DESC
 							), @dtmCurrentDateTime), 0)
 				,dblGradeDiff = IsNULL(GD.dblGradeDiff, 0)
 				,dblCoEfficient = 0
@@ -1300,12 +1300,12 @@ BEGIN TRY
 
 			SELECT @dblVariance = IsNULL(@dblNewCost, 0) - IsNULL(@dblNewValue, 0)
 
-			IF @dblVariance < 1
+			IF @dblVariance < 1 and @strCostingByCoEfficient = 'False'
 			BEGIN
 				SELECT TOP 1 @intTransactionDetailId = intTransactionDetailId
 				FROM @adjustedEntries
 				WHERE IsNULL(dblNewValue, 0) > 0
-				ORDER BY 1 DESC
+				ORDER BY intId DESC
 
 				UPDATE @adjustedEntries
 				SET dblNewValue = dblNewValue + @dblVariance

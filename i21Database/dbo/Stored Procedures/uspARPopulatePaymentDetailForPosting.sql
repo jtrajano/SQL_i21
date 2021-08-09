@@ -26,6 +26,7 @@ DECLARE	@ARAccount              INT
        ,@DefaultCurrencyId      INT
        ,@CFAccount              INT
        ,@NewAccountId           INT
+       ,@CreditCardAccountId    INT
        ,@AllowOtherUserToPost   BIT
        ,@ZeroBit                BIT
        ,@OneBit                 BIT
@@ -51,6 +52,7 @@ SET @DefaultCurrencyId = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPre
 SET @NewAccountId = (SELECT TOP 1 [intGLAccountId] FROM tblCMBankAccount WHERE [intBankAccountId] = @BankAccountId)
 SET @AllowOtherUserToPost = (SELECT TOP 1 ysnAllowUserSelfPost FROM tblSMUserPreference WHERE intEntityUserSecurityId = @UserId)
 SET @Param2 = (CASE WHEN UPPER(@Param) = 'ALL' THEN '' ELSE @Param END)
+SET @CreditCardAccountId = (SELECT TOP 1 intFeeGeneralLedgerAccountId FROM tblSMCompanyPreference WHERE intFeeGeneralLedgerAccountId IS NOT NULL AND intFeeGeneralLedgerAccountId <> 0)
 
 --Header
 INSERT INTO #ARPostPaymentHeader
@@ -81,6 +83,7 @@ INSERT INTO #ARPostPaymentHeader
     ,[intInterestAccount]
     ,[intCFAccountId]
     ,[intGainLossAccount]
+    ,[intCreditCardFeeAccountId]
     ,[intEntityCardInfoId]
 	,[ysnPosted]
     ,[ysnInvoicePrepayment]
@@ -108,6 +111,8 @@ INSERT INTO #ARPostPaymentHeader
     ,[dblBaseInvoiceTotal]
     ,[dblAmountDue]
     ,[dblBaseAmountDue]
+	,[dblCreditCardFee]
+	,[dblBaseCreditCardFee]
 
     ,[intInvoiceId]
     ,[ysnExcludedFromPayment]
@@ -167,6 +172,7 @@ SELECT
     ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
     ,[intCFAccountId]                   = @CFAccount
     ,[intGainLossAccount]               = @GainLossAccount
+    ,[intCreditCardFeeAccountId]        = @CreditCardAccountId
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
@@ -194,6 +200,8 @@ SELECT
     ,[dblBaseInvoiceTotal]              = @ZeroDecimal
     ,[dblAmountDue]                     = @ZeroDecimal
     ,[dblBaseAmountDue]                 = @ZeroDecimal
+	,[dblCreditCardFee]					= @ZeroDecimal
+	,[dblBaseCreditCardFee]				= @ZeroDecimal
 
     ,[intInvoiceId]                     = NULL
     ,[ysnExcludedFromPayment]           = @ZeroBit
@@ -296,6 +304,7 @@ INSERT INTO #ARPostPaymentHeader
     ,[intInterestAccount]
     ,[intCFAccountId]
     ,[intGainLossAccount]
+    ,[intCreditCardFeeAccountId]
 	,[ysnPosted]
     ,[ysnInvoicePrepayment]
     ,[strBatchId]
@@ -320,6 +329,8 @@ INSERT INTO #ARPostPaymentHeader
     ,[dblBaseInvoiceTotal]
     ,[dblAmountDue]
     ,[dblBaseAmountDue]
+	,[dblCreditCardFee]
+	,[dblBaseCreditCardFee]
 
     ,[intInvoiceId]
     ,[ysnExcludedFromPayment]
@@ -379,6 +390,7 @@ SELECT
     ,[intInterestAccount]               = ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount)
     ,[intCFAccountId]                   = @CFAccount
     ,[intGainLossAccount]               = @GainLossAccount
+    ,[intCreditCardFeeAccountId]        = @CreditCardAccountId
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
     ,[strBatchId]                       = @BatchId
@@ -403,6 +415,8 @@ SELECT
     ,[dblBaseInvoiceTotal]              = @ZeroDecimal
     ,[dblAmountDue]                     = @ZeroDecimal
     ,[dblBaseAmountDue]                 = @ZeroDecimal
+	,[dblCreditCardFee]					= @ZeroDecimal
+	,[dblBaseCreditCardFee]				= @ZeroDecimal
 
     ,[intInvoiceId]                     = NULL
     ,[ysnExcludedFromPayment]           = @ZeroBit
@@ -488,6 +502,7 @@ INSERT INTO #ARPostPaymentHeader
     ,[intInterestAccount]
     ,[intCFAccountId]
     ,[intGainLossAccount]
+    ,[intCreditCardFeeAccountId]
     ,[intEntityCardInfoId]
 	,[ysnPosted]
     ,[ysnInvoicePrepayment]
@@ -515,6 +530,8 @@ INSERT INTO #ARPostPaymentHeader
     ,[dblBaseInvoiceTotal]
     ,[dblAmountDue]
     ,[dblBaseAmountDue]
+	,[dblCreditCardFee]
+	,[dblBaseCreditCardFee]
 
     ,[intInvoiceId]
     ,[ysnExcludedFromPayment]
@@ -574,6 +591,7 @@ SELECT
     ,[intInterestAccount]               = ISNULL(P.[intInterestAccountId], ISNULL(SMCL.[intInterestAccountId], @IncomeInterestAccount))
     ,[intCFAccountId]                   = ISNULL(P.[intCFAccountId], @CFAccount)
     ,[intGainLossAccount]               = ISNULL(P.[intGainLossAccountId], @GainLossAccount)
+    ,[intCreditCardFeeAccountId]        = ISNULL(P.[intCreditCardFeeAccountId], @CreditCardAccountId)
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
@@ -601,6 +619,8 @@ SELECT
     ,[dblBaseInvoiceTotal]              = @ZeroDecimal
     ,[dblAmountDue]                     = @ZeroDecimal
     ,[dblBaseAmountDue]                 = @ZeroDecimal
+	,[dblCreditCardFee]					= @ZeroDecimal
+	,[dblBaseCreditCardFee]				= @ZeroDecimal
 
     ,[intInvoiceId]                     = NULL
     ,[ysnExcludedFromPayment]           = @ZeroBit
@@ -626,7 +646,7 @@ SELECT
     
 FROM
     (
-    SELECT LD.[intHeaderId] AS [intPaymentId], [intBankAccountId], [intDiscountAccountId], [intInterestAccountId], [intWriteOffAccountId], [intGainLossAccountId], [intCFAccountId] FROM @PaymemntIds LD
+    SELECT LD.[intHeaderId] AS [intPaymentId], [intBankAccountId], [intDiscountAccountId], [intInterestAccountId], [intWriteOffAccountId], [intGainLossAccountId], [intCFAccountId], [intCreditCardFeeAccountId] FROM @PaymemntIds LD
     WHERE 
         NOT EXISTS(SELECT NULL FROM #ARPostPaymentHeader IH WHERE LD.[intHeaderId] = IH.[intTransactionId])
         AND LD.[ysnPost] IS NOT NULL 
@@ -690,6 +710,7 @@ INSERT INTO #ARPostPaymentDetail
     ,[intInterestAccount]
     ,[intCFAccountId]
     ,[intGainLossAccount]
+    ,[intCreditCardFeeAccountId]
     ,[intEntityCardInfoId]
 	,[ysnPosted]
     ,[ysnInvoicePrepayment]
@@ -719,6 +740,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseInvoiceTotal]
     ,[dblAmountDue]
     ,[dblBaseAmountDue]
+	,[dblCreditCardFee]
+	,[dblBaseCreditCardFee]
 
     ,[intInvoiceId]
     ,[ysnExcludedFromPayment]
@@ -739,6 +762,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseTransactionInterest]
     ,[dblTransactionAmountDue]
     ,[dblBaseTransactionAmountDue]
+    ,[dblTransactionPayment]
+    ,[dblBaseTransactionPayment]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
     ,[strRateType])
@@ -770,6 +795,7 @@ SELECT
     ,[intInterestAccount]               = ARP.[intInterestAccount]
     ,[intCFAccountId]                   = ARP.[intCFAccountId]
     ,[intGainLossAccount]               = ARP.[intGainLossAccount]
+    ,[intCreditCardFeeAccountId]        = ARP.[intCreditCardFeeAccountId]
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
@@ -799,6 +825,8 @@ SELECT
     ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
     ,[dblAmountDue]                     = ARPD.[dblAmountDue]
     ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
+	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
 
     ,[intInvoiceId]                     = ARI.[intInvoiceId]
     ,[ysnExcludedFromPayment]           = ARI.[ysnExcludeFromPayment]
@@ -819,6 +847,8 @@ SELECT
     ,[dblBaseTransactionInterest]       = ARI.[dblBaseInterest]
     ,[dblTransactionAmountDue]          = ARI.[dblAmountDue]
     ,[dblBaseTransactionAmountDue]      = ARI.[dblBaseAmountDue]
+    ,[dblTransactionPayment]			= ARI.[dblPayment]
+    ,[dblBaseTransactionPayment]		= ARI.[dblBasePayment]
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
@@ -828,7 +858,7 @@ INNER JOIN
     #ARPostPaymentHeader ARP
         ON ARPD.[intPaymentId] = ARP.[intTransactionId]
 INNER JOIN
-    (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblBaseDiscount], [dblInterest], [dblBaseInterest], [dblAmountDue], [dblBaseAmountDue] FROM tblARInvoice) ARI
+    (SELECT [intInvoiceId], [ysnExcludeFromPayment], [ysnForgiven], [strInvoiceNumber], [strTransactionType], [strType], [ysnPosted], [ysnPaid], [ysnProcessed], [dtmPostDate], [dblDiscount], [dblBaseDiscount], [dblInterest], [dblBaseInterest], [dblAmountDue], [dblBaseAmountDue], [dblPayment], [dblBasePayment] FROM tblARInvoice) ARI
         ON ARPD.[intInvoiceId] = ARI.[intInvoiceId]
 LEFT OUTER JOIN
     (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRateType] FROM tblSMCurrencyExchangeRateType) SMCER
@@ -862,6 +892,7 @@ INSERT INTO #ARPostPaymentDetail
     ,[intInterestAccount]
     ,[intCFAccountId]
     ,[intGainLossAccount]
+    ,[intCreditCardFeeAccountId]
     ,[intEntityCardInfoId]
 	,[ysnPosted]
     ,[ysnInvoicePrepayment]
@@ -891,6 +922,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseInvoiceTotal]
     ,[dblAmountDue]
     ,[dblBaseAmountDue]
+	,[dblCreditCardFee]
+	,[dblBaseCreditCardFee]
 
     ,[intInvoiceId]
     ,[ysnExcludedFromPayment]
@@ -911,6 +944,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseTransactionInterest]
     ,[dblTransactionAmountDue]
     ,[dblBaseTransactionAmountDue]
+    ,[dblTransactionPayment]
+    ,[dblBaseTransactionPayment]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
     ,[strRateType])
@@ -942,6 +977,7 @@ SELECT
     ,[intInterestAccount]               = ARP.[intInterestAccount]
     ,[intCFAccountId]                   = ARP.[intCFAccountId]
     ,[intGainLossAccount]               = ARP.[intGainLossAccount]
+    ,[intCreditCardFeeAccountId]        = ARP.[intCreditCardFeeAccountId]
     ,[intEntityCardInfoId]              = ARP.[intEntityCardInfoId]
 	,[ysnPosted]                        = ARP.[ysnPosted]
     ,[ysnInvoicePrepayment]             = ARP.[ysnInvoicePrepayment]
@@ -971,6 +1007,8 @@ SELECT
     ,[dblBaseInvoiceTotal]              = ARPD.[dblBaseInvoiceTotal]
     ,[dblAmountDue]                     = ARPD.[dblAmountDue]
     ,[dblBaseAmountDue]                 = ARPD.[dblBaseAmountDue]
+	,[dblCreditCardFee]					= ARPD.[dblCreditCardFee]
+	,[dblBaseCreditCardFee]				= ARPD.[dblBaseCreditCardFee]
 
     ,[intInvoiceId]                     = NULL
     ,[ysnExcludedFromPayment]           = @ZeroBit
@@ -1000,6 +1038,8 @@ SELECT
     ,[dblBaseTransactionInterest]       = APB.[dblInterest]
     ,[dblTransactionAmountDue]          = APB.[dblAmountDue]
     ,[dblBaseTransactionAmountDue]      = APB.[dblAmountDue]
+    ,[dblTransactionPayment]			= @ZeroDecimal
+    ,[dblBaseTransactionPayment]		= @ZeroDecimal
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '') 
@@ -1011,16 +1051,11 @@ LEFT OUTER JOIN (SELECT [intCurrencyExchangeRateTypeId], [strCurrencyExchangeRat
 OPTION(recompile)
 
 INSERT INTO #ARPostZeroPayment([intTransactionId])
-SELECT
-     [intTransactionId]
-FROM
-	#ARPostPaymentDetail
-WHERE
-	[dblAmountPaid] = @ZeroDecimal
-GROUP BY
-	[intTransactionId]
-HAVING
-	SUM([dblPayment]) = @ZeroDecimal
-	AND SUM([dblDiscount]) = @ZeroDecimal
+SELECT [intTransactionId]
+FROM #ARPostPaymentDetail
+WHERE [dblAmountPaid] = @ZeroDecimal
+GROUP BY [intTransactionId]
+HAVING SUM([dblPayment]) = @ZeroDecimal
+   AND SUM([dblDiscount]) = @ZeroDecimal
 
 RETURN 1

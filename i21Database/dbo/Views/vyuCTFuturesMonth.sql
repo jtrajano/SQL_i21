@@ -15,3 +15,4 @@ AS
 			ysnExpired,
 			MONTH(CONVERT(DATETIME,'01 '+strFutureMonth)) intMonth
 	FROM	tblRKFuturesMonth
+	WHERE ysnExpired = 0

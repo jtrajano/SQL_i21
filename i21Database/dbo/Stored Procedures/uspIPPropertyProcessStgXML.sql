@@ -143,7 +143,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -297,6 +297,14 @@ BEGIN TRY
 			SELECT intPropertyValidityPeriodId
 			FROM OPENXML(@idoc, 'vyuIPGetPropertyValidityPeriods/vyuIPGetPropertyValidityPeriod', 2) WITH (intPropertyValidityPeriodId INT)
 
+			DELETE
+			FROM tblQMPropertyValidityPeriod
+			WHERE intPropertyId = @intNewPropertyId
+				AND intPropertyValidityPeriodRefId NOT IN (
+					SELECT intPropertyValidityPeriodId
+					FROM @tblQMPropertyValidityPeriod
+					)
+
 			SELECT @intPropertyValidityPeriodId = MIN(intPropertyValidityPeriodId)
 			FROM @tblQMPropertyValidityPeriod
 
@@ -420,14 +428,6 @@ BEGIN TRY
 				WHERE intPropertyValidityPeriodId > @intPropertyValidityPeriodId
 			END
 
-			DELETE
-			FROM tblQMPropertyValidityPeriod
-			WHERE intPropertyId = @intNewPropertyId
-				AND intPropertyValidityPeriodRefId NOT IN (
-					SELECT intPropertyValidityPeriodId
-					FROM @tblQMPropertyValidityPeriod
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Conditional Property--------------------------------------------
@@ -439,6 +439,14 @@ BEGIN TRY
 			INSERT INTO @tblQMConditionalProperty (intConditionalPropertyId)
 			SELECT intConditionalPropertyId
 			FROM OPENXML(@idoc, 'vyuIPGetConditionalPropertys/vyuIPGetConditionalProperty', 2) WITH (intConditionalPropertyId INT)
+
+			DELETE
+			FROM tblQMConditionalProperty
+			WHERE intPropertyId = @intNewPropertyId
+				AND intConditionalPropertyRefId NOT IN (
+					SELECT intConditionalPropertyId
+					FROM @tblQMConditionalProperty
+					)
 
 			SELECT @intConditionalPropertyId = MIN(intConditionalPropertyId)
 			FROM @tblQMConditionalProperty
@@ -553,14 +561,6 @@ BEGIN TRY
 				FROM @tblQMConditionalProperty
 				WHERE intConditionalPropertyId > @intConditionalPropertyId
 			END
-
-			DELETE
-			FROM tblQMConditionalProperty
-			WHERE intPropertyId = @intNewPropertyId
-				AND intConditionalPropertyRefId NOT IN (
-					SELECT intConditionalPropertyId
-					FROM @tblQMConditionalProperty
-					)
 
 			ext:
 

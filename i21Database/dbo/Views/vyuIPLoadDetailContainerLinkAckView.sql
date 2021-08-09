@@ -1,0 +1,6 @@
+﻿CREATE VIEW vyuIPLoadDetailContainerLinkAckView
+AS
+SELECT intLoadContainerId
+	,intLoadDetailContainerLinkId
+	,intLoadDetailContainerLinkRefId
+FROM tblLGLoadDetailContainerLink

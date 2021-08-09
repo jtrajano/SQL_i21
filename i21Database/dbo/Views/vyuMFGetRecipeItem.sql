@@ -13,7 +13,16 @@ SELECT r.intRecipeId
 	,i.strItemNo
 	,i.strDescription
 	,ri.dblQuantity
-	,um.strUnitMeasure strUOM
+	--,um.strUnitMeasure strUOM
+	,CASE WHEN ISNULL(r.intRecipeTypeId, 0) = 2 AND ISNULL(ri.intRecipeItemTypeId, 0) = 1 THEN '' ELSE um.strUnitMeasure END AS strUOM
+	,r.dblQuantity AS dblRecipeQuantity
+	,CASE WHEN ISNULL(r.intItemId,0) > 0 THEN um1.strUnitMeasure ELSE um2.strUnitMeasure END AS strRecipeUOM
+	,RT1.strName AS strRecipeType
+	,r.dtmValidFrom AS dtmRecipeValidFrom
+	,r.dtmValidTo AS dtmRecipeValidTo
+	,r.strComment
+	,ri.ysnComplianceItem
+	,ri.dblCompliancePercent
 	,ri.dblLowerTolerance
 	,ri.dblUpperTolerance
 	,cm.strName AS strConsumptionMethod
@@ -83,12 +92,19 @@ SELECT r.intRecipeId
 			ELSE ISNULL(ip.dblStandardCost, 0)
 			END
 		) AS dblCost
+	,B.strBook
+	,SB.strSubBook
+	,r.ysnVirtualRecipe
 FROM tblMFRecipe r
 LEFT JOIN tblICItem rhi ON r.intItemId = rhi.intItemId
 LEFT JOIN tblMFRecipeItem ri ON r.intRecipeId = ri.intRecipeId
 JOIN tblICItem i ON ri.intItemId = i.intItemId
 LEFT JOIN tblICItemUOM iu ON ri.intItemUOMId = iu.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON iu.intUnitMeasureId = um.intUnitMeasureId
+Left Join tblICItemUOM iu1 on r.intItemUOMId=iu1.intItemUOMId
+Left Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+Left Join tblICUnitMeasure um2 on r.intMarginUOMId=um2.intUnitMeasureId
+LEFT JOIN tblMFRecipeType RT1 ON RT1.intRecipeTypeId = r.intRecipeTypeId
 LEFT JOIN tblSMCompanyLocation cl ON r.intLocationId = cl.intCompanyLocationId
 LEFT JOIN tblMFManufacturingProcess mp ON r.intManufacturingProcessId = mp.intManufacturingProcessId
 LEFT JOIN vyuARCustomer cs ON r.intCustomerId = cs.[intEntityId]
@@ -104,3 +120,5 @@ LEFT JOIN tblICItemLocation il ON ri.intItemId = il.intItemId
 	AND il.intLocationId = r.intLocationId
 LEFT JOIN tblICItemPricing ip ON ip.intItemId = ri.intItemId
 	AND ip.intItemLocationId = il.intItemLocationId
+LEFT JOIN tblCTBook B ON B.intBookId = r.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = r.intSubBookId

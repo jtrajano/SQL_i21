@@ -24,6 +24,8 @@ SELECT Invoice.*
 	, ContractHeader.strContractNumber
 	, ContractDetail.intContractSeq
 	, inti21InvoiceDetailId = InvoiceItem.inti21InvoiceDetailId
+	, isnull(InvoiceItem.dblTaxTotal,0)dblTaxTotal
+	, isnull(InvoiceItem.dblItemTotal,0)dblItemTotal
 FROM tblMBILInvoiceItem InvoiceItem
 LEFT JOIN vyuMBILInvoice Invoice ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
 LEFT JOIN tblICItem Item ON Item.intItemId = InvoiceItem.intItemId

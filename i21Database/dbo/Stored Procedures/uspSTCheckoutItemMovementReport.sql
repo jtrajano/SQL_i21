@@ -36,23 +36,23 @@ SELECT
 		ELSE 0
 	 END AS dblAveragePrice
 
-	 , (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblTotalCost
+	 , tblIMQty.dblTotalCost AS dblTotalCost
 	 
 	 , CASE
 		WHEN tblIMQty.intQtySoldSum <> 0
-			THEN (tblIMQty.dblItemCostSum / NULLIF(tblIMQty.intQtySoldSum, 0)) 
+			THEN dblUnitCost 
 		ELSE 0
 	 END AS dblAverageCost
 	 
-	 , ItemPricing.dblLastCost AS dblCurrentCost
+	 , tblIMQty.dblUnitCost AS dblCurrentCost
 
 	 -- Formula: Gross Margin $ = Totals Sales - (Qty * Item Movement Item Cost)
-	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) AS dblGrossMarginDollar
+	 , (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - tblIMQty.dblTotalCost  AS dblGrossMarginDollar
 
 	 -- Formula: Gross Margin % = Total Sales - (Qty * Item Movement Item Cost) / Total Sales
 	 , CASE 
 		WHEN (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) <> 0
-			THEN ( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - (tblIMQty.dblItemCostSum * tblIMQty.intQtySoldSum) )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) 
+			THEN (( (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum) - tblIMQty.dblTotalCost )  /  (tblIMQty.dblGrossSalesSum + tblIMQty.dblDiscountAmountSum)) * 100
 		ELSE 0
 	 END AS dblGrossMarginPercent
 FROM
@@ -68,10 +68,12 @@ FROM
 		, SUM(ISNULL(IM.dblDiscountAmount, 0)) AS dblDiscountAmountSum
 		, SUM(ISNULL(IM.dblGrossSales, 0)) AS dblGrossSalesSum
 		, SUM(ISNULL(IM.intQtySold, 0)) AS intQtySoldSum
-		, SUM(ISNULL(IM.dblItemStandardCost, 0)) AS dblItemCostSum
+		, SUM(ISNULL(SAR.dblUnitCost, 0)) AS dblItemCostSum
 		-- , AVG(ISNULL(IM.dblItemStandardCost, 0)) AS dblItemCostAvgSum
 		, MIN(CH.dtmCheckoutDate) AS dtmCheckoutDateMin
 		, MAX(CH.dtmCheckoutDate) AS dtmCheckoutDateMax
+		, AVG(SAR.dblUnitCost) AS dblUnitCost
+		, SUM(ROUND(ISNULL(IM.intQtySold, 0) * ISNULL(SAR.dblUnitCost, 0),2)) AS dblTotalCost
 	FROM tblSTCheckoutItemMovements IM
 	INNER JOIN tblSTCheckoutHeader CH
 		ON IM.intCheckoutId = CH.intCheckoutId
@@ -86,6 +88,15 @@ FROM
 	INNER JOIN tblICItemLocation IL
 		ON Item.intItemId = IL.intItemId
 		AND CL.intCompanyLocationId = IL.intLocationId
+	INNER JOIN (SELECT intItemId, dtmDate, intCompanyLocationId, dblUnitCost 
+					FROM vyuARSalesAnalysisReport WHERE dtmDate BETWEEN @dtmCheckoutDateFrom AND @dtmCheckoutDateTo
+				OR 1 = CASE 
+							WHEN @dtmCheckoutDateFrom IS NULL AND @dtmCheckoutDateTo IS NULL
+								THEN 1
+							ELSE 0
+					   END) SAR ON SAR.intItemId = Item.intItemId 
+		AND SAR.dtmDate = CH.dtmCheckoutDate 
+		AND SAR.intCompanyLocationId = ST.intCompanyLocationId
 	LEFT JOIN tblSTSubcategory Family
 		ON IL.intFamilyId = Family.intSubcategoryId
 		AND Family.strSubcategoryType = 'F'

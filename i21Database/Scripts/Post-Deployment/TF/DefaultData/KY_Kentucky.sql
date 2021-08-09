@@ -1,13 +1,16 @@
-﻿DECLARE @TaxAuthorityCode NVARCHAR(10) = 'KY'
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'KY' AND ysnFilingForThisTA = 1)
+BEGIN
+	PRINT ('Deploying Kentucky Tax Forms')
+END
+GO
+
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'KY'
 	, @TaxAuthorityId INT
 
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
-
-	PRINT ('Deploying Kentucky Tax Forms')
-
 -- Product Codes
 /* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
 select 'UNION ALL SELECT intProductCodeId = ' + CAST(0 AS NVARCHAR(10)) 
@@ -161,9 +164,9 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DOH', strScheduleName = 'Sold for Import from OH, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 293, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172108, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DVA', strScheduleName = 'Sold for Import from VA, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 295, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172109, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '5DWV', strScheduleName = 'Sold for Import from WV, KY Tax Collected', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 297, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172110, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7OH', strScheduleName = 'Exported to OH', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 333, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172111, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7VA', strScheduleName = 'Exported to VA', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 335, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172112, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7WV', strScheduleName = 'Exported to WV', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 337, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 172113, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7OH', strScheduleName = 'Exported to OH', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 333, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172111, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7VA', strScheduleName = 'Exported to VA', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 335, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172112, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = '72A138', strFormName = 'Special Fuel Dealer Return', strScheduleCode = '7WV', strScheduleName = 'Exported to WV', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 337, strStoredProcedure = 'uspTFGetInvoiceTax', intMasterId = 172113, intComponentTypeId = 1
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 

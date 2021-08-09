@@ -103,7 +103,8 @@
 	[intEntityId]						INT												NOT NULL	DEFAULT ((0)), 
 	[intEntityContactId]				INT												NULL,
 	[intEntityApplicatorId]				INT												NULL,
-	[dblTotalWeight]					NUMERIC(18, 6)									NULL		DEFAULT 0,	
+	[dblTotalWeight]					NUMERIC(18, 6)									NULL DEFAULT 0,	
+	[dblTotalStandardWeight]			NUMERIC(18, 6)									NULL DEFAULT 0,
 	[intDocumentMaintenanceId]			INT												NULL,	
 	[intTruckDriverId]					INT												NULL,        	
 	[intTruckDriverReferenceId]			INT												NULL,
@@ -129,6 +130,11 @@
 	[strBillingMethod]					NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL,
 	[strApplicatorLicense]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL,
 	[intPeriodId]						INT												NULL,
+    [intUserIdforDelete]				INT												NULL,
+	[strReceiptNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
+	[ysnInterCompany]					BIT												NULL DEFAULT ((0)),
+	[ysnImportFromCSV] 					BIT											    NULL	CONSTRAINT [DF_tblARInvoice_ysnImportFromCSV] DEFAULT ((0)),
+	[guiApiUniqueId]					UNIQUEIDENTIFIER NULL
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
@@ -145,7 +151,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblARInvoice_tblARPayment_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [tblARPayment]([intPaymentId]),
 	CONSTRAINT [FK_tblARInvoice_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
-	CONSTRAINT [FK_tblARInvoice_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [tblTRLoadDistributionHeader]([intLoadDistributionHeaderId]),-- ON DELETE CASCADE,
+	--CONSTRAINT [FK_tblARInvoice_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [tblTRLoadDistributionHeader]([intLoadDistributionHeaderId]),-- ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoice_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]),
 	CONSTRAINT [FK_tblARInvoice_tblCFTransaction_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [tblCFTransaction]([intTransactionId]),
 	CONSTRAINT [FK_tblARInvoice_tblMBMeterReading_intMeterReadingId] FOREIGN KEY ([intMeterReadingId]) REFERENCES [tblMBMeterReading]([intMeterReadingId]),
@@ -264,6 +270,9 @@ GO
 CREATE INDEX [IX_tblARInvoice_strTransactionType] ON [dbo].[tblARInvoice] ([strTransactionType] ASC)
 GO
 
+CREATE INDEX [IX_tblARInvoice_ysnPosted] ON [dbo].[tblARInvoice] ([ysnPosted] ASC)
+GO
+
 CREATE INDEX [IX_tblARInvoice_intOriginalInvoiceId] ON [dbo].[tblARInvoice] ([intOriginalInvoiceId] ASC)
 GO
 
@@ -294,4 +303,38 @@ BEGIN
 		DELETE A
 		FROM tblARInvoice A
 		INNER JOIN DELETED B ON A.intInvoiceId = B.intInvoiceId
+END
+
+GO
+CREATE TRIGGER trgAfterDeleteARInvoice
+    ON dbo.tblARInvoice
+    FOR DELETE
+AS
+BEGIN
+	IF EXISTS (SELECT * FROM DELETED)
+		BEGIN
+			--iNSERT
+		   INSERT INTO  tblARAuditLog
+		   SELECT 'Deleted','Invoice',strInvoiceNumber,GETDATE(),intUserIdforDelete,0 FROM DELETED
+
+		END
+END
+
+GO
+
+CREATE TRIGGER trgForUpdateARInvoice 
+ON dbo.tblARInvoice
+	FOR UPDATE 
+AS
+BEGIN
+	
+		DECLARE @strInvoiceNumber NVARCHAR (50) 
+		SELECT @strInvoiceNumber=i.strInvoiceNumber from deleted i; IF UPDATE(strInvoiceNumber)
+
+		IF @strInvoiceNumber IS NOT  NULL
+		BEGIN
+		IF UPDATE (strInvoiceNumber)
+		INSERT INTO  tblARAuditLog
+		   SELECT 'Updated','Invoice',strInvoiceNumber,GETDATE(),NULL,0 FROM deleted
+		END
 END

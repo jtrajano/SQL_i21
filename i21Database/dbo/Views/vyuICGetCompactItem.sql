@@ -33,6 +33,7 @@ SELECT
 	, Item.strShortName
 	, Item.strRequired
 	, Item.ysnBasisContract
+	, Item.ysnAutoAdjustAccrualDiff
 	, Item.intM2MComputationId
 	, M2M.strM2MComputation
 	, strTonnageTaxUOM = TonnageUOM.strUnitMeasure

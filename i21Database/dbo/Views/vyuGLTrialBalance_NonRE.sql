@@ -4,11 +4,11 @@ AS
 WITH DETAIL AS(
 	SELECT A.intAccountId,A.intAccountGroupId, F.intFiscalYearId, 
 		F.dtmDateFrom FiscalStart, P.intGLFiscalYearPeriodId,
-		P.dtmStartDate PeriodStart, P.dtmEndDate PeriodEnd 
+		P.dtmStartDate PeriodStart, P.dtmEndDate PeriodEnd
 	FROM 
-		tblGLAccount A,
-		tblGLFiscalYear F 
-	JOIN tblGLFiscalYearPeriod P on F.intFiscalYearId = P.intFiscalYearId
+		tblGLAccount A
+		inner join tblGLFiscalYear F on 1=1
+		JOIN tblGLFiscalYearPeriod P on F.intFiscalYearId = P.intFiscalYearId
 	WHERE A.intAccountId <> F.intRetainAccount
 )
 ,ACCOUNTTYPE AS

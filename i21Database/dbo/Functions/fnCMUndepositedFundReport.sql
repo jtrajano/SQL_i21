@@ -118,4 +118,5 @@ else a.dblAmount end) <>0
 )
 
 select ROW_NUMBER() OVER( ORDER BY dtmDate) rowId, * from mainTable
+where ISNULL(strPaymentMethod,'') <> 'CF Invoice'
 )

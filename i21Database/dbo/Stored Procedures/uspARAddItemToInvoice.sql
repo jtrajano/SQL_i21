@@ -44,6 +44,7 @@
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT 			= NULL
 	,@ItemCostTypeId				INT				= NULL
 	,@ItemMarginById				INT				= NULL
 	,@ItemCommentTypeId				INT				= NULL
@@ -51,15 +52,16 @@
 	,@ItemRecipeQty					NUMERIC(18,6)	= NULL
 	,@ItemSalesOrderDetailId		INT				= NULL												
 	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
+	,@ContractHeaderId				INT				= NULL
+	,@ContractDetailId				INT				= NULL
 	,@ItemContractHeaderId			INT				= NULL
 	,@ItemContractDetailId			INT				= NULL
-	,@ItemItemContractHeaderId		INT				= NULL
-	,@ItemItemContractDetailId		INT				= NULL
-	,@ItemItemContract				BIT				= 0
+	,@ItemContract					BIT				= 0
 	,@ItemShipmentId				INT				= NULL			
 	,@ItemShipmentPurchaseSalesContractId	INT		= NULL	
 	,@ItemWeightUOMId				INT				= NULL	
-	,@ItemWeight					NUMERIC(38,20)	= 0.000000		
+	,@ItemWeight					NUMERIC(38,20)	= 0.000000
+	,@ItemStandardWeight			NUMERIC(38,20)	= 0.000000
 	,@ItemShipmentGrossWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentTareWt			NUMERIC(38,20)	= 0.000000		
 	,@ItemShipmentNetWt				NUMERIC(38,20)	= 0.000000			
@@ -191,6 +193,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
 			,@ItemSublocationId				= @ItemSublocationId
+			,@ItemPriceFixationDetailId		= @ItemPriceFixationDetailId
 			,@ItemCostTypeId				= @ItemCostTypeId
 			,@ItemMarginById				= @ItemMarginById
 			,@ItemCommentTypeId				= @ItemCommentTypeId
@@ -200,15 +203,16 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemSubFormula				= @ItemSubFormula
 			,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
 			,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+			,@ContractHeaderId				= @ContractHeaderId
+			,@ContractDetailId				= @ContractDetailId
 			,@ItemContractHeaderId			= @ItemContractHeaderId
 			,@ItemContractDetailId			= @ItemContractDetailId
-			,@ItemItemContractHeaderId		= @ItemItemContractHeaderId
-			,@ItemItemContractDetailId		= @ItemItemContractDetailId
-			,@ItemItemContract				= @ItemItemContract
+			,@ItemContract					= @ItemContract
 			,@ItemShipmentId				= @ItemShipmentId
 			,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
 			,@ItemWeightUOMId				= @ItemWeightUOMId
 			,@ItemWeight					= @ItemWeight
+			,@ItemStandardWeight			= @ItemStandardWeight
 			,@ItemShipmentGrossWt			= @ItemShipmentGrossWt
 			,@ItemShipmentTareWt			= @ItemShipmentTareWt
 			,@ItemShipmentNetWt				= @ItemShipmentNetWt
@@ -287,8 +291,6 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@InvoiceType					NVARCHAR(200)
 				,@TermId						INT
 				,@Pricing						NVARCHAR(250)	= NULL
-				,@ContractHeaderId				INT				= NULL
-				,@ContractDetailId				INT				= NULL
 				,@EntityCustomerId				INT
 				,@InvoiceDate					DATETIME
 				,@SpecialPrice					NUMERIC(18,6)	= 0.000000
@@ -368,8 +370,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				SET @ItemPrice				= @SpecialPrice
 				SET @ItemUnitPrice			= @SpecialPrice
 				SET @ItemPricing			= @Pricing
-				SET @ItemContractHeaderId	= @ContractHeaderId
-				SET @ItemContractDetailId	= @ContractDetailId
+
 				IF ISNULL(@ContractDetailId,0) <> 0
 				BEGIN
 					SET @ItemPrice						= @SpecialPrice * @PriceUOMQuantity
@@ -450,6 +451,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strSubFormula]
 				,[intRecipeId]
 				,[intSubLocationId]
+				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
 				,[intCommentTypeId]
@@ -464,7 +466,9 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intOriginalInvoiceDetailId]
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
-				,[dblAddOnQuantity])
+				,[dblAddOnQuantity]
+				,[intInventoryShipmentChargeId]
+				,[dblStandardWeight])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -475,11 +479,11 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemOrderUOMId
 				,ISNULL(ISNULL(@ItemUOMId, (SELECT TOP 1 [intIssueUOMId] FROM tblICItemLocation WHERE [intItemId] = @ItemId AND [intLocationId] = @CompanyLocationId ORDER BY [intItemLocationId] )), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM WHERE [intItemId] = @ItemId ORDER BY [ysnStockUnit] DESC, [intItemUOMId]))
 				,@ItemPriceUOMId
+				,@ContractHeaderId
+				,@ContractDetailId
 				,@ItemContractHeaderId
 				,@ItemContractDetailId
-				,@ItemItemContractHeaderId
-				,@ItemItemContractDetailId
-				,@ItemItemContract
+				,@ItemContract
 				,@ItemQtyOrdered
 				,@ItemQtyShipped
 				,@ItemUnitQuantity
@@ -539,6 +543,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemSubFormula
 				,@ItemRecipeId
 				,@ItemSublocationId
+				,@ItemPriceFixationDetailId
 				,@ItemCostTypeId
 				,@ItemMarginById
 				,@ItemCommentTypeId
@@ -554,6 +559,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemAddonDetailKey	
 				,@ItemAddonParent
 				,@ItemAddOnQuantity
+				,@ItemInventoryShipmentChargeId
+				,@ItemStandardWeight
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()

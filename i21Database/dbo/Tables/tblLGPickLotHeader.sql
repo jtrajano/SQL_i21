@@ -1,13 +1,14 @@
 ﻿CREATE TABLE [dbo].[tblLGPickLotHeader]
 (
 	[intPickLotHeaderId] INT NOT NULL IDENTITY(1, 1), 
+	[intType] INT NULL,
     [intConcurrencyId] INT NOT NULL, 
     [strPickLotNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[dtmPickDate] DATETIME NOT NULL,
 	[intCustomerEntityId] INT NOT NULL,
     [intCompanyLocationId] INT NOT NULL, 
     [intCommodityId] INT NOT NULL, 
-	[intSubLocationId] INT NOT NULL,
+	[intSubLocationId] INT NULL,
 	[intWeightUnitMeasureId] INT NOT NULL,
     [intUserSecurityId] INT NOT NULL, 	
 	[intDeliveryHeaderId] INT NULL,
@@ -15,7 +16,7 @@
 	[intCompanyId] INT NULL,
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,
-
+	[strComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblLGPickLotHeader_intPickLotHeaderId] PRIMARY KEY ([intPickLotHeaderId]), 
 	CONSTRAINT [UK_tblLGPickLotHeader_intReferenceNumber] UNIQUE ([strPickLotNumber]),
 	CONSTRAINT [FK_tblLGPickLotHeader_tblEMEntity_intCustomerEntityId_intEntityId] FOREIGN KEY ([intCustomerEntityId]) REFERENCES tblEMEntity([intEntityId]),

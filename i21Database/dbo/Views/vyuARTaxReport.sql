@@ -5,7 +5,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , strTransactionType       = INVOICE.strTransactionType
 	 , strSourceType			= INVOICE.strType
 	 , strCFTransactionType     = CF.strTransactionType
-	 , dtmDate					= INVOICE.dtmDate
+	 , dtmDate					= CAST(INVOICE.dtmDate AS DATE)
 	 , intCurrencyId			= INVOICE.intCurrencyId
 	 , intCompanyLocationId		= INVOICE.intCompanyLocationId
 	 , intShipToLocationId		= INVOICE.intShipToLocationId
@@ -37,7 +37,10 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblTaxable       		= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN 0 
 									ELSE (CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  ELSE 0.000000
+													 END
 												ELSE 0.000000 
 											END) 
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
@@ -48,7 +51,10 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 												ELSE 0.000000 
 											END) +
 											(CASE WHEN DETAIL.dblAdjustedTax <> 0.000000 
-												THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+												THEN CASE WHEN DETAIL.ysnTaxExempt = 0 
+														  THEN DETAIL.dblLineTotal * (DETAIL.dblAdjustedTax/ISNULL(NULLIF(DETAIL.dblTotalAdjustedTax, 0), DETAIL.dblAdjustedTax))
+														  ELSE 0.000000
+													 END
 												ELSE 0.000000 
 											END))
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
@@ -89,6 +95,9 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblQtyTonShipped			= DETAIL.dblQtyTonShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , strFederalTaxId 			= CUSTOMER.strFederalTaxId
 	 , strStateTaxId			= CUSTOMER.strStateTaxId
+	 , dblInvoiceTotal          = INVOICE.dblInvoiceTotal
+	 , intFreightTermId			= INVOICE.intFreightTermId
+	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
@@ -121,7 +130,7 @@ INNER JOIN (
 		 , strItemNo				= ITEM.strItemNo
 		 , strCategoryCode			= CATEGORY.strCategoryCode
 		 , intTaxClassId			= IDT.intTaxClassId
-		 , intSalesTaxAccountId		= TAXCODE.intSalesTaxAccountId
+		 , intSalesTaxAccountId		= IDT.intSalesTaxAccountId
 		 , intPurchaseTaxAccountId	= TAXCODE.intPurchaseTaxAccountId
 		 , intCategoryId			= ITEM.intCategoryId
 		 , intTaxCodeCount			= ISNULL(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount)
@@ -133,13 +142,14 @@ INNER JOIN (
 			 , intTaxCodeId
 			 , intTaxGroupId
 			 , intTaxClassId
+			 , intSalesTaxAccountId
 			 , strCalculationMethod
 			 , dblRate
 			 , dblAdjustedTax		
 			 , dblTax				
 			 , ysnTaxExempt
-			 ,ysnTaxAdjusted
-			 , ysnInvalidSetup
+			 , ysnTaxAdjusted
+			 , ysnInvalidSetup			 
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	LEFT JOIN (
@@ -163,7 +173,7 @@ INNER JOIN (
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 	) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = IDT.intTaxClassId
 					 AND ITEMTAXCATEGORY.intCategoryId = ITEM.intCategoryId
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 		WHERE ICT.intCategoryId = ITEM.intCategoryId
@@ -209,7 +219,7 @@ INNER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
 		FROM dbo.tblGLAccount WITH (NOLOCK)
-	) SALESACCOUNT ON TAXCODE.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
+	) SALESACCOUNT ON IDT.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
 	LEFT OUTER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
@@ -272,4 +282,18 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+OUTER APPLY (
+	 SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) COLLATE Latin1_General_CI_AS
+	 FROM (
+	  SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
+	  FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+	  INNER JOIN (
+	   SELECT intAccountStatusId
+		 , strAccountStatusCode
+	   FROM dbo.tblARAccountStatus WITH (NOLOCK)
+	  ) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+	  WHERE CAS.intEntityCustomerId = INVOICE.intEntityCustomerId
+	  FOR XML PATH ('')
+	 ) SC (strAccountStatusCode)
+) STATUSCODES
 WHERE INVOICE.ysnPosted = 1

@@ -8,9 +8,14 @@
 [intSubLocationId] INT NULL,
 [intStorageLocationId] INT NULL,
 [intHaulerEntityId] INT NULL,
+[intBrokerEntityId] INT NULL,
+[intWeightGradeId] INT NULL,
+[dtmCustomsEntrySent] DATETIME NULL,
+[strCustomsComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 [dtmPickupDate] DATETIME NULL,
 [dtmDeliveryDate] DATETIME NULL,
 [dtmLastFreeDate] DATETIME NULL,
+[dtmEmptyContainerReturn] DATETIME NULL,
 [dtmStrippingReportReceivedDate] DATETIME NULL,
 [dtmSampleAuthorizedDate] DATETIME NULL,
 [strStrippingReportComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
@@ -25,6 +30,8 @@ CONSTRAINT [FK_tblLGLoadWarehouse_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId])
 CONSTRAINT [FK_tblLGLoadWarehouse_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 CONSTRAINT [FK_tblLGLoadWarehouse_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 CONSTRAINT [FK_tblLGLoadWarehouse_tblEMEntity_intHaulerEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGLoadWarehouse_tblEMEntity_intBrokerEntityId] FOREIGN KEY ([intBrokerEntityId]) REFERENCES tblEMEntity([intEntityId]),
+CONSTRAINT [FK_tblLGLoadWarehouse_tblCTWeightGrade_intWeightGradeId] FOREIGN KEY ([intWeightGradeId]) REFERENCES tblCTWeightGrade([intWeightGradeId]),
 CONSTRAINT [FK_tblLGLoadWarehouse_tblLGWarehouseRateMatrixHeader_intWarehouseRateMatrixHeaderId] FOREIGN KEY ([intWarehouseRateMatrixHeaderId]) REFERENCES [tblLGWarehouseRateMatrixHeader]([intWarehouseRateMatrixHeaderId])
 )
 GO

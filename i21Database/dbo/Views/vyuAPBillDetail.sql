@@ -16,12 +16,13 @@ SELECT
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
 		 ELSE 'Invalid Type'
-	END COLLATE Latin1_General_CI_AS AS strTransactionType,
+	END AS strTransactionType,
 	G2.strName,
 	G2.strEntityNo,
 	A.strVendorOrderNumber,
 	A.intBillId,
 	A.dtmDate,
+	FP.strPeriod,
 	A.dtmDateCreated,
 	A.ysnPosted,
 	B.intBillDetailId,
@@ -46,6 +47,7 @@ SELECT
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
 		WHEN 5 THEN '1099 DIV'
+		WHEN 7 THEN '1099 NEC'
 		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form,
 	B.int1099Category,
 	CASE WHEN D.int1099CategoryId IS NULL THEN 'NONE' ELSE D.strCategory END AS str1099Category,
@@ -81,7 +83,7 @@ SELECT
 	PG.strName as strPurchasingGroupName,
 	CB.strContractBasis as strINCO,
 	ISNULL(A2.ysnPaid,0) AS ysnPaid,
-	A2.strPaymentInfo COLLATE Latin1_General_CI_AS AS strPaymentInfo,
+	A2.strPaymentInfo,
 	A2.dtmDatePaid,
 	A2.dtmPaymentDateReconciled,
 	ISNULL(A2.dblPayment,0) AS dblPayment,
@@ -94,6 +96,8 @@ INNER JOIN dbo.tblAPBillDetail B
 	ON A.intBillId = B.intBillId
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId
+LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 -- LEFT JOIN dbo.tblAPBillDetailTax BD 
 -- 	ON BD.intBillDetailId = B.intBillDetailId
 LEFT JOIN dbo.tblICInventoryReceiptItem IRE 

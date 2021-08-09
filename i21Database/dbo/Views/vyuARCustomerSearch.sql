@@ -5,8 +5,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intSalespersonId			= SALESPERSON.intEntityId
 	 , intCurrencyId			= CUSTOMER.intCurrencyId
 	 , intTermsId				= CUSTOMER.intTermsId
-	 , intShipToId				= CUSTOMER.intShipToId
-	 , intBillToId				= CUSTOMER.intBillToId
+	 , intShipToId				= SHIPTOLOCATION.intEntityLocationId
+	 , intBillToId				= BILLTOLOCATION.intEntityLocationId
 	 , strName					= ENTITY.strName
 	 , strCustomerNumber		= CASE WHEN ISNULL(CUSTOMER.strCustomerNumber, '') = '' THEN ENTITY.strEntityNo ELSE CUSTOMER.strCustomerNumber END	 
 	 , strVatNumber				= CUSTOMER.strVatNumber
@@ -66,7 +66,8 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , intServiceChargeId		= CUSTOMER.intServiceChargeId
 	 , intPaymentMethodId		= CUSTOMER.intPaymentMethodId
 	 , strPaymentMethod			= CUSTOMER.strPaymentMethod
-	 , ysnCreditHold
+	 , ysnCreditHold			= CUSTOMER.ysnCreditHold
+	 , ysnExemptCreditCardFee	= CUSTOMER.ysnExemptCreditCardFee
 	 , intWarehouseId			= SHIPTOLOCATION.intWarehouseId
 	 , strWarehouseName			= SHIPTOLOCATION.strWarehouseName
 	 , intEntityLineOfBusinessIds = STUFF(LOB.intEntityLineOfBusinessIds,1,3,'') COLLATE Latin1_General_CI_AS
@@ -74,6 +75,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , strCreditCode			= CUSTOMER.strCreditCode
 	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached
 	 , intCreditLimitReached	= DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
+	 , intInterCompanyId		= intInterCompanyId
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -105,9 +107,11 @@ INNER JOIN (
 		 , intPaymentMethodId	= C.intPaymentMethodId
 		 , strPaymentMethod		= PAYMENTMETHOD.strPaymentMethod
 		 , ysnCreditHold
+		 , ysnExemptCreditCardFee
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached
+		 , intInterCompanyId
 	FROM dbo.tblARCustomer C WITH (NOLOCK)	
 	LEFT JOIN (
 		SELECT intTermID
@@ -222,8 +226,10 @@ LEFT JOIN (
 		 , strZipCode
 		 , strCountry
 		 , strPhone
+		 , intEntityId
+		 , ysnDefaultLocation
 	FROM dbo.tblEMEntityLocation WITH (NOLOCK)
-) BILLTOLOCATION ON CUSTOMER.intBillToId = BILLTOLOCATION.intEntityLocationId
+) BILLTOLOCATION ON CUSTOMER.intEntityId = BILLTOLOCATION.intEntityId AND BILLTOLOCATION.ysnDefaultLocation=1
 LEFT JOIN (
 	SELECT S.intEntityId
 		 , strSalespersonId	    = CASE WHEN ISNULL(S.strSalespersonId, '') = '' THEN ST.strEntityNo ELSE S.strSalespersonId END

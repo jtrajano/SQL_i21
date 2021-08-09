@@ -111,11 +111,13 @@ BEGIN
 				receipt.intContractDetailId
 				, shipment.intContractDetailId
 				, invoice.intContractDetailId
+				, adjustment.intContractDetailId
 			)
 			,intContractHeaderId = COALESCE(
 				receipt.intContractHeaderId
 				, shipment.intContractHeaderId
 				, invoice.intContractHeaderId
+				, adjustment.intContractHeaderId
 			)
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
@@ -171,6 +173,7 @@ BEGIN
 					WHEN t.strTransactionForm = 'Inbound Shipments' THEN 31
 					WHEN t.strTransactionForm = 'Outbound Shipment' THEN 32
 					WHEN t.strTransactionForm = 'Invoice' THEN 48
+					WHEN t.strTransactionForm = 'Credit Memo' THEN 66
 					ELSE 
 						NULL
 				 END 
@@ -221,7 +224,7 @@ BEGIN
 					tblARInvoice inv INNER JOIN tblARInvoiceDetail invD
 						ON inv.intInvoiceId = invD.intInvoiceId
 				WHERE
-					t.strTransactionForm = 'Invoice'
+					t.strTransactionForm IN ('Invoice', 'Credit Memo') 
 					AND inv.strInvoiceNumber = t.strTransactionId
 					AND inv.intInvoiceId = t.intTransactionId
 					AND invD.intInvoiceDetailId = t.intTransactionDetailId
@@ -248,6 +251,22 @@ BEGIN
 						, invoice.intContractDetailId 
 					)
 			) contractDetail
+
+			OUTER APPLY (
+				SELECT 
+					intContractDetailId = ad.intContractDetailId
+					,intContractHeaderId = ad.intContractHeaderId
+				FROM 
+					tblICInventoryAdjustment a INNER JOIN tblICInventoryAdjustmentDetail ad
+						ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+					LEFT JOIN tblICLot l
+						ON l.intLotId = ad.intLotId 
+				WHERE
+					t.strTransactionForm = 'Inventory Adjustment'
+					AND a.strAdjustmentNo = t.strTransactionId
+					AND a.intInventoryAdjustmentId = t.intTransactionId
+					AND ad.intInventoryAdjustmentDetailId = t.intTransactionDetailId
+			) adjustment 
 
 		WHERE
 			(t.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 

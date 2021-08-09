@@ -104,6 +104,7 @@ BEGIN
 					intRetailPriceAdjustmentDetailId	INT,
 					ysnOneTimeUse						BIT,
 					intCompanyLocationId				INT NULL,
+					intStoreGroupId						INT NULL,
 					intCategoryId						INT NULL,
 				    intFamilyId							INT NULL,
 					intClassId							INT NULL,
@@ -116,15 +117,17 @@ BEGIN
 					intItemUOMId						INT NULL,
  					dblPrice							NUMERIC(18,6) NULL, 
 					dblLastCost							NUMERIC(18,6) NULL,
-					dblFactor						NUMERIC(18,6) NULL
+					dblFactor							NUMERIC(18,6) NULL,
+					dtmEffectiveDate					DATETIME NULL
 				)
-
+				
 				-- INSERT to Temp Table
 				INSERT INTO @tblRetailPriceAdjustmentDetailIds
 				(
 					intRetailPriceAdjustmentDetailId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
+					intStoreGroupId,
 					intCategoryId,
 				    intFamilyId,
 					intClassId,
@@ -137,12 +140,14 @@ BEGIN
 					intItemUOMId,
  					dblPrice, 
 					dblLastCost,
-					dblFactor
+					dblFactor,
+					dtmEffectiveDate
 				)
 				SELECT
 					pad.intRetailPriceAdjustmentDetailId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
+					intStoreGroupId,
 					intCategoryId,
 				    intFamilyId,
 					intClassId,
@@ -155,7 +160,8 @@ BEGIN
 					intItemUOMId,
  					dblPrice, 
 					dblLastCost,
-					pad.dblFactor
+					pad.dblFactor,
+					rpa.dtmEffectiveDate
 				FROM tblSTRetailPriceAdjustmentDetail pad
 				INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
 					ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
@@ -166,6 +172,7 @@ BEGIN
 					BEGIN
 
 						DECLARE @intLocationId						INT = NULL
+							, @intStoreGroupId						INT = NULL
 							, @intVendorId							INT = NULL
 							, @intCategoryId						INT = NULL
 							, @intFamilyId							INT = NULL
@@ -184,6 +191,7 @@ BEGIN
 							, @strRoundPrice						NVARCHAR(100) = NULL
 							, @strPriceEndingDigit					NVARCHAR(100) = NULL
 							, @strDistrict							NVARCHAR(100) = NULL
+							, @dtmEffectiveDate						DATETIME = NULL
 
 						WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 							BEGIN
@@ -192,6 +200,7 @@ BEGIN
 									@intRetailPriceAdjustmentDetailId	= intRetailPriceAdjustmentDetailId,
 									@ysnOneTimeUse						= ysnOneTimeUse,
 									@intLocationId						= intCompanyLocationId,
+									@intStoreGroupId					= intStoreGroupId,
 									@intCategoryId						= intCategoryId,
 									@intFamilyId						= intFamilyId,
 									@intClassId							= intClassId,
@@ -204,11 +213,13 @@ BEGIN
 									@intItemUOMId						= intItemUOMId,
  									@dblRetailPrice						= dblPrice, 
 									@dblLastCostPrice					= dblLastCost,
-									@dblFactor							= dblFactor
+									@dblFactor							= dblFactor,
+									@dtmEffectiveDate					= dtmEffectiveDate
 								FROM @tblRetailPriceAdjustmentDetailIds
 
 								DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@dblRetailPrice AS NUMERIC(38, 20))
 								DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCostPrice AS NUMERIC(38, 20))
+								DECLARE @dtmEffectiveDateConv AS DATETIME = @dtmEffectiveDate
 
 								SET @intCurrentUserId = ISNULL(@intCurrentUserId, @intSavedUserId)
 
@@ -232,7 +243,12 @@ BEGIN
 								INNER JOIN tblICCategory CAT ON CAT.intCategoryId = I.intCategoryId
 								LEFT JOIN tblSTSubcategory FAMILY ON FAMILY.intSubcategoryId = itemLoc.intFamilyId
 								LEFT JOIN tblSTSubcategory CLASS ON CLASS.intSubcategoryId = itemLoc.intClassId
-								WHERE (@intLocationId IS NULL OR (CL.intCompanyLocationId = @intLocationId))
+								WHERE 
+								(@intLocationId IS NULL OR (CL.intCompanyLocationId = @intLocationId))
+								AND (@intStoreGroupId IS NULL OR (CL.intCompanyLocationId IN (SELECT intCompanyLocationId FROM tblSTStore st
+																								INNER JOIN tblSTStoreGroupDetail stgd
+																									ON st.intStoreId = stgd.intStoreId
+																								WHERE stgd.intStoreGroupId = @intStoreGroupId)))
 								AND (@intVendorId IS NULL OR (Vendor.intEntityId = @intVendorId))
 								AND (@strRegion = '' OR (ST.strRegion = @strRegion))
 								AND (@strDistrict = '' OR (ST.strDistrict = @strDistrict))
@@ -303,16 +319,19 @@ BEGIN
 
 
 										SET @dblRetailPriceConv = ROUND(@dblRetailPriceConv, 2)
+
 										EXEC [uspICUpdateItemPricingForCStore]
 											-- filter params
 											@strUpcCode					= @strProcessLongUpcCode 
 											,@strDescription			= @strProcessDescription 
+											,@strScreen					= 'RetailPriceAdjustment' 
 											,@intItemId					= @intProcessItemId
 											,@intItemPricingId			= @intProcessItemPricingId 
 											-- update params
 											,@dblStandardCost			= NULL 
 											,@dblRetailPrice			= @dblRetailPriceConv
 											,@dblLastCost				= @dblLastCostConv
+											,@dtmEffectiveDate			= @dtmEffectiveDateConv
 											,@intEntityUserSecurityId	= @intCurrentUserId
 			
 										-- Check if Successfull
@@ -507,6 +526,12 @@ BEGIN
 				BEGIN
 					IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_ItemPricingAuditLog') IS NOT NULL  
 						DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog 
+						
+					IF OBJECT_ID('tempdb..#tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog 
+						
+					IF OBJECT_ID('tempdb..#tmpUpdateItemCostForCStoreEffectiveDate_AuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemCostForCStoreEffectiveDate_AuditLog 
 				END
 
 
@@ -584,4 +609,3 @@ ExitWithRollback:
 
 		
 ExitPost:
-GO

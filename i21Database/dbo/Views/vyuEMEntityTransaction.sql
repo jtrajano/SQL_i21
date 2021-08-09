@@ -14,7 +14,7 @@
 		strPaymentInfo = null,
 		intPaymentId = null	,
 		intTransactionId = null,
-		dtmDatePaid = null
+		dtmDatePaid = a.dtmPostDate
 	from vyuARCustomerHistory a	
 		left join tblARInvoice b on a.strTransactionNumber = b.strInvoiceNumber
 		left join tblARPayment c on a.strTransactionNumber = c.strRecordNumber

@@ -52,6 +52,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		DECLARE	@EntityCustomerId			INT
 			,@Date							DATETIME
 			,@CompanyLocationId				INT
+			,@LocationSalesAccountId		INT
+			,@LocationName					NVARCHAR(500)	= ''
 			,@EntityId						INT
 			,@NewTransactionId				INT				= NULL		
 			,@ErrorMessage					NVARCHAR(250)	= NULL
@@ -88,7 +90,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@ConversionFactor				NUMERIC(18,6)   = @ZeroDecimal	
 			,@BillingBy						NVARCHAR(50)	= NULL
 			,@COGSAmount					NUMERIC(18,6)   = @ZeroDecimal
-			,@CustomerNumber				NVARCHAR(100)	= NULL
+			,@CustomerNumber				NVARCHAR(100)	= ''
 			,@ItemCategory					NVARCHAR(100)	= NULL
 			,@intItemLocationId				INT				= NULL
 			,@ysnAllowNegativeStock			BIT				= 0
@@ -96,11 +98,12 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@intCostingMethod				INT				= NULL
 			,@ysnOrigin						BIT				= 0
 			,@ysnRecap						BIT			 	= 0
+			,@ysnImpactInventory			BIT			 	= 1
 
 		IF @IsTank = 1
 			BEGIN
 				SELECT 
-					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = D.strCustomerNumber)
+					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblARCustomer WHERE strCustomerNumber = D.strCustomerNumber)
 					,@Date							= D.dtmDate
 					,@ShipDate						= D.dtmDate		
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
@@ -219,7 +222,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
 					, @intStockUnit					= ICUOM.intItemUOMId
 					, @intCostingMethod				= ICIL.intCostingMethod
-					,@ysnRecap						= H.ysnRecap	
+					, @ysnRecap						= H.ysnRecap
+					, @ysnImpactInventory			= 0
 				FROM
 					tblARImportLogDetail ILD
 				INNER JOIN
@@ -277,7 +281,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		ELSE
 			BEGIN
 				SELECT 
-					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblEMEntity WHERE strEntityNo = D.strCustomerNumber)
+					 @EntityCustomerId				= (SELECT TOP 1 intEntityId FROM tblARCustomer WHERE strCustomerNumber = D.strCustomerNumber)
 					,@Date							= D.dtmDate
 					,@CompanyLocationId				= (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE strLocationName = D.strLocationName)
 					,@EntityId						= ISNULL(@UserEntityId, H.intEntityId)
@@ -337,6 +341,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 
 		IF ISNULL(@CompanyLocationId, 0) = 0
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Location Name provided does not exists. '
+
+		SELECT TOP 1 @LocationSalesAccountId = intSalesAccount, @LocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId =  ISNULL(@CompanyLocationId, 0)
+
+		IF ISNULL(@LocationSalesAccountId, 0) = 0
+			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + CASE WHEN @LocationSalesAccountId IS NULL THEN 'The Sales account of Company Location ' + @LocationName + ' is not valid. ' ELSE 'The Sales account of Company Location ' + @LocationName + ' was not set. ' END
 	
 		IF @TermId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
@@ -490,7 +499,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intSubCurrencyId]
 							,[dblSubCurrencyRate]
 							,[ysnUseOriginIdAsInvoiceNumber]
-
+							,[ysnImpactInventory]
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -593,7 +602,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]	= 1.000000
 							,[intSubCurrencyId]			= NULL
 							,[dblSubCurrencyRate]		= 1.000000
-							,[ysnUseOriginIdAsInvoiceNumber] =   CASE WHEN  (@OriginId IS NOT NULL  AND  @CustomerNumber <> '9998') THEN CAST(1 AS BIT) ELSE CAST(1 AS BIT) END
+							,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(@OriginId, '') <> '' AND  @CustomerNumber <> '9998' THEN 1 ELSE 0 END
+							,[ysnImpactInventory]		= @ysnImpactInventory
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
 								INSERT INTO @TaxDetails(
@@ -662,7 +672,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						ARI.dblAmountDue	= ARI.dblInvoiceTotal + T.[Discount],
 						ARI.dblBaseAmountDue = ARI.dblInvoiceTotal + T.[Discount],
 						ARI.dblInvoiceSubtotal   =  ARI.dblInvoiceSubtotal +  T.[Discount],
-						ARI.dblBaseInvoiceSubtotal  =  ARI.dblBaseInvoiceSubtotal + T.[Discount]
+						ARI.dblBaseInvoiceSubtotal  =  ARI.dblBaseInvoiceSubtotal + T.[Discount],
+						ARI.ysnImportFromCSV = 1
 
 						FROM tblARInvoice ARI
 						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARI.intInvoiceId = I.intID

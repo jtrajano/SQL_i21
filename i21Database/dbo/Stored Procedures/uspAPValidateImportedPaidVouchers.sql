@@ -14,6 +14,12 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;  
 IF @transCount = 0 BEGIN TRANSACTION; 
 
+;WITH cte AS (
+	SELECT ROW_NUMBER() OVER(PARTITION BY A.strStore, A.strVendorOrderNumber ORDER BY A.intId) intRow,
+	A.intId
+	FROM tblAPImportPaidVouchersForPayment A
+)
+
 UPDATE A
 	SET A.strNotes = CASE
 					WHEN 
@@ -21,14 +27,15 @@ UPDATE A
 						AND B.ysnPaid = 0
 						AND B.ysnPosted = 1
 						AND B.intBillId > 0
-						AND A.dblPayment = B.dblAmountDue
-						THEN 
-							(
-								CASE 
-								WHEN A.dblPayment < 0 AND B.intTransactionType = 1
-								THEN 'Invalid amount.'
-								ELSE NULL END
-							)
+						AND ABS(A.dblPayment) = B.dblAmountDue --MAKE THE CSV DATA AMOUNT POSITIVE TO CORRECTLY VALIDATE WITH tblAPBill.dblAmountDue
+						-- THEN 
+						-- 	(
+						-- 		CASE 
+						-- 		WHEN ABS(A.dblPayment) < 0 AND B.intTransactionType = 1
+						-- 		THEN 'Invalid amount.'
+						-- 		ELSE NULL END
+						-- 	)
+						THEN NULL
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
 					THEN 'Currency is different on current selected currency.'
@@ -42,19 +49,35 @@ UPDATE A
 						B.intBillId IS NULL
 					THEN 'Voucher not found.'
 					WHEN 
-						A.dblPayment > B.dblAmountDue
+						A.dblPayment > (B.dblAmountDue * -1) AND B.intTransactionType = 3
 					THEN 'Overpayment'
 					WHEN 
-						A.dblPayment < B.dblAmountDue
+						A.dblPayment > B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Overpayment'
+						WHEN 
+						A.dblPayment < (B.dblAmountDue * -1) AND B.intTransactionType = 3
 					THEN 'Underpayment'
+					WHEN 
+						A.dblPayment < B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Underpayment'
+					WHEN 
+						A.dblPayment < 0 AND B.intTransactionType != 3
+					THEN 'Amount is negative. Debit Memo type is expected.'
 					ELSE NULL
 					END,
-		A.strBillId = B.strBillId
+		A.strBillId = B.strBillId,
+		A.strVendorOrderNumber = A.strStore + '-' + A.strVendorOrderNumber
 FROM tblAPImportPaidVouchersForPayment A
-LEFT JOIN tblAPBill B
-ON 
-	B.strVendorOrderNumber = A.strStore + '-' + A.strVendorOrderNumber
-AND B.intEntityVendorId = A.intEntityVendorId
+INNER JOIN cte cte ON cte.intId = A.intId
+OUTER APPLY	(
+	SELECT *
+	FROM (
+		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
+		FROM tblAPBill 
+		WHERE strVendorOrderNumber = A.strStore + '-' + A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId
+	) voucher
+	WHERE voucher.intRow = cte.intRow
+) B
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
   

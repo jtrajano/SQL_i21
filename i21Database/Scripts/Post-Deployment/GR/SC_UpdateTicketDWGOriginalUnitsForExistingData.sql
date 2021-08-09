@@ -1,0 +1,9 @@
+﻿PRINT ('BEGIN UPDATE OF DWG ORIGINAL NET UNITS')
+
+	UPDATE tblSCTicket
+	SET dblDWGOriginalNetUnits = dblNetUnits
+	WHERE dblDWGOriginalNetUnits IS NULL
+		AND strInOutFlag = 'O'
+
+PRINT ('END UPDATE OF DWG ORIGINAL NET UNITS')
+GO

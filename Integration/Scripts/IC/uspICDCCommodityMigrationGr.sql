@@ -71,8 +71,21 @@ where upper(rtrim(oc.gacom_un_desc)) <> 'LB'
 ----====================================STEP 4======================================
 --For grain only business, Setup a category for each commodity. Category is required for i21
 --for grain & ag business, setup a category for commodites which does not have an associated ag item
-insert into tblICCategory (strCategoryCode, strDescription, strInventoryType, intCostingMethod, strInventoryTracking, intConcurrencyId)
-select rtrim(gacom_com_cd), rtrim(gacom_desc), 'Inventory' strInventoryType, 1 CostingMethod, 'Item Level' InventoryTracking, 1 intConcurrencyId
+insert into tblICCategory (
+	strCategoryCode
+	, strDescription
+	, strInventoryType
+	, intCostingMethod
+	, strInventoryTracking
+	, intConcurrencyId
+)
+select 
+	rtrim(gacom_com_cd)
+	, rtrim(gacom_desc)
+	, NULL -- 'Inventory' strInventoryType
+	, 1 CostingMethod
+	, 'Item Level' InventoryTracking
+	, 1 intConcurrencyId
 from gacommst oc
 left join tblICCategory C on C.strCategoryCode = rtrim(gacom_com_cd)  COLLATE SQL_Latin1_General_CP1_CS_AS
 where C.intCategoryId is null AND  NOT EXISTS (select agitm_no from agitmmst where agitm_ga_com_cd = oc.gacom_com_cd)

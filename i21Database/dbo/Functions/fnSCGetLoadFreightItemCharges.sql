@@ -83,12 +83,12 @@ BEGIN
 		,[strCostMethod]                    = LoadCost.strCostMethod
 		,[dblRate]							= CASE
 												WHEN LoadCost.strCostMethod = 'Amount' THEN 0
-												ELSE RE.dblFreightRate
+												ELSE LoadCost.dblRate
 											END
 		,[intCostUOMId]						= dbo.fnGetMatchingItemUOMId(@intFreightItemId, LoadCost.intItemUOMId)
 		,[intOtherChargeEntityVendorId]		= LoadCost.intVendorId
 		,[dblAmount]						= CASE
-												WHEN LoadCost.strCostMethod = 'Amount' THEN ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 20)
+												WHEN LoadCost.strCostMethod = 'Amount' THEN ISNULL(LoadCost.dblAmount,0.0) --ROUND ((RE.dblQty / SC.dblNetUnits * LoadCost.dblRate), 20)
 												ELSE 0
 											END						
 		,[intContractHeaderId]				= (SELECT TOP 1 intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = RE.intContractDetailId)
@@ -96,7 +96,7 @@ BEGIN
 		,[ysnAccrue]						= @ysnAccrue
 		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
-		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+		,[ysnAllowVoucher]				= CASE WHEN RE.intEntityVendorId <> LoadCost.intVendorId AND ISNULL(@ysnAccrue,0) = 1 THEN 1 ELSE RE.ysnAllowVoucher END
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
 		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 		,intTaxGroupId = RE.intTaxGroupId
@@ -116,6 +116,7 @@ BEGIN
 			ON IC.intItemId = SCS.intFreightItemId
 		WHERE LoadCost.intItemId = @intFreightItemId 
 			AND LoadCost.dblRate != 0
+			AND LoadCost.ysnAccrue = 1
 
 	END
 	ELSE
@@ -182,7 +183,7 @@ BEGIN
 		,[ysnAccrue]						= @ysnAccrue
 		,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 		,[strChargesLink]					= RE.strChargesLink
-		,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+		,[ysnAllowVoucher]				= CASE WHEN RE.intEntityVendorId <> ContractCost.intVendorId AND ISNULL(@ysnAccrue,0) = 1 THEN 1 ELSE RE.ysnAllowVoucher END
 		,[intLoadShipmentId]			= RE.intLoadShipmentId 
 		,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 		,intTaxGroupId = RE.intTaxGroupId
@@ -200,6 +201,7 @@ BEGIN
 			ON IC.intItemId = SCS.intFreightItemId
 		WHERE ContractCost.intItemId = @intFreightItemId 
 			AND ContractCost.dblRate != 0
+			AND ISNULL(ContractCost.ysnBasis,0) = 0
 	END
 	RETURN
 END

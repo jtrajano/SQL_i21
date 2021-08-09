@@ -10,13 +10,16 @@
 --------------------------------------------------------------------------------------
 */
 
-
+-- Resolves the Kill State error during Upgrade for SQL Server 2019 or later
+:r .\4_SM\2010_Kill_State_Error_Fix.sql
 
 --EM
 :r .\12_EM\17_DropDependencies_RenameTable.sql
 
 --DONT PUT ABOVE THIS 
 :r .\4_SM\1910_StopAuditMigrationJob.sql
+
+:r .\14_CT\CreatePricingInvoiceLink.sql
 
 -- Validate Origin records
 -- --coctlmst
@@ -37,6 +40,7 @@
 
 -- CM
 :r .\2_CM\1_CM.sql
+:r .\2_CM\2_DataFix.sql
 
 -- DB
 :r .\3_DB\1_1340_to_1410.sql
@@ -62,6 +66,7 @@
 :r .\4_SM\1810_Fix_GL_Account.sql
 :r .\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql
 :r .\4_SM\12_MigrateRecentlyViewed.sql
+:r .\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
@@ -70,6 +75,7 @@
 :r .\6_GL\4_1440_to_1530.sql
 :r .\6_GL\5_1710.sql
 :r .\6_GL\6_1910.sql
+:r .\6_GL\7_2110.sql
 
 -- AR
 :r .\7_AR\00_DropTriggers.sql
@@ -84,6 +90,7 @@
 :r .\7_AR\10_FixInvoiceSOLineOfBusiness.sql
 :r .\7_AR\11_FixSalesOrderNullysnQuote.sql
 :r .\7_AR\12_MoveQuotePagesToLetters.sql
+:r .\7_AR\13_FixCustomerBillToShipTo.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql
@@ -177,6 +184,7 @@
 :r .\14_CT\1910_ContractCostPaidByToParty.sql
 :r .\14_CT\1910_BasisComponent.sql
 :r .\14_CT\1920_ItemContracts.sql
+:r .\14_CT\DropIndexes.sql
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql

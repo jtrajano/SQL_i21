@@ -4,37 +4,44 @@ GO
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glhstmst]') AND type IN (N'U'))
 
 EXEC('ALTER PROCEDURE [dbo].[uspGLImportOriginHistoricalJournal]
-@intEntityId		INT
+@intEntityId		INT,
+@result NVARCHAR(MAX) OUT
 AS
 SET ANSI_WARNINGS OFF
 SET NOCOUNT ON
-DECLARE @result NVARCHAR(MAX)
-DECLARE @invalidDatesUpdated VARCHAR(1)
 
+DECLARE @invalidDatesUpdated VARCHAR(1)
+SET @result = ''FALSE''
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCompanyPreferenceOption A join tblGLAccount B on A.OriginConversion_OffsetAccountId = B.intAccountId)
 BEGIN
-	SELECT ''Origin Offset Account is required in GL Company Configuration.''
-	RETURN -1
+	RAISERROR (''Origin Offset Account is required in GL Company Configuration.'', 16,1)
+	GOTO ExitImport
 END
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM glhstmst)
 BEGIN
-	SELECT ''Origin table is empty.''
-	RETURN -1
+	
+	RAISERROR( ''Origin table is empty.'', 16, 1);
+	GOTO ExitImport
 END
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntity WHERE intEntityId = @intEntityId)
 BEGIN
-	SELECT CONVERT(NVARCHAR(4),@intEntityId) + '' Entity Id is not valid. Please re-login your credential.''
-	RETURN -1
+	--SELECT CONVERT(NVARCHAR(4),@intEntityId) + '' Entity Id is not valid. Please re-login your credential.''
+	RAISERROR(''%d Entity Id is not valid. Please re-login your credential.'', 16, 1, @intEntityId);
+	GOTO ExitImport
 END
 
+DECLARE @result1  NVARCHAR(MAX) 
 --BEGIN TRANSACTION
-EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
+EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result= @result1 OUTPUT
 
-	--IF @@ERROR <> 0	OR CHARINDEX(''SUCCESS'', @result,1)= 0
-	--		GOTO ROLLBACK_INSERT
+IF CHARINDEX(''SUCCESS'',  @result1 ) = 0
+	GOTO ExitImport
+ELSE
+	SET  @result1 = REPLACE(@result1,''SUCCESS '','''')
 
-SELECT @result = REPLACE(@result , ''SUCCESS '','''')
+
+
 
 	--+++++++++++++++++++++++++++++++++
 	--		CLEAN-UP TEMP TABLES
@@ -74,7 +81,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	FROM glhstmst
 	GROUP BY glhst_period, glhst_src_id, glhst_src_seq
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT IMPORT LOGS
@@ -89,7 +96,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	INSERT INTO tblGLCOAImportLogDetail (intImportLogId,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalId,intConcurrencyId)
 		SELECT @intImportLogId,strDescription,dtmDate,strSourceId,strSourceType,strJournalId,1 FROM #iRelyImptblGLJournal
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--+++++++++++++++++++++++++++++++++
 	--	   UPDATE POSTING DATE
@@ -125,7 +132,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 			strSourceType
 	FROM #iRelyImptblGLJournal
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--+++++++++++++++++++++++++++++++++
 	--		 TEMP DETAIL JOURNAL
@@ -140,8 +147,8 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 		0 AS DebitRate,
 		CASE WHEN (glhst_dr_cr_ind = ''C'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''D'' AND glhst_amt < 0) THEN ABS(glhst_amt) ELSE 0 END Credit,
 		0 AS CreditRate,
-		CASE WHEN (glhst_dr_cr_ind = ''D'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''C'' AND glhst_amt < 0) THEN ABS(glhst_units) ELSE 0 END DebitUnits,
-		CASE WHEN (glhst_dr_cr_ind = ''C'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''D'' AND glhst_amt < 0) THEN ABS(glhst_units) ELSE 0 END CreditUnits,
+		CASE WHEN (OriginAcct.glact_normal_value = ''D'' ) AND glhst_units >0 OR (OriginAcct.glact_normal_value = ''C'' ) AND glhst_units <0 THEN ABS(glhst_units) ELSE 0 END DebitUnits,    
+  		CASE WHEN (OriginAcct.glact_normal_value = ''C'' ) AND glhst_units >0 OR (OriginAcct.glact_normal_value = ''D'' ) AND glhst_units <0 THEN ABS(glhst_units) ELSE 0 END CreditUnits,
 		glhst_ref AS strDescription,
 		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
@@ -164,8 +171,11 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	 INNER JOIN tblGLCOACrossReference ON
 		SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
+	 OUTER APPLY(
+		SELECT TOP 1 glact_normal_value FROM glactmst where glact_acct1_8 = glhst_acct1_8 and glact_acct9_16 = glhst_acct9_16
+	 )OriginAcct
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--+++++++++++++++++++++++++++++++++
 	--		 UPDATE COLLATE JOURNAL
@@ -183,7 +193,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 		ALTER COLUMN glhst_src_seq
 			CHAR(5) COLLATE Latin1_General_CI_AS NOT NULL
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	--		 UPDATE DETAIL [intJournalId] BASED ON HEADER
@@ -196,7 +206,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 		tblGLJournal.strJournalId = #iRelyImptblGLJournalDetail.glhst_jrnl_no
 		AND tblGLJournal.strSourceId = glhst_src_seq
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--++++++++++++++++++++++++++++
 	--		UPDATE GOODDATE
@@ -219,7 +229,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 0
 	SELECT @invalidDatesUpdated =  CASE WHEN @@ROWCOUNT > 0  THEN ''1'' ELSE ''0'' END
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--+++++++++++++++++++++++++++++++++
 	--	   INSERT JOURNAL [DETAIL]
@@ -231,7 +241,7 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,A4GLIdentity
 						FROM  #iRelyImptblGLJournalDetail
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
 	--+++++++++++++++++++++++++++++++++++++
 	--	UPDATE POST DATE JOURNAL [HEADER]
@@ -241,10 +251,12 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
                                         WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
 										WHERE intJournalId IN (SELECT DISTINCT(intJournalId) FROM #iRelyImptblGLJournalDetail)
 
-	--IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+	
 
-    IF LEN(@result) > 0
-		SET @result = @result + '','' + CAST(@intImportLogId AS NVARCHAR(40))  --''SUCCESS SELECT A.intJournalId FROM tblGLJournal A INNER JOIN tblGLCOAImportLogDetail B on A.strJournalId = B.strJournalId WHERE B.intImportLogId IN('' +  @result --(Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + '','' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('''')) as intJournalId)
+    IF LEN(@result1) > 0
+	BEGIN
+		SET @result = @result1 + '','' + CAST(@intImportLogId AS NVARCHAR(40))  --''SUCCESS SELECT A.intJournalId FROM tblGLJournal A INNER JOIN tblGLCOAImportLogDetail B on A.strJournalId = B.strJournalId WHERE B.intImportLogId IN('' +  @result --(Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + '','' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('''')) as intJournalId)
+	END
 	ELSE
 		SET @result = CAST(@intImportLogId AS NVARCHAR(40));
 
@@ -255,9 +267,12 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 	EXEC dbo.uspGLInsertOffsetAccountForOriginTrans;
 	UPDATE tblGLCompanyPreferenceOption  set ysnHistoricalJournalImported = 1
 -- for testing only	THROW 51000, ''The record does not exist.'', 1;  
-	SELECT ''SUCCESS:''+  @result +'':'' + @invalidDatesUpdated
+	SET @result = ''SUCCESS:''+  @result +'':'' + @invalidDatesUpdated
 	
 
+	ExitImport:
+
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail')
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail
+')
 GO

@@ -18,9 +18,17 @@
 	[ysnOnceApproved]				[bit]											NULL,
 	[ysnVisible]					[bit]											NOT NULL DEFAULT (1),
 	[intOrder]						[int]											NULL,
+	[strRecentAmendmentLog]			[nvarchar] (max) COLLATE Latin1_General_CI_AS	NULL,
 	[intConcurrencyId]				[int]											NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMApproval_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_Approver] FOREIGN KEY ([intApproverId]) REFERENCES [tblEMEntity]([intEntityId]), 
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_SubmitterBy] FOREIGN KEY ([intSubmittedById]) REFERENCES [tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblSMApproval_tblEMEntity_AlternateApprover] FOREIGN KEY ([intAlternateApproverId]) REFERENCES [tblEMEntity]([intEntityId])
 )
+
+GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblSMApproval_intTransactionId] ON dbo.tblSMApproval ([intTransactionId],[ysnCurrent]) INCLUDE([intApproverId],[dtmDate])
+GO
+	CREATE NONCLUSTERED INDEX [IX_tblSMApproval_strStatus] ON [dbo].[tblSMApproval] ([strStatus] ASC) INCLUDE ([intTransactionId],[intSubmittedById])
+GO

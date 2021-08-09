@@ -16,9 +16,11 @@ DECLARE @intEntityCustomerId	INT	= NULL
 	  , @ysnPosted				BIT	= 0
 	  , @strErrorMessage		NVARCHAR(MAX)
 	  , @ZeroDecimal			NUMERIC(18, 6)	= 0
+	  , @dtmPostDate			DATETIME = NULL
 
 SELECT @intEntityCustomerId	= intEntityCustomerId
 	 , @ysnPosted			= ysnPosted
+	 , @dtmPostDate			= dtmPostDate
 FROM tblARInvoice
 WHERE intInvoiceId = @InvoiceId
 
@@ -99,6 +101,7 @@ BEGIN TRY
 	  AND intEntityCustomerId = @intEntityCustomerId
 	  AND dblAmountDue > 0
 	  AND intInvoiceId <> @InvoiceId
+	  AND dtmPostDate <= @dtmPostDate
 
 	--GET OPEN PREPAIDS
 	SELECT intInvoiceId			= OP.intInvoiceId
@@ -115,6 +118,7 @@ BEGIN TRY
 	  AND OP.intEntityCustomerId = @intEntityCustomerId
 	  AND OP.dblAmountDue > 0
 	  AND OP.intInvoiceId <> @InvoiceId
+	  AND dtmPostDate <= @dtmPostDate
 
 	--GET UN-RESTRICTED PREPAIDS
 	SELECT intInvoiceId			= OP.intInvoiceId
@@ -157,12 +161,15 @@ BEGIN TRY
 		 , intItemId				= OPD.intItemId
 		 , ysnRestricted			= ISNULL(OPD.ysnRestricted, 0)
 		 , strContractApplyTo		= OP.strContractApplyTo
+		 , strContractCategoryId	= ICH.strContractCategoryId
 	INTO #ITEMCONTRACTS
 	FROM #OPENPREPAIDS OP
 	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
-	WHERE OPD.intContractDetailId IS NULL
+	LEFT JOIN tblCTItemContractHeader ICH ON OPD.intItemContractHeaderId = ICH.intItemContractHeaderId
+	WHERE (OPD.intContractDetailId IS NULL
 	  AND OPD.intItemCategoryId IS NULL
-	  AND OPD.intItemContractDetailId IS NOT NULL
+	  AND OPD.intItemContractDetailId IS NOT NULL)
+	  OR strContractCategoryId = 'Dollar'
 
 	--GET ITEM CATEGORY
 	SELECT intInvoiceId				= OP.intInvoiceId
@@ -286,6 +293,7 @@ BEGIN TRY
 		INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId 
 		INNER JOIN #ITEMCATEGORY RCAT ON ((RCAT.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 1 AND ID.intItemContractHeaderId IS NOT NULL AND ITEM.intCategoryId = RCAT.intCategoryId)
 									   OR (RCAT.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 0 AND ID.intItemContractHeaderId IS NOT NULL)
+									   OR (RCAT.strContractApplyTo = 'Contract' AND RCAT.ysnRestricted = 1 AND ITEM.intCategoryId = RCAT.intCategoryId)
 									   OR (RCAT.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 1 AND ITEM.intCategoryId = RCAT.intCategoryId)
 									   OR (RCAT.strContractApplyTo = 'Any' AND RCAT.ysnRestricted = 0 AND RCAT.intCategoryId IS NOT NULL))
 		WHERE ID.intInvoiceId = @InvoiceId
@@ -297,10 +305,10 @@ BEGIN TRY
 		FROM #OPENCREDITMEMO OM
 	) I
 	
-	DELETE PC
-	FROM tblARPrepaidAndCredit PC
-	INNER JOIN #APPLIEDCONTRACTS AC ON PC.intPrepaymentDetailId = AC.intInvoiceDetailId AND PC.intPrepaymentId = AC.intInvoiceId
-	WHERE PC.intInvoiceId = @InvoiceId
+	-- DELETE PC
+	-- FROM tblARPrepaidAndCredit PC
+	-- INNER JOIN #APPLIEDCONTRACTS AC ON PC.intPrepaymentDetailId = AC.intInvoiceDetailId AND PC.intPrepaymentId = AC.intInvoiceId
+	-- WHERE PC.intInvoiceId = @InvoiceId
 		
 	UPDATE A 
 	SET ysnApplied = 1

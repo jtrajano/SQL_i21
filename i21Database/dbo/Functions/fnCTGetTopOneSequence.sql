@@ -29,7 +29,7 @@ RETURNS @returntable	TABLE
 	strFutureMonth			NVARCHAR(100) COLLATE Latin1_General_CI_AS,				
 	strStorageLocation		NVARCHAR(100) COLLATE Latin1_General_CI_AS,				
 	strSubLocation			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strItemDescription		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strItemDescription		NVARCHAR(250) COLLATE Latin1_General_CI_AS,
 	intContractDetailId		INT,
 	strProductType			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	ysnSubCurrency			BIT,

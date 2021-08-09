@@ -43,6 +43,7 @@ SELECT CP.intCompanyPreferenceId
 		WHEN 3 THEN 'LG Loads - Inbound'
 		WHEN 4 THEN 'TM Sites'
 		WHEN 5 THEN 'Entities'
+		WHEN 6 THEN 'Sales/Transfer Orders'
 		END COLLATE Latin1_General_CI_AS
 	,CP.strALKMapKey
 	,CP.intTransUsedBy
@@ -176,6 +177,12 @@ SELECT CP.intCompanyPreferenceId
 	,strReserveBCategory = RB.strCategoryCode
 	,CP.intPurchaseContractBasisItemId
 	,strPurchaseContractBasisItem = PCBI.strItemNo
+	,CP.intDefaultPickType
+	,strDefaultPickType = CASE WHEN CP.intDefaultPickType = 2 THEN 'Containers' ELSE 'Lots' END COLLATE Latin1_General_CI_AS
+	,CP.ysnIncludeOpenContractsOnInventoryView
+	,CP.ysnIncludeArrivedInPortStatus
+	,CP.ysnIncludeStrippingInstructionStatus
+	,CP.ysnWeightClaimsByContainer
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId

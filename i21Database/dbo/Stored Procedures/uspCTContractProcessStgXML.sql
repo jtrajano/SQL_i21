@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractProcessStgXML]
 	--@intToCompanyId INT
+	@ysnProcessERPInfo BIT = 0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -173,6 +174,15 @@ BEGIN TRY
 		,@intSubBookId INT
 		,@strApprover NVARCHAR(100)
 		,@intCurrentUserEntityId INT
+		,@strINCOLocation NVARCHAR(50)
+		,@intINCOLocationTypeId INT
+		,@strApprovalStatus NVARCHAR(150)
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId INT
+		,@strExternalContractNumber NVARCHAR(MAX)
+		,@strUserName NVARCHAR(50)
+		,@intAuditLogUserId INT
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -185,6 +195,13 @@ BEGIN TRY
 	SELECT intContractStageId
 	FROM tblCTContractStage
 	WHERE strFeedStatus IS NULL
+	
+	UNION
+	
+	SELECT intContractStageId
+	FROM tblCTContractStage
+	WHERE intStatusId = 2
+		AND intDeadlockError > 0
 
 	SELECT @intContractStageId = MIN(intContractStageId)
 	FROM @tblCTContractStage
@@ -206,29 +223,25 @@ BEGIN TRY
 		,ysnApproval BIT
 		)
 
-	IF @intContractStageId IS NOT NULL
-	BEGIN
-		SELECT TOP 1 @strAmendmentApprovalXML = strAmendmentApprovalXML
-		FROM tblCTContractStage
-		WHERE intContractStageId = @intContractStageId
-
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAmendmentApprovalXML
-
-		INSERT INTO @tblCTAmendmentApproval (
-			strDataIndex
-			,ysnApproval
-			)
-		SELECT strDataIndex
-			,ysnApproval
-		FROM OPENXML(@idoc, 'vyuIPAmendmentApprovals/vyuIPAmendmentApproval', 2) WITH (
-				strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
-				,ysnApproval BIT
-				) x
-
-		EXEC sp_xml_removedocument @idoc
-	END
-
+	--IF @intContractStageId IS NOT NULL
+	--BEGIN
+	--	SELECT TOP 1 @strAmendmentApprovalXML = strAmendmentApprovalXML
+	--	FROM tblCTContractStage
+	--	WHERE intContractStageId = @intContractStageId
+	--	EXEC sp_xml_preparedocument @idoc OUTPUT
+	--		,@strAmendmentApprovalXML
+	--	INSERT INTO @tblCTAmendmentApproval (
+	--		strDataIndex
+	--		,ysnApproval
+	--		)
+	--	SELECT strDataIndex
+	--		,ysnApproval
+	--	FROM OPENXML(@idoc, 'vyuIPAmendmentApprovals/vyuIPAmendmentApproval', 2) WITH (
+	--			strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
+	--			,ysnApproval BIT
+	--			) x
+	--	EXEC sp_xml_removedocument @idoc
+	--END
 	WHILE @intContractStageId > 0
 	BEGIN
 		SET @intContractHeaderId = NULL
@@ -253,6 +266,8 @@ BEGIN TRY
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
 			,@strSubmittedByXML = NULL
+			,@strLogXML = NULL
+			,@strAuditXML = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strContractNumber = strContractNumber
@@ -278,6 +293,8 @@ BEGIN TRY
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
 			,@strSubmittedByXML = strSubmittedByXML
+			,@strLogXML = strLogXML
+			,@strAuditXML = strAuditXML
 		FROM tblCTContractStage
 		WHERE intContractStageId = @intContractStageId
 
@@ -465,6 +482,7 @@ BEGIN TRY
 		END
 
 		IF @strTransactionType = 'Purchase Contract'
+			OR @ysnProcessERPInfo = 1
 		BEGIN
 			BEGIN TRY
 				SELECT @intContractHeaderRefId = @intContractHeaderId
@@ -481,6 +499,27 @@ BEGIN TRY
 					WHERE intContractHeaderRefId = @intContractHeaderId
 
 					GOTO x
+				END
+
+				IF @ysnProcessERPInfo = 1
+				BEGIN
+					EXEC sp_xml_preparedocument @idoc OUTPUT
+						,@strDetailXML
+
+					UPDATE CD
+					SET CD.strERPPONumber = x.strERPPONumber
+						,CD.strERPItemNumber = x.strERPItemNumber
+						,CD.intConcurrencyId = CD.intConcurrencyId + 1
+					FROM OPENXML(@idoc, 'vyuIPContractDetailERPInfoViews/vyuIPContractDetailERPInfoView', 2) WITH (
+							strERPPONumber NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strERPItemNumber NVARCHAR(100) Collate Latin1_General_CI_AS
+							,intContractDetailRefId INT
+							) x
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = x.intContractDetailRefId
+
+					EXEC sp_xml_removedocument @idoc
+
+					GOTO ext
 				END
 
 				------------------Header------------------------------------------------------
@@ -575,6 +614,9 @@ BEGIN TRY
 					,@strCountry = NULL
 					,@ysnApproval = NULL
 					,@strSubBook = NULL
+					,@strINCOLocation = NULL
+					,@strApprovalStatus = NULL
+					,@strExternalContractNumber = NULL
 
 				SELECT @strSalespersonId = strSalesperson
 					,@strCommodityCode = strCommodityCode
@@ -595,6 +637,9 @@ BEGIN TRY
 					,@strCountry = strCountry
 					,@ysnApproval = ysnApproval
 					,@strSubBook = strSubBook
+					,@strINCOLocation = strINCOLocation
+					,@strApprovalStatus = strApprovalStatus
+					,@strExternalContractNumber = strExternalContractNumber
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -615,9 +660,24 @@ BEGIN TRY
 						,strCountry NVARCHAR(100) Collate Latin1_General_CI_AS
 						,ysnApproval BIT
 						,strSubBook NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strINCOLocation NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strApprovalStatus NVARCHAR(150) Collate Latin1_General_CI_AS
+						,strExternalContractNumber NVARCHAR(MAX) Collate Latin1_General_CI_AS
 						) x
 
 				SELECT @strErrorMessage = ''
+
+				IF Len(@strExternalContractNumber) > 50
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'External Contract Number cannot be more than 50 chars.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'External Contract Number cannot be more than 50 chars.'
+					END
+				END
 
 				IF @strCommodityCode IS NOT NULL
 					AND NOT EXISTS (
@@ -841,6 +901,23 @@ BEGIN TRY
 					END
 				END
 
+				IF @strINCOLocation IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblSMCity AB
+						WHERE AB.strCity = @strINCOLocation
+						)
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'City ' + @strINCOLocation + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'City ' + @strINCOLocation + ' is not available.'
+					END
+				END
+
 				SELECT @intCountryId = NULL
 
 				SELECT @intCountryId = intCountryID
@@ -920,6 +997,8 @@ BEGIN TRY
 
 				SELECT @intCommodityUnitMeasureId = NULL
 
+				SELECT @intINCOLocationTypeId = NULL
+
 				SELECT @intCommodityId = intCommodityId
 				FROM tblICCommodity C
 				WHERE C.strCommodityCode = @strCommodityCode
@@ -963,8 +1042,8 @@ BEGIN TRY
 				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strCreatedBy
-					AND CE.strEntityNo <> ''
 
+				--AND CE.strEntityNo <> ''
 				IF @intUserId IS NULL
 				BEGIN
 					IF EXISTS (
@@ -1003,6 +1082,10 @@ BEGIN TRY
 				SELECT @intCityId = intCityId
 				FROM tblSMCity AB
 				WHERE AB.strCity = @strArbitration
+
+				SELECT @intINCOLocationTypeId = intCityId
+				FROM tblSMCity AB
+				WHERE AB.strCity = @strINCOLocation
 
 				IF NOT EXISTS (
 						SELECT *
@@ -1116,6 +1199,8 @@ BEGIN TRY
 					,ysnReadOnlyInterCoContract
 					,intSubBookId
 					,intCompanyId
+					,intINCOLocationTypeId
+					,intLastModifiedById
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1179,11 +1264,13 @@ BEGIN TRY
 					,1 AS ysnReadOnlyInterCoContract
 					,@intSubBookId
 					,@intCompanyRefId
+					,@intINCOLocationTypeId
+					,@intUserId
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
-						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
-						,dtmContractDate DATETIME
+						--strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
+						dtmContractDate DATETIME
 						,dblHeaderQuantity NUMERIC(18, 6)
-						,strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
+						--,strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
 						,ysnSigned BIT
 						,dtmSigned DATETIME
 						,ysnPrinted BIT
@@ -1271,7 +1358,7 @@ BEGIN TRY
 						,CH.dblQuantity = CH1.dblQuantity
 						,CH.intSalespersonId = CH1.intSalespersonId
 						,CH.ysnSigned = CH1.ysnSigned
-						,CH.ysnPrinted = CH1.ysnPrinted
+						,CH.ysnPrinted = 1
 						,CH.intCropYearId = CH1.intCropYearId
 						,CH.intPositionId = CASE 
 							WHEN @ysnApproval = 0
@@ -1295,7 +1382,10 @@ BEGIN TRY
 								AND EXISTS (
 									SELECT *
 									FROM @tblCTAmendmentApproval
-									WHERE strDataIndex = 'intContractBasisId'
+									WHERE strDataIndex IN (
+											'intContractBasisId'
+											,'intFreightTermId'
+											)
 										AND ysnApproval = 1
 									)
 								THEN CH.intFreightTermId
@@ -1311,6 +1401,17 @@ BEGIN TRY
 									)
 								THEN CH.intTermId
 							ELSE CH1.intTermId
+							END
+						,CH.intINCOLocationTypeId = CASE 
+							WHEN @ysnApproval = 0
+								AND EXISTS (
+									SELECT *
+									FROM @tblCTAmendmentApproval
+									WHERE strDataIndex = 'intINCOLocationTypeId'
+										AND ysnApproval = 1
+									)
+								THEN CH.intINCOLocationTypeId
+							ELSE CH1.intINCOLocationTypeId
 							END
 						,CH.intContractTextId = CH1.intContractTextId
 						,CH.intGradeId = CASE 
@@ -1368,6 +1469,9 @@ BEGIN TRY
 						,CH.ysnReadOnlyInterCoContract = 1
 						,CH.intSubBookId = @intSubBookId
 						,CH.intCompanyId = @intCompanyRefId
+						,CH.strExternalEntity = CH1.strExternalEntity
+						,CH.strExternalContractNumber = CH1.strExternalContractNumber
+						,CH.intLastModifiedById = CH1.intLastModifiedById
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
@@ -1630,11 +1734,18 @@ BEGIN TRY
 						END
 					END
 
+					SELECT @intFutureMarketId = NULL
+
+					SELECT @intFutureMarketId = intFutureMarketId
+					FROM tblRKFutureMarket FM
+					WHERE FM.strFutMarketName = @strFutMarketName
+
 					IF @strFutureMonth IS NOT NULL
 						AND NOT EXISTS (
 							SELECT 1
 							FROM tblRKFuturesMonth MO
 							WHERE MO.strFutureMonth = @strFutureMonth
+								AND intFutureMarketId = @intFutureMarketId
 							)
 					BEGIN
 						IF @strErrorMessage <> ''
@@ -1811,77 +1922,69 @@ BEGIN TRY
 						END
 					END
 
-					IF @strShippingLine IS NOT NULL
-						AND NOT EXISTS (
-							SELECT 1
-							FROM tblEMEntity ShippingLine
-							JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
-								AND ET.strType = 'Shipping Line'
-							WHERE ShippingLine.strName = @strShippingLine
-							)
-					BEGIN
-						IF @strErrorMessage <> ''
-						BEGIN
-							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipping Line ' + @strShippingLine + ' is not available.'
-						END
-						ELSE
-						BEGIN
-							SELECT @strErrorMessage = 'Shipping Line ' + @strShippingLine + ' is not available.'
-						END
-					END
-
-					IF @strShipper IS NOT NULL
-						AND NOT EXISTS (
-							SELECT 1
-							FROM tblEMEntity ShippingLine
-							JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
-								AND ET.strType IN (
-									'Vendor'
-									,'Futures Broker'
-									)
-							WHERE ShippingLine.strName = @strShipper
-							)
-					BEGIN
-						IF @strErrorMessage <> ''
-						BEGIN
-							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipper ' + @strShipper + ' is not available.'
-						END
-						ELSE
-						BEGIN
-							SELECT @strErrorMessage = 'Shipper ' + @strShipper + ' is not available.'
-						END
-					END
-
-					SELECT @intShipToEntityId = NULL
-
-					SELECT @intShipToId = NULL
-
-					SELECT @intPurchasingGroupId = NULL
-
-					SELECT @intShipToEntityId = Customer.intEntityId
-					FROM tblEMEntity Customer
-					JOIN tblEMEntityType ET ON ET.intEntityId = Customer.intEntityId
-						AND ET.strType = 'Customer'
-					WHERE Customer.strName = @strShipToName
-
-					SELECT @intShipToId = intEntityLocationId
-					FROM tblEMEntityLocation
-					WHERE strLocationName = @strShipToLocationName
-						AND intEntityId = @intShipToEntityId
-
-					IF @strShipToLocationName IS NOT NULL
-						AND @intShipToId IS NULL
-					BEGIN
-						IF @strErrorMessage <> ''
-						BEGIN
-							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ship To ' + @strShipToLocationName + ' is not available.'
-						END
-						ELSE
-						BEGIN
-							SELECT @strErrorMessage = 'Ship To ' + @strShipToLocationName + ' is not available.'
-						END
-					END
-
+					--IF @strShippingLine IS NOT NULL
+					--	AND NOT EXISTS (
+					--		SELECT 1
+					--		FROM tblEMEntity ShippingLine
+					--		JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
+					--			AND ET.strType = 'Shipping Line'
+					--		WHERE ShippingLine.strName = @strShippingLine
+					--		)
+					--BEGIN
+					--	IF @strErrorMessage <> ''
+					--	BEGIN
+					--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipping Line ' + @strShippingLine + ' is not available.'
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SELECT @strErrorMessage = 'Shipping Line ' + @strShippingLine + ' is not available.'
+					--	END
+					--END
+					--IF @strShipper IS NOT NULL
+					--	AND NOT EXISTS (
+					--		SELECT 1
+					--		FROM tblEMEntity ShippingLine
+					--		JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
+					--			AND ET.strType IN (
+					--				'Vendor'
+					--				,'Futures Broker'
+					--				)
+					--		WHERE ShippingLine.strName = @strShipper
+					--		)
+					--BEGIN
+					--	IF @strErrorMessage <> ''
+					--	BEGIN
+					--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipper ' + @strShipper + ' is not available.'
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SELECT @strErrorMessage = 'Shipper ' + @strShipper + ' is not available.'
+					--	END
+					--END
+					--SELECT @intShipToEntityId = NULL
+					--SELECT @intShipToId = NULL
+					--SELECT @intPurchasingGroupId = NULL
+					--SELECT @intShipToEntityId = Customer.intEntityId
+					--FROM tblEMEntity Customer
+					--JOIN tblEMEntityType ET ON ET.intEntityId = Customer.intEntityId
+					--	AND ET.strType = 'Customer'
+					--WHERE Customer.strName = @strShipToName
+					--SELECT @intShipToId = intEntityLocationId
+					--FROM tblEMEntityLocation
+					--WHERE strLocationName = @strShipToLocationName
+					--	AND intEntityId = @intShipToEntityId
+					--IF @strShipToLocationName IS NOT NULL
+					--	AND @intShipToId IS NULL
+					--BEGIN
+					--	IF @strErrorMessage <> ''
+					--	BEGIN
+					--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Ship To ' + @strShipToLocationName + ' is not available.'
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SELECT @strErrorMessage = 'Ship To ' + @strShipToLocationName + ' is not available.'
+					--	END
+					--END
 					SELECT @intPurchasingGroupId = intPurchasingGroupId
 					FROM tblSMPurchasingGroup
 					WHERE strName = @strPurchasingGroupName
@@ -2031,8 +2134,6 @@ BEGIN TRY
 
 					SELECT @intPriceItemUOMId = NULL
 
-					SELECT @intFutureMarketId = NULL
-
 					SELECT @intFutureMonthId = NULL
 
 					SELECT @intPricingTypeId = NULL
@@ -2141,13 +2242,10 @@ BEGIN TRY
 					WHERE PU.intItemId = @intItemId
 						AND PU.intUnitMeasureId = @intPriceUnitMeasureId
 
-					SELECT @intFutureMarketId = intFutureMarketId
-					FROM tblRKFutureMarket FM
-					WHERE FM.strFutMarketName = @strFutMarketName
-
 					SELECT @intFutureMonthId = intFutureMonthId
 					FROM tblRKFuturesMonth MO
 					WHERE MO.strFutureMonth = @strFutureMonth
+						AND intFutureMarketId = @intFutureMarketId
 
 					SELECT @intPricingTypeId = intPricingTypeId
 					FROM tblCTPricingType PT
@@ -2525,8 +2623,8 @@ BEGIN TRY
 						,dblConvertedBasis
 						,@intSubBookId
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
-							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
-							,dtmContractDate DATETIME
+							--strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
+							dtmContractDate DATETIME
 							,dblHeaderQuantity NUMERIC(18, 6)
 							,strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
 							,ysnSigned BIT
@@ -2993,7 +3091,13 @@ BEGIN TRY
 											AND ysnApproval = 1
 										)
 									THEN CD.intContractStatusId
-								ELSE CD1.intContractStatusId
+								ELSE (
+										CASE 
+											WHEN CD1.intContractStatusId = 3--Cancelled
+												THEN CD1.intContractStatusId
+											ELSE CD.intContractStatusId
+											END
+										)
 								END
 							,intCompanyLocationId = CD1.intCompanyLocationId
 							,intShipToId = CD1.intShipToId
@@ -3283,141 +3387,147 @@ BEGIN TRY
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
 							AND CD.intContractSeq = @intContractSeq
 
-						IF @ysnApproval = 0
-						BEGIN
-							DELETE
-							FROM tblCTContractFeed
-							WHERE intContractHeaderId = @intNewContractHeaderId
-								AND intContractSeq = @intContractSeq
-								AND IsNULL(strFeedStatus, '') IN (
-									''
-									,'IGNORE'
-									)
-
-							INSERT INTO tblCTContractFeed (
-								intContractHeaderId
-								,intContractDetailId
-								,strCommodityCode
-								,strCommodityDesc
-								,strContractBasis
-								,strContractBasisDesc
-								,strSubLocation
-								,strCreatedBy
-								,strCreatedByNo
-								,strEntityNo
-								,strTerm
-								,strPurchasingGroup
-								,strContractNumber
-								,strERPPONumber
-								,intContractSeq
-								,strItemNo
-								,strStorageLocation
-								,dblQuantity
-								,dblCashPrice
-								,strQuantityUOM
-								,dtmPlannedAvailabilityDate
-								,dblBasis
-								,strCurrency
-								,dblUnitCashPrice
-								,strPriceUOM
-								,strRowState
-								,dtmContractDate
-								,dtmStartDate
-								,dtmEndDate
-								,dtmFeedCreated
-								,strSubmittedBy
-								,strSubmittedByNo
-								,strOrigin
-								,dblNetWeight
-								,strNetWeightUOM
-								,strVendorAccountNum
-								,strTermCode
-								,strContractItemNo
-								,strContractItemName
-								,strERPItemNumber
-								,strERPBatchNumber
-								,strLoadingPoint
-								,strPackingDescription
-								,ysnMaxPrice
-								,ysnSubstituteItem
-								,strLocationName
-								,strSalesperson
-								,strSalespersonExternalERPId
-								,strProducer
-								,intItemId
-								)
-							SELECT intContractHeaderId
-								,intContractDetailId
-								,strCommodityCode
-								,strCommodityDesc
-								,strContractBasis
-								,strContractBasisDesc
-								,strSubLocation
-								,strCreatedBy
-								,strCreatedByNo
-								,strEntityNo
-								,strTerm
-								,strPurchasingGroup
-								,strContractNumber
-								,strERPPONumber
-								,intContractSeq
-								,strItemNo
-								,strStorageLocation
-								,dblQuantity
-								,dblCashPrice
-								,strQuantityUOM
-								,dtmPlannedAvailabilityDate
-								,dblBasis
-								,strCurrency
-								,dblUnitCashPrice
-								,strPriceUOM
-								,CASE 
-									WHEN intContractStatusId = 3
-										THEN 'Delete'
-									ELSE (
-											CASE 
-												WHEN EXISTS (
-														SELECT *
-														FROM tblCTContractFeed
-														WHERE intContractHeaderId = @intNewContractHeaderId
-															AND intContractSeq = @intContractSeq
-														)
-													THEN 'Modified'
-												ELSE 'Added'
-												END
-											)
-									END
-								,dtmContractDate
-								,dtmStartDate
-								,dtmEndDate
-								,GETDATE()
-								,strSubmittedBy
-								,strSubmittedByNo
-								,strOrigin
-								,dblNetWeight
-								,strNetWeightUOM
-								,strVendorAccountNum
-								,strTermCode
-								,strContractItemNo
-								,strContractItemName
-								,strERPItemNumber
-								,strERPBatchNumber
-								,strLoadingPoint
-								,strPackingDescription
-								,ysnMaxPrice
-								,ysnSubstituteItem
-								,strLocationName
-								,strSalesperson
-								,strSalespersonExternalERPId
-								,strProducer
-								,intItemId
-							FROM vyuCTContractFeed
-							WHERE intContractHeaderId = @intNewContractHeaderId
-								AND intContractSeq = @intContractSeq
-						END
-
 						SELECT @intContractDetailId = intContractDetailId
 						FROM tblCTContractDetail
+						WHERE intContractHeaderId = @intNewContractHeaderId
+							AND intContractSeq = @intContractSeq
+					END
+
+					IF @strApprovalStatus = 'Approved with Modifications'
+						AND EXISTS (
+							SELECT *
+							FROM tblCTContractFeed
+							WHERE intContractHeaderId = @intNewContractHeaderId
+							)
+					BEGIN
+						--EXEC [uspCTContractApproved] @intNewContractHeaderId,@intUserId,@intContractDetailId
+						DELETE
+						FROM tblCTContractFeed
+						WHERE intContractHeaderId = @intNewContractHeaderId
+							AND intContractSeq = @intContractSeq
+							AND IsNULL(strFeedStatus, '') IN (
+								''
+								,'IGNORE'
+								)
+
+						INSERT INTO tblCTContractFeed (
+							intContractHeaderId
+							,intContractDetailId
+							,strCommodityCode
+							,strCommodityDesc
+							,strContractBasis
+							,strContractBasisDesc
+							,strSubLocation
+							,strCreatedBy
+							,strCreatedByNo
+							,strEntityNo
+							,strTerm
+							,strPurchasingGroup
+							,strContractNumber
+							,strERPPONumber
+							,intContractSeq
+							,strItemNo
+							,strStorageLocation
+							,dblQuantity
+							,dblCashPrice
+							,strQuantityUOM
+							,dtmPlannedAvailabilityDate
+							,dblBasis
+							,strCurrency
+							,dblUnitCashPrice
+							,strPriceUOM
+							,strRowState
+							,dtmContractDate
+							,dtmStartDate
+							,dtmEndDate
+							,dtmFeedCreated
+							,strSubmittedBy
+							,strSubmittedByNo
+							,strOrigin
+							,dblNetWeight
+							,strNetWeightUOM
+							,strVendorAccountNum
+							,strTermCode
+							,strContractItemNo
+							,strContractItemName
+							,strERPItemNumber
+							,strERPBatchNumber
+							,strLoadingPoint
+							,strPackingDescription
+							,ysnMaxPrice
+							,ysnSubstituteItem
+							,strLocationName
+							,strSalesperson
+							,strSalespersonExternalERPId
+							,strProducer
+							,intItemId
+							)
+						SELECT intContractHeaderId
+							,intContractDetailId
+							,strCommodityCode
+							,strCommodityDesc
+							,strContractBasis
+							,strContractBasisDesc
+							,strSubLocation
+							,strCreatedBy
+							,strCreatedByNo
+							,strEntityNo
+							,strTerm
+							,strPurchasingGroup
+							,strContractNumber
+							,strERPPONumber
+							,intContractSeq
+							,strItemNo
+							,strStorageLocation
+							,dblQuantity
+							,dblCashPrice
+							,strQuantityUOM
+							,dtmPlannedAvailabilityDate
+							,dblBasis
+							,strCurrency
+							,dblUnitCashPrice
+							,strPriceUOM
+							,CASE 
+								WHEN intContractStatusId = 3
+									THEN 'Delete'
+								ELSE (
+										CASE 
+											WHEN EXISTS (
+													SELECT *
+													FROM tblCTContractFeed
+													WHERE intContractHeaderId = @intNewContractHeaderId
+														AND intContractSeq = @intContractSeq
+													)
+												THEN 'Modified'
+											ELSE 'Added'
+											END
+										)
+								END
+							,dtmContractDate
+							,dtmStartDate
+							,dtmEndDate
+							,GETDATE()
+							,strSubmittedBy
+							,strSubmittedByNo
+							,strOrigin
+							,dblNetWeight
+							,strNetWeightUOM
+							,strVendorAccountNum
+							,strTermCode
+							,strContractItemNo
+							,strContractItemName
+							,strERPItemNumber
+							,strERPBatchNumber
+							,strLoadingPoint
+							,strPackingDescription
+							,ysnMaxPrice
+							,ysnSubstituteItem
+							,strLocationName
+							,strSalesperson
+							,strSalespersonExternalERPId
+							,strProducer
+							,intItemId
+						FROM vyuCTContractFeed
 						WHERE intContractHeaderId = @intNewContractHeaderId
 							AND intContractSeq = @intContractSeq
 					END
@@ -3445,7 +3555,7 @@ BEGIN TRY
 
 				INSERT INTO @tblCTContractCost (intContractCostId)
 				SELECT intContractCostId
-				FROM OPENXML(@idoc, 'vyuCTContractCostViews/vyuCTContractCostView', 2) WITH (intContractCostId INT)
+				FROM OPENXML(@idoc, 'vyuIPContractCostViews/vyuIPContractCostView', 2) WITH (intContractCostId INT)
 
 				SELECT @intContractCostId = MIN(intContractCostId)
 				FROM @tblCTContractCost
@@ -3463,7 +3573,7 @@ BEGIN TRY
 						,@strCurrency = strCurrency
 						,@strVendorName = strVendorName
 						,@strCurrencyExchangeRateType = strCurrencyExchangeRateType
-					FROM OPENXML(@idoc, 'vyuCTContractCostViews/vyuCTContractCostView', 2) WITH (
+					FROM OPENXML(@idoc, 'vyuIPContractCostViews/vyuIPContractCostView', 2) WITH (
 							strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -3513,8 +3623,8 @@ BEGIN TRY
 					JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 						AND ET.strType = 'Vendor'
 					WHERE EY.strName = @strVendorName
-						AND EY.strEntityNo <> ''
 
+					--AND EY.strEntityNo <> ''
 					SELECT @intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
 					FROM tblSMCurrencyExchangeRateType RT
 					WHERE RT.strCurrencyExchangeRateType = @strCurrencyExchangeRateType
@@ -3554,6 +3664,7 @@ BEGIN TRY
 						,intContractCostRefId
 						,intContractDetailId
 						,intConcurrencyId
+						,intPrevConcurrencyId
 						)
 					SELECT @intItemId
 						,@intVendorId
@@ -3589,13 +3700,14 @@ BEGIN TRY
 						,intContractCostId
 						,intContractDetailId
 						,1
-					FROM OPENXML(@idoc, 'vyuCTContractCostViews/vyuCTContractCostView', 2) WITH (
-							strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strUOM NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strVendorName NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strCurrencyExchangeRateType NVARCHAR(50) Collate Latin1_General_CI_AS
-							,dblRate NUMERIC(18, 6)
+						,0
+					FROM OPENXML(@idoc, 'vyuIPContractCostViews/vyuIPContractCostView', 2) WITH (
+							--strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strUOM NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strVendorName NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strCurrencyExchangeRateType NVARCHAR(50) Collate Latin1_General_CI_AS
+							dblRate NUMERIC(18, 6)
 							,dblFX NUMERIC(18, 6)
 							,ysnAccrue BIT
 							,ysnMTM BIT
@@ -3770,31 +3882,29 @@ BEGIN TRY
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strDocumentXML
 
-				IF EXISTS (
-						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
-								intContractDocumentId INT
-								,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
-								) x
-						LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-						WHERE D.strDocumentName IS NULL
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Document Name ' + x.strDocumentName + ' is not available.'
-					FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
-							intContractDocumentId INT
-							,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
-							) x
-					LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-					WHERE D.strDocumentName IS NULL
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
+				--IF EXISTS (
+				--		SELECT *
+				--		FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				--				intContractDocumentId INT
+				--				,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
+				--				) x
+				--		LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
+				--		WHERE D.strDocumentName IS NULL
+				--		)
+				--BEGIN
+				--	SELECT @strErrorMessage = 'Document Name ' + x.strDocumentName + ' is not available.'
+				--	FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				--			intContractDocumentId INT
+				--			,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
+				--			) x
+				--	LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
+				--	WHERE D.strDocumentName IS NULL
+				--	RAISERROR (
+				--			@strErrorMessage
+				--			,16
+				--			,1
+				--			)
+				--END
 				INSERT INTO tblCTContractDocument (
 					intContractHeaderId
 					,intDocumentId
@@ -3805,7 +3915,7 @@ BEGIN TRY
 					,D.intDocumentId
 					,1
 					,x.intContractDocumentId
-				FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (
 						intContractDocumentId INT
 						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
@@ -3819,7 +3929,7 @@ BEGIN TRY
 
 				UPDATE CD
 				SET intDocumentId = D.intDocumentId
-				FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (
 						intContractDocumentId INT
 						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
@@ -3832,7 +3942,7 @@ BEGIN TRY
 				WHERE CD.intContractHeaderId = @intNewContractHeaderId
 					AND NOT EXISTS (
 						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (intContractDocumentId INT) x
+						FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (intContractDocumentId INT) x
 						WHERE CD.intContractDocumentRefId = x.intContractDocumentId
 						)
 
@@ -3843,14 +3953,14 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
+						FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
 						LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
 						WHERE PR.strName IS NULL
 							AND x.strProducer IS NOT NULL
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'Producer ' + x.strProducer + ' is not available.'
-					FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
+					FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
 					LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
 						AND x.strProducer IS NOT NULL
 					WHERE PR.strName IS NULL
@@ -3864,13 +3974,13 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
+						FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
 						LEFT JOIN tblICCertification CF ON CF.strCertificationName = x.strCertificationName
 						WHERE CF.strCertificationName IS NULL
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'Certification ' + x.strCertificationName + ' is not available.'
-					FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
+					FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
 					LEFT JOIN tblICCertification CF ON CF.strCertificationName = x.strCertificationName
 					WHERE CF.strCertificationName IS NULL
 
@@ -3907,7 +4017,7 @@ BEGIN TRY
 					,PR.intEntityId
 					,x.dblQuantity
 					,1 AS intConcurrencyId
-				FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (
 						strProducer NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,intContractDetailId INT
@@ -3950,11 +4060,16 @@ BEGIN TRY
 					intContractHeaderId
 					,intConditionId
 					,intConcurrencyId
+					,strConditionDescription
 					)
 				SELECT @intNewContractHeaderId
 					,C.intConditionId
 					,1 AS intConcurrencyId
-				FROM OPENXML(@idoc, 'vyuCTContractConditionViews/vyuCTContractConditionView', 2) WITH (strConditionName NVARCHAR(200) Collate Latin1_General_CI_AS) x
+					,x.strConditionDesc
+				FROM OPENXML(@idoc, 'vyuCTContractConditionViews/vyuCTContractConditionView', 2) WITH (
+						strConditionName NVARCHAR(200) Collate Latin1_General_CI_AS
+						,strConditionDesc NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						) x
 				JOIN tblCTCondition C ON C.strConditionName = x.strConditionName
 
 				EXEC sp_xml_removedocument @idoc
@@ -3966,6 +4081,7 @@ BEGIN TRY
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
 					AND ysnApproval = 1
+					AND intPriceFixationId IS NULL
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -3994,6 +4110,7 @@ BEGIN TRY
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
 					AND ysnApproval = 0
+					AND intPriceFixationId IS NULL
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -4058,13 +4175,12 @@ BEGIN TRY
 				FROM tblCTContractHeader
 				WHERE intContractHeaderId = @intNewContractHeaderId
 
-				INSERT INTO @config (
-					strApprovalFor
-					,strValue
-					)
-				SELECT 'Contract Type'
-					,'Purchase'
-
+				--INSERT INTO @config (
+				--	strApprovalFor
+				--	,strValue
+				--	)
+				--SELECT 'Contract Type'
+				--	,'Purchase'
 				SELECT @strApprover = strApprover
 				FROM tblIPMultiCompany
 				WHERE intCompanyId = @intCompanyRefId
@@ -4076,14 +4192,13 @@ BEGIN TRY
 				IF @intCurrentUserEntityId IS NULL
 					SELECT @intCurrentUserEntityId = @intCreatedById
 
-				EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.Contract'
-					,@recordId = @intNewContractHeaderId
-					,@transactionNo = @strNewContractNumber
-					,@transactionEntityId = @intEntityId
-					,@currentUserEntityId = @intCurrentUserEntityId
-					,@amount = 0
-					,@approverConfiguration = @config
-
+				--EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.Contract'
+				--	,@recordId = @intNewContractHeaderId
+				--	,@transactionNo = @strNewContractNumber
+				--	,@transactionEntityId = @intEntityId
+				--	,@currentUserEntityId = @intCurrentUserEntityId
+				--	,@amount = 0
+				--	,@approverConfiguration = @config
 				SELECT @intContractScreenId = intScreenId
 				FROM tblSMScreen
 				WHERE strNamespace = 'ContractManagement.view.Contract'
@@ -4092,6 +4207,242 @@ BEGIN TRY
 				FROM tblSMTransaction
 				WHERE intRecordId = @intNewContractHeaderId
 					AND intScreenId = @intContractScreenId
+
+				IF @intTransactionRefId IS NULL
+				BEGIN
+					INSERT INTO tblSMTransaction (
+						intScreenId
+						,intRecordId
+						,strTransactionNo
+						,intEntityId
+						,strApprovalStatus
+						,intConcurrencyId
+						)
+					SELECT @intContractScreenId
+						,@intNewContractHeaderId
+						,@strNewContractNumber
+						,@intEntityId
+						,'Waiting for Submit'
+						,1
+
+					SELECT @intTransactionRefId = SCOPE_IDENTITY()
+
+					INSERT INTO tblSMApproval (
+						dtmDate
+						,dblAmount
+						,dtmDueDate
+						,intSubmittedById
+						,strStatus
+						,ysnCurrent
+						,intScreenId
+						,ysnVisible
+						,intOrder
+						,intTransactionId
+						)
+					SELECT GETUTCDATE()
+						,0
+						,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+						,@intCurrentUserEntityId
+						,'Waiting for Submit'
+						,1
+						,@intContractScreenId
+						,1
+						,1
+						,@intTransactionRefId
+				END
+				ELSE
+				BEGIN
+					IF @ysnApproval = 1
+					BEGIN
+						UPDATE tblSMTransaction
+						SET strApprovalStatus = 'Waiting for Submit'
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intTransactionId = @intTransactionRefId
+
+						UPDATE tblSMApproval
+						SET ysnCurrent = 0
+						WHERE intTransactionId = @intTransactionRefId
+
+						DECLARE @maxOrder INT = ISNULL((
+									SELECT MAX(intOrder)
+									FROM tblSMApproval
+									WHERE intTransactionId = @intTransactionRefId
+									), 0)
+
+						-- Increment this
+						SELECT @maxOrder = @maxOrder + 1
+
+						INSERT INTO tblSMApproval (
+							dtmDate
+							,dblAmount
+							,dtmDueDate
+							,intSubmittedById
+							,strStatus
+							,ysnCurrent
+							,intScreenId
+							,ysnVisible
+							,intOrder
+							,intTransactionId
+							,intApproverId
+							)
+						SELECT GETUTCDATE()
+							,0
+							,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+							,@intCurrentUserEntityId
+							,'Edited Transaction'
+							,0
+							,@intContractScreenId
+							,1
+							,@maxOrder
+							,@intTransactionRefId
+							,@intCurrentUserEntityId
+
+						-- Increment this
+						SELECT @maxOrder = @maxOrder + 1
+
+						INSERT INTO tblSMApproval (
+							dtmDate
+							,dblAmount
+							,dtmDueDate
+							,intSubmittedById
+							,strStatus
+							,ysnCurrent
+							,intScreenId
+							,ysnVisible
+							,intOrder
+							,intTransactionId
+							)
+						SELECT GETUTCDATE()
+							,0
+							,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+							,@intCurrentUserEntityId
+							,'Waiting for Submit'
+							,1
+							,@intContractScreenId
+							,1
+							,@maxOrder
+							,@intTransactionRefId
+					END
+				END
+
+				EXEC sp_xml_removedocument @idoc
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLogXML
+
+				SELECT @strUserName = NULL
+
+				SELECT @strUserName = strName
+				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(MAX) Collate Latin1_General_CI_AS)
+
+				SELECT @intAuditLogUserId = NULL
+
+				SELECT @intAuditLogUserId = CE.intEntityId
+				FROM tblEMEntity CE
+				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+				WHERE ET1.strType = 'User'
+					AND CE.strName = @strUserName
+
+				--AND CE.strEntityNo <> ''
+				IF @intAuditLogUserId IS NULL
+				BEGIN
+					SELECT TOP 1 @intAuditLogUserId = intEntityId
+					FROM tblSMUserSecurity
+					WHERE strUserName = 'irelyadmin'
+				END
+
+				INSERT INTO tblSMLog (
+					dtmDate
+					,strRoute
+					,intTransactionId
+					,intConcurrencyId
+					,intEntityId
+					,strType
+					)
+				SELECT dtmDate
+					,strRoute
+					,@intTransactionRefId
+					,1
+					,@intAuditLogUserId
+					,'Audit'
+				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (
+						intLogId INT
+						,dtmDate DATETIME
+						,strRoute NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						)
+
+				SELECT @intLogId = SCOPE_IDENTITY();
+
+				EXEC sp_xml_removedocument @idoc
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAuditXML
+
+				DECLARE @tblSMAudit TABLE (
+					intAuditId INT
+					,intAuditRefId INT
+					)
+
+				DELETE
+				FROM @tblSMAudit
+
+				INSERT INTO tblSMAudit (
+					intLogId
+					,strAction
+					,strChange
+					,strFrom
+					,strTo
+					,strAlias
+					,ysnField
+					,ysnHidden
+					,intKeyValue
+					--,intParentAuditId
+					,intConcurrencyId
+					)
+				OUTPUT inserted.intAuditId
+					,inserted.intKeyValue
+				INTO @tblSMAudit
+				SELECT @intLogId
+					,strAction
+					,strChange
+					,strFrom
+					,strTo
+					,strAlias
+					,ysnField
+					,ysnHidden
+					,intAuditId
+					--,(
+					--	SELECT TOP 1 A.intAuditId
+					--	FROM tblSMAudit A
+					--	WHERE intLogId = @intLogId
+					--		AND A.intKeyValue = x.intParentAuditId
+					--	)
+					,1
+				FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+						intLogId INT
+						,strAction NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strChange NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						,strFrom NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						,strTo NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						,strAlias NVARCHAR(205) Collate Latin1_General_CI_AS
+						,ysnField BIT
+						,ysnHidden BIT
+						,intAuditId INT
+						,intParentAuditId INT
+						) x
+
+				UPDATE A1
+				SET intParentAuditId = (
+						SELECT TOP 1 A2.intAuditId
+						FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+								intAuditId INT
+								,intParentAuditId INT
+								) x
+						JOIN @tblSMAudit A2 ON A2.intAuditRefId = x.intParentAuditId
+						WHERE x.intAuditId = A.intAuditRefId
+						)
+				FROM @tblSMAudit A
+				JOIN tblSMAudit A1 ON A.intAuditId = A1.intAuditId
 
 				DECLARE @strSQL NVARCHAR(MAX)
 					,@strServerName NVARCHAR(50)
@@ -4104,7 +4455,7 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT 1
-						FROM master.dbo.sysdatabases
+						FROM sys.databases
 						WHERE name = @strDatabaseName
 						)
 				BEGIN
@@ -4179,6 +4530,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intContractScreenId
+						,@populatedByInterCompany=1
 				END
 
 				--------------------------------------------------------------------------------------------------------------------------
@@ -4188,8 +4541,15 @@ BEGIN TRY
 
 				UPDATE tblCTContractStage
 				SET strFeedStatus = 'Processed'
-					,strMessage='Success'
+					,strMessage = 'Success'
 					,intStatusId = 1
+					,ysnMailSent = (
+						CASE 
+							WHEN @ysnApproval = 0
+								THEN 1
+							ELSE NULL
+							END
+						)
 				WHERE intContractStageId = @intContractStageId
 
 				IF @intTransactionCount = 0
@@ -4208,8 +4568,19 @@ BEGIN TRY
 
 				UPDATE tblCTContractStage
 				SET strFeedStatus = 'Failed'
-					,strMessage = @ErrMsg
+					,strMessage = Ltrim(ERROR_NUMBER()) + ' - ' + @ErrMsg
 					,intStatusId = 2
+					,intDeadlockError = (
+						CASE 
+							WHEN ERROR_NUMBER() IN (
+									1205
+									,266
+									)
+								AND intDeadlockError <= 5
+								THEN intDeadlockError + 1
+							ELSE 0
+							END
+						)
 				WHERE intContractStageId = @intContractStageId
 			END CATCH
 		END

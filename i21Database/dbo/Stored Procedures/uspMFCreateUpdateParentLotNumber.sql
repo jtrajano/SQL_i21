@@ -10,6 +10,7 @@
 	,@intLocationId INT = NULL
 	,@dtmDate DATETIME = NULL
 	,@intShiftId INT = NULL
+	,@ysnUpdateOnlyParentLot BIT=0
 AS
 BEGIN
 	DECLARE @ErrMsg NVARCHAR(Max)
@@ -54,6 +55,8 @@ BEGIN
 		,@ysnIRCorrection BIT
 		,@intLoadId INT
 	DECLARE @tblICLot TABLE (intLotId INT)
+
+	SELECT @strParentLotNumber=LTRIM(RTRIM(@strParentLotNumber))
 
 	SELECT @strLifeTimeType = strLifeTimeType
 		,@intLifeTime = intLifeTime
@@ -277,6 +280,9 @@ BEGIN
 				END
 		WHERE intLotId = @intLotId
 	END
+
+	if @ysnUpdateOnlyParentLot=0
+	Begin
 
 	IF @intSplitFromLotId IS NULL
 		AND @strCondition = 'Damaged'
@@ -542,4 +548,5 @@ BEGIN
 		SET ysnStatus = 0
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
 	END
+	End
 END

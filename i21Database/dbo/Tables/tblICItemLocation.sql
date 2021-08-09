@@ -77,6 +77,7 @@ Type the overview for the table here.
 		[ysnStorageUnitRequired] BIT NULL DEFAULT ((1)),
 		[strStorageUnitNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[intCostAdjustmentType] TINYINT NULL, 
+		[ysnActive] BIT NULL DEFAULT ((1)),
 		[intSort] INT NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,
@@ -84,6 +85,7 @@ Type the overview for the table here.
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
 		[intDataSourceId] TINYINT NULL,
+		[dblTransactionQtyLimit] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
@@ -107,6 +109,11 @@ Type the overview for the table here.
 	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intCountGroupId]
 		ON [dbo].[tblICItemLocation]([intCountGroupId] ASC)
 		INCLUDE ([intItemId], [intLocationId])
+	GO
+	
+	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intLocationId]
+		ON [dbo].[tblICItemLocation]([intLocationId] ASC)
+		INCLUDE ([intItemId], [intCostingMethod])
 	GO
 
 	EXEC sp_addextendedproperty @name = N'MS_Description',

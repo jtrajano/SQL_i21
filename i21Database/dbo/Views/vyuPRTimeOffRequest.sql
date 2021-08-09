@@ -11,11 +11,12 @@ SELECT
 	,EMP.strMiddleName
 	,REQ.dtmRequestDate
 	,DEP.strDepartment
+	,strRankDescription = EMPRank.strDescription
 	,REQ.dtmDateFrom
 	,REQ.dtmDateTo
 	,TOFF.strTimeOff
 	,REQ.dblRequest
-	,strApprovalStatus = ISNULL(TRANS.strApprovalStatus, 'No Need for Approval')
+	,strApprovalStatus = ISNULL(TRN.strApprovalStatus, CASE WHEN APP.intEntityUserSecurityId IS NOT NULL AND APPScreen.strNamespace = 'Payroll.view.TimeOffRequest' THEN 'Waiting for Submit' ELSE 'No Need for Approval' END)
 	,REQ.ysnPostedToCalendar
 	,strCalendarInfo = ENT.strName + ' : ' + CAST(CAST(dblRequest AS FLOAT) AS VARCHAR(20)) 
 						+ ' Hour' + CASE WHEN (dblRequest > 0) THEN 's ' ELSE ' ' END + TOFF.strTimeOff
@@ -28,12 +29,14 @@ FROM
 	tblPRTimeOffRequest REQ
 	LEFT JOIN tblEMEntity ENT ON REQ.intEntityEmployeeId = ENT.intEntityId
 	LEFT JOIN tblPREmployee EMP ON REQ.intEntityEmployeeId = EMP.intEntityId
+	LEFT JOIN tblPREmployeeRank EMPRank ON EMP.intRank = EMPRank.intRank
 	LEFT JOIN tblPRTypeTimeOff TOFF ON REQ.intTypeTimeOffId = TOFF.intTypeTimeOffId
 	LEFT JOIN tblPRDepartment DEP ON REQ.intDepartmentId = DEP.intDepartmentId 
-	LEFT JOIN 
-		(SELECT intRecordId, strApprovalStatus FROM tblSMTransaction TRN
-			INNER JOIN tblSMScreen SCR 
-			ON TRN.intScreenId = SCR.intScreenId 
-			AND SCR.strNamespace = 'Payroll.view.TimeOffRequest') TRANS 
-		ON REQ.intTimeOffRequestId = TRANS.intRecordId
+	LEFT JOIN tblSMUserSecurityRequireApprovalFor APP
+	    ON EMP.intEntityId = APP.intEntityUserSecurityId
+	LEFT JOIN tblSMScreen APPScreen
+	    ON APP.intScreenId = APPScreen.intScreenId
+	LEFT JOIN tblSMTransaction TRN
+		ON TRN.intScreenId = APPScreen.intScreenId AND APPScreen.strNamespace = 'Payroll.view.TimeOffRequest'
+		AND TRN.intRecordId = REQ.intTimeOffRequestId
 	LEFT JOIN tblPRPaycheck PC ON REQ.intPaycheckId = PC.intPaycheckId

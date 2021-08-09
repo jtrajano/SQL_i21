@@ -43,6 +43,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @dblTotalAR							AS NUMERIC(18,6)    = 0
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -384,6 +385,39 @@ LEFT JOIN (
 	  AND P.intPaymentId NOT IN (SELECT I.intPaymentId FROM dbo.tblARInvoice I WITH (NOLOCK) WHERE I.strTransactionType = 'Customer Prepayment' AND I.intPaymentId IS NOT NULL AND I.ysnPosted = 1)
 	  AND ISNULL(NULLIF(P.strPaymentInfo, ''), '') NOT LIKE 'CFSI-%'
 
+	UNION ALL
+
+	SELECT intInvoiceId				= NULL
+		 , intPaymentId				= P.intPaymentId
+		 , intInvoiceDetailId		= NULL
+		 , intEntityCustomerId		= P.intEntityVendorId
+		 , strTransactionNumber		= NULL
+		 , strPONumber				= NULL
+		 , strTransactionType		= 'Payment'
+		 , strInvoiceType			= 'Payment'
+		 , strType					= NULL
+		 , strItemNo				= NULL
+		 , strItemDescription		= 'PAYMENT (' + ISNULL(NULLIF(P.strPaymentInfo, ''), P.strPaymentRecordNum) + ')'
+		 , dblAmount				= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
+		 , dblQuantity				= NULL
+		 , dblInvoiceDetailTotal	= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
+		 , dtmDate					= P.dtmDatePaid
+		 , dtmDueDate				= P.dtmDatePaid
+	FROM dbo.tblAPPayment P WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intPaymentId
+			 , dblPayment				= SUM(ISNULL(PD.dblPayment, 0))
+			 , dblDiscount 				= SUM(ISNULL(PD.dblDiscount, 0))
+			 , dblInterest 				= SUM(ISNULL(PD.dblInterest, 0))			 
+		FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
+		WHERE PD.intInvoiceId IS NOT NULL
+		GROUP BY PD.intPaymentId
+	) PD ON P.intPaymentId = PD.intPaymentId
+	INNER JOIN #COMPANYLOCATIONS CL ON P.intCompanyLocationId = CL.intCompanyLocationId
+	WHERE P.ysnPosted = 1	  
+	  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	  AND ((@ysnIncludeWriteOffPaymentLocal = 1 AND P.intPaymentMethodId NOT IN (SELECT intPaymentMethodID FROM #WRITEOFFSPAYMENTMETHODS)) OR @ysnIncludeWriteOffPaymentLocal = 0)
+
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
 --INCLUDE BUDGET
@@ -469,11 +503,16 @@ IF @ysnPrintOnlyPastDueLocal = 1
 		  , dblTotalAR 	= ISNULL(dblTotalAR, 0) - ISNULL(dbl0Days, 0) - ISNULL(dblFuture, 0)
     END
 
+SELECT @dblTotalAR  =SUM(dblTotalAR)  from #AGINGSUMMARY
+
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) = 0) AND ISNULL(strTransactionType, '') NOT IN ('Beginning Balance', 'Customer Budget')
-		DELETE FROM #AGINGSUMMARY WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
-    END
+		IF  @dblTotalAR = 0 
+		BEGIN
+        DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) <= 0) AND ISNULL(strTransactionType, '') NOT IN ('Beginning Balance', 'Customer Budget')
+		DELETE FROM #AGINGSUMMARY WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0
+		END
+	END
 
 --INSERT INTO STATEMENT STAGING
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Full Details - No Card Lock' 

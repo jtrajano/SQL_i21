@@ -8,7 +8,8 @@
     [dblPerPeriod]     NUMERIC (18, 6) DEFAULT ((0)) NULL,
     [strPeriod]        NVARCHAR (30) COLLATE Latin1_General_CI_AS   NULL,
     [dblMaxEarned]     NUMERIC (18, 6) DEFAULT ((0)) NULL,
-    [dblMaxCarryover]  NUMERIC (18, 6)  DEFAULT ((0)) NULL, 
+    [dblMaxCarryover]  NUMERIC (18, 6)  DEFAULT ((0)) NULL,
+    [dblMaxBalance]        NUMERIC (18, 6) NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)),
 	CONSTRAINT [FK_tblPRTypeTimeOffDetail_tblPRTypeTimeOff] FOREIGN KEY ([intTypeTimeOffId]) REFERENCES [dbo].[tblPRTypeTimeOff] ([intTypeTimeOffId]) ON DELETE CASCADE
 )

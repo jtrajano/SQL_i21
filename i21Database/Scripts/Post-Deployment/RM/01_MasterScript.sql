@@ -193,28 +193,14 @@ BEGIN
 		UNION ALL SELECT 61, 'Re-opened Sequence', 'Re-opened Sequence.'
 		UNION ALL SELECT 62, 'Deleted Voucher', 'Deleted Voucher.'
 		UNION ALL SELECT 63, 'Deleted Invoice', 'Deleted Invoice.'
+		UNION ALL SELECT 64, 'Created Credit Memo', 'Created Credit Memo.'
+		UNION ALL SELECT 65, 'Deleted Credit Memo', 'Deleted Credit Memo.'
+		UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
+		UNION ALL SELECT 67, 'Price Updated', 'Price Updated.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 
 	SET IDENTITY_INSERT tblRKLogAction OFF
 
-END
-GO
-
-IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKM2MType')
-BEGIN
-	SET IDENTITY_INSERT tblRKM2MType ON
-    
-	INSERT INTO tblRKM2MType(intM2MTypeId
-		, strType)
-	SELECT * FROM (
-		SELECT intM2MTypeId = 1
-			, strType = 'Mark to Market'
-		UNION ALL SELECT 2
-			, 'Stress Test'
-	) t
-	WHERE intM2MTypeId NOT IN (SELECT intM2MTypeId FROM tblRKM2MType)
-
-	SET IDENTITY_INSERT tblRKM2MType OFF
 END
 GO

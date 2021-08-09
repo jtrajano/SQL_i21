@@ -44,15 +44,19 @@ WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
 
 SELECT * INTO #tempFirstToSecond FROM (
-	select strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName  from #FirstRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 	except
-	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName  from #SecondRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 )t
 
 SELECT * INTO #tempSecondToFirst FROM (
-	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName from #SecondRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 	except
-	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName from #FirstRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 ) t
 
 
@@ -60,13 +64,17 @@ SELECT * INTO #tempSecondToFirst FROM (
 SELECT F.* 
 ,dblShipReceiveQty = COALESCE(receiptItem.dblReceived,shipmentItem.dblQuantity)
 ,dtmShipReceiptDate = COALESCE(receipt.dtmReceiptDate,shipment.dtmShipDate)
-,dtmContractDate = CH.dtmContractDate
-,strContractNumber = CH.strContractNumber+'-'+CAST(CD.intContractSeq as varchar)
-,CH.intContractHeaderId
+,dtmContractDate = CASE WHEN F.strTranType = 'Storage Settlement' 
+						THEN settleStorageContract.dtmContractDate
+						ELSE CH.dtmContractDate END
+,strContractNumber = COALESCE(settleStorageItem.strContractNumbers, CH.strContractNumber+'-'+CAST(CD.intContractSeq as varchar)) 
+,intContractHeaderId =  CASE WHEN F.strTranType = 'Storage Settlement' 
+						THEN settleStorageContract.intContractHeaderId
+						ELSE CH.intContractHeaderId END
 ,strHeaderPricing = ptCH.strPricingType
 ,strSeqPricing = ptCD.strPricingType
-,strTicketNumber = COALESCE(receiptItemSource.strSourceNumber,shipmentItemSource.strSourceNumber)
-,intTicketId = COALESCE(receiptItem.intSourceId,shipmentItem.intSourceId)
+,strTicketNumber = COALESCE(receiptItemSource.strSourceNumber,shipmentItemSource.strSourceNumber, settleStorageItem.strTransactionNumber)
+,intTicketId = COALESCE(receiptItem.intSourceId,shipmentItem.intSourceId, settleStorageItem.intTransactionId)
 INTO #tempFinalFirstRun
 FROM #tempFirstToSecond F
 LEFT JOIN tblICInventoryReceiptItem receiptItem 
@@ -86,23 +94,45 @@ LEFT JOIN vyuICGetShipmentItemSource shipmentItemSource
 	ON shipmentItemSource.intInventoryShipmentItemId = shipmentItem.intInventoryShipmentItemId
 	--AND F.strTranType = 'Inventory Shipment'
 LEFT JOIN tblICInventoryShipment shipment 
-	ON shipment.intInventoryShipmentId = shipmentItem.intInventoryShipmentId   
+	ON shipment.intInventoryShipmentId = shipmentItem.intInventoryShipmentId
+LEFT JOIN vyuGRGetSettleStorage settleStorageItem
+	ON settleStorageItem.intSettleStorageId =  F.intTransactionReferenceDetailId
+	AND F.strTranType = 'Storage Settlement'
+OUTER APPLY
+(
+	SELECT  TOP 1 cth.intContractHeaderId
+				, cth.dtmContractDate 
+				, cth.intPricingTypeId
+	FROM    tblGRSettleContract sc
+	INNER JOIN tblCTContractDetail ctd
+	ON ctd.intContractDetailId = sc.intContractDetailId
+	INNER JOIN tblCTContractHeader cth
+	ON cth.intContractHeaderId = ctd.intContractHeaderId
+	WHERE   sc.intSettleStorageId = settleStorageItem.intSettleStorageId
+) settleStorageContract
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = COALESCE(receiptItem.intLineNo,shipmentItem.intLineNo)
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN tblCTPricingType ptCH on ptCH.intPricingTypeId = CH.intPricingTypeId
+LEFT JOIN tblCTPricingType ptCH on ptCH.intPricingTypeId = CASE WHEN F.strTranType = 'Storage Settlement'
+																THEN settleStorageContract.intPricingTypeId
+																ELSE CH.intPricingTypeId END
 LEFT JOIN tblCTPricingType ptCD on ptCD.intPricingTypeId = CD.intPricingTypeId
 
 
 SELECT S.* 
 ,dblShipReceiveQty = COALESCE(receiptItem.dblReceived,shipmentItem.dblQuantity)
 ,dtmShipReceiptDate = COALESCE(receipt.dtmReceiptDate,shipment.dtmShipDate)
-,dtmContractDate = CH.dtmContractDate
-,strContractNumber = CH.strContractNumber+'-'+CAST(CD.intContractSeq as varchar)
-,CH.intContractHeaderId
+,dtmContractDate = CASE WHEN S.strTranType = 'Storage Settlement' 
+						THEN settleStorageContract.dtmContractDate
+						ELSE CH.dtmContractDate END
+,strContractNumber = COALESCE(settleStorageItem.strContractNumbers, CH.strContractNumber+'-'+CAST(CD.intContractSeq as varchar)) 
+,intContractHeaderId =  CASE WHEN S.strTranType = 'Storage Settlement' 
+						THEN settleStorageContract.intContractHeaderId
+						ELSE CH.intContractHeaderId
+						END
 ,strHeaderPricing = ptCH.strPricingType
 ,strSeqPricing = ptCD.strPricingType
-,strTicketNumber = COALESCE(receiptItemSource.strSourceNumber,shipmentItemSource.strSourceNumber)
-,intTicketId = COALESCE(receiptItem.intSourceId,shipmentItem.intSourceId)
+,strTicketNumber = COALESCE(receiptItemSource.strSourceNumber,shipmentItemSource.strSourceNumber, settleStorageItem.strTransactionNumber)
+,intTicketId = COALESCE(receiptItem.intSourceId,shipmentItem.intSourceId, settleStorageItem.intTransactionId)
 INTO #tempFinalSecondRun
 FROM #tempSecondToFirst S
 LEFT JOIN tblICInventoryReceiptItem receiptItem 
@@ -123,9 +153,26 @@ LEFT JOIN vyuICGetShipmentItemSource shipmentItemSource
 	--AND S.strTranType = 'Inventory Shipment'
 LEFT JOIN tblICInventoryShipment shipment 
 	ON shipment.intInventoryShipmentId = shipmentItem.intInventoryShipmentId   
+LEFT JOIN vyuGRGetSettleStorage settleStorageItem
+	ON settleStorageItem.intSettleStorageId =  S.intTransactionReferenceDetailId
+	AND S.strTranType = 'Storage Settlement'
+OUTER APPLY
+(
+	SELECT  TOP 1 cth.intContractHeaderId
+				, cth.dtmContractDate 
+				, cth.intPricingTypeId
+	FROM    tblGRSettleContract sc
+	INNER JOIN tblCTContractDetail ctd
+	ON ctd.intContractDetailId = sc.intContractDetailId
+	INNER JOIN tblCTContractHeader cth
+	ON cth.intContractHeaderId = ctd.intContractHeaderId
+	WHERE   sc.intSettleStorageId = settleStorageItem.intSettleStorageId
+) settleStorageContract
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId  = COALESCE(receiptItem.intLineNo,shipmentItem.intLineNo)
 LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-LEFT JOIN tblCTPricingType ptCH on ptCH.intPricingTypeId = CH.intPricingTypeId
+LEFT JOIN tblCTPricingType ptCH on ptCH.intPricingTypeId = CASE WHEN S.strTranType = 'Storage Settlement'
+																THEN settleStorageContract.intPricingTypeId
+																ELSE CH.intPricingTypeId END
 LEFT JOIN tblCTPricingType ptCD on ptCD.intPricingTypeId = CD.intPricingTypeId
 
 
@@ -227,7 +274,7 @@ FROM (
 		, a.intTicketId
 	FROM #tempFinalFirstRun a
 	INNER JOIN #tempFinalSecondRun b ON b.strTransactionReferenceId = a.strTransactionReferenceId
-
+	AND (a.dblTotal - b.dblTotal) <> 0
 
 	UNION ALL
 	SELECT 

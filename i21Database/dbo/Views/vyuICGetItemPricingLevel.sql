@@ -2,6 +2,7 @@
 AS
 SELECT	intItemPricingLevelId	= PricingLevel.intItemPricingLevelId
 		,col.intCompanyLocationPricingLevelId
+		,intItemLocationId		= PricingLevel.intItemLocationId
 		,intItemId				= PricingLevel.intItemId
 		,strItemNo				= Item.strItemNo
 		,strDescription			= Item.strDescription

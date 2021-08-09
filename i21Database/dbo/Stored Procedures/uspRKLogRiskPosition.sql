@@ -96,6 +96,12 @@ BEGIN
 		WHERE ISNULL(strBatchId, '') = ''
 	END
 
+	IF @Rebuild = 1 AND EXISTS(SELECT TOP 1 1 FROM #tmpSummaryLogs WHERE strBucketType IN('Company Owned','Sales In-Transit','Purchase In-Transit','Customer Owned','Delayed Pricing', 'On Hold')) 	
+	BEGIN
+		GOTO BulkRebuild
+	END
+
+
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpSummaryLogs)
 	BEGIN
 		SELECT @intId = NULL
@@ -160,9 +166,11 @@ BEGIN
 			, @intUserId = intUserId
 			, @intEntityId = intEntityId
 			, @strNotes = strNotes
+			, @strInOut = strInOut
 			, @ysnDelete = ysnDelete
 			, @strMiscFields = strMiscFields
 		FROM #tmpSummaryLogs
+		ORDER BY dtmTransactionDate
 
 		IF OBJECT_ID('tempdb..#tmpPrevLog') IS NOT NULL
 			DROP TABLE #tmpPrevLog
@@ -176,7 +184,7 @@ BEGIN
 				AND strBucketType = @strBucketType
 				AND strTransactionType = @strTransactionType
 				AND strTransactionNumber = @strTransactionNumber
-				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType OR intFutureMarketId <> @intFutureMarketId)
 				AND ysnNegate IS NULL)
 			BEGIN
 				INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Fixing manual changes on derivative ' + ISNULL(@strTransactionNumber, '') + '.')
@@ -251,7 +259,7 @@ BEGIN
 					AND strBucketType = @strBucketType
 					AND strTransactionType = @strTransactionType
 					AND strTransactionNumber = @strTransactionNumber
-					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType OR intFutureMarketId <> @intFutureMarketId)
 					AND ysnNegate IS NULL
 
 
@@ -260,7 +268,7 @@ BEGIN
 					AND strBucketType = @strBucketType
 					AND strTransactionType = @strTransactionType
 					AND strTransactionNumber = @strTransactionNumber
-					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType OR intFutureMarketId <> @intFutureMarketId)
 					AND ysnNegate IS NULL
 			END
 		END
@@ -504,7 +512,7 @@ BEGIN
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = CASE WHEN UPPER(@strDistributionType) = 'BUY' THEN 'IN' ELSE 'OUT' END
+				, strInOut = @strInOut
 				, dblOrigNoOfLots = @dblNoOfLots 
 				, @dblContractSize
 				, dblOrigQty = ISNULL(@dblQty, @dblNoOfLots * @dblContractSize)
@@ -1157,6 +1165,93 @@ BEGIN
 		DELETE FROM #tmpSummaryLogs
 		WHERE intId = @intId
 	END
+	
+	GOTO Logging
+
+	BulkRebuild:
+
+	SET @intTransCtr = @intTotal
+
+	INSERT INTO @FinalTable(strBatchId
+		, strBucketType
+		, intActionId
+		, strTransactionType
+		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
+		, strTransactionNumber
+		, dtmTransactionDate
+		, intContractDetailId
+		, intContractHeaderId
+		, intFutureMarketId
+		, intFutureMonthId
+		, intFutOptTransactionId
+		, intCommodityId
+		, intItemId
+		, intProductTypeId
+		, intOrigUOMId
+		, intBookId
+		, intSubBookId
+		, intLocationId
+		, strInOut
+		, dblOrigQty
+		, dblPrice
+		, intEntityId
+		, intTicketId
+		, intUserId
+		, strNotes
+		, strMiscFields)
+	SELECT strBatchId
+		, strBucketType
+		, intActionId
+		, strTransactionType = CASE WHEN strTransactionType LIKE 'Inventory Adjustment%' THEN 'Inventory Adjustment' ELSE strTransactionType END
+		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
+		, strTransactionNumber
+		, dtmTransactionDate
+		, intContractDetailId
+		, intContractHeaderId
+		, intFutureMarketId
+		, intFutureMonthId
+		, intTransactionRecordId
+		, intCommodityId
+		, intItemId
+		, intProductTypeId = NULL--I.intProductTypeId
+		, intOrigUOMId = intCommodityUOMId
+		, intBookId
+		, intSubBookId
+		, intLocationId
+		, strInOut = CASE 
+				WHEN strBucketType = 'Sales In-Transit' OR
+						strBucketType = 'Purchase In-Transit' OR
+						strBucketType = 'Customer Owned' OR
+						strBucketType = 'Delayed Pricing' OR
+						strBucketType = 'On Hold' OR
+						strTransactionType = 'Inventory Receipt' OR
+						strTransactionType = 'Produce' OR
+						strTransactionType = 'Inventory Transfer' OR
+						strTransactionType like 'Inventory Adjustment%' OR
+						strTransactionType = 'Storage Settlement'
+					THEN CASE WHEN ISNULL(dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
+				WHEN strTransactionType = 'Inventory Shipment' OR
+						strTransactionType = 'Invoice' OR
+						strTransactionType  = 'Outbound Shipment' OR
+						strTransactionType = 'Consume' 
+					THEN CASE WHEN ISNULL(dblQty, 0) >= 0 THEN 'OUT' ELSE 'IN' END
+				ELSE '' END
+		, dblOrigQty = dblQty
+		, dblPrice = dblPrice
+		, intEntityId
+		, intTicketId
+		, intUserId
+		, strNotes
+		, strMiscFields
+	FROM #tmpSummaryLogs
+
+
+	
+	Logging:
 
 	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Processed ' + CAST(@intTransCtr AS NVARCHAR) + ' of ' + CAST(@intTotal AS NVARCHAR) + ' records.')
 	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Starting Bulk Insert.')

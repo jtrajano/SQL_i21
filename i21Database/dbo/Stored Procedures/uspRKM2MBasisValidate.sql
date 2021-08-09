@@ -6,6 +6,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		, @PreviousErrMsg NVARCHAR(MAX)
 		, @mRowNumber INT
+		, @strType NVARCHAR(50)
 		, @strFutMarketName NVARCHAR(50)
 		, @strCommodityCode NVARCHAR(50)
 		, @strItemNo NVARCHAR(50)
@@ -20,6 +21,7 @@ BEGIN TRY
 	WHILE @mRowNumber > 0
 	BEGIN
 		SELECT @PreviousErrMsg = ''
+			, @strType = NULL
 			, @strFutMarketName	= NULL
 			, @strCommodityCode	= NULL
 			, @strItemNo = NULL
@@ -30,7 +32,8 @@ BEGIN TRY
 			, @strPeriodTo = NULL
 			, @dblBasis = NULL
 		
-		SELECT @strFutMarketName = strFutMarketName
+		SELECT @strType = strType 
+			, @strFutMarketName = strFutMarketName
 			, @strCommodityCode = strCommodityCode
 			, @strItemNo = strItemNo
 			, @strCurrency = strCurrency
@@ -42,6 +45,11 @@ BEGIN TRY
 		FROM tblRKM2MBasisImport
 		WHERE intM2MBasisImportId = @mRowNumber
 		
+		IF @strType NOT IN ( 'Mark to Market','Stress Test','Forecast')
+		BEGIN
+			SET @PreviousErrMsg = 'Invalid Type ' +  @strType +'.'
+		END
+
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKFutureMarket WHERE strFutMarketName = @strFutMarketName)
 		BEGIN
 			SET @PreviousErrMsg = 'Invalid Futures Market.'

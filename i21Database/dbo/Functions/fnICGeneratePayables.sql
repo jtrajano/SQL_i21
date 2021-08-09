@@ -211,9 +211,9 @@ SELECT DISTINCT
 	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
 	,[ysnSubCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN 1 ELSE 0 END
 	,[intSubCurrencyCents]		=	ISNULL(A.intSubCurrencyCents, 0)
-	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
-	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing'))
-	,[strAccountDesc]			=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing'))
+	,[intAccountId]				=	glAccount.intAccountId --[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing')
+	,[strAccountId]				=	glAccount.strAccountId 
+	,[strAccountDesc]			=	glAccount.strDescription 
 	,[strName]					=	D2.strName
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
@@ -271,16 +271,19 @@ SELECT DISTINCT
 		END
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
-	,[dblWeightUnitQty]			=	CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
-	,[dblCostUnitQty]			=	CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
-	,[intCurrencyId]			=	ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference))
+	,[dblWeightUnitQty]			=	ItemWeightUOM.dblUnitQty --CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
+	,[dblCostUnitQty]			=	ItemCostUOM.dblUnitQty --CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
+	,[dblUnitQty]				=	ItemUOM.dblUnitQty --ISNULL(ItemUOM.dblUnitQty,1)
+	,[intCurrencyId]			=	ISNULL(A.intCurrencyId, companyPrefrence.intDefaultCurrencyId)
 	,[strCurrency]				=   H1.strCurrency
 	,[intCostCurrencyId]		=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
-										 ELSE ISNULL(A.intCurrencyId,(SELECT intDefaultCurrencyId FROM dbo.tblSMCompanyPreference)) 
+										 ELSE ISNULL(A.intCurrencyId,companyPrefrence.intDefaultCurrencyId) 
 									END	
-	,[strCostCurrency]			=	CASE WHEN B.ysnSubCurrency > 0 THEN SubCurrency.strCurrency
-									ELSE (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+	,[strCostCurrency]			=	CASE 
+										WHEN B.ysnSubCurrency > 0 THEN 
+											SubCurrency.strCurrency
+										ELSE 
+											H1.strCurrency 
 									END
 	,[strVendorLocation]		=	EL.strLocationName
 	,[str1099Form]				=	CASE 	WHEN patron.intEntityId IS NOT NULL 
@@ -310,7 +313,7 @@ SELECT DISTINCT
 										) ELSE 0.00 END)
 									ELSE 0 END
 	,[intLocationId]			=	A.intLocationId
-	,[strReceiptLocation]		= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
+	,[strReceiptLocation]		=	companyLocation.strLocationName
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[intTaxGroupId]							=	B.intTaxGroupId
@@ -335,11 +338,29 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 	INNER JOIN tblICItem C 
 		ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc 
-		ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
+		ON C.intItemId = loc.intItemId 
+		AND loc.intLocationId = A.intLocationId
 	INNER JOIN  (
 		tblAPVendor D1 INNER JOIN tblEMEntity D2 
 			ON D1.[intEntityId] = D2.intEntityId
 	) ON A.[intEntityVendorId] = D1.[intEntityId]
+	
+	LEFT JOIN dbo.tblSMCompanyLocation companyLocation
+		ON companyLocation.intCompanyLocationId = A.intLocationId
+
+	OUTER APPLY (
+		SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference
+	) companyPrefrence
+
+	OUTER APPLY (
+		SELECT TOP 1 
+			ga.intAccountId
+			,ga.strAccountId
+			,ga.strDescription
+		FROM tblGLAccount ga
+		WHERE 
+			ga.intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'AP Clearing')	
+	) glAccount 
 	
 	LEFT JOIN (
 		tblICItemUOM ItemWeightUOM INNER JOIN tblICUnitMeasure WeightUOM 
@@ -531,7 +552,10 @@ WHERE
 	AND B.intOwnershipType <> 2	
 	AND C.strType <> 'Bundle'
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
-	AND ISNULL(B.ysnAllowVoucher, 1) = 1
+	AND (
+		(@ysnForVoucher = 0 AND ISNULL(B.ysnAddPayable, 1) = 1) -- This condition determines if the item can be added into the Payable Staging table or not during posting. 
+		OR (@ysnForVoucher = 1 AND ISNULL(B.ysnAllowVoucher, 1) = 1) -- This condition determines if the item can be converted to Voucher or Debit Memo. 
+	)
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
 		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
@@ -625,16 +649,16 @@ SELECT DISTINCT
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	
-			--CAST(A.dblUnitCost AS DECIMAL(38,20))
-			CASE 
-				WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
-					A.dblUnitCost
-				ELSE 
-					CASE 
-						WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblUnitCost
-						ELSE A.dblUnitCost
-					END 
-			END
+			CAST(A.dblUnitCost AS DECIMAL(38,20))
+			--CASE 
+			--	WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
+			--		A.dblUnitCost
+			--	ELSE 
+			--		CASE 
+			--			WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblUnitCost
+			--			ELSE A.dblUnitCost
+			--		END 
+			--END
 		,[dblDiscount]								=	0
 		,[dblTax]									=	
 			ISNULL(
@@ -659,9 +683,9 @@ SELECT DISTINCT
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
 		,[ysnSubCurrency]							=	ISNULL(A.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	ISNULL(A.intSubCurrencyCents,1)
-		,[intAccountId]								=	[dbo].[fnGetItemGLAccount](A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')
-		,[strAccountId]								=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
-		,[strAccountDesc]							=	(SELECT strDescription FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(A.intItemId, ItemLoc.intItemLocationId, 'AP Clearing'))
+		,[intAccountId]								=	glAccount.intAccountId 
+		,[strAccountId]								=	glAccount.strAccountId 
+		,[strAccountDesc]							=	glAccount.strDescription 
 		,[strName]									=	A.strName
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
@@ -689,16 +713,20 @@ SELECT DISTINCT
 		,[dblWeightUnitQty]							=	CAST(1 AS DECIMAL(38,20))
 		,[dblCostUnitQty]							=	CAST(1 AS DECIMAL(38,20))
 		,[dblUnitQty]								=	1
-		,[intCurrencyId]							=	CASE WHEN A.ysnSubCurrency > 0 
-															 THEN (SELECT ISNULL(intMainCurrencyId,A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0))
-															 ELSE  ISNULL(A.intCurrencyId,0)
+		,[intCurrencyId]							=	CASE 
+															WHEN A.ysnSubCurrency > 0 THEN 
+																ISNULL(SubCurrency.intCurrencyID, H1.intCurrencyID) 
+															ELSE 
+																ISNULL(H1.intCurrencyID,0)
 														END	
-		,[strCurrency]								=	CASE WHEN A.ysnSubCurrency > 0 
-															 THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT ISNULL(intMainCurrencyId, A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
-															 ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
+		,[strCurrency]								=	CASE 
+															WHEN A.ysnSubCurrency > 0 THEN 
+																ISNULL(SubCurrency.strCurrency, H1.strCurrency) 
+															ELSE 
+																H1.strCurrency 
 														END
 		,[intCostCurrencyId]						=	ISNULL(A.intCurrencyId,0)		
-		,[strCostCurrency]							=	(SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)	
+		,[strCostCurrency]							=	H1.strCurrency 
 		,[strVendorLocation]						=	NULL
 		,[str1099Form]								=	CASE WHEN patron.intEntityId IS NOT NULL 
 															AND item.ysn1099Box3 = 1
@@ -719,7 +747,7 @@ SELECT DISTINCT
 		,[dblFranchiseWeight]						=	0.00
 		,[dblClaimAmount]							=	0.00
 		,[intLocationId]							=	A.intLocationId
-		,[strReceiptLocation]						= (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A.intLocationId)
+		,[strReceiptLocation]						=  companyLocation.strLocationName 
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	A.intTaxGroupId
@@ -741,15 +769,30 @@ SELECT DISTINCT
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
 		,[intLoadShipmentDetailId]	     			= NULL 
 		,[intLoadShipmentCostId]	     			= A.intLoadShipmentCostId
-FROM [vyuICChargesForBilling] A
+FROM 
+	[vyuICChargesForBilling] A
+	INNER JOIN (
+			tblAPVendor D1 INNER JOIN tblEMEntity D2 
+				ON D1.[intEntityId] = D2.intEntityId
+		) ON A.[intEntityVendorId] = D1.[intEntityId]	
 	LEFT JOIN dbo.tblSMCurrency H1 ON H1.intCurrencyID = A.intCurrencyId
 	LEFT JOIN dbo.tblSMCurrency SubCurrency ON SubCurrency.intMainCurrencyId = A.intCurrencyId 
-	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
+	LEFT JOIN dbo.tblSMCompanyLocation companyLocation ON companyLocation.intCompanyLocationId = A.intLocationId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId 
 		 AND ItemLoc.intLocationId = A.intLocationId
 	LEFT JOIN tblICItem item ON item.intItemId = A.intItemId
+	OUTER APPLY (
+		SELECT TOP 1 
+			ga.intAccountId
+			,ga.strAccountId
+			,ga.strDescription
+		FROM tblGLAccount ga
+		WHERE 
+			ga.intAccountId = dbo.fnGetItemGLAccount(item.intItemId, ItemLoc.intItemLocationId, 'AP Clearing')	
+	) glAccount 
+
 	LEFT JOIN vyuPATEntityPatron patron ON patron.intEntityId = A.intEntityVendorId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = A.intContractHeaderId
 	LEFT JOIN tblCTContractDetail CD 
@@ -794,21 +837,42 @@ FROM [vyuICChargesForBilling] A
 			, BD.intInventoryReceiptChargeId
 
 	) Billed
+	OUTER APPLY (
+		SELECT TOP 1 
+			ri.ysnAddPayable
+		FROM 
+			tblICInventoryReceiptItem ri
+		WHERE
+			ri.intInventoryReceiptId = A.intInventoryReceiptId
+			AND A.intContractHeaderId = COALESCE(ri.intContractHeaderId, ri.intOrderId)
+			AND A.intContractDetailId = COALESCE(ri.intContractDetailId, ri.intLineNo) 
+	) contractItem 
 WHERE
 	-- This part is used to convert the IR to Voucher. It should not include the 3rd party vendors
 	(
 		@ysnForVoucher = 1 
 		AND A.intInventoryReceiptId = @intReceiptId 
-		AND (A.intEntityVendorId = IR.intEntityVendorId)		
+		AND (A.intEntityVendorId = IR.intEntityVendorId)
 		AND (
 			(
 				A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) 
 				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
 				OR Billed.dblQtyReceived IS NULL
 			)
-			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
-			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
-		)	
+			/*
+				1. Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
+						2: BASIS 
+						5: DELAYED PRICING 
+
+			*/
+			AND 1 = 
+				CASE 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND CD.intPricingTypeId IN (2, 5) THEN 
+						0 
+					ELSE 
+						1 
+				END 
+		)		
 		AND ISNULL(A.ysnAllowVoucher, 1) = 1
 	)
 	-- This condition is used to insert the other charges, including the 3rd party vendors, to the payable table. 
@@ -822,9 +886,25 @@ WHERE
 				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
 				OR Billed.dblQtyReceived IS NULL
 			)
-			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
-			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+			/*
+				1. Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
+						2: BASIS 
+						5: DELAYED PRICING 
+
+				2. Exclude the charge if contract item is set as ysnAddPayable = 0. 
+
+			*/
+			AND 1 = 
+				CASE 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND CD.intPricingTypeId IN (2, 5) THEN 
+						0 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND ISNULL(contractItem.ysnAddPayable, 1) = 0 THEN 
+						0
+					ELSE 
+						1 
+				END 
 		)
+
 		/*
 			IC-7556
 			If there's a contract involved and it already generated payables for costs/charges, don't re-generate them during posting but remove all of them during unposting.

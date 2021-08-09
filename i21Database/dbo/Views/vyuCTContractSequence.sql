@@ -51,7 +51,12 @@ AS
 			CH.intBookId																AS	intHeaderBookId,
 			CH.intSubBookId																AS	intHeaderSubBookId,
 			CD.intBookId																AS	intDetailBookId,
-			CD.intSubBookId																AS	intDetailSubBookId
+			CD.intSubBookId																AS	intDetailSubBookId,
+			strPackingDescription,
+			intLoadingPortId,
+			CD.intProducerId,
+			CD.intItemContractId,
+			CH.ysnReadOnlyInterCoContract
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId

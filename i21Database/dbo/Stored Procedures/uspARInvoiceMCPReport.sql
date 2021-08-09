@@ -13,21 +13,31 @@ SET ANSI_WARNINGS OFF
 DECLARE @blbLogo 			VARBINARY (MAX) = NULL
       , @blbStretchedLogo 	VARBINARY (MAX) = NULL
 
-SELECT TOP 1 @blbLogo = U.blbFile 
-FROM tblSMUpload U
-INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-  AND A.strComment = 'Header'
+SELECT		TOP 1 @blbLogo = U.blbFile 
+FROM		dbo.tblSMUpload AS U
+INNER JOIN	tblSMAttachment AS A
+ON			U.intAttachmentId = A.intAttachmentId
+INNER JOIN	dbo.tblSMTransaction AS B
+ON			A.intTransactionId = B.intTransactionId
+INNER JOIN	dbo.tblSMScreen AS C
+ON			B.intScreenId = C.intScreenId
+WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+		AND A.strComment = 'Header'
 
-SELECT TOP 1 @blbStretchedLogo = U.blbFile 
-FROM tblSMUpload U
-INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-  AND A.strComment = 'Stretched Header'
+SELECT		TOP 1 @blbLogo = U.blbFile 
+FROM		dbo.tblSMUpload AS U
+INNER JOIN	tblSMAttachment AS A
+ON			U.intAttachmentId = A.intAttachmentId
+INNER JOIN	dbo.tblSMTransaction AS B
+ON			A.intTransactionId = B.intTransactionId
+INNER JOIN	dbo.tblSMScreen AS C
+ON			B.intScreenId = C.intScreenId
+WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+		AND A.strComment = 'Stretched Header'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress
@@ -43,6 +53,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strTruckDriver
 	 , intBillToLocationId
 	 , intShipToLocationId
+	 , dtmShipDate
 	 , strBillToLocationName
 	 , strShipToLocationName
 	 , strBillTo		
@@ -66,6 +77,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblItemPrice
 	 , dblPriceWithTax
 	 , dblTotalPriceWithTax
+	 , dblInvoiceSubtotal
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , dblInvoiceTax
@@ -88,6 +100,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strLocationNumber
 	 , strSalesOrderNumber
 	 , strPaymentInfo
+	 , dtmCreated
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -106,6 +119,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 								  END
 	 , intBillToLocationId		= INV.intBillToLocationId
 	 , intShipToLocationId		= INV.intShipToLocationId
+	 , dtmShipDate				= INV.dtmShipDate
 	 , strBillToLocationName	= BILLTO.strEntityNo
 	 , strShipToLocationName	= SHIPTO.strEntityNo
 	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
@@ -126,7 +140,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId,0)
 	 , intSiteId				= INVOICEDETAIL.intSiteId
 	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
-	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 5 - Honstein' THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
+	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax') THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
 	 , strItemNo				= INVOICEDETAIL.strItemNo
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strContractNo			= INVOICEDETAIL.strContractNo
@@ -135,6 +149,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dblItemPrice				= INVOICEDETAIL.dblTotal
 	 , dblPriceWithTax			= INVOICEDETAIL.dblPriceWithTax
 	 , dblTotalPriceWithTax		= INVOICEDETAIL.dblTotalPriceWithTax
+	 , dblInvoiceSubtotal		= ISNULL(INV.dblInvoiceSubtotal, 0)
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
@@ -154,8 +169,8 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , intTicketId				= ISNULL(TICKETDETAILS.intTicketId, 0)
 	 , strTicketNumbers			= TICKETDETAILS.strTicketNumbers
-	 , dtmLoadedDate			= TICKETDETAILS.dtmLoadedDate
-	 , dtmScaleDate				= TICKETDETAILS.dtmScaleDate
+	 , dtmLoadedDate			= INV.dtmShipDate
+	 , dtmScaleDate				= INV.dtmPostDate
 	 , strCommodity				= TICKETDETAILS.strCommodity
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , blbSignature				= INV.blbSignature
@@ -163,6 +178,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strLocationNumber		= [LOCATION].strLocationNumber
 	 , strSalesOrderNumber		= SO.strSalesOrderNumber
 	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
+	 , dtmCreated				= GETDATE()
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (
@@ -320,10 +336,10 @@ OUTER APPLY (
 ) MESSAGES
 WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strRequestId = @strRequestId
-  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein')
 
 --HONSTEIN TAX DETAILS
-IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 5 - Honstein')
+IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax'))
 	BEGIN
 		DECLARE @strRemitToAddress	NVARCHAR(MAX)	= NULL
 
@@ -350,7 +366,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		)
 		SELECT intEntityUserId		= @intEntityUserId
 			, strRequestId			= @strRequestId
-			, strInvoiceFormat		= 'Format 5 - Honstein'
+			, strInvoiceFormat		= strInvoiceFormat
 			, strItemComments		= STAGING.strItemComments
 			, dblInvoiceTotal		= STAGING.dblInvoiceTotal
 			, dblAmountDue			= STAGING.dblAmountDue
@@ -385,14 +401,14 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		) TAXES ON ID.intInvoiceDetailId = TAXES.intInvoiceDetailId
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
-		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		  AND ID.dblTotalTax <> 0
 
 		UNION ALL
 
 		SELECT intEntityUserId		= @intEntityUserId
 			, strRequestId			= @strRequestId
-			, strInvoiceFormat		= 'Format 5 - Honstein'
+			, strInvoiceFormat		= strInvoiceFormat
 			, strItemComments		= STAGING.strItemComments
 			, dblInvoiceTotal		= STAGING.dblInvoiceTotal
 			, dblAmountDue			= STAGING.dblAmountDue
@@ -413,10 +429,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 						  , dblAmountDue
 						  , blbSignature
 						  , strComments
+						  , strInvoiceFormat
 			FROM tblARInvoiceReportStagingTable
 			WHERE intEntityUserId = @intEntityUserId
 		      AND strRequestId = @strRequestId
-		      AND strInvoiceFormat = 'Format 5 - Honstein'
+		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		) STAGING 
 		INNER JOIN (
 			SELECT intInvoiceId			= ID.intInvoiceId
@@ -477,18 +494,19 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , blbLogo					= ORIG.blbLogo
 		  , strUnitMeasure			= ORIG.strUnitMeasure
 		  , strSalesOrderNumber		= ORIG.strSalesOrderNumber
+		  , dblPrice				= STAGING.dblItemPrice / STAGING.dblQtyShipped
 		FROM tblARInvoiceReportStagingTable STAGING
 		INNER JOIN (
 			SELECT *
 			FROM tblARInvoiceReportStagingTable
 			WHERE intEntityUserId = @intEntityUserId
 		  	  AND strRequestId = @strRequestId
-		      AND strInvoiceFormat = 'Format 5 - Honstein'
+		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 			  AND blbLogo IS NOT NULL
 		) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.strItemNo = 'State Sales Tax')
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
-		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		  AND STAGING.strItemNo IN ('Tax', 'State Sales Tax')
 
 		UPDATE tblARInvoiceReportStagingTable
@@ -499,7 +517,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , intSortId			= CASE WHEN strItemNo IN ('Tax') THEN 99999999 ELSE intInvoiceDetailId END
 		WHERE intEntityUserId = @intEntityUserId
 		  AND strRequestId = @strRequestId
-		  AND strInvoiceFormat = 'Format 5 - Honstein'
+		  AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 
 		UPDATE STAGING
 		SET dblTotalTax = STAGING.dblTotalTax - SST.dblTotalSST
@@ -516,269 +534,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		) SST ON STAGING.intInvoiceDetailId = SST.intInvoiceDetailId
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
-		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		  AND STAGING.strItemNo <> 'State Sales Tax'
-
-		INSERT INTO tblARInvoiceReportStagingTableCopy (
-			  intInvoiceId
-			, intCompanyLocationId
-			, intEntityCustomerId
-			, intEntityUserId
-			, intInvoiceDetailId
-			, intTaxCodeId
-			, intDetailCount
-			, intRecipeId
-			, intOneLinePrintId
-			, intTruckDriverId
-			, intBillToLocationId
-			, intShipToLocationId
-			, intTermId
-			, intShipViaId
-			, intSiteId
-			, intItemId
-			, intTicketId
-			, strRequestId
-			, strCompanyName
-			, strCompanyAddress
-			, strCompanyInfo
-			, strCompanyPhoneNumber
-			, strCompanyEmail
-			, strCompanyLocation
-			, strRemitToAddress
-			, strType
-			, strTicketType
-			, strCustomerName
-			, strCustomerNumber
-			, strLocationName
-			, strLocationNumber
-			, strCurrency
-			, strInvoiceNumber
-			, strSalesOrderNumber
-			, strBillToLocationName
-			, strShipToLocationName
-			, strBillTo
-			, strShipTo
-			, strSalespersonName
-			, strPONumber
-			, strBOLNumber
-			, strPaymentInfo
-			, strShipVia
-			, strTerm
-			, strFreightTerm
-			, strDeliverPickup
-			, strInvoiceHeaderComment
-			, strInvoiceFooterComment
-			, strItemNo
-			, strContractNumber
-			, strItem
-			, strItemDescription
-			, strUnitMeasure
-			, strUnitMeasureSymbol
-			, strPaid
-			, strPosted
-			, strTaxCode
-			, strTransactionType
-			, strInvoiceComments
-			, strItemComments
-			, strPaymentComments
-			, strCustomerComments
-			, strItemType
-			, strVFDDocumentNumber
-			, strBOLNumberDetail
-			, strProvisional
-			, strTicketNumbers
-			, strTicketNumber
-			, strTicketNumberDate
-			, strCustomerReference
-			, strSalesReference
-			, strPurchaseReference
-			, strLoadNumber
-			, strEntityContract
-			, strSiteNumber
-			, strAddonDetailKey
-			, strTruckDriver
-			, strSource
-			, strOrigin
-			, strComments
-			, strContractNo
-			, strContractNoSeq
-			, strInvoiceFormat
-			, strBargeNumber
-			, strCommodity
-			, strSubFormula
-			, strTrailer
-			, strSeals
-			, strLotNumber
-			, dblInvoiceSubtotal
-			, dblShipping
-			, dblTax
-			, dblInvoiceTotal
-			, dblAmountDue
-			, dblContractBalance
-			, dblQtyShipped
-			, dblQtyOrdered
-			, dblDiscount
-			, dblTotalTax
-			, dblPrice
-			, dblItemPrice
-			, dblTaxDetail
-			, dblTotalWeight
-			, dblTotalProvisional
-			, dblEstimatedPercentLeft
-			, dblPercentFull
-			, dblInvoiceTax
-			, dblPriceWithTax
-			, dblTotalPriceWithTax
-			, ysnHasEmailSetup
-			, ysnHasRecipeItem
-			, ysnHasVFDDrugItem
-			, ysnHasProvisional
-			, ysnPrintInvoicePaymentDetail
-			, ysnListBundleSeparately
-			, ysnHasAddOnItem
-			, ysnStretchLogo
-			, ysnHasSubFormula
-			, dtmDate
-			, dtmPostDate
-			, dtmShipDate
-			, dtmDueDate
-			, dtmLoadedDate
-			, dtmScaleDate
-			, blbLogo
-			, blbSignature
-			, dtmCreated
-			, intSortId
-		)
-		SELECT intInvoiceId
-			, intCompanyLocationId
-			, intEntityCustomerId
-			, intEntityUserId
-			, intInvoiceDetailId
-			, intTaxCodeId
-			, intDetailCount
-			, intRecipeId
-			, intOneLinePrintId
-			, intTruckDriverId
-			, intBillToLocationId
-			, intShipToLocationId
-			, intTermId
-			, intShipViaId
-			, intSiteId
-			, intItemId
-			, intTicketId
-			, strRequestId
-			, strCompanyName
-			, strCompanyAddress
-			, strCompanyInfo
-			, strCompanyPhoneNumber
-			, strCompanyEmail
-			, strCompanyLocation
-			, strRemitToAddress
-			, strType
-			, strTicketType
-			, strCustomerName
-			, strCustomerNumber
-			, strLocationName
-			, strLocationNumber
-			, strCurrency
-			, strInvoiceNumber
-			, strSalesOrderNumber
-			, strBillToLocationName
-			, strShipToLocationName
-			, strBillTo
-			, strShipTo
-			, strSalespersonName
-			, strPONumber
-			, strBOLNumber
-			, strPaymentInfo
-			, strShipVia
-			, strTerm
-			, strFreightTerm
-			, strDeliverPickup
-			, strInvoiceHeaderComment
-			, strInvoiceFooterComment
-			, strItemNo
-			, strContractNumber
-			, strItem
-			, strItemDescription
-			, strUnitMeasure
-			, strUnitMeasureSymbol
-			, strPaid
-			, strPosted
-			, strTaxCode
-			, strTransactionType
-			, strInvoiceComments
-			, strItemComments
-			, strPaymentComments
-			, strCustomerComments
-			, strItemType
-			, strVFDDocumentNumber
-			, strBOLNumberDetail
-			, strProvisional
-			, strTicketNumbers
-			, strTicketNumber
-			, strTicketNumberDate
-			, strCustomerReference
-			, strSalesReference
-			, strPurchaseReference
-			, strLoadNumber
-			, strEntityContract
-			, strSiteNumber
-			, strAddonDetailKey
-			, strTruckDriver
-			, strSource
-			, strOrigin
-			, strComments
-			, strContractNo
-			, strContractNoSeq
-			, strInvoiceFormat
-			, strBargeNumber
-			, strCommodity
-			, strSubFormula
-			, strTrailer
-			, strSeals
-			, strLotNumber
-			, dblInvoiceSubtotal
-			, dblShipping
-			, dblTax
-			, dblInvoiceTotal
-			, dblAmountDue
-			, dblContractBalance
-			, dblQtyShipped
-			, dblQtyOrdered
-			, dblDiscount
-			, dblTotalTax
-			, dblPrice
-			, dblItemPrice
-			, dblTaxDetail
-			, dblTotalWeight
-			, dblTotalProvisional
-			, dblEstimatedPercentLeft
-			, dblPercentFull
-			, dblInvoiceTax
-			, dblPriceWithTax
-			, dblTotalPriceWithTax
-			, ysnHasEmailSetup
-			, ysnHasRecipeItem
-			, ysnHasVFDDrugItem
-			, ysnHasProvisional
-			, ysnPrintInvoicePaymentDetail
-			, ysnListBundleSeparately
-			, ysnHasAddOnItem
-			, ysnStretchLogo
-			, ysnHasSubFormula
-			, dtmDate
-			, dtmPostDate
-			, dtmShipDate
-			, dtmDueDate
-			, dtmLoadedDate
-			, dtmScaleDate
-			, blbLogo
-			, blbSignature
-			, GETDATE() 
-			, intSortId
-		FROM tblARInvoiceReportStagingTable
-		WHERE intEntityUserId = @intEntityUserId 
-		  AND strRequestId = @strRequestId 
-		  AND strInvoiceFormat = 'Format 5 - Honstein'
 	END

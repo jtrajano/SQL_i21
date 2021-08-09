@@ -206,22 +206,22 @@ BEGIN TRY
 				END
 			END
 
-			IF @strLocationName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblSMCompanyLocation CL
-					WHERE CL.strLocationName = @strLocationName
-					)
-			BEGIN
-				IF @strErrorMessage <> ''
-				BEGIN
-					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location Name ' + @strLocationName + ' is not available.'
-				END
-				ELSE
-				BEGIN
-					SELECT @strErrorMessage = 'Location Name ' + @strLocationName + ' is not available.'
-				END
-			END
+			--IF @strLocationName IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblSMCompanyLocation CL
+			--		WHERE CL.strLocationName = @strLocationName
+			--		)
+			--BEGIN
+			--	IF @strErrorMessage <> ''
+			--	BEGIN
+			--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location Name ' + @strLocationName + ' is not available.'
+			--	END
+			--	ELSE
+			--	BEGIN
+			--		SELECT @strErrorMessage = 'Location Name ' + @strLocationName + ' is not available.'
+			--	END
+			--END
 
 			IF @strBook IS NOT NULL
 				AND NOT EXISTS (
@@ -333,12 +333,18 @@ BEGIN TRY
 			FROM tblSMCompanyLocation
 			WHERE strLocationName = @strLocationName
 
+			if @intLocationId is null
+			Begin
+				SELECT @intLocationId = intCompanyLocationId
+				FROM tblSMCompanyLocation
+			End
+
 			SELECT @intUserId = CE.intEntityId
 			FROM tblEMEntity CE
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strCreatedBy
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intUserId IS NULL
 			BEGIN
@@ -601,7 +607,6 @@ BEGIN TRY
 					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
-			--Declare @intBookId int
 			SELECT @intBookId = intBookId
 			FROM tblCTBook
 			WHERE strBook = @strBook
@@ -627,16 +632,15 @@ BEGIN TRY
 				,intCompanyId
 				)
 			SELECT I.intItemId
-				,x.dblSupplyTarget
+				,x.dblTgt
 				,@intBookId
 				,@intSubBookId
 				,NULL AS intCompanyId
 			FROM OPENXML(@idoc, 'vyuMFGetItemSupplyTargets/vyuMFGetItemSupplyTarget', 2) WITH (
-					strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
-					,strCompanyName NVARCHAR(50) Collate Latin1_General_CI_AS
-					,dblSupplyTarget NUMERIC(18, 6)
+					strNo NVARCHAR(50) Collate Latin1_General_CI_AS
+					,dblTgt NUMERIC(18, 6)
 					) x
-			JOIN tblICItem I ON I.strItemNo = x.strItemNo
+			JOIN tblICItem I ON I.strItemNo = x.strNo
 
 			ext:
 
@@ -658,6 +662,8 @@ BEGIN TRY
 			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
+				,@screenId=@intDemandScreenId
+				,@populatedByInterCompany=1
 
 			DECLARE @strSQL NVARCHAR(MAX)
 				,@strServerName NVARCHAR(50)
@@ -670,7 +676,7 @@ BEGIN TRY
 
 			IF EXISTS (
 					SELECT 1
-					FROM master.dbo.sysdatabases
+					FROM sys.databases
 					WHERE name = @strDatabaseName
 					)
 			BEGIN

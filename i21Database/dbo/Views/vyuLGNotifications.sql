@@ -68,7 +68,7 @@ FROM (
 			AND CP.strPositionType = 'Shipment'
 			AND CD.intContractStatusId IN (1,2,4)
 		) t
-		,tblCTEvent EV
+		inner join tblCTEvent EV on 1=1
 	WHERE t.intDayToShipment < EV.intDaysToRemind
 		AND EV.strEventName = 'Contract without Shipping Instruction'
 	
@@ -127,7 +127,7 @@ FROM (
 			AND CH.intContractTypeId = 1
 			AND CD.intContractStatusId IN (1,2,4)
 		) t
-		,tblCTEvent EV
+		inner join tblCTEvent EV on 1=1
 	WHERE t.intDayToShipment > EV.intDaysToRemind
 		AND EV.strEventName = 'Contract without Shipping Advice'
 	
@@ -184,7 +184,7 @@ FROM (
 			AND CH.intContractTypeId = 1
 			AND CD.intContractStatusId IN (1,2,4)
 		) t
-		,tblCTEvent EV
+		inner join tblCTEvent EV on 1=1
 	WHERE t.intDayToShipment < EV.intDaysToRemind
 		AND EV.strEventName = 'Contract Without Document'
 	
@@ -244,7 +244,7 @@ FROM (
 			AND CH.intContractHeaderId IN (SELECT DISTINCT intOrderId FROM tblICInventoryReceiptItem)
 			AND CD.intContractStatusId IN (1,2,4)
 		) t
-		,tblCTEvent EV
+		inner join tblCTEvent EV on 1=1
 	WHERE t.intDayToShipment >= EV.intDaysToRemind
 		AND EV.strEventName = 'Contract Without Weight Claim'
 	
@@ -300,7 +300,7 @@ FROM (
 			AND CH.intContractTypeId = 1
 			AND CD.intContractStatusId IN (1,2,4)
 		) t
-		,tblCTEvent EV
+		inner join tblCTEvent EV on 1=1
 	WHERE t.intDayToShipment > EV.intDaysToRemind
 		AND EV.strEventName = 'Weight Claims w/o Debit Note'
 
@@ -357,7 +357,7 @@ FROM (
 			AND ISNULL(L.ysn4cRegistration,0) =0 
 			AND CD.intContractStatusId IN (1,2,4)
 		) t
-		,tblCTEvent EV
+		inner join tblCTEvent EV on 1=1
 	WHERE EV.strEventName = 'Contracts w/o 4C'
 
 	UNION ALL
@@ -413,6 +413,6 @@ FROM (
 			AND L.dtmBLDate IS NOT NULL
 			AND CD.intContractStatusId IN (1,2,4)
 		) t
-		,tblCTEvent EV
+		inner join tblCTEvent EV on 1=1
 	WHERE EV.strEventName = 'Contracts w/o TC'
 ) tbl

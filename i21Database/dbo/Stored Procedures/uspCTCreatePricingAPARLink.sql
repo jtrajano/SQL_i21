@@ -6,6 +6,7 @@
 	,@intSourceDetailId int --Inventory Shipment Item/Inventory Receipt Item ID
 	,@dblQuantity numeric(18,6) -- Transaction Quantity
 	,@strScreen nvarchar(50) -- the value must be 'Invoice' or 'Voucher'
+	,@ysnReturn bit = 0
 
 as
 begin
@@ -21,6 +22,11 @@ begin
 			,intBillDetailId
 			,intInvoiceId
 			,intInvoiceDetailId
+			,intSourceId
+			,dblQuantity
+			,dtmCreatedDate
+			,ysnMarkDelete
+			,ysnReturn
 			,intConcurrencyId  
 		)  
 		SELECT   
@@ -29,6 +35,11 @@ begin
 			,intBillDetailId = (case when @strScreen = 'Voucher' then @intDetailId else null end)  
 			,intInvoiceId = (case when @strScreen = 'Invoice' then @intHeaderId else null end)  
 			,intInvoiceDetailId = (case when @strScreen = 'Invoice' then @intDetailId else null end)  
+			,intSourceId = @intSourceDetailId
+			,dblQuantity = @dblQuantity
+			,dtmCreatedDate = getdate()
+			,ysnMarkDelete = null
+			,ysnReturn = @ysnReturn
 			,intConcurrencyId = 1 
 
 	end try

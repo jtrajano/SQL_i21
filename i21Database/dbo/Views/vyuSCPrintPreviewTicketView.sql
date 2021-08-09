@@ -152,6 +152,32 @@ AS SELECT
 
 	,tblEMEntity.strName
 	,tblEMEntity.strEntityNo
+    ,strShipToLocationName  = ShipToLocation.strLocationName
+	,strShipToLocationAddress = LTRIM(RTRIM(CASE   
+       WHEN ISNULL(ShipToLocation.strLocationName, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strLocationName + ' '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strAddress, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strAddress + CHAR(13)  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strCity, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strCity + ', '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strState, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strState + ', '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strZipCode, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strZipCode + ', '  
+       END + CASE   
+       WHEN ISNULL(ShipToLocation.strCountry, '') = ''  
+        THEN ''  
+       ELSE ShipToLocation.strCountry  
+       END))  
 	,tblEMEntitySplit.strSplitNumber
 	,vyuEMSearchShipVia.strName AS strHaulerName
 	--,EMDriver.strName AS strDriverName
@@ -217,23 +243,29 @@ AS SELECT
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 	,tblSCTicketFormat.ysnSuppressCashPrice
-	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')  COLLATE Latin1_General_CI_AS
+	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')  --COLLATE Latin1_General_CI_AS
 	,EMScaleOps.strTimezone
 	,SC.strTrailerId
+	,tblSCTicketPrintOption.intTicketPrintOptionId
+	,Destination.strLocationName as strDestinationLocationName
+	,DestinationSubLocation.strSubLocationName as strDestinationSubLocation
+	,DestinationStorageLocation.strName as strDestinationStorageLocation
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
   LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = SC.intSplitId
   LEFT JOIN tblSCScaleSetup tblSCScaleSetup on tblSCScaleSetup.intScaleSetupId = SC.intScaleSetupId
   LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId
-  LEFT JOIN tblSMCompanyLocation Origin on Origin.intCompanyLocationId = SC.intProcessingLocationId
+  LEFT JOIN tblSMCompanyLocation Destination on Destination.intCompanyLocationId = SC.intTransferLocationId
   LEFT JOIN tblSMCompanyLocation SetupLocation on SetupLocation.intCompanyLocationId = tblSCScaleSetup.intLocationId
   LEFT JOIN tblSCListTicketTypes tblSCListTicketTypes on (tblSCListTicketTypes.intTicketType = SC.intTicketType AND tblSCListTicketTypes.strInOutIndicator = SC.strInOutFlag)
   LEFT JOIN tblGRStorageType tblGRStorageType on tblGRStorageType.strStorageTypeCode = SC.strDistributionOption
   LEFT JOIN tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation on tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
+  LEFT JOIN tblSMCompanyLocationSubLocation DestinationSubLocation on DestinationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationToId
   LEFT JOIN tblSCTicketPool tblSCTicketPool on tblSCTicketPool.intTicketPoolId = SC.intTicketPoolId
   LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
   LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
+  LEFT JOIN tblICStorageLocation DestinationStorageLocation on DestinationStorageLocation.intStorageLocationId = SC.intStorageLocationToId
   LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
   LEFT JOIN tblICInventoryReceipt tblICInventoryReceipt on tblICInventoryReceipt.intInventoryReceiptId = SC.intInventoryReceiptId
   LEFT JOIN tblICInventoryShipment tblICInventoryShipment on tblICInventoryShipment.intInventoryShipmentId = SC.intInventoryShipmentId
@@ -242,13 +274,14 @@ AS SELECT
   LEFT JOIN tblSCTicketFormat ON tblSCTicketFormat.intTicketFormatId = tblSCTicketPrintOption.intTicketFormatId
   LEFT JOIN tblICItem IC ON IC.intItemId = SC.intItemId
   LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
-  --LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SC.intEntityContactId
   LEFT JOIN tblEMEntitySignature EM ON EM.intEntityId = SC.intEntityScaleOperatorId
   LEFT JOIN tblSMSignature SMS ON SMS.intSignatureId = EM.intElectronicSignatureId
   LEFT JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SC.intDeliverySheetId
   LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SC.intSalesOrderId
   LEFT JOIN tblICLot ICLot ON ICLot.intLotId = SC.intLotId
   LEFT JOIN tblEMEntityLocation EMScaleOps on EMScaleOps.intEntityId = SC.intEntityScaleOperatorId
+		AND ysnDefaultLocation = 1
+  LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = SC.intShipToLocationId
   OUTER APPLY(
 		SELECT SCSM.strStationShortDescription
 		,SCM.strTicketNumber
@@ -288,6 +321,6 @@ AS SELECT
 		FOR XML PATH('')) 
 
   )SealNumber
-,(
-	SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
-  ) SMCompanySetup
+	OUTER APPLY(
+		SELECT TOP 1 strCompanyName,strCity, strState, strZip,strPhone, strFax, strAddress FROM tblSMCompanySetup
+	) SMCompanySetup

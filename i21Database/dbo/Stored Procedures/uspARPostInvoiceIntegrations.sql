@@ -4,7 +4,7 @@
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
 AS  
-  
+
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
@@ -44,7 +44,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
@@ -56,7 +56,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
@@ -73,9 +73,8 @@ BEGIN
        , ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
        , ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
        , ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
-	   , ARI.intPeriodId       		    = ACCPERIOD.intGLFiscalYearPeriodId
-									  
-    FROM #ARPostInvoiceHeader PID
+	   , ARI.intPeriodId       		    = ACCPERIOD.intGLFiscalYearPeriodId									  
+    FROM ##ARPostInvoiceHeader PID
     INNER JOIN (
 		SELECT intInvoiceId
 			 , strType
@@ -122,7 +121,7 @@ BEGIN
       , ARPD.dblBaseInvoiceTotal	= ARI.dblBaseInvoiceTotal * dbo.[fnARGetInvoiceAmountMultiplier](ARI.strTransactionType)
       , ARPD.dblAmountDue			= (ARI.dblInvoiceTotal + ISNULL(ARPD.dblInterest, @ZeroDecimal))  - (ISNULL(ARPD.dblPayment, @ZeroDecimal) + ISNULL(ARPD.dblDiscount, @ZeroDecimal))
       , ARPD.dblBaseAmountDue		= (ARI.dblBaseInvoiceTotal + ISNULL(ARPD.dblBaseInterest, @ZeroDecimal))  - (ISNULL(ARPD.dblBasePayment, @ZeroDecimal) + ISNULL(ARPD.dblBaseDiscount, @ZeroDecimal))
-    FROM #ARPostInvoiceHeader PID
+    FROM ##ARPostInvoiceHeader PID
     INNER JOIN (
 		SELECT intInvoiceId
 			 , dblInvoiceTotal
@@ -149,7 +148,7 @@ BEGIN
 	UPDATE HDTHW						
 	SET HDTHW.[ysnBilled] = 1
       , HDTHW.[dtmBilled] = (CASE WHEN HDTHW.[dtmBilled] IS NULL THEN GETDATE() ELSE HDTHW.[dtmBilled] END)
-	FROM #ARPostInvoiceHeader PID
+	FROM ##ARPostInvoiceHeader PID
 	INNER JOIN (
 		SELECT [intInvoiceId]
 			 , [dtmBilled]
@@ -165,7 +164,7 @@ BEGIN
 								
 	INSERT INTO @TankDeliveryForSync ([intInvoiceId])
 	SELECT DISTINCT [intInvoiceId] = PID.[intInvoiceId]
-	FROM #ARPostInvoiceDetail PID
+	FROM ##ARPostInvoiceDetail PID
 	INNER JOIN dbo.tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID] 
 								
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForSync)
@@ -182,196 +181,6 @@ BEGIN
 		DELETE FROM @TankDeliveryForSync WHERE [intInvoiceId] = @intInvoiceForSyncId																												
 	END
 
-	--CREATE CREDIT MEMO FOR FINAL INVOICE
-	DECLARE @FinalInvoicesWithCreditMemo AS TABLE (
-		 intInvoiceId		INT
-		, strInvoiceNumber	NVARCHAR(50)
-		, dblAmountDue		NUMERIC(18, 6)
-		, dblBaseAmountDue	NUMERIC(18, 6)
-	)
-
-	INSERT INTO @FinalInvoicesWithCreditMemo
-	SELECT PID.intInvoiceId, PID.strInvoiceNumber, ISNULL(PROVISIONAL.dblInvoiceTotal, 0) - ISNULL(ARI.dblInvoiceTotal, 0), ISNULL(PROVISIONAL.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBaseInvoiceTotal, 0)
-	FROM #ARPostInvoiceHeader PID
-	INNER JOIN (
-		SELECT intInvoiceId, dblInvoiceTotal, dblBaseInvoiceTotal, ysnPosted
-			 , dblPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-	) ARI ON ARI.intInvoiceId = PID.intInvoiceId
-	INNER JOIN (
-		SELECT intInvoiceId, dblInvoiceTotal, dblBaseInvoiceTotal, dblPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-	) PROVISIONAL ON PROVISIONAL.intInvoiceId = PID.intOriginalInvoiceId
-	WHERE PID.intSourceId = 2 AND ISNULL(PID.intOriginalInvoiceId, 0) > 0
-	AND PID.ysnExcludeInvoiceFromPayment = 1
-	AND PID.dblInvoiceTotal < ISNULL(PROVISIONAL.dblInvoiceTotal, 0)
-	AND ARI.ysnPosted = 1
-
-	WHILE EXISTS(SELECT TOP 1 1 FROM @FinalInvoicesWithCreditMemo)
-	BEGIN
-		DECLARE @intFinalInvoiceIdWithCreditMemo	INT = NULL
-			  , @strInvoiceNumber					NVARCHAR(50)
-			  , @InvoiceEntries						InvoiceIntegrationStagingTable
-			  , @LineItemTaxEntries					LineItemTaxDetailStagingTable
-
-		SELECT TOP 1 @intFinalInvoiceIdWithCreditMemo = intInvoiceId, @strInvoiceNumber = strInvoiceNumber
-		FROM @FinalInvoicesWithCreditMemo
-
-		INSERT INTO @InvoiceEntries (
-			[strTransactionType]
-			, [strType]
-			, [strSourceTransaction]
-			, [intOriginalInvoiceId]
-			, [strSourceId]
-			, [intEntityCustomerId]
-			, [intCompanyLocationId]			
-			, [intCurrencyId]
-			, [intEntityId]
-			, [dtmDate]
-			, [dtmDueDate]
-			, [dtmShipDate]
-			, [dtmPostDate]
-			, [ysnPost]
-			, [ysnInventory]
-			, [strItemDescription]
-			, [dblQtyShipped]
-			, [dblPrice]
-			, [intTaxGroupId]
-			, [ysnRecomputeTax]
-		)
-		SELECT [strTransactionType]			= 'Credit Memo' 
-				, [strType]					= 'Standard'
-				, [strSourceTransaction]	= 'Direct'
-				, [intOriginalInvoiceId]	= @intFinalInvoiceIdWithCreditMemo
-				, [strSourceId]				= I.strInvoiceNumber
-				, [intEntityCustomerId]		= I.intEntityCustomerId
-				, [intCompanyLocationId]	= I.intCompanyLocationId			 
-				, [intCurrencyId]			= I.intCurrencyId
-				, [intEntityId]				= @UserId
-				, [dtmDate]					= I.dtmDate
-				, [dtmDueDate]				= I.dtmDate
-				, [dtmShipDate]				= I.dtmDate
-				, [dtmPostDate]				= I.dtmDate
-				, [ysnPost]					= 0
-				, [ysnInventory]			= 0
-				, [strItemDescription]		= 'Credit Memo for ' + @strInvoiceNumber
-				, [dblQtyShipped]			= 1
-				, [dblPrice]				= ISNULL(I.dblProvisionalAmount, 0) - ISNULL(I.dblInvoiceTotal, 0)
-				, [intTaxGroupId]			= NULL
-				, [ysnRecomputeTax]			= 0
-		FROM tblARInvoice I
-		WHERE intInvoiceId = @intFinalInvoiceIdWithCreditMemo
-
-		EXEC dbo.uspARProcessInvoices @InvoiceEntries		= @InvoiceEntries
-									, @LineItemTaxEntries	= @LineItemTaxEntries
-									, @UserId				= 1
-									, @GroupingOption		= 0
-
-		DELETE FROM @FinalInvoicesWithCreditMemo WHERE intInvoiceId = @intFinalInvoiceIdWithCreditMemo
-	END
-
-	--CREATE OVERPAYMENT FOR FINAL INVOICE
-	DECLARE @FinalInvoicesWithOverpayment AS TABLE (
-		 intInvoiceId			INT
-		, intEntityCustomerId	INT
-		, intCompanyLocationId	INT
-		, intCurrencyId			INT
-		, dtmDatePaid			DATETIME
-		, intPaymentMethodId	INT
-		, strPaymentInfo		NVARCHAR(50)
-		, dblAmountPaid			DECIMAL(18, 6)
-		, intAccountId			INT
-	)
-
-	INSERT INTO @FinalInvoicesWithOverpayment
-	SELECT intInvoiceId				= ARI.intInvoiceId
-			,intEntityCustomerId	= ARI.intEntityCustomerId
-			,intCompanyLocationId	= ARI.intCompanyLocationId
-			,intCurrencyId			= ARI.intCurrencyId
-			,dtmDatePaid			= ARI.dtmDate
-			,intPaymentMethodId		= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Prepay')
-			,strPaymentInfo			= ARI.strPaymentInfo
-			,dblAmountPaid			= (CASE WHEN ARI.ysnExcludeFromPayment = 0 THEN PROVISIONAL.dblPayment ELSE ARI.dblProvisionalAmount END) - ARI.dblInvoiceTotal
-			,intInvoiceAccountId	= ARI.intAccountId
-	FROM #ARPostInvoiceHeader PID
-	INNER JOIN (
-		SELECT intInvoiceId
-			, intEntityCustomerId
-			, intCompanyLocationId
-			, intCurrencyId
-			, dtmDate
-			, strPaymentInfo
-			, dblInvoiceTotal
-			, dblProvisionalAmount
-			, intAccountId
-			, dblPayment
-			, intOriginalInvoiceId
-			, intSourceId
-			, ysnPosted
-			, ysnExcludeFromPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)) ARI  ON ARI.intInvoiceId = PID.intInvoiceId
-	INNER JOIN (
-		SELECT intInvoiceId, dblInvoiceTotal, dblPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-	) PROVISIONAL ON PROVISIONAL.intInvoiceId = ARI.intOriginalInvoiceId
-	INNER JOIN tblSMCompanyLocation CL ON ARI.intCompanyLocationId = CL.intCompanyLocationId
-	INNER JOIN tblARCustomer C ON ARI.intEntityCustomerId = C.intEntityId
-	WHERE ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0
-	AND ARI.dblInvoiceTotal < ISNULL(PROVISIONAL.dblPayment, 0)
-	AND ARI.ysnPosted = 1
-
-	WHILE EXISTS(SELECT TOP 1 1 FROM @FinalInvoicesWithOverpayment)
-	BEGIN
-		DECLARE @intFinalInvoiceIdWithOverpayment	INT = NULL
-				, @intEntityCustomerId		INT
-				, @intCompanyLocationId		INT
-				, @intCurrencyId			INT
-				, @dtmDatePaid				DATETIME
-				, @intPaymentMethodId		INT
-				, @strPaymentInfo			NVARCHAR(50)
-				, @dblAmountPaid			DECIMAL(18, 6)
-				, @intAccountId				INT
-				, @intPaymentId				INT
-
-		SELECT TOP 1 
-				@intFinalInvoiceIdWithOverpayment = intInvoiceId
-				,@intEntityCustomerId	= intEntityCustomerId
-				,@intCompanyLocationId	= intCompanyLocationId
-				,@intCurrencyId			= intCurrencyId
-				,@dtmDatePaid			= dtmDatePaid
-				,@intPaymentMethodId	= intPaymentMethodId
-				,@strPaymentInfo		= strPaymentInfo
-				,@dblAmountPaid			= dblAmountPaid
-				,@intAccountId			= intAccountId
-		FROM @FinalInvoicesWithOverpayment
-
-		EXEC dbo.uspARCreateCustomerPayment
-			@EntityCustomerId		= @intEntityCustomerId
-			,@CompanyLocationId		= @intCompanyLocationId
-			,@CurrencyId			= @intCurrencyId
-			,@DatePaid				= @dtmDatePaid
-			,@AccountId				= @intAccountId
-			,@AmountPaid			= @dblAmountPaid
-			,@PaymentMethodId		= @intPaymentMethodId
-			,@EntityId				= 1 
-			,@AllowOverpayment		= 1	
-			,@AllowPrepayment		= 1	
-			,@RaiseError			= 1
-			,@NewPaymentId			= @intPaymentId OUT
-
-		EXEC uspARPostPayment @post = 1, @param = @intPaymentId, @raiseError = 1, @ysnForFinalInvoice = 1
-
-		UPDATE tblARInvoice
-		SET 
-			  dblAmountDue = dblInvoiceSubtotal
-			, dblBaseAmountDue = dblBaseInvoiceSubtotal
-			, dblInvoiceTotal = dblInvoiceSubtotal
-			, dblBaseInvoiceTotal = dblBaseInvoiceSubtotal
-		WHERE intPaymentId = @intPaymentId
-
-		DELETE FROM @FinalInvoicesWithOverpayment WHERE intInvoiceId = @intFinalInvoiceIdWithOverpayment
-	END
-
 	--CREATE PAYMENT FOR PREPAIDS/CREDIT MEMO TAB
 	DECLARE @InvoicesWithPrepaids AS TABLE (
 		  intInvoiceId INT
@@ -381,7 +190,7 @@ BEGIN
 	INSERT INTO @InvoicesWithPrepaids
 	SELECT intInvoiceId
 	     , strTransactionType 
-	FROM #ARPostInvoiceHeader I
+	FROM ##ARPostInvoiceHeader I
 	CROSS APPLY (										
 		SELECT TOP 1 intPrepaymentId
 		FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)
@@ -464,7 +273,7 @@ BEGIN
 	--PREPAIDS
 	DECLARE @Ids Id
 	INSERT INTO @Ids
-	SELECT [intInvoiceId] FROM #ARPostInvoiceHeader
+	SELECT [intInvoiceId] FROM ##ARPostInvoiceHeader
 
 	EXEC dbo.uspARAutoApplyPrepaids @tblInvoiceIds = @Ids
 
@@ -477,7 +286,7 @@ BEGIN
 		(SELECT
 			 [intEntityCustomerId] = [intEntityCustomerId]
 			, [dblTotalInvoice]     = SUM(CASE WHEN [ysnIsInvoicePositive] = 1 THEN [dblInvoiceTotal] - ISNULL(REFUND.dblRefundTotal, 0) ELSE -[dblInvoiceTotal] - ISNULL(REFUND.dblRefundTotal, 0) END)
-		FROM #ARPostInvoiceHeader IH
+		FROM ##ARPostInvoiceHeader IH
 		OUTER APPLY (
 			SELECT dblRefundTotal = SUM(CM.dblInvoiceTotal)
 			FROM tblARInvoiceDetail CR
@@ -492,12 +301,30 @@ BEGIN
 		) REFUND
 		WHERE IH.strTransactionType <> 'Cash'
 		GROUP BY [intEntityCustomerId]
-	) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
+	) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]		
+
+	--UPDATE INVOICE TRANSACTION HISTORY
+	DELETE FROM @Invoices
+	
+	INSERT INTO @Invoices([intHeaderId]) 
+	SELECT [intInvoiceId]
+	FROM ##ARPostInvoiceHeader I
+
+	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 1
 
 	--PATRONAGE
 	DECLARE	@successfulCountP	INT
-		  , @strId				NVARCHAR(MAX)
+		  , @strId				NVARCHAR(MAX)	
 
+	SELECT @strId = COALESCE(@strId + ',' ,'') + CAST([intHeaderId] AS NVARCHAR(250)) FROM @Invoices
+
+	EXEC [dbo].[uspPATGatherVolumeForPatronage]
+		 @transactionIds	= @strId
+		,@post				= 1
+		,@type				= 2
+		,@successfulCount	= @successfulCountP OUTPUT
+
+	--LOAD SHIPMENT
 	DECLARE @IdsP TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
@@ -521,8 +348,8 @@ BEGIN
 		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
 		 , [ysnProvisionalWithGL]	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-	FROM #ARPostInvoiceHeader I
-	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
+	FROM ##ARPostInvoiceHeader I
+	INNER JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -531,22 +358,6 @@ BEGIN
 		AND I.strInvoiceOriginId = RET.strInvoiceNumber
 		AND I.intOriginalInvoiceId = RET.intInvoiceId
 	) RI
-
-	SELECT @strId = COALESCE(@strId + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250)) FROM @IdsP
-
-	EXEC [dbo].[uspPATGatherVolumeForPatronage]
-		 @transactionIds	= @strId
-		,@post				= 1
-		,@type				= 2
-		,@successfulCount	= @successfulCountP OUTPUT
-
-	--UPDATE INVOICE TRANSACTION HISTORY
-	DELETE FROM @Invoices
-	
-	INSERT INTO @Invoices([intHeaderId]) 
-	SELECT [intInvoiceId] FROM @IdsP
-
-    EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 1
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsP)
 	BEGIN
@@ -565,15 +376,6 @@ BEGIN
 				   , @ysnFromReturnP		= [ysnFromReturn]
 		FROM @IdsP 
 		ORDER BY [intInvoiceId]
-
-		--COMMITTED QTY
-		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
-
-		--IN TRANSIT OUTBOUND QTY
-		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDP, 1
-
-		--IN TRANSIT DIRECT QTY
-		EXEC dbo.[uspARUpdateInTransitDirect] @InvoiceIDP, 1
 
 		--LOAD SHIPMENT
         IF @FromProvisionalP = 0 OR @ProvisionalWithGLP = 0
@@ -613,7 +415,7 @@ BEGIN
 	INSERT INTO @FinishedGoodItems
 	SELECT DISTINCT [intInvoiceDetailId] = UPD.[intInvoiceDetailId]
 			      , [intUserId]          = UPD.[intUserId]
-	FROM #ARPostInvoiceDetail UPD
+	FROM ##ARPostInvoiceDetail UPD
 	INNER JOIN tblMFWorkOrder MFWO ON UPD.[intInvoiceDetailId] = MFWO.[intInvoiceDetailId]
 	WHERE UPD.[ysnBlended] = 1
 
@@ -646,7 +448,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
@@ -658,7 +460,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
@@ -673,10 +475,9 @@ BEGIN
 		, ARI.dblPayment				= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END
 		, ARI.dblBasePayment			= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END
 		, ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
-		, ARI.ysnExcludeFromPayment		= 0
 		, ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
 		, ARI.intPeriodId				= NULL
-	FROM #ARPostInvoiceHeader PID
+	FROM ##ARPostInvoiceHeader PID
 	INNER JOIN (
 		SELECT intInvoiceId
 			 , ysnPosted
@@ -722,7 +523,7 @@ BEGIN
 	UPDATE HDTHW						
 	SET HDTHW.ysnBilled = 0
 	  , HDTHW.dtmBilled = NULL
-	FROM #ARPostInvoiceHeader PID
+	FROM ##ARPostInvoiceHeader PID
 	INNER JOIN (
 		SELECT intInvoiceId
 			 , dtmBilled
@@ -733,7 +534,7 @@ BEGIN
 	DELETE PD
 	FROM tblARPaymentDetail PD
 	INNER JOIN tblARPayment P ON P.intPaymentId = PD.intPaymentId AND P.ysnPosted = 0
-	WHERE PD.intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM #ARPostInvoiceHeader WHERE [ysnPost] = 0)
+	WHERE PD.intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM ##ARPostInvoiceHeader WHERE [ysnPost] = 0)
 						
 	DECLARE @TankDeliveryForUnSync TABLE (
 		  [intInvoiceId] INT
@@ -743,7 +544,7 @@ BEGIN
 	--TANK DELIVERY SYNC							
 	INSERT INTO @TankDeliveryForUnSync
 	SELECT DISTINCT [intInvoiceId] = PID.[intInvoiceId]
-	FROM #ARPostInvoiceDetail PID
+	FROM ##ARPostInvoiceDetail PID
 	INNER JOIN dbo.tblTMSite TMS WITH (NOLOCK) ON PID.[intSiteId] = TMS.[intSiteID]				
 															
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForUnSync ORDER BY intInvoiceId)
@@ -762,7 +563,7 @@ BEGIN
 	DECLARE @CashRefunds AS TABLE (intInvoiceId INT)
 
 	INSERT INTO @CashRefunds
-	SELECT intInvoiceId FROM #ARPostInvoiceHeader I
+	SELECT intInvoiceId FROM ##ARPostInvoiceHeader I
 	CROSS APPLY (										
 		SELECT TOP 1 intPrepaymentId
 		FROM dbo.tblARPrepaidAndCredit WITH (NOLOCK)
@@ -803,7 +604,7 @@ BEGIN
 	DELETE CF 
 	FROM tblCMUndepositedFund CF
 	INNER JOIN
-		#ARPostInvoiceHeader I
+		##ARPostInvoiceHeader I
 			ON CF.intSourceTransactionId = I.intInvoiceId 
 			AND CF.strSourceTransactionId = I.strInvoiceNumber
 	WHERE CF.strSourceSystem = 'AR'
@@ -815,7 +616,7 @@ BEGIN
 	INNER JOIN (
 		SELECT [intEntityCustomerId] = [intEntityCustomerId]
 			 , [dblTotalInvoice]     = SUM(CASE WHEN [ysnIsInvoicePositive] = 1 THEN [dblInvoiceTotal] - ISNULL(REFUND.dblRefundTotal, 0) ELSE -[dblInvoiceTotal] - ISNULL(REFUND.dblRefundTotal, 0) END)
-		FROM #ARPostInvoiceHeader IH
+		FROM ##ARPostInvoiceHeader IH
 		OUTER APPLY (
 			SELECT dblRefundTotal = SUM(CM.dblInvoiceTotal)
 			FROM tblARInvoiceDetail CR
@@ -830,12 +631,29 @@ BEGIN
 		) REFUND
 		WHERE IH.strTransactionType <> 'Cash'
 		GROUP BY [intEntityCustomerId]
-		) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
+	) INVOICE ON CUSTOMER.intEntityId = INVOICE.[intEntityCustomerId]
+
+	--UPDATE INVOICE TRANSACTION HISTORY
+	DELETE FROM @Invoices
+	
+	INSERT INTO @Invoices([intHeaderId]) 
+	SELECT [intInvoiceId] 
+	FROM ##ARPostInvoiceHeader
+
+    EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 0
 
 	--PATRONAGE
 	DECLARE	@successfulCountU	INT
 		  , @strIdU				NVARCHAR(MAX)
 
+	SELECT @strIdU = COALESCE(@strIdU + ',' ,'') + CAST([intHeaderId] AS NVARCHAR(250)) FROM @Invoices
+
+	EXEC [dbo].[uspPATGatherVolumeForPatronage] @transactionIds		= @strIdU
+											  , @post				= 0
+											  , @type				= 2
+											  , @successfulCount	= @successfulCountU OUTPUT	
+
+	--LOAD SHIPMENT										  
 	DECLARE @IdsU TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
@@ -859,8 +677,8 @@ BEGIN
 		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
 		 , [ysnProvisionalWithGL] 	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-	FROM #ARPostInvoiceHeader I
-	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
+	FROM ##ARPostInvoiceHeader I
+	INNER JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -869,22 +687,6 @@ BEGIN
 		AND I.strInvoiceOriginId = RET.strInvoiceNumber
 		AND I.intOriginalInvoiceId = RET.intInvoiceId
 	) RI
-
-
-	SELECT @strIdU = COALESCE(@strIdU + ',' ,'') + CAST([intInvoiceId] AS NVARCHAR(250)) FROM @IdsU
-
-	EXEC [dbo].[uspPATGatherVolumeForPatronage] @transactionIds		= @strIdU
-											  , @post				= 0
-											  , @type				= 2
-											  , @successfulCount	= @successfulCountU OUTPUT
-
-	--UPDATE INVOICE TRANSACTION HISTORY
-	DELETE FROM @Invoices
-	
-	INSERT INTO @Invoices([intHeaderId]) 
-	SELECT [intInvoiceId] FROM @IdsU
-
-    EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @Invoices, 0
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @IdsU)
 	BEGIN
@@ -903,15 +705,6 @@ BEGIN
 				   , @ysnFromReturnU		= [ysnFromReturn]
 		FROM @IdsU 
 		ORDER BY [intInvoiceId]
-		
-		--COMMITTED QTY
-		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
-
-		--IN TRANSIT OUTBOUND QTY
-		EXEC dbo.[uspARUpdateInTransit] @InvoiceIDU, 0
-
-		--IN TRANSIT DIRECT QTY
-		EXEC dbo.[uspARUpdateInTransitDirect] @InvoiceIDU, 0
 
 		--LOAD SHIPMENT
         IF @FromProvisionalU = 0 OR @ProvisionalWithGLU = 0
@@ -984,7 +777,7 @@ BEGIN
 					33
 			END
 	FROM 
-		#ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
+		##ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
 			ON I.strInvoiceNumber = Inv.strInvoiceNumber
 		INNER JOIN tblARInvoiceDetail InvDet
 			ON InvDet.intInvoiceId = Inv.intInvoiceId
@@ -1034,7 +827,7 @@ BEGIN
 					33
 			END
 	FROM 
-		#ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
+		##ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
 			ON I.strInvoiceNumber = Inv.strInvoiceNumber
 		INNER JOIN tblARPrepaidAndCredit Prepaid
 			ON Prepaid.intInvoiceId = Inv.intInvoiceId
@@ -1066,7 +859,7 @@ SET [dtmCreditLimitReached] =  CASE WHEN ISNULL(CUSTOMER.[dblARBalance], 0) >= I
 FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
 CROSS APPLY (
 	SELECT TOP 1 I.[dtmPostDate]
-	FROM #ARPostInvoiceHeader I
+	FROM ##ARPostInvoiceHeader I
 	WHERE I.[intEntityCustomerId] = CUSTOMER.[intEntityId]
 	ORDER BY I.[dtmPostDate] DESC
 ) INVOICE
@@ -1075,10 +868,10 @@ WHERE ISNULL(CUSTOMER.[dblCreditLimit], @ZeroDecimal) > @ZeroDecimal
 --UPDATE BATCH ID
 UPDATE INV
 SET INV.[strBatchId]	 = CASE WHEN PID.[ysnPost] = 1 THEN PID.[strBatchId] ELSE NULL END
-  , INV.[dtmBatchDate]  = CASE WHEN PID.[ysnPost] = 1 THEN PID.[dtmPostDate] ELSE NULL END
+  , INV.[dtmBatchDate]  = CASE WHEN PID.[ysnPost] = 1 THEN CAST(GETDATE() AS DATE) ELSE NULL END
   , INV.[intPostedById] = CASE WHEN PID.[ysnPost] = 1 THEN PID.[intUserId] ELSE NULL END
 FROM tblARInvoice INV
-INNER JOIN #ARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
+INNER JOIN ##ARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
 
 --UPDATE CONTRACT BALANCE
 EXEC dbo.uspARUpdateContractOnPost @UserId
@@ -1088,7 +881,7 @@ DECLARE @tblContractsFinancial AS Id
 
 INSERT INTO @tblContractsFinancial
 SELECT DISTINCT intInvoiceId
-FROM #ARPostInvoiceDetail 
+FROM ##ARPostInvoiceDetail 
 WHERE intContractDetailId IS NOT NULL
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblContractsFinancial)
@@ -1148,7 +941,7 @@ SELECT intTransactionId			= PID.intInvoiceId
 	, intItemContractHeaderId	= ID.intItemContractHeaderId
 	, intItemContractDetailId	= ID.intItemContractDetailId
 	, intItemContractLineNo		= ICD.intLineNo
-FROM #ARPostInvoiceDetail PID
+FROM ##ARPostInvoiceDetail PID
 INNER JOIN tblARInvoiceDetail ID ON PID.intInvoiceDetailId = ID.intInvoiceDetailId
 INNER JOIN tblCTItemContractDetail ICD ON ID.intItemContractDetailId = ICD.intItemContractDetailId
 WHERE ID.intItemContractDetailId IS NOT NULL
@@ -1156,9 +949,18 @@ WHERE ID.intItemContractDetailId IS NOT NULL
 
 EXEC dbo.uspCTItemContractInvoicePosted @tblItemContracts, @UserId
 
+--UPDATE INVENTORY ITEM COMMITTED
+EXEC dbo.[uspARUpdateCommitted]
+
+--IN TRANSIT OUTBOUND QTY
+EXEC dbo.[uspARUpdateInTransit]
+
+--IN TRANSIT DIRECT QTY
+EXEC dbo.[uspARUpdateInTransitDirect]
+
 DELETE A
 FROM tblARPrepaidAndCredit A
-INNER JOIN #ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId 
+INNER JOIN ##ARPostInvoiceHeader B ON A.intInvoiceId = B.intInvoiceId 
 WHERE ysnApplied = 0
 
 --POST RESULT
@@ -1176,36 +978,27 @@ IF @IntegrationLogId IS NULL
 			, [strInvoiceNumber]
 			, [strBatchId]
 			, [intInvoiceId]
-		FROM #ARPostInvoiceHeader
+		FROM ##ARPostInvoiceHeader
 	END
 
-DECLARE @strRowState			NVARCHAR(50) = (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
-DECLARE @tblInvoicesToUpdate	AS Id
+DECLARE @tblInvoicesToUpdate	AS InvoiceId
 
-INSERT INTO @tblInvoicesToUpdate
-SELECT DISTINCT intInvoiceId
-FROM #ARPostInvoiceHeader
+INSERT INTO @tblInvoicesToUpdate (intHeaderId, ysnPost, strTransactionType)
+SELECT DISTINCT intHeaderId	= intInvoiceId
+			  , ysnPost 	= @Post
+			  , strTransactionType	= (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
+FROM ##ARPostInvoiceHeader
 
-WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesToUpdate)
-	BEGIN
-		DECLARE @intInvoiceId 	INT	= NULL
-			  , @dtmInvoiceDate	DATETIME = NULL
+--UPDATE GROSS MARGIN SUMMARY
+EXEC dbo.uspARInvoiceGrossMarginSummary @ysnRebuild = 0
+									  , @InvoiceId	= @tblInvoicesToUpdate
 
-		SELECT TOP 1 @intInvoiceId = intId
-				   , @dtmInvoiceDate = CASE WHEN @Post = 1 THEN NULL ELSE I.dtmPostDate END
-		FROM @tblInvoicesToUpdate U
-		INNER JOIN tblARInvoice I ON U.intId = I.intInvoiceId
+--INTER COMPANY PRE-STAGE
+EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdate
+									    , @intUserId		= @UserId		
 
-		--INTER COMPANY PRE-STAGE
-		EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, @strRowState, @UserId
-		--UPDATE GROSS MARGIN SUMMARY
-		EXEC dbo.uspARInvoiceGrossMarginSummary @ysnPosted 		= @Post
-    										  , @ysnRebuild 	= 0
-											  , @intInvoiceId 	= @intInvoiceId
-											  , @dtmDate	  	= @dtmInvoiceDate
-		
-		DELETE FROM @tblInvoicesToUpdate WHERE intId = @intInvoiceId
-	END
+--Create inventory receipt to another company
+EXEC [dbo].[uspARInterCompanyIntegrationSource] @BatchId = @BatchId, @Post = @Post
 
 --AUDIT LOG
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
@@ -1233,9 +1026,9 @@ SELECT DISTINCT
 	,[strFromValue]				= ''
 	,[strToValue]				= [strInvoiceNumber]
 	,[strDetails]				= NULL
-FROM #ARPostInvoiceHeader
+FROM ##ARPostInvoiceHeader
 
-EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
+EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 
 END TRY
 BEGIN CATCH

@@ -124,6 +124,7 @@ BEGIN TRY
 			,strRowState
 			,strItemGroupName
 			,intRecipeItemId
+			,ysnImport
 			)
 		SELECT R.strName
 			,CL.strLocationName
@@ -157,6 +158,7 @@ BEGIN TRY
 				END
 			,RI.strItemGroupName
 			,RI.intRecipeItemId
+			,0 AS ysnImport
 		FROM tblMFRecipe R
 		JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = R.intLocationId
 		JOIN tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId

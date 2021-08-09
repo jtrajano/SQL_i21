@@ -1,4 +1,4 @@
-﻿
+
 CREATE PROCEDURE [uspCMFindMatchingRecordsForBankRecon]
 	@strBankStatementImportId NVARCHAR(40) = NULL,
 	@intBankAccountId INT,

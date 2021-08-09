@@ -212,7 +212,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= @currentDateTime
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal','Imported Journal') THEN REPLACE(B.[strSourceType],' ','')
+			,[strCode]				= CASE	WHEN ISNULL(B.[strJournalType],'') IN ('Origin Journal','Adjusted Origin Journal','Imported Journal') THEN REPLACE(ISNULL(B.[strSourceType],''),' ','')
 											ELSE 'GJ' END 
 								
 			,[strJournalLineDescription] = A.[strDescription]
@@ -334,10 +334,12 @@ UPDATE  b SET ysnReversed = 1 FROM tblGLJournal j
 
 
 UPDATE j SET intFiscalPeriodId = f.intGLFiscalYearPeriodId, intFiscalYearId = f.intFiscalYearId
-	FROM tblGLJournal j, tblGLFiscalYearPeriod f, @tmpValidJournals t
+	FROM tblGLJournal j
+		inner join tblGLFiscalYearPeriod f on 1=1
+		inner join @tmpValidJournals t on t.intJournalId = j.intJournalId
 	WHERE j.dtmDate >= f.dtmStartDate and j.dtmDate <= f.dtmEndDate
 	AND j.ysnPosted = 1
-	AND t.intJournalId = j.intJournalId
+
 
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -491,6 +493,7 @@ BEGIN
 			INNER join tblGLJournal C on A. intJournalId = C.intJournalId
 			OUTER APPLY dbo.fnGLGetExchangeRate(@intCurrencylId,A.intCurrencyExchangeRateTypeId,@dtmDate_NEW) B
 			WHERE A.intJournalId = @intJournalId
+			ORDER BY A.intJournalDetailId
 							
 		DELETE FROM @tmpReverseJournals WHERE intJournalId = @intJournalId
 	END 	

@@ -13,6 +13,7 @@
 	
 	dblOpeningQty NUMERIC(28, 2) NULL,		
 	dblReceivedQty NUMERIC(28, 2) NULL,		
+	dblInventoryCountQty NUMERIC(28, 20) NULL,
 	dblInvoicedQty NUMERIC(28, 2) NULL,		
 	dblAdjustments NUMERIC(28, 2) NULL,		
 	dblTransfersReceived NUMERIC(28, 2) NULL,

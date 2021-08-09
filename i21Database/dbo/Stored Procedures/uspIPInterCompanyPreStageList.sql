@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageList @intListId INT
+	,@strListName NVARCHAR(50) = NULL
 	,@strRowState NVARCHAR(50) = NULL
 	,@intUserId INT = NULL
 AS
@@ -14,12 +15,14 @@ BEGIN TRY
 
 	INSERT INTO tblQMListPreStage (
 		intListId
+		,strListName
 		,strRowState
 		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intListId
+		,@strListName
 		,@strRowState
 		,@intUserId
 		,''

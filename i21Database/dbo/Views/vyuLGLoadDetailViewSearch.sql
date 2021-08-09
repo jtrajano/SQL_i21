@@ -155,6 +155,9 @@ SELECT   L.intLoadId
         ,strHauler = Hauler.strName
         ,strDriver = Driver.strName
 		,strDispatcher = US.strUserName 
+		,strShippingLine = ShippingLine.strName
+		,strForwardingAgent = ForwardingAgent.strName
+		,L.strBookingReference
         ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
 									THEN CAST(ST.strTicketNumber AS VARCHAR(100))
 								 WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
@@ -180,21 +183,33 @@ SELECT   L.intLoadId
 			WHEN 1 THEN 'Scheduled'
 			WHEN 2 THEN 'Dispatched'
 			WHEN 3 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Inbound Transit' END
+				CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Inbound Transit' END
 			WHEN 4 THEN 'Received'
 			WHEN 5 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Outbound Transit' END
+				CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Outbound Transit' END
 			WHEN 6 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Delivered' END
+				CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Delivered' END
 			WHEN 7 THEN 
 				CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
 						ELSE 'Shipping Instruction Created' END
@@ -254,6 +269,8 @@ LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
 LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
 LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId

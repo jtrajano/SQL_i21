@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFRepostCostAdjustment 
 	@strCostAdjustmentBatchId AS NVARCHAR(50)
 	,@intEntityUserSecurityId AS INT
+	,@dtmDate AS DATETIME = NULL -- This is used to fix the stock rebuild.
 AS
 BEGIN TRY
 	DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
@@ -44,6 +45,8 @@ BEGIN TRY
 	DECLARE @unpostCostAdjustment AS ItemCostAdjustmentTableType
 	DECLARE @strBatchIdForUnpost AS NVARCHAR(50)
 		,@strBatchIdForRepost AS NVARCHAR(50)
+
+	Select @strBatchIdForRepost=@strCostAdjustmentBatchId
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intWorkOrderId = intWorkOrderId
@@ -250,7 +253,7 @@ BEGIN TRY
 					AND IL.intLocationId = @intLocationId
 				))
 		,[intItemUOMId] = PL.intItemUOMId
-		,[dtmDate] = IsNull(Isnull(@dtmCurrentDateTime,W.dtmPostDate), W.dtmCompletedDate)
+		,[dtmDate] = COALESCE(@dtmDate, @dtmCurrentDateTime, W.dtmPostDate, W.dtmCompletedDate) --IsNull(Isnull(@dtmCurrentDateTime,W.dtmPostDate), W.dtmCompletedDate)
 		,[dblQty] = 0
 		,[dblUOMQty] = 1
 		,[intCostUOMId] = PL.intItemUOMId
@@ -275,8 +278,8 @@ BEGIN TRY
 		,[strTransactionId] = W.strWorkOrderNo
 		,[intTransactionTypeId] = 9
 		,[intLotId] = IsNULL(PL.intProducedLotId, PL.intLotId)
-		,[intSubLocationId] = L.intSubLocationId
-		,[intStorageLocationId] = L.intStorageLocationId
+		,[intSubLocationId] = IsNULL(L.intSubLocationId,SL.intSubLocationId)
+		,[intStorageLocationId] =IsNULL(L.intStorageLocationId,PL.intStorageLocationId)
 		,[ysnIsStorage] = NULL
 		,[strActualCostId] = NULL
 		,[intSourceTransactionId] = intBatchId
@@ -289,6 +292,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = PL.intItemId
 		AND IU.intUnitMeasureId = @intUnitMeasureId
 	LEFT JOIN tblICLot L ON L.intLotId = PL.intProducedLotId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = PL.intStorageLocationId
 	LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
 		AND RI.intItemId = PL.intItemId
 		AND RI.intRecipeItemTypeId = 2
@@ -476,9 +480,9 @@ BEGIN TRY
 			FROM @adjustedEntries
 			)
 	BEGIN
-		-- Get a new batch id to repost the cost adjustment. 
-		EXEC uspSMGetStartingNumber 3
-			,@strBatchIdForRepost OUT
+		---- Get a new batch id to repost the cost adjustment. 
+		--EXEC uspSMGetStartingNumber 3
+		--	,@strBatchIdForRepost OUT
 
 		SET @intReturnValue = 0
 
@@ -574,6 +578,11 @@ BEGIN TRY
 				END
 		END
 	END
+	ELSE 
+	BEGIN 			
+		-- 'Cost adjustment for {Batch Id} is missing. Stock rebuild will abort.'
+		EXEC uspICRaiseError 80265, @strCostAdjustmentBatchId; 	
+	END 
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
@@ -592,4 +601,6 @@ BEGIN CATCH
 			,1
 			,'WITH NOWAIT'
 			)
+
+	RETURN -1; 
 END CATCH

@@ -81,6 +81,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\39_ReplicationConfigurationTable_InitOnly.sql
 :r .\SM\DefaultData\40_DisconnectedReplicationTable.sql 
 :r .\SM\DefaultData\41_TaxReportType.sql 
+:r .\SM\DefaultData\42_InterCompanyMasterScreen.sql
+:r .\SM\DefaultData\43_UserRoleAdvancePermission.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
@@ -93,6 +95,15 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_DeleteDuplicateUserPreference.sql
 :r .\SM\2010_RemoveF9Shortcut.sql
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
+:r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
+:r .\SM\2010_UpdateLicenseAgreement.sql
+:r .\SM\2110_CreateIDPGridLayout.sql
+:r .\SM\2110_UpdateAuditLogs.sql
+:r .\SM\2110_AddIDPToCustomerLicenseModule.sql
+:r .\SM\2120_AddUserPortalSettingsToContactImport.sql
+:r .\SM\2120_InsertLanguages.sql
+:r .\SM\2120_UpdateAddonComponents.sql
+:r .\SM\2120_InsertOtherLabels.sql
 
 
 -- Canned Report
@@ -201,6 +212,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\6_PanelOwnerMigration.sql
 :r .\DB\7_Create_BusinessInsights.sql
 
+-- Fixed Assets
+:r .\FA\DefaultData\FixedAssetGroup.sql
+
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
 :r .\GL\DefaultData\1a_AccountStructure.sql
@@ -234,7 +248,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\3_PopulateSourceSystemData.sql
 :r .\CM\4_DataFix.sql
 :r .\CM\5_UndepositedFund.sql
+:r .\CM\6_InsertDefaultDataSync.sql
 :r .\CM\7_AlterCashProjectionView.sql
+:r .\CM\8_FlagCCTransaction.sql
+:r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
@@ -281,6 +298,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultData\Categories1099.sql
 :r .\AP\DefaultData\Categories1099PATR.sql
 :r .\AP\DefaultData\Categories1099DIV.sql
+:r .\AP\DefaultData\Categories1099K.sql
 :r .\AP\ClearPostResult.sql
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
@@ -316,6 +334,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\PurgePayableCompleted.sql
 :r .\AP\UpdatePaymentDetailOffset.sql
 :r .\AP\UpdatePayableFreightTerm.sql
+:r .\AP\NonEmployeeCompensationTo1099NEC.sql
+:r .\AP\InsertClearingTransactionsToClearingTable.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -341,6 +361,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\22_InventoryValuationPerformance.sql
 :r .\IC\24_PopulateTransactionUOM.sql 
 :r .\IC\25_TransactionTypeRename.sql 
+:r .\IC\26_LockAvgCost.sql 
+:r .\IC\27_ActivateItemLocations.sql 
+:r .\IC\28_PopulateICAPClearing.sql 
+:r .\IC\29_CleanupObjects.sql
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -356,6 +380,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
 :r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
+:r .\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql
 
 
 -- Patronage
@@ -382,6 +407,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\1920_Add_Accrued_Payables.sql
 :R .\CT\Create_fnCTFormatNumber.sql
 :R .\CT\2010_AddMissingHistory.sql
+:R .\CT\CTPreference.sql
+:R .\CT\DropUnusedObjects.sql
 :R .\CT\6_Cleanup.sql
 
 --Notes Receivable
@@ -399,7 +426,16 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\GR_FarmField.sql
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
+:R .\GR\StorageHistoryPaidAmount.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
+
+:R .\GR\1920_Dev_Linking_Voucher_Discount.sql
+:R .\GR\StorageInventoryReceipt.sql
+:R .\GR\Fix_NULL_SSId_in_voucher_details.sql
+:R .\GR\UpdateBasisAndSettlementPriceInCustomerStorageTable.sql
+:R .\GR\UpdateStrCodeInTransferStorageGLEntries.sql
+:R .\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql
+:R .\GR\SC_UpdateTicketDWGOriginalUnitsForExistingData.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -535,6 +571,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\02_TerminalControl.sql
 :r .\TF\DefaultData\03_TaxCategory.sql
 :r .\TF\DefaultData\04_TransactionSource.sql
+:r .\TF\DefaultData\05_Locality.sql
 :r .\TF\DefaultData\IN_Indiana.sql
 :r .\TF\DefaultData\IL_Illinois.sql
 :r .\TF\DefaultData\NE_Nebraska.sql
@@ -560,6 +597,12 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\CO_Colorado.sql
 :r .\TF\DefaultData\TN_Tennessee.sql
 :r .\TF\DefaultData\MO_Missouri.sql
+:r .\TF\DefaultData\MD_Maryland.sql
+:r .\TF\DefaultData\VA_Virginia.sql
+:r .\TF\DefaultData\DC_DistrictColumbia.sql
+:r .\TF\DefaultData\GA_Georgia.sql
+:r .\TF\DefaultData\FL_Florida.sql
+:r .\TF\DefaultData\AL_Alabama.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
@@ -575,6 +618,8 @@ print 'BEGIN POST DEPLOYMENT'
 --RiskManagement
 :R .\RM\01_MasterScript.sql
 :R .\RM\02_DataFix.sql
+:R .\RM\fnRKGetBucketBasisDeliveriesAboveR2.sql
+:R .\RM\uspRKDPRCompareBasisDeliveriesAboveR2.sql
 
 -- Scale Ticket
 :R .\SC\Populate_Risk_Summary_Log.sql
@@ -587,6 +632,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CCR\SiteDataFix.sql
 :r .\CCR\RemoveCCRObsoleteScreen.sql
 :r .\CCR\ImportFileDefault.sql
+:r .\CCR\CrossReferenceDefault.sql
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
@@ -622,18 +668,43 @@ print 'BEGIN POST DEPLOYMENT'
 -- Vendor rebate
 :r .\VR\1_UpdateColumnTableProgramItem.sql
 
+-- AGRONOMY
+:r .\AG\1_AGUOMDefaultData.sql
+
+
 --MIGRATE AUDIT LOGS
 :r .\SM\1910_MigrateAuditLog.sql
+
+--MIGRATE AUDIT LOGS
+:r .\SM\2120_MigrateAttachment.sql
 
 
 --SM - this should always be the last to execute
 	-- REMINDER: DO NOT ADD ANY SQL FILE AFTER THIS
 --:r .\SM\1830_ReIndexTables.sql
-:r .\SM\1830_CreateReIndexMaintenancePlan.sql
+--:r .\SM\1830_CreateReIndexMaintenancePlan.sql
 :r .\SM\1910_CreateAuditLogMigrationPlan.sql
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
 
+-- Clean up i21 database objects
+:r .\SM\01_CleanupObjects.sql
+:r .\IC\29_CleanupObjects.sql
+:r .\RM\03_CleanupObjects.sql
+:r .\IP\2_CleanupObjects.sql
+:r .\AR\01_CleanupObjects.sql
+:r .\GR\3_CleanupObjects.sql
+:r .\CM\9_CleanupObjects.sql
+:r .\CT\2_CleanupObjects.sql
+:r .\MF\11_CleanupObjects.sql
+:r .\TR\01_CleanupObjects.sql
+:r .\LG\3_CleanupObjects.sql
+:r .\GL\01_CleanupObjects.sql
+:r .\AP\01_CleanupObjects.sql
+:r .\ET\01_CleanupObjects.sql
+:r .\PAT\6_CleanupObjects.sql
+:r .\TF\01_CleanupObjects.sql
+:r .\MF\13_CleanupObjects.sql
 
 print 'END POST DEPLOYMENT'

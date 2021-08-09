@@ -32,11 +32,13 @@ BEGIN TRY
 		SET @ysnSuccess = CAST(1 AS BIT)
 
 		DECLARE @intRevertType AS INT = (SELECT TOP 1 intRevertType FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
+		DECLARE @dtmEffectiveDate AS DATETIME = (SELECT TOP 1 dtmEffectiveDate FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
 
 		DECLARE @intRevertItemRecords INT = 0
 		DECLARE @intRevertItemLocationRecords INT = 0
 		DECLARE @intRevertItemPricingRecords INT = 0
 		DECLARE @intRevertItemSpecialPricingRecords INT = 0
+		DECLARE @intRevertItemDiscontinuedRecords INT = 0
 
 		
 		
@@ -890,7 +892,7 @@ BEGIN TRY
 									WHERE Uom.ysnStockUnit = 1
 									ORDER BY temp.intItemPricingId ASC
 										
-
+								
 
 									-- UPDATE ITEM PRICING
 									EXEC [dbo].[uspICUpdateItemPricingForCStore]
@@ -904,6 +906,7 @@ BEGIN TRY
 											,@dblStandardCost			= @dblStandardCost 
 											,@dblRetailPrice			= @dblSalePrice 
 											,@dblLastCost				= @dblLastCost
+											,@dtmEffectiveDate			= @dtmEffectiveDate
 											,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
 			
@@ -971,6 +974,7 @@ BEGIN TRY
 							DECLARE @tempITEMSPECIALPRICING TABLE (
 										intItemSpecialPricingId		INT NOT NULL
 										, dblUnitAfterDiscount		NUMERIC(38, 20) NULL
+										, dblCost					NUMERIC(38, 20) NULL
 										, dtmBeginDate				DATETIME
 										, dtmEndDate				DATETIME
 
@@ -986,6 +990,7 @@ BEGIN TRY
 							(
 								intItemSpecialPricingId
 								, dblUnitAfterDiscount
+								, dblCost
 								, dtmBeginDate
 								, dtmEndDate
 
@@ -997,6 +1002,7 @@ BEGIN TRY
 							SELECT DISTINCT
 								intItemSpecialPricingId	= piv.intItemSpecialPricingId
 								, dblUnitAfterDiscount	= piv.dblUnitAfterDiscount
+								, dblCost				= piv.dblCost
 								, dtmBeginDate			= piv.dtmBeginDate
 								, dtmEndDate			= piv.dtmEndDate
 
@@ -1019,7 +1025,7 @@ BEGIN TRY
 									AND detail.strPreviewOldData != detail.strPreviewNewData
 							) src
 							PIVOT (
-								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dtmBeginDate, dtmEndDate)
+								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dblCost, dtmBeginDate, dtmEndDate)
 							) piv
 
 							-- Count records
@@ -1047,6 +1053,7 @@ BEGIN TRY
 											 , Item.strDescription
 											 , ItemSpecialPricing.intItemSpecialPricingId
 											 , ItemSpecialPricing.dblUnitAfterDiscount
+											 , ItemSpecialPricing.dblCost
 											 , ItemSpecialPricing.dtmBeginDate
 											 , ItemSpecialPricing.dtmEndDate
 									FROM tblICItemSpecialPricing ItemSpecialPricing
@@ -1071,6 +1078,7 @@ BEGIN TRY
 	
 									DECLARE  @intItemSpecialPricingId		INT
 											, @dblUnitAfterDiscount			DECIMAL(38, 20)
+											, @dblCost						DECIMAL(38, 20)
 											, @dtmBeginDate					DATETIME
 											, @dtmEndDate					DATETIME
 
@@ -1090,6 +1098,7 @@ BEGIN TRY
 																				
 
 											, @dblUnitAfterDiscount		= ISNULL(temp.dblUnitAfterDiscount, ItemSpecialPricing.dblUnitAfterDiscount)
+											, @dblCost					= ISNULL(temp.dblCost, ItemSpecialPricing.dblCost)
 											, @dtmBeginDate				= ISNULL(temp.dtmBeginDate, ItemSpecialPricing.dtmBeginDate)
 											, @dtmEndDate				= ISNULL(temp.dtmEndDate, ItemSpecialPricing.dtmEndDate)
 									FROM @tempITEMSPECIALPRICING temp
@@ -1111,6 +1120,7 @@ BEGIN TRY
 									-- UPDATE ITEM PECIAL PRICING
 									EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 											@dblPromotionalSalesPrice	= @dblUnitAfterDiscount 
+											, @dblPromotionalCost		= @dblCost 
 											, @dtmBeginDate				= @dtmBeginDate 
 											, @dtmEndDate 				= @dtmEndDate 
 											, @intItemSpecialPricingId  = @intItemSpecialPricingId
@@ -1136,6 +1146,7 @@ BEGIN TRY
 											 , Item.strDescription
 											 , ItemSpecialPricing.intItemSpecialPricingId
 											 , ItemSpecialPricing.dblUnitAfterDiscount
+											 , ItemSpecialPricing.dblCost
 											 , ItemSpecialPricing.dtmBeginDate
 											 , ItemSpecialPricing.dtmEndDate
 									FROM tblICItemSpecialPricing ItemSpecialPricing
@@ -1158,13 +1169,111 @@ BEGIN TRY
 				-- ==================================================================================================================================================
 
 			END
+
+		ELSE IF(@intRevertType = 3)
+			BEGIN
+			-- ITEM STATUS
+			-- ==================================================================================================================================================
+			-- [START] - Revert ITEM STATUS
+			-- ==================================================================================================================================================
+			IF EXISTS(
+							SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
+							WHERE detail.strTableName = N'tblICItem' 
+								AND detail.intRevertHolderId = @intRevertHolderId
+								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+								AND detail.strPreviewOldData != detail.strPreviewNewData
+						 )
+					BEGIN
+					
+						-- Create
+						DECLARE @tempITEMSTATUS TABLE (
+									intItemId				INT,
+									strStatus				NVARCHAR(20)
+						)
+
+
+						-- Insert
+						INSERT INTO @tempITEMSTATUS
+						(
+							intItemId,
+							strStatus
+						)
+						SELECT DISTINCT
+							intItemId		= src.intItemId,
+							strStatus		= src.strOldData
+						FROM (
+							SELECT detail.intItemId, strOldData
+							FROM vyuSTSearchRevertHolderDetail detail
+							WHERE detail.strTableName = N'tblICItem'
+								AND detail.intRevertHolderId = @intRevertHolderId
+								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+								AND detail.strPreviewOldData != detail.strPreviewNewData
+						) src
+
+
+
+						-- Count records
+						SET @intRevertItemDiscontinuedRecords = (
+																SELECT COUNT(detail.intItemId)
+																FROM vyuSTSearchRevertHolderDetail detail
+																WHERE detail.strTableName = N'tblICItem'
+																	AND detail.intRevertHolderId = @intRevertHolderId
+																	AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+																	AND detail.strPreviewOldData != detail.strPreviewNewData
+																	)
+
+						IF (EXISTS (SELECT * FROM @tempITEMSTATUS))
+						BEGIN
+							WHILE EXISTS (SELECT TOP 1 1 FROM @tempITEMSTATUS) 
+								BEGIN
+								
+									DECLARE  @intUpdateItemId		INT
+									DECLARE  @strUpdateStatus		VARCHAR(20)
+
+									SELECT TOP 1 
+										@intUpdateItemId = intItemId, 
+										@strUpdateStatus = strStatus
+									FROM @tempITEMSTATUS
+
+									-- This is where IC SP Executed for updating 
+									EXEC [uspICUpdateItemForCStore]
+											@strDescription					= NULL
+											,@dblRetailPriceFrom			= NULL
+											,@dblRetailPriceTo 				= NULL
+											,@intItemId 					= @intUpdateItemId
+											,@intItemUOMId 					= NULL
+											--update params				
+											,@intCategoryId 				= NULL
+											,@strCountCode 					= NULL
+											,@strItemDescription 			= NULL
+											,@strItemNo 					= NULL
+											,@strShortName 					= NULL
+											,@strUpcCode					= NULL
+											,@strLongUpcCode 				= NULL
+											,@strStatus 					= @strUpdateStatus
+											,@intEntityUserSecurityId		= @intEntityId
+											
+									-- Remove
+									DELETE FROM @tempITEMSTATUS WHERE intItemId = @intUpdateItemId
+								END
+						END
+					
+
+
+					END	
+			END
+			
+			-- ==================================================================================================================================================
+			-- [END] - Revert ITEM STATUS
+			-- ==================================================================================================================================================
+			
 		
-		
-
-
-
 		-- Clean up (ITEM, ITEM UOM, ITEM LOCATION, VendorXref)
 		BEGIN
+		
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Items') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Items 
+
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
 				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
 
@@ -1189,7 +1298,7 @@ BEGIN TRY
 
 
 		DECLARE @intAllRevertedRecordsCount INT = 0
-		SET @intAllRevertedRecordsCount = @intRevertItemRecords + @intRevertItemLocationRecords + @intRevertItemPricingRecords + @intRevertItemSpecialPricingRecords
+		SET @intAllRevertedRecordsCount = @intRevertItemRecords + @intRevertItemLocationRecords + @intRevertItemPricingRecords + @intRevertItemSpecialPricingRecords + @intRevertItemDiscontinuedRecords
 
 		DECLARE @strAllRevertedRecordsCount NVARCHAR(500) = CAST(@intAllRevertedRecordsCount AS NVARCHAR(500))
 

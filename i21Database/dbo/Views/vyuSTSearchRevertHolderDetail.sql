@@ -45,11 +45,11 @@ SELECT --DISTINCT
 										WHEN RHD.strTableColumnName = 'intVendorId'
 											THEN ISNULL(Entity_New.strName, '')
 										WHEN RHD.strTableColumnName = 'intMinimumAge'
-											THEN CAST(ItemLoc.intMinimumAge AS NVARCHAR(50))
+											THEN CAST(CAST(ItemLoc.intMinimumAge AS FLOAT) AS NVARCHAR(50))
 										WHEN RHD.strTableColumnName = 'dblMinOrder'
-											THEN CAST(ItemLoc.dblMinOrder AS NVARCHAR(50))
+											THEN CAST(CAST(ItemLoc.dblMinOrder AS FLOAT) AS NVARCHAR(50))
 										WHEN RHD.strTableColumnName = 'dblSuggestedQty'
-											THEN CAST(ItemLoc.dblSuggestedQty AS NVARCHAR(50))
+											THEN CAST(CAST(ItemLoc.dblSuggestedQty AS FLOAT) AS NVARCHAR(50))
 										WHEN RHD.strTableColumnName = 'intStorageLocationId'
 											THEN ISNULL(StorageLoc_New.strName, '')
 										WHEN RHD.strTableColumnName = 'intCountGroupId'
@@ -102,14 +102,16 @@ SELECT --DISTINCT
 							 WHEN revertHolder.intRevertType = 2
 								THEN CASE
 									WHEN RHD.strTableColumnName = 'dblSalePrice'
-										THEN CAST(ItemPricing_New.dblSalePrice AS NVARCHAR(50))
+										THEN CAST(CAST(ItemPricing_New.dblSalePrice AS FLOAT) AS NVARCHAR(50))
 									WHEN RHD.strTableColumnName = 'dblStandardCost'
-										THEN CAST(ItemPricing_New.dblStandardCost AS NVARCHAR(50))
+										THEN CAST(CAST(ItemPricing_New.dblStandardCost AS FLOAT) AS NVARCHAR(50))
 									WHEN RHD.strTableColumnName = 'dblLastCost'
-										THEN CAST(ItemPricing_New.dblLastCost AS NVARCHAR(50))
-
+										THEN CAST(CAST(ItemPricing_New.dblLastCost AS FLOAT) AS NVARCHAR(50))
 									WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
-										THEN CAST(ItemSpecialPricing_New.dblUnitAfterDiscount AS NVARCHAR(50))
+										THEN CAST(CAST(ItemSpecialPricing_New.dblUnitAfterDiscount AS FLOAT) AS NVARCHAR(50))
+									WHEN RHD.strTableColumnName = 'dblCost'
+										THEN CAST(CAST(ItemSpecialPricing_New.dblCost AS FLOAT) AS NVARCHAR(50))
+
 									WHEN RHD.strTableColumnName = 'dtmBeginDate'
 										THEN CONVERT(VARCHAR(10), CAST(ItemSpecialPricing_New.dtmBeginDate AS DATE), 101) -- CAST(ItemSpecialPricing_Old.dtmBeginDate AS NVARCHAR(20))
 									WHEN RHD.strTableColumnName = 'dtmEndDate'
@@ -118,17 +120,27 @@ SELECT --DISTINCT
 									ELSE 
 										ISNULL(RHD.strNewData, '')
 								END
+								
+							 WHEN revertHolder.intRevertType = 3
+								THEN CASE 
+									WHEN RHD.strTableColumnName = 'strStatus'
+										THEN ISNULL(Item.strStatus, '')
+								END
 
 							ELSE  
 								ISNULL(RHD.strNewData, '')
-					END COLLATE Latin1_General_CI_AS
+					END  COLLATE Latin1_General_CI_AS
 	, strPreviewOldData	= CASE
 								WHEN RHD.strTableColumnDataType = 'DATETIME'
 									THEN CONVERT(VARCHAR(10), CAST(RHD.strOldData AS DATE), 101)
+								WHEN RHD.strTableColumnDataType = 'VARCHAR'
+									THEN  CAST(RHD.strOldData AS VARCHAR(20))
 								WHEN RHD.strOldData = 'true' THEN 'Yes'
 								WHEN RHD.strOldData = 'false' THEN 'No'
+								WHEN (RHD.strTableColumnDataType = 'INT' OR RHD.strTableColumnDataType LIKE '%NUMERIC%') AND RHD.strPreviewOldData NOT LIKE '%[A-Za-z]%'
+									THEN ISNULL(CAST(CAST(RHD.strPreviewOldData AS FLOAT) AS NVARCHAR(50)), RHD.strOldData)
 								ELSE
-									ISNULL(RHD.strPreviewOldData, RHD.strOldData)
+									ISNULL(CAST(RHD.strPreviewOldData AS NVARCHAR(50)), RHD.strOldData)
 						END COLLATE Latin1_General_CI_AS
 --, strPreviewOldData = CASE
 --							WHEN RHD.strTableColumnName = 'intCategoryId'
@@ -189,7 +201,7 @@ INNER JOIN tblICCategory Category
 LEFT JOIN tblICItemLocation ItemLoc
 	ON RHD.intItemLocationId = ItemLoc.intItemLocationId
 LEFT JOIN tblICItemUOM Uom
-	ON Item.intItemId = Uom.intItemId
+	ON Item.intItemId = Uom.intItemId AND Uom.ysnStockUnit = 1
 LEFT JOIN tblSMCompanyLocation CompanyLoc
 	ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_New

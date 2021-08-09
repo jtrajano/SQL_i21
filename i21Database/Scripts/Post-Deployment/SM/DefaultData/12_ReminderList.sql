@@ -1495,4 +1495,63 @@ BEGIN
 	WHERE [strReminder] = N'Pre-shipment Sample not yet approved' AND [strType] = N'Contract' 
 END
 
+--START RESPONSIBLE PARTY TASK
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMReminderList WHERE CHARINDEX('CashManagement.view.ResponsiblePartyTask', strNamespace) > 0 )
+	INSERT INTO tblSMReminderList(strReminder, strType,strMessage, strQuery,strNamespace, intSort, intConcurrencyId)
+	SELECT 'Process',	'Bank Task',	'{0} {1} {2} unprocessed.',
+		'select intTaskId from vyuCMResponsiblePartyTask where isnull(ysnStatus,0) = 0 and intEntityId = {0}',
+		'CashManagement.view.ResponsiblePartyTask?showSearch=true&intEntityId={0}', 1, 1 
+
+ELSE
+	UPDATE tblSMReminderList
+	SET strReminder='Process', strType='Bank Task',strMessage='{0} {1} {2} unprocessed.', 
+	strQuery='select intTaskId from vyuCMResponsiblePartyTask where isnull(ysnStatus,0) = 0 and intEntityId = {0}',
+	strNamespace='CashManagement.view.ResponsiblePartyTask?showSearch=true&intEntityId={0}'
+	WHERE CHARINDEX('CashManagement.view.ResponsiblePartyTask', strNamespace) > 0 
 GO
+--END RESPONSIBLE PARTY TASK
+
+-- BEGIN Inventory Reminders
+IF NOT EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Imported' AND [strType] = N'Inventory Receipt')
+BEGIN 
+	DECLARE @intMaxSortOrder INT
+	SELECT @intMaxSortOrder = MAX(intSort) FROM [tblSMReminderList]
+	
+	INSERT INTO [tblSMReminderList] (
+		[strReminder]
+		, [strType]
+		, [strMessage]
+		, [strQuery]
+		, [strNamespace]
+		, [intSort]
+	)
+	SELECT 
+		[strReminder] = 'Imported'
+		, [strType] = 'Inventory Receipt'
+		, [strMessage] = '{0} imported.'
+		, [strQuery] = 
+'SELECT 
+	r.strReceiptNumber, r.ysnPosted, r.dtmDateCreated
+FROM 
+	tblICInventoryReceipt r INNER JOIN tblSMCompanyLocation cl 
+		ON r.intLocationId = cl.intCompanyLocationId 
+	CROSS APPLY (
+		SELECT 
+			u.strUserName, u.intEntityId 
+		FROM  
+			tblSMUserSecurity u 
+		WHERE 
+			u.intEntityId = {0} 
+			and u.ysnStoreManager = 1 
+			and u.intCompanyLocationId = cl.intCompanyLocationId 
+	) u
+WHERE 
+	r.strDataSource = ''EdiGenerateReceipt'' 
+	AND (r.ysnPosted = 0 OR r.ysnPosted IS NULL)
+'
+		, [strNamespace] = 'Inventory.view.InventoryReceipt?showSearch=true&searchCommand=reminderSearchConfig'
+		, [intSort] = ISNULL(@intMaxSortOrder, 0) + 1
+END 
+GO
+-- END Inventory Reminders

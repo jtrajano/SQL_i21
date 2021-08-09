@@ -218,7 +218,7 @@ BEGIN TRY
 					,CONTAINER_NO NVARCHAR(100)
 					,TRACKING_NO INT
 					) x
-			WHERE ISNULL(x.PO_NUMBER, '') <> ''
+			--WHERE ISNULL(x.PO_NUMBER, '') <> ''
 
 			SELECT @strInfo2 = @strInfo2 + ISNULL(strERPPONumber, '') + ' / ' + LTRIM(intContractSeq) + ','
 			FROM @tblReceiptItem
@@ -282,13 +282,13 @@ BEGIN TRY
 				,strSubLocationName
 				,strStorageLocationName
 				,dblQuantity
-				,strQuantityUOM
+				,dbo.fnIPConvertSAPUOMToi21(strQuantityUOM)
 				,dblGrossWeight
 				,dblTareWeight
 				,dblNetWeight
-				,strNetWeightUOM
+				,dbo.fnIPConvertSAPUOMToi21(strNetWeightUOM)
 				,dblCost
-				,strCostUOM
+				,dbo.fnIPConvertSAPUOMToi21(strCostUOM)
 				,strCostCurrency
 				,strContainerNumber
 				,strTrackingNo

@@ -92,13 +92,18 @@ FROM (
 				FROM (
 					SELECT CPE.*
 						, strRiskIndicator
-						, dblRiskTotalBusinessVolume = ISNULL(dblRiskTotalBusinessVolume, 0.00)
+						, dblRiskTotalBusinessVolume = dbo.fnCTConvertQuantityToTargetCommodityUOM(toUOM.intCommodityUnitMeasureId
+																				, CASE WHEN ISNULL(M2M.intQtyUOMId, 0) = 0 THEN toUOM.intCommodityUnitMeasureId ELSE M2M.intQtyUOMId END
+																				, ISNULL(dblRiskTotalBusinessVolume, 0.00))
 						, intRiskUnitOfMeasureId
 						, dblCompanyExposurePercentage = ROUND(ISNULL(dblCompanyExposurePercentage, 0.00), 2)
 						, dblSupplierSalesPercentage = ROUND(ISNULL(dblSupplierSalesPercentage, 0.00), 2)
 						, intEntityId
 					FROM tblRKM2MCounterPartyExposure CPE
+					JOIN tblRKM2MHeader M2M ON M2M.intM2MHeaderId = CPE.intM2MHeaderId
 					JOIN tblAPVendor e ON e.intEntityId = CPE.intVendorId
+					LEFT JOIN tblICCommodityUnitMeasure fromUOM ON M2M.intCommodityId = fromUOM.intCommodityId AND fromUOM.intUnitMeasureId = M2M.intQtyUOMId
+					LEFT JOIN tblICCommodityUnitMeasure toUOM ON M2M.intCommodityId = toUOM.intCommodityId AND toUOM.intUnitMeasureId = e.intRiskUnitOfMeasureId
 					LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
 				) t1
 				GROUP BY strEntityName

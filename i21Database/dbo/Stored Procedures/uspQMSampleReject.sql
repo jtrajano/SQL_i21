@@ -19,6 +19,7 @@ BEGIN TRY
 	DECLARE @intLotStatusId INT
 	DECLARE @intOrgLotStatusId INT
 	DECLARE @intLastModifiedUserId INT
+		,@intTestedById INT
 	DECLARE @dtmLastModified DATETIME
 	DECLARE @strLotNumber NVARCHAR(50)
 	DECLARE @intItemId INT
@@ -51,6 +52,7 @@ BEGIN TRY
 		,@intLotStatusId = intLotStatusId
 		,@intLastModifiedUserId = intLastModifiedUserId
 		,@dtmLastModified = dtmLastModified
+		,@intTestedById = intTestedById
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleId INT
 			,intProductTypeId INT
@@ -58,7 +60,11 @@ BEGIN TRY
 			,intLotStatusId INT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
+			,intTestedById INT
 			)
+
+	IF @intTestedById IS NULL
+		SELECT @intTestedById = @intLastModifiedUserId
 
 	SELECT @intOrgLotStatusId = @intLotStatusId
 
@@ -141,7 +147,7 @@ BEGIN TRY
 			SET intBondStatusId = @intLotStatusId
 			FROM dbo.tblICLot AS L
 			JOIN dbo.tblMFLotInventory AS LI ON L.intLotId = LI.intLotId
-			JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+			JOIN dbo.tblICInventoryReceiptItemLot RIL ON RIL.strLotNumber = L.strLotNumber
 			WHERE RIL.strContainerNo = @strContainerNumber
 		END
 		ELSE
@@ -626,12 +632,14 @@ BEGIN TRY
 				ELSE intLotStatusId
 				END
 			)
-		,intTestedById = x.intLastModifiedUserId
-		,dtmTestedOn = x.dtmLastModified
+		,intTestedById = x.intTestedById
+		,dtmTestedOn = x.dtmTestedOn
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
-			intLastModifiedUserId INT
+			intTestedById INT
+			,dtmTestedOn DATETIME
+			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			) x
 	WHERE dbo.tblQMSample.intSampleId = @intSampleId
@@ -640,7 +648,7 @@ BEGIN TRY
 	BEGIN
 		EXEC uspSMAuditLog @keyValue = @intSampleId
 			,@screenName = 'Quality.view.QualitySample'
-			,@entityId = @intLastModifiedUserId
+			,@entityId = @intTestedById
 			,@actionType = 'Rejected'
 			,@changeDescription = ''
 			,@fromValue = ''

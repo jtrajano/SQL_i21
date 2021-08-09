@@ -33,6 +33,6 @@ BEGIN
 					ELSE PM.intManufacturingProcessId
 					END
 				)
-			AND SL.strClassification = 'WIP'
+			--AND SL.strClassification = 'WIP'
 		) AS DT
 END

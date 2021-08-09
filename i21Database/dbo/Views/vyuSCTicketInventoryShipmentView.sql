@@ -10,6 +10,8 @@ ICSI.intInventoryShipmentItemId,
 ICSI.strShipmentNumber,  
 ICSI.dtmShipDate,  
 ICSI.strOrderType,  
+ICSI.strShipFromLocation AS strLocationName,
+ICSI.strCommodityCode,
 ICSI.strSourceType,  
 ICSI.strCustomerNumber,  
 ICSI.strCustomerName,  
@@ -40,6 +42,9 @@ SC.intContractSequence,
 SC.dblNetUnits,
 SC.dtmTicketDateTime
 FROM tblSCTicket SC  
-INNER JOIN vyuICGetInventoryShipmentItem ICSI ON SC.intInventoryShipmentId = ICSI.intInventoryShipmentId 
+INNER JOIN vyuICGetInventoryShipmentItem ICSI
+    ON SC.intTicketId = ICSI.intSourceId
+    AND SC.intItemId = ICSI.intItemId
+    AND ICSI.strSourceType = 'Scale'
 LEFT JOIN vyuGRGetStorageTickets GRSC ON SC.intTicketId = GRSC.intTicketId  
 LEFT JOIN tblGRStorageType GRST ON GRST.strStorageTypeCode = SC.strDistributionOption

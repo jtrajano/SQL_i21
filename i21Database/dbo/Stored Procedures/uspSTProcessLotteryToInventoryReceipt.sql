@@ -893,24 +893,86 @@ BEGIN TRY
 	BEGIN
 		IF(ISNULL(@Id,0) != 0)
 		BEGIN
-			IF(ISNULL(@Id,0) != 0)
+
+			DECLARE @P10LotteryBookId INT
+			SELECT TOP 1 @P10LotteryBookId = intLotteryBookId FROM tblSTReceiveLottery where intReceiveLotteryId = @Id 
+
+			IF(ISNULL(@P10LotteryBookId,0) = 0)
 			BEGIN
-				
-				DECLARE @deleteLotteryBookId INT 
-				SELECT TOP 1 @deleteLotteryBookId = intLotteryBookId FROM tblSTReceiveLottery WHERE intInventoryReceiptId = @Id
-
-				EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId = @Id,@intEntityUserSecurityId = @UserId
-
-
-				-- DELETE FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @Id
-				DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @deleteLotteryBookId
-
+				DELETE FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id 
+					
 				SET @Success = CAST(1 AS BIT)
+				SET @StatusMsg = ''
+				--RETURN
 			END
+			ELSE
+			BEGIN
+				DECLARE @P10LotteryBookTransactions INT = 0
+				SELECT @P10LotteryBookTransactions += ISNULL(COUNT(*),0) FROM tblSTCheckoutLotteryCount WHERE intLotteryBookId = @P10LotteryBookId
+				SELECT @P10LotteryBookTransactions += ISNULL(COUNT(*),0) FROM tblSTReturnLottery WHERE intLotteryBookId = @P10LotteryBookId
+				IF(@P10LotteryBookTransactions > 0)
+				BEGIN
+					INSERT INTO tblSTLotteryProcessError (
+								[intCheckoutId]				
+							,[strBookNumber]				
+							,[strGame]					
+							,[strError]					
+							,[strProcess]				
+						)
+						SELECT 
+							@UserId
+							,tblSTLotteryBook.[strBookNumber]
+							,tblSTLotteryGame.strGame
+							,'Unable to delete lottry book with existing transaction/s'
+							,'Deleting receive lottery'
+						FROM tblSTReceiveLottery 
+						INNER JOIN tblSTLotteryBook
+						ON tblSTLotteryBook.intLotteryBookId =  tblSTReceiveLottery.intLotteryBookId 
+						INNER JOIN tblSTLotteryGame 
+						ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+						WHERE intReceiveLotteryId = @Id
+							
+						SET @Success = CAST(1 AS BIT)
+						SET @StatusMsg = ''
+						--RETURN
+				END
+				ELSE
+				BEGIN
+					DECLARE @P10InventoryReceiptId INT 
+					SELECT TOP 1 @P10InventoryReceiptId = intInventoryReceiptId FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id
+					IF(ISNULL(@P10InventoryReceiptId,0) != 0)
+					BEGIN
+						EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId = @P10InventoryReceiptId,@intEntityUserSecurityId = @UserId
+					END
+						
+					DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @P10LotteryBookId
+					DELETE FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id 
+
+					SET @Success = CAST(1 AS BIT)
+					SET @StatusMsg = ''
+					--RETURN
+				END
+			END
+
 		END
 		ELSE
 		BEGIN
+			INSERT INTO tblSTLotteryProcessError (
+				 [intCheckoutId]				
+				,[strBookNumber]				
+				,[strGame]					
+				,[strError]					
+				,[strProcess]				
+			)
+			SELECT 
+				@UserId
+				,'[Unhandled Exception]'
+				,'[Unhandled Exception]'
+				,'Unable to find receive lottery'
+				,'Deleting receive lottery'
+
 			SET @Success = CAST(1 AS BIT)
+			SET @StatusMsg = ''
 		END
 	END
 

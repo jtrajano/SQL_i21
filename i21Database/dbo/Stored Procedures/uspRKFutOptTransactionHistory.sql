@@ -114,11 +114,13 @@ BEGIN TRY
 			BEGIN
 				INSERT INTO @SummaryLog(strTransactionType
 					, intTransactionRecordId
+					, dtmTransactionDate
 					, ysnDelete
 					, intUserId
 					, strNotes)
 				SELECT strTransactionType = 'Derivatives'
 					, intTransactionRecordId = intFutOptTransactionId
+					, dtmTransactionDate
 					, ysnDelete = 1
 					, intUserId = @intUserId
 					, strNotes = 'Delete record'
@@ -224,11 +226,13 @@ BEGIN TRY
 			BEGIN
 				INSERT INTO @SummaryLog(strTransactionType
 				, intTransactionRecordId
+				, dtmTransactionDate
 				, ysnDelete
 				, intUserId
 				, strNotes)
 			SELECT strTransactionType = 'Derivatives'
 				, intTransactionRecordId = @intFutOptTransactionId
+				, dtmTransactionDate = GETDATE()
 				, ysnDelete = 1
 				, intUserId = @intUserId
 				, strNotes = 'Delete record'
@@ -256,6 +260,7 @@ BEGIN TRY
 					, intEntityId
 					, intUserId
 					, intLocationId
+					, strInOut
 					, intCommodityUOMId
 					, strNotes
 					, strMiscFields)
@@ -280,6 +285,7 @@ BEGIN TRY
 					, intEntityId = der.intEntityId
 					, intUserId = der.intUserId
 					, der.intLocationId
+					, strInOut = CASE WHEN UPPER(der.strNewBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
 					, cUOM.intCommodityUnitMeasureId
 					, strNotes = strNotes
 					, strMiscFields = '{intOptionMonthId = "' + ISNULL(CAST(intOptionMonthId AS NVARCHAR), '') +'"}'

@@ -95,7 +95,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 		FROM @temp_xml_table 
 		WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation')
 
-		IF @condition = 'Equal To'
+		IF UPPER(@condition) = UPPER('Equal To')
 			BEGIN				
 				IF @fieldname = 'strCustomerName'
 					BEGIN
@@ -580,10 +580,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 			OR ((ISNULL(dbl91Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
 		)
 
-		DELETE FROM tblARCustomerAgingStagingTable
+		DELETE AGING 
+		FROM tblARCustomerAgingStagingTable AGING
+		LEFT JOIN #CUSTOMERWITHBALANCES BAL ON AGING.intEntityCustomerId = BAL.intEntityCustomerId
 		WHERE intEntityUserId = @intEntityUserId 
 		  AND strAgingType = 'Summary'
-		  AND intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM #CUSTOMERWITHBALANCES)
+		  AND ISNULL(BAL.intEntityCustomerId, 0) = 0
 
 		UPDATE GL
 		SET GL.dblTotalAR 				= ISNULL(AGING.dblTotalAR, 0)

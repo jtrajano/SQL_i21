@@ -101,7 +101,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -364,21 +364,21 @@ BEGIN TRY
 							)
 				END
 
-				IF @strLocationName IS NOT NULL
-					AND NOT EXISTS (
-						SELECT 1
-						FROM tblSMCompanyLocation t
-						WHERE t.strLocationName = @strLocationName
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
+				--IF @strLocationName IS NOT NULL
+				--	AND NOT EXISTS (
+				--		SELECT 1
+				--		FROM tblSMCompanyLocation t
+				--		WHERE t.strLocationName = @strLocationName
+				--		)
+				--BEGIN
+				--	SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
+				--	RAISERROR (
+				--			@strErrorMessage
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				IF @strTrader IS NOT NULL
 					AND NOT EXISTS (
@@ -580,9 +580,16 @@ BEGIN TRY
 				FROM tblICCommodity t
 				WHERE t.strCommodityCode = @strCommodityCode
 
-				SELECT @intLocationId = t.intCompanyLocationId
-				FROM tblSMCompanyLocation t
-				WHERE t.strLocationName = @strLocationName
+				--SELECT @intLocationId = t.intCompanyLocationId
+				--FROM tblSMCompanyLocation t
+				--WHERE t.strLocationName = @strLocationName
+
+				IF ISNULL(@strLocationName, '') <> ''
+					AND @intLocationId IS NULL
+				BEGIN
+					SELECT TOP 1 @intLocationId = t.intCompanyLocationId
+					FROM tblSMCompanyLocation t WITH (NOLOCK)
+				END
 
 				SELECT @intTraderId = t.intEntityId
 				FROM tblEMEntity t
@@ -1035,6 +1042,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intScreenId
+						,@populatedByInterCompany=1
 				END
 			END
 

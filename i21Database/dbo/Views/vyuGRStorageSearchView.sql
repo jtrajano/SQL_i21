@@ -32,8 +32,8 @@ SELECT DISTINCT
 	,strScheduleId				  	= SR.strScheduleDescription
 	,strDPARecieptNumber		  	= CS.strDPARecieptNumber
 	,strCustomerReference		  	= ISNULL(CS.strCustomerReference,'')  
-	,dblOriginalBalance			  	= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
-	,dblOpenBalance				  	= dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOpenBalance) 
+	,dblOriginalBalance			  	= dbo.fnCalculateQtyBetweenUOM (CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOriginalBalance) 
+	,dblOpenBalance				  	= dbo.fnCalculateQtyBetweenUOM (CS.intItemUOMId,ItemUOM.intItemUOMId,CS.dblOpenBalance) 
 	,dtmDeliveryDate			  	= CS.dtmDeliveryDate
 	,strDiscountComment			  	= CS.strDiscountComment
 	,dblInsuranceRate			  	= ISNULL(CS.dblInsuranceRate,0)
@@ -108,6 +108,8 @@ SELECT DISTINCT
 	,strStorageTransactionNumber = CS.strStorageTicketNumber
 	,CS.dblBasis
 	,CS.dblSettlementPrice
+	--,intTicketPricingTypeId = ISNULL(CH.intPricingTypeId, -99)
+	,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
@@ -152,16 +154,17 @@ LEFT JOIN tblEMEntitySplit EMSplit
 	ON EMSplit.intSplitId = SC.intSplitId 
 		OR EMSplit.intSplitId = DeliverySheet.intSplitId
 LEFT JOIN tblCTContractDetail CD
-    ON CD.intContractDetailId = SC.intContractId  
+    ON CD.intContractDetailId = IRI.intContractDetailId
 LEFT JOIN tblCTContractHeader CH 
     ON CH.intContractHeaderId = CD.intContractHeaderId  
 LEFT JOIN (
 		tblGRTransferStorageSplit TSS
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = TSS.intTransferStorageId
-		LEFT JOIN tblGRTransferStorageReference TSR
+		INNER JOIN tblGRTransferStorageReference TSR
 			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
-	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
+			AND TSR.intTransferStorageId = TS.intTransferStorageId
+	) ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
 		AND TS.strTransferStorageTicket NOT LIKE '%-R'
 LEFT JOIN tblCTContractDetail CD_Transfer
     ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
@@ -169,7 +172,7 @@ LEFT JOIN tblCTContractDetail CD_Transfer
 LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
 LEFT JOIN (
-	SELECT GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId 
+	SELECT DISTINCT GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId 
 	FROM tblGRStorageHistory GSH
 	JOIN tblCTContractHeader GCH
 		ON GCH.intContractHeaderId = GSH.intContractHeaderId

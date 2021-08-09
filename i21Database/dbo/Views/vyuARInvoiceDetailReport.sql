@@ -21,7 +21,8 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strItemDescription		= ITEM.strDescription
 	 , strComments				= I.strComments
 	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
-	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblItemWeight, 0) ELSE ISNULL(ID.dblItemWeight, 0) * -1 END
+	 , strUnitMeasure 			= ID.[strUnitMeasure]
+	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblShipmentNetWt, 0) ELSE ISNULL(ID.dblShipmentNetWt, 0) * -1 END
 	 , dblUnitCost				= CASE WHEN CT.intContractHeaderId IS NOT NULL THEN ISNUlL(ID.dblUnitPrice,0) ELSE ISNULL( ID.dblPrice,0) END
 	 , dblCostPerUOM			= ISNULL(ID.dblPrice, 0)
 	 , dblUnitCostCurrency		= ISNULL(ID.dblPrice, 0)
@@ -35,13 +36,25 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , intDaysToPay				= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 								   	   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 							  	  END
+	 , intItemId				= ITEM.intItemId
+	 , strCategoryName			= CATEGORY.strCategoryCode
+	 , intCategoryId			= CATEGORY.intCategoryId
+	 , strSalespersonName		= ESP.strName
+	 , strShipToState			= RTRIM(strShipToState)
+	 , intEntitySalespersonId	= I.intEntitySalespersonId
+	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
+	 , intBillToLocationId		= I.intBillToLocationId
+	 , intShipToLocationId		= I.intShipToLocationId
+	 , strBinNumber				= ID.strBinNumber
+	 , strGroupNumber			= ID.strGroupNumber
+	 , strFeedDiet				= ID.strFeedDiet
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
 		 , intInvoiceDetailId
 		 , intContractHeaderId
 		 , intContractDetailId
-		 , intItemId
+		 , ID.intItemId
 		 , dblQtyShipped
 		 , dblItemWeight
 		 , dblPrice
@@ -50,12 +63,33 @@ INNER JOIN (
 		 , dblDiscount
 		 , dblTotal
 		 , strUnitCostCurrency = SC.strCurrency
+		 , ID.intItemUOMId
+		 , strUnitMeasure
+		 , strBinNumber
+		 , strGroupNumber
+		 , strFeedDiet
+		 , dblShipmentNetWt
+		 , intEntitySalespersonId
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID
 		     , strCurrency
 		FROM dbo.tblSMCurrency
 	) SC ON ID.intSubCurrencyId = SC.intCurrencyID
+	LEFT JOIN (
+		SELECT intItemUOMId
+				, intItemId
+				, IU.intUnitMeasureId
+				, IU.strUpcCode
+				,strUnitMeasure
+		FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intUnitMeasureId
+					, strUnitMeasure
+			FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+		) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+	) U ON ID.intItemId = U.intItemId 
+	   AND U.intItemUOMId = ID.intItemUOMId
 ) ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN (
 	SELECT EME.intEntityId
@@ -70,10 +104,35 @@ INNER JOIN (
 ) C ON I.intEntityCustomerId = C.intEntityId
 LEFT JOIN (
 	SELECT intItemId
+		 , intCategoryId
 		 , strItemNo
 		 , strDescription
 	FROM dbo.tblICItem WITH (NOLOCK)
 ) ITEM ON ID.intItemId = ITEM.intItemId
+
+LEFT JOIN (
+	SELECT intCategoryId
+		 , strCategoryCode
+	FROM dbo.tblICCategory WITH (NOLOCK)
+) CATEGORY ON ITEM.intCategoryId = CATEGORY.intCategoryId
+LEFT JOIN (
+	tblARSalesperson SP 
+	INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId
+) ON I.intEntitySalespersonId = SP.[intEntityId]
+OUTER APPLY (
+	 SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) COLLATE Latin1_General_CI_AS
+	 FROM (
+	  SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
+	  FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+	  INNER JOIN (
+	   SELECT intAccountStatusId
+		 , strAccountStatusCode
+	   FROM dbo.tblARAccountStatus WITH (NOLOCK)
+	  ) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+	  WHERE CAS.intEntityCustomerId = I.intEntityCustomerId
+	  FOR XML PATH ('')
+	 ) SC (strAccountStatusCode)
+) STATUSCODES
 LEFT JOIN (
 	SELECT CTH.intContractHeaderId
 		 , CTH.strContractNumber
@@ -86,8 +145,7 @@ LEFT JOIN (
 			 , intContractSeq
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 	) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
-) CT ON ID.intContractHeaderId = CT.intContractHeaderId
-	AND ID.intContractDetailId = CT.intContractDetailId
+) CT ON ID.intContractDetailId = CT.intContractDetailId
 LEFT JOIN (
 	SELECT intGLFiscalYearPeriodId
 		 , strAccountingPeriod = P.strPeriod

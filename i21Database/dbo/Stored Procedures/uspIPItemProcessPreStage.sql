@@ -64,6 +64,7 @@ BEGIN TRY
 		UPDATE tblICItemPreStage
 		SET strFeedStatus = 'Processed'
 			,strMessage = 'Success'
+			,intStatusId=1
 		WHERE intItemPreStageId = @intItemPreStageId
 
 		SELECT @intItemPreStageId = MIN(intItemPreStageId)

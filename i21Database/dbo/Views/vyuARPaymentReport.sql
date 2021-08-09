@@ -26,6 +26,7 @@ SELECT PAYMENTS.intPaymentId
 	 , PAYMENTS.dblInterest
 	 , PAYMENTS.dblDiscount
 	 , PAYMENTS.dblWriteOffAmount
+	 , PAYMENTS.dblCreditCardFee
 	 , PAYMENTS.dblPayment
 	 , ysnStretchLogo		= ISNULL(COMPANYPREF.ysnStretchLogo, 0)
 	 , blbLogo				= CASE WHEN ISNULL(COMPANYPREF.ysnStretchLogo, 0) = 1 THEN ISNULL(STRETCHEDLOGO.blbLogo, LOGO.blbLogo) ELSE LOGO.blbLogo END
@@ -58,14 +59,16 @@ FROM (
 		 , dtmDueDate           = ARPD.dtmDueDate
 		 , dblInterest          = ISNULL(ARPD.dblInterest, 0.00)
 		 , dblDiscount          = ISNULL(ARPD.dblDiscount, 0.00)
-		 , dblWriteOffAmount		= ISNULL(ARPD.dblWriteOffAmount, 0.00)
-		 , dblPayment           = ISNULL(ARPD.dblPayment, 0.00)     
+		 , dblWriteOffAmount	= ISNULL(ARPD.dblWriteOffAmount, 0.00)
+		 , dblCreditCardFee		= ISNULL(ARPD.dblCreditCardFee, 0.00)
+		 , dblPayment           = ISNULL(ARPD.dblPayment, 0.00) + ISNULL(ARPD.dblCreditCardFee, 0.00)
 	FROM tblARPayment ARP
 	LEFT OUTER JOIN (
 		SELECT PD.intPaymentId
 			 , PD.dblDiscount
 			 , PD.dblWriteOffAmount
 			 , PD.dblInterest
+			 , PD.dblCreditCardFee
 			 , PD.dblPayment
 			 , ARI.*
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK)
@@ -100,7 +103,8 @@ FROM (
 		 , dtmDueDate           = I.dtmDueDate
 		 , dblInterest          = I.dblInterest
 		 , dblDiscount          = I.dblDiscount
-		 , dblWriteOffAmount	  = 0.00
+		 , dblWriteOffAmount	= 0.00
+		 , dblCreditCardFee		= 0.00
 		 , dblPayment           = I.dblInvoiceTotal
 	FROM tblARPayment ARP
 	INNER JOIN (
@@ -171,18 +175,28 @@ OUTER APPLY (
 	FROM dbo.tblARCompanyPreference WITH (NOLOCK)
 ) COMPANYPREF
 OUTER APPLY (
-	SELECT TOP 1 blbLogo = blbFile 
-	FROM tblSMUpload U
-	INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-	  AND A.strComment = 'Header'
+	SELECT		TOP 1 blbLogo = U.blbFile 
+	FROM		dbo.tblSMUpload AS U
+	INNER JOIN	tblSMAttachment AS A
+	ON			U.intAttachmentId = A.intAttachmentId
+	INNER JOIN	dbo.tblSMTransaction AS B
+	ON			A.intTransactionId = B.intTransactionId
+	INNER JOIN	dbo.tblSMScreen AS C
+	ON			B.intScreenId = C.intScreenId
+	WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+			AND A.strComment = 'Header'
 ) LOGO
 OUTER APPLY (
-	SELECT TOP 1 blbLogo = blbFile 
-	FROM tblSMUpload U
-	INNER JOIN tblSMAttachment A ON U.intAttachmentId = A.intAttachmentId
-	WHERE A.strScreen = 'SystemManager.CompanyPreference' 
-	  AND A.strComment = 'Stretched Header'
+	SELECT		TOP 1 blbLogo = U.blbFile 
+	FROM		dbo.tblSMUpload AS U
+	INNER JOIN	tblSMAttachment AS A
+	ON			U.intAttachmentId = A.intAttachmentId
+	INNER JOIN	dbo.tblSMTransaction AS B
+	ON			A.intTransactionId = B.intTransactionId
+	INNER JOIN	dbo.tblSMScreen AS C
+	ON			B.intScreenId = C.intScreenId
+	WHERE		C.strNamespace = 'SystemManager.view.CompanyPreference' 
+			AND A.strComment = 'Stretched Header'
 ) STRETCHEDLOGO
 OUTER APPLY (
 	SELECT dblPayment = SUM(ISNULL(dblAmountPaid, 0.00)) 

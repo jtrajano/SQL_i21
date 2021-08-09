@@ -362,7 +362,7 @@ BEGIN
 		--UPDATE STARTING NUMBER
 		UPDATE pay
 			SET 
-				strPaymentRecordNum = @payPrefix + CAST(@payStartingNumber - 1 AS NVARCHAR)
+				strPaymentRecordNum = @payPrefix + CAST(@payStartingNumber AS NVARCHAR)
 				-- ,strPayee = dbo.fnAPGetCheckPayee(@payPrefix + CAST(@payStartingNumber - 1 AS NVARCHAR), pay.dtmDatePaid , pay.intEntityVendorId, pay.intPayToAddressId)
 				,@payStartingNumber = @payStartingNumber + 1
 		FROM tblAPPayment pay
@@ -451,6 +451,8 @@ BEGIN
 		,@entityId = @userId											-- Entity Id
 		,@actionType = 'Created'										-- Action Type
 	END
+
+	EXEC uspAPAddTransactionLinks 2, @createdPaymentIds, 1
 
 	BEGIN TRY
 		EXEC uspAPPostPayment @userId = @userId,

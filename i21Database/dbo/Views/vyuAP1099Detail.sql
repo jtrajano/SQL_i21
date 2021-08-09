@@ -5,6 +5,7 @@ SELECT
 	CAST(ROW_NUMBER() OVER(ORDER BY (SELECT 1)) AS INT) AS intId
 	,voucher.dtmDateCreated
 	,voucher.dtmDate
+	,FP.strPeriod
 	,voucher.dtmDatePaid
 	,commodity.strCommodityCode
 	,voucher.intBillId
@@ -18,13 +19,14 @@ SELECT
 	,voucher.strComment
 	,item.strItemNo
 	,item.strDescription AS strItemDescription
-	,paymentInfo.strCheckNumbers COLLATE Latin1_General_CI_AS AS strCheckNumbers
+	,paymentInfo.strCheckNumbers
 	,CASE voucherDetail.int1099Form WHEN 0 THEN 'NONE'
 		WHEN 1 THEN '1099 MISC'
 		WHEN 2 THEN '1099 INT'
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
 		WHEN 5 THEN '1099 DIV'
+		WHEN 7 THEN '1099 NEC'
 		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form
 	,CASE voucherDetail.int1099Form 
 			WHEN 1
@@ -33,6 +35,8 @@ SELECT
 			THEN categoryPATR.strCategory
 			WHEN 5
 			THEN categoryDIV.strCategory
+			WHEN 7
+			THEN category.strCategory
 			ELSE 'NONE'
 	END AS strCategory
 	,voucher.intEntityVendorId
@@ -48,6 +52,8 @@ LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCom
 LEFT JOIN tblAP1099Category category ON category.int1099CategoryId = voucherDetail.int1099Category
 LEFT JOIN tblAP1099PATRCategory categoryPATR ON categoryPATR.int1099CategoryId = voucherDetail.int1099Category
 LEFT JOIN tblAP1099DIVCategory categoryDIV ON categoryDIV.int1099CategoryId = voucherDetail.int1099Category
+LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+			ON voucher.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR voucher.dtmDate = FP.dtmStartDate OR voucher.dtmDate = FP.dtmEndDate
 OUTER APPLY (
 		SELECT STUFF(
 			(SELECT 

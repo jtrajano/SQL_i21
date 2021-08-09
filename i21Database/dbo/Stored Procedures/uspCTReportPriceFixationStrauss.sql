@@ -19,8 +19,21 @@ BEGIN TRY
 			@FirstApprovalId			INT,
 			@FirstApprovalSign			VARBINARY(MAX),
 			@InterCompApprovalSign		VARBINARY(MAX),	
+   			@InterCompSubmitterSign  VARBINARY(MAX),  
 			@xmlDocumentId				INT,
-			@intTransactionId			INT			
+			@intTransactionId			INT,
+			@PreviousSubmitterId		INT,
+			@PreviousSubmitterSign 		VARBINARY(MAX);
+
+	Declare @intApproverGroupId int
+			,@StraussContractSubmitId int
+			,@intChildDefaultSubmitById int
+			,@ysnIsParent bit
+			,@blbParentSubmitSignature VARBINARY(MAX)
+			,@blbParentApproveSignature VARBINARY(MAX)
+			,@blbChildSubmitSignature VARBINARY(MAX)
+			,@blbChildApproveSignature VARBINARY(MAX)
+			;
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -92,25 +105,68 @@ BEGIN TRY
 	WHERE intScreenId = @intScreenId
 	AND intRecordId = @intPriceContractId 
 
-	SELECT	TOP 1 @FirstApprovalId=intApproverId 
-	FROM	tblSMApproval 
-	WHERE	intTransactionId=@intTransactionId
-	AND		strStatus='Approved' 
-	ORDER 
-	BY		intApprovalId
-
-	SELECT	@FirstApprovalSign =  Sig.blbDetail 
-	FROM	tblSMSignature Sig  WITH (NOLOCK)
-	JOIN    tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
-	WHERE	Sig.intEntityId=@FirstApprovalId
 	
-	SELECT	@InterCompApprovalSign =Sig.blbDetail 
-	FROM	tblCTIntrCompApproval	IA
-	JOIN	tblSMUserSecurity		US	ON	US.strUserName	=	IA.strUserName	
-	JOIN	tblSMSignature			Sig	ON	US.intEntityId	=	Sig.intEntityId
-	JOIN    tblEMEntitySignature	ES	ON	Sig.intSignatureId = ES.intElectronicSignatureId
-	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
-	AND		IA.strScreen	=	'Price Contract'
+	SELECT	TOP 1 @FirstApprovalId = intApproverId
+		, @intApproverGroupId = intApproverGroupId
+		, @StraussContractSubmitId = intSubmittedById
+	FROM	tblSMApproval 
+	WHERE	intTransactionId = @intTransactionId
+	AND		strStatus = 'Approved' 
+	ORDER BY intApprovalId
+
+	IF (ISNULL(@StraussContractSubmitId, 0) = 0)
+	BEGIN
+		SELECT	TOP 1 @StraussContractSubmitId = intSubmittedById
+		FROM	tblSMApproval 
+		WHERE	intTransactionId = @intTransactionId
+		AND		strStatus = 'Submitted' 
+		ORDER BY intApprovalId
+	END
+
+	select top 1
+		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
+	from
+		tblCTContractHeader ch
+		inner join tblSMMultiCompany smc on smc.intMultiCompanyId = ch.intCompanyId
+		inner join tblIPMultiCompany mc on mc.intCompanyId = smc.intMultiCompanyId
+		inner join tblSMUserSecurity us on lower(us.strUserName) = lower(mc.strApprover)
+	where
+		ch.intContractHeaderId = @intContractHeaderId
+
+	select
+		@ysnIsParent = t.ysnIsParent
+		,@blbParentSubmitSignature = h.blbDetail
+		,@blbParentApproveSignature = j.blbDetail
+		,@blbChildSubmitSignature = l.blbDetail
+		,@blbChildApproveSignature = n.blbDetail
+	from
+		(
+		select
+			ysnIsParent = (case when isnull(b.intMultiCompanyParentId,0) = 0 then convert(bit,1) else convert(bit,0) end)
+			,intParentSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @StraussContractSubmitId else d.intEntityId end)
+			,intParentApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @FirstApprovalId else f.intEntityId end)
+			,intChildSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then d.intEntityId else @StraussContractSubmitId end)
+			,intChildApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then f.intEntityId else @FirstApprovalId end)
+		from
+			tblCTContractHeader a
+			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
+			left join tblCTIntrCompApproval c on c.intPriceFixationId = @intPriceFixationId and c.strScreen = 'Price Contract' and c.ysnApproval = 0
+			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
+			left join tblCTIntrCompApproval e on e.intPriceFixationId = @intPriceFixationId and e.strScreen = 'Price Contract' and e.ysnApproval = 1
+			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
+		where
+			a.intContractHeaderId = @intContractHeaderId
+		) t
+		left join tblEMEntitySignature g on g.intEntityId = t.intParentSubmitBy
+		left join tblSMSignature h  on h.intEntityId = g.intEntityId and h.intSignatureId = g.intElectronicSignatureId
+		left join tblEMEntitySignature i on i.intEntityId = t.intParentApprovedBy
+		left join tblSMSignature j  on j.intEntityId = i.intEntityId and j.intSignatureId = i.intElectronicSignatureId
+		left join tblEMEntitySignature k on k.intEntityId = t.intChildSubmitBy
+		left join tblSMSignature l  on l.intEntityId = k.intEntityId and l.intSignatureId = k.intElectronicSignatureId
+		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
+		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId
+
+	
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
 	FROM	tblSMCompanySetup
@@ -119,6 +175,7 @@ BEGIN TRY
 			xmlParam = @xmlParam,
 			PF.intPriceFixationId,
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
+			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
 			strOtherPartyAddress	= CASE 
 									  WHEN CH.strReportTo = 'Buyer' THEN --Customer
 									  	LTRIM(RTRIM(EC.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
@@ -138,7 +195,7 @@ BEGIN TRY
 			CH.strContractNumber,
 			CH.strCustomerContract,
 			strDescription = IM.strDescription,
-			strQuantity = dbo.fnRemoveTrailingZeroes(CD.dblQuantity)+ ' ' + UM.strUnitMeasure,
+			strQuantity = dbo.fnCTChangeNumericScale(dbo.fnRemoveTrailingZeroes(CD.dblQuantity) , ISNULL(CP.intQuantityDecimals,2))+ ' ' + UM.strUnitMeasure,
 			strPeriod = datename(dd,CD.dtmStartDate)
 						+ ' '
 						+ datename(mm,CD.dtmStartDate)
@@ -155,10 +212,10 @@ BEGIN TRY
 								ELSE	'This confirms that the above contract has been partially priced as follows:'
 						END,
 			dblLotsUnFixed = dbo.fnCTChangeNumericScale(ISNULL(PF.dblTotalLots-PF.dblLotsFixed,0),1),
-			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,2) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
-			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
-			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,2) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
+			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strDescription + ' per ' + CM.strUnitMeasure,
 			strSummary = CASE	WHEN	ISNULL(PF.[dblTotalLots],0) - ISNULL(PF.[dblLotsFixed],0) = 0 
 								THEN	'All lot(s) are fixed.'
 								ELSE	''
@@ -176,15 +233,93 @@ BEGIN TRY
 								+ ' per ' + FM.strUnitMeasure,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
-		    BuyerSign = CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
-		    SellerSign = CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
+	
+			SubmitterSign =		case
+								when CH.intContractTypeId = 1
+								then 
+									case
+									when @ysnIsParent = 1
+									then @blbParentSubmitSignature
+									else @blbChildSubmitSignature
+									end
+								else
+									case
+									when @ysnIsParent = 1
+									then @blbChildSubmitSignature
+									else @blbParentSubmitSignature
+									end
+								end
+								,
+		    BuyerSign =			case
+									when CH.intContractTypeId = 1
+									then 
+										case
+										when @ysnIsParent = 1
+										then @blbParentApproveSignature
+										else @blbChildApproveSignature
+										end
+									else
+										case
+										when @ysnIsParent = 1
+										then @blbChildApproveSignature
+										else @blbParentApproveSignature
+										end
+									end
+									,
+			CounterSubmitterSign =	case
+									when CH.intContractTypeId = 1
+									then 
+										case
+										when @ysnIsParent = 1
+										then null
+										else @blbParentSubmitSignature
+										end
+									else
+										case
+										when @ysnIsParent = 1
+										then @blbParentSubmitSignature
+										else @blbChildSubmitSignature
+										end
+									end
+									,
+		    SellerSign =			case
+									when CH.intContractTypeId = 1
+									then 
+										case
+										when @ysnIsParent = 1
+										then null
+										else @blbParentApproveSignature
+										end
+									else
+										case
+										when @ysnIsParent = 1
+										then @blbParentApproveSignature
+										else @blbChildApproveSignature
+										end
+									end
+									,
 			intReportLogoHeight = ISNULL(@intReportLogoHeight,0),
 			intReportLogoWidth = ISNULL(@intReportLogoWidth,0)
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
-	CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	SQ.intContractDetailId
+	cross apply	(	select top 1 cd1.*
+					from tblCTContractDetail cd1
+					where cd1.intContractHeaderId = 
+													case
+													when isnull(@intContractDetailId,0) = 0
+													then @intContractHeaderId
+													else cd1.intContractHeaderId
+													end
+						  and cd1.intContractDetailId =
+						  							case
+						  							when isnull(@intContractDetailId,0) = 0
+						  							then cd1.intContractDetailId
+						  							else @intContractDetailId 
+						  							end
+				) CD
+	--CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
+	--JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	SQ.intContractDetailId
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=	CD.intCompanyLocationId
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
@@ -204,7 +339,7 @@ BEGIN TRY
 	JOIN	tblICItemUOM				FU	ON	FU.intItemUOMId					=	CD.intFXPriceUOMId		LEFT
 	JOIN	tblICCommodityUnitMeasure	FC	ON	FC.intCommodityId				=	CH.intCommodityId		AND FC.intUnitMeasureId				=	FU.intUnitMeasureId		LEFT	
 	JOIN	tblICUnitMeasure			FM	ON	FM.intUnitMeasureId				=	FC.intUnitMeasureId
-
+	CROSS 	APPLY	tblCTCompanyPreference 		CP
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 

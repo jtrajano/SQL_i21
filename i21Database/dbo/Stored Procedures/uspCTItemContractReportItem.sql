@@ -115,7 +115,7 @@ BEGIN TRY
 					LEFT JOIN tblICUnitMeasure G ON IU.intUnitMeasureId = G.intUnitMeasureId
 					LEFT JOIN tblICItemUOM IUA ON IUA.intItemUOMId = F.intItemUOMId
 					LEFT JOIN tblICUnitMeasure GA ON IUA.intUnitMeasureId = GA.intUnitMeasureId
-			,(SELECT TOP 1
+			inner join (SELECT TOP 1
 					strCompanyName
 					,strAddress AS strCompanyAddress
 					,strCity + ' ' + strState + ' ' + strZip AS strCompanyStateAddress
@@ -123,7 +123,7 @@ BEGIN TRY
 					,strState AS strCompanyState
 					,strZip AS strCompanyZip
 				FROM tblSMCompanySetup
-			) tblSMCompanySetup
+			) tblSMCompanySetup on 1=1
 		WHERE C.intEntityLocationId = CASE
 										WHEN D.intShipToId IS NOT NULL
 											THEN D.intShipToId

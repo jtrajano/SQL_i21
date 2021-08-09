@@ -330,7 +330,7 @@ BEGIN TRY
 				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
 				,strCalculationShrinkOption		 = @strCalculationShrinkOption
 				,intDiscountUOMId				 = @intDiscountUOMId 
-				 FROM @tblExtendedTab ORDER BY 1 
+				 FROM @tblExtendedTab ORDER BY intExtendedKey
 			 END
 			 ELSE IF (@dblReading > @dblMaxToForIncremental)
 			 BEGIN
@@ -365,7 +365,7 @@ BEGIN TRY
 				,intShrinkCalculationOptionId	 = @intShrinkCalculationOptionId
 				,strCalculationShrinkOption		 = @strCalculationShrinkOption
 				,intDiscountUOMId				 = @intDiscountUOMId 			 
-				 FROM @tblExtendedTab ORDER BY 1 DESC
+				 FROM @tblExtendedTab ORDER BY intExtendedKey DESC
 			 END
 		END	 							
 		ELSE
@@ -468,8 +468,8 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0
-		ROLLBACK TRANSACTION
+	-- IF XACT_STATE() != 0 AND @@TRANCOUNT > 0
+	-- 	ROLLBACK TRANSACTION
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH

@@ -95,7 +95,7 @@ BEGIN
 	)
 	SELECT * FROM dbo.fnCTCreateVoucherPayable(@detailId, 'cost', 0, 1);
 
-	IF EXISTS(SELECT * FROM @voucherPayables)
+	IF EXISTS(SELECT TOP 1 1 FROM @voucherPayables)
 	BEGIN	
 		EXEC uspAPRemoveVoucherPayable @voucherPayables, DEFAULT, DEFAULT
 	END

@@ -4,7 +4,7 @@ AS
 BEGIN
 	SELECT L.strLoadNumber
 		,L.intLoadId
-		,LOT.strLotNumber AS strLot
+		,strLot = LOT.strLotNumber
 		,LD.intLoadDetailId
 		,LDL.intLoadDetailLotId
 		,LDL.intLotId
@@ -15,14 +15,17 @@ BEGIN
 		,LDL.dblNet
 		,LDL.intWeightUOMId
 		,LDL.strWarehouseCargoNumber
-		,UM.strUnitMeasure AS strItemUnitMeasure
-		,WUM.strUnitMeasure AS strWeightUnitMeasure
-		,UM.strUnitMeasure AS strItemUOM
-		,WUM.strUnitMeasure AS strWeightUOM
+		,LDL.strID1
+		,LDL.strID2
+		,LDL.strID3
+		,strItemUnitMeasure = UM.strUnitMeasure
+		,strWeightUnitMeasure = WUM.strUnitMeasure
+		,strItemUOM = UM.strUnitMeasure
+		,strWeightUOM = WUM.strUnitMeasure
 		,LOT.strLotNumber
-		,ISNULL(Receipt.strWarehouseRefNo,LOT.strWarehouseRefNo) AS strWarehouseRefNo
+		,strWarehouseRefNo = ISNULL(Receipt.strWarehouseRefNo,LOT.strWarehouseRefNo)
 		,CLSL.strSubLocationName
-		,SL.strName AS strStorageLocation
+		,strStorageLocation = SL.strName
 		,LDL.intConcurrencyId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId

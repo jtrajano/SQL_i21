@@ -284,8 +284,14 @@ BEGIN TRY
 			,@strBatchId
 			,@intUserId
 
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
+		IF EXISTS (
+				SELECT *
+				FROM @GLEntries
+				)
+		BEGIN
+			EXEC dbo.uspGLBookEntries @GLEntries
+				,0
+		END
 
 		UPDATE tblMFWorkOrderProducedLot
 		SET ysnProductionReversed = 1

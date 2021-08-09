@@ -10,6 +10,38 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+--------------------------
+-- Generate Category Code --
+--------------------------
+DECLARE 
+	@strCategoryCode NVARCHAR(50),
+	@strNewCategoryCode NVARCHAR(50),
+	@strNewCategoryCodeWithCounter NVARCHAR(50),
+	@counter INT,
+	@strNewDescription NVARCHAR(50)
+
+SELECT 
+	@strCategoryCode = strCategoryCode
+	,@strNewCategoryCode = strCategoryCode + '-copy' 
+	,@strNewDescription = strDescription + '-copy' 
+FROM 
+	tblICCategory 
+WHERE 
+	intCategoryId = @intCategoryId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblICCategory WHERE strCategoryCode = @strNewCategoryCode)
+BEGIN
+	SET @counter = 1
+	SET @strNewCategoryCodeWithCounter = @strNewCategoryCode + (CAST(@counter AS NVARCHAR(50)))
+	WHILE EXISTS(SELECT TOP 1 1 FROM tblICCategory WHERE strCategoryCode = @strNewCategoryCodeWithCounter)
+	BEGIN
+		SET @counter += 1
+		SET @strNewCategoryCodeWithCounter = @strNewCategoryCode + (CAST(@counter AS NVARCHAR(50)))
+	END
+	SET @strNewCategoryCode = @strNewCategoryCodeWithCounter
+	SET @strNewDescription = @strNewDescription + (CAST(@counter AS NVARCHAR(50)))
+END
+
 -- Duplicate primary details
 INSERT INTO [dbo].[tblICCategory]
            ([strCategoryCode]
@@ -48,8 +80,9 @@ INSERT INTO [dbo].[tblICCategory]
            ,[ysnYieldAdjustment]
            ,[ysnWarehouseTracked]
            ,[dtmDateCreated])
-SELECT [strCategoryCode] + '-copy'
-           ,[strDescription] + '-copy'
+SELECT 
+			[strCategoryCode] = @strNewCategoryCode
+           ,[strDescription] = @strNewDescription
            ,[strInventoryType]
            ,[intLineOfBusinessId]
            ,[intCostingMethod]
@@ -217,18 +250,14 @@ WHERE intCategoryId = @intCategoryId
 BEGIN 
 
 DECLARE @strDescription NVARCHAR(400)
-DECLARE @CategoryCode NVARCHAR(50)
-DECLARE @NewCategoryCode NVARCHAR(50)
-SELECT @CategoryCode = strCategoryCode FROM tblICCategory where intCategoryId = @intCategoryId
-SELECT @NewCategoryCode = strCategoryCode FROM tblICCategory where intCategoryId = @intNewCategoryId
 
-SET @strDescription = 'Duplicated ' + @CategoryCode + ' as ' + @NewCategoryCode + ''
+SET @strDescription = 'Duplicated ' + @strCategoryCode + ' as ' + @strNewCategoryCode + ''
 EXEC	dbo.uspSMAuditLog 
 			@keyValue = @intNewCategoryId						-- Item Id. 
 			,@screenName = 'Inventory.view.Category'     -- Screen Namespace
 			,@entityId = @intUserId						-- Entity Id.
 			,@actionType = 'Duplicated'                  -- Action Type
 			,@changeDescription = @strDescription
-			,@fromValue = @CategoryCode							-- Previous Value
-			,@toValue = @NewCategoryCode						-- New Value
+			,@fromValue = @strCategoryCode							-- Previous Value
+			,@toValue = @strNewCategoryCode						-- New Value
 END

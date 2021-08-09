@@ -17,6 +17,7 @@
 	strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
 	dblOpeningQty NUMERIC(28, 2) NULL,		
 	dblReceivedQty NUMERIC(28, 2) NULL,		
+	dblInventoryCountQty NUMERIC(28, 2) NULL,		
 	dblInvoicedQty NUMERIC(28, 2) NULL,		
 	dblAdjustments NUMERIC(28, 2) NULL,		
 	dblTransfersReceived NUMERIC(28, 2) NULL,

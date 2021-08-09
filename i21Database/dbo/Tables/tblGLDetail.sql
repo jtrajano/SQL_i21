@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblGLDetail] (
     [intGLDetailId]             INT              IDENTITY (1, 1) NOT NULL,
-    [intCompanyId] [int] NULL,
+    [intSubsidiaryCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
     [dtmDate]                   DATETIME         NOT NULL,
-    [strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
+    [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NOT NULL,
     [dblDebit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblDebit]  DEFAULT ((0)),
     [dblCredit] [numeric](18, 6) NULL CONSTRAINT [DF_tblGLDetail_dblCredit]  DEFAULT ((0)),
@@ -51,6 +51,8 @@
 	-- new columns GL-3550	
 	[strDocument] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strComments] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
+    [intFiscalPeriodId] INT NULL,
+    [intSubsidiaryGLDetailId] INT NULL,
     CONSTRAINT [PK_tblGL] PRIMARY KEY CLUSTERED ([intGLDetailId] ASC),
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])
@@ -117,7 +119,7 @@ GO
 
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Table Primary Key' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intGLDetailId' 
 GO
-EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Company Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intCompanyId' 
+EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Subsidiary Company Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intSubsidiaryCompanyId' 
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Multi-Company Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'intMultiCompanyId' 
 GO
@@ -211,3 +213,10 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Document' , @l
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Comments' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'strComments' 
 GO
+
+CREATE NONCLUSTERED INDEX idxGL_tblGLDetail_FiscalPeriod ON [dbo].[tblGLDetail]
+(
+	[intFiscalPeriodId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+

@@ -15,6 +15,8 @@
 	[intPositionId]									[int] NULL,
 	[strINCOLocationType]							NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 
+	[strInstructions]								[nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
+
 	--From Contract Basis
 	[intConcurrencyId]	 INT				DEFAULT (1)						NOT NULL,
 	CONSTRAINT [AK_tblSMFreightTerms_strFreightTerm] UNIQUE NONCLUSTERED ([strFreightTerm] ASC),	

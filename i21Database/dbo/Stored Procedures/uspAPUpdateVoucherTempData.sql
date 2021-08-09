@@ -160,6 +160,15 @@ BEGIN
 					RAISERROR('PAYVOUCHERNEGATIVEDISCOUNT', 16, 1);
 					RETURN;
 				END
+				ELSE
+				BEGIN
+					--POSITIVE DISCOUNT IS NOT VALID IF TRANSACTION TYPE IS NOT A VOUCHER
+					IF (SELECT TOP 1 voucher.intTransactionType FROM @ids ids INNER JOIN tblAPBill voucher ON ids.intId = voucher.intBillId) != 1
+					BEGIN
+						RAISERROR('PAYVOUCHERDISCOUNTNOTALLOWED', 16, 1);
+						RETURN;
+					END 
+				END
 
 				--DO NOT ALLOW NEGATIVE INTEREST
 				IF @tempInterest < 0 

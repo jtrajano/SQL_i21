@@ -21,8 +21,12 @@
 	[dblBatchSubFee2] NUMERIC(18,6) NULL,
 	[dblBatchSubFee3] NUMERIC(18,6) NULL,
 	[intSubImportFileHeaderId] INT NULL,
+	[intVendorDefaultId] INT NULL, 
+	[strVendor] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[ysnGeneric] BIT NULL,
 	CONSTRAINT [PK_tblCCImportDealerCreditCardReconDetail] PRIMARY KEY ([intImportDealerCreditCardReconDetailId]),
-	CONSTRAINT [FK_tblCCImportDealerCreditCardReconDetail_tblCCImportDealerCreditCardRecon] FOREIGN KEY([intImportDealerCreditCardReconId]) REFERENCES [tblCCImportDealerCreditCardRecon] ([intImportDealerCreditCardReconId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblCCImportDealerCreditCardReconDetail_tblCCImportDealerCreditCardRecon] FOREIGN KEY([intImportDealerCreditCardReconId]) REFERENCES [tblCCImportDealerCreditCardRecon] ([intImportDealerCreditCardReconId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblCCImportDealerCreditCardReconDetail_tblCCVendorDefault] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [tblCCVendorDefault]([intVendorDefaultId])
 )
 GO
 

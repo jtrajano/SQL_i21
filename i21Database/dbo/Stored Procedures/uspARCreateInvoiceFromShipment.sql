@@ -199,6 +199,8 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[strSalesOrderNumber]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intItemContractHeaderId]
+	,[intItemContractDetailId]
 	,[intShipmentPurchaseSalesContractId]
 	,[dblShipmentGrossWt]
 	,[dblShipmentTareWt]
@@ -226,6 +228,7 @@ INSERT INTO @UnsortedEntriesForInvoice
 	,[dblCurrencyExchangeRate]
 	,[intSubCurrencyId] 
 	,[dblSubCurrencyRate] 
+	,[dblStandardWeight]
 	)
 SELECT
 	 [strSourceTransaction]					= 'Inventory Shipment'
@@ -272,7 +275,7 @@ SELECT
 	,[strDocumentNumber]					= @ShipmentNumber 
 	,[strItemDescription]					= ARSI.[strItemDescription]
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-	,[dblQtyOrdered]						= CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0
+	,[dblQtyOrdered]						= CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0 AND ISNULL(ARSI.[intItemContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intItemContractDetailId], 0) = 0
 											  THEN 0 
 											  ELSE ARSI.[dblQtyOrdered] 
 											  END
@@ -315,6 +318,8 @@ SELECT
 	,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
 	,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
 	,[intContractDetailId]					= ARSI.[intContractDetailId] 
+	,[intItemContractHeaderId]				= ARSI.[intItemContractHeaderId] 
+	,[intItemContractHeaderId]				= ARSI.[intItemContractDetailId] 
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
 	,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
@@ -342,6 +347,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
+	,[dblStandardWeight]					= ARSI.dblStandardWeight
 FROM vyuARShippedItems ARSI
 WHERE ARSI.[strTransactionType] = 'Inventory Shipment'
   AND ARSI.[intInventoryShipmentId] = @ShipmentId
@@ -435,6 +441,8 @@ SELECT
 	,[strSalesOrderNumber]					= SO.strSalesOrderNumber 
 	,[intContractHeaderId]					= NULL
 	,[intContractDetailId]					= NULL
+	,[intItemContractHeaderId]				= NULL
+	,[intItemContractHeaderId]				= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[dblShipmentGrossWt]					= @ZeroDecimal 
 	,[dblShipmentTareWt]					= @ZeroDecimal
@@ -462,6 +470,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= SOD.[dblCurrencyExchangeRate]
 	,[intSubCurrencyId]						= SOD.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= SOD.[dblSubCurrencyRate]
+	,[dblStandardWeight]					= SOD.dblStandardWeight
 FROM tblICInventoryShipment ICIS
 INNER JOIN tblSOSalesOrder SO ON SO.strSalesOrderNumber = @strReferenceNumber
 							 AND ICIS.intEntityCustomerId = SO.intEntityCustomerId 
@@ -558,6 +567,8 @@ SELECT
 	,[strSalesOrderNumber]					= '' 
 	,[intContractHeaderId]					= NULL
 	,[intContractDetailId]					= NULL
+	,[intItemContractHeaderId]				= NULL
+	,[intItemContractHeaderId]				= NULL
 	,[intShipmentPurchaseSalesContractId]	= NULL
 	,[dblShipmentGrossWt]					= @ZeroDecimal 
 	,[dblShipmentTareWt]					= @ZeroDecimal
@@ -585,6 +596,7 @@ SELECT
 	,[dblCurrencyExchangeRate]				= ICISI.[dblForexRate]
 	,[intSubCurrencyId]						= NULL
 	,[dblSubCurrencyRate]					= @ZeroDecimal
+	,[dblStandardWeight]					= @ZeroDecimal
 FROM 
 	tblICInventoryShipment ICIS
 INNER JOIN
@@ -882,6 +894,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 					  , @intPriceFixationId				INT = NULL
 					  , @intContractDetailToDeleteId    INT = NULL
 					  , @ysnLoad						BIT = 0
+					  , @intContractDetailId			INT = NULL
 
 				SELECT TOP 1 @intInvoiceEntriesId			= intInvoiceEntriesId 
 						   , @dblQtyShipped					= dblQtyShipped
@@ -889,6 +902,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 						   , @intPriceFixationId			= intPriceFixationId
 						   , @intContractDetailToDeleteId	= intContractDetailId
 						   , @ysnLoad						= ysnLoad
+						   , @intContractDetailId			= intContractDetailId
 				FROM #CONTRACTSPRICING 
 				ORDER BY intInvoiceEntriesId
 
@@ -922,9 +936,13 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									END
 
 								UPDATE @EntriesForInvoice
-								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN @dblQuantity ELSE @dblOriginalQtyShipped END
-								  , dblPrice		= @dblFinalPrice
+								SET dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
+								  , intPriceFixationDetailId	= @intPriceFixationDetailId
+								WHERE intId = @intInvoiceEntriesId OR intContractDetailId = @intContractDetailId
+
+								UPDATE @EntriesForInvoice
+								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN dblQtyOrdered ELSE @dblOriginalQtyShipped END
 								WHERE intId = @intInvoiceEntriesId
 
 								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
@@ -988,6 +1006,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, dblConversionFactor
 									, ysnClearDetailTaxes
 									, dblSubCurrencyRate
+									, intStorageLocationId
+									, intCompanyLocationSubLocationId
+									, intSubLocationId
+									, intPriceFixationDetailId
+									, dblStandardWeight
 								)
 								SELECT strSourceTransaction
 									, intSourceId
@@ -1018,7 +1041,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, strDocumentNumber
 									, strItemDescription
 									, intOrderUOMId
-									, dblQtyOrdered				= @dblQuantity
+									, dblQtyOrdered
 									, intItemUOMId
 									, intPriceUOMId
 									, dblContractPriceUOMQty
@@ -1042,6 +1065,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, dblConversionFactor
 									, ysnClearDetailTaxes
 									, dblSubCurrencyRate
+									, intStorageLocationId
+									, intCompanyLocationSubLocationId
+									, intSubLocationId
+									, intPriceFixationDetailId	= @intPriceFixationDetailId
+									, dblStandardWeight
 								FROM @EntriesForInvoice
 								WHERE intId = @intInvoiceEntriesId
 
@@ -1114,6 +1142,7 @@ ELSE
 				, intStorageLocationId
 				, intSubLocationId
 				, intCompanyLocationSubLocationId
+				, dblStandardWeight
 			)
 			SELECT intInvoiceDetailId				= NULL
 				, strSourceTransaction				= 'Direct'
@@ -1150,6 +1179,7 @@ ELSE
 				, intStorageLocationId				= EI.intStorageLocationId
 				, intSubLocationId					= EI.intSubLocationId
 				, intCompanyLocationSubLocationId	= EI.intSubLocationId
+				, dblStandardWeight					= EI.dblStandardWeight
 			FROM @EntriesForInvoice EI
 
 			EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
@@ -1176,7 +1206,7 @@ IF @ysnHasPriceFixation = 1
 			 , intInvoiceDetailId		= ID.intInvoiceDetailId
 			 , intConcurrencyId			= 1
 		FROM tblARInvoiceDetail ID
-		INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.dblPrice = PRICE.dblFinalPrice
+		INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.intPriceFixationDetailId = PRICE.intPriceFixationDetailId
 		WHERE ID.intInvoiceId = @NewInvoiceId
 		  AND PRICE.ysnProcessed = 1
 		  AND ID.intInventoryShipmentItemId IS NOT NULL

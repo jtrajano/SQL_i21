@@ -105,6 +105,7 @@ AS
        ,SCT.intCommodityId
        ,SCT.intDiscountId
        ,SCT.intContractId
+       ,CTH.intContractHeaderId
        ,SCT.intDiscountLocationId
        ,SCT.intItemId
        ,SCT.intEntityId
@@ -178,6 +179,11 @@ AS
     
 	,SCT.ysnCertOfAnalysisPosted
 	,SCT.ysnExportRailXML
+   ,SCT.intAGWorkOrderId
+   ,SCT.ysnMultipleTicket
+   ,strAGWorkOrderNumber  = AWO.strOrderNumber
+   ,strAGWorkOrderLocation = AWOL.strLocationName
+   ,SCT.dblDWGOriginalNetUnits
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -216,3 +222,7 @@ AS
 		FOR XML PATH ('')
 	) ContractsApplied(strContractsApplied)
 	) ContractsApplied
+   LEFT JOIN tblAGWorkOrder AWO
+      ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
+   LEFT JOIN tblSMCompanyLocation AWOL
+		ON AWO.intCompanyLocationId = AWOL.intCompanyLocationId

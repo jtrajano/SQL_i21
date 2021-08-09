@@ -1,160 +1,170 @@
 CREATE TABLE [dbo].[tblCTContractDetail]
 (
-	intContractDetailId				INT IDENTITY(1,1) NOT NULL,
-	intSplitFromId					INT,
-	intParentDetailId				INT,
-	ysnSlice						BIT,
-	intConcurrencyId				INT NOT NULL,
-	intContractHeaderId				INT NOT NULL,
-	intContractStatusId				INT NULL,
-	strFinancialStatus				NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
-	intContractSeq					INT NOT NULL,
-	intCompanyLocationId			INT NOT NULL,
-	intShipToId						INT,
-	dtmStartDate					DATETIME NOT NULL,
-	dtmEndDate						DATETIME NOT NULL,
-	intFreightTermId				INT NULL,
-	intShipViaId					INT NULL,	
-	intItemContractId				INT NULL,
-	intItemBundleId					INT NULL,
-	intItemId						INT NULL,
-	strItemSpecification			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	intCategoryId					INT NULL,
-	dblQuantity						NUMERIC(18, 6) NOT NULL,
-	intItemUOMId					INT NULL,	
-	dblOriginalQty					NUMERIC(18, 6) NULL, 
-    dblBalance						NUMERIC(18, 6) NULL, 
-    dblIntransitQty					NUMERIC(18, 6) NULL, 
-    dblScheduleQty					NUMERIC(18, 6) NULL, 
-	dblBalanceLoad					NUMERIC(18, 6) NULL, 
-	dblScheduleLoad					NUMERIC(18, 6) NULL, 
-    dblShippingInstructionQty		NUMERIC(18, 6) NULL, 
-	dblNetWeight					NUMERIC(18, 6) NULL, 
-	intNetWeightUOMId				INT NULL,	
-	intUnitMeasureId				INT NULL,
-	intCategoryUOMId				INT NULL, 	
-	intNoOfLoad						INT NULL, 
-	dblQuantityPerLoad				NUMERIC(18, 6) NULL,     
-	intIndexId						INT NULL, 
-	dblAdjustment					NUMERIC(18, 6) NULL, 
-	intAdjItemUOMId					INT NULL,    
-	intPricingTypeId				INT NULL,
-	intFutureMarketId				INT NULL,
-	intFutureMonthId				INT NULL,
-	dblFutures						NUMERIC(18, 6) NULL,
-	dblBasis						NUMERIC(18, 6) NULL,	
-	dblOriginalBasis				NUMERIC(18, 6) NULL,
-	dblConvertedBasis				NUMERIC(18, 6) NULL,
-	intBasisCurrencyId				INT,
-	intBasisUOMId					INT,
-	dblFreightBasisBase				NUMERIC(18, 6) NULL,
-	intFreightBasisBaseUOMId		INT,
-	dblFreightBasis					NUMERIC(18, 6) NULL,
-	intFreightBasisUOMId			INT,
-	dblRatio						NUMERIC(18,6),
-	dblCashPrice					NUMERIC(18, 6) NULL,
-	dblTotalCost					NUMERIC(18, 6) NULL,
-	intCurrencyId					INT NULL,
-	intPriceItemUOMId				INT NULL, 
-	dblNoOfLots						NUMERIC(18, 6) NULL,
-	dtmLCDate						DATETIME,
-	dtmLastPricingDate				DATETIME,
-	dblConvertedPrice				NUMERIC(18, 6) NULL,
-	intConvPriceCurrencyId			INT,
-	intConvPriceUOMId				INT,	
-	intMarketZoneId					INT NULL,
-	intDiscountTypeId				INT NULL ,
-	intDiscountId					INT NULL,
-	intDiscountScheduleId			INT NULL,
-	intDiscountScheduleCodeId		INT NULL,
-	intStorageScheduleRuleId		INT NULL,
-	intContractOptHeaderId			INT NULL,
-	strBuyerSeller					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	intBillTo						INT NULL,
-	intFreightRateId				INT NULL,
-	strFobBasis						NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	intRailGradeId					INT NULL,
-	strRailRemark					NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
-	strLoadingPointType				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    intLoadingPortId				INT NULL, 
-	strDestinationPointType			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-    intDestinationPortId			INT NULL, 
-    strShippingTerm					NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
-    intShippingLineId				INT NULL, 
-	strVessel						NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
-    intDestinationCityId			INT NULL, 
-    intShipperId					INT NULL, 
-	strRemark						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
-	intSubLocationId				INT,
-	intStorageLocationId			INT,
-	intPurchasingGroupId			INT,
-	intFarmFieldId					INT NULL,
-	intSplitId						INT NULL,
-	strGrade						NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
-	strGarden						NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
-	strVendorLotID					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	strInvoiceNo					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	strReference					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strERPPONumber					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	strERPItemNumber				NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
-	strERPBatchNumber				NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
-	intUnitsPerLayer				INT NULL,
-	intLayersPerPallet				INT NULL,
-	dtmEventStartDate				DATETIME NULL,
-	dtmPlannedAvailabilityDate		DATETIME NULL,
-	dtmUpdatedAvailabilityDate		DATETIME NULL,
-	dtmM2MDate						DATETIME NULL,
-	intBookId						INT NULL,
-	intSubBookId					INT NULL,
-	intContainerTypeId				INT NULL,
-	intNumberOfContainers			INT NULL,
-	intInvoiceCurrencyId			INT NULL,
-	dtmFXValidFrom					DATETIME NULL,
-	dtmFXValidTo					DATETIME NULL,
-	dblRate							NUMERIC(18, 6) NULL,
-	dblFXPrice						NUMERIC(18, 6) NULL,
-	ysnUseFXPrice					BIT,
-	intFXPriceUOMId					INT NULL,
-	strFXRemarks					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	dblAssumedFX					NUMERIC(18, 6) NULL,
-	strFixationBy					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	strPackingDescription			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	dblYield						NUMERIC(18, 6) NULL, 
-	intCurrencyExchangeRateId		INT NULL,
-	intRateTypeId					INT NULL,
-    intCreatedById					INT,
-	dtmCreated						DATETIME,
-	intLastModifiedById				INT,
-	dtmLastModified					DATETIME,
-	ysnInvoice						BIT NULL DEFAULT 0, 
-	ysnProvisionalInvoice			BIT NULL DEFAULT 0, 
-	ysnQuantityFinal				BIT NULL DEFAULT 0, 
-	intProducerId					INT NULL,
-	ysnClaimsToProducer				BIT,
-	ysnRiskToProducer				BIT,
-	ysnBackToBack					BIT,
-    dblAllocatedQty					NUMERIC(18, 6) NULL, 
-    dblReservedQty					NUMERIC(18, 6) NULL, 
-    dblAllocationAdjQty				NUMERIC(18, 6) NULL, 
-    dblInvoicedQty					NUMERIC(18, 6) NULL, 
-	ysnPriceChanged					BIT,
-	intContractDetailRefId			INT,
-	ysnStockSale					BIT,
-	strCertifications				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-    ysnSplit						BIT,
-    ysnProvisionalPNL				BIT NOT NULL DEFAULT 0, 
-    ysnFinalPNL						BIT NOT NULL DEFAULT 0, 
-    dtmProvisionalPNL				DATETIME NULL,
-    dtmFinalPNL						DATETIME NULL,
-	intPricingStatus				INT,
-	dtmStartDateUTC					DATETIME NULL,
-
-	-- NOTE: ALL FIELDS HERE SHOULD BE SAME WITH ContractDetail (UDT) AND fnCTGetContractDetail
+	intContractDetailId int IDENTITY(1,1) NOT NULL,
+	intSplitFromId int,
+	intParentDetailId int,
+	ysnSlice BIT,
+	intConcurrencyId int NOT NULL,
+	intContractHeaderId int NOT NULL,
+	intContractStatusId int NULL,
+	strFinancialStatus nvarchar(30) COLLATE Latin1_General_CI_AS NULL,
+	intContractSeq int NOT NULL,
+	intCompanyLocationId int NOT NULL,
+	intShipToId INT,
+	dtmStartDate datetime NOT NULL,
+	dtmEndDate datetime NOT NULL,
+	intFreightTermId int NULL,
+	intShipViaId int NULL,	
+	intItemContractId INT NULL,
+	intItemBundleId INT NULL,
+	intItemId int NULL,
+	strItemSpecification nvarchar(MAX) COLLATE Latin1_General_CI_AS NULL,
+	intCategoryId INT NULL,
+	dblQuantity numeric(18, 6) NOT NULL,
+	intItemUOMId int NULL,	
+	dblOriginalQty NUMERIC(18, 6) NULL, 
+    dblBalance NUMERIC(18, 6) NULL, 
+    dblIntransitQty NUMERIC(18, 6) NULL, 
+    dblScheduleQty NUMERIC(18, 6) NULL, 
+	dblBalanceLoad	NUMERIC(18, 6) NULL, 
+	dblScheduleLoad	NUMERIC(18, 6) NULL, 
+    dblShippingInstructionQty NUMERIC(18, 6) NULL, 
+	dblNetWeight NUMERIC(18, 6) NULL, 
+	intNetWeightUOMId int NULL,	
+	intUnitMeasureId int NULL,
+	intCategoryUOMId INT NULL, 	
+	intNoOfLoad INT NULL, 
+	dblQuantityPerLoad NUMERIC(18, 6) NULL,     
+	intIndexId INT NULL, 
+	dblAdjustment NUMERIC(18, 6) NULL, 
+	intAdjItemUOMId int NULL,    
+	intPricingTypeId int NULL,
+	intFutureMarketId int NULL,
+	intFutureMonthId INT NULL,
+	dblFutures numeric(18, 6) NULL,
+	dblBasis numeric(18, 6) NULL,	
+	dblOriginalBasis numeric(18, 6) NULL,
+	dblConvertedBasis numeric(18, 6) NULL,
+	intBasisCurrencyId INT,
+	intBasisUOMId INT,
+	dblFreightBasisBase numeric(18, 6) NULL,
+	intFreightBasisBaseUOMId INT,
+	dblFreightBasis numeric(18, 6) NULL,
+	intFreightBasisUOMId INT,
+	dblRatio NUMERIC(18,6),
+	dblCashPrice numeric(18, 6) NULL,
+	dblTotalCost numeric(18, 6) NULL,
+	intCurrencyId int NULL,
+	intPriceItemUOMId  INT NULL, 
+	dblNoOfLots NUMERIC(18, 6) NULL,
+	dtmLCDate DATETIME,
+	dtmLastPricingDate DATETIME,
+	dblConvertedPrice  NUMERIC(18, 6) NULL,
+	intConvPriceCurrencyId INT,
+	intConvPriceUOMId INT,	
+	intMarketZoneId int NULL,
+	intDiscountTypeId int NULL ,
+	intDiscountId int NULL,
+	intDiscountScheduleId int NULL,
+	intDiscountScheduleCodeId int NULL,
+	intStorageScheduleRuleId int NULL,
+	intContractOptHeaderId int NULL,
+	strBuyerSeller nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	intBillTo int NULL,
+	intFreightRateId int NULL,
+	strFobBasis nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	intRailGradeId int NULL,
+	strRailRemark nvarchar(250) COLLATE Latin1_General_CI_AS NULL,
+	strLoadingPointType nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+    intLoadingPortId INT NULL, 
+	strDestinationPointType nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+    intDestinationPortId INT NULL, 
+    strShippingTerm NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
+    intShippingLineId INT NULL, 
+	strVessel NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
+    intDestinationCityId INT NULL, 
+    intShipperId INT NULL, 
+	strRemark NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	intSubLocationId INT,
+	intStorageLocationId INT,
+	intPurchasingGroupId INT,
+	intFarmFieldId INT NULL,
+	intSplitId INT NULL,
+	strGrade NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
+	strGarden NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
+	strVendorLotID NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strInvoiceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strReference NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strERPPONumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	strERPItemNumber	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
+	strERPBatchNumber	NVARCHAR (100)  COLLATE Latin1_General_CI_AS,
+	intUnitsPerLayer INT NULL,
+	intLayersPerPallet INT NULL,
+	dtmEventStartDate datetime NULL,
+	dtmPlannedAvailabilityDate datetime NULL,
+	dtmUpdatedAvailabilityDate  datetime NULL,
+	dtmM2MDate  datetime NULL,
+	intBookId INT NULL,
+	intSubBookId INT NULL,
+	intContainerTypeId INT NULL,
+	intNumberOfContainers INT NULL,
+	intInvoiceCurrencyId int NULL,
+	dtmFXValidFrom  datetime NULL,
+	dtmFXValidTo  datetime NULL,
+	dblRate numeric(18, 6) NULL,
+	dblFXPrice numeric(18, 6) NULL,
+	ysnUseFXPrice BIT,
+	intFXPriceUOMId int NULL,
+	strFXRemarks NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	dblAssumedFX numeric(18, 6) NULL,
+	strFixationBy NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	strPackingDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	dblYield NUMERIC(18, 6) NULL, 
+	intCurrencyExchangeRateId INT NULL,
+	intRateTypeId INT NULL,
+    intCreatedById INT,
+	dtmCreated DATETIME,
+	intLastModifiedById INT,
+	dtmLastModified DATETIME,
+	ysnInvoice BIT NULL DEFAULT 0, 
+	ysnProvisionalInvoice BIT NULL DEFAULT 0, 
+	ysnQuantityFinal BIT NULL DEFAULT 0, 
+	intProducerId INT NULL,
+	ysnClaimsToProducer BIT,
+	ysnRiskToProducer BIT,
+	ysnBackToBack BIT,
+    dblAllocatedQty NUMERIC(18, 6) NULL, 
+    dblReservedQty NUMERIC(18, 6) NULL, 
+    dblAllocationAdjQty NUMERIC(18, 6) NULL, 
+    dblInvoicedQty NUMERIC(18, 6) NULL, 
+	ysnPriceChanged BIT,
+	intContractDetailRefId INT,
+	ysnStockSale BIT,
+	strCertifications NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+    ysnSplit BIT,
+    ysnProvisionalPNL BIT NOT NULL DEFAULT 0, 
+    ysnFinalPNL BIT NOT NULL DEFAULT 0, 
+    dtmProvisionalPNL DATETIME NULL,
+    dtmFinalPNL DATETIME NULL,
+	intPricingStatus INT,
+	dtmStartDateUTC datetime NULL,
+	-- Reference Pricing
+	dblRefFuturesQty NUMERIC(18, 6) NULL,
+	intRefFuturesItemUOMId INT NULL,
+	intRefFuturesCurrencyId INT NULL,
+	intRefFuturesMarketId INT NULL,
+	intRefFuturesMonthId INT NULL,
+	ysnAutoShortClosed BIT NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 
-	
+	-- Reference Pricing Constraints
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intRefFuturesItemUOMId_intItemUOMId] FOREIGN KEY (intRefFuturesItemUOMId) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intRefFuturesMarketId_intFutureMarketId] FOREIGN KEY ([intRefFuturesMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intRefFuturesMonthId_intFutureMonthId] FOREIGN KEY ([intRefFuturesMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intRefFuturesCurrencyId_intCurrencyId] FOREIGN KEY ([intRefFuturesCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractDetail_intParentDetailId_intContractDetailId] FOREIGN KEY (intParentDetailId) REFERENCES tblCTContractDetail(intContractDetailId),
 
@@ -573,185 +583,90 @@ CREATE NONCLUSTERED INDEX [IX_tblCTContractDetail_intSplitFromId]
 ON [dbo].[tblCTContractDetail](intSplitFromId);
 GO
 
--- CREATE TRIGGER [dbo].[trgCTContractDetail]
---     ON [dbo].[tblCTContractDetail]
---     FOR INSERT,UPDATE
---     AS
+CREATE TRIGGER [dbo].[trgCTContractDetail]
+    ON [dbo].[tblCTContractDetail]
+    FOR INSERT,UPDATE
+    AS 
+    
+	declare @ErrMsg nvarchar(max);
 
--- 	declare @intActiveContractDetailId int = 0;
--- 	declare @intPricingTypeId int = 0;
--- 	declare @dblSequenceQuantity numeric(18,6) = 0.00;
--- 	declare @intPricingStatus int = 0;
--- 	declare @dblPricedQuantity numeric(18,6) = 0.00;
-	
--- 	declare @intActiveId int = 0;
--- 	declare @dblCommulativeAppliedAndPrice numeric(18,6) = 0;
--- 	declare @dblActivelAppliedQuantity numeric(18,6);
--- 	declare @dblRemainingAppliedQuantity numeric(18,6) = 0;
--- 	declare @ysnLoad bit;
--- 	declare @ErrMsg nvarchar(max);
+	declare @intActiveContractDetailId int = 0;
+	declare @intActiveContractHeaderId int = 0;
+	declare @intPricingTypeId int = 0;
+	declare @dblSequenceQuantity numeric(18,6) = 0.00;
+	declare @intPricingStatus int = 0;
+	declare @dblPricedQuantity numeric(18,6) = 0.00;
+	declare @ysnMultiPrice bit = 0;
+	declare @dblBalance numeric(18,6);
 
--- 	begin try
+	begin try
 
--- 		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity from inserted i;
+		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity, @dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then i.dblBalance else i.dblBalanceLoad end) 
+		from 
+			inserted i
+			inner join tblCTContractHeader ch on ch.intContractHeaderId = i.intContractHeaderId;  
 
--- 		if (@intPricingTypeId = 1)
--- 		begin
--- 			set @intPricingStatus = 2;
--- 		end
--- 		else
--- 		begin
--- 			select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
+		if (@intPricingTypeId = 1)
+		begin
+			set @intPricingStatus = 2;
+		end
+		else
+		begin
+			if exists (select top 1 1 from tblCTContractHeader ch inner join tblCTContractDetail cd on ch.intContractHeaderId = cd.intContractHeaderId where cd.intContractDetailId = @intActiveContractDetailId and ch.ysnMultiplePriceFixation is not null)
+			begin
+				set @ysnMultiPrice = 1
+				select top 1 @intActiveContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId
+			end
+
+			if @ysnMultiPrice = 1
+			begin
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractHeaderId = @intActiveContractHeaderId 
+			end
+			else
+			begin
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) 
+				from 
+					tblCTPriceFixation pf 
+					inner join tblCTPriceFixationDetail pfd with (updlock) on pfd.intPriceFixationId = pf.intPriceFixationId
+				where pf.intContractDetailId = @intActiveContractDetailId 
+			end			
 			
--- 			if (@dblPricedQuantity = 0)
--- 			begin
--- 				set @intPricingStatus = 0;
--- 			end
--- 			else
--- 			begin
--- 				if (@dblSequenceQuantity > @dblPricedQuantity)
--- 				begin
--- 					set @intPricingStatus = 1;
--- 				end
--- 				else
--- 				begin
--- 					set @intPricingStatus = 2;
--- 				end
--- 			end
--- 		end
+			if (@dblPricedQuantity = 0)
+			begin
+				set @intPricingStatus = 0;
+			end
+			else
+			begin
+				if (@dblSequenceQuantity > @dblPricedQuantity)
+				begin
+					set @intPricingStatus = 1;
+				end
+				else
+				begin
+					set @intPricingStatus = 2;
+				end
+			end
+		end
 
--- 		update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
+		if not exists(select top 1 1 from tblCTContractDetail where intPricingStatus = @intPricingStatus and intContractDetailId = @intActiveContractDetailId)
+		begin
+			update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
+		end
 
+		exec uspCTUpdateAppliedAndPrice
+			@intContractDetailId = @intActiveContractDetailId
+			,@dblBalance = @dblBalance
 
--- 		declare @Pricing table (
--- 			intId int
--- 			,intContractHeaderId int
--- 			,ysnLoad bit
--- 			,intContractDetailId int
--- 			,dblSequenceQuantity numeric(18,6)
--- 			,dblBalance numeric(18,6)
--- 			,dblAppliedQuantity numeric(18,6)
--- 			,intNoOfLoad int null
--- 			,dblBalanceLoad numeric(18,6)
--- 			,dblAppliedLoad numeric(18,6)
--- 			,intPriceFixationId int
--- 			,intPriceFixationDetailId int
--- 			,intPricingNumber int
--- 			,intNumber int
--- 			,dblPricedQuantity numeric(18,6)
--- 			,dblQuantityAppliedAndPriced numeric(18,6)
--- 			,dblLoadPriced numeric(18,6)
--- 			,dblLoadAppliedAndPriced numeric(18,6)
--- 			,dblCorrectAppliedAndPriced numeric(18,6) null
--- 		)
-
--- 		insert into @Pricing
--- 		select
--- 			intId = convert(int,ROW_NUMBER() over (order by pfd.intPriceFixationDetailId))
--- 			,ch.intContractHeaderId
--- 			,ch.ysnLoad
--- 			,cd.intContractDetailId
--- 			,dblSequenceQuantity = cd.dblQuantity
--- 			,cd.dblBalance
--- 			,dblAppliedQuantity = cd.dblQuantity - cd.dblBalance
--- 			,cd.intNoOfLoad
--- 			,cd.dblBalanceLoad
--- 			,dblAppliedLoad = cd.intNoOfLoad - cd.dblBalanceLoad
--- 			,pf.intPriceFixationId
--- 			,pfd.intPriceFixationDetailId
--- 			,intPricingNumber = ROW_NUMBER() over (partition by pf.intPriceFixationId order by pfd.intPriceFixationDetailId)
--- 			,pfd.intNumber
--- 			,dblPricedQuantity = isnull(invoiced.dblQtyShipped, pfd.dblQuantity)
--- 			,pfd.dblQuantityAppliedAndPriced
--- 			,pfd.dblLoadPriced
--- 			,pfd.dblLoadAppliedAndPriced
--- 			,dblCorrectAppliedAndPriced = null
--- 		from tblCTPriceFixation pf
--- 		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
--- 		join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
--- 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
--- 		join tblCTContractType ct on ct.intContractTypeId = ch.intContractTypeId
--- 		left join (
--- 			select 
--- 				ar.intPriceFixationDetailId, dblQtyShipped = sum(di.dblQtyShipped)
--- 			from
--- 				tblCTPriceFixationDetailAPAR ar
--- 				join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId
--- 			group by
--- 				ar.intPriceFixationDetailId
--- 		) invoiced on invoiced.intPriceFixationDetailId = pfd.intPriceFixationDetailId
--- 		where pf.intContractDetailId = @intActiveContractDetailId
--- 		and ct.strContractType = 'Sale'
--- 		order by pfd.intPriceFixationDetailId
-
--- 		select @intActiveId = min(intId) from @Pricing
--- 		while (@intActiveId is not null)
--- 		begin
--- 			select
--- 				@dblActivelAppliedQuantity = (case when ysnLoad = 1 then dblAppliedLoad else dblAppliedQuantity end)
--- 				,@dblPricedQuantity = (case when ysnLoad = 1 then dblLoadPriced else dblPricedQuantity end)
--- 				,@ysnLoad = isnull(ysnLoad,0)
--- 			from
--- 				@Pricing
--- 			where
--- 				intId = @intActiveId;
-
--- 			set @dblCommulativeAppliedAndPrice += @dblPricedQuantity;
--- 			if (@dblRemainingAppliedQuantity = 0)
--- 			begin
--- 				set @dblRemainingAppliedQuantity = @dblActivelAppliedQuantity;
--- 			end
-
--- 			if (@dblCommulativeAppliedAndPrice < @dblActivelAppliedQuantity)
--- 			begin
--- 				update @Pricing
--- 				set dblCorrectAppliedAndPriced = @dblPricedQuantity
--- 				where intId = @intActiveId
-
--- 				set @dblRemainingAppliedQuantity -= @dblPricedQuantity;
--- 			end
--- 			else
--- 			begin
--- 				update @Pricing
--- 				set dblCorrectAppliedAndPriced = @dblRemainingAppliedQuantity
--- 				where intId = @intActiveId
-
--- 				set @dblRemainingAppliedQuantity -= @dblRemainingAppliedQuantity;
--- 			end
-
-
-
--- 			select @intActiveId = min(intId) from @Pricing where intId > @intActiveId;
--- 		end
-
--- 		update
--- 			b
--- 		set
--- 			b.intNumber = (case when b.intNumber <> a.intPricingNumber then a.intPricingNumber else b.intNumber end)
--- 			,b.dblQuantityAppliedAndPriced = (case when b.dblQuantityAppliedAndPriced <> a.dblCorrectAppliedAndPriced then a.dblCorrectAppliedAndPriced else b.dblQuantityAppliedAndPriced end)
--- 			,b.dblLoadAppliedAndPriced = (case when @ysnLoad = 1 then a.dblCorrectAppliedAndPriced else null end)
--- 		from
--- 			@Pricing a
--- 			,tblCTPriceFixationDetail b
--- 		where
--- 			(
--- 				a.intNumber <> a.intPricingNumber
--- 				or a.dblCorrectAppliedAndPriced <> (
--- 					case
--- 					when a.ysnLoad = 1
--- 					then a.dblLoadAppliedAndPriced
--- 					else a.dblQuantityAppliedAndPriced
--- 					end
--- 				)
--- 			 )
--- 			and b.intPriceFixationDetailId = a.intPriceFixationDetailId
-
--- 	end try
--- 	begin catch
--- 		SET @ErrMsg = ERROR_MESSAGE()  
--- 		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT') 
--- 	end catch
--- GO
+	end try
+	begin catch
+		SET @ErrMsg = ERROR_MESSAGE()  
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT') 
+	end catch
+GO
 
 CREATE TRIGGER [dbo].[trgCTContractDetailDelete]
 	ON [dbo].[tblCTContractDetail]

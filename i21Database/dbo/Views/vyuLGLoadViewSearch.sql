@@ -37,7 +37,7 @@ SELECT L.intLoadId
 	,L.dtmScheduledDate
 	,strHauler = Hauler.strName
 	,strDriver = Driver.strName
-	,ysnDispatched = CASE WHEN L.ysnDispatched = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	,ysnDispatched = ISNULL(L.ysnDispatched, 0)
 	,strPosition = P.strPosition
 	,strPositionType = P.strPositionType
 	,strWeightUnitMeasure = UM.strUnitMeasure
@@ -45,21 +45,33 @@ SELECT L.intLoadId
 		WHEN 1 THEN 'Scheduled'
 		WHEN 2 THEN 'Dispatched'
 		WHEN 3 THEN 
-			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-					ELSE 'Inbound Transit' END
+			CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+				ELSE 'Inbound Transit' END
 		WHEN 4 THEN 'Received'
 		WHEN 5 THEN 
-			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-					ELSE 'Outbound Transit' END
+			CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+				ELSE 'Outbound Transit' END
 		WHEN 6 THEN 
-			CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-					WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-					ELSE 'Delivered' END
+			CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+				WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+				WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+				ELSE 'Delivered' END
 		WHEN 7 THEN 
 			CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
 					ELSE 'Shipping Instruction Created' END
@@ -93,7 +105,7 @@ SELECT L.intLoadId
 	,L.dtmCancelDispatchMailSent
 	,L.intLoadShippingInstructionId
 	,L.intShipmentType
-	,LSI.strLoadNumber AS strShippingInstructionNo
+	,strShippingInstructionNo = LSI.strLoadNumber
 	,strShipmentType = CASE L.intShipmentType
 		WHEN 1 THEN 'Shipment'
 		WHEN 2 THEN 'Shipping Instructions'
@@ -104,6 +116,9 @@ SELECT L.intLoadId
 	,strShippingLine = ShippingLine.strName
 	,strInsurer = Insurer.strName
 	,strTerminal = Terminal.strName
+	,L.strCourierTrackingNumber
+	,L.str4CLicenseNumber
+	,L.strExternalERPReferenceNumber
 	,strBLDraftToBeSent = BLDraftToBeSent.strName
 	,strDocPresentationVal = DocPresentation.strName
 	,strInsuranceCurrency = Currency.strCurrency
@@ -131,16 +146,41 @@ SELECT L.intLoadId
 	,BO.strBook
 	,L.intSubBookId
 	,SB.strSubBook
+	,L.ysnAllowReweighs
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
-LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
-LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
-LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
-LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
-LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
-LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = L.intTerminalEntityId
-LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
-LEFT JOIN tblEMEntity DocPresentation ON DocPresentation.intEntityId = L.intDocPresentationId
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Hauler'
+			and ET.intEntityId = L.intHaulerEntityId) Hauler
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Salesperson'
+			and ET.intEntityId = L.intDriverEntityId) Driver
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Shipping Line'
+			and ET.intEntityId = L.intShippingLineEntityId) ShippingLine
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Forwarding Agent'
+			and ET.intEntityId = L.intForwardingAgentEntityId) ForwardingAgent
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Insurer'
+			and ET.intEntityId = L.intInsurerEntityId) Insurer
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Terminal'
+			and ET.intEntityId = L.intTerminalEntityId) Terminal
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType IN ('Shipping Line', 'Forwarding Agent')
+			and ET.intEntityId = L.intShippingLineEntityId) BLDraftToBeSent
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType IN ('Vendor', 'Customer','Forwarding Agent','Shipping Line','Terminal')
+			and ET.intEntityId = L.intDocPresentationId) DocPresentation
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId

@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @strLoadContainerNumber NVARCHAR(100)
 	DECLARE @intLoadDetailContainerLinkId INT
 	DECLARE @dblContainerLinkQty NUMERIC(18,6)
+	DECLARE @intLoadId INT
 	DECLARE @intLoadDetailId INT
 	DECLARE @intLoadDetailItemUOMId INT
 	DECLARE @strContractType NVARCHAR(100)
@@ -27,6 +28,7 @@ BEGIN TRY
 	SELECT @intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
 		  ,@strLoadContainerNumber = LC.strContainerNumber
 		  ,@ysnPosted = ISNULL(L.ysnPosted, 0)
+		  ,@intLoadId = L.intLoadId
 	FROM tblLGLoadContainer LC
 	JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
@@ -117,6 +119,12 @@ BEGIN TRY
 		END
 
 	COMMIT TRANSACTION
+
+	--If Rejected from Inventory Return, update Pending Claim entry
+	IF (@strScreenName = 'Inventory Return')
+	BEGIN
+		EXEC uspLGAddPendingClaim @intLoadId, 1
+	END
 
 END TRY
 

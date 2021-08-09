@@ -51,6 +51,7 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.dblForexRate
 	, Book.strBook
 	, SubBook.strSubBook
+	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.intBookId
 	, Receipt.intSubBookId
 FROM tblICInventoryReceiptCharge ReceiptCharge
@@ -68,3 +69,8 @@ FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) 
 	LEFT JOIN tblCTBook Book ON Book.intBookId = Receipt.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Receipt.intSubBookId
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal

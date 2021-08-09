@@ -30,6 +30,7 @@ SELECT
 	F.Trucker,
 	D.strContactType,
 	D.strEmailDistributionOption,
+	strUserEmailDistributionOption = Case when (F.[User] = 1) THEN B.strEmailDistributionOption ELSE '' END,
 	B.imgPhoto,
 	papit = g.strPassword
 FROM

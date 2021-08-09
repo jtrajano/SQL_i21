@@ -44,12 +44,14 @@ BEGIN
 					PostDate AS dtmPostDate ,
 					PaymentDate AS dtmDatePaid,
 					ExemptUnits ,
+					dblSubtotal ,
 					dblTotal ,
 					dblTax ,
 					strCompanyName ,
 					strCompanyAddress ,
 					strCounty,
-					strTaxCode
+					strTaxCode,
+					intBillDetailTaxId
 					FROM vyuAPRptVoucherCheckOff WHERE VendorId = '' --RETURN NOTHING TO RETURN SCHEMA
 END
 
@@ -157,13 +159,15 @@ SET @query = 'SELECT * FROM (
 					PostDate as dtmPostDate ,
 					PaymentDate as dtmDatePaid,
 					ExemptUnits ,
+					dblSubtotal ,
 					dblTotal ,
 					dblTax ,
 					strCompanyName ,
 					strCompanyAddress,
 					GETDATE() as dtmCurrentDate,
 					strCounty,
-					strTaxCode
+					strTaxCode,
+					intBillDetailTaxId
 					FROM 
 				[vyuAPRptVoucherCheckOff]
 				ORDER BY StateOfOrigin DESC

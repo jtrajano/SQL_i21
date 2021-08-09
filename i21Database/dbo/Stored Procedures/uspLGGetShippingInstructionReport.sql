@@ -13,6 +13,8 @@ BEGIN
 			@strZip						NVARCHAR(12),
 			@strCountry					NVARCHAR(25),
 			@strPhone					NVARCHAR(50),
+			@strFax						NVARCHAR(50),
+			@strWeb						NVARCHAR(200),
 			@strFullName				NVARCHAR(100),
 			@strUserName				NVARCHAR(100),
 			@strLogisticsCompanyName	NVARCHAR(MAX),
@@ -76,6 +78,8 @@ BEGIN
 			,@strZip = strZip
 			,@strCountry = strCountry
 			,@strPhone = strPhone
+			,@strFax = strFax
+			,@strWeb = strWebSite 
 	FROM tblSMCompanySetup
 	
 	SELECT @strFullName = E.strName,
@@ -164,6 +168,8 @@ SELECT *
 	,strCompanyZip = @strZip 
 	,strCompanyCountry = @strCountry 
 	,strCompanyPhone = @strPhone
+	,strCompanyFax = @strFax
+	,strCompanyWebSite = @strWeb
 	,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
 	,strCityAndDate = @strCity + ', '+ DATENAME(dd,getdate()) + ' ' + LEFT(DATENAME(MONTH,getdate()),3) + ' ' + DATENAME(yyyy,getdate())
 	,strShipmentPeriod
@@ -183,6 +189,7 @@ FROM (
 		,Item.strItemNo
 		,strItemDescription = Item.strDescription
 		,strItemUnitMeasure = UM.strUnitMeasure
+		,strItemOrigin = CA.strDescription
 		,strVendor = CASE 
 			WHEN ISNULL(CD.ysnClaimsToProducer, 0) = 1
 				THEN DProducer.strName
@@ -231,6 +238,14 @@ FROM (
 		,strDocPresentationVal = CASE 
 			WHEN L.strDocPresentationType = 'Bank' THEN Bank.strBankName
 			WHEN L.strDocPresentationType = 'Forwarding Agent' THEN DocPres.strName
+			ELSE '' END
+		,strDocPresentationAddress = CASE
+			WHEN L.strDocPresentationType = 'Bank' THEN Bank.strAddress
+			WHEN L.strDocPresentationType = 'Forwarding Agent' THEN DocPresLoc.strAddress
+			ELSE '' END
+		,strDocPresentationCityStateZip = CASE
+			WHEN L.strDocPresentationType = 'Bank' THEN Bank.strCity + ', ' + Bank.strState + ', ' + Bank.strZipCode
+			WHEN L.strDocPresentationType = 'Forwarding Agent' THEN DocPresLoc.strCity + ', ' + DocPresLoc.strState + ', ' + DocPresLoc.strZipCode
 			ELSE '' END
 		,L.dtmETAPOL
 		,L.dtmETAPOD
@@ -435,7 +450,8 @@ FROM (
 		,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
 		,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)			
 		,strShipmentPeriod = UPPER(CONVERT(NVARCHAR,CD.dtmStartDate,106)) + ' - ' + UPPER(CONVERT(NVARCHAR,CD.dtmEndDate,106))
-		,strMarkingInstruction = L.strMarks			
+		,strMarkingInstruction = L.strMarks
+		,strPositionInfo = DATENAME(mm, CD.dtmEndDate) + ' / ' + CAST(DATEPART(yy, CD.dtmEndDate) AS NVARCHAR(10)) + ' ' + POS.strPosition
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblICItem Item ON Item.intItemId = LD.intItemId
@@ -465,6 +481,7 @@ FROM (
 	LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
 	LEFT JOIN tblEMEntity BLDraft ON BLDraft.intEntityId = L.intBLDraftToBeSentId
 	LEFT JOIN tblEMEntity DocPres ON DocPres.intEntityId = L.intDocPresentationId
+	LEFT JOIN tblEMEntityLocation DocPresLoc ON DocPres.intEntityId = DocPresLoc.intEntityId AND DocPresLoc.ysnDefaultLocation = 1
 	LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
 	LEFT JOIN tblCMBank Bank ON Bank.intBankId = L.intDocPresentationId
 	LEFT JOIN tblLGLoadNotifyParties FLNP ON L.intLoadId = FLNP.intLoadId AND FLNP.strNotifyOrConsignee = 'First Notify'
@@ -506,6 +523,8 @@ FROM (
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId AND LoadingPort.ysnPort = 1
 	LEFT JOIN tblSMCity DestinationPort ON DestinationPort.intCityId = CD.intLoadingPortId AND DestinationPort.ysnPort = 1
+	LEFT JOIN tblCTPosition POS ON POS.intPositionId = CH.intPositionId
+	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = Item.intOriginId
 	CROSS APPLY tblLGCompanyPreference CP
 	OUTER APPLY (SELECT TOP 1 strOwner, strFreightClause FROM tblLGShippingLineServiceContractDetail SLSCD
 			 INNER JOIN tblLGShippingLineServiceContract SLSC ON SLSCD.intShippingLineServiceContractId = SLSC.intShippingLineServiceContractId

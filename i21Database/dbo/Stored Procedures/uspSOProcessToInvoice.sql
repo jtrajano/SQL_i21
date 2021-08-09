@@ -12,6 +12,8 @@ SET NOCOUNT ON
 SET XACT_ABORT OFF  
 SET ANSI_WARNINGS OFF
 
+DECLARE @strErrorMessage NVARCHAR(MAX)
+
 SET @dtmDateProcessed	= CAST(ISNULL(@dtmDateProcessed, GETDATE()) AS DATE)
 
 --VALIDATE IF SO IS ALREADY CLOSED
@@ -42,6 +44,26 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON S
 		RETURN;
 	END
 
+--VALIDATE IF STORAGE LOCATION IS BLANK WHEN STORAGE UNIT IS SELECTED
+DECLARE @strItemBlankStorageLocation NVARCHAR(MAX) = NULL;
+
+SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
+FROM tblSOSalesOrder SO
+INNER JOIN tblSOSalesOrderDetail SOD
+ON SO.intSalesOrderId = SOD.intSalesOrderId
+INNER JOIN tblICItem I
+ON SOD.intItemId = I.intItemId
+WHERE ISNULL(SOD.intStorageLocationId, 0) > 0
+AND ISNULL(SOD.intSubLocationId, 0) = 0
+AND SO.intSalesOrderId = @SalesOrderId
+
+IF (@strItemBlankStorageLocation IS NOT NULL)
+	BEGIN
+		SET @strErrorMessage = 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
+		RAISERROR(@strErrorMessage, 16, 1)
+		RETURN;
+	END
+
 --VALIDATE IF HAS NON-STOCK ITEMS
 IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARGetSalesOrderItems SI ON SO.intSalesOrderId = SI.intSalesOrderId AND SO.intSalesOrderId = @SalesOrderId AND SI.dblQtyRemaining > 0)
 	BEGIN
@@ -51,8 +73,6 @@ IF NOT EXISTS (SELECT NULL FROM tblSOSalesOrder SO INNER JOIN vyuARGetSalesOrder
 ELSE
 	BEGIN
 		--AUTO-BLEND ITEMS
-		DECLARE @strErrorMessage NVARCHAR(MAX)
-
 		BEGIN TRY
 			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @SalesOrderId, @intUserId = @UserId, @dtmDateProcessed = @dtmDateProcessed
 		END TRY
@@ -106,8 +126,7 @@ ELSE
 												   , @intScaleUOMId = NULL
 												   , @intUserId = @UserId
 												   , @dblNetWeight = 0
-												   , @ysnFromSalesOrder = 1
-												   , @intTicketId = NULL
+												   , @ysnFromSalesOrder = 1												   
 			END
 
 		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTItemContractDetail ICTD ON ICTD.intItemContractDetailId = SOD.intItemContractDetailId AND SOD.dblQtyOrdered > ICTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)

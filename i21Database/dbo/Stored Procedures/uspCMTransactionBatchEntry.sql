@@ -138,7 +138,7 @@ FROM @BankTransactionBatchDetailEntries
 					,@intBankLoanId
 					,@intCurrencyId--[intCurrencyId]
 					,1--[dblExchangeRate]
-					,@dtmBatchDate--[dtmDate]
+					,@dtmDate--[dtmDate]
 					,@strName--[strPayee]
 					,NULL--[intPayeeId]
 					,NULL--[strAddress]
@@ -226,7 +226,7 @@ FROM @BankTransactionBatchDetailEntries
 						,[intBankAccountId] = @intBankAccountId
 						,[intBankLoanId] = @intBankLoanId
 						,[intCurrencyId] = @intCurrencyId
-						,[dtmDate] = @dtmBatchDate
+						,[dtmDate] = @dtmDate
 						,[strPayee] = @strName
 						,[dblAmount] = @dblCredit
 						,[strAmountInWords] = dbo.fnConvertNumberToWord(@dblCredit)

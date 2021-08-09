@@ -235,7 +235,7 @@ BEGIN
 			,CD.intShiftId
 			,MD.Item
 		FROM dbo.#tblMFCalendarDetail CD
-			,dbo.fnSplitString(@strMachineId, ',') MD
+			inner join dbo.fnSplitString(@strMachineId, ',') MD on 1=1
 		WHERE CD.intCalendarDetailId IS NULL
 			AND CD.ysnHoliday = 0
 			AND NOT EXISTS (
@@ -260,7 +260,7 @@ BEGIN
 			,CD.intShiftId
 			,MD.Item
 		FROM dbo.#tblMFCalendarDetail CD
-			,dbo.fnSplitString(@strMachineId, ',') MD
+			inner join dbo.fnSplitString(@strMachineId, ',') MD on 1=1
 		WHERE CD.intCalendarDetailId IS NULL
 			AND CD.ysnHoliday = 0
 			AND NOT EXISTS (
@@ -304,8 +304,8 @@ BEGIN
 	WHERE CD.intCalendarDetailId IS NULL
 		AND CD.ysnHoliday = 0
 
-	SELECT @strMachineName = Isnull(@strMachineName, '') + '[' + DT.strName + '],'
-		,@strMachineName1 = Isnull(@strMachineName1, '') + 'Convert(bit,[' + DT.strName + ']) as [' + DT.strName + '],'
+	SELECT @strMachineName = Isnull(@strMachineName, '') + '[' + '~'+DT.strName + '],'
+		,@strMachineName1 = Isnull(@strMachineName1, '') + 'Convert(bit,[' + '~'+DT.strName + ']) as [' + '~'+DT.strName + '],'
 	FROM (
 		SELECT DISTINCT M.strName
 		FROM dbo.tblMFMachine M
@@ -338,7 +338,7 @@ BEGIN
 				,CD.intNoOfMachine
 				,CD.ysnHoliday
 				,M.intMachineId
-				,M.strName
+				,''~''+M.strName AS strName
 				,CD.intConcurrencyId
 			FROM #tblMFCalendarDetail CD
 			JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId AND (CD.ysnHoliday=0 OR CD.ysnHoliday='+LTRIM(@ysnIncludeHoliday)+')

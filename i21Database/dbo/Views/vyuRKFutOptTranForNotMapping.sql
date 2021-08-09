@@ -17,8 +17,8 @@ SELECT DE.intFutOptTransactionId
 	, strInstrumentType = CASE WHEN DE.intInstrumentTypeId = 1 THEN 'Futures'
 						WHEN DE.intInstrumentTypeId = 2 THEN 'Options'
 						WHEN DE.intInstrumentTypeId = 3 THEN 'Currency Contract' END COLLATE Latin1_General_CI_AS
-	, dblGetNoOfContract = CASE WHEN strBuySell = 'Sell' THEN - dblNoOfContract ELSE dblNoOfContract END
-	, dblHedgeQty = CASE WHEN strBuySell = 'Sell' THEN - (FMarket.dblContractSize * GOC.dblSumOpenContract)
+	, dblGetNoOfContract = CASE WHEN DE.strBuySell = 'Sell' THEN - DE.dblNoOfContract ELSE DE.dblNoOfContract END
+	, dblHedgeQty = CASE WHEN DE.strBuySell = 'Sell' THEN - (FMarket.dblContractSize * GOC.dblSumOpenContract)
 						ELSE (FMarket.dblContractSize * GOC.dblSumOpenContract) END
 	, strUnitMeasure
 	, strCommodityCode
@@ -32,8 +32,8 @@ SELECT DE.intFutOptTransactionId
 	, strContractNumber = ch.strContractNumber
 	, strRollingMonth = RMonth.strFutureMonth
 	, DE.intRollingMonthId
-	, strSelectedInstrumentType = CASE WHEN ISNULL(intSelectedInstrumentTypeId,1) =1  THEN 'Exchange Traded'
-										WHEN intSelectedInstrumentTypeId = 2 THEN 'OTC'
+	, strSelectedInstrumentType = CASE WHEN ISNULL(DE.intSelectedInstrumentTypeId,1) =1  THEN 'Exchange Traded'
+										WHEN DE.intSelectedInstrumentTypeId = 2 THEN 'OTC'
 										ELSE 'OTC - Others' END COLLATE Latin1_General_CI_AS
 	, dblAssignedLots = AD.dblAssignedLots
 	, Bank.strBankName
@@ -43,7 +43,9 @@ SELECT DE.intFutOptTransactionId
 								WHERE (intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
 										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail)
 										OR intFutOptTransactionId IN (SELECT intLFutOptTransactionId FROM tblRKOptionsMatchPnS)
-										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)) 
+										OR intFutOptTransactionId IN (SELECT intSFutOptTransactionId FROM tblRKOptionsMatchPnS)
+										OR intFutOptTransactionId IN (SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary WHERE (ISNULL(dblAssignedLotsToSContract,0) <> 0 OR ISNULL(dblAssignedLotsToPContract,0) <>  0))
+										OR intFutOptTransactionId IN (SELECT DISTINCT intOrigSliceTradeId FROM tblRKFutOptTransaction WHERE intOrigSliceTradeId is not null))
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
 	, strHedgeType = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN 'Price Contract'
 							WHEN CF.intContractFuturesId IS NOT NULL THEN 'Contract Futures'
@@ -54,6 +56,10 @@ SELECT DE.intFutOptTransactionId
 	, strHedgeContract = CASE WHEN PF.intPriceContractId IS NOT NULL THEN PriceHeader.strContractNumber + ISNULL('-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10)), '')
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + ISNULL('-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10)), '')
 							ELSE NULL END COLLATE Latin1_General_CI_AS
+	, dblAvailableContract = ISNULL(DE.dblPContractBalanceLots, 0.00)
+	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
+	, DE.intOrigSliceTradeId
+	, strOriginalTradeNo = ST.strInternalTradeNo
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -81,6 +87,7 @@ LEFT JOIN tblCTContractHeader PriceHeader ON PriceHeader.intContractHeaderId = P
 LEFT JOIN tblCTContractFutures CF ON CF.intFutOptTransactionId = DE.intFutOptTransactionId
 LEFT JOIN tblCTContractDetail CFDetail ON CFDetail.intContractDetailId = CF.intContractDetailId
 LEFT JOIN tblCTContractHeader CFHeader ON CFHeader.intContractHeaderId = CFDetail.intContractHeaderId
+LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = DE.intOrigSliceTradeId
 LEFT JOIN (
 	SELECT intFutOptTransactionId
 		, dblMaxOpenContract = MAX(dblOpenContract)

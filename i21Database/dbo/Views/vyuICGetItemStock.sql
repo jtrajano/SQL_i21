@@ -17,6 +17,7 @@ SELECT
 	ItemLocation.ysnStorageUnitRequired,
 	ItemLocation.intItemLocationId,
 	ItemLocation.intSubLocationId,
+	ItemLocation.ysnActive,
 	Item.intCategoryId,
 	Category.strCategoryCode,
 	Category.ysnRetailValuation,
@@ -51,6 +52,7 @@ SELECT
 	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
 	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0) * COALESCE(ReceiveUOM.dblUnitQty, StockUOM.dblUnitQty, 0),
+	dblReceiveStandardWeight = COALESCE(ReceiveUOM.dblStandardWeight, StockUOM.dblStandardWeight, 0),
 	ysnReceiveUOMAllowPurchase = COALESCE(ReceiveUOM.ysnAllowPurchase, StockUOM.ysnAllowPurchase), 
 	ysnReceiveUOMAllowSale = COALESCE(ReceiveUOM.ysnAllowSale, StockUOM.ysnAllowSale), 
 	strIssueUOM = COALESCE(iUOM.strUnitMeasure, sUOM.strUnitMeasure),
@@ -154,7 +156,8 @@ SELECT
 	Item.ysnLotWeightsRequired,
 	ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT),
 	ysnHasSubstitute = CAST(ISNULL(ItemSubstitute.ysnHasSubstitute, 0) AS BIT),
-	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT)
+	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
+	dblStandardWeight = StockUOM.dblStandardWeight
 FROM	
 	tblICItem Item 
 	LEFT JOIN (

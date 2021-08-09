@@ -118,6 +118,9 @@
 	,@CardNumberForDualCard				NVARCHAR(MAX)	= NULL
 	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
+	,@intUserId							INT				= NULL
+
+	
 
 
 	
@@ -638,9 +641,21 @@ BEGIN
 	--					AUTO CREATE SITE
 	-- if transaction is remote or ext remote				  --
 	------------------------------------------------------------
+	
+	DECLARE @intTaxGroupByState INT = NULL
+	IF(@intTaxGroupByState IS NULL)
+	BEGIN
+		SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
+	END
+
+	IF(@intTaxGroupByState IS NULL)
+	BEGIN
+		SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
+	END
+
 	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R') AND @strNetworkType = 'PacPride')
 	BEGIN 
-			
+		
 			INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -655,7 +670,8 @@ BEGIN
 				,intPPHostId		
 				,strPPSiteType		
 				,strSiteType
-				,strAllowExemptionsOnExtAndRetailTrans
+				,strAllowExemptionsOnExtAndRetailTrans  
+				,intTaxGroupId
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -687,6 +703,7 @@ BEGIN
 												THEN 'Extended Remote'
 											END)
 				,@strAllowExemptionsOnExtAndRetailTrans
+				,@intTaxGroupByState
 
 			SET @intSiteId = SCOPE_IDENTITY();
 			SET @ysnSiteCreated = 1;
@@ -694,17 +711,6 @@ BEGIN
 	END
 	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Voyager')
 	BEGIN
-		DECLARE @intTaxGroupByState INT = NULL
-
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
-		END
-		
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
-		END
 
 		INSERT INTO tblCFSite
 			(
@@ -745,6 +751,17 @@ BEGIN
 		DECLARE @CFNState	NVARCHAR(MAX) = NULL
 		SELECT TOP 1 @CFNState = strPostalCode FROM tblCFStateCode where strStateName = @strSiteTaxLocation
 
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @CFNState
+		END
+
+		IF(@intTaxGroupByState IS NULL)
+		BEGIN
+			SELECT TOP 1 @intTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
+		END
+
+
 		INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -756,6 +773,7 @@ BEGIN
 				,strTaxState			
 				,strSiteType
 				,strAllowExemptionsOnExtAndRetailTrans
+				,intTaxGroupId			
 			)
 			SELECT
 				intNetworkId			= @intNetworkId
@@ -771,6 +789,7 @@ BEGIN
 											ELSE @strTransactionType
 											END)
 				,@strAllowExemptionsOnExtAndRetailTrans
+				,@intTaxGroupByState
 				
 
 			SET @intSiteId = SCOPE_IDENTITY();
@@ -778,18 +797,7 @@ BEGIN
 	END
 	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Wright Express')
 	BEGIN
-		DECLARE @intWEXTaxGroupByState INT = NULL
-
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intWEXTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND strState = @strSiteState
-		END
 		
-		IF(@intTaxGroupByState IS NULL)
-		BEGIN
-			SELECT TOP 1 @intWEXTaxGroupByState = intTaxGroupId FROM tblCFNetworkSiteTaxGroup WHERE intNetworkId = @intNetworkId AND (strState IS NULL OR strState = '')
-		END
-
 		INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -816,7 +824,7 @@ BEGIN
 				,strSiteAddress			= @strSiteAddress	
 				,strSiteCity			= @strSiteCity	
 				,strSiteType			= 'Extended Remote'
-				,intTaxGroupId			= @intWEXTaxGroupByState
+				,intTaxGroupId			= @intTaxGroupByState
 				,@strAllowExemptionsOnExtAndRetailTrans
 				
 
@@ -1010,6 +1018,11 @@ BEGIN
 		END
 	END
 
+	IF(LOWER(@strTransactionType) LIKE '%foreign%')
+	BEGIN
+		SET @intCardId = NULL
+	END
+
 	IF (@intCardId = 0)
 	BEGIN
 		SET @intCardId = NULL
@@ -1033,19 +1046,19 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = @strProductId
 		AND intNetworkId = @intNetworkId
-		AND intSiteId = @intSiteId
+		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
 	END
 
-	IF(@intProductId = 0)
-	BEGIN
-		SELECT TOP 1 
-			 @intProductId = intItemId
-			,@intARItemId = intARItemId
-		FROM tblCFItem 
-		WHERE strProductNumber = @strProductId
-		AND intNetworkId = @intNetworkId
-		AND (intSiteId = 0 OR intSiteId IS NULL)
-	END
+	-- IF(@intProductId = 0)
+	-- BEGIN
+	-- 	SELECT TOP 1 
+	-- 		 @intProductId = intItemId
+	-- 		,@intARItemId = intARItemId
+	-- 	FROM tblCFItem 
+	-- 	WHERE strProductNumber = @strProductId
+	-- 	AND intNetworkId = @intNetworkId
+	-- 	AND (intSiteId = 0 OR intSiteId IS NULL)
+	-- END
 
 	IF(@intProductId = 0)
 	BEGIN
@@ -1055,7 +1068,28 @@ BEGIN
 		FROM tblCFItem 
 		WHERE strProductNumber = RTRIM(LTRIM(@strProductId))
 		AND intNetworkId = @intNetworkId
-		AND (intSiteId = 0 OR intSiteId IS NULL)
+		AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+	END
+
+	IF(@intProductId = 0)
+	BEGIN
+
+		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
+		BEGIN
+
+			SELECT * INTO #tempProduct FROM tblCFItem 
+			WHERE intNetworkId = @intNetworkId
+			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+			AND ISNUMERIC(strProductNumber) = 1 
+
+			SELECT TOP 1 
+				@intProductId = intItemId
+				,@intARItemId = intARItemId
+			FROM #tempProduct 
+			WHERE CAST( RTRIM(LTRIM(strProductNumber)) as INT) = CAST( RTRIM(LTRIM(@strProductId)) as INT)
+			AND intNetworkId = @intNetworkId
+			AND (intSiteId = @intSiteId OR (intSiteId = 0 OR intSiteId IS NULL))
+		END
 	END
 
 
@@ -1595,6 +1629,8 @@ BEGIN
 			--,(@Pk,'Net Price',0.0,0.0)
 			--,(@Pk,'Total Amount',0.0,0.0)
 
+			
+			COMMIT TRANSACTION
 			RETURN;
 		END
 
@@ -2313,6 +2349,58 @@ BEGIN
 		------------------------------------------------------------
 		--						TRANSACTION PRICE				  --
 		------------------------------------------------------------
+
+
+		--DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
+		--DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
+
+		--SELECT TOP 1
+		--  @dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
+		--, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
+		--, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
+		--, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
+		--, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
+		--, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
+		--, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
+		--, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
+		--, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
+		--, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
+		--, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
+		--, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
+		--FROM tblCFTransaction
+		--WHERE intTransactionId = @Pk 
+
+		EXEC [uspCFTransactionAuditLog] 
+			@processName					= 'Import Transaction'
+			,@keyValue						= @Pk
+			,@entityId						= @intUserId
+			,@action						= ''
+			--,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
+			--,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
+			--,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
+			--,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
+			--,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
+			--,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
+			--,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
+			--,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
+			--,@strFromPriceMethod			= @strAuditPriceMethod			
+			--,@strFromPriceBasis				= @strAuditPriceBasis			
+			--,@strFromPriceProfileId			= @strAuditPriceProfileId		
+			--,@strFromPriceIndexId			= @strAuditPriceIndexId			
+
+	
+
+
 
 		print @dblCalcOverfillQuantity
 		IF(@dblCalcOverfillQuantity > 0)

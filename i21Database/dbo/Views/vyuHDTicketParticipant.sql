@@ -13,6 +13,6 @@
 			,strMobile = b.strMobile
 		from
 			tblHDTicketParticipant a
-			,vyuEMEntityContact2 b
-		where
-			b.intEntityContactId = a.intEntityContactId
+			inner join vyuEMEntityContact2 b on b.intEntityContactId = a.intEntityContactId
+		
+			

@@ -118,6 +118,7 @@ FROM (
 		, ContractView.strFreightTerm
 		, ContractView.intContractSeq
 		, intAllowZeroCostTypeId = ItemLocation.intAllowZeroCostTypeId 
+		, ysnWeighed					= CAST(0 AS BIT) 
 	FROM vyuCTContractAddOrdersLookup ContractView
         INNER JOIN vyuPODetails POView ON POView.intContractDetailId = ContractView.intContractDetailId
 		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = POView.intItemId AND ItemLocation.intLocationId = POView.intLocationId 

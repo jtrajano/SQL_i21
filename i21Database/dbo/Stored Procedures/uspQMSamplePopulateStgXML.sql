@@ -23,16 +23,28 @@ BEGIN TRY
 		,@intCompanyId int
 		,@intTransactionId int
 		,@intScreenId int
+		,@strLogCondition nvarchar(50)
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId int
 
 	SET @intSampleStageId = NULL
 	SET @strSampleNumber = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
+	SET @strLogCondition = NULL
 
 	SELECT @strSampleNumber = strSampleNumber
 		,@intCompanyId = intCompanyId
 	FROM tblQMSample WITH (NOLOCK)
 	WHERE intSampleId = @intSampleId
+
+	IF @strRowState = 'Delete'
+	BEGIN
+		SELECT @intCompanyId = intCompanyId
+		FROM dbo.tblIPMultiCompany WITH (NOLOCK)
+		WHERE ysnCurrentCompany = 1
+	END
 
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen WITH (NOLOCK)
@@ -43,8 +55,14 @@ BEGIN TRY
 	WHERE intRecordId = @intSampleId
 		AND intScreenId = @intScreenId
 
+	SELECT TOP 1 @intLogId = intLogId
+	FROM tblSMLog
+	WHERE intTransactionId = @intTransactionId
+	ORDER BY intLogId DESC
+
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intSampleId)
+	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
 
 	SELECT @strObjectName = 'vyuQMSampleHeaderView'
 
@@ -80,6 +98,32 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+	---------------------------------------------Audit Log------------------------------------------
+	IF @strLogCondition IS NOT NULL
+	BEGIN
+	SELECT @strLogXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPLogView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strLogXML OUTPUT
+		,NULL
+		,NULL
+
+	SELECT @strAuditXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPAuditView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strAuditXML OUTPUT
+		,NULL
+		,NULL
+	END
+
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
 		,@strDatabaseName NVARCHAR(50)
@@ -104,6 +148,8 @@ BEGIN TRY
 		,strFromCompanyName
 		,intTransactionId
 		,intCompanyId
+		,strLogXML
+		,strAuditXML
 		)
 	SELECT intSampleId = @intSampleId
 		,strSampleNumber = @strSampleNumber
@@ -118,7 +164,9 @@ BEGIN TRY
 		,intToBookId = @intToBookId
 		,strFromCompanyName = @strFromCompanyName
 		,intTransactionId = @intTransactionId
-		,intCompanyId = @intCompanyId'
+		,intCompanyId = @intCompanyId
+		,strLogXML = @strLogXML
+		,strAuditXML = @strAuditXML'
 
 	EXEC sp_executesql @strSQL
 		,N'@intSampleId INT
@@ -134,7 +182,9 @@ BEGIN TRY
 			,@intToBookId INT
 			,@strFromCompanyName NVARCHAR(150)
 			,@intTransactionId INT
-			,@intCompanyId INT'
+			,@intCompanyId INT
+			,@strLogXML NVARCHAR(MAX)
+			,@strAuditXML NVARCHAR(MAX)'
 		,@intSampleId
 		,@strSampleNumber
 		,@strHeaderXML
@@ -149,6 +199,8 @@ BEGIN TRY
 		,@strFromCompanyName
 		,@intTransactionId
 		,@intCompanyId
+		,@strLogXML
+		,@strAuditXML
 END TRY
 
 BEGIN CATCH

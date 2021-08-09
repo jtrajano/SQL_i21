@@ -78,44 +78,46 @@ SELECT	CH.intContractHeaderId,
 
 		CH.strExternalEntity,
 		CH.strExternalContractNumber,
-		CH.ysnReceivedSignedFixationLetter
+		CH.ysnReceivedSignedFixationLetter, -- CT-5315
+		strEntitySelectedLocation = ESL.strLocationName -- CT-5315
 
 FROM	tblCTContractHeader					CH	WITH (NOLOCK)
-JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
-JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId						LEFT
-JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					LEFT
-JOIN	tblEMEntity							ES	ON	ES.intEntityId						=		CH.intSalespersonId					LEFT
-JOIN	tblEMEntity							PY	ON	PY.intEntityId						=		CH.intCounterPartyId				LEFT
-JOIN	tblICCommodityUnitMeasure			CS	ON	CS.intCommodityId					=		CH.intCommodityId				
+JOIN	tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=		CH.intContractTypeId
+JOIN	tblEMEntity							EY	WITH (NOLOCK) ON	EY.intEntityId						=		CH.intEntityId						LEFT
+JOIN	tblEMEntity							PR	WITH (NOLOCK) ON	PR.intEntityId						=		CH.intProducerId					LEFT
+JOIN	tblEMEntity							ES	WITH (NOLOCK) ON	ES.intEntityId						=		CH.intSalespersonId					LEFT
+JOIN	tblEMEntity							PY	WITH (NOLOCK) ON	PY.intEntityId						=		CH.intCounterPartyId				LEFT
+JOIN	tblICCommodityUnitMeasure			CS	WITH (NOLOCK) ON	CS.intCommodityId					=		CH.intCommodityId				
 												AND	CS.ysnStockUnit						=		1									LEFT
-JOIN	tblICCommodityUnitMeasure			CD	ON	CD.intCommodityId					=		CH.intCommodityId				
+JOIN	tblICCommodityUnitMeasure			CD	WITH (NOLOCK) ON	CD.intCommodityId					=		CH.intCommodityId				
 												AND	CD.ysnDefault						=		1									LEFT
-JOIN	tblICUnitMeasure					U1	ON	U1.intUnitMeasureId					=		CS.intUnitMeasureId					LEFT
-JOIN	tblICCommodityUnitMeasure			CM	ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
-JOIN	tblICUnitMeasure					U2	ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					LEFT
-JOIN	tblICCommodityUnitMeasure			CL	ON	CL.intCommodityUnitMeasureId		=		CH.intLoadUOMId						LEFT
-JOIN	tblICUnitMeasure					U3	ON	U3.intUnitMeasureId					=		CL.intUnitMeasureId					LEFT
+JOIN	tblICUnitMeasure					U1	WITH (NOLOCK) ON	U1.intUnitMeasureId					=		CS.intUnitMeasureId					LEFT
+JOIN	tblICCommodityUnitMeasure			CM	WITH (NOLOCK) ON	CM.intCommodityUnitMeasureId		=		CH.intCommodityUOMId				LEFT
+JOIN	tblICUnitMeasure					U2	WITH (NOLOCK) ON	U2.intUnitMeasureId					=		CM.intUnitMeasureId					LEFT
+JOIN	tblICCommodityUnitMeasure			CL	WITH (NOLOCK) ON	CL.intCommodityUnitMeasureId		=		CH.intLoadUOMId						LEFT
+JOIN	tblICUnitMeasure					U3	WITH (NOLOCK) ON	U3.intUnitMeasureId					=		CL.intUnitMeasureId					LEFT
 
-JOIN	tblICCommodity						CY	ON	CY.intCommodityId					=		CH.intCommodityId					LEFT
-JOIN	tblCTWeightGrade					W1	ON	W1.intWeightGradeId					=		CH.intGradeId						LEFT
-JOIN	tblCTWeightGrade					W2	ON	W2.intWeightGradeId					=		CH.intWeightId						LEFT
-JOIN	tblCTContractText					TX	ON	TX.intContractTextId				=		CH.intContractTextId				LEFT
-JOIN	tblCTAssociation					AN	ON	AN.intAssociationId					=		CH.intAssociationId					LEFT
-JOIN	tblSMTerm							TM	ON	TM.intTermID						=		CH.intTermId						LEFT	
-JOIN	tblCTApprovalBasis					AB	ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				LEFT
-JOIN	tblCTContractBasis					CB	ON	CB.intContractBasisId				=		CH.intContractBasisId				LEFT
-JOIN	tblCTPosition						PO	ON	PO.intPositionId					=		CH.intPositionId					LEFT
-JOIN	tblCTInsuranceBy					IB	ON	IB.intInsuranceById					=		CH.intInsuranceById					LEFT
-JOIN	tblCTInvoiceType					IT	ON	IT.intInvoiceTypeId					=		CH.intInvoiceTypeId					LEFT
-JOIN	tblSMCountry						CO	ON	CO.intCountryID						=		CH.intCountryId						LEFT
-JOIN	tblCTPricingType					PT	ON	PT.intPricingTypeId					=		CH.intPricingTypeId					LEFT
-JOIN	tblSMCompanyLocationPricingLevel	PL	ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
-JOIN	tblSMCity							CT	ON	CT.intCityId						=		CH.intINCOLocationTypeId			LEFT
-JOIN	tblSMCompanyLocationSubLocation		SL	ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId					LEFT
-JOIN	tblCTContractPlan					CP	ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
-JOIN	tblEMEntity							CE	ON	CE.intEntityId						=		CH.intCreatedById					LEFT
-JOIN	tblEMEntity							UE	ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
-JOIN	tblCTCropYear						YR	ON	YR.intCropYearId					=		CH.intCropYearId					LEFT
-JOIN	tblCTBook							BK	ON	BK.intBookId						=		CH.intBookId						LEFT
-JOIN	tblCTSubBook						SB	ON	SB.intSubBookId						=		CH.intSubBookId						LEFT
-JOIN	tblSMFreightTerms					FT	ON	FT.intFreightTermId					=		CH.intFreightTermId
+JOIN	tblICCommodity						CY	WITH (NOLOCK) ON	CY.intCommodityId					=		CH.intCommodityId					LEFT
+JOIN	tblCTWeightGrade					W1	WITH (NOLOCK) ON	W1.intWeightGradeId					=		CH.intGradeId						LEFT
+JOIN	tblCTWeightGrade					W2	WITH (NOLOCK) ON	W2.intWeightGradeId					=		CH.intWeightId						LEFT
+JOIN	tblCTContractText					TX	WITH (NOLOCK) ON	TX.intContractTextId				=		CH.intContractTextId				LEFT
+JOIN	tblCTAssociation					AN	WITH (NOLOCK) ON	AN.intAssociationId					=		CH.intAssociationId					LEFT
+JOIN	tblSMTerm							TM	WITH (NOLOCK) ON	TM.intTermID						=		CH.intTermId						LEFT	
+JOIN	tblCTApprovalBasis					AB	WITH (NOLOCK) ON	AB.intApprovalBasisId				=		CH.intApprovalBasisId				LEFT
+JOIN	tblCTContractBasis					CB	WITH (NOLOCK) ON	CB.intContractBasisId				=		CH.intContractBasisId				LEFT
+JOIN	tblCTPosition						PO	WITH (NOLOCK) ON	PO.intPositionId					=		CH.intPositionId					LEFT
+JOIN	tblCTInsuranceBy					IB	WITH (NOLOCK) ON	IB.intInsuranceById					=		CH.intInsuranceById					LEFT
+JOIN	tblCTInvoiceType					IT	WITH (NOLOCK) ON	IT.intInvoiceTypeId					=		CH.intInvoiceTypeId					LEFT
+JOIN	tblSMCountry						CO	WITH (NOLOCK) ON	CO.intCountryID						=		CH.intCountryId						LEFT
+JOIN	tblCTPricingType					PT	WITH (NOLOCK) ON	PT.intPricingTypeId					=		CH.intPricingTypeId					LEFT
+JOIN	tblSMCompanyLocationPricingLevel	PL	WITH (NOLOCK) ON	PL.intCompanyLocationPricingLevelId	=		CH.intCompanyLocationPricingLevelId LEFT
+JOIN	tblSMCity							CT	WITH (NOLOCK) ON	CT.intCityId						=		CH.intINCOLocationTypeId			LEFT
+JOIN	tblSMCompanyLocationSubLocation		SL	WITH (NOLOCK) ON	SL.intCompanyLocationSubLocationId	=		CH.intWarehouseId					LEFT
+JOIN	tblCTContractPlan					CP	WITH (NOLOCK) ON	CP.intContractPlanId				=		CH.intContractPlanId				LEFT
+JOIN	tblEMEntity							CE	WITH (NOLOCK) ON	CE.intEntityId						=		CH.intCreatedById					LEFT
+JOIN	tblEMEntity							UE	WITH (NOLOCK) ON	UE.intEntityId						=		CH.intLastModifiedById				LEFT
+JOIN	tblCTCropYear						YR	WITH (NOLOCK) ON	YR.intCropYearId					=		CH.intCropYearId					LEFT
+JOIN	tblCTBook							BK	WITH (NOLOCK) ON	BK.intBookId						=		CH.intBookId						LEFT
+JOIN	tblCTSubBook						SB	WITH (NOLOCK) ON	SB.intSubBookId						=		CH.intSubBookId						LEFT
+JOIN	tblSMFreightTerms					FT	WITH (NOLOCK) ON	FT.intFreightTermId					=		CH.intFreightTermId
+LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = CH.intEntitySelectedLocationId -- CT-5315

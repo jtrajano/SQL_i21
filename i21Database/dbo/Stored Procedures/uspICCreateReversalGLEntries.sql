@@ -165,7 +165,7 @@ BEGIN
 				ON GLEntries.intJournalLineNo = Reversal.intRelatedInventoryTransactionId
 				AND GLEntries.intTransactionId = Reversal.intTransactionId
 				AND GLEntries.strTransactionId = Reversal.strTransactionId
-				AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
+				--AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
 	WHERE	Reversal.strBatchId = @strBatchId			

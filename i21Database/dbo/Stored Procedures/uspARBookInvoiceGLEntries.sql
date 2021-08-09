@@ -114,7 +114,7 @@ SELECT
     ,[intCommodityId]
     ,[intSourceEntityId]
     ,[ysnRebuild]
-FROM #ARInvoiceGLEntries
+FROM ##ARInvoiceGLEntries
 
 IF @Post = 0
     BEGIN
@@ -144,12 +144,12 @@ IF @Post = 0
 		)
         SELECT DISTINCT [intInvoiceId]
 			, [strInvoiceNumber]
-        FROM #ARPostInvoiceDetail
+        FROM ##ARPostInvoiceDetail
         WHERE [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash')				 	
           AND [intItemId] IS NOT NULL
           AND ISNULL([strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software')
 
-		--DELETE FROM @GLPost
+		DELETE FROM @GLPost WHERE strCode <> 'AR'
         
 		WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostICInvoiceData ORDER BY intInvoiceId)
         BEGIN				
@@ -158,8 +158,8 @@ IF @Post = 0
 			FROM @UnPostICInvoiceData
             ORDER BY [intInvoiceId]
 
-            SELECT @WStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
-            SELECT @WOStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
+            SELECT @WStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
+            SELECT @WOStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
             IF @WOStorageCount > 0
             BEGIN
 				-- Unpost onhand stocks. 
@@ -226,10 +226,15 @@ IF @Post = 0
 
 IF EXISTS (SELECT TOP 1 1 FROM @GLPost) 
 	BEGIN
+		DECLARE @SkipICValidation BIT = 0
+
+		IF EXISTS(SELECT TOP 1 1 FROM @GLPost WHERE [strJournalLineDescription] = 'CarQuest Import') OR @Post = 0
+			SET @SkipICValidation = 1
+
 		EXEC dbo.uspGLBookEntries @GLEntries			= @GLPost
 								, @ysnPost				= @Post
 								, @SkipGLValidation		= 1
-								, @SkipICValidation		= 0
+								, @SkipICValidation		= @SkipICValidation
 	END
 
 END TRY

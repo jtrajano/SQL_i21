@@ -45,6 +45,7 @@
 	,strNewWarehouseRefNo NVARCHAR(50)
 	,strOldContainerNo NVARCHAR(50) 
 	,strNewContainerNo NVARCHAR(50) 
+	,strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,CONSTRAINT PK_tblMFInventoryAdjustment PRIMARY KEY (intAdjustmentId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intItemId FOREIGN KEY (intItemId) REFERENCES tblICItem(intItemId)
 	,CONSTRAINT FK_tblMFInventoryAdjustment_tblICItem_intOldItemId FOREIGN KEY (intOldItemId) REFERENCES tblICItem(intItemId)

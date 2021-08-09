@@ -1,14 +1,16 @@
-﻿
-CREATE PROCEDURE [dbo].[uspSMCreateAuditLogMigrationPlan]
+﻿CREATE PROCEDURE [dbo].[uspSMCreateAuditLogMigrationPlan]
  @currentDatabaseName NVARCHAR(100)
  AS
  BEGIN
 
-
-EXEC sp_configure'SHOW ADVANCE',1
-RECONFIGURE
-EXEC sp_configure'AGENT XPs',1
-RECONFIGURE
+ /*
+	-- do this part outside this SP. We should not do server setting changes outside the customer's knowledge.
+	-- this also fails in Azure SQL
+	EXEC sp_configure'SHOW ADVANCE',1
+	RECONFIGURE
+	EXEC sp_configure'AGENT XPs',1
+	RECONFIGURE
+*/
 
 BEGIN TRANSACTION
 DECLARE @ReturnCode INT

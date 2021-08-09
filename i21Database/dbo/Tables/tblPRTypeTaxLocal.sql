@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPRTypeTaxLocal](
 	[intTypeTaxLocalId] [int] NOT NULL,
 	[intTypeTaxStateId] INT NOT NULL, 
-	[strLocalName] [nvarchar](20) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strLocalName] [nvarchar](25) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLocalType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblPRTypeTaxLocal] PRIMARY KEY ([intTypeTaxLocalId]), 

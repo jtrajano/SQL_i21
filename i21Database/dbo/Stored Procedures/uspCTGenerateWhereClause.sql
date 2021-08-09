@@ -96,63 +96,71 @@ BEGIN TRY
 
 		FROM	@temp_xml_table WHERE intId = @intId
 
-		IF @strDatatype = 'DateTime'
+		IF (@strCondition != 'Dummy')
 		BEGIN
-			IF @strFrom IS NOT NULL AND @strTo IS NOT NULL
+			IF @strDatatype = 'DateTime'
 			BEGIN
-				SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
-				SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
-				SET @strClause += @strClause +  ' ('+@strFromField+' BETWEEN ''' + @strFrom  + ''' AND ''' + @strTo +''') '
-			END
-			ELSE IF @strFrom IS NOT NULL AND @strTo IS NULL
-			BEGIN
-				SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
-				IF	@strFromField = @strToField
-					SET @strClause += @strClause +  ' ('+@strFromField+' = ''' + @strFrom + ''') '
-				ELSE	
-					SET @strClause = @strClause +  ' (' + @strFromField  + ' BETWEEN '''+@strFrom+''' AND '''+@strFrom +''')'
-			END
-			ELSE IF @strFrom IS  NULL AND @strTo IS NOT NULL
-			BEGIN
-				SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
-				IF	@strFromField = @strToField
-					SET @strClause += @strClause +  ' ('+@strFromField+' = ''' + @strTo + ''') '
+				IF @strFrom IS NOT NULL AND @strTo IS NOT NULL
+				BEGIN
+					SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
+					SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
+					SET @strClause += @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) BETWEEN ''' + @strFrom  + ''' AND ''' + @strTo +''') '
+				END
+				ELSE IF @strFrom IS NOT NULL AND @strTo IS NULL
+				BEGIN
+					SELECT  @strFrom = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strFrom AS DATETIME),101) ELSE @strFrom END
+					IF	@strFromField = @strToField
+						SET @strClause += @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) = ''' + @strFrom + ''') '
+					ELSE	
+						SET @strClause = @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) BETWEEN '''+@strFrom+''' AND '''+@strFrom +''')'
+				END
+				ELSE IF @strFrom IS  NULL AND @strTo IS NOT NULL
+				BEGIN
+					SELECT  @strTo = CASE WHEN @ysnIgnoreTime = 1 THEN CONVERT(NVARCHAR(20), CAST(@strTo AS DATETIME),101) ELSE @strTo END
+					IF	@strFromField = @strToField
+						SET @strClause += @strClause +  ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) = ''' + @strTo + ''') '
+					ELSE
+						SET @strClause = @strClause + ' (CAST(FLOOR(CAST('+@strFromField+' AS FLOAT)) AS DATETIME) BETWEEN '''+@strTo+''' AND '''+@strTo +''')'  
+				END
 				ELSE
-					SET @strClause = @strClause + ' (' + @strToField  + ' BETWEEN '''+@strTo+''' AND '''+@strTo +''')'  
+				BEGIN
+					IF LTRIM(RTRIM(ISNULL(@strClause,''))) <> ''
+						SET @strClause += SUBSTRING(@strClause,0,LEN(@strClause) -3)
+				END
 			END
 			ELSE
 			BEGIN
-				IF LTRIM(RTRIM(ISNULL(@strClause,''))) <> ''
-					SET @strClause += SUBSTRING(@strClause,0,LEN(@strClause) -3)
+				SELECT @strOperator = CASE WHEN @strCondition LIKE '%Not%' THEN 'NOT IN' ELSE 'IN' END
+				IF RTRIM(LTRIM(ISNULL(@strFrom,''))) <> '' AND RTRIM(LTRIM(ISNULL(@strTo,''))) <> ''
+				BEGIN
+					SELECT @strFrom = CASE WHEN @strDatatype = 'String' THEN ''''+@strFrom+'''' ELSE @strFrom END
+					SELECT @strTo = CASE WHEN @strDatatype = 'String' THEN ''''+@strTo+'''' ELSE @strTo END
+					SET @strClause += ' ('+@strFromField+' '+@strOperator+' (' + @strFrom + ','+ @strTo +')) '
+				END
+				ELSE IF RTRIM(LTRIM(ISNULL(@strFrom,''))) <> ''
+				BEGIN
+					SELECT @strFrom = CASE WHEN @strDatatype = 'String' THEN ''''+@strFrom+'''' ELSE @strFrom END
+					SET @strClause += ' ('+@strFromField+' '+@strOperator+' (' + @strFrom + ')) '
+				END
+				ELSE
+				BEGIN
+					IF LTRIM(RTRIM(ISNULL(@strClause,''))) <> ''
+						SET @strClause += SUBSTRING(@strClause,0,LEN(@strClause) -3)
+				END
 			END
-		END
-		ELSE
-		BEGIN
-			SELECT @strOperator = CASE WHEN @strCondition LIKE '%Not%' THEN 'NOT IN' ELSE 'IN' END
-			IF RTRIM(LTRIM(ISNULL(@strFrom,''))) <> '' AND RTRIM(LTRIM(ISNULL(@strTo,''))) <> ''
-			BEGIN
-				SELECT @strFrom = CASE WHEN @strDatatype = 'String' THEN ''''+@strFrom+'''' ELSE @strFrom END
-				SELECT @strTo = CASE WHEN @strDatatype = 'String' THEN ''''+@strTo+'''' ELSE @strTo END
-				SET @strClause += ' ('+@strFromField+' '+@strOperator+' (' + @strFrom + ','+ @strTo +')) '
-			END
-			ELSE IF RTRIM(LTRIM(ISNULL(@strFrom,''))) <> ''
-			BEGIN
-				SELECT @strFrom = CASE WHEN @strDatatype = 'String' THEN ''''+@strFrom+'''' ELSE @strFrom END
-				SET @strClause += ' ('+@strFromField+' '+@strOperator+' (' + @strFrom + ')) '
-			END
-			ELSE
-			BEGIN
-				IF LTRIM(RTRIM(ISNULL(@strClause,''))) <> ''
-					SET @strClause += SUBSTRING(@strClause,0,LEN(@strClause) -3)
-			END
-		END
 
-		IF LEN(@strClause) > 0 AND @intId < (SELECT MAX(intId) FROM @temp_xml_table)
-		BEGIN
-			SET @strClause = @strClause + ' AND '
+			IF LEN(@strClause) > 0 AND @intId < (SELECT MAX(intId) FROM @temp_xml_table)
+			BEGIN
+				SET @strClause = @strClause + ' AND '
+			END
 		END
 
 		SELECT @intId = MIN(intId) FROM @temp_xml_table WHERE intId > @intId
+	END
+
+	IF (@strClause LIKE '% AND ')
+	BEGIN
+		SET @strClause = SUBSTRING(@strClause, 0, LEN(@strClause) - 3)
 	END
 
 END TRY

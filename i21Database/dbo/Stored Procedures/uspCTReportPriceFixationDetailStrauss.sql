@@ -10,7 +10,9 @@ BEGIN TRY
 
 	DECLARE
 		@intPriceFixationId		INT,
-		@xmlDocumentId			INT;
+		@xmlDocumentId			INT,
+		@intContractHeaderId	int,
+		@intContractDetailId	int;
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -47,6 +49,8 @@ BEGIN TRY
 	SELECT	@intPriceFixationId = [from]
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intPriceFixationId'
+
+	select @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 			
 	SELECT	DISTINCT 
 			PF.intPriceFixationId,
@@ -54,16 +58,32 @@ BEGIN TRY
 			strFutMarketName = MA.strFutMarketName,
 			MO.strFutureMonth,
 			dblNoOfLots = dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]),
-			strPrice = dbo.fnCTChangeNumericScale(PD.dblFutures,2) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
+			strPrice = dbo.fnCTChangeNumericScale(PD.dblFutures,ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
 			PD.strNotes
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
-	CROSS APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) CD
+	cross apply	(	select top 1 cd1.*
+					from tblCTContractDetail cd1
+					where cd1.intContractHeaderId = 
+													case
+													when isnull(@intContractDetailId,0) = 0
+													then @intContractHeaderId
+													else cd1.intContractHeaderId
+													end
+						  and cd1.intContractDetailId =
+						  							case
+						  							when isnull(@intContractDetailId,0) = 0
+						  							then cd1.intContractDetailId
+						  							else @intContractDetailId 
+						  							end
+				) CD
+	--CROSS APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) CD
 	LEFT	JOIN	tblRKFutureMarket			MA	ON	MA.intFutureMarketId			=	PD.intFutureMarketId	
 	LEFT	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	PD.intFutureMonthId		
 	LEFT	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		
 	LEFT	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId		
 	LEFT	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId
+	CROSS 	APPLY	tblCTCompanyPreference 		CP
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 

@@ -19,4 +19,8 @@
 	,intTransactionId int
 	,intCompanyId int
 	,ysnMailSent Bit
+	,intStatusId int
+	,strLogXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strAuditXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strContractNumber	NVARCHAR(50) COLLATE Latin1_General_CI_AS
 )

@@ -86,6 +86,12 @@ BEGIN TRY
 				FROM tblQMTicketDiscount
 				WHERE intTicketFileId = @intCustomerStorageId AND strSourceType = 'Storage'
 
+				-- we need to clear the transaction links before deleting the actual customer storage 
+				exec uspSCAddTransactionLinks 
+					@intTransactionType = 5
+					, @intTransactionId = @intCustomerStorageId
+					, @intAction = 2
+
 				DELETE
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId

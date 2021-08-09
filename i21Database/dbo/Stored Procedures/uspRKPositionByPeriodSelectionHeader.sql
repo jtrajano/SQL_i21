@@ -23,7 +23,7 @@ BEGIN TRY
 	
 	SELECT intSeqId = 1
 		, strType = 'Ownership'
-		, dblTotal = ISNULL(invQty, 0) + ISNULL(ReserveQty, 0) + ISNULL(InTransite, 0) + (ISNULL(dblPurchase,0) - ISNULL(dblSales,0))
+		, dblTotal = ISNULL(invQty, 0) + ISNULL(InTransit, 0) + (ISNULL(dblPurchase,0) - ISNULL(dblSales,0))
 	INTO #temp
 	FROM (
 		SELECT invQty = (SELECT SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, ium1.intCommodityUnitMeasureId, ISNULL(it1.dblUnitOnHand, 0)), 0))
@@ -47,15 +47,23 @@ BEGIN TRY
 						WHERE i.intCommodityId = @intCommodityId
 							AND il.intLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
 							AND i.intItemId = ISNULL(@intItemId, i.intItemId))
-			, InTransite = (SELECT SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, ium1.intCommodityUnitMeasureId, ISNULL(dblStockQty, 0)), 0))
-						FROM vyuLGInventoryView iv
-						JOIN tblICItem i ON iv.intItemId = i.intItemId
-						JOIN vyuRKPositionByPeriodContDetView cd ON iv.intContractDetailId = cd.intContractDetailId AND cd.intContractStatusId <> 3
-						JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
-						JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
-						WHERE cd.intCommodityId = @intCommodityId
-							AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
-							AND i.intItemId = ISNULL(@intItemId, i.intItemId))
+			--, InTransite = (SELECT SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, ium1.intCommodityUnitMeasureId, ISNULL(dblStockQty, 0)), 0))
+			--			FROM vyuLGInventoryView iv
+			--			JOIN tblICItem i ON iv.intItemId = i.intItemId
+			--			JOIN vyuRKPositionByPeriodContDetView cd ON iv.intContractDetailId = cd.intContractDetailId AND cd.intContractStatusId <> 3
+			--			JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
+			--			JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
+			--			WHERE cd.intCommodityId = @intCommodityId
+			--				AND cd.intCompanyLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
+			--				AND i.intItemId = ISNULL(@intItemId, i.intItemId))
+			, InTransit = (SELECT SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, ium1.intCommodityUnitMeasureId, ISNULL(dblQuantity, 0)), 0)) 
+						FROM vyuICGetInventoryInTransit ic
+						JOIN tblICUnitMeasure um ON um.strUnitMeasure = ic.strUOM
+						JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = ic.intCommodityId AND um.intUnitMeasureId = ium.intUnitMeasureId
+						JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = ic.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
+						WHERE ic.intCommodityId = @intCommodityId
+							AND intLocationId in (SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
+							AND intItemId = ISNULL(@intItemId, intItemId))
 			, dblSales = (SELECT ISNULL(SUM(dblOriginalQuantity), 0) - ISNULL(SUM(dblAdjustmentAmount), 0) dblTotal
 						FROM (
 							SELECT dblAdjustmentAmount = SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, ium1.intCommodityUnitMeasureId, ISNULL(dblAdjustmentAmount, 0)), 0))
@@ -120,7 +128,7 @@ BEGIN TRY
 	FROM tblICInventoryReceipt r
 	INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
 	INNER JOIN vyuICGetReceiptItemSource ris ON ris.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
-	INNER JOIN vyuRKPositionByPeriodContDetView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+	INNER JOIN vyuRKPositionByPeriodContDetView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId NOT IN (3,5,6)
 	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId 
 	JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
 	WHERE cd.intCommodityId = @intCommodityId AND cd.intCompanyLocationId IN (SELECT Item COLLATE Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCompanyLocationId, ','))
@@ -131,7 +139,7 @@ BEGIN TRY
 		, dblTotal = SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, ium1.intCommodityUnitMeasureId, ISNULL(ri.dblQuantity, 0)), 0))
 	FROM tblICInventoryShipment r
 	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
-	INNER JOIN vyuRKPositionByPeriodContDetView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId <> 3
+	INNER JOIN vyuRKPositionByPeriodContDetView cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2 AND cd.intContractStatusId NOT IN (3,5,6)
 	JOIN tblICCommodityUnitMeasure ium ON ium.intCommodityId = cd.intCommodityId AND cd.intUnitMeasureId = ium.intUnitMeasureId
 	JOIN tblICCommodityUnitMeasure ium1 ON ium1.intCommodityId = cd.intCommodityId AND ium1.intUnitMeasureId = @intQuantityUOMId
 	WHERE cd.intCommodityId = @intCommodityId

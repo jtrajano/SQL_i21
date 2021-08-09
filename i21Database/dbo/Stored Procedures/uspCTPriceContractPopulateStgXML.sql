@@ -5,6 +5,7 @@
 	,@strRowState NVARCHAR(100)
 	,@ysnReplication BIT = 1
 	,@ysnProcessApproverInfo bit=0
+	,@ysnApproval BIT=0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -25,12 +26,20 @@ BEGIN TRY
 		,@intContractScreenId INT
 		,@strApproverXML NVARCHAR(MAX)
 		,@strSubmittedByXML NVARCHAR(MAX)
+		,@strAdditionalInfo NVARCHAR(MAX)
+		,@strLogCondition nvarchar(50)
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId int
+		,@intContractHeaderId int
+		,@strContractNumber nvarchar(50)
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
 	SET @strPriceContractXML = NULL
 	SET @strPriceContractCondition = NULL
 	SET @strPriceFixationXML = NULL
+	SET @strLogCondition = NULL
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -55,6 +64,14 @@ BEGIN TRY
 	FROM tblCTPriceContract
 	WHERE intPriceContractId = @intPriceContractId
 
+	SELECT @intContractHeaderId = intContractHeaderId
+	FROM tblCTPriceFixation
+	WHERE intPriceContractId = @intPriceContractId
+
+	SELECT @strContractNumber = strContractNumber
+	FROM tblCTContractHeader
+	WHERE intContractHeaderId = @intContractHeaderId
+
 	SELECT @intContractScreenId = intScreenId
 	FROM tblSMScreen
 	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
@@ -63,6 +80,17 @@ BEGIN TRY
 	FROM tblSMTransaction
 	WHERE intRecordId = @intPriceContractId
 		AND intScreenId = @intContractScreenId
+
+	Select Top 1 @intLogId=intLogId
+	from dbo.tblSMLog
+	Where intTransactionId=@intTransactionId
+	Order by intLogId desc
+
+	-------------------------PriceContract-----------------------------------------------------------
+	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
+	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
+
+
 if @ysnProcessApproverInfo=0
 Begin
 	-------------------------PriceContract-----------------------------------------------------------
@@ -80,6 +108,12 @@ Begin
 		,@strPriceContractXML OUTPUT
 		,NULL
 		,NULL
+
+	SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
+
+	SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPPriceContract></vyuIPPriceContracts>'
+
+	SELECT @strPriceContractXML = Replace(@strPriceContractXML, '</vyuIPPriceContract></vyuIPPriceContracts>', @strAdditionalInfo)
 
 	---------------------------------------------PriceFixation------------------------------------------
 	SET @strPriceFixationXML = NULL
@@ -146,7 +180,32 @@ End
 		,NULL
 		,NULL
 
-	
+	---------------------------------------------Audit Log------------------------------------------
+	IF @strLogCondition IS NOT NULL
+	BEGIN
+	SELECT @strLogXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPLogView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strLogXML OUTPUT
+		,NULL
+		,NULL
+
+	---------------------------------------------Audit Log------------------------------------------
+	SELECT @strAuditXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPAuditView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strAuditXML OUTPUT
+		,NULL
+		,NULL
+	END
 
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
@@ -159,7 +218,7 @@ End
 
 	IF EXISTS (
 			SELECT 1
-			FROM master.dbo.sysdatabases
+			FROM sys.databases
 			WHERE name = @strDatabaseName
 			)
 	BEGIN
@@ -177,6 +236,9 @@ End
 		,intTransactionId 
 		,intCompanyId 
 		,strSubmittedByXML
+		,strLogXML
+		,strAuditXML
+		,strContractNumber
 		)
 	SELECT intPriceContractId = @intPriceContractId
 		,strPriceContractNo = @strPriceContractNo
@@ -190,7 +252,10 @@ End
 		,intMultiCompanyId = @intToCompanyId
 		,intTransactionId =@intTransactionId
 		,intCompanyId =@intCompanyId
-		,strSubmittedByXML=@strSubmittedByXML'
+		,strSubmittedByXML=@strSubmittedByXML
+		,strLogXML=@strLogXML
+		,strAuditXML=@strAuditXML
+		,strContractNumber=@strContractNumber'
 
 		EXEC sp_executesql @strSQL
 			,N'@intPriceContractId int, 
@@ -205,7 +270,10 @@ End
 			@intToCompanyId int,
 			@intTransactionId int,
 			@intCompanyId int,
-			@strSubmittedByXML nvarchar(MAX)'
+			@strSubmittedByXML nvarchar(MAX),
+			@strLogXML nvarchar(MAX),
+			@strAuditXML nvarchar(MAX),
+			@strContractNumber nvarchar(50)'
 			,@intPriceContractId
 			,@strPriceContractNo
 			,@strPriceContractXML
@@ -219,6 +287,9 @@ End
 			,@intTransactionId
 			,@intCompanyId
 			,@strSubmittedByXML
+			,@strLogXML
+			,@strAuditXML
+			,@strContractNumber
 	END
 END TRY
 

@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPBillImport]
 as
 SELECT
-	TransactionType.strText COLLATE Latin1_General_CI_AS AS strTransactionType,
+	TransactionType.strText strTransactionType,
 	Vendor.strName,
 	A.dtmBillDate,
 	A.strVendorOrderNumber,

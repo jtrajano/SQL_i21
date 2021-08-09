@@ -41,8 +41,8 @@ BEGIN
 		WHERE intAccountGroupId = @intAccountGroupId
 
 		UNION ALL SELECT tbl.intParentGroupId,tbl.intAccountGroupId
-		FROM tblGLAccountGroup tbl, menu_tree mt 
-		WHERE tbl.intParentGroupId = mt.intAccountGroupId
+		FROM tblGLAccountGroup tbl inner join menu_tree mt on tbl.intParentGroupId = mt.intAccountGroupId
+		
 	) 
 	INSERT into @tmpTbl
 	SELECT * FROM menu_tree 

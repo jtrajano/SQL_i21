@@ -90,6 +90,7 @@ SELECT
 	, Adj.strInvoiceNumber
 	, Adj.strShipmentNumber
 	, Adj.strReceiptNumber
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryAdjustmentDetail AdjDetail
 LEFT JOIN vyuICGetInventoryAdjustment Adj ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation NewLocation ON NewLocation.intCompanyLocationId = AdjDetail.intNewLocationId
@@ -122,3 +123,8 @@ LEFT JOIN (
 		ON NewLotOwner.intOwnerId = NewLotOwnerEntity.intEntityId
 )
 	ON NewLotOwner.intItemOwnerId = AdjDetail.intNewItemOwnerId
+OUTER APPLY (
+	SELECT TOP 1 fp.strPeriod
+	FROM tblGLFiscalYearPeriod fp
+	WHERE Adj.dtmAdjustmentDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+) fiscal

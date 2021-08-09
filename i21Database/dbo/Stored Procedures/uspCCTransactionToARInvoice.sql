@@ -60,6 +60,7 @@ BEGIN
     INSERT INTO @EntriesForInvoice(
         [strTransactionType]
         ,[strSourceTransaction]
+		,[strType]
         --,[intSourceId]
         ,[strSourceId]
         ,[intEntityCustomerId]
@@ -85,6 +86,7 @@ BEGIN
     )
     SELECT [strTransactionType] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN 'Debit Memo' ELSE 'Credit Memo' END
         ,[strSourceTransaction] = 'Credit Card Reconciliation'
+		,[strType] = 'Dealer Credit Card'
         --,[intSourceId] = ccSiteHeader.intSiteHeaderId
         ,[strSourceId] = ccSiteDetail.intSiteDetailId
         ,[intEntityCustomerId] = ccSite.intCustomerId
@@ -153,6 +155,7 @@ BEGIN
 		INSERT INTO @EntriesForInvoicePerSite (
 			[strTransactionType]
 			,[strSourceTransaction]
+			,[strType]
 			,[intSourceId]
 			,[strSourceId]
 			,[intEntityCustomerId]
@@ -177,6 +180,7 @@ BEGIN
 		)
 		SELECT [strTransactionType]
 			,[strSourceTransaction]
+			,[strType]
 			,[intSourceId]
 			,[strSourceId]
 			,[intEntityCustomerId]

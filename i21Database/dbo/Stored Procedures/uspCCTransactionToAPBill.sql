@@ -49,6 +49,7 @@ BEGIN
 
 		INSERT INTO @Voucher (intTransactionType
 			, dtmDate
+			, dtmVoucherDate
 			, intEntityVendorId
 			, intShipToId
 			, intLocationId
@@ -61,6 +62,7 @@ BEGIN
 			, ysnStage)
 		SELECT intTransactionType = 3 
 			,dtmDate = @dtmDate
+			,dtmVoucherDate = @dtmDate
 			,intEntityVendorId = @intVendorId
 			,intShipToId = @intShipTo
 			,intLocationId = @intShipTo
@@ -102,6 +104,7 @@ BEGIN
 		-- 1099K Adjustment
 		INSERT INTO @Voucher1099K (intTransactionType
 			, dtmDate
+			, dtmVoucherDate
 			, intEntityVendorId
 			, intShipToId
 			, strVendorOrderNumber
@@ -114,6 +117,7 @@ BEGIN
 			, ysnStage)
 		SELECT 9
 			, dtmDate
+			, dtmVoucherDate
 			, intEntityVendorId
 			, intShipToId
 			, strVendorOrderNumber

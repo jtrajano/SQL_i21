@@ -1,13 +1,15 @@
 CREATE PROCEDURE [dbo].[uspGRInsertStorageHistoryRecord]
 (
 	@StorageHistoryData AS StorageHistoryStagingTable READONLY,
-    @intStorageHistoryId AS INT OUTPUT
+    @intStorageHistoryId AS INT OUTPUT,
+	@strStorageHistoryIds as nvarchar(max) = '' output
 )
 AS
 BEGIN TRY   
      DECLARE @ErrMsg NVARCHAR(MAX)
 	 DECLARE @StorageHistoryDataDummy AS StorageHistoryStagingTable
 	 DECLARE @intId INT
+	 DECLARE @intIds Id
 
 	 INSERT INTO @StorageHistoryDataDummy
 	 (
@@ -25,6 +27,7 @@ BEGIN TRY
 		,dblUnits
 		,dtmHistoryDate
 		,dblPaidAmount
+		,dblCost
 		,dblCurrencyRate
 		,intUserId
 		,ysnPost
@@ -52,6 +55,7 @@ BEGIN TRY
 		,dblUnits
 		,dtmHistoryDate
 		,dblPaidAmount
+		,dblCost
 		,dblCurrencyRate
 		,intUserId
 		,ysnPost
@@ -101,6 +105,7 @@ BEGIN TRY
 			[dblUnits],
 			[dtmHistoryDate],
 			[dblPaidAmount],
+			[dblCost],
 			[strPaidDescription],
 			[dblCurrencyRate],
 			[strType],
@@ -115,6 +120,7 @@ BEGIN TRY
 			[strVoucher],
 			[intTransferStorageReferenceId]
 		) 
+		OUTPUT INSERTED.intStorageHistoryId INTO @intIds(intId)
 		SELECT 
 			[intCustomerStorageId]          = SH.intCustomerStorageId,
 			[intSettleStorageId]            = SH.intSettleStorageId,
@@ -130,6 +136,7 @@ BEGIN TRY
 			[dblUnits]                      = SH.dblUnits,
 			[dtmHistoryDate]                = SH.dtmHistoryDate,
 			[dblPaidAmount]                 = SH.dblPaidAmount,
+			[dblCost]                 		= SH.dblCost,
 			[strPaidDescription]            = SH.strPaidDescription,
 			[dblCurrencyRate]               = SH.dblCurrencyRate,
 			[strType]                       = SH.strType,
@@ -148,7 +155,11 @@ BEGIN TRY
 
 		SELECT @intStorageHistoryId = SCOPE_IDENTITY();
 
-		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,5,3))
+
+		select @strStorageHistoryIds =  @strStorageHistoryIds + cast(intId as nvarchar) + ',' from @intIds
+
+
+		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,5,3) OR (intTransactionTypeId = 4 AND strType = 'Settlement')))
 		BEGIN
 			EXEC uspGRRiskSummaryLog @intStorageHistoryId
 		END

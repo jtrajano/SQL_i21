@@ -138,4 +138,3 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 70030) EXEC sp_dropmessa
 SET @strmessage = 'Transfer %s transaction is already cleared.'
 EXEC sp_addmessage 70030,11,@strmessage,'us_english','False'
 
-

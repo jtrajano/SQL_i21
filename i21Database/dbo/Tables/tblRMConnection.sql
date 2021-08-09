@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblRMConnection] (
     [intConnectionId]       INT            IDENTITY (1, 1) NOT NULL,
-    [strName]               NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+    [strName]               NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [intConnectionType]     INT            NOT NULL,
     [strUserName]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [strPassword]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
@@ -13,7 +13,8 @@
     [ysnUseCurrentDatabase] BIT            CONSTRAINT [DF_tblRMConnection_ysnUseCurrentDatabase] DEFAULT ((0)) NOT NULL,
     [ysnRemote]             BIT            NULL,
     [intConcurrencyId]      INT            CONSTRAINT [DF__tblRMConn__intCo__6A7BAA63] DEFAULT ((1)) NOT NULL,
-    CONSTRAINT [PK_dbo.Connections] PRIMARY KEY CLUSTERED ([intConnectionId] ASC)
+    CONSTRAINT [PK_dbo.Connections] PRIMARY KEY CLUSTERED ([intConnectionId] ASC),
+	CONSTRAINT [UK_dbo.tblRMConnection_strName] UNIQUE (strName)
 );
 
 

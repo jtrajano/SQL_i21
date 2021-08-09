@@ -89,6 +89,17 @@ BEGIN
                 END
 END
 
+DECLARE @strLocationName NVARCHAR(150)
+
+IF isnull(@intLocationId,0) <> 0
+BEGIN
+	SELECT  @strLocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intLocationId
+
+END
+ELSE
+BEGIN
+	SET @strLocationName = 'All'
+END
 
 DECLARE @Commodity AS TABLE 
 (
@@ -106,3 +117,4 @@ SELECT
 	,strUnitMeasure
 FROM tblRKDPRContractHedge
 WHERE intDPRHeaderId = @intDPRHeaderId
+AND	 strLocationName = CASE WHEN @strLocationName = 'All' THEN strLocationName ELSE @strLocationName END

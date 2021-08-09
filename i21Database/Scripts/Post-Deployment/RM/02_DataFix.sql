@@ -395,5 +395,12 @@ BEGIN
 	WHERE tblPatch.intM2MInquiryBasisDetailId = tblRKM2MInquiryBasisDetail.intM2MInquiryBasisDetailId
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblRKFuturesMonth WHERE dtmFutureMonthsDate <> CONVERT(DATE,'01 ' + strFutureMonth))
+BEGIN
+	UPDATE tblRKFuturesMonth SET dtmFutureMonthsDate = CONVERT(DATE,'01 ' + strFutureMonth)
+	WHERE dtmFutureMonthsDate <> CONVERT(DATE,'01 ' + strFutureMonth)
+
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO

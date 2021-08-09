@@ -40,10 +40,10 @@ SELECT
 	 , D.strLifeTimeType
 	 , H.strUnitMeasure AS strUOM
 	 , ISNULL(E.dblUnitQty,0) AS dblItemUOMCF
-	 , intStockUOM = ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)
-	 , strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)
-	 , strStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)
-	 , dblStockUOMCF = ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)
+	 , intStockUOM = stockUnit.intItemUOMId --ISNULL((SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)
+	 , strStockUOM = stockUnit.strUnitMeasure --(SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)
+	 , strStockUOMType = stockUnit.strUnitType --(SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId)
+	 , dblStockUOMCF = stockUnit.dblUnitQty --ISNULL((SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ysnStockUnit = 1 AND ItemUOM.intItemUOMId = E.intItemUOMId),0)
 	 , F.strSubLocationName
 	 , G.strName AS strStorageName
 	 , ysnCompleted = CAST((CASE WHEN A.intOrderStatusId IN (1, 2, 7) AND B.dblQtyOrdered != B.dblQtyReceived THEN 0 ELSE 1 END) AS BIT)
@@ -93,4 +93,17 @@ LEFT JOIN vyuPOPurchaseDetailReceiptNumber O
 	ON B.intPurchaseDetailId = O.intPurchaseDetailId
 LEFT JOIN tblSMFreightTerms FreightTerms
 	ON FreightTerms.intFreightTermId = A.intFreightTermId
+OUTER APPLY (
+	SELECT TOP 1 
+		ItemUOM.intItemUOMId
+		,UOM.strUnitMeasure 
+		,UOM.strUnitType
+		,ItemUOM.dblUnitQty
+	FROM 
+		tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM 
+			ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId 
+	WHERE 
+		ysnStockUnit = 1 
+		AND ItemUOM.intItemUOMId = E.intItemUOMId 
+) stockUnit
 GO

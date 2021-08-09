@@ -76,6 +76,8 @@ SELECT
 	, strLotCondition				= ICPreference.strLotCondition
 	, intLoadDetailContainerLinkId	= LoadContainerLink.intLoadDetailContainerLinkId 
 	, intAllowZeroCostTypeId = ItemLocation.intAllowZeroCostTypeId 
+	, ysnWeighed					= CAST(0 AS BIT) -- LG weighed column is not yet available. Ask LG to change this view after it was added. 
+	, strSealNumber						= LoadContainer.strSealNumber
 FROM tblLGLoad Load
 	INNER JOIN tblLGLoadDetail LoadDetail ON LoadDetail.intLoadId = Load.intLoadId
 	INNER JOIN tblLGLoadDetailContainerLink LoadContainerLink ON LoadDetail.intLoadDetailId = LoadContainerLink.intLoadDetailId

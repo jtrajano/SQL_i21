@@ -71,6 +71,11 @@ SET NOCOUNT ON
 			SELECT	@strStartingNumber = CASE WHEN @intContractTypeId = 1 THEN 'PurchaseContract' ELSE 'SaleContract' END
 			EXEC	uspCTGetStartingNumber @strStartingNumber,@strContractNumber OUTPUT
 
+			WHILE EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE intContractTypeId = @intContractTypeId AND strContractNumber = @strContractNumber)
+			BEGIN
+				EXEC uspCTGetStartingNumber @strStartingNumber,@strContractNumber OUTPUT
+			END
+
 			UPDATE	#tblCTContractHeader 
 			SET		dblQuantity			=	@dblSplitQuantity,
 					strContractNumber	=	@strContractNumber,

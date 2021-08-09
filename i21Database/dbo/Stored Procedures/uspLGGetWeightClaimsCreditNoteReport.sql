@@ -112,6 +112,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,strCompanyPhone = @strPhone
 	,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ', '
 	,strCityAndDate = @strCity + ', '+ DATENAME(dd,WC.dtmTransDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,WC.dtmTransDate),3)),LEFT(DATENAME(MONTH,WC.dtmTransDate),3)) + ' ' + DATENAME(yyyy,WC.dtmTransDate)
+	,strTransDate = dbo.fnConvertDateToReportDateFormat(WC.dtmTransDate, 0)
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -121,7 +122,13 @@ SELECT DISTINCT WC.intWeightClaimId
 	,EL.strCity
 	,EL.strState
 	,strCountry = isnull(rtELTranslation.strTranslation,EL.strCountry)
-	,strCustomerAddress = E.strName + CHAR(13) + EL.strAddress + CHAR(13) + EL.strZipCode + ' ' + EL.strCity + CHAR(13) + EL.strState + ' ' + isnull(rtELTranslation.strTranslation,EL.strCountry)
+	,strCustomerAddress = E.strName + CHAR(13) 
+		+ CASE WHEN (ISNULL(EL.strAddress, '') = '') THEN '' ELSE EL.strAddress + CHAR(13) END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '') THEN '' ELSE EL.strZipCode + ' ' END 
+		+ CASE WHEN (ISNULL(EL.strCity, '') = '') THEN '' ELSE EL.strCity END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '' AND ISNULL(EL.strCity, '') = '') THEN '' ELSE CHAR(13) END  
+		+ CASE WHEN (ISNULL(EL.strState, '') = '') THEN '' ELSE EL.strState + ' ' END 
+		+ ISNULL(rtELTranslation.strTranslation,EL.strCountry)
 	,INV.intInvoiceId
 	,INV.strInvoiceNumber
 	,strShippingLine = @via + ' ' + ShippingLine.strName
@@ -129,6 +136,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,L.strPackingDescription
 	,CH.strContractNumber
 	,CH.dtmContractDate
+	,strContractDate = dbo.fnConvertDateToReportDateFormat(CH.dtmContractDate, 0)
 	,CH.strCustomerContract
 	,CH.dblQuantity
 	,strCommodityUnitMeasure = CMUM.strUnitMeasure
@@ -204,8 +212,11 @@ JOIN (
 	WHERE LOD.intLoadId = @intLoadId
 	) LD ON WCD.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = CASE WHEN LD.intCustomerEntityId <> WCD.intPartyEntityId THEN E.intDefaultLocationId 
-																ELSE ISNULL(LD.intCustomerEntityLocationId, E.intDefaultLocationId) END
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId 
+	AND ((LD.intCustomerEntityId = WCD.intPartyEntityId AND EL.ysnDefaultLocation = 1)
+		OR (LD.intCustomerEntityId <> WCD.intPartyEntityId 
+			AND ((intCustomerEntityLocationId IS NOT NULL AND EL.intEntityLocationId = LD.intCustomerEntityLocationId)
+				OR (intCustomerEntityLocationId IS NULL AND EL.ysnDefaultLocation = 1))))
 LEFT JOIN tblARInvoice INV ON INV.intInvoiceId = WCD.intInvoiceId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
 LEFT JOIN tblARCustomer CUS ON CUS.intEntityId = E.intEntityId

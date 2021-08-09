@@ -8,7 +8,7 @@ SELECT
 	intLoadContainerId = LDCL.intLoadContainerId,
 	strLoadNumber = L.strLoadNumber,
 	strTrackingNumber = L.strLoadNumber,
-	intCompanyLocationId = L.intCompanyLocationId,
+	intCompanyLocationId = PCT.intCompanyLocationId,
 	strLocationName = CL.strLocationName,
 	strCommodity = CY.strDescription,
 	strPosition = PO.strPosition,
@@ -29,6 +29,7 @@ SELECT
 	intTerminalEntityId = L.intTerminalEntityId,
 	strTerminal = Terminal.strName,
 	intShippingLineEntityId = L.intShippingLineEntityId,
+	strShippingLine = ShipLine.strName,
 	strMVessel = L.strMVessel,
 	strMVoyageNumber = L.strMVoyageNumber,
 	strFVessel = L.strFVessel,
@@ -37,6 +38,8 @@ SELECT
 	intStorageLocationId = LW.intStorageLocationId,
 	intSubLocationId = LW.intSubLocationId,
 	strSubLocationName = SubLocation.strSubLocationName,
+	dtmLastFreeDate = LW.dtmLastFreeDate,
+	dtmEmptyContainerReturn = LW.dtmEmptyContainerReturn,
 	strTruckNo = L.strTruckNo,
 	intForwardingAgentEntityId = L.intForwardingAgentEntityId,
 	strForwardingAgent = FwdAgent.strName,
@@ -54,6 +57,8 @@ SELECT
 	dtmETAPOD = L.dtmETAPOD,
 	dtmDispatchedDate = L.dtmDispatchedDate,
 	strComments = L.strComments,
+	strExternalShipmentNumber = L.strExternalShipmentNumber,
+	ysnArrivedInPort = L.ysnArrivedInPort,
 
 	---- Purchase Contract Details
 	intContractDetailId = PCT.intContractDetailId,
@@ -64,9 +69,11 @@ SELECT
 	strPricingType = PT.strPricingType,
 	intContractSeq = PCT.intContractSeq,
 	strPContractNumber = CAST(PCH.strContractNumber as VARCHAR(100)) + '/' + CAST(PCT.intContractSeq AS VARCHAR(100)),
-	dblCashPrice = CASE WHEN (PCT.dblCashPrice IS NOT NULL) THEN PCT.dblCashPrice ELSE dbo.fnCTGetSequencePrice(PCT.intContractDetailId,NULL) END,
+	dblCashPrice = ISNULL(PAD.dblSeqPrice, PAD.dblSeqPartialPrice),
 	dblCashPriceInQtyUOM = dbo.fnCTConvertQtyToTargetItemUOM(PCT.intItemUOMId,PCT.intPriceItemUOMId,PCT.dblCashPrice),
+	intCurrencyId = CUR.intCurrencyID,
 	strCurrency = CUR.strCurrency,
+	ysnSubCurrency = CUR.ysnSubCurrency,
 	strPriceUOM = U2.strUnitMeasure,
 	intItemId = PCT.intItemId,
 	intItemUOMId = PCT.intItemUOMId,
@@ -90,7 +97,9 @@ SELECT
 	dblFranchise = IsNull(WG.dblFranchise, 0),
 	dtmStartDate = PCT.dtmStartDate,
 	dtmEndDate = PCT.dtmEndDate,
+	dtmUpdatedAvailabilityDate = PCT.dtmUpdatedAvailabilityDate,
 	ysnOnTime = CAST(CASE WHEN DATEDIFF (DAY, L.dtmPostedDate, PCT.dtmEndDate) >= 0 THEN 1 ELSE 0 END as Bit),
+	strERPPONumber = PCT.strERPPONumber,
 
 	---- Sales Contract Details
 	intSContractDetailId = SCT.intContractDetailId,
@@ -100,7 +109,7 @@ SELECT
 	strSalesPricingType = SPT.strPricingType,
 	intSContractSeq = SCT.intContractSeq,
 	strSContractNumber = CAST(SCH.strContractNumber as VARCHAR(100)) + '/' + CAST(SCT.intContractSeq AS VARCHAR(100)),
-	dblSCashPrice = CASE WHEN (SCT.dblCashPrice IS NOT NULL) THEN SCT.dblCashPrice ELSE dbo.fnCTGetSequencePrice(SCT.intContractDetailId,NULL) END,
+	dblSCashPrice = ISNULL(SAD.dblSeqPrice, SAD.dblSeqPartialPrice),
 	dblSCashPriceInQtyUOM = dbo.fnCTConvertQtyToTargetItemUOM(SCT.intItemUOMId,SCT.intPriceItemUOMId,SCT.dblCashPrice),
 	strSCurrency = SCUR.strCurrency,
 	strSPriceUOM = SU2.strUnitMeasure,
@@ -199,6 +208,7 @@ INNER JOIN tblCTContractDetail PCT ON PCT.intContractDetailId = LD.intPContractD
 INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCT.intContractHeaderId
 INNER JOIN tblSMCompanyLocation CL ON	CL.intCompanyLocationId	= PCT.intCompanyLocationId
 INNER JOIN tblEMEntity V ON V.intEntityId = PCH.intEntityId
+INNER JOIN vyuLGAdditionalColumnForContractDetailView PAD ON PAD.intContractDetailId = PCT.intContractDetailId
 LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
 LEFT JOIN tblICCommodityUnitMeasure CU ON CU.intCommodityUnitMeasureId = PCH.intCommodityUOMId
 LEFT JOIN tblICUnitMeasure U3 ON U3.intUnitMeasureId = CU.intUnitMeasureId
@@ -221,6 +231,7 @@ LEFT JOIN tblICItemUOM BU ON BU.intItemUOMId = PCT.intBasisUOMId
 LEFT JOIN tblICUnitMeasure U4 ON U4.intUnitMeasureId = BU.intUnitMeasureId
 LEFT JOIN tblCTContractDetail SCT ON SCT.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCT.intContractHeaderId
+LEFT JOIN vyuLGAdditionalColumnForContractDetailView SAD ON SAD.intContractDetailId = SCT.intContractDetailId
 LEFT JOIN tblSMCurrency	SCUR ON SCUR.intCurrencyID = SCT.intCurrencyId
 LEFT JOIN tblICCommodityUnitMeasure SCU ON SCU.intCommodityUnitMeasureId = SCH.intCommodityUOMId
 LEFT JOIN tblICUnitMeasure SU3 ON SU3.intUnitMeasureId = SCU.intUnitMeasureId
@@ -251,8 +262,8 @@ LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCT.intProducerId
 LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
-OUTER APPLY (SELECT TOP 1 CER.strCertificationName 
-				FROM tblCTContractCertification CC JOIN tblICCertification CER ON CER.intCertificationId = CC.intCertificationId 
+OUTER APPLY (SELECT TOP 1 CE.strCertificationName 
+				FROM tblCTContractCertification CC JOIN tblICCertification CE ON CE.intCertificationId = CC.intCertificationId 
 				WHERE CC.intContractDetailId = PCT.intContractDetailId) CER
 OUTER APPLY (SELECT TOP 1 R.strReceiptNumber, R.dtmReceiptDate, RL.strLocationName 
 			FROM tblICInventoryReceiptItem RI

@@ -29,7 +29,7 @@ BEGIN
 		IF(@ysnAdjustment = 0)
 		BEGIN
 			SET @CursorTran = CURSOR FOR
-			SELECT DCCD.intImportDealerCreditCardReconDetailId, DCCD.strSiteNumber, DCC.intVendorDefaultId
+			SELECT DCCD.intImportDealerCreditCardReconDetailId, DCCD.strSiteNumber, DCCD.intVendorDefaultId
 			FROM tblCCImportDealerCreditCardReconDetail DCCD
 			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
 			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1 AND DCCD.intSubImportFileHeaderId IS NULL
@@ -37,7 +37,7 @@ BEGIN
 		ELSE
 		BEGIN
 			SET @CursorTran = CURSOR FOR
-			SELECT DCCD.intImportDealerCreditCardReconDetailId, DCCD.strSiteNumber, DCC.intVendorDefaultId
+			SELECT DCCD.intImportDealerCreditCardReconDetailId, DCCD.strSiteNumber, DCCD.intVendorDefaultId
 			FROM tblCCImportDealerCreditCardReconDetail DCCD
 			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
 			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1 AND DCCD.intSubImportFileHeaderId IS NOT NULL
@@ -45,44 +45,59 @@ BEGIN
 
 		BEGIN TRANSACTION
 
+		-- CROSS REFRENCE VENDOR MAPPING
+		UPDATE D SET D.intVendorDefaultId = CASE WHEN D.intVendorDefaultId = V.intVendorDefaultId AND D.ysnGeneric = 1 THEN V.intVendorDefaultId WHEN D.intVendorDefaultId IS NULL THEN  V.intVendorDefaultId ELSE NULL END
+		FROM tblCCImportDealerCreditCardReconDetail D
+		LEFT JOIN vyuCCCrossReferenceVendor V ON V.strImportValue = D.strVendor
+		WHERE D.ysnGeneric = 1
+
+
 		OPEN @CursorTran
 		FETCH NEXT FROM @CursorTran INTO @intImportDealerCreditCardReconDetailId, @strSiteNumber, @intVendorDefaultId
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			
-			DECLARE @intSiteId INT = NULL
-			-- CHECK IF HAS VALID SITE NUMBER
-			SELECT @intSiteId = S.intSiteId FROM tblCCSite S
-			INNER JOIN tblCCVendorDefault VD ON VD.intVendorDefaultId = S.intVendorDefaultId
-			WHERE VD.intVendorDefaultId = @intVendorDefaultId AND S.strSite = @strSiteNumber
 
-			IF (@intSiteId IS NULL)
+			-- CHECK IF HAS VENDOR DEFAULT
+			IF(@intVendorDefaultId IS NULL)
 			BEGIN
-				UPDATE tblCCImportDealerCreditCardReconDetail SET strMessage = 'Invalid Site Number', ysnValid = 0 WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+				UPDATE tblCCImportDealerCreditCardReconDetail SET strMessage = 'Invalid Vendor Number. It''s not mapped to Vendor Cross Reference.', ysnValid = 0 WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
 			END
 			ELSE
 			BEGIN
-				IF(@ysnAdjustment = 0)
+				DECLARE @intSiteId INT = NULL
+				-- CHECK IF HAS VALID SITE NUMBER
+				SELECT @intSiteId = S.intSiteId FROM tblCCSite S
+				INNER JOIN tblCCVendorDefault VD ON VD.intVendorDefaultId = S.intVendorDefaultId
+				WHERE VD.intVendorDefaultId = @intVendorDefaultId AND S.strSite = @strSiteNumber
+
+				IF (@intSiteId IS NULL)
 				BEGIN
-					UPDATE tblCCImportDealerCreditCardReconDetail SET intSiteId = @intSiteId WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+					UPDATE tblCCImportDealerCreditCardReconDetail SET strMessage = 'Invalid Site Number', ysnValid = 0 WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
 				END
 				ELSE
 				BEGIN
-					IF EXISTS(SELECT TOP 1 1 FROM tblCCImportDealerCreditCardReconDetail WHERE strSiteNumber = @strSiteNumber)
+					IF(@ysnAdjustment = 0)
 					BEGIN
-						DECLARE @dtmAdjProcessDate DATETIME
-						SELECT TOP 1 @dtmAdjProcessDate = dtmTransactionDate FROM tblCCImportDealerCreditCardReconDetail 
-						WHERE strSiteNumber = @strSiteNumber
-						
-						UPDATE tblCCImportDealerCreditCardReconDetail SET intSiteId = @intSiteId, dtmTransactionDate = @dtmAdjProcessDate 
-						WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+						UPDATE tblCCImportDealerCreditCardReconDetail SET intSiteId = @intSiteId WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
 					END
 					ELSE
 					BEGIN
-						UPDATE tblCCImportDealerCreditCardReconDetail SET strMessage = 'Invalid Adjustment', ysnValid = 0 WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+						IF EXISTS(SELECT TOP 1 1 FROM tblCCImportDealerCreditCardReconDetail WHERE strSiteNumber = @strSiteNumber)
+						BEGIN
+							DECLARE @dtmAdjProcessDate DATETIME
+							SELECT TOP 1 @dtmAdjProcessDate = dtmTransactionDate FROM tblCCImportDealerCreditCardReconDetail 
+							WHERE strSiteNumber = @strSiteNumber
+							
+							UPDATE tblCCImportDealerCreditCardReconDetail SET intSiteId = @intSiteId, dtmTransactionDate = @dtmAdjProcessDate 
+							WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+						END
+						ELSE
+						BEGIN
+							UPDATE tblCCImportDealerCreditCardReconDetail SET strMessage = 'Invalid Adjustment', ysnValid = 0 WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+						END
 					END
 				END
-			END
+			END	
 
 			FETCH NEXT FROM @CursorTran INTO @intImportDealerCreditCardReconDetailId, @strSiteNumber, @intVendorDefaultId
 		END

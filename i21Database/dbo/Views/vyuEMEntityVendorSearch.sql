@@ -60,6 +60,7 @@ SELECT DISTINCT
 	, ysnProspect			= entityType.Prospect
 	, ysnCustomer			= entityType.Customer
 	, ysnCreditHold			= CAST(0 AS BIT)--CUSTOMER.ysnCreditHold
+	, ysnExemptCreditCardFee = CAST(0 AS BIT)
 	, intFreightTermId		= ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId)
 	, strFreightTerm		= fTerms.strFreightTerm
 	, strFobPoint			= fTerms.strFobPoint
@@ -73,6 +74,10 @@ SELECT DISTINCT
 	, intCreditLimitReached = NULL--DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
 	, ysnHasPastDueBalances	= CAST(0 AS BIT) 
 	, strEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
+	, ysnHasCustomerCreditApprover	= NULL--CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
+	, dblShipToLongitude		= shipLocation.dblLongitude
+	, dblShipToLatitude			= shipLocation.dblLatitude
+	, strAccountType = CASE WHEN Vendor.intVendorType = 1 THEN 'Company' ELSE 'Person' END
 FROM tblAPVendor Vendor
 INNER JOIN tblEMEntity entityToVendor ON Vendor.intEntityId = entityToVendor.intEntityId
 --LEFT JOIN tblEMEntity entityToSalesperson ON Vendor.intSalespersonId = entityToSalesperson.intEntityId

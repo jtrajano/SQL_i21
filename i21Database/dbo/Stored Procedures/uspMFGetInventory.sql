@@ -7,7 +7,7 @@ FROM tblEMEntity E
 JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
 	AND ET.strType = 'Customer'
 WHERE strName = @strCustomerName
-	AND strEntityNo <> ''
+	--AND strEntityNo <> ''
 
 SELECT I.strItemNo AS [Item]
 	,I.strDescription AS [Item Desc]

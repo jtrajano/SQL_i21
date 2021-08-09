@@ -9,6 +9,7 @@ BEGIN
 	;WITH CTE(intAccountId,strDescription) 
 	AS(
 	SELECT A1.intAccountId,
+	   REPLACE(
 	   STUFF(( 
 	   SELECT  ' ' + @strDelimiter + ' ' +  RTRIM(S.strChartDesc)
 		FROM         dbo.tblGLAccountSegment S INNER JOIN
@@ -18,7 +19,7 @@ BEGIN
 						  WHERE A2.intAccountId = A1.intAccountId
 						  ORDER BY St.intSort
 			FOR XML PATH('') )  
-		, 1, 2, '' ) AS strDescription
+		, 1, 2, '' ), '&amp;', '&') AS strDescription
     FROM tblGLAccount A1  
 	GROUP BY intAccountId)
 	UPDATE A SET A.strDescription = ISNULL(CTE.strDescription ,'')

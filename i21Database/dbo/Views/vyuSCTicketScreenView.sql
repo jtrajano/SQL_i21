@@ -248,8 +248,14 @@
 	,SCT.ysnExportRailXML
 	,SCT.strTrailerId
 	,SCT.intTransferWeight
-	
-  FROM tblSCTicket SCT
+	,SCT.intAGWorkOrderId
+	,SCT.ysnMultipleTicket
+	,strAGWorkOrderNumber  = AWO.strOrderNumber
+   	,strAGWorkOrderLocation = AWOL.strLocationName
+	,strShipToLocationName = EL.strLocationName
+	,intShipToLocationId	= EL.intEntityLocationId
+	,SCT.dblDWGOriginalNetUnits
+  FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
 	LEFT JOIN tblSCListTicketTypes SCListTicket on SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag
@@ -323,23 +329,35 @@
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN (
-		SELECT TOP 1 * FROM vyuAPBasisAdvanceTicket
+		SELECT TOP 1
+		intBillId 
+		,ysnRestricted
+		,intScaleTicketId
+		FROM vyuAPBasisAdvanceTicket With(nolock)
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
 	LEFT JOIN (
-		SELECT dblPayment = SUM(ISNULL(AP.dblPayment,0.0)), intScaleTicketId = APD.intScaleTicketId FROM tblAPBillDetail APD
-		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId --AND AP.dblPayment > 0
-		INNER JOIN tblAPPaymentDetail APPayDtl ON AP.intBillId = APPayDtl.intBillId
-		INNER JOIN tblAPPayment APPay ON APPayDtl.intPaymentId = APPay.intPaymentId
-		INNER JOIN tblCMBankTransaction BankTran ON APPay.strPaymentRecordNum = BankTran.strTransactionId
-		WHERE ISNULL(APD.intScaleTicketId,0) <> 0 
+		SELECT dblPayment = SUM(ISNULL(AP.dblPayment,0.0)), intScaleTicketId = APD.intScaleTicketId 
+		FROM tblAPBillDetail APD WITH(NOLOCK)
+		INNER JOIN tblAPBill AP WITH(NOLOCK) ON AP.intBillId = APD.intBillId --AND AP.dblPayment > 0
+		INNER JOIN tblAPPaymentDetail APPayDtl WITH(NOLOCK) ON AP.intBillId = APPayDtl.intBillId
+		INNER JOIN tblAPPayment APPay WITH(NOLOCK) ON APPayDtl.intPaymentId = APPay.intPaymentId
+		INNER JOIN tblCMBankTransaction BankTran WITH(NOLOCK) ON APPay.strPaymentRecordNum = BankTran.strTransactionId
+		WHERE APD.intScaleTicketId <> 0 
+		AND APD.intScaleTicketId IS NOT NULL
 		 AND BankTran.ysnCheckVoid = 0
 		AND APPay.ysnPosted = 1
 		GROUP BY intScaleTicketId
 	) APPayment
 		ON APPayment.intScaleTicketId = SCT.intTicketId
-	outer apply ( SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where TSN.intTicketId = SCT.intTicketId) TSCN 
+	outer apply ( SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN  With(nolock)
+					INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where TSN.intTicketId = SCT.intTicketId) TSCN 
 	left join tblCTCropYear CYR
 		on CYR.intCropYearId = SCT.intCropYearId
 	--LEFT JOIN (SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where ) TSCN ON TSCN.intTicketId = SCT.intTicketId
 	LEFT JOIN tblCTItemContractDetail ICD ON ISNULL(SCT.intItemContractDetailId,0) = ICD.intItemContractDetailId
 	LEFT JOIN tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
+	LEFT JOIN tblAGWorkOrder AWO
+    	ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
+   	LEFT JOIN tblSMCompanyLocation AWOL
+		ON AWO.intCompanyLocationId = AWOL.intCompanyLocationId
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = SCT.intShipToLocationId

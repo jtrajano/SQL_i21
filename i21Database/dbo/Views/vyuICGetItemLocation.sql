@@ -49,6 +49,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnTaxFlag2
 	, ItemLocation.ysnTaxFlag3
 	, ItemLocation.ysnTaxFlag4
+	, ItemLocation.ysnActive
 	, ItemLocation.ysnPromotionalItem
 	, ItemLocation.intMixMatchId
 	, MixMatch.strPromoItemListId

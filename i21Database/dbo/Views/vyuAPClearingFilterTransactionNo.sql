@@ -28,9 +28,11 @@ SELECT
 FROM tblLGLoad A
 INNER JOIN tblLGLoadDetail B
 	ON A.intLoadId = B.intLoadId
+LEFT JOIN tblLGLoadCost C
+	ON A.intLoadId = C.intLoadId
 WHERE
 	A.ysnPosted = 1 
-AND A.intPurchaseSale IN (1,3) --Inbound/Drop Ship load shipment type only have AP Clearing GL Entries.
+AND (A.intPurchaseSale IN (1,3) OR C.ysnAccrue = 1) --Inbound/Drop Ship load shipment type only have AP Clearing GL Entries. OR COST IS ysnAccrue
 AND A.intSourceType != 1 --Source Type should not be 'None'
 UNION ALL
 SELECT

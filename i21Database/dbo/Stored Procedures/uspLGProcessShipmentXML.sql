@@ -2,6 +2,7 @@
 	@strInfo1 NVARCHAR(MAX) = '' OUTPUT
 	,@ysnDropShip BIT = 0
 	,@intMultiCompanyId INT
+	,@ysnReplication BIT = 1
 	)
 AS
 BEGIN TRY
@@ -28,7 +29,6 @@ BEGIN TRY
 		,@strFeedStatus NVARCHAR(MAX)
 		,@dtmFeedDate DATETIME
 		,@strMessage NVARCHAR(MAX)
-		--,@intMultiCompanyId INT
 		,@intReferenceId INT
 		,@intEntityId INT
 		,@strTransactionType NVARCHAR(MAX)
@@ -95,8 +95,6 @@ BEGIN TRY
 		,@strPSubLocationName NVARCHAR(50)
 		,@strSSubLocationName NVARCHAR(50)
 		,@strWeightItemUOM NVARCHAR(50)
-		,@strVendor NVARCHAR(100)
-		,@strShipFrom NVARCHAR(50)
 		,@strPLocationName NVARCHAR(50)
 		,@strSLocationName NVARCHAR(50)
 		,@strCustomer NVARCHAR(100)
@@ -166,6 +164,25 @@ BEGIN TRY
 		,@strHSubBook NVARCHAR(50)
 		,@intHBookId INT
 		,@intHSubBookId INT
+		,@intContractDetailId INT
+		,@dtmETAPOD DATETIME
+		,@dtmNewETAPOD DATETIME
+		,@strDestinationPort NVARCHAR(200)
+		,@intLeadTime INT
+		,@intContractHeaderId INT
+		,@dtmUpdatedAvailabilityDate DATETIME
+		,@intApprovedById INT
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId INT
+		,@strETAPODReasonCode NVARCHAR(100)
+		,@strETAPOLReasonCode NVARCHAR(100)
+		,@strETSPOLReasonCode NVARCHAR(100)
+		,@intETAPODReasonCodeId INT
+		,@intETAPOLReasonCodeId INT
+		,@intETSPOLReasonCodeId INT
+		,@strAuditUserName NVARCHAR(50)
+		,@intAuditLogUserId INT
 	DECLARE @tempLoadDetail TABLE (
 		intLoadDetailId INT NOT NULL
 		,intConcurrencyId INT NOT NULL
@@ -209,6 +226,11 @@ BEGIN TRY
 		,strExternalBatchNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 		,ysnNoClaim BIT
 		)
+	DECLARE @tblIPETAPOD TABLE (
+		dtmETAPOD DATETIME
+		,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		)
+	DECLARE @tblIPContractDetail TABLE (intContractDetailId INT)
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -225,15 +247,15 @@ BEGIN TRY
 	SELECT @intId = MIN(intId)
 	FROM @tblLGIntrCompLogisticsStg
 
-	if @intId is null
-	Begin
-		Return
-	End
+	IF @intId IS NULL
+	BEGIN
+		RETURN
+	END
 
 	UPDATE S
 	SET strFeedStatus = 'In-Progress'
-	From tblLGIntrCompLogisticsStg S
-	JOIN @tblLGIntrCompLogisticsStg PS on PS.intId=S.intId
+	FROM tblLGIntrCompLogisticsStg S
+	JOIN @tblLGIntrCompLogisticsStg PS ON PS.intId = S.intId
 
 	WHILE @intId > 0
 	BEGIN
@@ -256,7 +278,6 @@ BEGIN TRY
 				,@strFeedStatus = NULL
 				,@dtmFeedDate = NULL
 				,@strMessage = NULL
-				--,@intMultiCompanyId = NULL
 				,@intReferenceId = NULL
 				,@intEntityId = NULL
 				,@strTransactionType = NULL
@@ -305,6 +326,12 @@ BEGIN TRY
 				,@strHSubBook = NULL
 				,@intHBookId = NULL
 				,@intHSubBookId = NULL
+				,@strWeightUnitMeasure = NULL
+				,@strLogXML = NULL
+				,@strAuditXML = NULL
+				,@strETAPODReasonCode = NULL
+				,@strETAPOLReasonCode = NULL
+				,@strETSPOLReasonCode = NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -325,7 +352,6 @@ BEGIN TRY
 				,@strFeedStatus = strFeedStatus
 				,@dtmFeedDate = dtmFeedDate
 				,@strMessage = strMessage
-				--,@intMultiCompanyId = intMultiCompanyId
 				,@intReferenceId = intReferenceId
 				,@intEntityId = intEntityId
 				,@strTransactionType = strTransactionType
@@ -335,6 +361,8 @@ BEGIN TRY
 				,@intCompanyId = intCompanyId
 				,@strHBook = strBook
 				,@strHSubBook = strSubBook
+				,@strLogXML = strLogXML
+				,@strAuditXML = strAuditXML
 			FROM tblLGIntrCompLogisticsStg
 			WHERE intId = @intId
 
@@ -387,6 +415,10 @@ BEGIN TRY
 				,@strBook = strBook
 				,@strSubBook = strSubBook
 				,@strUserName = strUserName
+				,@strWeightUnitMeasure = strWeightUnitMeasure
+				,@strETAPODReasonCode = strETAPODReasonCode
+				,@strETAPOLReasonCode = strETAPOLReasonCode
+				,@strETSPOLReasonCode = strETSPOLReasonCode
 			FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 					strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -407,6 +439,10 @@ BEGIN TRY
 					,strBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strUserName NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strWeightUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strETAPODReasonCode NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strETAPOLReasonCode NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strETSPOLReasonCode NVARCHAR(100) Collate Latin1_General_CI_AS
 					) x
 
 			SELECT @intSourceType = CASE @strSourceType
@@ -427,6 +463,63 @@ BEGIN TRY
 					END
 
 			SELECT @strErrorMessage = ''
+
+			SELECT @intETAPODReasonCodeId = NULL
+
+			SELECT @intETAPODReasonCodeId = intReasonCodeId
+			FROM tblLGReasonCode
+			WHERE strReasonCode = @strETAPODReasonCode
+
+			IF @strETAPODReasonCode IS NOT NULL
+				AND @intETAPODReasonCodeId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ETA POD ' + @strETAPODReasonCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ETA POD ' + @strETAPODReasonCode + ' is not available.'
+				END
+			END
+
+			SELECT @intETAPOLReasonCodeId = NULL
+
+			SELECT @intETAPOLReasonCodeId = intReasonCodeId
+			FROM tblLGReasonCode
+			WHERE strReasonCode = @strETAPOLReasonCode
+
+			IF @strETAPOLReasonCode IS NOT NULL
+				AND @intETAPOLReasonCodeId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ETA POL ' + @strETAPOLReasonCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ETA POL ' + @strETAPOLReasonCode + ' is not available.'
+				END
+			END
+
+			SELECT @intETSPOLReasonCodeId = NULL
+
+			SELECT @intETSPOLReasonCodeId = intReasonCodeId
+			FROM tblLGReasonCode
+			WHERE strReasonCode = @strETSPOLReasonCode
+
+			IF @strETSPOLReasonCode IS NOT NULL
+				AND @intETSPOLReasonCodeId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ETS POL ' + @strETSPOLReasonCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ETS POL ' + @strETSPOLReasonCode + ' is not available.'
+				END
+			END
 
 			IF @strHauler IS NOT NULL
 				AND NOT EXISTS (
@@ -774,7 +867,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strUserName
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intUserId IS NULL
 			BEGIN
@@ -791,9 +884,12 @@ BEGIN TRY
 					FROM tblSMUserSecurity
 			END
 
+			SELECT @intWeightUnitMeasureId = intUnitMeasureId
+			FROM tblICUnitMeasure
+			WHERE strUnitMeasure = @strWeightUnitMeasure
+
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
-			--,@intCompanyRefId = intCompanyId
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
 				AND intBookId = @intBookId
@@ -803,6 +899,8 @@ BEGIN TRY
 
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
+
+			EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
 
 			IF @strRowState = 'Delete'
 			BEGIN
@@ -824,6 +922,9 @@ BEGIN TRY
 				GOTO NextTransaction
 			END
 
+			DELETE
+			FROM @tblIPETAPOD
+
 			IF @intNewLoadId IS NULL
 			BEGIN
 				EXEC uspSMGetStartingNumber @intStartingNumberType
@@ -834,9 +935,6 @@ BEGIN TRY
 					,strLoadNumber
 					,intCompanyLocationId
 					,intPurchaseSale
-					--,intItemId
-					--,dblQuantity
-					--,intUnitMeasureId
 					,dtmScheduledDate
 					,strCustomerReference
 					,strBookingReference
@@ -953,7 +1051,6 @@ BEGIN TRY
 					,strGenerateLoadHauler
 					,ysnDocumentsReceived
 					,ysnSubCurrency
-					--,intCompanyId
 					,intBookId
 					,intSubBookId
 					,intLoadRefId
@@ -980,13 +1077,13 @@ BEGIN TRY
 					,[dtmETAPOD4]
 					,intCompanyId
 					)
+				OUTPUT inserted.dtmETAPOD
+					,inserted.strDestinationPort
+				INTO @tblIPETAPOD
 				SELECT 1 AS intConcurrencyId
 					,@strNewLoadNumber
 					,@intCompanyLocationId
 					,@intPurchaseSale
-					--,intItemId
-					--,dblQuantity
-					--,intUnitMeasureId
 					,x.dtmScheduledDate
 					,x.strCustomerReference
 					,x.strBookingReference
@@ -1032,7 +1129,7 @@ BEGIN TRY
 						ELSE @intSourceType
 						END
 					,@intPositionId
-					,intWeightUnitMeasureId
+					,@intWeightUnitMeasureId
 					,strBLNumber
 					,dtmBLDate
 					,strOriginPort
@@ -1092,7 +1189,6 @@ BEGIN TRY
 						ELSE intShipmentStatus
 						END
 					,0 AS ysnPosted
-					--,dtmPostedDate
 					,intTransUsedBy
 					,intShipmentType
 					,intLoadShippingInstructionId
@@ -1103,9 +1199,9 @@ BEGIN TRY
 					,ysnQuantityFinal
 					,ysnCancelled
 					,intShippingModeId
-					,intETAPOLReasonCodeId
-					,intETSPOLReasonCodeId
-					,intETAPODReasonCodeId
+					,@intETAPOLReasonCodeId
+					,@intETSPOLReasonCodeId
+					,@intETAPODReasonCodeId
 					,@intFreightTermId
 					,@intCurrencyId
 					,intCreatedById
@@ -1117,7 +1213,6 @@ BEGIN TRY
 					,strGenerateLoadHauler
 					,ysnDocumentsReceived
 					,ysnSubCurrency
-					--,intCompanyId
 					,@intBookId
 					,@intSubBookId
 					,@intLoadRefId
@@ -1184,7 +1279,6 @@ BEGIN TRY
 						,intLoadHeaderId INT
 						,intSourceType INT
 						,intPositionId INT
-						,intWeightUnitMeasureId INT
 						,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,dtmBLDate DATETIME
 						,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -1277,16 +1371,13 @@ BEGIN TRY
 						,ysnQuantityFinal BIT
 						,ysnCancelled BIT
 						,intShippingModeId INT
-						,intETAPOLReasonCodeId INT
-						,intETSPOLReasonCodeId INT
-						,intETAPODReasonCodeId INT
 						,intFreightTermId INT
 						,intCurrencyId INT
 						,intCreatedById INT
 						,dtmCreatedOn DATETIME
 						,intLastUpdateById INT
 						,dtmLastUpdateOn DATETIME
-						,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+						,strBatchId NVARCHAR(40) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,ysnDocumentsReceived BIT
@@ -1365,7 +1456,7 @@ BEGIN TRY
 							END
 						)
 					,intPositionId = @intPositionId
-					,intWeightUnitMeasureId = x.intWeightUnitMeasureId
+					,intWeightUnitMeasureId = @intWeightUnitMeasureId
 					,strBLNumber = x.strBLNumber
 					,dtmBLDate = x.dtmBLDate
 					,strOriginPort = x.strOriginPort
@@ -1424,8 +1515,6 @@ BEGIN TRY
 							THEN L.intShipmentStatus
 						ELSE x.intShipmentStatus
 						END
-					--,ysnPosted = x.ysnPosted
-					--,dtmPostedDate = x.dtmPostedDate
 					,intTransUsedBy = x.intTransUsedBy
 					,intShipmentType = x.intShipmentType
 					,intLoadShippingInstructionId = x.intLoadShippingInstructionId
@@ -1436,10 +1525,10 @@ BEGIN TRY
 					,ysnQuantityFinal = x.ysnQuantityFinal
 					,ysnCancelled = x.ysnCancelled
 					,intShippingModeId = x.intShippingModeId
-					,intETAPOLReasonCodeId = x.intETAPOLReasonCodeId
-					,intETSPOLReasonCodeId = x.intETSPOLReasonCodeId
-					,intETAPODReasonCodeId = x.intETAPODReasonCodeId
-					,intFreightTermId = @intFreightTermId
+					,intETAPOLReasonCodeId = @intETAPOLReasonCodeId
+					,intETSPOLReasonCodeId = @intETSPOLReasonCodeId
+					,intETAPODReasonCodeId = @intETAPODReasonCodeId
+					--,intFreightTermId = @intFreightTermId
 					,intCurrencyId = @intCurrencyId
 					,intCreatedById = x.intCreatedById
 					,dtmCreatedOn = x.dtmCreatedOn
@@ -1474,6 +1563,9 @@ BEGIN TRY
 					,[strDestinationPort4] = x.[strDestinationPort4]
 					,[dtmETSPOL4] = x.[dtmETSPOL4]
 					,[dtmETAPOD4] = x.[dtmETAPOD4]
+				OUTPUT inserted.dtmETAPOD
+					,inserted.strDestinationPort
+				INTO @tblIPETAPOD
 				FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -1515,7 +1607,6 @@ BEGIN TRY
 						,intLoadHeaderId INT
 						,intSourceType INT
 						,intPositionId INT
-						,intWeightUnitMeasureId INT
 						,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,dtmBLDate DATETIME
 						,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -1608,16 +1699,13 @@ BEGIN TRY
 						,ysnQuantityFinal BIT
 						,ysnCancelled BIT
 						,intShippingModeId INT
-						,intETAPOLReasonCodeId INT
-						,intETSPOLReasonCodeId INT
-						,intETAPODReasonCodeId INT
 						,intFreightTermId INT
 						,intCurrencyId INT
 						,intCreatedById INT
 						,dtmCreatedOn DATETIME
 						,intLastUpdateById INT
 						,dtmLastUpdateOn DATETIME
-						,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+						,strBatchId NVARCHAR(40) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,ysnDocumentsReceived BIT
@@ -1646,7 +1734,7 @@ BEGIN TRY
 
 			INSERT INTO @tblLGLoadDetail (intLoadDetailId)
 			SELECT intLoadDetailId
-			FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (intLoadDetailId INT)
+			FROM OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (intLoadDetailId INT)
 
 			SELECT @intLoadDetailId = MIN(intLoadDetailId)
 			FROM @tblLGLoadDetail
@@ -1658,8 +1746,6 @@ BEGIN TRY
 					,@strPSubLocationName = NULL
 					,@strSSubLocationName = NULL
 					,@strWeightItemUOM = NULL
-					,@strVendor = NULL
-					,@strShipFrom = NULL
 					,@strPLocationName = NULL
 					,@strSLocationName = NULL
 					,@strCustomer = NULL
@@ -1672,23 +1758,19 @@ BEGIN TRY
 					,@strPSubLocationName = strPSubLocationName
 					,@strSSubLocationName = strSSubLocationName
 					,@strWeightItemUOM = strWeightItemUOM
-					,@strVendor = strVendor
-					,@strShipFrom = strShipFrom
 					,@strPLocationName = strPLocationName
 					,@strSLocationName = strSLocationName
 					,@strCustomer = strCustomer
 					,@strShipTo = strShipTo
 					,@strInboundTaxGroup = strInboundTaxGroup
 					,@strOutboundTaxGroup = strOutboundTaxGroup
-				FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 						intLoadDetailId INT
 						,[strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strPSubLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strSSubLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strWeightItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strVendor NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strShipFrom NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strPLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strSLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strCustomer NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -1914,16 +1996,6 @@ BEGIN TRY
 				WHERE IU.intItemId = @intItemId
 					AND IU.intUnitMeasureId = @intWeightUnitMeasureId
 
-				--SELECT @intVendorId = EY.intEntityId
-				--FROM tblEMEntity EY
-				--JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
-				--	AND ET.strType = 'Vendor'
-				--WHERE EY.strName = @strVendor
-				--	AND EY.strEntityNo <> ''
-				--SELECT @intVendorLocationId = EL.intEntityLocationId
-				--FROM tblEMEntityLocation EL
-				--WHERE EL.intEntityId = @intVendorId
-				--	AND EL.strLocationName = @strShipFrom
 				SELECT @intPCompanyLocationId = intCompanyLocationId
 				FROM tblSMCompanyLocation SubL
 				WHERE SubL.strLocationName = @strPLocationName
@@ -1937,7 +2009,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'Customer'
 				WHERE EY.strName = @strCustomer
-					AND EY.strEntityNo <> ''
+					--AND EY.strEntityNo <> ''
 
 				SELECT @intCustomerLocationId = EL.intEntityLocationId
 				FROM tblEMEntityLocation EL
@@ -1946,7 +2018,7 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT *
-						FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
+						FROM OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 								[intSContractDetailId] INT
 								,intLoadDetailId INT
 								) x
@@ -1972,7 +2044,7 @@ BEGIN TRY
 					SELECT @intSContractDetailId = NULL
 
 					SELECT @intSContractDetailId = SCD.intContractDetailId
-					FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
+					FROM OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 							[intPContractDetailId] INT
 							,intLoadDetailId INT
 							) x
@@ -2019,6 +2091,9 @@ BEGIN TRY
 					FROM tblCTContractHeader
 					WHERE intContractHeaderId = @intSContractHeaderId
 				END
+
+				DELETE
+				FROM @tblIPContractDetail
 
 				IF NOT EXISTS (
 						SELECT *
@@ -2071,8 +2146,6 @@ BEGIN TRY
 						,[ysnPrintLoadDirections]
 						,[strVendorReference]
 						,[strCustomerReference]
-						--,[intAllocationDetailId]
-						--,[intPickLotDetailId]
 						,[intPSubLocationId]
 						,[intSSubLocationId]
 						,[intNumberOfContainers]
@@ -2082,6 +2155,8 @@ BEGIN TRY
 						,[ysnNoClaim]
 						,[intLoadDetailRefId]
 						)
+					OUTPUT inserted.intPContractDetailId
+					INTO @tblIPContractDetail
 					SELECT 1 AS [intConcurrencyId]
 						,@intNewLoadId
 						,CASE 
@@ -2121,8 +2196,8 @@ BEGIN TRY
 						,@intWeightItemUOMId
 						,x.[strPriceStatus]
 						,x.[dblUnitPrice]
-						,NULL [intPriceCurrencyId]
-						,NULL [intPriceUOMId]
+						,PCD.intCurrencyId [intPriceCurrencyId]
+						,PCD.intPriceItemUOMId [intPriceUOMId]
 						,x.[dblAmount]
 						,NULL [intForexRateTypeId]
 						,x.[dblForexRate]
@@ -2147,8 +2222,6 @@ BEGIN TRY
 							ELSE PCH.strCustomerContract
 							END
 						,x.[strCustomerReference]
-						--,[intAllocationDetailId]
-						--,[intPickLotDetailId]
 						,@intPCompanyLocationSubLocationId
 						,@intSCompanyLocationSubLocationId
 						,x.[intNumberOfContainers]
@@ -2157,7 +2230,7 @@ BEGIN TRY
 						,x.[strExternalBatchNo]
 						,x.[ysnNoClaim]
 						,x.[intLoadDetailId]
-					FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
+					FROM OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 							[intVendorEntityId] INT
 							,[intVendorEntityLocationId] INT
 							,[intCustomerEntityId] INT
@@ -2261,8 +2334,8 @@ BEGIN TRY
 						,[intWeightItemUOMId] = @intWeightItemUOMId
 						,[strPriceStatus] = x.[strPriceStatus]
 						,[dblUnitPrice] = x.[dblUnitPrice]
-						,[intPriceCurrencyId] = NULL -- [intPriceCurrencyId]
-						,[intPriceUOMId] = NULL --[intPriceUOMId]
+						,[intPriceCurrencyId] = PCD.intCurrencyId
+						,[intPriceUOMId] = PCD.intPriceItemUOMId
 						,[dblAmount] = x.[dblAmount]
 						,[intForexRateTypeId] = NULL --[intForexRateTypeId]
 						,[dblForexRate] = x.[dblForexRate]
@@ -2287,8 +2360,6 @@ BEGIN TRY
 							ELSE PCH.strCustomerContract
 							END
 						,[strCustomerReference] = x.[strCustomerReference]
-						--,[intAllocationDetailId]
-						--,[intPickLotDetailId]
 						,[intPSubLocationId] = @intPCompanyLocationSubLocationId
 						,[intSSubLocationId] = @intSCompanyLocationSubLocationId
 						,[intNumberOfContainers] = x.[intNumberOfContainers]
@@ -2296,8 +2367,10 @@ BEGIN TRY
 						,[strExternalShipmentItemNumber] = x.[strExternalShipmentItemNumber]
 						,[strExternalBatchNo] = x.[strExternalBatchNo]
 						,[ysnNoClaim] = x.[ysnNoClaim]
+					OUTPUT inserted.intPContractDetailId
+					INTO @tblIPContractDetail
 					FROM tblLGLoadDetail LD
-					JOIN OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
+					JOIN OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 							[intVendorEntityId] INT
 							,[intVendorEntityLocationId] INT
 							,[intCustomerEntityId] INT
@@ -2359,6 +2432,68 @@ BEGIN TRY
 					WHERE x.intLoadDetailId = @intLoadDetailId
 				END
 
+				IF EXISTS (
+						SELECT *
+						FROM @tblIPETAPOD
+						WHERE dtmETAPOD IS NOT NULL
+						) AND @strTransactionType='Inbound Shipment'
+				BEGIN
+					SELECT @intContractDetailId = NULL
+						,@dtmETAPOD = NULL
+						,@strDestinationPort = NULL
+
+					SELECT @dtmETAPOD = dtmETAPOD
+						,@strDestinationPort = strDestinationPort
+					FROM @tblIPETAPOD
+
+					IF @strTransactionType = 'Drop Shipment'
+					BEGIN
+						SELECT @intContractDetailId = @intSContractDetailId
+					END
+					ELSE
+					BEGIN
+						SELECT @intContractDetailId = intContractDetailId
+						FROM @tblIPContractDetail
+					END
+
+					SELECT TOP 1 @intLeadTime = intLeadTime
+					FROM tblSMCity DPort
+					WHERE DPort.strCity = @strDestinationPort
+						AND DPort.ysnPort = 1
+
+					IF @intLeadTime IS NULL
+					BEGIN
+						SELECT @intLeadTime = 0
+					END
+
+					SELECT @dtmNewETAPOD = DATEADD(DD, @intLeadTime, @dtmETAPOD)
+
+					SELECT @intContractHeaderId = intContractHeaderId
+						,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intContractDetailId
+
+					IF @dtmUpdatedAvailabilityDate <> @dtmNewETAPOD
+					BEGIN
+						UPDATE tblCTContractDetail
+						SET dtmUpdatedAvailabilityDate = @dtmNewETAPOD
+							,dtmPlannedAvailabilityDate = @dtmETAPOD
+						WHERE intContractDetailId = @intContractDetailId
+
+						SELECT TOP 1 @intApprovedById = intApprovedById
+						FROM tblCTApprovedContract
+						WHERE intContractDetailId = @intContractDetailId
+						ORDER BY intApprovedContractId DESC
+
+						IF @intApprovedById IS NOT NULL
+						BEGIN
+							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId
+								,@intApprovedById = @intApprovedById
+								,@intContractDetailId = @intContractDetailId
+						END
+					END
+				END
+
 				SELECT @intLoadDetailId = MIN(intLoadDetailId)
 				FROM @tblLGLoadDetail
 				WHERE intLoadDetailId > @intLoadDetailId
@@ -2375,473 +2510,502 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadDetailLot
-
-			DECLARE @intLoadDetailLotId INT
-
-			DELETE
-			FROM @tblLGLoadDetailLot
-
-			INSERT INTO @tblLGLoadDetailLot (intLoadDetailLotId)
-			SELECT intLoadDetailLotId
-			FROM OPENXML(@idoc, 'vyuLGLoadDetailLotsViews/vyuLGLoadDetailLotsView', 2) WITH (intLoadDetailLotId INT)
-
-			SELECT @intLoadDetailLotId = MIN(intLoadDetailLotId)
-			FROM @tblLGLoadDetailLot
-
-			WHILE @intLoadDetailLotId IS NOT NULL
+			IF @strLoadDetailLot IS NOT NULL
 			BEGIN
-				SELECT @strLotNumber = NULL
-					,@strItemUnitMeasure = NULL
-					,@strWeightUnitMeasure = NULL
-					,@strItemNo = NULL
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadDetailLot
 
-				SELECT @strLotNumber = strLotNumber
-					,@strItemUnitMeasure = strItemUnitMeasure
-					,@strWeightUnitMeasure = strWeightUnitMeasure
-					,@strItemNo = strItemNo
-				FROM OPENXML(@idoc, 'vyuLGLoadDetailLotsViews/vyuLGLoadDetailLotsView', 2) WITH (
-						intLoadDetailId INT
-						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intLoadDetailLotId INT
-						)
-				WHERE intLoadDetailLotId = @intLoadDetailLotId
+				DECLARE @intLoadDetailLotId INT
 
-				IF @strItemUnitMeasure IS NOT NULL
-					AND NOT EXISTS (
-						SELECT 1
-						FROM tblICUnitMeasure U1
-						WHERE U1.strUnitMeasure = @strItemUnitMeasure
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strItemUnitMeasure + ' is not available.'
+				DELETE
+				FROM @tblLGLoadDetailLot
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				IF @strWeightUnitMeasure IS NOT NULL
-					AND NOT EXISTS (
-						SELECT 1
-						FROM tblICUnitMeasure U1
-						WHERE U1.strUnitMeasure = @strWeightUnitMeasure
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				IF @strLotNumber IS NOT NULL
-					AND NOT EXISTS (
-						SELECT 1
-						FROM tblICLot L
-						WHERE L.strLotNumber = @strLotNumber
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Lot ' + @strLotNumber + ' is not available.'
-
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intItemId = NULL
-
-				SELECT @intUnitMeasureId = NULL
-
-				SELECT @intItemUOMId = NULL
-
-				SELECT @intWeightUnitMeasureId = NULL
-
-				SELECT @intWeightItemUOMId = NULL
-
-				SELECT @intLotId = NULL
-
-				SELECT @intItemId = intItemId
-				FROM tblICItem I
-				WHERE I.strItemNo = @strItemNo
-
-				SELECT @intUnitMeasureId = intUnitMeasureId
-				FROM tblICUnitMeasure U1
-				WHERE U1.strUnitMeasure = @strItemUnitMeasure
-
-				SELECT @intItemUOMId = intItemUOMId
-				FROM tblICItemUOM IU
-				WHERE IU.intItemId = @intItemId
-					AND IU.intUnitMeasureId = @intUnitMeasureId
-
-				SELECT @intWeightUnitMeasureId = intUnitMeasureId
-				FROM tblICUnitMeasure U1
-				WHERE U1.strUnitMeasure = @strWeightUnitMeasure
-
-				SELECT @intWeightItemUOMId = intItemUOMId
-				FROM tblICItemUOM IU
-				WHERE IU.intItemId = @intItemId
-					AND IU.intUnitMeasureId = @intWeightUnitMeasureId
-
-				SELECT @intLotId = intLotId
-				FROM tblICLot L
-				WHERE L.strLotNumber = @strLotNumber
-
-				IF NOT EXISTS (
-						SELECT *
-						FROM tblLGLoadDetailLot LDL
-						JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
-						WHERE intLoadDetailLotRefId = @intLoadDetailLotId
-							AND LD.intLoadId = @intNewLoadId
-						)
-				BEGIN
-					INSERT INTO tblLGLoadDetailLot (
-						[intLoadDetailId]
-						,[intLotId]
-						,[dblLotQuantity]
-						,[intItemUOMId]
-						,[dblGross]
-						,[dblTare]
-						,[dblNet]
-						,[intWeightUOMId]
-						,[strWarehouseCargoNumber]
-						,[intSort]
-						,[intConcurrencyId]
-						,[intLoadDetailLotRefId]
-						)
-					SELECT (
-							SELECT TOP 1 LD.intLoadDetailId
-							FROM tblLGLoadDetail LD
-							JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-							WHERE LD.intLoadDetailRefId = x.intLoadDetailId
-								AND L.intLoadId = @intNewLoadId
-							)
-						,@intLotId
-						,[dblLotQuantity]
-						,@intItemUOMId
-						,[dblGross]
-						,[dblTare]
-						,[dblNet]
-						,@intWeightItemUOMId
-						,[strWarehouseCargoNumber]
-						,[intSort]
-						,1 [intConcurrencyId]
-						,[intLoadDetailLotId]
-					FROM OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
-							[intLoadDetailId] INT
-							,[intLotId] INT
-							,[dblLotQuantity] NUMERIC(38, 20)
-							,[intItemUOMId] INT
-							,[dblGross] NUMERIC(38, 20)
-							,[dblTare] NUMERIC(38, 20)
-							,[dblNet] NUMERIC(38, 20)
-							,[intWeightUOMId] INT
-							,[strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS
-							,[intSort] INT
-							,[intConcurrencyId] INT
-							,[intLoadDetailLotRefId] INT
-							,intLoadDetailLotId INT
-							) x
-					WHERE x.intLoadDetailLotId = @intLoadDetailLotId
-				END
-				ELSE
-				BEGIN
-					UPDATE LD
-					SET [intLotId] = @intLotId
-						,[dblLotQuantity] = x.[dblLotQuantity]
-						,[intItemUOMId] = @intItemUOMId
-						,[dblGross] = x.[dblGross]
-						,[dblTare] = x.[dblTare]
-						,[dblNet] = x.[dblNet]
-						,[intWeightUOMId] = @intWeightItemUOMId
-						,[strWarehouseCargoNumber] = x.[strWarehouseCargoNumber]
-						,[intConcurrencyId] = LD.[intConcurrencyId] + 1
-					FROM tblLGLoadDetailLot LD
-					JOIN OPENXML(@idoc, 'vyuLGLoadDetailViews/vyuLGLoadDetailView', 2) WITH (
-							[intLoadDetailId] INT
-							,[intLotId] INT
-							,[dblLotQuantity] NUMERIC(38, 20)
-							,[intItemUOMId] INT
-							,[dblGross] NUMERIC(38, 20)
-							,[dblTare] NUMERIC(38, 20)
-							,[dblNet] NUMERIC(38, 20)
-							,[intWeightUOMId] INT
-							,[strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS
-							,[intSort] INT
-							,[intConcurrencyId] INT
-							,[intLoadDetailLotRefId] INT
-							,intLoadDetailLotId INT
-							) x ON x.intLoadDetailLotId = LD.intLoadDetailLotRefId
-					WHERE x.intLoadDetailLotId = @intLoadDetailLotId
-				END
+				INSERT INTO @tblLGLoadDetailLot (intLoadDetailLotId)
+				SELECT intLoadDetailLotId
+				FROM OPENXML(@idoc, 'vyuIPLoadDetailLotsViews/vyuIPLoadDetailLotsView', 2) WITH (intLoadDetailLotId INT)
 
 				SELECT @intLoadDetailLotId = MIN(intLoadDetailLotId)
 				FROM @tblLGLoadDetailLot
-				WHERE intLoadDetailLotId > @intLoadDetailLotId
+
+				WHILE @intLoadDetailLotId IS NOT NULL
+				BEGIN
+					SELECT @strLotNumber = NULL
+						,@strItemUnitMeasure = NULL
+						,@strWeightUnitMeasure = NULL
+						,@strItemNo = NULL
+
+					SELECT @strLotNumber = strLotNumber
+						,@strItemUnitMeasure = strItemUnitMeasure
+						,@strWeightUnitMeasure = strWeightUnitMeasure
+						,@strItemNo = strItemNo
+					FROM OPENXML(@idoc, 'vyuIPLoadDetailLotsViews/vyuIPLoadDetailLotsView', 2) WITH (
+							strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strItemUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intLoadDetailLotId INT
+							)
+					WHERE intLoadDetailLotId = @intLoadDetailLotId
+
+					IF @strItemUnitMeasure IS NOT NULL
+						AND NOT EXISTS (
+							SELECT 1
+							FROM tblICUnitMeasure U1
+							WHERE U1.strUnitMeasure = @strItemUnitMeasure
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strItemUnitMeasure + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					IF @strWeightUnitMeasure IS NOT NULL
+						AND NOT EXISTS (
+							SELECT 1
+							FROM tblICUnitMeasure U1
+							WHERE U1.strUnitMeasure = @strWeightUnitMeasure
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					IF @strLotNumber IS NOT NULL
+						AND NOT EXISTS (
+							SELECT 1
+							FROM tblICLot L
+							WHERE L.strLotNumber = @strLotNumber
+							)
+					BEGIN
+						SELECT @strErrorMessage = 'Lot ' + @strLotNumber + ' is not available.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @intItemId = NULL
+
+					SELECT @intUnitMeasureId = NULL
+
+					SELECT @intItemUOMId = NULL
+
+					SELECT @intWeightUnitMeasureId = NULL
+
+					SELECT @intWeightItemUOMId = NULL
+
+					SELECT @intLotId = NULL
+
+					SELECT @intItemId = intItemId
+					FROM tblICItem I
+					WHERE I.strItemNo = @strItemNo
+
+					SELECT @intUnitMeasureId = intUnitMeasureId
+					FROM tblICUnitMeasure U1
+					WHERE U1.strUnitMeasure = @strItemUnitMeasure
+
+					SELECT @intItemUOMId = intItemUOMId
+					FROM tblICItemUOM IU
+					WHERE IU.intItemId = @intItemId
+						AND IU.intUnitMeasureId = @intUnitMeasureId
+
+					SELECT @intWeightUnitMeasureId = intUnitMeasureId
+					FROM tblICUnitMeasure U1
+					WHERE U1.strUnitMeasure = @strWeightUnitMeasure
+
+					SELECT @intWeightItemUOMId = intItemUOMId
+					FROM tblICItemUOM IU
+					WHERE IU.intItemId = @intItemId
+						AND IU.intUnitMeasureId = @intWeightUnitMeasureId
+
+					SELECT @intLotId = intLotId
+					FROM tblICLot L
+					WHERE L.strLotNumber = @strLotNumber
+
+					IF NOT EXISTS (
+							SELECT *
+							FROM tblLGLoadDetailLot LDL
+							JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+							WHERE intLoadDetailLotRefId = @intLoadDetailLotId
+								AND LD.intLoadId = @intNewLoadId
+							)
+					BEGIN
+						INSERT INTO tblLGLoadDetailLot (
+							[intLoadDetailId]
+							,[intLotId]
+							,[dblLotQuantity]
+							,[intItemUOMId]
+							,[dblGross]
+							,[dblTare]
+							,[dblNet]
+							,[intWeightUOMId]
+							,[strWarehouseCargoNumber]
+							,[intSort]
+							,[intConcurrencyId]
+							,[intLoadDetailLotRefId]
+							)
+						SELECT (
+								SELECT TOP 1 LD.intLoadDetailId
+								FROM tblLGLoadDetail LD
+								JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+								WHERE LD.intLoadDetailRefId = x.intLoadDetailId
+									AND L.intLoadId = @intNewLoadId
+								)
+							,@intLotId
+							,[dblLotQuantity]
+							,@intItemUOMId
+							,[dblGross]
+							,[dblTare]
+							,[dblNet]
+							,@intWeightItemUOMId
+							,[strWarehouseCargoNumber]
+							,[intSort]
+							,1 [intConcurrencyId]
+							,[intLoadDetailLotId]
+						FROM OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
+								[intLoadDetailId] INT
+								,[dblLotQuantity] NUMERIC(38, 20)
+								,[dblGross] NUMERIC(38, 20)
+								,[dblTare] NUMERIC(38, 20)
+								,[dblNet] NUMERIC(38, 20)
+								,[strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS
+								,[intSort] INT
+								,intLoadDetailLotId INT
+								) x
+						WHERE x.intLoadDetailLotId = @intLoadDetailLotId
+					END
+					ELSE
+					BEGIN
+						UPDATE LD
+						SET [intLotId] = @intLotId
+							,[dblLotQuantity] = x.[dblLotQuantity]
+							,[intItemUOMId] = @intItemUOMId
+							,[dblGross] = x.[dblGross]
+							,[dblTare] = x.[dblTare]
+							,[dblNet] = x.[dblNet]
+							,[intWeightUOMId] = @intWeightItemUOMId
+							,[strWarehouseCargoNumber] = x.[strWarehouseCargoNumber]
+							,[intConcurrencyId] = LD.[intConcurrencyId] + 1
+						FROM tblLGLoadDetailLot LD
+						JOIN OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
+								[intLoadDetailId] INT
+								,[dblLotQuantity] NUMERIC(38, 20)
+								,[dblGross] NUMERIC(38, 20)
+								,[dblTare] NUMERIC(38, 20)
+								,[dblNet] NUMERIC(38, 20)
+								,[strWarehouseCargoNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS
+								,[intSort] INT
+								,intLoadDetailLotId INT
+								) x ON x.intLoadDetailLotId = LD.intLoadDetailLotRefId
+						WHERE x.intLoadDetailLotId = @intLoadDetailLotId
+					END
+
+					SELECT @intLoadDetailLotId = MIN(intLoadDetailLotId)
+					FROM @tblLGLoadDetailLot
+					WHERE intLoadDetailLotId > @intLoadDetailLotId
+				END
+
+				DELETE LDL
+				FROM tblLGLoadDetailLot LDL
+				JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+				WHERE LD.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM @tblLGLoadDetailLot x
+						WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
+						)
+
+				EXEC sp_xml_removedocument @idoc
 			END
 
-			DELETE LDL
-			FROM tblLGLoadDetailLot LDL
-			JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
-			WHERE LD.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM @tblLGLoadDetailLot x
-					WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
-					)
-
 			---***** Code for Notification party
-			EXEC sp_xml_removedocument @idoc
+			IF @strLoadNotifyParty IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadNotifyParty
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadNotifyParty
-
-			INSERT INTO tblLGLoadNotifyParties (
-				[intConcurrencyId]
-				,[intLoadId]
-				,[strNotifyOrConsignee]
-				,[strType]
-				,[intEntityId]
-				,[intCompanySetupID]
-				,[intBankId]
-				,[intEntityLocationId]
-				,[intCompanyLocationId]
-				,[strText]
-				,intLoadNotifyPartyRefId
-				)
-			SELECT 1 AS [intConcurrencyId]
-				,@intNewLoadId
-				,x.[strNotifyOrConsignee]
-				,CASE 
-					WHEN x.[strType] = 'Customer'
-						THEN 'Company'
-					ELSE x.[strType]
-					END
-				,NULL
-				,C.[intCompanySetupID]
-				,B.[intBankId]
-				,NULL [intEntityLocationId]
-				,CL.[intCompanyLocationId]
-				,x.[strText]
-				,x.intLoadNotifyPartyId
-			FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesNotMappeds/vyuLGLoadNotifyPartiesNotMapped', 2) WITH (
-					[intLoadNotifyPartyId] INT
-					,[intConcurrencyId] INT
-					,[intLoadId] INT
-					,[strNotifyOrConsignee] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[intEntityId] INT
-					,[intCompanySetupID] INT
-					,[intBankId] INT
-					,[intEntityLocationId] INT
-					,[intCompanyLocationId] INT
-					,[strText] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
-				AND x.strType = 'Customer'
-			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
-				AND x.strType = 'Bank'
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
-				AND x.strType = 'Customer'
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadNotifyParties NP
-					WHERE NP.intLoadId = @intNewLoadId
-						AND NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
+				INSERT INTO tblLGLoadNotifyParties (
+					[intConcurrencyId]
+					,[intLoadId]
+					,[strNotifyOrConsignee]
+					,[strType]
+					,[intEntityId]
+					,[intCompanySetupID]
+					,[intBankId]
+					,[intEntityLocationId]
+					,[intCompanyLocationId]
+					,[strText]
+					,intLoadNotifyPartyRefId
 					)
+				SELECT 1 AS [intConcurrencyId]
+					,@intNewLoadId
+					,x.[strNotifyOrConsignee]
+					,x.[strType]
+					,E.intEntityId
+					,C.[intCompanySetupID]
+					,B.[intBankId]
+					,EL.intEntityLocationId
+					,CL.[intCompanyLocationId]
+					,x.[strText]
+					,x.intLoadNotifyPartyId
+				FROM OPENXML(@idoc, 'vyuIPLoadNotifyPartiess/vyuIPLoadNotifyParties', 2) WITH (
+						[intLoadNotifyPartyId] INT
+						,[intLoadId] INT
+						,[strNotifyOrConsignee] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[strText] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				LEFT JOIN tblEMEntity E ON E.strName = x.strParty
+					AND x.strType IN (
+						'Vendor'
+						,'Customer'
+						,'Forwarding Agent'
+						,'Shipping Line'
+						,'Terminal'
+						)
+				LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
+					AND x.strType = 'Company'
+				LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
+					AND x.strType = 'Bank'
+				LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
+					AND x.strType IN (
+						'Vendor'
+						,'Customer'
+						,'Forwarding Agent'
+						,'Shipping Line'
+						,'Terminal'
+						)
+				LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
+					AND x.strType = 'Company'
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadNotifyParties NP
+						WHERE NP.intLoadId = @intNewLoadId
+							AND NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
+						)
 
-			UPDATE NP
-			SET [intConcurrencyId] = NP.[intConcurrencyId] + 1
-				,[strNotifyOrConsignee] = NP.[strNotifyOrConsignee]
-				,[strType] = CASE 
-					WHEN x.[strType] = 'Customer'
-						THEN 'Company'
-					ELSE x.[strType]
-					END
-				--,[intEntityId] = E.[intEntityId]
-				,[intCompanySetupID] = C.[intCompanySetupID]
-				,[intBankId] = B.[intBankId]
-				,[intEntityLocationId] = NULL
-				,[intCompanyLocationId] = CL.[intCompanyLocationId]
-				,[strText] = x.[strText]
-			FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesNotMappeds/vyuLGLoadNotifyPartiesNotMapped', 2) WITH (
-					[intLoadNotifyPartyId] INT
-					,[intConcurrencyId] INT
-					,[intLoadId] INT
-					,[strNotifyOrConsignee] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[intEntityId] INT
-					,[intCompanySetupID] INT
-					,[intBankId] INT
-					,[intEntityLocationId] INT
-					,[intCompanyLocationId] INT
-					,[strText] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
-				AND x.strType = 'Customer'
-			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
-				AND x.strType = 'Bank'
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
-				AND x.strType = 'Customer'
-			JOIN tblLGLoadNotifyParties NP ON NP.intLoadId = @intNewLoadId
-				AND NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
+				UPDATE NP
+				SET [intConcurrencyId] = NP.[intConcurrencyId] + 1
+					,[strNotifyOrConsignee] = NP.[strNotifyOrConsignee]
+					,[strType] = x.[strType]
+					,[intEntityId] = E.[intEntityId]
+					,[intCompanySetupID] = C.[intCompanySetupID]
+					,[intBankId] = B.[intBankId]
+					,[intEntityLocationId] = EL.intEntityLocationId
+					,[intCompanyLocationId] = CL.[intCompanyLocationId]
+					,[strText] = x.[strText]
+				FROM OPENXML(@idoc, 'vyuIPLoadNotifyPartiess/vyuIPLoadNotifyParties', 2) WITH (
+						[intLoadNotifyPartyId] INT
+						,[intLoadId] INT
+						,[strNotifyOrConsignee] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[strText] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				LEFT JOIN tblEMEntity E ON E.strName = x.strParty
+					AND x.strType IN (
+						'Vendor'
+						,'Customer'
+						,'Forwarding Agent'
+						,'Shipping Line'
+						,'Terminal'
+						)
+				LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
+					AND x.strType = 'Company'
+				LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
+					AND x.strType = 'Bank'
+				LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
+					AND x.strType IN (
+						'Vendor'
+						,'Customer'
+						,'Forwarding Agent'
+						,'Shipping Line'
+						,'Terminal'
+						)
+				LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
+					AND x.strType = 'Company'
+				JOIN tblLGLoadNotifyParties NP ON NP.intLoadId = @intNewLoadId
+					AND NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
 
-			DELETE NP
-			FROM tblLGLoadNotifyParties NP
-			WHERE NP.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadNotifyPartiesNotMappeds/vyuLGLoadNotifyPartiesNotMapped', 2) WITH (intLoadNotifyPartyId INT) x
-					WHERE NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
-					)
+				DELETE NP
+				FROM tblLGLoadNotifyParties NP
+				WHERE NP.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuIPLoadNotifyPartiess/vyuIPLoadNotifyParties', 2) WITH (intLoadNotifyPartyId INT) x
+						WHERE NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
+						)
+
+				EXEC sp_xml_removedocument @idoc
+			END
 
 			--Process Document
-			EXEC sp_xml_removedocument @idoc
+			IF @strLoadDocument IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadDocument
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadDocument
-
-			IF EXISTS (
-					SELECT *
+				IF EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
+								intLoadDocumentId INT
+								,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
+								) x
+						LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
+						WHERE D.strDocumentName IS NULL
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Document Name ' + x.strDocumentName + ' is not available.'
 					FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
 							intLoadDocumentId INT
 							,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 							) x
 					LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
 					WHERE D.strDocumentName IS NULL
+
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				INSERT INTO tblLGLoadDocuments (
+					intConcurrencyId
+					,intLoadId
+					,intDocumentId
+					,strDocumentType
+					,strDocumentNo
+					,intOriginal
+					,intCopies
+					,ysnSent
+					,dtmSentDate
+					,ysnReceived
+					,dtmReceivedDate
+					,intLoadDocumentRefId
+					,[ysnReceivedCopy]
+					,[dtmCopyReceivedDate]
 					)
-			BEGIN
-				SELECT @strErrorMessage = 'Document Name ' + x.strDocumentName + ' is not available.'
+				SELECT 1 AS intConcurrencyId
+					,@intNewLoadId
+					,D.intDocumentId
+					,x.strDocumentType
+					,x.strDocumentNo
+					,x.intOriginal
+					,x.intCopies
+					,x.ysnSent
+					,x.dtmSentDate
+					,x.ysnReceived
+					,x.dtmReceivedDate
+					,x.intLoadDocumentId
+					,x.[ysnReceivedCopy]
+					,x.[dtmCopyReceivedDate]
+				FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
+						[intConcurrencyId] INT
+						,[intLoadId] INT
+						,[intDocumentId] INT
+						,[strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[intOriginal] INT
+						,[intCopies] INT
+						,[ysnSent] BIT
+						,[dtmSentDate] DATETIME
+						,[ysnReceived] BIT
+						,[dtmReceivedDate] DATETIME
+						,[ysnReceivedCopy] BIT
+						,[dtmCopyReceivedDate] DATETIME
+						,[intLoadDocumentId] INT
+						,strDocumentName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadDocuments LD
+						WHERE LD.intLoadId = @intNewLoadId
+							AND LD.intLoadDocumentRefId = x.intLoadDocumentId
+						)
+
+				UPDATE LD
+				SET intDocumentId = D.intDocumentId
+					,strDocumentType = x.strDocumentType
+					,strDocumentNo = x.strDocumentNo
+					,intOriginal = x.intOriginal
+					,intCopies = x.intCopies
+					,ysnSent = x.ysnSent
+					,dtmSentDate = x.dtmSentDate
+					,ysnReceived = x.ysnReceived
+					,dtmReceivedDate = x.dtmReceivedDate
+					,[ysnReceivedCopy] = x.[ysnReceivedCopy]
+					,[dtmCopyReceivedDate] = x.[dtmCopyReceivedDate]
 				FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
 						intLoadDocumentId INT
-						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
+						,[strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[intOriginal] INT
+						,[intCopies] INT
+						,[ysnSent] BIT
+						,[dtmSentDate] DATETIME
+						,[ysnReceived] BIT
+						,[dtmReceivedDate] DATETIME
+						,[ysnReceivedCopy] BIT
+						,[dtmCopyReceivedDate] DATETIME
+						,strDocumentName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						) x
-				LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-				WHERE D.strDocumentName IS NULL
+				JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
+				JOIN tblLGLoadDocuments LD ON LD.intLoadId = @intNewLoadId
+					AND LD.intLoadDocumentRefId = x.intLoadDocumentId
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
+				DELETE LD
+				FROM tblLGLoadDocuments LD
+				WHERE LD.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (intLoadDocumentId INT) x
+						WHERE LD.intLoadDocumentRefId = x.intLoadDocumentId
 						)
+
+				EXEC sp_xml_removedocument @idoc
 			END
 
-			INSERT INTO tblLGLoadDocuments (
-				intConcurrencyId
-				,intLoadId
-				,intDocumentId
-				,strDocumentType
-				,strDocumentNo
-				,intOriginal
-				,intCopies
-				,ysnSent
-				,dtmSentDate
-				,ysnReceived
-				,dtmReceivedDate
-				,intLoadDocumentRefId
-				,[ysnReceivedCopy]
-				,[dtmCopyReceivedDate]
-				)
-			SELECT 1 AS intConcurrencyId
-				,@intNewLoadId
-				,D.intDocumentId
-				,x.strDocumentType
-				,x.strDocumentNo
-				,x.intOriginal
-				,x.intCopies
-				,x.ysnSent
-				,x.dtmSentDate
-				,x.ysnReceived
-				,x.dtmReceivedDate
-				,x.intLoadDocumentId
-				,x.[ysnReceivedCopy]
-				,x.[dtmCopyReceivedDate]
-			FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
-					[intConcurrencyId] INT
-					,[intLoadId] INT
-					,[intDocumentId] INT
-					,[strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[intOriginal] INT
-					,[intCopies] INT
-					,[ysnSent] BIT
-					,[dtmSentDate] DATETIME
-					,[ysnReceived] BIT
-					,[dtmReceivedDate] DATETIME
-					,[ysnReceivedCopy] BIT
-					,[dtmCopyReceivedDate] DATETIME
-					,[intLoadDocumentId] INT
-					,strDocumentName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadDocuments LD
-					WHERE LD.intLoadId = @intNewLoadId
-						AND LD.intLoadDocumentRefId = x.intLoadDocumentId
-					)
+			--IF @strLoadDetailContainerLink IS NOT NULL
+			--BEGIN
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strLoadDetailContainerLink
 
-			UPDATE LD
-			SET intDocumentId = D.intDocumentId
-				,strDocumentType = x.strDocumentType
-				,strDocumentNo = x.strDocumentNo
-				,intOriginal = x.intOriginal
-				,intCopies = x.intCopies
-				,ysnSent = x.ysnSent
-				,dtmSentDate = x.dtmSentDate
-				,ysnReceived = x.ysnReceived
-				,dtmReceivedDate = x.dtmReceivedDate
-				,[ysnReceivedCopy] = x.[ysnReceivedCopy]
-				,[dtmCopyReceivedDate] = x.[dtmCopyReceivedDate]
-			FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (
-					intLoadDocumentId INT
-					,[strDocumentType] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[strDocumentNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[intOriginal] INT
-					,[intCopies] INT
-					,[ysnSent] BIT
-					,[dtmSentDate] DATETIME
-					,[ysnReceived] BIT
-					,[dtmReceivedDate] DATETIME
-					,[ysnReceivedCopy] BIT
-					,[dtmCopyReceivedDate] DATETIME
-					,strDocumentName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-			JOIN tblLGLoadDocuments LD ON LD.intLoadId = @intNewLoadId
-				AND LD.intLoadDocumentRefId = x.intLoadDocumentId
-
-			DELETE LD
-			FROM tblLGLoadDocuments LD
-			WHERE LD.intLoadId = @intNewLoadId
+			DELETE LDCL
+			FROM tblLGLoadDetailContainerLink LDCL
+			WHERE LDCL.intLoadId = @intNewLoadId
 				AND NOT EXISTS (
 					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadDocumentViews/vyuLGLoadDocumentView', 2) WITH (intLoadDocumentId INT) x
-					WHERE LD.intLoadDocumentRefId = x.intLoadDocumentId
+					FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH ([intLoadDetailContainerLinkId] INT) x
+					WHERE LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
 					)
 
 			EXEC sp_xml_removedocument @idoc
 
+			--END
+			--IF @strLoadContainer IS NOT NULL
+			--BEGIN
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLoadContainer
 
 			IF EXISTS (
 					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
+					FROM OPENXML(@idoc, 'vyuIPLoadContainerViews/vyuIPLoadContainerView', 2) WITH (
 							intLoadContainerId INT
 							,strUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strWeightUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -2853,7 +3017,7 @@ BEGIN TRY
 					)
 			BEGIN
 				SELECT @strErrorMessage = 'Unit Measure ' + x.strUnitMeasure + ' is not available.'
-				FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPLoadContainerViews/vyuIPLoadContainerView', 2) WITH (
 						intLoadContainerId INT
 						,strUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strWeightUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -2964,7 +3128,7 @@ BEGIN TRY
 				,x.[strRemarks]
 				,x.[intLoadContainerId]
 				,x.intSort
-			FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadContainerViews/vyuIPLoadContainerView', 2) WITH (
 					[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[dblQuantity] NUMERIC(18, 6)
 					,[intUnitMeasureId] INT
@@ -3072,7 +3236,7 @@ BEGIN TRY
 				,[intAmountCurrencyId] = ACU.[intCurrencyID]
 				,[strRemarks] = x.[strRemarks]
 				,intSort = x.intSort
-			FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (
+			FROM OPENXML(@idoc, 'vyuIPLoadContainerViews/vyuIPLoadContainerView', 2) WITH (
 					[strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,[dblQuantity] NUMERIC(18, 6)
 					,[intUnitMeasureId] INT
@@ -3135,856 +3299,936 @@ BEGIN TRY
 			WHERE LC.intLoadId = @intNewLoadId
 				AND NOT EXISTS (
 					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadContainerViews/vyuLGLoadContainerView', 2) WITH (intLoadContainerId INT) x
+					FROM OPENXML(@idoc, 'vyuIPLoadContainerViews/vyuIPLoadContainerView', 2) WITH (intLoadContainerId INT) x
 					WHERE LC.intLoadContainerRefId = x.intLoadContainerId
 					)
 
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadDetailContainerLink
+			--END
+			IF @strLoadDetailContainerLink IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadDetailContainerLink
 
-			IF EXISTS (
-					SELECT *
+				IF EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (strItemUOM NVARCHAR(50) Collate Latin1_General_CI_AS) x
+						LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
+						WHERE UM.strUnitMeasure IS NULL
+						)
+				BEGIN
+					SELECT @strErrorMessage = 'Unit Measure ' + x.strItemUOM + ' is not available.'
 					FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (strItemUOM NVARCHAR(50) Collate Latin1_General_CI_AS) x
 					LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 					WHERE UM.strUnitMeasure IS NULL
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Unit Measure ' + x.strItemUOM + ' is not available.'
-				FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (strItemUOM NVARCHAR(50) Collate Latin1_General_CI_AS) x
-				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
-				WHERE UM.strUnitMeasure IS NULL
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				INSERT INTO tblLGLoadDetailContainerLink (
+					[intConcurrencyId]
+					,[intLoadId]
+					,[intLoadContainerId]
+					,[intLoadDetailId]
+					,[dblQuantity]
+					,[intItemUOMId]
+					,[dblReceivedQty]
+					,[dblLinkGrossWt]
+					,[dblLinkTareWt]
+					,[dblLinkNetWt]
+					,[dblUnitCost]
+					,[strIntegrationOrderNumber]
+					,[dblIntegrationOrderPrice]
+					,[strExternalContainerId]
+					,[ysnExported]
+					,[dtmExportedDate]
+					,[dtmIntegrationOrderDate]
+					,[intLoadDetailContainerLinkRefId]
+					,strIntegrationNumber
+					)
+				SELECT 1 AS [intConcurrencyId]
+					,@intNewLoadId
+					,(
+						SELECT TOP 1 [intLoadContainerId]
+						FROM tblLGLoadContainer
+						WHERE intLoadContainerRefId = x.intLoadContainerId
+							AND intLoadId = @intNewLoadId
 						)
+					,(
+						SELECT TOP 1 [intLoadDetailId]
+						FROM tblLGLoadDetail
+						WHERE intLoadDetailRefId = x.intLoadDetailId
+							AND intLoadId = @intNewLoadId
+						)
+					,x.[dblQuantity]
+					,IU.[intItemUOMId]
+					,x.[dblReceivedQty]
+					,x.[dblLinkGrossWt]
+					,x.[dblLinkTareWt]
+					,x.[dblLinkNetWt]
+					,x.[dblUnitCost]
+					,x.[strIntegrationOrderNumber]
+					,x.[dblIntegrationOrderPrice]
+					,x.[strExternalContainerId]
+					,x.[ysnExported]
+					,x.[dtmExportedDate]
+					,x.[dtmIntegrationOrderDate]
+					,x.[intLoadDetailContainerLinkId]
+					,x.strIntegrationNumber
+				FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (
+						[intLoadContainerId] INT
+						,[intLoadDetailId] INT
+						,[dblQuantity] NUMERIC(18, 6)
+						,[intItemUOMId] INT
+						,[dblReceivedQty] NUMERIC(18, 6)
+						,[dblLinkGrossWt] NUMERIC(38, 20)
+						,[dblLinkTareWt] NUMERIC(38, 20)
+						,[dblLinkNetWt] NUMERIC(38, 20)
+						,[dblUnitCost] NUMERIC(18, 6)
+						,[strIntegrationOrderNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						,[dblIntegrationOrderPrice] NUMERIC(18, 6)
+						,[strExternalContainerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[ysnExported] [bit]
+						,[dtmExportedDate] DATETIME
+						,[dtmIntegrationOrderDate] DATETIME
+						,[intLoadDetailContainerLinkRefId] INT
+						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,intLoadDetailContainerLinkId INT
+						--,intLoadDetailId INT
+						,[strIntegrationNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						) x
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadDetailContainerLink LDCL
+						WHERE LDCL.intLoadId = @intNewLoadId
+							AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
+						)
+
+				UPDATE tblLGLoadDetailContainerLink
+				SET [intConcurrencyId] = LDCL.intConcurrencyId + 1
+					,[intLoadContainerId] = (
+						SELECT TOP 1 [intLoadContainerId]
+						FROM tblLGLoadContainer
+						WHERE intLoadContainerRefId = x.intLoadContainerId
+							AND intLoadId = @intNewLoadId
+						)
+					,[intLoadDetailId] = (
+						SELECT TOP 1 [intLoadDetailId]
+						FROM tblLGLoadDetail
+						WHERE intLoadDetailRefId = x.intLoadDetailId
+							AND intLoadId = @intNewLoadId
+						)
+					,[dblQuantity] = x.[dblQuantity]
+					,[intItemUOMId] = IU.[intItemUOMId]
+					,[dblReceivedQty] = x.[dblReceivedQty]
+					,[dblLinkGrossWt] = x.[dblLinkGrossWt]
+					,[dblLinkTareWt] = x.[dblLinkTareWt]
+					,[dblLinkNetWt] = x.[dblLinkNetWt]
+					,[dblUnitCost] = x.[dblUnitCost]
+					,[strIntegrationOrderNumber] = x.[strIntegrationOrderNumber]
+					,[dblIntegrationOrderPrice] = x.[dblIntegrationOrderPrice]
+					,[strExternalContainerId] = x.[strExternalContainerId]
+					,[ysnExported] = x.[ysnExported]
+					,[dtmExportedDate] = x.[dtmExportedDate]
+					,[dtmIntegrationOrderDate] = x.[dtmIntegrationOrderDate]
+					,strIntegrationNumber = x.strIntegrationNumber
+				FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (
+						[intLoadContainerId] INT
+						,[intLoadDetailId] INT
+						,[dblQuantity] NUMERIC(18, 6)
+						,[intItemUOMId] INT
+						,[dblReceivedQty] NUMERIC(18, 6)
+						,[dblLinkGrossWt] NUMERIC(38, 20)
+						,[dblLinkTareWt] NUMERIC(38, 20)
+						,[dblLinkNetWt] NUMERIC(38, 20)
+						,[dblUnitCost] NUMERIC(18, 6)
+						,[strIntegrationOrderNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						,[dblIntegrationOrderPrice] NUMERIC(18, 6)
+						,[strExternalContainerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[ysnExported] [bit]
+						,[dtmExportedDate] DATETIME
+						,[dtmIntegrationOrderDate] DATETIME
+						,[intLoadDetailContainerLinkRefId] INT
+						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,[intLoadDetailContainerLinkId] INT
+						,[strIntegrationNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						) x
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadId = @intNewLoadId
+					AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
+				WHERE EXISTS (
+						SELECT *
+						FROM tblLGLoadDetailContainerLink LDCL
+						WHERE LDCL.intLoadId = @intNewLoadId
+							AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
+						)
+
+				DELETE LDCL
+				FROM tblLGLoadDetailContainerLink LDCL
+				WHERE LDCL.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH ([intLoadDetailContainerLinkId] INT) x
+						WHERE LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
+						)
+
+				EXEC sp_xml_removedocument @idoc
 			END
 
-			INSERT INTO tblLGLoadDetailContainerLink (
-				[intConcurrencyId]
-				,[intLoadId]
-				,[intLoadContainerId]
-				,[intLoadDetailId]
-				,[dblQuantity]
-				,[intItemUOMId]
-				,[dblReceivedQty]
-				,[dblLinkGrossWt]
-				,[dblLinkTareWt]
-				,[dblLinkNetWt]
-				,[dblUnitCost]
-				,[strIntegrationOrderNumber]
-				,[dblIntegrationOrderPrice]
-				,[strExternalContainerId]
-				,[ysnExported]
-				,[dtmExportedDate]
-				,[dtmIntegrationOrderDate]
-				,[intLoadDetailContainerLinkRefId]
-				,strIntegrationNumber
-				)
-			SELECT 1 AS [intConcurrencyId]
-				,@intNewLoadId
-				,(
-					SELECT TOP 1 [intLoadContainerId]
-					FROM tblLGLoadContainer
-					WHERE intLoadContainerRefId = x.intLoadContainerId
-						AND intLoadId = @intNewLoadId
+			IF @strLoadCost IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadCost
+
+				--Load cost
+				INSERT INTO tblLGLoadCost (
+					[intConcurrencyId]
+					,[intLoadId]
+					,[intItemId]
+					,[intVendorId]
+					,[strEntityType]
+					,[strCostMethod]
+					,[intCurrencyId]
+					,[dblRate]
+					,[dblAmount]
+					,[dblFX]
+					,[intItemUOMId]
+					,[ysnAccrue]
+					,[ysnMTM]
+					,[ysnPrice]
+					,[intBillId]
+					,[intLoadCostRefId]
 					)
-				,(
-					SELECT TOP 1 [intLoadDetailId]
-					FROM tblLGLoadDetail
-					WHERE intLoadDetailRefId = x.intLoadDetailId
-						AND intLoadId = @intNewLoadId
+				SELECT 1 AS [intConcurrencyId]
+					,@intNewLoadId
+					,I.intItemId
+					,E.intEntityId [intVendorId]
+					,ET.strType
+					,x.[strCostMethod]
+					,CU.[intCurrencyID]
+					,x.[dblRate]
+					,x.[dblAmount]
+					,x.[dblFX]
+					,IU.[intItemUOMId]
+					,x.[ysnAccrue]
+					,x.[ysnMTM]
+					,x.[ysnPrice]
+					,NULL [intBillId]
+					,[intLoadCostId]
+				FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
+						[intLoadCostId] [int]
+						,[intLoadId] [int]
+						,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
+						,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
+						,[dblRate] [numeric](18, 6)
+						,[dblAmount] [numeric](18, 6)
+						,[dblFX] [numeric](18, 6)
+						,[ysnAccrue] [bit]
+						,[ysnMTM] [bit]
+						,[ysnPrice] [bit]
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
+					--AND E.strEntityNo <> ''
+				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+					AND ET.strType = 'Vendor'
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadCost LC
+						WHERE LC.intLoadId = @intNewLoadId
+							AND LC.intLoadCostRefId = x.intLoadCostId
+						)
+
+				UPDATE LC
+				SET [intConcurrencyId] = LC.[intConcurrencyId] + 1
+					,[intItemId] = I.[intItemId]
+					,[intVendorId] = E.intEntityId
+					,[strEntityType] = ET.[strType]
+					,[strCostMethod] = x.[strCostMethod]
+					,[intCurrencyId] = CU.[intCurrencyID]
+					,[dblRate] = x.[dblRate]
+					,[dblAmount] = x.[dblAmount]
+					,[dblFX] = x.[dblFX]
+					,[intItemUOMId] = IU.[intItemUOMId]
+					,[ysnAccrue] = x.[ysnAccrue]
+					,[ysnMTM] = x.[ysnMTM]
+					,[ysnPrice] = x.[ysnPrice]
+				FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
+						[intLoadCostId] [int]
+						,[intLoadId] [int]
+						,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
+						,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
+						,[dblRate] [numeric](18, 6)
+						,[dblAmount] [numeric](18, 6)
+						,[dblFX] [numeric](18, 6)
+						,[ysnAccrue] [bit]
+						,[ysnMTM] [bit]
+						,[ysnPrice] [bit]
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblLGLoadCost LC ON LC.intLoadId = @intNewLoadId
+					AND LC.intLoadCostRefId = x.intLoadCostId
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
+					--AND E.strEntityNo <> ''
+				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
+					AND ET.strType = 'Vendor'
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
+
+				DELETE LC
+				FROM tblLGLoadCost LC
+				WHERE LC.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (intLoadCostId INT) x
+						WHERE LC.intLoadCostRefId = x.intLoadCostId
+						)
+
+				EXEC sp_xml_removedocument @idoc
+			END
+
+			IF @strLoadStorageCost IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadStorageCost
+
+				--Load Storage cost
+				INSERT INTO tblLGLoadStorageCost (
+					[intConcurrencyId]
+					,[intLoadId]
+					,[intLoadDetailLotId]
+					,[dblPrice]
+					,[intPriceCurrencyId]
+					,[intPriceUOMId]
+					,[dblAmount]
+					,[intCurrency]
+					,[intCostType]
+					,[ysnSubCurrency]
+					,[intLoadStorageCostRefId]
 					)
-				,x.[dblQuantity]
-				,IU.[intItemUOMId]
-				,x.[dblReceivedQty]
-				,x.[dblLinkGrossWt]
-				,x.[dblLinkTareWt]
-				,x.[dblLinkNetWt]
-				,x.[dblUnitCost]
-				,x.[strIntegrationOrderNumber]
-				,x.[dblIntegrationOrderPrice]
-				,x.[strExternalContainerId]
-				,x.[ysnExported]
-				,x.[dtmExportedDate]
-				,x.[dtmIntegrationOrderDate]
-				,x.[intLoadDetailContainerLinkId]
-				,x.strIntegrationNumber
-			FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (
-					[intLoadContainerId] INT
-					,[intLoadDetailId] INT
-					,[dblQuantity] NUMERIC(18, 6)
-					,[intItemUOMId] INT
-					,[dblReceivedQty] NUMERIC(18, 6)
-					,[dblLinkGrossWt] NUMERIC(38, 20)
-					,[dblLinkTareWt] NUMERIC(38, 20)
-					,[dblLinkNetWt] NUMERIC(38, 20)
-					,[dblUnitCost] NUMERIC(18, 6)
-					,[strIntegrationOrderNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,[dblIntegrationOrderPrice] NUMERIC(18, 6)
-					,[strExternalContainerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[ysnExported] [bit]
-					,[dtmExportedDate] DATETIME
-					,[dtmIntegrationOrderDate] DATETIME
-					,[intLoadDetailContainerLinkRefId] INT
-					,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,intLoadDetailContainerLinkId INT
-					--,intLoadDetailId INT
-					,[strIntegrationNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
-			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadDetailContainerLink LDCL
-					WHERE LDCL.intLoadId = @intNewLoadId
-						AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
+				SELECT 1 AS [intConcurrencyId]
+					,@intNewLoadId
+					,(
+						SELECT TOP 1 [intLoadDetailLotId]
+						FROM tblLGLoadDetailLot LDL
+						JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+						WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
+							AND LD.intLoadId = @intNewLoadId
+						)
+					,[dblPrice]
+					,CU.[intCurrencyID]
+					,IU.[intItemUOMId]
+					,x.[dblAmount]
+					,CU2.[intCurrencyID]
+					,I2.intItemId [intCostType]
+					,x.[ysnSubCurrency]
+					,[intLoadStorageCostId]
+				FROM OPENXML(@idoc, 'vyuIPLoadStorageCostViews/vyuIPLoadStorageCostView', 2) WITH (
+						[intLoadStorageCostId] INT
+						--,[intConcurrencyId] INT
+						--,[intLoadId] INT
+						,[intLoadDetailLotId] INT
+						,[dblPrice] NUMERIC(18, 6)
+						--,[intPriceCurrencyId] INT
+						--,[intPriceUOMId] INT
+						,[dblAmount] NUMERIC(18, 6)
+						--,[intCurrency] INT
+						--,[intCostType] INT
+						,[ysnSubCurrency] BIT
+						,strPriceCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						--,intLoadDetailLotId int
+						) x
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strPriceCurrency
+				LEFT JOIN tblSMCurrency CU2 ON CU.strCurrency = x.strCurrency
+				LEFT JOIN tblICItem I2 ON I2.strItemNo = x.strCostType
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadStorageCost LSC
+						WHERE LSC.intLoadId = @intNewLoadId
+							AND LSC.intLoadStorageCostRefId = x.intLoadStorageCostId
+						)
+
+				UPDATE LSC
+				SET [intConcurrencyId] = LSC.[intConcurrencyId] + 1
+					,[intLoadDetailLotId] = (
+						SELECT TOP 1 [intLoadDetailLotId]
+						FROM tblLGLoadDetailLot LDL
+						JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
+						WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
+							AND LD.intLoadId = @intNewLoadId
+						)
+					,[dblPrice] = x.[dblPrice]
+					,[intPriceCurrencyId] = CU.[intCurrencyID]
+					,[intPriceUOMId] = IU.[intItemUOMId]
+					,[dblAmount] = x.[dblAmount]
+					,[intCurrency] = CU2.[intCurrencyID]
+					,[intCostType] = I2.intItemId
+					,[ysnSubCurrency] = x.[ysnSubCurrency]
+					,[intLoadStorageCostRefId] = x.[intLoadStorageCostId]
+				FROM OPENXML(@idoc, 'vyuIPLoadStorageCostViews/vyuIPLoadStorageCostView', 2) WITH (
+						[intLoadStorageCostId] INT
+						--,[intConcurrencyId] INT
+						--,[intLoadId] INT
+						,[intLoadDetailLotId] INT
+						,[dblPrice] NUMERIC(18, 6)
+						--,[intPriceCurrencyId] INT
+						--,[intPriceUOMId] INT
+						,[dblAmount] NUMERIC(18, 6)
+						--,[intCurrency] INT
+						--,[intCostType] INT
+						,[ysnSubCurrency] BIT
+						,strPriceCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblLGLoadStorageCost LSC ON LSC.intLoadId = @intNewLoadId
+					AND LSC.intLoadStorageCostRefId = x.intLoadStorageCostId
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUOM
+				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strPriceCurrency
+				LEFT JOIN tblSMCurrency CU2 ON CU.strCurrency = x.strCurrency
+				LEFT JOIN tblICItem I2 ON I2.strItemNo = x.strCostType
+
+				DELETE LSC
+				FROM tblLGLoadStorageCost LSC
+				WHERE LSC.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuIPLoadStorageCostViews/vyuIPLoadStorageCostView', 2) WITH (intLoadStorageCostId INT) x
+						WHERE LSC.intLoadStorageCostRefId = x.intLoadStorageCostId
+						)
+
+				EXEC sp_xml_removedocument @idoc
+			END
+
+			IF @strLoadWarehouse IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadWarehouse
+
+				--Load warehouse
+				INSERT INTO tblLGLoadWarehouse (
+					[intConcurrencyId]
+					,[intLoadId]
+					,[strDeliveryNoticeNumber]
+					,[dtmDeliveryNoticeDate]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[intHaulerEntityId]
+					,[dtmPickupDate]
+					,[dtmDeliveryDate]
+					,[dtmLastFreeDate]
+					,[dtmStrippingReportReceivedDate]
+					,[dtmSampleAuthorizedDate]
+					,[strStrippingReportComments]
+					,[strFreightComments]
+					,[strSampleComments]
+					,[strOtherComments]
+					,[intWarehouseRateMatrixHeaderId]
+					,[intLoadWarehouseRefId]
 					)
+				SELECT 1 AS [intConcurrencyId]
+					,@intNewLoadId
+					,[strDeliveryNoticeNumber]
+					,[dtmDeliveryNoticeDate]
+					,CLSL.[intCompanyLocationSubLocationId]
+					,SL.[intStorageLocationId]
+					,Hauler.[intEntityId]
+					,x.[dtmPickupDate]
+					,x.[dtmDeliveryDate]
+					,x.[dtmLastFreeDate]
+					,x.[dtmStrippingReportReceivedDate]
+					,x.[dtmSampleAuthorizedDate]
+					,x.[strStrippingReportComments]
+					,x.[strFreightComments]
+					,x.[strSampleComments]
+					,x.[strOtherComments]
+					,NULL [intWarehouseRateMatrixHeaderId]
+					,[intLoadWarehouseId]
+				FROM OPENXML(@idoc, 'vyuIPLoadWarehouseViews/vyuIPLoadWarehouseView', 2) WITH (
+						[intLoadWarehouseId] INT
+						--,[intConcurrencyId] INT
+						,[intLoadId] INT
+						,[strDeliveryNoticeNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[dtmDeliveryNoticeDate] DATETIME
+						--,[intSubLocationId] INT
+						--,[intStorageLocationId] INT
+						--,[intHaulerEntityId] INT
+						,[dtmPickupDate] DATETIME
+						,[dtmDeliveryDate] DATETIME
+						,[dtmLastFreeDate] DATETIME
+						,[dtmStrippingReportReceivedDate] DATETIME
+						,[dtmSampleAuthorizedDate] DATETIME
+						,[strStrippingReportComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,[strFreightComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,[strSampleComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,[strOtherComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						--,[intWarehouseRateMatrixHeaderId] INT
+						--,[intLoadWarehouseRefId] INT
+						,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strWarehouse NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
+				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
+				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
+					AND Hauler.strEntityNo <> '' --???
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadWarehouse LW
+						WHERE LW.intLoadId = @intNewLoadId
+							AND LW.intLoadWarehouseRefId = x.intLoadWarehouseId
+						)
 
-			UPDATE tblLGLoadDetailContainerLink
-			SET [intConcurrencyId] = LDCL.intConcurrencyId + 1
-				,[intLoadContainerId] = (
-					SELECT TOP 1 [intLoadContainerId]
-					FROM tblLGLoadContainer
-					WHERE intLoadContainerRefId = x.intLoadContainerId
-						AND intLoadId = @intNewLoadId
+				UPDATE LW
+				SET [intConcurrencyId] = LW.[intConcurrencyId] + 1
+					,[strDeliveryNoticeNumber] = x.[strDeliveryNoticeNumber]
+					,[dtmDeliveryNoticeDate] = x.[dtmDeliveryNoticeDate]
+					,[intSubLocationId] = CLSL.[intCompanyLocationSubLocationId]
+					,[intStorageLocationId] = SL.[intStorageLocationId]
+					,[intHaulerEntityId] = Hauler.[intEntityId]
+					,[dtmPickupDate] = x.[dtmPickupDate]
+					,[dtmDeliveryDate] = x.[dtmDeliveryDate]
+					,[dtmLastFreeDate] = x.[dtmLastFreeDate]
+					,[dtmStrippingReportReceivedDate] = x.[dtmStrippingReportReceivedDate]
+					,[dtmSampleAuthorizedDate] = x.[dtmSampleAuthorizedDate]
+					,[strStrippingReportComments] = x.[strStrippingReportComments]
+					,[strFreightComments] = x.[strFreightComments]
+					,[strSampleComments] = x.[strSampleComments]
+					,[strOtherComments] = x.[strOtherComments]
+				FROM OPENXML(@idoc, 'vyuIPLoadWarehouseViews/vyuIPLoadWarehouseView', 2) WITH (
+						[intLoadWarehouseId] INT
+						--,[intConcurrencyId] INT
+						,[intLoadId] INT
+						,[strDeliveryNoticeNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+						,[dtmDeliveryNoticeDate] DATETIME
+						--,[intSubLocationId] INT
+						--,[intStorageLocationId] INT
+						--,[intHaulerEntityId] INT
+						,[dtmPickupDate] DATETIME
+						,[dtmDeliveryDate] DATETIME
+						,[dtmLastFreeDate] DATETIME
+						,[dtmStrippingReportReceivedDate] DATETIME
+						,[dtmSampleAuthorizedDate] DATETIME
+						,[strStrippingReportComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,[strFreightComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,[strSampleComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,[strOtherComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						--,[intWarehouseRateMatrixHeaderId] INT
+						--,[intLoadWarehouseRefId] INT
+						,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strWarehouse NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						,strShipVia NVARCHAR(50) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblLGLoadWarehouse LW ON LW.intLoadId = @intNewLoadId
+					AND LW.intLoadWarehouseRefId = x.intLoadWarehouseId
+				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
+				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
+				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
+					AND Hauler.strEntityNo <> '' --???
+
+				DELETE LW
+				FROM tblLGLoadWarehouse LW
+				WHERE LW.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuIPLoadWarehouseViews/vyuIPLoadWarehouseView', 2) WITH (intLoadWarehouseId INT) x
+						WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
+						)
+
+				EXEC sp_xml_removedocument @idoc
+			END
+
+			IF @strLoadWarehouseServices IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadWarehouseServices
+
+				--Load warehouse Services
+				INSERT INTO tblLGLoadWarehouseServices (
+					[intConcurrencyId]
+					,[intLoadWarehouseId]
+					,[strCategory]
+					,[strActivity]
+					,[intType]
+					,[intItemId]
+					,[dblUnitRate]
+					,[intItemUOMId]
+					,[dblQuantity]
+					,[dblCalculatedAmount]
+					,[dblActualAmount]
+					,[ysnChargeCustomer]
+					,[dblBillAmount]
+					,[ysnPrint]
+					,[intSort]
+					,[strComments]
+					,[intLoadWarehouseServicesRefId]
 					)
-				,[intLoadDetailId] = (
-					SELECT TOP 1 [intLoadDetailId]
-					FROM tblLGLoadDetail
-					WHERE intLoadDetailRefId = x.intLoadDetailId
-						AND intLoadId = @intNewLoadId
+				SELECT 1 AS [intConcurrencyId]
+					,(
+						SELECT TOP 1 [intLoadWarehouseId]
+						FROM tblLGLoadWarehouse LW
+						WHERE LW.[intLoadWarehouseRefId] = x.[intLoadWarehouseId]
+							AND intLoadId = @intNewLoadId
+						)
+					,x.[strCategory]
+					,x.[strActivity]
+					,NULL [intType]
+					,I.[intItemId]
+					,x.[dblUnitRate]
+					,IU.[intItemUOMId]
+					,x.[dblQuantity]
+					,x.[dblCalculatedAmount]
+					,x.[dblActualAmount]
+					,x.[ysnChargeCustomer]
+					,x.[dblBillAmount]
+					,x.[ysnPrint]
+					,x.[intSort]
+					,x.[strComments]
+					,[intLoadWarehouseServicesId]
+				FROM OPENXML(@idoc, 'vyuIPLoadWarehouseServicess/vyuIPLoadWarehouseServices', 2) WITH (
+						[intLoadWarehouseServicesId] INT
+						,[intConcurrencyId] INT
+						,[intLoadWarehouseId] INT
+						,[strCategory] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						,[strActivity] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						,[intType] INT
+						--,[intItemId] [int]
+						,[dblUnitRate] NUMERIC(18, 6)
+						--,[intItemUOMId] INT
+						,[dblQuantity] NUMERIC(18, 6)
+						,[dblCalculatedAmount] NUMERIC(18, 6)
+						,[dblActualAmount] NUMERIC(18, 6)
+						,[ysnChargeCustomer] [bit]
+						,[dblBillAmount] NUMERIC(18, 6)
+						,[ysnPrint] [bit]
+						,[intSort] INT
+						,[strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						--,[intBillId] [int]
+						,[intWarehouseRateMatrixDetailId] [int]
+						,strItemNo NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						,strUnitMeasure NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadWarehouseServices LWS
+						JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWS.intLoadWarehouseId
+						WHERE W.intLoadId = @intNewLoadId
+							AND LWS.intLoadWarehouseServicesRefId = x.intLoadWarehouseServicesId
+						)
+
+				UPDATE LWS
+				SET [intConcurrencyId] = LWS.[intConcurrencyId] + 1
+					,[strCategory] = x.[strCategory]
+					,[strActivity] = x.[strActivity]
+					,[intItemId] = I.[intItemId]
+					,[dblUnitRate] = x.[dblUnitRate]
+					,[intItemUOMId] = IU.[intItemUOMId]
+					,[dblQuantity] = x.[dblQuantity]
+					,[dblCalculatedAmount] = x.[dblCalculatedAmount]
+					,[dblActualAmount] = x.[dblActualAmount]
+					,[ysnChargeCustomer] = x.[ysnChargeCustomer]
+					,[dblBillAmount] = x.[dblBillAmount]
+					,[ysnPrint] = x.[ysnPrint]
+					,[intSort] = x.[intSort]
+					,[strComments] = x.[strComments]
+				FROM OPENXML(@idoc, 'vyuIPLoadWarehouseServicess/vyuIPLoadWarehouseServices', 2) WITH (
+						[intLoadWarehouseServicesId] INT
+						--,[intConcurrencyId] INT
+						,[intLoadWarehouseId] INT
+						,[strCategory] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						,[strActivity] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
+						--,[intType] INT
+						--,[intItemId] [int]
+						,[dblUnitRate] NUMERIC(18, 6)
+						--,[intItemUOMId] INT
+						,[dblQuantity] NUMERIC(18, 6)
+						,[dblCalculatedAmount] NUMERIC(18, 6)
+						,[dblActualAmount] NUMERIC(18, 6)
+						,[ysnChargeCustomer] [bit]
+						,[dblBillAmount] NUMERIC(18, 6)
+						,[ysnPrint] [bit]
+						,[intSort] INT
+						,[strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						--,[intBillId] [int]
+						--,[intWarehouseRateMatrixDetailId] [int]
+						,strItemNo NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						,strUnitMeasure NVARCHAR(300) COLLATE Latin1_General_CI_AS
+						) x
+				JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseServicesRefId = x.intLoadWarehouseServicesId
+				JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWS.intLoadWarehouseId
+					AND W.intLoadId = @intNewLoadId
+				JOIN tblICItem I ON I.strItemNo = x.strItemNo
+				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
+				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
+					AND IU.intUnitMeasureId = UM.intUnitMeasureId
+
+				DELETE LWS
+				FROM tblLGLoadWarehouseServices LWS
+				JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWS.intLoadWarehouseId
+				WHERE W.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuIPLoadWarehouseServicess/vyuIPLoadWarehouseServices', 2) WITH (intLoadWarehouseServicesId INT) x
+						WHERE LWS.intLoadWarehouseServicesRefId = x.intLoadWarehouseServicesId
+						)
+
+				EXEC sp_xml_removedocument @idoc
+			END
+
+			IF @strLoadWarehouseContainer IS NOT NULL
+			BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadWarehouseContainer
+
+				--Load warehouse Containers
+				INSERT INTO tblLGLoadWarehouseContainer (
+					[intConcurrencyId]
+					,[intLoadWarehouseId]
+					,[intLoadContainerId]
+					,[intLoadWarehouseContainerRefId]
 					)
-				,[dblQuantity] = x.[dblQuantity]
-				,[intItemUOMId] = IU.[intItemUOMId]
-				,[dblReceivedQty] = x.[dblReceivedQty]
-				,[dblLinkGrossWt] = x.[dblLinkGrossWt]
-				,[dblLinkTareWt] = x.[dblLinkTareWt]
-				,[dblLinkNetWt] = x.[dblLinkNetWt]
-				,[dblUnitCost] = x.[dblUnitCost]
-				,[strIntegrationOrderNumber] = x.[strIntegrationOrderNumber]
-				,[dblIntegrationOrderPrice] = x.[dblIntegrationOrderPrice]
-				,[strExternalContainerId] = x.[strExternalContainerId]
-				,[ysnExported] = x.[ysnExported]
-				,[dtmExportedDate] = x.[dtmExportedDate]
-				,[dtmIntegrationOrderDate] = x.[dtmIntegrationOrderDate]
-				,strIntegrationNumber = x.strIntegrationNumber
-			FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH (
-					[intLoadContainerId] INT
-					,[intLoadDetailId] INT
-					,[dblQuantity] NUMERIC(18, 6)
-					,[intItemUOMId] INT
-					,[dblReceivedQty] NUMERIC(18, 6)
-					,[dblLinkGrossWt] NUMERIC(38, 20)
-					,[dblLinkTareWt] NUMERIC(38, 20)
-					,[dblLinkNetWt] NUMERIC(38, 20)
-					,[dblUnitCost] NUMERIC(18, 6)
-					,[strIntegrationOrderNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,[dblIntegrationOrderPrice] NUMERIC(18, 6)
-					,[strExternalContainerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[ysnExported] [bit]
-					,[dtmExportedDate] DATETIME
-					,[dtmIntegrationOrderDate] DATETIME
-					,[intLoadDetailContainerLinkRefId] INT
-					,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,[intLoadDetailContainerLinkId] INT
-					,[strIntegrationNumber] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
-			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadId = @intNewLoadId
-				AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
-			WHERE EXISTS (
-					SELECT *
-					FROM tblLGLoadDetailContainerLink LDCL
-					WHERE LDCL.intLoadId = @intNewLoadId
-						AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
-					)
+				SELECT 1 AS [intConcurrencyId]
+					,(
+						SELECT TOP 1 [intLoadWarehouseId]
+						FROM tblLGLoadWarehouse LW
+						WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
+							AND intLoadId = @intNewLoadId
+						)
+					,(
+						SELECT TOP 1 [intLoadContainerId]
+						FROM tblLGLoadContainer LC
+						WHERE LC.intLoadContainerRefId = x.intLoadContainerId
+							AND intLoadId = @intNewLoadId
+						)
+					,[intLoadWarehouseContainerId]
+				FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseContainerView', 2) WITH (
+						[intLoadWarehouseId] INT
+						,[intLoadContainerId] INT
+						,[intLoadWarehouseContainerId] INT
+						) x
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblLGLoadWarehouseContainer LWC
+						JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWC.intLoadWarehouseId
+						WHERE W.intLoadId = @intNewLoadId
+							AND LWC.[intLoadWarehouseContainerRefId] = x.[intLoadWarehouseContainerId]
+						)
 
-			DELETE LDCL
-			FROM tblLGLoadDetailContainerLink LDCL
-			WHERE LDCL.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH ([intLoadDetailContainerLinkId] INT) x
-					WHERE LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
-					)
+				UPDATE LWC
+				SET [intConcurrencyId] = LWC.[intConcurrencyId] + 1
+					,[intLoadWarehouseId] = (
+						SELECT TOP 1 [intLoadWarehouseId]
+						FROM tblLGLoadWarehouse LW
+						WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
+							AND intLoadId = @intNewLoadId
+						)
+					,[intLoadContainerId] = (
+						SELECT TOP 1 [intLoadContainerId]
+						FROM tblLGLoadContainer LC
+						WHERE LC.intLoadContainerRefId = x.intLoadContainerId
+							AND intLoadId = @intNewLoadId
+						)
+				FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseContainerView', 2) WITH (
+						[intLoadWarehouseId] INT
+						,[intLoadContainerId] INT
+						,[intLoadWarehouseContainerId] INT
+						) x
+				JOIN tblLGLoadWarehouseContainer LWC ON LWC.[intLoadWarehouseContainerRefId] = x.[intLoadWarehouseContainerId]
+				JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWC.intLoadWarehouseId
+					AND W.intLoadId = @intNewLoadId
 
-			EXEC sp_xml_removedocument @idoc
+				DELETE LWC
+				FROM tblLGLoadWarehouseContainer LWC
+				JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWC.intLoadWarehouseId
+				WHERE W.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseContainerView', 2) WITH ([intLoadWarehouseContainerId] INT) x
+						WHERE LWC.[intLoadWarehouseContainerRefId] = x.[intLoadWarehouseContainerId]
+						)
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadCost
+				EXEC sp_xml_removedocument @idoc
+			END
 
-			--Load cost
-			INSERT INTO tblLGLoadCost (
-				[intConcurrencyId]
-				,[intLoadId]
-				,[intItemId]
-				,[intVendorId]
-				,[strEntityType]
-				,[strCostMethod]
-				,[intCurrencyId]
-				,[dblRate]
-				,[dblAmount]
-				,[dblFX]
-				,[intItemUOMId]
-				,[ysnAccrue]
-				,[ysnMTM]
-				,[ysnPrice]
-				,[intBillId]
-				,[intLoadCostRefId]
-				)
-			SELECT 1 AS [intConcurrencyId]
-				,@intNewLoadId
-				,I.intItemId
-				,E.intEntityId [intVendorId]
-				,ET.strType
-				,x.[strCostMethod]
-				,CU.[intCurrencyID]
-				,x.[dblRate]
-				,x.[dblAmount]
-				,x.[dblFX]
-				,IU.[intItemUOMId]
-				,x.[ysnAccrue]
-				,x.[ysnMTM]
-				,x.[ysnPrice]
-				,NULL [intBillId]
-				,[intLoadCostId]
-			FROM OPENXML(@idoc, 'vyuLGLoadCostViews/vyuLGLoadCostView', 2) WITH (
-					[intLoadCostId] [int]
-					,[intConcurrencyId] [int]
-					,[intLoadId] [int]
-					,[intItemId] [int]
-					,[intVendorId] [int]
-					,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
-					,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
-					,[intCurrencyId] INT
-					,[dblRate] [numeric](18, 6)
-					,[dblAmount] [numeric](18, 6)
-					,[dblFX] [numeric](18, 6)
-					,[intItemUOMId] [int]
-					,[ysnAccrue] [bit]
-					,[ysnMTM] [bit]
-					,[ysnPrice] [bit]
-					,[intBillId] [int]
-					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
-			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-				AND E.strEntityNo <> ''
-			LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-				AND ET.strType = 'Vendor'
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadCost LC
-					WHERE LC.intLoadId = @intNewLoadId
-						AND LC.intLoadCostRefId = x.intLoadCostId
-					)
+			EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
 
-			UPDATE LC
-			SET [intConcurrencyId] = LC.[intConcurrencyId] + 1
-				,[intItemId] = I.[intItemId]
-				,[intVendorId] = E.intEntityId
-				,[strEntityType] = ET.[strType]
-				,[strCostMethod] = x.[strCostMethod]
-				,[intCurrencyId] = LC.[intCurrencyId] + 1
-				,[dblRate] = x.[dblRate]
-				,[dblAmount] = x.[dblAmount]
-				,[dblFX] = x.[dblFX]
-				,[intItemUOMId] = IU.[intItemUOMId]
-				,[ysnAccrue] = x.[ysnAccrue]
-				,[ysnMTM] = x.[ysnMTM]
-				,[ysnPrice] = x.[ysnPrice]
-			FROM OPENXML(@idoc, 'vyuLGLoadCostViews/vyuLGLoadCostView', 2) WITH (
-					[intLoadCostId] [int]
-					,[intConcurrencyId] [int]
-					,[intLoadId] [int]
-					,[intItemId] [int]
-					,[intVendorId] [int]
-					,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
-					,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
-					,[intCurrencyId] INT
-					,[dblRate] [numeric](18, 6)
-					,[dblAmount] [numeric](18, 6)
-					,[dblFX] [numeric](18, 6)
-					,[intItemUOMId] [int]
-					,[ysnAccrue] [bit]
-					,[ysnMTM] [bit]
-					,[ysnPrice] [bit]
-					,[intBillId] [int]
-					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblLGLoadCost LC ON LC.intLoadId = @intNewLoadId
-				AND LC.intLoadCostRefId = x.intLoadCostId
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
-			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-				AND E.strEntityNo <> ''
-			LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
-				AND ET.strType = 'Vendor'
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strCurrency
+			IF @ysnReplication = 1
+			BEGIN
+				SELECT @strHeaderCondition = 'intLoadId = ' + LTRIM(@intNewLoadId)
 
-			DELETE LC
-			FROM tblLGLoadCost LC
-			WHERE LC.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadCostViews/vyuLGLoadCostView', 2) WITH (intLoadCostId INT) x
-					WHERE LC.intLoadCostRefId = x.intLoadCostId
-					)
+				EXEC uspCTGetTableDataInXML 'tblLGLoad'
+					,@strHeaderCondition
+					,@strAckLoadXML OUTPUT
 
-			EXEC sp_xml_removedocument @idoc
+				EXEC uspCTGetTableDataInXML 'tblLGLoadDetail'
+					,@strHeaderCondition
+					,@strAckLoadDetailXML OUTPUT
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadStorageCost
+				EXEC uspCTGetTableDataInXML 'tblLGLoadNotifyParties'
+					,@strHeaderCondition
+					,@strAckLoadNotifyPartyXML OUTPUT
 
-			--Load Storage cost
-			INSERT INTO tblLGLoadStorageCost (
-				[intConcurrencyId]
-				,[intLoadId]
-				,[intLoadDetailLotId]
-				,[dblPrice]
-				,[intPriceCurrencyId]
-				,[intPriceUOMId]
-				,[dblAmount]
-				,[intCurrency]
-				,[intCostType]
-				,[ysnSubCurrency]
-				,[intLoadStorageCostRefId]
-				)
-			SELECT 1 AS [intConcurrencyId]
-				,@intNewLoadId
-				,(
-					SELECT TOP 1 [intLoadDetailLotId]
-					FROM tblLGLoadDetailLot LDL
-					JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
-					WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
-						AND LD.intLoadId = @intNewLoadId
-					)
-				,[dblPrice]
-				,CU.[intCurrencyID]
-				,IU.[intItemUOMId]
-				,x.[dblAmount]
-				,CU2.[intCurrencyID]
-				,I2.intItemId [intCostType]
-				,x.[ysnSubCurrency]
-				,[intLoadStorageCostId]
-			FROM OPENXML(@idoc, 'vyuLGLoadStorageCostViews/vyuLGLoadStorageCostView', 2) WITH (
-					[intLoadStorageCostId] INT
-					,[intConcurrencyId] INT
-					,[intLoadId] INT
-					,[intLoadDetailLotId] INT
-					,[dblPrice] NUMERIC(18, 6)
-					,[intPriceCurrencyId] INT
-					,[intPriceUOMId] INT
-					,[dblAmount] NUMERIC(18, 6)
-					,[intCurrency] INT
-					,[intCostType] INT
-					,[ysnSubCurrency] BIT
-					,strPriceCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					--,intLoadDetailLotId int
-					) x
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUOM
-			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strPriceCurrency
-			LEFT JOIN tblSMCurrency CU2 ON CU.strCurrency = x.strCurrency
-			LEFT JOIN tblICItem I2 ON I2.strItemNo = x.strCostType
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadStorageCost LSC
-					WHERE LSC.intLoadId = @intNewLoadId
-						AND LSC.intLoadStorageCostRefId = x.intLoadStorageCostId
-					)
+				EXEC uspCTGetTableDataInXML 'tblLGLoadDocuments'
+					,@strHeaderCondition
+					,@strAckLoadDocumentXML OUTPUT
 
-			UPDATE LSC
-			SET [intConcurrencyId] = LSC.[intConcurrencyId] + 1
-				,[intLoadDetailLotId] = (
-					SELECT TOP 1 [intLoadDetailLotId]
-					FROM tblLGLoadDetailLot LDL
-					JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDL.intLoadDetailId
-					WHERE LDL.intLoadDetailLotRefId = x.intLoadDetailLotId
-						AND LD.intLoadId = @intNewLoadId
-					)
-				,[dblPrice] = x.[dblPrice]
-				,[intPriceCurrencyId] = CU.[intCurrencyID]
-				,[intPriceUOMId] = IU.[intItemUOMId]
-				,[dblAmount] = x.[dblAmount]
-				,[intCurrency] = CU2.[intCurrencyID]
-				,[intCostType] = I2.intItemId
-				,[ysnSubCurrency] = x.[ysnSubCurrency]
-				,[intLoadStorageCostRefId] = x.[intLoadStorageCostId]
-			FROM OPENXML(@idoc, 'vyuLGLoadStorageCostViews/vyuLGLoadStorageCostView', 2) WITH (
-					[intLoadStorageCostId] INT
-					,[intConcurrencyId] INT
-					,[intLoadId] INT
-					,[intLoadDetailLotId] INT
-					,[dblPrice] NUMERIC(18, 6)
-					,[intPriceCurrencyId] INT
-					,[intPriceUOMId] INT
-					,[dblAmount] NUMERIC(18, 6)
-					,[intCurrency] INT
-					,[intCostType] INT
-					,[ysnSubCurrency] BIT
-					,strPriceCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblLGLoadStorageCost LSC ON LSC.intLoadId = @intNewLoadId
-				AND LSC.intLoadStorageCostRefId = x.intLoadStorageCostId
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUOM
-			LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strPriceCurrency
-			LEFT JOIN tblSMCurrency CU2 ON CU.strCurrency = x.strCurrency
-			LEFT JOIN tblICItem I2 ON I2.strItemNo = x.strCostType
+				EXEC uspCTGetTableDataInXML 'tblLGLoadContainer'
+					,@strHeaderCondition
+					,@strAckLoadContainerXML OUTPUT
 
-			DELETE LSC
-			FROM tblLGLoadStorageCost LSC
-			WHERE LSC.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadStorageCostViews/vyuLGLoadStorageCostView', 2) WITH (intLoadStorageCostId INT) x
-					WHERE LSC.intLoadStorageCostRefId = x.intLoadStorageCostId
-					)
+				SELECT @strLoadContainerId = COALESCE(@strLoadContainerId + ',', '') + CAST(intLoadContainerId AS VARCHAR(5))
+				FROM tblLGLoadContainer
+				WHERE intLoadId = @intNewLoadId
 
-			EXEC sp_xml_removedocument @idoc
+				SELECT @strLoadDetailContainerLinkCondition = 'intLoadContainerId IN (' + LTRIM(@strLoadContainerId) + ')'
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadWarehouse
+				EXEC dbo.uspCTGetTableDataInXML 'tblLGLoadDetailContainerLink'
+					,@strLoadDetailContainerLinkCondition
+					,@strAckLoadDetailContainerLinkXML OUTPUT
+					,NULL
+					,NULL
 
-			--Load warehouse
-			INSERT INTO tblLGLoadWarehouse (
-				[intConcurrencyId]
-				,[intLoadId]
-				,[strDeliveryNoticeNumber]
-				,[dtmDeliveryNoticeDate]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[intHaulerEntityId]
-				,[dtmPickupDate]
-				,[dtmDeliveryDate]
-				,[dtmLastFreeDate]
-				,[dtmStrippingReportReceivedDate]
-				,[dtmSampleAuthorizedDate]
-				,[strStrippingReportComments]
-				,[strFreightComments]
-				,[strSampleComments]
-				,[strOtherComments]
-				,[intWarehouseRateMatrixHeaderId]
-				,[intLoadWarehouseRefId]
-				)
-			SELECT 1 AS [intConcurrencyId]
-				,@intNewLoadId
-				,[strDeliveryNoticeNumber]
-				,[dtmDeliveryNoticeDate]
-				,CLSL.[intCompanyLocationSubLocationId]
-				,SL.[intStorageLocationId]
-				,Hauler.[intEntityId]
-				,x.[dtmPickupDate]
-				,x.[dtmDeliveryDate]
-				,x.[dtmLastFreeDate]
-				,x.[dtmStrippingReportReceivedDate]
-				,x.[dtmSampleAuthorizedDate]
-				,x.[strStrippingReportComments]
-				,x.[strFreightComments]
-				,x.[strSampleComments]
-				,x.[strOtherComments]
-				,NULL [intWarehouseRateMatrixHeaderId]
-				,[intLoadWarehouseId]
-			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseViews/vyuLGLoadWarehouseView', 2) WITH (
-					[intLoadWarehouseId] INT
-					,[intConcurrencyId] INT
-					,[intLoadId] INT
-					,[strDeliveryNoticeNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[dtmDeliveryNoticeDate] DATETIME
-					,[intSubLocationId] INT
-					,[intStorageLocationId] INT
-					,[intHaulerEntityId] INT
-					,[dtmPickupDate] DATETIME
-					,[dtmDeliveryDate] DATETIME
-					,[dtmLastFreeDate] DATETIME
-					,[dtmStrippingReportReceivedDate] DATETIME
-					,[dtmSampleAuthorizedDate] DATETIME
-					,[strStrippingReportComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[strFreightComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[strSampleComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[strOtherComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[intWarehouseRateMatrixHeaderId] INT
-					,[intLoadWarehouseRefId] INT
-					,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strWarehouse NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
-			LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
-			LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
-				AND Hauler.strEntityNo <> '' --???
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadWarehouse LW
-					WHERE LW.intLoadId = @intNewLoadId
-						AND LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-					)
+				EXEC uspCTGetTableDataInXML 'tblLGLoadCost'
+					,@strHeaderCondition
+					,@strAckLoadCostXML OUTPUT
 
-			UPDATE LW
-			SET [intConcurrencyId] = LW.[intConcurrencyId] + 1
-				,[strDeliveryNoticeNumber] = x.[strDeliveryNoticeNumber]
-				,[dtmDeliveryNoticeDate] = x.[dtmDeliveryNoticeDate]
-				,[intSubLocationId] = CLSL.[intCompanyLocationSubLocationId]
-				,[intStorageLocationId] = SL.[intStorageLocationId]
-				,[intHaulerEntityId] = Hauler.[intEntityId]
-				,[dtmPickupDate] = x.[dtmPickupDate]
-				,[dtmDeliveryDate] = x.[dtmDeliveryDate]
-				,[dtmLastFreeDate] = x.[dtmLastFreeDate]
-				,[dtmStrippingReportReceivedDate] = x.[dtmStrippingReportReceivedDate]
-				,[dtmSampleAuthorizedDate] = x.[dtmSampleAuthorizedDate]
-				,[strStrippingReportComments] = x.[strStrippingReportComments]
-				,[strFreightComments] = x.[strFreightComments]
-				,[strSampleComments] = x.[strSampleComments]
-				,[strOtherComments] = x.[strOtherComments]
-			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseViews/vyuLGLoadWarehouseView', 2) WITH (
-					[intLoadWarehouseId] INT
-					,[intConcurrencyId] INT
-					,[intLoadId] INT
-					,[strDeliveryNoticeNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS
-					,[dtmDeliveryNoticeDate] DATETIME
-					,[intSubLocationId] INT
-					,[intStorageLocationId] INT
-					,[intHaulerEntityId] INT
-					,[dtmPickupDate] DATETIME
-					,[dtmDeliveryDate] DATETIME
-					,[dtmLastFreeDate] DATETIME
-					,[dtmStrippingReportReceivedDate] DATETIME
-					,[dtmSampleAuthorizedDate] DATETIME
-					,[strStrippingReportComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[strFreightComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[strSampleComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[strOtherComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[intWarehouseRateMatrixHeaderId] INT
-					,[intLoadWarehouseRefId] INT
-					,strStorageLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strWarehouse NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strShipVia NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblLGLoadWarehouse LW ON LW.intLoadId = @intNewLoadId
-				AND LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-			JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
-			LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
-			LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
-				AND Hauler.strEntityNo <> '' --???
+				EXEC uspCTGetTableDataInXML 'tblLGLoadStorageCost'
+					,@strHeaderCondition
+					,@strAckLoadStorageCostXML OUTPUT
 
-			DELETE LW
-			FROM tblLGLoadWarehouse LW
-			WHERE LW.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadWarehouseViews/vyuLGLoadWarehouseView', 2) WITH (intLoadWarehouseId INT) x
-					WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-					)
+				EXEC uspCTGetTableDataInXML 'tblLGLoadWarehouse'
+					,@strHeaderCondition
+					,@strAckLoadWarehouseXML OUTPUT
 
-			EXEC sp_xml_removedocument @idoc
+				SELECT @strLoadWarehouseId = COALESCE(@strLoadWarehouseId + ',', '') + CAST(intLoadWarehouseId AS VARCHAR(5))
+				FROM tblLGLoadWarehouse
+				WHERE intLoadId = @intNewLoadId
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadWarehouseServices
+				SELECT @strLoadWarehouseCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 
-			--Load warehouse Services
-			INSERT INTO tblLGLoadWarehouseServices (
-				[intConcurrencyId]
-				,[intLoadWarehouseId]
-				,[strCategory]
-				,[strActivity]
-				,[intType]
-				,[intItemId]
-				,[dblUnitRate]
-				,[intItemUOMId]
-				,[dblQuantity]
-				,[dblCalculatedAmount]
-				,[dblActualAmount]
-				,[ysnChargeCustomer]
-				,[dblBillAmount]
-				,[ysnPrint]
-				,[intSort]
-				,[strComments]
-				,[intLoadWarehouseServicesRefId]
-				)
-			SELECT 1 AS [intConcurrencyId]
-				,(
-					SELECT TOP 1 [intLoadWarehouseId]
-					FROM tblLGLoadWarehouse LW
-					WHERE LW.[intLoadWarehouseRefId] = x.[intLoadWarehouseId]
-						AND intLoadId = @intNewLoadId
-					)
-				,x.[strCategory]
-				,x.[strActivity]
-				,NULL [intType]
-				,I.[intItemId]
-				,x.[dblUnitRate]
-				,IU.[intItemUOMId]
-				,x.[dblQuantity]
-				,x.[dblCalculatedAmount]
-				,x.[dblActualAmount]
-				,x.[ysnChargeCustomer]
-				,x.[dblBillAmount]
-				,x.[ysnPrint]
-				,x.[intSort]
-				,x.[strComments]
-				,[intLoadWarehouseServicesId]
-			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseServicesViews/vyuLGLoadWarehouseServicesView', 2) WITH (
-					[intLoadWarehouseServicesId] INT
-					,[intConcurrencyId] INT
-					,[intLoadWarehouseId] INT
-					,[strCategory] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,[strActivity] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[intType] INT
-					,[intItemId] [int]
-					,[dblUnitRate] NUMERIC(18, 6)
-					,[intItemUOMId] INT
-					,[dblQuantity] NUMERIC(18, 6)
-					,[dblCalculatedAmount] NUMERIC(18, 6)
-					,[dblActualAmount] NUMERIC(18, 6)
-					,[ysnChargeCustomer] [bit]
-					,[dblBillAmount] NUMERIC(18, 6)
-					,[ysnPrint] [bit]
-					,[intSort] INT
-					,[strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,[intBillId] [int]
-					,[intWarehouseRateMatrixDetailId] [int]
-					,strItemNo NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,strUnitMeasure NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadWarehouseServices LWS
-					JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWS.intLoadWarehouseId
-					WHERE W.intLoadId = @intNewLoadId
-						AND LWS.intLoadWarehouseServicesRefId = x.intLoadWarehouseServicesId
-					)
+				EXEC dbo.uspCTGetTableDataInXML 'tblLGLoadWarehouseServices'
+					,@strLoadWarehouseCondition
+					,@strAckLoadWarehouseServicesXML OUTPUT
+					,NULL
+					,NULL
 
-			UPDATE LWS
-			SET [intConcurrencyId] = LWS.[intConcurrencyId] + 1
-				,[strCategory] = x.[strCategory]
-				,[strActivity] = x.[strActivity]
-				,[intItemId] = I.[intItemId]
-				,[dblUnitRate] = x.[dblUnitRate]
-				,[intItemUOMId] = IU.[intItemUOMId]
-				,[dblQuantity] = x.[dblQuantity]
-				,[dblCalculatedAmount] = x.[dblCalculatedAmount]
-				,[dblActualAmount] = x.[dblActualAmount]
-				,[ysnChargeCustomer] = x.[ysnChargeCustomer]
-				,[dblBillAmount] = x.[dblBillAmount]
-				,[ysnPrint] = x.[ysnPrint]
-				,[intSort] = x.[intSort]
-				,[strComments] = x.[strComments]
-			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseServicesViews/vyuLGLoadWarehouseServicesView', 2) WITH (
-					[intLoadWarehouseServicesId] INT
-					,[intConcurrencyId] INT
-					,[intLoadWarehouseId] INT
-					,[strCategory] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,[strActivity] NVARCHAR(1024) COLLATE Latin1_General_CI_AS
-					,[intType] INT
-					,[intItemId] [int]
-					,[dblUnitRate] NUMERIC(18, 6)
-					,[intItemUOMId] INT
-					,[dblQuantity] NUMERIC(18, 6)
-					,[dblCalculatedAmount] NUMERIC(18, 6)
-					,[dblActualAmount] NUMERIC(18, 6)
-					,[ysnChargeCustomer] [bit]
-					,[dblBillAmount] NUMERIC(18, 6)
-					,[ysnPrint] [bit]
-					,[intSort] INT
-					,[strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,[intBillId] [int]
-					,[intWarehouseRateMatrixDetailId] [int]
-					,strItemNo NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					,strUnitMeasure NVARCHAR(300) COLLATE Latin1_General_CI_AS
-					) x
-			JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseServicesRefId = x.intLoadWarehouseServicesId
-			JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWS.intLoadWarehouseId
-				AND W.intLoadId = @intNewLoadId
-			JOIN tblICItem I ON I.strItemNo = x.strItemNo
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
+				EXEC dbo.uspCTGetTableDataInXML 'tblLGLoadWarehouseContainer'
+					,@strLoadWarehouseCondition
+					,@strAckLoadWarehouseContainerXML OUTPUT
+					,NULL
+					,NULL
+			END
+			ELSE
+			BEGIN
+				SELECT @strHeaderCondition = 'intLoadId = ' + LTRIM(@intNewLoadId)
 
-			DELETE LWS
-			FROM tblLGLoadWarehouseServices LWS
-			JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWS.intLoadWarehouseId
-			WHERE W.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadWarehouseServicesViews/vyuLGLoadWarehouseServicesView', 2) WITH (intLoadWarehouseServicesId INT) x
-					WHERE LWS.intLoadWarehouseServicesRefId = x.intLoadWarehouseServicesId
-					)
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadAckView'
+					,@strHeaderCondition
+					,@strAckLoadXML OUTPUT
 
-			EXEC sp_xml_removedocument @idoc
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadDetailAckView'
+					,@strHeaderCondition
+					,@strAckLoadDetailXML OUTPUT
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadWarehouseContainer
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadNotifyPartiesAckView'
+					,@strHeaderCondition
+					,@strAckLoadNotifyPartyXML OUTPUT
 
-			--Load warehouse Containers
-			INSERT INTO tblLGLoadWarehouseContainer (
-				[intConcurrencyId]
-				,[intLoadWarehouseId]
-				,[intLoadContainerId]
-				,[intLoadWarehouseContainerRefId]
-				)
-			SELECT 1 AS [intConcurrencyId]
-				,(
-					SELECT TOP 1 [intLoadWarehouseId]
-					FROM tblLGLoadWarehouse LW
-					WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-						AND intLoadId = @intNewLoadId
-					)
-				,(
-					SELECT TOP 1 [intLoadContainerId]
-					FROM tblLGLoadContainer LC
-					WHERE LC.intLoadContainerRefId = x.intLoadContainerId
-						AND intLoadId = @intNewLoadId
-					)
-				,[intLoadWarehouseContainerId]
-			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseServicesContainer', 2) WITH (
-					[intLoadWarehouseId] INT
-					,[intLoadContainerId] INT
-					,[intLoadWarehouseContainerId] INT
-					) x
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblLGLoadWarehouseContainer LWC
-					JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWC.intLoadWarehouseId
-					WHERE W.intLoadId = @intNewLoadId
-						AND LWC.[intLoadWarehouseContainerRefId] = x.[intLoadWarehouseContainerId]
-					)
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadDocumentsAckView'
+					,@strHeaderCondition
+					,@strAckLoadDocumentXML OUTPUT
 
-			UPDATE LWC
-			SET [intConcurrencyId] = LWC.[intConcurrencyId] + 1
-				,[intLoadWarehouseId] = (
-					SELECT TOP 1 [intLoadWarehouseId]
-					FROM tblLGLoadWarehouse LW
-					WHERE LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-						AND intLoadId = @intNewLoadId
-					)
-				,[intLoadContainerId] = (
-					SELECT TOP 1 [intLoadContainerId]
-					FROM tblLGLoadContainer LC
-					WHERE LC.intLoadContainerRefId = x.intLoadContainerId
-						AND intLoadId = @intNewLoadId
-					)
-			FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseServicesContainer', 2) WITH (
-					[intLoadWarehouseId] INT
-					,[intLoadContainerId] INT
-					,[intLoadWarehouseContainerId] INT
-					) x
-			JOIN tblLGLoadWarehouseContainer LWC ON LWC.[intLoadWarehouseContainerRefId] = x.[intLoadWarehouseContainerId]
-			JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWC.intLoadWarehouseId
-				AND W.intLoadId = @intNewLoadId
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadContainerAckView'
+					,@strHeaderCondition
+					,@strAckLoadContainerXML OUTPUT
 
-			DELETE LWC
-			FROM tblLGLoadWarehouseContainer LWC
-			JOIN tblLGLoadWarehouse W ON W.intLoadWarehouseId = LWC.intLoadWarehouseId
-			WHERE W.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadWarehouseContainerViews/vyuLGLoadWarehouseServicesContainer', 2) WITH ([intLoadWarehouseContainerId] INT) x
-					WHERE LWC.[intLoadWarehouseContainerRefId] = x.[intLoadWarehouseContainerId]
-					)
+				SELECT @strLoadContainerId = COALESCE(@strLoadContainerId + ',', '') + CAST(intLoadContainerId AS VARCHAR(5))
+				FROM tblLGLoadContainer
+				WHERE intLoadId = @intNewLoadId
 
-			SELECT @strHeaderCondition = 'intLoadId = ' + LTRIM(@intNewLoadId)
+				SELECT @strLoadDetailContainerLinkCondition = 'intLoadContainerId IN (' + LTRIM(@strLoadContainerId) + ')'
 
-			EXEC uspCTGetTableDataInXML 'tblLGLoad'
-				,@strHeaderCondition
-				,@strAckLoadXML OUTPUT
+				EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadDetailContainerLinkAckView'
+					,@strLoadDetailContainerLinkCondition
+					,@strAckLoadDetailContainerLinkXML OUTPUT
+					,NULL
+					,NULL
 
-			EXEC uspCTGetTableDataInXML 'tblLGLoadDetail'
-				,@strHeaderCondition
-				,@strAckLoadDetailXML OUTPUT
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadCostAckView'
+					,@strHeaderCondition
+					,@strAckLoadCostXML OUTPUT
 
-			EXEC uspCTGetTableDataInXML 'tblLGLoadNotifyParties'
-				,@strHeaderCondition
-				,@strAckLoadNotifyPartyXML OUTPUT
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadStorageCostAckView'
+					,@strHeaderCondition
+					,@strAckLoadStorageCostXML OUTPUT
 
-			EXEC uspCTGetTableDataInXML 'tblLGLoadDocuments'
-				,@strHeaderCondition
-				,@strAckLoadDocumentXML OUTPUT
+				EXEC uspCTGetTableDataInXML 'vyuIPLoadWarehouseAckView'
+					,@strHeaderCondition
+					,@strAckLoadWarehouseXML OUTPUT
 
-			EXEC uspCTGetTableDataInXML 'tblLGLoadContainer'
-				,@strHeaderCondition
-				,@strAckLoadContainerXML OUTPUT
+				SELECT @strLoadWarehouseId = COALESCE(@strLoadWarehouseId + ',', '') + CAST(intLoadWarehouseId AS VARCHAR(5))
+				FROM tblLGLoadWarehouse
+				WHERE intLoadId = @intNewLoadId
 
-			SELECT @strLoadContainerId = COALESCE(@strLoadContainerId + ',', '') + CAST(intLoadContainerId AS VARCHAR(5))
-			FROM tblLGLoadContainer
-			WHERE intLoadId = @intNewLoadId
+				SELECT @strLoadWarehouseCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 
-			SELECT @strLoadDetailContainerLinkCondition = 'intLoadContainerId IN (' + LTRIM(@strLoadContainerId) + ')'
+				EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadWarehouseServicesAckView'
+					,@strLoadWarehouseCondition
+					,@strAckLoadWarehouseServicesXML OUTPUT
+					,NULL
+					,NULL
 
-			EXEC dbo.uspCTGetTableDataInXML 'tblLGLoadDetailContainerLink'
-				,@strLoadDetailContainerLinkCondition
-				,@strAckLoadDetailContainerLinkXML OUTPUT
-				,NULL
-				,NULL
-
-			EXEC uspCTGetTableDataInXML 'tblLGLoadCost'
-				,@strHeaderCondition
-				,@strAckLoadCostXML OUTPUT
-
-			EXEC uspCTGetTableDataInXML 'tblLGLoadStorageCost'
-				,@strHeaderCondition
-				,@strAckLoadStorageCostXML OUTPUT
-
-			EXEC uspCTGetTableDataInXML 'tblLGLoadWarehouse'
-				,@strHeaderCondition
-				,@strAckLoadWarehouseXML OUTPUT
-
-			SELECT @strLoadWarehouseId = COALESCE(@strLoadWarehouseId + ',', '') + CAST(intLoadWarehouseId AS VARCHAR(5))
-			FROM tblLGLoadWarehouse
-			WHERE intLoadId = @intNewLoadId
-
-			SELECT @strLoadWarehouseCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
-
-			EXEC dbo.uspCTGetTableDataInXML 'tblLGLoadWarehouseServices'
-				,@strLoadWarehouseCondition
-				,@strAckLoadWarehouseServicesXML OUTPUT
-				,NULL
-				,NULL
-
-			EXEC dbo.uspCTGetTableDataInXML 'tblLGLoadWarehouseContainer'
-				,@strLoadWarehouseCondition
-				,@strAckLoadWarehouseContainerXML OUTPUT
-				,NULL
-				,NULL
+				EXEC dbo.uspCTGetTableDataInXML 'vyuIPLoadWarehouseContainerAckView'
+					,@strLoadWarehouseCondition
+					,@strAckLoadWarehouseContainerXML OUTPUT
+					,NULL
+					,NULL
+			END
 
 			SELECT @intLoadScreenId = intScreenId
 			FROM tblSMScreen
@@ -3998,6 +4242,127 @@ BEGIN TRY
 			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
+				,@screenId=@intLoadScreenId
+				,@populatedByInterCompany=1
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strLogXML
+
+			SELECT @strAuditUserName = NULL
+
+			SELECT @strAuditUserName = strName
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS)
+
+			SELECT @intAuditLogUserId = NULL
+
+			SELECT @intAuditLogUserId = CE.intEntityId
+			FROM tblEMEntity CE
+			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+			WHERE ET1.strType = 'User'
+				AND CE.strName = @strAuditUserName
+				--AND CE.strEntityNo <> ''
+
+			IF @intAuditLogUserId IS NULL
+			BEGIN
+				SELECT TOP 1 @intAuditLogUserId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = 'irelyadmin'
+			END
+
+			INSERT INTO tblSMLog (
+				dtmDate
+				,strRoute
+				,intTransactionId
+				,intConcurrencyId
+				,intEntityId
+				,strType
+				)
+			SELECT dtmDate
+				,strRoute
+				,@intTransactionRefId
+				,1
+				,@intAuditLogUserId
+				,'Audit'
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (
+					intLogId INT
+					,dtmDate DATETIME
+					,strRoute NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					)
+
+			SELECT @intLogId = SCOPE_IDENTITY();
+
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAuditXML
+
+			DECLARE @tblSMAudit TABLE (
+				intAuditId INT
+				,intAuditRefId INT
+				)
+
+			DELETE
+			FROM @tblSMAudit
+
+			INSERT INTO tblSMAudit (
+				intLogId
+				,strAction
+				,strChange
+				,strFrom
+				,strTo
+				,strAlias
+				,ysnField
+				,ysnHidden
+				,intKeyValue
+				--,intParentAuditId
+				,intConcurrencyId
+				)
+			OUTPUT inserted.intAuditId
+				,inserted.intKeyValue
+			INTO @tblSMAudit
+			SELECT @intLogId
+				,strAction
+				,strChange
+				,strFrom
+				,strTo
+				,strAlias
+				,ysnField
+				,ysnHidden
+				,intAuditId
+				--,(
+				--	SELECT TOP 1 A.intAuditId
+				--	FROM tblSMAudit A
+				--	WHERE intLogId = @intLogId
+				--		AND A.intKeyValue = x.intParentAuditId
+				--	)
+				,1
+			FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+					intLogId INT
+					,strAction NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strChange NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strFrom NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strTo NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strAlias NVARCHAR(205) Collate Latin1_General_CI_AS
+					,ysnField BIT
+					,ysnHidden BIT
+					,intAuditId INT
+					,intParentAuditId INT
+					) x
+
+			UPDATE A1
+			SET intParentAuditId = (
+					SELECT TOP 1 A2.intAuditId
+					FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+							intAuditId INT
+							,intParentAuditId INT
+							) x
+					JOIN @tblSMAudit A2 ON A2.intAuditRefId = x.intParentAuditId
+					WHERE x.intAuditId = A.intAuditRefId
+					)
+			FROM @tblSMAudit A
+			JOIN tblSMAudit A1 ON A.intAuditId = A1.intAuditId
+
+			EXEC sp_xml_removedocument @idoc
 
 			DECLARE @strSQL NVARCHAR(MAX)
 				,@strServerName NVARCHAR(50)
@@ -4010,7 +4375,7 @@ BEGIN TRY
 
 			IF EXISTS (
 					SELECT 1
-					FROM master.dbo.sysdatabases
+					FROM sys.databases
 					WHERE name = @strDatabaseName
 					)
 			BEGIN
@@ -4105,6 +4470,9 @@ BEGIN TRY
 
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Processed'
+				,intStatusId = 1
+				,strReference = @strNewLoadNumber
+				,intReferenceId = @intNewLoadId
 			WHERE intId = @intId
 
 			IF @intTransactionCount = 0
@@ -4124,6 +4492,9 @@ BEGIN TRY
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
+				,strReference = @strNewLoadNumber
+				,intReferenceId = @intNewLoadId
 			WHERE intId = @intId
 
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
@@ -4136,9 +4507,9 @@ BEGIN TRY
 
 	UPDATE S
 	SET strFeedStatus = NULL
-	From tblLGIntrCompLogisticsStg S
-	JOIN @tblLGIntrCompLogisticsStg PS on PS.intId=S.intId
-	Where S.strFeedStatus = 'In-Progress'
+	FROM tblLGIntrCompLogisticsStg S
+	JOIN @tblLGIntrCompLogisticsStg PS ON PS.intId = S.intId
+	WHERE S.strFeedStatus = 'In-Progress'
 
 	IF @strTransactionType IN (
 			'Outbound Shipment'
@@ -4167,14 +4538,13 @@ BEGIN TRY
 			)
 	BEGIN
 		--DECLARE @intFreightTermId INT
-		SELECT @intFreightTermId = intFreightTermId
-		FROM tblSMFreightTerms
-		WHERE strFreightTerm = 'Pickup'
-
+		--SELECT @intFreightTermId = intFreightTermId
+		--FROM tblSMFreightTerms
+		--WHERE strFreightTerm = 'Pickup'
 		UPDATE tblLGLoad
 		SET intPurchaseSale = 1
 			,intSourceType = 2
-			,intFreightTermId = @intFreightTermId
+		--,intFreightTermId = @intFreightTermId
 		WHERE intLoadId = @intNewLoadId
 
 		IF EXISTS (
@@ -4200,8 +4570,6 @@ BEGIN TRY
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE LD.intLoadId = @intNewLoadId
 	END
-
-	EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
 
 	IF ISNULL(@strInfo1, '') <> ''
 		SELECT @strInfo1 = LEFT(@strInfo1, LEN(@strInfo1) - 1)

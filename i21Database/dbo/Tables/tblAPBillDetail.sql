@@ -28,6 +28,8 @@
 	[intLoadDetailId]    INT             NULL,
 	[intLoadShipmentCostId]    INT             NULL,
 	[intLoadId]    INT             NULL,
+	[intWeightClaimId]    INT             NULL,
+	[intWeightClaimDetailId]    INT             NULL,
 	[intScaleTicketId]    INT             NULL,
 	[intTicketId]    INT             NULL,
 	[intCCSiteDetailId]    INT             NULL,
@@ -35,6 +37,7 @@
 	[intPrepayTransactionId]    INT             NULL,
 	[intReallocationId]    INT             NULL,
 	[intItemBundleId]	INT 	NULL,
+	[intLinkingId]	INT NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblBundleTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
@@ -105,8 +108,9 @@
 	CONSTRAINT [FK_tblAPBillDetail_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES tblICInventoryReceiptItem([intInventoryReceiptItemId]),
 	CONSTRAINT [FK_tblAPBillDetail_intPaycheckHeaderId] FOREIGN KEY ([intPaycheckHeaderId]) REFERENCES tblPRPaycheck([intPaycheckId]),
 	CONSTRAINT [FK_tblAPBillDetail_intPurchaseDetailId] FOREIGN KEY ([intPurchaseDetailId]) REFERENCES tblPOPurchaseDetail([intPurchaseDetailId]),
-	CONSTRAINT [FK_tblAPBillDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES tblLGLoadDetail([intLoadDetailId]),
+	--CONSTRAINT [FK_tblAPBillDetail_intLoadDetailId] FOREIGN KEY ([intLoadDetailId]) REFERENCES tblLGLoadDetail([intLoadDetailId]), /* this is a duplicate FK */
 	CONSTRAINT [FK_tblAPBillDetail_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
+	CONSTRAINT [FK_tblAPBillDetail_intWeightClaimDetailId] FOREIGN KEY ([intWeightClaimDetailId]) REFERENCES tblLGWeightClaimDetail([intWeightClaimDetailId]),
 	CONSTRAINT [FK_tblAPBillDetail_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES tblARInvoice([intInvoiceId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblHDTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES tblHDTicket([intTicketId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblAPBillReallocation] FOREIGN KEY ([intReallocationId]) REFERENCES tblAPBillReallocation([intReallocationId]),
@@ -122,12 +126,12 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptItemId]
 		ON [dbo].[tblAPBillDetail]([intInventoryReceiptItemId] ASC)
-		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived, intInventoryReceiptChargeId)
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptChargeId]
 		ON [dbo].[tblAPBillDetail]([intInventoryReceiptChargeId] ASC)
-		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived, intInventoryReceiptItemId)
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intLoadDetailId]
@@ -144,7 +148,10 @@ CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intSettleStorageId]
 		ON [dbo].[tblAPBillDetail]([intSettleStorageId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
-
+CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intContractDetailId]
+		ON [dbo].[tblAPBillDetail]([intContractDetailId] ASC)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBillDetail]
 (
 	[intBillId] ASC,

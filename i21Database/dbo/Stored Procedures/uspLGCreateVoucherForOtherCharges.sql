@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
 	DECLARE @xmlLoadCosts XML
+	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	DECLARE @voucherDetailData TABLE (
 		intItemRecordId INT Identity(1, 1)
@@ -41,10 +42,13 @@ BEGIN TRY
 		,intCostUOMId INT
 		,intLoadCostId INT
 		,ysnInventoryCost BIT
+		,ysnAccrue BIT
 		,intItemUOMId INT
 		,dblUnitQty DECIMAL(38,20)
 		,dblCostUnitQty DECIMAL(38,20)
 		,intCurrencyId INT
+		,intCurrencyExchangeRateTypeId INT NULL
+		,dblExchangeRate DECIMAL(18,6) DEFAULT(1)
 		,intSubLocationId INT
 		,intStorageLocationId INT
 		)
@@ -149,10 +153,13 @@ BEGIN TRY
 		,intCostUOMId
 		,intLoadCostId
 		,ysnInventoryCost
+		,ysnAccrue
 		,intItemUOMId
 		,dblUnitQty
 		,dblCostUnitQty
 		,intCurrencyId
+		,intCurrencyExchangeRateTypeId
+		,dblExchangeRate
 		,intSubLocationId
 		,intStorageLocationId
 		)
@@ -169,13 +176,17 @@ BEGIN TRY
 		,intCostUOMId = V.intPriceItemUOMId
 		,intLoadCostId = V.intLoadCostId
 		,ysnInventoryCost = I.ysnInventoryCost
+		,ysnAccrue = LC.ysnAccrue
 		,intItemUOMId = V.intItemUOMId
 		,dblUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(ItemUOM.dblUnitQty,1) END
 		,dblCostUnitQty = CASE WHEN V.strCostMethod IN ('Amount','Percentage') THEN 1 ELSE ISNULL(CostUOM.dblUnitQty,1) END
 		,intCurrencyId = V.intCurrencyId
+		,intCurrencyExchangeRateTypeId = FX.intForexRateTypeId
+		,dblExchangeRate = COALESCE(LC.dblFX, FX.dblFXRate, 1)
 		,intSubLocationId = NULL
 		,intStorageLocationId = NULL
 	FROM vyuLGLoadCostForVendor V
+	JOIN tblLGLoadCost LC ON LC.intLoadCostId = V.intLoadCostId
 	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = V.intLoadDetailId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
 			WHEN ISNULL(LD.intPContractDetailId, 0) = 0
@@ -188,31 +199,18 @@ BEGIN TRY
 	JOIN tblICItem I ON I.intItemId = V.intItemId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = V.intItemUOMId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = V.intPriceItemUOMId
+	LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = V.intCurrencyId
+	OUTER APPLY (SELECT	TOP 1  
+					intForexRateTypeId = RD.intRateTypeId
+					,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
+					FROM tblSMCurrencyExchangeRate ER
+					JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+					WHERE @DefaultCurrencyId <> ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)
+						AND ((ER.intFromCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
+							OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CUR.intMainCurrencyId, CUR.intCurrencyID)))
+					ORDER BY RD.dtmValidFromDate DESC) FX
 	WHERE V.intLoadId = @intLoadId AND V.intBillId IS NULL
 		AND ((V.intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts)) OR (NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts))) 
-	GROUP BY V.intEntityVendorId
-		,CH.intContractHeaderId
-		,CD.intContractDetailId
-		,ItemLoc.intItemLocationId
-		,V.intItemId
-		,V.intLoadId
-		,V.strLoadNumber
-		,V.dblNet
-		,LD.intLoadId
-		,LD.intLoadDetailId
-		,V.intLoadCostId
-		,I.ysnInventoryCost
-		,V.intItemUOMId
-		,V.intPriceItemUOMId
-		,ItemUOM.dblUnitQty
-		,CostUOM.dblUnitQty
-		,LD.dblQuantity
-		,V.strCostMethod
-		,V.dblPrice
-		,V.dblTotal
-		,V.intCurrencyId
-		,V.intSubLocationId
-		,V.intStorageLocationId
 
 	INSERT INTO @distinctVendor
 	SELECT DISTINCT intVendorEntityId
@@ -297,6 +295,7 @@ BEGIN TRY
 				,[dblTax]
 				,[dblDiscount]
 				,[dblExchangeRate]
+				,[intCurrencyExchangeRateTypeId]
 				,[ysnSubCurrency]
 				,[intSubCurrencyCents]
 				,[intAccountId]
@@ -340,10 +339,13 @@ BEGIN TRY
 				,[intCostCurrencyId] = VDD.intCurrencyId
 				,[dblTax] = 0
 				,[dblDiscount] = 0
-				,[dblExchangeRate] = 1
+				,[dblExchangeRate] = VDD.dblExchangeRate
+				,[intCurrencyExchangeRateTypeId] = VDD.intCurrencyExchangeRateTypeId
 				,[ysnSubCurrency] = CUR.ysnSubCurrency
 				,[intSubCurrencyCents] = CUR.intCent
-				,[intAccountId] = dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'Other Charge Expense')
+				,[intAccountId] = CASE WHEN (CP.ysnEnableAccrualsForOutbound = 1 AND L.intPurchaseSale = 2 AND VDD.ysnAccrue = 1 AND VDD.intVendorEntityId IS NOT NULL) 
+					THEN dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'AP Clearing') 
+					ELSE dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'Other Charge Expense') END
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
 				,[ysnStage] = CAST(CASE WHEN (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
@@ -354,6 +356,7 @@ BEGIN TRY
 				INNER JOIN tblLGLoad L on VDD.intLoadId = L.intLoadId
 				INNER JOIN tblICItem I ON I.intItemId = VDD.intItemId
 				LEFT JOIN tblSMCurrency CUR ON VDD.intCurrencyId = CUR.intCurrencyID
+				OUTER APPLY tblLGCompanyPreference CP
 				OUTER APPLY (SELECT TOP 1 ysnCreateOtherCostPayable = ISNULL(ysnCreateOtherCostPayable, 0) FROM tblCTCompanyPreference) COC
 				OUTER APPLY (SELECT TOP 1 CTC.intContractCostId FROM tblCTContractCost CTC
 						WHERE CD.intContractDetailId = CTC.intContractDetailId
@@ -455,6 +458,7 @@ BEGIN TRY
 					,[dblTax]
 					,[dblDiscount]
 					,[dblExchangeRate]
+					,[intCurrencyExchangeRateTypeId]
 					,[ysnSubCurrency]
 					,[intSubCurrencyCents]
 					,[intAccountId]
@@ -498,7 +502,8 @@ BEGIN TRY
 					,[intCostCurrencyId] = VDD.intCurrencyId
 					,[dblTax] = 0
 					,[dblDiscount] = 0
-					,[dblExchangeRate] = 1
+					,[dblExchangeRate] = VDD.dblExchangeRate
+					,[intCurrencyExchangeRateTypeId] = VDD.intCurrencyExchangeRateTypeId
 					,[ysnSubCurrency] = CUR.ysnSubCurrency
 					,[intSubCurrencyCents] = CUR.intCent
 					,[intAccountId] = CASE WHEN (CTC.intContractCostId IS NULL) THEN dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'Other Charge Expense') ELSE VDD.intAccountId END
@@ -598,6 +603,7 @@ BEGIN TRY
 					,[dblTax]
 					,[dblDiscount]
 					,[dblExchangeRate]
+					,[intCurrencyExchangeRateTypeId]
 					,[ysnSubCurrency]
 					,[intSubCurrencyCents]
 					,[intAccountId]
@@ -642,7 +648,8 @@ BEGIN TRY
 					,[intCostCurrencyId] = VDD.intCurrencyId
 					,[dblTax] = 0
 					,[dblDiscount] = 0
-					,[dblExchangeRate] = 1
+					,[dblExchangeRate] = VDD.dblExchangeRate
+					,[intCurrencyExchangeRateTypeId] = VDD.intCurrencyExchangeRateTypeId
 					,[ysnSubCurrency] = CUR.ysnSubCurrency
 					,[intSubCurrencyCents] = CUR.intCent
 					,[intAccountId] = VDD.intAccountId

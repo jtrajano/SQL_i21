@@ -11,7 +11,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
 		
-		SELECT * FROM tblARCustomerActivityStagingTable
+		SELECT *,0 [dblUnitsRecap], 0 [dblAmountsRecap] FROM tblARCustomerActivityStagingTable
 	END
 
 -- Declare the variables.
@@ -450,6 +450,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		  AND (@strTransactionType IS NULL OR I.strType LIKE  '%' + @strTransactionType + '%')
 		  AND (@strPaymentIds IS NULL OR 0 = 1)
+		  AND (@ysnPrintDetail = 1 OR (@ysnPrintDetail = 0 AND I.strType <> 'CF Tran'))
 	END
 ELSE
 	BEGIN
@@ -462,6 +463,7 @@ ELSE
 		  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFrom AND @dtmDateTo
 		  AND (@strTransactionType IS NULL OR I.strType LIKE  '%' + @strTransactionType + '%')
 		  AND (@strPaymentIds IS NULL OR 0 = 1)
+		  AND (@ysnPrintDetail = 1 OR (@ysnPrintDetail = 0 AND I.strType <> 'CF Tran'))
 	END
 
 --FILTERED PAYMENTS
@@ -525,6 +527,7 @@ SELECT intTransactionId			= I.intInvoiceId
 	 , strTransactionNumber		= I.strInvoiceNumber
 	 , strTransactionType		= I.strTransactionType
 	 , strActivityType			= 'Invoice'
+	 , strType					= I.strType
 	 , dtmTransactionDate		= I.dtmDate
 	 , dblInvoiceTotal			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblInvoiceSubtotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
@@ -614,6 +617,16 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom		= @dtmDateFrom
 										, @strCustomerIds	= @strCustomerIds
 										, @intEntityUserId	= @intEntityUserId
 
+IF ISNULL(@ysnPrintDetail, 0) = 0
+	BEGIN
+		UPDATE tblARCustomerAgingStagingTable
+		SET dblFuture	= 0
+		  , dblTotalAR	= dblTotalAR - ISNULL(dblFuture, 0)
+		WHERE intEntityUserId = @intEntityUserId
+	END
+
+DELETE FROM tblARCustomerActivityStagingTable WHERE intEntityUserId = @intEntityUserId
+
 IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Totals Only'
 	BEGIN
 		--#TRANSACTIONS
@@ -622,13 +635,12 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			 , strTransactionType		= I.strTransactionType
 			 , strActivityType			= 'Invoice'
 			 , dtmTransactionDate		= I.dtmTransactionDate
-			 , dblInvoiceTotal			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+			 , dblInvoiceTotal			= CASE  WHEN I.strType = 'Service Charge' THEN  0 ELSE  CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END END 
 			 , dblInvoiceSubtotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
 			 , dblInvoiceLineTotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceLineTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceLineTotal, 0) END
 			 , dblPayment				= NULL
 			 , dblDiscount				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblDiscount, 0) * -1 ELSE ISNULL(I.dblDiscount, 0) END
-			 , dblInterest				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END
-			 , intEntityCustomerId		= I.intEntityCustomerId
+			 , dblInterest				= CASE  WHEN I.strType = 'Service Charge' THEN CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END ELSE CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END END 			 , intEntityCustomerId		= I.intEntityCustomerId
 			 , intItemId				= I.intItemId
 			 , intInvoiceDetailId		= I.intInvoiceDetailId
 			 , intInvoiceDetailTaxId	= I.intInvoiceDetailTaxId
@@ -672,7 +684,6 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			 , dblTotalTax				= CAST(0 AS NUMERIC(18, 6))
 		FROM #PAYMENTS P
 
-		DELETE FROM tblARCustomerActivityStagingTable WHERE intEntityUserId = @intEntityUserId
 		INSERT INTO tblARCustomerActivityStagingTable (
 			  strReportDateRange
 			, dtmLastPaymentDate
@@ -805,7 +816,7 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 		ORDER BY TRANSACTIONS.dtmTransactionDate
 	END
 
-IF @ysnPrintRecap = 1
+IF @ysnPrintRecap = 1 OR @strFormattingOptions = 'Product Recap Totals Only'
 	BEGIN
 		EXEC dbo.uspARInvoiceProductRecapReport @dtmDateFrom = @dtmDateFrom
 											  , @dtmDateTo = @dtmDateTo
@@ -814,17 +825,38 @@ IF @ysnPrintRecap = 1
 											  , @strTransactionType = @strTransactionType
 											  , @strFormattingOptions = @strFormattingOptions
 											  , @intEntityUserId = @intEntityUserId
+											  , @ysnPrintDetail	= @ysnPrintDetail
 	END
 
 IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Totals Only'
 	BEGIN
-		SELECT * FROM tblARCustomerActivityStagingTable 
-		WHERE intEntityUserId = @intEntityUserId 
-		ORDER BY dtmTransactionDate
+	SELECT * FROM(
+		SELECT ISNULL(PostDatePayment.dtmDatePaid,PostDateInvoice.dtmPostDate)[PostDate],* FROM tblARCustomerActivityStagingTable ARST
+		LEFT  JOIN(
+		SELECT 
+			ARI.strInvoiceNumber[strInvoiceNumber2],
+			ARI.dtmPostDate
+			FROM dbo.tblARInvoice ARI
+		)  PostDateInvoice ON PostDateInvoice.strInvoiceNumber2=ARST.strTransactionNumber 
+		LEFT  JOIN(
+		SELECT 
+			ARI.strRecordNumber[strRecordNumber2],
+			ARI.dtmDatePaid
+			FROM dbo.tblARPayment ARI
+		)  PostDatePayment ON PostDatePayment.strRecordNumber2=ARST.strTransactionNumber 
+		OUTER APPLY(
+		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		)Recap
+
+		WHERE intEntityUserId = @intEntityUserId)NST
+		ORDER BY NST.PostDate 
 	END
 ELSE 
 	BEGIN
 		SELECT * FROM tblARCustomerActivityStagingTable 
+		OUTER APPLY(
+		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		)Recap
 		WHERE intEntityUserId = @intEntityUserId 
 		ORDER BY strCustomerName
 	END

@@ -46,12 +46,15 @@ RETURNS TABLE AS RETURN
 		,[intLoadShipmentId]				=	B.intLoadId
 		,[intLoadShipmentDetailId]			=	B.intLoadDetailId
 		,[intLoadShipmentCostId]			=	B.intLoadShipmentCostId
+		,[intWeightClaimId]					=	B.intLoadId
+		,[intWeightClaimDetailId]			=	B.intWeightClaimDetailId
 		,[intPaycheckHeaderId]				=	B.intPaycheckHeaderId
 		,[intCustomerStorageId]				=	B.intCustomerStorageId
 		,[intSettleStorageId]				=	B.intSettleStorageId
 		,[intCCSiteDetailId]				=	B.intCCSiteDetailId
 		,[intInvoiceId]						=	B.intInvoiceId
 		,[intBuybackChargeId]				=	B.intBuybackChargeId
+		,[intLinkingId]						=	B.intLinkingId
 		,[dblOrderQty]						=	B.dblQtyOrdered
 		,[dblOrderUnitQty]					=	B.dblUnitQty
 		,[intOrderUOMId]					=	B.intUnitOfMeasureId
@@ -100,6 +103,7 @@ RETURNS TABLE AS RETURN
 	OR	B.intContractDetailId > 0
 	OR	B.intLoadDetailId > 0
 	OR	B.intLoadShipmentCostId > 0
+	OR	B.intWeightClaimDetailId > 0
 	OR	B.intCustomerStorageId > 0
 	OR	B.intSettleStorageId > 0
 	OR	B.intPaycheckHeaderId > 0

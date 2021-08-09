@@ -37,5 +37,10 @@
 	[intRowNo] INT Default 0,
 	strRowState NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intRecipeItemId int,
+	ysnMailSent BIT NULL,
+	intStatusId int,
+	ysnImport Bit Constraint DF_tblMFRecipeItemStage_ysnImport Default 1,
+	intTrxSequenceNo BIGINT,
+	intParentTrxSequenceNo BIGINT,
 	CONSTRAINT [PK_tblMFRecipeItemStage_intRecipeItemStageId] PRIMARY KEY ([intRecipeItemStageId]),
 )

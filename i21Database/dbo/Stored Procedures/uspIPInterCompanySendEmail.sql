@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPInterCompanySendEmail @strMessageType NVARCHAR(50)
+﻿CREATE PROCEDURE [dbo].[uspIPInterCompanySendEmail] @strMessageType NVARCHAR(50)
 	,@strStatus NVARCHAR(50) = ''
 	,@ysnDailyNotification BIT=0
 	,@intStatusId INT = NULL
@@ -8,6 +8,7 @@ DECLARE @strStyle NVARCHAR(MAX)
 	,@strHeader NVARCHAR(MAX)
 	,@strDetail NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
+	,@intShipmentType int
 
 IF @strStatus = 'Success'
 	SELECT @intStatusId = 1 -- Processed
@@ -133,29 +134,60 @@ BEGIN
 						<th>&nbsp;From Company</th>
 						<th>&nbsp;Message</th>
 					</tr>'
-
-	IF EXISTS (
-			SELECT *
+	IF @intStatusId=1
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblCTContractStage S WITH (NOLOCK)
+				WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+					AND ysnMailSent IS NULL
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>
+				   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+			</tr>'
 			FROM tblCTContractStage S WITH (NOLOCK)
+			LEFT JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intCompanyId = S.intCompanyId
+			WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+				AND S.ysnMailSent IS NULL
+
+			UPDATE tblCTContractStage
+			SET ysnMailSent = 1
 			WHERE intStatusId = @intStatusId --1--Processed/2--Failed
 				AND ysnMailSent IS NULL
-			)
+		END
+	END
+	ELSE
 	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
-			   + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' 
-			   + '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' 
-			   + '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
-		</tr>'
-		FROM tblCTContractStage S WITH (NOLOCK)
-		LEFT JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intCompanyId = S.intCompanyId
-		WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
-			AND S.ysnMailSent IS NULL
+			IF EXISTS (
+				SELECT *
+				FROM tblCTContractStage S WITH (NOLOCK)
+				WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+					AND ysnMailSent IS NULL
+					AND intDeadlockError=0
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>
+				   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+			</tr>'
+			FROM tblCTContractStage S WITH (NOLOCK)
+			LEFT JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intCompanyId = S.intCompanyId
+			WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+				AND S.ysnMailSent IS NULL
+				AND S.intDeadlockError=0
 
-		UPDATE tblCTContractStage
-		SET ysnMailSent = 1
-		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
-			AND ysnMailSent IS NULL
+			UPDATE tblCTContractStage
+			SET ysnMailSent = 1
+			WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+				AND ysnMailSent IS NULL
+				AND intDeadlockError=0
+		END
 	END
 END
 
@@ -171,7 +203,7 @@ BEGIN
 	IF @strStatus = 'Success'
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strPriceContractNo, '') + '</td>' + 
+			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
 			   '<td>&nbsp;' + 'Success' + '</td>
@@ -210,8 +242,6 @@ IF @strMessageType = 'Contract Signature'
 BEGIN
 	SET @strHeader = '<tr>
 						<th>&nbsp;Contract Number</th>
-						<th>&nbsp;Row State</th>
-						<th>&nbsp;From Company</th>
 						<th>&nbsp;Message</th>
 					</tr>'
 
@@ -237,8 +267,41 @@ BEGIN
 	END
 END
 
-IF @strMessageType = 'Load'
+IF @strMessageType = 'Price Contract Approved in BU'
 BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Price Contract Number</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strPriceContractNo, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Approved' + '</td>
+		</tr>'
+		FROM tblCTPriceContractStage S WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent is null
+
+		UPDATE tblCTPriceContractStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId
+		AND ysnMailSent is null
+	END
+	
+END
+
+IF @strMessageType In ('Inbound Shipping Instruction','Inbound Shipment')
+BEGIN
+	If @strMessageType='Inbound Shipment'
+	Begin
+		Select @intShipmentType=1
+	End
+	Else
+	Begin
+		Select @intShipmentType=2
+	End
 	SET @strHeader = '<tr>
 						<th>&nbsp;Load Number</th>
 						<th>&nbsp;Row State</th>
@@ -246,41 +309,31 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
+	IF EXISTS (
+		SELECT *
+		FROM tblLGIntrCompLogisticsStg WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND intShipmentType=@intShipmentType
+			AND ysnMailSent IS NULL
+		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
+			   <td>&nbsp;' + ISNULL(S.strReference, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
+			   '<td>&nbsp;' + ISNULL(S.strMessage, 'Success') + '</td>
 		</tr>'
 		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
 		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
-		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent IS NULL
+			AND intShipmentType=@intShipmentType
 
 		UPDATE tblLGIntrCompLogisticsStg
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
-		</tr>'
-		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
-		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
-
-		UPDATE tblLGIntrCompLogisticsStg
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent IS NULL
+			AND intShipmentType=@intShipmentType
 	END
 END
 
@@ -383,6 +436,7 @@ BEGIN
 	SET @strHeader = '<tr>
 						<th>&nbsp;Transaction Id</th>
 						<th>&nbsp;Transaction Date</th>
+						<th>&nbsp;Trade No</th>
 						<th>&nbsp;From Company</th>
 						<th>&nbsp;Message</th>
 					</tr>'
@@ -397,11 +451,14 @@ BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmTransactionDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strInternalTradeNo, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
-		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName,S.strMessage
+		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName,S.strMessage,FOT.strInternalTradeNo
 		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
+		JOIN tblRKFutOptTransactionHeader H WITH (NOLOCK) ON H.intFutOptTransactionHeaderRefId = S.intFutOptTransactionHeaderId
+		JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		WHERE S.intStatusId = @intStatusId
 			AND S.ysnMailSent = 0) t
 
@@ -481,7 +538,7 @@ END
 
 -- Master Screens
 
-IF @strMessageType = 'Masters'
+IF @strMessageType = 'Quality Masters'
 BEGIN
 	SET @strHeader = '<tr>
 						<th>&nbsp;Id</th>
@@ -633,41 +690,18 @@ BEGIN
 		SET ysnMailSent = 1
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
-	END
+	END	
+END
 
--- IC, LG and RM Masters
-
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intItemId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Item' + '</td>
-	</tr>'
-	FROM tblICItemStage S WITH (NOLOCK)
-	WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
-		AND ISNULL(S.ysnMailSent, 0) = 0
-
-	UPDATE tblICItemStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-			
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intItemId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Item' + '</td>
-	</tr>'
-	FROM tblICItemStage S WITH (NOLOCK)
-	WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
-		AND ISNULL(S.ysnMailSent, 0) = 0
-
-	UPDATE tblICItemStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+IF @strMessageType = 'Freight Rate Matrix'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -692,6 +726,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Futures Month'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -716,6 +761,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Options Month'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -740,6 +796,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Settlement Price'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -764,6 +831,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Basis Entry'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -788,6 +866,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Forecast Price'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -812,6 +901,161 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Parent Quality Masters'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMAttributePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+				<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intAttributeId),'') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strAttributeName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Attribute' + '</td>
+		</tr>'
+		FROM tblQMAttributePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMAttributePreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMListPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+				<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intListId),'') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strListName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'List' + '</td>
+		</tr>'
+		FROM tblQMListPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMListPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMSampleTypePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intSampleTypeId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strSampleTypeName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Sample Type' + '</td>
+		</tr>'
+		FROM tblQMSampleTypePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMSampleTypePreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+	
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMPropertyPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intPropertyId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strPropertyName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Property' + '</td>
+		</tr>'
+		FROM tblQMPropertyPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMPropertyPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMTestPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intTestId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strTestName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Test' + '</td>
+		</tr>'
+		FROM tblQMTestPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMTestPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMProductPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intProductId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strProductName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Template' + '</td>
+		</tr>'
+		FROM tblQMProductPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMProductPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END	
 END
 
 IF @ysnDailyNotification = 1
@@ -844,6 +1088,201 @@ BEGIN
 		WHERE S.dtmFeedDate BETWEEN @dtmDate
 				AND @dtmDate2 
 				AND intMultiCompanyId =4
+END
+IF @strMessageType = 'Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblICItemStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + 'Success' + '</td>' + '<td>&nbsp;' + 'Item' + '</td>
+	</tr>'
+		FROM tblICItemStage S WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblICItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType = 'Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblICItemStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + '<td>&nbsp;' + 'Item' + '</td>
+	</tr>'
+		FROM tblICItemStage S WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblICItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType = 'Parent Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblICItemPreStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, S.intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(I.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
+	</tr>'
+		FROM tblICItemPreStage S WITH (NOLOCK)
+		JOIN tblICItem I on I.intItemId=S.intItemId
+		WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+			AND S.ysnMailSent IS NULL
+
+		UPDATE tblICItemPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType in('Sales Invoice','Credit Note for Weight Claim')
+BEGIN
+	DECLARE @intTransactionTypeId int
+	IF @strMessageType = 'Sales Invoice'
+		SELECT @intTransactionTypeId = 1
+	ELSE IF @strMessageType = 'Credit Note for Weight Claim'
+		SELECT @intTransactionTypeId = 11
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblARInvoiceStage  WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+			AND intTransactionTypeId=@intTransactionTypeId
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intInvoiceId), '') + '</td>' + '<td>&nbsp;' + ISNULL(strInvoiceNumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + '<td>&nbsp;' + 'Success' + '</td> 
+	</tr>'
+		FROM tblARInvoiceStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+			AND intTransactionTypeId=@intTransactionTypeId
+
+		UPDATE tblARInvoiceStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+			AND intTransactionTypeId=@intTransactionTypeId
+	END
+END
+
+IF @strMessageType ='Recipe'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM tblMFRecipeStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType ='Recipe Item'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Recipe Header Item No</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Recipe Created Y/N? </th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeItemStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeHeaderItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	<td>&nbsp;' + (Case When Exists(Select 1 from tblMFRecipeStage R Where R.strSessionId =RI.strSessionId and R.strItemNo =RI.strRecipeHeaderItemNo and R.strVersionNo =RI.strVersionNo and R.strMessage ='Success') Then 'Yes' Else 'No' End) + '</td> 
+	</tr>'
+		FROM tblMFRecipeItemStage RI WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
 END
 
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)

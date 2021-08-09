@@ -49,7 +49,8 @@ BEGIN TRY
 			@intFutureMonthId			INT,
 			@dblFutures					NUMERIC(18, 6),
 			@ysnUniqueEntityReference	BIT,
-			@ysnUsed					BIT = 0
+			@ysnUsed					BIT = 0,
+			@dblTotalPriced				NUMERIC(18, 6) = 0
 
 	SELECT	@ysnUniqueEntityReference = ysnUniqueEntityReference FROM tblCTCompanyPreference
 	--SELECT	@XML	=	dbo.[fnCTRemoveStringXMLTag](@XML,'strAmendmentLog')
@@ -129,6 +130,17 @@ BEGIN TRY
 			
 	);  
 
+	SELECT @dblTotalPriced = ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+	FROM (
+		SELECT dblQty = ISNULL(pfd.dblQuantity, 0) --dbo.fnCTConvertQtyToTargetCommodityUOM(@intCommodityId, tCum.intUnitMeasureId, fCum.intUnitMeasureId, ISNULL(pfd.dblQuantity, 0))
+		FROM tblCTPriceFixation pf
+		JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationId = pf.intPriceFixationId
+		--JOIN tblICCommodityUnitMeasure fCum ON fCum.intCommodityUnitMeasureId = @intCommodityUOMId
+		--JOIN tblICItemUOM tCum ON tCum.intItemUOMId = pfd.intQtyItemUOMId
+		WHERE intContractHeaderId = @intContractHeaderId 
+	) tbl
+	
+
 	IF @RowState = 'Added'
 	BEGIN
 		IF	@intContractTypeId IS NULL
@@ -155,7 +167,7 @@ BEGIN TRY
 				SET @ErrMsg = 'UOM is missing while creating contract.'
 				RAISERROR(@ErrMsg,16,1)
 			END
-			IF NOT EXISTS(SELECT * FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intCommodityUnitMeasureId = @intCommodityUOMId)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intCommodityUnitMeasureId = @intCommodityUOMId)
 			BEGIN
 				SET @ErrMsg = 'Combination of commodity id and UOM id is not matching.'
 				RAISERROR(@ErrMsg,16,1)
@@ -249,7 +261,12 @@ BEGIN TRY
 				SET @ErrMsg = 'No Of Lots is missing while creating contract.'
 				RAISERROR(@ErrMsg,16,1)
 			END
-
+			
+			IF (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0))
+			BEGIN
+				SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+				RAISERROR(@ErrMsg,16,1)
+			END
 		END
 
 		IF	@strContractNumber IS NULL
@@ -274,7 +291,7 @@ BEGIN TRY
 		END
 		
 
-		IF EXISTS(SELECT * FROM tblCTContractHeader WHERE intContractTypeId  = @intContractTypeId AND strContractNumber = @strContractNumber)
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE intContractTypeId  = @intContractTypeId AND strContractNumber = @strContractNumber)
 		BEGIN
 			SET @ErrMsg = 'Contract number is already available.'
 			RAISERROR(@ErrMsg,16,1)
@@ -283,8 +300,8 @@ BEGIN TRY
 		--Active check
 		
 		IF	@intEntityId IS NOT NULL AND (
-			(@intContractTypeId = 1 AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intEntityId AND ysnActive = 1 AND strEntityType = 'Vendor') ) OR
-			(@intContractTypeId = 2 AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intEntityId AND ysnActive = 1 AND strEntityType = 'Customer') )
+			(@intContractTypeId = 1 AND NOT EXISTS(SELECT TOP 1 1 FROM vyuCTEntity WHERE intEntityId = @intEntityId AND ysnActive = 1 AND strEntityType = 'Vendor') ) OR
+			(@intContractTypeId = 2 AND NOT EXISTS(SELECT TOP 1 1 FROM vyuCTEntity WHERE intEntityId = @intEntityId AND ysnActive = 1 AND strEntityType = 'Customer') )
 		)
 		BEGIN
 			SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intEntityId
@@ -292,63 +309,63 @@ BEGIN TRY
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intContractBasisId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblSMFreightTerms WHERE intFreightTermId = @intContractBasisId AND ysnActive = 1)
+		IF	@intContractBasisId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMFreightTerms WHERE intFreightTermId = @intContractBasisId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strFreightTerm FROM tblSMFreightTerms WHERE intFreightTermId = @intContractBasisId
 			SET @ErrMsg = 'Freight Term ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intTermId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblSMTerm WHERE intTermID = @intTermId AND ysnActive = 1)
+		IF	@intTermId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblSMTerm WHERE intTermID = @intTermId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strTerm FROM tblSMTerm WHERE intTermID = @intTermId
 			SET @ErrMsg = 'Term ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intSalespersonId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intSalespersonId AND ysnActive = 1 AND strEntityType = 'Salesperson')
+		IF	@intSalespersonId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM vyuCTEntity WHERE intEntityId = @intSalespersonId AND ysnActive = 1 AND strEntityType = 'Salesperson')
 		BEGIN
 			SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intSalespersonId
 			SET @ErrMsg = 'Salesperson ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intContractTextId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTContractText WHERE intContractTextId = @intContractTextId AND ysnActive = 1)
+		IF	@intContractTextId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractText WHERE intContractTextId = @intContractTextId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strTextCode FROM tblCTContractText WHERE intContractTextId = @intContractTextId
 			SET @ErrMsg = 'Contract Text ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intGradeId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTWeightGrade WHERE intWeightGradeId = @intGradeId AND ysnActive = 1)
+		IF	@intGradeId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblCTWeightGrade WHERE intWeightGradeId = @intGradeId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strWeightGradeDesc FROM tblCTWeightGrade WHERE intWeightGradeId = @intGradeId
 			SET @ErrMsg = 'Grade ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intWeightId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTWeightGrade WHERE intWeightGradeId = @intWeightId AND ysnActive = 1)
+		IF	@intWeightId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblCTWeightGrade WHERE intWeightGradeId = @intWeightId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strWeightGradeDesc FROM tblCTWeightGrade WHERE intWeightGradeId = @intWeightId
 			SET @ErrMsg = 'Weight ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intCropYearId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTCropYear WHERE intCropYearId = @intCropYearId AND ysnActive = 1)
+		IF	@intCropYearId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblCTCropYear WHERE intCropYearId = @intCropYearId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strCropYear FROM tblCTCropYear WHERE intCropYearId = @intCropYearId
 			SET @ErrMsg = 'Crop Year ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intAssociationId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblCTAssociation WHERE intAssociationId = @intAssociationId AND ysnActive = 1)
+		IF	@intAssociationId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblCTAssociation WHERE intAssociationId = @intAssociationId AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strName FROM tblCTAssociation WHERE intAssociationId = @intAssociationId
 			SET @ErrMsg = 'Association ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 
-		IF	@intProducerId IS NOT NULL AND NOT EXISTS(SELECT * FROM vyuCTEntity WHERE intEntityId = @intProducerId AND strEntityType = 'Producer' AND ysnActive = 1)
+		IF	@intProducerId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM vyuCTEntity WHERE intEntityId = @intProducerId AND strEntityType = 'Producer' AND ysnActive = 1)
 		BEGIN
 			SELECT @ErrMsg = strName FROM tblEMEntity WHERE intEntityId = @intProducerId
 			SET @ErrMsg = 'Producer ' + ISNULL(@ErrMsg,'selected') + ' is inactive.'
@@ -358,19 +375,19 @@ BEGIN TRY
 
 		SELECT	@intYear = YEAR(@dtmContractDate)
 		SELECT @intFiscalYearId = intFiscalYearId FROM tblGLFiscalYear WHERE strFiscalYear = LTRIM(@intYear)
-		IF EXISTS(SELECT * FROM tblGLFiscalYearPeriod WHERE intFiscalYearId = @intFiscalYearId AND @dtmContractDate BETWEEN dtmStartDate AND dtmEndDate AND ysnCTOpen = 0)
+		IF EXISTS(SELECT TOP 1 1 FROM tblGLFiscalYearPeriod WHERE intFiscalYearId = @intFiscalYearId AND @dtmContractDate BETWEEN dtmStartDate AND dtmEndDate AND ysnCTOpen = 0)
 		BEGIN
 			SET @ErrMsg = 'Selected contract date is in a fiscal period that has been closed.'
 			RAISERROR(@ErrMsg,16,1)
 		END
 	END
-	IF @RowState = 'Modified'
+	ELSE IF @RowState = 'Modified'
 	BEGIN
 		SELECT	@ysnMultiplePriceFixation	=	ISNULL(@ysnMultiplePriceFixation,ysnMultiplePriceFixation)
 		FROM	tblCTContractHeader
 		WHERE	intContractHeaderId	=	@intContractHeaderId
 
-		SELECT * FROM vyuCTSequenceUsageHistory WHERE intContractHeaderId = @intContractHeaderId
+		--SELECT * FROM vyuCTSequenceUsageHistory WHERE intContractHeaderId = @intContractHeaderId
 
 		IF EXISTS(SELECT TOP 1 1 FROM vyuCTSequenceUsageHistory WHERE intContractHeaderId = @intContractHeaderId AND ysnDeleted <> 1)
 		BEGIN
@@ -385,6 +402,12 @@ BEGIN TRY
 				SET @ErrMsg = 'Cannot reduce number of lots to '+LTRIM(CAST(@dblNoOfLots AS INT)) + '. As '+LTRIM(CAST(@dblLotsFixed AS INT)) + ' lots are price fixed.'
 				RAISERROR(@ErrMsg,16,1)
 			END
+		END
+
+		IF (@ysnMultiplePriceFixation = 1) AND (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0))
+		BEGIN
+			SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
+			RAISERROR(@ErrMsg,16,1)
 		END
 	END
 

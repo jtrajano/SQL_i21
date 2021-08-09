@@ -13,6 +13,7 @@
 	,@strShortName AS NVARCHAR(50) = NULL 
 	,@strUpcCode AS NVARCHAR(50) = NULL 
 	,@strLongUpcCode AS NVARCHAR(50) = NULL 
+	,@strStatus AS NVARCHAR(50) = NULL 
 	,@intEntityUserSecurityId AS INT 
 AS
 
@@ -48,6 +49,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Class') IS NULL
 		intClassId INT 
 	)
 
+IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Items') IS NULL  
+	CREATE TABLE #tmpUpdateItemForCStore_Items (
+		intItemId INT 
+	)
+
 -- Create the temp table for the audit log. 
 IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NULL  
 	CREATE TABLE #tmpUpdateItemForCStore_itemAuditLog (
@@ -58,12 +64,14 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NULL
 		,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		,strItemNo_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		,strShortName_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+		,strStatus_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		-- Modified Fields
 		,intCategoryId_New INT NULL
 		,strCountCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		,strItemNo_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		,strShortName_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+		,strStatus_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 	)
 ;
 
@@ -91,12 +99,14 @@ BEGIN
 		,strDescription_Original
 		,strItemNo_Original
 		,strShortName_Original
+		,strStatus_Original
 		-- Modified Fields
 		,intCategoryId_New
 		,strCountCode_New 
 		,strDescription_New 
 		,strItemNo_New
 		,strShortName_New
+		,strStatus_New
 	)
 	SELECT	[Changes].intItemId 
 			, [Changes].intCategoryId_Original 
@@ -104,11 +114,13 @@ BEGIN
 			, [Changes].strDescription_Original 
 			, [Changes].strItemNo_Original 
 			, [Changes].strShortName_Original
+			, [Changes].strStatus_Original
 			, [Changes].intCategoryId_New 
 			, [Changes].strCountCode_New 
 			, [Changes].strDescription_New 
 			, [Changes].strItemNo_New 
 			, [Changes].strShortName_New 
+			, [Changes].strStatus_New 
 	FROM	(
 				-- Merge will help us build the audit log and update the records at the same time. 
 				MERGE	
@@ -151,7 +163,12 @@ BEGIN
 						WHERE	(
 									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Category)
 									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Category WHERE intCategoryId = i.intCategoryId)			
-								)								
+								)	
+								AND
+								(
+									NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Items)
+									OR EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemForCStore_Items WHERE intItemId = i.intItemId)			
+								)	
 								AND (
 									@strDescription IS NULL 
 									OR i.strDescription = @strDescription 
@@ -181,6 +198,7 @@ BEGIN
 							,intModifiedByUserId = @intEntityUserSecurityId
 							,strItemNo = ISNULL(@strItemNo, item.strItemNo) 
 							,strShortName = ISNULL(@strShortName, item.strShortName) 
+							,strStatus = ISNULL(@strStatus, item.strStatus) 
 					OUTPUT 
 						$action
 						, inserted.intItemId 
@@ -190,12 +208,14 @@ BEGIN
 						, deleted.strDescription
 						, deleted.strItemNo
 						, deleted.strShortName
+						, deleted.strStatus
 						-- Modified values 
 						, inserted.intCategoryId
 						, inserted.strCountCode
 						, inserted.strDescription
 						, inserted.strItemNo
 						, inserted.strShortName 
+						, inserted.strStatus 
 
 			) AS [Changes] (
 				Action
@@ -206,12 +226,14 @@ BEGIN
 				, strDescription_Original
 				, strItemNo_Original
 				, strShortName_Original
+				, strStatus_Original
 				-- Modified values 
 				, intCategoryId_New
 				, strCountCode_New
 				, strDescription_New
 				, strItemNo_New 
 				, strShortName_New
+				, strStatus_New
 			)
 	WHERE	[Changes].Action = 'UPDATE'
 	;
@@ -254,7 +276,7 @@ BEGIN
 					WHEN MATCHED THEN 
 						UPDATE 
 						SET		
-							strUpcCode = @strUpcCode 
+							strUpcCode = ISNULL(@strUpcCode, itemUom.strUpcCode) 
 							,strLongUPCCode = ISNULL(@strLongUpcCode, itemUom.strLongUPCCode) 							
 					OUTPUT 
 						$action
@@ -335,6 +357,14 @@ BEGIN
 	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
 	WHERE
 		ISNULL(strShortName_Original, '') <> ISNULL(strShortName_New, '')
+	UNION ALL
+	SELECT	intItemId
+			,strDescription = 'C-Store updates the Status'
+			,strOld = strStatus_Original
+			,strNew = strStatus_New
+	FROM	#tmpUpdateItemForCStore_itemAuditLog auditLog
+	WHERE
+		ISNULL(strStatus_Original, '') <> ISNULL(strStatus_New, '')
 
 	OPEN loopAuditLog;
 
@@ -420,4 +450,4 @@ BEGIN
 	END 
 	CLOSE loopAuditLog;
 	DEALLOCATE loopAuditLog;
-END 
+END

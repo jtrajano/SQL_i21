@@ -22,7 +22,7 @@ SELECT
 	,dblBasis							= CD.dblBasis
 	,dblBasisInItemStockUOM				= dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM.intItemUOMId, CD.intBasisUOMId, CD.dblBasis)
 	,intPricingTypeId					= CD.intPricingTypeId
-	,strPricingType						= PT.strPricingType
+	,strPricingType						= PT_SEQ.strPricingType
 	,dtmStartDate						= CD.dtmStartDate
 	,intContractStatusId				= CD.intContractStatusId
 	,strContractStatus					= CS.strContractStatus
@@ -63,8 +63,10 @@ SELECT
 	,CD.dtmEndDate
 	,intGetContractDetailFutureMonthId = CD.intFutureMonthId
 	,ysnLoad = ISNULL(CH.ysnLoad,0)
+	,strPricingTypeHeader = PT_HEAD.strPricingType
+	,intPricingTypeHeader = PT_HEAD.intPricingTypeId
 FROM tblCTContractDetail CD
-CROSS JOIN tblCTCompanyPreference CP	
+CROSS JOIN tblCTCompanyPreference CP
 JOIN tblSMCompanyLocation CL 
 	ON CL.intCompanyLocationId = CD.intCompanyLocationId
 JOIN tblCTContractHeader CH	
@@ -75,8 +77,8 @@ JOIN tblCTContractType CT
 	ON CT.intContractTypeId	= CH.intContractTypeId
 LEFT JOIN tblCTContractStatus CS
 	ON CS.intContractStatusId = CD.intContractStatusId
-LEFT JOIN tblCTPricingType PT
-	ON PT.intPricingTypeId = CD.intPricingTypeId			
+LEFT JOIN tblCTPricingType PT_SEQ
+	ON PT_SEQ.intPricingTypeId = CD.intPricingTypeId			
 LEFT JOIN tblICItem Item 
 	ON Item.intItemId =	CD.intItemId
 LEFT JOIN tblICItemUOM ItemUOM
@@ -84,5 +86,9 @@ LEFT JOIN tblICItemUOM ItemUOM
 		AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblSMFreightTerms FT
 	ON FT.intFreightTermId = ISNULL(CD.intFreightTermId,CH.intFreightTermId)
-CROSS APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+LEFT JOIN tblCTPricingType PT_HEAD
+	ON PT_HEAD.intPricingTypeId = CH.intPricingTypeId
+OUTER APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+GO
+
 

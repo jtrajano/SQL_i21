@@ -14,14 +14,10 @@
 			,tblEMEntityPhoneNumber.strPhone
 			,strDirectionEntityType = 'Customer' COLLATE Latin1_General_CI_AS
 		from tblARCustomer
-			,[tblEMEntityToContact]
-			,tblEMEntity
-			,tblEMEntityPhoneNumber
-		where
-			[tblEMEntityToContact].intEntityId = tblARCustomer.intEntityId
-			and tblEMEntity.intEntityId = [tblEMEntityToContact].intEntityContactId
-			and tblEMEntityPhoneNumber.intEntityId = tblEMEntity.intEntityId
-
+			inner join [tblEMEntityToContact] on [tblEMEntityToContact].intEntityId = tblARCustomer.intEntityId
+			inner join tblEMEntity on tblEMEntity.intEntityId = [tblEMEntityToContact].intEntityContactId
+			inner join tblEMEntityPhoneNumber on tblEMEntityPhoneNumber.intEntityId = tblEMEntity.intEntityId
+		
 		union all
 
 		select
@@ -38,10 +34,6 @@
 			,tblEMEntityPhoneNumber.strPhone
 			,strDirectionEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 		from tblAPVendor
-			,[tblEMEntityToContact]
-			,tblEMEntity
-			,tblEMEntityPhoneNumber
-		where
-			[tblEMEntityToContact].intEntityId = tblAPVendor.intEntityId
-			and tblEMEntity.intEntityId = [tblEMEntityToContact].intEntityContactId
-			and tblEMEntityPhoneNumber.intEntityId = tblEMEntity.intEntityId
+			inner join [tblEMEntityToContact] on [tblEMEntityToContact].intEntityId = tblAPVendor.intEntityId
+			inner join tblEMEntity on tblEMEntity.intEntityId = [tblEMEntityToContact].intEntityContactId
+			inner join tblEMEntityPhoneNumber on tblEMEntityPhoneNumber.intEntityId = tblEMEntity.intEntityId

@@ -4,7 +4,13 @@ AS
 SELECT	ReceiptItem.intInventoryReceiptId
 		, ReceiptItem.intInventoryReceiptItemId
 		, Item.strItemNo
-		, strItemDescription = Item.strDescription
+		, strItemDescription = 
+			CASE 
+				WHEN placeHolderItem.intItemId IS NOT NULL THEN 
+					ReceiptItem.strImportDescription
+				ELSE 
+					Item.strDescription
+			END 
 		, Item.strLotTracking
 		, strUnitMeasure = ItemUnitMeasure.strUnitMeasure
 		, intItemUOMId = ItemUnitMeasure.intUnitMeasureId
@@ -249,6 +255,11 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 			ON ReceiptItem.intForexRateTypeId = forexType.intCurrencyExchangeRateTypeId
 		LEFT JOIN tblICItem Item 
 			ON Item.intItemId = ReceiptItem.intItemId
+		LEFT JOIN (
+			tblICItem placeHolderItem INNER JOIN tblICCompanyPreference pref
+				ON placeHolderItem.intItemId = pref.intItemIdHolderForReceiptImport
+		)
+			ON placeHolderItem.intItemId = ReceiptItem.intItemId
 		LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
 			ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
 		LEFT JOIN tblICStorageLocation StorageLocation 
@@ -351,7 +362,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 					,dblQuantity
 					,dblItemUOMCF
 					,strSourceNumber
-			FROM	vyuICGetInventoryTransferDetail TransferView
+			FROM	vyuICCompactInventoryTransferDetail TransferView
 			WHERE	TransferView.intInventoryTransferDetailId = ISNULL(ReceiptItem.intInventoryTransferDetailId, ReceiptItem.intSourceId)
 					AND (
 						Receipt.strReceiptType = 'Transfer Order'

@@ -45,4 +45,5 @@
     ,intCompanyId int
 	,ysnMailSent Bit
 	,dtmFeedDate					DATETIME CONSTRAINT DF_tblICItemStage_dtmFeedDate DEFAULT GETDATE()
+	,intStatusId int
 	)

@@ -38,8 +38,14 @@ SELECT
 	, Link.strInvoiceNumber
 	, Link.strShipmentNumber
 	, Link.strReceiptNumber
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryAdjustment Adj
 LEFT JOIN vyuICInventoryAdjustmentSourceLink Link
 	on Link.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Adj.intLocationId
 LEFT JOIN tblEMEntity UserEntity ON UserEntity.intEntityId = Adj.intEntityId
+OUTER APPLY (
+	SELECT TOP 1 fp.strPeriod
+	FROM tblGLFiscalYearPeriod fp
+	WHERE Adj.dtmAdjustmentDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+) fiscal

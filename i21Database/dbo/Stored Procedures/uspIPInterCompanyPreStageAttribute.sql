@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE uspIPInterCompanyPreStageAttribute @intAttributeId INT
+	,@strAttributeName NVARCHAR(50) = NULL
 	,@strRowState NVARCHAR(50) = NULL
 	,@intUserId INT = NULL
 AS
@@ -14,12 +15,14 @@ BEGIN TRY
 
 	INSERT INTO tblQMAttributePreStage (
 		intAttributeId
+		,strAttributeName
 		,strRowState
 		,intUserId
 		,strFeedStatus
 		,strMessage
 		)
 	SELECT @intAttributeId
+		,@strAttributeName
 		,@strRowState
 		,@intUserId
 		,''

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateInvoiceFromShipment]
 	@ShipmentId				INT
+    ,@ShipmentItemId                INT
     ,@UserId				INT
     ,@intContractHeaderId	INT
 	,@intContractDetailId	INT
@@ -177,6 +178,7 @@ INSERT INTO @EntriesForInvoice
     ,[intStorageScheduleTypeId]
     ,[intDestinationGradeId]
     ,[intDestinationWeightId]
+    ,[intPriceFixationDetailId]
     --,[strAddonDetailKey]
     --,[ysnAddonParent]
     --,[dblAddOnQuantity]
@@ -328,20 +330,22 @@ SELECT
     ,[intStorageScheduleTypeId]             = ARSI.[intStorageScheduleTypeId]
     ,[intDestinationGradeId]                = ARSI.[intDestinationGradeId]
     ,[intDestinationWeightId]               = ARSI.[intDestinationWeightId]
+    ,[intPriceFixationDetailId]             = @intPriceFixationDetailId
     --,[strAddonDetailKey]                    = NULL
     --,[ysnAddonParent]                       = @ZeroBit
     --,[dblAddOnQuantity]                     = @ZeroDecimal
 FROM
-    tblICInventoryShipment ICIS
+    tblICInventoryShipment ICIS with (nolock)
 INNER JOIN
-	tblICInventoryShipmentItem ICISI on ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId and ICISI.intLineNo = @intContractDetailId
+	tblICInventoryShipmentItem ICISI with (nolock) on ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId and ICISI.intLineNo = @intContractDetailId
 INNER JOIN
-    vyuARShippedItems ARSI
-        ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId] and ARSI.intContractDetailId = ICISI.intLineNo
-LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
-left join tblCTContractHeader ch on ch.intContractHeaderId = CD.intContractHeaderId
+    vyuARShippedItems ARSI with (nolock)
+        ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId] and ARSI.intContractDetailId = ICISI.intLineNo and ARSI.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
+LEFT JOIN tblCTContractDetail CD with (nolock) ON CD.intContractDetailId = ARSI.intContractDetailId 
+left join tblCTContractHeader ch with (nolock) on ch.intContractHeaderId = CD.intContractHeaderId
 WHERE
 ICIS.[intInventoryShipmentId] = @ShipmentId AND ARSI.strTransactionType = 'Inventory Shipment'
+and ICISI.intInventoryShipmentItemId = @ShipmentItemId
 --AND (
 --		(CD.intContractDetailId <> @intContractDetailId AND CD.dblCashPrice IS NOT NULL) 
 --			OR 
@@ -404,7 +408,7 @@ SELECT
 FROM
 	@EntriesForInvoice  EFI
 INNER JOIN
-	tblSOSalesOrderDetailTax SOSODT
+	tblSOSalesOrderDetailTax SOSODT with (nolock)
 		ON EFI.[intTempDetailIdForTaxes] = SOSODT.[intSalesOrderDetailId] 
 ORDER BY 
 	 EFI.[intSalesOrderDetailId] ASC
@@ -413,6 +417,7 @@ ORDER BY
 
 DECLARE @ErrorMessage NVARCHAR(250)
 
+/*
 -- Check if the contract is destination weights and grades
 IF EXISTS 
 (
@@ -434,6 +439,7 @@ BEGIN
                             @intTransactionId		= 	@intPriceFixationDetailId,
                             @dblTransactionQty      =   @dblQuantity
 END
+*/
 
 
 EXEC    [dbo].[uspARProcessInvoicesByBatch]
@@ -445,7 +451,7 @@ EXEC    [dbo].[uspARProcessInvoicesByBatch]
              ,@ErrorMessage         = @ErrorMessage OUTPUT
              ,@LogId                = @LogId OUTPUT
              
-SELECT @NewInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
+SELECT @NewInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail with (nolock) WHERE intIntegrationLogId = @LogId
 
 exec uspCTUpdateSequenceStatus
      @intContractDetailId = @intContractDetailId

@@ -245,35 +245,16 @@ BEGIN
 				FROM #tmpCustomers WITH(NOLOCK)	
 				FOR XML PATH ('')
 			) C (intEntityCustomerId)
+			
 
-			IF @strLetterName = '1 Day Overdue Collection Letter'		
-				BEGIN		
-					SET @dtmDateFrom = DATEADD(day, -10, GETDATE())
-				END		
-			ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
-				BEGIN		
-					SET @dtmDateFrom = DATEADD(day, -30, GETDATE())
-				END
-			ELSE IF @strLetterName = '30 Day Overdue Collection Letter' OR @strLetterName = 'Recent Overdue Collection Letter'
-				BEGIN						
-					SET @dtmDateFrom = DATEADD(day, -60, GETDATE())
-				END
-			ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
-				BEGIN						
-					SET @dtmDateFrom = DATEADD(day, -90, GETDATE())
-				END
-			ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
-				BEGIN
-					SET @dtmDateFrom = DATEADD(day, -120, GETDATE())
-				END
-
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
-														  , @ysnInclude120Days = 1
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
 														  , @strCustomerIds = @strCustomerLocalIds
 														  , @intEntityUserId = @intEntityUserId
 
 			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND strType = 'CF Tran'
 			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM @SelectedCustomer)
+			DELETE FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dblCredits, 0) <> 0 OR ISNULL(dblPrepaids, 0) <> 0 OR ISNULL(dblPrepayments, 0) <> 0
+			
 			DELETE FROM ORIG
 			FROM tblARCustomerAgingStagingTable ORIG
 			INNER JOIN (
@@ -290,37 +271,51 @@ BEGIN
 			IF @strLetterName = 'Recent Overdue Collection Letter'
 				BEGIN
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId 
+					  AND strAgingType = 'Detail'
+					  AND ISNULL(dbl10Days,0) + ISNULL(dbl30Days,0) + ISNULL(dbl60Days,0) + ISNULL(dbl90Days,0) + ISNULL(dbl120Days,0) + ISNULL(dbl121Days,0) = 0
 				END
 			ELSE IF @strLetterName = '1 Day Overdue Collection Letter'		
 				BEGIN		
 					DELETE FROM tblARCustomerAgingStagingTable		
-					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl10Days, 0) = 0 AND ISNULL(dbl30Days, 0) = 0 AND ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0		
+					WHERE intEntityUserId = @intEntityUserId 
+					  AND strAgingType = 'Detail' 
+					  AND ISNULL(dbl0Days, 0) <> 0
 				END		
 			ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
 				BEGIN		
 					DELETE FROM tblARCustomerAgingStagingTable		
-					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl30Days, 0) = 0 AND ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0		
+					WHERE intEntityUserId = @intEntityUserId
+					  AND strAgingType = 'Detail'
+					  AND (ISNULL(dbl0Days, 0) <> 0 OR ISNULL(dbl10Days,0) <> 0)
 				END
 			ELSE IF @strLetterName = '30 Day Overdue Collection Letter'
 				BEGIN
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl60Days, 0) = 0 AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId 
+					  AND strAgingType = 'Detail' 
+					  AND (ISNULL(dbl0Days, 0) <> 0 OR ISNULL(dbl10Days,0) <> 0 OR ISNULL(dbl30Days,0) <> 0)
 				END
 			ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
 				BEGIN						
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl90Days, 0) = 0 AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId 
+					  AND strAgingType = 'Detail' 
+					  AND (ISNULL(dbl0Days, 0) <> 0 OR ISNULL(dbl10Days,0) <> 0 OR ISNULL(dbl30Days,0) <> 0 OR ISNULL(dbl60Days,0) <> 0)
 				END
 			ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
 				BEGIN
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl120Days, 0) = 0 AND ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId 
+					  AND strAgingType = 'Detail' 
+					  AND (ISNULL(dbl0Days, 0) <> 0 OR ISNULL(dbl10Days,0) <> 0 OR ISNULL(dbl30Days,0) <> 0 OR ISNULL(dbl60Days,0) <> 0 OR ISNULL(dbl90Days,0) <> 0)
 				END
 			ELSE IF @strLetterName = 'Final Overdue Collection Letter'
 				BEGIN						
 					DELETE FROM tblARCustomerAgingStagingTable
-					WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail' AND ISNULL(dbl121Days, 0) = 0
+					WHERE intEntityUserId = @intEntityUserId 
+					  AND strAgingType = 'Detail' 
+					  AND (ISNULL(dbl0Days, 0) <> 0 OR ISNULL(dbl10Days,0) <> 0 OR ISNULL(dbl30Days,0) <> 0 OR ISNULL(dbl60Days,0) <> 0 OR ISNULL(dbl90Days,0) <> 0 OR ISNULL(dbl120Days,0) <> 0)
 				END
 
 			INSERT INTO #TransactionLetterDetail (	

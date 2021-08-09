@@ -58,6 +58,7 @@ BEGIN TRY
 		UPDATE tblQMAttributePreStage
 		SET strFeedStatus = 'Processed'
 			,strMessage = 'Success'
+			,intStatusId = 1
 		WHERE intAttributePreStageId = @intAttributePreStageId
 
 		SELECT @intAttributePreStageId = MIN(intAttributePreStageId)

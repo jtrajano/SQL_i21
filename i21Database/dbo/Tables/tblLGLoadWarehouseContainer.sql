@@ -4,6 +4,9 @@
 [intConcurrencyId] INT NOT NULL, 
 [intLoadWarehouseId] INT NOT NULL,
 [intLoadContainerId] INT NOT NULL,
+[strID1] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strID2] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strID3] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intLoadWarehouseContainerRefId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoadWarehouseContainer] PRIMARY KEY ([intLoadWarehouseContainerId]), 

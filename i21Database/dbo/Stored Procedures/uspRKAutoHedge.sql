@@ -69,6 +69,7 @@ BEGIN TRY
 		, @intContractHeaderId = intContractHeaderId
 		, @intContractDetailId = intContractDetailId
 		, @intSelectedInstrumentTypeId = intSelectedInstrumentTypeId
+		, @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId
 	FROM OPENXML(@idoc, 'root', 2)
 	WITH (intFutOptTransactionId INT
 		, dtmTransactionDate DATETIME
@@ -95,37 +96,34 @@ BEGIN TRY
 		, CurrentDate DATETIME
 		, intContractHeaderId INT
 		, intContractDetailId INT
-		, intSelectedInstrumentTypeId INT)
+		, intSelectedInstrumentTypeId INT
+		, intFutOptTransactionHeaderId INT)
 	
-	INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId
-		, dtmTransactionDate
-		, intSelectedInstrumentTypeId
-		, strSelectedInstrumentType)
-	VALUES (1
-		, @dtmTransactionDate
-		, @intSelectedInstrumentTypeId
-		, CASE WHEN ISNULL(@intSelectedInstrumentTypeId, 1) = 1 THEN 'Exchange Traded'
-				WHEN @intSelectedInstrumentTypeId = 2 THEN 'OTC'
-				ELSE 'OTC - Others' END)
-	
-	SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
-
 	SELECT @ysnMultiplePriceFixation = ysnMultiplePriceFixation
 		, @intHeaderPricingTypeId = intPricingTypeId
 		, @ysnIsHedged = CASE WHEN ISNULL(ysnMultiplePriceFixation, 0) = 1 AND intPricingTypeId = 1 THEN  0 ELSE 1 END
 	FROM tblCTContractHeader
 	WHERE intContractHeaderId = @intContractHeaderId
 	
-	IF EXISTS (SELECT TOP 1 1 FROM tblRKReconciliationBrokerStatementHeader t
-				WHERE t.intFutureMarketId = @intFutureMarketId
-					AND t.intBrokerageAccountId = @intBrokerageAccountId
-					AND t.intCommodityId = @intCommodityId
-					AND t.intEntityId = @intEntityId
-					AND ysnFreezed = 1
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFilledDate, 110), 110))
+	IF (@ysnReassign = 0)
 	BEGIN
-		RAISERROR('The selected filled date already reconciled.', 16, 1)
+		IF EXISTS (SELECT TOP 1 1 FROM tblRKReconciliationBrokerStatementHeader t
+					WHERE t.intFutureMarketId = @intFutureMarketId
+						AND t.intBrokerageAccountId = @intBrokerageAccountId
+						AND t.intCommodityId = @intCommodityId
+						AND t.intEntityId = @intEntityId
+						AND ysnFreezed = 1
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFilledDate, 110), 110))
+		BEGIN
+			RAISERROR('The selected filled date already reconciled.', 16, 1)
+		END
 	END
+
+	DECLARE @strScreenName NVARCHAR(50) = 'Price Contracts'
+		IF (@ysnReassign = 1)
+		BEGIN
+			SET @strScreenName = 'Reassign Contract'
+		END
 	
 	IF ISNULL(@intFutureMarketId, 0) = 0
 	BEGIN
@@ -164,10 +162,28 @@ BEGIN TRY
 			UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @dblNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
 		END
 
-		
+		EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId = @intFutOptTransactionId
+			, @intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+			, @strScreenName = @strScreenName
+			, @intUserId = @intUserId
+			, @action = 'UPDATE'
+			, @ysnLogRiskSummary = 1
 	END
 	ELSE
-	BEGIN
+	BEGIN		
+		INSERT INTO tblRKFutOptTransactionHeader (intConcurrencyId
+			, dtmTransactionDate
+			, intSelectedInstrumentTypeId
+			, strSelectedInstrumentType)
+		VALUES (1
+			, @dtmTransactionDate
+			, @intSelectedInstrumentTypeId
+			, CASE WHEN ISNULL(@intSelectedInstrumentTypeId, 1) = 1 THEN 'Exchange Traded'
+					WHEN @intSelectedInstrumentTypeId = 2 THEN 'OTC'
+					ELSE 'OTC - Others' END)
+	
+		SELECT @intFutOptTransactionHeaderId = SCOPE_IDENTITY() 
+
 		IF ISNULL(@strInternalTradeNo, '') = ''
 		BEGIN
 			SELECT @strInternalTradeNo = strPrefix + LTRIM(intNumber)+ CASE WHEN @ysnIsHedged = 1 THEN '-H' ELSE '' END
@@ -230,6 +246,13 @@ BEGIN TRY
 		SET @intFutOptTransactionId = SCOPE_IDENTITY()
 
 		EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, NULL, @intUserId, ''
+
+		EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId = @intFutOptTransactionId
+			, @intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+			, @strScreenName = @strScreenName
+			, @intUserId = @intUserId
+			, @action = 'ADD'
+			, @ysnLogRiskSummary = 0
 		
 		SET @strXml = '<root><Transaction>';
 		IF ISNULL(@ysnMultiplePriceFixation, 0) = 1

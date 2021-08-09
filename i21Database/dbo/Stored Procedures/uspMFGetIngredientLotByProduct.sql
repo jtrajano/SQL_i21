@@ -98,6 +98,7 @@ BEGIN
 					THEN SU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 			,0 AS intItemStockUOMId
+			,RI.intItemId As intMainItemId
 		FROM dbo.tblMFRecipe R
 		LEFT JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
@@ -216,6 +217,7 @@ BEGIN
 				ELSE RU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 			,S.intItemStockUOMId
+			,RI.intItemId As intMainItemId
 		FROM dbo.tblMFRecipe R
 		LEFT JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intRecipeItemTypeId = 1
@@ -323,6 +325,7 @@ BEGIN
 					THEN SU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 			,0 AS intItemStockUOMId
+			,RI.intItemId As intMainItemId
 		FROM dbo.tblMFWorkOrderRecipe R
 		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId
@@ -444,6 +447,7 @@ BEGIN
 				ELSE RU.strUnitMeasure
 				END AS strRecipeUnitMeasure
 			,S.intItemStockUOMId
+			,RI.intItemId As intMainItemId
 		FROM dbo.tblMFWorkOrderRecipe R
 		LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 			AND RI.intWorkOrderId = R.intWorkOrderId

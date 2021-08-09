@@ -136,8 +136,8 @@ SELECT DISTINCT
 	dblNetYTD = Sum(ISNULL(tblPaycheckYTD.dblNetPayTotalYTD, 0)),
 	intPayToDown = ISNULL(tblCMBankAccount.intPayToDown, 0)
 FROM 
-	tblSMCompanySetup, 
-	(SELECT
+	tblSMCompanySetup
+	inner join (SELECT
 		intPaycheckId, 
 		strPaycheckId,
 		intEntityEmployeeId,
@@ -151,7 +151,7 @@ FROM
 		ysnVoid 
 	FROM 
 		tblPRPaycheck
-	WHERE ysnPosted = 1) [tblPRPaycheck] 
+	WHERE ysnPosted = 1) [tblPRPaycheck] on 1=1
 	LEFT JOIN 
 		(SELECT 
 			tblPREmployee.*,

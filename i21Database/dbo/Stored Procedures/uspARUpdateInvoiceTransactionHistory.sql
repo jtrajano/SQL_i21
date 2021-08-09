@@ -4,8 +4,10 @@
 	 @Payment				BIT = 0,
 	 @PaymentStaging		PaymentIntegrationStagingTable READONLY
 AS
+	--INVOICE
 	IF @Payment = 0
 		BEGIN
+			--SAVE/UPDATE/DELETE
 			IF @Post IS NULL
 				BEGIN
 					IF NOT EXISTS (SELECT TOP 1 1 FROM tblARTransactionDetail a JOIN @InvoiceIds b ON a.intTransactionId = b.intHeaderId)
@@ -39,12 +41,11 @@ AS
 								, dtmTransactionDate	= GETDATE()
 								, intCurrencyId			= ARID.intSubCurrencyId
 								, intCommodityId		= ITM.intCommodityId
-								, dblCost				= ICT.dblCost
+								, dblCost				= CAST(0 AS NUMERIC(18, 6))
 							FROM tblARInvoiceDetail ARID WITH (NOLOCK)
 							INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.intInvoiceId = ARI.intInvoiceId
 							INNER JOIN @InvoiceIds II ON ARI.intInvoiceId = II.intHeaderId
-							LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId
-							LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionId
+							LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId							
 							LEFT JOIN tblSCTicket ST WITH (NOLOCK) ON ST.intTicketId = ARID.intTicketId
 						END
 					ELSE
@@ -78,13 +79,12 @@ AS
 								, dtmTransactionDate	= GETDATE()
 								, intCurrencyId			= ATD.intCurrencyId
 								, intCommodityId		= CASE WHEN ATD.intItemId IS NOT NULL THEN ITM.intCommodityId ELSE NULL END
-								, dblCost				= CASE WHEN ATD.dblPrice IS NOT NULL THEN ICT.dblCost ELSE NULL END
+								, dblCost				= CASE WHEN ATD.dblPrice IS NOT NULL THEN CAST(0 AS NUMERIC(18, 6)) ELSE NULL END
 							FROM tblARInvoiceDetail ARID WITH (NOLOCK)
 							INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.intInvoiceId = ARI.intInvoiceId
 							INNER JOIN tblARTransactionDetail ATD WITH (NOLOCK) ON ATD.intTransactionDetailId = ARID.intInvoiceDetailId
 							INNER JOIN @InvoiceIds II ON ARI.intInvoiceId = II.intHeaderId
-							LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId
-							LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionId
+							LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId							
 							LEFT JOIN tblSCTicket ST WITH (NOLOCK) ON ST.intTicketId = ARID.intTicketId
 							WHERE ATD.dblQtyShipped			<> ARID.dblQtyShipped
 							   OR ATD.dblPrice				<> ARID.dblPrice
@@ -95,6 +95,7 @@ AS
 							   OR ATD.intTicketId			<> ARID.intTicketId
 						END
 				END
+			--POST/UNPOST	
 			ELSE
 				BEGIN
 					INSERT INTO tblARInvoiceTransactionHistory (
@@ -133,10 +134,41 @@ AS
 					INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.intInvoiceId = ARI.intInvoiceId
 					INNER JOIN @InvoiceIds II ON ARI.intInvoiceId = II.intHeaderId
 					LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId
-					LEFT JOIN tblICInventoryTransaction ICT ON ARID.intInvoiceDetailId = ICT.intTransactionId
+					LEFT JOIN (
+						SELECT intTransactionId
+							 , intTransactionDetailId
+							 , dblCost					= SUM(dblCost)
+						FROM ##ARItemsForCosting
+						GROUP BY intTransactionId, intTransactionDetailId
+
+						UNION ALL
+
+						SELECT intTransactionId
+							 , intTransactionDetailId
+							 , dblCost					= SUM(dblCost)
+						FROM ##ARItemsForInTransitCosting
+						GROUP BY intTransactionId, intTransactionDetailId
+
+						UNION ALL
+
+						SELECT intTransactionId
+							 , intTransactionDetailId
+							 , dblCost					= SUM(dblCost)
+						FROM ##ARItemsForStorageCosting
+						GROUP BY intTransactionId, intTransactionDetailId
+						--SELECT intTransactionId
+						--     , intTransactionDetailId
+						--	 , dblCost					= SUM(dblCost)
+						--FROM tblICInventoryTransaction ICT WITH (NOLOCK)
+						--WHERE ysnIsUnposted = 0
+						--  AND strTransactionForm IN ('Credit Memo', 'Invoice')
+						--GROUP BY intTransactionId, intTransactionDetailId
+					) ICT ON ARID.intInvoiceDetailId = ICT.intTransactionDetailId 
+						AND ARI.intInvoiceId = ICT.intTransactionId 
 					LEFT JOIN tblSCTicket ST WITH (NOLOCK) ON ST.intTicketId = ARID.intTicketId
 				END
 		END
+	--PAYMENT
 	ELSE
 		BEGIN
 			INSERT INTO tblARInvoiceTransactionHistory (

@@ -8,6 +8,9 @@
     ,@Error         AS NVARCHAR(500) = NULL OUTPUT		
 AS	
 
+DECLARE @RetryDataFix BIT = 1
+RetryDataFix:
+
 DECLARE @ErrorMessage	NVARCHAR(500)
 DECLARE @OneBit			BIT = 1
 DECLARE @ZeroBit		BIT = 0
@@ -217,6 +220,8 @@ CREATE TABLE #ARPostPaymentDetail
     ,[dblBaseTransactionInterest]       NUMERIC(18,6)   NULL
     ,[dblTransactionAmountDue]          NUMERIC(18,6)   NULL
     ,[dblBaseTransactionAmountDue]      NUMERIC(18,6)   NULL
+	,[dblTransactionPayment]			NUMERIC(18,6)   NULL
+    ,[dblBaseTransactionPayment]		NUMERIC(18,6)   NULL
 	,[intCurrencyExchangeRateTypeId]    INT             NULL
     ,[dblCurrencyExchangeRate]          NUMERIC(18,6)   NULL
     ,[strRateType]                      NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NULL)
@@ -275,6 +280,15 @@ WHERE [strError] NOT IN ('There was no payment to receive.' )
 
 IF LTRIM(RTRIM(ISNULL(@ErrorMessage, ''))) <> ''
 BEGIN
+	IF(@RetryDataFix = 1)
+	BEGIN
+		SET @RetryDataFix = 0
+		SET @ErrorMessage = ''
+		DELETE FROM #ARInvalidPaymentData
+		EXEC uspARRebuildPayment @intPaymentId = @PaymentId
+		GOTO RetryDataFix
+	END
+
     SET @Error = @ErrorMessage
 	RETURN 1
 END

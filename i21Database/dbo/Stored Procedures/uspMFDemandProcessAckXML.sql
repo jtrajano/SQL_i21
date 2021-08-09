@@ -11,6 +11,7 @@ BEGIN TRY
 		,@intDemandAcknowledgementStageId INT
 		,@intInvPlngReportMasterRefId INT
 		,@intInvPlngReportMasterId INT
+		,@intScreenId int
 
 	SELECT @intDemandAcknowledgementStageId = MIN(intDemandAcknowledgementStageId)
 	FROM tblMFDemandAcknowledgementStage
@@ -44,9 +45,15 @@ BEGIN TRY
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterRefId
 			AND intInvPlngReportMasterRefID IS NULL
 
+		SELECT @intScreenId = intScreenId
+		FROM tblSMScreen
+		WHERE strNamespace = 'Manufacturing.view.DemandAnalysisView'
+
 		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 			,@referenceTransactionId = @intTransactionRefId
 			,@referenceCompanyId = @intCompanyRefId
+			,@screenId=@intScreenId
+			,@populatedByInterCompany=1
 
 		SELECT @intDemandAcknowledgementStageId = MIN(intDemandAcknowledgementStageId)
 		FROM tblMFDemandAcknowledgementStage

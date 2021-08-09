@@ -16,6 +16,7 @@ AS
 			,CP.intCleanCostCurrencyId
 			,CP.intCleanCostUOMId
 			,CP.strDefaultContractReport
+			,CP.strDefaultContractReportFuture
 			,CP.ysnShowReportLangaugeSelection
 			,CP.strDefaultAmendmentReport
 			,CP.strDefaultPricingConfirmation
@@ -74,6 +75,11 @@ AS
 			,CP.ysnDocumentByBookAndSubBook
 			,CP.ysnUpdatedAvailabilityPurchase
 			,CP.ysnUpdatedAvailabilitySales
+			,CP.ysnAllowFutureTypeContractsPurchase
+			,CP.ysnAllowFutureTypeContractsSales
+			,CP.ysnAllowAutoShortCloseFutureTypeContracts
+			,CP.strDefaultReleaseReport
+			,CP.ysnEnableReleaseInstructionsTab
 			,strCleanCostUOM = U1.strUnitMeasure
 			,strCleanCostCurrency = C1.strCurrency
 			,strDefContractStatus = CS.strContractStatus
@@ -97,6 +103,12 @@ AS
 			,CP.intQuantityDecimals
 			,CP.ysnAutoCompleteDPDeliveryDate
 			,CP.intPricingDecimals
+			,CP.strContractApprovalIncrements
+			,CP.ysnListAllCustomerVendorLocations -- CT-5315
+			,CP.ysnAllowBasisSequencePriceChangeWhenPartiallyPriced
+			,CP.ysnStayAsDraftContractUntilApproved
+			,CP.ysnCalculatePlannedAvailabilityPurchase
+			,CP.ysnCalculatePlannedAvailabilitySale
 	FROM	tblCTCompanyPreference		CP LEFT
 	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CP.intCleanCostUOMId		LEFT
 	JOIN	tblSMCurrency				C1	ON	C1.intCurrencyID			=	CP.intCleanCostCurrencyId	LEFT

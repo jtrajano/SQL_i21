@@ -16,6 +16,8 @@
 	,intTransactionId INT
 	,intCompanyId INT
 	,ysnMailSent BIT NULL
+	,intStatusId int
+	,intTransactionTypeId int
 	)
 
 

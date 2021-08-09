@@ -6,7 +6,7 @@
 	[strApType] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmDate]   DATETIME  NOT NULL,
 	[strInvoice] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-	[strReference] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strReference] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strCcdReference] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strPayReference] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[dblGross] DECIMAL(18, 6) NULL DEFAULT 0, 

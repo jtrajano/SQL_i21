@@ -66,9 +66,12 @@ SELECT
 		,cat.strDescription strCategory
 		,cat.intCategoryId
 		,com.intCommodityId
+		,receiptItemLot.strCargoNo
+		,receiptItemLot.strWarrantNo
+		, fiscal.strPeriod strAccountingPeriod
 FROM	tblICInventoryReceiptItemLot receiptItemLot
-		INNER JOIN tblICInventoryReceiptItem item 
-			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceiptItem item ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = item.intInventoryReceiptId
 		INNER JOIN tblICItem oItem ON oItem.intItemId = item.intItemId
 		LEFT OUTER JOIN tblICCategory cat ON cat.intCategoryId = oItem.intCategoryId
 		LEFT OUTER JOIN tblICCommodity com ON com.intCommodityId = oItem.intCommodityId
@@ -101,3 +104,8 @@ FROM	tblICInventoryReceiptItemLot receiptItemLot
 			ON Currency.intCurrencyID = receipt.intCurrencyId
 		LEFT JOIN tblEMEntity Producer
 			ON Producer.intEntityId = receiptItemLot.intProducerId
+		OUTER APPLY (
+			SELECT TOP 1 fp.strPeriod
+			FROM tblGLFiscalYearPeriod fp
+			WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+		) fiscal

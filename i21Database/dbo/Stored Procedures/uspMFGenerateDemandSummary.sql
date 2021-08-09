@@ -11,6 +11,8 @@ BEGIN
 	DECLARE @intNoOfMonths INT
 		,@strBatch NVARCHAR(MAX) = ''
 		,@strBatchId NVARCHAR(MAX) = ''
+		,@ysnParent BIT
+		,@intLocationId int
 	DECLARE @tblMFItemBook TABLE (
 		intId INT identity(1, 1)
 		,intItemId INT
@@ -23,6 +25,37 @@ BEGIN
 		,@intItemId INT
 		,@intBookId INT
 		,@intSubBookId INT
+
+	SELECT @ysnParent = ysnParent
+	FROM tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	SELECT @intLocationId = intCompanyLocationId
+	FROM tblSMCompanyLocation
+
+	IF @ysnLoadPlan = 0
+	BEGIN
+		IF (
+				SELECT Count(DISTINCT AV.strValue)
+				FROM tblCTInvPlngReportAttributeValue AV
+				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
+				WHERE AV.intReportAttributeID = 1
+					AND AV.intInvPlngReportMasterID IN (
+						SELECT Item Collate Latin1_General_CI_AS
+						FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+						)
+					AND strFieldName = 'strMonth1'
+				) > 1
+		BEGIN
+			RAISERROR (
+					'Starting month should be same for all the selected demand batches.'
+					,16
+					,1
+					)
+
+			RETURN
+		END
+	END
 
 	IF @ysnLoadPlan = 1
 	BEGIN
@@ -49,7 +82,7 @@ BEGIN
 				,intBookId
 				,intSubBookId
 				)
-			SELECT DISTINCT IsNULL(AV.intMainItemId,AV.intItemId)
+			SELECT DISTINCT IsNULL(AV.intMainItemId, AV.intItemId)
 				,RM.intBookId
 				,RM.intSubBookId
 			FROM tblCTInvPlngReportAttributeValue AV
@@ -104,15 +137,15 @@ BEGIN
 		--			AND IBook.intItemId IS NULL
 		--		)
 		--BEGIN
-			SELECT @strItemNo = @strItemNo + IsNULL(I.strShortName,'') + ' / '
-			FROM tblICItemBundle IBundle
-			JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
-			JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
-				AND IBook.intBookId = @intBookId
-				AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
-			WHERE IBundle.intItemId = @intItemId
-		--END
+		SELECT @strItemNo = @strItemNo + IsNULL(I.strShortName, '') + ' / '
+		FROM tblICItemBundle IBundle
+		JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
+		JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
+			AND IBook.intBookId = @intBookId
+			AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+		WHERE IBundle.intItemId = @intItemId
 
+		--END
 		IF @strItemNo IS NULL
 			SELECT @strItemNo = ''
 
@@ -407,7 +440,7 @@ BEGIN
 				,(
 					CASE 
 						WHEN MI.intItemId IS NOT NULL
-							THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
+							THEN I.strItemNo + ' - ' + IsNULL(I.strShortName, '')
 						ELSE IB.strItemNo
 						END
 					) AS strItemDescription
@@ -423,12 +456,15 @@ BEGIN
 				,SB.intSubBookId
 				,AV.intMainItemId
 				,I.intItemId
-				,ST.dblSupplyTarget
+				,CASE 
+					WHEN @ysnParent = 1
+						THEN ST.dblSupplyTarget
+					ELSE IL.dblLeadTime
+					END AS dblSupplyTarget
 				,MI.strItemNo AS strMainItemNo
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
-			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			LEFT JOIN tblICItem MI ON MI.intItemId = AV.intMainItemId
 			JOIN tblICItem I ON I.intItemId = AV.intItemId
 			LEFT JOIN tblCTBook B ON B.intBookId = AV.intBookId
@@ -442,6 +478,7 @@ BEGIN
 			LEFT JOIN @tblMFItemBook IB ON IB.intItemId = AV.intItemId
 				AND IB.intBookId = B.intBookId
 				AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
+			LEFT JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.intLocationId =@intLocationId
 			WHERE A.intReportAttributeID IN (
 					2 --Opening Inventory
 					,4 --Existing Purchases
@@ -451,10 +488,6 @@ BEGIN
 					,10 --Weeks of Supply
 					)
 				AND IsNumeric(AV.strValue) = 1
-				AND Batch.intInvPlngReportMasterID IN (
-					SELECT Item Collate Latin1_General_CI_AS
-					FROM [dbo].[fnSplitString](@strBatchId, ',')
-					)
 				--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				AND AV.strFieldName NOT IN (
 					'OpeningInv'
@@ -861,7 +894,7 @@ BEGIN
 					,(
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
-								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
+								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName, '')
 							ELSE IB.strItemNo
 							END
 						) AS strItemDescription
@@ -883,7 +916,11 @@ BEGIN
 					,SB.intSubBookId
 					,AV.intMainItemId
 					,I.intItemId
-					,ST.dblSupplyTarget
+					,CASE 
+					WHEN @ysnParent = 1
+						THEN ST.dblSupplyTarget
+					ELSE IL.dblLeadTime
+					END AS dblSupplyTarget
 					,MI.strItemNo AS strMainItemNo
 				FROM tblCTInvPlngReportAttributeValue AV
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
@@ -904,7 +941,24 @@ BEGIN
 				LEFT JOIN @tblMFItemBook IB ON IB.intItemId = AV.intItemId
 					AND IB.intBookId = B.intBookId
 					AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
-				WHERE A.intReportAttributeID IN (
+					LEFT JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.intLocationId =@intLocationId
+			
+				WHERE EXISTS (
+						SELECT 1
+						FROM tblCTInvPlngReportAttributeValue AV1
+						WHERE AV1.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
+							AND AV1.intItemId = AV.intItemId
+							AND AV1.intReportAttributeID = 8
+							AND IsNumeric(AV1.strValue) = 1
+							AND (
+								CASE 
+									WHEN IsNUmeric(AV1.strValue) = 0
+										THEN Convert(NUMERIC(18, 6), 0.0)
+									ELSE AV1.strValue
+									END
+								) > 0
+						)
+					AND A.intReportAttributeID IN (
 						2 --Opening Inventory
 						,4 --Existing Purchases
 						,5 --Planned Purchases
@@ -1131,6 +1185,10 @@ BEGIN
 				,DATEDIFF(mm, 0, Max(dtmDate))
 			FROM tblCTInvPlngReportMaster
 			WHERE ysnPost = 1
+				AND intInvPlngReportMasterID IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+					)
 			GROUP BY intBookId
 				,intSubBookId
 
@@ -1485,7 +1543,7 @@ BEGIN
 					,(
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
-								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
+								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName, '')
 							ELSE IB.strItemNo
 							END
 						) AS strItemDescription
@@ -1501,7 +1559,11 @@ BEGIN
 					,SB.intSubBookId
 					,FD.intMainItemId
 					,I.intItemId
-					,ST.dblSupplyTarget
+					,CASE 
+					WHEN @ysnParent = 1
+						THEN ST.dblSupplyTarget
+					ELSE IL.dblLeadTime
+					END AS dblSupplyTarget
 					,MI.strItemNo AS strMainItemNo
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
@@ -1519,6 +1581,7 @@ BEGIN
 				LEFT JOIN @tblMFItemBook IB ON IB.intItemId = FD.intItemId
 					AND IB.intBookId = B.intBookId
 					AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
+					LEFT JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.intLocationId =@intLocationId
 				WHERE IsNumeric(FD.dblQty) = 1
 					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				) AS SourceTable

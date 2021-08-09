@@ -4,6 +4,22 @@ AS
 
 BEGIN
 
+	-- START TR-1611 - Sub ledger Transaction traceability
+	DECLARE @intCreateLinkTransactionId INT, 
+		@strCreateLinkTransactionNo NVARCHAR(50),
+		@strCreateLinkTransactionType NVARCHAR(100),
+		@strCreateLinkModuleName NVARCHAR(100)
+
+	SELECT @intCreateLinkTransactionId = MR.intMeterReadingId
+		, @strCreateLinkTransactionNo = MR.strTransactionId
+		, @strCreateLinkTransactionType  = 'Meter Billing'
+		, @strCreateLinkModuleName = 'Meter Billing'
+	FROM tblMBMeterReading MR
+	WHERE MR.intMeterReadingId = @TransactionId
+
+	EXEC dbo.uspICAddTransactionLinkOrigin @intCreateLinkTransactionId, @strCreateLinkTransactionNo, @strCreateLinkTransactionType, @strCreateLinkModuleName
+	-- END TR-1611
+
 	SELECT *
 	INTO #tmpMeterReading
 	FROM vyuMBGetMeterReadingDetail
@@ -42,7 +58,7 @@ BEGIN
 			, @ItemUOMId = intItemUOMId 
 		FROM #tmpMeterReading
 
-		SELECT *
+		SELECT dblRate, ysnTaxExempt
 		INTO #tmpTaxes
 		FROM dbo.fnConstructLineItemTaxDetail (
 			1
@@ -57,7 +73,7 @@ BEGIN
 			, @TransactionDate
 			, NULL
 			, 1
-			,0			--@IncludeInvalidCodes
+			, 0			--@IncludeInvalidCodes
 			, NULL
 			, NULL
 			, NULL

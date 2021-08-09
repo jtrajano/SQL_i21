@@ -19,15 +19,15 @@ PRINT('CT - 174To181 End')
 ------------183----------
 
 GO
-PRINT('Udate existing sequence History')
+--PRINT('Update existing sequence History')
  
-EXEC uspCTUpdateExistingSequenceHistory
+--EXEC uspCTUpdateExistingSequenceHistory
  
-PRINT('End Udate existing sequence History')
- GO
+--PRINT('End Update existing sequence History')
+-- GO
 
 GO
-PRINT('Udate Original Quantity')
+PRINT('Update Original Quantity')
  
 UPDATE CD SET CD.dblOriginalQty = t.dblQuantity
 FROM tblCTContractDetail CD
@@ -40,7 +40,7 @@ WHERE t.intRowNum = 1 AND CD.dblOriginalQty IS NULL
  
 UPDATE tblCTContractDetail SET dblOriginalQty = dblQuantity WHERE dblOriginalQty IS NULL
 
-PRINT('End Udate Original Quantity')
+PRINT('End Update Original Quantity')
 GO
 
 GO

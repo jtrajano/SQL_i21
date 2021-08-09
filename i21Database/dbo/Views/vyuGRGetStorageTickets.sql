@@ -23,14 +23,13 @@ SELECT DISTINCT
     ,intContractHeaderId                = case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END end
     ,intContractDetailId				= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else CASE WHEN CS.ysnTransferStorage = 0 THEN CD_Ticket.intContractDetailId ELSE CD_Transfer.intContractDetailId END end
     ,strContractNumber					= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END end
-    ,intTicketId						= ISNULL(SC.intTicketId,0)
+    ,intTicketId						= SC.intTicketId
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
     ,dblStorageUnPaid					= ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0)
     ,strReceiptNumber					= IR.strReceiptNumber
     ,ysnReadyForTransfer				= CAST(
 											CASE 
-												WHEN DeliverySheet.ysnPost = 1 THEN 1
-												WHEN CS.intTicketId IS NOT NULL THEN 1
+												WHEN DeliverySheet.ysnPost = 1 OR CS.intTicketId IS NOT NULL OR CS.ysnTransferStorage = 1 THEN 1
 												ELSE 0
 											END AS BIT
 										)
@@ -41,6 +40,9 @@ SELECT DISTINCT
                                                 ELSE 0
                                             END AS BIT
                                         )
+    
+    --,intTicketPricingTypeId = ISNULL(CH_Ticket.intPricingTypeId, -99)
+    ,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
@@ -67,9 +69,11 @@ LEFT JOIN
 	FROM tblGRStorageHistory GSH
 	INNER JOIN tblCTContractHeader GCH
 		ON GCH.intContractHeaderId = GSH.intContractHeaderId
+			and GCH.intPricingTypeId = 5
 	INNER JOIN tblCTContractDetail GCD
 		ON GCH.intContractHeaderId = GCD.intContractHeaderId
-	WHERE GSH.strType IN ('From Transfer','From Delivery Sheet','From Scale')
+			and GCD.intPricingTypeId = 5
+	WHERE GSH.strType IN ('From Transfer','From Delivery Sheet','From Scale')		
 )GHistory
     on GHistory.intCustomerStorageId = CS.intCustomerStorageId
 		AND ST.ysnDPOwnedType = 1 
@@ -86,15 +90,19 @@ LEFT JOIN tblCTContractDetail CD_Ticket
     --ON CD_Ticket.intContractDetailId = SC.intContractId
 	ON CD_Ticket.intContractDetailId = IRI.intContractDetailId
 		AND CS.ysnTransferStorage = 0
+		and CD_Ticket.intPricingTypeId = 5
 LEFT JOIN tblCTContractHeader CH_Ticket 
     ON CH_Ticket.intContractHeaderId = CD_Ticket.intContractHeaderId
+		and CH_Ticket.intPricingTypeId = 5
 LEFT JOIN tblGRTransferStorageSplit TSS
 	ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblCTContractDetail CD_Transfer
     ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
 		AND CS.ysnTransferStorage = 1
+		and CD_Transfer.intPricingTypeId = 5
 LEFT JOIN tblCTContractHeader CH_Transfer
-    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
+    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId
+	and CH_Transfer.intPricingTypeId = 5
 LEFT JOIN tblICInventoryReceipt IR 
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
 LEFT JOIN (tblSCDeliverySheet DeliverySheet 

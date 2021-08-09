@@ -49,7 +49,9 @@ BEGIN
 			[strMessageType]			NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 			[strFilter]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 			[ysnDismiss]				[bit] NULL,
-			[intActivitySourceId]		[int] NULL
+			[intActivitySourceId]		[int] NULL,
+			strInterCompanyCreatedBy	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+			strInterCompanyAssignedTo	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 		)
 
 		IF OBJECT_ID('tempdb..#TempActivityAttendee') IS NOT NULL
@@ -69,17 +71,20 @@ BEGIN
 
 		CREATE TABLE #TempComment
 		(
-			[intCommentId]		INT,
-			[strComment]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-			[strScreen]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-			[strRecordNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-			[dtmAdded]			DATETIME DEFAULT (GETDATE()) NULL,
-			[dtmModified]		DATETIME DEFAULT (GETDATE()) NULL,
-			[ysnPublic]			BIT NULL,
-			[ysnEdited]			BIT NULL,
-			[intEntityId]		INT NULL,
-			[intTransactionId]	INT NULL,
-			[intActivityId]		INT NULL
+			[intCommentId]				INT,
+			[strComment]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+			[strScreen]					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+			[strRecordNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+			[dtmAdded]					DATETIME DEFAULT (GETDATE()) NULL,
+			[dtmModified]				DATETIME DEFAULT (GETDATE()) NULL,
+			[ysnPublic]					BIT NULL,
+			[ysnEdited]					BIT NULL,
+			[intEntityId]				INT NULL,
+			[intTransactionId]			INT NULL,
+			[intActivityId]				INT NULL,
+			[intInterCompanyId]			INT NULL,
+			[strInterCompanyEntityName]	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+			[intInterCompanyEntityId]	INT NULL
 		)
 
 		IF OBJECT_ID('tempdb..#TempNotification') IS NOT NULL
@@ -196,12 +201,14 @@ BEGIN
 		INSERT INTO #TempActivity(
 			[intActivityId], [intTransactionId], [strType], [strSubject], [intEntityContactId], [intEntityId], [intCompanyLocationId], [dtmStartDate], [dtmEndDate], [dtmStartTime], [dtmEndTime], [ysnAllDayEvent],
 			[ysnRemind], [strReminder], [strStatus], [strPriority], [strCategory], [intAssignedTo], [strActivityNo], [strRelatedTo], [strRecordNo], [strLocation], [strDetails], [strShowTimeAs],
-			[ysnPrivate], [ysnPublic], [dtmCreated], [dtmModified], [intCreatedBy], [strImageId], [strMessageType], [strFilter], [ysnDismiss], [intActivitySourceId]
+			[ysnPrivate], [ysnPublic], [dtmCreated], [dtmModified], [intCreatedBy], [strImageId], [strMessageType], [strFilter], [ysnDismiss], [intActivitySourceId],
+			[strInterCompanyCreatedBy], [strInterCompanyAssignedTo]
 		)
 		SELECT
 			[intActivityId], [intTransactionId], [strType], [strSubject], [intEntityContactId], [intEntityId], [intCompanyLocationId], [dtmStartDate], [dtmEndDate], [dtmStartTime], [dtmEndTime], [ysnAllDayEvent],
 			[ysnRemind], [strReminder], [strStatus], [strPriority], [strCategory], [intAssignedTo], [strActivityNo], [strRelatedTo], [strRecordNo], [strLocation], [strDetails], [strShowTimeAs],
-			[ysnPrivate], [ysnPublic], [dtmCreated], [dtmModified], [intCreatedBy], [strImageId], [strMessageType], [strFilter], [ysnDismiss], [intActivitySourceId]
+			[ysnPrivate], [ysnPublic], [dtmCreated], [dtmModified], [intCreatedBy], [strImageId], [strMessageType], [strFilter], [ysnDismiss], [intActivitySourceId],
+			[strInterCompanyCreatedBy], [strInterCompanyAssignedTo]
 		FROM tblSMActivity
 		WHERE intTransactionId = @intSourceTransactionId AND strType = 'Comment' AND
 		intActivityId NOT IN (
@@ -240,7 +247,8 @@ BEGIN
 				' + CONVERT(VARCHAR, @intDestinationTransactionId) + ', [strType], [strSubject], [intEntityContactId], [intEntityId], [intCompanyLocationId], [dtmStartDate], [dtmEndDate], [dtmStartTime], [dtmEndTime], [ysnAllDayEvent],
 				[ysnRemind], [strReminder], [strStatus], [strPriority], [strCategory], [intAssignedTo], [strRelatedTo], [strRecordNo], [strLocation], [strDetails], [strShowTimeAs],
 				[ysnPrivate], [ysnPublic], [dtmCreated], [dtmModified], [intCreatedBy], [strImageId], [strMessageType], [strFilter], [ysnDismiss], [intActivitySourceId], ''' + @strNewActivityNo + ''',
-				''' + @strInterCompanyCreatedBy + ''', ''' + @strInterCompanyAssignedTo + '''
+				(CASE WHEN ISNULL(strInterCompanyCreatedBy, '''') = '''' THEN ''' + @strInterCompanyCreatedBy + ''' ELSE strInterCompanyCreatedBy END), 
+				(CASE WHEN ISNULL(strInterCompanyAssignedTo, '''') = '''' THEN ''' + @strInterCompanyAssignedTo + ''' ELSE strInterCompanyAssignedTo END)
 			FROM #TempActivity;
 			
 			SELECT @paramOut = SCOPE_IDENTITY()
@@ -290,9 +298,9 @@ BEGIN
 
 			----------------------------------------ACTIVITY COMMENTS----------------------------------------
 			INSERT INTO #TempComment(
-				[intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId]
+				[intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId], [strInterCompanyEntityName]
 			)
-			SELECT [intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId]
+			SELECT [intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId], [strInterCompanyEntityName]
 			FROM tblSMComment
 			WHERE intActivityId = @intActivityId
 
@@ -308,8 +316,12 @@ BEGIN
 						[intInterCompanyId], [strInterCompanyEntityName], [intInterCompanyEntityId]
 					)
 					SELECT TOP 1 [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], ' + CONVERT(VARCHAR, @intNewActivityId) + ', 
-						' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ', ''' + @strCommentEntityName + ''', ' + CONVERT(VARCHAR, @intCommentEntityId) + '
+						' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ', 
+						(CASE WHEN ISNULL(strInterCompanyEntityName, '''') = '''' THEN ''' + @strCommentEntityName + ''' ELSE strInterCompanyEntityName END), 
+						' + CONVERT(VARCHAR, @intCommentEntityId) + '
 					FROM #TempComment;
+
+
 
 					SELECT @paramOut = SCOPE_IDENTITY()
 				';
@@ -399,6 +411,12 @@ BEGIN
 				),
 				ysnPublic = (
 					SELECT ysnPublic FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMActivity] WHERE intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + '
+				),
+				strInterCompanyCreatedBy = (
+					SELECT strInterCompanyCreatedBy FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMActivity] WHERE intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + '
+				), 
+				strInterCompanyAssignedTo = (
+					SELECT strInterCompanyAssignedTo FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMActivity] WHERE intActivityId = ' + CONVERT(VARCHAR, @intSourceActivityId) + '
 				)
 				WHERE intActivityId = ' + CONVERT(VARCHAR, @intDestinationActivityId);
 			EXEC sp_executesql @sql
@@ -509,9 +527,9 @@ BEGIN
 			EXEC sp_executesql @sql;
 
 			INSERT INTO #TempComment(
-				[intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId]
+				[intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId], [strInterCompanyEntityName]
 			)
-			SELECT [intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId]
+			SELECT [intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId], [strInterCompanyEntityName]
 			FROM tblSMComment
 			WHERE intActivityId = @intSourceActivityId AND
 			intCommentId NOT IN (
@@ -524,13 +542,20 @@ BEGIN
 				SELECT TOP 1 @intCommentId = intCommentId, @intCommentEntityId = intEntityId FROM #TempComment
 				SELECT TOP 1 @strCommentEntityName = strName FROM tblEMEntity where intEntityId = @intCommentEntityId
 
+				IF ISNULL(@strCommentEntityName, '') = ''
+				BEGIN
+					SELECT TOP 1 @strCommentEntityName = strInterCompanyEntityName FROM #TempComment where intEntityId = @intCommentEntityId
+				END
+
 				SET @sql = N'
 					INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMComment] (
 						[strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId],
 						[intInterCompanyId], [strInterCompanyEntityName], [intInterCompanyEntityId]
 					)
 					SELECT TOP 1 [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], ' + CONVERT(VARCHAR, @intDestinationActivityId) + ', 
-								' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ', ''' + @strCommentEntityName + ''', ' + CONVERT(VARCHAR, @intCommentEntityId) + '
+								' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ', 
+								(CASE WHEN ISNULL(strInterCompanyEntityName, '''') = '''' THEN ''' + @strCommentEntityName + ''' ELSE strInterCompanyEntityName END), 
+								' + CONVERT(VARCHAR, @intCommentEntityId) + '
 					FROM #TempComment;
 
 					SELECT @paramOut = SCOPE_IDENTITY()
@@ -626,7 +651,10 @@ BEGIN
 						strComment = (
 							SELECT strComment FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
 						),
-						dtmModified = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
+						dtmModified = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + ''',
+						strInterCompanyEntityName = (
+							SELECT strInterCompanyEntityName FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
+						)
 						WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempDestinationCommentId);
 					EXEC sp_executesql @sql
 

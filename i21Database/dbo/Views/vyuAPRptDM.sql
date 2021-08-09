@@ -3,12 +3,14 @@ AS
 SELECT
 		commonData.*
 		,strContractNumber		=	ContractHeader.strContractNumber
+		,strVendorRef			=	ISNULL(ContractHeader.strCustomerContract, '')
 		,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
 												AND ContractDetail.intItemContractId > 0
 												AND DMDetails.intContractCostId IS NULL
 										THEN ItemContract.strContractItemName
-										ELSE ISNULL(Item.strDescription,'')
+										ELSE ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, ''))
 									END
+		,strMiscQuality			=	ISNULL(I.strDescription, ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, '')))
 		,strItemNo				=	ISNULL(Item.strItemNo, DMDetails.strMiscDescription)
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
@@ -18,9 +20,9 @@ SELECT
 										THEN  'Container Rejection - Commodity cost' 
 										WHEN DMDetails.intLoadId > 0 THEN 'Weight Claim'
 										ELSE ''
-										END COLLATE Latin1_General_CI_AS
+										END
 		,strUOM					=	QtyUOMDetails.strUnitMeasure
-		,strClaimUOM			=	'' COLLATE Latin1_General_CI_AS
+		,strClaimUOM			=	''
 		,strCostUOM				=	CASE WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
 		,strLPlant				=	LPlant.strSubLocationName
 		,intContractSeqId		=	ContractDetail.intContractSeq
@@ -46,6 +48,9 @@ SELECT
 		,strContainerNumber		=	LCointainer.strContainerNumber
 		,strShipVia				=	shipVia.strShipVia
 		,ysnPaid				=	DM.ysnPaid
+		,strContractNumberSeq	=	CASE WHEN ContractHeader.intContractHeaderId > 0 THEN ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq) ELSE '' END
+		,dblDetailTotalWithTax	=	CAST((DMDetails.dblTotal + DMDetails.dblTax) AS DECIMAL(18, 2))
+		,dblHeaderTotal			=	CAST(DM.dblTotal AS DECIMAL(18, 2))
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -69,4 +74,6 @@ SELECT
 	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
 	LEFT JOIN tblSMShipVia shipVia
 			ON shipVia.intEntityId = DM.intShipViaId
+	LEFT JOIN tblICItem I ON I.intItemId = ContractDetail.intItemId
+	CROSS JOIN tblSMCompanyPreference CP
 	WHERE DM.intTransactionType = 3

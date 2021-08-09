@@ -1,7 +1,20 @@
-CREATE PROCEDURE uspICImportItemLocationsFromStaging @strIdentifier NVARCHAR(100), @intDataSourceId INT = 2
+CREATE PROCEDURE uspICImportItemLocationsFromStaging 
+	@strIdentifier NVARCHAR(100)
+	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItemLocation WHERE strImportIdentifier <> @strIdentifier
+
+DECLARE @Duplicates TABLE (intRecordNo INT, strItemNo NVARCHAR(150), strLocation NVARCHAR(250))
+;WITH cte0 AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation) AS RowNumber
+   FROM tblICImportStagingItemLocation
+   WHERE strImportIdentifier = @strIdentifier
+)
+INSERT INTO @Duplicates (intRecordNo, strItemNo, strLocation)
+SELECT ISNULL(cte0.intLineNo, 1), cte0.strItemNo, cte0.strLocation FROM cte0 
+WHERE RowNumber > 1;
 
 ;WITH cte AS
 (
@@ -32,6 +45,7 @@ CREATE TABLE #tmp (
 	, ysnPromotionalItem BIT NULL
 	, ysnStorageUnitRequired BIT NULL
 	, ysnDepositRequired BIT NULL
+	, ysnActive BIT NULL
 	, intBottleDepositNo INT NULL
 	, ysnSaleable BIT NULL
 	, ysnQuantityRequired BIT NULL
@@ -54,6 +68,7 @@ CREATE TABLE #tmp (
 	, dblSuggestedQty NUMERIC(38, 20)
 	, dblLeadTime NUMERIC(38, 20)
 	, strCounted NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, intCountGroupId INT NULL
 	, ysnCountedDaily BIT NULL
 	, ysnCountBySINo BIT NULL
 	, strSerialNoBegin NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
@@ -89,6 +104,7 @@ INSERT INTO #tmp (
 	, ysnPromotionalItem
 	, ysnStorageUnitRequired
 	, ysnDepositRequired
+	, ysnActive
 	, intBottleDepositNo
 	, ysnSaleable
 	, ysnQuantityRequired
@@ -111,6 +127,7 @@ INSERT INTO #tmp (
 	, dblSuggestedQty
 	, dblLeadTime
 	, strCounted
+	, intCountGroupId
 	, ysnCountedDaily
 	, ysnCountBySINo
 	, strSerialNoBegin
@@ -145,6 +162,7 @@ SElECT
 	, ysnPromotionalItem		= s.ysnPromotionalItem
 	, ysnStorageUnitRequired	= s.ysnStorageUnitRequired
 	, ysnDepositRequired        = s.ysnDepositRequired
+	, ysnActive        			= s.ysnActive
 	, intBottleDepositNo        = s.intBottleDepositNo
 	, ysnSaleable               = s.ysnSaleable
 	, ysnQuantityRequired       = s.ysnQuantityRequired
@@ -167,6 +185,7 @@ SElECT
 	, dblSuggestedQty           = s.dblSuggestedQty
 	, dblLeadTime               = s.dblLeadTime
 	, strCounted                = s.strCounted
+	, intCountGroupId			= cg.intCountGroupId
 	, ysnCountedDaily           = s.ysnCountedDaily
 	, ysnCountBySINo            = s.ysnCountbySerialNumber
 	, strSerialNoBegin          = s.strSerialNumberBegin
@@ -182,7 +201,8 @@ SElECT
 	, intCreatedByUserId		= s.intCreatedByUserId
 FROM tblICImportStagingItemLocation s
 	INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo))) 
-	INNER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+	INNER JOIN tblSMCompanyLocation c ON (LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+		OR LOWER(c.strLocationNumber) = LTRIM(RTRIM(LOWER(s.strLocation))))
 	LEFT OUTER JOIN vyuAPVendor v ON LOWER(v.strName) = LTRIM(RTRIM(LOWER(s.strVendorId)))
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sl ON LOWER(sl.strSubLocationName) = LTRIM(RTRIM(LOWER(s.strStorageLocation)))
 	LEFT OUTER JOIN tblICStorageLocation su ON LOWER(su.strName) = LTRIM(RTRIM(LOWER(s.strStorageUnit)))
@@ -206,6 +226,7 @@ FROM tblICImportStagingItemLocation s
 	LEFT OUTER JOIN tblICUnitMeasure g ON LOWER(g.strUnitMeasure) = LTRIM(RTRIM(LOWER(s.strGrossNetUOM)))
 	LEFT OUTER JOIN tblICItemUOM gs ON gs.intUnitMeasureId = g.intUnitMeasureId
 		AND gs.intItemId = i.intItemId
+	LEFT OUTER JOIN tblICCountGroup cg ON LOWER(cg.strCountGroup) = LTRIM(RTRIM(LOWER(s.strInventoryCountGroup)))
 WHERE s.strImportIdentifier = @strIdentifier
 	
 CREATE TABLE #output (
@@ -236,6 +257,7 @@ USING
 		, ysnPromotionalItem		
 		, ysnStorageUnitRequired	
 		, ysnDepositRequired        
+		, ysnActive        
 		, intBottleDepositNo        
 		, ysnSaleable               
 		, ysnQuantityRequired       
@@ -257,7 +279,8 @@ USING
 		, dblMinOrder               
 		, dblSuggestedQty           
 		, dblLeadTime               
-		, strCounted                
+		, strCounted
+		, intCountGroupId
 		, ysnCountedDaily           
 		, ysnCountBySINo            
 		, strSerialNoBegin          
@@ -295,6 +318,7 @@ UPDATE SET
 	, ysnPromotionalItem = source.ysnPromotionalItem
 	, ysnStorageUnitRequired = source.ysnStorageUnitRequired
 	, ysnDepositRequired = source.ysnDepositRequired
+	, ysnActive = source.ysnActive
 	, intBottleDepositNo = source.intBottleDepositNo
 	, ysnSaleable = source.ysnSaleable
 	, ysnQuantityRequired = source.ysnQuantityRequired
@@ -317,6 +341,7 @@ UPDATE SET
 	, dblSuggestedQty = source.dblSuggestedQty
 	, dblLeadTime = source.dblLeadTime
 	, strCounted = source.strCounted
+	, intCountGroupId = source.intCountGroupId
 	, ysnCountedDaily = source.ysnCountedDaily
 	, ysnCountBySINo = source.ysnCountBySINo
 	, strSerialNoBegin = source.strSerialNoBegin
@@ -352,6 +377,7 @@ INSERT
 	, ysnPromotionalItem		
 	, ysnStorageUnitRequired	
 	, ysnDepositRequired        
+	, ysnActive        
 	, intBottleDepositNo        
 	, ysnSaleable               
 	, ysnQuantityRequired       
@@ -374,6 +400,7 @@ INSERT
 	, dblSuggestedQty           
 	, dblLeadTime               
 	, strCounted                
+	, intCountGroupId
 	, ysnCountedDaily           
 	, ysnCountBySINo            
 	, strSerialNoBegin          
@@ -410,6 +437,7 @@ VALUES
 	, ysnPromotionalItem		
 	, ysnStorageUnitRequired	
 	, ysnDepositRequired        
+	, ysnActive        
 	, intBottleDepositNo        
 	, ysnSaleable               
 	, ysnQuantityRequired       
@@ -431,7 +459,8 @@ VALUES
 	, dblMinOrder               
 	, dblSuggestedQty           
 	, dblLeadTime               
-	, strCounted                
+	, strCounted   
+	, intCountGroupId
 	, ysnCountedDaily           
 	, ysnCountBySINo            
 	, strSerialNoBegin          
@@ -449,23 +478,76 @@ VALUES
 )
 OUTPUT deleted.intItemId, $action, inserted.intItemId INTO #output;
 
-UPDATE l
-SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
-FROM tblICImportLog l
-WHERE l.strUniqueId = @strIdentifier
+-- Logs 
+BEGIN 
+	INSERT INTO tblICImportLogFromStaging (
+		[strUniqueId] 
+		,[intRowsImported] 
+		,[intRowsUpdated] 
+	)
+	SELECT
+		@strIdentifier
+		,intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
+		,intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
 
-DECLARE @TotalImported INT
-DECLARE @LogId INT
+	INSERT INTO tblICImportLogDetailFromStaging(
+		strUniqueId
+		, intRecordNo
+		, strField
+		, strAction
+		, strValue
+		, strMessage
+		, strStatus
+		, strType
+		, intConcurrencyId
+	)
+	SELECT 
+		@strIdentifier
+		, s.intRecordNo
+		, 'Item No/Location'
+		, 'Skipped'
+		, s.strItemNo + '/' + s.strLocation
+		, 'Duplicate Record'
+		, 'Failed'
+		, 'Warning'
+		, 1
+	FROM @Duplicates s
+	
+	UNION ALL 
+	SELECT 
+		@strIdentifier
+		, ISNULL(s.intLineNo, 1)
+		, 'Location'
+		, 'Skipped'
+		, s.strLocation
+		, 'Invalid Location'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		tblICImportStagingItemLocation s LEFT JOIN tblSMCompanyLocation c 
+			ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+	WHERE 
+		s.strImportIdentifier = @strIdentifier
+		AND c.intCompanyLocationId IS NULL
 
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
-WHERE strUniqueId = @strIdentifier
-
-IF @TotalImported = 0 AND @LogId IS NOT NULL
-BEGIN
-	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
+	UNION ALL 
+	SELECT 
+		@strIdentifier
+		, ISNULL(s.intLineNo, 1)
+		, 'Item No'
+		, 'Skipped'
+		, s.strLocation
+		, 'Invalid Item'
+		, 'Failed'
+		, 'Error'
+		, 1
+	FROM 
+		tblICImportStagingItemLocation s LEFT JOIN tblICItem c 
+			ON LOWER(c.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo)))
+	WHERE 
+		s.strImportIdentifier = @strIdentifier
+		AND c.intItemId IS NULL
 END
 
 DROP TABLE #tmp
@@ -475,3 +557,12 @@ DELETE FROM [tblICImportStagingItemLocation] WHERE strImportIdentifier = @strIde
 
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
+
+-- Remove duplicate stock unit
+;WITH cte AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY intItemId ORDER BY intItemId, ysnStockUnit) AS RowNumber
+   FROM tblICItemUOM
+   WHERE ysnStockUnit = 1
+)
+UPDATE cte SET ysnStockUnit = 0 WHERE RowNumber > 1;

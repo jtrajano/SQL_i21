@@ -50,7 +50,17 @@ BEGIN TRY
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId
 
-	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId	
+	DECLARE @PFTable TABLE(
+		intPriceFixationId INT,
+		intPriceContractId INT
+	)
+
+	INSERT INTO @PFTable (intPriceFixationId, intPriceContractId)
+	SELECT intPriceFixationId, intPriceContractId 
+	FROM tblCTPriceFixation 
+	WHERE intPriceContractId = @intPriceContractId
+
+	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM @PFTable WHERE intPriceContractId = @intPriceContractId
 
 	SELECT	@intScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.PriceContracts'
 	SELECT  @intTransactionId	=	intTransactionId,@ysnOnceApproved = ysnOnceApproved FROM tblSMTransaction WHERE intRecordId = @intPriceContractId AND intScreenId = @intScreenId
@@ -158,16 +168,6 @@ BEGIN TRY
 					IF ISNULL(@intFutOptTransactionId,0) = 0
 					BEGIN
 						UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-						-- DERIVATIVE ENTRY HISTORY						
-						SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-						EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'ADD', 0
-						-- DERIVATIVE ENTRY AUDIT LOG: EXEC uspSMAuditLog 'RiskManagement.view.DerivativeEntry', @intFutOptTransactionHeaderId, @intUserId, 'Created', 'small-new-plus'
-					END
-					ELSE IF dbo.fnCTCheckIfDuplicateFutOptTransactionHistory(@intOutputId) > 1
-					BEGIN
-						-- DERIVATIVE ENTRY HISTORY
-						SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-						EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'UPDATE', 0
 					END
 				END
 			END
@@ -237,7 +237,7 @@ BEGIN TRY
 		IF ISNULL(@intContractDetailId,0) > 0 
 		BEGIN
 			DECLARE @ticketId INT
-			SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket WHERE intTicketType = 6 AND intContractId = @intContractDetailId
+			SELECT TOP 1 @ticketId = intTicketId FROM tblSCTicket with (nolock) WHERE intTicketType = 6 AND intContractId = @intContractDetailId
 			IF @ticketId IS NOT NULL
 			BEGIN
 				DECLARE @newInvoiceId INT
@@ -271,7 +271,7 @@ BEGIN TRY
 	where
 		fd.intPriceFixationDetailId = t.intPriceFixationDetailId
 
-		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
+		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM @PFTable WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
 	END
 	
 	EXEC [uspCTInterCompanyPriceContract] @intPriceContractId,@ysnApprove,@strRowState

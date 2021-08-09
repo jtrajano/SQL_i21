@@ -315,3 +315,36 @@ BEGIN
 	EXEC uspICRaiseError 80202, @strItemNo
 	RETURN -80202
 END 
+
+-- Check if the storage location is invalid 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@intItemId = Errors.intItemId 
+		,@intErrorCode = Errors.intErrorCode
+		,@strText = Errors.strText
+FROM	#FoundErrors Errors 
+WHERE	intErrorCode IN (80261)
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'The Storage Location invalid in {Storage Unit} for {Item No}.'
+	EXEC uspICRaiseError @strText
+	RETURN -@intErrorCode
+END 
+
+-- Check for non-inventory items. 
+SELECT @strItemNo = NULL, @intItemId = NULL
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item ON Errors.intItemId = Item.intItemId
+		INNER JOIN tblICItemLocation ItemLocation ON Errors.intItemLocationId = ItemLocation.intItemLocationId
+		INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
+WHERE	intErrorCode = 80264
+
+IF @intItemId IS NOT NULL 
+BEGIN 
+	-- 'The item type for {Item No} is not "stockable". Costing is not allowed.'
+	EXEC uspICRaiseError 80264, @strItemNo;
+	RETURN -80264
+END 

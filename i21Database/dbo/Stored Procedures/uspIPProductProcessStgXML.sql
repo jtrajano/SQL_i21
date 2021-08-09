@@ -337,7 +337,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -482,6 +482,14 @@ BEGIN TRY
 			SELECT intProductControlPointId
 			FROM OPENXML(@idoc, 'vyuIPGetProductControlPoints/vyuIPGetProductControlPoint', 2) WITH (intProductControlPointId INT)
 
+			DELETE
+			FROM tblQMProductControlPoint
+			WHERE intProductId = @intNewProductId
+				AND intProductControlPointRefId NOT IN (
+					SELECT intProductControlPointId
+					FROM @tblQMProductControlPoint
+					)
+
 			SELECT @intProductControlPointId = MIN(intProductControlPointId)
 			FROM @tblQMProductControlPoint
 
@@ -597,14 +605,6 @@ BEGIN TRY
 				WHERE intProductControlPointId > @intProductControlPointId
 			END
 
-			DELETE
-			FROM tblQMProductControlPoint
-			WHERE intProductId = @intNewProductId
-				AND intProductControlPointRefId NOT IN (
-					SELECT intProductControlPointId
-					FROM @tblQMProductControlPoint
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Product Test--------------------------------------------
@@ -616,6 +616,14 @@ BEGIN TRY
 			INSERT INTO @tblQMProductTest (intProductTestId)
 			SELECT intProductTestId
 			FROM OPENXML(@idoc, 'vyuIPGetProductTests/vyuIPGetProductTest', 2) WITH (intProductTestId INT)
+
+			DELETE
+			FROM tblQMProductTest
+			WHERE intProductId = @intNewProductId
+				AND intProductTestRefId NOT IN (
+					SELECT intProductTestId
+					FROM @tblQMProductTest
+					)
 
 			SELECT @intProductTestId = MIN(intProductTestId)
 			FROM @tblQMProductTest
@@ -705,14 +713,6 @@ BEGIN TRY
 				WHERE intProductTestId > @intProductTestId
 			END
 
-			DELETE
-			FROM tblQMProductTest
-			WHERE intProductId = @intNewProductId
-				AND intProductTestRefId NOT IN (
-					SELECT intProductTestId
-					FROM @tblQMProductTest
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Product Property--------------------------------------------
@@ -724,6 +724,14 @@ BEGIN TRY
 			INSERT INTO @tblQMProductProperty (intProductPropertyId)
 			SELECT intProductPropertyId
 			FROM OPENXML(@idoc, 'vyuIPGetProductPropertys/vyuIPGetProductProperty', 2) WITH (intProductPropertyId INT)
+
+			DELETE
+			FROM tblQMProductProperty
+			WHERE intProductId = @intNewProductId
+				AND intProductPropertyRefId NOT IN (
+					SELECT intProductPropertyId
+					FROM @tblQMProductProperty
+					)
 
 			SELECT @intProductPropertyId = MIN(intProductPropertyId)
 			FROM @tblQMProductProperty
@@ -875,14 +883,6 @@ BEGIN TRY
 				WHERE intProductPropertyId > @intProductPropertyId
 			END
 
-			DELETE
-			FROM tblQMProductProperty
-			WHERE intProductId = @intNewProductId
-				AND intProductPropertyRefId NOT IN (
-					SELECT intProductPropertyId
-					FROM @tblQMProductProperty
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Product Property Validity Period--------------------------------------------
@@ -894,6 +894,14 @@ BEGIN TRY
 			INSERT INTO @tblQMProductPropertyValidityPeriod (intProductPropertyValidityPeriodId)
 			SELECT intProductPropertyValidityPeriodId
 			FROM OPENXML(@idoc, 'vyuIPGetProductPropertyValidityPeriods/vyuIPGetProductPropertyValidityPeriod', 2) WITH (intProductPropertyValidityPeriodId INT)
+
+			DELETE
+			FROM tblQMProductPropertyValidityPeriod
+			WHERE intProductPropertyId = @ProductPropertyId
+				AND intProductPropertyValidityPeriodRefId NOT IN (
+					SELECT intProductPropertyValidityPeriodId
+					FROM @tblQMProductPropertyValidityPeriod
+					)
 
 			SELECT @intProductPropertyValidityPeriodId = MIN(intProductPropertyValidityPeriodId)
 			FROM @tblQMProductPropertyValidityPeriod
@@ -1051,14 +1059,6 @@ BEGIN TRY
 				WHERE intProductPropertyValidityPeriodId > @intProductPropertyValidityPeriodId
 			END
 
-			DELETE
-			FROM tblQMProductPropertyValidityPeriod
-			WHERE intProductPropertyId = @ProductPropertyId
-				AND intProductPropertyValidityPeriodRefId NOT IN (
-					SELECT intProductPropertyValidityPeriodId
-					FROM @tblQMProductPropertyValidityPeriod
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Conditional Product Property--------------------------------------------
@@ -1070,6 +1070,14 @@ BEGIN TRY
 			INSERT INTO @tblQMConditionalProductProperty (intConditionalProductPropertyId)
 			SELECT intConditionalProductPropertyId
 			FROM OPENXML(@idoc, 'vyuIPGetConditionalProductPropertys/vyuIPGetConditionalProductProperty', 2) WITH (intConditionalProductPropertyId INT)
+
+			DELETE
+			FROM tblQMConditionalProductProperty
+			WHERE intProductPropertyId = @ProductPropertyId
+				AND intConditionalProductPropertyRefId NOT IN (
+					SELECT intConditionalProductPropertyId
+					FROM @tblQMConditionalProductProperty
+					)
 
 			SELECT @intConditionalProductPropertyId = MIN(intConditionalProductPropertyId)
 			FROM @tblQMConditionalProductProperty
@@ -1209,14 +1217,6 @@ BEGIN TRY
 				WHERE intConditionalProductPropertyId > @intConditionalProductPropertyId
 			END
 
-			DELETE
-			FROM tblQMConditionalProductProperty
-			WHERE intProductPropertyId = @ProductPropertyId
-				AND intConditionalProductPropertyRefId NOT IN (
-					SELECT intConditionalProductPropertyId
-					FROM @tblQMConditionalProductProperty
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Product Property Formula Property--------------------------------------------
@@ -1228,6 +1228,14 @@ BEGIN TRY
 			INSERT INTO @tblQMProductPropertyFormulaProperty (intProductPropertyFormulaPropertyId)
 			SELECT intProductPropertyFormulaPropertyId
 			FROM OPENXML(@idoc, 'vyuIPGetProductPropertyFormulaPropertys/vyuIPGetProductPropertyFormulaProperty', 2) WITH (intProductPropertyFormulaPropertyId INT)
+
+			DELETE
+			FROM tblQMProductPropertyFormulaProperty
+			WHERE intProductPropertyId = @ProductPropertyId
+				AND intProductPropertyFormulaPropertyRefId NOT IN (
+					SELECT intProductPropertyFormulaPropertyId
+					FROM @tblQMProductPropertyFormulaProperty
+					)
 
 			SELECT @intProductPropertyFormulaPropertyId = MIN(intProductPropertyFormulaPropertyId)
 			FROM @tblQMProductPropertyFormulaProperty
@@ -1366,14 +1374,6 @@ BEGIN TRY
 				FROM @tblQMProductPropertyFormulaProperty
 				WHERE intProductPropertyFormulaPropertyId > @intProductPropertyFormulaPropertyId
 			END
-
-			DELETE
-			FROM tblQMProductPropertyFormulaProperty
-			WHERE intProductPropertyId = @ProductPropertyId
-				AND intProductPropertyFormulaPropertyRefId NOT IN (
-					SELECT intProductPropertyFormulaPropertyId
-					FROM @tblQMProductPropertyFormulaProperty
-					)
 
 			ext:
 

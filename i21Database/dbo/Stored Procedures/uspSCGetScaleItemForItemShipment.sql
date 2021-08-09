@@ -18,8 +18,17 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intDirectType AS INT = 3
+DECLARE @AGWorkOrderType AS INT = 59
+DECLARE @intTicketStorageScheduleTypeId AS INT
+
+
 
 BEGIN TRY
+		SELECT TOP 1
+			@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
+		FROM tblSCTicket
+		WHERE intTicketId = @intTicketId
+
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' OR @strDistributionOption = 'ICN'
 		BEGIN
 			BEGIN 
@@ -86,6 +95,43 @@ BEGIN TRY
 				WHERE	ScaleTicket.intTicketId = @intTicketId
 			END
 		END
+
+		---- AG WORK ORDER
+		ELSE IF (@intTicketStorageScheduleTypeId = -9)
+		BEGIN
+			BEGIN 
+				SELECT	intItemId = ScaleTicket.intItemId
+						,intLocationId = ItemLocation.intItemLocationId 
+						,intItemUOMId = ItemUOM.intItemUOMId
+						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+						,dblQty = @dblNetUnits 
+						,dblUOMQty = ItemUOM.dblUnitQty
+						,dblCost = WOD.dblPrice
+						,dblSalesPrice = 0
+						,intCurrencyId = ScaleTicket.intCurrencyId
+						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+						,intTransactionId = ScaleTicket.intTicketId
+						,intTransactionDetailId = NULL
+						,strTransactionId = ScaleTicket.strTicketNumber
+						,intTransactionTypeId = @AGWorkOrderType --@intDirectType 
+						,intLotId = NULL 
+						,intSubLocationId = WOD.intSubLocationId -- DEV NOTE Since these fields are not available in Ticket screen we should use the one saved in the Work Order
+						,intStorageLocationId = WOD.intStorageLocationId -- DEV NOTE Since these fields are not available in Ticket screen we should use the one saved in the Work Order
+						,ysnIsStorage = 0
+						,ysnAllowInvoice = 1
+				FROM	dbo.tblSCTicket ScaleTicket
+				INNER JOIN dbo.tblICItemUOM ItemUOM 
+					ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
+				INNER JOIN dbo.tblICItemLocation ItemLocation 
+					ON ScaleTicket.intItemId = ItemLocation.intItemId 
+					AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				INNER JOIN tblAGWorkOrderDetail WOD
+					ON ScaleTicket.intAGWorkOrderId = WOD.intWorkOrderId
+						AND ScaleTicket.intItemId = WOD.intItemId
+				WHERE	ScaleTicket.intTicketId = @intTicketId
+			END
+		END
+		
 		ELSE
 		BEGIN
 			BEGIN 
@@ -100,9 +146,9 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
+						,intTransactionDetailId = NULL
 						,strTransactionId = ScaleTicket.strTicketNumber
 						,intTransactionTypeId = @intDirectType 
-						,intTransactionDetailId = NULL
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId

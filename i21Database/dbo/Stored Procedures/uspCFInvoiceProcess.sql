@@ -29,7 +29,8 @@ BEGIN TRY
 	DECLARE @loopCustomerId				INT
 	DECLARE @CFID NVARCHAR(MAX)
 
-	IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
+	-- IF (@@TRANCOUNT = 0) BEGIN TRANSACTION
+	BEGIN TRANSACTION
 
 	----------CREATE TEMPORARY TABLE----------
 	CREATE TABLE #tblCFDisctinctCustomerInvoice	
@@ -197,7 +198,8 @@ BEGIN TRY
 
 	IF(@ysnHasError = 1)
 	BEGIN
-		IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+		-- IF (@@TRANCOUNT > 0) 
+		ROLLBACK TRANSACTION 
 
 		SELECT   
 			@CatchErrorMessage = ERROR_MESSAGE(),  
@@ -215,11 +217,13 @@ BEGIN TRY
 		
 		SELECT @index = CHARINDEX('>',@CatchErrorMessage)
 		SELECT @ErrorMessage = SUBSTRING(@CatchErrorMessage,@index + 1, 1000);  
+
+		RETURN
 	END
 	ELSE
 	BEGIN
 		UPDATE tblCFAccount SET dtmLastBillingCycleDate = @dtmInvoiceDate WHERE intAccountId IN (SELECT intAccountId FROM tblCFInvoiceStagingTable where strUserId = @username)
-		IF (@@TRANCOUNT > 0) COMMIT TRANSACTION
+		-- IF (@@TRANCOUNT > 0) 
 	END
 
 	--------HISTORY--------
@@ -261,6 +265,95 @@ BEGIN TRY
 	INNER JOIN tblEMEntity as ent
 	ON ipr.intCustomerId = ent.intEntityId
 
+	INSERT INTO tblCFInvoiceProcessResult
+	(
+		 ysnStatus
+		,intCustomerId
+		,strInvoiceReportNumber
+		,dblInvoiceAmount
+		,dblInvoiceQuantity
+		,dblInvoiceDiscount
+		,dblInvoiceFee
+		,dblPayment
+		,intInvoiceId
+		,intPaymentId
+		,strInvoiceId
+		,strPaymentId
+		,dtmInvoiceDate
+	)
+	SELECT
+		 1
+		,intCustomerId
+		,strTempInvoiceReportNumber
+		,SUM(dblCalculatedTotalAmount)
+		,SUM(dblQuantity)
+		,SUM(dblDiscount)
+		,SUM(dblFeeAmount)
+		,0
+		,NULL
+		,NULL
+		,NULL
+		,NULL
+		,dtmInvoiceDate
+		FROM
+		tblCFInvoiceStagingTable
+		WHERE strUserId = @username
+		AND LOWER(strStatementType) = @statementType
+		AND intCustomerId NOT IN (SELECT intCustomerId FROM tblCFInvoiceProcessResult AS innerQuery WHERE ISNULL(innerQuery.strInvoiceReportNumber,'') = ISNULL(tblCFInvoiceStagingTable.strTempInvoiceReportNumber,''))
+		GROUP BY 
+			intCustomerId , 
+			strCustomerNumber ,
+			strCustomerName ,
+			strTempInvoiceReportNumber, 
+			dtmInvoiceDate
+
+
+	INSERT INTO tblCFInvoiceProcessHistory
+	(
+		 intCustomerId
+		,intInvoiceId
+		,intPaymentId
+		,strCustomerNumber
+		,strCustomerName
+		,strInvoiceNumber
+		,strPaymentNumber
+		,dblInvoiceAmount
+		,dblTotalQuantity
+		,dblDiscountEligibleQuantity
+		,dblDiscountAmount
+		,dtmInvoiceDate
+		,strInvoiceNumberHistory
+		,strReportName
+		,dtmBalanceForwardDate
+	)
+	SELECT
+		 intCustomerId
+		,NULL
+		,NULL
+		,strCustomerNumber
+		,strCustomerName
+		,strTempInvoiceReportNumber
+		,NULL
+		,SUM(dblCalculatedTotalAmount)
+		,SUM(dblQuantity)
+		,SUM(dblEligableGallon)
+		,SUM(dblDiscount)
+		,dtmInvoiceDate
+		,strTempInvoiceReportNumber
+		,@reportName
+		,@balanceForwardDate
+		FROM
+		tblCFInvoiceStagingTable
+		WHERE strUserId = @username
+		AND LOWER(strStatementType) = @statementType
+		AND intCustomerId NOT IN (SELECT intCustomerId FROM tblCFInvoiceProcessHistory AS innerQuery WHERE ISNULL(innerQuery.strInvoiceNumber,'') = ISNULL(tblCFInvoiceStagingTable.strTempInvoiceReportNumber,''))
+		GROUP BY 
+			intCustomerId , 
+			strCustomerNumber ,
+			strCustomerName ,
+			strTempInvoiceReportNumber, 
+			dtmInvoiceDate
+	
 
 	INSERT INTO tblCFInvoiceHistoryStagingTable
 	(
@@ -385,6 +478,7 @@ BEGIN TRY
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
 		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
 		,ysnSummaryByMiscellaneous
 		,ysnSummaryByProduct
@@ -422,6 +516,7 @@ BEGIN TRY
 		,ysnSummaryByDriverPin
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
+		,strDepartmentGrouping
 	)
 	SELECT 
 		intCustomerGroupId
@@ -545,6 +640,7 @@ BEGIN TRY
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
 		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
 		,ysnSummaryByMiscellaneous
 		,ysnSummaryByProduct
@@ -582,6 +678,7 @@ BEGIN TRY
 		,ysnSummaryByDriverPin
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
+		,strDepartmentGrouping
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
@@ -925,8 +1022,7 @@ BEGIN TRY
 	
 	UPDATE tblCFTransaction 
 	SET ysnInvoiced = 1
-	-- WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username  AND ISNULL(ysnExpensed,0) = 0 AND LOWER(strStatementType) = @statementType) 
-	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username AND LOWER(strStatementType) = @statementType) -- CF-2459
+	WHERE intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceStagingTable WHERE strUserId = @username  AND LOWER(strStatementType) = @statementType)  --AND ISNULL(ysnExpensed,0) = 0
 
 
 	----------DROP TEMPORARY TABLE----------
@@ -937,12 +1033,15 @@ BEGIN TRY
 	DROP TABLE #tblCFDisctinctCustomerInvoice
 	----------------------------------------
 
+	
+	COMMIT TRANSACTION
 	 
 
 END TRY
 BEGIN CATCH
 	
-	IF (@@TRANCOUNT > 0) ROLLBACK TRANSACTION 
+	-- IF (@@TRANCOUNT > 0) 
+	ROLLBACK TRANSACTION 
   
 	SELECT   
 		@CatchErrorMessage = ERROR_MESSAGE(),  

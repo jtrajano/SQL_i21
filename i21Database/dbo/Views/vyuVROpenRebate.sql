@@ -99,7 +99,7 @@ FROM (
 		LEFT OUTER JOIN tblICUnitMeasure itemUnitMeasure ON itemUnitMeasure.intUnitMeasureId = pi.intUnitMeasureId
 	WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblVRRebate WHERE intInvoiceDetailId = invoiceDetail.intInvoiceDetailId)
 		AND invoice.ysnPosted = 1
-		AND invoice.strTransactionType IN ('Invoice', 'Credit Memo')
+		AND invoice.strTransactionType IN ('Invoice', 'Credit Memo', 'Cash')
 ) openRebates
 WHERE openRebates.strProgram IS NOT NULL
 	AND openRebates.dblRebateRate <> 0

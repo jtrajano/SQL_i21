@@ -10,8 +10,6 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	,@InventoryReceiptId AS INT OUTPUT
 	,@intBillId AS INT OUTPUT
 	,@ysnSkipValidation as BIT = NULL
-	,@intFutureMarketId AS INT = NULL
-	,@intFutureMonthId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -103,8 +101,6 @@ DECLARE @intDeliverySheetItemId INT
 DECLARE @intDeliverySheetLocationId INT
 DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strReceiptNumber NVARCHAR(50)
-DECLARE @dblTicketUnitPrice NUMERIC(18, 6)
-DECLARE @dblTicketUnitBasis NUMERIC(18, 6)
 
 -- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
@@ -138,9 +134,7 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
 		, @intTicketItemUOMId = ST.intItemUOMIdTo
 		, @intTicketEntityId = ST.intEntityId
 		, @intTicketDeliverySheetId = intDeliverySheetId
-		, @strTicketStatus = strTicketStatus
-		, @dblTicketUnitPrice = dblUnitPrice
-		, @dblTicketUnitBasis = dblUnitBasis
+		,@strTicketStatus = strTicketStatus
 FROM dbo.tblSCTicket ST WHERE
 ST.intTicketId = @intTicketId
 
@@ -177,15 +171,6 @@ BEGIN TRY
 				END
 			end
 			
-
-		END
-
-		IF(@strDistributionOption = 'SPT')
-			AND (ISNULL(@dblTicketUnitBasis,0) + ISNULL(@dblTicketUnitPrice,0)) = 0
-		BEGIN
-
-			SET @ErrMsg  = 'Cannot distribute Zero Spot ticket with destination Weights/Grades'
-			RAISERROR(@ErrMsg, 11, 1);
 
 		END
 
@@ -525,8 +510,6 @@ BEGIN TRY
 					,@intContractId
 					,@intUserId
 					,@ysnDPStorage
-					,@intFutureMarketId = @intFutureMarketId
-					,@intFutureMonthId = @intFutureMonthId
 
 					DECLARE @intDPContractId INT;
 					DECLARE @dblDPContractUnits NUMERIC(38,20);
@@ -570,7 +553,7 @@ BEGIN TRY
 								,intStorageScheduleTypeId
 								,ysnAllowVoucher 
 							)
-							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId, @intFutureMarketId, @intFutureMonthId
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;
 
 						-- Attempt to fetch next row from cursor
@@ -666,10 +649,11 @@ BEGIN TRY
 		END
 	END
 
+	exec uspSCAddTransactionLinks @intTransactionType = 1, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 		
 	UPDATE	SC
-	SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber
+	SET		SC.intLotId = ICLot.intLotId, SC.strLotNumber = ICLot.strLotNumber, SC.dtmDateModifiedUtc = GETUTCDATE()
 	FROM	dbo.tblSCTicket SC 
 	INNER JOIN tblICInventoryReceiptItem IRI ON SC.intTicketId = IRI.intSourceId
 	INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND intSourceType = 1
@@ -723,6 +707,8 @@ BEGIN TRY
 	BEGIN
 		EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
 	END
+
+	--EXEC uspSCModifyTicketDiscountItemInfo @intTicketId
 
 	EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

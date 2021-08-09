@@ -114,6 +114,10 @@ BEGIN
 		SELECT @intLocationId = intLocationId
 		FROM tblICStorageLocation
 		WHERE intStorageLocationId = @intStorageLocationId
+
+		SELECT @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY  = NULL
+		SELECT @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY  = 'Inventory Adjustment'
+
 	END
 	ELSE
 	BEGIN
@@ -851,7 +855,7 @@ BEGIN
 	-- After sorting out the Batch for the Consume and Produce, the Produce still need to be posted using the original @strBatchId. 
 	BEGIN
 		UPDATE t
-		SET t.strBatchId = @strBatchId, dtmDateModified = GETUTCDATE()
+		SET t.strBatchId = @strBatchId
 		FROM tblICInventoryTransaction t
 		WHERE t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId

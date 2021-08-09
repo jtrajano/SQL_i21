@@ -9,8 +9,6 @@ BEGIN TRY
 	
 	BEGIN TRANSACTION
 
-
-
 	SET @strEntityIds = ''
 
 	DECLARE @dtmDateTimeModifiedFrom AS DATETIME
@@ -18,6 +16,7 @@ BEGIN TRY
 
 	DECLARE @ErrMsg				NVARCHAR(MAX),
 	        @idoc				INT,
+			@StoreGroup 		NVARCHAR(MAX),
 			@Location 			NVARCHAR(MAX),
 			@Vendor             NVARCHAR(MAX),
 			@Category           NVARCHAR(MAX),
@@ -31,6 +30,8 @@ BEGIN TRY
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
+			@PromotionalCost    DECIMAL (18,6),
+		    @EffectiveDate		NVARCHAR(50),
 		    @SalesStartDate		NVARCHAR(50),
 			@SalesEndDate   	NVARCHAR(50),
 			@ysnPreview			NVARCHAR(1),
@@ -41,6 +42,7 @@ BEGIN TRY
 
 
 	SELECT	
+			@StoreGroup		 =	 StoreGroup,
 			@Location		 =	 Location,
             @Vendor          =   Vendor,
 			@Category        =   Category,
@@ -54,6 +56,8 @@ BEGIN TRY
 			@StandardCost 	 = 	 Cost,
 			@RetailPrice   	 =	 Retail,
 			@SalesPrice		 =	 SalesPrice,
+			@PromotionalCost =	 PromotionalCost,
+			@EffectiveDate	 =	 EffectiveDate,
 			@SalesStartDate	 =	 SalesStartingDate,
 			@SalesEndDate	 =	 SalesEndingDate,
 			@ysnPreview		 =   ysnPreview,
@@ -62,6 +66,7 @@ BEGIN TRY
 	FROM	OPENXML(@idoc, 'root',2)
 	WITH
 	(
+			StoreGroup		        NVARCHAR(MAX),
 			Location		        NVARCHAR(MAX),
 			Vendor	     	        NVARCHAR(MAX),
 			Category		        NVARCHAR(MAX),
@@ -75,6 +80,8 @@ BEGIN TRY
 			Cost		            DECIMAL (18,6),
 			Retail		            DECIMAL (18,6),
 			SalesPrice       		DECIMAL (18,6),
+			PromotionalCost      	DECIMAL (18,6),
+			EffectiveDate			NVARCHAR(50),
 			SalesStartingDate		NVARCHAR(50),
 			SalesEndingDate			NVARCHAR(50),
 			ysnPreview				NVARCHAR(1),
@@ -145,19 +152,16 @@ BEGIN TRY
 				intItemId INT 
 				,intItemSpecialPricingId INT 
 				,dblOldUnitAfterDiscount NUMERIC(38, 20) NULL 
+				,dblOldCost NUMERIC(38, 20) NULL 
 				,dtmOldBeginDate DATETIME NULL 
 				,dtmOldEndDate DATETIME NULL 
 				,dblNewUnitAfterDiscount NUMERIC(38, 20) NULL 
+				,dblNewCost NUMERIC(38, 20) NULL 
 				,dtmNewBeginDate DATETIME NULL
 				,dtmNewEndDate DATETIME NULL 		
 			)
 		;
 	END
-
-
-
-
-
 
 	-- Add the filter records
 	BEGIN
@@ -168,6 +172,21 @@ BEGIN TRY
 				)
 				SELECT [intID] AS intLocationId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Location)
+			END
+			
+		IF(@StoreGroup IS NOT NULL AND @StoreGroup != '')
+			BEGIN
+				INSERT INTO #tmpUpdateItemPricingForCStore_Location (
+					intLocationId
+				)
+				SELECT st.intCompanyLocationId AS intLocationId
+				FROM [dbo].[fnGetRowsFromDelimitedValues](@StoreGroup)
+				INNER JOIN tblSTStoreGroup sg
+					ON sg.intStoreGroupId = intID
+				INNER JOIN tblSTStoreGroupDetail sgt
+					ON sgt.intStoreGroupId = sg.intStoreGroupId
+				INNER JOIN tblSTStore st
+					ON st.intStoreId = sgt.intStoreId
 			END
 		
 		IF(@Vendor IS NOT NULL AND @Vendor != '')
@@ -215,20 +234,41 @@ BEGIN TRY
 	-- ==========================================================================================
 	-- [START] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
 	-- ==========================================================================================
-	IF(@Location IS NULL AND @Region IS NOT NULL AND @District IS NOT NULL AND @State IS NOT NULL)
+	IF(@Location IS NULL AND ((@Region IS NOT NULL AND @Region != '') OR (@District IS NOT NULL AND @District != '') OR (@State IS NOT NULL AND @State != '')))
 		BEGIN
+
+			DELETE FROM #tmpUpdateItemPricingForCStore_Location
 			
 			INSERT INTO #tmpUpdateItemPricingForCStore_Location 
 			(
 				intLocationId
 			)
-			SELECT 
+			SELECT DISTINCT
 				intLocationId = intCompanyLocationId
 			FROM tblSTStore
-			WHERE strRegion		= @Region
-				AND strDistrict = @District
-				AND strState	= @State
+			WHERE strRegion		= ISNULL(@Region, strRegion)
+				AND strDistrict = ISNULL(@District, strDistrict)
+				AND strState	= ISNULL(@State, strState)
+				AND intCompanyLocationId IN (SELECT st.intCompanyLocationId AS intLocationId
+					FROM [dbo].[fnGetRowsFromDelimitedValues](@StoreGroup)
+					INNER JOIN tblSTStoreGroup sg
+						ON sg.intStoreGroupId = intID
+					INNER JOIN tblSTStoreGroupDetail sgt
+						ON sgt.intStoreGroupId = sg.intStoreGroupId
+					INNER JOIN tblSTStore st
+						ON st.intStoreId = sgt.intStoreId) --To not allow duplicates
 
+			
+			--To prevent defaulting to all stores if Region District and State did not return any rows
+			IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Location)
+			INSERT INTO #tmpUpdateItemPricingForCStore_Location 
+			(
+				intLocationId
+			)
+			VALUES
+			(
+				9999999999 --So that it will filter to null
+			)
 		END
 	-- ==========================================================================================
 	-- [END] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
@@ -254,21 +294,21 @@ BEGIN TRY
 
 	DECLARE @dblStandardCostConv AS NUMERIC(38, 20) = CAST(@StandardCost AS NUMERIC(38, 20))
 	DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@RetailPrice AS NUMERIC(38, 20))
+	DECLARE @dtmEffectiveDateConv AS DATE = CAST(@EffectiveDate AS DATE)
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
-
-
-
 
 
 	BEGIN TRY
 		-- ITEM PRICING
 		EXEC [uspICUpdateItemPricingForCStore]
 			  @strUpcCode				= @strUpcCode
+			, @strScreen				= 'UpdateItemPricing'
 			, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
 			, @intItemId				= NULL
 			, @dblStandardCost			= @dblStandardCostConv
 			, @dblRetailPrice			= @dblRetailPriceConv
 			, @intEntityUserSecurityId	= @intCurrentUserIdConv
+			, @dtmEffectiveDate			= @dtmEffectiveDateConv
 	END TRY
 	BEGIN CATCH
 		SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
@@ -276,13 +316,10 @@ BEGIN TRY
 
 		GOTO ExitWithRollback 
 	END CATCH
-
-
-
-
-
+	
 
 	DECLARE @dblSalesPriceConv AS DECIMAL(18, 6) = CAST(@SalesPrice AS DECIMAL(18, 6))
+	DECLARE @dblPromotionalCostConv AS DECIMAL(18, 6) = CAST(@PromotionalCost AS DECIMAL(18, 6))
 	DECLARE @dtmSalesStartingDateConv AS DATE = CAST(@SalesStartDate AS DATE)
 	DECLARE @dtmSalesEndingDateConv AS DATE = CAST(@SalesEndDate AS DATE)
 
@@ -290,8 +327,10 @@ BEGIN TRY
 		-- ITEM SPECIAL PRICING
 		EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 			 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
+			,@dblPromotionalCost			= @dblPromotionalCostConv 
 			,@dtmBeginDate					= @dtmSalesStartingDateConv
 			,@dtmEndDate					= @dtmSalesEndingDateConv 
+			,@strUpcCode					= @strUpcCode
 			,@intEntityUserSecurityId		= @intCurrentUserIdConv
 	END TRY
 	BEGIN CATCH
@@ -496,15 +535,17 @@ BEGIN TRY
 			, ysnPreview
 			, ysnForRevert
 		)
-		SELECT DISTINCT 
+		SELECT  
 			strTableName				= N'tblICItemSpecialPricing'
 			, strTableColumnName		= CASE
 											WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'dblUnitAfterDiscount'
+											WHEN [Changes].oldColumnName = 'strCost_Original' THEN 'dblCost'
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'dtmBeginDate'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'dtmEndDate'
 										END
 			, strTableColumnDataType	= CASE
 											WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'NUMERIC(18, 6)'
+											WHEN [Changes].oldColumnName = 'strCost_Original' THEN 'NUMERIC(18, 6)'
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'DATETIME'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'DATETIME'
 										END
@@ -525,6 +566,7 @@ BEGIN TRY
 			, strItemDescription		= I.strDescription
 			, strChangeDescription		= CASE
 											WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'Unit After Discount'
+											WHEN [Changes].oldColumnName = 'strCost_Original' THEN 'Promotional Cost'
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
 										END
@@ -541,20 +583,22 @@ BEGIN TRY
 				SELECT intItemId 
 					,intItemSpecialPricingId 
 					,CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_Original
+					,CAST(CAST(dblOldCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strCost_Original
 					,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
 					,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
 					,CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_New
+					,CAST(CAST(dblNewCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strCost_New
 					,CAST(CAST(dtmNewBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_New
 					,CAST(CAST(dtmNewEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_New
 				FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
 			) t
 			unpivot
 			(
-				strOldData for oldColumnName in (strUnitAfterDiscount_Original, strBeginDate_Original, strEndDate_Original)
+				strOldData for oldColumnName in (strUnitAfterDiscount_Original, strCost_Original, strBeginDate_Original, strEndDate_Original)
 			) o
 			unpivot
 			(
-				strNewData for newColumnName in (strUnitAfterDiscount_New, strBeginDate_New, strEndDate_New)
+				strNewData for newColumnName in (strUnitAfterDiscount_New, strCost_New, strBeginDate_New, strEndDate_New)
 			) n
 			WHERE  REPLACE(oldColumnName, '_Original', '') = REPLACE(newColumnName, '_New', '')	
 		
@@ -636,7 +680,7 @@ BEGIN TRY
 				, 1
 			FROM @tblPreview
 			WHERE ysnPreview = 1
-			ORDER BY strItemDescription, strChangeDescription ASC
+			ORDER BY strUpc, strChangeDescription, strLocation ASC
 
 		END
 	 ELSE IF(@ysnRecap = 0)
@@ -878,16 +922,26 @@ BEGIN TRY
 	----------------------------- START Query Preview -------------------------------------
 	---------------------------------------------------------------------------------------
 	-- Query Preview display
-	SELECT DISTINCT 
-	          strLocation
-			  , strUpc
-			  , strItemDescription
-			  , strChangeDescription
-			  , strPreviewOldData AS strOldData
-			  , strPreviewNewData AS strNewData
-	FROM @tblPreview
-	WHERE ysnPreview = 1
-	ORDER BY strItemDescription, strChangeDescription ASC
+		SELECT DISTINCT 
+			@strGuid
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strPreviewOldData AS strOldData
+			, strPreviewNewData AS strNewData
+
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intPrimaryKeyId
+			, strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, 1
+		FROM @tblPreview
+		WHERE ysnPreview = 1
+		ORDER BY strUpc, strChangeDescription, strLocation ASC
    
 	---------------------------------------------------------------------------------------
 	----------------------------- END Query Preview ---------------------------------------

@@ -68,6 +68,7 @@ SELECT S.intSampleId
 	,S.intSentById
 	,S.intSampleRefId
 	,S.ysnParent
+	,S.ysnIgnoreContract
 	,S.intCreatedUserId
 	,S.dtmCreated
 	,S.intLastModifiedUserId

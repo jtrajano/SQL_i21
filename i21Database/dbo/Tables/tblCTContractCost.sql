@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblCTContractCost](
 	[intContractCostId]			INT IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId]			INT NOT NULL,
-	[intPrevConcurrencyId]		INT,
+	[intPrevConcurrencyId]		INT NOT NULL DEFAULT ((0)),
 	[intContractDetailId]		INT NOT NULL,
 	[intItemId]					INT NULL,
 	[intVendorId]				INT NULL,
@@ -52,8 +52,6 @@ CREATE NONCLUSTERED INDEX [NonClusteredIndex_tblCTContractCost_001] ON [dbo].tbl
 	[intContractDetailId] ASC,
 	intItemId ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)
-
-GO
 
 GO
 

@@ -29,6 +29,10 @@ BEGIN TRY
 	WHERE intRecordId = @intInvPlngReportMasterID
 		AND intScreenId = @intDemandScreenId
 
+	SELECT @intCompanyId = intCompanyId
+	FROM tblIPMultiCompany
+	WHERE ysnCurrentCompany=1
+
 	IF @strRowState = 'Delete'
 	BEGIN
 		INSERT INTO tblMFDemandStage (
@@ -74,14 +78,8 @@ BEGIN TRY
 
 	SELECT @strObjectName = 'vyuMFGetItemSupplyTarget'
 
-	SELECT @intCompanyId = intCompanyId
-	FROM tblICItem
-	WHERE IsNUll(intCompanyId, 0) > 0
-
-	SELECT @strHeaderCondition = 'intCompanyId = ' + LTRIM(@intCompanyId)
-
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
+		,NULL
 		,@strItemSupplyTargetXML OUTPUT
 		,NULL
 		,NULL
@@ -114,7 +112,7 @@ BEGIN TRY
 
 	IF EXISTS (
 			SELECT 1
-			FROM master.dbo.sysdatabases
+			FROM sys.databases
 			WHERE name = @strDatabaseName
 			)
 	BEGIN

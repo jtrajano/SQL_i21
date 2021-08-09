@@ -46,6 +46,16 @@ SET ARI.[dblProvisionalAmount]		= PRO.[dblInvoiceTotal]
   , ARI.[dblBaseProvisionalAmount]	= PRO.[dblBaseInvoiceTotal]
   , ARI.[ysnExcludeFromPayment]		= ISNULL(@ysnExcludeFromPayment, 0)
   , ARI.[ysnProvisionalWithGL]     	= PRO.[ysnProvisionalWithGL]
+  , ARI.[strComments]				= CASE WHEN (PRO.[dblInvoiceTotal] > ARI.[dblInvoiceTotal] AND ISNULL(@ysnExcludeFromPayment, 0) = 1) 
+											OR  (PRO.[dblPayment] > ARI.[dblInvoiceTotal] AND ISNULL(@ysnExcludeFromPayment, 0) = 0)
+										THEN '' 
+										ELSE PRO.[strComments] 
+									  END
+  , ARI.[strTransactionType]		= CASE WHEN (PRO.[dblInvoiceTotal] > ARI.[dblInvoiceTotal] AND ISNULL(@ysnExcludeFromPayment, 0) = 1) 
+											OR  (PRO.[dblPayment] > ARI.[dblInvoiceTotal] AND ISNULL(@ysnExcludeFromPayment, 0) = 0)
+										THEN 'Credit Memo' 
+										ELSE 'Invoice'
+									  END
 FROM tblARInvoice ARI
 INNER JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId] AND PRO.[strType] = 'Provisional'
 WHERE ARI.[intInvoiceId] IN (SELECT [intHeaderId] FROM @InvoiceIds)

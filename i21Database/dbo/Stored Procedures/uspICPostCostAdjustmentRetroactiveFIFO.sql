@@ -18,7 +18,7 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentRetroactiveFIFO]
 	,@intSourceTransactionId AS INT
 	,@intSourceTransactionDetailId AS INT 
 	,@strSourceTransactionId AS NVARCHAR(20)
-	,@strBatchId AS NVARCHAR(20)
+	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@intEntityUserSecurityId AS INT
 	,@intRelatedInventoryTransactionId AS INT = NULL 
@@ -734,7 +734,6 @@ BEGIN
 
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
-				, dtmDateModified = GETUTCDATE()
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 
 			-- Update the log with correct inventory transaction id
@@ -814,7 +813,6 @@ BEGIN
 		BEGIN 
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
-				, dtmDateModified = GETUTCDATE()
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 		END 
 

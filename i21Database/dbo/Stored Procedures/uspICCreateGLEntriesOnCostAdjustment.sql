@@ -669,7 +669,7 @@ AS
 	-- FIFO DETAILED
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
@@ -709,7 +709,7 @@ AS
 	-- FIFO SUMMARIZED
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
@@ -761,7 +761,7 @@ AS
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
@@ -801,7 +801,7 @@ AS
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
@@ -853,7 +853,7 @@ AS
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
@@ -893,7 +893,7 @@ AS
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
@@ -945,7 +945,7 @@ AS
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(cbLog.dblQty, 0) * ISNULL(cbLog.dblCost, 0) + ISNULL(cbLog.dblValue, 0), 2)
@@ -985,7 +985,7 @@ AS
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ISNULL(cbLog.dblValue, 0)
@@ -1037,7 +1037,7 @@ AS
 	UNION ALL 
 	SELECT	t.dtmDate
 			,t.intItemId
-			,t.intItemLocationId
+			,ISNULL(t.intInTransitSourceLocationId, t.intItemLocationId)
 			,t.intTransactionId
 			,t.strTransactionId
 			,dblValue = ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2)
@@ -1391,8 +1391,8 @@ SELECT
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
 		,intAccountId				= tblGLAccount.intAccountId
-		,dblDebit					= Debit.Value
-		,dblCredit					= Credit.Value
+		,dblDebit					= Credit.Value
+		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= dbo.fnCreateCostAdjGLDescription(
@@ -1435,14 +1435,14 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intRevalueInTransit
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
-WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory --@COST_ADJ_TYPE_Adjust_InTransit 
 UNION ALL
 SELECT	
 		dtmDate						= ForGLEntries_CTE.dtmDate
 		,strBatchId					= @strBatchId
 		,intAccountId				= tblGLAccount.intAccountId
-		,dblDebit					= Credit.Value
-		,dblCredit					= Debit.Value
+		,dblDebit					= Debit.Value
+		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
 		,strDescription				= dbo.fnCreateCostAdjGLDescription(
@@ -1485,7 +1485,7 @@ FROM	ForGLEntries_CTE
 			ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
 		CROSS APPLY dbo.fnGetDebit(dblValue) Debit
 		CROSS APPLY dbo.fnGetCredit(dblValue) Credit
-WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit
+WHERE	intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Adjust_InTransit_Inventory --@COST_ADJ_TYPE_Adjust_InTransit
 
 /*-----------------------------------------------------------------------------------
   GL Entries for Adjust In-Transit from Transfer Order

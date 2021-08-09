@@ -139,7 +139,7 @@ BEGIN TRY
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
-					, strVendorInvoiceNumber = tblTRLoadReceipt.strBillOfLading
+					, strVendorInvoiceNumber = APBill.strVendorOrderNumber
 					, strCustomerLicenseNumber = NULL
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
@@ -171,8 +171,13 @@ BEGIN TRY
 					LEFT JOIN tblTRSupplyPoint ON tblTRSupplyPoint.intEntityLocationId = tblICInventoryReceipt.intShipFromId 
 						LEFT JOIN tblTFTerminalControlNumber ON tblTFTerminalControlNumber.intTerminalControlNumberId = tblTRSupplyPoint.intTerminalControlNumberId
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
-				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId  = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
+				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+				LEFT JOIN (
+					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
+					FROM tblAPBillDetail 
+					INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
+				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId AND APBill.intItemId = tblICInventoryReceiptItem.intItemId
 				--LEFT JOIN (
 				--	SELECT  
 				--		tblTRLoadDistributionDetail.intLoadDistributionDetailId,
@@ -323,7 +328,7 @@ BEGIN TRY
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
-					, strVendorInvoiceNumber = tblTRLoadReceipt.strBillOfLading
+					, strVendorInvoiceNumber = APBill.strVendorOrderNumber
 					, strCustomerLicenseNumber = NULL
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
@@ -356,6 +361,11 @@ BEGIN TRY
 					INNER JOIN tblSMCompanyLocation ON tblICInventoryReceipt.intLocationId = tblSMCompanyLocation.intCompanyLocationId
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+				LEFT JOIN (
+					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
+					FROM tblAPBillDetail 
+					INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
+				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId AND APBill.intItemId = tblICInventoryReceiptItem.intItemId
 				--LEFT JOIN (
 				--	SELECT  
 				--		tblTRLoadDistributionDetail.intLoadDistributionDetailId,

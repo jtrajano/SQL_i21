@@ -271,11 +271,11 @@ BEGIN TRY
 			SET @ErrMsg = 'Created date is missing while creating contract.'
 			RAISERROR(@ErrMsg,16,1)
 		END		
-		IF	@dtmNewM2MDate IS NULL AND @intNewPricingTypeId <> 5
-		BEGIN
-			SET @ErrMsg = 'M2M Date is missing while creating contract.'
-			RAISERROR(@ErrMsg,16,1)
-		END
+		-- IF	@dtmNewM2MDate IS NULL AND @intNewPricingTypeId <> 5
+		-- BEGIN
+		-- 	SET @ErrMsg = 'M2M Date is missing while creating contract.'
+		-- 	RAISERROR(@ErrMsg,16,1)
+		-- END
 		IF	@dblNewQuantity > 9999999999.999999
 		BEGIN
 			SET @ErrMsg = 'Quantity cannot be greater than 99999999.999999.'
@@ -330,22 +330,8 @@ BEGIN TRY
 		--End Active check
 	END
 
-	IF @RowState  = 'Modified'
+	ELSE IF @RowState  = 'Modified'
 	BEGIN
-		--SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShippingInstructionContractQty WHERE intContractDetailId = @intContractDetailId
-		--IF @dblQuantityUsed > @dblNewQuantityInOldUOM
-		--BEGIN
-		--	SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in shipping instruction.'
-		--	RAISERROR(@ErrMsg,16,1) 
-		--END
-
-		--SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShipmentContractQty WHERE intContractDetailId = @intContractDetailId
-		--IF @dblQuantityUsed > @dblNewQuantityInOldUOM
-		--BEGIN
-		--	SET @ErrMsg = 'Cannot update sequence quantity below '+LTRIM(@dblQuantityUsed)+' as it is used in Inbound shipments.'
-		--	RAISERROR(@ErrMsg,16,1) 
-		--END
-
 		SELECT @dblQuantityUsed = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intOldItemId,intUnitMeasureId,@intOldQtyUnitMeasureId,dblReservedQuantity)) FROM tblLGReservation WHERE intContractDetailId = @intContractDetailId
 		IF @dblQuantityUsed > @dblNewQuantityInOldUOM
 		BEGIN
@@ -359,15 +345,6 @@ BEGIN TRY
 			SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as prepaid balance is associated with the contract.'
 			RAISERROR(@ErrMsg,16,1) 
 		END
-
-		--IF @intNewStatusId IN (3) AND @intOldStatusId NOT IN (3) AND 
-		--EXISTS(	SELECT * FROM tblLGLoadDetail LD JOIN tblLGLoad LO ON LO.intLoadId = LD.intLoadId 
-		--		WHERE (LD.intPContractDetailId = @intContractDetailId OR intSContractDetailId = @intContractDetailId) AND ISNULL(LO.ysnCancelled,0) <> 1)
-		--BEGIN
-		--	SELECT	@strNumber = strContractStatus FROM tblCTContractStatus WHERE intContractStatusId	=	@intNewStatusId
-		--	SET @ErrMsg = 'Cannot change status of Sequence '+LTRIM(@intContractSeq)+' to '+@strNumber+' as loads are associated with the sequence.'
-		--	RAISERROR(@ErrMsg,16,1) 
-		--END
 
 		IF @intNewStatusId IN (6) AND @intOldStatusId NOT IN (6) AND ISNULL(@dblAllocatedQty,0) > 0 AND
 		@dblAllocatedQty > @dblNewQuantity - @dblNewBalance
@@ -390,6 +367,8 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				select @dblOldScheduleQty = isnull(@dblOldScheduleQty,0);
+				
 				IF (@dblNewQuantity < @dblOldQuantity - @dblOldBalance + @dblOldScheduleQty)
 				BEGIN
 					SET @ErrMsg = 'Sequence ' + LTRIM(@intContractSeq) + ' quantity cannot be reduced below ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '. As current contract quantity is ' +  LTRIM(@dblOldQuantity) + ' and quantity in use is ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '.'
@@ -446,7 +425,7 @@ BEGIN TRY
 		END
 	END
 
-	IF @RowState  = 'Delete'
+	ELSE IF @RowState  = 'Delete'
 	BEGIN
 		IF EXISTS	(	
 						SELECT * FROM tblICInventoryReceipt IR
@@ -480,16 +459,14 @@ BEGIN TRY
 	END
 
 	IF EXISTS(
-			SELECT	* 
-			FROM	tblICItemSubLocation	SL
+			SELECT	TOP 1 1 FROM tblICItemSubLocation SL
 			JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
 			JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
 			WHERE	IL.intItemId = @intNewItemId AND CS.intCompanyLocationId = @intNewCompanyLocationId 
 	) AND ISNULL(@intNewSubLocationId,0) <> 0
 	BEGIN
 		IF NOT EXISTS(
-			SELECT	* 
-			FROM	tblICItemSubLocation	SL
+			SELECT	TOP 1 1 FROM tblICItemSubLocation SL
 			JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
 			JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
 			WHERE	IL.intItemId = @intNewItemId AND CS.intCompanyLocationId = @intNewCompanyLocationId AND SL.intSubLocationId = @intNewSubLocationId
@@ -502,7 +479,7 @@ BEGIN TRY
 
 	IF ISNULL(@ysnSlice,0) = 0
 	BEGIN
-		IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
+		IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
 		BEGIN
 			SELECT @ErrMsg = strStatus FROM tblICItem WHERE intItemId = @intNewItemId
 			IF @ErrMsg = 'Phased Out'

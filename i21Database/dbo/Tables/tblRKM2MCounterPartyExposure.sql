@@ -5,7 +5,7 @@
     [intVendorId] INT  NULL, 
 	[intContractHeaderId] INT  NULL,
     [strContractSeq] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
-    [strEntityName] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+    [strEntityName] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     [dblFixedPurchaseVolume] NUMERIC(18, 6) NULL,     
 	[dblUnfixedPurchaseVolume] NUMERIC(18, 6) NULL,  
 	[dblTotalCommittedVolume] NUMERIC(18, 6) NULL,  

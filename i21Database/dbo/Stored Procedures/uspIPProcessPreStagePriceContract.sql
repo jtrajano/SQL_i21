@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspIPProcessPreStagePriceContract]
-	(@ysnProcessApproverInfo bit=0)
+﻿CREATE PROCEDURE [dbo].[uspIPProcessPreStagePriceContract] (@ysnProcessApproverInfo BIT = 0)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -14,12 +13,17 @@ BEGIN TRY
 		,@intPriceContractPreStageId INT
 		,@intPriceContractId INT
 		,@intContractHeaderId INT
+		,@ysnApproval BIT
+		,@intContractScreenId INT
+	DECLARE @tblCTPriceContractPreStage TABLE (intPriceContractPreStageId INT)
 
-	Declare @tblCTPriceContractPreStage table(intPriceContractPreStageId int)
-	Insert into @tblCTPriceContractPreStage
-	SELECT intPriceContractPreStageId
-	FROM tblCTPriceContractPreStage
-	WHERE strFeedStatus IS NULL
+	INSERT INTO @tblCTPriceContractPreStage
+	SELECT PS.intPriceContractPreStageId
+	FROM dbo.tblCTPriceContractPreStage PS
+	JOIN dbo.tblCTPriceFixation PF ON PF.intPriceContractId = PS.intPriceContractId
+	JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = PF.intContractHeaderId
+	WHERE PS.strFeedStatus IS NULL
+		AND CH.intContractHeaderRefId IS NOT NULL
 
 	SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
 	FROM @tblCTPriceContractPreStage
@@ -36,6 +40,12 @@ BEGIN TRY
 			FROM @tblCTPriceContractPreStage PS
 			)
 
+	SELECT @intContractScreenId = NULL
+
+	SELECT @intContractScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
 	WHILE @intPriceContractPreStageId IS NOT NULL
 	BEGIN
 		SELECT @intPriceContractId = NULL
@@ -46,10 +56,34 @@ BEGIN TRY
 			,@strDelete = NULL
 			,@strToTransactionType = NULL
 			,@intContractHeaderId = NULL
+			,@ysnApproval = NULL
 
 		SELECT @intPriceContractId = intPriceContractId
+			,@ysnApproval = ysnApproval
 		FROM tblCTPriceContractPreStage
 		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
+
+		IF @ysnApproval = 0
+		BEGIN
+			IF NOT EXISTS (
+					SELECT TOP 1 1
+					FROM dbo.tblSMTransaction
+					WHERE strApprovalStatus IN (
+							'Approved'
+							,'Approved with Modifications'
+							,'No Need for Approval'
+							)
+						AND intRecordId = @intPriceContractId
+						AND intScreenId = @intContractScreenId
+					)
+			BEGIN
+				UPDATE dbo.tblCTPriceContractPreStage
+				SET strFeedStatus = 'IGNORE'
+				WHERE intPriceContractPreStageId = @intPriceContractPreStageId
+
+				GOTO NextContract
+			END
+		END
 
 		SELECT @intContractHeaderId = intContractHeaderId
 		FROM tblCTPriceFixation
@@ -87,6 +121,7 @@ BEGIN TRY
 				,'Added'
 				,0
 				,@ysnProcessApproverInfo
+				,@ysnApproval
 		END
 		ELSE IF EXISTS (
 				SELECT 1
@@ -103,6 +138,7 @@ BEGIN TRY
 				,'Modified'
 				,0
 				,@ysnProcessApproverInfo
+				,@ysnApproval
 		END
 		ELSE IF NOT EXISTS (
 				SELECT 1
@@ -110,7 +146,7 @@ BEGIN TRY
 				WHERE intPriceContractId = @intPriceContractId
 				)
 		BEGIN
-			SELECT @strToTransactionType=strTransactionType
+			SELECT @strToTransactionType = strTransactionType
 				,@intToCompanyId = intMultiCompanyId
 			FROM tblCTPriceContractPreStage
 			WHERE intPriceContractId = @intPriceContractId
@@ -122,11 +158,14 @@ BEGIN TRY
 				,'Delete'
 				,0
 				,@ysnProcessApproverInfo
+				,@ysnApproval
 		END
 
 		UPDATE tblCTPriceContractPreStage
 		SET strFeedStatus = 'Processed'
 		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
+
+		NextContract:
 
 		SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
 		FROM @tblCTPriceContractPreStage

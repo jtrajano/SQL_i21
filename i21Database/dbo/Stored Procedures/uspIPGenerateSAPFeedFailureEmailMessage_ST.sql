@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPGenerateSAPFeedFailureEmailMessage_ST @strMessageType NVARCHAR(50)
+﻿CREATE PROCEDURE uspIPGenerateSAPFeedFailureEmailMessage_ST @strMessageType NVARCHAR(50),@intStatusId int=2
 AS
 BEGIN TRY
 	DECLARE @strStyle NVARCHAR(MAX)
@@ -7,6 +7,9 @@ BEGIN TRY
 		,@strDetail NVARCHAR(MAX) = ''
 		,@strMessage NVARCHAR(MAX)
 		,@intDuration INT = 30
+	DECLARE @intLotErrorCount INT
+		,@intLotSuccessCount INT
+		,@strSummaryDetail NVARCHAR(MAX) = ''
 
 	SELECT @intDuration = ISNULL(strValue, 30)
 	FROM tblIPSAPIDOCTag
@@ -44,6 +47,7 @@ BEGIN TRY
 					</style>'
 	SET @strHtml = '<html>
 					<body>
+						@summary
 
 					<table class="GeneratedTable">
 						<tbody>
@@ -125,15 +129,29 @@ BEGIN TRY
 
 	IF @strMessageType = 'Stock'
 	BEGIN
-		SET @strHeader = '<tr>
-						<th>&nbsp;Transaction</th>
-						<th>&nbsp;Lot No.</th>
-						<th>&nbsp;Item No.</th>
-						<th>&nbsp;Storage Unit</th>
-						<th>&nbsp;Book</th>
-						<th>&nbsp;Sub Book</th>
-						<th>&nbsp;Message</th>
-					</tr>'
+		SELECT @intLotErrorCount = 0
+			,@intLotSuccessCount = 0
+
+		SELECT @intLotErrorCount = COUNT(1)
+		FROM tblIPLotError WITH (NOLOCK)
+		WHERE ysnMailSent = 0
+
+		SELECT @intLotSuccessCount = COUNT(1)
+		FROM tblIPLotArchive WITH (NOLOCK)
+		WHERE ysnMailSent = 0
+
+		IF @intLotErrorCount > 0
+			OR @intLotSuccessCount > 0
+		BEGIN
+			SET @strSummaryDetail = '<p><b>
+										Total Lots: ' + CONVERT(VARCHAR, (@intLotSuccessCount + @intLotErrorCount)) + '</br>
+										Processed Lots: ' + CONVERT(VARCHAR, @intLotSuccessCount) + '</br>
+										Failed Lots: ' + CONVERT(VARCHAR, @intLotErrorCount) + '</b></p>'
+			
+			UPDATE tblIPLotArchive
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
 
 		IF EXISTS (
 			SELECT 1
@@ -141,6 +159,16 @@ BEGIN TRY
 			WHERE ysnMailSent = 0
 			)
 		BEGIN
+			SET @strHeader = '<tr>
+				<th>&nbsp;Transaction</th>
+				<th>&nbsp;Lot No.</th>
+				<th>&nbsp;Item No.</th>
+				<th>&nbsp;Storage Unit</th>
+				<th>&nbsp;Book</th>
+				<th>&nbsp;Sub Book</th>
+				<th>&nbsp;Message</th>
+			</tr>'
+
 			SELECT @strDetail = @strDetail + 
 			'<tr>
 				<td>&nbsp;' + 'Stock' + '</td>' + 
@@ -197,12 +225,108 @@ BEGIN TRY
 		END
 	END
 
-	SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
-	SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
+IF @strMessageType ='Recipe'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM tblMFRecipeStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType ='Recipe Item'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Recipe Header Item No</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeItemStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeHeaderItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM tblMFRecipeItemStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+IF @strMessageType ='PO'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Contract Number</th>
+						<th>&nbsp;Contract Seq Number</th>
+						<th>&nbsp;ERP PO Number</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM dbo.tblCTContractFeed   WITH (NOLOCK)
+		WHERE strMessage is not null
+			AND ysnMailSent =0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strContractNumber), '') + '</td>' + '<td>&nbsp;' + ISNULL(Ltrim(intContractSeq), '') + '</td>' + '<td>&nbsp;' + ISNULL(strERPPONumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM dbo.tblCTContractFeed WITH (NOLOCK)
+		WHERE strMessage is not null
+			AND ysnMailSent =0
+
+		UPDATE tblCTContractFeed
+		SET ysnMailSent = 1
+		WHERE strMessage is not null
+			AND ysnMailSent =0
+	END
+END
+
+	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
+	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
+	SET @strHtml = REPLACE(@strHtml, '@summary', ISNULL(@strSummaryDetail, ''))
 	SET @strMessage = @strStyle + @strHtml
 
 	IF ISNULL(@strDetail, '') = ''
 		SET @strMessage = ''
+	
+	IF ISNULL(@strSummaryDetail, '') <> ''
+		SET @strMessage = @strStyle + @strHtml
 
 	SELECT @strMessage AS strMessage
 END TRY

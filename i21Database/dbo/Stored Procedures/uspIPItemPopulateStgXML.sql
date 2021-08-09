@@ -74,7 +74,7 @@ BEGIN TRY
 	JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 	WHERE ET.strType = 'User'
 		AND t.intEntityId = @intUserId
-		AND t.strEntityNo <> ''
+		--AND t.strEntityNo <> ''
 
 	IF @strLastModifiedUser IS NULL
 	BEGIN
@@ -384,7 +384,7 @@ BEGIN TRY
 
 		IF EXISTS (
 				SELECT 1
-				FROM master.dbo.sysdatabases
+				FROM sys.databases
 				WHERE name = @strDatabaseName
 				)
 		BEGIN

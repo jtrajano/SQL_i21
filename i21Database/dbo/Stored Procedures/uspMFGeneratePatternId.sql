@@ -129,10 +129,10 @@ BEGIN
 		Where intInventoryReceiptItemId = @intInventoryReceiptItemId
 	END
 
-	IF OBJECT_ID('tempdb..##tblMFRecord') IS NOT NULL
-		DROP TABLE ##tblMFRecord
+	IF OBJECT_ID('tempdb..#tblMFRecord') IS NOT NULL
+		DROP TABLE #tblMFRecord
 
-	CREATE TABLE [dbo].##tblMFRecord ([strRecordName] NVARCHAR(50))
+	CREATE TABLE [dbo].#tblMFRecord ([strRecordName] NVARCHAR(50))
 
 	IF @dtmDate IS NULL
 		SET @dtmCurrentDate = GetDate()
@@ -321,7 +321,7 @@ BEGIN
 				AND TABLE_SCHEMA = 'dbo'
 
 			DELETE
-			FROM ##tblMFRecord
+			FROM #tblMFRecord
 
 			IF @intShiftId IS NULL
 				AND @strTableName = 'tblMFShift'
@@ -367,25 +367,25 @@ BEGIN
 
 			SELECT @strSQL = 'Select ' + @strColumnName + ' From ' + @strTableName + ' Where ' + @strPrimaryColumnName + ' = ' + LTRIM(@intPrimaryColumnId)
 
-			DECLARE @a NVARCHAR(MAX) = 'INSERT INTO ##tblMFRecord ' + @strSQL
+			DECLARE @a NVARCHAR(MAX) = 'INSERT INTO #tblMFRecord ' + @strSQL
 
 			EXEC sp_executesql @a
 
 			SELECT @strValue = REPLACE(@strSubPatternFormat, '<?>', '''' + strRecordName + '''')
-			FROM ##tblMFRecord
+			FROM #tblMFRecord
 
 			DELETE
-			FROM ##tblMFRecord
+			FROM #tblMFRecord
 
 			IF @strValue IS NOT NULL
 			BEGIN
-				SET @a = 'INSERT INTO ##tblMFRecord SELECT ' + @strValue
+				SET @a = 'INSERT INTO #tblMFRecord SELECT ' + @strValue
 
 				EXEC sp_executesql @a
 			END
 
 			SELECT @strPatternString = @strPatternString + strRecordName
-			FROM ##tblMFRecord
+			FROM #tblMFRecord
 		END
 
 		IF @intSubPatternTypeId = 6

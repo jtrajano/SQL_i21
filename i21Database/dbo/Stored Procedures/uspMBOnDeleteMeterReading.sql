@@ -16,6 +16,12 @@ DECLARE @ErrorState INT;
 
 BEGIN TRY
 
+	-- START TR-1611 - Sub ledger Transaction traceability
+	DECLARE @strTransaction NVARCHAR(100) = NULL
+    SELECT @strTransaction = strTransactionId FROM tblMBMeterReading MR WHERE MR.intMeterReadingId = @MeterReadingId
+	EXEC dbo.[uspICDeleteTransactionLinks] @MeterReadingId, @strTransaction, 'Meter Billing', 'Meter Billing'
+	-- END TR-1611
+	
 	DECLARE @InvoiceId INT
 	SELECT TOP 1 @InvoiceId =  intInvoiceId FROM tblARInvoice
 	WHERE intMeterReadingId = @MeterReadingId

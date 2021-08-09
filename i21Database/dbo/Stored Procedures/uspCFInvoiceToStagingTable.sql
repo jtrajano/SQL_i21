@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@Guid						NVARCHAR(MAX)  
 	,@UserId					NVARCHAR(MAX)  
@@ -7,6 +8,7 @@
 AS
 BEGIN
 
+	DECLARE @ErrorMessage NVARCHAR(MAX);  
 	DECLARE @CatchErrorMessage NVARCHAR(MAX);  
 	DECLARE @CatchErrorSeverity INT;  
 	DECLARE @CatchErrorState INT;  
@@ -31,6 +33,8 @@ BEGIN
 
 	DELETE tblCFInvoiceStagingTable					WHERE strUserId is null
 	DELETE tblARCustomerStatementStagingTable		WHERE intEntityUserId is null AND strStatementFormat = @strStatementFormat
+	
+	DELETE FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId  
 
 BEGIN TRY
 
@@ -63,7 +67,6 @@ BEGIN TRY
 		, [begingroup] NVARCHAR(MAX)
 		, [endgroup] NVARCHAR(MAX)
 		, [datatype] NVARCHAR(MAX))
-
 	
 	DECLARE @ysnIncludeRemittancePage BIT
 	SELECT TOP 1
@@ -74,6 +77,11 @@ BEGIN TRY
 	SELECT TOP 1
 			@ysnReprintInvoice = ISNULL([from],0)
 	FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
+
+	DECLARE @ysnIncludePrintedTransaction BIT
+	SELECT TOP 1
+			@ysnIncludePrintedTransaction = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
 
 	DECLARE @dtmBalanceForwardDate DATETIME
 	SELECT TOP 1
@@ -103,6 +111,26 @@ BEGIN TRY
 		@strCustomerNumber = ISNULL([from],'')
 	FROM @temp_params WHERE [fieldname] = 'strCustomerNumber'
 
+
+	DECLARE @ysnInvoiceBillingCycleFee BIT
+	SELECT TOP 1
+			@ysnInvoiceBillingCycleFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnBillingCycle'
+
+	DECLARE @ysnInvoiceMonthyFee BIT
+	SELECT TOP 1
+			@ysnInvoiceMonthyFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnMonthly'
+
+	DECLARE @ysnInvoiceAnnualFee BIT
+	SELECT TOP 1
+			@ysnInvoiceAnnualFee = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnInvoiceAnnualFee'
+
+	
+
+
+
 		
 	SET @strCustomerNumber = NULLIF(@strCustomerNumber, '')
 
@@ -116,12 +144,40 @@ BEGIN TRY
 	-----------------------------------------------------------
 	DELETE FROM tblCFInvoiceReportTempTable	WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId, @StatementType = @StatementType
+
+
+	DELETE FROM tblCFInvoiceReportTotalValidation WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+	IF (ISNULL(@ysnReprintInvoice,0) = 0 AND ISNULL(@ysnIncludePrintedTransaction,0) = 0 ) 
+	BEGIN
+		EXEC "dbo"."uspCFInvoiceReportValidation" @UserId = @UserId , @StatementType = @StatementType
+
+		DECLARE @intInvalidTransaction INT 
+		SELECT @intInvalidTransaction = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+
+		IF (@intInvalidTransaction >= 1) 
+		BEGIN
+			SET @ErrorMessage = 'Total Validation Error'
+			GOTO EXITWITHERROR
+		END
+	END
+	
 	
 	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 	EXEC "dbo"."uspCFInvoiceReportSummary" @UserId = @UserId , @StatementType = @StatementType
 
 	DELETE FROM tblCFInvoiceDiscountTempTable WHERE strUserId = @UserId 
 	EXEC "dbo"."uspCFInvoiceReportDiscount" @UserId = @UserId , @StatementType = @StatementType
+	
+
+	DELETE FROM tblCFInvoiceReportTieredUnitDiscountTempTable WHERE strUserId = @UserId  
+	EXEC [uspCFInvoiceReportTieredUnitDiscount] 
+		 @InvoiceDate = @dtmInvoiceDate
+		,@UserId = @UserId
+		,@StatementType = @StatementType
+		,@ysnInvoiceBillingCycleFee =  @ysnInvoiceBillingCycleFee
+		,@ysnInvoiceMonthyFee = @ysnInvoiceMonthyFee
+		,@ysnInvoiceAnnualFee = @ysnInvoiceAnnualFee
+	
 
 	-- INSERT CALCULATED INVOICES TO STAGING TABLE --
 	-----------------------------------------------------------
@@ -239,6 +295,7 @@ BEGIN TRY
 	,dblAPR
 	,ysnPrintMiscellaneous
 	,ysnSummaryByCard
+	,ysnSummaryByDepartmentProduct
 	,ysnSummaryByDepartment
 	,ysnSummaryByMiscellaneous
 	,ysnSummaryByProduct
@@ -272,6 +329,7 @@ BEGIN TRY
 	,ysnShowDriverPinDescriptionOnly
 	,ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd
+	,strDepartmentGrouping
 	)
 	SELECT 
 	 intCustomerGroupId
@@ -491,6 +549,7 @@ BEGIN TRY
 	,dblAPR
 	,ysnPrintMiscellaneous
 	,ysnSummaryByCard			
+	,ysnSummaryByDepartmentProduct
 	,ysnSummaryByDepartment		
 	,ysnSummaryByMiscellaneous	
 	,ysnSummaryByProduct			
@@ -560,6 +619,7 @@ BEGIN TRY
 	,ysnShowDriverPinDescriptionOnly
 	,ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd
+	,strDepartmentGrouping
 	FROM tblCFInvoiceReportTempTable AS cfInvRpt
 	INNER JOIN ( SELECT * FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId) AS cfInvRptSum
 	ON cfInvRpt.intTransactionId = cfInvRptSum.intTransactionId 
@@ -670,13 +730,13 @@ BEGIN TRY
 
 	
 	
-	SELECT DISTINCT 
-	 intAccountId
-	,intCustomerId
-	,strCustomerName
-	FROM tblCFInvoiceStagingTable
-	WHERE strUserId = @UserId 
-	AND LOWER(strStatementType) =  LOWER(@StatementType)
+	--SELECT DISTINCT 
+	-- intAccountId
+	--,intCustomerId
+	--,strCustomerName
+	--FROM tblCFInvoiceStagingTable
+	--WHERE strUserId = @UserId 
+	--AND LOWER(strStatementType) =  LOWER(@StatementType)
 
 	--INSERT FEE RECORDS--
 	IF LOWER(@StatementType)  = 'invoice'
@@ -1153,12 +1213,28 @@ BEGIN TRY
 		UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL AND intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 	END
 
+	
+	IF (ISNULL(@ysnReprintInvoice,0) = 0 AND ISNULL(@ysnIncludePrintedTransaction,0) = 0 AND ISNULL(@ysnIncludeRemittancePage,0) = 1 ) 
+	BEGIN
+		EXEC "dbo"."uspCFInvoiceReportBalanceValidation" @UserId = @UserId ,  @StatementType = @StatementType 
+		DECLARE @intInvalidBalance INT 
+		SELECT @intInvalidBalance = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
+
+		IF (@intInvalidBalance >= 1) 
+		BEGIN
+			SET @ErrorMessage = 'Balance Validation Error'
+			GOTO EXITWITHERROR
+		END
+
+	END
+	
+
 	--SELECT * FROM vyuCFAccountTerm
 	--select * from vyuCFCardAccount
 
 
 	--IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
-
+	RETURN
 END TRY 
 BEGIN CATCH
 	
@@ -1194,8 +1270,11 @@ BEGIN CATCH
 
 	RAISERROR (@CatchErrorMessage,@CatchErrorSeverity,@CatchErrorState)
 
-	
-	
 
 END CATCH
+
+
+	EXITWITHERROR:
+	RAISERROR (@ErrorMessage,16,1)
+
 END

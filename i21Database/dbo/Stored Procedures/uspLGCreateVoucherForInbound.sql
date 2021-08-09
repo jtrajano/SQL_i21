@@ -18,6 +18,7 @@ BEGIN TRY
 	DECLARE @intShipTo INT
 	DECLARE @intCurrencyId INT
 	DECLARE @intShipmentStatus INT
+	DECLARE @ysnAllowReweighs BIT = 0
 	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	DECLARE @distinctVendor TABLE 
@@ -28,40 +29,36 @@ BEGIN TRY
 		(intItemRecordId INT Identity(1, 1)
 		,intItemId INT)
 
-	SELECT @strLoadNumber = strLoadNumber FROM tblLGLoad WHERE intLoadId = @intLoadId
+	SELECT @strLoadNumber = strLoadNumber 
+		,@ysnAllowReweighs = ysnAllowReweighs
+	FROM tblLGLoad WHERE intLoadId = @intLoadId
 
 	IF OBJECT_ID('tempdb..#tempVoucherId') IS NOT NULL
 		DROP TABLE #tempVoucherId
 
-	SELECT *
-	INTO #tempVoucherId
-	FROM (
-		SELECT intBillId
-		FROM tblLGLoadCost
-		WHERE intLoadId = @intLoadId
-			AND intBillId IS NOT NULL
-			AND intBillId NOT IN (SELECT intBillId FROM tblAPBillDetail BD 
-									JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
-									WHERE BD.intLoadShipmentCostId IS NULL)
-
-		UNION
-	
-		SELECT intBillId
-		FROM tblLGLoadWarehouseServices
-		WHERE intLoadWarehouseId IN (SELECT intLoadWarehouseId FROM tblLGLoadWarehouse WHERE intLoadId = @intLoadId)
-			AND intBillId IS NOT NULL
-		) tbl
-
-	IF EXISTS(SELECT TOP 1 1 FROM tblAPBillDetail BD 
-	JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
-	WHERE LD.intLoadId = @intLoadId AND BD.intBillId NOT IN (SELECT intBillId FROM #tempVoucherId))
+	--Check if any Purchase Basis Contract price is not fully priced
+	IF EXISTS (SELECT TOP 1 1 FROM 
+					tblCTContractDetail CD
+					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
 	BEGIN
+		DECLARE @strContractNumber NVARCHAR(100)
+		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
 
-		DECLARE @ErrorMessage NVARCHAR(250)
+		SELECT TOP 1 
+			@strContractNumber = CH.strContractNumber + '/' + CAST(CD.intContractSeq AS nvarchar(10))
+		FROM 
+		tblCTContractDetail CD
+		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+		OUTER APPLY fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) PF
+		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
+			AND (PF.dblTotalLots IS NULL OR (ISNULL(PF.dblTotalLots,0) > 0 AND (ISNULL(PF.dblTotalLots,0) <> ISNULL(PF.dblLotsFixed,0))))
 
-		SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
-
-		RAISERROR(@ErrorMessage, 16, 1);
+		SET @ErrorMessageNotPriced = 'Contract No. ' + @strContractNumber + ' is not fully priced. Unable to create Voucher.' 
+		RAISERROR(@ErrorMessageNotPriced, 16, 1);
 		RETURN 0;
 	END
 
@@ -89,7 +86,7 @@ BEGIN TRY
 	END
 
 
-	IF (@intShipmentStatus = 4)
+	IF (@intShipmentStatus = 4 AND @ysnAllowReweighs = 0)
 	BEGIN
 		--If Shipment is already received, call the IR to Voucher procedure
 		SELECT DISTINCT 
@@ -104,6 +101,9 @@ BEGIN TRY
 			AND receipt.intSourceType = 2
 			AND receipt.intSourceInventoryReceiptId IS NULL 
 			AND receipt.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse')
+
+		--Delete the Payables created by LS to allow IR to regenerate the payables
+		DELETE FROM tblAPVoucherPayable WHERE intLoadShipmentId = @intLoadId AND intLoadShipmentCostId IS NULL
 
 		DECLARE @intInventoryReceiptId INT = NULL
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInventoryReceipts)
@@ -176,28 +176,28 @@ BEGIN TRY
 			,[intContractDetailId] = LD.intPContractDetailId
 			,[intContractSeqId] = CT.intContractSeq
 			,[intContractCostId] = NULL
-			,[intInventoryReceiptItemId] = receiptItem.intInventoryReceiptItemId
+			,[intInventoryReceiptItemId] = NULL
 			,[intLoadShipmentId] = L.intLoadId
 			,[strLoadShipmentNumber] = LTRIM(L.strLoadNumber)
 			,[intLoadShipmentDetailId] = LD.intLoadDetailId
 			,[intLoadShipmentCostId] = NULL
 			,[intItemId] = LD.intItemId
 			,[strMiscDescription] = item.strDescription
-			,[dblOrderQty] = LD.dblQuantity
+			,[dblOrderQty] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
 			,[dblOrderUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intOrderUOMId] = LD.intItemUOMId
-			,[dblQuantityToBill] = LD.dblQuantity
+			,[dblQuantityToBill] = LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)
 			,[dblQtyToBillUnitQty] = ISNULL(ItemUOM.dblUnitQty,1)
 			,[intQtyToBillUOMId] = LD.intItemUOMId
 			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
-			,[dblNetWeight] = ISNULL(LD.dblNet,0)
+			,[dblNetWeight] = LD.dblNet - ISNULL(B.dblNetWeight, 0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
 			,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
 			,[intFreightTermId] = L.intFreightTermId
-			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
+			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
 										 WHEN AD.ysnValidFX = 1 THEN 
@@ -218,7 +218,7 @@ BEGIN TRY
 			,[intAccountId] = apClearing.intAccountId
 			,[strBillOfLading] = L.strBLNumber
 			,[ysnReturn] = CAST(0 AS BIT)
-			,[ysnStage] = CAST(CASE WHEN (CT.intPricingTypeId IN (1,6)) THEN 0 ELSE 1 END AS BIT)
+			,[ysnStage] = CAST(1 AS BIT)
 			,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 			,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 		FROM tblLGLoad L
@@ -228,17 +228,19 @@ BEGIN TRY
 		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CT.intContractDetailId
 		JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CH.intEntityId = D1.[intEntityId]  
 		LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = AD.intSeqCurrencyId
-		OUTER APPLY (SELECT receiptItem.intInventoryReceiptItemId, receiptItem.dblTax FROM tblICInventoryReceipt receipt 
-						INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-					WHERE receiptItem.intSourceId = LD.intLoadDetailId AND receipt.intSourceType = 2
-						AND receipt.intSourceInventoryReceiptId IS NULL 
-						AND receipt.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse')
-					) receiptItem
 		LEFT JOIN tblICItem item ON item.intItemId = LD.intItemId 
 		LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId and ItemLoc.intLocationId = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
 		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemId = LD.intItemId and ItemWeightUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = CT.intPriceItemUOMId
+		OUTER APPLY (SELECT dblQtyBilled = SUM(CASE WHEN (intTransactionType = 3) THEN -dblQtyReceived ELSE dblQtyReceived END)
+							,dblNetWeight = SUM(CASE WHEN (intTransactionType = 3) THEN -BD.dblNetWeight ELSE BD.dblNetWeight END)
+					FROM tblAPBillDetail BD 
+					INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
+					INNER JOIN tblICItem Item ON Item.intItemId = BD.intItemId
+					WHERE B.intTransactionType IN (1, 3) 
+						AND BD.intItemId = LD.intItemId AND Item.strType <> 'Other Charge'
+						AND BD.intLoadId = L.intLoadId AND BD.intLoadDetailId = LD.intLoadDetailId) B
 		OUTER APPLY dbo.fnGetItemGLAccountAsTable(LD.intItemId, ItemLoc.intItemLocationId, 'AP Clearing') itemAccnt
 		OUTER APPLY (SELECT TOP 1 W.intSubLocationId, W.intStorageLocationId, strSubLocation = CLSL.strSubLocationName, strStorageLocation = SL.strName FROM tblLGLoadWarehouse W
 					LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = W.intStorageLocationId
@@ -258,9 +260,7 @@ BEGIN TRY
 							ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		WHERE L.intLoadId = @intLoadId
-			AND LD.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
-											WHERE BD.intItemId = LD.intItemId AND Item.strType <> 'Other Charge')
-
+			AND (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)) > 0
 
 		INSERT INTO @distinctVendor
 		SELECT DISTINCT intEntityVendorId
@@ -296,7 +296,8 @@ BEGIN TRY
 
 		IF (@total = 0)
 		BEGIN
-			SET @ErrorMessage = 'Voucher was already created for ' + @strLoadNumber;
+			DECLARE @ErrorMessage NVARCHAR(250)
+			SET @ErrorMessage = 'Voucher(s) are already created for the Total Quantity of this Load/Shipment';
 
 			RAISERROR (@ErrorMessage,11,1);
 			RETURN;
@@ -306,7 +307,7 @@ BEGIN TRY
 
 		DECLARE @xmlVoucherIds XML
 		DECLARE @createVoucherIds NVARCHAR(MAX)
-		DECLARE @voucherIds TABLE (intBillId INT)
+		DECLARE @voucherIds Id
 
 		WHILE ISNULL(@intMinRecord, 0) <> 0
 		BEGIN
@@ -422,13 +423,13 @@ BEGIN TRY
 			SET @xmlVoucherIds = CAST('<A>'+ REPLACE(@createVoucherIds, ',', '</A><A>')+ '</A>' AS XML)
 
 			INSERT INTO @voucherIds 
-				(intBillId) 
+				(intId) 
 			SELECT 
 				RTRIM(LTRIM(T.value('.', 'INT'))) AS intBillId
 			FROM @xmlVoucherIds.nodes('/A') AS X(T) 
 			WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 
-			SELECT TOP 1 @intBillId = intBillId FROM @voucherIds
+			SELECT TOP 1 @intBillId = intId FROM @voucherIds
 
 			SELECT @intMinRecord = MIN(intRecordId)
 			FROM @distinctVendor

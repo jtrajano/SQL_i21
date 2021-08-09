@@ -324,6 +324,16 @@ BEGIN TRY
 				,@intInventoryAdjustmentId OUTPUT
 				,@strAdjustmentDescription;
 		
+
+
+			
+			if @intInventoryAdjustmentId > 0 and @intOwnershipType = 1
+				exec uspSCDeliverySheetShrinkage @DeliverySheetId = @intDeliverySheetId
+														, @InventoryAdjustmentId = @intInventoryAdjustmentId
+														, @intEntityUserSecurityId = @intUserId
+														, @ysnPost = 1
+
+
 			SELECT @strDescription =  'Quantity Adjustment : ' + strAdjustmentNo, @strTransactionId = strAdjustmentNo  
 			FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intInventoryAdjustmentId
 
@@ -585,6 +595,12 @@ BEGIN TRY
 
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
+
+	-- Update the exported status of the delivery sheet
+	UPDATE tblSCDeliverySheet SET ysnExport = 0
+	WHERE intDeliverySheetId = @intDeliverySheetId
+
+	--EXEC [dbo].[uspSCModifyTicketDiscountItemInfo] null, @intDeliverySheetId
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 

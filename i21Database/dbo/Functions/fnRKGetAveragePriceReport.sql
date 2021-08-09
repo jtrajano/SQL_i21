@@ -5,23 +5,23 @@
 RETURNS @FinalTable TABLE
 (
 	intBookId INT
-	, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strBook NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, intSubBookId INT
-	, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strSubBook NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, intProductTypeId INT
-	, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strTransactionStatus NVARCHAR(100) COLLATE Latin1_General_CI_AS
-	, strTransactionNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strProductType NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	, strTransactionType NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	, strTransactionStatus NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	, strTransactionNo NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, intBundleItemId INT
-	, strBundle NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strBundle NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, intItemId INT
-	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strItemNo NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, dtmAvailability DATETIME
 	, intFutureMarketId INT
-	, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strFutureMarket NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, intFutureMonthId INT
-	, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strFutureMonth NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	, dblQty NUMERIC(24, 10)
 	, dblTransactionPrice NUMERIC(24, 10)
 	, dblContractDifferential NUMERIC(24, 10)

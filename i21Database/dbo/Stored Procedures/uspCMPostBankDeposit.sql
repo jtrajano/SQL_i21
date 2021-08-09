@@ -148,10 +148,18 @@ END
 
 IF @ysnRecap = 0
 BEGIN
-	IF @ysnPost = 1 AND NOT EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail where  intTransactionId = @intTransactionId )
+	IF @ysnPost = 1 
 	BEGIN
-		RAISERROR('Cannot post an empty detail transaction.', 11, 1)
-		GOTO Post_Rollback
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail where  intTransactionId = @intTransactionId )
+		BEGIN
+			RAISERROR('Cannot post an empty detail transaction.', 11, 1)
+			GOTO Post_Rollback
+		END
+		IF EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail where  intTransactionId = @intTransactionId AND intGLAccountId IS NULL)
+		BEGIN
+			RAISERROR('Missing required GL Account Id.', 11, 1)
+			GOTO Post_Rollback
+		END
 	END
 	
 -- Validate the date against the FY Periods
@@ -507,7 +515,7 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]	
 			) 
-SELECT
+	SELECT
 			[strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
@@ -536,7 +544,7 @@ SELECT
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]	 
-FROM #tmpGLDetail
+	FROM #tmpGLDetail
 
 
 	DECLARE @PostResult INT
@@ -544,12 +552,16 @@ FROM #tmpGLDetail
 		
 	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
+	UPDATE 	A 
+	SET		ysnPosted = @ysnPost
+			,intFiscalPeriodId = F.intGLFiscalYearPeriodId
+			,intConcurrencyId += 1 
+	FROM tblCMBankTransaction A
+	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
+	WHERE	strTransactionId = @strTransactionId
 
-	UPDATE tblCMBankTransaction
-		SET		ysnPosted = @ysnPost
-				,intConcurrencyId += 1 
-		WHERE	strTransactionId = @strTransactionId
-		IF @@ERROR <> 0	GOTO Post_Rollback
+	IF @@ERROR <> 0	GOTO Post_Rollback
+
 END -- @ysnRecap = 0
 
 --=====================================================================================================================================

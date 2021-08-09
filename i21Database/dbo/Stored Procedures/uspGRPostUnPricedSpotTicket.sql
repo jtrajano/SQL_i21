@@ -181,6 +181,7 @@ BEGIN TRY
 							,[dtmVoucherDate]
 							,[intStorageLocationId]
 							,[intSubLocationId]
+							,[ysnStage]
 					)
 					SELECT 
 						GP.[intEntityVendorId]
@@ -217,10 +218,10 @@ BEGIN TRY
 						,GP.[dblQtyToBillUnitQty]				
 						,GP.[intQtyToBillUOMId]				
 						,[dblCost] = CASE WHEN GP.[intInventoryReceiptChargeId] IS NOT NULL THEN GP.dblUnitCost ELSE @dblCashPrice END
-						,GP.[dblCostUnitQty]					
+						,ISNULL(GP.[dblCostUnitQty], 1) 
 						,GP.[intCostUOMId]						
 						,GP.[dblNetWeight]						
-						,[dblWeightUnitQty]					
+						,ISNULL([dblWeightUnitQty], 1) 
 						,GP.[intWeightUOMId]					
 						,GP.[intCostCurrencyId]
 						,GP.[dblTax]							
@@ -237,7 +238,8 @@ BEGIN TRY
 						,GP.dtmDate
 						,GP.intStorageLocationId
 						,GP.intSubLocationId
-					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId,1,1) GP
+						,0
+					FROM dbo.fnICGeneratePayables (@intInventoryReceiptId, 1, 1) GP
 
 					END 
 

@@ -139,7 +139,7 @@ END
 
 IF EXISTS(SELECT intItemUOMIdFrom FROM tblSCTicket)
 BEGIN
-	UPDATE tblSCTicket SET intItemUOMIdFrom = ItemUOM.intItemUOMId
+	UPDATE tblSCTicket SET intItemUOMIdFrom = ItemUOM.intItemUOMId, dtmDateModifiedUtc = GETUTCDATE()
 	FROM tblSCTicket SCT
 	INNER JOIN tblICItemUOM ItemUOM ON SCT.intItemId = ItemUOM.intItemId
 	INNER JOIN tblSCScaleSetup SCS  ON SCT.intScaleSetupId = SCS.intScaleSetupId AND SCS.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -147,7 +147,7 @@ END
 
 IF EXISTS(SELECT intItemUOMIdTo FROM tblSCTicket)
 BEGIN
-	UPDATE tblSCTicket SET intItemUOMIdTo = ItemUOM.intItemUOMId
+	UPDATE tblSCTicket SET intItemUOMIdTo = ItemUOM.intItemUOMId, dtmDateModifiedUtc = GETUTCDATE()
 	FROM tblSCTicket SCT
 	INNER JOIN tblICItemUOM ItemUOM ON SCT.intItemId = ItemUOM.intItemId
 	WHERE ItemUOM.ysnStockUnit = 1
@@ -312,7 +312,7 @@ END
 GO
 IF EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode IN ('DEF','CNT','SPT','SPL','HLD','LOD','SO'))
 BEGIN
-	UPDATE tblSCTicket set intStorageScheduleTypeId = (SELECT GR.intStorageScheduleTypeId FROM tblGRStorageType GR WHERE GR.strStorageTypeCode = strDistributionOption) WHERE intStorageScheduleTypeId < 0
+	UPDATE tblSCTicket set dtmDateModifiedUtc = GETUTCDATE(), intStorageScheduleTypeId = (SELECT GR.intStorageScheduleTypeId FROM tblGRStorageType GR WHERE GR.strStorageTypeCode = strDistributionOption) WHERE intStorageScheduleTypeId < 0
 END
 GO
 IF EXISTS(SELECT 1 FROM tblGRDiscountScheduleCode WHERE intStorageTypeId IS NULL)
@@ -383,6 +383,39 @@ BEGIN
 	-8 AS intStorageScheduleTypeId
 	,'Item Contract' AS strStorageTypeDescription
 	,'ICN'strStorageTypeCode
+	, 0 AS ysnReceiptedStorage
+	,1 AS intConcurrencyId
+	,'Customer' AS strOwnedPhysicalStock
+	,0 AS ysnDPOwnedType
+	,0 AS ysnGrainBankType
+	,1 AS ysnActive
+	,0 AS ysnCustomerStorage
+
+    SET IDENTITY_INSERT [dbo].[tblGRStorageType] OFF
+END
+GO
+
+IF NOT EXISTS(SELECT 1 FROM tblGRStorageType WHERE strStorageTypeCode = 'AWO')
+BEGIN
+	SET IDENTITY_INSERT [dbo].[tblGRStorageType] ON
+
+	INSERT INTO tblGRStorageType
+	(
+	 intStorageScheduleTypeId
+	,strStorageTypeDescription
+	,strStorageTypeCode
+	,ysnReceiptedStorage
+	,intConcurrencyId
+	,strOwnedPhysicalStock
+	,ysnDPOwnedType
+	,ysnGrainBankType
+	,ysnActive
+	,ysnCustomerStorage
+	)
+	SELECT 
+	-9 AS intStorageScheduleTypeId
+	,'AG Work Order' AS strStorageTypeDescription
+	,'AWO'strStorageTypeCode
 	, 0 AS ysnReceiptedStorage
 	,1 AS intConcurrencyId
 	,'Customer' AS strOwnedPhysicalStock

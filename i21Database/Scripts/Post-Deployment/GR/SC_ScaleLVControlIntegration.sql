@@ -1,5 +1,8 @@
 ﻿IF NOT EXISTS(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gasctmst')
 BEGIN
+	--any modification in below table definition should also update the column definition in the service 
+	-- use this formula in excel =CONCATENATE("new column_definition(""", A2, """,", D2, "),")
+	-- purpose is to avoid string will be truncated error 
 	EXEC('
 
 	CREATE TABLE [dbo].[gasctmst](
@@ -156,7 +159,7 @@ BEGIN
 	[gasct_cnt_loc] [char](3) NULL,
 	[gasct_xfr_to_loc] [char](3) NULL,
 	[gasct_itm_no] [char](13) NULL,
-	[gasct_ivc_no] [char](8) NOT NULL,
+	[gasct_ivc_no] [char](8) NULL,
 	[gasct_load_loc_no] [char](3) NULL,
 	[gasct_load_no] [char](8) NULL,
 	[gasct_orig_gross_wgt] [decimal](13, 3) NULL,
@@ -230,7 +233,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
-				,ISNULL(gasct_open_close_ind, ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
+				,ISNULL(nullif(gasct_open_close_ind, ''''), ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
 				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
 				,gasct_com_cd COLLATE Latin1_General_CI_AS AS strItemNo
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
@@ -658,6 +661,10 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					declare @intScaleOperatorId int
 					declare @newLVTicket int
 					declare @IrelyAdminId int
+					declare @ysnUseItemCommodityDiscountOriginImport bit = 0
+
+					select @ysnUseItemCommodityDiscountOriginImport = ysnUseItemCommodityDiscountOriginImport 
+						from tblGRCompanyPreference 
 
 					select @IrelyAdminId = intEntityId from tblEMEntityCredential where strUserName = ''irelyadmin''
 
@@ -748,8 +755,16 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							,[dblTareWeight]				= SC.dblTareWeight
 							,[dtmTareDateTime]				= SC.dtmTareDateTime
 							,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
-							,[intDiscountId]				= GRD_CROSS_REF.intDiscountId -- GRDI.intDiscountId (not being used)
-							,[intDiscountScheduleId]		= GRD_CROSS_REF.intDiscountScheduleId -- consider review for redundancy. 
+							,[intDiscountId]				= case when @ysnUseItemCommodityDiscountOriginImport = 1 then 
+																ICC.intScheduleDiscountId
+															else
+																ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId)
+															end
+							,[intDiscountScheduleId]		= case when @ysnUseItemCommodityDiscountOriginImport = 1 then 
+																ICC_GRD_CROSS_REF.intDiscountScheduleId
+															else
+																GRD_CROSS_REF.intDiscountScheduleId 
+															end -- consider review for redundancy. 
 							,[dblFreightRate]				= SC.dblFreightRate
 							,[dblTicketFees]				= SC.dblTicketFees
 							,[ysnFarmerPaysFreight]			= SC.ysnFarmerPaysFreight
@@ -796,7 +811,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						LEFT JOIN tblICItem IC ON IC.strShortName COLLATE Latin1_General_CI_AS =  IR.gasct_com_cd COLLATE Latin1_General_CI_AS
 						LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 						LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
-						LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
+						LEFT JOIN tblGRDiscountId GRDI ON (ISNUMERIC(GRDI.strDiscountId) = 1 AND CAST(GRDI.strDiscountId AS INT) = SC.strDiscountId)
+								OR  (ISNUMERIC(GRDI.strDiscountId) = 0 and (GRDI.strDiscountId =  SC.strDiscountId) )
 						LEFT JOIN tblSCScaleSetup SCS ON SCS.strStationShortDescription = SC.strStationShortDescription
 						LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 						LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
@@ -807,9 +823,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 						LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
 						--LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
-						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId
-						left join tblGRDiscountSchedule GRDS on GRDS.intCommodityId = IC.intCommodityId
-						left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId				
+						left join tblGRDiscountCrossReference GRD_CROSS_REF on ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId) = GRD_CROSS_REF.intDiscountId
+						left join tblGRDiscountCrossReference ICC_GRD_CROSS_REF on ICC.intScheduleDiscountId = ICC_GRD_CROSS_REF.intDiscountId
 						OUTER APPLY (
 							SELECT TOP 1 intLoadId, intLoadDetailId,
 								intContractDetailId = case 
@@ -841,7 +857,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						SELECT 
 						DISTINCT 
 							gasct_reading AS dblGradeReading
-							,gasct_shrk_what AS strShrinkWhat
+							,ShrinkCalculationOption.strShrinkCalculationOption --gasct_shrk_what AS strShrinkWhat
 							,gasct_shrk_pct AS dblShrinkPercent
 							,c.intDiscountScheduleCodeId
 							,intTicketId = k.intTicketLVStagingId
@@ -944,14 +960,18 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
 						INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
 					
-						INNER JOIN tblGRDiscountSchedule GRDS on GRDS.intCommodityId = ic.intCommodityId
-						INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+						INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRD_CROSS_REF.intDiscountId = isnull(k.intDiscountId, ic.intScheduleDiscountId)
 						--dapat di ka nababa dito
-						INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = GRDS.intDiscountScheduleId AND c.intStorageTypeId = -1
+						INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId AND c.intStorageTypeId = -1
 						INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
 						--INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 						--INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
 						--INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
+						--
+						join tblGRShrinkCalculationOption ShrinkCalculationOption
+							on c.intShrinkCalculationOptionId = ShrinkCalculationOption.intShrinkCalculationOptionId	
+						--
+
 						INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
 						INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
 						WHERE b.gasct_disc_cd is not null 
@@ -959,33 +979,352 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 
 
 						INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)					
-						select
-								DiscountScheduleCode.dblDefaultValue as dblGradeReading
+						select 
+								DISTINCT
+								isnull(gasct_reading, DiscountScheduleCode.dblDefaultValue) as dblGradeReading
 								,ShrinkCalculationOption.strShrinkCalculationOption AS strShrinkWhat
-								,0 AS dblShrinkPercent
+								,isnull(gasct_shrk_pct, 0) AS dblShrinkPercent
 								,DiscountScheduleCode.intDiscountScheduleCodeId
 								,TicketStaging.intTicketLVStagingId
 								,''Scale'' AS strSourceType
 								,''Dollar'' strDiscountChargeType 
 								,TicketStaging.intOriginTicketId
 								,ShrinkCalculationOption.intShrinkCalculationOptionId
-
+								
 							from tblSCTicketLVStaging TicketStaging
 								join tblGRDiscountScheduleCode DiscountScheduleCode
 									on TicketStaging.intDiscountScheduleId = DiscountScheduleCode.intDiscountScheduleId
 								join tblGRShrinkCalculationOption ShrinkCalculationOption
 									on DiscountScheduleCode.intShrinkCalculationOptionId = ShrinkCalculationOption.intShrinkCalculationOptionId	
 							
-								INNER JOIN INSERTED IR  ON TicketStaging.intOriginTicketId= IR.A4GLIdentity		
+								INNER JOIN tblICCommodity ic ON ic.intCommodityId = TicketStaging.intCommodityId					
+								INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRD_CROSS_REF.intDiscountId = isnull(TicketStaging.intDiscountId, ic.intScheduleDiscountId)
+
+								INNER JOIN INSERTED IR  ON TicketStaging.intOriginTicketId= IR.A4GLIdentity									
+								INNER JOIN tblICItem i on i.intItemId = DiscountScheduleCode.intItemId
+							
+								
+								left join
+								(
+								SELECT	
+									gasct_disc_cd_1		gasct_disc_cd,
+									gasct_reading_1		gasct_reading,
+									gasct_disc_calc_1	gasct_disc_calc,
+									gasct_un_disc_amt_1 gasct_un_disc_amt,
+									gasct_shrk_what_1	gasct_shrk_what,
+									gasct_shrk_pct_1	gasct_shrk_pct,
+									A4GLIdentity		
+									FROM INSERTED 
+									WHERE gasct_disc_cd_1 IS NOT NULL
+
+								UNION ALL
+									SELECT gasct_disc_cd_2,gasct_reading_2,gasct_disc_calc_2,gasct_un_disc_amt_2,gasct_shrk_what_2,gasct_shrk_pct_2,A4GLIdentity      
+									FROM INSERTED  WHERE gasct_disc_cd_2 IS NOT NULL
+								UNION ALL
+			
+									SELECT gasct_disc_cd_3,gasct_reading_3,gasct_disc_calc_3,gasct_un_disc_amt_3,gasct_shrk_what_3,gasct_shrk_pct_3,A4GLIdentity
+									FROM INSERTED  WHERE gasct_disc_cd_3 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW''
+								UNION ALL
+									SELECT gasct_disc_cd_4,gasct_reading_4,gasct_disc_calc_4,gasct_un_disc_amt_4,gasct_shrk_what_4,gasct_shrk_pct_4,A4GLIdentity
+									FROM INSERTED  WHERE gasct_disc_cd_4 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW''
+								UNION ALL
+									(
+									 SELECT disc_cd
+				 						,SUM(reading)
+				 						,SUM(disc_calc)
+				 						,SUM(un_disc)
+				 						,shrk_what
+				 						,SUM(gasct_shrk_pct)
+				 						,A4GLIdentity
+									 FROM (
+				 							SELECT 
+				 							 gasct_disc_cd_4 disc_cd
+				 							,Convert(FLOAT, gasct_reading_4) reading
+				 							,Convert(FLOAT, gasct_disc_calc_4) disc_calc
+				 							,Convert(FLOAT, gasct_un_disc_amt_4) un_disc
+				 							,gasct_shrk_what_4 shrk_what
+				 							,Convert(FLOAT, gasct_shrk_pct_4) gasct_shrk_pct
+				 							,A4GLIdentity
+				 							FROM INSERTED
+				 							WHERE gasct_disc_cd_4 IS NOT NULL
+				 	    						AND gasct_disc_cd_3 IS NOT NULL
+				 	    						AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    						AND gasct_disc_cd_4 = ''TW''
+				 	
+				 						UNION ALL
+				 	
+				 						SELECT 
+				 							gasct_disc_cd_3
+				 							,Convert(FLOAT, gasct_reading_3)
+				 							,Convert(FLOAT, gasct_disc_calc_3)
+				 							,Convert(FLOAT, gasct_un_disc_amt_3)
+				 							,gasct_shrk_what_3
+				 							,Convert(FLOAT, gasct_shrk_pct_3)
+				 							,A4GLIdentity
+				 							FROM INSERTED
+				 							WHERE gasct_disc_cd_3 IS NOT NULL
+				 	    						AND gasct_disc_cd_4 IS NOT NULL
+				 	    						AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    						AND gasct_disc_cd_3 = ''TW''
+				 						) t
+									 GROUP BY disc_cd
+				 						,shrk_what
+				 						,A4GLIdentity
+				 
+									) 
+								UNION ALL
+									SELECT gasct_disc_cd_5,gasct_reading_5,gasct_disc_calc_5,gasct_un_disc_amt_5,gasct_shrk_what_5,gasct_shrk_pct_5,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_5 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_6,gasct_reading_6,gasct_disc_calc_6,gasct_un_disc_amt_6,gasct_shrk_what_6,gasct_shrk_pct_6,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_6 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_7,gasct_reading_7,gasct_disc_calc_7,gasct_un_disc_amt_7,gasct_shrk_what_7,gasct_shrk_pct_7,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_7 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_8,gasct_reading_8,gasct_disc_calc_8,gasct_un_disc_amt_8,gasct_shrk_what_8,gasct_shrk_pct_8,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_8 IS NOT NULL  
+								UNION ALL
+									SELECT gasct_disc_cd_9,gasct_reading_9,gasct_disc_calc_9,gasct_un_disc_amt_9,gasct_shrk_what_9,gasct_shrk_pct_9,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_9 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_10,gasct_reading_10,gasct_disc_calc_10,gasct_un_disc_amt_10,gasct_shrk_what_10,gasct_shrk_pct_10,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_10 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_11,gasct_reading_11,gasct_disc_calc_11,gasct_un_disc_amt_11,gasct_shrk_what_11,gasct_shrk_pct_11,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_11 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
+						)b 
+						on TicketStaging.intOriginTicketId =  b.A4GLIdentity AND (b.gasct_disc_cd is not null and b.gasct_disc_cd <> '''')
+							 AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
+
 								where TicketStaging.strInOutFlag = ''O''
 
 					
+						----- Calculating Discount information
+
+						--Scale Station
+						declare @is_multiple_weight bit
+						--Ticket
+						declare @scale_setup int
+						declare @ticket_gross_w0 DECIMAL(24, 4) = 0
+						declare @ticket_gross_w1 DECIMAL(24, 4) = 0
+						declare @ticket_gross_w2 DECIMAL(24, 4) = 0
+						declare @ticket_convert_uom DECIMAL(24, 10) = 0
+						declare @ticket_delivery_sheet int
+						declare @ticket_item_id int 
+
+						--Getting Ticket Information
+						select 
+							--dblNetUnits	
+							@scale_setup = intScaleSetupId
+							,@ticket_gross_w0 = dblGrossWeight - dblTareWeight
+							--,@ticket_gross_w1 = dblGrossWeight1 - dblTareWeight1
+							--,@ticket_gross_w2 = dblGrossWeight2 - dblTareWeight2
+							,@ticket_convert_uom = dblConvertedUOMQty
+							,@ticket_delivery_sheet = intDeliverySheetId
+							,@ticket_item_id  = intItemId
+							--, dblShrink 
+
+						from tblSCTicketLVStaging with(updlock)
+
+						where intTicketLVStagingId = @newLVTicket
+
+						select @is_multiple_weight = ysnMultipleWeights 
+							from tblSCScaleSetup 
+								where intScaleSetupId = @scale_setup
+
+						declare @discount_calculation_success_message nvarchar(100) = ''Success''
+						declare @discount_captured_message nvarchar(max) = ''''
+						declare @discount_has_issue bit = 0
+
+						declare @calculated_discount table (
+								intExtendedKey int
+								,dblFrom DECIMAL(24, 6)
+								,dblTo DECIMAL(24, 6)
+								,dblDiscountAmount DECIMAL(24, 6)
+								,dblShrink DECIMAL(24, 6)
+								,strMessage nvarchar(max)
+								,intDiscountCalculatingOptionId int
+								,strDiscountChargeType nvarchar(50)
+								,strCalculationDiscountOption nvarchar(50)
+								,intShrinkCalculationOptionId int
+								,strCalculationShrinkOption nvarchar(50)
+								,intDiscountUOMId int
+							)
+
+						
+						declare @discounts_table as table(
+							id int
+							,intDiscountScheduleCodeId int
+							,dblReading DECIMAL(24, 6)
+						)
+						insert into @discounts_table(id, intDiscountScheduleCodeId, dblReading)
+						select intTicketDiscountLVStagingId, intDiscountScheduleCodeId, dblGradeReading 
+							from tblSCTicketDiscountLVStaging with(updlock) 
+							where intTicketId = @newLVTicket 
+							
+								and dblGradeReading <> 0
+
+
+
+						declare @current_discount_id int
+						declare @current_discount_schedule int
+						declare @current_reading DECIMAL(24, 6)
+						declare @current_discount_result DECIMAL(24, 6)
+						declare @current_shrink_result DECIMAL(24, 6)
+						declare @current_discount_message nvarchar(max)
+
+
+						select @current_discount_id = min(id) from @discounts_table
+						while @current_discount_id is not null
+						begin
+							select @current_discount_schedule = intDiscountScheduleCodeId
+								,@current_reading = dblReading
+							from @discounts_table
+								where id = @current_discount_id 
+
+							delete from @calculated_discount
+							insert into @calculated_discount
+							exec uspGRCalculateDiscountandShrink 
+								@intDiscountScheduleCodeId = @current_discount_schedule
+								, @dblReading = @current_reading
+								, @intItemId = @ticket_item_id
+								, @intItemUOMId = 0
+
+							
+							select @current_discount_result = dblDiscountAmount
+								, @current_shrink_result = dblShrink
+								, @current_discount_message = strMessage
+							from @calculated_discount
+
+							if @current_discount_message <> @discount_calculation_success_message --and @discount_has_issue = 0
+							begin
+								select top 1 @current_discount_message = ''Discount('' + Item.strShortName + '')-'' +  @current_discount_message
+									from tblGRDiscountScheduleCode DiscountSchedCode
+										join tblICItem Item
+											on DiscountSchedCode.intItemId = Item.intItemId
+									where DiscountSchedCode.intDiscountScheduleCodeId = @current_discount_schedule
+								
+
+								select @discount_captured_message = @discount_captured_message + @current_discount_message + '','' 
+									,@discount_has_issue = 1
+
+							end
+
+							update tblSCTicketDiscountLVStaging
+								set dblShrinkPercent = @current_shrink_result
+								,dblDiscountAmount = @current_discount_result
+
+								where intTicketDiscountLVStagingId = @current_discount_id
+
+
+							select @current_discount_id = min(id) 
+								from @discounts_table where id > @current_discount_id
+
+						end
+
+
+						if @discount_captured_message <> ''''
+						begin
+							set @discount_captured_message = replace(@discount_captured_message, ''Invalid reading value entered'', ''Invalid reading value'')
+							set @discount_captured_message = replace(@discount_captured_message, '' Minimum Reading'', ''Minimum'')
+							set @discount_captured_message = replace(@discount_captured_message, ''Maximum Reading'', ''Maximum'')
+
+						end
+						--Discount
+						--Wet Weight
+						declare @discount_ww DECIMAL(24, 4) = 0
+						--Net Weight
+						declare @discount_nw DECIMAL(24, 4)  = 0
+						--Gross Weight
+						declare @discount_gw DECIMAL(24, 4)  = 0
+
+
+						declare @gross_shrink_w DECIMAL(24, 4)
+						declare @wet_shrink_w DECIMAL(24, 4)
+						declare @net_shrink_w DECIMAL(24, 4)
+						-- Final computation
+						--Wet Weight
+						declare @ww DECIMAL(24, 4) = 0
+						declare @ws_ww DECIMAL(24, 4) = 0
+						--Net Weight
+						declare @nw DECIMAL(24, 4)  = 0
+						--Gross Weight
+						declare @gw DECIMAL(24, 4)  = 0
+
+
+
+						declare @final_gross DECIMAL(24, 4)
+						declare @final_shrink DECIMAL(24, 4)
+						declare @final_net DECIMAL(24, 4)
+
+						--Holder for the weight group
+						declare @all_w table (
+							--total per weight group
+							total_w DECIMAL(24, 4)
+							-- weight group header
+							,what_w nvarchar(50)
+
+						)
+						--get the total shrink per group header
+						insert into @all_w (total_w, what_w)
+						select sum(dblShrinkPercent), strShrinkWhat 
+							from tblSCTicketDiscountLVStaging 
+								where intTicketId = @newLVTicket 
+						group by strShrinkWhat
+
+						--assign the right weight to the variable to be used later in the computation
+						select @discount_ww = case when what_w = ''Wet Weight'' or what_w = ''W'' then @discount_ww + total_w else @discount_ww end
+							, @discount_nw = case when what_w = ''Net Weight'' or what_w = ''N'' then @discount_nw + total_w else @discount_nw end
+							, @discount_gw = case when what_w = ''Gross Weight'' or what_w = ''P'' then @discount_gw + total_w else @discount_gw end
+
+							from @all_w 
+
+						-- if the scale station is a multi weight add the gross 0, 1, 2
+						if @is_multiple_weight = 1
+						begin
+							set @ticket_gross_w0 = @ticket_gross_w0 + @ticket_gross_w1 + @ticket_gross_w2
+						end
+
+
+						select @gross_shrink_w = ( @ticket_gross_w0 * @discount_gw ) / 100
+						select @ww = @ticket_gross_w0 - @gross_shrink_w
+
+						select @wet_shrink_w = (@ww * @discount_ww ) / 100
+						select @ws_ww = @ww - @wet_shrink_w
+
+						select @net_shrink_w = (@ws_ww * @discount_nw ) / 100
+
+
+						select @final_gross = @ticket_gross_w0 * @ticket_convert_uom
+						select @final_shrink = case when isnull(@ticket_delivery_sheet, 0) > 0 then 0 else (@gross_shrink_w + @wet_shrink_w + @net_shrink_w) * @ticket_convert_uom end
+						select @final_net = @final_gross - @final_shrink
+
+						
+						update  tblSCTicketLVStaging
+							set dblNetUnits = @final_net
+								, dblGrossUnits = @final_gross
+								, dblShrink = @final_shrink
+						where intTicketLVStagingId = @newLVTicket
+
+
+
+						----- End calculating discount information
+
+
+
+
+
+
 						declare @ticket_number nvarchar(100)
 						declare @inserted_ticket_number int
 						declare @validation_message nvarchar(max)
 						
 
-						select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket)
+						select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket) + isnull(LTRIM(RTRIM(@discount_captured_message)), '''')
 						--select @validation_message
 						if @validation_message = ''''
 						begin
@@ -1008,7 +1347,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 										where intTicketLVStagingId = @newLVTicket
 							 
 								update tblSCTicket 
-										set ysnHasGeneratedTicketNumber = 0 
+										set ysnHasGeneratedTicketNumber = 0, dtmDateModifiedUtc = GETUTCDATE() 
 											where intTicketLVStagingId = @newLVTicket
 
 								delete from tblQMTicketDiscount 

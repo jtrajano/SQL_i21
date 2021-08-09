@@ -31,6 +31,8 @@ FROM (
 			,dblShrinkPercent = ISNULL((
 										SELECT dblShrinkPercent
 										FROM tblQMTicketDiscount TD
+										LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+											on TD.intTicketDiscountId = QMII.intTicketDiscountId
 										JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
 										WHERE TD.intTicketId =  CASE 
 																	WHEN INVSHIP.intSourceType = 4 THEN (
@@ -46,12 +48,14 @@ FROM (
 																										   WHERE intTicketId = INVSHIPITEM.intSourceId
 																										 )
 																END
-															AND DS.intItemId = InvDtl.intItemId
+															AND isnull(QMII.intItemId, DS.intItemId) = InvDtl.intItemId
 										), 0)
 
 			,dblGradeReading = ISNULL((
 										SELECT dblGradeReading
 										FROM tblQMTicketDiscount TD
+										LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+											on TD.intTicketDiscountId = QMII.intTicketDiscountId
 										JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
 										WHERE TD.intTicketId = CASE 
 																	WHEN INVSHIP.intSourceType = 4
@@ -67,13 +71,14 @@ FROM (
 																			WHERE intTicketId = INVSHIPITEM.intSourceId
 																		 )
 															   END
-											AND DS.intItemId = InvDtl.intItemId
+											AND isnull(QMII.intItemId, DS.intItemId) = InvDtl.intItemId
 										), 0)
 			,InvDtl.dblTotal AS dblAmount
 			,InvDtl.dblTotalTax AS dblTax
 			,PYMTDTL.dblTotal AS Net
 		FROM tblAPPayment PYMT
-		JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+		JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId				
+					and PYMTDTL.dblPayment <> 0
 		JOIN tblARInvoice Inv ON PYMTDTL.intInvoiceId = Inv.intInvoiceId
 		JOIN tblARInvoiceDetail InvDtl ON InvDtl.intInvoiceId = Inv.intInvoiceId
 		JOIN tblICInventoryShipmentCharge INVSHIPCHR ON InvDtl.intInventoryShipmentChargeId = INVSHIPCHR.intInventoryShipmentChargeId

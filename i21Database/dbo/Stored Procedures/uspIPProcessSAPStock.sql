@@ -1,11 +1,13 @@
-﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPStock]
-@strSessionId NVARCHAR(50)='',
-@strInfo1 NVARCHAR(MAX)='' OUT,
-@strInfo2 NVARCHAR(MAX)='' OUT,
-@ysnProcessDeadLockEntry BIT=0
+﻿CREATE PROCEDURE [dbo].[uspIPProcessSAPStock] @strSessionId NVARCHAR(50) = ''
+	,@strInfo1 NVARCHAR(MAX) = '' OUT
+	,@strInfo2 NVARCHAR(MAX) = '' OUT
+	,@ysnProcessDeadLockEntry BIT = 0
 AS
 BEGIN TRY
+	DECLARE @ErrMsg NVARCHAR(MAX)
 
+	RETURN
+		/*
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -25,7 +27,6 @@ Declare @intMinRowNo int,
 		@intLocationId int,
 		@intEntityUserId int,
 		@intSourceId int=1,
-		@ErrMsg NVARCHAR(MAX),
 		@intMinRowNo1 int,
 		@strFinalErrMsg NVARCHAR(MAX)='',
 		@strStockType NVARCHAR(50)
@@ -52,6 +53,10 @@ Begin
 End
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
+
+SELECT @intEntityUserId = intEntityId
+FROM tblSMUserSecurity WITH (NOLOCK)
+WHERE strUserName = 'IRELYADMIN'
 
 If ISNULL(@strSessionId,'')=''
 	Insert Into @tblStock(strItemNo,strSubLocation,dblQuantity,strSessionId)
@@ -174,7 +179,7 @@ Begin
 End
 
 If ISNULL(@strFinalErrMsg,'')<>'' RaisError(@strFinalErrMsg,16,1)
-
+*/
 END TRY
 
 BEGIN CATCH

@@ -109,14 +109,9 @@ AS
 			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed],0),CD.dblNoOfLots)	AS NUMERIC(18, 6))			AS	dblUnpricedLots,
 			CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.intLotsHedged,0),CD.dblNoOfLots)	AS NUMERIC(18, 6))			AS	dblUnhedgedLots,
 			CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalanceLoad,0) AS INT)										AS	intLoadReceived,
-			CAST(
-				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),CD.dtmStartDate) AND CH.intContractTypeId = 1 
-						THEN	1
-						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysSales,0),CD.dtmStartDate) AND CH.intContractTypeId = 2
-						THEN	1
-						ELSE	0
-				END		AS BIT
-			)	AS		ysnEarlyDayPassed,
+			CAST(CASE WHEN DATEADD(d, 0, DATEDIFF(d, 0, GETUTCDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),ISNULL(CD.dtmStartDateUTC,CD.dtmStartDate)) AND CH.intContractTypeId = 1 THEN 1
+					WHEN DATEADD(d, 0, DATEDIFF(d, 0, GETUTCDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysSales,0),ISNULL(CD.dtmStartDateUTC,CD.dtmStartDate)) AND CH.intContractTypeId = 2 THEN 1
+					ELSE 0 END AS BIT) AS ysnEarlyDayPassed,
 			CAST(CASE WHEN IM.strType = 'Bundle' THEN 1 ELSE 0 END AS BIT) AS ysnBundleItem,
 			IM.strBundleType,
 			dbo.fnCTGetContractPrice(CD.intContractDetailId) dblContractPrice,
@@ -160,7 +155,9 @@ AS
 			CH.intInsuranceById,				CH.strInsuranceBy,				CH.strInsuranceByDescription,
 			CH.intInvoiceTypeId,				CH.strInvoiceType,				CH.strInvoiceTypeDescription,
 			CH.dblTolerancePct,					CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
-			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
+			CH.ysnSubstituteItem
+			,ysnUnlimitedQuantity = CAST(ISNULL(CH.ysnUnlimitedQuantity,0) AS BIT)
+			,CH.ysnMaxPrice,			
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
 			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad,
 			CH.strCropYear,						CH.ysnExported,					CH.dtmExported,
@@ -171,7 +168,6 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
-			
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

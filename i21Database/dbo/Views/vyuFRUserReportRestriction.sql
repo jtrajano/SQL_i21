@@ -3,7 +3,7 @@ AS
 
 WITH reports AS (
 SELECT intEntityId , strReportName, strUserName,intUserRoleID,  intReportId
-FROM tblFRReport A , tblSMUserSecurity C 
+FROM tblFRReport A inner join tblSMUserSecurity C on 1=1
 )
 SELECT 
 ROW_NUMBER() OVER (ORDER BY A.intReportId asc) rowId,
@@ -18,7 +18,7 @@ ROW_NUMBER() OVER (ORDER BY A.intReportId asc) rowId,
         WHEN R.ysnRestriction = 1 THEN 'No Access' 
         WHEN R.ysnRestriction = 0 THEN 'Read-Only' 
         ELSE '' 
-    END COLLATE Latin1_General_CI_AS as strRestriction,
+    END strRestriction,
 	ISNULL(R.intConcurrencyId,0) intConcurrencyId,
 	CASE WHEN intRestrictionId IS NOT null THEN CAST( 1 AS BIT) ELSE CAST( 0 AS BIT) END
 	ysnRestricted

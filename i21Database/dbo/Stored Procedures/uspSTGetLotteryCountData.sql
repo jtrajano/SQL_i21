@@ -51,7 +51,7 @@ SELECT tblSTCheckoutLotteryCount.* INTO #tempSoldOutLotteryCount
 FROM tblSTCheckoutLotteryCount 
 INNER JOIN tblSTLotteryBook ON tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 INNER JOIN tblSTCheckoutHeader ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
-WHERE LOWER(tblSTCheckoutLotteryCount.strSoldOut) = 'yes' and (tblSTCheckoutHeader.dtmCheckoutDate != @date or tblSTCheckoutHeader.intShiftNo != @shiftNo)
+WHERE LOWER(tblSTCheckoutLotteryCount.strSoldOut) = 'yes' and ((tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo) OR tblSTCheckoutHeader.dtmCheckoutDate < @date)
 
 
 INSERT INTO @tblSTOuputTable

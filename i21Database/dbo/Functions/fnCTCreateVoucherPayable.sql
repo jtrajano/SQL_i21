@@ -72,11 +72,11 @@ RETURNS TABLE AS RETURN
 	CROSS APPLY ( select ysnMultiplePriceFixation from tblCTCompanyPreference ) CPT
 	JOIN tblCTContractDetail CD	ON CD.intContractDetailId = CC.intContractDetailId AND (CC.ysnPrice = 1 AND CD.intPricingTypeId IN (1,6) 
 			OR CC.ysnAccrue = CASE 
-				WHEN ISNULL(CPT.ysnMultiplePriceFixation,0) = 0 AND @accrue = 1 THEN 1 
+				WHEN CPT.ysnMultiplePriceFixation = 0 AND @accrue = 1 THEN 1 
 				ELSE CC.ysnAccrue 
 			END
 		) 
-		AND (CASE WHEN @remove = 0 AND CC.intConcurrencyId <> ISNULL(CC.intPrevConcurrencyId,0) THEN 1 ELSE @remove END = 1)
+		AND (CASE WHEN @remove = 0 AND CC.intConcurrencyId <> CC.intPrevConcurrencyId THEN 1 ELSE @remove END = 1)
 	JOIN tblCTContractHeader CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CC.intVendorId = D1.[intEntityId] 
 
@@ -103,13 +103,13 @@ RETURNS TABLE AS RETURN
 																						when CC.strCostType = 'Other Charges'
 																						or (
 																								select
-																									count(*)
+																									count(1)
 																								from
 																									tblICInventoryReceiptItem a
 																									,tblICInventoryReceipt b
 																								where
-																									a.intContractHeaderId = CD.intContractHeaderId
-																									and a.intContractDetailId = CD.intContractDetailId
+																									a.intOrderId = CD.intContractHeaderId
+																									and a.intLineNo = CD.intContractDetailId
 																									and b.intInventoryReceiptId = a.intInventoryReceiptId
 																							) = 0
 																						then 'Other Charge Expense'
@@ -147,4 +147,5 @@ RETURNS TABLE AS RETURN
 		WHEN @type = 'cost' AND CC.intContractCostId = @id THEN 1
 	END = 1 
 	AND CASE WHEN @accrue = 0 AND payable.intEntityVendorId IS NOT NULL THEN 1 ELSE @accrue END = 1
+	AND ISNULL(CC.ysnBasis, 0) <> 1
 )

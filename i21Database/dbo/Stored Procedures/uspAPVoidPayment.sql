@@ -364,7 +364,7 @@ BEGIN
 			C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment)) END
+			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment + B.dblDiscount)) END
 			-- C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13)
 			-- 							THEN (
 			-- 								CASE WHEN B.ysnOffset = 0
@@ -378,6 +378,15 @@ BEGIN
 				INNER JOIN tblAPBill C
 						ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
+	--UPDATE 1099 AMOUNT
+	UPDATE BD
+	SET BD.dbl1099 = BD.dbl1099 - ((BD.dblTotal + BD.dblTax) / B.dblTotal * PD.dblPayment)
+	FROM tblAPPayment P
+	INNER JOIN tblAPPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
+	INNER JOIN tblAPBill B ON B.intBillId = PD.intOrigBillId
+	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+	WHERE P.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND BD.int1099Form > 0
 
 	--UPDATE INVOICES
 	DECLARE @invoices Id

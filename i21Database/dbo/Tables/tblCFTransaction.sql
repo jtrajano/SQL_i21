@@ -106,55 +106,6 @@ CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_ysnPosted_dtmTransactionDate_intP
 )
 GO
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO
 CREATE TRIGGER [dbo].[trgCFTransactionRecordNumber]
 ON [dbo].[tblCFTransaction]
@@ -176,63 +127,63 @@ AS
 			INNER JOIN INSERTED B ON A.intTransactionId = B.intTransactionId
 	END
 GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intVehicleId]
-    ON [dbo].[tblCFTransaction]([intVehicleId] ASC);
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intVehicleId]
+--     ON [dbo].[tblCFTransaction]([intVehicleId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intTransactionId]
-    ON [dbo].[tblCFTransaction]([intTransactionId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intTransactionId]
+--     ON [dbo].[tblCFTransaction]([intTransactionId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intSiteId]
-    ON [dbo].[tblCFTransaction]([intSiteId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intSiteId]
+--     ON [dbo].[tblCFTransaction]([intSiteId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intSiteGroupId]
-    ON [dbo].[tblCFTransaction]([intSiteGroupId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intSiteGroupId]
+--     ON [dbo].[tblCFTransaction]([intSiteGroupId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intProductId]
-    ON [dbo].[tblCFTransaction]([intProductId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intProductId]
+--     ON [dbo].[tblCFTransaction]([intProductId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intPriceProfileId]
-    ON [dbo].[tblCFTransaction]([intPriceProfileId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intPriceProfileId]
+--     ON [dbo].[tblCFTransaction]([intPriceProfileId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intPriceIndexId]
-    ON [dbo].[tblCFTransaction]([intPriceIndexId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intPriceIndexId]
+--     ON [dbo].[tblCFTransaction]([intPriceIndexId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intNetworkId]
-    ON [dbo].[tblCFTransaction]([intNetworkId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intNetworkId]
+--     ON [dbo].[tblCFTransaction]([intNetworkId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intInvoiceId]
-    ON [dbo].[tblCFTransaction]([intInvoiceId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intInvoiceId]
+--     ON [dbo].[tblCFTransaction]([intInvoiceId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intContractId]
-    ON [dbo].[tblCFTransaction]([intContractId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intContractId]
+--     ON [dbo].[tblCFTransaction]([intContractId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intContractDetailId]
-    ON [dbo].[tblCFTransaction]([intContractDetailId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intContractDetailId]
+--     ON [dbo].[tblCFTransaction]([intContractDetailId] ASC);
 
 
-GO
-CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intCardId]
-    ON [dbo].[tblCFTransaction]([intCardId] ASC);
+-- GO
+-- CREATE NONCLUSTERED INDEX [IX_tblCFTransaction_intCardId]
+--     ON [dbo].[tblCFTransaction]([intCardId] ASC);
 
 
 GO

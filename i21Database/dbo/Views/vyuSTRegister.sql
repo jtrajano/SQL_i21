@@ -4,6 +4,7 @@ SELECT reg.intRegisterId
 	--, reg.intStoreId
 	, st.intStoreId
 	, st.intStoreNo
+	, st.intCompanyLocationId
 	, reg.strRegisterName
 	, reg.strRegisterClass
 	, reg.ysnRegisterDataLoad
@@ -49,6 +50,10 @@ SELECT reg.intRegisterId
 									THEN dbo.fnAESDecryptASym(reg.strSAPPHIREPassword)
 								ELSE NULL
 							END COLLATE Latin1_General_CI_AS
+	, reg.ysnSAPPHIRECaptureTransactionLog
+	, reg.intSAPPHIRECaptureIntervalMinutes
+	, reg.strSAPPHIRELastTranslogReport
+	, reg.strSAPPHIRELastTranslogReportDayCloseTime
 	, reg.intSAPPHIRECheckoutPullTimePeriodId
 	, strSAPPHIRECheckoutPullTimePeriodId = CASE
 												WHEN (reg.intSAPPHIRECheckoutPullTimePeriodId = 1)
@@ -138,4 +143,3 @@ INNER JOIN tblSTStore st
 --FROM tblSTRegister R
 --INNER JOIN tblSTStore S 
 --	ON S.intStoreId = R.intStoreId
-

@@ -60,6 +60,10 @@ BEGIN TRY
 		RETURN
 	END
 
+	SELECT @intUserId = intEntityId
+	FROM tblSMUserSecurity WITH (NOLOCK)
+	WHERE strUserName = 'IRELYADMIN'
+
 	IF ISNULL(@strSessionId, '') = ''
 		SELECT @intMinItem = MIN(intStageItemId)
 		FROM tblIPItemStage
@@ -452,11 +456,13 @@ BEGIN TRY
 						,intLocationId
 						,intCostingMethod
 						,intAllowNegativeInventory
+						,intAllowZeroCostTypeId
 						)
 					SELECT @intItemId
 						,cl.intCompanyLocationId
 						,1
 						,3
+						,2
 					FROM tblSMCompanyLocation cl
 
 					INSERT INTO tblICItemSubLocation (
@@ -472,7 +478,7 @@ BEGIN TRY
 						AND il.intItemId = @intItemId
 
 					--Add Audit Trail Record
-					SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intItemId) + '","keyValue":' + CONVERT(VARCHAR, @intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
+					--SET @strJson = '{"action":"Created","change":"Created - Record: ' + CONVERT(VARCHAR, @intItemId) + '","keyValue":' + CONVERT(VARCHAR, @intItemId) + ',"iconCls":"small-new-plus","leaf":true}'
 
 					SELECT @dtmDate = DATEADD(ss, DATEDIFF(ss, GETDATE(), GETUTCDATE()), dtmCreated)
 					FROM tblIPItemStage
@@ -485,34 +491,41 @@ BEGIN TRY
 					FROM tblIPItemStage
 					WHERE intStageItemId = @intStageItemId
 
-					SELECT @intUserId = e.intEntityId
-					FROM tblEMEntity e
-					JOIN tblEMEntityType et ON e.intEntityId = et.intEntityId
-					WHERE e.strExternalERPId = @strUserName
-						AND et.strType = 'User'
+					--SELECT @intUserId = e.intEntityId
+					--FROM tblEMEntity e
+					--JOIN tblEMEntityType et ON e.intEntityId = et.intEntityId
+					--WHERE e.strExternalERPId = @strUserName
+					--	AND et.strType = 'User'
 
-					INSERT INTO tblSMAuditLog (
-						strActionType
-						,strTransactionType
-						,strRecordNo
-						,strDescription
-						,strRoute
-						,strJsonData
-						,dtmDate
-						,intEntityId
-						,intConcurrencyId
-						)
-					VALUES (
-						'Created'
-						,'Inventory.view.Item'
-						,@intItemId
-						,''
-						,''
-						,@strJson
-						,@dtmDate
-						,@intUserId
-						,1
-						)
+					--INSERT INTO tblSMAuditLog (
+					--	strActionType
+					--	,strTransactionType
+					--	,strRecordNo
+					--	,strDescription
+					--	,strRoute
+					--	,strJsonData
+					--	,dtmDate
+					--	,intEntityId
+					--	,intConcurrencyId
+					--	)
+					--VALUES (
+					--	'Created'
+					--	,'Inventory.view.Item'
+					--	,@intItemId
+					--	,''
+					--	,''
+					--	,@strJson
+					--	,@dtmDate
+					--	,@intUserId
+					--	,1
+					--	)
+
+					EXEC uspSMAuditLog @keyValue = @intItemId
+						,@screenName = 'Inventory.view.Item'
+						,@entityId = @intUserId
+						,@actionType = 'Created'
+						,@actionIcon = 'small-new-plus'
+						,@details = ''
 				END
 				ELSE
 				BEGIN --Update

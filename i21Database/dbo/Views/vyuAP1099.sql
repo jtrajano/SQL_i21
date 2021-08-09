@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAP1099]
 AS
 SELECT
-      dbo.fnTrim(C.strVendorId) COLLATE Latin1_General_CI_AS AS strVendorId
+      dbo.fnTrim(C.strVendorId) AS strVendorId
 	, C.[intEntityId]
     , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrimX(C2.str1099Name) ELSE dbo.fnTrimX(C2.strName) END), '&', 'and'))  COLLATE Latin1_General_CI_AS 
     , strAddress = SUBSTRING(REPLACE(REPLACE(dbo.fnTrimX(D.strAddress), CHAR(10), ' ') , CHAR(13), ' '),0,40) COLLATE Latin1_General_CI_AS  --max char 40       
@@ -46,9 +46,22 @@ SELECT
     , dblRoyalties = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 11--'Royalties'     
 		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END    
-    , dblSubstitutePayments = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 12--'Substitute Payments in Lieu of Dividends or Interest '     
-	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
-     ELSE 0 END    
+    , dblSubstitutePayments = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 12--'Substitute Payments in Lieu of Dividends or Interest'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END   
+	 , dblFishResale = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 13--'Fish purchased for resale'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END  
+	 , dblDeferrals = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 14--'Section 409A deferrals'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END  
+	 , dblDeferredCompensation = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 15--'Nonqualified deferred compensation'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END   	
 	, dbl1099INT = CASE WHEN A.int1099Form = 2--1099 INT
 	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END  
@@ -154,6 +167,18 @@ SELECT
 	, A.int1099Form
 	, A.int1099Category
 	, CASE WHEN B.intTransactionType = 9 THEN B.dtmDate ELSE B2.dtmDatePaid END AS dtmDate
+	, dblNonemployeeCompensationNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 8--'Nonemployee Compensation'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END  
+	, dblDirectSalesNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 2--'Direct Sales'     
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+	ELSE 0 END    
+	, dblFederalIncomeNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 4--'Federal Income Tax Withheld'     
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END    
+	, dblStateNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 15--'State Tax Withheld'     
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END   
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
@@ -168,6 +193,11 @@ LEFT JOIN (
 	INNER JOIN tblAPPaymentDetail P2 ON P.intPaymentId = P2.intPaymentId
 	WHERE P.ysnPosted = 1
 ) B2 ON B.intBillId = B2.intBillId
+OUTER APPLY (
+	SELECT SUM(dbl1099) dbl1099
+	FROM tblAPBillDetail
+	WHERE intBillId = B.intBillId AND int1099Form <> 0
+) B3
 LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEntityId)
     ON C.[intEntityId] = B.intEntityVendorId
 LEFT JOIN [tblEMEntityLocation] D

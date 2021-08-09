@@ -233,6 +233,8 @@ BEGIN
 		,0		--@IsDeliver						 --@IsDeliver					
 		,0      --@IsCFQuote						 --@IsCFQuote					
 		) E
+	
+	WHERE cfNetwork.intNetworkId = @intNetworkId AND smTaxCodeRate.dtmEffectiveDate <= @dtmTransactionDate
 
 			--@intSiteId				
 			--@intCardId				
@@ -242,7 +244,6 @@ BEGIN
 					
 					
 				
-	WHERE cfNetwork.intNetworkId = @intNetworkId
 
 	
 

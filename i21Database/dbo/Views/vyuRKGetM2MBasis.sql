@@ -1,6 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuRKGetM2MBasis]
-
 AS
+
+WITH
+parameter_tbl
+AS 
+( 
+	SELECT GETDATE() currentDate
+)
 
 SELECT DISTINCT strCommodityCode
 	, im.strItemNo
@@ -44,15 +50,16 @@ LEFT JOIN tblICItem im ON im.intItemId = cd.intItemId
 LEFT JOIN tblICItem i ON i.intItemId = cd.intItemId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = i.intOriginId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
-LEFT JOIN tblRKFuturesMonth fm1 ON fm1.intFutureMonthId = cd.intFutureMonthId
+INNER JOIN tblRKFuturesMonth fm1 ON fm1.intFutureMonthId = cd.intFutureMonthId
+	AND ISNULL(fm1.ysnExpired, 0) = 0 
+	AND ISNULL(fm1.dtmLastTradingDate, (SELECT currentDate FROM parameter_tbl)) >=  (SELECT currentDate FROM parameter_tbl)
 LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
 LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
-WHERE dblBalance > 0 AND cd.intPricingTypeId <> 5 AND cd.intContractStatusId <> 3
-
+WHERE dblBalance > 0 AND cd.intPricingTypeId <> 5 AND cd.intContractStatusId <> 3	
 UNION SELECT DISTINCT strCommodityCode
 	, im.strItemNo
 	, strOriginDest = ca.strDescription
@@ -96,7 +103,9 @@ LEFT JOIN tblICItem i ON i.intItemId = cd.intItemId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = i.intOriginId
 LEFT JOIN tblRKCommodityMarketMapping fmm ON fmm.intCommodityId = ch.intCommodityId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = fmm.intFutureMarketId
-LEFT JOIN tblRKFuturesMonth fm1 ON fm1.intFutureMonthId = cd.intFutureMonthId
+INNER JOIN tblRKFuturesMonth fm1 ON fm1.intFutureMonthId = cd.intFutureMonthId
+	AND ISNULL(fm1.ysnExpired, 0) = 0 
+	AND ISNULL(fm1.dtmLastTradingDate, (SELECT currentDate FROM parameter_tbl)) >=  (SELECT currentDate FROM parameter_tbl)
 LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
 LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
@@ -158,8 +167,8 @@ FROM (
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE dblQuantity > 0
 		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 intRiskViewId FROM tblRKCompanyPreference) = 2 THEN it.strLotTracking ELSE 'No' END)) iis
-LEFT JOIN (
-	SELECT DISTINCT cd.intItemId
+OUTER APPLY (
+	SELECT DISTINCT TOP 1 cd.intItemId
 		, cd.intCompanyLocationId
 		, fm.intFutureMarketId
 		, fmon.intFutureMonthId
@@ -194,4 +203,5 @@ LEFT JOIN (
 	LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-) ct ON iis.intItemId = ct.intItemId
+	WHERE cd.intItemId = iis.intItemId
+) ct

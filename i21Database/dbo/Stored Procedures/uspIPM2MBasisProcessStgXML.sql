@@ -100,7 +100,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -190,6 +190,14 @@ BEGIN TRY
 			INSERT INTO @tblRKM2MBasisDetail (intM2MBasisDetailId)
 			SELECT intM2MBasisDetailId
 			FROM OPENXML(@idoc, 'vyuIPGetM2MBasisDetails/vyuIPGetM2MBasisDetail', 2) WITH (intM2MBasisDetailId INT)
+
+			DELETE
+			FROM tblRKM2MBasisDetail
+			WHERE intM2MBasisId = @intNewM2MBasisId
+				AND intM2MBasisDetailRefId NOT IN (
+					SELECT intM2MBasisDetailId
+					FROM @tblRKM2MBasisDetail
+					)
 
 			SELECT @intM2MBasisDetailId = MIN(intM2MBasisDetailId)
 			FROM @tblRKM2MBasisDetail
@@ -296,21 +304,21 @@ BEGIN TRY
 							)
 				END
 
-				IF @strLocationName IS NOT NULL
-					AND NOT EXISTS (
-						SELECT 1
-						FROM tblSMCompanyLocation t
-						WHERE t.strLocationName = @strLocationName
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
+				--IF @strLocationName IS NOT NULL
+				--	AND NOT EXISTS (
+				--		SELECT 1
+				--		FROM tblSMCompanyLocation t
+				--		WHERE t.strLocationName = @strLocationName
+				--		)
+				--BEGIN
+				--	SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
+				--	RAISERROR (
+				--			@strErrorMessage
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				IF @strMarketZoneCode IS NOT NULL
 					AND NOT EXISTS (
@@ -420,9 +428,16 @@ BEGIN TRY
 				WHERE t.strFutureMonth = @strFutureMonth
 					AND t.intFutureMarketId = @intFutureMarketId
 
-				SELECT @intCompanyLocationId = t.intCompanyLocationId
-				FROM tblSMCompanyLocation t
-				WHERE t.strLocationName = @strLocationName
+				--SELECT @intCompanyLocationId = t.intCompanyLocationId
+				--FROM tblSMCompanyLocation t
+				--WHERE t.strLocationName = @strLocationName
+
+				IF ISNULL(@strLocationName, '') <> ''
+					AND @intCompanyLocationId IS NULL
+				BEGIN
+					SELECT TOP 1 @intCompanyLocationId = t.intCompanyLocationId
+					FROM tblSMCompanyLocation t WITH (NOLOCK)
+				END
 
 				SELECT @intMarketZoneId = t.intMarketZoneId
 				FROM tblARMarketZone t
@@ -544,14 +559,6 @@ BEGIN TRY
 				FROM @tblRKM2MBasisDetail
 				WHERE intM2MBasisDetailId > @intM2MBasisDetailId
 			END
-
-			DELETE
-			FROM tblRKM2MBasisDetail
-			WHERE intM2MBasisId = @intNewM2MBasisId
-				AND intM2MBasisDetailRefId NOT IN (
-					SELECT intM2MBasisDetailId
-					FROM @tblRKM2MBasisDetail
-					)
 
 			ext:
 

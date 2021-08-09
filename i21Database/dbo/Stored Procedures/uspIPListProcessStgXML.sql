@@ -81,7 +81,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -185,6 +185,14 @@ BEGIN TRY
 			SELECT intListItemId
 			FROM OPENXML(@idoc, 'tblQMListItems/tblQMListItem', 2) WITH (intListItemId INT)
 
+			DELETE
+			FROM tblQMListItem
+			WHERE intListId = @intNewListId
+				AND intListItemRefId NOT IN (
+					SELECT intListItemId
+					FROM @tblQMListItem
+					)
+
 			SELECT @intListItemId = MIN(intListItemId)
 			FROM @tblQMListItem
 
@@ -254,14 +262,6 @@ BEGIN TRY
 				FROM @tblQMListItem
 				WHERE intListItemId > @intListItemId
 			END
-
-			DELETE
-			FROM tblQMListItem
-			WHERE intListId = @intNewListId
-				AND intListItemRefId NOT IN (
-					SELECT intListItemId
-					FROM @tblQMListItem
-					)
 
 			ext:
 

@@ -28,16 +28,16 @@ BEGIN TRY
 	WHERE strFeedStatus IS NULL
 		AND strRowState <> 'Posted'
 
-	UPDATE tblARInvoicePreStage
-	SET strFeedStatus = 'IGNORE'
-	WHERE strFeedStatus IS NULL
-		AND strRowState = 'Posted'
-		AND intInvoiceId IN (
-			SELECT PS.intInvoiceId
-			FROM tblARInvoicePreStage PS
-			WHERE strFeedStatus IS NOT NULL
-				AND strRowState = 'Posted'
-			)
+	--UPDATE tblARInvoicePreStage
+	--SET strFeedStatus = 'IGNORE'
+	--WHERE strFeedStatus IS NULL
+	--	AND strRowState = 'Posted'
+	--	AND intInvoiceId IN (
+	--		SELECT PS.intInvoiceId
+	--		FROM tblARInvoicePreStage PS
+	--		WHERE strFeedStatus IS NOT NULL
+	--			AND strRowState = 'Posted'
+	--		)
 
 	UPDATE tblARInvoicePreStage
 	SET strFeedStatus = 'IGNORE'

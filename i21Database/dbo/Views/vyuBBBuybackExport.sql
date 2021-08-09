@@ -10,6 +10,7 @@ AS
 		,strItemNumber = ISNULL(H.strVendorProduct,G.strItemNo)
 		,strUnitMeasure = ISNULL(K.strVendorUOM,J.strUnitMeasure) COLLATE Latin1_General_CI_AS 
 		,A.intInvoiceId
+		,B.dblQtyOrdered
 		,B.dblQtyShipped
 		,D.intBuybackId
 		,L.strCategoryCode
@@ -18,6 +19,14 @@ AS
 		,P.strProgramDescription
 		,P.strVendorProgramId
 		,E.strVendorCustomerLocation
+		,M.intVendorSetupId
+		,M.strCompany1Id
+		,SO.dtmDate dtmSalesOrderDate
+		,SO.strBOLNumber strSalesOrderBOLNumber
+		,CASE WHEN A.ysnReturned = 1 THEN 'Return'
+			  WHEN A.intSalesOrderId > 0 THEN 'Sales'
+			  ELSE ''
+		 END AS strTransactionType
 	FROM tblARInvoice A
 	INNER JOIN tblARInvoiceDetail B
 		ON A.intInvoiceId = B.intInvoiceId
@@ -50,6 +59,7 @@ AS
 	LEFT JOIN tblVRUOMXref K
 		ON J.intUnitMeasureId = K.intUnitMeasureId
 			AND M.intVendorSetupId = K.intVendorSetupId
+	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = A.intSalesOrderId
 	WHERE D.ysnPosted = 1
 GO
 

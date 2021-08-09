@@ -5,7 +5,7 @@
 	[intImportFileHeaderId] INT NOT NULL,
 	[intUserId] INT NOT NULL,
 	[dtmImportDate] DATETIME NOT NULL,
-	[intVendorDefaultId] INT NOT NULL, 
+	[intVendorDefaultId] INT NULL, 
     CONSTRAINT [PK_tblCCImportDealerCreditCardRecon] PRIMARY KEY ([intImportDealerCreditCardReconId]),
 	CONSTRAINT [FK_tblCCImportDealerCreditCardRecon_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId]),
 	CONSTRAINT [FK_tblCCImportDealerCreditCardRecon_tblCCVendorDefault] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [tblCCVendorDefault]([intVendorDefaultId])

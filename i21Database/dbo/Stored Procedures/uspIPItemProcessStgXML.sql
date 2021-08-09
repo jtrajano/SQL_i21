@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPItemProcessStgXML
+﻿CREATE PROCEDURE [dbo].[uspIPItemProcessStgXML]
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -730,7 +730,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -4271,6 +4271,12 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
+
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
@@ -4482,7 +4488,8 @@ BEGIN TRY
 					FROM @tblICFinalItemLocation IA1
 					WHERE IA1.intItemId = IA.intItemId
 						AND IA1.intLocationId = IA.intLocationId
-					) and IA.intLocationId is not null
+					)
+				AND IA.intLocationId is not null
 
 			UPDATE IA1
 			SET intVendorId = @intVendorId
@@ -4826,6 +4833,12 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				end
+
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
@@ -5102,6 +5115,12 @@ BEGIN TRY
 				SELECT @intLocationId = intCompanyLocationId
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
+
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -5383,6 +5402,12 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
+
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
@@ -5643,6 +5668,12 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
+
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
@@ -5883,6 +5914,12 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
+
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
@@ -6088,6 +6125,12 @@ BEGIN TRY
 				SELECT @intLocationId = intCompanyLocationId
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
+
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -6491,8 +6534,8 @@ BEGIN TRY
 					) x
 			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
 			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
-			LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = x.strLocationName
-			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = L.intCompanyLocationId
+			--LEFT JOIN tblSMCompanyLocation L ON L.strLocationName = x.strLocationName
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = @intLocationId
 				AND IL.intItemId = @intNewItemId
 
 			EXEC sp_xml_removedocument @idoc
@@ -6695,8 +6738,8 @@ BEGIN TRY
 					) x
 			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
 			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+			--LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = @intLocationId
 				AND intItemId = @intNewItemId
 			LEFT JOIN tblICDataSource DS ON DS.strSourceName Collate Latin1_General_CI_AS = x.strSourceName
 
@@ -6848,6 +6891,12 @@ BEGIN TRY
 				SELECT @intLocationId = intCompanyLocationId
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
+
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -7228,6 +7277,12 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
+				if @intLocationId is null
+				Begin
+					SELECT @intLocationId = intCompanyLocationId
+					FROM tblSMCompanyLocation
+				End
+
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
 				BEGIN
@@ -7478,16 +7533,16 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT *
 					FROM OPENXML(@idoc, 'vyuIPGetItemSubLocations/vyuIPGetItemSubLocation', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
-					LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-					LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+					--LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+					LEFT JOIN tblICItemLocation IL ON IL.intLocationId =@intLocationId
 						AND IL.intItemId = @intNewItemId
 					WHERE IL.intItemLocationId IS NULL
 					)
 			BEGIN
 				SELECT @strLocationName = x.strLocationName
 				FROM OPENXML(@idoc, 'vyuIPGetItemSubLocations/vyuIPGetItemSubLocation', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
-				LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-				LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+				--LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+				LEFT JOIN tblICItemLocation IL ON IL.intLocationId = @intLocationId
 					AND IL.intItemId = @intNewItemId
 				WHERE IL.intItemLocationId IS NULL
 
@@ -7564,12 +7619,14 @@ BEGIN TRY
 					) x
 			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
 			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+			--LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
 			LEFT JOIN tblSMCompanyLocationSubLocation CSL ON CSL.strSubLocationName = x.strSubLocationName
-			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblICItemLocation IL ON IL.intLocationId = @intLocationId
 				AND IL.intItemId = @intNewItemId
 
 			EXEC sp_xml_removedocument @idoc
+
+			
 
 			------------------Item UOM UPC------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -7615,6 +7672,8 @@ BEGIN TRY
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
 
 			EXEC sp_xml_removedocument @idoc
+
+			
 
 			---******************************** Item Substitute ********************************************
 			DECLARE @intItemSubstituteId INT
@@ -7981,16 +8040,16 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT *
 					FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
-					LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-					LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+					--LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+					LEFT JOIN tblICItemLocation IL ON IL.intLocationId = @intLocationId
 						AND IL.intItemId = @intNewItemId
 					WHERE IL.intItemLocationId IS NULL
 					)
 			BEGIN
 				SELECT @strLocationName = x.strLocationName
 				FROM OPENXML(@idoc, 'vyuIPGetItemSubstitutions/vyuIPGetItemSubstitution', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
-				LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-				LEFT JOIN tblICItemLocation IL ON IL.intLocationId = CL.intCompanyLocationId
+				--LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+				LEFT JOIN tblICItemLocation IL ON IL.intLocationId = @intLocationId
 					AND IL.intItemId = @intNewItemId
 				WHERE IL.intItemLocationId IS NULL
 
@@ -8045,7 +8104,7 @@ BEGIN TRY
 					) x
 			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
 			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
-			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
+			LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = @intLocationId
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -8130,6 +8189,8 @@ BEGIN TRY
 				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 					,@referenceTransactionId = @intTransactionId
 					,@referenceCompanyId = @intCompanyId
+					,@screenId=@intItemScreenId
+					,@populatedByInterCompany=1
 			END
 
 			INSERT INTO tblICItemAcknowledgementStage (
@@ -8153,6 +8214,8 @@ BEGIN TRY
 
 			UPDATE tblICItemStage
 			SET strFeedStatus = 'Processed'
+				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intItemStageId = @intItemStageId
 
 			-- Audit Log
@@ -8190,6 +8253,7 @@ BEGIN TRY
 			UPDATE tblICItemStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intItemStageId = @intItemStageId
 		END CATCH
 

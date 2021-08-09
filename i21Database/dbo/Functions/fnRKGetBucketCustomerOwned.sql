@@ -39,6 +39,7 @@ RETURNS @returntable TABLE
 	, strStorageTypeDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, ysnActive BIT
 	, ysnExternal BIT
+	, intTicketId INT
 )
 AS
 BEGIN
@@ -76,6 +77,7 @@ BEGIN
 		, strStorageTypeDescription
 		, ysnActive
 		, ysnExternal
+		, intTicketId
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
 			, sl.intSummaryLogId
@@ -111,6 +113,7 @@ BEGIN
 			, strStorageTypeDescription
 			, ysnActive
 			, ysnExternal = ISNULL(ysnExternal, 0)
+			, intTicketId
 		FROM vyuRKGetSummaryLog sl
 		CROSS APPLY (
 			SELECT strStorageTypeCode
@@ -141,11 +144,11 @@ BEGIN
 			) AS pt
 		) a
 		WHERE strBucketType = 'Customer Owned'
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
+			--AND sl.dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 			AND ISNULL(sl.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(sl.intEntityId, 0))
-	) t WHERE intRowNum = 1
+	) t --WHERE intRowNum = 1
 	
 	RETURN
 END

@@ -404,6 +404,7 @@ CREATE TABLE #InvoiceNonInventoryItem
 	,[intPriceUOMId]					INT												NULL
 	,[dblUnitQuantity]					NUMERIC(18, 6)									NULL
 	,[dblItemWeight]					NUMERIC(18, 6)									NULL
+	,[dblStandardWeight]				NUMERIC(18, 6)									NULL
 	,[intItemWeightUOMId]				INT												NULL
 	,[dblDiscount]						NUMERIC(18, 6)									NULL
 	,[dblItemTermDiscount]				NUMERIC(18, 6)									NULL
@@ -499,6 +500,7 @@ CREATE TABLE #InvoiceNonInventoryItem
 	,[intStorageScheduleTypeId]			INT												NULL
 	,[intDestinationGradeId]			INT												NULL
 	,[intDestinationWeightId]			INT												NULL
+	,[intPriceFixationDetailId]			INT												NULL
     ,[strAddonDetailKey]                NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[ysnAddonParent]                   BIT                                             NULL
     ,[dblAddOnQuantity]                 NUMERIC(18, 6)                                  NULL
@@ -512,7 +514,10 @@ CREATE TABLE #InvoiceNonInventoryItem
 	,[intSourceId]						INT												NULL
 	,[strSourceId]						NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
 	,[ysnPost]							BIT												NULL
-	,[intTempDetailIdForTaxes]			INT												NULL)
+	,[intTempDetailIdForTaxes]			INT												NULL
+	,[strBinNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strGroupNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strFeedDiet]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL)
 
 INSERT INTO #InvoiceNonInventoryItem
 	([intInvoiceId]
@@ -529,6 +534,7 @@ INSERT INTO #InvoiceNonInventoryItem
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -624,6 +630,7 @@ INSERT INTO #InvoiceNonInventoryItem
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
@@ -637,7 +644,10 @@ INSERT INTO #InvoiceNonInventoryItem
 	,[intSourceId]
 	,[strSourceId]
 	,[ysnPost]
-	,[intTempDetailIdForTaxes])
+	,[intTempDetailIdForTaxes]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet])
 SELECT
 	 [intInvoiceId]							= IE.[intInvoiceId]
 	,[intInvoiceDetailId]					= NULL
@@ -653,6 +663,7 @@ SELECT
 	,[intPriceUOMId]						= ISNULL(IP.[intPriceUOMId], ISNULL(ISNULL(IE.[intPriceUOMId], IL.[intIssueUOMId]), (SELECT TOP 1 [intItemUOMId] FROM tblICItemUOM ICUOM WITH (NOLOCK) WHERE ICUOM.[intItemId] = IC.[intItemId] ORDER BY ICUOM.[ysnStockUnit] DESC, [intItemUOMId])))
 	,[dblUnitQuantity]						= ISNULL(IP.[dblPriceUOMQuantity], ISNULL(IE.[dblContractPriceUOMQty], 1.000000))
 	,[dblItemWeight]						= IE.[dblItemWeight]
+	,[dblStandardWeight]					= IE.[dblStandardWeight]
 	,[intItemWeightUOMId]					= IE.[intItemWeightUOMId]
 	,[dblDiscount]							= ISNULL(IE.[dblDiscount], @ZeroDecimal)
 	,[dblItemTermDiscount]					= ISNULL(ISNULL(IP.[dblTermDiscount], IE.[dblItemTermDiscount]), @ZeroDecimal)
@@ -764,6 +775,7 @@ SELECT
 	,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
 	,[intDestinationGradeId]				= IE.[intDestinationGradeId]
 	,[intDestinationWeightId]				= IE.[intDestinationWeightId]
+	,[intPriceFixationDetailId]				= IE.[intPriceFixationDetailId]
     ,[strAddonDetailKey]                    = IE.[strAddonDetailKey]
     ,[ysnAddonParent]                       = IE.[ysnAddonParent]
     ,[dblAddOnQuantity]                     = IE.[dblAddOnQuantity]
@@ -778,6 +790,9 @@ SELECT
 	,[strSourceId]							= IE.[strSourceId]
 	,[ysnPost]								= IE.[ysnPost]
 	,[intTempDetailIdForTaxes]				= IE.[intTempDetailIdForTaxes]
+	,[strBinNumber]							= IE.[strBinNumber]
+	,[strGroupNumber]						= IE.[strGroupNumber]
+	,[strFeedDiet]							= IE.[strFeedDiet]
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -865,6 +880,7 @@ USING
 		,[intPriceUOMId]
 		,[dblUnitQuantity]
 		,[dblItemWeight]
+		,[dblStandardWeight]
 		,[intItemWeightUOMId]
 		,[dblDiscount]
 		,[dblItemTermDiscount]
@@ -960,6 +976,7 @@ USING
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
         ,[dblAddOnQuantity]
@@ -974,6 +991,9 @@ USING
 		,[strSourceId]
 		,[ysnPost]
 		,[intTempDetailIdForTaxes]
+		,[strBinNumber]
+		,[strGroupNumber]
+		,[strFeedDiet]
 	FROM
 		#InvoiceNonInventoryItem
 	)
@@ -994,6 +1014,7 @@ INSERT(
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -1089,10 +1110,14 @@ INSERT(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 	)
 VALUES(
 	 [intInvoiceId]
@@ -1108,6 +1133,7 @@ VALUES(
 	,[intPriceUOMId]
 	,[dblUnitQuantity]
 	,[dblItemWeight]
+	,[dblStandardWeight]
 	,[intItemWeightUOMId]
 	,[dblDiscount]
 	,[dblItemTermDiscount]
@@ -1203,10 +1229,14 @@ VALUES(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 )
 OUTPUT  
 			ISNULL(@IntegrationLogId, -9999)		--[intIntegrationLogId]

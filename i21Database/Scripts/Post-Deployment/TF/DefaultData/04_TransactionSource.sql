@@ -1,4 +1,5 @@
 ﻿PRINT ('Deploying Transaction Source')
+GO
 
 DECLARE @TransactionSource AS TABLE(intTransactionSourceId INT, strTransactionSource NVARCHAR(50), intMasterId INT)
 
@@ -51,6 +52,5 @@ WHEN NOT MATCHED BY TARGET THEN
 
 
 SET IDENTITY_INSERT tblTFTransactionSource OFF
-
 
 GO

@@ -19,6 +19,11 @@ BEGIN TRY
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
+	IF ISNULL(@intCompanyId, 0) = 0
+	BEGIN
+		RETURN
+	END
+
 	UPDATE dbo.tblCTContractHeader
 	SET intCompanyId = @intCompanyId
 	WHERE intCompanyId IS NULL
@@ -117,12 +122,11 @@ BEGIN TRY
 
 		IF @strInsert = 'Insert'
 		BEGIN
-			IF EXISTS (
+			IF NOT EXISTS (
 					SELECT 1
-					FROM tblCTContractHeader
+					FROM tblCTContractPreStage
 					WHERE intContractHeaderId = @ContractHeaderId
-						AND intConcurrencyId = 1
-					)
+						)
 			BEGIN
 				INSERT INTO dbo.tblCTContractPreStage (
 					intContractHeaderId
@@ -139,9 +143,8 @@ BEGIN TRY
 		BEGIN
 			IF EXISTS (
 					SELECT 1
-					FROM tblCTContractHeader
+					FROM tblCTContractPreStage
 					WHERE intContractHeaderId = @ContractHeaderId
-						AND intConcurrencyId > 1
 					)
 			BEGIN
 				DELETE

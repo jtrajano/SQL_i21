@@ -19,8 +19,7 @@
 	[ysnDelete]				BIT            NULL,
 	[dtmDateDeleted]		DATETIME	   NULL,
     [intConcurrencyId]      INT            DEFAULT 1 NOT NULL,
-    CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([intBankId] ASC),
-    UNIQUE NONCLUSTERED ([strBankName] ASC)
+    CONSTRAINT [PK_tblCMBank] PRIMARY KEY CLUSTERED ([intBankId] ASC)
 );
 
 GO
@@ -136,7 +135,7 @@ BEGIN
     ,strFax       = i.strFax
     ,strWebsite = i.strWebsite
     ,strEmail   = i.strEmail
-	,strRTN        = CASE WHEN i.strRTN = tblCMBankAccount.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
+	,strRTN     = i.strRTN --  = CASE WHEN i.strRTN = tblCMBankAccount.strRTN THEN i.strRTN ELSE [dbo].fnAESEncryptASym(i.strRTN) END
     FROM inserted i
     WHERE tblCMBankAccount.intBankId = i.intBankId
 

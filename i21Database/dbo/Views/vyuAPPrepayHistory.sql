@@ -94,6 +94,7 @@ FROM (
 		ON b.intEntityVendorId = v.intEntityId
     WHERE b.ysnPosted = 1
     AND b.intTransactionType IN (13, 2, 3)
+    AND o.ysnApplied = 1
 
     UNION
     --Applied to AR Receive Payments

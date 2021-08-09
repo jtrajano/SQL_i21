@@ -103,7 +103,7 @@ BEGIN
 			strBatchId = t.strBatchId
 			,strBucketType = 
 				CASE 
-					WHEN t.strTransactionForm IN ('Inventory Receipt', 'Inventory Transfer') THEN 'Purchase In-Transit'
+					WHEN t.strTransactionForm IN ('Inventory Receipt', 'Inventory Transfer', 'Inbound Shipments') THEN 'Purchase In-Transit'
 					WHEN t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment', 'Invoice') THEN 'Sales In-Transit'
 				END 
 			,strTransactionType = v.strTransactionType
@@ -115,11 +115,13 @@ BEGIN
 				receipt.intContractDetailId
 				, shipment.intContractDetailId
 				, invoice.intContractDetailId
+				, logistics.intContractDetailId
 			)
 			,intContractHeaderId = COALESCE(
 				receipt.intContractHeaderId
 				, shipment.intContractHeaderId
 				, invoice.intContractHeaderId
+				, logistics.intContractHeaderId
 			)
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
@@ -233,6 +235,27 @@ BEGIN
 			) invoice
 
 			OUTER APPLY (
+				SELECT
+					l.strLoadNumber
+					,ld.intPContractDetailId
+					,cd.intContractHeaderId
+					,cd.intContractDetailId
+				FROM 
+					tblLGLoad l
+					INNER JOIN tblLGLoadDetail ld
+						ON l.intLoadId = ld.intLoadId
+					INNER JOIN tblCTContractDetail cd
+						ON cd.intContractDetailId = ld.intPContractDetailId
+					INNER JOIN tblCTContractHeader ch
+						ON ch.intContractHeaderId = cd.intContractHeaderId
+				WHERE
+					t.strTransactionForm = 'Inbound Shipments'
+					AND l.strLoadNumber = t.strTransactionId
+					AND l.intLoadId = t.intTransactionId
+					AND ld.intLoadDetailId = t.intTransactionDetailId
+			) logistics 
+
+			OUTER APPLY (
 				SELECT 
 					cd.intPricingTypeId
 					,cPricingType.strPricingType
@@ -246,11 +269,13 @@ BEGIN
 						receipt.intContractHeaderId
 						, shipment.intContractHeaderId
 						, invoice.intContractHeaderId
+						, logistics.intContractHeaderId
 					)
 					AND cd.intContractDetailId = COALESCE(
 						receipt.intContractDetailId
 						, shipment.intContractDetailId
 						, invoice.intContractDetailId 
+						, logistics.intContractHeaderId
 					)
 			) contractDetail
 

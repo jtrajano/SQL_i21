@@ -2,10 +2,15 @@
 (
     [intImportLoadId] INT NOT NULL IDENTITY,
     [guidImportIdentifier] UNIQUEIDENTIFIER NOT NULL,
-    [intImportFileHeaderId] INT NOT NULL,
+    [intImportFileHeaderId] INT NULL,
 	[intUserId] INT NOT NULL,
 	[dtmImportDate] DATETIME NOT NULL,
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
+    [strSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strFileName] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+    [strFileExtension]  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strMessage] NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+    [strStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblTRImportLoad] PRIMARY KEY ([intImportLoadId]),
 	CONSTRAINT [FK_tblTRImportLoad_tblSMImportFileHeader] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [tblSMImportFileHeader]([intImportFileHeaderId])
 )

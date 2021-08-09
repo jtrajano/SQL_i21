@@ -103,7 +103,7 @@ BEGIN
 		[strBillId]				=	A.strBillId,
 		[dblQtyReceived]		=	(pd.dblPayment + (CASE WHEN (pd.dblAmountDue = 0) THEN pd.dblDiscount ELSE 0 END))
 		 							--get the percentage of payment made to total amount due
-									/ (CASE WHEN @post = 1 THEN (voucher.dblAmountDue + pd.dblPayment) 
+									/ (CASE WHEN @post = 1 THEN ((voucher.dblAmountDue * CASE WHEN pd.ysnOffset = 1 THEN -1 ELSE 1 END) + pd.dblPayment) 
 											ELSE (voucher.dblTotal) END) --get the percentage of payment
 									* voucherDetail.dblQtyReceived
 									* (CASE WHEN @post = 1 THEN -1 ELSE 1 END),

@@ -58,6 +58,10 @@
 	ysnPopulatedByIntegration BIT NULL CONSTRAINT [DF_tblCTContractFeed_ysnPopulatedByIntegration] DEFAULT 0, 
 	intItemId int,
 	dtmProcessedDate DATETIME,
+	intStatusId INT,
     CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC),
 	CONSTRAINT [FK_tblCTContractFeed_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
+GO
+	CREATE NONCLUSTERED INDEX [IX_tblCTContractFeed_intContractDetailId] ON [dbo].[tblCTContractFeed] ([intContractDetailId] ASC)	
+GO

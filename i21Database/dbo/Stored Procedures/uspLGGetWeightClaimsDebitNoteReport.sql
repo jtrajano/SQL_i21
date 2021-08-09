@@ -115,6 +115,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,strCompanyPhone = @strPhone
 	,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ', '
 	,strCityAndDate = @strCity + ', '+ DATENAME(dd,WC.dtmTransDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,WC.dtmTransDate),3)),LEFT(DATENAME(MONTH,WC.dtmTransDate),3)) + ' ' + DATENAME(yyyy,WC.dtmTransDate)
+	,strTransDate = dbo.fnConvertDateToReportDateFormat(WC.dtmTransDate, 0)
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -124,13 +125,20 @@ SELECT DISTINCT WC.intWeightClaimId
 	,EL.strCity
 	,EL.strState
 	,strCountry = isnull(rtELTranslation.strTranslation,EL.strCountry)
-	,strVendorAddress = E.strName + CHAR(13) + EL.strAddress + CHAR(13) + EL.strZipCode + ' ' + EL.strCity + CHAR(13) + EL.strState + ' ' + isnull(rtELTranslation.strTranslation,EL.strCountry)
+	,strVendorAddress = E.strName + CHAR(13) 
+		+ CASE WHEN (ISNULL(EL.strAddress, '') = '') THEN '' ELSE EL.strAddress + CHAR(13) END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '') THEN '' ELSE EL.strZipCode + ' ' END 
+		+ CASE WHEN (ISNULL(EL.strCity, '') = '') THEN '' ELSE EL.strCity END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '' AND ISNULL(EL.strCity, '') = '') THEN '' ELSE CHAR(13) END  
+		+ CASE WHEN (ISNULL(EL.strState, '') = '') THEN '' ELSE EL.strState + ' ' END 
+		+ ISNULL(rtELTranslation.strTranslation,EL.strCountry)
 	,B.strBillId
 	,strShippingLine = @via + ' ' + ShippingLine.strName
 	,L.strMVessel
 	,L.strPackingDescription
 	,CH.strContractNumber
 	,CH.dtmContractDate
+	,strContractDate = dbo.fnConvertDateToReportDateFormat(CH.dtmContractDate, 0)
 	,CH.strCustomerContract
 	,CH.dblQuantity
 	,strCommodityUnitMeasure = CMUM.strUnitMeasure
@@ -148,6 +156,7 @@ SELECT DISTINCT WC.intWeightClaimId
 			THEN @Invoice
 		END
 	,strVoucherBankInfo = @strVoucherBankInfo1 + ': ' + CHAR(13) + CHAR(13) + BA.strBankName + CHAR(13) + @strVoucherBankInfo2 + ' : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + @strVoucherBankInfo3 + ' : ' + ISNULL(BA.strSWIFT, '')
+	,strVoucherBankInfoBrE = 'Please transfer this amount in our favour with: ' + CHAR(13) + CHAR(13) + BA.strBankName + CHAR(13) + @strVoucherBankInfo2 + ' : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + @strVoucherBankInfo3 + ' : ' + ISNULL(BA.strSWIFT, '')
 	,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
 	,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
 	,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
@@ -214,8 +223,11 @@ JOIN (
 	WHERE LOD.intLoadId = @intLoadId
 	) LD ON WCD.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = CASE WHEN LD.intVendorEntityId <> WCD.intPartyEntityId THEN E.intDefaultLocationId 
-																ELSE ISNULL(LD.intVendorEntityLocationId, E.intDefaultLocationId) END
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId 
+	AND ((LD.intVendorEntityId = WCD.intPartyEntityId AND EL.ysnDefaultLocation = 1)
+		OR (LD.intVendorEntityId <> WCD.intPartyEntityId 
+			AND ((intVendorEntityLocationId IS NOT NULL AND EL.intEntityLocationId = LD.intVendorEntityLocationId)
+				OR (intVendorEntityLocationId IS NULL AND EL.ysnDefaultLocation = 1))))
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId

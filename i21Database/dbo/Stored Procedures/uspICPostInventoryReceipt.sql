@@ -139,6 +139,32 @@ BEGIN
 	DECLARE @strChargeItem AS NVARCHAR(50)
 
 
+	-- Validate Receipt Total
+	
+	-- Source Type must be equal to 0 - None to trigger Receipt Total Validation
+	IF @intSourceType = 0
+	BEGIN
+
+		DECLARE @ysnValidateReceiptTotal AS BIT
+
+		SELECT TOP 1 @ysnValidateReceiptTotal = ysnValidateReceiptTotal FROM tblICCompanyPreference
+
+		-- Company Preference if Receipt Total should be validated
+		IF @ysnValidateReceiptTotal = 1
+		BEGIN
+
+			DECLARE @ysnValidReceiptTotal AS BIT
+
+			EXEC uspICValidateReceiptTotal @intTransactionId, @ysnValidReceiptTotal OUTPUT
+
+			IF @ysnValidReceiptTotal = 0
+			BEGIN
+				EXEC uspICRaiseError 80266;
+				GOTO With_Rollback_Exit
+			END
+		END
+	END
+
 	-- Validate if the Inventory Receipt exists   
 	IF @intTransactionId IS NULL  
 	BEGIN   
@@ -1371,19 +1397,22 @@ BEGIN
 					,t.intItemUOMId
 					,r.[dtmReceiptDate] 
 					,dblQty = 
-						CASE WHEN (loadShipmentLookup.strContainerNumber IS NULL) THEN
-							-- If there are no containers, reduce the in-transit qty based on how it was increased by Load Schedule. 
-							-t.dblQty 
-							ELSE
-								CASE		
-									-- If Gross/Net UOM is specified, use Net Weight as qty
-									WHEN ri.intWeightUOMId IS NOT NULL THEN
-										-dbo.fnCalculateQtyBetweenUOM(ri.intWeightUOMId, t.intItemUOMId, ri.dblNet)
-									-- If Gross/Net UOM is missing, then get the item/lot qty. 
-									ELSE
-										-dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, ri.dblOpenReceive)
-								END	
-							END
+						-ri.dblOpenReceive
+						---t.dblQty 
+						--CASE 
+						--	WHEN (loadShipmentLookup.strContainerNumber IS NULL) THEN
+						--		-- If there are no containers, reduce the in-transit qty based on how it was increased by Load Schedule. 
+						--		-t.dblQty 
+						--	ELSE
+						--		CASE		
+						--			-- If Gross/Net UOM is specified, use Net Weight as qty
+						--			WHEN ri.intWeightUOMId IS NOT NULL THEN
+						--				-dbo.fnCalculateQtyBetweenUOM(ri.intWeightUOMId, t.intItemUOMId, ri.dblNet)
+						--			-- If Gross/Net UOM is missing, then get the item/lot qty. 
+						--			ELSE
+						--				-dbo.fnCalculateQtyBetweenUOM(ri.intUnitMeasureId, t.intItemUOMId, ri.dblOpenReceive)
+						--		END	
+						--END
 					,t.[dblUOMQty] 
 					,t.[dblCost] 
 					,t.[dblValue] 
@@ -2004,6 +2033,53 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
+	
+	-- Process the decimal discrepancy
+	BEGIN 
+		INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+				,[dblDebitForeign]	
+				,[dblDebitReport]	
+				,[dblCreditForeign]	
+				,[dblCreditReport]	
+				,[dblReportingRate]	
+				,[dblForeignRate]
+				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
+		)
+		EXEC @intReturnValue = uspICCreateReceiptGLEntriesToFixDecimalDiscrepancy
+			@strReceiptNumber = @strTransactionId
+			,@strBatchId = @strBatchId
+			,@GLEntries = @GLEntries
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+	END	
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -2225,7 +2301,57 @@ BEGIN
 				INNER JOIN dbo.tblICLot Lot 
 					ON Lot.intLotId = ItemLot.intLotId
 		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
-				AND Receipt.strReceiptNumber = @strTransactionId				
+				AND Receipt.strReceiptNumber = @strTransactionId	
+				
+		-- Unpost the IC-AP-Clearing
+		BEGIN 
+			INSERT INTO tblICAPClearing (
+				[intTransactionId]
+				,[strTransactionId]
+				,[intTransactionType]
+				,[strReferenceNumber]
+				,[dtmDate]
+				,[intEntityVendorId]
+				,[intLocationId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptItemTaxId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptChargeTaxId]
+				,[intInventoryShipmentChargeId]
+				,[intInventoryShipmentChargeTaxId]
+				,[intAccountId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[dblQuantity]
+				,[dblAmount]
+				,[strBatchId]
+			)
+			SELECT 
+				[intTransactionId]
+				,[strTransactionId]
+				,[intTransactionType]
+				,[strReferenceNumber]
+				,[dtmDate]
+				,[intEntityVendorId]
+				,[intLocationId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptItemTaxId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptChargeTaxId]
+				,[intInventoryShipmentChargeId]
+				,[intInventoryShipmentChargeTaxId]
+				,[intAccountId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[dblQuantity]
+				,[dblAmount]
+				,[strBatchId] = @strBatchId
+			FROM 
+				tblICAPClearing
+			WHERE
+				strTransactionId = @strTransactionId
+				AND ysnIsUnposted = 0 
+		END 
 	END 	
 END   
 
@@ -2493,6 +2619,86 @@ BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 	
 
+	-- Add the AP Clearing
+	BEGIN 
+		DECLARE @APClearing AS APClearing
+
+		INSERT INTO @APClearing (
+			[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionType]
+			,[strReferenceNumber]
+			,[dtmDate]
+			,[intEntityVendorId]
+			,[intLocationId]
+			,[intTransactionDetailId]
+			,[intAccountId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[dblQuantity]
+			,[dblAmount]	
+			,[strCode]
+		)
+		SELECT DISTINCT 
+			[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionType]
+			,[strReferenceNumber]
+			,[dtmDate]
+			,[intEntityVendorId]
+			,[intLocationId]
+			,[intTransactionDetailId] = 
+				COALESCE(
+					intInventoryReceiptItemId
+					,intInventoryReceiptChargeId					
+				)
+			,[intAccountId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[dblQuantity]
+			,[dblAmount] = g.dblAmount
+			,[strCode] = 'IR'
+		FROM 
+			tblICAPClearing ap
+			CROSS APPLY (
+				SELECT 
+					dblAmount = SUM(g.dblAmount) 
+				FROM
+					tblICAPClearing g
+				WHERE
+					g.strBatchId = @strBatchId
+					AND (
+						(g.intInventoryReceiptItemId = ap.intInventoryReceiptItemId AND ap.intInventoryReceiptItemId IS NOT NULL)
+						OR (g.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId AND ap.intInventoryReceiptChargeId IS NOT NULL)
+					)
+			) g
+		WHERE
+			strBatchId = @strBatchId
+
+		EXEC dbo.uspAPClearing
+			@APClearing
+			,@ysnPost
+
+		-- Update the IC-AP Clearing when unposting the transaction. 
+		IF @ysnPost = 0 
+		BEGIN 			
+			UPDATE tblICAPClearing
+			SET 				
+				dblQuantity = -dblQuantity -- Negate the Qty
+				,dblAmount = -dblAmount -- Negate the Amount 				
+			WHERE 
+				strTransactionId = @strTransactionId
+				AND strBatchId = @strBatchId
+
+			UPDATE tblICAPClearing
+			SET 
+				ysnIsUnposted = 1 -- Flag the AP Clearing as unposted. 
+			WHERE 
+				strTransactionId = @strTransactionId
+				AND ysnIsUnposted = 0 
+		END 
+	END 
+
 	EXEC dbo.uspICPostInventoryReceiptIntegrations
 		@ysnPost
 		,@intTransactionId
@@ -2502,6 +2708,7 @@ BEGIN
 		@intReceiptId = @intTransactionId
 		,@ysnPost = @ysnPost
 		,@intEntityUserSecurityId = @intEntityUserSecurityId
+
 	
 	COMMIT TRAN @TransactionName
 END 

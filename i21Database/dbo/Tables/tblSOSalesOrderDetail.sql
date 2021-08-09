@@ -51,6 +51,7 @@
 	[intSubLocationId]					INT				NULL,	
 	[ysnBlended]						BIT				NULL DEFAULT 0, 
 	[dblItemWeight]						NUMERIC(18, 6)	NULL DEFAULT 0,
+	[dblStandardWeight]					NUMERIC(38, 20)	NULL DEFAULT 0,
 	[dblOriginalItemWeight]				NUMERIC(18, 6)	NULL DEFAULT 0,
 	[intItemWeightUOMId]				INT				NULL,    
     [intCostTypeId]						INT				NULL, 
@@ -90,3 +91,7 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 );
+GO
+
+CREATE INDEX [IX_tblSOSalesOrderDetail_intSalesOrderId] ON [dbo].[tblSOSalesOrderDetail] ([intSalesOrderId] ASC)
+GO

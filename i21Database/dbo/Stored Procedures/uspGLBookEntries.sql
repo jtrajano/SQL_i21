@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspGLBookEntries
+﻿
+CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
 	,@SkipGLValidation BIT = 0
@@ -16,26 +17,10 @@ SET ANSI_WARNINGS OFF
 DECLARE @errorCode INT
 DECLARE @dtmDateEntered DATETIME = GETDATE()
 
-DECLARE @GLEntries2 AS RecapTableType;
-
-INSERT INTO @GLEntries2
-SELECT * FROM @GLEntries
-
-
-
-UPDATE
-GL SET
-dtmDate = @dtmDateEntered
-FROM
-@GLEntries2 GL
-WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
-AND dtmDate < @dtmDateEntered
-
-
 
 IF (ISNULL(@SkipGLValidation,0)  = 0)
 BEGIN
-	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries2, @ysnPost
+	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries, @ysnPost
 	IF @errorCode > 0	RETURN @errorCode
 END
 
@@ -48,7 +33,7 @@ BEGIN
 			,@dtmDateFrom = NULL 
 			,@dtmDateTo = NULL 
 			,@ysnThrowError = 1
-			,@GLEntries = @GLEntries2
+			,@GLEntries = @GLEntries
 			,@ysnPost = @ysnPost
 
 	IF @errorCode > 0	RETURN @errorCode
@@ -66,7 +51,7 @@ BEGIN
 
 	DECLARE @dtmDateEnteredMin DATETIME = NULL ,@strBatchId NVARCHAR(50)
 
-	SELECT TOP 1 @strBatchId =strBatchId FROM @GLEntries2 
+	SELECT TOP 1 @strBatchId =strBatchId FROM @GLEntries 
 
 	SELECT @dtmDateEnteredMin = MIN(dtmDateEntered) FROM tblGLDetail WHERE strBatchId =@strBatchId group by strBatchId
 
@@ -106,6 +91,7 @@ BEGIN
             ,[dblForeignRate]
 			,[dblReportingRate]
 			,strSourceDocumentId
+			,intFiscalPeriodId
 			,intSourceLocationId
 			,intSourceUOMId
 			,dblSourceUnitDebit
@@ -117,7 +103,7 @@ BEGIN
 			,dtmDateEnteredMin
 	)
 	SELECT 
-			dbo.fnRemoveTimeOnDate([dtmDate])
+			dbo.fnRemoveTimeOnDate(dtmDate)
 			,[strBatchId]
 			,@intMultCompanyId
 			,[intAccountId]
@@ -152,6 +138,7 @@ BEGIN
             ,[dblForeignRate]
 			,ISNULL([dblReportingRate],0)
 			,ISNULL(strSourceDocumentId,'')
+			,F.intGLFiscalYearPeriodId
 			,intSourceLocationId
 			,intSourceUOMId
 			,ISNULL(dblSourceUnitDebit,0)
@@ -161,15 +148,18 @@ BEGIN
 			,[intConcurrencyId]
 			,@ysnPost
 			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
-	FROM	@GLEntries2 GLEntries
+	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
-END;
+			CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F
 
-EXEC uspGLInsertAuditLog @ysnPost, @GLEntries2
-EXEC uspGLUpdateTrialBalance @GLEntries2
+END
+;
+
+EXEC uspGLInsertAuditLog @ysnPost, @GLEntries
+EXEC uspGLUpdateTrialBalance @GLEntries
 --=====================================================================================================================================
 -- 	UPSERT DATA TO THE SUMMARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -188,7 +178,7 @@ BEGIN
 						,dblCreditForeign = SUM(CASE WHEN @ysnPost = 1 THEN CreditForeign.Value ELSE DebitForeign.Value * -1 END)
 						,dblDebitUnit = SUM(CASE WHEN @ysnPost = 1 THEN DebitUnit.Value ELSE CreditUnit.Value * -1 END)
 						,dblCreditUnit = SUM(CASE WHEN @ysnPost = 1 THEN CreditUnit.Value ELSE DebitUnit.Value * -1 END)						
-				FROM	@GLEntries2 GLEntries
+				FROM	@GLEntries GLEntries
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
@@ -243,4 +233,3 @@ BEGIN
 END;
 
 RETURN 0
-

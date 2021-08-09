@@ -245,7 +245,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
-				AND t.strEntityNo <> ''
+				--AND t.strEntityNo <> ''
 
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
@@ -297,6 +297,7 @@ BEGIN TRY
 					,strApprovalBase
 					,intSampleLabelId
 					,ysnAdjustInventoryQtyBySampleQty
+					,ysnPartyMandatory
 					,intApprovalLotStatusId
 					,intRejectionLotStatusId
 					,intBondedApprovalLotStatusId
@@ -315,6 +316,7 @@ BEGIN TRY
 					,strApprovalBase
 					,@intSampleLabelId
 					,ysnAdjustInventoryQtyBySampleQty
+					,ysnPartyMandatory
 					,@intApprovalLotStatusId
 					,@intRejectionLotStatusId
 					,@intBondedApprovalLotStatusId
@@ -330,6 +332,7 @@ BEGIN TRY
 						,ysnFinalApproval BIT
 						,strApprovalBase NVARCHAR(50)
 						,ysnAdjustInventoryQtyBySampleQty BIT
+						,ysnPartyMandatory BIT
 						,dtmCreated DATETIME
 						,dtmLastModified DATETIME
 						)
@@ -348,6 +351,7 @@ BEGIN TRY
 					,strApprovalBase = x.strApprovalBase
 					,intSampleLabelId = @intSampleLabelId
 					,ysnAdjustInventoryQtyBySampleQty = x.ysnAdjustInventoryQtyBySampleQty
+					,ysnPartyMandatory = x.ysnPartyMandatory
 					,intApprovalLotStatusId = @intApprovalLotStatusId
 					,intRejectionLotStatusId = @intRejectionLotStatusId
 					,intBondedApprovalLotStatusId = @intBondedApprovalLotStatusId
@@ -360,6 +364,7 @@ BEGIN TRY
 						,ysnFinalApproval BIT
 						,strApprovalBase NVARCHAR(50)
 						,ysnAdjustInventoryQtyBySampleQty BIT
+						,ysnPartyMandatory BIT
 						,dtmLastModified DATETIME
 						) x
 				WHERE tblQMSampleType.intSampleTypeRefId = @intSampleTypeRefId
@@ -380,6 +385,14 @@ BEGIN TRY
 			INSERT INTO @tblQMSampleTypeDetail (intSampleTypeDetailId)
 			SELECT intSampleTypeDetailId
 			FROM OPENXML(@idoc, 'vyuIPGetSampleTypeDetails/vyuIPGetSampleTypeDetail', 2) WITH (intSampleTypeDetailId INT)
+
+			DELETE
+			FROM tblQMSampleTypeDetail
+			WHERE intSampleTypeId = @intNewSampleTypeId
+				AND intSampleTypeDetailRefId NOT IN (
+					SELECT intSampleTypeDetailId
+					FROM @tblQMSampleTypeDetail
+					)
 
 			SELECT @intSampleTypeDetailId = MIN(intSampleTypeDetailId)
 			FROM @tblQMSampleTypeDetail
@@ -474,14 +487,6 @@ BEGIN TRY
 				WHERE intSampleTypeDetailId > @intSampleTypeDetailId
 			END
 
-			DELETE
-			FROM tblQMSampleTypeDetail
-			WHERE intSampleTypeId = @intNewSampleTypeId
-				AND intSampleTypeDetailRefId NOT IN (
-					SELECT intSampleTypeDetailId
-					FROM @tblQMSampleTypeDetail
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Sample Type User Role--------------------------------------------
@@ -493,6 +498,14 @@ BEGIN TRY
 			INSERT INTO @tblQMSampleTypeUserRole (intSampleTypeUserRoleId)
 			SELECT intSampleTypeUserRoleId
 			FROM OPENXML(@idoc, 'vyuIPGetSampleTypeUserRoles/vyuIPGetSampleTypeUserRole', 2) WITH (intSampleTypeUserRoleId INT)
+
+			DELETE
+			FROM tblQMSampleTypeUserRole
+			WHERE intSampleTypeId = @intNewSampleTypeId
+				AND intSampleTypeUserRoleRefId NOT IN (
+					SELECT intSampleTypeUserRoleId
+					FROM @tblQMSampleTypeUserRole
+					)
 
 			SELECT @intSampleTypeUserRoleId = MIN(intSampleTypeUserRoleId)
 			FROM @tblQMSampleTypeUserRole
@@ -581,14 +594,6 @@ BEGIN TRY
 				FROM @tblQMSampleTypeUserRole
 				WHERE intSampleTypeUserRoleId > @intSampleTypeUserRoleId
 			END
-
-			DELETE
-			FROM tblQMSampleTypeUserRole
-			WHERE intSampleTypeId = @intNewSampleTypeId
-				AND intSampleTypeUserRoleRefId NOT IN (
-					SELECT intSampleTypeUserRoleId
-					FROM @tblQMSampleTypeUserRole
-					)
 
 			ext:
 

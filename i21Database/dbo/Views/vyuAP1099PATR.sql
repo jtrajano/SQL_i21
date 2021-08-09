@@ -45,7 +45,7 @@ AS
 	, A.strAddress
 	, A.strVendorCompanyName
 	, A.strPayeeName
-	, A.strVendorId  COLLATE Latin1_General_CI_AS as strVendorId
+	, A.strVendorId
 	, A.strZip
 	, A.strCity
 	, A.strState

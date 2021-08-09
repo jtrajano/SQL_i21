@@ -17,6 +17,11 @@ BEGIN TRY
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
+	IF ISNULL(@intCompanyId, 0) = 0
+	BEGIN
+		RETURN
+	END
+
 	UPDATE dbo.tblCTPriceContract
 	SET intCompanyId = @intCompanyId
 	WHERE intCompanyId IS NULL
@@ -101,11 +106,13 @@ BEGIN TRY
 				,strRowState
 				,intMultiCompanyId
 				,strTransactionType
+				,ysnApproval
 				)
 			SELECT @intPriceContractId
 				,@strRowState
 				,@intToCompanyId
 				,@strTransactionType
+				,@ysnApprove
 		END
 	END
 END TRY

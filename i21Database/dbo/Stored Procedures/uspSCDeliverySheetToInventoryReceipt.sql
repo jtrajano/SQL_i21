@@ -375,7 +375,7 @@ END
 	WHERE  SC.intDeliverySheetId = @intDeliverySheetId
 	EXEC dbo.uspICIncreaseInTransitInBoundQty @InTransitTableType;
 
-	UPDATE tblSCTicket SET strDistributionOption = 'HLD', intStorageScheduleTypeId = -5, ysnDeliverySheetPost = 1 WHERE intDeliverySheetId = @intDeliverySheetId;
+	UPDATE tblSCTicket SET strDistributionOption = 'HLD', intStorageScheduleTypeId = -5, ysnDeliverySheetPost = 1, dtmDateModifiedUtc = GETUTCDATE() WHERE intDeliverySheetId = @intDeliverySheetId;
 
 	-- VOUCHER INTEGRATION
 	SELECT @createVoucher = ysnCreateVoucher, @postVoucher = ysnPostVoucher FROM tblAPVendor WHERE intEntityId = @intEntityId

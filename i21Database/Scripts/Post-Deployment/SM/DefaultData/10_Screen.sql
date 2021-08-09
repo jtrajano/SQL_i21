@@ -540,19 +540,18 @@ GO
 -- Patronage - End Screen Rename --
 
 ----------------------------Contract Management------------
-
-UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Price Contracts','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New')
-AND strModule = 'Contract Management'
-
 UPDATE tblSMScreen SET strScreenName = N'Weight Grade',strNamespace = 'ContractManagement.view.WeightGrade' 
 WHERE strNamespace = 'ContractManagement.view.WeightsGrades' AND strModule = N'Contract Management'
 
-UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
-WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
+--UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
+--WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
+
+UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New','Price Contracts')
+AND strModule = 'Contract Management'
 
 --Include Price Contracts on approval
 
-UPDATE TOP(1) tblSMScreen SET ysnApproval =  1 WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+UPDATE TOP(1) tblSMScreen SET ysnApproval =  1, ysnAvailable = 1, strScreenName = 'Price Contracts', strModule = 'Contract Management' WHERE strNamespace = 'ContractManagement.view.PriceContracts'
 
 
 ------------------------END Contract Management------------
@@ -612,18 +611,6 @@ GO
 
 -- Patronage - End Screen Rename --
 
-----------------------------Contract Management------------
-
-UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Price Contracts','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New')
-AND strModule = 'Contract Management'
-
-UPDATE tblSMScreen SET strScreenName = N'Weight Grade',strNamespace = 'ContractManagement.view.WeightGrade' 
-WHERE strNamespace = 'ContractManagement.view.WeightsGrades' AND strModule = N'Contract Management'
-
-UPDATE tblSMScreen SET strScreenName = N'Price Contracts',strNamespace = 'ContractManagement.view.PriceContracts' 
-WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule = N'Contract Management'
-
-------------------------END Contract Management------------
 
 PRINT N'END INSERT DEFAULT SCREEN'
 GO
@@ -1089,8 +1076,12 @@ GO
 			
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher') 
 	BEGIN
-		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName])
-		VALUES (N'Vouchers', N'Vouchers', N'AccountsPayable.view.Voucher', N'Accounts Payable', 'tblAPBill', 1, N'Accounts Payable')
+		INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId], [strGroupName], [ysnIDP])
+		VALUES (N'Vouchers', N'Vouchers', N'AccountsPayable.view.Voucher', N'Accounts Payable', 'tblAPBill', 1, N'Accounts Payable', 1)
+	END
+	ELSE
+	BEGIN
+		UPDATE [tblSMScreen] SET ysnIDP = 1 WHERE strNamespace = 'AccountsPayable.view.Voucher'
 	END
 
 	------------------------ END REPLICATION SCREEN ------------------------
@@ -1211,4 +1202,28 @@ GO
 	BEGIN
 		UPDATE [tblSMScreen] SET strScreenId = 'Email History', strScreenName = 'Email History', strModule = 'Global Component Engine', ysnAvailable = 1  WHERE strNamespace = 'GlobalComponentEngine.view.EmailHistory'
 	END
+
+	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt')
+	-- BEGIN
+	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
+    --     VALUES (N'', N'Inventory Receipt', N'Inventory.view.InventoryReceipt', N'Inventory Receipt', N'', 1,  0) 
+	-- END
+	-- ELSE
+	-- BEGIN
+	-- 	UPDATE tblSMScreen
+    --     SET  ysnApproval = 1
+    --     WHERE strNamespace = 'Inventory.view.InventoryReceipt'
+	-- END
+
+	-- IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders')
+	-- BEGIN
+	-- 	INSERT [dbo].[tblSMScreen] ([strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [ysnApproval], [intConcurrencyId])
+    --     VALUES (N'', N'Inventory Receipt Transfer Orders', N'Inventory.view.InventoryReceipt.TransferOrders', N'Inventory Receipt Transfer Orders', N'', 1,  0) 
+	-- END
+	-- ELSE
+	-- BEGIN
+	-- 	UPDATE tblSMScreen
+    --     SET  ysnApproval = 1
+    --     WHERE strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders'
+	-- END
 GO

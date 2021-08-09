@@ -13,8 +13,9 @@ SELECT strJournalType ,
            e.strName COLLATE Latin1_General_CI_AS strUserName,
            total.dblCredit,
            total.dblDebit,
-		   strCurrency COLLATE Latin1_General_CI_AS strCurrency,
-		   ysnRecurringTemplate
+           strCurrency COLLATE Latin1_General_CI_AS strCurrency,
+           ysnRecurringTemplate,
+           fp.strPeriod
    FROM tblGLJournal j
    OUTER APPLY (SELECT  j.strJournalId,
           SUM(ISNULL(d.dblCredit,0.0)) dblCredit,
@@ -22,8 +23,9 @@ SELECT strJournalType ,
    FROM tblGLJournalDetail d WHERE j.intJournalId = d.intJournalId) total
    LEFT JOIN tblEMEntity e ON e.intEntityId = j.intEntityId
    LEFT JOIN tblSMCurrency C ON C.intCurrencyID = j.intCurrencyId
-   where  strTransactionType IN ('General Journal','Recurring')
-   and  ISNULL(strSourceType,'') <> 'AA'
+   LEFT JOIN tblGLFiscalYearPeriod fp ON fp.intGLFiscalYearPeriodId = j.intFiscalPeriodId
+   WHERE  strTransactionType IN ('General Journal','Recurring')
+   AND  ISNULL(strSourceType,'') <> 'AA'
 GO
 CREATE NONCLUSTERED INDEX [_dta_index_tblEMEntity_9_2007079032__K1_2] ON [dbo].[tblEMEntity]
 (

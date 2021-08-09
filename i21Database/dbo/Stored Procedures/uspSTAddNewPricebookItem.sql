@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspSTAddNewPricebookItem]			
+﻿CREATE PROCEDURE [dbo].[uspSTAddNewPricebookItem]			
 	@strDescription						NVARCHAR(250)
 	, @intCategoryId					INT	
 	, @strItemNo						NVARCHAR(100)
@@ -15,7 +14,10 @@ CREATE PROCEDURE [dbo].[uspSTAddNewPricebookItem]
 
 	, @strVendorProduct					NVARCHAR(100)		= NULL
 
-	, @UDTItemPricing StoreItemPricing	READONLY
+	--, @UDTItemPricing StoreItemPricing	READONLY
+	
+	, @UDTItemCostPricing StoreItemCostPricing	READONLY
+	, @UDTItemRetailPricing StoreItemPricePricing	READONLY
 
 	, @ysnDebug							BIT
 	, @intEntityId						INT
@@ -55,6 +57,35 @@ BEGIN
 			DECLARE @intNewItemPricingId	AS INT
 			DECLARE @intNewItemVendorXrefId AS INT
 			DECLARE @strLongUpcCode_Entry	AS NVARCHAR(100)
+
+			
+			-- temp table for ItemLocations
+			BEGIN
+				DECLARE @tempCStoreLocation TABLE
+				(
+					intStoreId				INT,
+					intCompanyLocationId	INT,
+
+					-- Item Location
+					ysnUseTaxFlag1			BIT,
+					ysnUseTaxFlag2			BIT,
+					ysnUseTaxFlag3			BIT,
+					ysnUseTaxFlag4			BIT,
+					ysnBlueLaw1				BIT,
+					ysnBlueLaw2				BIT,
+					ysnFoodStampable		BIT,
+					ysnReturnable			BIT,
+					ysnSaleable				BIT,
+					ysnPrePriced			BIT,
+					ysnIdRequiredLiquor		BIT,
+					ysnIdRequiredCigarette	BIT,
+					intProductCodeId		INT,
+					intFamilyId				INT,
+					intClassId				INT,
+					intMinimumAge			INT,
+					intCost					INT
+				)
+			END
 
 			SET @ysnResultSuccess	= CAST(1 AS BIT)
 			SET @strResultMessage	= ''
@@ -204,48 +235,6 @@ BEGIN
 					)
 			END
 
-
-			-- temp table for ItemPricing
-			BEGIN
-				DECLARE @tblCStoreItemPricing TABLE (
-					intItemPricingId			INT
-					, intItemId					INT
-					, dblStandardCost			NUMERIC(38,20)
-					, dblLastCost				NUMERIC(38,20)
-					, dblSalePrice				NUMERIC(38,20)
-					, intCompanyLocationId		INT
-				)
-			END
-
-
-			-- temp table for ItemLocations
-			BEGIN
-				DECLARE @tempCStoreLocation TABLE
-				(
-					intStoreId				INT,
-					intCompanyLocationId	INT,
-
-					-- Item Location
-					ysnUseTaxFlag1			BIT,
-					ysnUseTaxFlag2			BIT,
-					ysnUseTaxFlag3			BIT,
-					ysnUseTaxFlag4			BIT,
-					ysnBlueLaw1				BIT,
-					ysnBlueLaw2				BIT,
-					ysnFoodStampable		BIT,
-					ysnReturnable			BIT,
-					ysnSaleable				BIT,
-					ysnPrePriced			BIT,
-					ysnIdRequiredLiquor		BIT,
-					ysnIdRequiredCigarette	BIT,
-					intProductCodeId		INT,
-					intFamilyId				INT,
-					intClassId				INT,
-					intMinimumAge			INT
-				)
-			END
-
-
 			-- ============================================================================================================================
 			-- [START] - ADD ITEM
 			-- ============================================================================================================================
@@ -321,76 +310,85 @@ BEGIN
 					BEGIN		
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strLongUPCCode = @strLongUpcCode OR intUpcCode = CONVERT(NUMERIC(32, 0), CAST(@strLongUpcCode AS FLOAT)))
 							BEGIN
-								-- ITEM UOM
-								BEGIN TRY
+								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry))	
+									BEGIN
+									
+										-- ITEM UOM
+										BEGIN TRY
 
-									EXEC [uspICAddItemUOMForCStore]
-										@intUnitMeasureId			= @intUnitMeasureId
-										,@intItemId					= @intNewItemId
-										,@strLongUPCCode			= @strLongUpcCode
-										,@ysnStockUnit				= 1
-										,@intEntityUserSecurityId	= @intEntityId 
-										,@intItemUOMId				= @intNewItemUOMId OUTPUT 
+											EXEC [uspICAddItemUOMForCStore]
+												@intUnitMeasureId			= @intUnitMeasureId
+												,@intItemId					= @intNewItemId
+												,@strLongUPCCode			= @strLongUpcCode
+												,@ysnStockUnit				= 1
+												,@intEntityUserSecurityId	= @intEntityId 
+												,@intItemUOMId				= @intNewItemUOMId OUTPUT 
 
-									-- =================================================================================
-									-- [START] - ADD ITEM UOM DEBUG
-									-- =================================================================================
-									IF(@ysnDebug = 1)
-										BEGIN
-											SELECT 'New Added Item Uom', * FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId
-										END
-									-- =================================================================================
-									-- [END] - ADD ITEM UOM DEBUG
-									-- =================================================================================
+											-- =================================================================================
+											-- [START] - ADD ITEM UOM DEBUG
+											-- =================================================================================
+											IF(@ysnDebug = 1)
+												BEGIN
+													SELECT 'New Added Item Uom', * FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId
+												END
+											-- =================================================================================
+											-- [END] - ADD ITEM UOM DEBUG
+											-- =================================================================================
 
-									IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
-										BEGIN
-											SET @strResultMessage = 'Item UOM is not created successfully'  
+											IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+												BEGIN
+													SET @strResultMessage = 'Item UOM is not created successfully'  
+
+													GOTO ExitWithRollback
+												END
+											ELSE
+												BEGIN
+													--TEST
+													IF(@ysnDebug = 1)
+														BEGIN
+															SELECT 'New Item', *  FROM tblICItem WHERE intItemId = @intNewItemId
+															SELECT 'New Item OUM', * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND ysnStockUnit = 1
+														END
+
+
+													IF(@strUpcCode IS NOT NULL OR @strUpcCode != '')
+														BEGIN
+													
+															DECLARE @intItemUOMId INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+
+															--EXEC [dbo].[uspICUpdateItemForCStore]
+															--	-- filter params	
+															--	@strDescription				= NULL 
+															--	,@dblRetailPriceFrom		= NULL  
+															--	,@dblRetailPriceTo			= NULL 
+															--	,@intItemId					= @intNewItemId 
+															--	,@intItemUOMId				= @intItemUOMId 
+															--	-- update params
+															--	,@intCategoryId				= NULL
+															--	,@strCountCode				= NULL
+															--	,@strItemDescription		= NULL 	
+															--	,@strItemNo					= NULL
+															--	,@strShortName				= NULL 
+															--	,@strUpcCode				= @strUpcCode 
+															--	,@strLongUpcCode			= NULL 
+															--	,@intEntityUserSecurityId	= @intEntityId
+
+														END
+												END
+										END TRY
+										BEGIN CATCH
+											SET @strResultMessage = 'Error Adding new Item UOM: ' + ERROR_MESSAGE()  
 
 											GOTO ExitWithRollback
-										END
-									ELSE
-										BEGIN
-											
-									--TEST
-									IF(@ysnDebug = 1)
-										BEGIN
-											SELECT 'New Item', *  FROM tblICItem WHERE intItemId = @intNewItemId
-											SELECT 'New Item OUM', * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND ysnStockUnit = 1
-										END
+										END CATCH
 
+									END
+								ELSE
+									BEGIN
+										SET @strResultMessage = 'Short UPC of ' + dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry) + ' already exists.'  
 
-											IF(@strUpcCode = '')
-												BEGIN
-													SET @strUpcCode = NULL;
-												END
-											
-													DECLARE @intItemUOMId INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
-
-													EXEC [dbo].[uspICUpdateItemForCStore]
-														-- filter params	
-														@strDescription				= NULL 
-														,@dblRetailPriceFrom		= NULL  
-														,@dblRetailPriceTo			= NULL 
-														,@intItemId					= @intNewItemId 
-														,@intItemUOMId				= @intItemUOMId 
-														-- update params
-														,@intCategoryId				= NULL
-														,@strCountCode				= NULL
-														,@strItemDescription		= NULL 	
-														,@strItemNo					= NULL
-														,@strShortName				= NULL 
-														,@strUpcCode				= @strUpcCode 
-														,@strLongUpcCode			= NULL 
-														,@intEntityUserSecurityId	= @intEntityId
-										END
-
-								END TRY
-								BEGIN CATCH
-									SET @strResultMessage = 'Error Adding new Item UOM: ' + ERROR_MESSAGE()  
-
-									GOTO ExitWithRollback
-								END CATCH
+										GOTO ExitWithRollback
+									END
 
 							END
 						ELSE
@@ -407,8 +405,7 @@ BEGIN
 			-- [END] - ADD ITEM UOM
 			-- ============================================================================================================================
 
-
-
+			
 
 			-- ============================================================================================================================
 			-- [START] - ADD ITEM LOCATION
@@ -416,6 +413,26 @@ BEGIN
 			BEGIN
 	
 					BEGIN TRY
+					
+						-- [START] - ADD ITEM LOCATION
+
+						--Cost
+						SELECT st.intStoreId, st.intCompanyLocationId
+						INTO #tmpEffectiveDate 
+						FROM  @UDTItemCostPricing cp
+							LEFT JOIN tblSTStore st
+								ON cp.intStoreNo = st.intStoreNo
+								
+						--Retail
+						INSERT INTO #tmpEffectiveDate (intStoreId, intCompanyLocationId)
+						SELECT st.intStoreId, st.intCompanyLocationId
+						FROM  @UDTItemRetailPricing rp
+							LEFT JOIN tblSTStore st
+								ON rp.intStoreNo = st.intStoreNo
+						WHERE rp.intStoreNo NOT IN (SELECT intStoreNo FROM @UDTItemCostPricing) 
+
+						-- [END] - ADD ITEM LOCATION
+
 						INSERT INTO @tempCStoreLocation
 						(
 							intStoreId,
@@ -460,11 +477,13 @@ BEGIN
 							intFamilyId					= ISNULL(@intFamilyId, catLoc.intFamilyId),
 							intClassId					= ISNULL(@intClassId, catLoc.intClassId),
 							intMinimumAge				= catLoc.intMinimumAge
-						FROM tblSTStore st
+						FROM #tmpEffectiveDate cp
+						LEFT JOIN tblSTStore st
+							ON cp.intStoreId = st.intStoreId
 						LEFT JOIN tblICCategoryLocation catLoc
 							ON st.intCompanyLocationId = catLoc.intLocationId
 						WHERE st.intCompanyLocationId IS NOT NULL
-							AND catLoc.intCategoryId = @intCategoryId
+							
 							
 							
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
@@ -480,42 +499,17 @@ BEGIN
 						GOTO ExitWithRollback
 					END CATCH
 
-
-
-
-					INSERT INTO @tblCStoreItemPricing 
-					(
-						intItemPricingId
-						, intItemId
-						, dblStandardCost
-						, dblLastCost
-						, dblSalePrice
-						, intCompanyLocationId
-					)
-					SELECT 
-						intItemPricingId		= NULL
-						, intItemId				= udt.intItemId
-						, dblStandardCost		= udt.dblStandardCost
-						, dblLastCost			= udt.dblLastCost
-						, dblSalePrice			= udt.dblSalePrice
-						, intCompanyLocationId  = st.intCompanyLocationId
-					FROM @UDTItemPricing udt
-					INNER JOIN tblSTStore st
-						ON udt.intStoreId = st.intStoreId
-
-
-
 					-- =================================================================================
 					-- [START] - ADD ITEM LOCATION DEBUG
 					-- =================================================================================
 					IF(@ysnDebug = 1)
 						BEGIN
 								SELECT '@tempCStoreLocation', * FROM @tempCStoreLocation
-								SELECT '@tblCStoreItemPricing', * FROM @tblCStoreItemPricing
 						END
 					-- =================================================================================
 					-- [END] - ADD ITEM LOCATION DEBUG
 					-- =================================================================================
+					
 
 
 					IF EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
@@ -544,6 +538,17 @@ BEGIN
 									@dblLastCost_New				NUMERIC(18, 6),
 									@dblSalePrice_New				NUMERIC(18, 6)
 
+							DECLARE @tmp_CostEffectiveDate AS StoreItemCostPricing
+							DECLARE @tmp_RetailEffectiveDate AS StoreItemPricePricing
+
+							INSERT INTO @tmp_CostEffectiveDate
+							   SELECT *
+							   FROM @UDTItemCostPricing;
+							   
+							INSERT INTO @tmp_RetailEffectiveDate
+							   SELECT *
+							   FROM @UDTItemRetailPricing;
+							   
 
 							WHILE EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
 								BEGIN
@@ -568,7 +573,6 @@ BEGIN
 											@intClassId_New				= intClassId,
 											@intMinimumAge_New			= intMinimumAge
 									FROM @tempCStoreLocation
-
 									
 									-- =================================================================================
 									-- [START] - ADD ITEM LOCATION DEBUG
@@ -609,6 +613,7 @@ BEGIN
 											,@intVendorId				= @intVendorId
 											,@intEntityUserSecurityId	= @intEntityId
 											,@intItemLocationId			= @intNewItemLocationId OUTPUT 
+
 										
 										-- =================================================================================
 										-- [START] - ADD ITEM UOM DEBUG
@@ -669,50 +674,145 @@ BEGIN
 										
 
 
-										IF EXISTS(SELECT TOP 1 1 FROM @tblCStoreItemPricing WHERE intCompanyLocationId = @intCompanyLocationId_New)
-											BEGIN
+											SELECT TOP 1
+												@dblStandardCost_New	= dblCost
+											FROM  @UDTItemCostPricing cp
+												LEFT JOIN tblSTStore st
+													ON cp.intStoreNo = st.intStoreNo
+											WHERE st.intStoreId = @intStoreId_New
+											
+											SELECT TOP 1
+												@dblSalePrice_New	= dblRetailPrice
+											FROM  @UDTItemRetailPricing rp
+												LEFT JOIN tblSTStore st
+													ON rp.intStoreNo = st.intStoreNo
+											WHERE st.intStoreId = @intStoreId_New
+
+											IF(@intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
+												BEGIN
 												
-												SELECT TOP 1
-													@dblStandardCost_New	= dblStandardCost,
-													@dblLastCost_New		= dblLastCost,
-													@dblSalePrice_New		= dblSalePrice
-												FROM @tblCStoreItemPricing 
-												WHERE intCompanyLocationId = @intCompanyLocationId_New
+													-- ITEM PRICING
+													EXEC [uspICAddItemPricingForCStore]
+														@intItemId					= @intNewItemId
+														,@intItemLocationId			= @intNewItemLocationId
 
-												IF(@intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
-													BEGIN
-														-- ITEM PRICING
-														EXEC [uspICAddItemPricingForCStore]
-															@intItemId					= @intNewItemId
-															,@intItemLocationId			= @intNewItemLocationId
+														,@dblStandardCost			= @dblStandardCost_New 
+														,@dblLastCost				= @dblLastCost_New 
+														,@dblSalePrice				= @dblSalePrice_New
+														,@intEntityUserSecurityId	= @intEntityId
+														,@intItemPricingId			= @intNewItemPricingId OUTPUT
+													
+													-- =================================================================================
+													-- [START] - ADD ITEM PRICING DEBUG
+													-- =================================================================================
+													IF(@ysnDebug = 1)
+														BEGIN
+															SELECT 'New Added Item Pricing', * FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId
+														END
+													-- =================================================================================
+													-- [END] - ADD ITEM PRICING DEBUG
+													-- =================================================================================
 
-															,@dblStandardCost			= @dblStandardCost_New 
-															,@dblLastCost				= @dblLastCost_New 
-															,@dblSalePrice				= @dblSalePrice_New
-															,@intEntityUserSecurityId	= @intEntityId
-															,@intItemPricingId			= @intNewItemPricingId OUTPUT
+													IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId)
+														BEGIN
+															SET @strResultMessage = 'Item Pricing is not created successfully'  
 
-														-- =================================================================================
-														-- [START] - ADD ITEM PRICING DEBUG
-														-- =================================================================================
-														IF(@ysnDebug = 1)
-															BEGIN
-																SELECT 'New Added Item Pricing', * FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId
-															END
-														-- =================================================================================
-														-- [END] - ADD ITEM PRICING DEBUG
-														-- =================================================================================
+															GOTO ExitWithRollback
+														END
+														
+													--Cost Loop
+													WHILE EXISTS(SELECT TOP 1 1 FROM @tmp_CostEffectiveDate ce
+																				INNER JOIN tblSTStore st
+																					ON st.intStoreId = @intStoreId_New
+																						AND ce.intStoreNo = st.intStoreNo)
+														BEGIN
 
-														IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId)
-															BEGIN
-																SET @strResultMessage = 'Item Pricing is not created successfully'  
+															DECLARE @intItemId_new					INT,
+																	@intEffectiveItemCostId_new		INT,
+																	@intPricingId_New				INT,
+																	@intStoreNoCost_New				INT,
+																	@dblCost_new					NUMERIC(18, 6),
+																	@dtmEffectiveDate_new			DATETIME
+
+									
+															SELECT TOP 1
+																	@intItemId_new					= @intNewItemId,
+																	@intEffectiveItemCostId_new		= ce.intEffectiveItemCostId,
+																	@intPricingId_New				= @intNewItemPricingId,
+																	@intStoreNoCost_New				= ce.intStoreNo,
+																	@dblCost_new					= ce.dblCost,
+																	@dtmEffectiveDate_new			= ce.dtmEffectiveCostDate
+															FROM @tmp_CostEffectiveDate ce
+
+															-- ITEM LOCATION
+															BEGIN TRY
+										
+
+																	EXEC [uspICUpdateItemPricingForCStore]
+																		@intItemId						= @intItemId_new 
+																		,@intItemPricingId				= @intPricingId_New
+																		,@dblStandardCost				= @dblCost_new 
+																		,@dtmEffectiveDate				= @dtmEffectiveDate_new
+																		,@intEntityUserSecurityId		= @intEntityId
+										
+															END TRY
+															BEGIN CATCH
+																SET @strResultMessage = 'Error Adding Cost new Item Location: ' + ERROR_MESSAGE()  
 
 																GOTO ExitWithRollback
-															END
-													END
-												
+															END CATCH
+															
+															DELETE @tmp_CostEffectiveDate 
+															WHERE intStoreNo = @intStoreNoCost_New
+																AND dtmEffectiveCostDate = @dtmEffectiveDate_new
 
-											END
+														END
+													
+													--Retail Loop
+													WHILE EXISTS(SELECT TOP 1 1 FROM @tmp_RetailEffectiveDate rp
+																				INNER JOIN tblSTStore st
+																					ON st.intStoreId = @intStoreId_New
+																						AND rp.intStoreNo = st.intStoreNo)
+														BEGIN
+
+															DECLARE @intItemIdRetail_new				INT,
+																	@intPricingIdRetail_New				INT,
+																	@intStoreNoRetail_New				INT,
+																	@dblRetail_new						NUMERIC(18, 6),
+																	@dtmEffectiveDateRetail_new			DATETIME
+
+									
+															SELECT TOP 1
+																	@intItemIdRetail_new		= @intNewItemId,
+																	@intPricingIdRetail_New		= @intNewItemPricingId,
+																	@intStoreNoRetail_New		= rp.intStoreNo,
+																	@dblRetail_new				= rp.dblRetailPrice,
+																	@dtmEffectiveDateRetail_new	= rp.dtmEffectiveRetailPriceDate
+															FROM @tmp_RetailEffectiveDate rp
+
+															-- ITEM LOCATION
+															BEGIN TRY
+																	EXEC [uspICUpdateItemPricingForCStore]
+																		@intItemId						= @intItemIdRetail_new  
+																		,@intItemPricingId				= @intPricingIdRetail_New
+																		,@dblRetailPrice				= @dblRetail_new 
+																		,@dtmEffectiveDate				= @dtmEffectiveDateRetail_new
+																		,@intEntityUserSecurityId		= @intEntityId
+										
+															END TRY
+															BEGIN CATCH
+																SET @strResultMessage = 'Error Adding Retail new Item Location: ' + ERROR_MESSAGE()  
+
+																GOTO ExitWithRollback
+															END CATCH
+															
+															DELETE @tmp_RetailEffectiveDate 
+															WHERE intStoreNo = @intStoreNoRetail_New
+																AND dtmEffectiveRetailPriceDate = @dtmEffectiveDateRetail_new
+
+														END
+												END
+												
 
 									END TRY
 									BEGIN CATCH
@@ -758,10 +858,17 @@ BEGIN
 
 					IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS NOT NULL  
 						DROP TABLE #tmpUpdateItemLocationForCStore_itemLocationAuditLog 
+						
+					IF OBJECT_ID('tempdb..#tmpUpdateItemCostForCStoreEffectiveDate_AuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemCostForCStoreEffectiveDate_AuditLog 
+						
+					IF OBJECT_ID('tempdb..#tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog') IS NOT NULL  
+						DROP TABLE #tmpUpdateItemRetailForCStoreEffectiveDate_AuditLog 
+						
+					IF OBJECT_ID('tempdb..#tmpEffectiveDate') IS NOT NULL  
+						DROP TABLE #tmpEffectiveDate 
+						 
 			END
-
-
-	
 
 			GOTO ExitWithCommit
 
@@ -823,3 +930,5 @@ ExitWithRollback:
 
 		
 ExitPost:
+		
+

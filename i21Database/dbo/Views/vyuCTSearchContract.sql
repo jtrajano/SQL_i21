@@ -73,7 +73,7 @@ AS
 			CH.strSalesperson,
 			CH.strCPContract,
 			CH.strCounterParty,
-			ISNULL(TR.ysnOnceApproved,0) AS ysnApproved,
+			ISNULL(TR.ysnApproved,0) AS ysnApproved,
 			CH.intDefaultCommodityUnitMeasureId,
 			CH.ysnBrokerage,
 			CH.strBook,
@@ -84,7 +84,8 @@ AS
 			CH.strFreightTerm,
 			CH.strExternalEntity,
 			CH.strExternalContractNumber,
-			CH.ysnReceivedSignedFixationLetter
+			CH.ysnReceivedSignedFixationLetter, -- CT-5315
+			CH.strEntitySelectedLocation -- CT-5315
 
 	FROM	[vyuCTSearchContractHeader]  CH	WITH (NOLOCK) LEFT
 	JOIN
@@ -94,7 +95,7 @@ AS
 			dblTotalBalance = SUM(F.dblBalance),
 			dblTotalAppliedQty = SUM(F.dblAppliedQuantity)
 		FROM tblCTContractHeader HV WITH (NOLOCK)
-			LEFT JOIN tblICCommodityUnitMeasure UM 
+			LEFT JOIN tblICCommodityUnitMeasure UM WITH (NOLOCK)
 				ON UM.intCommodityUnitMeasureId = HV.intCommodityUOMId 
 			LEFT JOIN tblCTContractDetail CD WITH (NOLOCK)
 				ON CD.intContractHeaderId   = HV.intContractHeaderId
@@ -108,9 +109,9 @@ AS
 		SELECT * FROM 
 		(
 			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
-					TR.intRecordId, TR.ysnOnceApproved 
-			FROM	tblSMTransaction	TR
-			JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+					TR.intRecordId, TR.ysnOnceApproved, ysnApproved = case when TR.strApprovalStatus = 'Approved' then convert(bit,1) else convert(bit,0) end 
+			FROM	tblSMTransaction	TR WITH (NOLOCK)
+			JOIN	tblSMScreen			SC	WITH (NOLOCK) ON	SC.intScreenId		=	TR.intScreenId
 			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
 										'ContractManagement.view.Amendments')
 		) t

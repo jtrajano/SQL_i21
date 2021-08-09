@@ -15,6 +15,7 @@ SELECT  L.intLoadId
 	   ,L.strMVoyageNumber
 	   ,L.strFVessel
 	   ,L.strFVoyageNumber
+	   ,L.strIMONumber
 	   ,L.dblInsuranceValue
 	   ,L.strShippingMode
 	   ,L.intNumberOfContainers
@@ -55,21 +56,33 @@ SELECT  L.intLoadId
 			WHEN 1 THEN 'Scheduled'
 			WHEN 2 THEN 'Dispatched'
 			WHEN 3 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Inbound Transit' END
+				CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Inbound Transit' END
 			WHEN 4 THEN 'Received'
 			WHEN 5 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Outbound Transit' END
+				CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Outbound Transit' END
 			WHEN 6 THEN 
-				CASE WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
-						WHEN (L.ysnDocumentsApproved = 1) THEN 'Documents Approved'
-						WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
-						ELSE 'Delivered' END
+				CASE WHEN (L.ysnDocumentsApproved = 1 
+						AND L.dtmDocumentsApproved IS NOT NULL
+						AND ((L.dtmDocumentsApproved > L.dtmArrivedInPort OR L.dtmArrivedInPort IS NULL)
+						AND (L.dtmDocumentsApproved > L.dtmCustomsReleased OR L.dtmCustomsReleased IS NULL))) 
+						THEN 'Documents Approved'
+					WHEN (L.ysnCustomsReleased = 1) THEN 'Customs Released'
+					WHEN (L.ysnArrivedInPort = 1) THEN 'Arrived in Port'
+					ELSE 'Delivered' END
 			WHEN 7 THEN 
 				CASE WHEN (ISNULL(L.strBookingReference, '') <> '') THEN 'Booked'
 						ELSE 'Shipping Instruction Created' END

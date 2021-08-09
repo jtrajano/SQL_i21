@@ -75,7 +75,9 @@ BEGIN
 		a.intPricingStatus is null
 	');
 
+	
 	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblCTPriceFixationDetail'))
+		AND EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblRKDailyAveragePriceDetail')) 
 	BEGIN
 		EXEC 
 		('
@@ -87,4 +89,12 @@ BEGIN
 	END
 END
 END
+GO
+	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intPrevConcurrencyId' AND object_id = OBJECT_ID(N'tblCTContractCost'))
+	BEGIN
+		EXEC 
+		('
+			update tblCTContractCost set intPrevConcurrencyId = 0 where intPrevConcurrencyId is null
+		');
+	END
 GO

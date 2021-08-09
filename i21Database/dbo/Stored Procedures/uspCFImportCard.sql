@@ -21,6 +21,7 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 		DECLARE @Counter						INT = 0
 		
 		DECLARE @intNetworkId					INT
+		DECLARE @strNetworkType					NVARCHAR(MAX)
 		DECLARE @strCardNumber					NVARCHAR(MAX)
 		DECLARE @strCardDescription				NVARCHAR(MAX)
 		DECLARE @intAccountId					INT
@@ -104,6 +105,10 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 			--*********************BEGIN TRANSACTION*****************--
 				SELECT TOP 1
 				 @intNetworkId							   = (SELECT intNetworkId 
+																	FROM tblCFNetwork 
+																	WHERE strNetwork = LTRIM(RTRIM(cfcus_network_id))
+																	COLLATE Latin1_General_CI_AS)
+				,@strNetworkType							   = (SELECT strNetworkType
 																	FROM tblCFNetwork 
 																	WHERE strNetwork = LTRIM(RTRIM(cfcus_network_id))
 																	COLLATE Latin1_General_CI_AS)
@@ -206,6 +211,30 @@ CREATE PROCEDURE [dbo].[uspCFImportCard]
 
 				FROM cfcusmst
 				WHERE cfcus_card_no = @originCard
+
+				IF(LOWER(@strNetworkType) = 'cfn' OR LOWER(@strNetworkType) = 'pacpride')
+				BEGIN
+					
+					DECLARE @intLen INT = 0 
+					DECLARE @intStart INT
+					DECLARE @intRequiredLen INT = 7 
+
+					SET @intLen =  LEN(@strCardNumber)
+					SET @intStart = (@intLen - @intRequiredLen) + 1
+
+
+					IF(@intLen > @intRequiredLen)
+					BEGIN
+						SET @strCardNumber = SUBSTRING(@strCardNumber, @intStart, @intRequiredLen)
+					END
+
+					IF(@intLen < @intRequiredLen)
+					BEGIN
+						SET @strCardNumber = [dbo].fnCFPadString(@strCardNumber,@intRequiredLen,'0','left');
+					END
+
+				END
+
 				
 			
 				IF(@intAccountId != 0)

@@ -42,6 +42,8 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULLIF(@intEntityUserId, 0)
 	  , @intCompanyLocationId				AS INT				= NULL
+	  , @ARBalance							NUMERIC(18,6)		= 0.00
+
 
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
@@ -122,7 +124,6 @@ CREATE TABLE #STATEMENTREPORT (
 	 , strCompanyAddress			NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
 	 , strFullAddress				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	 , strStatementFooterComment	NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
-	 , strComment					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL	 
      , dtmDate						DATETIME NULL
      , dtmDueDate					DATETIME NULL	 
 	 , dtmDatePaid					DATETIME NULL
@@ -291,6 +292,7 @@ SELECT intPaymentId			= P.intPaymentId
 	 , strNotes				= P.strNotes
 	 , dtmDatePaid			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid)))
 	 , ysnInvoicePrepayment	= P.ysnInvoicePrepayment
+	 , intPaymentMethodId	= P.intPaymentMethodId
 INTO #POSTEDARPAYMENTS
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
@@ -333,7 +335,6 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strTransactionType		= I.strTransactionType
 	 , strType					= I.strType
 	 , strInvoiceOriginId		= I.strInvoiceOriginId
-	 , strComments				= I.strComments
 	 , dtmDate					= I.dtmDate
 	 , dtmDueDate				= I.dtmDueDate
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
@@ -368,7 +369,6 @@ INSERT INTO #STATEMENTREPORT (
 	 , strPaymentInfo
 	 , strFullAddress
 	 , strStatementFooterComment
-	 , strComment
      , dtmDate
      , dtmDueDate
 	 , dtmDatePaid
@@ -392,7 +392,6 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strPaymentInfo				= TRANSACTIONS.strPaymentInfo
 	 , strFullAddress				= C.strFullAddress
 	 , strStatementFooterComment	= C.strStatementFooterComment
-	 , strComment					= TRANSACTIONS.strComment
      , dtmDate						= TRANSACTIONS.dtmDate
      , dtmDueDate					= TRANSACTIONS.dtmDueDate
 	 , dtmDatePaid					= ISNULL(TRANSACTIONS.dtmDatePaid, '01/02/1900')
@@ -418,28 +417,14 @@ LEFT JOIN (
 								  END
 		 , dblBalance			= CASE WHEN strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN I.dblInvoiceTotal * -1
 									   ELSE I.dblInvoiceTotal 
-								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
-		 , dblPayment			= CASE WHEN strTransactionType = 'Customer Prepayment' THEN I.dblInvoiceTotal 
-									   ELSE 
-											CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) 
-												 ELSE 0.00 
-											END
-								  END
+								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE 0.00 END
+		 , dblPayment			= 0.00
 		 , dtmDate				= I.dtmDate
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
-		 , strComment			= dbo.fnEliminateHTMLTags(I.strComments, 0)
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
-	LEFT JOIN (
-		SELECT intInvoiceId
-			 , dblPayment = SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
-		FROM #PAYMENTDETAILS
-		WHERE ysnInvoicePrepayment = 0
-		  AND dtmDatePaid <= @dtmDateTo
-		GROUP BY intInvoiceId
-	) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 
 	UNION ALL
 
@@ -457,17 +442,16 @@ LEFT JOIN (
 		 , dtmDueDate			= NULL
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= NULL
-		 , strComment			= ISNULL(P.strPaymentInfo, '') + CASE WHEN ISNULL(P.strNotes, '') <> '' THEN ' - ' + P.strNotes ELSE '' END
 	FROM #POSTEDARPAYMENTS P
 	INNER JOIN (
 		SELECT intPaymentId		= PD.intPaymentId
 		     , intInvoiceId		= PD.intInvoiceId
 			 , strInvoiceNumber	= I.strInvoiceNumber
 			 , dblPayment		= SUM(PD.dblPayment) + SUM(PD.dblDiscount) + SUM(PD.dblWriteOffAmount) - SUM(PD.dblInterest) 
-			 , dblInvoiceTotal	= CASE WHEN I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo THEN I.dblInvoiceTotal ELSE 0 END 
+			 , dblInvoiceTotal	= CASE WHEN I.dtmPostDate BETWEEN @dtmDateFrom AND @dtmDateTo THEN I.dblInvoiceTotal ELSE 0 END 
 		FROM #PAYMENTDETAILS PD 
 		INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-		GROUP BY PD.intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal, I.dtmDate
+		GROUP BY PD.intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal, I.dtmPostDate
 	) DETAILS ON DETAILS.intPaymentId = P.intPaymentId
 	LEFT JOIN (
 		SELECT intInvoiceId
@@ -478,7 +462,7 @@ LEFT JOIN (
 	) TOTALPAYMENT ON DETAILS.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	WHERE P.ysnInvoicePrepayment = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
-	  AND DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
+	  AND  (DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0  OR  DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) = 0)
 	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
@@ -593,10 +577,18 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 IF @ysnPrintOnlyPastDueLocal = 1
 	DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'        
 
-IF @ysnPrintZeroBalanceLocal = 0
-    DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) = 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
+SELECT @ARBalance = SUM(dblTotalAR) FROM #BALANCEFORWARDAGING
 
+IF @ysnPrintZeroBalanceLocal = 0
+	BEGIN
+		IF @ARBalance = 0 
+		BEGIN	
+
+		DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR (ISNULL(dblBalance, 0) <= 0 OR ISNULL(dblARBalance,0) <=0)) AND ISNULL(strTransactionType, '') NOT IN ('Customer Budget')
+		END
+	END
 DELETE FROM #STATEMENTREPORT WHERE strTransactionType IS NULL
+
 
 DELETE SR
 FROM #STATEMENTREPORT SR
@@ -629,7 +621,8 @@ OUTER APPLY (
 	) NEAREST
 	WHERE BUDGET.intEntityCustomerId = SR.intEntityCustomerId
 	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) <= NEAREST.dtmBudgetDate
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) < @dtmDateToLocal
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) <= @dtmDateToLocal
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), BUDGET.dtmBudgetDate))) >=@dtmDateFrom
 ) BUDGETNOWDUE
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Budget Reminder'
@@ -651,7 +644,6 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strTransactionType
 	, strPaymentInfo
 	, strFullAddress
-	, strComment
 	, strStatementFooterComment
 	, strCompanyName
 	, strCompanyAddress
@@ -683,7 +675,6 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, strTransactionType		= SR.strTransactionType
 	, strPaymentInfo			= SR.strPaymentInfo
 	, strFullAddress			= SR.strFullAddress
-	, strComment				= SR.strComment
 	, strStatementFooterComment	= SR.strStatementFooterComment
 	, strCompanyName			= SR.strCompanyName
 	, strCompanyAddress			= SR.strCompanyAddress
@@ -699,6 +690,11 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, ysnStatementCreditLimit	= SR.ysnStatementCreditLimit
 	, blbLogo					= @blbLogo
 FROM #STATEMENTREPORT SR
+
+UPDATE tblARCustomerStatementStagingTable
+SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')  
+WHERE intEntityUserId = @intEntityUserIdLocal 
+  AND strStatementFormat = 'Budget Reminder'
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN

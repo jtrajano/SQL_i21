@@ -3,12 +3,14 @@ AS
 SELECT
 	commonData.*
 	,strContractNumber		=	ContractHeader.strContractNumber
+	,strVendorRef			=	ISNULL(ContractHeader.strCustomerContract, '')
 	,strMiscDescription		=	CASE WHEN DMDetails.intContractDetailId > 0
 											AND ContractDetail.intItemContractId > 0
 											AND DMDetails.intContractCostId IS NULL
 									THEN ItemContract.strContractItemName
-									ELSE ISNULL(Item.strDescription, CASE WHEN DMDetails.ysnStage = 0 THEN ISNULL(DMDetails.strMiscDescription, '') ELSE '' END)
+									ELSE ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, ''))
 								END
+	,strMiscQuality			=	ISNULL(I.strDescription, ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, '')))
 	,strItemNo				=	CASE WHEN Item.strType = 'Other Charge' THEN '' ELSE Item.strItemNo END --AP-3233
 	,strBillOfLading		=	Receipt.strBillOfLading
 	,strCountryOrigin		=	CASE WHEN ContractDetail.intItemId > 0 THEN 
@@ -23,14 +25,14 @@ SELECT
 									THEN SubCurrency.strCurrency
 								ELSE MainCurrency.strCurrency
 								END
-	,strConcern				=	'' COLLATE Latin1_General_CI_AS
+	,strConcern				=	''
 	,strUOM					=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL 
 									WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 											THEN NULL 
 									WHEN ContractCost.intContractCostId > 0 THEN ContractCostItemMeasure.strUnitMeasure
 									ELSE QtyUOMDetails.strUnitMeasure
 									END
-	,strClaimUOM			=	'' COLLATE Latin1_General_CI_AS
+	,strClaimUOM			=	''
 	,strCostUOM				=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL 
 									WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 											THEN NULL
@@ -57,6 +59,9 @@ SELECT
 	,dblClaimAmount			=	0 --DMDetails.dblClaimAmount
 	,strERPPONumber			=	ContractDetail.strERPPONumber
 	,strContainerNumber		=	LCointainer.strContainerNumber
+	,strContractNumberSeq	=	CASE WHEN ContractHeader.intContractHeaderId > 0 THEN ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq) ELSE '' END
+	,dblDetailTotalWithTax	=	CAST((DMDetails.dblTotal + DMDetails.dblTax) AS DECIMAL(18, 2))
+	,dblHeaderTotal			=	CAST(DM.dblTotal AS DECIMAL(18, 2))
 FROM tblAPBill DM
 INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -82,4 +87,6 @@ LEFT JOIN tblICItem ContractItem ON ContractItem.intItemId = ContractDetail.intI
 LEFT JOIN tblICCommodityAttribute CommAttr ON CommAttr.intCommodityAttributeId = ContractItem.intOriginId
 LEFT JOIN tblSMCompanyLocationSubLocation LPlant ON ContractDetail.intSubLocationId = LPlant.intCompanyLocationSubLocationId
 LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
+LEFT JOIN tblICItem I ON I.intItemId = ContractDetail.intItemId
+CROSS JOIN tblSMCompanyPreference CP
 WHERE DM.intTransactionType = 1

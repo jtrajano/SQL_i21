@@ -92,9 +92,11 @@ BEGIN
 		-- ==================================================================================================================
 
 
+		IF @@TRANCOUNT = 0
+		BEGIN
+			BEGIN TRANSACTION 
+		END
 
-
-		BEGIN TRANSACTION 
 
 		-- OUT Params
 		SET @strStatusMsg = 'Success'
@@ -222,6 +224,11 @@ BEGIN
 			intInvoiceId INT,
 			ysnPosted BIT,
 			strTransactionType NVARCHAR(150) COLLATE SQL_Latin1_General_CP1_CS_AS
+		)
+		
+		DECLARE @tblInventoryReceiptIds TABLE
+		(
+			strReceiptId VARCHAR(40)
 		)
 
 		DECLARE @tblTempRank TABLE
@@ -462,11 +469,11 @@ BEGIN
 									,[intHeaderId]
 									,[dtmDate]
 						)
-						SELECT
+						SELECT DISTINCT
 									 [intId] = CPT.intPumpTotalsId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
-									,[intTaxGroupId] = TAX.intTaxGroupId
+									,[intTaxGroupId] = TPI.intTaxGroupId
 									,[intTaxCodeId] = TAX.intTaxCodeId
 									,[intTaxClassId] = TAX.intTaxClassId
 									,[strTaxableByOtherTaxes] = TAX.strTaxableByOtherTaxes
@@ -521,6 +528,8 @@ BEGIN
 
 							JOIN tblSTStore ST 
 								ON IL.intLocationId = ST.intCompanyLocationId
+							LEFT JOIN tblSTPumpItem TPI 
+								ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 								AND CH.intStoreId = ST.intStoreId	
 							JOIN vyuEMEntityCustomerSearch vC 
 								ON ST.intCheckoutCustomerId = vC.intEntityId
@@ -532,7 +541,7 @@ BEGIN
 																				, I.intItemId							-- Item Id
 																				, ST.intCheckoutCustomerId				-- Customer Id
 																				, ST.intCompanyLocationId				-- Company Location Id
-																				, ST.intTaxGroupId						-- Tax Group Id
+																				, TPI.intTaxGroupId						-- Tax Group Id
 																				, 0										-- 0 Price if not reversal
 																				, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																				, vC.intShipToId						-- Ship to Location
@@ -656,7 +665,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
@@ -727,7 +736,7 @@ BEGIN
 
 										,[dblDiscount]				= 0
 										
-										,[dblPrice]					= (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
+										,[dblPrice]					= ROUND((ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - CAST(Tax.[dblAdjustedTax] AS DECIMAL(18,8))) / CAST(CPT.dblQuantity AS DECIMAL(18,8)),6) -- (ISNULL(CAST(CPT.dblAmount AS DECIMAL(18,2)), 0) - Tax.[dblAdjustedTax]) / CPT.dblQuantity
 
 										,[ysnRefreshPrice]			= 0
 										,[strMaintenanceType]		= NULL
@@ -735,7 +744,7 @@ BEGIN
 										,[dtmMaintenanceDate]		= NULL
 										,[dblMaintenanceAmount]		= NULL
 										,[dblLicenseAmount]			= NULL
-										,[intTaxGroupId]			= @intTaxGroupId
+										,[intTaxGroupId]			= TPI.intTaxGroupId
 										,[ysnRecomputeTax]			= 0 -- Should recompute tax only for Pump Total Items
 										,[intSCInvoiceId]			= NULL
 										,[strSCInvoiceNumber]		= NULL
@@ -777,6 +786,8 @@ BEGIN
 								ON UOM.intItemId = I.intItemId
 							JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
+							JOIN tblSTPumpItem TPI 
+								ON UOM.intItemUOMId = TPI.intItemUOMId
 							
 							-- http://jira.irelyserver.com/browse/ST-1316
 							--JOIN tblICItemPricing IP 
@@ -900,7 +911,7 @@ BEGIN
 										--,[ysnImportedFromOrigin]
 										--,[ysnImportedAsPosted]
 									)
-									SELECT 
+									SELECT DISTINCT
 										 [strSourceTransaction]		= 'Invoice'
 										,[strTransactionType]		= @strInvoiceTransactionTypeMain
 										,[strType]					= @strInvoiceTypeMain
@@ -2039,7 +2050,7 @@ BEGIN
 										 [intId] = CC.intCustChargeId
 										,[intDetailId] = NULL
 										,[intDetailTaxId] = NULL
-										,[intTaxGroupId] = FuelTax.intTaxGroupId
+										,[intTaxGroupId] = TPI.intTaxGroupId
 										,[intTaxCodeId] = FuelTax.intTaxCodeId
 										,[intTaxClassId] = FuelTax.intTaxClassId
 										,[strTaxableByOtherTaxes] = FuelTax.strTaxableByOtherTaxes
@@ -2099,6 +2110,8 @@ BEGIN
 							LEFT JOIN tblICItemLocation IL 
 								ON I.intItemId = IL.intItemId
 								AND ST.intCompanyLocationId = IL.intLocationId
+							LEFT JOIN tblSTPumpItem TPI 
+								ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 							-- http://jira.irelyserver.com/browse/ST-1316
 							--LEFT JOIN tblICItemPricing IP 
@@ -2142,7 +2155,7 @@ BEGIN
 																				END
 																				, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
 																				, ST.intCompanyLocationId				-- Company Location Id
-																				, ST.intTaxGroupId						-- Tax Group Id
+																				, TPI.intTaxGroupId						-- Tax Group Id
 																				, 0										-- 0 Price if not reversal
 																				, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																				, vC.intShipToId						-- Ship to Location
@@ -2434,7 +2447,7 @@ BEGIN
 											,[intTaxGroupId]			= CASE 
 																				-- IF Item is Fuel
 																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
-																					THEN @intTaxGroupId
+																					THEN TPI.intTaxGroupId
 																				ELSE NULL
 																		END	
 																			 
@@ -2496,6 +2509,8 @@ BEGIN
 								LEFT JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
 									AND ST.intCompanyLocationId = IL.intLocationId
+								LEFT JOIN tblSTPumpItem TPI
+									ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 								-- http://jira.irelyserver.com/browse/ST-1316
 								--LEFT JOIN tblICItemPricing IP 
@@ -3650,7 +3665,7 @@ BEGIN
 									 [intId] = CC.intCustChargeId
 									,[intDetailId] = NULL
 									,[intDetailTaxId] = NULL
-									,[intTaxGroupId] = FuelTax.intTaxGroupId
+									,[intTaxGroupId] = TPI.intTaxGroupId
 									,[intTaxCodeId] = FuelTax.intTaxCodeId
 									,[intTaxClassId] = FuelTax.intTaxClassId
 									,[strTaxableByOtherTaxes] = FuelTax.strTaxableByOtherTaxes
@@ -3691,10 +3706,12 @@ BEGIN
 													ELSE STUOM.intItemUOMId
 												END
 						LEFT JOIN tblICItem I 
-									ON UOM.intItemId = I.intItemId
+							ON UOM.intItemId = I.intItemId
 						LEFT JOIN tblICItemLocation IL 
 							ON I.intItemId = IL.intItemId
 							AND ST.intCompanyLocationId = IL.intLocationId
+						LEFT JOIN tblSTPumpItem TPI 
+							ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 						-- http://jira.irelyserver.com/browse/ST-1316
 						--LEFT JOIN tblICItemPricing IP 
@@ -3725,7 +3742,7 @@ BEGIN
 																			END
 																			, CC.intCustomerId	-- ST.intCheckoutCustomerId				-- Customer Id
 																			, ST.intCompanyLocationId				-- Company Location Id
-																			, ST.intTaxGroupId						-- Tax Group Id
+																			, TPI.intTaxGroupId						-- Tax Group Id
 																			, 0										-- 0 Price if not reversal
 																			, @dtmCheckoutDate						-- Tax is also computed based on date. Use Checkout date.
 																			, vC.intShipToId						-- Ship to Location
@@ -4034,7 +4051,7 @@ BEGIN
 											,[intTaxGroupId]			= CASE 
 																				-- IF Item is Fuel
 																				WHEN (I.intItemId IS NOT NULL AND I.ysnFuelItem = CAST(1 AS BIT))
-																					THEN @intTaxGroupId
+																					THEN TPI.intTaxGroupId
 																				ELSE NULL
 																		END	
 											,[ysnRecomputeTax]			= 0 -- no Tax for none Pump Total Items
@@ -4111,6 +4128,8 @@ BEGIN
 								LEFT JOIN tblICItemLocation IL 
 									ON I.intItemId = IL.intItemId
 									AND ST.intCompanyLocationId = IL.intLocationId
+								LEFT JOIN tblSTPumpItem TPI 
+									ON UOM.intItemUOMId = TPI.intItemUOMId AND ST.intStoreId = TPI.intStoreId
 
 								-- http://jira.irelyserver.com/browse/ST-1316
 								--LEFT JOIN tblICItemPricing IP 
@@ -4711,9 +4730,19 @@ IF(@ysnDebug = 1)
 																				FROM tblGLPostRecap
 																				WHERE strBatchId = @strBatchIdForNewPostRecap
 
-																ROLLBACK TRANSACTION 
+																 
+																
+																IF @@TRANCOUNT > 0
+																BEGIN
+																	ROLLBACK TRANSACTION
+																END
 
-																BEGIN TRANSACTION
+
+																IF @@TRANCOUNT = 0
+																BEGIN
+																	BEGIN TRANSACTION
+																END
+
 																	EXEC dbo.uspGLPostRecap 
 																			@GLEntries
 																			,@intCurrentUserId
@@ -5435,7 +5464,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 						END TRY
 						BEGIN CATCH
 					
-							UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	 
+							--UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	 
 
 							SET @strStatusMsg = ERROR_MESSAGE()
 							GOTO ExitWithRollback
@@ -6188,9 +6217,16 @@ IF(@ysnDebug = CAST(1 AS BIT))
 																					FROM tblGLPostRecap
 																					WHERE strBatchId = @strBatchIdUsed
 
-																		ROLLBACK TRANSACTION 
+																		IF @@TRANCOUNT > 0
+																		BEGIN
+																			ROLLBACK TRANSACTION
+																		END
 
-																		BEGIN TRANSACTION
+
+																		IF @@TRANCOUNT = 0
+																		BEGIN
+																			BEGIN TRANSACTION
+																		END
 
 																			EXEC dbo.uspGLPostRecap 
 																					@GLEntries
@@ -6361,23 +6397,31 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				IF EXISTS(SELECT TOP 1 intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId)
 				BEGIN
 
-					--UNPOST IR--
-					DECLARE @strIRTransactionIds NVARCHAR(MAX) 
-					SELECT @strIRTransactionIds = COALESCE(@strIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId) 
-					Select @strIRTransactionIds
-
-
-					DECLARE	@intIRLotteryUnpostProcessReturnValue int,
+					DECLARE	@intIRLotteryUnpostProcessReturnValue int = 0,
 							@strIRLotteryUnpostBatchId nvarchar(40)
 
-					EXEC	@intIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
-							@ysnPost = 0,
-							@ysnRecap = 0,
-							@strTransactionId = @strIRTransactionIds,
-							@intEntityUserSecurityId = @intCurrentUserId,
-							@strBatchId = @strIRLotteryUnpostBatchId OUTPUT
-							
+					--UNPOST IR--
+					DECLARE @strIRTransactionId NVARCHAR(MAX) 
+					--SELECT @strIRTransactionIds = COALESCE(@strIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId) 
 
+					INSERT INTO @tblInventoryReceiptIds 
+					SELECT strReceiptNumber AS strReceiptId FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId)
+					
+					WHILE EXISTS (SELECT TOP 1 strReceiptId FROM @tblInventoryReceiptIds)
+					BEGIN
+
+						SELECT TOP 1 @strIRTransactionId = strReceiptId FROM @tblInventoryReceiptIds
+						
+						EXEC	@intIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
+								@ysnPost = 0,
+								@ysnRecap = 0,
+								@strTransactionId = @strIRTransactionId,
+								@intEntityUserSecurityId = @intCurrentUserId,
+								@strBatchId = @strIRLotteryUnpostBatchId OUTPUT
+								
+						DELETE FROM @tblInventoryReceiptIds WHERE strReceiptId = @strIRTransactionId
+					END
+							
 
 					IF(@intIRLotteryUnpostProcessReturnValue = 0)
 					BEGIN
@@ -6644,7 +6688,13 @@ ExitWithCommit:
 
 
 	-- Commit Transaction
-	COMMIT TRANSACTION
+
+	
+	IF @@TRANCOUNT > 0
+		BEGIN
+			-- PRINT 'Will Rollback'
+			COMMIT TRANSACTION
+		END
 	GOTO ExitPost
 	
 
@@ -6656,9 +6706,9 @@ ExitWithRollback:
 			ROLLBACK TRANSACTION 
 		END
 
-	UPDATE tblSTCheckoutHeader SET intCheckoutCurrentProcess = 0 WHERE intCheckoutId = @intCheckoutId
+	--UPDATE tblSTCheckoutHeader SET intCheckoutCurrentProcess = 0 WHERE intCheckoutId = @intCheckoutId
 
-	DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @intCurrentUserId
+	--DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @intCurrentUserId
 	--SELECT 'x',* FROM @tblSTLotteryProcessError
 	INSERT INTO tblSTLotteryProcessError (
 		 intCheckoutId
@@ -6675,6 +6725,7 @@ ExitWithRollback:
 		,strProcess
 	FROM
 	@tblSTLotteryProcessError
+	GOTO ExitPost
 		
 ExitPost:
 	

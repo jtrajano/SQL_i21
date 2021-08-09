@@ -12,6 +12,7 @@ BEGIN
 	DECLARE @strPrintSiteAddress				NVARCHAR(MAX)
 	DECLARE @strDetailDisplay					NVARCHAR(MAX)
 	DECLARE @ysnSummaryByCard					BIT
+	DECLARE @ysnSummaryByDepartmentProduct		BIT
 	DECLARE @ysnSummaryByProduct				BIT
 	DECLARE @ysnSummaryByCardProd				BIT
 	DECLARE @ysnSummaryByVehicle				BIT
@@ -28,6 +29,7 @@ BEGIN
 	DECLARE @ysnShowVehicleDescriptionOnly		BIT
 	DECLARE @ysnPageBreakByPrimarySortOrder		BIT
 	DECLARE @ysnSummaryByDeptDriverPinProd		BIT
+	DECLARE @strDepartmentGrouping				NVARCHAR(MAX)
 	
 	
 
@@ -41,6 +43,7 @@ BEGIN
 	,@strPrintPricePerGallon			 =  strPrintPricePerGallon		
 	,@strPrintSiteAddress				 =  strPrintSiteAddress		
 	,@ysnSummaryByCard					 =  ysnSummaryByCard			
+	,@ysnSummaryByDepartmentProduct		 =  ysnSummaryByDepartmentProduct
 	,@ysnSummaryByProduct				 =  ysnSummaryByProduct		
 	,@ysnSummaryByCardProd				 =  ysnSummaryByCardProd		
 	,@ysnSummaryByVehicle				 =  ysnSummaryByVehicle		
@@ -58,6 +61,8 @@ BEGIN
 	,@ysnShowVehicleDescriptionOnly		 =  ysnShowVehicleDescriptionOnly
 	,@ysnPageBreakByPrimarySortOrder	 =  ysnPageBreakByPrimarySortOrder
 	,@ysnSummaryByDeptDriverPinProd		 =  ysnSummaryByDeptDriverPinProd
+	,@strDepartmentGrouping	 			 =  strDepartmentGrouping
+	
 	
 	FROM tblCFAccount
 	WHERE intCustomerId = @intCustomerId
@@ -72,7 +77,8 @@ BEGIN
 	,strPrintPricePerGallon			  = 	 @strPrintPricePerGallon		
 	,strPrintSiteAddress			  = 	 @strPrintSiteAddress		
 	,strDetailDisplay				  =		 @strDetailDisplay
-	,ysnSummaryByCard				  = 	 @ysnSummaryByCard				
+	,ysnSummaryByCard				  = 	 @ysnSummaryByCard	
+	,ysnSummaryByDepartmentProduct	  = 	 @ysnSummaryByDepartmentProduct	
 	,ysnSummaryByProduct			  = 	 @ysnSummaryByProduct			
 	,ysnSummaryByCardProd			  = 	 @ysnSummaryByCardProd			
 	,ysnSummaryByVehicle			  = 	 @ysnSummaryByVehicle			
@@ -89,6 +95,7 @@ BEGIN
 	,ysnSummaryByDriverPin			  =		 @ysnSummaryByDriverPin
 	,ysnPageBreakByPrimarySortOrder	  =		 @ysnPageBreakByPrimarySortOrder
 	,ysnSummaryByDeptDriverPinProd    =		 @ysnSummaryByDeptDriverPinProd
+	,strDepartmentGrouping	  		  = 	 @strDepartmentGrouping
 	WHERE strInvoiceNumberHistory = @strInvoiceNumber
 
 	UPDATE tblCFInvoiceHistoryStagingTable  

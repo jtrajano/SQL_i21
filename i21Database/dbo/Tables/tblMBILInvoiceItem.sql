@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblMBILInvoiceItem](
 	[intInvoiceItemId] INT IDENTITY(1,1) NOT NULL,	
 	[intInvoiceId] INT NOT NULL,
-	[intSiteId] INT NOT NULL,
+	[intSiteId] INT NULL,
 	[intItemId] INT NULL,
 	[intItemUOMId] INT NULL,
 	[intContractDetailId] INT NULL,
@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[tblMBILInvoiceItem](
 	[dblPercentageFull] NUMERIC (18, 6) NULL,
 	[inti21InvoiceDetailId] INT NULL,
 	[intConcurrencyId] INT DEFAULT ((1)) NULL,
+	[dblItemTotal] NUMERIC (18,6) null,
+	[dblTaxTotal] NUMERIC (18,6) null,
 	CONSTRAINT [PK_tblMBILInvoiceItem] PRIMARY KEY CLUSTERED ([intInvoiceItemId] ASC),
     CONSTRAINT [FK_tblMBILInvoiceItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
     CONSTRAINT [FK_tblMBILInvoiceItem_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

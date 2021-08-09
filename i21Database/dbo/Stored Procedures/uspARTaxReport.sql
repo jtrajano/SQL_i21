@@ -366,7 +366,7 @@ IF ISNULL(@strTaxReportType, 'Tax Detail') <> 'Tax By State'
 		INNER JOIN #CUSTOMERS C ON TAX.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN #COMPANYLOCATIONS CL ON TAX.intCompanyLocationId = CL.intCompanyLocationId
 		INNER JOIN #INVOICES I ON TAX.intInvoiceId = I.intInvoiceId
-		WHERE TAX.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+		WHERE CAST(TAX.dtmDate AS DATETIME) BETWEEN @dtmDateFrom AND @dtmDateTo
 		AND (@strTaxCode IS NULL OR TAX.strTaxCode LIKE '%'+ @strTaxCode +'%')
 		AND (@strTaxAgency IS NULL OR TAX.strTaxAgency LIKE '%'+ @strTaxAgency +'%')
 		AND (@strTaxClass IS NULL OR TAX.strTaxClass LIKE '%'+ @strTaxClass +'%')

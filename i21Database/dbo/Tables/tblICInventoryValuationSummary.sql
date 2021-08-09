@@ -22,3 +22,18 @@
 	, dtmDateLastSynced DATETIME2 NULL
 	, strKey NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	CONSTRAINT [PK_tblICInventoryValuationSummary] PRIMARY KEY ([intInventoryValuationSummaryId]))
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryValuationSummary_strPeriod_category]
+	ON [dbo].[tblICInventoryValuationSummary]([strPeriod] ASC, [strCategoryCode] ASC, [strItemNo] ASC, [strLocationName] ASC)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryValuationSummary_strPeriod_commodity]
+	ON [dbo].[tblICInventoryValuationSummary]([strPeriod] ASC, [strCommodityCode] ASC, [strItemNo] ASC, [strLocationName] ASC)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryValuationSummary_intItemId_strPeriod]
+	ON [dbo].[tblICInventoryValuationSummary]([intItemId] ASC, [strPeriod] ASC)
+GO
+

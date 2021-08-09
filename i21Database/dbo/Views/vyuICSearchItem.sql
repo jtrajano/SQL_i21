@@ -3,6 +3,7 @@ AS
 
 SELECT Item.intItemId
 , Item.strItemNo
+, Item.ysnRestrictedChemical
 , Item.strType
 , Item.strDescription
 , strItemDescription = Item.strDescription
@@ -33,6 +34,7 @@ SELECT Item.intItemId
 , Item.strShortName
 , Item.strRequired
 , Item.ysnBasisContract
+, Item.ysnAutoAdjustAccrualDiff
 , Item.intM2MComputationId
 , M2M.strM2MComputation
 , strTonnageTaxUOM = TonnageUOM.strUnitMeasure

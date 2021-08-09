@@ -33,7 +33,7 @@ SELECT
 	,
 	b.dtmOriginationDate,
 	a.intVendorType, --get the actual text
-	strVendorType = case when a.intVendorType = 1 then 'Person' when a.intVendorType = '0' then 'Company' else '' end COLLATE Latin1_General_CI_AS,
+	strVendorType = case when a.intVendorType = 1 then 'Person' when a.intVendorType = '0' then 'Company' else '' end,
 	a.intGLAccountExpenseId, -- get the actual text
 	aa.strAccountId,
 	a.intCurrencyId, -- get the actual text,
@@ -54,8 +54,10 @@ SELECT
 	a.ysnPymtCtrlAlwaysDiscount,
 	a.ysnPymtCtrlEFTActive,
 	a.ysnPymtCtrlHold,
-	a.ysnOneBillPerPayment
-	---
+	a.ysnOneBillPerPayment,
+	a.dtmCreated,
+	a.dtmLastModified,
+	EC.strClass
 	FROM tblAPVendor a
 	join tblEMEntity b
 		on b.intEntityId = a.[intEntityId]
@@ -92,6 +94,7 @@ SELECT
 		on ae.intEntityLocationId = a.intShipFromId
 	left join tblEMEntityPhoneNumber pn
 		on pn.intEntityId = d.intEntityId
+	LEFT JOIN tblEMEntityClass EC ON EC.intEntityClassId = b.intEntityClassId
 
 	
 

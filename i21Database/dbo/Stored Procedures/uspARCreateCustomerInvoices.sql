@@ -170,6 +170,7 @@ INSERT INTO @InvoicesToGenerate (
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
 	,[ysnConvertToStockUOM]
@@ -321,6 +322,7 @@ SELECT
 	,[intStorageScheduleTypeId]			= [intStorageScheduleTypeId]
 	,[intDestinationGradeId]			= [intDestinationGradeId]
 	,[intDestinationWeightId]			= [intDestinationWeightId]
+	,[intPriceFixationDetailId]			= [intPriceFixationDetailId]
     ,[strAddonDetailKey]                = [strAddonDetailKey]
     ,[ysnAddonParent]                   = [ysnAddonParent]
 	,[ysnConvertToStockUOM]				= [ysnConvertToStockUOM]
@@ -648,7 +650,7 @@ SELECT
 FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 WHERE
-	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'POS', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout')
+	ITG.[strType] NOT IN ('Meter Billing', 'Standard', 'POS', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'CF Tran', 'CF Invoice', 'Store Checkout', 'Agronomy', 'Dealer Credit Card')
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
@@ -1037,6 +1039,36 @@ FROM
 WHERE
 	ITG.[intCurrencyId] IS NULL
 	AND NOT EXISTS (SELECT NULL FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL)
+
+INSERT INTO #ARInvalidInvoiceRecords
+	([intId]
+	,[strMessage]		
+	,[strTransactionType]
+	,[strType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'Duplicate Ticket Number found ' + ITG.[strSourceId] +  '.' +  ' This file may not be imported until all Ticket Numbers are unique.'
+	,[strTransactionType]	= ITG.[strTransactionType]
+	,[strType]				= ITG.[strType]
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intInvoiceId]			= ITG.[intInvoiceId]
+FROM @InvoicesToGenerate ITG --WITH (NOLOCK)
+INNER JOIN (
+	SELECT COUNT(strSourceId)[SourceCount]
+	     , strSourceId 
+	FROM @InvoicesToGenerate 
+	WHERE ISNULL(strSourceId, '') <> ''
+	GROUP BY strSourceId 
+) ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
+WHERE ID.SourceCount > 1
+  AND [strType] <> 'POS'
+  AND ITG.[strSourceTransaction] <> 'Store Charge'
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
@@ -1467,7 +1499,7 @@ SELECT
 	,[intOriginalInvoiceId]			= ITG.[intOriginalInvoiceId]
 	,[intLoadId]                    = ITG.[intLoadId]
 	,[intEntityId]					= ITG.[intEntityId]
-	,[intEntityContactId]			= ITG.[intEntityContactId]
+	,[intEntityContactId]			= ISNULL(ITG.[intEntityContactId], ETC.intEntityContactId)
 	,[intDocumentMaintenanceId]		= NULL
 	,[dblTotalWeight]				= @ZeroDecimal
 	,[dblTotalTermDiscount]			= @ZeroDecimal
@@ -1515,6 +1547,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
 		ON ARC.[intBillToId] = BL1.intEntityLocationId
+LEFT OUTER JOIN
+	(SELECT intEntityId, intEntityContactId FROM tblEMEntityToContact WITH (NOLOCK) WHERE ysnDefaultContact = 1) ETC
+		ON ITG.intEntityCustomerId = ETC.intEntityId
 		
 WHILE EXISTS(SELECT TOP 1 NULL FROM #CustomerInvoice WHERE RTRIM(LTRIM(ISNULL([strInvoiceNumber],''))) = '' ORDER BY [intRowId])	
 BEGIN
@@ -2107,6 +2142,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
@@ -2254,6 +2290,7 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
+		,[intPriceFixationDetailId]				= ITG.[intPriceFixationDetailId]
         ,[strAddonDetailKey]                    = ITG.[strAddonDetailKey]
         ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 		,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
@@ -2354,16 +2391,12 @@ BEGIN TRY
 		,[strFromValue]				= IL.[strSourceId]
 		,[strToValue]				= ARI.[strInvoiceNumber]
 		,[strDetails]				= NULL
-	 FROM @IntegrationLog IL
-	INNER JOIN
-		(SELECT [intInvoiceId], [strInvoiceNumber] FROM tblARInvoice) ARI
-			ON IL.[intInvoiceId] = ARI.[intInvoiceId]
-	 WHERE
-		[ysnSuccess] = 1 
-		AND [ysnInsert] = 1
+	FROM @IntegrationLog IL
+	INNER JOIN tblARInvoice ARI ON IL.[intInvoiceId] = ARI.[intInvoiceId]
+	WHERE [ysnSuccess] = 1 
+	  AND [ysnInsert] = 1
 
-	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog
-
+	EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserId
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0

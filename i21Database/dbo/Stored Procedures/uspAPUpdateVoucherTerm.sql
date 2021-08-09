@@ -27,8 +27,8 @@ BEGIN
 	UPDATE A
 		SET 
 			A.intTermsId = @termId,
-			A.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(A.dtmDate, A.intTermsId), A.dtmDueDate),
-			A.dblDiscount = CASE WHEN A.ysnDiscountOverride = 1 THEN A.dblDiscount ELSE dbo.fnGetDiscountBasedOnTerm(GETDATE(), A.dtmBillDate, A.intTermsId, A.dblTotal) END,
+			A.dtmDueDate = ISNULL(dbo.fnGetDueDateBasedOnTerm(A.dtmDate, @termId), A.dtmDueDate),
+			A.dblDiscount = CASE WHEN A.ysnDiscountOverride = 1 THEN A.dblDiscount ELSE dbo.fnGetDiscountBasedOnTerm(GETDATE(), A.dtmBillDate, @termId, A.dblTotal) END,
 			A.dtmDeferredInterestDate = (CASE WHEN term.ysnDeferredPay = 1 THEN A.dtmBillDate ELSE NULL END)
 	OUTPUT 
 		inserted.intBillId,
@@ -41,7 +41,7 @@ BEGIN
 	INNER JOIN tblAPBillEdit B
 		ON A.intBillId = B.intBillId
 	INNER JOIN tblSMTerm term
-		ON term.intTermID = A.intTermsId
+		ON term.intTermID = @termId
 	AND B.intEntityId = @userId
 
 	-- DECLARE @strDescription AS NVARCHAR(100) 

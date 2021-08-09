@@ -33,6 +33,7 @@
 	[ysnPost] BIT NULL DEFAULT 0,
 	[intInventoryAdjustmentId] INT NULL,
 	[dblOldCost] DECIMAL(38,20) NULL,
+	[dblCost] DECIMAL(38,20) NULL,
 	[intTransferStorageReferenceId] INT NULL,
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
@@ -61,5 +62,23 @@ INCLUDE (
 	,intInventoryShipmentId
 	,intBillId
 	,intContractHeaderId
+	,intTransferStorageId
+	,intTransferStorageReferenceId
 ) 
+GO 
+
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intInventoryReceiptId] ON [dbo].[tblGRStorageHistory]
+(
+	[intInventoryReceiptId] DESC
+)
+INCLUDE (
+	intCustomerStorageId
+	,intTicketId
+	,intContractHeaderId
+)
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intTicketId] ON [dbo].[tblGRStorageHistory]
+(
+	[intTicketId] ASC
+)
 GO 

@@ -6,8 +6,6 @@
 	@InventoryReceiptId AS INT OUTPUT,
 	@intBillId AS INT OUTPUT
 	,@ysnSkipValidation as BIT = NULL
-	,@intFutureMarketId AS INT = NULL
-	,@intFutureMonthId AS INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -87,9 +85,14 @@ DECLARE @ysnLoadContract BIT
 DECLARE @_dblQuantityPerLoad NUMERIC(18,6)
 DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strReceiptNumber NVARCHAR(50)
+DECLARE @_dblQtyToCompare NUMERIC (38,20)  
+DECLARE @_intLoadItemUOM INT
+dECLARE @intTicketLoadDetailId INT
+DECLARE @_intContractItemUom  INT
+DECLARE @_dblContractScheduledQty NUMERIC (38,20)  
 
 SELECT	
-	@intTicketItemUOMId = UOM.intItemUOMId
+	@intTicketItemUOMId = SC.intItemUOMIdTo
 	, @intLoadId = SC.intLoadId
 	, @intItemId = SC.intItemId
 	, @dblGrossUnits = SC.dblGrossUnits
@@ -102,8 +105,10 @@ SELECT
 	, @ysnTicketHasSpecialDiscount = SC.ysnHasSpecialDiscount
 	, @ysnTicketSpecialGradePosted = SC.ysnSpecialGradePosted
 	, @strTicketStatus = SC.strTicketStatus
-FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
-WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+	, @intTicketLoadDetailId = SC.intLoadDetailId
+FROM dbo.tblSCTicket SC 
+WHERE SC.intTicketId = @intTicketId 
+
 
 BEGIN TRY
 DECLARE @intId INT;
@@ -139,10 +144,24 @@ BEGIN
 
 END
 
+
+SELECT 
+	*
+INTO #tmpManualDistributionLineItem
+FROM @LineItem
+WHERE strDistributionOption = @strTicketDistributionOption
+
+INSERT INTO #tmpManualDistributionLineItem
+SELECT 
+	*
+FROM @LineItem
+WHERE strDistributionOption <> @strTicketDistributionOption
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, intLoadDetailId
-FROM @LineItem;
+FROM #tmpManualDistributionLineItem;
 
 OPEN intListCursor;
 
@@ -168,7 +187,10 @@ OPEN intListCursor;
 							WHERE intLoadDetailId = @intLoadDetailId 
 
 							SET @ysnLoadContract = 0
-							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0)
+							SELECT TOP 1 
+								@ysnLoadContract = ISNULL(ysnLoad,0)
+								,@_intContractItemUom = B.intItemUOMId
+								,@_dblContractScheduledQty = B.dblScheduleQty
 							FROM tblCTContractHeader A
 							INNER JOIN tblCTContractDetail B
 								ON A.intContractHeaderId = B.intContractHeaderId
@@ -180,22 +202,38 @@ OPEN intListCursor;
 								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
 							END  
 							
-					
 							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
 
 							-- Adjust the contract Scheduled quantity based on the difference between the quantity/load and the units allocated
 							IF(@ysnLoadContract = 0)
 							BEGIN
+
+								SELECT TOP 1 
+									@_intLoadItemUOM = intItemUOMId
+								FROM tblLGLoadDetail WITH(NOLOCK)
+								WHERE intLoadDetailId = @intLoadDetailId
+
+								SET @_dblContractScheduledQty = dbo.fnCalculateQtyBetweenUOM(@_intContractItemUom,@intTicketItemUOMId,@_dblContractScheduledQty)
 								
-								SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQuantityPerLoad 
+								SET @_dblQtyToCompare = dbo.fnCalculateQtyBetweenUOM(@_intLoadItemUOM,@intTicketItemUOMId,@_dblQuantityPerLoad)	
+								IF (@_dblContractScheduledQty <  @_dblQtyToCompare)
+								BEGIN
+									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblContractScheduledQty
+								END
+								ELSE
+								BEGIN
+									
+									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQtyToCompare
+								END
 								IF(@dblLoopAdjustedScheduleQuantity <> 0)
 								BEGIN
-									EXEC	uspCTUpdateScheduleQuantity 
+									EXEC	uspCTUpdateScheduleQuantityUsingUOM 
 									@intContractDetailId	=	@intLoopContractId,
 									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
 									@strScreenName			=	'Auto - Scale'
+									,@intSourceItemUOMId	=	@intTicketItemUOMId
 								END
 								
 							END
@@ -230,12 +268,13 @@ OPEN intListCursor;
 
 									IF @dblLoopAdjustedScheduleQuantity <> 0
 									BEGIN
-										EXEC	uspCTUpdateScheduleQuantity 
-										@intContractDetailId	=	@intLoopContractId,
-										@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
+										EXEC uspCTUpdateScheduleQuantityUsingUOM 
+											@intContractDetailId	=	@intLoopContractId
+											,@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity
+											,@intUserId				=	@intUserId
+											,@intExternalId			=   @intTicketId
+											,@strScreenName			=	'Auto - Scale'
+											,@intSourceItemUOMId	=	@intTicketItemUOMId
 									END
 								END
 								
@@ -373,8 +412,6 @@ OPEN intListCursor;
 					,@intLoopContractId
 					,@intUserId
 					,@ysnDPStorage
-					,@intFutureMarketId	= @intFutureMarketId
-					,@intFutureMonthId = @intFutureMonthId
 
 					DECLARE @intDPContractId INT;
 					DECLARE @dblDPContractUnits NUMERIC(12,4);
@@ -418,7 +455,7 @@ OPEN intListCursor;
 								,intStorageScheduleTypeId
 								,ysnAllowVoucher  
 							)
-							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId, @intFutureMarketId, @intFutureMonthId
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblLoopContractUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblLoopContractUnits, @intEntityId, @ysnIsStorage;
 						-- Attempt to fetch next row from cursor
 						FETCH NEXT FROM intListCursorDP INTO @intLoopContractId, @dblDPContractUnits;
@@ -478,6 +515,7 @@ END
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId
 	
+	exec uspSCAddTransactionLinks @intTransactionType = 1, @intTransactionId = @intTicketId, @intAction  = 1
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId;
 
 	UPDATE	SC
@@ -854,6 +892,8 @@ END
 		BEGIN
 			EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
 		END
+
+		--EXEC uspSCModifyTicketDiscountItemInfo @intTicketId
 		
 		EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

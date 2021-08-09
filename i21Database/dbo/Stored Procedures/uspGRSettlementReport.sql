@@ -137,12 +137,15 @@ SELECT
 FROM tblSMUpload
 WHERE intAttachmentId = 
 (
-	SELECT TOP 1
-		intAttachmentId
-	FROM tblSMAttachment
-	WHERE strScreen = 'SystemManager.CompanyPreference'
-		AND strComment = 'Header'
-	ORDER BY intAttachmentId DESC
+	SELECT		TOP 1 intAttachmentId
+	FROM		tblSMAttachment AS a
+	INNER JOIN	tblSMTransaction AS b
+	ON			a.intTransactionId = b.intTransactionId
+	INNER JOIN	tblSMScreen AS c
+	ON			b.intScreenId = c.intScreenId
+	WHERE		c.strNamespace = 'SystemManager.view.CompanyPreference'
+			AND a.strComment = 'Header'
+	ORDER BY	intAttachmentId DESC
 )
 
 INSERT INTO @temp_xml_table
@@ -332,7 +335,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -569,7 +572,298 @@ BEGIN
 					intInventoryReceiptChargeId IS NOT NULL
 					OR BillDtl.intInventoryReceiptItemId IS NOT NULL
 					)
+			UNION ALL
+			/*-------------------------------------------------------
+			*********NON-STORAGE DISTRIBUTION FROM SCALE**************
+			*******************DIRECT IN TICKETS**********************
+			-------------------------------------------------------*/
+			SELECT  DISTINCT 
+				 intBankAccountId		    	= BNKTRN.intBankAccountId
+				,intBillDetailId		    	= BillDtl.intBillDetailId
+				,intTransactionId		    	= BNKTRN.intTransactionId
+				,strTransactionId		    	= BNKTRN.strTransactionId
+				,strCompanyName					= @strCompanyName
+				,strCompanyAddress				= ISNULL(@strAddress,'') + ', ' + CHAR(13) + CHAR(10) + ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+ @strZip,'') + ISNULL(', '+ @strCountry,'') + CHAR(13) + CHAR(10) + ISNULL('' + @strPhone,'') 
+				,strItemNo						= Item.strItemNo
+				,lblGrade						= CASE 
+													WHEN SC.intCommodityAttributeId > 0 THEN 'Grade' 
+													ELSE NULL 
+												END
+				,strGrade						= CASE 
+													WHEN SC.intCommodityAttributeId > 0 THEN Attribute.strDescription 
+													ELSE NULL 
+												END
+				,strCommodity			    	= Commodity.strCommodityCode
+				,strDate				    	= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
+				,strTime				    	= CONVERT(VARCHAR(8), GETDATE(), 108)
+				,strAccountNumber		    	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
+				,strReferenceNo			    	= BNKTRN.strReferenceNo
+				,strEntityName			    	= case when PYMT.ysnOverrideSettlement = 0 then ENTITY.strName
+													ELSE
+																PYMT.strOverridePayee 
+													end
+				,strVendorAddress				= 	case when 														
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> ''
+														then ''
+													else
+														 dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+													end
+				,dtmDeliveryDate		    	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
+				,intTicketId			    	= SC.intTicketId		
+				,strTicketNumber		    	= SC.strTicketNumber 				
+				,strReceiptNumber		    	= NULL --Direct In tickets don't have receipts
+				,intInventoryReceiptItemId  	= NULL --Direct In tickets don't have receipts
+				,intContractDetailId			= ISNULL(BillDtl.intContractDetailId, 0) 
+				,RecordId						= Bill.strBillId
+				,lblSplitNumber					= CASE 
+													WHEN EM.strSplitNumber IS NOT NULL THEN 'Split' 
+													ELSE NULL 
+												END		 
+				,strSplitNumber					= EM.strSplitNumber
+				,strCustomerReference			= SC.strCustomerReference
+				,lblTicketComment				= CASE 
+													WHEN ISNULL(SC.strTicketComment,'') <> '' THEN 'Comments' 
+													ELSE NULL 
+												END  
+				,strTicketComment				= SC.strTicketComment
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
+				,lblFarmField					= CASE 
+													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
+													ELSE NULL 
+												END
+				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,dtmDate						= Bill.dtmDate
+				,dblGrossWeight					= CASE 
+													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
+													ELSE ISNULL(SC.dblGrossWeight, 0)
+												END
+				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)						  								 
+				,dblNetWeight					= CASE 
+													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
+													ELSE ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+												END
+				,dblDockage						= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
+				,dblCost						= BillDtl.dblCost
+				,Net							= CASE 
+													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblNetWeight) 
+													ELSE BillDtl.dblNetWeight
+												END
+				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
+				,dblTotal						= BillDtl.dblTotal
+				,dblTax							= BillDtl.dblTax
+				,dblNetTotal					= BillDtl.dblTotal + BillDtl.dblTax
+				,lblSourceType					= CASE 
+													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+													ELSE 'Contract'
+												END							  								 
+				,strSourceType					= 'Scale' --Dev's note: Scale for now for Direct In tickets
+												--CASE 
+												--	WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+												--		CASE 
+												--			WHEN SC.intSourceType = 4 THEN 'Settle Storage'
+												--			WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
+												--			WHEN INVRCPT.intSourceType = 2 THEN 'Inbound Shipment'
+												--			WHEN INVRCPT.intSourceType = 1 THEN SD.strDistributionType --'Scale'
+												--			ELSE 'None'
+												--		END
+												--	ELSE CNTRCT.strContractNumber
+												--END
+				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
+				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
+				,strId							= Bill.strBillId
+				,intPaymentId					= PYMT.intPaymentId
+				,InboundNetWeight				= CASE 
+													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+													ELSE BillDtl.dblQtyOrdered
+												END 
+				,OutboundNetWeight			 	= 0 
+				,InboundGrossDollars			= CASE 
+														WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+														ELSE BillDtl.dblTotal
+												END 
+				,OutboundGrossDollars			= 0
+				,InboundTax						= CASE 
+													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+													ELSE BillDtl.dblTax
+												END 
+				,OutboundTax					= 0
+				,InboundDiscount				= ISNULL(BillByReceipt.dblTotal, 0)
+				,OutboundDiscount				= 0 
+				,InboundNetDue					= CASE 
+													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+													ELSE BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
+												END 
+				,OutboundNetDue					= 0 
+				,VoucherAdjustment				= ISNULL(BillByReceiptItem.dblTotal,0)
+				,SalesAdjustment				= Invoice.dblPayment 
+				,CheckAmount					= PYMT.dblAmountPaid 
+				,IsAdjustment					= 'False'		   
+				,dblGradeFactorTax				= CASE 
+													WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
+													ELSE NULL 
+												END 
+				,lblFactorTax					= CASE 
+													WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' 
+													ELSE NULL 
+												END
+				,dblVendorPrepayment			= CASE 
+													WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment 
+													ELSE NULL 
+												END 
+				,lblVendorPrepayment			= CASE 
+													WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay'
+													ELSE NULL 
+												END
+				,dblCustomerPrepayment			= CASE 
+													WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN  Invoice.dblPayment
+													ELSE NULL 
+												END
+				,lblCustomerPrepayment			= CASE 
+													WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' 
+													ELSE NULL 
+												END
+				,dblPartialPrepaymentSubTotal	= CASE 
+													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals 
+													ELSE NULL 
+												END
+				,dblPartialPrepayment			= CASE 
+													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals
+													ELSE NULL 
+												END 
+				,lblPartialPrepayment			= CASE 
+													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
+													ELSE NULL 
+												END
+				,blbHeaderLogo					= @companyLogo
+			   	,VENDOR.[intEntityId]
+			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
+				,strDeliverySheetNumber			= NULL
+				,strSplitDescription			= NULL
+				,strDSSplitNumber				= NULL
+				,ysnPosted						= PYMT.ysnPosted
+			FROM tblCMBankTransaction BNKTRN
+			JOIN tblAPPayment PYMT 
+				ON BNKTRN.strTransactionId = PYMT.strPaymentRecordNum
+			JOIN tblAPPaymentDetail PYMTDTL 
+				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+			JOIN tblAPBill Bill 
+				ON PYMTDTL.intBillId = Bill.intBillId
+			JOIN tblAPBillDetail BillDtl 
+				ON Bill.intBillId = BillDtl.intBillId 
+					AND BillDtl.intInventoryReceiptChargeId IS NULL
+			JOIN tblICItem Item 
+				ON BillDtl.intItemId = Item.intItemId
+					AND Item.strType = 'Inventory'
+			LEFT JOIN tblICCommodity Commodity 
+				ON Commodity.intCommodityId = Item.intCommodityId
+			LEFT JOIN tblCTContractHeader CNTRCT 
+				ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
+			LEFT JOIN tblAPVendor VENDOR 
+				ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], BNKTRN.intEntityId)
+			LEFT JOIN tblEMEntity ENTITY 
+				ON VENDOR.[intEntityId] = ENTITY.intEntityId
+			LEFT JOIN tblEMEntityEFTInformation EFT 
+				ON ENTITY.intEntityId = EFT.intEntityId 
+					AND EFT.ysnActive = 1			
+			LEFT JOIN tblEMEntityLocation EL 
+				ON EL.intEntityId = Bill.intEntityVendorId 
+					AND EL.ysnDefaultLocation = 1
+			LEFT JOIN tblICItemUOM CostItemUOM 
+				ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+			LEFT JOIN tblICUnitMeasure CostUOM 
+				ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
+			LEFT JOIN tblICItemUOM ItemUOM 
+				ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
+			LEFT JOIN tblICUnitMeasure UOM 
+				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			JOIN tblSCTicket SC 
+				ON SC.intTicketId = BillDtl.intScaleTicketId
+					AND BillDtl.intCustomerStorageId IS NULL
 
+			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
+				on SC.intTicketId = INVRCPTITEM.intSourceId
+			
+			LEFT JOIN tblICInventoryReceipt InventoryReceipt
+				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
+
+			LEFT JOIN tblEMEntitySplit EM 
+				ON EM.intSplitId = SC.intSplitId 
+					AND SC.intSplitId <> 0
+			LEFT JOIN tblEMEntityFarm EntityFarm 
+				ON EntityFarm.intEntityId = VENDOR.intEntityId 
+					AND EntityFarm.intFarmFieldId = ISNULL(SC.intFarmFieldId, 0)
+			LEFT JOIN tblICCommodityAttribute Attribute 
+				ON Attribute.intCommodityAttributeId = SC.intCommodityAttributeId
+			LEFT JOIN vyuSCGetScaleDistribution SD 
+				ON SD.intTicketId = SC.intTicketId
+			LEFT JOIN (
+						SELECT 
+							intBillDetailId
+							,SUM(dblAmount) AS dblTotal 
+							,SUM(dblTax) AS dblTax
+						FROM vyuGRSettlementSubReport 
+						GROUP BY intBillDetailId
+					) BillByReceipt 
+					ON BillByReceipt.intBillDetailId = BillDtl.intBillDetailId
+			LEFT JOIN (
+						SELECT 
+							intBillId
+							,SUM(dblTotal) AS dblTotal
+						FROM tblAPBillDetail
+						WHERE intInventoryReceiptChargeId IS NOT NULL 
+							AND intInventoryReceiptItemId IS NULL
+						GROUP BY intBillId
+					) BillByReceiptItem 
+					ON BillByReceiptItem.intBillId = BillDtl.intBillId  
+			LEFT JOIN (
+						SELECT
+							PYMT.intPaymentId
+							,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
+						FROM tblAPPayment PYMT
+						JOIN tblAPPaymentDetail PYMTDTL 
+							ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+						JOIN tblAPBillDetail BillDtl 
+							ON BillDtl.intBillId = PYMTDTL.intBillId
+						JOIN tblICItem B 
+							ON B.intItemId = BillDtl.intItemId 
+								AND B.strType = 'Other Charge'
+						WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL 	 
+						GROUP BY  PYMT.intPaymentId
+					) ScaleDiscountTax 
+					ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			 
+			LEFT JOIN (
+						SELECT				
+							intBillId
+							,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+						FROM tblAPAppliedPrepaidAndDebit 
+						WHERE ysnApplied = 1
+						GROUP BY intBillId
+					) VendorPrepayment 
+					ON VendorPrepayment.intBillId = Bill.intBillId			
+			LEFT JOIN (
+						SELECT 
+							intPaymentId
+							,SUM(dblPayment) AS dblPayment 
+						FROM tblAPPaymentDetail
+						WHERE intInvoiceId IS NOT NULL
+						GROUP BY intPaymentId
+					) Invoice 
+					ON Invoice.intPaymentId = PYMT.intPaymentId			
+			LEFT JOIN (  
+						SELECT 
+							intPaymentId
+							,SUM(dblTotal) AS dblTotals 
+							,SUM(dblPayment) AS dblPayment 
+						FROM tblAPPaymentDetail
+						WHERE intBillId IS NOT NULL
+						GROUP BY intPaymentId
+					) PartialPayment 
+					ON PartialPayment.intPaymentId = PYMT.intPaymentId
+			WHERE BNKTRN.intBankAccountId = @intBankAccountId
+				AND BNKTRN.strTransactionId = @strPaymentNo
+				and INVRCPTITEM.intInventoryReceiptItemId is null
+				--and InventoryReceipt.intSourceType = 1
 			/*--------------------------------------------------------
 			*******************FROM SETTLE STORAGE********************
 			--------------------------------------------------------*/			
@@ -622,7 +916,7 @@ BEGIN
 													ELSE NULL 
 												END
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -657,8 +951,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -733,23 +1027,24 @@ BEGIN
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
-					AND Item.strType <> 'Other Charge'	
-			JOIN tblGRStorageHistory StrgHstry 
-				ON ( 
-						Bill.intBillId = StrgHstry.intBillId
-						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
-							and StrgHstry.strType = 'Settlement'
-							)
-				)
+					AND Item.strType <> 'Other Charge'
+			JOIN ( --DEV'S NOTE: GRN-2409; changed to cater multiple vouchers in settlements
+					tblGRSettleStorageBillDetail BD 
+					JOIN tblGRStorageHistory StrgHstry
+						ON StrgHstry.intSettleStorageId = BD.intSettleStorageId
+				) ON BD.intBillId = Bill.intBillId
+			-- JOIN tblGRStorageHistory StrgHstry 
+			-- 	ON Bill.intBillId = StrgHstry.intBillId
 			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			JOIN tblSCTicket SC 
+			LEFT JOIN tblSCTicket SC  
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -757,8 +1052,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+					,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
 				ON tblOtherCharge.intBillId = Bill.intBillId			
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -914,7 +1211,7 @@ BEGIN
 				,strCustomerReference			= ''
 				,lblTicketComment				= NULL
 				,strTicketComment				= NULL
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -949,8 +1246,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1060,6 +1357,7 @@ BEGIN
 			LEFT JOIN (
 						SELECT 
 							A.intBillId
+							,isnull(A.intLinkingId, -90) as intLinkingId
 							,SUM(dblTotal) AS dblTotal
 							,SUM(dblTax) AS dblTax
 						FROM tblAPBillDetail A
@@ -1067,8 +1365,10 @@ BEGIN
 							ON A.intItemId = B.intItemId 
 								AND B.strType = 'Other Charge'
 						GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId			
+					ON tblOtherCharge.intBillId = Bill.intBillId	
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1225,7 +1525,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1460,7 +1760,300 @@ BEGIN
 					OR BillDtl.intInventoryReceiptItemId IS NOT NULL
 					)
 
-						/*-------------------------------------------------------
+			UNION ALL
+			/*-------------------------------------------------------
+			*********NON-STORAGE DISTRIBUTION FROM SCALE**************
+			*******************DIRECT IN TICKETS**********************
+			*******************TEMPORARY SETTLEMENTS******************
+			-------------------------------------------------------*/
+			SELECT  DISTINCT 
+				 intBankAccountId		    	= NULL
+				,intBillDetailId		    	= BillDtl.intBillDetailId
+				,intTransactionId		    	= NULL
+				,strTransactionId		    	= NULL
+				,strCompanyName					= @strCompanyName
+				,strCompanyAddress				= ISNULL(@strAddress,'') + ', ' + CHAR(13) + CHAR(10) + ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+ @strZip,'') + ISNULL(', '+ @strCountry,'') + CHAR(13) + CHAR(10) + ISNULL('' + @strPhone,'') 
+				,strItemNo						= Item.strItemNo
+				,lblGrade						= CASE 
+													WHEN SC.intCommodityAttributeId > 0 THEN 'Grade' 
+													ELSE NULL 
+												END
+				,strGrade						= CASE 
+													WHEN SC.intCommodityAttributeId > 0 THEN Attribute.strDescription 
+													ELSE NULL 
+												END
+				,strCommodity			    	= Commodity.strCommodityCode
+				,strDate				    	= dbo.fnGRConvertDateToReportDateFormat(GETDATE())
+				,strTime				    	= CONVERT(VARCHAR(8), GETDATE(), 108)
+				,strAccountNumber		    	= dbo.fnAESDecryptASym(EFT.strAccountNumber)
+				,strReferenceNo			    	= 'XXXXXX'
+				,strEntityName			    	= case when PYMT.ysnOverrideSettlement = 0 then ENTITY.strName
+													ELSE
+																PYMT.strOverridePayee 
+													end
+				,strVendorAddress				= 	case when 														
+														PYMT.ysnOverrideSettlement = 1 and 
+														isnull(PYMT.strOverridePayee, '')  <> ''
+														then ''
+													else
+														 dbo.fnConvertToFullAddress(EL.strAddress, EL.strCity, EL.strState, EL.strZipCode)
+													end
+				,dtmDeliveryDate		    	= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
+				,intTicketId			    	= SC.intTicketId		
+				,strTicketNumber		    	= SC.strTicketNumber 				
+				,strReceiptNumber		    	= NULL --Direct In tickets don't have receipts
+				,intInventoryReceiptItemId  	= NULL --Direct In tickets don't have receipts
+				,intContractDetailId			= ISNULL(BillDtl.intContractDetailId, 0) 
+				,RecordId						= Bill.strBillId
+				,lblSplitNumber					= CASE 
+													WHEN EM.strSplitNumber IS NOT NULL THEN 'Split' 
+													ELSE NULL 
+												END		 
+				,strSplitNumber					= EM.strSplitNumber
+				,strCustomerReference			= SC.strCustomerReference
+				,lblTicketComment				= CASE 
+													WHEN ISNULL(SC.strTicketComment,'') <> '' THEN 'Comments' 
+													ELSE NULL 
+												END  
+				,strTicketComment				= SC.strTicketComment
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
+				,lblFarmField					= CASE 
+													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
+													ELSE NULL 
+												END
+				,strFarmField					= EntityFarm.strFarmNumber + '\' + EntityFarm.strFieldNumber 
+				,dtmDate						= Bill.dtmDate
+				,dblGrossWeight					= CASE 
+													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
+													ELSE ISNULL(SC.dblGrossWeight, 0)
+												END
+				,dblTareWeight					= ISNULL(SC.dblTareWeight, 0)						  								 
+				,dblNetWeight					= CASE 
+													WHEN (SC.dblTareWeight IS NULL) OR (SC.dblTareWeight = 0) THEN dbo.fnCalculateQtyBetweenUOM(SC.intItemUOMIdTo,SC.intItemUOMIdFrom,SC.dblGrossWeight)
+													ELSE ISNULL(SC.dblGrossWeight, 0) - ISNULL(SC.dblTareWeight, 0)
+												END
+				,dblDockage						= [dbo].[fnRemoveTrailingZeroes](ROUND(SC.dblShrink,3))		 
+				,dblCost						= BillDtl.dblCost
+				,Net							= CASE 
+													WHEN ISNULL(BillDtl.intUnitOfMeasureId,0) > 0 AND ISNULL(BillDtl.intCostUOMId,0) > 0 THEN dbo.fnCTConvertQtyToTargetItemUOM(BillDtl.intUnitOfMeasureId,BillDtl.intCostUOMId,BillDtl.dblNetWeight) 
+													ELSE BillDtl.dblNetWeight
+												END
+				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
+				,dblTotal						= BillDtl.dblTotal
+				,dblTax							= BillDtl.dblTax
+				,dblNetTotal					= BillDtl.dblTotal + BillDtl.dblTax
+				,lblSourceType					= CASE 
+													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
+													ELSE 'Contract'
+												END							  								 
+				,strSourceType					= 'Scale' --Dev's note: Scale for now for Direct In tickets
+												--CASE 
+												--	WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN
+												--		CASE 
+												--			WHEN SC.intSourceType = 4 THEN 'Settle Storage'
+												--			WHEN INVRCPT.intSourceType = 3 THEN 'Transport'
+												--			WHEN INVRCPT.intSourceType = 2 THEN 'Inbound Shipment'
+												--			WHEN INVRCPT.intSourceType = 1 THEN SD.strDistributionType --'Scale'
+												--			ELSE 'None'
+												--		END
+												--	ELSE CNTRCT.strContractNumber
+												--END
+				,TotalDiscount					= ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
+				,NetDue							= BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0) + ISNULL(BillByReceipt.dblTax, 0)
+				,strId							= Bill.strBillId
+				,intPaymentId					= PYMT.intPaymentId
+				,InboundNetWeight				= CASE 
+													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+													ELSE BillDtl.dblQtyOrdered
+												END 
+				,OutboundNetWeight			 	= 0 
+				,InboundGrossDollars			= CASE 
+														WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+														ELSE BillDtl.dblTotal
+												END 
+				,OutboundGrossDollars			= 0
+				,InboundTax						= CASE 
+													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+													ELSE BillDtl.dblTax
+												END 
+				,OutboundTax					= 0
+				,InboundDiscount				= ISNULL(BillByReceipt.dblTotal, 0)
+				,OutboundDiscount				= 0 
+				,InboundNetDue					= CASE 
+													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0
+													ELSE BillDtl.dblTotal + BillDtl.dblTax + ISNULL(BillByReceipt.dblTotal, 0)
+												END 
+				,OutboundNetDue					= 0 
+				,VoucherAdjustment				= ISNULL(BillByReceiptItem.dblTotal,0)
+				,SalesAdjustment				= Invoice.dblPayment 
+				,CheckAmount					= PYMT.dblAmountPaid 
+				,IsAdjustment					= 'False'		   
+				,dblGradeFactorTax				= CASE 
+													WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN ScaleDiscountTax.dblGradeFactorTax
+													ELSE NULL 
+												END 
+				,lblFactorTax					= CASE 
+													WHEN ISNULL(ScaleDiscountTax.dblGradeFactorTax,0) <> 0 THEN 'Factor Tax' 
+													ELSE NULL 
+												END
+				,dblVendorPrepayment			= CASE 
+													WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN VendorPrepayment.dblVendorPrepayment 
+													ELSE NULL 
+												END 
+				,lblVendorPrepayment			= CASE 
+													WHEN ISNULL(VendorPrepayment.dblVendorPrepayment,0) <> 0 THEN 'Vendor Prepay'
+													ELSE NULL 
+												END
+				,dblCustomerPrepayment			= CASE 
+													WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN  Invoice.dblPayment
+													ELSE NULL 
+												END
+				,lblCustomerPrepayment			= CASE 
+													WHEN ISNULL(Invoice.dblPayment,0) <> 0 THEN 'Customer Prepay' 
+													ELSE NULL 
+												END
+				,dblPartialPrepaymentSubTotal	= CASE 
+													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals 
+													ELSE NULL 
+												END
+				,dblPartialPrepayment			= CASE 
+													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment-PartialPayment.dblTotals
+													ELSE NULL 
+												END 
+				,lblPartialPrepayment			= CASE 
+													WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN 'Partial Payment Adj'
+													ELSE NULL 
+												END
+				,blbHeaderLogo					= @companyLogo
+			   	,VENDOR.[intEntityId]
+			   	,strDeliveryDate				= dbo.fnGRConvertDateToReportDateFormat(SC.dtmTicketDateTime)
+				,strDeliverySheetNumber			= NULL
+				,strSplitDescription			= NULL
+				,strDSSplitNumber				= NULL
+				,ysnPosted						= PYMT.ysnPosted
+			FROM tblAPPayment PYMT
+			JOIN tblAPPaymentDetail PYMTDTL 
+				ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+			JOIN tblAPBill Bill 
+				ON PYMTDTL.intBillId = Bill.intBillId
+			JOIN tblAPBillDetail BillDtl 
+				ON Bill.intBillId = BillDtl.intBillId 
+					AND BillDtl.intInventoryReceiptChargeId IS NULL
+			JOIN tblICItem Item 
+				ON BillDtl.intItemId = Item.intItemId
+					AND Item.strType = 'Inventory'
+			LEFT JOIN tblICCommodity Commodity 
+				ON Commodity.intCommodityId = Item.intCommodityId
+			LEFT JOIN tblCTContractHeader CNTRCT 
+				ON BillDtl.intContractHeaderId = CNTRCT.intContractHeaderId
+			LEFT JOIN tblAPVendor VENDOR 
+				ON VENDOR.[intEntityId] = PYMT.[intEntityVendorId]
+			LEFT JOIN tblEMEntity ENTITY 
+				ON VENDOR.[intEntityId] = ENTITY.intEntityId
+			LEFT JOIN tblEMEntityEFTInformation EFT 
+				ON ENTITY.intEntityId = EFT.intEntityId 
+					AND EFT.ysnActive = 1			
+			LEFT JOIN tblEMEntityLocation EL 
+				ON EL.intEntityId = Bill.intEntityVendorId 
+					AND EL.ysnDefaultLocation = 1
+			LEFT JOIN tblICItemUOM CostItemUOM 
+				ON BillDtl.intCostUOMId = CostItemUOM.intItemUOMId
+			LEFT JOIN tblICUnitMeasure CostUOM 
+				ON CostItemUOM.intUnitMeasureId = CostUOM.intUnitMeasureId
+			LEFT JOIN tblICItemUOM ItemUOM 
+				ON BillDtl.intUnitOfMeasureId = ItemUOM.intItemUOMId
+			LEFT JOIN tblICUnitMeasure UOM 
+				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			JOIN tblSCTicket SC 
+				ON SC.intTicketId = BillDtl.intScaleTicketId
+					AND BillDtl.intCustomerStorageId IS NULL
+
+			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
+				on SC.intTicketId = INVRCPTITEM.intSourceId
+			
+			LEFT JOIN tblICInventoryReceipt InventoryReceipt
+				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
+
+
+			LEFT JOIN tblEMEntitySplit EM 
+				ON EM.intSplitId = SC.intSplitId 
+					AND SC.intSplitId <> 0
+			LEFT JOIN tblEMEntityFarm EntityFarm 
+				ON EntityFarm.intEntityId = VENDOR.intEntityId 
+					AND EntityFarm.intFarmFieldId = ISNULL(SC.intFarmFieldId, 0)
+			LEFT JOIN tblICCommodityAttribute Attribute 
+				ON Attribute.intCommodityAttributeId = SC.intCommodityAttributeId
+			LEFT JOIN vyuSCGetScaleDistribution SD 
+				ON SD.intTicketId = SC.intTicketId
+			LEFT JOIN (
+						SELECT 
+							intBillDetailId
+							,SUM(dblAmount) AS dblTotal 
+							,SUM(dblTax) AS dblTax
+						FROM vyuGRSettlementSubReport 
+						GROUP BY intBillDetailId
+					) BillByReceipt 
+					ON BillByReceipt.intBillDetailId = BillDtl.intBillDetailId
+			LEFT JOIN (
+						SELECT 
+							intBillId
+							,SUM(dblTotal) AS dblTotal
+						FROM tblAPBillDetail
+						WHERE intInventoryReceiptChargeId IS NOT NULL 
+							AND intInventoryReceiptItemId IS NULL
+						GROUP BY intBillId
+					) BillByReceiptItem 
+					ON BillByReceiptItem.intBillId = BillDtl.intBillId  
+			LEFT JOIN (
+						SELECT
+							PYMT.intPaymentId
+							,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
+						FROM tblAPPayment PYMT
+						JOIN tblAPPaymentDetail PYMTDTL 
+							ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+						JOIN tblAPBillDetail BillDtl 
+							ON BillDtl.intBillId = PYMTDTL.intBillId
+						JOIN tblICItem B 
+							ON B.intItemId = BillDtl.intItemId 
+								AND B.strType = 'Other Charge'
+						WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL 	 
+						GROUP BY  PYMT.intPaymentId
+					) ScaleDiscountTax 
+					ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			 
+			LEFT JOIN (
+						SELECT				
+							intBillId
+							,SUM(dblAmountApplied* -1) AS dblVendorPrepayment 
+						FROM tblAPAppliedPrepaidAndDebit 
+						WHERE ysnApplied = 1
+						GROUP BY intBillId
+					) VendorPrepayment 
+					ON VendorPrepayment.intBillId = Bill.intBillId			
+			LEFT JOIN (
+						SELECT 
+							intPaymentId
+							,SUM(dblPayment) AS dblPayment 
+						FROM tblAPPaymentDetail
+						WHERE intInvoiceId IS NOT NULL
+						GROUP BY intPaymentId
+					) Invoice 
+					ON Invoice.intPaymentId = PYMT.intPaymentId			
+			LEFT JOIN (  
+						SELECT 
+							intPaymentId
+							,SUM(dblTotal) AS dblTotals 
+							,SUM(dblPayment) AS dblPayment 
+						FROM tblAPPaymentDetail
+						WHERE intBillId IS NOT NULL
+						GROUP BY intPaymentId
+					) PartialPayment 
+					ON PartialPayment.intPaymentId = PYMT.intPaymentId
+			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
+				AND SC.intTicketType = 6 -- Direct In ticket
+				-- and INVRCPTITEM.intInventoryReceiptItemId is null
+				-- and InventoryReceipt.intSourceType = 1
+
+			/*-------------------------------------------------------
 			*****Temporary Settlement FROM SETTLE STORAGE*******
 			-------------------------------------------------------*/
 			UNION ALL
@@ -1511,7 +2104,7 @@ BEGIN
 													ELSE NULL 
 												END
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1546,8 +2139,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1632,6 +2225,7 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -1639,8 +2233,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId			
+				ON tblOtherCharge.intBillId = Bill.intBillId				
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1796,7 +2392,7 @@ BEGIN
 				,strCustomerReference			= ''
 				,lblTicketComment				= NULL
 				,strTicketComment				= NULL
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1831,8 +2427,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2051,5 +2647,12 @@ BEGIN
 			WHERE intPaymentKey > @intPaymentKey
 	END	
 END
+
+--The purpose of this code is for the report so that it will still have data even if there is no settlement
+--The scenenario is the selected voucher in the payment detail does not have a ticket. if we don't provide data, all the subreport will have an because there are expecting existing data.
+--GRN-2622
+if ( select count(*) from @Settlement ) <=0
+	insert @Settlement (intBillDetailId, intPaymentId, intContractDetailId, intEntityId)
+	select 0,0,0, 0
 
 SELECT * FROM @Settlement

@@ -16,6 +16,7 @@ SELECT [Order].intOrderId
 	, [Order].strDriverName
 	, [Order].intRouteId
 	, [Order].strRouteId
+	, [Order].intSequence
 	, [Order].intStopNumber
 	, OrderItem.intSiteId
 	, Site.intSiteNumber

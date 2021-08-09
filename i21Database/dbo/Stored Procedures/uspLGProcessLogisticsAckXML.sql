@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [uspLGProcessLogisticsAckXML]
+﻿CREATE PROCEDURE [dbo].[uspLGProcessLogisticsAckXML] (@ysnReplication BIT = 1)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -33,9 +33,10 @@ BEGIN TRY
 		,@intCompanyRefId INT
 		,@intBookId INT
 		,@intSubBookId INT
+		,@intLoadScreenId int
+	DECLARE @tblLGIntrCompLogisticsAck TABLE (intAcknowledgementId INT)
 
-	Declare @tblLGIntrCompLogisticsAck table(intAcknowledgementId int)
-	Insert into @tblLGIntrCompLogisticsAck(intAcknowledgementId)
+	INSERT INTO @tblLGIntrCompLogisticsAck (intAcknowledgementId)
 	SELECT intAcknowledgementId
 	FROM tblLGIntrCompLogisticsAck
 	WHERE strFeedStatus IS NULL
@@ -43,15 +44,19 @@ BEGIN TRY
 	SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
 	FROM @tblLGIntrCompLogisticsAck
 
-	if @intAcknowledgementStageId is null
-	Begin
-		Return
-	End
-		UPDATE S
-	SET strFeedStatus = 'In-Progress'
-	From tblLGIntrCompLogisticsAck S
-	JOIN @tblLGIntrCompLogisticsAck PS on PS.intAcknowledgementId=S.intAcknowledgementId
+	IF @intAcknowledgementStageId IS NULL
+	BEGIN
+		RETURN
+	END
+	
+	SELECT @intLoadScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
 
+	UPDATE S
+	SET strFeedStatus = 'In-Progress'
+	FROM tblLGIntrCompLogisticsAck S
+	JOIN @tblLGIntrCompLogisticsAck PS ON PS.intAcknowledgementId = S.intAcknowledgementId
 
 	WHILE @intAcknowledgementStageId > 0
 	BEGIN
@@ -92,191 +97,382 @@ BEGIN TRY
 		FROM tblLGIntrCompLogisticsAck
 		WHERE intAcknowledgementId = @intAcknowledgementStageId
 
-		------------------Header------------------------------------------------------
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadXML
+		IF @ysnReplication = 1
+		BEGIN
+			------------------Header------------------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadXML
 
-		SELECT @intLoadId = intLoadId
-			,@intLoadRefId = intLoadRefId
-			,@strLoadNumber = strLoadNumber
-			,@intBookId = intBookId
-			,@intSubBookId = intSubBookId
-		FROM OPENXML(@idoc, 'tblLGLoads/tblLGLoad', 2) WITH (
-				intLoadId INT
-				,intLoadRefId INT
-				,strLoadNumber NVARCHAR(100)
-				,intBookId INT
-				,intSubBookId INT
-				)
+			SELECT @intLoadId = intLoadId
+				,@intLoadRefId = intLoadRefId
+				,@strLoadNumber = strLoadNumber
+				,@intBookId = intBookId
+				,@intSubBookId = intSubBookId
+			FROM OPENXML(@idoc, 'tblLGLoads/tblLGLoad', 2) WITH (
+					intLoadId INT
+					,intLoadRefId INT
+					,strLoadNumber NVARCHAR(100)
+					,intBookId INT
+					,intSubBookId INT
+					)
 
-		UPDATE tblLGLoad
-		SET intLoadRefId = @intLoadId
-			,strExternalLoadNumber = @strContractNumber
-		WHERE intLoadId = @intLoadRefId
-			AND intLoadRefId IS NULL
+			UPDATE tblLGLoad
+			SET intLoadRefId = @intLoadId
+				,strExternalLoadNumber = @strContractNumber
+			WHERE intLoadId = @intLoadRefId
+				AND intLoadRefId IS NULL
 
-		-----------------------------------Detail-------------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			-----------------------------------Detail-------------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadDetailXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadDetailXML
 
-		UPDATE LD
-		SET LD.intLoadDetailRefId = XMLDetail.intLoadDetailId
-		FROM OPENXML(@idoc, 'tblLGLoadDetails/tblLGLoadDetail', 2) WITH (
-				intLoadDetailId INT
-				,intLoadDetailRefId INT
-				) XMLDetail
-		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = XMLDetail.intLoadDetailRefId
-		WHERE LD.intLoadId = @intLoadRefId
-			AND LD.intLoadDetailRefId IS NULL
+			UPDATE LD
+			SET LD.intLoadDetailRefId = XMLDetail.intLoadDetailId
+			FROM OPENXML(@idoc, 'tblLGLoadDetails/tblLGLoadDetail', 2) WITH (
+					intLoadDetailId INT
+					,intLoadDetailRefId INT
+					) XMLDetail
+			JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = XMLDetail.intLoadDetailRefId
+			WHERE LD.intLoadId = @intLoadRefId
+				AND LD.intLoadDetailRefId IS NULL
 
-		-----------------------------------NotifyParty--------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			-----------------------------------NotifyParty--------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadNotifyPartyXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadNotifyPartyXML
 
-		UPDATE LN
-		SET LN.intLoadNotifyPartyRefId = XMLNotifyParty.intLoadNotifyPartyId
-		FROM OPENXML(@idoc, 'tblLGLoadNotifyPartiess/tblLGLoadNotifyParties', 2) WITH (
-				intLoadNotifyPartyId INT
-				,intLoadNotifyPartyRefId INT
-				) XMLNotifyParty
-		JOIN tblLGLoadNotifyParties LN ON LN.intLoadNotifyPartyId = XMLNotifyParty.intLoadNotifyPartyRefId
-		WHERE LN.intLoadId = @intLoadRefId
-			AND LN.intLoadNotifyPartyRefId IS NULL
+			UPDATE LN
+			SET LN.intLoadNotifyPartyRefId = XMLNotifyParty.intLoadNotifyPartyId
+			FROM OPENXML(@idoc, 'tblLGLoadNotifyPartiess/tblLGLoadNotifyParties', 2) WITH (
+					intLoadNotifyPartyId INT
+					,intLoadNotifyPartyRefId INT
+					) XMLNotifyParty
+			JOIN tblLGLoadNotifyParties LN ON LN.intLoadNotifyPartyId = XMLNotifyParty.intLoadNotifyPartyRefId
+			WHERE LN.intLoadId = @intLoadRefId
+				AND LN.intLoadNotifyPartyRefId IS NULL
 
-		-----------------------------------Document--------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			-----------------------------------Document--------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadDocumentXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadDocumentXML
 
-		UPDATE LD
-		SET LD.intLoadDocumentRefId = XMLDocument.intLoadDocumentId
-		FROM OPENXML(@idoc, 'tblLGLoadDocumentss/tblLGLoadDocuments', 2) WITH (
-				intLoadDocumentId INT
-				,intLoadDocumentRefId INT
-				) XMLDocument
-		JOIN tblLGLoadDocuments LD ON LD.intLoadDocumentId = XMLDocument.intLoadDocumentRefId
-		WHERE LD.intLoadId = @intLoadRefId
-			AND LD.intLoadDocumentRefId IS NULL
+			UPDATE LD
+			SET LD.intLoadDocumentRefId = XMLDocument.intLoadDocumentId
+			FROM OPENXML(@idoc, 'tblLGLoadDocumentss/tblLGLoadDocuments', 2) WITH (
+					intLoadDocumentId INT
+					,intLoadDocumentRefId INT
+					) XMLDocument
+			JOIN tblLGLoadDocuments LD ON LD.intLoadDocumentId = XMLDocument.intLoadDocumentRefId
+			WHERE LD.intLoadId = @intLoadRefId
+				AND LD.intLoadDocumentRefId IS NULL
 
-		-----------------------------------Container-------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			-----------------------------------Container-------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadContainerXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadContainerXML
 
-		UPDATE LC
-		SET LC.intLoadContainerRefId = XMLContainer.intLoadContainerId
-		FROM OPENXML(@idoc, 'tblLGLoadContainers/tblLGLoadContainer', 2) WITH (
-				intLoadContainerId INT
-				,intLoadContainerRefId INT
-				) XMLContainer
-		JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = XMLContainer.intLoadContainerRefId
-		WHERE LC.intLoadId = @intLoadRefId
-			AND LC.intLoadContainerRefId IS NULL
+			UPDATE LC
+			SET LC.intLoadContainerRefId = XMLContainer.intLoadContainerId
+			FROM OPENXML(@idoc, 'tblLGLoadContainers/tblLGLoadContainer', 2) WITH (
+					intLoadContainerId INT
+					,intLoadContainerRefId INT
+					) XMLContainer
+			JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = XMLContainer.intLoadContainerRefId
+			WHERE LC.intLoadId = @intLoadRefId
+				AND LC.intLoadContainerRefId IS NULL
 
-		--------------------------------ContainerLink------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			--------------------------------ContainerLink------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadDetailContainerLinkXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadDetailContainerLinkXML
 
-		UPDATE LDCL
-		SET LDCL.intLoadDetailContainerLinkRefId = XMLContainerLink.intLoadDetailContainerLinkId
-		FROM OPENXML(@idoc, 'tblLGLoadDetailContainerLinks/tblLGLoadDetailContainerLink', 2) WITH (
-				intLoadDetailContainerLinkId INT
-				,intLoadDetailContainerLinkRefId INT
-				) XMLContainerLink
-		JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailContainerLinkId = XMLContainerLink.intLoadDetailContainerLinkRefId
-		JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-		WHERE LC.intLoadId = @intLoadRefId
-			AND LDCL.intLoadDetailContainerLinkRefId IS NULL
+			UPDATE LDCL
+			SET LDCL.intLoadDetailContainerLinkRefId = XMLContainerLink.intLoadDetailContainerLinkId
+			FROM OPENXML(@idoc, 'tblLGLoadDetailContainerLinks/tblLGLoadDetailContainerLink', 2) WITH (
+					intLoadDetailContainerLinkId INT
+					,intLoadDetailContainerLinkRefId INT
+					) XMLContainerLink
+			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailContainerLinkId = XMLContainerLink.intLoadDetailContainerLinkRefId
+			JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+			WHERE LC.intLoadId = @intLoadRefId
+				AND LDCL.intLoadDetailContainerLinkRefId IS NULL
 
-		--------------------------------Warehouse------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			--------------------------------Warehouse------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadWarehouseXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadWarehouseXML
 
-		UPDATE LW
-		SET LW.intLoadWarehouseRefId = XMLWarehouse.intLoadWarehouseId
-		FROM OPENXML(@idoc, 'tblLGLoadWarehouses/tblLGLoadWarehouse', 2) WITH (
-				intLoadWarehouseId INT
-				,intLoadWarehouseRefId INT
-				) XMLWarehouse
-		JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = XMLWarehouse.intLoadWarehouseRefId
-		WHERE LW.intLoadId = @intLoadRefId
-			AND LW.intLoadWarehouseRefId IS NULL
+			UPDATE LW
+			SET LW.intLoadWarehouseRefId = XMLWarehouse.intLoadWarehouseId
+			FROM OPENXML(@idoc, 'tblLGLoadWarehouses/tblLGLoadWarehouse', 2) WITH (
+					intLoadWarehouseId INT
+					,intLoadWarehouseRefId INT
+					) XMLWarehouse
+			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = XMLWarehouse.intLoadWarehouseRefId
+			WHERE LW.intLoadId = @intLoadRefId
+				AND LW.intLoadWarehouseRefId IS NULL
 
-		--------------------------------Cost------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			--------------------------------Cost------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadCostXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadCostXML
 
-		UPDATE LCO
-		SET LCO.intLoadCostRefId = XMLCost.intLoadCostId
-		FROM OPENXML(@idoc, 'tblLGLoadCosts/tblLGLoadCost', 2) WITH (
-				intLoadCostId INT
-				,intLoadCostRefId INT
-				) XMLCost
-		JOIN tblLGLoadCost LCO ON LCO.intLoadCostId = XMLCost.intLoadCostRefId
-		WHERE LCO.intLoadId = @intLoadRefId
-			AND LCO.intLoadCostRefId IS NULL
+			UPDATE LCO
+			SET LCO.intLoadCostRefId = XMLCost.intLoadCostId
+			FROM OPENXML(@idoc, 'tblLGLoadCosts/tblLGLoadCost', 2) WITH (
+					intLoadCostId INT
+					,intLoadCostRefId INT
+					) XMLCost
+			JOIN tblLGLoadCost LCO ON LCO.intLoadCostId = XMLCost.intLoadCostRefId
+			WHERE LCO.intLoadId = @intLoadRefId
+				AND LCO.intLoadCostRefId IS NULL
 
-		--------------------------------StorageCost------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			--------------------------------StorageCost------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadStorageCostXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadStorageCostXML
 
-		UPDATE LSC
-		SET LSC.intLoadStorageCostRefId = XMLStorageCost.intLoadStorageCostId
-		FROM OPENXML(@idoc, 'tblLGLoadStorageCosts/tblLGLoadStorageCost', 2) WITH (
-				intLoadStorageCostId INT
-				,intLoadStorageCostRefId INT
-				) XMLStorageCost
-		JOIN tblLGLoadStorageCost LSC ON LSC.intLoadStorageCostId = XMLStorageCost.intLoadStorageCostRefId
-		WHERE LSC.intLoadId = @intLoadRefId
-			AND LSC.intLoadStorageCostRefId IS NULL
+			UPDATE LSC
+			SET LSC.intLoadStorageCostRefId = XMLStorageCost.intLoadStorageCostId
+			FROM OPENXML(@idoc, 'tblLGLoadStorageCosts/tblLGLoadStorageCost', 2) WITH (
+					intLoadStorageCostId INT
+					,intLoadStorageCostRefId INT
+					) XMLStorageCost
+			JOIN tblLGLoadStorageCost LSC ON LSC.intLoadStorageCostId = XMLStorageCost.intLoadStorageCostRefId
+			WHERE LSC.intLoadId = @intLoadRefId
+				AND LSC.intLoadStorageCostRefId IS NULL
 
-		--------------------------------Warehouse Services------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			--------------------------------Warehouse Services------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadWarehouseServicesXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadWarehouseServicesXML
 
-		UPDATE LWS
-		SET LWS.intLoadWarehouseServicesRefId = XMLStorageCost.intLoadWarehouseServicesId
-		FROM OPENXML(@idoc, 'tblLGLoadWarehouseServicess/tblLGLoadWarehouseServices', 2) WITH (
-				intLoadWarehouseServicesId INT
-				,intLoadWarehouseServicesRefId INT
-				) XMLStorageCost
-		JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseServicesId = XMLStorageCost.intLoadWarehouseServicesRefId
-		JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
-		WHERE LW.intLoadId = @intLoadRefId
-			AND LWS.intLoadWarehouseServicesRefId IS NULL
+			UPDATE LWS
+			SET LWS.intLoadWarehouseServicesRefId = XMLStorageCost.intLoadWarehouseServicesId
+			FROM OPENXML(@idoc, 'tblLGLoadWarehouseServicess/tblLGLoadWarehouseServices', 2) WITH (
+					intLoadWarehouseServicesId INT
+					,intLoadWarehouseServicesRefId INT
+					) XMLStorageCost
+			JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseServicesId = XMLStorageCost.intLoadWarehouseServicesRefId
+			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
+			WHERE LW.intLoadId = @intLoadRefId
+				AND LWS.intLoadWarehouseServicesRefId IS NULL
 
-		--------------------------------Warehouse Container------------------------------------
-		EXEC sp_xml_removedocument @idoc
+			--------------------------------Warehouse Container------------------------------------
+			EXEC sp_xml_removedocument @idoc
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAckLoadWarehouseContainerXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadWarehouseContainerXML
 
-		UPDATE LWC
-		SET LWC.intLoadWarehouseContainerRefId = XMLStorageCost.intLoadWarehouseContainerId
-		FROM OPENXML(@idoc, 'tblLGLoadWarehouseContainers/tblLGLoadWarehouseContainer', 2) WITH (
-				intLoadWarehouseContainerId INT
-				,intLoadWarehouseContainerRefId INT
-				) XMLStorageCost
-		JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadWarehouseContainerId = XMLStorageCost.intLoadWarehouseContainerRefId
-		JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
-		WHERE LW.intLoadId = @intLoadRefId
-			AND LWC.intLoadWarehouseContainerRefId IS NULL
+			UPDATE LWC
+			SET LWC.intLoadWarehouseContainerRefId = XMLStorageCost.intLoadWarehouseContainerId
+			FROM OPENXML(@idoc, 'tblLGLoadWarehouseContainers/tblLGLoadWarehouseContainer', 2) WITH (
+					intLoadWarehouseContainerId INT
+					,intLoadWarehouseContainerRefId INT
+					) XMLStorageCost
+			JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadWarehouseContainerId = XMLStorageCost.intLoadWarehouseContainerRefId
+			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+			WHERE LW.intLoadId = @intLoadRefId
+				AND LWC.intLoadWarehouseContainerRefId IS NULL
+		END
+		ELSE
+		BEGIN
+			------------------Header------------------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadXML
+
+			SELECT @intLoadId = intLoadId
+				,@intLoadRefId = intLoadRefId
+				,@strLoadNumber = strLoadNumber
+				,@intBookId = intBookId
+				,@intSubBookId = intSubBookId
+			FROM OPENXML(@idoc, 'vyuIPLoadAckViews/vyuIPLoadAckView', 2) WITH (
+					intLoadId INT
+					,intLoadRefId INT
+					,strLoadNumber NVARCHAR(100)
+					,intBookId INT
+					,intSubBookId INT
+					)
+
+			UPDATE tblLGLoad
+			SET intLoadRefId = @intLoadId
+				,strExternalLoadNumber = @strContractNumber
+			WHERE intLoadId = @intLoadRefId
+				AND intLoadRefId IS NULL
+
+			-----------------------------------Detail-------------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadDetailXML
+
+			UPDATE LD
+			SET LD.intLoadDetailRefId = XMLDetail.intLoadDetailId
+			FROM OPENXML(@idoc, 'vyuIPLoadDetailAckViews/vyuIPLoadDetailAckView', 2) WITH (
+					intLoadDetailId INT
+					,intLoadDetailRefId INT
+					) XMLDetail
+			JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = XMLDetail.intLoadDetailRefId
+			WHERE LD.intLoadId = @intLoadRefId
+				AND LD.intLoadDetailRefId IS NULL
+
+			-----------------------------------NotifyParty--------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadNotifyPartyXML
+
+			UPDATE LN
+			SET LN.intLoadNotifyPartyRefId = XMLNotifyParty.intLoadNotifyPartyId
+			FROM OPENXML(@idoc, 'vyuIPLoadNotifyPartiesAckViews/vyuIPLoadNotifyPartiesAckView', 2) WITH (
+					intLoadNotifyPartyId INT
+					,intLoadNotifyPartyRefId INT
+					) XMLNotifyParty
+			JOIN tblLGLoadNotifyParties LN ON LN.intLoadNotifyPartyId = XMLNotifyParty.intLoadNotifyPartyRefId
+			WHERE LN.intLoadId = @intLoadRefId
+				AND LN.intLoadNotifyPartyRefId IS NULL
+
+			-----------------------------------Document--------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadDocumentXML
+
+			UPDATE LD
+			SET LD.intLoadDocumentRefId = XMLDocument.intLoadDocumentId
+			FROM OPENXML(@idoc, 'tblLGLoadDocumentss/tblLGLoadDocuments', 2) WITH (
+					intLoadDocumentId INT
+					,intLoadDocumentRefId INT
+					) XMLDocument
+			JOIN tblLGLoadDocuments LD ON LD.intLoadDocumentId = XMLDocument.intLoadDocumentRefId
+			WHERE LD.intLoadId = @intLoadRefId
+				AND LD.intLoadDocumentRefId IS NULL
+
+			-----------------------------------Container-------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadContainerXML
+
+			UPDATE LC
+			SET LC.intLoadContainerRefId = XMLContainer.intLoadContainerId
+			FROM OPENXML(@idoc, 'tblLGLoadContainers/tblLGLoadContainer', 2) WITH (
+					intLoadContainerId INT
+					,intLoadContainerRefId INT
+					) XMLContainer
+			JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = XMLContainer.intLoadContainerRefId
+			WHERE LC.intLoadId = @intLoadRefId
+				AND LC.intLoadContainerRefId IS NULL
+
+			--------------------------------ContainerLink------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadDetailContainerLinkXML
+
+			UPDATE LDCL
+			SET LDCL.intLoadDetailContainerLinkRefId = XMLContainerLink.intLoadDetailContainerLinkId
+			FROM OPENXML(@idoc, 'tblLGLoadDetailContainerLinks/tblLGLoadDetailContainerLink', 2) WITH (
+					intLoadDetailContainerLinkId INT
+					,intLoadDetailContainerLinkRefId INT
+					) XMLContainerLink
+			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailContainerLinkId = XMLContainerLink.intLoadDetailContainerLinkRefId
+			JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+			WHERE LC.intLoadId = @intLoadRefId
+				AND LDCL.intLoadDetailContainerLinkRefId IS NULL
+
+			--------------------------------Warehouse------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadWarehouseXML
+
+			UPDATE LW
+			SET LW.intLoadWarehouseRefId = XMLWarehouse.intLoadWarehouseId
+			FROM OPENXML(@idoc, 'tblLGLoadWarehouses/tblLGLoadWarehouse', 2) WITH (
+					intLoadWarehouseId INT
+					,intLoadWarehouseRefId INT
+					) XMLWarehouse
+			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = XMLWarehouse.intLoadWarehouseRefId
+			WHERE LW.intLoadId = @intLoadRefId
+				AND LW.intLoadWarehouseRefId IS NULL
+
+			--------------------------------Cost------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadCostXML
+
+			UPDATE LCO
+			SET LCO.intLoadCostRefId = XMLCost.intLoadCostId
+			FROM OPENXML(@idoc, 'tblLGLoadCosts/tblLGLoadCost', 2) WITH (
+					intLoadCostId INT
+					,intLoadCostRefId INT
+					) XMLCost
+			JOIN tblLGLoadCost LCO ON LCO.intLoadCostId = XMLCost.intLoadCostRefId
+			WHERE LCO.intLoadId = @intLoadRefId
+				AND LCO.intLoadCostRefId IS NULL
+
+			--------------------------------StorageCost------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadStorageCostXML
+
+			UPDATE LSC
+			SET LSC.intLoadStorageCostRefId = XMLStorageCost.intLoadStorageCostId
+			FROM OPENXML(@idoc, 'tblLGLoadStorageCosts/tblLGLoadStorageCost', 2) WITH (
+					intLoadStorageCostId INT
+					,intLoadStorageCostRefId INT
+					) XMLStorageCost
+			JOIN tblLGLoadStorageCost LSC ON LSC.intLoadStorageCostId = XMLStorageCost.intLoadStorageCostRefId
+			WHERE LSC.intLoadId = @intLoadRefId
+				AND LSC.intLoadStorageCostRefId IS NULL
+
+			--------------------------------Warehouse Services------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadWarehouseServicesXML
+
+			UPDATE LWS
+			SET LWS.intLoadWarehouseServicesRefId = XMLStorageCost.intLoadWarehouseServicesId
+			FROM OPENXML(@idoc, 'tblLGLoadWarehouseServicess/tblLGLoadWarehouseServices', 2) WITH (
+					intLoadWarehouseServicesId INT
+					,intLoadWarehouseServicesRefId INT
+					) XMLStorageCost
+			JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseServicesId = XMLStorageCost.intLoadWarehouseServicesRefId
+			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
+			WHERE LW.intLoadId = @intLoadRefId
+				AND LWS.intLoadWarehouseServicesRefId IS NULL
+
+			--------------------------------Warehouse Container------------------------------------
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckLoadWarehouseContainerXML
+
+			UPDATE LWC
+			SET LWC.intLoadWarehouseContainerRefId = XMLStorageCost.intLoadWarehouseContainerId
+			FROM OPENXML(@idoc, 'tblLGLoadWarehouseContainers/tblLGLoadWarehouseContainer', 2) WITH (
+					intLoadWarehouseContainerId INT
+					,intLoadWarehouseContainerRefId INT
+					) XMLStorageCost
+			JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadWarehouseContainerId = XMLStorageCost.intLoadWarehouseContainerRefId
+			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+			WHERE LW.intLoadId = @intLoadRefId
+				AND LWC.intLoadWarehouseContainerRefId IS NULL
+		END
 
 		---UPDATE Feed Status in Staging
 		UPDATE tblLGIntrCompLogisticsStg
@@ -293,6 +489,8 @@ BEGIN TRY
 		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 			,@referenceTransactionId = @intTransactionRefId
 			,@referenceCompanyId = @intCompanyRefId
+			,@screenId=@intLoadScreenId
+			,@populatedByInterCompany=1
 
 		NextTransaction:
 
@@ -302,11 +500,12 @@ BEGIN TRY
 		FROM @tblLGIntrCompLogisticsAck
 		WHERE intAcknowledgementId > @intAcknowledgementStageId
 	END
-			UPDATE S
+
+	UPDATE S
 	SET strFeedStatus = NULL
-	From tblLGIntrCompLogisticsAck S
-	JOIN @tblLGIntrCompLogisticsAck PS on PS.intAcknowledgementId=S.intAcknowledgementId
-	Where strFeedStatus = 'In-Progress'
+	FROM tblLGIntrCompLogisticsAck S
+	JOIN @tblLGIntrCompLogisticsAck PS ON PS.intAcknowledgementId = S.intAcknowledgementId
+	WHERE strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

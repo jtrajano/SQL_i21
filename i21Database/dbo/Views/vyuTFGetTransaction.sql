@@ -93,7 +93,15 @@ LEFT JOIN tblTFException Exception ON Exception.intReportingComponentId = Trans.
 	AND Exception.strTransactionType = Trans.strTransactionType
 	AND Exception.intTransactionNumberId = Trans.intTransactionNumberId
 WHERE ISNULL(Exception.ysnDeleted, 0) != 1
-
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include') = 0
+		OR Exception.strOriginState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include'))
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude') = 0
+		OR Exception.strOriginState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude'))
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include') = 0
+		OR (Exception.strDestinationState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include')))
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude') = 0
+		OR (Exception.strDestinationState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude')))
+		
 UNION ALL
 
 SELECT intTransactionId = -1 --CAST(CAST(Exception.intExceptionId AS NVARCHAR(10)) + CAST((SELECT TOP 1 ISNULL(intTransactionId, '') FROM tblTFTransaction WHERE intReportingComponentId = Exception.intReportingComponentId) AS NVARCHAR(10)) AS INT)
@@ -186,3 +194,11 @@ LEFT JOIN tblTFProductCode PC ON PC.intProductCodeId = Exception.intProductCodeI
 LEFT JOIN tblICItem Item ON Item.intItemId = Exception.intItemId
 WHERE ISNULL(Exception.ysnDeleted, 0) != 1
 	AND strExceptionType = 'Add'
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include') = 0
+		OR Exception.strOriginState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include'))
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude') = 0
+		OR Exception.strOriginState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentOriginState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude'))
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include') = 0
+		OR (Exception.strDestinationState IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Include')))
+	AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude') = 0
+		OR (Exception.strDestinationState NOT IN (SELECT strOriginDestinationState FROM vyuTFGetReportingComponentDestinationState WHERE intReportingComponentId = Exception.intReportingComponentId AND strType = 'Exclude')))

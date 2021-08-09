@@ -2,7 +2,8 @@ CREATE VIEW [dbo].[vyuICCategoryLocation]
 AS 
 
 SELECT	
-	categoryLocation.* 
+	categoryLocation.*
+	,category.strCategoryCode
 	,companyLocation.strLocationName
 	,companyLocation.intCompanyLocationId
 	,strProductCodeId = defaultProductCode.strRegProdCode
@@ -11,6 +12,8 @@ SELECT
 	,strGeneralItemNo = Item.strItemNo
 FROM	
 	tblICCategoryLocation categoryLocation
+	LEFT JOIN tblICCategory category
+		ON category.intCategoryId = categoryLocation.intCategoryId
 	LEFT JOIN tblSMCompanyLocation companyLocation
 		ON categoryLocation.intLocationId = companyLocation.intCompanyLocationId
 	LEFT JOIN tblSTSubcategoryRegProd defaultProductCode

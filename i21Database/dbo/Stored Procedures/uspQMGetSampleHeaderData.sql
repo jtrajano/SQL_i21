@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspQMGetSampleHeaderData @intProductTypeId INT
 	,@intProductValueId INT
+	,@intLotId INT = 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -36,37 +37,42 @@ BEGIN
 		,C.strSequenceNumber
 		,C.intItemContractId
 		,C.strContractItemName
-		,CAST(CASE 
-				WHEN I.strType = 'Bundle'
-					THEN NULL
-				ELSE C.intItemId
-				END AS INT) AS intItemId
-		,(
-			CASE 
-				WHEN I.strType = 'Bundle'
-					THEN NULL
-				ELSE C.strItemNo
-				END
-			) AS strItemNo
-		,(
-			CASE 
-				WHEN I.strType = 'Bundle'
-					THEN NULL
-				ELSE C.strItemDescription
-				END
-			) AS strDescription
-		,CAST(CASE 
-				WHEN I.strType = 'Bundle'
-					THEN C.intItemId
-				ELSE NULL
-				END AS INT) AS intItemBundleId
-		,(
-			CASE 
-				WHEN I.strType = 'Bundle'
-					THEN C.strItemNo
-				ELSE NULL
-				END
-			) AS strBundleItemNo
+		--,CAST(CASE 
+		--		WHEN I.strType = 'Bundle'
+		--			THEN NULL
+		--		ELSE C.intItemId
+		--		END AS INT) AS intItemId
+		--,(
+		--	CASE 
+		--		WHEN I.strType = 'Bundle'
+		--			THEN NULL
+		--		ELSE C.strItemNo
+		--		END
+		--	) AS strItemNo
+		--,(
+		--	CASE 
+		--		WHEN I.strType = 'Bundle'
+		--			THEN NULL
+		--		ELSE C.strItemDescription
+		--		END
+		--	) AS strDescription
+		--,CAST(CASE 
+		--		WHEN I.strType = 'Bundle'
+		--			THEN C.intItemId
+		--		ELSE NULL
+		--		END AS INT) AS intItemBundleId
+		--,(
+		--	CASE 
+		--		WHEN I.strType = 'Bundle'
+		--			THEN C.strItemNo
+		--		ELSE NULL
+		--		END
+		--	) AS strBundleItemNo
+		,C.intItemId
+		,C.strItemNo
+		,C.strItemDescription AS strDescription
+		,CD.intItemBundleId
+		,IB.strItemNo AS strBundleItemNo
 		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.strItemUOM AS strRepresentingUOM
@@ -94,8 +100,13 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuCTContractDetailView C
 	JOIN tblICItem I ON I.intItemId = C.intItemId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
+	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	WHERE C.intContractDetailId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 9 -- Container Line Item  
@@ -116,6 +127,8 @@ BEGIN
 		,S.intItemId
 		,S.strItemNo
 		,S.strItemDescription AS strDescription
+		,CD.intItemBundleId
+		,IB.strItemNo AS strBundleItemNo
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.strItemUOM AS strRepresentingUOM
 		,C.intEntityId
@@ -145,9 +158,14 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
+	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	WHERE S.intLoadDetailContainerLinkId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 10 -- Shipment Line Item  
@@ -165,6 +183,8 @@ BEGIN
 		,S.intItemId
 		,S.strItemNo
 		,S.strItemDescription AS strDescription
+		,CD.intItemBundleId
+		,IB.strItemNo AS strBundleItemNo
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.strItemUOM AS strRepresentingUOM
 		,C.intEntityId
@@ -192,9 +212,14 @@ BEGIN
 		,C.strBook
 		,C.intSubBookId
 		,C.strSubBook
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM vyuLGLoadContainerReceiptContracts S
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intPContractDetailId
 		AND S.strType = 'Inbound'
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
+	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	WHERE S.intLoadDetailId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 6 -- Lot  
@@ -233,6 +258,8 @@ BEGIN
 		,L.intItemId
 		,I.strItemNo
 		,I.strDescription
+		,CD.intItemBundleId
+		,IB.strItemNo AS strBundleItemNo
 		,(
 			CASE 
 				WHEN IU.intItemUOMId = L.intWeightUOMId
@@ -242,8 +269,8 @@ BEGIN
 			) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 		,UOM.strUnitMeasure AS strRepresentingUOM
-		,I.intOriginId AS intCountryId
-		,CA.strDescription AS strCountry
+		,ISNULL(C.intItemContractOriginId, I.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, CA.strDescription) AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
@@ -267,6 +294,9 @@ BEGIN
 		,S.strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		AND L.intLotId = @intProductValueId
@@ -282,7 +312,10 @@ BEGIN
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
 	LEFT JOIN vyuCTContractDetailView C ON C.intContractDetailId = RI.intContractDetailId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
+	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	LEFT JOIN vyuLGLoadContainerReceiptContracts S ON S.intPContractDetailId = C.intContractDetailId
+		AND S.intLoadContainerId <> -1
 	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
 	WHERE L.intLotId = @intProductValueId
 END
@@ -294,8 +327,10 @@ BEGIN
 
 	SELECT @dblRepresentingQty = SUM(CASE 
 				WHEN IU.intItemUOMId = L.intWeightUOMId
-					THEN ISNULL(L.dblWeight, L.dblQty)
-				ELSE L.dblQty
+					THEN ISNULL(L.dblWeight, 0)
+				WHEN IU.intItemUOMId = L.intItemUOMId
+					THEN ISNULL(L.dblQty, 0)
+				ELSE dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, IU.intItemUOMId, L.dblQty)
 				END)
 		,@intRepresentingUOMId = MAX(IU.intUnitMeasureId)
 		,@strRepresentingUOM = MAX(UOM.strUnitMeasure)
@@ -335,16 +370,22 @@ BEGIN
 		,PL.intItemId
 		,I.strItemNo
 		,I.strDescription
+		,CD.intItemBundleId
+		,IB.strItemNo AS strBundleItemNo
 		,@dblRepresentingQty AS dblRepresentingQty
 		,@intRepresentingUOMId AS intRepresentingUOMId
 		,@strRepresentingUOM AS strRepresentingUOM
-		,I.intOriginId AS intCountryId
-		,CA.strDescription AS strCountry
+		,ISNULL(C.intItemContractOriginId, I.intOriginId) AS intCountryId
+		,ISNULL(C.strItemContractOrigin, CA.strDescription) AS strCountry
 		,@intInventoryReceiptId AS intInventoryReceiptId
 		,@intWorkOrderId AS intWorkOrderId
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
 		,@strContainerNumber AS strContainerNumber
+		,L.intStorageLocationId
+		,SL.strName AS strStorageLocationName
+		,CL.intCompanyLocationSubLocationId
+		,CL.strSubLocationName
 		,S.intLoadId
 		,S.intLoadDetailId
 		,S.intLoadContainerId
@@ -359,17 +400,32 @@ BEGIN
 		,S.strMarks
 		,C.intContractTypeId
 		,C.strItemSpecification
+		,C.intContractHeaderId
+		,C.dblHeaderQuantity
+		,C.strHeaderUnitMeasure
 	FROM tblICParentLot PL
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = PL.intLotStatusId
+		AND PL.intParentLotId = @intProductValueId
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	LEFT JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
-		AND L.intParentLotId = @intProductValueId
+		AND L.intLotId = (
+				CASE 
+					WHEN ISNULL(@intLotId, 0) > 0
+						THEN @intLotId
+					ELSE L.intLotId
+					END
+				)
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = L.intSubLocationId
 	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
 	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
 	LEFT JOIN vyuCTContractDetailView C ON C.intContractDetailId = RI.intContractDetailId
+	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = C.intContractDetailId
+	LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 	LEFT JOIN vyuLGLoadContainerReceiptContracts S ON S.intPContractDetailId = C.intContractDetailId
+		AND S.intLoadContainerId <> -1
 	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
 	WHERE PL.intParentLotId = @intProductValueId
 END

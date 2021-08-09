@@ -1,6 +1,7 @@
-﻿CREATE view [dbo].[vyuMFGetItemSupplyTarget]
-As
-Select I.strItemNo, CL.strLocationName, IL.dblLeadTime As dblSupplyTarget,I.intCompanyId
-from tblICItem I
-JOIN tblICItemLocation IL on IL.intItemId=I.intItemId
-JOIN tblSMCompanyLocation CL on CL.intCompanyLocationId=IL.intLocationId 
+﻿CREATE VIEW [dbo].[vyuMFGetItemSupplyTarget]
+AS
+SELECT I.strItemNo as strNo
+	,IL.dblLeadTime AS dblTgt
+FROM dbo.tblICItem I
+JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
+WHERE strType <> 'Other Charge'

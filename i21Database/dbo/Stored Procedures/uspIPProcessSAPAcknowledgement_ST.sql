@@ -194,6 +194,7 @@ BEGIN TRY
 							,strMessage = 'Success'
 							,strERPPONumber = @PO_NUMBER
 							,strERPItemNumber = @PO_LINE_ITEM_NO
+							,ysnMailSent=1
 						WHERE intContractDetailId = @intContractDetailId
 							AND ISNULL(strFeedStatus, '') IN (
 								'Awt Ack'
@@ -204,8 +205,12 @@ BEGIN TRY
 						UPDATE tblCTContractFeed
 						SET strERPPONumber = @PO_NUMBER
 							,strERPItemNumber = @PO_LINE_ITEM_NO
+							,ysnMailSent=1
 						WHERE intContractDetailId = @intContractDetailId
 							AND ISNULL(strFeedStatus, '') = ''
+
+						INSERT INTO dbo.tblCTContractPreStage (intContractHeaderId)
+						SELECT @intContractHeaderId
 
 						INSERT INTO @tblMessage (
 							strMessageType
@@ -273,6 +278,7 @@ BEGIN TRY
 							UPDATE tblCTContractFeed
 							SET strFeedStatus = 'Ack Rcvd'
 								,strMessage = 'Success'
+								,ysnMailSent=1
 							WHERE intContractDetailId = @intContractDetailId
 								AND ISNULL(strFeedStatus, '') = 'Awt Ack'
 								AND ISNULL(strERPPONumber, '') = @PO_NUMBER
@@ -290,8 +296,13 @@ BEGIN TRY
 								,strMessage = 'Success'
 								,strERPPONumber = @PO_NUMBER
 								,strERPItemNumber = @PO_LINE_ITEM_NO
+								,ysnMailSent=1
 							WHERE intContractDetailId = @intContractDetailId
 								AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+
+							INSERT INTO dbo.tblCTContractPreStage (intContractHeaderId)
+							SELECT @intContractHeaderId
+
 						END
 
 						INSERT INTO @tblMessage (

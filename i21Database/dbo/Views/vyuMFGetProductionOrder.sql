@@ -62,11 +62,12 @@ LEFT JOIN tblMFScheduleCalendarDetail CD ON CD.intCalendarDetailId = SWD.intCale
 LEFT JOIN dbo.tblMFShift S ON S.intShiftId = IsNULL(SWD.intPlannedShiftId, W.intPlannedShiftId)
 LEFT JOIN dbo.tblMFStageWorkOrder SW ON SW.intWorkOrderId = W.intWorkOrderId
 	AND SW.dtmPlannedDate = ISNULL(CD.dtmCalendarDate, W.dtmPlannedDate)
-	AND CASE 
-		WHEN ISNULL(SW.intPlannnedShiftId, 0) = 0
-			THEN ISNULL(SWD.intPlannedShiftId, 0)
-		ELSE ISNULL(SW.intPlannnedShiftId, 0)
-		END = ISNULL(SWD.intPlannedShiftId, 0)
+	AND IsNULL(SW.intPlannnedShiftId,0) = IsNULL(W.intPlannedShiftId,0)
+	--AND CASE 
+	--	WHEN ISNULL(SW.intPlannnedShiftId, 0) = 0
+	--		THEN ISNULL(SWD.intPlannedShiftId, 0)
+	--	ELSE ISNULL(SW.intPlannnedShiftId, 0)
+	--	END = ISNULL(SWD.intPlannedShiftId, 0)
 LEFT JOIN dbo.tblMFOrderHeader OH ON OH.intOrderHeaderId = SW.intOrderHeaderId
 LEFT JOIN dbo.tblMFOrderStatus OS ON OS.intOrderStatusId = OH.intOrderStatusId
 LEFT JOIN dbo.tblMFBlendRequirement BR ON W.intBlendRequirementId = BR.intBlendRequirementId

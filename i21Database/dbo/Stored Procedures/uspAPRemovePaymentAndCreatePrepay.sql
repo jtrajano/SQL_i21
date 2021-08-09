@@ -80,6 +80,8 @@ AND (
 			bankTran.ysnClr = 1
 			OR
 			pay.intPaymentMethodId = 10 --CASH PAYMENT
+			OR
+			pay.intPaymentMethodId = 6 --eCheck
 		) 
 	)
 
@@ -182,6 +184,8 @@ BEGIN
 		,origBill.dblPayment = origBill.dblPayment - payDetail.dblPayment
 		,origBill.dblAmountDue = origBill.dblAmountDue + payDetail.dblPayment
 		,origBill.dtmDatePaid = NULL
+		,origBill.dblPaymentTemp = origBill.dblPaymentTemp - payDetail.dblPayment
+		,origBill.ysnInPayment = 0
 	FROM tblAPBill origBill
 	INNER JOIN tblAPPaymentDetail payDetail ON origBill.intBillId = payDetail.intBillId
 	INNER JOIN tblAPPayment pay ON payDetail.intPaymentId = pay.intPaymentId

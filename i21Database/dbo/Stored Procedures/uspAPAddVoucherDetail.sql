@@ -45,6 +45,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -64,6 +65,7 @@ IF NOT EXISTS(
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
@@ -105,6 +107,8 @@ SELECT TOP 100 PERCENT
 	,intLoadDetailId					=	A.intLoadShipmentDetailId
 	,intLoadId							=	A.intLoadShipmentId
 	,intLoadShipmentCostId				=	A.intLoadShipmentCostId
+	,intWeightClaimId					=	A.intWeightClaimId
+	,intWeightClaimDetailId				=	A.intWeightClaimDetailId
 	,intScaleTicketId					=	A.intScaleTicketId
 	,intTicketId						=	A.intTicketId
 	,intCCSiteDetailId					=	A.intCCSiteDetailId
@@ -116,6 +120,7 @@ SELECT TOP 100 PERCENT
 	,intContractDetailId				=	ctDetail.intContractDetailId
 	,intPriceFixationDetailId			=	A.intPriceFixationDetailId
 	,intContractSeq						=	ctDetail.intContractSeq
+	,intLinkingId						=	A.intLinkingId
 	/*Prepaid info*/					
 	,dblPrepayPercentage				=	A.dblPrepayPercentage
 	,intPrepayTypeId					=	A.intPrepayTypeId
@@ -143,16 +148,18 @@ SELECT TOP 100 PERCENT
 	,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
 											ELSE A.dblCostUnitQty END
-	,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
-														THEN ctDetail.dblSeqPrice
-													ELSE 
-														(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
-															THEN ctDetail.dblSeqPrice
-															ELSE A.dblCost
-														END)
-													END)
-											ELSE A.dblCost END
+	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
+	,dblCost							=	A.dblCost
+	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
+	-- 													THEN ctDetail.dblSeqPrice
+	-- 												ELSE 
+	-- 													(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
+	-- 														THEN ctDetail.dblSeqPrice
+	-- 														ELSE A.dblCost
+	-- 													END)
+	-- 												END)
+	-- 										ELSE A.dblCost END
 	,dblOldCost							=	A.dblOldCost
 	/*Quantity info*/					
 	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
@@ -338,7 +345,7 @@ LEFT JOIN @payablesKey payableKeys
 	ON payableKeys.intOldPayableId = A.intVoucherPayableId
 LEFT JOIN tblAPVoucherPayable vp 
 	ON payableKeys.intNewPayableId = vp.intVoucherPayableId
-WHERE A.ysnStage = 1
+WHERE A.ysnStage = 1 AND vp.intVoucherPayableId IS NOT NULL --UPDATE ONLY THOSE WHO IS IN tblAPVoucherPayable
 
 MERGE INTO tblAPBillDetail AS destination
 USING
@@ -379,7 +386,9 @@ INSERT
 	,intLocationId						
 	,intLoadDetailId
 	,intLoadShipmentCostId					
-	,intLoadId							
+	,intLoadId	
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					
@@ -391,6 +400,7 @@ INSERT
 	,intContractDetailId	
 	,intPriceFixationDetailId			
 	,intContractSeq						
+	,intLinkingId					
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
 	,intPrepayTypeId					
@@ -470,7 +480,9 @@ VALUES
 	,intLocationId						
 	,intLoadDetailId	
 	,intLoadShipmentCostId				
-	,intLoadId							
+	,intLoadId				
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId					
 	,intTicketId					
 	,intCCSiteDetailId					
@@ -482,6 +494,7 @@ VALUES
 	,intContractDetailId	
 	,intPriceFixationDetailId			
 	,intContractSeq						
+	,intLinkingId			
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
 	,intPrepayTypeId					
@@ -587,7 +600,7 @@ FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
 LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
-WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
+WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL OR A.intPriceFixationDetailId > 0
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 

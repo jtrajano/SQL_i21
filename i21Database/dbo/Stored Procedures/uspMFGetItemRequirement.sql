@@ -84,7 +84,7 @@ BEGIN
 			,W.dtmLatestDate
 			,SW.dtmPlannedStartDate
 			,SW.dtmPlannedEndDate
-			,SH.strShiftName
+			,'' strShiftName
 			,0 AS intConcurrencyId
 		FROM dbo.tblMFSchedule S
 		JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId
@@ -97,7 +97,7 @@ BEGIN
 		JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
-		JOIN dbo.tblMFShift SH ON SH.intShiftId = SWD.intPlannedShiftId
+		--JOIN dbo.tblMFShift SH ON SH.intShiftId = SWD.intPlannedShiftId
 		LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = W.intCustomerId
 		WHERE (
 				(
@@ -131,7 +131,7 @@ BEGIN
 			,W.dtmLatestDate
 			,SW.dtmPlannedStartDate
 			,SW.dtmPlannedEndDate
-			,SH.strShiftName
+			--,SH.strShiftName
 		ORDER BY W.strSalesOrderNo
 
 		INSERT INTO @tblInputItem (

@@ -260,8 +260,8 @@ BEGIN
 		,FT.strFreightTerm AS strShipmentMethodOfPayment
 		,strTotalPalletsLoaded
 		,SUM(dblQuantityShipped) OVER (PARTITION BY InvS.intInventoryShipmentId) dblTotalUnitsShipped
-		,0 AS dblTotalWeight
-		,'' AS strWeightUOM
+		,IsNULL(SUM(dblQuantityShipped*I.dblWeight)OVER (PARTITION BY InvS.intInventoryShipmentId),0) AS dblTotalWeight
+		,IsNULL(W.strUnitMeasure,'') AS strWeightUOM
 		,InvSI.intLineNo AS intLineNo
 		,@strOrderStatus AS strOrderStatus
 		,IsNULL(EDI.strUPCCaseCode, '') AS strUPCCaseCode
@@ -319,6 +319,7 @@ BEGIN
 		AND I.intItemId = IU1.intItemId
 	LEFT JOIN tblSMShipVia SV ON SV.intEntityId = InvS.intShipViaId
 	JOIN tblSMFreightTerms FT ON FT.intFreightTermId = InvS.intFreightTermId
+	Left JOIN tblICUnitMeasure W on W.intUnitMeasureId=I.intWeightUOMId
 
 	SELECT *
 	INTO #tblMFSSCCNo

@@ -16,6 +16,7 @@ dbo.fnConvertNumberToWord(Unde.dblAmount) COLLATE Latin1_General_CI_AS AS strAmo
 BT.intCurrencyId, 
 BT.dblExchangeRate, 
 BT.intEntityId, 
+BT.ysnCheckVoid,
 Unde.ysnToProcess, 
 Unde.ysnCommitted, 
 Unde.ysnGenerated, 
@@ -30,10 +31,10 @@ ysnPayeeEFTInfoActive = ISNULL((
 		SELECT TOP 1 ysnActive FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc
 ),0),
-strPayeeEFTInfoEffective = ISNULL((
-		SELECT TOP 1 (CASE WHEN dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) THEN 'EFFECTIVE' ELSE 'INEFFECTIVE' END)  FROM [tblEMEntityEFTInformation] EFTInfo 
-		WHERE EFTInfo.ysnActive = 1 AND dtmEffectiveDate <= DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0) AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc
-),'INVALID') COLLATE Latin1_General_CI_AS,
+dtmEFTEffectiveDate = 
+		(SELECT TOP 1 dtmEffectiveDate  FROM [tblEMEntityEFTInformation] EFTInfo 
+			WHERE EFTInfo.ysnActive = 1 
+			AND intEntityId =  Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc),
 ysnPrenoteSent = ISNULL((
 		SELECT TOP 1 ysnPrenoteSent FROM [tblEMEntityEFTInformation] EFTInfo 
 		WHERE EFTInfo.ysnActive = 1 AND intEntityId = Pay.intEntityCustomerId ORDER BY dtmEffectiveDate desc

@@ -8,6 +8,7 @@ SELECT	L.strLoadNumber
 		,dblDeliveredQuantity = CASE WHEN ISNULL(LDCL.dblReceivedQty, 0) = 0 THEN LD.dblDeliveredQuantity ELSE ISNULL(LDCL.dblReceivedQty, 0) END  
 		,ItemUOM.dblUnitQty AS dblItemUOMCF
 		,LC.strContainerNumber
+		,LC.strContainerId
 		,dblFranchise = CASE WHEN ISNULL(PWG.dblFranchise, 0) > 0 THEN PWG.dblFranchise / 100 ELSE 0 END 
 		,dblContainerWeightPerQty = CASE WHEN ISNULL(LC.dblQuantity, 0) = 0 THEN LC.dblNetWt ELSE LC.dblNetWt / LC.dblQuantity END -- (LC.dblNetWt / CASE WHEN ISNULL(LC.dblQuantity,0) = 0 THEN 1 ELSE LC.dblQuantity END)
 		,intWeightUOMId = WeightItemUOM.intItemUOMId

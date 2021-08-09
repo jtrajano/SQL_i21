@@ -42,6 +42,9 @@ CREATE TABLE [dbo].[tblCTItemContractHistory] (
 	[strTransactionType]					[nvarchar](250)	COLLATE Latin1_General_CI_AS NULL,
 	[dtmTransactionDate]					[datetime] NULL,	
 
+	[ysnUsageLog]							[bit] DEFAULT ((0)) NOT NULL,
+	[dtmCreatedDate]						[datetime] NULL,
+
     [intConcurrencyId]						[int] CONSTRAINT [DF_tblCTItemContractHistory_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 
     CONSTRAINT [PK_tblCTItemContractHistory_intItemContractHistoryId] PRIMARY KEY CLUSTERED ([intItemContractHistoryId] ASC)

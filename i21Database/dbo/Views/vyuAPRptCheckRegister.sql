@@ -4,7 +4,7 @@
 			APP.strPaymentRecordNum,
 			CMBT.ysnCheckVoid,
 			CMBT.ysnClr,
-			'AP' COLLATE Latin1_General_CI_AS AS strSystem,
+			'AP' AS strSystem,
 			CMBA.intBankId,
 			CMBTT.strBankTransactionTypeName,
 			dtmDateReconciled AS dtmClearedDate,
@@ -23,10 +23,10 @@
 		FROM 
 			dbo.tblCMBankTransaction CMBT 
 		INNER JOIN tblCMBankTransactionType CMBTT
-			ON CMBT.intBankTransactionTypeId =  CMBT.intBankTransactionTypeId
+			ON CMBT.intBankTransactionTypeId =  CMBTT.intBankTransactionTypeId
 		INNER JOIN tblCMBankAccount CMBA
 			ON CMBA.intBankAccountId =  CMBT.intBankAccountId
 		INNER JOIN tblAPPayment APP
 			ON CMBT.strTransactionId = APP.strPaymentRecordNum
 		WHERE 
-			CMBTT.strBankTransactionTypeName = 'AP Payment'
+			CMBTT.strBankTransactionTypeName IN ('AP Payment','AP eCheck','Void Check','Void ACH','ACH','Void AP Payment')

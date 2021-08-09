@@ -12,7 +12,7 @@ SELECT
 		WHEN vyu.strAccountType = 'Liability' THEN 'L'
 		WHEN vyu.strAccountType = 'Equity' THEN 'Q'
 	ELSE ''
-	END	COLLATE Latin1_General_CI_AS
+	END	
 ,dblBudget1  = ISNULL(dblBudget1,0)
 ,dblBudget2  = ISNULL(dblBudget2,0)
 ,dblBudget3  = ISNULL(dblBudget3,0) 

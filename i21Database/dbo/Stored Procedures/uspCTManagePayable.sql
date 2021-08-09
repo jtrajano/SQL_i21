@@ -51,7 +51,7 @@ BEGIN TRY
 			IF (@intContractHeaderId IS NOT NULL AND @intContractHeaderId > 0)
 			BEGIN
 				SET @intScreenId = (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strModule = 'Contract Management' AND strNamespace = 'ContractManagement.view.Contract');
-				IF NOT EXISTS (SELECT * FROM tblSMTransaction a WHERE a.intRecordId = @intContractHeaderId AND a.intScreenId = @intScreenId AND a.strApprovalStatus IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
+				IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMTransaction a WHERE a.intRecordId = @intContractHeaderId AND a.intScreenId = @intScreenId AND a.strApprovalStatus IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
 				BEGIN
 					/*Don't add to Payables IF the contract is NOT yet approved.*/
 					RETURN
@@ -122,7 +122,7 @@ INSERT INTO @voucherPayables(
 )
 SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type, 1, @remove);
 
-IF NOT EXISTS(SELECT * FROM @voucherPayables)
+IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables)
 BEGIN	
 	IF @type = 'header' AND @remove = 0
 	BEGIN
@@ -133,7 +133,125 @@ END
 
 IF @remove = 0
 BEGIN
+
+	--/*CT-5329 (Pass only those payables that are exists in tblAPVoucherPayable)*/
+
+	--DECLARE @updateVoucherPayables AS VoucherPayable;
+	--insert into @updateVoucherPayables (
+	--	 [intEntityVendorId]    
+	--	 ,[intTransactionType]    
+	--	 ,[intLocationId]    
+	--	 ,[intShipToId]    
+	--	 ,[intShipFromId]    
+	--	 ,[intShipFromEntityId]    
+	--	 ,[intPayToAddressId]    
+	--	 ,[intCurrencyId]    
+	--	 ,[dtmDate]    
+	--	 ,[strVendorOrderNumber]    
+	--	 ,[strReference]    
+	--	 ,[strSourceNumber]    
+	--	 ,[intPurchaseDetailId]    
+	--	 ,[intContractHeaderId]    
+	--	 ,[intContractDetailId]    
+	--	 ,[intContractSeqId]    
+	--	 ,[intContractCostId]    
+	--	 ,[intScaleTicketId]    
+	--	 ,[intInventoryReceiptItemId]    
+	--	 ,[intInventoryReceiptChargeId]    
+	--	 ,[intInventoryShipmentItemId]    
+	--	 ,[intInventoryShipmentChargeId]    
+	--	 ,[intLoadShipmentId]    
+	--	 ,[intLoadShipmentDetailId]    
+	--	 ,[intItemId]          
+	--	 ,[intPurchaseTaxGroupId]       
+	--	 ,[strMiscDescription]    
+	--	 ,[dblOrderQty]    
+	--	 ,[dblOrderUnitQty]    
+	--	 ,[intOrderUOMId]    
+	--	 ,[dblQuantityToBill]    
+	--	 ,[dblQtyToBillUnitQty]    
+	--	 ,[intQtyToBillUOMId]    
+	--	 ,[dblCost]         
+	--	 ,[dblCostUnitQty]    
+	--	 ,[intCostUOMId]    
+	--	 ,[dblNetWeight]    
+	--	 ,[dblWeightUnitQty]    
+	--	 ,[intWeightUOMId]    
+	--	 ,[intCostCurrencyId]    
+	--	 ,[dblTax]    
+	--	 ,[dblDiscount]    
+	--	 ,[intCurrencyExchangeRateTypeId]    
+	--	 ,[dblExchangeRate]    
+	--	 ,[ysnSubCurrency]    
+	--	 ,[intSubCurrencyCents]    
+	--	 ,[intAccountId]    
+	--	 ,[intShipViaId]    
+	--	 ,[intTermId]       
+	--	 ,[strBillOfLading]       
+	--	 ,[ysnReturn] 
+	--)
+	--select distinct
+	--	 a.[intEntityVendorId]    
+	--	 ,a.[intTransactionType]    
+	--	 ,a.[intLocationId]    
+	--	 ,a.[intShipToId]    
+	--	 ,a.[intShipFromId]    
+	--	 ,a.[intShipFromEntityId]    
+	--	 ,a.[intPayToAddressId]    
+	--	 ,a.[intCurrencyId]    
+	--	 ,a.[dtmDate]    
+	--	 ,a.[strVendorOrderNumber]    
+	--	 ,a.[strReference]    
+	--	 ,a.[strSourceNumber]    
+	--	 ,a.[intPurchaseDetailId]    
+	--	 ,a.[intContractHeaderId]    
+	--	 ,a.[intContractDetailId]    
+	--	 ,a.[intContractSeqId]    
+	--	 ,a.[intContractCostId]    
+	--	 ,a.[intScaleTicketId]    
+	--	 ,a.[intInventoryReceiptItemId]    
+	--	 ,a.[intInventoryReceiptChargeId]    
+	--	 ,a.[intInventoryShipmentItemId]    
+	--	 ,a.[intInventoryShipmentChargeId]    
+	--	 ,a.[intLoadShipmentId]    
+	--	 ,a.[intLoadShipmentDetailId]    
+	--	 ,a.[intItemId]          
+	--	 ,a.[intPurchaseTaxGroupId]       
+	--	 ,a.[strMiscDescription]    
+	--	 ,a.[dblOrderQty]    
+	--	 ,a.[dblOrderUnitQty]    
+	--	 ,a.[intOrderUOMId]    
+	--	 ,a.[dblQuantityToBill]    
+	--	 ,a.[dblQtyToBillUnitQty]    
+	--	 ,a.[intQtyToBillUOMId]    
+	--	 ,a.[dblCost]         
+	--	 ,a.[dblCostUnitQty]    
+	--	 ,a.[intCostUOMId]    
+	--	 ,a.[dblNetWeight]    
+	--	 ,a.[dblWeightUnitQty]    
+	--	 ,a.[intWeightUOMId]    
+	--	 ,a.[intCostCurrencyId]    
+	--	 ,a.[dblTax]    
+	--	 ,a.[dblDiscount]    
+	--	 ,a.[intCurrencyExchangeRateTypeId]    
+	--	 ,a.[dblExchangeRate]    
+	--	 ,a.[ysnSubCurrency]    
+	--	 ,a.[intSubCurrencyCents]    
+	--	 ,a.[intAccountId]    
+	--	 ,a.[intShipViaId]    
+	--	 ,a.[intTermId]       
+	--	 ,a.[strBillOfLading]       
+	--	 ,a.[ysnReturn] 
+	--from
+	--	@voucherPayables a
+	--	,tblAPVoucherPayable b
+	--where
+	--	b.intContractHeaderId = a.intContractHeaderId
+	--	and b.intContractDetailId = a.intContractDetailId
+	--	and b.intContractCostId = a.intContractCostId
+
 	EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @voucherPayableTax = @voucherPayableTax
+
 END
 ELSE
 BEGIN
@@ -144,11 +262,13 @@ IF @type = 'header' AND @remove = 0
 BEGIN
 	EXEC uspCTDeleteBasisUnAccruedPayable @id
 
-	UPDATE	CC
-	SET		CC.intPrevConcurrencyId = CC.intConcurrencyId
-	FROM	tblCTContractCost	CC
-	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
-	WHERE	CD.intContractHeaderId	=	@id
+	SELECT @intContractDetailId = intContractDetailId
+	FROM tblCTContractDetail
+	WHERE intContractHeaderId = @id
+	
+	UPDATE	tblCTContractCost
+	SET		intPrevConcurrencyId = intConcurrencyId
+	WHERE	intContractDetailId	=	@intContractDetailId
 END
 
 END TRY

@@ -86,7 +86,7 @@ BEGIN TRY
 	JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 	WHERE ET.strType = 'User'
 		AND t.intEntityId = @intUserId
-		AND t.strEntityNo <> ''
+		--AND t.strEntityNo <> ''
 
 	IF @strLastModifiedUser IS NULL
 	BEGIN
@@ -162,10 +162,10 @@ BEGIN TRY
 			,@strFromCompanyName NVARCHAR(150)
 			,@intTransactionId INT
 			,@intCompanyId INT'
-		,intOptionsMatchPnSHeaderId
-		,strHeaderXML
-		,strOptionsMatchPnSXML
-		,strOptionsPnSExpiredXML
+		,@intOptionsMatchPnSHeaderId
+		,@strHeaderXML
+		,@strOptionsMatchPnSXML
+		,@strOptionsPnSExpiredXML
 		,@strRowState
 		,@strLastModifiedUser
 		,@intToCompanyId

@@ -75,10 +75,10 @@ BEGIN TRY
 					@intTraderId			=	CH.intSalespersonId,
 					@strBuySell				=	CASE WHEN CH.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,	
 
-					@intCurrencyId			=	TS.intCurrencyId,
-					@intBookId				=	TS.intBookId,
-					@intSubBookId			=	TS.intSubBookId,
-					@intLocationId			=	TS.intCompanyLocationId,
+					@intCurrencyId			=	CD.intCurrencyId,
+					@intBookId				=	CD.intBookId,
+					@intSubBookId			=	CD.intSubBookId,
+					@intLocationId			=	CD.intCompanyLocationId,
 					@ysnAA					=	CF.ysnAA,
 					@dblHedgeNoOfLots		= 	CF.dblHedgeNoOfLots,
 					@intUserId				=	CD.intCreatedById
@@ -88,8 +88,10 @@ BEGIN TRY
 			JOIN	tblCTContractDetail			CD		ON		CD.intContractDetailId = CF.intContractDetailId
 			INNER 
 			JOIN	tblCTContractHeader			CH		ON		CH.intContractHeaderId = CD.intContractHeaderId
-			CROSS	
-			APPLY	fnCTGetTopOneSequence(CD.intContractHeaderId,CD.intContractDetailId) TS
+			-- CROSS	
+			-- APPLY	fnCTGetTopOneSequence(CD.intContractHeaderId,CD.intContractDetailId) TS
+
+
 			WHERE	CF.intContractFuturesId	=	@intContractFuturesId
 
 			SELECT @ysnFreezed = ysnFreezed FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = ISNULL(@intFutOptTransactionId,0)
@@ -131,16 +133,6 @@ BEGIN TRY
 				IF ISNULL(@intFutOptTransactionId,0) = 0
 				BEGIN
 					UPDATE tblCTContractFutures SET intFutOptTransactionId = @intOutputId WHERE intContractFuturesId = @intContractFuturesId
-					-- DERIVATIVE ENTRY HISTORY						
-					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'ADD', 0
-					-- DERIVATIVE ENTRY AUDIT LOG: EXEC uspSMAuditLog 'RiskManagement.view.DerivativeEntry', @intFutOptTransactionHeaderId, @intUserId, 'Created', 'small-new-plus'
-				END
-				ELSE IF dbo.fnCTCheckIfDuplicateFutOptTransactionHistory(@intOutputId) > 1
-				BEGIN
-					-- DERIVATIVE ENTRY HISTORY
-					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'UPDATE', 0
 				END
 			END
 

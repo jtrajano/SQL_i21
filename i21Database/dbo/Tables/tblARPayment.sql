@@ -49,10 +49,9 @@
 	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
 
-
-
-
-
+GO
+CREATE NONCLUSTERED INDEX [NC_Index_tblARPayment]
+ON [dbo].[tblARPayment]([intEntityCustomerId], [ysnPosted], [ysnProcessedToNSF]) INCLUDE ([dtmDatePaid], [dblAmountPaid], [strRecordNumber], [ysnInvoicePrepayment]);
 
 GO
 CREATE TRIGGER trgReceivePaymentRecordNumber
@@ -107,6 +106,7 @@ BEGIN
 
 	DECLARE @strRecordNumber 	NVARCHAR(50) = NULL
 		  , @strError 			NVARCHAR(500) = NULL
+		  , @strPaidInvoice 	NVARCHAR(MAX) = NULL
 		  , @intPaymentId 		INT = NULL
 		  , @ysnPosted			BIT = 0		  
 
@@ -115,11 +115,22 @@ BEGIN
 		 , @ysnPosted		= ysnPosted 
 	FROM DELETED 
 
+	SELECT @strPaidInvoice = COALESCE(@strPaidInvoice + ', ' + I.strInvoiceNumber, I.strInvoiceNumber)
+	FROM tblARPaymentDetail PD
+	INNER JOIN DELETED D ON PD.intPaymentId = D.intPaymentId
+	INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+	WHERE D.ysnPosted = 0
+	  AND I.ysnPaid = 1
+	GROUP BY I.strInvoiceNumber
+
 	IF EXISTS (SELECT TOP 1 NULL FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strCode = 'AR' AND intTransactionId = @intPaymentId AND strTransactionId = @strRecordNumber)
 		SET @strError = 'You cannot delete payment ' + @strRecordNumber + '. It has existing posted GL entries.';
 
 	IF @ysnPosted = 1
 		SET @strError = 'You cannot delete posted payment (' + @strRecordNumber + ')';
+
+	IF @strPaidInvoice <> ''
+		SET @strError = 'Invoice (' + @strPaidInvoice + ') has been fully paid. This payment may not be deleted.';
 
 	IF ISNULL(@strError, '') <> ''
 		RAISERROR(@strError, 16, 1);
@@ -194,4 +205,37 @@ BEGIN
 	END
 	ELSE
 		RAISERROR('Cannot update posted payment',16,1)		
+END
+
+GO
+CREATE TRIGGER trgForDeleteARPayment
+    ON dbo.tblARPayment
+    FOR DELETE
+AS
+BEGIN
+	IF EXISTS (SELECT * FROM DELETED)
+		BEGIN
+			--iNSERT
+		   INSERT INTO  tblARAuditLog
+		   SELECT 'Deleted','Payment',strRecordNumber,GETDATE(),NULL,0 FROM DELETED
+
+		END
+END
+
+GO
+CREATE TRIGGER trgForUpdatePayment 
+	ON dbo.tblARPayment
+	FOR UPDATE 
+AS
+BEGIN
+		DECLARE @strRecordNumber NVARCHAR (50) 
+		SELECT @strRecordNumber=i.strRecordNumber from deleted i; IF UPDATE(strRecordNumber)
+
+		IF @strRecordNumber IS NOT  NULL
+		BEGIN
+		IF UPDATE (strRecordNumber)
+		INSERT INTO  tblARAuditLog
+		   SELECT 'Updated','Payment',strRecordNumber,GETDATE(),NULL,0 FROM deleted
+
+		END
 END

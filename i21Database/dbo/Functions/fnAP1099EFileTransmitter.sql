@@ -13,7 +13,7 @@ BEGIN
 	@transmitter = 
 		'T' --1
 		+ CAST(@year AS NVARCHAR(10))  --Position 2-5
-		+ CASE WHEN @year <= YEAR(GETDATE()) - 1 THEN ' ' ELSE 'P' END -- Position 6
+		+ CASE WHEN @year < (YEAR(GETDATE()) - 1) THEN 'P' ELSE ' ' END -- Position 6
 		+ ISNULL(NULLIF(LEFT(A.strFederalTaxID,9),''),SPACE(9)) --Position 7-15 TIN
 		+ C.strTransmitterCode --'33A19' --Position 16-20 TCC
 		+ SPACE(7) -- 21-27Position 

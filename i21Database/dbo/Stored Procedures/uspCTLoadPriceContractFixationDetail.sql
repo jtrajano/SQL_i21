@@ -17,7 +17,7 @@ BEGIN TRY
 					(
 						SELECT  ',' +  convert(nvarchar(20),c.intInvoiceId)
 						from tblCTPriceFixationDetailAPAR c
-						where c.intPriceFixationDetailId = a.intPriceFixationDetailId
+						where c.intPriceFixationDetailId = a.intPriceFixationDetailId and isnull(c.ysnReturn,0) = 0
 						FOR xml path('')
 					)
 				, 1
@@ -29,7 +29,7 @@ BEGIN TRY
 					(
 						SELECT  ', ' + b.strInvoiceNumber
 						FROM tblARInvoice b
-						WHERE b.intInvoiceId in (select c.intInvoiceId from tblCTPriceFixationDetailAPAR c where c.intPriceFixationDetailId = a.intPriceFixationDetailId)
+						WHERE b.intInvoiceId in (select c.intInvoiceId from tblCTPriceFixationDetailAPAR c where c.intPriceFixationDetailId = a.intPriceFixationDetailId and isnull(c.ysnReturn,0) = 0)
 						FOR xml path('')
 					)
 				, 1
@@ -37,7 +37,7 @@ BEGIN TRY
 				, ''
 			)
 		from tblCTPriceFixationDetailAPAR a
-		where a.intInvoiceId is not null group by a.intPriceFixationDetailId			
+		where a.intInvoiceId is not null and isnull(a.ysnReturn,0) = 0 group by a.intPriceFixationDetailId			
 		),
 	fixationDetailVoucher as (
 		select
@@ -74,7 +74,7 @@ BEGIN TRY
 			SELECT PFD.intPriceFixationDetailId, BP.ysnPaid
 			FROM tblCTPriceFixationDetail PFD
 			INNER JOIN tblCTPriceFixationDetailAPAR APAR ON PFD.intPriceFixationDetailId = APAR.intPriceFixationDetailId AND APAR.intBillId IS NOT NULL
-			INNER JOIN vyuAPBillPayment BP ON APAR.intBillId = BP.intBillId
+			INNER JOIN tblAPBill BP ON APAR.intBillId = BP.intBillId
 			WHERE PFD.intPriceFixationId = @intPriceFixationId
 			GROUP BY PFD.intPriceFixationDetailId, BP.ysnPaid
 		)

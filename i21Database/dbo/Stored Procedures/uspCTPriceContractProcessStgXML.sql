@@ -54,6 +54,7 @@ BEGIN TRY
 		,@intPriceUnitMeasureId INT
 		,@strPriceItemUOM NVARCHAR(50)
 		,@config AS ApprovalConfigurationType
+		,@ysnApproval BIT
 	DECLARE @intNewPriceContractId INT
 		,@strFinalPriceUOM NVARCHAR(50)
 		,@strAgreedItemUOM NVARCHAR(50)
@@ -120,6 +121,11 @@ BEGIN TRY
 		,@strSubmittedByXML NVARCHAR(MAX)
 		,@strApprover NVARCHAR(100)
 		,@intCurrentUserEntityId INT
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId INT
+		,@strUserName NVARCHAR(50)
+		,@intAuditLogUserId INT
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -166,6 +172,10 @@ BEGIN TRY
 		SET @intCompanyId = NULL
 		SET @strApproverXML = NULL
 
+		SELECT @ysnApproval = NULL
+			,@strLogXML = NULL
+			,@strAuditXML = NULL
+
 		SELECT @intPriceContractId = intPriceContractId
 			,@strPriceContractNo = strPriceContractNo
 			,@strPriceContractXML = strPriceContractXML
@@ -183,6 +193,8 @@ BEGIN TRY
 			,@strTransactionType = strTransactionType
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
+			,@strLogXML = strLogXML
+			,@strAuditXML = strAuditXML
 		FROM tblCTPriceContractStage
 		WHERE intPriceContractStageId = @intPriceContractStageId
 
@@ -615,6 +627,7 @@ BEGIN TRY
 
 			UPDATE tblCTPriceContractStage
 			SET strFeedStatus = 'Processed'
+				,intStatusId = 1
 			WHERE intPriceContractStageId = @intPriceContractStageId
 		END
 
@@ -658,6 +671,7 @@ BEGIN TRY
 					,@dtmLastModified = dtmLastModified
 					,@strCreatedBy = strCreatedBy
 					,@strLastModifiedBy = strLastModifiedBy
+					,@ysnApproval = ysnApproval
 				FROM OPENXML(@idoc, 'vyuIPPriceContracts/vyuIPPriceContract', 2) WITH (
 						strUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strCurrency NVARCHAR(40) Collate Latin1_General_CI_AS
@@ -668,6 +682,7 @@ BEGIN TRY
 						,strLastModifiedBy NVARCHAR(50) Collate Latin1_General_CI_AS
 						,intPriceContractId INT
 						,strPriceContractNo NVARCHAR(50) Collate Latin1_General_CI_AS
+						,ysnApproval BIT
 						) x
 
 				SELECT @intUnitMeasureId = intUnitMeasureId
@@ -744,7 +759,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'User'
 				WHERE EY.strName = @strCreatedBy
-					AND EY.strEntityNo <> ''
+					--AND EY.strEntityNo <> ''
 
 				IF @intCreatedById IS NULL
 				BEGIN
@@ -766,7 +781,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'User'
 				WHERE EY.strName = @strLastModifiedBy
-					AND EY.strEntityNo <> ''
+					--AND EY.strEntityNo <> ''
 
 				IF @intLastModifiedById IS NULL
 				BEGIN
@@ -807,6 +822,7 @@ BEGIN TRY
 						,intConcurrencyId
 						,intPriceContractRefId
 						,intCompanyId
+						,ysnReadOnlyInterCoPrice
 						)
 					SELECT @strNewPriceContractNo
 						,@intCommodityId
@@ -819,6 +835,7 @@ BEGIN TRY
 						,1 AS intConcurrencyId
 						,@intPriceContractId
 						,@intCompanyRefId
+						,1 As ysnReadOnlyInterCoPrice
 
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
 
@@ -844,6 +861,7 @@ BEGIN TRY
 						,intLastModifiedById = @intLastModifiedById
 						,dtmLastModified = @dtmLastModified
 						,intConcurrencyId = intConcurrencyId + 1
+						,ysnReadOnlyInterCoPrice=1
 					WHERE intPriceContractRefId = @intPriceContractId
 						AND intPriceContractId = @intNewPriceContractId
 				END
@@ -1766,16 +1784,13 @@ BEGIN TRY
 				IF @intCurrentUserEntityId IS NULL
 					SELECT @intCurrentUserEntityId = @intCreatedById
 
-				EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.PriceContracts'
-					,@recordId = @intNewPriceContractId
-					,@transactionNo = @strNewPriceContractNo
-					,@transactionEntityId = @intEntityId
-					,@currentUserEntityId = @intCurrentUserEntityId
-					,@amount = 0
-					,@approverConfiguration = @config
-
-				x:
-
+				--EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.PriceContracts'
+				--	,@recordId = @intNewPriceContractId
+				--	,@transactionNo = @strNewPriceContractNo
+				--	,@transactionEntityId = @intEntityId
+				--	,@currentUserEntityId = @intCurrentUserEntityId
+				--	,@amount = 0
+				--	,@approverConfiguration = @config
 				SELECT @intContractScreenId = intScreenId
 				FROM tblSMScreen
 				WHERE strNamespace = 'ContractManagement.view.PriceContracts'
@@ -1784,6 +1799,244 @@ BEGIN TRY
 				FROM tblSMTransaction
 				WHERE intRecordId = @intNewPriceContractId
 					AND intScreenId = @intContractScreenId
+
+				IF @intTransactionRefId IS NULL
+				BEGIN
+					INSERT INTO tblSMTransaction (
+						intScreenId
+						,intRecordId
+						,strTransactionNo
+						,intEntityId
+						,strApprovalStatus
+						,intConcurrencyId
+						)
+					SELECT @intContractScreenId
+						,@intNewPriceContractId
+						,@strNewPriceContractNo
+						,@intEntityId
+						,'Waiting for Submit'
+						,1
+
+					SELECT @intTransactionRefId = SCOPE_IDENTITY()
+
+					INSERT INTO tblSMApproval (
+						dtmDate
+						,dblAmount
+						,dtmDueDate
+						,intSubmittedById
+						,strStatus
+						,ysnCurrent
+						,intScreenId
+						,ysnVisible
+						,intOrder
+						,intTransactionId
+						)
+					SELECT GETUTCDATE()
+						,0
+						,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+						,@intCurrentUserEntityId
+						,'Waiting for Submit'
+						,1
+						,@intContractScreenId
+						,1
+						,1
+						,@intTransactionRefId
+				END
+				ELSE
+				BEGIN
+					IF @ysnApproval = 1
+					BEGIN
+						UPDATE tblSMTransaction
+						SET strApprovalStatus = 'Waiting for Submit'
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intTransactionId = @intTransactionRefId
+
+						UPDATE tblSMApproval
+						SET ysnCurrent = 0
+						WHERE intTransactionId = @intTransactionRefId
+
+						DECLARE @maxOrder INT = ISNULL((
+									SELECT MAX(intOrder)
+									FROM tblSMApproval
+									WHERE intTransactionId = @intTransactionRefId
+									), 0)
+
+						-- Increment this
+						SELECT @maxOrder = @maxOrder + 1
+
+						INSERT INTO tblSMApproval (
+							dtmDate
+							,dblAmount
+							,dtmDueDate
+							,intSubmittedById
+							,strStatus
+							,ysnCurrent
+							,intScreenId
+							,ysnVisible
+							,intOrder
+							,intTransactionId
+							,intApproverId
+							)
+						SELECT GETUTCDATE()
+							,0
+							,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+							,@intCurrentUserEntityId
+							,'Edited Transaction'
+							,0
+							,@intContractScreenId
+							,1
+							,@maxOrder
+							,@intTransactionRefId
+							,@intCurrentUserEntityId
+
+						-- Increment this
+						SELECT @maxOrder = @maxOrder + 1
+
+						INSERT INTO tblSMApproval (
+							dtmDate
+							,dblAmount
+							,dtmDueDate
+							,intSubmittedById
+							,strStatus
+							,ysnCurrent
+							,intScreenId
+							,ysnVisible
+							,intOrder
+							,intTransactionId
+							)
+						SELECT GETUTCDATE()
+							,0
+							,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+							,@intCurrentUserEntityId
+							,'Waiting for Submit'
+							,1
+							,@intContractScreenId
+							,1
+							,@maxOrder
+							,@intTransactionRefId
+					END
+				END
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLogXML
+
+				SELECT @strUserName = NULL
+
+				SELECT @strUserName = strName
+				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS)
+
+				SELECT @intAuditLogUserId = NULL
+
+				SELECT @intAuditLogUserId = CE.intEntityId
+				FROM tblEMEntity CE
+				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+				WHERE ET1.strType = 'User'
+					AND CE.strName = @strUserName
+					--AND CE.strEntityNo <> ''
+
+				IF @intAuditLogUserId IS NULL
+				BEGIN
+					SELECT TOP 1 @intAuditLogUserId = intEntityId
+					FROM tblSMUserSecurity
+					WHERE strUserName = 'irelyadmin'
+				END
+
+				INSERT INTO tblSMLog (
+					dtmDate
+					,strRoute
+					,intTransactionId
+					,intConcurrencyId
+					,intEntityId
+					,strType
+					)
+				SELECT dtmDate
+					,strRoute
+					,@intTransactionRefId
+					,1
+					,@intAuditLogUserId
+					,'Audit'
+				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (
+						intLogId INT
+						,dtmDate DATETIME
+						,strRoute NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						)
+
+				SELECT @intLogId = SCOPE_IDENTITY();
+
+				EXEC sp_xml_removedocument @idoc
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strAuditXML
+
+				DECLARE @tblSMAudit TABLE (
+					intAuditId INT
+					,intAuditRefId INT
+					)
+
+				DELETE
+				FROM @tblSMAudit
+
+				INSERT INTO tblSMAudit (
+					intLogId
+					,strAction
+					,strChange
+					,strFrom
+					,strTo
+					,strAlias
+					,ysnField
+					,ysnHidden
+					,intKeyValue
+					--,intParentAuditId
+					,intConcurrencyId
+					)
+				OUTPUT inserted.intAuditId
+					,inserted.intKeyValue
+				INTO @tblSMAudit
+				SELECT @intLogId
+					,strAction
+					,strChange
+					,strFrom
+					,strTo
+					,strAlias
+					,ysnField
+					,ysnHidden
+					,intAuditId
+					--,(
+					--	SELECT TOP 1 A.intAuditId
+					--	FROM tblSMAudit A
+					--	WHERE intLogId = @intLogId
+					--		AND A.intKeyValue = x.intParentAuditId
+					--	)
+					,1
+				FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+						intLogId INT
+						,strAction NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strChange NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						,strFrom NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						,strTo NVARCHAR(MAX) Collate Latin1_General_CI_AS
+						,strAlias NVARCHAR(205) Collate Latin1_General_CI_AS
+						,ysnField BIT
+						,ysnHidden BIT
+						,intAuditId INT
+						,intParentAuditId INT
+						) x
+
+				UPDATE A1
+				SET intParentAuditId = (
+						SELECT TOP 1 A2.intAuditId
+						FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+								intAuditId INT
+								,intParentAuditId INT
+								) x
+						JOIN @tblSMAudit A2 ON A2.intAuditRefId = x.intParentAuditId
+						WHERE x.intAuditId = A.intAuditRefId
+						)
+				FROM @tblSMAudit A
+				JOIN tblSMAudit A1 ON A.intAuditId = A1.intAuditId
+
+				EXEC sp_xml_removedocument @idoc
+
+				x:
 
 				DECLARE @strSQL NVARCHAR(MAX)
 					,@strServerName NVARCHAR(50)
@@ -1796,7 +2049,7 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT 1
-						FROM master.dbo.sysdatabases
+						FROM sys.databases
 						WHERE name = @strDatabaseName
 						)
 				BEGIN
@@ -1859,6 +2112,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
+						,@screenId=@intContractScreenId
+						,@populatedByInterCompany=1
 				END
 
 				UPDATE tblCTPriceContractStage

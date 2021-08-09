@@ -26,5 +26,6 @@ CREATE TYPE [dbo].[StorageHistoryStagingTable] AS TABLE
 	[strSettleTicket] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
     [strVoucher] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	[dblOldCost] DECIMAL(38,20) NULL,
+	[dblCost] DECIMAL(38,20) NULL,
     [intTransferStorageReferenceId] INT NULL
 )

@@ -276,17 +276,20 @@ BEGIN
 					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'',''I'') THEN
 														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
 													ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
-					[dbl1099]				=	(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
+					[dbl1099]				=	(CASE WHEN A.dblTotal <> A.dblAmountDue 
 												THEN 
-													(
-														((CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
-															/
-															(A.dblTotal)
+													(CASE WHEN (A.dblTotal > 0 AND C2.apivc_1099_amt > 0)
+													THEN 
+														(
+															((CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+																/
+																(A.dblTotal)
+															)
+															*
+															A.dblTotal
 														)
-														*
-														A.dblTotal
-													)
-												ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
+													ELSE 0 END) --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
+												ELSE 0 END),
 					[int1099Form]			=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 1 ELSE 0 END),
 					[int1099Category]		=	(CASE WHEN C2.apivc_1099_amt > 0 THEN 8 ELSE 0 END),
 					[intLineNo]				=	C.aphgl_dist_no,

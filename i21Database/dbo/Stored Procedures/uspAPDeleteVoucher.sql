@@ -107,14 +107,17 @@ BEGIN TRY
 		ON A.intTransactionReversed = B.intBillId
 	WHERE A.intBillId = @intBillId
 
-	--EXECUTE uspAPUpdateVoucherPayable for deleted.
-	EXEC [dbo].[uspAPUpdateVoucherPayable]
-		@voucherDetailIds = @voucherBillDetailIds,
-		@decrease = 1
-	
-	EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
-		@billDetailIds = @voucherBillDetailIds,
-		@decrease = 0
+	IF(EXISTS(SELECT TOP 1 1 FROM @voucherBillDetailIds))
+	BEGIN
+		--EXECUTE uspAPUpdateVoucherPayable for deleted.
+		EXEC [dbo].[uspAPUpdateVoucherPayable]
+			@voucherDetailIds = @voucherBillDetailIds,
+			@decrease = 1
+		
+		EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
+			@billDetailIds = @voucherBillDetailIds,
+			@decrease = 0
+	END
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
 
@@ -122,7 +125,12 @@ BEGIN TRY
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 
-	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
+	IF(EXISTS(SELECT TOP 1 1 FROM @voucherBillDetailIds))
+	BEGIN
+		EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
+	END
+
+	EXEC uspAPAddTransactionLinks 1, @intBillId, 2
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
@@ -144,19 +152,22 @@ BEGIN TRY
 	--Update the tblAPBillBatch
 	EXEC uspAPUpdateBillBatch @billBatchId = @billBatchId
 
-	DELETE FROM dbo.tblSMTransaction
-	WHERE intRecordId = @intBillId 
-	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
+	--Removed - FRM-9293
+	--DELETE FROM dbo.tblSMTransaction
+	--WHERE intRecordId = @intBillId 
+	--AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
 	
-	--Audit Log          
-	EXEC dbo.uspSMAuditLog 
-		 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
-		,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
-		,@entityId			= @UserEntityID						-- Entity Id.
-		,@actionType		= 'Deleted'							-- Action Type
-		,@changeDescription	= ''								-- Description
-		,@fromValue			= ''								-- Previous Value
-		,@toValue			= ''								-- New Value
+	IF @callerModule <> 0
+	BEGIN
+		EXEC dbo.uspSMAuditLog 
+			 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
+			,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
+			,@entityId			= @UserEntityID						-- Entity Id.
+			,@actionType		= 'Deleted'							-- Action Type
+			,@changeDescription	= ''								-- Description
+			,@fromValue			= ''								-- Previous Value
+			,@toValue			= ''								-- New Value
+	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
 

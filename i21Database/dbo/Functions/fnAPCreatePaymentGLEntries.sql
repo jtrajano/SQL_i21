@@ -698,7 +698,7 @@ BEGIN
 		-- [strTransactionForm]			=	@SCREEN_NAME,
 		-- [strModuleName]					=	@MODULE_NAME,
 		-- [intConcurrencyId]				=	1,
-		-- [dblDebitForeign]				=	CASE WHEN DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1 THEN DT.dblDifference ELSE 0 END,   
+		-- [dblDebitForeign]				=	CASE WHEN DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1 THEN DT.dblDifferenceForeign ELSE 0 END,   
 		-- [dblDebitReport]				=	0,
 		-- [dblCreditForeign]				=	0,
 		-- [dblCreditReport]				=	0,
@@ -753,6 +753,7 @@ BEGIN
 		-- ) DT
 		-- WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds) AND
 		-- ((DT.dblDifference <> 0 AND DT.dblDifference < 1 AND DT.dblDifference > -1) OR (DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1))
+		-- AND PD.dblPayment <> 0
 
 	UPDATE A
 		SET A.strDescription = B.strDescription

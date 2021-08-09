@@ -20,7 +20,8 @@ BEGIN TRY
 			@intContractDetailId	INT,
 			@intLaguageId			INT,
 			@intSrCurrentUserId		INT,
-			@strCurrentUser			NVARCHAR(100)
+			@strCurrentUser			NVARCHAR(100),
+			@strReportDateFormat	nvarchar(50)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -79,7 +80,8 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSrCurrentUserId'
 
-	SELECT	@strCurrentUser = strName FROM tblEMEntity WHERE intEntityId = @intSrCurrentUserId
+	SELECT	@strCurrentUser = strName FROM tblEMEntity WHERE intEntityId = @intSrCurrentUserId;
+	select top 1 @strReportDateFormat = strReportDateFormat from tblSMCompanyPreference;
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strAddress)) END,
@@ -102,15 +104,17 @@ BEGIN TRY
 			,strContractNumber						=	CH.strContractNumber + ' / ' + CAST(CD.intContractSeq AS NVARCHAR(5))
 			,strDestinationPointName				=	SQ.strDestinationPointName
 			,strItemDescription						=   strItemDescription
-			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + ' ' + ISNULL(SQ.strPackingDescription, '')
-			,strShipment							=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
+			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure
+			--,strShipment							=	LEFT(DATENAME(MONTH, SQ.dtmEndDate), 3) + ' ' + DATENAME(YEAR, SQ.dtmEndDate) + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + CASE WHEN NULLIF(SQ.strFixationBy, '') IS NOT NULL THEN ' at '+ SQ.strFixationBy+'''s option' ELSE '' END
+			,strShipment							=	replace(convert(varchar,SQ.dtmStartDate,103),' ','/') + ' - ' + replace(convert(varchar,SQ.dtmEndDate,103),' ','/') + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + CASE WHEN NULLIF(SQ.strFixationBy, '') IS NOT NULL THEN ' at '+ SQ.strFixationBy+'''s option' ELSE '' END
 
-			,strEntityAddress						=  	LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
-													  	ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-													  	ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
-													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') + 
-													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + 
-													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'')
+		    ,strEntityAddress      					=   LTRIM(RTRIM(EY.strEntityName)) + ', '    + CHAR(13)+CHAR(10) +  
+										                ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +  
+										                ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') +   
+										                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') +   
+										                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'')
+		  
+		    ,strEntityCountry      					=   CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END
 													  	
 			,strBookEntityAddress					=  	LTRIM(RTRIM(EV.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
 													  	ISNULL(LTRIM(RTRIM(EV.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
@@ -119,13 +123,25 @@ BEGIN TRY
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityZipCode)) END,'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityCountry)) END,'')
 			,strLocationWithDate					=	SQ.strLocationName+', '+ CONVERT (VARCHAR,CH.dtmContractDate,106)
+			,strLocationWithOutDate					=	SQ.strLocationName+', '
+			,strLocationDate						=	GETDATE()--CH.dtmContractDate
+			,strReportDateFormat					=	@strReportDateFormat
 			,strCustomerContract					=	CH.strCustomerContract
 			,strStraussText1						=	'<p>Pls arrange for pre-shipment samples for the above mentioned consignment. Samples of 250 grams per lot should be drawn and sent by Courier <span style="text-decoration: underline;"><strong>21 days prior</strong></span> to shipment to the below stated address.</p>'
 			,strCompanyName							=	@strCompanyName
 			,strCurrentUser							=	@strCurrentUser
 			,strReportTitle							=   (case when pos.strPositionType = 'Shipment' then 'PRE-SHIPMENT SAMPLE INSTRUCTIONS' when pos.strPositionType = 'Spot' then 'SAMPLE INSTRUCTIONS' else '' end)
 			,strPositionLabel						=   (case when pos.strPositionType = 'Shipment' then 'Shipment' when pos.strPositionType = 'Spot' then 'Delivery' else '' end)
-			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION')
+			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION%')
+			, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
+
+			,strStraussEntityName = LTRIM(RTRIM(EY.strEntityName))
+			,strStraussStreetAddress = ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'')
+			,strStraussZipCodeAndCity = ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) + ' ' END,'') + ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'')
+			/*For strStraussState, replace the value with Country if the value is null or empty - this is to eliminate the gap between City and Country if no State is define*/
+			,strStraussState = ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN (CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END) ELSE LTRIM(RTRIM(EY.strEntityState))   END,'')
+			/*For strStraussCountry, replace the value with null if the strStraussState is null or empty - this is to eliminate the gap between City and Country if no State is define*/
+			,strStraussCountry = CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN null else CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END end
 
 		FROM	tblCTContractHeader				CH
 		JOIN	tblCTContractDetail				CD	WITH (NOLOCK)	ON	CH.intContractHeaderId	= CD.intContractHeaderId
@@ -146,6 +162,7 @@ LEFT	JOIN	(
 								DP.strCity								AS	strDestinationPointName,
 								CD.strPackingDescription				AS strPackingDescription,
 								CD.dtmStartDate,
+								CD.dtmEndDate,
 								IM.strDescription AS strItemDescription,
 								CD.strFixationBy
 

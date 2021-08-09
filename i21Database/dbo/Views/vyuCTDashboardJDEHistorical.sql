@@ -49,7 +49,7 @@ SELECT 	 SQ.intContractDetailId
 		,BK.strBook						
 		,SK.strSubBook					
 		,CD.strInvoiceNo						
-		,CD.strCertifications AS strCertificationName	
+		,dbo.[fnCTCoalesceCertificates](CD.intContractDetailId)  AS strCertificationName	
 		,CH.intContractHeaderId				
 		,ISNULL(CD.dblScheduleQty, 0)			AS dblScheduleQty
 		,CASE 	WHEN ISNULL(CD.ysnInvoice, 0) = 0 	
@@ -80,7 +80,7 @@ SELECT 	 SQ.intContractDetailId
 		,CD.strERPBatchNumber
 		,CD.strGarden
 		,CH.strCustomerContract
-		,CB.strContractBasis
+		,strContractBasis = NULL
 		,CD.dtmPlannedAvailabilityDate
 		,dtmPlannedAvailabilityDateYM = CD.dtmPlannedAvailabilityDate
 		,SQ.strCommodityCode
@@ -140,7 +140,6 @@ SELECT 	 SQ.intContractDetailId
 	FROM 		vyuCTContractSequence			 	SQ	WITH (NOLOCK)		
 	JOIN 		tblCTContractDetail				 	CD	WITH (NOLOCK) ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId NOT IN (1,2,4)
 	JOIN 		tblCTContractHeader				 	CH	WITH (NOLOCK) ON	CH.intContractHeaderId				=	SQ.intContractHeaderId
-	LEFT JOIN	tblCTContractBasis					CB	WITH (NOLOCK) ON	CB.intContractBasisId				=	CH.intContractBasisId
 	LEFT JOIN	tblICItem						 	IM	WITH (NOLOCK) ON	IM.intItemId						=	SQ.intItemId
 	LEFT JOIN 	tblEMEntity						 	PR	WITH (NOLOCK) ON	PR.intEntityId						=	ISNULL(CD.intProducerId,CH.intProducerId)
 	LEFT JOIN 	tblSMCity						 	LP	WITH (NOLOCK) ON	LP.intCityId						=	CD.intLoadingPortId

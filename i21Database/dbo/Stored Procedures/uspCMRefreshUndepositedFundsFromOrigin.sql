@@ -30,25 +30,25 @@ WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
 		)
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
+IF @intBankAccountId IS NOT NULL
+BEGIN
 -- Update any outdated records from the Deposit Entry table that does not have bank account.
-UPDATE tblCMUndepositedFund
-set intBankAccountId = @intBankAccountId
-WHERE strSourceSystem = 'AR'
-	AND intSourceTransactionId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1 AND intBankAccountId IS NULL)
-	AND intBankDepositId IS NULL
+	UPDATE tblCMUndepositedFund
+	set intBankAccountId = @intBankAccountId
+	WHERE strSourceSystem = 'AR'
+		AND intSourceTransactionId IN (SELECT intPaymentId FROM tblARPayment WHERE ysnPosted = 1 AND intBankAccountId IS NULL)
+		AND intBankDepositId IS NULL
 
--- Update any outdated records from the Deposit Entry table that came from Invoice.
-UPDATE tblCMUndepositedFund
-set intBankAccountId = @intBankAccountId
-WHERE strSourceSystem = 'AR'
-	AND strSourceTransactionId LIKE 'SI-%'
-	AND intBankDepositId IS NULL
+	-- Update any outdated records from the Deposit Entry table that came from Invoice.
+	UPDATE tblCMUndepositedFund
+	set intBankAccountId = @intBankAccountId
+	WHERE strSourceSystem = 'AR'
+		AND strSourceTransactionId LIKE 'SI-%'
+		AND intBankDepositId IS NULL
 
-IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
+	IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
-DECLARE @intCurrencyId  INT
-SELECT TOP 1 @intCurrencyId = intCurrencyId FROM tblCMBankAccount where intBankAccountId = @intBankAccountId
-
+END
 -- Insert records from the Deposit Entry
 ;WITH CTE AS (
 SELECT	
@@ -165,25 +165,27 @@ WHERE dblAmount <> 0
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 -- Update the Undeposited Fund records from the Deposit Entry
-UPDATE	tblCMUndepositedFund
-SET		dtmDate = dbo.fnConvertOriginDateToSQLDateTime(v.aptrx_chk_rev_dt) -- Use aptrx_chk_rev_dt because this is the deposit entry date. 
-		,dblAmount = ABS(v.aptrx_net_amt)
-		,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
-		,strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
-		,intLastModifiedUserId = @intUserId
-		,dtmLastModified = GETDATE()
-FROM	tblCMUndepositedFund f INNER JOIN vyuCMOriginDepositEntry v
-			ON f.strSourceTransactionId = ( 
-							CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
-							+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
-							+ CAST(v.aptrx_cbk_no AS NVARCHAR(2)) 
-							+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
-						) COLLATE Latin1_General_CI_AS
-		INNER JOIN tblCMBankAccount b
-			ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
-WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
-		AND f.intBankAccountId = @intBankAccountId
-		AND f.intBankDepositId IS NULL 
+IF @intBankAccountId IS NOT NULL
+	UPDATE	tblCMUndepositedFund
+	SET		dtmDate = dbo.fnConvertOriginDateToSQLDateTime(v.aptrx_chk_rev_dt) -- Use aptrx_chk_rev_dt because this is the deposit entry date. 
+			,dblAmount = ABS(v.aptrx_net_amt)
+			,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
+			,strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
+			,intLastModifiedUserId = @intUserId
+			,dtmLastModified = GETDATE()
+	FROM	tblCMUndepositedFund f INNER JOIN vyuCMOriginDepositEntry v
+				ON f.strSourceTransactionId = ( 
+								CAST(v.aptrx_vnd_no AS NVARCHAR(10)) 
+								+ CAST(v.aptrx_ivc_no AS NVARCHAR(18)) 
+								+ CAST(v.aptrx_cbk_no AS NVARCHAR(2)) 
+								+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
+							) COLLATE Latin1_General_CI_AS
+			INNER JOIN tblCMBankAccount b
+				ON b.strCbkNo = v.aptrx_cbk_no COLLATE Latin1_General_CI_AS 
+	WHERE	f.strSourceSystem = @SOURCE_SYSTEM_DEPOSIT_ENTRY
+			AND f.intBankAccountId = @intBankAccountId
+			AND f.intBankDepositId IS NULL 
+			
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
 --=====================================================================================================================================

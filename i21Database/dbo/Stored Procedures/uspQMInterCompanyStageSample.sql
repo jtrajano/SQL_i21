@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intSamplePreStageId INT
 		,@strFromCompanyName NVARCHAR(150)
 		,@intCompanyId INT
+		,@intBookId INT
 
 	SELECT @intCompanyId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -66,9 +67,11 @@ BEGIN TRY
 	BEGIN
 		SELECT @intSampleId = NULL
 			,@strRowState = NULL
+			,@intBookId = NULL
 
 		SELECT @intSampleId = intSampleId
 			,@strRowState = strRowState
+			,@intBookId = intBookId
 		FROM tblQMSamplePreStage WITH (NOLOCK)
 		WHERE intSamplePreStageId = @intSamplePreStageId
 
@@ -153,6 +156,7 @@ BEGIN TRY
 			END
 
 			IF @strUpdate = 'Update'
+				AND @strRowState <> 'Delete'
 			BEGIN
 				IF EXISTS (
 						SELECT 1
@@ -175,8 +179,26 @@ BEGIN TRY
 
 			IF @strRowState = 'Delete'
 			BEGIN
-				IF @strDelete = 'Delete'
+				IF NOT EXISTS (
+					SELECT 1
+					FROM tblQMSample WITH (NOLOCK)
+					WHERE intSampleId = @intSampleId
+				)
 				BEGIN
+					SELECT @intToBookId = @intBookId
+						,@strToTransactionType = 'Quality Sample'
+						,@intToCompanyId = intCompanyId
+						,@strFromCompanyName = strName
+					FROM tblIPMultiCompany WITH (NOLOCK)
+					WHERE intBookId = @intBookId
+
+					IF ISNULL(@intParent, 0) = 0
+					BEGIN
+						SELECT @intToCompanyId = intCompanyId
+						FROM tblIPMultiCompany WITH (NOLOCK)
+						WHERE ysnParent = 1
+					END
+
 					EXEC uspQMSamplePopulateStgXML @intSampleId
 						,@intToEntityId
 						,@intCompanyLocationId

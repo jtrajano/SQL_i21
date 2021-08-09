@@ -17,7 +17,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmDate					= I.dtmDate
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
 	 , dtmDueDate				= I.dtmDueDate
-	 , intPaymentId				= P.intPaymentId
+	 , intPaymentId				= CASE WHEN I.strTransactionType = 'Cash' THEN BT.intTransactionId ELSE P.intPaymentId END
 	 , strRecordNumber			= CASE WHEN I.strTransactionType = 'Cash' THEN BT.strTransactionId ELSE P.strRecordNumber END
 	 , dblDiscount				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscount,0)  ELSE  ISNULL(I.dblDiscount,0) * -1 END
 	 , dblDiscountAvailable		= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscountAvailable,0)  ELSE  ISNULL(I.dblDiscountAvailable,0) * -1 END

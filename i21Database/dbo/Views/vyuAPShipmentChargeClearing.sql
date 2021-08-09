@@ -66,8 +66,17 @@ SELECT
     ,billDetail.intItemId  
     ,billDetail.intUnitOfMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal  
-    ,CASE   
+    ,(billDetail.dblTotal + billDetail.dblTax) 
+        *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        )
+    AS dblVoucherTotal  
+    ,(CASE   
         WHEN billDetail.intWeightUOMId IS NULL THEN   
             ISNULL(billDetail.dblQtyReceived, 0)   
         ELSE   
@@ -77,7 +86,16 @@ SELECT
                 ELSE   
                     ISNULL(billDetail.dblNetWeight, 0)   
             END  
-    END AS dblVoucherQty  
+    END)
+    *
+        (
+            CASE 
+            WHEN bill.intTransactionType = 3
+            THEN -1
+            ELSE 1
+            END
+        )
+     AS dblVoucherQty  
     ,0 AS dblReceiptChargeTotal
     ,0 AS dblReceiptChargeQty
     -- ,((ShipmentCharge.dblAmount) * (CASE WHEN ShipmentCharge.ysnPrice = 1 THEN -1 ELSE 1 END))  

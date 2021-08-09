@@ -53,6 +53,7 @@ BEGIN TRY
 		,@strParentLotNumber NVARCHAR(50)
 		,@strReferenceNo NVARCHAR(50)
 		,@intTransactionFrom INT
+		,@strItemNo nvarchar(50)
 
 	DECLARE @tblQuantityBreakup AS Table
 	(
@@ -166,6 +167,7 @@ BEGIN TRY
 
 	SELECT @strLotTracking = strLotTracking
 		,@intCategoryId = intCategoryId
+		,@strItemNo=strItemNo 
 	FROM tblICItem
 	WHERE intItemId = @intItemId
 
@@ -335,10 +337,178 @@ BEGIN TRY
 
 	IF @strLotTracking = 'No'
 	BEGIN
+		
 		SELECT @strRetBatchId = strBatchId
 			,@intBatchId = intBatchID
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+
+				DECLARE @dblUpperToleranceQuantity NUMERIC(16, 8)
+			,@dblLowerToleranceQuantity NUMERIC(16, 8)
+			,@strQtyToProduce NVARCHAR(50)
+			,@strUpperToleranceQuantity NVARCHAR(50)
+			,@strLowerToleranceQuantity NVARCHAR(50)
+			,@intInputItemId INT
+			,@strInputItemNo NVARCHAR(50)
+			,@strQty NVARCHAR(50)
+			,@dblUpperTolerance NUMERIC(16, 8)
+		DECLARE @tblMFWorkOrderConsumedItem TABLE (
+			intItemId INT
+			,dblQty NUMERIC(18, 6)
+			)
+
+		INSERT INTO @tblMFWorkOrderConsumedItem (
+			intItemId
+			,dblQty
+			)
+		SELECT intItemId
+			,sum(dblQuantity)
+		FROM tblMFWorkOrderConsumedLot
+		WHERE intWorkOrderId = @intWorkOrderId
+		GROUP BY intItemId
+
+		IF EXISTS (
+				SELECT 1
+				FROM dbo.tblMFWorkOrderRecipe R
+				JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+					AND R.intWorkOrderId = RI.intWorkOrderId
+				JOIN @tblMFWorkOrderConsumedItem CI ON CI.intItemId = RI.intItemId
+				WHERE R.intItemId = @intItemId
+					AND R.ysnActive = 1
+					AND R.intLocationId = @intLocationId
+					AND intRecipeItemTypeId = 1
+					AND R.intWorkOrderId = @intWorkOrderId
+					AND CI.dblQty > (dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity)
+					AND IsNULL(RI.dblUpperTolerance, 0) > 0
+				)
+		BEGIN
+			SELECT TOP 1 @intInputItemId = RI.intItemId
+				,@strUpperToleranceQuantity = [dbo].[fnRemoveTrailingZeroes] (RI.dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity)
+				,@strQty = [dbo].[fnRemoveTrailingZeroes](CI.dblQty)
+			FROM dbo.tblMFWorkOrderRecipe R
+			JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+				AND R.intWorkOrderId = RI.intWorkOrderId
+			JOIN @tblMFWorkOrderConsumedItem CI ON CI.intItemId = RI.intItemId
+			WHERE R.intItemId = @intItemId
+				AND R.ysnActive = 1
+				AND R.intLocationId = @intLocationId
+				AND intRecipeItemTypeId = 1
+				AND R.intWorkOrderId = @intWorkOrderId
+				AND CI.dblQty > (RI.dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity)
+				AND IsNULL(RI.dblUpperTolerance, 0) > 0
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			RAISERROR (
+					'The attempted consume quantity of ''%s'' for material ''%s'' is more than the allowed consumption quantity with upper tolerance %s. The transaction will not be allowed to proceed.'
+					,11
+					,1
+					,@strQty
+					,@strInputItemNo
+					,@strUpperToleranceQuantity
+					)
+
+			RETURN
+		END
+
+		IF EXISTS (
+				SELECT 1
+				FROM dbo.tblMFWorkOrderRecipe R
+				JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+					AND R.intWorkOrderId = RI.intWorkOrderId
+				JOIN @tblMFWorkOrderConsumedItem CI ON CI.intItemId = RI.intItemId
+				WHERE R.intItemId = @intItemId
+					AND R.ysnActive = 1
+					AND R.intLocationId = @intLocationId
+					AND intRecipeItemTypeId = 1
+					AND R.intWorkOrderId = @intWorkOrderId
+					AND (RI.dblCalculatedLowerTolerance * @dblPlannedQuantity / R.dblQuantity) > CI.dblQty
+				)
+		BEGIN
+			SELECT TOP 1 @intInputItemId = RI.intItemId
+				,@strLowerToleranceQuantity = [dbo].[fnRemoveTrailingZeroes] (RI.dblCalculatedLowerTolerance * @dblPlannedQuantity / R.dblQuantity)
+				,@strQty = [dbo].[fnRemoveTrailingZeroes](CI.dblQty)
+			FROM dbo.tblMFWorkOrderRecipe R
+			JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+				AND R.intWorkOrderId = RI.intWorkOrderId
+			JOIN @tblMFWorkOrderConsumedItem CI ON CI.intItemId = RI.intItemId
+			WHERE R.intItemId = @intItemId
+				AND R.ysnActive = 1
+				AND R.intLocationId = @intLocationId
+				AND intRecipeItemTypeId = 1
+				AND R.intWorkOrderId = @intWorkOrderId
+				AND (dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity) > CI.dblQty
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			RAISERROR (
+					'The attempted consume quantity of ''%s'' for material ''%s'' is less than the allowed consumption quantity with lower tolerance %s. The transaction will not be allowed to proceed.'
+					,11
+					,1
+					,@strQty
+					,@strInputItemNo
+					,@strLowerToleranceQuantity
+					)
+
+			RETURN
+		END
+
+		SELECT @dblUpperToleranceQuantity = CASE 
+				WHEN dblCalculatedUpperTolerance = 0
+					THEN @dblPlannedQuantity
+				ELSE dblCalculatedUpperTolerance * @dblPlannedQuantity / R.dblQuantity
+				END
+			,@dblLowerToleranceQuantity = dblCalculatedLowerTolerance * @dblPlannedQuantity / R.dblQuantity
+			,@dblUpperTolerance = IsNULL(RI.dblUpperTolerance, 0)
+		FROM dbo.tblMFWorkOrderRecipe R
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+			AND R.intWorkOrderId = RI.intWorkOrderId
+		WHERE R.intItemId = @intItemId
+			AND R.ysnActive = 1
+			AND intRecipeItemTypeId = 2
+			AND RI.intItemId = @intItemId
+			AND R.intWorkOrderId = @intWorkOrderId
+
+		IF @dblQtyToProduce > @dblUpperToleranceQuantity
+			AND @dblUpperTolerance > 0
+		BEGIN
+			SELECT @strQtyToProduce = [dbo].[fnRemoveTrailingZeroes]( @dblQtyToProduce)
+
+			SELECT @strUpperToleranceQuantity = [dbo].[fnRemoveTrailingZeroes](@dblUpperToleranceQuantity)
+
+			RAISERROR (
+					'The attempted produce quantity of ''%s'' for material ''%s'' is more than the allowed production quantity with upper tolerance %s. The transaction will not be allowed to proceed.'
+					,11
+					,1
+					,@strQtyToProduce
+					,@strItemNo
+					,@strUpperToleranceQuantity
+					)
+
+			RETURN
+		END
+
+		IF @dblLowerToleranceQuantity > @dblQtyToProduce
+		BEGIN
+			SELECT @strQtyToProduce = [dbo].[fnRemoveTrailingZeroes](@dblQtyToProduce)
+
+			SELECT @strLowerToleranceQuantity = [dbo].[fnRemoveTrailingZeroes](@dblLowerToleranceQuantity)
+
+			RAISERROR (
+					'The attempted produce quantity of ''%s'' for material ''%s'' is less than the allowed production quantity with lower tolerance %s. The transaction will not be allowed to proceed.'
+					,11
+					,1
+					,@strQtyToProduce
+					,@strItemNo
+					,@strLowerToleranceQuantity
+					)
+
+			RETURN
+		END
 
 		if @intStorageLocationId=0
 			Set @intStorageLocationId=NULL
@@ -603,6 +773,20 @@ BEGIN TRY
 		SELECT @intId = MIN(intId)
 		FROM @tblMFWorkOrderConsumedLot
 		WHERE intId > @intId
+	END
+
+	IF NOT EXISTS(SELECT *
+					FROM dbo.tblMFProductionPreStage
+					WHERE intWorkOrderId = @intWorkOrderId)
+	BEGIN
+		INSERT INTO dbo.tblMFProductionPreStage (
+				intWorkOrderId
+				,intProductionStatusId
+				,intUserId
+				)
+		SELECT @intWorkOrderId
+			,13
+			,@intUserId
 	END
 
 	COMMIT TRANSACTION
