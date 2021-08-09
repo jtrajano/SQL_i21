@@ -9435,6 +9435,8 @@
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
     <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
