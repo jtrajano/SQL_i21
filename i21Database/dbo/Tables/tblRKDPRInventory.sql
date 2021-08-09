@@ -11,7 +11,7 @@
     [strUnitMeasure] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intCollateralId] INT NULL,
     [strLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-    [strCustomerName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strEntityName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strReceiptNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intContractHeaderId] INT NULL,
     [strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
