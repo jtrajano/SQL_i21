@@ -203,6 +203,7 @@ CREATE TABLE #tmp (
 	, dblMaxQty NUMERIC(38, 20) NULL
 	, dblVolume NUMERIC(38, 20) NULL
 	, dblWeight NUMERIC(38, 20) NULL
+	, dblStandardWeight NUMERIC(38, 20) NULL
 	, ysnStockUnit BIT NULL
 	, ysnAllowPurchase BIT NULL
 	, ysnAllowSale BIT NULL
@@ -222,6 +223,7 @@ INSERT INTO #tmp (
 	dblMaxQty,
 	dblVolume,
 	dblWeight,
+	dblStandardWeight,
 	ysnStockUnit,
 	ysnAllowPurchase,
 	ysnAllowSale,
@@ -248,6 +250,7 @@ SELECT
 	, x.dblMaxQty
 	, x.dblVolume
 	, x.dblWeight
+	, x.dblStandardWeight
 	, ISNULL(stock.ysnStockUnit, x.ysnIsStockUnit)
 	, x.ysnAllowPurchase
 	, x.ysnAllowSale
@@ -287,6 +290,7 @@ DECLARE @dblLength NUMERIC(38, 20)
 DECLARE @dblMaxQty NUMERIC(38, 20) 
 DECLARE @dblVolume NUMERIC(38, 20) 
 DECLARE @dblWeight NUMERIC(38, 20) 
+DECLARE @dblStandardWeight NUMERIC(38, 20) 
 DECLARE @ysnStockUnit BIT 
 DECLARE @ysnAllowPurchase BIT 
 DECLARE @ysnAllowSale BIT 
@@ -308,6 +312,7 @@ SELECT
 	,dblMaxQty
 	,dblVolume
 	,dblWeight
+	,dblStandardWeight
 	,ysnStockUnit
 	,ysnAllowPurchase
 	,ysnAllowSale
@@ -328,6 +333,7 @@ FETCH NEXT FROM uom_cursor INTO
 	,@dblMaxQty
 	,@dblVolume
 	,@dblWeight
+	,@dblStandardWeight
 	,@ysnStockUnit
 	,@ysnAllowPurchase
 	,@ysnAllowSale
@@ -351,6 +357,7 @@ BEGIN
 		,dblMaxQty = @dblMaxQty
 		,dblVolume = @dblVolume
 		,dblWeight = @dblWeight
+		,dblStandardWeight = @dblStandardWeight
 		,ysnStockUnit = @ysnStockUnit
 		,ysnAllowPurchase = @ysnAllowPurchase
 		,ysnAllowSale = @ysnAllowSale
@@ -393,6 +400,7 @@ BEGIN
 			dblMaxQty,
 			dblVolume,
 			dblWeight,
+			dblStandardWeight,
 			ysnStockUnit,
 			ysnAllowPurchase,
 			ysnAllowSale,
@@ -412,6 +420,7 @@ BEGIN
 			RowItem.dblMaxQty,
 			RowItem.dblVolume,
 			RowItem.dblWeight,
+			RowItem.dblStandardWeight,
 			RowItem.ysnStockUnit,
 			RowItem.ysnAllowPurchase,
 			RowItem.ysnAllowSale,
@@ -432,6 +441,7 @@ BEGIN
 			,dblMaxQty = @dblMaxQty
 			,dblVolume = @dblVolume
 			,dblWeight = @dblWeight
+			,dblStandardWeight = @dblStandardWeight
 			,ysnStockUnit = @ysnStockUnit
 			,ysnAllowPurchase = @ysnAllowPurchase
 			,ysnAllowSale = @ysnAllowSale
@@ -467,6 +477,7 @@ BEGIN
 		,@dblMaxQty
 		,@dblVolume
 		,@dblWeight
+		,@dblStandardWeight
 		,@ysnStockUnit
 		,@ysnAllowPurchase
 		,@ysnAllowSale

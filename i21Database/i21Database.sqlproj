@@ -9615,6 +9615,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetTOReceipt.sql" />
     <Build Include="dbo\Tables\tblMFTODetail.sql" />
     <Build Include="dbo\Tables\tblMFTOReceiptDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10134,5 +10136,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\WV_WestVirginia.sql" />
   </ItemGroup>
 </Project>
