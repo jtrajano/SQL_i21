@@ -98,9 +98,23 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnStorageUnitRequired
 	, ItemLocation.intCostAdjustmentType
 	, ItemLocation.intAllowZeroCostTypeId
+	, dblOnHandQty = CASE 
+						WHEN Transact.dblOnHandQty IS NULL
+						THEN 0
+						ELSE Transact.dblOnHandQty
+					END
 FROM tblICItemLocation ItemLocation
 	INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 	INNER JOIN tblICItem Item ON Item.intItemId = ItemLocation.intItemId
+	OUTER APPLY (
+		SELECT TOP 1 
+			SUM(dblQty) AS dblOnHandQty 
+			FROM tblICInventoryTransaction 
+			WHERE 
+			intItemId = ItemLocation.intItemId 
+			AND
+			intItemLocationId = ItemLocation.intItemLocationId
+	) AS Transact
 	LEFT JOIN tblICCommodity ItemCommodity ON Item.intCommodityId = ItemCommodity.intCommodityId
 	LEFT JOIN tblICCategory ItemCategory ON Item.intCategoryId = ItemCategory.intCategoryId
 	LEFT JOIN tblICManufacturer ItemManufacturer ON Item.intManufacturerId = ItemManufacturer.intManufacturerId
