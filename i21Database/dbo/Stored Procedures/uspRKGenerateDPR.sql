@@ -2761,7 +2761,7 @@ BEGIN TRY
 					, strUnitMeasure
 					, intCollateralId
 					, strLocationName
-					, strCustomerName
+					, strEntityName
 					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
@@ -2883,7 +2883,7 @@ BEGIN TRY
 					, strUnitMeasure
 					, intCollateralId
 					, strLocationName
-					, strCustomerName
+					, strEntityName
 					, strReceiptNo
 					, intContractHeaderId
 					, strContractNumber
