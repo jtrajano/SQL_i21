@@ -9,6 +9,6 @@
 	[strVendorOrderNumber] 	NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[dblPayment] 			DECIMAL(18, 2) NOT NULL DEFAULT 0, 
 	[dblDiscount] 			DECIMAL(18, 2) NULL DEFAULT 0, 
-	[dlbInterest] 			DECIMAL(18, 2) NULL DEFAULT 0,
+	[dblInterest] 			DECIMAL(18, 2) NULL DEFAULT 0,
 	[strNotes] 				NVARCHAR (1000)  COLLATE Latin1_General_CI_AS NULL
 )
