@@ -94,6 +94,19 @@ OUTER APPLY (
     INNER JOIN tblAPBillDetailTax bdTax ON bdTax.intBillDetailId = billDetail.intBillDetailId
     WHERE billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 ) voucherTax
+join (
+		select sum(dblTransactionUnits) dblTransactionUnits
+		 , intInventoryReceiptId
+		 , intInventoryReceiptItemId
+		from tblGRStorageInventoryReceipt 
+			where intTransferStorageReferenceId is not null
+				and ysnUnposted = 0
+		group by intInventoryReceiptId
+		 , intInventoryReceiptItemId
+	) StorageTransfer
+	--AND transferClr.strMark = '1.1'
+	on StorageTransfer.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+		and StorageTransfer.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
@@ -392,6 +405,19 @@ OUTER APPLY (
     FROM tblAPBillDetailTax taxes
     WHERE taxes.intBillDetailId = billDetail.intBillDetailId
 ) oldCostTax
+join (
+		select sum(dblTransactionUnits) dblTransactionUnits
+		 , intInventoryReceiptId
+		 , intInventoryReceiptItemId
+		from tblGRStorageInventoryReceipt 
+			where intTransferStorageReferenceId is not null
+				and ysnUnposted = 0
+		group by intInventoryReceiptId
+		 , intInventoryReceiptItemId
+	) StorageTransfer
+	--AND transferClr.strMark = '1.1'
+	on StorageTransfer.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+		and StorageTransfer.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 -- LEFT JOIN vyuAPReceiptClearingGL APClearing
 --     ON APClearing.strTransactionId = receipt.strReceiptNumber
 --         AND APClearing.intItemId = receiptItem.intItemId
