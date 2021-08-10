@@ -27,7 +27,7 @@ BEGIN
 			DECLARE @DummyGLEntries AS RecapTableType
 			DECLARE @dblInventoryItemCost AS DECIMAL(24,10)
 			DECLARE @dblOriginalCost AS DECIMAL(24,10)
-			DECLARE @dblDiscountCost AS DECIMAL(24,10)
+			DECLARE @dblGLCost AS DECIMAL(24,10)
 			DECLARE @dblUnits AS DECIMAL(24,10)
 			DECLARE @strBatchId AS NVARCHAR(40)
 			DECLARE @GLForItem AS GLForItem
@@ -107,7 +107,7 @@ BEGIN
 			WHERE intId = @cursorId
 
 			SET @dblInventoryItemCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
-			set @dblOriginalCost = @dblInventoryItemCost
+			SET @dblOriginalCost = @dblInventoryItemCost
 	
 			/*start >> other charges*/	
 			DECLARE @OtherChargesDetail AS TABLE(
@@ -199,6 +199,15 @@ BEGIN
 
 			UPDATE @OtherChargesDetail SET dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
 			
+			IF @dblOriginalCost <> @dblInventoryItemCost
+			BEGIN
+				SET @dblGLCost = (@dblOriginalCost - @dblInventoryItemCost) * (@dblUnits)
+			END
+			ELSE
+			BEGIN
+				SET @dblGLCost = NULL
+			END
+
 			/*end >> other charges*/
 			
 			DELETE FROM @GLEntries
@@ -226,7 +235,7 @@ BEGIN
 				,ysnIsStorage
 				,intStorageScheduleTypeId
 			)
-			SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,null,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+			SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblGLCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 			FROM @ItemsToPostCopy WHERE intId = @cursorId
 
 			--select '@GLForItem',* from @GLForItem
@@ -371,8 +380,9 @@ BEGIN
 				,@AccountCategory_ContraInventory ='AP Clearing'
 				,@intEntityUserSecurityId = @intUserId
 				,@ysnDPtoOS = 1
-
-			--SELECT '@GLEntries',* FROM @GLEntries
+			--SELECT '@GLForItem',* FROM @GLForItem
+			-- SELECT '@GLEntries',* FROM @GLEntries
+			-- SELECT 'tblICInventoryTransaction',* FROM tblICInventoryTransaction WHERE strBatchId = @strBatchId
 			IF EXISTS(SELECT 1 FROM @GLEntries)
 			BEGIN 
 				EXEC uspGLBookEntries @GLEntries, 1

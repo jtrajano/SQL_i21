@@ -99,7 +99,7 @@ BEGIN
 				,@dtmCostBucketDate AS DATETIME
 				,@dblCostBucketQty AS NUMERIC(18, 6)
 				,@dblTotalCostBucketQty AS NUMERIC(18, 6)
-		--SELECT	@strCostBucketDate = CONVERT(NVARCHAR(20), MIN(cb.dtmDate), 101)
+		--SELECT	@strCostBucketDate = CONVERT(NVARCHAR(40), MIN(cb.dtmDate), 101)
 		--FROM	tblICInventoryLot cb
 		--WHERE	cb.intItemId = @intItemId
 		--		AND cb.intItemLocationId = @intItemLocationId
@@ -133,7 +133,7 @@ BEGIN
 			SET @dblTotalCostBucketQty += @dblCostBucketQty
 			IF @dblTotalCostBucketQty >= ROUND(@dblQty, 6)
 			BEGIN 
-				SET @strCostBucketDate = CONVERT(NVARCHAR(20), @dtmCostBucketDate, 101) 
+				SET @strCostBucketDate = CONVERT(NVARCHAR(40), @dtmCostBucketDate, 101) 
 				GOTO breakLoopFindBestDateToPost
 			END 
 			
@@ -146,7 +146,7 @@ BEGIN
 		IF @strCostBucketDate IS NOT NULL 
 		BEGIN 
 			--'Stock is not available for {Item} at {Location} as of {Transaction Date}. Use the nearest stock available date of {Cost Bucket Date} or later.'
-			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(20), @dtmDate, 101) 
+			DECLARE @strDate AS VARCHAR(20) = CONVERT(NVARCHAR(40), @dtmDate, 101) 
 
 			SET @strLocationName = dbo.fnFormatMsg80003(@intItemLocationId, @intSubLocationId, @intStorageLocationId)
 			EXEC uspICRaiseError 80096, @strItemNo, @strLocationName, @strDate, @strCostBucketDate;

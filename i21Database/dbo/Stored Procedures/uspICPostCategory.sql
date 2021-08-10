@@ -21,7 +21,7 @@ CREATE PROCEDURE [dbo].[uspICPostCategory]
 	,@intCurrencyId AS INT
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
-	,@strTransactionId AS NVARCHAR(20)
+	,@strTransactionId AS NVARCHAR(40)
 	,@strBatchId AS NVARCHAR(40)
 	,@intTransactionTypeId AS INT
 	,@strTransactionForm AS NVARCHAR(255)

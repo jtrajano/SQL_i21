@@ -24,6 +24,13 @@ DECLARE @ErrorState INT
 CREATE TABLE #TempMBILInvoice (
 	[intInvoiceId]		int
 );
+CREATE TABLE #TempMBILInvoiceItem (
+	[intInvoiceId]		int,
+	[intItemId]			int,
+	[intLocationId]		int,
+	[strItemNo]			nvarchar(max),
+	[strLocationName]		nvarchar(max)
+);
 	
 	--=====================================================================================================================================
 	-- 	POPULATE INVOICE TO POST TEMPORARY TABLE
@@ -33,6 +40,8 @@ CREATE TABLE #TempMBILInvoice (
 	ELSE
 		INSERT INTO #TempMBILInvoice SELECT [intInvoiceId] FROM tblMBILInvoice WHERE ysnPosted = 0
 
+	INSERT INTO #TempMBILInvoiceItem SELECT [intInvoiceId], [intItemId], [intLocationId], [strItemNo], [strLocationName] FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+
 	-------------------------------------------------------------
 	------------------- Validate Invoices -----------------------
 	-------------------------------------------------------------
@@ -41,6 +50,24 @@ CREATE TABLE #TempMBILInvoice (
 		SET @ErrorMessage = 'Record does not exists.'
 		RETURN
 	END
+	WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
+	BEGIN
+		DECLARE @intItemInvoiceId INT
+		DECLARE @intItemId INT
+		DECLARE @intLocationId INT
+		DECLARE @strItemNo NVARCHAR(MAX)
+		DECLARE @strLocationName NVARCHAR(MAX)
+
+		SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
+
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+		BEGIN
+			SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
+			RETURN
+		END
+
+		DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
+	END		
 
 	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL)
 	BEGIN
@@ -158,10 +185,12 @@ CREATE TABLE #TempMBILInvoice (
 			, [ysnRecomputeTax]
 			, [intContractDetailId]
 			, [intSiteId] 
+			, [strInvoiceOriginId]
+			, [ysnUseOriginIdAsInvoiceNumber]
 		)
 	SELECT 
 		 [intInvoiceId]
-		,[strTransactionType] = 'Invoice'
+		,[strTransactionType] = InvoiceItem.strType
 		,[strType] = 'Tank Delivery'
 		,[strSourceTransaction] = 'Mobile Billing'
 		,[intSourceId] = InvoiceItem.intInvoiceId
@@ -171,7 +200,7 @@ CREATE TABLE #TempMBILInvoice (
 		,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 		,[intEntityId] = InvoiceItem.intEntityCustomerId
 		,[dtmDate] = InvoiceItem.dtmInvoiceDate
-		,[dtmDueDate] = InvoiceItem.dtmInvoiceDate
+		,[dtmDueDate] = NULL
 		,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
 		,[dtmPostDate] = InvoiceItem.dtmPostedDate
 		,[strComments] = InvoiceItem.strComments
@@ -197,6 +226,8 @@ CREATE TABLE #TempMBILInvoice (
 		,[ysnRecomputeTax] = 1
 		,[intContractDetailId] = InvoiceItem.intContractDetailId
 		,[intSiteId] = InvoiceItem.intSiteId
+		,[strInvoiceOriginId] = InvoiceItem.strInvoiceNo
+		,[ysnUseOriginIdAsInvoiceNumber] = 1
 
 	FROM vyuMBILInvoiceItem InvoiceItem
 	WHERE inti21InvoiceId IS NULL and intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
@@ -282,12 +313,12 @@ CREATE TABLE #TempMBILInvoice (
 
 			DELETE FROM #TempMBILInvoice WHERE intInvoiceId = @intInvoiceId
 
-			UPDATE tblARInvoice 
-				SET strInvoiceNumber = (SELECT TOP 1 strInvoiceNo FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
-				WHERE intInvoiceId   = (SELECT TOP 1 intInvoiceId FROM tblARInvoice A
-										WHERE A.intEntityCustomerId = (SELECT TOP 1 intEntityCustomerId FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
-										AND A.intSourceId = @intInvoiceId 
-										AND A.strType = 'Tank Delivery' order by dtmDateCreated desc)
+			--UPDATE tblARInvoice 
+			--	SET strInvoiceNumber = (SELECT TOP 1 strInvoiceNo FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
+			--	WHERE intInvoiceId   = (SELECT TOP 1 intInvoiceId FROM tblARInvoice A
+			--							WHERE A.intEntityCustomerId = (SELECT TOP 1 intEntityCustomerId FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
+			--							AND A.intSourceId = @intInvoiceId 
+			--							AND A.strType = 'Tank Delivery' order by dtmDateCreated desc)
 		END
 
 	END
