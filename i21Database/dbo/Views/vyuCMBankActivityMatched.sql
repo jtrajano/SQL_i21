@@ -17,6 +17,7 @@ Activity.strBankDescription,
 Activity.dblAmount * CASE WHEN strDebitCredit = 'D' THEN -1 ELSE 1 END dblActivityAmount,
 Activity.strDebitCredit,
 A.dtmDateReconciled,
+Trans.intBankTransactionTypeId,
 A.intConcurrencyId
 FROM 
 tblCMABRActivityMatched A
@@ -38,7 +39,8 @@ OUTER APPLY(
 	strReferenceNo,
 	dtmDate,
 	dblAmount,
-	strBankTransactionTypeName 
+	strBankTransactionTypeName,
+	intBankTransactionTypeId
     FROM vyuCMBankTransaction 
     WHERE intTransactionId = A.intTransactionId
 ) Trans
