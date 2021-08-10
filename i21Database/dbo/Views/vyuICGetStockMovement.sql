@@ -2,7 +2,7 @@ CREATE VIEW [dbo].[vyuICGetStockMovement]
 AS
 
 SELECT	intInventoryValuationKeyId = 
-			t.intInventoryStockMovementId
+		t.intInventoryStockMovementId
 		,i.intItemId
 		,strItemNo					= i.strItemNo
 		,strItemDescription			= i.strDescription
@@ -34,7 +34,7 @@ SELECT	intInventoryValuationKeyId =
 											SUBSTRING(t.strBatchId, PATINDEX('%[0-9]%',t.strBatchId), LEN(t.strBatchId) - CHARINDEX('-',t.strBatchId))
 										ELSE 
 											SUBSTRING(t.strBatchId, PATINDEX('%[0-9]%',t.strBatchId), LEN(t.strBatchId) - CHARINDEX('-',t.strBatchId) - CHARINDEX('-', REVERSE(t.strBatchId)))
-									END AS INT)
+									END AS NUMERIC(18, 10))
 		,CostingMethod.strCostingMethod
 		,strUOM						= umTransUOM.strUnitMeasure
 		,strStockUOM				= iuStock.strUnitMeasure
