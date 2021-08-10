@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspRestApiImportReceipt] (@guiUniqueId UNIQUEIDENTIFIER)
+CREATE PROCEDURE [dbo].[uspApiImportReceipt] (@guiUniqueId UNIQUEIDENTIFIER)
 AS
 
 DECLARE @ReceiptEntries ReceiptStagingTable
