@@ -289,7 +289,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 			,@LineItemTaxEntries= @TaxDetails
 			,@UserId			= @UserId
 			,@GroupingOption	= 8
-			,@RaiseError		= 1
+			,@RaiseError		= 0
 			,@BatchId			= @BatchId
 			,@ErrorMessage		= @ErrorMessage OUTPUT
 			--,@CreatedIvoices	= @CreatedInvoices OUTPUT
