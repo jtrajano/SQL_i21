@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGenerateBasketAnalysisData]
 	 @intItemId				NVARCHAR(MAX)
+	,@intStoreGroupId			NVARCHAR(MAX)
 	,@intStoreId			NVARCHAR(MAX)
 	,@strComparison			NVARCHAR(MAX)
 	,@dtmBeginDate			NVARCHAR(MAX)
@@ -112,6 +113,12 @@ END
 --	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldCategory + @CharSpace + @CharEquals + @CharSpace  + @intCategoryId 
 --	SET @CharConjunction = @CharAnd
 --END
+
+IF(ISNULL(@intStoreGroupId,0) != 0)
+BEGIN
+	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldStore + @CharSpace + @CharEquals + @CharSpace  + @intStoreId 
+	SET @CharConjunction = @CharAnd
+END
 
 IF(ISNULL(@intStoreId,0) != 0)
 BEGIN
