@@ -8922,6 +8922,7 @@
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
