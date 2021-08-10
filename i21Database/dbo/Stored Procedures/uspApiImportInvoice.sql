@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspRestApiImportInvoice] (@guiUniqueId UNIQUEIDENTIFIER)
+CREATE PROCEDURE [dbo].[uspApiImportInvoice] (@guiUniqueId UNIQUEIDENTIFIER)
 AS
 
 DECLARE @InvoiceEntries		AS InvoiceStagingTable

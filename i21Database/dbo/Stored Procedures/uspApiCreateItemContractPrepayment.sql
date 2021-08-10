@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspRestApiCreateItemContractPrepayment] (
+CREATE PROCEDURE [dbo].[uspApiCreateItemContractPrepayment] (
 	@guiUniqueId UNIQUEIDENTIFIER,
 	@intItemContractHeaderId INT
 )
@@ -7,8 +7,9 @@ AS
 DECLARE @strInvoiceNumber NVARCHAR(200)
 DECLARE @intInvoiceId INT
 DECLARE @intCompanyLocationId INT
+DECLARE @strContractCategoryId NVARCHAR(50)
 
-SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
+SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId, @strContractCategoryId = strContractCategoryId
 FROM tblCTItemContractHeader
 WHERE intItemContractHeaderId = @intItemContractHeaderId
 
@@ -160,9 +161,12 @@ SELECT
 FROM vyuARPrepaymentContractDefault cpd
 WHERE cpd.intItemContractHeaderId = @intItemContractHeaderId
 
-exec uspARInsertTransactionDetail @InvoiceId = @intInvoiceId, @UserId = 1
-exec uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @ForDelete = 0, @UserId = 1
+IF @strContractCategoryId = 'Item'
+BEGIN
+	exec uspARInsertTransactionDetail @InvoiceId = @intInvoiceId, @UserId = 1
+	exec uspARUpdateInvoiceIntegrations @InvoiceId = 1807, @ForDelete = 0, @UserId = 1
+END
 
-DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6) NULL, intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 SELECT * FROM @Logs
