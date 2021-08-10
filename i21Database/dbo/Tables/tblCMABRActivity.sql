@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblCMABRActivity]
     [dblDepositAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     [dblWithdrawalAmount] NUMERIC(18, 6) NOT NULL DEFAULT 0,	
 	[intImportStatus] INT NULL DEFAULT 0, 
-    [intCreatedUserId] INT NULL DEFAULT 0, 
+    [intCreatedUserId] INT NULL, 
     [dtmCreated] DATETIME NULL, 
     [intLineNo] INT NULL,
     [intLastModifiedUserId] INT NULL,
