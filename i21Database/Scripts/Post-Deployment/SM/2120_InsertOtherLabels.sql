@@ -535,6 +535,54 @@ BEGIN
 	VALUES ('Rows', 1)
 END
 
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Sort Ascending')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Sort Ascending', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Sort Descending')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Sort Descending', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Clear Sorting')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Clear Sorting', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Filter')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Filter', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Group By')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Group By', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Group By with Totals')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Group By with Totals', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Clear Group By')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Clear Group By', 1)
+END
+
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Yes')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Yes', 1)
+END
+
 --========================================== Messages =====================================================--
 
 IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Do you want to save the changes you made?')
