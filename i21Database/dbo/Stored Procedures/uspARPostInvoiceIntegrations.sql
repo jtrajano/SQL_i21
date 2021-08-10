@@ -724,7 +724,7 @@ BEGIN
 														 , @intShipmentType			 = 1
 					END
 												 
-				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDU
 											   , @ysnPost				 	= 1
 											   , @intEntityUserSecurityId  	= @UserId
 				
