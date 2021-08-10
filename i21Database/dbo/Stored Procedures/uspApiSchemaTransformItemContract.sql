@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspRestApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
+CREATE PROCEDURE [dbo].[uspApiSchemaTransformItemContract] (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
 
 DECLARE @Date DATETIME = GETDATE()
