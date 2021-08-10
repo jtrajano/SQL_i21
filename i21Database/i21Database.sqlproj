@@ -9605,6 +9605,8 @@
     <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightRate.sql" />
     <Build Include="dbo\Views\vyuICSearchCountByCategoryDetail.sql" />
+    <Build Include="dbo\Views\vyuICSearchItemCustomerXref.sql" />
+    <Build Include="dbo\Views\vyuICSearchItemVendorXref.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
