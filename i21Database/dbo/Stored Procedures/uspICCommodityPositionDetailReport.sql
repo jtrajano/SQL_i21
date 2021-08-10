@@ -24,6 +24,15 @@ BEGIN
 	BEGIN
 		SET @top = ' top 1'
 		SET @dtmDate = NULL 
+
+		SELECT 
+			intLocationId = CAST(NULL AS INT)
+			,Capacity = CAST(0 AS NUMERIC(18, 6))
+			,PercentFull = CAST(0 AS NUMERIC(18, 6)) 
+		WHERE
+			1 = 0  
+			
+		RETURN 
 	END
 
 	SET @sql = 
