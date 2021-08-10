@@ -9619,6 +9619,7 @@
     <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSONo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSODetail.sql" />
+    <Build Include="dbo\Tables\tblIPCommodityManufacturingProcess.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

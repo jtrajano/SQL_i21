@@ -27,11 +27,11 @@ SELECT PD.intPickListDetailId
 		END AS strTask
 FROM dbo.tblSOSalesOrder S
 JOIN dbo.tblSOSalesOrderDetail SD ON SD.intSalesOrderId = S.intSalesOrderId
-JOIN dbo.tblMFPickList P ON P.strWorkOrderNo = S.strSalesOrderNumber
+JOIN dbo.tblMFPickList P ON P.intSalesOrderId = S.intSalesOrderId
 JOIN dbo.tblMFPickListDetail PD ON PD.intPickListId = P.intPickListId
 LEFT JOIN tblICLot L ON L.intLotId = PD.intLotId
-JOIN dbo.tblICItem i ON i.intItemId = SD.intItemId
-JOIN dbo.tblICItemUOM iu ON iu.intItemUOMId = PD.intPickUOMId
+JOIN dbo.tblICItem i ON i.intItemId = SD.intItemId AND PD.intItemId =SD.intItemId
+JOIN dbo.tblICItemUOM iu ON iu.intItemUOMId = PD.intPickUOMId AND PD.intItemUOMId =SD.intItemUOMId
 JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 JOIN dbo.tblEMEntity E ON E.intEntityId = S.intEntityCustomerId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation subl ON subl.intCompanyLocationSubLocationId = PD.intSubLocationId

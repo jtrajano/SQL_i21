@@ -63,7 +63,7 @@ BEGIN TRY
 				)
 			OUTPUT INSERTED.strERPRecipeNo
 			INTO @tblIPRecipeName
-			SELECT NULL
+			SELECT ItemNo
 				,strLocationName
 				,ItemNo
 				,Quantity
@@ -71,7 +71,7 @@ BEGIN TRY
 				,[Version]
 				,ValidFrom
 				,ValidTo
-				,IsNULL(ProcessName, MP.strProcessName )
+				,MP.strProcessName
 				,CreatedDate
 				,CreatedBy
 				,TrxSequenceNo
