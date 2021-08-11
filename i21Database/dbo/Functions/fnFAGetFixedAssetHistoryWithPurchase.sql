@@ -49,7 +49,7 @@ BEGIN
 -- Insert Create Asset transaction in GL
 INSERT INTO @tblFixedAssetHistory
  SELECT
-	GL.dtmTransactionDate,
+	FA.dtmDateInService,
 	0 dblDepreciationToDate,
 	0 dblTaxDepreciationToDate,
 	FA.intAssetId,
