@@ -16,6 +16,7 @@
     [strVoucherReportName]          NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL, 
 	[intVoucherInvoiceNoOption]     TINYINT NULL,
 	[intDebitMemoInvoiceNoOption]   TINYINT NULL,
+    [strVoucherImportTemplate]      NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Standard', 
     [intImportTypeId]               INT NOT NULL DEFAULT 5,
     [intConcurrencyId]              INT NOT NULL DEFAULT 0
     PRIMARY KEY CLUSTERED (intCompanyPreferenceId ASC)
