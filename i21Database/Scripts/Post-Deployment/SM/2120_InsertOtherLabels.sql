@@ -609,6 +609,12 @@ BEGIN
 	VALUES ('Are you sure you want to continue?', 1)
 END
 
+IF NOT EXISTS (SELECT 1 FROM tblSMScreenLabel WHERE strLabel = 'Are you sure you want to logout?')
+BEGIN
+	INSERT INTO tblSMScreenLabel (strLabel, intConcurrencyId)
+	VALUES ('Are you sure you want to logout?', 1)
+END
+
 --======================================== End Messages ===================================================--
 
 

@@ -10,4 +10,10 @@ SELECT DISTINCT strLabel FROM (
 	SELECT strMenuName strLabel from tblSMMasterMenu  
 		UNION
 	SELECT strScreenName FROM tblSMScreen
+		UNION
+	SELECT strModule FROM tblSMModule
+		UNION
+	SELECT strTabName FROM tblSMCustomTab
+		UNION
+	SELECT strControlName from tblSMCustomTabDetail
 ) Labels
