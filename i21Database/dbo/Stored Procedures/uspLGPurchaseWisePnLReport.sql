@@ -245,12 +245,9 @@ FROM
 					ROUND(dbo.fnDivide(CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN INVC.dblNetShippedWt 
 									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
 									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
-		,dblLotContractSize = /* Invoice or Allocated Weight */
-							CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN INVC.dblNetShippedWt 
-								 ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END
-		,dblLotContractSizeInPriceUOM = /* Invoice or Allocated Weight in Sales Price Unit */
-							CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, SCD.intPriceItemUOMId, INVC.dblNetShippedWt)
-								ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, SCD.intPriceItemUOMId, ALD.dblSAllocatedQty) END
+		,dblLotContractSize = /* Lots Contract Size = Lots x Contract Size*/
+							PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)
+		,dblLotContractSizeInPriceUOM = PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
 		,dblReservesARateTotal = RA.dblReservesARateTotal
 		,dblReservesAValueTotal = RA.dblReservesAValueTotal * -1
 		,dblReservesBRateTotal = RB.dblReservesBRateTotal
