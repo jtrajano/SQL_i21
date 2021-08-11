@@ -160,6 +160,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Functions\fnFAGetSumDepreciationFromEndDate.sql" />
     <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT508.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

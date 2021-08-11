@@ -64,7 +64,7 @@ RETURNS TABLE AS RETURN
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	apClearing.intAccountId
-		,[intShipViaId]								=	0
+		,[intShipViaId]								=	null
 		,[intTermId]								=	CC.intTermId	
 		,[strBillOfLading]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)	

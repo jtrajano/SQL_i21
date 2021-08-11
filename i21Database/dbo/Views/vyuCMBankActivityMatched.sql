@@ -38,7 +38,7 @@ OUTER APPLY(
 	strTransactionId,   
 	strReferenceNo,  
 	dtmDate,  
-	ABS(dblAmount) * CASE WHEN BTY.strDebitCredit = 'D' THEN -1 ELSE 1 END dblTransAmount,
+	ABS(dblAmount) * CASE WHEN (BTY.strDebitCredit = 'D') OR (BTY.strDebitCredit = 'DC' AND dblAmount <0) THEN -1 ELSE 1 END dblTransAmount,
 	strBankTransactionTypeName,  
 	BT.intBankTransactionTypeId  
     FROM tblCMBankTransaction   BT join tblCMBankTransactionType BTY on BT.intBankTransactionTypeId = BTY.intBankTransactionTypeId
