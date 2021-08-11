@@ -1325,6 +1325,20 @@ GO
 		   [strPrefix]						=		N'RH',
 		   [ysnAddonComponent]              =       1
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Automated Quoting')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		129,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Automated Quoting',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		127,
+		   [strPrefix]						=		N'AQ',
+		   [ysnAddonComponent]              =       1
+
+
+
+
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 
 GO
