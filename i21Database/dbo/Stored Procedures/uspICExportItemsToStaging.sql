@@ -19,6 +19,7 @@ DECLARE @Items TABLE(
 	strModelNo NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	ysnUseWeighScales BIT NULL,
 	ysnLotWeightsRequired BIT NULL,
+	ysnStockedItem BIT NULL,
 	strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strCategoryCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strBrandCode NVARCHAR(100) COLLATE Latin1_General_CI_AS,
@@ -44,6 +45,7 @@ SELECT
 	, item.strModelNo
 	, item.ysnUseWeighScales
 	, item.ysnLotWeightsRequired
+	, item.ysnStockedItem
 	, commodity.strCommodityCode
 	, category.strCategoryCode
 	, brand.strBrandCode
@@ -61,10 +63,10 @@ WHERE dbo.fnDateGreaterThanEquals(ISNULL(item.dtmDateModified, item.dtmDateCreat
 /* Header */
 INSERT INTO tblICStagingItem(intItemId, strItemNo, strDescription, strType, strBundleType, strStatus
 	, strInventoryTracking, strLotTracking, strCostType, strCostMethod, strModelNo, ysnUseWeighScales
-	, ysnLotWeightsRequired, strCommodityCode, strCategoryCode, strBrandCode, strManufacturer)
+	, ysnLotWeightsRequired, ysnStockedItem, strCommodityCode, strCategoryCode, strBrandCode, strManufacturer)
 SELECT intItemId, strItemNo, strDescription, strType, strBundleType, strStatus
 	, strInventoryTracking, strLotTracking, strCostType, strCostMethod, strModelNo, ysnUseWeighScales
-	, ysnLotWeightsRequired, strCommodityCode, strCategoryCode, strBrandCode, strManufacturer
+	, ysnLotWeightsRequired, ysnStockedItem, strCommodityCode, strCategoryCode, strBrandCode, strManufacturer
 FROM @Items	
 
 /* Details */

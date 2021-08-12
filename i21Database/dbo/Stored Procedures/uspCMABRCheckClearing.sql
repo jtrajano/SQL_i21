@@ -1,6 +1,7 @@
 
 CREATE PROCEDURE uspCMABRCheckClearing
     @intBankAccountId INT,
+	@intImportBankStatementLogId INT,
     @intEntityId INT
 AS
 DECLARE @dtmCurrent DATETIME =  CAST(FLOOR(CAST(GETDATE() AS float)) AS DATETIME)
@@ -20,12 +21,13 @@ FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId
 
 ;WITH matching as(
 
-SELECT intABRActivityId, intTransactionId, intBankAccountId
-FROM tblCMABRActivity ABR
-OUTER APPLY(
+SELECT intABRActivityId, CM.intTransactionId, ABR.intBankAccountId
+FROM tblCMABRActivity ABR 
+
+CROSS APPLY(
 	SELECT 
 	TOP 1
-	intTransactionId
+	C.intTransactionId
 	FROM tblCMBankTransaction C
 	JOIN tblCMBankTransactionType T 
 	ON C.intBankTransactionTypeId=T.intBankTransactionTypeId
@@ -33,10 +35,10 @@ OUTER APPLY(
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
-	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
+	AND RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = 
 		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' AND @intABRDaysNoRef > 0
-			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
-			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
+			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, C.dtmDate)
+			THEN RTRIM(LTRIM(ISNULL(C.strReferenceNo,'')))
 		ELSE
 			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
 		END
@@ -47,11 +49,14 @@ OUTER APPLY(
 	ELSE
 		T.strDebitCredit
 	END
-	ORDER BY dtmDate
+	ORDER BY C.dtmDate
 )CM
+WHERE intImportBankStatementLogId =@intImportBankStatementLogId
+AND ABR.intImportStatus =2
 )
 INSERT INTO ##tempActivityMatched (intABRActivityId, intTransactionId)
-SELECT  intABRActivityId, intTransactionId FROM matching WHERE intTransactionId IS NOT NULL
+SELECT  intABRActivityId, intTransactionId FROM matching 
+
 
 UPDATE CM
 SET ysnClr = 1

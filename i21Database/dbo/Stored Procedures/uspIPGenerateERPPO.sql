@@ -54,6 +54,8 @@ BEGIN TRY
 
 	EXEC uspIPValidateERPOtherFieldsContractFeed
 
+	EXEC uspIPValidateERPContractFeed
+
 	IF NOT EXISTS (
 			SELECT 1
 			FROM tblCTContractFeed
@@ -62,8 +64,6 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
-
-	EXEC uspIPValidateERPContractFeed
 
 	DELETE
 	FROM @tblCTContractFeed
