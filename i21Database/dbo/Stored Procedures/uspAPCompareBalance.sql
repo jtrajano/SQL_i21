@@ -1,9 +1,9 @@
 ﻿CREATE PROCEDURE uspAPCompareBalance
 (
     @asOfDate DATETIME = NULL,
-    @emailProfileName NVARCHAR(200) = NULL,
-    @recipients NVARCHAR(MAX) = NULL,
-    @emailSubject NVARCHAR(500) = NULL,
+    --@emailProfileName NVARCHAR(200) = NULL,
+    --@recipients NVARCHAR(MAX) = NULL,
+    --@emailSubject NVARCHAR(500) = NULL,
     @htmlResult NVARCHAR(MAX) OUTPUT
 )
 AS
@@ -12,7 +12,7 @@ BEGIN
     DECLARE 
 	@companyName AS NVARCHAR(MAX) 
  	,@resultAsHTML AS NVARCHAR(MAX) = '';
-    DECLARE @subject NVARCHAR(500) = ISNULL(@emailSubject, 'AP Balance Compare');
+    --DECLARE @subject NVARCHAR(500) = ISNULL(@emailSubject, 'AP Balance Compare');
 
      SELECT TOP 1 @companyName = ISNULL(strCompanyName, '') FROM tblSMCompanySetup
 
@@ -48,8 +48,8 @@ BEGIN
 
     --SELECT * FROM #tmpAPClearingGLBalanceCompare
 
-    IF @emailProfileName IS NOT NULL AND @recipients IS NOT NULL
-    BEGIN
+    --IF @emailProfileName IS NOT NULL AND @recipients IS NOT NULL
+    --BEGIN
 
         IF EXISTS(SELECT 1 FROM #tmpAPClearingBalanceCompare WHERE dblDifference > 1 OR dblDifference < -1)
         BEGIN
@@ -98,6 +98,6 @@ BEGIN
 
         --     PRINT 'Email Sent to Queue.'
         -- END
-    END
+    --END
 
 END
