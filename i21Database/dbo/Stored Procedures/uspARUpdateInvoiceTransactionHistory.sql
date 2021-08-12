@@ -44,7 +44,7 @@ AS
 							INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.intInvoiceId = ARI.intInvoiceId
 							INNER JOIN @InvoiceIds II ON ARI.intInvoiceId = II.intHeaderId
 							LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId
-							LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionId
+							LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionDetailId
 							LEFT JOIN tblSCTicket ST WITH (NOLOCK) ON ST.intTicketId = ARID.intTicketId
 						END
 					ELSE
@@ -84,7 +84,7 @@ AS
 							INNER JOIN tblARTransactionDetail ATD WITH (NOLOCK) ON ATD.intTransactionDetailId = ARID.intInvoiceDetailId
 							INNER JOIN @InvoiceIds II ON ARI.intInvoiceId = II.intHeaderId
 							LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId
-							LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionId
+							LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionDetailId
 							LEFT JOIN tblSCTicket ST WITH (NOLOCK) ON ST.intTicketId = ARID.intTicketId
 							WHERE ATD.dblQtyShipped			<> ARID.dblQtyShipped
 							   OR ATD.dblPrice				<> ARID.dblPrice
@@ -133,7 +133,7 @@ AS
 					INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.intInvoiceId = ARI.intInvoiceId
 					INNER JOIN @InvoiceIds II ON ARI.intInvoiceId = II.intHeaderId
 					LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId
-					LEFT JOIN tblICInventoryTransaction ICT ON ARID.intInvoiceDetailId = ICT.intTransactionId
+					LEFT JOIN tblICInventoryTransaction ICT ON ARID.intInvoiceDetailId = ICT.intTransactionDetailId
 					LEFT JOIN tblSCTicket ST WITH (NOLOCK) ON ST.intTicketId = ARID.intTicketId
 				END
 		END
@@ -185,7 +185,7 @@ AS
 			INNER JOIN tblARInvoice ARI WITH (NOLOCK) ON ARID.intInvoiceId = ARI.intInvoiceId
 			JOIN @PaymentStaging PS ON PS.intInvoiceId = ARID.intInvoiceId
 			LEFT JOIN tblICItem ITM WITH (NOLOCK) ON ITM.intItemId = ARID.intItemId
-			LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionId
+			LEFT JOIN tblICInventoryTransaction ICT WITH (NOLOCK) ON ARID.intInvoiceDetailId = ICT.intTransactionDetailId
 			LEFT JOIN tblSCTicket ST WITH (NOLOCK) ON ST.intTicketId = ARID.intTicketId
 		END
 	

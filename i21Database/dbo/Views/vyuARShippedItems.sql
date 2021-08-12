@@ -473,41 +473,7 @@ FROM (
 		FROM dbo.vyuLGShipmentContainerPurchaseContracts WITH (NOLOCK)
 		) LGSD ON ICIRI1.intLineNo = LGSD.intContractDetailId
 	) LGICSHIPMENT ON ICISI.intInventoryShipmentItemId = LGICSHIPMENT.intInventoryShipmentItemId
-	LEFT OUTER JOIN (
-		SELECT intContractHeaderId
-			 , intContractDetailId
-			 , strContractNumber
-			 , intContractSeq
-			 , intDestinationGradeId
-			 , strDestinationGrade
-			 , intDestinationWeightId
-			 , strDestinationWeight
-			 , intSubCurrencyId
-			 , intCurrencyId
-			 , strUnitMeasure
-			 , intOrderUOMId
-			 , intItemUOMId
-			 , intPriceItemUOMId
-			 , strOrderUnitMeasure
-			 , intItemWeightUOMId
-			 , dblCashPrice
-			 , dblUnitPrice
-			 , dblOrderPrice
-			 , dblDetailQuantity
-			 , intFreightTermId
-			 , dblShipQuantity
-			 , dblOrderQuantity
-			 , dblSubCurrencyRate
-			 , intCurrencyExchangeRateTypeId
-			 , strCurrencyExchangeRateType
-			 , intCurrencyExchangeRateId
-			 , dblCurrencyExchangeRate
-			 , dblPriceUOMQuantity
-			 , intBookId
-			 , intSubBookId
-		 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
-	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
-		  AND ICIS.intOrderType = 1
+	LEFT JOIN dbo.vyuCTCustomerContract ARCC WITH (NOLOCK) ON ICISI.intLineNo = ARCC.intContractDetailId AND ICIS.intOrderType = 1
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
