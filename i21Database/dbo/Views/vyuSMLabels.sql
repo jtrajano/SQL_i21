@@ -16,4 +16,10 @@ SELECT DISTINCT strLabel FROM (
 	SELECT strTabName FROM tblSMCustomTab
 		UNION
 	SELECT strControlName from tblSMCustomTabDetail
+        UNION
+    SELECT TRIM(strReminder + ' ' + strType) FROM tblSMReminderList
+        UNION
+    SELECT strControlName FROM tblSMControl
+        UNION
+    SELECT strGridLayoutName FROM tblSMGridLayout where strGrid = 'grdSearch'
 ) Labels
