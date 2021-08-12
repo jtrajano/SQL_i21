@@ -586,17 +586,6 @@ BEGIN TRY
 		where
 			Row_Num = 2
 
-		select
-			intPricingTypeId = intPricingTypeId
-			,dblSeqHistoryPreviousQty = dblQuantity
-
-		from
-			@sequenceHistory
-		where
-			Row_Num = 2
-
-			select * from @cbLogTemp
-
 		if not (@intPricingTypeId is null)
 		begin
 			update @cbLogTemp set intPricingTypeId = @intPricingTypeId where dblQty < @dblSeqHistoryPreviousQty;
