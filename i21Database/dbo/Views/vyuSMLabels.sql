@@ -22,4 +22,4 @@ SELECT DISTINCT strLabel FROM (
     SELECT strControlName FROM tblSMControl
         UNION
     SELECT strGridLayoutName FROM tblSMGridLayout where strGrid = 'grdSearch'
-) Labels
+) Labels WHERE ISNULL(strLabel, '') <> '' ORDER BY strLabel
