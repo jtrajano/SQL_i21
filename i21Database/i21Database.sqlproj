@@ -9104,6 +9104,7 @@
     <Build Include="dbo\Views\vyuAGGetWorkOrderDetail.sql" />
     <Build Include="dbo\Views\vyuAGGetWorkOrder.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
     <Build Include="dbo\Views\vyuICCompactInventoryTransferDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessSummaryLogOnPriceUpdate.sql" />
@@ -10145,7 +10146,10 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
   </ItemGroup>
+<<<<<<< HEAD
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WV_WestVirginia.sql" />
   </ItemGroup>
+=======
+>>>>>>> 21.1Dev
 </Project>
