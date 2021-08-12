@@ -55,6 +55,7 @@ BEGIN TRY
 
 	DECLARE @strEntityNo NVARCHAR(200)
 	DECLARE @errorMessage NVARCHAR(500)
+	DECLARE @intFutureMarketId INT
 	
 
 	SET @ErrMsg =	'uspCTUpdationFromTicketDistribution '+
@@ -291,7 +292,31 @@ BEGIN TRY
 		IF @ysnDP = 1
 		BEGIN
 
-			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)			
+			SELECT @dblNetUnits = dbo.fnCTConvertQtyToTargetItemUOM(@intScaleUOMId,@intItemUOMId,@dblNetUnits)
+
+			SELECT		@intContractTypeId		=	intContractTypeId,
+						@intCommodityId			=	intCommodityId,
+						@strSeqMonth			=	RIGHT(CONVERT(varchar, dtmEndDate, 106),8),
+						@intItemId				=	intItemId
+			FROM	vyuCTContractSequence 
+			WHERE	intContractDetailId = @intContractDetailId
+
+			SELECT TOP 1
+				@intFutureMarketId = intFutureMarketId
+			FROM tblICCommodity
+			WHERE intCommodityId = @intCommodityId
+
+			IF OBJECT_ID('tempdb..#FutureAndBasisPrice2') IS NOT NULL  						
+				DROP TABLE #FutureAndBasisPrice2						
+
+			SELECT * INTO #FutureAndBasisPrice2 
+			FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,@intFutureMarketId,null,@locationId,null,0,@intItemId,null)			
+
+			SELECT TOP 1
+				@dblCost = ISNULL(dblBasis,0) + ISNULL(dblSettlementPrice,0)
+			FROM #FutureAndBasisPrice2
+
+			SET @dblCost = ISNULL(@dblCost,0)
 			
 			INSERT	INTO @Processed SELECT @intContractDetailId,0,NULL,@dblCost,0
 
