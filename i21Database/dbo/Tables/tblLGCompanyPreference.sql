@@ -81,6 +81,8 @@
 [ysnIncludeArrivedInPortStatus] BIT NULL DEFAULT ((0)),
 [ysnIncludeStrippingInstructionStatus] BIT NULL DEFAULT ((0)),
 [ysnWeightClaimsByContainer] BIT NULL DEFAULT ((0)),
+[intExpirationDays] INT NULL,
+[intExpirationDateBasis] INT NULL,
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
