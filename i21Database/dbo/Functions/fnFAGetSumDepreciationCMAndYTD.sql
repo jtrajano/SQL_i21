@@ -1,8 +1,9 @@
-﻿CREATE FUNCTION [dbo].[fnFAGetSumDepreciationFromEndDate]
+﻿CREATE FUNCTION [dbo].[fnFAGetSumDepreciationCMAndYTD]
 (
 	@intAssetId INT,
 	@intBookId INT = 1,
-	@dtmEndDate DATETIME = NULL,
+	@dtmStartDate DATETIME = NULL,
+	@dtmEndDate DATETIME,
 	@ysnCurrentMonthDepreciation BIT = 0 -- IF 1, DATE RANGE WILL BE FROM THE FIRST DAY OF THE END DATE'S YEAR UP TO THE LAST DAY OF THE MONTH OF END DATE
 										 -- IF 0, DATE RANGE WILL BE FROM FIRST TO LAST DAY OF THE MONTH OF THE END DATE FALLS INTO
 )
@@ -49,18 +50,17 @@ BEGIN
 	WHERE intRowId = @intCurrentRowId
 END
 
-IF (@dtmEndDate IS NULL)
+-- SET dtmStartDate is NULL
+IF (@dtmStartDate IS NULL)
 BEGIN
-	IF (@ysnCurrentMonthDepreciation = 0)
-		SELECT @dblDepreciationSumResult = SUM(ISNULL(dblDepreciation, 0)) FROM @tblDepreciations WHERE dtmDepreciationToDate BETWEEN DATEADD(mm, DATEDIFF(mm, 0, GETDATE()), 0) AND DATEADD (dd, -1, DATEADD(mm, DATEDIFF(mm, 0, GETDATE()) + 1, 0))
-	ELSE
-		SELECT @dblDepreciationSumResult = SUM(ISNULL(dblDepreciation, 0)) FROM @tblDepreciations WHERE dtmDepreciationToDate BETWEEN DATEFROMPARTS(YEAR(GETDATE()), 1, 1)  AND DATEADD (dd, -1, DATEADD(mm, DATEDIFF(mm, 0, GETDATE()) + 1, 0))
+	SET @dtmStartDate =
+		CASE 
+			WHEN @ysnCurrentMonthDepreciation = 0 THEN DATEADD(mm, DATEDIFF(mm, 0, @dtmEndDate), 0)
+			ELSE DATEADD(yy, DATEDIFF(yy, 0, @dtmEndDate), 0)
+		END
 END
-ELSE
-	IF (@ysnCurrentMonthDepreciation = 0)
-		SELECT @dblDepreciationSumResult = SUM(ISNULL(dblDepreciation, 0)) from @tblDepreciations WHERE dtmDepreciationToDate BETWEEN DATEADD(mm, DATEDIFF(mm, 0, @dtmEndDate), 0) AND DATEADD (dd, -1, DATEADD(mm, DATEDIFF(mm, 0, @dtmEndDate) + 1, 0))
-	ELSE
-		SELECT @dblDepreciationSumResult = SUM(ISNULL(dblDepreciation, 0)) from @tblDepreciations WHERE dtmDepreciationToDate BETWEEN DATEFROMPARTS(YEAR(@dtmEndDate), 1, 1) AND DATEADD (dd, -1, DATEADD(mm, DATEDIFF(mm, 0, @dtmEndDate) + 1, 0))
+
+SELECT @dblDepreciationSumResult = SUM(ISNULL(dblDepreciation, 0)) from @tblDepreciations WHERE dtmDepreciationToDate BETWEEN @dtmStartDate AND @dtmEndDate
 
 RETURN @dblDepreciationSumResult
 END

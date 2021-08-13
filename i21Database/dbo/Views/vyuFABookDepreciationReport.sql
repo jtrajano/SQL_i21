@@ -59,7 +59,7 @@ FROM
         WHERE intAssetId = FA.intAssetId AND intBookId = 2 AND intDepreciationMethodId = DM.intDepreciationMethodId
     ) TaxBookDepreciation
     OUTER APPLY (
-        SELECT dbo.fnFAGetSumDepreciationFromEndDate(FAD.intAssetId, 1, FY.dtmEndDate, 0) dblDepreciationToDate
+        SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 1, FY.dtmStartDate, FY.dtmEndDate, 0) dblDepreciationToDate
         FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FY
         WHERE 
 		    FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1 AND 
@@ -67,7 +67,7 @@ FROM
 		    FAD.dtmDepreciationToDate BETWEEN FY.dtmStartDate AND FY.dtmEndDate
     ) GAAPDepreciationCurrentMonth
     OUTER APPLY (
-        SELECT dbo.fnFAGetSumDepreciationFromEndDate(FAD.intAssetId, 2, FY.dtmEndDate, 0) dblDepreciationToDate
+        SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 2, FY.dtmStartDate, FY.dtmEndDate, 0) dblDepreciationToDate
         FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FY
         WHERE 
 		    FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 2 AND 
@@ -75,28 +75,42 @@ FROM
 		    FAD.dtmDepreciationToDate BETWEEN FY.dtmStartDate AND FY.dtmEndDate
     ) TaxDepreciationCurrentMonth
     OUTER APPLY (
-        SELECT dbo.fnFAGetSumDepreciationFromEndDate(FAD.intAssetId, 1, FY.dtmEndDate, 1) dblDepreciationYTD
+        SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 1, FY.dtmDateFrom, FYP.dtmEndDate, 1) dblDepreciationYTD
 	    FROM tblFAFixedAssetDepreciation FAD
-		LEFT JOIN tblGLFiscalYearPeriod FY ON FY.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
-	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1 AND FFA.intFiscalPeriodId = FY.intGLFiscalYearPeriodId AND FAD.strTransaction = 'Depreciation'
-	    AND FAD.dtmDepreciationToDate BETWEEN (SELECT DATEADD(yy, DATEDIFF(yy, 0, FY.dtmStartDate), 0) AS StartOfYear) AND FY.dtmEndDate
+		LEFT JOIN tblGLFiscalYearPeriod FYP ON FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
+		JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = FYP.intFiscalYearId AND FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
+	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1 AND FFA.intFiscalPeriodId = FYP.intGLFiscalYearPeriodId
+	    AND FAD.dtmDepreciationToDate BETWEEN FY.dtmDateFrom AND FYP.dtmEndDate
     ) GAAPDepreciationYTD
     OUTER APPLY (
-        SELECT dbo.fnFAGetSumDepreciationFromEndDate(FAD.intAssetId, 2, FY.dtmEndDate, 1) dblDepreciationYTD
-	    FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FY
-	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 2 AND FY.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
-	    AND FAD.dtmDepreciationToDate BETWEEN (SELECT DATEADD(yy, DATEDIFF(yy, 0, FY.dtmStartDate), 0) AS StartOfYear) AND FY.dtmEndDate
+        SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 2, FY.dtmDateFrom, FYP.dtmEndDate, 1) dblDepreciationYTD
+	    FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FYP
+		JOIN tblGLFiscalYear FY ON FY.intFiscalYearId = FYP.intFiscalYearId AND FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
+	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 2 AND FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId
+	    AND FAD.dtmDepreciationToDate BETWEEN FY.dtmDateFrom AND FYP.dtmEndDate
     ) TaxDepreciationYTD
     OUTER APPLY (
-        SELECT MAX(ISNULL(FAD.dblDepreciationToDate, 0)) dblDepreciationLTD
-	    FROM tblFAFixedAssetDepreciation FAD
-	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1
+        SELECT MAX(FAD.dblDepreciationToDate) dblDepreciationLTD
+	    FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FYP
+	    WHERE 
+			FAD.intAssetId = FA.intAssetId AND 
+			FAD.intBookId = 1 AND 
+			FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId AND
+			FAD.dtmDepreciationToDate BETWEEN FAD.dtmDateInService AND FYP.dtmEndDate 
     ) GAAPDepreciationLTD
     OUTER APPLY (
-        SELECT MAX(ISNULL(FAD.dblDepreciationToDate, 0)) dblDepreciationLTD
-	    FROM tblFAFixedAssetDepreciation FAD
-	    WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 2
+        SELECT MAX(FAD.dblDepreciationToDate) dblDepreciationLTD
+	    FROM tblFAFixedAssetDepreciation FAD, tblGLFiscalYearPeriod FYP
+	    WHERE 
+			FAD.intAssetId = FA.intAssetId AND 
+			FAD.intBookId = 2 AND 
+			FYP.intGLFiscalYearPeriodId = FFA.intFiscalPeriodId AND
+			FAD.dtmDepreciationToDate BETWEEN FAD.dtmDateInService AND FYP.dtmEndDate 
     ) TaxDepreciationLTD
+
+WHERE
+	FAD.strTransaction IN ('Depreciation', 'Imported')
+
 GROUP BY 
     FFA.intFiscalPeriodId, 
     FA.intAssetId, 
@@ -129,5 +143,3 @@ GROUP BY
     TaxBookDepreciation.dblCost,
     TaxBookDepreciation.dblSalvageValue,
     FA.intConcurrencyId
-
-GO
