@@ -824,19 +824,6 @@ END CATCH
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------
 BEGIN TRY
-	IF(OBJECT_ID('tempdb..#ARInvalidInventories') IS NOT NULL)
-    BEGIN
-        DROP TABLE #ARInvalidInventories
-    END
-
-	CREATE TABLE #ARInvalidInventories (
-		 [strMessage]			NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL
-		,[strTransactionType]	NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
-		,[strTransactionId]		NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
-		,[strBatchNumber]		NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
-		,[intTransactionId]		INT              NULL
-	)
-
     IF(OBJECT_ID('tempdb..#ARInvoiceGLEntries') IS NOT NULL)
     BEGIN
         DROP TABLE #ARInvoiceGLEntries
@@ -897,7 +884,6 @@ BEGIN TRY
         ,@PostDate 		= @PostDate
         ,@BatchId  		= @batchIdUsed
         ,@UserId   		= @userId
-		,@raiseError	= @raiseError
 	
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -1021,19 +1007,6 @@ BEGIN TRY
         , [strModuleName]
     FROM [dbo].[fnARGetInvalidGLEntries](@GLEntries, @post)
 
-	INSERT INTO @InvalidGLEntries (
-		  [strTransactionId]
-        , [strText]
-        , [intErrorCode]
-        , [strModuleName]
-	)
-	SELECT DISTINCT
-		 [strTransactionId]
-		,[strMessage]
-		,100
-		,'Accounts Receivable'
-	FROM #ARInvalidInventories
-
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
@@ -1053,17 +1026,7 @@ BEGIN TRY
         ,[intTransactionId]     = GLE.[intTransactionId] 
     FROM @InvalidGLEntries IGLE
     LEFT OUTER JOIN @GLEntries GLE ON IGLE.[strTransactionId] = GLE.[strTransactionId]	
-	WHERE IGLE.strTransactionId IS NOT NULL
-
-	UNION ALL
-
-	SELECT DISTINCT
-         [strError]             = strMessage
-        ,[strTransactionType]   = strTransactionType
-        ,[strTransactionId]     = strTransactionId
-        ,[strBatchNumber]       = strBatchNumber
-        ,[intTransactionId]     = intTransactionId
-    FROM #ARInvalidInventories
+	WHERE IGLE.strTransactionId IS NOT NULL	
 
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
