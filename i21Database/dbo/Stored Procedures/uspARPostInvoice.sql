@@ -364,7 +364,6 @@ BEGIN TRY
         ,@PostDate 		= @PostDate
         ,@BatchId  		= @batchIdUsed
         ,@UserId   		= @userId
-		,@raiseError	= @raiseError
 	
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -474,19 +473,6 @@ BEGIN TRY
         , [strModuleName]
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
-	INSERT INTO @InvalidGLEntries (
-		  [strTransactionId]
-		, [strText]
-		, [intErrorCode]
-		, [strModuleName]
-	)
-	SELECT DISTINCT
-		  [strTransactionId]
-		, [strMessage]
-		, 100
-		, 'Accounts Receivable'
-	FROM ##ARInvalidInventories
-
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
@@ -507,16 +493,6 @@ BEGIN TRY
     FROM @InvalidGLEntries IGLE
     LEFT OUTER JOIN @GLEntries GLE ON IGLE.[strTransactionId] = GLE.[strTransactionId]	
 	WHERE IGLE.strTransactionId IS NOT NULL
-
-	UNION ALL
- 
- 	SELECT DISTINCT
-         [strError]             = strMessage
-        ,[strTransactionType]   = strTransactionType
-        ,[strTransactionId]     = strTransactionId
-        ,[strBatchNumber]       = strBatchNumber
-        ,[intTransactionId]     = intTransactionId
-    FROM ##ARInvalidInventories
 
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
