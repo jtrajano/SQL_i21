@@ -9,6 +9,22 @@ BEGIN TRY
 		,@strErrorMessage NVARCHAR(MAX)
 
 	IF NOT EXISTS (
+			SELECT 1
+			FROM dbo.tblICInventoryTransfer
+			WHERE intInventoryTransferId = @intInventoryTransferId
+				AND intStatusId = 1
+			)
+	BEGIN
+		RAISERROR (
+				'Inventory Transfer is already in In-Transit / Closed status.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
+	IF NOT EXISTS (
 			SELECT *
 			FROM dbo.tblMFTODetail
 			WHERE intInventoryTransferId = @intInventoryTransferId
