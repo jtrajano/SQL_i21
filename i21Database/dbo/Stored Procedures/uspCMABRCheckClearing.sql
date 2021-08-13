@@ -35,13 +35,13 @@ CROSS APPLY(
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
-	AND RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = 
-		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' AND @intABRDaysNoRef > 0
-			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, C.dtmDate)
-			THEN RTRIM(LTRIM(ISNULL(C.strReferenceNo,'')))
-		ELSE
-			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
-		END
+	AND 1 = 
+	CASE WHEN  RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = '' AND LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
+	THEN 
+		IIF(@dtmCurrent<= DATEADD(DAY,@intABRDaysNoRef, C.dtmDate), 1, 0)
+	ELSE
+		IIF(RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))), 1, 0)
+	END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit =
 	CASE WHEN C.intBankTransactionTypeId = 5 THEN
