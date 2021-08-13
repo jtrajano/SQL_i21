@@ -337,7 +337,6 @@ BEGIN TRY
         ,@PostDate 		= @PostDate
         ,@BatchId  		= @BatchIdUsed
         ,@UserId   		= @UserId
-		,@raiseError	= 1
 
 	INSERT INTO @GLEntries
 		([dtmDate]
