@@ -2084,7 +2084,7 @@ BEGIN TRY
 					,[intContractHeaderId]			= case WHEN a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
 					,[intContractDetailId]			= case WHEN a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] =  CASE 
-														WHEN ST.ysnDPOwnedType = 0 THEN NULL
+														WHEN @ysnDPOwnedType = 0 THEN NULL
 														ELSE 
 															CASE 
 																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RI.intInventoryReceiptItemId
@@ -2092,7 +2092,7 @@ BEGIN TRY
 															END
 													END
 					,[intInventoryReceiptChargeId]	= CASE 
-														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
+														WHEN @ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
 														ELSE 
 																CASE 
 																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN RC.intInventoryReceiptChargeId
@@ -2202,7 +2202,7 @@ BEGIN TRY
 													END		
 					,[dblOldCost]					=  CASE WHEN @ysnFromPriceBasisContract = 0 THEN
 																CASE
-																	WHEN ST.ysnDPOwnedType = 1 AND a.intItemType = 1
+																	WHEN @ysnDPOwnedType = 1 AND a.intItemType = 1
 																	THEN ISNULL(CS.dblSettlementPrice, 0) + ISNULL(CS.dblBasis, 0)
 																	ELSE NULL
 																END
@@ -2219,7 +2219,7 @@ BEGIN TRY
 																						AND IT.intItemId = a.intItemId
 																						AND IT.intTransactionDetailId = CC.intSettleContractId
 																			)
-																	WHEN ST.ysnDPOwnedType = 1
+																	WHEN @ysnDPOwnedType = 1
 																		THEN (
 																				SELECT IT.dblCost 
 																				FROM tblICInventoryTransaction IT
