@@ -158,7 +158,7 @@
     <Build Include="dbo\Stored Procedures\uspApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
-    <Build Include="dbo\Functions\fnFAGetSumDepreciationFromEndDate.sql" />
+    <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
     <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT508.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTONo.sql" />
