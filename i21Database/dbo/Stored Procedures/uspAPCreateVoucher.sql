@@ -418,6 +418,8 @@ BEGIN TRY
 		[intShipViaId]			,
 		[intContactId]			,
 		[intOrderById]			,
+		[intBookId]				,
+		[intSubBookId]			,
 		[intCurrencyId]			,
 		[intSubCurrencyCents]
 	)
@@ -457,6 +459,8 @@ BEGIN TRY
 		[intShipViaId]			,
 		[intContactId]			,
 		[intOrderById]			,
+		[intBookId]				,
+		[intSubBookId]			,
 		[intCurrencyId]			,
 		[intSubCurrencyCents]
 	)

@@ -40,6 +40,8 @@ RETURNS @returntable TABLE
     [intStoreLocationId]	INT NULL , 
     [intContactId]			INT NULL , 
     [intOrderById]			INT NULL , 
+	[intBookId]				INT NULL ,
+	[intSubBookId]			INT NULL ,
     [intCurrencyId]			INT NOT NULL,
 	[intSubCurrencyCents]	INT NOT NULL DEFAULT 1
 )
@@ -139,6 +141,8 @@ BEGIN
 		[intStoreLocationId]	,
 		[intContactId]			,
 		[intOrderById]			,
+		[intBookId]				,
+		[intSubBookId]			,
 		[intCurrencyId]			,
 		[intSubCurrencyCents]	
 	)
@@ -214,6 +218,8 @@ BEGIN
 		[intStoreLocationId]	=	CASE WHEN A.intLocationId > 0 THEN A.intLocationId ELSE userCompLoc.intCompanyLocationId END,
 		[intContactId]			=	C.intEntityContactId,
 		[intOrderById]			=	@userId,
+		[intBookId]				=	ISNULL(A.intBookId,ctBookEntities.intBookId),
+		[intSubBookId]			=	ISNULL(A.intSubBookId,ctBookEntities.intSubBookId),
 		[intCurrencyId]			=	CASE WHEN A.intCurrencyId > 0 THEN A.intCurrencyId 
 									ELSE vendor.intCurrencyId END,
 		[intSubCurrencyCents]	=	CASE WHEN A.intSubCurrencyCents > 0 THEN A.intSubCurrencyCents
@@ -305,6 +311,18 @@ BEGIN
 			WHERE defaultTerm.intTermID = vendor.intTermsId
 		) termHeirarchy
 	) termData
+	OUTER APPLY (
+		SELECT TOP 1
+			bookEntity.intEntityId
+			,bookEntity.intBookId
+			,ctbook.strBook
+			,bookEntity.intSubBookId
+			,ctsubbook.strSubBook
+		FROM tblCTBookVsEntity bookEntity
+		INNER JOIN tblCTBook ctbook ON bookEntity.intBookId = ctbook.intBookId
+		INNER JOIN tblCTSubBook ctsubbook ON bookEntity.intSubBookId = ctsubbook.intSubBookId
+		WHERE bookEntity.intEntityId = A.intEntityVendorId
+	) ctBookEntities
 	WHERE A.intCountId = 1
 
 	-- UPDATE A
