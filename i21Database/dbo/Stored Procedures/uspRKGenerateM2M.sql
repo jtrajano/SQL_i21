@@ -3223,7 +3223,7 @@ BEGIN TRY
 				, DER.intFutureMonthId
 				, strFutureMarket
 				, DER.intFutureMarketId
-				, dblPrice = 0
+				, dblPrice 
 				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
 				, DER.intCurrencyId
