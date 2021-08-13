@@ -1420,6 +1420,19 @@ BEGIN
 
 		------------------------------------------------------------
 
+
+		DECLARE @ysnTempInvalid BIT
+		IF(@ysnInvalid= 1)
+		BEGIN
+			SET @ysnTempInvalid = 0
+		END
+		ELSE
+		BEGIN
+			SET @ysnInvalid= 1
+			SET @ysnTempInvalid = 1
+		END
+
+
 		------------------------------------------------------------
 		--				INSERT TRANSACTION RECORD				  --
 		------------------------------------------------------------
@@ -1535,6 +1548,7 @@ BEGIN
 		------------------------------------------------------------
 		--				INSERT IMPORT ERROR LOGS				  --
 		------------------------------------------------------------
+		
 		
 		
 		IF(ISNULL(@ysnWriteDriverPinError,0) = 1)
@@ -1830,9 +1844,23 @@ BEGIN
 		WHERE intTransactionId = @Pk
 		
 
-		IF(@ysnRecalculateInvalid = 1)
-		BEGIN 
-			SET @ysnInvalid = @ysnRecalculateInvalid
+		IF(@ysnTempInvalid = 1)
+		BEGIN
+			IF(@ysnRecalculateInvalid = 1)
+			BEGIN 
+				SET @ysnInvalid = @ysnRecalculateInvalid
+			END
+			ELSE
+			BEGIN
+				SET @ysnInvalid = 0
+			END
+		END
+		ELSE
+		BEGIN
+			IF(@ysnRecalculateInvalid = 1)
+			BEGIN 
+				SET @ysnInvalid = @ysnRecalculateInvalid
+			END
 		END
 
 		IF (@strPriceMethod = 'Inventory - Standard Pricing')
