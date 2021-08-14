@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGenerateBasketAnalysisData]
 	 @intItemId				NVARCHAR(MAX)
-	,@intStoreGroupId			NVARCHAR(MAX)
+	,@intStoreGroupId		NVARCHAR(MAX)
 	,@intStoreId			NVARCHAR(MAX)
 	,@strComparison			NVARCHAR(MAX)
 	,@dtmBeginDate			NVARCHAR(MAX)
@@ -13,27 +13,6 @@
 AS
 
 
-	--SELECT @intItemId			
-	--SELECT @intStoreId			
-	--SELECT @strComparison
-	--SELECT @dtmBeginDate		
-	--SELECT @dtmEndDate			
-	--SELECT @strDistrict		
-	--SELECT @strRegion			
-	--SELECT @intCategoryId		
-	--SELECT @intUserId			
-
-	
-
-
-
---DEBUG VALUES--
---DECLARE @strItemId NVARCHAR(MAX) = '00028200003843'
---DECLARE @dtmDateFrom NVARCHAR(MAX) = '2017-03-01 09:17:14.000' 
---DECLARE @dtmDateTo NVARCHAR(MAX) =  '2017-03-30 09:17:14.000'
---DECLARE @strDistrict NVARCHAR(MAX) = ''
---DECLARE @strRegion NVARCHAR(MAX) = ''
---DECLARE @strCategory NVARCHAR(MAX) = ''
 
 
 --[PHASE 1] > Compose parameters--
@@ -116,7 +95,13 @@ END
 
 IF(ISNULL(@intStoreGroupId,0) != 0)
 BEGIN
-	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + @FieldStore + @CharSpace + @CharEquals + @CharSpace  + @intStoreId 
+	SET @Where = @Where + @CharSpace + @CharConjunction + @CharSpace + 'store.intStoreId IN (SELECT st.intStoreId 
+										FROM tblSTStore st
+										INNER JOIN tblSTStoreGroupDetail stgd
+										ON st.intStoreId = stgd.intStoreId 
+										INNER JOIN tblSTStoreGroup stg
+										ON stgd.intStoreGroupId = stg.intStoreGroupId
+										WHERE stg.intStoreGroupId = ' + @intStoreGroupId + ')'
 	SET @CharConjunction = @CharAnd
 END
 
@@ -233,18 +218,6 @@ IF(ISNULL(@intCategoryId,0) != 0)
 BEGIN
 	IF(@strComparison = @ValueItem)
 	BEGIN
-		--***DEBUG CODE***--
-		--SELECT *
-		--FROM @tblSTGroupByUPC 
-		--INNER JOIN tblICItemUOM uom
-		--	ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
-		--INNER JOIN tblICItem item
-		--	ON uom.intItemId = item.intItemId
-		--INNER JOIN tblICCategory cat
-		--	ON item.intCategoryId = cat.intCategoryId
-		--WHERE cat.intCategoryId != @intCategoryId AND item.intItemId != @intItemId
-		--***DEBUG CODE***--
-
 		DELETE @tblSTGroupByUPC 
 		FROM @tblSTGroupByUPC 
 		INNER JOIN tblICItemUOM uom
@@ -258,18 +231,6 @@ BEGIN
 
 	IF(@strComparison = @ValueCategory)
 	BEGIN
-		--***DEBUG CODE***--
-		--SELECT *
-		--FROM @tblSTGroupByUPC 
-		--INNER JOIN tblICItemUOM uom
-		--	ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
-		--INNER JOIN tblICItem item
-		--	ON uom.intItemId = item.intItemId
-		--INNER JOIN tblICCategory cat
-		--	ON item.intCategoryId = cat.intCategoryId
-		--WHERE cat.intCategoryId != @intCategoryId AND item.intCategoryId != @intBasketCategoryId
-		--***DEBUG CODE***--
-
 		DELETE @tblSTGroupByUPC 
 		FROM @tblSTGroupByUPC 
 		INNER JOIN tblICItemUOM uom
@@ -303,19 +264,19 @@ INSERT INTO tblSTBasketAnalysisStagingTable
 	,strCategoryDescription
 )
 SELECT 
-@intUserId,
-strTrlDesc, 
-strTrlUPC, 
-intRank = DENSE_RANK() OVER (ORDER BY intTimeSoldTogether DESC),
-intBasketTransaction = @count,
-intTimeSoldTogether,
-(CAST(intTimeSoldTogether AS NUMERIC(18,6)) / CAST(@count AS NUMERIC(18,6))) * 100,
-item.intItemId,
-strItemNo,
-item.strDescription,
-cat.intCategoryId,
-strCategoryCode,
-cat.strDescription
+	@intUserId,
+	strTrlDesc, 
+	strTrlUPC, 
+	intRank = DENSE_RANK() OVER (ORDER BY intTimeSoldTogether DESC),
+	intBasketTransaction = @count,
+	intTimeSoldTogether,
+	(CAST(intTimeSoldTogether AS NUMERIC(18,6)) / CAST(@count AS NUMERIC(18,6))) * 100,
+	item.intItemId,
+	strItemNo,
+	item.strDescription,
+	cat.intCategoryId,
+	strCategoryCode,
+	cat.strDescription
 FROM @tblSTGroupByUPC
 INNER JOIN tblICItemUOM uom
 	ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
@@ -323,116 +284,3 @@ INNER JOIN tblICItem item
 	ON uom.intItemId = item.intItemId
 INNER JOIN tblICCategory cat
 	ON item.intCategoryId = cat.intCategoryId
-
-
-
-
-
-
-
-
-
---DEBUG CODE--
-
---code block 1--
-
---DELETE FROM tblSTBasketAnalysisStagingTable WHERE intUserId  = @intUserId
---INSERT INTO tblSTBasketAnalysisStagingTable
---(
---	 intUserId
---	,strDescription
---	,strItemUPC
---	,intRank
---	,intTotalBasket
---	,intTotalItem
---	,dblBasketAverage
---	,intItemId
---	,strItemId
---	,strItemDescription
---	,intCategoryId
---	,strCategoryId
---	,strCategoryDescription
-
---)
---SELECT 
---@intUserId,
---strTrlDesc, 
---strTrlUPC, 
---intRank = DENSE_RANK() OVER (ORDER BY COUNT(*) DESC),
---intBasketTransaction = @count,
---intTimeSoldTogether = COUNT(*),
---CAST(COUNT(*) AS NUMERIC(18,6)) / CAST(@count AS NUMERIC(18,6)),
---intItemId,
---strItemNo,
---strItemDescription,
---intCategoryId,
---strCategoryCode,
---strCategoryDescription
---FROM (
---	SELECT 
---	intTermMsgSN, 
---	strTrlDesc, 
---	strTrlUPC, 
---	COUNT(*) AS cnt2,
---	item.strItemNo,
---	item.intItemId,
---	item.strDescription as strItemDescription,
---	cat.strCategoryCode,
---	cat.intCategoryId,
---	cat.strDescription as strCategoryDescription
---	FROM tblSTTranslogRebates
---	INNER JOIN tblICItemUOM uom
---		ON CONVERT(NUMERIC(32, 0),CAST(strTrlUPC AS FLOAT)) = uom.intUpcCode
---	INNER JOIN tblICItem item
---		ON uom.intItemId = item.intItemId
---	INNER JOIN tblICCategory cat
---		ON item.intCategoryId = cat.intCategoryId
---	WHERE intTermMsgSN in (SELECT DISTINCT intId FROM @tblIDs)
---	GROUP BY 
---	intTermMsgSN, 
---	strTrlDesc, 
---	strTrlUPC,
---	item.strItemNo,
---	item.intItemId,
---	item.strDescription,
---	cat.strCategoryCode,
---	cat.intCategoryId,
---	cat.strDescription
---	) AS mytable
---GROUP BY 
---strTrlDesc, 
---strTrlUPC,
---strItemNo,
---intItemId,
---strItemDescription,
---strCategoryCode,
---intCategoryId,
---strCategoryDescription
---ORDER BY COUNT(*) DESC
-
--- code block 2 -- 
-
---SELECT 
---strTrlDesc, 
---strTrlUPC, 
---intRank = DENSE_RANK() OVER (ORDER BY COUNT(*) DESC),
---intBasketTransaction = (SELECT COUNT(*) FROM @tblIDs),
---intTimeSoldTogether = COUNT(*),
---COUNT(*) / (SELECT COUNT(*) FROM @tblIDs)
---FROM (
---	SELECT 
---	intTermMsgSN, 
---	strTrlDesc, 
---	strTrlUPC, 
---	COUNT(*) AS cnt2
---	FROM tblSTTranslogRebates
---	WHERE intTermMsgSN in (SELECT DISTINCT intId FROM @tblIDs)
---	GROUP BY 
---	intTermMsgSN, 
---	strTrlDesc, 
---	strTrlUPC
---	) AS mytable
---GROUP BY 
---strTrlDesc, 
---strTrlUPC
---ORDER BY COUNT(*) DESC
