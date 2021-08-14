@@ -695,118 +695,126 @@ BEGIN TRY
 					,strItemChanged		
 					,strOldValue		  	
 					,strNewValue
-					,intConcurrencyId				
+					,intConcurrencyId
+					,ysnInitialPricing
 				)
-			   SELECT 
-			   intSequenceHistoryId   = NULL
-			  ,dtmHistoryCreated	  = GETDATE()
-			  ,intContractHeaderId	  = @intContractHeaderId
-			  ,intContractDetailId	  = @intContractDetailId
-			  ,intAmendmentApprovalId = 1
-			  ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Qty' ELSE 'Full Price Qty' END
-			  --,strOldValue			  =  0
-			  ,strOldValue			  =  (
-											case
-											when PFD.dblQuantity <> CD.dblQuantity then isnull(SALPart.strNewValue,'0')
-											else isnull(SALFull.strNewValue,'0')
-											end
-										 )
-			  ,strNewValue		      =  PFD.dblQuantity
-			  ,intConcurrencyId		  =  1 
-			  FROM 
-			  tblCTPriceFixationDetail PFD
-			  JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
-			  JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
-			  JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			  LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
-			  OUTER APPLY
-			  (
-				select
-					top 1 strNewValue
-				from
-					tblCTSequenceAmendmentLog
-				where
-					intContractHeaderId = @intContractHeaderId
-					and intContractDetailId = @intContractDetailId
-					and strItemChanged = 'Partial Price Qty'
-				order by
-					intSequenceAmendmentLogId desc
-			  ) SALPart
-			  OUTER APPLY
-			  (
-				select
-					top 1 strNewValue
-				from
-					tblCTSequenceAmendmentLog
-				where
-					intContractHeaderId = @intContractHeaderId
-					and intContractDetailId = @intContractDetailId
-					and strItemChanged = 'Full Price Qty'
-				order by
-					intSequenceAmendmentLogId desc
-			  ) SALFull
-			  WHERE 
-			  (
-				  ISNULL(CH.ysnPrinted, 0) = 1
-				  OR ISNULL(CH.ysnSigned, 0) = 1
-			  ) 
-			  AND CD.intContractDetailId = @intContractDetailId
+				select * from (
+					
+				   SELECT 
+				   intSequenceHistoryId   = NULL
+				  ,dtmHistoryCreated	  = GETDATE()
+				  ,intContractHeaderId	  = @intContractHeaderId
+				  ,intContractDetailId	  = @intContractDetailId
+				  ,intAmendmentApprovalId = 1
+				  ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Qty' ELSE 'Full Price Qty' END
+				  --,strOldValue			  =  0
+				  ,strOldValue			  =  (
+												case
+												when PFD.dblQuantity <> CD.dblQuantity then isnull(SALPart.strNewValue,'0')
+												else isnull(SALFull.strNewValue,'0')
+												end
+											 )
+				  ,strNewValue		      =  PFD.dblQuantity
+				  ,intConcurrencyId		  =  1
+				  ,ysnInitialPricing	= (case when SALPart.strNewValue is null and SALFull.strNewValue is null then 1 else 0 end)
+				  FROM 
+				  tblCTPriceFixationDetail PFD
+				  JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
+				  JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
+				  JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				  LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
+				  OUTER APPLY
+				  (
+					select
+						top 1 strNewValue
+					from
+						tblCTSequenceAmendmentLog
+					where
+						intContractHeaderId = @intContractHeaderId
+						and intContractDetailId = @intContractDetailId
+						and strItemChanged = 'Partial Price Qty'
+					order by
+						intSequenceAmendmentLogId desc
+				  ) SALPart
+				  OUTER APPLY
+				  (
+					select
+						top 1 strNewValue
+					from
+						tblCTSequenceAmendmentLog
+					where
+						intContractHeaderId = @intContractHeaderId
+						and intContractDetailId = @intContractDetailId
+						and strItemChanged = 'Full Price Qty'
+					order by
+						intSequenceAmendmentLogId desc
+				  ) SALFull
+				  WHERE 
+				  (
+					  ISNULL(CH.ysnPrinted, 0) = 1
+					  OR ISNULL(CH.ysnSigned, 0) = 1
+				  ) 
+				  AND CD.intContractDetailId = @intContractDetailId
 
-           UNION
+	           UNION
 
-			  SELECT 
-			  intSequenceHistoryId   = NULL
-			 ,dtmHistoryCreated	  = GETDATE()
-			 ,intContractHeaderId	  = @intContractHeaderId
-			 ,intContractDetailId	  = @intContractDetailId
-			 ,intAmendmentApprovalId = 1
-			 ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Fixation' ELSE 'Full Price Fixation' END
-			 --,strOldValue			  =  0
-			 ,strOldValue			  =  (
-											case
-											when PFD.dblQuantity <> CD.dblQuantity then isnull(SALPart.strNewValue,'0')
-											else isnull(SALFull.strNewValue,'0')
-											end
-										 )
-			 ,strNewValue		      =  PFD.dblFutures
-			 ,intConcurrencyId		  =  1 
-			 FROM 
-			 tblCTPriceFixationDetail PFD
-			 JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
-			 JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
-			 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			 LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
-			 OUTER APPLY
-			 (
-				select
-					top 1 strNewValue
-				from
-					tblCTSequenceAmendmentLog
-				where
-					intContractHeaderId = @intContractHeaderId
-					and intContractDetailId = @intContractDetailId
-					and strItemChanged = 'Partial Price Fixation'
-				order by
-					intSequenceAmendmentLogId desc
-		 	 ) SALPart
-			OUTER APPLY
-			 (
-				select
-					top 1 strNewValue
-				from
-					tblCTSequenceAmendmentLog
-				where
-					intContractHeaderId = @intContractHeaderId
-					and intContractDetailId = @intContractDetailId
-					and strItemChanged = 'Full Price Fixation'
-				order by
-					intSequenceAmendmentLogId desc
-		 	 ) SALFull
-			 WHERE (
-					ISNULL(CH.ysnPrinted, 0) = 1
-					OR ISNULL(CH.ysnSigned, 0) = 1
-					)
-				AND CD.intContractDetailId = @intContractDetailId
+				  SELECT 
+				  intSequenceHistoryId   = NULL
+				 ,dtmHistoryCreated	  = GETDATE()
+				 ,intContractHeaderId	  = @intContractHeaderId
+				 ,intContractDetailId	  = @intContractDetailId
+				 ,intAmendmentApprovalId = 1
+				 ,strItemChanged		  = CASE WHEN PFD.dblQuantity <> CD.dblQuantity THEN 'Partial Price Fixation' ELSE 'Full Price Fixation' END
+				 --,strOldValue			  =  0
+				 ,strOldValue			  =  (
+												case
+												when PFD.dblQuantity <> CD.dblQuantity then isnull(SALPart.strNewValue,'0')
+												else isnull(SALFull.strNewValue,'0')
+												end
+											 )
+				 ,strNewValue		      =  PFD.dblFutures
+				 ,intConcurrencyId		  =  1 
+				  ,ysnInitialPricing	= (case when SALPart.strNewValue is null and SALFull.strNewValue is null then 1 else 0 end)
+				 FROM 
+				 tblCTPriceFixationDetail PFD
+				 JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
+				 JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
+				 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				 LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
+				 OUTER APPLY
+				 (
+					select
+						top 1 strNewValue
+					from
+						tblCTSequenceAmendmentLog
+					where
+						intContractHeaderId = @intContractHeaderId
+						and intContractDetailId = @intContractDetailId
+						and strItemChanged = 'Partial Price Fixation'
+					order by
+						intSequenceAmendmentLogId desc
+			 	 ) SALPart
+				OUTER APPLY
+				 (
+					select
+						top 1 strNewValue
+					from
+						tblCTSequenceAmendmentLog
+					where
+						intContractHeaderId = @intContractHeaderId
+						and intContractDetailId = @intContractDetailId
+						and strItemChanged = 'Full Price Fixation'
+					order by
+						intSequenceAmendmentLogId desc
+			 	 ) SALFull
+				 WHERE (
+						ISNULL(CH.ysnPrinted, 0) = 1
+						OR ISNULL(CH.ysnSigned, 0) = 1
+						)
+					AND CD.intContractDetailId = @intContractDetailId
+
+			)tbl
+			where tbl.strOldValue <> tbl.strNewValue
 
 		
 		IF	@ysnMultiplePriceFixation = 1
