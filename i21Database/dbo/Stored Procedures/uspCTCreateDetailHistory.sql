@@ -61,7 +61,9 @@ BEGIN TRY
 			dblFutures					   NUMERIC(18,6),
 			dblBasis				       NUMERIC(18,6),
 			dblCashPrice			       NUMERIC(18,6),
-			intPriceItemUOMId			   INT
+			intPriceItemUOMId			   INT,
+			intBookId			   INT,
+			intSubBookId			   INT
 		)
 		
 		DECLARE	@SCOPE_IDENTITY TABLE (intSequenceHistoryId INT)
@@ -119,6 +121,8 @@ BEGIN TRY
 		   ,dblBasis			
 		   ,dblCashPrice		
 		   ,intPriceItemUOMId	 
+		   ,intBookId	 
+		   ,intSubBookId	 
 		)
 		SELECT 
 		 intContractHeaderId	
@@ -135,7 +139,10 @@ BEGIN TRY
 		,dblFutures			
 		,dblBasis			
 		,dblCashPrice		
-		,intPriceItemUOMId
+		,intPriceItemUOMId	 
+		,intBookId	 
+		,intSubBookId
+
 		FROM 
 		(
 		  SELECT * FROM 
@@ -721,6 +728,50 @@ BEGIN TRY
 		   JOIN	tblICUnitMeasure				U21			 ON	  U21.intUnitMeasureId			  =	PU1.intUnitMeasureId
 		   WHERE U2.intUnitMeasureId <> U21.intUnitMeasureId
 		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   
+		   UNION
+		   --Book
+		    SELECT
+		    intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+		   ,dtmHistoryCreated	    = GETDATE()
+		   ,intContractHeaderId	    = @intContractHeaderId
+		   ,intContractDetailId	    = CurrentRow.intContractDetailId
+		   ,intAmendmentApprovalId	= 20
+		   ,strItemChanged		    = 'Book'
+		   ,strOldValue			    =  oldBook.strBook
+		   ,strNewValue		        =  newBook.strBook
+		   ,intConcurrencyId		=  1  
+		   
+		   FROM tblCTSequenceHistory			CurrentRow
+		   JOIN @tblDetail					    PreviousRow	 ON   isnull(CurrentRow.intBookId,0)    <> isnull(PreviousRow.intBookId,0)
+		   JOIN @SCOPE_IDENTITY					NewRecords   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+		   left JOIN tblCTBook newBook on isnull(newBook.intBookId,0) = isnull(CurrentRow.intBookId,0)
+		   left JOIN tblCTBook oldBook on isnull(oldBook.intBookId,0) = isnull(PreviousRow.intBookId,0)
+		   WHERE isnull(oldBook.intBookId,0) <> isnull(newBook.intBookId,0)
+		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   
+		   UNION
+		   --Sub Book
+		    SELECT
+		    intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+		   ,dtmHistoryCreated	    = GETDATE()
+		   ,intContractHeaderId	    = @intContractHeaderId
+		   ,intContractDetailId	    = CurrentRow.intContractDetailId
+		   ,intAmendmentApprovalId	= 21
+		   ,strItemChanged		    = 'Sub Book'
+		   ,strOldValue			    =  oldSubBook.strSubBook
+		   ,strNewValue		        =  newSubBook.strSubBook
+		   ,intConcurrencyId		=  1  
+		   
+		   FROM tblCTSequenceHistory			CurrentRow
+		   JOIN @tblDetail					    PreviousRow	 ON   isnull(CurrentRow.intSubBookId,0)    <> isnull(PreviousRow.intSubBookId,0)
+		   JOIN @SCOPE_IDENTITY					NewRecords   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+		   left JOIN tblCTSubBook newSubBook on isnull(newSubBook.intSubBookId,0) = isnull(CurrentRow.intSubBookId,0)
+		   left JOIN tblCTSubBook oldSubBook on isnull(oldSubBook.intSubBookId,0) = isnull(PreviousRow.intSubBookId,0)
+		   WHERE isnull(oldSubBook.intSubBookId,0) <> isnull(newSubBook.intSubBookId,0)
+		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+
+
 		END     
 	END
 
