@@ -13,7 +13,6 @@
 	intConcurrencyId			   INT,
 	ysnSigned					   bit NOT NULL CONSTRAINT [DF_tblCTSequenceAmendmentLog_ysnSigned]  DEFAULT ((0)),
 	dtmSigned					   DATETIME,
-	ysnInitialPricing				bit not null default 0,
     CONSTRAINT [PK_tblCTSequenceAmendmentLog_intSequenceAmendmentLogId] PRIMARY KEY CLUSTERED (intSequenceAmendmentLogId ASC),
     CONSTRAINT [FK_tblCTSequenceAmendmentLog_tblCTContractDetail_intContractDetailId] FOREIGN KEY (intContractDetailId) REFERENCES [tblCTContractDetail](intContractDetailId) ON DELETE CASCADE
 )
