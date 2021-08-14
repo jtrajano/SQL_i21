@@ -161,6 +161,17 @@ UPDATE T SET dblDepre = dblMonth  + ISNULL(dblYear, 0)
 FROM @tblAssetInfo T
 WHERE strError IS NULL 
 
+-- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
+IF (@BookId = 2)
+BEGIN
+		UPDATE A
+		SET A.dblDepre = A.dblDepre + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
+		FROM  @tblAssetInfo A
+		JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
+		JOIN @Id I ON I.intId = A.intAssetId
+		WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+END
+
 UPDATE B set ysnFullyDepreciated = 1 FROM @tblAssetInfo B JOIN
 tblFABookDepreciation BD ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
 WHERE dblDepre >= (BD.dblCost - BD.dblSalvageValue)
