@@ -411,7 +411,8 @@ BEGIN TRY
 			,strItemChanged		
 			,strOldValue		  	
 			,strNewValue
-			,intConcurrencyId				
+			,intConcurrencyId	
+			,ysnInitialPricing			
 		  )
 		  --Entity
 		   SELECT TOP 1
@@ -424,6 +425,7 @@ BEGIN TRY
 		  ,strOldValue			  =  PreviousType.strName
 		  ,strNewValue		      =  CurrentType.strName
 		  ,intConcurrencyId		  =  1 
+		  ,ysnInitialPricing = 0
 
 		  FROM tblCTSequenceHistory		CurrentRow
 		  JOIN @SCOPE_IDENTITY			NewRecords          ON  NewRecords.intSequenceHistoryId				=   CurrentRow.intSequenceHistoryId 
@@ -445,6 +447,7 @@ BEGIN TRY
 		  ,strOldValue			    = PreviousType.strPosition
 		  ,strNewValue		        = CurrentType.strPosition
 		  ,intConcurrencyId		  =  1
+		  ,ysnInitialPricing = 0
 
 		  FROM tblCTSequenceHistory		  CurrentRow
 		  JOIN @SCOPE_IDENTITY			  NewRecords             ON  NewRecords.intSequenceHistoryId		   =    CurrentRow.intSequenceHistoryId 
@@ -465,6 +468,7 @@ BEGIN TRY
 		  ,strOldValue			    = PreviousType.strFreightTerm
 		  ,strNewValue		        = CurrentType.strFreightTerm
 		  ,intConcurrencyId		  =  1
+		  ,ysnInitialPricing = 0
 
 		  FROM tblCTSequenceHistory			    CurrentRow
 		  JOIN @SCOPE_IDENTITY				    NewRecords				ON  NewRecords.intSequenceHistoryId	 =  CurrentRow.intSequenceHistoryId 
@@ -485,6 +489,7 @@ BEGIN TRY
 		  ,strOldValue			    =  PreviousType.strTerm
 		  ,strNewValue		        =  CurrentType.strTerm
 		  ,intConcurrencyId			=  1
+		  ,ysnInitialPricing = 0
 		  
 		  FROM tblCTSequenceHistory				CurrentRow
 		  JOIN @SCOPE_IDENTITY					NewRecords              ON  NewRecords.intSequenceHistoryId			=   CurrentRow.intSequenceHistoryId
@@ -504,7 +509,8 @@ BEGIN TRY
 		  ,strItemChanged		    = 'Grades' 
 		  ,strOldValue			    = PreviousType.strWeightGradeDesc
 		  ,strNewValue		        = CurrentType.strWeightGradeDesc
-		  ,intConcurrencyId		    =  1 
+		  ,intConcurrencyId		    =  1
+		  ,ysnInitialPricing = 0 
 		  
 		  FROM tblCTSequenceHistory					CurrentRow
 		  JOIN @SCOPE_IDENTITY						NewRecords				ON  NewRecords.intSequenceHistoryId			 =    CurrentRow.intSequenceHistoryId 
@@ -525,7 +531,8 @@ BEGIN TRY
 		  ,strItemChanged		    = 'Weights' 
 		  ,strOldValue			    = PreviousType.strWeightGradeDesc 
 		  ,strNewValue		        = CurrentType.strWeightGradeDesc
-		  ,intConcurrencyId		    =  1  
+		  ,intConcurrencyId		    =  1 
+		  ,ysnInitialPricing = 0 
 		  
 		  FROM tblCTSequenceHistory					CurrentRow
 		  JOIN @SCOPE_IDENTITY						NewRecords              ON  NewRecords.intSequenceHistoryId			 =   CurrentRow.intSequenceHistoryId 
@@ -545,7 +552,8 @@ BEGIN TRY
 		  ,strItemChanged		    = 'Status' 
 		  ,strOldValue			    = PreviousType.strContractStatus  
 		  ,strNewValue		        = CurrentType.strContractStatus
-		  ,intConcurrencyId		    =  1  
+		  ,intConcurrencyId		    =  1
+		  ,ysnInitialPricing = 0  
 		  
 		  FROM tblCTSequenceHistory				CurrentRow
 		  JOIN @SCOPE_IDENTITY					NewRecords					ON  NewRecords.intSequenceHistoryId		  =  CurrentRow.intSequenceHistoryId
@@ -566,6 +574,7 @@ BEGIN TRY
 		  ,strOldValue			    = Convert(Nvarchar,PreviousRow.dtmStartDate,101)  
 		  ,strNewValue		        = Convert(Nvarchar,CurrentRow.dtmStartDate,101)
 		  ,intConcurrencyId		    =  1 
+		  ,ysnInitialPricing = 0
 		  
 		  FROM tblCTSequenceHistory			CurrentRow
 		  JOIN @SCOPE_IDENTITY				NewRecords				   ON  NewRecords.intSequenceHistoryId				 =  CurrentRow.intSequenceHistoryId 
@@ -584,6 +593,7 @@ BEGIN TRY
 		  ,strOldValue			    = Convert(Nvarchar,PreviousRow.dtmEndDate,101)  
 		  ,strNewValue		        = Convert(Nvarchar,CurrentRow.dtmEndDate,101)
 		  ,intConcurrencyId		    =  1 
+		  ,ysnInitialPricing = 0
 		  
 		  FROM tblCTSequenceHistory			CurrentRow
 		  JOIN @SCOPE_IDENTITY				NewRecords				   ON  NewRecords.intSequenceHistoryId			    =  CurrentRow.intSequenceHistoryId 
@@ -601,7 +611,8 @@ BEGIN TRY
 		   ,strItemChanged		    =  'Items' 
 		   ,strOldValue			    =  PreviousType.strItemNo  
 		   ,strNewValue		        =  CurrentType.strItemNo
-		   ,intConcurrencyId		=  1  
+		   ,intConcurrencyId		=  1
+		  ,ysnInitialPricing = 0  
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @SCOPE_IDENTITY				    NewRecords				   ON  NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
@@ -621,7 +632,8 @@ BEGIN TRY
 		   ,strItemChanged		    =  'Quantity' 
 		   ,strOldValue			    =  LTRIM(PreviousRow.dblQuantity)  
 		   ,strNewValue		        =  LTRIM(CurrentRow.dblQuantity)
-		   ,intConcurrencyId		=  1  
+		   ,intConcurrencyId		=  1
+		  ,ysnInitialPricing = 0  
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @SCOPE_IDENTITY					NewRecords				    ON  NewRecords.intSequenceHistoryId     =  CurrentRow.intSequenceHistoryId
@@ -639,7 +651,8 @@ BEGIN TRY
 		   ,strItemChanged		    =  'Quantity UOM'  
 		   ,strOldValue			    = U21.strUnitMeasure
 		   ,strNewValue		        = U2.strUnitMeasure
-		   ,intConcurrencyId		=  1  
+		   ,intConcurrencyId		=  1 
+		  ,ysnInitialPricing = 0 
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @SCOPE_IDENTITY					NewRecords						   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
@@ -662,7 +675,8 @@ BEGIN TRY
 		   ,strItemChanged		    =  'Futures Market'
 		   ,strOldValue			    = PreviousType.strFutMarketName
 		   ,strNewValue		        = CurrentType.strFutMarketName
-		   ,intConcurrencyId		=  1   
+		   ,intConcurrencyId		=  1
+		  ,ysnInitialPricing = 0   
 		   
 		   FROM tblCTSequenceHistory				CurrentRow
 		   JOIN @SCOPE_IDENTITY						NewRecords						ON		    NewRecords.intSequenceHistoryId     =   CurrentRow.intSequenceHistoryId
@@ -682,7 +696,8 @@ BEGIN TRY
 		   ,strItemChanged		    =  'Currency'
 		   ,strOldValue			    = PreviousType.strCurrency
 		   ,strNewValue		        = CurrentType.strCurrency
-		   ,intConcurrencyId		=  1   
+		   ,intConcurrencyId		=  1
+		  ,ysnInitialPricing = 0   
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @SCOPE_IDENTITY					NewRecords   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
@@ -702,7 +717,8 @@ BEGIN TRY
 		   ,strItemChanged		    =  'Mn/Yr'
 		   ,strOldValue			    = PreviousType.strFutureMonth
 		   ,strNewValue		        = CurrentType.strFutureMonth
-		   ,intConcurrencyId		=  1   
+		   ,intConcurrencyId		=  1 
+		  ,ysnInitialPricing = 0  
 		   
 		   FROM tblCTSequenceHistory			    CurrentRow
 		   JOIN @SCOPE_IDENTITY					    NewRecords   ON   NewRecords.intSequenceHistoryId			= CurrentRow.intSequenceHistoryId 
@@ -710,6 +726,7 @@ BEGIN TRY
 		   LEFT JOIN tblRKFuturesMonth				CurrentType	 ON	  ISNULL(CurrentType.intFutureMonthId ,0)    =	ISNULL(CurrentRow.intFutureMonthId	,0)
 		   LEFT JOIN tblRKFuturesMonth				PreviousType ON	  ISNULL(PreviousType.intFutureMonthId,0)	 =	ISNULL(PreviousRow.intFutureMonthId	,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   and PreviousType.strFutureMonth <> CurrentType.strFutureMonth
 
 		   UNION
 		   --Futures
@@ -723,6 +740,7 @@ BEGIN TRY
 		   ,strOldValue			    = LTRIM(PreviousRow.dblFutures)
 		   ,strNewValue		        = LTRIM(CurrentRow.dblFutures)
 		   ,intConcurrencyId		=  1  
+		  ,ysnInitialPricing 		= (case when PreviousRow.dblFutures is null then 1 else 0 end)
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @SCOPE_IDENTITY				    NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
@@ -741,6 +759,7 @@ BEGIN TRY
 		   ,strOldValue			    = LTRIM(PreviousRow.dblBasis)
 		   ,strNewValue		        = LTRIM(CurrentRow.dblBasis)
 		   ,intConcurrencyId		=  1  
+		  ,ysnInitialPricing = 0
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @SCOPE_IDENTITY				    NewRecords          ON   NewRecords.intSequenceHistoryId  = CurrentRow.intSequenceHistoryId 
@@ -759,6 +778,7 @@ BEGIN TRY
 		   ,strOldValue			    = LTRIM(PreviousRow.dblCashPrice)
 		   ,strNewValue		        = LTRIM(CurrentRow.dblCashPrice)
 		   ,intConcurrencyId		=  1  
+		  ,ysnInitialPricing 		= (case when PreviousRow.dblCashPrice is null then 1 else 0 end)
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @SCOPE_IDENTITY					NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
@@ -777,6 +797,7 @@ BEGIN TRY
 		   ,strOldValue			    =  U21.strUnitMeasure
 		   ,strNewValue		        =  U2.strUnitMeasure
 		   ,intConcurrencyId		=  1  
+		  ,ysnInitialPricing = 0
 		   
 		   FROM tblCTSequenceHistory			CurrentRow
 		   JOIN @tblDetail					    PreviousRow	 ON   CurrentRow.intPriceItemUOMId    <> PreviousRow.intPriceItemUOMId
