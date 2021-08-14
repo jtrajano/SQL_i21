@@ -38,9 +38,15 @@ CROSS APPLY(
 	AND 1 = 
 	CASE WHEN  RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = '' AND LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
 	THEN 
-		IIF(@dtmCurrent<= DATEADD(DAY,@intABRDaysNoRef, C.dtmDate), 1, 0)
+		CASE WHEN @dtmCurrent <= DATEADD(DAY,@intABRDaysNoRef, C.dtmDate)
+		THEN 1
+		ELSE 0
+		END
 	ELSE
-		IIF(RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))), 1, 0)
+		CASE WHEN RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,'')))
+		THEN 1
+		ELSE 0
+		END
 	END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
 	AND ABR.strDebitCredit =
