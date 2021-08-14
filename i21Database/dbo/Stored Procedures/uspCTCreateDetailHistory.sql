@@ -31,6 +31,7 @@ BEGIN TRY
 		, @strTransactionType NVARCHAR(20)
         , @ysnStayAsDraftContractUntilApproved BIT
         , @ysnAddAmendmentForNonDraftContract BIT = 0
+        , @ysnPricingAsAmendment BIT = 1
 		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
@@ -79,7 +80,8 @@ BEGIN TRY
 	
 	SELECT
 		@ysnAmdWoAppvl = ISNULL(ysnAmdWoAppvl, 0),
-		@ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0)
+		@ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0),
+		@ysnPricingAsAmendment = ysnPricingAsAmendment
 	FROM tblCTCompanyPreference;
 	
 	DELETE FROM @tblHeader;
@@ -729,6 +731,7 @@ BEGIN TRY
 			LEFT JOIN tblRKFuturesMonth CurrentType ON ISNULL(CurrentType.intFutureMonthId, 0) = ISNULL(CurrentRow.intFutureMonthId, 0)
 			LEFT JOIN tblRKFuturesMonth PreviousType ON ISNULL(PreviousType.intFutureMonthId, 0) = ISNULL(PreviousRow.intFutureMonthId, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			and PreviousType.strFutureMonth <> CurrentType.strFutureMonth
 			
 			--Futures
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -744,6 +747,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY NewRecords ON NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail PreviousRow ON ISNULL(CurrentRow.dblFutures, 0) <> ISNULL(PreviousRow.dblFutures, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			and @ysnPricingAsAmendment = 1
 			
 			--Basis
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -774,6 +778,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY NewRecords ON NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail PreviousRow ON ISNULL(CurrentRow.dblCashPrice, 0) <> ISNULL(PreviousRow.dblCashPrice, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			and @ysnPricingAsAmendment = 1
 			
 			--Cash Price UOM
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
