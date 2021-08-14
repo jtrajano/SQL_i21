@@ -122,6 +122,7 @@ BEGIN TRY
 			,FD.dblHedgeNoOfLots
 			,FD.dblLoadApplied
 			,FD.ysnToBeDeleted
+			,FD.dblPreviousQty
 			,FD.intConcurrencyId
 			,PM.strUnitMeasure	AS strPricingUOM,
 			strHedgeCurrency = case when FD.ysnHedge = 1 then CY.strCurrency else null end,
