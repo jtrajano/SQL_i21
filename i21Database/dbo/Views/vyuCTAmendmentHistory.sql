@@ -54,6 +54,7 @@ FROM
 			,intSalesPersonId				=  CH.intSalespersonId
 			,strSalesPerson					=  CS.strName
 			,intConcurrencyId				=  SAL.intConcurrencyId
+			,ysnInitialPricing				= SAL.ysnInitialPricing
 		FROM tblCTSequenceAmendmentLog	   SAL
 		JOIN tblCTContractHeader		   CH  ON CH.intContractHeaderId     = SAL.intContractHeaderId
 		JOIN tblEMEntity				   EY  ON EY.intEntityId		     = CH.intEntityId
@@ -63,6 +64,7 @@ FROM
 		LEFT JOIN tblICCommodity	       CO  ON CO.intCommodityId			 = CH.intCommodityId
 		LEFT JOIN tblSMCompanyLocation	   CL  ON CL.intCompanyLocationId    = CD.intCompanyLocationId
 		LEFT JOIN vyuEMEntity			   CS  ON CS.intEntityId	 		= CH.intSalespersonId
+		WHERE SAL.ysnInitialPricing = 0
 	) tblAmendment
 	GROUP BY
 		intSequenceAmendmentLogId,
@@ -88,4 +90,5 @@ FROM
 		dtmSigned,
 		intSalesPersonId,
 		strSalesPerson,
-		intConcurrencyId
+		intConcurrencyId,
+		ysnInitialPricing
