@@ -223,8 +223,8 @@ BEGIN TRY
 				END AS strActualInputItemNo
 			,VRI.dblCalculatedQuantity AS dblVirtualPercentage
 			,ARI.dblCalculatedQuantity AS dblActualPercentage
-			,VB.dblTotalCost * VRI.dblCalculatedQuantity / 100 AS dblVirtualBasis
-			,AB.dblTotalCost * ARI.dblCalculatedQuantity / 100 AS dblActualBasis
+			,IsNULL(VB.dblTotalCost * VRI.dblCalculatedQuantity / 100,0) AS dblVirtualBasis
+			,IsNULL(AB.dblTotalCost * ARI.dblCalculatedQuantity / 100,0) AS dblActualBasis
 			,C.dblCost1 AS dblCost1
 			,C.dblCost2 AS dblCost2
 			,C.dblCost3 AS dblCost3
@@ -247,7 +247,7 @@ BEGIN TRY
 			AND CA.intCommodityAttributeId = ISNULL(VI.intProductTypeId,AI.intProductTypeId)
 		) AS DT
 	ORDER BY ISNULL(DT.intVirtualRecipeId, DT.intActualRecipeId)
-		,DT.intRecipeItemTypeId DESC
+		,DT.intRecipeItemTypeId DESC,DT.intVirtualRecipeItemId Desc
 END TRY
 
 BEGIN CATCH

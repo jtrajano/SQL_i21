@@ -575,6 +575,7 @@ BEGIN TRY
 			FROM tblICLot
 			WHERE intParentLotId = @intParentLotId
 				AND intItemId = @intSampleItemId
+				AND intStorageLocationId is not null
 		END
 
 		SELECT @intSeqNo = MIN(intSeqNo)
