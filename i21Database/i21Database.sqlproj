@@ -170,6 +170,11 @@
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
     <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendInputItem.sql" />
+    <Build Include="dbo\Tables\tblMFWODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWODetailConfirm.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
