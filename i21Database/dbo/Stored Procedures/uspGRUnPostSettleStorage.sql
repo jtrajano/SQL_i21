@@ -156,6 +156,9 @@ BEGIN TRY
 
 	WHILE EXISTS(SELECT 1 FROM @SettleStorages)
 	BEGIN
+		--WE SHOULD CLEAR THE STORAGE HISTORY STAGING TABLE
+		DELETE FROM @StorageHistoryStagingTable
+
 		SET @intSettleStorageId = NULL
 		SET @intParentSettleStorageId = NULL
 		SET @TicketNo = NULL
