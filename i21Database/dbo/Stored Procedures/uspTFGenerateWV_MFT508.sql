@@ -65,22 +65,23 @@ BEGIN TRY
 		, @dblS2L8_A NUMERIC(18, 6) = 0.00
 		, @dblS2L8_B NUMERIC(18, 6) = 0.00
 		, @dblS2L8_C NUMERIC(18, 6) = 0.00
+		, @dblS2L8_D NUMERIC(18, 6) = 0.00
 		, @dblS2L8_E NUMERIC(18, 6) = 0.00
 		, @dblS2L9_A NUMERIC(18, 6) = 0.00
 		, @dblS2L9_B NUMERIC(18, 6) = 0.00
 		, @dblS2L9_C NUMERIC(18, 6) = 0.00
-		, @dblS2L9_E NUMERIC(18, 6) = 0.00
+		, @dblS2L9_D NUMERIC(18, 6) = 0.00
 		, @dblS2L10_A NUMERIC(18, 6) = 0.00
 		, @dblS2L10_B NUMERIC(18, 6) = 0.00
 		, @dblS2L10_C NUMERIC(18, 6) = 0.00
-		, @dblS2L10_E NUMERIC(18, 6) = 0.00
+		, @dblS2L10_D NUMERIC(18, 6) = 0.00
 		, @dblS2L11_B NUMERIC(18, 6) = 0.00
 		, @dblS2L12_B NUMERIC(18, 6) = 0.00
 		, @dblS2L13_B NUMERIC(18, 6) = 0.00
 		, @dblS2L14_A NUMERIC(18, 6) = 0.00
 		, @dblS2L14_B NUMERIC(18, 6) = 0.00
 		, @dblS2L14_C NUMERIC(18, 6) = 0.00
-		, @dblS2L14_E NUMERIC(18, 6) = 0.00
+		, @dblS2L14_D NUMERIC(18, 6) = 0.00
 
 		, @dblS2L15 NUMERIC(18, 6) = 0.00
 
@@ -104,11 +105,11 @@ BEGIN TRY
 		, @dblS3L5_A NUMERIC(18, 6) = 0.00
 		, @dblS3L5_B NUMERIC(18, 6) = 0.00
 		, @dblS3L5_C NUMERIC(18, 6) = 0.00
-		, @dblS3L5_E NUMERIC(18, 6) = 0.00
+		, @dblS3L5_D NUMERIC(18, 6) = 0.00
 		, @dblS3L6_A NUMERIC(18, 6) = 0.00
 		, @dblS3L6_B NUMERIC(18, 6) = 0.00
 		, @dblS3L6_C NUMERIC(18, 6) = 0.00
-		, @dblS3L6_E NUMERIC(18, 6) = 0.00
+		, @dblS3L6_D NUMERIC(18, 6) = 0.00
 
 		, @dblS3L7 NUMERIC(18, 6) = 0.00
 
@@ -125,7 +126,7 @@ BEGIN TRY
 		, @strS2L9_A_Rate NVARCHAR(20) = NULL
 		, @strS2L9_B_Rate NVARCHAR(20) = NULL
 		, @strS2L9_C_Rate NVARCHAR(20) = NULL
-		, @strS2L9_E_Rate NVARCHAR(20) = NULL
+		, @strS2L9_D_Rate NVARCHAR(20) = NULL
 
 		, @strS2L12_B_Rate NVARCHAR(20) = NULL
 
@@ -137,7 +138,7 @@ BEGIN TRY
 		, @strS3L5_A_Rate NVARCHAR(20) = NULL
 		, @strS3L5_B_Rate NVARCHAR(20) = NULL
 		, @strS3L5_C_Rate NVARCHAR(20) = NULL
-		, @strS3L5_E_Rate NVARCHAR(20) = NULL
+		, @strS3L5_D_Rate NVARCHAR(20) = NULL
 		, @strS1L2_Rate NVARCHAR(20) = NULL
 		, @dblS1L2_Rate NUMERIC(18, 6) = 0.00
 		, @strS1L5 NVARCHAR(20) = NULL
@@ -184,15 +185,15 @@ BEGIN TRY
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 		-- SECTION 2
-		SELECT @dblS2L1_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Gasoline'
-		SELECT @dblS2L1_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Gasohol'
-		SELECT @dblS2L1_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Undyed Diesel/Kerosene'
-		SELECT @dblS2L1_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Compressed Natural Gas'
+		SELECT @dblS2L1_A = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Gasoline'
+		SELECT @dblS2L1_B = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Gasohol'
+		SELECT @dblS2L1_C = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Undyed Diesel/Kerosene'
+		SELECT @dblS2L1_D = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Compressed Natural Gas'
 		
-		SELECT @dblS2L2_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Gasoline'
-		SELECT @dblS2L2_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Gasohol'
-		SELECT @dblS2L2_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Undyed Diesel/Kerosene'
-		SELECT @dblS2L2_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Compressed Natural Gas'
+		SELECT @dblS2L2_A = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Gasoline'
+		SELECT @dblS2L2_B = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Gasohol'
+		SELECT @dblS2L2_C = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Undyed Diesel/Kerosene'
+		SELECT @dblS2L2_D = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Compressed Natural Gas'
 		
 		SET @dblS2L3_A = @dblS2L1_A + @dblS2L2_A
 		SET @dblS2L3_B = @dblS2L1_B + @dblS2L2_B
@@ -214,37 +215,38 @@ BEGIN TRY
 		SET @dblS2L5_C = @dblS2L3_C * @dblS2L4_C
 		SET @dblS2L5_D = @dblS2L3_D * @dblS2L4_D
 
-		SELECT @dblS2L6_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Dyed Diesel/Kerosene'
-		SELECT @dblS2L6_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Propane/LPG'
-		SELECT @dblS2L6_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Aviation Gas'
-		SELECT @dblS2L6_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Aviation Jet Fuel'
-		SELECT @dblS2L6_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'LNG'
+		SELECT @dblS2L6_A = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Dyed Diesel/Kerosene'
+		SELECT @dblS2L6_B = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Propane/LPG'
+		SELECT @dblS2L6_C = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Aviation Gas'
+		SELECT @dblS2L6_D = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'Aviation Jet Fuel'
+		SELECT @dblS2L6_E = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '2' and strType = 'LNG'
 
-		SELECT @dblS2L7_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Dyed Diesel/Kerosene'
-		SELECT @dblS2L7_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Propane/LPG'
-		SELECT @dblS2L7_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Aviation Gas'
-		SELECT @dblS2L7_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Aviation Jet Fuel'
-		SELECT @dblS2L7_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'LNG'
+		SELECT @dblS2L7_A = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Dyed Diesel/Kerosene'
+		SELECT @dblS2L7_B = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Propane/LPG'
+		SELECT @dblS2L7_C = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Aviation Gas'
+		SELECT @dblS2L7_D = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'Aviation Jet Fuel'
+		SELECT @dblS2L7_E = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11' and strType = 'LNG'
 
 		SET @dblS2L8_A = @dblS2L6_A + @dblS2L7_A
 		SET @dblS2L8_B = @dblS2L6_B + @dblS2L7_B
-		SET @dblS2L8_C = @dblS2L6_C + @dblS2L6_D + @dblS2L7_C + @dblS2L7_D
+		SET @dblS2L8_C = @dblS2L6_C + @dblS2L7_C 
+		SET @dblS2L8_D = @dblS2L6_D + @dblS2L7_D
 		SET @dblS2L8_E = @dblS2L6_E + @dblS2L7_E
 
 		SELECT @strS2L9_A_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S2L9A_RATE'
 		SELECT @strS2L9_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S2L9B_RATE'
 		SELECT @strS2L9_C_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S2L9C_RATE'
-		SELECT @strS2L9_E_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S2L9E_RATE'
+		SELECT @strS2L9_D_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S2L9D_RATE'
 
 		SET @dblS2L9_A = CONVERT(NUMERIC(18, 6), @strS2L9_A_Rate)
 		SET @dblS2L9_B = CONVERT(NUMERIC(18, 6), @strS2L9_B_Rate)
 		SET @dblS2L9_C = CONVERT(NUMERIC(18, 6), @strS2L9_C_Rate)
-		SET @dblS2L9_E = CONVERT(NUMERIC(18, 6), @strS2L9_E_Rate)
+		SET @dblS2L9_D = CONVERT(NUMERIC(18, 6), @strS2L9_D_Rate)
 
 		SET @dblS2L10_A = @dblS2L8_A * @dblS2L9_A
 		SET @dblS2L10_B = @dblS2L8_B * @dblS2L9_B
 		SET @dblS2L10_C = @dblS2L8_C * @dblS2L9_C
-		SET @dblS2L10_E = @dblS2L8_E * @dblS2L9_E
+		SET @dblS2L10_D = @dblS2L8_D * @dblS2L9_D
 
 		SELECT @strS2L11_B = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S2L11B'
 		SET @dblS2L11_B = CONVERT(NUMERIC(18, 6), @strS2L11_B)
@@ -257,15 +259,15 @@ BEGIN TRY
 		SET @dblS2L14_A = @dblS2L10_A 
 		SET @dblS2L14_B = @dblS2L10_B + @dblS2L13_B 
 		SET @dblS2L14_C = @dblS2L10_C
-		SET @dblS2L14_E = @dblS2L10_E
+		SET @dblS2L14_D = @dblS2L10_D
 
-		SET @dblS2L15 = @dblS2L5_A + @dblS2L5_B + @dblS2L5_C + @dblS2L5_D + @dblS2L14_A + @dblS2L14_B + @dblS2L14_C + @dblS2L14_E
+		SET @dblS2L15 = @dblS2L5_A + @dblS2L5_B + @dblS2L5_C + @dblS2L5_D + @dblS2L14_A + @dblS2L14_B + @dblS2L14_C + @dblS2L14_D
 		
 		-- SECTION 3
-		SELECT @dblS3L1_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Gasoline'
-		SELECT @dblS3L1_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Gasohol'
-		SELECT @dblS3L1_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Undyed Diesel/Kerosene'
-		SELECT @dblS3L1_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Compressed Natural Gas'
+		SELECT @dblS3L1_A = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Gasoline'
+		SELECT @dblS3L1_B = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Gasohol'
+		SELECT @dblS3L1_C = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Undyed Diesel/Kerosene'
+		SELECT @dblS3L1_D = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Compressed Natural Gas'
 	
 		SELECT @strS3L2_A_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S3L2A_RATE'
 		SELECT @strS3L2_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S3L2B_RATE'
@@ -282,29 +284,29 @@ BEGIN TRY
 		SET @dblS3L3_C = @dblS3L1_C * @dblS3L2_C
 		SET @dblS3L3_D = @dblS3L1_D * @dblS3L2_D
 
-		SELECT @dblS3L4_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Dyed Diesel/Kerosene'
-		SELECT @dblS3L4_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Propane/LPG'
-		SELECT @dblS3L4_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Aviation Gas'
-		SELECT @dblS3L4_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Aviation Jet Fuel'
-		SELECT @dblS3L4_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'LNG'
+		SELECT @dblS3L4_A = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Dyed Diesel/Kerosene'
+		SELECT @dblS3L4_B = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Propane/LPG'
+		SELECT @dblS3L4_C = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Aviation Gas'
+		SELECT @dblS3L4_D = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'Aviation Jet Fuel'
+		SELECT @dblS3L4_E = ISNULL(SUM(dblBillQty),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-508' AND strScheduleCode = '11A' and strType = 'LNG'
 
 		SELECT @strS3L5_A_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S3L5A_RATE'
 		SELECT @strS3L5_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S3L5B_RATE'
 		SELECT @strS3L5_C_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S3L5C_RATE'
-		SELECT @strS3L5_E_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S3L5E_RATE'
+		SELECT @strS3L5_D_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S3L5D_RATE'
 
 		SET @dblS3L5_A = CONVERT(NUMERIC(18, 6), @strS3L5_A_Rate)
 		SET @dblS3L5_B = CONVERT(NUMERIC(18, 6), @strS3L5_B_Rate)
 		SET @dblS3L5_C = CONVERT(NUMERIC(18, 6), @strS3L5_C_Rate)
-		SET @dblS3L5_E = CONVERT(NUMERIC(18, 6), @strS3L5_E_Rate)
+		SET @dblS3L5_D = CONVERT(NUMERIC(18, 6), @strS3L5_D_Rate)
 
 
 		SET @dblS3L6_A = @dblS3L4_A * @dblS3L5_A
 		SET @dblS3L6_B = @dblS3L4_B * @dblS3L5_B
-		SET @dblS3L6_C = (@dblS3L4_C + @dblS3L4_D) * @dblS3L5_C
-		SET @dblS3L6_E = @dblS3L4_E * @dblS3L5_E
+		SET @dblS3L6_C = @dblS3L4_C * @dblS3L5_C
+		SET @dblS3L6_D = @dblS3L4_D * @dblS3L5_D
 
-		SET @dblS3L7 = @dblS3L3_A + @dblS3L3_B + @dblS3L3_C + @dblS3L3_D + @dblS3L6_A + @dblS3L6_B + @dblS3L6_C + @dblS3L6_E
+		SET @dblS3L7 = @dblS3L3_A + @dblS3L3_B + @dblS3L3_C + @dblS3L3_D + @dblS3L6_A + @dblS3L6_B + @dblS3L6_C + @dblS3L6_D
 
 		-- SECTION 4
 		SET @dblS4L1 = @dblS2L15
@@ -395,22 +397,25 @@ BEGIN TRY
 		, dblS2L8_A  =  @dblS2L8_A 
 		, dblS2L8_B  =  @dblS2L8_B 
 		, dblS2L8_C  =  @dblS2L8_C 
+		, dblS2L8_D  =  @dblS2L8_D 
 		, dblS2L8_E  =  @dblS2L8_E 
 		, dblS2L9_A  =  @dblS2L9_A 
 		, dblS2L9_B  =  @dblS2L9_B 
 		, dblS2L9_C  =  @dblS2L9_C 
-		, dblS2L9_E  =  @dblS2L9_E 
+		, dblS2L9_D  =  @dblS2L9_D
+
 		, dblS2L10_A  =  @dblS2L10_A 
 		, dblS2L10_B  =  @dblS2L10_B 
 		, dblS2L10_C  =  @dblS2L10_C 
-		, dblS2L10_E  =  @dblS2L10_E 
+		, dblS2L10_D  =  @dblS2L10_D
+
 		, dblS2L11_B  =  @dblS2L11_B 
 		, dblS2L12_B  =  @dblS2L12_B 
 		, dblS2L13_B  =  @dblS2L13_B 
 		, dblS2L14_A  =  @dblS2L14_A 
 		, dblS2L14_B  =  @dblS2L14_B 
 		, dblS2L14_C  =  @dblS2L14_C 
-		, dblS2L14_E  =  @dblS2L14_E
+		, dblS2L14_D  =  @dblS2L14_D
 		, dblS2L15  =  @dblS2L15 
 		, dblS3L1_A  =  @dblS3L1_A 
 		, dblS3L1_B  =  @dblS3L1_B 
@@ -432,11 +437,11 @@ BEGIN TRY
 		, dblS3L5_A  =  @dblS3L5_A 
 		, dblS3L5_B  =  @dblS3L5_B 
 		, dblS3L5_C  =  @dblS3L5_C 
-		, dblS3L5_E  =  @dblS3L5_E 
+		, dblS3L5_D  =  @dblS3L5_D 
 		, dblS3L6_A  =  @dblS3L6_A 
 		, dblS3L6_B  =  @dblS3L6_B 
 		, dblS3L6_C  =  @dblS3L6_C 
-		, dblS3L6_E  =  @dblS3L6_E 
+		, dblS3L6_D  =  @dblS3L6_D
 		, dblS3L7  =  @dblS3L7 
 		, dblS4L1  =  @dblS4L1 
 		, dblS4L2  =  @dblS4L2 
@@ -449,7 +454,7 @@ BEGIN TRY
 		, strS2L9_A_Rate =  @strS2L9_A_Rate
 		, strS2L9_B_Rate =  @strS2L9_B_Rate
 		, strS2L9_C_Rate =  @strS2L9_C_Rate
-		, strS2L9_E_Rate =  @strS2L9_E_Rate
+		, strS2L9_D_Rate =  @strS2L9_D_Rate
 		, strS2L12_B_Rate =  @strS2L12_B_Rate
 		, strS3L2_A_Rate =  @strS3L2_A_Rate
 		, strS3L2_B_Rate =  @strS3L2_B_Rate
@@ -458,7 +463,7 @@ BEGIN TRY
 		, strS3L5_A_Rate =  @strS3L5_A_Rate
 		, strS3L5_B_Rate =  @strS3L5_B_Rate
 		, strS3L5_C_Rate =  @strS3L5_C_Rate
-		, strS3L5_E_Rate =  @strS3L5_E_Rate
+		, strS3L5_D_Rate =  @strS3L5_D_Rate
 		, strS1L2_Rate =  @strS1L2_Rate
 		, dblS1L2_Rate  =  @dblS1L2_Rate 
 		, strS1L5 =  @strS1L5
