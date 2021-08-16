@@ -15,6 +15,16 @@ BEGIN
 	declare @intContractId int
 	declare @intLoadId int
 	
+	declare @SCALE_TICKET NVARCHAR(50) = 'Scale Ticket'
+		,@INVENTORY_RECEIPT NVARCHAR(50) = 'Inventory Receipt'
+		,@INVENTORY_SHIPMENT NVARCHAR(50) = 'Inventory Shipment'
+		,@VOUCHER NVARCHAR(50) = 'Voucher'
+		,@INVOICE NVARCHAR(50) = 'Invoice'
+		,@CONTRACT NVARCHAR(50) = 'Contract'
+		,@TRANSPORT_LOAD NVARCHAR(50) = 'Transport Load'
+		,@STORAGE_TICKET_NUMBER NVARCHAR(50) = 'Storage Ticket Number'
+		,@CUSTOMER_STORAGE NVARCHAR(50) = 'Customer Storage'
+		,@CUSTOMER_TRANSFER NVARCHAR(50) = 'Customer Transfer'
 
 	if @intTransactionType in (1, 2, 3)
 	begin
@@ -90,13 +100,13 @@ BEGIN
 					--Source
 					Ticket.intTicketId,
 					Ticket.strTicketNumber,
-					'Ticket',
+					@SCALE_TICKET,
 					'Ticket Management',
 
 					Receipt.intInventoryReceiptId,
 					Receipt.strReceiptNumber,
+					@INVENTORY_RECEIPT,
 					'Inventory',
-					'Receipt',
 					'Create'
 				from tblSCTicket Ticket		
 					join tblSCTicketSplit Split
@@ -121,7 +131,7 @@ BEGIN
 						EXEC uspICDeleteTransactionLinks 
 							@intTransactionId = @intTransactionId
 							,@strTransactionNo = @strDestTransactionNo
-							,@strTransactionType = 'Ticket'
+							,@strTransactionType = @SCALE_TICKET
 							,@strModuleName = 'Ticket Management'
 					END
 
@@ -140,13 +150,13 @@ BEGIN
 					SELECT
 						--Source
 						ContractHeader.intContractHeaderId,
-						ContractHeader.strContractNumber,
+						ContractHeader.strContractNumber,						
 						'Contracts',
-						'Contract',
+						@CONTRACT,
 
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
-						'Ticket',
+						@SCALE_TICKET,
 						'Ticket Management',
 						'Create'
 					from tblSCTicket Ticket
@@ -182,12 +192,12 @@ BEGIN
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
 						'Ticket Management',
-						'Ticket',
+						@SCALE_TICKET,
 
 						Receipt.intInventoryReceiptId,
 						Receipt.strReceiptNumber,
+						@INVENTORY_RECEIPT,
 						'Inventory',
-						'Receipt',
 						'Create'
 					from tblSCTicket Ticket
 						join tblICInventoryReceipt Receipt
@@ -214,7 +224,7 @@ BEGIN
 				EXEC uspICDeleteTransactionLinks 
 					@intTransactionId = @intTransactionId
 					,@strTransactionNo = @strDestTransactionNo
-					,@strTransactionType = 'Ticket'
+					,@strTransactionType = @SCALE_TICKET
 					,@strModuleName = 'Ticket Management'
 			END
 			--end delete transaction for ticket undistribute
@@ -239,7 +249,7 @@ BEGIN
 			EXEC uspICDeleteTransactionLinks 
 				@intTransactionId = @intTransactionId
 				,@strTransactionNo = @strDestTransactionNo
-				,@strTransactionType = 'Ticket'
+				,@strTransactionType = @SCALE_TICKET
 				,@strModuleName = 'Ticket Management'
 
 			--start - Checking for void status
@@ -264,13 +274,13 @@ BEGIN
 					SELECT
 						--Source
 						ContractHeader.intContractHeaderId,
-						ContractHeader.strContractNumber,
+						ContractHeader.strContractNumber,						
 						'Contracts',
-						'Contract',
+						@CONTRACT,
 
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
-						'Ticket',
+						@SCALE_TICKET,
 						'Ticket Management',
 						'Create'
 					from tblSCTicket Ticket				
@@ -306,11 +316,11 @@ BEGIN
 						LoadShipment.intLoadId,
 						LoadShipment.strLoadNumber,
 						'Logistics',
-						'Load Shipment',
+						@TRANSPORT_LOAD,
 
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
-						'Ticket',
+						@SCALE_TICKET,
 						'Ticket Management',
 						'Create'
 					from tblSCTicket Ticket				
@@ -334,7 +344,7 @@ BEGIN
 			EXEC uspICDeleteTransactionLinks 
 				@intTransactionId = @intTransactionId
 				,@strTransactionNo = @strDestTransactionNo
-				,@strTransactionType = 'Ticket'
+				,@strTransactionType = @SCALE_TICKET
 				,@strModuleName = 'Ticket Management'				
 		END
 		--end delete event for ticket
@@ -368,13 +378,13 @@ BEGIN
 					--Source
 					Ticket.intTicketId,
 					Ticket.strTicketNumber,
-					'Ticket',
+					@SCALE_TICKET,
 					'Ticket Management',
 
 					Shipment.intInventoryShipmentId,
 					Shipment.strShipmentNumber,
+					@INVENTORY_SHIPMENT,
 					'Inventory',
-					'Shipment',
 					'Create'
 				from tblSCTicket Ticket		
 					join tblSCTicketSplit Split
@@ -401,7 +411,7 @@ BEGIN
 						EXEC uspICDeleteTransactionLinks 
 							@intTransactionId = @intTransactionId
 							,@strTransactionNo = @strDestTransactionNo
-							,@strTransactionType = 'Ticket'
+							,@strTransactionType = @SCALE_TICKET
 							,@strModuleName = 'Ticket Management'
 					END
 
@@ -420,13 +430,13 @@ BEGIN
 					SELECT
 						--Source
 						ContractHeader.intContractHeaderId,
-						ContractHeader.strContractNumber,
+						ContractHeader.strContractNumber,						
 						'Contracts',
-						'Contract',
+						@CONTRACT,
 
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
-						'Ticket',
+						@SCALE_TICKET,
 						'Ticket Management',
 						'Create'
 					from tblSCTicket Ticket
@@ -462,12 +472,12 @@ BEGIN
 						Ticket.intTicketId,
 						Ticket.strTicketNumber,
 						'Ticket Management',
-						'Ticket',
+						@SCALE_TICKET,
 
 						Shipment.intInventoryShipmentId,
 						Shipment.strShipmentNumber,
+						@INVENTORY_SHIPMENT,
 						'Inventory',
-						'Shipment',
 						'Create'
 					from tblSCTicket Ticket
 						join tblICInventoryShipment Shipment
@@ -490,7 +500,7 @@ BEGIN
 				EXEC uspICDeleteTransactionLinks 
 					@intTransactionId = @intTransactionId
 					,@strTransactionNo = @strDestTransactionNo
-					,@strTransactionType = 'Ticket'
+					,@strTransactionType = @SCALE_TICKET
 					,@strModuleName = 'Ticket Management'
 			END
 			--end delete transaction for ticket undistribute
@@ -532,12 +542,12 @@ BEGIN
 			CustomerStorage.intCustomerStorageId
 			,case when CustomerStorage.strStorageTicketNumber like 'CS%' then CustomerStorage.strStorageTicketNumber else 'CS-' + CustomerStorage.strStorageTicketNumber end  + '-('+ cast(CustomerStorage.intCustomerStorageId as nvarchar) + ')'
 			,'Ticket Management'
-			,'Customer Storage'
+			,@CUSTOMER_STORAGE
 
 			,SettleStorage.intSettleStorageId
 			,SettleStorage.strStorageTicket
 			,'Ticket Management'
-			,'Settlement'
+			,@STORAGE_TICKET_NUMBER
 			,'Create'
 
 	
@@ -568,7 +578,7 @@ BEGIN
 					@intTransactionId = @intTransactionId
 					,@strTransactionNo = @strDestTransactionNo
 					,@strModuleName = 'Ticket Management'
-					,@strTransactionType = 'Settlement'
+					,@strTransactionType = @STORAGE_TICKET_NUMBER
 			END
 			--end delete transaction for ticket undistribute
 			
@@ -601,12 +611,12 @@ BEGIN
 			Ticket.intTicketId
 			,Ticket.strTicketNumber
 			,'Ticket Management'
-			,'Ticket'
+			,@SCALE_TICKET
 
 			,CustomerStorage.intCustomerStorageId
 			,case when CustomerStorage.strStorageTicketNumber like 'CS%' then CustomerStorage.strStorageTicketNumber else 'CS-' + CustomerStorage.strStorageTicketNumber end   + '-('+ cast(CustomerStorage.intCustomerStorageId as nvarchar) + ')'
 			,'Ticket Management'
-			,'Customer Storage'
+			,@CUSTOMER_STORAGE
 			,'Create'
 
 	
@@ -636,7 +646,7 @@ BEGIN
 				EXEC uspICDeleteTransactionLinks 
 					@intTransactionId = @intTransactionId
 					,@strTransactionNo = @strDestTransactionNo
-					,@strTransactionType = 'Customer Storage'
+					,@strTransactionType = @CUSTOMER_STORAGE
 					,@strModuleName = 'Ticket Management'
 			END
 			--end delete transaction for ticket undistribute
@@ -674,12 +684,12 @@ BEGIN
 				CustomerStorage.intCustomerStorageId
 				,case when CustomerStorage.strStorageTicketNumber like 'CS%' then CustomerStorage.strStorageTicketNumber else 'CS-' + CustomerStorage.strStorageTicketNumber end   + '-('+ cast(CustomerStorage.intCustomerStorageId as nvarchar) + ')'
 				,'Ticket Management'
-				,'Customer Storage'
+				,@CUSTOMER_STORAGE
 
 				,SettleStorage.intSettleStorageId
 				,SettleStorage.strStorageTicket
 				,'Ticket Management'
-				,'Settlement'
+				,@STORAGE_TICKET_NUMBER
 				,'Create'
 
 	
@@ -697,12 +707,12 @@ BEGIN
 				ContractHeader.intContractHeaderId
 				,ContractHeader.strContractNumber
 				,'Contracts'
-				,'Contract'
+				,@CONTRACT
 
 				,SettleStorage.intSettleStorageId
 				,SettleStorage.strStorageTicket
 				,'Ticket Management'
-				,'Settlement'
+				,@STORAGE_TICKET_NUMBER
 				,'Create'
 
 	
@@ -756,12 +766,12 @@ BEGIN
 				CustomerStorage.intCustomerStorageId
 				,case when CustomerStorage.strStorageTicketNumber like 'CS%' then CustomerStorage.strStorageTicketNumber else 'CS-' + CustomerStorage.strStorageTicketNumber end   + '-('+ cast(CustomerStorage.intCustomerStorageId as nvarchar) + ')'
 				,'Ticket Management'
-				,'Customer Storage'
+				,@CUSTOMER_STORAGE
 
 				,TransferStorage.intTransferStorageId
 				,TransferStorage.strTransferStorageTicket
 				,'Ticket Management'
-				,'Customer Transfer'
+				,@CUSTOMER_TRANSFER
 				,'Create'
 	
 	
@@ -777,12 +787,12 @@ BEGIN
 				TransferStorage.intTransferStorageId
 				,TransferStorage.strTransferStorageTicket
 				,'Ticket Management'
-				,'Customer Transfer'
+				,@CUSTOMER_TRANSFER
 	
 				,CustomerStorage.intCustomerStorageId
 				,case when CustomerStorage.strStorageTicketNumber like 'CS%' then CustomerStorage.strStorageTicketNumber else 'CS-' + CustomerStorage.strStorageTicketNumber end   + '-('+ cast(CustomerStorage.intCustomerStorageId as nvarchar) + ')'
 				,'Ticket Management'
-				,'Customer Storage'
+				,@CUSTOMER_STORAGE
 				,'Create'
 	
 				from tblGRTransferStorage TransferStorage
@@ -811,7 +821,7 @@ BEGIN
 					EXEC uspICDeleteTransactionLinks 
 						@intTransactionId = @intTransactionId
 						,@strTransactionNo = @strDestTransactionNo
-						,@strTransactionType = 'Customer Transfer'
+						,@strTransactionType = @CUSTOMER_TRANSFER
 						,@strModuleName = 'Ticket Management'
 				END
 			
