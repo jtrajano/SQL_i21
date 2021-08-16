@@ -298,8 +298,10 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemPerformerId					= @ItemPerformerId
 	,@ItemLeaseBilling					= @ItemLeaseBilling
 	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
-	      
-		  
+	,@ItemCurrencyExchangeRateTypeId 	= @ItemCurrencyExchangeRateTypeId
+ 	,@ItemCurrencyExchangeRateId  		= @ItemCurrencyExchangeRateId
+ 	,@ItemCurrencyExchangeRate   		= @ItemCurrencyExchangeRate	      
+		  	      
 SET @NewInvoiceId = @NewId		                 
       
 	--AUDIT LOG
