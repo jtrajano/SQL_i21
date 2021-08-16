@@ -104,7 +104,7 @@ SELECT
 	strTransactionType = 'Dollar Contracts',
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
-FROM tblRestApiSchemaItemContract sc
+FROM tblRestApiSchemaDollarContract sc
 LEFT JOIN tblSMCountry country ON country.strCountry = sc.strCountry OR country.strCountryCode = sc.strCountry
 WHERE country.intCountryID IS NULL
   AND NULLIF(sc.strCountry, '') IS NOT NULL
@@ -125,7 +125,7 @@ SELECT
 	strTransactionType = 'Dollar Contracts',
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
-FROM tblRestApiSchemaItemContract sc
+FROM tblRestApiSchemaDollarContract sc
 LEFT JOIN tblSMTerm term ON term.strTerm = sc.strTerms OR term.strTermCode = sc.strTerms
 WHERE term.intTermID IS NULL
   AND NULLIF(sc.strTerms, '') IS NOT NULL
@@ -146,7 +146,7 @@ SELECT
 	strTransactionType = 'Dollar Contracts',
 	strApiVersion = NULL,
 	guiSubscriptionId = NULL
-FROM tblRestApiSchemaItemContract sc
+FROM tblRestApiSchemaDollarContract sc
 LEFT JOIN tblSMFreightTerms term ON term.strFreightTerm = sc.strFreightTerm OR term.strDescription = sc.strFreightTerm
 WHERE term.intFreightTermId IS NULL
   AND NULLIF(sc.strFreightTerm, '') IS NOT NULL
