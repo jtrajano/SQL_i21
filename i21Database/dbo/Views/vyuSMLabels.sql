@@ -14,7 +14,7 @@ SELECT DISTINCT strLabel FROM (
 		UNION
 	SELECT strControlName from tblSMCustomTabDetail
         UNION
-    SELECT TRIM(strReminder + ' ' + strType) FROM tblSMReminderList
+    SELECT LTRIM(RTRIM(strReminder + ' ' + strType)) FROM tblSMReminderList
         UNION
     SELECT strControlName FROM tblSMControl
         UNION
