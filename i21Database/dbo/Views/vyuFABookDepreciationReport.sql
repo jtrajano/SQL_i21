@@ -49,14 +49,15 @@ FROM
 	    SELECT intDepreciationCount = ISNULL(COUNT(1), 0) FROM tblFAFixedAssetDepreciation 
 	    WHERE intAssetId = FA.intAssetId AND intBookId = 1 AND strTransaction IN ('Depreciation', 'Imported')
     ) BookDepCnt
-
-    OUTER APPLY(  
-        SELECT dblCost, dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation 
-        WHERE intAssetId = FA.intAssetId AND intBookId = 1 AND intDepreciationMethodId = DM.intDepreciationMethodId
+     OUTER APPLY(  
+        SELECT BD.dblCost, BD.dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation BD
+		 JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = BD.intDepreciationMethodId
+	     WHERE BD.intAssetId = FA.intAssetId AND intBookId = 1
     ) GAAPBookDepreciation
     OUTER APPLY(  
-         SELECT dblCost, dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation 
-        WHERE intAssetId = FA.intAssetId AND intBookId = 2 AND intDepreciationMethodId = DM.intDepreciationMethodId
+         SELECT BD.dblCost, BD.dblSalvageValue, DM.strDepreciationMethodId FROM tblFABookDepreciation BD
+		 JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = BD.intDepreciationMethodId
+	     WHERE BD.intAssetId = FA.intAssetId AND intBookId = 2
     ) TaxBookDepreciation
     OUTER APPLY (
         SELECT dbo.fnFAGetSumDepreciationCMAndYTD(FAD.intAssetId, 1, FY.dtmStartDate, FY.dtmEndDate, 0) dblDepreciationToDate
