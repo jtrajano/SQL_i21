@@ -45,6 +45,15 @@
 	strActiveInactiveDeleteIndicator NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strBottleDepositNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	strInventoryGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+
+	-- Fields for the Category -> Vendor Category XRef
+	intCategoryId INT NULL,
+	intVendorId INT NULL,
+	ysnAddOrderingUPC BIT NULL,
+	ysnUpdateExistingRecords BIT NULL,
+	ysnAddNewRecords BIT NULL,
+	ysnUpdatePrice BIT NULL,
+
 	dtmDateCreated DATETIME NULL,
     dtmDateModified DATETIME NULL,
     intCreatedByUserId INT NULL,
