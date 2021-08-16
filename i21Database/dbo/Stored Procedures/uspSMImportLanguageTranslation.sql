@@ -12,11 +12,13 @@ BEGIN TRANSACTION
 
 	MERGE INTO [tblSMLanguageTranslation] A
 	USING [tblSMLanguageTranslationStaging] B ON (A.strLabel = B.strLabel AND A.intLanguageId = @intLanguageId)
-	--When records are matched, update the records if there is any change
-	WHEN MATCHED AND A.strTranslation <> B.strTranslation
-	THEN UPDATE SET A.strTranslation = RTRIM(LTRIM(B.strTranslation)), A.intConcurrencyId = A.intConcurrencyId + 1
+	--When translation doesn't match update the records
+	WHEN MATCHED 
+	THEN UPDATE SET 
+		A.strTranslation	= CASE WHEN A.strTranslation <> B.strTranslation THEN RTRIM(LTRIM(B.strTranslation)) ELSE A.strTranslation END, 
+		A.intConcurrencyId	= CASE WHEN A.strTranslation <> B.strTranslation THEN A.intConcurrencyId + 1 ELSE A.intConcurrencyId END
 	--When no records are matched, insert the incoming records from source table to target table
-	WHEN NOT MATCHED BY TARGET 
+	WHEN NOT MATCHED BY TARGET
 	THEN INSERT (strLabel, strTranslation, intLanguageId) 
 	VALUES (RTRIM(LTRIM(B.strLabel)), RTRIM(LTRIM(B.strTranslation)), @intLanguageId);
 
@@ -32,7 +34,6 @@ BEGIN TRANSACTION
 			WHERE intLanguageId = @intLanguageId
 		END
 
-	-- Delete screen(s) staging that doesn't have conflicts
 	DELETE FROM [tblSMLanguageTranslationStaging]
 
 COMMIT TRANSACTION

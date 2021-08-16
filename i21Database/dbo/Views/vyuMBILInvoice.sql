@@ -24,7 +24,7 @@ SELECT Invoice.intInvoiceId
 	, ISNULL(dblTotal,0) as dblTotal
 	, Invoice.intTermId
 	, Term.strTerm
-	, Invoice.ysnPosted
+	, i21Invoice.ysnPosted
 	, Invoice.ysnVoided
 	, Invoice.dtmPostedDate
 	, Invoice.dtmVoidedDate
@@ -41,7 +41,7 @@ LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Invoi
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Invoice.intDriverId
 LEFT JOIN tblMBILShift InvoiceShift ON InvoiceShift.intShiftId = Invoice.intShiftId
 LEFT JOIN tblMBILOrder InvoiceOrder ON InvoiceOrder.intOrderId = Invoice.intOrderId
-LEFT JOIN tblSMTerm Term ON Term.intTermID = InvoiceOrder.intTermId
+LEFT JOIN tblSMTerm Term ON Term.intTermID = Invoice.intTermId
 LEFT JOIN tblARInvoice i21Invoice ON i21Invoice.intInvoiceId = Invoice.inti21InvoiceId
 LEFT JOIN (    
   SELECT item.intInvoiceId,SUM(isnull(dblItemTotal,0))dblItemTotal,SUM(isnull(dblTaxTotal,0))dblTaxTotal

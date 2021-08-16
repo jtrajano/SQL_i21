@@ -212,6 +212,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\6_PanelOwnerMigration.sql
 :r .\DB\7_Create_BusinessInsights.sql
 
+-- Fixed Assets
+:r .\FA\DefaultData\FixedAssetGroup.sql
+
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
 :r .\GL\DefaultData\1a_AccountStructure.sql
@@ -599,6 +602,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\GA_Georgia.sql
 :r .\TF\DefaultData\FL_Florida.sql
 :r .\TF\DefaultData\AL_Alabama.sql
+:r .\TF\DefaultData\WV_WestVirginia.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

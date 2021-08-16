@@ -1,8 +1,10 @@
 CREATE TABLE [dbo].[tblCMABRActivityMatched]
 (
 	[intABRActivityMatchedId] INT IDENTITY(1,1) NOT NULL,
-	[intABRActivityId] INT NOT NULL,
-    [intTransactionId] INT NOT NULL,
+	[strMatchingId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	[intBankAccountId] INT NULL,
+	[intABRActivityId] INT NULL,
+    [intTransactionId] INT NULL,
 	[dtmDateEntered] DATETIME NULL,
 	[dtmDateReconciled] DATETIME NULL,
     [intEntityId] INT NOT NULL,

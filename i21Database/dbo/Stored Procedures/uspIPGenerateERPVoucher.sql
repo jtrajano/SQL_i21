@@ -320,11 +320,11 @@ BEGIN TRY
 
 		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
-		SELECT @strXML += '<TotalDiscount>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDiscount, 0))) + '</TotalDiscount>'
+		SELECT @strXML += '<TotalDiscount>' + LTRIM(ISNULL(@dblDiscount, 0)) + '</TotalDiscount>'
 
-		SELECT @strXML += '<TotalTax>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTax, 0))) + '</TotalTax>'
+		SELECT @strXML += '<TotalTax>' + LTRIM(ISNULL(@dblTax, 0)) + '</TotalTax>'
 
-		SELECT @strXML += '<VoucherTotal>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTotal, 0))) + '</VoucherTotal>'
+		SELECT @strXML += '<VoucherTotal>' + LTRIM(ISNULL(@dblTotal, 0)) + '</VoucherTotal>'
 
 		SELECT @strXML += '<Remarks>' + ISNULL(@strRemarks, '') + '</Remarks>'
 
@@ -519,23 +519,23 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<ItemNo>' + ISNULL(@strItemNo, '') + '</ItemNo>'
 
-			SELECT @strItemXML += '<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailQuantity, 0))) + '</Quantity>'
+			SELECT @strItemXML += '<Quantity>' + LTRIM(ISNULL(@dblDetailQuantity, 0)) + '</Quantity>'
 
 			SELECT @strItemXML += '<QuantityUOM>' + ISNULL(@strQuantityUOM, '') + '</QuantityUOM>'
 
 			SELECT @strItemXML += '<Currency>' + ISNULL(@strDetailCurrency, '') + '</Currency>'
 
-			SELECT @strItemXML += '<Cost>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailCost, 0))) + '</Cost>'
+			SELECT @strItemXML += '<Cost>' + LTRIM(ISNULL(@dblDetailCost, 0)) + '</Cost>'
 
 			SELECT @strItemXML += '<CostUOM>' + ISNULL(@strQuantityUOM, '') + '</CostUOM>'
 
-			SELECT @strItemXML += '<DiscountPerc>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailDiscount, 0))) + '</DiscountPerc>'
+			SELECT @strItemXML += '<DiscountPerc>' + LTRIM(ISNULL(@dblDetailDiscount, 0)) + '</DiscountPerc>'
 
-			SELECT @strItemXML += '<SubTotal>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailTotal, 0))) + '</SubTotal>'
+			SELECT @strItemXML += '<SubTotal>' + LTRIM(ISNULL(@dblDetailTotal, 0)) + '</SubTotal>'
 
-			SELECT @strItemXML += '<Tax>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailTax, 0))) + '</Tax>'
+			SELECT @strItemXML += '<Tax>' + LTRIM(ISNULL(@dblDetailTax, 0)) + '</Tax>'
 
-			SELECT @strItemXML += '<lineTotal>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailTotalwithTax, 0))) + '</lineTotal>'
+			SELECT @strItemXML += '<lineTotal>' + LTRIM(ISNULL(@dblDetailTotalwithTax, 0)) + '</lineTotal>'
 
 			SELECT @strItemXML += '</line>'
 

@@ -236,7 +236,7 @@ BEGIN TRY
 
 			SELECT @dblTotalUnits = SUM(dblUnits)
 			FROM tblGRStorageHistory
-			WHERE intTransactionTypeId IN (5,1,9)
+			WHERE (intTransactionTypeId IN (5,1,9) OR (intTransactionTypeId = 3 AND strType = 'From Transfer'))
 				AND intCustomerStorageId = @intId
 			GROUP BY intCustomerStorageId
 
@@ -2950,8 +2950,7 @@ BEGIN TRY
 					INNER JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
 						AND IU.ysnStockUnit = 1
 				WHERE SV.intItemType = 1
-
-				
+			   				
 				SET @IdOutputs = ''
 				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT, @IdOutputs OUTPUT
 
@@ -2963,6 +2962,16 @@ BEGIN TRY
 				else
 					INSERT INTO @intStorageHistoryIds
 					SELECT @intStorageHistoryId
+
+							
+
+				--Add traceability for contract settlement transaction
+				exec uspSCAddTransactionLinks 
+					@intTransactionType = 6
+					,@intTransactionId = @intSettleStorageId
+					,@intAction = 1
+
+
 			END
 
 			UPDATE tblGRSettleStorage

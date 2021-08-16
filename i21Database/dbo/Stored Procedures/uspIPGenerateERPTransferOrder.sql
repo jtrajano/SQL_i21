@@ -115,7 +115,7 @@ BEGIN TRY
 		SELECT @strUserName = US.strUserName
 			,@strTransferNo = IT.strTransferNo
 			,@dtmTransferDate = IT.dtmTransferDate
-			,@strShipVia = ShipVia.strShipVia
+			,@strShipVia = V.strVendorAccountNum
 			,@strBolNumber = IT.strBolNumber
 			,@dtmBolDate = IT.dtmBolDate
 			,@dtmBolReceivedDate = IT.dtmBolReceivedDate
@@ -127,7 +127,7 @@ BEGIN TRY
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(IT.intEntityId, IT.intCreatedUserId)
 		LEFT JOIN dbo.tblSMCompanyLocation FCL ON FCL.intCompanyLocationId = IT.intFromLocationId
 		LEFT JOIN dbo.tblSMCompanyLocation TCL ON TCL.intCompanyLocationId = IT.intToLocationId
-		LEFT JOIN dbo.tblSMShipVia ShipVia ON ShipVia.intEntityId = IT.intShipViaId
+		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = IT.intShipViaId
 		LEFT JOIN dbo.tblEMEntity E ON E.intEntityId = IT.intBrokerId
 		WHERE IT.intInventoryTransferId = @intInventoryTransferId
 
@@ -416,7 +416,7 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<LotNo>' + ISNULL(@strLotNumber, '') + '</LotNo>'
 
-			SELECT @strItemXML += '<TransferQty>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblQuantity, 0))) + '</TransferQty>'
+			SELECT @strItemXML += '<TransferQty>' + LTRIM(ISNULL(@dblQuantity, 0)) + '</TransferQty>'
 
 			SELECT @strItemXML += '<TransferQtyUOM>' + ISNULL(@strQtyUOM, '') + '</TransferQtyUOM>'
 
@@ -430,17 +430,17 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<Marks>' + ISNULL(@strMarks, '') + '</Marks>'
 
-			SELECT @strItemXML += '<TransferPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTransferPrice, 0))) + '</TransferPrice>'
+			SELECT @strItemXML += '<TransferPrice>' + LTRIM(ISNULL(@dblTransferPrice, 0)) + '</TransferPrice>'
 
 			SELECT @strItemXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
 			SELECT @strItemXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
 
-			SELECT @strItemXML += '<GrossWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblGross, 0))) + '</GrossWeight>'
+			SELECT @strItemXML += '<GrossWeight>' + LTRIM(ISNULL(@dblGross, 0)) + '</GrossWeight>'
 
-			SELECT @strItemXML += '<TareWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTare, 0))) + '</TareWeight>'
+			SELECT @strItemXML += '<TareWeight>' + LTRIM(ISNULL(@dblTare, 0)) + '</TareWeight>'
 
-			SELECT @strItemXML += '<NetWeight>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblNet, 0))) + '</NetWeight>'
+			SELECT @strItemXML += '<NetWeight>' + LTRIM(ISNULL(@dblNet, 0)) + '</NetWeight>'
 
 			SELECT @strItemXML += '<WeightUOM>' + ISNULL(@strQuantityUOM, '') + '</WeightUOM>'
 

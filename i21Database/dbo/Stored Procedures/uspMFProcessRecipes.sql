@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspMFProcessRecipes
+﻿CREATE PROCEDURE dbo.uspMFProcessRecipes(@ysnMinOneInputItemRequired int=1)
 AS
 BEGIN
 	DECLARE @strSessionId NVARCHAR(50),@intRecordId int,@intEntityId int
@@ -57,7 +57,8 @@ BEGIN
 		EXEC dbo.uspMFImportRecipes @strSessionId
 			,'Recipe Item'
 			,@intEntityId
-			,1
+			,@ysnMinOneInputItemRequired
+
 		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblMFSession
 		WHERE intRecordId > @intRecordId

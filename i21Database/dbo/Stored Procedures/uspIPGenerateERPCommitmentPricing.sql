@@ -290,15 +290,15 @@ BEGIN TRY
 
 		SELECT @strXML += '<Comments>' + ISNULL(@strComment, '') + '</Comments>'
 
-		SELECT @strXML += '<MarketArb>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblMarketArbitrage, 0))) + '</MarketArb>'
+		SELECT @strXML += '<MarketArb>' + LTRIM(ISNULL(@dblMarketArbitrage, 0)) + '</MarketArb>'
 
-		SELECT @strXML += '<Arbitrage>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblCalculatedArbitrage, 0))) + '</Arbitrage>'
+		SELECT @strXML += '<Arbitrage>' + LTRIM(ISNULL(@dblCalculatedArbitrage, 0)) + '</Arbitrage>'
 
-		SELECT @strXML += '<FuturesPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblCalculatedFutures, 0))) + '</FuturesPrice>'
+		SELECT @strXML += '<FuturesPrice>' + LTRIM(ISNULL(@dblCalculatedFutures, 0)) + '</FuturesPrice>'
 
-		SELECT @strXML += '<FXPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblCalculatedFXPrice, 0))) + '</FXPrice>'
+		SELECT @strXML += '<FXPrice>' + LTRIM(ISNULL(@dblCalculatedFXPrice, 0)) + '</FXPrice>'
 
-		SELECT @strXML += '<RefPrice>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblCalculatedRefPrice, 0))) + '</RefPrice>'
+		SELECT @strXML += '<RefPrice>' + LTRIM(ISNULL(@dblCalculatedRefPrice, 0)) + '</RefPrice>'
 
 		SELECT @strXML += '<ERPRefNo>' + ISNULL(@strERPRefNo, '') + '</ERPRefNo>'
 
@@ -621,7 +621,7 @@ BEGIN TRY
 
 				SELECT @strItemXML += '<ERPRecipeNo>' + ISNULL(@strERPRecipeNo, '') + '</ERPRecipeNo>'
 
-				SELECT @strItemXML += '<TotalCostPR>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTotalCostPR, 0))) + '</TotalCostPR>'
+				SELECT @strItemXML += '<TotalCostPR>' + LTRIM(ISNULL(@dblTotalCostPR, 0)) + '</TotalCostPR>'
 			END
 
 			SELECT @strItemXML += '</line>'

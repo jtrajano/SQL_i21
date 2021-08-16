@@ -54,7 +54,7 @@ FROM (
 	UNION ALL SELECT *
 		, dblToBeHedgedLots = dblNoOfLots - dblHedgedLots
 	FROM (
-		SELECT intContractDetailId = CD.intContractDetailId
+		SELECT intContractDetailId = (SELECT TOP 1 intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId)
 			, CH.intContractHeaderId
 			, CH.dtmContractDate
 			, CT.strContractType
@@ -83,7 +83,7 @@ FROM (
 			, CD.intContractStatusId
 			, CH.intPricingTypeId
 		FROM tblCTContractHeader CH
-		INNER JOIN (SELECT DISTINCT intContractHeaderId, intContractStatusId, intContractDetailId FROM tblCTContractDetail) CD ON CH.intContractHeaderId = CD.intContractHeaderId
+		INNER JOIN (SELECT DISTINCT intContractHeaderId, intContractStatusId FROM tblCTContractDetail) CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		JOIN tblCTContractType CT ON CT.intContractTypeId = CH.intContractTypeId
 		JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		JOIN tblICCommodity COM ON COM.intCommodityId = CH.intCommodityId

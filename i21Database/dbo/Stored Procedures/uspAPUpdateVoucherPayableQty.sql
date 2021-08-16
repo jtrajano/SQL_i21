@@ -300,6 +300,8 @@ ELSE SAVE TRAN @SavePoint
 				,B.[str1099Type]					
 				,B.[ysnReturn]	
 				,B.[intFreightTermId]
+				,B.[intBookId]
+				,B.[intSubBookId]
 				,B.[intVoucherPayableId]
 				,C.intOldPayableId AS intVoucherPayableKey
 			FROM tblAPVoucherPayable B
@@ -406,6 +408,8 @@ ELSE SAVE TRAN @SavePoint
 			,[str1099Type]					
 			,[ysnReturn]		
 			,[intFreightTermId]
+			,[intBookId]
+			,[intSubBookId]
 		)
 		VALUES (
 			[intTransactionType]
@@ -492,7 +496,9 @@ ELSE SAVE TRAN @SavePoint
 			,[dbl1099]			
 			,[str1099Type]					
 			,[ysnReturn]	
-			,[intFreightTermId]		
+			,[intFreightTermId]	
+			,[intBookId]
+			,[intSubBookId]	
 		)
 		OUTPUT
 			SourceData.intVoucherPayableId,
@@ -752,6 +758,8 @@ ELSE SAVE TRAN @SavePoint
 				,D.[str1099Type]					
 				,D.[ysnReturn]		
 				,D.[intFreightTermId]
+				,D.[intBookId]
+				,D.[intSubBookId]
 				,D.[intVoucherPayableId]	
 				,B.intVoucherPayableId AS intVoucherPayableKey
 			-- FROM tblAPBillDetail A
@@ -859,6 +867,8 @@ ELSE SAVE TRAN @SavePoint
 			,[str1099Type]					
 			,[ysnReturn]	
 			,[intFreightTermId]
+			,[intBookId]
+			,[intSubBookId]
 		)
 		VALUES(
 			[intTransactionType]
@@ -944,6 +954,8 @@ ELSE SAVE TRAN @SavePoint
 			,[str1099Type]					
 			,[ysnReturn]	
 			,[intFreightTermId]
+			,[intBookId]
+			,[intSubBookId]
 		)
 		OUTPUT SourceData.intVoucherPayableId, inserted.intVoucherPayableId, SourceData.intVoucherPayableKey INTO @deleted;
 

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPAxxisExportVendorLocation]
-	@vendorId INT = NULL
+	@vendorId INT = NULL,
+	@modifiedFields NVARCHAR(MAX) = NULL
 AS
 
 BEGIN
@@ -11,26 +12,73 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-IF OBJECT_ID(N'tmpAxxisVendorLocation') IS NOT NULL DROP TABLE tmpAxxisVendorLocation
+IF OBJECT_ID(N'tmpAxxisVendorLocation') IS NOT NULL 
+BEGIN
+	DELETE FROM tmpAxxisVendorLocation
+END
+ELSE
+BEGIN
+	CREATE TABLE tmpAxxisVendorLocation(
+		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
+		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+	)
+END
+
+IF OBJECT_ID(N'tempdb..#tmpModifiedFields') IS NOT NULL DROP TABLE #tmpModifiedFields
+CREATE TABLE #tmpModifiedFields(strFields NVARCHAR(MAX))
+
+INSERT INTO #tmpModifiedFields
+SELECT @modifiedFields
+
+DECLARE @tblFields TABLE(strField NVARCHAR(50))
+
+;WITH tmp(DataItem, strFields) AS
+(
+    SELECT
+        LEFT(strFields, CHARINDEX(',', strFields + ',') - 1),
+		STUFF(strFields, 1, CHARINDEX(',', strFields + ','), '')
+    FROM #tmpModifiedFields
+    UNION all
+
+    SELECT
+        LEFT(strFields, CHARINDEX(',', strFields + ',') - 1),
+		STUFF(strFields, 1, CHARINDEX(',', strFields + ','), '')
+    FROM tmp
+    WHERE
+        strFields > ''
+)
+
+INSERT INTO @tblFields
+SELECT
+    DataItem
+FROM tmp
+
+-- SELECT * FROM @tblFields
+
+IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strLocationName','strCheckPayeeName','strShipVia')) 
+BEGIN
+	RETURN;
+END
 
 IF @vendorId IS NULL
 BEGIN
+	INSERT INTO tmpAxxisVendorLocation
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
 		C.strShipVia
-	INTO tmpAxxisVendorLocation
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId
 END
 ELSE
 BEGIN
+	INSERT INTO tmpAxxisVendorLocation
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
 		C.strShipVia
-	INTO tmpAxxisVendorLocation
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId

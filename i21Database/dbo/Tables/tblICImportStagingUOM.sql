@@ -18,6 +18,7 @@ CREATE TABLE [dbo].[tblICImportStagingUOM] (
 	[dblVolume] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strVolumeUOM] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dblMaxQty] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	[dblStandardWeight] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateCreated] [datetime] NULL,
 	[dtmDateModified] [datetime] NULL,
 	[intCreatedByUserId] [int] NULL,

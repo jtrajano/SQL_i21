@@ -193,6 +193,7 @@ BEGIN TRY
 								END
 							)
 						,strMessage = @StatusText
+						,strFeedStatus = 'Ack Rcvd'
 						,strERPPONumber = @ERPCONumber
 					WHERE intContractFeedId = @TrxSequenceNo
 

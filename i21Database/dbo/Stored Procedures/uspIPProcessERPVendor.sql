@@ -310,6 +310,18 @@ BEGIN TRY
 						)
 			END
 
+			IF @intActionId <> 4
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblAPVendor V
+						WHERE V.strVendorAccountNum = @strAccountNo
+						)
+					SELECT @intActionId = 2
+				ELSE
+					SELECT @intActionId = 1
+			END
+
 			IF @intActionId = 1
 			BEGIN
 				IF EXISTS (
@@ -548,6 +560,25 @@ BEGIN TRY
 							)
 					END
 
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntityType ET
+							WHERE ET.intEntityId = @intEntityId
+								AND ET.strType = 'Futures Broker'
+							)
+					BEGIN
+						INSERT INTO tblEMEntityType (
+							intEntityId
+							,strType
+							,intConcurrencyId
+							)
+						VALUES (
+							@intEntityId
+							,'Futures Broker'
+							,1
+							)
+					END
+
 					--Entity Location
 					INSERT INTO tblEMEntityLocation (
 						intEntityId
@@ -756,6 +787,26 @@ BEGIN TRY
 								,0
 						END
 					END
+				END
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblEMEntityType ET
+						WHERE ET.intEntityId = @intEntityId
+							AND ET.strType = 'Futures Broker'
+						)
+				BEGIN
+					INSERT INTO tblEMEntityType (
+						intEntityId
+						,strType
+						,intConcurrencyId
+						)
+					OUTPUT inserted.intEntityTypeId
+						,inserted.strType
+					INTO @tblEMEntityType
+					SELECT @intEntityId
+						,'Futures Broker'
+						,1
 				END
 
 				DELETE

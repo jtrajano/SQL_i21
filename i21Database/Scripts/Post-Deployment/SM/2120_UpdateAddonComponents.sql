@@ -15,6 +15,20 @@ BEGIN
 	WHERE		strModule = 'Transaction Traceability'
 END
 
+IF EXISTS (SELECT 1 FROM tblSMModule WHERE strModule = 'Report Hierarchy')
+BEGIN
+	UPDATE		tblSMModule
+	SET			ysnAddonComponent = 1
+	WHERE		strModule = 'Report Hierarchy'
+END
+
+IF EXISTS (SELECT 1 FROM tblSMModule WHERE strModule = 'Automated Quoting')
+BEGIN
+	UPDATE		tblSMModule
+	SET			ysnAddonComponent = 1
+	WHERE		strModule = 'Automated Quoting'
+END
+
 PRINT('/*******************  END UPDATING ADDON COMPONENTS  *******************/')
 
 GO
