@@ -30,8 +30,7 @@ BEGIN TRY
 				@dblCashPrice			NUMERIC(18,6),
 				@strTransactionType		NVARCHAR(20),
 				@ysnStayAsDraftContractUntilApproved BIT,
-				@ysnAddAmendmentForNonDraftContract BIT = 0,
-				@ysnPricingAsAmendment BIT = 1
+				@ysnAddAmendmentForNonDraftContract BIT = 0
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -75,7 +74,7 @@ BEGIN TRY
 		
 		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 		SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
-		SELECT @ysnAmdWoAppvl	    = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0), @ysnPricingAsAmendment = ysnPricingAsAmendment FROM tblCTCompanyPreference
+		SELECT @ysnAmdWoAppvl	    = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0) FROM tblCTCompanyPreference
 
 		DELETE FROM @tblHeader
 		DELETE FROM @tblDetail
@@ -648,7 +647,6 @@ BEGIN TRY
 		   LEFT JOIN tblRKFuturesMonth				CurrentType	 ON	  ISNULL(CurrentType.intFutureMonthId ,0)    =	ISNULL(CurrentRow.intFutureMonthId	,0)
 		   LEFT JOIN tblRKFuturesMonth				PreviousType ON	  ISNULL(PreviousType.intFutureMonthId,0)	 =	ISNULL(PreviousRow.intFutureMonthId	,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-		   and PreviousType.strFutureMonth <> CurrentType.strFutureMonth
 
 		   UNION
 		   --Futures
@@ -667,7 +665,6 @@ BEGIN TRY
 		   JOIN @SCOPE_IDENTITY				    NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
 		   JOIN @tblDetail					    PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-		   and @ysnPricingAsAmendment = 1
 
 		   UNION
 		   --Basis
@@ -704,7 +701,6 @@ BEGIN TRY
 		   JOIN @SCOPE_IDENTITY					NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
 		   JOIN @tblDetail					    PreviousRow			ON   ISNULL(CurrentRow.dblCashPrice,0)  <> ISNULL(PreviousRow.dblCashPrice,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-		   and @ysnPricingAsAmendment = 1
 		   
 		   UNION
 		   --Cash Price UOM
