@@ -24,7 +24,10 @@ CREATE TABLE tblApiImportLog (
     dtmImportFinishDateUtc DATETIME2 NULL,
     ysnRolledBack BIT NULL,
     strMessage NVARCHAR(4000) NULL,
-    CONSTRAINT PK_tblApiImportLog_guiApiImportLogId PRIMARY KEY NONCLUSTERED(guiApiImportLogId),
-    INDEX UX_tblApiImportLog_dtmImportDateUtc CLUSTERED (dtmImportDateUtc DESC)
+    CONSTRAINT PK_tblApiImportLog_guiApiImportLogId PRIMARY KEY NONCLUSTERED(guiApiImportLogId)
 )
+GO
+
+CREATE CLUSTERED INDEX UX_tblApiImportLog_dtmImportDateUtc ON tblApiImportLog(dtmImportDateUtc DESC)
+
 GO

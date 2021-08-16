@@ -9,8 +9,11 @@ CREATE TABLE tblApiImportLogDetail (
     strMessage NVARCHAR(4000) NULL,
     CONSTRAINT PK_tblApiImportLogDetail_guiApiImportLogId PRIMARY KEY NONCLUSTERED(guiApiImportLogDetailId),
     CONSTRAINT tblApiImportLogDetail_tblApiImportLog_guiApiImportLogId
-        FOREIGN KEY (guiApiImportLogId) REFERENCES [tblApiImportLog](guiApiImportLogId) ON DELETE CASCADE,
-    INDEX IX_tblApiImportLogDetail_intRowNo CLUSTERED(intRowNo ASC)
+        FOREIGN KEY (guiApiImportLogId) REFERENCES [tblApiImportLog](guiApiImportLogId) ON DELETE CASCADE
 )
+
+GO
+
+CREATE CLUSTERED INDEX IX_tblApiImportLogDetail_intRowNo ON tblApiImportLogDetail (intRowNo ASC)
 
 GO
