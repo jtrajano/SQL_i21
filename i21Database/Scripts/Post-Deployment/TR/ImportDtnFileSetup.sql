@@ -131,7 +131,7 @@ DECLARE @LayoutTitle NVARCHAR(100)
 SET @LayoutTitle = 'DTN Standard Outbound Invoice CSV Deferred Tax'
 
 -- Deferred Tax Format
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle) 
 BEGIN
 	PRINT ('Deploying - DTN Standard Outbound Invoice CSV Plus Deferred Tax')
 
@@ -578,11 +578,52 @@ END
 GO
 
 DECLARE @LayoutTitle NVARCHAR(100)
+	, @HeaderId INT = NULL
+
+SET @LayoutTitle = 'iRely Enterprise Vendor Invoice Deferred Tax'
+SET @HeaderId = (SELECT intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+
+-- iRely Enterprise Vendor Invoice Import Deffered Tax (CORRECTION FOR DEFFERED TAX intPosition)
+IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileRecordMarker WHERE strRecordMarker = 'Deferred Invoice No 10' AND intPosition = 40 AND intImportFileHeaderId = @HeaderId)
+BEGIN
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 1' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 1' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 1' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 2' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 2' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 2' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 3' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 3' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 3' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 4' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 4' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 4' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 5' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 5' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 5' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 6' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 6' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 6' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 7' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 7' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 7' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 8' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 8' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 8' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 9' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 9' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 9' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 1 WHERE strRecordMarker = 'Deferred Tax Amount 10' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 3 WHERE strRecordMarker = 'Deferred Date 10' AND intImportFileHeaderId = @HeaderId
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 4 WHERE strRecordMarker = 'Deferred Invoice No 10' AND intImportFileHeaderId = @HeaderId
+END
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
 	, @FileHeaderId INT = NULL
 	, @DetailId INT = NULL
 
 SET @LayoutTitle = 'iRely Enterprise Vendor Invoice Deferred Tax'
-
 -- iRely Enterprise Vendor Invoice Import Deffered Tax
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
@@ -631,7 +672,7 @@ BEGIN
 
 	-- DEFERRED TAX 2
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 2', 0, 5, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 2', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -640,7 +681,7 @@ BEGIN
 
 	-- DEFERRED DATE 2
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 2', 0, 7, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 2', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -649,7 +690,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 2
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 2', 0, 8, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 2', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -659,7 +700,7 @@ BEGIN
 
 	-- DEFERRED TAX 3
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 3', 0, 9, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 3', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -668,7 +709,7 @@ BEGIN
 
 	-- DEFERRED DATE 3
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 3', 0, 11, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 3', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -677,7 +718,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 3
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 3', 0, 12, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 3', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -687,7 +728,7 @@ BEGIN
 
 	-- DEFERRED TAX 4
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 4', 0, 13, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 4', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -696,7 +737,7 @@ BEGIN
 
 	-- DEFERRED DATE 4
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 4', 0, 15, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 4', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -705,7 +746,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 4
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 4', 0, 16, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 4', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -715,7 +756,7 @@ BEGIN
 
 	-- DEFERRED TAX 5
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 5', 0, 17, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 5', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -724,7 +765,7 @@ BEGIN
 
 	-- DEFERRED DATE 5
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 5', 0, 19, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 5', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -733,7 +774,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 5
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 5', 0, 20, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 5', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -743,7 +784,7 @@ BEGIN
 
 	-- DEFERRED TAX 6
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 6', 0, 21, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 6', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -752,7 +793,7 @@ BEGIN
 
 	-- DEFERRED DATE 6
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 6', 0, 23, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 6', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -761,7 +802,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 6
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 6', 0, 24, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 6', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -771,7 +812,7 @@ BEGIN
 	
 	-- DEFERRED TAX 7
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 7', 0, 25, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 7', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -780,7 +821,7 @@ BEGIN
 
 	-- DEFERRED DATE 7
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 7', 0, 27, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 7', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -789,7 +830,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 7
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 7', 0, 28, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 7', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -799,7 +840,7 @@ BEGIN
 
 	-- DEFERRED TAX 8
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 8', 0, 29, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 8', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -808,7 +849,7 @@ BEGIN
 
 	-- DEFERRED DATE 8
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 8', 0, 31, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 8', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -817,7 +858,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 8
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 8', 0, 32, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 8', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -827,7 +868,7 @@ BEGIN
 
 	-- DEFERRED TAX 9
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 9', 0, 33, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 9', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -836,7 +877,7 @@ BEGIN
 
 	-- DEFERRED DATE 9
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 9', 0, 35, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 9', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -845,7 +886,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 9
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 9', 0, 36, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 9', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -855,7 +896,7 @@ BEGIN
 
 	-- DEFERRED TAX 10
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Tax Amount 10', 0, 37, 1)
+	VALUES (@FileHeaderId, 'Deferred Tax Amount 10', 0, 1, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -864,7 +905,7 @@ BEGIN
 
 	-- DEFERRED DATE 10
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Date 10', 0, 39, 1)
+	VALUES (@FileHeaderId, 'Deferred Date 10', 0, 3, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
@@ -873,7 +914,7 @@ BEGIN
 
 	-- DEFERRED INVOICE 10
 	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
-	VALUES (@FileHeaderId, 'Deferred Invoice No 10', 0, 40, 1)
+	VALUES (@FileHeaderId, 'Deferred Invoice No 10', 0, 4, 1)
 
 	SET @DetailId = SCOPE_IDENTITY()
 
