@@ -1656,6 +1656,7 @@ UPDATE	SC
 SET		SC.intInventoryShipmentId = addResult.intInventoryShipmentId
 FROM	dbo.tblSCTicket SC INNER JOIN tblICInventoryShipmentItem addResult
 		ON SC.intTicketId = addResult.intSourceId
+WHERE	addResult.intInventoryShipmentId = @InventoryShipmentId
 
 exec uspSCUpdateDeliverySheetDate @intTicketId = @intTicketId
 
