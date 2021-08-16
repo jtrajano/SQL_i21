@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuARCustomerLocationExport]
 AS
-SELECT intEntity				= ARC.intEntityId
+SELECT intEntityId				= ARC.intEntityId
 	 , strCustomerName			= EME.strName
      , intEntityLocationId		= EMEL.intEntityLocationId
      , strLocationName			= EMEL.strLocationName
