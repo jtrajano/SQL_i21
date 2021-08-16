@@ -372,7 +372,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 ---------------------------------------------------------------------------------------------------------------------------------------
 UPDATE A
 SET [ysnDisposed] = 1,
-dtmDispositionDate = dtmDispose
+dtmDispositionDate = dtmDispose,
+strDispositionNumber = @strTransactionId
 FROM
 tblFAFixedAsset A
 JOIN @tblAsset B ON B.intAssetId = A.intAssetId
