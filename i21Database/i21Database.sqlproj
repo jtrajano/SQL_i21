@@ -175,6 +175,7 @@
     <Build Include="dbo\Tables\tblMFWODetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWODetailConfirm.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTOReceiptDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
