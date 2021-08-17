@@ -176,6 +176,7 @@
 :r .\12_EM\21_CleanAPBillMissingContact.sql
 
 :r .\12_EM\22_DeleteDuplicateEntityType.sql
+:r .\12_EM\23_DeleteDuplicateEntityMobileNumber.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 
