@@ -133,6 +133,7 @@ LEFT JOIN dbo.tblGLAccount F ON  prepaidDetail.intAccountId = F.intAccountId
 		WHERE B.intBillId = A.intBillId AND C.ysnPrepay = 1
 	)
 	AND A.ysnOrigin = 1
+	AND A.intTransactionReversed IS NULL --REMOVE ALREADY REVERSED
 UNION ALL
 --NEGATIVE PART
 SELECT
