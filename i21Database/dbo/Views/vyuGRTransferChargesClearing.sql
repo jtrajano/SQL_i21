@@ -321,7 +321,8 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE GL.strDescription LIKE '%Charges from %'
 --and TS.dtmTransferStorageDate between '2021-03-02' and '2021-03-03'
-AND (CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = SR.dblUnitQty)
+AND ((CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = SR.dblUnitQty)
+    OR (CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = CS.dblGrossQuantity))
 UNION ALL      
 --Transfer for Receipt Charge Taxes
 SELECT DISTINCT '5',
