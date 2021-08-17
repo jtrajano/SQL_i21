@@ -27,6 +27,15 @@ FROM (
 			 , ysnReturn
 		FROM dbo.tblARPOS POS WITH (NOLOCK)
 		WHERE intInvoiceId IS NOT NULL OR intCreditMemoId IS NOT NULL
+
+		UNION ALL 
+
+		SELECT intInvoiceId	= intCreditMemoId
+			 , intPOSLogId
+			 , intPOSId
+			 , ysnReturn
+		FROM dbo.tblARPOS POS WITH (NOLOCK)
+		WHERE intInvoiceId IS NOT NULL AND intCreditMemoId IS NOT NULL
 	) POS ON POSLOG.intPOSLogId = POS.intPOSLogId
 	CROSS APPLY (
 		SELECT intTransactionId = intInvoiceId
