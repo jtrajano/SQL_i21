@@ -104,11 +104,17 @@ FROM
 		FROM 
 			tblICCategory c INNER JOIN tblICCategoryVendor vXRef 
 				ON c.intCategoryId = vXRef.intCategoryId
-			INNER JOIN vyuAPVendor v
-				ON vXRef.intVendorId = v.intEntityId
+			CROSS APPLY (
+				SELECT TOP 1 
+					v.* 
+				FROM 
+					vyuAPVendor v
+				WHERE 
+					((v.strVendorId = p.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL))
+					AND v.intEntityId = vXRef.intVendorId 
+			) v	
 		WHERE
-			((v.strVendorId = p.strVendorId AND @intVendorId IS NULL) OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL))
-			AND vXRef.strVendorDepartment = p.strVendorCategory	
+			vXRef.strVendorDepartment = p.strVendorCategory	
 	) vendorCategoryXRef
 WHERE
 	p.strUniqueId = @UniqueId
@@ -173,9 +179,15 @@ SELECT
 	, 1
 FROM 
 	tblICEdiPricebook p
-	LEFT JOIN vyuAPVendor v
-		ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-		OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+	OUTER APPLY (
+		SELECT TOP 1 
+			v.* 
+		FROM 
+			vyuAPVendor v
+		WHERE 
+			(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+			OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+	) v	
 WHERE 
 	v.intEntityId IS NULL 
 	AND p.strUniqueId = @UniqueId
@@ -712,7 +724,9 @@ FROM (
 						loc.intCompanyLocationId 
 						,l.*
 					FROM 						
-						@Locations loc LEFT JOIN tblICItemLocation l 
+						@Locations loc INNER JOIN tblSMCompanyLocation cl 
+							ON loc.intCompanyLocationId = cl.intCompanyLocationId
+						LEFT JOIN tblICItemLocation l 
 							ON l.intItemId = i.intItemId
 							AND loc.intCompanyLocationId = l.intLocationId
 				) l
@@ -1006,7 +1020,6 @@ FROM (
 						,price.dblAverageCost
 					)
 				)
-			--,catV.ysnUpdatePrice
 			,p.ysnAddOrderingUPC
 			,p.ysnUpdateExistingRecords
 			,p.ysnAddNewRecords
@@ -1016,26 +1029,17 @@ FROM (
 				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 			INNER JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
-			LEFT JOIN vyuAPVendor v
-				ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-				OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
 			OUTER APPLY (
 				SELECT 
 					loc.intCompanyLocationId 
 					,l.*
 				FROM 						
-					@Locations loc INNER JOIN tblICItemLocation l 
+					@Locations loc INNER JOIN tblSMCompanyLocation cl 
+						ON loc.intCompanyLocationId = cl.intCompanyLocationId
+					INNER JOIN tblICItemLocation l 
 						ON l.intItemId = i.intItemId
-						AND loc.intCompanyLocationId = l.intLocationId
+						AND l.intLocationId = loc.intCompanyLocationId 
 			) il
-			LEFT JOIN tblICCategory cat 
-				ON cat.intCategoryId = i.intCategoryId
-			LEFT JOIN tblICCategoryLocation catLoc 
-				ON catLoc.intCategoryId = cat.intCategoryId
-				AND catLoc.intLocationId = il.intLocationId
-			--LEFT JOIN tblICCategoryVendor catV 
-			--	ON catV.intCategoryLocationId = catLoc.intCategoryLocationId
-			--	AND catV.intVendorId = v.intEntityId
 			LEFT JOIN tblICItemPricing price 
 				ON price.intItemId = i.intItemId
 				AND price.intItemLocationId = il.intItemLocationId
@@ -1165,8 +1169,6 @@ FROM (
 		FROM tblICEdiPricebook p
 			INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 			INNER JOIN tblICItem i ON i.intItemId = u.intItemId
-			LEFT JOIN tblICCategory cat 
-				ON cat.intCategoryId = i.intCategoryId
 			OUTER APPLY (
 				SELECT 
 					loc.intCompanyLocationId 
@@ -1176,15 +1178,6 @@ FROM (
 						ON l.intItemId = i.intItemId
 						AND loc.intCompanyLocationId = l.intLocationId
 			) il
-			LEFT JOIN tblICCategoryLocation catLoc 
-				ON catLoc.intCategoryId = cat.intCategoryId
-				AND catLoc.intLocationId = il.intLocationId
-			LEFT JOIN vyuAPVendor v
-				ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-				OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-			--LEFT JOIN tblICCategoryVendor catV 
-			--	ON catV.intCategoryLocationId = catLoc.intCategoryLocationId
-			--	AND catV.intVendorId = v.intEntityId
 			LEFT JOIN tblICItemSpecialPricing price 
 				ON price.intItemId = i.intItemId
 				AND price.intItemLocationId = il.intItemLocationId
@@ -1318,9 +1311,15 @@ FROM (
 					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 				INNER JOIN tblICItem i 
 					ON i.intItemId = u.intItemId
-				INNER JOIN vyuAPVendor v
-					ON (v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-					OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+				CROSS APPLY (
+					SELECT TOP 1 
+						v.* 
+					FROM 
+						vyuAPVendor v
+					WHERE 
+						(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+						OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+				) v				
 			WHERE
 				p.strUniqueId = @UniqueId
 	) AS Source_Query  
