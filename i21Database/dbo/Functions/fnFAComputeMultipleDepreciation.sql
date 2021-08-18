@@ -117,6 +117,24 @@ OUTER APPLY(
 )E
 WHERE strError IS NULL
 
+-- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
+IF (@BookId = 2)
+BEGIN
+		UPDATE A
+		SET A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
+		FROM  @tblAssetInfo A
+		JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
+		JOIN @Id I ON I.intId = A.intAssetId
+		WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+
+	-- If sum of Section179 and BonusDepreciation (current dblDepre) is greater than or equal to the basis, skip monthly depreciation
+	IF EXISTS(SELECT TOP 1 1 FROM  @tblAssetInfo A JOIN @Id I ON I.intId = A.intAssetId 
+				JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId 
+				WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1 AND dblBasis <= dblDepre)
+		BEGIN
+			GOTO Skip_Tax_Monthly_Depreciation
+		END
+END
 
 UPDATE T SET 
 dblPercentage = F.dblPercentage,
@@ -161,15 +179,18 @@ UPDATE T SET dblDepre = dblMonth  + ISNULL(dblYear, 0)
 FROM @tblAssetInfo T
 WHERE strError IS NULL 
 
--- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
+
 IF (@BookId = 2)
 BEGIN
-		UPDATE A
-		SET A.dblDepre = A.dblDepre + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
-		FROM  @tblAssetInfo A
-		JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
-		JOIN @Id I ON I.intId = A.intAssetId
-		WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+	UPDATE A
+	SET A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
+	FROM  @tblAssetInfo A
+	JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
+	JOIN @Id I ON I.intId = A.intAssetId
+	WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+
+	IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE dblBasis < dblDepre)
+		GOTO Basis_Limit_Reached
 END
 
 UPDATE B set ysnFullyDepreciated = 1 FROM @tblAssetInfo B JOIN
@@ -177,6 +198,7 @@ tblFABookDepreciation BD ON BD.intAssetId = B.intAssetId and BD.intBookId = @Boo
 WHERE dblDepre >= (BD.dblCost - BD.dblSalvageValue)
 AND strError IS NULL 
 
+Basis_Limit_Reached:
 
 UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
 dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
@@ -251,7 +273,7 @@ OUTER APPLY(
 )Import
 WHERE dblImportGAAPDepToDate is not null and isnull(dtmImportedDepThru,0) > 0
 
-
+Skip_Tax_Monthly_Depreciation:
 
 UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
 dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
