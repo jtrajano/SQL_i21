@@ -1417,6 +1417,8 @@
     <Build Include="dbo\Functions\fnPOHasItemReceipt.sql" />
     <Build Include="dbo\Functions\fnPOHasBill.sql" />
     <Build Include="dbo\Tables\tblSTUpdateItemDiscontinuedPreview.sql" />
+    <Build Include="dbo\Tables\tblSTRetailAdjustmentPreview.sql" />
+    <Build Include="dbo\Tables\tblSTBatchRetailAdjustmentPreview.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuICGetLot.sql" />
