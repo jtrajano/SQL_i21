@@ -870,7 +870,7 @@ BEGIN TRY
 			, CD.intPricingTypeId
 			, CD.dblRatio
 			, CB.dblBasis
-			, CB.dblFutures
+			, dblFutures = CASE WHEN CH.intPricingTypeId = 2 AND CD.intPricingTypeId = 1 THEN CD.dblFutures ELSE CB.dblFutures END
 			, CD.intContractStatusId
 			, CD.dblCashPrice
 			, CD.intContractDetailId
@@ -953,6 +953,7 @@ BEGIN TRY
 			INNER JOIN tblICCommodityUnitMeasure cu ON cu.intCommodityId = @intCommodityId AND cu.intUnitMeasureId = @intPriceUOMId
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = dc.intCurrencyId
 			LEFT JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = @intCommodityId AND cu1.intUnitMeasureId = dc.intUnitMeasureId
+			WHERE NOT (cd.intPricingTypeId = 2 AND cd.strPricingType = 'Priced')
 			GROUP BY cu.intCommodityUnitMeasureId
 				, cu1.intCommodityUnitMeasureId
 				, strAdjustmentType
@@ -1364,9 +1365,6 @@ BEGIN TRY
 				, dblFutures = CASE WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Basis' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
 									--Basis (Partially Priced) Priced Record
 									WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' THEN ISNULL(priceFixationDetail.dblFutures, 0)
-									-- CONTRACT DETAIL PRICED BUT HEADER PRICING TYPE IS BASIS SHOULD GET WEIGHTED AVERAGE FUTURES
-									-- FOR SCENARIOS WITH MULTIPLE PARTIAL PRICING
-									WHEN cd.intPricingTypeId = 1 AND cth.intPricingTypeId = 2 THEN ISNULL(priceFixationDetail.dblFutures, 0)
 									ELSE 
 										CASE WHEN cd.intPricingTypeId IN (1, 3) 
 											THEN ISNULL(cd.dblFutures, 0) 
@@ -1444,18 +1442,21 @@ BEGIN TRY
 				SELECT dblFutures = SUM(dblFutures) 
 				FROM
 				(
-					SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / cd.dblBalance)
+					SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / pricedTotal.dblTotalPricedQuantity)
 					FROM tblCTPriceFixation pfh
 					INNER JOIN tblCTPriceFixationDetail pfd
 						ON pfh.intPriceFixationId = pfd.intPriceFixationId
 						AND pfd.dtmFixationDate <= @dtmEndDate
+					OUTER APPLY 
+						(
+							SELECT dblTotalPricedQuantity = SUM(pfdi.dblQuantity)
+							FROM tblCTPriceFixationDetail pfdi
+							WHERE pfh.intPriceFixationId = pfdi.intPriceFixationId
+							AND pfdi.dtmFixationDate <= @dtmEndDate
+						) pricedTotal
 					WHERE intContractDetailId = cd.intContractDetailId
-						AND (
 							-- Basis (Partially Priced) Priced Record
-							(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
-							-- Contract Detail Is Priced But Contract Header Pricing is Basis
-							OR (cd.intPricingTypeId = 1 AND cth.intPricingTypeId = 2)
-							)
+						AND (cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
 				) t
 			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -3665,6 +3666,7 @@ BEGIN TRY
 		SELECT @strPeriodTos = COALESCE(@strPeriodTos + ', ', '') + CONVERT(NVARCHAR(50), strPeriodTo)
 		FROM (
 			SELECT DISTINCT strPeriodTo FROM #tmpM2MTransaction
+			WHERE strPeriodTo IS NOT NULL
 		) tbl
 	
 		SELECT @strLocationIds = COALESCE(@strLocationIds + ', ', '') + ISNULL(intCompanyLocationId, '')
@@ -3778,7 +3780,8 @@ BEGIN TRY
 			, dblCashOrFuture
 			, dblBasisOrDiscount
 			, dblRatio
-			, intUnitMeasureId)
+			, intUnitMeasureId
+			, intLocationId)
 		SELECT intM2MHeaderId
 			, intM2MBasisDetailId
 			, strOriginDest
@@ -3796,6 +3799,7 @@ BEGIN TRY
 			, dblBasisOrDiscount
 			, dblRatio
 			, intUnitMeasureId
+			, intCompanyLocationId
 		FROM #tmpM2MDifferentialBasis
 
 		-- Settlement Price
