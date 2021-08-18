@@ -42,7 +42,8 @@ SELECT
 	ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT),
 	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
 	TranSession.guiSessionId,
-	dtmSessionDate = TranSession.dtmTransactionDate
+	dtmSessionDate = TranSession.dtmTransactionDate,
+	Item.intComputeItemTotalOption
 FROM tblICItem Item
 LEFT JOIN (
 	tblICItemLocation ItemLocation INNER JOIN tblSMCompanyLocation l 
