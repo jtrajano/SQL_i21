@@ -13,6 +13,12 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,intLocationId				= t.intCompanyLocationId --ISNULL(InTransitLocation.intCompanyLocationId, [Location].intCompanyLocationId) 
 		,t.intItemLocationId
 		,strLocationName			= [location].strLocationName --ISNULL(InTransitLocation.strLocationName, [Location].strLocationName) --ISNULL([Location].strLocationName, InTransitLocation.strLocationName + ' (' + ItemLocation.strDescription + ')') 
+		,intSummaryLocationId  		= t.intInTransitSourceLocationId
+		,strSummaryLocationName = CASE WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 
+													[location].strLocationName + ' (In-Transit)'
+												ELSE 
+													[location].strLocationName
+											END
 		,t.intSubLocationId
 		,subLoc.strSubLocationName
 		,t.intStorageLocationId

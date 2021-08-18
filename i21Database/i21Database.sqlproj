@@ -9608,6 +9608,7 @@
     <Build Include="dbo\Views\vyuICSearchItemCustomerXref.sql" />
     <Build Include="dbo\Views\vyuICSearchItemVendorXref.sql" />
     <Build Include="dbo\Views\vyuICSearchStockReservation.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
