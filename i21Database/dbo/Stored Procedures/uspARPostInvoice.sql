@@ -57,7 +57,7 @@ DECLARE  @totalRecords INT = 0
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-IF ISNULL(@raiseError,0) = 0	
+IF ISNULL(@raiseError,0) = 0
 BEGIN
 	IF @InitTranCount = 0
 		BEGIN TRANSACTION
@@ -496,6 +496,7 @@ BEGIN TRY
             @Post    = @post
            ,@BatchId = @batchIdUsed
 		   ,@UserId  = @userId
+		   ,@raiseError = @raiseError
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
             @Post    = @post
@@ -504,6 +505,25 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
+
+	DELETE FROM tblARPostingQueue
+    WHERE intPostQueueId IN (
+	SELECT intPostQueueId
+    FROM tblARPostingQueue ARPQ
+    INNER JOIN ##ARInvoiceGLEntries PID 
+	ON PID.[intTransactionId] = ARPQ.[intTransactionId]
+	AND PID.[strTransactionId] = ARPQ.[strTransactionNumber]
+	AND ARPQ.strBatchId = @batchIdUsed)
+
+	DELETE FROM tblGLDetail
+    WHERE intGLDetailId IN (
+	SELECT intGLDetailId
+    FROM tblGLDetail GLD
+    INNER JOIN ##ARInvoiceGLEntries PID 
+	ON PID.[intTransactionId] = GLD.[intTransactionId]
+	AND PID.[strTransactionId] = GLD.[strTransactionId]
+	AND GLD.strBatchId = @batchIdUsed)
+
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
 	IF @raiseError = 0
 		BEGIN
