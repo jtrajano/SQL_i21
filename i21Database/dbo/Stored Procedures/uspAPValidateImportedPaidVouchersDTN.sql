@@ -14,6 +14,12 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;  
 IF @transCount = 0 BEGIN TRANSACTION; 
 
+UPDATE I
+SET I.intEntityVendorId = ISNULL(MD.intEntityVendorId, -1), I.strNotes = CASE WHEN MD.intEntityVendorId IS NULL THEN 'Vendor Mapping not found.' ELSE NULL END
+FROM tblAPImportPaidVouchersForPayment I
+LEFT JOIN tblGLVendorMapping VM ON VM.intVendorMappingId = I.intEntityVendorId
+LEFT JOIN tblGLVendorMappingDetail MD ON MD.intVendorMappingId = VM.intVendorMappingId AND MD.strMapVendorName = I.strEntityVendorName
+
 ;WITH cte AS (
 	SELECT ROW_NUMBER() OVER(PARTITION BY A.strVendorOrderNumber ORDER BY A.intId) intRow,
 	A.intId
