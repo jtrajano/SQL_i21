@@ -7131,6 +7131,26 @@ BEGIN
 	END
 	END
 
+
+
+	DECLARE @ysnZeroCostIssue BIT = 0 
+
+
+	SELECT @ysnZeroCostIssue = COUNT(1) 
+	FROM tblICItemLocation IL 
+	WHERE IL.intItemId = @intARItemId
+	AND IL.intItemLocationId = @intARItemLocationId
+	AND ISNULL(@dblQuantity, 0) > 0
+	AND ISNULL([dbo].fnICGetItemRunningCost(@intARItemId,@intARItemLocationId,NULL,NULL,NULL,NUll,NULL,NULL,1),0) = 0
+	AND (ISNULL(IL.intAllowZeroCostTypeId, 1) = 1 )
+	
+	IF(ISNULL(@ysnZeroCostIssue,0) = 1)
+		BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Import',@runDate,@guid, @intTransactionId, 'Zero cost is not allowed for this item')
+		END
+		
+
 	---------------------------------------------------
 	--					ZERO PRICING				 --
 	---------------------------------------------------
