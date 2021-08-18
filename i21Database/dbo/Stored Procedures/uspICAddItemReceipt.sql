@@ -932,6 +932,7 @@ BEGIN
 				,intLoadShipmentId
 				,intLoadShipmentDetailId
 				,ysnAddPayable
+				,intComputeItemTotalOption
 		)
 		SELECT	intInventoryReceiptId	= @inventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -1030,6 +1031,7 @@ BEGIN
 				,RawData.intLoadShipmentId
 				,RawData.intLoadShipmentDetailId
 				,ysnAddPayable					= RawData.ysnAddPayable
+				,intComputeItemTotalOption		= Item.intComputeItemTotalOption
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON ISNULL(RawHeaderData.Vendor, 0) = ISNULL(RawData.intEntityVendorId, 0) 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -2009,7 +2011,37 @@ BEGIN
 		SET		dblLineTotal = 
 					ROUND(
 						--ISNULL(dblTax, 0) + 
-						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+						--CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+						--			dbo.fnMultiply(
+						--				ISNULL(ReceiptItem.dblNet, 0)
+						--				,dbo.fnMultiply(
+						--					dbo.fnDivide(
+						--						ISNULL(dblUnitCost, 0) 
+						--						,ISNULL(Receipt.intSubCurrencyCents, 1) 
+						--					)
+						--					,dbo.fnDivide(
+						--						GrossNetUOM.dblUnitQty
+						--						,CostUOM.dblUnitQty 
+						--					)
+						--				)
+						--			)								 
+						--		ELSE 
+						--			dbo.fnMultiply(
+						--				ISNULL(ReceiptItem.dblOpenReceive, 0)
+						--				,dbo.fnMultiply(
+						--					dbo.fnDivide(
+						--						ISNULL(dblUnitCost, 0) 
+						--						,ISNULL(Receipt.intSubCurrencyCents, 1) 
+						--					)
+						--					,dbo.fnDivide(
+						--						ReceiveUOM.dblUnitQty
+						--						,CostUOM.dblUnitQty 
+						--					)
+						--				)
+						--			)
+						--END 
+
+						CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL AND ReceiptItem.intComputeItemTotalOption = 0 THEN 
 									dbo.fnMultiply(
 										ISNULL(ReceiptItem.dblNet, 0)
 										,dbo.fnMultiply(
