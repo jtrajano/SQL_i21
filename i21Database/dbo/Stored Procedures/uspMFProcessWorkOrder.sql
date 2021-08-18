@@ -2,6 +2,7 @@
 	@intProducedItemId INT
 	,@intUserId INT
 	,@intLocationId INT
+	,@strBatchId NVARCHAR(50) OUTPUT
 	)
 AS
 BEGIN
@@ -20,7 +21,6 @@ BEGIN
 		,@intStorageLocationId INT
 		,@intLotId INT
 		,@strLotNumber NVARCHAR(50)
-		,@strBatchId NVARCHAR(50)
 		,@intSubLocationId INT
 
 	SELECT @dtmProductionDate = GETDATE()
