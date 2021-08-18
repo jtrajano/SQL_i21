@@ -34,7 +34,9 @@ SELECT
 	ISNULL(E.ysnClr,0) AS ysnClear,
 	F.strPaymentMethod,
 	entityGroup.strEntityGroupName,
-	G.strCurrency
+	G.strCurrency,
+	A.strCheckMessage,
+	CASE WHEN A.ysnEFTImported = 1 THEN A.dtmDateCreated ELSE NULL END dtmEFTImportDate
 	FROM dbo.tblAPPayment A
 		LEFT JOIN dbo.tblCMBankAccount B
 			ON A.intBankAccountId = B.intBankAccountId
