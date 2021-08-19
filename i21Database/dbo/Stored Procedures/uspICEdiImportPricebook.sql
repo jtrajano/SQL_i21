@@ -644,13 +644,26 @@ FROM
 			iu.intItemId = i.intItemId
 			AND iu.ysnStockUnit = 1 
 	) stockUnit
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId 
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.intItemId = i.intItemId
+			AND (
+				iu.intUnitMeasureId = m.intUnitMeasureId
+				OR iu.intUnitMeasureId = s.intUnitMeasureId
+			)
+	) existUOM
+
 WHERE
 	p.strUniqueId = @UniqueId
-	AND u.intItemUOMId IS NULL
 	AND i.intItemId IS NOT NULL 
 	AND NULLIF(p.strCaseBoxSizeQuantityPerCaseBox, '') IS NOT NULL 
 	AND p.ysnAddOrderingUPC = 1
 	AND stockUnit.intItemUOMId IS NOT NULL 
+	AND existUOM.intItemUOMId IS NULL 
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
