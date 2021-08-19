@@ -9449,6 +9449,12 @@
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
+    <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
+    <Build Include="dbo\Views\vyuFABookDepreciationReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
