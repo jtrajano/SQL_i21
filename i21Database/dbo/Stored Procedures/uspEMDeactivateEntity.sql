@@ -8,7 +8,7 @@ AS
 	BEGIN
 		UPDATE tblAPVendor SET ysnPymtCtrlActive = 0 WHERE [intEntityId] = @Id
 		
-		DECLARE @details NVARCHAR(MAX) = '{"change":"ysnPymtCtrlActive","from":true,"to":false,"leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' +CAST(@Id AS NVARCHAR(MAX)) + ',"changeDescription":"Active","hidden":false}'
+		DECLARE @details NVARCHAR(MAX) = '{"change":"ysnPymtCtrlActive","from":"true","to":"false","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' +CAST(@Id AS NVARCHAR(MAX)) + ',"changeDescription":"Active","hidden":false}'
 		EXEC uspSMAuditLog 
 			@keyValue = @Id,
 			@screenName = 'EntityManagement.view.Entity',
