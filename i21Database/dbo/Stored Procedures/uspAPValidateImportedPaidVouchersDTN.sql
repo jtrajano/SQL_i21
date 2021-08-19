@@ -80,6 +80,7 @@ OUTER APPLY	(
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
+WHERE A.strNotes IS NULL
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
   
