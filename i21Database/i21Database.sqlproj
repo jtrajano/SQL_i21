@@ -164,6 +164,7 @@
     <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
     <Build Include="dbo\Functions\fnFACalendarDatesWithQuarter.sql" />
     <Build Include="dbo\Functions\fnFACountRemainingMonthsInQuarter.sql" />
+    <Build Include="dbo\Functions\fnFACountRemainingMonthsInYear.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

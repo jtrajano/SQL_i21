@@ -128,6 +128,14 @@ BEGIN
 	WHERE strError IS NULL
 END
 
+-- Mid Year Depreciation Take for Mid Year Convention
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Year' AND strError IS NULL)
+BEGIN
+	UPDATE @tblAssetInfo
+	SET dblMidYear = dblAnnualDep / 2
+	WHERE strError IS NULL
+END
+
 -- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
 IF (@BookId = 2)
 BEGIN
@@ -198,6 +206,19 @@ BEGIN
 	UPDATE T SET dblMonth = dblMidQuarter / @intRemainingMonthsInQuarter
 	FROM @tblAssetInfo T
 	WHERE strError IS NULL AND intMonth BETWEEN 1 AND @intRemainingMonthsInQuarter -- From the month of PlacedInService up to the last month of the quarter of the PlacedInService date
+END
+
+-- Mid Year Convention -> Compute Mid Year depreciation take on the year that PlacedInService falls into.
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Year' AND strError IS NULL)
+BEGIN
+	DECLARE 
+		@intRemainingMonthsInYear INT
+
+	SELECT @intRemainingMonthsInYear = [dbo].[fnFACountRemainingMonthsInYear](dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
+	FROM @tblAssetInfo WHERE strError IS NULL
+	UPDATE @tblAssetInfo
+	SET dblMonth = dblMidYear/ @intRemainingMonthsInYear 
+	WHERE strError IS NULL AND intMonth BETWEEN 1 AND @intRemainingMonthsInYear --from month of PlacedInService up to the last month of year of the PlacedInService date
 END
 
 UPDATE T SET dblDepre = dblMonth  + ISNULL(dblYear, 0)
