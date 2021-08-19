@@ -9462,6 +9462,8 @@
     <Build Include="dbo\Views\vyuFABookDepreciationReport.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
