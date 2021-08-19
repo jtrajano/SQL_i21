@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspEMDeactivateEntity]
 	@Id int,
-	@intEntityId INT = NULL
+	@intUserId INT = NULL
 AS
 	
 
@@ -12,7 +12,7 @@ AS
 		EXEC uspSMAuditLog 
 			@keyValue = @Id,
 			@screenName = 'EntityManagement.view.Entity',
-			@entityId = @intEntityId,
+			@entityId = @intUserId,
 			@actionType = 'Updated',
 			@details = @details
 	END	
