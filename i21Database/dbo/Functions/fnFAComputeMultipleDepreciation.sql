@@ -40,7 +40,10 @@ DECLARE @tblAssetInfo TABLE (
 	dblDepre 	DECIMAL (18,6),
 	ysnFullyDepreciated BIT NULL,
 	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
-	strAssetTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+	strAssetTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	dblQuarterly NUMERIC (18,6),
+	dblMidQuarter NUMERIC (18,6),
+	dblMidYear NUMERIC (18,6)
 
 ) 
 
@@ -117,6 +120,14 @@ OUTER APPLY(
 )E
 WHERE strError IS NULL
 
+-- Set Quarterly and Mid Quarter Depreciation take for Mid Quarter Convention
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Quarter' AND strError IS NULL)
+BEGIN
+	UPDATE @tblAssetInfo
+	SET dblQuarterly = dblAnnualDep / 4, dblMidQuarter = (dblAnnualDep/4)/2
+	WHERE strError IS NULL
+END
+
 -- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
 IF (@BookId = 2)
 BEGIN
@@ -174,6 +185,20 @@ END
 
 FROM @tblAssetInfo T
 WHERE strError IS NULL AND intMonth = 1 --First Depreciation
+
+-- Mid Quarter Convention -> Compute Mid Quarter depreciation take on the Quarter that the PlacedInService falls into.
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Quarter' AND strError IS NULL)
+BEGIN
+	DECLARE 
+		@intRemainingMonthsInQuarter INT
+
+	SELECT @intRemainingMonthsInQuarter = [dbo].[fnFACountRemainingMonthsInQuarter](dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
+	FROM @tblAssetInfo WHERE strError IS NULL
+
+	UPDATE T SET dblMonth = dblMidQuarter / @intRemainingMonthsInQuarter
+	FROM @tblAssetInfo T
+	WHERE strError IS NULL AND intMonth BETWEEN 1 AND @intRemainingMonthsInQuarter -- From the month of PlacedInService up to the last month of the quarter of the PlacedInService date
+END
 
 UPDATE T SET dblDepre = dblMonth  + ISNULL(dblYear, 0)
 FROM @tblAssetInfo T

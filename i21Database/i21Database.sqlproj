@@ -172,6 +172,8 @@
     <Build Include="dbo\Stored Procedures\uspMFProcessWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWODetailConfirm.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTOReceiptDetail.sql" />
+    <Build Include="dbo\Functions\fnFACalendarDatesWithQuarter.sql" />
+    <Build Include="dbo\Functions\fnFACountRemainingMonthsInQuarter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
