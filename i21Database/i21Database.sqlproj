@@ -160,11 +160,7 @@
     <Build Include="dbo\Stored Procedures\uspApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
-    <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
-    <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
-    <Build Include="dbo\Functions\fnFACalendarDatesWithQuarter.sql" />
-    <Build Include="dbo\Functions\fnFACountRemainingMonthsInQuarter.sql" />
-    <Build Include="dbo\Functions\fnFACountRemainingMonthsInYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -259,6 +255,11 @@
     <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
   </ItemGroup>
   <ItemGroup>
+    <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
+    <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
+    <Build Include="dbo\Functions\fnFACalendarDatesWithQuarter.sql" />
+    <Build Include="dbo\Functions\fnFACountRemainingMonthsInQuarter.sql" />
+    <Build Include="dbo\Functions\fnFACountRemainingMonthsInYear.sql" />
     <Build Include="dbo\Tables\tblAPBill.sql" />
     <Build Include="dbo\Tables\tblAPBillBatch.sql" />
     <Build Include="dbo\Tables\tblAPBillDetail.sql" />
