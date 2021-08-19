@@ -88,6 +88,8 @@ SELECT
 	,intLoadShipmentCostId						= ReceiptCharge.intLoadShipmentCostId
 	,ReceiptCharge.ysnAllowVoucher
 	,ReceiptCharge.strCostMethod
+	,Receipt.intBookId
+	,Receipt.intSubBookId
 FROM 
 	tblICInventoryReceiptCharge ReceiptCharge  INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
@@ -270,6 +272,8 @@ SELECT
 	,[intLoadShipmentCostId]					= ReceiptCharge.intLoadShipmentCostId
 	,ReceiptCharge.ysnAllowVoucher
 	,ReceiptCharge.strCostMethod
+	,Receipt.intBookId
+	,Receipt.intSubBookId
 FROM tblICInventoryReceiptCharge ReceiptCharge INNER JOIN tblICItem Item 
 		ON ReceiptCharge.intChargeId = Item.intItemId
 

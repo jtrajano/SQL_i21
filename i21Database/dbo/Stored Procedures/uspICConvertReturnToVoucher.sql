@@ -149,7 +149,9 @@ BEGIN
 				,[intShipViaId]						
 				,[intTermId]						
 				,[strBillOfLading]					
-				,[ysnReturn]						
+				,[ysnReturn]
+				,[intBookId]
+				,[intSubBookId]
 		)
 		SELECT 
 			[intEntityVendorId]			
@@ -202,6 +204,8 @@ BEGIN
 			,[intTermId]						
 			,[strBillOfLading]					
 			,[ysnReturn]	 
+			,[intBookId]
+			,[intSubBookId]
 		FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1)
 
 		END 
