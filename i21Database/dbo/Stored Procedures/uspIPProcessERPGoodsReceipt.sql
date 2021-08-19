@@ -795,6 +795,8 @@ BEGIN TRY
 					,0
 					,@strReceiptNo
 					,@intUserId
+
+				EXEC uspICUpdateTransferOrderStatus @intInventoryReceiptId,3 -- Set status of the transfer order to 'Closed'
 			END
 
 			INSERT INTO tblIPInitialAck (
