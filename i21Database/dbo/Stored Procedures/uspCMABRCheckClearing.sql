@@ -12,8 +12,10 @@ IF OBJECT_ID('tempdb..##tempActivityMatched') IS NOT NULL
 
 CREATE TABLE ##tempActivityMatched
 (
+	rowId INT,
 	intABRActivityId INT NULL,
-	intTransactionId INT NULL
+	intTransactionId INT NULL,
+	
 )
 
 SELECT @intABRDaysNoRef=ISNULL(intABRDaysNoRef,0)
@@ -38,7 +40,7 @@ CROSS APPLY(
 	AND 1 = 
 	CASE WHEN  RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = '' AND LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
 	THEN 
-		CASE WHEN @dtmCurrent <= DATEADD(DAY,@intABRDaysNoRef, C.dtmDate)
+		CASE WHEN ABR.dtmClear <= DATEADD(DAY,@intABRDaysNoRef, C.dtmDate)
 		THEN 1
 		ELSE 0
 		END
@@ -60,8 +62,8 @@ CROSS APPLY(
 WHERE intImportBankStatementLogId =@intImportBankStatementLogId
 AND ABR.intImportStatus =2
 )
-INSERT INTO ##tempActivityMatched (intABRActivityId, intTransactionId)
-SELECT  intABRActivityId, intTransactionId FROM matching 
+INSERT INTO ##tempActivityMatched (rowId, intABRActivityId, intTransactionId)
+SELECT ROW_NUMBER() OVER(ORDER BY intABRActivityId) rowId,  intABRActivityId, intTransactionId FROM matching 
 
 
 UPDATE CM
@@ -79,7 +81,14 @@ tblCMABRActivity ABR JOIN
 T.intABRActivityId = ABR.intABRActivityId
 
 DECLARE @bankMatchingId NVARCHAR(20)
-EXEC uspSMGetStartingNumber 162,  @bankMatchingId OUT
+DECLARE @cntMatched INT , @index INT = 0
+SELECT @cntMatched = COUNT(*) FROM ##tempActivityMatched
 
-INSERT INTO tblCMABRActivityMatched(strMatchingId,intBankAccountId, intABRActivityId, intTransactionId, dtmDateEntered, intEntityId, intConcurrencyId)
-SELECT @bankMatchingId,@intBankAccountId, intABRActivityId, intTransactionId,@dtmCurrent, @intEntityId,1 FROM ##tempActivityMatched
+WHILE (@index < @cntMatched)
+BEGIN
+	SET @index += 1
+	EXEC uspSMGetStartingNumber 162,  @bankMatchingId OUT
+	INSERT INTO tblCMABRActivityMatched(strMatchingId,intBankAccountId, intABRActivityId, intTransactionId, dtmDateEntered, intEntityId, intConcurrencyId)
+	SELECT @bankMatchingId,@intBankAccountId, intABRActivityId, intTransactionId,@dtmCurrent, @intEntityId,1 FROM ##tempActivityMatched
+	WHERE rowId = @index
+END
