@@ -160,6 +160,7 @@
     <Build Include="dbo\Stored Procedures\uspApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
