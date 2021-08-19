@@ -160,21 +160,7 @@
     <Build Include="dbo\Stored Procedures\uspApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
-    <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
-    <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
-    <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT508.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetTONo.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetTODetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFPostInventoryTransfer.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetBlendItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetBlendInputItem.sql" />
-    <Build Include="dbo\Tables\tblMFWODetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFProcessWorkOrder.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFWODetailConfirm.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetTOReceiptDetail.sql" />
-    <Build Include="dbo\Functions\fnFACalendarDatesWithQuarter.sql" />
-    <Build Include="dbo\Functions\fnFACountRemainingMonthsInQuarter.sql" />
-    <Build Include="dbo\Functions\fnFACountRemainingMonthsInYear.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -269,6 +255,21 @@
     <Folder Include="Scripts\Post-Deployment\FA\DefaultData" />
   </ItemGroup>
   <ItemGroup>
+    <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
+    <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT508.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTONo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFPostInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendInputItem.sql" />
+    <Build Include="dbo\Tables\tblMFWODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFProcessWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWODetailConfirm.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetTOReceiptDetail.sql" />
+    <Build Include="dbo\Functions\fnFACalendarDatesWithQuarter.sql" />
+    <Build Include="dbo\Functions\fnFACountRemainingMonthsInQuarter.sql" />
+    <Build Include="dbo\Functions\fnFACountRemainingMonthsInYear.sql" />
     <Build Include="dbo\Tables\tblAPBill.sql" />
     <Build Include="dbo\Tables\tblAPBillBatch.sql" />
     <Build Include="dbo\Tables\tblAPBillDetail.sql" />
