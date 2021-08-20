@@ -1977,7 +1977,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,CASE WHEN [strType] IN ('CF Tran') THEN ABS([dblQty]) ELSE [dblQty] END
+		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -1999,61 +1999,7 @@ BEGIN
 		,[intForexRateTypeId]
 		,[dblForexRate]
 	FROM ##ARItemsForCosting
-
-	-- IC Costing Zero Cost
-	INSERT INTO @ItemsForCosting
-		([intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,[dblQty]
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate])
-	SELECT
-		 [intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,CASE WHEN [strType] IN ('POS') THEN ABS([dblQty]) ELSE [dblQty] END
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate]
-	FROM ##ARItemsForCosting
+	WHERE ISNULL([ysnAutoBlend], 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2063,7 +2009,6 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-
 	SELECT
 		 [intInvoiceId]
 		,[strInvoiceNumber]
