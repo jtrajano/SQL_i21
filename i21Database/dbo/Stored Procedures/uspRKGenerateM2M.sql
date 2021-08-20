@@ -647,8 +647,8 @@ BEGIN TRY
 			, dtmContractDate
 			, strEntityName
 			, strCustomerContract
-			, intFutureMarketId
-			, intFutureMonthId
+			--, intFutureMarketId
+			--, intFutureMonthId
 			, strPricingStatus)
 		SELECT ROW_NUMBER() OVER (PARTITION BY tbl.intContractDetailId ORDER BY dtmTransactionDate DESC) intRowNum
 			, strCommodityCode
@@ -679,8 +679,8 @@ BEGIN TRY
 			, dtmTransactionDate
 			, strEntityName
 			, strCustomerContract
-			, intFutureMarketId
-			, intFutureMonthId
+			--, intFutureMarketId
+			--, intFutureMonthId
 			, strPricingStatus
 		FROM (
 			SELECT dtmTransactionDate = MAX(dtmTransactionDate)
@@ -710,8 +710,8 @@ BEGIN TRY
 				, strItemNo
 				, strEntityName
 				, strCustomerContract = ''
-				, intFutureMarketId
-				, intFutureMonthId
+				--, intFutureMarketId
+				--, intFutureMonthId
 				, strPricingStatus
 			FROM
 			(
@@ -742,8 +742,8 @@ BEGIN TRY
 					, CBL.intItemId
 					, strItemNo
 					, strEntityName = EM.strName
-					, CBL.intFutureMarketId
-					, CBL.intFutureMonthId
+					--, CBL.intFutureMarketId
+					--, CBL.intFutureMonthId
 					, stat.strPricingStatus
 				FROM tblCTContractBalanceLog CBL
 				INNER JOIN tblICCommodity CY ON CBL.intCommodityId = CY.intCommodityId
@@ -780,8 +780,8 @@ BEGIN TRY
 				, intItemId
 				, strItemNo
 				, strEntityName
-				, intFutureMarketId
-				, intFutureMonthId
+				--, intFutureMarketId
+				--, intFutureMonthId
 				, strPricingStatus
 				, dblBasis
 			HAVING SUM(dblQuantity) > 0	
@@ -1374,7 +1374,7 @@ BEGIN TRY
 									END
 				, dblMarketRatio = ISNULL(basisDetail.dblRatio, 0)
 				, dblMarketBasis1 = ISNULL(CASE WHEN cd.strPricingType <> 'HTA' THEN basisDetail.dblMarketBasis ELSE 0 END, 0)
-				, dblMarketCashPrice = ISNULL(CASE WHEN cd.strPricingType <> 'HTA' THEN basisDetail.dblMarketBasis ELSE 0 END, 0)
+				, dblMarketCashPrice = ISNULL(CASE WHEN cd.strPricingType = 'Cash' THEN	basisDetail.dblMarketBasis ELSE 0 END, 0)
 				, intMarketBasisUOM = ISNULL(basisDetail.intMarketBasisUOM, 0)
 				, intMarketBasisCurrencyId = ISNULL(basisDetail.intMarketBasisCurrencyId, 0)
 				, dblFuturePrice1 = CASE WHEN cd.strPricingType IN ('Basis', 'Ratio') THEN 0 ELSE p.dblFuturePrice END
@@ -1425,8 +1425,8 @@ BEGIN TRY
 			LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
 			OUTER APPLY (
 				SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
-				WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
-					AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
+				WHERE ISNULL(tmp.intFutureMarketId,0) = ISNULL(cd.intFutureMarketId, ISNULL(tmp.intFutureMarketId,0))
+					AND ISNULL(tmp.intItemId,0) = ISNULL(cd.intItemId, ISNULL(tmp.intItemId,0))
 					AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
 														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
@@ -3226,7 +3226,7 @@ BEGIN TRY
 				, DER.intFutureMonthId
 				, strFutureMarket
 				, DER.intFutureMarketId
-				, dblPrice 
+				, dblPrice
 				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
 				, DER.intCurrencyId
@@ -3753,14 +3753,14 @@ BEGIN TRY
 		LEFT JOIN tblCTContractType ct ON ct.intContractTypeId = bd.intContractTypeId
 		LEFT JOIN tblARMarketZone mz ON mz.intMarketZoneId = bd.intMarketZoneId
 		LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = bd.intUnitMeasureId
-		WHERE b.intM2MBasisId = @intM2MBasisId
+		WHERE (b.intM2MBasisId = @intM2MBasisId
 			AND c.intCommodityId = ISNULL(@intCommodityId, c.intCommodityId)
 			AND b.strPricingType = @strM2MType
 			AND ISNULL(bd.intItemId, 0) IN (SELECT CASE WHEN @strItemIds = '' THEN ISNULL(bd.intItemId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strItemIds, ', ')) --added this be able to filter by item (RM-739)
 			AND ISNULL(bd.strPeriodTo, '') IN (SELECT CASE WHEN @strPeriodTos = '' THEN ISNULL(bd.strPeriodTo, '') ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END FROM [dbo].[fnSplitString](@strPeriodTos, ', ')) --added this be able to filter by period to (RM-739)
 			AND ISNULL(bd.intCompanyLocationId, 0) IN (SELECT CASE WHEN @strLocationIds = '' THEN ISNULL(bd.intCompanyLocationId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strLocationIds, ', ')) --added this be able to filter by item (RM-739)
 			AND ISNULL(bd.intMarketZoneId, 0) IN (SELECT CASE WHEN @strZoneIds = '' THEN ISNULL(bd.intMarketZoneId, 0) ELSE CASE WHEN Item = '' THEN 0 ELSE LTRIM(RTRIM(Item)) COLLATE Latin1_General_CI_AS END END AS Item FROM [dbo].[fnSplitString](@strZoneIds, ', ')) --added this be able to filter by item (RM-739)
-			OR (bd.strContractInventory = 'Inventory' and b.intM2MBasisId = @intM2MBasisId
+			) OR (bd.strContractInventory = 'Inventory' and b.intM2MBasisId = @intM2MBasisId
 				AND c.intCommodityId = ISNULL(@intCommodityId, c.intCommodityId)
 				AND b.strPricingType = @strM2MType)
 		ORDER BY i.strMarketValuation
