@@ -194,7 +194,7 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = '3', strScheduleName = 'Loaded in WV and Delivered in WV', strType = 'Aviation Gas', strNote = '', strTransactionType = 'Inventory', intSort = 2240,strStoredProcedure = 'uspTFGetTransporterInventoryTax', intMasterId = 4800104, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = '3', strScheduleName = 'Loaded in WV and Delivered in WV', strType = 'Aviation Jet Fuel', strNote = '', strTransactionType = 'Inventory', intSort = 2250,strStoredProcedure = 'uspTFGetTransporterInventoryTax', intMasterId = 4800105, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = '3', strScheduleName = 'Loaded in WV and Delivered in WV', strType = 'LNG', strNote = '', strTransactionType = 'Inventory', intSort = 2260,strStoredProcedure = 'uspTFGetTransporterInventoryTax', intMasterId = 4800106, intComponentTypeId = 1
-	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = 'MFT-507_Main', strScheduleName = 'WV Transporter Report Main Form', strType = '', strNote = '', strTransactionType = '', intSort = 2270,strStoredProcedure = '', intMasterId = 4800107, intComponentTypeId = 2
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = 'MFT-507', strScheduleName = 'WV Transporter Report Main Form', strType = '', strNote = '', strTransactionType = '', intSort = 2270,strStoredProcedure = '', intMasterId = 4800107, intComponentTypeId = 2
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'MFT-507', strFormName = 'WV Transporter Report', strScheduleCode = 'MFT-507_Efile', strScheduleName = 'WV Transporter Report Electronic file (TXT format)', strType = '', strNote = '', strTransactionType = '', intSort = 2280,strStoredProcedure = '', intMasterId = 4800108, intComponentTypeId = 4
 
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
@@ -382,14 +382,14 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Aviation Jet Fuel', strState = 'WV', strStatus = 'Include', intMasterId = 4800017
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'LNG', strState = 'WV', strStatus = 'Include', intMasterId = 4800018
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Gasoline', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800019
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-508', strScheduleCode = '2', strType = 'Gasohol', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800020
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-509', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800021
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-510', strScheduleCode = '2', strType = 'Compressed Natural Gas', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800022
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-511', strScheduleCode = '2', strType = 'Dyed Diesel/Kerosene', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800023
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-512', strScheduleCode = '2', strType = 'Propane/LPG', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800024
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-513', strScheduleCode = '2', strType = 'Aviation Gas', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800025
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-514', strScheduleCode = '2', strType = 'Aviation Jet Fuel', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800026
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-515', strScheduleCode = '2', strType = 'LNG', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800027
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Gasohol', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800020
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800021
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Compressed Natural Gas', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800022
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Dyed Diesel/Kerosene', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800023
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Propane/LPG', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800024
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Aviation Gas', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800025
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Aviation Jet Fuel', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800026
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'LNG', strState = 'WV', strStatus = 'Exclude', intMasterId = 4800027
 
 	EXEC uspTFUpgradeValidOriginStates @TaxAuthorityCode = @TaxAuthorityCode, @ValidOriginStates = @ValidOriginStates
 
@@ -603,6 +603,8 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-508', strScheduleCode = 'MFT-508', strType = '', strTemplateItemId = 'WVMFT508-S1L13', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '8', strDescription = 'Section 1 Line 13 Total Refund (Default Value is from Line 12 Overpayment Amt)', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = 8, ysnOutputDesigner = 0, strInputType = 'double', intMasterId = 4800029
 	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-508', strScheduleCode = 'MFT-508', strType = '', strTemplateItemId = 'WVMFT508-S1L14', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '9', strDescription = 'Section 1 Line 14 Credit Due', strScheduleList = NULL, strConfiguration = '0.00', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = 9, ysnOutputDesigner = 0, strInputType = 'double', intMasterId = 4800030
+
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'MFT-507', strScheduleCode = 'MFT-507', strType = '', strTemplateItemId = 'WVMFT507-L5', strReportSection = 'Header', intReportItemSequence = '0', intTemplateItemNumber = '1', strDescription = 'Line 5 Late File Penalty', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = '1', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = 1, ysnOutputDesigner = 0, strInputType = 'double', intMasterId = 4800031
 
 
 	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
@@ -2415,7 +2417,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '3', strType = 'Aviation Gas', ysnStatus = 1, intFrequency = 1, intMasterId = 4800104
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '3', strType = 'Aviation Jet Fuel', ysnStatus = 1, intFrequency = 1, intMasterId = 4800105
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '3', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 4800106
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = 'MFT-507_Main', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 4800107
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = 'MFT-507', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 4800107
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = 'MFT-507_Efile', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 4800108
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
