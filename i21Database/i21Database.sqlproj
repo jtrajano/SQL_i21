@@ -162,6 +162,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
+    <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Views\vyuAPBillForImport.sql" />
   </ItemGroup>
   <ItemGroup>
