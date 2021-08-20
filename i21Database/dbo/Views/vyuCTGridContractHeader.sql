@@ -143,7 +143,7 @@ AS
 			NM.strBroker,
 			NM.strBrokerAccount,
 			CH.ysnReceivedSignedFixationLetter,
-			AP.strApprovalStatus,
+			strApprovalStatus = (case when CD.intDetailCount = 0 and RA.ysnRequireApproval = 1 then 'Waiting for Submit' else AP.strApprovalStatus end),
 			P.strPositionType,
 			CH.ysnReadOnlyInterCoContract,
 			intCommodityFutureMarketId = NM.intCommodityFutureMarketId
@@ -159,4 +159,16 @@ AS
 		WHERE	SC.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
 		AND		AP.ysnCurrent = 1
 	) AP
+	cross apply (
+		select intDetailCount = count(*) from tblCTContractDetail where intContractHeaderId = CH.intContractHeaderId
+	) CD
+	cross apply (
+		select ysnRequireApproval = convert(bit,count(*))
+		from tblSMUserSecurityRequireApprovalFor af
+		cross apply (
+			select top 1 intScreenId from tblSMScreen where strModule = 'Contract Management' and strNamespace = 'ContractManagement.view.Contract'
+		) sc
+		where
+		af.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById) and af.intScreenId = sc.intScreenId
+	)RA
 	LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
