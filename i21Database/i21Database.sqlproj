@@ -9448,8 +9448,6 @@
     <Build Include="dbo\Stored Procedures\uspICImportCountDetailFromStaging.sql" />
     <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
     <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
-    <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
-    <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateTicketSplitByDeliverySheetSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
