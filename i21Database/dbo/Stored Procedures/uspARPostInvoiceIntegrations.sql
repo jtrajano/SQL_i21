@@ -3,6 +3,7 @@
 	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
+	,@raiseError  AS BIT   = 0
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -25,10 +26,13 @@ DECLARE  @InitTranCount				INT
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-IF @InitTranCount = 0
-	BEGIN TRANSACTION
-ELSE
-	SAVE TRANSACTION @Savepoint
+IF ISNULL(@raiseError,0) = 0
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 
 BEGIN TRY
 
@@ -874,27 +878,22 @@ EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
 END TRY
 BEGIN CATCH
     DECLARE @ErrorMerssage NVARCHAR(MAX)
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-    IF @InitTranCount = 0
-        IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION
-	ELSE
-		IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION @Savepoint
+	SELECT @ErrorMerssage = ERROR_MESSAGE()
+
+	IF @raiseError = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
 												
 	RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH
-
-IF @InitTranCount = 0
-	BEGIN
-		IF (XACT_STATE()) = -1
-			ROLLBACK TRANSACTION
-		IF (XACT_STATE()) = 1
-			COMMIT TRANSACTION
-		RETURN 1;
-	END	
 
 Post_Exit:
 	RETURN 0;
