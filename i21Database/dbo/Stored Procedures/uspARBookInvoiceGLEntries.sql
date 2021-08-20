@@ -25,6 +25,7 @@ BEGIN
 	ELSE
 		SAVE TRANSACTION @Savepoint
 END
+
 BEGIN TRY
 
 DECLARE @GLPost RecapTableType
@@ -246,14 +247,14 @@ BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()
 
 	IF @raiseError = 0
-		BEGIN
-			IF @InitTranCount = 0
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION
-			ELSE
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION @Savepoint
-		END
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
 
 	IF @raiseError = 1
         RAISERROR(@ErrorMerssage, 11, 1)

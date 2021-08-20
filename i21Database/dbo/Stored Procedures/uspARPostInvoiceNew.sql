@@ -492,6 +492,7 @@ BEGIN TRY
            ,@BatchId          = @BatchIdUsed
 		   ,@UserId           = @UserId
 		   ,@IntegrationLogId = @IntegrationLogId
+		   ,@raiseError		  = @RaiseError
 
 	UPDATE ILD
 	SET
@@ -511,25 +512,6 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-
-	DELETE FROM tblARPostingQueue
-    WHERE intPostQueueId IN (
-	SELECT intPostQueueId
-    FROM tblARPostingQueue ARPQ
-    INNER JOIN ##ARInvoiceGLEntries PID 
-	ON PID.[intTransactionId] = ARPQ.[intTransactionId]
-	AND PID.[strTransactionId] = ARPQ.[strTransactionNumber]
-	AND ARPQ.strBatchId = @BatchIdUsed)
-
-	DELETE FROM tblGLDetail
-    WHERE intGLDetailId IN (
-	SELECT intGLDetailId
-    FROM tblGLDetail GLD
-    INNER JOIN ##ARInvoiceGLEntries PID 
-	ON PID.[intTransactionId] = GLD.[intTransactionId]
-	AND PID.[strTransactionId] = GLD.[strTransactionId]
-	AND GLD.strBatchId = @BatchIdUsed)
-
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
 	IF @RaiseError = 0
 		BEGIN
