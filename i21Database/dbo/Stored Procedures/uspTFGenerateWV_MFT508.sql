@@ -149,7 +149,8 @@ BEGIN TRY
 
 		, @strS1L5Date NVARCHAR(20) = NULL
 		, @strS1L6Date NVARCHAR(20) = NULL
-
+		, @strS1L13 NVARCHAR(20) = NULL
+		, @strS1L14 NVARCHAR(20) = NULL
 
 	IF (ISNULL(@xmlParam,'') != '')
 	BEGIN		
@@ -347,11 +348,13 @@ BEGIN TRY
 
 		SET @dblS1L11 = @dblS1L8 + @dblS1L9 + @dblS1L10
 
-		SET @dblS1L12 = CASE WHEN @dblS1L3 > @dblS1L7 THEN 0 ELSE @dblS1L7 - @dblS1L3 END
+		SET @dblS1L12 = CASE WHEN @dblS1L3 > @dblS1L7 THEN 0 ELSE (@dblS1L7 - @dblS1L3) END
 
-		SET @dblS1L13 = @dblS1L12
-		SET @dblS1L14 = @dblS1L12
+		SELECT @strS1L13 = NULLIF(strConfiguration,'') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S1L13'
+		SELECT @strS1L14 = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT508-S1L14'
 
+		SET @dblS1L13 = CASE WHEN @strS1L13 IS NULL THEN @dblS1L12 ELSE CONVERT(NUMERIC(18, 6), ISNULL(@strS1L13, 0)) END
+		SET @dblS1L14 = CONVERT(NUMERIC(18, 6), @strS1L14)
 	END
 
 	SELECT dtmFrom = @dtmFrom 
