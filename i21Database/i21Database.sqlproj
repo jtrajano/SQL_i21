@@ -167,6 +167,7 @@
     <Build Include="dbo\Stored Procedures\uspMFPostInventoryTransfer.sql" />
 	<Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT507.sql" />
 	<Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT511.sql" />
+    <Build Include="dbo\Functions\fnTRStringConcat.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
