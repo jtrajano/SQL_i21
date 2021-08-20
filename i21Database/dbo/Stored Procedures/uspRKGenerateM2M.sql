@@ -724,7 +724,7 @@ BEGIN TRY
 					, CBL.dtmStartDate
 					, CBL.dtmEndDate
 					, dblQuantity = CBL.dblQty
-					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 THEN CBL.dblFutures ELSE NULL END
+					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 OR CBL.intPricingTypeId = 3 THEN CBL.dblFutures ELSE NULL END 
 					, dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
 					, dblCashPrice = CASE WHEN CBL.intPricingTypeId = 1 THEN ISNULL(CBL.dblFutures,0) + ISNULL(CBL.dblBasis,0) ELSE NULL END
 					, dblAmount = CASE WHEN CBL.intPricingTypeId = 1 THEN [dbo].[fnCTConvertQtyToStockItemUOM](CD.intItemUOMId, CBL.dblQty) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(CBL.dblFutures, 0) + ISNULL(CBL.dblBasis, 0))
@@ -754,6 +754,7 @@ BEGIN TRY
 				INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CBL.intContractDetailId
 				LEFT JOIN #tmpPricingStatus stat ON stat.intContractDetailId = CBL.intContractDetailId
 				WHERE CBL.strTransactionType = 'Contract Balance'
+					
 			) tbl
 			WHERE intCommodityId = ISNULL(@intCommodityId, intCommodityId)
 				AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
@@ -1360,8 +1361,17 @@ BEGIN TRY
 				, dblDummyContractBasis = ISNULL(cd.dblBasis, 0)
 				, dblCash = CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice ELSE NULL END
 				, dblFuturesClosingPrice1 = dblFuturePrice
-				, dblFutures = CASE WHEN cd.intPricingTypeId = 2 AND strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
-									ELSE CASE WHEN cd.intPricingTypeId IN (1, 3) THEN ISNULL(cd.dblFutures, 0) ELSE ISNULL(cd.dblFutures, 0) END END
+				, dblFutures = CASE WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Basis' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
+									--Basis (Partially Priced) Priced Record
+									WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' THEN ISNULL(priceFixationDetail.dblFutures, 0)
+									-- CONTRACT DETAIL PRICED BUT HEADER PRICING TYPE IS BASIS SHOULD GET WEIGHTED AVERAGE FUTURES
+									-- FOR SCENARIOS WITH MULTIPLE PARTIAL PRICING
+									WHEN cd.intPricingTypeId = 1 AND cth.intPricingTypeId = 2 THEN ISNULL(priceFixationDetail.dblFutures, 0)
+									ELSE 
+										CASE WHEN cd.intPricingTypeId IN (1, 3) 
+											THEN ISNULL(cd.dblFutures, 0) 
+											ELSE ISNULL(cd.dblFutures, 0) END 
+									END
 				, dblMarketRatio = ISNULL(basisDetail.dblRatio, 0)
 				, dblMarketBasis1 = ISNULL(CASE WHEN cd.strPricingType <> 'HTA' THEN basisDetail.dblMarketBasis ELSE 0 END, 0)
 				, dblMarketCashPrice = ISNULL(CASE WHEN cd.strPricingType <> 'HTA' THEN basisDetail.dblMarketBasis ELSE 0 END, 0)
@@ -1385,7 +1395,7 @@ BEGIN TRY
 				, cd.intCompanyLocationId
 				, cd.intMarketZoneId
 				, cd.intContractStatusId
-				, dtmContractDate
+				, cd.dtmContractDate
 				, ffm.ysnExpired
 				, cd.dblInvoicedQuantity
 				, dblPricedQty
@@ -1427,10 +1437,30 @@ BEGIN TRY
 													THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
 												ELSE tmp.strPeriodTo END
 					AND tmp.strContractInventory = 'Contract') basisDetail
+			LEFT JOIN tblCTContractHeader cth
+				ON cd.intContractHeaderId = cth.intContractHeaderId
+			OUTER APPLY (
+				-- Weighted Average Futures Price for Basis (Priced Qty) in Multiple Price Fixations
+				SELECT dblFutures = SUM(dblFutures) 
+				FROM
+				(
+					SELECT dblFutures = (pfd.dblFutures) * (pfd.dblQuantity / cd.dblBalance)
+					FROM tblCTPriceFixation pfh
+					INNER JOIN tblCTPriceFixationDetail pfd
+						ON pfh.intPriceFixationId = pfd.intPriceFixationId
+						AND pfd.dtmFixationDate <= @dtmEndDate
+					WHERE intContractDetailId = cd.intContractDetailId
+						AND (
+							-- Basis (Partially Priced) Priced Record
+							(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+							-- Contract Detail Is Priced But Contract Header Pricing is Basis
+							OR (cd.intPricingTypeId = 1 AND cth.intPricingTypeId = 2)
+							)
+				) t
+			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 
 		)t
 
-		
 		-- @TODO: THIS IS SUPER SLOW!!!!!!!!! YOU NEED TO OPTMIZE THIS. THIS RUNS LIKE FOREVER
 		-- THIS CAUSES Market to Market screen saving to execute endlessly
 		-- intransit
@@ -3193,7 +3223,7 @@ BEGIN TRY
 				, DER.intFutureMonthId
 				, strFutureMarket
 				, DER.intFutureMarketId
-				, dblPrice
+				, dblPrice 
 				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
 				, DER.intCurrencyId
@@ -3357,7 +3387,7 @@ BEGIN TRY
 						WHEN strPricingType = 'Priced' THEN ISNULL(dblFutures, 0)
 						ELSE dblCalculatedFutures END)
 				, dblCash --Contract Cash
-				, dblCosts = ABS(dblCosts)
+				, dblCosts = ABS(dblCosts) 
 				--Market Basis
 				, dblMarketBasis = (CASE WHEN strPricingType ! = 'HTA' THEN
 										CASE WHEN @ysnCanadianCustomer = 1 AND @strM2MCurrency = 'CAD'

@@ -103,6 +103,7 @@ DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strReceiptNumber NVARCHAR(50)
 DECLARE @dblTicketUnitPrice NUMERIC(18, 6)
 DECLARE @dblTicketUnitBasis NUMERIC(18, 6)
+DECLARE @ysnRequireSpot bit = 0
 
 -- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
@@ -147,6 +148,10 @@ FROM dbo.tblGRStorageType ST WHERE
 ST.strStorageTypeCode = @strDistributionOption
 
 
+select @ysnRequireSpot = case when intRequireSpotSalePrice = 1 then 1 else 0 end
+	from tblSCScaleSetup 
+		where intScaleSetupId = @intScaleStationId
+
 BEGIN TRY
 		--Validation
 		BEGIN
@@ -180,6 +185,8 @@ BEGIN TRY
 
 		IF(@strDistributionOption = 'SPT')
 			AND (ISNULL(@dblTicketUnitBasis,0) + ISNULL(@dblTicketUnitPrice,0)) = 0
+			AND  @ysnRequireSpot = 1
+
 		BEGIN
 
 			SET @ErrMsg  = 'Cannot distribute Zero Spot ticket with destination Weights/Grades'

@@ -1,26 +1,29 @@
 ﻿CREATE VIEW [dbo].[vyuSMContactControl]
 AS 
-SELECT intControlId
-,cl.intScreenId
-,strControlId
-,strControlName
-,ISNULL(sc.strGroupName,mm.strCategory) COLLATE Latin1_General_CI_AS AS strGroupName 
-,CASE WHEN ISNULL(cl.strContainer, 0) <> 0 THEN cl.strContainer ELSE sc.strScreenName END AS strContainer
-,strControlType
-,cl.intConcurrencyId
-,CASE WHEN ISNULL(mm.strMenuName,'') <> '' THEN REPLACE(mm.strMenuName, '(Portal)', '') ELSE sc.strScreenName END AS strScreenName
-FROM tblSMControl cl
-INNER JOIN tblSMScreen sc ON cl.intScreenId = sc.intScreenId
-LEFT JOIN tblSMMasterMenu mm ON sc.strNamespace = LEFT(mm.strCommand, (CASE WHEN (CHARINDEX('?', mm.strCommand) - 1) < 0 THEN LEN(mm.strCommand) ELSE (CHARINDEX('?', mm.strCommand) - 1) END))
---LEFT JOIN tblSMContactMenu cm ON mm.intMenuID = cm.intMasterMenuId
-where sc.strNamespace in (
-	select 	LEFT(strCommand, (		CASE WHEN (CHARINDEX('?', strCommand) - 1) < 0 		THEN LEN(strCommand) 		ELSE (CHARINDEX('?', strCommand) - 1) 		END 	))
-	from tblSMMasterMenu a
-	inner join tblSMContactMenu b on b.intMasterMenuId = a.intMenuID
-)
-OR
- sc.strNamespace in (
-	SELECT REPLACE(	LEFT(strCommand, (		CASE WHEN (CHARINDEX('?', strCommand) - 1) < 0 		THEN LEN(strCommand) 		ELSE (CHARINDEX('?', strCommand) - 1) 		END 	)), '.view.', '.search.')
-	from tblSMMasterMenu a
-	inner join tblSMContactMenu b on b.intMasterMenuId = a.intMenuID
-)
+SELECT DISTINCT
+	intControlId,
+	A.intScreenId,
+	strControlId,
+	strControlName,
+	ISNULL(B.strGroupName, C.strCategory) COLLATE Latin1_General_CI_AS AS strGroupName,
+	CASE 
+		WHEN ISNULL(A.strContainer, 0) <> 0 THEN A.strContainer 
+		ELSE B.strScreenName 
+	END AS strContainer,
+	strControlType,
+	A.intConcurrencyId,
+	CASE 
+		WHEN ISNULL(C.strMenuName, '') <> '' THEN REPLACE(C.strMenuName, '(Portal)', '') 
+		ELSE B.strScreenName 
+	END AS strScreenName
+FROM [tblSMControl] A
+INNER JOIN [tblSMScreen] B ON B.intScreenId = A.intScreenId
+LEFT JOIN [tblSMMasterMenu] C ON B.strNamespace = LEFT(C.strCommand, (CASE WHEN (CHARINDEX('?', C.strCommand) - 1) < 0 THEN LEN(C.strCommand) ELSE (CHARINDEX('?', C.strCommand) - 1) END))
+WHERE B.strNamespace IN (
+	SELECT LEFT(strCommand, (CASE WHEN (CHARINDEX('?', strCommand) - 1) < 0 THEN LEN(strCommand) ELSE (CHARINDEX('?', strCommand) - 1) END))
+	FROM [tblSMMasterMenu] D
+	INNER JOIN [tblSMContactMenu] E ON E.intMasterMenuId = D.intMenuID) 
+OR B.strNamespace IN (
+	SELECT REPLACE(LEFT(strCommand, (CASE WHEN (CHARINDEX('?', strCommand) - 1) < 0 THEN LEN(strCommand) ELSE (CHARINDEX('?', strCommand) - 1) END)), '.view', '.search')
+	FROM [tblSMMasterMenu] F
+	INNER JOIN [tblSMContactMenu] G ON G.intMasterMenuId = F.intMenuID)

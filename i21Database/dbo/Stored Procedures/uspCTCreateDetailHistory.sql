@@ -31,6 +31,7 @@ BEGIN TRY
 		, @strTransactionType NVARCHAR(20)
         , @ysnStayAsDraftContractUntilApproved BIT
         , @ysnAddAmendmentForNonDraftContract BIT = 0
+        , @ysnPricingAsAmendment BIT = 1
 		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
@@ -56,7 +57,10 @@ BEGIN TRY
 		, dblFutures NUMERIC(18, 6)
 		, dblBasis NUMERIC(18, 6)
 		, dblCashPrice NUMERIC(18, 6)
-		, intPriceItemUOMId INT);
+		, intPriceItemUOMId INT
+        , intBookId INT
+        , intSubBookId INT)
+		;
 	
 	DECLARE @contractDetails AS [dbo].[ContractDetailTable];
 	DECLARE @SCOPE_IDENTITY TABLE(intSequenceHistoryId INT);
@@ -79,7 +83,8 @@ BEGIN TRY
 	
 	SELECT
 		@ysnAmdWoAppvl = ISNULL(ysnAmdWoAppvl, 0),
-		@ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0)
+		@ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0),
+		@ysnPricingAsAmendment = ysnPricingAsAmendment
 	FROM tblCTCompanyPreference;
 	
 	DELETE FROM @tblHeader;
@@ -118,7 +123,9 @@ BEGIN TRY
 		, dblFutures
 		, dblBasis
 		, dblCashPrice
-		, intPriceItemUOMId)
+		, intPriceItemUOMId
+		, intBookId     
+        , intSubBookId)
 	SELECT intContractHeaderId
 		, t1.intContractDetailId
 		, intContractStatusId
@@ -134,6 +141,8 @@ BEGIN TRY
 		, dblBasis
 		, dblCashPrice
 		, intPriceItemUOMId
+		, intBookId     
+        , intSubBookId
 	FROM (SELECT *
 		FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
 						FROM tblCTSequenceHistory
@@ -281,6 +290,10 @@ BEGIN TRY
 	) FD ON FD.intPriceFixationId = PF.intPriceFixationId
 	WHERE CD.intContractHeaderId = @intContractHeaderId
 		AND CD.intContractDetailId = ISNULL(@intContractDetailId, CD.intContractDetailId);
+
+	declare
+		@intSequenceHistoryCount int
+		,@intValidSequenceHistoryCount int;
 	
 	SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY;
 	WHILE ISNULL(@intSequenceHistoryId, 0) > 0
@@ -290,81 +303,141 @@ BEGIN TRY
 		SELECT @intContractDetailId = intContractDetailId
 		FROM tblCTSequenceHistory
 		WHERE intSequenceHistoryId = @intSequenceHistoryId;
-		
-		SELECT @intPrevHistoryId = MAX(intSequenceHistoryId)
-		FROM tblCTSequenceHistory WITH(NOLOCK)
-		WHERE intSequenceHistoryId < @intSequenceHistoryId
-			AND intContractDetailId = @intContractDetailId;
-		
-		IF @intPrevHistoryId IS NOT NULL
-		BEGIN
-			SELECT @dblPrevQty = dblQuantity
-				, @dblPrevBal = dblBalance
-				, @intPrevStatusId = intContractStatusId
-				, @dblPrevFutures = dblFutures
-				, @dblPrevBasis = dblBasis
-				, @dblPrevCashPrice = dblCashPrice
-			FROM tblCTSequenceHistory
-			WHERE intSequenceHistoryId = @intPrevHistoryId;
-			
-			SELECT @dblQuantity = dblQuantity
-				, @dblBalance = dblBalance
-				, @intContractStatusId = intContractStatusId
-				, @dblFutures = dblFutures
-				, @dblBasis = dblBasis
-				, @dblCashPrice = dblCashPrice
+
+		if (OBJECT_ID('tempdb..#tempSequenceHistoryCompare') is not null)
+		begin
+			DROP TABLE #tempSequenceHistoryCompare;
+		end
+
+		select top 2
+		intContractStatusId
+		,intCompanyLocationId
+		,intPricingTypeId
+		,intFutureMarketId
+		,intFutureMonthId
+		,intCurrencyId
+		,intDtlQtyInCommodityUOMId
+		,intDtlQtyUnitMeasureId
+		,intCurrencyExchangeRateId
+		,intBookId
+		,intSubBookId
+		,dtmStartDate
+		,dtmEndDate
+		,dblQuantity
+		,dblBalance
+		,dblScheduleQty
+		,dblFutures
+		,dblBasis
+		,dblCashPrice
+		,dblLotsPriced
+		,dblLotsUnpriced
+		,dblQtyPriced
+		,dblQtyUnpriced
+		,dblFinalPrice
+		,dblRatio
+		,dtmFXValidFrom
+		,dtmFXValidTo
+		,dblRate
+		,strPricingType
+		,strPricingStatus
+		,strCurrencypair
+		,strBook
+		,strSubBook
+		,intPriceItemUOMId
+		into #tempSequenceHistoryCompare
+		from tblCTSequenceHistory where intContractDetailId = @intContractDetailId order by intSequenceHistoryId desc
+
+		select @intSequenceHistoryCount = count(*) from #tempSequenceHistoryCompare
+
+		select @intValidSequenceHistoryCount = count(*) from (
+			select distinct * from #tempSequenceHistoryCompare
+		)tbl
+
+		if (@intSequenceHistoryCount = 2 and @intValidSequenceHistoryCount = 1)
+		begin
+			DELETE
 			FROM tblCTSequenceHistory
 			WHERE intSequenceHistoryId = @intSequenceHistoryId;
+		end
+		else
+		begin
 			
-			IF ISNULL(@dblPrevQty, 0) <> ISNULL(@dblQuantity, 0)
+			SELECT @intPrevHistoryId = MAX(intSequenceHistoryId)
+			FROM tblCTSequenceHistory WITH(NOLOCK)
+			WHERE intSequenceHistoryId < @intSequenceHistoryId
+				AND intContractDetailId = @intContractDetailId;
+			
+			IF @intPrevHistoryId IS NOT NULL
 			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty
-					, ysnQtyChange = 1
+				SELECT @dblPrevQty = dblQuantity
+					, @dblPrevBal = dblBalance
+					, @intPrevStatusId = intContractStatusId
+					, @dblPrevFutures = dblFutures
+					, @dblPrevBasis = dblBasis
+					, @dblPrevCashPrice = dblCashPrice
+				FROM tblCTSequenceHistory
+				WHERE intSequenceHistoryId = @intPrevHistoryId;
+				
+				SELECT @dblQuantity = dblQuantity
+					, @dblBalance = dblBalance
+					, @intContractStatusId = intContractStatusId
+					, @dblFutures = dblFutures
+					, @dblBasis = dblBasis
+					, @dblCashPrice = dblCashPrice
+				FROM tblCTSequenceHistory
 				WHERE intSequenceHistoryId = @intSequenceHistoryId;
-			END;
-			
-			IF ISNULL(@dblPrevBal, 0) <> ISNULL(@dblBalance, 0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal
-					, ysnBalanceChange = 1
-				WHERE intSequenceHistoryId = @intSequenceHistoryId;
-			END;
-			
-			IF ISNULL(@intPrevStatusId, 0) <> ISNULL(@intContractStatusId, 0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId
-					, ysnStatusChange = 1
-				WHERE intSequenceHistoryId = @intSequenceHistoryId;
-			END;
-			
-			IF ISNULL(@dblPrevFutures, 0) <> ISNULL(@dblFutures, 0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldFutures = @dblPrevFutures
-					, ysnFuturesChange = 1
-				WHERE intSequenceHistoryId = @intSequenceHistoryId;
-			END;
-			
-			IF ISNULL(@dblPrevBasis, 0) <> ISNULL(@dblBasis, 0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldBasis = @dblPrevBasis
-					, ysnBasisChange = 1
-				WHERE intSequenceHistoryId = @intSequenceHistoryId;
-			END;
-			
-			IF ISNULL(@dblPrevCashPrice, 0) <> ISNULL(@dblCashPrice, 0)
-			BEGIN
-				UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice
-					, ysnCashPriceChange = 1
-				WHERE intSequenceHistoryId = @intSequenceHistoryId;
-			END;
-		END
-			
-		EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId
-			, @intContractDetailId = @intContractDetailId
-			, @strSource = @strSource
-			, @strProcess = @strProcess
-			, @contractDetail = @contractDetails
-			, @intUserId = @intUserId;
+				
+				IF ISNULL(@dblPrevQty, 0) <> ISNULL(@dblQuantity, 0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldQuantity = @dblPrevQty
+						, ysnQtyChange = 1
+					WHERE intSequenceHistoryId = @intSequenceHistoryId;
+				END;
+				
+				IF ISNULL(@dblPrevBal, 0) <> ISNULL(@dblBalance, 0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldBalance = @dblPrevBal
+						, ysnBalanceChange = 1
+					WHERE intSequenceHistoryId = @intSequenceHistoryId;
+				END;
+				
+				IF ISNULL(@intPrevStatusId, 0) <> ISNULL(@intContractStatusId, 0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET intOldStatusId = @intPrevStatusId
+						, ysnStatusChange = 1
+					WHERE intSequenceHistoryId = @intSequenceHistoryId;
+				END;
+				
+				IF ISNULL(@dblPrevFutures, 0) <> ISNULL(@dblFutures, 0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldFutures = @dblPrevFutures
+						, ysnFuturesChange = 1
+					WHERE intSequenceHistoryId = @intSequenceHistoryId;
+				END;
+				
+				IF ISNULL(@dblPrevBasis, 0) <> ISNULL(@dblBasis, 0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldBasis = @dblPrevBasis
+						, ysnBasisChange = 1
+					WHERE intSequenceHistoryId = @intSequenceHistoryId;
+				END;
+				
+				IF ISNULL(@dblPrevCashPrice, 0) <> ISNULL(@dblCashPrice, 0)
+				BEGIN
+					UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice
+						, ysnCashPriceChange = 1
+					WHERE intSequenceHistoryId = @intSequenceHistoryId;
+				END;
+			END
+				
+			EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId
+				, @intContractDetailId = @intContractDetailId
+				, @strSource = @strSource
+				, @strProcess = @strProcess
+				, @contractDetail = @contractDetails
+				, @intUserId = @intUserId;
+
+		end
 		
 		SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId)
 		FROM @SCOPE_IDENTITY
@@ -665,6 +738,7 @@ BEGIN TRY
 			LEFT JOIN tblRKFuturesMonth CurrentType ON ISNULL(CurrentType.intFutureMonthId, 0) = ISNULL(CurrentRow.intFutureMonthId, 0)
 			LEFT JOIN tblRKFuturesMonth PreviousType ON ISNULL(PreviousType.intFutureMonthId, 0) = ISNULL(PreviousRow.intFutureMonthId, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			and PreviousType.strFutureMonth <> CurrentType.strFutureMonth
 			
 			--Futures
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -680,6 +754,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY NewRecords ON NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail PreviousRow ON ISNULL(CurrentRow.dblFutures, 0) <> ISNULL(PreviousRow.dblFutures, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			and @ysnPricingAsAmendment = 1
 			
 			--Basis
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -710,6 +785,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY NewRecords ON NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId
 			JOIN @tblDetail PreviousRow ON ISNULL(CurrentRow.dblCashPrice, 0) <> ISNULL(PreviousRow.dblCashPrice, 0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+			and @ysnPricingAsAmendment = 1
 			
 			--Cash Price UOM
 			UNION ALL SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -729,7 +805,48 @@ BEGIN TRY
 			JOIN tblICItemUOM PU1 ON PU1.intItemUOMId = PreviousRow.intPriceItemUOMId
 			JOIN tblICUnitMeasure U21 ON U21.intUnitMeasureId = PU1.intUnitMeasureId
 			WHERE U2.intUnitMeasureId <> U21.intUnitMeasureId
-				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId;
+				AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+
+			--Book
+			UNION ALL
+			SELECT
+				intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+				,dtmHistoryCreated        = GETDATE()
+				,intContractHeaderId        = @intContractHeaderId
+				,intContractDetailId        = CurrentRow.intContractDetailId
+				,intAmendmentApprovalId    = 20
+				,strItemChanged            = 'Book'
+				,strOldValue                =  oldBook.strBook
+				,strNewValue                =  newBook.strBook
+				,intConcurrencyId        =  1
+			FROM tblCTSequenceHistory            CurrentRow
+			JOIN @tblDetail                        PreviousRow     ON   isnull(CurrentRow.intBookId,0)    <> isnull(PreviousRow.intBookId,0)
+			JOIN @SCOPE_IDENTITY                    NewRecords   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+			left JOIN tblCTBook newBook on isnull(newBook.intBookId,0) = isnull(CurrentRow.intBookId,0)
+			left JOIN tblCTBook oldBook on isnull(oldBook.intBookId,0) = isnull(PreviousRow.intBookId,0)
+			WHERE isnull(oldBook.intBookId,0) <> isnull(newBook.intBookId,0)
+			AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+
+			--Sub Book
+			UNION ALL
+			SELECT
+	 			intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+				,dtmHistoryCreated        = GETDATE()
+				,intContractHeaderId        = @intContractHeaderId
+				,intContractDetailId        = CurrentRow.intContractDetailId
+				,intAmendmentApprovalId    = 21
+				,strItemChanged            = 'Sub Book'
+				,strOldValue                =  oldSubBook.strSubBook
+				,strNewValue                =  newSubBook.strSubBook
+				,intConcurrencyId        =  1
+			FROM tblCTSequenceHistory            CurrentRow
+			JOIN @tblDetail                        PreviousRow     ON   isnull(CurrentRow.intSubBookId,0)    <> isnull(PreviousRow.intSubBookId,0)
+			JOIN @SCOPE_IDENTITY                    NewRecords   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+			left JOIN tblCTSubBook newSubBook on isnull(newSubBook.intSubBookId,0) = isnull(CurrentRow.intSubBookId,0)
+			left JOIN tblCTSubBook oldSubBook on isnull(oldSubBook.intSubBookId,0) = isnull(PreviousRow.intSubBookId,0)
+			WHERE isnull(oldSubBook.intSubBookId,0) <> isnull(newSubBook.intSubBookId,0)
+			AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId;
+
 		END;
 	END;
 END TRY

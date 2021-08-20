@@ -427,6 +427,11 @@ DECLARE
 		BEGIN
 			INSERT INTO #tmpLGContractPrice
 			EXEC uspCTGetContractPrice @intContractHeaderId,@intContractDetailId, @dblQty, 'Invoice'
+
+			IF NOT EXISTS (SELECT 1 FROM #tmpLGContractPrice HAVING SUM(dblPrice) <> 0)
+			BEGIN
+				RAISERROR('One or more contracts is not yet priced. Please price the contracts to proceed.', 16, 1);
+			END
 		END
 
 		INSERT INTO @EntriesForInvoice
