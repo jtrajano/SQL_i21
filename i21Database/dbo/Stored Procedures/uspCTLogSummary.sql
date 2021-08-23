@@ -2543,7 +2543,7 @@ BEGIN TRY
 				, intActionId = 17
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strTransactionReference = 'Price Fixation'
+			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
@@ -2684,9 +2684,9 @@ BEGIN TRY
 				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				OUTER APPLY (
-					SELECT TOP 1 dblOrigQty = CASE WHEN intActionId = 1 THEN ABS(pl.dblOrigQty) ELSE pl.dblOrigQty END, pl.dblFutures
+					SELECT TOP 1 pl.dblOrigQty, pl.dblFutures
 					FROM @cbLogPrev pl
-					WHERE strTransactionReference = 'Price Fixation'
+					WHERE strProcess = 'Price Fixation'
 						AND intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
 						AND intContractDetailId = @intContractDetailId
 					ORDER BY dtmTransactionDate DESC
@@ -2825,7 +2825,7 @@ BEGIN TRY
 					(
 						SELECT DISTINCT intTransactionReferenceDetailId
 						FROM @cbLogPrev
-						WHERE strTransactionReference = 'Price Fixation'
+						WHERE strProcess = 'Price Fixation'
 							AND intContractDetailId = @intContractDetailId
 					)
 				) tbl
@@ -2960,7 +2960,7 @@ BEGIN TRY
 				(
 					SELECT DISTINCT intTransactionReferenceDetailId
 					FROM @cbLogPrev
-					WHERE strTransactionReference = 'Price Fixation'
+					WHERE strProcess = 'Price Fixation'
 						AND intContractDetailId = @intContractDetailId
 				)
 			) tbl
