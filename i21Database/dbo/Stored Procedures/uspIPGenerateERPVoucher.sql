@@ -59,6 +59,8 @@ BEGIN TRY
 		,@dblDetailTotal NUMERIC(18, 6)
 		,@dblDetailTax NUMERIC(18, 6)
 		,@dblDetailTotalwithTax NUMERIC(18, 6)
+		,@intContractDetailId INT
+		,@strType NVARCHAR(50)
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -367,6 +369,8 @@ BEGIN TRY
 				,@dblDetailTotal = NULL
 				,@dblDetailTax = NULL
 				,@dblDetailTotalwithTax = NULL
+				,@intContractDetailId = NULL
+				,@strType = NULL
 
 			SELECT @intItemId = BD.intItemId
 			FROM dbo.tblAPBillDetail BD
@@ -423,6 +427,8 @@ BEGIN TRY
 				,@dblDetailDiscount = CONVERT(NUMERIC(18, 6), BD.dblDiscount)
 				,@dblDetailTotal = CONVERT(NUMERIC(18, 6), BD.dblTotal)
 				,@dblDetailTax = CONVERT(NUMERIC(18, 6), BD.dblTax)
+				,@intContractDetailId = BD.intContractDetailId
+				,@strType = I.strType
 			FROM tblAPBillDetail BD
 			JOIN tblICItem I ON I.intItemId = BD.intItemId
 			JOIN dbo.tblSMCurrency C ON C.intCurrencyID = BD.intCurrencyId
@@ -431,6 +437,26 @@ BEGIN TRY
 			WHERE BD.intBillDetailId = @intBillDetailId
 
 			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
+
+			IF ISNULL(@strType, '') = 'Other Charge'
+				AND @intContractDetailId IS NULL
+			BEGIN
+				SELECT TOP 1 @intContractDetailId = BD.intContractDetailId
+				FROM tblAPBillDetail BD
+				WHERE BD.intBillId = @intBillId
+					AND BD.intContractDetailId IS NOT NULL
+
+				IF @intContractDetailId IS NOT NULL
+				BEGIN
+					SELECT @strContractNumber = CH.strContractNumber
+						,@strSequenceNo = LTRIM(CD.intContractSeq)
+						,@strERPPONumber = CD.strERPPONumber
+						,@strERPItemNumber = CD.strERPItemNumber
+					FROM tblCTContractDetail CD
+					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					WHERE CD.intContractDetailId = @intContractDetailId
+				END
+			END
 
 			SELECT TOP 1 @strWorkOrderNo = W.strWorkOrderNo
 				,@strERPOrderNo = W.strERPOrderNo
