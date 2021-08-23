@@ -113,7 +113,9 @@ BEGIN TRY
 			,dblMachineCapacity NUMERIC(18, 6)
 			,dtmPlannedDate DATETIME
 			,intPlannedShiftId INT
-			)
+			) Where dblQuantity is not null
+
+	Delete from @tblWO Where dblQuantity is null
 
 	IF @intSalesOrderDetailId = 0
 		SET @intSalesOrderDetailId = NULL
@@ -305,7 +307,8 @@ BEGIN TRY
 
 		SELECT @dtmDueDate = Min(dtmDueDate)
 		FROM @tblWO
-
+		if @dblQuantity is not null
+		Begin
 		INSERT INTO tblMFBlendRequirement (
 			strDemandNo
 			,intItemId
@@ -352,7 +355,7 @@ BEGIN TRY
 		FROM tblMFBlendSheetRule a
 		JOIN tblMFBlendSheetRuleValue b ON a.intBlendSheetRuleId = b.intBlendSheetRuleId
 			AND b.ysnDefault = 1
-
+		End
 		SELECT @intMinWO = Min(intRowNo)
 		FROM @tblWO
 
