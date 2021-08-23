@@ -163,6 +163,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT507.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT511.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
