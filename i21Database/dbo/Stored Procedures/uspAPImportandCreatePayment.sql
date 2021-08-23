@@ -43,9 +43,11 @@ BEGIN TRY
 		EXEC uspAPCreatePayment @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
 
 		UPDATE PD
-		SET PD.dblPayment = I.dblPayment,
-			PD.dblDiscount = I.dblDiscount,
-			PD.dblInterest = I.dblInterest
+		SET PD.dblDiscount = I.dblDiscount,
+			PD.dblPayment = I.dblPayment,
+			PD.dblInterest = I.dblInterest,
+			PD.dblAmountDue = (I.dblPayment + I.dblDiscount) - I.dblInterest,
+			PD.dblTotal = (I.dblPayment + I.dblDiscount) - I.dblInterest
 		FROM tblAPPaymentDetail PD
 		INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
