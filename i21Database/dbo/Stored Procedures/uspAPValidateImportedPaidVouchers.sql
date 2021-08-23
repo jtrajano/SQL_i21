@@ -41,6 +41,9 @@ UPDATE A
 						B.intBillId IS NULL
 					THEN 'Voucher not found.'
 					WHEN 
+						A.dblPayment > 0 AND B.intTransactionType != 1
+					THEN 'Amount is positive. Voucher type is expected.'
+					WHEN 
 						A.dblPayment < 0 AND B.intTransactionType != 3
 					THEN 'Amount is negative. Debit Memo type is expected.'
 					WHEN 
