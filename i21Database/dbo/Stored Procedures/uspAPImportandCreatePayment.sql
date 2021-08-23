@@ -26,7 +26,7 @@ BEGIN TRY
 	SELECT dtmDatePaid, 
 		   intEntityVendorId, 
 		   strCheckNumber, 
-		   intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND I2.strCheckNumber = I.strCheckNumber FOR XML PATH('')), 1, 1, '')
+		   intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) FOR XML PATH('')), 1, 1, '')
 	INTO #tmpMultiVouchersImport
 	FROM tblAPImportPaidVouchersForPayment I
 	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber
@@ -68,7 +68,7 @@ BEGIN TRY
 		
 		EXEC uspAPUpdateVoucherPayment @createdPaymentId, 1
 
-		DELETE FROM #tmpMultiVouchersImport WHERE dtmDatePaid = @datePaid AND strCheckNumber = @checkNumber AND intIds = @intIds
+		DELETE FROM #tmpMultiVouchersImport WHERE dtmDatePaid = @datePaid AND (strCheckNumber = @checkNumber OR (strCheckNumber IS NULL AND @checkNumber IS NULL)) AND intIds = @intIds
 
 		SET @createdPayments = @createdPayments + CASE WHEN @createdPayments = '' THEN '' ELSE ', ' END + CONVERT(VARCHAR(12), @createdPaymentId)
 	END
