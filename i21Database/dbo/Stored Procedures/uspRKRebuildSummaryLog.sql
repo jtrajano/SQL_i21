@@ -2435,6 +2435,11 @@ BEGIN TRY
         EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
         INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - On Hold')
         DELETE FROM @ExistingHistory
+		
+		----------------------------------------------------
+		-- Run Integration scripts required after rebuild --
+		----------------------------------------------------
+		EXEC uspRKRunIntegrationAfterRebuild
 
 		UPDATE tblRKRebuildSummaryLog
 		SET ysnSuccess = 1

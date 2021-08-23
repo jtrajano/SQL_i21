@@ -8914,6 +8914,8 @@
     <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
     <Build Include="dbo\Tables\tblAP1099KCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

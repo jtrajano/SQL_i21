@@ -285,4 +285,10 @@ BEGIN
 	WHERE dblOrigQty IS NULL
 		AND dblQty IS NOT NULL
 END
+
+IF EXISTS (SELECT TOP 1 1 FROM tblCTContractBalanceLog WHERE intActionId = 1 AND strTransactionReference = 'Price Fixation' AND intTransactionReferenceDetailId IS NULL)
+BEGIN
+	EXEC uspCTFixCBLogAfterRebuild
+END
+
 GO
