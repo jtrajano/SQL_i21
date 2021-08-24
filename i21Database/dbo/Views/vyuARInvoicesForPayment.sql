@@ -71,6 +71,7 @@ SELECT
  	,intSourceId						= ARIFP.intSourceId 
 	,ysnClosed							= ARIFP.ysnClosed
 	,ysnForgiven						= ARIFP.ysnForgiven
+	,intDaysOld							= DATEDIFF(DAYOFYEAR, ARIFP.[dtmDate], CAST(GETDATE() AS DATE))
 FROM (
 		--AR TRANSACTIONS
 		SELECT 
