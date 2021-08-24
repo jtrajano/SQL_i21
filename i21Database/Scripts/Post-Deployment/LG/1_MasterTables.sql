@@ -468,3 +468,35 @@ BEGIN
 	')
 END
 GO
+
+/*
+* Update Freight Rate field on Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'dblFreightRate')
+BEGIN
+	EXEC ('UPDATE L
+			SET dblFreightRate = FR.dblRate
+			FROM tblLGLoad L
+			OUTER APPLY (SELECT TOP 1 intDefaultFreightItemId FROM tblLGCompanyPreference) FI
+			OUTER APPLY (SELECT TOP 1 dblRate FROM tblLGLoadCost LC 
+						 WHERE LC.intLoadId = L.intLoadId AND LC.intItemId = FI.intDefaultFreightItemId) FR
+			WHERE FI.intDefaultFreightItemId IS NOT NULL AND FR.dblRate IS NOT NULL AND dblFreightRate <> FR.dblRate
+	')
+END
+GO
+
+/*
+* Update Surcharge field on Load table
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'dblSurcharge')
+BEGIN
+	EXEC ('UPDATE L
+			SET dblSurcharge = SR.dblRate
+			FROM tblLGLoad L
+			OUTER APPLY (SELECT TOP 1 intDefaultSurchargeItemId FROM tblLGCompanyPreference) SI
+			OUTER APPLY (SELECT TOP 1 dblRate FROM tblLGLoadCost LC 
+						 WHERE LC.intLoadId = L.intLoadId AND LC.intItemId = SI.intDefaultSurchargeItemId) SR
+			WHERE SI.intDefaultSurchargeItemId IS NOT NULL AND SR.dblRate IS NOT NULL AND dblSurcharge <> SR.dblRate
+	')
+END
+GO

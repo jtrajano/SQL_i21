@@ -169,6 +169,7 @@ DECLARE @DataForReceiptHeader TABLE(
 	,intSourceType INT
 	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,strVendorRefNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,strWarehouseRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	--,intTaxGroupId INT
 )
 
@@ -184,6 +185,7 @@ INSERT INTO @DataForReceiptHeader(
 		,Currency
 		,intSourceType
 		,strVendorRefNo
+		,strWarehouseRefNo
 		--,intTaxGroupId
 )
 SELECT	RawData.intEntityVendorId
@@ -196,6 +198,7 @@ SELECT	RawData.intEntityVendorId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
 		,RawData.strVendorRefNo
+		,RawData.strWarehouseRefNo
 FROM	@ReceiptEntries RawData
 GROUP BY RawData.intEntityVendorId
 		,RawData.strBillOfLadding
@@ -207,6 +210,7 @@ GROUP BY RawData.intEntityVendorId
 		,RawData.intCurrencyId
 		,RawData.intSourceType
 		,RawData.strVendorRefNo
+		,RawData.strWarehouseRefNo
 ;
 
 -- Validate if there is data to process. If there is no data, then raise an error. 
@@ -405,6 +409,7 @@ BEGIN
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
 					AND ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawHeaderData.[Location], RawHeaderData.strVendorRefNo),'') = ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawData.intLocationId, RawData.strVendorRefNo),'')	
+					AND ISNULL(RawHeaderData.strWarehouseRefNo, '') = ISNULL(RawData.strWarehouseRefNo, '')
 		WHERE	RawHeaderData.intId = @intId
 		ORDER BY RawData.intInventoryReceiptId DESC
 
@@ -508,6 +513,7 @@ BEGIN
 						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)
 						AND ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawHeaderData.[Location], RawHeaderData.strVendorRefNo),'') = ISNULL(dbo.fnSMGetVendorRefNoPrefix(RawData.intLocationId, RawData.strVendorRefNo),'')	
+						AND ISNULL(RawHeaderData.strWarehouseRefNo, '') = ISNULL(RawData.strWarehouseRefNo, '')
 						AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 
 			WHERE	RawHeaderData.intId = @intId
@@ -557,6 +563,7 @@ BEGIN
 				,intModifiedByUserId 	= @intUserId
 				,strDataSource			= ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType)
 				,intShipFromEntityId	= ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
+				,strWarehouseRefNo		= IntegrationData.strWarehouseRefNo
 		WHEN NOT MATCHED THEN 
 			INSERT (
 				strReceiptNumber
@@ -600,6 +607,7 @@ BEGIN
 				,intCreatedByUserId
 				,strDataSource
 				,intShipFromEntityId
+				,strWarehouseRefNo
 			)
 			VALUES (
 				/*strReceiptNumber*/			@receiptNumber
@@ -643,6 +651,7 @@ BEGIN
 				,@intUserId
 				/*strDataSource*/				,ISNULL(IntegrationData.strDataSource, IntegrationData.strReceiptType) 
 				/*intShipFromEntityId*/			,ISNULL(IntegrationData.intShipFromEntityId, IntegrationData.intEntityVendorId)
+				,IntegrationData.strWarehouseRefNo
 			)
 		;
 				
@@ -1049,6 +1058,7 @@ BEGIN
 					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
 					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
 					AND ISNULL(RawHeaderData.strVendorRefNo,0) = ISNULL(RawData.strVendorRefNo,0)
+					AND ISNULL(RawHeaderData.strWarehouseRefNo, '') = ISNULL(RawData.strWarehouseRefNo, '')
 					--AND ISNULL(RawHeaderData.ShipFromEntity,0) = ISNULL(RawData.intShipFromEntityId,0)	
 				INNER JOIN tblICItem Item
 					ON Item.intItemId = RawData.intItemId

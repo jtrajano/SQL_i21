@@ -166,114 +166,116 @@ SELECT -- Load Header
 			ELSE '' END 
 		+ CASE WHEN ISNULL(L.strExternalLoadNumber, '') <> '' THEN ' - ' + '(S) ' + L.strExternalLoadNumber ELSE '' END 
 		+ CASE WHEN ISNULL(L.strCustomerReference, '') <> '' THEN ' - ' + '(C) ' + L.strCustomerReference ELSE '' END COLLATE Latin1_General_CI_AS
-		,L.intPositionId
-		,L.intWeightUnitMeasureId
-		,strWeightUnitMeasure = UM.strUnitMeasure
-		,strBLNumber = ISNULL(L.strBLNumber,'')
-		,L.dtmBLDate
-		,L.strOriginPort
-		,L.strDestinationPort
-		,intLeadTime = ISNULL(DPort.intLeadTime, 0)
-		,L.strDestinationCity
-		,L.intTerminalEntityId
-		,strTerminal =  Terminal.strName
-		,L.intShippingLineEntityId
-		,strShippingLine =  ShippingLine.strName
-		,L.strServiceContractNumber
-		,strServiceContractOwner = SLSC.strOwner
-		,L.strPackingDescription
-		,L.strMVessel
-		,L.strMVoyageNumber
-		,L.strFVessel
-		,L.strFVoyageNumber
-		,L.intForwardingAgentEntityId
-		,strForwardingAgent = ForwardingAgent.strName
-		,L.strForwardingAgentRef
-		,L.intInsurerEntityId
-		,strInsurer = Insurer.strName
-		,L.dblInsuranceValue
-		,L.intInsuranceCurrencyId
-		,strInsuranceCurrency = InsCur.strCurrency
-		,L.dtmDocsToBroker
-		,L.strMarks
-		,L.strMarkingInstructions
-		,L.strShippingMode
-		,L.intNumberOfContainers
-		,L.intContainerTypeId
-		,strContainerType = CT.strContainerType
-		,L.intBLDraftToBeSentId
-		,L.strBLDraftToBeSentType
-		,strBLDraftToBeSent = BLDraftToBeSent.strName
-		,L.strDocPresentationType
-		,strDocPresentationVal = NP.strName
-		,L.intDocPresentationId
-		,L.ysnPosted
-		,L.dtmPostedDate
-		,L.dtmDocsReceivedDate
-		,L.dtmETAPOL
-		,L.dtmETSPOL
-		,L.dtmETAPOD
-		,L.dtmDeadlineCargo
-		,L.dtmDeadlineBL
-		,L.dtmISFReceivedDate
-		,L.dtmISFFiledDate
-		,L.ysnArrivedInPort
-		,L.ysnDocumentsApproved
-		,L.ysnCustomsReleased
-		,L.dtmArrivedInPort
-		,L.dtmDocumentsApproved
-		,L.dtmCustomsReleased
-		,L.strVessel1
-		,L.strOriginPort1
-		,L.strDestinationPort1
-		,L.dtmETSPOL1
-		,L.dtmETAPOD1
-		,L.strVessel2
-		,L.strOriginPort2
-		,L.strDestinationPort2
-		,L.dtmETSPOL2
-		,L.dtmETAPOD2
-		,L.strVessel3
-		,L.strOriginPort3
-		,L.strDestinationPort3
-		,L.dtmETSPOL3
-		,L.dtmETAPOD3
-		,L.strVessel4
-		,L.strOriginPort4
-		,L.strDestinationPort4
-		,L.dtmETSPOL4
-		,L.dtmETAPOD4
-		,L.dblDemurrage
-		,L.intDemurrageCurrencyId
-		,L.dblDespatch
-		,L.intDespatchCurrencyId
-		,L.dblLoadingRate
-		,L.intLoadingUnitMeasureId
-		,L.strLoadingPerUnit
-		,L.dblDischargeRate
-		,L.intDischargeUnitMeasureId
-		,L.strDischargePerUnit
-		,L.intTransportationMode
-		,L.intShipmentStatus
-		,L.intShipmentType
-		,L.strExternalShipmentNumber
-		,strShippingInstructionNumber = LOADSI.strLoadNumber
-		,FT.strFreightTerm
-		,FT.strFobPoint
-		,strETAPODReasonCode = ETAPODRC.strReasonCodeDescription
-		,strETAPOLReasonCode = ETAPOLRC.strReasonCodeDescription
-		,strETSPOLReasonCode = ETSPOLRC.strReasonCodeDescription
-		,strDemurrageCurrency = DemCur.strCurrency
-		,strDespatchCurrency = DesCur.strCurrency
-		,strLoadingUnitMeasure = LUM.strUnitMeasure
-		,strDischargeUnitMeasure = DUM.strUnitMeasure
-		,BO.strBook
-		,SB.strSubBook
-		,INC.intInsuranceCalculatorId
-		,L.dtmStuffingDate
-		,L.intBookId
-		,L.intSubBookId
-		,L.ysnAllowReweighs
+	,L.intPositionId
+	,L.intWeightUnitMeasureId
+	,strWeightUnitMeasure = UM.strUnitMeasure
+	,strBLNumber = ISNULL(L.strBLNumber,'')
+	,L.dtmBLDate
+	,L.strOriginPort
+	,L.strDestinationPort
+	,intLeadTime = ISNULL(DPort.intLeadTime, 0)
+	,L.strDestinationCity
+	,L.intTerminalEntityId
+	,strTerminal =  Terminal.strName
+	,L.intShippingLineEntityId
+	,strShippingLine =  ShippingLine.strName
+	,L.strServiceContractNumber
+	,strServiceContractOwner = SLSC.strOwner
+	,L.strPackingDescription
+	,L.strMVessel
+	,L.strMVoyageNumber
+	,L.strFVessel
+	,L.strFVoyageNumber
+	,L.intForwardingAgentEntityId
+	,strForwardingAgent = ForwardingAgent.strName
+	,L.strForwardingAgentRef
+	,L.intInsurerEntityId
+	,strInsurer = Insurer.strName
+	,L.dblInsuranceValue
+	,L.intInsuranceCurrencyId
+	,strInsuranceCurrency = InsCur.strCurrency
+	,L.dtmDocsToBroker
+	,L.strMarks
+	,L.strMarkingInstructions
+	,L.strShippingMode
+	,L.intNumberOfContainers
+	,L.intContainerTypeId
+	,strContainerType = CT.strContainerType
+	,L.intBLDraftToBeSentId
+	,L.strBLDraftToBeSentType
+	,strBLDraftToBeSent = BLDraftToBeSent.strName
+	,L.strDocPresentationType
+	,strDocPresentationVal = NP.strName
+	,L.intDocPresentationId
+	,L.ysnPosted
+	,L.dtmPostedDate
+	,L.dtmDocsReceivedDate
+	,L.dtmETAPOL
+	,L.dtmETSPOL
+	,L.dtmETAPOD
+	,L.dtmDeadlineCargo
+	,L.dtmDeadlineBL
+	,L.dtmISFReceivedDate
+	,L.dtmISFFiledDate
+	,L.ysnArrivedInPort
+	,L.ysnDocumentsApproved
+	,L.ysnCustomsReleased
+	,L.dtmArrivedInPort
+	,L.dtmDocumentsApproved
+	,L.dtmCustomsReleased
+	,L.strVessel1
+	,L.strOriginPort1
+	,L.strDestinationPort1
+	,L.dtmETSPOL1
+	,L.dtmETAPOD1
+	,L.strVessel2
+	,L.strOriginPort2
+	,L.strDestinationPort2
+	,L.dtmETSPOL2
+	,L.dtmETAPOD2
+	,L.strVessel3
+	,L.strOriginPort3
+	,L.strDestinationPort3
+	,L.dtmETSPOL3
+	,L.dtmETAPOD3
+	,L.strVessel4
+	,L.strOriginPort4
+	,L.strDestinationPort4
+	,L.dtmETSPOL4
+	,L.dtmETAPOD4
+	,L.dblDemurrage
+	,L.intDemurrageCurrencyId
+	,L.dblDespatch
+	,L.intDespatchCurrencyId
+	,L.dblLoadingRate
+	,L.intLoadingUnitMeasureId
+	,L.strLoadingPerUnit
+	,L.dblDischargeRate
+	,L.intDischargeUnitMeasureId
+	,L.strDischargePerUnit
+	,L.intTransportationMode
+	,L.intShipmentStatus
+	,L.intShipmentType
+	,L.strExternalShipmentNumber
+	,strShippingInstructionNumber = LOADSI.strLoadNumber
+	,FT.strFreightTerm
+	,FT.strFobPoint
+	,strETAPODReasonCode = ETAPODRC.strReasonCodeDescription
+	,strETAPOLReasonCode = ETAPOLRC.strReasonCodeDescription
+	,strETSPOLReasonCode = ETSPOLRC.strReasonCodeDescription
+	,strDemurrageCurrency = DemCur.strCurrency
+	,strDespatchCurrency = DesCur.strCurrency
+	,strLoadingUnitMeasure = LUM.strUnitMeasure
+	,strDischargeUnitMeasure = DUM.strUnitMeasure
+	,BO.strBook
+	,SB.strSubBook
+	,INC.intInsuranceCalculatorId
+	,L.dtmStuffingDate
+	,L.intBookId
+	,L.intSubBookId
+	,L.ysnAllowReweighs
+	,L.dblFreightRate
+	,L.dblSurcharge
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId

@@ -103,6 +103,12 @@ DECLARE @_strAuditDescription NVARCHAR(500)
 DECLARE @ItemReservationTableType AS ItemReservationTableType
 
 BEGIN TRY
+		-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+		BEGIN
+			DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+			EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+		END
+		
 		SELECT TOP 1
 			@intTicketItemUOMId = SC.intItemUOMIdTo
 			,@strDistributionOption = SC.strDistributionOption

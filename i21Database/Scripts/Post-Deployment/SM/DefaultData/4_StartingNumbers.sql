@@ -4,6 +4,9 @@
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Delivery Notice'
 	WHERE strModule = 'Logistics' AND strTransactionType = 'Weight Claims' AND intStartingNumberId = 86
 
+	UPDATE tblSMStartingNumber SET strTransactionType = 'Batch Load'
+	WHERE strModule = 'Logistics' AND strTransactionType = 'Generate Loads' AND intStartingNumberId = 40
+
 	UPDATE tblSMStartingNumber SET strTransactionType = 'Document Maintenance'
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Comment Maintenance'
 
@@ -412,13 +415,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Load Schedule')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 40
-			,[strTransactionType]	= N'Generate Loads'
-			,[strPrefix]			= N'GL-'
+			,[strTransactionType]	= N'Batch Load'
+			,[strPrefix]			= N'BLS-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Generate Loads')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Batch Load')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 41
 			,[strTransactionType]	= N'Inventory Transfer'

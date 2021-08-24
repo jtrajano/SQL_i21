@@ -36,7 +36,7 @@ FROM tblEMEntity E
 JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
 	AND ET.strType = 'Customer'
 WHERE strName = @strCustomerName
-	AND strEntityNo <> ''
+	--AND strEntityNo <> ''
 
 SELECT DT.strReceiptNumber AS [Receipt Number]
 	,DT.strBillOfLading AS [BOL]

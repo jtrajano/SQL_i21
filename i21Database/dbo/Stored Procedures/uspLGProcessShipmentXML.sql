@@ -867,7 +867,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strUserName
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intUserId IS NULL
 			BEGIN
@@ -1377,7 +1377,7 @@ BEGIN TRY
 						,dtmCreatedOn DATETIME
 						,intLastUpdateById INT
 						,dtmLastUpdateOn DATETIME
-						,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+						,strBatchId NVARCHAR(40) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,ysnDocumentsReceived BIT
@@ -1528,7 +1528,7 @@ BEGIN TRY
 					,intETAPOLReasonCodeId = @intETAPOLReasonCodeId
 					,intETSPOLReasonCodeId = @intETSPOLReasonCodeId
 					,intETAPODReasonCodeId = @intETAPODReasonCodeId
-					,intFreightTermId = @intFreightTermId
+					--,intFreightTermId = @intFreightTermId
 					,intCurrencyId = @intCurrencyId
 					,intCreatedById = x.intCreatedById
 					,dtmCreatedOn = x.dtmCreatedOn
@@ -1705,7 +1705,7 @@ BEGIN TRY
 						,dtmCreatedOn DATETIME
 						,intLastUpdateById INT
 						,dtmLastUpdateOn DATETIME
-						,strBatchId NVARCHAR(20) COLLATE Latin1_General_CI_AS
+						,strBatchId NVARCHAR(40) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadEquipmentType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strGenerateLoadHauler NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,ysnDocumentsReceived BIT
@@ -2009,7 +2009,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'Customer'
 				WHERE EY.strName = @strCustomer
-					AND EY.strEntityNo <> ''
+					--AND EY.strEntityNo <> ''
 
 				SELECT @intCustomerLocationId = EL.intEntityLocationId
 				FROM tblEMEntityLocation EL
@@ -3548,7 +3548,7 @@ BEGIN TRY
 				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-					AND E.strEntityNo <> ''
+					--AND E.strEntityNo <> ''
 				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 					AND ET.strType = 'Vendor'
 				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -3596,7 +3596,7 @@ BEGIN TRY
 				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-					AND E.strEntityNo <> ''
+					--AND E.strEntityNo <> ''
 				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 					AND ET.strType = 'Vendor'
 				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -4242,6 +4242,8 @@ BEGIN TRY
 			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
+				,@screenId=@intLoadScreenId
+				,@populatedByInterCompany=1
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLogXML
@@ -4258,7 +4260,7 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strAuditUserName
-				AND CE.strEntityNo <> ''
+				--AND CE.strEntityNo <> ''
 
 			IF @intAuditLogUserId IS NULL
 			BEGIN

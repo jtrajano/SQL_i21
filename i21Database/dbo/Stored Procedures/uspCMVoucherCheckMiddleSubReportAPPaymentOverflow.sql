@@ -89,7 +89,7 @@ WITH Invoices as(
  				THEN -1 
 				ELSE 1 END
 			,dblNet = PreAndDeb.dblAmountApplied *
-				CASE WHEN (preBILL.intTransactionType = 3)
+				CASE WHEN (preBILL.intTransactionType = 3) 
 					OR (preBILL.intTransactionType IN (2, 13)  AND preBILL.ysnPrepayHasPayment = 1) 
 				THEN -1 
 				ELSE 1 END

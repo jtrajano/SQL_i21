@@ -67,7 +67,7 @@
 	ysnIngredientAvailable bit CONSTRAINT [DF_tblMFWorkOrder_ysnIngredientAvailable] DEFAULT 1,
 	intCountStatusId INT NULL, 
 	intDepartmentId int,
-	strBatchId nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+	strBatchId nvarchar(40) COLLATE Latin1_General_CI_AS NULL,
 	intInboundOrderHeaderId INT NULL, 
 	strInboundBOLNo NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	dtmLastProducedDate datetime,

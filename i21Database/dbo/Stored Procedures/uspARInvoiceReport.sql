@@ -209,8 +209,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strFreightTerm			= FREIGHT.strFreightTerm
 	 , strDeliverPickup			= FREIGHT.strFobPoint
 	 , strComments				= dbo.fnEliminateHTMLTags(INV.strComments, 0)
-	 , strInvoiceHeaderComment	= ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Header', NULL, 1), INV.strComments)
-	 , strInvoiceFooterComment	= ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Footer', NULL, 1), INV.strFooterComments)
+	 , strInvoiceHeaderComment	= ISNULL(ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Header', NULL, 1), INV.strComments),dbo.fnARGetDefaultComment(INV.intCompanyLocationId,INV.intEntityCustomerId,INV.strTransactionType, INV.strType, 'Header', NULL, 1))
+	 , strInvoiceFooterComment	= ISNULL(ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Footer', NULL, 1), INV.strFooterComments),dbo.fnARGetDefaultComment(INV.intCompanyLocationId,INV.intEntityCustomerId,INV.strTransactionType, INV.strType, 'Footer', NULL, 1))
 	 , dblInvoiceSubtotal		= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
@@ -276,11 +276,11 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strInvoiceFormat			= SELECTEDINV.strInvoiceFormat
 	 , blbSignature				= INV.blbSignature
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
-	 , strSubFormula			= INVOICEDETAIL.strSubFormula
+	 , strSubFormula			= INVOICEDETAIL.strSubFormula	
 	 , dtmCreated				= GETDATE()
 	 , strServiceChargeItem		= CASE WHEN SELECTEDINV.strInvoiceFormat 
 										IN ('By Customer Balance', 'By Invoice') 
-										THEN 'Service Charge on Past Due' + CHAR(13) + 'Balance as of: ' +  CAST(CAST(INV.dtmDate AS DATE) AS VARCHAR)
+										THEN 'Service Charge on Past Due ' + CHAR(13) + 'Balance as of: ' +  CONVERT(VARCHAR(10), INV.dtmDate, 101)
 										ELSE
 										''
 										END

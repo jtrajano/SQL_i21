@@ -10,7 +10,7 @@ RETURNS TABLE AS RETURN
 	SELECT	DISTINCT
 		[intEntityVendorId]							=	ISNULL(entity.intEntityId, payable.intEntityVendorId)
 		,[intTransactionType]						=	CASE WHEN RT.Item = 0 THEN 1 ELSE 3 END --voucher
-		,[intLocationId]							=	NULL --Contract doesn't have location
+		,[intLocationId]							=	CD.intCompanyLocationId
 		,[intShipToId]								=	NULL --?
 		,[intShipFromId]							=	NULL --?
 		,[intShipFromEntityId]						=	NULL --?
@@ -64,7 +64,7 @@ RETURNS TABLE AS RETURN
 		,[ysnSubCurrency]							=	ISNULL(CY.ysnSubCurrency,0)
 		,[intSubCurrencyCents]						=	CASE WHEN CY.ysnSubCurrency > 0 THEN CY.intCent ELSE 1 END
 		,[intAccountId]								=	apClearing.intAccountId
-		,[intShipViaId]								=	0
+		,[intShipViaId]								=	null
 		,[intTermId]								=	CC.intTermId	
 		,[strBillOfLading]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)	

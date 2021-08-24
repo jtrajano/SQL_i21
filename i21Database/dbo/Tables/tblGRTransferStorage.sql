@@ -21,3 +21,8 @@ CREATE TABLE [dbo].[tblGRTransferStorage]
     CONSTRAINT [FK_tblGRTransferStorage_intUserId_intUserId] FOREIGN KEY ([intUserId]) REFERENCES [dbo].tblSMUserSecurity ([intEntityId]),
     CONSTRAINT [FK_tblGRTransferStorage_intTransferLocationId_intCompanyLocationId] FOREIGN KEY ([intTransferLocationId]) REFERENCES [dbo].tblSMCompanyLocation ([intCompanyLocationId])    
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblGRTransferStorage_strTransferStorageTicket]
+	ON [dbo].[tblGRTransferStorage] ([strTransferStorageTicket])
+GO

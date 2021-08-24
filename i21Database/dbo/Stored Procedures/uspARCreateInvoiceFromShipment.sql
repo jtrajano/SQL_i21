@@ -939,7 +939,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 								SET dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
 								  , intPriceFixationDetailId	= @intPriceFixationDetailId
-								WHERE intId = @intInvoiceEntriesId OR intContractDetailId = @intContractDetailId
+								WHERE intId = @intInvoiceEntriesId OR intContractDetailId = @intContractDetailId AND intPriceUOMId IS NOT NULL
 
 								UPDATE @EntriesForInvoice
 								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN dblQtyOrdered ELSE @dblOriginalQtyShipped END

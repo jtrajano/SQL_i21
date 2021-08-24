@@ -126,15 +126,20 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 
-			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure,
+			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + (CASE WHEN CD.intContractStatusId = 3 THEN ' - Cancelled.' ELSE '' END),
 			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
-			strStraussPrice			= CASE WHEN CD.intPricingTypeId = 2 THEN 'PTBF basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + 
-												CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END +
-													BCU.strCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/'+ BUM.strUnitMeasure +' at '+ CD.strFixationBy + '''s option prior to FND of ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + ' or on presentation of documents,whichever is earlier.'
-										   ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
-									   END,
+			strStraussPrice			= CASE WHEN CH.intPricingTypeId = 2
+											THEN 'PTBF basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+			 									+ CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END
+			 									+ BCU.strCurrency + ' '
+			 									+ dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/' + BUM.strUnitMeasure
+			 									+ ' at ' + CD.strFixationBy + '''s option prior to FND of '
+			 									+ DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate)
+			 									+ ' or on presentation of documents,whichever is earlier.'
+			 								ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
+			 						   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
 			strStraussShipment		= CASE WHEN SM.strReportDateFormat = 'M/d/yyyy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
 										   WHEN SM.strReportDateFormat = 'M/d/yy'		THEN dbo.fnConvertDateToReportDateFormat(CD.dtmStartDate, 0) + ' - ' + dbo.fnConvertDateToReportDateFormat( CD.dtmEndDate, 0)
@@ -190,7 +195,7 @@ BEGIN TRY
 		FROM tblSMCompanyPreference
 	) SM
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
-	AND		CD.intContractStatusId <> 3
+	--AND		CD.intContractStatusId <> 3
 
 END TRY
 

@@ -33,6 +33,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 		,@intBookId INT
 		,@intSubBookId INT
+		,@intLoadScreenId int
 	DECLARE @tblLGIntrCompLogisticsAck TABLE (intAcknowledgementId INT)
 
 	INSERT INTO @tblLGIntrCompLogisticsAck (intAcknowledgementId)
@@ -47,6 +48,10 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
+	
+	SELECT @intLoadScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
 
 	UPDATE S
 	SET strFeedStatus = 'In-Progress'
@@ -484,6 +489,8 @@ BEGIN TRY
 		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 			,@referenceTransactionId = @intTransactionRefId
 			,@referenceCompanyId = @intCompanyRefId
+			,@screenId=@intLoadScreenId
+			,@populatedByInterCompany=1
 
 		NextTransaction:
 
