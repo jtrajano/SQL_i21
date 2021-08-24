@@ -2388,7 +2388,7 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-511' , strScheduleCode = '11A', strType = 'Aviation Gas', ysnStatus = 1, intFrequency = 1, intMasterId = 4800075
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-511' , strScheduleCode = '11A', strType = 'Aviation Jet Fuel', ysnStatus = 1, intFrequency = 1, intMasterId = 4800076
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-511' , strScheduleCode = '11A', strType = 'LNG', ysnStatus = 1, intFrequency = 1, intMasterId = 4800077
-	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-511' , strScheduleCode = 'MFT-511_Main', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 4800078
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-511' , strScheduleCode = 'MFT-511', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 4800078
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-511' , strScheduleCode = 'MFT-511_Efile', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 4800079
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '1', strType = 'Gasoline', ysnStatus = 1, intFrequency = 1, intMasterId = 4800080
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'MFT-507' , strScheduleCode = '1', strType = 'Gasohol', ysnStatus = 1, intFrequency = 1, intMasterId = 4800081
