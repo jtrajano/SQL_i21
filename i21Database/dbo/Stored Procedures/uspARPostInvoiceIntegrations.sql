@@ -724,7 +724,7 @@ BEGIN
 														 , @intShipmentType			 = 1
 					END
 												 
-				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDU
 											   , @ysnPost				 	= 1
 											   , @intEntityUserSecurityId  	= @UserId
 				
@@ -974,7 +974,7 @@ IF @IntegrationLogId IS NULL
 			, intTransactionId
 		)
 		SELECT CASE WHEN [ysnPost] = 1 THEN 'Transaction successfully posted.'  ELSE 'Transaction successfully unposted.' END
-			, [strTransactionType]
+			, [strTransactionType] = CASE strTransactionType WHEN 'Debit Memo' THEN 'Debit Memo (Sales)' ELSE strTransactionType END
 			, [strInvoiceNumber]
 			, [strBatchId]
 			, [intInvoiceId]

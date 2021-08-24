@@ -95,6 +95,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\2010_RemoveF9Shortcut.sql
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 :r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
+:r .\SM\2010_UpdateLicenseAgreement.sql
 :r .\SM\2110_CreateIDPGridLayout.sql
 :r .\SM\2110_UpdateAuditLogs.sql
 :r .\SM\2110_AddIDPToCustomerLicenseModule.sql
@@ -242,6 +243,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\6_InsertDefaultDataSync.sql
 :r .\CM\7_AlterCashProjectionView.sql
 :r .\CM\8_FlagCCTransaction.sql
+:r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql

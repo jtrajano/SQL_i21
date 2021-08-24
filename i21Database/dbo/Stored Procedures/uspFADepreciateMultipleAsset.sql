@@ -132,11 +132,12 @@ BEGIN
         strError NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL ,
         strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
         ysnDepreciated BIT NULL,
-        dtmDepreciate DATETIME NULL
+        dtmDepreciate DATETIME NULL,
+        strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
       )
   
-      INSERT INTO @tblDepComputation(intAssetId,dblBasis,dblMonth, dblDepre, ysnFullyDepreciated, strError)
-        SELECT intAssetId, dblBasis,dblMonth,dblDepre,ysnFullyDepreciated, strError
+      INSERT INTO @tblDepComputation(intAssetId,dblBasis,dblMonth, dblDepre, ysnFullyDepreciated, strError, strTransaction)
+        SELECT intAssetId, dblBasis,dblMonth,dblDepre,ysnFullyDepreciated, strError, strTransaction
         FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
 
       DELETE FROM @IdGood
@@ -274,7 +275,7 @@ BEGIN
 				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
                   E.dblDepre ,  
                   BD.dblSalvageValue,  
-                  'Depreciation',  
+                  ISNULL(E.strTransaction, 'Depreciation'),  
                   @strTransactionId,  
                   D.strDepreciationType,
                   D.strConvention,
@@ -283,7 +284,7 @@ BEGIN
                   JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
                   JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                   OUTER APPLY (
-                    SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
+                    SELECT dblDepre,dblBasis, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
                   OUTER APPLY(
                     SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
@@ -332,7 +333,7 @@ BEGIN
 				        DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
                 E.dblDepre,  
                 BD.dblSalvageValue,  
-                'Depreciation',  
+                ISNULL(E.strTransaction, 'Depreciation'),  
                 @strTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
@@ -341,7 +342,7 @@ BEGIN
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                 OUTER APPLY (
-                  SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
+                  SELECT dblDepre,dblBasis,strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 OUTER APPLY(
                   SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] = @i 

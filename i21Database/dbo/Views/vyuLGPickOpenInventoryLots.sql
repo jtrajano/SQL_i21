@@ -27,7 +27,7 @@ FROM (
        ,strItemUOM = UOM.strUnitMeasure
        ,strItemUOMType = UOM.strUnitType
        ,dblItemUOMConv = ItemUOM.dblUnitQty
-	   ,strBundleItemNo = Bundle.strItemNo
+	   ,strBundleItemNo = ISNULL(ConBundle.strItemNo, Bundle.strBundleItemNo)
        ,strLotNumber = Lot.strLotNumber
        ,intSubLocationId = Lot.intSubLocationId
        ,strSubLocationName = SubLocation.strSubLocationName
@@ -150,7 +150,7 @@ FROM (
 		LEFT JOIN tblEMEntity EY ON EY.intEntityId = CTHeader.intEntityId   
 		LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblICCommodity COM ON COM.intCommodityId = Item.intCommodityId
-		LEFT JOIN tblICItem Bundle ON Bundle.intItemId = CTDetail.intItemBundleId
+		LEFT JOIN tblICItem ConBundle ON ConBundle.intItemId = CTDetail.intItemBundleId
 		LEFT JOIN tblSMCompanyLocation LOC ON LOC.intCompanyLocationId = Lot.intLocationId
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lot.intItemUOMId
 		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -182,6 +182,9 @@ FROM (
 		LEFT JOIN tblCTContractDetail SCTDetail ON SCTDetail.intContractDetailId = LD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCTHeader ON SCTHeader.intContractHeaderId = SCTDetail.intContractHeaderId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
+		OUTER APPLY (SELECT TOP 1 strBundleItemNo = BI.strItemNo FROM tblICItem BI 
+						INNER JOIN tblICItemBundle IB ON IB.intItemId = BI.intItemId
+					 WHERE IB.intBundleItemId = Item.intItemId) Bundle
 		OUTER APPLY (SELECT dblReservedQty = SUM(SR.dblQty) from tblICStockReservation SR
 					WHERE SR.intLotId = Lot.intLotId AND SR.ysnPosted <> 1) SR
 		OUTER APPLY (SELECT dblAllocatedQty = SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL 

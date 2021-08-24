@@ -34,6 +34,7 @@ BEGIN TRY
 		,@intCreatedUserId INT
 		,@dtmCreated DATETIME
 		,@strStorageLocation NVARCHAR(50)
+		,@strDemandType NVARCHAR(50)
 
 	SELECT @intBendDemandStageId = MIN(intBendDemandStageId)
 	FROM tblIPBendDemandStage
@@ -57,6 +58,7 @@ BEGIN TRY
 				,@strWorkCenter = NULL
 				,@dtmDueDate = NULL
 				,@strMachine = NULL
+				,@strDemandType =NULL
 
 			SELECT @strCompanyLocation = strCompanyLocation
 				,@intActionId = intActionId
@@ -70,6 +72,7 @@ BEGIN TRY
 				,@strWorkCenter = strWorkCenter
 				,@dtmDueDate = dtmDueDate
 				,@strMachine = strMachine
+				,@strDemandType=strDemandType
 			FROM dbo.tblIPBendDemandStage
 			WHERE intBendDemandStageId = @intBendDemandStageId
 
@@ -277,7 +280,7 @@ BEGIN TRY
 				,1 intStatusId
 				,NULL intOrderId
 				,@strOrderNo
-				,'F' strOrderType
+				,@strDemandType
 				,@intUserId
 				,@dtmCreatedDate
 				,@intUserId

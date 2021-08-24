@@ -8913,6 +8913,7 @@
     <Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
     <None Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
     <None Include="Scripts\Post-Deployment\CM\8_FlagCCTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\CM\vyuCMBankAccountRegisterRunningBalance.sql" />
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
@@ -9428,14 +9429,28 @@
     <Build Include="dbo\Stored Procedures\uspRKGetM2MCounterPartyExposureReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFutures360RealizedPnLReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFutures360UnRealizedPnLReport.sql" />
+    <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping.sql" />
+    <Build Include="dbo\Tables\tblSCGrainReceiptDiscountMapping200.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetM2MCounterPartyExposureReport.sql" />
+    <Build Include="dbo\Tables\tblIPBillItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportCountDetailFromStaging.sql" />
     <Build Include="dbo\Tables\tblICImportStagingCountDetail.sql" />
+    <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateTicketSplitByDeliverySheetSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryPositionReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryGrandTotalReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCoverageInquiryDetailReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICZeroLotStockForSAPIntegration.sql" />
-    <Build Include="dbo\Functions\fnARCheckCustomerLicenseModuleExists.sql" />
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMat.sql" />
+    <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9705,7 +9720,9 @@
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Build>
     <Build Include="dbo\Stored Procedures\uspSMCheckPendingAttachmentFileIfPresent.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
@@ -9732,9 +9749,10 @@
     <None Include="Scripts\Post-Deployment\PAT\6_CleanupObjects.sql" />
     <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
-    <None Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddUpdateFreightFromBatchLoad.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

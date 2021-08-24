@@ -71,7 +71,7 @@ BEGIN TRY
 	WHERE 
 		(ISNULL([intSourceId],0) <> 0 AND [strSourceTransaction] NOT IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation')) 
 		OR
-		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct')) 
+		(ISNULL([intSourceId],0) = 0 AND [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct', 'CF Tran')) 
 
 
 	IF OBJECT_ID('tempdb..#EntriesForProcessing') IS NOT NULL DROP TABLE #EntriesForProcessing	
@@ -890,7 +890,7 @@ BEGIN
 			#EntriesForProcessing EFP WITH (NOLOCK)
 				ON (ISNULL(ITG.[intId], 0) = ISNULL(EFP.[intId], 0) OR @GroupingOption > 0)
 				AND (ISNULL(ITG.[intEntityCustomerId], 0) = ISNULL(EFP.[intEntityCustomerId], 0) OR (EFP.[intEntityCustomerId] IS NULL AND @GroupingOption < 1))
-				AND (ISNULL(ITG.[intSourceId], 0) = ISNULL(EFP.[intSourceId], 0) OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR ITG.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
+				AND (ISNULL(ITG.[intSourceId], 0) = ISNULL(EFP.[intSourceId], 0) OR (EFP.[intSourceId] IS NULL AND (@GroupingOption < 2 OR ITG.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy', 'CF Tran'))))
 				AND (ISNULL(ITG.[intCompanyLocationId], 0) = ISNULL(EFP.[intCompanyLocationId], 0) OR (EFP.[intCompanyLocationId] IS NULL AND @GroupingOption < 3))
 				AND (ISNULL(ITG.[intCurrencyId],0) = ISNULL(EFP.[intCurrencyId],0) OR (EFP.[intCurrencyId] IS NULL AND @GroupingOption < 4))
 				AND (CAST(ISNULL(ITG.[dtmDate], @DateNow) AS DATE) = CAST(ISNULL(EFP.[dtmDate], @DateNow) AS DATE) OR (EFP.[dtmDate] IS NULL AND @GroupingOption < 5))
@@ -1780,10 +1780,6 @@ BEGIN TRY
 			,@TransType			= N'all'
 			,@RaiseError		= @RaiseError
 
-
-
-
-
 	DECLARE @NewIdsForPostingRecap InvoiceId
 	INSERT INTO @NewIdsForPostingRecap(
 		 [intHeaderId]
@@ -1811,23 +1807,39 @@ BEGIN TRY
 		AND [ysnPost] IS NOT NULL
 		AND [ysnPost] = 1
 		AND ISNULL([ysnRecap], 0) = 1
-
 		
 	IF EXISTS(SELECT TOP 1 NULL FROM @NewIdsForPostingRecap)
-		EXEC [dbo].[uspARPostInvoiceNew]
-			 @BatchId			= @NewBatchId --NULL #mark 101
-			,@Post				= 1
-			,@Recap				= 1
-			,@UserId			= @UserId
-			,@InvoiceIds		= @NewIdsForPostingRecap
-			,@IntegrationLogId	= @IntegrationLogId
-			,@BeginDate			= NULL
-			,@EndDate			= NULL
-			,@BeginTransaction	= NULL
-			,@EndTransaction	= NULL
-			,@Exclude			= NULL
-			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError
+		BEGIN 
+			EXEC [dbo].[uspARPostInvoiceNew]
+				@BatchId			= @NewBatchId --NULL #mark 101
+				,@Post				= 1
+				,@Recap				= 1
+				,@UserId			= @UserId
+				,@InvoiceIds		= @NewIdsForPostingRecap
+				,@IntegrationLogId	= @IntegrationLogId
+				,@BeginDate			= NULL
+				,@EndDate			= NULL
+				,@BeginTransaction	= NULL
+				,@EndTransaction	= NULL
+				,@Exclude			= NULL
+				,@TransType			= N'all'
+				,@RaiseError		= @RaiseError
+
+			UPDATE @NewIdsForPostingRecap SET ysnForDelete = 1
+
+			UPDATE MBIL 
+			SET inti21InvoiceId = NULL
+			FROM tblMBILInvoice MBIL
+			INNER JOIN @NewIdsForPostingRecap RECAP ON MBIL.inti21InvoiceId = RECAP.intHeaderId
+
+			EXEC dbo.uspARUpdateInvoicesIntegrations @InvoiceIds = @InsertedInvoiceIds
+													,@UserId	 = @UserId
+				
+			DELETE I
+			FROM tblARInvoice I
+			INNER JOIN @NewIdsForPostingRecap RECAP ON I.intInvoiceId = RECAP.intHeaderId
+		
+		END
 END TRY
 BEGIN CATCH
 	IF ISNULL(@RaiseError,0) = 0
@@ -1937,7 +1949,7 @@ BEGIN TRY
 			,@EndTransaction	= NULL
 			,@Exclude			= NULL
 			,@TransType			= N'all'
-			,@RaiseError		= @RaiseError
+			,@RaiseError		= @RaiseError	
 
 END TRY
 BEGIN CATCH

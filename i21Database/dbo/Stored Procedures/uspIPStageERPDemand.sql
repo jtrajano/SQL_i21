@@ -16,6 +16,10 @@ BEGIN TRY
 		,@intRowNo INT
 		,@strXml NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
+	DECLARE @strDate NVARCHAR(50)
+	Declare @dtmCurrentDate datetime
+	Select @dtmCurrentDate =GETDATE()
+	SELECT @strDate = Convert(CHAR, @dtmCurrentDate, 106)
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
@@ -59,9 +63,9 @@ BEGIN TRY
 			INTO @tblIPDemand
 			SELECT parentId
 				,ActionId
-				,CreatedDate
+				,@dtmCurrentDate
 				,CreatedBy
-				,DemandName
+				,DemandName +@strDate
 				,TrxSequenceNo
 				,CompanyLocation
 				,ItemNo
@@ -71,7 +75,6 @@ BEGIN TRY
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					parentId BIGINT '@parentId'
 					,ActionId INT '../ActionId'
-					,CreatedDate DATETIME '../CreatedDate'
 					,CreatedBy NVARCHAR(50) '../CreatedBy'
 					,DemandName NVARCHAR(50) '../DemandName'
 					,TrxSequenceNo BIGINT

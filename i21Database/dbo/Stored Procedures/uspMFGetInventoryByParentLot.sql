@@ -60,7 +60,7 @@ FROM tblEMEntity E
 JOIN tblEMEntityType ET ON E.intEntityId = ET.intEntityId
 	AND ET.strType = 'Customer'
 WHERE strName = @strCustomerName
-	AND strEntityNo <> ''
+	--AND strEntityNo <> ''
 
 INSERT INTO @tblMFMultipleLotCode (
 	intLotId

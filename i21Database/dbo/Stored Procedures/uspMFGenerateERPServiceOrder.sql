@@ -141,7 +141,7 @@ BEGIN TRY
 				+'<ServiceContractNo>'+	IsNULL(WRM.strServiceContractNo ,'')     +'</ServiceContractNo>'
 				+'<VendorAccountNo>'+	IsNULL(V.strVendorAccountNum,'')   +'</VendorAccountNo>'
 				+'<Currency>'+	C.strCurrency      +'</Currency>'
-				+'<ERPServicePONumber>'+	W.strERPServicePONumber   +'</ERPServicePONumber>'
+				+'<ERPServicePONumber>'+	IsNULL(W.strERPServicePONumber,'')   +'</ERPServicePONumber>'
 			FROM dbo.tblMFWorkOrder W
 			JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
 			JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -172,7 +172,7 @@ BEGIN TRY
 
 				+'</line>'
 			FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail  WWRMD
-			JOIN dbo.tblLGWarehouseRateMatrixDetail WRMD on WRMD.intWarehouseRateMatrixDetailId =WWRMD.intWorkOrderWarehouseRateMatrixDetailId 
+			JOIN dbo.tblLGWarehouseRateMatrixDetail WRMD on WRMD.intWarehouseRateMatrixDetailId =WWRMD.intWarehouseRateMatrixDetailId 
 			JOIN dbo.tblICItem I ON I.intItemId = WRMD.intItemId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WRMD.intItemUOMId
 			JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId

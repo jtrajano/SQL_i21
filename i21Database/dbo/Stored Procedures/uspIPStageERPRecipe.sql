@@ -71,10 +71,7 @@ BEGIN TRY
 				,[Version]
 				,ValidFrom
 				,ValidTo
-				,IsNULL(ProcessName, (
-						SELECT TOP 1 strProcessName
-						FROM tblMFManufacturingProcess
-						))
+				,IsNULL(ProcessName, MP.strProcessName )
 				,CreatedDate
 				,CreatedBy
 				,TrxSequenceNo
@@ -109,6 +106,10 @@ BEGIN TRY
 					,Active INT
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
+			LEFT JOIN tblICItem I on I.strItemNo =x.ItemNo Collate Latin1_General_CI_AS
+			LEFT JOIN tblIPCommodityManufacturingProcess CP on CP.intCommodityId=I.intCommodityId
+			LEFT JOIN tblMFManufacturingProcess MP on MP.intManufacturingProcessId=CP.intManufacturingProcessId
+
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strERPRecipeNo, '') + ','
 			FROM @tblIPRecipeName
@@ -185,6 +186,7 @@ BEGIN TRY
 
 			UPDATE RI
 			SET strRecipeHeaderItemNo = R.strItemNo,strRecipeName=R.strItemNo
+				,strValidFrom=R.strValidFrom,strValidTo=R.strValidTo
 			FROM tblMFRecipeStage R
 			JOIN tblMFRecipeItemStage RI ON RI.intParentTrxSequenceNo = R.intTrxSequenceNo
 

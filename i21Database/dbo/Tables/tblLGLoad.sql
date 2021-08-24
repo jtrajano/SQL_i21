@@ -172,6 +172,8 @@
 [intLoadRefId] INT NULL,
 [ysnLoadBased] BIT NULL DEFAULT ((0)),
 [ysnAllowReweighs] BIT NULL DEFAULT ((0)),
+[dblFreightRate] NUMERIC(18, 6) NULL,
+[dblSurcharge] NUMERIC(18, 6) NULL,
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([strLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

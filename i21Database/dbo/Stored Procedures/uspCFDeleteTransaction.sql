@@ -32,8 +32,10 @@ DECLARE @IVTable TABLE
 
 BEGIN TRY
 
-
+DECLARE @ysnInvoiced AS BIT = 0
 DECLARE @dblQuantity AS NUMERIC(18,6)
+
+SELECT @ysnInvoiced = 1 FROM tblCFTransaction WHERE intTransactionId = @intTransactionId AND ISNULL(intInvoiceId,0) != 0
 
 IF(ISNULL(@intContractId,0) != 0)
 BEGIN
@@ -72,6 +74,10 @@ BEGIN
 	RETURN 1
 
 END
+ELSE IF(@ysnInvoiced != 1)
+BEGIN
+	DELETE FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+END
 ELSE
 BEGIN
 	
@@ -81,7 +87,7 @@ BEGIN
 			WHERE	[intEntityId] = @intUserId
 
 	INSERT INTO @IVTable
-	SELECT intTransactionId,intInvoiceId  from tblARInvoice INV
+	SELECT intTransactionId,intInvoiceId  from tblCFTransaction INV
 	WHERE intTransactionId = @intTransactionId
 
 

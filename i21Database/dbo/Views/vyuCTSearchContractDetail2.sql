@@ -258,7 +258,7 @@ SELECT a.intContractDetailId
 	, bo.strPricingLevelName
 	, b.strPrintableRemarks
 	, b.ysnPrinted
-	, strProducer = bp.strName
+	, strProducer = bp2.strName
 	, strProductType = bq.strDescription
 	, b.ysnProvisional
 	, b.dblProvisionalInvoicePct
@@ -381,6 +381,7 @@ LEFT JOIN tblCTPosition bm WITH(NOLOCK) ON bm.intPositionId = b.intPositionId
 LEFT JOIN prepaid bn ON bn.intContractHeaderId = b.intContractHeaderId
 LEFT JOIN tblSMCompanyLocationPricingLevel bo WITH(NOLOCK) ON bo.intCompanyLocationPricingLevelId = b.intCompanyLocationPricingLevelId
 LEFT JOIN tblEMEntity bp WITH(NOLOCK) ON bp.intEntityId = b.intProducerId
+LEFT JOIN tblEMEntity bp2 WITH(NOLOCK) ON bp2.intEntityId = a.intProducerId
 LEFT JOIN tblICCommodityAttribute bq WITH(NOLOCK) ON bq.intCommodityAttributeId = c.intProductTypeId AND bq.strType = 'ProductType'
 LEFT JOIN tblSMPurchasingGroup br WITH(NOLOCK) ON br.intPurchasingGroupId = a.intPurchasingGroupId
 LEFT JOIN tblICCommodityUnitMeasure bs WITH(NOLOCK) ON bs.intCommodityId = b.intCommodityId AND bs.ysnDefault = 1

@@ -18,6 +18,7 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+		,@intScreenId int
 	DECLARE @tblRKFutOptTransactionHeaderAckStage TABLE (intFutOptTransactionHeaderAckStageId INT)
 
 	INSERT INTO @tblRKFutOptTransactionHeaderAckStage (intFutOptTransactionHeaderAckStageId)
@@ -152,9 +153,15 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				SELECT @intScreenId = intScreenId
+				FROM tblSMScreen
+				WHERE strNamespace = 'RiskManagement.view.DerivativeEntry'
+
 				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
 					,@referenceTransactionId = @intTransactionRefId
 					,@referenceCompanyId = @intCompanyRefId
+					,@screenId=@intScreenId
+					,@populatedByInterCompany=1
 			END
 		END
 

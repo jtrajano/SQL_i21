@@ -52,6 +52,7 @@ INSERT INTO ##ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
+	,[ysnAutoBlend]
 ) 
 
 SELECT 
@@ -111,6 +112,7 @@ SELECT
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
+	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -179,6 +181,7 @@ INSERT INTO ##ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
+	,[ysnAutoBlend]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -215,9 +218,10 @@ SELECT
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
+	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
-INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ARIC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
+INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.[intBundleItemId] = ICI.[intItemId]
 LEFT OUTER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
@@ -272,6 +276,7 @@ INSERT INTO ##ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
+	,[ysnAutoBlend]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -299,6 +304,7 @@ SELECT
 	,ARIC.[intCategoryId]
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
+	,ARID.[ysnAutoBlend]
 FROM ##ARItemsForCosting ARIC
 INNER JOIN ##ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId

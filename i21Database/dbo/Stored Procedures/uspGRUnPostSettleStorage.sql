@@ -61,6 +61,11 @@ BEGIN TRY
 		,ysnDPOwnedType BIT
 		,intContractDetailId INT NULL
 	)	
+	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+	BEGIN
+		DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+		EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+	END
 		
 	--check first if the settle storage being deleted is the parent, then its children should be deleted first
 	SELECT @isParentSettleStorage = CASE WHEN MIN(intSettleStorageId) > 0 THEN 1 ELSE 0 END
@@ -567,7 +572,12 @@ BEGIN TRY
 			UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
 		END
-
+		-- Delete, the storage tickets that does not have units left
+		DELETE FROM tblGRSettleStorageTicket 
+			where intSettleStorageId = @intParentSettleStorageId 
+				and intCustomerStorageId = @intCustomerStorageId 
+				and dblUnits = 0
+				
 		--DELETE THE SETTLE STORAGE
 		UPDATE tblGRStorageHistory SET intSettleStorageId = NULL, intBillId = NULL WHERE intSettleStorageId = @intSettleStorageId
 		DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId

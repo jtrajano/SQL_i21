@@ -24,6 +24,7 @@ GO
 
 ALTER TABLE [dbo].[tblFABookDepreciation]  WITH CHECK ADD  CONSTRAINT [FK_tblFABookDepreciation_tblFAFixedAsset] FOREIGN KEY([intAssetId])
 REFERENCES [dbo].[tblFAFixedAsset] ([intAssetId])
+ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblFABookDepreciation] CHECK CONSTRAINT [FK_tblFABookDepreciation_tblFAFixedAsset]

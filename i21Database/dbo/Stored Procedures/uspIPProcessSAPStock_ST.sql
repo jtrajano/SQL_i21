@@ -92,122 +92,165 @@ BEGIN TRY
 			BEGIN
 				SELECT @ysnResetLotQtyOnce = 0
 
-				DELETE
-				FROM @tblLotTable
+				BEGIN TRY
+					EXEC uspICZeroLotStockForSAPIntegration @intEntityId
+				END TRY
 
-				INSERT INTO @tblLotTable
-				SELECT DISTINCT intItemId
-					,intLocationId
-					,intSubLocationId
-					--,intStorageLocationId
-				FROM tblICLot WITH (NOLOCK)
-				WHERE dblQty > 0
-					AND intSubLocationId IS NOT NULL
-					--AND intStorageLocationId IS NOT NULL
+				BEGIN CATCH
+					IF XACT_STATE() != 0
+						AND @@TRANCOUNT > 0
+						ROLLBACK TRANSACTION
 
-				SELECT @intMinRecordLotId = MIN(intLotRecordId)
-				FROM @tblLotTable
+					SET @ErrMsg = 'Reset Stock: ' + ERROR_MESSAGE()
 
-				WHILE (ISNULL(@intMinRecordLotId, 0) > 0)
-				BEGIN
-					BEGIN TRY
-						SELECT @intItemId = NULL
-							,@intCompanyLocationId = NULL
-							,@intSubLocationId = NULL
-							--,@intStorageLocationId = NULL
-						
-						SELECT @intItemId = intItemId
-							,@intCompanyLocationId = intLocationId
-							,@intSubLocationId = intSubLocationId
-							--,@intStorageLocationId = intStorageLocationId
-						FROM @tblLotTable
-						WHERE intLotRecordId = @intMinRecordLotId
+					INSERT INTO tblIPLotError (
+						strItemNo
+						,strLocationName
+						,strSubLocationName
+						,strStorageLocationName
+						,dblQuantity
+						,strQuantityUOM
+						,dblNetWeight
+						,strNetWeightUOM
+						,strLotNumber
+						,dblCost
+						,strCostUOM
+						,strCostCurrency
+						,strBook
+						,strSubBook
+						,strTransactionType
+						,strErrorMessage
+						,strImportStatus
+						,strSessionId
+						)
+					SELECT strItemNo
+						,strLocationName
+						,strSubLocationName
+						,strStorageLocationName
+						,dblQuantity
+						,strQuantityUOM
+						,dblNetWeight
+						,strNetWeightUOM
+						,strLotNumber
+						,dblCost
+						,strCostUOM
+						,strCostCurrency
+						,strBook
+						,strSubBook
+						,strTransactionType
+						,@ErrMsg
+						,'Failed'
+						,strSessionId
+					FROM tblIPLotStage
 
-						--BEGIN TRAN
-						
-						EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
-							,@intItemId = @intItemId
-							,@strLotNumber = 'FIFO'
-							,@intLocationId = @intCompanyLocationId
-							,@intSubLocationId = @intSubLocationId
-							,@intStorageLocationId = NULL
-							,@intItemUOMId = NULL
-							,@dblNewQty = 0
-							,@dblCost = NULL
-							,@intEntityUserId = @intEntityId
-							,@intSourceId = 1
-						
-						--COMMIT TRAN
-					END TRY
+					DELETE
+					FROM tblIPLotStage
 
-					BEGIN CATCH
-						IF XACT_STATE() != 0
-							AND @@TRANCOUNT > 0
-							ROLLBACK TRANSACTION
-
-						SET @ErrMsg = 'Reset: ' + ERROR_MESSAGE()
-
-						SELECT @strItemNo = t.strItemNo
-						FROM tblICItem t WITH (NOLOCK)
-						WHERE t.intItemId = @intItemId
-
-						SELECT @strSubLocationName = t.strSubLocationName
-						FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
-						WHERE t.intCompanyLocationSubLocationId = @intSubLocationId
-							AND t.intCompanyLocationId = @intCompanyLocationId
-
-						INSERT INTO tblIPLotError (
-							strItemNo
-							,strLocationName
-							,strSubLocationName
-							,strStorageLocationName
-							,dblQuantity
-							,strQuantityUOM
-							,dblNetWeight
-							,strNetWeightUOM
-							,strLotNumber
-							,dblCost
-							,strCostUOM
-							,strCostCurrency
-							,strBook
-							,strSubBook
-							,strTransactionType
-							,strErrorMessage
-							,strImportStatus
-							,strSessionId
-							)
-						SELECT strItemNo
-							,strLocationName
-							,strSubLocationName
-							,strStorageLocationName
-							,dblQuantity
-							,strQuantityUOM
-							,dblNetWeight
-							,strNetWeightUOM
-							,strLotNumber
-							,dblCost
-							,strCostUOM
-							,strCostCurrency
-							,strBook
-							,strSubBook
-							,strTransactionType
-							,@ErrMsg
-							,'Failed'
-							,strSessionId
-						FROM tblIPLotStage
-						WHERE strItemNo = @strItemNo
-							AND strSubLocationName = @strSubLocationName
-
-						DELETE
-						FROM tblIPLotStage
-						WHERE strItemNo = @strItemNo
-							AND strSubLocationName = @strSubLocationName
-					END CATCH
-
-					SELECT @intMinRecordLotId = MIN(intLotRecordId)
-					FROM @tblLotTable
-					WHERE intLotRecordId > @intMinRecordLotId
-				END
+					DELETE
+					FROM @tblLotStage
+				END CATCH
+					--DELETE
+					--FROM @tblLotTable
+					--INSERT INTO @tblLotTable
+					--SELECT DISTINCT intItemId
+					--	,intLocationId
+					--	,intSubLocationId
+					--	--,intStorageLocationId
+					--FROM tblICLot WITH (NOLOCK)
+					--WHERE dblQty <> 0
+					--	AND intSubLocationId IS NOT NULL
+					--	--AND intStorageLocationId IS NOT NULL
+					--SELECT @intMinRecordLotId = MIN(intLotRecordId)
+					--FROM @tblLotTable
+					--WHILE (ISNULL(@intMinRecordLotId, 0) > 0)
+					--BEGIN
+					--	BEGIN TRY
+					--		SELECT @intItemId = NULL
+					--			,@intCompanyLocationId = NULL
+					--			,@intSubLocationId = NULL
+					--			--,@intStorageLocationId = NULL
+					--		SELECT @intItemId = intItemId
+					--			,@intCompanyLocationId = intLocationId
+					--			,@intSubLocationId = intSubLocationId
+					--			--,@intStorageLocationId = intStorageLocationId
+					--		FROM @tblLotTable
+					--		WHERE intLotRecordId = @intMinRecordLotId
+					--		--BEGIN TRAN
+					--		EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
+					--			,@intItemId = @intItemId
+					--			,@strLotNumber = 'FIFO'
+					--			,@intLocationId = @intCompanyLocationId
+					--			,@intSubLocationId = @intSubLocationId
+					--			,@intStorageLocationId = NULL
+					--			,@intItemUOMId = NULL
+					--			,@dblNewQty = 0
+					--			,@dblCost = NULL
+					--			,@intEntityUserId = @intEntityId
+					--			,@intSourceId = 1
+					--		--COMMIT TRAN
+					--	END TRY
+					--	BEGIN CATCH
+					--		IF XACT_STATE() != 0
+					--			AND @@TRANCOUNT > 0
+					--			ROLLBACK TRANSACTION
+					--		SET @ErrMsg = 'Reset: ' + ERROR_MESSAGE()
+					--		SELECT @strItemNo = t.strItemNo
+					--		FROM tblICItem t WITH (NOLOCK)
+					--		WHERE t.intItemId = @intItemId
+					--		SELECT @strSubLocationName = t.strSubLocationName
+					--		FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
+					--		WHERE t.intCompanyLocationSubLocationId = @intSubLocationId
+					--			AND t.intCompanyLocationId = @intCompanyLocationId
+					--		INSERT INTO tblIPLotError (
+					--			strItemNo
+					--			,strLocationName
+					--			,strSubLocationName
+					--			,strStorageLocationName
+					--			,dblQuantity
+					--			,strQuantityUOM
+					--			,dblNetWeight
+					--			,strNetWeightUOM
+					--			,strLotNumber
+					--			,dblCost
+					--			,strCostUOM
+					--			,strCostCurrency
+					--			,strBook
+					--			,strSubBook
+					--			,strTransactionType
+					--			,strErrorMessage
+					--			,strImportStatus
+					--			,strSessionId
+					--			)
+					--		SELECT strItemNo
+					--			,strLocationName
+					--			,strSubLocationName
+					--			,strStorageLocationName
+					--			,dblQuantity
+					--			,strQuantityUOM
+					--			,dblNetWeight
+					--			,strNetWeightUOM
+					--			,strLotNumber
+					--			,dblCost
+					--			,strCostUOM
+					--			,strCostCurrency
+					--			,strBook
+					--			,strSubBook
+					--			,strTransactionType
+					--			,@ErrMsg
+					--			,'Failed'
+					--			,strSessionId
+					--		FROM tblIPLotStage
+					--		WHERE strItemNo = @strItemNo
+					--			AND strSubLocationName = @strSubLocationName
+					--		DELETE
+					--		FROM tblIPLotStage
+					--		WHERE strItemNo = @strItemNo
+					--			AND strSubLocationName = @strSubLocationName
+					--	END CATCH
+					--	SELECT @intMinRecordLotId = MIN(intLotRecordId)
+					--	FROM @tblLotTable
+					--	WHERE intLotRecordId > @intMinRecordLotId
+					--END
 			END
 
 			IF NOT EXISTS (
@@ -328,7 +371,7 @@ BEGIN TRY
 			IF ISNULL(@intSubLocationId, 0) = 0
 			BEGIN
 				RAISERROR (
-						'Invalid Sub Location. '
+						'Invalid Storage Location. '
 						,16
 						,1
 						)
@@ -342,7 +385,7 @@ BEGIN TRY
 			IF ISNULL(@intStorageLocationId, 0) = 0
 			BEGIN
 				RAISERROR (
-						'Invalid Storage Location. '
+						'Invalid Storage Unit. '
 						,16
 						,1
 						)
@@ -545,19 +588,6 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				-- To adjust Qty as 0
-				--EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
-				--	,@intItemId = @intItemId
-				--	,@strLotNumber = @strLotNumber
-				--	,@intLocationId = @intCompanyLocationId
-				--	,@intSubLocationId = @intSubLocationId
-				--	,@intStorageLocationId = @intStorageLocationId
-				--	,@intItemUOMId = NULL
-				--	,@dblNewQty = 0
-				--	,@dblCost = NULL
-				--	,@intEntityUserId = @intEntityId
-				--	,@intSourceId = 1
-				
 				-- Update - To adjust to new Qty. Doing this way (Resetting and Adjusting) to handle the qty and cost correctly
 				EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
 					,@dtmDate = NULL

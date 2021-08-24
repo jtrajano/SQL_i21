@@ -24,6 +24,7 @@
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),  
 	[dtmImportedDate] DATETIME NULL, 
     [ysnInvolvedWithShrinkage] bit null,
+    [ysnDistributeTicketOnly] BIT NOT NULL DEFAULT (0), 
     CONSTRAINT [PK_tblSCDeliverySheet_intDeliverySheetId] PRIMARY KEY ([intDeliverySheetId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblSCDeliverySheet_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
