@@ -11,6 +11,7 @@ RETURNS @tbl TABLE (
 	dblMonth NUMERIC(18,6) NULL,
 	dblDepre NUMERIC(18,6) NULL,
 	ysnFullyDepreciated BIT NULL,
+	dtmDepreciateToDate DATETIME,
 	strError NVARCHAR(100) NULL,
 	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 )
@@ -43,7 +44,8 @@ DECLARE @tblAssetInfo TABLE (
 	strAssetTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	dblQuarterly NUMERIC (18,6),
 	dblMidQuarter NUMERIC (18,6),
-	dblMidYear NUMERIC (18,6)
+	dblMidYear NUMERIC (18,6),
+	dtmDepreciateToDate DATETIME
 
 ) 
 
@@ -121,20 +123,14 @@ OUTER APPLY(
 WHERE strError IS NULL
 
 -- Set Quarterly and Mid Quarter Depreciation take for Mid Quarter Convention
-IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Quarter' AND strError IS NULL)
-BEGIN
-	UPDATE @tblAssetInfo
-	SET dblQuarterly = dblAnnualDep / 4, dblMidQuarter = (dblAnnualDep/4)/2
-	WHERE strError IS NULL
-END
+UPDATE @tblAssetInfo
+SET dblQuarterly = dblAnnualDep / 4, dblMidQuarter = (dblAnnualDep/4)/2
+WHERE strConvention = 'Mid Quarter' AND strError IS NULL
 
 -- Mid Year Depreciation Take for Mid Year Convention
-IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Year' AND strError IS NULL)
-BEGIN
-	UPDATE @tblAssetInfo
-	SET dblMidYear = dblAnnualDep / 2
-	WHERE strError IS NULL
-END
+UPDATE @tblAssetInfo
+SET dblMidYear = dblAnnualDep / 2
+WHERE strConvention = 'Mid Year' AND strError IS NULL
 
 -- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
 IF (@BookId = 2)
@@ -170,11 +166,19 @@ outer apply(
 WHERE intMonth > totalMonths
 and F.strConvention <> 'Full Month'
 
+DECLARE
+	@dtmPlacedInService DATETIME,
+	@dtmMonthStartDate DATETIME,
+	@intDays INT
+
+SELECT @dtmPlacedInService = dtmPlacedInService FROM @tblAssetInfo WHERE strError IS NULL
+SELECT @dtmMonthStartDate = dtmStartDate, @intDays = intDays
+FROM dbo.fnFAGetMonthPeriodFromDate(@dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
+
 
 UPDATE T
 SET dblMonth = dblAnnualDep/ intMonthDivisor,
-intDaysInFirstMonth= 
-DAY(DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1, dtmPlacedInService)),0)))
+intDaysInFirstMonth = @intDays
 FROM @tblAssetInfo T
 WHERE strError IS NULL
 
@@ -184,9 +188,9 @@ dblMonth =
 
 CASE 
 WHEN strConvention = 'Actual Days' THEN
-	dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
+	dblMonth * ((intDaysInFirstMonth - (DATEDIFF(DAY, @dtmMonthStartDate, dtmPlacedInService) + 1) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
 WHEN strConvention= 'Mid Month' THEN
-	dblMonth *.50 
+	dblMonth *.50
 ELSE
 	dblMonth
 END
@@ -302,7 +306,7 @@ OUTER APPLY(
 	Dep.dtmDepreciationToDate IS NULL
 		THEN 0 
 	WHEN 
-		CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, -1, A.dtmImportedDepThru))) + 1, 0)) as float)) as datetime)
+		dbo.fnFAGetPreviousMonthPeriodEndDateFromDate(A.dtmImportedDepThru, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
 		= Dep.dtmDepreciationToDate  and isnull(A.dtmImportedDepThru,0) > 0
 		THEN
 			CASE 
@@ -348,6 +352,7 @@ INSERT INTO @tbl(
 	dblMonth,
 	dblDepre,
 	ysnFullyDepreciated,
+	dtmDepreciateToDate,
 	strError,
 	strTransaction
 	)
@@ -356,7 +361,8 @@ INSERT INTO @tbl(
 	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblBasis END,
 	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblMonth END,
 	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblDepre END,
-	ysnFullyDepreciated ,
+	ysnFullyDepreciated,
+	dbo.fnFAGetNextDepreciationDate(intAssetId, @BookId),
 	strError,
 	strTransaction
 	FROM @tblAssetInfo 
