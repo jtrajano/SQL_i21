@@ -217,7 +217,4 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strGroupNumber]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[strFeedDiet]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 	,[intPriceFixationDetailId]				INT												NULL
-	,[strBinNumber]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strGroupNumber]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
-	,[strFeedDiet]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 )
