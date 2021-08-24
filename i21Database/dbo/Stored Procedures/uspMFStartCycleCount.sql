@@ -1400,6 +1400,7 @@ BEGIN TRY
 			,intCategoryId
 			,dblRequiredQty
 			,intStorageLocationId
+			,intMainItemId
 			)
 		SELECT I.intItemId
 			,IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(L.intItemUOMId, I.intItemUOMId, L.dblQty), 0) - IsNULL(I.dblRequiredQty, 0)
@@ -1420,6 +1421,7 @@ BEGIN TRY
 			,I.intCategoryId
 			,IsNULL(I.dblRequiredQty, 0)
 			,I.intStorageLocationId
+			,WI.intMainItemId
 		FROM @tblICFinalItem I
 		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
 			AND L.intStorageLocationId = I.intStorageLocationId
