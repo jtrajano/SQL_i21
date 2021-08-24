@@ -313,7 +313,7 @@ BEGIN TRY
 
 	SELECT 
 		  dtmFrom = @dtmFrom
-		, dtmFrom = @dtmTo
+		, dtmTo = @dtmTo
 		
 		-- SECTION 1
 		, dblS1L1_A = @dblS1L1_A
