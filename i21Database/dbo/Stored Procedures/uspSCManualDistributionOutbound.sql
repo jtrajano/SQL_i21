@@ -386,19 +386,55 @@ OPEN intListCursor;
 						BEGIN
 
 						if @strDistributionOption = 'ICN'	
-						begin
-							if @intTicketItemContractDetailId != @intLoopContractId  
-							begin
+						begin							
+							SET @_dblContractScheduledQty = 0
+								SELECT TOP 1 
+									@_dblContractScheduledQty = ISNULL(B.dblScheduled,0)
+								FROM tblCTItemContractHeader A
+								INNER JOIN tblCTItemContractDetail B
+									ON A.intItemContractHeaderId = B.intItemContractHeaderId 
+								WHERE B.intItemContractDetailId = @intLoopContractId
+
+
+							IF ISNULL(@intLoopContractId,0) <> 0 AND @intTicketItemContractDetailId = @intLoopContractId  
+							BEGIN  
+								IF(@_dblConvertedLoopQty > @dblTicketScheduleQuantity )
+								BEGIN
+									IF(@_dblContractScheduledQty >= @dblTicketScheduleQuantity)
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @dblTicketScheduleQuantity
+									END
+									ELSE
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @_dblContractScheduledQty
+									END
+								END
+								ELSE
+								BEGIN
+									IF(@_dblContractScheduledQty >= @_dblConvertedLoopQty)
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @_dblConvertedLoopQty) * -1
+									END
+									ELSE
+									BEGIN
+										SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @_dblContractScheduledQty
+									END
+								END
+								
+								select @dblLoopAdjustedScheduleQuantity, 0, @_dblConvertedLoopQty , @dblTicketScheduleQuantity, @_dblConvertedLoopQty
+
+								IF @dblLoopAdjustedScheduleQuantity <> 0
+								BEGIN									
+									EXEC uspCTItemContractUpdateScheduleQuantity @intLoopContractId, @dblLoopAdjustedScheduleQuantity, @intUserId, @intTicketId, 'Auto - Scale'									
+								END
+							END 
+							ELSE
+							BEGIN
 								EXEC uspCTItemContractUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale'
-							end
-							else 
-							begin
-								set @_dblConvertedLoopQty = (@dblTicketScheduleQuantity * -1)
-								EXEC uspCTItemContractUpdateScheduleQuantity @intLoopContractId, @_dblConvertedLoopQty, @intUserId, @intTicketId, 'Auto - Scale'
-								EXEC uspCTItemContractUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Auto - Scale'
-							end
-							
-							EXEC dbo.uspSCUpdateTicketItemContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
+								
+							END	
+
+							EXEC dbo.uspSCUpdateTicketItemContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  							
 							
 						end					
 

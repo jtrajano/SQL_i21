@@ -35,9 +35,13 @@ BEGIN
 
 	SELECT @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 	
-	IF(isnull(@intFutureMonthId,0)=0 AND isnull(@intFutureMarketId,0)=0)
+	IF ( isnull(@intFutureMarketId,0)=0)
 	BEGIN
 		SELECT TOP 1 @intFutureMarketId=intFutureMarketId FROM tblRKCommodityMarketMapping where intCommodityId=@intCommodityId
+	END
+
+	IF(isnull(@intFutureMonthId,0)=0)
+	BEGIN
 				
 		SELECT TOP 1 @intFutureMonthId=intFutureMonthId
 			FROM tblRKFuturesMonth WHERE ysnExpired = 0 AND  dtmSpotDate <= GETDATE() AND intFutureMarketId = @intFutureMarketId ORDER BY dtmSpotDate DESC ,intYear DESC

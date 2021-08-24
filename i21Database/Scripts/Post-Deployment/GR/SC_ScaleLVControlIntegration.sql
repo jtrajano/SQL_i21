@@ -233,7 +233,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
-				,ISNULL(gasct_open_close_ind, ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
+				,ISNULL(nullif(gasct_open_close_ind, ''''), ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
 				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
 				,gasct_com_cd COLLATE Latin1_General_CI_AS AS strItemNo
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
