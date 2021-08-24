@@ -9,7 +9,7 @@ BEGIN TRY
 	DECLARE	@ErrMsg	NVARCHAR(MAX)
 		,@strLotCalculationType nvarchar(50);
 
-	select top 1 @strLotCalculationType = lower(strLotCalculationType) from tblCTCompanyPreference;
+	select top 1 @strLotCalculationType = lower(strLotCalculationType) from tblCTCompanyPreference where strPricingQuantity = 'By Futures Contracts' and strLotCalculationType = 'Round';
 	
 	with fixationDetailInvoice as (
 		select
