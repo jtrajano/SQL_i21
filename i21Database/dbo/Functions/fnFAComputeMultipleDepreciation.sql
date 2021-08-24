@@ -296,22 +296,20 @@ OUTER APPLY
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
 OUTER APPLY(
+	SELECT CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, 
+		CASE WHEN Dep.strTransaction = 'Place in service' THEN 0
+		ELSE 1 END, Dep.dtmDepreciationToDate))) + 1, 0)) as float)) as datetime) endDate 
+)PrevDepPlusOneMonth
+OUTER APPLY(
 	SELECT t=
 	CASE
-	WHEN (A.dtmImportedDepThru >  DATEADD(m, 1, Dep.dtmDepreciationToDate) AND ISNULL(A.dtmImportedDepThru,0) >0 ) OR 
-	Dep.dtmDepreciationToDate IS NULL
-		THEN 0 
-	WHEN 
-		CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, -1, A.dtmImportedDepThru))) + 1, 0)) as float)) as datetime)
-		= Dep.dtmDepreciationToDate  and isnull(A.dtmImportedDepThru,0) > 0
+	WHEN A.dtmImportedDepThru IS NULL THEN 0
+	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
+	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.endDate	THEN 0
+	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.endDate
 		THEN
-			CASE 
-				WHEN Dep.strTransaction = 'Place in service'  
-				THEN 0
-			ELSE		
-				 CASE when ISNULL(dblImportGAAPDepToDate,0) = 0 then 1
-				 ELSE 2
-				 END
+			CASE WHEN A.strTransaction = 'Place in service' THEN 0
+			ELSE 2
 			END
 	ELSE 
 		1
