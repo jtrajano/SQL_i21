@@ -39,6 +39,21 @@ BEGIN
 			RETURN
 		END
 	END
+	ELSE
+	BEGIN
+		DELETE
+		FROM tblMFWODetail
+		WHERE intProducedItemId = @intProducedItemId
+			AND intItemId = @intItemId
+			AND dblQuantity = @dblQuantity
+			AND intItemUOMId = @intItemUOMId
+			AND intStorageLocationId = @intStorageLocationId
+			AND intSubLocationId = @intSubLocationId
+			AND intUserId = @intUserId
+			AND intLocationId = @intLocationId
+			AND intTransactionTypeId = 9
+			AND ysnProcessed = 0
+	END
 
 	INSERT INTO dbo.tblMFWODetail (
 		intProducedItemId

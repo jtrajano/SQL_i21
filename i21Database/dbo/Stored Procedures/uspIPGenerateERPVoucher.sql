@@ -486,9 +486,12 @@ BEGIN TRY
 				SELECT @strError = @strError + 'Item No cannot be blank. '
 			END
 
-			IF ISNULL(@dblDetailQuantity, 0) = 0
+			IF ISNULL(@strType, '') <> 'Other Charge'
 			BEGIN
-				SELECT @strError = @strError + 'Detail - Quantity should be greater than 0. '
+				IF ISNULL(@dblDetailQuantity, 0) = 0
+				BEGIN
+					SELECT @strError = @strError + 'Detail - Quantity should be greater than 0. '
+				END
 			END
 
 			IF ISNULL(@strDetailCurrency, '') = ''
