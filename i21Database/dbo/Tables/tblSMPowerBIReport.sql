@@ -1,12 +1,12 @@
 ﻿CREATE TABLE [dbo].[tblSMPowerBIReport]
 (
 	[intPowerBIReportId]		INT		NOT NULL	PRIMARY KEY IDENTITY, 
-	[strReportName]				NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strReportId]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strName]					NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strId]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strDatasetId]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strEmbedUrl]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strWebUrl]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intPowerBICredentialId]	INT NOT NULL,
+	[intPowerBICredentialId]	INT		NULL,
 	[intConcurrencyId]			INT		NOT NULL	DEFAULT 1,
 
 

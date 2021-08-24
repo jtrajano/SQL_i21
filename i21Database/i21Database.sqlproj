@@ -9607,6 +9607,7 @@
     <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
     <Build Include="dbo\Views\vyuTRCustomerFreightRate.sql" />
     <Build Include="dbo\Tables\tblSMPowerBICredential.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIDataset.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
