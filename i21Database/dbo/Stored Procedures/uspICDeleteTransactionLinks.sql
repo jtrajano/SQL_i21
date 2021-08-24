@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].uspICDeleteTransactionLinks(
-    @intTransactionId INT, 
-    @strTransactionNo NVARCHAR(50),
+    @intReceiptId INT, 
+    @strReceiptNumber NVARCHAR(50),
     @strTransactionType NVARCHAR(100),
     @strModuleName NVARCHAR(100)
     )
@@ -11,15 +11,15 @@ BEGIN
     FROM tblICTransactionLinks
     WHERE 
     (
-        intDestId = @intTransactionId AND 
-        strDestTransactionNo = @strTransactionNo AND
+        intDestId = @intReceiptId AND 
+        strDestTransactionNo = @strReceiptNumber AND
         strDestTransactionType = @strTransactionType AND
         strDestModuleName = @strModuleName
     ) 
     OR 
     (
-        intSrcId = @intTransactionId AND 
-        strSrcTransactionNo = @strTransactionNo AND
+        intSrcId = @intReceiptId AND 
+        strSrcTransactionNo = @strReceiptNumber AND
         strSrcTransactionType = @strTransactionType AND
         strSrcModuleName = @strModuleName
     )
@@ -27,8 +27,8 @@ BEGIN
     DELETE tblICTransactionNodes
     FROM tblICTransactionNodes 
     WHERE 
-    intTransactionId = @intTransactionId AND
-    strTransactionNo = @strTransactionNo AND
+    intTransactionId = @intReceiptId AND
+    strTransactionNo = @strReceiptNumber AND
     strTransactionType = @strTransactionType AND
     strModuleName = @strModuleName
 

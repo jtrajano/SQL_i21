@@ -50,24 +50,27 @@ CREATE TABLE #TempMBILInvoiceItem (
 		SET @ErrorMessage = 'Record does not exists.'
 		RETURN
 	END
-	WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
+	IF @BatchId IS NULL
 	BEGIN
-		DECLARE @intItemInvoiceId INT
-		DECLARE @intItemId INT
-		DECLARE @intLocationId INT
-		DECLARE @strItemNo NVARCHAR(MAX)
-		DECLARE @strLocationName NVARCHAR(MAX)
-
-		SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
-
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+		WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
 		BEGIN
-			SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
-			RETURN
-		END
+			DECLARE @intItemInvoiceId INT
+			DECLARE @intItemId INT
+			DECLARE @intLocationId INT
+			DECLARE @strItemNo NVARCHAR(MAX)
+			DECLARE @strLocationName NVARCHAR(MAX)
 
-		DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
-	END		
+			SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+			BEGIN
+				SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
+				RETURN
+			END
+
+			DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
+		END
+	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL)
 	BEGIN

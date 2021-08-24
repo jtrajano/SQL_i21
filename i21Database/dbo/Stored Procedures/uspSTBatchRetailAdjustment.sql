@@ -348,6 +348,7 @@ BEGIN
 										,@strScreen					= 'RetailPriceAdjustment' 
 										,@intItemId					= @intProcessItemId
 										,@intItemPricingId			= @intProcessItemPricingId 
+										,@strScreen					= 'RetailPriceAdjustment' 
 										-- update params
 										,@dblStandardCost			= NULL 
 										,@dblRetailPrice			= @dblRetailPriceConv
