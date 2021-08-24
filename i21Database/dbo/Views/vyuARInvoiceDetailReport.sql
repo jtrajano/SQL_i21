@@ -70,9 +70,6 @@ INNER JOIN (
 		 , strFeedDiet
 		 , dblShipmentNetWt
 		 , intEntitySalespersonId
-		 , strBinNumber
-		 , strGroupNumber
-		 , strFeedDiet
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID
