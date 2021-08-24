@@ -249,8 +249,15 @@ FROM
 									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
 									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
 		,dblLotContractSize = /* Lots Contract Size = Lots x Contract Size*/
-							PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)
-		,dblLotContractSizeInPriceUOM = PCD.dblNoOfLots * dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
+							ROUND(dbo.fnDivide(CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt)
+									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
+									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
+								* dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)
+		,dblLotContractSizeInPriceUOM =  /* Lots Contract Size converted to Price UOM for Eff Hedge PL calculation */
+							ROUND(dbo.fnDivide(CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt)
+									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
+									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
+								* dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
 		,dblReservesARateTotal = RA.dblReservesARateTotal
 		,dblReservesAValueTotal = RA.dblReservesAValueTotal * -1
 		,dblReservesBRateTotal = RB.dblReservesBRateTotal
