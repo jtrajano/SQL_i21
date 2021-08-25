@@ -300,17 +300,20 @@ OUTER APPLY
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
 OUTER APPLY(
-	SELECT CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, 
-		CASE WHEN Dep.strTransaction = 'Place in service' THEN 0
-		ELSE 1 END, Dep.dtmDepreciationToDate))) + 1, 0)) as float)) as datetime) endDate 
+	SELECT TOP 1 D.dtmEndDate FROM (
+		SELECT dtmEndDate, 'A' src  FROM dbo.fnFAGetMonthPeriodFromDate(A.dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END) -- get end date of current month
+		UNION ALL
+		SELECT dtmEndDate, 'B' src  FROM dbo.fnFAGetNextMonthPeriodFromDate(A.dtmDepreciateToDate, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END) -- get end date of next month
+	) D
+	WHERE src = CASE WHEN Dep.strTransaction = 'Place in service' THEN 'A' ELSE 'B' END
 )PrevDepPlusOneMonth
 OUTER APPLY(
 	SELECT t=
 	CASE
 	WHEN A.dtmImportedDepThru IS NULL THEN 0
 	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
-	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.endDate	THEN 0
-	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.endDate
+	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.dtmEnDate THEN 0
+	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.dtmEnDate
 		THEN
 			CASE WHEN A.strTransaction = 'Place in service' THEN 0
 			ELSE 2

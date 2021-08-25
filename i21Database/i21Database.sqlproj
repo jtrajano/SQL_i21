@@ -167,6 +167,7 @@
     <Build Include="dbo\Functions\fnFAGetNextDepreciationDate.sql" />
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetPreviousMonthPeriodEndDateFromDate.sql" />
+    <Build Include="dbo\Functions\fnFAGetNextMonthPeriodFromDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
