@@ -935,7 +935,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 								SET dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
 								  , intPriceFixationDetailId	= @intPriceFixationDetailId
-								WHERE intId = @intInvoiceEntriesId OR intContractDetailId = @intContractDetailId
+								WHERE intId = @intInvoiceEntriesId OR (intContractDetailId = @intContractDetailId AND ISNULL(intOrderUOMId, 0) <> 0)
 
 								UPDATE @EntriesForInvoice
 								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN dblQtyOrdered ELSE @dblOriginalQtyShipped END
@@ -1207,4 +1207,4 @@ IF @ysnHasPriceFixation = 1
 
 RETURN @NewInvoiceId
 
-END		
+END
