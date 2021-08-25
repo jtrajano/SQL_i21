@@ -164,6 +164,9 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT507.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT511.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
     <Build Include="dbo\Functions\fnFAGetNextDepreciationDate.sql" />
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetPreviousMonthPeriodEndDateFromDate.sql" />
