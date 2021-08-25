@@ -48,6 +48,8 @@ BEGIN TRY
 		,@strDetailTerm NVARCHAR(100)
 	DECLARE @intDetailCountryId INT
 		,@intDetailTermId INT
+		,@intEntityContactId INT
+		,@intEntityLocationId INT
 	DECLARE @tblEMEntity TABLE (
 		strOldName NVARCHAR(100)
 		,ysnOldActive BIT
@@ -159,6 +161,8 @@ BEGIN TRY
 				,@strEntityNo = NULL
 				,@intAuditDetailId = NULL
 				,@intStageEntityTermId = NULL
+				,@intEntityContactId = NULL
+				,@intEntityLocationId = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -372,6 +376,8 @@ BEGIN TRY
 
 				SELECT @intDetailCountryId = NULL
 					,@intDetailTermId = NULL
+					,@intEntityContactId = NULL
+					,@intEntityLocationId = NULL
 
 				SELECT @intDetailActionId = intActionId
 					,@intDetailLineType = intLineType
@@ -714,6 +720,43 @@ BEGIN TRY
 							WHERE VT.intEntityVendorId = @intEntityId
 							)
 
+					--Add Contacts to Entity table
+					INSERT INTO tblEMEntity (
+						strName
+						,ysnActive
+						,strContactNumber
+						,strEmail
+						,intConcurrencyId
+						)
+					SELECT @strName
+						,1
+						,''
+						,''
+						,1
+
+					SELECT @intEntityContactId = SCOPE_IDENTITY()
+
+					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
+					FROM tblEMEntityLocation
+					WHERE intEntityId = @intEntityId
+						AND ysnDefaultLocation = 1
+
+					--Map Contacts to Vendor
+					INSERT INTO tblEMEntityToContact (
+						intEntityId
+						,intEntityContactId
+						,intEntityLocationId
+						,ysnPortalAccess
+						,ysnDefaultContact
+						,intConcurrencyId
+						)
+					SELECT @intEntityId
+						,@intEntityContactId
+						,@intEntityLocationId
+						,0
+						,1
+						,1
+
 					EXEC uspSMAuditLog @keyValue = @intEntityId
 						,@screenName = 'EntityManagement.view.Entity'
 						,@entityId = @intUserId
@@ -1006,6 +1049,50 @@ BEGIN TRY
 					AND ETS.intStageEntityId = @intStageEntityId
 					AND ETS.intLineType = 3
 					AND ETS.intActionId = 4
+
+				IF NOT EXISTS (
+						SELECT TOP 1 1
+						FROM tblEMEntityToContact EC
+						WHERE EC.intEntityId = @intEntityId
+						)
+				BEGIN
+					--Add Contacts to Entity table
+					INSERT INTO tblEMEntity (
+						strName
+						,ysnActive
+						,strContactNumber
+						,strEmail
+						,intConcurrencyId
+						)
+					SELECT @strName
+						,1
+						,''
+						,''
+						,1
+
+					SELECT @intEntityContactId = SCOPE_IDENTITY()
+
+					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
+					FROM tblEMEntityLocation
+					WHERE intEntityId = @intEntityId
+						AND ysnDefaultLocation = 1
+
+					--Map Contacts to Vendor
+					INSERT INTO tblEMEntityToContact (
+						intEntityId
+						,intEntityContactId
+						,intEntityLocationId
+						,ysnPortalAccess
+						,ysnDefaultContact
+						,intConcurrencyId
+						)
+					SELECT @intEntityId
+						,@intEntityContactId
+						,@intEntityLocationId
+						,0
+						,1
+						,1
+				END
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 
