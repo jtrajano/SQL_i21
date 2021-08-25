@@ -73,6 +73,8 @@ BEGIN TRY
 
 		, @dblS1L12 NUMERIC(18, 6) = 0.00
 
+		, @dblS1L12_Rate NUMERIC(18, 6) = 0.00
+
 		, @dblS1L13 NUMERIC(18, 6) = 0.00
 
 
@@ -81,8 +83,6 @@ BEGIN TRY
 		, @dblS2L2 NUMERIC(18, 6) = 0.00
 		, @dblS2L3 NUMERIC(18, 6) = 0.00
 		, @dblS2L4 NUMERIC(18, 6) = 0.00
-		, @dblS2L5 NUMERIC(18, 6) = 0.00
-		, @dblS2L6 NUMERIC(18, 6) = 0.00
 		, @dblS2L7 NUMERIC(18, 6) = 0.00
 
 		-- SECTION 3
@@ -119,7 +119,7 @@ BEGIN TRY
 
 		, @dblS3L7 NUMERIC(18, 6) = 0.00
 		
-		-- RATE
+		-- CONFIG
 		, @strS1L4_A_Rate NVARCHAR(20) = NULL
 		, @strS1L4_B_Rate NVARCHAR(20) = NULL
 		, @strS1L4_C_Rate NVARCHAR(20) = NULL
@@ -129,6 +129,12 @@ BEGIN TRY
 		, @strS1L9_B_Rate NVARCHAR(20) = NULL
 		, @strS1L9_C_Rate NVARCHAR(20) = NULL
 		, @strS1L9_D_Rate NVARCHAR(20) = NULL
+		, @strS1L12_Rate NVARCHAR(20) = NULL
+
+		, @strS2L5_Refund NVARCHAR(MAX) = NULL
+		, @strS2L6_Credit NVARCHAR(20) = NULL
+		, @strS2L7_TransferTo NVARCHAR(20) = NULL
+		, @strS2L7_EndDate NVARCHAR(20) = NULL
 
 		, @strS3L2_A_Rate NVARCHAR(20) = NULL
 		, @strS3L2_B_Rate NVARCHAR(20) = NULL
@@ -228,11 +234,13 @@ BEGIN TRY
 		SELECT @strS1L9_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S1L9B_RATE'
 		SELECT @strS1L9_C_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S1L9C_RATE'
 		SELECT @strS1L9_D_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S1L9D_RATE'
+		SELECT @strS1L12_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S1L12_LESS_DISCOUNT_RATE'
 
 		SET @dblS1L9_A = CONVERT(NUMERIC(18, 6), @strS1L9_A_Rate)
 		SET @dblS1L9_B = CONVERT(NUMERIC(18, 6), @strS1L9_B_Rate)
 		SET @dblS1L9_C = CONVERT(NUMERIC(18, 6), @strS1L9_C_Rate)
 		SET @dblS1L9_D = CONVERT(NUMERIC(18, 6), @strS1L9_D_Rate)
+		SET @dblS1L12_Rate = CONVERT(NUMERIC(18, 6), @strS1L12_Rate)
 
 		SET @dblS1L10_A = @dblS1L8_A * @dblS1L9_A
 		SET @dblS1L10_B = @dblS1L8_B * @dblS1L9_B
@@ -240,19 +248,22 @@ BEGIN TRY
 		SET @dblS1L10_D = @dblS1L8_D * @dblS1L9_D
 
 		SET @dblS1L11 = (@dblS1L5_A + @dblS1L5_B + @dblS1L5_C + @dblS1L5_D) + (@dblS1L10_A + @dblS1L10_B + @dblS1L10_C + @dblS1L10_D)
-		SET @dblS1L12 = @dblS1L11 * 0.0075
+		SET @dblS1L12 = @dblS1L11 * @dblS1L12_Rate
 		SET @dblS1L13 = @dblS1L11 - @dblS1L12
 
 
 		-- SECTION 2
+		SELECT @strS2L5_Refund = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S2L5_REFUND'
+		SELECT @strS2L6_Credit = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S2L6_CREDIT'
+		SELECT @strS2L7_TransferTo = strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S2L7_CREDIT_TRANSFER_TO'
+		SELECT @strS2L7_EndDate = strConfiguration FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'WVMFT511-S2L7_CREDIT_PERIOD_END_DATE'
+
 		SET @dblS2L1 = @dblS3L7
 		SET @dblS2L2 = @dblS1L12
 		IF (@dblS2L2 > @dblS2L1) BEGIN SET @dblS2L3 = 0 END
 		ELSE BEGIN SET @dblS2L3 = @dblS2L1 - @dblS2L2 END
 		IF (@dblS2L1 > @dblS2L2) BEGIN SET @dblS2L4 = 0 END
 		ELSE BEGIN SET @dblS2L4 = @dblS2L2 - @dblS2L1 END
-		SET @dblS2L5 = @dblS2L4
-		SET @dblS2L6 = @dblS2L4
 
 		-- SECTION 3
 		SELECT @dblS3L1_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'MFT-511' AND strScheduleCode = '11' and strType = 'Gasoline'
@@ -367,8 +378,8 @@ BEGIN TRY
 		, dblS2L2 = @dblS2L2 
 		, dblS2L3 = @dblS2L3 
 		, dblS2L4 = @dblS2L4 
-		, dblS2L5 = @dblS2L5 
-		, dblS2L6 = @dblS2L6 
+		--, dblS2L5 = @dblS2L5 
+		--, dblS2L6 = @dblS2L6 
 		, dblS2L7 = @dblS2L7 
 		  
 		-- SECTION
@@ -405,7 +416,7 @@ BEGIN TRY
 		  
 		, dblS3L7 = @dblS3L7 
 		  
-		-- RATE
+		-- CONFIG
 		, strS1L4_A_Rate = @strS1L4_A_Rate 
 		, strS1L4_B_Rate = @strS1L4_B_Rate 
 		, strS1L4_C_Rate = @strS1L4_C_Rate 
@@ -414,8 +425,14 @@ BEGIN TRY
 		, strS1L9_A_Rate = @strS1L9_A_Rate 
 		, strS1L9_B_Rate = @strS1L9_B_Rate 
 		, strS1L9_C_Rate = @strS1L9_C_Rate 
-		, strS1L9_D_Rate = @strS1L9_D_Rate 
-		  				 
+		, strS1L9_D_Rate = @strS1L9_D_Rate
+		, strS1L12_Rate = @strS1L12_Rate
+
+		, strS2L5_Refund = @strS2L5_Refund
+		, strS2L6_Credit = @strS2L6_Credit 
+		, strS2L7_TransferTo = @strS2L7_TransferTo
+		, strS2L7_EndDate = @strS2L7_EndDate
+
 		, strS3L2_A_Rate = @strS3L2_A_Rate 
 		, strS3L2_B_Rate = @strS3L2_B_Rate 
 		, strS3L2_C_Rate = @strS3L2_C_Rate 
