@@ -318,6 +318,7 @@ BEGIN TRY
 								intMinimumAge				INT		NULL,
 								dblMinOrder					NUMERIC(18, 6) NULL,
 								dblSuggestedQty				NUMERIC(18, 6) NULL,
+								dblTransactionQtyLimit		NUMERIC(18, 6) NULL,
 								intStorageLocationId		INT		NULL,
 								intCountGroupId				INT		NULL
 						)
@@ -356,6 +357,7 @@ BEGIN TRY
 							intMinimumAge,
 							dblMinOrder,
 							dblSuggestedQty,
+							dblTransactionQtyLimit,
 							intStorageLocationId,
 							intCountGroupId
 						)
@@ -387,7 +389,8 @@ BEGIN TRY
 							intVendorId				= CASE WHEN piv.intVendorId = '' THEN NULL ELSE piv.intVendorId END, --piv.intVendorId,
 							intMinimumAge			= CASE WHEN piv.intMinimumAge = '' THEN NULL ELSE piv.intMinimumAge END, -- piv.intMinimumAge,
 							dblMinOrder				= CASE WHEN piv.dblMinOrder = '' THEN NULL ELSE piv.dblMinOrder END, -- piv.dblMinOrder,
-							dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty,
+							dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty, 
+							dblTransactionQtyLimit	= CASE WHEN piv.dblTransactionQtyLimit = '' THEN NULL ELSE piv.dblTransactionQtyLimit END, -- piv.dblTransactionQtyLimit, 
 							intStorageLocationId	= CASE WHEN piv.intStorageLocationId = '' THEN NULL ELSE piv.intStorageLocationId END, --piv.intStorageLocationId
 							intCountGroupId			= CASE WHEN piv.intCountGroupId = '' THEN NULL ELSE piv.intCountGroupId END --piv.intStorageLocationId
 						FROM (
@@ -404,7 +407,7 @@ BEGIN TRY
 						PIVOT (
 							MAX(strOldData) FOR strTableColumnName IN (ysnTaxFlag1,ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnDepositRequired, intDepositPLUId, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable,
 																		ysnReturnable, ysnSaleable, ysnIdRequiredLiquor, ysnIdRequiredCigarette, ysnPromotionalItem, ysnPrePriced, ysnApplyBlueLaw1, ysnApplyBlueLaw2,
-																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, 
+																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, dblTransactionQtyLimit,
 																		intStorageLocationId, intCountGroupId)
 						) piv
 
@@ -466,6 +469,7 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
+									 ItemLoc.dblTransactionQtyLimit,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc
@@ -516,7 +520,8 @@ BEGIN TRY
 											@intVendorId				INT,
 											@intMinimumAge				INT,
 											@dblMinOrder				NUMERIC(18, 6),
-											@dblSuggestedQty			NUMERIC(18, 6),
+											@dblSuggestedQty			NUMERIC(18, 6), 
+											@dblTransactionQtyLimit		NUMERIC(18, 6),
 											@intStorageLocationId		INT,
 											@intCountGroupId			INT
 				
@@ -549,7 +554,8 @@ BEGIN TRY
 											@intVendorId				= ISNULL(temp.intVendorId, ItemLoc.intVendorId), -- CASE WHEN temp.intVendorId IS NULL THEN ItemLoc.intVendorId ELSE temp.intVendorId END, -- temp.intVendorId,
 											@intMinimumAge				= ISNULL(temp.intMinimumAge, ItemLoc.intMinimumAge),
 											@dblMinOrder				= ISNULL(temp.dblMinOrder, ItemLoc.dblMinOrder),
-											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty),
+											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty), 
+											@dblTransactionQtyLimit		= ISNULL(temp.dblTransactionQtyLimit, ItemLoc.dblTransactionQtyLimit),
 											@intStorageLocationId		= ISNULL(temp.intStorageLocationId, ItemLoc.intStorageLocationId), -- CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
 											@intCountGroupId			= ISNULL(temp.intCountGroupId, ItemLoc.intCountGroupId)
 								FROM @tempITEMLOCATION temp
@@ -596,6 +602,7 @@ BEGIN TRY
 										,@intMinimumAge								= @intMinimumAge 
 										,@dblMinOrder								= @dblMinOrder 
 										,@dblSuggestedQty							= @dblSuggestedQty
+										,@dblTransactionQtyLimit					= @dblTransactionQtyLimit
 										,@intCountGroupId							= @intCountGroupId
 										,@intStorageLocationId						= @intStorageLocationId 
 										,@dblReorderPoint							= NULL
@@ -691,6 +698,7 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
+									 ItemLoc.dblTransactionQtyLimit,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc

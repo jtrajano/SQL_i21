@@ -300,22 +300,20 @@ OUTER APPLY
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
 OUTER APPLY(
+	SELECT CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, 
+		CASE WHEN Dep.strTransaction = 'Place in service' THEN 0
+		ELSE 1 END, Dep.dtmDepreciationToDate))) + 1, 0)) as float)) as datetime) endDate 
+)PrevDepPlusOneMonth
+OUTER APPLY(
 	SELECT t=
 	CASE
-	WHEN (A.dtmImportedDepThru >  DATEADD(m, 1, Dep.dtmDepreciationToDate) AND ISNULL(A.dtmImportedDepThru,0) >0 ) OR 
-	Dep.dtmDepreciationToDate IS NULL
-		THEN 0 
-	WHEN 
-		dbo.fnFAGetPreviousMonthPeriodEndDateFromDate(A.dtmImportedDepThru, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
-		= Dep.dtmDepreciationToDate  and isnull(A.dtmImportedDepThru,0) > 0
+	WHEN A.dtmImportedDepThru IS NULL THEN 0
+	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
+	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.endDate	THEN 0
+	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.endDate
 		THEN
-			CASE 
-				WHEN Dep.strTransaction = 'Place in service'  
-				THEN 0
-			ELSE		
-				 CASE when ISNULL(dblImportGAAPDepToDate,0) = 0 then 1
-				 ELSE 2
-				 END
+			CASE WHEN A.strTransaction = 'Place in service' THEN 0
+			ELSE 2
 			END
 	ELSE 
 		1
@@ -337,7 +335,7 @@ OUTER APPLY(
 ) U
 WHERE dblDepre < (BD.dblCost - BD.dblSalvageValue)
 AND intMonth > totalMonths
-AND strConvention <> 'Full Month'
+AND strConvention NOT IN ('Full Month', 'Mid Quarter', 'Mid Year')
 AND ISNULL(BD.ysnFullyDepreciated,0) = 0
 
 --ROUND OFF TO NEAREAST HUNDREDTHS
