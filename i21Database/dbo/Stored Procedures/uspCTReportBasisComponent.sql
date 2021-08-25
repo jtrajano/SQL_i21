@@ -18,6 +18,7 @@ BEGIN
 		, @strPosition				NVARCHAR(200)
 		, @EqualStartDate			DATETIME
 		, @EqualEndDate				DATETIME
+		, @EqualContractDate		DATETIME
 		, @intQtyDec				INT
 		, @intPriceDec				INT
 
@@ -86,7 +87,7 @@ BEGIN
 		, @dtmToContractDate = [to]
 	FROM @temp_xml_table   
 	WHERE [fieldname] = 'ContractDate'
-		AND	condition = 'BETWEEN'
+		AND	UPPER(condition) = 'BETWEEN'
 
 	SELECT @strProductType = [from]
 	FROM @temp_xml_table   
@@ -111,13 +112,13 @@ BEGIN
 		, @dtmToStartDate = [to]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'StartDate'
-		AND	condition = 'BETWEEN'
+		AND	UPPER(condition) = 'BETWEEN'
 
 	SELECT @dtmFromEndDate = [from]
 		, @dtmToEndDate = [to]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'EndDate'
-		AND	condition = 'BETWEEN'
+		AND	UPPER(condition) = 'BETWEEN'
 	
 	SELECT @EqualStartDate = [from]
 	FROM @temp_xml_table
@@ -127,6 +128,11 @@ BEGIN
 	SELECT @EqualEndDate = [from]
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'EndDate'
+		AND	condition = 'Equal To'
+
+	SELECT @EqualContractDate = [from]
+	FROM @temp_xml_table
+	WHERE [fieldname] = 'ContractDate'
 		AND	condition = 'Equal To'
 	
 	IF EXISTS(SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
@@ -207,6 +213,8 @@ BEGIN
 	WHERE CD.intContractStatusId <> 3
 		AND CD.dtmStartDate >= ISNULL(@dtmFromStartDate, CD.dtmStartDate) AND CD.dtmStartDate <= ISNULL(@dtmToStartDate, CD.dtmStartDate)
 		AND CD.dtmEndDate >= ISNULL(@dtmFromEndDate, CD.dtmEndDate) AND CD.dtmEndDate <= ISNULL(@dtmToEndDate, CD.dtmEndDate)
+		AND CH.dtmContractDate >= ISNULL(@dtmFromContractDate, CH.dtmContractDate) AND CH.dtmContractDate <= ISNULL(@dtmToContractDate, CH.dtmContractDate)
+		AND CONVERT(DATE, CH.dtmContractDate) = ISNULL(@EqualContractDate, CONVERT(DATE, CH.dtmContractDate))
 		AND CONVERT(DATE, CD.dtmStartDate) = ISNULL(@EqualStartDate, CONVERT(DATE, CD.dtmStartDate))
 		AND CONVERT(DATE, CD.dtmEndDate) = ISNULL(@EqualEndDate, CONVERT(DATE, CD.dtmEndDate))
 		AND CD.intContractDetailId = ISNULL(@intContractDetailId, CD.intContractDetailId)
