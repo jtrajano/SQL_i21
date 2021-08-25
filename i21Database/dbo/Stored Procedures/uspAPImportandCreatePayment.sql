@@ -23,13 +23,12 @@ BEGIN TRY
 	DECLARE @createdPayments NVARCHAR(1000) = '';
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
-	SELECT dtmDatePaid, 
-		   intEntityVendorId, 
-		   strCheckNumber, 
-		   intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) FOR XML PATH('')), 1, 1, '')
+	SELECT dtmDatePaid,
+		   strCheckNumber,
+		   intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
 	INTO #tmpMultiVouchersImport
 	FROM tblAPImportPaidVouchersForPayment I
-	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber
+	GROUP BY dtmDatePaid, intEntityVendorId, strCheckNumber, intCustomPartition
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpMultiVouchersImport)
 	BEGIN
@@ -54,23 +53,25 @@ BEGIN TRY
 		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId
 		WHERE P.intPaymentId = @createdPaymentId
 
-		UPDATE tblAPPayment SET strCheckMessage = @checkNumber, ysnEFTImported = 1 WHERE intPaymentId = @createdPaymentId
-
 		UPDATE P
 		SET P.intBankAccountId = @bankAccountId,
 			P.intCompanyLocationId = @locationId,
 			P.strCheckMessage = @checkNumber, 
 			P.ysnEFTImported = 1,
-			P.dblAmountPaid = PD.dblPayment
+			P.dblAmountPaid = PD.dblPayment,
+			P.intPaymentMethodId = CASE WHEN PD.dblPayment = 0 AND PC.intPaymentCount > 1 THEN 3 ELSE P.intPaymentMethodId END
 		FROM tblAPPayment P
 		OUTER APPLY (
 			SELECT SUM(dblPayment) dblPayment FROM tblAPPaymentDetail WHERE intPaymentId = P.intPaymentId
 		) PD
+		OUTER APPLY (
+			SELECT COUNT(*) intPaymentCount FROM tblAPPaymentDetail WHERE dblPayment <> 0
+		) PC
 		WHERE P.intPaymentId = @createdPaymentId
 		
 		EXEC uspAPUpdateVoucherPayment @createdPaymentId, 1
 
-		DELETE FROM #tmpMultiVouchersImport WHERE dtmDatePaid = @datePaid AND (strCheckNumber = @checkNumber OR (strCheckNumber IS NULL AND @checkNumber IS NULL)) AND intIds = @intIds
+		DELETE FROM #tmpMultiVouchersImport WHERE intIds = @intIds
 
 		SET @createdPayments = @createdPayments + CASE WHEN @createdPayments = '' THEN '' ELSE ', ' END + CONVERT(VARCHAR(12), @createdPaymentId)
 	END
