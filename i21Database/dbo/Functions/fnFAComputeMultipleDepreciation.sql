@@ -333,7 +333,7 @@ OUTER APPLY(
 ) U
 WHERE dblDepre < (BD.dblCost - BD.dblSalvageValue)
 AND intMonth > totalMonths
-AND strConvention <> 'Full Month'
+AND strConvention NOT IN ('Full Month', 'Mid Quarter')
 AND ISNULL(BD.ysnFullyDepreciated,0) = 0
 
 UPDATE @tblAssetInfo
