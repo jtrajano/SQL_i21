@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFCompleteTask @intOrderHeaderId INT
+﻿CREATE PROCEDURE [dbo].[uspMFCompleteTask] @intOrderHeaderId INT
 	,@intUserId INT
 	,@strTaskId NVARCHAR(MAX) = NULL
 	,@ysnLoad BIT = 0
@@ -75,6 +75,7 @@ BEGIN TRY
 		,@Charges ShipmentChargeStagingTable
 		,@Lots ShipmentItemLotStagingTable
 		,@lotsOnly ShipmentItemLotsOnlyStagingTable
+		,@strConsumeSourceLocation nvarchar(50)
 
 	IF @strTaskId = ''
 		SELECT @strTaskId = NULL
@@ -252,12 +253,24 @@ BEGIN TRY
 			AND intLocationId = @intLocationId
 			AND intAttributeId = 75
 
+	SELECT @strConsumeSourceLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 124
+
+	IF @strConsumeSourceLocation = ''
+		OR @strConsumeSourceLocation IS NULL
+	BEGIN
+		SELECT @strConsumeSourceLocation = 'False'
+	END
+
 		IF EXISTS (
 				SELECT *
 				FROM tblMFTask T
 				JOIN @tblTasks T1 ON T1.intTaskId = T.intTaskId
 				WHERE T.intToStorageLocationId = @intStageLocationId
-				)
+				) AND @strConsumeSourceLocation = 'False'
 		BEGIN
 			SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmDate, @intLocationId)
 
@@ -381,6 +394,8 @@ BEGIN TRY
 			SELECT @strTransactionId = @strReferenceNo
 
 			SELECT @intInventoryTransactionType = 5
+
+			SELECT @strConsumeSourceLocation = 'False'
 		END
 		ELSE
 		BEGIN
@@ -444,6 +459,8 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			if @strConsumeSourceLocation = 'False'
+			Begin
 			IF @strInventoryTracking = 'Lot Level'
 			BEGIN
 				EXEC uspMFLotMove @intLotId = @intLotId
@@ -561,6 +578,7 @@ BEGIN TRY
 					WHERE intInventoryTransferId = @intTransferId
 				END;
 			END
+			End
 		END
 
 		IF @ysnLoadProcessEnabled = 0

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspMFGenerateERPProductionOrder (
+﻿CREATE PROCEDURE [dbo].[uspMFGenerateERPProductionOrder] (
 	@strCompanyLocation NVARCHAR(6) = NULL
 	,@ysnUpdateFeedStatus BIT = 1
 	)
@@ -126,6 +126,7 @@ BEGIN TRY
 				+'<ProcessName>'+	MP.strProcessName   +'</ProcessName>'
 				+'<WorkOrderType>'+	(Case When IsNULL(SL.ysnExternal,0) =1 Then 'Offsite' Else 'Inhouse' End)   +'</WorkOrderType>'
 				+'<VendorAccountNo>'+	IsNULL(V.strVendorAccountNum,'')   +'</VendorAccountNo>'
+				+'<Book>' + ISNULL(PM.strPaymentMethod, '') + '</Book>'
 				+'<WorkOrderNo>'+	W.strWorkOrderNo    +'</WorkOrderNo>'
 				+'<ItemNo>'+	I.strItemNo     +'</ItemNo>'
 				+'<FormulaNumber>'+	IsNULL(IsNULL(WR.strERPRecipeNo,R.strERPRecipeNo),'')     +'</FormulaNumber>'
@@ -153,6 +154,7 @@ BEGIN TRY
 			LEFT JOIN tblMFMachine M ON M.intMachineId = W.intMachineId
 			LEFT JOIN dbo.tblLGWarehouseRateMatrixHeader WRM ON WRM.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId
 			LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = WRM.intVendorEntityId
+			LEFT JOIN dbo.tblSMPaymentMethod PM ON PM.intPaymentMethodID = V.intPaymentMethodId
 			WHERE W.intWorkOrderId = @intWorkOrderId
 
 
