@@ -22,6 +22,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF  
+SET XACT_ABORT ON
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -56,13 +57,13 @@ DECLARE  @totalRecords INT = 0
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
---IF ISNULL(@RaiseError,0) = 0	
---BEGIN
+IF ISNULL(@RaiseError,0) = 0	
+BEGIN
 	IF @InitTranCount = 0
 		BEGIN TRANSACTION
 	ELSE
 		SAVE TRANSACTION @Savepoint
---END
+END
 
 DECLARE @ErrorMerssage NVARCHAR(MAX)
 SET @Success = 1
@@ -1009,12 +1010,14 @@ BEGIN TRY
             @Post    = @Post
            ,@BatchId = @BatchIdUsed
 		   ,@UserId  = @UserId
+		   ,@raiseError = @RaiseError
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
 	        @Post             = @Post
            ,@BatchId          = @BatchIdUsed
 		   ,@UserId           = @UserId
 		   ,@IntegrationLogId = @IntegrationLogId
+		   ,@raiseError		  = @RaiseError
 
 	UPDATE ILD
 	SET
@@ -1240,49 +1243,50 @@ Do_Commit:
 	RETURN 1;
 
 Do_Rollback:
-	--IF @RaiseError = 0
-	--	BEGIN
-			IF @InitTranCount = 0
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION
-			ELSE
-				IF (XACT_STATE()) <> 0
-					ROLLBACK TRANSACTION @Savepoint
+	IF @RaiseError = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
 												
-			SET @CurrentTranCount = @@TRANCOUNT
-			SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
+		SET @CurrentTranCount = @@TRANCOUNT
+		SET @CurrentSavepoint = SUBSTRING(('uspARPostInvoiceNew' + CONVERT(VARCHAR, @CurrentTranCount)), 1, 32)										
 			
-			IF @CurrentTranCount = 0
-				BEGIN TRANSACTION
-			ELSE
-				SAVE TRANSACTION @CurrentSavepoint
+		IF @CurrentTranCount = 0
+			BEGIN TRANSACTION
+		ELSE
+			SAVE TRANSACTION @CurrentSavepoint
 
-			UPDATE ILD
-			SET
-				 ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
-				,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
-				,ILD.[strPostingMessage]	= @ErrorMerssage
-				,ILD.[strBatchId]			= @BatchId
-				,ILD.[strPostedTransactionId] = ''
-			FROM
-				tblARInvoiceIntegrationLogDetail ILD
-			WHERE
-				ILD.[intIntegrationLogId] = @IntegrationLogId
-				AND ILD.[ysnPost] IS NOT NULL							
+		UPDATE ILD
+		SET
+				ILD.[ysnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
+			,ILD.[ysnUnPosted]			= CASE WHEN ILD.[ysnPost] = 1 THEN ILD.[ysnUnPosted] ELSE 1 END
+			,ILD.[strPostingMessage]	= @ErrorMerssage
+			,ILD.[strBatchId]			= @BatchId
+			,ILD.[strPostedTransactionId] = ''
+		FROM
+			tblARInvoiceIntegrationLogDetail ILD
+		WHERE
+			ILD.[intIntegrationLogId] = @IntegrationLogId
+			AND ILD.[ysnPost] IS NOT NULL							
 
-			IF @CurrentTranCount = 0
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION
-					IF (XACT_STATE()) = 1
-						COMMIT TRANSACTION
-				END		
-			ELSE
-				BEGIN
-					IF (XACT_STATE()) = -1
-						ROLLBACK TRANSACTION  @CurrentSavepoint
-				END	
-		--END
+		IF @CurrentTranCount = 0
+			BEGIN
+				IF (XACT_STATE()) = -1
+					ROLLBACK TRANSACTION
+				IF (XACT_STATE()) = 1
+					COMMIT TRANSACTION
+			END		
+		ELSE
+			BEGIN
+				IF (XACT_STATE()) = -1
+					ROLLBACK TRANSACTION  @CurrentSavepoint
+			END	
+	END
+
 	IF @RaiseError = 1
 		RAISERROR(@ErrorMerssage, 11, 1)	
 	    

@@ -3,6 +3,7 @@
 	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
+	,@raiseError  AS BIT   = 0
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -16,6 +17,24 @@ DECLARE @OneDecimal DECIMAL(18,6) = 1.000000
 
 DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 DECLARE @Invoices AS dbo.[InvoiceId]
+
+DECLARE  @InitTranCount				INT
+		,@CurrentTranCount			INT
+		,@Savepoint					NVARCHAR(32)
+		,@CurrentSavepoint			NVARCHAR(32)
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+IF ISNULL(@raiseError,0) = 0
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
+
+BEGIN TRY
 
 IF @Post = 1
 BEGIN    
@@ -557,7 +576,7 @@ BEGIN
 		ORDER BY [intInvoiceId]
 		
         --UPDATE CONTRACT SEQUENCE BALANCE
-		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 1, @UserId = @UserId
+		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDU, @ysnDelete = 1, @UserId = @UserId
 		
 		--COMMITTED QTY
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDU, 1, @UserId, 1
@@ -753,3 +772,26 @@ SELECT DISTINCT
 FROM #ARPostInvoiceHeader
 
 EXEC [dbo].[uspSMInsertAuditLogs] @LogEntries = @InvoiceLog
+
+END TRY
+BEGIN CATCH
+    DECLARE @ErrorMerssage NVARCHAR(MAX)
+	SELECT @ErrorMerssage = ERROR_MESSAGE()
+
+	IF @raiseError = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
+												
+	RAISERROR(@ErrorMerssage, 11, 1)
+		
+	GOTO Post_Exit
+END CATCH
+
+Post_Exit:
+	RETURN 0;
