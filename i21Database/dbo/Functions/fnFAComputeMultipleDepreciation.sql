@@ -312,8 +312,8 @@ OUTER APPLY(
 	CASE
 	WHEN A.dtmImportedDepThru IS NULL THEN 0
 	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
-	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.dtmEnDate THEN 0
-	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.dtmEnDate
+	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.dtmEndDate THEN 0
+	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.dtmEndDate
 		THEN
 			CASE WHEN A.strTransaction = 'Place in service' THEN 0
 			ELSE 2
