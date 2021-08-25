@@ -1362,7 +1362,7 @@ BEGIN TRY
 				, dblDummyContractBasis = ISNULL(cd.dblBasis, 0)
 				, dblCash = CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice ELSE NULL END
 				, dblFuturesClosingPrice1 = dblFuturePrice
-				, dblFutures = CASE WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Basis' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
+				, dblFutures = CASE WHEN strPricingType = 'Basis' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
 									--Basis (Partially Priced) Priced Record
 									WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' THEN ISNULL(priceFixationDetail.dblFutures, 0)
 									ELSE 
