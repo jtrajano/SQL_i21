@@ -146,10 +146,11 @@ AS
 			AP.strApprovalStatus,
 			P.strPositionType,
 			CH.ysnReadOnlyInterCoContract,
-			intCommodityFutureMarketId = NM.intCommodityFutureMarketId
+			intCommodityFutureMarketId = NM.intCommodityFutureMarketId,
+			ysnContractRequiresApproval = (case when te.countValue > 0 or ue.countValue > 0 then convert(bit,1) else convert(bit,0) end)
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
-	OUTER APPLY --dbo.[fnCTGetLastApprovalStatus](CH.intContractHeaderId) strApprovalStatus
+	OUTER APPLY
 	(
 		SELECT	TOP 1 AP.strStatus AS strApprovalStatus 
 		FROM	tblSMApproval		AP
@@ -159,4 +160,10 @@ AS
 		WHERE	SC.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
 		AND		AP.ysnCurrent = 1
 	) AP
+	cross apply (
+		select countValue=count(*) from tblEMEntityRequireApprovalFor em where em.intEntityId = CH.intEntityId
+	)te
+	cross apply (
+		select countValue=count(*) from tblSMUserSecurityRequireApprovalFor smUser where smUser.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById)
+	)ue
 	LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
