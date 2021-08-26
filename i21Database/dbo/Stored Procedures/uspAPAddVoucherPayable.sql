@@ -273,6 +273,8 @@ BEGIN
 			,[intSubLocationId]					=	A.intSubLocationId
 			,[strSubLocationName]				=	subLoc.strSubLocationName
 			,[intLineNo]						=	A.intLineNo
+			,[intBookId]						=	A.intBookId
+			,[intSubBookId]						=	A.intSubBookId
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -399,6 +401,8 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -486,6 +490,8 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

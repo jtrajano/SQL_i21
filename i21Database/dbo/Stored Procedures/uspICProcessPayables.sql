@@ -72,6 +72,8 @@ SET ANSI_WARNINGS OFF
 			,[intFreightTermId]				
 			,[strBillOfLading]					
 			,[ysnReturn]
+			,[intBookId]
+			,[intSubBookId]
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -127,6 +129,8 @@ SET ANSI_WARNINGS OFF
 			,GP.[intFreightTermId]				
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
+			,GP.[intBookId]
+			,GP.[intSubBookId]
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
 	END
 	
