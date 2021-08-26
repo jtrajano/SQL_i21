@@ -34,6 +34,14 @@ CREATE TABLE #TempMBILInvoice (
 		INSERT INTO #TempMBILInvoice SELECT [intInvoiceId] FROM tblMBILInvoice WHERE ysnPosted = 0
 
 	-------------------------------------------------------------
+	------------------- Update Tax Detail-----------------------
+	-------------------------------------------------------------
+    UPDATE tblMBILInvoiceTaxCode 
+	SET dblTax = CASE WHEN strCalculationMethod ='Percentage' THEN (item.dblQuantity * item.dblPrice * (tax.dblRate / 100)) ELSE item.dblQuantity * tax.dblRate END
+	FROM tblMBILInvoiceItem item 
+	INNER JOIN tblMBILInvoiceTaxCode tax ON item.intInvoiceItemId = tax.intInvoiceItemId
+	WHERE item.intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+	-------------------------------------------------------------
 	------------------- Validate Invoices -----------------------
 	-------------------------------------------------------------
 	IF NOT EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice))
