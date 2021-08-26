@@ -57,9 +57,7 @@ BEGIN TRY
 			,@blbChildSubmitSignature				varbinary(max)
 			,@blbChildApproveSignature				varbinary(max)
 			,@intChildDefaultSubmitById				int
-			,@strTransactionApprovalStatus			NVARCHAR(100)
-			,@intInterParentDefaultSubmitById INT
-			,@intInterParentDefaultAprovedById INT;
+			,@strTransactionApprovalStatus			NVARCHAR(100);
 
 	DECLARE @tblSequenceHistoryId TABLE
 	(
@@ -219,20 +217,6 @@ BEGIN TRY
 		inner join tblSMUserSecurity us on lower(us.strUserName) = lower(mc.strApprover)
 	where
 		ch.intContractHeaderId = @intContractHeaderId
-		
-	select top 1 @intInterParentDefaultSubmitById = d.intEntityId  from tblCTIntrCompApproval c			
-	left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
-	left join tblCTContractHeader a on a.intContractHeaderId = @intContractHeaderId
-	inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
-	where c.ysnApproval = 0 and @thisContractStatus NOT IN ('Waiting for Submit') AND b.intMultiCompanyParentId = 1
-	order by c.intContractHeaderId desc  
-
-	select top 1 @intInterParentDefaultAprovedById = d.intEntityId  from tblCTIntrCompApproval c			
-	left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
-	left join tblCTContractHeader a on a.intContractHeaderId = @intContractHeaderId
-	inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
-	where c.ysnApproval = 1 and  @thisContractStatus = 'Approved' AND b.intMultiCompanyParentId = 1
-	order by c.intContractHeaderId desc  
 
 	select
 		@ysnIsParent = t.ysnIsParent
@@ -252,8 +236,8 @@ BEGIN TRY
 		(
 		select
 			ysnIsParent = (case when isnull(b.intMultiCompanyParentId,0) = 0 then convert(bit,1) else convert(bit,0) end)
-			,intParentSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @StraussContractSubmitId else ISNULL(d.intEntityId,@intInterParentDefaultSubmitById) end)
-			,intParentApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @FirstApprovalId else ISNULL(f.intEntityId,ISNULL(k.intEntityId,@intInterParentDefaultAprovedById)) end)
+			,intParentSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @StraussContractSubmitId else d.intEntityId end)
+			,intParentApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @FirstApprovalId else ISNULL(f.intEntityId,k.intEntityId) end)
 			,intChildSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then d.intEntityId else @StraussContractSubmitId end)
 			,intChildApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then f.intEntityId else @FirstApprovalId end)
 		from
@@ -265,7 +249,6 @@ BEGIN TRY
 			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
 			left join tblCTIntrCompApproval j on j.intContractHeaderId = a.intContractHeaderId and j.strScreen =  'Contract' and j.ysnApproval = 1
 			left join tblSMUserSecurity k on lower(k.strUserName) = lower(j.strUserName)
-			
 		where
 			a.intContractHeaderId = @intContractHeaderId
 		) t
