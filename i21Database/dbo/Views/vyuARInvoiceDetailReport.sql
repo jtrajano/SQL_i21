@@ -22,7 +22,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strComments				= I.strComments
 	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
 	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblShipmentNetWt, 0) ELSE ISNULL(ID.dblShipmentNetWt, 0) * -1 END
-	 , dblUnitCost				= CASE WHEN CT.intContractHeaderId IS NOT NULL THEN ISNUlL(ID.dblUnitPrice,0) ELSE ISNULL( ID.dblPrice,0) END
+	 , dblUnitCost				= CASE WHEN CT.intContractHeaderId IS NOT NULL AND ISNUlL(ID.dblUnitPrice, 0) <> 0 THEN ISNUlL(ID.dblUnitPrice, 0) ELSE ISNULL( ID.dblPrice, 0) END
 	 , dblCostPerUOM			= ISNULL(ID.dblPrice, 0)
 	 , dblUnitCostCurrency		= ISNULL(ID.dblPrice, 0)
 	 , dblTotalTax				= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblTotalTax, 0) ELSE ISNULL(ID.dblTotalTax, 0) * -1 END
@@ -44,6 +44,9 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
 	 , intBillToLocationId		= I.intBillToLocationId
 	 , intShipToLocationId		= I.intShipToLocationId
+	 , strBinNumber				= ID.strBinNumber
+	 , strGroupNumber			= ID.strGroupNumber
+	 , strFeedDiet				= ID.strFeedDiet
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
@@ -61,6 +64,9 @@ INNER JOIN (
 		 , strUnitCostCurrency = SC.strCurrency
 		 , dblShipmentNetWt
 		 , intEntitySalespersonId
+		 , strBinNumber
+		 , strGroupNumber
+		 , strFeedDiet
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID

@@ -337,7 +337,6 @@ BEGIN TRY
         ,@PostDate 		= @PostDate
         ,@BatchId  		= @BatchIdUsed
         ,@UserId   		= @UserId
-		,@raiseError	= 1
 
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -486,12 +485,14 @@ BEGIN TRY
             @Post    = @Post
            ,@BatchId = @BatchIdUsed
 		   ,@UserId  = @UserId
+		   ,@raiseError = @RaiseError
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
 	        @Post             = @Post
            ,@BatchId          = @BatchIdUsed
 		   ,@UserId           = @UserId
 		   ,@IntegrationLogId = @IntegrationLogId
+		   ,@raiseError		  = @RaiseError
 
 	UPDATE ILD
 	SET

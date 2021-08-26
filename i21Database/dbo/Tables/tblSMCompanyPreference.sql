@@ -6,6 +6,7 @@
     [intDefaultCountryId] INT NULL,
     [strEnvironmentType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''),
     [ysnLegacyIntegration] BIT NOT NULL,
+    [ysnEasyAutomation] BIT NOT NULL DEFAULT 0,
     [strSourceSystem] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT (''),
 	[strAccountingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [strSMTPHost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -69,5 +70,6 @@
     [strADUserName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strADPassword] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnEnableUserActivityLog] BIT NOT NULL DEFAULT 0,
+	[strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )

@@ -213,7 +213,7 @@ SELECT   intRow
 			, strUnitMeasure
 			, intCollateralId
 			, strLocationName
-			, strCustomerName
+			, strEntityName
 			, strReceiptNo
 			, intContractHeaderId
 			, strContractNumber

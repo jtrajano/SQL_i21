@@ -22,20 +22,20 @@ IF @transCount = 0 BEGIN TRANSACTION;
 
 UPDATE A
 	SET A.strNotes = CASE
-					WHEN 
-							A.intCurrencyId = B.intCurrencyId
-						AND B.ysnPaid = 0
-						AND B.ysnPosted = 1
-						AND B.intBillId > 0
-						AND ABS(A.dblPayment) = B.dblAmountDue --MAKE THE CSV DATA AMOUNT POSITIVE TO CORRECTLY VALIDATE WITH tblAPBill.dblAmountDue
-						-- THEN 
-						-- 	(
-						-- 		CASE 
-						-- 		WHEN ABS(A.dblPayment) < 0 AND B.intTransactionType = 1
-						-- 		THEN 'Invalid amount.'
-						-- 		ELSE NULL END
-						-- 	)
-						THEN NULL
+					-- WHEN 
+					-- 		A.intCurrencyId = B.intCurrencyId
+					-- 	AND B.ysnPaid = 0
+					-- 	AND B.ysnPosted = 1
+					-- 	AND B.intBillId > 0
+					-- 	AND ABS(A.dblPayment) = B.dblAmountDue --MAKE THE CSV DATA AMOUNT POSITIVE TO CORRECTLY VALIDATE WITH tblAPBill.dblAmountDue
+					-- 	-- THEN 
+					-- 	-- 	(
+					-- 	-- 		CASE 
+					-- 	-- 		WHEN ABS(A.dblPayment) < 0 AND B.intTransactionType = 1
+					-- 	-- 		THEN 'Invalid amount.'
+					-- 	-- 		ELSE NULL END
+					-- 	-- 	)
+					-- 	THEN NULL
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
 					THEN 'Currency is different on current selected currency.'

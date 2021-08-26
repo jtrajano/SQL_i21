@@ -1,17 +1,17 @@
 CREATE PROCEDURE uspGLFixPostHistoryGroupings
     @strTransactionId NVARCHAR(30)
 AS
-
-IF EXISTS (SELECT TOP 1 1 FROM tblGLDetail WHERE strTransactionId = @strTransactionId AND dtmDateEnteredMin IS NULL) -- THIS INDICATES THAT THIS UPDATE SCRIPT HAVE NOT BEEN EXECUTED
+IF EXISTS (SELECT TOP 1 1 FROM tblGLDetail WHERE strTransactionId = @strTransactionId 
+AND (dtmDateEnteredMin IS NULL or ysnPostAction is null)) -- THIS INDICATES THAT THIS UPDATE SCRIPT HAVE NOT BEEN EXECUTED
 BEGIN
     WITH GLGroupings as(
-    SELECT 
+        SELECT 
         strBatchId,
         MIN(dtmDateEntered)dtmDateEnteredMin, 
         ROW_NUMBER() OVER (ORDER BY min(dtmDateEntered)) rowId
         FROM tblGLDetail 
         WHERE @strTransactionId = strTransactionId
-        GROUP BY strBatchId,dtmDateEntered
+        GROUP BY strBatchId
     )
     UPDATE A 
     SET ysnPostAction = rowId%2 ,

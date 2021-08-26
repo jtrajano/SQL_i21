@@ -607,6 +607,7 @@
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
+    <Build Include="dbo\Views\vyuCMBankFileGenerationLog.sql" />
     <Build Include="dbo\Views\vyuCMBankTransaction.sql" />
     <Build Include="dbo\Tables\tblEMEntityCredential.sql" />
     <Build Include="dbo\Tables\tblCMAptrxmstArchive.sql" />
@@ -2195,6 +2196,7 @@
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleOverflowReport.sql" />
     <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
+    <Build Include="dbo\Views\vyuGLJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalYearStatus.sql" />
     <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateBillStatus.sql" />
@@ -8904,6 +8906,7 @@
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessSummaryLogOnPriceUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog2.sql" />
@@ -9031,6 +9034,8 @@
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9310,6 +9315,7 @@
     <None Include="Scripts\Post-Deployment\GR\UpdateCostBucketCustomerStorageInTransferStorageReference.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMargin.sql" />
     <None Include="Scripts\Post-Deployment\CT\DropUnusedObjects.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

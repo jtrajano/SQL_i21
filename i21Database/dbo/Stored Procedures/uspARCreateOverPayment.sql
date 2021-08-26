@@ -106,8 +106,9 @@ DECLARE
 	,@ItemLeaseBilling					BIT				= 0
 	,@ItemVirtualMeterReading			BIT				= 0
 	,@SubCurrency						BIT				= 0
-
-
+	,@ItemCurrencyExchangeRateTypeId 	INT    			= NULL
+ 	,@ItemCurrencyExchangeRateId  		INT    			= NULL
+ 	,@ItemCurrencyExchangeRate   		NUMERIC(18,6) 	= 0.000000
 
 SELECT TOP 1
 	 @EntityCustomerId					= ARC.[intEntityId]
@@ -193,11 +194,16 @@ SELECT TOP 1
 	,@ItemPerformerId					= NULL
 	,@ItemLeaseBilling					= 0
 	,@ItemVirtualMeterReading			= 0
+	,@ItemCurrencyExchangeRateTypeId 	= ARPD.intCurrencyExchangeRateTypeId
+ 	,@ItemCurrencyExchangeRateId  		= @ItemCurrencyExchangeRateId
+ 	,@ItemCurrencyExchangeRate   		= ARPD.dblCurrencyExchangeRate
 FROM
 	[tblARPayment] ARP
 INNER JOIN
 	[tblARCustomer] ARC
 		ON ARP.[intEntityCustomerId] = ARC.[intEntityId]
+INNER JOIN tblARPaymentDetail ARPD 
+		ON ARP.intPaymentId = ARPD.intPaymentId
 WHERE 
 	ARP.[intPaymentId] = @PaymentId
 
@@ -290,7 +296,9 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemPerformerId					= @ItemPerformerId
 	,@ItemLeaseBilling					= @ItemLeaseBilling
 	,@ItemVirtualMeterReading			= @ItemVirtualMeterReading
-	      
+	,@ItemCurrencyExchangeRateTypeId 	= @ItemCurrencyExchangeRateTypeId
+ 	,@ItemCurrencyExchangeRateId  		= @ItemCurrencyExchangeRateId
+ 	,@ItemCurrencyExchangeRate   		= @ItemCurrencyExchangeRate	      
 		  
 SET @NewInvoiceId = @NewId		                 
       

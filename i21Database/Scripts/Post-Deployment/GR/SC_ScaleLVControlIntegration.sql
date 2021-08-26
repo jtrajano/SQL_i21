@@ -233,7 +233,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
-				,ISNULL(gasct_open_close_ind, ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
+				,ISNULL(nullif(gasct_open_close_ind, ''''), ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
 				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
 				,gasct_com_cd COLLATE Latin1_General_CI_AS AS strItemNo
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
@@ -824,8 +824,26 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
 						--LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId				
-						left join tblGRDiscountCrossReference GRD_CROSS_REF on ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId) = GRD_CROSS_REF.intDiscountId
-						left join tblGRDiscountCrossReference ICC_GRD_CROSS_REF on ICC.intScheduleDiscountId = ICC_GRD_CROSS_REF.intDiscountId
+						left join (
+							select 
+								DCrossRef.intDiscountId 
+								,DCrossRef.intDiscountScheduleId
+								,DSchedule.intCommodityId
+							from tblGRDiscountCrossReference DCrossRef
+							join tblGRDiscountSchedule DSchedule
+								on DCrossRef.intDiscountScheduleId = DSchedule.intDiscountScheduleId
+						) GRD_CROSS_REF on ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId) = GRD_CROSS_REF.intDiscountId
+							and ICC.intCommodityId = GRD_CROSS_REF.intCommodityId
+						left join (
+							select 
+								DCrossRef.intDiscountId 
+								,DCrossRef.intDiscountScheduleId
+								,DSchedule.intCommodityId
+							from tblGRDiscountCrossReference DCrossRef
+							join tblGRDiscountSchedule DSchedule
+								on DCrossRef.intDiscountScheduleId = DSchedule.intDiscountScheduleId
+						)ICC_GRD_CROSS_REF on ICC.intScheduleDiscountId = ICC_GRD_CROSS_REF.intDiscountId
+							and ICC.intCommodityId = ICC_GRD_CROSS_REF.intCommodityId
 						OUTER APPLY (
 							SELECT TOP 1 intLoadId, intLoadDetailId,
 								intContractDetailId = case 
