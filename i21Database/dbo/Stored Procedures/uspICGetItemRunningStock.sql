@@ -386,6 +386,7 @@ SELECT
 	, intDecimalPlaces = iUOM.intDecimalPlaces
 	, ItemUOM.ysnAllowPurchase
 	, ItemUOM.ysnAllowSale
+	, dblStandardCost = ItemPricing.dblStandardCost
 FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		ON i.intItemId = t.intItemId
 	INNER JOIN (
@@ -443,7 +444,8 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		AND StockUOM.ysnStockUnit = 1
 	LEFT JOIN tblICItemLocation ItemLocation
 		ON ItemLocation.intItemLocationId = t.intItemLocationId
-	LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = t.intItemLocationId
+	LEFT JOIN tblICItemPricing ItemPricing 
+		ON ItemPricing.intItemLocationId = t.intItemLocationId
     	AND ItemPricing.intItemId = ItemLocation.intItemId
 	LEFT JOIN tblSMCompanyLocation CompanyLocation
 		ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
