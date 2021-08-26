@@ -41,9 +41,9 @@ DECLARE @tblInventoryTransactionGrouped TABLE (
 	intSubLocationId INT,
 	intStorageLocationId INT,
 	intCostingMethodId INT,
-	dblQty NUMERIC(38, 20),
-	dblUnitStorage NUMERIC(38, 20),
-	dblCost NUMERIC(38, 20)
+	dblQty NUMERIC(38, 6),
+	dblUnitStorage NUMERIC(38, 6),
+	dblCost NUMERIC(38, 6)
 );
 
 DECLARE @tblInventoryTransactionsInStockUOM TABLE (
@@ -349,7 +349,7 @@ SELECT
 	, strStorageLocationName		= strgLoc.strName
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
-	, dblRunningAvailableQty		= ROUND(t.dblQty, 6)
+	, dblRunningAvailableQty		= ROUND(t.dblQty, 6) 
 	, dblRunningReservedQty			= ROUND(ISNULL(reserved.dblQty, 0), 6)
 	, dblRunningAvailableQtyNoReserved = ROUND(ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0), 6) 
 	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
