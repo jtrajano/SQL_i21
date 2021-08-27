@@ -1,5 +1,9 @@
 ﻿CREATE VIEW [dbo].[vyuGRSettlementInboundSubReport]
 AS
+	
+	-- We are using this view to directly insert table to an API Export table
+	-- If there are changes in the view please update the insert in uspGRAPISettlementReportExport as well
+
 	WITH MSPG_123 (intPaymentId, strId, intBillId, intItemId, strDiscountCode, strDiscountCodeDescription, dblDiscountAmount, dblAmount, dblTax, Net, intCustomerStorageId, intInventoryReceiptChargeId)
 	AS 
 	(
