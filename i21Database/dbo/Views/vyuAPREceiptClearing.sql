@@ -456,6 +456,31 @@ join (
 -- 		AND APClearing.intTransactionId = receipt.intInventoryReceiptId
 -- 		AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- 		AND APClearing.intItemId = receiptItem.intItemId
+
+--receipts in storage that were FULLY transferred from DP to DP only
+LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
+    ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+--receipts in storage that were transferred
+OUTER APPLY (
+    SELECT TOP 1 [ysnExists] = 1
+    FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+    INNER JOIN tblGRStorageHistory SH
+        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
+    INNER JOIN tblGRCustomerStorage CS
+        ON CS.intCustomerStorageId = SH.intCustomerStorageId
+        AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+    INNER JOIN tblGRTransferStorageReference TSR
+        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
+    WHERE IR.intInventoryReceiptId = receipt.intInventoryReceiptId
+    AND IR.strReceiptNumber = receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
+) transferClr
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
 AND bill.ysnPosted = 1
@@ -463,7 +488,14 @@ AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
-
-
+--receipts in storage that were transferred
+-- AND NOT EXISTS(
+-- 	SELECT TOP 1 1
+-- 	FROM vyuGRTransferClearing transferClr
+--     WHERE transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+-- 	AND transferClr.strTransactionNumber = receipt.strReceiptNumber
+-- )
+--AND receipt.dtmReceiptDate >= '2020-09-09'GO
+AND transferClr.ysnExists IS NULL
 GO
 
