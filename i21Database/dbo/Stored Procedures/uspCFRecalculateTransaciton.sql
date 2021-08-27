@@ -6880,6 +6880,9 @@ BEGIN
 		SET @dblMargin = 0
 	END
 
+
+	SET @dblMargin = ROUND(@dblMargin,6) 
+
 	---------------------------------------------------
 	--				MARGIN COMPUTATION				 --
 	---------------------------------------------------
