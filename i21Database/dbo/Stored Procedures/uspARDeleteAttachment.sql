@@ -17,13 +17,29 @@ BEGIN TRY
 
 	IF @intAttachmentRetention > 0 
 	BEGIN
+		DECLARE @AttachmentIds Id
+
+		INSERT INTO @AttachmentIds
+		SELECT		SMA.intAttachmentId
+		FROM		tblSMAttachment AS SMA
+		INNER JOIN	dbo.tblSMTransaction AS SMT
+		ON			SMA.intTransactionId = SMT.intTransactionId
+		INNER JOIN	dbo.tblSMScreen AS SMS
+		ON			SMT.intScreenId = SMS.intScreenId
+		INNER JOIN	dbo.tblEMEntityType AS ENET
+		ON			SMA.strRecordNo = ENET.intEntityId
+		INNER JOIN	tblSMUpload SMU
+		ON			SMA.intAttachmentId = SMU.intAttachmentId
+		WHERE		SMS.strNamespace = 'EntityManagement.view.Entity'
+		AND			ENET.strType = 'Customer'
+
 		DELETE FROM SMA
-		FROM tblSMAttachment SMA
-		INNER JOIN tblSMUpload SMU
-		ON SMA.intAttachmentId = SMU.intAttachmentId
-		WHERE SMA.strScreen IN ('AccountsReceivable.view.ReceivePaymentsDetail', 'AccountsReceivable.view.Invoice', 'AccountsReceivable.view.SalesOrder')
-		AND (DATEDIFF(MONTH, dtmDateUploaded, GETDATE()) / 12) > @intAttachmentRetention
-		AND dtmDateUploaded IS NOT NULL
+		FROM		tblSMAttachment SMA
+		INNER JOIN	tblSMUpload SMU
+		ON			SMA.intAttachmentId = SMU.intAttachmentId
+		WHERE		SMA.intAttachmentId IN (SELECT intId FROM @AttachmentIds)
+		AND			dtmDateUploaded < DATEADD(YEAR, @intAttachmentRetention * -1, DATEADD(DAY, 0, GETDATE()))
+		AND			dtmDateUploaded IS NOT NULL
 	END
 
 END TRY
@@ -33,8 +49,8 @@ BEGIN CATCH
 
 	RAISERROR(@ErrorMerssage, 11, 1)
 
-	RETURN 0	
-END CATCH		
+	RETURN 0
+END CATCH
 
 RETURN 1
 
