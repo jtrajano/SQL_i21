@@ -92,7 +92,7 @@ INNER JOIN(
    
    			GROUP BY 
 			E.intEntityId
-			,intTypeTimeOffId   
+			,T.intTypeTimeOffId   
 ) TOYTD 
 	ON ETO.intEntityEmployeeId = TOYTD.intEntityId 
 		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId
