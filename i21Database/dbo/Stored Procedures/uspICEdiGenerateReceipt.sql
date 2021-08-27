@@ -363,7 +363,7 @@ BEGIN
 			ON i.FileIndex = inv.FileIndex
 		CROSS APPLY (
 			SELECT 
-				intItemId = ISNULL(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
+				intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId, itemNotFound.intItemId) 
 			FROM 
 				(
 					SELECT TOP 1 
