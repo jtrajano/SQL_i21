@@ -18,10 +18,11 @@ SELECT
 	, b.strBookDescription
 	, sb.strSubBook
 	, sb.strSubBookDescription
+	, r.intConcurrencyId
 FROM tblCTRawToWipConversion r
-JOIN tblICCommodity c ON c.intFutureMarketId = r.intFuturesMarketId
-JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = c.intFutureMarketId
-LEFT JOIN tblICUnitMeasure m ON m.intUnitMeasureId = fm.intUnitMeasureId
+JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = r.intFuturesMarketId
+JOIN tblRKCommodityMarketMapping cmm ON cmm.intFutureMarketId = fm.intFutureMarketId
+JOIN tblICCommodity c ON c.intCommodityId = cmm.intCommodityId
+JOIN tblICUnitMeasure m ON m.intUnitMeasureId = fm.intUnitMeasureId
 JOIN tblCTBook b ON b.intBookId = r.intBookId
-LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = r.intSubBookId
-	AND sb.intBookId = b.intBookId
+JOIN tblCTSubBook sb ON sb.intSubBookId = r.intSubBookId AND sb.intBookId = b.intBookId

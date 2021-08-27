@@ -438,10 +438,10 @@ BEGIN
 									 , @post = 1
 									 , @recap = 0
 									 , @isBatch = 0
-									 , @param = NULL
+									 , @param = @createdVouchersId
 									 , @userId = @intUserId
-									 , @beginTransaction = @createdVouchersId
-									 , @endTransaction = @createdVouchersId
+									 , @beginTransaction = NULL
+									 , @endTransaction = NULL
 									 , @success = @success OUTPUT
 
 			UPDATE CS
