@@ -167,6 +167,7 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeleteAttachment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
