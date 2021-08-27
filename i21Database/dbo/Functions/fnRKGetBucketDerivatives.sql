@@ -135,7 +135,7 @@ BEGIN
 		, strUserName
 		, strAction
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strDistributionType, c.strInOut, c.intFutureMarketId ORDER BY c.intSummaryLogId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strDistributionType, c.intFutureMarketId ORDER BY c.intSummaryLogId DESC)
 			, c.intFutOptTransactionId
 			, dblOpenContract =  ISNULL(c.dblOrigNoOfLots, 0) - CASE WHEN c.strInOut = 'IN' THEN  ISNULL(ABS(md.dblOrigNoOfLots), 0) ELSE ISNULL(md.dblOrigNoOfLots, 0) END
 			, intCommodityId
@@ -181,7 +181,7 @@ BEGIN
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 			AND intFutOptTransactionId NOT IN (SELECT intTransactionRecordId FROM OptionsLifecycle)
-			AND isnull(c.ysnNegate,0) = 0
+			--AND isnull(c.ysnNegate,0) = 0
 
 	) t WHERE intRowNum = 1
 
