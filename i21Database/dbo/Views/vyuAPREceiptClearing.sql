@@ -625,6 +625,27 @@ OUTER APPLY (
 --receipts in storage that were FULLY transferred from DP to DP only
 LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
     ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+--receipts in storage that were transferred
+OUTER APPLY (
+    SELECT TOP 1 [ysnExists] = 1
+    FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+    INNER JOIN tblGRStorageHistory SH
+        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
+    INNER JOIN tblGRCustomerStorage CS
+        ON CS.intCustomerStorageId = SH.intCustomerStorageId
+        AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+    INNER JOIN tblGRTransferStorageReference TSR
+        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
+    WHERE IR.intInventoryReceiptId = receipt.intInventoryReceiptId
+    AND IR.strReceiptNumber = receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
+) transferClr
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
 AND bill.ysnPosted = 1
@@ -634,14 +655,14 @@ AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND transferClrDP.intInventoryReceiptItemId IS NULL
 --receipts in storage that were transferred
-AND NOT EXISTS(
-	SELECT TOP 1 1
-	FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-	AND transferClr.strTransactionNumber = receipt.strReceiptNumber
-)
+-- AND NOT EXISTS(
+-- 	SELECT TOP 1 1
+-- 	FROM vyuGRTransferClearing transferClr
+--     WHERE transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+-- 	AND transferClr.strTransactionNumber = receipt.strReceiptNumber
+-- )
 --AND receipt.dtmReceiptDate >= '2020-09-09'GO
-
+AND transferClr.ysnExists IS NULL
 
 
 
@@ -715,18 +736,37 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
 --receipts in storage that were transferred
-LEFT JOIN vyuGRTransferClearing transferClr
-    ON transferClr.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+--LEFT JOIN vyuGRTransferClearing transferClr
+--    ON transferClr.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+OUTER APPLY (
+    SELECT TOP 1 [ysnExists] = 1
+    FROM tblICInventoryReceipt IR
+    INNER JOIN tblICInventoryReceiptItem IRI
+        ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND IRI.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+    INNER JOIN tblGRStorageHistory SH
+        ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+        AND ISNULL(IRI.intContractHeaderId, 0) = ISNULL(SH.intContractHeaderId, 0)
+    INNER JOIN tblGRCustomerStorage CS
+        ON CS.intCustomerStorageId = SH.intCustomerStorageId
+        AND CS.ysnTransferStorage = 0
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+    INNER JOIN tblGRTransferStorageReference TSR
+        ON TSR.intSourceCustomerStorageId = CS.intCustomerStorageId
+    WHERE IR.intInventoryReceiptId = Receipt.intInventoryReceiptId
+    AND IR.strReceiptNumber = Receipt.strReceiptNumber
+    AND IRI.intOwnershipType = (CASE WHEN ST.ysnDPOwnedType = 1 THEN 1 ELSE 2 END)
+) transferClr
 --receipts in storage that were FULLY transferred from DP to DP only
 LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
     ON transferClrDP.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 WHERE 
      bill.ysnPosted = 1
-	 AND transferClr.intInventoryReceiptItemId IS NULL
+	--AND transferClr.intInventoryReceiptItemId IS NULL
 	 AND transferClrDP.intInventoryReceiptItemId IS NULL
-
-
-AND Receipt.strReceiptType != 'Transfer Order'
+    AND Receipt.strReceiptType != 'Transfer Order'
+    AND transferClr.ysnExists IS NULL
 
 --AND receipt.dtmReceiptDate >= '2020-09-09'GO
 
