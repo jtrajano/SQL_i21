@@ -286,20 +286,20 @@ BEGIN TRY
 						,@actionIcon = 'small-tree-modified'
 						,@details = @strDetails
 				END
-				ELSE IF @intActionId = 4
-				BEGIN
-					SELECT @intStorageLocationId = intStorageLocationId
-					FROM tblICStorageLocation
-					WHERE strName = @strStorageUnit
-						AND intSubLocationId = @intCompanyLocationSubLocationId
-						AND intLocationId = @intCompanyLocationId
-
-					DELETE
-					FROM tblICStorageLocation
-					WHERE intStorageLocationId = @intStorageLocationId
-				END
+				
 			END
+			ELSE IF @intActionId = 4
+			BEGIN
+				SELECT @intStorageLocationId = intStorageLocationId
+				FROM tblICStorageLocation
+				WHERE strName = @strStorageUnit
+					AND intSubLocationId = @intCompanyLocationSubLocationId
+					AND intLocationId = @intCompanyLocationId
 
+				DELETE
+				FROM tblICStorageLocation
+				WHERE intStorageLocationId = @intStorageLocationId
+			END
 			MOVE_TO_ARCHIVE:
 
 			INSERT INTO dbo.tblIPInitialAck (

@@ -144,7 +144,7 @@ BEGIN TRY
 
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen
-	WHERE strNamespace = 'AccountsPayable.view.Voucher'
+	WHERE strNamespace = 'AccountsPayable.view.Bill'
 
 	UPDATE S
 	SET S.intStatusId = - 1
@@ -904,15 +904,15 @@ BEGIN TRY
 					WHERE strTransactionNo = @strBillId
 						AND intScreenId = @intScreenId
 
-					EXEC [uspSMCreateAttachmentFromFile] @transactionId = @intTransactionId -- the intTransactionId
-						,@fileName = @strFileName -- file name
-						,@fileExtension = 'pdf' -- extension
-						,@filePath = @strVendorInvoiceFilePath -- path
-						,@screenNamespace = 'AccountsPayable.Bill' -- screen type or namespace
-						,@useDocumentWatcher = 1 -- flag if the file was uploaded using document wacther
-						,@throwError = 1
-						,@attachmentId = @newAttachmentId OUTPUT
-						,@error = @message OUTPUT
+					--EXEC [uspSMCreateAttachmentFromFile] @transactionId = @intTransactionId -- the intTransactionId
+					--	,@fileName = @strFileName -- file name
+					--	,@fileExtension = 'pdf' -- extension
+					--	,@filePath = @strVendorInvoiceFilePath -- path
+					--	,@screenNamespace = 'AccountsPayable.Bill' -- screen type or namespace
+					--	,@useDocumentWatcher = 1 -- flag if the file was uploaded using document wacther
+					--	,@throwError = 1
+					--	,@attachmentId = @newAttachmentId OUTPUT
+					--	,@error = @message OUTPUT
 
 					SELECT @newAttachmentId
 						,@message
