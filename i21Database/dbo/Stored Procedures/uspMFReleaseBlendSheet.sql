@@ -89,6 +89,8 @@ BEGIN TRY
 		,intConsumptionMethodId INT
 		,intConsumptionStoragelocationId INT
 		,intParentItemId int
+		,dblUpperToleranceQty NUMERIC(38,20)
+		,dblLowerToleranceQty NUMERIC(38,20)
 		)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
@@ -416,8 +418,10 @@ End
 	--Missing Item Check / Required Qty Check
 	if @ysnAllInputItemsMandatory=1
 	Begin
-		Insert into @tblItem(intItemId,dblReqQty,ysnIsSubstitute,intConsumptionMethodId,intConsumptionStoragelocationId,intParentItemId)
+		Insert into @tblItem(intItemId,dblReqQty,ysnIsSubstitute,intConsumptionMethodId,intConsumptionStoragelocationId,intParentItemId,dblUpperToleranceQty,dblLowerToleranceQty)
 		Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblPlannedQuantity/r.dblQuantity)) AS RequiredQty,0 AS ysnIsSubstitute,ri.intConsumptionMethodId,ri.intStorageLocationId,0
+		,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblUpperToleranceQty
+		,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblLowerToleranceQty
 		From tblMFRecipeItem ri 
 		Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
 		where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
@@ -436,7 +440,10 @@ End
 		AND ri.intConsumptionMethodId IN (1,2,3)
 		UNION
 		Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblPlannedQuantity/r.dblQuantity)) AS RequiredQty,1 AS ysnIsSubstitute,0,0,rs.intItemId
+		,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblUpperToleranceQty
+		,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblLowerToleranceQty
 		From tblMFRecipeSubstituteItem rs 
+		JOIN tblMFRecipeItem ri on ri.intRecipeItemId =rs.intRecipeItemId 
 		Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
 		where rs.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
 
@@ -444,11 +451,17 @@ End
 		Declare @intConsumptionMethodId int
 		Declare @dblInputItemBSQty numeric(38,20)
 		Declare @dblBulkItemAvlQty numeric(38,20)
+		Declare @dblLowerToleranceQty numeric(38,20)
+		Declare @dblUpperToleranceQty numeric(38,20)
 
 		Select @intMinMissingItem=Min(intRowNo) From @tblItem
 		While(@intMinMissingItem is not null)
 		Begin
+			Select @dblLowerToleranceQty=NULL
+					,@dblUpperToleranceQty=NULL
 			Select @intInputItemId=intItemId,@dblInputReqQty=dblReqQty,@intConsumptionMethodId=intConsumptionMethodId 
+					,@dblLowerToleranceQty=dblLowerToleranceQty
+					,@dblUpperToleranceQty=dblUpperToleranceQty
 			From @tblItem Where intRowNo=@intMinMissingItem AND ysnIsSubstitute=0
 
 			If @intConsumptionMethodId=1
@@ -469,12 +482,20 @@ End
 				Set @dblInputItemBSQty=@dblInputItemBSQty + (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblLot 
 				Where intItemId in (Select intItemId From @tblItem Where intParentItemId = @intInputItemId))
 
-				if @dblInputItemBSQty < @dblInputReqQty
+				if @dblInputItemBSQty < @dblLowerToleranceQty
 				Begin
 					Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
 
 					Set @ErrMsg='Selected quantity of ' + CONVERT(varchar,@dblInputItemBSQty) + ' of item ' + CONVERT(nvarchar,@strInputItemNo) +
-					+ ' is less than the required quantity of ' + CONVERT(varchar,@dblInputReqQty) + '.'
+					+ ' is less than the lower tolerance quantity of ' + CONVERT(varchar,@dblLowerToleranceQty) + '.'
+					RaisError(@ErrMsg,16,1)
+				End
+				if @dblInputItemBSQty > @dblUpperToleranceQty
+				Begin
+					Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+
+					Set @ErrMsg='Selected quantity of ' + CONVERT(varchar,@dblInputItemBSQty) + ' of item ' + CONVERT(nvarchar,@strInputItemNo) +
+					+ ' is more than the upper tolerance quantity of ' + CONVERT(varchar,@dblUpperToleranceQty) + '.'
 					RaisError(@ErrMsg,16,1)
 				End
 			End

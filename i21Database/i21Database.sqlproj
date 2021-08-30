@@ -168,6 +168,7 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteAttachment.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessVoucherAttachment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
