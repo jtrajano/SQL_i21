@@ -5,6 +5,7 @@ SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY intSourceType, d
 SELECT 
 	intSourceType = 2 /* TM Orders */
 	,intOrderId = TMO.intDispatchId
+	,intOrderDetailId = NULL
 	,intEntityId = NULL
 	,intEntityLocationId = NULL
 	,intEntityTypeId = NULL
@@ -71,6 +72,7 @@ UNION ALL
 SELECT
 	intSourceType = 1  /* LG Loads - Outbound */
 	,intOrderId = LGLD.intLoadDetailId
+	,intOrderDetailId = NULL
 	,intEntityId = LGLD.intCustomerEntityId
 	,intEntityLocationId = LGLD.intCustomerEntityLocationId
 	,intEntityTypeId = NULL
@@ -138,6 +140,7 @@ UNION ALL
 SELECT
 	intSourceType = 3  /* LG Loads - Inbound */
 	,intOrderId = LGLD.intLoadDetailId
+	,intOrderDetailId = NULL
 	,intEntityId = LGLD.intVendorEntityId
 	,intEntityLocationId = LGLD.intVendorEntityLocationId
 	,intEntityTypeId = NULL
@@ -205,6 +208,7 @@ UNION ALL
 SELECT 
 	intSourceType = 4  /* TM Sites */
 	,intOrderId = TMO.intSiteId
+	,intOrderDetailId = NULL
 	,intEntityId = NULL
 	,intEntityLocationId = NULL
 	,intEntityTypeId = NULL
@@ -267,6 +271,7 @@ UNION ALL
 SELECT  
 	intSourceType = 5  /* Entities */
 	,intOrderId = EN.intEntityId
+	,intOrderDetailId = NULL
 	,intEntityId = EN.intEntityId
 	,intEntityLocationId = EL.intEntityLocationId
 	,intEntityTypeId = ET.intEntityTypeId
@@ -332,6 +337,7 @@ UNION ALL
 SELECT
 	intSourceType = 6 /* Sales Orders */
 	,intOrderId = SO.intSalesOrderId
+	,intOrderDetailId = SOD.intSalesOrderDetailId
 	,intEntityId = SO.intEntityId
 	,intEntityLocationId = SO.intShipToLocationId
 	,intEntityTypeId = NULL
@@ -406,6 +412,7 @@ UNION ALL
 SELECT
 	intSourceType = 6  /* Transfer Orders */
 	,intOrderId = IT.intInventoryTransferId 
+	,intOrderDetailId = ITD.intInventoryTransferDetailId
 	,intEntityId = E.intEntityId
 	,intEntityLocationId = NULL
 	,intEntityTypeId = NULL
