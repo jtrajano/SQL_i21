@@ -801,6 +801,7 @@ INSERT INTO @temp_statement_table(
 	, dblPayment
 	, strFullAddress
 	, strStatementFooterComment
+	, dblInvoiceTotal
 )
 SELECT DISTINCT
 	  ISNULL(BALANCEFORWARD.intEntityCustomerId, STATEMENTFORWARD.intEntityCustomerId)
@@ -815,6 +816,7 @@ SELECT DISTINCT
 	, 0
 	, STATEMENTFORWARD.strFullAddress
 	, STATEMENTFORWARD.strStatementFooterComment
+	, ISNULL(BALANCEFORWARD.dblTotalAR, 0)
 FROM @temp_statement_table STATEMENTFORWARD
     LEFT JOIN @temp_balanceforward_table BALANCEFORWARD ON STATEMENTFORWARD.intEntityCustomerId = BALANCEFORWARD.intEntityCustomerId    
 
