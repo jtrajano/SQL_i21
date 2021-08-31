@@ -10,11 +10,28 @@ CREATE TABLE [dbo].[tblFABookDepreciation](
 	[ysnFullyDepreciated] BIT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intBookId] [int] NULL,
+	[intCurrencyId]					INT NULL,
+	[intFunctionalCurrencyId]		INT NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
+	[dblRate]						NUMERIC(18, 6) NULL DEFAULT ((1)),
+	[dblFunctionalCost]				NUMERIC(18, 6) NULL,
+	[dblFunctionalSalvageValue]		NUMERIC(18, 6) NULL,
+	[dblFunctionalSection179]		NUMERIC(18, 6) NULL,
+	[dblFunctionalBonusDepreciation] NUMERIC(18, 6) NULL,
+	[dblMarketValue]				NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblFunctionalMarketValue]		NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblInsuranceValue]				NUMERIC(18, 6) NULL DEFAULT ((0)),
+	[dblFunctionalInsuranceValue]	NUMERIC(18, 6) NULL DEFAULT ((0)),
  CONSTRAINT [PK_tblFABookDepreciation] PRIMARY KEY CLUSTERED 
 (
 	[intBookDepreciationId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY], 
+	CONSTRAINT [FK_tblFABookDepreciation_tblSMCurrency] FOREIGN KEY([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
+	CONSTRAINT [FK_tblFABookDepreciation_tblSMCurrency2] FOREIGN KEY([intFunctionalCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
+	CONSTRAINT [FK_tblFABookDepreciation_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 ) ON [PRIMARY]
+GO
+
 GO
 
 ALTER TABLE [dbo].[tblFABookDepreciation]  WITH CHECK ADD  CONSTRAINT [FK_tblFABookDepreciation_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId])
