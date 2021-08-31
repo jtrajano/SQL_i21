@@ -34,7 +34,7 @@ BEGIN
 				,intInventoryTransferDetailId = TransferOrder.intInventoryTransferDetailId
 				,strOrderType = CASE WHEN (SalesOrder.intSalesOrderId IS NOT NULL) THEN ''Sales''
 									 WHEN (TransferOrder.intInventoryTransferId IS NOT NULL) THEN ''Transfer''
-									 ELSE '' END
+									 ELSE '''' END
 			FROM tblLGRouteOrder RO
 			INNER JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
 			OUTER APPLY 
