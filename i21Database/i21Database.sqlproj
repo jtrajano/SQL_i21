@@ -177,6 +177,8 @@
     <Build Include="dbo\Stored Procedures\uspMFWODetailConfirm.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTOReceiptDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessVoucherAttachment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetOrderNo.sql" />
+    <Build Include="dbo\Tables\tblMFRouteOrderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
