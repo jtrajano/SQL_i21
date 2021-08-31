@@ -341,18 +341,37 @@ WHERE Convert(CHAR(10), P.dtmEndDate, 126) <> Convert(CHAR(10), S.dtmEndDate, 12
 	AND SH.intBookId = @intBookId
 	AND PH.intPositionId = SH.intPositionId
 
+INSERT INTO @Data
+SELECT ''
+	,''
+	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
+	,'Unallocated S-Contract'
+	,''
+	,''
+	,B.strBook
+FROM dbo.tblCTContractDetail S 
+JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
+JOIN tblCTBook B ON B.intBookId = SH.intBookId
+WHERE not exists(Select *from tblLGAllocationDetail AD Where AD.intSContractDetailId =S.intContractDetailId
+	)
+	AND S.intContractStatusId = 1
+	AND SH.intContractTypeId=2
+		
+
 INSERT INTO @Data2
 SELECT SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'Quantity'
-	,[dbo].[fnRemoveTrailingZeroes](S.dblAllocatedQty)
-	,[dbo].[fnRemoveTrailingZeroes](S.dblQuantity)
+	,IsNULL([dbo].[fnRemoveTrailingZeroes](SUM(AD.dblSAllocatedQty)),0)
+	,[dbo].[fnRemoveTrailingZeroes](MAX(S.dblQuantity))
 	,B.strBook
 FROM dbo.tblCTContractDetail S
 JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
+LEFT JOIN tblLGAllocationDetail AD On AD.intSContractDetailId =S.intContractDetailId
 JOIN tblCTBook B ON B.intBookId = SH.intBookId
-WHERE S.dblAllocatedQty <> S.dblQuantity
-	AND S.intContractStatusId = 1
-	AND SH.intContractTypeId = 2
+WHERE S.intContractStatusId = 1
+AND SH.intContractTypeId = 2
+Group by SH.strContractNumber + '/' + ltrim(S.intContractSeq), B.strBook
+Having IsNULL(SUM(AD.dblSAllocatedQty),0) <>MAX(S.dblQuantity)
 
 SET @strHeader2 = '<tr><th>&nbsp;SerialNo</th>
 						<th>&nbsp;AllocationNumber</th>
