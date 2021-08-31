@@ -169,6 +169,8 @@
     <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteAttachment.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessVoucherAttachment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetOrderNo.sql" />
+    <Build Include="dbo\Tables\tblMFRouteOrderDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
