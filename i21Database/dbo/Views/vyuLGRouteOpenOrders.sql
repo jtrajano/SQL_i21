@@ -405,7 +405,7 @@ LEFT JOIN vyuARCustomerInquiryReport CB ON CB.intEntityCustomerId = E.intEntityI
 LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = I.intItemId AND OH.intLocationId = CompLoc.intCompanyLocationId
 WHERE SO.strTransactionType = 'Order' AND SO.strOrderStatus NOT IN ('Closed')
 AND NOT EXISTS (SELECT 1 FROM tblLGRouteOrder RO INNER JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
-				WHERE R.intSourceType = 6 AND R.ysnPosted = 1 AND RO.strOrderNumber = SO.strSalesOrderNumber)
+				WHERE R.intSourceType = 6 AND R.ysnPosted = 1 AND RO.intSalesOrderDetailId = SOD.intSalesOrderDetailId)
 
 UNION ALL
 
@@ -482,6 +482,6 @@ LEFT JOIN tblSMCompanyLocationSubLocation ToStrg ON ToStrg.intCompanyLocationSub
 LEFT JOIN vyuICGetItemStock OH ON OH.intItemId = I.intItemId AND OH.intLocationId = FromLoc.intCompanyLocationId
 WHERE IT.intStatusId IN (1, 2)
 AND NOT EXISTS (SELECT 1 FROM tblLGRouteOrder RO INNER JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
-				WHERE R.intSourceType = 6 AND R.ysnPosted = 1 AND RO.strOrderNumber = IT.strTransferNo)
+				WHERE R.intSourceType = 6 AND R.ysnPosted = 1 AND RO.intInventoryTransferDetailId = ITD.intInventoryTransferDetailId)
 
 ) t1
