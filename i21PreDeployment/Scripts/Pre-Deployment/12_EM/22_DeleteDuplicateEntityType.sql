@@ -1,4 +1,5 @@
 ﻿GO
+
 print 'Check and delete duplicate entity type'
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityType' and [COLUMN_NAME] = 'strType')
 	 AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblEMEntityType' and [COLUMN_NAME] = 'intEntityId')
