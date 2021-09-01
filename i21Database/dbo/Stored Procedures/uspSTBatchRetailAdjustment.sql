@@ -98,7 +98,8 @@ BEGIN
 					intItemUOMId						INT NULL,
  					dblPrice							NUMERIC(18,6) NULL, 
 					dblLastCost							NUMERIC(18,6) NULL,
-					dblFactor						NUMERIC(18,6) NULL
+					dblFactor							NUMERIC(18,6) NULL,
+					dtmEffectiveDate					DATETIME NULL
 				)
 
 				-- INSERT to Temp Table
@@ -120,7 +121,8 @@ BEGIN
 					intItemUOMId,
  					dblPrice, 
 					dblLastCost,
-					dblFactor
+					dblFactor,
+					dtmEffectiveDate
 				)
 				SELECT
 					pad.intRetailPriceAdjustmentDetailId,
@@ -139,7 +141,8 @@ BEGIN
 					intItemUOMId,
  					dblPrice, 
 					dblLastCost,
-					pad.dblFactor
+					pad.dblFactor,
+					rpa.dtmEffectiveDate
 				FROM tblSTRetailPriceAdjustmentDetail pad
 				INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
 					ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
@@ -186,6 +189,7 @@ BEGIN
 						, @strRoundPrice						NVARCHAR(100) = NULL
 						, @strPriceEndingDigit					NVARCHAR(100) = NULL
 						, @strDistrict							NVARCHAR(100) = NULL
+						, @dtmEffectiveDate						DATETIME = NULL
 
 					WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 						BEGIN
@@ -206,11 +210,13 @@ BEGIN
 								@intItemUOMId						= intItemUOMId,
  								@dblRetailPrice						= dblPrice, 
 								@dblLastCostPrice					= dblLastCost,
-								@dblFactor							= dblFactor
+								@dblFactor							= dblFactor,
+								@dtmEffectiveDate					= dtmEffectiveDate
 							FROM @tblRetailPriceAdjustmentDetailIds
 
 							DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@dblRetailPrice AS NUMERIC(38, 20))
 							DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCostPrice AS NUMERIC(38, 20))
+							DECLARE @dtmEffectiveDateConv AS DATETIME = @dtmEffectiveDate
 							
 							SET @intCurrentUserId = ISNULL(@intCurrentUserId, @intSavedUserId)
 
@@ -316,6 +322,7 @@ BEGIN
 										,@dblStandardCost			= NULL 
 										,@dblRetailPrice			= @dblRetailPriceConv
 										,@dblLastCost				= @dblLastCostConv
+										,@dtmEffectiveDate			= @dtmEffectiveDateConv
 										,@intEntityUserSecurityId	= @intCurrentUserId
 			
 									-- Check if Successfull
@@ -484,7 +491,7 @@ BEGIN
 							, trp.strRetailPriceAdjustmentNumber		AS strRetailPriceAdjustmentNumber
 					FROM @tblPreview tp
 						LEFT JOIN #tmpbatchpostingretailadjustmentId trpa
-							ON tp.intItemId = trpa.intItemId AND CAST(tp.strPreviewNewData AS NUMERIC) = CAST(trpa.dblPrice AS NUMERIC)
+							ON tp.intItemId = trpa.intItemId 
 						LEFT JOIN tblSTRetailPriceAdjustment trp
 							ON trp.intRetailPriceAdjustmentId = trpa.intRetailPriceAdjustmentId
 					WHERE strPreviewOldData != strPreviewNewData

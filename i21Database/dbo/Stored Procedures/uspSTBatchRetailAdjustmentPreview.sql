@@ -122,7 +122,7 @@ BEGIN
 				)
 				SELECT
 					pad.intRetailPriceAdjustmentDetailId,
-					pad.intRetailPriceAdjustmentId,
+					rpa.intRetailPriceAdjustmentId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
 					intCategoryId,
@@ -456,7 +456,7 @@ BEGIN
 							, trp.strRetailPriceAdjustmentNumber		AS strRetailPriceAdjustmentNumber
 					FROM @tblPreview tp
 						LEFT JOIN #tmpbatchpostingretailadjustmentId trpa
-							ON tp.intItemId = trpa.intItemId AND CAST(tp.strPreviewNewData AS NUMERIC) = CAST(trpa.dblPrice AS NUMERIC)
+							ON tp.intItemId = trpa.intItemId
 						LEFT JOIN tblSTRetailPriceAdjustment trp
 							ON trp.intRetailPriceAdjustmentId = trpa.intRetailPriceAdjustmentId
 					WHERE strPreviewOldData != strPreviewNewData
