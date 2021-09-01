@@ -8897,6 +8897,7 @@
     <Build Include="dbo\Triggers\trgCMInsertUpdateResponsiblePartyTaskDetail.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportStd.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
