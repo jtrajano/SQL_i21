@@ -66,7 +66,7 @@ INNER JOIN(
 										END
 										)
  
-			,intTypeTimeOffId
+			,T.intTypeTimeOffId
 			FROM tblPREmployee E INNER JOIN tblPREmployeeTimeOff T  ON E.intEntityId = T.intEntityEmployeeId  
 
 			LEFT JOIN 
