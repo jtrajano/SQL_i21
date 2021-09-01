@@ -2383,7 +2383,7 @@ BEGIN TRY
 				(
 					SELECT intTransactionReferenceDetailId
 					FROM tblCTContractBalanceLog
-					WHERE strProcess = 'Fixation Detail Delete'
+					WHERE strProcess in ('Fixation Detail Delete','Price Delete')
 					AND intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
 				)			
