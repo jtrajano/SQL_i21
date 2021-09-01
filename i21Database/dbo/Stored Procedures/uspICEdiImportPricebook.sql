@@ -381,6 +381,7 @@ FROM (
 			,strDescription = ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription)
 			,strShortName = ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName)
 			,b.intManufacturerId 
+			,intDuplicateItemId = dup.intItemId 
 			,p.* 
 		FROM 
 			tblICEdiPricebook p
@@ -388,8 +389,10 @@ FROM (
 				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 			LEFT JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
-			LEFT OUTER JOIN tblICBrand b 
+			LEFT JOIN tblICBrand b 
 				ON b.strBrandName = p.strManufacturersBrandName	
+			LEFT JOIN tblICItem dup
+				ON dup.strItemNo = p.strSellingUpcNumber
 		WHERE
 			p.strUniqueId = @UniqueId		
 	) AS Source_Query  
@@ -408,7 +411,7 @@ FROM (
 			,intConcurrencyId = Item.intConcurrencyId + 1
 
 	-- If not found and it is allowed, insert a new item record.
-	WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 THEN 
+	WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intDuplicateItemId IS NULL THEN 
 		INSERT (			
 			strItemNo
 			,strShortName
