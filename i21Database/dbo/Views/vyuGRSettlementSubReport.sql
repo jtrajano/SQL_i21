@@ -186,6 +186,7 @@ FROM
 				,Bill.intBillId
 				,BillDtl.intInventoryReceiptItemId
 				,BillDtl.intLinkingId
+				,BillDtl.dblQtyReceived
 			FROM tblAPBillDetail BillDtl
 			JOIN tblAPBill Bill 
 				ON BillDtl.intBillId = Bill.intBillId
@@ -234,6 +235,7 @@ FROM
 				,strTaxClass = TaxClass.strTaxClass
 				,BillDtl.intInventoryReceiptItemId
 				,BillDtl.intLinkingId
+				,BillDtl.dblQtyReceived
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId --and Bill.intTransactionType = 1
