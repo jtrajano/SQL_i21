@@ -44,7 +44,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intDirectLoadId INT
 DECLARE @ysnTicketMatchContractLoadBased BIT
 DECLARE @ysnTicketContractLoadBased BIT
-DECLARE @intTicketLoadDetailId BIT
+DECLARE @intTicketLoadDetailId INT
 DECLARE @intMatchTicketLoadDetailId BIT
 DECLARE @intMatchTicketStorageScheduleTypeId INT
 DECLARE @dblMatchTicketScheduleQty NUMERIC(18,6)
@@ -66,6 +66,10 @@ DECLARE @_dblDestinationQuantity NUMERIC(38, 20)
 DECLARE @dblContractScheduledQty NUMERIC(18,6)
 DECLARE @dblScheduleAdjustment NUMERIC(38, 20)
 DECLARE @_dblTicketScheduledQty NUMERIC(38, 20)
+DECLARE @intContractPricingType INT
+
+
+DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType 
 
 BEGIN TRY
 
@@ -78,6 +82,7 @@ BEGIN TRY
 		,@dblTicketNetUnits = SC.dblNetUnits
 		,@intTicketStorageScheduleTypeId = SC.intStorageScheduleTypeId 
 		,@intTicketContractDetailId = SC.intContractId
+		,@intTicketLoadDetailId = SC.intLoadDetailId
 	FROM tblSCTicket SC 
 	LEFT JOIN tblCTWeightGrade CTGrade 
 		ON CTGrade.intWeightGradeId = SC.intGradeId
@@ -578,232 +583,408 @@ BEGIN TRY
 
 		IF @strInOutFlag = 'I'
 		BEGIN
-			IF ISNULL(@strWhereFinalizedWeight,'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade,'Origin') <> 'Destination'
-			BEGIN
-				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
-
-				BEGIN
-					IF ISNULL(@intTicketContractDetailId,0) != 0
-					BEGIN
-						---Contract Details
-						SELECT TOP 1
-							@ysnContractLoadBased = ISNULL(B.ysnLoad,0)
-							,@dblContractAvailableQty = ISNULL(A.dblBalance,0) - ISNULL(A.dblScheduleQty,0)
-							,@dblContractScheduledQty = ISNULL(A.dblScheduleQty,0)
-						FROM tblCTContractDetail A
-						INNER JOIN tblCTContractHeader B
-							ON A.intContractHeaderId = B.intContractHeaderId
-						WHERE A.intContractDetailId = @intTicketContractDetailId 
-
-						SELECT @_dblTicketScheduledQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketScheduledQty) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
-						SELECT @_dblDestinationQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketNetUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
-
-						IF(@intTicketStorageScheduleTypeId = -2) ---Contract Distribution
-						BEGIN
-							SET @dblScheduleAdjustment = 0;
-							IF(@_dblTicketScheduledQty <> @_dblDestinationQuantity)
-							BEGIN
-								SET @dblScheduleAdjustment  = @_dblDestinationQuantity - @_dblTicketScheduledQty 
-
-								IF @dblScheduleAdjustment > 0
-								BEGIN
-									IF(@dblContractScheduledQty >= @_dblTicketScheduledQty)
-									BEGIN
-										IF(@dblContractAvailableQty < @dblScheduleAdjustment)
-										BEGIN
-											RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
-										END
-									END
-									ELSE
-									BEGIN
-										SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty
-										IF(@dblContractAvailableQty < @dblScheduleAdjustment)
-										BEGIN
-											RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
-										END
-									END
-								END
-								ELSE IF @dblScheduleAdjustment < 0
-								BEGIN
-									IF(@dblContractScheduledQty < @_dblTicketScheduledQty)
-									BEGIN
-										SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty
-										IF(@dblContractAvailableQty < @dblScheduleAdjustment)
-										BEGIN
-											RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
-										END
-									END
-								END
-							END
-							
-						
-							
-						END
-
-						IF(@intTicketStorageScheduleTypeId = -6) ---Load Distribution
-						BEGIN
-							SET @dblScheduleAdjustment = 0;
-							IF(@_dblTicketScheduledQty <> @_dblDestinationQuantity)
-							BEGIN
-								SET @dblScheduleAdjustment  = @_dblDestinationQuantity - @_dblTicketScheduledQty 
-
-								IF(@dblScheduleAdjustment > 0)
-								BEGIN
-									IF(@dblContractScheduledQty < @_dblDestinationQuantity)
-									BEGIN
-										SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty
-										IF(@dblContractAvailableQty < @dblScheduleAdjustment)
-										BEGIN
-											RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
-										END
-									END
-									ELSE
-									BEGIN
-										SET @dblScheduleAdjustment = 0
-									END
-								END
-								ELSE IF(@dblScheduleAdjustment < 0)
-								BEGIN
-									IF(@dblContractScheduledQty < ABS(@dblScheduleAdjustment))
-									BEGIN
-										SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty 
-										IF(@dblContractAvailableQty < @dblScheduleAdjustment)
-										BEGIN
-											RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
-										END
-									END
-									
-								END
-								
-							END
-						END
-
-						IF(ISNULL(@ysnContractLoadBased,0) = 1)
-						BEGIN
-							SET @dblScheduleAdjustment = 0
-						END
-
-						IF(@dblScheduleAdjustment <> 0)
-						BEGIN
-							EXEC uspCTUpdateScheduleQuantity
-									@intContractDetailId	=	@intTicketContractDetailId,
-									@dblQuantityToUpdate	=	@dblScheduleAdjustment,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=   'Auto - Scale'	
-						END
-
-						
-						IF(ISNULL(@ysnContractLoadBased,0) = 1)
-						BEGIN
-							SET @_dblDestinationQuantity = 1
-						END
-						
-						
-						EXEC uspCTUpdateSequenceBalance @intTicketContractDetailId, @_dblDestinationQuantity, @intUserId, @intTicketId, 'Scale'
-						SET @dblLoadUsedQty = @_dblDestinationQuantity * -1
-						EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intTicketContractDetailId,
-										@dblQuantityToUpdate	=	@dblLoadUsedQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=   'Scale'	
-					END
-				END
-				
-			END
+		
 			
-			DELETE FROM @ItemsToIncreaseInTransitDirect
-			INSERT INTO @ItemsToIncreaseInTransitDirect(
-				[intItemId]
-				,[intItemLocationId]
-				,[intItemUOMId]
-				,[intLotId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQty]
-				,[intTransactionId]
-				,[strTransactionId]
-				,[intTransactionTypeId]
-				,[intFOBPointId]
-			)
-			SELECT 
-				intItemId = SC.intItemId
-				,intItemLocationId = ICIL.intItemLocationId
-				,intItemUOMId = SC.intItemUOMIdTo
-				,intLotId = SC.intLotId
-				,intSubLocationId = SC.intSubLocationId
-				,intStorageLocationId = SC.intStorageLocationId
-				,dblQty = SC.dblNetUnits
-				,intTransactionId = 1
-				,strTransactionId = SC.strTicketNumber
-				,intTransactionTypeId = 1
-				,intFOBPointId = NULL
-			FROM tblSCTicket SC 
-			INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-			WHERE SC.intTicketId = @intTicketId
-			EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+			IF ISNULL(@intTicketContractDetailId,0) != 0
+			BEGIN
+				---Contract Details
+				SELECT TOP 1
+					@ysnContractLoadBased = ISNULL(B.ysnLoad,0)
+					,@dblContractAvailableQty = ISNULL(A.dblBalance,0) - ISNULL(A.dblScheduleQty,0)
+					,@dblContractScheduledQty = ISNULL(A.dblScheduleQty,0)
+					,@intContractPricingType = B.intPricingTypeId
+				FROM tblCTContractDetail A
+				INNER JOIN tblCTContractHeader B
+					ON A.intContractHeaderId = B.intContractHeaderId
+				WHERE A.intContractDetailId = @intTicketContractDetailId 
+
+				SELECT @_dblTicketScheduledQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketScheduledQty) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
+				SELECT @_dblDestinationQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblTicketNetUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intTicketContractDetailId
+
+				---Contract Distribution
+				IF(@intTicketStorageScheduleTypeId = -2) 
+				BEGIN
+					SET @dblScheduleAdjustment = 0;
+					IF(@_dblTicketScheduledQty <> @_dblDestinationQuantity)
+					BEGIN
+						SET @dblScheduleAdjustment  = @_dblDestinationQuantity - @_dblTicketScheduledQty 
+
+						IF @dblScheduleAdjustment > 0
+						BEGIN
+							IF(@dblContractScheduledQty >= @_dblTicketScheduledQty)
+							BEGIN
+								IF(@dblContractAvailableQty < @dblScheduleAdjustment)
+								BEGIN
+									RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
+								END
+							END
+							ELSE
+							BEGIN
+								SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty
+								IF(@dblContractAvailableQty < @dblScheduleAdjustment)
+								BEGIN
+									RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
+								END
+							END
+						END
+						ELSE IF @dblScheduleAdjustment < 0
+						BEGIN
+							IF(@dblContractScheduledQty < @_dblTicketScheduledQty)
+							BEGIN
+								SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty
+								IF(@dblContractAvailableQty < @dblScheduleAdjustment)
+								BEGIN
+									RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
+								END
+							END
+						END
+					END
+					
+					INSERT INTO tblSCTicketContractUsed (
+						[intTicketId]
+						,[intContractDetailId] 
+						,[intEntityId] 
+						,[dblScheduleQty] 
+					)
+					SELECT
+						intTicketId = @intTicketId
+						,[intContractDetailId] = @intTicketContractDetailId
+						,[intEntityId] = @intEntityId
+						,[dblScheduleQty] = @dblTicketNetUnits
+					
+				END
+
+				---Load Distribution
+				IF(@intTicketStorageScheduleTypeId = -6) 
+				BEGIN
+					SET @dblScheduleAdjustment = 0;
+					IF(@_dblTicketScheduledQty <> @_dblDestinationQuantity)
+					BEGIN
+						SET @dblScheduleAdjustment  = @_dblDestinationQuantity - @_dblTicketScheduledQty 
+
+						IF(@dblScheduleAdjustment > 0)
+						BEGIN
+							IF(@dblContractScheduledQty < @_dblDestinationQuantity)
+							BEGIN
+								SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty
+								IF(@dblContractAvailableQty < @dblScheduleAdjustment)
+								BEGIN
+									RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
+								END
+							END
+							ELSE
+							BEGIN
+								SET @dblScheduleAdjustment = 0
+							END
+						END
+						ELSE IF(@dblScheduleAdjustment < 0)
+						BEGIN
+							IF(@dblContractScheduledQty < ABS(@dblScheduleAdjustment))
+							BEGIN
+								SET @dblScheduleAdjustment = @_dblDestinationQuantity - @dblContractScheduledQty 
+								IF(@dblContractAvailableQty < @dblScheduleAdjustment)
+								BEGIN
+									RAISERROR('Purchase contract balance is not enough to process transaction.', 11, 1);
+								END
+							END
+							
+						END
+						
+					END
+
+					--REcord the Allocation
+					INSERT INTO tblSCTicketLoadUsed (
+						[intTicketId]
+						,[intLoadDetailId] 
+						,[intEntityId] 
+						,[dblQty] 
+					)
+					SELECT
+						@intTicketId
+						,@intTicketLoadDetailId
+						,@intEntityId
+						,@dblTicketNetUnits
+					
+				END
+			END
+			ELSE
+			BEGIN
+				--SPOT DISTRIBUTION
+				IF(@intTicketStorageScheduleTypeId = -3)
+				BEGIN
+					INSERT INTO tblSCTicketSpotUsed(
+						intTicketId
+						,intEntityId
+						,dblUnitFuture
+						,dblUnitBasis
+						,dblQty
+					)
+					SELECT 
+						intTicketId = @intTicketId
+						,intEntityId = @intEntityId
+						,dblUnitFuture = dblUnitPrice
+						,dblUnitBasis = dblUnitBasis
+						,dblQty = dblNetUnits
+					FROM tblSCTicket
+					WHERE intTicketId = @intTicketId
+				END
+				---STORAGE DISTRIBUTION
+				ELSE
+				BEGIN
+					INSERT INTO tblSCTicketStorageUsed(
+						intTicketId
+						,intEntityId
+						,intStorageTypeId
+						,intStorageScheduleId
+						,dblQty
+					)
+					SELECT 
+						intTicketId = @intTicketId
+						,intEntityId = @intEntityId
+						,intStorageTypeId = intStorageScheduleTypeId
+						,intStorageScheduleId = intStorageScheduleId
+						,dblQty = dblNetUnits
+					FROM tblSCTicket
+					WHERE intTicketId = @intTicketId
+				END
+			END
+
+			EXEC uspSCDirectUpdateContractAndLoadUsed
+				@intTicketId = @intTicketId
+				,@intUserId = @intUserId
+
+			--- INCREASE DIRECT IN-Transit
+			BEGIN
+				DELETE FROM @ItemsToIncreaseInTransitDirect
+				INSERT INTO @ItemsToIncreaseInTransitDirect(
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[intLotId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dblQty]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[intTransactionTypeId]
+					,[intFOBPointId]
+				)
+				SELECT 
+					intItemId = SC.intItemId
+					,intItemLocationId = ICIL.intItemLocationId
+					,intItemUOMId = SC.intItemUOMIdTo
+					,intLotId = SC.intLotId
+					,intSubLocationId = SC.intSubLocationId
+					,intStorageLocationId = SC.intStorageLocationId
+					,dblQty = SC.dblNetUnits
+					,intTransactionId = 1
+					,strTransactionId = SC.strTicketNumber
+					,intTransactionTypeId = 1
+					,intFOBPointId = NULL
+				FROM tblSCTicket SC 
+				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+				WHERE SC.intTicketId = @intTicketId
+				EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+			END
+						
+
+			--Create Voucher
+			EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
+			
+		
+				
+			---Create GL Entries
+			EXEC uspSCCreateDirectInGLEntries @intTicketId, 1, @intUserId 
+
+			/*------Increase inventory inbound in transit
+				BEGIN
+					INSERT INTO @ItemsToIncreaseInTransitInBound(
+						[intItemId] 
+						,[intItemLocationId] 
+						,[intItemUOMId] 
+						,[intLotId] 
+						,[intSubLocationId] 
+						,[intStorageLocationId] 
+						,[dblQty] 
+						,[intTransactionId] 
+						,[strTransactionId] 
+						,[dtmTransactionDate] 
+						,[intTransactionTypeId] 
+						,[intFOBPointId] 
+					)
+					SELECT
+						[intItemId] = SC.intItemId
+						,[intItemLocationId] = ICL.intItemLocationId
+						,[intItemUOMId] = SC.intItemUOMIdTo
+						,[intLotId] = NULL
+						,[intSubLocationId] = SC.intSubLocationId
+						,[intStorageLocationId] = SC.intStorageLocationId
+						,[dblQty] = SC.dblNetUnits
+						,[intTransactionId] = SC.intTicketId
+						,[strTransactionId] = SC.strTicketNumber
+						,[dtmTransactionDate] = GETDATE()
+						,[intTransactionTypeId] = 52  -- scale ticket
+						,[intFOBPointId] = NULL
+					FROM tblSCTicket SC
+					INNER JOIN tblICItemLocation ICL
+						ON SC.intItemId = ICL.intItemId
+							AND SC.intProcessingLocationId = ICL.intLocationId
+					WHERE intTicketId = @intTicketId
+
+					EXEC [dbo].[uspICIncreaseInTransitInBoundQty] @ItemsToIncreaseInTransitInBound 
+				END*/
+
+			
+		
 			
 		END
 		ELSE
 		BEGIN
-			IF ISNULL(@strWhereFinalizedWeight,'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade,'Origin') <> 'Destination'
+
+			---RECORD ALLOCATION				
 			BEGIN
-				SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
-				INNER JOIN tblCTPriceFixation CPX
-					ON CPX.intPriceFixationId = CTP.intPriceFixationId
-				INNER JOIN tblCTContractDetail CT
-					ON CPX.intContractDetailId = CT.intContractDetailId
-				INNER JOIN tblSCTicket SC
-					ON SC.intContractId = CT.intContractDetailId
-				WHERE CT.intContractDetailId = @intTicketId
-
-				IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
-				INNER JOIN tblCTPriceFixation CPX
-					ON CPX.intPriceFixationId = CTP.intPriceFixationId
-				INNER JOIN tblCTContractDetail CT
-					ON CPX.intContractDetailId = CT.intContractDetailId
-				INNER JOIN tblSCTicket SC
-					ON SC.intContractId = CT.intContractDetailId
-				WHERE  SC.intTicketId = @intTicketId))
+				IF ISNULL(@intTicketContractDetailId,0) != 0
 				BEGIN
-					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
-
-					IF(ISNULL(@intMatchTicketId,0) > 0)
+					---Contract Distribution
+					IF(@intTicketStorageScheduleTypeId = -2) 
 					BEGIN
-						DELETE FROM @ItemsToIncreaseInTransitDirect
-						INSERT INTO @ItemsToIncreaseInTransitDirect(
-							[intItemId]
-							,[intItemLocationId]
-							,[intItemUOMId]
-							,[intLotId]
-							,[intSubLocationId]
-							,[intStorageLocationId]
-							,[dblQty]
-							,[intTransactionId]
-							,[strTransactionId]
-							,[intTransactionTypeId]
-							,[intFOBPointId]
+						INSERT INTO tblSCTicketContractUsed (
+							[intTicketId]
+							,[intContractDetailId] 
+							,[intEntityId] 
+							,[dblScheduleQty] 
+						)
+						SELECT
+							intTicketId = @intTicketId
+							,[intContractDetailId] = @intTicketContractDetailId
+							,[intEntityId] = @intEntityId
+							,[dblScheduleQty] = @dblTicketNetUnits
+						
+					END
+
+					---Load Distribution
+					IF(@intTicketStorageScheduleTypeId = -6) 
+					BEGIN
+						INSERT INTO tblSCTicketLoadUsed (
+							[intTicketId]
+							,[intLoadDetailId] 
+							,[intEntityId] 
+							,[dblQty] 
+						)
+						SELECT
+							@intTicketId
+							,@intTicketLoadDetailId
+							,@intEntityId
+							,@dblTicketNetUnits
+						
+					END
+				END
+				ELSE
+				BEGIN
+					--SPOT DISTRIBUTION
+					IF(@intTicketStorageScheduleTypeId = -3)
+					BEGIN
+						INSERT INTO tblSCTicketSpotUsed(
+							intTicketId
+							,intEntityId
+							,dblUnitFuture
+							,dblUnitBasis
+							,dblQty
 						)
 						SELECT 
-							intItemId = SC.intItemId
-							,intItemLocationId = ICIL.intItemLocationId
-							,intItemUOMId = SC.intItemUOMIdTo
-							,intLotId = SC.intLotId
-							,intSubLocationId = SC.intSubLocationId
-							,intStorageLocationId = SC.intStorageLocationId
-							,dblQty = SC.dblNetUnits * -1
-							,intTransactionId = 1
-							,strTransactionId = SC.strTicketNumber
-							,intTransactionTypeId = 1
-							,intFOBPointId = NULL
-						FROM tblSCTicket SC 
-						INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-						WHERE SC.intTicketId = @intMatchTicketId
-						EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+							intTicketId = @intTicketId
+							,intEntityId = @intEntityId
+							,dblUnitFuture = dblUnitPrice
+							,dblUnitBasis = dblUnitBasis
+							,dblQty = dblNetUnits
+						FROM tblSCTicket
+						WHERE intTicketId = @intTicketId
+					END
+					---STORAGE DISTRIBUTION
+					ELSE
+					BEGIN
+						INSERT INTO tblSCTicketStorageUsed(
+							intTicketId
+							,intEntityId
+							,intStorageTypeId
+							,intStorageScheduleId
+							,dblQty
+						)
+						SELECT 
+							intTicketId = @intTicketId
+							,intEntityId = @intEntityId
+							,intStorageTypeId = intStorageScheduleTypeId
+							,intStorageScheduleId = intStorageScheduleId
+							,dblQty = dblNetUnits
+						FROM tblSCTicket
+						WHERE intTicketId = @intTicketId
 					END
 				END
 			END
+		
+			SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
+			INNER JOIN tblCTPriceFixation CPX
+				ON CPX.intPriceFixationId = CTP.intPriceFixationId
+			INNER JOIN tblCTContractDetail CT
+				ON CPX.intContractDetailId = CT.intContractDetailId
+			INNER JOIN tblSCTicket SC
+				ON SC.intContractId = CT.intContractDetailId
+			WHERE CT.intContractDetailId = @intTicketId
+
+			IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
+			INNER JOIN tblCTPriceFixation CPX
+				ON CPX.intPriceFixationId = CTP.intPriceFixationId
+			INNER JOIN tblCTContractDetail CT
+				ON CPX.intContractDetailId = CT.intContractDetailId
+			INNER JOIN tblSCTicket SC
+				ON SC.intContractId = CT.intContractDetailId
+			WHERE  SC.intTicketId = @intTicketId))
+
+
+			---CREATE INVOICE
+			BEGIN
+				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
+			END
+
+			---UPDATE DIRECT IN TRANSIT
+			BEGIN
+				DELETE FROM @ItemsToIncreaseInTransitDirect
+				INSERT INTO @ItemsToIncreaseInTransitDirect(
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[intLotId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dblQty]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[intTransactionTypeId]
+					,[intFOBPointId]
+				)
+				SELECT 
+					intItemId = SC.intItemId
+					,intItemLocationId = ICIL.intItemLocationId
+					,intItemUOMId = SC.intItemUOMIdTo
+					,intLotId = SC.intLotId
+					,intSubLocationId = SC.intSubLocationId
+					,intStorageLocationId = SC.intStorageLocationId
+					,dblQty = SC.dblNetUnits * -1
+					,intTransactionId = 1
+					,strTransactionId = SC.strTicketNumber
+					,intTransactionTypeId = 1
+					,intFOBPointId = NULL
+				FROM tblSCTicket SC 
+				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+				WHERE SC.intTicketId = @intMatchTicketId
+				EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+			END
+
+		
+			UPDATE tblSCTicket
+				SET ysnDestinationWeightGradePost = 1
+			WHERE intTicketId = @intTicketId
+		
 		END
 	END
 
