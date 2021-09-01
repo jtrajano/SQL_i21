@@ -30,6 +30,7 @@ BEGIN
 			, @ysnLoad BIT = 0
 			, @xmlDocumentId INT
 			, @intContractDetailId int
+			, @ysnDeleteWholePricing bit = 0
 			;
 
 		DECLARE @PriceContractXML TABLE(    
@@ -157,7 +158,8 @@ BEGIN
 			SELECT TOP 1    
 				@intId = pc.intId    
 				, @intPriceContractId = pc.intPriceContractId    
-				, @strPriceContractState = pc.strPriceContractState    
+				, @strPriceContractState = pc.strPriceContractState  
+				, @ysnDeleteWholePricing = (case when pc.strPriceContractState = 'Deleted' then 1 else 0 end)
 				, @intPriceFixationId = pc.intPriceFixationId    
 				, @strPriceFixationState = pc.strPriceFixationState    
 				, @intPriceFixationDetailId = pc.intPriceFixationDetailId    
@@ -231,7 +233,8 @@ BEGIN
 
 				EXEC uspCTPriceFixationDetailDelete
 					@intPriceFixationId = @intPriceFixationId
-					,@intUserId = @intUserId  
+					,@intUserId = @intUserId
+					,@ysnDeleteWholePricing = @ysnDeleteWholePricing
 
 				SELECT
 					@intActivePriceFixationDetailId = MIN(intPriceFixationDetailId)
@@ -370,7 +373,8 @@ BEGIN
 
 					EXEC uspCTPriceFixationDetailDelete
 						@intPriceFixationDetailId = @intPriceFixationDetailId
-						,@intUserId = @intUserId  
+						,@intUserId = @intUserId 
+						,@ysnDeleteWholePricing = @ysnDeleteWholePricing 
 
 					SELECT
 						@intFutOptTransactionId = FD.intFutOptTransactionId   
