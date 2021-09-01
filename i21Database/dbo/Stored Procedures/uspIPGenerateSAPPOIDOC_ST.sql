@@ -14,6 +14,7 @@ BEGIN
 		,@strSubBook NVARCHAR(50)
 		,@intSubBookId INT
 		,@strContractNumber NVARCHAR(50)
+		,@strINCOLocation NVARCHAR(50)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strContractFeedIds NVARCHAR(MAX)
@@ -145,6 +146,7 @@ BEGIN
 			,@intSubBookId = NULL
 			,@strSubBook = NULL
 			,@strContractNumber = NULL
+			,@strINCOLocation = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
@@ -300,11 +302,27 @@ BEGIN
 			WHERE intContractDetailId > @intContractDetailId
 		END
 
+		SELECT @strINCOLocation = (
+				CASE 
+					WHEN FT.strINCOLocationType = 'City'
+						OR FT.strINCOLocationType = 'Port'
+						THEN CT.strCity
+					WHEN FT.strINCOLocationType = 'Warehouse'
+						THEN SL.strSubLocationName
+					ELSE ''
+					END
+				)
+		FROM tblCTContractHeader CH
+		JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CH.intFreightTermId
+			AND intContractHeaderId = @intContractHeaderId
+		LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId
+		LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = CH.intWarehouseId
+		
 		SELECT @strHeaderXML = '<ROOT_PO><CTRL_POINT>' + '<DOC_NO>' + Ltrim(IsNULL(CF.intContractFeedId, '')) + '</DOC_NO>' + '<MSG_TYPE>' + CASE 
 				WHEN UPPER(CF.strRowState) = 'ADDED'
 					THEN 'PO_CREATE'
 				ELSE 'PO_UPDATE'
-				END + '</MSG_TYPE>' + '<SENDER>i21</SENDER>' + '<RECEIVER>ERP</RECEIVER>' + '</CTRL_POINT>' + '<HEADER>' + '<COMP_CODE>' + IsNULL('', '') + '</COMP_CODE>' + '<CONTRACT_NO>' + IsNULL(CF.strContractNumber, '') + '</CONTRACT_NO>' + '<PO_NUMBER>' + IsNULL(CF.strERPPONumber, '') + '</PO_NUMBER>' + '<VENDOR>' + IsNULL(strVendorAccountNum, '') + '</VENDOR>' + '<PAYMENT_TERM>' + IsNULL(CF.strTerm, '') + '</PAYMENT_TERM>' + '<INCO_TERM>' + IsNULL(CF.strContractBasis, '') + '</INCO_TERM>' + '<POSITION>' + IsNULL(strPosition, '') + '</POSITION>' + '<WEIGHT_TERM>' + IsNULL(W.strWeightGradeDesc, '') + '</WEIGHT_TERM>' + '<APPROVAL_BASIS>' + IsNULL(G.strWeightGradeDesc, '') + '</APPROVAL_BASIS>' + '<CREATE_DATE>' + IsNULL(Convert(NVARCHAR, CH.dtmCreated, 112), '') + '</CREATE_DATE>' + '<CREATED_BY>' + IsNULL(CF.strCreatedBy, '') + '</CREATED_BY>' + '<TRACKING_NO>' + Ltrim(IsNULL(CF.intContractFeedId, '')) + '</TRACKING_NO>' + '</HEADER>'
+				END + '</MSG_TYPE>' + '<SENDER>i21</SENDER>' + '<RECEIVER>ERP</RECEIVER>' + '</CTRL_POINT>' + '<HEADER>' + '<COMP_CODE>' + IsNULL('', '') + '</COMP_CODE>' + '<CONTRACT_NO>' + IsNULL(CF.strContractNumber, '') + '</CONTRACT_NO>' + '<PO_NUMBER>' + IsNULL(CF.strERPPONumber, '') + '</PO_NUMBER>' + '<VENDOR>' + IsNULL(strVendorAccountNum, '') + '</VENDOR>' + '<PAYMENT_TERM>' + IsNULL(CF.strTerm, '') + '</PAYMENT_TERM>' + '<INCO_TERM>' + IsNULL(CF.strContractBasis, '') + '</INCO_TERM>' + '<INCO_TERM_LOCATION>' + ISNULL(@strINCOLocation, '') + '</INCO_TERM_LOCATION>' + '<POSITION>' + IsNULL(strPosition, '') + '</POSITION>' + '<WEIGHT_TERM>' + IsNULL(W.strWeightGradeDesc, '') + '</WEIGHT_TERM>' + '<APPROVAL_BASIS>' + IsNULL(G.strWeightGradeDesc, '') + '</APPROVAL_BASIS>' + '<CREATE_DATE>' + IsNULL(Convert(NVARCHAR, CH.dtmCreated, 112), '') + '</CREATE_DATE>' + '<CREATED_BY>' + IsNULL(CF.strCreatedBy, '') + '</CREATED_BY>' + '<TRACKING_NO>' + Ltrim(IsNULL(CF.intContractFeedId, '')) + '</TRACKING_NO>' + '</HEADER>'
 		FROM tblCTContractFeed CF
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CF.intContractHeaderId
 		JOIN tblCTPosition P ON P.intPositionId = CH.intPositionId
