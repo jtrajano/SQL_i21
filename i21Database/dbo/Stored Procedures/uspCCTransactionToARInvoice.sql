@@ -266,6 +266,8 @@ BEGIN
 				,@UserId
 			FETCH NEXT FROM @CursorDeleteTran INTO @intInvoiceIdDelete
 		END
+		CLOSE @CursorDeleteTran
+		DEALLOCATE @CursorDeleteTran
 	END
 
 END
