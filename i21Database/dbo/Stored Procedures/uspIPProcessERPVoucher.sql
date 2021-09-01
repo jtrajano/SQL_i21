@@ -81,6 +81,13 @@ BEGIN TRY
 		,@intFinancingCostItemId INT
 		,@intFreightCostItemId INT
 		,@intTermID INT
+		,@intInventoryReceiptId INT
+		,@intInventoryReceiptItemId INT
+		,@dblSubTotal INT
+		,@dblLiborAmount NUMERIC(18, 6)
+		,@strLiborCheck NVARCHAR(50)
+		,@dblLiborMax NUMERIC(18, 6)
+		,@strLiborMaxCheck NVARCHAR(50)
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -100,6 +107,8 @@ BEGIN TRY
 		,strOrderUnitMeasure NVARCHAR(50)
 		,intAccountId INT
 		,strCurrency NVARCHAR(50)
+		,intInventoryReceiptId INT
+		,intInventoryReceiptItemId INT
 		)
 	DECLARE @tblIPFinalInvoiceDetail TABLE (
 		intFinalInvoiceDetailId INT identity(1, 1)
@@ -181,6 +190,7 @@ BEGIN TRY
 				,@dblMiscCharges = NULL
 				,@strMiscChargesDescription = NULL
 				,@strFileName = NULL
+				,@strErrorMessage=NULL
 
 			SELECT @strVendorAccountNo = strVendorAccountNo
 				,@strVendorName = strVendorName
@@ -236,6 +246,84 @@ BEGIN TRY
 			FROM tblSMCurrency
 			WHERE strCurrency = @strCurrency
 
+			SELECT @strLiborCheck = dbo.[fnIPGetSAPIDOCTagValue]('Voucher', 'Libor Check')
+
+			IF @strLIBORrate IS NOT NULL
+				AND @strLIBORrate <> ''
+				AND @dblFinanceChargeAmount > 0
+				AND @strLiborCheck = '1'
+			BEGIN
+				SELECT @strLIBORrate = Replace(@strLIBORrate, '%', '')
+
+				IF ISNUMERIC(@strLIBORrate) = 1
+				BEGIN
+					SELECT @dblLiborAmount = NULL
+
+					SELECT @dblLiborAmount = ((1.75 + @strLIBORrate) * 90 / 360) * @dblVoucherTotal
+
+					IF @dblLiborAmount <> @dblFinanceChargeAmount
+					BEGIN
+						IF @strErrorMessage <> ''
+						BEGIN
+							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Incorrect financial charges ' + ltrim(@dblFinanceChargeAmount)
+						END
+						ELSE
+						BEGIN
+							SELECT @strErrorMessage = 'Incorrect financial charges ' + ltrim(@dblFinanceChargeAmount)
+						END
+					END
+				END
+				ELSE
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Unable to process libor rate  ' + @strLIBORrate
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Unable to process libor rate ' + @strLIBORrate
+					END
+				END
+			END
+
+			SELECT @strLiborMaxCheck = dbo.[fnIPGetSAPIDOCTagValue]('Voucher', 'Libor Max Check')
+
+			IF @strLIBORrate IS NOT NULL
+				AND @strLIBORrate <> ''
+				AND @dblFinanceChargeAmount > 0
+				AND @strLiborMaxCheck = '1'
+			BEGIN
+				SELECT @dblLiborMax = dbo.[fnIPGetSAPIDOCTagValue]('Voucher', 'Libor Max')
+
+				IF @dblFinanceChargeAmount > @dblLiborMax
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Financial charge ' + ltrim(@dblFinanceChargeAmount) + ' is more than maximum charge configured in the system.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Financial charge ' + ltrim(@dblFinanceChargeAmount) + ' is more than maximum charge configured in the system.'
+					END
+				END
+			END
+
+			SELECT @intEntityId = intEntityId
+			FROM tblAPVendor
+			WHERE strVendorAccountNum = @strVendorAccountNo
+
+			IF @intEntityId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Vendor is not available for the vendor account number ' + ltrim(@strVendorAccountNo)
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'Vendor is not available for the vendor account number ' + ltrim(@strVendorAccountNo)
+				END
+			END
+
 			IF @strErrorMessage <> ''
 			BEGIN
 				RAISERROR (
@@ -245,10 +333,6 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intEntityId = intEntityId
-			FROM tblAPVendor
-			WHERE strVendorAccountNum = @strVendorAccountNo
-
 			IF EXISTS (
 					SELECT *
 					FROM tblAPBill
@@ -257,7 +341,8 @@ BEGIN TRY
 					)
 			BEGIN
 				UPDATE tblIPBillStage
-				SET intStatusId = - 2
+				SET intStatusId = 2
+					,strMessage = @strInvoiceNo + ' is already processed in i21.'
 				WHERE intBillStageId = @intBillStageId
 
 				GOTO ext
@@ -268,8 +353,8 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strCreatedBy
-				--AND CE.strEntityNo <> ''
 
+			--AND CE.strEntityNo <> ''
 			IF @intUserId IS NULL
 			BEGIN
 				IF EXISTS (
@@ -311,6 +396,8 @@ BEGIN TRY
 				,intLoadDetailId
 				,strOrderUnitMeasure
 				,strCurrency
+				,intInventoryReceiptId
+				,intInventoryReceiptItemId
 				)
 			SELECT strItemNo
 				,intContractHeaderId
@@ -328,6 +415,8 @@ BEGIN TRY
 				,intLoadDetailId
 				,strQuantityUOM
 				,strUnitRateCurrency
+				,intInventoryReceiptId
+				,intInventoryReceiptItemId
 			FROM tblIPBillDetailStage
 			WHERE intBillStageId = @intBillStageId
 				AND intSeqNo = 1
@@ -347,8 +436,10 @@ BEGIN TRY
 					,@strSubCurrency = NULL
 					,@dblTotalCost = 0
 					,@dblTotal = 0
-					,@intContractHeaderId=NULL
-					,@intContractDetailId=NULL
+					,@intContractHeaderId = NULL
+					,@intContractDetailId = NULL
+					,@intInventoryReceiptId = NULL
+					,@intInventoryReceiptItemId = NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
@@ -356,8 +447,10 @@ BEGIN TRY
 					,@strOrderUnitMeasure = strOrderUnitMeasure
 					,@strSubCurrency = strCurrency
 					,@dblTotal = dblTotal
-					,@intContractHeaderId=intContractHeaderId
-					,@intContractDetailId=intContractDetailId
+					,@intContractHeaderId = intContractHeaderId
+					,@intContractDetailId = intContractDetailId
+					,@intInventoryReceiptId = intInventoryReceiptId
+					,@intInventoryReceiptItemId = intInventoryReceiptItemId
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -522,7 +615,6 @@ BEGIN TRY
 				END
 
 				SELECT @intLocationId = intCompanyLocationId
-					,@dblTotalCost = dblTotalCost
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
@@ -834,7 +926,13 @@ BEGIN TRY
 				) DetailTotal
 			WHERE A.intBillId = @intBillInvoiceId
 
-			IF @dblTotalCost = @dblTotal
+			SELECT @dblSubTotal = NULL
+
+			SELECT @dblSubTotal = dblSubTotal
+			FROM tblICInventoryReceipt
+			WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+			IF IsNULL(@dblSubTotal, 0) = @dblTotal
 			BEGIN
 				EXEC uspSMSubmitTransaction @type = 'AccountsPayable.view.Voucher'
 					,@recordId = @intBillInvoiceId
@@ -843,84 +941,7 @@ BEGIN TRY
 					,@currentUserEntityId = @intUserId
 					,@amount = 0
 					,@approverConfiguration = @config
-					--SELECT intTransactionId = intTransactionId
-					--FROM tblSMTransaction
-					--WHERE intRecordId = @intBillInvoiceId
-					--	AND intScreenId = @intScreenId
-					--IF intTransactionId IS NULL
-					--BEGIN
-					--	INSERT INTO tblSMTransaction (
-					--		intScreenId
-					--		,intRecordId
-					--		,strTransactionNo
-					--		,intEntityId
-					--		,strApprovalStatus
-					--		,intConcurrencyId
-					--		)
-					--	SELECT @intScreenId
-					--		,intTransactionId
-					--		,@strBillId
-					--		,@intEntityId
-					--		,'Waiting for Submit'
-					--		,1
-					--	SELECT intTransactionId = SCOPE_IDENTITY()
-					--	INSERT INTO tblSMApproval (
-					--		dtmDate
-					--		,dblAmount
-					--		,dtmDueDate
-					--		,intSubmittedById
-					--		,strStatus
-					--		,ysnCurrent
-					--		,intScreenId
-					--		,ysnVisible
-					--		,intOrder
-					--		,intTransactionId
-					--		)
-					--	SELECT GETUTCDATE()
-					--		,0
-					--		,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
-					--		,@intUserId
-					--		,'Waiting for Submit'
-					--		,1
-					--		,@intScreenId
-					--		,1
-					--		,1
-					--		,intTransactionId
-					--END
 			END
-
-			BEGIN TRY
-				SELECT @isPresent = 0
-
-				EXEC [uspSMCheckPendingAttachmentFileIfPresent] @fullFileName = @strFileName
-					,@isPresent = @isPresent OUTPUT
-
-				SELECT @isPresent
-
-				IF @isPresent = 1
-				BEGIN
-					SELECT @intTransactionId = intTransactionId
-					FROM tblSMTransaction
-					WHERE strTransactionNo = @strBillId
-						AND intScreenId = @intScreenId
-
-					--EXEC [uspSMCreateAttachmentFromFile] @transactionId = @intTransactionId -- the intTransactionId
-					--	,@fileName = @strFileName -- file name
-					--	,@fileExtension = 'pdf' -- extension
-					--	,@filePath = @strVendorInvoiceFilePath -- path
-					--	,@screenNamespace = 'AccountsPayable.Bill' -- screen type or namespace
-					--	,@useDocumentWatcher = 1 -- flag if the file was uploaded using document wacther
-					--	,@throwError = 1
-					--	,@attachmentId = @newAttachmentId OUTPUT
-					--	,@error = @message OUTPUT
-
-					SELECT @newAttachmentId
-						,@message
-				END
-			END TRY
-
-			BEGIN CATCH
-			END CATCH
 
 			ext:
 

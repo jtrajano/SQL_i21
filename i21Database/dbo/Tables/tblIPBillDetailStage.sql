@@ -26,6 +26,8 @@
 	,intLoadId INT
 	,intLoadDetailId INT
 	,intWorkOrderId int
+	,intInventoryReceiptId int
+	,intInventoryReceiptItemId int
 	,CONSTRAINT [PK_tblIPBillDetailStage] PRIMARY KEY (intBillStageDetailId)
 	,CONSTRAINT [FK_tblIPBillDetailStage_tblIPBillStage_intBillStageId] FOREIGN KEY (intBillStageId) REFERENCES tblIPBillStage(intBillStageId)
 	)
