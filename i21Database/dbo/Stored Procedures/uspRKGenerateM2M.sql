@@ -1364,9 +1364,11 @@ BEGIN TRY
 				, dblDummyContractBasis = ISNULL(cd.dblBasis, 0)
 				, dblCash = CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice ELSE NULL END
 				, dblFuturesClosingPrice1 = dblFuturePrice
-				, dblFutures = CASE WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Basis' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
+				, dblFutures = CASE WHEN strPricingType = 'Basis' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
 									--Basis (Partially Priced) Priced Record
 									WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' THEN ISNULL(priceFixationDetail.dblFutures, 0)
+									-- Fully Priced but when backdated, not yet fully priced 
+									WHEN cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' AND priceFixationDetail.dblFutures IS NOT NULL THEN ISNULL(priceFixationDetail.dblFutures, 0)
 									ELSE 
 										CASE WHEN cd.intPricingTypeId IN (1, 3) 
 											THEN ISNULL(cd.dblFutures, 0) 
@@ -1457,8 +1459,17 @@ BEGIN TRY
 							AND pfdi.dtmFixationDate <= @dtmEndDate
 						) pricedTotal
 					WHERE intContractDetailId = cd.intContractDetailId
-							-- Basis (Partially Priced) Priced Record
-						AND (cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+						AND (   
+								-- Basis (Partially Priced) Priced Record
+								(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+								-- Backdated and not yet fully priced in that specific date
+								OR ((cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced') 
+									 AND EXISTS (SELECT TOP 1 '' FROM @ContractBalance cb
+												WHERE cb.intContractDetailId = cd.intContractDetailId
+												AND cb.strPricingType = 'Basis'
+												)
+									)
+							)
 				) t
 			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 

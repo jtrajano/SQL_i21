@@ -607,6 +607,7 @@
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
+    <Build Include="dbo\Views\vyuCMBankFileGenerationLog.sql" />
     <Build Include="dbo\Views\vyuCMBankTransaction.sql" />
     <Build Include="dbo\Tables\tblEMEntityCredential.sql" />
     <Build Include="dbo\Tables\tblCMAptrxmstArchive.sql" />
@@ -9035,6 +9036,14 @@
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
     <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementTaxDetailsSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementSummaryReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementInboundSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementOutboundSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExportDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

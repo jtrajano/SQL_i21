@@ -35,6 +35,23 @@ BEGIN TRY
 	--WHERE SH.intSiteHeaderId = @intSiteHeaderId
 	--	AND CL.intEntityId = @userId
 
+	-- CHECK THE POST STATUS
+	DECLARE @ysnCurrentPostValue BIT = NULL
+
+	SELECT @ysnCurrentPostValue = ysnPosted FROM tblCCSiteHeader WHERE intSiteHeaderId = @intSiteHeaderId
+	
+	IF(@ysnCurrentPostValue = @post) 
+	BEGIN
+		IF(@ysnCurrentPostValue = 1)
+		BEGIN
+			RAISERROR('Transaction is already posted.',16,1)
+		END
+		ELSE IF (@ysnCurrentPostValue = 0)
+		BEGIN
+			RAISERROR('Transaction is already unposted.',16,1)
+		END
+	END
+
 	IF(@intCompanyLocationId IS NULL)
 	BEGIN
 		RAISERROR('Invalid Vendor Company Location!', 16, 1)

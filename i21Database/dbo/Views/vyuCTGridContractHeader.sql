@@ -143,13 +143,14 @@ AS
 			NM.strBroker,
 			NM.strBrokerAccount,
 			CH.ysnReceivedSignedFixationLetter,
-			strApprovalStatus = (case when CD.intDetailCount = 0 and RA.ysnRequireApproval = 1 then 'Waiting for Submit' else AP.strApprovalStatus end),
+			AP.strApprovalStatus,
 			P.strPositionType,
 			CH.ysnReadOnlyInterCoContract,
-			intCommodityFutureMarketId = NM.intCommodityFutureMarketId
+			intCommodityFutureMarketId = NM.intCommodityFutureMarketId,
+			ysnContractRequiresApproval = (case when te.countValue > 0 or ue.countValue > 0 then convert(bit,1) else convert(bit,0) end)
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
-	OUTER APPLY --dbo.[fnCTGetLastApprovalStatus](CH.intContractHeaderId) strApprovalStatus
+	OUTER APPLY
 	(
 		SELECT	TOP 1 AP.strStatus AS strApprovalStatus 
 		FROM	tblSMApproval		AP
@@ -160,15 +161,9 @@ AS
 		AND		AP.ysnCurrent = 1
 	) AP
 	cross apply (
-		select intDetailCount = count(*) from tblCTContractDetail where intContractHeaderId = CH.intContractHeaderId
-	) CD
+		select countValue=count(*) from tblEMEntityRequireApprovalFor em where em.intEntityId = CH.intEntityId
+	)te
 	cross apply (
-		select ysnRequireApproval = convert(bit,count(*))
-		from tblSMUserSecurityRequireApprovalFor af
-		cross apply (
-			select top 1 intScreenId from tblSMScreen where strModule = 'Contract Management' and strNamespace = 'ContractManagement.view.Contract'
-		) sc
-		where
-		af.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById) and af.intScreenId = sc.intScreenId
-	)RA
+		select countValue=count(*) from tblSMUserSecurityRequireApprovalFor smUser where smUser.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById)
+	)ue
 	LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
