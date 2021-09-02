@@ -195,6 +195,7 @@ SELECT TOP 100 PERCENT
 													WHEN entity.str1099Form = '1099-MISC' THEN 1
 													WHEN entity.str1099Form = '1099-INT' THEN 2
 													WHEN entity.str1099Form = '1099-B' THEN 3
+													WHEN entity.str1099Form = '1099-K' THEN 6
 												ELSE 0 END)
 											) ELSE 0 END
 	,int1099Category					=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
@@ -207,7 +208,14 @@ SELECT TOP 100 PERCENT
 														AND item.ysn1099Box3 = 1
 														AND patron.ysnStockStatusQualified = 1 
 														THEN 3
-												ELSE ISNULL(category1099.int1099CategoryId, 0) END
+												ELSE
+													CASE
+														WHEN entity.str1099Form = '1099-MISC' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-INT' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-B' THEN ISNULL(category1099.int1099CategoryId, 0) 
+														WHEN entity.str1099Form = '1099-K' THEN ISNULL(category1099K.int1099CategoryId, 0) 
+													ELSE 0 END
+												END
 											) ELSE 0 END
 	,dbl1099							=	CASE WHEN B.intTransactionType IN (1, 3, 9, 14)
 											THEN ISNULL(A.dbl1099, 0) ELSE 0 END
@@ -271,6 +279,7 @@ OUTER APPLY (
 ) prepayRec
 LEFT JOIN vyuPATEntityPatron patron ON A.intEntityVendorId = patron.intEntityId
 LEFT JOIN tblAP1099Category category1099 ON entity.str1099Type = category1099.strCategory
+LEFT JOIN tblAP1099KCategory category1099K ON entity.str1099Type = category1099K.strCategory
 LEFT JOIN tblICItem item ON A.intItemId = item.intItemId
 LEFT JOIN vyuCTContractDetailView ctDetail ON ctDetail.intContractDetailId = A.intContractDetailId
 LEFT JOIN tblICItemUOM contractItemCostUOM ON contractItemCostUOM.intItemUOMId = ctDetail.intPriceItemUOMId
