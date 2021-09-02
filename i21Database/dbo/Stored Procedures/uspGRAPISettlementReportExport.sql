@@ -1,15 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRAPISettlementReportExport]
 	@guiApiUniqueId UniqueIdentifier
-	,@VoucherId nvarchar(100)
+	,@VoucherId int
 AS
+	set nocount on
 	DECLARE @intBillId int
 
 
 	declare @UQ uniqueidentifier = @guiApiUniqueId
 
-	select @intBillId = intBillId 
-		from tblAPBill 
-			where strBillId = @VoucherId
+	select @intBillId =  @VoucherId
 	
 	declare @Ids Id
 	declare @PaymentIds Id
