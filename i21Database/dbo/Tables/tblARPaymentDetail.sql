@@ -103,3 +103,8 @@ GO
 CREATE NONCLUSTERED INDEX [PIndex_tblARPaymentDetail_intPaymentId]
 ON [dbo].[tblARPaymentDetail] ([intPaymentId])
 INCLUDE ([intInvoiceId],[dblInvoiceTotal],[dblPayment])
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARPaymentDetail_intBillId]
+ON [dbo].[tblARPaymentDetail] ([intBillId])
+INCLUDE ([intPaymentId])

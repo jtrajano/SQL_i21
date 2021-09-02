@@ -69,7 +69,6 @@ BEGIN
 		INNER JOIN (
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
-				 --, ICT.intTransactionDetailId
 				 , ICT.intLotId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT 
@@ -82,7 +81,6 @@ BEGIN
 			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId	
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
-			 --AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
@@ -1979,7 +1977,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,CASE WHEN [strType] IN ('CF Tran') THEN ABS([dblQty]) ELSE [dblQty] END
+		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -2001,61 +1999,7 @@ BEGIN
 		,[intForexRateTypeId]
 		,[dblForexRate]
 	FROM ##ARItemsForCosting
-
-	-- IC Costing Zero Cost
-	INSERT INTO @ItemsForCosting
-		([intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,[dblQty]
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate])
-	SELECT
-		 [intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,CASE WHEN [strType] IN ('POS') THEN ABS([dblQty]) ELSE [dblQty] END
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate]
-	FROM ##ARItemsForCosting
+	WHERE ISNULL([ysnAutoBlend], 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2065,7 +2009,6 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-
 	SELECT
 		 [intInvoiceId]
 		,[strInvoiceNumber]

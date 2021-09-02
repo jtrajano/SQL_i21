@@ -48,6 +48,8 @@ BEGIN TRY
 		,@strDetailTerm NVARCHAR(100)
 	DECLARE @intDetailCountryId INT
 		,@intDetailTermId INT
+		,@intEntityContactId INT
+		,@intEntityLocationId INT
 	DECLARE @tblEMEntity TABLE (
 		strOldName NVARCHAR(100)
 		,ysnOldActive BIT
@@ -159,6 +161,8 @@ BEGIN TRY
 				,@strEntityNo = NULL
 				,@intAuditDetailId = NULL
 				,@intStageEntityTermId = NULL
+				,@intEntityContactId = NULL
+				,@intEntityLocationId = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -310,6 +314,18 @@ BEGIN TRY
 						)
 			END
 
+			IF @intActionId <> 4
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblAPVendor V
+						WHERE V.strVendorAccountNum = @strAccountNo
+						)
+					SELECT @intActionId = 2
+				ELSE
+					SELECT @intActionId = 1
+			END
+
 			IF @intActionId = 1
 			BEGIN
 				IF EXISTS (
@@ -360,6 +376,8 @@ BEGIN TRY
 
 				SELECT @intDetailCountryId = NULL
 					,@intDetailTermId = NULL
+					,@intEntityContactId = NULL
+					,@intEntityLocationId = NULL
 
 				SELECT @intDetailActionId = intActionId
 					,@intDetailLineType = intLineType
@@ -548,6 +566,73 @@ BEGIN TRY
 							)
 					END
 
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntityType ET
+							WHERE ET.intEntityId = @intEntityId
+								AND ET.strType = 'Futures Broker'
+							)
+					BEGIN
+						INSERT INTO tblEMEntityType (
+							intEntityId
+							,strType
+							,intConcurrencyId
+							)
+						VALUES (
+							@intEntityId
+							,'Futures Broker'
+							,1
+							)
+					END
+
+					--Entity Type
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntityType ET
+							WHERE ET.intEntityId = @intEntityId
+								AND ET.strType = @strEntityType
+							)
+					BEGIN
+						INSERT INTO tblEMEntityType (
+							intEntityId
+							,strType
+							,intConcurrencyId
+							)
+						OUTPUT inserted.intEntityTypeId
+							,inserted.strType
+						INTO @tblEMEntityType
+						SELECT @intEntityId
+							,@strEntityType
+							,1
+
+						IF @strEntityType = 'Ship Via'
+						BEGIN
+							IF NOT EXISTS (
+									SELECT 1
+									FROM tblSMShipVia
+									WHERE intEntityId = @intEntityId
+									)
+							BEGIN
+								INSERT INTO tblSMShipVia (
+									intEntityId
+									,strShipVia
+									,strShippingService
+									,strFreightBilledBy
+									,ysnCompanyOwnedCarrier
+									,ysnActive
+									,intSort
+									)
+								SELECT @intEntityId
+									,@strName
+									,'None'
+									,'Other'
+									,0
+									,1
+									,0
+							END
+						END
+					END
+
 					--Entity Location
 					INSERT INTO tblEMEntityLocation (
 						intEntityId
@@ -683,6 +768,43 @@ BEGIN TRY
 							WHERE VT.intEntityVendorId = @intEntityId
 							)
 
+					--Add Contacts to Entity table
+					INSERT INTO tblEMEntity (
+						strName
+						,ysnActive
+						,strContactNumber
+						,strEmail
+						,intConcurrencyId
+						)
+					SELECT @strName
+						,1
+						,''
+						,''
+						,1
+
+					SELECT @intEntityContactId = SCOPE_IDENTITY()
+
+					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
+					FROM tblEMEntityLocation
+					WHERE intEntityId = @intEntityId
+						AND ysnDefaultLocation = 1
+
+					--Map Contacts to Vendor
+					INSERT INTO tblEMEntityToContact (
+						intEntityId
+						,intEntityContactId
+						,intEntityLocationId
+						,ysnPortalAccess
+						,ysnDefaultContact
+						,intConcurrencyId
+						)
+					SELECT @intEntityId
+						,@intEntityContactId
+						,@intEntityLocationId
+						,0
+						,1
+						,1
+
 					EXEC uspSMAuditLog @keyValue = @intEntityId
 						,@screenName = 'EntityManagement.view.Entity'
 						,@entityId = @intUserId
@@ -756,6 +878,26 @@ BEGIN TRY
 								,0
 						END
 					END
+				END
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblEMEntityType ET
+						WHERE ET.intEntityId = @intEntityId
+							AND ET.strType = 'Futures Broker'
+						)
+				BEGIN
+					INSERT INTO tblEMEntityType (
+						intEntityId
+						,strType
+						,intConcurrencyId
+						)
+					OUTPUT inserted.intEntityTypeId
+						,inserted.strType
+					INTO @tblEMEntityType
+					SELECT @intEntityId
+						,'Futures Broker'
+						,1
 				END
 
 				DELETE
@@ -955,6 +1097,50 @@ BEGIN TRY
 					AND ETS.intStageEntityId = @intStageEntityId
 					AND ETS.intLineType = 3
 					AND ETS.intActionId = 4
+
+				IF NOT EXISTS (
+						SELECT TOP 1 1
+						FROM tblEMEntityToContact EC
+						WHERE EC.intEntityId = @intEntityId
+						)
+				BEGIN
+					--Add Contacts to Entity table
+					INSERT INTO tblEMEntity (
+						strName
+						,ysnActive
+						,strContactNumber
+						,strEmail
+						,intConcurrencyId
+						)
+					SELECT @strName
+						,1
+						,''
+						,''
+						,1
+
+					SELECT @intEntityContactId = SCOPE_IDENTITY()
+
+					SELECT TOP 1 @intEntityLocationId = intEntityLocationId
+					FROM tblEMEntityLocation
+					WHERE intEntityId = @intEntityId
+						AND ysnDefaultLocation = 1
+
+					--Map Contacts to Vendor
+					INSERT INTO tblEMEntityToContact (
+						intEntityId
+						,intEntityContactId
+						,intEntityLocationId
+						,ysnPortalAccess
+						,ysnDefaultContact
+						,intConcurrencyId
+						)
+					SELECT @intEntityId
+						,@intEntityContactId
+						,@intEntityLocationId
+						,0
+						,1
+						,1
+				END
 
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 

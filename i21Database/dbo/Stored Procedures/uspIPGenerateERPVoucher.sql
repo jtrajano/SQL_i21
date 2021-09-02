@@ -59,6 +59,8 @@ BEGIN TRY
 		,@dblDetailTotal NUMERIC(18, 6)
 		,@dblDetailTax NUMERIC(18, 6)
 		,@dblDetailTotalwithTax NUMERIC(18, 6)
+		,@intContractDetailId INT
+		,@strType NVARCHAR(50)
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -320,11 +322,11 @@ BEGIN TRY
 
 		SELECT @strXML += '<Currency>' + ISNULL(@strCurrency, '') + '</Currency>'
 
-		SELECT @strXML += '<TotalDiscount>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDiscount, 0))) + '</TotalDiscount>'
+		SELECT @strXML += '<TotalDiscount>' + LTRIM(ISNULL(@dblDiscount, 0)) + '</TotalDiscount>'
 
-		SELECT @strXML += '<TotalTax>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTax, 0))) + '</TotalTax>'
+		SELECT @strXML += '<TotalTax>' + LTRIM(ISNULL(@dblTax, 0)) + '</TotalTax>'
 
-		SELECT @strXML += '<VoucherTotal>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblTotal, 0))) + '</VoucherTotal>'
+		SELECT @strXML += '<VoucherTotal>' + LTRIM(ISNULL(@dblTotal, 0)) + '</VoucherTotal>'
 
 		SELECT @strXML += '<Remarks>' + ISNULL(@strRemarks, '') + '</Remarks>'
 
@@ -367,6 +369,8 @@ BEGIN TRY
 				,@dblDetailTotal = NULL
 				,@dblDetailTax = NULL
 				,@dblDetailTotalwithTax = NULL
+				,@intContractDetailId = NULL
+				,@strType = NULL
 
 			SELECT @intItemId = BD.intItemId
 			FROM dbo.tblAPBillDetail BD
@@ -423,6 +427,8 @@ BEGIN TRY
 				,@dblDetailDiscount = CONVERT(NUMERIC(18, 6), BD.dblDiscount)
 				,@dblDetailTotal = CONVERT(NUMERIC(18, 6), BD.dblTotal)
 				,@dblDetailTax = CONVERT(NUMERIC(18, 6), BD.dblTax)
+				,@intContractDetailId = BD.intContractDetailId
+				,@strType = I.strType
 			FROM tblAPBillDetail BD
 			JOIN tblICItem I ON I.intItemId = BD.intItemId
 			JOIN dbo.tblSMCurrency C ON C.intCurrencyID = BD.intCurrencyId
@@ -431,6 +437,26 @@ BEGIN TRY
 			WHERE BD.intBillDetailId = @intBillDetailId
 
 			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
+
+			IF ISNULL(@strType, '') = 'Other Charge'
+				AND @intContractDetailId IS NULL
+			BEGIN
+				SELECT TOP 1 @intContractDetailId = BD.intContractDetailId
+				FROM tblAPBillDetail BD
+				WHERE BD.intBillId = @intBillId
+					AND BD.intContractDetailId IS NOT NULL
+
+				IF @intContractDetailId IS NOT NULL
+				BEGIN
+					SELECT @strContractNumber = CH.strContractNumber
+						,@strSequenceNo = LTRIM(CD.intContractSeq)
+						,@strERPPONumber = CD.strERPPONumber
+						,@strERPItemNumber = CD.strERPItemNumber
+					FROM tblCTContractDetail CD
+					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					WHERE CD.intContractDetailId = @intContractDetailId
+				END
+			END
 
 			SELECT TOP 1 @strWorkOrderNo = W.strWorkOrderNo
 				,@strERPOrderNo = W.strERPOrderNo
@@ -460,9 +486,12 @@ BEGIN TRY
 				SELECT @strError = @strError + 'Item No cannot be blank. '
 			END
 
-			IF ISNULL(@dblDetailQuantity, 0) = 0
+			IF ISNULL(@strType, '') <> 'Other Charge'
 			BEGIN
-				SELECT @strError = @strError + 'Detail - Quantity should be greater than 0. '
+				IF ISNULL(@dblDetailQuantity, 0) = 0
+				BEGIN
+					SELECT @strError = @strError + 'Detail - Quantity should be greater than 0. '
+				END
 			END
 
 			IF ISNULL(@strDetailCurrency, '') = ''
@@ -519,23 +548,23 @@ BEGIN TRY
 
 			SELECT @strItemXML += '<ItemNo>' + ISNULL(@strItemNo, '') + '</ItemNo>'
 
-			SELECT @strItemXML += '<Quantity>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailQuantity, 0))) + '</Quantity>'
+			SELECT @strItemXML += '<Quantity>' + LTRIM(ISNULL(@dblDetailQuantity, 0)) + '</Quantity>'
 
 			SELECT @strItemXML += '<QuantityUOM>' + ISNULL(@strQuantityUOM, '') + '</QuantityUOM>'
 
 			SELECT @strItemXML += '<Currency>' + ISNULL(@strDetailCurrency, '') + '</Currency>'
 
-			SELECT @strItemXML += '<Cost>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailCost, 0))) + '</Cost>'
+			SELECT @strItemXML += '<Cost>' + LTRIM(ISNULL(@dblDetailCost, 0)) + '</Cost>'
 
 			SELECT @strItemXML += '<CostUOM>' + ISNULL(@strQuantityUOM, '') + '</CostUOM>'
 
-			SELECT @strItemXML += '<DiscountPerc>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailDiscount, 0))) + '</DiscountPerc>'
+			SELECT @strItemXML += '<DiscountPerc>' + LTRIM(ISNULL(@dblDetailDiscount, 0)) + '</DiscountPerc>'
 
-			SELECT @strItemXML += '<SubTotal>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailTotal, 0))) + '</SubTotal>'
+			SELECT @strItemXML += '<SubTotal>' + LTRIM(ISNULL(@dblDetailTotal, 0)) + '</SubTotal>'
 
-			SELECT @strItemXML += '<Tax>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailTax, 0))) + '</Tax>'
+			SELECT @strItemXML += '<Tax>' + LTRIM(ISNULL(@dblDetailTax, 0)) + '</Tax>'
 
-			SELECT @strItemXML += '<lineTotal>' + LTRIM(CONVERT(NUMERIC(18, 4), ISNULL(@dblDetailTotalwithTax, 0))) + '</lineTotal>'
+			SELECT @strItemXML += '<lineTotal>' + LTRIM(ISNULL(@dblDetailTotalwithTax, 0)) + '</lineTotal>'
 
 			SELECT @strItemXML += '</line>'
 

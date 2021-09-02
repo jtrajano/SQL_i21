@@ -42,7 +42,7 @@ BEGIN TRY
 	--- Uncomment line below when debugging ---
 	-------------------------------------------
 	-- SELECT strSource = @strSource, strProcess = @strProcess
-
+	
 	IF @strProcess IN 
 	(
 		'Update Scheduled Quantity',
@@ -626,17 +626,6 @@ BEGIN TRY
 			@sequenceHistory
 		where
 			Row_Num = 2
-
-		select
-			intPricingTypeId = intPricingTypeId
-			,dblSeqHistoryPreviousQty = dblQuantity
-
-		from
-			@sequenceHistory
-		where
-			Row_Num = 2
-
-			select * from @cbLogTemp
 
 		if not (@intPricingTypeId is null)
 		begin
@@ -2237,7 +2226,7 @@ BEGIN TRY
 						AND suh.intExternalHeaderId is not null
 					) tbl
 					WHERE Row_Num = 1
-				END		
+				END
 			END
 		END
 	END
@@ -2383,7 +2372,7 @@ BEGIN TRY
 				(
 					SELECT intTransactionReferenceDetailId
 					FROM tblCTContractBalanceLog
-					WHERE strProcess = 'Fixation Detail Delete'
+					WHERE strProcess in ('Fixation Detail Delete','Price Delete')
 					AND intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
 				)			
@@ -2646,7 +2635,7 @@ BEGIN TRY
 				, intActionId = 17
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
+			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strTransactionReference = 'Price Fixation'
 			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
@@ -2787,9 +2776,9 @@ BEGIN TRY
 				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				OUTER APPLY (
-					SELECT TOP 1 pl.dblOrigQty, pl.dblFutures
+					SELECT TOP 1 dblOrigQty = CASE WHEN intActionId = 1 THEN ABS(pl.dblOrigQty) ELSE pl.dblOrigQty END, pl.dblFutures
 					FROM @cbLogPrev pl
-					WHERE strProcess = 'Price Fixation'
+					WHERE strTransactionReference = 'Price Fixation'
 						AND intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
 						AND intContractDetailId = @intContractDetailId
 					ORDER BY dtmTransactionDate DESC
@@ -2928,7 +2917,7 @@ BEGIN TRY
 					(
 						SELECT DISTINCT intTransactionReferenceDetailId
 						FROM @cbLogPrev
-						WHERE strProcess = 'Price Fixation'
+						WHERE strTransactionReference = 'Price Fixation'
 							AND intContractDetailId = @intContractDetailId
 					)
 				) tbl
@@ -3063,7 +3052,7 @@ BEGIN TRY
 				(
 					SELECT DISTINCT intTransactionReferenceDetailId
 					FROM @cbLogPrev
-					WHERE strProcess = 'Price Fixation'
+					WHERE strTransactionReference = 'Price Fixation'
 						AND intContractDetailId = @intContractDetailId
 				)
 			) tbl
@@ -3831,6 +3820,15 @@ BEGIN TRY
 				-- If DP/Transfer Storage disregard Update Sequence Balance and consider Update Sequence Quantity "or the other way around"
 				IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 AND @strProcess = 'Update Sequence Balance')
 				BEGIN
+					-- DP Update Balance
+					UPDATE @cbLogSpecific
+					SET strTransactionReference = 'Contract Sequence'
+						, strTransactionType = 'Contract Balance'
+						, intActionId = 43
+						, strTransactionReferenceNo = strContractNumber
+						, dblQty = dblQty * -1
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
 				END
@@ -3997,7 +3995,7 @@ BEGIN TRY
 
 				-- Posted: IR/IS/Settle Storage
 				IF @ysnUnposted = 0--@dblQty > 0
-				BEGIN					
+				BEGIN
 					-- Get actual transaction quantity
 					-- Inventory Shipment
 					IF (@strTransactionReference = 'Inventory Shipment')

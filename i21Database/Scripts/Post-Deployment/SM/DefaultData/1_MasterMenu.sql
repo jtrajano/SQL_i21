@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'Dashboard' AND strCommand = 'Dashboard.view.PowerBI?showSearch=true')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Power BI Reports' AND strModuleName = 'Dashboard' AND strCommand = 'Dashboard.view.PowerBIReports?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6496,9 +6496,19 @@ ELSE
 DECLARE @FixedAssetsMaintenanceParentMenuId INT
 SELECT @FixedAssetsMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Reports', N'Fixed Assets', @FixedAssetsParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Reports' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId
+
+DECLARE @FixedAssetsReportsParentMenuId INT
+SELECT @FixedAssetsReportsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */
 UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsActivitiesParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsMaintenanceParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Maintenance'
+UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsReportsParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Reports'
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -6517,6 +6527,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Ass
 	VALUES (N'Fixed Asset Groups', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Fixed Asset Groups', N'Maintenance', N'Screen', N'FixedAssets.view.FixedAssetGroups', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssetGroups' WHERE strMenuName = 'Fixed Asset Groups' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax vs Book' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsReportsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Tax vs Book', N'Fixed Assets', @FixedAssetsReportsParentMenuId, N'Tax vs Book', N'Maintenance', N'Screen', N'FixedAssets.view.BookDepreciationReport?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.BookDepreciationReport?showSearch=true' WHERE strMenuName = 'Tax vs Book' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsReportsParentMenuId
 
 
 /* VENDOR REBATES */

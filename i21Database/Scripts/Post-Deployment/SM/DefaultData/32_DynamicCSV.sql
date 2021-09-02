@@ -2826,7 +2826,7 @@ UPDATE tblSMCSVDynamicImport SET
 			(
 			    Select TOP 1
 			        1
-			    from tblSMCompanyLocation
+			    from tblEMEntityLocation
 			    Where strLocationName = @fixed_rack_vendor_location
 			) AND  @fixed_rack_vendor_location <> ''''
 			BEGIN
@@ -2837,7 +2837,7 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				SET @intRackLocationId =  (Select intCompanyLocationId from tblSMCompanyLocation  where  strLocationName = @fixed_rack_no)
+				SET @intRackLocationId =  (Select intEntityLocationId from tblEMEntityLocation  where  strLocationName = @fixed_rack_vendor_location)
 			END
 		END
 

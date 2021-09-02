@@ -59,7 +59,8 @@ LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
-WHERE dblBalance > 0 AND cd.intPricingTypeId <> 5 AND cd.intContractStatusId <> 3	
+WHERE dblBalance > 0 AND cd.intPricingTypeId NOT IN (5,6) AND cd.intContractStatusId <> 3	
+
 UNION SELECT DISTINCT strCommodityCode
 	, im.strItemNo
 	, strOriginDest = ca.strDescription
@@ -103,16 +104,14 @@ LEFT JOIN tblICItem i ON i.intItemId = cd.intItemId
 LEFT JOIN tblICCommodityAttribute ca ON ca.intCommodityAttributeId = i.intOriginId
 LEFT JOIN tblRKCommodityMarketMapping fmm ON fmm.intCommodityId = ch.intCommodityId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = fmm.intFutureMarketId
-INNER JOIN tblRKFuturesMonth fm1 ON fm1.intFutureMonthId = cd.intFutureMonthId
-	AND ISNULL(fm1.ysnExpired, 0) = 0 
-	AND ISNULL(fm1.dtmLastTradingDate, (SELECT currentDate FROM parameter_tbl)) >=  (SELECT currentDate FROM parameter_tbl)
+LEFT JOIN tblRKFuturesMonth fm1 ON fm1.intFutureMonthId = cd.intFutureMonthId
 LEFT JOIN tblICUnitMeasure mum ON mum.intUnitMeasureId = fm.intUnitMeasureId
 LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
-WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
+WHERE cd.intPricingTypeId IN( 5,6) AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
 	, iis.strItemNo

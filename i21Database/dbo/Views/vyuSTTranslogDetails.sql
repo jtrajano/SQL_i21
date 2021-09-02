@@ -35,13 +35,22 @@ FROM
 				THEN 1
 				ELSE 0
 				END) AS BIT)  as ysnFuel
-	   --, USec.intEntityId
+		,CASE WHEN dblTrlPrcOvrd IS NOT NULL
+					THEN 'O' --Price Override
+				WHEN strTrlMatchLineTrlMatchName IS NOT NULL
+					THEN 'M' --Mix/Match Item
+				WHEN strTrlUPC IS NULL AND (dblTrlSign = -1 OR dblTrlLineTot < 0 OR strTrlDeptType = 'neg')
+					THEN 'N' --Department Return
+				WHEN strTrlUPC IS NOT NULL AND dblTrlSign = -1 
+					THEN 'R' --Item Return
+				WHEN strTrlUPC IS NULL
+					THEN 'D' --Department 
+				WHEN strTrlUPC IS NOT NULL
+					THEN 'I' --Normal Item 
+				END 
+			AS strItemType
 	FROM tblSTTranslogRebates TR
 	JOIN tblSTStore ST 
 		ON TR.intStoreId = ST.intStoreId 
-	-- OUTER APPLY tblSMUserSecurity USec
-	-- INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
-		-- ON USec.intEntityId = RolePerm.intEntityId
-		-- AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
 	 WHERE (strTransRollback IS NULL) AND (strTransFuelPrepayCompletion IS NULL)
 ) x

@@ -110,7 +110,7 @@ BEGIN TRY
 			SELECT (
 					SELECT TOP 1 intStageEntityId
 					FROM tblIPEntityStage
-					WHERE intTrxSequenceNo = x.parentId
+					WHERE strName = x.VendorName
 					)
 				,VendorName
 				,TrxSequenceNo
@@ -147,6 +147,12 @@ BEGIN TRY
 			SET ET.intStageEntityId = E.intStageEntityId
 			FROM tblIPEntityStage E
 			JOIN tblIPEntityTermStage ET ON ET.intParentTrxSequenceNo = E.intTrxSequenceNo
+
+			UPDATE ET
+			SET ET.strCountry = C.strCountry
+			FROM tblSMCountry C
+			JOIN tblIPEntityTermStage ET ON ET.strCountry = C.strISOCode
+				AND ISNULL(ET.strCountry, '') <> ''
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (

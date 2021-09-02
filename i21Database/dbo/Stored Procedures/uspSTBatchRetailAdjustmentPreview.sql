@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspSTBatchRetailAdjustmentPreview]
 	@UDT_RetailPriceAdjustmentId		StagingRetailAdjustmentId	READONLY,
+	@strGuid						UNIQUEIDENTIFIER,
 	@ysnSuccess						BIT				OUTPUT,
 	@strMessage						NVARCHAR(1000)	OUTPUT
 AS
@@ -65,14 +66,13 @@ BEGIN
 			-- ===========================================================================================================
 			-- START Create the batch posting table
 			BEGIN
-				-- Create the temp table for the audit log. 
-				IF OBJECT_ID('tempdb..#tmpbatchpostingretailadjustmentId') IS NULL  
-					CREATE TABLE #tmpbatchpostingretailadjustmentId (
-						intItemId INT
-						,intRetailPriceAdjustmentId INT 
-						,dblPrice NUMERIC(38, 20) 
-					)
-				;
+				-- Handle preview using Table variable
+				DECLARE @tblbatchpostingretailadjustmentId TABLE 
+				(
+					intItemId INT
+					,intRetailPriceAdjustmentId INT 
+					,dblPrice NUMERIC(38, 20) 
+				)
 			END
 			-- END Create the filter tables
 			-- ===========================================================================================================
@@ -124,7 +124,7 @@ BEGIN
 				)
 				SELECT
 					pad.intRetailPriceAdjustmentDetailId,
-					pad.intRetailPriceAdjustmentId,
+					rpa.intRetailPriceAdjustmentId,
 					ysnOneTimeUse,
 					intCompanyLocationId,
 					intStoreGroupId,
@@ -215,7 +215,7 @@ BEGIN
 							INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = itemLoc.intLocationId
 							INNER JOIN tblAPVendor Vendor ON Vendor.intEntityId = itemLoc.intVendorId
 							INNER JOIN tblSTStore ST ON ST.intCompanyLocationId = itemLoc.intLocationId
-							INNER JOIN tblICItemUOM UOM ON UOM.intItemId = I.intItemId
+							INNER JOIN tblICItemUOM UOM ON UOM.intItemId = I.intItemId AND UOM.ysnStockUnit = 1
 							INNER JOIN tblICCategory CAT ON CAT.intCategoryId = I.intCategoryId
 							LEFT JOIN tblSTSubcategory FAMILY ON FAMILY.intSubcategoryId = itemLoc.intFamilyId
 							LEFT JOIN tblSTSubcategory CLASS ON CLASS.intSubcategoryId = itemLoc.intClassId
@@ -301,6 +301,7 @@ BEGIN
 										,@strScreen					= 'RetailPriceAdjustment' 
 										,@intItemId					= @intProcessItemId
 										,@intItemPricingId			= @intProcessItemPricingId 
+										,@strScreen					= 'RetailPriceAdjustment' 
 										-- update params
 										,@dblStandardCost			= NULL 
 										,@dblRetailPrice			= @dblRetailPriceConv
@@ -312,7 +313,7 @@ BEGIN
 									BEGIN 
 										SET @intSuccessPostCount = @intSuccessPostCount + 1
 
-										INSERT INTO #tmpbatchpostingretailadjustmentId (intItemId,intRetailPriceAdjustmentId, dblPrice ) 
+										INSERT INTO @tblbatchpostingretailadjustmentId (intItemId,intRetailPriceAdjustmentId, dblPrice ) 
 										VALUES (@intProcessItemId, @intRetailPriceAdjustmentId, @dblRetailPriceConv)
 										
 									END
@@ -455,21 +456,6 @@ BEGIN
 						WHERE uom.ysnStockUnit = CAST(1 AS BIT) 
 					END
 
-					-- Return Preview
-					SELECT DISTINCT  tp.strItemDescription		AS strDescription
-							, tp.strLongUPCCode		AS strUpc
-							, tp.strLocationName		AS strLocation
-							, tp.strChangeDescription
-							, tp.strPreviewOldData		AS strOldData
-							, tp.strPreviewNewData		AS strNewData
-							, trp.strRetailPriceAdjustmentNumber		AS strRetailPriceAdjustmentNumber
-					FROM @tblPreview tp
-						LEFT JOIN #tmpbatchpostingretailadjustmentId trpa
-							ON tp.intItemId = trpa.intItemId AND CAST(tp.strPreviewNewData AS NUMERIC) = CAST(trpa.dblPrice AS NUMERIC)
-						LEFT JOIN tblSTRetailPriceAdjustment trp
-							ON trp.intRetailPriceAdjustmentId = trpa.intRetailPriceAdjustmentId
-					WHERE strPreviewOldData != strPreviewNewData
-					ORDER BY trp.strRetailPriceAdjustmentNumber ASC
 				END
 			-- ==============================================================================================
 			-- [END] IF HAS PREVIEW REPORT
@@ -531,6 +517,37 @@ ExitWithRollback:
 					SET @strMessage = @strMessage + '. Will Rollback Transaction.'
 
 					ROLLBACK TRANSACTION
+					
+					-- Return Preview
+					-- INSERT TO PREVIEW TABLE
+					INSERT INTO tblSTBatchRetailAdjustmentPreview
+					(
+						strGuid,
+						strLocation,
+						strUpc,
+						strDescription,
+						strChangeDescription,
+						strOldData,
+						strNewData,
+						strRetailPriceAdjustmentNumber,
+						intConcurrencyId
+					)
+					SELECT DISTINCT  @strGuid AS strGuid
+							, tp.strItemDescription						AS strDescription
+							, tp.strLongUPCCode							AS strUpc
+							, tp.strLocationName						AS strLocation
+							, tp.strChangeDescription
+							, tp.strPreviewOldData						AS strOldData
+							, tp.strPreviewNewData						AS strNewData
+							, trp.strRetailPriceAdjustmentNumber		AS strRetailPriceAdjustmentNumber
+							, 1
+					FROM @tblPreview tp
+						LEFT JOIN @tblbatchpostingretailadjustmentId trpa
+							ON tp.intItemId = trpa.intItemId 
+						LEFT JOIN tblSTRetailPriceAdjustment trp
+							ON trp.intRetailPriceAdjustmentId = trpa.intRetailPriceAdjustmentId
+					WHERE strPreviewOldData != strPreviewNewData
+					ORDER BY trp.strRetailPriceAdjustmentNumber ASC
 				END
 			END
 			
@@ -541,6 +558,37 @@ ExitWithRollback:
 						SET @strMessage = @strMessage + '. Will Rollback to Save point.'
 
 						ROLLBACK TRANSACTION @Savepoint
+						
+					-- Return Preview
+					-- INSERT TO PREVIEW TABLE
+					INSERT INTO tblSTBatchRetailAdjustmentPreview
+					(
+						strGuid,
+						strLocation,
+						strUpc,
+						strDescription,
+						strChangeDescription,
+						strOldData,
+						strNewData,
+						strRetailPriceAdjustmentNumber,
+						intConcurrencyId
+					)
+					SELECT DISTINCT  @strGuid
+							, tp.strItemDescription						AS strDescription
+							, tp.strLongUPCCode							AS strUpc
+							, tp.strLocationName						AS strLocation
+							, tp.strChangeDescription
+							, tp.strPreviewOldData						AS strOldData
+							, tp.strPreviewNewData						AS strNewData
+							, trp.strRetailPriceAdjustmentNumber		AS strRetailPriceAdjustmentNumber
+							, 1
+					FROM @tblPreview tp
+						LEFT JOIN @tblbatchpostingretailadjustmentId trpa
+							ON tp.intItemId = trpa.intItemId 
+						LEFT JOIN tblSTRetailPriceAdjustment trp
+							ON trp.intRetailPriceAdjustmentId = trpa.intRetailPriceAdjustmentId
+					WHERE strPreviewOldData != strPreviewNewData
+					ORDER BY trp.strRetailPriceAdjustmentNumber ASC
 					END
 			END
 			

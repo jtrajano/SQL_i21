@@ -484,6 +484,7 @@ BEGIN TRY
 						,@intInvoiceDetailId
 						,@intItemUOMId
 						,@dblInventoryShipmentItemLoadApplied
+						,@strShipmentNumber
 
 				END
 
@@ -503,6 +504,7 @@ BEGIN TRY
 				,@dblFinalPrice
 				,@ContractPriceUnitMeasureId
 				,@ContractDetailItemId
+				,@strPriceContractNo
 
 		END
 

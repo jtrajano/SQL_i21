@@ -1075,6 +1075,7 @@ BEGIN
 					[strFee] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 					[strPCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 					[dblPrice] DECIMAL(18, 2) NULL,
+					[dblTransactionQtyLimit] DECIMAL(18, 2) NULL,
 
 					[strFlagColumnType] NVARCHAR(50),
 					[intFlagSysid] INT NULL, 
@@ -1113,6 +1114,7 @@ BEGIN
 																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 																		ELSE ItemPrice.dblSalePrice
 																		END, 0)
+					, [dblTransactionQtyLimit]		=	ItemLoc.dblTransactionQtyLimit
 					, [strFlagColumnType]			=	UNPIVOTItemLoc.strColumnName
 					, [intFlagSysid]				=	CASE
 															WHEN UNPIVOTItemLoc.strColumnName = 'ysnPromotionalItem' -- Always INCLUDE
@@ -1367,14 +1369,15 @@ BEGIN
 						SELECT @xml =
 						(
 							SELECT
-								plu.[strSource]				AS 'upc/@source'
-								, plu.[strUpc]				AS 'upc'
-								, plu.[strUpcModifier]		AS 'upcModifier'
-								, plu.[strDescription]		AS 'description'
-								, plu.[strDepartment]		AS 'department'
-								, plu.[strFee]				AS 'fee'
-								, plu.[strPCode]			AS 'pcode'
-								, plu.[dblPrice]			AS 'price'
+								plu.[strSource]						AS 'upc/@source'
+								, plu.[strUpc]						AS 'upc'
+								, plu.[strUpcModifier]				AS 'upcModifier'
+								, plu.[strDescription]				AS 'description'
+								, plu.[strDepartment]				AS 'department'
+								, plu.[strFee]						AS 'fee'
+								, plu.[strPCode]					AS 'pcode'
+								, plu.[dblPrice]					AS 'price'
+								, plu.[dblTransactionQtyLimit]		AS 'maxQtyPerTrans'
 								,(	
 											SELECT
 												plus.intFlagSysid AS [@sysid]
@@ -1426,6 +1429,7 @@ BEGIN
 									, strFee
 									, strPCode
 									, dblPrice
+									, dblTransactionQtyLimit
 								FROM @tblTempSapphireCommanderUPLUs
 							) plu
 							FOR XML PATH('domain:PLU'), 

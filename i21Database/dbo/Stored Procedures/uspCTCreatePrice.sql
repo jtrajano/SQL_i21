@@ -18,6 +18,9 @@ declare
 	,@strContractNumber nvarchar(50)
 	,@intContractSeq int
 	,@dblTotalPricedQuantity numeric(18,6)
+	,@dblTotalPricedLots numeric(18,6)
+	,@dblTotalPricedFutures numeric(18,6)
+	,@dblTotalWeightedAvg numeric(18,6)
 	,@intPricingType int
 	,@intContractHeaderId int
 	,@intCommodityId int
@@ -74,7 +77,7 @@ begin try
 		,@intOriginalFutureMarketId =  cd.intFutureMarketId
 		,@intOriginalFutureMonthId = cd.intFutureMonthId
 		,@dblOriginalBasis = cd.dblOriginalBasis
-		,@dblTotalLots = (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)
+		,@dblTotalLots = (case when ch.ysnMultiplePriceFixation = 1 then ch.dblNoOfLots else cd.dblNoOfLots end)
 		,@dblLotsFixed = @dblTotalLots
 		,@intQtyItemUOMId = cd.intItemUOMId
 		,@dblQuantityPerLot = cd.dblQuantity / (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)
@@ -202,11 +205,25 @@ begin try
 			dblFinalPrice
 		*/
 
-		select @dblTotalPricedQuantity = sum(dblQuantity) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId;
-		update tblCTPriceFixation set dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot where  intPriceFixationId = @intPriceFixationId;
+		select
+			@dblTotalPricedQuantity = sum(dblQuantity)
+			,@dblTotalPricedLots = sum(dblNoOfLots)
+			,@dblTotalPricedFutures = sum(dblFutures)
+			,@dblTotalWeightedAvg = sum(dblNoOfLots * dblFutures)
+		from
+			tblCTPriceFixationDetail
+		where
+			intPriceFixationId = @intPriceFixationId;
 
-		--exec dbo.uspCTUpdateAppliedAndPrice @intContractDetailId = @intContractDetailId, @dblBalance = @dblBalance;
-		EXEC uspCTSavePriceContract @intPriceContractId = @intPriceContractId, @strXML = '', @dtmLocalDate = default;
+		update
+			tblCTPriceFixation
+		set
+			dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot
+			,dblPriceWORollArb = @dblTotalWeightedAvg / @dblTotalPricedLots
+		where
+			intPriceFixationId = @intPriceFixationId;
+
+		EXEC uspCTPostProcessPriceContract @intPriceContractId = @intPriceContractId, @intUserId = @intUserId, @dtmLocalDate = default;
 
 	end
 	else
@@ -351,8 +368,23 @@ begin try
 			dblFinalPrice
 		*/
 
-		select @dblTotalPricedQuantity = sum(dblQuantity) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId;
-		update tblCTPriceFixation set dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot where  intPriceFixationId = @intPriceFixationId;
+		select
+			@dblTotalPricedQuantity = sum(dblQuantity)
+			,@dblTotalPricedLots = sum(dblNoOfLots)
+			,@dblTotalPricedFutures = sum(dblFutures)
+			,@dblTotalWeightedAvg = sum(dblNoOfLots * dblFutures)
+		from
+			tblCTPriceFixationDetail
+		where
+			intPriceFixationId = @intPriceFixationId;
+
+		update
+			tblCTPriceFixation
+		set
+			dblLotsFixed = @dblTotalPricedQuantity / @dblQuantityPerLot
+			,dblPriceWORollArb = @dblTotalWeightedAvg / @dblTotalPricedLots
+		where
+			intPriceFixationId = @intPriceFixationId;
 
 		EXEC uspCTPostProcessPriceContract @intPriceContractId = @intPriceContractId, @intUserId = @intUserId, @dtmLocalDate = default;
 

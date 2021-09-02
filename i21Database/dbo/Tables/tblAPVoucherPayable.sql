@@ -119,6 +119,8 @@
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,
 	[intLineNo]						INT NULL,
+	[intBookId]						INT NULL,
+	[intSubBookId]					INT NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO

@@ -63,7 +63,7 @@ BEGIN TRY
 				)
 			OUTPUT INSERTED.strERPRecipeNo
 			INTO @tblIPRecipeName
-			SELECT NULL
+			SELECT ItemNo
 				,strLocationName
 				,ItemNo
 				,Quantity
@@ -71,7 +71,7 @@ BEGIN TRY
 				,[Version]
 				,ValidFrom
 				,ValidTo
-				,IsNULL(ProcessName, MP.strProcessName )
+				,MP.strProcessName
 				,CreatedDate
 				,CreatedBy
 				,TrxSequenceNo
@@ -134,6 +134,7 @@ BEGIN TRY
 				,strItemGroupName
 				,intTrxSequenceNo
 				,intParentTrxSequenceNo
+				,strShrinkage
 				)
 			SELECT NULL AS strRecipeName
 				,CL.strLocationName
@@ -165,6 +166,7 @@ BEGIN TRY
 				,NULL AS ItemGroupName
 				,TrxSequenceNo
 				,parentId
+				,Shrinkage
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
 					TrxSequenceNo BIGINT
 					,[Version] INT '../Version'

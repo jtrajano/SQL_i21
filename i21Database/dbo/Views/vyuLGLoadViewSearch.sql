@@ -42,7 +42,11 @@ SELECT L.intLoadId
 	,strPositionType = P.strPositionType
 	,strWeightUnitMeasure = UM.strUnitMeasure
 	,strShipmentStatus = CASE L.intShipmentStatus
-		WHEN 1 THEN 'Scheduled'
+		WHEN 1 THEN 
+			CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
+						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
+				THEN 'Expired'
+				ELSE 'Scheduled' END
 		WHEN 2 THEN 'Dispatched'
 		WHEN 3 THEN 
 			CASE WHEN (L.ysnDocumentsApproved = 1 
@@ -92,7 +96,7 @@ SELECT L.intLoadId
 	,L.ysnPosted
     ,ysnInProgress = ISNULL(L.ysnInProgress, 0)
 	,strTransUsedBy = CASE L.intTransUsedBy
-		WHEN 2 THEN 'Scale'
+		WHEN 2 THEN 'Scale Ticket'
 		WHEN 3 THEN 'Transport Load'
 		ELSE 'None' END COLLATE Latin1_General_CI_AS
     ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 THEN CAST(ST.strTicketNumber AS VARCHAR(100))

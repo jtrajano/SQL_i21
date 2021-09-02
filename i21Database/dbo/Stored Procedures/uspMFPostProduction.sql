@@ -911,6 +911,23 @@ BEGIN
 			AND intBatchId = @intBatchId
 	END
 
+	IF ISNULL(@ysnRecap, 0) = 0
+	BEGIN
+
+		UPDATE WRD
+		SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)
+			,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate
+			,WRD.dblDifference = CASE 
+				WHEN ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate) > 0
+					THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intProduceUOMKey, RD.intItemUOMId, @dblProduceQty), 0)) * dblUnitRate)
+				ELSE NULL
+				END
+		FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
+		JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
+		WHERE WRD.intWorkOrderId = @intWorkOrderId
+
+	End
+
 	IF ISNULL(@ysnRecap, 0) = 1
 	BEGIN
 		--Create Temp Table if not exists, so that insert statement for the temp table will not fail.

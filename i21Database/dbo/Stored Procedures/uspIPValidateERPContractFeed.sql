@@ -22,6 +22,7 @@ BEGIN
 		,@intContractFeedLogId INT
 		,@intContractFeedId INT
 		,@intOrgContractFeedId INT
+		,@strSubLocation NVARCHAR(50)
 	DECLARE @tblCTContractDetail TABLE (
 		intContractDetailId INT
 		,intContractHeaderId INT
@@ -101,6 +102,13 @@ BEGIN
 				,intStatusId = 6
 			WHERE intContractFeedId = @intOrgContractFeedId
 
+			SELECT @strSubLocation =NULL
+			SELECT TOP 1 @strSubLocation = strSubLocation
+			FROM dbo.tblCTContractFeed
+			WHERE intContractDetailId = @intContractDetailId
+			AND intContractFeedId < @intOrgContractFeedId
+			ORDER BY intContractFeedId DESC
+
 			INSERT INTO tblCTContractFeed (
 				intContractHeaderId
 				,intContractDetailId
@@ -160,7 +168,7 @@ BEGIN
 				,strCommodityDesc
 				,strContractBasis
 				,strContractBasisDesc
-				,strSubLocation
+				,@strSubLocation
 				,strCreatedBy
 				,strCreatedByNo
 				,strEntityNo
