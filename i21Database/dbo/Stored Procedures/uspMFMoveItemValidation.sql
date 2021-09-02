@@ -20,6 +20,7 @@ BEGIN TRY
 		AND intItemUOMId = @intItemUOMId
 		AND ISNULL(intStorageLocationId, ISNULL(@intStorageLocationId, 0)) = ISNULL(@intStorageLocationId, 0)
 		AND intItemLocationId = @intItemLocationId
+		AND dblOnHand > 0
 
 	IF @dblQuantity > ISNULL(@dblOnHand, 0)
 	BEGIN
