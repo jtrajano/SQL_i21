@@ -7,7 +7,8 @@
 	[intInventoryRateTypeId]						INT NULL,
 	[intContractRateTypeId]							INT NULL, 
     [intAccountsReceivableRateTypeId]				INT NULL, 
-	[intGeneralJournalRateTypeId]					INT NULL, 
+	[intGeneralJournalRateTypeId]					INT NULL,
+	[intFixedAssetsRateTypeId]						INT NULL,
 	/* Unrealized */
 	[intAccountsPayableUnrealizedId]				INT NULL,
 	[intAccountsReceivableUnrealizedId]				INT NULL, 
@@ -32,6 +33,7 @@
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
+	[intFixedAssetsRealizedId]						INT NULL, 	
     [intConcurrencyId]								INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMMultiCurrency_RateType_AccountsPayable] FOREIGN KEY ([intAccountsPayableRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_CashManagement] FOREIGN KEY ([intCashManagementRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
@@ -39,6 +41,7 @@
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_Contract] FOREIGN KEY ([intContractRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_AccountsReceivable] FOREIGN KEY ([intAccountsReceivableRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_GeneralJournal] FOREIGN KEY ([intGeneralJournalRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_RateType_FixedAssets] FOREIGN KEY ([intFixedAssetsRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_Unrealized_AccountsPayable] FOREIGN KEY ([intAccountsPayableUnrealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_Unrealized_AccountsReceivable] FOREIGN KEY ([intAccountsReceivableUnrealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_Unrealized_Inventory] FOREIGN KEY ([intInventoryUnrealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
@@ -58,5 +61,6 @@
 	CONSTRAINT [FK_tblSMMultiCurrency_Offset_RiskManagementFuture] FOREIGN KEY ([intRiskManagementFutureOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_Offset_RiskManagementCash] FOREIGN KEY ([intRiskManagementCashOffsetId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_Realized_RiskManagementFuture] FOREIGN KEY ([intAccountsPayableRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
-	CONSTRAINT [FK_tblSMMultiCurrency_Realized_RiskManagementCash] FOREIGN KEY ([intAccountsReceivableRealizedId]) REFERENCES [tblGLAccount]([intAccountId])
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_RiskManagementCash] FOREIGN KEY ([intAccountsReceivableRealizedId]) REFERENCES [tblGLAccount]([intAccountId]),
+	CONSTRAINT [FK_tblSMMultiCurrency_Realized_FixedAssets] FOREIGN KEY ([intFixedAssetsRealizedId]) REFERENCES [tblGLAccount]([intAccountId])
 )

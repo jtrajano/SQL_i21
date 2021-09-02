@@ -128,16 +128,21 @@ BEGIN
         dblBasis NUMERIC(18,6) NULL,
         dblMonth NUMERIC(18,6) NULL,
         dblDepre NUMERIC(18,6) NULL,
+        dblFunctionalBasis NUMERIC(18,6) NULL,
+        dblFunctionalMonth NUMERIC(18,6) NULL,
+        dblFunctionalDepre NUMERIC(18,6) NULL,
+        dblRate NUMERIC(18,6) NULL,
         ysnFullyDepreciated BIT NULL,
         strError NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL ,
         strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+        ysnMultiCurrency BIT NULL,
         ysnDepreciated BIT NULL,
         dtmDepreciate DATETIME NULL,
         strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
       )
   
-      INSERT INTO @tblDepComputation(intAssetId,dblBasis,dblMonth, dblDepre, ysnFullyDepreciated, strError, strTransaction)
-        SELECT intAssetId, dblBasis,dblMonth,dblDepre,ysnFullyDepreciated, strError, strTransaction
+      INSERT INTO @tblDepComputation(intAssetId,dblBasis,dblMonth, dblDepre, dblFunctionalBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction)
+        SELECT intAssetId, dblBasis,dblMonth,dblDepre, dblFunctionalBasis, dblFunctionalDepre, dblFunctionalMonth, dblRate, ysnMultiCurrency, ysnFullyDepreciated, strError, strTransaction
         FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
 
       DELETE FROM @IdGood
@@ -205,6 +210,9 @@ BEGIN
                     [dtmDepreciationToDate],  
                     [dblDepreciationToDate],  
                     [dblSalvageValue],  
+                    [dblFunctionalBasis],
+                    [dblFunctionalSalvageValue],
+                    [dblRate],
                     [strTransaction],  
                     [strTransactionId],  
                     [strType],  
@@ -220,7 +228,10 @@ BEGIN
                     NULL,  
                     BD.dtmPlacedInService,  
                     0,
-                    BD.dblSalvageValue,  
+                    BD.dblSalvageValue,
+                    (BD.dblCost - BD.dblSalvageValue) * CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
+                    ISNULL(BD.dblFunctionalSalvageValue, 0),
+                    CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
                     'Place in service',  
                     @strTransactionId,  
                     D.strDepreciationType,  
@@ -258,7 +269,11 @@ BEGIN
                   [dtmDispositionDate],  
                   [dtmDepreciationToDate],  
                   [dblDepreciationToDate],  
-                  [dblSalvageValue],  
+                  [dblSalvageValue],
+                  [dblFunctionalBasis],
+                  [dblFunctionalDepreciationToDate],
+                  [dblFunctionalSalvageValue],
+                  [dblRate],
                   [strTransaction],  
                   [strTransactionId],  
                   [strType],  
@@ -274,7 +289,11 @@ BEGIN
                   NULL,  
 				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
                   E.dblDepre ,  
-                  BD.dblSalvageValue,  
+                  BD.dblSalvageValue,
+                  CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
+                  CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
+                  CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue END,
+                  CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
                   ISNULL(E.strTransaction, 'Depreciation'),  
                   @strTransactionId,  
                   D.strDepreciationType,
@@ -284,7 +303,7 @@ BEGIN
                   JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
                   JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                   OUTER APPLY (
-                    SELECT dblDepre,dblBasis, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
+                    SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
                   OUTER APPLY(
                     SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
@@ -316,7 +335,11 @@ BEGIN
                 [dtmDispositionDate],  
                 [dtmDepreciationToDate],  
                 [dblDepreciationToDate],  
-                [dblSalvageValue],  
+                [dblSalvageValue],
+                [dblFunctionalBasis],
+                [dblFunctionalDepreciationToDate],
+                [dblFunctionalSalvageValue],
+                [dblRate],  
                 [strTransaction],  
                 [strTransactionId],  
                 [strType],  
@@ -332,7 +355,11 @@ BEGIN
                 NULL,  
 				        DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
                 E.dblDepre,  
-                BD.dblSalvageValue,  
+                BD.dblSalvageValue,
+                CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
+                CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
+                CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue END,
+                CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,  
                 ISNULL(E.strTransaction, 'Depreciation'),  
                 @strTransactionId,  
                 D.strDepreciationType,  
@@ -342,7 +369,7 @@ BEGIN
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                 OUTER APPLY (
-                  SELECT dblDepre,dblBasis,strTransaction FROM @tblDepComputation WHERE intAssetId = @i
+                  SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 OUTER APPLY(
                   SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] = @i 
@@ -396,7 +423,7 @@ BEGIN
           ,[strTransactionType]  
           ,[strTransactionForm]  
           ,[strModuleName]     
-            
+          ,[intCurrencyExchangeRateTypeId]  
           )  
           SELECT   
           [strTransactionId]  = B.strTransactionId  
@@ -405,9 +432,9 @@ BEGIN
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
-          ,[dblDebit]    = ROUND(B.dblMonth,2)  
+          ,[dblDebit]    = ROUND(ISNULL(B.dblFunctionalMonth, B.dblMonth), 2)  
           ,[dblCredit]   = 0  
-          ,[dblDebitForeign]  = 0  
+          ,[dblDebitForeign]  = CASE WHEN ISNULL(ysnMultiCurrency, 0) = 0 THEN 0 ELSE ROUND(B.dblMonth, 2) END 
           ,[dblCreditForeign]  = 0  
           ,[dblDebitReport]  = 0  
           ,[dblCreditReport]  = 0  
@@ -418,8 +445,8 @@ BEGIN
           ,[dtmDate]    =  FAD.dtmDepreciationToDate 
           ,[ysnIsUnposted]  = 0   
           ,[intConcurrencyId]  = 1  
-          ,[intCurrencyId]  = A.intCurrencyId  
-          ,[dblExchangeRate]  = 1  
+          ,[intCurrencyId]  = A.intCurrencyId
+          ,[dblExchangeRate] = ISNULL(B.dblRate, 1)
           ,[intUserId]   = 0  
           ,[intEntityId]   = @intEntityId     
           ,[dtmDateEntered]  = GETDATE()  
@@ -429,7 +456,8 @@ BEGIN
           ,[intJournalLineNo]  = A.[intAssetId]     
           ,[strTransactionType] = 'Depreciation'  
           ,[strTransactionForm] = 'Fixed Assets'  
-          ,[strModuleName]  = 'Fixed Assets'  
+          ,[strModuleName]  = 'Fixed Assets'
+          ,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
           ON A.intAssetId = B.intAssetId
@@ -451,9 +479,9 @@ BEGIN
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
           ,[dblDebit]    = 0  
-          ,[dblCredit]   = ROUND(B.dblMonth,2)  
+          ,[dblCredit]   = ROUND(ISNULL(B.dblFunctionalMonth, B.dblMonth), 2)  
           ,[dblDebitForeign]  = 0  
-          ,[dblCreditForeign]  = 0  
+          ,[dblCreditForeign]  = CASE WHEN ISNULL(ysnMultiCurrency, 0) = 0 THEN 0 ELSE ROUND(B.dblMonth, 2) END  
           ,[dblDebitReport]  = 0  
           ,[dblCreditReport]  = 0  
           ,[dblReportingRate]  = 0  
@@ -464,7 +492,7 @@ BEGIN
           ,[ysnIsUnposted]  = 0   
           ,[intConcurrencyId]  = 1  
           ,[intCurrencyId]  = A.intCurrencyId  
-          ,[dblExchangeRate]  = 1  
+          ,[dblExchangeRate]  = ISNULL(B.dblRate, 1)  
           ,[intUserId]   = 0  
           ,[intEntityId]   = @intEntityId     
           ,[dtmDateEntered]  = GETDATE()  
@@ -475,6 +503,7 @@ BEGIN
           ,[strTransactionType] = 'Depreciation'  
           ,[strTransactionForm] = 'Fixed Assets'  
           ,[strModuleName]  = 'Fixed Assets'  
+          ,[intCurrencyExchangeRateTypeId] = A.intCurrencyExchangeRateTypeId
           FROM tblFAFixedAsset A  
           JOIN @tblDepComputation B 
           ON A.intAssetId = B.intAssetId
