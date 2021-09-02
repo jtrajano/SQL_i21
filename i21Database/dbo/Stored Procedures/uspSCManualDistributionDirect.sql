@@ -390,7 +390,7 @@ BEGIN TRY
 			IF (ISNULL(@intTickeLoadDetailId,0) > 0)
 			BEGIN
 				SELECT TOP 1
-					@ysnDropship = CASE WHEN B.intPurchaseSale = 3 THEN 1 ELSE 0 END
+					@ysnDropShip = CASE WHEN B.intPurchaseSale = 3 THEN 1 ELSE 0 END
 				FROM tblLGLoadDetail A
 				INNER JOIN tblLGLoad B 
 					ON A.intLoadId = B.intLoadId
