@@ -259,7 +259,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblLiborAmount = NULL
 
-					SELECT @dblLiborAmount = ((1.75 + @strLIBORrate) * 90 / 360) * @dblVoucherTotal
+					SELECT @dblLiborAmount = ((1.75 + @strLIBORrate) * 90 / 300) * (@dblVoucherTotal-@dblFinanceChargeAmount)
 
 					IF @dblLiborAmount <> @dblFinanceChargeAmount
 					BEGIN
