@@ -118,149 +118,6 @@ FROM
 	) vendorCategoryXRef
 WHERE
 	p.strUniqueId = @UniqueId
-	   
--------------------------------------------------
--- BEGIN Validation 
--------------------------------------------------
-
----- Log UPCs that don't have corresponding items
---INSERT INTO tblICImportLogDetail(
---	intImportLogId
---	, strType
---	, intRecordNo
---	, strField
---	, strValue
---	, strMessage
---	, strStatus
---	, strAction
---	, intConcurrencyId
---)
---SELECT 
---	@LogId
---	, 'Error'
---	, p.intRecordNumber
---	, 'SellingUpcNumber'
---	, p.strSellingUpcNumber
---	, 'Cannot find the item that matches the UPC: ' + p.strSellingUpcNumber
---	, 'Skipped'
---	, 'Record not imported.'
---	, 1
---FROM 
---	tblICEdiPricebook p
---	LEFT OUTER JOIN tblICItemUOM u 
---		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
---	LEFT JOIN tblICItem i 
---		ON i.intItemId = u.intItemId
---WHERE 
---	i.intItemId IS NULL
---	AND p.strUniqueId = @UniqueId
-
--- Log the records with invalid Vendor Ids. 
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, p.intRecordNumber
-	, 'strVendorId'
-	, p.strVendorId
-	, 'Cannot find the Vendor that matches: ' + p.strVendorId
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-FROM 
-	tblICEdiPricebook p
-	OUTER APPLY (
-		SELECT TOP 1 
-			v.* 
-		FROM 
-			vyuAPVendor v
-		WHERE 
-			(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
-			OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
-	) v	
-WHERE 
-	v.intEntityId IS NULL 
-	AND p.strUniqueId = @UniqueId
-
--- Log the records with duplicate records
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, NULL
-	, NULL 
-	, NULL 
-	, dbo.fnFormatMessage(
-		'There are %i duplicate records(s) found in the file.'
-		,@duplicatePricebookCount
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-		,DEFAULT
-	)
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-WHERE 
-	@duplicatePricebookCount <> 0 
-
--- Log the records with missing Vendor-Category setup
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, p.intRecordNumber
-	, 'strVendorCategory'
-	, p.strVendorCategory
-	, 'Cannot find the Category &#8594; Vendor Category XRef that matches: ' + p.strVendorCategory
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-FROM 
-	tblICEdiPricebook p
-WHERE 
-	p.strUniqueId = @UniqueId
-	AND p.intCategoryId IS NULL 
-	AND p.intVendorId IS NULL 	
-
--------------------------------------------------
--- END Validation 
--------------------------------------------------
 
 -- Create the temp table for the audit log. 
 IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItem') IS NULL  
@@ -336,6 +193,224 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL
 	)
 ;
 
+	   
+-------------------------------------------------
+-- BEGIN Validation 
+-------------------------------------------------
+
+-- Log the records with invalid Vendor Ids. 
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, p.intRecordNumber
+	, 'strVendorId'
+	, p.strVendorId
+	, 'Cannot find the Vendor that matches: ' + p.strVendorId
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+	OUTER APPLY (
+		SELECT TOP 1 
+			v.* 
+		FROM 
+			vyuAPVendor v
+		WHERE 
+			(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+			OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+	) v	
+WHERE 
+	v.intEntityId IS NULL 
+	AND p.strUniqueId = @UniqueId
+
+-- Log the records with duplicate records
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Warning'
+	, NULL
+	, NULL 
+	, NULL 
+	, dbo.fnFormatMessage(
+		'There are %i duplicate records(s) found in the file.'
+		,@duplicatePricebookCount
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+		,DEFAULT
+	)
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+WHERE 
+	@duplicatePricebookCount <> 0 
+
+-- Log the records with missing Vendor-Category setup
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, p.intRecordNumber
+	, 'strVendorCategory'
+	, p.strVendorCategory
+	, 'Cannot find the Category &#8594; Vendor Category XRef that matches: ' + p.strVendorCategory
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+WHERE 
+	p.strUniqueId = @UniqueId
+	AND p.intCategoryId IS NULL 
+	AND p.intVendorId IS NULL 	
+
+-- Log the duplicate UOM from strItemUnitOfMeasure
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, intRecordNumber
+	, 'strItemUnitOfMeasure'
+	, strSymbol
+	, 'Duplicate UOM Symbol is used for ' + strUnitMeasure
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM (
+		SELECT 
+			strUnitMeasure = u.strUnitMeasure
+			,strSymbol = u.strSymbol
+			,intRecordNumber = p.intRecordNumber
+			,row_no = u.row_no
+		FROM 
+			tblICEdiPricebook p 
+			LEFT JOIN (
+				SELECT * 
+				FROM (
+					SELECT 
+						strUnitMeasure
+						,strSymbol
+						,row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
+					FROM 
+						tblICUnitMeasure u 
+				) x
+				WHERE
+					x.row_no > 1 			
+			) u
+			ON 
+				(p.ysnUpdateExistingRecords = 1 OR p.ysnAddNewRecords = 1) 
+				AND u.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')				
+		WHERE
+			p.strUniqueId = @UniqueId
+	) x
+WHERE
+	x.row_no > 1 
+
+-- Log the duplicate 2nd UOM from strOrderPackageDescription
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, intRecordNumber
+	, 'strOrderPackageDescription'
+	, strSymbol
+	, 'Duplicate UOM Symbol is used for ' + strUnitMeasure
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM (
+		SELECT 
+			strUnitMeasure = u.strUnitMeasure
+			,strSymbol = u.strSymbol
+			,intRecordNumber = p.intRecordNumber
+			,row_no = u.row_no
+		FROM 
+			tblICEdiPricebook p 
+			LEFT JOIN (
+				SELECT * 
+				FROM (
+					SELECT 
+						strUnitMeasure
+						,strSymbol
+						,row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
+					FROM 
+						tblICUnitMeasure u 
+				) x
+				WHERE
+					x.row_no > 1 			
+			) u
+			ON 
+				p.ysnAddOrderingUPC = 1 
+				AND u.strSymbol = NULLIF(p.strOrderPackageDescription, '')				
+		WHERE
+			p.strUniqueId = @UniqueId
+	) x
+WHERE
+	x.row_no > 1 
+
+IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
+	GOTO _Exit_With_Errors
+
+-------------------------------------------------
+-- END Validation 
+-------------------------------------------------
 -- Remove the pricebook records with the missing Vendor-Category setup
 DELETE p
 FROM 
@@ -470,7 +545,7 @@ FROM (
 
 SELECT @updatedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'UPDATE'
 SELECT @insertedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'INSERT'
-	   	
+
 -- Update or Insert Item UOM
 INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (
 	intItemId 
@@ -510,10 +585,24 @@ FROM (
 					i.intItemId = u.intItemId
 					OR i.strItemNo = p.strSellingUpcNumber
 			) i			
-			LEFT JOIN tblICUnitMeasure m 
-				ON m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
-			LEFT JOIN tblICUnitMeasure s 
-				ON s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+			OUTER APPLY (			
+				SELECT TOP 1 
+					m.*
+				FROM tblICUnitMeasure m 
+				WHERE
+					m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+				ORDER BY 
+					m.intUnitMeasureId 
+			) m
+			OUTER APPLY (
+				SELECT TOP 1 
+					s.*
+				FROM tblICUnitMeasure s 
+				WHERE
+					s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+				ORDER BY 
+					m.intUnitMeasureId 
+			) s
 			OUTER APPLY (
 				SELECT TOP 1 
 					iu.intItemUOMId 
@@ -634,10 +723,24 @@ FROM
 			i.intItemId = u.intItemId
 			OR i.strItemNo = p.strSellingUpcNumber
 	) i			
-	LEFT JOIN tblICUnitMeasure m 
-		ON m.strUnitMeasure = NULLIF(p.strOrderPackageDescription, '')
-	LEFT JOIN tblICUnitMeasure s 
-		ON s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
+	OUTER APPLY (			
+		SELECT TOP 1 
+			m.*
+		FROM tblICUnitMeasure m 
+		WHERE
+			m.strUnitMeasure = NULLIF(p.strOrderPackageDescription, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) m
+	OUTER APPLY (
+		SELECT TOP 1 
+			s.*
+		FROM tblICUnitMeasure s 
+		WHERE
+			s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) s
 	OUTER APPLY (
 		SELECT TOP 1 
 			iu.intItemUOMId 
@@ -659,7 +762,6 @@ FROM
 				OR iu.intUnitMeasureId = s.intUnitMeasureId
 			)
 	) existUOM
-
 WHERE
 	p.strUniqueId = @UniqueId
 	AND i.intItemId IS NOT NULL 
@@ -1404,6 +1506,8 @@ FROM (
 
 SELECT @updatedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'UPDATE'
 SELECT @insertedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'INSERT'
+
+_Exit_With_Errors: 
 
 -- Update the stats. 
 BEGIN 
