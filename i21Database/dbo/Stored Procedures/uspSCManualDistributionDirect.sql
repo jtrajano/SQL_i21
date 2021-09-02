@@ -42,7 +42,7 @@ BEGIN TRY
 	DECLARE @intTicketItemId INT
 	DECLARE @intDirectOutTicketId INT
 	DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
-	DECLARE @ysnDropShip BIT = 0
+	DECLARE @ysnDropShip BIT
 	
 	DECLARE @_intLoopLoadDetailId INT
 	DECLARE @_intLoopContractDetailId INT
@@ -53,7 +53,7 @@ BEGIN TRY
 	
 
 	
-
+	SET @ysnDropShip = 0
 
 	---GET TICKET DETAILS
 	SELECT TOP 1
