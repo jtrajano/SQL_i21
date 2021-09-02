@@ -3810,7 +3810,7 @@ BEGIN TRY
 						,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						) x
 				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
-				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
+				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName AND SL.intSubLocationId=CLSL.intCompanyLocationSubLocationId
 				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
 					AND Hauler.strEntityNo <> '' --???
 				WHERE NOT EXISTS (
@@ -3863,7 +3863,7 @@ BEGIN TRY
 				JOIN tblLGLoadWarehouse LW ON LW.intLoadId = @intNewLoadId
 					AND LW.intLoadWarehouseRefId = x.intLoadWarehouseId
 				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
-				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
+				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName AND SL.intSubLocationId=CLSL.intCompanyLocationSubLocationId
 				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
 					AND Hauler.strEntityNo <> '' --???
 
@@ -4584,7 +4584,11 @@ END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-
+	UPDATE tblLGIntrCompLogisticsStg
+	SET strFeedStatus = 'Failed'
+		,strMessage = @ErrMsg
+		,intStatusId = 2
+	WHERE intId = @intId
 	RAISERROR (
 			@ErrMsg
 			,16
