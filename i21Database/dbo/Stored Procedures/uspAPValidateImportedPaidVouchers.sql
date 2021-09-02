@@ -65,10 +65,10 @@ UPDATE A
 					THEN 'Debit Memo type amount should be negative.'
 					WHEN 
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue
-					THEN 'Overpayment'
+					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Underpayment' ELSE 'Overpayment' END)
 					WHEN 
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue
-					THEN 'Underpayment'
+					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Overpayment' ELSE 'Underpayment' END)
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
