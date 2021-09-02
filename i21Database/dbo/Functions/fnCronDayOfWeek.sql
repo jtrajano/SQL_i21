@@ -16,13 +16,13 @@ BEGIN
 	AND NOT (@ysnSunday = 1 AND @ysnMonday = 1 AND @ysnTuesday = 1 AND @ysnWednesday = 1 AND @ysnThursday = 1 AND @ysnFriday = 1 AND @ysnSaturday = 1)
 	BEGIN 
 		SET @dayOfWeek = ''
-		IF @ysnSunday = 1 SET @dayOfWeek = '1,'
-		IF @ysnMonday = 1 SET @dayOfWeek += '2,' 
-		IF @ysnTuesday = 1 SET @dayOfWeek += '3,'
-		IF @ysnWednesday = 1 SET @dayOfWeek += '4,' 
-		IF @ysnThursday = 1 SET @dayOfWeek += '5,' 
-		IF @ysnFriday = 1 SET @dayOfWeek += '6,' 
-		IF @ysnSaturday = 1 SET @dayOfWeek += '7,' 
+		IF @ysnSunday = 1 SET @dayOfWeek = '0,'
+		IF @ysnMonday = 1 SET @dayOfWeek += '1,' 
+		IF @ysnTuesday = 1 SET @dayOfWeek += '2,'
+		IF @ysnWednesday = 1 SET @dayOfWeek += '3,' 
+		IF @ysnThursday = 1 SET @dayOfWeek += '4,' 
+		IF @ysnFriday = 1 SET @dayOfWeek += '5,' 
+		IF @ysnSaturday = 1 SET @dayOfWeek += '6,' 
 
 		SET @dayOfWeek = REVERSE(@dayOfWeek) 
 		SET @dayOfWeek = SUBSTRING(@dayOfWeek, 2, LEN(@dayOfWeek) - 1) 

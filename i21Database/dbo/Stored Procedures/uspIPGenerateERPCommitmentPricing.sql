@@ -205,9 +205,12 @@ BEGIN TRY
 			SELECT @strError = @strError + 'Futures Price should be greater than 0. '
 		END
 
-		IF ISNULL(@dblCalculatedFXPrice, 0) = 0
+		IF @strCompanyLocation = '10'
 		BEGIN
-			SELECT @strError = @strError + 'FX Price should be greater than 0. '
+			IF ISNULL(@dblCalculatedFXPrice, 0) = 0
+			BEGIN
+				SELECT @strError = @strError + 'FX Price should be greater than 0. '
+			END
 		END
 
 		IF ISNULL(@dblCalculatedRefPrice, 0) = 0

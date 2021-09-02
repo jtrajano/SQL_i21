@@ -42,7 +42,7 @@ BEGIN TRY
 	--- Uncomment line below when debugging ---
 	-------------------------------------------
 	-- SELECT strSource = @strSource, strProcess = @strProcess
-
+	
 	IF @strProcess IN 
 	(
 		'Update Scheduled Quantity',
@@ -2226,7 +2226,7 @@ BEGIN TRY
 						AND suh.intExternalHeaderId is not null
 					) tbl
 					WHERE Row_Num = 1
-				END		
+				END
 			END
 		END
 	END
@@ -2372,7 +2372,7 @@ BEGIN TRY
 				(
 					SELECT intTransactionReferenceDetailId
 					FROM tblCTContractBalanceLog
-					WHERE strProcess = 'Fixation Detail Delete'
+					WHERE strProcess in ('Fixation Detail Delete','Price Delete')
 					AND intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
 				)			
@@ -3820,6 +3820,15 @@ BEGIN TRY
 				-- If DP/Transfer Storage disregard Update Sequence Balance and consider Update Sequence Quantity "or the other way around"
 				IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 AND @strProcess = 'Update Sequence Balance')
 				BEGIN
+					-- DP Update Balance
+					UPDATE @cbLogSpecific
+					SET strTransactionReference = 'Contract Sequence'
+						, strTransactionType = 'Contract Balance'
+						, intActionId = 43
+						, strTransactionReferenceNo = strContractNumber
+						, dblQty = dblQty * -1
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
 				END
@@ -3986,7 +3995,7 @@ BEGIN TRY
 
 				-- Posted: IR/IS/Settle Storage
 				IF @ysnUnposted = 0--@dblQty > 0
-				BEGIN					
+				BEGIN
 					-- Get actual transaction quantity
 					-- Inventory Shipment
 					IF (@strTransactionReference = 'Inventory Shipment')

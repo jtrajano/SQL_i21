@@ -10,6 +10,7 @@
     [intSort]								INT NULL DEFAULT (1), 
 	[ysnCustomView]							BIT NOT NULL DEFAULT (0), 
 	[ysnMenuLink]							BIT NOT NULL DEFAULT (0),
+	[ysnPBIReport]							BIT NOT NULL DEFAULT (0),
 	[strMenuLinkCommand]					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]						INT NOT NULL DEFAULT (1), 
 

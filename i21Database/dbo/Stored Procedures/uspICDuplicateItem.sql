@@ -446,7 +446,8 @@ BEGIN
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
 		ysnActive,
-		intAllowZeroCostTypeId
+		intAllowZeroCostTypeId,
+		dblTransactionQtyLimit
 	)
 	SELECT @NewItemId,
 		intLocationId,
@@ -511,7 +512,8 @@ BEGIN
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
 		ysnActive,
-		intAllowZeroCostTypeId
+		intAllowZeroCostTypeId,
+		dblTransactionQtyLimit
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------

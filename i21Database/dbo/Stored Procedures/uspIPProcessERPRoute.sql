@@ -578,9 +578,9 @@ BEGIN TRY
 			WHERE intItemRouteStageId = @intItemRouteStageId
 		END CATCH
 
-		SELECT @intItemRouteStageId = MIN(intStageItemId)
-		FROM tblIPItemStage
-		WHERE intStageItemId > @intItemRouteStageId
+		SELECT @intItemRouteStageId = MIN(intItemRouteStageId)
+		FROM tblIPItemRouteStage
+		WHERE intItemRouteStageId > @intItemRouteStageId
 	END
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
