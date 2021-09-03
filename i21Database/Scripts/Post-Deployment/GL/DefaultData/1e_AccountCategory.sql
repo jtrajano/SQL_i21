@@ -85,6 +85,7 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 75,name = 'Unrealized Futures Gain or Loss' UNION ALL --GL-3464
 			SELECT id = 76,name = 'Futures Trade Equity' UNION ALL --GL-3464
 			SELECT id = 77,name = 'Futures Gain or Loss Realized' UNION ALL --GL-3464
+			SELECT id = 78,name = 'Realized Gain or Loss Fixed Assets' UNION ALL 
 			SELECT id = 100, name = 'Mark to Market P&L' UNION ALL
 			SELECT id = 101, name = 'Mark to Market Offset' UNION ALL
 
