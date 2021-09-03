@@ -864,6 +864,9 @@ AND GLDetail.intAccountId IS NOT NULL
         ON bill.intBillId = billDetail.intBillId
     INNER JOIN tblGRCustomerStorage CS_TO
         ON CS_TO.intCustomerStorageId = billDetail.intCustomerStorageId
+    INNER JOIN tblGRStorageType ST
+        ON ST.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+        AND ST.ysnDPOwnedType = 1
     INNER JOIN tblGRTransferStorageReference TSR
         ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
     INNER JOIN tblGRCustomerStorage CS_FROM
