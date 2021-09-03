@@ -183,6 +183,8 @@ BEGIN TRY
 		, CD.intShipToId
 		, CD.dtmStartDate
 		, CD.dtmEndDate
+		, CD.ysnCashFlowOverride
+		, CD.dtmCashFlowDate
 		, CD.intFreightTermId
 		, CD.intShipViaId
 		, CD.intItemContractId
