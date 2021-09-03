@@ -1053,19 +1053,19 @@ INNER JOIN tblICInventoryReceiptCharge rc
  FROM    
  (  
   SELECT  
-   B.intTransferStorageReferenceId
+   B.intInventoryReceiptChargeId
    ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
    ,SUM(B.dblReceiptChargeTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
   FROM grainTransferChargeClearing B  
   GROUP BY   
-   intTransferStorageReferenceId
+   intInventoryReceiptChargeId
    ,strTransactionNumber  
    ,intItemId  
    ,intLocationId  
    ,strLocationName
  ) tmpAPOpenClearing  
 INNER JOIN tblGRTransferStorageReference tsr
-    ON tmpAPOpenClearing.intTransferStorageReferenceId = tsr.intTransferStorageReferenceId
+    ON tmpAPOpenClearing.intInventoryReceiptChargeId = tsr.intTransferStorageReferenceId
 INNER JOIN tblGRTransferStorage ts
   ON ts.intTransferStorageId = tsr.intTransferStorageId
 INNER JOIN tblGRCustomerStorage cs

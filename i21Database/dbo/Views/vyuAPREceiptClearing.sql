@@ -94,19 +94,6 @@ OUTER APPLY (
     INNER JOIN tblAPBillDetailTax bdTax ON bdTax.intBillDetailId = billDetail.intBillDetailId
     WHERE billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 ) voucherTax
-join (
-		select sum(dblTransactionUnits) dblTransactionUnits
-		 , intInventoryReceiptId
-		 , intInventoryReceiptItemId
-		from tblGRStorageInventoryReceipt 
-			where intTransferStorageReferenceId is not null
-				and ysnUnposted = 0
-		group by intInventoryReceiptId
-		 , intInventoryReceiptItemId
-	) StorageTransfer
-	--AND transferClr.strMark = '1.1'
-	on StorageTransfer.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-		and StorageTransfer.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
@@ -145,9 +132,6 @@ join (
 -- 		--AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- 		--AND APClearing.intItemId = receiptItem.intItemId
 
---receipts in storage that were FULLY transferred from DP to DP only
-LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
-    ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 --receipts in storage that were transferred
 OUTER APPLY (
     SELECT TOP 1 [ysnExists] = 1
@@ -178,144 +162,6 @@ AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
 AND transferClr.ysnExists IS NULL
-AND transferClrDP.intInventoryReceiptItemId IS NULL
-UNION ALL
-
-
---Receipt item,
-SELECT	
-	
-	'1.2' as strMark,
-    receipt.intEntityVendorId
-    ,receipt.dtmReceiptDate AS dtmDate
-    ,receipt.strReceiptNumber AS strTransactionNumber
-    ,receipt.intInventoryReceiptId
-    ,NULL AS intBillId
-    ,NULL AS strBillId
-    ,NULL AS intBillDetailId
-    ,receiptItem.intInventoryReceiptItemId
-    ,receiptItem.intItemId
-    ,receiptItem.intUnitMeasureId AS intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM
-    ,0 AS dblVoucherTotal
-    ,0 AS dblVoucherQty
-    ,(ROUND(
-        (
-			CASE	
-				WHEN receiptItem.intWeightUOMId IS NULL THEN 
-					ISNULL(receiptItem.dblOpenReceive, 0) 
-				ELSE 
-					CASE 
-						WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-							ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
-						ELSE 
-							CASE WHEN intSourceType = 2 
-								THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
-							ELSE ISNULL(receiptItem.dblNet, 0) 
-							END
-					END 
-				END				
-				- isnull(Shrek.dblComputedShrink, 0)			
-				- isnull(StorageTransfer.dblTransactionUnits, 0)
-		)
-        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
-        * (
-            CASE 
-                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
-                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
-                ELSE 
-                    1 
-            END 
-        )
-        , 2
-    ) 
-    +
-    --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
-    -- ISNULL(clearingTax.dblTax,0)
-    0 -- Setting clearing tax to 0 as IRs from Delivery Sheet do not have taxes.
-    )
-    *
-    (
-        CASE
-        WHEN receipt.strReceiptType = 'Inventory Return'
-        THEN -1
-        ELSE 1
-        END
-    )
-    AS dblReceiptTotal
-    ,( 
-		( ISNULL(receiptItem.dblOpenReceive, 0)
-				*
-			(
-				CASE
-					WHEN receipt.strReceiptType = 'Inventory Return'
-						THEN -1
-					ELSE 1
-				END
-			)
-		)
-
-		- isnull(Shrek.dblComputedShrink, 0)
-		
-		- isnull(StorageTransfer.dblTransactionUnits, 0)
-	)		
-		
-	 
-    AS dblReceiptQty
-    ,receipt.intLocationId
-    ,compLoc.strLocationName
-    ,CAST(CASE WHEN receiptItem.intOwnershipType = 2 THEN 0 ELSE 1 END AS BIT) AS ysnAllowVoucher
-    ,APClearing.intAccountId
-	,APClearing.strAccountId
-FROM tblICInventoryReceipt receipt 
-INNER JOIN tblICInventoryReceiptItem receiptItem
-	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-INNER JOIN tblSMCompanyLocation compLoc
-    ON receipt.intLocationId = compLoc.intCompanyLocationId
-LEFT JOIN tblSMFreightTerms ft
-    ON ft.intFreightTermId = receipt.intFreightTermId
-LEFT JOIN 
-(
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
-)
-    ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
-LEFT JOIN vyuAPReceiptClearingGL APClearing
-    ON APClearing.strTransactionId = receipt.strReceiptNumber
-        AND APClearing.intItemId = receiptItem.intItemId
-        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
-
---receipts in storage that were transferred
-join (
-		select sum(dblTransactionUnits) dblTransactionUnits
-		 , intInventoryReceiptId
-		 , intInventoryReceiptItemId
-		from tblGRStorageInventoryReceipt 
-			where intTransferStorageReferenceId is not null
-		group by intInventoryReceiptId
-		 , intInventoryReceiptItemId
-	) StorageTransfer
-	--AND transferClr.strMark = '1.1'
-	on StorageTransfer.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-		and StorageTransfer.intInventoryReceiptId = receiptItem.intInventoryReceiptId
-left join (
-	select sum(dblComputedShrinkPerIR) as dblComputedShrink, intInventoryReceiptItemId
-		from tblSCDeliverySheetShrinkReceiptDistribution
-            where intInventoryReceiptItemId is not null
-	group by intInventoryReceiptItemId
-
-) Shrek
-	on Shrek.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-
-WHERE 
-    receiptItem.dblUnitCost != 0 -- WILL NOT SHOW ALL THE 0 TOTAL IR 
---DO NOT INCLUDE RECEIPT WHICH USES IN-TRANSIT AS GL
---CLEARING FOR THIS IS ALREADY PART OF vyuAPLoadClearing
-AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
-AND receipt.strReceiptType != 'Transfer Order'
-AND receiptItem.intOwnershipType != 2
-AND receipt.ysnPosted = 1
-
 
 --UNION ALL
 ---- Delivery Sheet posting with shrinkage
@@ -536,19 +382,6 @@ OUTER APPLY (
     FROM tblAPBillDetailTax taxes
     WHERE taxes.intBillDetailId = billDetail.intBillDetailId
 ) oldCostTax
-join (
-		select sum(dblTransactionUnits) dblTransactionUnits
-		 , intInventoryReceiptId
-		 , intInventoryReceiptItemId
-		from tblGRStorageInventoryReceipt 
-			where intTransferStorageReferenceId is not null
-				and ysnUnposted = 0
-		group by intInventoryReceiptId
-		 , intInventoryReceiptItemId
-	) StorageTransfer
-	--AND transferClr.strMark = '1.1'
-	on StorageTransfer.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-		and StorageTransfer.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 -- LEFT JOIN vyuAPReceiptClearingGL APClearing
 --     ON APClearing.strTransactionId = receipt.strReceiptNumber
 --         AND APClearing.intItemId = receiptItem.intItemId
@@ -588,9 +421,6 @@ join (
 -- 		AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- 		AND APClearing.intItemId = receiptItem.intItemId
 
---receipts in storage that were FULLY transferred from DP to DP only
-LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
-    ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
 AND bill.ysnPosted = 1
@@ -598,7 +428,6 @@ AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
-AND transferClrDP.intInventoryReceiptItemId IS NULL
 --receipts in storage that were transferred
 AND NOT EXISTS(
 	SELECT TOP 1 1
@@ -606,183 +435,16 @@ AND NOT EXISTS(
     WHERE transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 	AND transferClr.strTransactionNumber = receipt.strReceiptNumber
 )
---AND receipt.dtmReceiptDate >= '2020-09-09'GO
 
-
-
-
-
-
-
-
---Vouchers for receipt items
-union all
-SELECT
-    bill.intEntityVendorId
-    ,bill.dtmDate AS dtmDate
-    ,Receipt.strReceiptNumber
-    ,Receipt.intInventoryReceiptId
-    ,bill.intBillId
-    ,bill.strBillId
-    ,billDetail.intBillDetailId
-    ,StorageReceipt.intInventoryReceiptItemId
-    ,billDetail.intItemId
-    ,billDetail.intUnitOfMeasureId AS intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM
-    ,StorageReceipt.dblUnits * ReceiptItem.dblUnitCost as dblVoucherTotal	
-    ,Round(StorageReceipt.dblUnits, 2) AS dblVoucherQty
-    ,0 AS dblReceiptTotal
-    ,0 AS dblReceiptQty
-   
-    ,Receipt.intLocationId
-    ,compLoc.strLocationName
-    ,CAST(1 AS BIT) ysnAllowVoucher
-    ,APClearing.intAccountId
-	,APClearing.strAccountId
-FROM tblGRStorageInventoryReceipt StorageReceipt
-			join ( 
-
-				select  Charge.intInventoryReceiptId, Tickets.intTicketId from (
-					select strTicketNumber, intTicketId, intItemId from tblSCTicket where intInventoryReceiptId is not null and intDeliverySheetId > 0
-					) Tickets
-					join tblICInventoryReceiptItem Item
-						on Item.intSourceId = Tickets.intTicketId				
-					join tblQMTicketDiscount TicketDiscount
-						on TicketDiscount.intTicketId = Tickets.intTicketId
-					join tblGRDiscountScheduleCode DiscountScheduleCode
-						on DiscountScheduleCode.intDiscountScheduleCodeId = TicketDiscount.intDiscountScheduleCodeId
-					join tblICInventoryReceiptCharge Charge
-						on Item.intInventoryReceiptId = Charge.intInventoryReceiptId				
-							and Charge.intChargeId = DiscountScheduleCode.intItemId		
-						
-		) TicketLinking			
-			on StorageReceipt.intInventoryReceiptId = TicketLinking.intInventoryReceiptId
-					
-		join tblICInventoryReceipt Receipt
-			on Receipt.intInventoryReceiptId = TicketLinking.intInventoryReceiptId
-		join tblICInventoryReceiptItem ReceiptItem
-			on Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId			
-			and ReceiptItem.intInventoryReceiptItemId = StorageReceipt.intInventoryReceiptItemId
-join tblAPBillDetail billDetail
-			on  billDetail.intCustomerStorageId = StorageReceipt.intCustomerStorageId
-				and ReceiptItem.intItemId = billDetail.intItemId
-		INNER JOIN tblAPBill bill ON billDetail.intBillId = bill.intBillId
-INNER JOIN tblSMCompanyLocation compLoc
-    ON Receipt.intLocationId = compLoc.intCompanyLocationId
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = billDetail.intAccountId AND APClearing.intAccountCategoryId = 45
-LEFT JOIN tblSMFreightTerms ft
-    ON ft.intFreightTermId = Receipt.intFreightTermId
-LEFT JOIN 
-(
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
-)
-    ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
 --receipts in storage that were transferred
-LEFT JOIN vyuGRTransferClearing transferClr
-    ON transferClr.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
---receipts in storage that were FULLY transferred from DP to DP only
-LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
-    ON transferClrDP.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-WHERE 
-     bill.ysnPosted = 1
-	 AND transferClr.intInventoryReceiptItemId IS NULL
-	 AND transferClrDP.intInventoryReceiptItemId IS NULL
-
-
-AND Receipt.strReceiptType != 'Transfer Order'
+-- AND NOT EXISTS(
+-- 	SELECT TOP 1 1
+-- 	FROM vyuGRTransferClearing transferClr
+--     WHERE transferClr.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+-- 	AND transferClr.strTransactionNumber = receipt.strReceiptNumber
+-- )
 
 --AND receipt.dtmReceiptDate >= '2020-09-09'GO
-
-
---This is for the settlement of the remaining IR in a transfer
-union all
-SELECT
-	--'4' as flag,
-	--*
-	
-	-- original select
-    bill.intEntityVendorId
-    ,bill.dtmDate AS dtmDate
-    ,Receipt.strReceiptNumber
-    ,Receipt.intInventoryReceiptId
-    ,bill.intBillId
-    ,bill.strBillId
-    ,billDetail.intBillDetailId
-    ,StorageReceipt.intInventoryReceiptItemId
-    ,billDetail.intItemId
-    ,billDetail.intUnitOfMeasureId AS intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM
-    ,(StorageReceipt.dblTransactionUnits + ((StorageReceipt.dblTransactionUnits / S.dblNetUnits) * ABS(S.dblShrinkage)))  * ReceiptItem.dblUnitCost as dblVoucherTotal	
-    ,Round((StorageReceipt.dblTransactionUnits + ((StorageReceipt.dblTransactionUnits / S.dblNetUnits) * ABS(S.dblShrinkage))) , 2) AS dblVoucherQty
-    ,0 AS dblReceiptTotal
-    ,0 AS dblReceiptQty
-   
-    ,Receipt.intLocationId
-    ,compLoc.strLocationName
-    ,CAST(1 AS BIT) ysnAllowVoucher
-    ,APClearing.intAccountId
-	,APClearing.strAccountId
-	
-FROM tblGRStorageInventoryReceipt StorageReceipt
-INNER JOIN (
-	SELECT 
-		intCustomerStorageId
-		,intInventoryReceiptId
-        ,intInventoryReceiptItemId
-		,dblNetUnits
-		,dblShrinkage
-        ,ROW_NUMBER() OVER(PARTITION BY intInventoryReceiptId
-                                 ORDER BY intStorageInventoryReceipt) AS rk
-	FROM tblGRStorageInventoryReceipt
-	WHERE ysnUnposted = 0
-) S ON S.intInventoryReceiptId = StorageReceipt.intInventoryReceiptId AND S.intInventoryReceiptItemId = StorageReceipt.intInventoryReceiptItemId AND S.rk = 1
-			join ( 
-
-				select  Item.intInventoryReceiptId, Tickets.intTicketId from (
-					select strTicketNumber, intTicketId, intItemId from tblSCTicket where intInventoryReceiptId is not null and intDeliverySheetId > 0
-					) Tickets
-					join tblICInventoryReceiptItem Item
-						on Item.intSourceId = Tickets.intTicketId				
-					--join tblQMTicketDiscount TicketDiscount
-					--	on TicketDiscount.intTicketId = Tickets.intTicketId
-					--join tblGRDiscountScheduleCode DiscountScheduleCode
-					--	on DiscountScheduleCode.intDiscountScheduleCodeId = TicketDiscount.intDiscountScheduleCodeId
-					--join tblICInventoryReceiptCharge Charge
-					--	on Item.intInventoryReceiptId = Charge.intInventoryReceiptId				
-					--		and Charge.intChargeId = DiscountScheduleCode.intItemId		
-						
-		) TicketLinking			
-			on StorageReceipt.intInventoryReceiptId = TicketLinking.intInventoryReceiptId
-					
-		join tblICInventoryReceipt Receipt
-			on Receipt.intInventoryReceiptId = TicketLinking.intInventoryReceiptId
-		join tblICInventoryReceiptItem ReceiptItem
-			on Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId			
-			and ReceiptItem.intInventoryReceiptItemId = StorageReceipt.intInventoryReceiptItemId
-join tblAPBillDetail billDetail
-			on  billDetail.intCustomerStorageId = StorageReceipt.intCustomerStorageId
-				and ReceiptItem.intItemId = billDetail.intItemId
-				and billDetail.intSettleStorageId = StorageReceipt.intSettleStorageId
-		INNER JOIN tblAPBill bill ON billDetail.intBillId = bill.intBillId
-INNER JOIN tblSMCompanyLocation compLoc
-    ON Receipt.intLocationId = compLoc.intCompanyLocationId
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = billDetail.intAccountId AND APClearing.intAccountCategoryId = 45
-LEFT JOIN tblSMFreightTerms ft
-    ON ft.intFreightTermId = Receipt.intFreightTermId
-LEFT JOIN 
-(
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
-)
-    ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
-WHERE 
-	StorageReceipt.intSettleStorageId is not null 
-and bill.ysnPosted = 1
-AND Receipt.strReceiptType != 'Transfer Order'
-
 
 GO
 
