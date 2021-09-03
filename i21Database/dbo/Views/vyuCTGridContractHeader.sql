@@ -165,9 +165,15 @@ AS
 		AND		AP.ysnCurrent = 1
 	) AP
 	cross apply (
-		select countValue=count(*) from tblEMEntityRequireApprovalFor em where em.intEntityId = CH.intEntityId
+		select countValue=count(*)
+		from tblEMEntityRequireApprovalFor em
+		cross apply (select sc.intScreenId from tblSMScreen sc where sc.strNamespace = 'ContractManagement.View.Contract')scr
+		where em.intEntityId = CH.intEntityId and em.intScreenId = scr.intScreenId
 	)te
 	cross apply (
-		select countValue=count(*) from tblSMUserSecurityRequireApprovalFor smUser where smUser.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById)
+		select countValue=count(*)
+		from tblSMUserSecurityRequireApprovalFor smUser
+		cross apply (select sc.intScreenId from tblSMScreen sc where sc.strNamespace = 'ContractManagement.View.Contract')scr
+		where smUser.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById) and smUser.intScreenId = scr.intScreenId
 	)ue
 	LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
