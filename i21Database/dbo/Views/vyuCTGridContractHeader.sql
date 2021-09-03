@@ -147,7 +147,7 @@ AS
 			P.strPositionType,
 			CH.ysnReadOnlyInterCoContract,
 			intCommodityFutureMarketId = NM.intCommodityFutureMarketId,
-			ysnContractRequiresApproval = (case when te.countValue > 0 or ue.countValue > 0 then convert(bit,1) else convert(bit,0) end)
+			ysnContractRequiresApproval = (case when ue.countValue > 0 then convert(bit,1) else convert(bit,0) end)
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY
