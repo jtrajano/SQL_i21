@@ -241,11 +241,7 @@ BEGIN TRY
 	SET @strLoadWarehouseServicesCondition = NULL
 	SET @strLoadWarehouseServicesXML = NULL
 
-	IF EXISTS (
-			SELECT TOP 1 1
-			FROM tblLGLoadWarehouseServices
-			WHERE intLoadWarehouseId IN (@strLoadWarehouseId)
-			)
+	IF @strLoadWarehouseId IS NOT NULL
 	BEGIN
 		SELECT @strLoadWarehouseServicesCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 
@@ -265,11 +261,7 @@ BEGIN TRY
 	SET @strLoadWarehouseContainerCondition = NULL
 	SET @strLoadWarehouseContainerXML = NULL
 
-	IF EXISTS (
-			SELECT TOP 1 1
-			FROM tblLGLoadWarehouseContainer
-			WHERE intLoadWarehouseId IN (@strLoadWarehouseId)
-			)
+	IF @strLoadWarehouseId IS NOT NULL
 	BEGIN
 		SELECT @strLoadWarehouseContainerCondition = 'intLoadWarehouseId IN (' + LTRIM(@strLoadWarehouseId) + ')'
 
