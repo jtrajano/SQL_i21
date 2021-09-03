@@ -240,7 +240,7 @@ FROM
 		,dblInvoicedPValue = /* Invoiced P-Value */
 							ISNULL(VCHR.dblTotalCost, 0) * -1
 		,dblInvoicedSValue = /* Invoiced S-Value */
-							COALESCE(INVC.dblTotalCost, PINVC.dblTotalCost, 0)
+							COALESCE(INVC.dblTotalCost, PINVC.dblTotalCost, 0) + ISNULL(INADJ.dblTotalCost, 0)
 		,dblDifference = /* Difference = P-Terminal Price - S-Terminal Price */
 							ISNULL(PCD.dblFutures, 0) - ISNULL(SCD.dblFutures, 0)
 		,dblDifferenceInFC = (ISNULL(PCD.dblFutures, 0) / ISNULL(PCUR.intCent, 1)) - (ISNULL(SCD.dblFutures, 0) / ISNULL(SCUR.intCent, 1))
@@ -353,7 +353,7 @@ FROM
 				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
 			WHERE IVD.ysnPosted = 1 
 				AND IVD.intContractDetailId = SCD.intContractDetailId
-				AND IVDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) INVC
+				AND IVD.intItemId = SCD.intItemId) INVC
 		OUTER APPLY
 			(SELECT 
 				dblTotalCost = SUM(dblTotal)
@@ -367,7 +367,20 @@ FROM
 				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
 			WHERE IVD.ysnPosted = 1 
 				AND IVD.intContractDetailId = SCD.intContractDetailId
-				AND IVDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) PINVC
+				AND IVD.intItemId = SCD.intItemId) PINVC
+		/* Sales Value Adjustment */
+		OUTER APPLY 
+			(SELECT 
+				dblTotalCost = SUM(dblTotal)
+			FROM 
+				(SELECT ivd.intInvoiceId, ivd.intItemId, ivd.intContractDetailId, iv.ysnPosted
+					,dblTotal = dblTotal * CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
+					FROM tblARInvoiceDetail ivd INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId AND iv.strType = 'Standard') IVD 
+				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
+			WHERE IVD.ysnPosted = 1 
+				AND IVD.intContractDetailId = SCD.intContractDetailId
+				AND IVD.intItemId <> SCD.intItemId
+				AND IVDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) INADJ
 		/* Reserves A */
 		OUTER APPLY 
 			(SELECT dblReservesARateTotal = SUM(ISNULL(CC.dblRate, 0))
