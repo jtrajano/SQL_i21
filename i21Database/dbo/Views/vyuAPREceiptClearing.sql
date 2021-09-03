@@ -422,8 +422,8 @@ OUTER APPLY (
 -- 		AND APClearing.intItemId = receiptItem.intItemId
 
 --receipts in storage that were FULLY transferred from DP to DP only
-LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
-    ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+-- LEFT JOIN vyuGRTransferClearing_FullDPtoDP transferClrDP
+--     ON transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 --receipts in storage that were transferred
 OUTER APPLY (
     SELECT TOP 1 [ysnExists] = 1
