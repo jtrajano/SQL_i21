@@ -53,6 +53,7 @@ BEGIN TRY
 	FROM tblLGRouteOrder RO
 	JOIN tblLGRoute R ON R.intRouteId = RO.intRouteId
 		AND RO.intRouteId = @intRouteId
+		AND ISNULL(RO.strOrderNumber, '') <> ''
 	ORDER BY RO.intSequence DESC
 
 	SELECT @intRowNo = MIN(intRowNo)
