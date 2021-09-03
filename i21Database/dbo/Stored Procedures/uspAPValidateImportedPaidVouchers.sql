@@ -65,7 +65,7 @@ OUTER APPLY	(
 	FROM (
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM tblAPBill 
-		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId
+		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId AND CONVERT(NVARCHAR(10), dtmBillDate, 101) = CONVERT(NVARCHAR(10), A.dtmBillDate, 101)
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
