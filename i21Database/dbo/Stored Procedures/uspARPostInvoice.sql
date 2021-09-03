@@ -167,7 +167,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
 							intTransactionId		= ARI.intInvoiceId
 							, strTransactionNumber	= ARI.strInvoiceNumber
 							, strBatchId			= @batchIdUsed
-							, dtmPostingdate		= GETDATE()
+							, dtmPostingdate		= @dtmStartWait
 							, intEntityId			= ARI.intEntityId
 							, strTransactionType	= 'Invoice'
 						FROM tblARInvoice ARI
