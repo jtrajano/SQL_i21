@@ -849,7 +849,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							,c.intDiscountScheduleCodeId
 							,intTicketId = k.intTicketLVStagingId
 							,''Scale'' AS strSourceType
-							,''Dollar'' strDiscountChargeType 
+							,isnull(c.strDiscountChargeType, ''Dollar'') strDiscountChargeType 
 							,b.A4GLIdentity
 							,DCode.intShrinkCalculationOptionId
 						FROM (
@@ -974,7 +974,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								,DiscountScheduleCode.intDiscountScheduleCodeId
 								,TicketStaging.intTicketLVStagingId
 								,''Scale'' AS strSourceType
-								,''Dollar'' strDiscountChargeType 
+								,isnull(DiscountScheduleCode.strDiscountChargeType, ''Dollar'') strDiscountChargeType 
 								,TicketStaging.intOriginTicketId
 								,ShrinkCalculationOption.intShrinkCalculationOptionId
 								
@@ -1163,6 +1163,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						declare @current_discount_result DECIMAL(24, 6)
 						declare @current_shrink_result DECIMAL(24, 6)
 						declare @current_discount_message nvarchar(max)
+						
 
 
 						select @current_discount_id = min(id) from @discounts_table
@@ -1182,9 +1183,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								, @intItemUOMId = 0
 
 							
-							select @current_discount_result = dblDiscountAmount
+							select @current_discount_result = case when lower(strDiscountChargeType) = ''dollar'' then dblDiscountAmount else dblDiscountAmount / 100 end 
 								, @current_shrink_result = dblShrink
-								, @current_discount_message = strMessage
+								, @current_discount_message = strMessage								
 							from @calculated_discount
 
 							if @current_discount_message <> @discount_calculation_success_message --and @discount_has_issue = 0
