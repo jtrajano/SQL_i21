@@ -426,7 +426,7 @@ BEGIN TRY
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
 
-		UPDATE b SET dblNoOfLots = (b.dblQuantity / d.dblContractSize)
+		UPDATE b SET dblNoOfLots = (b.dblQuantity / (c.dblQuantity/c.dblNoOfLots))
 		FROM tblCTPriceFixation a
 		INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationId =  b.intPriceFixationId
 		INNER JOIN tblCTContractDetail c ON a.intContractDetailId = c.intContractDetailId
