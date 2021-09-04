@@ -699,7 +699,7 @@ INSERT INTO tblICItemUOM (
 )
 SELECT 
 	intItemId = i.intItemId 
-	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)			
+	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	,dblUnitQty = CAST(p.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
 	--,strUpcCode = p.strOrderCaseUpcNumber
 	,strLongUPCCode = p.strOrderCaseUpcNumber
@@ -757,18 +757,16 @@ FROM
 			tblICItemUOM iu
 		WHERE
 			iu.intItemId = i.intItemId
-			AND (
-				iu.intUnitMeasureId = m.intUnitMeasureId
-				OR iu.intUnitMeasureId = s.intUnitMeasureId
-			)
+			AND iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
 	) existUOM
 WHERE
 	p.strUniqueId = @UniqueId
 	AND i.intItemId IS NOT NULL 
 	AND NULLIF(p.strCaseBoxSizeQuantityPerCaseBox, '') IS NOT NULL 
+	AND NULLIF(p.strOrderPackageDescription, '') IS NOT NULL 
 	AND p.ysnAddOrderingUPC = 1
 	AND stockUnit.intItemUOMId IS NOT NULL 
-	AND existUOM.intItemUOMId IS NULL 
+	AND existUOM.intItemUOMId IS NULL  
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
