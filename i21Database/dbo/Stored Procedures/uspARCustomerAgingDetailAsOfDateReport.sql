@@ -434,6 +434,7 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 AND  ISNULL(CR.dblRefundTotal, 0) = 0
+AND I.dblAmountDue <> 0
 
 UNION ALL
 
