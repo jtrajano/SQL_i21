@@ -1,4 +1,6 @@
 ﻿CREATE PROCEDURE uspSTPurchaseVSSalesVarianceReport
+	@strStoreGroupIdList AS NVARCHAR(MAX) = '',
+	@strStoreIdList AS NVARCHAR(MAX) = '',
 	@strCategoryIdList AS NVARCHAR(MAX) = '',
 	@dblVarianceQuantity AS NUMERIC(18,6),
 	@dblVariancePercentage AS NUMERIC(18,6) ,
@@ -105,6 +107,24 @@ LEFT JOIN tblICItemLocation ItemLoc
 LEFT JOIN tblICCategory as category 
 ON category.intCategoryId = Item.intCategoryId
 WHERE   (
+				ST.intStoreId IN (SELECT DISTINCT stgd.intStoreId FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreGroupIdList) list
+									JOIN tblSTStoreGroupDetail stgd
+										ON stgd.intStoreGroupId = list.intID)
+				OR 1 = CASE 
+							WHEN @strStoreGroupIdList = ''
+								THEN 1
+							ELSE 0
+					   END
+			)
+		AND (
+				ST.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
+				OR 1 = CASE 
+							WHEN @strStoreIdList = ''
+								THEN 1
+							ELSE 0
+					   END
+			)
+		AND (
 		Item.intCategoryId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCategoryIdList))
 				OR 1 = CASE 
 							WHEN @strCategoryIdList = ''
