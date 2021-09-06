@@ -166,6 +166,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
