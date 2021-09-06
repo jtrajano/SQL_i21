@@ -117,6 +117,7 @@ BEGIN
 				intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
 				,*
 			from tblCTContractBalanceLog
+			where dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
 		) t
 		WHERE intRowNum = 1
 	)
