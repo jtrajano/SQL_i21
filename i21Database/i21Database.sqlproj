@@ -140,6 +140,7 @@
     <Build Include="dbo\Views\vyuCTRestApiTicketDiscount.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
+    <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuGRRestApiCustomerStorageBalances.sql" />
     <Build Include="dbo\Views\vyuCTApiContractText.sql" />
@@ -174,6 +175,13 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessVoucherAttachment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetOrderNo.sql" />
     <Build Include="dbo\Tables\tblMFRouteOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetSO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetSODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteDetailConfirm.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteProcessInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRoutePostInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetTO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
     <Build Include="dbo\Functions\fnFAGetDefaultCurrencyExchangeRateTypeId.sql" />
   </ItemGroup>
   <ItemGroup>

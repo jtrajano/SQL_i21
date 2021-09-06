@@ -8,6 +8,7 @@
 	[strStore]          	NVARCHAR (3) COLLATE Latin1_General_CI_AS NULL,
 	[strBillId]         	NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorOrderNumber] 	NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+	[dtmBillDate]       	DATETIME NULL,
 	[strCheckNumber]		NVARCHAR (55) COLLATE Latin1_General_CI_AS NULL,
 	[dblPayment] 			DECIMAL(18, 2) NOT NULL DEFAULT 0, 
 	[dblDiscount] 			DECIMAL(18, 2) NULL DEFAULT 0, 
