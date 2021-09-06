@@ -496,11 +496,13 @@ BEGIN TRY
             @Post    = @post
            ,@BatchId = @batchIdUsed
 		   ,@UserId  = @userId
+		   ,@raiseError = @raiseError
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
             @Post    = @post
            ,@BatchId = @batchIdUsed
 		   ,@UserId  = @userId
+		   ,@raiseError = @raiseError
 
 END TRY
 BEGIN CATCH

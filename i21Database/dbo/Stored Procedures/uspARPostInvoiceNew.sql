@@ -498,12 +498,14 @@ BEGIN TRY
             @Post    = @Post
            ,@BatchId = @BatchIdUsed
 		   ,@UserId  = @UserId
+		   ,@raiseError = @RaiseError
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
 	        @Post             = @Post
            ,@BatchId          = @BatchIdUsed
 		   ,@UserId           = @UserId
 		   ,@IntegrationLogId = @IntegrationLogId
+		   ,@raiseError		  = @RaiseError
 
 	UPDATE ILD
 	SET ILD.[ysnPosted]					= CASE WHEN ILD.[ysnPost] = 1 THEN 1 ELSE ILD.[ysnPosted] END
