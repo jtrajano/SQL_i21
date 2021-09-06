@@ -852,9 +852,12 @@ BEGIN
 				,@strParentNo = NULL
 
 			SELECT @intParentId = intWorkOrderId
-				,@strParentNo = strWorkOrderNo
 			FROM tblMFWorkOrderProducedLot
 			WHERE intLotId = @intLotId
+
+			SELECT @strParentNo = strWorkOrderNo
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intParentId
 
 			IF NOT EXISTS (
 					SELECT *
@@ -895,9 +898,12 @@ BEGIN
 				,@strParentNo = NULL
 
 			SELECT @intParentId = intWorkOrderId
-				,@strParentNo = strWorkOrderNo
 			FROM tblMFWorkOrderProducedLot
 			WHERE intLotId = @intLotId
+
+			SELECT @strParentNo = strWorkOrderNo
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intParentId
 
 			IF NOT EXISTS (
 					SELECT *
