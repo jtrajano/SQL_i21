@@ -867,8 +867,8 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strUserName
-				--AND CE.strEntityNo <> ''
 
+			--AND CE.strEntityNo <> ''
 			IF @intUserId IS NULL
 			BEGIN
 				IF EXISTS (
@@ -887,6 +887,8 @@ BEGIN TRY
 			SELECT @intWeightUnitMeasureId = intUnitMeasureId
 			FROM tblICUnitMeasure
 			WHERE strUnitMeasure = @strWeightUnitMeasure
+			
+			SELECT @intNewLoadId=NULL
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
@@ -900,7 +902,10 @@ BEGIN TRY
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
 
-			EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
+			if @intNewLoadId is not null
+			Begin
+				EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
+			End
 
 			IF @strRowState = 'Delete'
 			BEGIN
@@ -2009,8 +2014,8 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'Customer'
 				WHERE EY.strName = @strCustomer
-					--AND EY.strEntityNo <> ''
 
+				--AND EY.strEntityNo <> ''
 				SELECT @intCustomerLocationId = EL.intEntityLocationId
 				FROM tblEMEntityLocation EL
 				WHERE EL.intEntityId = @intCustomerId
@@ -2436,7 +2441,8 @@ BEGIN TRY
 						SELECT *
 						FROM @tblIPETAPOD
 						WHERE dtmETAPOD IS NOT NULL
-						) AND @strTransactionType='Inbound Shipment'
+						)
+					AND @strTransactionType = 'Inbound Shipment'
 				BEGIN
 					SELECT @intContractDetailId = NULL
 						,@dtmETAPOD = NULL
@@ -2499,14 +2505,14 @@ BEGIN TRY
 				WHERE intLoadDetailId > @intLoadDetailId
 			END
 
-			DELETE LD
-			FROM tblLGLoadDetail LD
-			WHERE LD.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM @tblLGLoadDetail x
-					WHERE LD.intLoadDetailRefId = x.intLoadDetailId
-					)
+			--DELETE LD
+			--FROM tblLGLoadDetail LD
+			--WHERE LD.intLoadId = @intNewLoadId
+			--	AND NOT EXISTS (
+			--		SELECT *
+			--		FROM @tblLGLoadDetail x
+			--		WHERE LD.intLoadDetailRefId = x.intLoadDetailId
+			--		)
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -3810,7 +3816,8 @@ BEGIN TRY
 						,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						) x
 				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
-				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName AND SL.intSubLocationId=CLSL.intCompanyLocationSubLocationId
+				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
+					AND SL.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
 					AND Hauler.strEntityNo <> '' --???
 				WHERE NOT EXISTS (
@@ -3863,7 +3870,8 @@ BEGIN TRY
 				JOIN tblLGLoadWarehouse LW ON LW.intLoadId = @intNewLoadId
 					AND LW.intLoadWarehouseRefId = x.intLoadWarehouseId
 				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
-				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName AND SL.intSubLocationId=CLSL.intCompanyLocationSubLocationId
+				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
+					AND SL.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
 					AND Hauler.strEntityNo <> '' --???
 
@@ -4095,6 +4103,15 @@ BEGIN TRY
 				EXEC sp_xml_removedocument @idoc
 			END
 
+			DELETE LD
+			FROM tblLGLoadDetail LD
+			WHERE LD.intLoadId = @intNewLoadId
+				AND NOT EXISTS (
+					SELECT *
+					FROM @tblLGLoadDetail x
+					WHERE LD.intLoadDetailRefId = x.intLoadDetailId
+					)
+
 			EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
 
 			IF @ysnReplication = 1
@@ -4242,8 +4259,8 @@ BEGIN TRY
 			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
-				,@screenId=@intLoadScreenId
-				,@populatedByInterCompany=1
+				,@screenId = @intLoadScreenId
+				,@populatedByInterCompany = 1
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLogXML
@@ -4260,8 +4277,8 @@ BEGIN TRY
 			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 			WHERE ET1.strType = 'User'
 				AND CE.strName = @strAuditUserName
-				--AND CE.strEntityNo <> ''
 
+			--AND CE.strEntityNo <> ''
 			IF @intAuditLogUserId IS NULL
 			BEGIN
 				SELECT TOP 1 @intAuditLogUserId = intEntityId
@@ -4482,12 +4499,17 @@ BEGIN TRY
 		BEGIN CATCH
 			SET @ErrMsg = ERROR_MESSAGE()
 
-			IF @idoc <> 0
-				EXEC sp_xml_removedocument @idoc
+			BEGIN TRY
+				IF XACT_STATE() != 0
+					AND @intTransactionCount = 0
+					ROLLBACK TRANSACTION
 
-			IF XACT_STATE() != 0
-				AND @intTransactionCount = 0
-				ROLLBACK TRANSACTION
+				IF @idoc <> 0
+					EXEC sp_xml_removedocument @idoc
+			END TRY
+
+			BEGIN CATCH
+			END CATCH
 
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Failed'
@@ -4584,11 +4606,13 @@ END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-	UPDATE tblLGIntrCompLogisticsStg
+
+	UPDATE tblLGIntrCompLogisticsStg				
 	SET strFeedStatus = 'Failed'
 		,strMessage = @ErrMsg
 		,intStatusId = 2
 	WHERE intId = @intId
+
 	RAISERROR (
 			@ErrMsg
 			,16
