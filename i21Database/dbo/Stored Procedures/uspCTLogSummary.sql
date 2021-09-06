@@ -36,7 +36,8 @@ BEGIN TRY
 			@intCurrStatusId		INT = 0,
    			@ysnWithPriceFix 		BIT,
    			@intPricingTypeId       int,
-   			@dblSeqHistoryPreviousQty       NUMERIC(24, 10);
+   			@dblSeqHistoryPreviousQty	NUMERIC(24, 10),
+			@dblCurrentBasis		NUMERIC(24, 10);
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -396,7 +397,14 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @ysnWithPriceFix = ysnWithPriceFix, @intCurrStatusId = intContractStatusId FROM @tmpContractDetail
+	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0)
+		, @dblQuantityPerLoad = dblQuantityPerLoad
+		, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0)
+		, @dblContractQty = dblQuantity
+		, @ysnWithPriceFix = ysnWithPriceFix
+		, @intCurrStatusId = intContractStatusId
+		, @dblCurrentBasis = dblBasis
+	FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
 				FROM tblCTContractHeader ch
@@ -3638,7 +3646,8 @@ BEGIN TRY
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				-- Add all the basis quantities
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
+				-- Use current Basis Price when putting back basis qty
+				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
