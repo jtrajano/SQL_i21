@@ -98,7 +98,8 @@ BEGIN TRY
 
 		UPDATE	FD
 		SET		FD.dblNoOfLots			=	CD.dblNoOfLots,
-				FD.dblQuantity			=	CD.dblQuantity
+				FD.dblQuantity			=	CD.dblQuantity,
+				FD.dblHedgeNoOfLots		=	CASE WHEN FD.ysnHedge = 1 THEN CD.dblNoOfLots ELSE NULL END
 		FROM	tblCTPriceFixation			PF 
 		JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 		JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -149,7 +150,7 @@ BEGIN TRY
 					WHERE	@intFutOptTransactionId = intFutOptTransactionId
 					AND		intContractDetailId	= @intContractDetailId	
 					
-					EXEC	uspCTGetStartingNumber 'FutOpt Transaction', @strTradeNo OUTPUT
+					EXEC	uspCTGetStartingNumber 'Derivative Entry', @strTradeNo OUTPUT
 					SET		@strTradeNo	=	LTRIM(RTRIM(@strTradeNo)) + '-H'
 					SET		@XML =	'<root><toUpdate><dblNoOfContract>'+STR(@dblChildSeqLots,18,6)+'</dblNoOfContract>'+
 									'<dtmTransactionDate>'+@strDate+'</dtmTransactionDate>'+
@@ -171,6 +172,7 @@ BEGIN TRY
 								'<dblQuantity>'+STR(@dblChildSeqQty,18,6)+'</dblQuantity>'+
 								--'<dtmFixationDate>'+@strDateWithTime+'</dtmFixationDate>'+
 								CASE WHEN @ysnHedge = 1 THEN '<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>' ELSE '' END +
+								CASE WHEN @ysnHedge = 1 THEN '<dblHedgeNoOfLots>'+STR(@dblChildSeqLots,18,6)+'</dblHedgeNoOfLots>' ELSE '' END +
 								'<intPriceFixationId>'+STR(@intNewPriceFixationId)+'</intPriceFixationId></toUpdate></root>' 
 				
 				EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixationDetail',@intPriceFixationDetailId, @intNewPFDetailId OUTPUT,@XML
