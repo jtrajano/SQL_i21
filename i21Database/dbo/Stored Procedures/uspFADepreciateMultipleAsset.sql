@@ -166,7 +166,7 @@ BEGIN
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
       AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation', 'Place in service')
+      AND strTransaction  in( 'Depreciation','Imported', 'Place in service')
 		)D
         where D.cnt =1
 
@@ -176,7 +176,7 @@ BEGIN
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
       AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation', 'Place in service')
+      AND strTransaction  in( 'Depreciation','Imported', 'Place in service')
 		)D
         where D.cnt >1
 
