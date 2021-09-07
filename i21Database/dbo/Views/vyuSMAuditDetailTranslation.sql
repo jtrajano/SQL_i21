@@ -14,9 +14,13 @@ SELECT
 	THEN '***'ELSE strTo END				[to],
 	strAction								[action],
 	strAlias								[alias],
-	CASE WHEN ISNULL(strAlias, '') = '' 
-		THEN strChange 
-		ELSE strAlias END					[change],
+	CASE WHEN ISNULL(tblSMLanguageTranslation.strTranslation, '') <> '' 
+		THEN tblSMLanguageTranslation.strTranslation 
+		ELSE 
+			CASE WHEN ISNULL(strAlias, '') = '' 
+			THEN strChange 
+			ELSE strAlias END 
+		END	[change],
 	tblSMLog.dtmDate						[changeDate],
 	ysnHidden								[hidden],
 	tblEMEntity.strName						[user],
@@ -25,10 +29,8 @@ SELECT
 	tblSMAudit.intAuditId					[intAuditId],
 	tblSMAudit.intLogId						[intLogId],
 	tblSMAudit.intParentAuditId				[intParentAuditId],
-	tblSMLanguageTranslation.strTranslation [strTranslation],
-	tblSMLanguage.strLanguage				[strLanguage]
+	tblSMLanguageTranslation.intLanguageId	[intLanguageId]
 FROM tblSMAudit 
 INNER JOIN tblSMLog ON tblSMAudit.intLogId = tblSMLog.intLogId 
 LEFT JOIN tblEMEntity ON tblSMLog.intEntityId = tblEMEntity.intEntityId 
 LEFT JOIN tblSMLanguageTranslation ON tblSMLanguageTranslation.strLabel = (CASE WHEN ISNULL(strAlias, '') = '' THEN strChange ELSE strAlias END)
-LEFT JOIN tblSMLanguage ON tblSMLanguage.intLanguageId = tblSMLanguageTranslation.intLanguageId
