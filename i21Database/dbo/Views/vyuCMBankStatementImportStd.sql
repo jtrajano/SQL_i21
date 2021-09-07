@@ -1,17 +1,17 @@
 CREATE VIEW vyuCMBankStatementImportStd
 AS
-SELECT     
+SELECT
 strBankStatementImportId,
 BSI.intBankStatementImportId,
 BSI.dtmDate, 
 BSI.strReferenceNo, 
-BSI.dblWithdrawalAmount, 
+BSI.dblWithdrawalAmount,
 BSI.dblDepositAmount,
 BSI.intImportStatus,
 BankTrans.dblAmount, 
-0 AS dblDiff, 
+0 AS dblDiff,
 'OK' AS strResult
-FROM         
+FROM
 tblCMBankStatementImport BSI 
 cross APPLY(
 	SELECT
@@ -23,21 +23,21 @@ WHERE intImportStatus = 1
 
 UNION
 
-SELECT     
+SELECT
 strBankStatementImportId,
 BSI.intBankStatementImportId,
 BSI.dtmDate, 
 BSI.strReferenceNo, 
-BSI.dblWithdrawalAmount, 
-BSI.dblDepositAmount, 
+BSI.dblWithdrawalAmount,
+BSI.dblDepositAmount,
 BSI.intImportStatus,
-BankTrans.dblAmount, 
-ABS(BSI.dblAmount) -  ABS(BankTrans.dblAmount) AS dblDiff, 
+BankTrans.dblAmount,
+ABS(BSI.dblAmount) -  ABS(BankTrans.dblAmount) AS dblDiff,
 CASE 
 	WHEN BSI.dblWithdrawalAmount - BankTrans.dblAmount <> 0 THEN 'Difference Found' 
 	ELSE 'Reference No not found'
 END AS strResult
-FROM         
+FROM
 tblCMBankStatementImport BSI 
 OUTER APPLY(
 	SELECT
@@ -58,4 +58,3 @@ OUTER APPLY(
 	END
 )BankTrans
 WHERE intImportStatus <> 1
-
