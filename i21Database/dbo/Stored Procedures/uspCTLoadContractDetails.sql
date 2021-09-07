@@ -514,7 +514,8 @@ BEGIN TRY
 		INNER JOIN tblCTContractHeader b ON a.intContractHeaderId = b.intContractHeaderId
 		LEFT JOIN tblSMTransaction c ON c.intRecordId = a.intPriceContractId AND c.strApprovalStatus IS NOT NULL
 		LEFT JOIN tblSMScreen d ON d.strNamespace = 'ContractManagement.view.PriceContracts' AND d.intScreenId = c.intScreenId AND d.ysnApproval = 1
-		WHERE b.intContractHeaderId = a.intContractHeaderId
+		WHERE a.intContractHeaderId = CD.intContractHeaderId
+			AND b.intContractHeaderId = a.intContractHeaderId
 			AND CASE WHEN b.ysnMultiplePriceFixation = 1 AND a.intContractDetailId = CD.intContractDetailId THEN 1 ELSE 1 END = 1
 		ORDER BY c.intTransactionId DESC
 	) AP
