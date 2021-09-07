@@ -121,7 +121,7 @@ BEGIN TRY
 			CH.strWeight,
 			CH.strGrade,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
-			strRemark as strPrintableRemarks,
+			'Remarks : '+ strRemark as strPrintableRemarks,
 			CH.strTerm
 		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref' ELSE 'Customer Ref' END
 		   ,strCustomerContract					=   ISNULL(CH.strCustomerContract,'')
