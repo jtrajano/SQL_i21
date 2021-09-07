@@ -93,7 +93,7 @@ BEGIN
         IF ISNULL(@ysnRecap,0) = 0
         BEGIN
             UPDATE A SET ysnDepreciated = 0, ysnTaxDepreciated = 0,
-            ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
+            ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL, intDispositionNumber = null, strDispositionNumber = ''
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
             
