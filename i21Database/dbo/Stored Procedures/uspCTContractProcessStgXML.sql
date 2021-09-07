@@ -3163,9 +3163,10 @@ BEGIN TRY
 								ELSE CD1.intItemUOMId
 								END
 							,dblOriginalQty = CD1.dblOriginalQty
-							,dblBalance = CD1.dblBalance
+							,dblBalance = (CASE 
+											WHEN CD1.intContractStatusId not in (5,6)  Then CD1.dblBalance Else CD.dblBalance End)
 							,dblIntransitQty = CD1.dblIntransitQty
-							,dblScheduleQty = CD1.dblScheduleQty
+							--,dblScheduleQty = CD1.dblScheduleQty
 							,dblBalanceLoad = CD1.dblBalanceLoad
 							,dblScheduleLoad = CD1.dblScheduleLoad
 							,dblShippingInstructionQty = CD1.dblShippingInstructionQty
