@@ -182,6 +182,8 @@
     <Build Include="dbo\Stored Procedures\uspMFRoutePostInventoryTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTO.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
+    <Build Include="dbo\Views\vyuSMAuditDetail.sql" />
+    <Build Include="dbo\Views\vyuSMAuditDetailTranslation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
