@@ -39,8 +39,7 @@ SELECT
 					ItemLocation.intCostingMethod
 			END,
 	ysnHasAddOn = CAST(ISNULL(ItemAddOn.ysnHasAddOn, 0) AS BIT),
-	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT),
-	Item.intComputeItemTotalOption
+	ysnHasAddOnOtherCharge = CAST(ISNULL(AddOnOtherCharge.ysnHasAddOnOtherCharge, 0) AS BIT)
 FROM tblICItem Item
 LEFT JOIN (
 	tblICItemLocation ItemLocation INNER JOIN tblSMCompanyLocation l 

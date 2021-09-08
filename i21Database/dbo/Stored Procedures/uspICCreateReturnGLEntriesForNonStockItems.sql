@@ -380,8 +380,6 @@ AS
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
 					,DEFAULT
-					,ri.intComputeItemTotalOption
-					,ri.dblOpenReceive
 				)
 		,intSourceEntityId = r.intEntityVendorId
 		,intCommodityId = i.intCommodityId

@@ -645,8 +645,6 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										/ Header.intSubCurrencyCents 
 
@@ -678,8 +676,6 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 
@@ -1090,8 +1086,6 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										/ Header.intSubCurrencyCents 
 
@@ -1123,8 +1117,6 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 

@@ -186,10 +186,7 @@ AS (
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
-									,t.intItemUOMId								
-									,ri.intComputeItemTotalOption
-									,ri.dblOpenReceive
-								)
+									,t.intItemUOMId								)
 								,2 
 							)
 						)					

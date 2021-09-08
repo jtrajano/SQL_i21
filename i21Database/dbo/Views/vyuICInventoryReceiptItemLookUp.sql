@@ -242,7 +242,6 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		,dblLotTotalGross = ISNULL(receiptLot.dblLotTotalGross, 0)
 		,dblLotTotalTare = ISNULL(receiptLot.dblLotTotalTare, 0)
 		,dblLotTotalNet = ISNULL(receiptLot.dblLotTotalNet, 0)
-		,ReceiptItem.intComputeItemTotalOption
 
 FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

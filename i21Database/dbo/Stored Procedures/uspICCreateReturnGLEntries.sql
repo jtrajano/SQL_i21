@@ -343,8 +343,6 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
-							,ri.intComputeItemTotalOption
-							,ri.dblOpenReceive
 						)
 					)
 			,dblReturnUnitCostInFunctionalCurrency = 
@@ -365,8 +363,6 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
-									,ri.intComputeItemTotalOption
-									,ri.dblOpenReceive
 								)
 							)
 							,ri.dblForexRate
@@ -386,8 +382,6 @@ AS
 								,ri.ysnSubCurrency
 								,r.intSubCurrencyCents
 								,t.intItemUOMId
-								,ri.intComputeItemTotalOption
-								,ri.dblOpenReceive
 							)
 						)
 				END 
@@ -558,8 +552,6 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
-									,ri.intComputeItemTotalOption
-									,ri.dblOpenReceive
 								)
 								,2 
 							)

@@ -85,6 +85,7 @@
 	[intContractSeq] INT NULL,
 	[intInvoiceId] INT NULL , 
     [intBuybackChargeId] INT NULL, 
+	[intTicketDistributionAllocationId] INT NULL,
     CONSTRAINT [PK__tblAPBil__DCE2CCF4681FF753] PRIMARY KEY CLUSTERED ([intBillDetailId] ASC) ON [PRIMARY],
     CONSTRAINT [FK_tblAPBillDetail_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblAPBillDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
@@ -111,6 +112,7 @@
 	CONSTRAINT [FK_tblAPBillDetail_intInvoiceId] FOREIGN KEY ([intInvoiceId]) REFERENCES tblARInvoice([intInvoiceId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblHDTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES tblHDTicket([intTicketId]),
 	CONSTRAINT [FK_tblAPBillDetail_tblAPBillReallocation] FOREIGN KEY ([intReallocationId]) REFERENCES tblAPBillReallocation([intReallocationId]),
+	CONSTRAINT [FK_tblAPBillDetail_tblSCTicketDistributionAllocation] FOREIGN KEY ([intTicketDistributionAllocationId]) REFERENCES tblSCTicketDistributionAllocation([intTicketDistributionAllocationId]),
 ) ON [PRIMARY];
 
 
