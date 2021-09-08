@@ -9060,6 +9060,7 @@
     <Build Include="dbo\Stored Procedures\uspSCManualDistributionDirect.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateDirectInGLEntries.sql" />
     <Build Include="dbo\Views\vyuSCDirectAPClearing.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDistributionAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
