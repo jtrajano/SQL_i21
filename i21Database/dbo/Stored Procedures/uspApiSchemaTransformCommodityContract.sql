@@ -74,6 +74,27 @@ OUTER APPLY (
 WHERE sc.guiApiUniqueId = @guiApiUniqueId
     AND l.intCompanyLocationId IS NULL
 
+  
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Pricing Type'
+    , strValue = sc.strPricingType
+    , strLogLevel = 'Error'
+    , strStatus = 'Failed'
+    , intRowNo = sc.intRowNumber
+    , strMessage = 'The pricing type ' + ISNULL(sc.strPricingType, '') + ' does not exist.'
+FROM tblApiSchemaCommodityContract sc
+OUTER APPLY (
+  SELECT TOP 1 * 
+  FROM tblCTPricingType ptt
+  WHERE ptt.strPricingType = sc.strPricingType
+    AND ptt.intPricingTypeId != 6
+) pt
+WHERE sc.guiApiUniqueId = @guiApiUniqueId
+    AND pt.intPricingTypeId IS NULL
+
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
       NEWID()
@@ -112,6 +133,8 @@ INSERT INTO tblCTContractHeader (
     , intEntityId
     , intSalespersonId
     , intCommodityId
+    , intCommodityUOMId
+    , intPricingTypeId
     , dtmCreated
     , intConcurrencyId
     , ysnSigned
@@ -125,6 +148,8 @@ SELECT DISTINCT
   , e.intEntityId
   , sp.intEntityId
   , c.intCommodityId
+  , cu.intCommodityUnitMeasureId
+  , pt.intPricingTypeId
   , GETUTCDATE()
   , 1
   , 0
@@ -142,6 +167,15 @@ CROSS APPLY (
   WHERE spe.strName = sc.strSalesperson AND spe.strType = 'Salesperson'
 ) sp
 JOIN tblICCommodity c ON c.strCommodityCode = sc.strCommodity
+JOIN tblCTPricingType pt ON pt.strPricingType = sc.strPricingType
+  AND pt.intPricingTypeId != 6
+CROSS APPLY (
+  SELECT TOP 1 intCommodityUnitMeasureId
+  FROM tblICCommodityUnitMeasure CU
+  JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CU.intUnitMeasureId
+  WHERE intCommodityId = c.intCommodityId
+  AND CU.ysnDefault = 1
+) cu
 WHERE sc.guiApiUniqueId = @guiApiUniqueId
   AND NOT EXISTS(SELECT 1 FROM tblCTContractHeader h WHERE h.strContractNumber = sc.strContractNumber)
 GROUP BY 
@@ -149,6 +183,8 @@ GROUP BY
   , sc.strContractType
   , sc.dtmContractDate
   , sc.strCommodity
+  , sc.strPricingType
+  , pt.intPricingTypeId
   , sc.strSalesperson
   , ISNULL(sc.intPosition, 0)
   , ISNULL(sc.intCropYear, 0)
@@ -156,6 +192,7 @@ GROUP BY
   , e.intEntityId
   , sp.intEntityId
   , c.intCommodityId
+  , cu.intCommodityUnitMeasureId
 
  -- Validate details
   INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -259,6 +296,7 @@ DECLARE @strEntityNo NVARCHAR(100)
 DECLARE @strEntityName NVARCHAR(100)
 DECLARE @strSalespersonNo NVARCHAR(100)
 DECLARE @strSalespersonName NVARCHAR(100)
+DECLARE @intPricingtypeId NVARCHAR(50)
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
@@ -278,6 +316,7 @@ SELECT
   , xe.strName
   , spe.strEntityNo
   , spe.strName
+  , h.intPricingTypeId
 FROM tblCTContractHeader h
 JOIN tblICCommodity c ON c.intCommodityId = h.intCommodityId
 JOIN vyuApiEntity xe ON xe.intEntityId = h.intEntityId
@@ -290,6 +329,7 @@ GROUP BY
   , h.dtmContractDate
   , h.intCommodityId
   , h.intSalespersonId
+  , h.intPricingTypeId
   , ISNULL(h.intPositionId, 0)
   , ISNULL(h.intCropYearId, 0)
   , h.intEntityId
@@ -319,6 +359,7 @@ FETCH NEXT FROM cur INTO
   , @strEntityName
   , @strSalespersonNo
   , @strSalespersonName
+  , @intPricingtypeId
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -344,6 +385,7 @@ BEGIN
     , strRemark
     , intPricingTypeId
     , dtmCreated
+    , intUnitMeasureId
   )
   SELECT 
       intContractHeaderId = @intContractHeaderId
@@ -365,16 +407,20 @@ BEGIN
     , dtmEndDate = ISNULL(sc.dtmEndDate, DATEADD(DAY, 30, ISNULL(sc.dtmStartDate, DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0))))
     , dtmM2MDate = sc.dtmM2MDate
     , strRemark = sc.strRemark
-    , intPricingTypeId = CASE WHEN fm.intFutureMarketId IS NOT NULL AND sc.dblCashPrice IS NOT NULL THEN 1
-        WHEN fm.intFutureMarketId IS NOT NULL AND sc.dblCashPrice IS NULL AND sc.dblFutures IS NOT NULL THEN 3
-        WHEN fm.intFutureMarketId IS NOT NULL AND sc.dblCashPrice IS NULL AND sc.dblBasis IS NOT NULL THEN 2
-        WHEN fm.intFutureMarketId IS NULL AND sc.dblCashPrice IS NOT NULL THEN 6
-        ELSE 4 END
+    -- , intPricingTypeId = CASE WHEN fm.intFutureMarketId IS NOT NULL AND sc.dblCashPrice IS NOT NULL THEN 1
+    --     WHEN fm.intFutureMarketId IS NOT NULL AND sc.dblCashPrice IS NULL AND sc.dblFutures IS NOT NULL THEN 3
+    --     WHEN fm.intFutureMarketId IS NOT NULL AND sc.dblCashPrice IS NULL AND sc.dblBasis IS NOT NULL THEN 2
+    --     WHEN fm.intFutureMarketId IS NULL AND sc.dblCashPrice IS NOT NULL THEN 6
+    --     ELSE 4 END
+    , intPricingTypeId = h.intPricingTypeId
     , GETUTCDATE()
+    , iu.intUnitMeasureId
   FROM tblApiSchemaCommodityContract sc
     JOIN tblCTContractHeader h ON h.intContractHeaderId = @intContractHeaderId
     JOIN tblICItem i ON i.strItemNo = sc.strItem
     JOIN tblICCommodity co ON co.intCommodityId = @intCommodityId
+    LEFT JOIN tblCTPricingType pt ON pt.strPricingType = sc.strPricingType
+      AND pt.intPricingTypeId != 6
     LEFT JOIN tblSMCurrency c ON c.strCurrency = sc.strCurrency
     CROSS APPLY (
       SELECT TOP 1 intCompanyLocationId
@@ -421,12 +467,14 @@ BEGIN
     , h.intSalespersonId
     , h.dtmContractDate
     , h.intContractTypeId
+    , h.intPricingTypeId
     , ISNULL(h.intPositionId, 0)
     , ISNULL(h.intCropYearId, 0)
     , i.intItemId
     , l.intCompanyLocationId
     , sc.intSequence
     , iu.intItemUOMId
+    , iu.intUnitMeasureId
     , pu.intItemUOMId
     , c.intCurrencyID
     , sc.dtmStartDate
@@ -442,7 +490,7 @@ BEGIN
     , sc.dblBasis
 
   UPDATE tblCTContractHeader
-  SET dblQuantity = (SELECT ISNULL(SUM(dblQuantity), 0) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
+  SET dblQuantity = (SELECT ISNULL(SUM(ISNULL(dblQuantity, 0)), 0) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
   WHERE intContractHeaderId = @intContractHeaderId
 
   EXEC uspCTCreateDetailHistory	@intContractHeaderId = @intContractHeaderId, 
@@ -467,6 +515,7 @@ BEGIN
     , @strEntityName
     , @strSalespersonNo
     , @strSalespersonName
+    , @intPricingtypeId
 END
 
 CLOSE cur
