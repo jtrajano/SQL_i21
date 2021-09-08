@@ -434,7 +434,7 @@ BEGIN
 		,[intSettleStorageId]
 		,[intItemId]						
 		,[intLinkingId]		
-		,[intTicketDistributionAllocationId]]			
+		,[intTicketDistributionAllocationId]			
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
 		,[strTaxGroup]	
