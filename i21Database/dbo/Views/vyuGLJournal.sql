@@ -9,7 +9,7 @@ SELECT
     [dtmReverseDate], 
     [intCompanyId], 
     Extent1.[intConcurrencyId], 
-    [intCurrencyId], 
+    Extent1.[intCurrencyId], 
     [strCurrency], 
     [intEntityId], 
     [intFiscalPeriodId], 
