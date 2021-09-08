@@ -468,6 +468,17 @@ BEGIN TRY
 				FROM @UnitAllocation
 				WHERE intAllocationType = 2
 
+				INSERT INTO tblSCTicketDistributionAllocation(
+					intTicketId
+					,intSourceId
+					,intSourceType
+				)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketLoadUsedId
+					,intSourceType = 2
+				FROM tblSCTicketLoadUsed
+				WHERE intTicketId = @intTicketId
 
 			END
 
@@ -487,6 +498,18 @@ BEGIN TRY
 					,dblQuantity
 				FROM @UnitAllocation
 				WHERE intAllocationType = 1
+
+				INSERT INTO tblSCTicketDistributionAllocation(
+					intTicketId
+					,intSourceId
+					,intSourceType
+				)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketContractUsed
+					,intSourceType = 1
+				FROM tblSCTicketContractUsed
+				WHERE intTicketId = @intTicketId
 			END
 
 			---STORAGE
@@ -543,7 +566,21 @@ BEGIN TRY
 						ON A.intStorageScheduleTypeId = B.intStorageScheduleTypeId
 					WHERE intAllocationType = 3
 						AND B.ysnDPOwnedType = 1 
+
+					
 				END
+
+				INSERT INTO tblSCTicketDistributionAllocation(
+						intTicketId
+						,intSourceId
+						,intSourceType
+					)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketStorageUsedId
+					,intSourceType = 3
+				FROM tblSCTicketStorageUsed
+				WHERE intTicketId = @intTicketId
 			END
 
 			--SPOT
@@ -563,6 +600,18 @@ BEGIN TRY
 					,dblQty = A.dblQuantity
 				FROM @UnitAllocation A
 				WHERE intAllocationType = 4
+
+				INSERT INTO tblSCTicketDistributionAllocation(
+					intTicketId
+					,intSourceId
+					,intSourceType
+				)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketSpotUsedId
+					,intSourceType = 4
+				FROM tblSCTicketSpotUsed
+				WHERE intTicketId = @intTicketId
 			END
 		END
 
@@ -641,6 +690,18 @@ BEGIN TRY
 				FROM @UnitAllocation
 				WHERE intAllocationType = 2
 
+				INSERT INTO tblSCTicketDistributionAllocation(
+					intTicketId
+					,intSourceId
+					,intSourceType
+				)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketLoadUsedId
+					,intSourceType = 2
+				FROM tblSCTicketLoadUsed
+				WHERE intTicketId = @intTicketId
+
 
 			END
 
@@ -660,6 +721,18 @@ BEGIN TRY
 					,dblQuantity
 				FROM @UnitAllocation
 				WHERE intAllocationType = 1
+
+				INSERT INTO tblSCTicketDistributionAllocation(
+					intTicketId
+					,intSourceId
+					,intSourceType
+				)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketContractUsed
+					,intSourceType = 1
+				FROM tblSCTicketContractUsed
+				WHERE intTicketId = @intTicketId
 			END
 
 			---STORAGE
@@ -717,6 +790,18 @@ BEGIN TRY
 					WHERE intAllocationType = 3
 						AND B.ysnDPOwnedType = 1 
 				END
+
+				INSERT INTO tblSCTicketDistributionAllocation(
+						intTicketId
+						,intSourceId
+						,intSourceType
+					)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketStorageUsedId
+					,intSourceType = 3
+				FROM tblSCTicketStorageUsed
+				WHERE intTicketId = @intTicketId
 			END
 
 			--SPOT
@@ -736,7 +821,20 @@ BEGIN TRY
 					,dblQty = A.dblQuantity
 				FROM @UnitAllocation A
 				WHERE intAllocationType = 4
+
+				INSERT INTO tblSCTicketDistributionAllocation(
+					intTicketId
+					,intSourceId
+					,intSourceType
+				)
+				SELECT 
+					intTicketId = @intTicketId
+					,intSourceId = intTicketSpotUsedId
+					,intSourceType = 4
+				FROM tblSCTicketSpotUsed
+				WHERE intTicketId = @intTicketId
 			END
+
 		END
 
 

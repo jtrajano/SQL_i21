@@ -651,6 +651,18 @@ BEGIN TRY
 						,[intContractDetailId] = @intTicketContractDetailId
 						,[intEntityId] = @intEntityId
 						,[dblScheduleQty] = @dblTicketNetUnits
+
+					INSERT INTO tblSCTicketDistributionAllocation(
+						intTicketId
+						,intSourceId
+						,intSourceType
+					)
+					SELECT 
+						intTicketId = @intTicketId
+						,intSourceId = intTicketContractUsed
+						,intSourceType = 1
+					FROM tblSCTicketContractUsed
+					WHERE intTicketId = @intTicketId
 					
 				END
 
@@ -704,6 +716,18 @@ BEGIN TRY
 						,@intTicketLoadDetailId
 						,@intEntityId
 						,@dblTicketNetUnits
+
+					INSERT INTO tblSCTicketDistributionAllocation(
+						intTicketId
+						,intSourceId
+						,intSourceType
+					)
+					SELECT 
+						intTicketId = @intTicketId
+						,intSourceId = intTicketLoadUsedId
+						,intSourceType = 2
+					FROM tblSCTicketLoadUsed
+					WHERE intTicketId = @intTicketId
 					
 				END
 			END
@@ -727,6 +751,18 @@ BEGIN TRY
 						,dblQty = dblNetUnits
 					FROM tblSCTicket
 					WHERE intTicketId = @intTicketId
+
+					INSERT INTO tblSCTicketDistributionAllocation(
+						intTicketId
+						,intSourceId
+						,intSourceType
+					)
+					SELECT 
+						intTicketId = @intTicketId
+						,intSourceId = intTicketSpotUsedId
+						,intSourceType = 4
+					FROM tblSCTicketSpotUsed
+					WHERE intTicketId = @intTicketId
 				END
 				---STORAGE DISTRIBUTION
 				ELSE
@@ -745,6 +781,18 @@ BEGIN TRY
 						,intStorageScheduleId = intStorageScheduleId
 						,dblQty = dblNetUnits
 					FROM tblSCTicket
+					WHERE intTicketId = @intTicketId
+
+					INSERT INTO tblSCTicketDistributionAllocation(
+						intTicketId
+						,intSourceId
+						,intSourceType
+					)
+					SELECT 
+						intTicketId = @intTicketId
+						,intSourceId = intTicketStorageUsedId
+						,intSourceType = 3
+					FROM tblSCTicketStorageUsed
 					WHERE intTicketId = @intTicketId
 				END
 			END
@@ -859,6 +907,18 @@ BEGIN TRY
 							,[intContractDetailId] = @intTicketContractDetailId
 							,[intEntityId] = @intEntityId
 							,[dblScheduleQty] = @dblTicketNetUnits
+
+						INSERT INTO tblSCTicketDistributionAllocation(
+							intTicketId
+							,intSourceId
+							,intSourceType
+						)
+						SELECT 
+							intTicketId = @intTicketId
+							,intSourceId = intTicketContractUsed
+							,intSourceType = 1
+						FROM tblSCTicketContractUsed
+						WHERE intTicketId = @intTicketId
 						
 					END
 
@@ -876,6 +936,18 @@ BEGIN TRY
 							,@intTicketLoadDetailId
 							,@intEntityId
 							,@dblTicketNetUnits
+
+						INSERT INTO tblSCTicketDistributionAllocation(
+							intTicketId
+							,intSourceId
+							,intSourceType
+						)
+						SELECT 
+							intTicketId = @intTicketId
+							,intSourceId = intTicketLoadUsedId
+							,intSourceType = 2
+						FROM tblSCTicketLoadUsed
+						WHERE intTicketId = @intTicketId
 						
 					END
 				END
@@ -899,6 +971,18 @@ BEGIN TRY
 							,dblQty = dblNetUnits
 						FROM tblSCTicket
 						WHERE intTicketId = @intTicketId
+
+						INSERT INTO tblSCTicketDistributionAllocation(
+							intTicketId
+							,intSourceId
+							,intSourceType
+						)
+						SELECT 
+							intTicketId = @intTicketId
+							,intSourceId = intTicketSpotUsedId
+							,intSourceType = 4
+						FROM tblSCTicketSpotUsed
+						WHERE intTicketId = @intTicketId
 					END
 					---STORAGE DISTRIBUTION
 					ELSE
@@ -917,6 +1001,18 @@ BEGIN TRY
 							,intStorageScheduleId = intStorageScheduleId
 							,dblQty = dblNetUnits
 						FROM tblSCTicket
+						WHERE intTicketId = @intTicketId
+
+						INSERT INTO tblSCTicketDistributionAllocation(
+							intTicketId
+							,intSourceId
+							,intSourceType
+						)
+						SELECT 
+							intTicketId = @intTicketId
+							,intSourceId = intTicketStorageUsedId
+							,intSourceType = 3
+						FROM tblSCTicketStorageUsed
 						WHERE intTicketId = @intTicketId
 					END
 				END

@@ -932,6 +932,9 @@ BEGIN TRY
 
 						DELETE FROM tblSCTicketStorageUsed
 						WHERE intTicketId = @intTicketId
+
+						DELETE FROM tblSCTicketDistributionAllocation
+						WHERE intTicketId = @intTicketId
 					END
 				END
 			END
