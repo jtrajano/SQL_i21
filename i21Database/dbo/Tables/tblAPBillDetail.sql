@@ -166,7 +166,10 @@ CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_voucherPayable]
 								,intInventoryReceiptChargeId
 								,intInventoryReceiptItemId
 								,intInventoryShipmentChargeId
-								,intLoadDetailId DESC);
+								,intLoadDetailId
+								,intSettleStorageId
+								,intTicketDistributionAllocationId
+								DESC);
 GO
 CREATE TRIGGER trgLogVoucherDetailRisk
 ON dbo.tblAPBillDetail
