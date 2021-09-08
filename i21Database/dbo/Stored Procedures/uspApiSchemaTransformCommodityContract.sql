@@ -115,6 +115,46 @@ OUTER APPLY(
 WHERE sc.guiApiUniqueId = @guiApiUniqueId
     AND e.intEntityId IS NULL
 
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Freight Term'
+    , strValue = sc.strFreightTerm
+    , strLogLevel = 'Warning'
+    , strStatus = 'Ignored'
+    , intRowNo = sc.intRowNumber
+    , strMessage = 'The freight term ' + ISNULL(sc.strFreightTerm, '') + ' does not exist.'
+FROM tblApiSchemaCommodityContract sc
+OUTER APPLY(
+  SELECT TOP 1 *
+  FROM tblSMFreightTerms se 
+  WHERE (se.strFreightTerm = sc.strFreightTerm OR se.strDescription = sc.strFreightTerm)
+) e
+WHERE sc.guiApiUniqueId = @guiApiUniqueId
+  AND e.intFreightTermId IS NULL
+  AND NULLIF(sc.strFreightTerm, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Term'
+    , strValue = sc.strPaymentTerms
+    , strLogLevel = 'Warning'
+    , strStatus = 'Ignored'
+    , intRowNo = sc.intRowNumber
+    , strMessage = 'The payment term ' + ISNULL(sc.strPaymentTerms, '') + ' does not exist.'
+FROM tblApiSchemaCommodityContract sc
+OUTER APPLY(
+  SELECT TOP 1 *
+  FROM tblSMTerm se 
+  WHERE (se.strTermCode = sc.strPaymentTerms OR se.strTerm = sc.strPaymentTerms)
+) e
+WHERE sc.guiApiUniqueId = @guiApiUniqueId
+  AND e.intTermID IS NULL
+  AND NULLIF(sc.strPaymentTerms, '') IS NOT NULL
+
 -- Transform
 
 /*
@@ -135,6 +175,8 @@ INSERT INTO tblCTContractHeader (
     , intCommodityId
     , intCommodityUOMId
     , intPricingTypeId
+    , intTermId
+    , intFreightTermId
     , dtmCreated
     , intConcurrencyId
     , ysnSigned
@@ -150,6 +192,8 @@ SELECT DISTINCT
   , c.intCommodityId
   , cu.intCommodityUnitMeasureId
   , pt.intPricingTypeId
+  , tr.intTermID
+  , ft.intFreightTermId
   , GETUTCDATE()
   , 1
   , 0
@@ -161,6 +205,12 @@ CROSS APPLY (
   WHERE xe.strName = sc.strEntityNo 
     AND xe.strType = CASE sc.strContractType WHEN 'Purchase' THEN 'Vendor' ELSE 'Customer' END
 ) e
+LEFT JOIN tblSMFreightTerms ft ON ft.strFreightTerm = sc.strFreightTerm
+OUTER APPLY(
+  SELECT TOP 1 *
+  FROM tblSMTerm se 
+  WHERE (se.strTermCode = sc.strPaymentTerms OR se.strTerm = sc.strPaymentTerms)
+) tr
 CROSS APPLY (
   SELECT TOP 1 *
   FROM vyuApiEntity spe 
@@ -193,6 +243,8 @@ GROUP BY
   , sp.intEntityId
   , c.intCommodityId
   , cu.intCommodityUnitMeasureId
+  , tr.intTermID
+  , ft.intFreightTermId
 
  -- Validate details
   INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -296,7 +348,9 @@ DECLARE @strEntityNo NVARCHAR(100)
 DECLARE @strEntityName NVARCHAR(100)
 DECLARE @strSalespersonNo NVARCHAR(100)
 DECLARE @strSalespersonName NVARCHAR(100)
-DECLARE @intPricingtypeId NVARCHAR(50)
+DECLARE @intPricingtypeId INT
+DECLARE @intTermId INT
+DECLARE @intFreightTermId INT
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
@@ -309,6 +363,8 @@ SELECT
   , h.intSalespersonId
   , ISNULL(h.intPositionId, 0) intPositionId
   , ISNULL(h.intCropYearId, 0) intCropYearId
+  , ISNULL(h.intTermId, 0) intTermId
+  , ISNULL(h.intFreightTermId, 0) intFreightTermId
   , h.intEntityId
   , c.strCommodityCode
   , c.strDescription
@@ -332,6 +388,8 @@ GROUP BY
   , h.intPricingTypeId
   , ISNULL(h.intPositionId, 0)
   , ISNULL(h.intCropYearId, 0)
+  , ISNULL(h.intTermId, 0)
+  , ISNULL(h.intFreightTermId, 0)
   , h.intEntityId
   , h.intContractHeaderId
   , c.strCommodityCode
@@ -352,6 +410,8 @@ FETCH NEXT FROM cur INTO
   , @intSalespersonId
   , @intPositionId
   , @intCropYearId
+  , @intTermId
+  , @intFreightTermId
   , @intEntityId
   , @strCommodityCode
   , @strCommodityName
@@ -470,6 +530,8 @@ BEGIN
     , h.intPricingTypeId
     , ISNULL(h.intPositionId, 0)
     , ISNULL(h.intCropYearId, 0)
+    , ISNULL(h.intTermId, 0)
+    , ISNULL(h.intFreightTermId, 0)
     , i.intItemId
     , l.intCompanyLocationId
     , sc.intSequence
@@ -508,6 +570,8 @@ BEGIN
     , @intSalespersonId
     , @intPositionId
     , @intCropYearId
+    , @intTermId
+    , @intFreightTermId
     , @intEntityId
     , @strCommodityCode
     , @strCommodityName
