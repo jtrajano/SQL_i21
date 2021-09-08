@@ -4866,6 +4866,7 @@
     <Build Include="dbo\Views\vyuLGOpenPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertDiscountScheduleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertFactorTaxGroupXRefRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPaycheckMiddleReport.sql" />
     <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
