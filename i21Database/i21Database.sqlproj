@@ -184,6 +184,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
     <Build Include="dbo\Views\vyuSMAuditDetail.sql" />
     <Build Include="dbo\Views\vyuSMAuditDetailTranslation.sql" />
+    <Build Include="dbo\Views\vyuSMAuditLogPanelTranslation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
