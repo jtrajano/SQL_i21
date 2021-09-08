@@ -202,8 +202,6 @@ SELECT	intItemId = DetailItem.intItemId
 									,DetailItem.ysnSubCurrency
 									,Header.intSubCurrencyCents
 									,DEFAULT 
-									,DetailItem.intComputeItemTotalOption
-									,DetailItem.dblOpenReceive
 								)
 								--/ Header.intSubCurrencyCents 
 
@@ -247,8 +245,6 @@ SELECT	intItemId = DetailItem.intItemId
 									,NULL--DetailItem.ysnSubCurrency
 									,NULL--Header.intSubCurrencyCents
 									,DEFAULT 
-									,DetailItem.intComputeItemTotalOption
-									,DetailItem.dblOpenReceive
 								)
 								-- (B) Other Charge
 								+ 
@@ -305,8 +301,6 @@ SELECT	intItemId = DetailItem.intItemId
 				,NULL--DetailItem.ysnSubCurrency
 				,NULL--Header.intSubCurrencyCents
 				,DEFAULT 
-				,DetailItem.intComputeItemTotalOption
-				,DetailItem.dblOpenReceive
 			)
 FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 			ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 

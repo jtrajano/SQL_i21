@@ -733,8 +733,6 @@ BEGIN
 											,DetailItem.ysnSubCurrency
 											,Header.intSubCurrencyCents
 											,DEFAULT 
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										--/ Header.intSubCurrencyCents 
 
@@ -778,8 +776,6 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT 
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 
@@ -836,8 +832,6 @@ BEGIN
 						,NULL--DetailItem.ysnSubCurrency
 						,NULL--Header.intSubCurrencyCents
 						,DEFAULT 
-						,DetailItem.intComputeItemTotalOption
-						,DetailItem.dblOpenReceive
 					)
 				,intSourceEntityId = Header.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -1800,8 +1794,6 @@ BEGIN
 											,DetailItem.ysnSubCurrency
 											,Header.intSubCurrencyCents
 											,DEFAULT 
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										--/ Header.intSubCurrencyCents 
 
@@ -1833,8 +1825,6 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT 
-											,DetailItem.intComputeItemTotalOption
-											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 

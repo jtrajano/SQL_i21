@@ -338,8 +338,6 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
-							,ri.intComputeItemTotalOption
-							,ri.dblOpenReceive
 						)	
 					)
 			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
@@ -440,8 +438,6 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
-									,ri.intComputeItemTotalOption
-									,ri.dblOpenReceive
 								)
 								,2 
 							)
@@ -548,8 +544,6 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
-							,ri.intComputeItemTotalOption
-							,ri.dblOpenReceive
 						)						
 					)
 					,2
@@ -580,8 +574,6 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
-							,ri.intComputeItemTotalOption
-							,ri.dblOpenReceive
 						)	
 						, t.dblCost
 						, (
@@ -607,8 +599,6 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
-									,ri.intComputeItemTotalOption
-									,ri.dblOpenReceive
 								)
 								,2
 							)
@@ -689,8 +679,6 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 						,t.intItemUOMId
-						,ri.intComputeItemTotalOption
-						,ri.dblOpenReceive
 					)
 					,2 
 				)
