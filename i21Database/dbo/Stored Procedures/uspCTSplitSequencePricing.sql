@@ -113,6 +113,15 @@ BEGIN TRY
 		SET		dblNoOfContract			=	@dblNoOfLots
 		WHERE	intFutOptTransactionId	=	@intFutOptTransactionId
 
+		if (@ysnHedge = 1)
+		begin
+			 --Insert into Summary Log
+			EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, NULL, @intUserId, 'UPDATE';
+
+			 --Insert into Derivative History
+			EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, NULL, 'Contracts', @intUserId, 'UPDATE' , 0;
+		end
+
 		SELECT	@intChildContractDetailId = MIN(intContractDetailId) 
 		FROM	tblCTContractDetail 
 		WHERE	intSplitFromId			=	@intContractDetailId
@@ -158,6 +167,12 @@ BEGIN TRY
 									'<strInternalTradeNo>'+@strTradeNo+'</strInternalTradeNo></toUpdate></root>' 
 
 					EXEC uspCTCreateADuplicateRecord 'tblRKFutOptTransaction',@intFutOptTransactionId, @intNewFutOptTransactionId OUTPUT,@XML
+
+					--Insert into Summary Log
+					EXEC uspRKSaveDerivativeEntry @intNewFutOptTransactionId, NULL, @intUserId, 'ADD';
+
+					 --Insert into Derivative History
+					EXEC uspRKFutOptTransactionHistory @intNewFutOptTransactionId, NULL, 'Contracts', @intUserId, 'ADD' , 0;
 
 					SET @XML =	'<root><toUpdate><intHedgedLots>'+STR(@dblChildSeqLots,18,6)+'</intHedgedLots>'+
 								'<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>'+
