@@ -9059,6 +9059,7 @@
     <Build Include="dbo\Stored Procedures\uspSCDirectUpdateContractAndLoadUsed.sql" />
     <Build Include="dbo\Stored Procedures\uspSCManualDistributionDirect.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateDirectInGLEntries.sql" />
+    <Build Include="dbo\Views\vyuSCDirectAPClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
