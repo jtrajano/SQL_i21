@@ -2459,7 +2459,7 @@ BEGIN TRY
 							,[ysnNoClaim] BIT
 							,[intLoadDetailRefId] INT
 							,intLoadDetailId INT
-							) x ON x.intLoadDetailId = LD.intLoadDetailRefId
+							) x ON x.intLoadDetailId = LD.intLoadDetailRefId AND LD.intLoadId =@intNewLoadId 
 					LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 						AND PCD.intBookId = @intBookId
 						AND IsNULL(PCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
@@ -2468,6 +2468,7 @@ BEGIN TRY
 						AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IsNULL(PCD.intContractHeaderId, SCD.intContractHeaderId)
 					WHERE x.intLoadDetailId = @intLoadDetailId
+						
 				END
 
 				IF EXISTS (
@@ -2736,6 +2737,7 @@ BEGIN TRY
 							,[strWarehouseCargoNumber] = x.[strWarehouseCargoNumber]
 							,[intConcurrencyId] = LD.[intConcurrencyId] + 1
 						FROM tblLGLoadDetailLot LD
+						JOIN tblLGLoadDetail LD2 on LD2.intLoadDetailId=LD.intLoadDetailId AND LD2.intLoadId =@intNewLoadId 
 						JOIN OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 								[intLoadDetailId] INT
 								,[dblLotQuantity] NUMERIC(38, 20)
