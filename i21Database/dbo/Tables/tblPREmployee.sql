@@ -39,6 +39,7 @@
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
+    [guiApiUniqueId] UNIQUEIDENTIFIER NOT NULL,
 	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
     CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEntityId]),
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
