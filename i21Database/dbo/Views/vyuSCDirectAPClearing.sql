@@ -10,7 +10,7 @@ SELECT
     ,bill.intBillId
     ,bill.strBillId
     ,billDetail.intBillDetailId
-    ,SC.intTicketId
+    ,intScalTicketId = SC.intTicketId
     ,SC.intItemId
     ,intItemUOMId = SC.intItemUOMIdTo
     ,strUOM = ICUnitOfMeasure.strUnitMeasure
