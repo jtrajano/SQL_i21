@@ -127,7 +127,7 @@
     [strTrlUPCEntryType]                     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrloLnItemDiscProgramId]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblTrloLnItemDiscDiscAmt]               DECIMAL (18, 3) NULL,
-    [intTrloLnItemDiscQty]                   INT             NULL,
+    [dblTrloLnItemDiscQty]                   DECIMAL (18, 3) NULL,
     [intTrloLnItemDiscTaxCred]               INT             NULL,
 
     [strTrlFuelType]                         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
