@@ -3,6 +3,8 @@ CREATE PROCEDURE dbo.uspPRImportEmployee(
     @guiLogId UNIQUEIDENTIFIER 
 )
 
+AS
+
 SELECT * FROM tblApiSchemaEmployee
 
 GO
