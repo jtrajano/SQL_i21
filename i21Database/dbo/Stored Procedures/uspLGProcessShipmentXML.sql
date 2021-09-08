@@ -89,6 +89,8 @@ BEGIN TRY
 		,@intSACompanyLocationId INT
 		,@intSContractHeaderId INT
 		,@intCustomerEntityId INT
+		,@ysnPosted BIT
+		,@ysnParent BIT
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -231,8 +233,11 @@ BEGIN TRY
 		,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		)
 	DECLARE @tblIPContractDetail TABLE (intContractDetailId INT)
+	DECLARE @tblLGDeleteLoadWarehouse TABLE (intLoadWarehouseId INT)
+	DECLARE @tblLGDeleteLoadContainer TABLE (intLoadContainerId INT)
 
 	SELECT @intCompanyRefId = intCompanyId
+		,@ysnParent = ysnParent
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
@@ -887,11 +892,14 @@ BEGIN TRY
 			SELECT @intWeightUnitMeasureId = intUnitMeasureId
 			FROM tblICUnitMeasure
 			WHERE strUnitMeasure = @strWeightUnitMeasure
-			
-			SELECT @intNewLoadId=NULL
+
+			SELECT @intNewLoadId = NULL
+
+			SELECT @strNewLoadNumber = NULL
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
+				,@ysnPosted = ysnPosted
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
 				AND intBookId = @intBookId
@@ -902,10 +910,35 @@ BEGIN TRY
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
 
-			if @intNewLoadId is not null
-			Begin
-				EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
-			End
+			IF @intNewLoadId IS NOT NULL
+				AND IsNULL(@ysnPosted, 0) = 0
+			BEGIN
+				IF (
+						@ysnParent = 0
+						AND EXISTS (
+							SELECT *
+							FROM tblLGLoad L
+							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+								AND L.intLoadId = @intNewLoadId
+							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+							WHERE CD.intContractStatusId = 1
+							)
+						)
+					OR (
+						@ysnParent = 1
+						AND EXISTS (
+							SELECT *
+							FROM tblLGLoad L
+							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+								AND L.intLoadId = @intNewLoadId
+							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+							WHERE CD.intContractStatusId = 1
+							)
+						)
+				BEGIN
+					EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
+				END
+			END
 
 			IF @strRowState = 'Delete'
 			BEGIN
@@ -2513,7 +2546,6 @@ BEGIN TRY
 			--		FROM @tblLGLoadDetail x
 			--		WHERE LD.intLoadDetailRefId = x.intLoadDetailId
 			--		)
-
 			EXEC sp_xml_removedocument @idoc
 
 			IF @strLoadDetailLot IS NOT NULL
@@ -3300,7 +3332,8 @@ BEGIN TRY
 			LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strStaticValueCurrency
 			LEFT JOIN tblSMCurrency ACU ON ACU.strCurrency = x.strAmountCurrency
 
-			DELETE LC
+			INSERT INTO @tblLGDeleteLoadContainer (intLoadContainerId)
+			SELECT LC.intLoadContainerId
 			FROM tblLGLoadContainer LC
 			WHERE LC.intLoadId = @intNewLoadId
 				AND NOT EXISTS (
@@ -3815,7 +3848,7 @@ BEGIN TRY
 						,strWarehouse NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strShipVia NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						) x
-				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
+				LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
 				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
 					AND SL.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
@@ -3869,13 +3902,14 @@ BEGIN TRY
 						) x
 				JOIN tblLGLoadWarehouse LW ON LW.intLoadId = @intNewLoadId
 					AND LW.intLoadWarehouseRefId = x.intLoadWarehouseId
-				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
+				LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.strSubLocationName = x.strWarehouse
 				LEFT JOIN tblICStorageLocation SL ON SL.strName = x.strStorageLocationName
 					AND SL.intSubLocationId = CLSL.intCompanyLocationSubLocationId
 				LEFT JOIN tblEMEntity Hauler ON Hauler.strName = x.strShipVia
 					AND Hauler.strEntityNo <> '' --???
 
-				DELETE LW
+				INSERT INTO @tblLGDeleteLoadWarehouse (intLoadWarehouseId)
+				SELECT LW.intLoadWarehouseId
 				FROM tblLGLoadWarehouse LW
 				WHERE LW.intLoadId = @intNewLoadId
 					AND NOT EXISTS (
@@ -4103,6 +4137,14 @@ BEGIN TRY
 				EXEC sp_xml_removedocument @idoc
 			END
 
+			DELETE LW
+			FROM @tblLGDeleteLoadWarehouse DLW
+			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = DLW.intLoadWarehouseId
+
+			DELETE LC
+			FROM @tblLGDeleteLoadContainer DLC
+			JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = DLC.intLoadContainerId
+
 			DELETE LD
 			FROM tblLGLoadDetail LD
 			WHERE LD.intLoadId = @intNewLoadId
@@ -4112,7 +4154,34 @@ BEGIN TRY
 					WHERE LD.intLoadDetailRefId = x.intLoadDetailId
 					)
 
-			EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
+			IF IsNULL(@ysnPosted, 0) = 0
+			BEGIN
+				IF (
+						@ysnParent = 0
+						AND EXISTS (
+							SELECT *
+							FROM tblLGLoad L
+							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+								AND L.intLoadId = @intNewLoadId
+							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+							WHERE CD.intContractStatusId = 1
+							)
+						)
+					OR (
+						@ysnParent = 1
+						AND EXISTS (
+							SELECT *
+							FROM tblLGLoad L
+							JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+								AND L.intLoadId = @intNewLoadId
+							JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+							WHERE CD.intContractStatusId = 1
+							)
+						)
+				BEGIN
+					EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
+				END
+			END
 
 			IF @ysnReplication = 1
 			BEGIN
@@ -4607,7 +4676,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	UPDATE tblLGIntrCompLogisticsStg				
+	UPDATE tblLGIntrCompLogisticsStg
 	SET strFeedStatus = 'Failed'
 		,strMessage = @ErrMsg
 		,intStatusId = 2
