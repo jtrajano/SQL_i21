@@ -440,7 +440,8 @@ BEGIN
               AND ISNULL(intBookId,1) = @BookId
               ORDER BY B.intAssetDepreciationId DESC
           )FAD
-          
+          WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
+
           UNION ALL  
           SELECT   
           [strTransactionId]  = B.strTransactionId  
@@ -484,6 +485,7 @@ BEGIN
               AND ISNULL(intBookId,1) = @BookId
               ORDER BY B.intAssetDepreciationId DESC
           )FAD
+          WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
 
 		  DECLARE @GLEntries2 RecapTableType
 		  INSERT INTO @GLEntries2 SELECT * FROM @GLEntries 
