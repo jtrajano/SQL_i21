@@ -51,7 +51,7 @@ CREATE TABLE tblApiSchemaEmployee(
     strSpouse NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,--tblPREmployee
     strMaritalStatus NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,--tblPREmployee
     strWorkPhone NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,--tblPREmployee
-    intWorkersCompensationId,--tblPREmployee
+    intWorkersCompensationId INT,--tblPREmployee
     strEthnicity NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,--tblPREmployee
     strEEOCCode NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,--tblPREmployee
     strSocialSecurity NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,--tblPREmployee
@@ -60,10 +60,13 @@ CREATE TABLE tblApiSchemaEmployee(
     ysn1099Employee NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,--tblPREmployee
     strSupervisorId1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
     strSupervisorName1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
+    strSupervisoreTitle1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
     strSupervisorId2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
     strSupervisorName2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
+    strSupervisoreTitle2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
     strSupervisorId3 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
-    strSupervisorName3 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
+    strSupervisorName3 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
+    strSupervisoreTitle3 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,  
     strDepartment1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     strDepartmentDesc1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     strDepartment2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
