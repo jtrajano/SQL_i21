@@ -73,7 +73,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						ELSE 1 
 						END 
 					END,
-				@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(F.intCurrencyId, A.intCurrencyId) THEN 0 ELSE 1 END
+				@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, F.intCurrencyId) THEN 0 ELSE 1 END
 		FROM tblFAFixedAsset F 
         JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
         WHERE F.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID) AND BD.intBookId = 1 
