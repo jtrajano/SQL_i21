@@ -11,3 +11,9 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblSCTicketDistributionAllocation_intTicketId_intSourceId_intSourceType] ON [dbo].[tblSCTicketDistributionAllocation]
     ([intTicketId] ASC) INCLUDE([intSourceId],[intSourceType])
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSCTicketDistributionAllocation_intTicketDistributionAllocationId] ON [dbo].[tblSCTicketDistributionAllocation]
+(
+	[intTicketDistributionAllocationId] ASC
+)INCLUDE([intTicketId],[intSourceId],[intSourceType])
+GO

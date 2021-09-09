@@ -69,7 +69,8 @@ BEGIN
 			,[intTermId]						
 			,[strBillOfLading]					
 			,intSubLocationId 
-			,intStorageLocationId						
+			,intStorageLocationId
+			,intTicketDistributionAllocationId						
 		)
 		SELECT 
 			[intEntityVendorId]	= SC.intHaulerId
@@ -119,6 +120,7 @@ BEGIN
 			,[strBillOfLading] = NULL
 			,intSubLocationId =	SC.intSubLocationId
 			,intStorageLocationId = SC.intStorageLocationId
+			,intTicketDistributionAllocationId = A.intTicketDistributionAllocationId
 		FROM @DirectVoucherLineItem A	
 		INNER JOIN tblSCTicket SC
 			ON A.intScaleTicketId = SC.intTicketId
@@ -186,7 +188,8 @@ BEGIN
 			,[intTermId]						
 			,[strBillOfLading]					
 			,intSubLocationId 
-			,intStorageLocationId						
+			,intStorageLocationId
+			,intTicketDistributionAllocationId
 		)
 		SELECT 
 			[intEntityVendorId]	= CTC.intVendorId		
@@ -236,6 +239,7 @@ BEGIN
 			,[strBillOfLading] = NULL
 			,intSubLocationId =	SC.intSubLocationId
 			,intStorageLocationId = SC.intStorageLocationId
+			,intTicketDistributionAllocationId = A.intTicketDistributionAllocationId
 		FROM @DirectVoucherLineItem A	
 		INNER JOIN tblSCTicket SC
 			ON A.intScaleTicketId = SC.intTicketId
@@ -308,7 +312,8 @@ BEGIN
 			,[intTermId]						
 			,[strBillOfLading]					
 			,intSubLocationId 
-			,intStorageLocationId						
+			,intStorageLocationId	
+			,intTicketDistributionAllocationId
 		)
 		SELECT 
 			[intEntityVendorId]	= LGC.intVendorId		
@@ -358,6 +363,7 @@ BEGIN
 			,[strBillOfLading] = NULL
 			,intSubLocationId =	SC.intSubLocationId
 			,intStorageLocationId = SC.intStorageLocationId
+			,intTicketDistributionAllocationId = A.intTicketDistributionAllocationId
 		FROM @DirectVoucherLineItem A	
 		INNER JOIN tblSCTicket SC
 			ON A.intScaleTicketId = SC.intTicketId

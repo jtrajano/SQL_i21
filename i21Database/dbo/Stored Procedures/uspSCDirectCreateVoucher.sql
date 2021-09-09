@@ -78,6 +78,7 @@ BEGIN TRY
 				,[strVendorOrderNumber]
 				,[intStorageScheduleTypeId]
 				,[intUnitItemUOMId]
+				,intTicketDistributionAllocationId
 			)
 			SELECT 
 				intAccountId				= NULL
@@ -108,6 +109,7 @@ BEGIN TRY
 				,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
 				,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
 				,[intUnitItemUOMId]			= SC.intItemUOMIdTo
+				,intTicketDistributionAllocationId = SCTA.intTicketDistributionAllocationId
 			FROM tblSCTicket SC 
 			INNER JOIN tblSCTicketLoadUsed SCL
 				ON SC.intTicketId = SCL.intTicketId
@@ -119,6 +121,10 @@ BEGIN TRY
 				ON SCL.intLoadDetailId = LGD.intLoadDetailId
 			INNER JOIN tblCTContractDetail CNT
 				ON CNT.intContractDetailId = LGD.intPContractDetailId
+			INNER JOIN tblSCTicketDistributionAllocation SCTA
+				ON SCL.intTicketLoadUsedId = SCTA.intSourceId
+					AND intSourceType = 2
+			
 			-- INNER JOIN (
 			-- 	SELECT CTD.intContractHeaderId
 			-- 	,CTD.intContractDetailId
@@ -181,6 +187,7 @@ BEGIN TRY
 				,[strVendorOrderNumber]
 				,[intStorageScheduleTypeId]
 				,[intUnitItemUOMId]
+				,intTicketDistributionAllocationId
 			)
 			SELECT 
 				intAccountId				= NULL
@@ -211,6 +218,7 @@ BEGIN TRY
 				,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
 				,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
 				,[intUnitItemUOMId]			= SC.intItemUOMIdTo
+				,intTicketDistributionAllocationId = SCTA.intTicketDistributionAllocationId
 			FROM tblSCTicket SC 
 			INNER JOIN tblSCTicketContractUsed SCC
 				ON SC.intTicketId = SCC.intTicketId
@@ -222,6 +230,9 @@ BEGIN TRY
 				ON SCC.intContractDetailId = CTD.intContractDetailId
 			LEFT JOIN tblEMEntityLocation EM 
 				ON EM.intEntityId = SCC.intEntityId AND ysnDefaultLocation = 1
+			INNER JOIN tblSCTicketDistributionAllocation SCTA
+				ON SCC.intTicketContractUsed = SCTA.intSourceId
+					AND intSourceType = 1
 			WHERE SC.intTicketId = @intTicketId
 		END
 
@@ -268,6 +279,7 @@ BEGIN TRY
 				,[strVendorOrderNumber]
 				,[intStorageScheduleTypeId]
 				,[intUnitItemUOMId]
+				,intTicketDistributionAllocationId
 			)
 			SELECT 
 				intAccountId				= NULL
@@ -300,6 +312,7 @@ BEGIN TRY
 				,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
 				,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
 				,[intUnitItemUOMId]			= SC.intItemUOMIdTo
+				,intTicketDistributionAllocationId = SCTA.intTicketDistributionAllocationId
 			FROM tblSCTicket SC 
 			INNER JOIN tblSCTicketStorageUsed SCS
 				ON SC.intTicketId = SCS.intTicketId
@@ -311,6 +324,9 @@ BEGIN TRY
 				ON EM.intEntityId = SCS.intEntityId AND ysnDefaultLocation = 1
 			INNER JOIN tblGRStorageType GRT
 				ON GRT.intStorageScheduleTypeId = SCS.intStorageTypeId
+			INNER JOIN tblSCTicketDistributionAllocation SCTA
+				ON SCS.intTicketStorageUsedId = SCTA.intSourceId
+					AND intSourceType = 3
 			OUTER APPLY(
 				SELECT	
 					strSeqMonth = RIGHT(CONVERT(varchar, dtmEndDate, 106),8)
@@ -353,6 +369,7 @@ BEGIN TRY
 				,[strVendorOrderNumber]
 				,[intStorageScheduleTypeId]
 				,[intUnitItemUOMId]
+				,intTicketDistributionAllocationId
 			)
 			SELECT 
 				intAccountId				= NULL
@@ -383,6 +400,7 @@ BEGIN TRY
 				,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
 				,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
 				,[intUnitItemUOMId]			= SC.intItemUOMIdTo
+				,intTicketDistributionAllocationId = SCTA.intTicketDistributionAllocationId
 			FROM tblSCTicket SC 
 			INNER JOIN tblSCTicketSpotUsed SCS
 				ON SC.intTicketId = SCS.intTicketId
@@ -390,6 +408,9 @@ BEGIN TRY
 			INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
 			INNER JOIN tblICItemUOM ICUOM
 				ON SC.intItemUOMIdTo = ICUOM.intItemUOMId
+			INNER JOIN tblSCTicketDistributionAllocation SCTA
+				ON SCS.intTicketSpotUsedId = SCTA.intSourceId
+					AND intSourceType = 4
 			LEFT JOIN tblEMEntityLocation EM 
 				ON EM.intEntityId = SCS.intEntityId AND ysnDefaultLocation = 1
 			WHERE SC.intTicketId = @intTicketId
@@ -412,7 +433,8 @@ BEGIN TRY
 		[intCostUOMId],
 		[dblCostUnitQty],
 		[intContractDetailId],
-		[intLoadDetailId]
+		[intLoadDetailId],
+		intTicketDistributionAllocationId
 	)  
 	SELECT 
 		[intAccountId],
@@ -430,6 +452,7 @@ BEGIN TRY
 		[dblCostUnitQty],
 		[intContractDetailId],
 		[intLoadDetailId]
+		,intTicketDistributionAllocationId
 	FROM @ScaleToVoucherStagingTable
 
 	---TICKET OTHER CHARGES AND DISCOUNTS
@@ -451,6 +474,7 @@ BEGIN TRY
 			[dblCostUnitQty],
 			[intContractDetailId],
 			[intLoadDetailId]
+			,intTicketDistributionAllocationId
 		)
 		SELECT 
 			intAccountId			= NULL
@@ -472,6 +496,7 @@ BEGIN TRY
 			,dblCostUnitQty			= SC.dblCostUnitQty
 			,intContractDetailId	= SC.intContractDetailId
 			,intLoadDetailId		= SC.intLoadDetailId
+			,SC.intTicketDistributionAllocationId
 		FROM @ScaleToVoucherStagingTable SC
 		LEFT JOIN tblICItem IC ON IC.intItemId = SC.intFreightItemId
 		WHERE SC.intScaleTicketId = @intTicketId 
@@ -495,6 +520,7 @@ BEGIN TRY
 			[dblCostUnitQty],
 			[intContractDetailId],
 			[intLoadDetailId]
+			,intTicketDistributionAllocationId
 		)
 		SELECT 
 			intAccountId			= NULL
@@ -517,6 +543,7 @@ BEGIN TRY
 			,dblCostUnitQty			= SC.dblCostUnitQty
 			,intContractDetailId	= SC.intContractDetailId
 			,intLoadDetailId		= SC.intLoadDetailId
+			,SC.intTicketDistributionAllocationId
 		FROM @ScaleToVoucherStagingTable SC
 		LEFT JOIN tblICItem IC ON IC.intItemId = SC.intTicketFeesItemId
 		WHERE SC.intScaleTicketId = @intTicketId 
@@ -540,6 +567,7 @@ BEGIN TRY
 			[dblCostUnitQty],
 			[intContractDetailId],
 			[intLoadDetailId]
+			,intTicketDistributionAllocationId
 		)
 		SELECT 
 			intAccountId			= NULL
@@ -576,6 +604,7 @@ BEGIN TRY
 			,dblCostUnitQty			= SC.dblCostUnitQty
 			,intContractDetailId	= SC.intContractDetailId
 			,intLoadDetailId		= SC.intLoadDetailId
+			,SC.intTicketDistributionAllocationId
 		FROM @ScaleToVoucherStagingTable SC
 		INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SC.intScaleTicketId
 		LEFT JOIN tblGRDiscountScheduleCode GR ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
@@ -620,6 +649,7 @@ BEGIN TRY
 				,dblCostUnitQty			= ICUOM.dblUnitQty
 				,intContractDetailId	= LGD.intPContractDetailId
 				,intLoadDetailId		= LGD.intLoadDetailId
+				,TSC.intTicketDistributionAllocationId
 			INTO #tmpLoadOtherCharges
 			FROM @ScaleToVoucherStagingTable TSC
 			INNER JOIN tblSCTicket SC
@@ -658,6 +688,7 @@ BEGIN TRY
 				[dblCostUnitQty],
 				[intContractDetailId],
 				[intLoadDetailId]
+				,intTicketDistributionAllocationId
 			)
 			SELECT 
 				[intAccountId],
@@ -675,6 +706,7 @@ BEGIN TRY
 				[dblCostUnitQty],
 				[intContractDetailId],
 				[intLoadDetailId]
+				,intTicketDistributionAllocationId
 			FROM #tmpLoadOtherCharges
 			
 		END
@@ -704,6 +736,7 @@ BEGIN TRY
 				,intContractDetailId	= CTD.intContractDetailId
 				,intLoadDetailId		= NULL
 				,strCostMethod			= CTC.strCostMethod
+				,TSC.intTicketDistributionAllocationId
 			INTO #tmpContractOtherCharges
 			FROM @ScaleToVoucherStagingTable TSC
 			INNER JOIN tblSCTicket SC
@@ -746,6 +779,7 @@ BEGIN TRY
 				[dblCostUnitQty],
 				[intContractDetailId],
 				[intLoadDetailId]
+				,intTicketDistributionAllocationId
 			)
 			SELECT 
 				[intAccountId],
@@ -763,6 +797,7 @@ BEGIN TRY
 				[dblCostUnitQty],
 				[intContractDetailId],
 				[intLoadDetailId]
+				,intTicketDistributionAllocationId
 			FROM #tmpContractOtherCharges
 		END
 	END
@@ -822,6 +857,7 @@ BEGIN TRY
 		[intSubLocationId],
 		[intItemLocationId]
 		,ysnStage
+		,intTicketDistributionAllocationId
 		)
 		EXEC [dbo].[uspSCGenerateVoucherDetails] @voucherItems,@voucherOtherCharges,@voucherDetailDirectInventory
 		IF EXISTS(SELECT TOP 1 NULL FROM @voucherPayable)
