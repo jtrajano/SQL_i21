@@ -792,7 +792,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentCostId]
 			,[intItemId]						
 			,[intLinkingId]			
-			,[[intTicketDistributionAllocationId]]		
+			,[intTicketDistributionAllocationId]		
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
 			,[strTaxGroup]					
