@@ -695,8 +695,8 @@ BEGIN
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,DEFAULT
-							,DetailItem.intComputeItemTotalOption
-							,DetailItem.dblOpenReceive
+							,ri.intComputeItemTotalOption
+							,ri.dblOpenReceive
 						)
 				,strBatchId = gd.strBatchId
 			FROM 
