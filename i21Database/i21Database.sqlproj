@@ -9616,6 +9616,7 @@
     <Build Include="dbo\Views\vyuICSearchItemCustomerXref.sql" />
     <Build Include="dbo\Views\vyuICSearchItemVendorXref.sql" />
     <Build Include="dbo\Views\vyuICSearchStockReservation.sql" />
+    <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
