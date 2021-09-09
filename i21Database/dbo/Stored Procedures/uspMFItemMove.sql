@@ -6,7 +6,8 @@
 	,@intToStorageLocationId int
 	,@dblMoveQty numeric(18,6)
 	,@intItemUOMId int
-	,@intLocationId INT
+	,@intFromLocationId INT
+	,@intToLocationId INT
 	,@intUserId int
 	)
 AS
@@ -63,8 +64,8 @@ BEGIN
 		,[strTransferType] = 'Storage to Storage'
 		,[intSourceType] = 0
 		,[strDescription] = NULL
-		,[intFromLocationId] = @intLocationId
-		,[intToLocationId] = @intLocationId
+		,[intFromLocationId] = @intFromLocationId
+		,[intToLocationId] = @intToLocationId
 		,[ysnShipmentRequired] = 0
 		,[intStatusId] = 3
 		,[intShipViaId] = NULL
