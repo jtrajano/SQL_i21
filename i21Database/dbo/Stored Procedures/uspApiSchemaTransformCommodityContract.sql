@@ -489,6 +489,11 @@ BEGIN
     , sc.dblCashPrice
     , sc.dblBasis
 
+  DELETE ch
+  FROM tblCTContractHeader ch
+  WHERE NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = ch.intContractHeaderId)
+    AND ch.intContractHeaderId = @intContractHeaderId
+
   UPDATE tblCTContractHeader
   SET dblQuantity = (SELECT ISNULL(SUM(ISNULL(dblQuantity, 0)), 0) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId)
   WHERE intContractHeaderId = @intContractHeaderId
