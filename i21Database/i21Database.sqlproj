@@ -188,6 +188,7 @@
     <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
