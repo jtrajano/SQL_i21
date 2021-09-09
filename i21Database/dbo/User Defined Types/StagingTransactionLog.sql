@@ -151,7 +151,7 @@
 	[strTrlUPCEntryType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrloLnItemDiscProgramId] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[dblTrloLnItemDiscDiscAmt] decimal(18, 3) NULL, 
-	[intTrloLnItemDiscQty] INT NULL,
+	[dblTrloLnItemDiscQty] decimal(18, 3) NULL,
 	[intTrloLnItemDiscTaxCred] INT NULL,
 
 	-- NEW

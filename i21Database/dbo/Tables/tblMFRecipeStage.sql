@@ -34,5 +34,6 @@
 	strERPRecipeNo nvarchar(50) COLLATE Latin1_General_CI_AS,
 	intActive int,
 	strSubLocationName nvarchar(50) COLLATE Latin1_General_CI_AS,
+	ysnInitialAckSent BIT 
 	CONSTRAINT [PK_tblMFRecipeStage_intRecipeStageId] PRIMARY KEY ([intRecipeStageId])
 )

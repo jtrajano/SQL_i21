@@ -182,6 +182,12 @@
     <Build Include="dbo\Stored Procedures\uspMFRoutePostInventoryTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTO.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
+    <Build Include="dbo\Views\vyuSMAuditDetail.sql" />
+    <Build Include="dbo\Views\vyuSMAuditDetailTranslation.sql" />
+    <Build Include="dbo\Views\vyuSMAuditLogPanelTranslation.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
     <Build Include="dbo\Functions\fnFAGetDefaultCurrencyExchangeRateTypeId.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -4903,6 +4909,7 @@
     <Build Include="dbo\Views\vyuLGOpenPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertDiscountScheduleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertFactorTaxGroupXRefRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPaycheckMiddleReport.sql" />
     <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
@@ -8953,6 +8960,7 @@
     <Build Include="dbo\Triggers\trgCMInsertUpdateResponsiblePartyTaskDetail.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportStd.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
@@ -9978,6 +9986,7 @@
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\43_IDPFieldMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

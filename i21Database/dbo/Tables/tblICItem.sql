@@ -182,6 +182,7 @@ Type the overview for the table here.
 		[ysnAvgLocked] BIT NULL DEFAULT(0),
 		[intItemRefId] INT NULL,
 		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
 		CONSTRAINT [FK_tblICItem_tblICManufacturer] FOREIGN KEY ([intManufacturerId]) REFERENCES [tblICManufacturer]([intManufacturerId]), 
