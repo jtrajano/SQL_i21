@@ -43,6 +43,7 @@ BEGIN TRY
 	DECLARE @intDirectOutTicketId INT
 	DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 	DECLARE @ysnDropShip BIT
+	DECLARE @intMatchTicketId INT
 	
 	DECLARE @_intLoopLoadDetailId INT
 	DECLARE @_intLoopContractDetailId INT
@@ -65,6 +66,7 @@ BEGIN TRY
 		,@intTicketScaleSetupId = A.intScaleSetupId
 		,@intAllowOtherLocationContracts = intAllowOtherLocationContracts
 		,@intTicketItemId = intItemId
+		,@intMatchTicketId = intMatchTicketId
 	FROM tblSCTicket A
 	INNER JOIN tblSCScaleSetup B
 		ON A.intScaleSetupId = B.intScaleSetupId
@@ -317,7 +319,7 @@ BEGIN TRY
 				,A.[dblNetWeightDestination] 
 				,A.[ysnHasGeneratedTicketNumber]
 				,[dblScheduleQty] = NULL
-				,[dblConvertedUOMQty] = NULL
+				,[dblConvertedUOMQty]
 				,A.[dblContractCostConvertedUOM]
 				,A.[intItemUOMIdFrom] 
 				,A.[intItemUOMIdTo]
@@ -667,6 +669,10 @@ BEGIN TRY
 			,@dtmScaleDate = @dtmTicketDate
 			,@intUserId = @intUserId 
 			,@intBillId = @intBillInvoiceId OUTPUT
+
+		UPDATE tblSCTicket
+			SET intMatchTicketId = @intDirectOutTicketId
+		WHERE intTicketId = @intTicketId
 	END
 	--------------------------DIRECT OUT TICKET
 	ELSE
@@ -837,14 +843,57 @@ BEGIN TRY
 
 		END
 
+		---CREATE INVOICE
+		BEGIN
+			EXEC uspSCDirectCreateInvoice 
+				@intTicketId = @intTicketId
+				,@intEntityId = @intEntityId
+				,@intLocationId = @intTicketProcessingLocationId
+				,@intUserId = @intUserId 
+				,@intInvoiceId = @intBillInvoiceId OUTPUT
+		END
+
+		---UPDATE DIRECT IN TRANSIT
+		BEGIN
+			DELETE FROM @ItemsToIncreaseInTransitDirect
+			INSERT INTO @ItemsToIncreaseInTransitDirect(
+				[intItemId]	
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[intLotId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[dblQty]
+				,[intTransactionId]
+				,[strTransactionId]	
+				,[intTransactionTypeId]
+				,[intFOBPointId]
+			)
+			SELECT 
+				intItemId = SC.intItemId
+				,intItemLocationId = ICIL.intItemLocationId
+				,intItemUOMId = SC.intItemUOMIdTo
+				,intLotId = SC.intLotId
+				,intSubLocationId = SC.intSubLocationId
+				,intStorageLocationId = SC.intStorageLocationId
+				,dblQty = SC.dblNetUnits * -1
+				,intTransactionId = 1
+				,strTransactionId = SC.strTicketNumber
+				,intTransactionTypeId = 1
+				,intFOBPointId = NULL
+			FROM tblSCTicket SC 
+			INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+			WHERE SC.intTicketId = @intMatchTicketId
+			EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+		END
+
 
 	END
 
 	-- UPDATE TICKET
 	BEGIN
 		UPDATE tblSCTicket
-		SET intMatchTicketId = @intDirectOutTicketId
-			,strTicketStatus = 'C'
+		SET strTicketStatus = 'C'
 			,ysnDestinationWeightGradePost = 1
 			,dtmDateCreatedUtc = GETUTCDATE()
 			,dtmDateModifiedUtc = GETUTCDATE()
