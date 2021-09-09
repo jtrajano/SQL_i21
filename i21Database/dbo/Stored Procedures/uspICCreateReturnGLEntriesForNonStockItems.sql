@@ -632,6 +632,8 @@ BEGIN
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
 					,DEFAULT
+					,ri.intComputeItemTotalOption
+					,ri.dblOpenReceive
 				)
 		,strBatchId = @strBatchId
 	FROM 
