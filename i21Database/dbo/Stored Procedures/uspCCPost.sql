@@ -77,6 +77,8 @@ BEGIN TRY
 
 	SET @errorMessage = NULL
 
+	DECLARE @errorMessagePerProcess NVARCHAR(4000) = NULL
+
 	-- AP Transaction and Posting
 	EXEC [dbo].[uspCCTransactionToAPBill] 
 		@intSiteHeaderId = @intSiteHeaderId
@@ -84,10 +86,18 @@ BEGIN TRY
 		,@post	= @post
 		,@recap = 0
 		,@success = @success OUTPUT
-		,@errorMessage = @errorMessage OUTPUT
+		,@errorMessage = @errorMessagePerProcess OUTPUT
 		--,@createdBillId = @billId OUTPUT
 
-	
+	IF(ISNULL(@errorMessage, '') = '')
+	BEGIN
+		SET @errorMessage = @errorMessagePerProcess
+	END
+	ELSE
+	BEGIN
+		SET @errorMessage = @errorMessage + '\n' + @errorMessagePerProcess
+	END
+
 	IF(@success = 1)
 	BEGIN
 		SET @errorMessage = NULL
@@ -99,7 +109,16 @@ BEGIN TRY
 			,@Recap = 0
 			,@CreatedIvoices = @InvoicesId OUTPUT
 			,@success = @success OUTPUT
-			,@ErrorMessage = @errorMessage OUTPUT
+			,@ErrorMessage = @errorMessagePerProcess OUTPUT
+
+		IF(ISNULL(@errorMessage, '') = '')
+		BEGIN
+			SET @errorMessage = @errorMessagePerProcess
+		END
+		ELSE
+		BEGIN
+			SET @errorMessage = @errorMessage + '\n' + @errorMessagePerProcess
+		END
 	END
 
 	IF(@success = 1)
@@ -112,8 +131,17 @@ BEGIN TRY
 			,@post	= @post
 			,@recap = 0
 			,@success = @success OUTPUT
-			,@errorMessage = @errorMessage OUTPUT
+			,@errorMessage = @errorMessagePerProcess OUTPUT
 			,@createdBankTransactionId = @bankTransactionId OUTPUT
+
+		IF(ISNULL(@errorMessage, '') = '')
+		BEGIN
+			SET @errorMessage = @errorMessagePerProcess
+		END
+		ELSE
+		BEGIN
+			SET @errorMessage = @errorMessage + '\n' + @errorMessagePerProcess
+		END
 	END
 
 	-- SET Posted Flag
