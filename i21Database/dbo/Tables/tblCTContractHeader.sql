@@ -87,6 +87,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	ysnReadOnlyInterCoContract BIT NOT NULL DEFAULT 0,
 	ysnEnableFutures BIT NULL DEFAULT 0,
 	guiApiUniqueId UNIQUEIDENTIFIER NULL,
+	intApiRowNumber INT NULL,
 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 
