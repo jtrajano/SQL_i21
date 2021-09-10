@@ -1517,7 +1517,7 @@ BEGIN TRY
 			,I.intCategoryId
 			,Round(IsNULL(I.dblRequiredQty, 0) * IsNULL(dblRatio, 100) / 100, @intNoOfDecimalPlacesOnConsumption)
 			,I.intStorageLocationId
-			,IsNULL(WI.intMainItemId, I.intMainItemId)
+			,WI.intMainItemId
 		FROM @tblICFinalItem I
 		LEFT JOIN @tblMFLot L ON L.intItemId = I.intItemId
 			AND L.intStorageLocationId = I.intStorageLocationId
