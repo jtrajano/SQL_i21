@@ -16,6 +16,10 @@ SELECT DISTINCT strLabel FROM (
         UNION
     SELECT LTRIM(RTRIM(strReminder + ' ' + strType)) FROM tblSMReminderList
         UNION
+	SELECT LTRIM(RTRIM(strReminder + ' ' + strType + 's')) FROM tblSMReminderList WHERE strReminder NOT IN ('i21')
+		UNION
+	SELECT DISTINCT LTRIM(TRIM(REPLACE(REPLACE(REPLACE(strMessage,'{0}', ''), '{1}',''), '{2}', ''))) FROM tblSMReminderList where strReminder NOT IN ('Email')
+		UNION
     SELECT strControlName FROM tblSMControl
         UNION
 	SELECT strActionType FROM vyuSMAuditLogPanel
