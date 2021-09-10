@@ -180,6 +180,7 @@ SELECT
     , sc.strSalesperson
     , sc.strContractText
     , lob.strLineOfBusiness
+    , MIN(sc.intRowNumber)
 FROM tblRestApiSchemaItemContract sc
 INNER JOIN vyuARCustomer customer ON customer.strCustomerNumber = sc.strCustomerNo OR customer.strName = sc.strCustomerNo
 INNER JOIN tblSMCompanyLocation loc ON loc.strLocationName = sc.strLocation OR loc.strLocationNumber = sc.strLocation
@@ -273,6 +274,7 @@ DECLARE @strTerms NVARCHAR(200)
 DECLARE @strSalesperson NVARCHAR(200)
 DECLARE @strContractText NVARCHAR(200)
 DECLARE @strLineOfBusiness NVARCHAR(200)
+DECLARE @intApiRowNumber INT
 
 OPEN cur;
 
@@ -302,6 +304,7 @@ FETCH NEXT FROM cur INTO
 	, @strSalesperson
 	, @strContractText
 	, @strLineOfBusiness
+    , @intApiRowNumber
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -324,6 +327,7 @@ BEGIN
         , intContractTextId
         , intTermId
         , intLineOfBusinessId
+        , intApiRowNumber
     )
     SELECT
           guiApiUniqueId = @guiApiUniqueId
@@ -344,6 +348,7 @@ BEGIN
         , intContractTextId = @intContractTextId
         , intTermId = @intTermID
         , intLineOfBusinessId = @intLineOfBusinessId
+        , intApiRowNumber = @intApiRowNumber
 
     SET @intItemContractStagingId = SCOPE_IDENTITY()
 
@@ -511,10 +516,10 @@ BEGIN
         , sc.dblPrice
         , sc.dtmDeliveryDate
         , taxGroup.intTaxGroupId
-        , s.intContractStatusId
+        , s.strContractStatus
 		, ROW_NUMBER() OVER(PARTITION BY @intItemContractStagingId ORDER BY @intItemContractStagingId)
     FROM tblRestApiSchemaItemContract sc
-    INNER JOIN tblCTContractStatus s ON s.strContractStatus = sc.strStatus
+    INNER JOIN tblCTContractStatus s ON s.strContractStatus = LTRIM(RTRIM(sc.strStatus))
     INNER JOIN tblICItem i ON i.strItemNo = sc.strItemNo
     INNER JOIN tblICUnitMeasure uom ON uom.strUnitMeasure = sc.strUnitMeasure
     INNER JOIN tblICItemUOM u ON u.intItemId = i.intItemId AND u.intUnitMeasureId = uom.intUnitMeasureId
@@ -563,6 +568,7 @@ BEGIN
 		, @strSalesperson
 		, @strContractText
 		, @strLineOfBusiness
+        , @intApiRowNumber
 END
 
 CLOSE cur;
@@ -610,5 +616,18 @@ SET
     , intTotalRowsImported = @intTotalRowsImported
     , dtmImportFinishDateUtc = GETUTCDATE()
 WHERE guiApiImportLogId = @guiLogId
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Item Contract'
+    , strValue = ch.strContractNumber
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = ch.intApiRowNumber 
+    , strMessage = 'The item contract has been successfully imported.'
+FROM tblCTItemContractHeader ch
+WHERE ch.guiApiUniqueId = @guiApiUniqueId
 
 SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId
