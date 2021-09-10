@@ -287,13 +287,13 @@ BEGIN
 		, intItemUOMId
 		, intLineNo
 		, intTaxGroupId
-		-- , dblApplied
-		-- , dblAvailable
-		-- , dblBalance
+		, dblApplied
+		, dblAvailable
+		, dblBalance
 		, dblContracted
 		, dblPrice
-		-- , dblScheduled
-		-- , dblTax
+		, dblScheduled
+		, dblTax
 		, dblTotal
 		, dtmDeliveryDate
 		-- , dtmLastDeliveryDate
@@ -305,13 +305,13 @@ BEGIN
 		, ds.intItemUOMId
 		, ds.intLineNo
 		, ds.intTaxGroupId
-		-- , ds.dblApplied
-		-- , ds.dblAvailable
-		-- , ds.dblBalance
+		, ISNULL(ds.dblApplied, 0)
+		, ISNULL(ds.dblAvailable, 0)
+		, ISNULL(ds.dblBalance, 0)
 		, ds.dblContracted
 		, ds.dblPrice
-		-- , ds.dblScheduled
-		-- , ds.dblTax
+		, ISNULL(ds.dblScheduled, 0)
+		, ISNULL(ds.dblTax, 0)
 		, ds.dblContracted * ds.dblPrice
 		, ds.dtmDeliveryDate
 		-- , ds.dtmLastDeliveryDate
