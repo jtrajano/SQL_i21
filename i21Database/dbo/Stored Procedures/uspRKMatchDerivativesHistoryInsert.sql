@@ -117,7 +117,7 @@ ELSE --FOR DELETE
 		, intUserId = @userId
 		, intCommodityUOMId = intOrigUOMId
 		, strMiscFields = strMiscField
-		, intActionId = 67
+		, intActionId = 68
 	FROM tblRKSummaryLog  
 	WHERE strTransactionType = 'Match Derivatives'  
 	AND intTransactionRecordHeaderId = @intMatchFuturesPSHeaderId
