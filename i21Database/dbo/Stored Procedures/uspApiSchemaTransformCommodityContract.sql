@@ -166,6 +166,7 @@ DECLARE @dtmNullDate DATETIME = NULL --@dtmNullDate
 -- Insert contract headers
 INSERT INTO tblCTContractHeader (
       guiApiUniqueId
+    , intApiRowNumber
     , intContractTypeId
     , strContractNumber
     , dtmContractDate
@@ -180,9 +181,12 @@ INSERT INTO tblCTContractHeader (
     , dtmCreated
     , intConcurrencyId
     , ysnSigned
-    , ysnPrinted)
+    , ysnPrinted
+    , intPositionId
+    , intCropYearId)
 SELECT DISTINCT
     @guiApiUniqueId
+  , MIN(sc.intRowNumber)
   , CASE sc.strContractType WHEN 'Purchase' THEN 1 ELSE 2 END
   , sc.strContractNumber
   , sc.dtmContractDate
@@ -198,6 +202,8 @@ SELECT DISTINCT
   , 1
   , 0
   , 0
+  , pos.intPositionId
+  , cr.intCropYearId
 FROM tblApiSchemaCommodityContract sc
 CROSS APPLY (
   SELECT TOP 1 *
@@ -226,6 +232,8 @@ CROSS APPLY (
   WHERE intCommodityId = c.intCommodityId
   AND CU.ysnDefault = 1
 ) cu
+LEFT OUTER JOIN tblCTPosition pos ON pos.strPosition = sc.strPosition
+LEFT OUTER JOIN tblCTCropYear cr ON cr.strCropYear = sc.strCropYear
 WHERE sc.guiApiUniqueId = @guiApiUniqueId
   AND NOT EXISTS(SELECT 1 FROM tblCTContractHeader h WHERE h.strContractNumber = sc.strContractNumber)
 GROUP BY 
@@ -236,8 +244,8 @@ GROUP BY
   , sc.strPricingType
   , pt.intPricingTypeId
   , sc.strSalesperson
-  , ISNULL(sc.intPosition, 0)
-  , ISNULL(sc.intCropYear, 0)
+  , pos.intPositionId
+  , cr.intCropYearId
   , sc.strEntityNo
   , e.intEntityId
   , sp.intEntityId
@@ -296,6 +304,22 @@ GROUP BY
   WHERE sc.guiApiUniqueId = @guiApiUniqueId
     AND ib.strStatus = 'Discontinued'
 
+  INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+  SELECT
+        NEWID()
+      , guiApiImportLogId = @guiLogId
+      , strField = 'Basis Currency'
+      , strValue = sc.strBasisCurrency
+      , strLogLevel = 'Warning'
+      , strStatus = 'Ignored'
+      , intRowNo = sc.intRowNumber
+      , strMessage = 'The Basis Currency ' + ISNULL(sc.strContractNumber, '') + ' does exists.'
+  FROM tblApiSchemaCommodityContract sc
+  LEFT JOIN tblSMCurrency c ON c.strCurrency = sc.strBasisCurrency
+  WHERE sc.guiApiUniqueId = @guiApiUniqueId
+    AND c.intCurrencyID IS NULL
+    AND sc.strBasisCurrency IS NOT NULL
+
   -- INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
   -- SELECT
   --       NEWID()
@@ -331,6 +355,29 @@ GROUP BY
   ) iu
   WHERE sc.guiApiUniqueId = @guiApiUniqueId
     AND iu.intItemUOMId IS NULL
+
+  INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+  SELECT
+        NEWID()
+      , guiApiImportLogId = @guiLogId
+      , strField = 'Basis UOM'
+      , strValue = sc.strQuantityUOM
+      , strLogLevel = 'Warning'
+      , strStatus = 'Ignored'
+      , intRowNo = sc.intRowNumber
+      , strMessage = 'Cannot find the Basis UOM ' + ISNULL(sc.strBasisUom, '') + '.'
+  FROM tblApiSchemaCommodityContract sc
+  JOIN tblICItem i ON i.strItemNo = sc.strItem
+  OUTER APPLY (
+    SELECT uum.intItemUOMId, um.intUnitMeasureId
+    FROM tblICUnitMeasure um
+    JOIN tblICItemUOM uum ON uum.intUnitMeasureId = um.intUnitMeasureId
+      AND uum.intItemId = i.intItemId
+    WHERE um.strUnitMeasure = sc.strBasisUom
+  ) iu
+  WHERE sc.guiApiUniqueId = @guiApiUniqueId
+    AND iu.intItemUOMId IS NULL
+    AND sc.strBasisUom IS NOT NULL
 
 -- Insert contract details
 DECLARE @intContractHeaderId INT
@@ -446,6 +493,9 @@ BEGIN
     , intPricingTypeId
     , dtmCreated
     , intUnitMeasureId
+    , dblBasis
+    , intBasisCurrencyId
+    , intBasisUOMId
   )
   SELECT 
       intContractHeaderId = @intContractHeaderId
@@ -475,6 +525,9 @@ BEGIN
     , intPricingTypeId = h.intPricingTypeId
     , GETUTCDATE()
     , iu.intUnitMeasureId
+    , sc.dblBasis
+    , bc.intCurrencyID
+    , bu.intUnitMeasureId
   FROM tblApiSchemaCommodityContract sc
     JOIN tblCTContractHeader h ON h.intContractHeaderId = @intContractHeaderId
     JOIN tblICItem i ON i.strItemNo = sc.strItem
@@ -482,6 +535,7 @@ BEGIN
     LEFT JOIN tblCTPricingType pt ON pt.strPricingType = sc.strPricingType
       AND pt.intPricingTypeId != 6
     LEFT JOIN tblSMCurrency c ON c.strCurrency = sc.strCurrency
+    LEFT JOIN tblSMCurrency bc ON bc.strCurrency = sc.strBasisCurrency
     CROSS APPLY (
       SELECT TOP 1 intCompanyLocationId
       FROM tblSMCompanyLocation
@@ -499,6 +553,13 @@ BEGIN
         AND uum.intItemId = i.intItemId
       WHERE um.strUnitMeasure = sc.strQuantityUOM
     ) iu
+     OUTER APPLY (
+      SELECT uum.intItemUOMId, um.intUnitMeasureId
+      FROM tblICUnitMeasure um
+      JOIN tblICItemUOM uum ON uum.intUnitMeasureId = um.intUnitMeasureId
+        AND uum.intItemId = i.intItemId
+      WHERE um.strUnitMeasure = sc.strBasisUom
+    ) bu
     OUTER APPLY (
       SELECT puum.intItemUOMId
       FROM tblICUnitMeasure pum
@@ -550,6 +611,8 @@ BEGIN
     , sc.dblFutures
     , sc.dblCashPrice
     , sc.dblBasis
+    , bc.intCurrencyID
+    , bu.intUnitMeasureId
 
   DELETE ch
   FROM tblCTContractHeader ch
@@ -601,3 +664,15 @@ SET
 FROM tblApiImportLog i
 WHERE i.guiApiImportLogId = @guiLogId
 
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Contract'
+    , strValue = ch.strContractNumber
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = ch.intApiRowNumber 
+    , strMessage = 'The contract has been successfully imported.'
+FROM tblCTContractHeader ch
+WHERE ch.guiApiUniqueId = @guiApiUniqueId

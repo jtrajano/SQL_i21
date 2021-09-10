@@ -107,6 +107,7 @@ DECLARE @intLineOfBusinessId INT
 DECLARE @dtmDueDate DATETIME
 DECLARE @dblDollarValue NUMERIC(18,6)
 DECLARE @intStagingId INT
+DECLARE @intApiRowNumber INT
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
 FOR
@@ -130,6 +131,7 @@ SELECT s.intApiItemContractStagingId
 	, s.intLineOfBusinessId
 	, s.dtmDueDate
 	, s.dblDollarValue
+	, s.intApiRowNumber
 FROM tblCTApiItemContractStaging s
 WHERE s.guiApiUniqueId = @guiApiUniqueId
 
@@ -156,6 +158,7 @@ FETCH NEXT FROM cur INTO
 , @intLineOfBusinessId 
 , @dtmDueDate 
 , @dblDollarValue
+, @intApiRowNumber
 
 DECLARE @strDollarContractNumber NVARCHAR(3400)
 DECLARE @intItemContractHeaderId INT
@@ -188,7 +191,8 @@ BEGIN
 		, dblDollarValue
 		, dblRemainingDollarValue
 		, strContractNumber
-		, guiApiUniqueId)
+		, guiApiUniqueId
+		, intApiRowNumber)
 	SELECT 1
 		, @intContractType
 		, 'Dollar'
@@ -213,6 +217,7 @@ BEGIN
 		, @dblDollarValue
 		, @strDollarContractNumber
 		, @guiApiUniqueId
+		, @intApiRowNumber
 
 	SET @intItemContractHeaderId = SCOPE_IDENTITY()
 
@@ -242,6 +247,7 @@ BEGIN
 	, @intLineOfBusinessId 
 	, @dtmDueDate 
 	, @dblDollarValue
+	, @intApiRowNumber
 
 END
 
