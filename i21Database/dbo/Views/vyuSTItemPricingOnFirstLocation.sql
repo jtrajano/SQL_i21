@@ -11,14 +11,14 @@ SELECT
 		tblICItemPricing.dblAverageCost,
 		--tblICItemPricing.dblStandardCost,
 		CASE
-			WHEN (CAST(GETDATE() AS DATE) > effectiveCost.dtmEffectiveCostDate)
+			WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
 				THEN effectiveCost.dblCost --Effective Cost
 			ELSE tblICItemPricing.dblStandardCost
 		END AS dblStandardCost,
 		CASE
 			WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
 				THEN SplPrc.dblUnitAfterDiscount 
-			WHEN (CAST(GETDATE() AS DATE) > effectivePrice.dtmEffectiveRetailPriceDate)
+			WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
 				THEN effectivePrice.dblRetailPrice --Effective Retail Price
 			ELSE tblICItemPricing.dblSalePrice
 		END AS dblSalePrice,
@@ -72,7 +72,7 @@ SELECT
 				 dblRetailPrice,
 				 ROW_NUMBER() OVER (PARTITION BY intItemId ORDER BY dtmEffectiveRetailPriceDate DESC) AS intRowNum
 			FROM tblICEffectiveItemPrice
-			WHERE CAST(GETDATE() AS DATE) > dtmEffectiveRetailPriceDate
+			WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveRetailPriceDate
 		) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
 	) AS effectivePrice
 		ON tblICItem.intItemId = effectivePrice.intItemId
@@ -87,7 +87,7 @@ SELECT
 				 dblCost,
 				 ROW_NUMBER() OVER (PARTITION BY intItemId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
 			FROM tblICEffectiveItemCost
-			WHERE CAST(GETDATE() AS DATE) > dtmEffectiveCostDate
+			WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
 		) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
 	) AS effectiveCost
 		ON tblICItem.intItemId = effectiveCost.intItemId
