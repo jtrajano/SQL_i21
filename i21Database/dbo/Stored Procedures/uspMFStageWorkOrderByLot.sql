@@ -1189,6 +1189,26 @@ BEGIN TRY
 		SELECT @intMachineId = NULL
 	END
 
+	IF @intMainItemId IS NOT NULL
+	BEGIN
+		UPDATE tblMFProductionSummary
+		SET intMainItemId = @intMainItemId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intInputItemId
+			AND IsNULL(intMachineId, 0) = (
+				CASE 
+					WHEN intMachineId IS NOT NULL
+						THEN IsNULL(@intMachineId, 0)
+					ELSE IsNULL(intMachineId, 0)
+					END
+				)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
+			AND intMainItemId IS NULL
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
@@ -1391,17 +1411,6 @@ BEGIN TRY
 		,@intWorkOrderProducedLotId = NULL
 		,@intWorkOrderId = @intWorkOrderId
 
-	UPDATE WRD
-	SET WRD.dblProcessedQty = IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)
-		,WRD.dblActualAmount = (IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)) * dblUnitRate
-		,WRD.dblDifference = CASE 
-			WHEN ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)) * dblUnitRate) > 0
-				THEN IsNULL(dblEstimatedAmount,0) - ((IsNULL(WRD.dblProcessedQty, 0) + IsNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intInputWeightUOMId, RD.intItemUOMId, @dblInputWeight), 0)) * dblUnitRate)
-			ELSE NULL
-			END
-	FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
-	JOIN dbo.tblLGWarehouseRateMatrixDetail RD ON RD.intWarehouseRateMatrixDetailId = WRD.intWarehouseRateMatrixDetailId
-	WHERE WRD.intWorkOrderId = @intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
