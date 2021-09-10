@@ -162,7 +162,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
-    <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
