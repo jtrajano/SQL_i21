@@ -15,8 +15,8 @@ CREATE TABLE [dbo].[tblApiSchemaCommodityContract] (
     , strCommodity NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , strContractNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , strSalesperson NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-    , intCropYear INT NULL
-    , intPosition INT NULL
+    , strCropYear NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+    , strPosition NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , strContractStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , dtmStartDate DATETIME NULL
     , dtmEndDate DATETIME NULL
@@ -26,6 +26,8 @@ CREATE TABLE [dbo].[tblApiSchemaCommodityContract] (
     , intYear INT NULL
     , dblFutures NUMERIC(38, 20) NULL
     , dblBasis NUMERIC(38, 20) NULL
+    , strBasisCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+    , strBasisUom NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , dblCashPrice NUMERIC(18, 16) NULL
     , strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , strPriceUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
