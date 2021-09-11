@@ -31,6 +31,7 @@ FA.intExpenseAccountId,
 FA.intDepreciationAccountId,  
 FA.intAccumulatedAccountId,  
 FA.intGainLossAccountId,  
+FA.intSalesOffsetAccountId,
 FA.strManufacturerName,  
 FA.strModelNumber,  
 FA.ysnAcquired,  
@@ -55,7 +56,8 @@ GLAsset.strAccountId strAssetAccountId,
 GLExpense.strAccountId strExpenseAccountId,        
 GLDepreciation.strAccountId strDepreciationAccountId,        
 GLAccumulation.strAccountId strAccumulatedAccountId,        
-GLGainLoss.strAccountId strGainLossAccountId,        
+GLGainLoss.strAccountId strGainLossAccountId,
+GLARAccount.strAccountId strSalesOffsetAccountId,
 Company.strLocationName strCompanyLocation,        
 Currency.strCurrency,  
 FunctionalCurrency.strCurrency strFunctionalCurrency,  
@@ -83,6 +85,7 @@ LEFT JOIN tblGLAccount GLExpense ON GLExpense.intAccountId = FA.intExpenseAccoun
 LEFT JOIN tblGLAccount GLDepreciation ON GLDepreciation.intAccountId = FA.intDepreciationAccountId        
 LEFT JOIN tblGLAccount GLAccumulation ON GLAccumulation.intAccountId = FA.intAccumulatedAccountId        
 LEFT JOIN tblGLAccount GLGainLoss ON GLGainLoss.intAccountId = FA.intGainLossAccountId        
+LEFT JOIN tblGLAccount GLARAccount ON GLARAccount.intAccountId = FA.intSalesOffsetAccountId        
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID=FA.intCurrencyId        
 LEFT JOIN tblSMCurrency FunctionalCurrency ON FunctionalCurrency.intCurrencyID = FA.intFunctionalCurrencyId
 LEFT JOIN tblSMCurrencyExchangeRateType RateType ON RateType.intCurrencyExchangeRateTypeId = FA.intCurrencyExchangeRateTypeId

@@ -138,12 +138,14 @@ DECLARE @intDefaultCurrencyId INT, @ysnMultiCurrency BIT = 0, @intDefaultCurrenc
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 SELECT @intDefaultCurrencyExchangeRateTypeId = dbo.fnFAGetDefaultCurrencyExchangeRateTypeId() 
 SELECT TOP 1 @intRealizedGainLossAccountId = intFixedAssetsRealizedId FROM tblSMMultiCurrency
-DECLARE @dblCurrentRate NUMERIC(18,6), @dblRate NUMERIC(18,6)
+DECLARE @dblCurrentRate NUMERIC(18,6), @dblRate NUMERIC(18,6), @dblDispositionAmount NUMERIC(18, 6)
 
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN				
-		SELECT @dblRate = CASE WHEN ISNULL(BD.dblRate, 0) > 0 
+		SELECT 
+				@dblDispositionAmount = ISNULL(F.dblDispositionAmount, 0),
+				@dblRate = CASE WHEN ISNULL(BD.dblRate, 0) > 0 
 					THEN BD.dblRate 
 					ELSE 
 						CASE WHEN ISNULL(F.dblForexRate, 0) > 0 
@@ -158,6 +160,12 @@ IF ISNULL(@ysnRecap, 0) = 0
         JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
         WHERE BD.intBookId = 1
 
+		-- Rollback if Multi Currency but no Fixed Asset Realized Gain or Loss Account configured
+		IF (@ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NULL)
+		BEGIN
+			RAISERROR('Fixed Asset Realized Gain or Loss Account for Multi Currency was not configured in the Company Configuration.', 16,1)
+			GOTO Post_Rollback
+		END
 
 		UPDATE A 
 		SET totalDepre = G.S, totalForeignDepre = G.dblSumForeign
@@ -175,6 +183,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			GROUP BY FA.strAssetId
 		) G
 
+		-- Dispose Fixed Asset
 		 INSERT INTO tblFAFixedAssetDepreciation (  
                 [intAssetId],  
                 [intBookId],
@@ -258,6 +267,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strModuleName]			
 			,[intCurrencyExchangeRateTypeId]
 		)
+		-- Accumulated Depreciation Account GL Entry
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
@@ -303,7 +313,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		FROM tblFAFixedAsset A 
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
 
-		--WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
+		-- Asset Account GL Entry
 		UNION ALL
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
@@ -343,6 +353,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId
 		
+		-- Gain or Loss Account GL Entry
 		UNION ALL
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
@@ -355,29 +366,33 @@ IF ISNULL(@ysnRecap, 0) = 0
 										THEN
 											CASE WHEN A.dblCost > B.totalDepre THEN A.dblCost - B.totalDepre ELSE 0 END
 										ELSE
-											CASE WHEN A.dblCost > B.totalForeignDepre
-											THEN ROUND(((A.dblCost - B.totalForeignDepre) * @dblCurrentRate), 2)
-											ELSE 0 
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) > 0
+												THEN ROUND(((A.dblCost - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2) 
+												ELSE 0
 										END
 									  END
 			,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0
 										THEN 
 											CASE WHEN B.totalDepre > A.dblCost THEN B.totalDepre - A.dblCost ELSE 0 END
 										ELSE
-											CASE WHEN B.totalForeignDepre > A.dblCost
-											THEN ROUND(((B.totalForeignDepre - A.dblCost) * @dblCurrentRate), 2)
-											ELSE 0 
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) < 0
+												THEN ROUND((ABS(A.dblCost - B.totalForeignDepre - @dblDispositionAmount) * @dblCurrentRate), 2)
+												ELSE 0
 										END
 									  END
 			,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0
 										THEN 0
 										ELSE
-											CASE WHEN A.dblCost > B.totalForeignDepre THEN A.dblCost - B.totalForeignDepre ELSE 0 END
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) > 0
+												THEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
+											END
 										END
 			,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0
 										THEN 0
 										ELSE
-											CASE WHEN B.totalForeignDepre > A.dblCost THEN B.totalForeignDepre - A.dblCost ELSE 0 END
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) < 0
+												THEN ABS(A.dblCost - B.totalForeignDepre - @dblDispositionAmount) ELSE 0
+											END
 										END
 			,[dblDebitReport]		= 0
 			,[dblCreditReport]		= 0
@@ -406,14 +421,109 @@ IF ISNULL(@ysnRecap, 0) = 0
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost
 
-		-- IF MultiCurrency, do Realized Gain or Loss
-
-		IF (@ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NULL)
+		-- Add Sales Offset Account entry if Disposition Amount has value, else no entry
+		IF (@dblDispositionAmount > 0)
 		BEGIN
-			RAISERROR('Fixed Asset Realized Gain or Loss Account for Multi Currency was not configured in the Company Configuration.', 16,1)
-			GOTO Post_Rollback
+			INSERT INTO @GLEntries (
+				 [strTransactionId]
+				,[intTransactionId]
+				,[intAccountId]
+				,[strDescription]
+				,[strReference]	
+				,[dtmTransactionDate]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitForeign]			
+				,[dblCreditForeign]
+				,[dblDebitReport]
+				,[dblCreditReport]
+				,[dblReportingRate]
+				,[dblForeignRate]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[dtmDate]
+				,[ysnIsUnposted]
+				,[intConcurrencyId]	
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[intUserId]
+				,[intEntityId]			
+				,[dtmDateEntered]
+				,[strBatchId]
+				,[strCode]			
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]			
+				,[intCurrencyExchangeRateTypeId]
+			)
+			SELECT 
+			 [strTransactionId]		= B.strTransactionId
+			,[intTransactionId]		= A.[intAssetId]
+			,[intAccountId]			= A.[intSalesOffsetAccountId]
+			,[strDescription]		= A.[strAssetDescription]
+			,[strReference]			= A.strAssetId
+			,[dtmTransactionDate]	= A.[dtmDateAcquired]
+			,[dblDebit]				= CASE WHEN @ysnMultiCurrency = 0
+										THEN
+											CASE WHEN A.dblCost > B.totalDepre THEN A.dblCost - B.totalDepre ELSE 0 END
+										ELSE
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) < 0
+												THEN ROUND((@dblDispositionAmount * @dblCurrentRate), 2) ELSE 0
+										END
+									  END
+			,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0
+										THEN 
+											CASE WHEN B.totalDepre > A.dblCost THEN B.totalDepre - A.dblCost ELSE 0 END
+										ELSE
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) > 0
+												THEN ROUND((@dblDispositionAmount * @dblCurrentRate), 2) ELSE 0
+										END
+									  END
+			,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0
+										THEN 0
+										ELSE
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) < 0
+												THEN @dblDispositionAmount ELSE 0
+											END
+										END
+			,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0
+										THEN 0
+										ELSE
+											CASE WHEN (A.dblCost - B.totalForeignDepre - @dblDispositionAmount) > 0
+												THEN @dblDispositionAmount ELSE 0
+											END
+										END
+			,[dblDebitReport]		= 0
+			,[dblCreditReport]		= 0
+			,[dblReportingRate]		= 0
+			,[dblForeignRate]		= 0
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[dtmDate]				= B.[dtmDispose]
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intCurrencyId]		= A.intCurrencyId
+			,[dblExchangeRate]		= @dblCurrentRate
+			,[intUserId]			= 0
+			,[intEntityId]			= @intEntityId			
+			,[dtmDateEntered]		= GETDATE()
+			,[strBatchId]			= @strBatchId
+			,[strCode]				= 'AMDIS' --FA
+								
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]		= A.[intAssetId]			
+			,[strTransactionType]	= 'Fixed Assets'
+			,[strTransactionForm]	= 'Fixed Assets'
+			,[strModuleName]		= 'Fixed Assets'
+			,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
+		
+			FROM tblFAFixedAsset A
+			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost
 		END
 
+		-- Realized Gain or Loss GL Entry -> If multi currency, and if history rate and current rate is no equal
 		IF (@ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL AND @dblRate <> @dblCurrentRate)
 		BEGIN
 			INSERT INTO @GLEntries (
@@ -448,7 +558,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 					,[strTransactionType]
 					,[strTransactionForm]
 					,[strModuleName]			
-					,[intCurrencyExchangeRateTypeId]
 				)
 				SELECT
 				 [strTransactionId]		= B.strTransactionId
@@ -491,7 +600,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[strTransactionType]	= 'Fixed Assets'
 				,[strTransactionForm]	= 'Fixed Assets'
 				,[strModuleName]		= 'Fixed Assets'
-				,[intCurrencyExchangeRateTypeId] = ISNULL(A.intCurrencyExchangeRateTypeId, @intDefaultCurrencyExchangeRateTypeId)
+
 				FROM tblFAFixedAsset A
 				JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost
 		END
