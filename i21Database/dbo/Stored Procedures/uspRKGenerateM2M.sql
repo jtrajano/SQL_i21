@@ -618,6 +618,30 @@ BEGIN TRY
 		GROUP BY a.intContractDetailId, a.strContractNumber, strPricingType, a.strContractType, b.intCounter
 		HAVING SUM(dblQty) > 0
 
+		;WITH LatestContractDetails (
+				intContractHeaderId
+				,intContractDetailId
+				,dtmEndDate 
+				,dblBasis
+		) AS (
+			SELECT 
+				intContractHeaderId
+				,intContractDetailId
+				,dtmEndDate 
+				,dblBasis
+			FROM (
+				SELECT 
+					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
+					,*
+				FROM tblCTContractBalanceLog CBL
+				WHERE dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) <= @dtmEndDate
+				AND CBL.intCommodityId = ISNULL(@intCommodityId, CBL.intCommodityId)
+				AND CBL.strTransactionType = 'Contract Balance'
+				AND CBL.dblBasis IS NOT NULL
+			) t
+			WHERE intRowNum = 1
+		)
+
 		INSERT INTO @ContractBalance (intRowNum
 			, strCommodityCode
 			, intCommodityId
@@ -686,15 +710,15 @@ BEGIN TRY
 			SELECT dtmTransactionDate = MAX(dtmTransactionDate)
 				, strCommodityCode
 				, intCommodityId
-				, intContractHeaderId
+				, tbl.intContractHeaderId
 				, strContractNumber
 				, strLocationName
-				, dtmEndDate
+				, lcd.dtmEndDate
 				, dblQty = CAST(SUM(dblQuantity) AS NUMERIC(20, 6))
 				, dblFutures = CAST(MAX(dblFutures) AS NUMERIC(20, 6))
-				, dblBasis = CAST(dblBasis AS NUMERIC(20, 6))	
+				, dblBasis = CAST(lcd.dblBasis AS NUMERIC(20, 6))	
 				, dblCashPrice = CAST (MAX(dblCashPrice) AS NUMERIC(20, 6))
-				, dblAmount = CAST ((SUM(dblQuantity) * (dblBasis + MAX(dblFutures))) AS NUMERIC(20, 6))
+				, dblAmount = CAST ((SUM(dblQuantity) * (lcd.dblBasis + MAX(dblFutures))) AS NUMERIC(20, 6))
 				, intQtyUOMId
 				, intPricingTypeId
 				, intContractTypeId
@@ -702,7 +726,7 @@ BEGIN TRY
 				, strContractType
 				, strPricingType
 				, intCommodityUnitMeasureId = NULL
-				, intContractDetailId
+				, tbl.intContractDetailId
 				, intEntityId
 				, intQtyCurrencyId
 				, strType = strContractType + ' ' + strPricingType
@@ -724,10 +748,10 @@ BEGIN TRY
 					, strLocationName = L.strLocationName
 					, CBL.strContractNumber
 					, CBL.dtmStartDate
-					, CBL.dtmEndDate
+					--, CBL.dtmEndDate
 					, dblQuantity = CBL.dblQty
 					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 OR CBL.intPricingTypeId = 3 THEN CBL.dblFutures ELSE NULL END 
-					, dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
+					--, dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
 					, dblCashPrice = CASE WHEN CBL.intPricingTypeId = 1 THEN ISNULL(CBL.dblFutures,0) + ISNULL(CBL.dblBasis,0) ELSE NULL END
 					, dblAmount = CASE WHEN CBL.intPricingTypeId = 1 THEN [dbo].[fnCTConvertQtyToStockItemUOM](CD.intItemUOMId, CBL.dblQty) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(CBL.dblFutures, 0) + ISNULL(CBL.dblBasis, 0))
 										ELSE NULL END
@@ -756,13 +780,15 @@ BEGIN TRY
 				INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CBL.intContractDetailId
 				LEFT JOIN #tmpPricingStatus stat ON stat.intContractDetailId = CBL.intContractDetailId
 				WHERE CBL.strTransactionType = 'Contract Balance'
-					
 			) tbl
+			LEFT JOIN LatestContractDetails lcd
+				ON lcd.intContractHeaderId = tbl.intContractHeaderId
+				AND lcd.intContractDetailId = tbl.intContractDetailId
 			WHERE intCommodityId = ISNULL(@intCommodityId, intCommodityId)
 				AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
 			GROUP BY strCommodityCode
 				, intCommodityId
-				, intContractHeaderId
+				, tbl.intContractHeaderId
 				, strContractNumber
 				, strLocationName
 				, dtmEndDate
@@ -772,7 +798,7 @@ BEGIN TRY
 				, intLocationId
 				, strContractType
 				, strPricingType
-				, intContractDetailId
+				, tbl.intContractDetailId
 				, intEntityId
 				, intQtyCurrencyId
 				, strContractType
@@ -783,7 +809,7 @@ BEGIN TRY
 				--, intFutureMarketId
 				--, intFutureMonthId
 				, strPricingStatus
-				, dblBasis
+				, lcd.dblBasis
 			HAVING SUM(dblQuantity) > 0	
 		) tbl
 		JOIN #ContractStatus cs ON cs.intContractDetailId = tbl.intContractDetailId
@@ -1367,6 +1393,8 @@ BEGIN TRY
 				, dblFutures = CASE WHEN strPricingType = 'Basis' AND  strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
 									--Basis (Partially Priced) Priced Record
 									WHEN cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' THEN ISNULL(priceFixationDetail.dblFutures, 0)
+									-- Fully Priced but when backdated, not yet fully priced 
+									WHEN cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced' AND priceFixationDetail.dblFutures IS NOT NULL THEN ISNULL(priceFixationDetail.dblFutures, 0)
 									ELSE 
 										CASE WHEN cd.intPricingTypeId IN (1, 3) 
 											THEN ISNULL(cd.dblFutures, 0) 
@@ -1457,8 +1485,17 @@ BEGIN TRY
 							AND pfdi.dtmFixationDate <= @dtmEndDate
 						) pricedTotal
 					WHERE intContractDetailId = cd.intContractDetailId
-							-- Basis (Partially Priced) Priced Record
-						AND (cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+						AND (   
+								-- Basis (Partially Priced) Priced Record
+								(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+								-- Backdated and not yet fully priced in that specific date
+								OR ((cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced') 
+									 AND EXISTS (SELECT TOP 1 '' FROM @ContractBalance cb
+												WHERE cb.intContractDetailId = cd.intContractDetailId
+												AND cb.strPricingType = 'Basis'
+												)
+									)
+							)
 				) t
 			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 

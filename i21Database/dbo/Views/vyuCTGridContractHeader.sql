@@ -151,7 +151,7 @@ AS
 			CH.ysnStrategic, -- CT-5315
 			CH.intEntitySelectedLocationId, -- CT-5315
 			NM.strEntitySelectedLocation, -- CT-5315
-			ysnContractRequiresApproval = (case when te.countValue > 0 or ue.countValue > 0 then convert(bit,1) else convert(bit,0) end)
+			ysnContractRequiresApproval = (case when ue.countValue > 0 then convert(bit,1) else convert(bit,0) end)
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId
 	OUTER APPLY
@@ -165,9 +165,9 @@ AS
 		AND		AP.ysnCurrent = 1
 	) AP
 	cross apply (
-		select countValue=count(*) from tblEMEntityRequireApprovalFor em where em.intEntityId = CH.intEntityId
-	)te
-	cross apply (
-		select countValue=count(*) from tblSMUserSecurityRequireApprovalFor smUser where smUser.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById)
+		select countValue=count(*)
+		from tblSMUserSecurityRequireApprovalFor smUser
+		cross apply (select sc.intScreenId from tblSMScreen sc where sc.strNamespace = 'ContractManagement.View.Contract')scr
+		where smUser.intEntityUserSecurityId = isnull(CH.intLastModifiedById,CH.intCreatedById) and smUser.intScreenId = scr.intScreenId
 	)ue
 	LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId

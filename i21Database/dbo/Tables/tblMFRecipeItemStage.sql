@@ -42,5 +42,6 @@
 	ysnImport Bit Constraint DF_tblMFRecipeItemStage_ysnImport Default 1,
 	intTrxSequenceNo BIGINT,
 	intParentTrxSequenceNo BIGINT,
+	ysnInitialAckSent BIT 
 	CONSTRAINT [PK_tblMFRecipeItemStage_intRecipeItemStageId] PRIMARY KEY ([intRecipeItemStageId]),
 )

@@ -65,10 +65,10 @@ UPDATE A
 					THEN 'Debit Memo type amount should be negative.'
 					WHEN 
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue
-					THEN 'Overpayment'
+					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Underpayment' ELSE 'Overpayment' END)
 					WHEN 
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue
-					THEN 'Underpayment'
+					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Overpayment' ELSE 'Underpayment' END)
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
@@ -79,7 +79,7 @@ OUTER APPLY	(
 	FROM (
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM tblAPBill 
-		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId
+		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId AND CONVERT(NVARCHAR(10), dtmBillDate, 101) = CONVERT(NVARCHAR(10), A.dtmBillDate, 101)
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B

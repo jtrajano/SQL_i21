@@ -109,6 +109,7 @@
     <Build Include="dbo\Views\vyuICApiCategory.sql" />
     <Build Include="dbo\Tables\tblRestApiSchemaDollarContract.sql" />
     <Build Include="dbo\Tables\tblRestApiSchemaItemContract.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCommodityContract.sql" />
     <Build Include="dbo\Tables\tblRestApiItemTaxes.sql" />
     <Build Include="dbo\Tables\tblRestApiInvoiceStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptStaging.sql" />
@@ -139,9 +140,11 @@
     <Build Include="dbo\Views\vyuCTRestApiTicketDiscount.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
+    <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuGRRestApiCustomerStorageBalances.sql" />
     <Build Include="dbo\Views\vyuCTApiContractText.sql" />
+    <Build Include="dbo\Views\vyuApiEntity.sql" />
     <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
@@ -160,6 +163,7 @@
     <Build Include="dbo\Stored Procedures\uspApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT507.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
@@ -168,6 +172,23 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteAttachment.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessVoucherAttachment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetOrderNo.sql" />
+    <Build Include="dbo\Tables\tblMFRouteOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetSO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetSODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteDetailConfirm.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteProcessInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRoutePostInventoryTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetTO.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
+    <Build Include="dbo\Views\vyuSMAuditDetail.sql" />
+    <Build Include="dbo\Views\vyuSMAuditDetailTranslation.sql" />
+    <Build Include="dbo\Views\vyuSMAuditLogPanelTranslation.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -4888,6 +4909,8 @@
     <Build Include="dbo\Views\vyuLGOpenPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertDiscountScheduleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertFactorTaxGroupXRefRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertNetworkAccountRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPaycheckMiddleReport.sql" />
     <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
@@ -7405,6 +7428,7 @@
     <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
     <Build Include="dbo\Tables\tblTMManufacturer.sql" />
     <Build Include="dbo\Tables\tblCMConfig.sql" />
+    <Build Include="dbo\Tables\tblCMCompanyPreferenceOption.sql" />
     <Build Include="dbo\Tables\tblCMImportLog.sql" />
     <Build Include="dbo\Tables\tblCMImportLogDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectMilstoneSummary.sql" />
@@ -8937,6 +8961,7 @@
     <Build Include="dbo\Triggers\trgCMInsertUpdateResponsiblePartyTaskDetail.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportStd.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
@@ -9133,6 +9158,8 @@
     <Build Include="dbo\Tables\tblAGApplicationTarget.sql" />
     <Build Include="dbo\Views\vyuSCAgWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIUserRoleReport.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryValuationSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGetTestMsg.sql" />
     <Build Include="dbo\Stored Procedures\uspLGWeightNoteReport.sql" />
@@ -9644,6 +9671,18 @@
     <Build Include="dbo\Tables\tblIPCommodityManufacturingProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementTaxDetailsSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementSummaryReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementInboundSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementOutboundSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExportDelete.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBICredential.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIDataset.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIScheduleHistory.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIScheduleRunTime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9948,6 +9987,7 @@
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\43_IDPFieldMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

@@ -36,13 +36,14 @@ BEGIN TRY
 			@intCurrStatusId		INT = 0,
    			@ysnWithPriceFix 		BIT,
    			@intPricingTypeId       int,
-   			@dblSeqHistoryPreviousQty       NUMERIC(24, 10);
+   			@dblSeqHistoryPreviousQty	NUMERIC(24, 10),
+			@dblCurrentBasis		NUMERIC(24, 10);
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
 	-------------------------------------------
 	-- SELECT strSource = @strSource, strProcess = @strProcess
-
+	
 	IF @strProcess IN 
 	(
 		'Update Scheduled Quantity',
@@ -396,7 +397,14 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @ysnWithPriceFix = ysnWithPriceFix, @intCurrStatusId = intContractStatusId FROM @tmpContractDetail
+	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0)
+		, @dblQuantityPerLoad = dblQuantityPerLoad
+		, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0)
+		, @dblContractQty = dblQuantity
+		, @ysnWithPriceFix = ysnWithPriceFix
+		, @intCurrStatusId = intContractStatusId
+		, @dblCurrentBasis = dblBasis
+	FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
 				FROM tblCTContractHeader ch
@@ -2226,7 +2234,7 @@ BEGIN TRY
 						AND suh.intExternalHeaderId is not null
 					) tbl
 					WHERE Row_Num = 1
-				END		
+				END
 			END
 		END
 	END
@@ -2372,7 +2380,7 @@ BEGIN TRY
 				(
 					SELECT intTransactionReferenceDetailId
 					FROM tblCTContractBalanceLog
-					WHERE strProcess = 'Fixation Detail Delete'
+					WHERE strProcess in ('Fixation Detail Delete','Price Delete')
 					AND intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
 				)			
@@ -3638,7 +3646,8 @@ BEGIN TRY
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				-- Add all the basis quantities
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
+				-- Use current Basis Price when putting back basis qty
+				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
@@ -3820,6 +3829,15 @@ BEGIN TRY
 				-- If DP/Transfer Storage disregard Update Sequence Balance and consider Update Sequence Quantity "or the other way around"
 				IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 AND @strProcess = 'Update Sequence Balance')
 				BEGIN
+					-- DP Update Balance
+					UPDATE @cbLogSpecific
+					SET strTransactionReference = 'Contract Sequence'
+						, strTransactionType = 'Contract Balance'
+						, intActionId = 43
+						, strTransactionReferenceNo = strContractNumber
+						, dblQty = dblQty * -1
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
 				END
@@ -3986,7 +4004,7 @@ BEGIN TRY
 
 				-- Posted: IR/IS/Settle Storage
 				IF @ysnUnposted = 0--@dblQty > 0
-				BEGIN					
+				BEGIN
 					-- Get actual transaction quantity
 					-- Inventory Shipment
 					IF (@strTransactionReference = 'Inventory Shipment')

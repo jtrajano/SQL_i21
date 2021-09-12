@@ -73,6 +73,7 @@ BEGIN TRY
 				,@dtmDueDate = dtmDueDate
 				,@strMachine = strMachine
 				,@strDemandType=strDemandType
+				,@intTrxSequenceNo = intTrxSequenceNo
 			FROM dbo.tblIPBendDemandStage
 			WHERE intBendDemandStageId = @intBendDemandStageId
 

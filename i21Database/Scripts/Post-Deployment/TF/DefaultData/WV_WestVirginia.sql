@@ -334,7 +334,125 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'Aviation Gas', intMasterId = 4800037	
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'Aviation Jet Fuel', intMasterId = 4800038	
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'LNG', intMasterId = 4800039	
-
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-508', strScheduleCode = '1A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800040
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-508', strScheduleCode = '1A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800041
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-508', strScheduleCode = '1A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800042
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-508', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800043	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-508', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800044	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-508', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800045	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-511', strScheduleCode = '7A_MD', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800046
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-511', strScheduleCode = '7A_MD', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800047
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-511', strScheduleCode = '7A_MD', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800048
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800049
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800050
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800051
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-508', strScheduleCode = '1A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800052
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-508', strScheduleCode = '1A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800053
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-508', strScheduleCode = '2', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800054	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-508', strScheduleCode = '2', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800055	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-511', strScheduleCode = '7A_MD', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800056	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-511', strScheduleCode = '7A_MD', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800057	
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800058
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-511', strScheduleCode = '7B', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800059
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Gasoline', intMasterId = 4800060
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Gasohol', intMasterId = 4800061
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800062
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800063
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800064
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800065
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Compressed Natural Gas', intMasterId = 4800066
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800067
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800068
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800069
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Propane/LPG', intMasterId = 4800070
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Aviation Gas', intMasterId = 4800071
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'Aviation Jet Fuel', intMasterId = 4800072
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-508', strScheduleCode = '11', strType = 'LNG', intMasterId = 4800073
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Gasoline', intMasterId = 4800074
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Gasohol', intMasterId = 4800075
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800076
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800077
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800078
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800079
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Compressed Natural Gas', intMasterId = 4800080
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800081
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800082
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800083
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Propane/LPG', intMasterId = 4800084
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Aviation Gas', intMasterId = 4800085
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'Aviation Jet Fuel', intMasterId = 4800086
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-508', strScheduleCode = '11A', strType = 'LNG', intMasterId = 4800087
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Gasoline', intMasterId = 4800088
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Gasohol', intMasterId = 4800089
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800090
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800091
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800092
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800093
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Compressed Natural Gas', intMasterId = 4800094
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800095
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800096
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800097
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Propane/LPG', intMasterId = 4800098
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Aviation Gas', intMasterId = 4800099
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'Aviation Jet Fuel', intMasterId = 4800100
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-511', strScheduleCode = '11', strType = 'LNG', intMasterId = 4800101
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Gasoline', intMasterId = 4800102
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Gasohol', intMasterId = 4800103
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800104
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800105
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800106
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800107
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Compressed Natural Gas', intMasterId = 4800108
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800109
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800110
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800111
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Propane/LPG', intMasterId = 4800112
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Aviation Gas', intMasterId = 4800113
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'Aviation Jet Fuel', intMasterId = 4800114
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-511', strScheduleCode = '11A', strType = 'LNG', intMasterId = 4800115
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Gasoline', intMasterId = 4800116
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Gasohol', intMasterId = 4800117
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800118
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800119
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800120
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800121
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Compressed Natural Gas', intMasterId = 4800122
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800123
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800124
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800125
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Propane/LPG', intMasterId = 4800126
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Aviation Gas', intMasterId = 4800127
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'Aviation Jet Fuel', intMasterId = 4800128
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-507', strScheduleCode = '1', strType = 'LNG', intMasterId = 4800129
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Gasoline', intMasterId = 4800130
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Gasohol', intMasterId = 4800131
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800132
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800133
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800134
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800135
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Compressed Natural Gas', intMasterId = 4800136
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800137
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800138
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800139
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Propane/LPG', intMasterId = 4800140
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Aviation Gas', intMasterId = 4800141
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'Aviation Jet Fuel', intMasterId = 4800142
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-507', strScheduleCode = '2', strType = 'LNG', intMasterId = 4800143
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Gasoline', intMasterId = 4800144
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Gasohol', intMasterId = 4800145
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800146
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800147
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '170', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800148
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Undyed Diesel/Kerosene', intMasterId = 4800149
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '224', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Compressed Natural Gas', intMasterId = 4800150
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800151
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800152
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '171', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Dyed Diesel/Kerosene', intMasterId = 4800153
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Propane/LPG', intMasterId = 4800154
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Aviation Gas', intMasterId = 4800155
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'Aviation Jet Fuel', intMasterId = 4800156
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'MFT-507', strScheduleCode = '3', strType = 'LNG', intMasterId = 4800157
+		
 	EXEC uspTFUpgradeValidProductCodes @TaxAuthorityCode = @TaxAuthorityCode, @ValidProductCodes = @ValidProductCodes
 
 

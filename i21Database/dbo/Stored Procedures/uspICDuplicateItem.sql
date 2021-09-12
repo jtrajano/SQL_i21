@@ -169,7 +169,8 @@ BEGIN
 		intTonnageTaxUOMId, 
 		ysnLotWeightsRequired, 
 		dtmDateCreated,
-		ysnSeparateStockForUOMs
+		ysnSeparateStockForUOMs,
+		intComputeItemTotalOption
 	)
 	SELECT @NewItemNo,
 		strType,
@@ -308,7 +309,8 @@ BEGIN
 		intTonnageTaxUOMId,
 		ysnLotWeightsRequired = CASE WHEN strLotTracking = 'No' THEN 0 ELSE ysnLotWeightsRequired END,
 		GETUTCDATE(),
-		ysnSeparateStockForUOMs
+		ysnSeparateStockForUOMs,
+		intComputeItemTotalOption
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
@@ -446,7 +448,8 @@ BEGIN
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
 		ysnActive,
-		intAllowZeroCostTypeId
+		intAllowZeroCostTypeId,
+		dblTransactionQtyLimit
 	)
 	SELECT @NewItemId,
 		intLocationId,
@@ -511,7 +514,8 @@ BEGIN
 		ysnStorageUnitRequired,
 		intCostAdjustmentType,
 		ysnActive,
-		intAllowZeroCostTypeId
+		intAllowZeroCostTypeId,
+		dblTransactionQtyLimit
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------

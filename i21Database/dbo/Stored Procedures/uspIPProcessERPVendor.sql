@@ -585,6 +585,54 @@ BEGIN TRY
 							)
 					END
 
+					--Entity Type
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblEMEntityType ET
+							WHERE ET.intEntityId = @intEntityId
+								AND ET.strType = @strEntityType
+							)
+					BEGIN
+						INSERT INTO tblEMEntityType (
+							intEntityId
+							,strType
+							,intConcurrencyId
+							)
+						OUTPUT inserted.intEntityTypeId
+							,inserted.strType
+						INTO @tblEMEntityType
+						SELECT @intEntityId
+							,@strEntityType
+							,1
+
+						IF @strEntityType = 'Ship Via'
+						BEGIN
+							IF NOT EXISTS (
+									SELECT 1
+									FROM tblSMShipVia
+									WHERE intEntityId = @intEntityId
+									)
+							BEGIN
+								INSERT INTO tblSMShipVia (
+									intEntityId
+									,strShipVia
+									,strShippingService
+									,strFreightBilledBy
+									,ysnCompanyOwnedCarrier
+									,ysnActive
+									,intSort
+									)
+								SELECT @intEntityId
+									,@strName
+									,'None'
+									,'Other'
+									,0
+									,1
+									,0
+							END
+						END
+					END
+
 					--Entity Location
 					INSERT INTO tblEMEntityLocation (
 						intEntityId

@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportandCreatePayment]
+	@templateId INT,
 	@locationId INT,
 	@bankAccountId INT,
 	@userId INT,
@@ -56,10 +57,10 @@ BEGIN TRY
 		UPDATE P
 		SET P.intBankAccountId = @bankAccountId,
 			P.intCompanyLocationId = @locationId,
-			P.strCheckMessage = @checkNumber, 
+			P.strNotes = @checkNumber, 
 			P.ysnEFTImported = 1,
 			P.dblAmountPaid = PD.dblPayment,
-			P.intPaymentMethodId = CASE WHEN PD.dblPayment = 0 AND PC.intPaymentCount > 1 THEN 3 ELSE P.intPaymentMethodId END
+			P.intPaymentMethodId = CASE WHEN PD.dblPayment = 0 AND PC.intPaymentCount > 1 THEN 3 ELSE (CASE WHEN @templateId = 5 THEN 6 ELSE P.intPaymentMethodId END) END
 		FROM tblAPPayment P
 		OUTER APPLY (
 			SELECT SUM(dblPayment) dblPayment FROM tblAPPaymentDetail WHERE intPaymentId = P.intPaymentId

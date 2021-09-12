@@ -5354,7 +5354,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					,strSourceId			= NULL
 					,intPaymentOn			= NULL
 					,strChargesLink			= NULL
-					,dblUnitRetail			= NULL
+					,dblUnitRetail			= tblSTLotteryGame.dblTicketValue
 					,intSort				= NULL
 					,strDataSource			= @strSourceScreenName
 					FROM tblSTReceiveLottery

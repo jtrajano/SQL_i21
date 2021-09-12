@@ -26,6 +26,8 @@ SELECT Invoice.*
 	, inti21InvoiceDetailId = InvoiceItem.inti21InvoiceDetailId
 	, isnull(InvoiceItem.dblTaxTotal,0)dblTaxTotal
 	, isnull(InvoiceItem.dblItemTotal,0)dblItemTotal
+	, isnull(tax.dblRate,0)dblRate
+	, tax.strCalculationMethod
 FROM tblMBILInvoiceItem InvoiceItem
 LEFT JOIN vyuMBILInvoice Invoice ON Invoice.intInvoiceId = InvoiceItem.intInvoiceId
 LEFT JOIN tblICItem Item ON Item.intItemId = InvoiceItem.intItemId
@@ -35,3 +37,7 @@ LEFT JOIN tblCTContractDetail ContractDetail ON ContractDetail.intContractDetail
 LEFT JOIN tblCTContractHeader ContractHeader ON ContractHeader.intContractHeaderId = ContractDetail.intContractHeaderId
 LEFT JOIN tblARInvoiceDetail i21InvoiceDetail ON i21InvoiceDetail.intInvoiceDetailId = InvoiceItem.inti21InvoiceDetailId
 LEFT JOIN vyuMBILSite Site ON Site.intSiteId = InvoiceItem.intSiteId
+LEFT JOIN (
+			SELECT intInvoiceItemId,sum(dblRate)dblRate,strCalculationMethod
+		    FROM tblMBILInvoiceTaxCode 
+			GROUP BY intInvoiceItemId,strCalculationMethod)tax on InvoiceItem.intInvoiceItemId = tax.intInvoiceItemId
