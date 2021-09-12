@@ -87,6 +87,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	ysnReadOnlyInterCoContract BIT NOT NULL DEFAULT 0,
 	ysnEnableFutures BIT NULL DEFAULT 0,
 	guiApiUniqueId UNIQUEIDENTIFIER NULL,
+	intApiRowNumber INT NULL,
 
     [ysnStrategic] BIT NULL DEFAULT 0, 
     [intEntitySelectedLocationId] INT NULL,  -- CT-5315

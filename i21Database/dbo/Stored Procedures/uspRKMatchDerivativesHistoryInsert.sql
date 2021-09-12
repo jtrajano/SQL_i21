@@ -12,7 +12,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRANSACTION 
 
-
+DECLARE @SummaryLog AS RKSummaryLog
 
 -- Create the entry for Match Derivative History
 IF @action = 'ADD' 
@@ -71,6 +71,59 @@ ELSE --FOR DELETE
 	FROM 
 	tblRKMatchDerivativesHistory H
 	WHERE H.intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
+
+
+
+	INSERT INTO @SummaryLog(strBucketType
+		, strTransactionType
+		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
+		, strTransactionNumber
+		, dtmTransactionDate
+		, intFutOptTransactionId
+		, intCommodityId
+		, intLocationId
+		, intBookId
+		, intSubBookId
+		, intFutureMarketId
+		, intFutureMonthId
+		, dblNoOfLots
+		, dblPrice
+		, dblContractSize
+		, intEntityId
+		, intUserId
+		, intCommodityUOMId
+		, strMiscFields
+		, intActionId)
+	SELECT strBucketType
+		, strTransactionType
+		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
+		, strTransactionNumber
+		, dtmTransactionDate
+		, intFutOptTransactionId
+		, intCommodityId
+		, intLocationId
+		, intBookId
+		, intSubBookId
+		, intFutureMarketId
+		, intFutureMonthId
+		, dblNoOfLots =  dblOrigNoOfLots * -1
+		, dblPrice
+		, dblContractSize
+		, intEntityId
+		, intUserId = @userId
+		, intCommodityUOMId = intOrigUOMId
+		, strMiscFields = strMiscField
+		, intActionId = 68
+	FROM tblRKSummaryLog  
+	WHERE strTransactionType = 'Match Derivatives'  
+	AND intTransactionRecordHeaderId = @intMatchFuturesPSHeaderId
+
+	EXEC uspRKLogRiskPosition @SummaryLog
+
 
 	IF @@ERROR <> 0	GOTO _Rollback
 
