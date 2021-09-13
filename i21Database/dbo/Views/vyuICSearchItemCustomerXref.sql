@@ -2,7 +2,7 @@
 AS
 SELECT
 	Item.intItemId,
-	CustomerXref.intCustomerXrefId,
+	CustomerXref.intItemCustomerXrefId,
 	Item.strItemNo,
 	ItemLocation.strLocationName,
 	Customer.strName,
