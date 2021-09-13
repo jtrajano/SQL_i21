@@ -329,7 +329,15 @@ BEGIN
 						END
 						-- ===============================================
 						-- [END] - PREVIEW IF DEBUG (ITEM)
-						-- ===============================================
+						-- ===============================================@strUpcCode @strLongUpcCode
+						
+						IF LEN(@strUpcCode) < 4 OR  LEN(@strLongUpcCode) < 6
+							BEGIN
+							SET @ysnResultSuccess = 0
+							SET @strResultMessage = 'Error updating Item: Short UPC Code or UPC Code is in wrong format'  
+
+							GOTO ExitWithRollback
+							END
 
 						IF EXISTS (SELECT TOP 1 intItemId FROM tblICItemUOM WHERE intItemId != @intItemId AND (strUpcCode = @strUpcCode OR strLongUPCCode = @strLongUpcCode))
 							BEGIN

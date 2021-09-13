@@ -19,6 +19,7 @@ SELECT Shift.intShiftId
 	, Items.dblFuelGallonsDelievered
 	, Items.dblFuelSales
 	, Shift.intConcurrencyId
+	, Shift.strTrailerNumber  
 FROM tblMBILShift Shift
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Shift.intDriverId
 LEFT JOIN tblSMTruck Truck ON Truck.intTruckId = Shift.intTruckId

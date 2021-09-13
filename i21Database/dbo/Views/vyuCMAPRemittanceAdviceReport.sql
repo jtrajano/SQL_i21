@@ -43,7 +43,7 @@ SELECT CHK.dtmDate
 			+ ' on ' + 
 			CONVERT(varchar(11), PYMT.dtmDatePaid,106)
 		, PYMTDTL.intPaymentDetailId
-		, GETUTCDATE() dtmCurrent
+		, CASE WHEN O.intUTCOffset IS NULL THEN GETDATE() ELSE DATEADD(MINUTE, O.intUTCOffset * -1, GETUTCDATE()) END dtmCurrent
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
 INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
@@ -64,4 +64,7 @@ OUTER APPLY (
 	AND dtmEffectiveDate < = DATEADD(dd, DATEDIFF (dd, 0, GETDATE ()), 0) 
 	AND intEntityId = ENTITY.intEntityId ORDER BY dtmEffectiveDate desc
 ) F 
+OUTER APPLY(
+	SELECT intUTCOffset from [tblCMCompanyPreferenceOption]
+)O
 WHERE CHK.intBankTransactionTypeId IN (22, 23, 123)

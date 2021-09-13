@@ -3589,7 +3589,7 @@ BEGIN TRY
 				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-					--AND E.strEntityNo <> ''
+					AND E.strEntityNo <> ''
 				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 					AND ET.strType = 'Vendor'
 				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
@@ -3637,7 +3637,7 @@ BEGIN TRY
 				LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strItemUOM
 				LEFT JOIN tblICItem I ON I.strItemNo = x.strItemNo
 				LEFT JOIN tblEMEntity E ON E.strName = x.strEntityName
-					--AND E.strEntityNo <> ''
+					AND E.strEntityNo <> ''
 				LEFT JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 					AND ET.strType = 'Vendor'
 				LEFT JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId

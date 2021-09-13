@@ -44,6 +44,7 @@ BEGIN
 			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
+			AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND C.ysnStage = 1
@@ -101,6 +102,7 @@ BEGIN
 			,[intWeightClaimDetailId]			=	A.intWeightClaimDetailId
 			,[intCustomerStorageId]				=	A.intCustomerStorageId
 			,[intSettleStorageId]				=	A.intSettleStorageId
+			,[intTicketDistributionAllocationId]=	A.intTicketDistributionAllocationId
 			,[intItemId]						=	A.intItemId
 			,[intLinkingId]						=	A.intLinkingId
 			,[strItemNo]						=	item.strItemNo
@@ -273,6 +275,8 @@ BEGIN
 			,[intSubLocationId]					=	A.intSubLocationId
 			,[strSubLocationName]				=	subLoc.strSubLocationName
 			,[intLineNo]						=	A.intLineNo
+			,[intBookId]						=	A.intBookId
+			,[intSubBookId]						=	A.intSubBookId
 		FROM @voucherPayable A
 		INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 			ON A.intEntityVendorId = vendor.intEntityId
@@ -351,6 +355,7 @@ BEGIN
 		,[intSettleStorageId]
 		,[intItemId]						
 		,[intLinkingId]			
+		,[intTicketDistributionAllocationId]
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
 		,[strTaxGroup]	
@@ -399,6 +404,8 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
 	)
 	VALUES (
 		[intEntityVendorId]		
@@ -437,7 +444,8 @@ BEGIN
 		,[intCustomerStorageId]
 		,[intSettleStorageId]
 		,[intItemId]						
-		,[intLinkingId]					
+		,[intLinkingId]		
+		,[intTicketDistributionAllocationId]			
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
 		,[strTaxGroup]	
@@ -486,6 +494,8 @@ BEGIN
 		,[strStorageLocationName]
 		,[intSubLocationId]
 		,[strSubLocationName]
+		,[intBookId]
+		,[intSubBookId]
 	)
 	OUTPUT
 		SourceData.intVoucherPayableId,

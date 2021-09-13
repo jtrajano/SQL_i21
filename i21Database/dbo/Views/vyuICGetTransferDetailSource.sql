@@ -32,7 +32,7 @@ END COLLATE Latin1_General_CI_AS
 ,
 strSourceScreen = 
 CASE
-    WHEN Transfer.intSourceType = 1 THEN 'Tickets'
+    WHEN Transfer.intSourceType = 1 THEN 'Scale Ticket'
     --Transfer.intSourceType = 2 OBSOLETE
     WHEN Transfer.intSourceType = 3 THEN 'Transport Loads'
     ELSE NULL

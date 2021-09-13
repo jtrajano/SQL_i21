@@ -93,7 +93,7 @@ BEGIN
         IF ISNULL(@ysnRecap,0) = 0
         BEGIN
             UPDATE A SET ysnDepreciated = 0, ysnTaxDepreciated = 0,
-            ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL
+            ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL, intDispositionNumber = null, strDispositionNumber = ''
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
             
@@ -132,11 +132,12 @@ BEGIN
         strError NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL ,
         strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
         ysnDepreciated BIT NULL,
-        dtmDepreciate DATETIME NULL
+        dtmDepreciate DATETIME NULL,
+        strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
       )
   
-      INSERT INTO @tblDepComputation(intAssetId,dblBasis,dblMonth, dblDepre, ysnFullyDepreciated, strError)
-        SELECT intAssetId, dblBasis,dblMonth,dblDepre,ysnFullyDepreciated, strError
+      INSERT INTO @tblDepComputation(intAssetId,dblBasis,dblMonth, dblDepre, ysnFullyDepreciated, strError, strTransaction)
+        SELECT intAssetId, dblBasis,dblMonth,dblDepre,ysnFullyDepreciated, strError, strTransaction
         FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
 
       DELETE FROM @IdGood
@@ -165,7 +166,7 @@ BEGIN
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
       AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation', 'Place in service')
+      AND strTransaction  in( 'Depreciation','Imported', 'Place in service')
 		)D
         where D.cnt =1
 
@@ -175,7 +176,7 @@ BEGIN
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
       AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation', 'Place in service')
+      AND strTransaction  in( 'Depreciation','Imported', 'Place in service')
 		)D
         where D.cnt >1
 
@@ -274,7 +275,7 @@ BEGIN
 				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
                   E.dblDepre ,  
                   BD.dblSalvageValue,  
-                  'Depreciation',  
+                  ISNULL(E.strTransaction, 'Depreciation'),  
                   @strTransactionId,  
                   D.strDepreciationType,
                   D.strConvention,
@@ -283,7 +284,7 @@ BEGIN
                   JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
                   JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                   OUTER APPLY (
-                    SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
+                    SELECT dblDepre,dblBasis, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
                   OUTER APPLY(
                     SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
@@ -332,7 +333,7 @@ BEGIN
 				        DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
                 E.dblDepre,  
                 BD.dblSalvageValue,  
-                'Depreciation',  
+                ISNULL(E.strTransaction, 'Depreciation'),  
                 @strTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
@@ -341,7 +342,7 @@ BEGIN
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                 OUTER APPLY (
-                  SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
+                  SELECT dblDepre,dblBasis,strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 OUTER APPLY(
                   SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] = @i 
@@ -439,7 +440,8 @@ BEGIN
               AND ISNULL(intBookId,1) = @BookId
               ORDER BY B.intAssetDepreciationId DESC
           )FAD
-          
+          WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
+
           UNION ALL  
           SELECT   
           [strTransactionId]  = B.strTransactionId  
@@ -483,6 +485,7 @@ BEGIN
               AND ISNULL(intBookId,1) = @BookId
               ORDER BY B.intAssetDepreciationId DESC
           )FAD
+          WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
 
 		  DECLARE @GLEntries2 RecapTableType
 		  INSERT INTO @GLEntries2 SELECT * FROM @GLEntries 

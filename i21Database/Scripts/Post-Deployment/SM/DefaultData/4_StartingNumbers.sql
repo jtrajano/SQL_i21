@@ -52,6 +52,14 @@ GO
 
 	UPDATE tblSMStartingNumber SET strModule = 'Accounts Payable'
 	WHERE strModule = 'Purchasing'	
+
+		
+	UPDATE tblSMStartingNumber SET strPrefix = 'BACT-' WHERE intStartingNumberId = 161 AND strPrefix = 'BC-'
+	AND strModule = 'Cash Management'
+
+	UPDATE tblSMStartingNumber SET strPrefix = 'BM-' , strTransactionType='Bank Matching'
+	WHERE intStartingNumberId = 162 AND strPrefix = 'BCLR-'
+	AND strModule = 'Cash Management'
 GO
 	PRINT N'BEGIN DELETE OF TRANSACTION'
 
@@ -66,7 +74,6 @@ GO
 
 	DELETE FROM tblSMStartingNumber
 	WHERE strModule = 'Accounts Receivable' AND strTransactionType = 'Credit Note'
-
 GO
 	PRINT N'BEGIN CLEAN UP AND INSERT DEFAULT DATA'
 GO
@@ -1582,13 +1589,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Activity' AND strModule = 'Cash Management')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 162
-			,[strTransactionType]	= N'Bank Clearing'
-			,[strPrefix]			= N'BCLR-'
+			,[strTransactionType]	= N'Bank Matching'
+			,[strPrefix]			= N'BM-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Cash Management'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Clearing' AND strModule = 'Cash Management')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Matching' AND strModule = 'Cash Management')
 
 
 
@@ -1670,9 +1677,6 @@ GO
 		END
 	END 
 
-	UPDATE tblSMStartingNumber SET strPrefix = 'BACT' 
-	WHERE intStartingNumberId = 161 AND strPrefix = 'BC'
-	AND strModule = 'Cash Management'
 
 GO
 	PRINT N'BEGIN RENAME S'

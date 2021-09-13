@@ -31,7 +31,8 @@ BEGIN TRY
 				@strTransactionType		NVARCHAR(20),
 				@strScreenName			NVARCHAR(20),
 				@ysnStayAsDraftContractUntilApproved BIT,
-                @ysnAddAmendmentForNonDraftContract BIT = 0
+				@ysnAddAmendmentForNonDraftContract BIT = 0,
+				@ysnPricingAsAmendment BIT = 1
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -61,7 +62,9 @@ BEGIN TRY
 			dblFutures					   NUMERIC(18,6),
 			dblBasis				       NUMERIC(18,6),
 			dblCashPrice			       NUMERIC(18,6),
-			intPriceItemUOMId			   INT
+			intPriceItemUOMId			   INT,
+			intBookId			   INT,
+			intSubBookId			   INT
 		)
 		
 
@@ -76,7 +79,7 @@ BEGIN TRY
 		
 		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
 		SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor with (nolock) WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
-		SELECT @ysnAmdWoAppvl       = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0) FROM tblCTCompanyPreference
+		SELECT @ysnAmdWoAppvl       = ISNULL(ysnAmdWoAppvl,0), @ysnStayAsDraftContractUntilApproved = isnull(ysnStayAsDraftContractUntilApproved,0), @ysnPricingAsAmendment = ysnPricingAsAmendment FROM tblCTCompanyPreference
 
 		DELETE FROM @tblHeader
 		DELETE FROM @tblDetail
@@ -122,6 +125,8 @@ BEGIN TRY
 		   ,dblBasis			
 		   ,dblCashPrice		
 		   ,intPriceItemUOMId	 
+		   ,intBookId	 
+		   ,intSubBookId	 
 		)
 		SELECT 
 		 intContractHeaderId	
@@ -138,7 +143,10 @@ BEGIN TRY
 		,dblFutures			
 		,dblBasis			
 		,dblCashPrice		
-		,intPriceItemUOMId
+		,intPriceItemUOMId	 
+		,intBookId	 
+		,intSubBookId
+
 		FROM 
 		(
 		  SELECT * FROM 
@@ -710,6 +718,7 @@ BEGIN TRY
 		   LEFT JOIN tblRKFuturesMonth				CurrentType	 ON	  ISNULL(CurrentType.intFutureMonthId ,0)    =	ISNULL(CurrentRow.intFutureMonthId	,0)
 		   LEFT JOIN tblRKFuturesMonth				PreviousType ON	  ISNULL(PreviousType.intFutureMonthId,0)	 =	ISNULL(PreviousRow.intFutureMonthId	,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   and PreviousType.strFutureMonth <> CurrentType.strFutureMonth
 
 		   UNION
 		   --Futures
@@ -728,6 +737,7 @@ BEGIN TRY
 		   JOIN @SCOPE_IDENTITY				    NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
 		   JOIN @tblDetail					    PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   and @ysnPricingAsAmendment = 1
 
 		   UNION
 		   --Basis
@@ -764,6 +774,7 @@ BEGIN TRY
 		   JOIN @SCOPE_IDENTITY					NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
 		   JOIN @tblDetail					    PreviousRow			ON   ISNULL(CurrentRow.dblCashPrice,0)  <> ISNULL(PreviousRow.dblCashPrice,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   and @ysnPricingAsAmendment = 1
 		   
 		   UNION
 		   --Cash Price UOM
@@ -787,6 +798,50 @@ BEGIN TRY
 		   JOIN	tblICUnitMeasure				U21			 ON	  U21.intUnitMeasureId			  =	PU1.intUnitMeasureId
 		   WHERE U2.intUnitMeasureId <> U21.intUnitMeasureId
 		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   
+		   UNION
+		   --Book
+		    SELECT
+		    intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+		   ,dtmHistoryCreated	    = GETDATE()
+		   ,intContractHeaderId	    = @intContractHeaderId
+		   ,intContractDetailId	    = CurrentRow.intContractDetailId
+		   ,intAmendmentApprovalId	= 20
+		   ,strItemChanged		    = 'Book'
+		   ,strOldValue			    =  oldBook.strBook
+		   ,strNewValue		        =  newBook.strBook
+		   ,intConcurrencyId		=  1  
+		   
+		   FROM tblCTSequenceHistory			CurrentRow
+		   JOIN @tblDetail					    PreviousRow	 ON   isnull(CurrentRow.intBookId,0)    <> isnull(PreviousRow.intBookId,0)
+		   JOIN @SCOPE_IDENTITY					NewRecords   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+		   left JOIN tblCTBook newBook on isnull(newBook.intBookId,0) = isnull(CurrentRow.intBookId,0)
+		   left JOIN tblCTBook oldBook on isnull(oldBook.intBookId,0) = isnull(PreviousRow.intBookId,0)
+		   WHERE isnull(oldBook.intBookId,0) <> isnull(newBook.intBookId,0)
+		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+		   
+		   UNION
+		   --Sub Book
+		    SELECT
+		    intSequenceHistoryId    = NewRecords.intSequenceHistoryId
+		   ,dtmHistoryCreated	    = GETDATE()
+		   ,intContractHeaderId	    = @intContractHeaderId
+		   ,intContractDetailId	    = CurrentRow.intContractDetailId
+		   ,intAmendmentApprovalId	= 21
+		   ,strItemChanged		    = 'Sub Book'
+		   ,strOldValue			    =  oldSubBook.strSubBook
+		   ,strNewValue		        =  newSubBook.strSubBook
+		   ,intConcurrencyId		=  1  
+		   
+		   FROM tblCTSequenceHistory			CurrentRow
+		   JOIN @tblDetail					    PreviousRow	 ON   isnull(CurrentRow.intSubBookId,0)    <> isnull(PreviousRow.intSubBookId,0)
+		   JOIN @SCOPE_IDENTITY					NewRecords   ON   NewRecords.intSequenceHistoryId = CurrentRow.intSequenceHistoryId 
+		   left JOIN tblCTSubBook newSubBook on isnull(newSubBook.intSubBookId,0) = isnull(CurrentRow.intSubBookId,0)
+		   left JOIN tblCTSubBook oldSubBook on isnull(oldSubBook.intSubBookId,0) = isnull(PreviousRow.intSubBookId,0)
+		   WHERE isnull(oldSubBook.intSubBookId,0) <> isnull(newSubBook.intSubBookId,0)
+		   AND CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
+
+
 		END     
 	END
 END TRY

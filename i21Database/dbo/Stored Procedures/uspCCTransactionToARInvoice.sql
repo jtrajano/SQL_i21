@@ -100,14 +100,14 @@ BEGIN
         ,[ysnPost] = @Post
         ,[intItemId] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' THEN @intDealerSiteCreditItem ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN @intDealerSiteFeeItem ELSE -1 END) END
         ,[strItemDescription] = ccItem.strItem
-        ,[dblQtyShipped] = 1 --CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
+        ,[dblQtyShipped] = CASE WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN -1 ELSE 1 END --CASE WHEN ccItem.strItem = 'Dealer Site Fees' THEN -1 ELSE 1 END
         ,[dblPrice] = CASE WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblGross -- Dealer Site Gross
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblNet -- Dealer Site Net
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Company Owned Pass Thru' THEN ccSiteDetail.dblGross -- Company Owned Pass Thru
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 1 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblNet + (ccSiteDetail.dblFees * (1 - (ccSite.dblSharedFeePercentage / 100))) -- Dealer Site Shared Fees (Net) 
 			WHEN ccItem.strItem = 'Dealer Site Credits' AND ccSite.ysnPostNetToArCustomer = 0 AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblGross -- (ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)) -- Dealer Site Shared Fees (Gross) 
 			WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site Shared Fees' THEN ccSiteDetail.dblFees * (ccSite.dblSharedFeePercentage / 100)
-			WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN 0
+			WHEN ccItem.strItem = 'Dealer Site Fees' AND ccSite.strSiteType = 'Dealer Site' THEN ccSiteDetail.dblFees
 			ELSE (CASE WHEN ccSite.ysnPostNetToArCustomer = 0 THEN ccSiteDetail.dblFees ELSE 0 END) END
 		,[intTaxGroupId] = null
         ,[ysnRecomputeTax] = 0
@@ -133,20 +133,19 @@ BEGIN
 	--and those sites that does not have customer
     DELETE FROM @EntriesForInvoice WHERE intItemId = -1	or intEntityCustomerId is null OR dblPrice = 0
 	
-	DECLARE @intId INT
+	DECLARE @strSourceId NVARCHAR(200) = NULL
 
 	DECLARE @CursorTran AS CURSOR
 	SET @CursorTran = CURSOR FOR
-	SELECT intId FROM @EntriesForInvoice
+	SELECT DISTINCT strSourceId FROM @EntriesForInvoice
 	OPEN @CursorTran
-
 		
 	IF (@@CURSOR_ROWS = 0)
 	BEGIN
 		SET @success = 1
 	END
 
-	FETCH NEXT FROM @CursorTran INTO @intId
+	FETCH NEXT FROM @CursorTran INTO @strSourceId
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 		
@@ -202,7 +201,7 @@ BEGIN
 			,[ysnInventory]
 			,[intSalesAccountId]
 			,[strComments]
-		FROM @EntriesForInvoice WHERE intId = @intId
+		FROM @EntriesForInvoice WHERE strSourceId = @strSourceId
 
 		IF(@Post = 1)
 		BEGIN
@@ -228,7 +227,7 @@ BEGIN
 			SELECT DISTINCT @intInvoiceId =  B.intInvoiceId FROM @EntriesForInvoicePerSite A 
 			INNER JOIN tblARInvoiceDetail B ON B.intSiteDetailId = A.intSiteDetailId AND B.strItemDescription = A.strItemDescription	
 			
-			UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId WHERE intId = @intId
+			UPDATE @EntriesForInvoice SET intInvoiceId = @intInvoiceId WHERE strSourceId = @strSourceId
 			UPDATE @EntriesForInvoicePerSite SET intInvoiceId = @intInvoiceId	
 
 			EXEC [dbo].[uspARProcessInvoices]
@@ -245,7 +244,7 @@ BEGIN
 
 		END
 
-		FETCH NEXT FROM @CursorTran INTO @intId
+		FETCH NEXT FROM @CursorTran INTO @strSourceId
 	END
 	CLOSE @CursorTran
 	DEALLOCATE @CursorTran
@@ -266,6 +265,8 @@ BEGIN
 				,@UserId
 			FETCH NEXT FROM @CursorDeleteTran INTO @intInvoiceIdDelete
 		END
+		CLOSE @CursorDeleteTran
+		DEALLOCATE @CursorDeleteTran
 	END
 
 END

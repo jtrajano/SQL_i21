@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFStageWorkOrderByLot (
+﻿CREATE PROCEDURE [dbo].[uspMFStageWorkOrderByLot] (
 	@strXML NVARCHAR(MAX)
 	,@intWorkOrderInputLotId INT = NULL OUTPUT
 	)
@@ -81,6 +81,7 @@ BEGIN TRY
 		,@dblRequiredQty NUMERIC(18, 6)
 		,@dblSwapToQty2 NUMERIC(18, 6)
 		,@intMainItemId INT
+		,@strConsumeSourceLocation nvarchar(50)
 	DECLARE @tblMFSwapto TABLE (
 		intSwapTo INT identity(1, 1)
 		,intWorkOrderId INT
@@ -440,6 +441,18 @@ BEGIN TRY
 	IF @strMultipleMachinesShareCommonStagingLocation IS NULL
 	BEGIN
 		SELECT @strMultipleMachinesShareCommonStagingLocation = 'False'
+	END
+
+	SELECT @strConsumeSourceLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 124
+
+	IF @strConsumeSourceLocation = ''
+		OR @strConsumeSourceLocation IS NULL
+	BEGIN
+		SELECT @strConsumeSourceLocation = 'False'
 	END
 
 	--*************************************
@@ -936,7 +949,7 @@ BEGIN TRY
 
 	SELECT @intWorkOrderInputLotId = SCOPE_IDENTITY()
 
-	IF @strInventoryTracking = 'Lot Level'
+	IF @strInventoryTracking = 'Lot Level' AND @strConsumeSourceLocation = 'False'
 	BEGIN
 		SET @dblNewWeight = CASE 
 				WHEN @ysnEmptyOut = 0

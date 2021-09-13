@@ -8,6 +8,11 @@ CREATE PROCEDURE [dbo].[uspMFPostConsumption] @ysnPost BIT = 0
 	,@ysnPostGL BIT = 1
 	,@intLoadDistributionDetailId INT = NULL
 	,@dtmDate DATETIME = NULL
+	,@strOrderType NVARCHAR(50) = NULL
+	,@intSrcId INT = NULL
+	,@strSrcTransactionNo NVARCHAR(50) = NULL
+	,@strSrcModuleName NVARCHAR(50) = NULL
+	,@strSrcTransactionType NVARCHAR(50) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -57,6 +62,14 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@intOtherChargeItemLocationId INT
 	,@intWorkOrderProducedLotId INT
 	,@intProduceItemWIPAccountId AS INT
+	,@strWorkOrderNo NVARCHAR(50)
+	,@intParentId INT
+	,@strParentNo NVARCHAR(50)
+DECLARE @TransactionLink udtICTransactionLinks
+
+DELETE
+FROM @TransactionLink
+
 DECLARE @tblMFLot TABLE (
 	intRecordId INT Identity(1, 1)
 	,intLotId INT
@@ -94,6 +107,7 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
 
 SELECT @intManufacturingProcessId = intManufacturingProcessId
 	,@intLocationId = intLocationId
+	,@strWorkOrderNo = strWorkOrderNo
 FROM tblMFWorkOrder
 WHERE intWorkOrderId = @intWorkOrderId
 
@@ -828,6 +842,99 @@ BEGIN
 				,@strNotes = 'Residue qty clean up'
 		END
 
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderProducedLot
+				WHERE intLotId = @intLotId
+				)
+		BEGIN
+			SELECT @intParentId = NULL
+				,@strParentNo = NULL
+
+			SELECT @intParentId = intWorkOrderId
+			FROM tblMFWorkOrderProducedLot
+			WHERE intLotId = @intLotId
+
+			SELECT @strParentNo = strWorkOrderNo
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intParentId
+
+			IF NOT EXISTS (
+					SELECT *
+					FROM @TransactionLink
+					WHERE intSrcId = @intParentId
+						AND intDestId = @intWorkOrderId
+					)
+			BEGIN
+				INSERT INTO @TransactionLink (
+					strOperation
+					,intSrcId
+					,strSrcTransactionNo
+					,strSrcModuleName
+					,strSrcTransactionType
+					,intDestId
+					,strDestTransactionNo
+					,strDestModuleName
+					,strDestTransactionType
+					)
+				SELECT 'CREATE'
+					,intSrcId = @intParentId
+					,strSrcTransactionNo = @strParentNo
+					,strSrcModuleName = 'Manufacturing'
+					,strSrcTransactionType = 'Workorder Management'
+					,intDestId = @intWorkOrderId
+					,strDestTransactionNo = @strWorkOrderNo
+					,'Manufacturing'
+					,'Workorder Management'
+			END
+		END
+		ELSE IF EXISTS (
+				SELECT *
+				FROM tblICInventoryReceiptItemLot
+				WHERE intLotId = @intLotId
+				)
+		BEGIN
+			SELECT @intParentId = NULL
+				,@strParentNo = NULL
+
+			SELECT @intParentId = intWorkOrderId
+			FROM tblMFWorkOrderProducedLot
+			WHERE intLotId = @intLotId
+
+			SELECT @strParentNo = strWorkOrderNo
+			FROM tblMFWorkOrder
+			WHERE intWorkOrderId = @intParentId
+
+			IF NOT EXISTS (
+					SELECT *
+					FROM @TransactionLink
+					WHERE intSrcId = @intParentId
+						AND intDestId = @intWorkOrderId
+					)
+			BEGIN
+				INSERT INTO @TransactionLink (
+					strOperation
+					,intSrcId
+					,strSrcTransactionNo
+					,strSrcModuleName
+					,strSrcTransactionType
+					,intDestId
+					,strDestTransactionNo
+					,strDestModuleName
+					,strDestTransactionType
+					)
+				SELECT 'CREATE'
+					,intSrcId = @intParentId
+					,strSrcTransactionNo = @strParentNo
+					,strSrcModuleName = 'Manufacturing'
+					,strSrcTransactionType = 'Workorder Management'
+					,intDestId = @intWorkOrderId
+					,strDestTransactionNo = @strWorkOrderNo
+					,'Manufacturing'
+					,'Workorder Management'
+			END
+		END
+
 		SELECT @intRecordId = Min(intRecordId)
 		FROM @tblMFLot
 		WHERE intRecordId > @intRecordId
@@ -846,5 +953,35 @@ BEGIN
 		INSERT INTO #tblRecap
 		SELECT *
 		FROM @GLEntries
+	END
+	ELSE
+	BEGIN
+		IF @strOrderType IN (
+				'SALES ORDER'
+				,'INVOICE'
+				,'LOAD DISTRIBUTION'
+				)
+		BEGIN
+			INSERT INTO @TransactionLink (
+				strOperation
+				,intSrcId
+				,strSrcTransactionNo
+				,strSrcModuleName
+				,strSrcTransactionType
+				,intDestId
+				,strDestTransactionNo
+				,strDestModuleName
+				,strDestTransactionType
+				)
+			SELECT 'CREATE'
+				,intSrcId = @intSrcId
+				,strSrcTransactionNo = @strSrcTransactionNo
+				,strSrcModuleName = @strSrcModuleName
+				,strSrcTransactionType = @strSrcTransactionType
+				,intDestId = @intWorkOrderId
+				,strDestTransactionNo = @strWorkOrderNo
+				,'Manufacturing'
+				,'Workorder Management'
+		END
 	END
 END

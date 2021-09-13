@@ -1,5 +1,7 @@
+
 CREATE PROCEDURE uspCMABRCheckClearing
     @intBankAccountId INT,
+	@intImportBankStatementLogId INT,
     @intEntityId INT
 AS
 DECLARE @dtmCurrent DATETIME =  CAST(FLOOR(CAST(GETDATE() AS float)) AS DATETIME)
@@ -10,20 +12,24 @@ IF OBJECT_ID('tempdb..##tempActivityMatched') IS NOT NULL
 
 CREATE TABLE ##tempActivityMatched
 (
+	rowId INT,
 	intABRActivityId INT NULL,
-	intTransactionId INT NULL
+	intTransactionId INT NULL,
+	
 )
 
 SELECT @intABRDaysNoRef=ISNULL(intABRDaysNoRef,0)
 FROM tblCMBankAccount WHERE @intBankAccountId = intBankAccountId
 
 ;WITH matching as(
-    SELECT intABRActivityId, intTransactionId, intBankAccountId
-    FROM tblCMABRActivity ABR 
-OUTER APPLY(
+
+SELECT intABRActivityId, CM.intTransactionId, ABR.intBankAccountId
+FROM tblCMABRActivity ABR 
+
+CROSS APPLY(
 	SELECT 
 	TOP 1
-	intTransactionId
+	C.intTransactionId
 	FROM tblCMBankTransaction C
 	JOIN tblCMBankTransactionType T 
 	ON C.intBankTransactionTypeId=T.intBankTransactionTypeId
@@ -31,54 +37,34 @@ OUTER APPLY(
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
     AND ysnClr = 0
-	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
-		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' AND @intABRDaysNoRef > 0
-			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
-			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
-		ELSE
-			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
+	AND 1 = 
+	CASE WHEN  RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = '' AND LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
+	THEN 
+		CASE WHEN ABR.dtmClear <= DATEADD(DAY,@intABRDaysNoRef, C.dtmDate)
+		THEN 1
+		ELSE 0
 		END
-	AND ABS(dblAmount) = ABS(ABR.dblAmount)
-	AND ABR.strDebitCredit  = 'C'
-	AND
-    (
-		 strDebitCredit  ='C' OR  (strDebitCredit  ='DC' AND dblAmount > 0)
-	)
-	ORDER BY dtmDate
-)CM
-UNION ALL
-SELECT intABRActivityId, intTransactionId, intBankAccountId
-FROM tblCMABRActivity ABR
-OUTER APPLY(
-	SELECT 
-	TOP 1
-	intTransactionId
-	FROM tblCMBankTransaction C
-	JOIN tblCMBankTransactionType T 
-	ON C.intBankTransactionTypeId=T.intBankTransactionTypeId
-	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
-	AND ysnPosted = 1
-	AND ysnCheckVoid = 0
-    AND ysnClr = 0
-	AND RTRIM(LTRIM(ISNULL(strReferenceNo,''))) = 
-		CASE WHEN LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' AND @intABRDaysNoRef > 0
-			AND @dtmCurrent<= dateadd(DAY,@intABRDaysNoRef, dtmDate)
-			THEN RTRIM(LTRIM(ISNULL(strReferenceNo,'')))
-		ELSE
-			LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) 
+	ELSE
+		CASE WHEN RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,'')))
+		THEN 1
+		ELSE 0
 		END
+	END
 	AND ABS(dblAmount) = ABS(ABR.dblAmount)
-	AND ABR.strDebitCredit  = 'D'
-	AND
-    (
-		 strDebitCredit  ='D' OR  (strDebitCredit  ='DC' AND dblAmount < 0)
-	)
-	
-	ORDER BY dtmDate
+	AND ABR.strDebitCredit =
+	CASE WHEN C.intBankTransactionTypeId = 5 THEN
+		CASE WHEN  dblAmount > 0 THEN 'C' ELSE 'D' END
+	ELSE
+		T.strDebitCredit
+	END
+	ORDER BY C.dtmDate
 )CM
+WHERE intImportBankStatementLogId =@intImportBankStatementLogId
+AND ABR.intImportStatus =2
 )
-INSERT INTO ##tempActivityMatched (intABRActivityId, intTransactionId)
-SELECT  intABRActivityId, intTransactionId FROM matching WHERE intTransactionId IS NOT NULL
+INSERT INTO ##tempActivityMatched (rowId, intABRActivityId, intTransactionId)
+SELECT ROW_NUMBER() OVER(ORDER BY intABRActivityId) rowId,  intABRActivityId, intTransactionId FROM matching 
+
 
 UPDATE CM
 SET ysnClr = 1
@@ -95,7 +81,14 @@ tblCMABRActivity ABR JOIN
 T.intABRActivityId = ABR.intABRActivityId
 
 DECLARE @bankMatchingId NVARCHAR(20)
-EXEC uspSMGetStartingNumber 162,  @bankMatchingId OUT
+DECLARE @cntMatched INT , @index INT = 0
+SELECT @cntMatched = COUNT(*) FROM ##tempActivityMatched
 
-INSERT INTO tblCMABRActivityMatched(intABRActivityId, intTransactionId, dtmDateEntered, intEntityId, intConcurrencyId)
-SELECT intABRActivityId, intTransactionId,@dtmCurrent, @intEntityId,1 FROM ##tempActivityMatched
+WHILE (@index < @cntMatched)
+BEGIN
+	SET @index += 1
+	EXEC uspSMGetStartingNumber 162,  @bankMatchingId OUT
+	INSERT INTO tblCMABRActivityMatched(strMatchingId,intBankAccountId, intABRActivityId, intTransactionId, dtmDateEntered, intEntityId, intConcurrencyId)
+	SELECT @bankMatchingId,@intBankAccountId, intABRActivityId, intTransactionId,@dtmCurrent, @intEntityId,1 FROM ##tempActivityMatched
+	WHERE rowId = @index
+END

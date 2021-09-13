@@ -87,6 +87,117 @@ SET @batchIdUsed = @batchId
 IF (@transType IS NULL OR RTRIM(LTRIM(@transType)) = '')
 	SET @transType = 'all'
 
+DECLARE @dtmStartWait	DATETIME
+SET @dtmStartWait = GETDATE()
+
+DELETE PQ
+FROM tblARPostingQueue PQ
+WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) >= 60
+
+--CHECK IF THERE'S ON GOING POSTING IN QUEUE
+IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) <= 60)
+	--IF HAS QUEUE TRY TO WAIT FOR 1 MINUTE
+	BEGIN
+		DECLARE @intQueueCount INT = 0
+
+		--CHECK EVERY 5 SECS.
+		WHILE @intQueueCount <= 12
+			BEGIN
+				--IF WAITING TIME IS > 1 MINUTE, THROW TIME OUT ERROR
+				IF @intQueueCount >= 12
+					BEGIN
+						SET @intQueueCount = 13
+
+						IF @raiseError = 0
+							BEGIN
+								IF @InitTranCount = 0
+									BEGIN
+										IF (XACT_STATE()) = -1
+											ROLLBACK TRANSACTION
+										IF (XACT_STATE()) = 1
+											COMMIT TRANSACTION
+									END		
+								ELSE
+									BEGIN
+										IF (XACT_STATE()) = -1
+											ROLLBACK TRANSACTION  @Savepoint
+									END	
+
+								INSERT INTO tblARPostResult (
+										strMessage
+									  , strTransactionType
+									  , strTransactionId
+									  , strBatchNumber
+									  , intTransactionId
+								)
+								SELECT strMessage	= 'There''s an on-going posting for other transactions. Please try again later.'
+									, [strTransactionType]
+									, [strInvoiceNumber]
+									, [strBatchId]
+									, [intInvoiceId]
+								FROM tblARInvoice ARI
+								INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
+							END
+
+							IF @raiseError = 1
+								BEGIN
+									RAISERROR('There''s an on-going posting for other transactions. Please try again later.', 11, 1)							
+								END
+							GOTO Post_Exit
+					END
+				
+				IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPostingdate, @dtmStartWait) <= 60) AND @intQueueCount < 12
+					BEGIN
+						SET @intQueueCount += 1
+						WAITFOR DELAY '00:00:05'
+					END
+				ELSE IF @intQueueCount < 12
+					BEGIN
+						SET @intQueueCount = 12
+
+						INSERT INTO tblARPostingQueue (
+							intTransactionId
+							, strTransactionNumber
+							, strBatchId
+							, dtmPostingdate
+							, intEntityId
+							, strTransactionType
+						)
+						SELECT DISTINCT 
+							intTransactionId		= ARI.intInvoiceId
+							, strTransactionNumber	= ARI.strInvoiceNumber
+							, strBatchId			= @batchIdUsed
+							, dtmPostingdate		= @dtmStartWait
+							, intEntityId			= ARI.intEntityId
+							, strTransactionType	= 'Invoice'
+						FROM tblARInvoice ARI
+						INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
+					END
+			END		
+	END
+ELSE 
+	--IF NONE
+	BEGIN	
+		--INSERT INVOICES TO POSTING QUEUE
+		INSERT INTO tblARPostingQueue (
+			intTransactionId
+			, strTransactionNumber
+			, strBatchId
+			, dtmPostingdate
+			, intEntityId
+			, strTransactionType
+		)
+		SELECT DISTINCT 
+			intTransactionId		= ARI.intInvoiceId
+			, strTransactionNumber	= ARI.strInvoiceNumber
+			, strBatchId			= @batchIdUsed
+			, dtmPostingdate		= @dtmStartWait
+			, intEntityId			= ARI.intEntityId
+			, strTransactionType	= 'Invoice'
+		FROM tblARInvoice ARI
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
+	END
+
 DECLARE @InvoiceIds AS [InvoiceId]
 
 EXEC [dbo].[uspARInitializeTempTableForPosting]
@@ -138,11 +249,6 @@ EXEC [dbo].[uspARPopulateInvoiceAccountForPosting]
 
 IF @post = 1
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]
-
-DELETE PQ
-FROM tblARPostingQueue PQ
-INNER JOIN ##ARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
-WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) > 20 OR @post = 0
 
 EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
          @Post     = @post
@@ -201,27 +307,6 @@ IF(@totalInvalid > 0)
 	END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM ##ARPostInvoiceHeader
-
---INSERT INVOICES TO POSTING QUEUE
-IF (@totalRecords > 0) AND @recap = 0 AND @post = 1
-	BEGIN
-		INSERT INTO tblARPostingQueue (
-			  intTransactionId
-			, strTransactionNumber
-			, strBatchId
-			, dtmPostingdate
-			, intEntityId
-			, strTransactionType
-		)
-		SELECT DISTINCT 
-			  intTransactionId		= intInvoiceId
-			, strTransactionNumber	= strInvoiceNumber
-			, strBatchId			= strBatchId
-			, dtmPostingdate		= GETDATE()
-			, intEntityId			= intEntityId
-			, strTransactionType	= 'Invoice'
-		FROM ##ARPostInvoiceHeader 
-	END
 			
 IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	BEGIN
@@ -364,7 +449,6 @@ BEGIN TRY
         ,@PostDate 		= @PostDate
         ,@BatchId  		= @batchIdUsed
         ,@UserId   		= @userId
-		,@raiseError	= @raiseError
 	
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -474,19 +558,6 @@ BEGIN TRY
         , [strModuleName]
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
-	INSERT INTO @InvalidGLEntries (
-		  [strTransactionId]
-		, [strText]
-		, [intErrorCode]
-		, [strModuleName]
-	)
-	SELECT DISTINCT
-		  [strTransactionId]
-		, [strMessage]
-		, 100
-		, 'Accounts Receivable'
-	FROM ##ARInvalidInventories
-
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
@@ -508,16 +579,6 @@ BEGIN TRY
     LEFT OUTER JOIN @GLEntries GLE ON IGLE.[strTransactionId] = GLE.[strTransactionId]	
 	WHERE IGLE.strTransactionId IS NOT NULL
 
-	UNION ALL
- 
- 	SELECT DISTINCT
-         [strError]             = strMessage
-        ,[strTransactionType]   = strTransactionType
-        ,[strTransactionId]     = strTransactionId
-        ,[strBatchNumber]       = strBatchNumber
-        ,[intTransactionId]     = intTransactionId
-    FROM ##ARInvalidInventories
-
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
 		SELECT TOP 1 @ErrorMerssage = [strText] FROM @InvalidGLEntries
@@ -537,11 +598,13 @@ BEGIN TRY
             @Post    = @post
            ,@BatchId = @batchIdUsed
 		   ,@UserId  = @userId
+		   ,@raiseError = @raiseError
 
     EXEC [dbo].[uspARPostInvoiceIntegrations]
             @Post    = @post
            ,@BatchId = @batchIdUsed
 		   ,@UserId  = @userId
+		   ,@raiseError = @raiseError
 
 END TRY
 BEGIN CATCH

@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[tblICStagingItem] (
 	, strModelNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, ysnUseWeighScales BIT NULL
 	, ysnLotWeightsRequired BIT NULL
+	, ysnStockedItem BIT NULL
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strCategoryCode NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strBrandCode NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

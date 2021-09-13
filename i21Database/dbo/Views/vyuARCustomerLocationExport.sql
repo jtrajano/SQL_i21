@@ -1,6 +1,6 @@
 CREATE VIEW [dbo].[vyuARCustomerLocationExport]
 AS
-SELECT intEntity				= ARC.intEntityId
+SELECT intEntityId				= ARC.intEntityId
 	 , strCustomerName			= EME.strName
      , intEntityLocationId		= EMEL.intEntityLocationId
      , strLocationName			= EMEL.strLocationName
@@ -18,6 +18,7 @@ SELECT intEntity				= ARC.intEntityId
      , dblLatitude				= EMEL.dblLatitude
      , strTimezone				= ISNULL(EMEL.strTimezone, '')
      , strShipVia				= ISNULL(SMSV.strShipVia, '')
+     , ysnDefaultLocation		= ISNULL(EMEL.ysnDefaultLocation, 0)
 FROM tblARCustomer ARC
 INNER JOIN tblEMEntityLocation EMEL ON ARC.intEntityId = EMEL.intEntityId
 INNER JOIN tblEMEntity EME ON ARC.intEntityId = EME.intEntityId

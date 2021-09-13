@@ -48,6 +48,7 @@
 	[intBuybackChargeId]			INT NULL,
 	[intItemId]						INT NULL,
 	[intLinkingId]					INT NULL,
+	[intTicketDistributionAllocationId] INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intFreightTermId]				INT NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
@@ -119,6 +120,8 @@
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,
 	[intLineNo]						INT NULL,
+	[intBookId]						INT NULL,
+	[intSubBookId]					INT NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO

@@ -612,6 +612,28 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT 1
+						FROM tblIPItemUOMStage
+						WHERE intStageItemId = @intStageItemId
+						)
+				BEGIN
+					DELETE IUOM
+					FROM tblICItemUOM IUOM
+					JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+						AND IUOM.intItemId = @intItemId
+						AND UOM.strSymbol NOT IN (
+							SELECT strUOM
+							FROM tblIPItemUOMStage
+							WHERE strItemNo = @strItemNo
+							)
+						AND UOM.intUnitMeasureId NOT IN (
+							SELECT intUnitMeasureId
+							FROM tblICCommodityUnitMeasure
+							WHERE intCommodityId = @intCommodityId
+							)
+				END
+
+				IF EXISTS (
+						SELECT 1
 						FROM tblICItemUOM iu WITH (NOLOCK)
 						JOIN tblICUnitMeasure um WITH (NOLOCK) ON iu.intUnitMeasureId = um.intUnitMeasureId
 							AND iu.intItemId = @intItemId
@@ -644,8 +666,12 @@ BEGIN TRY
 				JOIN tblIPItemUOMStage st ON st.strUOM = um.strSymbol
 					AND st.intStageItemId = @intStageItemId
 
-				--WHERE iu.intItemId = @intItemId
-				--	AND st.intStageItemId = @intStageItemId
+				UPDATE tblICItemUOM
+				SET ysnStockUnit = 0
+				WHERE intItemId = @intItemId
+					AND dblUnitQty <> 1
+					AND ysnStockUnit = 1
+
 				DECLARE @strDetails NVARCHAR(MAX) = ''
 
 				IF EXISTS (

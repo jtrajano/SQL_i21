@@ -38,9 +38,9 @@ FROM
 	UNION ALL
 	SELECT vrpa.strTransactionType, vrpa.intTransactionId, vrpa.strTransactionId, vrpa.dblAmount, vrpa.strVendorInvoiceNumber, vrpa.intEntityVendorId, vrpa.intEntityId, vrpa.dtmDate, vrpa.strDescription, vrpa.intCompanyLocationId FROM vyuSTBatchPostingRetailPriceAdjustment vrpa WHERE vrpa.ysnPosted = 0
 	UNION ALL
-	SELECT 'Mobile Billing', intInvoiceId, strInvoiceNo, dblTotal, '' AS strVendorInvoiceNumber, intEntityCustomerId AS intEntityVendorId, intEntityCustomerId, dtmInvoiceDate, strComments, intLocationId AS intCompanyLocationId FROM vyuMBILInvoice WHERE ISNULL(ysnPosted, 0) = 0
+	SELECT 'Mobile Billing', intInvoiceId, strInvoiceNo, dblTotal, '' AS strVendorInvoiceNumber, intEntityCustomerId AS intEntityVendorId, intEntityCustomerId, dtmInvoiceDate, strComments, intLocationId AS intCompanyLocationId FROM vyuMBILInvoice WHERE ISNULL(ysnVoided, 0) = 0 AND (inti21InvoiceId NOT IN (SELECT intInvoiceId FROM tblARInvoice) OR inti21InvoiceId IS NULL)
 	UNION ALL
-	SELECT 'Mobile Billing', intPaymentId, strPaymentNo, dblPayment, '' AS strVendorInvoiceNumber, intEntityCustomerId AS intEntityVendorId, intEntityCustomerId, dtmDatePaid, strComments, intLocationId AS intCompanyLocationId FROM vyuMBILPayment WHERE ISNULL(ysnPosted, 0) = 0
+	SELECT 'Mobile Billing', intPaymentId, strPaymentNo, dblPayment, '' AS strVendorInvoiceNumber, intEntityCustomerId AS intEntityVendorId, intEntityCustomerId, dtmDatePaid, strComments, intLocationId AS intCompanyLocationId FROM vyuMBILPayment WHERE ISNULL(ysnPosted, 0) = 0 AND ISNULL(ysnVoided, 0) = 0 AND inti21PaymentId IS NULL
 ) BatchPosting
 LEFT JOIN tblEMEntity Entity ON BatchPosting.intEntityVendorId = Entity.intEntityId
 LEFT JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.[intEntityId]

@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspSTRetailAdjustmentPreview]
 	@UDT_RetailPrice		StagingRetailAdjustment READONLY,
+	@strGuid				UNIQUEIDENTIFIER,
 	@ysnSuccess				BIT				OUTPUT,
 	@strMessage				NVARCHAR(1000)	OUTPUT
 AS
@@ -189,7 +190,7 @@ BEGIN
 							INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = itemLoc.intLocationId
 							INNER JOIN tblAPVendor Vendor ON Vendor.intEntityId = itemLoc.intVendorId
 							INNER JOIN tblSTStore ST ON ST.intCompanyLocationId = itemLoc.intLocationId
-							INNER JOIN tblICItemUOM UOM ON UOM.intItemId = I.intItemId
+							INNER JOIN tblICItemUOM UOM ON UOM.intItemId = I.intItemId AND UOM.ysnStockUnit = 1
 							INNER JOIN tblICCategory CAT ON CAT.intCategoryId = I.intCategoryId
 							LEFT JOIN tblSTSubcategory FAMILY ON FAMILY.intSubcategoryId = itemLoc.intFamilyId
 							LEFT JOIN tblSTSubcategory CLASS ON CLASS.intSubcategoryId = itemLoc.intClassId
@@ -266,7 +267,6 @@ BEGIN
 											END
 									END
 
-
 									SET @dblRetailPriceConv = ROUND(@dblRetailPriceConv, 2)
 									EXEC [uspICUpdateItemPricingForCStore]
 										-- filter params
@@ -275,6 +275,7 @@ BEGIN
 										,@strScreen					= 'RetailPriceAdjustment' 
 										,@intItemId					= @intProcessItemId
 										,@intItemPricingId			= @intProcessItemPricingId 
+										,@strScreen					= 'RetailPriceAdjustment' 
 										-- update params
 										,@dblStandardCost			= NULL 
 										,@dblRetailPrice			= @dblRetailPriceConv
@@ -423,18 +424,6 @@ BEGIN
 							ON itemPricing.intItemId = uom.intItemId
 						WHERE uom.ysnStockUnit = CAST(1 AS BIT) 
 					END
-
-
-					-- Return Preview
-					SELECT  strItemDescription		AS strDescription
-							, strLongUPCCode		AS strUpc
-							, strLocationName		AS strLocation
-							, strChangeDescription
-							, strPreviewOldData		AS strOldData
-							, strPreviewNewData		AS strNewData
-					FROM @tblPreview
-					WHERE strPreviewOldData != strPreviewNewData
-					ORDER BY strItemNo, strLocationName ASC
 				END
 			-- ==============================================================================================
 			-- [END] IF HAS PREVIEW REPORT
@@ -496,6 +485,31 @@ ExitWithRollback:
 					SET @strMessage = @strMessage + '. Will Rollback Transaction.'
 
 					ROLLBACK TRANSACTION
+					
+					-- Return Preview
+					-- INSERT TO PREVIEW TABLE
+					INSERT INTO tblSTRetailAdjustmentPreview
+					(
+						strGuid,
+						strLocation,
+						strUpc,
+						strDescription,
+						strChangeDescription,
+						strOldData,
+						strNewData,
+						intConcurrencyId
+					)
+					SELECT  @strGuid
+							, strLocationName		AS strLocation
+							, strLongUPCCode		AS strUpc
+							, strItemDescription	AS strDescription
+							, strChangeDescription
+							, strPreviewOldData		AS strOldData
+							, strPreviewNewData		AS strNewData
+							, 1
+					FROM @tblPreview
+					WHERE strPreviewOldData != strPreviewNewData
+					ORDER BY strLongUPCCode, strLocationName ASC
 				END
 			END
 			
@@ -507,6 +521,31 @@ ExitWithRollback:
 
 						ROLLBACK TRANSACTION @Savepoint
 					END
+
+				-- Return Preview
+				-- INSERT TO PREVIEW TABLE
+				INSERT INTO tblSTRetailAdjustmentPreview
+				(
+					strGuid,
+					strLocation,
+					strUpc,
+					strDescription,
+					strChangeDescription,
+					strOldData,
+					strNewData,
+					intConcurrencyId
+				)
+				SELECT  @strGuid
+						, strLocationName		AS strLocation
+						, strLongUPCCode		AS strUpc
+						, strItemDescription	AS strDescription
+						, strChangeDescription
+						, strPreviewOldData		AS strOldData
+						, strPreviewNewData		AS strNewData
+						, 1
+				FROM @tblPreview
+				WHERE strPreviewOldData != strPreviewNewData
+				ORDER BY strLongUPCCode, strLocationName ASC
 			END
 			
 				

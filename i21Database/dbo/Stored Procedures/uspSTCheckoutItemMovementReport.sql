@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTCheckoutItemMovementReport]
 	@strStoreIdList AS NVARCHAR(MAX) = '',
+	@strStoreGroupIdList AS NVARCHAR(MAX) = '',
 	@strCategoryIdList AS NVARCHAR(MAX) = '',
 	@strFamilyIdList AS NVARCHAR(MAX) = '', 
 	@strClassIdList AS NVARCHAR(MAX) = '', 
@@ -104,6 +105,16 @@ FROM
 		ON IL.intFamilyId = Class.intSubcategoryId
 		AND Class.strSubcategoryType = 'C'
 	WHERE UOM.strLongUPCCode IS NOT NULL 
+		AND (
+				ST.intStoreId IN (SELECT DISTINCT stgd.intStoreId FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreGroupIdList) list
+									JOIN tblSTStoreGroupDetail stgd
+										ON stgd.intStoreGroupId = list.intID)
+				OR 1 = CASE 
+							WHEN @strStoreGroupIdList = ''
+								THEN 1
+							ELSE 0
+					   END
+			)
 		AND (
 				ST.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList))
 				OR 1 = CASE 

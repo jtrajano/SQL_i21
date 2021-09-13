@@ -37,6 +37,7 @@
 	[intSettleStorageId] 			INT NULL,
 	[intItemId]						INT NULL,
 	[intLinkingId]					INT NULL,
+	[intTicketDistributionAllocationId] INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intFreightTermId]				INT NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
@@ -89,6 +90,8 @@
 	[str1099Type]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered]				DATETIME DEFAULT(GETDATE()),
 	[ysnReturn]						BIT NULL,
+	[intBookId]						INT NULL,
+	[intSubBookId]					INT NULL,
     [intConcurrencyId]				INT NOT NULL DEFAULT 0
 );
 GO

@@ -228,7 +228,7 @@ BEGIN TRY
 
 		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
 		BEGIN
-			UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight
+			UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight where intContractDetailId = @intContractDetailId;
 		END
 
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1

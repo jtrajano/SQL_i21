@@ -46,7 +46,7 @@ BEGIN
 		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY cb.intContractDetailId ORDER BY cb.dtmCreatedDate DESC)
 			, cb.intContractDetailId
 			, cb.intContractStatusId
-			, dblFutures = CASE WHEN cb.intPricingTypeId IN (1, 3) THEN ISNULL(cb.dblFutures, cd.dblFutures) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) END
+			, dblFutures = CASE WHEN cb.intPricingTypeId IN (1, 3) THEN ISNULL(cd.dblFutures, cb.dblFutures) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) END
 			, dblBasis = CASE WHEN cb.intPricingTypeId IN (1, 2, 8) THEN ISNULL(cb.dblBasis, cd.dblBasis) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblBasis END) END
 		FROM tblCTContractBalanceLog cb
 		join tblCTContractDetail cd on cd.intContractDetailId = cb.intContractDetailId

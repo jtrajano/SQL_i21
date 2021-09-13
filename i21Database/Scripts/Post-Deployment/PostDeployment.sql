@@ -83,6 +83,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\41_TaxReportType.sql 
 :r .\SM\DefaultData\42_InterCompanyMasterScreen.sql
 :r .\SM\DefaultData\43_UserRoleAdvancePermission.sql
+:r .\SM\DefaultData\43_IDPFieldMapping.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
@@ -602,6 +603,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\GA_Georgia.sql
 :r .\TF\DefaultData\FL_Florida.sql
 :r .\TF\DefaultData\AL_Alabama.sql
+:r .\TF\DefaultData\WV_WestVirginia.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

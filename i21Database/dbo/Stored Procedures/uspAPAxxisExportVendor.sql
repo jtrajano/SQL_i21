@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPAxxisExportVendor]
-	@vendorId INT = NULL
+	@vendorId INT = NULL,
+	@modifiedFields NVARCHAR(MAX) = NULL
 AS
 
 BEGIN
@@ -11,28 +12,76 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-IF OBJECT_ID(N'tmpAxxisVendor') IS NOT NULL DROP TABLE tmpAxxisVendor
+IF OBJECT_ID(N'tmpAxxisVendor') IS NOT NULL
+BEGIN
+	DELETE FROM tmpAxxisVendor
+END
+ELSE
+BEGIN
+	CREATE TABLE tmpAxxisVendor(
+		strName NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
+		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
+		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+		strTaxNumber NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+	)
+END
+
+IF OBJECT_ID(N'tempdb..#tmpModifiedFields') IS NOT NULL DROP TABLE #tmpModifiedFields
+CREATE TABLE #tmpModifiedFields(strFields NVARCHAR(MAX))
+
+INSERT INTO #tmpModifiedFields
+SELECT @modifiedFields
+
+DECLARE @tblFields TABLE(strField NVARCHAR(50))
+
+;WITH tmp(DataItem, strFields) AS
+(
+    SELECT
+        LEFT(strFields, CHARINDEX(',', strFields + ',') - 1),
+		STUFF(strFields, 1, CHARINDEX(',', strFields + ','), '')
+    FROM #tmpModifiedFields
+    UNION all
+
+    SELECT
+        LEFT(strFields, CHARINDEX(',', strFields + ',') - 1),
+		STUFF(strFields, 1, CHARINDEX(',', strFields + ','), '')
+    FROM tmp
+    WHERE
+        strFields > ''
+)
+
+INSERT INTO @tblFields
+SELECT
+    DataItem
+FROM tmp
+
+-- SELECT * FROM @tblFields
+
+IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strName','strTaxNumber','strLocationName','strCheckPayeeName')) 
+BEGIN
+	RETURN;
+END
 
 IF @vendorId IS NULL
 BEGIN
+	INSERT INTO tmpAxxisVendor
 	SELECT
 		B.strName,
 		C.strLocationName,
 		ISNULL(C.strCheckPayeeName,'') AS strPrintedName,
 		ISNULL(A.strTaxNumber,'') AS strTaxNumber
-	INTO tmpAxxisVendor
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId
 END
 ELSE
 BEGIN
+	INSERT INTO tmpAxxisVendor
 	SELECT
 		B.strName,
 		C.strLocationName,
 		ISNULL(C.strCheckPayeeName,'') AS strPrintedName,
 		ISNULL(A.strTaxNumber,'') AS strTaxNumber
-	INTO tmpAxxisVendor
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId

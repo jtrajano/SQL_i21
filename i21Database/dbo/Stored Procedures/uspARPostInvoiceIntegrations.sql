@@ -3,6 +3,7 @@
 	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
 	,@IntegrationLogId	INT             = NULL
+	,@raiseError  AS BIT   = 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -25,10 +26,13 @@ DECLARE  @InitTranCount				INT
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
 
-IF @InitTranCount = 0
-	BEGIN TRANSACTION
-ELSE
-	SAVE TRANSACTION @Savepoint
+IF ISNULL(@raiseError,0) = 0
+BEGIN
+	IF @InitTranCount = 0
+		BEGIN TRANSACTION
+	ELSE
+		SAVE TRANSACTION @Savepoint
+END
 
 BEGIN TRY
 
@@ -724,7 +728,7 @@ BEGIN
 														 , @intShipmentType			 = 1
 					END
 												 
-				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDU
 											   , @ysnPost				 	= 1
 											   , @intEntityUserSecurityId  	= @UserId
 				
@@ -974,7 +978,7 @@ IF @IntegrationLogId IS NULL
 			, intTransactionId
 		)
 		SELECT CASE WHEN [ysnPost] = 1 THEN 'Transaction successfully posted.'  ELSE 'Transaction successfully unposted.' END
-			, [strTransactionType]
+			, [strTransactionType] = CASE strTransactionType WHEN 'Debit Memo' THEN 'Debit Memo (Sales)' ELSE strTransactionType END
 			, [strInvoiceNumber]
 			, [strBatchId]
 			, [intInvoiceId]
@@ -999,6 +1003,11 @@ EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdat
 
 --Create inventory receipt to another company
 EXEC [dbo].[uspARInterCompanyIntegrationSource] @BatchId = @BatchId, @Post = @Post
+
+--DELETE FROM POSTING QUEUE
+DELETE PQ
+FROM tblARPostingQueue PQ
+INNER JOIN ##ARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
 
 --AUDIT LOG
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
@@ -1033,27 +1042,22 @@ EXEC [dbo].[uspARInsertAuditLogs] @LogEntries = @InvoiceLog, @intUserId = @UserI
 END TRY
 BEGIN CATCH
     DECLARE @ErrorMerssage NVARCHAR(MAX)
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-    IF @InitTranCount = 0
-        IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION
-	ELSE
-		IF (XACT_STATE()) <> 0
-			ROLLBACK TRANSACTION @Savepoint
+	SELECT @ErrorMerssage = ERROR_MESSAGE()
+
+	IF @raiseError = 0
+	BEGIN
+		IF @InitTranCount = 0
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION
+		ELSE
+			IF (XACT_STATE()) <> 0
+				ROLLBACK TRANSACTION @Savepoint
+	END
 												
 	RAISERROR(@ErrorMerssage, 11, 1)
 		
 	GOTO Post_Exit
 END CATCH
-
-IF @InitTranCount = 0
-	BEGIN
-		IF (XACT_STATE()) = -1
-			ROLLBACK TRANSACTION
-		IF (XACT_STATE()) = 1
-			COMMIT TRANSACTION
-		RETURN 1;
-	END	
 
 Post_Exit:
 	RETURN 0;
