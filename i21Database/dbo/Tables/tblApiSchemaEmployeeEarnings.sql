@@ -16,10 +16,25 @@ CREATE TABLE tblApiSchemaEmployeeEarnings(
     ,strTaxCalculation NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,strAccountID NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,ysnUseGLSplit NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
-    ,strTaxID NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
-    ,strTaxDescription	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
-    ,strTaxType	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
-    ,strTaxPaidBy NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+
+    ,strTaxID1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strTaxDescription1	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+
+    ,strTaxID2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strTaxDescription2	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+
+    ,strTaxID3 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strTaxDescription3	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+
+    ,strTaxID4 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strTaxDescription4	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+
+    ,strTaxID5 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strTaxDescription5	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+
+    ,strTaxID6 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strTaxDescription6	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+
     ,ysnDefault NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
 )
 
