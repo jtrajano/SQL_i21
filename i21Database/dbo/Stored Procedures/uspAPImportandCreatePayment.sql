@@ -49,7 +49,6 @@ BEGIN TRY
 			PD.dblAmountDue = (I.dblPayment + I.dblDiscount) - I.dblInterest,
 			PD.dblTotal = (I.dblPayment + I.dblDiscount) - I.dblInterest
 		FROM tblAPPaymentDetail PD
-		INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId
 		WHERE P.intPaymentId = @createdPaymentId
