@@ -217,12 +217,12 @@ FROM
 		,strCommodity = COM.strCommodityCode
 		,strPClient = V.strName
 		,strSClient = C.strName
-		,dblPAllocatedQty = CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt
+		,dblPAllocatedQty = CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
 								 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
 								 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty) END
 		,dblSAllocatedQty = CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt)
 								 ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END
-		,dblPAllocatedQtyInPriceUOM = CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, PCD.intPriceItemUOMId, VCHR.dblNetShippedWt)
+		,dblPAllocatedQtyInPriceUOM = CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, PCD.intPriceItemUOMId, VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0))
 										   WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (LS.intItemUOMId, PCD.intPriceItemUOMId, LS.dblNetShippedWt)
 										   ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, PCD.intPriceItemUOMId, ALD.dblPAllocatedQty) END
 		,dblSAllocatedQtyInPriceUOM = CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, SCD.intPriceItemUOMId, ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt))
@@ -267,7 +267,7 @@ FROM
 								+ ISNULL(RA.dblReservesARateTotal, 0) 
 								+ ISNULL(RB.dblReservesBRateTotal, 0) 
 		,dblTonnageCheck = /* P-Qty - S-Qty */
-						CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt
+						CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
 							 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
 							 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty) END
 						- COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty))
@@ -338,6 +338,21 @@ FROM
 			WHERE (BLD.ysnPosted = 1 OR BLD.intTransactionType = 11) 
 				AND BLD.intContractDetailId = PCD.intContractDetailId
 				AND BLDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) VCHR
+		/* Purchase Weight Adjustment */
+		OUTER APPLY 
+			(SELECT 
+				dblWtAdjustment = SUM(BLD.dblWeightAdj)
+			FROM 
+				(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
+					,dblWeightAdj = dbo.fnCalculateQtyBetweenUOM (PCD.intNetWeightUOMId, ToWUOM.intItemUOMId, bld.dblWeight) 
+									* CASE WHEN bl.intTransactionType IN (3, 11) THEN 1 ELSE -1 END
+					FROM tblAPBillDetail bld
+					INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD
+				INNER JOIN tblICItem BLDI ON BLDI.intItemId = BLD.intItemId
+			WHERE (BLD.ysnPosted = 1 OR BLD.intTransactionType = 11) 
+				AND BLD.intContractDetailId = PCD.intContractDetailId
+				AND BLD.intItemId <> PCD.intItemId
+				AND BLDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) VCADJ
 		/* Sales Value */
 		OUTER APPLY 
 			(SELECT 
