@@ -96,6 +96,7 @@ BEGIN
 
             ----GET Ticket Distribution of Units
             BEGIN
+                /*
                 ---SPOT
                 BEGIN
                     INSERT INTO @ticketDistributionAllocation (
@@ -224,6 +225,21 @@ BEGIN
                         ON B.intContractDetailId = C.intContractDetailId
                     WHERE A.intTicketId = @intTicketId 
                 END
+                */
+              
+                INSERT INTO @ticketDistributionAllocation (
+                    [intAllocationType]
+                    ,[dblQuantity] 
+                    ,[intEntityId] 
+                    ,[intContractDetailId]
+                    ,[intLoadDetailId]  
+                    ,[intStorageScheduleId]
+                    ,[intStorageScheduleTypeId]
+                    ,[dblFuture] 
+                    ,[dblBasis] 
+                    ,intTicketDistributionAllocationId
+                )
+                EXEC uspSCGetTicketDistributionAllocation @intTicketId
           
             END
 
