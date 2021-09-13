@@ -2430,7 +2430,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT @strBatchId
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2517,7 +2517,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2605,7 +2605,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2848,7 +2848,7 @@ BEGIN TRY
 					, strProcess)
 				SELECT strBatchId = @strBatchId
 					, dtmTransactionDate
-					, strTransactionType = 'Sales Basis Deliveries'
+					, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 					, strTransactionReference = strTransactionType
 					, intTransactionReferenceId
 					, intTransactionReferenceDetailId
