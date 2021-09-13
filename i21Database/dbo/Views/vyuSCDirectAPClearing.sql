@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSCDirectAPClearing]
 AS 
-
+    select '1' as strData
+    /*
     ----DIRECT TICKET
         ----SPOT
         SELECT
@@ -204,5 +205,5 @@ AS
             AND SC.intTicketTypeId = 8
             AND SC.strTicketStatus = 'C'
             AND CTH.intPricingTypeId = 1
-
+    */
 GO
