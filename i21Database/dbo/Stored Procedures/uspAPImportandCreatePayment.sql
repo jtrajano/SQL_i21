@@ -56,20 +56,18 @@ BEGIN TRY
 			SELECT TOP 1 @currencyId = intCurrencyId FROM vyuCMBankAccount WHERE intBankAccountId = @bankAccountId
 			SELECT TOP 1 @paymentMethodId = intPaymentMethodId, @payToAddress = intDefaultLocationId FROM vyuAPVendor WHERE intEntityId = @vendorId
 
-			SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), intBillId)
-			FROM dbo.fnAPGetPayVoucherForPayment(@currencyId, @paymentMethodId, @datePaid, 1, @vendorId, @payToAddress, 0)
-		END
+		SELECT DISTINCT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
+		FROM dbo.fnGetRowsFromDelimitedValues(@intIds) IDS
+		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
+		INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
 
 		EXEC uspAPCreatePayment @userId, @bankAccountId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
 
-		IF @templateId NOT IN (1, 2, 3)
-		BEGIN
-			DELETE PD
-			FROM tblAPPaymentDetail PD
-			INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
-			LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
-			WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND (I.intId IS NULL OR I.intId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds)))
-		END
+		DELETE PD
+		FROM tblAPPaymentDetail PD
+		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
+		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
+		WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND I.intId IS NULL
 		
 		UPDATE PD
 		SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
@@ -80,7 +78,7 @@ BEGIN TRY
 		FROM tblAPPaymentDetail PD
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 		LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
-		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
+		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
 		WHERE PD.intPaymentId = @createdPaymentId
 
 		UPDATE P
