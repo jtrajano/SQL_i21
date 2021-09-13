@@ -35,13 +35,19 @@ BEGIN TRY
 	BEGIN
 		SELECT TOP 1 @datePaid = dtmDatePaid, @checkNumber = strCheckNumber, @intIds = intIds, @billIds = '' FROM #tmpMultiVouchersImport
 
-		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
+		SELECT DISTINCT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
 		FROM dbo.fnGetRowsFromDelimitedValues(@intIds) IDS
 		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
 		INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
 
 		EXEC uspAPCreatePayment @userId, @bankAccountId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
 
+		DELETE PD
+		FROM tblAPPaymentDetail PD
+		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
+		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
+		WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND I.intId IS NULL
+		
 		UPDATE PD
 		SET PD.dblDiscount = I.dblDiscount,
 			PD.dblPayment = I.dblPayment,
@@ -49,10 +55,10 @@ BEGIN TRY
 			PD.dblAmountDue = (I.dblPayment + I.dblDiscount) - I.dblInterest,
 			PD.dblTotal = (I.dblPayment + I.dblDiscount) - I.dblInterest
 		FROM tblAPPaymentDetail PD
-		INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId
-		WHERE P.intPaymentId = @createdPaymentId
+		LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
+		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
+		WHERE PD.intPaymentId = @createdPaymentId
 
 		UPDATE P
 		SET P.intBankAccountId = @bankAccountId,
