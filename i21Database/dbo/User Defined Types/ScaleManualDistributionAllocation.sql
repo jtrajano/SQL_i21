@@ -13,4 +13,5 @@ CREATE TYPE [dbo].[ScaleManualDistributionAllocation] AS TABLE
 	,[intStorageScheduleTypeId] INT NULL					
 	,[dblFuture] NUMERIC(18, 6)
 	,[dblBasis] NUMERIC(18, 6)
+	,intTicketDistributionAllocationId INT NULL
 )

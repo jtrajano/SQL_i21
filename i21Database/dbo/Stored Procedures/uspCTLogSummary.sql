@@ -2421,7 +2421,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT @strBatchId
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2508,7 +2508,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2596,7 +2596,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2734,9 +2734,18 @@ BEGIN TRY
 					, cd.intContractDetailId
 					, cd.intContractSeq
 					, cd.intContractTypeId
-					, dblQty = CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 0 -- When change of price only.
-									ELSE CASE WHEN @ysnLoadBased = 1 THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
-										ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0) END END
+					, dblQty = (
+						case
+						when ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity
+						then 0
+						else
+							CASE
+							WHEN @ysnLoadBased = 1
+							THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
+							ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0)
+							END
+						end
+					)
 					, dblOrigQty = pfd.dblQuantity
 					, dblDynamic =  CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 0 -- When change of price only.
 										ELSE (CASE WHEN @ysnLoadBased = 1 THEN ISNULL(pfd.dblLoadAppliedAndPriced, 0) * cd.dblQuantityPerLoad
@@ -2830,7 +2839,7 @@ BEGIN TRY
 					, strProcess)
 				SELECT strBatchId = @strBatchId
 					, dtmTransactionDate
-					, strTransactionType = 'Sales Basis Deliveries'
+					, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 					, strTransactionReference = strTransactionType
 					, intTransactionReferenceId
 					, intTransactionReferenceDetailId
