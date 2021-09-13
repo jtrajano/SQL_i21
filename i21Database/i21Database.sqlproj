@@ -9481,6 +9481,23 @@
     <Build Include="dbo\Tables\tblGRAPISettlementOutboundSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExportDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGenerate3PartyDirectInPayables.sql" />
+    <Build Include="dbo\User Defined Types\ScaleDirectTicketCharge.sql" />
+    <Build Include="dbo\User Defined Types\ScaleDirectToVoucherItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCRemoveDirectPayables.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDirectAddPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGenerate3PartyDirectOutPayables.sql" />
+    <Build Include="dbo\Tables\tblSCTicketStorageUsed.sql" />
+    <Build Include="dbo\Tables\tblSCTicketSpotUsed.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualDistributionAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDirectUpdateLSSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateContractSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDirectUpdateContractAndLoadUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistributionDirect.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateDirectInGLEntries.sql" />
+    <Build Include="dbo\Views\vyuSCDirectAPClearing.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDistributionAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetTicketDistributionAllocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
