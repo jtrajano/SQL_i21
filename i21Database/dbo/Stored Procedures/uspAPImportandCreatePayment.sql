@@ -78,7 +78,6 @@ BEGIN TRY
 			PD.dblAmountDue = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
 			PD.dblTotal = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - I.dblInterest) ELSE PD.dblTotal END
 		FROM tblAPPaymentDetail PD
-		INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 		LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
 		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
