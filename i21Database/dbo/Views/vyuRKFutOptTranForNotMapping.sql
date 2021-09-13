@@ -16,7 +16,9 @@ SELECT DE.intFutOptTransactionId
 	, strSalespersonId = Trader.strName
 	, strInstrumentType = CASE WHEN DE.intInstrumentTypeId = 1 THEN 'Futures'
 						WHEN DE.intInstrumentTypeId = 2 THEN 'Options'
-						WHEN DE.intInstrumentTypeId = 3 THEN 'Currency Contract' END COLLATE Latin1_General_CI_AS
+						WHEN DE.intInstrumentTypeId = 3 THEN 'Spot'						
+						WHEN DE.intInstrumentTypeId = 4 THEN 'Forward'						
+						WHEN DE.intInstrumentTypeId = 5 THEN 'Swap' END COLLATE Latin1_General_CI_AS
 	, dblGetNoOfContract = CASE WHEN DE.strBuySell = 'Sell' THEN - DE.dblNoOfContract ELSE DE.dblNoOfContract END
 	, dblHedgeQty = CASE WHEN DE.strBuySell = 'Sell' THEN - (FMarket.dblContractSize * GOC.dblSumOpenContract)
 						ELSE (FMarket.dblContractSize * GOC.dblSumOpenContract) END
@@ -60,6 +62,11 @@ SELECT DE.intFutOptTransactionId
 	, ysnSlicedTrade = ISNULL(DE.ysnSlicedTrade, CAST(0 AS BIT))
 	, DE.intOrigSliceTradeId
 	, strOriginalTradeNo = ST.strInternalTradeNo
+	, strBuyBankName = BuyBank.strBankName COLLATE Latin1_General_CI_AS
+	, strBuyBankAccountNo = BuyBankAcct.strBankAccountNo COLLATE Latin1_General_CI_AS
+	, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
+	, dtmBankTransferDate = BT.dtmDate	
+	, ysnBankTransferPosted = BT.ysnPosted
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -87,6 +94,9 @@ LEFT JOIN tblCTContractHeader PriceHeader ON PriceHeader.intContractHeaderId = P
 LEFT JOIN tblCTContractFutures CF ON CF.intFutOptTransactionId = DE.intFutOptTransactionId
 LEFT JOIN tblCTContractDetail CFDetail ON CFDetail.intContractDetailId = CF.intContractDetailId
 LEFT JOIN tblCTContractHeader CFHeader ON CFHeader.intContractHeaderId = CFDetail.intContractHeaderId
+LEFT JOIN tblCMBank AS BuyBank ON DE.intBuyBankId = Bank.intBankId
+LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON DE.intBuyBankAccountId = BankAcct.intBankAccountId
+LEFT JOIN tblCMBankTransfer BT ON BT.intTransactionId = DE.intBankTransferId
 LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = DE.intOrigSliceTradeId
 LEFT JOIN (
 	SELECT intFutOptTransactionId
