@@ -2692,8 +2692,18 @@ BEGIN TRY
 					, cd.intContractDetailId
 					, cd.intContractSeq
 					, cd.intContractTypeId
-					, dblQty = CASE WHEN @ysnLoadBased = 1 THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
-									ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0) END
+					, dblQty = (
+						case
+						when ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity
+						then 0
+						else
+							CASE
+							WHEN @ysnLoadBased = 1
+							THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
+							ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0)
+							END
+						end
+					)
 					, dblOrigQty = pfd.dblQuantity
 					, dblDynamic =  CASE WHEN @ysnLoadBased = 1 THEN ISNULL(pfd.dblLoadAppliedAndPriced, 0) * cd.dblQuantityPerLoad
 										ELSE ISNULL(dblQuantityAppliedAndPriced, 0) END
@@ -2724,7 +2734,7 @@ BEGIN TRY
 					, intActionId = 17
 					, strNotes = (CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity
 										THEN (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Quantity. Change Futures Price.' ELSE 'Change Quantity.' END)
-										ELSE (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Quantity' ELSE NULL END) END)
+										ELSE (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Futures Price' ELSE NULL END) END)
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
