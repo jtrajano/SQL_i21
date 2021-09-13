@@ -35,7 +35,7 @@ BEGIN TRY
 	BEGIN
 		SELECT TOP 1 @datePaid = dtmDatePaid, @checkNumber = strCheckNumber, @intIds = intIds, @billIds = '' FROM #tmpMultiVouchersImport
 
-		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
+		SELECT DISTINCT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
 		FROM dbo.fnGetRowsFromDelimitedValues(@intIds) IDS
 		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
 		INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
