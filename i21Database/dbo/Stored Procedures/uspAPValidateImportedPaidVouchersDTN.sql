@@ -78,8 +78,9 @@ OUTER APPLY	(
 	SELECT *
 	FROM (
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
-		FROM tblAPBill 
-		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId
+		FROM vyuAPBillForImport
+		WHERE intEntityVendorId = A.intEntityVendorId
+			AND ISNULL(strPaymentScheduleNumber, strVendorOrderNumber) = A.strVendorOrderNumber
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
