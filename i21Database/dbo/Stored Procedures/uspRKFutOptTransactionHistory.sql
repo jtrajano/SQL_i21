@@ -17,6 +17,13 @@ BEGIN TRY
 
 	SELECT TOP 1 @strUserName = strName FROM tblEMEntity WHERE intEntityId = @intUserId
 
+	-- Will not log risk summary when OTC instrument types.
+	SELECT TOP 1 @ysnLogRiskSummary = CASE WHEN derh.strSelectedInstrumentType = 'OTC' THEN 0 ELSE @ysnLogRiskSummary END 
+		FROM  tblRKFutOptTransaction der
+		INNER JOIN tblRKFutOptTransactionHeader derh
+			ON derh.intFutOptTransactionHeaderId = der.intFutOptTransactionHeaderId
+		WHERE der.intFutOptTransactionId = @intFutOptTransactionId
+
 	IF @action = 'HEADER DELETE' --This scenario is when you delete the entire derivative entry. It will look for the history table to insert delete entry to those transaction that doesn't have. 
 	BEGIN
 		INSERT INTO tblRKFutOptTransactionHistory (intFutOptTransactionHeaderId
@@ -50,6 +57,11 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, ysnMonthExpired
+			, intBuyBankId
+			, intBuyBankAccountId
+			, intBankTransferId
+			, dblFinanceForwardRate
+			, dblContractRate
 			, strUserName
 			, strAction)
 		SELECT H.intFutOptTransactionHeaderId
@@ -60,7 +72,9 @@ BEGIN TRY
 			, dblContractSize = FMarket.dblContractSize
 			, strInstrumentType = (CASE WHEN T.intInstrumentTypeId = 1 THEN 'Futures'
 										WHEN T.intInstrumentTypeId = 2 THEN 'Options'
-										WHEN T.intInstrumentTypeId = 3 THEN 'Currency Contract'
+										WHEN T.intInstrumentTypeId = 3 THEN 'Spot'
+										WHEN T.intInstrumentTypeId = 4 THEN 'Forward'
+										WHEN T.intInstrumentTypeId = 5 THEN 'Swap'
 										ELSE '' END)
 			, strFutureMarket = FMarket.strFutMarketName
 			, strCurrency = Curr.strCurrency
@@ -86,12 +100,17 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, ysnMonthExpired = FMonth.ysnExpired
+			, intBuyBankId
+			, intBuyBankAccountId
+			, intBankTransferId
+			, dblFinanceForwardRate
+			, dblContractRate
 			, strUserName = @strUserName
 			, 'DELETE'
 		FROM tblRKFutOptTransaction T
 		JOIN tblRKFutOptTransactionHeader H ON T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
-		JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
-		JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = T.intFutureMonthId
+		LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
+		LEFT JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = T.intFutureMonthId
 		LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = T.intLocationId
 		LEFT JOIN tblSMCurrency Curr ON Curr.intCurrencyID = T.intCurrencyId
 		LEFT JOIN tblEMEntity B ON B.intEntityId = T.intEntityId
@@ -169,6 +188,11 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, ysnMonthExpired
+			, intBuyBankId
+			, intBuyBankAccountId
+			, intBankTransferId
+			, dblFinanceForwardRate
+			, dblContractRate
 			, strUserName
 			, strAction)
 		SELECT H.intFutOptTransactionHeaderId
@@ -179,7 +203,9 @@ BEGIN TRY
 			, dblContractSize = FMarket.dblContractSize
 			, strInstrumentType = (CASE WHEN T.intInstrumentTypeId = 1 THEN 'Futures'
 										WHEN T.intInstrumentTypeId = 2 THEN 'Options'
-										WHEN T.intInstrumentTypeId = 3 THEN 'Currency Contract'
+										WHEN T.intInstrumentTypeId = 3 THEN 'Spot'
+										WHEN T.intInstrumentTypeId = 4 THEN 'Forward'
+										WHEN T.intInstrumentTypeId = 5 THEN 'Swap'
 										ELSE '' END)
 			, strFutureMarket = FMarket.strFutMarketName
 			, strCurrency = Curr.strCurrency
@@ -205,12 +231,17 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, ysnMonthExpired = FMonth.ysnExpired
+			, intBuyBankId
+			, intBuyBankAccountId
+			, intBankTransferId
+			, dblFinanceForwardRate
+			, dblContractRate
 			, strUserName = @strUserName
 			, @action
 		FROM tblRKFutOptTransaction T
 		JOIN tblRKFutOptTransactionHeader H on T.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
-		JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
-		JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = T.intFutureMonthId
+		LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = T.intFutureMarketId
+		LEFT JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = T.intFutureMonthId
 		LEFT JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId = T.intLocationId
 		LEFT JOIN tblSMCurrency Curr ON Curr.intCurrencyID = T.intCurrencyId
 		LEFT JOIN tblEMEntity B ON B.intEntityId = T.intEntityId
@@ -312,7 +343,7 @@ BEGIN TRY
 					, ysnPreCrush =  ISNULL(ysnPreCrush,0)
 					, strBrokerTradeNo =  strBrokerTradeNo
 				FROM vyuRKGetFutOptTransactionHistory der
-				JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
+				LEFT JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 				LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
 				WHERE der.intFutOptTransactionId = @intFutOptTransactionId
 			END
