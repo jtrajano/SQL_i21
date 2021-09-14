@@ -509,6 +509,7 @@ BEGIN
 					) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 					WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
 					-- WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+					AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 
 				--SELECT * FROM @tblTempRJR RJ
 				) as innerQuery
