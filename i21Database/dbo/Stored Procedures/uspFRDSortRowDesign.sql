@@ -50,7 +50,13 @@ BEGIN
 END
 
 INSERT INTO #TempRowDesign ([RowDetailId],[RefNo],[Sort])
-	SELECT RowID = LTRIM(RTRIM(@RowDetailId)), (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowId = @RowId and intRowDetailId = LTRIM(RTRIM(@RowDetailId))), @SORT
+	SELECT RowID = LTRIM(RTRIM(@RowDetailId)),
+	CASE 
+		WHEN EXISTS (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowId = @RowId and intRowDetailId = LTRIM(RTRIM(@RowDetailId)))
+		THEN (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowId = @RowId and intRowDetailId = LTRIM(RTRIM(@RowDetailId)))
+		ELSE 0
+		END
+	,@SORT
 
 SELECT * INTO #TempRowDesign2 FROM #TempRowDesign
 
