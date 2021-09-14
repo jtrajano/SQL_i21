@@ -233,7 +233,14 @@ BEGIN
 				,@createdVouchersId = @created1099KVouchersId OUTPUT
 			END
 			
-			SET @errorMessage = @strNo1099Setup		
+			IF(ISNULL(@errorMessage, '') = '')
+			BEGIN
+				SET @errorMessage = @strNo1099Setup	
+			END
+			ELSE
+			BEGIN
+				SET @errorMessage = @errorMessage + ' ' + @strNo1099Setup	
+			END		
 		END
 		ELSE
 		BEGIN
