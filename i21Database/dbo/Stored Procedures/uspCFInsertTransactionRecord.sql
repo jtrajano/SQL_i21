@@ -116,7 +116,11 @@
 	
 	,@strSiteTaxLocation				NVARCHAR(MAX)	= NULL
 	,@CardNumberForDualCard				NVARCHAR(MAX)	= NULL
+	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
+	,@intUserId							INT				= NULL
+
+	
 
 
 	
@@ -417,6 +421,16 @@ BEGIN
 	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
+
+		IF(@dblOriginalTotalPrice < 0)
+		BEGIN
+			IF(ISNULL(@dblQuantity,0) > 0)
+			BEGIN
+				SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+				SET @dblQuantity = (@dblQuantity * -1)
+			END
+		END
+
 		IF(@strTransactionType = 'R')
 		BEGIN
 			SET @strTransactionType = 'Remote'
@@ -424,6 +438,10 @@ BEGIN
 		ELSE IF (@strTransactionType = 'D' OR @strTransactionType = 'C' OR @strTransactionType = 'N')
 		BEGIN
 			SET @strTransactionType = 'Local/Network'
+			IF(ISNULL(@dblTransferCost,0) = 0)-- AND @strTransactionType = 'Local/Network'
+			BEGIN
+				SET @dblTransferCost = @dblOriginalGrossPrice
+			END
 		END
 		ELSE IF (@strTransactionType = 'F')
 		BEGIN
@@ -588,13 +606,15 @@ BEGIN
 	
 	--TAX REFERENCE--
 
-
-	IF(@dblOriginalGrossPrice < 0)
+	IF (@strNetworkType != 'CFN' AND @strNetworkType != 'Wright Express')
 	BEGIN
-		SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
-		IF(ISNULL(@dblQuantity,0) > 0)
+		IF(@dblOriginalGrossPrice < 0)
 		BEGIN
-			SET @dblQuantity = (@dblQuantity * -1)
+			SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+			IF(ISNULL(@dblQuantity,0) > 0)
+			BEGIN
+				SET @dblQuantity = (@dblQuantity * -1)
+			END
 		END
 	END
 
@@ -654,7 +674,7 @@ BEGIN
 			SELECT
 				intNetworkId			= @intNetworkId
 				,strSiteNumber			= @strSiteId
-				,strSiteName			= @strSiteName
+				,strSiteName			= @strSiteId -- default site name to site number
 				,strDeliveryPickup		= 'Pickup'
 				,intARLocationId		= @intNetworkLocation
 				,strControllerType		= (CASE @strNetworkType 
@@ -823,34 +843,38 @@ BEGIN
 				--SET @i = '0000000'
 				--SELECT CONVERT(BIGINT, @i)
 
-				IF(ISNULL(@strCardId,'') = '')
-				BEGIN
+				-- IF(ISNULL(@strCardId,'') = '')
+				-- BEGIN
+
+
 					IF(ISNULL(@CardNumberForDualCard,'') != '')
 					BEGIN
 						SET @strCardId = @CardNumberForDualCard
 					END
 					ELSE
 					BEGIN
-						SET @strCardId = @strVehicleId
+						SET @strCardId = @VehicleNumberForDualCard
 						SET @strVehicleId = null
 					END
-				END
 
-				IF (ISNUMERIC(@strCardId) = 1)
-				BEGIN
-					IF (CONVERT(BIGINT, @strCardId) = 0)
-					BEGIN
-						IF(ISNULL(@CardNumberForDualCard,'') != '')
-						BEGIN
-							SET @strCardId = @CardNumberForDualCard
-						END
-						ELSE
-						BEGIN
-							SET @strCardId = @strVehicleId
-							SET @strVehicleId = null
-						END
-					END
-				END
+				-- END
+
+				-- IF (ISNUMERIC(@strCardId) = 1)
+				-- BEGIN
+				-- 	IF (CONVERT(BIGINT, @strCardId) = 0)
+				-- 	BEGIN
+					--	IF(ISNULL(@CardNumberForDualCard,'') != '')
+					--	BEGIN
+					--		SET @strCardId = @CardNumberForDualCard
+					--		-- SET @strVehicleId = null
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SET @strCardId = @strVehicleId
+					--		SET @strVehicleId = null
+					--	END
+					---- END
+				-- END
 			END
 		END
 	END
@@ -990,6 +1014,12 @@ BEGIN
 			WHERE C.strCardNumber = @strCardId
 			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 		END
+	END
+
+	IF(LOWER(@strTransactionType) LIKE '%foreign%')
+	BEGIN
+		SET @intCardId = NULL
+		SET @intCustomerId = @intForeignCustomerId
 	END
 
 	IF (@intCardId = 0)
@@ -1184,7 +1214,10 @@ BEGIN
 	IF(ISNUMERIC(@strVehicleId) = 1)
 	BEGIN
 		SET @strVehicleId = CAST(@strVehicleId AS BIGINT)
-		IF(@strVehicleId = 0)
+		DECLARE @bgIntVehicleId BIGINT
+		SET @bgIntVehicleId = CAST(@strVehicleId AS BIGINT)
+
+		IF(@bgIntVehicleId = 0)
 		BEGIN
 			SET @ysnIgnoreVehicleError = 1
 		END
@@ -2173,6 +2206,58 @@ BEGIN
 		------------------------------------------------------------
 		--						TRANSACTION PRICE				  --
 		------------------------------------------------------------
+
+
+		--DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
+		--DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
+
+		--SELECT TOP 1
+		--  @dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
+		--, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
+		--, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
+		--, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
+		--, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
+		--, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
+		--, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
+		--, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
+		--, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
+		--, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
+		--, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
+		--, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
+		--FROM tblCFTransaction
+		--WHERE intTransactionId = @Pk 
+
+		EXEC [uspCFTransactionAuditLog] 
+			@processName					= 'Import Transaction'
+			,@keyValue						= @Pk
+			,@entityId						= @intUserId
+			,@action						= ''
+			--,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
+			--,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
+			--,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
+			--,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
+			--,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
+			--,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
+			--,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
+			--,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
+			--,@strFromPriceMethod			= @strAuditPriceMethod			
+			--,@strFromPriceBasis				= @strAuditPriceBasis			
+			--,@strFromPriceProfileId			= @strAuditPriceProfileId		
+			--,@strFromPriceIndexId			= @strAuditPriceIndexId			
+
+	
+
+
 
 		print @dblCalcOverfillQuantity
 		IF(@dblCalcOverfillQuantity > 0)
