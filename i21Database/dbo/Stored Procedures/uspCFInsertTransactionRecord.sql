@@ -593,14 +593,14 @@ BEGIN
 	--TAX REFERENCE--
 
 
-	IF(@dblOriginalGrossPrice < 0)
-	BEGIN
-		SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
-		IF(ISNULL(@dblQuantity,0) > 0)
+		IF(@dblOriginalGrossPrice < 0)
 		BEGIN
-			SET @dblQuantity = (@dblQuantity * -1)
+			SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+			IF(ISNULL(@dblQuantity,0) > 0)
+			BEGIN
+				SET @dblQuantity = (@dblQuantity * -1)
+			END
 		END
-	END
 
 	DECLARE @ysnCreateSite BIT 
 	DECLARE @strAllowExemptionsOnExtAndRetailTrans NVARCHAR(MAX)
@@ -637,7 +637,7 @@ BEGIN
 
 	IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND (@strPPSiteType = 'N' OR @strPPSiteType = 'R') AND @strNetworkType = 'PacPride')
 	BEGIN 
-		
+			
 			INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -652,7 +652,7 @@ BEGIN
 				,intPPHostId		
 				,strPPSiteType		
 				,strSiteType
-				,strAllowExemptionsOnExtAndRetailTrans  
+				,strAllowExemptionsOnExtAndRetailTrans
 				,intTaxGroupId
 			)
 			SELECT
@@ -779,7 +779,7 @@ BEGIN
 	END
 	ELSE IF ((@intSiteId IS NULL OR @intSiteId = 0) AND @intNetworkId != 0 AND @strNetworkType = 'Wright Express')
 	BEGIN
-		
+
 		INSERT INTO tblCFSite
 			(
 				 intNetworkId		
@@ -844,15 +844,15 @@ BEGIN
 				BEGIN
 					IF (CONVERT(BIGINT, @strCardId) = 0)
 					BEGIN
-						IF(ISNULL(@CardNumberForDualCard,'') != '')
-						BEGIN
-							SET @strCardId = @CardNumberForDualCard
-						END
-						ELSE
-						BEGIN
+					IF(ISNULL(@CardNumberForDualCard,'') != '')
+					BEGIN
+						SET @strCardId = @CardNumberForDualCard
+					END
+					ELSE
+					BEGIN
 							SET @strCardId = @strVehicleId
-							SET @strVehicleId = null
-						END
+						SET @strVehicleId = null
+					END
 					END
 				END
 			END
@@ -994,6 +994,12 @@ BEGIN
 			WHERE C.strCardNumber = @strCardId
 			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 		END
+	END
+
+	IF(LOWER(@strTransactionType) LIKE '%foreign%')
+	BEGIN
+		SET @intCardId = NULL
+		SET @intCustomerId = @intForeignCustomerId
 	END
 
 	IF (@intCardId = 0)
