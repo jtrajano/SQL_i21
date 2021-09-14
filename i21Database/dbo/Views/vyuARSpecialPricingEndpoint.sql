@@ -18,11 +18,9 @@ INNER JOIN
 INNER JOIN
 	tblEMEntity Customer 
 		ON Customer.intEntityId = C.intEntityId
-INNER JOIN 
+LEFT JOIN 
 	tblEMEntityLocation Loc 
-		ON Loc.intEntityLocationId = SP.intCustomerLocationId AND Loc.intEntityId = SP.intEntityCustomerId
-INNER JOIN
+		ON Loc.intEntityLocationId = SP.intCustomerLocationId
+LEFT JOIN
 	tblICItem I
 		ON I.intItemId = SP.intItemId
-WHERE intCustomerLocationId IS NOT NULL
-AND SP.intEntityVendorId IS NULL
