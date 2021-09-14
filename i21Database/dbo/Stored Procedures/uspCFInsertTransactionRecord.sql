@@ -1021,6 +1021,7 @@ BEGIN
 	IF(LOWER(@strTransactionType) LIKE '%foreign%')
 	BEGIN
 		SET @intCardId = NULL
+		SET @intCustomerId = @intForeignCustomerId
 	END
 
 	IF (@intCardId = 0)
