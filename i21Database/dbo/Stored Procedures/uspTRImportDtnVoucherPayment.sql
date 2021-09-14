@@ -23,6 +23,7 @@ BEGIN
 
 			
 			DECLARE @intTermId INT = NULL
+			DECLARE @strInvoiceNo NVARCHAR(100) = NULL
 			DECLARE @dtmDueDate DATETIME = NULL
 			DECLARE @dblAmountDue NUMERIC(18,6) = NULL
 			DECLARE @dblTotalDeferredAmt NUMERIC(18,6) = NULL
@@ -89,6 +90,7 @@ BEGIN
 				,@dtmDeferredDate10 = dtmDeferredDate10
 				,@strDeferredInvoiceNo10 = strDeferredInvoiceNo10
 				,@dtmDueDate = dtmDueDate
+				,@strInvoiceNo = strInvoiceNo
 			FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
 						
 			SELECT @intTermId = intTermsId, @dblAmountDue = dblAmountDue FROM tblAPBill B WHERE B.intBillId = @intBillId
@@ -116,7 +118,7 @@ BEGIN
 				[dblDiscount])
 			SELECT intBillId = @intBillId,
 				intTermsId = @intTermId,
-				strPaymentScheduleNumber = NULL,
+				strPaymentScheduleNumber = @strInvoiceNo,
 				dtmDueDate = @dtmDueDate,
 				dblPayment = @dblDeferredAmt,
 				ysnPaid = 0,
