@@ -168,6 +168,7 @@
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
+    <Build Include="dbo\Views\vyuAPBillForImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
