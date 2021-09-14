@@ -112,7 +112,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SET @errorMessage = @errorMessage + '\n' + @errorMessagePerProcess
+		SET @errorMessage = @errorMessage + CHAR(13) + @errorMessagePerProcess
 	END
 
 	IF(@success = 1)
@@ -134,7 +134,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			SET @errorMessage = @errorMessage + '\n' + @errorMessagePerProcess
+			SET @errorMessage = @errorMessage + CHAR(13) + @errorMessagePerProcess
 		END
 	END
 
@@ -157,7 +157,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			SET @errorMessage = @errorMessage + '\n' + @errorMessagePerProcess
+			SET @errorMessage = @errorMessage +  CHAR(13) + @errorMessagePerProcess
 		END
 	END
 
@@ -179,8 +179,10 @@ BEGIN TRY
 		RAISERROR(@errorMessage,16,1)
 	END
 
-	COMMIT TRANSACTION
-
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		COMMIT TRANSACTION
+	END
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
@@ -192,6 +194,9 @@ BEGIN CATCH
 	SET @errorMessage  = ERROR_MESSAGE()
 	SET @ErrorState    = ERROR_STATE()
 	SET	@success = 0
-	ROLLBACK TRANSACTION
+	IF(@@TRANCOUNT > 0)
+	BEGIN
+		ROLLBACK TRANSACTION
+	END
 	RAISERROR (@errorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
 END CATCH
