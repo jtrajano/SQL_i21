@@ -430,10 +430,11 @@ BEGIN TRY
 					IF NOT EXISTS(SELECT TOP 1 1 
 							  FROM tblSCTruckDriverReference A	
 							  INNER JOIN tblSCTicket B
-							  	ON A.intEntityId = B.intEntityId
+							  	ON 1=1
 							  WHERE intTicketId = @intDirectOutTicketId
 							  	AND B.strCustomerReference = A.strData
-								AND A.strRecordType = 'R')
+								AND A.strRecordType = 'R'
+								AND A.intEntityId IS NULL)
 					BEGIN
 						INSERT INTO tblSCTruckDriverReference(
 							intEntityId
@@ -441,7 +442,7 @@ BEGIN TRY
 							,strRecordType
 						)
 						SELECT TOP 1
-							intEntityId = intEntityId
+							intEntityId = NULL
 							,strData = strCustomerReference
 							,strRecordType = 'R'
 						FROM tblSCTicket 
