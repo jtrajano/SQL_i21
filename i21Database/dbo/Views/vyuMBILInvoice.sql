@@ -24,11 +24,12 @@ SELECT Invoice.intInvoiceId
 	, ISNULL(dblTotal,0) as dblTotal
 	, Invoice.intTermId
 	, Term.strTerm
-	, i21Invoice.ysnPosted
+	, ysnPosted = cast(case when i21Invoice.intInvoiceId is null then 0 else 1 end as bit)
 	, Invoice.ysnVoided
 	, Invoice.dtmPostedDate
 	, Invoice.dtmVoidedDate
-	, Invoice.inti21InvoiceId
+	--, Invoice.inti21InvoiceId
+	, inti21InvoiceId = i21Invoice.intInvoiceId
 	, stri21InvoiceNo = i21Invoice.strInvoiceNumber
 	, Invoice.intConcurrencyId
 	, strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS
@@ -47,3 +48,4 @@ LEFT JOIN (
   SELECT item.intInvoiceId,SUM(isnull(dblItemTotal,0))dblItemTotal,SUM(isnull(dblTaxTotal,0))dblTaxTotal
   FROM tblMBILInvoiceItem item      
   GROUP BY item.intInvoiceId) tax ON Invoice.intInvoiceId = tax.intInvoiceId
+

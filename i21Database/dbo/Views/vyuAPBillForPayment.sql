@@ -71,6 +71,7 @@ FROM (
 			ELSE voucher.dblPaymentTemp END AS dblPaymentTemp
 		,voucher.ysnInPayment
 		,0 AS ysnInPaymentSched
+		,NULL AS strPaymentScheduleNumber
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId
@@ -149,6 +150,7 @@ FROM (
 		,voucher.dblPaymentTemp
 		,voucher.ysnInPayment
 		,paySched.ysnInPayment AS ysnInPaymentSched
+		,paySched.strPaymentScheduleNumber
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
 		ON vendor.intEntityId = voucher.intEntityVendorId

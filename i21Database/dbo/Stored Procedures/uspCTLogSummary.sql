@@ -36,8 +36,10 @@ BEGIN TRY
 			@intCurrStatusId		INT = 0,
    			@ysnWithPriceFix 		BIT,
    			@intPricingTypeId       int,
-   			@dblSeqHistoryPreviousQty	NUMERIC(24, 10),
-			@dblCurrentBasis		NUMERIC(24, 10);
+   			@dblSeqHistoryPreviousQty		NUMERIC(24, 10),
+			@intSeqHistoryPreviousFutMkt	INT,
+			@intSeqHistoryPreviousFutMonth	INT,
+			@dblCurrentBasis				NUMERIC(24, 10);
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -433,120 +435,115 @@ BEGIN TRY
 		-- 	1.2. Increase balance for additional sequence
 		-- 5. Deleting sequence
 		-- 	1.1. Negate balance of the sequence
+		DECLARE @sequenceHistory TABLE (Row_Num INT
+			, intSequenceHistoryId INT
+			, dtmTransactionDate DATETIME
+			, intContractHeaderId INT
+			, strContractNumber NVARCHAR(50)
+			, intContractDetailId INT
+			, intContractSeq INT
+			, intContractTypeId INT
+			, dblQty NUMERIC(18, 6)
+			, dblOrigQty NUMERIC(18, 6)
+			, intQtyUOMId INT
+			, intPricingTypeId INT
+			, strPricingType NVARCHAR(50)
+			, strTransactionType NVARCHAR(50)
+			, intTransactionId INT
+			, strTransactionId NVARCHAR(50)
+			, dblFutures NUMERIC(18, 6)
+			, dblBasis NUMERIC(18, 6)
+			, intBasisUOMId INT
+			, intBasisCurrencyId INT
+			, intPriceUOMId INT
+			, intContractStatusId INT
+			, intEntityId INT
+			, intCommodityId INT
+			, intItemId INT
+			, intCompanyLocationId INT
+			, intFutureMarketId INT
+			, intFutureMonthId INT
+			, dtmStartDate DATETIME
+			, dtmEndDate DATETIME
+			, intBookId INT
+			, intSubBookId INT
+			, intOrderBy INT
+			, intUserId INT
+			, dblQuantity NUMERIC(18, 6));
 
-		declare @sequenceHistory table (
-			Row_Num int
-			,intSequenceHistoryId int
-			,dtmTransactionDate datetime
-			,intContractHeaderId int
-			,strContractNumber nvarchar(50)
-			,intContractDetailId int
-			,intContractSeq int
-			,intContractTypeId int
-			,dblQty numeric(18,6)
-			,dblOrigQty numeric(18,6)
-			,intQtyUOMId int
-			,intPricingTypeId int
-			,strPricingType nvarchar(50)
-			,strTransactionType nvarchar(50)
-			,intTransactionId int
-			,strTransactionId nvarchar(50)
-			,dblFutures numeric(18,6)
-			,dblBasis numeric(18,6)
-			,intBasisUOMId int
-			,intBasisCurrencyId int
-			,intPriceUOMId int
-			,intContractStatusId int
-			,intEntityId int
-			,intCommodityId int
-			,intItemId int
-			,intCompanyLocationId int
-			,intFutureMarketId int
-			,intFutureMonthId int
-			,dtmStartDate datetime
-			,dtmEndDate datetime
-			,intBookId int
-			,intSubBookId int
-			,intOrderBy int
-			,intUserId int
-			,dblQuantity numeric(18,6)
-		);
-
-		insert into @sequenceHistory (
-			Row_Num
-			,intSequenceHistoryId
-			,dtmTransactionDate
-			,intContractHeaderId
-			,strContractNumber
-			,intContractDetailId
-			,intContractSeq
-			,intContractTypeId
-			,dblQty
-			,dblOrigQty
-			,intQtyUOMId
-			,intPricingTypeId
-			,strPricingType
-			,strTransactionType
-			,intTransactionId
-			,strTransactionId
-			,dblFutures
-			,dblBasis
-			,intBasisUOMId
-			,intBasisCurrencyId
-			,intPriceUOMId
-			,intContractStatusId
-			,intEntityId
-			,intCommodityId
-			,intItemId
-			,intCompanyLocationId
-			,intFutureMarketId
-			,intFutureMonthId
-			,dtmStartDate
-			,dtmEndDate
-			,intBookId
-			,intSubBookId
-			,intOrderBy
-			,intUserId
-			,dblQuantity
-		)
+		INSERT INTO @sequenceHistory (Row_Num
+			, intSequenceHistoryId
+			, dtmTransactionDate
+			, intContractHeaderId
+			, strContractNumber
+			, intContractDetailId
+			, intContractSeq
+			, intContractTypeId
+			, dblQty
+			, dblOrigQty
+			, intQtyUOMId
+			, intPricingTypeId
+			, strPricingType
+			, strTransactionType
+			, intTransactionId
+			, strTransactionId
+			, dblFutures
+			, dblBasis
+			, intBasisUOMId
+			, intBasisCurrencyId
+			, intPriceUOMId
+			, intContractStatusId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intCompanyLocationId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dtmStartDate
+			, dtmEndDate
+			, intBookId
+			, intSubBookId
+			, intOrderBy
+			, intUserId
+			, dblQuantity)
 		SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.intSequenceHistoryId DESC) AS Row_Num
-				, sh.intSequenceHistoryId
-				, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
-				, sh.intContractHeaderId
-				, cd.strContractNumber
-				, sh.intContractDetailId
-				, cd.intContractSeq
-				, cd.intContractTypeId
-				, dblQty = sh.dblBalance
-				, dblOrigQty = sh.dblBalance
-				, intQtyUOMId = cd.intCommodityUOMId
-				, sh.intPricingTypeId
-				, sh.strPricingType
-				, strTransactionType = 'Contract Sequence'
-				, intTransactionId = sh.intContractDetailId
-				, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
-				, sh.dblFutures
-				, sh.dblBasis
-				, cd.intBasisUOMId
-				, cd.intBasisCurrencyId
-				, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
-				, sh.intContractStatusId
-				, sh.intEntityId
-				, sh.intCommodityId
-				, sh.intItemId
-				, sh.intCompanyLocationId
-				, sh.intFutureMarketId
-				, sh.intFutureMonthId
-				, sh.dtmStartDate
-				, sh.dtmEndDate
-				, sh.intBookId
-				, sh.intSubBookId
-				, intOrderBy = 1
-				, sh.intUserId
-				, sh.dblQuantity
-			FROM tblCTSequenceHistory sh
-			INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
-			WHERE intSequenceUsageHistoryId IS NULL
+			, sh.intSequenceHistoryId
+			, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
+			, sh.intContractHeaderId
+			, cd.strContractNumber
+			, sh.intContractDetailId
+			, cd.intContractSeq
+			, cd.intContractTypeId
+			, dblQty = sh.dblBalance
+			, dblOrigQty = sh.dblBalance
+			, intQtyUOMId = cd.intCommodityUOMId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = 'Contract Sequence'
+			, intTransactionId = sh.intContractDetailId
+			, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
+			, sh.dblFutures
+			, sh.dblBasis
+			, cd.intBasisUOMId
+			, cd.intBasisCurrencyId
+			, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
+			, sh.intContractStatusId
+			, sh.intEntityId
+			, sh.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
+			, sh.dtmStartDate
+			, sh.dtmEndDate
+			, sh.intBookId
+			, sh.intSubBookId
+			, intOrderBy = 1
+			, sh.intUserId
+			, sh.dblQuantity
+		FROM tblCTSequenceHistory sh
+		INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+		WHERE intSequenceUsageHistoryId IS NULL
 
 		INSERT INTO @cbLogTemp (strBatchId
 			, dtmTransactionDate
@@ -623,22 +620,20 @@ BEGIN TRY
 			, intUserId			
 			, intActionId = 43	
 			, strProcess  = @strProcess
-		FROM
-			@sequenceHistory
+		FROM @sequenceHistory
 		WHERE Row_Num = 1
 
-		select
-			@intPricingTypeId = intPricingTypeId
-			,@dblSeqHistoryPreviousQty = dblQuantity
-		from
-			@sequenceHistory
-		where
-			Row_Num = 2
+		SELECT TOP 1 @intPricingTypeId = intPricingTypeId
+			, @dblSeqHistoryPreviousQty = dblQuantity
+			, @intSeqHistoryPreviousFutMkt = intFutureMarketId
+			, @intSeqHistoryPreviousFutMonth = intFutureMonthId
+		FROM @sequenceHistory
+		WHERE Row_Num = 2
 
-		if not (@intPricingTypeId is null)
-		begin
-			update @cbLogTemp set intPricingTypeId = @intPricingTypeId where dblQty < @dblSeqHistoryPreviousQty;
-		end
+		IF NOT (@intPricingTypeId IS NULL)
+		BEGIN
+			UPDATE @cbLogTemp SET intPricingTypeId = @intPricingTypeId WHERE dblQty < @dblSeqHistoryPreviousQty;
+		END
 
 		IF (SELECT COUNT(*) FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) >= 1
 		BEGIN
@@ -820,6 +815,86 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			-- Insert negating entry due to other changes besides Qty
+			IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE (intFutureMarketId <> @intSeqHistoryPreviousFutMkt OR intFutureMonthId <> @intSeqHistoryPreviousFutMonth) AND dblQty <> @dblSeqHistoryPreviousQty)
+			BEGIN
+				INSERT INTO @cbLogCurrent (strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, dblOrigQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId
+					, intActionId
+					, strProcess)
+				SELECT strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, @dblSeqHistoryPreviousQty
+					, @dblSeqHistoryPreviousQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId
+					, intActionId
+					, strProcess
+				FROM @cbLogTemp
+			END
+
 			INSERT INTO @cbLogCurrent (strBatchId
 				, dtmTransactionDate
 				, strTransactionType
@@ -1910,15 +1985,11 @@ BEGIN TRY
 					, CBL.intCommodityId
 					, CBL.intItemId
 					, CBL.intLocationId
-					, intPricingTypeId =
-											case
-												when
-													CBL.strTransactionType = 'Contract Balance'
-													and CBL.strTransactionReference = 'Inventory Shipment'
-													and isnull(shipmentItem.ysnAllowInvoice,0) = 1
-												then 1
-												else CBL.intPricingTypeId
-											end
+					, intPricingTypeId = CASE WHEN CBL.strTransactionType = 'Contract Balance'
+													AND CBL.strTransactionReference = 'Inventory Shipment'
+													AND ISNULL(shipmentItem.ysnAllowInvoice, 0) = 1
+													AND ISNULL(CBL.intPricingTypeId, 0) <> 6 THEN 1
+											ELSE CBL.intPricingTypeId END
 					, CBL.intFutureMarketId
 					, CBL.intFutureMonthId
 					, CBL.dblBasis
@@ -2430,7 +2501,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT @strBatchId
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2517,7 +2588,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2605,7 +2676,7 @@ BEGIN TRY
 				, strProcess)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
-				, strTransactionType = 'Sales Basis Deliveries'
+				, strTransactionType = CASE WHEN cbl.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 				, cbl.strTransactionReference
 				, cbl.intTransactionReferenceId
 				, cbl.intTransactionReferenceDetailId
@@ -2743,9 +2814,18 @@ BEGIN TRY
 					, cd.intContractDetailId
 					, cd.intContractSeq
 					, cd.intContractTypeId
-					, dblQty = CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 0 -- When change of price only.
-									ELSE CASE WHEN @ysnLoadBased = 1 THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
-										ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0) END END
+					, dblQty = (
+						case
+						when ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity
+						then 0
+						else
+							CASE
+							WHEN @ysnLoadBased = 1
+							THEN (ISNULL(pfd.dblLoadPriced, 0) - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * cd.dblQuantityPerLoad
+							ELSE ISNULL(pfd.dblQuantity, 0) - ISNULL(dblQuantityAppliedAndPriced, 0)
+							END
+						end
+					)
 					, dblOrigQty = pfd.dblQuantity
 					, dblDynamic =  CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) = pfd.dblQuantity AND ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 0 -- When change of price only.
 										ELSE (CASE WHEN @ysnLoadBased = 1 THEN ISNULL(pfd.dblLoadAppliedAndPriced, 0) * cd.dblQuantityPerLoad
@@ -2839,7 +2919,7 @@ BEGIN TRY
 					, strProcess)
 				SELECT strBatchId = @strBatchId
 					, dtmTransactionDate
-					, strTransactionType = 'Sales Basis Deliveries'
+					, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase' ELSE 'Sales' END + ' Basis Deliveries'
 					, strTransactionReference = strTransactionType
 					, intTransactionReferenceId
 					, intTransactionReferenceDetailId
