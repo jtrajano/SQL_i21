@@ -53,7 +53,17 @@ FROM
 	tblICEdiPricebook p
 WHERE 
 	p.strUniqueId = @UniqueId
-	
+
+-- Clean the UPC codes 
+UPDATE p
+SET 
+	p.strSellingUpcNumber = NULLIF(NULLIF(LTRIM(RTRIM(strSellingUpcNumber)), ''), '0') 
+	,p.strOrderCaseUpcNumber = NULLIF(NULLIF(LTRIM(RTRIM(strOrderCaseUpcNumber)), ''), '0') 
+FROM 
+	tblICEdiPricebook p
+WHERE 
+	p.strUniqueId = @UniqueId
+
 -- Remove the duplicate records in tblICEdiPricebook
 ;WITH deleteDuplicate_CTE (
 	intEdiPricebookId
@@ -118,7 +128,81 @@ FROM
 	) vendorCategoryXRef
 WHERE
 	p.strUniqueId = @UniqueId
-	   
+
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItem') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICItem (
+		intItemId INT
+		,strAction NVARCHAR(50) NULL
+		,intBrandId_Old INT NULL 
+		,intBrandId_New INT NULL 
+		,strDescription_Old NVARCHAR(50) NULL
+		,strDescription_New NVARCHAR(50) NULL 
+		,strShortName_Old NVARCHAR(50) NULL
+		,strShortName_New NVARCHAR(50) NULL
+		,strItemNo_Old NVARCHAR(50) NULL
+		,strItemNo_New NVARCHAR(50) NULL
+	)
+;
+
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemUOM') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICItemUOM (
+		intItemId INT
+		,intItemUOMId INT
+		,strAction NVARCHAR(50) NULL
+		,intUnitMeasureId_Old INT NULL
+		,intUnitMeasureId_New INT NULL
+	)
+;
+
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemVendorXref') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICItemVendorXref (
+		intItemId INT
+		,strAction NVARCHAR(50) NULL
+		,intVendorId_Old INT NULL 
+		,intVendorId_New INT NULL 
+		,strVendorProduct_Old NVARCHAR(50) NULL
+		,strVendorProduct_New NVARCHAR(50) NULL 
+		,strProductDescription_Old NVARCHAR(50) NULL
+		,strProductDescription_New NVARCHAR(50) NULL
+	)
+;
+
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemLocation') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICItemLocation (
+		intItemId INT
+		,intItemLocationId INT 
+		,strAction NVARCHAR(50) NULL
+		,intLocationId_Old INT NULL 
+		,intLocationId_New INT NULL 
+	)
+;
+
+
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemPricing') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICItemPricing (
+		intItemId INT
+		,intItemLocationId INT 
+		,intItemPricingId INT 
+		,strAction NVARCHAR(50) NULL
+	)
+;
+
+
+-- Create the temp table for the audit log. 
+IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL  
+	CREATE TABLE #tmpICEdiImportPricebook_tblICItemSpecialPricing (
+		intItemId INT
+		,intItemLocationId INT 
+		,intItemSpecialPricingId INT 
+		,strAction NVARCHAR(50) NULL
+	)
+;
+
 -------------------------------------------------
 -- BEGIN Validation 
 -------------------------------------------------
@@ -257,6 +341,164 @@ WHERE
 	p.strUniqueId = @UniqueId
 	AND p.intCategoryId IS NULL 
 	AND p.intVendorId IS NULL 	
+
+-- Log the duplicate UOM from strItemUnitOfMeasure
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, intRecordNumber
+	, 'strItemUnitOfMeasure'
+	, strSymbol
+	, 'Duplicate UOM Symbol is used for ' + strUnitMeasure
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM (
+		SELECT 
+			strUnitMeasure = u.strUnitMeasure
+			,strSymbol = u.strSymbol
+			,intRecordNumber = p.intRecordNumber
+			,row_no = u.row_no
+		FROM 
+			tblICEdiPricebook p 
+			LEFT JOIN (
+				SELECT * 
+				FROM (
+					SELECT 
+						strUnitMeasure
+						,strSymbol
+						,row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
+					FROM 
+						tblICUnitMeasure u 
+				) x
+				WHERE
+					x.row_no > 1 			
+			) u
+			ON 
+				(p.ysnUpdateExistingRecords = 1 OR p.ysnAddNewRecords = 1) 
+				AND u.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')				
+		WHERE
+			p.strUniqueId = @UniqueId
+	) x
+WHERE
+	x.row_no > 1 
+
+-- Log the duplicate 2nd UOM from strOrderPackageDescription
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, intRecordNumber
+	, 'strOrderPackageDescription'
+	, strSymbol
+	, 'Duplicate UOM Symbol is used for ' + strUnitMeasure
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM (
+		SELECT 
+			strUnitMeasure = u.strUnitMeasure
+			,strSymbol = u.strSymbol
+			,intRecordNumber = p.intRecordNumber
+			,row_no = u.row_no
+		FROM 
+			tblICEdiPricebook p 
+			LEFT JOIN (
+				SELECT * 
+				FROM (
+					SELECT 
+						strUnitMeasure
+						,strSymbol
+						,row_no = ROW_NUMBER() OVER (PARTITION BY u.strSymbol ORDER BY u.strSymbol) 
+					FROM 
+						tblICUnitMeasure u 
+				) x
+				WHERE
+					x.row_no > 1 			
+			) u
+			ON 
+				p.ysnAddOrderingUPC = 1 
+				AND u.strSymbol = NULLIF(p.strOrderPackageDescription, '')				
+		WHERE
+			p.strUniqueId = @UniqueId
+	) x
+WHERE
+	x.row_no > 1 
+	
+-- Log the duplicate UPC code for the 2nd UOM. 
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, intRecordNumber
+	, 'strOrderCaseUpcNumber'
+	, strOrderCaseUpcNumber
+	, 'Duplicate UPC code is used for ' + strOrderPackageDescription
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	OUTER APPLY (
+		SELECT TOP 1 
+			i.intItemId 
+		FROM
+			tblICItem i 
+		WHERE
+			i.intItemId = u.intItemId
+			OR i.strItemNo = p.strSellingUpcNumber
+	) i
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId 
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.intItemId = i.intItemId
+			AND iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
+	) existUOM
+WHERE
+	p.strUniqueId = @UniqueId
+	AND i.intItemId IS NOT NULL 
+	AND NULLIF(p.strOrderCaseUpcNumber, '') IS NOT NULL 
+	AND p.ysnAddOrderingUPC = 1
+	AND existUOM.intItemUOMId IS NOT NULL  
+
+IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
+	GOTO _Exit_With_Errors
 
 -------------------------------------------------
 -- END Validation 
@@ -652,8 +894,8 @@ FROM
 		WHERE
 			iu.intItemId = i.intItemId
 			AND (
-				iu.intUnitMeasureId = m.intUnitMeasureId
-				OR iu.intUnitMeasureId = s.intUnitMeasureId
+				iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
+				OR iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
 			)
 	) existUOM
 
