@@ -2,24 +2,24 @@ CREATE TABLE tblApiSchemaEmployeeDeduction(
      guiApiUniqueId UNIQUEIDENTIFIER NOT NULL
     ,intRowNumber INT NULL
     ,intKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY
-    ,intEntityNo INT NULL
+    ,intEntityNo INT NOT NULL                                                   --Required
     ,strDeductionId NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,strDeductionDesc NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,dblDeductionRate FLOAT(50) NULL
-    ,ysnDefault NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,ysnDefault NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL                --Values should be "Y" and "N" only
     ,strCategory NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,strPaidBy NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,dblRateCalc FLOAT(50) NULL
-    ,strRateCalcType NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strRateCalcType NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL           --Values should be "Fixed Amount", "Percent", "Hourly Amount" and "Hourly Percent" only
     ,dblDeductFrom FLOAT(50) NULL
-    ,strDeductFromType NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,strDeductFromType NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL         --Values should be "Net Pay" and "Gross Pay" only
     ,dblAnnualLimit	 FLOAT(50) NULL
     ,dtmBeginDate DATETIME NULL
     ,dtmEndDate	DATETIME NULL
     ,strAccountId NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
-    ,ysnAccountGLSplit NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,ysnAccountGLSplit NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL         --Values should be "Y" and "N" only
     ,strExpenseAccountId NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
-    ,ysnExpenseGLSplit NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+    ,ysnExpenseGLSplit NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL         --Values should be "Y" and "N" only
     ,strDeductionTaxId1	NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,strDeductionTaxDesc1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
     ,strDeductionTaxId2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
