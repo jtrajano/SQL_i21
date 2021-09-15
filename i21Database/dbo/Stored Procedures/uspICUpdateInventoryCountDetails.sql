@@ -200,6 +200,7 @@ END
 
 IF @ysnCountByLots = 1
 BEGIN
+
 	INSERT INTO tblICInventoryCountDetail(
 		  intInventoryCountId
 		, intItemId
@@ -580,18 +581,22 @@ BEGIN
 			CASE 
 				WHEN hasExistingStock.intItemId IS NULL THEN il.intSubLocationId 
 				ELSE 
-					CASE 
-						WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN stock.intSubLocationId  
-						ELSE stockUnit.intSubLocationId
+					CASE
+						WHEN i.ysnSeparateStockForUOMs = 1 THEN 
+							stock.intSubLocationId							
+						ELSE
+							stockUnit.intSubLocationId
 					END 
 			END 
 		, intStorageLocationId = 
 			CASE 
 				WHEN hasExistingStock.intItemId IS NULL THEN il.intStorageLocationId 
 				ELSE 
-					CASE 
-						WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN stock.intStorageLocationId  
-						ELSE stockUnit.intStorageLocationId
+					CASE
+						WHEN i.ysnSeparateStockForUOMs = 1 THEN 
+							stock.intStorageLocationId							
+						ELSE
+							stockUnit.intStorageLocationId
 					END 
 			END
 		, intLotId = NULL
@@ -652,7 +657,8 @@ BEGIN
 		, intConcurrencyId = 1
 		, intSort = 1
 		, NULL
-	FROM tblICItemLocation il
+	FROM 
+		tblICItemLocation il
 		INNER JOIN tblICItemPricing p 
 			ON p.intItemLocationId = il.intItemLocationId
 			AND p.intItemId = il.intItemId
@@ -661,17 +667,25 @@ BEGIN
 			AND stockUOM.ysnStockUnit = 1
 		INNER JOIN tblICItem i 
 			ON i.intItemId = il.intItemId
+
+		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1
 		-- Get the stocks using its own UOM 
-		LEFT JOIN (
+		OUTER APPLY (
 			SELECT	intItemId
 					,intItemUOMId
 					,intItemLocationId
 					,intSubLocationId
 					,intStorageLocationId
 					,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
-			FROM	vyuICGetItemStockSummary
-			WHERE	--dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
-					FLOOR(CAST(dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
+			FROM	vyuICGetItemStockSummary v
+			WHERE	
+					FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
+					AND v.intItemId = i.intItemId
+					AND v.intItemLocationId = il.intItemLocationId
+					AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 1		
+					AND (v.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+					AND (v.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 			GROUP BY 
 					intItemId,
 					intItemUOMId,
@@ -679,11 +693,9 @@ BEGIN
 					intSubLocationId,
 					intStorageLocationId
 		) stock 
-			ON stock.intItemId = i.intItemId
-			AND stock.intItemLocationId = il.intItemLocationId
-			AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 1
+			
 		-- Get the stocks as 'Stock Unit'. 
-		LEFT JOIN (
+		OUTER APPLY (
 			SELECT	 
 				st.intItemId
 				,st.intItemLocationId
@@ -705,6 +717,12 @@ BEGIN
 			WHERE	
 				--dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1
 				FLOOR(CAST(dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
+				AND st.intItemId = i.intItemId			
+				AND st.intItemLocationId = il.intItemLocationId
+				AND st.intLocationId = il.intLocationId
+				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0
+				AND (st.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+				AND (st.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 			GROUP BY 
 				st.intItemId
 				,st.intItemLocationId
@@ -712,11 +730,7 @@ BEGIN
 				,st.intStorageLocationId
 				,st.intLocationId
 		) stockUnit 
-		ON 
-			stockUnit.intItemId = i.intItemId			
-			AND stockUnit.intItemLocationId = il.intItemLocationId
-			AND stockUnit.intLocationId = il.intLocationId
-			AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0
+		
 		-- Get the stock reservation. 
 		OUTER APPLY (
 			SELECT 
@@ -731,10 +745,11 @@ BEGIN
 				sr.intItemId = i.intItemId
 				AND sr.intItemLocationId = il.intItemLocationId
 				AND (dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), sr.dtmDate,112), @AsOfDate) = 1 OR sr.dtmDate IS NULL) 
-				AND ISNULL(sr.intStorageLocationId, 0) = COALESCE(stock.intStorageLocationId, stockUnit.intStorageLocationId, 0)
-				AND ISNULL(sr.intSubLocationId, 0) = COALESCE(stock.intSubLocationId, stockUnit.intSubLocationId, 0)
-				AND sr.intItemUOMId = COALESCE(stock.intItemUOMId, sr.intItemUOMId) 
+				AND sr.intItemUOMId = COALESCE(stock.intItemUOMId, sr.intItemUOMId) 				
+				AND (sr.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+				AND (sr.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 		) reserved
+
 		-- last transaction
 		OUTER APPLY (
 			SELECT
@@ -749,11 +764,11 @@ BEGIN
 				AND t.intItemLocationId = il.intItemLocationId 
 				AND t.dblQty > 0 
 				AND ISNULL(t.ysnIsUnposted, 0) = 0 
-				--AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
 				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) lastTransaction 
+
 		OUTER APPLY (
 			SELECT TOP 1 
 				v.intItemId
@@ -763,14 +778,13 @@ BEGIN
 				--dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
 				v.intItemId = i.intItemId
 				AND v.intItemLocationId = il.intItemLocationId
-				AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
-				AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL)    
 				AND FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@AsOfDate AS FLOAT))
+				AND (v.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+				AND (v.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 		) hasExistingStock 
+
 		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
-		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
-		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1	
 		OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@AsOfDate, i.intItemId, il.intItemLocationId, 0) EffectivePricing	 
 	WHERE 
 		il.intLocationId = @intLocationId
@@ -781,13 +795,5 @@ BEGIN
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (i.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
 		AND (i.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
-		AND (
-			(stock.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
-			OR (hasExistingStock.intItemId IS NULL AND il.intSubLocationId = storageLocationFilter.intStorageLocationId)				
-		)
-		AND (
-			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
-			OR (hasExistingStock.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
-		)
-		AND il.ysnActive = 1
+		AND il.ysnActive = 1		
 END
