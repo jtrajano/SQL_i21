@@ -33,11 +33,7 @@ BEGIN
 	DECLARE @ysnHasBasisContract INT = 0
 	DECLARE @_intLoopContractDetailId INT = 0
 
-	declare @SystemUnpost bit = 0
-	declare @ysnSuccessUnpost bit = 0
-	declare @strBatchIdUsed nvarchar(50)
-	declare @strErrorMessage nvarchar(100)
-
+	
 	BEGIN TRY
 		BEGIN
 			SELECT TOP 1 
@@ -217,80 +213,9 @@ BEGIN
 							)
 							SELECT [intId] = intPrepayId
 							FROM #tmpContractPrepay where intPrepayId > 0
-						
-							
-
-							select @SystemUnpost  = 0
-								, @ysnSuccessUnpost = 1
-								, @strBatchIdUsed = ''
-
-							IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=1 AND intBillId = @intBillId)
-							BEGIN
-								EXEC uspAPPostBill 
-									 @post=0
-									,@recap=0
-									,@isBatch=0
-									,@param=@intBillId			
-									,@userId=@intUserId
-									, @success = @ysnSuccessUnpost output
-									, @batchIdUsed = @strBatchIdUsed output
-									set @SystemUnpost  = 1
-
-								if @ysnSuccessUnpost = 0
-								begin
-									print 'Failed voucher unpost'
-
-									select @strErrorMessage = 'Failed unposting the voucher before applying prepaid: ' + strMessage 
-										from tblAPPostResult 
-											where strBatchNumber = @strBatchIdUsed
-
-									if @strErrorMessage  <> ''
-									begin
-										Raiserror(@strErrorMessage , 11, 1)
-									end
-								end 
-							END	
-
-							if @ysnSuccessUnpost = 1
-							begin
-								EXEC uspAPApplyPrepaid @intBillId, @prePayId								
-							end
-							
+					
+							EXEC uspAPApplyPrepaid @intBillId, @prePayId
 							update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
-
-
-							IF @SystemUnpost = 1 and @ysnSuccessUnpost = 1
-							BEGIN
-								EXEC uspAPPostBill 
-									 @post=1
-									,@recap=0
-									,@isBatch=0
-									,@param=@intBillId			
-									,@userId=@intUserId
-									, @success = @ysnSuccessUnpost output
-									, @batchIdUsed = @strBatchIdUsed output
-									set @SystemUnpost  = 1
-
-								if @ysnSuccessUnpost = 0
-								begin
-									print 'Failed voucher post'
-
-									select @strErrorMessage = 'Failed posting the voucher after applying prepaid: ' + strMessage 
-										from tblAPPostResult 
-											where strBatchNumber = @strBatchIdUsed
-
-									if @strErrorMessage  <> ''
-									begin
-										Raiserror(@strErrorMessage , 11, 1)
-									end
-								end 
-								
-
-
-							END	
-
-
-							
 						END
 					END
 
