@@ -25,12 +25,12 @@ BEGIN
 
 	SELECT @dtmProductionDate = GETDATE()
 
-	SELECT @intProducedItemId = intItemId
+	SELECT @intProducedItemId = intProducedItemId
 		,@dblProducedQuantity = dblQuantity
 		,@intProducedItemUOMId = intItemUOMId
 		,@intTransferToStorageLocationId = intStorageLocationId
 	FROM tblMFWODetail
-	WHERE intItemId = @intProducedItemId
+	WHERE intProducedItemId = @intProducedItemId
 		AND ysnProcessed = 0
 		AND intTransactionTypeId = 9
 
@@ -60,7 +60,7 @@ BEGIN
 
 	SELECT @strProduceXml = @strProduceXml + '<intManufacturingCellId>' + convert(VARCHAR, @intManufacturingCellId) + '</intManufacturingCellId>'
 
-	SELECT @strProduceXml = @strProduceXml + '<dblPlannedQuantity>' + convert(VARCHAR, 10) + '</dblPlannedQuantity>'
+	SELECT @strProduceXml = @strProduceXml + '<dblPlannedQuantity>' + convert(VARCHAR, @dblProducedQuantity) + '</dblPlannedQuantity>'
 
 	SELECT @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
 
@@ -72,7 +72,7 @@ BEGIN
 
 	SELECT @intDetailId = MIN(intDetailId)
 	FROM tblMFWODetail
-	WHERE intItemId = @intProducedItemId
+	WHERE intProducedItemId = @intProducedItemId
 		AND ysnProcessed = 0
 		AND intTransactionTypeId = 8
 
@@ -118,13 +118,13 @@ BEGIN
 
 		SELECT @intDetailId = MIN(intDetailId)
 		FROM tblMFWODetail
-		WHERE intItemId = @intProducedItemId
+		WHERE intProducedItemId = @intProducedItemId
 			AND ysnProcessed = 0
 			AND intTransactionTypeId = 8
 			AND intDetailId > @intDetailId
 	END
 
-	SELECT @strProduceXml = @strProduceXml + '</root>'
+	SELECT @strProduceXml = @strProduceXml +@strConsumeXml+ '</root>'
 
 	EXEC [dbo].[uspMFCompleteBlendSheet] @strXml = @strProduceXml
 		,@intLotId = @intLotId OUT
@@ -133,4 +133,9 @@ BEGIN
 		,@ysnRecap = 0
 		,@strBatchId = @strBatchId OUT
 		,@ysnAutoBlend = 0
+
+	Update tblMFWODetail
+	Set ysnProcessed = 1
+	WHERE intProducedItemId = @intProducedItemId
+		AND ysnProcessed = 0
 END
