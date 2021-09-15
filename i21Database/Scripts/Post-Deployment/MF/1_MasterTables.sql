@@ -4139,3 +4139,8 @@ UPDATE tblMFCompanyPreference
 SET ysnEnableItemMenuOnHandheld = 0
 WHERE ysnEnableItemMenuOnHandheld IS NULL
 GO
+
+UPDATE tblMFCompanyPreference
+SET ysnWOAutoSelectBOMServiceItems = 0
+WHERE ysnWOAutoSelectBOMServiceItems IS NULL
+GO
