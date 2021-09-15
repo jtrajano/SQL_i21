@@ -53,7 +53,17 @@ FROM
 	tblICEdiPricebook p
 WHERE 
 	p.strUniqueId = @UniqueId
-	
+
+-- Clean the UPC codes 
+UPDATE p
+SET 
+	p.strSellingUpcNumber = NULLIF(NULLIF(LTRIM(RTRIM(strSellingUpcNumber)), ''), '0') 
+	,p.strOrderCaseUpcNumber = NULLIF(NULLIF(LTRIM(RTRIM(strOrderCaseUpcNumber)), ''), '0') 
+FROM 
+	tblICEdiPricebook p
+WHERE 
+	p.strUniqueId = @UniqueId
+
 -- Remove the duplicate records in tblICEdiPricebook
 ;WITH deleteDuplicate_CTE (
 	intEdiPricebookId
@@ -193,7 +203,6 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL
 	)
 ;
 
-	   
 -------------------------------------------------
 -- BEGIN Validation 
 -------------------------------------------------
@@ -404,6 +413,57 @@ FROM (
 	) x
 WHERE
 	x.row_no > 1 
+	
+-- Log the duplicate UPC code for the 2nd UOM. 
+INSERT INTO tblICImportLogDetail(
+	intImportLogId
+	, strType
+	, intRecordNo
+	, strField
+	, strValue
+	, strMessage
+	, strStatus
+	, strAction
+	, intConcurrencyId
+)
+SELECT 
+	@LogId
+	, 'Error'
+	, intRecordNumber
+	, 'strOrderCaseUpcNumber'
+	, strOrderCaseUpcNumber
+	, 'Duplicate UPC code is used for ' + strOrderPackageDescription
+	, 'Skipped'
+	, 'Record not imported.'
+	, 1
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	OUTER APPLY (
+		SELECT TOP 1 
+			i.intItemId 
+		FROM
+			tblICItem i 
+		WHERE
+			i.intItemId = u.intItemId
+			OR i.strItemNo = p.strSellingUpcNumber
+	) i
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId 
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.intItemId = i.intItemId
+			AND iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
+	) existUOM
+WHERE
+	p.strUniqueId = @UniqueId
+	AND i.intItemId IS NOT NULL 
+	AND NULLIF(p.strOrderCaseUpcNumber, '') IS NOT NULL 
+	AND p.ysnAddOrderingUPC = 1
+	AND existUOM.intItemUOMId IS NOT NULL  
 
 IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @LogId AND strType = 'Error')
 	GOTO _Exit_With_Errors
@@ -757,7 +817,10 @@ FROM
 			tblICItemUOM iu
 		WHERE
 			iu.intItemId = i.intItemId
-			AND iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
+			AND (
+				iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
+				OR iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
+			)
 	) existUOM
 WHERE
 	p.strUniqueId = @UniqueId
