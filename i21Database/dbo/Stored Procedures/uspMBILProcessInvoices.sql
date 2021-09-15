@@ -43,6 +43,14 @@ CREATE TABLE #TempMBILInvoiceItem (
 	INSERT INTO #TempMBILInvoiceItem SELECT [intInvoiceId], [intItemId], [intLocationId], [strItemNo], [strLocationName] FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
 
 	-------------------------------------------------------------
+	------------------- Update Tax Detail-----------------------
+	-------------------------------------------------------------
+    UPDATE tblMBILInvoiceTaxCode 
+	SET dblTax = CASE WHEN strCalculationMethod ='Percentage' THEN (item.dblQuantity * item.dblPrice * (tax.dblRate / 100)) ELSE item.dblQuantity * tax.dblRate END
+	FROM tblMBILInvoiceItem item 
+	INNER JOIN tblMBILInvoiceTaxCode tax ON item.intInvoiceItemId = tax.intInvoiceItemId
+	WHERE item.intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+	-------------------------------------------------------------
 	------------------- Validate Invoices -----------------------
 	-------------------------------------------------------------
 	IF NOT EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice))
@@ -50,26 +58,29 @@ CREATE TABLE #TempMBILInvoiceItem (
 		SET @ErrorMessage = 'Record does not exists.'
 		RETURN
 	END
-	WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
+	IF @BatchId IS NULL
 	BEGIN
-		DECLARE @intItemInvoiceId INT
-		DECLARE @intItemId INT
-		DECLARE @intLocationId INT
-		DECLARE @strItemNo NVARCHAR(MAX)
-		DECLARE @strLocationName NVARCHAR(MAX)
-
-		SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
-
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+		WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
 		BEGIN
-			SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
-			RETURN
+			DECLARE @intItemInvoiceId INT
+			DECLARE @intItemId INT
+			DECLARE @intLocationId INT
+			DECLARE @strItemNo NVARCHAR(MAX)
+			DECLARE @strLocationName NVARCHAR(MAX)
+
+			SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+			BEGIN
+				SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
+				RETURN
+			END
+
+			DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
 		END
+	END
 
-		DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
-	END		
-
-	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL)
+	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL AND inti21InvoiceId IN (SELECT intInvoiceId FROM tblARInvoice))
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE ysnPosted = 1 AND intInvoiceId = (SELECT TOP 1 inti21InvoiceId FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL))
 		BEGIN
@@ -230,7 +241,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 		,[ysnUseOriginIdAsInvoiceNumber] = 1
 
 	FROM vyuMBILInvoiceItem InvoiceItem
-	WHERE inti21InvoiceId IS NULL and intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+	WHERE (inti21InvoiceId IS NULL OR inti21InvoiceId NOT IN (SELECT intInvoiceId FROM tblARInvoice)) AND intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
 
 	INSERT INTO @TaxDetails
 					(
@@ -322,6 +333,21 @@ CREATE TABLE #TempMBILInvoiceItem (
 		END
 
 	END
+
+	IF @BatchId IS NULL
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
+		BEGIN
+			SELECT TOP 1 @ErrorMessage = strPostingMessage FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
+
+			IF @ErrorMessage <> 'Transaction successfully posted.'
+			BEGIN
+				SET @ErrorMessage = @ErrorMessage + ' Kindly check the created invoice for details.'
+				RAISERROR(@ErrorMessage,16,1)
+			END
+		END
+	END
+	
 
 END
 

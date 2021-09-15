@@ -39,7 +39,8 @@ DECLARE @tblAssetInfo TABLE (
 	intDaysRemainingFirstMonth INT,
 	dblDepre 	DECIMAL (18,6),
 	ysnFullyDepreciated BIT NULL,
-	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	strAssetTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 
 ) 
 
@@ -52,6 +53,7 @@ INSERT INTO  @tblAssetInfo(
 	dblYear,
 	dblImportGAAPDepToDate,
 	dtmImportedDepThru,
+	strAssetTransaction,
 	strError
 )
 SELECT 
@@ -63,12 +65,13 @@ BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
 CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
 DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmImportedDepThru)) + 1, 0)),
+Depreciation.strTransaction,
 NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
 JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
-	SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
+	SELECT TOP 1 dblDepreciationToDate, strTransaction FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
 	AND ISNULL(intBookId,1) = @BookId
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
@@ -214,22 +217,20 @@ OUTER APPLY
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
 OUTER APPLY(
+	SELECT CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, 
+		CASE WHEN Dep.strTransaction = 'Place in service' THEN 0
+		ELSE 1 END, Dep.dtmDepreciationToDate))) + 1, 0)) as float)) as datetime) endDate 
+)PrevDepPlusOneMonth
+OUTER APPLY(
 	SELECT t=
 	CASE
-	WHEN (A.dtmImportedDepThru >  DATEADD(m, 1, Dep.dtmDepreciationToDate) AND ISNULL(A.dtmImportedDepThru,0) >0 ) OR 
-	Dep.dtmDepreciationToDate IS NULL
-		THEN 0 
-	WHEN 
-		CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, -1, A.dtmImportedDepThru))) + 1, 0)) as float)) as datetime)
-		= Dep.dtmDepreciationToDate  and isnull(A.dtmImportedDepThru,0) > 0
+	WHEN A.dtmImportedDepThru IS NULL THEN 0
+	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
+	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.endDate	THEN 0
+	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.endDate
 		THEN
-			CASE 
-				WHEN Dep.strTransaction = 'Place in service'  
-				THEN 0
-			ELSE		
-				 CASE when ISNULL(dblImportGAAPDepToDate,0) = 0 then 1
-				 ELSE 2
-				 END
+			CASE WHEN A.strTransaction = 'Place in service' THEN 0
+			ELSE 2
 			END
 	ELSE 
 		1
@@ -254,6 +255,7 @@ AND intMonth > totalMonths
 AND strConvention <> 'Full Month'
 AND ISNULL(BD.ysnFullyDepreciated,0) = 0
 
+--ROUND OFF TO NEAREAST HUNDREDTHS
 UPDATE @tblAssetInfo
 set dblMonth = ROUND(dblMonth, 2),
 dblDepre =  ROUND(dblDepre, 2)
@@ -270,9 +272,9 @@ INSERT INTO @tbl(
 	)
 	SELECT 
 	intAssetId,
-	dblBasis, 
-	dblMonth, 
-	dblDepre, 
+	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblBasis END,
+	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblMonth END,
+	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblDepre END,
 	ysnFullyDepreciated ,
 	strError,
 	strTransaction

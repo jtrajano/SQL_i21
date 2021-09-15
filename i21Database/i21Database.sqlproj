@@ -109,6 +109,7 @@
     <Build Include="dbo\Views\vyuICApiCategory.sql" />
     <Build Include="dbo\Tables\tblRestApiSchemaDollarContract.sql" />
     <Build Include="dbo\Tables\tblRestApiSchemaItemContract.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCommodityContract.sql" />
     <Build Include="dbo\Tables\tblRestApiItemTaxes.sql" />
     <Build Include="dbo\Tables\tblRestApiInvoiceStaging.sql" />
     <Build Include="dbo\Tables\tblRestApiReceiptStaging.sql" />
@@ -139,9 +140,11 @@
     <Build Include="dbo\Views\vyuCTRestApiTicketDiscount.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
+    <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
     <Build Include="dbo\Views\vyuGRRestApiCustomerStorageBalances.sql" />
     <Build Include="dbo\Views\vyuCTApiContractText.sql" />
+    <Build Include="dbo\Views\vyuApiEntity.sql" />
     <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
@@ -160,7 +163,11 @@
     <Build Include="dbo\Stored Procedures\uspApiCreateItemContractPrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
+    <Build Include="dbo\Functions\fnTRStringConcat.sql" />
+    <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
+    <Build Include="dbo\Views\vyuAPBillForImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3175,6 +3182,7 @@
     <Build Include="dbo\Stored Procedures\uspTRUpdateSentQuote.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
     <Build Include="dbo\Views\vyuAPItemUOM.sql" />
+    <Build Include="dbo\Views\vyuApiTransportFreightSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFBlendBinTicketReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFKitTicketReport.sql" />
     <Build Include="dbo\Functions\fnCTConvertQtyToTargetCategoryUOM.sql" />
@@ -7366,6 +7374,7 @@
     <Build Include="dbo\User Defined Types\BillFeesTableType.sql" />
     <Build Include="dbo\Tables\tblTMManufacturer.sql" />
     <Build Include="dbo\Tables\tblCMConfig.sql" />
+    <Build Include="dbo\Tables\tblCMCompanyPreferenceOption.sql" />
     <Build Include="dbo\Tables\tblCMImportLog.sql" />
     <Build Include="dbo\Tables\tblCMImportLogDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectMilstoneSummary.sql" />
@@ -9449,12 +9458,18 @@
     <Build Include="dbo\Views\vyuCTGetItemForItemContract.sql" />
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
-    <Build Include="dbo\Tables\tblFAFixedAssetGroup.sql" />
-    <Build Include="dbo\Views\vyuFABookDepreciationReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspCTFixCBLogAfterRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRunIntegrationAfterRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersSAS.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportandCreatePayment.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementTaxDetailsSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementSummaryReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementInboundSubReport.sql" />
+    <Build Include="dbo\Tables\tblGRAPISettlementOutboundSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExportDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
