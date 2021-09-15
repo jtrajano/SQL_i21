@@ -23,7 +23,6 @@ BEGIN
 
 			
 			DECLARE @intTermId INT = NULL
-			DECLARE @strInvoiceNo NVARCHAR(100) = NULL
 			DECLARE @dtmDueDate DATETIME = NULL
 			DECLARE @dblAmountDue NUMERIC(18,6) = NULL
 			DECLARE @dblTotalDeferredAmt NUMERIC(18,6) = NULL
