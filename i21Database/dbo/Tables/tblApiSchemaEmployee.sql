@@ -44,7 +44,7 @@ CREATE TABLE tblApiSchemaEmployee(
     strEmergencyPhone NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,     
     strEmergencyPhone2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,    
     dtmBirthDate [datetime] NULL,                                           
-    ysnActive NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,                 --Boolean with values "Y" and "N" only
+    ysnActive BIT  NULL,                 --Boolean with values "Y" and "N" only
     dtmOriginalDateHired [datetime] NULL,                          
     strGender NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,             
     dtmDateHired [datetime] NOT NULL,                                           --Required                                 
@@ -57,7 +57,7 @@ CREATE TABLE tblApiSchemaEmployee(
     strSocialSecurity NVARCHAR(100) COLLATE Latin1_General_CI_AS  NOT NULL,     --Required
     dtmTerminated [datetime] NULL,
     strTerminatedReason NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
-    ysn1099Employee NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,           --Boolean with values "Y" and "N" only
+    ysn1099Employee BIT  NULL,           --Boolean with values "Y" and "N" only
     strSupervisorId1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,          --Employee ID of the Supervisor
     strSupervisorName1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,        --Employee Name of the Supervisor
     strSupervisoreTitle1 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,      --Employee Title of the Supervisor
@@ -79,8 +79,8 @@ CREATE TABLE tblApiSchemaEmployee(
     dblGlLocationDistributionPercent2 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     strGlLocationDistributionLocation3 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     dblGlLocationDistributionPercent3 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
-    ysnStatutoryEmployee NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,      --Boolean with values "Y" and "N" only
-    ysnThirdPartySickPay NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,      --Boolean with values "Y" and "N" only
-    ysnRetirementPlan NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL          --Boolean with values "Y" and "N" only
+    ysnStatutoryEmployee BIT  NULL,      --Boolean with values "Y" and "N" only
+    ysnThirdPartySickPay BIT  NULL,      --Boolean with values "Y" and "N" only
+    ysnRetirementPlan BIT  NULL          --Boolean with values "Y" and "N" only
 
 )
