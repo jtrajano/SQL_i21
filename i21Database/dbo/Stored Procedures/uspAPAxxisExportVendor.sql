@@ -88,7 +88,7 @@ BEGIN
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId
 	WHERE 
-		A.intEntityId = @vendorI
+		A.intEntityId = @vendorId
 	AND A.ysnTransportTerminal = 1
 END
 
