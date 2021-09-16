@@ -384,7 +384,7 @@ BEGIN
 			,strCouponDescription
 			,strDepartment
 		FROM ( 
-			SELECT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
+			SELECT DISTINCT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 				, ST.intStoreNo as intOutletNumber
 				, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 				, '' as strOutletAddressTwo
@@ -526,7 +526,11 @@ BEGIN
 					FROM tblSTTranslogRebates
 					WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
 				) TRR WHERE TRR.rn = 1		
-					AND TRR.ysnRJRSubmitted = CASE WHEN @ysnResubmit = CAST(0 AS BIT) THEN CAST(0 AS BIT) WHEN @ysnResubmit = CAST(1 AS BIT) THEN TRR.ysnRJRSubmitted END
+					AND TRR.ysnRJRSubmitted = CASE WHEN @ysnResubmit = CAST(0 AS BIT) 
+														THEN CAST(0 AS BIT) 
+													WHEN @ysnResubmit = CAST(1 AS BIT) 
+														THEN TRR.ysnRJRSubmitted 
+													END
 			) TR
 			JOIN tblSTStore ST ON ST.intStoreId = TR.intStoreId
 			LEFT JOIN tblICItemUOM uom

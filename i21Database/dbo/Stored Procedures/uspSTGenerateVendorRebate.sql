@@ -411,7 +411,7 @@ BEGIN TRY
 			,strAccountLoyaltyIDNumber
 			,strCouponDescription
 		FROM ( 
-			SELECT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
+			SELECT DISTINCT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 				, ST.intStoreNo as intOutletNumber
 				, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 				, '' as strOutletAddressTwo
