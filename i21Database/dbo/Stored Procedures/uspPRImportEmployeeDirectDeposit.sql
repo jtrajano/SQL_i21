@@ -18,11 +18,25 @@ DECLARE @strAccountNumber AS NVARCHAR(100)
 DECLARE @strAccountType AS NVARCHAR(100)
 DECLARE @strClassification AS NVARCHAR(100)
 DECLARE @dtmEffectiveDate AS NVARCHAR(100)	
-DECLARE @ysnPreNoteSent AS NVARCHAR(100)
+DECLARE @ysnPreNoteSent AS BIT
 DECLARE @strDistributionType AS NVARCHAR(100)	
 DECLARE @dblAmount AS FLOAT(50)
 DECLARE @intOrder AS INT
-DECLARE @ysnActive AS NVARCHAR(100)	
+DECLARE @ysnActive AS BIT
+
+	INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
+	SELECT
+		guiApiImportLogDetailId = NEWID()
+	   ,guiApiImportLogId = @guiLogId
+	   ,strField		= 'Employee ID'
+	   ,strValue		= SE.intEntityNo
+	   ,strLogLevel		= 'Error'
+	   ,strStatus		= 'Failed'
+	   ,intRowNo		= SE.intRowNumber
+	   ,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	   FROM tblApiSchemaEmployeeDirectDeposit SE
+	   LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = SE.intEntityNo
+	   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDirectDeposit')) 
 	DROP TABLE #TempEmployeeDirectDeposit
@@ -83,8 +97,8 @@ DECLARE @ysnActive AS NVARCHAR(100)
 							,@strAccountType
 							,@strClassification
 							,@dtmEffectiveDate
-							,CASE WHEN @ysnActive = 'Y' THEN 1 ELSE 0 END
-							,CASE WHEN @ysnPreNoteSent = 'Y' THEN 1 ELSE 0 END
+							,@ysnActive
+							,@ysnPreNoteSent
 							,1
 							,0
 							,@dblAmount
@@ -114,8 +128,8 @@ DECLARE @ysnActive AS NVARCHAR(100)
 							strAccountType = @strAccountType,
 							strAccountClassification = @strClassification, 
 							dtmEffectiveDate = @dtmEffectiveDate,
-							ysnActive = CASE WHEN @ysnActive = 'Y' THEN 1 ELSE 0 END,
-							ysnPrenoteSent = CASE WHEN @ysnPreNoteSent = 'Y' THEN 1 ELSE 0 END,
+							ysnActive = @ysnActive,
+							ysnPrenoteSent = @ysnPreNoteSent,
 							ysnPrintNotifications = 0,
 							dblAmount = @dblAmount, 
 							intOrder = @intOrder,
