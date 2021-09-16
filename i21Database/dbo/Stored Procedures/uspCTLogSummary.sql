@@ -545,7 +545,7 @@ BEGIN TRY
 		SELECT strBatchId = @strBatchId
 			, dtmTransactionDate
 			, strTransactionType = 'Contract Balance'
-			, strTransactionReference = strTransactionType
+			, strTransactionReference = 'Contract Sequence'
 			, intTransactionReferenceId = intContractHeaderId
 			, intTransactionReferenceDetailId = intContractDetailId
 			, strTransactionReferenceNo = strContractNumber
@@ -3497,6 +3497,18 @@ BEGIN TRY
 				DELETE FROM @cbLogPrev 
 				WHERE intId <> (SELECT TOP 1 intId FROM @cbLogPrev WHERE strTransactionType = 'Contract Balance' ORDER BY intId DESC)
 
+				DECLARE @_dtmCurrent DATETIME
+					, @dblPreviousQtyPriced NUMERIC(24, 10)
+					, @dblPreviousFutures NUMERIC(24, 10)
+
+				SELECT TOP 1 @dblPreviousQtyPriced = dblQtyPriced
+				FROM tblCTSequenceHistory
+				WHERE intContractDetailId = @intContractDetailId
+				ORDER BY intSequenceHistoryId DESC
+
+				SELECT @_dtmCurrent = dtmTransactionDate FROM @cbLogSpecific
+				SELECT @dblPreviousFutures = dblFutures FROM @cbLogPrev
+
 				-- Compare previous AND current except the qty				
 				SELECT @ysnMatched = CASE WHEN COUNT(intPricingTypeId) = 1 THEN 1 ELSE 0 END
 				FROM
@@ -3507,53 +3519,54 @@ BEGIN TRY
 				) tbl
 
 				IF @ysnMatched <> 1
-				BEGIN		
-					-- Negate AND add previous record
-					UPDATE a
-					SET dblQty = CASE
-									WHEN @strProcess = 'Price Fixation' --previous priced
-										THEN CASE WHEN ISNULL(@dblPriced, 0) = 0 THEN b.dblQtyPriced *- 1 ELSE @dblPriced - b.dblQtyPriced END							
-										ELSE @dblQtys *- 1
-								END,
-						a.intPricingTypeId = CASE 
-												WHEN @strProcess = 'Price Fixation' THEN 2
-												ELSE a.intPricingTypeId
-											END,
-						intActionId = 43
-					FROM @cbLogPrev a
-					OUTER APPLY
-					(
-						SELECT TOP 1 dblQtyPriced 
-						FROM tblCTSequenceHistory 
-						WHERE intContractDetailId = a.intContractDetailId
-						ORDER BY intSequenceHistoryId DESC
-					) b	
-
-					IF (@dblQtys != 0 OR @strProcess = 'Price Fixation')
+				BEGIN
+					IF (ISNULL(@TotalBasis, 0) <> 0)
 					BEGIN
+						-- Negate AND add previous record
+						UPDATE @cbLogPrev
+						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' --previous priced
+											THEN CASE WHEN ISNULL(@TotalPriced, 0) = 0 THEN @dblPreviousQtyPriced * - 1 ELSE @TotalPriced - @dblPreviousQtyPriced END
+										ELSE @TotalBasis * - 1 END
+							, intPricingTypeId = 2
+							, dblFutures = NULL
+							, intActionId = 43
+
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
-						BEGIN		
-							DECLARE @_dtmCurrent datetime
-							SELECT @_dtmCurrent = dtmTransactionDate FROM @cbLogSpecific			
+						BEGIN
 							UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
 							EXEC uspCTLogContractBalance @cbLogPrev, 0
 						END
 
-						UPDATE a
-						SET a.dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty *- 1 FROM @cbLogPrev)
-											ELSE @dblQtys END
-							, a.intPricingTypeId = CASE WHEN @strProcess = 'Price Fixation' THEN 1
-														ELSE a.intPricingTypeId END
-						FROM @cbLogSpecific a				
-						OUTER APPLY
-						(
-							SELECT TOP 1 dblQtyPriced 
-							FROM tblCTSequenceHistory 
-							WHERE intContractDetailId = a.intContractDetailId
-							ORDER BY intSequenceHistoryId DESC
-						) b	
+						UPDATE @cbLogSpecific
+						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty * - 1 FROM @cbLogPrev)
+											ELSE @TotalBasis END
+							, intPricingTypeId = 2
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END		
+					IF (ISNULL(@TotalPriced, 0) <> 0)
+					BEGIN
+						-- Negate AND add previous record
+						UPDATE @cbLogPrev
+						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' --previous priced
+											THEN CASE WHEN ISNULL(@TotalPriced, 0) = 0 THEN @dblPreviousQtyPriced * - 1 ELSE @TotalPriced - @dblPreviousQtyPriced END
+										ELSE @TotalPriced * - 1 END
+							, intPricingTypeId = 1
+							, dblFutures = @dblPreviousFutures
+							, intActionId = 43
 
+						-- Negate previous if the value is not 0
+						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
+						BEGIN
+							UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
+							EXEC uspCTLogContractBalance @cbLogPrev, 0
+						END
+
+						UPDATE @cbLogSpecific
+						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty * - 1 FROM @cbLogPrev)
+										ELSE @TotalPriced END
+							, intPricingTypeId = 1
+							, dblFutures = @dblPreviousFutures
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 				END		
