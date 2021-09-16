@@ -207,38 +207,6 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL
 -- BEGIN Validation 
 -------------------------------------------------
 
----- Log UPCs that don't have corresponding items
---INSERT INTO tblICImportLogDetail(
---	intImportLogId
---	, strType
---	, intRecordNo
---	, strField
---	, strValue
---	, strMessage
---	, strStatus
---	, strAction
---	, intConcurrencyId
---)
---SELECT 
---	@LogId
---	, 'Error'
---	, p.intRecordNumber
---	, 'SellingUpcNumber'
---	, p.strSellingUpcNumber
---	, 'Cannot find the item that matches the UPC: ' + p.strSellingUpcNumber
---	, 'Skipped'
---	, 'Record not imported.'
---	, 1
---FROM 
---	tblICEdiPricebook p
---	LEFT OUTER JOIN tblICItemUOM u 
---		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
---	LEFT JOIN tblICItem i 
---		ON i.intItemId = u.intItemId
---WHERE 
---	i.intItemId IS NULL
---	AND p.strUniqueId = @UniqueId
-
 -- Log the records with invalid Vendor Ids. 
 INSERT INTO tblICImportLogDetail(
 	intImportLogId
@@ -290,7 +258,7 @@ INSERT INTO tblICImportLogDetail(
 )
 SELECT 
 	@LogId
-	, 'Error'
+	, 'Warning'
 	, NULL
 	, NULL 
 	, NULL 
@@ -503,81 +471,6 @@ IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail l WHERE l.intImportLogId = @
 -------------------------------------------------
 -- END Validation 
 -------------------------------------------------
-
--- Create the temp table for the audit log. 
-IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItem') IS NULL  
-	CREATE TABLE #tmpICEdiImportPricebook_tblICItem (
-		intItemId INT
-		,strAction NVARCHAR(50) NULL
-		,intBrandId_Old INT NULL 
-		,intBrandId_New INT NULL 
-		,strDescription_Old NVARCHAR(50) NULL
-		,strDescription_New NVARCHAR(50) NULL 
-		,strShortName_Old NVARCHAR(50) NULL
-		,strShortName_New NVARCHAR(50) NULL
-		,strItemNo_Old NVARCHAR(50) NULL
-		,strItemNo_New NVARCHAR(50) NULL
-	)
-;
-
--- Create the temp table for the audit log. 
-IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemUOM') IS NULL  
-	CREATE TABLE #tmpICEdiImportPricebook_tblICItemUOM (
-		intItemId INT
-		,intItemUOMId INT
-		,strAction NVARCHAR(50) NULL
-		,intUnitMeasureId_Old INT NULL
-		,intUnitMeasureId_New INT NULL
-	)
-;
-
--- Create the temp table for the audit log. 
-IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemVendorXref') IS NULL  
-	CREATE TABLE #tmpICEdiImportPricebook_tblICItemVendorXref (
-		intItemId INT
-		,strAction NVARCHAR(50) NULL
-		,intVendorId_Old INT NULL 
-		,intVendorId_New INT NULL 
-		,strVendorProduct_Old NVARCHAR(50) NULL
-		,strVendorProduct_New NVARCHAR(50) NULL 
-		,strProductDescription_Old NVARCHAR(50) NULL
-		,strProductDescription_New NVARCHAR(50) NULL
-	)
-;
-
--- Create the temp table for the audit log. 
-IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemLocation') IS NULL  
-	CREATE TABLE #tmpICEdiImportPricebook_tblICItemLocation (
-		intItemId INT
-		,intItemLocationId INT 
-		,strAction NVARCHAR(50) NULL
-		,intLocationId_Old INT NULL 
-		,intLocationId_New INT NULL 
-	)
-;
-
-
--- Create the temp table for the audit log. 
-IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemPricing') IS NULL  
-	CREATE TABLE #tmpICEdiImportPricebook_tblICItemPricing (
-		intItemId INT
-		,intItemLocationId INT 
-		,intItemPricingId INT 
-		,strAction NVARCHAR(50) NULL
-	)
-;
-
-
--- Create the temp table for the audit log. 
-IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL  
-	CREATE TABLE #tmpICEdiImportPricebook_tblICItemSpecialPricing (
-		intItemId INT
-		,intItemLocationId INT 
-		,intItemSpecialPricingId INT 
-		,strAction NVARCHAR(50) NULL
-	)
-;
-
 -- Remove the pricebook records with the missing Vendor-Category setup
 DELETE p
 FROM 
@@ -623,6 +516,7 @@ FROM (
 			,strDescription = ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription)
 			,strShortName = ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName)
 			,b.intManufacturerId 
+			,intDuplicateItemId = dup.intItemId 
 			,p.* 
 		FROM 
 			tblICEdiPricebook p
@@ -630,8 +524,10 @@ FROM (
 				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 			LEFT JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
-			LEFT OUTER JOIN tblICBrand b 
+			LEFT JOIN tblICBrand b 
 				ON b.strBrandName = p.strManufacturersBrandName	
+			LEFT JOIN tblICItem dup
+				ON dup.strItemNo = p.strSellingUpcNumber
 		WHERE
 			p.strUniqueId = @UniqueId		
 	) AS Source_Query  
@@ -650,7 +546,7 @@ FROM (
 			,intConcurrencyId = Item.intConcurrencyId + 1
 
 	-- If not found and it is allowed, insert a new item record.
-	WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 THEN 
+	WHEN NOT MATCHED AND Source_Query.ysnAddNewRecords = 1 AND Source_Query.intDuplicateItemId IS NULL THEN 
 		INSERT (			
 			strItemNo
 			,strShortName
@@ -709,7 +605,7 @@ FROM (
 
 SELECT @updatedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'UPDATE'
 SELECT @insertedItem = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItem WHERE strAction = 'INSERT'
-	   	
+
 -- Update or Insert Item UOM
 INSERT INTO #tmpICEdiImportPricebook_tblICItemUOM (
 	intItemId 
@@ -749,10 +645,24 @@ FROM (
 					i.intItemId = u.intItemId
 					OR i.strItemNo = p.strSellingUpcNumber
 			) i			
-			LEFT JOIN tblICUnitMeasure m 
-				ON m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
-			LEFT JOIN tblICUnitMeasure s 
-				ON s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+			OUTER APPLY (			
+				SELECT TOP 1 
+					m.*
+				FROM tblICUnitMeasure m 
+				WHERE
+					m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+				ORDER BY 
+					m.intUnitMeasureId 
+			) m
+			OUTER APPLY (
+				SELECT TOP 1 
+					s.*
+				FROM tblICUnitMeasure s 
+				WHERE
+					s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+				ORDER BY 
+					m.intUnitMeasureId 
+			) s
 			OUTER APPLY (
 				SELECT TOP 1 
 					iu.intItemUOMId 
@@ -849,7 +759,7 @@ INSERT INTO tblICItemUOM (
 )
 SELECT 
 	intItemId = i.intItemId 
-	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId, u.intUnitMeasureId)			
+	,intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)			
 	,dblUnitQty = CAST(p.strCaseBoxSizeQuantityPerCaseBox AS NUMERIC(38, 20)) 
 	--,strUpcCode = p.strOrderCaseUpcNumber
 	,strLongUPCCode = p.strOrderCaseUpcNumber
@@ -873,10 +783,24 @@ FROM
 			i.intItemId = u.intItemId
 			OR i.strItemNo = p.strSellingUpcNumber
 	) i			
-	LEFT JOIN tblICUnitMeasure m 
-		ON m.strUnitMeasure = NULLIF(p.strOrderPackageDescription, '')
-	LEFT JOIN tblICUnitMeasure s 
-		ON s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
+	OUTER APPLY (			
+		SELECT TOP 1 
+			m.*
+		FROM tblICUnitMeasure m 
+		WHERE
+			m.strUnitMeasure = NULLIF(p.strOrderPackageDescription, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) m
+	OUTER APPLY (
+		SELECT TOP 1 
+			s.*
+		FROM tblICUnitMeasure s 
+		WHERE
+			s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
+		ORDER BY 
+			m.intUnitMeasureId 
+	) s
 	OUTER APPLY (
 		SELECT TOP 1 
 			iu.intItemUOMId 
@@ -898,14 +822,14 @@ FROM
 				OR iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
 			)
 	) existUOM
-
 WHERE
 	p.strUniqueId = @UniqueId
 	AND i.intItemId IS NOT NULL 
 	AND NULLIF(p.strCaseBoxSizeQuantityPerCaseBox, '') IS NOT NULL 
+	AND NULLIF(p.strOrderPackageDescription, '') IS NOT NULL 
 	AND p.ysnAddOrderingUPC = 1
 	AND stockUnit.intItemUOMId IS NOT NULL 
-	AND existUOM.intItemUOMId IS NULL 
+	AND existUOM.intItemUOMId IS NULL  
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
@@ -1643,6 +1567,8 @@ FROM (
 
 SELECT @updatedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'UPDATE'
 SELECT @insertedVendorXRef = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemVendorXref WHERE strAction = 'INSERT'
+
+_Exit_With_Errors: 
 
 -- Update the stats. 
 BEGIN 
