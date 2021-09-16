@@ -71,6 +71,8 @@ BEGIN
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId
+	WHERE
+		A.ysnTransportTerminal = 1
 END
 ELSE
 BEGIN
@@ -82,7 +84,9 @@ BEGIN
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId
-	WHERE A.intEntityId = @vendorId
+	WHERE 
+		A.intEntityId = @vendorId
+	AND A.ysnTransportTerminal = 1
 END
 
 END TRY
