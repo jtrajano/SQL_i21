@@ -89,7 +89,7 @@ END
 -- Get and insert Fixed Asset Depreciaton history
 
 INSERT INTO @tblFixedAssetHistory
-SELECT G.dtmDepreciationToDate, GAAP.dblDepreciationToDate , Tax.dblDepreciationToDate dblTaxDepreciationToDate, G.intAssetId,
+SELECT G.dtmDepreciationToDate, GAAP.dblDepreciationToDate , ISNULL(Tax.dblDepreciationToDate, FullyDepreciatedTax.dblDepreciationToDate) dblTaxDepreciationToDate, G.intAssetId,
 ISNULL(GAAP.intAssetDepreciationId,Tax.intAssetDepreciationId) intAssetDepreciationId,
 ISNULL(GAAP.intDepreciationMethodId, Tax.intDepreciationMethodId) intDepreciationMethodId,
 ISNULL(GAAP.strDepreciationMethodId, Tax.strDepreciationMethodId) strDepreciationMethodId,
@@ -145,6 +145,12 @@ OUTER APPLY(
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 2
 )Tax
+OUTER APPLY (
+	SELECT MAX(FAD.dblDepreciationToDate) dblDepreciationToDate
+	FROM tblFAFixedAssetDepreciation FAD
+	JOIN tblFAFixedAsset FA ON FA.intAssetId = FAD.intAssetId
+	WHERE FAD.intAssetId = G.intAssetId AND FAD.intBookId = 2 AND FA.ysnTaxDepreciated = 1
+) FullyDepreciatedTax
 
 INSERT INTO @tbl
 SELECT * FROM @tblFixedAssetHistory
