@@ -4,7 +4,8 @@ SELECT
 FA.intAssetId,   
 FA.strAssetId,   
 FA.strAssetDescription,  
-FA.intCompanyLocationId,  
+FA.intCompanyLocationId,
+FA.intParentAssetId,
 FA.strSerialNumber,  
 FA.strNotes,  
 FA.dtmDateAcquired,  
@@ -52,7 +53,7 @@ GLAsset.strAccountId strAssetAccountId,
 GLExpense.strAccountId strExpenseAccountId,        
 GLDepreciation.strAccountId strDepreciationAccountId,        
 GLAccumulation.strAccountId strAccumulatedAccountId,        
-GLGainLoss.strAccountId strGainLossAccountId,        
+GLGainLoss.strAccountId strGainLossAccountId,
 Company.strLocationName strCompanyLocation,        
 Currency.strCurrency,  
 ysnFullyDepreciated =   
@@ -61,9 +62,18 @@ ysnFullyDepreciated =
    
  ELSE   
     CAST(1 AS BIT)  
-    END,  
+    END,
+ParentAssetDetails.strAssetId strParentAssetId,
+ysnParentAsset = CAST( 
+    CASE WHEN ISNULL(ParentAsset.intChildAsset, 0) > 0
+    THEN 1 ELSE 0 END
+    AS BIT),
+ysnChildAsset = CAST( 
+    CASE WHEN ChildAsset.strAssetId IS NULL
+    THEN 0 ELSE 1 END
+    AS BIT),
 FA.intConcurrencyId  
-from tblFAFixedAsset FA       
+FROM tblFAFixedAsset FA       
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId        
 LEFT JOIN tblGLAccount GLExpense ON GLExpense.intAccountId = FA.intExpenseAccountId        
 LEFT JOIN tblGLAccount GLDepreciation ON GLDepreciation.intAccountId = FA.intDepreciationAccountId        
@@ -98,3 +108,18 @@ OUTER APPLY (
     AND intBookId =2
     
 )TaxDepreciation
+OUTER APPLY (
+    SELECT strAssetId
+    FROM tblFAFixedAsset 
+    WHERE intAssetId = FA.intParentAssetId
+) ParentAssetDetails
+OUTER APPLY (
+    SELECT COUNT(1) intChildAsset
+    FROM tblFAFixedAsset 
+    WHERE intParentAssetId = FA.intAssetId
+) ParentAsset
+OUTER APPLY (
+    SELECT strAssetId
+    FROM tblFAFixedAsset 
+    WHERE intAssetId = FA.intAssetId AND intParentAssetId IS NOT NULL
+) ChildAsset
