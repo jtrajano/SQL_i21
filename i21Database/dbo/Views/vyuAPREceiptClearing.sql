@@ -3,7 +3,7 @@ AS
 
 --Receipt item,
 SELECT	
-	'1' as strMark,
+	-- '1' as strMark,
     receipt.intEntityVendorId
     ,receipt.dtmReceiptDate AS dtmDate
     ,receipt.strReceiptNumber AS strTransactionNumber
@@ -206,7 +206,7 @@ UNION ALL
 --Receipt item,
 SELECT	
 	
-	'1.2' as strMark,
+	-- '1.2' as strMark,
     receipt.intEntityVendorId
     ,receipt.dtmReceiptDate AS dtmDate
     ,receipt.strReceiptNumber AS strTransactionNumber
@@ -440,7 +440,7 @@ AND receipt.ysnPosted = 1
 UNION ALL
 --Vouchers for receipt items
 SELECT
-	'2' as strMark,
+	-- '2' as strMark,
     bill.intEntityVendorId
     ,bill.dtmDate AS dtmDate
     ,receipt.strReceiptNumber
@@ -673,7 +673,7 @@ AND transferClr.ysnExists IS NULL
 --Vouchers for receipt items
 union all
 SELECT
-	'3' as strMark,
+	-- '3' as strMark,
     bill.intEntityVendorId
     ,bill.dtmDate AS dtmDate
     ,Receipt.strReceiptNumber
