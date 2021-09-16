@@ -126,7 +126,7 @@ BEGIN
 			VALUES(
 				 @intAccountId
 				,@intNetworkId
-				,@strCustomerNumber
+				,@strAccountNumber
 			 )
 			COMMIT TRANSACTION
 			RETURN 1
