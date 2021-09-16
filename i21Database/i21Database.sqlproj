@@ -172,6 +172,8 @@
     <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
