@@ -31,15 +31,27 @@ DECLARE @intAccountId AS INT
 DECLARE @intExpenseAccountId AS INT
 DECLARE @intAllowance AS INT
 DECLARE @strPaidBy  AS NVARCHAR(100)
-DECLARE @ysnDefault AS NVARCHAR(100)
+DECLARE @ysnDefault AS BIT
 DECLARE @intSort AS INT
-DECLARE @ysnW42020 AS NVARCHAR(100)
-DECLARE @ysnW4Step2c AS NVARCHAR(100)
+DECLARE @ysnW42020 AS BIT
+DECLARE @ysnW4Step2c AS BIT
 DECLARE @dblW4ClaimDependents AS FLOAT(50)
 DECLARE @dblW4OtherIncome  AS FLOAT(50)
 DECLARE @dblW4Deductions  AS FLOAT(50)
 
-
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
+SELECT
+	guiApiImportLogDetailId = NEWID()
+	,guiApiImportLogId = @guiLogId
+	,strField		= 'Employee ID'
+	,strValue		= SE.intEntityNo
+	,strLogLevel		= 'Error'
+	,strStatus		= 'Failed'
+	,intRowNo		= SE.intRowNumber
+	,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	FROM tblApiSchemaEmployeeTaxes SE
+	LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
+	WHERE SE.guiApiUniqueId = @guiApiUniqueId
 
 SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniqueId = @guiApiUniqueId
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeTaxes)
@@ -60,9 +72,9 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@intExpenseAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
 			,@intAllowance = dblFederalAllowance
 			,@strPaidBy  = strPaidBy
-			,@ysnDefault = CASE WHEN ysnDefault = 'Y' THEN 1 ELSE 0 END
-			,@ysnW42020 =  CASE WHEN ysn2020W4 = 'Y' THEN 1 ELSE 0 END
-			,@ysnW4Step2c =  CASE WHEN ysnStep2c = 'Y' THEN 1 ELSE 0 END
+			,@ysnDefault = ysnDefault
+			,@ysnW42020 =  ysn2020W4
+			,@ysnW4Step2c = ysnStep2c
 			,@dblW4ClaimDependents = dblClaimDependents
 			,@dblW4OtherIncome  = dblotherIncome
 			,@dblW4Deductions = 0.00
@@ -126,10 +138,10 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,1
 						,EMT.dblFederalAllowance
 						,EMT.strPaidBy
-						,CASE WHEN EMT.ysnDefault = 'Y' THEN 1 ELSE 0 END
+						,EMT.ysnDefault
 						,1
-						,CASE WHEN EMT.ysn2020W4 = 'Y' THEN 1 ELSE 0 END
-						,CASE WHEN EMT.ysnStep2c = 'Y' THEN 1 ELSE 0 END
+						,EMT.ysn2020W4
+						,EMT.ysnStep2c
 						,EMT.dblClaimDependents
 						,0
 						,0

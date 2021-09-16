@@ -7,7 +7,7 @@ CREATE TABLE tblApiSchemaEmployeeTaxes(
     strTaxDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,         --Description of the Tax
     strCalculationType NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     strPaidBy NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
-    ysnDefault NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,                --Default Values should be "Y" and "N" only
+    ysnDefault BIT  NULL,                --Default Values should be "Y" and "N" only
     strFilingStatus NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,           --Default Values should be Single and Married
     strState NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,                  --Default Values should be state names only
     strCountry NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
@@ -17,14 +17,14 @@ CREATE TABLE tblApiSchemaEmployeeTaxes(
     dblFederalAllowance FLOAT(50) NULL,
     strSupplimentalCalc NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,       --Default Values should be Flat Rate and Normal Rate Only
     strLiabilityAccount NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
-    ysnLiabilityGlSplit NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,       --Default Values should be "Y" and "N" only
+    ysnLiabilityGlSplit BIT  NULL,       --Default Values should be "Y" and "N" only
     strExpenseAccount NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,         --Default Values should be "Y" and "N" only
-    ysnExpenseAccountGlSplit NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,  --Default Values should be "Y" and "N" only
-    ysn2020W4 NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,                 --Default Values should be "Y" and "N" only
-    ysnStep2c NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,                 --Default Values should be "Y" and "N" only
+    ysnExpenseAccountGlSplit BIT NULL,  --Default Values should be "Y" and "N" only
+    ysn2020W4 BIT NULL,                 --Default Values should be "Y" and "N" only
+    ysnStep2c BIT NULL,                 --Default Values should be "Y" and "N" only
     dblClaimDependents FLOAT(50) NULL,
     dblotherIncome FLOAT(50) NULL,
-    ysnResident NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,               --Default Values should be "Y" and "N" only
+    ysnResident BIT NULL,               --Default Values should be "Y" and "N" only
     intDependents INT NULL,
     dblPercentGross FLOAT(50) NULL,
     strAccountId NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL, 
