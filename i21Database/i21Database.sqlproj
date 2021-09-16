@@ -1710,6 +1710,7 @@
     <Build Include="dbo\Tables\tblApiUserAccount.sql" />
     <Build Include="dbo\Tables\tblApiImportLog.sql" />
     <Build Include="dbo\Tables\tblApiImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformProperty.sql" />
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsage.sql" />
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsageStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiMonthlyRequestUsageStagingTransform.sql" />
