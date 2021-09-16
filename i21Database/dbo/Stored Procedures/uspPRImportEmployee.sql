@@ -46,7 +46,7 @@ DECLARE @EmployeeGlLocationPercentage3 as FLOAT (50)
 
 DECLARE @strName as NVARCHAR(50)
 DECLARE @strEmail as NVARCHAR(50)
-DECLARE @ysnPrint1099 as NVARCHAR(50)
+DECLARE @ysnPrint1099 as BIT
 DECLARE @strContactNumber as NVARCHAR(50)
 DECLARE @strTitle as NVARCHAR(50)
 DECLARE @strPhone as NVARCHAR(50)
@@ -54,7 +54,7 @@ DECLARE @strEmail2 as NVARCHAR(50)
 DECLARE @strTimezone as NVARCHAR(50)
 DECLARE @intLanguageId as NVARCHAR(50)
 DECLARE @strEntityNo as NVARCHAR(50)
-DECLARE @ysnActive as NVARCHAR(50)
+DECLARE @ysnActive as BIT
 DECLARE @strDocumentDelivery  as NVARCHAR(50)
 DECLARE @strExternalERPId as NVARCHAR(50)
 DECLARE @intEntityRank as NVARCHAR(50)
@@ -93,10 +93,10 @@ DECLARE @strEEOCCode as NVARCHAR(50)
 DECLARE @strSocialSecurity as NVARCHAR(50)
 DECLARE @dtmTerminated as NVARCHAR(50)
 DECLARE @strTerminatedReason as NVARCHAR(50)
-DECLARE @ysn1099Employee as NVARCHAR(50)
-DECLARE @ysnStatutoryEmployee as NVARCHAR(50)
-DECLARE @ysnThirdPartySickPay as NVARCHAR(50)
-DECLARE @ysnRetirementPlan as NVARCHAR(50)
+DECLARE @ysn1099Employee as BIT
+DECLARE @ysnStatutoryEmployee as BIT
+DECLARE @ysnThirdPartySickPay as BIT
+DECLARE @ysnRetirementPlan as BIT
 
 
 
@@ -104,12 +104,12 @@ DECLARE @ysnRetirementPlan as NVARCHAR(50)
 
 --INSERT INTO tblApiImportLogDetail(guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
 --SELECT
---	guiApiImportLogId = @guiLogId
---   ,strField		= 'Employee ID'
---   ,strValue		= SE.strEmployeeId
+--	  guiApiImportLogId 	= @guiLogId
+--   ,strField			= 'Employee ID'
+--   ,strValue			= SE.strEmployeeId
 --   ,strLogLevel		= 'Error'
---   ,strStatus		= 'Failed'
---   ,intRowNo		= SE.intRowNumber
+--   ,strStatus			= 'Failed'
+--   ,intRowNo			= SE.intRowNumber
 --   ,strMessage		= 'Cannot find the Employee No: '+ ISNULL(SE.strEmployeeId,'') + '.'
 --   FROM tblApiSchemaEmployee SE
 --   LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId
@@ -117,6 +117,20 @@ DECLARE @ysnRetirementPlan as NVARCHAR(50)
 
 --select strExternalERPId,* FROM #TempEmployeeDetails
 --DROP TABLE #TempEmployeeDetails
+
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
+SELECT
+	guiApiImportLogDetailId = NEWID()
+   ,guiApiImportLogId = @guiLogId
+   ,strField		= 'Employee ID'
+   ,strValue		= SE.strEmployeeId
+   ,strLogLevel		= 'Error'
+   ,strStatus		= 'Failed'
+   ,intRowNo		= SE.intRowNumber
+   ,strMessage		= 'Cannot find the Employee No: '+ ISNULL(SE.strEmployeeId,'') + '.'
+   FROM tblApiSchemaEmployee SE
+   LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId
+   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 
 
 SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueId = @guiApiUniqueId
@@ -149,7 +163,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,strDepartment
 				) SELECT strName
 					,strEmail
-					,ysn1099Employee			= CASE WHEN ysn1099Employee = 'Y' THEN 1 ELSE 0 END
+					,ysn1099Employee
 					,strContactNumber
 					,strTitle
 					,strPhone
@@ -157,7 +171,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					,strTimezone
 					,1
 					,strEmployeeId
-					,ysnActive					= CASE WHEN ysnActive = 'Y' THEN 1 ELSE 0 END
+					,ysnActive
 					,strDocumentDelivery1 + ',' + strDocumentDelivery2 + ',' + strDocumentDelivery3
 					,strExternalERPId
 					,strRank					= (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = strRank)
@@ -266,7 +280,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					strEmergencyPhone,
 					strEmergencyPhone2,
 					dtmBirthDate,
-					ysnActive								= CASE WHEN ysnActive = 'Y' THEN 1 ELSE 0 END,
+					ysnActive,
 					dtmOriginalDateHired,
 					strGender,
 					dtmDateHired,
@@ -279,10 +293,10 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					strSocialSecurity,
 					dtmTerminated,
 					strTerminatedReason,
-					ysn1099Employee							= (CASE WHEN ysn1099Employee = 'Y' THEN 1 ELSE 0 END),
-					ysnStatutoryEmployee					= CASE WHEN ysnStatutoryEmployee = 'Y' THEN 1 ELSE 0 END,
-					ysnThirdPartySickPay					= (CASE WHEN PRST.ysnThirdPartySickPay = 'Y' THEN 1 ELSE 0 END),
-					ysnRetirementPlan						= (CASE WHEN PRST.ysnRetirementPlan = 'Y' THEN 1 ELSE 0 END)
+					ysn1099Employee,
+					ysnStatutoryEmployee,
+					ysnThirdPartySickPay,
+					ysnRetirementPlan
 					FROM #TempEmployeeDetails PRST
 					WHERE PRST.strEmployeeId = @EmployeeID
 
@@ -417,7 +431,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					   @SupervisorId3 = strSupervisorId3, @SupervisorName3 = strSupervisorName3, @SupervisorTitle3 = strSupervisoreTitle3
 						,@strName = strName
 						,@strEmail = strEmail
-						,@ysnPrint1099 = CASE WHEN ysn1099Employee = 'Y' THEN 1 ELSE 0 END
+						,@ysnPrint1099 = ysn1099Employee
 						,@strContactNumber = strContactNumber
 						,@strTitle = @strTitle
 						,@strPhone = @strPhone
@@ -425,7 +439,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						,@strTimezone = @strTimezone
 						,@intLanguageId = @intLanguageId
 						,@strEntityNo = @strEntityNo
-						,@ysnActive = CASE WHEN ysnActive = 'Y' THEN 1 ELSE 0 END
+						,@ysnActive = ysnActive
 						,@strDocumentDelivery = strDocumentDelivery1 + ',' + strDocumentDelivery2 + ',' + strDocumentDelivery3
 						,@strExternalERPId = @strExternalERPId
 						,@intEntityRank = (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = strRank)
@@ -540,10 +554,10 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,strSocialSecurity = @strSocialSecurity
 				,dtmTerminated = @dtmTerminated
 				,strTerminatedReason = @strTerminatedReason
-				,ysn1099Employee = (CASE WHEN @ysn1099Employee = 'Y' THEN 1 ELSE 0 END)
-				,ysnStatutoryEmployee = (CASE WHEN @ysnStatutoryEmployee = 'Y' THEN 1 ELSE 0 END)
-				,ysnThirdPartySickPay = (CASE WHEN @ysnThirdPartySickPay = 'Y' THEN 1 ELSE 0 END)
-				,ysnRetirementPlan = (CASE WHEN @ysnRetirementPlan = 'Y' THEN 1 ELSE 0 END)
+				,ysn1099Employee = @ysn1099Employee
+				,ysnStatutoryEmployee = @ysnStatutoryEmployee
+				,ysnThirdPartySickPay = @ysnThirdPartySickPay
+				,ysnRetirementPlan = @ysnRetirementPlan
 				WHERE intEntityId = @EntityId
 
 
