@@ -14,7 +14,7 @@ DECLARE @EmployeeEntityNo AS INT
 DECLARE @intEntityNo AS INT
 DECLARE @strEarningDesc AS NVARCHAR(50)
 DECLARE @dblEarningAmount AS FLOAT(50)
-DECLARE @ysnEarningDefault AS NVARCHAR(50)
+DECLARE @ysnEarningDefault AS BIT
 DECLARE @strPayGroup AS NVARCHAR(50)
 DECLARE @strCalculationType	 AS NVARCHAR(50)
 DECLARE @strLinkedEarning AS NVARCHAR(50)
@@ -24,7 +24,7 @@ DECLARE @strAccrueTimeOff AS NVARCHAR(50)
 DECLARE @strDeductTimeOff AS NVARCHAR(50)
 DECLARE @strTaxCalculation AS NVARCHAR(50)
 DECLARE @strAccountID AS NVARCHAR(50)
-DECLARE @ysnUseGLSplit AS NVARCHAR(50)
+DECLARE @ysnUseGLSplit AS BIT
 DECLARE @strTaxID1 AS NVARCHAR(50)
 DECLARE @strTaxDescription1 AS NVARCHAR(50)
 DECLARE @strTaxID2 AS NVARCHAR(50)
@@ -38,6 +38,20 @@ DECLARE @strTaxDescription5 AS NVARCHAR(50)
 DECLARE @strTaxID6 AS NVARCHAR(50)
 DECLARE @strTaxDescription6 AS NVARCHAR(50)
 
+
+	INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
+	SELECT
+		guiApiImportLogDetailId = NEWID()
+	   ,guiApiImportLogId = @guiLogId
+	   ,strField		= 'Employee ID'
+	   ,strValue		= SE.intEntityNo
+	   ,strLogLevel		= 'Error'
+	   ,strStatus		= 'Failed'
+	   ,intRowNo		= SE.intRowNumber
+	   ,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	   FROM tblApiSchemaEmployeeEarnings SE
+	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
+	   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeEarnings')) 
 	DROP TABLE #TempEmployeeEarnings
@@ -130,7 +144,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 						 WHEN strPayGroup = 'Commissions' THEN 9
 						 WHEN strPayGroup = 'Monthly' THEN 10
 						 WHEN strPayGroup = 'Bi-Weekly' THEN 11 END
-					,CASE WHEN ysnEarningDefault = 'Y' THEN 1 ELSE 0 END
+					,ysnEarningDefault
 					,1
 					,1
 				FROM #TempEmployeeEarnings
@@ -223,7 +237,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 														 WHEN @strPayGroup = 'Commissions' THEN 9
 														 WHEN @strPayGroup = 'Monthly' THEN 10
 														 WHEN @strPayGroup = 'Bi-Weekly' THEN 11 END
-					,ysnDefault						= CASE WHEN @ysnEarningDefault = 'Y' THEN 1 ELSE 0 END
+					,ysnDefault						= @ysnEarningDefault
 					WHERE intEntityEmployeeId = @EmployeeEntityNo
 						AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strDescription = @strEarningDesc)
 
