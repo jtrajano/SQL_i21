@@ -15,7 +15,7 @@ DECLARE @EmployeeEntityNo AS INT
 DECLARE @intEntityNo AS INT
 DECLARE @strDeductionDesc  AS NVARCHAR(50)
 DECLARE @strDeductionId AS NVARCHAR(50)
-DECLARE @ysnDefault  AS NVARCHAR(50)
+DECLARE @ysnDefault  AS BIT
 DECLARE @strCategory  AS NVARCHAR(50)
 DECLARE @strPaidBy  AS NVARCHAR(50)
 DECLARE @dblRateCalc AS FLOAT(50)
@@ -26,9 +26,9 @@ DECLARE @dblAnnualLimit	 AS FLOAT(50)
 DECLARE @dtmBeginDate AS NVARCHAR(50)
 DECLARE @dtmEndDate	AS NVARCHAR(50)
 DECLARE @strAccountId  AS NVARCHAR(50)
-DECLARE @ysnAccountGLSplit  AS NVARCHAR(50)
+DECLARE @ysnAccountGLSplit  AS BIT
 DECLARE @strExpenseAccountId  AS NVARCHAR(50)
-DECLARE @ysnExpenseGLSplit  AS NVARCHAR(50)
+DECLARE @ysnExpenseGLSplit  AS BIT
 DECLARE @strDeductionTaxId1	 AS NVARCHAR(50)
 DECLARE @strDeductionTaxDesc1  AS NVARCHAR(50)
 DECLARE @strDeductionTaxId2  AS NVARCHAR(50)
@@ -43,6 +43,20 @@ DECLARE @strDeductionTaxId6  AS NVARCHAR(50)
 DECLARE @strDeductionTaxDesc6  AS NVARCHAR(50)
 DECLARE @strDeductionTaxId7  AS NVARCHAR(50)
 DECLARE @strDeductionTaxDesc7  AS NVARCHAR(50)
+
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
+SELECT
+	guiApiImportLogDetailId = NEWID()
+   ,guiApiImportLogId = @guiLogId
+   ,strField		= 'Employee ID'
+   ,strValue		= SE.intEntityNo
+   ,strLogLevel		= 'Error'
+   ,strStatus		= 'Failed'
+   ,intRowNo		= SE.intRowNumber
+   ,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+   FROM tblApiSchemaEmployeeDeduction SE
+   LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = SE.intEntityNo
+   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDeductions')) 
 DROP TABLE #TempEmployeeDeductions
@@ -129,7 +143,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 					,1
 					,1
 					,(SELECT TOP 1 strPaidBy FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
-					,CASE WHEN ysnDefault = 'Y' THEN 1 ELSE 0 END
+					,ysnDefault
 					,1
 					,1
 				FROM #TempEmployeeDeductions
@@ -220,7 +234,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 					,intAccountId						= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)
 					,intExpenseAccountId				= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId)
 					,strPaidBy							= (SELECT TOP 1 strPaidBy FROM tblPRTypeTax WHERE strDescription = @strDeductionDesc)
-					,ysnDefault							= CASE WHEN @ysnDefault = 'Y' THEN 1 ELSE 0 END
+					,ysnDefault							= @ysnDefault
 				WHERE intEmployeeDeductionId = @intEntityNo
 				AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 
