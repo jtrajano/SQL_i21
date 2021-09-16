@@ -31,6 +31,20 @@ DECLARE @dblHoursEarned AS FLOAT(50)
 DECLARE @dblHoursUsed AS FLOAT(50) 
 DECLARE @dblAdjustments AS FLOAT(50) 
 
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
+SELECT
+	guiApiImportLogDetailId = NEWID()
+	,guiApiImportLogId = @guiLogId
+	,strField		= 'Employee ID'
+	,strValue		= SE.intEntityNo
+	,strLogLevel		= 'Error'
+	,strStatus		= 'Failed'
+	,intRowNo		= SE.intRowNumber
+	,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	FROM tblApiSchemaEmployeeTimeOff SE
+	LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = SE.intEntityNo
+	WHERE SE.guiApiUniqueId = @guiApiUniqueId
+
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeTimeOff')) 
 DROP TABLE #TempEmployeeTimeOff
 
