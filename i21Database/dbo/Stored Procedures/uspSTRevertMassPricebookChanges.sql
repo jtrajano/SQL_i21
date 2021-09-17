@@ -1235,7 +1235,7 @@ BEGIN TRY
 											, @intCompanyLocationId			INT
 											, @intItemUOMId					INT
 											, @dblUnitAfterDiscount			DECIMAL(38, 20)
-											, @dblCost						DECIMAL(38, 20)
+											, @dblPromoCost						DECIMAL(38, 20)
 											, @dtmBeginDate					DATETIME
 											, @dtmEndDate					DATETIME
 											, @strItemDescription			VARCHAR(100)
@@ -1257,7 +1257,7 @@ BEGIN TRY
 																				
 
 											, @dblUnitAfterDiscount		= ISNULL(temp.dblUnitAfterDiscount, ItemSpecialPricing.dblUnitAfterDiscount)
-											, @dblCost					= ISNULL(temp.dblCost, ItemSpecialPricing.dblCost)
+											, @dblPromoCost					= ISNULL(temp.dblCost, ItemSpecialPricing.dblCost)
 											, @dtmBeginDate				= ISNULL(temp.dtmBeginDate, ItemSpecialPricing.dtmBeginDate)
 											, @dtmEndDate				= ISNULL(temp.dtmEndDate, ItemSpecialPricing.dtmEndDate)
 									FROM @tempITEMSPECIALPRICING temp
@@ -1279,7 +1279,7 @@ BEGIN TRY
 									-- UPDATE ITEM PECIAL PRICING
 									EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 											@dblPromotionalSalesPrice	= @dblUnitAfterDiscount 
-											, @dblPromotionalCost		= @dblCost 
+											, @dblPromotionalCost		= @dblPromoCost 
 											, @dtmBeginDate				= @dtmBeginDate 
 											, @dtmEndDate 				= @dtmEndDate 
 											, @intItemSpecialPricingId  = @intItemSpecialPricingId
