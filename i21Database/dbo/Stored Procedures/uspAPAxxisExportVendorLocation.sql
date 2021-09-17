@@ -21,7 +21,8 @@ BEGIN
 	CREATE TABLE tmpAxxisVendorLocation(
 		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
 		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+		strTerminalNo NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL
 	)
 END
 
