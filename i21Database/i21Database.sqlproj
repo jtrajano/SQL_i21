@@ -120,6 +120,7 @@
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
     <Build Include="dbo\Tables\tblApiImportLog.sql" />
     <Build Include="dbo\Tables\tblApiImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformProperty.sql" />
     <Build Include="dbo\Tables\tblApiInventoryTransferStaging.sql" />
     <Build Include="dbo\Tables\tblApiInventoryTransferDetailStaging.sql" />
     <Build Include="dbo\Tables\tblApiUserAccount.sql" />
@@ -172,6 +173,8 @@
     <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6844,6 +6847,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
     <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricingForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateEffectivePricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPromotionalPricingForCStore.sql" />
     <Build Include="dbo\User Defined Types\ScaleDestinationStagingTable.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceHistoryStagingTable.sql" />
