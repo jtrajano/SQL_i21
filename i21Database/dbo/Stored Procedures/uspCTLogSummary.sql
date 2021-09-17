@@ -1434,91 +1434,191 @@ BEGIN TRY
 		END
 		ELSE IF @strProcess = 'Create Voucher'
 		BEGIN
-			INSERT INTO @cbLogCurrent (strBatchId
-				, dtmTransactionDate
-				, strTransactionType
-				, strTransactionReference
-				, intTransactionReferenceId
-				, intTransactionReferenceDetailId
-				, strTransactionReferenceNo
-				, intContractDetailId
-				, intContractHeaderId
-				, strContractNumber
-				, intContractSeq
-				, intContractTypeId
-				, intEntityId
-				, intCommodityId
-				, intItemId
-				, intLocationId
-				, intPricingTypeId
-				, intFutureMarketId
-				, intFutureMonthId
-				, dblBasis
-				, dblFutures
-				, intQtyUOMId
-				, intQtyCurrencyId
-				, intBasisUOMId
-				, intBasisCurrencyId
-				, intPriceUOMId
-				, dtmStartDate
-				, dtmEndDate
-				, dblQty
-				, dblOrigQty
-				, dblDynamic
-				, intContractStatusId
-				, intBookId
-				, intSubBookId
-				, strNotes
-				, intUserId
-				, intActionId
-				, strProcess)
-			SELECT TOP 1 NULL
-				, cbl.dtmTransactionDate
-				, strTransactionType = 'Purchase Basis Deliveries'
-				, strTransactionReference = 'Voucher'
-				, intTransactionReferenceId = bd.intBillId
-				, intTransactionReferenceDetailId = bd.intBillDetailId
-				, strTransactionReferenceNo = b.strBillId
-				, cbl.intContractDetailId
-				, cbl.intContractHeaderId
-				, cbl.strContractNumber
-				, cbl.intContractSeq
-				, cbl.intContractTypeId
-				, cbl.intEntityId
-				, cbl.intCommodityId
-				, cbl.intItemId
-				, cbl.intLocationId
-				, cbl.intPricingTypeId
-				, cbl.intFutureMarketId
-				, cbl.intFutureMonthId
-				, dblBasis = pfd.dblBasis
-				, dblFutures = pfd.dblFutures
-				, cbl.intQtyUOMId
-				, cbl.intQtyCurrencyId
-				, cbl.intBasisUOMId
-				, cbl.intBasisCurrencyId
-				, cbl.intPriceUOMId
-				, cbl.dtmStartDate
-				, cbl.dtmEndDate
-				, dblQty = @dblTransactionQty
-				, dblOrigQty = @dblTransactionQty
-				, dblDynamic = @dblTransactionQty
-				, cbl.intContractStatusId
-				, cbl.intBookId
-				, cbl.intSubBookId
-				, strNotes = ''
-				, cbl.intUserId
-				, intActionId = 15
-				, strProcess = @strProcess
-			FROM tblCTContractBalanceLog cbl
-			INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
-			INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
-			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
-			WHERE cbl.intPricingTypeId = 1			
-				AND cbl.intContractHeaderId = @intContractHeaderId
-				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
-				and (select top 1 intHeaderPricingTypeId from @tmpContractDetail) <> 3
-			ORDER BY cbl.intContractBalanceLogId DESC
+			DECLARE @intSettleStorageId INT
+			SELECT @intSettleStorageId = BD.intSettleStorageId FROM tblAPBillDetail BD
+			JOIN tblGRSettleStorage SS ON SS. intSettleStorageId = BD.intSettleStorageId
+			WHERE BD.intBillDetailId = @intTransactionId
+
+			-- Check if settle storage transaction
+			IF (ISNULL(@intSettleStorageId, 0) = 0)
+			BEGIN
+				INSERT INTO @cbLogCurrent (strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, dblOrigQty
+					, dblDynamic
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId
+					, intActionId
+					, strProcess)
+				SELECT TOP 1 NULL
+					, cbl.dtmTransactionDate
+					, strTransactionType = 'Purchase Basis Deliveries'
+					, strTransactionReference = 'Voucher'
+					, intTransactionReferenceId = bd.intBillId
+					, intTransactionReferenceDetailId = bd.intBillDetailId
+					, strTransactionReferenceNo = b.strBillId
+					, cbl.intContractDetailId
+					, cbl.intContractHeaderId
+					, cbl.strContractNumber
+					, cbl.intContractSeq
+					, cbl.intContractTypeId
+					, cbl.intEntityId
+					, cbl.intCommodityId
+					, cbl.intItemId
+					, cbl.intLocationId
+					, cbl.intPricingTypeId
+					, cbl.intFutureMarketId
+					, cbl.intFutureMonthId
+					, dblBasis = pfd.dblBasis
+					, dblFutures = pfd.dblFutures
+					, cbl.intQtyUOMId
+					, cbl.intQtyCurrencyId
+					, cbl.intBasisUOMId
+					, cbl.intBasisCurrencyId
+					, cbl.intPriceUOMId
+					, cbl.dtmStartDate
+					, cbl.dtmEndDate
+					, dblQty = @dblTransactionQty
+					, dblOrigQty = @dblTransactionQty
+					, dblDynamic = @dblTransactionQty
+					, cbl.intContractStatusId
+					, cbl.intBookId
+					, cbl.intSubBookId
+					, strNotes = ''
+					, cbl.intUserId
+					, intActionId = 15
+					, strProcess = @strProcess
+				FROM tblCTContractBalanceLog cbl
+				INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
+				INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
+				LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
+				WHERE cbl.intPricingTypeId = 1			
+					AND cbl.intContractHeaderId = @intContractHeaderId
+					AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
+					and (select top 1 intHeaderPricingTypeId from @tmpContractDetail) <> 3
+				ORDER BY cbl.intContractBalanceLogId DESC
+			END
+			ELSE
+			BEGIN
+				IF EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE strTransactionReference = 'Settle Storage' AND intTransactionReferenceId = @intSettleStorageId AND strTransactionType = 'Purchase Basis Deliveries')
+				BEGIN
+					INSERT INTO @cbLogCurrent (strBatchId
+						, dtmTransactionDate
+						, strTransactionType
+						, strTransactionReference
+						, intTransactionReferenceId
+						, intTransactionReferenceDetailId
+						, strTransactionReferenceNo
+						, intContractDetailId
+						, intContractHeaderId
+						, strContractNumber
+						, intContractSeq
+						, intContractTypeId
+						, intEntityId
+						, intCommodityId
+						, intItemId
+						, intLocationId
+						, intPricingTypeId
+						, intFutureMarketId
+						, intFutureMonthId
+						, dblBasis
+						, dblFutures
+						, intQtyUOMId
+						, intQtyCurrencyId
+						, intBasisUOMId
+						, intBasisCurrencyId
+						, intPriceUOMId
+						, dtmStartDate
+						, dtmEndDate
+						, dblQty
+						, dblOrigQty
+						, dblDynamic
+						, intContractStatusId
+						, intBookId
+						, intSubBookId
+						, strNotes
+						, intUserId
+						, intActionId
+						, strProcess)
+					SELECT TOP 1 NULL
+						, cbl.dtmTransactionDate
+						, strTransactionType = 'Purchase Basis Deliveries'
+						, strTransactionReference = 'Voucher'
+						, intTransactionReferenceId = bd.intBillId
+						, intTransactionReferenceDetailId = bd.intBillDetailId
+						, strTransactionReferenceNo = b.strBillId
+						, cbl.intContractDetailId
+						, cbl.intContractHeaderId
+						, cbl.strContractNumber
+						, cbl.intContractSeq
+						, cbl.intContractTypeId
+						, cbl.intEntityId
+						, cbl.intCommodityId
+						, cbl.intItemId
+						, cbl.intLocationId
+						, cbl.intPricingTypeId
+						, cbl.intFutureMarketId
+						, cbl.intFutureMonthId
+						, dblBasis = pfd.dblBasis
+						, dblFutures = pfd.dblFutures
+						, cbl.intQtyUOMId
+						, cbl.intQtyCurrencyId
+						, cbl.intBasisUOMId
+						, cbl.intBasisCurrencyId
+						, cbl.intPriceUOMId
+						, cbl.dtmStartDate
+						, cbl.dtmEndDate
+						, dblQty = @dblTransactionQty
+						, dblOrigQty = @dblTransactionQty
+						, dblDynamic = @dblTransactionQty
+						, cbl.intContractStatusId
+						, cbl.intBookId
+						, cbl.intSubBookId
+						, strNotes = ''
+						, cbl.intUserId
+						, intActionId = 15
+						, strProcess = @strProcess
+					FROM tblCTContractBalanceLog cbl
+					INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
+					INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
+					LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
+					WHERE cbl.intPricingTypeId = 1			
+						AND cbl.intContractHeaderId = @intContractHeaderId
+						AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
+						and (select top 1 intHeaderPricingTypeId from @tmpContractDetail) <> 3
+					ORDER BY cbl.intContractBalanceLogId DESC
+				END
+			END
 		END
 		ELSE IF @strProcess = 'Delete Voucher'
 		BEGIN
@@ -1599,7 +1699,7 @@ BEGIN TRY
 				, intActionId = 62
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
-			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Voucher' AND pLog.strProcess = 'Create Voucher' AND pLog.intTransactionReferenceDetailId = @intTransactionId
+			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Voucher' AND pLog.strProcess = 'Create Voucher' AND pLog.intTransactionReferenceDetailId = @intTransactionId AND pLog.strTransactionType = 'Purchase Basis Deliveries'
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
