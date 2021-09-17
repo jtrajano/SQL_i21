@@ -7434,6 +7434,7 @@
     <Build Include="dbo\Tables\tblTMManufacturer.sql" />
     <Build Include="dbo\Tables\tblCMConfig.sql" />
     <Build Include="dbo\Tables\tblCMCompanyPreferenceOption.sql" />
+    <Build Include="dbo\Tables\vyuCMCompanyPreferenceOption.sql" />
     <Build Include="dbo\Tables\tblCMImportLog.sql" />
     <Build Include="dbo\Tables\tblCMImportLogDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectMilstoneSummary.sql" />
