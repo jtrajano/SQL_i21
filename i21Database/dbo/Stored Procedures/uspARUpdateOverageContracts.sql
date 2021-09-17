@@ -187,6 +187,26 @@ IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 		LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
 	END 
 
+DECLARE @intSalesOrderContractTicketItemCount	INT = 1
+DECLARE @intSalesOrderContractTicketItemTotalOrdered NUMERIC(18, 6) = 0
+
+IF ISNULL(@ysnFromSalesOrder, 0) = 1
+BEGIN
+	SELECT @intSalesOrderContractTicketItemCount = COUNT(*)
+	FROM #INVOICEDETAILS
+	WHERE intContractDetailId IS NOT NULL
+	AND intTicketId IS NOT NULL
+
+	IF(@intSalesOrderContractTicketItemCount > 1) 
+	BEGIN
+		SELECT @intSalesOrderContractTicketItemTotalOrdered = SUM(dblQtyOrdered)
+		FROM #INVOICEDETAILS
+		WHERE intContractDetailId IS NOT NULL
+		AND intTicketId IS NOT NULL
+	END
+END
+
+
 WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 	BEGIN
 		DECLARE @intInvoiceDetailId			INT	= NULL
@@ -292,14 +312,14 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 												END
 									  END
 				  , dblQtyOrdered	= CASE WHEN @dblNetWeight = 0 THEN CTD.dblBalance ELSE ID.dblQtyOrdered END
-				  , @dblQtyOverAged	= CASE WHEN @dblNetWeight > 0 
+				  , @dblQtyOverAged	= (CASE WHEN @dblNetWeight > 0 
 										   THEN ISNULL(@dblNetWeight, 0) - 
 												CASE WHEN CTD.dblBalance = CTD.dblQuantity AND CTD.dblScheduleQty = CTD.dblQuantity
-													 THEN ID.dblQtyOrdered 
+													 THEN CASE WHEN @intSalesOrderContractTicketItemTotalOrdered > 0 THEN @intSalesOrderContractTicketItemTotalOrdered ELSE ID.dblQtyOrdered END
 													 ELSE CTD.dblBalance 
 												END
 											ELSE ID.dblQtyOrdered - CTD.dblBalance 
-									  END					
+									  END) / @intSalesOrderContractTicketItemCount
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId				
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
@@ -815,7 +835,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 		  AND ISNULL(ID.ysnAddonParent, 0) = 0		  
 		  AND ISNULL(@ysnFromSalesOrder, 0) = 1
 		  AND ADDON.ysnAutoAdd = 0
-		  		
+
 		EXEC dbo.uspARAddItemToInvoices @InvoiceEntries		= @tblInvoiceDetailEntries
 									  , @IntegrationLogId	= NULL
 									  , @UserId				= @intUserId
