@@ -34,6 +34,17 @@ BEGIN
 		AND ysnProcessed = 0
 		AND intTransactionTypeId = 9
 
+	IF @dblProducedQuantity IS NULL
+	BEGIN
+		RAISERROR (
+				'Unable to find the record to produce it.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
 	SELECT @intItemFactoryId = intItemFactoryId
 	FROM tblICItemFactory
 	WHERE intItemId = @intProducedItemId
@@ -41,6 +52,25 @@ BEGIN
 	SELECT @intManufacturingCellId = intManufacturingCellId
 	FROM tblICItemFactoryManufacturingCell
 	WHERE intItemFactoryId = @intItemFactoryId
+		AND ysnDefault = 1
+
+	IF @intManufacturingCellId IS NULL
+	BEGIN
+		SELECT @intManufacturingCellId = intManufacturingCellId
+		FROM tblICItemFactoryManufacturingCell
+		WHERE intItemFactoryId = @intItemFactoryId
+	END
+
+	IF @intManufacturingCellId IS NULL
+	BEGIN
+		RAISERROR (
+				'Unable to find the manufacturing cell.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	SELECT @strProduceXml = '<root>'
 
@@ -124,7 +154,7 @@ BEGIN
 			AND intDetailId > @intDetailId
 	END
 
-	SELECT @strProduceXml = @strProduceXml +@strConsumeXml+ '</root>'
+	SELECT @strProduceXml = @strProduceXml + @strConsumeXml + '</root>'
 
 	EXEC [dbo].[uspMFCompleteBlendSheet] @strXml = @strProduceXml
 		,@intLotId = @intLotId OUT
@@ -134,8 +164,8 @@ BEGIN
 		,@strBatchId = @strBatchId OUT
 		,@ysnAutoBlend = 0
 
-	Update tblMFWODetail
-	Set ysnProcessed = 1
+	UPDATE tblMFWODetail
+	SET ysnProcessed = 1
 	WHERE intProducedItemId = @intProducedItemId
 		AND ysnProcessed = 0
 END

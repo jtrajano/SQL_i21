@@ -53,6 +53,7 @@ BEGIN TRY
 		,@intParentLotId INT
 		,@strParentLotNumber NVARCHAR(50)
 		,@intSampleStatusId INT
+		,@strReceiptType NVARCHAR(50)
 	DECLARE @tblICInventoryReceipt TABLE (intInventoryReceiptId INT)
 	DECLARE @tblICInventoryReceiptItem TABLE (intInventoryReceiptItemId INT)
 	DECLARE @tblICInventoryReceiptItemParentLot TABLE (intParentLotId INT)
@@ -80,6 +81,17 @@ BEGIN TRY
 		AND R.ysnPosted = 1
 		AND RI.ysnExported IS NULL
 		AND ISNULL(CD.strERPPONumber, '') <> ''
+
+	INSERT INTO @tblICInventoryReceipt (intInventoryReceiptId)
+	SELECT DISTINCT R.intInventoryReceiptId
+	FROM tblICInventoryReceiptItemLot RIL
+	JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = R.intLocationId
+		AND CL.strLotOrigin = @strCompanyLocation
+	WHERE R.strReceiptType = 'Direct'
+		AND R.ysnPosted = 1
+		AND RI.ysnExported IS NULL
 
 	INSERT INTO @tblICInventoryReceipt (intInventoryReceiptId)
 	SELECT DISTINCT R.intInventoryReceiptId
@@ -120,12 +132,13 @@ BEGIN TRY
 			,@strTransferNo = NULL
 			,@strERPTransferOrderNo = NULL
 			,@strCurrency = NULL
+			,@strReceiptType=NULL
 
 		SELECT @intInventoryReceiptItemId = NULL
 
 		SELECT @intActionId = (
 				CASE 
-					WHEN R.strReceiptType = 'Purchase Contract'
+					WHEN R.strReceiptType IN ('Purchase Contract','Direct')
 						THEN 1
 					ELSE 2
 					END
@@ -138,6 +151,7 @@ BEGIN TRY
 			,@strBillOfLading = R.strBillOfLading
 			,@strWarehouseRefNo = R.strWarehouseRefNo
 			,@strCurrency = C.strCurrency
+			,@strReceiptType=strReceiptType
 		FROM dbo.tblICInventoryReceipt R
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(R.intModifiedByUserId, R.intCreatedByUserId)
 		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = R.intEntityVendorId
@@ -374,7 +388,7 @@ BEGIN TRY
 				SELECT @strError = @strError + 'Storage Unit cannot be blank. '
 			END
 
-			IF @intActionId = 1
+			IF @intActionId = 1 AND @strReceiptType<>'Direct'
 			BEGIN
 				IF ISNULL(@strContractNumber, '') = ''
 				BEGIN
@@ -465,6 +479,7 @@ BEGIN TRY
 
 			IF @intActionId = 1
 				AND UPPER(@strCommodityCode) = 'COFFEE'
+				AND @strReceiptType<>'Direct'
 			BEGIN
 				INSERT INTO @tblICInventoryReceiptItemParentLot (intParentLotId)
 				SELECT DISTINCT RIL.intParentLotId

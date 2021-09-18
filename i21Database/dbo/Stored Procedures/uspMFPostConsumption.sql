@@ -788,6 +788,9 @@ BEGIN
 		,intBatchId = @intBatchId
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	DECLARE @strLotNumber NVARCHAR(50)
+		,@intInventoryReceiptItemId INT
+
 	INSERT INTO @tblMFLot (
 		intLotId
 		,intItemUOMId
@@ -803,11 +806,16 @@ BEGIN
 	WHILE @intRecordId IS NOT NULL
 	BEGIN
 		SELECT @intLotId = NULL
+			,@strLotNumber = NULL
 
 		SELECT @intLotId = intLotId
 			,@intItemUOMId = intItemUOMId
 		FROM @tblMFLot
 		WHERE intRecordId = @intRecordId
+
+		SELECT @strLotNumber = strLotNumber
+		FROM tblICLot
+		WHERE intLotId = @intLotId
 
 		IF (
 				(
@@ -886,29 +894,36 @@ BEGIN
 					,strDestTransactionNo = @strWorkOrderNo
 					,'Manufacturing'
 					,'Workorder Management'
+
+				EXEC uspICAddTransactionLinks @TransactionLink
 			END
 		END
 		ELSE IF EXISTS (
 				SELECT *
 				FROM tblICInventoryReceiptItemLot
-				WHERE intLotId = @intLotId
+				WHERE strLotNumber = @strLotNumber
 				)
 		BEGIN
 			SELECT @intParentId = NULL
 				,@strParentNo = NULL
+				,@intInventoryReceiptItemId = NULL
 
-			SELECT @intParentId = intWorkOrderId
-			FROM tblMFWorkOrderProducedLot
-			WHERE intLotId = @intLotId
+			SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId
+			FROM tblICInventoryReceiptItemLot
+			WHERE strLotNumber = @strLotNumber
 
-			SELECT @strParentNo = strWorkOrderNo
-			FROM tblMFWorkOrder
-			WHERE intWorkOrderId = @intParentId
+			SELECT @intParentId = intInventoryReceiptId
+			FROM tblICInventoryReceiptItem
+			WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+			SELECT @strParentNo = strReceiptNumber
+			FROM tblICInventoryReceipt
+			WHERE intInventoryReceiptId = @intParentId
 
 			IF NOT EXISTS (
 					SELECT *
 					FROM @TransactionLink
-					WHERE intSrcId = @intParentId
+					WHERE IsNULL(intSrcId,0) = IsNULL(@intParentId,0)
 						AND intDestId = @intWorkOrderId
 					)
 			BEGIN
@@ -932,6 +947,8 @@ BEGIN
 					,strDestTransactionNo = @strWorkOrderNo
 					,'Manufacturing'
 					,'Workorder Management'
+
+				EXEC uspICAddTransactionLinks @TransactionLink
 			END
 		END
 
@@ -982,6 +999,8 @@ BEGIN
 				,strDestTransactionNo = @strWorkOrderNo
 				,'Manufacturing'
 				,'Workorder Management'
+
+			EXEC uspICAddTransactionLinks @TransactionLink
 		END
 	END
 END
