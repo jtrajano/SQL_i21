@@ -32,6 +32,7 @@ BEGIN TRY
 	SELECT TOP 20 intLotSplitFeedId
 	FROM dbo.tblIPLotSplitFeed
 	WHERE strCompanyLocation = @strCompanyLocation
+	AND intStatusId IS NULL
 
 	SELECT @intLotSplitFeedId = MIN(intLotSplitFeedId)
 	FROM @tblIPLotSplitFeed
