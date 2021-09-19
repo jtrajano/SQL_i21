@@ -22,6 +22,13 @@ BEGIN
 		,@intLotId INT
 		,@strLotNumber NVARCHAR(50)
 		,@intSubLocationId INT
+	DECLARE @tblMFWODetail TABLE (intDetailId INT)
+
+	INSERT INTO @tblMFWODetail (intDetailId)
+	SELECT intDetailId
+	FROM tblMFWODetail
+	WHERE intProducedItemId = @intProducedItemId
+		AND ysnProcessed = 0
 
 	SELECT @dtmProductionDate = GETDATE()
 
@@ -156,16 +163,39 @@ BEGIN
 
 	SELECT @strProduceXml = @strProduceXml + @strConsumeXml + '</root>'
 
-	EXEC [dbo].[uspMFCompleteBlendSheet] @strXml = @strProduceXml
-		,@intLotId = @intLotId OUT
-		,@strLotNumber = @strLotNumber OUT
-		,@intLoadDistributionDetailId = NULL
-		,@ysnRecap = 0
-		,@strBatchId = @strBatchId OUT
-		,@ysnAutoBlend = 0
+	BEGIN TRY
+		EXEC [dbo].[uspMFCompleteBlendSheet] @strXml = @strProduceXml
+			,@intLotId = @intLotId OUT
+			,@strLotNumber = @strLotNumber OUT
+			,@intLoadDistributionDetailId = NULL
+			,@ysnRecap = 0
+			,@strBatchId = @strBatchId OUT
+			,@ysnAutoBlend = 0
 
-	UPDATE tblMFWODetail
-	SET ysnProcessed = 1
-	WHERE intProducedItemId = @intProducedItemId
-		AND ysnProcessed = 0
+		UPDATE tblMFWODetail
+		SET ysnProcessed = 1
+		WHERE intDetailId IN (
+				SELECT D.intDetailId
+				FROM @tblMFWODetail D
+				)
+	END TRY
+
+	BEGIN CATCH
+		DECLARE @str NVARCHAR(MAX)
+
+		SELECT @str = ERROR_MESSAGE()
+
+		UPDATE tblMFWODetail
+		SET ysnProcessed = 0
+		WHERE intDetailId IN (
+				SELECT D.intDetailId
+				FROM @tblMFWODetail D
+				)
+
+		RAISERROR (
+				@str
+				,16
+				,1
+				)
+	END CATCH
 END
