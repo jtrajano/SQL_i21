@@ -94,8 +94,8 @@ LEFT JOIN tblCTContractHeader PriceHeader ON PriceHeader.intContractHeaderId = P
 LEFT JOIN tblCTContractFutures CF ON CF.intFutOptTransactionId = DE.intFutOptTransactionId
 LEFT JOIN tblCTContractDetail CFDetail ON CFDetail.intContractDetailId = CF.intContractDetailId
 LEFT JOIN tblCTContractHeader CFHeader ON CFHeader.intContractHeaderId = CFDetail.intContractHeaderId
-LEFT JOIN tblCMBank AS BuyBank ON DE.intBuyBankId = Bank.intBankId
-LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON DE.intBuyBankAccountId = BankAcct.intBankAccountId
+LEFT JOIN tblCMBank AS BuyBank ON DE.intBuyBankId = BuyBank.intBankId
+LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON DE.intBuyBankAccountId = BuyBankAcct.intBankAccountId
 LEFT JOIN tblCMBankTransfer BT ON BT.intTransactionId = DE.intBankTransferId
 LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = DE.intOrigSliceTradeId
 LEFT JOIN (
