@@ -189,6 +189,7 @@
     <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
