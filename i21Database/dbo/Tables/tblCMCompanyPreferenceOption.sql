@@ -1,6 +1,7 @@
  
 CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	[intCompanyPreferenceOptionId] [int] IDENTITY(1,1) NOT NULL,
+	[intUTCOffset] [int] NULL,
 	[intBTFromFXGLAccountId] [int] NULL,
 	[intBTToFXGLAccountId] [int] NULL,
 	[intBTFeesAccountId] [int] NULL,
