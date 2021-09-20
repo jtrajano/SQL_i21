@@ -380,7 +380,7 @@ BEGIN TRY
 					,@intQtyUnitMeasureId = IUOM.intUnitMeasureId
 					,@intLotId = L.intLotId
 					,@strLotCondition = ISNULL(ITD.strLotCondition, 'Sound/Full')
-					,@dblCost = (dbo.fnMultiply(ITD.dblQuantity, ISNULL(ITD.dblCost, 0)) / ITD.dblNet) -- Line Total / Net Wt
+					--,@dblCost = (dbo.fnMultiply(ITD.dblQuantity, ISNULL(ITD.dblCost, 0)) / ITD.dblNet) -- Line Total / Net Wt
 					,@intTransferDetailCurrencyId = ITD.intCurrencyId
 				FROM tblICInventoryTransferDetail ITD
 				JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ITD.intItemUOMId
@@ -392,6 +392,15 @@ BEGIN TRY
 						FROM @InventoryTransferDetail
 						)
 				ORDER BY ABS(ITD.dblNet - @dblNetWeight)
+
+				SELECT TOP 1 @dblCost = dblCost
+				FROM tblICInventoryTransaction WITH (NOLOCK)
+				WHERE intTransactionTypeId = 13
+					AND intTransactionId = @intInventoryTransferId
+					AND intTransactionDetailId = @intInventoryTransferDetailId
+					AND ysnIsUnposted = 0
+					AND dblQty > 0
+				ORDER BY intInventoryTransactionId DESC
 
 				IF ISNULL(@intLotId, 0) = 0
 				BEGIN
