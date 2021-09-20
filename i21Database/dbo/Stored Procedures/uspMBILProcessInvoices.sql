@@ -310,6 +310,8 @@ CREATE TABLE #TempMBILInvoiceItem (
 
 	IF (ISNULL(@ysnRecap,0) = 0 AND (@ysnPost = 1))
 	BEGIN
+		SELECT @SuccessfulCount = COUNT(*) FROM #TempMBILInvoice
+
 		WHILE EXISTS(SELECT 1 FROM #TempMBILInvoice)
 		BEGIN
 			DECLARE @intInvoiceId INT = (SELECT TOP 1 intInvoiceId FROM #TempMBILInvoice)
