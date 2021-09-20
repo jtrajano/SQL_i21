@@ -9039,6 +9039,7 @@
     <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExportDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnStorage.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildRiskSummaryLogForCustomerOwned.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
