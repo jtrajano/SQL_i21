@@ -184,9 +184,15 @@ BEGIN
 				ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u
 				ON u.intUnitMeasureId = iu.intUnitMeasureId
-			INNER JOIN tblICCommodityUnitMeasure commodityUOM
-				ON commodityUOM.intCommodityId = v.intCommodityId 
-				AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
+			CROSS APPLY (
+				SELECT TOP 1 
+					commodityUOM.* 
+				FROM 
+					tblICCommodityUnitMeasure commodityUOM
+				WHERE 
+					commodityUOM.intCommodityId = v.intCommodityId 
+					AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
+			) commodityUOM
 
 			OUTER APPLY (
 				SELECT 

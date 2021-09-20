@@ -9707,6 +9707,9 @@
     <Build Include="dbo\Views\vyuSCDirectAPClearing.sql" />
     <Build Include="dbo\Tables\tblSCTicketDistributionAllocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetTicketDistributionAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnStorage.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildRiskSummaryLogForCustomerOwned.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
