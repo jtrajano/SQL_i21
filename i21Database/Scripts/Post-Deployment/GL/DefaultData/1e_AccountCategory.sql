@@ -128,8 +128,8 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 150, name = 'Forex AP/AR' UNION ALL --GL-8243
 			SELECT id = 151, name = 'Unrealized Gain or Loss Forward Accrual' UNION ALL --GL-8410
 			SELECT id = 152, name = 'Unrealized Gain or Loss Swap Accrual' UNION ALL --GL-8410
-			SELECT id = 151, name = 'Realized Gain or Loss Forward Accrual' UNION ALL --GL-8410
-			SELECT id = 152, name = 'Realized Gain or Loss Swap Accrual' --GL-8410
+			SELECT id = 153, name = 'Realized Gain or Loss Forward Accrual' UNION ALL --GL-8410
+			SELECT id = 154, name = 'Realized Gain or Loss Swap Accrual' --GL-8410
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
