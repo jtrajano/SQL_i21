@@ -34,6 +34,8 @@
 	intBookId INT,
 	intSubBookId INT,
 	ysnVirtualRecipe BIT CONSTRAINT [DF_tblMFRecipe_ysnVirtualRecipe] DEFAULT 0,
+	guiApiUniqueId UNIQUEIDENTIFIER NULL,
+	intRowNumber INT NULL,
 
     CONSTRAINT [PK_tblMFRecipe_intRecipeId] PRIMARY KEY ([intRecipeId]), 
     CONSTRAINT [FK_tblMFRecipe_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -54,3 +56,8 @@
 GO
 
 CREATE INDEX [IX_tblMFRecipe_intItemId] ON [dbo].[tblMFRecipe] ([intItemId])
+GO
+
+CREATE INDEX [IX_tblMFRecipe_strName] ON [dbo].[tblMFRecipe] ([strName])
+
+GO
