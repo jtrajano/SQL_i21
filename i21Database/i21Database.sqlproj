@@ -9037,6 +9037,8 @@
     <Build Include="dbo\Tables\tblGRAPISettlementOutboundSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExport.sql" />
     <Build Include="dbo\Stored Procedures\uspGRAPISettlementReportExportDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnStorage.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryStorage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
