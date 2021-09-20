@@ -85,6 +85,9 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 75,name = 'Unrealized Futures Gain or Loss' UNION ALL --GL-3464
 			SELECT id = 76,name = 'Futures Trade Equity' UNION ALL --GL-3464
 			SELECT id = 77,name = 'Futures Gain or Loss Realized' UNION ALL --GL-3464
+			
+
+
 			SELECT id = 100, name = 'Mark to Market P&L' UNION ALL
 			SELECT id = 101, name = 'Mark to Market Offset' UNION ALL
 
@@ -118,7 +121,15 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 144, name = 'Fixed Assets' UNION ALL
 			SELECT id = 145, name = 'Accumulated Depreciation' UNION ALL
 			SELECT id = 146, name = 'Fixed Asset Gain or Loss' UNION ALL
-			SELECT id = 147, name = 'Depreciation Expense'
+			SELECT id = 147, name = 'Depreciation Expense' UNION ALL
+			SELECT id = 148, name = 'Realized Gain or Loss Fixed Asset' UNION --GL-8416
+
+			-- Bank Transfer Category
+			SELECT id = 150, name = 'Forex AP/AR' UNION ALL --GL-8243
+			SELECT id = 151, name = 'Unrealized Gain or Loss Forward Accrual' UNION ALL --GL-8410
+			SELECT id = 152, name = 'Unrealized Gain or Loss Swap Accrual' UNION ALL --GL-8410
+			SELECT id = 151, name = 'Realized Gain or Loss Forward Accrual' UNION ALL --GL-8410
+			SELECT id = 152, name = 'Realized Gain or Loss Swap Accrual' --GL-8410
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
