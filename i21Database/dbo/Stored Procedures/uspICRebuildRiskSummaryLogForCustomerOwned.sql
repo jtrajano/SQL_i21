@@ -1,67 +1,10 @@
-﻿CREATE PROCEDURE [dbo].[uspICLogRiskPositionFromInTransit]
-	@strBatchId AS NVARCHAR(40)
-	,@strTransactionId AS NVARCHAR(50) = NULL 
-	,@intEntityUserSecurityId AS INT
+CREATE PROCEDURE [dbo].[uspICRebuildRiskSummaryLogForCustomerOwned]
+	@intEntityUserSecurityId AS INT
+	,@ysnAvoidDuplicate AS BIT = 1
 AS
-	
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
--- Create the temp config table. 
-IF OBJECT_ID('tempdb..#tmpLogRiskPosition') IS NULL  
-BEGIN 
-	CREATE TABLE #tmpLogRiskPosition (
-		ysnSkip BIT 
-	)
-END 
-
--- Check if the logging needs to be skipped
-IF EXISTS (SELECT TOP 1 1 FROM #tmpLogRiskPosition WHERE ysnSkip = 1) 
-BEGIN 
-	RETURN;
-END 
-
-DECLARE @strBucketType AS NVARCHAR(50) 
+DECLARE @strBucketType AS NVARCHAR(50) = 'Customer Owned'
 		,@strActionType AS NVARCHAR(500)
-
---SELECT @strBucketType = 
---	CASE 
---		WHEN @intBucketType = 1 THEN 'Company Owned'
---		WHEN @intBucketType = 2 THEN 'Sales In-Transit'
---		WHEN @intBucketType = 3 THEN 'Purchase In-Transit'
---		WHEN @intBucketType = 4 THEN 'In-House'
---	END
-
---SELECT @strActionType =
---	CASE 
---		WHEN @intActionType = 1 THEN 'Work Order Production'
---		WHEN @intActionType = 2 THEN 'Work Order Consumption'
---		WHEN @intActionType = 3 THEN 'Inventory Adjustment'
---		WHEN @intActionType = 4 THEN 'Inventory Transfer'
---		WHEN @intActionType = 5 THEN 'Receipt on Purchase Priced Contract'
---		WHEN @intActionType = 6 THEN 'Receipt on Purchase Basis Contract (PBD)'
---		WHEN @intActionType = 7 THEN 'Receipt on Company Owned Storage'
---		WHEN @intActionType = 8 THEN 'Receipt on Spot Priced'
---		WHEN @intActionType = 9 THEN 'Customer owned to Company owned Storage'
---		WHEN @intActionType = 10 THEN 'Delivery on Sales Priced Contract'
---		WHEN @intActionType = 11 THEN 'Delivery on Sales Basis Contract (SBD)'
---		WHEN @intActionType = 12 THEN 'Shipment on Spot Priced'
---	END
-
--- Create the temp table to skip a batch id from logging into the summary log. 
-IF OBJECT_ID('tempdb..#tmpICLogRiskPositionFromOnHandSkipList') IS NULL  
-BEGIN 
-	CREATE TABLE #tmpICLogRiskPositionFromOnHandSkipList (
-		strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
-	)
-END 
-
--- Exit immediately if the batch id is in the list. 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpICLogRiskPositionFromOnHandSkipList WHERE strBatchId = @strBatchId)
-	RETURN;
 
 -----------------------------------------
 -- Call Risk Module's Summary Log sp
@@ -101,11 +44,7 @@ BEGIN
 		)
 		SELECT 
 			strBatchId = t.strBatchId
-			,strBucketType = 
-				CASE 
-					WHEN t.strTransactionForm IN ('Inventory Receipt', 'Inventory Transfer', 'Inbound Shipments') THEN 'Purchase In-Transit'
-					WHEN t.strTransactionForm IN ('Inventory Shipment', 'Outbound Shipment', 'Invoice') THEN 'Sales In-Transit'
-				END 
+			,strBucketType = @strBucketType
 			,strTransactionType = v.strTransactionType
 			,intTransactionRecordHeaderId = t.intTransactionId
 			,intTransactionRecordId = t.intTransactionDetailId
@@ -115,13 +54,13 @@ BEGIN
 				receipt.intContractDetailId
 				, shipment.intContractDetailId
 				, invoice.intContractDetailId
-				, logistics.intContractDetailId
+				, adjustment.intContractDetailId
 			)
 			,intContractHeaderId = COALESCE(
 				receipt.intContractHeaderId
 				, shipment.intContractHeaderId
 				, invoice.intContractHeaderId
-				, logistics.intContractHeaderId
+				, adjustment.intContractHeaderId
 			)
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
@@ -138,27 +77,11 @@ BEGIN
 			,intEntityId = v.intEntityId
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
-			,strNotes = t.strDescription
+			,strNotes = ''--t.strDescription
 			,strDistributionType = ''
 			,intActionId = 
 				 CASE	
-					WHEN t.strTransactionForm = 'Produce' THEN 2
-					WHEN t.strTransactionForm = 'Consume' THEN 3
 					WHEN t.strTransactionForm = 'Inventory Transfer' THEN 4
-					WHEN t.strTransactionForm = 'Inventory Receipt' THEN 
-						CASE 
-							WHEN contractDetail.strPricingType = 'Priced' THEN 5
-							WHEN contractDetail.strPricingType = 'Basis' THEN 6
-							WHEN contractDetail.strPricingType = 'DP (Priced Later)' THEN 45
-							ELSE 8 -- Spot Priced
-						END
-					WHEN t.strTransactionForm = 'Inventory Shipment' THEN 
-						CASE 
-							WHEN contractDetail.strPricingType = 'Priced' THEN 10
-							WHEN contractDetail.strPricingType = 'Basis' THEN 11
-							--WHEN contractDetail.strPricingType = 'DP (Priced Later)' THEN 1
-							ELSE 12 -- Spot Priced
-						END
 					WHEN t.strTransactionForm = 'Inventory Adjustment' THEN 				
 						CASE 
 							WHEN t.intTransactionTypeId = 10 THEN 20 --Inventory Adjustment - Quantity Change
@@ -173,17 +96,11 @@ BEGIN
 							WHEN t.intTransactionTypeId = 47 THEN 29 --Inventory Adjustment - Opening Inventory
 							WHEN t.intTransactionTypeId = 48 THEN 30 --Inventory Adjustment - Change Lot Weight
 							ELSE NULL
-						END 	
-					WHEN t.strTransactionForm = 'Inbound Shipments' THEN 31			
-					WHEN t.strTransactionForm = 'Outbound Shipment' THEN 32
-					WHEN t.strTransactionForm = 'Invoice' AND  t.ysnIsUnposted = 0 THEN 48 --Posted Invoice
-					WHEN t.strTransactionForm = 'Invoice' AND  t.ysnIsUnposted = 1 THEN 60 --Unposted Invoice
-					ELSE 
-						NULL
+						END
 				 END 
 		FROM	
-			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
-				ON t.intInventoryTransactionId = v.intInventoryTransactionId
+			tblICInventoryTransactionStorage t inner join vyuICGetInventoryStorage v 
+				ON t.intInventoryTransactionStorageId = v.intInventoryTransactionStorageId
 			INNER JOIN tblICItemUOM iu
 				ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u
@@ -234,32 +151,11 @@ BEGIN
 					tblARInvoice inv INNER JOIN tblARInvoiceDetail invD
 						ON inv.intInvoiceId = invD.intInvoiceId
 				WHERE
-					t.strTransactionForm = 'Invoice'
+					t.strTransactionForm IN ('Invoice', 'Credit Memo') 
 					AND inv.strInvoiceNumber = t.strTransactionId
 					AND inv.intInvoiceId = t.intTransactionId
 					AND invD.intInvoiceDetailId = t.intTransactionDetailId
 			) invoice
-
-			OUTER APPLY (
-				SELECT
-					l.strLoadNumber
-					,ld.intPContractDetailId
-					,cd.intContractHeaderId
-					,cd.intContractDetailId
-				FROM 
-					tblLGLoad l
-					INNER JOIN tblLGLoadDetail ld
-						ON l.intLoadId = ld.intLoadId
-					INNER JOIN tblCTContractDetail cd
-						ON cd.intContractDetailId = ld.intPContractDetailId
-					INNER JOIN tblCTContractHeader ch
-						ON ch.intContractHeaderId = cd.intContractHeaderId
-				WHERE
-					t.strTransactionForm = 'Inbound Shipments'
-					AND l.strLoadNumber = t.strTransactionId
-					AND l.intLoadId = t.intTransactionId
-					AND ld.intLoadDetailId = t.intTransactionDetailId
-			) logistics 
 
 			OUTER APPLY (
 				SELECT 
@@ -275,24 +171,49 @@ BEGIN
 						receipt.intContractHeaderId
 						, shipment.intContractHeaderId
 						, invoice.intContractHeaderId
-						, logistics.intContractHeaderId
 					)
 					AND cd.intContractDetailId = COALESCE(
 						receipt.intContractDetailId
 						, shipment.intContractDetailId
 						, invoice.intContractDetailId 
-						, logistics.intContractHeaderId
 					)
 			) contractDetail
 
+			OUTER APPLY (
+				SELECT 
+					intContractDetailId = ad.intContractDetailId
+					,intContractHeaderId = ad.intContractHeaderId
+				FROM 
+					tblICInventoryAdjustment a INNER JOIN tblICInventoryAdjustmentDetail ad
+						ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+					LEFT JOIN tblICLot l
+						ON l.intLotId = ad.intLotId 
+				WHERE
+					t.strTransactionForm = 'Inventory Adjustment'
+					AND a.strAdjustmentNo = t.strTransactionId
+					AND a.intInventoryAdjustmentId = t.intTransactionId
+					AND ad.intInventoryAdjustmentDetailId = t.intTransactionDetailId
+			) adjustment 
+
+			OUTER APPLY (
+				SELECT TOP 1 
+					rk.intSummaryLogId
+				FROM 
+					tblRKSummaryLog rk
+				WHERE
+					rk.strTransactionNumber = t.strTransactionId
+			) riskLog 
 		WHERE
-			(t.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
-			AND t.strBatchId = @strBatchId
-			AND t.dblQty <> 0 
-			AND t.intInTransitSourceLocationId IS NOT NULL 
+			t.dblQty <> 0 
 			AND v.strTransactionType NOT IN ('Storage Settlement', 'Transfer Storage')
+			AND t.strTransactionForm IN (
+				'Inventory Transfer'
+				, 'Inventory Adjustment'
+			)
+			AND (
+				riskLog.intSummaryLogId IS NULL 
+			)
 	END
 	
 	EXEC uspRKLogRiskPosition @SummaryLogs, 0, 0
 END 
-
