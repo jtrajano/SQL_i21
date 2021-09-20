@@ -22,6 +22,7 @@ BEGIN
 		,@intLotId INT
 		,@strLotNumber NVARCHAR(50)
 		,@intSubLocationId INT
+		,@strWorkOrderNo NVARCHAR(50)
 	DECLARE @tblMFWODetail TABLE (intDetailId INT)
 
 	INSERT INTO @tblMFWODetail (intDetailId)
@@ -171,6 +172,9 @@ BEGIN
 			,@ysnRecap = 0
 			,@strBatchId = @strBatchId OUT
 			,@ysnAutoBlend = 0
+			,@strWorkOrderNo =@strWorkOrderNo OUT
+
+		Select @strBatchId=@strWorkOrderNo
 
 		UPDATE tblMFWODetail
 		SET ysnProcessed = 1
