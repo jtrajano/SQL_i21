@@ -6,6 +6,7 @@
 	,@ysnRecap BIT = 0
     ,@strBatchId NVARCHAR(50)='' OUT
 	,@ysnAutoBlend BIT=0
+	,@strWorkOrderNo nvarchar(50)='' OUT
 )
 AS
 BEGIN TRY
@@ -22,7 +23,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@strRetBatchId NVARCHAR(40)
 		,@intStatusId INT
-		,@strWorkOrderNo NVARCHAR(50)
+		--,@strWorkOrderNo NVARCHAR(50)
 		,@strProduceXml NVARCHAR(Max)
 		,@intManufacturingProcessId INT
 		,@intLocationId INT
