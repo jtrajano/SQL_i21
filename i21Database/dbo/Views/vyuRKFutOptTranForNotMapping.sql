@@ -81,8 +81,8 @@ LEFT JOIN tblSMCurrencyExchangeRateType AS CurEx ON DE.intCurrencyExchangeRateTy
 LEFT JOIN tblRKAssignFuturesToContractSummary AS AD ON AD.intFutOptAssignedId = DE.intFutOptTransactionId
 LEFT JOIN tblCTContractHeader AS ch ON ch.intContractHeaderId = AD.intContractHeaderId
 LEFT JOIN tblCTContractDetail AS cd ON cd.intContractDetailId = AD.intContractDetailId
-LEFT JOIN tblCMBank AS BuyBank ON DE.intBuyBankId = Bank.intBankId
-LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON DE.intBuyBankAccountId = BankAcct.intBankAccountId
+LEFT JOIN tblCMBank AS BuyBank ON DE.intBuyBankId = BuyBank.intBankId
+LEFT JOIN vyuCMBankAccount AS BuyBankAcct ON DE.intBuyBankAccountId = BuyBankAcct.intBankAccountId
 LEFT JOIN tblCMBankTransfer BT ON BT.intTransactionId = DE.intBankTransferId
 LEFT JOIN tblRKFutOptTransaction ST ON ST.intFutOptTransactionId = DE.intOrigSliceTradeId
 LEFT JOIN (

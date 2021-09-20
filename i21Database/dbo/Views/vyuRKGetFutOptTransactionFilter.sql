@@ -25,8 +25,8 @@ SELECT intRowNum = 1
 	,strCommodityCode = strCommodityCode
 	,intCurrencyID = NULL
 	,strCurrency = NULL
-	,ysnOptions = 0
-    ,ysnActive = 1
+	,ysnOptions = CAST(0 AS bit)
+    ,ysnActive = CAST(1 AS bit)
 	,intSelectedInstrumentTypeId = 2
 FROM tblICCommodity C
 WHERE C.strCommodityCode = 'Currency'
