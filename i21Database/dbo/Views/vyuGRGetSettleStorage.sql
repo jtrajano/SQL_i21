@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRGetSettleStorage]
 AS     
-SELECT DISTINCT
+SELECT
 	 intSettleStorageId			= SS.intSettleStorageId
 	,intEntityId				= SS.intEntityId
 	,strEntityName				= E.strName
@@ -104,9 +104,10 @@ SELECT DISTINCT
 	, strCommodityCode
 	, strCategoryCode	= Category.strCategoryCode
 FROM tblGRSettleStorage SS
-JOIN tblGRSettleStorageTicket ST
+LEFT JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
-JOIN tblGRCustomerStorage CS
+	AND SS.intParentSettleStorageId IS NOT NULL
+LEFT JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = ST.intCustomerStorageId
 JOIN tblEMEntity E 
 	ON E.intEntityId = SS.intEntityId
