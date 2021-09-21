@@ -163,6 +163,7 @@ ORDER BY intBillId
 
 IF NULLIF(@billIds, '') IS NULL
 BEGIN
+	RAISERROR('Posting/unposting already in process.', 16, 1);
 	GOTO Post_Rollback
 END
 
