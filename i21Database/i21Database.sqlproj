@@ -186,6 +186,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRoutePostInventoryTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTO.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
