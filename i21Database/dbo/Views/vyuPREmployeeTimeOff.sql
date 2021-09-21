@@ -85,7 +85,7 @@ INNER JOIN(
 											END
 										)
  
-			,intTypeTimeOffId
+			,T.intTypeTimeOffId
 			FROM tblPREmployee E INNER JOIN tblPREmployeeTimeOff T  ON E.intEntityId = T.intEntityEmployeeId  
 			
 			LEFT JOIN 
@@ -123,7 +123,7 @@ INNER JOIN(
 
    			GROUP BY 
 			E.intEntityId
-			,intTypeTimeOffId   
+			,T.intTypeTimeOffId   
 ) TOYTD 
 	ON ETO.intEntityEmployeeId = TOYTD.intEntityId 
 		AND ETO.intTypeTimeOffId = TOYTD.intTypeTimeOffId
