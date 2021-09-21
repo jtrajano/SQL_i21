@@ -194,6 +194,7 @@
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
     <Build Include="dbo\Views\vyuAPBillForImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6888,7 +6889,7 @@
     <Build Include="dbo\Tables\tblLGInsuranceCalculator.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICMassAddPromotionForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateEffectivePricingForCStore.sql" />
