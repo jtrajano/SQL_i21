@@ -169,6 +169,7 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT511.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6843,6 +6844,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
     <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICMassAddPromotionForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPromotionalPricingForCStore.sql" />
     <Build Include="dbo\User Defined Types\ScaleDestinationStagingTable.sql" />
