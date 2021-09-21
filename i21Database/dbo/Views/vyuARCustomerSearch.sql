@@ -74,7 +74,7 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , strCreditCode			= CUSTOMER.strCreditCode
 	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached
 	 , intCreditLimitReached	= DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
-	 , intInterCompanyId		= intInterCompanyId
+	 , intInterCompanyId		= CUSTOMER.intInterCompanyId
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
