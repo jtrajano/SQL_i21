@@ -6888,7 +6888,8 @@
     <Build Include="dbo\Tables\tblLGInsuranceCalculator.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspICMassAddPromotionForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateEffectivePricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateRevertEffectivePricingForCStore.sql" />

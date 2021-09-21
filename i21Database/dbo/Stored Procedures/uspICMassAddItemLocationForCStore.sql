@@ -1,4 +1,5 @@
-ALTER PROCEDURE [dbo].[uspICMassAddItemLocationForCStore]
+--	This Stored Procedure will copy location to multiple locations
+CREATE PROCEDURE [dbo].[uspICMassAddItemLocationForCStore]
 	-- filter params
 	@intItemLocationId AS INT = NULL 
 
@@ -26,6 +27,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,dblTransactionQtyLimit_Original NUMERIC(18, 6) NULL 
 		,ysnDepositRequired_Original BIT NULL
 		,intDepositPLUId_Original INT NULL 
+		,intBottleDepositNo_Original INT NULL 
 		,ysnQuantityRequired_Original BIT NULL 
 		,ysnScaleItem_Original BIT NULL 
 		,ysnFoodStampable_Original BIT NULL 
@@ -35,8 +37,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,ysnIdRequiredCigarette_Original BIT NULL 
 		,ysnPromotionalItem_Original BIT NULL 
 		,ysnPrePriced_Original BIT NULL 
+		,ysnOpenPricePLU_Original BIT NULL 
+		,ysnLinkedItem_Original BIT NULL 
 		,ysnApplyBlueLaw1_Original BIT NULL 
 		,ysnApplyBlueLaw2_Original BIT NULL 
+		,ysnCarWash_Original BIT NULL 
 		,ysnCountedDaily_Original BIT NULL 
 		,strCounted_Original NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,ysnCountBySINo_Original BIT NULL 
@@ -59,6 +64,7 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,dblTransactionQtyLimit_New NUMERIC(18, 6) NULL 
 		,ysnDepositRequired_New BIT NULL
 		,intDepositPLUId_New INT NULL 
+		,intBottleDepositNo_New INT NULL
 		,ysnQuantityRequired_New BIT NULL 
 		,ysnScaleItem_New BIT NULL 
 		,ysnFoodStampable_New BIT NULL 
@@ -68,8 +74,11 @@ IF OBJECT_ID('tempdb..#tmpUpdateItemLocationForCStore_itemLocationAuditLog') IS 
 		,ysnIdRequiredCigarette_New BIT NULL 
 		,ysnPromotionalItem_New BIT NULL 
 		,ysnPrePriced_New BIT NULL 
+		,ysnOpenPricePLU_New BIT NULL 
+		,ysnLinkedItem_New BIT NULL 
 		,ysnApplyBlueLaw1_New BIT NULL 
 		,ysnApplyBlueLaw2_New BIT NULL 
+		,ysnCarWash_New BIT NULL 
 		,ysnCountedDaily_New BIT NULL 
 		,strCounted_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,ysnCountBySINo_New BIT NULL 
@@ -99,7 +108,8 @@ BEGIN
 		, ysnTaxFlag4_Original
 		, dblTransactionQtyLimit_Original
 		, ysnDepositRequired_Original
-		, intDepositPLUId_Original
+		, intDepositPLUId_Original 
+		, intBottleDepositNo_Original
 		, ysnQuantityRequired_Original
 		, ysnScaleItem_Original
 		, ysnFoodStampable_Original
@@ -109,8 +119,11 @@ BEGIN
 		, ysnIdRequiredCigarette_Original
 		, ysnPromotionalItem_Original
 		, ysnPrePriced_Original
+		, ysnOpenPricePLU_Original
+		, ysnLinkedItem_Original
 		, ysnApplyBlueLaw1_Original
 		, ysnApplyBlueLaw2_Original
+		, ysnCarWash_Original
 		, ysnCountedDaily_Original
 		, strCounted_Original
 		, ysnCountBySINo_Original
@@ -132,7 +145,8 @@ BEGIN
 		, ysnTaxFlag4_New
 		, dblTransactionQtyLimit_New
 		, ysnDepositRequired_New
-		, intDepositPLUId_New
+		, intDepositPLUId_New 
+		, intBottleDepositNo_New
 		, ysnQuantityRequired_New
 		, ysnScaleItem_New
 		, ysnFoodStampable_New
@@ -142,8 +156,11 @@ BEGIN
 		, ysnIdRequiredCigarette_New
 		, ysnPromotionalItem_New
 		, ysnPrePriced_New
+		, ysnOpenPricePLU_New
+		, ysnLinkedItem_New
 		, ysnApplyBlueLaw1_New
 		, ysnApplyBlueLaw2_New
+		, ysnCarWash_New
 		, ysnCountedDaily_New
 		, strCounted_New
 		, ysnCountBySINo_New
@@ -169,6 +186,7 @@ BEGIN
 			, [Changes].dblTransactionQtyLimit_Original
 			, [Changes].ysnDepositRequired_Original
 			, [Changes].intDepositPLUId_Original
+			, [Changes].intBottleDepositNo_Original
 			, [Changes].ysnQuantityRequired_Original
 			, [Changes].ysnScaleItem_Original
 			, [Changes].ysnFoodStampable_Original
@@ -178,8 +196,11 @@ BEGIN
 			, [Changes].ysnIdRequiredCigarette_Original
 			, [Changes].ysnPromotionalItem_Original
 			, [Changes].ysnPrePriced_Original
+			, [Changes].ysnOpenPricePLU_Original
+			, [Changes].ysnLinkedItem_Original
 			, [Changes].ysnApplyBlueLaw1_Original
 			, [Changes].ysnApplyBlueLaw2_Original
+			, [Changes].ysnCarWash_Original
 			, [Changes].ysnCountedDaily_Original
 			, [Changes].strCounted_Original
 			, [Changes].ysnCountBySINo_Original
@@ -202,6 +223,7 @@ BEGIN
 			, [Changes].dblTransactionQtyLimit_New
 			, [Changes].ysnDepositRequired_New
 			, [Changes].intDepositPLUId_New
+			, [Changes].intBottleDepositNo_New
 			, [Changes].ysnQuantityRequired_New
 			, [Changes].ysnScaleItem_New
 			, [Changes].ysnFoodStampable_New
@@ -211,8 +233,11 @@ BEGIN
 			, [Changes].ysnIdRequiredCigarette_New
 			, [Changes].ysnPromotionalItem_New
 			, [Changes].ysnPrePriced_New
+			, [Changes].ysnOpenPricePLU_New
+			, [Changes].ysnLinkedItem_New
 			, [Changes].ysnApplyBlueLaw1_New
 			, [Changes].ysnApplyBlueLaw2_New
+			, [Changes].ysnCarWash_New
 			, [Changes].ysnCountedDaily_New
 			, [Changes].strCounted_New
 			, [Changes].ysnCountBySINo_New
@@ -243,7 +268,8 @@ BEGIN
 								,ysnTaxFlag4			
 								,dblTransactionQtyLimit 
 								,ysnDepositRequired		
-								,intDepositPLUId		
+								,intDepositPLUId	
+								,intBottleDepositNo
 								,ysnQuantityRequired	
 								,ysnScaleItem			
 								,ysnFoodStampable		
@@ -253,8 +279,11 @@ BEGIN
 								,ysnIdRequiredCigarette 
 								,ysnPromotionalItem		
 								,ysnPrePriced			
+								,ysnOpenPricePLU			
+								,ysnLinkedItem			
 								,ysnApplyBlueLaw1		
-								,ysnApplyBlueLaw2		
+								,ysnApplyBlueLaw2	
+								,ysnCarWash			
 								,ysnCountedDaily		
 								,strCounted				
 								,ysnCountBySINo			
@@ -287,28 +316,32 @@ BEGIN
 							,dblTransactionQtyLimit = Source_Query.dblTransactionQtyLimit
 							,ysnDepositRequired		= Source_Query.ysnDepositRequired
 							,intDepositPLUId		= Source_Query.intDepositPLUId
+							,intBottleDepositNo		= Source_Query.intBottleDepositNo
 							,ysnQuantityRequired	= Source_Query.ysnQuantityRequired
-							,ysnScaleItem			=  Source_Query.ysnScaleItem
+							,ysnScaleItem			= Source_Query.ysnScaleItem
 							,ysnFoodStampable		= Source_Query.ysnFoodStampable
-							,ysnReturnable			=  Source_Query.ysnReturnable
-							,ysnSaleable			=  Source_Query.ysnSaleable
-							,ysnIdRequiredLiquor	=  Source_Query.ysnIdRequiredLiquor
-							,ysnIdRequiredCigarette =  Source_Query.ysnIdRequiredCigarette
-							,ysnPromotionalItem		=  Source_Query.ysnPromotionalItem
-							,ysnPrePriced			=  Source_Query.ysnPrePriced
+							,ysnReturnable			= Source_Query.ysnReturnable
+							,ysnSaleable			= Source_Query.ysnSaleable
+							,ysnIdRequiredLiquor	= Source_Query.ysnIdRequiredLiquor
+							,ysnIdRequiredCigarette = Source_Query.ysnIdRequiredCigarette
+							,ysnPromotionalItem		= Source_Query.ysnPromotionalItem
+							,ysnPrePriced			= Source_Query.ysnPrePriced
+							,ysnOpenPricePLU		= Source_Query.ysnOpenPricePLU
+							,ysnLinkedItem			= Source_Query.ysnLinkedItem
 							,ysnApplyBlueLaw1		= Source_Query.ysnApplyBlueLaw1
 							,ysnApplyBlueLaw2		= Source_Query.ysnApplyBlueLaw2
+							,ysnCarWash				= Source_Query.ysnCarWash
 							,ysnCountedDaily		= Source_Query.ysnCountedDaily
 							,strCounted				= Source_Query.strCounted
 							,ysnCountBySINo			= Source_Query.ysnCountBySINo
-							,intFamilyId			=  Source_Query.intFamilyId
+							,intFamilyId			= Source_Query.intFamilyId
 							,intClassId				= Source_Query.intClassId
-							,intProductCodeId		=  Source_Query.intProductCodeId
+							,intProductCodeId		= Source_Query.intProductCodeId
 							,intVendorId			= Source_Query.intVendorId
 							,intMinimumAge			= Source_Query.intMinimumAge
-							,dblMinOrder			=  Source_Query.dblMinOrder
-							,dblSuggestedQty		=  Source_Query.dblSuggestedQty
-							,intCountGroupId		=  Source_Query.intCountGroupId
+							,dblMinOrder			= Source_Query.dblMinOrder
+							,dblSuggestedQty		= Source_Query.dblSuggestedQty
+							,intCountGroupId		= Source_Query.intCountGroupId
 							,intStorageLocationId	= Source_Query.intStorageLocationId
 							,dblReorderPoint		= Source_Query.dblReorderPoint
 							,strDescription			= Source_Query.strDescription
@@ -317,81 +350,89 @@ BEGIN
 							
 					WHEN NOT MATCHED THEN 
 						INSERT (
-							intItemId
-							,intLocationId
-							,ysnTaxFlag1				
-							,ysnTaxFlag2			
-							,ysnTaxFlag3			
-							,ysnTaxFlag4			
-							,dblTransactionQtyLimit 
-							,ysnDepositRequired		
-							,intDepositPLUId		
-							,ysnQuantityRequired	
-							,ysnScaleItem			
-							,ysnFoodStampable		
-							,ysnReturnable			
-							,ysnSaleable			
-							,ysnIdRequiredLiquor	
-							,ysnIdRequiredCigarette 
-							,ysnPromotionalItem		
-							,ysnPrePriced			
-							,ysnApplyBlueLaw1		
-							,ysnApplyBlueLaw2		
-							,ysnCountedDaily		
-							,strCounted				
-							,ysnCountBySINo			
-							,intFamilyId			
-							,intClassId				
-							,intProductCodeId		
-							,intVendorId			
-							,intMinimumAge			
-							,dblMinOrder			
-							,dblSuggestedQty		
-							,intCountGroupId		
-							,intStorageLocationId	
-							,dblReorderPoint		
-							,strDescription			
-							,dtmDateModified 
-							,intModifiedByUserId 
+								intItemId
+								,intLocationId
+								,ysnTaxFlag1				
+								,ysnTaxFlag2			
+								,ysnTaxFlag3			
+								,ysnTaxFlag4			
+								,dblTransactionQtyLimit 
+								,ysnDepositRequired		
+								,intDepositPLUId	
+								,intBottleDepositNo
+								,ysnQuantityRequired	
+								,ysnScaleItem			
+								,ysnFoodStampable		
+								,ysnReturnable			
+								,ysnSaleable			
+								,ysnIdRequiredLiquor	
+								,ysnIdRequiredCigarette 
+								,ysnPromotionalItem		
+								,ysnPrePriced			
+								,ysnOpenPricePLU			
+								,ysnLinkedItem			
+								,ysnApplyBlueLaw1		
+								,ysnApplyBlueLaw2		
+								,ysnCarWash	
+								,ysnCountedDaily		
+								,strCounted				
+								,ysnCountBySINo			
+								,intFamilyId			
+								,intClassId				
+								,intProductCodeId		
+								,intVendorId			
+								,intMinimumAge			
+								,dblMinOrder			
+								,dblSuggestedQty		
+								,intCountGroupId		
+								,intStorageLocationId	
+								,dblReorderPoint		
+								,strDescription			
+								,dtmDateModified 
+								,intModifiedByUserId 
 							)
 							VALUES
 							(
-							Source_Query.intItemId
-							, Source_Query.intLocationId
-							, Source_Query.ysnTaxFlag1
-							, Source_Query.ysnTaxFlag2
-							, Source_Query.ysnTaxFlag3
-							, Source_Query.ysnTaxFlag4
-							, Source_Query.dblTransactionQtyLimit
-							, Source_Query.ysnDepositRequired
-							, Source_Query.intDepositPLUId
-							, Source_Query.ysnQuantityRequired
-							, Source_Query.ysnScaleItem
-							, Source_Query.ysnFoodStampable
-							, Source_Query.ysnReturnable
-							, Source_Query.ysnSaleable
-							, Source_Query.ysnIdRequiredLiquor
-							, Source_Query.ysnIdRequiredCigarette
-							, Source_Query.ysnPromotionalItem
-							, Source_Query.ysnPrePriced
-							, Source_Query.ysnApplyBlueLaw1
-							, Source_Query.ysnApplyBlueLaw2
-							, Source_Query.ysnCountedDaily
-							, Source_Query.strCounted
-							, Source_Query.ysnCountBySINo
-							, Source_Query.intFamilyId
-							, Source_Query.intClassId
-							, Source_Query.intProductCodeId
-							, Source_Query.intVendorId
-							, Source_Query.intMinimumAge
-							, Source_Query.dblMinOrder
-							, Source_Query.dblSuggestedQty
-							, Source_Query.intCountGroupId
-							, Source_Query.intStorageLocationId
-							, Source_Query.dblReorderPoint
-							, Source_Query.strDescription
-							, GETUTCDATE()
-							, @intEntityUserSecurityId
+								Source_Query.intItemId
+								, Source_Query.intLocationId
+								, Source_Query.ysnTaxFlag1
+								, Source_Query.ysnTaxFlag2
+								, Source_Query.ysnTaxFlag3
+								, Source_Query.ysnTaxFlag4
+								, Source_Query.dblTransactionQtyLimit
+								, Source_Query.ysnDepositRequired
+								, Source_Query.intDepositPLUId
+								, Source_Query.intBottleDepositNo
+								, Source_Query.ysnQuantityRequired
+								, Source_Query.ysnScaleItem
+								, Source_Query.ysnFoodStampable
+								, Source_Query.ysnReturnable
+								, Source_Query.ysnSaleable
+								, Source_Query.ysnIdRequiredLiquor
+								, Source_Query.ysnIdRequiredCigarette
+								, Source_Query.ysnPromotionalItem
+								, Source_Query.ysnPrePriced
+								, Source_Query.ysnOpenPricePLU
+								, Source_Query.ysnLinkedItem
+								, Source_Query.ysnApplyBlueLaw1
+								, Source_Query.ysnApplyBlueLaw2
+								, Source_Query.ysnCarWash
+								, Source_Query.ysnCountedDaily
+								, Source_Query.strCounted
+								, Source_Query.ysnCountBySINo
+								, Source_Query.intFamilyId
+								, Source_Query.intClassId
+								, Source_Query.intProductCodeId
+								, Source_Query.intVendorId
+								, Source_Query.intMinimumAge
+								, Source_Query.dblMinOrder
+								, Source_Query.dblSuggestedQty
+								, Source_Query.intCountGroupId
+								, Source_Query.intStorageLocationId
+								, Source_Query.dblReorderPoint
+								, Source_Query.strDescription
+								, GETUTCDATE()
+								, @intEntityUserSecurityId
 							)
 					OUTPUT 
 						$action
@@ -405,6 +446,7 @@ BEGIN
 						, deleted.dblTransactionQtyLimit
 						, deleted.ysnDepositRequired
 						, deleted.intDepositPLUId
+						, deleted.intBottleDepositNo
 						, deleted.ysnQuantityRequired
 						, deleted.ysnScaleItem
 						, deleted.ysnFoodStampable
@@ -414,8 +456,11 @@ BEGIN
 						, deleted.ysnIdRequiredCigarette
 						, deleted.ysnPromotionalItem
 						, deleted.ysnPrePriced
+						, deleted.ysnOpenPricePLU
+						, deleted.ysnLinkedItem
 						, deleted.ysnApplyBlueLaw1
 						, deleted.ysnApplyBlueLaw2
+						, deleted.ysnCarWash
 						, deleted.ysnCountedDaily
 						, deleted.strCounted
 						, deleted.ysnCountBySINo
@@ -438,6 +483,7 @@ BEGIN
 						, inserted.dblTransactionQtyLimit
 						, inserted.ysnDepositRequired
 						, inserted.intDepositPLUId
+						, inserted.intBottleDepositNo
 						, inserted.ysnQuantityRequired
 						, inserted.ysnScaleItem
 						, inserted.ysnFoodStampable
@@ -447,8 +493,11 @@ BEGIN
 						, inserted.ysnIdRequiredCigarette
 						, inserted.ysnPromotionalItem
 						, inserted.ysnPrePriced
+						, inserted.ysnOpenPricePLU
+						, inserted.ysnLinkedItem
 						, inserted.ysnApplyBlueLaw1
 						, inserted.ysnApplyBlueLaw2
+						, inserted.ysnCarWash
 						, inserted.ysnCountedDaily
 						, inserted.strCounted
 						, inserted.ysnCountBySINo
@@ -475,6 +524,7 @@ BEGIN
 				, dblTransactionQtyLimit_Original
 				, ysnDepositRequired_Original
 				, intDepositPLUId_Original
+				, intBottleDepositNo_Original
 				, ysnQuantityRequired_Original
 				, ysnScaleItem_Original
 				, ysnFoodStampable_Original
@@ -484,8 +534,11 @@ BEGIN
 				, ysnIdRequiredCigarette_Original
 				, ysnPromotionalItem_Original
 				, ysnPrePriced_Original
+				, ysnOpenPricePLU_Original
+				, ysnLinkedItem_Original
 				, ysnApplyBlueLaw1_Original
 				, ysnApplyBlueLaw2_Original
+				, ysnCarWash_Original
 				, ysnCountedDaily_Original
 				, strCounted_Original
 				, ysnCountBySINo_Original
@@ -508,6 +561,7 @@ BEGIN
 				, dblTransactionQtyLimit_New
 				, ysnDepositRequired_New
 				, intDepositPLUId_New
+				, intBottleDepositNo_New
 				, ysnQuantityRequired_New
 				, ysnScaleItem_New
 				, ysnFoodStampable_New
@@ -517,8 +571,11 @@ BEGIN
 				, ysnIdRequiredCigarette_New
 				, ysnPromotionalItem_New
 				, ysnPrePriced_New
+				, ysnOpenPricePLU_New
+				, ysnLinkedItem_New
 				, ysnApplyBlueLaw1_New
 				, ysnApplyBlueLaw2_New
+				, ysnCarWash_New
 				, ysnCountedDaily_New
 				, strCounted_New
 				, ysnCountBySINo_New
@@ -539,685 +596,29 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog)
 BEGIN 
-	DECLARE @auditLog_strDescription AS NVARCHAR(255) 
-			,@auditLog_actionType AS NVARCHAR(50) = 'Updated'
-
-	DECLARE 
-		@auditLog_intItemId INT
-		,@auditLog_intItemLocationId INT 
-		-- Original Fields
-		,@auditLog_ysnTaxFlag1_Original BIT
-		,@auditLog_ysnTaxFlag2_Original BIT
-		,@auditLog_ysnTaxFlag3_Original BIT 
-		,@auditLog_ysnTaxFlag4_Original BIT
-		,@auditLog_dblTransactionQtyLimit_Original NUMERIC(18, 6)
-		,@auditLog_ysnDepositRequired_Original BIT
-		,@auditLog_intDepositPLUId_Original INT
-		,@auditLog_ysnQuantityRequired_Original BIT 
-		,@auditLog_ysnScaleItem_Original BIT 
-		,@auditLog_ysnFoodStampable_Original BIT 
-		,@auditLog_ysnReturnable_Original BIT 
-		,@auditLog_ysnSaleable_Original BIT 
-		,@auditLog_ysnIdRequiredLiquor_Original BIT
-		,@auditLog_ysnIdRequiredCigarette_Original BIT 
-		,@auditLog_ysnPromotionalItem_Original BIT
-		,@auditLog_ysnPrePriced_Original BIT
-		,@auditLog_ysnApplyBlueLaw1_Original BIT
-		,@auditLog_ysnApplyBlueLaw2_Original BIT
-		,@auditLog_ysnCountedDaily_Original BIT
-		,@auditLog_strCounted_Original NVARCHAR(50)
-		,@auditLog_ysnCountBySINo_Original BIT
-		,@auditLog_intFamilyId_Original INT
-		,@auditLog_intClassId_Original INT
-		,@auditLog_intProductCodeId_Original INT
-		,@auditLog_intVendorId_Original INT
-		,@auditLog_intMinimumAge_Original INT
-		,@auditLog_dblMinOrder_Original NUMERIC(18, 6)
-		,@auditLog_dblSuggestedQty_Original NUMERIC(18, 6)
-		,@auditLog_intCountGroupId_Original INT
-		,@auditLog_intStorageLocationId_Original INT
-		,@auditLog_dblReorderPoint_Original NUMERIC(18, 6)
-		,@auditLog_strDescription_Original NVARCHAR(1000)
-		-- Modified Fields
-		,@auditLog_ysnTaxFlag1_New BIT
-		,@auditLog_ysnTaxFlag2_New BIT
-		,@auditLog_ysnTaxFlag3_New BIT 
-		,@auditLog_ysnTaxFlag4_New BIT
-		,@auditLog_dblTransactionQtyLimit_New NUMERIC(18, 6)
-		,@auditLog_ysnDepositRequired_New BIT
-		,@auditLog_intDepositPLUId_New INT
-		,@auditLog_ysnQuantityRequired_New BIT
-		,@auditLog_ysnScaleItem_New BIT
-		,@auditLog_ysnFoodStampable_New BIT
-		,@auditLog_ysnReturnable_New BIT
-		,@auditLog_ysnSaleable_New BIT
-		,@auditLog_ysnIdRequiredLiquor_New BIT
-		,@auditLog_ysnIdRequiredCigarette_New BIT
-		,@auditLog_ysnPromotionalItem_New BIT
-		,@auditLog_ysnPrePriced_New BIT
-		,@auditLog_ysnApplyBlueLaw1_New BIT
-		,@auditLog_ysnApplyBlueLaw2_New BIT
-		,@auditLog_ysnCountedDaily_New BIT
-		,@auditLog_strCounted_New NVARCHAR(50)
-		,@auditLog_ysnCountBySINo_New BIT
-		,@auditLog_intFamilyId_New INT
-		,@auditLog_intClassId_New INT
-		,@auditLog_intProductCodeId_New INT
-		,@auditLog_intVendorId_New INT
-		,@auditLog_intMinimumAge_New INT 
-		,@auditLog_dblMinOrder_New NUMERIC(18, 6)
-		,@auditLog_dblSuggestedQty_New NUMERIC(18, 6)
-		,@auditLog_intCountGroupId_New INT
-		,@auditLog_intStorageLocationId_New INT
-		,@auditLog_dblReorderPoint_New NUMERIC(18, 6)
-		,@auditLog_strDescription_New NVARCHAR(1000)
-
-
-	DECLARE loopAuditLog CURSOR LOCAL FAST_FORWARD
-	FOR 	
-	SELECT	
-			intItemId
-			,intItemLocationId
-			-- Original Fields
-			,ysnTaxFlag1_Original
-			,ysnTaxFlag2_Original
-			,ysnTaxFlag3_Original 
-			,ysnTaxFlag4_Original
-			,dblTransactionQtyLimit_Original
-			,ysnDepositRequired_Original
-			,intDepositPLUId_Original
-			,ysnQuantityRequired_Original
-			,ysnScaleItem_Original
-			,ysnFoodStampable_Original
-			,ysnReturnable_Original
-			,ysnSaleable_Original
-			,ysnIdRequiredLiquor_Original
-			,ysnIdRequiredCigarette_Original
-			,ysnPromotionalItem_Original
-			,ysnPrePriced_Original
-			,ysnApplyBlueLaw1_Original
-			,ysnApplyBlueLaw2_Original
-			,ysnCountedDaily_Original
-			,strCounted_Original
-			,ysnCountBySINo_Original
-			,intFamilyId_Original
-			,intClassId_Original
-			,intProductCodeId_Original
-			,intVendorId_Original
-			,intMinimumAge_Original 
-			,dblMinOrder_Original 
-			,dblSuggestedQty_Original 
-			,intCountGroupId_Original 
-			,intStorageLocationId_Original 
-			,dblReorderPoint_Original 
-			,strDescription_Original 
-			-- Modified Fields
-			,ysnTaxFlag1_New 
-			,ysnTaxFlag2_New
-			,ysnTaxFlag3_New
-			,ysnTaxFlag4_New
-			,dblTransactionQtyLimit_New
-			,ysnDepositRequired_New
-			,intDepositPLUId_New 
-			,ysnQuantityRequired_New 
-			,ysnScaleItem_New 
-			,ysnFoodStampable_New 
-			,ysnReturnable_New 
-			,ysnSaleable_New 
-			,ysnIdRequiredLiquor_New 
-			,ysnIdRequiredCigarette_New 
-			,ysnPromotionalItem_New 
-			,ysnPrePriced_New 
-			,ysnApplyBlueLaw1_New 
-			,ysnApplyBlueLaw2_New 
-			,ysnCountedDaily_New 
-			,strCounted_New 
-			,ysnCountBySINo_New 
-			,intFamilyId_New 
-			,intClassId_New 
-			,intProductCodeId_New 
-			,intVendorId_New 
-			,intMinimumAge_New 
-			,dblMinOrder_New 
-			,dblSuggestedQty_New 
-			,intCountGroupId_New 
-			,intStorageLocationId_New 
-			,dblReorderPoint_New 
-			,strDescription_New 
-	FROM	#tmpUpdateItemLocationForCStore_itemLocationAuditLog 
-
-	OPEN loopAuditLog;
-
-	FETCH NEXT FROM loopAuditLog INTO 
-		@auditLog_intItemId 
-		,@auditLog_intItemLocationId 
-		-- Original Fields
-		,@auditLog_ysnTaxFlag1_Original 
-		,@auditLog_ysnTaxFlag2_Original 
-		,@auditLog_ysnTaxFlag3_Original  
-		,@auditLog_ysnTaxFlag4_Original 
-		,@auditLog_dblTransactionQtyLimit_Original 
-		,@auditLog_ysnDepositRequired_Original 
-		,@auditLog_intDepositPLUId_Original 
-		,@auditLog_ysnQuantityRequired_Original 
-		,@auditLog_ysnScaleItem_Original 
-		,@auditLog_ysnFoodStampable_Original 
-		,@auditLog_ysnReturnable_Original 
-		,@auditLog_ysnSaleable_Original 
-		,@auditLog_ysnIdRequiredLiquor_Original 
-		,@auditLog_ysnIdRequiredCigarette_Original 
-		,@auditLog_ysnPromotionalItem_Original 
-		,@auditLog_ysnPrePriced_Original 
-		,@auditLog_ysnApplyBlueLaw1_Original 
-		,@auditLog_ysnApplyBlueLaw2_Original 
-		,@auditLog_ysnCountedDaily_Original 
-		,@auditLog_strCounted_Original 
-		,@auditLog_ysnCountBySINo_Original 
-		,@auditLog_intFamilyId_Original 
-		,@auditLog_intClassId_Original 
-		,@auditLog_intProductCodeId_Original 
-		,@auditLog_intVendorId_Original 
-		,@auditLog_intMinimumAge_Original 
-		,@auditLog_dblMinOrder_Original 
-		,@auditLog_dblSuggestedQty_Original 
-		,@auditLog_intCountGroupId_Original 
-		,@auditLog_intStorageLocationId_Original 
-		,@auditLog_dblReorderPoint_Original 
-		,@auditLog_strDescription_Original 
-		-- Modified Fields
-		,@auditLog_ysnTaxFlag1_New 
-		,@auditLog_ysnTaxFlag2_New 
-		,@auditLog_ysnTaxFlag3_New  
-		,@auditLog_ysnTaxFlag4_New 
-		,@auditLog_dblTransactionQtyLimit_New 
-		,@auditLog_ysnDepositRequired_New 
-		,@auditLog_intDepositPLUId_New 
-		,@auditLog_ysnQuantityRequired_New 
-		,@auditLog_ysnScaleItem_New 
-		,@auditLog_ysnFoodStampable_New 
-		,@auditLog_ysnReturnable_New 
-		,@auditLog_ysnSaleable_New 
-		,@auditLog_ysnIdRequiredLiquor_New 
-		,@auditLog_ysnIdRequiredCigarette_New 
-		,@auditLog_ysnPromotionalItem_New 
-		,@auditLog_ysnPrePriced_New 
-		,@auditLog_ysnApplyBlueLaw1_New 
-		,@auditLog_ysnApplyBlueLaw2_New 
-		,@auditLog_ysnCountedDaily_New 
-		,@auditLog_strCounted_New 
-		,@auditLog_ysnCountBySINo_New 
-		,@auditLog_intFamilyId_New 
-		,@auditLog_intClassId_New 
-		,@auditLog_intProductCodeId_New 
-		,@auditLog_intVendorId_New 
-		,@auditLog_intMinimumAge_New 
-		,@auditLog_dblMinOrder_New 
-		,@auditLog_dblSuggestedQty_New 
-		,@auditLog_intCountGroupId_New 
-		,@auditLog_intStorageLocationId_New 
-		,@auditLog_dblReorderPoint_New 
-		,@auditLog_strDescription_New 
-	;
-	WHILE @@FETCH_STATUS = 0
+	DECLARE @strLocationFrom AS VARCHAR(100) = (SELECT TOP 1 strLocationName FROM tblSMCompanyLocation cl 
+																		INNER JOIN tblICItemLocation il
+																		ON cl.intCompanyLocationId = il.intLocationId
+																		WHERE il.intItemLocationId = @intItemLocationId)
+	DECLARE @strLocationTo   AS VARCHAR(100) =  (SELECT TOP 1 strLocationName FROM tblSMCompanyLocation cl 
+																		INNER JOIN tblICItemLocation il
+																		ON cl.intCompanyLocationId = il.intLocationId
+																		WHERE il.intItemLocationId = @intLocationToUpdateId)
+																		
+	DECLARE @auditLog_actionType AS NVARCHAR(50) = 'Updated'
+			,@auditLog_intItemId INT = (SELECT TOP 1 intItemId FROM #tmpUpdateItemLocationForCStore_itemLocationAuditLog)
+	
+	IF ISNULL(@strLocationFrom, '') <> ISNULL(@strLocationTo, '')
 	BEGIN 
-		IF ISNULL(@auditLog_ysnTaxFlag1_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag1_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Tax Flag 1'
-				,@fromValue = @auditLog_ysnTaxFlag1_Original
-				,@toValue = @auditLog_ysnTaxFlag1_New
-		END
+		EXEC dbo.uspSMAuditLog 
+			@keyValue = @auditLog_intItemId
+			,@screenName = 'Store.view.InventoryMassMaintenance'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = @auditLog_actionType
+			,@changeDescription = 'C-Store Executes Mass Add of Location'
+			,@fromValue = @strLocationFrom
+			,@toValue = @strLocationTo
+			
+	END
 
-		IF ISNULL(@auditLog_ysnTaxFlag2_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag2_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Tax Flag 2'
-				,@fromValue = @auditLog_ysnTaxFlag2_Original
-				,@toValue = @auditLog_ysnTaxFlag2_New
-		END
-
-		IF ISNULL(@auditLog_ysnTaxFlag3_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag3_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Tax Flag 3'
-				,@fromValue = @auditLog_ysnTaxFlag3_Original
-				,@toValue = @auditLog_ysnTaxFlag3_New
-		END
-		
-		IF ISNULL(@auditLog_ysnTaxFlag4_Original, 0) <> ISNULL(@auditLog_ysnTaxFlag4_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Tax Flag 4'
-				,@fromValue = @auditLog_ysnTaxFlag4_Original
-				,@toValue = @auditLog_ysnTaxFlag4_New
-		END
-		
-		IF ISNULL(@auditLog_dblTransactionQtyLimit_Original, 0) <> ISNULL(@auditLog_dblTransactionQtyLimit_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Transaction Qty Limit'
-				,@fromValue = @auditLog_dblTransactionQtyLimit_Original
-				,@toValue = @auditLog_dblTransactionQtyLimit_New
-		END
-
-		IF ISNULL(@auditLog_ysnDepositRequired_Original, 0) <> ISNULL(@auditLog_ysnDepositRequired_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Deposit Required'
-				,@fromValue = @auditLog_ysnDepositRequired_Original
-				,@toValue = @auditLog_ysnDepositRequired_New
-		END
-
-		IF ISNULL(@auditLog_intDepositPLUId_Original, 0) <> ISNULL(@auditLog_intDepositPLUId_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Deposit PLU Id'
-				,@fromValue = @auditLog_intDepositPLUId_Original
-				,@toValue = @auditLog_intDepositPLUId_New
-		END
-
-		IF ISNULL(@auditLog_ysnQuantityRequired_Original, 0) <> ISNULL(@auditLog_ysnQuantityRequired_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Quantity Required'
-				,@fromValue = @auditLog_ysnQuantityRequired_Original
-				,@toValue = @auditLog_ysnQuantityRequired_New
-		END
-
-		IF ISNULL(@auditLog_ysnScaleItem_Original, 0) <> ISNULL(@auditLog_ysnScaleItem_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Scale Item'
-				,@fromValue = @auditLog_ysnScaleItem_Original
-				,@toValue = @auditLog_ysnScaleItem_New
-		END
-
-		IF ISNULL(@auditLog_ysnFoodStampable_Original, 0) <> ISNULL(@auditLog_ysnFoodStampable_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Food Stampable'
-				,@fromValue = @auditLog_ysnFoodStampable_Original
-				,@toValue = @auditLog_ysnFoodStampable_New
-		END
-
-		IF ISNULL(@auditLog_ysnReturnable_Original, 0) <> ISNULL(@auditLog_ysnReturnable_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Returnable'
-				,@fromValue = @auditLog_ysnReturnable_Original
-				,@toValue = @auditLog_ysnReturnable_New
-		END
-
-		IF ISNULL(@auditLog_ysnSaleable_Original, 0) <> ISNULL(@auditLog_ysnSaleable_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Saleable'
-				,@fromValue = @auditLog_ysnSaleable_Original
-				,@toValue = @auditLog_ysnSaleable_New
-		END
-
-		IF ISNULL(@auditLog_ysnIdRequiredLiquor_Original, 0) <> ISNULL(@auditLog_ysnIdRequiredLiquor_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Required Liquor'
-				,@fromValue = @auditLog_ysnIdRequiredLiquor_Original
-				,@toValue = @auditLog_ysnIdRequiredLiquor_New
-		END
-
-
-		IF ISNULL(@auditLog_ysnIdRequiredCigarette_Original, 0) <> ISNULL(@auditLog_ysnIdRequiredCigarette_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Required Cigarette'
-				,@fromValue = @auditLog_ysnIdRequiredCigarette_Original
-				,@toValue = @auditLog_ysnIdRequiredCigarette_New
-		END
-
-		IF ISNULL(@auditLog_ysnPromotionalItem_Original, 0) <> ISNULL(@auditLog_ysnPromotionalItem_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Promotional Item'
-				,@fromValue = @auditLog_ysnPromotionalItem_Original
-				,@toValue = @auditLog_ysnPromotionalItem_New
-		END
-
-		IF ISNULL(@auditLog_ysnPrePriced_Original, 0) <> ISNULL(@auditLog_ysnPrePriced_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Pre Priced'
-				,@fromValue = @auditLog_ysnPrePriced_Original
-				,@toValue = @auditLog_ysnPrePriced_New
-		END
-
-		IF ISNULL(@auditLog_ysnApplyBlueLaw1_Original, 0) <> ISNULL(@auditLog_ysnApplyBlueLaw1_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Apply Blue Law 1'
-				,@fromValue = @auditLog_ysnApplyBlueLaw1_Original
-				,@toValue = @auditLog_ysnApplyBlueLaw1_New
-		END
-
-		IF ISNULL(@auditLog_ysnApplyBlueLaw2_Original, 0) <> ISNULL(@auditLog_ysnApplyBlueLaw2_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Apply Blue Law 2'
-				,@fromValue = @auditLog_ysnApplyBlueLaw2_Original
-				,@toValue = @auditLog_ysnApplyBlueLaw2_New
-		END
-
-		IF ISNULL(@auditLog_ysnCountedDaily_Original, 0) <> ISNULL(@auditLog_ysnCountedDaily_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Counted Daily'
-				,@fromValue = @auditLog_ysnCountedDaily_Original
-				,@toValue = @auditLog_ysnCountedDaily_New
-		END
-
-		IF ISNULL(@auditLog_strCounted_Original, 0) <> ISNULL(@auditLog_strCounted_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Counted'
-				,@fromValue = @auditLog_strCounted_Original
-				,@toValue = @auditLog_strCounted_New
-		END
-
-
-		IF ISNULL(@auditLog_ysnCountBySINo_Original, 0) <> ISNULL(@auditLog_ysnCountBySINo_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Count By Serial No.'
-				,@fromValue = @auditLog_ysnCountBySINo_Original
-				,@toValue = @auditLog_ysnCountBySINo_New
-		END
-
-		IF ISNULL(@auditLog_intFamilyId_Original, 0) <> ISNULL(@auditLog_intFamilyId_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Family Id'
-				,@fromValue = @auditLog_intFamilyId_Original
-				,@toValue = @auditLog_intFamilyId_New
-		END
-		
-		IF ISNULL(@auditLog_intClassId_Original, 0) <> ISNULL(@auditLog_intClassId_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Class Id'
-				,@fromValue = @auditLog_intClassId_Original
-				,@toValue = @auditLog_intClassId_New
-		END
-
-		IF ISNULL(@auditLog_intProductCodeId_Original, 0) <> ISNULL(@auditLog_intProductCodeId_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Product Code Id'
-				,@fromValue = @auditLog_intProductCodeId_Original
-				,@toValue = @auditLog_intProductCodeId_New
-		END
-
-		IF ISNULL(@auditLog_intVendorId_Original, 0) <> ISNULL(@auditLog_intVendorId_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Vendor Id'
-				,@fromValue = @auditLog_intVendorId_Original
-				,@toValue = @auditLog_intVendorId_New
-		END
-
-		IF ISNULL(@auditLog_intMinimumAge_Original, 0) <> ISNULL(@auditLog_intMinimumAge_Original, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Minimum Age'
-				,@fromValue = @auditLog_intMinimumAge_Original
-				,@toValue = @auditLog_intMinimumAge_New
-		END
-
-		IF ISNULL(@auditLog_dblMinOrder_Original, 0) <> ISNULL(@auditLog_dblMinOrder_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Minimum Order'
-				,@fromValue = @auditLog_dblMinOrder_Original
-				,@toValue = @auditLog_dblMinOrder_New
-		END
-
-		IF ISNULL(@auditLog_dblSuggestedQty_Original, 0) <> ISNULL(@auditLog_dblSuggestedQty_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Suggested Qty'
-				,@fromValue = @auditLog_dblSuggestedQty_Original
-				,@toValue = @auditLog_dblSuggestedQty_New
-		END
-
-		IF ISNULL(@auditLog_intCountGroupId_Original, 0) <> ISNULL(@auditLog_intCountGroupId_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Count Group Id'
-				,@fromValue = @auditLog_intCountGroupId_Original
-				,@toValue = @auditLog_intCountGroupId_New
-		END
-		
-		IF ISNULL(@auditLog_intStorageLocationId_Original, 0) <> ISNULL(@auditLog_intStorageLocationId_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Storage Location Id'
-				,@fromValue = @auditLog_intStorageLocationId_Original
-				,@toValue = @auditLog_intStorageLocationId_New
-		END
-		
-		IF ISNULL(@auditLog_dblReorderPoint_Original, 0) <> ISNULL(@auditLog_dblReorderPoint_New, 0)
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Reorder Point'
-				,@fromValue = @auditLog_dblReorderPoint_Original
-				,@toValue = @auditLog_dblReorderPoint_New
-		END
-
-		IF ISNULL(@auditLog_strDescription_Original, '') <> ISNULL(@auditLog_strDescription_New, '')
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLog_intItemLocationId
-				,@screenName = 'Inventory.view.ItemLocation'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = @auditLog_actionType
-				,@changeDescription = 'C-Store updates the Description'
-				,@fromValue = @auditLog_strDescription_Original
-				,@toValue = @auditLog_strDescription_New
-		END
-
-
-		FETCH NEXT FROM loopAuditLog INTO 
-			@auditLog_intItemId 
-			,@auditLog_intItemLocationId 
-			-- Original Fields
-			,@auditLog_ysnTaxFlag1_Original 
-			,@auditLog_ysnTaxFlag2_Original 
-			,@auditLog_ysnTaxFlag3_Original  
-			,@auditLog_ysnTaxFlag4_Original 
-			,@auditLog_dblTransactionQtyLimit_Original 
-			,@auditLog_ysnDepositRequired_Original 
-			,@auditLog_intDepositPLUId_Original 
-			,@auditLog_ysnQuantityRequired_Original 
-			,@auditLog_ysnScaleItem_Original 
-			,@auditLog_ysnFoodStampable_Original 
-			,@auditLog_ysnReturnable_Original 
-			,@auditLog_ysnSaleable_Original 
-			,@auditLog_ysnIdRequiredLiquor_Original 
-			,@auditLog_ysnIdRequiredCigarette_Original 
-			,@auditLog_ysnPromotionalItem_Original 
-			,@auditLog_ysnPrePriced_Original 
-			,@auditLog_ysnApplyBlueLaw1_Original 
-			,@auditLog_ysnApplyBlueLaw2_Original 
-			,@auditLog_ysnCountedDaily_Original 
-			,@auditLog_strCounted_Original 
-			,@auditLog_ysnCountBySINo_Original 
-			,@auditLog_intFamilyId_Original 
-			,@auditLog_intClassId_Original 
-			,@auditLog_intProductCodeId_Original 
-			,@auditLog_intVendorId_Original 
-			,@auditLog_intMinimumAge_Original 
-			,@auditLog_dblMinOrder_Original 
-			,@auditLog_dblSuggestedQty_Original 
-			,@auditLog_intCountGroupId_Original 
-			,@auditLog_intStorageLocationId_Original 
-			,@auditLog_dblReorderPoint_Original 
-			,@auditLog_strDescription_Original 
-			-- Modified Fields
-			,@auditLog_ysnTaxFlag1_New 
-			,@auditLog_ysnTaxFlag2_New 
-			,@auditLog_ysnTaxFlag3_New 
-			,@auditLog_ysnTaxFlag4_New 
-			,@auditLog_dblTransactionQtyLimit_New 
-			,@auditLog_ysnDepositRequired_New 
-			,@auditLog_intDepositPLUId_New 
-			,@auditLog_ysnQuantityRequired_New 
-			,@auditLog_ysnScaleItem_New 
-			,@auditLog_ysnFoodStampable_New 
-			,@auditLog_ysnReturnable_New 
-			,@auditLog_ysnSaleable_New 
-			,@auditLog_ysnIdRequiredLiquor_New 
-			,@auditLog_ysnIdRequiredCigarette_New 
-			,@auditLog_ysnPromotionalItem_New 
-			,@auditLog_ysnPrePriced_New 
-			,@auditLog_ysnApplyBlueLaw1_New 
-			,@auditLog_ysnApplyBlueLaw2_New 
-			,@auditLog_ysnCountedDaily_New 
-			,@auditLog_strCounted_New 
-			,@auditLog_ysnCountBySINo_New 
-			,@auditLog_intFamilyId_New 
-			,@auditLog_intClassId_New 
-			,@auditLog_intProductCodeId_New 
-			,@auditLog_intVendorId_New 
-			,@auditLog_intMinimumAge_New 
-			,@auditLog_dblMinOrder_New 
-			,@auditLog_dblSuggestedQty_New 
-			,@auditLog_intCountGroupId_New 
-			,@auditLog_intStorageLocationId_New 
-			,@auditLog_dblReorderPoint_New 
-			,@auditLog_strDescription_New 
-		;
-	END 
-	CLOSE loopAuditLog;
-	DEALLOCATE loopAuditLog;
 END

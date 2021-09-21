@@ -77,7 +77,7 @@ IF OBJECT_ID('tempdb..#tmpEffectivePriceForCStore_AuditLog') IS NULL
 	)
 ;
 
-DECLARE @auditLogCost_id AS INT 
+DECLARE @auditLogItem_id AS INT 
 		,@auditLogCost_Old AS NVARCHAR(255)
 		,@auditLogCost_New AS NVARCHAR(255)
 		,@auditLogAction AS NVARCHAR(50)
@@ -242,7 +242,7 @@ BEGIN
 	OPEN loopAuditLog;
 
 	FETCH NEXT FROM loopAuditLog INTO 
-		@auditLogCost_id
+		@auditLogItem_id
 		,@auditLogCost_Old
 		,@auditLogCost_New
 		,@auditLogAction
@@ -250,32 +250,28 @@ BEGIN
 	;
 	WHILE @@FETCH_STATUS = 0
 	BEGIN 
-		IF @auditLogAction = 'UPDATE'
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLogCost_id
-				,@screenName = 'Inventory.view.Item'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = 'Updated'
-				,@changeDescription = @auditLogDescription
-				,@fromValue = @auditLogCost_Old
-				,@toValue = @auditLogCost_New
-		END
+		--For Inventory -> Item audit log
+		EXEC dbo.uspSMAuditLog 
+			@keyValue = @auditLogItem_id
+			,@screenName = 'Inventory.view.Item'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Updated'
+			,@changeDescription = @auditLogDescription
+			,@fromValue = @auditLogCost_Old
+			,@toValue = @auditLogCost_New
 
-		ELSE IF @auditLogAction = 'INSERT'
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLogCost_id
-				,@screenName = 'Inventory.view.Item'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = 'Updated'
-				,@changeDescription = @auditLogDescription
-				,@fromValue = ''
-				,@toValue = @auditLogCost_New
-		END
+		--For Store -> Item Quick Entry audit log
+		EXEC dbo.uspSMAuditLog 
+			@keyValue = @auditLogItem_id
+			,@screenName = 'Store.view.InventoryMassMaintenance'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Updated'
+			,@changeDescription = @auditLogDescription
+			,@fromValue = @auditLogCost_Old
+			,@toValue = @auditLogCost_New
 
 		FETCH NEXT FROM loopAuditLog INTO 
-			@auditLogCost_id
+			@auditLogItem_id
 			,@auditLogCost_Old
 			,@auditLogCost_New
 			,@auditLogAction
@@ -444,7 +440,7 @@ BEGIN
 	OPEN loopAuditLog;
 
 	FETCH NEXT FROM loopAuditLog INTO 
-		@auditLogCost_id
+		@auditLogItem_id
 		,@auditLogCost_Old
 		,@auditLogCost_New
 		,@auditLogAction
@@ -452,32 +448,29 @@ BEGIN
 	;
 	WHILE @@FETCH_STATUS = 0
 	BEGIN 
-		IF @auditLogAction = 'UPDATE'
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLogCost_id
-				,@screenName = 'Inventory.view.Item'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = 'Updated'
-				,@changeDescription = @auditLogDescription
-				,@fromValue = @auditLogCost_Old
-				,@toValue = @auditLogCost_New
-		END
+		--For Inventory -> Item audit log
+		EXEC dbo.uspSMAuditLog 
+			@keyValue = @auditLogItem_id
+			,@screenName = 'Inventory.view.Item'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Updated'
+			,@changeDescription = @auditLogDescription
+			,@fromValue = @auditLogCost_Old
+			,@toValue = @auditLogCost_New
+			
+		--For Store -> Item Quick Entry audit log
+		EXEC dbo.uspSMAuditLog 
+			@keyValue = @auditLogItem_id
+			,@screenName = 'Store.view.InventoryMassMaintenance'
+			,@entityId = @intEntityUserSecurityId
+			,@actionType = 'Updated'
+			,@changeDescription = @auditLogDescription
+			,@fromValue = @auditLogCost_Old
+			,@toValue = @auditLogCost_New
 
-		ELSE IF @auditLogAction = 'INSERT'
-		BEGIN 
-			EXEC dbo.uspSMAuditLog 
-				@keyValue = @auditLogCost_id
-				,@screenName = 'Inventory.view.Item'
-				,@entityId = @intEntityUserSecurityId
-				,@actionType = 'Updated'
-				,@changeDescription = @auditLogDescription
-				,@fromValue = ''
-				,@toValue = @auditLogCost_New
-		END
 
 		FETCH NEXT FROM loopAuditLog INTO 
-			@auditLogCost_id
+			@auditLogItem_id
 			,@auditLogCost_Old
 			,@auditLogCost_New
 			,@auditLogAction
