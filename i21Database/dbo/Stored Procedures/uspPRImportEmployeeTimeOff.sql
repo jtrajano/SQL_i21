@@ -40,7 +40,7 @@ SELECT
 	,strLogLevel		= 'Error'
 	,strStatus		= 'Failed'
 	,intRowNo		= SE.intRowNumber
-	,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(50)) + '.'
 	FROM tblApiSchemaEmployeeTimeOff SE
 	LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = SE.intEntityNo
 	WHERE SE.guiApiUniqueId = @guiApiUniqueId
