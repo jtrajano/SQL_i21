@@ -1928,7 +1928,7 @@ BEGIN TRY
 								,dblWeightPerQty
 								,dblUnitCost
 								)
-							SELECT L.intParentLotId
+							SELECT TOP 1 L.intParentLotId
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2

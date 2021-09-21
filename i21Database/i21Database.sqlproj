@@ -120,6 +120,7 @@
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
     <Build Include="dbo\Tables\tblApiImportLog.sql" />
     <Build Include="dbo\Tables\tblApiImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformProperty.sql" />
     <Build Include="dbo\Tables\tblApiInventoryTransferStaging.sql" />
     <Build Include="dbo\Tables\tblApiInventoryTransferDetailStaging.sql" />
     <Build Include="dbo\Tables\tblApiUserAccount.sql" />
@@ -184,6 +185,15 @@
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
     <Build Include="dbo\Views\vyuSMAuditDetail.sql" />
     <Build Include="dbo\Views\vyuSMAuditDetailTranslation.sql" />
+    <Build Include="dbo\Views\vyuSMAuditLogPanelTranslation.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
+    <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
+    <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
+    <Build Include="dbo\Views\vyuAPBillForImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -4904,6 +4914,8 @@
     <Build Include="dbo\Views\vyuLGOpenPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertDiscountScheduleRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertFactorTaxGroupXRefRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertNetworkAccountRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertPriceProfileRecord.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPaycheckMiddleReport.sql" />
     <Build Include="dbo\Views\vyuARDestinationWeight.sql" />
@@ -6876,8 +6888,11 @@
     <Build Include="dbo\Tables\tblLGInsuranceCalculator.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspICMassAddPromotionForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricingForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateEffectivePricingForCStore.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateRevertEffectivePricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPromotionalPricingForCStore.sql" />
     <Build Include="dbo\User Defined Types\ScaleDestinationStagingTable.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceHistoryStagingTable.sql" />
@@ -9676,6 +9691,26 @@
     <Build Include="dbo\Tables\tblSMPowerBIDataset.sql" />
     <Build Include="dbo\Tables\tblSMPowerBIScheduleHistory.sql" />
     <Build Include="dbo\Tables\tblSMPowerBIScheduleRunTime.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGenerate3PartyDirectInPayables.sql" />
+    <Build Include="dbo\User Defined Types\ScaleDirectTicketCharge.sql" />
+    <Build Include="dbo\User Defined Types\ScaleDirectToVoucherItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCRemoveDirectPayables.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDirectAddPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGenerate3PartyDirectOutPayables.sql" />
+    <Build Include="dbo\Tables\tblSCTicketStorageUsed.sql" />
+    <Build Include="dbo\Tables\tblSCTicketSpotUsed.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualDistributionAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDirectUpdateLSSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateContractSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCDirectUpdateContractAndLoadUsed.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistributionDirect.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateDirectInGLEntries.sql" />
+    <Build Include="dbo\Views\vyuSCDirectAPClearing.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDistributionAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetTicketDistributionAllocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnStorage.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildRiskSummaryLogForCustomerOwned.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9980,6 +10015,7 @@
     <None Include="Scripts\Post-Deployment\SM\2110_AddIDPToCustomerLicenseModule.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\43_IDPFieldMapping.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

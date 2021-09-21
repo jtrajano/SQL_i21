@@ -8,6 +8,19 @@ AS
 BEGIN TRY
 	DECLARE @intTransactionCount INT
 		,@strErrorMessage NVARCHAR(MAX)
+		,@strBatchId NVARCHAR(50)
+	DECLARE @tblMFRouteOrderDetail TABLE (
+		intInventoryTransferId INT
+		,intInventoryTransferDetailId INT
+		,intItemId INT
+		,dblQuantity NUMERIC(18, 6)
+		,intItemUOMId INT
+		,intStorageLocationId INT
+		,intSubLocationId INT
+		,intUserId INT
+		,ysnProcessed INT
+		,intLocationId INT
+		)
 
 	IF NOT EXISTS (
 			SELECT 1
@@ -53,11 +66,64 @@ BEGIN TRY
 	FROM tblICInventoryTransfer
 	WHERE intInventoryTransferId = @intInventoryTransferId
 
-	UPDATE tblMFRouteOrderDetail
-	SET ysnProcessed = 1
-		,ysnCompleted = 1
+	INSERT INTO @tblMFRouteOrderDetail (
+		intInventoryTransferId
+		,intInventoryTransferDetailId
+		,intItemId
+		,dblQuantity
+		,intItemUOMId
+		,intStorageLocationId
+		,intSubLocationId
+		,intUserId
+		,ysnProcessed
+		,intLocationId
+		)
+	SELECT intInventoryTransferId
+		,intInventoryTransferDetailId
+		,intItemId
+		,SUM(dblQuantity)
+		,intItemUOMId
+		,intStorageLocationId
+		,intSubLocationId
+		,intUserId
+		,ysnProcessed
+		,intLocationId
+	FROM dbo.tblMFRouteOrderDetail
 	WHERE intInventoryTransferId = @intInventoryTransferId
 		AND intRouteId = @intRouteId
+		AND ysnProcessed = 0
+	GROUP BY intInventoryTransferId
+		,intInventoryTransferDetailId
+		,intItemId
+		,intItemUOMId
+		,intStorageLocationId
+		,intSubLocationId
+		,intUserId
+		,ysnProcessed
+		,intLocationId
+
+	IF EXISTS (
+			SELECT 1
+			FROM @tblMFRouteOrderDetail
+			)
+	BEGIN
+		UPDATE ITD
+		SET dblQuantity = TOD.dblQuantity
+		FROM tblICInventoryTransferDetail ITD
+		JOIN @tblMFRouteOrderDetail TOD ON ITD.intInventoryTransferId = TOD.intInventoryTransferId
+
+		EXEC dbo.uspICPostInventoryTransfer @ysnPost = 1
+			,@ysnRecap = 0
+			,@strTransactionId = @strTransferNo
+			,@intEntityUserSecurityId = @intUserId
+			,@strBatchId = @strBatchId OUTPUT
+
+		UPDATE tblMFRouteOrderDetail
+		SET ysnProcessed = 1
+			,ysnCompleted = 1
+		WHERE intInventoryTransferId = @intInventoryTransferId
+			AND intRouteId = @intRouteId
+	END
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

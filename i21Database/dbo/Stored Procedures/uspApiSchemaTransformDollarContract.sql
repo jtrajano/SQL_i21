@@ -181,6 +181,7 @@ SELECT DISTINCT
     , sc.strSalesperson
     , sc.strContractText
     , sc.strLineOfBusiness
+    , MIN(sc.intRowNumber)
 FROM tblRestApiSchemaDollarContract sc
 INNER JOIN vyuARCustomer customer ON customer.strCustomerNumber = sc.strCustomerNo OR customer.strName = sc.strCustomerNo
 INNER JOIN tblSMCompanyLocation loc ON loc.strLocationName = sc.strLocation OR loc.strLocationNumber = sc.strLocation
@@ -248,6 +249,7 @@ DECLARE @strTerms NVARCHAR(200)
 DECLARE @strSalesperson NVARCHAR(200)
 DECLARE @strContractText NVARCHAR(200)
 DECLARE @strLineOfBusiness NVARCHAR(200)
+DECLARE @intApiRowNumber INT
 
 OPEN cur;
 
@@ -278,6 +280,7 @@ FETCH NEXT FROM cur INTO
     , @strSalesperson
     , @strContractText
     , @strLineOfBusiness
+    , @intApiRowNumber
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
@@ -301,6 +304,7 @@ BEGIN
         , intTermId
         , intLineOfBusinessId
         , dblDollarValue
+        , intApiRowNumber
     )
     SELECT
           guiApiUniqueId = @guiApiUniqueId
@@ -322,6 +326,7 @@ BEGIN
         , intTermId = @intTermID
         , intLineOfBusinessId = @intLineOfBusinessId
         , dblDollarValue = @dblContractValue
+        , intApiRowNumber = @intApiRowNumber
 
     SET @intItemContractStagingId = SCOPE_IDENTITY()
 
@@ -412,6 +417,7 @@ BEGIN
         , @strSalesperson
         , @strContractText
         , @strLineOfBusiness
+        , @intApiRowNumber
 END
 
 CLOSE cur;
@@ -419,7 +425,7 @@ DEALLOCATE cur;
 
 EXEC dbo.uspApiImportDollarContractsFromStaging @guiApiUniqueId
 
-DELETE FROM tblRestApiSchemaDollarContract WHERE guiApiUniqueId = @guiApiUniqueId
+--DELETE FROM tblRestApiSchemaDollarContract WHERE guiApiUniqueId = @guiApiUniqueId
 
 INSERT INTO tblApiImportLogDetail (
       guiApiImportLogDetailId
@@ -447,7 +453,7 @@ DECLARE @intTotalRowsImported INT
 SET @intTotalRowsImported = (
     SELECT COUNT(*) 
     FROM tblCTItemContractHeader h
-    INNER JOIN tblCTItemContractDetail d ON h.intItemContractHeaderId = d.intItemContractHeaderId 
+    INNER JOIN tblCTItemContractHeaderCategory d ON h.intItemContractHeaderId = d.intItemContractHeaderId 
     WHERE h.guiApiUniqueId = @guiApiUniqueId
 )
 
@@ -460,5 +466,17 @@ SET
     , dtmImportFinishDateUtc = GETUTCDATE()
 WHERE guiApiImportLogId = @guiLogId
 
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT
+      NEWID()
+    , guiApiImportLogId = @guiLogId
+    , strField = 'Dollar Contract'
+    , strValue = ch.strContractNumber
+    , strLogLevel = 'Info'
+    , strStatus = 'Success'
+    , intRowNo = ch.intApiRowNumber 
+    , strMessage = 'The dollar contract has been successfully imported.'
+FROM tblCTItemContractHeader ch
+WHERE ch.guiApiUniqueId = @guiApiUniqueId
 
 SELECT * FROM tblRestApiTransformationLog WHERE guiApiUniqueId = @guiApiUniqueId

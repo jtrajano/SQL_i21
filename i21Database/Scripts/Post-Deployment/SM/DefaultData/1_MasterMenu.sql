@@ -9,9 +9,8 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-
 	
-	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Projects' AND strModuleName = 'IDP')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -3663,9 +3662,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Option Lifecycle' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Option Lifecycle', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Option Lifecycle', N'Derivative', N'Screen', N'RiskManagement.view.OptionsLifecycle', N'small-menu-derivative', 0, 0, 0, 1, 1, 1)
+	VALUES (N'Option Lifecycle', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Option Lifecycle', N'Derivative', N'Screen', N'RiskManagement.view.OptionsLifecycle?multiGrouping=true', N'small-menu-derivative', 0, 0, 0, 1, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'RiskManagement.view.OptionsLifecycle' WHERE strMenuName = 'Option Lifecycle' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'RiskManagement.view.OptionsLifecycle?multiGrouping=true' WHERE strMenuName = 'Option Lifecycle' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mark To Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -5271,9 +5270,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Subcategories' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Subcategories', N'Store', @StoreMaintenanceParentMenuId, N'Subcategories', N'Maintenance', N'Screen', N'Store.view.SubCategory', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Subcategories', N'Store', @StoreMaintenanceParentMenuId, N'Subcategories', N'Maintenance', N'Screen', N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubcategory', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Store.view.SubCategory' WHERE strMenuName = 'Subcategories' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'Store.view.SubCategory?showSearch=true&searchCommand=SearchSubcategory' WHERE strMenuName = 'Subcategories' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 
 -- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId)
 -- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -5351,9 +5350,9 @@ ELSE
 --Lottery
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Lottery Games', N'Store', @StoreLotteryParentMenuId, N'Lottery Games', N'Lottery', N'Screen', N'Store.view.LotteryGame', N'small-menu-lottery', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Lottery Games', N'Store', @StoreLotteryParentMenuId, N'Lottery Games', N'Lottery', N'Screen', N'Store.view.LotteryGame?showSearch=true&searchCommand=SearchLotteryGame', N'small-menu-lottery', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.LotteryGame' WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.LotteryGame?showSearch=true&searchCommand=SearchLotteryGame' WHERE strMenuName = 'Lottery Games' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Books' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -6893,6 +6892,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Processe
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GlobalComponentEngine.view.OcrProcessedDocumentsLog' WHERE strMenuName = N'Processed Documents Log' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Field Mapping' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Field Mapping', N'IDP', @IDPMaintenanceParentMenuId, N'Field Mapping', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrFieldMapping', N'small-menu-maintenance', 1, 1, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GlobalComponentEngine.view.OcrFieldMapping' WHERE strMenuName = N'Field Mapping' AND strModuleName = N'IDP' AND intParentMenuID = @IDPMaintenanceParentMenuId
+
+
+
 --CREATE
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'IDP' AND intParentMenuID = @IDPParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
@@ -6942,6 +6949,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Form Tra
 	VALUES (N'Form Training Documents', N'IDP', @IDPFormTrainingToolParentMenuId, N'Form Training Documents', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrUploadImage', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GlobalComponentEngine.view.OcrUploadImage' WHERE strMenuName = N'Form Training Documents' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Projects' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Projects', N'IDP', @IDPFormTrainingToolParentMenuId, N'Projects', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrProject?showSearch=true', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'GlobalComponentEngine.view.OcrProject?showSearch=true' WHERE strMenuName = N'Projects' AND strModuleName = N'IDP' AND intParentMenuID = @IDPFormTrainingToolParentMenuId
 
 
 

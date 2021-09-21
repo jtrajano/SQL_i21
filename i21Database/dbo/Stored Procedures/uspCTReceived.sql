@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReceived]
 	@ItemsFromInventoryReceipt ReceiptItemTableType READONLY
-	,@intUserId  INT
-	,@ysnPosted BIT
+	, @intUserId INT
+	, @ysnPosted BIT
+
 AS
 
 BEGIN TRY
@@ -33,85 +34,75 @@ BEGIN TRY
 				@strTicketNumber				NVARCHAR(50),
 				@intSequenceUsageHistoryId		INT
 
-	SELECT	@strReceiptType = strReceiptType
-			,@intSourceType = intSourceType  
-	FROM	@ItemsFromInventoryReceipt
+	SELECT @strReceiptType = strReceiptType
+		, @intSourceType = intSourceType
+	FROM @ItemsFromInventoryReceipt
 
 	SELECT @strScreenName = CASE WHEN @strReceiptType = 'Inventory Return' THEN 'Receipt Return' ELSE 'Inventory Receipt' END
-
+	
 	IF @intSourceType = -1
 	BEGIN
 		SELECT @strScreenName = 'Load Schedule'
 	END
 
-	IF	@strReceiptType NOT IN ('Purchase Contract','Purchase Order', 'Inventory Return')
+	IF @strReceiptType NOT IN ('Purchase Contract','Purchase Order', 'Inventory Return')
 		RETURN
-
-	DECLARE @tblToProcess TABLE
-	(
-		intUniqueId					INT IDENTITY
-		,intInventoryReceiptDetailId INT
-		,intContractDetailId INT
-		,intItemUOMId INT
-		,dblQty NUMERIC(18,6)
-		,intContainerId	INT
-		,ysnLoad BIT
-		,intPricingTypeId INT
-		,intSourceId INT NULL 
-		,intInventoryReceiptId INT NULL
-		,intToItemUOMId INT NULL 
-	)
-
-	IF @strReceiptType IN ('Purchase Contract','Inventory Return')
+	
+	DECLARE @tblToProcess TABLE (intUniqueId INT IDENTITY
+		, intInventoryReceiptDetailId INT
+		, intContractDetailId INT
+		, intItemUOMId INT
+		, dblQty NUMERIC(18, 6)
+		, intContainerId INT
+		, ysnLoad BIT
+		, intPricingTypeId INT
+		, intSourceId INT NULL 
+		, intInventoryReceiptId INT NULL
+		, intToItemUOMId INT NULL)
+	
+	IF @strReceiptType IN ('Purchase Contract', 'Inventory Return')
 	BEGIN
 		IF(@intSourceType = 6) --'Purchase Order'
 		BEGIN
-			SELECT	@ysnPO = 1
-
-			INSERT INTO @tblToProcess (
-				intInventoryReceiptDetailId
-				,intContractDetailId
-				,intItemUOMId
-				,dblQty
-				,ysnLoad
-				,intPricingTypeId
-				,intSourceId
-				,intInventoryReceiptId
-				,intToItemUOMId
-			)
-			SELECT 	
-				IR.intInventoryReceiptDetailId
-				,CD.intContractDetailId
-				,IR.intItemUOMId
-				,CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN IR.intLoadReceive ELSE IR.dblQty END
-				,ysnLoad = ISNULL(CH.ysnLoad, 0)
-				,CD.intPricingTypeId
-				,IR.intSourceId
-				,IR.intInventoryReceiptId
-				,CD.intItemUOMId
-			FROM	
-				@ItemsFromInventoryReceipt	IR
-				JOIN tblPOPurchaseDetail PO	ON	PO.intPurchaseId = IR.intSourceId
-				JOIN tblCTContractDetail CD	ON	CD.intContractDetailId = PO.intContractDetailId
-				JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId = CH.intContractHeaderId
-			--WHERE	PO.intContractDetailId		IS	NOT NULL
+			SELECT @ysnPO = 1
+			
+			INSERT INTO @tblToProcess (intInventoryReceiptDetailId
+				, intContractDetailId
+				, intItemUOMId
+				, dblQty
+				, ysnLoad
+				, intPricingTypeId
+				, intSourceId
+				, intInventoryReceiptId
+				, intToItemUOMId)
+			SELECT IR.intInventoryReceiptDetailId
+				, CD.intContractDetailId
+				, IR.intItemUOMId
+				, CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN IR.intLoadReceive ELSE IR.dblQty END
+				, ysnLoad = ISNULL(CH.ysnLoad, 0)
+				, CD.intPricingTypeId
+				, IR.intSourceId
+				, IR.intInventoryReceiptId
+				, CD.intItemUOMId
+			FROM @ItemsFromInventoryReceipt	IR
+			JOIN tblPOPurchaseDetail PO ON PO.intPurchaseId = IR.intSourceId
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = PO.intContractDetailId
+			JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		END
 		ELSE
 		BEGIN
 			IF @intSourceType = 2
 			BEGIN
-				INSERT INTO @tblToProcess (
-					intInventoryReceiptDetailId
-					,intContractDetailId
-					,intItemUOMId
-					,dblQty
-					,intContainerId
-					,ysnLoad
-					,intPricingTypeId
-					,intSourceId
-					,intInventoryReceiptId
-					,intToItemUOMId
-				)
+				INSERT INTO @tblToProcess (intInventoryReceiptDetailId
+					, intContractDetailId
+					, intItemUOMId
+					, dblQty
+					, intContainerId
+					, ysnLoad
+					, intPricingTypeId
+					, intSourceId
+					, intInventoryReceiptId
+					, intToItemUOMId)
 				SELECT DISTINCT ri.intInventoryReceiptItemId
 					, cd.intContractDetailId
 					, ri.intUnitMeasureId
@@ -148,137 +139,117 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				INSERT	INTO @tblToProcess (
-					intInventoryReceiptDetailId
-					,intContractDetailId
-					,intItemUOMId
-					,dblQty
-					,intContainerId
-					,ysnLoad
-					,intPricingTypeId
-					,intSourceId
-					,intInventoryReceiptId
-					,intToItemUOMId
-				)
-				SELECT 	
-					intInventoryReceiptDetailId
-					,CD.intContractDetailId
-					,IR.intItemUOMId
-					,CASE WHEN ISNULL(CH.ysnLoad, 0) =1 THEN IR.intLoadReceive ELSE dblQty END
-					,intContainerId
-					,ysnLoad = ISNULL(CH.ysnLoad, 0)
-					,CD.intPricingTypeId
-					,IR.intSourceId
-					,IR.intInventoryReceiptId
-					,CD.intItemUOMId
-				FROM	
-					@ItemsFromInventoryReceipt	IR
-					JOIN tblCTContractDetail CD	ON	CD.intContractDetailId	=	IR.intLineNo
-					JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-				WHERE
-					ISNULL(intLineNo, 0) > 0
+				INSERT	INTO @tblToProcess (intInventoryReceiptDetailId
+					, intContractDetailId
+					, intItemUOMId
+					, dblQty
+					, intContainerId
+					, ysnLoad
+					, intPricingTypeId
+					, intSourceId
+					, intInventoryReceiptId
+					, intToItemUOMId)
+				SELECT intInventoryReceiptDetailId
+					, CD.intContractDetailId
+					, IR.intItemUOMId
+					, CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN IR.intLoadReceive ELSE dblQty END
+					, intContainerId
+					, ysnLoad = ISNULL(CH.ysnLoad, 0)
+					, CD.intPricingTypeId
+					, IR.intSourceId
+					, IR.intInventoryReceiptId
+					, CD.intItemUOMId
+				FROM @ItemsFromInventoryReceipt	IR
+				JOIN tblCTContractDetail CD	ON CD.intContractDetailId = IR.intLineNo
+				JOIN tblCTContractHeader CH	ON CD.intContractHeaderId = CH.intContractHeaderId
+				WHERE ISNULL(intLineNo, 0) > 0
 					AND ISNULL(CH.ysnLoad, 0) = 1
 			END
-
-			INSERT	INTO @tblToProcess (
-				intInventoryReceiptDetailId
-				,intContractDetailId
-				,intItemUOMId
-				,dblQty
-				,intContainerId
-				,ysnLoad
-				,intPricingTypeId
-				,intSourceId
-				,intInventoryReceiptId
-				,intToItemUOMId
-			)
-			SELECT 	
-				intInventoryReceiptDetailId
-				,CD.intContractDetailId
-				,IR.intItemUOMId
-				,CASE WHEN ISNULL(CH.ysnLoad, 0) =1 THEN IR.intLoadReceive ELSE dblQty END
-				,intContainerId
-				,ysnLoad = ISNULL(CH.ysnLoad, 0)
-				,CD.intPricingTypeId
-				,IR.intSourceId
-				,IR.intInventoryReceiptId
-				,CD.intItemUOMId
-			FROM	
-				@ItemsFromInventoryReceipt	IR
-				JOIN tblCTContractDetail CD	ON	CD.intContractDetailId	=	IR.intLineNo
-				JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-			WHERE
-				ISNULL(intLineNo, 0) > 0
+			
+			INSERT INTO @tblToProcess (intInventoryReceiptDetailId
+				, intContractDetailId
+				, intItemUOMId
+				, dblQty
+				, intContainerId
+				, ysnLoad
+				, intPricingTypeId
+				, intSourceId
+				, intInventoryReceiptId
+				, intToItemUOMId)
+			SELECT intInventoryReceiptDetailId
+				, CD.intContractDetailId
+				, IR.intItemUOMId
+				, CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN IR.intLoadReceive ELSE dblQty END
+				, intContainerId
+				, ysnLoad = ISNULL(CH.ysnLoad, 0)
+				, CD.intPricingTypeId
+				, IR.intSourceId
+				, IR.intInventoryReceiptId
+				, CD.intItemUOMId
+			FROM @ItemsFromInventoryReceipt	IR
+			JOIN tblCTContractDetail CD	ON CD.intContractDetailId = IR.intLineNo
+			JOIN tblCTContractHeader CH	ON CD.intContractHeaderId = CH.intContractHeaderId
+			WHERE ISNULL(intLineNo, 0) > 0
 				AND ISNULL(CH.ysnLoad, 0) = 0 -- CT-4969
 		END
 	END
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
-	WHILE ISNULL(@intUniqueId,0) > 0
+	WHILE ISNULL(@intUniqueId, 0) > 0
 	BEGIN
-		SELECT	@intContractDetailId			= NULL
-				,@intFromItemUOMId				= NULL
-				,@dblQty						= NULL
-				,@intInventoryReceiptDetailId	= NULL 
-				,@intContainerId				= NULL
-				,@strTicketNumber				= NULL
-				,@intPricingTypeId				= NULL 
+		SELECT @intContractDetailId			= NULL
+			, @intFromItemUOMId				= NULL
+			, @dblQty						= NULL
+			, @intInventoryReceiptDetailId	= NULL 
+			, @intContainerId				= NULL
+			, @strTicketNumber				= NULL
+			, @intPricingTypeId				= NULL 
 
-		SELECT	@intContractDetailId			= intContractDetailId
-				,@intFromItemUOMId				= intItemUOMId
-				,@dblQty						= dblQty
-				,@intInventoryReceiptDetailId	= intInventoryReceiptDetailId 
-				,@intContainerId				= intContainerId
-				,@ysnLoad						= ysnLoad
-				,@intPricingTypeId				= intPricingTypeId
-				,@intSourceId					= intSourceId
-				,@intInventoryReceiptDetailId	= intInventoryReceiptDetailId
-				,@intToItemUOMId				= intToItemUOMId
-		FROM	@tblToProcess 
-		WHERE	intUniqueId						=	 @intUniqueId
-
+		SELECT @intContractDetailId			= intContractDetailId
+			, @intFromItemUOMId				= intItemUOMId
+			, @dblQty						= dblQty
+			, @intInventoryReceiptDetailId	= intInventoryReceiptDetailId 
+			, @intContainerId				= intContainerId
+			, @ysnLoad						= ysnLoad
+			, @intPricingTypeId				= intPricingTypeId
+			, @intSourceId					= intSourceId
+			, @intInventoryReceiptDetailId	= intInventoryReceiptDetailId
+			, @intToItemUOMId				= intToItemUOMId
+		FROM @tblToProcess
+		WHERE intUniqueId = @intUniqueId
+		
 		IF @intContractDetailId IS NULL 
 		BEGIN
-			RAISERROR('Contract does not exist.',16,1)
+			RAISERROR('Contract does not exist.', 16, 1)
+		END
+		
+		SELECT @dblConvertedQty = CASE WHEN @ysnLoad = 1 THEN @dblQty ELSE dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId, @intToItemUOMId, @dblQty) END
+
+		IF ISNULL(@dblConvertedQty, 0) = 0
+		BEGIN
+			RAISERROR('UOM does not exist.', 16, 1)
 		END
 
-		SELECT @dblConvertedQty = 
-			CASE 
-				WHEN @ysnLoad=1 THEN 
-					@dblQty 
-				ELSE 
-					dbo.fnCalculateQtyBetweenUOM(
-						@intFromItemUOMId
-						,@intToItemUOMId
-						,@dblQty
-					) 
-			END
-
-		IF ISNULL(@dblConvertedQty,0) = 0
+		IF @intSourceType IN (1, 5) AND @intPricingTypeId = 5
 		BEGIN
-			RAISERROR('UOM does not exist.',16,1)
-		END
-
-		IF @intSourceType IN (1,5) AND @intPricingTypeId = 5
-		BEGIN
-			EXEC	uspCTUpdateSequenceQuantity 
-					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblConvertedQty,
-					@intUserId				=	@intUserId,
-					@intExternalId			=	@intInventoryReceiptDetailId,
-					@strScreenName			=	@strScreenName
+			EXEC uspCTUpdateSequenceQuantity
+				@intContractDetailId	=	@intContractDetailId,
+				@dblQuantityToUpdate	=	@dblConvertedQty,
+				@intUserId				=	@intUserId,
+				@intExternalId			=	@intInventoryReceiptDetailId,
+				@strScreenName			=	@strScreenName
 		END
 		ELSE
 		BEGIN
-			EXEC	uspCTUpdateSequenceBalance
-					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblConvertedQty,
-					@intUserId				=	@intUserId,
-					@intExternalId			=	@intInventoryReceiptDetailId,
-					@strScreenName			=	@strScreenName 
-
-			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
+			EXEC uspCTUpdateSequenceBalance
+				@intContractDetailId	=	@intContractDetailId,
+				@dblQuantityToUpdate	=	@dblConvertedQty,
+				@intUserId				=	@intUserId,
+				@intExternalId			=	@intInventoryReceiptDetailId,
+				@strScreenName			=	@strScreenName 
+			
+			SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
 
 			-- Ticket Management will handle scheduled quantity when Undistruited
 			IF @intSourceType = 1 AND @ysnPosted = 0
@@ -296,11 +267,11 @@ BEGIN TRY
 				3 = 'Transport'
 				4 = 'Settle Storage'
 				5 = 'Delivery Sheet'
-			*/			
-
-			IF ((@intSourceType IN (-1,0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return') 
+			*/
+			
+			IF ((@intSourceType IN (-1,0,1,2,3,5, 7) OR ISNULL(@ysnPO, 0) = 1)AND @strReceiptType <> 'Inventory Return') 
 			   -- OR (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return' )
-			BEGIN					
+			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
 						@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
@@ -343,7 +314,6 @@ BEGIN TRY
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
-
 END TRY
 
 BEGIN CATCH

@@ -26,26 +26,23 @@ from tblCMBankLoan L
 JOIN tblCMBankTransaction T
 ON L.intBankLoanId = T.intBankLoanId
 AND intBankTransactionTypeId = 52
-
-
-
 CROSS APPLY
 (
-	SELECT SUM(BB.dblDebit - BB.dblCredit) dblBalance 
+	SELECT SUM(BB.dblCredit - BB.dblDebit) dblBalance 
 	from tblCMBankTransaction AA join tblCMBankTransactionDetail BB
 	on AA.intTransactionId = BB.intTransactionId
-	WHERE intBankLoanId = L.intBankLoanId 
+	WHERE AA.intBankLoanId = L.intBankLoanId 
 )U
 CROSS APPLY
 (
-	SELECT SUM(DD.dblDebit - DD.dblCredit) dblBalance, FF.strAccountId, EE.strBankAccountNo, CC.intBankAccountId, CC.strTransactionId, EE.strBankName
+	SELECT SUM(DD.dblCredit - DD.dblDebit) dblBalance, FF.strAccountId, EE.strBankAccountNo, CC.intBankAccountId, CC.strTransactionId, EE.strBankName
 	,EE.strCurrency, EE.intCurrencyId,DD.intGLAccountId
 	from tblCMBankTransaction CC 
 	join tblCMBankTransactionDetail DD	on CC.intTransactionId = DD.intTransactionId
 	join vyuCMBankAccount EE on EE.intBankAccountId = CC.intBankAccountId
 	join tblGLAccount FF on DD.intGLAccountId = FF.intAccountId
 	
-	 WHERE intBankLoanId = L.intBankLoanId 
+	 WHERE CC.intBankLoanId = L.intBankLoanId 
 	 AND CC.intBankTransactionTypeId = 52
 	 GROUP BY CC.intBankAccountId,EE.strBankAccountNo,DD.intGLAccountId, FF.strAccountId, CC.strTransactionId,EE.strCurrency, EE.intCurrencyId, EE.strBankName
 )V

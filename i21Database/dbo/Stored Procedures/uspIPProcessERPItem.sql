@@ -35,6 +35,7 @@ BEGIN TRY
 		,@strExternalGroup NVARCHAR(50)
 		,@strOrigin NVARCHAR(100)
 		,@strProductType NVARCHAR(100)
+		,@ysnOtherChargeItem BIT
 	DECLARE @intCompanyLocationId INT
 		,@intItemId INT
 		,@intCommodityId INT
@@ -125,6 +126,7 @@ BEGIN TRY
 				,@strExternalGroup = NULL
 				,@strOrigin = NULL
 				,@strProductType = NULL
+				,@ysnOtherChargeItem = NULL
 
 			SELECT @intCompanyLocationId = NULL
 				,@intItemId = NULL
@@ -155,6 +157,7 @@ BEGIN TRY
 				,@strExternalGroup = strExternalGroup
 				,@strOrigin = strOrigin
 				,@strProductType = strProductType
+				,@ysnOtherChargeItem = ysnOtherChargeItem
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 
@@ -451,11 +454,23 @@ BEGIN TRY
 						,@strItemNo
 						,@strDescription
 						,@strShortName
-						,'Inventory'
+						,CASE 
+							WHEN ISNULL(@ysnOtherChargeItem, 0) = 1
+								THEN 'Other Charge'
+							ELSE 'Inventory'
+							END
 						,@intCommodityId
 						,@intCategoryId
-						,@strLotTracking
-						,'Lot Level'
+						,CASE 
+							WHEN ISNULL(@ysnOtherChargeItem, 0) = 1
+								THEN 'No'
+							ELSE @strLotTracking
+							END
+						,CASE 
+							WHEN ISNULL(@ysnOtherChargeItem, 0) = 1
+								THEN 'Item Level'
+							ELSE 'Lot Level'
+							END
 						,@intLifeTime
 						,@strLifeTimeType
 						,@strItemStatus
@@ -529,7 +544,6 @@ BEGIN TRY
 						,3
 						,2
 				END
-
 			END
 			ELSE IF @intActionId = 2
 			BEGIN
@@ -849,6 +863,7 @@ BEGIN TRY
 				,strExternalGroup
 				,strOrigin
 				,strProductType
+				,ysnOtherChargeItem
 				)
 			SELECT intTrxSequenceNo
 				,strCompanyLocation
@@ -870,6 +885,7 @@ BEGIN TRY
 				,strExternalGroup
 				,strOrigin
 				,strProductType
+				,ysnOtherChargeItem
 			FROM tblIPItemStage
 			WHERE intStageItemId = @intStageItemId
 
@@ -949,6 +965,7 @@ BEGIN TRY
 				,strExternalGroup
 				,strOrigin
 				,strProductType
+				,ysnOtherChargeItem
 				,strErrorMessage
 				,strImportStatus
 				)
@@ -972,6 +989,7 @@ BEGIN TRY
 				,strExternalGroup
 				,strOrigin
 				,strProductType
+				,ysnOtherChargeItem
 				,@ErrMsg
 				,'Failed'
 			FROM tblIPItemStage

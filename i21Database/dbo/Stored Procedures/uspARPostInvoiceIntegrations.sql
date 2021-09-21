@@ -1004,6 +1004,11 @@ EXEC dbo.uspIPInterCompanyPreStageInvoice @PreStageInvoice	= @tblInvoicesToUpdat
 --Create inventory receipt to another company
 EXEC [dbo].[uspARInterCompanyIntegrationSource] @BatchId = @BatchId, @Post = @Post
 
+--DELETE FROM POSTING QUEUE
+DELETE PQ
+FROM tblARPostingQueue PQ
+INNER JOIN ##ARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
+
 --AUDIT LOG
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
 DELETE FROM @InvoiceLog

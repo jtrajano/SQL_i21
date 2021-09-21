@@ -1098,7 +1098,7 @@ BEGIN
 					, [intItemLocationId]			=	ItemLoc.intItemLocationId
 					, [strSource]					=	'keyboard'
 					, [strUpc]						=	PCF.strUPCwthOrwthOutCheckDigit -- IF COMMANDER/SAPPHIRE include check digit
-					, [strUpcModifier]				=	'000'
+					, [strUpcModifier]				=	CAST(ISNULL(mo.intModifier, '000') AS VARCHAR(100))
 					, [strDescription]				=	LEFT(  REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
 					, [strDepartment]				=	CAST(CategoryLoc.intRegisterDepartmentId AS NVARCHAR(50))
 					, [strFee]						=	CAST(ItemLoc.intBottleDepositNo AS NVARCHAR(10)) -- CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
@@ -1162,6 +1162,8 @@ BEGIN
 				INNER JOIN tblICItemUOM UOM
 					ON Item.intItemId = UOM.intItemId
 					AND UOM.ysnStockUnit = 1
+				LEFT JOIN tblSTModifier mo
+					ON UOM.intItemUOMId = mo.intItemUOMId
 				INNER JOIN tblICCategory Category
 					ON Item.intCategoryId = Category.intCategoryId
 				INNER JOIN dbo.tblICCategoryLocation CategoryLoc 
