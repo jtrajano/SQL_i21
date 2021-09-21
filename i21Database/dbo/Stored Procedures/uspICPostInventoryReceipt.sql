@@ -1462,6 +1462,7 @@ BEGIN
 					
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
+
 				-- Call the post routine for the In-Transit costing (Inbound Shipment) 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
@@ -1593,6 +1594,7 @@ BEGIN
 								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
 								AND t.intItemId = tp.intItemId 
 								AND t.dblQty > 0 
+								AND t.ysnIsUnposted = 0 
 						WHERE
 							(
 								td.intInventoryTransferDetailId = ri.intSourceId
