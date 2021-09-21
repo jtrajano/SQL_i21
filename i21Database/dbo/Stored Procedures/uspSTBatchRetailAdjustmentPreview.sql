@@ -572,9 +572,9 @@ ExitWithRollback:
 						intConcurrencyId
 					)
 					SELECT DISTINCT  @strGuid AS strGuid
-							, tp.strItemDescription						AS strDescription
-							, tp.strLongUPCCode							AS strUpc
 							, tp.strLocationName						AS strLocation
+							, tp.strLongUPCCode							AS strUpc
+							, tp.strItemDescription						AS strDescription
 							, tp.strChangeDescription
 							, tp.strPreviewOldData						AS strOldData
 							, tp.strPreviewNewData						AS strNewData
@@ -613,9 +613,9 @@ ExitWithRollback:
 						intConcurrencyId
 					)
 					SELECT DISTINCT  @strGuid
-							, tp.strItemDescription						AS strDescription
-							, tp.strLongUPCCode							AS strUpc
 							, tp.strLocationName						AS strLocation
+							, tp.strLongUPCCode							AS strUpc
+							, tp.strItemDescription						AS strDescription
 							, tp.strChangeDescription
 							, tp.strPreviewOldData						AS strOldData
 							, tp.strPreviewNewData						AS strNewData
