@@ -29,6 +29,7 @@ BEGIN
 
 	SET @strGUID = NEWID()
 
+
 	IF(@strCustomerNumber IS NULL OR @strCustomerNumber = '')
 	BEGIN
 		INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
