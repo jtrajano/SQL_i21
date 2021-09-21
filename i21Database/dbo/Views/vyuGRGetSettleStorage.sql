@@ -169,7 +169,7 @@ CROSS APPLY (
 ) AS _strContractIds
 OUTER APPLY (
 	SELECT 
-		SUM(CD.dblCashPrice) AS dblCashPrice
+		dblCashPrice = SUM(CD.dblCashPrice) / COUNT(*)
 	FROM tblCTContractDetail CD
 	INNER JOIN tblGRSettleContract SC
 		ON CD.intContractDetailId = SC.intContractDetailId
@@ -182,7 +182,7 @@ OUTER APPLY (
 	SELECT dblCashPrice = SUM(_son.dblCashPrice)
 	FROM (
 		SELECT 
-			dblCashPrice = SUM(CD.dblCashPrice * SC.dblUnits)
+			dblCashPrice = SUM(CD.dblCashPrice * SC.dblUnits) / COUNT(*)
 		FROM tblGRSettleContract SC
 		JOIN tblGRSettleStorage SSS
 			ON SC.intSettleStorageId = SSS.intSettleStorageId 
@@ -192,7 +192,7 @@ OUTER APPLY (
 		WHERE CD.intPricingTypeId <> 2
 			AND SS.intParentSettleStorageId IS NULL		
 		UNION ALL
-		SELECT dblCashPrice  = SUM(TSS.dblSpotUnits * TSS.dblCashPrice)
+		SELECT dblCashPrice  = SUM(TSS.dblSpotUnits * TSS.dblCashPrice) / COUNT(*)
 		FROM tblGRSettleStorageTicket T
 		JOIN tblGRSettleStorage TSS
 			ON T.intSettleStorageId = TSS.intSettleStorageId
