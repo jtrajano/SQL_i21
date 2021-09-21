@@ -165,6 +165,7 @@
 	[dtmDateCreatedUtc] DATETIME2 NULL,
 	[dtmDateModifiedUtc] DATETIME2 NULL,
 	[dtmDateLastUpdatedUtc] AS COALESCE(dtmDateModifiedUtc, dtmDateCreatedUtc),
+    [dblDWGSpotPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY CLUSTERED ([intTicketId] ASC),
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_strTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [strTicketNumber],[intEntityId],[intProcessingLocationId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intTicketLocationId] FOREIGN KEY ([intTicketLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

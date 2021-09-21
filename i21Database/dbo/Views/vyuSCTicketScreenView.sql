@@ -255,6 +255,7 @@
 	,strShipToLocationName = EL.strLocationName
 	,intShipToLocationId	= EL.intEntityLocationId
 	,SCT.dblDWGOriginalNetUnits
+	,SCT.dblDWGSpotPrice
   FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
