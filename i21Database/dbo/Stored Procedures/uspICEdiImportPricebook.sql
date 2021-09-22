@@ -856,33 +856,35 @@ FROM (
 			SELECT 
 				i.intItemId
 				,l.intItemLocationId
-				,intClassId = ISNULL(ISNULL(sc.intSubcategoryId, catLoc.intClassId), l.intClassId)
-				,intFamilyId = ISNULL(ISNULL(sf.intSubcategoryId, catLoc.intFamilyId), l.intFamilyId)
+				,intClassId = catLoc.intClassId --ISNULL(ISNULL(sc.intSubcategoryId, catLoc.intClassId), l.intClassId)
+				,intFamilyId = catLoc.intFamilyId --ISNULL(ISNULL(sf.intSubcategoryId, catLoc.intFamilyId), l.intFamilyId)
 				,ysnDepositRequired = ISNULL(CASE p.strDepositRequired WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnDepositRequired)
 				,ysnPromotionalItem = ISNULL(CASE p.strPromotionalItem WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnPromotionalItem)
 				,ysnPrePriced = ISNULL(ISNULL(CASE p.strPrePriced WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, catLoc.ysnPrePriced), l.ysnPrePriced)
 				,dblSuggestedQty = ISNULL(NULLIF(p.strSuggestedOrderQuantity, ''), l.dblSuggestedQty)
 				,dblMinOrder = ISNULL(NULLIF(p.strMinimumOrderQuantity, ''), l.dblMinOrder)
 				,intBottleDepositNo = ISNULL(NULLIF(p.strBottleDepositNumber, ''), l.intBottleDepositNo)
-				,ysnTaxFlag1 = ISNULL(l.ysnTaxFlag1, catLoc.ysnUseTaxFlag1)
-				,ysnTaxFlag2 = ISNULL(l.ysnTaxFlag2, catLoc.ysnUseTaxFlag2)
-				,ysnTaxFlag3 = ISNULL(l.ysnTaxFlag3, catLoc.ysnUseTaxFlag3)
-				,ysnTaxFlag4 = ISNULL(l.ysnTaxFlag4, catLoc.ysnUseTaxFlag4)
-				,ysnApplyBlueLaw1 = ISNULL(l.ysnApplyBlueLaw1, catLoc.ysnBlueLaw1)
-				,ysnApplyBlueLaw2 = ISNULL(l.ysnApplyBlueLaw2, catLoc.ysnBlueLaw2)
-				,intProductCodeId = ISNULL(l.intProductCodeId, catLoc.intProductCodeId)
-				,ysnFoodStampable = ISNULL(l.ysnFoodStampable, catLoc.ysnFoodStampable)
-				,ysnReturnable = ISNULL(l.ysnReturnable, catLoc.ysnReturnable)
-				,ysnSaleable = ISNULL(l.ysnSaleable, catLoc.ysnSaleable)
-				,ysnIdRequiredCigarette = ISNULL(l.ysnIdRequiredCigarette, catLoc.ysnIdRequiredCigarette)
-				,ysnIdRequiredLiquor = ISNULL(l.ysnIdRequiredLiquor, catLoc.ysnIdRequiredLiquor)
-				,intMinimumAge = ISNULL(l.intMinimumAge, catLoc.intMinimumAge)
+				,ysnTaxFlag1 = catLoc.ysnUseTaxFlag1--ISNULL(l.ysnTaxFlag1, catLoc.ysnUseTaxFlag1)
+				,ysnTaxFlag2 = catLoc.ysnUseTaxFlag2--ISNULL(l.ysnTaxFlag2, catLoc.ysnUseTaxFlag2)
+				,ysnTaxFlag3 = catLoc.ysnUseTaxFlag3--ISNULL(l.ysnTaxFlag3, catLoc.ysnUseTaxFlag3)
+				,ysnTaxFlag4 = catLoc.ysnUseTaxFlag4--ISNULL(l.ysnTaxFlag4, catLoc.ysnUseTaxFlag4)
+				,ysnApplyBlueLaw1 = catLoc.ysnBlueLaw1--ISNULL(l.ysnApplyBlueLaw1, catLoc.ysnBlueLaw1)
+				,ysnApplyBlueLaw2 = catLoc.ysnBlueLaw2--ISNULL(l.ysnApplyBlueLaw2, catLoc.ysnBlueLaw2)
+				,intProductCodeId = catLoc.intProductCodeId--ISNULL(l.intProductCodeId, catLoc.intProductCodeId)
+				,ysnFoodStampable = catLoc.ysnFoodStampable--ISNULL(l.ysnFoodStampable, catLoc.ysnFoodStampable)
+				,ysnReturnable = catLoc.ysnReturnable--ISNULL(l.ysnReturnable, catLoc.ysnReturnable)
+				,ysnSaleable = catLoc.ysnSaleable--ISNULL(l.ysnSaleable, catLoc.ysnSaleable)
+				,ysnIdRequiredCigarette = catLoc.ysnIdRequiredCigarette--ISNULL(l.ysnIdRequiredCigarette, catLoc.ysnIdRequiredCigarette)
+				,ysnIdRequiredLiquor = catLoc.ysnIdRequiredLiquor--ISNULL(l.ysnIdRequiredLiquor, catLoc.ysnIdRequiredLiquor)
+				,intMinimumAge = catLoc.intMinimumAge--ISNULL(l.intMinimumAge, catLoc.intMinimumAge)
 				,intCountGroupId = cg.intCountGroupId
-				,intLocationId = l.intCompanyLocationId 
+				,intLocationId = loc.intCompanyLocationId 
 				,p.ysnAddOrderingUPC
 				,p.ysnUpdateExistingRecords
 				,p.ysnAddNewRecords
 				,p.ysnUpdatePrice
+				,intIssueUOMId = sellingUOM.intItemUOMId
+				,intReceiveUOMId = purchaseUOM.intItemUOMId
 			FROM tblICEdiPricebook p
 				INNER JOIN tblICItemUOM u 
 					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
@@ -900,18 +902,47 @@ FROM (
 					ON cg.strCountGroup = p.strInventoryGroup
 				OUTER APPLY (
 					SELECT 
-						loc.intCompanyLocationId 
-						,l.*
+						loc.intCompanyLocationId 					
 					FROM 						
 						@Locations loc INNER JOIN tblSMCompanyLocation cl 
 							ON loc.intCompanyLocationId = cl.intCompanyLocationId
-						LEFT JOIN tblICItemLocation l 
-							ON l.intItemId = i.intItemId
-							AND loc.intCompanyLocationId = l.intLocationId
+				) loc
+				OUTER APPLY (
+					SELECT TOP 1 
+						l.*
+					FROM 						
+						tblICItemLocation l 
+					WHERE
+						l.intItemId = i.intItemId
+						AND l.intLocationId = loc.intCompanyLocationId
 				) l
 				LEFT JOIN tblICCategoryLocation catLoc 
 					ON catLoc.intCategoryId = cat.intCategoryId
-					AND catLoc.intLocationId = l.intLocationId
+					AND catLoc.intLocationId = loc.intCompanyLocationId
+				OUTER APPLY (			
+						SELECT TOP 1 
+							iu.intItemUOMId 
+						FROM 
+							tblICUnitMeasure m INNER JOIN tblICItemUOM iu
+								ON m.intUnitMeasureId = iu.intUnitMeasureId
+						WHERE
+							m.strUnitMeasure = NULLIF(p.strOrderPackageDescription, '')
+							AND iu.intItemId = i.intItemId 
+						ORDER BY 
+							m.intUnitMeasureId 
+					) purchaseUOM
+				OUTER APPLY (			
+						SELECT TOP 1 
+							iu.intItemUOMId 
+						FROM 
+							tblICUnitMeasure m INNER JOIN tblICItemUOM iu
+								ON m.intUnitMeasureId = iu.intUnitMeasureId
+						WHERE
+							m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+							AND iu.intItemId = i.intItemId 
+						ORDER BY 
+							m.intUnitMeasureId 
+					) sellingUOM
 			WHERE
 				p.strUniqueId = @UniqueId
 	) AS Source_Query  
@@ -945,6 +976,8 @@ FROM (
 			, ItemLocation.ysnIdRequiredLiquor = Source_Query.ysnIdRequiredLiquor
 			, ItemLocation.intMinimumAge = Source_Query.intMinimumAge
 			, ItemLocation.intCountGroupId = Source_Query.intCountGroupId
+			, ItemLocation.intIssueUOMId = Source_Query.intIssueUOMId
+			, ItemLocation.intReceiveUOMId = Source_Query.intReceiveUOMId
 			, ItemLocation.intConcurrencyId = ItemLocation.intConcurrencyId + 1
 
 	-- If none is found, insert a new item location 
@@ -1035,8 +1068,8 @@ FROM (
 			,3--,intAllowNegativeInventory
 			,DEFAULT--,intSubLocationId
 			,DEFAULT--,intStorageLocationId
-			,DEFAULT--,intIssueUOMId
-			,DEFAULT--,intReceiveUOMId
+			,Source_Query.intIssueUOMId
+			,Source_Query.intReceiveUOMId
 			,DEFAULT--,intGrossUOMId
 			,DEFAULT--,intFamilyId
 			,Source_Query.intClassId--,intClassId
