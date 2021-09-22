@@ -20,6 +20,7 @@ BEGIN
 		,@intTicketItemUOM = intItemUOMIdTo
 	FROM tblSCTicket 
 	WHERE intTicketId = @intTicketId
+		and intStorageScheduleTypeId = -2 -- CONTRACT DISTRIBUTION TYPE
 
 	IF(ISNULL(@intTicketContractDetailId,0) > 0)
 	BEGIN
