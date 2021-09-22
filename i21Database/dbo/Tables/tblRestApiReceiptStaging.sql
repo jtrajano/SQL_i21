@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblRestApiReceiptStaging]
 	, strVendorRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strWarehouseRefNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strShiftNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	, dtmLastFreeWhseDate DATETIME NULL
 	, CONSTRAINT PK_tblRestApiReceiptStaging_intRestApiReceiptStagingId PRIMARY KEY (intRestApiReceiptStagingId)
 )
