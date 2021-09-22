@@ -190,6 +190,9 @@
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
