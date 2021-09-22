@@ -15,6 +15,8 @@ CREATE TABLE [dbo].[tblRestApiReceiptItemStaging]
     , intStorageUnitId INT NULL
     , intTaxGroupId INT NULL
     , intForexRateType INT NULL
+    , intOrderId INT NULL
+    , intLineNo INT NULL
     , CONSTRAINT PK_tblRestApiReceiptItemStaging_intRestApiReceiptItemStagingId PRIMARY KEY(intRestApiReceiptItemStagingId)
     , CONSTRAINT [FK_tblRestApiReceiptStaging_tblRestApiReceiptItemStaging_intRestApiReceiptStagingId] 
         FOREIGN KEY ([intRestApiReceiptStagingId]) 
