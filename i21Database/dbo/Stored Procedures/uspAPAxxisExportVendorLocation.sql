@@ -72,8 +72,8 @@ BEGIN
 		E.strTerminalControlNumber AS strTerminalNo
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
+	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId
-	LEFT JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
 	LEFT JOIN tblTFTerminalControlNumber E ON D.intTerminalControlNumberId = E.intTerminalControlNumberId
 	WHERE
 		A.ysnTransportTerminal = 1
@@ -88,8 +88,8 @@ BEGIN
 		E.strTerminalControlNumber AS strTerminalNo
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
+	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId
-	LEFT JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
 	LEFT JOIN tblTFTerminalControlNumber E ON D.intTerminalControlNumberId = E.intTerminalControlNumberId
 	WHERE 
 		A.intEntityId = @vendorId
