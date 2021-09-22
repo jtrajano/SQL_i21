@@ -3706,7 +3706,7 @@ BEGIN TRY
 						UPDATE @cbLogSpecific
 						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty * - 1 FROM @cbLogPrev)
 											ELSE @TotalBasis END
-							, intPricingTypeId = 2
+							, intPricingTypeId = (case when intPricingTypeId = 1 then 1 else 2 end)
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END		
 					IF (ISNULL(@TotalPriced, 0) <> 0)
