@@ -1,4 +1,4 @@
-﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OH' AND ysnFilingForThisTA = 1)
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'OH')
 BEGIN
 	PRINT ('Deploying Ohio Tax Forms')
 END
@@ -7,7 +7,7 @@ GO
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'OH'
 	, @TaxAuthorityId INT
 
-SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN

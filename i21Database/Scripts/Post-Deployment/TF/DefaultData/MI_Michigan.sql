@@ -1,4 +1,4 @@
-﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MI' AND ysnFilingForThisTA = 1)
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MI')
 BEGIN
 	PRINT ('Deploying Michigan Tax Forms')
 END

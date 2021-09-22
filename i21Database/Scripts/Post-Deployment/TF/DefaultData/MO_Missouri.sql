@@ -1,4 +1,4 @@
-﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MO' AND ysnFilingForThisTA = 1)
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MO')
 BEGIN
 	PRINT ('Deploying Missouri Tax Forms')
 END

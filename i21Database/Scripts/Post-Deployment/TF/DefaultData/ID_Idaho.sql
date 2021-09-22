@@ -1,4 +1,4 @@
-﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'ID' AND ysnFilingForThisTA = 1)
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'ID')
 BEGIN
 	PRINT ('Deploying Idaho Tax Forms')
 END
@@ -7,7 +7,7 @@ GO
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'ID'
 	, @TaxAuthorityId INT
 
-SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN

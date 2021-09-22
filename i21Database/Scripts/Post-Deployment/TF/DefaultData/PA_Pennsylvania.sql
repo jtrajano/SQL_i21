@@ -1,4 +1,4 @@
-﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'PA' AND ysnFilingForThisTA = 1)
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'PA')
 BEGIN
 	PRINT ('Deploying Pennsylvania Tax Forms')
 END

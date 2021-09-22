@@ -1,4 +1,4 @@
-﻿IF EXISTS(SELECT TOP 1 intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'DC' AND ysnFilingForThisTA = 1)
+﻿IF EXISTS(SELECT TOP 1 intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'DC')
 BEGIN
 	PRINT ('Deploying District of Columbia Tax Forms')
 END
@@ -7,7 +7,7 @@ GO
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'DC'
 	, @TaxAuthorityId INT
 
-SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
