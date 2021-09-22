@@ -13,6 +13,8 @@ FA.dtmDateInService,
 FA.dblCost,  
 FA.dblForexRate,  
 FA.intCurrencyId,  
+FA.intFunctionalCurrencyId,
+FA.intCurrencyExchangeRateTypeId,
 FA.dblMarketValue,  
 FA.dblInsuranceValue,  
 FA.dblSalvageValue,  
@@ -29,6 +31,7 @@ FA.intExpenseAccountId,
 FA.intDepreciationAccountId,  
 FA.intAccumulatedAccountId,  
 FA.intGainLossAccountId,  
+FA.intSalesOffsetAccountId,
 FA.strManufacturerName,  
 FA.strModelNumber,  
 FA.ysnAcquired,  
@@ -54,8 +57,11 @@ GLExpense.strAccountId strExpenseAccountId,
 GLDepreciation.strAccountId strDepreciationAccountId,        
 GLAccumulation.strAccountId strAccumulatedAccountId,        
 GLGainLoss.strAccountId strGainLossAccountId,
+GLARAccount.strAccountId strSalesOffsetAccountId,
 Company.strLocationName strCompanyLocation,        
 Currency.strCurrency,  
+FunctionalCurrency.strCurrency strFunctionalCurrency,  
+RateType.strCurrencyExchangeRateType,
 ysnFullyDepreciated =   
  CASE WHEN (BDFD.Cnt > 0 AND BDCnt.Cnt > 0) OR BDCnt.Cnt = 0  
  THEN CAST(0 AS BIT)  
@@ -79,7 +85,10 @@ LEFT JOIN tblGLAccount GLExpense ON GLExpense.intAccountId = FA.intExpenseAccoun
 LEFT JOIN tblGLAccount GLDepreciation ON GLDepreciation.intAccountId = FA.intDepreciationAccountId        
 LEFT JOIN tblGLAccount GLAccumulation ON GLAccumulation.intAccountId = FA.intAccumulatedAccountId        
 LEFT JOIN tblGLAccount GLGainLoss ON GLGainLoss.intAccountId = FA.intGainLossAccountId        
+LEFT JOIN tblGLAccount GLARAccount ON GLARAccount.intAccountId = FA.intSalesOffsetAccountId        
 LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID=FA.intCurrencyId        
+LEFT JOIN tblSMCurrency FunctionalCurrency ON FunctionalCurrency.intCurrencyID = FA.intFunctionalCurrencyId
+LEFT JOIN tblSMCurrencyExchangeRateType RateType ON RateType.intCurrencyExchangeRateTypeId = FA.intCurrencyExchangeRateTypeId
 LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intCompanyLocationId        
 LEFT JOIN tblFADepreciationMethod DM on DM.intDepreciationMethodId = FA.intDepreciationMethodId
 LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = FA.intAssetGroupId

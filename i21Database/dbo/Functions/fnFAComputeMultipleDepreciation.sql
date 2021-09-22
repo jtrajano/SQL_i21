@@ -6,10 +6,15 @@ CREATE FUNCTION [dbo].[fnFAComputeMultipleDepreciation]
 	@BookId INT = 1
 )
 RETURNS @tbl TABLE (
-	intAssetId INT ,
+	intAssetId INT,
 	dblBasis NUMERIC(18,6) NULL,
 	dblMonth NUMERIC(18,6) NULL,
 	dblDepre NUMERIC(18,6) NULL,
+	dblFunctionalBasis NUMERIC(18,6) NULL,
+	dblFunctionalMonth NUMERIC(18,6) NULL,
+	dblFunctionalDepre NUMERIC(18,6) NULL,
+	dblRate NUMERIC(18,6) NULL,
+	ysnMultiCurrency BIT NULL,
 	ysnFullyDepreciated BIT NULL,
 	strError NVARCHAR(100) NULL,
 	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
@@ -43,9 +48,13 @@ DECLARE @tblAssetInfo TABLE (
 	strAssetTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 	dblQuarterly NUMERIC (18,6),
 	dblMidQuarter NUMERIC (18,6),
-	dblMidYear NUMERIC (18,6)
-
+	dblMidYear NUMERIC (18,6),
+	dblRate NUMERIC (18,6),
+	ysnMultiCurrency BIT NULL
 ) 
+
+DECLARE @intDefaultCurrencyId INT
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 
 INSERT INTO  @tblAssetInfo(
 	intAssetId,
@@ -57,6 +66,8 @@ INSERT INTO  @tblAssetInfo(
 	dblImportGAAPDepToDate,
 	dtmImportedDepThru,
 	strAssetTransaction,
+	dblRate,
+	ysnMultiCurrency,
 	strError
 )
 SELECT 
@@ -69,6 +80,8 @@ Depreciation.dblDepreciationToDate,
 CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
 DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmImportedDepThru)) + 1, 0)),
 Depreciation.strTransaction,
+CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE ISNULL(A.dblForexRate, 1) END,
+CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(A.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, A.intCurrencyId) THEN 0 ELSE 1 END,
 NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
@@ -85,7 +98,6 @@ UPDATE @tblAssetInfo SET strError =  'Fixed asset should be disposed'
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strError IS NULL)
 	RETURN
-
 
 
 UPDATE T 
@@ -121,20 +133,14 @@ OUTER APPLY(
 WHERE strError IS NULL
 
 -- Set Quarterly and Mid Quarter Depreciation take for Mid Quarter Convention
-IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Quarter' AND strError IS NULL)
-BEGIN
-	UPDATE @tblAssetInfo
-	SET dblQuarterly = dblAnnualDep / 4, dblMidQuarter = (dblAnnualDep/4)/2
-	WHERE strError IS NULL
-END
+UPDATE @tblAssetInfo
+SET dblQuarterly = dblAnnualDep / 4, dblMidQuarter = (dblAnnualDep/4)/2
+WHERE strConvention = 'Mid Quarter' AND strError IS NULL
 
 -- Mid Year Depreciation Take for Mid Year Convention
-IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Year' AND strError IS NULL)
-BEGIN
-	UPDATE @tblAssetInfo
-	SET dblMidYear = dblAnnualDep / 2
-	WHERE strError IS NULL
-END
+UPDATE @tblAssetInfo
+SET dblMidYear = dblAnnualDep / 2
+WHERE strConvention = 'Mid Year' AND strError IS NULL
 
 -- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
 IF (@BookId = 2)
@@ -339,22 +345,35 @@ UPDATE @tblAssetInfo
 set dblMonth = ROUND(dblMonth, 2),
 dblDepre =  ROUND(dblDepre, 2)
 
+UPDATE @tblAssetInfo 
+SET dblMonth = 0, dblDepre = 0, dblBasis = 0
+WHERE strAssetTransaction IS NULL
    
 INSERT INTO @tbl(
 	intAssetId,
 	dblBasis,
 	dblMonth,
 	dblDepre,
+	dblFunctionalBasis,
+	dblFunctionalMonth,
+	dblFunctionalDepre,
+	dblRate,
+	ysnMultiCurrency,
 	ysnFullyDepreciated,
 	strError,
 	strTransaction
 	)
 	SELECT 
 	intAssetId,
-	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblBasis END,
-	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblMonth END,
-	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblDepre END,
-	ysnFullyDepreciated ,
+	dblBasis,
+	dblMonth,
+	dblDepre,
+	dblBasis * dblRate,
+	dblMonth * dblRate,
+	dblDepre * dblRate,
+	dblRate,
+	ysnMultiCurrency,
+	ysnFullyDepreciated,
 	strError,
 	strTransaction
 	FROM @tblAssetInfo 

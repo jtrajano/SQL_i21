@@ -194,6 +194,7 @@
     <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
     <Build Include="dbo\Views\vyuAPBillForImport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
+    <Build Include="dbo\Functions\fnFAGetDefaultCurrencyExchangeRateTypeId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

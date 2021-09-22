@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[dblCost]					NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[dblForexRate]				NUMERIC (18, 6) NULL DEFAULT ((1)),
 	[intCurrencyId]				INT NULL,
+	[intFunctionalCurrencyId]	INT NULL,
 	[dblMarketValue]			NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[dblInsuranceValue]			NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[dblSalvageValue]			NUMERIC (18, 6) NULL DEFAULT ((0)),
@@ -27,7 +28,9 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[intDepreciationAccountId]	INT NULL,
 	[intAccumulatedAccountId]	INT NULL,
 	[intGainLossAccountId]		INT NULL,
+	[intSalesOffsetAccountId]	INT NULL,
 	[intDepreciationMethodId]	INT NULL,
+	[intCurrencyExchangeRateTypeId] INT NULL,
 	[strManufacturerName]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strModelNumber]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnAcquired]				BIT NULL,
@@ -45,7 +48,11 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount2] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount3] FOREIGN KEY ([intDepreciationAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount4] FOREIGN KEY ([intAccumulatedAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+	CONSTRAINT [FK_tblFRBudget_tblGLAccount5] FOREIGN KEY ([intSalesOffsetAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFAFixedAsset_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId]) REFERENCES [dbo].[tblFADepreciationMethod] ([intDepreciationMethodId]),
-	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetGroup] FOREIGN KEY([intAssetGroupId]) REFERENCES [dbo].[tblFAFixedAssetGroup] ([intAssetGroupId])
+	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetGroup] FOREIGN KEY([intAssetGroupId]) REFERENCES [dbo].[tblFAFixedAssetGroup] ([intAssetGroupId]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrency] FOREIGN KEY([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrency2] FOREIGN KEY([intFunctionalCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
 

@@ -57,14 +57,27 @@ IF ISNULL(@ysnPost, 0) = 0
 Post_Transaction:
 
 DECLARE @ErrorMessage NVARCHAR(MAX)
-DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
+DECLARE @intDefaultCurrencyId	INT, @ysnMultiCurrency BIT = 0, @intDefaultCurrencyExchangeRateTypeId INT
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
+SELECT @intDefaultCurrencyExchangeRateTypeId = dbo.fnFAGetDefaultCurrencyExchangeRateTypeId()
 
-DECLARE @dblDailyRate	NUMERIC (18,6)
+DECLARE @dblRate NUMERIC (18,6)
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN							
-		
+		SELECT @dblRate = CASE WHEN ISNULL(BD.dblRate, 0) > 0 
+					THEN BD.dblRate 
+					ELSE 
+						CASE WHEN ISNULL(F.dblForexRate, 0) > 0 
+						THEN F.dblForexRate 
+						ELSE 1 
+						END 
+					END,
+				@ysnMultiCurrency = CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(F.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, F.intCurrencyId) THEN 0 ELSE 1 END
+		FROM tblFAFixedAsset F 
+        JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
+        WHERE F.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID) AND BD.intBookId = 1 
+
 		DECLARE @GLEntries RecapTableType				
 		
 		-- ASSET ACCOUNT
@@ -101,7 +114,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]			
-			
+			,[intCurrencyExchangeRateTypeId]
 		)
 		SELECT 
 			 [strTransactionId]		= @strTransactionId
@@ -110,9 +123,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.[strAssetId]
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= A.[dblCost]
+			,[dblDebit]				= CASE WHEN @ysnMultiCurrency = 0 THEN A.[dblCost] ELSE (A.[dblCost] * @dblRate) END
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= 0
+			,[dblDebitForeign]		= CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE A.[dblCost] END
 			,[dblCreditForeign]		= 0
 			,[dblDebitReport]		= 0
 			,[dblCreditReport]		= 0
@@ -124,7 +137,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= @dblRate
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -136,7 +149,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionType]	= 'Purchase'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
-		
+			,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId
+
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
 
@@ -150,9 +164,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strReference]			= A.[strAssetId]
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= 0
-			,[dblCredit]			= A.[dblCost]
+			,[dblCredit]			= CASE WHEN @ysnMultiCurrency = 0 THEN A.[dblCost] ELSE (A.[dblCost] * @dblRate) END
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= 0
+			,[dblCreditForeign]		= CASE WHEN @ysnMultiCurrency = 0 THEN 0 ELSE A.[dblCost] END
 			,[dblDebitReport]		= 0
 			,[dblCreditReport]		= 0
 			,[dblReportingRate]		= 0
@@ -163,7 +177,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 1
+			,[dblExchangeRate]		= @dblRate
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -175,7 +189,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strTransactionType]	= 'Purchase'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
-		
+			,[intCurrencyExchangeRateTypeId] = @intDefaultCurrencyExchangeRateTypeId
+
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
 					
