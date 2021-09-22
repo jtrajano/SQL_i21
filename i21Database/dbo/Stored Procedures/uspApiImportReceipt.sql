@@ -105,6 +105,14 @@ LEFT JOIN tblICItemUOM uom ON uom.intItemUOMId = ri.intCostUOMId
 WHERE uom.intItemUOMId IS NULL
 	AND r.guiUniqueId = @guiUniqueId
 
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT CASE WHEN s.strOrderType IS NULL THEN 'orderType is required.' ELSE 'Cannot find the orderType ''' + s.strOrderType + '''. Valid values are: Direct, Purchase Order, Purchase Contract, Transfer Order.' END
+	, 'orderType', 'Error',  strOrderType
+FROM tblRestApiReceiptStaging s
+WHERE s.guiUniqueId = @guiUniqueId
+	AND NULLIF(s.strOrderType, '') IS NOT NULL
+	AND s.strOrderType NOT IN ('Direct', 'Purchase Order', 'Purchase Contract', 'Transfer Order')
+
 IF EXISTS(SELECT * FROM @Logs)
 	GOTO Logging
 
@@ -135,9 +143,16 @@ INSERT INTO @ReceiptEntries(
 	, intForexRateTypeId
 	, intCostUOMId
 	, dblUnitRetail
-	, strWarehouseRefNo)
+	, strWarehouseRefNo
+	, intPurchaseId
+	, intPurchaseDetailId
+	, intTicketId
+	, intInventoryTransferId
+	, intInventoryTransferDetailId
+	, intLoadShipmentId
+	, intLoadShipmentDetailId)
 SELECT 
-	  'Direct'
+	  ISNULL(r.strOrderType, 'Direct')
 	, 0
 	, r.dtmReceiptDate
 	, r.intEntityId
@@ -160,6 +175,13 @@ SELECT
 	, ri.intCostUOMId
 	, ri.dblUnitRetail
 	, r.strWarehouseRefNo
+	, ri.intPurchaseId
+	, ri.intPurchaseDetailId
+	, ri.intTicketId
+	, ri.intInventoryTransferId
+	, ri.intInventoryTransferDetailId
+	, ri.intLoadShipmentId
+	, ri.intLoadShipmentDetailId
 FROM tblRestApiReceiptStaging r
 	INNER JOIN tblRestApiReceiptItemStaging ri ON ri.intRestApiReceiptStagingId = r.intRestApiReceiptStagingId
 	INNER JOIN tblICItemLocation il ON il.intItemId = ri.intItemId
