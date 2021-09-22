@@ -564,7 +564,7 @@ FROM
 	@InvoicesToGenerate ITG --WITH (NOLOCK)
 	 INNER JOIN vyuMBILInvoiceItem MBILItem ON MBILItem.strInvoiceNo = ITG.strInvoiceOriginId
 WHERE
-	 NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = ITG.intCompanyLocationId AND intItemId = ITG.intItemId)
+	 NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = ITG.intCompanyLocationId AND strItemNo = MBILItem.strItemNo)
 
 
 DELETE FROM V
