@@ -521,6 +521,35 @@ BEGIN TRY
 						WHERE intItemId = @intItemId
 						)
 
+				-- Add Pack UOM 'KG BAGS'
+				INSERT INTO tblICItemUOM (
+					intConcurrencyId
+					,intItemId
+					,intUnitMeasureId
+					,dblUnitQty
+					,ysnStockUnit
+					,ysnAllowPurchase
+					,ysnAllowSale
+					)
+				SELECT 1
+					,@intItemId
+					,CUOM.intUnitMeasureId
+					,CUOM.dblUnitQty
+					,0
+					,1
+					,1
+				FROM tblICCommodityUnitMeasure CUOM
+				JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CUOM.intUnitMeasureId
+					AND UOM.strUnitType = 'Quantity'
+					AND UPPER(UOM.strUnitMeasure) LIKE '%KG BAG%'
+					AND CUOM.intCommodityId = @intCommodityId
+					AND UOM.intUnitMeasureId NOT IN (
+						SELECT intUnitMeasureId
+						FROM tblICItemUOM
+						WHERE intItemId = @intItemId
+						)
+				ORDER BY CUOM.dblUnitQty
+
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblICItem I
