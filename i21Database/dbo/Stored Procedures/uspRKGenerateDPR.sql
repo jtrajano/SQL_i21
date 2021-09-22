@@ -4580,57 +4580,6 @@ BEGIN TRY
 		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
 		WHERE t.intCommodityId = @intCommodityId 
 				
-		UNION ALL
-		SELECT t.intCommodityId
-			, strCommodityCode
-			, intContractHeaderId
-			, strContractNumber
-			, intFutOptTransactionHeaderId
-			, strInternalTradeNo
-			, strType
-			, strSubType
-			, strContractType
-			, strContractEndMonth
-			, dblTotal
-			, um.strUnitMeasure
-			, intInventoryReceiptItemId
-			, strLocationName
-			, strTicketNumber
-			, dtmTicketDateTime
-			, strCustomerReference
-			, strDistributionOption
-			, dblUnitCost
-			, dblQtyReceived
-			, strAccountNumber
-			, strTranType
-			, dblNoOfLot
-			, dblDelta
-			, intBrokerageAccountId
-			, strInstrumentType
-			, dblNoOfContract
-			, dblContractSize
-			, strCurrency
-			, intInvoiceId
-			, strInvoiceNumber
-			, intBillId
-			, strBillId
-			, intItemId
-			, strItemNo
-			, intCategoryId
-			, strCategory
-			, intFutureMarketId
-			, strFutureMarket
-			, intFutureMonthId
-			, strFutureMonth
-			, strBrokerTradeNo
-			, strNotes
-			, ysnPreCrush
-			, strEntityName
-			, strDeliveryDate
-		FROM @ListContractHedge t
-		JOIN tblICCommodityUnitMeasure cuc ON t.intCommodityId = cuc.intCommodityId AND cuc.ysnDefault = 1
-		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = cuc.intUnitMeasureId
-		WHERE t.intCommodityId = @intCommodityId
 	END
 	
 	UPDATE @FinalContractHedge SET intSeqNo = 1 WHERE strType LIKE 'Purchase%'
