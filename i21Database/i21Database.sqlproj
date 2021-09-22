@@ -196,6 +196,9 @@
     <Build Include="dbo\Views\vyuAPBillForImport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
