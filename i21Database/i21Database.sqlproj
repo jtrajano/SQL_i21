@@ -195,6 +195,9 @@
     <Build Include="dbo\Views\vyuAPBillForImport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
     <Build Include="dbo\Functions\fnFAGetDefaultCurrencyExchangeRateTypeId.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
     <Build Include="dbo\Functions\fnFAGetDefaultCurrencyExchangeRateTypeId.sql" />
     <Build Include="dbo\Tables\tblFABasisAdjustment.sql" />
     <Build Include="dbo\Functions\fnFAGetNextDepreciationDate.sql" />
