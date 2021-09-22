@@ -89,7 +89,11 @@ END
 -- Get and insert Fixed Asset Depreciaton history
 
 INSERT INTO @tblFixedAssetHistory
-SELECT G.dtmDepreciationToDate, GAAP.dblDepreciationToDate , ISNULL(Tax.dblDepreciationToDate, FullyDepreciatedTax.dblDepreciationToDate) dblTaxDepreciationToDate, G.intAssetId,
+SELECT G.dtmDepreciationToDate, ISNULL(GAAP.dblDepreciationToDate, 0) , 
+dblTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Adjustment', 'Adjustment') 
+							THEN ISNULL(Tax.dblDepreciationToDate, FullyDepreciatedTax.dblDepreciationToDate) 
+							ELSE ISNULL(Tax.dblDepreciationToDate, 0) END, 
+G.intAssetId,
 ISNULL(GAAP.intAssetDepreciationId,Tax.intAssetDepreciationId) intAssetDepreciationId,
 ISNULL(GAAP.intDepreciationMethodId, Tax.intDepreciationMethodId) intDepreciationMethodId,
 ISNULL(GAAP.strDepreciationMethodId, Tax.strDepreciationMethodId) strDepreciationMethodId,
@@ -123,6 +127,7 @@ outer apply(
 	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 1
+	AND A.strTransaction = G.strTransaction
 )GAAP
 OUTER APPLY(
 	SELECT 
@@ -144,6 +149,7 @@ OUTER APPLY(
 	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
 	AND A.intAssetId = G.intAssetId
 	AND intBookId = 2
+	AND A.strTransaction = G.strTransaction
 )Tax
 OUTER APPLY (
 	SELECT MAX(FAD.dblDepreciationToDate) dblDepreciationToDate

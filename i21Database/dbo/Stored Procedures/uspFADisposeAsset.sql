@@ -143,7 +143,6 @@ SELECT TOP 1 @intRealizedGainLossAccountId = intAccountId FROM vyuGLAccountDetai
 
 DECLARE @dblCurrentRate NUMERIC(18,6), @dblRate NUMERIC(18,6), @dblDispositionAmount NUMERIC(18, 6)
 
-
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN				
 		SELECT 

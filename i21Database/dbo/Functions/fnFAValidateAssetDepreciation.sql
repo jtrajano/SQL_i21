@@ -1,4 +1,4 @@
-CREATE FUNCTION fnFAValidateAssetDepreciation
+CREATE FUNCTION [dbo].[fnFAValidateAssetDepreciation]
  (
 	@ysnPost   AS BIT    = 0,
 	@BookId INT =1 ,
@@ -43,7 +43,16 @@ BEGIN
             FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId
             ORDER BY dtmDepreciationToDate DESC
         )D
-        WHERE (D.dblDepreciationToDate >=(ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0)) 
+		OUTER APPLY(
+			SELECT TOP 1 intBasisAdjustmentId, dblAdjustment, ysnAddToBasis 
+			FROM tblFABasisAdjustment BA
+			WHERE BA.intAssetId = A.intAssetId AND BA.intBookId = @BookId
+		) Adjustment
+        WHERE 
+			((CASE WHEN Adjustment.intBasisAdjustmentId IS NULL
+				THEN CASE WHEN D.dblDepreciationToDate >= ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0) THEN 1 ELSE 0 END
+				ELSE CASE WHEN (D.dblDepreciationToDate) >= ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0) + Adjustment.dblAdjustment THEN 1 ELSE 0 END 
+			 END) = 1
         OR  ISNULL(BD.ysnFullyDepreciated,0) = 1 )
         AND ISNULL(A.ysnDisposed, 0) = 0
 

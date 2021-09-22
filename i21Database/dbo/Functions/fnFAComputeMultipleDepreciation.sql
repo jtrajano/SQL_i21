@@ -1,5 +1,3 @@
-
-
 CREATE FUNCTION [dbo].[fnFAComputeMultipleDepreciation]
 (
     @Id Id READONLY,
@@ -53,7 +51,7 @@ DECLARE @tblAssetInfo TABLE (
 	ysnMultiCurrency BIT NULL
 ) 
 
-DECLARE @intDefaultCurrencyId INT
+DECLARE @intDefaultCurrencyId INT, @dblAdjustment NUMERIC(18, 6), @dblFunctionalAdjustment NUMERIC(18, 6), @ysnAdjustBasis BIT = NULL
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 
 INSERT INTO  @tblAssetInfo(
@@ -92,13 +90,25 @@ OUTER APPLY(
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
 
+-- Check Adjusment to Basis
+SELECT @dblAdjustment = ISNULL(SUM(dblAdjustment), 0), @dblFunctionalAdjustment = ISNULL(SUM(dblFunctionalAdjustment), 0), @ysnAdjustBasis = B.ysnAddToBasis
+FROM @tblAssetInfo A 
+JOIN tblFABasisAdjustment B ON B.intAssetId = A.intAssetId AND B.intBookId = @BookId
+WHERE B.dtmDate <= dbo.fnFAGetNextDepreciationDate(B.intAssetId, @BookId)
+GROUP BY B.ysnAddToBasis
+
+IF (@dblAdjustment > 0)
+BEGIN
+	IF (@ysnAdjustBasis = 1)
+		UPDATE @tblAssetInfo SET dblBasis += @dblAdjustment
+END
+
 
 UPDATE @tblAssetInfo SET strError =  'Fixed asset should be disposed' 
-	WHERE ROUND(dblYear,2) >=  ROUND(dblBasis,2)
+	WHERE ROUND(dblYear,2) >=  ROUND(dblBasis,2) AND ISNULL(@ysnAdjustBasis, 0) <> 0
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strError IS NULL)
 	RETURN
-
 
 UPDATE T 
 SET 
@@ -245,28 +255,44 @@ BEGIN
 		GOTO Basis_Limit_Reached
 END
 
-UPDATE B set ysnFullyDepreciated = 1 FROM @tblAssetInfo B JOIN
-tblFABookDepreciation BD ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
-WHERE dblDepre >= (BD.dblCost - BD.dblSalvageValue)
-AND strError IS NULL 
-
 Basis_Limit_Reached:
 
-UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
-dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
-FROM @tblAssetInfo B JOIN
-tblFABookDepreciation BD 
-ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
-OUTER APPLY(
-	SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
-	tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+IF (@ysnAdjustBasis = 0) -- No Adjustment
+	UPDATE @tblAssetInfo set ysnFullyDepreciated = 1 WHERE dblDepre >= (dblBasis + @dblAdjustment) AND strError IS NULL
+ELSE IF (@ysnAdjustBasis = 1) -- Adjustment Add to Basi
+	UPDATE @tblAssetInfo set ysnFullyDepreciated = 1 WHERE dblDepre >= dblBasis AND strError IS NULL
+ELSE -- Adjustment Not Add to Basis
+	UPDATE B set ysnFullyDepreciated = 1 FROM @tblAssetInfo B JOIN
+	tblFABookDepreciation BD ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
+	WHERE dblDepre >= (BD.dblCost - BD.dblSalvageValue)
+	AND strError IS NULL
 
-) U
-WHERE dblDepre > (BD.dblCost - BD.dblSalvageValue)
-AND strError IS NULL 
+IF (@ysnAdjustBasis IS NULL OR @ysnAdjustBasis <> 0) -- No Adjustment OR Adustment Add to Basis
+	UPDATE B set dblDepre = dblBasis, 
+	dblMonth = dblBasis - U.dblDepreciationToDate
+	FROM @tblAssetInfo B JOIN
+	tblFABookDepreciation BD 
+	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
+	OUTER APPLY(
+		SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
+		tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+	) U
 
+	WHERE dblDepre > dblBasis
+	AND strError IS NULL 
+ELSE -- Adjustment Not Add to Basis
+	UPDATE B set dblDepre = dblBasis + @dblAdjustment, 
+	dblMonth = dblBasis - U.dblDepreciationToDate
+	FROM @tblAssetInfo B JOIN
+	tblFABookDepreciation BD 
+	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
+	OUTER APPLY(
+		SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
+		tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+	) U
 
-
+	WHERE dblDepre > dblBasis + @dblAdjustment
+	AND strError IS NULL 
 
 --imported assets
 UPDATE 
@@ -325,20 +351,34 @@ WHERE dblImportGAAPDepToDate is not null and isnull(dtmImportedDepThru,0) > 0
 
 Skip_Tax_Monthly_Depreciation:
 
-UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
-dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
-FROM @tblAssetInfo B JOIN
-tblFABookDepreciation BD 
-ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
-OUTER APPLY(
-	SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
-	tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
-
-) U
-WHERE dblDepre < (BD.dblCost - BD.dblSalvageValue)
-AND intMonth > totalMonths
-AND strConvention NOT IN ('Full Month', 'Mid Quarter', 'Mid Year')
-AND ISNULL(BD.ysnFullyDepreciated,0) = 0
+IF (@ysnAdjustBasis = 0) -- Adjustment Not Add to Basis
+	UPDATE B set dblDepre = dblBasis + @dblAdjustment,
+	dblMonth = (dblBasis + @dblAdjustment) - U.dblDepreciationToDate
+	FROM @tblAssetInfo B JOIN
+	tblFABookDepreciation BD 
+	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
+	OUTER APPLY(
+		SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
+		tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+	) U
+	WHERE dblDepre < dblBasis 
+	AND intMonth > totalMonths
+	AND strConvention NOT IN ('Full Month', 'Mid Quarter', 'Mid Year')
+	AND ISNULL(BD.ysnFullyDepreciated,0) = 0
+ELSE -- No Adjustment or Adjustment Add to Basis
+	UPDATE B set dblDepre = dblBasis,
+	dblMonth = dblBasis - U.dblDepreciationToDate
+	FROM @tblAssetInfo B JOIN
+	tblFABookDepreciation BD 
+	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
+	OUTER APPLY(
+		SELECT MAX (dblDepreciationToDate) dblDepreciationToDate from 
+		tblFAFixedAssetDepreciation WHERE intAssetId = B.intAssetId AND intBookId = @BookId
+	) U
+	WHERE dblDepre < dblBasis 
+	AND intMonth > totalMonths
+	AND strConvention NOT IN ('Full Month', 'Mid Quarter', 'Mid Year')
+	AND ISNULL(BD.ysnFullyDepreciated,0) = 0
 
 --ROUND OFF TO NEAREAST HUNDREDTHS
 UPDATE @tblAssetInfo
@@ -348,6 +388,7 @@ dblDepre =  ROUND(dblDepre, 2)
 UPDATE @tblAssetInfo 
 SET dblMonth = 0, dblDepre = 0, dblBasis = 0
 WHERE strAssetTransaction IS NULL
+
    
 INSERT INTO @tbl(
 	intAssetId,

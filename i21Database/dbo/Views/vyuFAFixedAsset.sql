@@ -93,11 +93,11 @@ LEFT JOIN tblSMCompanyLocation Company ON Company.intCompanyLocationId = FA.intC
 LEFT JOIN tblFADepreciationMethod DM on DM.intDepreciationMethodId = FA.intDepreciationMethodId
 LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = FA.intAssetGroupId
 OUTER APPLY(  
-    SELECT COUNT(*)Cnt FROM tblFABookDepreciation   
+    SELECT COUNT(*) Cnt FROM tblFABookDepreciation   
     WHERE intAssetId = FA.intAssetId  
 )BDCnt  
 OUTER APPLY(  
-    SELECT COUNT(*)Cnt  FROM tblFABookDepreciation   
+    SELECT COUNT(*) Cnt  FROM tblFABookDepreciation   
     WHERE intAssetId = FA.intAssetId  
     AND ISNULL(ysnFullyDepreciated,0) = 0  
 )BDFD
@@ -106,7 +106,7 @@ OUTER APPLY (
     MAX(dblDepreciationToDate) dblDepreciationToDate
     FROM tblFAFixedAssetDepreciation
     WHERE intAssetId = FA.intAssetId
-    AND intBookId =1
+    AND intBookId = 1
     
 )GAAPDepreciation
 OUTER APPLY (
@@ -114,7 +114,7 @@ OUTER APPLY (
     MAX(dblDepreciationToDate) dblDepreciationToDate
     FROM tblFAFixedAssetDepreciation
     WHERE intAssetId = FA.intAssetId
-    AND intBookId =2
+    AND intBookId = 2
     
 )TaxDepreciation
 OUTER APPLY (
