@@ -310,8 +310,11 @@ CREATE TABLE #TempMBILInvoiceItem (
 
 	IF (ISNULL(@ysnRecap,0) = 0 AND (@ysnPost = 1))
 	BEGIN
-		SELECT @SuccessfulCount = COUNT(*) FROM #TempMBILInvoice
+		--SELECT @SuccessfulCount = COUNT(*) FROM #TempMBILInvoice
 
+		CREATE TABLE #InvoiceTemp(intInvoiceId int)
+		INSERT INTO #InvoiceTemp(intInvoiceId) SELECT intInvoiceId FROM #TempMBILInvoice
+		
 		WHILE EXISTS(SELECT 1 FROM #TempMBILInvoice)
 		BEGIN
 			DECLARE @intInvoiceId INT = (SELECT TOP 1 intInvoiceId FROM #TempMBILInvoice)
@@ -333,7 +336,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 			--							AND A.intSourceId = @intInvoiceId 
 			--							AND A.strType = 'Tank Delivery' order by dtmDateCreated desc)
 		END
-
+		SELECT @SuccessfulCount  = count(1) FROM tblARInvoice ar INNER JOIN tblMBILInvoice mb ON ar.intInvoiceId = mb.inti21InvoiceId WHERE mb.intInvoiceId in(SELECT intInvoiceId FROM #InvoiceTemp) and ar.ysnPosted = 1
 	END
 
 	IF @BatchId IS NULL
