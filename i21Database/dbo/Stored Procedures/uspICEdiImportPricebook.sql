@@ -136,8 +136,8 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItem') IS NULL
 		,strAction NVARCHAR(50) NULL
 		,intBrandId_Old INT NULL 
 		,intBrandId_New INT NULL 
-		,strDescription_Old NVARCHAR(50) NULL
-		,strDescription_New NVARCHAR(50) NULL 
+		,strDescription_Old NVARCHAR(250) NULL
+		,strDescription_New NVARCHAR(250) NULL 
 		,strShortName_Old NVARCHAR(50) NULL
 		,strShortName_New NVARCHAR(50) NULL
 		,strItemNo_Old NVARCHAR(50) NULL
@@ -165,8 +165,8 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemVendorXref') IS NULL
 		,intVendorId_New INT NULL 
 		,strVendorProduct_Old NVARCHAR(50) NULL
 		,strVendorProduct_New NVARCHAR(50) NULL 
-		,strProductDescription_Old NVARCHAR(50) NULL
-		,strProductDescription_New NVARCHAR(50) NULL
+		,strProductDescription_Old NVARCHAR(250) NULL
+		,strProductDescription_New NVARCHAR(250) NULL
 	)
 ;
 
@@ -513,8 +513,8 @@ FROM (
 		SELECT 
 			i.intItemId 
 			,intBrandId = ISNULL(b.intBrandId, i.intBrandId)
-			,strDescription = ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription)
-			,strShortName = ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName)
+			,strDescription = CAST(ISNULL(NULLIF(p.strSellingUpcLongDescription, ''), i.strDescription) AS NVARCHAR(250))
+			,strShortName = CAST(ISNULL(ISNULL(NULLIF(p.strSellingUpcShortDescription, ''), SUBSTRING(p.strSellingUpcLongDescription, 1, 15)), i.strShortName) AS NVARCHAR(50))
 			,b.intManufacturerId 
 			,intDuplicateItemId = dup.intItemId 
 			,p.* 
@@ -1513,8 +1513,8 @@ FROM (
 				i.intItemId 
 				,v.intEntityId 
 				,p.strSellingUpcNumber
-				,p.strVendorsItemNumberForOrdering
-				,p.strSellingUpcLongDescription
+				,strVendorsItemNumberForOrdering = CAST(p.strVendorsItemNumberForOrdering AS NVARCHAR(50)) 
+				,strSellingUpcLongDescription = CAST(p.strSellingUpcLongDescription AS NVARCHAR(250)) 
 				,u.intItemUOMId 
 				,u.dblUnitQty
 			FROM 
@@ -1543,7 +1543,7 @@ FROM (
 	WHEN MATCHED THEN 
 		UPDATE 
 		SET		
-			strVendorProduct = Source_Query.strVendorsItemNumberForOrdering
+			strVendorProduct = Source_Query.strVendorsItemNumberForOrdering  
 			,strProductDescription = Source_Query.strSellingUpcLongDescription
 
 	-- If none is found, insert a new vendor xref
