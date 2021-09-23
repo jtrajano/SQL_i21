@@ -2352,7 +2352,7 @@ LEFT OUTER JOIN
 		,[dblTotal]				= SUM(ID.[dblTotal])
         ,[intInvoiceId]			= ID.[intInvoiceId]
 		,[intAccountId]			= dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'Cost of Goods')
-		,[ysnGLOnly]			= ARIFC.[ysnGLOnly]
+		,[ysnGLOnly]			= ISNULL(ARIFC.[ysnGLOnly], 0)
 		,[dblCost]				= SUM(ISNULL(ARIFC.[dblCost], @ZeroDecimal) * ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
 		,[strDescription]		= ICI.[strDescription]
     FROM
@@ -2370,7 +2370,7 @@ LEFT OUTER JOIN
         ID.[intInvoiceId], ID.[intItemId], ICIL.[intItemLocationId], ARIFC.[ysnGLOnly], ARIFC.[dblCost], ICI.[strDescription]
     ) ARID
         ON I.[intInvoiceId] = ARID.[intInvoiceId]
-WHERE ARID.[ysnGLOnly] = CAST(1 AS BIT)
+WHERE ISNULL(ARID.[ysnGLOnly], 0) = CAST(1 AS BIT)
 
 --DIRECT OUT TICKET (General)
 INSERT ##ARInvoiceGLEntries
@@ -2468,7 +2468,7 @@ INNER JOIN
 		,[dblTotal]				= SUM(ID.[dblTotal])
         ,[intInvoiceId]			= ID.[intInvoiceId]
 		,[intAccountId]			= dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'General')
-		,[ysnGLOnly]			= ARIFC.[ysnGLOnly]
+		,[ysnGLOnly]			= ISNULL(ARIFC.[ysnGLOnly], 0)
 		,[dblCost]				= SUM(ISNULL(ARIFC.[dblCost], @ZeroDecimal) * ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
 		,[strDescription]		= ICI.[strDescription]
 
@@ -2487,6 +2487,6 @@ INNER JOIN
         ID.[intInvoiceId], ID.[intItemId], ICIL.[intItemLocationId], ARIFC.[ysnGLOnly], ARIFC.[dblCost], ICI.[strDescription]
     ) ARID
         ON I.[intInvoiceId] = ARID.[intInvoiceId]
-WHERE ARID.[ysnGLOnly] = CAST(1 AS BIT)
+WHERE ISNULL(ARID.[ysnGLOnly], 0) = CAST(1 AS BIT)
 
 RETURN 1 

@@ -89,7 +89,7 @@ SELECT
 	,[dblAdjustRetailValue]
 FROM 
 	##ARItemsForCosting
-WHERE [ysnGLOnly] = CAST(0 AS BIT)
+WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
