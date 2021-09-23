@@ -1492,6 +1492,8 @@ BEGIN
 			,[intImportCardId]
 			,[intDriverPinId]
 			,[ysnInvoiced]
+			,[intUserId]
+			,[ysnImported]
 		)
 		VALUES
 		(
@@ -1544,6 +1546,8 @@ BEGIN
 			,@intCardId
 			,@intDriverPinId
 			,@ysnInvoiced
+			,@intUserId
+			,1
 		)			
 	
 		DECLARE @Pk	INT		
