@@ -86,10 +86,10 @@ FROM
 		ON EL.intEntityLocationId = A.intShipFromId
 	INNER JOIN dbo.tblSMCurrency CUR 
 		ON CUR.intCurrencyID = A.intCurrencyId
-	INNER JOIN dbo.tblSMCompanyLocation CL
-		ON CL.intCompanyLocationId = A.intShipToId
 	INNER JOIN dbo.tblSMTerm ST
 		ON ST.intTermID = A.intTermsId
+	LEFT JOIN dbo.tblSMCompanyLocation CL
+		ON CL.intCompanyLocationId = A.intShipToId
 	OUTER APPLY (
 		SELECT TOP 1 commodity.strCommodityCode
 		FROM dbo.tblAPBillDetail detail
