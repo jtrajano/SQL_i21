@@ -193,6 +193,10 @@
     <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
