@@ -87,13 +87,41 @@ SELECT DISTINCT
     , sc.strContractText
     , sc.strLineOfBusiness
 FROM tblRestApiSchemaDollarContract sc
-INNER JOIN vyuARCustomer customer ON customer.strCustomerNumber = sc.strCustomerNo OR customer.strName = sc.strCustomerNo
-INNER JOIN tblSMCompanyLocation loc ON loc.strLocationName = sc.strLocation OR loc.strLocationNumber = sc.strLocation
-INNER JOIN tblSMCurrency currency ON currency.strCurrency = sc.strCurrency OR currency.strDescription = sc.strCurrency
-INNER JOIN vyuCTEntity sp ON (sp.strEntityName = sc.strSalesperson OR sp.strEntityNumber = sc.strSalesperson) AND sp.strEntityType = 'Salesperson'
-LEFT JOIN tblSMFreightTerms ft ON ft.strFreightTerm = sc.strFreightTerm OR ft.strDescription = sc.strFreightTerm
-LEFT JOIN tblSMTerm t ON t.strTerm = sc.strTerms OR t.strTermCode = sc.strTerms
-LEFT JOIN tblSMCountry ct ON ct.strCountry = sc.strCountry OR ct.strCountryCode = sc.strCountry
+CROSS APPLY (
+  SELECT TOP 1 intEntityId
+  FROM vyuARCustomer 
+  WHERE strCustomerNumber = sc.strCustomerNo OR strName = sc.strCustomerNo
+) customer
+CROSS APPLY (
+  SELECT TOP 1 intCompanyLocationId
+  FROM tblSMCompanyLocation
+  WHERE strLocationName = sc.strLocation OR strLocationNumber = sc.strLocation
+) loc
+CROSS APPLY (
+  SELECT TOP 1 intCurrencyID
+  FROM tblSMCurrency
+  WHERE strCurrency = sc.strCurrency OR strDescription = sc.strCurrency
+) currency
+CROSS APPLY (
+  SELECT TOP 1 x.intEntityId
+  FROM vyuCTEntity x
+  WHERE (x.strEntityName = sc.strSalesperson OR x.strEntityNumber = sc.strSalesperson) AND x.strEntityType = 'Salesperson'
+) sp
+OUTER APPLY (
+  SELECT TOP 1 xf.intFreightTermId
+  FROM tblSMFreightTerms xf
+  WHERE xf.strFreightTerm = sc.strFreightTerm OR xf.strDescription = sc.strFreightTerm
+) ft
+OUTER APPLY (
+  SELECT TOP 1 xt.intTermID
+  FROM tblSMTerm xt
+  WHERE xt.strTerm = sc.strTerms OR xt.strTermCode = sc.strFreightTerm
+) t
+OUTER APPLY (
+  SELECT TOP 1 xc.intCountryID
+  FROM tblSMCountry xc
+  WHERE xc.strCountry = sc.strCountry OR xc.strCountryCode = sc.strCountry
+) ct
 LEFT JOIN tblCTContractText ctext ON ctext.strTextCode = sc.strContractText
 LEFT JOIN tblSMLineOfBusiness lob ON lob.strLineOfBusiness = sc.strLineOfBusiness
 WHERE sc.guiApiUniqueId = @guiApiUniqueId
