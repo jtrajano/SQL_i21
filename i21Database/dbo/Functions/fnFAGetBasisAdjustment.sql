@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnFAGetBasisAdjustment]
 (
-	@intAssetId int,
-	@intBookId char(5)
+	@intAssetId INT,
+	@intBookId INT
 )
 RETURNS @tblAdjustment TABLE
 (
@@ -14,7 +14,8 @@ RETURNS @tblAdjustment TABLE
 	dblAdjustment NUMERIC(18, 6),
 	dblFunctionalAdjustment NUMERIC(18, 6),
 	dtmDate DATETIME,
-	ysnAddToBasis BIT
+	ysnAddToBasis BIT,
+	strAdjustmentType NVARCHAR(100)
 )
 AS
 BEGIN
@@ -30,6 +31,7 @@ BEGIN
 		,SUM(BA.dblFunctionalAdjustment)
 		,BA.dtmDate
 		,BA.ysnAddToBasis
+		,BA.strAdjustmentType
 	FROM tblFABasisAdjustment BA
 	OUTER APPLY (
 		SELECT MAX(dtmDepreciationToDate) dtmDepreciationToDate
@@ -46,6 +48,6 @@ BEGIN
 		,BA.dblRate
 		,BA.dtmDate
 		,BA.ysnAddToBasis
-
+		,BA.strAdjustmentType
 	RETURN
 END

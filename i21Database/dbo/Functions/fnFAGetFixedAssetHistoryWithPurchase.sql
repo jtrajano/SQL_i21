@@ -90,7 +90,7 @@ END
 
 INSERT INTO @tblFixedAssetHistory
 SELECT G.dtmDepreciationToDate, ISNULL(GAAP.dblDepreciationToDate, 0) , 
-dblTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Adjustment', 'Adjustment') 
+dblTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Basis Adjustment', 'Depreciation Adjustment') 
 							THEN ISNULL(Tax.dblDepreciationToDate, FullyDepreciatedTax.dblDepreciationToDate) 
 							ELSE ISNULL(Tax.dblDepreciationToDate, 0) END, 
 G.intAssetId,

@@ -111,7 +111,7 @@ BEGIN
 --  CHECK IF THE PROCESS IS RECAP OR NOT  
 ---------------------------------------------------------------------------------------------------------------------------------------  
 Post_Transaction:  
-DECLARE @strTransactionId NVARCHAR(100), @strAdjustmentTransactionId NVARCHAR(100)  
+DECLARE @strTransactionId NVARCHAR(100), @strAdjustmentTransactionId NVARCHAR(100), @strDepAdjustmentTransactionId NVARCHAR(100)  
   
 IF ISNULL(@ysnRecap, 0) = 0  
 BEGIN     
@@ -120,9 +120,25 @@ BEGIN
               @IdHasNoPlaceOfService Id,
               @IdHasNoDepreciation Id,
               @IdHasDepreciation Id,
-              @IdHasAdjustment Id
+              @IdHasBasisAdjustment Id,
+              @IdHasDepreciationAdjustment Id
       
-	  CREATE TABLE #tblAdjustment (
+      -- Adjustment to Basis and Depreciation should be different/separated
+	  CREATE TABLE #tblBasisAdjustment (
+        intAssetId INT,
+	    intBookId INT,
+	    intCurrencyId INT,
+	    intFunctionalCurrencyId INT,
+	    intCurrencyExchangeRateTypeId INT,
+	    dblRate NUMERIC(18, 6),
+	    dblAdjustment NUMERIC(18, 6),
+	    dblFunctionalAdjustment NUMERIC(18, 6),
+	    dtmDate DATETIME,
+	    ysnAddToBasis BIT,
+		strTransactionId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+      )
+
+      CREATE TABLE #tblDepreciationAdjustment (
         intAssetId INT,
 	    intBookId INT,
 	    intCurrencyId INT,
@@ -199,18 +215,18 @@ BEGIN
         where D.cnt >1
 
 	-- GL Entry for Adjustment is for GAAP only
-	INSERT INTO @IdHasAdjustment
+	INSERT INTO @IdHasBasisAdjustment
         SELECT intId FROM @IdGood
         OUTER APPLY (
-            SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId) WHERE intAssetId = intId AND intBookdId = @BookId
+            SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId) WHERE intAssetId = intId AND intBookdId = @BookId AND (strAdjustmentType IS NULL OR strAdjustmentType = 'Basis')
         ) Adjustment
         WHERE Adjustment.cnt > 0
 
-    IF EXISTS(SELECT TOP 1 1 FROM @IdHasAdjustment)
+    IF EXISTS(SELECT TOP 1 1 FROM @IdHasBasisAdjustment)
     BEGIN
         DECLARE @idx INT
-        SELECT TOP 1 @idx = intId FROM @IdHasAdjustment
-        INSERT INTO #tblAdjustment
+        SELECT TOP 1 @idx = intId FROM @IdHasBasisAdjustment
+        INSERT INTO #tblBasisAdjustment
         SELECT TOP 1 
 			intAssetId, 
 			intBookdId, 
@@ -226,6 +242,32 @@ BEGIN
 		FROM dbo.fnFAGetBasisAdjustment(@idx, @BookId) WHERE intBookdId = @BookId AND intAssetId = @idx
     END 
 
+    INSERT INTO @IdHasDepreciationAdjustment
+        SELECT intId FROM @IdGood
+        OUTER APPLY (
+            SELECT COUNT(1) cnt FROM dbo.fnFAGetBasisAdjustment(intId, @BookId) WHERE intAssetId = intId AND intBookdId = @BookId AND strAdjustmentType = 'Depreciation'
+        ) Adjustment
+        WHERE Adjustment.cnt > 0
+
+    IF EXISTS(SELECT TOP 1 1 FROM @IdHasDepreciationAdjustment)
+    BEGIN
+        DECLARE @idx2 INT
+        SELECT TOP 1 @idx2 = intId FROM @IdHasDepreciationAdjustment
+        INSERT INTO #tblDepreciationAdjustment
+        SELECT TOP 1 
+			intAssetId, 
+			intBookdId, 
+			intCurrencyId,
+			intFunctionalCurrencyId,
+			intCurrencyExchangeRateTypeId,
+			dblRate,
+			dblAdjustment,
+			dblFunctionalAdjustment,
+			dtmDate,
+			ysnAddToBasis,
+			NULL
+		FROM dbo.fnFAGetBasisAdjustment(@idx2, @BookId) WHERE intBookdId = @BookId AND intAssetId = @idx2
+    END
   
       DECLARE @IdIterate Id
  
@@ -356,10 +398,10 @@ BEGIN
           END
         END  
 	
-	  IF EXISTS(SELECT TOP 1 1 FROM @IdHasAdjustment)
+	  IF EXISTS(SELECT TOP 1 1 FROM @IdHasBasisAdjustment)
       BEGIN  
           DELETE FROM @IdIterate
-          INSERT INTO @IdIterate SELECT intId FROM @IdHasAdjustment
+          INSERT INTO @IdIterate SELECT intId FROM @IdHasBasisAdjustment
  
           WHILE EXISTS(SELECT TOP 1 1 FROM @IdIterate)
           BEGIN
@@ -399,7 +441,7 @@ BEGIN
                 0,
                 0,
                 Adjustment.dblRate,
-                'Adjustment',  
+                'Basis Adjustment',  
                 @strAdjustmentTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention,
@@ -411,14 +453,82 @@ BEGIN
                   SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 OUTER APPLY (
-                    SELECT TOP 1 dblAdjustment, dblFunctionalAdjustment, dtmDate, dblRate FROM #tblAdjustment
+                    SELECT TOP 1 dblAdjustment, dblFunctionalAdjustment, dtmDate, dblRate FROM #tblBasisAdjustment
                     WHERE intAssetId = @i AND intBookId = @BookId
                 ) Adjustment
                 WHERE F.intAssetId = @i
                 AND BD.intBookId = @BookId
 
-				UPDATE #tblAdjustment SET strTransactionId = @strAdjustmentTransactionId WHERE intAssetId = @i
+				UPDATE #tblBasisAdjustment SET strTransactionId = @strAdjustmentTransactionId WHERE intAssetId = @i
                 UPDATE @tblDepComputation SET strTransactionId = @strAdjustmentTransactionId WHERE intAssetId = @i
+                DELETE FROM @IdIterate WHERE intId = @i
+          END
+      END
+
+      -- Depreciation Adjustment
+      IF EXISTS(SELECT TOP 1 1 FROM @IdHasDepreciationAdjustment)
+      BEGIN  
+          DELETE FROM @IdIterate
+          INSERT INTO @IdIterate SELECT intId FROM @IdHasDepreciationAdjustment
+ 
+          WHILE EXISTS(SELECT TOP 1 1 FROM @IdIterate)
+          BEGIN
+              SELECT TOP 1 @i = intId FROM @IdIterate 
+              EXEC uspSMGetStartingNumber  @intStartingNumberId = 113 , @strID= @strDepAdjustmentTransactionId OUTPUT  
+              INSERT INTO tblFAFixedAssetDepreciation (  
+                [intAssetId],  
+                [intBookId],
+                [intDepreciationMethodId],  
+                [dblBasis],  
+                [dtmDateInService],  
+                [dtmDispositionDate],  
+                [dtmDepreciationToDate],  
+                [dblDepreciationToDate],  
+                [dblSalvageValue],
+                [dblFunctionalBasis],
+                [dblFunctionalDepreciationToDate],
+                [dblFunctionalSalvageValue],
+                [dblRate],  
+                [strTransaction],  
+                [strTransactionId],  
+                [strType],  
+                [strConvention],
+                [strBatchId]
+              )  
+              SELECT  
+                @i,
+                @BookId,
+                D.intDepreciationMethodId,
+                E.dblBasis,  
+                BD.dtmPlacedInService,  
+                NULL,  
+                Adjustment.dtmDate,
+                Adjustment.dblAdjustment,
+                BD.dblSalvageValue,
+				CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
+                Adjustment.dblFunctionalAdjustment,
+                CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue END,
+                Adjustment.dblRate,  
+                'Depreciation Adjustment',  
+                @strDepAdjustmentTransactionId,  
+                D.strDepreciationType,  
+                D.strConvention,
+                @strBatchId
+                FROM tblFAFixedAsset F 
+                JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
+                JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+                OUTER APPLY (
+                  SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
+                ) E
+                OUTER APPLY (
+                    SELECT TOP 1 dblAdjustment, dblFunctionalAdjustment, dtmDate, dblRate FROM #tblDepreciationAdjustment
+                    WHERE intAssetId = @i AND intBookId = @BookId
+                ) Adjustment
+                WHERE F.intAssetId = @i
+                AND BD.intBookId = @BookId
+
+				UPDATE #tblDepreciationAdjustment SET strTransactionId = @strDepAdjustmentTransactionId WHERE intAssetId = @i
+                UPDATE @tblDepComputation SET strTransactionId = @strDepAdjustmentTransactionId WHERE intAssetId = @i
                 DELETE FROM @IdIterate WHERE intId = @i
           END
       END
@@ -565,11 +675,11 @@ BEGIN
           ON A.intAssetId = B.intAssetId
 		  OUTER APPLY (
 			SELECT TOP 1 strTransactionId, dblAdjustment, dblFunctionalAdjustment,dblRate, dtmDate, intCurrencyId,
-				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId
-			FROM #tblAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId, ysnAddToBasis
+			FROM #tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
 		  ) Adjustment
           WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
-			AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
+			AND ISNULL(Adjustment.dblAdjustment, 0) <> 0 AND Adjustment.ysnAddToBasis = 1
 		
 		  UNION ALL
 		  SELECT   
@@ -610,11 +720,11 @@ BEGIN
           ON A.intAssetId = B.intAssetId
 		  OUTER APPLY (
 			SELECT TOP 1 strTransactionId, dblAdjustment, dblFunctionalAdjustment,dblRate, dtmDate, intCurrencyId,
-				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId
-			FROM #tblAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId, ysnAddToBasis
+			FROM #tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
 		  ) Adjustment
           WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
-			AND ISNULL(Adjustment.dblAdjustment, 0) <> 0
+			AND ISNULL(Adjustment.dblAdjustment, 0) <> 0 AND Adjustment.ysnAddToBasis = 1
 		
 		  -- Depreciation Entries
 		  UNION ALL
@@ -757,33 +867,42 @@ BEGIN
 END
 
   ;WITH Q as(
-     SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult,
-      'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError 
+     SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult, 'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError 
       FROM @GLEntries C WHERE @strBatchId = strBatchId
       AND ysnIsUnposted = 0  AND @BookId = 1
       AND strModuleName ='Fixed Assets'
-	  AND (@strAdjustmentTransactionId IS NULL OR strTransactionId <> @strAdjustmentTransactionId)
+	  AND strTransactionId = @strTransactionId
       GROUP by strReference, strTransactionId, dtmDate
     UNION
-     SELECT strReference strAssetId, strTransactionId, 'Asset Basis Adjusted' strResult,
-      'GAAP' strBook, dtmDate, cast(0 as BIT) ysnError 
-      FROM @GLEntries C WHERE @strBatchId = strBatchId
-      AND ysnIsUnposted = 0  AND @BookId = 1
-      AND strModuleName ='Fixed Assets'
+	  SELECT strAssetId, strTransactionId, 'Asset Basis Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+	  FROM  tblFAFixedAssetDepreciation A 
+      JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+      WHERE @strBatchId = strBatchId AND A.intBookId = 1 AND @BookId = 1
 	  AND strTransactionId = @strAdjustmentTransactionId
-      GROUP by strReference, strTransactionId, dtmDate
+	UNION
+      SELECT strAssetId, strTransactionId, 'Asset Depreciation Adjusted' strResult, 'GAAP' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+	  FROM  tblFAFixedAssetDepreciation A 
+      JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+      WHERE @strBatchId = strBatchId AND A.intBookId = 1 AND @BookId = 1 
+	  AND strTransactionId = @strDepAdjustmentTransactionId
 	UNION
       SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
-	  AND (@strAdjustmentTransactionId IS NULL OR strTransactionId <> @strAdjustmentTransactionId)
+	  AND strTransactionId = @strTransactionId
 	UNION
       SELECT strAssetId, strTransactionId, 'Tax Basis Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
 	  FROM  tblFAFixedAssetDepreciation A 
       JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
       WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
 	  AND strTransactionId = @strAdjustmentTransactionId
+	UNION
+      SELECT strAssetId, strTransactionId, 'Tax Depreciation Adjusted' strResult, 'Tax' strBook, dtmDepreciationToDate, cast(0 as BIT) 
+	  FROM  tblFAFixedAssetDepreciation A 
+      JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+      WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
+	  AND strTransactionId = @strDepAdjustmentTransactionId
     UNION
       SELECT strAssetId,'' strTransactionId, strError strResult, 
       CASE WHEN @BookId = 1 THEN 'GAAP' 

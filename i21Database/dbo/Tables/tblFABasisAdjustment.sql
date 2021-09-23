@@ -13,6 +13,7 @@
 	[dtmDateEntered] DATETIME NOT NULL,
 	[ysnAddToBasis] BIT NOT NULL DEFAULT(0),
 	[strReason] NVARCHAR(255) NULL,
+	[strAdjustmentType] NVARCHAR(100) NULL,
 	[intConcurrencyId] INT NOT NULL,
 
 	CONSTRAINT [PK_tblFABasisAdjustment] PRIMARY KEY CLUSTERED ([intBasisAdjustmentId] ASC),

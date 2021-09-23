@@ -39,17 +39,17 @@ BEGIN
         JOIN @Id I on I.intId =  A.intAssetId
         JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId AND BD.intBookId = @BookId
         OUTER APPLY(
-            SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate 
+            SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate, dtmDepreciationToDate 
             FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId
             ORDER BY dtmDepreciationToDate DESC
         )D
 		OUTER APPLY(
-			SELECT TOP 1 intBasisAdjustmentId, dblAdjustment, ysnAddToBasis 
+			SELECT SUM(BA.dblAdjustment) dblAdjustment
 			FROM tblFABasisAdjustment BA
-			WHERE BA.intAssetId = A.intAssetId AND BA.intBookId = @BookId
+			WHERE BA.intAssetId = A.intAssetId AND BA.intBookId = @BookId AND BA.dtmDate <= D.dtmDepreciationToDate
 		) Adjustment
         WHERE 
-			((CASE WHEN Adjustment.intBasisAdjustmentId IS NULL
+			((CASE WHEN Adjustment.dblAdjustment IS NULL
 				THEN CASE WHEN D.dblDepreciationToDate >= ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0) THEN 1 ELSE 0 END
 				ELSE CASE WHEN (D.dblDepreciationToDate) >= ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0) + Adjustment.dblAdjustment THEN 1 ELSE 0 END 
 			 END) = 1
