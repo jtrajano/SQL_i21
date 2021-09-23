@@ -29,6 +29,7 @@ BEGIN TRY
 			,'' AS 'strDescription'
 			,'' AS 'dtmExpiryDate'
 			,'' AS 'dblNetWeight'
+			,'' AS 'strLotNumber'
 
 		RETURN
 	END
@@ -203,6 +204,7 @@ BEGIN TRY
 		,dbo.fnConvertDateToReportDateFormat(L.dtmExpiryDate, 0) AS dtmExpiryDate
 		--,CONVERT(NUMERIC(18, 0), ISNULL(T.dblQty, L.dblQty) * I.dblWeight) AS dblNetWeight
 		,'' AS dblNetWeight
+		,L.strLotNumber
 	FROM tblMFOrderManifest OM
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
