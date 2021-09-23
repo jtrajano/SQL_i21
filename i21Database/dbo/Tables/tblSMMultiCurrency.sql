@@ -32,7 +32,15 @@
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
-    [intConcurrencyId]								INT NOT NULL DEFAULT 1, 
+	/* Bank Transfer */
+	[intUnrealizedGainLossForwardAccountId]			INT NULL, 
+	[intUnrealizedGainLossForwardOffsetAccountId]	INT NULL, 
+	[intUnrealizedGainLossSwapAccountId]			INT NULL, 
+	[intUnrealizedGainLossSwapOffsetAccountId]		INT NULL, 
+	[intRealizedGainLossForwardAccountId]			INT NULL, 
+	[intRealizedGainLossSwapAccountId]				INT NULL, 
+	/* Bank Transfer */
+	[intConcurrencyId]								INT NOT NULL DEFAULT 1, 
     CONSTRAINT [FK_tblSMMultiCurrency_RateType_AccountsPayable] FOREIGN KEY ([intAccountsPayableRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_CashManagement] FOREIGN KEY ([intCashManagementRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_Inventory] FOREIGN KEY ([intInventoryRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
