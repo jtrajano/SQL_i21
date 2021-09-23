@@ -86,7 +86,6 @@ BEGIN
 			,intQtyCurrencyId
 			,intBasisCurrencyId
 			,strNotes
-			,intUserId
 
 	) AS (
 		SELECT 
@@ -111,7 +110,6 @@ BEGIN
 			,intQtyCurrencyId
 			,intBasisCurrencyId
 			,strNotes
-			,intUserId
 		FROM (
 			select 
 				intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
@@ -249,7 +247,7 @@ BEGIN
 		LEFT  JOIN tblCTBook book ON book.intBookId = LCD.intBookId
 		LEFT  JOIN tblCTSubBook subBook ON subBook.intSubBookId = LCD.intSubBookId
 		LEFT JOIN tblEMEntity em ON em.intEntityId = LCD.intEntityId
-		LEFT JOIN tblEMEntity u ON u.intEntityId = LCD.intUserId
+		LEFT JOIN tblEMEntity u ON u.intEntityId = cb.intUserId
 		LEFT JOIN tblCTContractStatus cs ON cs.intContractStatusId = LCD.intContractStatusId
 		WHERE strTransactionType IN ('Contract Balance')
 			AND cb.dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
