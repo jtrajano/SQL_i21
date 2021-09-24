@@ -53,8 +53,8 @@ BEGIN
 		FROM #tmpApiSchemaVendorTop
 
 		--VENDOR
-		INSERT INTO tblAPVendor(intEntityId, strVendorId, intGLAccountExpenseId, intVendorType, strTaxNumber, intTermsId, ysnWithholding, dblCreditLimit)
-		SELECT @entityId, V.strVendorId, AD.intAccountId, VT.intVendorType, V.strTaxNumber, T.intTermID, 0, 0
+		INSERT INTO tblAPVendor(intEntityId, strVendorId, intGLAccountExpenseId, intVendorType, strTaxNumber, intTermsId, ysnWithholding, dblCreditLimit, guiApiUniqueId)
+		SELECT @entityId, V.strVendorId, AD.intAccountId, VT.intVendorType, V.strTaxNumber, T.intTermID, 0, 0, @guiApiUniqueId
 		FROM #tmpApiSchemaVendorTop V
 		LEFT JOIN vyuGLAccountDetail AD ON AD.strAccountId = V.strExpenseAccountId AND AD.strAccountType = 'Expense'
 		LEFT JOIN (

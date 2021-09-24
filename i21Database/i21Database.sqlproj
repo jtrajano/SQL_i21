@@ -197,6 +197,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
+    <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
