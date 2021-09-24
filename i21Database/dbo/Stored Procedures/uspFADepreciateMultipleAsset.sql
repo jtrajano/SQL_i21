@@ -127,7 +127,7 @@ BEGIN
               @IdHasDepreciationAdjustment Id
       
       -- Adjustment to Basis and Depreciation should be different/separated
-	  CREATE TABLE #tblBasisAdjustment (
+	   DECLARE @tblBasisAdjustment TABLE (
         intAssetId INT,
 	    intBookId INT,
 	    intCurrencyId INT,
@@ -229,7 +229,7 @@ BEGIN
     BEGIN
         DECLARE @idx INT
         SELECT TOP 1 @idx = intId FROM @IdHasBasisAdjustment
-        INSERT INTO #tblBasisAdjustment
+        INSERT INTO @tblBasisAdjustment
         SELECT TOP 1 
 			intAssetId, 
 			intBookdId, 
@@ -456,13 +456,13 @@ BEGIN
                   SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 OUTER APPLY (
-                    SELECT TOP 1 dblAdjustment, dblFunctionalAdjustment, dtmDate, dblRate FROM #tblBasisAdjustment
+                    SELECT TOP 1 dblAdjustment, dblFunctionalAdjustment, dtmDate, dblRate FROM @tblBasisAdjustment
                     WHERE intAssetId = @i AND intBookId = @BookId
                 ) Adjustment
                 WHERE F.intAssetId = @i
                 AND BD.intBookId = @BookId
 
-				UPDATE #tblBasisAdjustment SET strTransactionId = @strAdjustmentTransactionId WHERE intAssetId = @i
+				UPDATE @tblBasisAdjustment SET strTransactionId = @strAdjustmentTransactionId WHERE intAssetId = @i
                 UPDATE @tblDepComputation SET strTransactionId = @strAdjustmentTransactionId WHERE intAssetId = @i
                 DELETE FROM @IdIterate WHERE intId = @i
           END
@@ -679,7 +679,7 @@ BEGIN
 		  OUTER APPLY (
 			SELECT TOP 1 strTransactionId, dblAdjustment, dblFunctionalAdjustment,dblRate, dtmDate, intCurrencyId,
 				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId, ysnAddToBasis
-			FROM #tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+			FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
 		  ) Adjustment
           WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
 			AND ISNULL(Adjustment.dblAdjustment, 0) <> 0 AND Adjustment.ysnAddToBasis = 1
@@ -724,7 +724,7 @@ BEGIN
 		  OUTER APPLY (
 			SELECT TOP 1 strTransactionId, dblAdjustment, dblFunctionalAdjustment,dblRate, dtmDate, intCurrencyId,
 				intFunctionalCurrencyId, intCurrencyExchangeRateTypeId, ysnAddToBasis
-			FROM #tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
+			FROM @tblBasisAdjustment WHERE intAssetId = A.intAssetId AND intBookId = 1
 		  ) Adjustment
           WHERE B.dblBasis IS NOT NULL AND B.dblDepre IS NOT NULL AND B.dblMonth IS NOT NULL -- Do not include in posting if NULL
 			AND ISNULL(Adjustment.dblAdjustment, 0) <> 0 AND Adjustment.ysnAddToBasis = 1
