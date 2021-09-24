@@ -2545,7 +2545,7 @@ BEGIN TRY
 																, fd.intCommodityUnitMeasureId
 																, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																											, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																											, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + (select top 1 isnull(dblFuturePrice,0) from #tblSettlementPrice where intContractDetailId = fd.intContractDetailId))))
+																											, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFutures, 0))))
 					, dblUPValueQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(CASE WHEN ISNULL(intQuantityUOMId, 0) = 0 THEN fd.intCommodityUnitMeasureId ELSE intQuantityUOMId END
 																, fd.intCommodityUnitMeasureId
 																, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
@@ -2557,7 +2557,7 @@ BEGIN TRY
 																, fd.intCommodityUnitMeasureId
 																, dbo.fnCTConvertQuantityToTargetCommodityUOM(fd.intCommodityUnitMeasureId
 																											, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
-																											, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (select top 1 isnull(dblFuturePrice,0) from #tblSettlementPrice where intContractDetailId = fd.intContractDetailId))))
+																											, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0)))))
 				FROM #tmpCPE fd
 				JOIN tblAPVendor e ON e.intEntityId = fd.intEntityId
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
