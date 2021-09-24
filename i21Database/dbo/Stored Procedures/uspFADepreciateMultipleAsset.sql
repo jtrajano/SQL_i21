@@ -141,7 +141,7 @@ BEGIN
 		strTransactionId NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
       )
 
-      CREATE TABLE #tblDepreciationAdjustment (
+      DECLARE @tblDepreciationAdjustment TABLE (
         intAssetId INT,
 	    intBookId INT,
 	    intCurrencyId INT,
@@ -256,7 +256,7 @@ BEGIN
     BEGIN
         DECLARE @idx2 INT
         SELECT TOP 1 @idx2 = intId FROM @IdHasDepreciationAdjustment
-        INSERT INTO #tblDepreciationAdjustment
+        INSERT INTO @tblDepreciationAdjustment
         SELECT TOP 1 
 			intAssetId, 
 			intBookdId, 
@@ -524,13 +524,13 @@ BEGIN
                   SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 OUTER APPLY (
-                    SELECT TOP 1 dblAdjustment, dblFunctionalAdjustment, dtmDate, dblRate FROM #tblDepreciationAdjustment
+                    SELECT TOP 1 dblAdjustment, dblFunctionalAdjustment, dtmDate, dblRate FROM @tblDepreciationAdjustment
                     WHERE intAssetId = @i AND intBookId = @BookId
                 ) Adjustment
                 WHERE F.intAssetId = @i
                 AND BD.intBookId = @BookId
 
-				UPDATE #tblDepreciationAdjustment SET strTransactionId = @strDepAdjustmentTransactionId WHERE intAssetId = @i
+				UPDATE @tblDepreciationAdjustment SET strTransactionId = @strDepAdjustmentTransactionId WHERE intAssetId = @i
                 UPDATE @tblDepComputation SET strTransactionId = @strDepAdjustmentTransactionId WHERE intAssetId = @i
                 DELETE FROM @IdIterate WHERE intId = @i
           END
