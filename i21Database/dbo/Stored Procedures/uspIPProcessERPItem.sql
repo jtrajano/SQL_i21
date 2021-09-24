@@ -279,30 +279,33 @@ BEGIN TRY
 						)
 			END
 
-			IF ISNULL(@intLifeTime, 0) <= 0
+			IF ISNULL(@ysnOtherChargeItem, 0) = 0
 			BEGIN
-				SELECT @strError = 'Life Time should be greater than 0.'
+				IF ISNULL(@intLifeTime, 0) <= 0
+				BEGIN
+					SELECT @strError = 'Life Time should be greater than 0.'
 
-				RAISERROR (
-						@strError
-						,16
-						,1
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@strLifeTimeType, '') NOT IN (
+						'Days'
+						,'Months'
+						,'Years'
 						)
-			END
+				BEGIN
+					SELECT @strError = 'Life Time Unit not found.'
 
-			IF ISNULL(@strLifeTimeType, '') NOT IN (
-					'Days'
-					,'Months'
-					,'Years'
-					)
-			BEGIN
-				SELECT @strError = 'Life Time Unit not found.'
-
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
+					RAISERROR (
+							@strError
+							,16
+							,1
+							)
+				END
 			END
 
 			IF ISNULL(@strItemStatus, '') NOT IN (
@@ -471,7 +474,7 @@ BEGIN TRY
 								THEN 'Item Level'
 							ELSE 'Lot Level'
 							END
-						,@intLifeTime
+						,ISNULL(@intLifeTime, 0)
 						,@strLifeTimeType
 						,@strItemStatus
 						,@ysnFairTradeCompliance
@@ -583,7 +586,7 @@ BEGIN TRY
 				SET intConcurrencyId = intConcurrencyId + 1
 					,strDescription = @strDescription
 					,strShortName = @strShortName
-					,intLifeTime = @intLifeTime
+					,intLifeTime = ISNULL(@intLifeTime, 0)
 					,strLifeTimeType = @strLifeTimeType
 					,strStatus = @strItemStatus
 					,ysnFairTradeCompliant = @ysnFairTradeCompliance
