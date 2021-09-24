@@ -179,7 +179,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
                         FROM tblARInvoice ARI
                         INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ARI.intInvoiceId = ILD.intInvoiceId
 						WHERE ILD.intIntegrationLogId = @IntegrationLogId
-						  AND ARI.strType <> 'Provisional'
+						  AND ISNULL(ARI.intLoadId, 0) = 0
 
 						UNION ALL
 
@@ -192,7 +192,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
                             , strTransactionType    = 'Invoice'
                         FROM tblARInvoice ARI
                         INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId
-						WHERE ARI.strType <> 'Provisional'
+						WHERE ISNULL(ARI.intLoadId, 0) = 0	
                     END
             END        
     END
@@ -218,7 +218,7 @@ ELSE
         FROM tblARInvoice ARI
 		INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ARI.intInvoiceId = ILD.intInvoiceId
 		WHERE ILD.intIntegrationLogId = @IntegrationLogId
-		  AND ARI.strType <> 'Provisional'
+		  AND ISNULL(ARI.intLoadId, 0) = 0
 
 		UNION ALL
 
@@ -231,7 +231,7 @@ ELSE
 			, strTransactionType    = 'Invoice'
 		FROM tblARInvoice ARI
 		INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId
-		AND ARI.strType <> 'Provisional'		
+		WHERE ISNULL(ARI.intLoadId, 0) = 0	
     END
 
 
