@@ -189,6 +189,7 @@
     <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
+    <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
