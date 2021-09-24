@@ -153,7 +153,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
 					END
 				ELSE IF @intQueueCount < 12
 					BEGIN
-						SET @intQueueCount = 12
+						SET @intQueueCount = 13
 
 						INSERT INTO tblARPostingQueue (
 							intTransactionId
@@ -172,6 +172,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
 							, strTransactionType	= 'Invoice'
 						FROM tblARInvoice ARI
 						INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
+						WHERE ARI.strType <> 'Provisional'
 					END
 			END		
 	END
@@ -196,6 +197,7 @@ ELSE
 			, strTransactionType	= 'Invoice'
 		FROM tblARInvoice ARI
 		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
+		WHERE ARI.strType <> 'Provisional'
 	END
 
 DECLARE @InvoiceIds AS [InvoiceId]
