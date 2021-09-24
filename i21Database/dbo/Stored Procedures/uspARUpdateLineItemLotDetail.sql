@@ -107,8 +107,8 @@ BEGIN
 	SELECT 
          [intInvoiceDetailId]       = ARID.[intInvoiceDetailId]
         ,[intLotId]                 = LGDL.[intLotId]
-        ,[dblQuantityShipped]       = dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], LOT.[intItemUOMId], ROUND(LGDL.dblLotQuantity/AVGLOT.dblQuantityShipped, 6) * ARID.[dblQtyShipped])
-        ,[dblGrossWeight]           = dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], LOT.[intItemUOMId], ROUND(LGDL.dblLotQuantity/AVGLOT.dblQuantityShipped, 6) * ARID.[dblQtyShipped])
+        ,[dblQuantityShipped]       = dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], LOT.[intItemUOMId], LGDL.dblNet)
+        ,[dblGrossWeight]           = LGDL.dblGross
         ,[dblTareWeight]            = LGDL.[dblTare]
         ,[dblWeightPerQty]          = 1
         ,[strWarehouseCargoNumber]  = LGDL.[strWarehouseCargoNumber]
