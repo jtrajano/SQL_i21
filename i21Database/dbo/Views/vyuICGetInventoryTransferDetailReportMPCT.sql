@@ -21,15 +21,29 @@ SELECT
 	,dblWeight = dbo.fnMultiply(tfd.dblQuantity, l.dblWeightPerQty) 
 	,strWeightUOM = wu.strUnitMeasure
 	,dtmReceiptDate = r.dtmReceiptDate	
-	,strWarehouse = fromStorageLocation.strSubLocationName
+	,strWarehouse = --fromStorageLocation.strSubLocationName
+		dbo.fnICFormatErrorMessage (
+			'%s%s%s%s%s%s'
+			,ISNULL(fromStorageLocation.strSubLocationName, '')
+			,ISNULL(fromStorageLocation.strAddress, '')
+			,ISNULL(fromStorageLocation.strCity, '')
+			,ISNULL(fromStorageLocation.strState, '') 
+			,ISNULL(fromStorageLocation.strZipCode, '') 
+			,ISNULL(fromStorageLocation.strCountry, '') 
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+		)
+
 	,strDeliveryInstructions = 
 		dbo.fnICFormatErrorMessage (
-			'Commodity to be delivered to %s%s%s%s.'
+			'Commodity to be delivered to %s%s%s%s%s.'
 			,ISNULL(toStorageLocation.strSubLocationName, '')
 			,ISNULL(toStorageLocation.strCity, '')
 			,ISNULL(toStorageLocation.strState, '') 
+			,ISNULL(toStorageLocation.strZipCode, '') 
 			,ISNULL(toStorageLocation.strCountry, '') 
-			,DEFAULT
 			,DEFAULT
 			,DEFAULT
 			,DEFAULT
@@ -99,10 +113,19 @@ FROM
 
 	OUTER APPLY (
 		SELECT TOP 1 
-			subLoc.strSubLocationName
+			strSubLocationName = CASE WHEN subLoc.intVendorId IS NOT NULL THEN CAST(v2.strName AS NVARCHAR(100)) ELSE subLoc.strSubLocationName END 
+			,strAddress = ', ' + NULLIF(CASE WHEN subLoc.intVendorId IS NOT NULL THEN CAST(v2.strAddress AS NVARCHAR(100)) ELSE subLoc.strAddress END, '')
+			,strCity = ', ' + NULLIF(CASE WHEN subLoc.intVendorId IS NOT NULL THEN CAST(v2.strCity AS NVARCHAR(100)) ELSE subLoc.strCity END, '')
+			,strState = ', ' + NULLIF(CASE WHEN subLoc.intVendorId IS NOT NULL THEN CAST(v2.strState AS NVARCHAR(100)) ELSE subLoc.strState END, '')
+			,strZipCode = ', ' + NULLIF(CASE WHEN subLoc.intVendorId IS NOT NULL THEN CAST(v2.strZipCode AS NVARCHAR(100)) ELSE subLoc.strZipCode END, '')
+			,strCountry = ', ' + NULLIF(CASE WHEN subLoc.intVendorId IS NOT NULL THEN CAST(v2.strCountry AS NVARCHAR(100)) ELSE country.strCountry END, '')
 		FROM 
 			tblSMCompanyLocationSubLocation subLoc INNER JOIN tblICInventoryTransferDetail tfd2
 				ON subLoc.intCompanyLocationSubLocationId = tfd2.intFromSubLocationId
+			LEFT JOIN tblSMCountry country
+				ON country.intCountryID = subLoc.intCountryId
+			LEFT JOIN vyuAPVendor v2
+				ON v2.intEntityId = subLoc.intVendorId 
 		WHERE
 			tfd2.intInventoryTransferId = t.intInventoryTransferId
 	) fromStorageLocation
@@ -112,6 +135,7 @@ FROM
 			strSubLocationName = subLoc.strSubLocationName
 			,strCity = ', ' + subLoc.strCity 
 			,strState = ', ' + subLoc.strState 
+			,strZipCode = ', ' + subLoc.strZipCode 
 			,strCountry = ', ' + country.strCountry
 		FROM 
 			tblSMCompanyLocationSubLocation subLoc INNER JOIN tblICInventoryTransferDetail tfd3
