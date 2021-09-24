@@ -77,7 +77,9 @@
 					,cd.intCompanyLocationId 
                 from        
                     tblCTContractDetail cd
-                    left join tblAPBillDetail bd on bd.intContractDetailId = cd.intContractDetailId and isnull(bd.intSettleStorageId,0) = 0   
+					LEFT JOIN tblAPBillDetail bd1 ON bd1.intContractDetailId = cd.intContractDetailId AND ISNULL(bd1.intSettleStorageId, 0) = 0 AND bd1.intInventoryReceiptChargeId IS NULL
+					LEFT JOIN tblAPBill b ON b.intBillId = bd1.intBillId AND b.intTransactionType = 1
+					LEFT JOIN tblAPBillDetail bd ON bd.intContractDetailId = cd.intContractDetailId AND ISNULL(bd.intSettleStorageId, 0) = 0 AND bd.intBillId = b.intBillId AND bd.intInventoryReceiptChargeId IS NULL
                 where
                     not exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceContract pc where pc.intPriceContractId = pf.intPriceContractId and pf.intContractDetailId = cd.intContractDetailId)
                 group by        
