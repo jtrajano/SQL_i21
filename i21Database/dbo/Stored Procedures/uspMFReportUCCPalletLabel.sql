@@ -204,7 +204,7 @@ BEGIN TRY
 		,dbo.fnConvertDateToReportDateFormat(L.dtmExpiryDate, 0) AS dtmExpiryDate
 		--,CONVERT(NUMERIC(18, 0), ISNULL(T.dblQty, L.dblQty) * I.dblWeight) AS dblNetWeight
 		,'' AS dblNetWeight
-		,L.strLotNumber
+		,PL.strParentLotNumber AS strLotNumber
 	FROM tblMFOrderManifest OM
 	JOIN tblMFOrderHeader OH ON OH.intOrderHeaderId = OM.intOrderHeaderId
 	JOIN tblMFOrderDetail OD ON OD.intOrderDetailId = OM.intOrderDetailId
@@ -219,6 +219,7 @@ BEGIN TRY
 		AND OML.intCustomerLabelTypeId = @intCustomerLabelTypeId
 	LEFT JOIN tblSMShipVia SV ON SV.intEntityId = S.intShipViaId
 	LEFT JOIN tblICLot L ON L.intLotId = OM.intLotId
+	LEFT JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 	LEFT JOIN tblMFTask T ON T.intOrderHeaderId = OH.intOrderHeaderId
 		AND T.intLotId = OM.intLotId
 	WHERE OM.intOrderManifestId IN (
