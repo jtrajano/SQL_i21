@@ -1,3 +1,30 @@
 CREATE VIEW vyuFAFixedAssetHistory
 AS
-SELECT * FROM dbo.fnFAGetFixedAssetHistoryWithPurchase()
+SELECT 
+	 intAssetDepreciationId
+	,intAssetId
+	,intDepreciationMethodId
+	,strDepreciationMethodId
+	,dblBasis
+	,dblFunctionalBasis
+	,dtmDateInService
+	,dtmDispositionDate
+	,dtmDepreciationToDate
+	,dblDepreciationToDate
+	,dblFunctionalDepreciationToDate
+	,dblDepreciation
+	,dblFunctionalDepreciation
+	,dblRate
+	,dblTaxDepreciationToDate
+	,dblFunctionalTaxDepreciationToDate
+	,dblTaxDepreciation
+	,dblFunctionalTaxDepreciation
+	,dblTaxRate
+	,dblSalvageValue
+	,dblFunctionalSalvageValue
+	,strTransaction
+	,strTransactionId
+	,strType
+	,strConvention
+	,intConcurrencyId
+FROM dbo.fnFAGetFixedAssetHistoryWithPurchase()
