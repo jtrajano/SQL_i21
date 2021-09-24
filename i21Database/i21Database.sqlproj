@@ -205,6 +205,7 @@
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetNextMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetPreviousMonthPeriodEndDateFromDate.sql" />
+    <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
