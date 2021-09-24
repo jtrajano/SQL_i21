@@ -368,7 +368,7 @@ BEGIN
                   E.dblBasis,  
                   BD.dtmPlacedInService,  
                   NULL,  
-				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
+				  [dbo].[fnFAGetNextDepreciationDate](@i, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
                   E.dblDepre ,  
                   BD.dblSalvageValue,
                   CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,

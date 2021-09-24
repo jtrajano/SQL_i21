@@ -78,7 +78,7 @@ BD.dblCost - BD.dblSalvageValue,
 BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
 CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
-DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmImportedDepThru)) + 1, 0)),
+ImportedDepThruMonthPeriod.dtmEndDate,
 Depreciation.strTransaction,
 CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE ISNULL(A.dblForexRate, 1) END,
 CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(A.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, A.intCurrencyId) THEN 0 ELSE 1 END,
@@ -91,6 +91,9 @@ OUTER APPLY(
 	AND ISNULL(intBookId,1) = @BookId
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
+OUTER APPLY (
+	SELECT dtmEndDate FROM [dbo].[fnFAGetMonthPeriodFromDate](A.dtmImportedDepThru, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
+) ImportedDepThruMonthPeriod
 
 
 SELECT @dblDepreciationBasiComputation = dblBasis FROM @tblAssetInfo
@@ -204,27 +207,33 @@ outer apply(
 WHERE intMonth > totalMonths
 and F.strConvention <> 'Full Month'
 
+-- Update monthly depreciation computation per convention using fiscal year period
+DECLARE
+	@dtmPlacedInService DATETIME,
+	@dtmMonthStartDate DATETIME,
+	@intDays INT
+
+SELECT @dtmPlacedInService = dtmPlacedInService FROM @tblAssetInfo WHERE strError IS NULL
+SELECT @dtmMonthStartDate = dtmStartDate, @intDays = intDays
+FROM [dbo].[fnFAGetMonthPeriodFromDate](@dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
 
 UPDATE T
 SET dblMonth = dblAnnualDep/ intMonthDivisor,
-intDaysInFirstMonth= 
-DAY(DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,DATEADD(MONTH,1, dtmPlacedInService)),0)))
+intDaysInFirstMonth = @intDays
 FROM @tblAssetInfo T
 WHERE strError IS NULL
 
 UPDATE T
 SET 
 dblMonth = 
-
-CASE 
-WHEN strConvention = 'Actual Days' THEN
-	dblMonth * ((intDaysInFirstMonth - DAY(dtmPlacedInService) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
-WHEN strConvention= 'Mid Month' THEN
-	dblMonth *.50 
-ELSE
-	dblMonth
-END
-
+	CASE 
+	WHEN strConvention = 'Actual Days'
+		THEN dblMonth * ((intDaysInFirstMonth - (DATEDIFF(DAY, @dtmMonthStartDate, dtmPlacedInService) + 1) + 1)/ CAST(intDaysInFirstMonth AS FLOAT))
+	WHEN strConvention= 'Mid Month' 
+		THEN dblMonth *.50
+	ELSE
+		dblMonth
+	END
 FROM @tblAssetInfo T
 WHERE strError IS NULL AND intMonth = 1 --First Depreciation
 
@@ -356,17 +365,15 @@ OUTER APPLY
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
 OUTER APPLY(
-	SELECT CAST( CEILING(CAST( DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (DATEADD(m, 
-		CASE WHEN Dep.strTransaction = 'Place in service' THEN 0
-		ELSE 1 END, Dep.dtmDepreciationToDate))) + 1, 0)) as float)) as datetime) endDate 
+	SELECT [dbo].fnFAGetNextDepreciationDate(A.intAssetId, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END) dblNextDepreciationDate
 )PrevDepPlusOneMonth
 OUTER APPLY(
 	SELECT t=
 	CASE
 	WHEN A.dtmImportedDepThru IS NULL THEN 0
 	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
-	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.endDate	THEN 0
-	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.endDate
+	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.dblNextDepreciationDate	THEN 0
+	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.dblNextDepreciationDate
 		THEN
 			CASE WHEN A.strTransaction = 'Place in service' THEN 0
 			ELSE 2

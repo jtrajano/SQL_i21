@@ -202,6 +202,9 @@
     <Build Include="dbo\Tables\tblFABasisAdjustment.sql" />
     <Build Include="dbo\Functions\fnFAGetNextDepreciationDate.sql" />
     <Build Include="dbo\Functions\fnFAGetBasisAdjustment.sql" />
+    <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
+    <Build Include="dbo\Functions\fnFAGetNextMonthPeriodFromDate.sql" />
+    <Build Include="dbo\Functions\fnFAGetPreviousMonthPeriodEndDateFromDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -6899,7 +6902,7 @@
     <Build Include="dbo\Tables\tblLGInsuranceCalculator.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWeightClaimsDebitNoteReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailGAB.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspSCInsertDestinationInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICMassAddPromotionForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricingForCStore.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateEffectivePricingForCStore.sql" />

@@ -22,7 +22,7 @@ BEGIN
 	FROM tblFAFixedAsset A
 	OUTER APPLY (
 		SELECT TOP 1 dtmDepreciationToDate, strTransaction FROM tblFAFixedAssetDepreciation
-		WHERE intAssetId = A.intAssetId AND intBookId = @intBookId ORDER BY intAssetDepreciationId DESC
+		WHERE intAssetId = A.intAssetId AND intBookId = @intBookId ORDER BY dtmDepreciationToDate DESC
 	) Depreciation
 
 	WHERE A.intAssetId = @intAssetId
