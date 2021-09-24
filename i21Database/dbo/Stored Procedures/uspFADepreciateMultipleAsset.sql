@@ -95,7 +95,10 @@ BEGIN
             ysnDisposed = 0, ysnAcquired = 0, dtmDispositionDate = NULL, intDispositionNumber = null, strDispositionNumber = ''
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
-            
+
+            -- Delete Adjustments (Basis and Depreciation)
+            DELETE A FROM tblFABasisAdjustment A JOIN @IdGood B ON B.intId = A.intAssetId 
+
             UPDATE BD SET ysnFullyDepreciated  =0
             FROM tblFABookDepreciation BD  JOIN @IdGood B ON intAssetId = intId 
             
