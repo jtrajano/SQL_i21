@@ -28,5 +28,6 @@
 	,strVoucherNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strFileName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,intDocAttached BIT
+	,ysnMailReq BIT
 	,CONSTRAINT [PK_tblIPBillStage] PRIMARY KEY (intBillStageId)
 	)
