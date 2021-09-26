@@ -18,6 +18,7 @@ BEGIN TRY
 		,@strUserName NVARCHAR(50)
 		,@strWorkOrderType NVARCHAR(50)
 		,@strSubLocationName NVARCHAR(50)
+		,@intSubLocationId int
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intWorkOrderId INT
@@ -107,6 +108,7 @@ BEGIN TRY
 		BEGIN
 			SELECT @strWorkOrderNo = strWorkOrderNo
 				,@strERPOrderNo = strERPOrderNo
+				,@intSubLocationId=intSubLocationId
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
 
@@ -115,6 +117,15 @@ BEGIN TRY
 			BEGIN
 				GOTO NextPO
 			END;
+
+
+		SELECT @strSubLocationName = Left(strSubLocationName, 2)
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+		SELECT @intSubLocationId = intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE strSubLocationName = @strSubLocationName
 
 			SELECT @strXML = @strXML + '<header id="' + ltrim(@intWorkOrderPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(@intWorkOrderPreStageId) +'</TrxSequenceNo>'
@@ -149,7 +160,7 @@ BEGIN TRY
 			LEFT JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 				AND R.intLocationId = W.intLocationId
 				AND R.ysnActive = 1
-				AND R.intSubLocationId = SL.intCompanyLocationSubLocationId
+				AND R.intSubLocationId = @intSubLocationId
 			JOIN dbo.tblSMUserSecurity US ON US.intEntityId = W.intCreatedUserId
 			LEFT JOIN tblMFMachine M ON M.intMachineId = W.intMachineId
 			LEFT JOIN dbo.tblLGWarehouseRateMatrixHeader WRM ON WRM.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId

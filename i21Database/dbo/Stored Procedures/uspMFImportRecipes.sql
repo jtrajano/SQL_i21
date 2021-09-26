@@ -829,6 +829,22 @@ BEGIN
 			,intStatusId = 1
 		WHERE intRecipeStageId = @intMinId
 
+		DELETE RI
+		FROM tblMFRecipeItem RI
+		JOIN tblICItem I ON I.intItemId = RI.intItemId
+		JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
+		JOIN tblICItem HI ON HI.intItemId = R.intItemId
+		WHERE RI.intRecipeId = @intRecipeId
+			AND RI.intRecipeItemTypeId=1
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFRecipeItemStage
+				WHERE ysnInitialAckSent IS NULL
+					AND strRecipeItemNo = I.strItemNo
+					AND strRecipeHeaderItemNo = HI.strItemNo
+				)
+			AND RI.ysnImported = 1
+
 		NEXT_RECIPE:
 
 		SELECT @intMinId = MIN(intRecipeStageId)
@@ -874,6 +890,7 @@ BEGIN
 	FROM tblMFRecipeStage R
 	JOIN tblSMCompanyLocation CL ON CL.strLocationName = R.strLocationName
 	WHERE R.ysnInitialAckSent IS NULL
+	AND strSessionId = @strSessionId
 
 	UPDATE R
 	SET ysnInitialAckSent = 1
@@ -1448,6 +1465,7 @@ BEGIN
 				,intLastModifiedUserId
 				,dtmLastModified
 				,intConcurrencyId
+				,ysnImported
 				)
 			SELECT @intRecipeId
 				,i.intItemId
@@ -1508,6 +1526,7 @@ BEGIN
 				,@intUserId
 				,GETDATE()
 				,1 AS intConcurrencyId
+				,1 AS ysnImported
 			FROM tblMFRecipeItemStage s
 			LEFT JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
 			LEFT JOIN tblICUnitMeasure um ON um.strUnitMeasure = s.strUOM
@@ -1556,6 +1575,7 @@ BEGIN
 				,ri.intLastModifiedUserId = @intUserId
 				,ri.dtmLastModified = GETDATE()
 				,ri.intConcurrencyId = ri.intConcurrencyId + 1
+				,ri.ysnImported = 1
 			FROM tblMFRecipeItem ri
 			CROSS JOIN (
 				SELECT TOP 1 i.intItemId
@@ -1667,7 +1687,7 @@ BEGIN
 		AND ISNULL(strMessage, '') = ''
 		AND ysnImport = 1
 
-		DELETE
+	DELETE
 	FROM @tblIPInitialAck
 
 	INSERT INTO dbo.tblIPInitialAck (
@@ -1695,6 +1715,7 @@ BEGIN
 	FROM tblMFRecipeItemStage RI
 	JOIN tblSMCompanyLocation CL ON CL.strLocationName = RI.strLocationName
 	WHERE RI.ysnInitialAckSent IS NULL
+	AND strSessionId = @strSessionId
 
 	UPDATE RI
 	SET ysnInitialAckSent = 1
