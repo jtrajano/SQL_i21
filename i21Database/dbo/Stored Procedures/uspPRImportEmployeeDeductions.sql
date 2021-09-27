@@ -23,8 +23,8 @@ DECLARE @strRateCalcType  AS NVARCHAR(50)
 DECLARE @dblDeductFrom AS FLOAT(50)
 DECLARE @strDeductFromType  AS NVARCHAR(50)
 DECLARE @dblAnnualLimit	 AS FLOAT(50)
-DECLARE @dtmBeginDate AS NVARCHAR(50)
-DECLARE @dtmEndDate	AS NVARCHAR(50)
+DECLARE @dtmBeginDate AS DATETIME
+DECLARE @dtmEndDate	AS DATETIME
 DECLARE @strAccountId  AS NVARCHAR(50)
 DECLARE @ysnAccountGLSplit  AS BIT
 DECLARE @strExpenseAccountId  AS NVARCHAR(50)
@@ -77,8 +77,8 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 			,@dblDeductFrom = dblDeductFrom
 			,@strDeductFromType  = strDeductFromType
 			,@dblAnnualLimit	 = dblAnnualLimit
-			,@dtmBeginDate = dtmBeginDate
-			,@dtmEndDate	= dtmEndDate
+			,@dtmBeginDate = CAST(ISNULL(dtmBeginDate, null) AS DATETIME) 
+			,@dtmEndDate	= CAST(ISNULL(dtmEndDate, null) AS DATETIME)  
 			,@strAccountId  = strAccountId
 			,@ysnAccountGLSplit  = ysnAccountGLSplit
 			,@strExpenseAccountId  = strExpenseAccountId
