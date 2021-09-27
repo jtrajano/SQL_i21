@@ -746,6 +746,7 @@
     <Build Include="dbo\Views\vyuCMBankFileGenerationLog.sql" />
     <Build Include="dbo\Views\vyuCMBankTransaction.sql" />
     <Build Include="dbo\Views\vyuCMBankTransfer.sql" />
+    <Build Include="dbo\Views\vyuCMBankTransferRateType.sql" />
     <Build Include="dbo\Views\vyuCMGetBankTransaction.sql" />
     <Build Include="dbo\Tables\tblEMEntityCredential.sql" />
     <Build Include="dbo\Tables\tblCMAptrxmstArchive.sql" />
