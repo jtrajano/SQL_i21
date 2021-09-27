@@ -64,7 +64,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@intEntityEmployeeId = intEntityNo
 			,@strCalculationType  = strCalculationType
 			,@strFilingStatus  = strFilingStatus
-			,@intSupplementalCalc = strSupplimentalCalc
+			,@intSupplementalCalc = (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
 			,@dblAmount = dblAmount
 			,@dblExtraWithholding = dblExtraWithholding
 			,@dblLimit = dblLimit
@@ -128,7 +128,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,EMT.strFilingStatus
 						,@TaxStateId
 						,@TaxLocalId
-						,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
+						,@intSupplementalCalc
 						,EMT.dblAmount
 						,EMT.dblExtraWithholding
 						,EMT.dblLimit
