@@ -9,4 +9,5 @@ CREATE TABLE [dbo].[tblARPerformanceLog](
 	[intUserId]                 INT NULL,
 	CONSTRAINT [PK_tblARPerformanceLog_intPerformanceLogId] PRIMARY KEY CLUSTERED ([intPerformanceLogId] ASC)
 );
+GO
 CREATE INDEX [idx_tblARPerformanceLog] ON [dbo].[tblARPerformanceLog] (strScreenName, dtmStartDateTime, dtmEndDateTime, intUserId)
