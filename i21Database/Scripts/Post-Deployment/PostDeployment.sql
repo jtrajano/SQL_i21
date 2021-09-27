@@ -215,6 +215,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Fixed Assets
 :r .\FA\DefaultData\FixedAssetGroup.sql
+:r .\FA\01_UpdateMultiCurrencyFields.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql

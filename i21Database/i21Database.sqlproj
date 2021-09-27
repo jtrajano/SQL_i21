@@ -10046,6 +10046,7 @@
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_IDPFieldMapping.sql" />
+    <None Include="Scripts\Post-Deployment\FA\01_UpdateMultiCurrencyFields.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
