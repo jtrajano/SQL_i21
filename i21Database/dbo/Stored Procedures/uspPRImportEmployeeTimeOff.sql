@@ -15,7 +15,7 @@ DECLARE @EmployeeEntityNo AS INT
 DECLARE @intEntityNo AS INT
 DECLARE @strTimeOffId AS NVARCHAR(100)
 DECLARE @strTimeOffDesc AS NVARCHAR(100)
-DECLARE @dtmEligibleDate AS NVARCHAR(100)
+DECLARE @dtmEligibleDate AS DATETIME
 DECLARE @dblRate AS FLOAT(50)
 DECLARE @dblPerPeriod AS FLOAT(50) 
 DECLARE @strPeriod AS NVARCHAR(100)
@@ -24,7 +24,7 @@ DECLARE @strAwardOn AS NVARCHAR(100)
 DECLARE @dblMaxEarned AS FLOAT(50) 
 DECLARE @dblMaxCarryOver AS FLOAT(50) 
 DECLARE @dblMaxBalance AS FLOAT(50) 
-DECLARE @dtmLastAwardDate AS NVARCHAR(100)
+DECLARE @dtmLastAwardDate AS DATETIME
 DECLARE @dblHoursCarryOver AS FLOAT(50) 
 DECLARE @dblHoursAccrued AS FLOAT(50) 
 DECLARE @dblHoursEarned AS FLOAT(50) 
@@ -55,7 +55,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			 @intEntityNo =  intEntityNo
 			,@strTimeOffId =  strTimeOffId
 			,@strTimeOffDesc =  strTimeOffDesc
-			,@dtmEligibleDate =  dtmEligibleDate
+			,@dtmEligibleDate =  CAST(ISNULL(dtmEligibleDate, null) AS DATETIME)
 			,@dblRate =  dblRate
 			,@dblPerPeriod =   dblPerPeriod
 			,@strPeriod =  strPeriod
@@ -64,7 +64,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			,@dblMaxEarned =   dblMaxEarned
 			,@dblMaxCarryOver =   dblMaxCarryOver
 			,@dblMaxBalance =   dblMaxBalance
-			,@dtmLastAwardDate =  dtmLastAwardDate
+			,@dtmLastAwardDate =  CAST(ISNULL(dtmLastAwardDate, null) AS DATETIME)
 			,@dblHoursCarryOver =  dblHoursCarryOver 
 			,@dblHoursAccrued =   dblHoursAccrued
 			,@dblHoursEarned =   dblHoursEarned
