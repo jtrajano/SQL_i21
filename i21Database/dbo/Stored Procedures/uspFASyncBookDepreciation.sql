@@ -33,12 +33,12 @@ BEGIN
 		intFunctionalCurrencyId = B.intFunctionalCurrencyId,
 		intCurrencyExchangeRateTypeId = B.intCurrencyExchangeRateTypeId,
 		dblRate = @rate,
-		dblFunctionalCost = B.dblCost * @rate,
-		dblFunctionalSalvageValue =  B.dblSalvageValue * @rate,
+		dblFunctionalCost = ROUND((B.dblCost * @rate), 2),
+		dblFunctionalSalvageValue =  ROUND((B.dblSalvageValue * @rate), 2),
 		dblInsuranceValue = B.dblInsuranceValue,
-		dblFunctionalInsuranceValue = B.dblInsuranceValue * @rate,
+		dblFunctionalInsuranceValue = ROUND((B.dblInsuranceValue * @rate), 2),
 		dblMarketValue = B.dblMarketValue,
-		dblFunctionalMarketValue = B.dblMarketValue * @rate
+		dblFunctionalMarketValue = ROUND((B.dblMarketValue * @rate), 2)
 	FROM tblFABookDepreciation A 
 	JOIN tblFAFixedAsset B 
 		ON A.intAssetId = B.intAssetId
