@@ -19,7 +19,11 @@ CASE WHEN intBankTransferTypeId = 1 THEN 'Bank Transfer'
  WHEN intBankTransferTypeId = 4 THEN 'Swap In'   
  WHEN intBankTransferTypeId = 5 THEN 'Swap Out'   
  WHEN intBankTransferTypeId = 6 THEN 'Create Loan'   
-END strBankTransferTypeId  
+END strBankTransferTypeId,
+J.strCurrencyExchangeRateType strRateTypeAmountFrom,
+K.strCurrencyExchangeRateType strRateTypeAmountTo,
+L.strCurrencyExchangeRateType strRateTypeFeesFrom,
+M.strCurrencyExchangeRateType strRateTypeFeesTo
 FROM tblCMBankTransfer A 
 OUTER APPLY(
 	SELECT TOP 1 dtmDateReconciled FROM tblCMBankTransaction WHERE strLink = A.strTransactionId
@@ -36,19 +40,27 @@ OUTER APPLY(
 )E  
 OUTER APPLY(  
  SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId  
-)F  
-
+)F
 OUTER APPLY(  
  	SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = A.intCurrencyIdFeesFrom  
 )G
-  
 OUTER APPLY(  
  	SELECT TOP 1 strCurrency FROM tblSMCurrency WHERE intCurrencyID = A.intCurrencyIdFeesTo  
 )H  
 OUTER APPLY(  
  	SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intGLAccountIdFeesFrom  
 )I 
-  
-  
+OUTER APPLY(  
+ SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intRateTypeIdAmountFrom  
+)J  
+OUTER APPLY(  
+ SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intRateTypeIdAmountTo  
+)K  
+OUTER APPLY(  
+ SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intRateTypeIdFeesFrom  
+)L  
+OUTER APPLY(  
+ SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intRateTypeIdFeesTo  
+)M
   
   

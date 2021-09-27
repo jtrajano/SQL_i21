@@ -111,7 +111,7 @@ SELECT	TOP 1
 		,@intBankAccountIdFrom = intBankAccountIdFrom
 		,@intBankAccountIdTo = intBankAccountIdTo
 		,@intCreatedEntityId = intEntityId
-		,@dblRate = dblRate
+		,@dblRate = dblRateAmountTo
 		,@intCurrencyIdFrom = B.intCurrencyId
 		,@intCurrencyIdTo = C.intCurrencyId
 FROM	[dbo].tblCMBankTransfer A JOIN
@@ -348,7 +348,7 @@ BEGIN
 			,[intCurrencyId]		= @intCurrencyIdFrom
 			,[intCurrencyExchangeRateTypeId] =  A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= CASE 
-											WHEN @ysnForeignToForeign =1 THEN A.dblRate
+											WHEN @ysnForeignToForeign =1 THEN A.dblRateAmountTo
 											WHEN @intCurrencyIdTo <> @intDefaultCurrencyId OR @intCurrencyIdFrom <> @intDefaultCurrencyId  
 											THEN ISNULL(@dblHistoricRate,1) ELSE 1 END
 			,[dtmDateEntered]		= GETDATE()
@@ -646,19 +646,19 @@ FROM #tmpGLDetail
 					SELECT CASE WHEN @intCurrencyIdFrom <> @intCurrencyIdTo
 												AND @intCurrencyIdTo <> @intDefaultCurrencyId
 												AND @intCurrencyIdFrom = @intDefaultCurrencyId
-												THEN ROUND(dblAmount/A.dblRate,2)
+												THEN ROUND(dblAmount/A.dblRateAmountTo,2)
 											  WHEN
 												@intCurrencyIdFrom <> @intCurrencyIdTo
 												AND @intCurrencyIdTo = @intDefaultCurrencyId
 												AND @intCurrencyIdFrom <> @intDefaultCurrencyId
 
 
-											 THEN ROUND(dblAmount*A.dblRate,2)
+											 THEN ROUND(dblAmount*A.dblRateAmountTo,2)
 											 ELSE A.dblAmount END
 											 Val
 				)AmountFunctional
 				OUTER APPLY(
-					SELECT ROUND(A.dblAmount / ISNULL(A.dblRate,1),2)Val
+					SELECT ROUND(A.dblAmount / ISNULL(A.dblRateAmountTo,1),2)Val
 				)AmountForeign
 		CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 		WHERE	A.strTransactionId = @strTransactionId	
