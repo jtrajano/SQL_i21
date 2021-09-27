@@ -31,7 +31,7 @@ FROM tblFABookDepreciation A
 JOIN tblFAFixedAsset B 
 	ON A.intAssetId = B.intAssetId
 WHERE 
-	intFunctionalCurrencyId IS NULL
+	A.intFunctionalCurrencyId IS NULL
 
 PRINT N'END Update tblFABookDepreciation Multi Currency fields'
 
