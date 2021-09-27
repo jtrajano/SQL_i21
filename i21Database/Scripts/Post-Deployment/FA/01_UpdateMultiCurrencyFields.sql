@@ -1,6 +1,6 @@
 ﻿PRINT N'BEGIN Update tblFAFixedAsset, tblFABookDepreciation and tblFAFixedAssetDepreciation'
 
-CREATE TABLE #tblCurrent (
+CREATE TABLE #tblFACurrentAssets (
 	intAssetId INT,
 	dblForexRate NUMERIC(16,2),
 	ysnProcessed BIT
@@ -11,14 +11,14 @@ DECLARE
 	@intFunctionalCurrencyId INT,
 	@dblForexRate NUMERIC(16, 2) = NULL
 
-INSERT INTO #tblCurrent
+INSERT INTO #tblFACurrentAssets
 SELECT intAssetId, dblForexRate, 0 FROM tblFAFixedAsset WHERE intFunctionalCurrencyId IS NULL ORDER BY intAssetId
 
 SELECT TOP 1 @intFunctionalCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
-WHILE EXISTS(SELECT TOP 1 1 FROM #tblCurrent WHERE ysnProcessed = 0 ORDER BY intAssetId)
+WHILE EXISTS(SELECT TOP 1 1 FROM #tblFACurrentAssets WHERE ysnProcessed = 0 ORDER BY intAssetId)
 BEGIN
-	SELECT TOP 1 @intCurrentAssetId = intAssetId, @dblForexRate = CASE WHEN ISNULL(@dblForexRate, 0) > 0 THEN @dblForexRate ELSE 1 END FROM #tblCurrent WHERE ysnProcessed = 0 ORDER BY intAssetId 
+	SELECT TOP 1 @intCurrentAssetId = intAssetId, @dblForexRate = CASE WHEN ISNULL(@dblForexRate, 0) > 0 THEN @dblForexRate ELSE 1 END FROM #tblFACurrentAssets WHERE ysnProcessed = 0 ORDER BY intAssetId 
 
 	UPDATE tblFAFixedAsset
 	SET
@@ -133,14 +133,14 @@ BEGIN
 		-- End Sync tblFABookDepreciation
 	END
 
-	UPDATE #tblCurrent
+	UPDATE #tblFACurrentAssets
 	SET ysnProcessed = 1
 	WHERE intAssetId = @intCurrentAssetId
 END
 
 PRINT N'END Update tblFAFixedAsset, tblFABookDepreciation and tblFAFixedAssetDepreciation'
 
-IF OBJECT_ID('tempdb..#tblCurrent') IS NOT NULL
+IF OBJECT_ID('tempdb..#tblFACurrentAssets') IS NOT NULL
 BEGIN
-	DROP TABLE #tblCurrent
+	DROP TABLE #tblFACurrentAssets
 END
