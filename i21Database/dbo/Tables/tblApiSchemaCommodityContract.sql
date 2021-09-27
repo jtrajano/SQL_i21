@@ -31,8 +31,6 @@ CREATE TABLE [dbo].[tblApiSchemaCommodityContract] (
     , dblCashPrice NUMERIC(18, 16) NULL
     , strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , strPriceUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-    , strPaymentTerms NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-    , strFreightTerm NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , strRemark NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
     , dtmM2MDate DATETIME NULL
 );

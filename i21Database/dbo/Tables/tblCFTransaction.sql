@@ -80,6 +80,8 @@
     [dtmExportedThirdPartyDate] DATETIME NULL, 
     [intExportedThirdPartyUser] INT NULL, 
     [intDriverPinId]			INT NULL, 
+    [intUserId]			        INT NULL, 
+    [ysnImported]               BIT             NULL,
     CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC) WITH (FILLFACTOR = 70),
     CONSTRAINT [FK_tblCFTransaction_tblARSalesperson] FOREIGN KEY ([intSalesPersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
     CONSTRAINT [FK_tblCFTransaction_tblCFCard] FOREIGN KEY ([intCardId]) REFERENCES [dbo].[tblCFCard] ([intCardId]),

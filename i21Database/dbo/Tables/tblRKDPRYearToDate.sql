@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblRKDPRYearToDate]
 (
-	[intDPRYearToDateId] INT NOT NULL , 
+	[intDPRYearToDateId] INT IDENTITY NOT NULL , 
     [intDPRHeaderId] INT NOT NULL, 
 	[intRowNumber] INT NULL,
     [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

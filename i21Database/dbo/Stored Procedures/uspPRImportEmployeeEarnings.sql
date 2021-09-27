@@ -48,7 +48,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 	   ,strLogLevel		= 'Error'
 	   ,strStatus		= 'Failed'
 	   ,intRowNo		= SE.intRowNumber
-	   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(50)) + '.'
+	   ,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
 	   FROM tblApiSchemaEmployeeEarnings SE
 	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
 	   WHERE SE.guiApiUniqueId = @guiApiUniqueId

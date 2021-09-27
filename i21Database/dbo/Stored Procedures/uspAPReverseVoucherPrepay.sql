@@ -39,9 +39,12 @@ EXEC uspAPDuplicateBill @billId = @billId, @userId = @userId, @type = 12, @billC
 --EXEC uspSMGetStartingNumber 122, @recordNum OUTPUT
 
 SELECT
-	@oldPrepay = CASE WHEN ysnOldPrepayment = 1 OR ysnOrigin = 1 THEN 1 ELSE 0 END,
-	@newBillId = strBillId + '-R'
-FROM tblAPBill WHERE intBillId = @billId
+	@oldPrepay = CASE WHEN A.ysnOldPrepayment = 1 OR 
+					(A.ysnOrigin = 1 AND 
+						NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail gl WHERE gl.strTransactionId = A.strBillId AND gl.ysnIsUnposted = 0))
+					THEN 1 ELSE 0 END,
+	@newBillId = A.strBillId + '-R'
+FROM tblAPBill A WHERE A.intBillId = @billId
 
 UPDATE A
 	SET A.intTransactionType = 12

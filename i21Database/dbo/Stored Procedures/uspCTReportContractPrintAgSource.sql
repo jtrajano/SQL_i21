@@ -121,7 +121,7 @@ BEGIN TRY
 			CH.strWeight,
 			CH.strGrade,
 			dbo.fnSMGetCompanyLogo('Header') AS blbHeaderLogo,
-			strPrintableRemarks,
+			'Remarks : '+ strRemark as strPrintableRemarks,
 			CH.strTerm
 		   ,lblCustomerContract					=	CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor Ref' ELSE 'Customer Ref' END
 		   ,strCustomerContract					=   ISNULL(CH.strCustomerContract,'')
@@ -130,6 +130,9 @@ BEGIN TRY
 	FROM	vyuCTContractHeaderView CH
 	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
+	OUTER APPLY (
+		SELECT TOP 1 strRemark from tblCTContractDetail where intContractHeaderId  IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
+	)remarks
 	WHERE	intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	IN (SELECT Item FROM dbo.fnSplitString(@intContractHeaderId,','))

@@ -954,8 +954,8 @@ BEGIN TRY
 					,SCT.[dblScheduleQty]
 					,SCT.[dblConvertedUOMQty]
 					,SCT.[dblContractCostConvertedUOM]
-					,SCT.[intItemUOMIdFrom] 
-					,SCT.[intItemUOMIdTo]
+					,isnull(SCT.[intItemUOMIdFrom] , ScaleUom.intItemUOMId) AS intItemUOMIdFrom
+					,isnull(SCT.[intItemUOMIdTo], ItemUOM.intItemUOMId) AS intItemUOMIdTo
 					,SCT.[intTicketTypeId]
 					,SCT.[intStorageScheduleTypeId]
 					,SCT.[strFreightSettlement]
@@ -982,6 +982,18 @@ BEGIN TRY
 					SELECT DS.intDeliverySheetId,SCD.intDeliverySheetId AS dsId,SCD.intEntityId FROM @temp_xml_deliverysheet_sc SCD
 					INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber
 				) DS ON DS.dsId = SCT.intDeliverySheetId 
+					join tblICItem Item
+						on SCT.intItemId = Item.intItemId
+					join tblSCScaleSetup Setup	
+						on SCT.intScaleSetupId = Setup.intScaleSetupId
+					join tblICItemUOM ItemUOM
+						on Item.intItemId = ItemUOM.intItemId
+							and ItemUOM.ysnStockUnit = 1
+					join tblICItemUOM ScaleUom
+						on Setup.intUnitMeasureId = ScaleUom.intUnitMeasureId
+							and SCT.intItemId = ScaleUom.intItemId
+
+
 				ORDER BY SCT.strTicketNumber ASC
 				
 				------------------------------------------------------------------------------------------------------
@@ -1266,9 +1278,11 @@ BEGIN TRY
 					,SC.ysnHasGeneratedTicketNumber 			= SCT.ysnHasGeneratedTicketNumber
 					,SC.dblScheduleQty 							= SCT.dblScheduleQty
 					,SC.dblConvertedUOMQty 						= SCT.dblConvertedUOMQty
-					,SC.dblContractCostConvertedUOM 			= SCT.dblContractCostConvertedUOM
-					,SC.intItemUOMIdFrom  						= SCT.intItemUOMIdFrom
-					,SC.intItemUOMIdTo  						= SCT.intItemUOMIdTo
+					,SC.dblContractCostConvertedUOM 			= SCT.dblContractCostConvertedUOM					
+					
+					,SC.intItemUOMIdFrom  						= isnull(SCT.[intItemUOMIdFrom] , ScaleUom.intItemUOMId)
+					,SC.intItemUOMIdTo  						= isnull(SCT.[intItemUOMIdTo], ItemUOM.intItemUOMId)
+
 					,SC.intTicketTypeId  						= SCT.intTicketTypeId
 					,SC.intStorageScheduleTypeId  				= SCT.intStorageScheduleTypeId
 					,SC.strFreightSettlement  					= SCT.strFreightSettlement
@@ -1295,6 +1309,18 @@ BEGIN TRY
 						AND SC.strInOutFlag = SCT.strInOutFlag
 						AND SC.intEntityId = SCT.intEntityId
 						AND SC.intProcessingLocationId = SCT.intProcessingLocationId
+
+					join tblICItem Item
+						on SCT.intItemId = Item.intItemId
+					join tblSCScaleSetup Setup	
+						on SCT.intScaleSetupId = Setup.intScaleSetupId
+					join tblICItemUOM ItemUOM
+						on Item.intItemId = ItemUOM.intItemId
+							and ItemUOM.ysnStockUnit = 1
+					join tblICItemUOM ScaleUom
+						on Setup.intUnitMeasureId = ScaleUom.intUnitMeasureId
+							and SCT.intItemId = ScaleUom.intItemId
+
 				LEFT JOIN @deliverysheet_xref DSXREF
 					ON SCT.intDeliverySheetId = DSXREF.intMainId
 						AND DSXREF.intLocationId = @intRemoteLocationId

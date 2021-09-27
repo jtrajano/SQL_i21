@@ -33,7 +33,7 @@ DECLARE @ysnActive AS BIT
 	   ,strLogLevel		= 'Error'
 	   ,strStatus		= 'Failed'
 	   ,intRowNo		= SE.intRowNumber
-	   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(50)) + '.'
+	   ,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
 	   FROM tblApiSchemaEmployeeDirectDeposit SE
 	   LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = SE.intEntityNo
 	   WHERE SE.guiApiUniqueId = @guiApiUniqueId

@@ -3,6 +3,8 @@
     [intAttachmentId]   INT              NULL,
     [strFileIdentifier] UNIQUEIDENTIFIER NOT NULL,
     [blbFile]           VARBINARY (MAX)  NULL,
+    [ysnOptimized]      BIT              NULL,
+    [intOptimizedSize]  INT              NULL,
     [dtmDateUploaded]   DATETIME         NOT NULL,
     [intConcurrencyId]  INT              NOT NULL,
     CONSTRAINT [PK_tblUpload] PRIMARY KEY CLUSTERED ([intUploadId] ASC),

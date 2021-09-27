@@ -53,7 +53,7 @@ SELECT
    ,strLogLevel		= 'Error'
    ,strStatus		= 'Failed'
    ,intRowNo		= SE.intRowNumber
-   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(50)) + '.'
+   ,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
    FROM tblApiSchemaEmployeeDeduction SE
    LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = SE.intEntityNo
    WHERE SE.guiApiUniqueId = @guiApiUniqueId
