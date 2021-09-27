@@ -307,39 +307,6 @@ BEGIN TRY
 	FROM	tblCTContractHeader CH WITH (NOLOCK)						
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
 
-	SELECT	@strApplicableLaw = dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,@intLaguageId,'Description',DM.strConditionDesc)
-	FROM	tblCTContractCondition	CD  WITH (NOLOCK)
-	JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
-	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
-	AND		UPPER(DM.strConditionName)	=	'APPLICABLE LAW'
-
-	SELECT	@strGeneralCondition = STUFF(								
-			(
-					SELECT	--CHAR(13)+CHAR(10) + 
-							'  </br>' + dbo.[fnCTGetTranslation]('ContractManagement.view.Condition',CD.intConditionId,1,'Description',DM.strConditionDesc)
-					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
-					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
-					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) LIKE	'%GENERAL_CONDITION')
-					ORDER BY DM.intConditionId		
-					FOR XML PATH(''), TYPE				
-			   ).value('.','varchar(max)')
-			   ,1,2, ''						
-			)
-	FROM	tblCTContractHeader CH WITH (NOLOCK)						
-	WHERE	CH.intContractHeaderId = @intContractHeaderId
-
-	IF EXISTS
-	(
-				SELECT	TOP 1 1 
-				FROM	tblCTContractCertification	CC  WITH (NOLOCK)
-				JOIN	tblCTContractDetail			CH	WITH (NOLOCK) ON	CC.intContractDetailId	=	CH.intContractDetailId
-				JOIN	tblICCertification			CF	WITH (NOLOCK) ON	CF.intCertificationId	=	CC.intCertificationId	
-				WHERE	UPPER(CF.strCertificationName) = 'FAIRTRADE' AND CH.intContractHeaderId = @intContractHeaderId
-	)
-	BEGIN
-		SET @ysnFairtrade = 1
-	END
-
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
@@ -516,7 +483,7 @@ BEGIN TRY
 			,strContractNumber						= CH.strContractNumber
 			,strContractNumberStrauss				= CH.strContractNumber + (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) = 0 then '' else ' - AMENDMENT' end)
 			,strCustomerContract					= CH.strCustomerContract
-			,strContractBasis						= CB.strFreightTerm
+			,strContractBasis						= SQ.strFreightTerm
 			,strContractBasisDesc					= CB.strFreightTerm+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
 			,strCityWarehouse						= CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
 			,strLocationName						= SQ.strLocationName			
@@ -814,8 +781,8 @@ BEGIN TRY
 							BC.strCurrency AS strBasisCurrency,
 							dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',BM.intUnitMeasureId,@intLaguageId,'Name',BM.strUnitMeasure) strBasisUnitMeasure,
 							BI.strItemNo strItemBundleNo,
-							CD.dblCashPrice
-
+							CD.dblCashPrice,
+							FT.strFreightTerm
 				FROM		tblCTContractDetail		CD  WITH (NOLOCK)
 				JOIN		tblICItem				IM	WITH (NOLOCK) ON	IM.intItemId				=	CD.intItemId
 				JOIN		tblSMCompanyLocation	CL	WITH (NOLOCK) ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		
@@ -833,6 +800,7 @@ BEGIN TRY
 				LEFT JOIN   tblICItemUOM			BU	WITH (NOLOCK) ON	BU.intItemUOMId				=	CD.intBasisUOMId
 				LEFT JOIN   tblICUnitMeasure		BM	WITH (NOLOCK) ON	BM.intUnitMeasureId			=	BU.intUnitMeasureId
 				LEFT JOIN	tblICItem				BI	WITH (NOLOCK) ON	BI.intItemId				=	CD.intItemBundleId
+				LEFT JOIN   tblSMFreightTerms		FT	WITH (NOLOCK) ON	FT.intFreightTermId			=	CD.intFreightTermId	
 				WHERE CD.intContractDetailId = @sequenceContractDetailId
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1 
