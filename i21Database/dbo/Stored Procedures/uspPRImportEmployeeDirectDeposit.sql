@@ -51,7 +51,7 @@ DECLARE @ysnActive AS BIT
 			,@strAccountNumber = strAccountNumber
 			,@strAccountType = strAccountType
 			,@strClassification = strClassification
-			,@dtmEffectiveDate	= dtmEffectiveDate
+			,@dtmEffectiveDate	= CAST(ISNULL(dtmEffectiveDate, null) AS DATETIME)
 			,@ysnPreNoteSent = ysnPreNoteSent
 			,@strDistributionType = strDistributionType
 			,@dblAmount	= dblAmount
