@@ -205,7 +205,16 @@ FROM (
 		,strPriceUOM = SUOM.strUnitMeasure
 		,intPriceUnitMeasureId = SItemUOM.intUnitMeasureId
 		,SCurrency.ysnSubCurrency
-		,dblAvailableAllocationQty = ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0)
+		,dblAvailableAllocationQty = ISNULL(AD.dblPAllocatedQty, 0) 
+			- (CASE WHEN ((CASE WHEN ISNULL(LDS.dblPShippedQuantity, 0) > ISNULL(LD.dblPShippedQuantity,0) 
+						THEN ISNULL(LDS.dblPShippedQuantity, 0) 
+						ELSE ISNULL(LD.dblPShippedQuantity, 0) END <=0)) THEN 0 
+					ELSE 
+						CASE WHEN (ISNULL(LDS.dblPShippedQuantity, 0) > ISNULL(LD.dblPShippedQuantity,0))
+						THEN ISNULL(LDS.dblPShippedQuantity, 0) 
+						ELSE ISNULL(LD.dblPShippedQuantity, 0) 
+						END 
+				END)
 		,dblQtyConversionFactor = dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId)
 		,dblAvailableContractQty = ISNULL(CDP.dblQuantity,0) 
 			- (CASE WHEN ((CASE WHEN ISNULL(CDP.dblScheduleQty, 0) > ISNULL(CDP.dblShippingInstructionQty,0) 
@@ -253,6 +262,17 @@ FROM (
 			AND ISNULL(L.ysnCancelled, 0) = 0
 		GROUP BY SP.intAllocationDetailId
 		) LD ON AD.intAllocationDetailId = LD.intAllocationDetailId
+	LEFT JOIN (
+		SELECT SP.intAllocationDetailId
+			,SUM(SP.dblQuantity) dblPShippedQuantity
+			,SUM(SP.dblDeliveredQuantity) dblSShippedQuantity
+		FROM tblLGLoadDetail SP
+		JOIN tblLGLoad L ON L.intLoadId = SP.intLoadId
+			AND L.intPurchaseSale = 3
+			AND L.intShipmentType = 1
+			AND ISNULL(L.ysnCancelled, 0) = 0
+		GROUP BY SP.intAllocationDetailId
+		) LDS ON AD.intAllocationDetailId = LDS.intAllocationDetailId
 	LEFT JOIN (
 		SELECT PL.intAllocationDetailId
 			,SUM(PL.dblSalePickedQty) dblSalePickedQty
