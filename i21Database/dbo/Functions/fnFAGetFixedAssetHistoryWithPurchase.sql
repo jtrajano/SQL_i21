@@ -144,7 +144,7 @@ dblFunctionalTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Basis A
 							ELSE ISNULL(Tax.dblFunctionalDepreciationToDate, 0) END,
 ISNULL(Tax.dblDepreciation, 0),
 ISNULL(Tax.dblFunctionalDepreciation, 0),
-ISNULL(Tax.dblRate, 1),
+ISNULL(Tax.dblRate, 0),
 G.intAssetId,
 ISNULL(GAAP.intAssetDepreciationId,Tax.intAssetDepreciationId) intAssetDepreciationId,
 ISNULL(GAAP.intDepreciationMethodId, Tax.intDepreciationMethodId) intDepreciationMethodId,

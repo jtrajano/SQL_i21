@@ -139,7 +139,7 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 SELECT @intDefaultCurrencyExchangeRateTypeId = dbo.fnFAGetDefaultCurrencyExchangeRateTypeId()
  -- TODO: DUMMY DATA ONLY
 --SELECT TOP 1 @intRealizedGainLossAccountId = intFixedAssetsRealizedId FROM tblSMMultiCurrency
-SELECT TOP 1 @intRealizedGainLossAccountId = intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'Realized Gain Or Loss Receivables'
+SELECT TOP 1 @intRealizedGainLossAccountId = intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory = 'Realized Gain or Loss Fixed Asset'
 
 DECLARE @dblCurrentRate NUMERIC(18,6), @dblRate NUMERIC(18,6), @dblDispositionAmount NUMERIC(18, 6)
 
