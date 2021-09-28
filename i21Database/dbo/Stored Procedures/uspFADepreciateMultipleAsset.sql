@@ -663,7 +663,7 @@ BEGIN
 		  SELECT   
           [strTransactionId]  = Adjustment.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intDepreciationAccountId]  
+          ,[intAccountId]   = A.[intAssetAccountId]  
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
@@ -708,7 +708,7 @@ BEGIN
 		  SELECT   
           [strTransactionId]  = Adjustment.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intAccumulatedAccountId]  
+          ,[intAccountId]   = A.[intExpenseAccountId]  
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
