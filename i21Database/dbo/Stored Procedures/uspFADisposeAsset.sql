@@ -433,6 +433,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost
+		AND ((A.dblCost - (CASE WHEN @ysnMultiCurrency = 0 THEN B.totalDepre ELSE B.totalForeignDepre END) - @dblDispositionAmount) <> 0) -- debit and credit should not be zero.
 
 		-- Add Sales Offset Account entry if Disposition Amount has value, else no entry
 		UNION ALL
@@ -530,7 +531,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				
 			FROM tblFAFixedAsset A
 			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost 
-			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL AND @dblRate <> @dblCurrentRate
+			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
+			AND @dblRate <> @dblCurrentRate AND ((A.dblCost - B.totalForeignDepre) <> 0)
 
 
 		BEGIN TRY
