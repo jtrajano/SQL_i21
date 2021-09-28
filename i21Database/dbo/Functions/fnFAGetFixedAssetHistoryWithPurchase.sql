@@ -133,8 +133,8 @@ INSERT INTO @tblFixedAssetHistory
 SELECT G.dtmDepreciationToDate, 
 ISNULL(GAAP.dblDepreciationToDate, 0),
 ISNULL(GAAP.dblFunctionalDepreciationToDate, 0),
-0,
-0,
+ISNULL(GAAP.dblDepreciation, 0),
+ISNULL(GAAP.dblFunctionalDepreciation, 0),
 ISNULL(GAAP.dblRate, 1),
 dblTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Basis Adjustment', 'Depreciation Adjustment') 
 							THEN ISNULL(Tax.dblDepreciationToDate, FullyDepreciatedTax.dblDepreciationToDate) 
@@ -142,8 +142,8 @@ dblTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Basis Adjustment'
 dblFunctionalTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Basis Adjustment', 'Depreciation Adjustment') 
 							THEN ISNULL(Tax.dblFunctionalDepreciationToDate, FullyDepreciatedTax.dblFunctionalDepreciationToDate) 
 							ELSE ISNULL(Tax.dblFunctionalDepreciationToDate, 0) END,
-0,
-0,
+ISNULL(Tax.dblDepreciation, 0),
+ISNULL(Tax.dblFunctionalDepreciation, 0),
 ISNULL(Tax.dblRate, 1),
 G.intAssetId,
 ISNULL(GAAP.intAssetDepreciationId,Tax.intAssetDepreciationId) intAssetDepreciationId,
@@ -179,6 +179,8 @@ outer apply(
 	A.dblSalvageValue,
 	A.dblFunctionalSalvageValue,
 	dblRate,
+	dblDepreciation,
+	dblFunctionalDepreciation,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
 	LEFT JOIN tblFADepreciationMethod B ON A.intDepreciationMethodId = B.intDepreciationMethodId
@@ -205,6 +207,8 @@ OUTER APPLY(
 	A.dblSalvageValue,
 	A.dblFunctionalSalvageValue,
 	dblRate,
+	dblDepreciation,
+	dblFunctionalDepreciation,
 	A.intConcurrencyId
 	FROM tblFAFixedAssetDepreciation A
 	LEFT JOIN tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId

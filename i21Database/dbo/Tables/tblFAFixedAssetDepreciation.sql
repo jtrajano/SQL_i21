@@ -14,6 +14,8 @@ CREATE TABLE [dbo].[tblFAFixedAssetDepreciation] (
 	[dblFunctionalSalvageValue]	NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[dblFunctionalDepreciationToDate]NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[dblRate]					NUMERIC (18, 6) NULL DEFAULT ((0)),
+	[dblDepreciation]			NUMERIC (18, 6) NULL DEFAULT ((0)),
+	[dblFunctionalDepreciation]	NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[strTransaction]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTransactionId]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strType]					NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,

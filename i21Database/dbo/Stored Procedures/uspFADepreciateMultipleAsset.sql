@@ -292,7 +292,9 @@ BEGIN
                     [dtmDateInService],  
                     [dtmDispositionDate],  
                     [dtmDepreciationToDate],  
-                    [dblDepreciationToDate],  
+                    [dblDepreciationToDate], 
+                    [dblDepreciation],
+                    [dblFunctionalDepreciation],
                     [dblSalvageValue],  
                     [dblFunctionalBasis],
                     [dblFunctionalSalvageValue],
@@ -311,6 +313,8 @@ BEGIN
                     BD.dtmPlacedInService,
                     NULL,  
                     BD.dtmPlacedInService,  
+                    0,
+                    0,
                     0,
                     BD.dblSalvageValue,
                     (BD.dblCost - BD.dblSalvageValue) * CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
@@ -352,7 +356,9 @@ BEGIN
                   [dtmDateInService],  
                   [dtmDispositionDate],  
                   [dtmDepreciationToDate],  
-                  [dblDepreciationToDate],  
+                  [dblDepreciationToDate],
+                  [dblDepreciation],
+                  [dblFunctionalDepreciation],  
                   [dblSalvageValue],
                   [dblFunctionalBasis],
                   [dblFunctionalDepreciationToDate],
@@ -372,7 +378,9 @@ BEGIN
                   BD.dtmPlacedInService,  
                   NULL,  
 				  [dbo].[fnFAGetNextDepreciationDate](@i, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
-                  E.dblDepre ,  
+                  E.dblDepre,
+                  E.dblMonth,
+                  E.dblFunctionalMonth,
                   BD.dblSalvageValue,
                   CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
                   CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
@@ -387,7 +395,7 @@ BEGIN
                   JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
                   JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                   OUTER APPLY (
-                    SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
+                    SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
                   OUTER APPLY(
                     SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
@@ -418,7 +426,9 @@ BEGIN
                 [dtmDateInService],  
                 [dtmDispositionDate],  
                 [dtmDepreciationToDate],  
-                [dblDepreciationToDate],  
+                [dblDepreciationToDate],
+                [dblDepreciation],
+                [dblFunctionalDepreciation],  
                 [dblSalvageValue],
                 [dblFunctionalBasis],
                 [dblFunctionalDepreciationToDate],
@@ -438,6 +448,8 @@ BEGIN
                 BD.dtmPlacedInService,  
                 NULL,  
                 Adjustment.dtmDate,
+                0,
+                0,
                 0,
                 0,
                 Adjustment.dblFunctionalAdjustment,
@@ -487,6 +499,8 @@ BEGIN
                 [dtmDispositionDate],  
                 [dtmDepreciationToDate],  
                 [dblDepreciationToDate],  
+                [dblDepreciation],
+                [dblFunctionalDepreciation],
                 [dblSalvageValue],
                 [dblFunctionalBasis],
                 [dblFunctionalDepreciationToDate],
@@ -507,6 +521,8 @@ BEGIN
                 NULL,  
                 Adjustment.dtmDate,
                 Adjustment.dblAdjustment,
+                Adjustment.dblAdjustment,
+                Adjustment.dblFunctionalAdjustment,
                 BD.dblSalvageValue,
 				CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
                 Adjustment.dblFunctionalAdjustment,
@@ -554,6 +570,8 @@ BEGIN
                 [dtmDispositionDate],  
                 [dtmDepreciationToDate],  
                 [dblDepreciationToDate],  
+                [dblDepreciation],
+                [dblFunctionalDepreciation],  
                 [dblSalvageValue],
                 [dblFunctionalBasis],
                 [dblFunctionalDepreciationToDate],
@@ -574,6 +592,8 @@ BEGIN
                 NULL,  
 				        dbo.fnFAGetNextDepreciationDate(@i, @BookId),--DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
                 E.dblDepre,  
+                E.dblMonth,
+                E.dblFunctionalMonth,
                 BD.dblSalvageValue,
                 CASE WHEN ISNULL(E.dblFunctionalBasis, 0) > 0 THEN E.dblFunctionalBasis ELSE E.dblBasis END,
                 CASE WHEN ISNULL(E.dblFunctionalDepre, 0) > 0 THEN E.dblFunctionalDepre ELSE E.dblDepre END,
@@ -588,7 +608,7 @@ BEGIN
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
                 OUTER APPLY (
-                  SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
+                  SELECT dblDepre,dblBasis, dblRate, dblFunctionalBasis, dblFunctionalDepre, dblMonth, dblFunctionalMonth, strTransaction FROM @tblDepComputation WHERE intAssetId = @i
                 ) E
                 WHERE F.intAssetId = @i
                 AND BD.intBookId = @BookId
