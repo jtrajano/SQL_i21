@@ -6,8 +6,8 @@ CREATE TABLE [dbo].[tblCTContractReleaseInstruction]
 	dtmDate DATETIME NOT NULL,
 	dblQuantity NUMERIC(38, 20) NOT NULL,
 	intItemUOMId INT NOT NULL,
-	strNotes NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
-	strConditions NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
+	strNotes NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	strConditions NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     intConcurrencyId INT NULL,
     CONSTRAINT [PK_tblCTContractReleaseInstruction_intContractReleaseInstructionId] PRIMARY KEY CLUSTERED (intContractReleaseInstructionId ASC), 
     CONSTRAINT [FK_tblCTContractReleaseInstruction_tblCTContractDetail_intContractDetailId] FOREIGN KEY (intContractDetailId) REFERENCES tblCTContractDetail(intContractDetailId) ON DELETE CASCADE
