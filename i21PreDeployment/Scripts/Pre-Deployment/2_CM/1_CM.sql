@@ -22,3 +22,13 @@ BEGIN
 	EXEC sp_rename 'apchkmst', 'apchkmst_origin'
 END
 GO
+
+--RENAME Bank Transfer columns 
+IF COL_LENGTH('tblCMBankTransfer', 'dblRate') IS NOT NULL
+BEGIN
+	EXEC sp_rename 'dbo.tblCMBankTransfer.dblRate', 'dblRateAmountTo', 'COLUMN';  
+	EXEC sp_rename 'dbo.tblCMBankTransfer.dblHistoricRate', 'dblRateAmountFrom', 'COLUMN';  
+END
+
+
+
