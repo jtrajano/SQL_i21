@@ -254,6 +254,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\6_InsertDefaultDataSync.sql
 :r .\CM\7_AlterCashProjectionView.sql
 :r .\CM\8_FlagCCTransaction.sql
+:r .\CM\10_BankTransfer.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 --Accounts Receivable

@@ -21,7 +21,7 @@ UNION
 	,[intFunctionalCurrencyId]			= (SELECT TOP 1 [intDefaultCurrencyId] FROM tblSMCompanyPreference)
 	,[intFromCurrencyId]				= 0
 	,[intToCurrencyId]					= 0
-	,[intCurrencyExchangeRateId]		= 99999
-	,[intCurrencyExchangeRateDetailId]	= 99999
-	,[dblRate]							= NULL
+	,[intCurrencyExchangeRateId]		= 0
+	,[intCurrencyExchangeRateDetailId]	= 0
+	,[dblRate]							= 0
 	,[dtmValidFromDate]					= GETDATE()	

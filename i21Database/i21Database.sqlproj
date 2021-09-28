@@ -9005,6 +9005,7 @@
     <Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
     <None Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
     <None Include="Scripts\Post-Deployment\CM\8_FlagCCTransaction.sql" />
+    <None Include="Scripts\Post-Deployment\CM\10_BankTransfer.sql" />
     <None Include="Scripts\Post-Deployment\CM\vyuCMBankAccountRegisterRunningBalance.sql" />
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
