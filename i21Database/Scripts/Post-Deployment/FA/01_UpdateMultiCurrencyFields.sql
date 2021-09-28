@@ -6,6 +6,8 @@ SELECT TOP 1 @intFunctionalCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPr
 UPDATE tblFAFixedAsset
 SET
 	dblForexRate = CASE WHEN ISNULL(dblForexRate, 0) > 0 THEN dblForexRate ELSE 1 END,
+	dblFunctionalCost = ROUND((dblCost * (CASE WHEN ISNULL(dblForexRate, 0) > 0 THEN dblForexRate ELSE 1 END)), 2),
+	dblFunctionalSalvageValue = ROUND((dblSalvageValue * (CASE WHEN ISNULL(dblForexRate, 0) > 0 THEN dblForexRate ELSE 1 END)), 2),
 	intFunctionalCurrencyId = @intFunctionalCurrencyId
 WHERE intFunctionalCurrencyId IS NULL
 
