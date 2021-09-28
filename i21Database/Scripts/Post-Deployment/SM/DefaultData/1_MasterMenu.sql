@@ -3732,6 +3732,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Ave
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'RiskManagement.view.DailyAveragePrice?showSearch=true' WHERE strMenuName = 'Daily Average Price' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Physical vs Futures' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Physical vs Futures', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Physical vs Futures', N'Derivative', N'Screen', N'RiskManagement.view.PhysicalVsFutures', N'small-menu-derivative', 0, 0, 0, 1, 9, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'RiskManagement.view.PhysicalVsFutures' WHERE strMenuName = 'Physical vs Futures' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Consolidated Profit/Loss' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Consolidated Profit/Loss', N'Risk Management', @RiskManagementReportParentMenuId, N'Consolidated Profit/Loss', N'Report', N'Screen', N'RiskManagement.view.ConsolidatedPNL', N'small-menu-report', 0, 0, 0, 1, 0, 1)
