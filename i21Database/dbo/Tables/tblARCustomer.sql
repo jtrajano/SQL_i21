@@ -1,6 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblARCustomer] (
     [intEntityId]                     INT             NOT NULL,
-    --[intEntityCustomerId]                   INT             IDENTITY (1, 1) NOT NULL,
     [strCustomerNumber]               NVARCHAR (15)   COLLATE Latin1_General_CI_AS NULL,
     [strType]                         NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblCreditLimit]                  NUMERIC (18, 6) NULL,
@@ -68,7 +67,6 @@
     [strStockStatus]                  NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strPatronClass]                  CHAR (1)        COLLATE Latin1_General_CI_AS NULL,
     [dtmDeceasedDate]                 DATETIME        NULL,
-    --[ysnSubjectToFWT]                 BIT             DEFAULT ((0)) NOT NULL,
 	[ysnHDBillableSupport]			  BIT             DEFAULT ((0)) NOT NULL,
     [strScreenConnectLink]			  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[intTaxCodeId]					  INT			  NULL,
@@ -117,6 +115,7 @@
     [strInterCompanyVendorId]               NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intInterCompanyLocationId]             INT NULL,
     [strInterCompanyLocationId]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
+    [guiApiUniqueId]                        UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
