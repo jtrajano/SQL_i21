@@ -71,20 +71,20 @@ INSERT INTO  @tblAssetInfo(
 	strError
 )
 SELECT 
-intId,
-BD.intDepreciationMethodId,
-strConvention,
-BD.dblCost - BD.dblSalvageValue,
-BD.dtmPlacedInService,
-Depreciation.dblDepreciationToDate,
-CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
-ImportedDepThruMonthPeriod.dtmEndDate,
-Depreciation.strTransaction,
-CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE ISNULL(A.dblForexRate, 1) END,
-CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(A.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, A.intCurrencyId) THEN 0 ELSE 1 END,
-NULL
+	intId,
+	BD.intDepreciationMethodId,
+	strConvention,
+	BD.dblCost - BD.dblSalvageValue,
+	BD.dtmPlacedInService,
+	Depreciation.dblDepreciationToDate,
+	CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
+	ImportedDepThruMonthPeriod.dtmEndDate,
+	Depreciation.strTransaction,
+	CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE ISNULL(A.dblForexRate, 1) END,
+	CASE WHEN ISNULL(BD.intFunctionalCurrencyId, ISNULL(A.intFunctionalCurrencyId, @intDefaultCurrencyId)) = ISNULL(BD.intCurrencyId, A.intCurrencyId) THEN 0 ELSE 1 END,
+	NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
-JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
+JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId = @BookId
 JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
 	SELECT TOP 1 dblDepreciationToDate, strTransaction FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
@@ -121,7 +121,7 @@ GROUP BY B.ysnAddToBasis
 IF (@dblDepreciationAdjustment <> 0)
 BEGIN
 	IF (@ysnDepreciationAdjustBasis = 1)
-		SET @dblDepreciationBasiComputation -= @dblDepreciationAdjustment
+		SET @dblDepreciationBasiComputation += @dblDepreciationAdjustment
 END
 
 
@@ -295,11 +295,11 @@ END
 
 Basis_Limit_Reached:
 
-IF (@ysnAdjustBasis = 0) -- No Adjustment
+IF (@ysnAdjustBasis = 0) -- Adjustment Not Add to Basis
 	UPDATE @tblAssetInfo set ysnFullyDepreciated = 1 WHERE dblDepre >= (dblBasis + @dblAdjustment) AND strError IS NULL
-ELSE IF (@ysnAdjustBasis = 1) -- Adjustment Add to Basi
+ELSE IF (@ysnAdjustBasis = 1) -- Adjustment Add to Basis
 	UPDATE @tblAssetInfo set ysnFullyDepreciated = 1 WHERE dblDepre >= dblBasis AND strError IS NULL
-ELSE -- Adjustment Not Add to Basis
+ELSE -- No Adjustment
 	UPDATE B set ysnFullyDepreciated = 1 FROM @tblAssetInfo B JOIN
 	tblFABookDepreciation BD ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
 	WHERE dblDepre >= (BD.dblCost - BD.dblSalvageValue)

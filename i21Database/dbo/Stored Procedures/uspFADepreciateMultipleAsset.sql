@@ -667,10 +667,30 @@ BEGIN
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
-          ,[dblDebit]    = ROUND(Adjustment.dblFunctionalAdjustment, 2)  
-          ,[dblCredit]   = 0  
-          ,[dblDebitForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId THEN 0 ELSE ROUND(Adjustment.dblAdjustment, 2) END 
-          ,[dblCreditForeign]  = 0  
+          ,[dblDebit]    = CASE WHEN Adjustment.dblFunctionalAdjustment > 0
+                                THEN ROUND(Adjustment.dblFunctionalAdjustment, 2)
+                                ELSE 0
+                           END
+          ,[dblCredit]   = CASE WHEN Adjustment.dblFunctionalAdjustment < 0
+                                THEN ROUND(ABS(Adjustment.dblFunctionalAdjustment), 2)
+                                ELSE 0
+                           END  
+          ,[dblDebitForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment > 0 
+                                            THEN ROUND(Adjustment.dblAdjustment, 2) 
+                                            ELSE 0
+                                        END
+                                END 
+          ,[dblCreditForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment < 0 
+                                            THEN ROUND(ABS(Adjustment.dblAdjustment), 2) 
+                                            ELSE 0
+                                        END
+                                END   
           ,[dblDebitReport]  = 0  
           ,[dblCreditReport]  = 0  
           ,[dblReportingRate]  = 0  
@@ -712,10 +732,30 @@ BEGIN
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
-          ,[dblDebit]    = 0  
-          ,[dblCredit]   = ROUND(Adjustment.dblFunctionalAdjustment, 2)  
-          ,[dblDebitForeign]  = 0
-          ,[dblCreditForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId THEN 0 ELSE ROUND(Adjustment.dblAdjustment, 2) END   
+          ,[dblDebit]    = CASE WHEN Adjustment.dblFunctionalAdjustment < 0
+                                THEN ROUND(ABS(Adjustment.dblFunctionalAdjustment), 2)
+                                ELSE 0
+                           END   
+          ,[dblCredit]   = CASE WHEN Adjustment.dblFunctionalAdjustment > 0
+                                THEN ROUND(Adjustment.dblFunctionalAdjustment, 2)
+                                ELSE 0
+                           END  
+          ,[dblDebitForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment < 0 
+                                            THEN ROUND(ABS(Adjustment.dblAdjustment), 2) 
+                                            ELSE 0
+                                        END
+                                END
+          ,[dblCreditForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment > 0 
+                                            THEN ROUND(Adjustment.dblAdjustment, 2) 
+                                            ELSE 0
+                                        END
+                                END
           ,[dblDebitReport]  = 0  
           ,[dblCreditReport]  = 0  
           ,[dblReportingRate]  = 0  
