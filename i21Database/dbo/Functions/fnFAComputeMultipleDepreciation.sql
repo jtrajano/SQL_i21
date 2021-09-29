@@ -365,17 +365,22 @@ OUTER APPLY
 	ORDER BY dtmDepreciationToDate DESC
 )Dep
 OUTER APPLY(
-	SELECT [dbo].fnFAGetNextDepreciationDate(A.intAssetId, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END) dblNextDepreciationDate
+	SELECT TOP 1 D.dtmEndDate FROM (
+		SELECT dtmEndDate, 'A' src  FROM dbo.fnFAGetMonthPeriodFromDate(A.dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END) -- get end date of current month
+		UNION ALL
+		SELECT dtmEndDate, 'B' src  FROM dbo.fnFAGetNextMonthPeriodFromDate(Dep.dtmDepreciationToDate, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END) -- get end date of next month
+	) D
+	WHERE src = CASE WHEN Dep.strTransaction = 'Place in service' OR Dep.strTransaction IS NULL THEN 'A' ELSE 'B' END
 )PrevDepPlusOneMonth
 OUTER APPLY(
 	SELECT t=
 	CASE
 	WHEN A.dtmImportedDepThru IS NULL THEN 0
 	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
-	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.dblNextDepreciationDate	THEN 0
-	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.dblNextDepreciationDate
+	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.dtmEndDate THEN 0
+	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.dtmEndDate
 		THEN
-			CASE WHEN A.strTransaction = 'Place in service' THEN 0
+			CASE WHEN A.strTransaction = 'Place in service' OR Dep.strTransaction IS NULL THEN 0
 			ELSE 2
 			END
 	ELSE 
