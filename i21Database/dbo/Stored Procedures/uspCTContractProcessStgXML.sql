@@ -2557,7 +2557,7 @@ BEGIN TRY
 						,x.dblTotalCost
 						,@intCurrencyID
 						,@intUnitMeasureId
-						,x.dblAvailableNetWeight
+						,x.dblNetWeight
 						,@intItemWeightUOMId
 						,GETDATE()
 						,@intCompanyLocationId
@@ -2703,6 +2703,7 @@ BEGIN TRY
 							,dblOriginalBasis NUMERIC(18, 6)
 							,strFixationBy NVARCHAR(50)
 							,dblConvertedBasis NUMERIC(18, 6)
+							,dblNetWeight NUMERIC(18, 6)
 							) x
 					WHERE intContractSeq = @intContractSeq
 
