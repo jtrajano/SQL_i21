@@ -228,7 +228,7 @@ BEGIN TRY
 
 		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
 		BEGIN
-			UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight
+			UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight where intContractDetailId = @intContractDetailId;
 		END
 
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
@@ -440,7 +440,7 @@ BEGIN TRY
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
 
-		UPDATE b SET dblNoOfLots = b.dblQuantity / (c.dblQuantity/c.dblNoOfLots)--(b.dblQuantity / d.dblContractSize)
+		UPDATE b SET dblNoOfLots = (b.dblQuantity / (c.dblQuantity/c.dblNoOfLots))
 		FROM tblCTPriceFixation a
 		INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationId =  b.intPriceFixationId
 		INNER JOIN tblCTContractDetail c ON a.intContractDetailId = c.intContractDetailId

@@ -62,7 +62,6 @@ BEGIN
 		INNER JOIN (
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
-				 --, ICT.intTransactionDetailId
 				 , ICT.intLotId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT 
@@ -75,7 +74,6 @@ BEGIN
 			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
-			 --AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
@@ -108,26 +106,6 @@ BEGIN
 		##ARPostInvoiceHeader I
 	WHERE  
 		I.[ysnPosted] = @OneBit
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--INVOICE IS ON QUEUE
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The transaction ' + I.strInvoiceNumber + ' has ongoing posting.'
-	FROM ##ARPostInvoiceHeader I
-	INNER JOIN tblARPostingQueue PQ ON I.intInvoiceId = PQ.intTransactionId AND I.strInvoiceNumber = PQ.strTransactionNumber	
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1653,8 +1631,28 @@ BEGIN
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
-	INSERT INTO @PostInvoiceDataFromIntegration
-    SELECT PID.* FROM ##ARPostInvoiceDetail PID INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
+	INSERT INTO @PostInvoiceDataFromIntegration (
+		intInvoiceId
+		, dtmDate
+		, strInvoiceNumber
+		, strTransactionType
+		, intInvoiceDetailId
+		, intItemId
+		, strBatchId
+		, intEntityId
+		, intUserId
+	)
+	SELECT intInvoiceId			= PID.intInvoiceId
+		, dtmDate				= PID.dtmDate
+		, strInvoiceNumber		= PID.strInvoiceNumber
+		, strTransactionType	= PID.strTransactionType
+		, intInvoiceDetailId	= PID.intInvoiceDetailId
+		, intItemId				= PID.intItemId
+		, strBatchId			= PID.strBatchId
+		, intEntityId			= PID.intEntityId
+		, intUserId				= PID.intUserId
+	FROM ##ARPostInvoiceDetail PID 
+	INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1678,8 +1676,38 @@ BEGIN
 
 	--MFG Auto Blend
 	DELETE FROM @PostInvoiceDataFromIntegration
-	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM ##ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @OneBit AND PID.[ysnAutoBlend] = @OneBit
+	INSERT INTO @PostInvoiceDataFromIntegration (
+		intInvoiceId
+		, dtmDate
+		, strInvoiceNumber
+		, strTransactionType
+		, intInvoiceDetailId
+		, intItemId
+		, strBatchId
+		, intEntityId
+		, intUserId
+		, intCompanyLocationId
+		, intItemUOMId
+		, intSubLocationId
+		, intStorageLocationId
+		, dblQuantity
+	)
+	SELECT intInvoiceId			= PID.intInvoiceId
+		, dtmDate				= PID.dtmDate
+		, strInvoiceNumber		= PID.strInvoiceNumber
+		, strTransactionType	= PID.strTransactionType
+		, intInvoiceDetailId	= PID.intInvoiceDetailId
+		, intItemId				= PID.intItemId
+		, strBatchId			= PID.strBatchId
+		, intEntityId			= PID.intEntityId
+		, intUserId				= PID.intUserId
+		, intCompanyLocationId	= PID.intCompanyLocationId
+		, intItemUOMId			= PID.intItemUOMId
+		, intSubLocationId		= PID.intSubLocationId
+		, intStorageLocationId	= PID.intStorageLocationId
+		, dblQuantity			= PID.dblQuantity
+	FROM ##ARPostInvoiceDetail PID 
+	WHERE PID.[ysnBlended] <> @OneBit AND PID.[ysnAutoBlend] = @OneBit
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2331,8 +2359,28 @@ BEGIN
 
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
-	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM ##ARPostInvoiceDetail PID INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
+	INSERT INTO @PostInvoiceDataFromIntegration (
+		intInvoiceId
+		, dtmDate
+		, strInvoiceNumber
+		, strTransactionType
+		, intInvoiceDetailId
+		, intItemId
+		, strBatchId
+		, intEntityId
+		, intUserId
+	)
+	SELECT intInvoiceId			= PID.intInvoiceId
+		, dtmDate				= PID.dtmDate
+		, strInvoiceNumber		= PID.strInvoiceNumber
+		, strTransactionType	= PID.strTransactionType
+		, intInvoiceDetailId	= PID.intInvoiceDetailId
+		, intItemId				= PID.intItemId
+		, strBatchId			= PID.strBatchId
+		, intEntityId			= PID.intEntityId
+		, intUserId				= PID.intUserId
+	FROM ##ARPostInvoiceDetail PID 
+	INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2356,8 +2404,38 @@ BEGIN
 
 	--MFG Auto Blend
 	DELETE FROM @PostInvoiceDataFromIntegration
-	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM ##ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @ZeroBit AND PID.[ysnAutoBlend] = @OneBit
+	INSERT INTO @PostInvoiceDataFromIntegration (
+		intInvoiceId
+		, dtmDate
+		, strInvoiceNumber
+		, strTransactionType
+		, intInvoiceDetailId
+		, intItemId
+		, strBatchId
+		, intEntityId
+		, intUserId
+		, intCompanyLocationId
+		, intItemUOMId
+		, intSubLocationId
+		, intStorageLocationId
+		, dblQuantity
+	)
+	SELECT intInvoiceId			= PID.intInvoiceId
+		, dtmDate				= PID.dtmDate
+		, strInvoiceNumber		= PID.strInvoiceNumber
+		, strTransactionType	= PID.strTransactionType
+		, intInvoiceDetailId	= PID.intInvoiceDetailId
+		, intItemId				= PID.intItemId
+		, strBatchId			= PID.strBatchId
+		, intEntityId			= PID.intEntityId
+		, intUserId				= PID.intUserId
+		, intCompanyLocationId	= PID.intCompanyLocationId
+		, intItemUOMId			= PID.intItemUOMId
+		, intSubLocationId		= PID.intSubLocationId
+		, intStorageLocationId	= PID.intStorageLocationId
+		, dblQuantity			= PID.dblQuantity
+	FROM ##ARPostInvoiceDetail PID 
+	WHERE PID.[ysnBlended] <> @ZeroBit AND PID.[ysnAutoBlend] = @OneBit
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]

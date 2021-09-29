@@ -11,6 +11,8 @@ AS
 DECLARE @Start DATETIME
 SET @Start = GETDATE()
 
+SET @VendorId = NULLIF(@VendorId, 0) 
+
 DECLARE @Stores TABLE (
 	FileIndex INT
 	, RecordIndex INT
@@ -97,7 +99,7 @@ BEGIN
 	SET @LogId = @@IDENTITY
 END
 
-DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
+--DELETE FROM tblICEdiMap WHERE UniqueId = @UniqueId
 
 -- It's needed to increment each store indices by 1 since the reset file index is now based on the invoice record.
 -- Need to equalize file indices of all groupings
@@ -159,6 +161,301 @@ FROM
 WHERE 
 	CAST(s.StoreNumber AS INT) = st.intStoreNo
 
+
+/**********************************************************************************************
+	BEGIN VALIDATION
+**********************************************************************************************/
+BEGIN 
+	-- Log UPCs that don't have corresponding items
+	INSERT INTO tblICImportLogDetail(
+		intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId
+	)
+	SELECT 
+		@LogId
+		, 'Error'
+		, i.RecordIndex
+		, 'Item UPC'
+		, i.ItemUpc
+		, 'Cannot find the item that matches the UPC or Vendor Item Code Xref.: ' + i.ItemUpc
+		, 'Skipped'
+		, 'Record not imported.'
+		, 1
+	FROM 
+		@Items i INNER JOIN @Invoices inv
+			ON i.FileIndex = inv.FileIndex
+		CROSS APPLY (
+			SELECT TOP 1 
+				v.*
+			FROM 
+				vyuAPVendor v 
+			WHERE 			
+				v.intEntityId = @VendorId
+				OR (
+					SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
+		) v
+		OUTER APPLY (
+			SELECT 
+				intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
+			FROM (
+				SELECT TOP 1 
+					it.intItemId
+				FROM 
+					tblICItemUOM iu INNER JOIN tblICItem it 
+						ON it.intItemId = iu.intItemId
+				WHERE
+					SUBSTRING(ISNULL(iu.strLongUPCCode, iu.strUpcCode), PATINDEX('%[^0]%', ISNULL(iu.strLongUPCCode, iu.strUpcCode)+'.'), LEN(ISNULL(iu.strLongUPCCode, iu.strUpcCode)))
+					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))		
+			) itemBasedOnUpcCode
+			FULL OUTER JOIN (
+				SELECT TOP 1 
+					item.intItemId
+				FROM
+					tblICItem item INNER JOIN tblICItemVendorXref xref
+						ON item.intItemId = xref.intItemId
+					INNER JOIN tblAPVendor vendor
+						ON vendor.intEntityId = xref.intVendorId
+					INNER JOIN tblEMEntity e
+						ON e.intEntityId = vendor.intEntityId
+				WHERE					
+					e.intEntityId = v.intEntityId
+					AND (
+						SUBSTRING(xref.strVendorProduct , PATINDEX('%[^0]%', xref.strVendorProduct +'.'), LEN(xref.strVendorProduct))					
+						= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
+					)
+			) itemBasedOnVendorItemNo
+				ON 1 = 1
+		) it
+	WHERE 
+		it.intItemId IS NULL
+
+	-- Log items with invalid locations
+	INSERT INTO tblICImportLogDetail(
+		intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId
+	)
+	SELECT 
+		@LogId
+		, 'Error'
+		, i.RecordIndex
+		, 'Item Location'
+		, i.ItemUpc
+		, 'Item: ' + i.ItemUpc + ' does not belong to store location: ' + st.StoreNumber
+		, 'Skipped'
+		, 'Record not imported.'
+		, 1
+	FROM 
+		@Invoices inv INNER JOIN @ReceiptStore st 
+			ON inv.FileIndex = st.FileIndex
+		INNER JOIN @Items i 
+			ON i.FileIndex = inv.FileIndex
+		CROSS APPLY (
+			SELECT TOP 1 
+				v.*
+			FROM 
+				vyuAPVendor v 
+			WHERE 			
+				v.intEntityId = @VendorId
+				OR (
+					SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
+		) v
+		CROSS APPLY (
+			SELECT 
+				intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
+			FROM (
+				SELECT TOP 1 
+					it.intItemId
+				FROM 
+					tblICItemUOM u INNER JOIN tblICItem it 
+						ON it.intItemId = u.intItemId
+				WHERE
+					SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
+					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))		
+			) itemBasedOnUpcCode
+			FULL OUTER JOIN (
+				SELECT TOP 1 
+					item.intItemId
+				FROM
+					tblICItem item INNER JOIN tblICItemVendorXref xref
+						ON item.intItemId = xref.intItemId
+					INNER JOIN tblAPVendor vendor
+						ON vendor.intEntityId = xref.intVendorId
+					INNER JOIN tblEMEntity e
+						ON e.intEntityId = vendor.intEntityId
+				WHERE					
+					e.intEntityId = v.intEntityId
+					AND (
+						SUBSTRING(xref.strVendorProduct , PATINDEX('%[^0]%', xref.strVendorProduct +'.'), LEN(xref.strVendorProduct))					
+						= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
+					)
+			) itemBasedOnVendorItemNo
+				ON 1 = 1
+		) it
+		LEFT JOIN tblICItemLocation il 
+			ON il.intItemId = it.intItemId
+			AND il.intLocationId = st.intLocationId
+	WHERE 
+		il.intLocationId IS NULL
+
+	-- Log item with invalid UOM setup. 
+	INSERT INTO tblICImportLogDetail(
+		intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId
+	)
+	SELECT 
+		@LogId
+		, 'Error'
+		, i.RecordIndex
+		, 'Unit of Measure'
+		, i.UnitOfMeasure
+		, 'UOM: ' + i.UnitOfMeasure + ' in Item UPC: ' + i.ItemUpc + ' is missing or Stock Unit is not set in the Item Setup.'
+		, 'Failed'
+		, 'Record not imported.'
+		, 1
+	FROM 
+		@Invoices inv INNER JOIN @ReceiptStore st 
+			ON inv.FileIndex = st.FileIndex
+		CROSS APPLY (
+			SELECT TOP 1 
+				v.*
+			FROM 
+				vyuAPVendor v 
+			WHERE 			
+				v.intEntityId = @VendorId
+				OR (
+					SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
+		) v		
+		INNER JOIN @Items i 
+			ON i.FileIndex = inv.FileIndex
+		CROSS APPLY (
+			SELECT 
+				intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
+			FROM 
+				(
+					SELECT TOP 1 
+						item.intItemId
+					FROM 
+						tblICItemUOM lookupUom INNER JOIN tblICItem item
+							ON item.intItemId = lookupUom.intItemId			
+					WHERE
+						SUBSTRING(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode), PATINDEX('%[^0]%', ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)+'.'), LEN(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)))
+						= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
+				) itemBasedOnUpcCode
+				FULL OUTER JOIN (
+					SELECT TOP 1 
+						item.intItemId
+					FROM
+						tblICItem item INNER JOIN tblICItemVendorXref xref
+							ON item.intItemId = xref.intItemId
+						INNER JOIN tblAPVendor vendor
+							ON vendor.intEntityId = xref.intVendorId
+						INNER JOIN tblEMEntity e
+							ON e.intEntityId = vendor.intEntityId
+					WHERE					
+						e.intEntityId = v .intEntityId 
+						AND (
+							SUBSTRING(xref.strVendorProduct , PATINDEX('%[^0]%', xref.strVendorProduct +'.'), LEN(xref.strVendorProduct))					
+							= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
+						)
+				) itemBasedOnVendorItemNo
+					ON 1 = 1
+		) it
+		LEFT OUTER JOIN tblICItemUOM stockUnit 
+			ON stockUnit.intItemId = it.intItemId
+			AND stockUnit.ysnStockUnit = 1
+		LEFT JOIN tblICUnitMeasure symbolUOM 
+			ON symbolUOM.strSymbol = i.UnitOfMeasure
+		LEFT JOIN tblICItemUOM symbolItemUOM 
+			ON symbolItemUOM.intItemId = it.intItemId
+			AND symbolItemUOM.intUnitMeasureId = symbolUOM.intUnitMeasureId
+	WHERE
+		symbolItemUOM.intItemUOMId IS NULL 
+		AND stockUnit.intItemUOMId IS NULL 
+
+	-- Log error for invalid vendor. 
+	INSERT INTO tblICImportLogDetail(
+		intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId
+	)
+	SELECT 
+		@LogId
+		, 'Error'
+		, i.RecordIndex
+		, 'Vendor Code'
+		, inv.VendorCode
+		, 'Vendor Account No.: ' + inv.VendorCode + ' is not found in the Vendor setup.'
+		, 'Failed'
+		, 'Record not imported.'
+		, 1
+	FROM 
+		@Items i INNER JOIN @Invoices inv
+			ON i.FileIndex = inv.FileIndex
+		OUTER APPLY (
+			SELECT TOP 1 
+				v.*
+			FROM 
+				vyuAPVendor v 
+			WHERE 			
+				v.intEntityId = @VendorId
+				OR (
+					SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+					SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+					COLLATE SQL_Latin1_General_CP1_CS_AS
+					AND @VendorId IS NULL 
+				)
+		) v		
+	WHERE 
+		v.intEntityId IS NULL 
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strType = 'Error' AND strStatus = 'Failed') 
+	BEGIN 
+		GOTO LogErrors
+	END 
+END 
+/**********************************************************************************************
+	END VALIDATION
+**********************************************************************************************/
+
 -- Populate receipt staging table
 INSERT INTO @ReceiptStagingTable(
 	strReceiptType
@@ -182,17 +479,17 @@ INSERT INTO @ReceiptStagingTable(
 )
 SELECT 
 	strReceiptType = 'Direct' 
-	,intEntityVendorId = @VendorId 
+	,intEntityVendorId = v.intEntityId 
 	,intShipFromId = el.intEntityLocationId 
 	,intLocationId = st.intLocationId 
 	,dtmDate = CASE WHEN ISDATE(inv.InvoiceDate) = 1 THEN CAST(inv.InvoiceDate AS DATETIME) ELSE NULL END
 	,intSourceId = 0 
 	,intItemId = it.intItemId 
 	,intItemLocationId = il.intItemLocationId
-	,intItemUOMId = ISNULL(iu.intItemUOMId, im.intItemUOMId) 
+	,intItemUOMId = ISNULL(symbolItemUOM.intItemUOMId, stockUnit.intItemUOMId) 
 	,dblQuantity = 
 		CASE 
-			WHEN i.UnitMultiplier > 1 AND iu.intItemUOMId IS NULL THEN i.Quantity * i.UnitMultiplier 
+			WHEN i.UnitMultiplier > 1 AND symbolItemUOM.intItemUOMId IS NULL THEN i.Quantity * i.UnitMultiplier 
 			ELSE i.Quantity 
 		END 
 	,dblCost = 
@@ -200,14 +497,14 @@ SELECT
 			NULLIF(CASE WHEN i.UnitMultiplier > 1 THEN i.UnitCost / i.UnitMultiplier ELSE NULL END, 0) 
 			, NULLIF(i.UnitCost, 0)
 			, dbo.fnCalculateCostBetweenUOM(
-				im.intItemUOMId
-				,ISNULL(iu.intItemUOMId, im.intItemUOMId) 
+				stockUnit.intItemUOMId
+				,ISNULL(symbolItemUOM.intItemUOMId, stockUnit.intItemUOMId) 
 				,COALESCE(NULLIF(pricing.dblLastCost, 0), NULLIF(pricing.dblStandardCost, 0))
 			)
 			, 0
 		) 
 
-	,intCostUOMId = ISNULL(iu.intItemUOMId, im.intItemUOMId) 
+	,intCostUOMId = ISNULL(symbolItemUOM.intItemUOMId, stockUnit.intItemUOMId) 
 	,intSourceType = 0
 	,strVendorRefNo = inv.InvoiceNumber
 	,intCurrencyId = v.intCurrencyId 
@@ -217,8 +514,8 @@ SELECT
 			NULLIF(CASE WHEN i.UnitMultiplier > 1 THEN i.RetailPrice / i.UnitMultiplier ELSE NULL END, 0) 
 			, NULLIF(i.RetailPrice, 0)
 			, dbo.fnCalculateCostBetweenUOM(
-				im.intItemUOMId
-				,ISNULL(iu.intItemUOMId, im.intItemUOMId) 
+				stockUnit.intItemUOMId
+				,ISNULL(symbolItemUOM.intItemUOMId, stockUnit.intItemUOMId) 
 				,NULLIF(pricing.dblSalePrice, 0)
 			)
 			, 0
@@ -227,8 +524,20 @@ SELECT
 FROM 
 	@Invoices inv INNER JOIN @ReceiptStore st 
 		ON inv.FileIndex = st.FileIndex
-	INNER JOIN vyuAPVendor v 
-		ON v.intEntityId = @VendorId
+	CROSS APPLY (
+		SELECT TOP 1 
+			v.*
+		FROM 
+			vyuAPVendor v 
+		WHERE 			
+			v.intEntityId = @VendorId
+			OR (
+				SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+				SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+				COLLATE SQL_Latin1_General_CP1_CS_AS
+				AND @VendorId IS NULL 
+			)
+	) v
 	INNER JOIN @Items i 
 		ON i.FileIndex = inv.FileIndex
 	CROSS APPLY (
@@ -265,20 +574,20 @@ FROM
 				ON 1 = 1
 	) it
 	LEFT OUTER JOIN tblEMEntityLocation el 
-		ON el.intEntityId = @VendorId
+		ON el.intEntityId = v.intEntityId
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
 	INNER JOIN tblICItemLocation il 
 		ON il.intItemId = it.intItemId
 		AND il.intLocationId = st.intLocationId
-	LEFT OUTER JOIN tblICItemUOM im 
-		ON im.intItemId = it.intItemId
-		AND im.ysnStockUnit = 1
-	LEFT JOIN tblICUnitMeasure u 
-		ON u.strUnitMeasure = i.UnitOfMeasure
-	LEFT JOIN tblICItemUOM iu 
-		ON iu.intItemId = it.intItemId
-		AND iu.intUnitMeasureId = u.intUnitMeasureId
+	LEFT OUTER JOIN tblICItemUOM stockUnit 
+		ON stockUnit.intItemId = it.intItemId
+		AND stockUnit.ysnStockUnit = 1
+	LEFT JOIN tblICUnitMeasure symbolUOM 
+		ON symbolUOM.strSymbol = i.UnitOfMeasure
+	LEFT JOIN tblICItemUOM symbolItemUOM 
+		ON symbolItemUOM.intItemId = it.intItemId
+		AND symbolItemUOM.intUnitMeasureId = symbolUOM.intUnitMeasureId
 	OUTER APPLY (
 		SELECT TOP 1 *
 		FROM 
@@ -313,24 +622,40 @@ SELECT
 	,strCostMethod = 'Amount'
 	,dblAmount = c.Amount
 FROM 
-	@Charges c INNER JOIN @ReceiptStore st 
+	@Charges c INNER JOIN @ReceiptStore st	
 		ON c.FileIndex = st.FileIndex
+	INNER JOIN @Invoices inv 
+		ON inv.FileIndex = c.FileIndex
 	INNER JOIN tblICItem i 
 		ON i.strItemNo = c.ItemDescription
-	INNER JOIN vyuAPVendor v 
-		ON v.intEntityId = @VendorId
+	CROSS APPLY (
+		SELECT TOP 1 
+			v.*
+		FROM 
+			vyuAPVendor v 
+		WHERE 			
+			v.intEntityId = @VendorId
+			OR (
+				SUBSTRING(v.strVendorAccountNum, PATINDEX('%[^0]%', v.strVendorAccountNum), LEN(v.strVendorAccountNum)) =
+				SUBSTRING(inv.VendorCode, PATINDEX('%[^0]%', inv.VendorCode), LEN(inv.VendorCode))
+				COLLATE SQL_Latin1_General_CP1_CS_AS
+				AND @VendorId IS NULL 
+			)
+	) v	
 	LEFT OUTER JOIN tblEMEntityLocation el 
-		ON el.intEntityId = @VendorId
+		ON el.intEntityId = v.intEntityId
 		AND el.ysnActive = 1
 		AND el.intEntityLocationId = v.intDefaultLocationId
-		AND ISNULL(c.Amount, 0) != 0
+		AND ISNULL(c.Amount, 0) <> 0
 
 IF EXISTS(SELECT * FROM @ReceiptStagingTable)
+BEGIN 
 	EXEC dbo.uspICAddItemReceipt 
 		@ReceiptStagingTable
 		, @ReceiptOtherChargesTable
 		, @UserId
 		, @ReceiptItemLotStagingTable
+END
 ELSE
 BEGIN
 	INSERT INTO tblICImportLogDetail(
@@ -350,12 +675,20 @@ BEGIN
 		, -1
 		, NULL
 		, NULL
-		, 'Unable to generate receipts. Possible reasons: (1) No store headers found in file and no selected location. (2) Store headers found but the locations do not exists in the system. (3) Items are not in the store location(s).'
+		, 'Unable to generate receipts. 
+		Possible reasons: 
+		<ul>
+			<li>No store headers found in file and no selected location.</li>
+			<li>Store headers found but the locations do not exists in the system.</li>
+			<li>Vendor is invalid. The Vendor Account No. is not found in the system.</li>
+			<li>Items are not in the store location(s).</li>
+			<li>Placeholder item for Receipt Import is missing in the Company Configuration &#8594; Inventory.</li>
+		</ul>
+		'
 		, 'Failed'
 		, 'No record(s) imported.'
 		, 1 
 	GOTO LogErrors;
-	RETURN
 END
 
 -- Log valid items
@@ -384,104 +717,6 @@ FROM
 	@ReceiptStagingTable rs	INNER JOIN tblICItem i 
 		ON rs.intItemId = i.intItemId
 
--- Log UPCs that don't have corresponding items
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, i.RecordIndex
-	, 'Item UPC'
-	, i.ItemUpc
-	, 'Cannot find the item that matches the UPC or Vendor Item Code Xref.: ' + i.ItemUpc
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-FROM 
-	@Items i 
-	OUTER APPLY (
-		SELECT 
-			intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
-		FROM (
-			SELECT TOP 1 
-				it.intItemId
-			FROM 
-				tblICItemUOM u INNER JOIN tblICItem it 
-					ON it.intItemId = u.intItemId
-			WHERE
-				SUBSTRING(ISNULL(u.strLongUPCCode, u.strUpcCode), PATINDEX('%[^0]%', ISNULL(u.strLongUPCCode, u.strUpcCode)+'.'), LEN(ISNULL(u.strLongUPCCode, u.strUpcCode)))
-				= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))		
-		) itemBasedOnUpcCode
-		FULL OUTER JOIN (
-			SELECT TOP 1 
-				item.intItemId
-			FROM
-				tblICItem item INNER JOIN tblICItemVendorXref xref
-					ON item.intItemId = xref.intItemId
-				INNER JOIN tblAPVendor vendor
-					ON vendor.intEntityId = xref.intVendorId
-				INNER JOIN tblEMEntity e
-					ON e.intEntityId = vendor.intEntityId
-			WHERE					
-				e.intEntityId = @VendorId
-				AND (
-					SUBSTRING(xref.strVendorProduct , PATINDEX('%[^0]%', xref.strVendorProduct +'.'), LEN(xref.strVendorProduct))					
-					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
-				)
-		) itemBasedOnVendorItemNo
-			ON 1 = 1
-	) it
-WHERE 
-	it.intItemId IS NULL
-
--- Log items with invalid locations
-INSERT INTO tblICImportLogDetail(
-	intImportLogId
-	, strType
-	, intRecordNo
-	, strField
-	, strValue
-	, strMessage
-	, strStatus
-	, strAction
-	, intConcurrencyId
-)
-SELECT 
-	@LogId
-	, 'Error'
-	, i.RecordIndex
-	, 'Item Location'
-	, i.ItemUpc
-	, 'Item: ' + i.ItemUpc + ' does not belong to store location: ' + st.StoreNumber
-	, 'Skipped'
-	, 'Record not imported.'
-	, 1
-FROM 
-	@Invoices inv INNER JOIN @ReceiptStore st 
-		ON inv.FileIndex = st.FileIndex
-	INNER JOIN @Items i 
-		ON i.FileIndex = inv.FileIndex
-	INNER JOIN tblICItemUOM lookupUom 
-		ON SUBSTRING(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode), PATINDEX('%[^0]%', ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)+'.'), LEN(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)))
-		= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
-	INNER JOIN tblICItem it 
-		ON it.intItemId = lookupUom.intItemId
-	LEFT JOIN tblICItemLocation il 
-		ON il.intItemId = it.intItemId
-		AND il.intLocationId = st.intLocationId
-WHERE 
-	il.intLocationId IS NULL
-
-GOTO LogErrors
 
 LogErrors:
 

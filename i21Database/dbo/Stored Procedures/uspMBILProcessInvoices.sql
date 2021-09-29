@@ -24,6 +24,13 @@ DECLARE @ErrorState INT
 CREATE TABLE #TempMBILInvoice (
 	[intInvoiceId]		int
 );
+CREATE TABLE #TempMBILInvoiceItem (
+	[intInvoiceId]		int,
+	[intItemId]			int,
+	[intLocationId]		int,
+	[strItemNo]			nvarchar(max),
+	[strLocationName]		nvarchar(max)
+);
 	
 	--=====================================================================================================================================
 	-- 	POPULATE INVOICE TO POST TEMPORARY TABLE
@@ -33,6 +40,16 @@ CREATE TABLE #TempMBILInvoice (
 	ELSE
 		INSERT INTO #TempMBILInvoice SELECT [intInvoiceId] FROM tblMBILInvoice WHERE ysnPosted = 0
 
+	INSERT INTO #TempMBILInvoiceItem SELECT [intInvoiceId], [intItemId], [intLocationId], [strItemNo], [strLocationName] FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+
+	-------------------------------------------------------------
+	------------------- Update Tax Detail-----------------------
+	-------------------------------------------------------------
+    UPDATE tblMBILInvoiceTaxCode 
+	SET dblTax = CASE WHEN strCalculationMethod ='Percentage' THEN (item.dblQuantity * item.dblPrice * (tax.dblRate / 100)) ELSE item.dblQuantity * tax.dblRate END
+	FROM tblMBILInvoiceItem item 
+	INNER JOIN tblMBILInvoiceTaxCode tax ON item.intInvoiceItemId = tax.intInvoiceItemId
+	WHERE item.intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
 	-------------------------------------------------------------
 	------------------- Validate Invoices -----------------------
 	-------------------------------------------------------------
@@ -41,8 +58,29 @@ CREATE TABLE #TempMBILInvoice (
 		SET @ErrorMessage = 'Record does not exists.'
 		RETURN
 	END
+	--IF @BatchId IS NULL
+	--BEGIN
+	--	WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
+	--	BEGIN
+	--		DECLARE @intItemInvoiceId INT
+	--		DECLARE @intItemId INT
+	--		DECLARE @intLocationId INT
+	--		DECLARE @strItemNo NVARCHAR(MAX)
+	--		DECLARE @strLocationName NVARCHAR(MAX)
 
-	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL)
+	--		SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
+
+	--		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+	--		BEGIN
+	--			SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
+	--			RETURN
+	--		END
+
+	--		DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
+	--	END
+	--END
+
+	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL AND inti21InvoiceId IN (SELECT intInvoiceId FROM tblARInvoice))
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE ysnPosted = 1 AND intInvoiceId = (SELECT TOP 1 inti21InvoiceId FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL))
 		BEGIN
@@ -173,7 +211,7 @@ CREATE TABLE #TempMBILInvoice (
 		,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 		,[intEntityId] = InvoiceItem.intEntityCustomerId
 		,[dtmDate] = InvoiceItem.dtmInvoiceDate
-		,[dtmDueDate] = InvoiceItem.dtmInvoiceDate
+		,[dtmDueDate] = NULL
 		,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
 		,[dtmPostDate] = InvoiceItem.dtmPostedDate
 		,[strComments] = InvoiceItem.strComments
@@ -203,7 +241,7 @@ CREATE TABLE #TempMBILInvoice (
 		,[ysnUseOriginIdAsInvoiceNumber] = 1
 
 	FROM vyuMBILInvoiceItem InvoiceItem
-	WHERE inti21InvoiceId IS NULL and intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+	WHERE (inti21InvoiceId IS NULL OR inti21InvoiceId NOT IN (SELECT intInvoiceId FROM tblARInvoice)) AND intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
 
 	INSERT INTO @TaxDetails
 					(
@@ -262,7 +300,7 @@ CREATE TABLE #TempMBILInvoice (
 			,@LineItemTaxEntries= @TaxDetails
 			,@UserId			= @UserId
 			,@GroupingOption	= 8
-			,@RaiseError		= 1
+			,@RaiseError		= 0
 			,@BatchId			= @BatchId
 			,@ErrorMessage		= @ErrorMessage OUTPUT
 			--,@CreatedIvoices	= @CreatedInvoices OUTPUT
@@ -295,6 +333,27 @@ CREATE TABLE #TempMBILInvoice (
 		END
 
 	END
+
+	IF @BatchId IS NULL
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
+		BEGIN
+			SELECT TOP 1 @ErrorMessage = ISNULL(strPostingMessage, strMessage) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
+			
+
+			IF @ErrorMessage like '%was not set up to be available on the specified location%'
+			BEGIN
+				SET @ErrorMessage = @ErrorMessage
+				RAISERROR(@ErrorMessage,16,1)
+			END
+			ELSE IF @ErrorMessage <> 'Transaction successfully posted.'
+			BEGIN
+				SET @ErrorMessage = @ErrorMessage + ' Kindly check the created invoice for details.'
+				RAISERROR(@ErrorMessage,16,1)
+			END
+		END
+	END
+	
 
 END
 

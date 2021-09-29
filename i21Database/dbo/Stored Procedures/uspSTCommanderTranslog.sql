@@ -61,7 +61,13 @@ BEGIN
 							SELECT c.intTermMsgSN as termMsgSN
 							FROM @UDT_Translog c
 								WHERE (c.strTransType = 'sale'
-								OR c.strTransType = 'network sale')
+									OR c.strTransType = 'network sale'
+									OR c.strTransType = 'void'
+									OR c.strTransType = 'refund sale'
+									OR c.strTransType = 'refund network sale'
+									OR c.strTransType = 'refund void'
+									OR c.strTransType = 'suspended sale'
+									OR c.strTransType = 'suspended network sale')
 								AND c.dtmDate IS NOT NULL
 							GROUP BY c.intTermMsgSN
 						) x ON x.termMsgSN = chk.intTermMsgSN
@@ -84,7 +90,13 @@ BEGIN
 						SELECT @intCountRows = COUNT(c.intTermMsgSN)
 						FROM @UDT_Translog c
 							WHERE (c.strTransType = 'sale'
-							OR c.strTransType = 'network sale')
+								OR c.strTransType = 'network sale'
+								OR c.strTransType = 'void'
+								OR c.strTransType = 'refund sale'
+								OR c.strTransType = 'refund network sale'
+								OR c.strTransType = 'refund void'
+								OR c.strTransType = 'suspended sale'
+								OR c.strTransType = 'suspended network sale')
 							AND c.dtmDate IS NOT NULL
 						GROUP BY c.intTermMsgSN
 					END
@@ -242,10 +254,15 @@ BEGIN
 							[dblTrlSellUnitPrice],
 							[dblTrlUnitPrice],
 							[dblTrlLineTot],
+							[dblTrlPrcOvrd],
 							[strTrlDesc],
 							[strTrlUPC],
 							[strTrlModifier],
 							[strTrlUPCEntryType],
+							[strTrloLnItemDiscProgramId],
+							[dblTrloLnItemDiscDiscAmt],
+							[dblTrloLnItemDiscQty],
+							[intTrloLnItemDiscTaxCred],
 
 							-- NEW
 							-- trlFuel
@@ -468,6 +485,7 @@ BEGIN
 							[dblTrlSellUnitPrice]				= dblTrlSellUnitPrice,
 							[dblTrlUnitPrice]					= dblTrlUnitPrice,
 							[dblTrlLineTot]						= dblTrlLineTot,
+							[dblTrlPrcOvrd]						= dblTrlPrcOvrd,
 							[strTrlDesc]						= strTrlDesc,
 
 							-- NOTE: in the future if we will be supporting PASSPORT for rebate file
@@ -485,6 +503,10 @@ BEGIN
 																END,
 							[strTrlModifier]					= strTrlModifier,
 							[strTrlUPCEntryType]				= strTrlUPCEntryType,
+							[strTrloLnItemDiscProgramId]		= strTrloLnItemDiscProgramId,
+							[dblTrloLnItemDiscDiscAmt]			= dblTrloLnItemDiscDiscAmt,
+							[dblTrloLnItemDiscQty]				= dblTrloLnItemDiscQty,
+							[intTrloLnItemDiscTaxCred]			= intTrloLnItemDiscTaxCred,
 
 							-- NEW
 							-- trlFuel
@@ -554,29 +576,35 @@ BEGIN
 								SELECT c.intTermMsgSN as termMsgSN
 								FROM @UDT_Translog c
 									WHERE (c.strTransType = 'sale'
-									OR c.strTransType = 'network sale')
+										OR c.strTransType = 'network sale'
+										OR c.strTransType = 'void'
+										OR c.strTransType = 'refund void'
+										OR c.strTransType = 'refund sale'
+										OR c.strTransType = 'refund network sale'
+										OR c.strTransType = 'suspended sale'
+										OR c.strTransType = 'suspended network sale')									
 									AND c.dtmDate IS NOT NULL
 								GROUP BY c.intTermMsgSN
 							) x ON x.termMsgSN = chk.intTermMsgSN
-							WHERE NOT EXISTS
-							(
-								SELECT * 
-								FROM dbo.tblSTTranslogRebates TR
-								WHERE TR.dtmDate = chk.dtmDate --CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
-									AND TR.intTermMsgSNterm = chk.intTermMsgSNterm
-									AND TR.intTermMsgSN = chk.intTermMsgSN
-									AND TR.intTrTickNumPosNum = chk.intTrTickNumPosNum
-									AND TR.intTrTickNumTrSeq  = chk.intTrTickNumTrSeq
-									AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.strTransType COLLATE DATABASE_DEFAULT
-									AND TR.intStoreNumber = chk.intStoreNumber
-							)
-							AND chk.dtmDate IS NOT NULL
-							ORDER BY chk.intTermMsgSNterm ASC
+						WHERE NOT EXISTS
+						(
+							SELECT * 
+							FROM dbo.tblSTTranslogRebates TR
+							WHERE TR.dtmDate = chk.dtmDate --CAST(left(REPLACE(chk.trHeaderdate, 'T', ' '), len(chk.trHeaderdate) - 6) AS DATETIME)
+								AND TR.intTermMsgSNterm = chk.intTermMsgSNterm
+								AND TR.intTermMsgSN = chk.intTermMsgSN
+								AND TR.intTrTickNumPosNum = chk.intTrTickNumPosNum
+								AND TR.intTrTickNumTrSeq  = chk.intTrTickNumTrSeq
+								AND TR.strTransType COLLATE DATABASE_DEFAULT = chk.strTransType COLLATE DATABASE_DEFAULT
+								AND TR.intStoreNumber = chk.intStoreNumber
+						)
+						AND chk.dtmDate IS NOT NULL
+						ORDER BY chk.intTermMsgSNterm ASC
 
-							SET @ysnSuccess = CAST(1 AS BIT)
-							SET @strMessage = 'Success'
+						SET @ysnSuccess = CAST(1 AS BIT)
+						SET @strMessage = 'Success'
 
-							GOTO ExitWithCommit
+						GOTO ExitWithCommit
 
 					END
 				ELSE IF(@intCountRows = 0)
@@ -646,7 +674,4 @@ ExitWithRollback:
 						--ROLLBACK TRANSACTION @Savepoint
 					END
 			END
-
-
-
 ExitPost:

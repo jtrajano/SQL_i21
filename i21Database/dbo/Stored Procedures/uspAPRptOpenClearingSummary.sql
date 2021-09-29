@@ -897,6 +897,10 @@ FROM
   GROUP BY   
    intEntityVendorId  
    ,intSettleStorageId
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
  ) tmpAPOpenClearing  
 INNER JOIN tblGRSettleStorage SS
 	ON tmpAPOpenClearing.intSettleStorageId = SS.intSettleStorageId
@@ -935,7 +939,10 @@ INNER JOIN tblGRSettleStorage SS
   FROM grainTransferClearing B  
   GROUP BY   
    intInventoryReceiptItemId
-   ,B.strTransactionNumber  
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
  ) tmpAPOpenClearing  
 INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt 
             ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
@@ -970,6 +977,10 @@ INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryRecei
   FROM grainTransferClearing B  
   GROUP BY   
    intInventoryReceiptItemId
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
  ) tmpAPOpenClearing  
 INNER JOIN (
 			tblGRTransferStorageReference transferreference
@@ -1008,7 +1019,11 @@ INNER JOIN (
   FROM grainTransferChargeClearing B  
 	WHERE strTransactionNumber NOT LIKE ''TRA%''
   GROUP BY   
-   B.intInventoryReceiptChargeId
+   intInventoryReceiptChargeId
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
  ) tmpAPOpenClearing  
 INNER JOIN tblICInventoryReceiptCharge rc  
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
@@ -1038,15 +1053,19 @@ INNER JOIN tblICInventoryReceiptCharge rc
  FROM    
  (  
   SELECT  
-   B.intTransferStorageReferenceId
+   B.intInventoryReceiptChargeId
    ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
    ,SUM(B.dblReceiptChargeTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
   FROM grainTransferChargeClearing B  
   GROUP BY   
-   B.intTransferStorageReferenceId
+   intInventoryReceiptChargeId
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
  ) tmpAPOpenClearing  
 INNER JOIN tblGRTransferStorageReference tsr
-    ON tmpAPOpenClearing.intTransferStorageReferenceId = tsr.intTransferStorageReferenceId
+    ON tmpAPOpenClearing.intInventoryReceiptChargeId = tsr.intTransferStorageReferenceId
 INNER JOIN tblGRTransferStorage ts
   ON ts.intTransferStorageId = tsr.intTransferStorageId
 INNER JOIN tblGRCustomerStorage cs

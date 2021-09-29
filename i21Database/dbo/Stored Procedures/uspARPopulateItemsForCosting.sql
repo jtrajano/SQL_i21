@@ -52,7 +52,8 @@ INSERT INTO ##ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
-) 
+	,[ysnGLOnly]
+)
 
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
@@ -111,6 +112,7 @@ SELECT
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
+	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -149,7 +151,6 @@ WHERE
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
-	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0)) OR ((ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))))
 
 --Bundle Items
@@ -217,7 +218,7 @@ SELECT
 	,[strType]					= ARID.[strType]
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
-INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ARIC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
+INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
 INNER JOIN tblICItem ICI WITH (NOLOCK) ON ARIC.[intBundleItemId] = ICI.[intItemId]
 LEFT OUTER JOIN
 	(SELECT [intItemUOMId], [dblUnitQty] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM

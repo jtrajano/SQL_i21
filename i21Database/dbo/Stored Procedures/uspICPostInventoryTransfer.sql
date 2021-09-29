@@ -966,6 +966,8 @@ IF @ysnPost = 0
 BEGIN   
 	-- Call the unpost routine 
 	BEGIN 
+		DELETE FROM #tmpICLogRiskPositionFromOnHandSkipList
+
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -1009,6 +1011,7 @@ BEGIN
 				,@strBatchId
 				,@intEntityUserSecurityId
 				,@ysnRecap
+
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 
 		exec @intReturnValue =  [dbo].[uspICUnpostStorage]
@@ -1200,6 +1203,18 @@ BEGIN
 				AND stockUOM.ysnStockUnit = 1
 		WHERE
 			tf.strTransferNo = @strTransactionId
+	END 
+
+	--------------------------------------------------------------------
+	-- Call the Risk Log sp for Customer-Owned or Storage stocks. 
+	--------------------------------------------------------------------
+	BEGIN 
+		EXEC @intReturnValue = dbo.uspICLogRiskPositionFromOnStorage
+			@strBatchId
+			,@strTransactionId
+			,@intEntityUserSecurityId
+
+		IF @intReturnValue < 0 RETURN @intReturnValue
 	END 
 
 	COMMIT TRAN @TransactionName

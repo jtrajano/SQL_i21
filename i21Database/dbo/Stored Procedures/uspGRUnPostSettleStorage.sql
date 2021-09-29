@@ -164,6 +164,9 @@ BEGIN TRY
 
 	WHILE EXISTS(SELECT 1 FROM @SettleStorages)
 	BEGIN
+		--WE SHOULD CLEAR THE STORAGE HISTORY STAGING TABLE
+		DELETE FROM @StorageHistoryStagingTable
+
 		SET @intSettleStorageId = NULL
 		SET @intParentSettleStorageId = NULL
 		SET @TicketNo = NULL
@@ -526,7 +529,12 @@ BEGIN TRY
 			UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
 		END
-
+		-- Delete, the storage tickets that does not have units left
+		DELETE FROM tblGRSettleStorageTicket 
+			where intSettleStorageId = @intParentSettleStorageId 
+				and intCustomerStorageId = @intCustomerStorageId 
+				and dblUnits = 0
+				
 		--DELETE THE SETTLE STORAGE
 		UPDATE tblGRStorageHistory SET intSettleStorageId = NULL, intBillId = NULL WHERE intSettleStorageId = @intSettleStorageId
 		DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId

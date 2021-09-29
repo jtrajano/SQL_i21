@@ -542,6 +542,31 @@ WHERE
 	ISNULL([strSourceTransaction],'') = 'Load Schedule'
 	AND  NOT EXISTS(SELECT NULL FROM tblLGLoad WITH (NOLOCK) WHERE [intLoadId] = ITG.[intSourceId])
 
+INSERT INTO #ARInvalidInvoiceRecords
+    ([intId]
+    ,[strMessage]		
+    ,[strTransactionType]
+    ,[strType]
+    ,[strSourceTransaction]
+    ,[intSourceId]
+    ,[strSourceId]
+    ,[intInvoiceId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'The item(' + MBILItem.strItemNo + ') was not set up to be available on the specified location(' + MBILItem.strLocationName + ')!' 
+	,[strTransactionType]	= ITG.[strTransactionType]
+	,[strType]				= ITG.[strType]
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intInvoiceId]			= ITG.[intInvoiceId]
+FROM
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
+	 INNER JOIN vyuMBILInvoiceItem MBILItem ON MBILItem.strInvoiceNo = ITG.strInvoiceOriginId
+WHERE
+	 NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = ITG.intCompanyLocationId AND strItemNo = MBILItem.strItemNo)
+
+
 DELETE FROM V
 FROM @InvoicesToGenerate V
 WHERE EXISTS(SELECT NULL FROM #ARInvalidInvoiceRecords I WHERE V.[intId] = I.[intId])
@@ -1058,16 +1083,17 @@ SELECT
 	,[intSourceId]			= ITG.[intSourceId]
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToGenerate ITG --WITH (NOLOCK)
-	INNER JOIN (
-		SELECT COUNT(strSourceId)[SourceCount],strSourceId FROM  @InvoicesToGenerate GROUP BY strSourceId 
-	)ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
-	WHERE ID.SourceCount > 1
-	AND [strType] <> 'POS'
-	AND ITG.[strSourceTransaction] <> 'Store Charge'
-
-
+FROM @InvoicesToGenerate ITG --WITH (NOLOCK)
+INNER JOIN (
+	SELECT COUNT(strSourceId)[SourceCount]
+		, strSourceId 
+	FROM @InvoicesToGenerate 
+	WHERE ISNULL(strSourceId, '') <> ''
+GROUP BY strSourceId 
+) ID ON  ITG.[strSourceId] =  ID.[strSourceId]  
+WHERE ID.SourceCount > 1
+  AND [strType] <> 'POS'
+  AND ITG.[strSourceTransaction] <> 'Store Charge'
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
