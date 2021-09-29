@@ -127,10 +127,11 @@ SELECT
    ,strLogLevel		= 'Error'
    ,strStatus		= 'Failed'
    ,intRowNo		= SE.intRowNumber
-   ,strMessage		= 'Cannot find the Employee No: '+ ISNULL(SE.strEmployeeId,'') + '.'
+   ,strMessage		= 'Cannot find the Employee No: '+ CAST(ISNULL(SE.strEmployeeId, '') AS NVARCHAR(100)) + '.'
    FROM tblApiSchemaEmployee SE
    LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId
    WHERE SE.guiApiUniqueId = @guiApiUniqueId
+   AND SE.strEmployeeId IS NULL
 
 
 SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueId = @guiApiUniqueId
@@ -260,7 +261,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan
+					ysnRetirementPlan,
+					guiApiUniqueId
 				)
 				SELECT 
 					@NewId,
@@ -296,7 +298,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					ysn1099Employee,
 					ysnStatutoryEmployee,
 					ysnThirdPartySickPay,
-					ysnRetirementPlan
+					ysnRetirementPlan,
+					@guiApiUniqueId
 					FROM #TempEmployeeDetails PRST
 					WHERE PRST.strEmployeeId = @EmployeeID
 
