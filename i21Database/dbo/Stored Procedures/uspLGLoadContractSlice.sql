@@ -486,9 +486,9 @@ BEGIN TRY
 		LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
 		LEFT JOIN tblICItemContract IC ON IC.intItemId = I.intItemId
 			AND IC.intItemContractId = CD.intItemContractId
-		LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = ISNULL(IC.intCountryId, I.intOriginId)
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCountryID = IC.intCountryId
 			AND I.intCommodityId = CA.intCommodityId
-		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CA.intCommodityAttributeId = CTCQ.intCommodityAttributeId
+		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON isnull(CA.intCommodityAttributeId,I.intOriginId) = CTCQ.intCommodityAttributeId
 			AND CTCQ.intContainerTypeId = CT.intContainerTypeId
 		WHERE CD.intContractHeaderId = @intContractHeaderId AND ISNULL(CD.dblNetWeight,0) > 0
 
