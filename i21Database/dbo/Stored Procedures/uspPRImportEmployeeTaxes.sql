@@ -48,10 +48,11 @@ SELECT
 	,strLogLevel		= 'Error'
 	,strStatus		= 'Failed'
 	,intRowNo		= SE.intRowNumber
-	,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	FROM tblApiSchemaEmployeeTaxes SE
 	LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
 	WHERE SE.guiApiUniqueId = @guiApiUniqueId
+	AND SE.intEntityNo IS NULL
 
 SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniqueId = @guiApiUniqueId
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeTaxes)
