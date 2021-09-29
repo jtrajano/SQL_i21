@@ -26,7 +26,7 @@ DECLARE
 INSERT INTO #tblFAGaapDep
 SELECT intAssetDepreciationId, intAssetId, intBookId, dtmDepreciationToDate, dblDepreciationToDate, dblFunctionalDepreciationToDate, strTransaction, 0, 0 
 FROM tblFAFixedAssetDepreciation
-WHERE strTransaction = 'Depreciation' AND intBookId = 1 AND dblDepreciation = 0 AND dblFunctionalDepreciation = 0
+WHERE strTransaction IN ('Depreciation', 'Imported') AND intBookId = 1 AND dblDepreciation = 0 AND dblFunctionalDepreciation = 0
 ORDER BY intAssetId, intAssetDepreciationId
 
 WHILE EXISTS(SELECT TOP 1 1 FROM #tblFAGaapDep WHERE ysnProcessed = 0 AND intBookId = 1)
@@ -96,7 +96,7 @@ CREATE TABLE #tblFATaxDep (
 INSERT INTO #tblFATaxDep
 SELECT intAssetDepreciationId, intAssetId, intBookId, dtmDepreciationToDate, dblDepreciationToDate, dblFunctionalDepreciationToDate, strTransaction, 0, 0 
 FROM tblFAFixedAssetDepreciation
-WHERE strTransaction = 'Depreciation' AND intBookId = 2 AND dblDepreciation = 0 AND dblFunctionalDepreciation = 0
+WHERE strTransaction IN ('Depreciation', 'Imported') AND intBookId = 2 AND dblDepreciation = 0 AND dblFunctionalDepreciation = 0
 ORDER BY intAssetId, intAssetDepreciationId
 
 WHILE EXISTS(SELECT TOP 1 1 FROM #tblFATaxDep WHERE ysnProcessed = 0 AND intBookId = 2)
