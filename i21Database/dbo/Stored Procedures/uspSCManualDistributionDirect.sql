@@ -415,7 +415,7 @@ BEGIN TRY
 							,strCustomerReference = E.strCustomerReference
 					FROM tblSCTicket A
 					INNER JOIN tblLGLoadDetail B
-						ON A.intLoadDetailId = B.intLoadDetailId
+						ON B.intLoadDetailId = @intTickeLoadDetailId
 					INNER JOIN tblCTContractDetail C
 						ON B.intSContractDetailId = C.intContractDetailId
 					INNER JOIn tblCTContractHeader D
