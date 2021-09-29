@@ -38,14 +38,14 @@ SELECT
 	  guiApiImportLogDetailId = NEWID()
     , guiApiImportLogId = @guiLogId
     , strField = 'Entity No'
-    , strValue = strEntityNo
+    , strValue = strEntityNumber
     , strLogLevel = 'Error'
     , strStatus = 'Failed'
     , intRowNo = intRowNumber
-    , strMessage = 'Entity No ('+ SC.strEntityNo + ') already exists.'
+    , strMessage = 'Entity No ('+ SC.strEntityNumber + ') already exists.'
 FROM tblApiSchemaCustomer SC
 WHERE SC.guiApiUniqueId = @guiApiUniqueId
-AND EXISTS (SELECT TOP 1 NULL FROM tblEMEntity WHERE strEntityNo = strEntityNo)
+AND EXISTS (SELECT TOP 1 NULL FROM tblEMEntity WHERE strEntityNo = strEntityNumber)
 
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -333,7 +333,7 @@ DECLARE @intEntityId	INT
 DECLARE	@intContactId	INT
 DECLARE @intLocationId	INT
 
-DECLARE   @strEntityNo				NVARCHAR(100)
+DECLARE   @strEntityNumber				NVARCHAR(100)
 		, @strCustomerName				NVARCHAR(100)
 		, @strOriginationDate			NVARCHAR(100)
 		, @strDocumentDelivery			NVARCHAR(100)
@@ -404,7 +404,7 @@ DECLARE   @strEntityNo				NVARCHAR(100)
 DECLARE cursorSC CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT
-	  strEntityNo
+	  strEntityNumber
 	, strCustomerName
 	, strOriginationDate
 	, strDocumentDelivery
@@ -478,7 +478,7 @@ AND		intRowNumber NOT IN (SELECT intRowNo FROM tblApiImportLogDetail WHERE guiAp
 OPEN cursorSC;
 
 FETCH NEXT FROM cursorSC INTO 
-	  @strEntityNo
+	  @strEntityNumber
 	, @strCustomerName
 	, @strOriginationDate
 	, @strDocumentDelivery
@@ -559,7 +559,7 @@ BEGIN
 		, strStateTaxId
 	)
 	SELECT 
-		  (CASE WHEN ISNULL(@strEntityNo, '') = '' THEN  [dbo].[fnARGetEntityNumber]() ELSE @strEntityNo END)
+		  (CASE WHEN ISNULL(@strEntityNumber, '') = '' THEN  [dbo].[fnARGetEntityNumber]() ELSE @strEntityNumber END)
 		, @strCustomerName
 		, ''
 		, CASE WHEN ISNULL(@strOriginationDate, '') <> '' THEN CASE WHEN ISDATE(@strOriginationDate) = 1 THEN CAST(@strOriginationDate AS DATETIME) ELSE GETDATE() END ELSE GETDATE() END
@@ -741,7 +741,7 @@ SELECT
 	, @intLocationId
 	, @intLocationId
 	, 0
-	, CASE WHEN ISNULL(@strCustomerNumber, '') = '' THEN @strEntityNo ELSE @strCustomerNumber END
+	, CASE WHEN ISNULL(@strCustomerNumber, '') = '' THEN @strEntityNumber ELSE @strCustomerNumber END
 	, @guiApiUniqueId
 
 	IF @strPhone <> ''
@@ -769,7 +769,7 @@ SELECT
 	END
 
 	FETCH NEXT FROM cursorSC INTO 
-          @strEntityNo
+          @strEntityNumber
 		, @strCustomerName
 		, @strOriginationDate
 		, @strDocumentDelivery
