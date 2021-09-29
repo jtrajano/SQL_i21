@@ -15,7 +15,7 @@ DECLARE @EmployeeEntityNo AS INT
 DECLARE @intEntityNo AS INT
 DECLARE @strTimeOffId AS NVARCHAR(100)
 DECLARE @strTimeOffDesc AS NVARCHAR(100)
-DECLARE @dtmEligibleDate AS DATETIME
+DECLARE @dtmEligibleDate AS NVARCHAR(100)
 DECLARE @dblRate AS FLOAT(50)
 DECLARE @dblPerPeriod AS FLOAT(50) 
 DECLARE @strPeriod AS NVARCHAR(100)
@@ -24,7 +24,7 @@ DECLARE @strAwardOn AS NVARCHAR(100)
 DECLARE @dblMaxEarned AS FLOAT(50) 
 DECLARE @dblMaxCarryOver AS FLOAT(50) 
 DECLARE @dblMaxBalance AS FLOAT(50) 
-DECLARE @dtmLastAwardDate AS DATETIME
+DECLARE @dtmLastAwardDate AS NVARCHAR(100)
 DECLARE @dblHoursCarryOver AS FLOAT(50) 
 DECLARE @dblHoursAccrued AS FLOAT(50) 
 DECLARE @dblHoursEarned AS FLOAT(50) 
@@ -40,10 +40,11 @@ SELECT
 	,strLogLevel		= 'Error'
 	,strStatus		= 'Failed'
 	,intRowNo		= SE.intRowNumber
-	,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	FROM tblApiSchemaEmployeeTimeOff SE
 	LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = SE.intEntityNo
 	WHERE SE.guiApiUniqueId = @guiApiUniqueId
+	AND SE.intEntityNo IS NULL
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeTimeOff')) 
 DROP TABLE #TempEmployeeTimeOff
@@ -55,7 +56,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			 @intEntityNo =  intEntityNo
 			,@strTimeOffId =  strTimeOffId
 			,@strTimeOffDesc =  strTimeOffDesc
-			,@dtmEligibleDate =  CAST(ISNULL(dtmEligibleDate, null) AS DATETIME)
+			,@dtmEligibleDate = dtmEligibleDate
 			,@dblRate =  dblRate
 			,@dblPerPeriod =   dblPerPeriod
 			,@strPeriod =  strPeriod
@@ -64,7 +65,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			,@dblMaxEarned =   dblMaxEarned
 			,@dblMaxCarryOver =   dblMaxCarryOver
 			,@dblMaxBalance =   dblMaxBalance
-			,@dtmLastAwardDate =  CAST(ISNULL(dtmLastAwardDate, null) AS DATETIME)
+			,@dtmLastAwardDate =   dtmEligibleDate
 			,@dblHoursCarryOver =  dblHoursCarryOver 
 			,@dblHoursAccrued =   dblHoursAccrued
 			,@dblHoursEarned =   dblHoursEarned
@@ -112,12 +113,12 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,@dblMaxCarryOver
 					,@dblMaxEarned
 					,@dblMaxBalance
-					,@dtmLastAwardDate
+					,CONVERT(datetime, @dtmLastAwardDate, 101)
 					,@dblHoursAccrued
 					,@dblHoursEarned
 					,@dblHoursCarryOver
 					,@dblHoursUsed
-					,@dtmEligibleDate
+					,CONVERT(datetime, @dtmEligibleDate, 101)
 					,1
 					,1
 				)
@@ -138,12 +139,12 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,dblMaxCarryover = @dblMaxCarryOver
 					,dblMaxEarned = @dblMaxEarned
 					,dblMaxBalance = @dblMaxBalance
-					,dtmLastAward = @dtmLastAwardDate
+					,dtmLastAward = CONVERT(datetime, @dtmLastAwardDate, 101)
 					,dblHoursAccrued = @dblHoursAccrued
 					,dblHoursEarned = @dblHoursEarned
 					,dblHoursCarryover = @dblHoursCarryOver
 					,dblHoursUsed = @dblHoursUsed
-					,dtmEligible = @dtmEligibleDate
+					,dtmEligible = CONVERT(datetime, @dtmEligibleDate, 101)
 				WHERE intEmployeeTimeOffId = @intEntityNo
 				AND intTypeTimeOffId = (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
 
