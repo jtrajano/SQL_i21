@@ -518,7 +518,6 @@ LEFT JOIN (
 		 , strBOLNumberDetail		= NULL
 		 , strLotNumber				= NULL
 		 , strSubFormula			= NULL
-		 , dblTaxExempt				= NULL
 		 , strSCInvoiceNumber		= NULL
 		 , dtmDateSC				= NULL
 		 , dtmToCalculate			= NULL
