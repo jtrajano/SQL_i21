@@ -164,7 +164,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT507.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT511.sql" />
