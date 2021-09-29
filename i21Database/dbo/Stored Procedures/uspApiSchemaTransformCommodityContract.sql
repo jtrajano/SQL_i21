@@ -45,7 +45,7 @@ SELECT NEWID()
     , strLogLevel = 'Error'
     , strStatus = 'Failed'
     , intRowNo = sc.intRowNumber
-    , strMessage = 'The commodity ' + ISNULL(sc.strCommodity, '') + ' does not exist.'
+    , strMessage = 'The Commodity ' + ISNULL(sc.strCommodity, '') + ' does not exist.'
 FROM tblApiSchemaCommodityContract sc
 OUTER APPLY (
   SELECT TOP 1 * 
@@ -74,6 +74,46 @@ OUTER APPLY (
 WHERE sc.guiApiUniqueId = @guiApiUniqueId
     AND l.intCompanyLocationId IS NULL
 
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT NEWID()
+    , guiApiImportLogId = @guiLogId 
+    , strField = 'Freight Term'
+    , strValue = sc.strFreightTerm
+    , strLogLevel = 'Warning'
+    , strStatus = 'Ignored'
+    , intRowNo = sc.intRowNumber
+    , strMessage = 'The Freight Term ' + ISNULL(sc.strFreightTerm, '') + ' does not exist.'
+FROM tblApiSchemaCommodityContract sc
+OUTER APPLY (
+  SELECT TOP 1 * 
+  FROM tblSMFreightTerms xc
+  WHERE xc.strFreightTerm = sc.strFreightTerm OR xc.strDescription = sc.strFreightTerm
+) c
+WHERE sc.guiApiUniqueId = @guiApiUniqueId
+  AND c.intFreightTermId IS NULL
+  AND NULLIF(sc.strFreightTerm, '') IS NOT NULL
+
+INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+SELECT NEWID()
+    , guiApiImportLogId = @guiLogId 
+    , strField = 'Futures Mn/Yr'
+    , strValue = sc.strFuturesMonth
+    , strLogLevel = 'Warning'
+    , strStatus = 'Ignored'
+    , intRowNo = sc.intRowNumber
+    , strMessage = 'The Futures Mn/Yr ' + ISNULL(sc.strFuturesMonth, '') + ' does not exist.'
+FROM tblApiSchemaCommodityContract sc
+OUTER APPLY (
+  SELECT TOP 1 intFutureMarketId
+  FROM tblRKFutureMarket 
+  WHERE strFutMarketName = sc.strMarketName
+) fm
+LEFT JOIN vyuCTFuturesMonth fmm ON fmm.strFutureMonthYear = sc.strFuturesMonth
+  AND fmm.intFutureMarketId = fm.intFutureMarketId
+  AND fmm.ysnExpired = 0
+WHERE sc.guiApiUniqueId = @guiApiUniqueId
+  AND fmm.intFutureMonthId IS NULL
+  AND NULLIF(sc.strFuturesMonth, '') IS NOT NULL
   
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT
@@ -84,7 +124,7 @@ SELECT
     , strLogLevel = 'Error'
     , strStatus = 'Failed'
     , intRowNo = sc.intRowNumber
-    , strMessage = 'The pricing type ' + ISNULL(sc.strPricingType, '') + ' does not exist.'
+    , strMessage = 'The Pricing Type ' + ISNULL(sc.strPricingType, '') + ' does not exist.'
 FROM tblApiSchemaCommodityContract sc
 OUTER APPLY (
   SELECT TOP 1 * 
@@ -104,7 +144,7 @@ SELECT
     , strLogLevel = 'Error'
     , strStatus = 'Failed'
     , intRowNo = sc.intRowNumber
-    , strMessage = 'The salesperson ' + ISNULL(sc.strSalesperson, '') + ' does not exist.'
+    , strMessage = 'The Salesperson ' + ISNULL(sc.strSalesperson, '') + ' does not exist.'
 FROM tblApiSchemaCommodityContract sc
 OUTER APPLY(
   SELECT TOP 1 *
@@ -141,7 +181,8 @@ INSERT INTO tblCTContractHeader (
     , ysnSigned
     , ysnPrinted
     , intPositionId
-    , intCropYearId)
+    , intCropYearId
+    , intFreightTermId)
 SELECT DISTINCT
     @guiApiUniqueId
   , MIN(sc.intRowNumber)
@@ -160,6 +201,7 @@ SELECT DISTINCT
   , 0
   , pos.intPositionId
   , cr.intCropYearId
+  , ft.intFreightTermId
 FROM tblApiSchemaCommodityContract sc
 CROSS APPLY (
   SELECT TOP 1 *
@@ -172,6 +214,11 @@ CROSS APPLY (
   FROM vyuApiEntity spe 
   WHERE spe.strName = sc.strSalesperson AND spe.strType = 'Salesperson'
 ) sp
+OUTER APPLY (
+  SELECT TOP 1 xt.intFreightTermId
+  FROM tblSMFreightTerms xt
+  WHERE xt.strFreightTerm = sc.strFreightTerm OR xt.strDescription = sc.strFreightTerm
+) ft
 JOIN tblICCommodity c ON c.strCommodityCode = sc.strCommodity
 JOIN tblCTPricingType pt ON pt.strPricingType = sc.strPricingType
   AND pt.intPricingTypeId != 6
@@ -201,6 +248,7 @@ GROUP BY
   , sp.intEntityId
   , c.intCommodityId
   , cu.intCommodityUnitMeasureId
+  , ft.intFreightTermId
 
  -- Validate details
   INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -423,6 +471,7 @@ BEGIN
     , dblCashPrice
     , dblTotalCost
     , intFutureMarketId
+    , intFutureMonthId
     , intItemUOMId
     , intPriceItemUOMId
     , intCurrencyId
@@ -450,6 +499,7 @@ BEGIN
     , dblCashPrice = (ISNULL(sc.dblCashPrice, 0))
     , dblTotalCost = (ISNULL(sc.dblCashPrice, 0) * ISNULL(sc.dblQuantity, 0))
     , intFutureMarketId = fm.intFutureMarketId
+    , intFutureMonthId = fmm.intFutureMonthId
     , intItemUOMId = iu.intItemUOMId
     , intPriceItemUOMId = pu.intItemUOMId
     , intCurrencyId = c.intCurrencyID
@@ -512,6 +562,9 @@ BEGIN
       FROM tblRKFutureMarket 
       WHERE strFutMarketName = sc.strMarketName
     ) fm
+    LEFT JOIN vyuCTFuturesMonth fmm ON fmm.strFutureMonthYear = sc.strFuturesMonth
+      AND fmm.intFutureMarketId = fm.intFutureMarketId
+      AND fmm.ysnExpired = 0
     JOIN vyuApiEntity e ON e.intEntityId = @intEntityId
       AND e.strType = CASE @intContractTypeId WHEN 1 THEN 'Vendor' ELSE 'Customer' END
     JOIN vyuApiEntity sp ON sp.intEntityId = @intSalespersonId
@@ -544,6 +597,7 @@ BEGIN
     , sc.strRemark
     , st.intContractStatusId
     , fm.intFutureMarketId
+    , fmm.intFutureMonthId
     , cu.intUnitMeasureId
     , sc.dblQuantity
     , sc.dblFutures

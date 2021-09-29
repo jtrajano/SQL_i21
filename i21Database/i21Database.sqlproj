@@ -165,8 +165,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBoilerplate.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
+    <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
     <Build Include="dbo\Views\vyuAPBillForImport.sql" />
@@ -188,6 +188,19 @@
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
+    <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomer.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCustomer.sql" />
+    <Build Include="dbo\Functions\fnARGetEntityNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

@@ -48,10 +48,11 @@ SELECT
 	,strLogLevel		= 'Error'
 	,strStatus		= 'Failed'
 	,intRowNo		= SE.intRowNumber
-	,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	FROM tblApiSchemaEmployeeTaxes SE
 	LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
 	WHERE SE.guiApiUniqueId = @guiApiUniqueId
+	AND SE.intEntityNo IS NULL
 
 SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniqueId = @guiApiUniqueId
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeTaxes)
@@ -64,7 +65,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@intEntityEmployeeId = intEntityNo
 			,@strCalculationType  = strCalculationType
 			,@strFilingStatus  = strFilingStatus
-			,@intSupplementalCalc = strSupplimentalCalc
+			,@intSupplementalCalc = (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
 			,@dblAmount = dblAmount
 			,@dblExtraWithholding = dblExtraWithholding
 			,@dblLimit = dblLimit
@@ -128,7 +129,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,EMT.strFilingStatus
 						,@TaxStateId
 						,@TaxLocalId
-						,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
+						,@intSupplementalCalc
 						,EMT.dblAmount
 						,EMT.dblExtraWithholding
 						,EMT.dblLimit
