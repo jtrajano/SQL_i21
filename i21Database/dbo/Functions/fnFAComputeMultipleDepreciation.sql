@@ -88,7 +88,7 @@ JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciatio
 JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
 	SELECT TOP 1 dblDepreciationToDate, strTransaction FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
-	AND ISNULL(intBookId,1) = @BookId
+	AND ISNULL(intBookId,1) = @BookId AND strTransaction <> 'Place in service'
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
 OUTER APPLY (
@@ -376,11 +376,10 @@ OUTER APPLY(
 	SELECT t=
 	CASE
 	WHEN A.dtmImportedDepThru IS NULL THEN 0
-	WHEN Dep.dtmDepreciationToDate IS NULL  THEN 0   
 	WHEN A.dtmImportedDepThru > PrevDepPlusOneMonth.dtmEndDate THEN 0
 	WHEN A.dtmImportedDepThru = PrevDepPlusOneMonth.dtmEndDate
 		THEN
-			CASE WHEN A.strTransaction = 'Place in service' OR Dep.strTransaction IS NULL THEN 0
+			CASE WHEN A.strTransaction = 'Place in service' THEN 0
 			ELSE 2
 			END
 	ELSE 
@@ -424,11 +423,6 @@ ELSE -- No Adjustment or Adjustment Add to Basis
 UPDATE @tblAssetInfo
 set dblMonth = ROUND(dblMonth, 2),
 dblDepre =  ROUND(dblDepre, 2)
-
-UPDATE @tblAssetInfo 
-SET dblMonth = 0, dblDepre = 0, dblBasis = 0
-WHERE strAssetTransaction IS NULL
-
    
 INSERT INTO @tbl(
 	intAssetId,
