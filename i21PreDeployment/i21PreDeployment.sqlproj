@@ -416,7 +416,4 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\7_AR\15_FixtblARCustomer_MissingColumn.sql" />
-  </ItemGroup>
 </Project>
