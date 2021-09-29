@@ -33,10 +33,11 @@ DECLARE @ysnActive AS BIT
 	   ,strLogLevel		= 'Error'
 	   ,strStatus		= 'Failed'
 	   ,intRowNo		= SE.intRowNumber
-	   ,strMessage		= 'Cannot find the Employee Entity No: '+ ISNULL(SE.intEntityNo,'') + '.'
+	   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	   FROM tblApiSchemaEmployeeDirectDeposit SE
 	   LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = SE.intEntityNo
 	   WHERE SE.guiApiUniqueId = @guiApiUniqueId
+	   AND SE.intEntityNo IS NULL
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDirectDeposit')) 
 	DROP TABLE #TempEmployeeDirectDeposit
@@ -51,7 +52,7 @@ DECLARE @ysnActive AS BIT
 			,@strAccountNumber = strAccountNumber
 			,@strAccountType = strAccountType
 			,@strClassification = strClassification
-			,@dtmEffectiveDate	= CAST(ISNULL(dtmEffectiveDate, null) AS DATETIME)
+			,@dtmEffectiveDate	= dtmEffectiveDate
 			,@ysnPreNoteSent = ysnPreNoteSent
 			,@strDistributionType = strDistributionType
 			,@dblAmount	= dblAmount
@@ -96,7 +97,7 @@ DECLARE @ysnActive AS BIT
 							,dbo.fnAESEncryptASym(@strAccountNumber)
 							,@strAccountType
 							,@strClassification
-							,@dtmEffectiveDate
+							,CAST(@dtmEffectiveDate as date)
 							,@ysnActive
 							,@ysnPreNoteSent
 							,1
@@ -127,7 +128,7 @@ DECLARE @ysnActive AS BIT
 							strAccountNumber = dbo.fnAESEncryptASym(@strAccountNumber), 
 							strAccountType = @strAccountType,
 							strAccountClassification = @strClassification, 
-							dtmEffectiveDate = @dtmEffectiveDate,
+							dtmEffectiveDate = CAST(@dtmEffectiveDate as date),
 							ysnActive = @ysnActive,
 							ysnPrenoteSent = @ysnPreNoteSent,
 							ysnPrintNotifications = 0,
