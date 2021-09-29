@@ -5202,11 +5202,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Promotion
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Store.view.Promotions?showSearch=true&searchCommand=SearchPromotions' WHERE strMenuName = 'Promotions' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
 
--- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Mass' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
--- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
--- 	VALUES (N'Inventory Mass', N'Store', @StorePricebookParentMenuId, N'Inventory Mass', N'Pricebook', N'Screen', N'Store.view.InventoryMassMaintenance?showSearch=true&searchCommand=SearchInventoryMassMaintenance', N'small-menu-pricebook', 0, 0, 0, 1, 3, 1)
--- ELSE
--- 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Store.view.InventoryMassMaintenance?showSearch=true&searchCommand=SearchInventoryMassMaintenance' WHERE strMenuName = 'Inventory Mass' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Item Quick Entry' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Item Quick Entry', N'Store', @StorePricebookParentMenuId, N'Item Quick Entry', N'Pricebook', N'Screen', N'Store.view.InventoryMassMaintenance?showSearch=true&searchCommand=SearchInventoryMassMaintenance', N'small-menu-pricebook', 0, 0, 0, 1, 3, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'Store.view.InventoryMassMaintenance?showSearch=true&searchCommand=SearchInventoryMassMaintenance' WHERE strMenuName = 'Inventory Mass' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Item Data' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
