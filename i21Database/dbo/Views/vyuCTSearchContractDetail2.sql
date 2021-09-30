@@ -51,7 +51,7 @@ WITH shipmentstatus AS (
 
 , approved AS (
 	SELECT intContractDetailId
-		, dblRepresentingQty = CASE WHEN SUM(dblRepresentingQty) > dblQuantity THEN dblQuantity ELSE SUM(dblRepresentingQty) END
+		, dblRepresentingQty = CASE WHEN SUM(dblRepresentingQty) >= dblQuantity THEN dblQuantity ELSE SUM(dblRepresentingQty) END
 	FROM (
 		SELECT ccc.intContractDetailId
 			,ccc.dblQuantity
@@ -168,7 +168,7 @@ SELECT a.intContractDetailId
 	, za.strApprovalBasis
 	--, strApprovalBasis = au.strWeightGradeDesc
 	, ysnApproved = ISNULL(TR.ysnOnceApproved, 0)
-	, dblApprovedQty = QA.dblApprovedQty
+	, dblApprovedQty = aa.dblRepresentingQty
 	, strAssociationName = zb.strName
 	, a.dblAssumedFX
 	, dblBalLotsToHedge = a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0)
@@ -409,7 +409,7 @@ LEFT JOIN tblICItemUOM cm WITH(NOLOCK) ON cm.intItemUOMId = a.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMeasureId
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
 LEFT JOIN tblEMEntityLocation ESL on ESL.intEntityLocationId = a.intShipToId -- CT-5315
-OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
+--OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
 LEFT JOIN (
     SELECT *
     FROM
