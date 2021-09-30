@@ -200,7 +200,6 @@
     <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomer.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomer.sql" />
-    <Build Include="dbo\Functions\fnARGetEntityNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
