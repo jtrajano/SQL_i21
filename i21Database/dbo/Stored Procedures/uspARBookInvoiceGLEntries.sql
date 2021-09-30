@@ -2,31 +2,11 @@
      @Post              BIT				= 0
 	,@BatchId           NVARCHAR(40)
     ,@UserId            INT
-    ,@raiseError		AS BIT			= 0
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
-SET XACT_ABORT ON  
-
-DECLARE  @InitTranCount				INT
-		,@CurrentTranCount			INT
-		,@Savepoint					NVARCHAR(32)
-		,@CurrentSavepoint			NVARCHAR(32)
-
-SET @InitTranCount = @@TRANCOUNT
-SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
-
-IF ISNULL(@raiseError,0) = 0
-BEGIN
-	IF @InitTranCount = 0
-		BEGIN TRANSACTION
-	ELSE
-		SAVE TRANSACTION @Savepoint
-END
-
-BEGIN TRY
 
 DECLARE @GLPost RecapTableType
 INSERT INTO @GLPost
@@ -322,26 +302,4 @@ IF @Post = 0
   --      END	
     END
 
-END TRY
-BEGIN CATCH
-    DECLARE @ErrorMerssage NVARCHAR(MAX)
-	SELECT @ErrorMerssage = ERROR_MESSAGE()
-
-	IF @raiseError = 0
-	BEGIN
-		IF @InitTranCount = 0
-			IF (XACT_STATE()) <> 0
-				ROLLBACK TRANSACTION
-		ELSE
-			IF (XACT_STATE()) <> 0
-				ROLLBACK TRANSACTION @Savepoint
-	END
-
-	IF @raiseError = 1
-        RAISERROR(@ErrorMerssage, 11, 1)
-		
-	GOTO Post_Exit
-END CATCH
-
-Post_Exit:
-	RETURN 0;
+RETURN 0
