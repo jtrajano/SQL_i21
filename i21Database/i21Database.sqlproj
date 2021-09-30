@@ -200,6 +200,14 @@
     <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomer.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemAccount.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemLocation.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
