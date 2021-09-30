@@ -202,6 +202,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomer.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomer.sql" />
     <Build Include="dbo\Functions\fnARGetEntityNumber.sql" />
+    <Build Include="dbo\Views\vyuCTFutureMarketItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
