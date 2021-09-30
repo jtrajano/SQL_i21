@@ -177,7 +177,9 @@ WHERE strConvention = 'Mid Year' AND strError IS NULL
 IF (@BookId = 2)
 BEGIN
 		UPDATE A
-		SET A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
+		SET 
+			A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0),
+			A.dblMonth = ISNULL(A.dblMonth, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
 		FROM  @tblAssetInfo A
 		JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
 		JOIN @Id I ON I.intId = A.intAssetId
@@ -283,7 +285,9 @@ WHERE strError IS NULL
 IF (@BookId = 2)
 BEGIN
 	UPDATE A
-	SET A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
+	SET 
+		A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0),
+		A.dblMonth = ISNULL(A.dblMonth, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
 	FROM  @tblAssetInfo A
 	JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
 	JOIN @Id I ON I.intId = A.intAssetId

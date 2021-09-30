@@ -31,6 +31,10 @@ RETURNS @tbl TABLE (
 		dtmDispositionDate DATETIME,
 		dblSalvageValue DECIMAL(18, 6),
 		dblFunctionalSalvageValue DECIMAL(18, 6),
+		dblSection179 DECIMAL(18, 6),
+		dblFunctionalSection179 DECIMAL(18, 6),
+		dblBonusDepreciation DECIMAL(18, 6),
+		dblFunctionalBonusDepreciation DECIMAL(18, 6),
 		intConcurrencyId INT
 	)
 AS
@@ -66,6 +70,10 @@ DECLARE @tblFixedAssetHistory TABLE (
 		dtmDispositionDate DATETIME,
 		dblSalvageValue DECIMAL(18, 6),
 		dblFunctionalSalvageValue DECIMAL(18, 6),
+		dblSection179 DECIMAL(18, 6),
+		dblFunctionalSection179 DECIMAL(18, 6),
+		dblBonusDepreciation DECIMAL(18, 6),
+		dblFunctionalBonusDepreciation DECIMAL(18, 6),
 		intConcurrencyId INT
 	)
 
@@ -104,6 +112,10 @@ INSERT INTO @tblFixedAssetHistory
 	NULL, 
 	FA.dblSalvageValue,
 	ROUND((FA.dblSalvageValue * ISNULL(FA.dblForexRate, 1)), 2) dblFunctionalSalvageValue,
+	0,
+	0,
+	0,
+	0,
 	FA.intConcurrencyId
  FROM tblFAFixedAsset FA
  LEFT JOIN tblGLDetail GL ON GL.intTransactionId = FA.intAssetId AND GL.strReference = FA.strAssetId
@@ -159,6 +171,10 @@ ISNULL(GAAP.dtmDateInService, Tax.dtmDateInService)dtmDateInService,
 ISNULL(GAAP.dtmDispositionDate,Tax.dtmDispositionDate)dtmDispositionDate,
 ISNULL(GAAP.dblSalvageValue, Tax.dblSalvageValue)dblSalvageValue,
 ISNULL(GAAP.dblFunctionalSalvageValue, Tax.dblFunctionalSalvageValue)dblFunctionalSalvageValue,
+CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblSection179, 0) ELSE 0 END,
+CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblFunctionalSection179, 0) ELSE 0 END,
+CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblBonusDepreciation, 0) ELSE 0 END,
+CASE WHEN TaxFirstDepreciation.dtmDepreciationToDate = G.dtmDepreciationToDate THEN ISNULL(TaxFirstDepreciation.dblFunctionalBonusDepreciation, 0) ELSE 0 END,
 ISNULL(GAAP.intConcurrencyId, Tax.intConcurrencyId)intConcurrencyId
 FROM tblFAFixedAssetDepreciation G
 outer apply(
@@ -206,7 +222,7 @@ OUTER APPLY(
 	dtmDispositionDate,
 	A.dblSalvageValue,
 	A.dblFunctionalSalvageValue,
-	dblRate,
+	A.dblRate,
 	dblDepreciation,
 	dblFunctionalDepreciation,
 	A.intConcurrencyId
@@ -214,7 +230,7 @@ OUTER APPLY(
 	LEFT JOIN tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
 	WHERE dtmDepreciationToDate = G.dtmDepreciationToDate 
 	AND A.intAssetId = G.intAssetId
-	AND intBookId = 2
+	AND A.intBookId = 2
 	AND A.strTransaction = G.strTransaction
 )Tax
 OUTER APPLY (
@@ -223,6 +239,17 @@ OUTER APPLY (
 	WHERE FAD.intAssetId = G.intAssetId AND FAD.intBookId = 2 AND FAD.strTransaction = 'Depreciation'
 	ORDER BY FAD.dtmDepreciationToDate DESC
 ) FullyDepreciatedTax
+
+OUTER APPLY (
+	SELECT TOP 1 BD.dblSection179, BD.dblFunctionalSection179, BD.dblBonusDepreciation, BD.dblFunctionalBonusDepreciation, dtmDepreciationToDate
+	FROM tblFABookDepreciation BD 
+	LEFT JOIN tblFAFixedAssetDepreciation A on A.intAssetId = BD.intAssetId AND A.intBookId = 2
+	WHERE BD.intAssetId = G.intAssetId
+	AND BD.intBookId = 2
+	AND A.strTransaction = G.strTransaction
+	AND A.strTransaction = 'Depreciation'
+	ORDER BY dtmDepreciationToDate
+) TaxFirstDepreciation
 
 
 INSERT INTO @tbl
