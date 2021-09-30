@@ -468,19 +468,20 @@ BEGIN TRY
 		WHERE CD.intContractHeaderId = @intContractHeaderId
 
 		UPDATE CD
-		SET intNumberOfContainers = CEILING(CD.dblNetWeight / ISNULL(CASE 
+		SET intNumberOfContainers = CEILING((case when CTCQ.intContainerTypeCommodityQtyId is null then CD.dblNetWeight else dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CTCQCOMM.intItemUOMId,CD.dblNetWeight) end)  / ISNULL(
+						CASE 
 						WHEN ISNULL(CASE 
 									WHEN LOWER(ISNULL(CD.strPackingDescription, '')) = 'bags'
 										THEN CTCQ.dblQuantity
 									ELSE CTCQ.dblBulkQuantity
 									END, 0) = 0
-							THEN CD.dblNetWeight
+							THEN (case when CTCQ.intContainerTypeCommodityQtyId is null then CD.dblNetWeight else dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CTCQCOMM.intItemUOMId,CD.dblNetWeight) end)
 						ELSE CASE 
 								WHEN LOWER(ISNULL(CD.strPackingDescription, '')) = 'bags'
 									THEN CTCQ.dblQuantity
 								ELSE CTCQ.dblBulkQuantity
 								END
-						END, CD.dblNetWeight))
+						END, (case when CTCQ.intContainerTypeCommodityQtyId is null then CD.dblNetWeight else dbo.fnCTConvertQtyToTargetItemUOM(CD.intNetWeightUOMId,CTCQCOMM.intItemUOMId,CD.dblNetWeight) end)))
 		FROM tblCTContractDetail CD
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = CD.intContainerTypeId
 		LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
@@ -490,6 +491,7 @@ BEGIN TRY
 			AND I.intCommodityId = CA.intCommodityId
 		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON isnull(CA.intCommodityAttributeId,I.intOriginId) = CTCQ.intCommodityAttributeId
 			AND CTCQ.intContainerTypeId = CT.intContainerTypeId
+		LEFT JOIN tblICItemUOM CTCQCOMM on CTCQCOMM.intItemId = CD.intItemId and CTCQCOMM.intUnitMeasureId = CTCQ.intUnitMeasureId
 		WHERE CD.intContractHeaderId = @intContractHeaderId AND ISNULL(CD.dblNetWeight,0) > 0
 
 		DELETE
