@@ -1,8 +1,14 @@
-﻿CREATE PROCEDURE dbo.uspApiSchemaTransformCustomer (
+﻿CREATE PROCEDURE [dbo].[uspApiSchemaTransformCustomer] (
       @guiApiUniqueId UNIQUEIDENTIFIER
     , @guiLogId UNIQUEIDENTIFIER
 )
 AS
+
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET ANSI_WARNINGS OFF
+SET XACT_ABORT ON
 
 -- VALIDATE
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -548,6 +554,11 @@ FETCH NEXT FROM cursorSC INTO
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
+	IF(ISNULL(@strEntityNumber, '') = '')
+	BEGIN
+		EXEC uspSMGetStartingNumber 43, @strEntityNumber OUT
+	END
+
 	INSERT INTO tblEMEntity(
 		  strEntityNo
 		, strName
@@ -559,7 +570,7 @@ BEGIN
 		, strStateTaxId
 	)
 	SELECT 
-		  (CASE WHEN ISNULL(@strEntityNumber, '') = '' THEN  [dbo].[fnARGetEntityNumber]() ELSE @strEntityNumber END)
+		  @strEntityNumber
 		, @strCustomerName
 		, ''
 		, CASE WHEN ISNULL(@strOriginationDate, '') <> '' THEN CASE WHEN ISDATE(@strOriginationDate) = 1 THEN CAST(@strOriginationDate AS DATETIME) ELSE GETDATE() END ELSE GETDATE() END
