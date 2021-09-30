@@ -320,7 +320,7 @@ IF (@ysnAdjustBasis IS NULL OR @ysnAdjustBasis <> 0) -- No Adjustment OR Adustme
 	AND strError IS NULL 
 ELSE -- Adjustment Not Add to Basis
 	UPDATE B set dblDepre = dblBasis + @dblAdjustment, 
-	dblMonth = dblBasis - U.dblDepreciationToDate
+	dblMonth = (dblBasis + @dblAdjustment) - U.dblDepreciationToDate
 	FROM @tblAssetInfo B JOIN
 	tblFABookDepreciation BD 
 	ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
