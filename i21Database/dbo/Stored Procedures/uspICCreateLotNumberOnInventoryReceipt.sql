@@ -326,13 +326,13 @@ BEGIN
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
 			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate
 			,intOriginId			= ItemLot.intOriginId
-			,intGradeId				= ISNULL(ItemLot.intGradeId, ReceiptItem.intGradeId)
+			,intGradeId				= COALESCE(ItemLot.intGradeId, ReceiptItem.intGradeId, SourceLot.intGradeId)
 			,strBOLNo				= Receipt.strBillOfLading
 			,strVessel				= Receipt.strVessel
 			,strReceiptNumber		= Receipt.strReceiptNumber
-			,strMarkings			= ItemLot.strMarkings
+			,strMarkings			= COALESCE(ItemLot.strMarkings, SourceLot.strMarkings)
 			,strNotes				= ItemLot.strRemarks
-			,intEntityVendorId		= ISNULL(ItemLot.intEntityVendorId, Receipt.intEntityVendorId)  
+			,intEntityVendorId		= COALESCE(ItemLot.intEntityVendorId, Receipt.intEntityVendorId, SourceLot.intEntityVendorId)  
 			,strVendorLotNo			= ItemLot.strVendorLotId
 			,strGarden				= ItemLot.strGarden
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
@@ -344,7 +344,7 @@ BEGIN
 			,strSourceTransactionId		= Receipt.strReceiptNumber
 			,intSourceTransactionTypeId = @InventoryTransactionType_InventoryReceipt
 			,strContainerNo			= ItemLot.strContainerNo
-			,strCondition			= ISNULL(NULLIF(ItemLot.strCondition, ''), @DefaultLotCondition)
+			,strCondition			= COALESCE(NULLIF(ItemLot.strCondition, ''), SourceLot.strCondition, @DefaultLotCondition)
 			,intInventoryReceiptId			= Receipt.intInventoryReceiptId
 			,intInventoryReceiptItemId		= ReceiptItem.intInventoryReceiptItemId
 			,intInventoryReceiptItemLotId	= ItemLot.intInventoryReceiptItemLotId
