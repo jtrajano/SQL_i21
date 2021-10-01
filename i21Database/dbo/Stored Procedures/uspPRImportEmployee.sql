@@ -56,6 +56,11 @@ DECLARE @intLanguageId as NVARCHAR(50)
 DECLARE @strEntityNo as NVARCHAR(50)
 DECLARE @ysnActive as BIT
 DECLARE @strDocumentDelivery  as NVARCHAR(50)
+DECLARE @strDocumentDelivery1  as NVARCHAR(50)
+DECLARE @strDocumentDelivery2  as NVARCHAR(50)
+DECLARE @strDocumentDelivery3 as NVARCHAR(50)
+
+
 DECLARE @strExternalERPId as NVARCHAR(50)
 DECLARE @intEntityRank as NVARCHAR(50)
 DECLARE @strDepartment as NVARCHAR(50)
@@ -67,6 +72,7 @@ DECLARE @strCity as NVARCHAR(50)
 DECLARE @strState as NVARCHAR(50)
 DECLARE @strCountry as NVARCHAR(50)
 DECLARE @strZipCode as NVARCHAR(50)
+DECLARE @strEmPhone as NVARCHAR(50)
 
 DECLARE @strEmployeeId as NVARCHAR(50)
 DECLARE @strNameSuffix as NVARCHAR(50)
@@ -82,6 +88,8 @@ DECLARE @strEmergencyPhone as NVARCHAR(50)
 DECLARE @strEmergencyPhone2 as NVARCHAR(50)
 DECLARE @dtmBirthDate as NVARCHAR(50)
 DECLARE @dtmOriginalDateHired as NVARCHAR(50)
+DECLARE @dtmOriginationDate as NVARCHAR(50)
+
 DECLARE @strGender as NVARCHAR(50)
 DECLARE @dtmDateHired as NVARCHAR(50)
 DECLARE @strSpouse as NVARCHAR(50)
@@ -155,13 +163,16 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,intLanguageId
 				,strEntityNo
 				,ysnActive
-				,strDocumentDelivery
+				--,strDocumentDelivery
 				,strExternalERPId
 				,intEntityRank
 				,strDateFormat
 				,strNumberFormat
 				,strFieldDelimiter
 				,strDepartment
+				,strSuffix
+				,dtmOriginationDate
+				,strMobile
 				) SELECT strName
 					,strEmail
 					,ysn1099Employee
@@ -173,28 +184,79 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					,1
 					,strEmployeeId
 					,ysnActive
-					,strDocumentDelivery1 + ',' + strDocumentDelivery2 + ',' + strDocumentDelivery3
+					--,ISNULL(EME.strDocumentDelivery1,'')  + ',' +ISNULL(EME.strDocumentDelivery2,'') + ',' + ISNULL(EME.strDocumentDelivery3,'')
 					,strExternalERPId
-					,strRank					= (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = strRank)
+					,strRank					= (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = EME.strRank)
 					,'M/d/yyyy'
 					,'1,234,567.89'
 					,'Comma'
 					,strDepartment1
+					,strSuffix
+					,dtmOriginationDate
+					,EME.strEMPhone
 					FROM #TempEmployeeDetails EME
 					WHERE EME.strEmployeeId = @EmployeeID
 
 				SET @NewId = SCOPE_IDENTITY()
+
+				SET @strDocumentDelivery = ''
+
+				SELECT TOP 1 
+				@strDocumentDelivery1 = DC.strDocumentDelivery1,
+				@strDocumentDelivery2 = DC.strDocumentDelivery2,
+				@strDocumentDelivery3 = DC.strDocumentDelivery3,
+				@strEmPhone = strEMPhone
+				FROM #TempEmployeeDetails DC WHERE DC.strEmployeeId = @EmployeeID
+
+				IF @strDocumentDelivery1 IS NOT NULL
+				BEGIN
+					SET @strDocumentDelivery = @strDocumentDelivery1
+
+				END
+
+				IF @strDocumentDelivery2 IS NOT NULL
+				BEGIN
+					IF @strDocumentDelivery IS NULL
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery2
+						END
+					ELSE
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery + ',' + @strDocumentDelivery2
+						END
+				END
+
+				IF @strDocumentDelivery3 IS NOT NULL
+				BEGIN
+					IF @strDocumentDelivery IS NULL
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery3
+						END
+					ELSE
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery + ',' + @strDocumentDelivery3
+						END
+				END
 				
+				UPDATE tblEMEntity SET strDocumentDelivery = @strDocumentDelivery  WHERE intEntityId = @NewId
+
+				
+
 				DECLARE @ysnDefault BIT
 				SET @ysnDefault = 1
+
+				--INSERT [dbo].[tblEMEntity] ([strName], strNickName, strTitle, strContactNumber,strMobile)
+				--SELECT strName,strName,strTitle,strContactNumber,strEMPhone FROM #TempEmployeeDetails CT WHERE CT.strEmployeeId = @EmployeeID
+
+				DECLARE @EntityPhoneID AS NVARCHAR(50)
+				SET @EntityPhoneID = SCOPE_IDENTITY()
 
 				INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
 				select top 1 @NewId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
 
-				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strCountry], [strZipCode],[strTimezone], [ysnDefaultLocation])
-				SELECT @NewId, @EmployeeID + ' ' + strFirstName + ' ' + strMiddleName + ' ' + strLastName, '',strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault
-				FROM #TempEmployeeDetails
-
+				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strCountry], [strZipCode],[strTimezone], [ysnDefaultLocation],[strCheckPayeeName])
+				SELECT @NewId, @EmployeeID + ' ' + strFirstName + ' ' + strMiddleName + ' ' + strLastName, '',strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName
+				FROM #TempEmployeeDetails LC WHERE LC.strEmployeeId = @EmployeeID
 
 				DECLARE @EntityLocationId INT
 				SET @EntityLocationId = SCOPE_IDENTITY()
@@ -202,8 +264,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				DECLARE @EntityContactId INT
 				SET @EntityContactId = SCOPE_IDENTITY()
 
-				INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact)
-				VALUES							  (@NewId, @NewId, (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @NewId), 0,@ysnDefault)
+				INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact,intConcurrencyId)
+				VALUES							  (@NewId, @EntityPhoneID, (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @NewId), 0,@ysnDefault,1)
 
 
 				if not exists(select top 1 1 from tblEMEntityType where intEntityId = @NewId)
@@ -273,7 +335,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					strNameSuffix,
 					strType,
 					strPayPeriod,
-					intRank									= (SELECT TOP 1 intEmployeeRankId FROM tblPREmployeeRank where intEmployeeRankId = intRank),
+					intRank									= (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = PRST.strRank),
 					dtmReviewDate,
 					dtmNextReview,
 					strTimeEntryPassword,
@@ -479,16 +541,19 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						,@strEmail = strEmail
 						,@ysnPrint1099 = ysn1099Employee
 						,@strContactNumber = strContactNumber
-						,@strTitle = @strTitle
-						,@strPhone = @strPhone
-						,@strEmail2 = @strEmail2
-						,@strTimezone = @strTimezone
-						,@intLanguageId = @intLanguageId
-						,@strEntityNo = @strEntityNo
+						,@strTitle = A.strTitle
+						,@strPhone = strPhone
+						,@strEmail2 = strEmail
+						,@strTimezone = strTimezone
+						,@strEntityNo = strEmployeeId
 						,@ysnActive = ysnActive
-						,@strDocumentDelivery = strDocumentDelivery1 + ',' + strDocumentDelivery2 + ',' + strDocumentDelivery3
-						,@strExternalERPId = @strExternalERPId
-						,@intEntityRank = (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = strRank)
+						,@strEmPhone = strEMPhone
+						--,@strDocumentDelivery = strDocumentDelivery1 + ',' + strDocumentDelivery2 + ',' + strDocumentDelivery3
+						,@strDocumentDelivery1 = strDocumentDelivery1
+						,@strDocumentDelivery2 = strDocumentDelivery2
+						,@strDocumentDelivery3 = strDocumentDelivery3
+						,@strExternalERPId = strExternalERPId
+						,@intEntityRank = (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = A.strRank)
 						,@strDepartment = strDepartment1
 						,@strFirstName = strFirstName
 						,@strMiddleName = strMiddleName
@@ -497,11 +562,12 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						,@strState = strState
 						,@strCountry = strCountry
 						,@strZipCode =strZipCode
+						,@dtmOriginationDate = dtmOriginationDate
 
 						,@strNameSuffix = strSuffix
 						,@strType = strType
 						,@strPayPeriod = strPayPeriod
-						,@intRank = (SELECT TOP 1 intEmployeeRankId FROM tblPREmployeeRank where intEmployeeRankId = intRank)
+						,@intRank = (SELECT TOP 1 intRank FROM tblPREmployeeRank where strDescription = A.strRank)
 						,@dtmReviewDate = dtmReviewDate
 						,@dtmNextReview = dtmNextReview
 						,@strTimeEntryPassword = strTimeEntryPassword
@@ -539,34 +605,73 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				--UPDATE ENTITY
 				UPDATE tblEMEntity SET
 				 strName = @strName
+				,strSuffix = @strNameSuffix
 				,strEmail = @strEmail
 				,ysnPrint1099 = @ysnPrint1099
 				,strContactNumber = @strContactNumber
 				,strTitle = @strTitle
 				,strPhone = @strPhone
-				,strEmail2 = @strEmail2
+				,strEmail2 = @strEmail
 				,strTimezone = @strTimezone
-				,intLanguageId = @intLanguageId
 				,strEntityNo = @strEntityNo
 				,ysnActive = @ysnActive
-				,strDocumentDelivery = @strDocumentDelivery
 				,strExternalERPId = @strExternalERPId
 				,intEntityRank = @intEntityRank
 				,strDepartment = @strDepartment
+				,dtmOriginationDate = @dtmOriginationDate
+				,strMobile = @strEmPhone
 				WHERE intEntityId = @EntityId
 
+				--UPDATE tblEMEntity SET
+				--	strMobile = @strEmPhone
+				--WHERE intEntityId = (@EntityId + 1)
 
-				--UPDATE tblEMEntityPhoneNumber SET strPhone = @strPhone WHERE intEntityPhoneNumberId = (SELECT TOP 1 intEntityPhoneNumberId FROM tblEMEntityPhoneNumber WHERE intEntityId = @EntityId)
 
-				--UPDATE tblEMEntityLocation SET 
-				--[strLocationName] = @EmployeeID + ' ' + @strFirstName + ' ' + @strMiddleName + ' ' + @strLastName
-				--,[strAddress] = ''
-				--,[strCity] = @strCity
-				--,[strState] = @strState
-				--,[strCountry] = @strCountry
-				--,[strZipCode] = @strZipCode
-				--,[strTimezone] = @strTimezone
-				--WHERE intEntityLocationId = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
+				IF @strDocumentDelivery1 IS NOT NULL
+				BEGIN
+					SET @strDocumentDelivery = @strDocumentDelivery1
+
+				END
+
+				IF @strDocumentDelivery2 IS NOT NULL
+				BEGIN
+					IF @strDocumentDelivery IS NULL
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery2
+						END
+					ELSE
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery + ',' + @strDocumentDelivery2
+						END
+				END
+
+				IF @strDocumentDelivery3 IS NOT NULL
+				BEGIN
+					IF @strDocumentDelivery IS NULL
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery3
+						END
+					ELSE
+						BEGIN
+							SET @strDocumentDelivery = @strDocumentDelivery + ',' + @strDocumentDelivery3
+						END
+				END
+
+				UPDATE tblEMEntity SET strDocumentDelivery = @strDocumentDelivery WHERE intEntityId = @EntityId
+
+
+				UPDATE tblEMEntityPhoneNumber SET strPhone = @strPhone WHERE intEntityPhoneNumberId = (SELECT TOP 1 intEntityPhoneNumberId FROM tblEMEntityPhoneNumber WHERE intEntityId = @EntityId)
+
+				UPDATE tblEMEntityLocation SET 
+				[strLocationName] = @EmployeeID + ' ' + @strFirstName + ' ' + @strMiddleName + ' ' + @strLastName
+				,[strAddress] = ''
+				,[strCity] = @strCity
+				,[strState] = @strState
+				,[strCountry] = @strCountry
+				,[strZipCode] = @strZipCode
+				,[strTimezone] = @strTimezone
+				,[strCheckPayeeName] = @strName
+				WHERE intEntityLocationId = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
 
 				--UPDATE tblEMEntityToContact SET [intEntityContactId] = @EntityId
 				--WHERE intEntityToContactId = (SELECT TOP 1 intEntityToContactId FROM tblEMEntityToContact WHERE intEntityId = @EntityId)
@@ -579,7 +684,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,strNameSuffix = @strNameSuffix
 				,strType = @strType
 				,strPayPeriod = @strPayPeriod
-				,intRank = (SELECT TOP 1 intEmployeeRankId FROM tblPREmployeeRank where intEmployeeRankId = @intRank)
+				,intRank = @intRank
 				,dtmReviewDate = @dtmReviewDate
 				,dtmNextReview = @dtmNextReview
 				,strTimeEntryPassword = @strTimeEntryPassword
