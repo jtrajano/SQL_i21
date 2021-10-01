@@ -1056,8 +1056,10 @@ begin try
 					from
 						tblAPBillDetail BD
 						join tblAPBill BL ON BL.intBillId = BD.intBillId
+						join tblSCTicket TK ON TK.intTicketId = BD.intScaleTicketId
 					where
-						BD.intContractDetailId = @intContractDetailId
+						BD.intContractDetailId = @intContractDetailId 
+						and BD.intScaleTicketId = @intTicketId 
 						and BL.intTransactionType in(2, 13)
 						and BL.ysnPosted = 1
 						and BL.ysnPaid = 0
