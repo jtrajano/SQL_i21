@@ -3435,6 +3435,8 @@
     <Build Include="dbo\Views\vyuCFInvoiceMiscReport.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceCardReport.sql" />
     <Build Include="dbo\Views\vyuGLReallocation.sql" />
+    <Build Include="dbo\Views\vyuGLRevalue.sql"/>
+    <Build Include="dbo\Views\vyuGLRevalueDetails.sql"/>
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostItemChange.sql" />
     <Build Include="dbo\Tables\tblGLReconciledAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveShiftActivityMachines.sql" />
