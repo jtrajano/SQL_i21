@@ -20,6 +20,7 @@ DECLARE @Department2 as NVARCHAR(50)
 DECLARE @DepartmentDesc2 as NVARCHAR(50)
 DECLARE @Department3 as NVARCHAR(50)
 DECLARE @DepartmentDesc3 as NVARCHAR(50)
+DECLARE @strClass as NVARCHAR(50)
 
 DECLARE @SupervisorId1 as NVARCHAR(50)
 DECLARE @SupervisorName1 as NVARCHAR(50)
@@ -76,6 +77,7 @@ DECLARE @strEmPhone as NVARCHAR(50)
 
 DECLARE @strEmployeeId as NVARCHAR(50)
 DECLARE @strNameSuffix as NVARCHAR(50)
+DECLARE @strSuffix as NVARCHAR(50)
 DECLARE @strType as NVARCHAR(50)
 DECLARE @strPayPeriod as NVARCHAR(50)
 DECLARE @intRank as INT
@@ -151,19 +153,17 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 
 		IF @EntityId IS NULL
 			BEGIN
+				
 				INSERT INTO tblEMEntity (
 				 strName
-				,strEmail
 				,ysnPrint1099
 				,strContactNumber
 				,strTitle
 				,strPhone
 				,strEmail2
-				,strTimezone
 				,intLanguageId
 				,strEntityNo
 				,ysnActive
-				--,strDocumentDelivery
 				,strExternalERPId
 				,intEntityRank
 				,strDateFormat
@@ -173,27 +173,25 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,strSuffix
 				,dtmOriginationDate
 				,strMobile
-				) SELECT strName
-					,strEmail
+				) SELECT 
+					 strName
 					,ysn1099Employee
-					,strContactNumber
+					,''
 					,strTitle
-					,strPhone
+					,''
 					,strEmail
-					,strTimezone
 					,1
 					,strEmployeeId
 					,ysnActive
-					--,ISNULL(EME.strDocumentDelivery1,'')  + ',' +ISNULL(EME.strDocumentDelivery2,'') + ',' + ISNULL(EME.strDocumentDelivery3,'')
 					,strExternalERPId
-					,strRank					= (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = EME.strRank)
+					,strRank	= (SELECT intRank FROM tblPREmployeeRank WHERE strDescription = EME.strRank)
 					,'M/d/yyyy'
 					,'1,234,567.89'
 					,'Comma'
 					,strDepartment1
 					,strSuffix
 					,dtmOriginationDate
-					,EME.strEMPhone
+					,''
 					FROM #TempEmployeeDetails EME
 					WHERE EME.strEmployeeId = @EmployeeID
 
@@ -205,7 +203,10 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				@strDocumentDelivery1 = DC.strDocumentDelivery1,
 				@strDocumentDelivery2 = DC.strDocumentDelivery2,
 				@strDocumentDelivery3 = DC.strDocumentDelivery3,
-				@strEmPhone = strEMPhone
+				@strEmPhone = strEMPhone,
+				@strName = strName,
+				@strClass = strClass,
+				@strPhone = strPhone
 				FROM #TempEmployeeDetails DC WHERE DC.strEmployeeId = @EmployeeID
 
 				IF @strDocumentDelivery1 IS NOT NULL
@@ -240,7 +241,43 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				
 				UPDATE tblEMEntity SET strDocumentDelivery = @strDocumentDelivery  WHERE intEntityId = @NewId
 
-				
+
+
+				--INSERT TO CONTACT ENTITY
+				INSERT INTO tblEMEntity (
+					 strName
+					,strEmail
+					,ysnPrint1099
+					,strContactNumber
+					,strMobile
+					,strPhone
+					,strTimezone
+					,intLanguageId
+					,ysnActive
+					,strSuffix
+					,intEntityRank
+					,intConcurrencyId
+					,strEntityNo
+				)
+				SELECT 
+					 EME.strName
+					,EME.strEmail
+					,EME.ysn1099Employee
+					,EME.strContactNumber
+					,EME.strEMPhone
+					,EME.strPhone
+					,EME.strTimezone
+					,1
+					,EME.ysnActive
+					,EME.strSuffix
+					,(SELECT intRank FROM tblPREmployeeRank WHERE strDescription = EME.strRank)
+					,1
+					,''
+					FROM #TempEmployeeDetails EME
+					WHERE EME.strEmployeeId = @EmployeeID
+
+				DECLARE @ContactId AS INT
+				SET @ContactId = SCOPE_IDENTITY()
 
 				DECLARE @ysnDefault BIT
 				SET @ysnDefault = 1
@@ -251,11 +288,19 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				DECLARE @EntityPhoneID AS NVARCHAR(50)
 				SET @EntityPhoneID = SCOPE_IDENTITY()
 
+				--select * from tblEMEntityMobileNumber where intEntityId = 2434
+
+				--select * from tblEMEntityPhoneNumber where intEntityId = 2434
+
+
 				INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
-				select top 1 @NewId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
+				select top 1 @ContactId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
+
+				INSERT INTO tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
+				select top 1 @ContactId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
 
 				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strCountry], [strZipCode],[strTimezone], [ysnDefaultLocation],[strCheckPayeeName])
-				SELECT @NewId, @EmployeeID + ' ' + strFirstName + ' ' + strMiddleName + ' ' + strLastName, '',strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName
+				SELECT @NewId, strName, strAdress,strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName
 				FROM #TempEmployeeDetails LC WHERE LC.strEmployeeId = @EmployeeID
 
 				DECLARE @EntityLocationId INT
@@ -265,7 +310,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				SET @EntityContactId = SCOPE_IDENTITY()
 
 				INSERT [dbo].[tblEMEntityToContact] ([intEntityId], [intEntityContactId], [intEntityLocationId],[ysnPortalAccess], ysnDefaultContact,intConcurrencyId)
-				VALUES							  (@NewId, @EntityPhoneID, (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @NewId), 0,@ysnDefault,1)
+				VALUES							  (@NewId, @ContactId, (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @NewId), 0,@ysnDefault,1)
 
 
 				if not exists(select top 1 1 from tblEMEntityType where intEntityId = @NewId)
@@ -286,7 +331,6 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					 c.strNotes,
 					 c.intEntityId
 						FROM tblEMEntity c WHERE c.intEntityId = @NewId
-			
 
 				INSERT INTO tblPREmployee
 				(
@@ -529,7 +573,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				BEGIN
 					IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1)
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @NewId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1))
+						IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @NewId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1))
 						BEGIN
 							INSERT INTO tblPREmployeeLocationDistribution (intEntityEmployeeId,intProfitCenter,dblPercentage,intConcurrencyId) VALUES (@NewId,(SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1),@EmployeeGlLocationPercentage1,1)
 						END
@@ -541,7 +585,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				BEGIN
 					IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2)
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @NewId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2))
+						IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @NewId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2))
 						BEGIN
 							INSERT INTO tblPREmployeeLocationDistribution (intEntityEmployeeId,intProfitCenter,dblPercentage,intConcurrencyId) VALUES (@NewId,(SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2),@EmployeeGlLocationPercentage2,1)
 						END
@@ -553,7 +597,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				BEGIN
 					IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3)
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @NewId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3))
+						IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @NewId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3))
 						BEGIN
 							INSERT INTO tblPREmployeeLocationDistribution (intEntityEmployeeId,intProfitCenter,dblPercentage,intConcurrencyId) VALUES (@NewId,(SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3),@EmployeeGlLocationPercentage3,1)
 						END
@@ -605,7 +649,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						,@strZipCode =strZipCode
 						,@dtmOriginationDate = dtmOriginationDate
 
-						,@strNameSuffix = strSuffix
+						,@strNameSuffix = strNameSuffix
+						,@strSuffix = strSuffix
 						,@strType = strType
 						,@strPayPeriod = strPayPeriod
 						,@intRank = (SELECT TOP 1 intRank FROM tblPREmployeeRank where strDescription = A.strRank)
@@ -663,9 +708,20 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,strMobile = @strEmPhone
 				WHERE intEntityId = @EntityId
 
-				--UPDATE tblEMEntity SET
-				--	strMobile = @strEmPhone
-				--WHERE intEntityId = (@EntityId + 1)
+				UPDATE tblEMEntity SET
+					 strName = @strName
+					,strEmail = @strEmail
+					,ysnPrint1099 = @ysn1099Employee
+					,strContactNumber = @strContactNumber
+					,strMobile = @strEmPhone
+					,strPhone = @strPhone
+					,strTimezone = @strTimezone
+					,intLanguageId = 1
+					,ysnActive = @ysnActive
+					,strSuffix = @strSuffix
+					,intEntityRank = @intRank
+					,strEntityNo = ''
+				WHERE intEntityId = (@EntityId + 1)
 
 
 				IF @strDocumentDelivery1 IS NOT NULL
@@ -700,12 +756,23 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 
 				UPDATE tblEMEntity SET strDocumentDelivery = @strDocumentDelivery WHERE intEntityId = @EntityId
 
+				DECLARE @UContactId AS INT
 
-				UPDATE tblEMEntityPhoneNumber SET strPhone = @strPhone WHERE intEntityPhoneNumberId = (SELECT TOP 1 intEntityPhoneNumberId FROM tblEMEntityPhoneNumber WHERE intEntityId = @EntityId)
+				SELECT TOP 1 @UContactId = intEntityId FROM tblEMEntity where strName = @strName and strContactNumber = @strContactNumber and strMobile != '' and strPhone != ''
+				
+				IF EXISTS (SELECT TOP 1 * FROM tblEMEntityPhoneNumber WHERE intEntityId = @UContactId)
+					BEGIN
+						UPDATE tblEMEntityPhoneNumber SET strPhone = @strPhone WHERE intEntityId = @UContactId
+					END
+				
+				IF EXISTS (SELECT TOP 1 * FROM tblEMEntityMobileNumber WHERE intEntityId = @UContactId)
+					BEGIN
+						UPDATE tblEMEntityMobileNumber SET strPhone = @strPhone WHERE intEntityId = @UContactId
+					END
 
 				UPDATE tblEMEntityLocation SET 
 				[strLocationName] = @EmployeeID + ' ' + @strFirstName + ' ' + @strMiddleName + ' ' + @strLastName
-				,[strAddress] = ''
+				,[strAddress] = @strName
 				,[strCity] = @strCity
 				,[strState] = @strState
 				,[strCountry] = @strCountry
@@ -941,7 +1008,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId1)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId AND intSupervisorId = (SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId1))
+							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId AND intSupervisorId = (SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId1))
 							BEGIN
 								INSERT tblPREmployeeSupervisor(intEntityEmployeeId,intSupervisorId) 
 								VALUES (@EntityId,(SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId1))
@@ -953,7 +1020,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId2)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId AND intSupervisorId = (SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId2))
+							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId AND intSupervisorId = (SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId2))
 							BEGIN
 								INSERT tblPREmployeeSupervisor(intEntityEmployeeId,intSupervisorId) 
 								VALUES (@EntityId,(SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId2))
@@ -964,7 +1031,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblPREmployee WHERE strEmployeeId = @SupervisorId3)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId AND intSupervisorId = (SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId3))
+							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId AND intSupervisorId = (SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId3))
 							BEGIN
 								INSERT tblPREmployeeSupervisor(intEntityEmployeeId,intSupervisorId) 
 								VALUES (@EntityId,(SELECT intEntityId FROM tblPREmployee WHERE strEmployeeId = @SupervisorId3))
@@ -976,7 +1043,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1) AND dblPercentage = @EmployeeGlLocationPercentage1)
+							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1) AND dblPercentage = @EmployeeGlLocationPercentage1)
 							BEGIN
 								INSERT INTO tblPREmployeeLocationDistribution (intEntityEmployeeId,intProfitCenter,dblPercentage,intConcurrencyId) 
 								VALUES (@EntityId,(SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation1),@EmployeeGlLocationPercentage1,1)
@@ -987,7 +1054,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2) AND dblPercentage = @EmployeeGlLocationPercentage2)
+							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2) AND dblPercentage = @EmployeeGlLocationPercentage2)
 							BEGIN
 								INSERT INTO tblPREmployeeLocationDistribution (intEntityEmployeeId,intProfitCenter,dblPercentage,intConcurrencyId) 
 								VALUES (@EntityId,(SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation2),@EmployeeGlLocationPercentage2,1)
@@ -998,7 +1065,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3)
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3) AND dblPercentage = @EmployeeGlLocationPercentage3)
+							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId AND intProfitCenter = (SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3) AND dblPercentage = @EmployeeGlLocationPercentage3)
 							BEGIN
 								INSERT INTO tblPREmployeeLocationDistribution (intEntityEmployeeId,intProfitCenter,dblPercentage,intConcurrencyId) 
 								VALUES (@EntityId,(SELECT TOP 1 intAccountSegmentId FROM tblGLAccountSegment WHERE strCode = @EmployeeGlLocation3),@EmployeeGlLocationPercentage3,1)
@@ -1013,7 +1080,6 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 	DROP TABLE #TempEmployeeDetails
 
 END
-
 
 
 GO
