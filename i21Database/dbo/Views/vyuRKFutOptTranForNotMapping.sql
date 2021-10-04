@@ -61,6 +61,9 @@ SELECT DE.intFutOptTransactionId
 	, strBankTransferNo = BT.strTransactionId COLLATE Latin1_General_CI_AS
 	, dtmBankTransferDate = BT.dtmDate	
 	, ysnBankTransferPosted = BT.ysnPosted
+	, strApprovalStatus = CASE WHEN ISNULL(approval.strApprovalStatus, '') != '' AND approval.strApprovalStatus != 'Approved' THEN approval.strApprovalStatus
+							WHEN ISNULL(DE.strStatus, '') = '' AND approval.strApprovalStatus = 'Approved' THEN approval.strApprovalStatus
+							ELSE DE.strStatus END
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
@@ -101,3 +104,13 @@ LEFT JOIN tblCTContractDetail hedgecontractdetail
 	ON hedgecontract.intContractDetailId = hedgecontractdetail.intContractDetailId
 LEFT JOIN tblCTContractHeader hedgecontractheader
 	ON hedgecontractdetail.intContractHeaderId = hedgecontractheader.intContractHeaderId
+OUTER APPLY (
+	SELECT TOP 1 intScreenId FROM tblSMScreen 
+	WHERE strModule = 'Risk Management' 
+	AND strScreenName = 'Derivative Entry'
+) approvalScreen
+LEFT JOIN tblSMTransaction approval
+	ON DE.intFutOptTransactionId = approval.intRecordId
+	AND DE.intInstrumentTypeId = 4						-- OTC Forwards Only
+	AND approval.intScreenId = approvalScreen.intScreenId
+	AND approval.strApprovalStatus IN ('Waiting for Approval', 'Waiting for Submit', 'Approved')
