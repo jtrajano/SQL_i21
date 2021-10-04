@@ -86,7 +86,6 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 				,@TaxStateId = T.intTypeTaxStateId
 				,@TaxLocalId = T.intTypeTaxLocalId
 				,@EmployeeTaxId = PRTE.intEmployeeTaxId
-				
 			FROM tblPRTypeTax T 
 		left join tblPREmployeeTax PRTE
 		on T.intTypeTaxId = PRTE.intTypeTaxId
@@ -95,9 +94,11 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 
 		IF @EmployeeTaxId IS NULL
 			BEGIN
-				INSERT INTO tblPREmployeeTax
-					(
-						intEntityEmployeeId
+				IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeTax WHERE intEntityEmployeeId = @EntityNo and intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc))
+					BEGIN
+						INSERT INTO tblPREmployeeTax
+						(
+						 intEntityEmployeeId
 						,intTypeTaxId
 						,strCalculationType
 						,strFilingStatus
@@ -121,61 +122,92 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,dblW4OtherIncome 
 						,dblW4Deductions 
 						,intConcurrencyId 
-					)
-					SELECT 
-						 EMT.intEntityNo
-						,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
-						,EMT.strCalculationType
-						,EMT.strFilingStatus
-						,@TaxStateId
-						,@TaxLocalId
-						,@intSupplementalCalc
-						,EMT.dblAmount
-						,EMT.dblExtraWithholding
-						,EMT.dblLimit
-						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strAccountId)
-						,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
-						,1
-						,1
-						,EMT.dblFederalAllowance
-						,EMT.strPaidBy
-						,EMT.ysnDefault
-						,1
-						,EMT.ysn2020W4
-						,EMT.ysnStep2c
-						,EMT.dblClaimDependents
-						,0
-						,0
-						,1
-						FROM #TempEmployeeTaxes EMT
-					WHERE EMT.intEntityNo = @EntityNo
+						)
+						SELECT TOP 1
+							 EMT.intEntityNo
+							,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+							,EMT.strCalculationType
+							,EMT.strFilingStatus
+							,@TaxStateId
+							,@TaxLocalId
+							,@intSupplementalCalc
+							,EMT.dblAmount
+							,EMT.dblExtraWithholding
+							,EMT.dblLimit
+							,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strAccountId)
+							,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
+							,1
+							,1
+							,EMT.dblFederalAllowance
+							,EMT.strPaidBy
+							,EMT.ysnDefault
+							,1
+							,EMT.ysn2020W4
+							,EMT.ysnStep2c
+							,EMT.dblClaimDependents
+							,0
+							,0
+							,1
+							FROM #TempEmployeeTaxes EMT
+						WHERE EMT.intEntityNo = @EntityNo
 					SET @NewId = SCOPE_IDENTITY()
-					DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo
+					END
+				
+				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
 
 			END
 		ELSE
 			BEGIN
-				UPDATE tblPREmployeeTax SET
-					intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
-					,strCalculationType = @strCalculationType
-					,strFilingStatus = @strFilingStatus
-					,intTypeTaxStateId = @TaxStateId
-					,intTypeTaxLocalId  = @TaxLocalId
-					,intSupplementalCalc = @strCalculationType
-					,dblAmount = @dblAmount
-					,dblExtraWithholding  = @dblExtraWithholding
-					,dblLimit = @dblLimit
-					,intAccountId = @intAccountId
-					,intExpenseAccountId = @intExpenseAccountId
-					,intAllowance = @intAllowance
-					,strPaidBy = @strPaidBy
-					,ysnDefault = @ysnDefault
-					,ysnW42020 = @ysnW42020
-					,ysnW4Step2c = @ysnW4Step2c
-					,dblW4ClaimDependents = @dblW4ClaimDependents
-					,dblW4OtherIncome  = @dblW4OtherIncome
-					,dblW4Deductions  = @dblW4Deductions
-				WHERE intEmployeeTaxId = @NewId
+				--IF EXISTS (SELECT TOP 1 * FROM tblPREmployeeTax 
+				--	WHERE intEntityEmployeeId = @EmployeeTaxId 
+				--	and intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc))
+				--	BEGIN
+				--		UPDATE tblPREmployeeTax SET
+				--			intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+				--			,strCalculationType = @strCalculationType
+				--			,strFilingStatus = @strFilingStatus
+				--			,intTypeTaxStateId = @TaxStateId
+				--			,intTypeTaxLocalId  = @TaxLocalId
+				--			,intSupplementalCalc = @strCalculationType
+				--			,dblAmount = @dblAmount
+				--			,dblExtraWithholding  = @dblExtraWithholding
+				--			,dblLimit = @dblLimit
+				--			,intAccountId = @intAccountId
+				--			,intExpenseAccountId = @intExpenseAccountId
+				--			,intAllowance = @intAllowance
+				--			,strPaidBy = @strPaidBy
+				--			,ysnDefault = @ysnDefault
+				--			,ysnW42020 = @ysnW42020
+				--			,ysnW4Step2c = @ysnW4Step2c
+				--			,dblW4ClaimDependents = @dblW4ClaimDependents
+				--			,dblW4OtherIncome  = @dblW4OtherIncome
+				--			,dblW4Deductions  = @dblW4Deductions
+				--		WHERE intEmployeeTaxId = @NewId
+				--	END
+					UPDATE tblPREmployeeTax SET
+							intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+							,strCalculationType = @strCalculationType
+							,strFilingStatus = @strFilingStatus
+							,intTypeTaxStateId = @TaxStateId
+							,intTypeTaxLocalId  = @TaxLocalId
+							,intSupplementalCalc = @strCalculationType
+							,dblAmount = @dblAmount
+							,dblExtraWithholding  = @dblExtraWithholding
+							,dblLimit = @dblLimit
+							,intAccountId = @intAccountId
+							,intExpenseAccountId = @intExpenseAccountId
+							,intAllowance = @intAllowance
+							,strPaidBy = @strPaidBy
+							,ysnDefault = @ysnDefault
+							,ysnW42020 = @ysnW42020
+							,ysnW4Step2c = @ysnW4Step2c
+							,dblW4ClaimDependents = @dblW4ClaimDependents
+							,dblW4OtherIncome  = @dblW4OtherIncome
+							,dblW4Deductions  = @dblW4Deductions
+						WHERE intEmployeeTaxId = @NewId
+
+				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
+				
 			END
 	END
 
