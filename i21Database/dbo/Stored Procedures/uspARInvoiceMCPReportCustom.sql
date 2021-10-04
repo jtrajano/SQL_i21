@@ -501,15 +501,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 			  AND blbLogo IS NOT NULL
 		) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.strItemNo = 'State Sales Tax')
-		OUTER APPLY (
-			SELECT dblInvoiceTax
-			FROM tblARInvoiceReportStagingTable
-			WHERE intEntityUserId = @intEntityUserId
-		  	  AND strRequestId = @strRequestId
-		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
-			  AND blbLogo IS NOT NULL
-			  AND RTRIM(strItemDescription) ='SC Sales tax'
-		) SALESTAX 
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
 		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
@@ -532,11 +523,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  SET  dblInvoiceTax = SALESTAX.dblItemPrice
 		  FROM tblARInvoiceReportStagingTable STAGING
 		  OUTER APPLY(
-			SELECT dblItemPrice  from tblARInvoiceReportStagingTable where TRIM(strItemDescription) ='SC Sales tax'
+			SELECT dblItemPrice  from tblARInvoiceReportStagingTable where RTRIM(strItemDescription) ='SC Sales tax'
 		  )SALESTAX
 
 
-		  DELETE FROM tblARInvoiceReportStagingTable  where TRIM(strItemDescription) ='SC Sales tax'
+		  DELETE FROM tblARInvoiceReportStagingTable  where RTRIM(strItemDescription) ='SC Sales tax'
 
 
 	END
