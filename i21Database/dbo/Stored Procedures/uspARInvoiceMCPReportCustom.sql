@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARInvoiceMCPReport]
+﻿CREATE PROCEDURE [dbo].[uspARInvoiceMCPReportCustom]
 	  @tblInvoiceReport		AS InvoiceReportTable READONLY
 	, @intEntityUserId		AS INT	= NULL
 	, @strRequestId			AS NVARCHAR(MAX) = NULL
@@ -118,10 +118,10 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dtmShipDate				= INV.dtmShipDate
 	 , strBillToLocationName	= BILLTO.strEntityNo
 	 , strShipToLocationName	= SHIPTO.strEntityNo
-	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, NULL, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 	 , strShipToAddress			= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
 	 									THEN CONSUMPTIONSITE.strSiteFullAddress
-										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, NULL, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 								  END
 	 , strSource				= INV.strType
 	 , intTermId				= INV.intTermId
@@ -273,7 +273,7 @@ OUTER APPLY (
 			   , strCompanyAddress	= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
 											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, NULL, NULL, ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Yes'
-											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, [LOCATION].strCountry, NULL, CUSTOMER.ysnIncludeEntityName)
+											THEN dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, [LOCATION].strAddress, [LOCATION].strCity, [LOCATION].strStateProvince, [LOCATION].strZipPostalCode, NULL, NULL, CUSTOMER.ysnIncludeEntityName)
 									   WHEN [LOCATION].strUseLocationAddress = 'Letterhead'
 											THEN ''
 									  END
@@ -453,6 +453,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 				   , TCODE.intTaxCodeId
 		) TAXES ON STAGING.intInvoiceId = TAXES.intInvoiceId
 
+
 		UPDATE STAGING		
 		SET intCompanyLocationId 	= ORIG.intCompanyLocationId
 		  , intEntityCustomerId		= ORIG.intEntityCustomerId
@@ -500,6 +501,15 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 			  AND blbLogo IS NOT NULL
 		) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.strItemNo = 'State Sales Tax')
+		OUTER APPLY (
+			SELECT dblInvoiceTax
+			FROM tblARInvoiceReportStagingTable
+			WHERE intEntityUserId = @intEntityUserId
+		  	  AND strRequestId = @strRequestId
+		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
+			  AND blbLogo IS NOT NULL
+			  AND RTRIM(strItemDescription) ='SC Sales tax'
+		) SALESTAX 
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
 		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
@@ -515,21 +525,18 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  AND strRequestId = @strRequestId
 		  AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 
-		UPDATE STAGING
-		SET dblTotalTax = STAGING.dblTotalTax - SST.dblTotalSST
-		FROM tblARInvoiceReportStagingTable STAGING
-		INNER JOIN (
-			SELECT IDT.intInvoiceDetailId
-				 , dblTotalSST = SUM(dblAdjustedTax) 
-			FROM tblARInvoiceDetailTax IDT
-			INNER JOIN tblSMTaxClass TCLASS ON IDT.intTaxClassId = TCLASS.intTaxClassId
-			INNER JOIN tblSMTaxReportType TREPORT ON TCLASS.intTaxReportTypeId = TREPORT.intTaxReportTypeId
-			WHERE ISNULL(TREPORT.strType, '') = 'State Sales Tax'
-			  AND IDT.dblAdjustedTax <> 0			  
-			GROUP BY IDT.intInvoiceDetailId
-		) SST ON STAGING.intInvoiceDetailId = SST.intInvoiceDetailId
-		WHERE STAGING.intEntityUserId = @intEntityUserId
-		  AND STAGING.strRequestId = @strRequestId
-		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
-		  AND STAGING.strItemNo <> 'State Sales Tax'
+
+		  select strItemDescription,STAGING.dblItemPrice,* from tblARInvoiceReportStagingTable STAGING
+
+		  UPDATE STAGING
+		  SET  dblInvoiceTax = SALESTAX.dblItemPrice
+		  FROM tblARInvoiceReportStagingTable STAGING
+		  OUTER APPLY(
+			SELECT dblItemPrice  from tblARInvoiceReportStagingTable where TRIM(strItemDescription) ='SC Sales tax'
+		  )SALESTAX
+
+
+		  DELETE FROM tblARInvoiceReportStagingTable  where TRIM(strItemDescription) ='SC Sales tax'
+
+
 	END
