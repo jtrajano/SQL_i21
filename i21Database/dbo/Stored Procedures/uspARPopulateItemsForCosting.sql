@@ -64,10 +64,11 @@ SELECT
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
 										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
+										WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= ARID.[dblUnitQty]
+	,[dblUOMQty]				= CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -92,7 +93,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															,ARID.[dblUnitQty]
+															,CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
@@ -122,7 +123,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [dblQtyShipped], [dblShipmentNetWt] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
 		ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId], [intItemUOMId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
