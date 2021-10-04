@@ -5,6 +5,7 @@
 	, @dblNetWeight			NUMERIC(18, 6) = 0
 	, @ysnFromSalesOrder	BIT = 0
 	, @ysnFromImport		BIT = 0
+	, @dblSpotPirce			NUMERIC(18, 6) = 0
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -680,7 +681,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 							 , intItemId			= @intItemId
 							 , intItemUOMId			= @intItemUOMId
 							 , dblQtyShipped		= @dblQtyOverAged
-							 , dblPrice				= 0
+							 , dblPrice				= @dblSpotPirce
 							 , ysnCharge			= CAST(0 AS BIT)
 
 						INSERT INTO #INVOICEDETAILSTOADD (intInvoiceDetailId, intContractDetailId, intContractHeaderId, intTicketId, intItemId, intItemUOMId, dblQtyShipped, dblPrice, ysnCharge)
