@@ -103,15 +103,15 @@ AS
 		) F
  GROUP BY HV.intContractHeaderId
  )BL ON  BL.intContractHeaderId = CH.intContractHeaderId
- LEFT JOIN	
+ OUTER APPLY
  (
 	SELECT intRecordId = MIN(TR.intRecordId)
 		, TR.ysnOnceApproved
 		, ysnApproved = CASE WHEN TR.strApprovalStatus IN ( 'Approved', 'Approved with Modifications') THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END
 	FROM tblSMTransaction TR WITH (NOLOCK)
 	JOIN tblSMScreen SC	WITH (NOLOCK) ON SC.intScreenId = TR.intScreenId
-	WHERE SC.strNamespace IN( 'ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
+	WHERE SC.strNamespace IN( 'ContractManagement.view.Contract', 'ContractManagement.view.Amendments') AND TR.intRecordId = CH.intContractHeaderId
 	GROUP BY TR.ysnOnceApproved
 		, CASE WHEN TR.strApprovalStatus IN ( 'Approved', 'Approved with Modifications') THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END
 	
-) TR ON TR.intRecordId = CH.intContractHeaderId	
+) TR --ON TR.intRecordId = CH.intContractHeaderId	
