@@ -299,8 +299,8 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				INSERT INTO tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
 				select top 1 @ContactId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
 
-				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strCountry], [strZipCode],[strTimezone], [ysnDefaultLocation],[strCheckPayeeName])
-				SELECT @NewId, strName, strAdress,strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName
+				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strCountry], [strZipCode],[strTimezone], [ysnDefaultLocation],[strCheckPayeeName],[strPhone])
+				SELECT @NewId, strName, strAdress,strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName, strPhone
 				FROM #TempEmployeeDetails LC WHERE LC.strEmployeeId = @EmployeeID
 
 				DECLARE @EntityLocationId INT
@@ -648,6 +648,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						,@strCountry = strCountry
 						,@strZipCode =strZipCode
 						,@dtmOriginationDate = dtmOriginationDate
+						,@strAddress = strAdress
 
 						,@strNameSuffix = strNameSuffix
 						,@strSuffix = strSuffix
@@ -771,14 +772,15 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					END
 
 				UPDATE tblEMEntityLocation SET 
-				[strLocationName] = @EmployeeID + ' ' + @strFirstName + ' ' + @strMiddleName + ' ' + @strLastName
-				,[strAddress] = @strName
+				[strLocationName] = @strName
+				,[strAddress] = @strAddress
 				,[strCity] = @strCity
 				,[strState] = @strState
 				,[strCountry] = @strCountry
 				,[strZipCode] = @strZipCode
 				,[strTimezone] = @strTimezone
 				,[strCheckPayeeName] = @strName
+				,[strPhone] = @strPhone
 				WHERE intEntityLocationId = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
 
 				--UPDATE tblEMEntityToContact SET [intEntityContactId] = @EntityId
