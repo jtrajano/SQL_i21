@@ -116,8 +116,8 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , intBillToLocationId		= INV.intBillToLocationId
 	 , intShipToLocationId		= INV.intShipToLocationId
 	 , dtmShipDate				= INV.dtmShipDate
-	 , strBillToLocationName	= BILLTO.strEntityNo
-	 , strShipToLocationName	= SHIPTO.strEntityNo
+	 , strBillToLocationName	= ''
+	 , strShipToLocationName	= ''
 	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, NULL, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
 	 , strShipToAddress			= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
 	 									THEN CONSUMPTIONSITE.strSiteFullAddress
