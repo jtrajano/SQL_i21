@@ -48,8 +48,16 @@ EXEC (' CREATE VIEW [dbo].[vyuCMBankTransaction]
 				tblPRPaycheck PayCheck  INNER JOIN
 				tblPREmployee Emp ON PayCheck.intEntityEmployeeId = Emp.intEntityId
 				WHERE PayCheck.strPaycheckId = tblCMBankTransaction.strTransactionId 
+		),''''),
+		strAccountClassification = ISNULL((
+		SELECT TOP 1 strAccountClassification FROM [tblEMEntityEFTInformation] EFTInfo 
+		WHERE EFTInfo.ysnActive = 1 AND intEntityId = intPayeeId ORDER BY dtmEffectiveDate desc
 		),'''')
+
 		FROM tblCMBankTransaction
+		OUTER APPLY (
+			SELECT SUM(ISNULL(dblDebit,0)) dblDebit, SUM(ISNULL(dblCredit,0)) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = tblCMBankTransaction.intTransactionId
+		)Detail
 		WHERE --dbo.fnIsDepositEntry(strLink) = 0
 		strLink NOT IN (
 							SELECT
@@ -67,5 +75,6 @@ EXEC (' CREATE VIEW [dbo].[vyuCMBankTransaction]
 							WHERE	 b.aptrx_trans_type = ''O'' 
 							)
 		')
+
 END
 GO
