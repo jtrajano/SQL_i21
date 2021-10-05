@@ -1468,7 +1468,8 @@
     <Build Include="dbo\Tables\tblSTBatchRetailAdjustmentPreview.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
-    <Build Include="dbo\Views\vyuICGetLot.sql" />
+    <Build Include="dbo\Views\vyuICGetLot.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspSTMassAddLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSTDuplicateModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPrice.sql" />
