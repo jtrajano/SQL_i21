@@ -856,8 +856,8 @@ FROM (
 			SELECT 
 				i.intItemId
 				,l.intItemLocationId
-				,intClassId = catLoc.intClassId --ISNULL(ISNULL(sc.intSubcategoryId, catLoc.intClassId), l.intClassId)
-				,intFamilyId = catLoc.intFamilyId --ISNULL(ISNULL(sf.intSubcategoryId, catLoc.intFamilyId), l.intFamilyId)
+				,intClassId = COALESCE(sc.intSubcategoryId, catLoc.intClassId, l.intClassId)
+				,intFamilyId = COALESCE(sf.intSubcategoryId, catLoc.intFamilyId, l.intFamilyId)
 				,ysnDepositRequired = ISNULL(CASE p.strDepositRequired WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnDepositRequired)
 				,ysnPromotionalItem = ISNULL(CASE p.strPromotionalItem WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnPromotionalItem)
 				,ysnPrePriced = ISNULL(ISNULL(CASE p.strPrePriced WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, catLoc.ysnPrePriced), l.ysnPrePriced)
