@@ -3,7 +3,8 @@
 	,@ForDelete			BIT = 0    
 	,@UserId			INT = NULL
 	,@InvoiceDetailId 	INT = NULL
-	,@ysnLogRisk		BIT = 1     
+	,@ysnLogRisk		BIT = 1
+	,@FromPosting		BIT = 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -126,7 +127,7 @@ BEGIN TRY
 	IF @ForDelete = 0 EXEC dbo.[uspARUpdateRemoveSalesOrderStatus] @intInvoiceId
 	EXEC dbo.[uspARUpdateItemComponent] @intInvoiceId, @ForDelete
 	EXEC dbo.[uspARUpdateLineItemLotDetail] @intInvoiceId
-	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, 0
+	EXEC dbo.[uspARUpdateReservedStock] @intInvoiceId, @ForDelete, @intUserId, @FromPosting
 	EXEC dbo.[uspARUpdateInboundShipmentOnInvoice] @intInvoiceId, @ForDelete, @intUserId	
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
 	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds

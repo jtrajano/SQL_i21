@@ -396,6 +396,7 @@ CREATE TABLE ##ARItemsForCosting (
 	, [dblAdjustCostValue]				NUMERIC(38, 20) NULL
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL
 	, [strType]                         NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , [ysnAutoBlend]                    BIT NULL
     , [ysnGLOnly]						BIT NULL
 )
 
