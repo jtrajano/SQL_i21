@@ -913,7 +913,7 @@ BEGIN
 				,[dblQty]								= 0
 				,[dblUOMQty]							= 0
 				,[dblCost]								= 0
-				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+				,[dblValue]								= dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - itemTotal.itemTotalValue
 				,[dblSalesPrice]						= 0
 				,[intCurrencyId]						= NULL -- @intCurrencyId
 				,[dblExchangeRate]						= 1 -- @dblExchangeRate
@@ -935,7 +935,7 @@ BEGIN
 														-- 'Inventory variance is created. The current item valuation is %c. The new valuation is (Qty x New Average Cost) %c x %c = %c.'
 														 dbo.fnFormatMessage(
 															dbo.fnICGetErrorMessage(80078)
-															,dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+															,itemTotal.itemTotalValue
 															,Stock.dblUnitOnHand
 															,ItemPricing.dblAverageCost
 															,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
@@ -954,9 +954,12 @@ BEGIN
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 				CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, DEFAULT) [location]
+		OUTER APPLY (
+			SELECT [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId) itemTotalValue
+		) itemTotal
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
+				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - itemTotal.itemTotalValue, 2) <> 0
 
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative
