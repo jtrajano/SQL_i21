@@ -1,9 +1,30 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRUpdateEmployeeTimeOff]
 	@intTypeTimeOffId INT,
-	@intEntityEmployeeId INT = NULL
+	@intEntityEmployeeId INT = NULL,
+	@intUserId INT = 0,
+	@ysnFromUpdateUser BIT = 0
 AS
 BEGIN
 
+
+	--Temporary Variable for audit log
+	CREATE TABLE #tmpTableForAuditTimeOff(
+		intEntityEmployeeId Int,
+		dblRateOld NUMERIC(18, 6),
+		dblRateNew NUMERIC(18, 6),
+		dblPerPeriodOld NUMERIC(18, 6),
+		dblPerPeriodNew NUMERIC(18, 6),
+		strPeriodOld VARCHAR(100),
+		strPeriodNew VARCHAR(100),
+		strAwardPeriodOld VARCHAR(100),
+		strAwardPeriodNew VARCHAR(100),
+		dblMaxEarnedOld NUMERIC(18, 6),
+		dblMaxEarnedNew NUMERIC(18, 6),
+		dblMaxCarryoverOld NUMERIC(18, 6),
+		dblMaxCarryoverNew NUMERIC(18, 6),
+		dblMaxBalanceOld NUMERIC(18, 6),
+		dblMaxBalanceNew NUMERIC(18, 6),	
+	)
 	--Get Employees with specified Time Off
 	SELECT E.intEntityId
 		,intYearsOfService = DATEDIFF(YEAR, ISNULL(E.dtmDateHired, GETDATE()), GETDATE())
@@ -27,6 +48,8 @@ BEGIN
 		ON E.intEntityId = T.intEntityEmployeeId
 	WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
 		 AND T.intTypeTimeOffId = @intTypeTimeOffId
+
+	
 
 	--Calculate Next Award Date
 	UPDATE #tmpEmployees 
@@ -91,6 +114,16 @@ BEGIN
 			,dblMaxEarned = T.dblMaxEarned
 			,dblMaxCarryover = T.dblMaxCarryover
 			,dblMaxBalance = T.dblMaxBalance
+		OUTPUT
+			inserted.intEntityEmployeeId,
+			deleted.dblRate, inserted.dblRate,
+			deleted.dblPerPeriod,inserted.dblPerPeriod,
+			deleted.strPeriod,inserted.strPeriod,
+			deleted.strAwardPeriod,inserted.strAwardPeriod,
+			deleted.dblMaxEarned , inserted.dblMaxEarned,
+			deleted.dblMaxCarryover, inserted.dblMaxCarryover,
+			deleted.dblMaxBalance, inserted.dblMaxBalance
+		INTO #tmpTableForAuditTimeOff
 		FROM
 		(SELECT 
 			TOP 1
@@ -145,5 +178,87 @@ BEGIN
 		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END
 
+		
+	------------CREATE AUDIT ENTRY
+		DECLARE @cur_Id INT;
+		DECLARE @cur_Namespace VARCHAR(max);
+		DECLARE @cur_Action VARCHAR(30);
+		DECLARE @cur_Description VARCHAR(100);
+		DECLARE @cur_From VARCHAR(100);
+		DECLARE @cur_To VARCHAR(100);
+		DECLARE @cur_EntityId Int;
+
+
+		DECLARE AuditTableCursor CURSOR FOR
+		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
+			CASE	
+				WHEN @ysnFromUpdateUser = 1 THEN 'Rate(Updated in Update Employees)'
+				ELSE 'Rate'
+			END,
+			CAST(CAST(dblRateOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblRateNew AS FLOAT) AS NVARCHAR(20)),@intUserId FROM #tmpTableForAuditTimeOff 
+		UNION
+		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
+			CASE 
+				WHEN @ysnFromUpdateUser = 1 THEN 'Per Period(Updated in Update Employees)'
+				ELSE 'Per Period' 
+			END
+			,CAST(CAST(dblPerPeriodOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblPerPeriodNew AS FLOAT) AS NVARCHAR(20)),@intUserId FROM #tmpTableForAuditTimeOff 
+		UNION
+		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
+			CASE 
+				WHEN @ysnFromUpdateUser = 1 THEN 'Period(Updated in Update Employees)'
+				ELSE 'Period'
+			END,
+			strPeriodOld,strPeriodNew,@intUserId FROM #tmpTableForAuditTimeOff 
+		UNION
+		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
+			CASE 
+				WHEN @ysnFromUpdateUser = 1 THEN 'Award Period(Updated in Update Employees)'
+				ELSE 'Award Period'
+			END,
+			strAwardPeriodOld,strAwardPeriodNew,@intUserId FROM #tmpTableForAuditTimeOff 
+		UNION
+		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
+			CASE 
+				WHEN @ysnFromUpdateUser = 1 THEN 'Max Earned(Updated in Update Employees)'
+				ELSE 'Max Earned' 
+			END,
+			CAST(CAST(dblMaxEarnedOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblMaxEarnedNew AS FLOAT) AS NVARCHAR(20)),@intUserId FROM #tmpTableForAuditTimeOff 
+		UNION
+		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
+			CASE 
+				WHEN @ysnFromUpdateUser = 1 THEN 'Max Carryover(Updated in Update Employees)'
+				ELSE 'Max Carryover'
+			END,
+			CAST(CAST(dblMaxCarryoverOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblMaxCarryoverNew AS FLOAT) AS NVARCHAR(20)),@intUserId FROM #tmpTableForAuditTimeOff 
+		UNION
+		SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated',
+			CASE 
+				WHEN @ysnFromUpdateUser = 1 THEN 'Max Balance(Updated in Update Employees)'
+				ELSE 'Max Balance'
+			END,
+			CAST(CAST(dblMaxBalanceOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblMaxBalanceNew AS FLOAT) AS NVARCHAR(20)),@intUserId FROM #tmpTableForAuditTimeOff 
+
+		OPEN AuditTableCursor
+			
+		FETCH NEXT FROM AuditTableCursor INTO @cur_Id,@cur_Namespace,@cur_Action,@cur_Description,@cur_From,@cur_To,@cur_EntityId
+		WHILE(@@FETCH_STATUS = 0)
+		BEGIN
+		--Insert individual Record to audit log
+			EXEC uspSMAuditLog
+				@keyValue = @cur_Id,
+				@screenName = @cur_Namespace,
+				@entityId = @cur_EntityId,
+				@actionType = @cur_Action,
+				@changeDescription  = @cur_Description,
+				@fromValue = @cur_From,
+				@toValue = @cur_To
+
+			FETCH NEXT FROM AuditTableCursor INTO @cur_Id,@cur_Namespace,@cur_Action,@cur_Description,@cur_From,@cur_To,@cur_EntityId
+		END
+		CLOSE AuditTableCursor
+		DEALLOCATE AuditTableCursor
+
+		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTableForAuditTimeOff')) DROP TABLE #tmpTableForAuditTimeOff 
 END
 GO
