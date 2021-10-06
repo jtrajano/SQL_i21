@@ -13,7 +13,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @intReturnValue AS INT = 0; 
 
@@ -1492,6 +1492,10 @@ BEGIN
 	EXEC dbo.uspICFixStockQuantities 
 		@intItemId 
 		,@intCategoryId
+
+	-- Rebuild the Daily Transactions
+	EXEC [dbo].[uspICPostStockDailyQuantity]
+		@ysnRebuild = 1
 END 
 
 ------------------------------------------------------------------------------
@@ -6443,10 +6447,6 @@ BEGIN
 					ON t.strBatchId = t_CreatedDate.strBatchId
 	END 
 END 
-
--- Rebuild the Daily Transactions
-EXEC [dbo].[uspICPostStockDailyQuantity]
-	@ysnRebuild = 1
 
 ---- Compare the snapshot of the gl entries 
 --BEGIN

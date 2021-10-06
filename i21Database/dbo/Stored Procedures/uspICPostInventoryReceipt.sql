@@ -10,7 +10,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -202,16 +202,22 @@ BEGIN
 	IF @ysnPost = 0 AND @ysnRecap = 0 
 	BEGIN 
 
-		SELECT	TOP 1 
-				@strBillNumber = Bill.strBillId
-		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-				LEFT JOIN dbo.tblAPBillDetail BillItems
-					ON BillItems.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-				INNER JOIN dbo.tblAPBill Bill
-					ON Bill.intBillId = BillItems.intBillId
-		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
-				AND BillItems.intBillDetailId IS NOT NULL
+		SELECT TOP 1 
+			@strBillNumber = bill.strBillId
+		FROM
+			tblICInventoryReceiptItem ri
+			OUTER APPLY (
+				SELECT TOP 1 
+					b.strBillId
+				FROM 
+					tblAPBill b INNER JOIN tblAPBillDetail bd
+						ON b.intBillId = bd.intBillId
+				WHERE
+					bd.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
+			) bill
+		WHERE
+			ri.intInventoryReceiptId = @intTransactionId
+			AND bill.strBillId IS NOT NULL 
 
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
@@ -226,19 +232,23 @@ BEGIN
 	IF @ysnPost = 0 AND @ysnRecap = 0 
 	BEGIN 
 		SET @strBillNumber = NULL 
-		SELECT	TOP 1 
-				@strBillNumber = Bill.strBillId
-				,@strChargeItem = Item.strItemNo
-		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
-					ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
-				INNER JOIN dbo.tblICItem Item
-					ON Item.intItemId = Charge.intChargeId				
-				LEFT JOIN dbo.tblAPBillDetail BillItems
-					ON BillItems.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
-				INNER JOIN dbo.tblAPBill Bill
-					ON Bill.intBillId = BillItems.intBillId
-		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
-				AND BillItems.intBillDetailId IS NOT NULL
+
+		SELECT TOP 1 
+			@strBillNumber = bill.strBillId
+		FROM
+			tblICInventoryReceiptCharge rc
+			OUTER APPLY (
+				SELECT TOP 1 
+					b.strBillId
+				FROM 
+					tblAPBill b INNER JOIN tblAPBillDetail bd
+						ON b.intBillId = bd.intBillId
+				WHERE
+					bd.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
+			) bill
+		WHERE
+			rc.intInventoryReceiptId = @intTransactionId
+			AND bill.strBillId IS NOT NULL 
 
 		IF ISNULL(@strBillNumber, '') <> ''
 		BEGIN 
@@ -275,22 +285,57 @@ BEGIN
 	END 
 
 	-- Do not allow post if no lot entry in a lotted item
-	SET @strItemNo = NULL
-	SELECT TOP 1 @strItemNo = item.strItemNo
-	FROM tblICInventoryReceipt receipt
-		INNER JOIN tblICInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptId = receipt.intInventoryReceiptId
-		INNER JOIN tblICItem item ON item.intItemId = receiptItem.intItemId
-		LEFT JOIN tblICInventoryReceiptItemLot itemLot ON itemLot.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-	WHERE dbo.fnGetItemLotType(item.intItemId) <> 0
-		AND itemLot.intInventoryReceiptItemLotId IS NULL
-		AND receipt.intInventoryReceiptId = @intTransactionId
-
-	IF @strItemNo IS NOT NULL
 	BEGIN
-		-- 'Lotted item {Item No} should should have lot(s) specified.'
-		EXEC uspICRaiseError 80090, @strItemNo
-		GOTO With_Rollback_Exit  
+		SET @strItemNo = NULL
+		SELECT TOP 1 
+			@strItemNo = item.strItemNo
+		FROM 
+			tblICInventoryReceiptItem receiptItem 			
+			INNER JOIN tblICItem item 
+				ON item.intItemId = receiptItem.intItemId
+			LEFT JOIN tblICInventoryReceiptItemLot itemLot 
+				ON itemLot.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+		WHERE 
+			receiptItem.intInventoryReceiptId = @intTransactionId
+			AND dbo.fnGetItemLotType(item.intItemId) <> 0
+			AND itemLot.intInventoryReceiptItemLotId IS NULL
+			
+		IF @strItemNo IS NOT NULL
+		BEGIN
+			-- 'Lotted item {Item No} should should have lot(s) specified.'
+			EXEC uspICRaiseError 80090, @strItemNo
+			GOTO With_Rollback_Exit  
+		END
 	END
+
+	-- Check if receipt items and lots have gross/net UOM and have gross qty and net qty when the items have Lot Weights Required enabled in Item setup.	
+	BEGIN 
+		SET @intItemId = NULL
+
+		SELECT TOP 1 
+			@strItemNo = i.strItemNo
+			,@intItemId = i.intItemId
+		FROM 
+			tblICInventoryReceiptItem ri 			
+			INNER JOIN tblICItem i 
+				ON i.intItemId = ri.intItemId
+		WHERE 
+			ri.intInventoryReceiptId = @intTransactionId
+			AND i.ysnLotWeightsRequired = 1
+			AND i.strLotTracking <> 'No'
+			AND (
+				ri.intWeightUOMId IS NULL 
+				OR ISNULL(ri.dblGross, 0) = 0 
+				OR ISNULL(ri.dblNet, 0) = 0
+			)
+			
+		IF @intItemId IS NOT NULL
+		BEGIN
+			-- 'Gross/Net UOM and weights are required for item %s.'
+			EXEC uspICRaiseError 80190, @strItemNo
+			GOTO With_Rollback_Exit 	
+		END
+	END 
 
 	-- Do not allow unpost if it has an Inventory Return transaction 
 	IF @ysnPost = 0 AND @ysnRecap = 0 
@@ -395,101 +440,54 @@ BEGIN
 	END COMMENT (IC-8603) 
 	*/
 
-	UPDATE lot
-	SET lot.strWarehouseRefNo = r.strWarehouseRefNo
-	FROM tblICInventoryReceiptItemLot lot 
-		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
-		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-	WHERE r.intInventoryReceiptId = @intTransactionId
-	
-	/*
-		Check if receipt items and lots have gross/net UOM and have gross qty and net qty when the items have Lot Weights Required enabled in Item setup.
-	*/
-	SET @intItemId = NULL
-
-	SELECT @strItemNo = i.strItemNo
-		,@intItemId = i.intItemId
-	FROM tblICInventoryReceipt r
-			INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-			INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
-		WHERE i.ysnLotWeightsRequired = 1
-			AND i.strLotTracking <> 'No'
-			AND (ri.intWeightUOMId IS NULL OR (ri.dblGross = 0 AND ri.dblNet = 0))
-			AND r.intInventoryReceiptId = @intTransactionId
-
-	IF @intItemId IS NOT NULL
-	BEGIN
-		EXEC uspICRaiseError 80190, @strItemNo
-		GOTO With_Rollback_Exit 	
-	END
-
-	--/*Do not allow receiving of negative qty.*/ 
-	--SET @intItemId = NULL
-
-	--SELECT	@strItemNo = i.strItemNo
-	--		,@intItemId = i.intItemId
-	--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
-	--			ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	--		INNER JOIN tblICItem i 
-	--			ON i.intItemId = ri.intItemId
-	--WHERE	r.intInventoryReceiptId = @intTransactionId
-	--		AND ISNULL(ri.dblOpenReceive, 0) < 0 
-	--		AND r.strReceiptType <> 'Inventory Return'
-	--		AND r.intSourceType <> @SOURCE_TYPE_Store
-
-	--IF @intItemId IS NOT NULL
-	--BEGIN
-	--	-- 'Receiving a negative stock for {Item} is not allowed.'
-	--	EXEC uspICRaiseError 80223, @strItemNo
-	--	GOTO With_Rollback_Exit 	
-	--END
-
 	-- Check if company-owned item and the location that doesn't allow zero cost
 	-- 1 or NULL: No
 	-- 2: Yes
 	-- 3: Yes, with warning message
-	SET @intItemId = NULL
-
-	SELECT	
-		@strItemNo = Item.strItemNo
-		,@intItemId = Item.intItemId
-		,@strLocation = Company.strLocationName
-	FROM
-		tblICInventoryReceipt r 
-		INNER JOIN tblICInventoryReceiptItem ri 
-			ON r.intInventoryReceiptId = ri.intInventoryReceiptId			
-		INNER JOIN tblICItem Item 
-			ON ri.intItemId = Item.intItemId
-		INNER JOIN dbo.tblICItemLocation ItemLocation 
-			ON ItemLocation.intItemId = Item.intItemId
-			AND ItemLocation.intLocationId = r.intLocationId
-		INNER JOIN tblSMCompanyLocation Company 
-			ON Company.intCompanyLocationId = ItemLocation.intLocationId
-	WHERE 		
-		r.strReceiptNumber = @strTransactionId
-		AND ISNULL(ri.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-		AND ri.dblUnitCost <= 0						
-		AND ISNULL(ItemLocation.intAllowZeroCostTypeId, 1) = 1
-		
-	IF @intItemId IS NOT NULL
-	BEGIN
-		-- 'Zero cost is not allowed in "%s" location for item "%s".'
-		EXEC uspICRaiseError 80229, @strLocation, @strItemNo
-		GOTO With_Rollback_Exit 	
-	END
-END
-
--- Check if sub location and storage locations are valid. 
-BEGIN
-	DECLARE @ysnValidLocation BIT
-	EXEC dbo.uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT, @strItemNo OUTPUT 
-
-	IF @ysnValidLocation = 0
 	BEGIN 
-		-- The sub location and storage unit in {Item No} does not match.
-		EXEC uspICRaiseError 80087, @strItemNo
-		GOTO With_Rollback_Exit
+		SET @intItemId = NULL
+
+		SELECT	
+			@strItemNo = Item.strItemNo
+			,@intItemId = Item.intItemId
+			,@strLocation = Company.strLocationName
+		FROM
+			tblICInventoryReceipt r 
+			INNER JOIN tblICInventoryReceiptItem ri 
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId			
+			INNER JOIN tblICItem Item 
+				ON ri.intItemId = Item.intItemId
+			INNER JOIN dbo.tblICItemLocation ItemLocation 
+				ON ItemLocation.intItemId = Item.intItemId
+				AND ItemLocation.intLocationId = r.intLocationId
+			INNER JOIN tblSMCompanyLocation Company 
+				ON Company.intCompanyLocationId = ItemLocation.intLocationId
+		WHERE 		
+			r.strReceiptNumber = @strTransactionId
+			AND ISNULL(ri.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+			AND ri.dblUnitCost <= 0						
+			AND ISNULL(ItemLocation.intAllowZeroCostTypeId, 1) = 1
+		
+		IF @intItemId IS NOT NULL
+		BEGIN
+			-- 'Zero cost is not allowed in "%s" location for item "%s".'
+			EXEC uspICRaiseError 80229, @strLocation, @strItemNo
+			GOTO With_Rollback_Exit 	
+		END
 	END 
+
+	-- Check if sub location and storage locations are valid. 
+	BEGIN
+		DECLARE @ysnValidLocation BIT
+		EXEC dbo.uspICValidateReceiptItemLocations @intTransactionId, @ysnValidLocation OUTPUT, @strItemNo OUTPUT 
+
+		IF @ysnValidLocation = 0
+		BEGIN 
+			-- The sub location and storage unit in {Item No} does not match.
+			EXEC uspICRaiseError 80087, @strItemNo
+			GOTO With_Rollback_Exit
+		END 
+	END
 END
 
 -- Get the next batch number
@@ -510,6 +508,13 @@ END
 IF @ysnPost = 1
 BEGIN 	
 	DECLARE @intCreateUpdateLotError AS INT 
+
+	UPDATE lot
+	SET lot.strWarehouseRefNo = r.strWarehouseRefNo
+	FROM tblICInventoryReceiptItemLot lot 
+		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	WHERE r.intInventoryReceiptId = @intTransactionId
 
 	EXEC @intCreateUpdateLotError = dbo.uspICCreateLotNumberOnInventoryReceipt 
 			@strTransactionId
@@ -839,10 +844,11 @@ BEGIN
 				INNER JOIN tblICItem i 
 					ON DetailItem.intItemId = i.intItemId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
-					ON ItemLocation.intLocationId = (
+					ON ItemLocation.intItemId = DetailItem.intItemId
+					AND ItemLocation.intLocationId = (
 						CASE WHEN Header.strReceiptNumber = @RECEIPT_TYPE_TRANSFER_ORDER THEN Header.intTransferorId ELSE Header.intLocationId END 
 					)
-					AND ItemLocation.intItemId = DetailItem.intItemId
+					
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 					AND dbo.fnGetItemLotType(DetailItem.intItemId) IN (1,2,3)

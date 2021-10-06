@@ -9073,6 +9073,9 @@
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
 	<Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStockAsOfDate.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

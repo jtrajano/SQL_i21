@@ -7,3 +7,7 @@ CREATE TABLE tblICItemCache (
 )
 
 GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICItemCache]
+	ON [dbo].[tblICItemCache]([intItemId] ASC)
+GO

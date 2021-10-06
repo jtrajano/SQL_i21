@@ -10,6 +10,8 @@
 	,@intCompanyLocationId INT = 0
 	
 AS
+SET ANSI_WARNINGS ON
+
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @dblAvailableGrainOpenBalance DECIMAL(24, 10)

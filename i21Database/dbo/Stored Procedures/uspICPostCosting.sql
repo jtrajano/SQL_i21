@@ -34,7 +34,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -127,7 +127,7 @@ SELECT
 	,[intItemLocationId] = p.intItemLocationId
 	,[intItemUOMId] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN iu.intItemUOMId ELSE p.intItemUOMId END 
 	,[dtmDate] = 
-		p.dtmDate
+		dbo.fnRemoveTimeOnDate(p.dtmDate) 
 		-- Revert the code below. It is causing problems at Pri Mar. See IC-8966. 
 		/**
 		CASE 			

@@ -6,6 +6,8 @@
 	,@strBatchId NVARCHAR(1000) OUTPUT
 	,@ysnIsPosted BIT OUTPUT
 AS
+SET ANSI_WARNINGS ON
+
 BEGIN TRY
 	
 	SET @strStatusMsg = ''

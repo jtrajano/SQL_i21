@@ -27,7 +27,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @dtmReceiptDate AS DATETIME 
 		,@strReceiptSourceNumber AS NVARCHAR(50)
@@ -134,8 +134,10 @@ BEGIN
 		AND cb.intItemId = Source_Query.intItemId
 		AND cb.intItemLocationId = Source_Query.intItemLocationId
 		AND cb.intItemUOMId = Source_Query.intItemUOMId
-		AND (cb.dblStockIn - cb.dblStockOut) > 0 
-		AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmReturnDate) = 1
+		--AND (cb.dblStockIn - cb.dblStockOut) > 0 
+		--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmReturnDate) = 1
+		AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmReturnDate AS FLOAT))
+		AND cb.dblStockAvailable > 0
 		AND cb.intTransactionId = Source_Query.intTransactionId
 		AND cb.strTransactionId = Source_Query.strTransactionId 
 

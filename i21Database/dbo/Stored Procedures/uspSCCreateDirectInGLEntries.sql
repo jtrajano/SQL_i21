@@ -3,6 +3,7 @@
     ,@ysnDistribute BIT
     ,@intUserId INT
 AS
+SET ANSI_WARNINGS ON
 BEGIN
     BEGIN TRY
         DECLARE @ErrMsg NVARCHAR(MAX)

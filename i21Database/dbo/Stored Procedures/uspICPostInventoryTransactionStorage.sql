@@ -37,7 +37,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @InventoryStockMovementId AS INT
 SET @InventoryTransactionIdentityId = NULL
@@ -119,10 +119,21 @@ SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 
 IF @InventoryTransactionIdentityId IS NOT NULL 
 BEGIN 
+	-----------------------------------------
+	-- Log the Stock Movement
+	-----------------------------------------
 	EXEC uspICPostInventoryStockMovement
 		@InventoryTransactionId = NULL
 		,@InventoryTransactionStorageId = @InventoryTransactionIdentityId
 		,@InventoryStockMovementId = @InventoryStockMovementId OUTPUT 
+
+	-----------------------------------------
+	-- Log the Daily Storage Quantity
+	-----------------------------------------
+	BEGIN 
+		EXEC uspICPostStorageDailyQuantity 
+			@intInventoryTransactionStorageId = @InventoryTransactionIdentityId
+	END 
 END 
 
 IF @intLotId IS NOT NULL 
