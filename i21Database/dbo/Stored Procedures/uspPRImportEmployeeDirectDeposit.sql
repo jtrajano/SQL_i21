@@ -113,7 +113,7 @@ DECLARE @ysnActive AS BIT
 						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 						SET @NewId = SCOPE_IDENTITY()
 
-					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @intEntityNo
+					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @intEntityNo AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 			END
 		ELSE
 			BEGIN
@@ -137,18 +137,17 @@ DECLARE @ysnActive AS BIT
 							ysnPullTaxSeparately = 0,
 							ysnRefundBudgetCredits = 0,
 							strDistributionType = @strDistributionType
-						WHERE intEntityEFTInfoId = @NewId
-
+						WHERE intEntityId = @intEntityNo 
+							AND intBankId = (SELECT TOP 1 intBankId FROM tblCMBank where strBankName = @strBankName)
+							AND dbo.fnAESDecryptASym(strAccountNumber) = @strAccountNumber
+							AND strAccountType = @strAccountType
 
 						--======================Close symmetric code snnipet=====================
 						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 
-					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @intEntityNo
+					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @intEntityNo AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 
 			END
-
-
-
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDirectDeposit')) 
