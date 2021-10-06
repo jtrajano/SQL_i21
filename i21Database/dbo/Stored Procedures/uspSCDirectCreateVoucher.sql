@@ -487,18 +487,30 @@ BEGIN TRY
 									END) * -1
 			,dblUnitQty				= SC.dblUnitQty
 			,dblDiscount			= 0
-			,dblCost				= SC.dblFreightRate
+			,dblCost				= COALESCE(LDCTC.dblRate,SC.dblFreightRate)
 			,intTaxGroupId			= SC.intTaxGroupId
 			,intInvoiceId			= null
 			,intScaleTicketId		= SC.intScaleTicketId
-			,intUnitOfMeasureId		= SC.intUnitOfMeasureId
-			,intCostUOMId			= SC.intCostUOMId
-			,dblCostUnitQty			= SC.dblCostUnitQty
+			,intUnitOfMeasureId		= COALESCE(LDCTC.intItemUOMId,SC.intUnitOfMeasureId)
+			,intCostUOMId			= COALESCE(LDCTC.intItemUOMId,SC.intCostUOMId)
+			,dblCostUnitQty			= COALESCE(LDCTCITM.dblUnitQty,SC.dblCostUnitQty)
 			,intContractDetailId	= SC.intContractDetailId
 			,intLoadDetailId		= SC.intLoadDetailId
 			,SC.intTicketDistributionAllocationId
 		FROM @ScaleToVoucherStagingTable SC
-		LEFT JOIN tblICItem IC ON IC.intItemId = SC.intFreightItemId
+		------******* START Load Contract Cost *****----------------
+		LEFT JOIN tblLGLoadDetail LD
+			ON SC.intLoadDetailId = LD.intLoadDetailId
+		LEFT JOIN tblCTContractDetail LDCT
+			ON LD.intPContractDetailId = LDCT.intContractDetailId
+		LEFT JOIN tblCTContractCost LDCTC
+			ON LDCT.intContractDetailId = LDCTC.intContractDetailId
+				AND LDCTC.intItemId = SC.intFreightItemId
+		LEFT JOIN tblICItemUOM LDCTCITM		
+			ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId
+		------******* END Load Contract Cost *****----------------
+		LEFT JOIN tblICItem IC 
+			ON IC.intItemId = SC.intFreightItemId
 		WHERE SC.intScaleTicketId = @intTicketId 
 			AND SC.dblFreightRate != 0
 			AND ysnFarmerPaysFreight = 1
