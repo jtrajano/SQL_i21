@@ -117,3 +117,8 @@ Tracks all stocks in a Actual-Cost manner. Records are physically arranged in an
 		ON [dbo].[tblICInventoryActualCost]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [dtmDate] ASC, [dblStockAvailable] ASC)
 		INCLUDE (intTransactionId, strTransactionId, dblCost);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost_Posting2]
+		ON [dbo].[tblICInventoryActualCost]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
+		INCLUDE (dblStockIn, dblStockOut);
+	GO

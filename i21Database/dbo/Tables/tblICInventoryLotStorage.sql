@@ -113,3 +113,8 @@ Records must be maintained in this table even if the costing method for an item 
 		ON [dbo].[tblICInventoryLotStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [intLotId] ASC, [dtmDate] ASC, [dblStockAvailable] ASC)
 		INCLUDE (intTransactionId, strTransactionId, dblCost);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotStorage_Posting2]
+		ON [dbo].[tblICInventoryLotStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [intLotId] ASC)
+		INCLUDE (dblStockIn, dblStockOut);
+	GO
