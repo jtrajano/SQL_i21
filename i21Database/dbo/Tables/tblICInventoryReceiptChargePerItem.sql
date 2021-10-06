@@ -27,6 +27,12 @@
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptChargePerItem_intInventoryReceiptId_intChargeId_intInventoryReceiptChargeId]
-	ON [dbo].[tblICInventoryReceiptChargePerItem]([intInventoryReceiptId] ASC, [intChargeId] ASC, [intInventoryReceiptChargeId] ASC)
+	ON [dbo].[tblICInventoryReceiptChargePerItem]([intInventoryReceiptId] ASC, [intInventoryReceiptChargeId] ASC, [intChargeId] ASC)
 	INCLUDE (intEntityVendorId, intContractId, dblCalculatedAmount, strAllocateCostBy, ysnAccrue, ysnInventoryCost, ysnPrice);
 
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptChargePerItem]
+	ON [dbo].[tblICInventoryReceiptChargePerItem](intInventoryReceiptChargeId)
+	INCLUDE (intInventoryReceiptId, intInventoryReceiptItemId, strAllocateCostBy, intContractId);
+GO

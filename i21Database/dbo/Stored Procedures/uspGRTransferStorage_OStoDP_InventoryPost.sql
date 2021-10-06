@@ -5,6 +5,8 @@ CREATE PROCEDURE [dbo].[uspGRTransferStorage_OStoDP_InventoryPost]
 	,@intUserId INT
 )
 AS
+SET ANSI_WARNINGS ON
+
 BEGIN
 	DECLARE @ItemsToPostCopy AS ItemCostingTableType
 	DECLARE @dblBasisCost DECIMAL(38,20)
