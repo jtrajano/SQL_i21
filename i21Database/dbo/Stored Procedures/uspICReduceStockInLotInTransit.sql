@@ -29,7 +29,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
@@ -74,8 +74,10 @@ BEGIN
 					AND cb.intLotId = @intLotId
 					AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 					AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-					AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+					--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+					--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+					AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					AND cb.dblStockAvailable <> 0 						
 					AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId)			
 			) cbAvailable
 			OUTER APPLY (
@@ -87,11 +89,14 @@ BEGIN
 						AND cb.intLotId = @intLotId
 						AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 						AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1						
+						--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+						--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1			
+						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+						AND cb.dblStockAvailable <> 0 												
 						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
 						AND (@strActualCostId IS NULL OR cb.strTransactionId = @strActualCostId)
-				ORDER BY cb.dtmDate ASC, cb.intInventoryLotId
+				ORDER BY 
+					cb.dtmDate ASC, cb.intInventoryLotId ASC
 			) cb
 
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
@@ -189,8 +194,10 @@ USING (
 	AND cb.intLotId = Source_Query.intLotId	
 	AND ISNULL(cb.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
 	AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
-	AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  -- Round out the remaining stock. If it becomes zero, then stock bucket is considered fully consumed already. 
-	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  -- Round out the remaining stock. If it becomes zero, then stock bucket is considered fully consumed already. 
+	--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+	AND cb.dblStockAvailable <> 0 						
 	AND (cb.strTransactionId = Source_Query.strActualCostId OR Source_Query.strActualCostId IS NULL) 
 	AND cb.intInventoryLotId = ISNULL(@CostBucketId, cb.intInventoryLotId)
 
