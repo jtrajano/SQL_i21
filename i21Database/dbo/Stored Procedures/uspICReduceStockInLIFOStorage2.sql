@@ -25,7 +25,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
@@ -68,8 +68,10 @@ BEGIN
 					cb.intItemId = @intItemId
 					AND cb.intItemLocationId = @intItemLocationId
 					AND cb.intItemUOMId = @intItemUOMId
-					AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-					AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1			
+					--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+					--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1	
+					AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					AND cb.dblStockAvailable <> 0					
 			) cbAvailable
 			OUTER APPLY (
 				SELECT	TOP 1 
@@ -78,10 +80,13 @@ BEGIN
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1						
+						--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+						--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1	
+						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+						AND cb.dblStockAvailable <> 0						
 						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
-				ORDER BY cb.dtmDate DESC
+				ORDER BY 
+					cb.dtmDate DESC, cb.intInventoryLIFOStorageId DESC 
 			) cb  
 
 
@@ -167,8 +172,10 @@ USING (
 	ON cb.intItemId = Source_Query.intItemId
 	AND cb.intItemLocationId = Source_Query.intItemLocationId
 	AND cb.intItemUOMId = Source_Query.intItemUOMId
-	AND (cb.dblStockIn - cb.dblStockOut) > 0 
-	AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	--AND (cb.dblStockIn - cb.dblStockOut) > 0 
+	--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+	AND cb.dblStockAvailable > 0						
 	AND cb.intInventoryLIFOStorageId = ISNULL(@CostBucketId, cb.intInventoryLIFOStorageId)
 
 -- Update an existing cost bucket

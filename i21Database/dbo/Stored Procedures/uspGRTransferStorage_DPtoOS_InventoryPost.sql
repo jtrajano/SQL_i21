@@ -5,6 +5,9 @@ CREATE PROCEDURE [dbo].[uspGRTransferStorage_DPtoOS_InventoryPost]
 	,@intUserId INT    
 )
 AS
+
+SET ANSI_WARNINGS ON
+
 BEGIN
 	DECLARE @errorAdjustment NVARCHAR(MAX)
 	DECLARE @ItemsToPostCopy AS ItemCostingTableType
