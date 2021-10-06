@@ -228,7 +228,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 						END
 					END
 
-				DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo
+				DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo AND strEarningDesc = @strEarningDesc
 
 			END
 		
@@ -366,7 +366,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 							END
 						END
 
-					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo
+					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo AND strEarningDesc = @strEarningDesc
 			END
 
 
