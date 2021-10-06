@@ -968,6 +968,7 @@ BEGIN TRY
 
 		--FOR FREIGHT CHARGES
 		BEGIN
+			
 			INSERT INTO @invoiceIntegrationStagingTable (
 				[strTransactionType]
 				,[strType]
@@ -1022,12 +1023,12 @@ BEGIN TRY
 				,[ysnResetDetails] = 0
 				,[intItemId] = ICI.intItemId
 				,[strItemDescription] = ICI.strItemNo
-				,[intOrderUOMId]= NULL
-				,[intItemUOMId] = NULL
+				,[intOrderUOMId]= LDCTC.intItemUOMId
+				,[intItemUOMId] = LDCTC.intItemUOMId
 				,[dblQtyOrdered] = Staging.dblQtyOrdered
 				,[dblQtyShipped] = Staging.dblQtyShipped
 				,[dblDiscount] = 0
-				,[dblPrice] = SC.dblFreightRate
+				,[dblPrice] = LDCTC.dblRate
 				,[ysnRefreshPrice] = 0
 				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 				,[ysnRecomputeTax] = 1
@@ -1045,9 +1046,21 @@ BEGIN TRY
 			LEFT JOIN tblEMEntityLocation EM 
 				ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 			INNER JOIN tblICItem ICI 
-				ON ICI.intItemId = SCS.intFreightItemId		
+				ON ICI.intItemId = SCS.intFreightItemId	
+			------******* START Load Contract Cost *****----------------
+			INNER JOIN tblLGLoadDetail LD
+				ON SC.intLoadDetailId = LD.intLoadDetailId
+			INNER JOIN tblCTContractDetail LDCT
+				ON LD.intSContractDetailId = LDCT.intContractDetailId
+			INNER JOIN tblCTContractCost LDCTC
+				ON LDCT.intContractDetailId = LDCTC.intContractDetailId
+					AND LDCTC.intItemId = SCS.intFreightItemId
+			INNER JOIN tblICItemUOM LDCTCITM		
+				ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId
+			------******* END Load Contract Cost *****----------------
 			WHERE SC.intTicketId = @intTicketId 
-				AND SC.dblFreightRate != 0
+				AND LDCTC.dblRate != 0
+				AND LDCTC.ysnPrice = 1
 				
 		END
 
@@ -1383,6 +1396,7 @@ BEGIN TRY
 				
 			END
 
+			EXEC uspARReComputeInvoiceAmounts @intInvoiceId
 
 			EXEC [dbo].[uspARPostInvoice]
 				@batchId			= NULL,
