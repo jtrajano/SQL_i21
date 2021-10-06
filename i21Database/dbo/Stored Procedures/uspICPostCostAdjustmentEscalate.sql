@@ -27,7 +27,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Check if there is a value to escalate. Exit immediately if zero. 
 IF ISNULL(@dblEscalateValue, 0) = 0 RETURN; 
