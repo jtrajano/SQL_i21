@@ -98,7 +98,14 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_forGLEntries]
 		ON [dbo].[tblICInventoryTransaction]([strBatchId], [intItemId], [strTransactionId])
-		INCLUDE ([intInTransitSourceLocationId]);
+		INCLUDE (
+			[intInTransitSourceLocationId]
+			, [intItemLocationId]
+			, [intItemUOMId]
+			, [intTransactionId]
+			, [intTransactionDetailId]
+			, [ysnIsUnposted]
+		);
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_detail]
@@ -118,9 +125,9 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemLocationId]
 	--	ON [dbo].[tblICInventoryTransaction]([intItemLocationId] ASC);
 
-	GO 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_forDPR]
-		ON [dbo].[tblICInventoryTransaction] ([intItemId])
-		INCLUDE ([intItemLocationId],[intItemUOMId],[dtmDate],[dblQty],[intCurrencyId],[intTransactionId],[strTransactionId],[intTransactionDetailId],[intTransactionTypeId],[strTransactionForm],[intInTransitSourceLocationId])
+	--GO 
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_forDPR]
+	--	ON [dbo].[tblICInventoryTransaction] ([intItemId])
+	--	INCLUDE ([intItemLocationId],[intItemUOMId],[dtmDate],[dblQty],[intCurrencyId],[intTransactionId],[strTransactionId],[intTransactionDetailId],[intTransactionTypeId],[strTransactionForm],[intInTransitSourceLocationId])
 
-	GO
+	--GO
