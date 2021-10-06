@@ -29,7 +29,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @dtmReceiptDate AS DATETIME 
 		,@strReceiptSourceNumber AS NVARCHAR(50)
@@ -188,8 +188,10 @@ BEGIN
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intLotId = @intLotId
 						AND cb.intItemUOMId = @intItemUOMId
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
-						AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+						--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) > 0  
+						--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+						AND cb.dblStockAvailable > 0
 						AND r.intInventoryReceiptId = @intTransactionId
 						AND r.strReceiptNumber = @strTransactionId
 			) cb 
@@ -198,7 +200,7 @@ BEGIN
 	BEGIN 
 		-- Check the stock from the cb. 
 		SET @UnitsOnHand = 0
-		SELECT	@UnitsOnHand = ISNULL(ROUND((cb.dblStockIn - cb.dblStockOut), 6), 0) 
+		SELECT	@UnitsOnHand = ISNULL(cb.dblStockAvailable, 0) 
 				,@strReceiptSourceNumber = cb.strTransactionId
 				,@dtmReceiptDate = cb.dtmDate
 		FROM	tblICItem i INNER JOIN tblICItemLocation il
@@ -266,8 +268,10 @@ BEGIN
 		AND cb.intLotId = Source_Query.intLotId	
 		AND ISNULL(cb.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
 		AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
-		AND (cb.dblStockIn - cb.dblStockOut) > 0 
-		AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+		--AND (cb.dblStockIn - cb.dblStockOut) > 0 
+		--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1
+		AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+		AND cb.dblStockAvailable > 0
 		AND cb.intTransactionId = Source_Query.intTransactionId
 		AND cb.strTransactionId = Source_Query.strTransactionId 
 

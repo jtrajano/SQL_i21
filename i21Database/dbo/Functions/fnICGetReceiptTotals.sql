@@ -23,49 +23,42 @@ BEGIN
 	FROM	tblICInventoryReceiptItem ReceiptItem
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 	
-	--Get the total tax for receipt charges
-	IF EXISTS (SELECT 1 FROM tblICInventoryReceiptCharge WHERE intInventoryReceiptId = @intInventoryReceiptId)
-	BEGIN
-		-- Get the total receipt charges
-		-- Add the charge if:
-		-- 1. (Receipt >> Currrency Id) = (Charge >> Currency Id)
-		-- 2. (Receipt >> Vendor Id) = (Charge >> Vendor Id)
-		SELECT @totalCharges = SUM(
-					CASE 
-						WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
-							CASE 
-								WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblAmount 
-								WHEN Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblAmount 
-								ELSE 0.00
-							END 
-						ELSE
-							0.00
-					END
-				)
-		FROM	tblICInventoryReceipt Receipt INNER JOIN tblICInventoryReceiptCharge ReceiptCharge
-					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		WHERE	ReceiptCharge.intInventoryReceiptId = @intInventoryReceiptId
-				AND ISNULL(Receipt.intCurrencyId, 1) = ISNULL(ReceiptCharge.intCurrencyId, ISNULL(Receipt.intCurrencyId, 1)) 
-
-		-- Get the total tax for receipt charges
-		SELECT	@totalChargesTax = 
-				SUM (
-					CASE 
-						WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
-							CASE 
-								WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblTax 
-								WHEN ReceiptCharge.ysnAccrue = 1 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblTax 
-								ELSE 0.00
-							END 
-						ELSE
-							0.00
-					END
-				)
-		FROM	tblICInventoryReceipt Receipt INNER JOIN tblICInventoryReceiptCharge ReceiptCharge
-					ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
-		WHERE	ReceiptCharge.intInventoryReceiptId = @intInventoryReceiptId
-				AND ISNULL(Receipt.intCurrencyId, 1) = ISNULL(ReceiptCharge.intCurrencyId, ISNULL(Receipt.intCurrencyId, 1)) 
-	END
+	-- Get the total receipt charges
+	-- Add the charge if:
+	-- 1. (Receipt >> Currrency Id) = (Charge >> Currency Id)
+	-- 2. (Receipt >> Vendor Id) = (Charge >> Vendor Id)
+	SELECT 
+			-- Get the total receipt charges
+			@totalCharges = SUM(
+				CASE 
+					WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
+						CASE 
+							WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblAmount 
+							WHEN Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblAmount 
+							ELSE 0.00
+						END 
+					ELSE
+						0.00
+				END
+			)
+			-- Get the total tax for receipt charges
+			,@totalChargesTax = 
+			SUM (
+				CASE 
+					WHEN Receipt.intCurrencyId = ISNULL(ReceiptCharge.intCurrencyId, Receipt.intCurrencyId) THEN 
+						CASE 
+							WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptCharge.dblTax 
+							WHEN ReceiptCharge.ysnAccrue = 1 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) THEN ReceiptCharge.dblTax 
+							ELSE 0.00
+						END 
+					ELSE
+						0.00
+				END
+			)
+	FROM	tblICInventoryReceipt Receipt INNER JOIN tblICInventoryReceiptCharge ReceiptCharge
+				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
+	WHERE	ReceiptCharge.intInventoryReceiptId = @intInventoryReceiptId
+			AND ISNULL(Receipt.intCurrencyId, 1) = ISNULL(ReceiptCharge.intCurrencyId, ISNULL(Receipt.intCurrencyId, 1)) 
 	
 	--Set Total Tax
 	SET @totalTax = @totalTax + @totalChargesTax

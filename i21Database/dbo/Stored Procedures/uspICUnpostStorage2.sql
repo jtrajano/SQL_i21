@@ -13,7 +13,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 	DROP TABLE #tmpInventoryTransactionStockToReverse
@@ -529,7 +529,107 @@ BEGIN
 		,t.intLocationId
 	FROM	#tmpInventoryTransactionStockToReverse tmp INNER JOIN dbo.tblICInventoryStockMovement t
 				ON tmp.intInventoryTransactionStorageId = t.intInventoryTransactionStorageId 
+END 
+
+-------------------------------------------
+-- Update the Daily Storage Quantity
+-------------------------------------------
+BEGIN 	
+	DECLARE @stock AS TABLE(
+		[intItemId] INT
+		,[intItemLocationId] INT
+		,[intItemUOMId] INT
+		,[dtmDate] DATETIME
+		,[dblQty] NUMERIC(38, 17)
+	)
+
+	INSERT INTO @stock
+	SELECT	
+		t.[intItemId] 
+		,t.[intItemLocationId] 
+		,t.[intItemUOMId] 
+		,t.[dtmDate] 
+		,[dblQty] = SUM(ISNULL(-t.dblQty, 0)) 
+	FROM 
+		tblICInventoryTransactionStorage t INNER JOIN #tmpInventoryTransactionStockToReverse tmp
+			ON t.intInventoryTransactionStorageId = tmp.intInventoryTransactionStorageId
+	WHERE
+		t.intItemUOMId IS NOT NULL 
+	GROUP BY
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+
+	-- insert as zero record. 
+	INSERT INTO tblICInventoryStorageAsOfDate 
+	(
+		[intItemId]
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+	)
+	SELECT 
+		s.intItemId
+		,s.intItemLocationId
+		,s.intItemUOMId
+		,s.dtmDate
+		,[dblQty] = 0 
+	FROM 
+		tblICInventoryStorageAsOfDate asOfDate RIGHT JOIN @stock s
+			ON asOfDate.[intItemId] = s.intItemId 
+			AND asOfDate.[intItemLocationId] = s.intItemLocationId 
+			AND asOfDate.[intItemUOMId] = s.intItemUOMId 
+			AND asOfDate.[dtmDate] = s.dtmDate 
+	WHERE
+		asOfDate.intId IS NULL 
+		 
+	SELECT 
+		@intItemId = NULL
+		,@intItemLocationId = NULL
+		,@intItemUOMId = NULL
+		,@dtmDate = NULL
+		,@dblQty = NULL
+	
+	WHILE EXISTS (SELECT TOP 1 1 FROM @stock)
+	BEGIN 
+		SELECT TOP 1 
+			@intItemId = s.intItemId
+			,@intItemLocationId = s.intItemLocationId
+			,@intItemUOMId = s.intItemUOMId
+			,@dtmDate = s.dtmDate
+			,@dblQty = s.dblQty
+		FROM @stock s
+
+		UPDATE asOfDate
+		SET
+			asOfDate.dblQty = ISNULL(asOfDate.dblQty, 0) + ISNULL(@dblQty, 0)
+		FROM 
+			tblICInventoryStorageAsOfDate asOfDate 			
+		WHERE
+			asOfDate.intItemId = @intItemId
+			AND asOfDate.intItemLocationId = @intItemLocationId
+			AND asOfDate.intItemUOMId = @intItemUOMId
+			AND asOfDate.dtmDate >= @dtmDate
+
+		DELETE @stock
+		WHERE
+			@intItemId = intItemId
+			AND @intItemLocationId = intItemLocationId
+			AND @intItemUOMId = intItemUOMId
+			AND @dtmDate = dtmDate
+
+		SELECT 
+			@intItemId = NULL
+			,@intItemLocationId = NULL
+			,@intItemUOMId = NULL
+			,@dtmDate = NULL
+			,@dblQty = NULL
+	END 	
+END 
 		
+BEGIN
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for the related transactions 
 	--------------------------------------------------------------
