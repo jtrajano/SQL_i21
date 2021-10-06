@@ -108,3 +108,8 @@ Records must be maintained in this table even if the costing method for an item 
 		ON [dbo].[tblICInventoryFIFOStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [dtmDate] ASC, [dblStockAvailable] ASC)
 		INCLUDE (intTransactionId, strTransactionId, dblCost);
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOStorage_Posting2]
+		ON [dbo].[tblICInventoryFIFOStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
+		INCLUDE (dblStockIn, dblStockOut);
+	GO

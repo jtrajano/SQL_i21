@@ -1492,6 +1492,10 @@ BEGIN
 	EXEC dbo.uspICFixStockQuantities 
 		@intItemId 
 		,@intCategoryId
+
+	-- Rebuild the Daily Transactions
+	EXEC [dbo].[uspICPostStockDailyQuantity]
+		@ysnRebuild = 1
 END 
 
 ------------------------------------------------------------------------------
