@@ -119,10 +119,21 @@ SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
 
 IF @InventoryTransactionIdentityId IS NOT NULL 
 BEGIN 
+	-----------------------------------------
+	-- Log the Stock Movement
+	-----------------------------------------
 	EXEC uspICPostInventoryStockMovement
 		@InventoryTransactionId = NULL
 		,@InventoryTransactionStorageId = @InventoryTransactionIdentityId
 		,@InventoryStockMovementId = @InventoryStockMovementId OUTPUT 
+
+	-----------------------------------------
+	-- Log the Daily Storage Quantity
+	-----------------------------------------
+	BEGIN 
+		EXEC uspICPostStorageDailyQuantity 
+			@intInventoryTransactionStorageId = @InventoryTransactionIdentityId
+	END 
 END 
 
 IF @intLotId IS NOT NULL 

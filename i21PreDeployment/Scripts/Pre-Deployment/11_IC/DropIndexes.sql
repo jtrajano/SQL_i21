@@ -78,3 +78,8 @@ GO
 IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICItemCache' AND object_id = OBJECT_ID('dbo.tblICItemCache'))
 	DROP INDEX [IX_tblICItemCache] ON tblICItemCache
 GO
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICInventoryTransactionStorage_intTransactionId' AND object_id = OBJECT_ID('dbo.tblICInventoryTransactionStorage'))
+	DROP INDEX [IX_tblICInventoryTransactionStorage_intTransactionId] ON tblICInventoryTransactionStorage
+GO
+GO

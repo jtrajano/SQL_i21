@@ -64,7 +64,7 @@ BEGIN
 				AND il.intItemLocationId = @intItemLocationId
 			OUTER APPLY (
 				SELECT 
-					dblAvailable = SUM(ROUND((cb.dblStockIn - cb.dblStockOut), 6))
+					dblAvailable = SUM(cb.dblStockAvailable)
 				FROM
 					tblICInventoryLot cb
 				WHERE
@@ -73,11 +73,8 @@ BEGIN
 					AND cb.intLotId = @intLotId
 					AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 					AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-					--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1			
-					AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 					AND cb.dblStockAvailable <> 0
-
+					AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 			) cbAvailable
 			OUTER APPLY (
 				SELECT	TOP 1 
@@ -88,16 +85,12 @@ BEGIN
 						AND cb.intLotId = @intLotId
 						AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 						AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-						--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
-						--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1	
-						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
-						AND cb.dblStockAvailable <> 0						
+						AND cb.dblStockAvailable <> 0		
+						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))										
 						AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
 				ORDER BY 
 					cb.dtmDate ASC, cb.intInventoryLotId ASC 
 			) cb
-
-
 	IF @CostBucketId IS NULL AND ISNULL(@AllowNegativeInventory, @ALLOW_NEGATIVE_NO) = @ALLOW_NEGATIVE_NO
 	BEGIN 
 		-- Get the available stock in the cost bucket. 
@@ -118,7 +111,7 @@ BEGIN
 
 		DECLARE findBestDateToPost CURSOR LOCAL FAST_FORWARD
 		FOR 
-		SELECT	dblQty = ROUND((ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)), 6)
+		SELECT	dblQty = cb.dblStockAvailable --ROUND((ISNULL(cb.dblStockIn, 0) - ISNULL(cb.dblStockOut, 0)), 6)
 				,cb.dtmDate
 		FROM	tblICInventoryLot cb
 		WHERE	cb.intItemId = @intItemId
@@ -126,7 +119,8 @@ BEGIN
 				AND cb.intLotId = @intLotId
 				AND ISNULL(cb.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 				AND ISNULL(cb.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-				AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
+				--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0 
+				AND cb.dblStockAvailable <> 0 
 		ORDER BY 
 			cb.dtmDate ASC 
 
