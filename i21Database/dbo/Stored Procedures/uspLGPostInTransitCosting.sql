@@ -4,6 +4,8 @@
 	,@intPurchaseSale INT
 	,@intEntityUserSecurityId INT
 AS
+SET ANSI_WARNINGS ON
+
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
 	DECLARE @intShipmentType INT

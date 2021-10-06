@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
 	
 DECLARE @ReceiptType AS INT
 DECLARE @SourceType AS INT
@@ -1080,10 +1080,21 @@ BEGIN
 	DECLARE @intControlPointId AS INT = 3
 	DECLARE @QualityInspectionTable QualityInspectionTable
  
-	INSERT INTO @QualityInspectionTable (intPropertyId,strPropertyName,strPropertyValue,strComment)
-	SELECT iri.intQAPropertyId, iri.strPropertyName,'true / false', iri.strComment
-	FROM tblICInventoryReceiptInspection iri
-	WHERE iri.intInventoryReceiptId = @ReceiptId
+	INSERT INTO @QualityInspectionTable (
+		intPropertyId
+		,strPropertyName
+		,strPropertyValue
+		,strComment
+	)
+	SELECT	
+		iri.intQAPropertyId
+		, iri.strPropertyName
+		,'true / false'
+		, iri.strComment
+	FROM 
+		tblICInventoryReceiptInspection iri
+	WHERE 
+		iri.intInventoryReceiptId = @ReceiptId
  
 	EXEC uspQMInspectionSaveResult @intControlPointId, @intProductTypeId, @intProductValueId, @UserId, @QualityInspectionTable	
 END

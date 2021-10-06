@@ -93,6 +93,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[intCreatedEntityId] INT NULL,
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
+		[dblStockAvailable] AS (ROUND(ISNULL(dblStockIn, 0) - ISNULL(dblStockOut, 0), 6)) PERSISTED,
 		CONSTRAINT [PK_tblICInventoryLotStorage] PRIMARY KEY NONCLUSTERED ([intInventoryLotStorageId]),
 		CONSTRAINT [FK_tblICInventoryLotStorage_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]),
 		CONSTRAINT [FK_tblICInventoryLotStorage_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
@@ -103,8 +104,17 @@ Records must be maintained in this table even if the costing method for an item 
 		ON [dbo].[tblICInventoryLotStorage]([intInventoryLotStorageId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotStorage_intItemId_intLocationId]
-		ON [dbo].[tblICInventoryLotStorage]([intItemId] ASC, [intItemLocationId] ASC)
-		INCLUDE (dtmDate, intLotId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotStorage_intItemId_intLocationId]
+	--	ON [dbo].[tblICInventoryLotStorage]([intItemId] ASC, [intItemLocationId] ASC)
+	--	INCLUDE (dtmDate, intLotId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotStorage_Posting]
+		ON [dbo].[tblICInventoryLotStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [intLotId] ASC, [dtmDate] ASC, [dblStockAvailable] ASC)
+		INCLUDE (intTransactionId, strTransactionId, dblCost);
 	GO
 
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLotStorage_Posting2]
+		ON [dbo].[tblICInventoryLotStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [intLotId] ASC)
+		INCLUDE (dblStockIn, dblStockOut);
+	GO

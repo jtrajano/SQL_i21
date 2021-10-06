@@ -88,6 +88,7 @@ Tracks all non-company owned stocks in a LIFO manner. Records are physically arr
 		[intCreatedUserId] INT NULL, 
 		[intCreatedEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
+		[dblStockAvailable] AS (ROUND(ISNULL(dblStockIn, 0) - ISNULL(dblStockOut, 0), 6)) PERSISTED,
 		CONSTRAINT [PK_tblICInventoryLIFOStorage] PRIMARY KEY NONCLUSTERED ([intInventoryLIFOStorageId]) 
 	)
 	GO
@@ -96,7 +97,12 @@ Tracks all non-company owned stocks in a LIFO manner. Records are physically arr
 		ON [dbo].[tblICInventoryLIFOStorage]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOStorageId] DESC);
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOStorage_intItemId_intLocationId]
-		ON [dbo].[tblICInventoryLIFOStorage]([intItemId] ASC, [intItemLocationId] ASC)
-		INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOStorage_intItemId_intLocationId]
+	--	ON [dbo].[tblICInventoryLIFOStorage]([intItemId] ASC, [intItemLocationId] ASC)
+	--	INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
+	--GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOStorage_Posting]
+		ON [dbo].[tblICInventoryLIFOStorage]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [dtmDate] DESC, [dblStockAvailable] ASC)
+		INCLUDE (intTransactionId, strTransactionId, dblCost);
 	GO

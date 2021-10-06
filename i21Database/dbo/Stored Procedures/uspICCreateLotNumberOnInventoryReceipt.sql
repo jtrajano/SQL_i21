@@ -8,7 +8,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
@@ -83,20 +83,19 @@ BEGIN
 	SET @intInventoryReceiptItemId = NULL 
 
 	SELECT	TOP 1 
-			@strItemNo					= Item.strItemNo
-			,@intItemId					= Item.intItemId
-			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
-			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+			--@strItemNo					= Item.strItemNo
+			--,@intItemId					= Item.intItemId
+			--,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
 			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
-			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblOpenReceive
+			-- ,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblOpenReceive
 			,@intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = ReceiptItem.intItemId
-			LEFT JOIN (
-				SELECT  AggregrateLot.intInventoryReceiptItemId
-						,TotalLotQtyInItemUOM = SUM(
+			OUTER APPLY (
+				SELECT  TotalLotQtyInItemUOM = SUM(
 							dbo.fnCalculateQtyBetweenUOM(
 								ISNULL(AggregrateLot.intItemUnitMeasureId, tblICInventoryReceiptItem.intUnitMeasureId)
 								,tblICInventoryReceiptItem.intUnitMeasureId
@@ -104,17 +103,16 @@ BEGIN
 							)
 						)
 						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantity, 0))
-				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
-							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+				FROM	dbo.tblICInventoryReceiptItem 
 						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
 							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
-				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
-				GROUP BY AggregrateLot.intInventoryReceiptItemId
+				WHERE	AggregrateLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
 			) ItemLot
-				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId											
-	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
-			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
+				
+	WHERE	
+		Receipt.strReceiptNumber = @strTransactionId
+		AND dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
+		AND ROUND(ISNULL(ItemLot.TotalLotQtyInItemUOM, 0), 6) <> ROUND(ReceiptItem.dblOpenReceive,6)
 
 	-- If Lot Qty is more than the Item Qty, then check if the item is a weight type and all lots are 'packed' uoms. 
 	IF (
@@ -129,7 +127,8 @@ BEGIN
 						,ri.intUnitMeasureId
 						,1
 					)
-		FROM	tblICInventoryReceiptItem ri INNER JOIN tblICItemUOM iu
+		FROM	tblICInventoryReceiptItem ri 
+				INNER JOIN tblICItemUOM iu
 					ON ri.intUnitMeasureId = iu.intItemUOMId
 				INNER JOIN tblICUnitMeasure u
 					ON u.intUnitMeasureId = iu.intUnitMeasureId 
@@ -137,7 +136,8 @@ BEGIN
 					-- select returns isInvalid = 1 if any of the lots are not in 'packed' uom.
 					SELECT	TOP 1 
 							isInvalid = CAST(1 AS BIT) 
-					FROM	tblICInventoryReceiptItemLot ril INNER JOIN tblICItemUOM iuLot
+					FROM	tblICInventoryReceiptItemLot ril 
+							INNER JOIN tblICItemUOM iuLot
 								ON ril.intItemUnitMeasureId = iuLot.intItemUOMId
 							INNER JOIN tblICUnitMeasure uLot
 								ON uLot.intUnitMeasureId = iuLot.intUnitMeasureId 
@@ -147,13 +147,15 @@ BEGIN
 				OUTER APPLY (
 					SELECT	TOP 1 
 							intLotItemUOMId = iuLot.intItemUOMId
-					FROM	tblICInventoryReceiptItemLot ril INNER JOIN tblICItemUOM iuLot
+					FROM	tblICInventoryReceiptItemLot ril 
+							INNER JOIN tblICItemUOM iuLot
 								ON ril.intItemUnitMeasureId = iuLot.intItemUOMId
 							INNER JOIN tblICUnitMeasure uLot
 								ON uLot.intUnitMeasureId = iuLot.intUnitMeasureId 
 					WHERE	ril.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 							AND uLot.strUnitType IN ('Packed', 'Quantity')
-					ORDER BY ril.intInventoryReceiptItemLotId DESC 
+					ORDER BY 
+						ril.intInventoryReceiptItemLotId DESC 
 				) lotPackedUOM
 		WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
 				AND u.strUnitType IN ('Weight')
@@ -193,38 +195,40 @@ BEGIN
 	SELECT	TOP 1 
 			@strItemNo					= Item.strItemNo
 			,@intItemId					= Item.intItemId
-			,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
+			--,@OpenReceiveQty			= ReceiptItem.dblOpenReceive
 			,@ReceiptItemNet			= ReceiptItem.dblNet
 			,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
 			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInItemUOM, 0)
-			,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblNet
+			--,@OpenReceiveQtyInItemUOM	= ReceiptItem.dblNet
 			,@CleanWgtCount				= ISNULL(clean.CleanCount, 0)
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = ReceiptItem.intItemId
-			LEFT JOIN (
-				SELECT  AggregrateLot.intInventoryReceiptItemId
-						,TotalLotQtyInItemUOM = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
-						,TotalLotQty = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
-				FROM	dbo.tblICInventoryReceipt INNER JOIN dbo.tblICInventoryReceiptItem 
-							ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
-						INNER JOIN dbo.tblICInventoryReceiptItemLot AggregrateLot
-							ON tblICInventoryReceiptItem.intInventoryReceiptItemId = AggregrateLot.intInventoryReceiptItemId
-				WHERE	tblICInventoryReceipt.strReceiptNumber = @strTransactionId				
-				GROUP BY AggregrateLot.intInventoryReceiptItemId
+			OUTER APPLY (
+				SELECT  
+					TotalLotQtyInItemUOM = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+					,TotalLotQty = SUM(ISNULL(AggregrateLot.dblGrossWeight, 0) - ISNULL(AggregrateLot.dblTareWeight, 0))
+				FROM	
+					dbo.tblICInventoryReceiptItemLot AggregrateLot					
+				WHERE	
+					AggregrateLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 			) ItemLot
-				ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-			LEFT OUTER JOIN (
-					SELECT COUNT(intInventoryReceiptItemLotId) CleanCount, intInventoryReceiptItemId
-					FROM dbo.tblICInventoryReceiptItemLot
-					WHERE strCondition = 'Clean Wgt'
-					GROUP BY intInventoryReceiptItemId
-			) clean ON clean.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId										
-	WHERE	dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
-			AND Receipt.strReceiptNumber = @strTransactionId
-			AND ROUND(ItemLot.TotalLotQtyInItemUOM,6) <> ROUND(ReceiptItem.dblNet,6)
-			AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 
+				
+			OUTER APPLY (
+				SELECT 
+					CleanCount = COUNT(clean.intInventoryReceiptItemLotId) 
+				FROM 
+					dbo.tblICInventoryReceiptItemLot clean
+				WHERE 
+					clean.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId										
+					AND clean.strCondition = 'Clean Wgt'
+			) clean 
+	WHERE	
+		Receipt.strReceiptNumber = @strTransactionId
+		AND dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 
+		AND ROUND(ItemLot.TotalLotQtyInItemUOM,6) <> ROUND(ReceiptItem.dblNet,6)
+		AND ReceiptItem.intWeightUOMId IS NOT NULL -- There is a Gross/Net UOM. 
 			
 	IF @intItemId IS NOT NULL AND @CleanWgtCount = 0
 	BEGIN 
@@ -394,4 +398,4 @@ END
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#GeneratedLotItems')) 
 	DROP TABLE #GeneratedLotItems
 
-RETURN 0; 
+RETURN 0;
