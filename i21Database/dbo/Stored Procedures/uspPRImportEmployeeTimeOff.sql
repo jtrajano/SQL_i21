@@ -103,7 +103,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 				)
 				VALUES
 				(
-					 @intEntityNo
+					 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @intEntityNo)
 					,(SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
 					,@dblRate
 					,@dblPerPeriod
@@ -124,7 +124,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 				)
 
 				SET @NewId = SCOPE_IDENTITY()
-				DELETE FROM #TempEmployeeTimeOff WHERE intEntityNo = @intEntityNo
+				DELETE FROM #TempEmployeeTimeOff WHERE intEntityNo = @intEntityNo AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
 
 			END
 		ELSE
@@ -148,7 +148,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 				WHERE intEmployeeTimeOffId = @intEntityNo
 				AND intTypeTimeOffId = (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
 
-				DELETE FROM #TempEmployeeTimeOff WHERE intEntityNo = @intEntityNo
+				DELETE FROM #TempEmployeeTimeOff WHERE intEntityNo = @intEntityNo AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
 			END
 
 	END
