@@ -44,6 +44,7 @@ BEGIN TRY
 	DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 	DECLARE @ysnDropShip BIT
 	DECLARE @intMatchTicketId INT
+	DECLARE @intTicketFreightCostUOMId INT
 	
 	DECLARE @_intLoopLoadDetailId INT
 	DECLARE @_intLoopContractDetailId INT
@@ -67,6 +68,7 @@ BEGIN TRY
 		,@intAllowOtherLocationContracts = intAllowOtherLocationContracts
 		,@intTicketItemId = intItemId
 		,@intMatchTicketId = intMatchTicketId
+		,@intTicketFreightCostUOMId = A.intFreightCostUOMId
 	FROM tblSCTicket A
 	INNER JOIN tblSCScaleSetup B
 		ON A.intScaleSetupId = B.intScaleSetupId
@@ -284,9 +286,9 @@ BEGIN TRY
 				,A.[ysnTicketPrinted]
 				,A.[ysnPlantTicketPrinted]
 				,A.[ysnGradingTagPrinted]
-				,A.[intHaulerId] 
+				,intHaulerId = NULL ---A.[intHaulerId] 
 				,A.[intFreightCarrierId] 
-				,A.[dblFreightRate] 
+				,dblFreightRate = 0.0 ----A.[dblFreightRate] 
 				,A.[ysnFarmerPaysFreight]
 				,A.[ysnCusVenPaysFees]
 				,A.[strLoadNumber] 
@@ -413,6 +415,7 @@ BEGIN TRY
 							,intCropYearId = D.intCropYearId
 							,strLoadNumber = E.strLoadNumber
 							,strCustomerReference = E.strCustomerReference
+							,intFreightCostUOMId = @intTicketFreightCostUOMId
 					FROM tblSCTicket A
 					INNER JOIN tblLGLoadDetail B
 						ON B.intLoadDetailId = @intTickeLoadDetailId
