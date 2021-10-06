@@ -91,6 +91,7 @@ Tracks all stocks in a Actual-Cost manner. Records are physically arranged in an
 		[intCreatedEntityId] INT NULL,
 		[intCompanyId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
+		[dblStockAvailable] AS (ROUND(ISNULL(dblStockIn, 0) - ISNULL(dblStockOut, 0), 6)) PERSISTED,
 		CONSTRAINT [PK_tblICInventoryActualCost] PRIMARY KEY NONCLUSTERED ([intInventoryActualCostId]) 
 	)
 	GO
@@ -113,6 +114,11 @@ Tracks all stocks in a Actual-Cost manner. Records are physically arranged in an
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost_Posting]
-		ON [dbo].[tblICInventoryActualCost]([strActualCostId], intItemId, intItemLocationId, intItemUOMId)
-		INCLUDE (dblStockIn, dblStockOut, dtmDate);
+		ON [dbo].[tblICInventoryActualCost]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC, [dtmDate] ASC, [dblStockAvailable] ASC)
+		INCLUDE (intTransactionId, strTransactionId, dblCost);
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryActualCost_Posting2]
+		ON [dbo].[tblICInventoryActualCost]([intItemId] ASC, [intItemLocationId] ASC, [intItemUOMId] ASC)
+		INCLUDE (dblStockIn, dblStockOut);
 	GO

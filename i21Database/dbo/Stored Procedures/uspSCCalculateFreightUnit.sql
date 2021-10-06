@@ -11,6 +11,6 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 	 SET @result = dbo.fnCalculateQtyBetweenUOM (@itemUOMIdFrom , dbo.fnGetMatchingItemUOMId(@itemId, @itemUOMIdTo), @dblQty)
 END 
