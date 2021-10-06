@@ -206,6 +206,7 @@
     <Build Include="dbo\Tables\tblAPIWODetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPIProcessWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspAPIGetCompletedWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMClearPowerBIData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
