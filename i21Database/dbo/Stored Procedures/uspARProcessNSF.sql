@@ -577,7 +577,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDCHARGES)
 			END
 		ELSE
 			BEGIN
-				SET @strMessage = 'Failed to Create Bank Transaction Entry'
+				SET @strErrorMsg = 'Failed to Create Bank Transaction Entry'
 				GOTO Do_Rollback
 			END
 
@@ -725,8 +725,9 @@ Do_Rollback:
 
 IF @InitTranCount = 0
 	BEGIN
-		IF (XACT_STATE()) = -1 OR ISNULL(@strMessage, '') <> ''
+		IF (XACT_STATE()) = -1 OR ISNULL(@strErrorMsg, '') <> ''
 		BEGIN 
+			SET @strMessage = @strErrorMsg
 			ROLLBACK TRANSACTION
 		END
 
@@ -735,8 +736,9 @@ IF @InitTranCount = 0
 	END		
 ELSE
 	BEGIN
-		IF (XACT_STATE()) = -1 OR ISNULL(@strMessage, '') <> ''
+		IF (XACT_STATE()) = -1 OR ISNULL(@strErrorMsg, '') <> ''
 		BEGIN
+			SET @strMessage = @strErrorMsg
 			ROLLBACK TRANSACTION  @Savepoint
 		END
 	END	
