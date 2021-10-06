@@ -210,6 +210,9 @@
     <Build Include="dbo\Tables\tblApiSchemaCustomer.sql" />
     <Build Include="dbo\Views\vyuFAMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReportCustom.sql" />
+    <Build Include="dbo\Tables\tblAPIWODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPIProcessWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPIGetCompletedWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
