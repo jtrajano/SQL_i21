@@ -60,7 +60,7 @@ BEGIN TRY
 			dblNoOfLots = CASE WHEN CP.strLotCalculationType = 'Round' THEN  dbo.fnRemoveTrailingZeroes(ROUND(PD.[dblNoOfLots],2))
 							   WHEN CP.strLotCalculationType = 'Actual' THEN  dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots])
 						  ELSE dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) END,
-			strPrice = dbo.fnCTChangeNumericScale(PD.dblFutures,ISNULL(CT.intPricingDecimals,2)) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
+			strPrice = dbo.fnCTChangeNumericScale(PD.dblFutures,ISNULL(CP.intPricingDecimals,2)) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
 			PD.strNotes
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
