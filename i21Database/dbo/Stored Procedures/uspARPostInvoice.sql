@@ -24,7 +24,7 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 SET XACT_ABORT ON
   
 --------------------------------------------------------------------------------------------  

@@ -8,7 +8,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Rebuild the cost adjustment using the Storage History. 
 -- This means (1) tblGRStorageHistory will be linked with (2) tblICInventoryReceiptItem and (3) tblAPBillDetail. 
