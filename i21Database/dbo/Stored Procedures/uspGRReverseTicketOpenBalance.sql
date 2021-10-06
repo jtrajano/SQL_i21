@@ -5,6 +5,8 @@
 AS
 BEGIN TRY
 	SET NOCOUNT ON
+	SET ANSI_WARNINGS ON
+
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
 	DECLARE @intStorageHistoryId INT
 	DECLARE @ErrMsg NVARCHAR(MAX)

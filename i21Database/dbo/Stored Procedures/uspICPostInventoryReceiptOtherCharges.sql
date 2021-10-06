@@ -39,8 +39,8 @@ BEGIN
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = OtherCharge.intChargeId
 			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intLocationId = Receipt.intLocationId
-				AND ItemLocation.intItemId = Item.intItemId
+				ON ItemLocation.intItemId = Item.intItemId
+				AND ItemLocation.intLocationId = Receipt.intLocationId 
 	WHERE	ItemLocation.intItemLocationId IS NULL 
 			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 
@@ -63,8 +63,9 @@ BEGIN
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = ReceiptItem.intItemId 
 			LEFT JOIN dbo.tblICItemLocation ItemLocation
-				ON ItemLocation.intLocationId = Receipt.intLocationId
-				AND ItemLocation.intItemId = Item.intItemId
+				ON ItemLocation.intItemId = Item.intItemId
+				AND ItemLocation.intLocationId = Receipt.intLocationId
+				
 	WHERE	ItemLocation.intItemLocationId IS NULL 
 			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			AND ReceiptItem.intItemId = ISNULL(@intRebuildItemId, ReceiptItem.intItemId)
@@ -87,12 +88,12 @@ BEGIN
 				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = OtherCharge.intChargeId
-	WHERE	OtherCharge.ysnAccrue = 1
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND ISNULL(OtherCharge.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId
+			AND OtherCharge.ysnAccrue = 1
 			AND OtherCharge.ysnPrice = 1
 			AND OtherCharge.ysnInventoryCost = 1
-			AND ISNULL(OtherCharge.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId
-			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-
+			
 	IF @intChargeItemId IS NOT NULL 
 	BEGIN 
 		-- The {Other Charge} is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.
@@ -107,11 +108,10 @@ BEGIN
 	SELECT TOP 1 
 			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 			,@intChargeItemId = Item.intItemId
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
-				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+	FROM	dbo.tblICInventoryReceiptCharge OtherCharge			
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = OtherCharge.intChargeId
-	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+	WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
 			AND (
 				-- Do not allow if third party or receipt vendor is going to pay the other charge and cost is passed-on to the item cost. 
 				(
@@ -152,10 +152,10 @@ BEGIN
 				ON c.intCurrencyID =  OtherCharge.intCurrencyId
 			LEFT JOIN tblSMCurrency fc
 				ON fc.intCurrencyID =  @intFunctionalCurrencyId
-	WHERE	ISNULL(OtherCharge.dblForexRate, 0) = 0 
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND ISNULL(OtherCharge.dblForexRate, 0) = 0 
 			AND OtherCharge.intCurrencyId IS NOT NULL 
-			AND OtherCharge.intCurrencyId <> @intFunctionalCurrencyId
-			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND OtherCharge.intCurrencyId <> @intFunctionalCurrencyId			
 			AND OtherCharge.intCurrencyId NOT IN (SELECT intCurrencyID FROM tblSMCurrency WHERE ysnSubCurrency = 1 AND intMainCurrencyId = @intFunctionalCurrencyId)
 
 	IF @intChargeItemId IS NOT NULL 
@@ -176,8 +176,8 @@ BEGIN
 			,@strFunctionalCurrencyId = NULL 
 
 	SELECT TOP 1 
-			@strTransactionId = Receipt.strReceiptNumber
-			,@strItemNo = Item.strItemNo
+			--@strTransactionId = Receipt.strReceiptNumber
+			@strItemNo = Item.strItemNo
 			,@intChargeItemId = Item.intItemId
 			,@strCurrencyId = cc.strCurrency
 			,@strFunctionalCurrencyId = rc.strCurrency

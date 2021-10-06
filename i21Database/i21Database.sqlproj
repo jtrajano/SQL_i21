@@ -8926,6 +8926,9 @@
     <Build Include="dbo\Views\vyuICGetInventoryDailyValuation.sql" />
     <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStockAsOfDate.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
