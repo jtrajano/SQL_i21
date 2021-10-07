@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspPATPostRefund] 
+﻿CREATE PROCEDURE [dbo].[uspPATPostRefund]
 	@intRefundId INT = NULL,
 	@ysnPosted BIT = NULL,
 	@ysnRecap BIT = NULL,
@@ -58,7 +58,7 @@ BEGIN
 		AND RCat.intPatronageCategoryId = CV.intPatronageCategoryId
 		AND R.ysnPosted <> 1
 	WHERE RCat.dblVolume > (CV.dblVolume - CV.dblVolumeProcessed)
-
+	AND R.intFiscalYearId = @intFiscalYearId
 END
 ELSE
 BEGIN
