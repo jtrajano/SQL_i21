@@ -22,7 +22,7 @@ SELECT
 	A.strVendorOrderNumber,
 	A.intBillId,
 	A.dtmDate,
-	FP.strPeriod,
+	dbo.fnAPGetFiscalPeriod(A.dtmDate) strPeriod,
 	A.dtmDateCreated,
 	A.ysnPosted,
 	B.intBillDetailId,
@@ -96,8 +96,6 @@ INNER JOIN dbo.tblAPBillDetail B
 	ON A.intBillId = B.intBillId
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId
-LEFT JOIN dbo.tblGLFiscalYearPeriod FP
-	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 -- LEFT JOIN dbo.tblAPBillDetailTax BD 
 -- 	ON BD.intBillDetailId = B.intBillDetailId
 LEFT JOIN dbo.tblICInventoryReceiptItem IRE 
