@@ -604,6 +604,7 @@
     <Build Include="dbo\Views\vyuFAFixedAssetHistory.sql" />
     <Build Include="dbo\Views\vyuFAUndepreciatedAssetAllPeriods.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
+    <Build Include="dbo\Views\vyuCMBorrowingFacility.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
@@ -9023,6 +9024,7 @@
     <None Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
     <None Include="Scripts\Post-Deployment\CM\8_FlagCCTransaction.sql" />
     <None Include="Scripts\Post-Deployment\CM\10_BankTransfer.sql" />
+    <None Include="Scripts\Post-Deployment\CM\11_TradingFinance.sql" />
     <None Include="Scripts\Post-Deployment\CM\vyuCMBankAccountRegisterRunningBalance.sql" />
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
@@ -9124,9 +9126,8 @@
     <Build Include="dbo\Tables\tblCMBankStatementImportLogDetail.sql" />
     <Build Include="dbo\Tables\tblCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
-    <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
-    <Build Include="dbo\Views\vyuCMBankStatementImportLogActivityDetail.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLogActivityDetail.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Views\vyuIPContractCostView.sql" />
@@ -9142,6 +9143,7 @@
     <Build Include="dbo\Tables\tblARAuditLog.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationAsCommodityStockUOM.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyMasterScreen.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\42_InterCompanyMasterScreen.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMDA7762.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMDD7762.sql" />
