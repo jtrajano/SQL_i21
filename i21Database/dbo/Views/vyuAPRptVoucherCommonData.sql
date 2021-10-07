@@ -1,7 +1,7 @@
 CREATE VIEW vyuAPRptVoucherCommonData
 AS
 
-SELECT DISTINCT
+SELECT
 A.intBillId
 ,companySetup.strCompanyName AS strCompanyName
 ,strCompanyAddress = ISNULL(RTRIM(companySetup.strCompanyName) + CHAR(13) + char(10), '')
