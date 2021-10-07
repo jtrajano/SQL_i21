@@ -187,6 +187,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTO.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRouteGetTODetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
+    <Build Include="dbo\Functions\fnAPGetFiscalPeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
