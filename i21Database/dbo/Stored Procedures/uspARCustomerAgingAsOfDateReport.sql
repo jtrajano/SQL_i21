@@ -530,7 +530,6 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 WHERE ((@ysnIncludeCreditsLocal = 1 AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')) OR (@ysnIncludeCreditsLocal = 0 AND I.strTransactionType = 'EXCLUDE CREDITS'))
     AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 	AND ISNULL(CR.dblRefundTotal, 0) = 0
-	AND I.dblAmountDue <> 0
 
 UNION ALL
 
