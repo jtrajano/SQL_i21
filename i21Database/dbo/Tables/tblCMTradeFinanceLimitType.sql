@@ -1,5 +1,5 @@
 
-CREATE TABLE [dbo].[tblCMTradingFinanceLimitType](
+CREATE TABLE [dbo].[tblCMTradeFinanceLimitType](
 	intLimitTypeId      INT IDENTITY(1,1) NOT NULL,
     strLimitType        NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
     intConcurrencyId    INT NOT NULL

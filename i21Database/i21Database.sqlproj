@@ -605,6 +605,7 @@
     <Build Include="dbo\Views\vyuFAUndepreciatedAssetAllPeriods.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
     <Build Include="dbo\Views\vyuCMBorrowingFacility.sql" />
+    <Build Include="dbo\Views\vyuCMBorrowingFacilityDetail.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
@@ -616,6 +617,10 @@
     <None Include="Scripts\Post-Deployment\Optional Run\2_Reports\1_UpdateConnection.sql" />
     <Build Include="dbo\Stored Procedures\uspGLReverseGLEntries.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImport.sql" />
+    <Build Include="dbo\Tables\tblCMTradeFinanceLimitType.sql" />
+    <Build Include="dbo\Tables\tblCMBankValuationRule.sql" />
+    <Build Include="dbo\Tables\tblCMBorrowingFacility.sql" />
+    <Build Include="dbo\Tables\tblCMBorrowingFacilityDetail.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
     <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
     <Build Include="dbo\Functions\fnGetBankGLBalance.sql" />
