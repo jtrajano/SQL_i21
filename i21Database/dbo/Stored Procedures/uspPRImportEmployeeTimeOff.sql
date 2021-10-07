@@ -56,7 +56,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			 @intEntityNo =  intEntityNo
 			,@strTimeOffId =  strTimeOffId
 			,@strTimeOffDesc =  strTimeOffDesc
-			,@dtmEligibleDate = dtmEligibleDate
+			,@dtmEligibleDate = CAST(dtmEligibleDate AS NVARCHAR) 
 			,@dblRate =  dblRate
 			,@dblPerPeriod =   dblPerPeriod
 			,@strPeriod =  strPeriod
@@ -65,12 +65,12 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			,@dblMaxEarned =   dblMaxEarned
 			,@dblMaxCarryOver =   dblMaxCarryOver
 			,@dblMaxBalance =   dblMaxBalance
-			,@dtmLastAwardDate =   dtmEligibleDate
-			,@dblHoursCarryOver =  dblHoursCarryOver 
-			,@dblHoursAccrued =   dblHoursAccrued
-			,@dblHoursEarned =   dblHoursEarned
-			,@dblHoursUsed =   dblHoursUsed
-			,@dblAdjustments =   dblAdjustments
+			,@dtmLastAwardDate = CAST(dtmLastAwardDate AS NVARCHAR) 
+			,@dblHoursCarryOver =	CAST(dblHoursCarryOver AS FLOAT) 
+			,@dblHoursAccrued =	CAST(dblHoursAccrued AS FLOAT)
+			,@dblHoursEarned =	CAST(dblHoursEarned AS FLOAT)
+			,@dblHoursUsed =	CAST(dblHoursUsed AS FLOAT)
+			,@dblAdjustments =	CAST(dblAdjustments AS FLOAT)
 		FROM #TempEmployeeTimeOff
 
 		SELECT TOP 1 
@@ -113,12 +113,12 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,@dblMaxCarryOver
 					,@dblMaxEarned
 					,@dblMaxBalance
-					,CONVERT(datetime, @dtmLastAwardDate, 101)
+					,CONVERT(DATE, @dtmLastAwardDate)
 					,@dblHoursAccrued
 					,@dblHoursEarned
 					,@dblHoursCarryOver
-					,@dblHoursUsed
-					,CONVERT(datetime, @dtmEligibleDate, 101)
+					,CAST(@dblAdjustments AS FLOAT) 
+					,CONVERT(DATE, @dtmEligibleDate)
 					,1
 					,1
 				)
@@ -139,12 +139,12 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,dblMaxCarryover = @dblMaxCarryOver
 					,dblMaxEarned = @dblMaxEarned
 					,dblMaxBalance = @dblMaxBalance
-					,dtmLastAward = CONVERT(datetime, @dtmLastAwardDate, 101)
+					,dtmLastAward = CONVERT(DATE, @dtmLastAwardDate) 
 					,dblHoursAccrued = @dblHoursAccrued
 					,dblHoursEarned = @dblHoursEarned
 					,dblHoursCarryover = @dblHoursCarryOver
-					,dblHoursUsed = @dblHoursUsed
-					,dtmEligible = CONVERT(datetime, @dtmEligibleDate, 101)
+					,dblHoursUsed = CAST(@dblAdjustments AS FLOAT)
+					,dtmEligible = CONVERT(DATE, @dtmEligibleDate)
 				WHERE intEmployeeTimeOffId = @intEntityNo
 				AND intTypeTimeOffId = (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strTimeOffId AND strDescription = @strTimeOffDesc)
 
