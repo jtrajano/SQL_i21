@@ -448,7 +448,8 @@ IF @ysnIncludeBudgetLocal = 1
 			 , strItemNo				= NULL
 			 , strItemDescription		= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 			 , strFullAddress			= C.strFullAddress
-			 , strStatementFooterComment = C.strStatementFooterComment
+			 , strStatementFooterComment= C.strStatementFooterComment
+			 , strPaymentMethod			= NULL
 		FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN (
