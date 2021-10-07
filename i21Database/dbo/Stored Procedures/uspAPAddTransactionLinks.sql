@@ -9,6 +9,22 @@ BEGIN
 	DECLARE @ID AS TABLE (intID INT)
 	DECLARE @intDestId INT, @strDestTransactionNo NVARCHAR(100)
 
+	IF NOT EXISTS(
+		SELECT 1
+		FROM tblAPBillDetail A
+		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@strTransactionIds) B ON A.intBillId = B.intID
+		WHERE
+			A.intInventoryReceiptItemId > 0
+		OR A.intInventoryReceiptChargeId > 0
+		OR A.intInventoryShipmentChargeId > 0
+		OR A.intLoadDetailId > 0
+		OR A.intLoadShipmentCostId > 0
+		OR A.intSettleStorageId > 0
+	)
+	BEGIN
+		RETURN;
+	END
+
 	--VOUCHER
 	IF @intTransactionType = 1
 	BEGIN
