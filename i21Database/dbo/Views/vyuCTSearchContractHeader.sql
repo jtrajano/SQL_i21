@@ -137,7 +137,7 @@ LEFT JOIN tblSMFreightTerms				FT	WITH (NOLOCK) ON	FT.intFreightTermId					=	CH.
 LEFT JOIN tblEMEntityLocation			ESL WITH (NOLOCK) ON	ESL.intEntityLocationId				=	CH.intEntitySelectedLocationId
 OUTER APPLY (
 	select top 1
-		ysnApproved = 1
+		ysnApproved = convert(bit,1)
 	from
 		tblSMScreen sc
 		join tblSMTransaction tr on tr.intScreenId = sc.intScreenId
