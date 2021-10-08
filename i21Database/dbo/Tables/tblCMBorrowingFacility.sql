@@ -1,7 +1,8 @@
 CREATE TABLE tblCMBorrowingFacility(
   intBorrowingFacilityId              INT             IDENTITY(1,1) NOT NULL,
+  strBorrowingFacilityId              NVARCHAR(20)    COLLATE Latin1_General_CI_AS NOT NULL,
   intBankId                           INT             NOT NULL,
-  strBankReferenceNo                  NVARCHAR(30)    COLLATE Latin1_General_CI_AS NULL,
+  strBankReferenceNo                  NVARCHAR(30)    COLLATE Latin1_General_CI_AS NOT NULL,
   intBankValuationRuleId              INT             NOT NULL,
   intPositionCurrencyId               INT             NOT NULL,
   dblGlobalLineCredit                 DECIMAL (18, 2) NOT NULL,
