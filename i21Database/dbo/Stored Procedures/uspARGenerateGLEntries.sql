@@ -10,6 +10,13 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS ON
 
+--PERFORMANCE SNIFFING
+DECLARE @PostTemp              BIT			= @Post
+      , @RecapTemp             BIT			= @Recap
+      , @PostDateTemp          DATETIME     = @PostDate
+      , @BatchIdTemp           NVARCHAR(40)	= @BatchId
+      , @UserIdTemp            INT          = @UserId
+
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
@@ -25,7 +32,7 @@ DECLARE  @AVERAGECOST   INT = 1
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
 DECLARE @ItemsForPost AS ItemCostingTableType
 
-IF @Post = 1
+IF @PostTemp = 1
 
 INSERT INTO @ItemsForPost
     ([intItemId]
@@ -132,16 +139,16 @@ BEGIN
 	)
 	EXEC dbo.uspICPostCosting  
 		 @ItemsForPost  
-		,@BatchId  
+		,@BatchIdTemp  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@UserId
+		,@UserIdTemp
 END
 
 DECLARE  @InTransitItems                ItemInTransitCostingTableType 
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
 				
-IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM ##ARPostInvoiceDetail WHERE intSourceId = 2))
+IF @PostTemp = 1 OR (@PostTemp = 0 AND EXISTS(SELECT TOP 1 1 FROM ##ARPostInvoiceDetail WHERE intSourceId = 2))
 INSERT INTO @InTransitItems
     ([intItemId] 
     ,[intItemLocationId] 
@@ -231,9 +238,9 @@ BEGIN		 --Call the post routine
 	)
 	EXEC dbo.uspICPostInTransitCosting  
 		 @InTransitItems  
-		,@BatchId  
+		,@BatchIdTemp  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@UserId	
+		,@UserIdTemp	
 
 	UPDATE B
 	SET intAccountId = dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
@@ -246,7 +253,7 @@ BEGIN		 --Call the post routine
 					             AND A.intTransactionDetailId =  C.intTransactionDetailId 
 					             AND A.intItemId = C.intItemId
 					             AND A.intItemLocationId = C.intItemLocationId
-	WHERE A.strBatchId = @BatchId
+	WHERE A.strBatchId = @BatchIdTemp
 	  AND C.intLinkedItemId IS NOT NULL
 	  AND dbo.fnGetItemGLAccount(A.intItemId, A.intItemLocationId, 'Cost of Goods') = B.intAccountId
 
@@ -254,7 +261,7 @@ END
 
 DECLARE @StorageItemsForPost AS ItemCostingTableType  			
 
-IF @Post = 1
+IF @PostTemp = 1
 INSERT INTO @StorageItemsForPost (  
      [intItemId] 
     ,[intItemLocationId] 
@@ -338,13 +345,13 @@ BEGIN
 	)
 	EXEC dbo.uspICPostStorage  
 			 @StorageItemsForPost  
-			,@BatchId  		
-			,@UserId
+			,@BatchIdTemp  		
+			,@UserIdTemp
 END
 
 UPDATE ##ARInvoiceGLEntries
-SET [dtmDateEntered] = @PostDate
-   ,[strBatchId]     = @BatchId
+SET [dtmDateEntered] = @PostDateTemp
+   ,[strBatchId]     = @BatchIdTemp
 
 UPDATE GL
 SET GL.intSourceEntityId = I.intEntityCustomerId
