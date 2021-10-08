@@ -178,6 +178,7 @@ BEGIN
 							, intItemUnitMeasureId
 							, dblUnit
 							, dblDiscount
+							, intCurrencyId
 							, dblUnitAfterDiscount --Retail Price
 							, dblCost
 							, intCreatedByUserId
@@ -191,6 +192,7 @@ BEGIN
 							, Source_Query.intItemUOMId
 							, 1
 							, 0
+							, 3 --USD tblSMCurrency
 							, @dblPromotionalSalesPrice
 							, @dblPromotionalCost
 							, @intEntityUserSecurityId
