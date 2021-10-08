@@ -83,7 +83,7 @@ BEGIN
 		END
 		if(@ysnUpdateLimit = 1)
 		BEGIN
-			
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
 			Select intEntityEmployeeId,'EntityManagement.view.Entity', 'Updated','Annual Limit(Updated in Update Employees)',CAST(CAST(dblLimitOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblLimitNew AS FLOAT) AS NVARCHAR(20)),@intUserId
 			FROM @EmployeeDeductionAudit
 		END
