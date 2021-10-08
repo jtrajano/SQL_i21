@@ -1025,10 +1025,10 @@ BEGIN TRY
 				,[strItemDescription] = ICI.strItemNo
 				,[intOrderUOMId]= LDCTC.intItemUOMId
 				,[intItemUOMId] = LDCTC.intItemUOMId
-				,[dblQtyOrdered] = Staging.dblQtyOrdered
-				,[dblQtyShipped] = Staging.dblQtyShipped
+				,[dblQtyOrdered] = Staging.dblQtyOrdered 
+				,[dblQtyShipped] = Staging.dblQtyShipped 
 				,[dblDiscount] = 0
-				,[dblPrice] = LDCTC.dblRate
+				,[dblPrice] = LDCTC.dblRate * -1
 				,[ysnRefreshPrice] = 0
 				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 				,[ysnRecomputeTax] = 1
