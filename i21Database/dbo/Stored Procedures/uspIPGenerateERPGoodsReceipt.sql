@@ -585,7 +585,8 @@ BEGIN TRY
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
 			UPDATE tblICInventoryReceiptItem
-			SET ysnExported = 0
+			SET ysnExported = 1
+				,dtmExportedDate = GETDATE()
 			WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 			UPDATE tblIPInvReceiptFeed
