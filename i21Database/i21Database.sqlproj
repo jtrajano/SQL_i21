@@ -206,6 +206,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformCustomerFreight.sql" />
     <Build Include="dbo\Views\vyuCTActiveEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetFiscalPeriod.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherTransactionType2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
