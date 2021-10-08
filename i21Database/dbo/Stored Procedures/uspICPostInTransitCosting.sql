@@ -78,6 +78,7 @@ DECLARE @AVERAGECOST AS INT = 1
 DECLARE @AUTO_VARIANCE AS INT = 1
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
