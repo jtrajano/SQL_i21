@@ -143,6 +143,8 @@ BEGIN
 
 	DECLARE @costAdjustmentType AS TINYINT 
 	SET @costAdjustmentType = dbo.fnICGetCostAdjustmentSetup(@intItemId, @intItemLocationId) 
+
+	DECLARE @intInventoryTransactionIdentityId AS INT
 END 
 
 -- Compute the cost adjustment
@@ -1147,5 +1149,16 @@ BEGIN
 	WHERE	ItemPricing.intItemId = @intItemId
 			AND ItemPricing.intItemLocationId = @intItemLocationId			
 			AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromAVGTransactions(@intItemId, @intItemLocationId), 2) <> 0
+
+	SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+	-----------------------------------------
+	-- Log the Daily Stock Quantity
+	-----------------------------------------
+	IF @intInventoryTransactionIdentityId IS NOT NULL 
+	BEGIN 
+		EXEC uspICPostStockDailyQuantity 
+			@intInventoryTransactionId = @intInventoryTransactionIdentityId
+	END 
 			
 END
