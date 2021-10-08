@@ -148,8 +148,8 @@ BEGIN TRY
             SELECT DISTINCT
                 intItemId AS intItemId,
                 dblNewCost AS dblNewCost
-            FROM (SELECT * FROM (SELECT ROW_NUMBER() OVER(ORDER BY intID ASC) AS intRow, intID AS intItemId FROM [dbo].[fnGetRowsFromDelimitedValues](@strItemId)) AS item
-				, (SELECT ROW_NUMBER() OVER(ORDER BY intID ASC) AS intRowCost, intID AS dblNewCost FROM [dbo].[fnGetRowsFromDelimitedValues](@strNewCost)) AS cost
+            FROM (SELECT * FROM (SELECT ROW_NUMBER() OVER(ORDER BY strDataType ASC) AS intRow, CAST(strDataType AS INT) AS intItemId FROM dbo.fnARSplitValues(@strItemId, ',')) AS item
+				, (SELECT ROW_NUMBER() OVER(ORDER BY strDataType ASC) AS intRowCost, CAST(strDataType AS NUMERIC(16,2)) AS dblNewCost FROM dbo.fnARSplitValues(@strNewCost, ',')) AS cost
 				WHERE item.intRow = cost.intRowCost) AS tblItems
         END
 
@@ -232,13 +232,13 @@ BEGIN TRY
 								FROM tblICItemSpecialPricing spr 
 								WHERE @StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate
 									AND spr.intItemLocationId = il.intItemLocationId)
-						WHEN (@StartDate <= (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
+						WHEN (@StartDate >= (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
 													WHERE EIP.intItemLocationId = il.intItemLocationId
-													AND @StartDate <= dtmEffectiveRetailPriceDate
+													AND @StartDate >= dtmEffectiveRetailPriceDate
 													ORDER BY dtmEffectiveRetailPriceDate ASC))
 							THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
 													WHERE EIP.intItemLocationId = il.intItemLocationId
-													AND @StartDate <= dtmEffectiveRetailPriceDate
+													AND @StartDate >= dtmEffectiveRetailPriceDate
 													ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 						WHEN ISNULL(ipr.intItemPricingId, 0) != 0
 							THEN ipr.dblSalePrice

@@ -107,7 +107,6 @@ BEGIN TRY
                 intQuantity INT,
                 dblPrice DECIMAL(18, 6) NULL,
                 strCategory VARCHAR(MAX),
-                dblCategoryMargin DECIMAL(18, 6) NULL,
                 strFamily VARCHAR(MAX),
                 strClass VARCHAR(MAX)
             );
@@ -188,7 +187,6 @@ BEGIN TRY
         intQuantity,
         --dblPrice,
         strCategory,
-        dblCategoryMargin,
         strFamily,
         strClass,
         strGuid,
@@ -229,9 +227,14 @@ BEGIN TRY
 			--AS FLOAT),2)
 			--AS dblPrice,
            cat.strCategoryCode AS strCategory,
-           catloc.dblTargetGrossProfit AS dblCategoryMargin, -- TO CONFIRM
-           fam.strSubcategoryDesc AS strFamily,
-           class.strSubcategoryDesc AS strClass,
+           (SELECT TOP 1 strSubcategoryDesc FROM tblSTSubcategory sc
+						INNER JOIN tblICItemLocation il
+						ON sc.intSubcategoryId = il.intFamilyId
+						WHERE intSubcategoryId IS NOT NULL AND il.intItemId = it.intItemId) AS strFamily,
+           (SELECT TOP 1 strSubcategoryDesc FROM tblSTSubcategory sc
+						INNER JOIN tblICItemLocation il
+						ON sc.intSubcategoryId = il.intClassId
+						WHERE intSubcategoryId IS NOT NULL AND il.intItemId = it.intItemId) AS strClass,
            @strGuid,
            1
     FROM tblICItem it
@@ -242,22 +245,6 @@ BEGIN TRY
             ON uom.intUnitMeasureId = um.intUnitMeasureId
         JOIN tblICCategory cat
             ON it.intCategoryId = cat.intCategoryId
-        LEFT JOIN tblICCategoryLocation catloc
-            ON cat.intCategoryId = catloc.intCategoryId 
-        LEFT JOIN (SELECT TOP 1 intSubcategoryId, strSubcategoryDesc, it.intItemId FROM tblSTSubcategory sc
-						INNER JOIN tblICItemLocation il
-						ON sc.intSubcategoryId = il.intFamilyId
-						INNER JOIN tblICItem it
-						ON il.intItemId = it.intItemId
-						WHERE intSubcategoryId IS NOT NULL) fam
-            ON it.intItemId = fam.intItemId
-        LEFT JOIN (SELECT TOP 1 intSubcategoryId, strSubcategoryDesc, it.intItemId FROM tblSTSubcategory sc
-						INNER JOIN tblICItemLocation il
-						ON sc.intSubcategoryId = il.intClassId
-						INNER JOIN tblICItem it
-						ON il.intItemId = it.intItemId
-						WHERE intSubcategoryId IS NOT NULL) class
-            ON it.intItemId = class.intItemId
         LEFT JOIN tblICItemLocation il
             ON il.intItemId = it.intItemId
     WHERE (
