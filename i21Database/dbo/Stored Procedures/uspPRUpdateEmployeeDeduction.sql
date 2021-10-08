@@ -61,7 +61,7 @@ BEGIN
 			deleted.dblPaycheckMax, inserted.dblPaycheckMax,
 			deleted.strDeductFrom, inserted.strDeductFrom,
 			deleted.intAccountId, inserted.intAccountId,
-			deleted.intAccountId, inserted.intExpenseAccountId
+			deleted.intExpenseAccountId, inserted.intExpenseAccountId
 		INTO
 			@EmployeeDeductionAudit
 		FROM tblPRTypeDeduction Deduction 
@@ -147,7 +147,7 @@ BEGIN
 		if(@ysnUpdateTaxes=1)
 		BEGIN
 			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
-				SELECT ED.intEmployeeDeductionId,'EntityManagement.view.Entity','Updated','Deleted Deduction Taxes in Update Employees',TT.strDescription,NULL,@intUserId
+				SELECT ED.intEntityEmployeeId,'EntityManagement.view.Entity','Updated','Deleted Deduction Taxes in Update Employees',TT.strDescription,NULL,@intUserId
 				from tblPREmployeeDeduction ED
 				inner join tblPREmployeeDeductionTax DT ON DT.intEmployeeDeductionId=ED.intEmployeeDeductionId
 				inner join tblPRTypeTax TT ON TT.intTypeTaxId = DT.intTypeTaxId
