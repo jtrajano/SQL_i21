@@ -49,5 +49,12 @@ BEGIN
 END 
 GO
 
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryDailyTransaction)
+BEGIN
+	EXEC uspICPostStockDailyQuantity
+		@ysnRebuild = 1
+END 
+GO 
+
 PRINT N'END - IC Improve Inventory Valuation Performance'
 GO
