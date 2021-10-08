@@ -5,6 +5,6 @@ BEGIN
 
 DECLARE @fiscalPeriod AS NVARCHAR(255)
 
-	SELECT @fiscalPeriod = strPeriod FROM tblGLFiscalYearPeriod FP WHERE '10/7/2021' BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR '10/7/2021' = FP.dtmStartDate OR '10/7/2021' = FP.dtmEndDate
+	SELECT @fiscalPeriod = strPeriod FROM tblGLFiscalYearPeriod FP WHERE @date BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR @date = FP.dtmStartDate OR @date = FP.dtmEndDate
 	RETURN @fiscalPeriod
 END
