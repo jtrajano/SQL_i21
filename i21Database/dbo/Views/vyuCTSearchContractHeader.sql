@@ -79,6 +79,10 @@ SELECT CH.intContractHeaderId
 	, strEntitySelectedLocation = ESL.strLocationName
 	, CH.strReportTo
 	, CH.ysnEnableFutures
+	, dblTotalBalance = CAST(BL.dblTotalBalance AS NUMERIC(18, 6))
+	, dblTotalAppliedQty = CAST(BL.dblTotalAppliedQty AS NUMERIC(18, 6))
+	, ysnApproved = ISNULL(TR.ysnApproved, 0)
+
 FROM tblCTContractHeader				CH	WITH (NOLOCK)
 JOIN tblCTContractType					TP	WITH (NOLOCK) ON	TP.intContractTypeId				=	CH.intContractTypeId
 JOIN tblEMEntity						EY	WITH (NOLOCK) ON	EY.intEntityId						=	CH.intEntityId
@@ -91,6 +95,19 @@ LEFT JOIN tblICCommodityUnitMeasure		CD	WITH (NOLOCK) ON	CD.intCommodityId					=
 															AND	CD.ysnDefault						=	1
 LEFT JOIN tblICUnitMeasure				U1	WITH (NOLOCK) ON	U1.intUnitMeasureId					=	CS.intUnitMeasureId
 LEFT JOIN tblICCommodityUnitMeasure		CM	WITH (NOLOCK) ON	CM.intCommodityUnitMeasureId		=	CH.intCommodityUOMId
+cross apply (
+	select
+		cd.intContractHeaderId
+		, dblTotalBalance = SUM(F.dblBalance)
+		, dblTotalAppliedQty = SUM(F.dblAppliedQuantity)
+	from tblCTContractDetail cd
+	CROSS APPLY (
+		SELECT dblBalance, dblBalanceLoad, dblAppliedQuantity
+        FROM [dbo].[fnCTConvertQuantityToTargetItemUOM2](cd.intItemId, cd.intUnitMeasureId, CM.intUnitMeasureId, cd.dblBalance, ISNULL(cd.intNoOfLoad, 0), ISNULL(cd.dblQuantity, 0), CH.ysnLoad)
+    ) F
+	where cd.intContractHeaderId = CH.intContractHeaderId
+	group by cd.intContractHeaderId
+) BL
 LEFT JOIN tblICUnitMeasure				U2	WITH (NOLOCK) ON	U2.intUnitMeasureId					=	CM.intUnitMeasureId
 LEFT JOIN tblICCommodityUnitMeasure		CL	WITH (NOLOCK) ON	CL.intCommodityUnitMeasureId		=	CH.intLoadUOMId
 LEFT JOIN tblICUnitMeasure				U3	WITH (NOLOCK) ON	U3.intUnitMeasureId					=	CL.intUnitMeasureId
@@ -117,4 +134,16 @@ LEFT JOIN tblCTCropYear					YR	WITH (NOLOCK) ON	YR.intCropYearId					=	CH.intCro
 LEFT JOIN tblCTBook						BK	WITH (NOLOCK) ON	BK.intBookId						=	CH.intBookId
 LEFT JOIN tblCTSubBook					SB	WITH (NOLOCK) ON	SB.intSubBookId						=	CH.intSubBookId
 LEFT JOIN tblSMFreightTerms				FT	WITH (NOLOCK) ON	FT.intFreightTermId					=	CH.intFreightTermId
-LEFT JOIN tblEMEntityLocation			ESL WITH (NOLOCK) ON	ESL.intEntityLocationId				=	CH.intEntitySelectedLocationId -- CT-5315
+LEFT JOIN tblEMEntityLocation			ESL WITH (NOLOCK) ON	ESL.intEntityLocationId				=	CH.intEntitySelectedLocationId
+OUTER APPLY (
+	select top 1
+		ysnApproved = 1
+	from
+		tblSMScreen sc
+		join tblSMTransaction tr on tr.intScreenId = sc.intScreenId
+	where
+		sc.strModule = 'Contract Management'
+		and sc.strNamespace in ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
+		and tr.strApprovalStatus in ('Approved', 'Approved with Modifications')
+		and tr.intRecordId = CH.intContractHeaderId
+) TR
