@@ -8921,6 +8921,9 @@
     <Build Include="dbo\Functions\fnGRWhatIsMyTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTranferChecking.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTransferFixDissection.sql" />
+    <Build Include="dbo\Tables\tblICInventoryDailyTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStockDailyQuantity.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryDailyValuation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
