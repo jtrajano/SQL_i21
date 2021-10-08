@@ -294,7 +294,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 
 
 				INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
-				select top 1 @ContactId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
+				select top 1 @ContactId, strEMPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
 
 				INSERT INTO tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
 				select top 1 @ContactId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
@@ -763,7 +763,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				
 				IF EXISTS (SELECT TOP 1 * FROM tblEMEntityPhoneNumber WHERE intEntityId = @UContactId)
 					BEGIN
-						UPDATE tblEMEntityPhoneNumber SET strPhone = @strPhone WHERE intEntityId = @UContactId
+						UPDATE tblEMEntityPhoneNumber SET strPhone = @strEmPhone WHERE intEntityId = @UContactId
 					END
 				
 				IF EXISTS (SELECT TOP 1 * FROM tblEMEntityMobileNumber WHERE intEntityId = @UContactId)
