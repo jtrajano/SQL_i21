@@ -213,6 +213,14 @@ BEGIN
 		,@intTransactionTypeId 
 		,@dtmDate
 		,@intInTransitSourceLocationId
+		
+	-----------------------------------------
+	-- Log the Daily Stock Quantity
+	-----------------------------------------
+	BEGIN 
+		EXEC uspICPostStockDailyQuantity 
+			@intInventoryTransactionId = @InventoryTransactionIdentityId
+	END 
 END 
 
 _EXIT:
