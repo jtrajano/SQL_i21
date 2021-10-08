@@ -6448,6 +6448,10 @@ BEGIN
 	END 
 END 
 
+-- Rebuild the Daily Transactions
+EXEC [dbo].[uspICPostStockDailyQuantity]
+	@ysnRebuild = 1
+
 ---- Compare the snapshot of the gl entries 
 --BEGIN
 --	EXEC uspICCompareGLSnapshotOnRebuildInventoryValuation
