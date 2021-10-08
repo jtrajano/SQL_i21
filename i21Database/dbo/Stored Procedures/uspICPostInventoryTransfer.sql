@@ -409,57 +409,58 @@ BEGIN
 			AND Detail.intOwnershipType = @ownershipType_Own
 
 		DECLARE @StorageOwnedStock AS ItemCostingTableType  
-		INSERT INTO @StorageOwnedStock (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId  
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-				,strActualCostId
-		) 
-		SELECT	Detail.intItemId  
-				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
-				,intItemUOMId = Detail.intItemUOMId
-				,Header.dtmTransferDate
-				,dblQty = -Detail.dblQuantity
-				,dblUOMQty = ItemUOM.dblUnitQty
-				,COALESCE(NULLIF(Detail.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
-				,0
-				,@DefaultCurrencyId
-				,1
-				,@intTransactionId 
-				,Detail.intInventoryTransferDetailId
-				,@strTransactionId
-				,@intTransactionType
-				,Detail.intLotId 
-				,Detail.intFromSubLocationId
-				,Detail.intFromStorageLocationId
-				,strActualCostId = Detail.strFromLocationActualCostId
-		FROM tblICInventoryTransferDetail Detail 
-			INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
-			INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-			LEFT JOIN dbo.tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-			LEFT JOIN dbo.tblICLot Lot ON Lot.intLotId = Detail.intLotId
-				AND Lot.intItemId = Detail.intItemId
-			LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-			LEFT JOIN tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
-			LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Detail.intItemId
-				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
-		WHERE Header.intInventoryTransferId = @intTransactionId
-			AND Item.strType <> 'Comment'
-			AND Detail.intOwnershipType = @ownershipType_Storage
+		-- COMMENT OUT THIS CODE. IT IS ILLEGAL TO TRANSFER STOCK FROM CUSTOMER-OWNED STOCKS. SEE IC-9816
+		--INSERT INTO @StorageOwnedStock (  
+		--		intItemId  
+		--		,intItemLocationId 
+		--		,intItemUOMId  
+		--		,dtmDate  
+		--		,dblQty  
+		--		,dblUOMQty  
+		--		,dblCost  
+		--		,dblSalesPrice  
+		--		,intCurrencyId  
+		--		,dblExchangeRate  
+		--		,intTransactionId  
+		--		,intTransactionDetailId  
+		--		,strTransactionId  
+		--		,intTransactionTypeId  
+		--		,intLotId 
+		--		,intSubLocationId
+		--		,intStorageLocationId
+		--		,strActualCostId
+		--) 
+		--SELECT	Detail.intItemId  
+		--		,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+		--		,intItemUOMId = Detail.intItemUOMId
+		--		,Header.dtmTransferDate
+		--		,dblQty = -Detail.dblQuantity
+		--		,dblUOMQty = ItemUOM.dblUnitQty
+		--		,COALESCE(NULLIF(Detail.dblCost, 0.00), Lot.dblLastCost, ItemPricing.dblLastCost)
+		--		,0
+		--		,@DefaultCurrencyId
+		--		,1
+		--		,@intTransactionId 
+		--		,Detail.intInventoryTransferDetailId
+		--		,@strTransactionId
+		--		,@intTransactionType
+		--		,Detail.intLotId 
+		--		,Detail.intFromSubLocationId
+		--		,Detail.intFromStorageLocationId
+		--		,strActualCostId = Detail.strFromLocationActualCostId
+		--FROM tblICInventoryTransferDetail Detail 
+		--	INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
+		--	INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+		--	LEFT JOIN dbo.tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+		--	LEFT JOIN dbo.tblICLot Lot ON Lot.intLotId = Detail.intLotId
+		--		AND Lot.intItemId = Detail.intItemId
+		--	LEFT JOIN tblICItemUOM LotItemUOM ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+		--	LEFT JOIN tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+		--	LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Detail.intItemId
+		--		AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
+		--WHERE Header.intInventoryTransferId = @intTransactionId
+		--	AND Item.strType <> 'Comment'
+		--	AND Detail.intOwnershipType = @ownershipType_Storage
 
 		-------------------------------------------
 		-- Call the costing SP (FROM stock)
@@ -607,69 +608,70 @@ BEGIN
 			AND Detail.intOwnershipType = @ownershipType_Own
 
 		DECLARE @TransferStoragetock AS ItemCostingTableType  
-		INSERT INTO @TransferStoragetock (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost  
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-				,strActualCostId
-		) 
-		SELECT Detail.intItemId
-				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
-				,COALESCE(Detail.intGrossNetUOMId, FromStock.intItemUOMId)
-				,Header.dtmTransferDate
-				,dblQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN -FromStock.dblQty ELSE Detail.dblNet END
-				,dblUOMQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN FromStock.dblUOMQty ELSE WeightUOM.dblUnitQty END
-				,dblCost = 
-					CASE	WHEN Detail.intGrossNetUOMId IS NULL THEN ISNULL(FromStock.dblCost, 0) 
-							ELSE 
-								CASE	WHEN ISNULL(NULLIF(Detail.dblNet, 0), 0) = 0 THEN 0 
-										ELSE dbo.fnDivide(dbo.fnMultiply(-FromStock.dblQty, FromStock.dblCost), Detail.dblNet)
-								END 
-					END
-				,dblSalesPrice = 0
-				,@DefaultCurrencyId
-				,dblExchangeRate = 1
-				,@intTransactionId 
-				,Detail.intInventoryTransferDetailId
-				,@strTransactionId
-				,@INVENTORY_TRANSFER_TYPE
-				,Detail.intNewLotId
-				,Detail.intToSubLocationId
-				,Detail.intToStorageLocationId
-				,strActualCostId = Detail.strToLocationActualCostId
-		FROM	tblICInventoryTransfer Header INNER JOIN tblICInventoryTransferDetail Detail 
-					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
-				INNER JOIN tblICItem Item 
-					ON Item.intItemId = Detail.intItemId
-				INNER JOIN dbo.tblICInventoryTransactionStorage FromStock 
-					ON FromStock.intTransactionDetailId = Detail.intInventoryTransferDetailId 
-					AND FromStock.intTransactionId = Detail.intInventoryTransferId
-					AND FromStock.intItemId = Detail.intItemId
-					AND FromStock.strTransactionId = Header.strTransferNo
-					AND FromStock.dblQty < 0 
-				LEFT JOIN tblICItemUOM ItemUOM 
-					ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-				LEFT JOIN tblICItemUOM WeightUOM 
-					ON WeightUOM.intItemUOMId = Detail.intGrossNetUOMId
-		WHERE ISNULL(FromStock.ysnIsUnposted, 0) = 0
-			AND FromStock.strBatchId = @strBatchId
-			AND Item.strType <> 'Comment'
-			AND Header.intInventoryTransferId = @intTransactionId
-			AND Detail.intOwnershipType = @ownershipType_Storage
+		-- COMMENT OUT THIS CODE. IT IS ILLEGAL TO TRANSFER STOCK FROM CUSTOMER-OWNED STOCKS. SEE IC-9816
+		--INSERT INTO @TransferStoragetock (  
+		--		intItemId  
+		--		,intItemLocationId 
+		--		,intItemUOMId  
+		--		,dtmDate  
+		--		,dblQty  
+		--		,dblUOMQty  
+		--		,dblCost  
+		--		,dblSalesPrice  
+		--		,intCurrencyId  
+		--		,dblExchangeRate  
+		--		,intTransactionId  
+		--		,intTransactionDetailId
+		--		,strTransactionId  
+		--		,intTransactionTypeId  
+		--		,intLotId 
+		--		,intSubLocationId
+		--		,intStorageLocationId
+		--		,strActualCostId
+		--) 
+		--SELECT Detail.intItemId
+		--		,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
+		--		,COALESCE(Detail.intGrossNetUOMId, FromStock.intItemUOMId)
+		--		,Header.dtmTransferDate
+		--		,dblQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN -FromStock.dblQty ELSE Detail.dblNet END
+		--		,dblUOMQty = CASE WHEN Detail.intGrossNetUOMId IS NULL THEN FromStock.dblUOMQty ELSE WeightUOM.dblUnitQty END
+		--		,dblCost = 
+		--			CASE	WHEN Detail.intGrossNetUOMId IS NULL THEN ISNULL(FromStock.dblCost, 0) 
+		--					ELSE 
+		--						CASE	WHEN ISNULL(NULLIF(Detail.dblNet, 0), 0) = 0 THEN 0 
+		--								ELSE dbo.fnDivide(dbo.fnMultiply(-FromStock.dblQty, FromStock.dblCost), Detail.dblNet)
+		--						END 
+		--			END
+		--		,dblSalesPrice = 0
+		--		,@DefaultCurrencyId
+		--		,dblExchangeRate = 1
+		--		,@intTransactionId 
+		--		,Detail.intInventoryTransferDetailId
+		--		,@strTransactionId
+		--		,@INVENTORY_TRANSFER_TYPE
+		--		,Detail.intNewLotId
+		--		,Detail.intToSubLocationId
+		--		,Detail.intToStorageLocationId
+		--		,strActualCostId = Detail.strToLocationActualCostId
+		--FROM	tblICInventoryTransfer Header INNER JOIN tblICInventoryTransferDetail Detail 
+		--			ON Header.intInventoryTransferId = Detail.intInventoryTransferId
+		--		INNER JOIN tblICItem Item 
+		--			ON Item.intItemId = Detail.intItemId
+		--		INNER JOIN dbo.tblICInventoryTransactionStorage FromStock 
+		--			ON FromStock.intTransactionDetailId = Detail.intInventoryTransferDetailId 
+		--			AND FromStock.intTransactionId = Detail.intInventoryTransferId
+		--			AND FromStock.intItemId = Detail.intItemId
+		--			AND FromStock.strTransactionId = Header.strTransferNo
+		--			AND FromStock.dblQty < 0 
+		--		LEFT JOIN tblICItemUOM ItemUOM 
+		--			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+		--		LEFT JOIN tblICItemUOM WeightUOM 
+		--			ON WeightUOM.intItemUOMId = Detail.intGrossNetUOMId
+		--WHERE ISNULL(FromStock.ysnIsUnposted, 0) = 0
+		--	AND FromStock.strBatchId = @strBatchId
+		--	AND Item.strType <> 'Comment'
+		--	AND Header.intInventoryTransferId = @intTransactionId
+		--	AND Detail.intOwnershipType = @ownershipType_Storage
 
 		-------------------------------------------
 		-- Call the costing SP (TO stock)
