@@ -78,6 +78,7 @@ DECLARE @AVERAGECOST AS INT = 1
 DECLARE @AUTO_VARIANCE AS INT = 1
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
@@ -495,6 +496,18 @@ BEGIN
 				) currentValuation
 		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
 				AND ISNULL(currentValuation.dblQty, 0) = 0 
+
+		SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+		-----------------------------------------
+		-- Log the Daily Stock Quantity
+		-----------------------------------------
+		IF @intInventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			EXEC uspICPostStockDailyQuantity 
+				@intInventoryTransactionId = @intInventoryTransactionIdentityId
+		END 
+
 	END 
 END 
 
