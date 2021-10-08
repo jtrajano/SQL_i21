@@ -6,9 +6,9 @@ CREATE TABLE [dbo].[tblCMBorrowingFacilityDetail](
     dblLimit                            DECIMAL(18,2)       NOT NULL,
     dblRate                             DECIMAL(18,6)       NOT NULL,
     dblFacilityLimit                    DECIMAL(18,6)       NOT NULL,
-    intTradeTypeLimitId                 TINYINT             NOT NULL,
+    intTradeTypeLimitId                 INT                 NOT NULL,
     dblHairCut                          DECIMAL(5,2)        NOT NULL,
-    intDaysInCycle                      SMALLINT            NOT NULL,
+    intDaysInCycle                      INT                 NOT NULL,
     intConcurrencyId                    INT                 NOT NULL,
  CONSTRAINT [PK_BorrowingFacilityDetailId] PRIMARY KEY CLUSTERED 
 (
