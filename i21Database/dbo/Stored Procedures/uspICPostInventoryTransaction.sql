@@ -190,10 +190,21 @@ END
 
 IF @InventoryTransactionIdentityId IS NOT NULL 
 BEGIN 
+	-----------------------------------------
+	-- Log the Stock Movement
+	-----------------------------------------
 	EXEC uspICPostInventoryStockMovement
 		@InventoryTransactionId = @InventoryTransactionIdentityId
 		,@InventoryTransactionStorageId = NULL
 		,@InventoryStockMovementId = @InventoryStockMovementId OUTPUT 
+
+	-----------------------------------------
+	-- Log the Daily Stock Quantity
+	-----------------------------------------
+	BEGIN 
+		EXEC uspICPostStockDailyQuantity 
+			@intInventoryTransactionId = @InventoryTransactionIdentityId
+	END 
 END 
 
 _EXIT:
