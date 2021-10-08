@@ -758,18 +758,6 @@ BEGIN
 		END
 	END
 
-	--------------------------------------------------------------------
-	-- Call the Risk Log sp for Customer-Owned or Storage stocks. 
-	--------------------------------------------------------------------
-	BEGIN 
-		EXEC @intReturnValue = dbo.uspICLogRiskPositionFromOnStorage
-			@strBatchId
-			,@strTransactionId
-			,@intEntityUserSecurityId
-
-		IF @intReturnValue < 0 RETURN @intReturnValue
-	END 
-
 	COMMIT TRAN @TransactionName
 END 
 
