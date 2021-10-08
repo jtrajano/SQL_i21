@@ -54,7 +54,7 @@
     [ysnFreezed] BIT NULL, 
     [intRollingMonthId] INT NULL, 
 	[intFutOptTransactionRefId] INT NULL,
-	[ysnPreCrush] BIT NULL,
+	[ysnPreCrush] BIT NULL DEFAULT (0),
 	[ysnSlicedTrade] BIT NULL DEFAULT((0)),
 	[intOrigSliceTradeId] INT NULL,
 	[dblOrigPSliceLots] NUMERIC(18,6) NULL,
