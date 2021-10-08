@@ -155,6 +155,8 @@ BEGIN
 
 	DECLARE @costAdjustmentType AS TINYINT 
 	SET @costAdjustmentType = dbo.fnICGetCostAdjustmentSetup(@intItemId, @intItemLocationId) 
+
+	DECLARE @intInventoryTransactionIdentityId AS INT
 END 
 
 -- Compute the cost adjustment
