@@ -205,6 +205,21 @@ BEGIN TRY
 					--AND t.strEntityNo <> ''
 			END
 
+			IF ISNULL(@intCuppedUserId, 0) = 0
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblSMUserSecurity WITH (NOLOCK)
+						WHERE strUserName = 'irelyadmin'
+						)
+					SELECT TOP 1 @intCuppedUserId = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
+					WHERE strUserName = 'irelyadmin'
+				ELSE
+					SELECT TOP 1 @intCuppedUserId = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
+			END
+
 			IF ISNULL(@strUpdatedBy, '') <> ''
 			BEGIN
 				SELECT @intUpdatedUserId = t.intEntityId
