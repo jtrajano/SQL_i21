@@ -2,9 +2,9 @@
 GO
 PRINT('/*******************  BEGIN Populate Trading Finance Limit Types *******************/')
 GO
-    SET  IDENTITY_INSERT tblCMTradingFinanceLimitType ON
+    SET  IDENTITY_INSERT tblCMTradeFinanceLimitType ON
 	MERGE 
-	INTO	dbo.tblCMTradingFinanceLimitType
+	INTO	dbo.tblCMTradeFinanceLimitType
 	WITH	(HOLDLOCK) 
 	AS		TradingFinanceLimitType
 	USING	(
@@ -36,7 +36,7 @@ GO
 		)
 	WHEN NOT MATCHED BY SOURCE THEN
 	DELETE;
-    SET  IDENTITY_INSERT tblCMTradingFinanceLimitType OFF
+    SET  IDENTITY_INSERT tblCMTradeFinanceLimitType OFF
 GO
 PRINT('/*******************  END Populate Trading Finance Limit Types *******************/')
 GO
