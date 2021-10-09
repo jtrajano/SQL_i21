@@ -680,10 +680,10 @@ BEGIN TRY
 			,strContractPrintSignOff			    = SQ.strContractPrintSignOff
 			,strEntityName							= LTRIM(RTRIM(EY.strEntityName))
 			,strApprovalText					    = @strApprovalText
-			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalSign  ELSE NULL END
-			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalSign ELSE NULL END
-			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalName ELSE NULL END
-			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalName ELSE NULL END
+			,FirstApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @FirstApprovalSign  ELSE NULL END
+			,SecondApprovalSign						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @SecondApprovalSign ELSE NULL END
+			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @FirstApprovalName ELSE NULL END
+			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode LIKE '%Coffee%' THEN @SecondApprovalName ELSE NULL END
 			,StraussContractApproverSignature		=  @StraussContractApproverSignature
 			--,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
 			,StraussContractSubmitSignature   		=  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then null else @StraussContractSubmitSignature  end)
