@@ -1071,7 +1071,7 @@ FROM (
 			,Source_Query.intIssueUOMId
 			,Source_Query.intReceiveUOMId
 			,DEFAULT--,intGrossUOMId
-			,DEFAULT--,intFamilyId
+			,Source_Query.intFamilyId--,intFamilyId
 			,Source_Query.intClassId--,intClassId
 			,Source_Query.intProductCodeId--,intProductCodeId
 			,DEFAULT--,intFuelTankId
