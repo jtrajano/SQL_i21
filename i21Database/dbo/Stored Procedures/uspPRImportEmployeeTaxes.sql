@@ -71,7 +71,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@dblAmount = dblAmount
 			,@dblExtraWithholding = dblExtraWithholding
 			,@dblLimit = dblLimit
-			,@intAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strAccountId)
+			,@intAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strLiabilityAccount)
 			,@intExpenseAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
 			,@intAllowance = dblFederalAllowance
 			,@strPaidBy  = strPaidBy
@@ -86,7 +86,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 		FROM #TempEmployeeTaxes
 
 		SELECT TOP 1 
-				@TypeTaxId= T.intTypeTaxId
+				 @TypeTaxId= T.intTypeTaxId
 				,@TaxStateId = ISNULL(T.intTypeTaxStateId,0)
 				,@TaxLocalId = ISNULL(T.intTypeTaxLocalId,0)
 				,@EmployeeTaxId = PRTE.intEmployeeTaxId
@@ -129,19 +129,19 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						)
 						SELECT TOP 1
 							 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = EMT.intEntityNo)
-							,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+							,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
 							,EMT.strCalculationType
 							,EMT.strFilingStatus
 							,(SELECT TOP 1 intTypeTaxStateId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
 							,(SELECT TOP 1 intTypeTaxLocalId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
-							,@intSupplementalCalc
+							,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
 							,EMT.dblAmount
 							,EMT.dblExtraWithholding
 							,EMT.dblLimit
-							,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strAccountId)
-							,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
-							,@ysnUseLocationDistribution
-							,@ysnUseLocationDistributionExpense
+							,@intAccountId
+							,@intExpenseAccountId
+							,EMT.ysnExpenseAccountGlSplit
+							,EMT.ysnLiabilityGlSplit
 							,EMT.dblFederalAllowance
 							,EMT.strPaidBy
 							,EMT.ysnDefault
@@ -153,7 +153,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 							,0
 							,1
 							FROM #TempEmployeeTaxes EMT
-						WHERE EMT.intEntityNo = @EntityNo
+						WHERE EMT.intEntityNo = @EntityNo AND EMT.strTaxId = @TaxId AND EMT.strTaxDescription = @TaxTaxDesc
 					SET @NewId = SCOPE_IDENTITY()
 					END
 				
@@ -185,7 +185,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,dblW4OtherIncome  = @dblW4OtherIncome
 						,dblW4Deductions  = @dblW4Deductions
 					WHERE intEmployeeTaxId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @EntityNo)
-
+						AND intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
 				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
 				
 			END
