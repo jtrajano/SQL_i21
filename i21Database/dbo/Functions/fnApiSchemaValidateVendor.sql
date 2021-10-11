@@ -57,7 +57,7 @@ BEGIN
 	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity Type', strType, 'Entity Type is not valid'
 	FROM tblApiSchemaVendor
 	OUTER APPLY vyuAPGuidGenerator 
-	WHERE guiApiUniqueId = @guiApiUniqueId AND strType IS NULL OR strType <> 'Vendor'
+	WHERE guiApiUniqueId = @guiApiUniqueId AND (strType IS NULL OR strType <> 'Vendor')
 
 	--strVendorId
 	INSERT @returntable
@@ -70,16 +70,16 @@ BEGIN
 	INSERT @returntable
 	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, V.intRowNumber, 'Expense Account', V.strExpenseAccountId, 'Expense Account is not valid'
 	FROM tblApiSchemaVendor V
-	LEFT JOIN vyuGLAccountDetail AD ON AD.strAccountId = V.strExpenseAccountId AND AD.strAccountType = 'Expense'
+	LEFT JOIN vyuGLAccountDetail AD ON AD.strAccountId = V.strExpenseAccountId AND AD.strAccountCategory NOT IN ('Cash Account', 'AP Account', 'AR Account', 'Inventory', 'Inventory In-Transit', 'Inventory Adjustment') AND AD.ysnActive = 1
 	OUTER APPLY vyuAPGuidGenerator 
-	WHERE guiApiUniqueId = @guiApiUniqueId AND (V.strExpenseAccountId IS NULL OR AD.intAccountId IS NULL)
+	WHERE guiApiUniqueId = @guiApiUniqueId AND (V.strExpenseAccountId IS NOT NULL AND AD.intAccountId IS NULL)
 
 	--strVendorType
 	INSERT @returntable
 	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Vendor Type', strVendorType, 'Vendor Type is not valid'
 	FROM tblApiSchemaVendor
 	OUTER APPLY vyuAPGuidGenerator 
-	WHERE guiApiUniqueId = @guiApiUniqueId AND (strVendorType <> 'Company' OR strVendorType <> 'Person')
+	WHERE guiApiUniqueId = @guiApiUniqueId AND (strVendorType <> 'Company' AND strVendorType <> 'Person')
 
 	--strTerm
 	INSERT @returntable
@@ -87,7 +87,7 @@ BEGIN
 	FROM tblApiSchemaVendor V
 	LEFT JOIN tblSMTerm T ON T.strTerm = V.strTerm
 	OUTER APPLY vyuAPGuidGenerator 
-	WHERE guiApiUniqueId = @guiApiUniqueId AND (V.strTerm IS NULL OR T.intTermID IS NULL)
+	WHERE guiApiUniqueId = @guiApiUniqueId AND (V.strTerm IS NOT NULL AND T.intTermID IS NULL)
 	
 	RETURN
 END
