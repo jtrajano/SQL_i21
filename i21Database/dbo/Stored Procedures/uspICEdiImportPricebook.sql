@@ -635,7 +635,20 @@ FROM (
 		FROM 
 			tblICEdiPricebook p
 			LEFT JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			OUTER APPLY (
 				SELECT TOP 1 
 					i.intItemId 
