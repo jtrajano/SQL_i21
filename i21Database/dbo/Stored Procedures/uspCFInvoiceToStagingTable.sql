@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@Guid						NVARCHAR(MAX)  
 	,@UserId					NVARCHAR(MAX)  
@@ -924,19 +923,19 @@ BEGIN TRY
 
 		UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
-		UPDATE tblARCustomerStatementStagingTable
-		SET 
-		strCFEmail							=	  (SELECT TOP (1) strEmail
-																						FROM    dbo.vyuARCustomerContacts
-																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																						AND (ISNULL(strEmail, N'') <> ''))
-		,strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
-																						FROM    dbo.vyuARCustomerContacts
-																						WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																						AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																						AND (ISNULL(strEmail, N'') <> ''))	
-		WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
+		--UPDATE tblARCustomerStatementStagingTable
+		--SET 
+		--strCFEmail							=	  (SELECT TOP (1) strEmail
+		--																				FROM    dbo.vyuARCustomerContacts
+		--																				WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+		--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+		--																				AND (ISNULL(strEmail, N'') <> ''))
+		--,strCFEmailDistributionOption		=	  (SELECT TOP (1) strEmailDistributionOption
+		--																				FROM    dbo.vyuARCustomerContacts
+		--																				WHERE (intEntityCustomerId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+		--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+		--																				AND (ISNULL(strEmail, N'') <> ''))	
+		--WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 
 		UPDATE tblARCustomerStatementStagingTable
@@ -968,6 +967,11 @@ BEGIN TRY
 		AND intEntityUserId = @intEntityUserId
 		AND LOWER(cfInv.strStatementType) =  LOWER(@StatementType)
 
+
+
+	
+
+
 		UPDATE tblARCustomerStatementStagingTable
 		SET
 				 tblARCustomerStatementStagingTable.intCFAccountId						=	  cfAccntTerm.intAccountId
@@ -975,17 +979,17 @@ BEGIN TRY
 				,tblARCustomerStatementStagingTable.strCFTermType						=	  cfAccntTerm.strType
 				,tblARCustomerStatementStagingTable.intCFTermID							=	  cfAccntTerm.intTermsCode
 
-				,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
-																								FROM    dbo.vyuARCustomerContacts as arCustCont
-																								WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																								AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																								AND (ISNULL(strEmail, N'') <> ''))
+				--,tblARCustomerStatementStagingTable.strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
+				--																				FROM    dbo.vyuARCustomerContacts as arCustCont
+				--																				WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+				--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+				--																				AND (ISNULL(strEmail, N'') <> ''))
 
-				,tblARCustomerStatementStagingTable.strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
-																							FROM    dbo.vyuARCustomerContacts as arCustCont
-																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																							AND (ISNULL(strEmail, N'') <> ''))
+				--,tblARCustomerStatementStagingTable.strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
+				--																			FROM    dbo.vyuARCustomerContacts as arCustCont
+				--																			WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+				--																			AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+				--																			AND (ISNULL(strEmail, N'') <> ''))
 		FROM vyuCFAccountTerm cfAccntTerm
 		WHERE tblARCustomerStatementStagingTable.intEntityCustomerId = cfAccntTerm.intCustomerId
 		AND intEntityUserId = @intEntityUserId
@@ -1110,19 +1114,19 @@ BEGIN TRY
 			UPDATE tblARCustomerStatementStagingTable SET ysnPrintFromCardFueling = 1 , dtmCFInvoiceDate = @dtmInvoiceDate
 			WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
-			UPDATE tblARCustomerStatementStagingTable
-			SET 
-			strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
-																							FROM    dbo.vyuARCustomerContacts as arCustCont
-																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																							AND (ISNULL(strEmail, N'') <> ''))
-			,strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
-																							FROM    dbo.vyuARCustomerContacts as arCustCont
-																							WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
-																							AND (strEmailDistributionOption LIKE '%CF Invoice%') 
-																							AND (ISNULL(strEmail, N'') <> ''))	
-			WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
+			--UPDATE tblARCustomerStatementStagingTable
+			--SET 
+			--strCFEmail							=	  (SELECT TOP (1) ISNULL(strEmail,'')
+			--																				FROM    dbo.vyuARCustomerContacts as arCustCont
+			--																				WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+			--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+			--																				AND (ISNULL(strEmail, N'') <> ''))
+			--,strCFEmailDistributionOption		=	  (SELECT TOP (1) ISNULL(strEmailDistributionOption,'')
+			--																				FROM    dbo.vyuARCustomerContacts as arCustCont
+			--																				WHERE (arCustCont.intCustomerEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId) 
+			--																				AND (strEmailDistributionOption LIKE '%CF Invoice%') 
+			--																				AND (ISNULL(strEmail, N'') <> ''))	
+			--WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 
 
 			UPDATE tblARCustomerStatementStagingTable
@@ -1173,6 +1177,43 @@ BEGIN TRY
 
 
 	END
+
+	UPDATE tblARCustomerStatementStagingTable
+	SET 
+			
+	 strCFEmail							= arCustomerContact.strEmail
+	,strCFEmailDistributionOption = 
+	(SELECT (CASE 
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'print , email , CF Invoice'
+
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email , CF Invoice'
+
+		WHEN ( (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email , CF Invoice'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+	END))													
+	FROM tblARCustomerStatementStagingTable
+	INNER JOIN vyuCFCustomerEntity AS emEntity 
+	ON emEntity.intEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId
+	OUTER APPLY (
+	SELECT TOP 1 
+		 strEmailDistributionOption
+		,strEmail 
+	FROM vyuARCustomerContacts
+	WHERE intEntityId = tblARCustomerStatementStagingTable.intEntityCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '' AND ISNULL(ysnActive,0) = 1
+	) AS arCustomerContact
+	WHERE intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
+	
 
 	IF LOWER(@StatementType)  = 'invoice'
 	BEGIN
