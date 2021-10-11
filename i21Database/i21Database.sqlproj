@@ -215,6 +215,8 @@
     <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedCountGroupAll.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroupAll.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRShipViaTariff.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRShipViaTariff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
