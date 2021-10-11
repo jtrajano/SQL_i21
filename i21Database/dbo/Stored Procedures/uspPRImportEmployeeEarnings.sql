@@ -122,16 +122,20 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 				SELECT
 					(SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = intEntityNo)  
 				   ,(SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = strEarningDesc)
-				   ,(SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE strEarning = strEarningDesc)
+				   ,strCalculationType
 				   ,CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
-							THEN dblAmount
-						 ELSE (SELECT TOP 1 dblAmount FROM tblPRTypeEarning WHERE strEarning = strEarningDesc) END
+							THEN dblEarningAmount --this is rate factor
+						 ELSE dblAmount END
 				   ,CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
-							THEN (SELECT TOP 1 dblAmount FROM tblPRTypeEarning WHERE strEarning = strEarningDesc) * dblAmount 
+							THEN (
+								SELECT TOP 1 dblAmount FROM tblPREmployeeEarning 
+									WHERE intEntityEmployeeId = @intEntityNo 
+									AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strLinkedEarning)
+							) * dblEarningAmount --this is rate factor
 						 ELSE dblAmount END
 				   ,dblDefaultHours
 				   ,dblDefaultHours -- dblHoursToProcess test
-				   ,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strAccountId)
+				   ,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountID)
 				   ,@ysnUseGLSplit
 				   ,0
 				   ,'' --strW2Code for test only
@@ -240,12 +244,17 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 			BEGIN
 				UPDATE tblPREmployeeEarning SET
 					 intTypeEarningId				= (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId)
-					,strCalculationType				= (SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+					,strCalculationType				= strCalculationType
 					,dblAmount						= CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
-														THEN dblAmount
-													  ELSE (SELECT TOP 1 dblAmount FROM tblPRTypeEarning WHERE strEarning = @strEarningId) END
+														THEN @dblEarningAmount
+													  ELSE @dblAmount END
 					,dblRateAmount					= CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
-														THEN (SELECT TOP 1 dblAmount FROM tblPRTypeEarning WHERE strEarning = @strEarningId) * dblAmount 
+														THEN 
+														(
+															SELECT TOP 1 dblAmount FROM tblPREmployeeEarning 
+																WHERE intEntityEmployeeId = @intEntityNo 
+																AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strLinkedEarning)
+														) * @dblEarningAmount 
 													  ELSE dblAmount END
 					,dblDefaultHours				= @dblDefaultHours
 					,dblHoursToProcess				= @dblDefaultHours -- dblHoursToProcess test
