@@ -1487,6 +1487,15 @@ ELSE
 
 --END BANK TASK GL-7365
 
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Borrowing Facility' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId)
+UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = N'Borrowing Facility'
+ AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
+ELSE
+
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Borrowing Facility', N'Cash Management', @CashManagementActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 0, 0, 0, 1, 9, 1)
+
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Positive Pay Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
