@@ -300,7 +300,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				select top 1 @ContactId, strPhone, (SELECT intDefaultCountryId FROM tblSMCompanyPreference) FROM #TempEmployeeDetails
 
 				INSERT [dbo].[tblEMEntityLocation]	([intEntityId], [strLocationName], [strAddress], [strCity], [strState], [strCountry], [strZipCode],[strTimezone], [ysnDefaultLocation],[strCheckPayeeName],[strPhone])
-				SELECT @NewId, strName, strAdress,strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName, strPhone
+				SELECT @NewId, strName, strAdress,strCity,strState, strCountry,strZipCode,strTimezone,@ysnDefault, strName, strEMPhone
 				FROM #TempEmployeeDetails LC WHERE LC.strEmployeeId = @EmployeeID
 
 				DECLARE @EntityLocationId INT
@@ -780,7 +780,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				,[strZipCode] = @strZipCode
 				,[strTimezone] = @strTimezone
 				,[strCheckPayeeName] = @strName
-				,[strPhone] = @strPhone
+				,[strPhone] = @strEmPhone
 				WHERE intEntityLocationId = (SELECT TOP 1 intEntityLocationId FROM tblEMEntityLocation WHERE intEntityId = @EntityId)
 
 				--UPDATE tblEMEntityToContact SET [intEntityContactId] = @EntityId
