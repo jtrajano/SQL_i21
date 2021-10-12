@@ -967,7 +967,7 @@ ON TARGET.intItemId = SOURCE.intItemId AND TARGET.intLocationId = SOURCE.intLoca
 WHEN MATCHED AND @ysnAllowOverwrite = 1 
 THEN
 	UPDATE SET
-		--guiApiUniqueId = SOURCE.guiApiUniqueId,
+		guiApiUniqueId = SOURCE.guiApiUniqueId,
 		intItemId = SOURCE.intItemId,
 		intLocationId = SOURCE.intLocationId,
 		intVendorId = SOURCE.intVendorId,
@@ -1032,7 +1032,7 @@ THEN
 WHEN NOT MATCHED THEN
 	INSERT
 	(
-		--guiApiUniqueId,
+		guiApiUniqueId,
 		intItemId,
 		intLocationId,
 		intVendorId,
