@@ -26,10 +26,11 @@ SELECT
 	, Hr
 	, intRegister
 	, strItemType
-	, dblTrlQty
-	, dblTrlUnitPrice
-	, dblTrlUnitPrice * dblTrlQty * dblTrlSign AS dblTrlLineTot  -- Added 10/12/2021
 	, strTrlMatchLineTrlMatchName
+	, dblTrlUnitPrice
+	, dblTrlQty
+	, dblTrlSign
+	, dblTrlUnitPrice * dblTrlQty * dblTrlSign AS dblTrlLineTot  -- Added 10/12/2021
 	, ROW_NUMBER() OVER (ORDER BY intTermMsgSN ASC) AS intId
 FROM
 (       SELECT --DISTINCT  -- update 09/08
