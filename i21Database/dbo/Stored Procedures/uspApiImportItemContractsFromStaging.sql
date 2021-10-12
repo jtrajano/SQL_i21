@@ -306,13 +306,14 @@ BEGIN
 		, ds.intLineNo
 		, ds.intTaxGroupId
 		, ISNULL(ds.dblApplied, 0)
-		, ISNULL(ds.dblAvailable, 0)
+		--, ISNULL(ds.dblAvailable, 0)
+		, ISNULL(ds.dblContracted, 0)
 		, ISNULL(ds.dblBalance, 0)
-		, ds.dblContracted
+		, ISNULL(ds.dblContracted, 0)
 		, ds.dblPrice
 		, ISNULL(ds.dblScheduled, 0)
 		, ISNULL(ds.dblTax, 0)
-		, ds.dblContracted * ds.dblPrice
+		, ISNULL(ds.dblContracted, 0) * ds.dblPrice
 		, ds.dtmDeliveryDate
 		-- , ds.dtmLastDeliveryDate
 		, i.strDescription
