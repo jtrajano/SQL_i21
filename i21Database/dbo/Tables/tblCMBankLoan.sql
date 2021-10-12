@@ -2,6 +2,7 @@
 CREATE TABLE [dbo].[tblCMBankLoan](
 	[strBankLoanId] [nvarchar](20)  COLLATE Latin1_General_CI_AS NOT NULL,
 	[intBankLoanId] [int] IDENTITY(1,1) NOT NULL,
+	[intBankAccountId] [int] IDENTITY(1,1) NULL,
 	[dtmOpened] [date] NOT NULL,
 	[dtmMaturity] [date] NOT NULL,
 	[dtmEntered] [datetime] NOT NULL,

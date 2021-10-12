@@ -14,17 +14,17 @@ T.strMemo,
 T.ysnPosted,
 T.intConcurrencyId
 FROM tblCMBankLoan L
-LEFT JOIN tblCMBankTransaction T
-on L.intBankLoanId = T.intBankLoanId
+JOIN tblCMBankTransaction T
+ON L.intBankLoanId = T.intBankLoanId
 LEFT JOIN tblCMBankTransactionDetail D
 ON D.intTransactionId = T.intTransactionId
 LEFT JOIN tblGLAccount A
 on A.intAccountId = D.intGLAccountId
 LEFT JOIN
 tblCMBankTransactionType P
-on P.intBankTransactionTypeId = T.intBankTransactionTypeId
-outer apply(
-select sum(dblCredit - dblDebit) dblCredit from tblCMBankTransactionDetail where intTransactionId = T.intTransactionId
+ON P.intBankTransactionTypeId = T.intBankTransactionTypeId
+OUTER APPLY(
+SELECT sum(dblCredit - dblDebit) dblCredit FROM tblCMBankTransactionDetail WHERE intTransactionId = T.intTransactionId
 ) detail
 GO
 
