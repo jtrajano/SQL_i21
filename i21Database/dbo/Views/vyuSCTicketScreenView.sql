@@ -254,6 +254,7 @@
    	,strAGWorkOrderLocation = AWOL.strLocationName
 	,SCT.dblDWGOriginalNetUnits
 	,SCT.dblDWGSpotPrice
+	,SCT.intFreightCostUOMId
   FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
