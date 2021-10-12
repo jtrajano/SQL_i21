@@ -12,12 +12,15 @@ SELECT DISTINCT
 	, um.strUnitMeasure
 	, cg.strCountGroup
 	, ven.strName AS strVendorName
+	, xref.intVendorId AS intVendorNo
 	, xref.strVendorProduct
 	, xref.strProductDescription
 	, ISNULL(ip.dblSalePrice, 0) AS dblSalePrice
 	, ISNULL(effectivePrice.dblRetailPrice, 0) AS dblRetailPrice
+	, effectivePrice.dtmEffectiveRetailPriceDate AS dtmEffectiveRetailPriceDate
 	, ISNULL(ip.dblStandardCost, 0) AS dblStandardCost
 	, ISNULL(effectiveCost.dblCost, 0) AS dblCost
+	, effectiveCost.dtmEffectiveCostDate as dtmEffectiveCostDate
 	, SplPrc.dtmBeginDate
 	, SplPrc.dtmEndDate
 	, ISNULL(SplPrc.dblUnitAfterDiscount, 0) AS dblUnitAfterDiscount
