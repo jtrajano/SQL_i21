@@ -208,26 +208,6 @@ BEGIN
 END
 
 
-DECLARE @intSalesOrderContractTicketItemCount	INT = 1
-DECLARE @intSalesOrderContractTicketItemTotalOrdered NUMERIC(18, 6) = 0
-
-IF ISNULL(@ysnFromSalesOrder, 0) = 1
-BEGIN
-	SELECT @intSalesOrderContractTicketItemCount = COUNT(*)
-	FROM #INVOICEDETAILS
-	WHERE intContractDetailId IS NOT NULL
-	AND intTicketId IS NOT NULL
-
-	IF(@intSalesOrderContractTicketItemCount > 1) 
-	BEGIN
-		SELECT @intSalesOrderContractTicketItemTotalOrdered = SUM(dblQtyOrdered)
-		FROM #INVOICEDETAILS
-		WHERE intContractDetailId IS NOT NULL
-		AND intTicketId IS NOT NULL
-	END
-END
-
-
 WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 	BEGIN
 		DECLARE @intInvoiceDetailId			INT	= NULL
