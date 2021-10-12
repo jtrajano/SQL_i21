@@ -12,6 +12,9 @@
 	[intCommissionEarningId] [int] NULL,
 	[strWH32BaseAddress] [nvarchar](150) NULL,
 	[intFirstDayOfWorkWeek] [int] NULL,
+	[intW2EFileFormatId] INT NULL, 
+	[strNAICSCode] [nvarchar](50) NULL,
+	[strCentralRegistrationNo] [nvarchar](50) NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
 (

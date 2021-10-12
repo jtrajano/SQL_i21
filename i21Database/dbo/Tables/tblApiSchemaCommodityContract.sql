@@ -22,8 +22,9 @@ CREATE TABLE [dbo].[tblApiSchemaCommodityContract] (
     , dtmEndDate DATETIME NULL
     , strPricingType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
     , strMarketName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-    , strMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-    , intYear INT NULL
+    , strFuturesMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+    , strFreightTerm NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , strPaymentTerms NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , dblFutures NUMERIC(38, 20) NULL
     , dblBasis NUMERIC(38, 20) NULL
     , strBasisCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL

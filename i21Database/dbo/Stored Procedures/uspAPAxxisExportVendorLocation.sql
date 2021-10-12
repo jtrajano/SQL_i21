@@ -21,7 +21,8 @@ BEGIN
 	CREATE TABLE tmpAxxisVendorLocation(
 		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
 		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+		strTerminalNo NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL
 	)
 END
 
@@ -56,7 +57,7 @@ FROM tmp
 
 -- SELECT * FROM @tblFields
 
-IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strLocationName','strCheckPayeeName','strShipVia')) 
+IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strLocationName','strCheckPayeeName','strShipVia','strTerminalNo')) 
 BEGIN
 	RETURN;
 END
@@ -67,7 +68,8 @@ BEGIN
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
-		C.strShipVia
+		C.strShipVia,
+		E.strTerminalControlNumber AS strTerminalNo
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
@@ -82,7 +84,8 @@ BEGIN
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
-		C.strShipVia
+		C.strShipVia,
+		E.strTerminalControlNumber AS strTerminalNo
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId

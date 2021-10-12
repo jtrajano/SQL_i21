@@ -120,6 +120,7 @@
     <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
     <Build Include="dbo\Tables\tblApiImportLog.sql" />
     <Build Include="dbo\Tables\tblApiImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformProperty.sql" />
     <Build Include="dbo\Tables\tblApiInventoryTransferStaging.sql" />
     <Build Include="dbo\Tables\tblApiInventoryTransferDetailStaging.sql" />
     <Build Include="dbo\Tables\tblApiUserAccount.sql" />
@@ -165,7 +166,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT507.sql" />
-    <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT511.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteTransactionLink.sql" />
@@ -189,14 +189,14 @@
     <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
     <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Views\vyuICItemAxxisSync.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
+    <Build Include="dbo\Views\vyuCTFutureMarketItem.sql" />
+    <Build Include="dbo\Functions\fnTRStringConcat.sql" />
+    <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Functions\fnARSalesAnalysisByCategory.sql" />
     <Build Include="dbo\Views\vyuAPBillForImport.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
-    <Build Include="dbo\Functions\fnFAGetDefaultCurrencyExchangeRateTypeId.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
-    <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
     <Build Include="dbo\Functions\fnFAGetDefaultCurrencyExchangeRateTypeId.sql" />
     <Build Include="dbo\Tables\tblFABasisAdjustment.sql" />
     <Build Include="dbo\Functions\fnFAGetNextDepreciationDate.sql" />
@@ -204,11 +204,46 @@
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetNextMonthPeriodFromDate.sql" />
     <Build Include="dbo\Functions\fnFAGetPreviousMonthPeriodEndDateFromDate.sql" />
-    <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
     <None Include="Scripts\Post-Deployment\FA\02_UpdateMonthlyAssetDepreciation.sql" />
+    <Build Include="dbo\Views\vyuFAMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
+    <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDeduction.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeEarnings.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTaxes.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployee.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDeductions.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendor.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaValidateVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCategoryAccount.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
+    <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomer.sql" />
     <Build Include="dbo\Tables\tblApiSchemaCustomer.sql" />
-    <Build Include="dbo\Views\vyuFAMultiCurrencyRevalue.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemAccount.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemLocation.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReportCustom.sql" />
     <Build Include="dbo\Tables\tblAPIWODetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPIProcessWorkOrder.sql" />
@@ -219,6 +254,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformCustomerFreight.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherTransactionType2.sql" />
     <Build Include="dbo\Views\vyuCTActiveEntity.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRShipViaTariff.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRShipViaTariff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10081,6 +10118,9 @@
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_IDPFieldMapping.sql" />
     <None Include="Scripts\Post-Deployment\FA\01_UpdateMultiCurrencyFields.sql" />
+    <Build Include="dbo\Tables\tblARPerformanceLog.sql" />
+    <Build Include="dbo\Views\vyuARPerformanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
