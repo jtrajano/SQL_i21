@@ -31,7 +31,7 @@
 	[strPricingLevel]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,				--PRICING LEVEL
 
 	--Entity Type Fields
-	[strType]          			NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,			--ENTITY TYPE
+	[strType]          			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,				--ENTITY TYPE
 
 	-- LOOKING FOR WAREHOUSE FIELD
 
