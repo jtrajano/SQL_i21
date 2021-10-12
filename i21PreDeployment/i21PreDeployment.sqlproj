@@ -412,4 +412,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\19_MF\DropConstraints.sql" />
+  </ItemGroup>
 </Project>

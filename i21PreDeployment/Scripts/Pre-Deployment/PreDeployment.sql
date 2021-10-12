@@ -201,6 +201,7 @@
 :r .\18_IU\1_DataCleanUp.sql
 
 --MF
+:r .\19_MF\DropConstraints.sql
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
