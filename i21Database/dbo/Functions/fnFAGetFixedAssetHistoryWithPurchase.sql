@@ -99,7 +99,7 @@ INSERT INTO @tblFixedAssetHistory
 	0 dblFunctionalTaxDepreciation,
 	0 dblTaxRate,
 	FA.intAssetId,
-	1,
+	0,
 	DM.intDepreciationMethodId, 
 	DM.strDepreciationMethodId, 
 	GL.strTransactionType, 
@@ -149,10 +149,16 @@ ISNULL(GAAP.dblDepreciation, 0),
 ISNULL(GAAP.dblFunctionalDepreciation, 0),
 ISNULL(GAAP.dblRate, 1),
 dblTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Basis Adjustment', 'Depreciation Adjustment') 
-							THEN ISNULL(Tax.dblDepreciationToDate, FullyDepreciatedTax.dblDepreciationToDate) 
+							THEN ISNULL(Tax.dblDepreciationToDate, 
+								CASE WHEN FullyDepreciatedTax.dtmDepreciationToDate <= G.dtmDepreciationToDate
+										THEN FullyDepreciatedTax.dblDepreciationToDate ELSE 0 END
+								) 
 							ELSE ISNULL(Tax.dblDepreciationToDate, 0) END,
 dblFunctionalTaxDepreciationToDate = CASE WHEN G.strTransaction NOT IN ('Basis Adjustment', 'Depreciation Adjustment') 
-							THEN ISNULL(Tax.dblFunctionalDepreciationToDate, FullyDepreciatedTax.dblFunctionalDepreciationToDate) 
+							THEN ISNULL(Tax.dblFunctionalDepreciationToDate, 
+								CASE WHEN FullyDepreciatedTax.dtmDepreciationToDate <= G.dtmDepreciationToDate
+										THEN FullyDepreciatedTax.dblFunctionalDepreciationToDate ELSE 0 END
+								) 
 							ELSE ISNULL(Tax.dblFunctionalDepreciationToDate, 0) END,
 ISNULL(Tax.dblDepreciation, 0),
 ISNULL(Tax.dblFunctionalDepreciation, 0),
@@ -234,9 +240,10 @@ OUTER APPLY(
 	AND A.strTransaction = G.strTransaction
 )Tax
 OUTER APPLY (
-	SELECT TOP 1 FAD.dblDepreciationToDate, FAD.intAssetDepreciationId, FAD.dblFunctionalDepreciationToDate
+	SELECT TOP 1 FAD.dblDepreciationToDate, FAD.intAssetDepreciationId, FAD.dblFunctionalDepreciationToDate, FAD.dtmDepreciationToDate
 	FROM tblFAFixedAssetDepreciation FAD
-	WHERE FAD.intAssetId = G.intAssetId AND FAD.intBookId = 2 AND FAD.strTransaction = 'Depreciation'
+	JOIN tblFABookDepreciation BD ON BD.intAssetId = FAD.intAssetId AND BD.intBookId = FAD.intBookId
+	WHERE FAD.intAssetId = G.intAssetId AND FAD.intBookId = 2 AND BD.intBookId = 2 AND FAD.strTransaction = 'Depreciation' AND BD.ysnFullyDepreciated = 1
 	ORDER BY FAD.dtmDepreciationToDate DESC
 ) FullyDepreciatedTax
 
