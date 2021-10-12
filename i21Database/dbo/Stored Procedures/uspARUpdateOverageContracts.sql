@@ -180,13 +180,33 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0 AND I
 	END
 
 IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
+BEGIN
+	SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyShipped ELSE ISI.dblQuantity END)
+	FROM tblARInvoiceDetail ID
+	INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
+	INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+	LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
+END 
+
+DECLARE @intSalesOrderContractTicketItemCount	INT = 1
+DECLARE @intSalesOrderContractTicketItemTotalOrdered NUMERIC(18, 6) = 0
+
+IF ISNULL(@ysnFromSalesOrder, 0) = 1
+BEGIN
+	SELECT @intSalesOrderContractTicketItemCount = COUNT(*)
+	FROM #INVOICEDETAILS
+	WHERE intContractDetailId IS NOT NULL
+	AND intTicketId IS NOT NULL
+
+	IF(@intSalesOrderContractTicketItemCount > 1) 
 	BEGIN
-		SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyOrdered ELSE ISI.dblQuantity END)
-		FROM tblARInvoiceDetail ID
-		INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
-		INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
-		LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
-	END 
+		SELECT @intSalesOrderContractTicketItemTotalOrdered = SUM(dblQtyOrdered)
+		FROM #INVOICEDETAILS
+		WHERE intContractDetailId IS NOT NULL
+		AND intTicketId IS NOT NULL
+	END
+END
+
 
 DECLARE @intSalesOrderContractTicketItemCount	INT = 1
 DECLARE @intSalesOrderContractTicketItemTotalOrdered NUMERIC(18, 6) = 0

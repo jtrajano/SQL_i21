@@ -1025,6 +1025,15 @@ BEGIN
 END 
 
 -----------------------------------------
+-- Log the Daily Stock Quantity
+-----------------------------------------
+BEGIN 
+	EXEC uspICPostStockDailyQuantity 
+		@strBatchId = @strBatchId
+		,@strTransactionId = @strTransactionId
+END 
+
+-----------------------------------------
 -- Call the Risk Log sp
 -----------------------------------------
 IF @ysnRecap = 0 
