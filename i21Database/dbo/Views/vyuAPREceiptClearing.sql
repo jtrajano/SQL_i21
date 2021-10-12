@@ -98,7 +98,7 @@ LEFT JOIN (
     SELECT SUM(dblTax) AS dblTax,
 		intInventoryReceiptItemId
     FROM (
-        SELECT DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
+        SELECT --DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
             rctTax.intInventoryReceiptItemId,
             --rctTax.intInventoryReceiptItemTaxId,
             rctTax.dblTax AS dblTax
@@ -107,17 +107,23 @@ LEFT JOIN (
         LEFT JOIN tblAPBillDetail billDetail 
             ON billDetail.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId
             AND billDetail.intInventoryReceiptChargeId IS NULL
-        LEFT JOIN tblAPBillDetailTax billDetailTax
-                ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
-                AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
-                AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+        -- LEFT JOIN tblAPBillDetailTax billDetailTax
+        --         ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
+        --         AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
+        --         AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
         WHERE 
             rctTax.intInventoryReceiptItemId = rctItem.intInventoryReceiptItemId 
-        AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
-                ELSE (
-                    CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
-                )
-                END
+        AND EXISTS (
+            SELECT 1 FROM tblAPBillDetailTax billDetailTax
+            INNER JOIN tblAPBillDetail billDetail ON billDetailTax.intBillDetailId = billDetail.intBillDetailId
+            WHERE billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
+            AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+        )
+        -- AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
+        --         ELSE (
+        --             CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
+        --         )
+        --         END
     ) tmpTax
 	GROUP BY intInventoryReceiptItemId
 ) clearingTax
