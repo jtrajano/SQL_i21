@@ -415,4 +415,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\19_MF\DropConstraints.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\Copy of 14_RefreshARTempTable.sql" />
+  </ItemGroup>
 </Project>
