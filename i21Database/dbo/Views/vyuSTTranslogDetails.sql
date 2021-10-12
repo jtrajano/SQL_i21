@@ -25,6 +25,7 @@ SELECT
 	, intTrTickNumTrSeq
 	, Hr
 	, intRegister
+	, ysnFuel
 	, strItemType
 	, strTrlMatchLineTrlMatchName
 	, dblTrlUnitPrice
@@ -66,20 +67,20 @@ FROM
                            THEN 1
                            ELSE 0
                            END) AS BIT)  as ysnFuel
-              ,CASE WHEN dblTrlPrcOvrd IS NOT NULL
-                                  THEN 'O' --Price Override
-                           WHEN strTrlMatchLineTrlMatchName IS NOT NULL
-                                  THEN 'M' --Mix/Match Item
-                           WHEN strTrlUPC IS NULL AND (dblTrlSign = -1 OR dblTrlLineTot < 0 OR strTrlDeptType = 'neg')
-                                  THEN 'N' --Department Return
-                           WHEN strTrlUPC IS NOT NULL AND dblTrlSign = -1 
-                                  THEN 'R' --Item Return
-                           WHEN strTrlUPC IS NULL
-                                  THEN 'D' --Department 
-                           WHEN strTrlUPC IS NOT NULL
-                                  THEN 'I' --Normal Item 
-                           END 
-                     AS strItemType
+        ,CASE WHEN dblTrlPrcOvrd IS NOT NULL
+                    THEN 'O' --Price Override
+            WHEN strTrlMatchLineTrlMatchName IS NOT NULL
+                    THEN 'M' --Mix/Match Item
+            WHEN strTrlUPC IS NULL AND (dblTrlSign = -1 OR dblTrlLineTot < 0 OR strTrlDeptType = 'neg')
+                    THEN 'N' --Department Return
+            WHEN strTrlUPC IS NOT NULL AND dblTrlSign = -1 
+                    THEN 'R' --Item Return
+            WHEN strTrlUPC IS NULL
+                    THEN 'D' --Department 
+            WHEN strTrlUPC IS NOT NULL
+                    THEN 'I' --Normal Item 
+            END 
+        AS strItemType
 		,CASE WHEN strTrlUPC IS NOT NULL AND dblTrlSign = -1  --  Added 10/01/2021
 		        then  -TR.dblTrlQty
 				Else TR.dblTrlQty 
