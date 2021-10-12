@@ -255,6 +255,7 @@ UPDATE tblSMCSVDynamicImport SET
 	declare @mobileno								nvarchar(100)
 	declare @locationname							nvarchar(100)
 	declare @freightterm							nvarchar(100)
+	declare @lob									nvarchar(100)
 
 
 	declare @printedname							nvarchar(100)
@@ -420,7 +421,7 @@ UPDATE tblSMCSVDynamicImport SET
 		@patronagemembershipdate = ''@patronagemembershipdate@'',
 		@patronagebirthdate = ''@patronagebirthdate@'',									@patronagestockstatus = ''@patronagestockstatus@'',
 		@patronagedeceaseddate = ''@patronagedeceaseddate@'',								@patronagelastactivitydate = ''@patronagelastactivitydate@'',
-		@genstatetaxid = ''@genstatetaxid@'', @genfederaltaxid = ''@genfederaltaxid@'', @freightterm = ''@freightterm@'', @taxgroup = ''@taxgroup@'',
+		@genstatetaxid = ''@genstatetaxid@'', @genfederaltaxid = ''@genfederaltaxid@'', @freightterm = ''@freightterm@'', @taxgroup = ''@taxgroup@'', @lob = ''@lob@'',
 
 
 		@IsValid = 1
@@ -459,6 +460,7 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @approvalpricechargeid				int
 		declare @freighttermid						int
 		declare @taxgroupId							int
+		declare @lobid								int
 
 		if @entityno <> '''' 
 		begin
@@ -903,6 +905,17 @@ UPDATE tblSMCSVDynamicImport SET
 			end
 		end
 
+		if @lob <> ''''
+		begin
+			select @lobid = intLineOfBusinessId from tblSMLineOfBusiness where strLineOfBusiness = @lob
+
+			if isnull(@lobid, 0) <= 0
+			begin
+				set @ValidationMessage = @ValidationMessage + '', Line of Business (''+  @lob +'') does not exists.''
+				set @IsValid = 0
+			end
+		end
+
 		if isnull(@printedname, '''') = ''''
 		BEGIN
 			SET @printedname = @name
@@ -1105,6 +1118,10 @@ UPDATE tblSMCSVDynamicImport SET
 				insert into tblARCustomerCompetitor(intEntityCustomerId, intEntityId)
 					select @entityId, @detailCurrentSysId
 
+			if isnull(@lobid, 0) > 0
+				insert into tblEMEntityLineOfBusiness(intEntityId, intLineOfBusinessId)
+					select @entityId, @lobid
+
 
 		end
 
@@ -1148,6 +1165,8 @@ UPDATE tblSMCSVDynamicImport SET
 	SELECT @NewHeaderId, 'zip', 'Zip', 0
 	Union All
 	SELECT @NewHeaderId, 'country', 'Country', 0
+	Union All
+	SELECT @NewHeaderId, 'lob', 'LOB', 0
 	Union All
 	SELECT @NewHeaderId, 'timezone', 'TimeZone', 0
 	Union All
