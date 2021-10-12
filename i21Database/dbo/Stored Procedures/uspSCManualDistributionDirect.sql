@@ -68,7 +68,7 @@ BEGIN TRY
 		,@intAllowOtherLocationContracts = intAllowOtherLocationContracts
 		,@intTicketItemId = intItemId
 		,@intMatchTicketId = intMatchTicketId
-		--,@intTicketFreightCostUOMId = A.intFreightCostUOMId
+		,@intTicketFreightCostUOMId = A.intFreightCostUOMId
 	FROM tblSCTicket A
 	INNER JOIN tblSCScaleSetup B
 		ON A.intScaleSetupId = B.intScaleSetupId
@@ -415,7 +415,7 @@ BEGIN TRY
 							,intCropYearId = D.intCropYearId
 							,strLoadNumber = E.strLoadNumber
 							,strCustomerReference = E.strCustomerReference
-							--,intFreightCostUOMId = @intTicketFreightCostUOMId
+							,intFreightCostUOMId = @intTicketFreightCostUOMId
 					FROM tblSCTicket A
 					INNER JOIN tblLGLoadDetail B
 						ON B.intLoadDetailId = @intTickeLoadDetailId
