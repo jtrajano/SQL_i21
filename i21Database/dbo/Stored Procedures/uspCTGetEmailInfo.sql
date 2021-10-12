@@ -20,9 +20,10 @@ BEGIN
 			@strCustomerContract		NVARCHAR(50),
 			@strThanks					NVARCHAR(MAX) = 'Thank you for your business.',
 			@ysnContractSlspnOnEmail	BIT = 0,
-			@strSalespersonName		NVARCHAR(255) = ''
+			@strSalespersonName		NVARCHAR(255) = '',
+			@ysnEnableEmailDistribution BIT = 0
 
-	SELECT @strDefaultContractReport = strDefaultContractReport, @ysnContractSlspnOnEmail = ysnContractSlspnOnEmail FROM tblCTCompanyPreference
+	SELECT @strDefaultContractReport = strDefaultContractReport, @ysnContractSlspnOnEmail = ysnContractSlspnOnEmail, @ysnEnableEmailDistribution = ysnEnableEmailDistribution FROM tblCTCompanyPreference
 
 	DECLARE @loop TABLE
 	(
@@ -114,20 +115,39 @@ BEGIN
 
 	IF @strMailType = 'Contract'
 	BEGIN
-		SELECT	@strIds	=	STUFF(															
-										(
-											SELECT	DISTINCT												
-													'|^|' +	LTRIM(intEntityContactId)
-											FROM	vyuCTEntityToContact 
-											WHERE	intEntityId = @intEntityId
-											AND		ISNULL(strEmail,'') <> ''
-											AND		strEmailDistributionOption LIKE '%Contracts%'
-											FOR XML PATH('')
-										),1,3, ''
-									)
+		IF @ysnEnableEmailDistribution = 1
+			BEGIN
+			SELECT	@strIds	=	STUFF(															
+											(
+												SELECT	DISTINCT												
+														'|^|' +	LTRIM(intEntityContactId)
+												FROM	vyuCTEntityToContact 
+												WHERE	intEntityId = @intEntityId
+												AND		ISNULL(strEmail,'') <> ''
+												AND		strEmailDistributionOption LIKE '%Contracts%'
+												FOR XML PATH('')
+											),1,3, ''
+										)
 				
-		FROM	vyuCTEntityToContact CH
-		WHERE	intEntityId = @intEntityId
+			FROM	vyuCTEntityToContact CH
+			WHERE	intEntityId = @intEntityId
+			END
+		ELSE
+			BEGIN
+			SELECT	@strIds	=	STUFF(															
+											(
+												SELECT	DISTINCT												
+														'|^|' +	LTRIM(intEntityContactId)
+												FROM	vyuCTEntityToContact 
+												WHERE	intEntityId = @intEntityId
+												AND		ISNULL(strEmail,'') <> ''
+												FOR XML PATH('')
+											),1,3, ''
+										)
+				
+			FROM	vyuCTEntityToContact CH
+			WHERE	intEntityId = @intEntityId
+			END
 	END
 	ELSE
 	BEGIN
