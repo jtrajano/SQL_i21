@@ -3907,6 +3907,8 @@ BEGIN TRY
 				--			,1
 				--			)
 				--END
+				DELETE FROM tblCTContractDocument WHERE intContractHeaderId=@intNewContractHeaderId
+
 				INSERT INTO tblCTContractDocument (
 					intContractHeaderId
 					,intDocumentId
@@ -3922,7 +3924,7 @@ BEGIN TRY
 						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
 				JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-				WHERE NOT EXISTS (
+				/*WHERE NOT EXISTS (
 						SELECT *
 						FROM tblCTContractDocument CD
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
@@ -3946,7 +3948,7 @@ BEGIN TRY
 						SELECT *
 						FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (intContractDocumentId INT) x
 						WHERE CD.intContractDocumentRefId = x.intContractDocumentId
-						)
+						)*/
 
 				EXEC sp_xml_removedocument @idoc
 
