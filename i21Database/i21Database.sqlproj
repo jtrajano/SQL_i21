@@ -10077,12 +10077,9 @@
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_IDPFieldMapping.sql" />
-<<<<<<< HEAD
-=======
     <Build Include="dbo\Tables\tblARPerformanceLog.sql" />
     <Build Include="dbo\Views\vyuARPerformanceLog.sql" />
     <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
->>>>>>> 21.1Dev
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -10299,10 +10296,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
   </ItemGroup>
-<<<<<<< HEAD
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WV_WestVirginia.sql" />
   </ItemGroup>
-=======
->>>>>>> 21.1Dev
 </Project>
