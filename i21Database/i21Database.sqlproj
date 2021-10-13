@@ -218,6 +218,16 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeInitialize.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEffectiveItemCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEffectiveItemPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemPricingLevel.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemSpecialPricing.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformEffectiveItemCost.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformEffectiveItemPrice.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemPricing.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemPricingLevel.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemSpecialPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
