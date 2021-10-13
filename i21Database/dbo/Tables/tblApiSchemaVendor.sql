@@ -31,13 +31,13 @@
 	[strPricingLevel]           NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,				--PRICING LEVEL
 
 	--Entity Type Fields
-	[strType]          			NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,			--ENTITY TYPE
+	[strType]          			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,				--ENTITY TYPE
 
 	-- LOOKING FOR WAREHOUSE FIELD
 
 	--Vendor Fields
 	[strVendorId]               NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,			--VENDOR NO
-	[strExpenseAccountId]      	NVARCHAR (40) COLLATE Latin1_General_CI_AS NOT NULL,			--VENDOR EXPENSE ACCOUNT
+	[strExpenseAccountId]      	NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,				--VENDOR EXPENSE ACCOUNT
 	[strVendorType] 			NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 				--VENDOR TYPE
 	[strTaxNumber] 				NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,					--VENDOR TAX NUMBER
 	[strTerm]					NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL			--VENDOR TERM
