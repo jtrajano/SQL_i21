@@ -18,3 +18,8 @@
 	CONSTRAINT [FK_tblARInvoiceDetailLot_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY ([intInvoiceDetailId]) REFERENCES [tblARInvoiceDetail] ([intInvoiceDetailId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblARInvoiceDetailLot_tblICLot] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetailLot_NonClustered] ON [dbo].[tblARInvoiceDetailLot] (
+  [intInvoiceDetailId], [intLotId]
+)
+GO

@@ -92,6 +92,7 @@
 :r .\7_AR\12_MoveQuotePagesToLetters.sql
 :r .\7_AR\13_FixCustomerBillToShipTo.sql
 :r .\7_AR\14_RefreshARTempTable.sql
+:r .\7_AR\15_DropOldIndex.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql

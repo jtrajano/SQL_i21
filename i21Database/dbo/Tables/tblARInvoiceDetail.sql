@@ -176,37 +176,12 @@
 );
 
 GO
-CREATE NONCLUSTERED INDEX [PIndex]
-    ON [dbo].[tblARInvoiceDetail]([intInvoiceId] ASC, [intItemId] ASC, [strItemDescription] ASC, [dblQtyOrdered] ASC, [dblQtyShipped] ASC, [dblPrice] ASC, [dblTotal] ASC);
-
-GO
-CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_strDocumentNumber]
-	ON [dbo].[tblARInvoiceDetail] ([strDocumentNumber],[intInventoryShipmentItemId])
-	INCLUDE ([intInvoiceId])
-
-GO
-CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intInventoryShipmentItemId]
-	ON [dbo].[tblARInvoiceDetail] ([intInventoryShipmentItemId])
-	INCLUDE ([intInvoiceId])
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intCustomerStorageId]
-	ON [dbo].[tblARInvoiceDetail] ([intCustomerStorageId])
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_forStockRebuild]
-	ON [dbo].[tblARInvoiceDetail] (intInvoiceDetailId, intItemId)
-	INCLUDE ([intInvoiceId])
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intInventoryShipmentChargeId]
-	ON [dbo].[tblARInvoiceDetail] ([intInventoryShipmentChargeId])
-	INCLUDE ([intInvoiceId])
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intOriginalInvoiceDetailId]
-	ON [dbo].[tblARInvoiceDetail] ([intOriginalInvoiceDetailId])
-GO
-
-CREATE INDEX [IX_tblARInvoiceDetail_[intInvoiceId] ON [dbo].[tblARInvoice] ([intInvoiceId] ASC)
+CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_NonClustered] ON [dbo].[tblARInvoiceDetail] (
+  [intInvoiceId], [intAccountId], [intCOGSAccountId], [intSalesAccountId], [intInventoryAccountId], [intConversionAccountId], 
+  [intInventoryShipmentItemId], [intInventoryShipmentChargeId], [intSalesOrderDetailId], [intContractHeaderId], [intContractDetailId], [intItemContractHeaderId], [intItemContractDetailId], [intShipmentId], [intTicketId], [intTicketHoursWorkedId],
+  [intSiteId], [intStorageLocationId], [intCompanyLocationSubLocationId], [intItemId], [intItemUOMId], [intLoadDetailId]
+  --REMOVED INDEXES
+  --intCustomerStorageId, intOriginalInvoiceDetailId, dblQtyOrdered, dblQtyShipped, dblPrice, dblTotal
+)
+INCLUDE([strItemDescription], [strDocumentNumber], [strPricing])
 GO
