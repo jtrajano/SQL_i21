@@ -409,4 +409,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\14_RefreshARTempTable.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\15_DropOldIndex.sql" />
+  </ItemGroup>
 </Project>
