@@ -599,7 +599,7 @@ BEGIN TRY
 						,[dblQtyOrdered] = LGD.dblQuantity
 						,[dblQtyShipped] = SCLoad.dblQty
 						,[dblDiscount] = 0
-						,[dblPrice] = ISNULL(LGD.dblUnitPrice,0)
+						,[dblPrice] = ISNULL(CTD.dblCashPrice,LGD.dblUnitPrice)
 						,[ysnRefreshPrice] = 0
 						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 						,[ysnRecomputeTax] = 1
@@ -686,7 +686,7 @@ BEGIN TRY
 						,[dblQtyOrdered] = CTD.dblOriginalQty
 						,[dblQtyShipped] = SCContract.dblScheduleQty
 						,[dblDiscount] = 0
-						,[dblPrice] = ISNULL(CTD.dblBasis,0) + ISNULL(CTD.dblFutures,0)
+						,[dblPrice] = ISNULL(CTD.dblCashPrice,0)
 						,[ysnRefreshPrice] = 0
 						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 						,[ysnRecomputeTax] = 1
@@ -1028,7 +1028,7 @@ BEGIN TRY
 				,[dblQtyOrdered] = Staging.dblQtyOrdered 
 				,[dblQtyShipped] = Staging.dblQtyShipped 
 				,[dblDiscount] = 0
-				,[dblPrice] = LDCTC.dblRate * -1
+				,[dblPrice] = LDCTC.dblRate 
 				,[ysnRefreshPrice] = 0
 				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 				,[ysnRecomputeTax] = 1

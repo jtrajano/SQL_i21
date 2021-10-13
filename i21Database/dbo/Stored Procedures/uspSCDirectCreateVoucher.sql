@@ -93,7 +93,7 @@ BEGIN TRY
 				,dblQuantity				= SCL.dblQty
 				,dblUnitQty					= ICUOM.dblUnitQty
 				,dblDiscount				= 0
-				,dblCost					= LGD.dblUnitPrice
+				,dblCost					= ISNULL(CNT.dblCashPrice,LGD.dblUnitPrice)
 				,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCL.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 				,intInvoiceId				= null
 				,intScaleTicketId			= SC.intTicketId
@@ -125,7 +125,7 @@ BEGIN TRY
 				ON SC.intItemUOMIdTo = ICUOM.intItemUOMId
 			INNER JOIN tblLGLoadDetail LGD 
 				ON SCL.intLoadDetailId = LGD.intLoadDetailId
-			INNER JOIN tblCTContractDetail CNT
+			LEFT JOIN tblCTContractDetail CNT
 				ON CNT.intContractDetailId = LGD.intPContractDetailId
 			INNER JOIN tblSCTicketDistributionAllocation SCTA
 				ON SCL.intTicketLoadUsedId = SCTA.intSourceId
