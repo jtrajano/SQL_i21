@@ -2,13 +2,15 @@
 CREATE VIEW [dbo].[vyuCMBorrowingFacilityDetail]
 AS
 SELECT A.*,
-strBankAccountNo,
-D.strCurrency strBankAccountCurrency,
-C.strLimitType
+B.strBankAccountNo,
+B.strCurrency strBankAccountCurrency,
+B.strLimitType,
+B.strLoanType,
+B.dblHaircut,
+B.dblLimit,
+B.intMaturityDays,
+B.strBankLoanId,
+B.intDaysInCycle
 FROM tblCMBorrowingFacilityDetail A
-LEFT JOIN vyuCMBankAccount B ON B.intBankAccountId = A.intBankAccountId
-LEFT JOIN tblCMTradeFinanceLimitType C ON C.intLimitTypeId = A.intTradeTypeLimitId
-LEFT JOIN tblSMCurrency D on D.intCurrencyID = B.intCurrencyId
+LEFT JOIN vyuCMBankLoan B ON B.intBorrowingFacilityId = A.intBorrowingFacilityId
 GO
-
-

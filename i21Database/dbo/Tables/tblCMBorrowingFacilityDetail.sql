@@ -2,13 +2,9 @@
 CREATE TABLE [dbo].[tblCMBorrowingFacilityDetail](
 	intBorrowingFacilityDetailId        INT IDENTITY(1,1)   NOT NULL,
 	intBorrowingFacilityId              INT                 NOT NULL,
-    intBankAccountId                    INT                 NOT NULL,
-    dblLimit                            DECIMAL(18,2)       NOT NULL,
     dblRate                             DECIMAL(18,6)       NOT NULL,
     dblFacilityLimit                    DECIMAL(18,6)       NOT NULL,
-    intTradeTypeLimitId                 INT                 NOT NULL,
-    dblHairCut                          DECIMAL(5,2)        NOT NULL,
-    intDaysInCycle                      INT                 NOT NULL,
+    intBankLoanId                       INT                 NOT NULL,
     intConcurrencyId                    INT                 NOT NULL,
  CONSTRAINT [PK_BorrowingFacilityDetailId] PRIMARY KEY CLUSTERED 
 (
@@ -23,6 +19,13 @@ REFERENCES [dbo].[tblCMBorrowingFacility] ([intBorrowingFacilityId])
 GO
 
 ALTER TABLE [dbo].[tblCMBorrowingFacilityDetail] CHECK CONSTRAINT [FK_tblCMBorrowingFacilityDetail_tblCMBorrowingFacility]
+GO
+
+ALTER TABLE [dbo].[tblCMBorrowingFacilityDetail]  WITH CHECK ADD  CONSTRAINT [FK_tblCMBorrowingFacilityDetail_tblCMBankLoan] FOREIGN KEY([intBankLoanId])
+REFERENCES [dbo].[tblCMBankLoan] ([intBankLoanId])
+GO
+
+ALTER TABLE [dbo].[tblCMBorrowingFacilityDetail] CHECK CONSTRAINT [FK_tblCMBorrowingFacilityDetail_tblCMBankLoan]
 GO
 
 
