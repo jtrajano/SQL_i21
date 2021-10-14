@@ -823,7 +823,7 @@ USING
 		ysnApplyBlueLaw2 = FilteredItemLocation.ysnApplyBlueLaw2,
 		ysnCarWash = FilteredItemLocation.ysnCarWash,
 		intItemTypeCode = ItemTypeCode.intRadiantItemTypeCodeId,
-		intItemTypeSubCode = FilteredItemLocation.intItemTypeSubcode,
+		intItemTypeSubCode = FilteredItemLocation.intItemTypeSubCode,
 		dblReorderPoint = FilteredItemLocation.dblReorderPoint,
 		dblMinOrder = FilteredItemLocation.dblMinOrder,
 		dblSuggestedQty = FilteredItemLocation.dblSuggestedQty,
