@@ -249,6 +249,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeInitialize.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKPhysicalVsFutures.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
