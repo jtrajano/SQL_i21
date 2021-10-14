@@ -3,7 +3,8 @@
 	[intCustomerFreightId] INT NOT NULL IDENTITY,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NOT NULL,
 	[intRowNumber] INT NULL,
-	[strCustomerName] NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,			-- Customer Name
+	--[strCustomerName] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,				-- Customer Name
+	[strCustomerEntityNo] NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,		-- Customer Entity No
 	[strTariffType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,			-- Tariff Type
 	[strCustomerLocation] NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,		-- Customer Location
 	[strSupplierZipCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			-- Supplier Zip Code
