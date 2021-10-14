@@ -159,7 +159,7 @@ BEGIN
 		) AS u
 			ON e.intItemId = u.intItemId
 			AND e.intItemLocationId = u.intItemLocationId
-			AND e.dtmEffectiveCostDate = u.dtmEffectiveDate
+			AND CONVERT(DATE, e.dtmEffectiveCostDate) = CONVERT(DATE, u.dtmEffectiveDate)
 			AND e.intEffectiveItemCostId = ISNULL(@intEffectiveItemCostId, e.intEffectiveItemCostId)
 
 		-- If matched, update the effective cost.
@@ -358,7 +358,7 @@ BEGIN
 		) AS u
 			ON e.intItemId = u.intItemId
 			AND e.intItemLocationId = u.intItemLocationId
-			AND e.dtmEffectiveRetailPriceDate = u.dtmEffectiveDate
+			AND CONVERT(DATE, e.dtmEffectiveRetailPriceDate) = CONVERT(DATE, u.dtmEffectiveDate)
 			AND e.intEffectiveItemPriceId = ISNULL(@intEffectiveItemPriceId, e.intEffectiveItemPriceId)
 
 		-- If matched, update the effective cost.
