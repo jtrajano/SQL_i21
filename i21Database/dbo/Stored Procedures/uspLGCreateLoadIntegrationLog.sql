@@ -555,7 +555,7 @@ BEGIN TRY
 		END
 	END
 
-	/* Update ETA POL Tracking */
+	/* Update ETS POL Tracking */
 	IF (@intShipmentType = 1 AND @dtmCurrentETSPOL IS NOT NULL AND @strRowState <> 'Delete')
 	BEGIN
 		IF NOT EXISTS (SELECT 1 FROM tblLGETATracking WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL')
@@ -565,7 +565,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			SELECT TOP 1 @dtmMaxETSPOL = dtmETAPOD FROM tblLGETATracking 
+			SELECT TOP 1 @dtmMaxETSPOL = dtmETSPOL FROM tblLGETATracking 
 			WHERE intLoadId = @intLoadId AND strTrackingType = 'ETS POL' ORDER BY intETATrackingId DESC
 
 			IF (@dtmMaxETSPOL <> @dtmCurrentETSPOL)
