@@ -1605,6 +1605,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Borrowing Facility')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 164
+			,[strTransactionType]	= N'Split Number'
+			,[strPrefix]			= N'SN-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Entity Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Entity Number')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
