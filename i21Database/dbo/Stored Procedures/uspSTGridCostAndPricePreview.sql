@@ -247,7 +247,7 @@ BEGIN TRY
 			AS FLOAT),2) AS NUMERIC(18,6))
 			AS dblCurrentRetailPrice,
            CASE WHEN @CategoryMargin = 'true'
-			THEN catloc.dblTargetGrossProfit 
+			THEN ISNULL(catloc.dblTargetGrossProfit, 0)
 		   ELSE 0
 		   END AS dblCategoryMargin, 
            ISNULL(@GivenMargin, 0) AS dblGivenMargin, 
