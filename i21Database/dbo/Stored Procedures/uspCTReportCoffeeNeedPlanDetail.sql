@@ -210,7 +210,17 @@ BEGIN
 			SELECT TOP 10  @TenthMonth= CASE WHEN [strColumnName]<>@NinthMonth THEN [strColumnName] ELSE NULL END  FROM #tblRequiredColumns ORDER BY [intColumnKey]
 	 END
 
-	 SELECT @intColumnKey = MIN(intColumnKey) FROM #tblRequiredColumns
+	DECLARE @FColumns nvarchar(max),@EColumns nvarchar(max);
+
+	select
+		@FColumns = coalesce(@FColumns + ',', '') +  '[First' + strColumnName + '] DECIMAL(24,2) NULL'
+		,@EColumns = coalesce(@EColumns + ',', '') +  '[End' + strColumnName + '] DECIMAL(24,2) NULL'
+	from
+		#tblRequiredColumns
+
+	exec('ALTER TABLE #tblCoffeeNeedPlan ADD' + @FColumns + ',' + @EColumns + ';');
+
+	SELECT @intColumnKey = MIN(intColumnKey) FROM #tblRequiredColumns
 
 	WHILE @intColumnKey > 0
 	BEGIN
@@ -224,15 +234,7 @@ BEGIN
 
 		SELECT @intMonthKey=intMonthKey,@intYearKey=intYearKey ,@strColumnName = strColumnName
 		FROM #tblRequiredColumns
-		WHERE intColumnKey = @intColumnKey
-					
-		SET @SqlALTER = 'ALTER TABLE #tblCoffeeNeedPlan ADD  [First' + @strColumnName + ']  DECIMAL(24,2) NULL'		
-		EXEC (@SqlALTER)
-
-		SET @SqlALTER=NULL
-		SET @SqlALTER = 'ALTER TABLE #tblCoffeeNeedPlan ADD  [End' + @strColumnName + ']   DECIMAL(24,2) NULL'
-		
-		EXEC (@SqlALTER)		
+		WHERE intColumnKey = @intColumnKey	
 		
 		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,strProductType,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
 							 SELECT Item.intItemId,Item.strItemNo,Item.strDescription,ProductType.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
@@ -257,15 +259,12 @@ BEGIN
 
 		EXEC (@SqlInsert)
 
-		--SELECT @SqlInsert
-
 		SET @SqlInsert=NULL
 		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,strProductType,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
 						  SELECT intItemId,'' '','' '','' '',0,'' '',NULL,SUM(ISNULL([First'+ @strColumnName + '],0))+SUM(ISNULL([End'+ @strColumnName + '],0))  
 						  FROM #tblCoffeeNeedPlan
 						  GROUP BY intItemId'
 						  
-		--SELECT @SqlInsert	
 		EXEC (@SqlInsert)
 
 
