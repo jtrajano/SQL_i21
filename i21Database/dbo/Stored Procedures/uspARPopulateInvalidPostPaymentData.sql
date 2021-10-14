@@ -83,6 +83,24 @@ BEGIN
         ON P.[intUndepositedFundsId] = GLAD.[intAccountId]
 	WHERE GLAD.[strAccountCategory] IS NULL
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	SELECT
+         [intTransactionId]         = [intTransactionId]
+        ,[strTransactionId]         = [strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = [intTransactionDetailId]
+        ,[strBatchId]               = [strBatchId]
+        ,[strError]                 = 'The GL account has not been set up for the ''Customer Prepaid'' selection (Company Location > GL Accounts Tab).  This invoice is not able to be posted without this information supplied.'
+    FROM #ARPostPaymentHeader
+	WHERE strPaymentMethod = 'Prepay' 
+	  AND ISNULL(intSalesAdvAcct, 0) = 0
+
     INSERT INTO #ARInvalidPaymentData (
          [intTransactionId]
         ,[strTransactionId]
@@ -1424,4 +1442,3 @@ BEGIN
 END
 
 RETURN 1
-
