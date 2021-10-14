@@ -132,14 +132,16 @@ BEGIN TRY
 			,@strTransferNo = NULL
 			,@strERPTransferOrderNo = NULL
 			,@strCurrency = NULL
-			,@strReceiptType=NULL
+			,@strReceiptType = NULL
 
 		SELECT @intInventoryReceiptItemId = NULL
 
 		SELECT @intActionId = (
 				CASE 
-					WHEN R.strReceiptType IN ('Purchase Contract','Direct')
+					WHEN R.strReceiptType = 'Purchase Contract'
 						THEN 1
+					WHEN R.strReceiptType = 'Direct'
+						THEN 3
 					ELSE 2
 					END
 				)
@@ -151,7 +153,7 @@ BEGIN TRY
 			,@strBillOfLading = R.strBillOfLading
 			,@strWarehouseRefNo = R.strWarehouseRefNo
 			,@strCurrency = C.strCurrency
-			,@strReceiptType=strReceiptType
+			,@strReceiptType = strReceiptType
 		FROM dbo.tblICInventoryReceipt R
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = ISNULL(R.intModifiedByUserId, R.intCreatedByUserId)
 		LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = R.intEntityVendorId
@@ -388,7 +390,7 @@ BEGIN TRY
 				SELECT @strError = @strError + 'Storage Unit cannot be blank. '
 			END
 
-			IF @intActionId = 1 AND @strReceiptType<>'Direct'
+			IF @intActionId = 1
 			BEGIN
 				IF ISNULL(@strContractNumber, '') = ''
 				BEGIN
@@ -479,7 +481,6 @@ BEGIN TRY
 
 			IF @intActionId = 1
 				AND UPPER(@strCommodityCode) = 'COFFEE'
-				AND @strReceiptType<>'Direct'
 			BEGIN
 				INSERT INTO @tblICInventoryReceiptItemParentLot (intParentLotId)
 				SELECT DISTINCT RIL.intParentLotId
