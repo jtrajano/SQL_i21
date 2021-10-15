@@ -80,8 +80,7 @@ BEGIN TRY
 		,@dblInputWeight2 NUMERIC(18, 6)
 		,@dblRequiredQty NUMERIC(18, 6)
 		,@dblSwapToQty2 NUMERIC(18, 6)
-		,@intMainItemId int
-
+		,@intMainItemId INT
 	DECLARE @tblMFSwapto TABLE (
 		intSwapTo INT identity(1, 1)
 		,intWorkOrderId INT
@@ -133,7 +132,7 @@ BEGIN TRY
 		,@ysnNegativeQuantityAllowed = ysnNegativeQuantityAllowed
 		,@ysnExcessConsumptionAllowed = ysnExcessConsumptionAllowed
 		,@dblDefaultResidueQty = dblDefaultResidueQty
-		,@intMainItemId=intMainItemId
+		,@intMainItemId = intMainItemId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intLocationId INT
 			,intSubLocationId INT
@@ -158,10 +157,10 @@ BEGIN TRY
 			,ysnNegativeQuantityAllowed BIT
 			,ysnExcessConsumptionAllowed BIT
 			,dblDefaultResidueQty NUMERIC(38, 20)
-			,intMainItemId int
+			,intMainItemId INT
 			)
 
-	IF @dtmActualInputDateTime>GETDATE()
+	IF @dtmActualInputDateTime > GETDATE()
 	BEGIN
 		RAISERROR (
 				'Feed time cannot be greater than current date and time.'
@@ -588,9 +587,14 @@ BEGIN TRY
 			AND intInventoryTransactionType = 9
 			AND dblQty = @dblSwapToQty2
 
-		IF @intSwapToLotId IS NOT NULL and exists( Select *from tblMFTask
-			WHERE intOrderHeaderId = @intSwapToOrderHeaderId
-				AND intLotId = @intInputLotId and dblQty = @dblSwapToQty2)
+		IF @intSwapToLotId IS NOT NULL
+			AND EXISTS (
+				SELECT *
+				FROM tblMFTask
+				WHERE intOrderHeaderId = @intSwapToOrderHeaderId
+					AND intLotId = @intInputLotId
+					AND dblQty = @dblSwapToQty2
+				)
 		BEGIN
 			UPDATE tblMFTask
 			SET intLotId = @intSwapToLotId
@@ -1185,6 +1189,26 @@ BEGIN TRY
 		SELECT @intMachineId = NULL
 	END
 
+	IF @intMainItemId IS NOT NULL
+	BEGIN
+		UPDATE tblMFProductionSummary
+		SET intMainItemId = @intMainItemId
+		WHERE intWorkOrderId = @intWorkOrderId
+			AND intItemId = @intInputItemId
+			AND IsNULL(intMachineId, 0) = (
+				CASE 
+					WHEN intMachineId IS NOT NULL
+						THEN IsNULL(@intMachineId, 0)
+					ELSE IsNULL(intMachineId, 0)
+					END
+				)
+			AND intItemTypeId IN (
+				1
+				,3
+				)
+			AND intMainItemId IS NULL
+	END
+
 	IF NOT EXISTS (
 			SELECT *
 			FROM tblMFProductionSummary
@@ -1201,7 +1225,7 @@ BEGIN TRY
 					1
 					,3
 					)
-				AND IsNULL(intMainItemId,IsNULL(@intMainItemId,0))=IsNULL(@intMainItemId,0)
+				AND IsNULL(intMainItemId, IsNULL(@intMainItemId, 0)) = IsNULL(@intMainItemId, 0)
 			)
 	BEGIN
 		INSERT INTO tblMFProductionSummary (
@@ -1258,7 +1282,7 @@ BEGIN TRY
 				1
 				,3
 				)
-			AND IsNULL(intMainItemId,IsNULL(@intMainItemId,0))=IsNULL(@intMainItemId,0)
+			AND IsNULL(intMainItemId, IsNULL(@intMainItemId, 0)) = IsNULL(@intMainItemId, 0)
 	END
 
 	---************************************
@@ -1344,7 +1368,7 @@ BEGIN TRY
 	JOIN tblICItemLocation IL ON IL.intItemId = WI.intItemId
 		AND IL.intLocationId = @intLocationId
 		AND WI.ysnConsumptionReversed = 0
-	Left JOIN tblICLot L ON L.intLotId = WI.intLotId
+	LEFT JOIN tblICLot L ON L.intLotId = WI.intLotId
 	WHERE intWorkOrderId = @intWorkOrderId
 	GROUP BY WI.intItemId
 		,IL.intItemLocationId
@@ -1365,7 +1389,7 @@ BEGIN TRY
 	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 	EXEC dbo.uspMFAdjustInventory @dtmDate = @dtmPlannedDate
-		,@intTransactionTypeId = 104--Stage
+		,@intTransactionTypeId = 104 --Stage
 		,@intItemId = @intInputItemId
 		,@intSourceLotId = @intInputLotId
 		,@intDestinationLotId = @intDestinationLotId
@@ -1381,11 +1405,11 @@ BEGIN TRY
 		,@strReason = NULL
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = NULL
-		,@intStorageLocationId  = @intStorageLocationId
-		,@intDestinationStorageLocationId  = @intConsumptionStorageLocationId
-		,@intWorkOrderInputLotId  = @intWorkOrderInputLotId
-		,@intWorkOrderProducedLotId  = NULL
-		,@intWorkOrderId  = @intWorkOrderId
+		,@intStorageLocationId = @intStorageLocationId
+		,@intDestinationStorageLocationId = @intConsumptionStorageLocationId
+		,@intWorkOrderInputLotId = @intWorkOrderInputLotId
+		,@intWorkOrderProducedLotId = NULL
+		,@intWorkOrderId = @intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

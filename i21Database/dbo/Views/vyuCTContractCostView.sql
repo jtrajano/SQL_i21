@@ -15,7 +15,7 @@ AS
 				CC.ysnMTM,
 				CC.ysnPrice,
 				CC.ysnAdditionalCost,
-				CC.ysnBasis,
+				ISNULL(CC.ysnBasis,0) AS ysnBasis,
 				CC.ysnReceivable,
 				CC.strParty,
 				CC.strPaidBy,

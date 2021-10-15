@@ -45,7 +45,7 @@ BEGIN TRY
 	--- Uncomment line below when debugging ---
 	-------------------------------------------
 	-- SELECT strSource = @strSource, strProcess = @strProcess
-
+	
 	IF @strProcess IN 
 	(
 		'Update Scheduled Quantity',

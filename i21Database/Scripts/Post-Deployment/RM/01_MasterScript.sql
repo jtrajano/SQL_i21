@@ -197,6 +197,7 @@ BEGIN
 		UNION ALL SELECT 65, 'Deleted Credit Memo', 'Deleted Credit Memo.'
 		UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
 		UNION ALL SELECT 67, 'Price Updated', 'Price Updated.'
+		UNION ALL SELECT 68, 'Delete Match Derivatives', 'Delete Match Derivatives.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 

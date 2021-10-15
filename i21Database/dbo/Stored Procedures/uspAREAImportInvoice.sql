@@ -39,6 +39,9 @@ INSERT INTO @InvoiceEntries (
 	, ysnAllowRePrice
 	, ysnRecomputeTax
 	, ysnConvertToStockUOM
+	, strBinNumber
+	, strGroupNumber
+	, strFeedDiet
 )
 SELECT intId				= I.intId
 	, strTransactionType	= I.strTransactionType
@@ -72,6 +75,9 @@ SELECT intId				= I.intId
 	, ysnAllowRePrice		= I.ysnAllowRePrice
 	, ysnRecomputeTax		= I.ysnRecomputeTax
 	, ysnConvertToStockUOM	= I.ysnConvertToStockUOM
+	, strBinNumber			= I.strBinNumber
+	, strGroupNumber		= I.strGroupNumber
+	, strFeedDiet			= I.strFeedDiet
 FROM @InvoiceEAEntries I
 INNER JOIN tblARCustomer C ON RTRIM(LTRIM(I.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber))
 INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber))

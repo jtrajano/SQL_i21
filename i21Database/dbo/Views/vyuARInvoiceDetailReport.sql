@@ -44,6 +44,9 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
 	 , intBillToLocationId		= I.intBillToLocationId
 	 , intShipToLocationId		= I.intShipToLocationId
+	 , strBinNumber				= ID.strBinNumber
+	 , strGroupNumber			= ID.strGroupNumber
+	 , strFeedDiet				= ID.strFeedDiet
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
@@ -61,6 +64,9 @@ INNER JOIN (
 		 , strUnitCostCurrency = SC.strCurrency
 		 , dblShipmentNetWt
 		 , intEntitySalespersonId
+		 , strBinNumber
+		 , strGroupNumber
+		 , strFeedDiet
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID
