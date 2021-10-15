@@ -81,8 +81,8 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@dblW4ClaimDependents = dblClaimDependents
 			,@dblW4OtherIncome  = dblotherIncome
 			,@dblW4Deductions = 0.00
-			,@ysnUseLocationDistribution = ysnExpenseAccountGlSplit
-			,@ysnUseLocationDistributionExpense = ysnLiabilityGlSplit
+			,@ysnUseLocationDistribution = ysnLiabilityGlSplit
+			,@ysnUseLocationDistributionExpense = ysnExpenseAccountGlSplit
 		FROM #TempEmployeeTaxes
 
 		SELECT TOP 1 
@@ -140,8 +140,8 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 							,EMT.dblLimit
 							,@intAccountId
 							,@intExpenseAccountId
-							,EMT.ysnExpenseAccountGlSplit
 							,EMT.ysnLiabilityGlSplit
+							,EMT.ysnExpenseAccountGlSplit
 							,EMT.dblFederalAllowance
 							,EMT.strPaidBy
 							,EMT.ysnDefault
