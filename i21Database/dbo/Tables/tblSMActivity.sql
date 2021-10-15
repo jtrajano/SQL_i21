@@ -49,3 +49,7 @@ GO
 
 CREATE INDEX [IX_tblSMActivity_intTransactionId] ON [dbo].[tblSMActivity] ([intTransactionId])
 GO
+CREATE NONCLUSTERED INDEX [IDX_tblSMActivity_strType_strStatus]
+ON [dbo].[tblSMActivity] ([strType],[strStatus])
+INCLUDE ([intTransactionId])
+GO
