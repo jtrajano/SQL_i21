@@ -69,7 +69,7 @@ FROM tblICItem I
 		FROM 
 			(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
 				,dblWeightAdj = dbo.fnCalculateQtyBetweenUOM (PCD.intNetWeightUOMId, PCD.intItemUOMId, bld.dblWeight) 
-								* CASE WHEN bl.intTransactionType IN (3, 11) THEN 1 ELSE -1 END
+								* CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
 				FROM tblAPBillDetail bld
 				INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD
 			INNER JOIN tblICItem BLDI ON BLDI.intItemId = BLD.intItemId
