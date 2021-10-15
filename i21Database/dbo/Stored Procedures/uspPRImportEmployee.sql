@@ -415,7 +415,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 						(SELECT TOP 1 intWorkersCompensationId FROM #TempEmployeeDetails WHERE strEmployeeId = @EmployeeID))
 					WHERE intEntityId = @NewId
 				
-				SELECT @Department1 = strDepartment1, @DepartmentDesc1 = strDepartmentDesc1,
+				SELECT TOP 1 @Department1 = strDepartment1, @DepartmentDesc1 = strDepartmentDesc1,
 					   @Department2 = strDepartment2, @DepartmentDesc2 = strDepartmentDesc2,
 					   @Department3 = strDepartment3, @DepartmentDesc3 = strDepartmentDesc3,
 
@@ -432,6 +432,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					   @EmployeeGlLocation2 =  strGlLocationDistributionLocation2,@EmployeeGlLocationPercentage2 = dblGlLocationDistributionPercent2,
 					   @EmployeeGlLocation3 =  strGlLocationDistributionLocation3,@EmployeeGlLocationPercentage3 = strGlLocationDistributionLocation3
 				  FROM #TempEmployeeDetails A
+					WHERE strEmployeeId = @EmployeeID
 				  
 				  --SELECT intLineOfBusinessId FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness1
 				  --SELECT intLineOfBusinessId FROM tblSMLineOfBusiness WHERE strLineOfBusiness = @LineOfBusiness2
@@ -611,7 +612,7 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 		ELSE
 			BEGIN
 				--SELECT ALL RECORDS FROM TEMP TABLE
-				SELECT @Department1 = strDepartment1, @DepartmentDesc1 = strDepartmentDesc1,
+				SELECT TOP 1 @Department1 = strDepartment1, @DepartmentDesc1 = strDepartmentDesc1,
 					   @Department2 = strDepartment2, @DepartmentDesc2 = strDepartmentDesc2,
 					   @Department3 = strDepartment3, @DepartmentDesc3 = strDepartmentDesc3,
 
@@ -848,6 +849,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					where strDepartment3 = @Department3
 					AND strDepartmentDesc3 = @DepartmentDesc3
 
+				--DELETE EXISTING RECORD
+				DELETE FROM tblPREmployeeDepartment WHERE intEntityEmployeeId = @EntityId
+
 				IF @Department1 IS NOT NULL
 					BEGIN
 						IF EXISTS (SELECT TOP 1 * FROM tblPRDepartment WHERE strDepartment = @Department1)
@@ -916,6 +920,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 				INNER JOIN tblSMLineOfBusiness PRL ON A.strLineOfBusiness5 = PRL.strLineOfBusiness
 				INNER JOIN tblEMEntityLineOfBusiness C ON B.intEntityId = C.intEntityId AND C.intLineOfBusinessId = PRL.intLineOfBusinessId
 					WHERE strLineOfBusiness5 = @LineOfBusiness5
+
+				--DELETE EXISTING RECORD BEFORE RE-INSERT
+				DELETE FROM tblEMEntityLineOfBusiness WHERE intEntityId = @EntityId
 
 				--UPDATE LINE OF BUSINESS
 				IF @LineOfBusiness1 IS NOT NULL
@@ -1005,6 +1012,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					AND strSupervisorName3 = @SupervisorName3
 					AND strSupervisoreTitle3 = @SupervisorTitle3
 
+				--DELETE EXISTING RECORD BEFORE RE-INSERT
+				DELETE FROM tblPREmployeeSupervisor WHERE intEntityEmployeeId = @EntityId
+
 				--UPDATE SUPERVISOR DATA
 				IF @SupervisorId1 IS NOT NULL
 					BEGIN
@@ -1040,6 +1050,9 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 							END
 						END
 					END
+
+				--DELETE EXISTING RECORD BEFORE RE-INSERT
+				DELETE FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @EntityId
 
 				IF @EmployeeGlLocation1 IS NOT NULL
 					BEGIN
