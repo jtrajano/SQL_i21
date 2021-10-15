@@ -80,11 +80,11 @@ BEGIN
 				WHERE	cb.intItemId = @intItemId
 						AND cb.intItemLocationId = @intItemLocationId
 						AND cb.intItemUOMId = @intItemUOMId
-						AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
+						--AND ROUND((cb.dblStockIn - cb.dblStockOut), 6) <> 0  
 						--AND dbo.fnDateLessThanEquals(cb.dtmDate, @dtmDate) = 1						
-						--AND ISNULL(cbAvailable.dblAvailable, 0) >=  ROUND(@dblQty, 6)
-						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
-						AND cb.dblStockAvailable >= ROUND(@dblQty, 6)
+						AND cb.dblStockAvailable <> 0 
+						AND FLOOR(CAST(cb.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))						
+						AND ISNULL(cbAvailable.dblAvailable, 0) >= ROUND(@dblQty, 6)
 
 				ORDER BY 
 					cb.dtmDate ASC, cb.intInventoryFIFOId ASC 
