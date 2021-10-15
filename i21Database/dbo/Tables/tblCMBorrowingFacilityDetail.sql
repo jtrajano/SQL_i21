@@ -3,7 +3,6 @@ CREATE TABLE [dbo].[tblCMBorrowingFacilityDetail](
 	intBorrowingFacilityDetailId        INT IDENTITY(1,1)   NOT NULL,
 	intBorrowingFacilityId              INT                 NOT NULL,
     dblRate                             DECIMAL(18,6)       NOT NULL,
-    dblFacilityLimit                    DECIMAL(18,6)       NOT NULL,
     intBankLoanId                       INT                 NOT NULL,
     intConcurrencyId                    INT                 NOT NULL,
  CONSTRAINT [PK_BorrowingFacilityDetailId] PRIMARY KEY CLUSTERED 

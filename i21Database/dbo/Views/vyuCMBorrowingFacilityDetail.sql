@@ -8,6 +8,7 @@ B.strLimitType,
 B.strLoanType,  
 B.dblHaircut,  
 B.dblLimit,  
+dblFacilityLimit =   dblRate * dblLimit,
 B.intMaturityDays,  
 B.strBankLoanId,  
 B.intDaysInCycle  
