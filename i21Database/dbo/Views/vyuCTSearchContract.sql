@@ -108,7 +108,7 @@ AS
 		SELECT * FROM 
 		(
 			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
-					TR.intRecordId, TR.ysnOnceApproved, ysnApproved = case when TR.strApprovalStatus = 'Approved' then convert(bit,1) else convert(bit,0) end 
+					TR.intRecordId, TR.ysnOnceApproved, ysnApproved = case when TR.strApprovalStatus IN ( 'Approved', 'Approved with Modifications') then convert(bit,1) else convert(bit,0) end 
 			FROM	tblSMTransaction	TR WITH (NOLOCK)
 			JOIN	tblSMScreen			SC	WITH (NOLOCK) ON	SC.intScreenId		=	TR.intScreenId
 			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',

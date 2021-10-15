@@ -297,3 +297,37 @@ BEGIN
 		FROM tblARInvoice A
 		INNER JOIN DELETED B ON A.intInvoiceId = B.intInvoiceId
 END
+
+GO
+CREATE TRIGGER trgAfterDeleteARInvoice
+    ON dbo.tblARInvoice
+    FOR DELETE
+AS
+BEGIN
+	IF EXISTS (SELECT * FROM DELETED)
+		BEGIN
+			--iNSERT
+		   INSERT INTO  tblARAuditLog
+		   SELECT 'Deleted','Invoice',strInvoiceNumber,GETDATE(),intUserIdforDelete,0 FROM DELETED
+
+		END
+END
+
+GO
+
+CREATE TRIGGER trgForUpdateARInvoice 
+ON dbo.tblARInvoice
+	FOR UPDATE 
+AS
+BEGIN
+	
+		DECLARE @strInvoiceNumber NVARCHAR (50) 
+		SELECT @strInvoiceNumber=i.strInvoiceNumber from deleted i; IF UPDATE(strInvoiceNumber)
+
+		IF @strInvoiceNumber IS NOT  NULL
+		BEGIN
+		IF UPDATE (strInvoiceNumber)
+		INSERT INTO  tblARAuditLog
+		   SELECT 'Updated','Invoice',strInvoiceNumber,GETDATE(),NULL,0 FROM deleted
+		END
+END

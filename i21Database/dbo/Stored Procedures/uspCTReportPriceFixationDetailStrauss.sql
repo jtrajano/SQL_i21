@@ -57,7 +57,9 @@ BEGIN TRY
 			PD.dtmFixationDate,
 			strFutMarketName = MA.strFutMarketName,
 			MO.strFutureMonth,
-			dblNoOfLots = dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]),
+			dblNoOfLots = CASE WHEN CP.strLotCalculationType = 'Round' THEN  dbo.fnRemoveTrailingZeroes(ROUND(PD.[dblNoOfLots],2))
+							   WHEN CP.strLotCalculationType = 'Actual' THEN  dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots])
+						  ELSE dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) END,
 			strPrice = dbo.fnCTChangeNumericScale(PD.dblFutures,2) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure,
 			PD.strNotes
 	FROM	tblCTPriceFixation			PF
@@ -83,6 +85,7 @@ BEGIN TRY
 	LEFT	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		
 	LEFT	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId		
 	LEFT	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId
+	CROSS APPLY tblCTCompanyPreference CP
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 	
 
