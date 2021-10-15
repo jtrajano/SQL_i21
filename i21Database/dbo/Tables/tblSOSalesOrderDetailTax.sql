@@ -33,7 +33,7 @@
 )
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblSOSalesOrderDetailTax_NonClustered] ON [dbo].[tblSOSalesOrderDetailTax] (
-  [intSalesOrderDetailId], [intTaxGroupId], [intTaxCodeId], [intTaxClassId], [intSalesTaxAccountId], [intUnitMeasureId], [dblAdjustedTax]
-)
+
+CREATE INDEX [IX_tblSOSalesOrderDetailTax_dblAdjustedTax] ON [dbo].[tblSOSalesOrderDetailTax] ([dblAdjustedTax]) INCLUDE([intSalesOrderDetailId], [intTaxCodeId])
+
 GO

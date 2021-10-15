@@ -93,8 +93,5 @@
 );
 GO
 
-CREATE NONCLUSTERED INDEX [IX_tblSOSalesOrderDetail_NonClustered] ON [dbo].[tblSOSalesOrderDetail] (
-  [intSalesOrderId], [intAccountId], [intCOGSAccountId], [intSalesAccountId], [intInventoryAccountId], [intStorageLocationId], [intSubLocationId],
-  [intContractHeaderId], [intContractDetailId], [intItemContractHeaderId], [intItemContractDetailId], [intItemId], [intItemUOMId], [intTaxGroupId]
-)
+CREATE INDEX [IX_tblSOSalesOrderDetail_intSalesOrderId] ON [dbo].[tblSOSalesOrderDetail] ([intSalesOrderId] ASC)
 GO

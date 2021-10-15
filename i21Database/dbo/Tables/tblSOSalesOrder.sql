@@ -99,10 +99,8 @@
 	CONSTRAINT [FK_tblSOSalesOrder_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])    
 );
 GO
-CREATE NONCLUSTERED INDEX [IX_tblSOSalesOrder_NonClustered] ON [dbo].[tblSOSalesOrder] (
-  [intEntityCustomerId], [intEntityId], [intCompanyLocationId], [intAccountId], [intShipToLocationId], [intBillToLocationId], [intFreightTermId], [intOrderedById], [intTermId], [ysnProcessed], [ysnQuote], [dtmDate] 
-)
-INCLUDE (strTransactionType)
+
+CREATE INDEX [IX_tblSOSalesOrder_ysnProcessed] ON [dbo].[tblSOSalesOrder] ([ysnProcessed] ASC)
 GO
 
 CREATE TRIGGER trgSalesOrderNumber
@@ -155,3 +153,5 @@ BEGIN
 
 END
 GO
+
+CREATE INDEX [IX_tblSOSalesOrder_strTransactionType_ysnQuote] ON [dbo].[tblSOSalesOrder] ([strTransactionType], [ysnQuote]) INCLUDE([intSalesOrderId], [strSalesOrderNumber], [intEntityCustomerId], [dtmDate], [intQuoteTemplateId])

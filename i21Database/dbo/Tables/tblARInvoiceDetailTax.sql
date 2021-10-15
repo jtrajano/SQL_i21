@@ -37,7 +37,12 @@
 )
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetailTax_NonClustered] ON [dbo].[tblARInvoiceDetailTax] (
-  [intInvoiceDetailId], [intTaxGroupId], [intTaxCodeId], [intTaxClassId], [intSalesTaxAccountId], [intUnitMeasureId], [dblAdjustedTax], [dblTax]
-)
+
+CREATE INDEX [IX_tblARInvoiceDetailTax_intInvoiceDetailId] ON [dbo].[tblARInvoiceDetailTax] ([intInvoiceDetailId])
+GO
+
+CREATE INDEX [IX_tblARInvoiceDetailTax_intTaxCodeId] ON [dbo].[tblARInvoiceDetailTax] ([intTaxCodeId])
+GO
+
+CREATE INDEX [IX_tblARInvoiceDetailTax_dblTax] ON [dbo].[tblARInvoiceDetailTax] ([dblTax])
 GO

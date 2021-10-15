@@ -419,7 +419,4 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\19_MF\DropConstraints.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\7_AR\15_DropOldIndex.sql" />
-  </ItemGroup>
 </Project>
