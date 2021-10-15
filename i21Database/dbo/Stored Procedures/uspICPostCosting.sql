@@ -1150,7 +1150,7 @@ END
 BEGIN 
 	EXEC @intReturnValue = dbo.uspICLogRiskPositionFromOnHand
 		@strBatchId
-		,@strTransactionId
+		,NULL
 		,@intEntityUserSecurityId
 
 	IF @intReturnValue < 0 RETURN @intReturnValue

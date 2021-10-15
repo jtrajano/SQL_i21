@@ -532,6 +532,6 @@ END
 BEGIN 
 	EXEC @intReturnValue = dbo.uspICLogRiskPositionFromInTransit
 		@strBatchId
-		,@strTransactionId
+		,NULL
 		,@intEntityUserSecurityId
 END 
