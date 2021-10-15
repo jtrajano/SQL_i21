@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspAPIProcessWorkOrder
+﻿CREATE PROCEDURE uspAPIProcessWorkOrder (@guiApiUniqueId UNIQUEIDENTIFIER)
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -9,16 +9,12 @@ BEGIN TRY
 		,@strProduceXml NVARCHAR(MAX)
 		,@strConsumeXml NVARCHAR(MAX)
 		,@strBatchXml NVARCHAR(MAX)
-	DECLARE @strItemNo NVARCHAR(50)
-		,@dblQuantity NUMERIC(18, 6)
-		,@strQtyUOM NVARCHAR(50)
-		,@strStorageLocation NVARCHAR(50)
-		,@strSubLocation NVARCHAR(50)
+	DECLARE @dblQuantity NUMERIC(18, 6)
+		
 		,@strLotNumber NVARCHAR(50)
 		,@intTransactionTypeId INT
 		,@strUserName NVARCHAR(100)
 		,@dtmDate DATETIME
-		,@strLocationName NVARCHAR(50)
 	DECLARE @intItemId INT
 		,@intQtyUnitMeasureId INT
 		,@intQtyItemUOMId INT
@@ -38,6 +34,7 @@ BEGIN TRY
 	SELECT DISTINCT intBatchId
 	FROM tblAPIWODetail WITH (NOLOCK)
 	WHERE ysnProcessed = 0
+		AND guiApiUniqueId = @guiApiUniqueId
 
 	SELECT @intBatchId = MIN(intBatchId)
 	FROM @tblWOBatch
@@ -70,6 +67,7 @@ BEGIN TRY
 					WHERE intBatchId = @intBatchId
 						AND intTransactionTypeId = 9
 						AND ysnProcessed = 0
+						AND guiApiUniqueId = @guiApiUniqueId
 					) > 1
 			BEGIN
 				RAISERROR (
@@ -85,6 +83,7 @@ BEGIN TRY
 					WHERE intBatchId = @intBatchId
 						AND intTransactionTypeId = 9
 						AND ysnProcessed = 0
+						AND guiApiUniqueId = @guiApiUniqueId
 					)
 			BEGIN
 				RAISERROR (
@@ -100,6 +99,7 @@ BEGIN TRY
 					WHERE intBatchId = @intBatchId
 						AND intTransactionTypeId = 8
 						AND ysnProcessed = 0
+						AND guiApiUniqueId = @guiApiUniqueId
 					)
 			BEGIN
 				RAISERROR (
@@ -113,19 +113,15 @@ BEGIN TRY
 			FROM tblAPIWODetail WITH (NOLOCK)
 			WHERE intBatchId = @intBatchId
 				AND ysnProcessed = 0
+				AND guiApiUniqueId = @guiApiUniqueId
 
 			WHILE @intDetailId IS NOT NULL
 			BEGIN
-				SELECT @strItemNo = NULL
-					,@dblQuantity = NULL
-					,@strQtyUOM = NULL
-					,@strStorageLocation = NULL
-					,@strSubLocation = NULL
+				SELECT @dblQuantity = NULL
 					,@strLotNumber = NULL
 					,@intTransactionTypeId = NULL
 					,@strUserName = NULL
 					,@dtmDate = NULL
-					,@strLocationName = NULL
 
 				SELECT @intItemId = NULL
 					,@intQtyUnitMeasureId = NULL
@@ -138,23 +134,20 @@ BEGIN TRY
 					,@intItemFactoryId = NULL
 					,@intManufacturingCellId = NULL
 
-				SELECT @strItemNo = strItemNo
-					,@dblQuantity = dblQuantity
-					,@strQtyUOM = strQtyUOM
-					,@strStorageLocation = strStorageLocation
-					,@strSubLocation = strSubLocation
+				SELECT @dblQuantity = dblQuantity
 					,@strLotNumber = strLotNumber
 					,@intTransactionTypeId = intTransactionTypeId
 					,@strUserName = strUserName
 					,@dtmDate = dtmDate
-					,@strLocationName = strLocationName
+					,@intStorageLocationId = intStorageLocationId
+					,@intSubLocationId = intSubLocationId
+					,@intCompanyLocationId = intCompanyLocationId
+					,@intQtyItemUOMId = intQtyItemUOMId
+					,@intItemId = intItemId
 				FROM tblAPIWODetail WITH (NOLOCK)
 				WHERE intDetailId = @intDetailId
 					AND ysnProcessed = 0
-
-				SELECT @intItemId = intItemId
-				FROM tblICItem WITH (NOLOCK)
-				WHERE strItemNo = @strItemNo
+					AND guiApiUniqueId = @guiApiUniqueId
 
 				IF @intItemId IS NULL
 				BEGIN
@@ -174,11 +167,7 @@ BEGIN TRY
 							)
 				END
 
-				SELECT @intQtyUnitMeasureId = t.intUnitMeasureId
-				FROM tblICUnitMeasure t WITH (NOLOCK)
-				WHERE t.strUnitMeasure = @strQtyUOM
-
-				IF @intQtyUnitMeasureId IS NULL
+				IF @intQtyItemUOMId IS NULL
 				BEGIN
 					RAISERROR (
 							'Invalid Quantity UOM. '
@@ -188,12 +177,10 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					SELECT @intQtyItemUOMId = intItemUOMId
+					IF NOT EXISTS(SELECT *
 					FROM tblICItemUOM t WITH (NOLOCK)
 					WHERE t.intItemId = @intItemId
-						AND t.intUnitMeasureId = @intQtyUnitMeasureId
-
-					IF @intQtyItemUOMId IS NULL
+						AND t.intItemUOMId = @intQtyItemUOMId)
 					BEGIN
 						RAISERROR (
 								'Quantity UOM does not belongs to the Item. '
@@ -202,10 +189,6 @@ BEGIN TRY
 								)
 					END
 				END
-
-				SELECT @intCompanyLocationId = intCompanyLocationId
-				FROM tblSMCompanyLocation WITH (NOLOCK)
-				WHERE strLocationName = @strLocationName
 
 				IF @intCompanyLocationId IS NULL
 				BEGIN
@@ -216,14 +199,12 @@ BEGIN TRY
 							)
 				END
 
-				IF ISNULL(@strSubLocation, '') <> ''
+				IF @intSubLocationId IS NOT NULL
 				BEGIN
-					SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
+					IF NOT EXISTS(SELECT *
 					FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
-					WHERE t.strSubLocationName = @strSubLocation
-						AND t.intCompanyLocationId = @intCompanyLocationId
-
-					IF @intSubLocationId IS NULL
+					WHERE t.intCompanyLocationSubLocationId = @intSubLocationId
+						AND t.intCompanyLocationId = @intCompanyLocationId)
 					BEGIN
 						RAISERROR (
 								'Invalid Storage Location. '
@@ -233,14 +214,12 @@ BEGIN TRY
 					END
 				END
 
-				IF ISNULL(@strStorageLocation, '') <> ''
+				IF @intStorageLocationId IS NOT NULL
 				BEGIN
-					SELECT @intStorageLocationId = t.intStorageLocationId
+					IF NOT EXISTS(SELECT *
 					FROM tblICStorageLocation t WITH (NOLOCK)
-					WHERE t.strName = @strStorageLocation
-						AND t.intSubLocationId = @intSubLocationId
-
-					IF @intStorageLocationId IS NULL
+					WHERE t.intStorageLocationId = @intStorageLocationId
+						AND t.intSubLocationId = @intSubLocationId)
 					BEGIN
 						RAISERROR (
 								'Invalid Storage Unit. '
@@ -410,6 +389,7 @@ BEGIN TRY
 				WHERE intBatchId = @intBatchId
 					AND intDetailId > @intDetailId
 					AND ysnProcessed = 0
+					AND guiApiUniqueId = @guiApiUniqueId
 			END
 
 			IF ISNULL(@strProduceXml, '') = ''
@@ -449,6 +429,7 @@ BEGIN TRY
 				,ysnCompleted = 0
 			WHERE intBatchId = @intBatchId
 				AND ysnProcessed = 0
+				AND guiApiUniqueId = @guiApiUniqueId
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION
@@ -469,6 +450,7 @@ BEGIN TRY
 				,ysnCompleted = 0
 			WHERE intBatchId = @intBatchId
 				AND ysnProcessed = 0
+				AND guiApiUniqueId = @guiApiUniqueId
 		END CATCH
 
 		SELECT @intBatchId = MIN(intBatchId)
