@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnFAGetBasisAdjustment]
 (
 	@intAssetId INT,
-	@intBookId INT
+	@intBookId INT = 1
 )
 RETURNS @tblAdjustment TABLE
 (
@@ -34,11 +34,12 @@ BEGIN
 		,BA.strAdjustmentType
 	FROM tblFABasisAdjustment BA
 	OUTER APPLY (
-		SELECT MAX(dtmDepreciationToDate) dtmDepreciationToDate
+		SELECT TOP 1 dtmDepreciationToDate
 		FROM tblFAFixedAssetDepreciation
 		WHERE intAssetId = @intAssetId AND intBookId = @intBookId AND strTransaction = 'Depreciation'
+		ORDER BY intAssetDepreciationId DESC
 	) Depreciation
-	WHERE BA.intAssetId = @intAssetId AND BA.intBookId = @intBookId AND BA.dtmDate BETWEEN Depreciation.dtmDepreciationToDate AND dbo.fnFAGetNextDepreciationDate(@intAssetId, @intBookId)
+	WHERE BA.intAssetId = @intAssetId AND BA.intBookId = @intBookId AND BA.dtmDate BETWEEN DATEADD(DAY,1, Depreciation.dtmDepreciationToDate) AND dbo.fnFAGetNextDepreciationDate(@intAssetId, @intBookId)
 	GROUP BY
 		 BA.intAssetId
 		,BA.intBookId

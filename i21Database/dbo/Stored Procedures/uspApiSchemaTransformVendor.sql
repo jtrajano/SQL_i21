@@ -3,6 +3,10 @@
 	@guiLogId UNIQUEIDENTIFIER
 AS
 
+--SET DEFAULT VALUES
+UPDATE tblApiSchemaVendor SET strType = 'Vendor' WHERE guiApiUniqueId = @guiApiUniqueId AND strType IS NULL
+UPDATE tblApiSchemaVendor SET strVendorType = 'Company' WHERE guiApiUniqueId = @guiApiUniqueId AND strVendorType IS NULL
+
 --VALIDATE
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strLogLevel, strStatus, strAction, intRowNo, strField, strValue, strMessage)
 SELECT * FROM dbo.fnApiSchemaValidateVendor(@guiApiUniqueId, @guiLogId)

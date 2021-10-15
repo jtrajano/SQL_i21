@@ -37,3 +37,10 @@ CONSTRAINT [FK_tblLGWeightClaimDetail_tblICItem_intItemd] FOREIGN KEY ([intItemI
 CONSTRAINT [FK_tblLGWeightClaimDetail_tblICItemUOM_intPriceItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 CONSTRAINT [FK_tblLGWeightClaimDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGWeightClaimDetail_intWeightClaimId] ON [dbo].[tblLGWeightClaimDetail]
+(
+	[intWeightClaimId], [intBillId]
+)
+GO

@@ -24,7 +24,7 @@ AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 SET XACT_ABORT ON
   
 --------------------------------------------------------------------------------------------  
@@ -153,7 +153,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
 					END
 				ELSE IF @intQueueCount < 12
 					BEGIN
-						SET @intQueueCount = 12
+						SET @intQueueCount = 13
 
 						INSERT INTO tblARPostingQueue (
 							intTransactionId
@@ -172,6 +172,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
 							, strTransactionType	= 'Invoice'
 						FROM tblARInvoice ARI
 						INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
+						WHERE ISNULL(ARI.intLoadId, 0) = 0
 					END
 			END		
 	END
@@ -196,6 +197,7 @@ ELSE
 			, strTransactionType	= 'Invoice'
 		FROM tblARInvoice ARI
 		INNER JOIN dbo.fnGetRowsFromDelimitedValues(@param) DV ON DV.[intID] = ARI.[intInvoiceId]
+		WHERE ISNULL(ARI.intLoadId, 0) = 0
 	END
 
 DECLARE @InvoiceIds AS [InvoiceId]

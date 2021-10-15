@@ -33,7 +33,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -78,6 +78,7 @@ DECLARE @AVERAGECOST AS INT = 1
 DECLARE @AUTO_VARIANCE AS INT = 1
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post

@@ -13,7 +13,8 @@ BEGIN
     SELECT 60011,'Accounts Payable', 'open' from tblGLFiscalYearPeriod WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'AP' OR @strTransactionType = 'All')) AND ysnAPOpen = 1 UNION ALL
     SELECT 60011,'Inventory', 'open' from tblGLFiscalYearPeriod WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'INV' OR @strTransactionType = 'All')) AND ysnINVOpen = 1 UNION ALL
     SELECT 60011,'Contract','open' from tblGLFiscalYearPeriod WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'CT' OR @strTransactionType = 'All')) AND ysnCTOpen = 1 UNION ALL
-	SELECT 60011,'Cash Account','open' from tblGLFiscalYearPeriod WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'CM' OR @strTransactionType = 'All')) AND ysnCMOpen = 1
+	SELECT 60011,'Cash Account','open' from tblGLFiscalYearPeriod WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'CM' OR @strTransactionType = 'All')) AND ysnCMOpen = 1 UNION ALL
+	SELECT 60011,'Fixed Assets','open' from tblGLFiscalYearPeriod WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'FA' OR @strTransactionType = 'All')) AND ysnFAOpen = 1
     -- dont post if period is already revalued
     IF EXISTS (SELECT TOP 1 1 FROM @errTable) RETURN
     INSERT INTO @errTable
@@ -21,7 +22,8 @@ BEGIN
     SELECT 60011, 'Accounts Payable','revalued' from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'AP' OR @strTransactionType = 'All') AND ysnAPRevalued = 1 UNION ALL
     SELECT 60011, 'Inventory','revalued' from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'INV'OR @strTransactionType = 'All') AND ysnINVRevalued = 1 UNION ALL
     SELECT 60011, 'Contract','revalued' from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'CT' OR @strTransactionType = 'All') AND ysnCTRevalued = 1 UNION ALL
-	SELECT 60011, 'Cash Account','revalued' from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'CM' OR @strTransactionType = 'All') AND ysnCMRevalued = 1
+	SELECT 60011, 'Cash Account','revalued' from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'CM' OR @strTransactionType = 'All') AND ysnCMRevalued = 1 UNION ALL
+	SELECT 60011, 'Fixed Assets','revalued' from tblGLFiscalYearPeriod WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId AND (@strTransactionType = 'FA' OR @strTransactionType = 'All') AND ysnFARevalued = 1
 
     IF EXISTS (SELECT TOP 1 1 FROM @errTable) RETURN
     -- dont post if reverse period is closed
@@ -30,7 +32,8 @@ BEGIN
     SELECT 60012, 'Accounts Payable','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'AP' OR @strTransactionType = 'All')) AND ysnAPOpen = 0 UNION ALL
     SELECT 60012, 'Inventory','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'INV'OR @strTransactionType = 'All')) AND ysnINVOpen = 0 UNION ALL
     SELECT 60012, 'Contract','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'CT' OR @strTransactionType = 'All')) AND ysnCTOpen = 0 UNION ALL
-	SELECT 60012, 'Cash Account','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'CM' OR @strTransactionType = 'All')) AND ysnCMOpen = 0
+	SELECT 60012, 'Cash Account','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'CM' OR @strTransactionType = 'All')) AND ysnCMOpen = 0 UNION ALL
+	SELECT 60012, 'Fixed Assets','closed' from tblGLFiscalYearPeriod B WHERE (intGLFiscalYearPeriodId = @intGLFiscalYearPeriodIdReverse AND (@strTransactionType = 'FA' OR @strTransactionType = 'All')) AND ysnFAOpen = 0
     RETURN
 END
 

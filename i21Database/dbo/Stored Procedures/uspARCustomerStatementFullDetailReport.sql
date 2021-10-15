@@ -275,7 +275,8 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , strItemNo				= TRANSACTIONS.strItemNo
 	 , strItemDescription		= TRANSACTIONS.strItemDescription
 	 , strFullAddress			= CUST.strFullAddress
-	 , strStatementFooterComment = CUST.strStatementFooterComment
+	 , strStatementFooterComment= CUST.strStatementFooterComment
+	 , strPaymentMethod			= TRANSACTIONS.strPaymentMethod
 INTO #STATEMENTREPORT
 FROM vyuARCustomerSearch C
 INNER JOIN #CUSTOMERS CUST ON C.intEntityCustomerId = CUST.intEntityCustomerId
@@ -296,6 +297,7 @@ LEFT JOIN (
 		 , dblInvoiceDetailTotal	= DETAIL.dblLineTotal * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
 		 , dtmDate					= I.dtmDate
 		 , dtmDueDate				= I.dtmDueDate
+		 , strPaymentMethod			= NULL
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 	LEFT JOIN (
@@ -339,6 +341,7 @@ LEFT JOIN (
 		 , dblInvoiceDetailTotal	= I.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType)
 		 , dtmDate					= I.dtmDate
 		 , dtmDueDate				= I.dtmDueDate
+		 , strPaymentMethod			= NULL
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	INNER JOIN #COMPANYLOCATIONS CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 	WHERE I.ysnPosted = 1
@@ -368,6 +371,7 @@ LEFT JOIN (
 		 , dblInvoiceDetailTotal	= (P.dblAmountPaid - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0) + ISNULL(PD.dblWriteOffAmount, 0)) * -1
 		 , dtmDate					= P.dtmDatePaid
 		 , dtmDueDate				= P.dtmDatePaid
+		 , strPaymentMethod			= P.strPaymentMethod
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intPaymentId
@@ -403,6 +407,7 @@ LEFT JOIN (
 		 , dblInvoiceDetailTotal	= ABS((ISNULL(PD.dblPayment, 0) - ISNULL(PD.dblInterest, 0) + ISNULL(PD.dblDiscount, 0))) * -1
 		 , dtmDate					= P.dtmDatePaid
 		 , dtmDueDate				= P.dtmDatePaid
+		 , strPaymentMethod			= NULL
 	FROM dbo.tblAPPayment P WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
@@ -443,7 +448,8 @@ IF @ysnIncludeBudgetLocal = 1
 			 , strItemNo				= NULL
 			 , strItemDescription		= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 			 , strFullAddress			= C.strFullAddress
-			 , strStatementFooterComment = C.strStatementFooterComment
+			 , strStatementFooterComment= C.strStatementFooterComment
+			 , strPaymentMethod			= NULL
 		FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
 		INNER JOIN (
@@ -476,7 +482,8 @@ SELECT intEntityCustomerId		= C.intEntityCustomerId
 	 , strItemNo				= NULL
 	 , strItemDescription		= 'BEGINNING BALANCE'
 	 , strFullAddress			= C.strFullAddress
-	 , strStatementFooterComment = C.strStatementFooterComment
+	 , strStatementFooterComment= C.strStatementFooterComment
+	 , strPaymentMethod			= NULL
 FROM #CUSTOMERS C
 LEFT JOIN #BEGINNINGBALANCE BB ON C.intEntityCustomerId = BB.intEntityCustomerId
 
@@ -553,6 +560,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, dbl91Days
 	, dblCredits
 	, dblPrepayments
+	, strPaymentMethod
 )
 SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.dtmDate, ISNULL(STATEMENTREPORT.intInvoiceId, 99999999), STATEMENTREPORT.strTransactionType))
     , intEntityCustomerId		= STATEMENTREPORT.intEntityCustomerId
@@ -579,9 +587,9 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dblQuantity				= STATEMENTREPORT.dblQuantity
 	, dblInvoiceDetailTotal		= STATEMENTREPORT.dblInvoiceDetailTotal
 	, dblInvoiceTotal			= STATEMENTREPORT.dblAmount
-	, dblRunningBalance			= SUM(CASE WHEN STATEMENTREPORT.strTransactionType IN (''Customer Budget'', ''Invoices'') 
+	, dblRunningBalance			= SUM(CASE WHEN (STATEMENTREPORT.strTransactionType IN (''Customer Budget'', ''Invoices'') 
 											AND ISNULL(STATEMENTREPORT.strType, '''') <> ''CF Invoice'' 
-											AND ((STATEMENTREPORT.intPaymentId IS NULL OR (STATEMENTREPORT.intPaymentId IS NOT NULL AND ISNULL(STATEMENTREPORT.strInvoiceType, '''') = ''Overpayment'')))
+											AND ((STATEMENTREPORT.intPaymentId IS NULL OR (STATEMENTREPORT.intPaymentId IS NOT NULL AND ISNULL(STATEMENTREPORT.strInvoiceType, '''') = ''Overpayment'')))) OR STATEMENTREPORT.strPaymentMethod = ''NSF''
 									      THEN 0 
 										  ELSE STATEMENTREPORT.dblInvoiceDetailTotal END
 								) OVER (PARTITION BY STATEMENTREPORT.intEntityCustomerId' + ISNULL(@queryRunningBalance, '') +')
@@ -595,6 +603,7 @@ SELECT intRowId 				= CONVERT(INT, ROW_NUMBER() OVER (ORDER BY STATEMENTREPORT.d
 	, dbl91Days					= ISNULL(AGING.dbl91Days, 0.000000)
 	, dblCredits				= ISNULL(AGING.dblCredits, 0.000000)
 	, dblPrepayments			= ISNULL(AGING.dblPrepayments, 0.000000)
+	, strPaymentMethod			= STATEMENTREPORT.strPaymentMethod
 FROM #STATEMENTREPORT STATEMENTREPORT
 INNER JOIN (
 	SELECT intEntityCustomerId
@@ -644,4 +653,4 @@ IF @ysnPrintCreditBalanceLocal = 0
 				AND AGINGREPORT.strAgingType = 'Summary'
 				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
 			)
-	END	
+	END

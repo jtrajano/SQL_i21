@@ -1,7 +1,8 @@
 ﻿
-CREATE TABLE [dbo].[tblCMBankLoan](
+CREATE TABLE [dbo].[tblCMBankLoan](	
 	[strBankLoanId] [nvarchar](20)  COLLATE Latin1_General_CI_AS NOT NULL,
 	[intBankLoanId] [int] IDENTITY(1,1) NOT NULL,
+	[intBankAccountId] [int] NULL,
 	[dtmOpened] [date] NOT NULL,
 	[dtmMaturity] [date] NOT NULL,
 	[dtmEntered] [datetime] NOT NULL,
@@ -11,6 +12,16 @@ CREATE TABLE [dbo].[tblCMBankLoan](
 	[intConcurrencyId] [int] NULL,
 	[dblLoanAmount] [decimal](18, 6) NULL,
 	[intCompanyLocationId] [int] NULL,
+	intLoanTypeId INT NULL,
+	--LIMIT
+	intBorrowingFacilityId INT NULL,
+	intLimitTypeId INT NULL,
+	strLimitDescription NVARCHAR(50),
+	dblLimit DECIMAL(18,6) NULL,
+	intMaturityDays INT NULL,
+	intDaysInCycle INT NULL,
+	dblHaircut DECIMAL(18,2) NULL,
+	strLimitComments NVARCHAR(500),
  CONSTRAINT [PK_tblBankLoan] PRIMARY KEY CLUSTERED 
 (
 	[intBankLoanId] ASC

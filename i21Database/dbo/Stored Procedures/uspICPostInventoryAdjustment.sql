@@ -10,7 +10,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -856,18 +856,6 @@ BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 		END
 	END
-
-	--------------------------------------------------------------------
-	-- Call the Risk Log sp for Customer-Owned or Storage stocks. 
-	--------------------------------------------------------------------
-	BEGIN 
-		EXEC @intReturnValue = dbo.uspICLogRiskPositionFromOnStorage
-			@strBatchId
-			,@strTransactionId
-			,@intEntityUserSecurityId
-
-		IF @intReturnValue < 0 RETURN @intReturnValue
-	END 
 
 	COMMIT TRAN @TransactionName
 END 

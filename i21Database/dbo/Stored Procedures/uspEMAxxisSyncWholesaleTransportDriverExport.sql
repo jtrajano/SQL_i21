@@ -14,7 +14,7 @@ BEGIN
 		A.strName AS strContactName, 
 		A.strEmail, 
 		A.strEmail AS strEmailUserName, 
-		ISNULL(NULL, '') COLLATE Latin1_General_CI_AS AS strShipVia 
+		ISNULL((SELECT strName from tblEMEntity where intEntityId = D.intShipViaId), '') AS strShipVia
 	INTO tmpEMAxxisDriver
 	FROM tblEMEntity A
 	INNER JOIN tblEMEntityLineOfBusiness B ON A.intEntityId = B.intEntityId
@@ -31,8 +31,7 @@ BEGIN
 	WHEN MATCHED THEN
 	UPDATE SET driver.strContactName = (SELECT ISNULL(strName, '') FROM tblEMEntity where intEntityId = contact.intEntityContactId),
 			   driver.strEmail = (SELECT ISNULL(strEmail, '') FROM tblEMEntity where intEntityId = contact.intEntityContactId),
-			   driver.strEmailUserName = (SELECT ISNULL(strEmail, '') FROM tblEMEntity where intEntityId = contact.intEntityContactId),
-			   driver.strShipVia = ISNULL((SELECT ISNULL(strShipVia, '') FROM tblSMShipVia where intEntityId = driver.intEntityId), '');
+			   driver.strEmailUserName = (SELECT ISNULL(strEmail, '') FROM tblEMEntity where intEntityId = contact.intEntityContactId);
 
 	SELECT strName AS Name, 
 		   strContactName AS ContactName, 

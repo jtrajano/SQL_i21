@@ -210,15 +210,15 @@ IF ISNULL(@ysnRecap, 0) = 0
                 F.intAssetId,
                 1,
                 D.intDepreciationMethodId,
-                BD.dblCost - BD.dblSalvageValue,  
+                LastDepreciation.dblBasis,  
                 BD.dtmPlacedInService,  
                 A.dtmDispose,
 				A.dtmDispose,
 				CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre ELSE A.totalForeignDepre END,  
-                BD.dblSalvageValue,
-                ROUND(((BD.dblCost - BD.dblSalvageValue) * @dblRate), 2),
+                LastDepreciation.dblSalvageValue,
+                LastDepreciation.dblFunctionalBasis,
                 ROUND((CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre * @dblRate ELSE A.totalDepre END), 2),
-                ROUND((CASE WHEN ISNULL(BD.dblFunctionalSalvageValue, 0) > 0 THEN BD.dblFunctionalSalvageValue ELSE BD.dblSalvageValue * @dblRate END), 2),
+                LastDepreciation.dblFunctionalSalvageValue,
                 @dblRate,    
                 'Dispose',  
                 A.strTransactionId,  
@@ -229,6 +229,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 				JOIN @tblAsset A ON A.intAssetId = F.intAssetId
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
+				OUTER APPLY (
+					SELECT TOP 1 dblBasis, dblFunctionalBasis, dblSalvageValue, dblFunctionalSalvageValue 
+					FROM tblFAFixedAssetDepreciation 
+					WHERE intAssetId = A.intAssetId AND intBookId = 1 AND strTransaction = 'Depreciation'
+					ORDER BY dtmDepreciationToDate DESC
+				) LastDepreciation
+				 
                 WHERE BD.intBookId = 1
 
 
@@ -426,6 +433,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		FROM tblFAFixedAsset A
 		JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost
+		AND ((A.dblCost - (CASE WHEN @ysnMultiCurrency = 0 THEN B.totalDepre ELSE B.totalForeignDepre END) - @dblDispositionAmount) <> 0) -- debit and credit should not be zero.
 
 		-- Add Sales Offset Account entry if Disposition Amount has value, else no entry
 		UNION ALL
@@ -523,7 +531,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 				
 			FROM tblFAFixedAsset A
 			JOIN @tblAsset B ON B.intAssetId = A.intAssetId AND B.totalDepre <> A.dblCost 
-			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL AND @dblRate <> @dblCurrentRate
+			WHERE @ysnMultiCurrency = 1 AND @intRealizedGainLossAccountId IS NOT NULL 
+			AND @dblRate <> @dblCurrentRate AND ((A.dblCost - B.totalForeignDepre) <> 0)
 
 
 		BEGIN TRY

@@ -1,14 +1,10 @@
 CREATE VIEW vyuCMBankTransfer  
 AS  
 SELECT A.*,  
+D.*,
+E.*,
 C.strPeriod,  
-D.strBankAccountNo strBankAccountNoFrom,  
-E.strBankAccountNo strBankAccountNoTo,  
-D.strCurrency  strCurrencyFrom,  
-E.strCurrency strCurrencyTo,  
 F.strCurrencyExchangeRateType ,  
-D.strGLAccountId strGLAccountIdFrom,  
-E.strGLAccountId strGLAccountIdTo, 
 G.strCurrency  strCurrencyIdFeesFrom,
 H.strCurrency strCurrencyIdFeesTo,
 I.strAccountId  strGLAccountIdFeesFrom,
@@ -20,7 +16,7 @@ CASE WHEN intBankTransferTypeId = 1 THEN 'Bank Transfer'
  WHEN intBankTransferTypeId = 5 THEN 'Swap Out'   
  WHEN intBankTransferTypeId = 6 THEN 'Create Loan'   
 END strBankTransferTypeId,
-J.strCurrencyExchangeRateType strRateTypeAmountFrom,
+CASE WHEN A.intRateTypeIdAmountFrom = 99999 THEN 'Historic Rate' ELSE J.strCurrencyExchangeRateType  END strRateTypeAmountFrom,
 K.strCurrencyExchangeRateType strRateTypeAmountTo,
 L.strCurrencyExchangeRateType strRateTypeFeesFrom,
 M.strCurrencyExchangeRateType strRateTypeFeesTo
@@ -33,10 +29,13 @@ OUTER APPLY(
  )C  
   
 OUTER APPLY(  
- SELECT TOP 1 strBankAccountNo, strCurrency, strGLAccountId FROM vyuCMBankAccount WHERE intBankAccountId =  A.intBankAccountIdFrom  
+ SELECT TOP 1 strBankAccountNo strBankAccountNoFrom, strCurrency strCurrencyFrom, strGLAccountId strGLAccountIdFrom
+ FROM vyuCMBankAccount 
+ WHERE intBankAccountId =  A.intBankAccountIdFrom  
 )D  
 OUTER APPLY(  
- SELECT TOP 1 strBankAccountNo, strCurrency, strGLAccountId FROM vyuCMBankAccount WHERE intBankAccountId =  A.intBankAccountIdTo  
+ SELECT TOP 1 strBankAccountNo strBankAccountNoTo, strCurrency strCurrencyTo, strGLAccountId strGLAccountIdTo
+ FROM vyuCMBankAccount WHERE intBankAccountId =  A.intBankAccountIdTo  
 )E  
 OUTER APPLY(  
  SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intCurrencyExchangeRateTypeId  

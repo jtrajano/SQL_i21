@@ -15,6 +15,15 @@ DECLARE @LayoutTitle NVARCHAR(100)
 SET @LayoutTitle = 'Rack Price - Marathon'
 IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - Marathon Rack Price Import')
+	BEGIN
+		SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - Marathon Rack Price Import'
+
+		-- Delete duplicate file header and details
+		DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileHeader WHERE intImportFileHeaderId = @FileHeaderId
+	END
 	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - Marathon Rack Price Import' WHERE strLayoutTitle = @LayoutTitle
 END
 
@@ -77,6 +86,15 @@ END
 SET @LayoutTitle = 'Rack Price - DTN'
 IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - DTN Rack Price Import')
+	BEGIN
+		SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - DTN Rack Price Import'
+
+		-- Delete duplicate file header and details
+		DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileHeader WHERE intImportFileHeaderId = @FileHeaderId
+	END
 	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - DTN Rack Price Import' WHERE strLayoutTitle = @LayoutTitle
 END
 
@@ -350,6 +368,15 @@ DECLARE @LayoutTitle NVARCHAR(100)
 SET @LayoutTitle = 'Rack Price - iRely Enterprise'
 IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
+	IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - iRely Enterprise Rack Price Import')
+	BEGIN
+		SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = 'TR - iRely Enterprise Rack Price Import'
+
+		-- Delete duplicate file header and details
+		DELETE FROM tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileRecordMarker WHERE intImportFileHeaderId = @FileHeaderId
+		DELETE FROM tblSMImportFileHeader WHERE intImportFileHeaderId = @FileHeaderId
+	END
 	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - iRely Enterprise Rack Price Import' WHERE strLayoutTitle = @LayoutTitle
 END
 

@@ -44,9 +44,9 @@ BEGIN
             ORDER BY dtmDepreciationToDate DESC
         )D
 		OUTER APPLY(
-			SELECT SUM(BA.dblAdjustment) dblAdjustment
+			SELECT ISNULL(SUM(BA.dblAdjustment), 0) dblAdjustment
 			FROM tblFABasisAdjustment BA
-			WHERE BA.intAssetId = A.intAssetId AND BA.intBookId = @BookId AND BA.dtmDate <= D.dtmDepreciationToDate
+			WHERE BA.intAssetId = A.intAssetId AND BA.intBookId = @BookId AND BA.dtmDate <= D.dtmDepreciationToDate AND BA.strAdjustmentType = 'Basis'
 		) Adjustment
         WHERE 
 			((CASE WHEN Adjustment.dblAdjustment IS NULL

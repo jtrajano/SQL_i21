@@ -159,7 +159,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
                     END
                 ELSE IF @intQueueCount < 12
                     BEGIN
-                        SET @intQueueCount = 12
+                        SET @intQueueCount = 13
 
                         INSERT INTO tblARPostingQueue (
                             intTransactionId
@@ -179,6 +179,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
                         FROM tblARInvoice ARI
                         INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ARI.intInvoiceId = ILD.intInvoiceId
 						WHERE ILD.intIntegrationLogId = @IntegrationLogId
+						  AND ISNULL(ARI.intLoadId, 0) = 0
 
 						UNION ALL
 
@@ -190,7 +191,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARPostingQueue WHERE DATEDIFF(SECOND, dtmPo
                             , intEntityId           = ARI.intEntityId
                             , strTransactionType    = 'Invoice'
                         FROM tblARInvoice ARI
-                        INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId						
+                        INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId
+						WHERE ISNULL(ARI.intLoadId, 0) = 0	
                     END
             END        
     END
@@ -216,6 +218,7 @@ ELSE
         FROM tblARInvoice ARI
 		INNER JOIN tblARInvoiceIntegrationLogDetail ILD ON ARI.intInvoiceId = ILD.intInvoiceId
 		WHERE ILD.intIntegrationLogId = @IntegrationLogId
+		  AND ISNULL(ARI.intLoadId, 0) = 0
 
 		UNION ALL
 
@@ -227,7 +230,8 @@ ELSE
 			, intEntityId           = ARI.intEntityId
 			, strTransactionType    = 'Invoice'
 		FROM tblARInvoice ARI
-		INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId		
+		INNER JOIN @InvoiceIds ILD ON ARI.intInvoiceId = ILD.intHeaderId
+		WHERE ISNULL(ARI.intLoadId, 0) = 0	
     END
 
 

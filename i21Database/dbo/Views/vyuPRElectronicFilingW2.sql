@@ -88,6 +88,13 @@ SELECT
 	,strEmployerContactPhoneExt
 	,strEmployerContactFax
 	,ISNULL(strEmployerContactEmail, '') strEmployerContactEmail
+	,strDateCreated = CONVERT(VARCHAR(8), GETDATE(), 112)
+	,strTimeCreated = SUBSTRING(REPLACE((REPLACE(CONVERT(VARCHAR(16), SYSDATETIME(), 114) ,':', '')),'.',''),1,8)	
+	,strRepresentativeName
+	,strRepresentativeTitle
+	,strRepresentativePhone
+	,strNAICSCode = ISNULL(strNAICSCode ,'')
+	,strCentralRegistrationNo = ISNULL(strCentralRegistrationNo,'')
 	,intConcurrencyId
 FROM
 	tblPRElectronicFilingW2

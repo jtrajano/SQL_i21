@@ -120,7 +120,6 @@ IF ISNULL(@ysnRecap, 0) = 0
 BEGIN     
         
       DECLARE @GLEntries RecapTableType ,
-              @IdHasNoPlaceOfService Id,
               @IdHasNoDepreciation Id,
               @IdHasDepreciation Id,
               @IdHasBasisAdjustment Id,
@@ -189,13 +188,6 @@ BEGIN
       
       IF NOT EXISTS(SELECT TOP 1 1 FROM @IdGood)
           GOTO LogError
-
-      INSERT INTO @IdHasNoPlaceOfService 
-        select intId from @IdGood 
-		    outer apply(	
-			    select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  AND ISNULL(intBookId,1) = @BookId
-		    )D
-        where D.cnt = 0
       
     INSERT INTO @IdHasNoDepreciation 
 		select intId from @IdGood 
@@ -203,9 +195,9 @@ BEGIN
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
       AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation','Imported', 'Place in service')
+      AND strTransaction  in( 'Depreciation','Imported')
 		)D
-        where D.cnt =1
+        where D.cnt = 0
 
     INSERT INTO @IdHasDepreciation 
 		select intId from @IdGood 
@@ -213,9 +205,9 @@ BEGIN
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
       AND ISNULL(intBookId,1) = @BookId
-      AND strTransaction  in( 'Depreciation','Imported', 'Place in service')
+      AND strTransaction  in( 'Depreciation','Imported')
 		)D
-        where D.cnt >1
+        where D.cnt > 0
 
 	-- GL Entry for Adjustment is for GAAP only
 	INSERT INTO @IdHasBasisAdjustment
@@ -273,72 +265,9 @@ BEGIN
     END
   
       DECLARE @IdIterate Id
+      DECLARE @i INT 
  
-  --for creation of place of service
-      IF EXISTS(SELECT TOP 1 1 FROM @IdHasNoPlaceOfService)  
-      BEGIN  
-          INSERT INTO @IdIterate SELECT intId FROM @IdHasNoPlaceOfService
-          DECLARE @i INT 
-          WHILE EXISTS(SELECT TOP 1 1 FROM @IdIterate)
-          BEGIN
-                SELECT TOP 1 @i = intId FROM @IdIterate 
-                EXEC uspSMGetStartingNumber  @intStartingNumberId = 113 , @strID= @strTransactionId OUTPUT  
-
-                INSERT INTO tblFAFixedAssetDepreciation (  
-                    [intAssetId],  
-                    [intBookId],
-                    [intDepreciationMethodId],  
-                    [dblBasis],  
-                    [dtmDateInService],  
-                    [dtmDispositionDate],  
-                    [dtmDepreciationToDate],  
-                    [dblDepreciationToDate], 
-                    [dblDepreciation],
-                    [dblFunctionalDepreciation],
-                    [dblSalvageValue],  
-                    [dblFunctionalBasis],
-                    [dblFunctionalSalvageValue],
-                    [dblRate],
-                    [strTransaction],  
-                    [strTransactionId],  
-                    [strType],  
-                    [strConvention],
-                    [strBatchId]
-                  )  
-                  SELECT  
-                    F.intAssetId,  
-                    @BookId,
-                    D.[intDepreciationMethodId],  
-                    BD.dblCost - BD.dblSalvageValue,  
-                    BD.dtmPlacedInService,
-                    NULL,  
-                    BD.dtmPlacedInService,  
-                    0,
-                    0,
-                    0,
-                    BD.dblSalvageValue,
-                    (BD.dblCost - BD.dblSalvageValue) * CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
-                    ISNULL(BD.dblFunctionalSalvageValue, 0),
-                    CASE WHEN ISNULL(BD.dblRate, 0) > 0 THEN BD.dblRate ELSE 1 END,
-                    'Place in service',  
-                    @strTransactionId,  
-                    D.strDepreciationType,  
-                    D.strConvention,
-                    @strBatchId
-                    FROM 
-                    tblFAFixedAsset F 
-                    JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId 
-                    JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
-                    WHERE F.intAssetId = @i
-                    AND BD.intBookId = @BookId
-                  
-                  UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
-
-
-
-                  DELETE FROM @IdIterate WHERE intId = @i
-              END
-      END  
+      -- First Depreciation
       IF EXISTS(SELECT TOP 1 1 FROM @IdHasNoDepreciation)  
       BEGIN  
           DELETE FROM @IdIterate
@@ -663,14 +592,34 @@ BEGIN
 		  SELECT   
           [strTransactionId]  = Adjustment.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intDepreciationAccountId]  
+          ,[intAccountId]   = A.[intAssetAccountId]  
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
-          ,[dblDebit]    = ROUND(Adjustment.dblFunctionalAdjustment, 2)  
-          ,[dblCredit]   = 0  
-          ,[dblDebitForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId THEN 0 ELSE ROUND(Adjustment.dblAdjustment, 2) END 
-          ,[dblCreditForeign]  = 0  
+          ,[dblDebit]    = CASE WHEN Adjustment.dblFunctionalAdjustment > 0
+                                THEN ROUND(Adjustment.dblFunctionalAdjustment, 2)
+                                ELSE 0
+                           END
+          ,[dblCredit]   = CASE WHEN Adjustment.dblFunctionalAdjustment < 0
+                                THEN ROUND(ABS(Adjustment.dblFunctionalAdjustment), 2)
+                                ELSE 0
+                           END  
+          ,[dblDebitForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment > 0 
+                                            THEN ROUND(Adjustment.dblAdjustment, 2) 
+                                            ELSE 0
+                                        END
+                                END 
+          ,[dblCreditForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment < 0 
+                                            THEN ROUND(ABS(Adjustment.dblAdjustment), 2) 
+                                            ELSE 0
+                                        END
+                                END   
           ,[dblDebitReport]  = 0  
           ,[dblCreditReport]  = 0  
           ,[dblReportingRate]  = 0  
@@ -708,14 +657,34 @@ BEGIN
 		  SELECT   
           [strTransactionId]  = Adjustment.strTransactionId  
           ,[intTransactionId]  = A.[intAssetId]  
-          ,[intAccountId]   = A.[intAccumulatedAccountId]  
+          ,[intAccountId]   = A.[intExpenseAccountId]  
           ,[strDescription]  = A.[strAssetDescription]  
           ,[strReference]   = A.[strAssetId]  
           ,[dtmTransactionDate] = Adjustment.dtmDate
-          ,[dblDebit]    = 0  
-          ,[dblCredit]   = ROUND(Adjustment.dblFunctionalAdjustment, 2)  
-          ,[dblDebitForeign]  = 0
-          ,[dblCreditForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId THEN 0 ELSE ROUND(Adjustment.dblAdjustment, 2) END   
+          ,[dblDebit]    = CASE WHEN Adjustment.dblFunctionalAdjustment < 0
+                                THEN ROUND(ABS(Adjustment.dblFunctionalAdjustment), 2)
+                                ELSE 0
+                           END   
+          ,[dblCredit]   = CASE WHEN Adjustment.dblFunctionalAdjustment > 0
+                                THEN ROUND(Adjustment.dblFunctionalAdjustment, 2)
+                                ELSE 0
+                           END  
+          ,[dblDebitForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment < 0 
+                                            THEN ROUND(ABS(Adjustment.dblAdjustment), 2) 
+                                            ELSE 0
+                                        END
+                                END
+          ,[dblCreditForeign]  = CASE WHEN Adjustment.intCurrencyId = Adjustment.intFunctionalCurrencyId 
+                                    THEN 0 
+                                    ELSE 
+                                        CASE WHEN Adjustment.dblAdjustment > 0 
+                                            THEN ROUND(Adjustment.dblAdjustment, 2) 
+                                            ELSE 0
+                                        END
+                                END
           ,[dblDebitReport]  = 0  
           ,[dblCreditReport]  = 0  
           ,[dblReportingRate]  = 0  

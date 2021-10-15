@@ -152,7 +152,7 @@ BEGIN
 		, dtmClr 
 		, dtmDate
 		, dtmDateReconciled 
-		, intBankAccountId
+		, bt.intBankAccountId
 		, intBankTransactionTypeId
 		, intTransactionId
 		, strBankLoanId 

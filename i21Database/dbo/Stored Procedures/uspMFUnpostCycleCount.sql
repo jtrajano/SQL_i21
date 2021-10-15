@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE uspMFUnpostCycleCount (@strXML NVARCHAR(MAX))
 AS
+SET ANSI_WARNINGS ON
+
 BEGIN TRY
 	DECLARE @intWorkOrderId INT
 		,@GLEntries AS RecapTableType

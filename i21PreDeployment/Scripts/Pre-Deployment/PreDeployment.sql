@@ -28,6 +28,9 @@
 -- Delete Objects
 :r .\DeleteScripts.sql
 
+-- AR This should be executed before 1_TM\4_1420_to_1430.sql
+:r .\7_AR\15_FixtblARCustomer_MissingColumn.sql
+
 -- TM
 :r .\1_TM\1_1320_to_1340.sql
 :r .\1_TM\2_DropUniqueConstraints.sql
@@ -91,6 +94,7 @@
 :r .\7_AR\11_FixSalesOrderNullysnQuote.sql
 :r .\7_AR\12_MoveQuotePagesToLetters.sql
 :r .\7_AR\13_FixCustomerBillToShipTo.sql
+:r .\7_AR\14_RefreshARTempTable.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql
@@ -202,6 +206,7 @@
 :r .\18_IU\1_DataCleanUp.sql
 
 --MF
+:r .\19_MF\DropConstraints.sql
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql

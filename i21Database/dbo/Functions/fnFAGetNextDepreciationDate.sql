@@ -22,7 +22,7 @@ BEGIN
 	FROM tblFAFixedAsset A
 	OUTER APPLY (
 		SELECT TOP 1 dtmDepreciationToDate, strTransaction FROM tblFAFixedAssetDepreciation
-		WHERE intAssetId = A.intAssetId AND intBookId = @intBookId ORDER BY dtmDepreciationToDate DESC
+		WHERE intAssetId = A.intAssetId AND intBookId = @intBookId ORDER BY intAssetDepreciationId DESC
 	) Depreciation
 
 	WHERE A.intAssetId = @intAssetId
@@ -42,8 +42,8 @@ BEGIN
 						@dtmDepreciationToDate
 					ELSE
 						CASE WHEN (EOMONTH(@dtmDepreciationToDate) = @dtmDepreciationToDate) 
-							THEN
-								CASE WHEN @strTransaction = 'Adjustment'
+							THEN 
+								CASE WHEN @strTransaction IN ('Basis Adjustment', 'Depreciation Adjustment')
 									THEN @dtmDepreciationToDate
 									ELSE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (@dtmDepreciationToDate)) + 2, 0))
 									END
@@ -58,10 +58,13 @@ BEGIN
 		DECLARE
 			@dtmCurrentEndate DATETIME
 
-		SELECT TOP 1 @dtmCurrentEndate = CONVERT(DATE, dtmEndDate) FROM tblGLFiscalYearPeriod -- If PlacedInService is equal to the fiscal period end date, next depreciation to date should be same with PlacedInService date
-		WHERE CONVERT(DATE, dtmEndDate) = @dtmPlacedInService ORDER BY dtmStartDate
+		SELECT TOP 1 @dtmCurrentEndate = CONVERT(DATE, dtmEndDate) FROM tblGLFiscalYearPeriod -- If PlacedInService or Adjustment is equal to the fiscal period's end date, next depreciation to date should be same with PlacedInService date
+		WHERE 
+			CONVERT(DATE, dtmEndDate) = @dtmPlacedInService OR 
+			(@strTransaction IN ('Basis Adjustment', 'Depreciation Adjustment') AND CONVERT(DATE, dtmEndDate) = @dtmDepreciationToDate)
+			ORDER BY dtmStartDate
 
-		IF (@ysnDepreciated = 0 AND @dtmCurrentEndate IS NOT NULL)
+		IF (@dtmCurrentEndate IS NOT NULL AND (@ysnDepreciated = 0 OR @strTransaction IN ('Basis Adjustment', 'Depreciation Adjustment')))
 			SET @dtmDate = @dtmCurrentEndate
 		ELSE
 			SELECT TOP 1 @dtmDate = CONVERT(DATE, dtmEndDate) FROM tblGLFiscalYearPeriod -- Get next fiscal year period

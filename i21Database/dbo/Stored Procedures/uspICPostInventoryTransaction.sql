@@ -43,7 +43,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @InventoryStockMovementId AS INT 
 
@@ -213,6 +213,14 @@ BEGIN
 		,@intTransactionTypeId 
 		,@dtmDate
 		,@intInTransitSourceLocationId
+		
+	-----------------------------------------
+	-- Log the Daily Stock Quantity
+	-----------------------------------------
+	BEGIN 
+		EXEC uspICPostStockDailyQuantity 
+			@intInventoryTransactionId = @InventoryTransactionIdentityId
+	END 
 END 
 
 _EXIT:

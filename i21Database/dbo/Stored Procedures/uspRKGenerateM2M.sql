@@ -631,7 +631,7 @@ BEGIN TRY
 				,dblBasis
 			FROM (
 				SELECT 
-					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intContractBalanceLogId DESC)
+					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) DESC)
 					,*
 				FROM tblCTContractBalanceLog CBL
 				WHERE dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) <= @dtmEndDate

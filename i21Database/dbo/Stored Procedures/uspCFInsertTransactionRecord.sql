@@ -1021,6 +1021,7 @@ BEGIN
 	IF(LOWER(@strTransactionType) LIKE '%foreign%')
 	BEGIN
 		SET @intCardId = NULL
+		SET @intCustomerId = @intForeignCustomerId
 	END
 
 	IF (@intCardId = 0)
@@ -1492,6 +1493,8 @@ BEGIN
 			,[intImportCardId]
 			,[intDriverPinId]
 			,[ysnInvoiced]
+			,[intUserId]
+			,[ysnImported]
 		)
 		VALUES
 		(
@@ -1544,6 +1547,8 @@ BEGIN
 			,@intCardId
 			,@intDriverPinId
 			,@ysnInvoiced
+			,@intUserId
+			,1
 		)			
 	
 		DECLARE @Pk	INT		

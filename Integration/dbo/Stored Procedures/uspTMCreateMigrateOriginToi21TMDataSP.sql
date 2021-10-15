@@ -674,14 +674,9 @@ BEGIN
 						,intI21Id = A.intTaxGroupId
 					INTO #tmpTaxLocaleTable 
 					FROM (
-						SELECT DISTINCT
-							B.A4GLIdentity
-							,A.intTaxGroupId
-						FROM tblSMTaxXRef A
-						INNER JOIN vwlclmst	B
-							ON A.strOrgState COLLATE Latin1_General_CI_AS = B.vwlcl_tax_state COLLATE Latin1_General_CI_AS
-							AND A.strOrgLocal1 COLLATE Latin1_General_CI_AS = B.vwlcl_tax_auth_id1 COLLATE Latin1_General_CI_AS 
-							AND A.strOrgLocal2 COLLATE Latin1_General_CI_AS = B.vwlcl_tax_auth_id2 COLLATE Latin1_General_CI_AS 
+						SELECT DISTINCT A4GLIdentity, intTaxGroupId
+						FROM vwlclmst
+						INNER JOIN tblSMTaxGroup ON strTaxGroup=vwlcl_tax_state + '' '' + vwlcl_tax_auth_id1 + '' '' + vwlcl_tax_auth_id2 
 					) A
 
 

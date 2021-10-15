@@ -22,6 +22,10 @@ SELECT
 	,dblTaxRate
 	,dblSalvageValue
 	,dblFunctionalSalvageValue
+	,dblSection179
+	,dblFunctionalSection179
+	,dblBonusDepreciation
+	,dblFunctionalBonusDepreciation
 	,strTransaction
 	,strTransactionId
 	,strType

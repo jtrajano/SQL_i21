@@ -1,15 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuGLFiscalYearPeriod]
 AS
-
-SELECT A.[intGLFiscalYearPeriodId]
-	,A.[intFiscalYearId]
-	,A.[strPeriod] COLLATE Latin1_General_CI_AS strPeriod
-	,A.[dtmStartDate]
-	,A.[dtmEndDate]
-	,dtmEndDateMDY = CONVERT(NVARCHAR(20), A.[dtmEndDate], 101)
-	,A.[ysnOpen]
-	,A.[intConcurrencyId]
-	,B.[strFiscalYear] COLLATE Latin1_General_CI_AS strFiscalYear
+SELECT 
+	A.*
+	, B.[strFiscalYear]
+	, dtmEndDateMDY = CONVERT(NVARCHAR(20), A.[dtmEndDate], 101)
+	, ysnCurrent = CASE WHEN GETDATE() BETWEEN A.dtmStartDate AND dtmEndDate THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM tblGLFiscalYearPeriod A
 INNER JOIN tblGLFiscalYear B
 ON A.intFiscalYearId = B.intFiscalYearId

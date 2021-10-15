@@ -149,7 +149,7 @@ SELECT
 	,BO.strBook
 	,L.intSubBookId
 	,SB.strSubBook
-	,strERPPONUmber = PCD.strERPPONumber
+	,strERPPONumber = PCD.strERPPONumber
 	,strDocStatus = CASE WHEN L.ysnDocumentsReceived = 1 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
 	,strRegistration = CASE WHEN L.ysn4cRegistration = 1 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
 FROM tblLGLoad L

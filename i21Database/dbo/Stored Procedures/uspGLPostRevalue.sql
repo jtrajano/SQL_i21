@@ -487,6 +487,8 @@ DECLARE @strMessage NVARCHAR(100)
 				UPDATE tblGLFiscalYearPeriod SET ysnCTRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 			IF @strTransactionType = 'CM' 
 				UPDATE tblGLFiscalYearPeriod SET ysnCMRevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
+			IF @strTransactionType = 'FA' 
+				UPDATE tblGLFiscalYearPeriod SET ysnFARevalued = 1 WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			IF @strTransactionType = 'All' 
 				UPDATE tblGLFiscalYearPeriod SET 

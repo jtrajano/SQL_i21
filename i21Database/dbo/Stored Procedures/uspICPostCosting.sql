@@ -34,7 +34,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -80,6 +80,7 @@ DECLARE @InventoryTransactionType_MarkUpOrDown AS INT = 49
 DECLARE @InventoryTransactionType_WriteOff AS INT = 50
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
@@ -879,12 +880,12 @@ BEGIN
 		SET @InventoryTransactionIdentityId = NULL 
 
 		SELECT	
-				@dblAutoVariance = dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+				@dblAutoVariance = dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - itemTotal.itemTotalValue
 				,@strAutoVarianceDescription = 
 						-- 'Inventory variance is created. The current item valuation is %c. The new valuation is (Qty x New Average Cost) %c x %c = %c.'
 							dbo.fnFormatMessage(
 							dbo.fnICGetErrorMessage(80078)
-							,dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId)
+							,itemTotal.itemTotalValue
 							,Stock.dblUnitOnHand
 							,ItemPricing.dblAverageCost
 							,(Stock.dblUnitOnHand * ItemPricing.dblAverageCost)
@@ -899,9 +900,12 @@ BEGIN
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
 				CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, DEFAULT) [location]
+		OUTER APPLY (
+			SELECT [dbo].[fnGetItemTotalValueFromTransactions](@intItemId, @intItemLocationId) itemTotalValue
+		) itemTotal
 		WHERE	ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
-				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
+				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - itemTotal.itemTotalValue, 2) <> 0
 
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -933,6 +937,17 @@ BEGIN
 				,@dblForexRate = 1
 				,@strDescription = @strAutoVarianceDescription 
 				,@intSourceEntityId = @intSourceEntityId
+
+		SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+		-----------------------------------------
+		-- Log the Daily Stock Quantity
+		-----------------------------------------
+		IF @intInventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			EXEC uspICPostStockDailyQuantity 
+				@intInventoryTransactionId = @intInventoryTransactionIdentityId
+		END 
 
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative
@@ -1087,8 +1102,7 @@ BEGIN
 		,@intContraInventory_ItemLocationId
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
-END 
-
+END 	
 
 -----------------------------------------
 -- Call the Risk Log sp
@@ -1101,3 +1115,4 @@ BEGIN
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
 END 
+

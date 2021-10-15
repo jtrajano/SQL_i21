@@ -30,7 +30,19 @@ BEGIN
 		intExpenseAccountIdOld INT,
 		intExpenseAccountIdNew INT
 	)
-
+	CREATE TABLE #tmpTableForAudit(
+		[Id] Int,
+		[Namespace] VARCHAR(max),
+		[Action] VARCHAR(30),
+		[Description] VARCHAR(100),	
+		[From] VARCHAR(100),
+		[To] VARCHAR(100),
+		[EntityId] Int
+	)
+	-- temporary Table for inserted tax type
+	CREATE TABLE #tmpInsertedTaxDeduction(
+		intEmployeeDeductionId int
+	)
 	--Update Deduction 
 	UPDATE tblPREmployeeDeduction
 		SET strCalculationType = CASE WHEN (@ysnUpdateCalcType = 1) THEN Deduction.strCalculationType ELSE EmpDeduction.strCalculationType END,
@@ -49,7 +61,7 @@ BEGIN
 			deleted.dblPaycheckMax, inserted.dblPaycheckMax,
 			deleted.strDeductFrom, inserted.strDeductFrom,
 			deleted.intAccountId, inserted.intAccountId,
-			deleted.intAccountId, inserted.intExpenseAccountId
+			deleted.intExpenseAccountId, inserted.intExpenseAccountId
 		INTO
 			@EmployeeDeductionAudit
 		FROM tblPRTypeDeduction Deduction 
@@ -57,65 +69,56 @@ BEGIN
 				ON Deduction.intTypeDeductionId = EmpDeduction.intTypeDeductionId
 		WHERE EmpDeduction.intTypeDeductionId = @intTypeDeductionId
 
-	DECLARE @details NVARCHAR(MAX)
-	DECLARE @employeeDeductionIdLog INT
-	DECLARE @entityEmployeeIdLog INT
-
-	--Create Audit Log Entry for the changes
-	WHILE EXISTS (SELECT TOP 1 1 FROM @EmployeeDeductionAudit)
-	BEGIN
-		SELECT TOP 1 
-			@employeeDeductionIdLog = intEmployeeDeductionId,
-			@entityEmployeeIdLog = intEntityEmployeeId,
-			@details = '{"change": "Deductions (via Update Employees)","children": [' + 
-							'{"action": "Updated","change": "Updated - Record: ' + 
-							(SELECT TOP 1 strDeduction COLLATE Latin1_General_CI_AS FROM tblPRTypeDeduction WHERE intTypeDeductionId = @intTypeDeductionId) + 
-							'","iconCls": "small-tree-modified","children": [' +
-					CASE WHEN (@ysnUpdateAmount = 1 AND dblAmountOld <> dblAmountNew) THEN 
-						'{"change":"Rate","from": "' + CAST(CAST(dblAmountOld AS FLOAT) AS NVARCHAR(20)) + 
-										'","to": "' + CAST(CAST(dblAmountNew AS FLOAT) AS NVARCHAR(20)) + '","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateCalcType = 1 AND strCalculationTypeOld <> strCalculationTypeNew) THEN 
-						'{"change":"Rate Type","from": "' + strCalculationTypeOld + 
-											'","to": "' + strCalculationTypeNew + '","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateLimit = 1 AND dblLimitOld <> dblLimitNew) THEN 
-						'{"change":"Annual Limit","from": "' + CAST(CAST(dblLimitOld AS FLOAT) AS NVARCHAR(20)) + 
-												'","to": "' + CAST(CAST(dblLimitNew AS FLOAT) AS NVARCHAR(20)) + '","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateDeductFrom = 1 AND (dblPaycheckMaxOld <> dblPaycheckMaxNew OR strDeductFromOld <> strDeductFromNew)) THEN 
-						'{"change":"Deduct From","from": "' + CAST(CAST(dblPaycheckMaxOld AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromOld + 
-												'","to": "' + CAST(CAST(dblPaycheckMaxNew AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromNew +
-												'","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateAccount = 1 AND intAccountIdOld <> intAccountIdNew) THEN 
-						'{"change":"Account ID","from": "' + (SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdOld) + 
-												'","to": "' + (SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdNew) + 
-												' ","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateExpense = 1 AND (intExpenseAccountIdOld <> intExpenseAccountIdNew 
-														OR (intExpenseAccountIdOld IS NOT NULL AND intExpenseAccountIdNew IS NULL)
-														OR (intExpenseAccountIdOld IS NULL AND intExpenseAccountIdNew IS NOT NULL))) THEN 
-						'{"change":"Expense Account","from": "' + ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdOld), '') + 
-												'","to": "' + ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdNew), '') + 
-												' ","leaf": true,"iconCls": "small-gear"},' ELSE '' END +
-					CASE WHEN (@ysnUpdateTaxes = 1) THEN 
-						'{"change":"Deduction Taxes","from": "","to":"Override All","leaf": true,"iconCls": "small-gear"}' ELSE '' END +
-					']' +
-				'}],"iconCls":"small-tree-grid"}'
+		if(@ysnUpdateCalcType = 1)
+		BEGIN
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+			Select intEntityEmployeeId,'EntityManagement.view.Entity', 'Updated','Rate Type(Updated in Update Employees)',strCalculationTypeOld,strCalculationTypeNew,@intUserId
+			FROM @EmployeeDeductionAudit 
+		END
+		if(@ysnUpdateAmount = 1)
+		BEGIN
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+			Select intEntityEmployeeId,'EntityManagement.view.Entity', 'Updated','Rate(Updated in Update Employees)',CAST(CAST(dblAmountOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblAmountNew AS FLOAT) AS NVARCHAR(20)),@intUserId
 			FROM @EmployeeDeductionAudit
+		END
+		if(@ysnUpdateLimit = 1)
+		BEGIN
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+			Select intEntityEmployeeId,'EntityManagement.view.Entity', 'Updated','Annual Limit(Updated in Update Employees)',CAST(CAST(dblLimitOld AS FLOAT) AS NVARCHAR(20)),CAST(CAST(dblLimitNew AS FLOAT) AS NVARCHAR(20)),@intUserId
+			FROM @EmployeeDeductionAudit
+		END
+		IF(@ysnUpdateDeductFrom =1)
+		BEGIN
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+			Select intEntityEmployeeId,'EntityManagement.view.Entity', 'Updated','Deduct from(Updated in Update Employees)',
+				CAST(CAST(dblPaycheckMaxOld AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromOld,
+				CAST(CAST(dblPaycheckMaxNew AS FLOAT) AS NVARCHAR(20)) + '% of ' + strDeductFromNew,
+				@intUserId
+			FROM @EmployeeDeductionAudit
+		END
+		
+		IF(@ysnUpdateAccount = 1)
+		BEGIN
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+			Select intEntityEmployeeId,'EntityManagement.view.Entity', 'Updated','Account ID(Updated in Update Employees)',
+				(SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdOld),
+				(SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intAccountIdNew)
+				,@intUserId
+				FROM @EmployeeDeductionAudit
+		END
 
-		SET @details = REPLACE(@details, '"small-gear"},]', '"small-gear"}]')
-
-		IF (@details NOT LIKE '%"children": []%')
-			EXEC dbo.uspSMAuditLog
-				@keyValue				= @entityEmployeeIdLog,				
-				@screenName				= 'EntityManagement.view.Entity', 
-				@entityId				= @intUserId,	
-				@actionType				= 'Updated',
-				@actionIcon				= 'small-tree-modified',
-				@changeDescription		= '',
-				@fromValue				= '',
-				@toValue				= '',
-				@details				= @details 
-
-		DELETE FROM @EmployeeDeductionAudit WHERE intEmployeeDeductionId = @employeeDeductionIdLog AND intEntityEmployeeId = @entityEmployeeIdLog
-	END
+		IF(@ysnUpdateExpense = 1)
+		BEGIN
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+			Select intEntityEmployeeId,'EntityManagement.view.Entity', 'Updated','Expense Account(Updated in Update Employees)',
+				ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdOld), ''),
+				ISNULL((SELECT TOP 1 strAccountId COLLATE Latin1_General_CI_AS FROM tblGLAccount WHERE intAccountId = intExpenseAccountIdNew), '') 
+				,@intUserId
+				FROM @EmployeeDeductionAudit
+		END
+		
+		
+			
 
 	--Update Template Deduction
 	UPDATE tblPRTemplateDeduction
@@ -139,6 +142,17 @@ BEGIN
 			INTO #tmpEmployeeDeduction
 			FROM tblPREmployeeDeduction 
 			WHERE intTypeDeductionId = @intTypeDeductionId
+		
+		--Insert Deleted Employee Earning in temp Audit log table 
+		if(@ysnUpdateTaxes=1)
+		BEGIN
+			INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+				SELECT ED.intEntityEmployeeId,'EntityManagement.view.Entity','Updated','Deleted Deduction Taxes in Update Employees',TT.strDescription,NULL,@intUserId
+				from tblPREmployeeDeduction ED
+				inner join tblPREmployeeDeductionTax DT ON DT.intEmployeeDeductionId=ED.intEmployeeDeductionId
+				inner join tblPRTypeTax TT ON TT.intTypeTaxId = DT.intTypeTaxId
+				WHERE intTypeDeductionId = @intTypeDeductionId
+		END
 
 		DELETE FROM tblPREmployeeDeductionTax 
 				WHERE intEmployeeDeductionId IN (SELECT intEmployeeDeductionId FROM #tmpEmployeeDeduction)
@@ -150,6 +164,7 @@ BEGIN
 
 			--Reinsert Deduction Taxes
 			INSERT INTO tblPREmployeeDeductionTax (intEmployeeDeductionId, intTypeTaxId, intSort, intConcurrencyId)
+			OUTPUT inserted.intEmployeeDeductionId INTO #tmpInsertedTaxDeduction
 				SELECT @intEmployeeDeductionId, intTypeTaxId, intSort, intConcurrencyId 
 				FROM tblPRTypeDeductionTax
 				WHERE intTypeDeductionId = @intTypeDeductionId
@@ -180,9 +195,53 @@ BEGIN
 
 			DELETE FROM #tmpTemplateDeduction WHERE intTemplateDeductionId = @intTemplateDeductionId
 		END
+		INSERT INTO #tmpTableForAudit([Id],[Namespace],[Action],[Description],[From],[To],[EntityId])
+			SELECT intEntityEmployeeId,'EntityManagement.view.Entity','Updated','Inserted Deduction Taxes in Update Employees',NULL,TT.strDescription,@intUserId
+			from tblPREmployeeDeduction ED
+				inner join tblPREmployeeDeductionTax DT ON DT.intEmployeeDeductionId=ED.intEmployeeDeductionId
+				inner join tblPRTypeTax TT ON TT.intTypeTaxId = DT.intTypeTaxId
+				WHERE intTypeDeductionId = @intTypeDeductionId
+			AND ED.intEmployeeDeductionId IN (SELECT Distinct(intEmployeeDeductionId) FROM #tmpInsertedTaxDeduction)
+		
+
 
 		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEmployeeDeduction')) DROP TABLE #tmpEmployeeDeduction
-		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTemplateDeduction')) DROP TABLE #tmpTemplateDeduction
+		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTemplateDeduction')) DROP TABLE #tmpTemplateDeduction 
+		IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInsertedTaxDeduction')) DROP TABLE #tmpInsertedTaxDeduction
+		
 	END
+	------------CREATE AUDIT ENTRY
+		DECLARE @cur_Id INT;
+		DECLARE @cur_Namespace VARCHAR(max);
+		DECLARE @cur_Action VARCHAR(30);
+		DECLARE @cur_Description VARCHAR(100);
+		DECLARE @cur_From VARCHAR(100);
+		DECLARE @cur_To VARCHAR(100);
+		DECLARE @cur_EntityId Int;
+
+		DECLARE AuditTableCursor CURSOR FOR
+		SELECT * FROM #tmpTableForAudit 
+
+		OPEN AuditTableCursor
+
+		FETCH NEXT FROM AuditTableCursor INTO @cur_Id,@cur_Namespace,@cur_Action,@cur_Description,@cur_From,@cur_To,@cur_EntityId
+		WHILE(@@FETCH_STATUS = 0)
+		BEGIN
+		--Insert individual Record to audit log
+			EXEC uspSMAuditLog
+				@keyValue = @cur_Id,
+				@screenName = @cur_Namespace,
+				@entityId = @cur_EntityId,
+				@actionType = @cur_Action,
+				@changeDescription  = @cur_Description,
+				@fromValue = @cur_From,
+				@toValue = @cur_To
+
+			FETCH NEXT FROM AuditTableCursor INTO @cur_Id,@cur_Namespace,@cur_Action,@cur_Description,@cur_From,@cur_To,@cur_EntityId
+		END
+		CLOSE AuditTableCursor
+		DEALLOCATE AuditTableCursor
+
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpTableForAudit')) DROP TABLE #tmpTableForAudit
 END
 GO

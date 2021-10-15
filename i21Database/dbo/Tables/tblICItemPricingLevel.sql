@@ -45,6 +45,11 @@ Type the overview for the table here.
 	)
 
 	GO
+
+		CREATE NONCLUSTERED INDEX [IX_tblICItemPricingLevel]
+		ON [dbo].[tblICItemPricingLevel]([intItemId] ASC, [intItemLocationId] ASC, strPricingMethod ASC)
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',
