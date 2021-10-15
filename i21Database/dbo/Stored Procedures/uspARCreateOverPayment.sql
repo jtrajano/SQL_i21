@@ -106,11 +106,9 @@ DECLARE
 	,@ItemLeaseBilling					BIT				= 0
 	,@ItemVirtualMeterReading			BIT				= 0
 	,@SubCurrency						BIT				= 0
-	,@ItemCurrencyExchangeRateTypeId	INT				= NULL
-    ,@ItemCurrencyExchangeRateId		INT				= NULL
-    ,@ItemCurrencyExchangeRate			NUMERIC(18,6)   = 0.000000
-
-
+	,@ItemCurrencyExchangeRateTypeId 	INT    			= NULL
+ 	,@ItemCurrencyExchangeRateId  		INT    			= NULL
+ 	,@ItemCurrencyExchangeRate   		NUMERIC(18,6) 	= 0.000000
 
 SELECT TOP 1
 	 @EntityCustomerId					= ARC.[intEntityId]
@@ -301,7 +299,7 @@ EXEC [dbo].[uspARCreateCustomerInvoice]
 	,@ItemCurrencyExchangeRateTypeId 	= @ItemCurrencyExchangeRateTypeId
  	,@ItemCurrencyExchangeRateId  		= @ItemCurrencyExchangeRateId
  	,@ItemCurrencyExchangeRate   		= @ItemCurrencyExchangeRate	      
-		  	      
+		  
 SET @NewInvoiceId = @NewId		                 
       
 	--AUDIT LOG

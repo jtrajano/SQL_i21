@@ -140,6 +140,12 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
+	UPDATE tblLGIntrCompLogisticsPreStg
+	SET strFeedStatus = 'Failed'
+		,strMessage = @ErrMsg
+		,intStatusId=2
+	WHERE intLoadPreStageId = @intLoadPreStageId
+
 	RAISERROR (
 			@ErrMsg
 			,16

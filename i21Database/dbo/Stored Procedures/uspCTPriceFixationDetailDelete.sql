@@ -283,8 +283,6 @@ BEGIN TRY
 		
 		UPDATE	CD
 		SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
-				CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
-				CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 				CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
 				CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE NULL END,
 				CD.dblCashPrice			=	NULL,

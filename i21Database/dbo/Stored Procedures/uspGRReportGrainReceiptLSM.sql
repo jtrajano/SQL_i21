@@ -17,6 +17,7 @@ BEGIN TRY
      ,@intScaleTicketId INT
 	 ,@strReceiptNumber NVARCHAR(30)
 	 ,@strItemStockUOM NVARCHAR(30) 
+	 ,@strItemStockUOMSymbol NVARCHAR(30) 
 	 ,@dblUnloadedGrain DECIMAL(24,10)
 	 ,@dblDockage DECIMAL(24,10)
 	 ,@dblTotaPurchasePrice DECIMAL(24,10)
@@ -91,6 +92,7 @@ ELSE
 
  SELECT 
  @strItemStockUOM = UnitMeasure.strUnitMeasure,  
+ @strItemStockUOMSymbol = UnitMeasure.strSymbol,
  @dblUnloadedGrain =  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)),3)
  ,@dblDockage = ROUND(SC.dblShrink,3)
  ,@dblDockagePercent = ROUND((SC.dblShrink*100.0/(dbo.fnCTConvertQtyToTargetItemUOM(ItemUOM1.intItemUOMId,SC.intItemUOMIdTo,(SC.dblGrossWeight-SC.dblTareWeight)))),2)  
@@ -210,7 +212,7 @@ begin
 		join tblICInventoryReceiptCharge ReceiptCharge
 			on Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 				and DiscountCode.intItemId = ReceiptCharge.intChargeId
-				and (@intFeeItemId is null and ReceiptCharge.intChargeId <> @intFeeItemId)
+				and (@intFeeItemId is null or ReceiptCharge.intChargeId <> @intFeeItemId)
 	where Ticket.intTicketId = @intScaleTicketId
 
 	
@@ -252,8 +254,6 @@ begin
 
 	set @GRRMarketingFee = abs(@GRRMarketingFee)
 end
-
-
 
 
 declare @SettleStorageTickets nvarchar(250)
@@ -344,7 +344,7 @@ SELECT
     + CHAR(13) + CHAR(10)     
     + ISNULL(@strCity, '') + ISNULL(', ' + @strState, '') +' '+ISNULL(@strZip, '')    
     AS strCompanyAddress    
-  ,LTRIM(RTRIM(EY.strEntityName)) +     
+  ,LTRIM(RTRIM(EY.strEntityName)) +   ' ' +  
   + CHAR(13) + CHAR(10)     
   + ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') +    
   + CHAR(13) + CHAR(10)     
@@ -362,16 +362,31 @@ SELECT
       END,     
        '')        
     AS strEntityAddress
+,ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') +      
+  + ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '')     
+  + ISNULL(', '     
+     + CASE     
+       WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN NULL    
+       ELSE LTRIM(RTRIM(EY.strEntityState))    
+       END,     
+        '')     
+    + ISNULL(' '     
+       + CASE     
+       WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL    
+       ELSE LTRIM(RTRIM(EY.strEntityZipCode))    
+      END,     
+       '')        
+    AS strEntityAddressDetail
 ,@strCompanyName AS strCompanyName
 ,@strPhone AS strPhone
 ,@strFax AS strFax
 ,SC.strTicketNumber
 ,@strReceiptNumber AS strReceiptNumber
-,@strCompanyName AS strEntityName
+,EY.strEntityName AS strEntityName
 ,imgCompanyLogo  = dbo.fnSMGetCompanyLogo('Header')  --@blbCompanyLogo
 ,SC.dblGrossWeight AS 'Weight(MT)'
 ,SC.dblTareWeight AS 'Vehicle Weight'
-,[dbo].[fnRemoveTrailingZeroes](@dblUnloadedGrain) AS strUnloadedGrain
+,[dbo].[fnRemoveTrailingZeroes](@dblUnloadedGrain) + ' ' + @strItemStockUOMSymbol AS strUnloadedGrain
 ,[dbo].[fnRemoveTrailingZeroes](@dblDockage) AS dblDockage
 ,[dbo].[fnRemoveTrailingZeroes](dblUnitPrice) AS dblUnitPrice
 ,[dbo].[fnRemoveTrailingZeroes](@dblDockagePercent) AS dblDockagePercent    

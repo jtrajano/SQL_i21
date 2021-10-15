@@ -80,6 +80,7 @@ DECLARE @InventoryTransactionType_MarkUpOrDown AS INT = 49
 DECLARE @InventoryTransactionType_WriteOff AS INT = 50
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
@@ -958,6 +959,17 @@ BEGIN
 				AND ItemPricing.intItemLocationId = @intItemLocationId			
 				AND ROUND(dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId), 2) <> 0
 
+		SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+		-----------------------------------------
+		-- Log the Daily Stock Quantity
+		-----------------------------------------
+		IF @intInventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			EXEC uspICPostStockDailyQuantity 
+				@intInventoryTransactionId = @intInventoryTransactionIdentityId
+		END 
+
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative
 		WHERE	intItemId = @intItemId 
@@ -1098,6 +1110,17 @@ BEGIN
 							AND t.intItemLocationId = iWithZeroStock.intItemLocationId
 				) currentValuation				
 		WHERE	ISNULL(currentValuation.floatingValue, 0) <> 0
+
+		SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+		-----------------------------------------
+		-- Log the Daily Stock Quantity
+		-----------------------------------------
+		IF @intInventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			EXEC uspICPostStockDailyQuantity 
+				@intInventoryTransactionId = @intInventoryTransactionIdentityId
+		END 
 	END 
 END 
 
@@ -1123,8 +1146,7 @@ BEGIN
 		,@intContraInventory_ItemLocationId
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
-END 
-
+END 	
 
 -----------------------------------------
 -- Call the Risk Log sp
@@ -1137,3 +1159,4 @@ BEGIN
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
 END 
+
