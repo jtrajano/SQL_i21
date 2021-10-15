@@ -253,8 +253,8 @@
     <Build Include="dbo\Tables\tblApiSchemaVendorPricing.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendorPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorPricing.sql" />
-    <Build Include="dbo\Tables\tblApiCompletedWorkOrderStocked.sql.sql" />
-    <Build Include="dbo\Tables\tblApiRESTErrorLog.sql.sql" />
+    <Build Include="dbo\Tables\tblApiCompletedWorkOrderStocked.sql" />
+    <Build Include="dbo\Tables\tblApiRESTErrorLog.sql" />
     <Build Include="dbo\Stored Procedures\uspApiForwardWorkOrders.sql" />
   </ItemGroup>
   <ItemGroup>
