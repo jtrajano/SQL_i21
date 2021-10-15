@@ -162,32 +162,49 @@
 	CONSTRAINT [FK_tblARInvoice_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
 	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId])
 );
+--INDEXES
+GO
+CREATE NONCLUSTERED INDEX [PIndex2]
+    ON [dbo].[tblARInvoice]([dblInvoiceSubtotal] ASC, [dblShipping] ASC, [dblTax] ASC, [dblInvoiceTotal] ASC, [dblDiscount] ASC, [dblAmountDue] ASC, [dblPayment] ASC, [strTransactionType] ASC, [intPaymentMethodId] ASC, [intAccountId] ASC, [ysnPosted] ASC, [ysnPaid] ASC);
+GO
+CREATE NONCLUSTERED INDEX [PIndex]
+    ON [dbo].[tblARInvoice]([strInvoiceNumber] ASC, [intEntityCustomerId] ASC, [dtmDate] ASC, [dtmDueDate] ASC, [intCurrencyId] ASC, [intCompanyLocationId] ASC, [intEntitySalespersonId] ASC, [dtmShipDate] ASC, [intShipViaId] ASC, [strPONumber] ASC, [intTermId] ASC);
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnPosted]
+	ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
+INCLUDE ([strTransactionType],[dtmPostDate],[dblInvoiceSubtotal])
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnForgiven]
+	ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
+INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoiceTotal],[ysnForgiven])
+GO
+CREATE INDEX [IX_tblARInvoice_strType] 
+	ON [dbo].[tblARInvoice] ([strType] ASC)
+GO
+CREATE INDEX [IX_tblARInvoice_strTransactionType] 
+	ON [dbo].[tblARInvoice] ([strTransactionType] ASC)
+GO
+CREATE INDEX [IX_tblARInvoice_ysnPosted] 
+	ON [dbo].[tblARInvoice] ([ysnPosted] ASC)
+GO
+CREATE INDEX [IX_tblARInvoice_intOriginalInvoiceId] 
+	ON [dbo].[tblARInvoice] ([intOriginalInvoiceId] ASC)
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoice_intEntityCustomerId_intCompanyLocationId] 
+	ON [dbo].[tblARInvoice] ([intEntityCustomerId], [intCompanyLocationId]) 
+INCLUDE ([strTransactionType], [strType], [ysnRecurring], [ysnProcessedToNSF], [intPeriodId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoice_intCompanyLocationId_ysnRecurring] 
+	ON [dbo].[tblARInvoice] ([intCompanyLocationId], [ysnRecurring]) 
+INCLUDE ([strTransactionType], [strType], [intEntityCustomerId], [ysnProcessedToNSF], [intPeriodId])
+GO
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+--TRIGGERS INSERT
 GO
 CREATE TRIGGER trgInvoiceNumber
 ON dbo.tblARInvoice
 AFTER INSERT
 AS
-
 DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100), intCompanyLocationId INT)
 DECLARE @count INT = 0
 DECLARE @intInvoiceId INT
@@ -238,41 +255,10 @@ BEGIN
 
 	DELETE FROM @inserted
 	WHERE intInvoiceId = @intInvoiceId
-
 END
+
+--TRIGGERS BEFORE DELETE
 GO
-CREATE NONCLUSTERED INDEX [PIndex2]
-    ON [dbo].[tblARInvoice]([dblInvoiceSubtotal] ASC, [dblShipping] ASC, [dblTax] ASC, [dblInvoiceTotal] ASC, [dblDiscount] ASC, [dblAmountDue] ASC, [dblPayment] ASC, [strTransactionType] ASC, [intPaymentMethodId] ASC, [intAccountId] ASC, [ysnPosted] ASC, [ysnPaid] ASC);
-
-
-GO
-CREATE NONCLUSTERED INDEX [PIndex]
-    ON [dbo].[tblARInvoice]([strInvoiceNumber] ASC, [intEntityCustomerId] ASC, [dtmDate] ASC, [dtmDueDate] ASC, [intCurrencyId] ASC, [intCompanyLocationId] ASC, [intEntitySalespersonId] ASC, [dtmShipDate] ASC, [intShipViaId] ASC, [strPONumber] ASC, [intTermId] ASC);
-
-GO
-CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnPosted]
-ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
-INCLUDE ([strTransactionType],[dtmPostDate],[dblInvoiceSubtotal])
-
-GO
-CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnForgiven]
-ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
-INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoiceTotal],[ysnForgiven])
-
-GO
-CREATE INDEX [IX_tblARInvoice_strType] ON [dbo].[tblARInvoice] ([strType] ASC)
-
-GO
-
-CREATE INDEX [IX_tblARInvoice_strTransactionType] ON [dbo].[tblARInvoice] ([strTransactionType] ASC)
-GO
-
-CREATE INDEX [IX_tblARInvoice_ysnPosted] ON [dbo].[tblARInvoice] ([ysnPosted] ASC)
-GO
-
-CREATE INDEX [IX_tblARInvoice_intOriginalInvoiceId] ON [dbo].[tblARInvoice] ([intOriginalInvoiceId] ASC)
-GO
-
 CREATE TRIGGER trg_tblARInvoiceDelete
 ON dbo.tblARInvoice
 INSTEAD OF DELETE 
@@ -302,6 +288,7 @@ BEGIN
 		INNER JOIN DELETED B ON A.intInvoiceId = B.intInvoiceId
 END
 
+--TRIGGERS AFTER DELETE
 GO
 CREATE TRIGGER trgAfterDeleteARInvoice
     ON dbo.tblARInvoice
@@ -317,21 +304,20 @@ BEGIN
 		END
 END
 
+--TRIGGERS UPDATE
 GO
-
 CREATE TRIGGER trgForUpdateARInvoice 
 ON dbo.tblARInvoice
 	FOR UPDATE 
 AS
 BEGIN
-	
-		DECLARE @strInvoiceNumber NVARCHAR (50) 
-		SELECT @strInvoiceNumber=i.strInvoiceNumber from deleted i; IF UPDATE(strInvoiceNumber)
+	DECLARE @strInvoiceNumber NVARCHAR (50) 
+	SELECT @strInvoiceNumber=i.strInvoiceNumber from deleted i; IF UPDATE(strInvoiceNumber)
 
-		IF @strInvoiceNumber IS NOT  NULL
-		BEGIN
-		IF UPDATE (strInvoiceNumber)
-		INSERT INTO  tblARAuditLog
-		   SELECT 'Updated','Invoice',strInvoiceNumber,GETDATE(),NULL,0 FROM deleted
-		END
+	IF @strInvoiceNumber IS NOT  NULL
+	BEGIN
+	IF UPDATE (strInvoiceNumber)
+	INSERT INTO  tblARAuditLog
+		SELECT 'Updated','Invoice',strInvoiceNumber,GETDATE(),NULL,0 FROM deleted
+	END
 END
