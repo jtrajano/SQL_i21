@@ -250,10 +250,6 @@ BEGIN
 	 FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @intRowNumber
 	 WHILE @@FETCH_STATUS = 0
      BEGIN
-
-		-- INSERT FREIGHT TYPE IN CUSTOMER
-		UPDATE tblARCustomer SET intEntityTariffTypeId = @intEntityTariffTypeId
-
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblARCustomerFreightXRef WHERE intEntityCustomerId = @intCustomerEntityId 
 			AND intEntityLocationId = @intCustomerEntityLocationId 
 			AND ISNULL(strZipCode, '') = ISNULL(@strSupplierZipCode, '')
@@ -267,6 +263,11 @@ BEGIN
 			AND ISNULL(ysnFreightOnly, 0) = ISNULL(@ysnFreightOnly, 0)
 			AND ISNULL(ysnFreightInPrice, 0) = ISNULL(@ysnFreightInPrice, 0)) 
 		BEGIN
+
+			-- INSERT FREIGHT TYPE IN CUSTOMER
+			UPDATE tblARCustomer SET intEntityTariffTypeId = @intEntityTariffTypeId
+			WHERE intEntityId = @intCustomerEntityId
+
 			-- INSERT FREIGHT SETUP
 			INSERT INTO tblARCustomerFreightXRef (intEntityCustomerId
 				, intEntityLocationId
@@ -312,7 +313,7 @@ BEGIN
 			SELECT guiApiImportLogDetailId = NEWID()
 				, guiApiImportLogId = @guiLogId
 				, strField = ''
-				, strValue = '' 
+				, strValue = ''
 				, strLogLevel = 'Success'
 				, strStatus = 'Success'
 				, intRowNo = @intRowNumber
