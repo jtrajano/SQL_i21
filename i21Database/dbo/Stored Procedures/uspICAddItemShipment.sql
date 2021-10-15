@@ -21,7 +21,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE 
 	@ShipmentEntries ShipmentStagingTable,
@@ -1004,6 +1004,8 @@ FROM @ShipmentEntries se INNER JOIN tblICInventoryShipment s
 		,CASE WHEN ISNULL(s.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(se.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END 
 		,se.dtmShipDate
 	) forexRate
+ORDER BY
+	se.intSort, se.intId
 
 -- Insert shipment charges
 INSERT INTO tblICInventoryShipmentCharge(
@@ -1029,6 +1031,7 @@ INSERT INTO tblICInventoryShipmentCharge(
 	, intItemContractHeaderId
 	, intItemContractDetailId
 	, ysnAddPayable
+	, intSort
 )
 SELECT 
 	sc.intShipmentId
@@ -1053,6 +1056,7 @@ SELECT
 	, sc.intItemContractHeaderId
 	, sc.intItemContractDetailId
 	, sc.ysnAddPayable
+	, intSort = sc.intSort
 FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 		ON sc.intShipmentId = s.intInventoryShipmentId 
 	-- Get the SM forex rate. 
@@ -1061,6 +1065,8 @@ FROM @ShipmentCharges sc INNER JOIN tblICInventoryShipment s
 		,CASE WHEN ISNULL(sc.intCurrency, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId THEN ISNULL(sc.intForexRateTypeId, @intDefaultForexRateTypeId) ELSE NULL END  
 		,s.dtmShipDate
 	) forexRate			
+ORDER BY
+	sc.intSort, sc.intId
 
 -- Insert item lots
 INSERT INTO tblICInventoryShipmentItemLot(
@@ -1071,6 +1077,7 @@ INSERT INTO tblICInventoryShipmentItemLot(
 	, dblTareWeight
 	, dblWeightPerQty
 	, strWarehouseCargoNumber
+	, intSort
 )
 SELECT 
 	si.intInventoryShipmentItemId
@@ -1080,6 +1087,7 @@ SELECT
 	, l.dblTareWeight
 	, l.dblWeightPerQty
 	, l.strWarehouseCargoNumber
+	, l.intSort 
 FROM @ShipmentItemLots l INNER JOIN @ShipmentEntries se 
 		ON l.intItemLotGroup = se.intItemLotGroup
 		AND se.intOrderType = l.intOrderType
@@ -1097,6 +1105,8 @@ FROM @ShipmentItemLots l INNER JOIN @ShipmentEntries se
 	INNER JOIN tblICItem i 
 		ON i.intItemId = si.intItemId
 WHERE i.strLotTracking <> 'No'
+ORDER BY
+	l.intSort, l.intId
 
 -- Insert into the reservation table.
 -- Scan Headers

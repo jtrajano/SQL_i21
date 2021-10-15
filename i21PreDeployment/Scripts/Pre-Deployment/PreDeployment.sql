@@ -91,6 +91,8 @@
 :r .\7_AR\11_FixSalesOrderNullysnQuote.sql
 :r .\7_AR\12_MoveQuotePagesToLetters.sql
 :r .\7_AR\13_FixCustomerBillToShipTo.sql
+:r .\7_AR\14_RefreshARTempTable.sql
+:r .\7_AR\15_DropOldIndex.sql
 
 -- AP
 :r .\8_AP\DropAPViews.sql
@@ -202,6 +204,7 @@
 :r .\18_IU\1_DataCleanUp.sql
 
 --MF
+:r .\19_MF\DropConstraints.sql
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql

@@ -57,7 +57,7 @@ FROM tmp
 
 -- SELECT * FROM @tblFields
 
-IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strLocationName','strCheckPayeeName','strShipVia')) 
+IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strLocationName','strCheckPayeeName','strShipVia','strTerminalNo')) 
 BEGIN
 	RETURN;
 END

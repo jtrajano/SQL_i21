@@ -21,7 +21,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Create the temp table 
 IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL  
@@ -159,7 +159,7 @@ BEGIN
 		) AS u
 			ON e.intItemId = u.intItemId
 			AND e.intItemLocationId = u.intItemLocationId
-			AND e.dtmEffectiveCostDate = u.dtmEffectiveDate
+			AND CONVERT(DATE, e.dtmEffectiveCostDate) = CONVERT(DATE, u.dtmEffectiveDate)
 			AND e.intEffectiveItemCostId = ISNULL(@intEffectiveItemCostId, e.intEffectiveItemCostId)
 
 		-- If matched, update the effective cost.
@@ -358,7 +358,7 @@ BEGIN
 		) AS u
 			ON e.intItemId = u.intItemId
 			AND e.intItemLocationId = u.intItemLocationId
-			AND e.dtmEffectiveRetailPriceDate = u.dtmEffectiveDate
+			AND CONVERT(DATE, e.dtmEffectiveRetailPriceDate) = CONVERT(DATE, u.dtmEffectiveDate)
 			AND e.intEffectiveItemPriceId = ISNULL(@intEffectiveItemPriceId, e.intEffectiveItemPriceId)
 
 		-- If matched, update the effective cost.

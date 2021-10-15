@@ -515,7 +515,7 @@ LEFT JOIN (
 		 , intSiteID				= NULL
 		 , strSiteNumber			= NULL
 		 , dblEstimatedPercentLeft	= NULL
-		 , strTicketNumber			= strPrepaymentNumber
+		 , strTicketNumber			= CASE WHEN strInvoiceFormat IN('Standard','Format 3 - Swink') THEN '' ELSE strPrepaymentNumber END
 		 , strTicketNumberDate		= strPrepaymentNumber
 		 , strTrailerNumber			= NULL
 		 , strSealNumber			= NULL

@@ -457,6 +457,11 @@ BEGIN TRY
 				,strMessage = NULL
 				,strFeedStatus = 'Awt Ack'
 			WHERE intContractFeedId = @intContractFeedId
+
+			UPDATE tblCTContractHeader
+			SET ysnExported = 1
+				,dtmExported = GETDATE()
+			WHERE intContractHeaderId = @intContractHeaderId
 		END
 
 		NextPO:

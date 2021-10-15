@@ -25,7 +25,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 IF @userId IS NULL
 BEGIN
@@ -1196,10 +1196,28 @@ BEGIN
 			INSERT INTO @clearingIds
 			SELECT intBillId FROM #tmpPostBillData
 
-			INSERT INTO @APClearing
-			SELECT * FROM fnAPClearing(@clearingIds)
+			IF EXISTS(
+				SELECT 1
+				FROM tblAPBillDetail A
+				INNER JOIN #tmpPostBillData B ON A.intBillId = B.intBillId
+				WHERE
+					A.intInventoryReceiptItemId > 0
+				OR A.intInventoryReceiptChargeId > 0
+				OR A.intInventoryShipmentChargeId > 0
+				OR A.intLoadDetailId > 0
+				OR A.intLoadShipmentCostId > 0
+				OR A.intSettleStorageId > 0
+			)
+			BEGIN
+				INSERT INTO @APClearing
+				SELECT * FROM fnAPClearing(@clearingIds)
 
-			EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+				IF EXISTS(SELECT 1 FROM @APClearing)
+				BEGIN
+					EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+				END
+			END
+
 		END TRY
 		BEGIN CATCH
 				DECLARE @errorClearing NVARCHAR(200) = ERROR_MESSAGE()

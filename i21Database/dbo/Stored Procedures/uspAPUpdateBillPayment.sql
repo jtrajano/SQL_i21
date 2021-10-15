@@ -119,7 +119,11 @@ BEGIN
 											(
 												paySchedDetails.dblDiscount,
 												CASE WHEN C.intTransactionType = 1 
-													THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, @amountDue) 
+													THEN 
+														(CASE WHEN C.ysnDiscountOverride = 0
+															THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, @amountDue) 
+															ELSE ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
+														END)
 												ELSE 0 END
 											)
 										END),
