@@ -169,8 +169,8 @@
 --INDEX
 GO
 CREATE INDEX [IX_tblARInvoice_NonClustered] ON [dbo].[tblARInvoice] (
-	[intEntityCustomerId], [intEntityId], [intAccountId], [intCompanyLocationId], [intShipToLocationId], [intBillToLocationId],
-	[intTermId], [intPaymentId], [intShipmentId], [intTransactionId], [intLoadId], [intOriginalInvoiceId], [intEntitySalespersonId], [ysnPosted], [dtmDate], [dtmPostDate]
+	[intEntityCustomerId], [intEntityId], [intEntityContactId], [intAccountId], [intCompanyLocationId], [intShipToLocationId], [intBillToLocationId], [intFreightTermId],
+	[intTermId], [intPaymentId], [intShipmentId], [intTransactionId], [intMeterReadingId], [intLoadId], [intSalesOrderId], [intOriginalInvoiceId], [intEntitySalespersonId], [intShipViaId], [ysnPosted], [dtmDate], [dtmPostDate]
 	--REMOVED INDEXES
 	--dtmDueDate, dtmShipDate, strPONumber, dblInvoiceSubtotal, dblShipping, dblTax, dblInvoiceTotal, dblDiscount, dblAmountDue, dblPayment, intPaymentMethodId, ysnPaid
 )

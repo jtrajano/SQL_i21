@@ -177,8 +177,8 @@
 
 GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_NonClustered] ON [dbo].[tblARInvoiceDetail] (
-  [intInvoiceId], [intAccountId],
-  [intInventoryShipmentItemId], [intInventoryShipmentChargeId], [intSalesOrderDetailId], [intContractHeaderId], [intContractDetailId], [intShipmentId], [intTicketId], [intTicketHoursWorkedId],
+  [intInvoiceId], [intAccountId], [intCOGSAccountId], [intSalesAccountId], [intInventoryAccountId], [intConversionAccountId], 
+  [intInventoryShipmentItemId], [intInventoryShipmentChargeId], [intSalesOrderDetailId], [intContractHeaderId], [intContractDetailId], [intItemContractHeaderId], [intItemContractDetailId], [intShipmentId], [intTicketId], [intTicketHoursWorkedId],
   [intSiteId], [intStorageLocationId], [intCompanyLocationSubLocationId], [intItemId], [intItemUOMId], [intLoadDetailId]
   --REMOVED INDEXES
   --intCustomerStorageId, intOriginalInvoiceDetailId, dblQtyOrdered, dblQtyShipped, dblPrice, dblTotal
