@@ -99,7 +99,7 @@ INSERT INTO @tblFixedAssetHistory
 	0 dblFunctionalTaxDepreciation,
 	0 dblTaxRate,
 	FA.intAssetId,
-	0,
+	1,
 	DM.intDepreciationMethodId, 
 	DM.strDepreciationMethodId, 
 	GL.strTransactionType, 
