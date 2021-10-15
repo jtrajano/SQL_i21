@@ -161,11 +161,11 @@ SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
 
--- IF NULLIF(@billIds, '') IS NULL
--- BEGIN
--- 	RAISERROR('Posting is already in process.', 16, 1);
--- 	GOTO Post_Rollback
--- END
+IF NULLIF(@billIds, '') IS NULL
+BEGIN
+	RAISERROR('Posting/unposting already in process.', 16, 1);
+	GOTO Post_Rollback
+END
 
 --Update the prepay and debit memo
 EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post

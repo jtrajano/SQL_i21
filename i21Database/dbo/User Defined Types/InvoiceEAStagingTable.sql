@@ -32,4 +32,7 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
 	,[ysnRecomputeTax]						BIT												NULL		-- Indicate whether to recompute for Taxes based on the current Tax setup	
 	,[strSubFormula]	    				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	,[ysnConvertToStockUOM]					BIT                                             NULL		-- If true, intItemUOMId will be converted to Stock UOM
+	,[strBinNumber]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strGroupNumber]	    				NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strFeedDiet]	    					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
 )

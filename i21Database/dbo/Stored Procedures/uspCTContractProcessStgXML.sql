@@ -2557,7 +2557,7 @@ BEGIN TRY
 						,x.dblTotalCost
 						,@intCurrencyID
 						,@intUnitMeasureId
-						,x.dblAvailableNetWeight
+						,x.dblNetWeight
 						,@intItemWeightUOMId
 						,GETDATE()
 						,@intCompanyLocationId
@@ -2703,6 +2703,7 @@ BEGIN TRY
 							,dblOriginalBasis NUMERIC(18, 6)
 							,strFixationBy NVARCHAR(50)
 							,dblConvertedBasis NUMERIC(18, 6)
+							,dblNetWeight NUMERIC(18, 6)
 							) x
 					WHERE intContractSeq = @intContractSeq
 
@@ -3906,6 +3907,8 @@ BEGIN TRY
 				--			,1
 				--			)
 				--END
+				DELETE FROM tblCTContractDocument WHERE intContractHeaderId=@intNewContractHeaderId
+
 				INSERT INTO tblCTContractDocument (
 					intContractHeaderId
 					,intDocumentId
@@ -3921,7 +3924,7 @@ BEGIN TRY
 						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
 				JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-				WHERE NOT EXISTS (
+				/*WHERE NOT EXISTS (
 						SELECT *
 						FROM tblCTContractDocument CD
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
@@ -3945,7 +3948,7 @@ BEGIN TRY
 						SELECT *
 						FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (intContractDocumentId INT) x
 						WHERE CD.intContractDocumentRefId = x.intContractDocumentId
-						)
+						)*/
 
 				EXEC sp_xml_removedocument @idoc
 

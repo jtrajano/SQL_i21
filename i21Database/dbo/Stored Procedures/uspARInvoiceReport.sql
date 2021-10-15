@@ -517,7 +517,7 @@ LEFT JOIN (
 		 , ysnAddonParent			= NULL
 		 , strBOLNumberDetail		= NULL
 		 , strLotNumber				= NULL
-		 , strSubFormula			= NULL		 
+		 , strSubFormula			= NULL
 		 , strSCInvoiceNumber		= NULL
 		 , dtmDateSC				= NULL
 		 , dtmToCalculate			= NULL

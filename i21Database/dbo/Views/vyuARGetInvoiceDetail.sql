@@ -176,6 +176,9 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strCategoryCode						= ICATEGORY.strCategoryCode
 	 , strCategoryDescription				= ICATEGORY.strDescription
 	 , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceDetailId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+	 , strBinNumber							= INV.strBinNumber
+	 , strGroupNumber						= INV.strGroupNumber
+	 , strFeedDiet							= INV.strFeedDiet
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (

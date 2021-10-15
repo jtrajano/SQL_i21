@@ -1546,7 +1546,7 @@ UNION ALL --TRANSFER CHARGES
  FROM    
  (  
   SELECT  
-  B.intTransferStorageReferenceId
+  B.intInventoryReceiptChargeId
    ,B.strTransactionNumber  
    ,SUM(B.dblTransferTotal) AS dblTransferTotal
    ,SUM(B.dblTransferQty) AS dblTransferQty  
@@ -1558,7 +1558,7 @@ UNION ALL --TRANSFER CHARGES
    ,B.strLocationName
   FROM grainTransferChargeClearing B  
   GROUP BY   
-   intTransferStorageReferenceId
+   intInventoryReceiptChargeId
    ,strTransactionNumber  
    ,intItemId  
    ,intLocationId  
@@ -1568,7 +1568,7 @@ UNION ALL --TRANSFER CHARGES
   -- OR  (SUM(B.dblTransferTotal) - SUM(B.dblReceiptChargeTotal)) != 0
  ) tmpAPOpenClearing  
 INNER JOIN tblGRTransferStorageReference rc  
-  ON tmpAPOpenClearing.intTransferStorageReferenceId = rc.intTransferStorageReferenceId
+  ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intTransferStorageReferenceId
  INNER JOIN tblGRTransferStorage r  
   ON r.intTransferStorageId = rc.intTransferStorageId  
   INNER JOIN tblGRCustomerStorage CS
