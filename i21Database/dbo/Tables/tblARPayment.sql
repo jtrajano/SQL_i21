@@ -50,11 +50,9 @@
 );
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblARPayment_NonClustered] ON [dbo].[tblARPayment] (
-  [intEntityCustomerId], [intAccountId], [intBankAccountId], [intEntityCardInfoId], [intLocationId], [ysnPosted], [dtmDatePaid]
-  --REMOVED INDEX
-  --ysnProcessedToNSF
-)
+CREATE NONCLUSTERED INDEX [NC_Index_tblARPayment]
+ON [dbo].[tblARPayment]([intEntityCustomerId], [ysnPosted], [ysnProcessedToNSF]) INCLUDE ([dtmDatePaid], [dblAmountPaid], [strRecordNumber], [ysnInvoicePrepayment]);
+
 GO
 CREATE TRIGGER trgReceivePaymentRecordNumber
 ON tblARPayment

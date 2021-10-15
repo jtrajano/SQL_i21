@@ -23,8 +23,3 @@
 	CONSTRAINT [FK_tblARPrepaidAndCredit_tblARInvoice_intPrepaymentId] FOREIGN KEY ([intPrepaymentId]) REFERENCES [dbo].[tblARInvoice]([intInvoiceId]),
 	CONSTRAINT [FK_tblARPrepaidAndCredit_tblARInvoiceDetail_intPrepaymentDetailId] FOREIGN KEY ([intPrepaymentDetailId]) REFERENCES [dbo].[tblARInvoiceDetail]([intInvoiceDetailId])
 )
-GO
-CREATE NONCLUSTERED INDEX [IX_tblARPrepaidAndCredit_NonClustered] ON [dbo].[tblARPrepaidAndCredit] (
-  [intInvoiceId], [intInvoiceDetailId], [intPrepaymentId], [intPrepaymentDetailId]
-)
-GO

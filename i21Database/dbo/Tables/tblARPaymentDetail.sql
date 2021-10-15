@@ -38,9 +38,9 @@
 );
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblARPaymentDetail_NonClustered] ON [dbo].[tblARPaymentDetail] (
-  [intPaymentId], [intAccountId], [intWriteOffAccountId], [intInvoiceId], [intBillId], [intCurrencyExchangeRateTypeId]
-)
+CREATE NONCLUSTERED INDEX [NC_Index_tblARPaymentDetail]
+ON [dbo].[tblARPaymentDetail]([intPaymentId]) INCLUDE ([dblDiscount], [dblInterest], [dblPayment], [intInvoiceId]);
+
 GO
 CREATE TRIGGER trg_tblARPaymentDetailUpdate
 ON dbo.tblARPaymentDetail

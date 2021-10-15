@@ -138,13 +138,20 @@
 	CONSTRAINT [FK_tblARCustomer_tblSMApprovalList_intPriceChangeApprovalId] FOREIGN KEY ([intPriceChangeApprovalId]) REFERENCES [tblSMApprovalList]([intApprovalListId]),	
 	CONSTRAINT [FK_tblARCustomer_tblSMTerm_intTermId] FOREIGN KEY ([intTermsId]) REFERENCES [dbo].[tblSMTerm] ([intTermID]),
 	CONSTRAINT [FK_tblARCustomer_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY ([intPaymentMethodId]) REFERENCES [dbo].[tblSMPaymentMethod] ([intPaymentMethodID]),
+
+	
+    --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 
 GO
-CREATE NONCLUSTERED INDEX [IX_tblARCustomer_NonClustered] ON [dbo].[tblARCustomer] (
-  [intAccountStatusId], [intSalespersonId], [intDefaultLocationId], [intTaxCodeId], [intShipToId], [intBillToId], [intCompanyLocationPricingLevelId], [intTermsId], [intPaymentMethodId]
-)
-GO
+--CREATE UNIQUE NONCLUSTERED INDEX [IX_tblARCustomer]
+--    ON [dbo].[tblARCustomer]([strCustomerNumber] ASC);
+
+
+--GO
+
+
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Used for Origin link to agcus_key or ptcus_key',
     @level0type = N'SCHEMA',
