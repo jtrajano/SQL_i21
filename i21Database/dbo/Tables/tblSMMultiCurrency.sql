@@ -8,6 +8,7 @@
 	[intContractRateTypeId]							INT NULL, 
     [intAccountsReceivableRateTypeId]				INT NULL, 
 	[intGeneralJournalRateTypeId]					INT NULL, 
+	[intFixedAssetsId]								INT NULL, 
 	/* Unrealized */
 	[intAccountsPayableUnrealizedId]				INT NULL,
 	[intAccountsReceivableUnrealizedId]				INT NULL, 
@@ -32,6 +33,7 @@
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
+	[intFixedAssetsRealizedId]						INT NULL,
 	/* Bank Transfer */
 	[intUnrealizedGainLossForwardAccountId]			INT NULL, 
 	[intUnrealizedGainLossForwardOffsetAccountId]	INT NULL, 
