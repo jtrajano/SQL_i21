@@ -52,6 +52,7 @@ Type the overview for the table here.
 						CAST(NULL AS BIGINT) 
 				END
 			) PERSISTED,
+        [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

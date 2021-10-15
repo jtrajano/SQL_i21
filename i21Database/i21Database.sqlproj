@@ -173,6 +173,7 @@
     <Build Include="dbo\Tables\tblSMIDPFieldMapping.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingField.sql" />
     <Build Include="dbo\Tables\tblSMIDPFieldMappingFieldTable.sql" />
+    <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItem.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformItem.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
@@ -197,6 +198,36 @@
     <Build Include="dbo\Tables\tblApiSchemaTransformCategory.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformCategoryAccount.sql" />
     <Build Include="dbo\Views\vyuAPGuidGenerator.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCustomer.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCustomer.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItem.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemAccount.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemLocation.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceMCPReportCustom.sql" />
+    <Build Include="dbo\Tables\tblAPIWODetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPIProcessWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPIGetCompletedWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaRecipe.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaRecipeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeFinalize.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeInitialize.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEffectiveItemCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformEffectiveItemPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemPricingLevel.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemSpecialPricing.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformEffectiveItemCost.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformEffectiveItemPrice.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemPricing.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemPricingLevel.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformItemSpecialPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -9532,6 +9563,9 @@
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnStorage.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildRiskSummaryLogForCustomerOwned.sql" />
+    <Build Include="dbo\Tables\tblICInventoryDailyTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStockDailyQuantity.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryDailyValuation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9836,6 +9870,9 @@
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateLicenseAgreement.sql" />
     <None Include="Scripts\Post-Deployment\FA\DefaultData\FixedAssetGroup.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\43_IDPFieldMapping.sql" />
+    <Build Include="dbo\Tables\tblARPerformanceLog.sql" />
+    <Build Include="dbo\Views\vyuARPerformanceLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

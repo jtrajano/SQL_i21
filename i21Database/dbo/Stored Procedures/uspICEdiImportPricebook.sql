@@ -439,7 +439,20 @@ SELECT
 FROM 
 	tblICEdiPricebook p
 	LEFT JOIN tblICItemUOM u 
-		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+		--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+		ON (
+			ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+			OR u.intUpcCode = 
+				CASE 
+					WHEN p.strSellingUpcNumber IS NOT NULL 
+						AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+						AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+					THEN 
+						CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+					ELSE 
+						CAST(NULL AS BIGINT) 	
+				END		
+		)
 	OUTER APPLY (
 		SELECT TOP 1 
 			i.intItemId 
@@ -521,13 +534,33 @@ FROM (
 		FROM 
 			tblICEdiPricebook p
 			LEFT JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			LEFT JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
 			LEFT JOIN tblICBrand b 
 				ON b.strBrandName = p.strManufacturersBrandName	
-			LEFT JOIN tblICItem dup
-				ON dup.strItemNo = p.strSellingUpcNumber
+			OUTER APPLY (
+				SELECT TOP 1 
+					dup.*
+				FROM 
+					tblICItem dup
+				WHERE
+					dup.strItemNo = p.strSellingUpcNumber			
+			) dup
+			
 		WHERE
 			p.strUniqueId = @UniqueId		
 	) AS Source_Query  
@@ -635,7 +668,20 @@ FROM (
 		FROM 
 			tblICEdiPricebook p
 			LEFT JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			OUTER APPLY (
 				SELECT TOP 1 
 					i.intItemId 
@@ -773,7 +819,20 @@ SELECT
 FROM 
 	tblICEdiPricebook p
 	LEFT JOIN tblICItemUOM u 
-		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+		--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+		ON (
+			ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+			OR u.intUpcCode = 
+				CASE 
+					WHEN p.strSellingUpcNumber IS NOT NULL 
+						AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+						AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+					THEN 
+						CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+					ELSE 
+						CAST(NULL AS BIGINT) 	
+				END		
+		)
 	OUTER APPLY (
 		SELECT TOP 1 
 			i.intItemId 
@@ -781,7 +840,7 @@ FROM
 			tblICItem i 
 		WHERE
 			i.intItemId = u.intItemId
-			OR i.strItemNo = p.strSellingUpcNumber
+			OR (i.strItemNo = p.strSellingUpcNumber AND u.intItemId IS NULL) 
 	) i			
 	OUTER APPLY (			
 		SELECT TOP 1 
@@ -856,8 +915,8 @@ FROM (
 			SELECT 
 				i.intItemId
 				,l.intItemLocationId
-				,intClassId = catLoc.intClassId --ISNULL(ISNULL(sc.intSubcategoryId, catLoc.intClassId), l.intClassId)
-				,intFamilyId = catLoc.intFamilyId --ISNULL(ISNULL(sf.intSubcategoryId, catLoc.intFamilyId), l.intFamilyId)
+				,intClassId = COALESCE(sc.intSubcategoryId, catLoc.intClassId, l.intClassId)
+				,intFamilyId = COALESCE(sf.intSubcategoryId, catLoc.intFamilyId, l.intFamilyId)
 				,ysnDepositRequired = ISNULL(CASE p.strDepositRequired WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnDepositRequired)
 				,ysnPromotionalItem = ISNULL(CASE p.strPromotionalItem WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, l.ysnPromotionalItem)
 				,ysnPrePriced = ISNULL(ISNULL(CASE p.strPrePriced WHEN 'Y' THEN 1 WHEN 'N' THEN 0 ELSE NULL END, catLoc.ysnPrePriced), l.ysnPrePriced)
@@ -887,7 +946,20 @@ FROM (
 				,intReceiveUOMId = purchaseUOM.intItemUOMId
 			FROM tblICEdiPricebook p
 				INNER JOIN tblICItemUOM u 
-					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					ON (
+						ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+						OR u.intUpcCode = 
+							CASE 
+								WHEN p.strSellingUpcNumber IS NOT NULL 
+									AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+									AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+								THEN 
+									CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+								ELSE 
+									CAST(NULL AS BIGINT) 	
+							END		
+					)
 				INNER JOIN tblICItem i 
 					ON i.intItemId = u.intItemId
 				LEFT JOIN tblICCategory cat 
@@ -1071,7 +1143,7 @@ FROM (
 			,Source_Query.intIssueUOMId
 			,Source_Query.intReceiveUOMId
 			,DEFAULT--,intGrossUOMId
-			,DEFAULT--,intFamilyId
+			,Source_Query.intFamilyId--,intFamilyId
 			,Source_Query.intClassId--,intClassId
 			,Source_Query.intProductCodeId--,intProductCodeId
 			,DEFAULT--,intFuelTankId
@@ -1238,7 +1310,20 @@ FROM (
 			,p.ysnUpdatePrice
 		FROM tblICEdiPricebook p
 			INNER JOIN tblICItemUOM u 
-				ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			INNER JOIN tblICItem i 
 				ON i.intItemId = u.intItemId
 			OUTER APPLY (
@@ -1379,7 +1464,21 @@ FROM (
 			,p.ysnUpdatePrice
 
 		FROM tblICEdiPricebook p
-			INNER JOIN tblICItemUOM u ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+			INNER JOIN tblICItemUOM u 
+				--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+				ON (
+					ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+					OR u.intUpcCode = 
+						CASE 
+							WHEN p.strSellingUpcNumber IS NOT NULL 
+								AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+								AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+							THEN 
+								CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+							ELSE 
+								CAST(NULL AS BIGINT) 	
+						END		
+				)
 			INNER JOIN tblICItem i ON i.intItemId = u.intItemId
 			OUTER APPLY (
 				SELECT 
@@ -1520,7 +1619,20 @@ FROM (
 			FROM 
 				tblICEdiPricebook p 
 				INNER JOIN tblICItemUOM u 
-					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					--ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+					ON (
+						ISNULL(NULLIF(RTRIM(LTRIM(u.strLongUPCCode)), ''), RTRIM(LTRIM(u.strUpcCode))) = p.strSellingUpcNumber
+						OR u.intUpcCode = 
+							CASE 
+								WHEN p.strSellingUpcNumber IS NOT NULL 
+									AND ISNUMERIC(RTRIM(LTRIM(p.strSellingUpcNumber))) = 1 
+									AND NOT (p.strSellingUpcNumber LIKE '%.%' OR p.strSellingUpcNumber LIKE '%e%' OR p.strSellingUpcNumber LIKE '%E%') 
+								THEN 
+									CAST(RTRIM(LTRIM(p.strSellingUpcNumber)) AS BIGINT) 
+								ELSE 
+									CAST(NULL AS BIGINT) 	
+							END		
+					)
 				INNER JOIN tblICItem i 
 					ON i.intItemId = u.intItemId
 				CROSS APPLY (
