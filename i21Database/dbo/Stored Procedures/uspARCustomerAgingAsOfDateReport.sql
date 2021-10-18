@@ -193,16 +193,10 @@ SELECT intPaymentId
 INTO #ARPOSTEDPAYMENT
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN @tblCustomers C ON P.intEntityCustomerId = C.intEntityCustomerId
-WHERE ysnPosted = 1
-	AND ysnProcessedToNSF = 0
-	AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-	OR intPaymentId IN (SELECT D.intPaymentId
-		FROM tblARPaymentDetail D
-		INNER JOIN tblARInvoice I
-		ON D.strTransactionNumber = I.strInvoiceNumber
-		WHERE dtmDate =@dtmDateToLocal
-		AND dtmDate <> dtmPostDate)
-	)
+LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
+WHERE P.ysnPosted = 1
+  AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND CAST(NSF.dtmDate AS DATE) > @dtmDateToLocal))
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 --WRITE OFF FILTER
 IF (@ysnIncludeWriteOffPaymentLocal = 1)
