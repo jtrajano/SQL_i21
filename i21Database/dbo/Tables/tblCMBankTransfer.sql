@@ -19,6 +19,7 @@
     [dtmLastModified]          DATETIME        NULL,
 	[ysnRecurring]             BIT             DEFAULT 0 NOT NULL,
 	[ysnDelete]				   BIT             NULL,
+    [ysnBankFees]			   BIT             NULL,
 	[dtmDateDeleted]		   DATETIME		   NULL,
 	[dblRateAmountTo]                  DECIMAL (18, 6) DEFAULT 1 NULL,
 	[intCurrencyExchangeRateTypeId] INT	NULL,
