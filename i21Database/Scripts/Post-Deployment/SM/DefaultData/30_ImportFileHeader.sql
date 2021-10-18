@@ -373,6 +373,7 @@ GO
 DECLARE @LayoutTitle NVARCHAR(100)
 , @FileHeaderId INT = NULL
 , @DetailId INT = NULL
+, @OldFileHeaderId INT = NULL
 
 SET @LayoutTitle = 'Rack Price - iRely Enterprise'
 IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
