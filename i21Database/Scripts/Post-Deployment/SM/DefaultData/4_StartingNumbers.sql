@@ -1614,6 +1614,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Entity Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 165
+			,[strTransactionType]	= N'Receipt Feed Id'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receipt Feed Id')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
