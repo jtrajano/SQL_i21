@@ -8,7 +8,7 @@
 	[intContractRateTypeId]							INT NULL, 
     [intAccountsReceivableRateTypeId]				INT NULL, 
 	[intGeneralJournalRateTypeId]					INT NULL, 
-	[intFixedAssetsId]								INT NULL, 
+	[intFixedAssetsRateTypeId]						INT NULL, 
 	/* Unrealized */
 	[intAccountsPayableUnrealizedId]				INT NULL,
 	[intAccountsReceivableUnrealizedId]				INT NULL, 
