@@ -8,6 +8,7 @@
 	,@intOrderDetailId INT = NULL
 	,@intFromStorageLocationId INT = NULL
 	,@intItemUOMId INT = NULL
+	,@ysnPickByBag BIT = 0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -39,14 +40,18 @@ BEGIN TRY
 
 	IF @intLotId IS NOT NULL
 	BEGIN
-		SELECT @dblSplitAndPickQty = dbo.fnMFConvertQuantityToTargetItemUOM(IsNULL(intWeightUOMId,intItemUOMId), intItemUOMId, @dblSplitAndPickWeight)
-		--@dblSplitAndPickWeight / (
-		--		CASE 
-		--			WHEN dblWeightPerQty = 0
-		--				THEN 1a
-		--			ELSE dblWeightPerQty
-		--			END
-		--		)
+		SELECT @dblSplitAndPickQty = CASE 
+				WHEN @ysnPickByBag = 1
+					THEN @dblSplitAndPickWeight
+				ELSE dbo.fnMFConvertQuantityToTargetItemUOM(IsNULL(intWeightUOMId, intItemUOMId), intItemUOMId, @dblSplitAndPickWeight)
+				END
+			--@dblSplitAndPickWeight / (
+			--		CASE 
+			--			WHEN dblWeightPerQty = 0
+			--				THEN 1a
+			--			ELSE dblWeightPerQty
+			--			END
+			--		)
 			,@intItemUOMId = intItemUOMId
 			,@intWeightUOMId = intWeightUOMId
 			,@dblWeightPerQty = dblWeightPerQty
@@ -57,11 +62,12 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intLotId = @intLotId
 	END
-	Else
-	Begin
-		Select @dblSplitAndPickQty=@dblSplitAndPickWeight
-		Select @intWeightUOMId=@intItemUOMId
-	End
+	ELSE
+	BEGIN
+		SELECT @dblSplitAndPickQty = @dblSplitAndPickWeight
+
+		SELECT @intWeightUOMId = @intItemUOMId
+	END
 
 	INSERT INTO tblMFTask (
 		intConcurrencyId

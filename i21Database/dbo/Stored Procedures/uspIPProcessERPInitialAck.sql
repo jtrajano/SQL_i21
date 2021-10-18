@@ -386,6 +386,7 @@ BEGIN TRY
 
 					UPDATE tblMFWorkOrder
 					SET strERPOrderNo = @ERPShopOrderNo
+						,strReferenceNo = @ERPShopOrderNo
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intWorkOrderId = @intWorkOrderId
 

@@ -25,6 +25,7 @@ BEGIN TRY
 		,@dblCalculatedQuantity DECIMAL(24, 10)
 		,@ysnSubstituteItem BIT
 		,@intMainItemId INT
+		,@strWorkOrderNo nvarchar(50)
 
 	CREATE TABLE #tblMFConsumptionDetail (
 		intContainerId INT
@@ -259,6 +260,7 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intTransferStorageLocationId = intStorageLocationId
 		,@intProductId = intItemId
+		,@strWorkOrderNo=strWorkOrderNo 
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -1444,12 +1446,16 @@ BEGIN TRY
 			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 				AND UT.ysnAllowPick = 1
 			LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+				AND SR.intTransactionId <> @intWorkOrderId
+				AND SR.strTransactionId <> @strWorkOrderNo
 				AND SR.ysnPosted = 0
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			LEFT JOIN tblMFTask T ON T.intLotId =L.intLotId 
+			LEFT JOIN tblMFStageWorkOrder SW ON T.intOrderHeaderId =SW.intOrderHeaderId AND SW.intWorkOrderId =@intWorkOrderId 
 			WHERE L.intLocationId = @intLocationId
 				AND L.intItemId = @intInputItemId
 				AND L.dblQty > 0
@@ -1470,6 +1476,7 @@ BEGIN TRY
 				,L.dtmDateCreated
 				,L.dtmManufacturedDate
 				,PL.strParentLotNumber
+				,SW.intWorkOrderId
 			HAVING (
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
@@ -1477,7 +1484,14 @@ BEGIN TRY
 						ELSE L.dblWeight
 						END
 					) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0))) > 0
-			ORDER BY CASE 
+			ORDER BY 
+					CASE 
+					WHEN SW.intWorkOrderId is not null
+						THEN 1
+					ELSE 2
+					END ASC
+					,
+					CASE 
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE '1900-01-01'
@@ -1510,12 +1524,16 @@ BEGIN TRY
 			JOIN tblICStorageUnitType UT ON UT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 				AND UT.ysnAllowPick = 1
 			LEFT JOIN tblICStockReservation SR ON SR.intLotId = L.intLotId
+				AND SR.intTransactionId <> @intWorkOrderId
+				AND SR.strTransactionId <> @strWorkOrderNo
 				AND SR.ysnPosted = 0
 			LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
 			JOIN dbo.tblICLotStatus BS ON BS.intLotStatusId = ISNULL(LI.intBondStatusId, 1)
 				AND BS.strPrimaryStatus = 'Active'
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+			LEFT JOIN tblMFTask T ON T.intLotId =L.intLotId 
+			LEFT JOIN tblMFStageWorkOrder SW ON T.intOrderHeaderId =SW.intOrderHeaderId AND SW.intWorkOrderId =@intWorkOrderId 
 			WHERE L.intLocationId = @intLocationId
 				AND SL.intStorageLocationId IN (
 					SELECT Item Collate Latin1_General_CI_AS
@@ -1540,6 +1558,7 @@ BEGIN TRY
 				,L.dtmDateCreated
 				,L.dtmManufacturedDate
 				,PL.strParentLotNumber
+				,SW.intWorkOrderId
 			HAVING (
 					CASE 
 						WHEN L.intWeightUOMId IS NULL
@@ -1547,7 +1566,14 @@ BEGIN TRY
 						ELSE L.dblWeight
 						END
 					) - (SUM(ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(SR.intItemUOMId, IsNULL(L.intWeightUOMId, L.intItemUOMId), SR.dblQty), 0))) > 0
-			ORDER BY CASE 
+			ORDER BY 
+					CASE 
+					WHEN SW.intWorkOrderId is not null
+						THEN 1
+					ELSE 2
+					END ASC
+					,
+					CASE 
 					WHEN @ysnPickByLotCode = 0
 						THEN ISNULL(L.dtmManufacturedDate, L.dtmDateCreated)
 					ELSE '1900-01-01'

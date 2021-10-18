@@ -851,6 +851,7 @@ BEGIN TRY
 				,intParentLotId INT
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblParentLot') IS NOT NULL
@@ -871,6 +872,7 @@ BEGIN TRY
 				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblAvailableInputLot') IS NOT NULL
@@ -888,6 +890,7 @@ BEGIN TRY
 				,dblUnitCost NUMERIC(38, 20)
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblInputLot') IS NOT NULL
@@ -902,6 +905,7 @@ BEGIN TRY
 				,dblWeightPerQty NUMERIC(38, 20)
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblInputLotHandAdd') IS NOT NULL
@@ -1084,6 +1088,7 @@ BEGIN TRY
 				,intParentLotId
 				,intItemUOMId
 				,intItemIssuedUOMId
+				,intPreference
 				)
 			SELECT L.intLotId
 				,L.strLotNumber
@@ -1104,12 +1109,13 @@ BEGIN TRY
 				,L.intParentLotId
 				,ISNULL(L.intWeightUOMId, L.intItemUOMId)
 				,L.intItemUOMId
+				,(Case When SubLoc.intSubLocationId is not null then 1 else 2 End ) AS  intPreference
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 			JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 			JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
-			JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+			LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
@@ -1193,6 +1199,7 @@ BEGIN TRY
 						,strCreatedBy
 						,intItemUOMId
 						,intItemIssuedUOMId
+						,intPreference
 						)
 					SELECT TL.intParentLotId
 						,PL.strParentLotNumber
@@ -1208,6 +1215,7 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
 					FROM #tblLot TL
 					JOIN tblICParentLot PL ON TL.intParentLotId = PL.intParentLotId
 					GROUP BY TL.intParentLotId
@@ -1222,6 +1230,7 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
 				END
 				ELSE
 				BEGIN
@@ -1295,6 +1304,7 @@ BEGIN TRY
 					,dblUnitCost
 					,intItemUOMId
 					,intItemIssuedUOMId
+					,intPreference
 					)
 				SELECT PL.intParentLotId
 					,PL.intItemId
@@ -1306,10 +1316,12 @@ BEGIN TRY
 								WHERE SR.intParentLotId = PL.intParentLotId --Review when Parent Lot Reservation Done
 									AND SR.intStorageLocationId = PL.intStorageLocationId
 									AND ISNULL(SR.ysnPosted, 0) = 0
+									AND SR.intItemId = PL.intItemId
 								) + (
 								SELECT ISNULL(SUM(BS.dblQuantity), 0)
 								FROM #tblBlendSheetLot BS
 								WHERE BS.intParentLotId = PL.intParentLotId
+									AND BS.intItemId = PL.intItemId
 								)
 							)
 						) AS dblAvailableQty
@@ -1320,11 +1332,13 @@ BEGIN TRY
 					,PL.dblUnitCost
 					,PL.intItemUOMId
 					,PL.intItemIssuedUOMId
+					,PL.intPreference
 				FROM #tblParentLot AS PL
 				WHERE PL.intItemId = @intRawItemId
 			END
 
 			IF @ysnEnableParentLot = 1
+				AND @ysnShowAvailableLotsByStorageLocation = 0
 			BEGIN
 				INSERT INTO #tblAvailableInputLot (
 					intParentLotId
@@ -1409,9 +1423,9 @@ BEGIN TRY
 			--Apply Business Rules
 			IF ISNULL(@ysnWOStagePick, 0) = 0
 			BEGIN
-				SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
-									   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId 
-									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > ' + CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' ORDER BY ' + @strOrderByFinal
+				SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId,intPreference) 
+									   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId,IsNULL(intPreference,1)  
+									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > ' + CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' ORDER BY IsNULL(intPreference,1), ' + @strOrderByFinal
 
 				EXEC (@strSQL)
 			END
@@ -1605,6 +1619,7 @@ BEGIN TRY
 				,intStorageLocationId
 				,dblWeightPerQty
 			FROM #tblInputLot
+			ORDER BY IsNULL(intPreference,1)
 
 			OPEN Cursor_FetchItem
 
