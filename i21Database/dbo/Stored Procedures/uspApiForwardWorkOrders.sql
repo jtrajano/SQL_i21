@@ -86,9 +86,10 @@ WHERE d.guiApiUniqueId = @guiApiUniqueId
 	AND d.ysnProcessed = 1
     AND d.strFeedStatus = 'Failed'
 
-INSERT INTO tblRestApiErrorLog (guiApiUniqueId, strValue, strError, strLogLevel, intLinePosition)
-SELECT @guiApiUniqueId, d.strWorkOrderNo, strMessage, 'Success', d.intItemId
+INSERT INTO tblRestApiErrorLog (guiApiUniqueId, strValue, strError, strLogLevel, intLinePosition, intLineNumber)
+SELECT @guiApiUniqueId, d.strWorkOrderNo, strMessage, 'Success', d.intItemId, wo.intWorkOrderId
 FROM tblAPIWODetail d
+JOIN tblMFWorkOrder wo ON wo.strWorkOrderNo = d.strWorkOrderNo
 WHERE d.guiApiUniqueId = @guiApiUniqueId
 	AND d.ysnProcessed = 1
     AND d.ysnCompleted = 1
