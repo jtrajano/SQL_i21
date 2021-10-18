@@ -9823,6 +9823,15 @@
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnStorage.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildRiskSummaryLogForCustomerOwned.sql" />
+    <Build Include="dbo\Tables\tblSCISTrackingDiscountCode.sql" />
+    <Build Include="dbo\Tables\tblSCICTrackingSetup.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCISGetBinInfo.sql" />
+    <Build Include="dbo\Tables\tblSCISBinDiscountHeader.sql" />
+    <Build Include="dbo\Tables\tblSCISBinSearch.sql" />
+    <Build Include="dbo\Tables\tblSCISBinSearchDiscountHeader.sql" />
+    <Build Include="dbo\Functions\fnSCISGetAverageDiscountPerStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCISBinSearchGetHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCISBinSearch.sql" />
     <Build Include="dbo\Tables\tblICInventoryDailyTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockDailyQuantity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryDailyValuation.sql" />
