@@ -100,6 +100,7 @@ BEGIN
 			,mc.strCellName
 			,i.strLotTracking
 			,i.intItemId
+			,w.strERPOrderNo
 			,i.intCategoryId
 			,w.intTransactionFrom
 		FROM tblMFWorkOrder w
@@ -146,6 +147,7 @@ BEGIN
 			,mc.strCellName
 			,i.strLotTracking
 			,i.intItemId
+			,w.strERPOrderNo
 			,i.intCategoryId
 			,w.intTransactionFrom
 		FROM tblMFWorkOrder w

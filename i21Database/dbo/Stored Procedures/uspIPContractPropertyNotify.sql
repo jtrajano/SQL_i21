@@ -8,6 +8,27 @@ DECLARE @strStyle NVARCHAR(MAX)
 	,@strDetail2 NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
 	,@intBookId int
+	,@dtmProcessedDate Datetime
+
+	SELECT @dtmProcessedDate = Convert(DATETIME, Convert(CHAR, Getdate(), 101))
+
+	IF EXISTS (
+			SELECT *
+			FROM tblIPContractPropertyNotify
+			WHERE dtmProcessedDate = @dtmProcessedDate
+			)
+	BEGIN
+		SET @strMessage = ''
+
+		SELECT @strMessage AS strMessage
+
+		RETURN
+	END
+	ELSE
+	BEGIN
+		INSERT INTO tblIPContractPropertyNotify (dtmProcessedDate)
+		SELECT @dtmProcessedDate
+	END
 
 SET @strStyle = '<style type="text/css" scoped>
 					table.GeneratedTable {
