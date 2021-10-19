@@ -491,7 +491,7 @@ BEGIN TRY
 					,strMiscDescription		= IC.strDescription
 					,dblQtyReceived			= (CASE 
 												WHEN IC.strCostMethod = 'Amount' THEN 1
-												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
+												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity END
 												ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
 											END) * -1
 					,dblUnitQty				= SC.dblUnitQty
@@ -550,8 +550,8 @@ BEGIN TRY
 					,strMiscDescription		= IC.strDescription
 					,dblQtyReceived			= (CASE 
 												WHEN IC.strCostMethod = 'Amount' THEN 1
-												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
-												ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
+												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity END
+												ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity END
 											END) * -1
 					,dblUnitQty				= SC.dblUnitQty
 					,dblDiscount			= 0
