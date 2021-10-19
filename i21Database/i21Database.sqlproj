@@ -269,6 +269,13 @@
     <Build Include="dbo\Tables\tblApiSchemaVendorPricing.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendorPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorPricing.sql" />
+    <Build Include="dbo\Tables\tblCMCashFlowReport.sql" />
+    <Build Include="dbo\Tables\tblCMCashFlowReportSummary.sql" />
+    <Build Include="dbo\Tables\tblCMCashFlowReportSummaryGroup.sql" />
+    <Build Include="dbo\Tables\tblCMCashFlowReportSummaryCode.sql" />
+    <Build Include="dbo\Views\vyuCMCashFlowReport.sql" />
+    <Build Include="dbo\Views\vyuCMCashFlowReportSummary.sql" />
+    <None Include="Scripts\Post-Deployment\CM\12_CashFlowReportSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
