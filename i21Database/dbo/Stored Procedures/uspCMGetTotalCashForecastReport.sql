@@ -17,7 +17,6 @@ BEGIN
 		@dblBeginBalanceUnit NUMERIC(18, 6),
 		@dblTotalBeginBalance NUMERIC(18, 6) = 0,
 		@dblTotalBeginBalanceUnit NUMERIC(18, 6) = 0,
-		@dblBucket1 DECIMAL(18, 6) = 0, -- Current
 		@dblBucket2 DECIMAL(18, 6) = 0, -- 1-7
 		@dblBucket3 DECIMAL(18, 6) = 0, -- 8-14
 		@dblBucket4 DECIMAL(18, 6) = 0, -- 15-21
@@ -150,15 +149,7 @@ BEGIN
 		SELECT @dblBucket9 = ISNULL(@dblBucket9, 0) + ISNULL(dblAmount, 0) 
 		FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(9, @intCurrentAccountId, DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate), @tblFilter);
 
-	END;
-
-	-- Get Begin Balance total
-	SELECT @dblTotalBeginBalance = SUM(dblBeginBalance), @dblTotalBeginBalanceUnit =  SUM(dblBeginBalanceUnit) FROM #tblAccounts
-
-	-- Bucket Current's value is the Total of BeginBalance of each GL accounts
-	SET @dblBucket1 = @dblTotalBeginBalance
-
-	INSERT INTO tblCMCashFlowReportSummary
+		INSERT INTO tblCMCashFlowReportSummary
 		(
 			dtmReportDate,
 			intReportingCurrencyId,
@@ -178,23 +169,25 @@ BEGIN
 			intCashFlowReportSummaryCodeId,
 			intConcurrencyId
 		)
-	VALUES (
-		 @dtmReportDate
-		,@intReportingCurrencyId
-		,@intBankAccountId
-		,@intCompanyLocationId
-		,@dblBucket1 + @dblBucket2 + @dblBucket3 + @dblBucket4 + @dblBucket5 + @dblBucket6 + @dblBucket7 + @dblBucket8 + @dblBucket9
-		,@dblBucket1
-		,@dblBucket2
-		,@dblBucket3
-		,@dblBucket4
-		,@dblBucket5
-		,@dblBucket6
-		,@dblBucket7
-		,@dblBucket8
-		,@dblBucket9
-		,@intCashFlowReportId
-		,1 -- Report Code = 1 for Total Cash
-		,1
-	)
+		VALUES (
+			 @dtmReportDate
+			,@intReportingCurrencyId
+			,@intCurrentAccountId
+			,@intCompanyLocationId
+			,@dblBeginBalance + @dblBucket2 + @dblBucket3 + @dblBucket4 + @dblBucket5 + @dblBucket6 + @dblBucket7 + @dblBucket8 + @dblBucket9
+			,@dblBeginBalance -- 'Current' bucket is Begin Balance of account
+			,@dblBucket2
+			,@dblBucket3
+			,@dblBucket4
+			,@dblBucket5
+			,@dblBucket6
+			,@dblBucket7
+			,@dblBucket8
+			,@dblBucket9
+			,@intCashFlowReportId
+			,1 -- Report Code = 1 for Total Cash
+			,1
+		)
+	END;
+
 END
