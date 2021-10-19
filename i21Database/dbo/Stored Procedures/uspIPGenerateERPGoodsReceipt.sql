@@ -33,6 +33,7 @@ BEGIN TRY
 		,@strTransferNo NVARCHAR(50)
 		,@strERPTransferOrderNo NVARCHAR(50)
 		,@strCurrency NVARCHAR(40)
+		,@intReceiptFeedHeaderId INT
 	DECLARE @intInventoryReceiptItemId INT
 		,@strContractNumber NVARCHAR(50)
 		,@strSequenceNo NVARCHAR(3)
@@ -54,8 +55,10 @@ BEGIN TRY
 		,@strParentLotNumber NVARCHAR(50)
 		,@intSampleStatusId INT
 		,@strReceiptType NVARCHAR(50)
+		,@intContainerId INT
 	DECLARE @tblICInventoryReceipt TABLE (intInventoryReceiptId INT)
 	DECLARE @tblICInventoryReceiptItem TABLE (intInventoryReceiptItemId INT)
+	DECLARE @ReceiptItemId TABLE (intInventoryReceiptItemId INT)
 	DECLARE @tblICInventoryReceiptItemParentLot TABLE (intParentLotId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -133,6 +136,7 @@ BEGIN TRY
 			,@strERPTransferOrderNo = NULL
 			,@strCurrency = NULL
 			,@strReceiptType = NULL
+			,@intReceiptFeedHeaderId = NULL
 
 		SELECT @intInventoryReceiptItemId = NULL
 
@@ -178,6 +182,8 @@ BEGIN TRY
 			INSERT INTO tblIPInvReceiptFeed (
 				strCompanyLocation
 				,intInventoryReceiptId
+				,intInventoryReceiptItemId
+				,intReceiptFeedHeaderId
 				,strReceiptNumber
 				,strTransferNo
 				,strERPTransferOrderNo
@@ -189,6 +195,8 @@ BEGIN TRY
 				)
 			SELECT @strCompanyLocation
 				,@intInventoryReceiptId
+				,RI.intInventoryReceiptItemId
+				,NULL
 				,@strReceiptNumber
 				,@strTransferNo
 				,@strERPTransferOrderNo
@@ -197,6 +205,8 @@ BEGIN TRY
 				,NULL
 				,NULL
 				,NULL
+			FROM tblICInventoryReceiptItem RI
+			WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
 		END
 		ELSE
 		BEGIN
@@ -206,8 +216,8 @@ BEGIN TRY
 				,strCreatedBy = @strUserName
 				,strMessage = NULL
 				,intStatusId = NULL
-				,strFeedStatus = NULL
 			WHERE intInventoryReceiptId = @intInventoryReceiptId
+				AND ISNULL(intStatusId, 1) = 1
 		END
 
 		IF @intActionId = 1
@@ -236,15 +246,20 @@ BEGIN TRY
 			SET strMessage = @strError
 				,intStatusId = 1
 			WHERE intInventoryReceiptId = @intInventoryReceiptId
+				AND ISNULL(intStatusId, 1) = 1
 
 			GOTO NextRec
 		END
 
+		-- Receipt Feed Id
+		EXEC dbo.uspSMGetStartingNumber 165
+			,@intReceiptFeedHeaderId OUTPUT
+
 		SELECT @strXML = ''
 
-		SELECT @strXML += '<header id="' + LTRIM(@intInventoryReceiptId) + '">'
+		SELECT @strXML += '<header id="' + LTRIM(@intReceiptFeedHeaderId) + '">'
 
-		SELECT @strXML += '<TrxSequenceNo>' + LTRIM(@intInventoryReceiptId) + '</TrxSequenceNo>'
+		SELECT @strXML += '<TrxSequenceNo>' + LTRIM(@intReceiptFeedHeaderId) + '</TrxSequenceNo>'
 
 		SELECT @strXML += '<CompanyLocation>' + LTRIM(@strCompanyLocation) + '</CompanyLocation>'
 
@@ -273,12 +288,16 @@ BEGIN TRY
 		DELETE
 		FROM @tblICInventoryReceiptItem
 
+		DELETE
+		FROM @ReceiptItemId
+
 		SELECT @strLineXML = ''
 
 		INSERT INTO @tblICInventoryReceiptItem (intInventoryReceiptItemId)
 		SELECT RI.intInventoryReceiptItemId
 		FROM tblICInventoryReceiptItem RI
 		WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+			AND RI.ysnExported IS NULL
 
 		SELECT @intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)
 		FROM @tblICInventoryReceiptItem
@@ -311,6 +330,7 @@ BEGIN TRY
 				,@intParentLotId = NULL
 				,@strParentLotNumber = NULL
 				,@intSampleStatusId = NULL
+				,@intContainerId = NULL
 
 			SELECT @intItemId = RI.intItemId
 			FROM tblICInventoryReceiptItem RI
@@ -365,6 +385,7 @@ BEGIN TRY
 				,@strERPItemNumber = ISNULL(CD.strERPItemNumber, '')
 				,@strCommodityCode = C.strCommodityCode
 				,@intPricingTypeId = CD.intPricingTypeId
+				,@intContainerId = RI.intContainerId
 			FROM tblICInventoryReceiptItem RI
 			JOIN tblICItem I ON I.intItemId = RI.intItemId
 			JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = RI.intUnitMeasureId
@@ -416,19 +437,64 @@ BEGIN TRY
 				END
 			END
 
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPInvReceiptFeed
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+						AND intInventoryReceiptItemId = @intInventoryReceiptItemId
+					)
+			BEGIN
+				INSERT INTO tblIPInvReceiptFeed (
+					strCompanyLocation
+					,intInventoryReceiptId
+					,intInventoryReceiptItemId
+					,intReceiptFeedHeaderId
+					,strReceiptNumber
+					,strTransferNo
+					,strERPTransferOrderNo
+					,strCreatedBy
+					,strTransactionType
+					,intStatusId
+					,strMessage
+					,strFeedStatus
+					)
+				SELECT @strCompanyLocation
+					,@intInventoryReceiptId
+					,@intInventoryReceiptItemId
+					,@intReceiptFeedHeaderId
+					,@strReceiptNumber
+					,@strTransferNo
+					,@strERPTransferOrderNo
+					,@strUserName
+					,LTRIM(@intActionId)
+					,NULL
+					,NULL
+					,NULL
+			END
+			ELSE
+			BEGIN
+				UPDATE tblIPInvReceiptFeed
+				SET intReceiptFeedHeaderId = @intReceiptFeedHeaderId
+					,strMessage = NULL
+					,intStatusId = NULL
+				WHERE intInventoryReceiptId = @intInventoryReceiptId
+					AND intInventoryReceiptItemId = @intInventoryReceiptItemId
+			END
+
 			IF @strError <> ''
 			BEGIN
 				UPDATE tblIPInvReceiptFeed
 				SET strMessage = @strError
 					,intStatusId = 1
 				WHERE intInventoryReceiptId = @intInventoryReceiptId
+					AND intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 				GOTO NextRec
 			END
 
 			SELECT @strItemXML = ''
 
-			SELECT @strItemXML += '<line id="' + LTRIM(@intInventoryReceiptItemId) + '" parentId="' + LTRIM(@intInventoryReceiptId) + '">'
+			SELECT @strItemXML += '<line id="' + LTRIM(@intInventoryReceiptItemId) + '" parentId="' + LTRIM(@intReceiptFeedHeaderId) + '">'
 
 			SELECT @strItemXML += '<TrxSequenceNo>' + LTRIM(@intInventoryReceiptItemId) + '</TrxSequenceNo>'
 
@@ -472,6 +538,7 @@ BEGIN TRY
 				SET strMessage = 'Receipt Item XML not available. '
 					,intStatusId = 1
 				WHERE intInventoryReceiptId = @intInventoryReceiptId
+					AND intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 				GOTO NextRec
 			END
@@ -490,6 +557,7 @@ BEGIN TRY
 				SELECT @intParentLotId = MIN(intParentLotId)
 				FROM @tblICInventoryReceiptItemParentLot
 
+				-- Receipt Sample (Parent Lot) check
 				WHILE @intParentLotId IS NOT NULL
 				BEGIN
 					SELECT @intSampleStatusId = NULL
@@ -518,16 +586,45 @@ BEGIN TRY
 					FROM @tblICInventoryReceiptItemParentLot
 					WHERE intParentLotId > @intParentLotId
 				END
-			END
 
-			IF @strError <> ''
-			BEGIN
-				UPDATE tblIPInvReceiptFeed
-				SET strMessage = @strError
-					,intStatusId = 1
-				WHERE intInventoryReceiptId = @intInventoryReceiptId
+				-- Arrival Sample (Container) check
+				IF @strError <> ''
+				BEGIN
+					SELECT @intSampleStatusId = NULL
+						,@strError = ''
 
-				GOTO NextRec
+					SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+					FROM tblQMSample S
+					WHERE S.strContainerNumber = @strContainerNumber
+					ORDER BY S.intSampleId DESC
+
+					--SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+					--FROM tblQMSample S
+					--WHERE S.intLoadContainerId = @intContainerId
+					--ORDER BY S.intSampleId DESC
+
+					IF @intSampleStatusId IS NULL
+					BEGIN
+						SELECT @strError = @strError + 'Sample is not available for receipt container "' + @strContainerNumber + '". '
+					END
+					ELSE IF @intSampleStatusId <> 3
+					BEGIN
+						SELECT @strError = @strError + 'Approved Sample is not available for receipt container "' + @strContainerNumber + '". '
+					END
+				END
+
+				IF @strError <> ''
+				BEGIN
+					UPDATE tblIPInvReceiptFeed
+					SET strMessage = @strError
+						,intStatusId = 1
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+						AND intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+					SELECT @strError = ''
+
+					GOTO NextItemRec
+				END
 			END
 
 			SELECT @strLotXML = ''
@@ -570,18 +667,36 @@ BEGIN TRY
 				SET strMessage = 'Receipt Lot XML not available. '
 					,intStatusId = 1
 				WHERE intInventoryReceiptId = @intInventoryReceiptId
+					AND intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 				GOTO NextRec
 			END
 
 			SELECT @strLineXML += @strItemXML + @strLotXML + '</line>'
 
+			INSERT INTO @ReceiptItemId (intInventoryReceiptItemId)
+			SELECT @intInventoryReceiptItemId
+
+			NextItemRec:
+
 			SELECT @intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)
 			FROM @tblICInventoryReceiptItem
 			WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
 		END
 
-		SELECT @strHeaderXML += @strXML + @strLineXML + '</header>'
+		IF EXISTS (
+				SELECT 1
+				FROM @ReceiptItemId
+				)
+		BEGIN
+			SELECT @strHeaderXML += @strXML + @strLineXML + '</header>'
+		END
+		ELSE
+		BEGIN
+			UPDATE tblSMStartingNumber
+			SET intNumber = (intNumber - 1)
+			WHERE intStartingNumberId = 165
+		END
 
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
@@ -589,11 +704,19 @@ BEGIN TRY
 			SET ysnExported = 1
 				,dtmExportedDate = GETDATE()
 			WHERE intInventoryReceiptId = @intInventoryReceiptId
+				AND intInventoryReceiptItemId IN (
+					SELECT intInventoryReceiptItemId
+					FROM @ReceiptItemId
+					)
 
 			UPDATE tblIPInvReceiptFeed
 			SET strMessage = NULL
 				,intStatusId = 2
 			WHERE intInventoryReceiptId = @intInventoryReceiptId
+				AND intInventoryReceiptItemId IN (
+					SELECT intInventoryReceiptItemId
+					FROM @ReceiptItemId
+					)
 		END
 
 		NextRec:
