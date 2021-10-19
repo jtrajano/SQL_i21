@@ -12,7 +12,7 @@ DECLARE @LayoutTitle NVARCHAR(100)
 -- Import File Headers for Transports - Import Rack Price --
 ------------------------------------------------------------
 
--- Rack Price - Marathon
+-- Marathon Rack Price Import
 SET @LayoutTitle = 'Rack Price - Marathon'
 IF EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
@@ -394,9 +394,10 @@ BEGIN
 	UPDATE tblSMImportFileHeader SET strLayoutTitle = 'TR - iRely Enterprise Rack Price Import' WHERE strLayoutTitle = @LayoutTitle
 END
 
+SET @LayoutTitle = 'TR - iRely Enterprise Rack Price Import'
 IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
 BEGIN
-	PRINT ('Deploying - Rack Price - iRely Enterprise')
+	PRINT ('Deploying - TR - iRely Enterprise Rack Price Import')
 
 	INSERT INTO tblSMImportFileHeader (strLayoutTitle
 		, strFileType
