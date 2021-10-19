@@ -3853,6 +3853,15 @@ ELSE
 DECLARE @TicketManagementCreateParentMenuId INT
 SELECT @TicketManagementCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'iSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId)
+   	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+    VALUES (N'iSite', N'Ticket Management', @TicketManagementParentMenuId, N'iSite', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1, 1)
+ELSE
+    UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0, intRow = 1 WHERE strMenuName = 'iSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
+
+DECLARE @TicketManagementISiteParentMenuId INT
+SELECT @TicketManagementISiteParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'iSite' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */
 UPDATE tblSMMasterMenu SET intParentMenuID = @TicketManagementActivitiesParentMenuId WHERE intParentMenuID =  @TicketManagementParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @TicketManagementMaintenanceParentMenuId WHERE intParentMenuID =  @TicketManagementParentMenuId AND strCategory = 'Maintenance'
@@ -4037,6 +4046,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Ticke
 	VALUES (N'New Ticket', N'Ticket Management', @TicketManagementCreateParentMenuId, N'New Ticket', N'Create', N'Screen', N'Grain.view.ScaleStationSelection?action=new', N'small-menu-create', 0, 0, 0, 1, 0, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.ScaleStationSelection?action=new' WHERE strMenuName = 'New Ticket' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementCreateParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Discount Header' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Discount Header', N'Ticket Management', @TicketManagementISiteParentMenuId, N'Discount Header', N'iSite', N'Screen', N'Grain.view.BinSearchDiscountHeader', N'small-menu-create', 0, 0, 0, 1, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.BinSearchDiscountHeader' WHERE strMenuName = 'Discount Header' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bin Configuration' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId])
+	VALUES (N'Bin Configuration', N'Ticket Management', @TicketManagementISiteParentMenuId, N'Bin Configuration', N'iSite', N'Screen', N'Grain.view.BinSearchConfiguration?showSearch=true', N'small-menu-create', 0, 0, 0, 1, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Grain.view.BinSearchConfiguration?showSearch=true' WHERE strMenuName = 'Bin Configuration' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementISiteParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName IN('Discount Tables','Discount Schedules')
