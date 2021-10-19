@@ -169,7 +169,7 @@ FROM
 
 	--CONTRACT
 	SELECT 
-		 t1.intBillDetailId
+		 t3.intBillDetailIdItem
 		,t3.strId
 		,t3.intBillId
 		,t3.intItemId
@@ -185,41 +185,21 @@ FROM
 		,t3.strTaxClass
 	FROM (
 			 SELECT 
-				 BillDtl.intBillDetailId
-				,BillDtl.dblQtyOrdered
-				,Bill.intBillId
-				,BillDtl.intInventoryReceiptItemId
-				,BillDtl.intLinkingId
-			FROM tblAPBillDetail BillDtl
-			JOIN tblAPBill Bill 
-				ON BillDtl.intBillId = Bill.intBillId
-			JOIN tblICItem Item 
-				ON BillDtl.intItemId = Item.intItemId 
-					AND Item.strType <> 'Other Charge'
-			WHERE BillDtl.intContractDetailId IS NOT NULL
-		  ) t1
-	
-	LEFT JOIN
-	(
-		SELECT * 
-		FROM
-		( 
-			 SELECT 
 				 strId						= Bill.strBillId
-				,intBillId					= BillDtl.intBillId
-				,intBillDetailId			= BillDtl.intBillDetailId
-				,intItemId					= BillDtl.intItemId
-				,strDiscountCode			= Item.strShortName
-				,strDiscountCodeDescription	= Item.strItemNo
+				,intBillId					= BillDtl2.intBillId
+				,intBillDetailId			= BillDtl2.intBillDetailId
+				,intItemId					= BillDtl2.intItemId
+				,intBillDetailIdItem		= BillDtl.intBillDetailId
+				,strDiscountCode			= Item2.strShortName
+				,strDiscountCodeDescription	= Item2.strItemNo
 				,dblDiscountAmount			= CASE 
 							 					WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN 
 							 																	CASE 
 							 																		WHEN INVRCPTCHR.strCostMethod = 'Per Unit' THEN INVRCPTCHR.dblRate
 							 																		WHEN INVRCPTCHR.strCostMethod = 'Amount'   THEN INVRCPTCHR.dblAmount
 							 																	END
-							 					ELSE BillDtl.dblCost
+							 					ELSE BillDtl2.dblCost
 											 END
-		
 				,dblShrinkPercent			= CASE 
 												WHEN INVRCPTCHR.strCostMethod IS NOT NULL THEN ISNULL(ScaleDiscount.dblShrinkPercent, 0)
 												WHEN StrgHstry.intBillId	  IS NOT NULL THEN ISNULL(StorageDiscount.dblShrinkPercent, 0)
@@ -231,24 +211,34 @@ FROM
 												ELSE 'N/A'
 											END  COLLATE Latin1_General_CI_AS as dblGradeReading
 
-				,dblAmount					= BillDtl.dblTotal
-				,intContractDetailId		= ISNULL(BillDtl.intContractDetailId, 0)
-				,dblTax						= BillDtl.dblTax
-				,dblNetTotal				= BillDtl.dblTotal + BillDtl.dblTax
+				,dblAmount					= BillDtl2.dblTotal
+				,intContractDetailId		= ISNULL(BillDtl2.intContractDetailId, 0)
+				,dblTax						= BillDtl2.dblTax
+				,dblNetTotal				= BillDtl2.dblTotal + BillDtl2.dblTax
 				,strTaxClass = TaxClass.strTaxClass
-				,BillDtl.intInventoryReceiptItemId
-				,BillDtl.intLinkingId
+				,BillDtl2.intInventoryReceiptItemId
+				,BillDtl2.intLinkingId
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
-			ON BillDtl.intBillId = Bill.intBillId --and Bill.intTransactionType = 1
+			ON BillDtl.intBillId = Bill.intBillId
 		JOIN tblICItem Item 
-			ON BillDtl.intItemId = Item.intItemId
+			ON BillDtl.intItemId = Item.intItemId 
+			AND Item.strType <> 'Other Charge'
+			AND BillDtl.intContractDetailId IS NOT NULL
+		LEFT JOIN tblAPBillDetail BillDtl2
+			ON BillDtl2.intBillId = Bill.intBillId
+			AND isnull(BillDtl2.intInventoryReceiptItemId, isnull(BillDtl.intInventoryReceiptItemId, 0)) = isnull(BillDtl.intInventoryReceiptItemId, 0)
+			AND (ISNULL(BillDtl2.intLinkingId, 0) = ISNULL(BillDtl.intLinkingId, 0) OR ISNULL(BillDtl2.intLinkingId,-90) = -90)
+		LEFT JOIN tblAPBill Bill2 
+			ON BillDtl2.intBillId = Bill2.intBillId --and Bill.intTransactionType = 1
+		LEFT JOIN tblICItem Item2 
+			ON BillDtl2.intItemId = Item2.intItemId
 		LEFT JOIN vyuAPBillDetailTax Tax 
-			ON BillDtl.intBillDetailId = Tax.intBillDetailId
+			ON BillDtl2.intBillDetailId = Tax.intBillDetailId
 		LEFT JOIN tblSMTaxClass TaxClass 
 			ON Tax.intTaxClassId = TaxClass.intTaxClassId
 		LEFT JOIN tblICInventoryReceiptCharge INVRCPTCHR 
-			ON INVRCPTCHR.intInventoryReceiptChargeId = BillDtl.intInventoryReceiptChargeId	
+			ON INVRCPTCHR.intInventoryReceiptChargeId = BillDtl2.intInventoryReceiptChargeId	
 		LEFT JOIN tblICInventoryReceipt INVRCPT 
 			ON INVRCPT.intInventoryReceiptId = INVRCPTCHR.intInventoryReceiptId
 		LEFT JOIN tblGRStorageHistory StrgHstry 
@@ -266,7 +256,7 @@ FROM
 						ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 					WHERE QM.strSourceType = 'Scale'
 			  ) ScaleDiscount 
-				ON ScaleDiscount.intTicketId = BillDtl.intScaleTicketId 
+				ON ScaleDiscount.intTicketId = BillDtl2.intScaleTicketId 
 					AND ScaleDiscount.intItemId = INVRCPTCHR.intChargeId 
 					AND INVRCPT.intSourceType = 1	
 		LEFT JOIN (
@@ -282,16 +272,11 @@ FROM
 						ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 					WHERE QM.strSourceType = 'Storage'
 			  ) StorageDiscount 
-				ON StorageDiscount.intTicketFileId = BillDtl.intCustomerStorageId 
-					AND StorageDiscount.intItemId = BillDtl.intItemId
-		WHERE Item.strType = 'Other Charge'
+				ON StorageDiscount.intTicketFileId = BillDtl2.intCustomerStorageId 
+					AND StorageDiscount.intItemId = BillDtl2.intItemId
+		WHERE Item2.strType = 'Other Charge'
 			--AND ((StrgHstry.intContractHeaderId IS NOT NULL) --settlement with contract
 				--OR (BillDtl.intInventoryReceiptChargeId IS NOT NULL AND BillDtl.intContractDetailId IS NOT NULL)) 
-		) tbl 
    )t3 
-		ON --t3.intBillId = t2.intBillId AND t3.intBillId = t1.intBillId
-				t3.intBillId = t1.intBillId 
-					and isnull(t3.intInventoryReceiptItemId, isnull(t1.intInventoryReceiptItemId, 0)) = isnull(t1.intInventoryReceiptItemId, 0)
-					and (ISNULL(t3.intLinkingId, 0) = ISNULL(t1.intLinkingId, 0) OR ISNULL(t3.intLinkingId,-90) = -90)
 	WHERE t3.intItemId IS NOT NULL 
 )t	
