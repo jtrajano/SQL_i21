@@ -12,3 +12,6 @@
 GO
 CREATE NONCLUSTERED INDEX [IX_tblGRTicketDiscountItemInfo_intDiscountItemId_intTicketDiscountId] ON [dbo].[tblGRTicketDiscountItemInfo]([intItemId],[intTicketDiscountId]) INCLUDE ([ysnInventoryCost]);
 GO
+CREATE NONCLUSTERED INDEX [IX_tblGRTicketDiscountItemInfo_intTicketDiscountId]
+ON [dbo].[tblGRTicketDiscountItemInfo]([intTicketDiscountId]) INCLUDE ([intItemId]);
+GO

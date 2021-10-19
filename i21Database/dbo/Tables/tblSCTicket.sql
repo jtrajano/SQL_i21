@@ -236,6 +236,10 @@ CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intLoadDetailId]
 ON [dbo].[tblSCTicket] ([intLoadDetailId])
 GO
 
+CREATE NONCLUSTERED INDEX [IX_tblSCTicket_intInvoiceId]
+ON [dbo].[tblSCTicket] ([intInvoiceId])
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',
