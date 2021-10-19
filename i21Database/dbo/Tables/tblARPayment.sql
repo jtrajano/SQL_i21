@@ -54,8 +54,8 @@ CREATE NONCLUSTERED INDEX [NC_Index_tblARPayment]
 	ON [dbo].[tblARPayment]([intEntityCustomerId], [ysnPosted], [ysnProcessedToNSF]) 
 INCLUDE ([dtmDatePaid], [dblAmountPaid], [strRecordNumber], [ysnInvoicePrepayment]);
 GO
-CREATE NONCLUSTERED INDEX [IDX_tblARPayment_strRecordNumber] 
-	ON [dbo].[tblARPayment] ([strRecordNumber])
+CREATE NONCLUSTERED INDEX [IDX_tblARPayment_strRecordNumber_intAccountId] 
+	ON [dbo].[tblARPayment] ([strRecordNumber], [intAccountId])
 	
 --TRIGGERS INSERT
 GO
