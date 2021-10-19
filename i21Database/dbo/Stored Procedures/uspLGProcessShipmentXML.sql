@@ -91,6 +91,8 @@ BEGIN TRY
 		,@intCustomerEntityId INT
 		,@ysnPosted BIT
 		,@ysnParent BIT
+		,@intSContractSeq int
+		,@strAuditDescription nvarchar(50)
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -2459,7 +2461,8 @@ BEGIN TRY
 							,[ysnNoClaim] BIT
 							,[intLoadDetailRefId] INT
 							,intLoadDetailId INT
-							) x ON x.intLoadDetailId = LD.intLoadDetailRefId AND LD.intLoadId =@intNewLoadId 
+							) x ON x.intLoadDetailId = LD.intLoadDetailRefId
+						AND LD.intLoadId = @intNewLoadId
 					LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailRefId = x.intSContractDetailId
 						AND PCD.intBookId = @intBookId
 						AND IsNULL(PCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
@@ -2468,7 +2471,6 @@ BEGIN TRY
 						AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IsNULL(PCD.intContractHeaderId, SCD.intContractHeaderId)
 					WHERE x.intLoadDetailId = @intLoadDetailId
-						
 				END
 
 				IF EXISTS (
@@ -2481,6 +2483,8 @@ BEGIN TRY
 					SELECT @intContractDetailId = NULL
 						,@dtmETAPOD = NULL
 						,@strDestinationPort = NULL
+						,@intSContractSeq=NULL
+						,@strAuditDescription=NULL
 
 					SELECT @dtmETAPOD = dtmETAPOD
 						,@strDestinationPort = strDestinationPort
@@ -2510,6 +2514,7 @@ BEGIN TRY
 
 					SELECT @intContractHeaderId = intContractHeaderId
 						,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
+						,@intSContractSeq=intContractSeq
 					FROM tblCTContractDetail
 					WHERE intContractDetailId = @intContractDetailId
 
@@ -2519,6 +2524,17 @@ BEGIN TRY
 						SET dtmUpdatedAvailabilityDate = @dtmNewETAPOD
 							,dtmPlannedAvailabilityDate = @dtmETAPOD
 						WHERE intContractDetailId = @intContractDetailId
+
+						SET @strAuditDescription = 'Sequence - ' + CAST(@intSContractSeq AS VARCHAR(20)) + ', Updated Availability Date'
+
+						EXEC dbo.uspSMAuditLog @keyValue = @intContractHeaderId
+							,@screenName = 'ContractManagement.view.Contract'
+							,@entityId = @intUserId
+							,@actionType = 'Updated (from Feed)'
+							,@actionIcon = 'small-tree-modified'
+							,@changeDescription = @strAuditDescription
+							,@fromValue = @dtmUpdatedAvailabilityDate
+							,@toValue = @dtmNewETAPOD
 
 						SELECT TOP 1 @intApprovedById = intApprovedById
 						FROM tblCTApprovedContract
@@ -2737,7 +2753,8 @@ BEGIN TRY
 							,[strWarehouseCargoNumber] = x.[strWarehouseCargoNumber]
 							,[intConcurrencyId] = LD.[intConcurrencyId] + 1
 						FROM tblLGLoadDetailLot LD
-						JOIN tblLGLoadDetail LD2 on LD2.intLoadDetailId=LD.intLoadDetailId AND LD2.intLoadId =@intNewLoadId 
+						JOIN tblLGLoadDetail LD2 ON LD2.intLoadDetailId = LD.intLoadDetailId
+							AND LD2.intLoadId = @intNewLoadId
 						JOIN OPENXML(@idoc, 'vyuIPLoadDetailViews/vyuIPLoadDetailView', 2) WITH (
 								[intLoadDetailId] INT
 								,[dblLotQuantity] NUMERIC(38, 20)
