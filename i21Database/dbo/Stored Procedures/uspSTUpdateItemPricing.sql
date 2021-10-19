@@ -169,7 +169,8 @@ BEGIN TRY
 				,dblNewUnitAfterDiscount NUMERIC(38, 20) NULL 
 				,dblNewCost NUMERIC(38, 20) NULL 
 				,dtmNewBeginDate DATETIME NULL
-				,dtmNewEndDate DATETIME NULL 		
+				,dtmNewEndDate DATETIME NULL 			
+				,strAction VARCHAR(20) NULL	
 			)
 		;
 	END
