@@ -66,6 +66,11 @@ INNER JOIN(
 												ELSE   
 													0	
 												END  
+											WHEN TOR.intYear IS NOT NULL  AND (T.strAwardPeriod = 'Start of Year') THEN
+												CASE WHEN TOR.intYear = YEAR(GETDATE())
+												THEN TOR.dblHoursTOR
+												ELSE 0
+												END
 											ELSE 
 												CASE WHEN PCTimeOff.intYear IS NOT NULL AND (PCTimeOff.intYear = YEAR(GETDATE())) THEN
 														dblHours
