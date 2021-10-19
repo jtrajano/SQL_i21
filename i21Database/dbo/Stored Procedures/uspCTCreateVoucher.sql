@@ -177,11 +177,12 @@ begin try
 		@voucherPayablesDataTemp
 	select
 		intVoucherPayableId = a.intVoucherPayableId
-		,dblQuantityToBill = a.dblQuantityToBill
+		,dblQuantityToBill = (case when a.dblQuantityToBill > ri.dblOpenReceive then ri.dblOpenReceive else a.dblQuantityToBill end)
 		,intContractDetailId = a.intContractDetailId
 		,intInventoryReceiptItemId = a.intInventoryReceiptItemId
 	from
 		@voucherPayables a
+		join tblICInventoryReceiptItem ri on ri.intInventoryReceiptItemId = a.intInventoryReceiptItemId
 	where
 		isnull(a.intInventoryReceiptChargeId,0) = 0
 		and a.intContractDetailId is not null;
