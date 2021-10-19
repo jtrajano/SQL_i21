@@ -106,7 +106,7 @@ IF @@ERROR <> 0 GOTO Post_Rollback
 SELECT TOP 1   
   @intTransactionId = intTransactionId  
   ,@dtmDate = dtmDate  
-  ,@dblAmount = dblAmount  
+  ,@dblAmount = dblAmountFrom  
   ,@ysnTransactionPostedFlag = ysnPosted  
   ,@intBankAccountIdFrom = intBankAccountIdFrom  
   ,@intBankAccountIdTo = intBankAccountIdTo  
