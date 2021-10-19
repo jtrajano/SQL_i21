@@ -48,12 +48,16 @@
 	CONSTRAINT [FK_tblARPayment_tblEMEntityCardInformation_intEntityCardInfoId] FOREIGN KEY ([intEntityCardInfoId]) REFERENCES [dbo].[tblEMEntityCardInformation] ([intEntityCardInfoId]),
 	CONSTRAINT [FK_tblARPayment_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
-
-
-
-
-
-
+--INDEXES
+GO
+CREATE NONCLUSTERED INDEX [NC_Index_tblARPayment]
+	ON [dbo].[tblARPayment]([intEntityCustomerId], [ysnPosted], [ysnProcessedToNSF]) 
+INCLUDE ([dtmDatePaid], [dblAmountPaid], [strRecordNumber], [ysnInvoicePrepayment]);
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARPayment_strRecordNumber_intAccountId] 
+	ON [dbo].[tblARPayment] ([strRecordNumber], [intAccountId])
+	
+--TRIGGERS INSERT
 GO
 CREATE TRIGGER trgReceivePaymentRecordNumber
 ON tblARPayment

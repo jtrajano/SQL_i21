@@ -203,6 +203,33 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intOriginalInvoiceDetailId]
 	ON [dbo].[tblARInvoiceDetail] ([intOriginalInvoiceDetailId])
 GO
-
-CREATE INDEX [IX_tblARInvoiceDetail_[intInvoiceId] ON [dbo].[tblARInvoice] ([intInvoiceId] ASC)
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intInvoiceId] 
+	ON [dbo].[tblARInvoiceDetail] ([intInvoiceId])
+INCLUDE ([intItemId], [dblQtyShipped], [intItemUOMId], [intInventoryShipmentItemId], [intSalesOrderDetailId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intTicketId]
+	ON [dbo].[tblARInvoiceDetail] ([intTicketId])
+INCLUDE ([intInvoiceId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intSalesOrderDetailId]
+	ON [dbo].[tblARInvoiceDetail] ([intSalesOrderDetailId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intItemId]
+	ON [dbo].[tblARInvoiceDetail] ([intSalesOrderDetailId])
+INCLUDE ([intInvoiceId], [dblQtyShipped], [intSiteId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_strPricing_intContractHeaderId] 
+	ON [dbo].[tblARInvoiceDetail] ([strPricing],[intContractHeaderId]) 
+INCLUDE ([intInvoiceId], [dblQtyShipped], [intItemUOMId], [intContractDetailId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intAccountId]
+	ON [dbo].[tblARInvoiceDetail] ([intAccountId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intContractHeaderId_intContractDetailId_intItemContractHeaderId_intItemContractDetailId]
+	ON [dbo].[tblARInvoiceDetail] ([intContractHeaderId], [intContractDetailId], [intItemContractHeaderId], [intItemContractDetailId])
+INCLUDE ([intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [dblPrice])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoiceDetail_intLoadDetailId_intSiteDetailId]
+	ON [dbo].[tblARInvoiceDetail] ([intLoadDetailId])
+INCLUDE ([intInvoiceId], [intItemId], [intItemUOMId], [dblQtyShipped], [dblPrice])
 GO

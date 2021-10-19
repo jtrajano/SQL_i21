@@ -160,6 +160,50 @@
 	CONSTRAINT [FK_tblARInvoice_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
 	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId])
 );
+--INDEXES
+GO
+CREATE NONCLUSTERED INDEX [PIndex2]
+    ON [dbo].[tblARInvoice]([dblInvoiceSubtotal] ASC, [dblShipping] ASC, [dblTax] ASC, [dblInvoiceTotal] ASC, [dblDiscount] ASC, [dblAmountDue] ASC, [dblPayment] ASC, [strTransactionType] ASC, [intPaymentMethodId] ASC, [intAccountId] ASC, [ysnPosted] ASC, [ysnPaid] ASC);
+GO
+CREATE NONCLUSTERED INDEX [PIndex]
+    ON [dbo].[tblARInvoice]([strInvoiceNumber] ASC, [intEntityCustomerId] ASC, [dtmDate] ASC, [dtmDueDate] ASC, [intCurrencyId] ASC, [intCompanyLocationId] ASC, [intEntitySalespersonId] ASC, [dtmShipDate] ASC, [intShipViaId] ASC, [strPONumber] ASC, [intTermId] ASC);
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnPosted]
+	ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
+INCLUDE ([strTransactionType],[dtmPostDate],[dblInvoiceSubtotal])
+GO
+CREATE NONCLUSTERED INDEX [PIndex_tblARInvoice_intEntityCustomerId_ysnForgiven]
+	ON [dbo].[tblARInvoice] ([intEntityCustomerId],[ysnPosted])
+INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoiceTotal],[ysnForgiven])
+GO
+CREATE INDEX [IX_tblARInvoice_strType] 
+	ON [dbo].[tblARInvoice] ([strType] ASC)
+GO
+CREATE INDEX [IX_tblARInvoice_strTransactionType] 
+	ON [dbo].[tblARInvoice] ([strTransactionType] ASC)
+GO
+CREATE INDEX [IX_tblARInvoice_ysnPosted] 
+	ON [dbo].[tblARInvoice] ([ysnPosted] ASC)
+GO
+CREATE INDEX [IX_tblARInvoice_intOriginalInvoiceId] 
+	ON [dbo].[tblARInvoice] ([intOriginalInvoiceId] ASC)
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoice_intEntityCustomerId_intCompanyLocationId] 
+	ON [dbo].[tblARInvoice] ([intEntityCustomerId], [intCompanyLocationId]) 
+INCLUDE ([strTransactionType], [strType], [ysnRecurring], [ysnProcessedToNSF], [intPeriodId])
+GO
+CREATE NONCLUSTERED INDEX [IDX_tblARInvoice_intCompanyLocationId_ysnRecurring] 
+	ON [dbo].[tblARInvoice] ([intCompanyLocationId], [ysnRecurring]) 
+INCLUDE ([strTransactionType], [strType], [intEntityCustomerId], [ysnProcessedToNSF], [intPeriodId])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intPaymentId_intTransactionId_intMeterReadingId] 
+	ON [dbo].[tblARInvoice] ([intPaymentId], [intTransactionId], [intMeterReadingId])
+INCLUDE ([intInvoiceId], [strInvoiceNumber], [strTransactionType], [strType], [dblInvoiceTotal])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intAccountId] 
+	ON [dbo].[tblARInvoice] ([intAccountId])
+INCLUDE ([intInvoiceId], [strInvoiceNumber], [strTransactionType], [dblInvoiceTotal])
+GO
 
 
 
