@@ -257,10 +257,12 @@ BEGIN
 	FROM 
 		tblICInventoryTransaction t 
 	WHERE
-		t.intInventoryTransactionId = @intInventoryTransactionId			
-		OR (
-			t.strBatchId = @strBatchId
-			AND t.strTransactionId = @strTransactionId 
+		(
+			t.intInventoryTransactionId = @intInventoryTransactionId			
+			OR (
+				t.strBatchId = @strBatchId
+				AND t.strTransactionId = @strTransactionId 
+			)
 		)
 		AND t.intItemUOMId IS NOT NULL 
 	GROUP BY
