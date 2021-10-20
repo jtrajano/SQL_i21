@@ -12,7 +12,7 @@ SELECT DISTINCT
 	, um.strUnitMeasure
 	, cg.strCountGroup
 	, ven.strName AS strVendorName
-	, xref.intVendorId AS intVendorNo
+	, ven.strVendorId AS strVendorNo
 	, xref.strVendorProduct
 	, xref.strProductDescription
 	, ISNULL(ip.dblSalePrice, 0) AS dblSalePrice
@@ -24,6 +24,7 @@ SELECT DISTINCT
 	, SplPrc.dtmBeginDate
 	, SplPrc.dtmEndDate
 	, ISNULL(SplPrc.dblUnitAfterDiscount, 0) AS dblUnitAfterDiscount
+	, ISNULL(SplPrc.dblCost , 0) as dblPromotionalCost
 	, ISNULL(
 		(
 			(CASE
