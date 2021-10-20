@@ -226,8 +226,14 @@ BEGIN
 				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
 			INNER JOIN dbo.tblGLAccount	
 				ON tblGLAccount.intAccountId = GLAccounts.intInventoryId
-			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebit(
+				--ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)
+				dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblCost, 0)) + ISNULL(ItemTransactions.dblValue, 0)
+			) Debit
+			CROSS APPLY dbo.fnGetCredit(
+				--ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)
+				dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblCost, 0)) + ISNULL(ItemTransactions.dblValue, 0)
+			) Credit
 			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
 			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
@@ -289,8 +295,14 @@ BEGIN
 				AND ItemTransactions.intTransactionTypeId = GLAccounts.intTransactionTypeId
 			INNER JOIN dbo.tblGLAccount	
 				ON tblGLAccount.intAccountId = GLAccounts.intAutoNegativeId
-			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
-			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
+			CROSS APPLY dbo.fnGetDebit(
+				--ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)
+				dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblCost, 0)) + ISNULL(ItemTransactions.dblValue, 0)
+			) Debit
+			CROSS APPLY dbo.fnGetCredit(
+				--ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)
+				dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblCost, 0)) + ISNULL(ItemTransactions.dblValue, 0)
+			) Credit
 			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
 			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
