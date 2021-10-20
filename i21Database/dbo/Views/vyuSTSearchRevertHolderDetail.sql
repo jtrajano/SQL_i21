@@ -107,11 +107,11 @@ SELECT --DISTINCT
 								THEN CASE
 									WHEN RHD.strTableColumnName = 'dblRetailPrice'
 										THEN CAST(CAST(ItemPricingPrice_New.dblRetailPrice AS FLOAT) AS NVARCHAR(50))
-									WHEN RHD.strTableColumnName = 'dblCost'
+									WHEN RHD.strTableColumnName = 'dblCost' AND RHD.strChangeDescription != 'Promotional Cost'
 										THEN CAST(CAST(ItemPricingCost_New.dblCost AS FLOAT) AS NVARCHAR(50))
 									WHEN RHD.strTableColumnName = 'dblUnitAfterDiscount'
 										THEN CAST(CAST(ItemSpecialPricing_New.dblUnitAfterDiscount AS FLOAT) AS NVARCHAR(50))
-									WHEN RHD.strTableColumnName = 'dblCost'
+									WHEN RHD.strTableColumnName = 'dblCost' AND RHD.strChangeDescription = 'Promotional Cost'
 										THEN CAST(CAST(ItemSpecialPricing_New.dblCost AS FLOAT) AS NVARCHAR(50))
 
 									WHEN RHD.strTableColumnName = 'dtmBeginDate'
