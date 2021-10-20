@@ -1137,6 +1137,7 @@ BEGIN TRY
 										, intCompanyLocationId		INT
 										, intItemLocationId			INT
 										, intItemUOMId				INT
+										, strAction					VARCHAR(20)
 							)
 
 
@@ -1153,6 +1154,7 @@ BEGIN TRY
 								, intCompanyLocationId
 								, intItemLocationId
 								, intItemUOMId
+								, strAction
 							)
 							SELECT DISTINCT
 								intItemSpecialPricingId	= piv.intItemSpecialPricingId
@@ -1165,6 +1167,7 @@ BEGIN TRY
 								, intCompanyLocationId	= piv.intCompanyLocationId
 								, intItemLocationId		= piv.intItemLocationId
 								, intItemUOMId			= piv.intItemUOMId
+								, strAction				= piv.strAction
 							FROM (
 								SELECT detail.intItemSpecialPricingId
 									 , detail.intItemId
@@ -1173,6 +1176,7 @@ BEGIN TRY
 									 , detail.intItemUOMId
 									 , detail.strTableColumnName
 									 , detail.strOldData
+									 , detail.strAction
 								FROM vyuSTSearchRevertHolderDetail detail
 								WHERE detail.strTableName = N'tblICItemSpecialPricing'
 									AND detail.intRevertHolderId = @intRevertHolderId
@@ -1240,6 +1244,7 @@ BEGIN TRY
 											, @dtmEndDate					DATETIME
 											, @strItemDescription			VARCHAR(100)
 											, @strUpcCode					VARCHAR(100)
+											, @strActionToDo				VARCHAR(20)
 
 								    -- GET VALUES HERE
 									SELECT TOP 1 
@@ -1260,6 +1265,7 @@ BEGIN TRY
 											, @dblPromoCost					= ISNULL(temp.dblCost, ItemSpecialPricing.dblCost)
 											, @dtmBeginDate				= ISNULL(temp.dtmBeginDate, ItemSpecialPricing.dtmBeginDate)
 											, @dtmEndDate				= ISNULL(temp.dtmEndDate, ItemSpecialPricing.dtmEndDate)
+											, @strActionToDo			= temp.strAction
 									FROM @tempITEMSPECIALPRICING temp
 									INNER JOIN tblICItemSpecialPricing ItemSpecialPricing
 										ON temp.intItemSpecialPricingId = ItemSpecialPricing.intItemSpecialPricingId
@@ -1283,6 +1289,7 @@ BEGIN TRY
 											, @dtmBeginDate				= @dtmBeginDate 
 											, @dtmEndDate 				= @dtmEndDate 
 											, @intItemSpecialPricingId  = @intItemSpecialPricingId
+											, @strAction				= @strActionToDo
 											, @intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
 	
