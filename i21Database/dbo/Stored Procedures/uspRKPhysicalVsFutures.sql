@@ -15,10 +15,11 @@ BEGIN
 SELECT
 	intRowNumber = ROW_NUMBER() OVER (ORDER BY CH.strContractNumber) 
 	,CH.strContractNumber
+	,strContractType = CASE WHEN CH.intContractTypeId = 2 THEN 'Sale'ELSE 'Purchase' END
 	,dblContractLots = CH.dblNoOfLots
 	,strPONumber = (SELECT  LTRIM(STUFF((SELECT ', ' + strERPPONumber FROM tblCTContractDetail where intContractHeaderId = CH.intContractHeaderId FOR XML PATH('')), 1, 1, '')))
-	,strStartDate = (SELECT LTRIM(STUFF((SELECT ', ' + dbo.fnRKFormatDate( dtmStartDate,(SELECT TOP 1 strReportDateFormat FROM tblSMCompanyPreference)) FROM tblCTContractDetail where intContractHeaderId = 21944 FOR XML PATH('')), 1, 1, '')))
-	,strEndDate = (SELECT LTRIM(STUFF((SELECT ', ' + dbo.fnRKFormatDate( dtmEndDate,(SELECT TOP 1 strReportDateFormat FROM tblSMCompanyPreference)) FROM tblCTContractDetail where intContractHeaderId = 21944 FOR XML PATH('')), 1, 1, '')))
+	,strStartDate = (SELECT LTRIM(STUFF((SELECT ', ' + dbo.fnRKFormatDate( dtmStartDate,(SELECT TOP 1 strReportDateFormat FROM tblSMCompanyPreference)) FROM tblCTContractDetail where intContractHeaderId = CH.intContractHeaderId FOR XML PATH('')), 1, 1, '')))
+	,strEndDate = (SELECT LTRIM(STUFF((SELECT ', ' + dbo.fnRKFormatDate( dtmEndDate,(SELECT TOP 1 strReportDateFormat FROM tblSMCompanyPreference)) FROM tblCTContractDetail where intContractHeaderId = CH.intContractHeaderId FOR XML PATH('')), 1, 1, '')))
 	,strLongInternalTradeNo = BUY.strInternalTradeNo
 	,dblLongTradeLots = BUY.dblNoOfContract
 	,dblLongTradePrice = BUY.dblPrice
