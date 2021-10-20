@@ -163,7 +163,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 		ELSE
 			BEGIN
 				UPDATE tblPREmployeeTax SET
-							intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+						 intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
 						,strCalculationType = @strCalculationType
 						,strFilingStatus = @strFilingStatus
 						,intTypeTaxStateId = (SELECT TOP 1 intTypeTaxStateId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
@@ -184,8 +184,9 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,dblW4ClaimDependents = @dblW4ClaimDependents
 						,dblW4OtherIncome  = @dblW4OtherIncome
 						,dblW4Deductions  = @dblW4Deductions
-					WHERE intEmployeeTaxId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @EntityNo)
+					WHERE intEntityEmployeeId = @EntityNo
 						AND intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+
 				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
 				
 			END
