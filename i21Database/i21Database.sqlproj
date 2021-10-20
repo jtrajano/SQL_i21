@@ -208,6 +208,9 @@
     <Build Include="dbo\Functions\fnAPGetFiscalPeriod.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherTransactionType2.sql" />
     <Build Include="dbo\Stored Procedures\uspRKPhysicalVsFutures.sql" />
+    <Build Include="dbo\Tables\tblIPInvPostedReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPreStageReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSetReceiptLotStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
