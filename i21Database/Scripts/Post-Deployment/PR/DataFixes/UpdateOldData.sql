@@ -438,5 +438,5 @@ BEGIN
 	--SELECT * FROM  tblPREmployee
 	WHERE LEN(ISNULL(dbo.fnAESDecryptASym(strSocialSecurity),'')) <= 0
 	AND strSocialSecurity IS NOT NULL
-	AND TRIM(strSocialSecurity) <> ''
+	AND LTRIM(RTRIM(strSocialSecurity)) <> ''
 END
