@@ -188,9 +188,10 @@ BEGIN
 	LEFT JOIN tblSMShipVia S ON S.strShipVia = CF.strShipViaName
 	LEFT JOIN tblARCustomerFreightXRef CFX ON CFX.intEntityCustomerId = C.intEntityId 
 		AND CFX.intEntityLocationId = EL.intEntityLocationId
+		AND CFX.intEntityTariffTypeId = T.intEntityTariffTypeId
 		AND CFX.strZipCode = CF.strSupplierZipCode 
 		AND CFX.intCategoryId = CA.intCategoryId
-		AND CFX.strFreightType = F.strFreightType
+		AND CFX.strFreightType = F.strFreightType		
 		AND ISNULL(CFX.intShipViaId, 0) = ISNULL(S.intEntityId, 0)
 	WHERE (ISNULL(CF.strShipViaName, '') = '' OR (S.intEntityId IS NOT NULL AND ISNULL(CF.strShipViaName, '') != '')) 
 	AND CF.guiApiUniqueId = @guiApiUniqueId
@@ -238,6 +239,7 @@ BEGIN
 		LEFT JOIN tblSMShipVia S ON S.strShipVia = CF.strShipViaName
 		LEFT JOIN tblARCustomerFreightXRef CFX ON CFX.intEntityCustomerId = C.intEntityId 
 			AND CFX.intEntityLocationId = EL.intEntityLocationId
+			AND CFX.intEntityTariffTypeId = T.intEntityTariffTypeId
 			AND CFX.strZipCode = CF.strSupplierZipCode 
 			AND CFX.intCategoryId = CA.intCategoryId
 			AND CFX.strFreightType = F.strFreightType
@@ -265,8 +267,8 @@ BEGIN
 		BEGIN
 
 			-- INSERT FREIGHT TYPE IN CUSTOMER
-			UPDATE tblARCustomer SET intEntityTariffTypeId = @intEntityTariffTypeId
-			WHERE intEntityId = @intCustomerEntityId
+			--UPDATE tblARCustomer SET intEntityTariffTypeId = @intEntityTariffTypeId
+			--WHERE intEntityId = @intCustomerEntityId
 
 			-- INSERT FREIGHT SETUP
 			INSERT INTO tblARCustomerFreightXRef (intEntityCustomerId
@@ -282,7 +284,8 @@ BEGIN
 				, ysnFreightInPrice
 				, dblMinimumUnits
 				, intConcurrencyId
-				, guiApiUniqueId)
+				, guiApiUniqueId
+				, intEntityTariffTypeId)
 			VALUES(@intCustomerEntityId
 				, @intCustomerEntityLocationId
 				, @strSupplierZipCode
@@ -297,6 +300,7 @@ BEGIN
 				, ISNULL(@dblMinimumUnit, 0)
 				, 1
 				, @guiApiUniqueId
+				, @intEntityTariffTypeId
 			)
 
 			-- INSERT LOGS
