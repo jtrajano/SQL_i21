@@ -86,10 +86,12 @@ BEGIN
 	FROM 
 		tblICInventoryTransactionStorage t 
 	WHERE
-		t.intInventoryTransactionStorageId = @intInventoryTransactionStorageId
-		OR (
-			t.strBatchId = @strBatchId
-			AND t.strTransactionId = @strTransactionId 
+		(
+			t.intInventoryTransactionStorageId = @intInventoryTransactionStorageId
+			OR (
+				t.strBatchId = @strBatchId
+				AND t.strTransactionId = @strTransactionId 
+			)
 		)
 		AND t.intItemUOMId IS NOT NULL 
 	GROUP BY
