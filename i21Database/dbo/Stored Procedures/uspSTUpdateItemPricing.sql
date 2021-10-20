@@ -759,6 +759,7 @@ BEGIN TRY
 				strChangeDescription,
 				strOldData,
 				strNewData,
+				strActionType,
 
 				intItemId,
 				intItemUOMId,
@@ -777,6 +778,7 @@ BEGIN TRY
 				, strChangeDescription
 				, strPreviewOldData
 				, strPreviewNewData
+				, strAction
 
 				, intItemId
 				, intItemUOMId
@@ -1044,6 +1046,9 @@ BEGIN TRY
 			  , strChangeDescription
 			  , strPreviewOldData AS strOldData
 			  , strPreviewNewData AS strNewData
+			  , CASE WHEN strAction = 'INSERT' THEN 'ADDED' 
+					WHEN strAction = 'UPDATE' THEN 'UPDATED'
+					END AS strActionType
 	FROM @tblPreview
 	WHERE ysnPreview = 1
 	ORDER BY strItemDescription, strChangeDescription ASC
