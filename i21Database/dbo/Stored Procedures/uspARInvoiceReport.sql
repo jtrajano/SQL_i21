@@ -217,7 +217,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
 	 , dblTaxExempt				= ISNULL(INVOICEDETAIL.dblTaxExempt, 0)
-	 , dblInvoiceTotal			= ((dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END) - CREDITSTOTAL.dblInvoiceTotal
+	 , dblInvoiceTotal			= ((dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END) - ISNULL(CREDITSTOTAL.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId, 0)
@@ -529,9 +529,11 @@ LEFT JOIN (
 	)InvoiceDetailwithCredits
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
 LEFT JOIN (
-	SELECT SUM(dblInvoiceTotal)[dblInvoiceTotal], intInvoiceId from vyuARGetPrepaidsAndCreditMemos 
+	SELECT intInvoiceId		= intInvoiceId
+	     , dblInvoiceTotal	= SUM(dblInvoiceTotal)
+	FROM vyuARGetPrepaidsAndCreditMemos 
 	GROUP BY intInvoiceId
-)CREDITSTOTAL ON CREDITSTOTAL.intInvoiceId=INV.intInvoiceId
+) CREDITSTOTAL ON CREDITSTOTAL.intInvoiceId=INV.intInvoiceId
 LEFT JOIN (
 	SELECT intCurrencyID
 		 , strCurrency
