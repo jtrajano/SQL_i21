@@ -10,6 +10,7 @@ CREATE PROCEDURE [dbo].[uspICUpdateItemPromotionalPricingForCStore]
 	,@intItemId AS INT = NULL 
 	,@intItemLocationId AS INT = NULL 
 	,@intItemSpecialPricingId AS INT = NULL 
+	,@strAction AS VARCHAR(20) = NULL
 	,@intEntityUserSecurityId AS INT 
 AS
 
@@ -95,9 +96,9 @@ BEGIN
 					WITH	(HOLDLOCK) 
 					AS		itemSpecialPricing	
 					USING (
-						SELECT	itemSpecialPricing.intItemSpecialPricingId,
+						SELECT	DISTINCT 
 								i.intItemId,
-								intItemLocationId = @intItemLocationId,
+								il.intItemLocationId,
 								uom.intItemUOMId,
 								dtmBeginDate = @dtmBeginDate,
 								dtmEndDate = @dtmEndDate
@@ -149,6 +150,10 @@ BEGIN
 						AND itemSpecialPricing.dtmBeginDate = Source_Query.dtmBeginDate
 						AND itemSpecialPricing.dtmEndDate = Source_Query.dtmEndDate
 					
+					-- If matched and Action is insert, delete. the Promotional Retail Price. 
+					WHEN MATCHED AND @strAction = 'INSERT' THEN 
+						DELETE
+
 					-- If matched, update the Promotional Retail Price. 
 					WHEN MATCHED THEN 
 						UPDATE 
@@ -185,7 +190,7 @@ BEGIN
 						)
 						VALUES (
 							Source_Query.intItemId
-							, @intItemLocationId
+							, Source_Query.intItemLocationId
 							, 'Vendor Discount'
 							, @dtmBeginDate
 							, @dtmEndDate

@@ -683,6 +683,7 @@ BEGIN TRY
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
+			, strAction
 			, ysnPreview
 			, ysnForRevert
 		)
@@ -708,8 +709,8 @@ BEGIN TRY
 			, intItemUOMId				= UOM.intItemUOMId
 			, intItemLocationId			= IL.intItemLocationId
 			, intItemSpecialPricingId	= ISP.intItemSpecialPricingId
-
-			, dtmDateModified			= ISP.dtmDateModified
+			
+			, dtmDateModified			= ISNULL(ISP.dtmDateModified, GETDATE())
 			, intCompanyLocationId		= CL.intCompanyLocationId
 			, strLocation				= CL.strLocationName
 			, strUpc					= UOM.strLongUPCCode
@@ -723,23 +724,25 @@ BEGIN TRY
 			, strPreviewOldData			= [Changes].strOldData
 			, strPreviewNewData			= [Changes].strNewData
 			, strOldDataPreview			= [Changes].strOldData
+			, strAction					= [Changes].strAction
 			, ysnPreview				= 1
 			, ysnForRevert				= 1
 		FROM 
 		(
-			SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData
+			SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData, strAction
 			FROM 
 			(
 				SELECT intItemId 
 					,intItemSpecialPricingId 
-					,CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_Original
-					,CAST(CAST(dblOldCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strCost_Original
+					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_Original
+					,ISNULL(CAST(CAST(dblOldCost AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strCost_Original
 					,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
 					,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
-					,CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_New
-					,CAST(CAST(dblNewCost AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strCost_New
+					,ISNULL(CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_New
+					,ISNULL(CAST(CAST(dblNewCost AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strCost_New
 					,CAST(CAST(dtmNewBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_New
 					,CAST(CAST(dtmNewEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_New
+					,strAction
 				FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
 			) t
 			unpivot
