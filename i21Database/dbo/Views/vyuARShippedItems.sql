@@ -107,6 +107,9 @@ SELECT id							= NEWID()
 	 , ysnShowForShipment			= isnull(SCALETICKET.ysnShowForShipment, 1)
 	 , intItemContractHeaderId		= SHIPPEDITEMS.intItemContractHeaderId
 	 , intItemContractDetailId		= SHIPPEDITEMS.intItemContractDetailId
+	 , dblStandardWeight			= SHIPPEDITEMS.dblStandardWeight
+	 , ysnDestinationWeightsAndGrades   = SHIPPEDITEMS.ysnDestinationWeightsAndGrades
+	 , dblDestinationQuantity		= SHIPPEDITEMS.dblDestinationQuantity
 FROM (
 	--IS FROM SO
 	SELECT strTransactionType				= 'Inventory Shipment' COLLATE Latin1_General_CI_AS
@@ -189,6 +192,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= SOD.dblStandardWeight
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	INNER JOIN (
 		SELECT *
@@ -373,6 +379,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= ITEMCONTRACT.intItemContractHeaderId
 		 , intItemContractDetailId			= ITEMCONTRACT.intItemContractDetailId
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = ICISI.ysnDestinationWeightsAndGrades
+		 , dblDestinationQuantity			= ICISI.dblDestinationQuantity
 	FROM (
 		SELECT 
 			dblForexRate,
@@ -594,6 +603,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblICInventoryShipmentCharge ICISC WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intInventoryShipmentId
@@ -725,6 +737,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(0, SO.intSalesOrderId) MFG
 	LEFT OUTER JOIN (
@@ -839,6 +854,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
 	CROSS APPLY dbo.fnMFGetInvoiceChargesByShipment(ICISI.intInventoryShipmentItemId, 0) MFG	
 	INNER JOIN (
@@ -949,6 +967,9 @@ FROM (
 		 , intSubBookId						= intSubBookId
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM 
 		vyuLGLoadScheduleForInvoice
 	 
@@ -1034,6 +1055,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM (
 		SELECT intLoadDetailId
 			 , intCurrencyId
@@ -1155,6 +1179,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM (
 		SELECT intLoadId
 		     , intLoadDetailId
@@ -1273,6 +1300,9 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
+		 , ysnDestinationWeightsAndGrades   = NULL
+		 , dblDestinationQuantity			= NULL
 	FROM (
 		SELECT intLoadId
 			 , intLoadDetailId
