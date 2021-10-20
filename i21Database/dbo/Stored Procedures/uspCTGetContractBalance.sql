@@ -513,9 +513,9 @@ BEGIN TRY
 		PF.intContractDetailId,											   	
 		FD.dtmFixationDate,												   
 		SUM(FD.dblQuantity),
-		FD.dblFutures,
+		dblFutures = (case when CD.intPricingTypeId = 1 then CD.dblFutures else FD.dblFutures end),
 		FD.dblBasis,
-		FD.dblCashPrice,
+		dblCashPrice = (case when CD.intPricingTypeId = 1 then CD.dblCashPrice else FD.dblCashPrice end),
 		0,
 		intNoOfLoad		   = SUM(FD.dblQuantity)/CD.dblQuantityPerLoad
 	   ,intShippedNoOfLoad = 0
