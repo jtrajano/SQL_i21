@@ -256,6 +256,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\8_FlagCCTransaction.sql
 :r .\CM\10_BankTransfer.sql
 :r .\CM\11_TradingFinance.sql
+:r .\CM\12_CashFlowReportSummary.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 
