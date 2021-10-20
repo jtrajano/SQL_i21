@@ -17,19 +17,11 @@ BEGIN TRY
 	IF @transCount = 0 BEGIN TRANSACTION
 
 	DECLARE @datePaid DATETIME;
-	DECLARE @vendorId INT;
 	DECLARE @checkNumber NVARCHAR(55);
 	DECLARE @intIds NVARCHAR(MAX);
 	DECLARE @billIds NVARCHAR(MAX);
 	DECLARE @createdPaymentId INT;
 	DECLARE @createdPayments NVARCHAR(MAX) = '';
-
-	--VENDOR DEFAULTS
-	DECLARE @currencyId INT = NULL;
-	DECLARE @paymentMethodId INT = NULL;
-	DECLARE @payToAddress INT = NULL;
-
-	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL
 
 	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL
 
