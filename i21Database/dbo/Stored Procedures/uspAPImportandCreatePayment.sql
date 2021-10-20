@@ -25,8 +25,6 @@ BEGIN TRY
 
 	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL
 
-	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL
-
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
 	SELECT dtmDatePaid,
 		   intEntityVendorId,
