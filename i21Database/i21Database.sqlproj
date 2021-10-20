@@ -10269,4 +10269,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\WV_WestVirginia.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
+  </ItemGroup>
 </Project>
