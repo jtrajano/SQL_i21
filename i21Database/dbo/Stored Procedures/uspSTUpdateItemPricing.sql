@@ -163,7 +163,8 @@ BEGIN TRY
 				,dtmOldEndDate DATETIME NULL 
 				,dblNewUnitAfterDiscount NUMERIC(38, 20) NULL 
 				,dtmNewBeginDate DATETIME NULL
-				,dtmNewEndDate DATETIME NULL 		
+				,dtmNewEndDate DATETIME NULL 	
+				,strAction VARCHAR(20) NULL 		
 			)
 		;
 	END
@@ -301,6 +302,7 @@ BEGIN TRY
 			 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
 			,@dtmBeginDate					= @dtmSalesStartingDateConv
 			,@dtmEndDate					= @dtmSalesEndingDateConv 
+			,@strUpcCode					= @strUpcCode
 			,@intEntityUserSecurityId		= @intCurrentUserIdConv
 	END TRY
 	BEGIN CATCH
@@ -617,7 +619,7 @@ BEGIN TRY
 
 
 
-
+			
 		-- ITEM SPECIAL PRICING
 		INSERT INTO @tblPreview (
 			strTableName
@@ -641,10 +643,11 @@ BEGIN TRY
 			, strPreviewOldData
 			, strPreviewNewData
 			, strOldDataPreview
+			, strAction
 			, ysnPreview
 			, ysnForRevert
 		)
-		SELECT DISTINCT 
+		SELECT  DISTINCT
 			strTableName				= N'tblICItemSpecialPricing'
 			, strTableColumnName		= CASE
 											WHEN [Changes].oldColumnName = 'strUnitAfterDiscount_Original' THEN 'dblUnitAfterDiscount'
@@ -664,8 +667,8 @@ BEGIN TRY
 			, intItemUOMId				= UOM.intItemUOMId
 			, intItemLocationId			= IL.intItemLocationId
 			, intItemSpecialPricingId	= ISP.intItemSpecialPricingId
-
-			, dtmDateModified			= ISP.dtmDateModified
+			
+			, dtmDateModified			= ISNULL(ISP.dtmDateModified, '')
 			, intCompanyLocationId		= CL.intCompanyLocationId
 			, strLocation				= CL.strLocationName
 			, strUpc					= UOM.strLongUPCCode
@@ -678,21 +681,23 @@ BEGIN TRY
 			, strPreviewOldData			= [Changes].strOldData
 			, strPreviewNewData			= [Changes].strNewData
 			, strOldDataPreview			= [Changes].strOldData
+			, strAction						= [Changes].strAction
 			, ysnPreview				= 1
 			, ysnForRevert				= 1
 		FROM 
 		(
-			SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData
+			SELECT DISTINCT intItemId, intItemSpecialPricingId, oldColumnName, strOldData, strNewData, strAction
 			FROM 
 			(
 				SELECT intItemId 
 					,intItemSpecialPricingId 
-					,CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_Original
+					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_Original
 					,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
 					,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
-					,CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)) AS strUnitAfterDiscount_New
+					,ISNULL(CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_New
 					,CAST(CAST(dtmNewBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_New
 					,CAST(CAST(dtmNewEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_New
+					,strAction
 				FROM #tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog
 			) t
 			unpivot
