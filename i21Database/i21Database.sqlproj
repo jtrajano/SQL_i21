@@ -235,6 +235,9 @@
     <Build Include="dbo\Tables\tblApiSchemaVendorPricing.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendorPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorPricing.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendorLocation.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaValidateVendorLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
