@@ -108,165 +108,177 @@ BEGIN
 	AND SVT.guiApiUniqueId = @guiApiUniqueId
 
 	--TRANSFORM
-	DECLARE @ImportTable TABLE 
-	(
-		rowNum						INT IDENTITY(1,1),
-		guiApiUniqueId              UNIQUEIDENTIFIER NOT NULL,
-		strShipViaName				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,	
-		strTariffDescription		NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,		
-		strTariffType				NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,	
-		strFreightType				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,		
-		strCategory					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,			
-		dblSurcharge				NUMERIC(18, 6) NULL,									
-		dtmShipViaEffectiveDate		DATETIME NOT NULL,										
-		dtmSurchargeEffectiveDate	DATETIME NULL,											
-		intFromMile					INT NULL,												
-		intToMile					INT NULL,												
-		dblCostRatePerUnit			NUMERIC(18, 6) NULL,						
-		dblInvoiceRatePerUnit		NUMERIC(18, 6) NULL						
-	)
+	DECLARE cur CURSOR FOR
+	SELECT SVT.intKey 
+	,SVT.intRowNumber   
+	,E.intEntityId
+	,SVT.strTariffDescription
+	,ET.intEntityTariffId
+	,ETT.intEntityTariffTypeId			
+	,SVT.strFreightType				
+	,C.intCategoryId					
+	,SVT.dblSurcharge				
+	,SVT.dtmShipViaEffectiveDate		
+	,SVT.dtmSurchargeEffectiveDate	
+	,SVT.intFromMile					
+	,SVT.intToMile					
+	,SVT.dblCostRatePerUnit			
+	,SVT.dblInvoiceRatePerUnit		
+	FROM tblApiSchemaTRShipViaTariff SVT
+		INNER JOIN tblSMShipVia SV ON SVT.strShipViaName = SV.strShipVia
+		INNER JOIN tblEMEntity E ON SV.intEntityId = E.intEntityId
+		INNER JOIN tblEMEntityTariffType ETT ON ETT.strTariffType = SVT.strTariffType
+		INNER JOIN tblICCategory C ON C.strCategoryCode = SVT.strCategory
+		INNER JOIN @tmpFreightType FT ON FT.strFreightType = SVT.strFreightType
+		LEFT JOIN tblEMEntityTariff ET ON ET.intEntityId = E.intEntityId
+			AND ET.intEntityTariffTypeId = ETT.intEntityTariffTypeId
+			AND SVT.strTariffDescription = ET.strDescription
+	WHERE --ET.intEntityTariffId IS NULL
+		--AND 
+		SVT.guiApiUniqueId = @guiApiUniqueId
 
-	INSERT INTO @ImportTable
-	SELECT
-		  guiApiUniqueId              
-		, strShipViaName				
-		, strTariffDescription		
-		, strTariffType				
-		, strFreightType				
-		, strCategory					
-		, dblSurcharge				
-		, dtmShipViaEffectiveDate		
-		, dtmSurchargeEffectiveDate	
-		, intFromMile					
-		, intToMile					
-		, dblCostRatePerUnit			
-		, dblInvoiceRatePerUnit		
-	FROM tblApiSchemaTRShipViaTariff 
-	WHERE guiApiUniqueId = @guiApiUniqueId
+    DECLARE @intKey						INT = NULL
+	DECLARE @intRowNumber				INT = NULL
+	DECLARE @intEntityId				INT = NULL
+	DECLARE @intEntityTariffId			INT = NULL
+	DECLARE @intEntityTariffTypeId		INT = NULL
+	DECLARE @strTariffDescription		NVARCHAR(50) = NULL
+	DECLARE @strFreightType				NVARCHAR(50) = NULL
+	DECLARE @intCategoryId				INT = NULL
+	DECLARE @dblSurcharge				NUMERIC(18, 6) = NULL
+	DECLARE @dtmShipViaEffectiveDate	DATETIME = NULL
+	DECLARE @dtmSurchargeEffectiveDate	DATETIME = NULL
+	DECLARE @intFromMile				INT	= NULL
+	DECLARE @intToMile					INT	= NULL
+	DECLARE @dblCostRatePerUnit			NUMERIC(18, 6) = NULL
+	DECLARE @dblInvoiceRatePerUnit		NUMERIC(18, 6) = NULL
 
-	DECLARE @rowCount INT;
-	DECLARE @rowNumber INT = 1;
+	OPEN cur
+	FETCH NEXT FROM cur INTO
+	 @intKey                     
+	,@intRowNumber               
+	,@intEntityId
+	,@strTariffDescription
+	,@intEntityTariffId
+	,@intEntityTariffTypeId
+	,@strFreightType				
+	,@intCategoryId				
+	,@dblSurcharge				
+	,@dtmShipViaEffectiveDate	
+	,@dtmSurchargeEffectiveDate	
+	,@intFromMile				
+	,@intToMile					
+	,@dblCostRatePerUnit			
+	,@dblInvoiceRatePerUnit		
 
-	SELECT @rowCount = COUNT(*) FROM @ImportTable;
-		
-	WHILE @rowNumber <= @rowCount
+	WHILE @@FETCH_STATUS = 0   
 	BEGIN
-		DECLARE @entityTariffId INT
-		DECLARE @etRowCount INT = (SELECT COUNT(*) FROM tblEMEntityTariff)
+		DECLARE @tariffId INT = NULL
 
-		-- Entity Tariff
-		INSERT INTO tblEMEntityTariff ([intEntityId]
-			, [strDescription]
-			, [dtmEffectiveDate]
-			, [intEntityTariffTypeId]
-			, [guiApiUniqueId]
-			, [intConcurrencyId])
-		SELECT E.intEntityId
-			, SVT.strTariffDescription
-			, SVT.dtmShipViaEffectiveDate
-			, ETT.intEntityTariffTypeId
-			, SVT.guiApiUniqueId
-			, 1
-		FROM @ImportTable SVT
-			INNER JOIN tblSMShipVia SV on SVT.strShipViaName = SV.strShipVia
-			INNER JOIN tblEMEntity E on SV.intEntityId = E.intEntityId
-			INNER JOIN tblEMEntityTariffType ETT ON ETT.strTariffType = SVT.strTariffType
-			LEFT JOIN tblEMEntityTariff ET ON ET.intEntityId = E.intEntityId
-				AND ET.intEntityTariffTypeId = ETT.intEntityTariffTypeId
-				AND SVT.strTariffDescription = ET.strDescription
-			WHERE ET.intEntityTariffId IS NULL
-				AND SVT.guiApiUniqueId = @guiApiUniqueId
-				AND SVT.rowNum = @rowNumber
-			
-			IF(@etRowCount > (SELECT COUNT(*) FROM tblEMEntityTariff))
-			BEGIN
-				SET @entityTariffId = SCOPE_IDENTITY()
-			END
-			ELSE
-			BEGIN
-				SET @entityTariffId = (SELECT TOP 1 ET.intEntityTariffId
-				FROM @ImportTable SVT
-					INNER JOIN tblSMShipVia SV on SVT.strShipViaName = SV.strShipVia
-					INNER JOIN tblEMEntity E on SV.intEntityId = E.intEntityId
-					INNER JOIN tblEMEntityTariffType ETT ON ETT.strTariffType = SVT.strTariffType
-					LEFT JOIN tblEMEntityTariff ET ON ET.intEntityId = E.intEntityId
-						AND ET.intEntityTariffTypeId = ETT.intEntityTariffTypeId
-						AND SVT.strTariffDescription = ET.strDescription
-				WHERE SVT.guiApiUniqueId = @guiApiUniqueId
-						AND SVT.rowNum = @rowNumber)
-			END
 
-		IF  @entityTariffId IS NOT NULL
+		-- Tariff
+		IF @intEntityTariffId IS NULL
 		BEGIN
-			-- Entity Tariff Category
+			INSERT INTO tblEMEntityTariff ([intEntityId]
+				, [strDescription]
+				, [dtmEffectiveDate]
+				, [intEntityTariffTypeId]
+				, [guiApiUniqueId]
+				, [intConcurrencyId])
+			VALUES(@intEntityId
+				, @strTariffDescription
+				, @dtmShipViaEffectiveDate
+				, @intEntityTariffTypeId
+				, @guiApiUniqueId
+				, 1)
+			SET @tariffId = SCOPE_IDENTITY()
+		END
+		ELSE
+		BEGIN
+			SET @tariffId = @intEntityTariffId
+		END
+
+
+		-- Tariff Category
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityTariffCategory WHERE intEntityTariffId = @tariffId AND intCategoryId = @intCategoryId)
+		BEGIN
 			INSERT INTO tblEMEntityTariffCategory([intEntityTariffId]
 				, [intCategoryId]
 				, [guiApiUniqueId]
 				, [intConcurrencyId])
-			SELECT @entityTariffId
-				, C.intCategoryId
-				, SVT.guiApiUniqueId
-				, 1
-			FROM @ImportTable SVT
-				LEFT JOIN tblICCategory C ON C.strCategoryCode = SVT.strCategory
-				LEFT JOIN tblEMEntityTariffCategory ETC ON ETC.intCategoryId = C.intCategoryId
-					AND ETC.intEntityTariffCategoryId IS NULL
-			WHERE SVT.guiApiUniqueId = @guiApiUniqueId
-				AND (ISNULL(SVT.strCategory, '') <> '')
-				AND SVT.strCategory NOT IN (
-					SELECT B.strCategoryCode 
-					FROM tblEMEntityTariffCategory A 
-						INNER JOIN tblICCategory B ON A.intCategoryId = B.intCategoryId 
-					WHERE A.intEntityTariffId = @entityTariffId)
-
-
-			-- Entity Fuel Surcharge
-			INSERT INTO tblEMEntityTariffFuelSurcharge ([intEntityTariffId]
-				, [dblFuelSurcharge]
-				, [dtmEffectiveDate]
-				, [guiApiUniqueId]
-				, [intConcurrencyId])
-			SELECT @entityTariffId
-				, SVT.dblSurcharge
-				, SVT.dtmSurchargeEffectiveDate
-				, SVT.guiApiUniqueId
-				, 1
-			FROM @ImportTable SVT
-			WHERE SVT.guiApiUniqueId = @guiApiUniqueId
-				AND SVT.rowNum = @rowNumber
-				AND ISNULL(SVT.dblSurcharge, 0) > 0 
-
-
-			-- Entity Tariff Mileage
-			INSERT INTO tblEMEntityTariffMileage ([intEntityTariffId]
-				, [intFromMiles]
-				, [intToMiles]
-				, [dblCostRatePerUnit]
-				, [dblInvoiceRatePerUnit]
-				, [guiApiUniqueId]
-				, [intConcurrencyId])
-			SELECT 
-				@entityTariffId
-				, SVT.intFromMile
-				, SVT.intToMile
-				, SVT.dblCostRatePerUnit
-				, SVT.dblInvoiceRatePerUnit
-				, SVT.guiApiUniqueId
-				, 1
-			FROM @ImportTable SVT
-			WHERE SVT.guiApiUniqueId = @guiApiUniqueId
-				AND SVT.rowNum = @rowNumber
-				AND ISNULL(SVT.intFromMile, 0) > 0
-				AND ISNULL(SVT.intToMile, 0) > 0
-				AND NOT EXISTS (
-					SELECT TOP 1 1 
-					FROM tblEMEntityTariffMileage ETM
-					WHERE SVT.intFromMile BETWEEN ETM.intFromMiles AND ETM.intToMiles
-						AND SVT.intToMile BETWEEN ETM.intFromMiles AND ETM.intToMiles
-						AND ISNULL(SVT.intFromMile, 0) > 0
-						AND ISNULL(SVT.intToMile, 0) > 0
-						AND ETM.intEntityTariffId = @entityTariffId)
+			VALUES (@tariffId
+				, @intCategoryId
+				, @guiApiUniqueId
+				, 1)
 		END
-		SET @rowNumber += 1
+
+
+		-- Tariff Fuel Surcharge
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityTariffFuelSurcharge WHERE intEntityTariffId = @tariffId AND (dblFuelSurcharge = @dblSurcharge AND dtmEffectiveDate = @dtmSurchargeEffectiveDate))
+		BEGIN
+			IF ISNULL(@dblSurcharge, 0) > 0
+			BEGIN
+				INSERT INTO tblEMEntityTariffFuelSurcharge ([intEntityTariffId]
+					, [dblFuelSurcharge]
+					, [dtmEffectiveDate]
+					, [guiApiUniqueId]
+					, [intConcurrencyId])
+				VALUES (@tariffId
+					, @dblSurcharge
+					, @dtmSurchargeEffectiveDate
+					, @guiApiUniqueId
+					, 1
+				)
+			END
+		END
+
+	--	-- Tariff Mileage
+		--	INSERT INTO tblEMEntityTariffMileage ([intEntityTariffId]
+		--		, [intFromMiles]
+		--		, [intToMiles]
+		--		, [dblCostRatePerUnit]
+		--		, [dblInvoiceRatePerUnit]
+		--		, [guiApiUniqueId]
+		--		, [intConcurrencyId])
+		--	SELECT 
+		--		@entityTariffId
+		--		, SVT.intFromMile
+		--		, SVT.intToMile
+		--		, SVT.dblCostRatePerUnit
+		--		, SVT.dblInvoiceRatePerUnit
+		--		, SVT.guiApiUniqueId
+		--		, 1
+		--	FROM @ImportTable SVT
+		--	WHERE SVT.guiApiUniqueId = @guiApiUniqueId
+		--		AND SVT.rowNum = @rowNumber
+		--		AND ISNULL(SVT.intFromMile, 0) > 0
+		--		AND ISNULL(SVT.intToMile, 0) > 0
+		--		AND NOT EXISTS (
+		--			SELECT TOP 1 1 
+		--			FROM tblEMEntityTariffMileage ETM
+		--			WHERE SVT.intFromMile BETWEEN ETM.intFromMiles AND ETM.intToMiles
+		--				AND SVT.intToMile BETWEEN ETM.intFromMiles AND ETM.intToMiles
+		--				AND ISNULL(SVT.intFromMile, 0) > 0
+		--				AND ISNULL(SVT.intToMile, 0) > 0
+		--				AND ETM.intEntityTariffId = @entityTariffId)
+
+	FETCH NEXT FROM cur INTO
+	 @intKey                     
+	,@intRowNumber               
+	,@intEntityId
+	,@strTariffDescription
+	,@intEntityTariffId
+	,@intEntityTariffTypeId
+	,@strFreightType				
+	,@intCategoryId				
+	,@dblSurcharge				
+	,@dtmShipViaEffectiveDate	
+	,@dtmSurchargeEffectiveDate	
+	,@intFromMile				
+	,@intToMile					
+	,@dblCostRatePerUnit			
+	,@dblInvoiceRatePerUnit		
 	END
+	CLOSE cur
+	DEALLOCATE cur
 END
