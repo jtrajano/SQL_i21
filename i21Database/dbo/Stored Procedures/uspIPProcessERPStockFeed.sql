@@ -287,6 +287,11 @@ BEGIN TRY
 			-- Lot Create / Update
 			IF ISNULL(@intLotId, 0) = 0
 			BEGIN
+				IF ISNULL(@dblNetWeight, 0) = 0
+				BEGIN
+					GOTO NextRec
+				END
+
 				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
 					,@intQtyItemUOMId = L.intItemUOMId
 				FROM tblICLot L WITH (NOLOCK)
@@ -374,6 +379,8 @@ BEGIN TRY
 						,@strDescription = 'Adjusted from external system'
 				END
 			END
+
+			NextRec:
 
 			INSERT INTO tblIPInitialAck (
 				intTrxSequenceNo
