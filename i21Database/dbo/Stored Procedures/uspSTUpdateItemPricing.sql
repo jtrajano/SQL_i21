@@ -804,7 +804,6 @@ BEGIN TRY
 				strChangeDescription,
 				strOldData,
 				strNewData,
-				strActionType,
 
 				intItemId,
 				intItemUOMId,
@@ -823,7 +822,6 @@ BEGIN TRY
 				, strChangeDescription
 				, strPreviewOldData
 				, strPreviewNewData
-				, strAction
 
 				, intItemId
 				, intItemUOMId
@@ -1084,19 +1082,26 @@ BEGIN TRY
 	----------------------------- START Query Preview -------------------------------------
 	---------------------------------------------------------------------------------------
 	-- Query Preview display
-	SELECT DISTINCT 
-	          strLocation
-			  , strUpc
-			  , strItemDescription
-			  , strChangeDescription
-			  , strPreviewOldData AS strOldData
-			  , strPreviewNewData AS strNewData
-			  , CASE WHEN strAction = 'INSERT' THEN 'ADDED' 
-					WHEN strAction = 'UPDATE' THEN 'UPDATED'
-					END AS strActionType
-	FROM @tblPreview
-	WHERE ysnPreview = 1
-	ORDER BY strItemDescription, strChangeDescription ASC
+		SELECT DISTINCT 
+			@strGuid
+			, strLocation
+			, strUpc
+			, strItemDescription
+			, strChangeDescription
+			, strPreviewOldData AS strOldData
+			, strPreviewNewData AS strNewData
+
+			, intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intPrimaryKeyId
+			, strTableName
+			, strTableColumnName
+			, strTableColumnDataType
+			, 1
+		FROM @tblPreview
+		WHERE ysnPreview = 1
+		ORDER BY strUpc, strChangeDescription, strLocation ASC
    
 	---------------------------------------------------------------------------------------
 	----------------------------- END Query Preview ---------------------------------------
