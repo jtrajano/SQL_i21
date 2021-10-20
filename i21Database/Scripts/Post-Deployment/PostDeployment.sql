@@ -643,6 +643,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TR\OverrideTaxGroupDefault.sql
 :r .\TR\ImportDtnFileSetup.sql
 :r .\TR\ImportDtnDefaultSetup.sql
+:r .\TR\FreightTariffTypeSetup.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
