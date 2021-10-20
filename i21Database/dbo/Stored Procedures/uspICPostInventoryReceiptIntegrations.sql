@@ -102,6 +102,12 @@ BEGIN
 		EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId, @ysnPost
 	END
 
+	-- Insert records in staging table to check and set the lot status
+	IF @ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT
+	BEGIN
+		EXEC dbo.uspIPPreStageReceipt @intTransactionId, @intEntityUserSecurityId, @ysnPost
+	END
+
 	-- Update the received quantities back to the Contract Management (Inventory Return)
 	IF	@ReceiptType = @RECEIPT_TYPE_INVENTORY_RETURN 
 	BEGIN 

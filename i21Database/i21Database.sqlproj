@@ -259,6 +259,9 @@
     <Build Include="dbo\Tables\tblApiSchemaVendorLocation.sql" />
     <Build Include="dbo\Functions\fnApiSchemaValidateVendorLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorLocation.sql" />
+    <Build Include="dbo\Tables\tblIPInvPostedReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPreStageReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPSetReceiptLotStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
