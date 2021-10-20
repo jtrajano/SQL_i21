@@ -285,6 +285,9 @@
     <Build Include="dbo\Stored Procedures\uspCMGetTotalCashForecastReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCashFlowReport.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportBankAccount.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaVendorLocation.sql" />
+    <Build Include="dbo\Functions\fnApiSchemaValidateVendorLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
