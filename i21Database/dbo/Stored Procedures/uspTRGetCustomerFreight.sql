@@ -60,7 +60,7 @@ set @dblInvoiceSurchargeRate =0;
 	           		@dblRate = ISNULL(CF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = CF.ysnFreightInPrice, 
 	           		@dblMinimumUnits = CF.dblMinimumUnits,
-					@intTariffType   = AR.intEntityTariffTypeId
+					@intTariffType   = CF.intEntityTariffTypeId
 	    from tblARCustomerFreightXRef CF 
 			join tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
 	            where CF.intEntityCustomerId = @intEntityCustomerId 
