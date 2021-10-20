@@ -399,6 +399,25 @@ BEGIN TRY
 
 			SELECT @intLoadRefId = @intLoadId
 
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strLogXML
+
+			SELECT @strAuditUserName = NULL
+
+			SELECT @strAuditUserName = strName
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS)
+
+			SELECT @intAuditLogUserId = NULL
+
+			SELECT @intAuditLogUserId = CE.intEntityId
+			FROM tblEMEntity CE
+			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+			WHERE ET1.strType = 'User'
+				AND CE.strName = @strAuditUserName
+
+			SELECT @intUserId=@intAuditLogUserId
+
+			EXEC sp_xml_removedocument @idoc
 			------------------Header------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLoad
@@ -869,13 +888,6 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @intUserId = CE.intEntityId
-			FROM tblEMEntity CE
-			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
-			WHERE ET1.strType = 'User'
-				AND CE.strName = @strUserName
-
-			--AND CE.strEntityNo <> ''
 			IF @intUserId IS NULL
 			BEGIN
 				IF EXISTS (
@@ -2530,7 +2542,7 @@ BEGIN TRY
 						EXEC dbo.uspSMAuditLog @keyValue = @intContractHeaderId
 							,@screenName = 'ContractManagement.view.Contract'
 							,@entityId = @intUserId
-							,@actionType = 'Updated (from Feed)'
+							,@actionType = 'Updated (from Inter Company Feed)'
 							,@actionIcon = 'small-tree-modified'
 							,@changeDescription = @strAuditDescription
 							,@fromValue = @dtmUpdatedAvailabilityDate
