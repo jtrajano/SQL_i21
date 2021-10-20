@@ -56,6 +56,25 @@ BEGIN TRY
 				AND CH.intBookId = TC.intFromBookId
 			WHERE TT.strTransactionType = 'Purchase Contract'
 				AND CH.intContractHeaderId = @ContractHeaderId
+			
+			IF @strInsert = 'Insert'
+			BEGIN
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblCTContractPreStage
+						WHERE intContractHeaderId = @ContractHeaderId
+							)
+				BEGIN
+					INSERT INTO dbo.tblCTContractPreStage (
+						intContractHeaderId
+						,strRowState
+						,ysnApproval
+						)
+					SELECT @ContractHeaderId
+						,'Added'
+						,0
+				END
+			END
 
 			IF @strInsert = 'Insert'
 			BEGIN
@@ -86,6 +105,32 @@ BEGIN TRY
 						,@strToTransactionType
 						,@intToCompanyId
 						,'Modified'
+				END
+			END
+
+			IF @strUpdate in ('Update','Update on Approval')
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblCTContractPreStage
+						WHERE intContractHeaderId = @ContractHeaderId
+						)
+				BEGIN
+					DELETE
+					FROM tblCTContractPreStage
+					WHERE strFeedStatus IS NULL
+						AND intContractHeaderId = @ContractHeaderId
+						AND strRowState = 'Modified'
+						AND ysnApproval=0
+
+					INSERT INTO dbo.tblCTContractPreStage (
+						intContractHeaderId
+						,strRowState
+						,ysnApproval
+						)
+					SELECT @ContractHeaderId
+						,'Modified'
+						,0
 				END
 			END
 		END
