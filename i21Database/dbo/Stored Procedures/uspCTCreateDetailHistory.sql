@@ -330,6 +330,7 @@ BEGIN TRY
 		,strBook
 		,strSubBook
 		,intPriceItemUOMId
+		,ysnStatusChange
 		into #tempSequenceHistoryCompare
 		from tblCTSequenceHistory where intContractDetailId = @intContractDetailId order by intSequenceHistoryId desc
 
