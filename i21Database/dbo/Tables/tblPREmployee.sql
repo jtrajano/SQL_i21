@@ -17,7 +17,7 @@
 	[strEthnicity] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[intWorkersCompensationId] [int] NULL,
 	[strEEOCCode] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[strSocialSecurity] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
+	[strSocialSecurity] [nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysn1099Employee] [bit] NULL,
 	[dtmTerminated] [datetime] NULL,
 	[strTerminatedReason] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
@@ -54,6 +54,57 @@ GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployee_intUserId] ON [dbo].[tblPREmployee] ([intUserSecurityId]) WHERE [intUserSecurityId] IS NOT NULL
 GO
 
+CREATE TRIGGER trgEmployeeSSNInsert
+ON dbo.tblPREmployee
+AFTER INSERT
+AS
+
+DECLARE @SSNumber NVARCHAR(100)
+DECLARE @EmployeeID INT
+
+DECLARE @inserted TABLE(intEntityId INT, strSocialSecurity NVARCHAR(MAX))
+
+INSERT INTO @inserted
+SELECT intEntityId, strSocialSecurity FROM INSERTED WHERE ISNULL(RTRIM(LTRIM(strSocialSecurity)), '') <> '' ORDER BY intEntityId
+
+WHILE(EXISTS(SELECT TOP 1 1 FROM @inserted) )
+BEGIN
+	SELECT TOP 1 @SSNumber = ISNULL(NULLIF(strSocialSecurity,'') ,'') , @EmployeeID = intEntityId FROM @inserted 
+	IF UPDATE (strSocialSecurity)
+	BEGIN
+		UPDATE tblPREmployee
+		SET strSocialSecurity = dbo.fnAESEncryptASym(@SSNumber)
+		WHERE intEntityId = @EmployeeID
+	END
+	DELETE FROM @inserted WHERE intEntityId = @EmployeeID
+END
+
+GO
+
+CREATE TRIGGER trgEmployeeSSNUpdate
+ON dbo.tblPREmployee
+AFTER UPDATE
+AS
+
+DECLARE @SSNumber NVARCHAR(100)
+DECLARE @EmployeeID INT
+
+DECLARE @inserted TABLE(intEntityId INT, strSocialSecurity NVARCHAR(MAX))
+
+INSERT INTO @inserted
+SELECT intEntityId, strSocialSecurity FROM INSERTED WHERE ISNULL(RTRIM(LTRIM(strSocialSecurity)), '') <> '' ORDER BY intEntityId
+
+WHILE(EXISTS(SELECT TOP 1 1 FROM @inserted) )
+BEGIN
+	SELECT TOP 1 @SSNumber = ISNULL(NULLIF(strSocialSecurity,'') ,'') , @EmployeeID = intEntityId FROM @inserted 
+	IF UPDATE (strSocialSecurity)
+	BEGIN
+		UPDATE tblPREmployee
+		SET strSocialSecurity = dbo.fnAESEncryptASym(@SSNumber)
+		WHERE intEntityId = @EmployeeID
+	END
+	DELETE FROM @inserted WHERE intEntityId = @EmployeeID
+END
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

@@ -429,3 +429,14 @@ BEGIN
 	WHERE CHARINDEX(''Voided'', strReferenceNo) > 0
 	')
 END
+
+IF EXISTS(select TOP 1 1 FROM tblPREmployee WHERE LEN(ISNULL(dbo.fnAESDecryptASym(strSocialSecurity),'')) <= 0) 
+BEGIN
+	--Trigger will do the encryption
+	UPDATE tblPREmployee 
+	SET strSocialSecurity = strSocialSecurity 
+	--SELECT * FROM  tblPREmployee
+	WHERE LEN(ISNULL(dbo.fnAESDecryptASym(strSocialSecurity),'')) <= 0
+	AND strSocialSecurity IS NOT NULL
+	AND TRIM(strSocialSecurity) <> ''
+END

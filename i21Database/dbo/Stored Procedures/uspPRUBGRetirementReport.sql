@@ -81,7 +81,7 @@ SELECT @strEndEmployeeNo = ISNULL((SELECT TOP 1 [to] FROM @temp_xml_table WHERE 
 
 -- Report Query:
 SELECT DISTINCT
- EMP.strSocialSecurity
+ strSocialSecurity = dbo.[fnAESDecryptASym](EMP.strSocialSecurity)
  ,EMP.strLastName
  ,EMP.strFirstName
  ,EMP.strMiddleName

@@ -4,7 +4,7 @@ SELECT
 	intYear = SUI.intYear
 	,intQuarter = SUI.intQuarter
 	,intEntityId = SUI.intEntityId
-	,strSSN = LEFT(REPLACE(ISNULL(EMP.strSocialSecurity, ''), '-',''), 9)
+	,strSSN = LEFT(REPLACE(ISNULL(dbo.[fnAESDecryptASym](EMP.strSocialSecurity), ''), '-',''), 9)
 	,strFirstName = UPPER(LEFT(ISNULL(EMP.strFirstName, ''), 15))
 	,strMiddleName = UPPER(LEFT(ISNULL(EMP.strMiddleName, ''), 15))
 	,strLastName = UPPER(LEFT(ISNULL(EMP.strLastName, ''), 20))
