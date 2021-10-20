@@ -242,42 +242,44 @@ BEGIN TRY
 				DROP TABLE #tempSequenceHistoryCompare;
 			END
 
-			SELECT TOP 2 intContractStatusId
-				, intCompanyLocationId
-				, intPricingTypeId
-				, intFutureMarketId
-				, intFutureMonthId
-				, intCurrencyId
-				, intDtlQtyInCommodityUOMId
-				, intDtlQtyUnitMeasureId
-				, intCurrencyExchangeRateId
-				, intBookId
-				, intSubBookId
-				, dtmStartDate
-				, dtmEndDate
-				, dblQuantity
-				, dblBalance
-				, dblScheduleQty
-				, dblFutures
-				, dblBasis
-				, dblCashPrice
-				, dblLotsPriced
-				, dblLotsUnpriced
-				, dblQtyPriced
-				, dblQtyUnpriced
-				, dblFinalPrice
-				, dblRatio
-				, dtmFXValidFrom
-				, dtmFXValidTo
-				, dblRate
-				, strPricingType
-				, strPricingStatus
-				, strCurrencypair
-				, strBook
-				, strSubBook
-				, intPriceItemUOMId
-			INTO #tempSequenceHistoryCompare
-			FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
+		select top 2
+		intContractStatusId
+		,intCompanyLocationId
+		,intPricingTypeId
+		,intFutureMarketId
+		,intFutureMonthId
+		,intCurrencyId
+		,intDtlQtyInCommodityUOMId
+		,intDtlQtyUnitMeasureId
+		,intCurrencyExchangeRateId
+		,intBookId
+		,intSubBookId
+		,dtmStartDate
+		,dtmEndDate
+		,dblQuantity
+		,dblBalance
+		,dblScheduleQty
+		,dblFutures
+		,dblBasis
+		,dblCashPrice
+		,dblLotsPriced
+		,dblLotsUnpriced
+		,dblQtyPriced
+		,dblQtyUnpriced
+		,dblFinalPrice
+		,dblRatio
+		,dtmFXValidFrom
+		,dtmFXValidTo
+		,dblRate
+		,strPricingType
+		,strPricingStatus
+		,strCurrencypair
+		,strBook
+		,strSubBook
+		,intPriceItemUOMId
+		,ysnStatusChange
+		into #tempSequenceHistoryCompare
+		from tblCTSequenceHistory where intContractDetailId = @intContractDetailId order by intSequenceHistoryId desc
 
 			SELECT @intSequenceHistoryCount = COUNT(*) FROM #tempSequenceHistoryCompare
 
