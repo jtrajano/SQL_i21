@@ -68,7 +68,7 @@ SET  IDENTITY_INSERT tblCMCashFlowReportSummaryCode ON
 			SELECT id = 16,  reportCode = 'SC-1002', report = 'Sold Currency Optimization', reportDescription = 'Sold Currency Optimization',			sort = 1015, operation = 'Subtract', groupId = 6 
 
 	) AS SummaryCodeHardCodedValues
-		ON  SummaryCodeTable.intCashFlowReportSummaryGroupId = SummaryCodeHardCodedValues.id
+		ON  SummaryCodeTable.intCashFlowReportSummaryCodeId = SummaryCodeHardCodedValues.id
 
 	WHEN MATCHED THEN 
 		UPDATE 
