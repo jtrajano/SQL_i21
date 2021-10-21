@@ -6,173 +6,281 @@ BEGIN
 
 DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
+-- Log required company locations
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'locationId|location'
+	, strValue = NULL
+	, strError = 'A company location is required.'
+FROM tblICStagingAdjustment a
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND a.intLocationId IS NULL AND a.strLocationName IS NULL
+
 -- Log Invalid company locations
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The location/locationId is required.' strError, null strValue, 'location/locationId' strField, a.LineNumber, a.LinePosition, 'Error'
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'locationId'
+	, strValue = CAST(a.intLocationId AS nvarchar(50))
+	, strError = 'Invalid locationId. The locationId does not exist.'
 FROM tblICStagingAdjustment a
-WHERE a.intLocationId IS NULL AND NULLIF(a.strLocationName, '') IS NULL
-
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The location "' + a.strLocationName + '" does not exist.' strError, a.strLocationName strValue, 'location' strField, a.LineNumber, a.LinePosition, 'Error'
-FROM tblICStagingAdjustment a
-OUTER APPLY (
-	SELECT TOP 1 ic.intCompanyLocationId
-	FROM tblSMCompanyLocation ic
-	WHERE (ic.strLocationNumber = a.strLocationName OR ic.strLocationName = a.strLocationName)
-) c
-WHERE c.intCompanyLocationId IS NULL
-	AND NULLIF(a.intLocationId, 0) IS NULL
-	AND NULLIF(a.strLocationName, '') IS NOT NULL
-
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The locationId "' + CAST(a.intLocationId AS NVARCHAR(50)) + '" does not exist.' strError, CAST(a.intLocationId AS NVARCHAR(50)) strValue, 'locationId' strField, a.LineNumber, a.LinePosition, 'Error'
-FROM tblICStagingAdjustment a
-OUTER APPLY (
-	SELECT TOP 1 ic.intCompanyLocationId
-	FROM tblSMCompanyLocation ic
-	WHERE ic.intCompanyLocationId = a.intLocationId
-) c
-WHERE c.intCompanyLocationId IS NULL
+LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intLocationId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND c.intCompanyLocationId IS NULL
 	AND a.intLocationId IS NOT NULL
-	AND NULLIF(a.strLocationName, '') IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The itemNo/itemId is required.' strError, null strValue, 'itemNo/itemId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-WHERE NULLIF(ad.intItemId, 0) IS NULL AND NULLIF(ad.strItemNo, '') IS NULL
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'location'
+	, strValue = a.strLocationName
+	, strError = 'Invalid location. "' + a.strLocationName + '" does not exist.'
+FROM tblICStagingAdjustment a
+LEFT JOIN tblSMCompanyLocation c ON c.strLocationNumber = a.strLocationName OR c.strLocationName = a.strLocationName
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND c.intCompanyLocationId IS NULL
+	AND a.strLocationName IS NOT NULL
+	AND a.intLocationId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The itemNo "' + ad.strItemNo + '" does not exist.' strError, ad.strItemNo strValue, 'itemNo' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT OUTER JOIN tblICItem ic ON ic.strItemNo = ad.strItemNo
-WHERE ic.intItemId IS NULL
-	AND NULLIF(ad.strItemNo, '') IS NOT NULL
-	AND ad.intItemId IS NULL
+-- Log required items
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'itemId|itemNo'
+	, strValue = NULL
+	, strError = 'An item is required.'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemId IS NULL AND d.strItemNo IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The itemId "' + CAST(ad.intItemId AS NVARCHAR(50)) + '" does not exist.' strError, CAST(ad.intItemId AS NVARCHAR(50)) strValue, 'itemId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT OUTER JOIN tblICItem ic ON ic.intItemId = ad.intItemId
-WHERE ic.intItemId IS NULL
-	AND NULLIF(ad.strItemNo, '') IS NULL
-	AND ad.intItemId IS NOT NULL
+-- Log invalid items
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'itemId'
+	, strValue = CAST(d.intItemId AS nvarchar(50))
+	, strError = 'Invalid itemId. The itemId does not exist.'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+LEFT JOIN tblICItem i ON i.intItemId = d.intItemId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemId IS NOT NULL
+	AND i.intItemId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The itemId "' + CAST(ad.intItemId AS NVARCHAR(50)) + '" is not set up for the location "'
-	 + c.strLocationName + '" with a locationId "' + CAST(c.intCompanyLocationId AS NVARCHAR(50)) + '".' strError, 
-	CAST(i.intItemId AS NVARCHAR(50)) strValue, 'itemId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = ad.intAdjustmentId
-LEFT OUTER JOIN tblICItem i ON i.intItemId = ad.intItemId
-OUTER APPLY (
-	SELECT TOP 1 ic.intCompanyLocationId, ic.strLocationName
-	FROM tblSMCompanyLocation ic
-	WHERE ic.intCompanyLocationId = a.intLocationId
-) c
-OUTER APPLY (
-	SELECT TOP 1 ic.intCompanyLocationId, ic.strLocationName
-	FROM tblSMCompanyLocation ic
-	JOIN tblICItemLocation il ON il.intLocationId = ic.intCompanyLocationId
-		AND il.intItemId = ad.intItemId
-	WHERE ic.intCompanyLocationId = a.intLocationId
-) cl
-WHERE cl.intCompanyLocationId IS NULL
-	AND NULLIF(ad.strItemNo, '') IS NULL
-	AND ad.intItemId IS NOT NULL
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'itemNo'
+	, strValue = d.strItemNo
+	, strError = 'Invalid itemNo. "' + d.strItemNo + '" does not exist.'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+LEFT JOIN tblICItem i ON i.strItemNo = d.strItemNo
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.strItemNo IS NOT NULL
+	AND d.intItemId IS NULL
+	AND i.intItemId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The itemNo "' + ISNULL(CAST(ad.strItemNo AS NVARCHAR(50)), '') + '" is not set up for the location "'
-	 + ISNULL(c.strLocationName, '') + '".' strError, 
-	CAST(i.strItemNo AS NVARCHAR(50)) strValue, 'itemNo' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = ad.intAdjustmentId
-LEFT OUTER JOIN tblICItem i ON i.strItemNo = ad.strItemNo
-OUTER APPLY (
-	SELECT TOP 1 ic.intCompanyLocationId, ic.strLocationName
-	FROM tblSMCompanyLocation ic
-	WHERE (ic.strLocationNumber = a.strLocationName OR ic.strLocationName = a.strLocationName)
-) c
-OUTER APPLY (
-	SELECT TOP 1 ic.intCompanyLocationId, ic.strLocationName
-	FROM tblSMCompanyLocation ic
-	INNER JOIN tblICItemLocation il ON il.intLocationId = ic.intCompanyLocationId
-		AND il.intItemId = i.intItemId
-	WHERE (ic.strLocationNumber = a.strLocationName OR ic.strLocationName = a.strLocationName)
-) cl
-WHERE cl.intCompanyLocationId IS NULL
-AND NULLIF(ad.strItemNo, '') IS NOT NULL
-	AND ad.intItemId IS NULL
+-- Invalid item locations
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'itemId'
+	, strValue = CAST(d.intItemId AS nvarchar(50))
+	, strError = 'The itemId is not valid for the location "' + c.strLocationName + '" with a locationId of "' + CAST(c.intCompanyLocationId AS nvarchar(50)) + '".'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+JOIN tblSMCompanyLocation c ON c.strLocationNumber = a.strLocationName OR c.strLocationName = a.strLocationName OR c.intCompanyLocationId = a.intLocationId
+JOIN tblICItem i ON i.intItemId = d.intItemId OR i.strItemNo = d.strItemNo
+LEFT JOIN tblICItemLocation il ON il.intLocationId = c.intCompanyLocationId
+	AND il.intItemId = i.intItemId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemId IS NOT NULL
+	AND il.intItemLocationId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The uom "' + CAST(ad.strUom AS NVARCHAR(50)) +  '" does not exist.' strError, 
-	CAST(ad.strUom AS NVARCHAR(50)) strValue, 'uom' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = ad.strUom
-WHERE u.intUnitMeasureId IS NULL
-	AND ad.strUom IS NOT NULL
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'itemNo'
+	, strValue = d.strItemNo
+	, strError = 'The itemNo is not valid for the location "' + c.strLocationName + '" with a locationId of "' + CAST(c.intCompanyLocationId AS nvarchar(50)) + '".'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+JOIN tblSMCompanyLocation c ON c.strLocationNumber = a.strLocationName OR c.strLocationName = a.strLocationName OR c.intCompanyLocationId = a.intLocationId
+JOIN tblICItem i ON i.intItemId = d.intItemId OR i.strItemNo = d.strItemNo
+LEFT JOIN tblICItemLocation il ON il.intLocationId = c.intCompanyLocationId
+	AND il.intItemId = i.intItemId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemId IS NULL
+	AND d.strItemNo IS NOT NULL
+	AND il.intItemLocationId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The itemUOMId "' + CAST(ad.intItemUOMId AS NVARCHAR(50)) +  '" does not exist.' strError, 
-	CAST(ad.intItemUOMId AS NVARCHAR(50)) strValue, 'itemUOMId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICItemUOM um ON um.intItemUOMId = ad.intItemUOMId
-WHERE um.intItemUOMId IS NULL
-	AND ad.intItemUOMId IS NOT NULL
+-- UOMS
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'uom'
+	, strValue = d.strUom
+	, strError = 'Invalid uom. "' + d.strUom + '" does not exist.'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+LEFT JOIN tblICUnitMeasure u ON u.strUnitMeasure = d.strUom
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.strUom IS NOT NULL
+	AND d.intUomId IS NULL
+	AND d.intItemUOMId IS NULL
+	AND u.intUnitMeasureId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The itemUOMId "' + CAST(ad.intItemUOMId AS NVARCHAR(50)) + '" is not valid for the item "' + ic.strItemNo + '".' strError, 
-	CAST(ad.intItemUOMId AS NVARCHAR(50)) strValue, 'itemUOMId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICItem ic ON ic.intItemId = ad.intItemId
-LEFT JOIN tblICItemUOM um ON um.intItemUOMId = ad.intItemUOMId AND um.intItemId = ic.intItemId
-WHERE um.intItemUOMId IS NULL
-	AND ad.intItemUOMId IS NOT NULL
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'uomId'
+	, strValue = CAST(d.intUomId AS nvarchar(50))
+	, strError = 'Invalid uomId. "' + CAST(d.intUomId AS nvarchar(50)) + '" does not exist.'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+LEFT JOIN tblICUnitMeasure u ON u.intUnitMeasureId = d.intUomId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intUomId IS NOT NULL
+	AND d.intItemUOMId IS NULL
+	AND u.intUnitMeasureId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The uom "' + CAST(ad.strUom AS NVARCHAR(50)) + '" is not valid for the item "' + ic.strItemNo + '".' strError, 
-	CAST(ad.strUom AS NVARCHAR(50)) strValue, 'uom' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICItem ic ON ic.intItemId = ad.intItemId OR ic.strItemNo = ad.strItemNo
-LEFT JOIN tblICItemUOM um ON um.intItemId = ic.intItemId
-LEFT JOIN tblICUnitMeasure u ON u.intUnitMeasureId = um.intUnitMeasureId
-WHERE um.intItemUOMId IS NULL
-	AND ad.strUom IS NOT NULL
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'itemUOMId'
+	, strValue = CAST(d.intItemUOMId AS nvarchar(50))
+	, strError = 'Invalid itemUOMId. "' + CAST(d.intItemUOMId AS nvarchar(50)) + '" does not exist.'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+LEFT JOIN tblICItemUOM m ON m.intItemUOMId = d.intItemUOMId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemUOMId IS NOT NULL
+	AND m.intItemUOMId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The newItemUOMId "' + CAST(ad.intNewItemUOMId AS NVARCHAR(50)) +  '" does not exist.' strError, 
-	CAST(ad.intNewItemUOMId AS NVARCHAR(50)) strValue, 'newItemUOMId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICItemUOM um ON um.intItemUOMId = ad.intNewItemUOMId
-WHERE um.intItemUOMId IS NULL
-	AND ad.intNewItemUOMId IS NOT NULL
+-- Validate item UOMs
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'itemUOMId'
+	, strValue = CAST(d.intItemUOMId AS nvarchar(50))
+	, strError = 'The itemUOMId is not valid for the item "' + CAST(i.strItemNo AS nvarchar(50)) + '" with an itemId of "' + CAST(i.intItemId AS nvarchar(50)) + '".'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+JOIN tblICItem i ON i.intItemId = d.intItemId OR i.strItemNo = d.strItemNo
+JOIN tblICItemUOM mm ON mm.intItemUOMId = d.intItemUOMId
+LEFT JOIN tblICItemUOM m ON m.intItemUOMId = d.intItemUOMId
+	AND m.intItemId = i.intItemId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemUOMId IS NOT NULL
+	AND m.intItemUOMId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The newItemUOMId "' + CAST(ad.intNewItemUOMId AS NVARCHAR(50)) + '" is not valid for the item "' + ic.strItemNo + '".' strError, 
-	CAST(ad.intNewItemUOMId AS NVARCHAR(50)) strValue, 'newItemUOMId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICItem ic ON ic.strItemNo = ad.strItemNo OR ic.intItemId = ad.intItemId
-LEFT JOIN tblICItemUOM um ON um.intItemUOMId = ad.intNewItemUOMId AND um.intItemId = ic.intItemId
-WHERE um.intItemUOMId IS NULL
-	AND ad.intNewItemUOMId IS NOT NULL
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'uomId'
+	, strValue = CAST(d.intUomId AS nvarchar(50))
+	, strError = 'The uomId is not valid for the item "' + CAST(i.strItemNo AS nvarchar(50)) + '" with an itemId of "' + CAST(i.intItemId AS nvarchar(50)) + '".'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+JOIN tblICItem i ON i.intItemId = d.intItemId OR i.strItemNo = d.strItemNo
+JOIN tblICUnitMeasure u ON u.intUnitMeasureId = d.intUomId
+LEFT JOIN tblICUnitMeasure m ON m.intUnitMeasureId = d.intUomId
+LEFT JOIN tblICItemUOM mm ON mm.intUnitMeasureId = m.intUnitMeasureId
+	AND mm.intItemId = i.intItemId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemUOMId IS NULL
+	AND d.intUomId IS NOT NULL
+	AND mm.intItemUOMId IS NULL
 
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The newWeightUOMId "' + CAST(ad.intNewWeightUomId AS NVARCHAR(50)) +  '" does not exist.' strError, 
-	CAST(ad.intNewWeightUomId AS NVARCHAR(50)) strValue, 'newWeightUOMId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICItemUOM um ON um.intItemUOMId = ad.intNewWeightUomId
-WHERE um.intItemUOMId IS NULL
-	AND ad.intNewWeightUomId IS NOT NULL
-	
-INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
-SELECT 'The newWeightUOMId "' + CAST(ad.intNewWeightUomId AS NVARCHAR(50)) + '" is not valid for the item "' + ic.strItemNo + '".' strError, 
-	CAST(ad.intNewWeightUomId AS NVARCHAR(50)) strValue, 'newWeightUOMId' strField, ad.LineNumber, ad.LinePosition, 'Error'
-FROM tblICStagingAdjustmentDetail ad
-LEFT JOIN tblICItem ic ON ic.strItemNo = ad.strItemNo OR ic.intItemId = ad.intItemId
-LEFT JOIN tblICItemUOM um ON um.intItemUOMId = ad.intNewWeightUomId AND um.intItemId = ic.intItemId
-WHERE um.intItemUOMId IS NULL
-	AND ad.intNewWeightUomId IS NOT NULL
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = 'uom'
+	, strValue = d.strUom
+	, strError = 'The uom is not valid for the item "' + CAST(i.strItemNo AS nvarchar(50)) + '" with an itemId of "' + CAST(i.intItemId AS nvarchar(50)) + '".'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+JOIN tblICItem i ON i.intItemId = d.intItemId OR i.strItemNo = d.strItemNo
+JOIN tblICUnitMeasure u ON u.strUnitMeasure = d.strUom
+LEFT JOIN tblICUnitMeasure m ON m.strUnitMeasure = d.strUom
+LEFT JOIN tblICItemUOM mm ON mm.intUnitMeasureId = m.intUnitMeasureId
+	AND mm.intItemId = i.intItemId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemUOMId IS NULL
+	AND d.intUomId IS NULL
+	AND d.strUom IS NOT NULL
+	AND mm.intItemUOMId IS NULL
+
+-- Validate based on adjustment type
+INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+SELECT
+	  strLogLevel = 'Error'
+	, strField = CASE WHEN d.intItemUOMId IS NOT NULL THEN 'itemUOMId' ELSE CASE WHEN d.intUomId IS NOT NULL THEN 'uomId' ELSE 'uom' END END
+	, strValue = NULL
+	, strError = 'A unit of measure is required when the adjustment type is "Quantity".'
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+	AND d.intItemUOMId IS NULL AND d.intUomId IS NULL AND d.strUom IS NULL
+	AND a.intAdjustmentType = 1
+
+-- INSERT INTO @Logs(strLogLevel, strField, strValue, strError)
+-- SELECT TOP 1
+-- 	  strLogLevel = 'Error'
+-- 	, strField = CASE WHEN d.intItemUOMId IS NOT NULL THEN 'itemUOMId'
+-- 		ELSE CASE WHEN d.intUomId IS NOT NULL THEN 'uomId' ELSE 'uom' END END
+-- 	, strValue = CASE WHEN d.intItemUOMId IS NOT NULL THEN CAST(d.intItemUOMId AS nvarchar(50))
+-- 		ELSE CASE WHEN d.intUomId IS NOT NULL THEN CAST(d.intUomId AS NVARCHAR(50)) ELSE d.strUom END END
+-- 	, strError = 'The "' + uom.strUnitMeasure + '" is not available for adjusting the quantity of the item "' + uom.strItemNo  + '".'
+-- FROM tblICStagingAdjustmentDetail d
+-- JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+-- OUTER APPLY (
+-- 	SELECT TOP 1 COALESCE(a1.intItemUOMId, a2.intItemUOMId, a3.intItemUOMId) intItemUOMId
+-- 		, COALESCE(aa1.strUnitMeasure, a2.strUnitMeasure, a3.strUnitMeasure) strUnitMeasure
+-- 		, COALESCE(aa1.intUnitMeasureId, a2.intUnitMeasureId, a3.intUnitMeasureId) intUnitMeasureId
+-- 		, i.strItemNo
+-- 	FROM tblICItem i
+-- 	LEFT JOIN tblICItemUOM a1 ON a1.intItemUOMId = d.intItemUOMId
+-- 	LEFT JOIN tblICUnitMeasure aa1 ON aa1.intUnitMeasureId = a1.intUnitMeasureId
+-- 	OUTER APPLY (
+-- 		SELECT TOP 1 b1.strUnitMeasure, b1.intUnitMeasureId, bb1.intItemUOMId
+-- 		FROM tblICUnitMeasure b1
+-- 		JOIN tblICItemUOM bb1 ON bb1.intUnitMeasureId = b1.intUnitMeasureId
+-- 			AND bb1.intItemId = i.intItemId
+-- 		WHERE b1.intUnitMeasureId = d.intUomId
+-- 	) a2
+-- 	OUTER APPLY (
+-- 		SELECT TOP 1 c1.strUnitMeasure, c1.intUnitMeasureId, cc1.intItemUOMId
+-- 		FROM tblICUnitMeasure c1
+-- 		LEFT JOIN tblICItemUOM cc1 ON cc1.intUnitMeasureId = c1.intUnitMeasureId
+-- 			AND cc1.intItemId = i.intItemId
+-- 		WHERE c1.strUnitMeasure = d.strUom
+-- 	) a3
+-- 	WHERE i.intItemId = d.intItemId OR i.strItemNo = d.strItemNo
+-- ) uom
+-- OUTER APPLY (
+-- 	SELECT *
+-- 	FROM dbo.fnICGetItemUOMFromRunningStock(d.intItemId
+-- 		, a.intLocationId
+-- 		, NULL
+-- 		, NULL
+-- 		, a.dtmDate
+-- 		, d.intOwnershipType
+-- 	)
+-- 	WHERE intItemUOMId = uom.intItemUOMId
+-- ) balance
+-- WHERE a.guiApiUniqueId = @guiApiUniqueId
+-- 	AND a.intAdjustmentType = 1
+-- 	AND uom.strItemNo IS NOT NULL
+-- 	AND balance.intItemUOMId IS NULL
 
 ---- END OF Validation
+
+IF EXISTS(SELECT * FROM @Logs)
+	GOTO _Exit
 
 DECLARE @Adjustments TABLE(strAdjustmentNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, intLocationId INT, intAdjustmentType INT, dtmAdjustmentDate DATETIME, 
 	strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -186,6 +294,7 @@ CROSS APPLY (
 	WHERE (a.intLocationId = ic.intCompanyLocationId) OR
 		((ic.strLocationNumber = a.strLocationName OR ic.strLocationName = a.strLocationName) AND a.intLocationId IS NULL)
 ) c
+WHERE a.guiApiUniqueId = @guiApiUniqueId
 
 DECLARE @intLocationId INT
 DECLARE @intAdjustmentType INT
@@ -216,8 +325,14 @@ BEGIN
 	INSERT INTO tblICInventoryAdjustmentDetail(intInventoryAdjustmentId, intItemId, intNewItemId, dblAdjustByQuantity, intLotId
 		, intNewLotId, intSubLocationId, intStorageLocationId, dblNewQuantity, dblNewSplitLotQuantity, dblNewCost, dtmNewExpiryDate, intNewLocationId, intNewItemUOMId
 		, intNewWeightUOMId, intItemUOMId, intNewSubLocationId, intNewStorageLocationId, intOwnershipType, dblQuantity, intCreatedByUserId, dtmDateCreated)
-	SELECT @intAdjustmentId, item.intItemId, newItem.intItemId, sad.dblAdjustQtyBy, lot.intLotId, newLot.intLotId, sub.intCompanyLocationSubLocationId, su.intStorageLocationId
-		, sad.dblNewQuantity, sad.dblNewLotQty
+	SELECT @intAdjustmentId, item.intItemId, newItem.intItemId, 
+		CASE WHEN sad.dblNewQuantity IS NOT NULL THEN sad.dblNewQuantity - ISNULL(balance.dblRunningAvailableQty, 0) ELSE sad.dblAdjustQtyBy END, 
+		lot.intLotId, newLot.intLotId, sub.intCompanyLocationSubLocationId, su.intStorageLocationId
+		, CASE WHEN sad.dblAdjustQtyBy IS NOT NULL 
+			THEN ISNULL(balance.dblRunningAvailableQty, 0) + sad.dblAdjustQtyBy
+			ELSE ISNULL(balance.dblRunningAvailableQty, 0)
+			END, 
+		sad.dblNewLotQty
 		, COALESCE(sad.dblNewUnitCost, dbo.fnICGetItemRunningCost(item.intItemId, @intLocationId, lot.intLotId, sub.intCompanyLocationSubLocationId, su.intStorageLocationId, item.intCommodityId, item.intCategoryId, @dtmAdjustmentDate, 0), pricing.dblLastCost)
 		, sad.dtmNewExpiryDate
 		, newLoc.intCompanyLocationId, newItemUOM.intItemUOMId, newWeightUOM.intItemUOMId, itemUOM.intItemUOMId
@@ -240,9 +355,44 @@ BEGIN
 		LEFT OUTER JOIN tblSMCompanyLocation newLoc ON newLoc.strLocationName = sad.strNewLocation
 		LEFT OUTER JOIN tblICItemLocation il ON il.intItemId = item.intItemId AND il.intLocationId = @intLocationId
 		LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = item.intItemId AND pricing.intItemLocationId = il.intItemLocationId
-		LEFT OUTER JOIN vyuICItemUOM itemUOM ON (itemUOM.intItemUOMId = sad.intItemUOMId OR itemUOM.strUnitMeasure = sad.strUom) AND itemUOM.intItemId = item.intItemId
+		OUTER APPLY (
+			SELECT TOP 1 COALESCE(a1.intItemUOMId, a2.intItemUOMId, a3.intItemUOMId) intItemUOMId
+				, COALESCE(aa1.strUnitMeasure, a2.strUnitMeasure, a3.strUnitMeasure) strUnitMeasure
+				, i.strItemNo
+				, i.intItemId
+			FROM tblICItem i
+			LEFT JOIN tblICItemUOM a1 ON a1.intItemUOMId = sad.intItemUOMId
+			LEFT JOIN tblICUnitMeasure aa1 ON aa1.intUnitMeasureId = a1.intUnitMeasureId
+			OUTER APPLY (
+				SELECT TOP 1 b1.strUnitMeasure, b1.intUnitMeasureId, bb1.intItemUOMId
+				FROM tblICUnitMeasure b1
+				JOIN tblICItemUOM bb1 ON bb1.intUnitMeasureId = b1.intUnitMeasureId
+					AND bb1.intItemId = i.intItemId
+				WHERE b1.intUnitMeasureId = sad.intUomId
+			) a2
+			OUTER APPLY (
+				SELECT TOP 1 c1.strUnitMeasure, c1.intUnitMeasureId, cc1.intItemUOMId
+				FROM tblICUnitMeasure c1
+				JOIN tblICItemUOM cc1 ON cc1.intUnitMeasureId = c1.intUnitMeasureId
+					AND cc1.intItemId = i.intItemId
+				WHERE c1.strUnitMeasure = sad.strUom
+			) a3
+			WHERE i.intItemId = sad.intItemId OR i.strItemNo = sad.strItemNo
+		) itemUOM
 		LEFT OUTER JOIN vyuICItemUOM newItemUOM ON (newItemUOM.intItemUOMId = sad.intNewItemUOMId OR newItemUOM.strUnitMeasure = sad.strNewUom) AND itemUOM.intItemId = item.intItemId
 		LEFT OUTER JOIN vyuICItemUOM newWeightUOM ON (newWeightUOM.intItemUOMId = sad.intNewWeightUomId OR newWeightUOM.strUnitMeasure = sad.strNewWeightUom) AND itemUOM.intItemId = item.intItemId
+		OUTER APPLY (
+			SELECT *
+			FROM dbo.fnICGetItemUOMFromRunningStock(
+				  itemUOM.intItemId
+				, @intLocationId
+				, NULL
+				, NULL
+				, @dtmAdjustmentDate
+				, ISNULL(sad.intOwnershipType, 1)
+			)
+			WHERE intItemUOMId = itemUOM.intItemUOMId
+		) balance
 	WHERE sad.strAdjustmentNo = @strTempAdjustmentNo
 
 	UPDATE tblICInventoryAdjustment
@@ -258,9 +408,15 @@ END
 CLOSE cur
 DEALLOCATE cur
 
+_Exit:
+
 ---- Cleanup staging
-DELETE FROM tblICStagingAdjustment
-DELETE FROM tblICStagingAdjustmentDetail
+DELETE d
+FROM tblICStagingAdjustmentDetail d
+JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
+WHERE a.guiApiUniqueId = @guiApiUniqueId
+
+DELETE FROM tblICStagingAdjustment WHERE guiApiUniqueId = @guiApiUniqueId
 
 SELECT * FROM @Logs
 
