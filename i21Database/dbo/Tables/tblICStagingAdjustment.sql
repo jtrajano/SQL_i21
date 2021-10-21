@@ -6,7 +6,7 @@ CREATE TABLE tblICStagingAdjustment(
 	, strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, dtmDate DATETIME NOT NULL
 	, intAdjustmentType INT NOT NULL
-	, strDescription NVARCHAR(300) COLLATE Latin1_General_CI_AS NOT NULL
+	, strDescription NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL
 	, [strIntegrationDocNo] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
 	, LineNumber INT NULL
 	, LinePosition INT NULL
