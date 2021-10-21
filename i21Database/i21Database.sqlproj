@@ -217,6 +217,10 @@
     <Build Include="dbo\Tables\tblApiCompletedWorkOrderStocked.sql" />
     <Build Include="dbo\Tables\tblApiRESTErrorLog.sql" />
     <Build Include="dbo\Stored Procedures\uspApiForwardWorkOrders.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedCountGroup.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedCountGroupAll.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroupAll.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
