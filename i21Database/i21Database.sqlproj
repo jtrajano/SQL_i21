@@ -262,6 +262,10 @@
     <Build Include="dbo\Tables\tblIPInvPostedReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPPreStageReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPSetReceiptLotStatus.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedCountGroup.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedCountGroupAll.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroupAll.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
