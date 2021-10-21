@@ -4,6 +4,7 @@
 	@intGLAccountId INT,
     @dtmFrom DATETIME,
     @dtmTo DATETIME,
+	@intCompanyLocationId INT = NULL,
 	@tblFilterCurrency AS [dbo].[CMCashFlowReportFilterRateType] READONLY
 )
 RETURNS TABLE
@@ -13,12 +14,7 @@ AS
 RETURN
 SELECT 
     tblBankTransactions.intGLAccountId, 
-    dblAmount =
-        SUM
-        (
-            tblBankTransactions.dblCredit - 
-            tblBankTransactions.dblDebit
-        )
+    dblAmount = SUM(tblBankTransactions.dblCredit - tblBankTransactions.dblDebit)
 FROM 
 (
     SELECT DISTINCT
@@ -92,6 +88,12 @@ FROM
         BT.ysnPosted = 1 AND 
         BA.intGLAccountId = @intGLAccountId AND 
 		BT.dtmDate BETWEEN @dtmFrom AND @dtmTo AND
-		FilterCurrency.intFilterCurrencyId IS NOT NULL
+		FilterCurrency.intFilterCurrencyId IS NOT NULL AND
+		(
+			CASE WHEN @intCompanyLocationId IS NULL
+				THEN 1
+				ELSE CASE WHEN BT.intCompanyLocationId = @intCompanyLocationId THEN 1 ELSE 0 END
+				END
+		) = 1
 ) AS tblBankTransactions 
 GROUP BY tblBankTransactions.intGLAccountId;
