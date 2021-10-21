@@ -1669,6 +1669,7 @@
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
+    <Build Include="dbo\Functions\fnICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
     <Build Include="dbo\Functions\fnICIsUpcExists.sql" />

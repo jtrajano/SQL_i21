@@ -10,5 +10,6 @@ CREATE TABLE tblICStagingAdjustment(
 	, [strIntegrationDocNo] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL
 	, LineNumber INT NULL
 	, LinePosition INT NULL
+	, guiApiUniqueId UNIQUEIDENTIFIER NULL
 	, CONSTRAINT PK_tblICStagingAdjustment_intStagingAdjustmentId PRIMARY KEY(intStagingAdjustmentId)
 )

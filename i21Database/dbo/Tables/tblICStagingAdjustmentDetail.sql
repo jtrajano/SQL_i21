@@ -9,6 +9,7 @@ CREATE TABLE tblICStagingAdjustmentDetail (
 	, intOwnershipType INT NULL
 	, strLotNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, intUomId INT NULL
 	, intItemUOMId INT NULL
 	-- Quantity Change
 	, dblAdjustQtyBy NUMERIC(38, 20) NULL
