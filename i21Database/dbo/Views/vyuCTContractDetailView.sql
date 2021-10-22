@@ -168,6 +168,19 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
+		, strFinanceTradeNo
+		, intBankAccountId
+		, strBankName = ''
+		, strBankAccountNo = ''
+		, intFacilityId
+		, strFacility = ''
+		, intLoanLimitId
+		, strLoanLimit = ''
+		, strLoanReferenceNo = ''
+		, dblLoanAmount
+		, intOverrideFacilityId
+		, strOverrideFacility = ''
+		, strBankReferenceNo
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD

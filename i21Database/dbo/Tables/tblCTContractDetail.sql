@@ -158,6 +158,15 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	ysnCashFlowOverride BIT NOT NULL DEFAULT 0,
 	dtmCashFlowDate datetime NULL,
 
+	-- Trade Finance Fields
+	strFinanceTradeNo NVARCHAR(50) NULL,
+	intBankAccountId INT NULL,
+	intFacilityId INT NULL,
+	intLoanLimitId INT NULL,
+	dblLoanAmount NUMERIC(18, 6) NULL,
+	intOverrideFacilityId INT NULL,
+	strBankReferenceNo NVARCHAR(100) NULL,
+
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 

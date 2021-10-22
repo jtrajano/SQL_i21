@@ -528,6 +528,19 @@ BEGIN TRY
 		, intDestinationLeadTime = ISNULL(DestinationPort.intLeadTime, 0)
 		, intDestinationLeadTimeSource = ISNULL(DestinationPort.intLeadTimeAtSource, 0)
 		, intFreightRateMatrixLeadTime = ISNULL(FRM.intLeadTime, 0)
+		, strFinanceTradeNo
+		, intBankAccountId
+		, strBankName = ''
+		, strBankAccountNo = ''
+		, intFacilityId
+		, strFacility = ''
+		, intLoanLimitId
+		, strLoanLimit = ''
+		, strLoanReferenceNo = ''
+		, dblLoanAmount
+		, intOverrideFacilityId
+		, strOverrideFacility = ''
+		, strBankReferenceNo
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
