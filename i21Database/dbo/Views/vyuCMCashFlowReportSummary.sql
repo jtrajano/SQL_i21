@@ -1,6 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuCMCashFlowReportSummary]
-AS 
-SELECT
+﻿SELECT
 	S.intCashFlowReportId,
 	S.intCashFlowReportSummaryId,
 	G.intCashFlowReportSummaryGroupId,
@@ -8,7 +6,7 @@ SELECT
 	C.intCashFlowReportSummaryCodeId,
 	C.strCashFlowReportSummaryCode,
 	BA.intBankAccountId,
-	BA.strBankAccountNo strBankAccountId,
+	dbo.fnAESDecryptASym(BA.strBankAccountNo) + ' - ' + B.strBankName  strBankAccountId,
 	RC.intCurrencyID intReportingCurrencyId,
 	RC.strCurrency strReportingCurrency,
 	CL.intCompanyLocationId,
@@ -37,8 +35,9 @@ LEFT JOIN tblCMCashFlowReportSummaryGroup G
 	ON G.intCashFlowReportSummaryGroupId = C.intCashFlowReportSummaryGroupId
 LEFT JOIN tblCMBankAccount BA
 	ON BA.intBankAccountId = S.intBankAccountId
+LEFT JOIN tblCMBank B 
+	ON B.intBankId = BA.intBankId
 LEFT JOIN tblSMCurrency RC
 	ON RC.intCurrencyID = S.intReportingCurrencyId
 LEFT JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = S.intCompanyLocationId
-
