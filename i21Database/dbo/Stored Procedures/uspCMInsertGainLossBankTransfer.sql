@@ -11,8 +11,9 @@ BEGIN
 		RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
 		RETURN
 	END
-	DECLARE @gainLoss DECIMAL(18,6)
+	DECLARE @gainLoss DECIMAL(18,6),@gainLossForeign DECIMAL(18,6)
 	SELECT @gainLoss= sum(dblDebit - dblCredit) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
+	SELECT @gainLossForeign= sum(dblDebitForeign - dblCreditForeign) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
@@ -21,6 +22,8 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
+			--,[dblDebitForeign]
+			--,[dblCreditForeign]
 			,[dblDebitUnit]
 			,[dblCreditUnit]
 			,[strDescription]
@@ -47,6 +50,8 @@ BEGIN
 			,[intAccountId]			= @intAccountsPayableRealizedId
 			,[dblDebit]				= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
 			,[dblCredit]			= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
+			--,[dblDebitForeign]		= case when @gainLossForeign < 0 then @gainLossForeign * -1  else 0 end
+			--,[dblCreditForeign]		= case when @gainLossForeign >= 0 then @gainLossForeign  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'

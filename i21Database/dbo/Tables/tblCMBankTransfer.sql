@@ -44,7 +44,7 @@
 	[dblFeesFrom]	           DECIMAL(18,6)  NULL,
 	[dblFeesTo]                DECIMAL(18,6)  NULL,
 	[intGLAccountIdFeesFrom]   INT            NULL,
-	[dblDifferenceTo]	       DECIMAL(18,6)  NULL,
+	[dblDifference] 	       DECIMAL(18,6)  NULL,
     [intRateTypeIdAmountFrom]  INT            NULL,
     [intRateTypeIdAmountTo]    INT            NULL,
     [intRateTypeIdFeesFrom]    INT            NULL,

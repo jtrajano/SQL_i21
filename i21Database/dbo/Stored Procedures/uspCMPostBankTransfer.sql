@@ -90,6 +90,7 @@ DECLARE
  ,@ysnForeignToFunctional BIT  
  ,@ysnForeignToForeign BIT  
  ,@ysnDefaultTransfer BIT  
+ ,@dblDifference DECIMAL(18,6)
    
  -- Table Variables  
  ,@RecapTable AS RecapTableType   
@@ -114,6 +115,7 @@ SELECT TOP 1
   ,@dblRate = dblRateAmountTo  
   ,@intCurrencyIdFrom = B.intCurrencyId  
   ,@intCurrencyIdTo = C.intCurrencyId  
+  ,@dblDifference = A.dblDifference
 FROM [dbo].tblCMBankTransfer A JOIN  
 [dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN  
 [dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo  
@@ -331,7 +333,7 @@ BEGIN
    ,[dblDebit]   					= 0  
    ,[dblCredit]   					= dblAmountFrom --   CASE WHEN @ysnForeignToForeign =1 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountFunctional.Val ELSE A.dblAmount END  
    ,[dblDebitForeign]  				= 0  
-   ,[dblCreditForeign]  			= dblAmountForeignFrom
+   ,[dblCreditForeign]  			= CASE WHEN @ysnFunctionalToForeign = 1 THEN  dblAmountForeignTo ELSE dblAmountForeignFrom END   
    ,[dblDebitUnit]   				= 0  
    ,[dblCreditUnit]  				= 0  
    ,[strDescription]  				= A.strDescription  
@@ -367,7 +369,7 @@ BEGIN
    ,[intAccountId]   				= GLAccnt.intAccountId  
    ,[dblDebit]    					= dblAmountTo  
    ,[dblCredit]   					= 0   
-   ,[dblDebitForeign]  				= dblAmountForeignTo  
+   ,[dblDebitForeign]  				= CASE WHEN @ysnForeignToFunctional = 1 THEN  dblAmountForeignFrom ELSE dblAmountForeignTo END  
    ,[dblCreditForeign]  			= 0  
    ,[dblDebitUnit]   				= 0  
    ,[dblCreditUnit]  				= 0  
@@ -394,7 +396,7 @@ BEGIN
  WHERE A.strTransactionId = @strTransactionId  
  IF @@ERROR <> 0 GOTO Post_Rollback  
   
- if( @ysnForeignToForeign = 1 or @ysnForeignToFunctional = 1 )  
+ if( @dblDifference <> 0 )  
   EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss from Bank Transfer'  
    
 END  
