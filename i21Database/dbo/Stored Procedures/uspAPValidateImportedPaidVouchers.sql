@@ -79,7 +79,7 @@ OUTER APPLY (
 			SELECT ', ' + P.strPaymentRecordNum 
 			FROM tblAPPaymentDetail PD 
 			INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId 
-			WHERE PD.intBillId = B.intBillId 
+			WHERE PD.intBillId = B.intBillId AND PD.dblPayment <> 0
 			ORDER BY P.intPaymentId FOR XML PATH('')
 		), 1, 1, ''
 	) AS strPaymentRecordNum
