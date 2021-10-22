@@ -30,6 +30,10 @@
 	,@strDescription NVARCHAR(255) = NULL 
 	,@intSourceEntityId INT = NULL 
 	,@intTransactionItemUOMId INT = NULL 
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
 	,@dtmCreated DATETIME = NULL OUTPUT 
 AS
 
@@ -77,6 +81,10 @@ INSERT INTO dbo.tblICInventoryTransactionStorage (
 		,[dtmCreated]
 		,[intSourceEntityId]
 		,[intTransactionItemUOMId]
+		,[strSourceType]
+		,[strSourceNumber]
+		,[strBOLNumber]
+		,[intTicketId]
 )
 SELECT	[intItemId]								= @intItemId
 		,[intItemLocationId]					= @intItemLocationId
@@ -111,6 +119,10 @@ SELECT	[intItemId]								= @intItemId
 		,[dtmCreated]							= @dtmCreated
 		,[intSourceEntityId]					= @intSourceEntityId
 		,[intTransactionItemUOMId]				= @intTransactionItemUOMId
+		,[strSourceType]						= @strSourceType
+		,[strSourceNumber]						= @strSourceNumber
+		,[strBOLNumber]							= @strBOLNumber
+		,[intTicketId]							= @intTicketId
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 
@@ -160,5 +172,9 @@ BEGIN
 		,@intEntityUserSecurityId 
 		,NULL -- @SourceCostBucketStorageId 
 		,@intSourceEntityId	
+		,@strSourceType
+		,@strSourceNumber 
+		,@strBOLNumber
+		,@intTicketId 
 		,NULL 
 END

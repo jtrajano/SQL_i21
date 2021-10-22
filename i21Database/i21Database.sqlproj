@@ -9091,6 +9091,7 @@
     <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
