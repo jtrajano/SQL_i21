@@ -180,11 +180,17 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0 AND I
 
 IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 BEGIN
-	SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyShipped ELSE ISI.dblQuantity END)
+	SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN IDD.dblQtyShipped
+	ELSE 
+	CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity > CTD.dblQuantity AND CTD.intPricingTypeId IN (1, 6) THEN CTD.dblQuantity ELSE ISI.dblDestinationQuantity END END)
 	FROM tblARInvoiceDetail ID
 	INNER JOIN #INVOICEDETAILS IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 	INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 	LEFT JOIN tblCTPriceFixationDetailAPAR APAR ON APAR.intInvoiceDetailId = ID.intInvoiceDetailId
+	LEFT JOIN(
+		SELECT H.intPricingTypeId,D.intContractDetailId,D.dblQuantity  from tblCTContractHeader H
+	INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
+	) CTD ON CTD.intContractDetailId =ID.intContractDetailId
 END 
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
@@ -894,3 +900,6 @@ WHERE ID.intInvoiceId = @intInvoiceId
   AND PRICE.ysnProcessed = 1
   AND ID.intInventoryShipmentItemId IS NOT NULL
   AND ID.intInventoryShipmentChargeId IS NULL
+  select *
+from tblARInvoiceDetail
+where intInvoiceId = @intInvoiceId
