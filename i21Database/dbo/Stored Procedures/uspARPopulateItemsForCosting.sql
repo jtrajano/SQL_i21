@@ -54,6 +54,7 @@ INSERT INTO ##ARItemsForCosting
 	,[strType]
 	,[ysnAutoBlend] 
 	,[ysnGLOnly]
+	,[strBOLNumber]
 )
 
 SELECT 
@@ -116,6 +117,7 @@ SELECT
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
+	,[strBOLNumber]				= ARID.strBOLNumber 
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN

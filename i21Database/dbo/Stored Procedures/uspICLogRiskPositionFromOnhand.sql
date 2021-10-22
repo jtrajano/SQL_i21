@@ -102,7 +102,11 @@ BEGIN
 		SELECT 
 			strBatchId = t.strBatchId
 			,strBucketType = @strBucketType
-			,strTransactionType = v.strTransactionType
+			,strTransactionType = -- v.strTransactionType
+				CASE 
+					WHEN transType.strName IN ('Invoice', 'Credit Memo') THEN ISNULL(invoice.strTransactionType, transType.strName) 
+					ELSE transType.strName 
+				END
 			,intTransactionRecordHeaderId = t.intTransactionId
 			,intTransactionRecordId = t.intTransactionDetailId
 			,strTransactionNumber = t.strTransactionId
@@ -119,19 +123,19 @@ BEGIN
 				, invoice.intContractHeaderId
 				, adjustment.intContractHeaderId
 			)
-			,intTicketId = v.intTicketId
-			,intCommodityId = v.intCommodityId
+			,intTicketId = t.intTicketId -- v.intTicketId
+			,intCommodityId =  i.intCommodityId --v.intCommodityId
 			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
 			,intItemId = t.intItemId
 			,intBookId = NULL
 			,intSubBookId = NULL
-			,intLocationId = v.intLocationId
+			,intLocationId = t.intCompanyLocationId --v.intLocationId
 			,intFutureMarketId = NULL
 			,intFutureMonthId = NULL
 			,dblNoOfLots = NULL
 			,dblQty = t.dblQty
 			,dblPrice = t.dblCost
-			,intEntityId = v.intEntityId
+			,intEntityId = t.intSourceEntityId --v.intEntityId
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId
 			,strNotes = t.strDescription
@@ -178,21 +182,26 @@ BEGIN
 						NULL
 				 END 
 		FROM	
-			tblICInventoryTransaction t inner join vyuICGetInventoryValuation v 
-				ON t.intInventoryTransactionId = v.intInventoryTransactionId
+			tblICInventoryTransaction t INNER JOIN tblICItem i 
+				ON t.intItemId = i.intItemId			
+
 			INNER JOIN tblICItemUOM iu
 				ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u
 				ON u.intUnitMeasureId = iu.intUnitMeasureId
+
 			CROSS APPLY (
 				SELECT TOP 1 
 					commodityUOM.* 
 				FROM 
 					tblICCommodityUnitMeasure commodityUOM
 				WHERE 
-					commodityUOM.intCommodityId = v.intCommodityId 
+					commodityUOM.intCommodityId = i.intCommodityId 
 					AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
 			) commodityUOM
+
+			LEFT JOIN tblICInventoryTransactionType transType 
+				ON transType.intTransactionTypeId = t.intTransactionTypeId
 
 			OUTER APPLY (
 				SELECT 
@@ -226,6 +235,7 @@ BEGIN
 				SELECT 
 					intContractDetailId = invD.intContractDetailId
 					,intContractHeaderId = invD.intContractHeaderId
+					,inv.strTransactionType
 				FROM 
 					tblARInvoice inv INNER JOIN tblARInvoiceDetail invD
 						ON inv.intInvoiceId = invD.intInvoiceId
@@ -279,7 +289,7 @@ BEGIN
 			AND t.strBatchId = @strBatchId
 			AND t.dblQty <> 0 
 			AND t.intInTransitSourceLocationId IS NULL 
-			AND v.strTransactionType NOT IN ('Storage Settlement', 'Transfer Storage')
+			AND transType.strName NOT IN ('Storage Settlement', 'Transfer Storage')
 	END
 	
 	EXEC uspRKLogRiskPosition @SummaryLogs, 0, 0

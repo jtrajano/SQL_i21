@@ -43,6 +43,10 @@
 	[intCreatedUserId] INT NULL, 
 	[intCreatedEntityId] INT NULL, 
 	[intCompanyId] INT NULL, 
+	[strSourceType] NVARCHAR(100) NULL,
+	[strSourceNumber] NVARCHAR(100) NULL,
+	[strBOLNumber] NVARCHAR(100) NULL,
+	[intTicketId] INT NULL,
 	CONSTRAINT [PK_tblICBackupDetailInventoryTransaction] PRIMARY KEY ([intBackupDetailId]),
 	CONSTRAINT [FK_tblICBackupDetailInventoryTransaction_tblICBackup] FOREIGN KEY ([intBackupId]) REFERENCES [tblICBackup]([intBackupId])
 )

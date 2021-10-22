@@ -82,3 +82,19 @@ GO
 IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICInventoryTransactionStorage_intTransactionId' AND object_id = OBJECT_ID('dbo.tblICInventoryTransactionStorage'))
 	DROP INDEX [IX_tblICInventoryTransactionStorage_intTransactionId] ON tblICInventoryTransactionStorage
 GO
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICItemUOM_intItemUOMId' AND object_id = OBJECT_ID('dbo.tblICItemUOM'))
+	DROP INDEX [IX_tblICItemUOM_intItemUOMId] ON tblICItemUOM
+GO
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICItemUOM_intUnitMeasureId' AND object_id = OBJECT_ID('dbo.tblICItemUOM'))
+	DROP INDEX [IX_tblICItemUOM_intUnitMeasureId] ON tblICItemUOM
+GO
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICItemUOM_intItemId' AND object_id = OBJECT_ID('dbo.tblICItemUOM'))
+	DROP INDEX [IX_tblICItemUOM_intItemId] ON tblICItemUOM
+GO
+
+IF EXISTS (SELECT * FROM sys.indexes WHERE name='IX_tblICItemUOM_intItemId_ysnStockUnit' AND object_id = OBJECT_ID('dbo.tblICItemUOM'))
+	DROP INDEX [IX_tblICItemUOM_intItemId_ysnStockUnit] ON tblICItemUOM
+GO
