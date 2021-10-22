@@ -894,6 +894,11 @@ UPDATE tblSMCSVDynamicImport SET
 			SET @printedname = @name
 		END
 
+		IF @detailcustomerno <> @entityno
+		BEGIN
+			SET  @entityno = @detailcustomerno
+		END
+
 		if @IsValid = 1 
 		begin
 
