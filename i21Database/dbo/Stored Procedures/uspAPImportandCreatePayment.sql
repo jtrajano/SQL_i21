@@ -56,7 +56,7 @@ BEGIN TRY
 			SELECT TOP 1 @currencyId = intCurrencyId FROM vyuCMBankAccount WHERE intBankAccountId = @bankAccountId
 			SELECT TOP 1 @paymentMethodId = intPaymentMethodId, @payToAddress = intDefaultLocationId FROM vyuAPVendor WHERE intEntityId = @vendorId
 
-		SELECT DISTINCT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
+		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
 		FROM dbo.fnGetRowsFromDelimitedValues(@intIds) IDS
 		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
 		INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
@@ -67,7 +67,7 @@ BEGIN TRY
 		FROM tblAPPaymentDetail PD
 		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
 		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
-		WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND I.intId IS NULL
+		WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND (I.intId IS NULL OR I.intId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds)))
 		
 		UPDATE PD
 		SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
