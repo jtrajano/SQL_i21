@@ -122,6 +122,7 @@ BEGIN
 		,[intForexRateTypeId] 
 		,[dblForexRate] 
 		,[intStorageScheduleTypeId] 
+		,[strBOLNumber]
 	)
 	SELECT 		
 		Query.[intItemId] 
@@ -148,6 +149,7 @@ BEGIN
 		,[intForexRateTypeId] 
 		,[dblForexRate] 
 		,[intStorageScheduleTypeId]  
+		,[strBOLNumber]
 	FROM (
 		SELECT 
 				[intItemId]					= ItemsToPost_Aggregrate.intItemId
@@ -174,6 +176,7 @@ BEGIN
 				,[intForexRateTypeId]			= ItemsToPost_Aggregrate.intForexRateTypeId
 				,[dblForexRate]					= ItemsToPost_Aggregrate.dblForexRate
 				,[intStorageScheduleTypeId]		= ItemsToPost_Aggregrate.intStorageScheduleTypeId
+				,[strBOLNumber]					= ItemsToPost_Aggregrate.strBOLNumber
 			FROM @ItemsToPost ItemsToPost_Aggregrate 
 			WHERE
 				ISNULL(ItemsToPost_Aggregrate.ysnIsStorage, 0) = 0 
@@ -198,6 +201,7 @@ BEGIN
 				,[intForexRateTypeId] 
 				,[dblForexRate] 
 				,[intStorageScheduleTypeId] 
+				,[strBOLNumber]
 		) Query	LEFT JOIN tblICItemUOM iu
 			ON Query.intItemUOMId = iu.intItemUOMId
 
@@ -294,6 +298,7 @@ BEGIN
 			,[intForexRateTypeId]
 			,[dblForexRate]
 			,[intStorageScheduleTypeId]		
+			,[strBOLNumber]
 		)
 		SELECT 
 			[intItemId]
@@ -322,6 +327,7 @@ BEGIN
 			,[intForexRateTypeId]
 			,[dblForexRate]
 			,[intStorageScheduleTypeId]		
+			,[strBOLNumber]
 		FROM	@ItemsToPost
 		WHERE	strTransactionId = @strTransactionId
 		ORDER BY intId 
