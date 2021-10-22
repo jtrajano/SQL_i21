@@ -17,11 +17,17 @@ BEGIN TRY
 	IF @transCount = 0 BEGIN TRANSACTION
 
 	DECLARE @datePaid DATETIME;
+	DECLARE @vendorId INT;
 	DECLARE @checkNumber NVARCHAR(55);
 	DECLARE @intIds NVARCHAR(MAX);
 	DECLARE @billIds NVARCHAR(MAX);
 	DECLARE @createdPaymentId INT;
 	DECLARE @createdPayments NVARCHAR(MAX) = '';
+
+	--VENDOR DEFAULTS
+	DECLARE @currencyId INT = NULL;
+	DECLARE @paymentMethodId INT = NULL;
+	DECLARE @payToAddress INT = NULL;
 
 	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL
 
@@ -50,29 +56,31 @@ BEGIN TRY
 			SELECT TOP 1 @currencyId = intCurrencyId FROM vyuCMBankAccount WHERE intBankAccountId = @bankAccountId
 			SELECT TOP 1 @paymentMethodId = intPaymentMethodId, @payToAddress = intDefaultLocationId FROM vyuAPVendor WHERE intEntityId = @vendorId
 
-		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
-		FROM dbo.fnGetRowsFromDelimitedValues(@intIds) IDS
-		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
-		INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
+			SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), intBillId)
+			FROM dbo.fnAPGetPayVoucherForPayment(@currencyId, @paymentMethodId, @datePaid, 1, @vendorId, @payToAddress, 0)
+		END
 
 		EXEC uspAPCreatePayment @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
 
-		DELETE PD
-		FROM tblAPPaymentDetail PD
-		INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
-		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
-		WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND (I.intId IS NULL OR I.intId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds)))
+		IF @templateId NOT IN (1, 2, 3)
+		BEGIN
+			DELETE PD
+			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
+			LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
+			WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND (I.intId IS NULL OR I.intId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds)))
+		END
 		
 		UPDATE PD
 		SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
 			PD.dblPayment = ISNULL(I.dblPayment, 0),
 			PD.dblInterest = ISNULL(I.dblInterest, 0),
-			PD.dblAmountDue = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
-			PD.dblTotal = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - I.dblInterest) ELSE PD.dblTotal END
+			PD.dblAmountDue = (ISNULL(I.dblPayment, 0) + ISNULL(I.dblDiscount, 0)) - ISNULL(I.dblInterest, 0),
+			PD.dblTotal = (ISNULL(I.dblPayment, 0) + ISNULL(I.dblDiscount, 0)) - ISNULL(I.dblInterest, 0)
 		FROM tblAPPaymentDetail PD
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 		LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
-		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
+		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
 		WHERE PD.intPaymentId = @createdPaymentId
 
 		UPDATE P
