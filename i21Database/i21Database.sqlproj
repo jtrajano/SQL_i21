@@ -295,6 +295,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedCountGroupAll.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroupAll.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMSyncCashFlowReportRateType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
