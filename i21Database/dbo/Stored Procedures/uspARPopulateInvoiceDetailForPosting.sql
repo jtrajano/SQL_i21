@@ -198,7 +198,9 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -353,7 +355,7 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
-    
+    ,[strBOLNumber]						= ARI.strBOLNumber
 FROM tblARInvoice ARI
 INNER JOIN (
     SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH(NoLock)
@@ -541,7 +543,9 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -696,7 +700,7 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
-    
+    ,[strBOLNumber]						= ARI.strBOLNumber
 FROM
     (
     SELECT LD.[intInvoiceId], LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM tblARInvoiceIntegrationLogDetail LD
@@ -877,7 +881,9 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -1032,6 +1038,7 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName , '')
                                             END		
+	,[strBOLNumber]						= ARI.strBOLNumber
     
 FROM
     (
@@ -1212,7 +1219,9 @@ INSERT #ARPostInvoiceDetail
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -1365,8 +1374,8 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))
-    
-FROM #ARPostInvoiceHeader ARI
+	,[strBOLNumber]						= ARI.strBOLNumber 
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN (
@@ -1553,7 +1562,9 @@ INSERT #ARPostInvoiceDetail
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -1765,7 +1776,8 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
-FROM #ARPostInvoiceHeader ARI
+	,[strBOLNumber]						= ARI.strBOLNumber
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 INNER JOIN (
@@ -1937,7 +1949,9 @@ INSERT #ARPostInvoiceDetail
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+	,[strBOLNumber]
+)
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -2085,7 +2099,8 @@ SELECT
     ,[strSourceType]                    = NULL
     ,[strPostingMessage]                = NULL
     ,[strDescription]                   = ISNULL(GL.strDescription, '') + ' Item: ' + ISNULL(ARID.strItemDescription, '') + ', Qty: ' + CAST(CAST(ARID.dblQtyShipped AS NUMERIC(18, 2)) AS nvarchar(100)) + ', Price: ' + CAST(CAST(ARID.dblPrice AS NUMERIC(18, 2)) AS nvarchar(100))		
-FROM #ARPostInvoiceHeader ARI
+	,[strBOLNumber]						= ARI.strBOLNumber
+FROM ##ARPostInvoiceHeader ARI
 INNER JOIN tblARInvoiceDetail ARID ON ARI.[intInvoiceId] = ARID.[intInvoiceId]
 INNER JOIN tblSMCompanyLocation SMCL ON ARI.[intCompanyLocationId] = SMCL.[intCompanyLocationId]
 LEFT OUTER JOIN (

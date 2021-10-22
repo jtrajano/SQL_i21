@@ -1030,7 +1030,11 @@ BEGIN
 		[dblCategoryCostValue] NUMERIC(38, 20) NULL, 
 		[dblCategoryRetailValue] NUMERIC(38, 20) NULL, 
 		[intSourceEntityId] INT NULL,
-		[intFobPointId] INT NULL 
+		[intFobPointId] INT NULL,
+		[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intTicketId] INT NULL		
 	)
 
 	CREATE NONCLUSTERED INDEX [IX_tmpICInventoryTransaction_delete]
@@ -1120,6 +1124,10 @@ BEGIN
 				,dblCategoryRetailValue
 				,intSourceEntityId
 				,intFobPointId
+				,strSourceType
+				,strSourceNumber
+				,strBOLNumber
+				,intTicketId
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 				LEFT JOIN tblICInventoryTransactionType  ty
@@ -1266,6 +1274,10 @@ BEGIN
 				,dblCategoryRetailValue
 				,intSourceEntityId
 				,intFobPointId
+				,strSourceType
+				,strSourceNumber
+				,strBOLNumber
+				,intTicketId
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
@@ -1828,6 +1840,10 @@ BEGIN
 						,dblForexRate
 						,intCostingMethod
 						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1856,6 +1872,10 @@ BEGIN
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
 						,ICTrans.intSourceEntityId
+						,ICTrans.strBOLNumber
+						,ICTrans.intTicketId
+						,ICTrans.strSourceType
+						,ICTrans.strSourceNumber
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemUOM StockUOM
 							ON StockUOM.intItemId = ICTrans.intItemId
 							AND StockUOM.ysnStockUnit = 1						
@@ -1935,6 +1955,10 @@ BEGIN
 						,dblForexRate
 						,intCostingMethod
 						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -1976,6 +2000,10 @@ BEGIN
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
 						,ICTrans.intSourceEntityId
+						,ICTrans.strBOLNumber
+						,ICTrans.intTicketId
+						,ICTrans.strSourceType
+						,ICTrans.strSourceNumber
 				FROM	#tmpICInventoryTransaction ICTrans LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON ICTrans.intItemId = ItemUOM.intItemId
 							AND ICTrans.intItemUOMId = ItemUOM.intItemUOMId
@@ -2037,7 +2065,7 @@ BEGIN
 					,[strRateType]
 					,[intSourceEntityId]
 					,[intCommodityId]
-					)
+				)
 				EXEC dbo.uspICCreateGLEntries 
 					@strBatchId
 					,@strAccountToCounterInventory
@@ -2115,6 +2143,10 @@ BEGIN
 						,dblForexRate
 						,intCostingMethod
 						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -2143,6 +2175,10 @@ BEGIN
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
 						,ICTrans.intSourceEntityId
+						,ICTrans.strBOLNumber
+						,ICTrans.intTicketId
+						,ICTrans.strSourceType
+						,ICTrans.strSourceNumber
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN dbo.tblICInventoryTransfer Header
 							ON ICTrans.strTransactionId = Header.strTransferNo				
 						INNER JOIN dbo.tblICInventoryTransferDetail Detail
@@ -2211,6 +2247,10 @@ BEGIN
 						,[intFobPointId]
 						,[intInTransitSourceLocationId]
 						,[intSourceEntityId]
+						,[strSourceType]
+						,[strSourceNumber]
+						,[strBOLNumber]
+						,[intTicketId]						
 					)
 					SELECT 	
 							[intItemId] = t.intItemId
@@ -2233,8 +2273,12 @@ BEGIN
 							,[strTransactionId] = t.strTransactionId
 							,[intTransactionDetailId] = t.intTransactionDetailId
 							,[intFobPointId] = t.intFobPointId
-							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
-							,[intSourceEntityId] = t.intSourceEntityId 
+							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)						
+							,[intSourceEntityId] = t.intSourceEntityId
+							,[strSourceType] = t.strSourceType
+							,[strSourceNumber] = t.strSourceNumber
+							,[strBOLNumber] = t.strBOLNumber
+							,[intTicketId] = t.intTicketId
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN tblICItem i 
@@ -2289,6 +2333,11 @@ BEGIN
 							,intForexRateTypeId
 							,dblForexRate
 							,intCostingMethod
+							,intSourceEntityId
+							,strBOLNumber
+							,intTicketId
+							,strSourceType
+							,strSourceNumber
 					)
 					SELECT 	Detail.intItemId  
 							,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
@@ -2315,6 +2364,11 @@ BEGIN
 									WHEN ISNULL(Detail.strToLocationActualCostId, Header.strActualCostId) IS NOT NULL THEN @ACTUALCOST 
 									ELSE NULL 
 								END
+							,TransferSource.intSourceEntityId
+							,TransferSource.strBOLNumber
+							,TransferSource.intTicketId
+							,TransferSource.strSourceType
+							,TransferSource.strSourceNumber
 					FROM	tblICInventoryTransferDetail Detail INNER JOIN tblICInventoryTransfer Header 
 								ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 							INNER JOIN tblICItem i
@@ -2646,6 +2700,11 @@ BEGIN
 							,intForexRateTypeId
 							,dblForexRate
 							,intCostingMethod
+							,intSourceEntityId
+							,strBOLNumber
+							,intTicketId
+							,strSourceType
+							,strSourceNumber
 					)
 					SELECT 	RebuildInvTrans.intItemId  
 							,RebuildInvTrans.intItemLocationId 
@@ -2673,6 +2732,11 @@ BEGIN
 							,RebuildInvTrans.intForexRateTypeId
 							,RebuildInvTrans.dblForexRate
 							,RebuildInvTrans.intCostingMethod
+							,RebuildInvTrans.intSourceEntityId
+							,RebuildInvTrans.strBOLNumber
+							,RebuildInvTrans.intTicketId
+							,RebuildInvTrans.strSourceType
+							,RebuildInvTrans.strSourceNumber
 					FROM	#tmpICInventoryTransaction RebuildInvTrans LEFT JOIN dbo.tblICInventoryAdjustment Adj
 								ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId
 								AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
@@ -2731,6 +2795,11 @@ BEGIN
 							,intForexRateTypeId
 							,dblForexRate
 							,intCostingMethod
+							,intSourceEntityId
+							,strBOLNumber
+							,intTicketId
+							,strSourceType
+							,strSourceNumber
 					)
 					SELECT 	ISNULL(AdjDetail.intNewItemId, AdjDetail.intItemId)
 							,ISNULL(NewLotItemLocation.intItemLocationId, SourceLotItemLocation.intItemLocationId) 
@@ -2999,6 +3068,11 @@ BEGIN
 							,intForexRateTypeId		= NULL
 							,dblForexRate			= 1 
 							,intCostingMethod		= FromStock.intCostingMethod
+							,FromStock.intSourceEntityId
+							,FromStock.strBOLNumber
+							,FromStock.intTicketId
+							,FromStock.strSourceType
+							,FromStock.strSourceNumber
 					FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 
@@ -3129,6 +3203,11 @@ BEGIN
 							,intForexRateTypeId
 							,dblForexRate
 							,intCostingMethod
+							,intSourceEntityId
+							,strBOLNumber
+							,intTicketId
+							,strSourceType
+							,strSourceNumber
 					)
 					SELECT 	RebuildInvTrans.intItemId  
 							,RebuildInvTrans.intItemLocationId 
@@ -3156,6 +3235,11 @@ BEGIN
 							,RebuildInvTrans.intForexRateTypeId
 							,RebuildInvTrans.dblForexRate
 							,RebuildInvTrans.intCostingMethod
+							,RebuildInvTrans.intSourceEntityId
+							,RebuildInvTrans.strBOLNumber
+							,RebuildInvTrans.intTicketId
+							,RebuildInvTrans.strSourceType
+							,RebuildInvTrans.strSourceNumber
 					FROM	#tmpICInventoryTransaction RebuildInvTrans LEFT JOIN dbo.tblICInventoryAdjustment Adj
 								ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId
 								AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
@@ -3214,6 +3298,11 @@ BEGIN
 							,intForexRateTypeId
 							,dblForexRate
 							,intCostingMethod
+							,intSourceEntityId
+							,strBOLNumber
+							,intTicketId
+							,strSourceType
+							,strSourceNumber
 					)
 					SELECT 	AdjDetail.intNewItemId
 							,NewItemLocation.intItemLocationId
@@ -3249,6 +3338,11 @@ BEGIN
 							,intForexRateTypeId		= NULL
 							,dblForexRate			= 1 
 							,intCostingMethod		= FromStock.intCostingMethod
+							,intSourceEntityId		= FromStock.intSourceEntityId
+							,strBOLNumber			= FromStock.strBOLNumber
+							,intTicketId			= FromStock.intTicketId
+							,strSourceType			= FromStock.strSourceType
+							,strSourceNumber		= FromStock.strSourceNumber
 					FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 								ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 
@@ -3308,6 +3402,11 @@ BEGIN
 								,intForexRateTypeId
 								,dblForexRate
 								,intCostingMethod
+								,intSourceEntityId
+								,strBOLNumber
+								,intTicketId
+								,strSourceType
+								,strSourceNumber
 						)
 						SELECT 	AdjDetail.intNewItemId
 								,NewItemLocation.intItemLocationId
@@ -3343,6 +3442,11 @@ BEGIN
 								,intForexRateTypeId		= NULL
 								,dblForexRate			= 1 
 								,intCostingMethod		= FromStock.intCostingMethod
+								,intSourceEntityId		= FromStock.intSourceEntityId
+								,strBOLNumber			= FromStock.strBOLNumber
+								,intTicketId			= FromStock.intTicketId
+								,strSourceType			= FromStock.strSourceType
+								,strSourceNumber		= FromStock.strSourceNumber	
 						FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 									ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
 
@@ -3464,6 +3568,11 @@ BEGIN
 						,intForexRateTypeId
 						,dblForexRate
 						,intCostingMethod
+						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -3491,6 +3600,11 @@ BEGIN
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
+						,ICTrans.intSourceEntityId
+						,ICTrans.strBOLNumber
+						,ICTrans.intTicketId
+						,ICTrans.strSourceType
+						,ICTrans.strSourceNumber
 
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
@@ -3610,6 +3724,11 @@ BEGIN
 						,[intSourceTransactionDetailId]
 						,[intFobPointId]
 						,[intInTransitSourceLocationId]
+						,[intSourceEntityId] 
+						,[strSourceType] 
+						,[strSourceNumber] 
+						,[strBOLNumber] 
+						,[intTicketId] 
 					)
 					SELECT 	
 							t.[intItemId] 
@@ -3631,8 +3750,13 @@ BEGIN
 							,t.[intTransactionId] 
 							,t.[strTransactionId] 
 							,t.[intTransactionDetailId] 
-							,[intFobPointId] = @intFobPointId
-							,[intInTransitSourceLocationId] = t.intItemLocationId
+							,intFobPointId = @intFobPointId
+							,intInTransitSourceLocationId = t.intItemLocationId
+							,t.intSourceEntityId
+							,t.strSourceType
+							,t.strSourceNumber
+							,t.strBOLNumber
+							,t.intTicketId
 					FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
 								ON t.intItemId = i.intItemId 
 							INNER JOIN #tmpRebuildList list
@@ -3739,6 +3863,11 @@ BEGIN
 						,intForexRateTypeId
 						,dblForexRate
 						,intCostingMethod
+						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -3775,6 +3904,11 @@ BEGIN
 						,RebuildInvTrans.intForexRateTypeId
 						,RebuildInvTrans.dblForexRate
 						,RebuildInvTrans.intCostingMethod
+						,RebuildInvTrans.intSourceEntityId
+						,RebuildInvTrans.strBOLNumber
+						,RebuildInvTrans.intTicketId
+						,RebuildInvTrans.strSourceType
+						,RebuildInvTrans.strSourceNumber
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItem i
 							ON RebuildInvTrans.intItemId = i.intItemId 
 						INNER JOIN #tmpRebuildList list
@@ -3919,7 +4053,12 @@ BEGIN
 						,[strSourceTransactionId] 
 						,[intSourceTransactionDetailId] 
 						--,[intFobPointId] 
-						,[intInTransitSourceLocationId]				
+						,[intInTransitSourceLocationId]								
+						,[intSourceEntityId] 
+						,[strSourceType] 
+						,[strSourceNumber] 
+						,[strBOLNumber] 
+						,[intTicketId] 
 				)
 				SELECT
 						[intItemId]					= t.intItemId
@@ -3949,6 +4088,11 @@ BEGIN
 								ELSE 
 									t.intInTransitSourceLocationId
 							END 
+						,[intSourceEntityId] = t.intSourceEntityId
+						,[strSourceType] = t.strSourceType
+						,[strSourceNumber] = t.strSourceNumber
+						,[strBOLNumber] = t.strBOLNumber
+						,[intTicketId] = t.intTicketId
 				FROM	
 						tblARInvoice i INNER JOIN tblARInvoiceDetail id 
 							ON i.intInvoiceId = id.intInvoiceId
@@ -4087,6 +4231,11 @@ BEGIN
 						,intCategoryId
 						,dblUnitRetail
 						,intCostingMethod
+						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -4218,6 +4367,11 @@ BEGIN
 								,RebuildInvTrans.intItemUOMId
 							)
 						,RebuildInvTrans.intCostingMethod
+						,RebuildInvTrans.intSourceEntityId
+						,RebuildInvTrans.strBOLNumber
+						,RebuildInvTrans.intTicketId
+						,RebuildInvTrans.strSourceType
+						,RebuildInvTrans.strSourceNumber
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
 						LEFT JOIN dbo.tblICInventoryReceipt Receipt
@@ -4329,6 +4483,9 @@ BEGIN
 							,[intInTransitSourceLocationId]
 							,[intForexRateTypeId]
 							,[dblForexRate]
+							,[intSourceEntityId] 
+							,[strBOLNumber] 
+							,[intTicketId] 
 					)
 					SELECT
 							t.[intItemId] 
@@ -4354,6 +4511,9 @@ BEGIN
 							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
 							,[intForexRateTypeId] = t.intForexRateTypeId
 							,[dblForexRate] = t.dblForexRate
+							,[intSourceEntityId] = r.intEntityVendorId
+							,[strBOLNumber] = r.strBillOfLading
+							,[intTicketId] = CASE WHEN r.intSourceType = 1 THEN ri.intSourceId ELSE NULL END 
 					FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 							INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
@@ -4375,6 +4535,18 @@ BEGIN
 							AND t.intFobPointId = @FOB_ORIGIN
 							AND t.dblQty > 0
 							AND i.strType <> 'Bundle'
+
+					-- Update the @ItemsForInTransitCosting for source type and source no.
+					BEGIN
+						UPDATE i
+						SET
+							i.strSourceType = v.strSourceType
+							,i.strSourceNumber = v.strSourceNumber			
+						FROM 
+							@ItemsForInTransitCosting i INNER JOIN vyuICGetReceiptItemSource v
+								ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+								AND i.intTransactionId = v.intInventoryReceiptId
+					END 
 
 					IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 					BEGIN 
@@ -4451,6 +4623,11 @@ BEGIN
 							,[intInTransitSourceLocationId]
 							,[intForexRateTypeId]
 							,[dblForexRate]
+							,[intSourceEntityId] 
+							,[strSourceType] 
+							,[strSourceNumber] 
+							,[strBOLNumber] 
+							,[intTicketId] 
 					)
 					SELECT 
 							[intItemId]				= t.intItemId  
@@ -4474,6 +4651,12 @@ BEGIN
 							,[intInTransitSourceLocationId] = dbo.fnICGetItemLocation(t.intItemId, r.intTransferorId) -- t.intInTransitSourceLocationId
 							,[intForexRateTypeId]			= tp.intForexRateTypeId
 							,[dblForexRate]					= tp.dblForexRate
+							,[intSourceEntityId] = tp.intSourceEntityId
+							,[strSourceType] = tp.strSourceType
+							,[strSourceNumber] = tp.strSourceNumber
+							,[strBOLNumber] = tp.strBOLNumber
+							,[intTicketId] = tp.intTicketId
+
 					FROM	@ItemsToPost tp INNER JOIN tblICItem i 
 								ON tp.intItemId = i.intItemId
 							INNER JOIN (
@@ -4999,6 +5182,11 @@ BEGIN
 						,intForexRateTypeId
 						,dblForexRate
 						,intCostingMethod
+						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	ICTrans.intItemId  
 						,ICTrans.intItemLocationId 
@@ -5026,7 +5214,11 @@ BEGIN
 						,ICTrans.intForexRateTypeId
 						,ICTrans.dblForexRate
 						,ICTrans.intCostingMethod
-
+						,ICTrans.intSourceEntityId
+						,ICTrans.strBOLNumber
+						,ICTrans.intTicketId
+						,ICTrans.strSourceType
+						,ICTrans.strSourceNumber
 				FROM	#tmpICInventoryTransaction ICTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON ICTrans.intItemLocationId = ItemLocation.intItemLocationId 
 						INNER JOIN tblICItemUOM StockUOM
@@ -5134,6 +5326,11 @@ BEGIN
 					,[intSourceTransactionDetailId]
 					,[intFobPointId]
 					,[intInTransitSourceLocationId]
+					,[intSourceEntityId] 
+					,[strSourceType] 
+					,[strSourceNumber] 
+					,[strBOLNumber] 
+					,[intTicketId] 
 				)
 				SELECT 	
 						t.[intItemId] 
@@ -5157,6 +5354,11 @@ BEGIN
 						,t.[intTransactionDetailId] 
 						,[intFobPointId] = @intFobPointId
 						,[intInTransitSourceLocationId] = t.intItemLocationId
+						,[intSourceEntityId] = t.intSourceEntityId
+						,[strSourceType] = t.strSourceType
+						,[strSourceNumber] = t.strSourceNumber
+						,[strBOLNumber] = t.strBOLNumber
+						,[intTicketId] = t.intTicketId
 				FROM	tblICInventoryTransaction t INNER JOIN tblICItem  i
 							ON t.intItemId = i.intItemId 					
 						INNER JOIN #tmpRebuildList list
@@ -5254,6 +5456,11 @@ BEGIN
 						,[intSourceTransactionDetailId]
 						,[intFobPointId]
 						,[intInTransitSourceLocationId]
+						,[intSourceEntityId] 
+						,[strSourceType] 
+						,[strSourceNumber] 
+						,[strBOLNumber] 
+						,[intTicketId] 
 					)
 					SELECT 	
 							[intItemId] = t.intItemId
@@ -5277,6 +5484,11 @@ BEGIN
 							,[intSourceTransactionDetailId] = t.intTransactionDetailId
 							,[intFobPointId] = t.intFobPointId
 							,[intInTransitSourceLocationId] = t.intInTransitSourceLocationId
+							,[intSourceEntityId] = t.intSourceEntityId
+							,[strSourceType] = t.strSourceType
+							,[strSourceNumber] = t.strSourceNumber
+							,[strBOLNumber] = t.strBOLNumber
+							,[intTicketId] = t.intTicketId
 					FROM	#tmpICInventoryTransaction t INNER JOIN tblICItem i 
 								ON i.intItemId = t.intItemId 
 							INNER JOIN #tmpRebuildList list
@@ -5327,6 +5539,11 @@ BEGIN
 						,dblAdjustCostValue
 						,dblAdjustRetailValue
 						,intCostingMethod
+						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -5370,6 +5587,11 @@ BEGIN
 						,dblAdjustCostValue = RebuildInvTrans.dblCategoryCostValue
 						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
 						,RebuildInvTrans.intCostingMethod
+						,RebuildInvTrans.intSourceEntityId
+						,RebuildInvTrans.strBOLNumber
+						,RebuildInvTrans.intTicketId
+						,RebuildInvTrans.strSourceType
+						,RebuildInvTrans.strSourceNumber
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
@@ -5585,7 +5807,7 @@ BEGIN
 						,dblUnitRetail = NULL 
 						,dblCategoryCostValue = NULL 
 						,dblCategoryRetailValue = NULL 
-						,adjDetail.intCostingMethod
+						,adjDetail.intCostingMethod					
 				FROM 
 					tblICInventoryAdjustment adj INNER JOIN tblICInventoryAdjustmentDetail adjDetail
 						ON adj.intInventoryAdjustmentId = adjDetail.intInventoryAdjustmentId
@@ -5616,7 +5838,223 @@ BEGIN
 
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 
-				-- Normally, Opening balance does generate GL entries. 
+				-- Normally, Opening balance does not generate GL entries. 
+				-- It will generate GL entries if it using Inventory Fix code: 001. 
+				SET @intReturnValue = NULL 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]					
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm] 
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strRateType]
+				)			
+				EXEC @intReturnValue = dbo.uspICCreateGLEntries
+					@strBatchId 
+					,'Inventory Adjustment'
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,NULL 
+					,@intItemId -- This is only used when rebuilding the stocks.
+					,@strTransactionId -- This is only used when rebuilding the stocks.
+					,@intCategoryId -- This is only used when rebuilding the stocks.
+			END 
+
+			-- Inventory Fix code: 001-C will re-add the stock back. 
+			ELSE IF	@ysnForceClearTheCostBuckets = 1 
+				AND @strTransactionType IN ('Inventory Adjustment - Opening Inventory') 
+				AND EXISTS (
+					SELECT TOP 1 1 FROM tblICInventoryAdjustment a WHERE a.intInventoryAdjustmentId = @intTransactionId AND a.strDescription LIKE '%Inventory Fix code: 001-C%'
+				)
+			BEGIN 								
+				--PRINT 'Inventory Fix code: 001-C'
+
+				-- Update the cost. Use the average cost from the first closing balance. 
+				UPDATE	AdjDetail
+				SET		dblNewCost = COALESCE(
+								--priorPeriod.dblCost
+								--, dbo.fnCalculateCostBetweenUOM(lastStockReceived.intItemUOMId, AdjDetail.intItemUOMId, lastStockReceived.dblCost) 
+								--, dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ItemPricing.dblLastCost) 
+								AdjDetail.dblNewCost 
+								, AdjDetail.dblCost 
+							) 
+				FROM	
+					tblICInventoryAdjustment Adj INNER JOIN tblICInventoryAdjustmentDetail AdjDetail 
+						ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+					INNER JOIN tblICItem i
+						ON i.intItemId = AdjDetail.intItemId 
+					INNER JOIN #tmpRebuildList list
+						ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+					LEFT JOIN tblICItemLocation ItemLocation
+						ON ItemLocation.intLocationId = Adj.intLocationId 
+						AND ItemLocation.intItemId = AdjDetail.intItemId
+					OUTER APPLY (
+						SELECT
+							dblCost = 
+								--(
+								--	dbo.fnDivide (
+								--		SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) 
+								--		,SUM(t.dblQty)
+								--	)
+								--)
+								CASE 
+									WHEN SUM(t.dblQty) > 0 AND SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) < 0 THEN 
+										dbo.fnDivide (
+											-SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) 
+											,SUM(t.dblQty)
+										)										
+									ELSE 
+										dbo.fnDivide (
+											SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) 
+											,SUM(t.dblQty)
+										)
+								END 
+						FROM 
+							tblICInventoryTransaction t 
+						WHERE 
+							t.intItemId = AdjDetail.intItemId
+							AND t.intItemLocationId = ItemLocation.intItemLocationId
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(Adj.dtmAdjustmentDate AS FLOAT))
+					) priorPeriod
+					OUTER APPLY (
+						SELECT TOP 1 
+							t.intItemUOMId
+							,t.dblCost
+						FROM 
+							tblICInventoryTransaction t 
+						WHERE 
+							t.intItemId = AdjDetail.intItemId
+							AND t.intItemLocationId = ItemLocation.intItemLocationId
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(Adj.dtmAdjustmentDate AS FLOAT))
+							AND t.dblQty > 0
+						ORDER BY
+							t.intInventoryTransactionId DESC 
+					) lastStockReceived
+
+					LEFT JOIN dbo.tblICItemUOM StockUnit
+						ON StockUnit.intItemId = AdjDetail.intItemId
+						AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+					LEFT JOIN dbo.tblICItemPricing ItemPricing
+						ON ItemPricing.intItemId = AdjDetail.intItemId
+						AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+
+				WHERE	
+					Adj.strAdjustmentNo = @strTransactionId
+					AND Adj.intInventoryAdjustmentId = @intTransactionId		
+
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId	
+						,strActualCostId 
+						,intForexRateTypeId
+						,dblForexRate
+						,intCategoryId
+						,dblUnitRetail
+						,dblAdjustCostValue
+						,dblAdjustRetailValue
+						,intCostingMethod					
+				)
+				SELECT 	adjDetail.intItemId  
+						,il.intItemLocationId 
+						,adjDetail.intItemUOMId  
+						,adj.dtmAdjustmentDate
+						,adjDetail.dblAdjustByQuantity
+						,iu.dblUnitQty
+						,ISNULL(adjDetail.dblNewCost, adjDetail.dblCost) 
+						,0
+						,@intFunctionalCurrencyId
+						,1
+						,adj.intInventoryAdjustmentId
+						,adjDetail.intInventoryAdjustmentDetailId
+						,adj.strAdjustmentNo
+						,47 -- Inventory Adjustment - Opening Inventory
+						,adjDetail.intLotId
+						,ISNULL(adjDetail.intNewSubLocationId, adjDetail.intSubLocationId)
+						,ISNULL(adjDetail.intNewStorageLocationId, adjDetail.intStorageLocationId)
+						,strActualCostId = NULL 
+						,NULL 
+						,1
+						,i.intCategoryId 
+						,dblUnitRetail = NULL 
+						,dblCategoryCostValue = NULL 
+						,dblCategoryRetailValue = NULL 
+						,adjDetail.intCostingMethod
+				FROM 
+					tblICInventoryAdjustment adj INNER JOIN tblICInventoryAdjustmentDetail adjDetail
+						ON adj.intInventoryAdjustmentId = adjDetail.intInventoryAdjustmentId
+					INNER JOIN tblICItem i
+						ON i.intItemId = adjDetail.intItemId 
+					INNER JOIN #tmpRebuildList list
+						ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+					INNER JOIN tblICItemLocation il
+						ON il.intItemId = adjDetail.intItemId
+						AND il.intLocationId = adj.intLocationId
+					INNER JOIN tblICItemUOM iu
+						ON iu.intItemId = adjDetail.intItemId
+						AND iu.intItemUOMId = adjDetail.intItemUOMId
+					INNER JOIN tblICCategory cat
+						ON cat.intCategoryId = i.intCategoryId  
+				WHERE
+					adj.strAdjustmentNo = @strTransactionId
+					AND adj.intInventoryAdjustmentId = @intTransactionId		
+					AND ISNULL(adjDetail.dblAdjustByQuantity, 0) <> 0
+				ORDER BY
+					adjDetail.intInventoryAdjustmentDetailId
+
+				EXEC @intReturnValue = dbo.uspICRepostCosting
+					@strBatchId
+					,NULL
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,@ItemsToPost
+					,@strTransactionId
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+				-- Normally, Opening balance does not generate GL entries. 
 				-- It will generate GL entries if it using Inventory Fix code: 001. 
 				SET @intReturnValue = NULL 
 				INSERT INTO @GLEntries (
@@ -5772,6 +6210,11 @@ BEGIN
 						,dblAdjustCostValue
 						,dblAdjustRetailValue
 						,intCostingMethod
+						,intSourceEntityId
+						,strBOLNumber
+						,intTicketId
+						,strSourceType
+						,strSourceNumber						
 				)
 				SELECT 	RebuildInvTrans.intItemId  
 						,RebuildInvTrans.intItemLocationId 
@@ -5840,6 +6283,11 @@ BEGIN
 						,dblAdjustCostValue = RebuildInvTrans.dblCategoryCostValue
 						,dblAdjustRetailValue = RebuildInvTrans.dblCategoryRetailValue
 						,RebuildInvTrans.intCostingMethod
+						,RebuildInvTrans.intSourceEntityId
+						,RebuildInvTrans.strBOLNumber
+						,RebuildInvTrans.intTicketId
+						,RebuildInvTrans.strSourceType
+						,RebuildInvTrans.strSourceNumber						
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
 						LEFT JOIN dbo.tblICInventoryReceipt Receipt

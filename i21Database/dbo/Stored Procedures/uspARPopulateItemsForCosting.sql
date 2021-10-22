@@ -52,7 +52,8 @@ INSERT INTO #ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
-) 
+	,[strBOLNumber]
+)
 
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
@@ -111,6 +112,7 @@ SELECT
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
+	,[strBOLNumber]				= ARID.strBOLNumber 
 FROM
     #ARPostInvoiceDetail ARID
 INNER JOIN

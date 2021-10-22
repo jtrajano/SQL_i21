@@ -208,7 +208,9 @@ INSERT INTO @ItemsForPost
     ,[intStorageScheduleTypeId]
     ,[dblUnitRetail]
     ,[intCategoryId]
-    ,[dblAdjustRetailValue]) 
+    ,[dblAdjustRetailValue]
+	,[strBOLNumber]
+) 
 SELECT 
      [intItemId]
 	,[intItemLocationId]
@@ -239,6 +241,7 @@ SELECT
 	,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
+	,[strBOLNumber]
 FROM 
 	#ARItemsForCosting
 
@@ -317,7 +320,9 @@ INSERT INTO @InTransitItems
     ,[intFobPointId] 
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
-    ,[dblForexRate])
+    ,[dblForexRate]
+	,[strBOLNumber]	
+)
 SELECT
      [intItemId] 
     ,[intItemLocationId] 
@@ -342,8 +347,8 @@ SELECT
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
     ,[dblForexRate]
-FROM 
-	#ARItemsForInTransitCosting
+	,[strBOLNumber]
+FROM ##ARItemsForInTransitCosting
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
 BEGIN
@@ -428,6 +433,7 @@ INSERT INTO @StorageItemsForPost (
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
+	,[strBOLNumber]
 ) 
 SELECT 
      [intItemId] 
@@ -448,6 +454,7 @@ SELECT
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
+	,[strBOLNumber]
 FROM 
 	#ARItemsForStorageCosting
 

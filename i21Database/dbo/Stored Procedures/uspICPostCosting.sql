@@ -62,6 +62,10 @@ DECLARE @intId AS INT
 		,@dblAdjustCostValue NUMERIC(38, 20)
 		,@dblAdjustRetailValue NUMERIC(38, 20)
 		,@intSourceEntityId INT 
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -121,6 +125,10 @@ INSERT INTO @StockToPost (
 	,[intCostingMethod]
 	,[ysnAllowVoucher]
 	,[intSourceEntityId]
+	,[strSourceType] 
+	,[strSourceNumber]
+	,[strBOLNumber]
+	,[intTicketId] 
 )
 SELECT
 	[intItemId] = p.intItemId 
@@ -164,6 +172,10 @@ SELECT
 	,[intCostingMethod] = p.intCostingMethod
 	,[ysnAllowVoucher] = p.ysnAllowVoucher
 	,[intSourceEntityId] = p.intSourceEntityId 
+	,[strSourceType] = p.strSourceType 
+	,[strSourceNumber] = p.strSourceNumber 
+	,[strBOLNumber] = p.strBOLNumber 
+	,[intTicketId] = p.intTicketId
 FROM 
 	@ItemsToPost p 
 	INNER JOIN tblICItem i 
@@ -171,18 +183,6 @@ FROM
 	LEFT JOIN tblICItemUOM iu
 		ON iu.intItemId = p.intItemId
 		AND iu.ysnStockUnit = 1
-	--OUTER APPLY (
-	--	SELECT TOP 1 
-	--		t.dtmDate
-	--	FROM 
-	--		tblICInventoryTransaction t
-	--	WHERE
-	--		t.strTransactionId = p.strTransactionId	
-	--		AND t.strBatchId <> REPLACE(@strBatchId, '-P', '') 
-	--	ORDER BY 
-	--		t.intInventoryTransactionId DESC 
-	--) lastTransaction
-
 ORDER BY 
 	p.intId
 
@@ -207,33 +207,41 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 DECLARE loopItems CURSOR LOCAL FAST_FORWARD
 FOR 
-SELECT  intId
-		,intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate = dbo.fnRemoveTimeOnDate(dtmDate)
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		,strActualCostId
-		,intForexRateTypeId
-		,dblForexRate 
-		,dblUnitRetail
-		,intCategoryId
-		,dblAdjustCostValue
-		,dblAdjustRetailValue
-		,intSourceEntityId
-FROM	@StockToPost 
-
+SELECT  p.intId
+		,p.intItemId
+		,p.intItemLocationId
+		,p.intItemUOMId
+		,p.dtmDate
+		,p.dblQty
+		,p.dblUOMQty
+		,p.dblCost
+		,p.dblSalesPrice
+		,p.intCurrencyId
+		,p.intTransactionId
+		,p.intTransactionDetailId
+		,p.strTransactionId
+		,p.intTransactionTypeId
+		,p.intLotId
+		,p.intSubLocationId
+		,p.intStorageLocationId
+		,p.strActualCostId
+		,p.intForexRateTypeId
+		,p.dblForexRate 
+		,p.dblUnitRetail
+		,p.intCategoryId
+		,p.dblAdjustCostValue
+		,p.dblAdjustRetailValue
+		,p.intSourceEntityId
+		,p.strSourceType 
+		,p.strSourceNumber 
+		,p.strBOLNumber 
+		,p.intTicketId
+FROM	@StockToPost p INNER JOIN tblICItem i 
+			ON p.intItemId = i.intItemId 
+WHERE
+		-- Allow only the items that are considered as "stockable" types. 
+		i.strType IN ('Inventory', 'Finished Good', 'Raw Material')
+		
 OPEN loopItems;
 
 -- Initial fetch attempt
@@ -263,6 +271,11 @@ FETCH NEXT FROM loopItems INTO
 	,@dblAdjustCostValue
 	,@dblAdjustRetailValue
 	,@intSourceEntityId
+	,@strSourceType 
+	,@strSourceNumber 
+	,@strBOLNumber 
+	,@intTicketId
+
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -319,6 +332,10 @@ BEGIN
 			,@dblUnitRetail
 			,@ysnTransferOnSameLocation
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -349,6 +366,10 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -379,6 +400,10 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -410,6 +435,10 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -443,6 +472,10 @@ BEGIN
 			,@dblAdjustCostValue 
 			,@dblAdjustRetailValue
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -491,6 +524,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -520,6 +557,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -549,6 +590,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -579,6 +624,10 @@ BEGIN
 					,@dblForexRate
 					,@dblUnitRetail
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -611,6 +660,10 @@ BEGIN
 					,@dblAdjustCostValue
 					,@dblAdjustRetailValue
 					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END
@@ -641,6 +694,10 @@ BEGIN
 				,@dblForexRate
 				,@dblUnitRetail
 				,@intSourceEntityId
+				,@strSourceType 
+				,@strSourceNumber 
+				,@strBOLNumber 
+				,@intTicketId 
 				;
 
 			IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -789,6 +846,10 @@ BEGIN
 		,@dblAdjustCostValue
 		,@dblAdjustRetailValue
 		,@intSourceEntityId
+		,@strSourceType 
+		,@strSourceNumber 
+		,@strBOLNumber 
+		,@intTicketId
 		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
