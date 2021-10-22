@@ -37,4 +37,8 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[intCostingMethod] INT NULL 
 	,[ysnAllowVoucher] BIT NULL 
 	,[intSourceEntityId] INT NULL
+	,[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[intTicketId] INT NULL 
 )

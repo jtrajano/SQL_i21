@@ -68,6 +68,10 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[intCompanyLocationId] INT NULL,
 		[intTransactionItemUOMId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
+		[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intTicketId] INT NULL,
 		-- AUDIT (UTC)---
 		[dtmDateCreated] DATETIME2 NULL,
 		[dtmDateModified] DATETIME2 NULL,	
