@@ -1623,6 +1623,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receipt Feed Id')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 166
+			,[strTransactionType]	= N'Trade Finance Transaction No'
+			,[strPrefix]			= N'TF-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Trade Finance Transaction No')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
