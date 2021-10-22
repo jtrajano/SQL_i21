@@ -42,6 +42,12 @@ DECLARE @intId AS INT
 
 		,@intReturnValue AS INT 
 
+		,@intSourceEntityId INT 
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
+
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
@@ -98,6 +104,11 @@ SELECT  intId
 		,intInTransitSourceLocationId
 		,intForexRateTypeId
 		,dblForexRate
+		,intSourceEntityId 
+		,strSourceType 
+		,strSourceNumber
+		,strBOLNumber 
+		,intTicketId
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -127,6 +138,11 @@ FETCH NEXT FROM loopItems INTO
 	,@intInTransitSourceLocationId
 	,@intForexRateTypeId
 	,@dblForexRate
+	,@intSourceEntityId 
+	,@strSourceType 
+	,@strSourceNumber
+	,@strBOLNumber 
+	,@intTicketId
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -174,6 +190,11 @@ BEGIN
 			,@intInTransitSourceLocationId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 			;
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -205,6 +226,11 @@ BEGIN
 			,@intInTransitSourceLocationId
 			,@intForexRateTypeId
 			,@dblForexRate
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 			;
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -235,7 +261,12 @@ BEGIN
 		,@intInTransitSourceLocationId
 		,@intForexRateTypeId
 		,@dblForexRate
-
+		,@intSourceEntityId 
+		,@strSourceType 
+		,@strSourceNumber
+		,@strBOLNumber 
+		,@intTicketId
+		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

@@ -469,6 +469,8 @@ BEGIN
 				,dblForexRate
 				,intCategoryId
 				,intSourceEntityId
+				,strBOLNumber 
+				,intTicketId
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -563,6 +565,9 @@ BEGIN
 				,dblForexRate				= 1 
 				,intCategoryId				= i.intCategoryId 
 				,intSourceEntityId			= Header.intEntityCustomerId
+				,strBOLNumber				= Header.strBOLNumber 
+				,intTicketId				= CASE WHEN Header.intSourceType = 1 THEN DetailItem.intSourceId ELSE NULL END 
+
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -600,6 +605,20 @@ BEGIN
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 				AND i.strType <> 'Bundle' -- Do not include Bundle items in the item costing. Bundle components are the ones included in the item costing. 
+
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@ItemsForPost i INNER JOIN vyuICGetInventoryShipmentItem v
+					ON i.intTransactionDetailId = v.intInventoryShipmentItemId
+					AND i.intTransactionId = v.intInventoryShipmentId
+			WHERE 
+				v.strSourceType <> 'None'
+		END 
 
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
@@ -721,6 +740,10 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,intSourceEntityId
+					,[strBOLNumber]
+					,[intTicketId]
+					,[strSourceType]
+					,[strSourceNumber]
 			)
 			SELECT
 					[intItemId] 
@@ -747,6 +770,10 @@ BEGIN
 					,[intForexRateTypeId] = t.intForexRateTypeId
 					,[dblForexRate] = t.dblForexRate
 					,[intSourceEntityId] = t.intSourceEntityId
+					,[strBOLNumber] = t.strBOLNumber
+					,[intTicketId] = t.intTicketId
+					,[strSourceType] = t.strSourceType
+					,[strSourceNumber] = t.strSourceNumber
 			FROM	tblICInventoryTransaction t 
 			WHERE	t.strTransactionId = @strTransactionId 
 					AND t.ysnIsUnposted = 0 
@@ -781,6 +808,10 @@ BEGIN
 						,[intForexRateTypeId]
 						,[dblForexRate]
 						,intSourceEntityId
+						,[strBOLNumber] 
+						,[intTicketId] 
+						,[strSourceType]
+						,[strSourceNumber] 
 				)
 				SELECT 
 					t.[intItemId] 
@@ -807,6 +838,10 @@ BEGIN
 					,t.intForexRateTypeId
 					,t.dblForexRate
 					,t.intSourceEntityId
+					,t.strBOLNumber
+					,t.intTicketId
+					,t.strSourceType
+					,t.strSourceNumber
 				FROM 
 					tblICInventoryShipment s INNER JOIN tblICInventoryTransaction t
 						ON s.strShipmentNumber = t.strTransactionId
@@ -893,6 +928,8 @@ BEGIN
 				,intForexRateTypeId
 				,dblForexRate
 				,intSourceEntityId
+				,strBOLNumber
+				,intTicketId
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -949,6 +986,8 @@ BEGIN
 				,intForexRateTypeId			= DetailItem.intForexRateTypeId
 				,dblForexRate				= 1 
 				,intSourceEntityId			= Header.intEntityCustomerId
+				,strBOLNumber				= Header.strBOLNumber
+				,intTicketId				= CASE WHEN Header.intSourceType = 1 THEN DetailItem.intSourceId ELSE NULL END 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -967,6 +1006,20 @@ BEGIN
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
 				AND i.strType <> 'Bundle' -- Do not include Bundle items in the storage costing. Bundle components are the ones included in the storage costing. 
 				
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@StorageItemsForPost i INNER JOIN vyuICGetInventoryShipmentItem v
+					ON i.intTransactionDetailId = v.intInventoryShipmentItemId
+					AND i.intTransactionId = v.intInventoryShipmentId
+			WHERE
+				v.strSourceType <> 'None'
+		END	
+
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 

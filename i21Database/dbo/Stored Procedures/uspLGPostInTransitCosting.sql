@@ -115,6 +115,8 @@ BEGIN TRY
 			,intInTransitSourceLocationId
 			,intForexRateTypeId
 			,dblForexRate
+			,intSourceEntityId
+			,strBOLNumber
 			)
 		SELECT 
 			intItemId = LD.intItemId
@@ -197,6 +199,8 @@ BEGIN TRY
 											THEN ISNULL(FX.dblFXRate, 1)
 											ELSE ISNULL(LD.dblForexRate,1) END
 									 END
+			,ISNULL(LD.intVendorEntityId, LD.intCustomerEntityId) 
+			,L.strLoadNumber
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId

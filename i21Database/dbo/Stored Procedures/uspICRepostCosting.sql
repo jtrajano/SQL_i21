@@ -40,6 +40,12 @@ DECLARE @intId AS INT
 		,@dblAdjustCostValue NUMERIC(38, 20)
 		,@dblAdjustRetailValue NUMERIC(38, 20)
 		,@intCostingMethod AS INT
+		
+		,@intSourceEntityId INT 
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -109,6 +115,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 	)
 	SELECT 
 		[intItemId] 
@@ -144,6 +154,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 	FROM 
 		@ItemsToPostRaw
 	GROUP BY 
@@ -179,6 +193,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 
 	-- Make sure the cost is repopulated. 
 	-- Either it will use the dblCost from @ItemsToPostRaw or use the item's last cost. 
@@ -248,6 +266,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 	)
 	SELECT 
 		[intItemId] 
@@ -283,6 +305,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 	FROM 
 		@ItemsToPostRaw
 	GROUP BY 
@@ -318,6 +344,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 END
 ELSE 
 BEGIN 
@@ -355,6 +385,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 	)
 	SELECT 
 		[intItemId] 
@@ -390,6 +424,10 @@ BEGIN
 		,[intCostingMethod] 
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
+		,[strBOLNumber]
+		,[intTicketId]
+		,[strSourceType]
+		,[strSourceNumber]
 	FROM 
 		@ItemsToPostRaw
 END 
@@ -437,6 +475,11 @@ SELECT  intId
 		,dblAdjustCostValue
 		,dblAdjustRetailValue
 		,intCostingMethod
+		,intSourceEntityId
+		,strSourceType
+		,strSourceNumber
+		,strBOLNumber
+		,intTicketId
 FROM	@ItemsToPost 
 
 OPEN loopItems;
@@ -468,6 +511,11 @@ FETCH NEXT FROM loopItems INTO
 	,@dblAdjustCostValue
 	,@dblAdjustRetailValue
 	,@intCostingMethod
+	,@intSourceEntityId 
+	,@strSourceType 
+	,@strSourceNumber 
+	,@strBOLNumber 
+	,@intTicketId 
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -566,6 +614,11 @@ BEGIN
 			,@dblForexRate
 			,@dblUnitRetail
 			,@ysnTransferOnSameLocation
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -595,6 +648,11 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -624,6 +682,11 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -654,6 +717,11 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@dblUnitRetail
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -686,6 +754,11 @@ BEGIN
 			,@dblForexRate
 			,@dblAdjustCostValue
 			,@dblAdjustRetailValue
+			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId 
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END
@@ -732,6 +805,11 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -760,6 +838,11 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -788,6 +871,11 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -817,6 +905,11 @@ BEGIN
 					,@intForexRateTypeId
 					,@dblForexRate
 					,@dblUnitRetail
+					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END 
@@ -848,6 +941,11 @@ BEGIN
 					,@dblForexRate
 					,@dblAdjustCostValue
 					,@dblAdjustRetailValue
+					,@intSourceEntityId
+					,@strSourceType 
+					,@strSourceNumber 
+					,@strBOLNumber 
+					,@intTicketId 
 
 				IF @intReturnValue < 0 GOTO _TerminateLoop;
 			END
@@ -877,6 +975,11 @@ BEGIN
 				,@intForexRateTypeId
 				,@dblForexRate
 				,@dblUnitRetail
+				,@intSourceEntityId
+				,@strSourceType 
+				,@strSourceNumber 
+				,@strBOLNumber 
+				,@intTicketId 
 				;
 
 			IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -1024,6 +1127,11 @@ BEGIN
 		,@dblAdjustCostValue
 		,@dblAdjustRetailValue
 		,@intCostingMethod
+		,@intSourceEntityId 
+		,@strSourceType 
+		,@strSourceNumber 
+		,@strBOLNumber 
+		,@intTicketId 
 		;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

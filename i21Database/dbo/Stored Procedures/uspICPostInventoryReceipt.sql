@@ -636,6 +636,8 @@ BEGIN
 				,intCategoryId
 				,dblUnitRetail
 				,intSourceEntityId
+				,strBOLNumber 
+				,intTicketId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -839,6 +841,9 @@ BEGIN
 						,DEFAULT 
 					)
 				,intSourceEntityId = Header.intEntityVendorId
+				,strBOLNumber = Header.strBillOfLading 
+				,intTicketId = CASE WHEN Header.intSourceType = 1 THEN DetailItem.intSourceId ELSE NULL END 
+
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN tblICItem i 
@@ -878,7 +883,19 @@ BEGIN
 
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
-				AND i.strType <> 'Bundle' -- Do not include Bundle items in the item costing. Bundle components are the ones included in the item costing. 
+				AND i.strType <> 'Bundle' -- Do not include Bundle items in the item costing. Bundle components are the ones included in the item costing.
+				
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@ItemsForPost i INNER JOIN vyuICGetReceiptItemSource v
+					ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+					AND i.intTransactionId = v.intInventoryReceiptId
+		END 
 
 		-- Update currency fields to functional currency. 
 		BEGIN 
@@ -933,6 +950,10 @@ BEGIN
 			,[dblAdjustRetailValue] 
 			,[intCostingMethod] 
 			,[ysnAllowVoucher] 
+			,[strSourceType]
+			,[strSourceNumber]
+			,[strBOLNumber]
+			,[intTicketId]
 		)
 		SELECT 
 			itemsToPost.intItemId
@@ -967,6 +988,10 @@ BEGIN
 			,itemsToPost.dblAdjustRetailValue
 			,itemsToPost.intCostingMethod
 			,itemsToPost.ysnAllowVoucher
+			,itemsToPost.strSourceType
+			,itemsToPost.strSourceNumber
+			,itemsToPost.strBOLNumber
+			,itemsToPost.intTicketId
 		FROM	
 			@ItemsForPost itemsToPost INNER JOIN tblICItem i 
 				ON itemsToPost.intItemId = i.intItemId
@@ -1046,6 +1071,10 @@ BEGIN
 					,intCategoryId
 					,dblUnitRetail
 					,intSourceEntityId
+					,strSourceType
+					,strSourceNumber
+					,strBOLNumber
+					,intTicketId
 			)
 			SELECT 
 					intItemId  
@@ -1072,6 +1101,10 @@ BEGIN
 					,intCategoryId
 					,dblUnitRetail
 					,intSourceEntityId
+					,strSourceType
+					,strSourceNumber
+					,strBOLNumber
+					,intTicketId
 			FROM	@ItemsForPost
 			--WHERE	dblQty > 0 
 			--		OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
@@ -1370,6 +1403,8 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[intSourceEntityId]
+					,[strBOLNumber]
+					,[intTicketId]
 			)
 			SELECT
 					t.[intItemId] 
@@ -1412,6 +1447,8 @@ BEGIN
 					,[intForexRateTypeId] = t.intForexRateTypeId
 					,[dblForexRate] = t.dblForexRate
 					,[intSourceEntityId] = r.intEntityVendorId
+					,strBOLNumber = r.strBillOfLading
+					,intTicketId = CASE WHEN r.intSourceType = 1 THEN ri.intSourceId ELSE NULL END 
 			FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
 						ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 					INNER JOIN vyuLGLoadContainerLookup loadShipmentLookup
@@ -1434,6 +1471,18 @@ BEGIN
 					AND t.dblQty > 0
 					AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 					
+			-- Update the @ItemsForPost for source type and source no.
+			BEGIN
+				UPDATE i
+				SET
+					i.strSourceType = v.strSourceType
+					,i.strSourceNumber = v.strSourceNumber			
+				FROM 
+					@ItemsForInTransitCosting i INNER JOIN vyuICGetReceiptItemSource v
+						ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+						AND i.intTransactionId = v.intInventoryReceiptId
+			END 
+
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
 				-- Call the post routine for the In-Transit costing (Inbound Shipment) 
@@ -1510,6 +1559,10 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[intSourceEntityId]
+					,[strBOLNumber]
+					,[intTicketId]
+					,[strSourceType]
+					,[strSourceNumber]
 			)
 			SELECT 
 					[intItemId]				= t.intItemId  
@@ -1534,6 +1587,10 @@ BEGIN
 					,[intForexRateTypeId]			= tp.intForexRateTypeId
 					,[dblForexRate]					= tp.dblForexRate
 					,[intSourceEntityId]		= tp.intSourceEntityId
+					,[strBOLNumber] = tp.strBOLNumber
+					,[intTicketId] = tp.intTicketId 
+					,[strSourceType] = tp.strSourceType
+					,[strSourceNumber] = tp.strSourceNumber 
 			FROM	@ItemsForPost tp INNER JOIN tblICItem i 
 						ON tp.intItemId = i.intItemId
 					INNER JOIN (
@@ -1699,6 +1756,8 @@ BEGIN
 				,intForexRateTypeId
 				,dblForexRate
 				,intSourceEntityId
+				,strBOLNumber 
+				,intTicketId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -1859,6 +1918,8 @@ BEGIN
 				,intForexRateTypeId = DetailItem.intForexRateTypeId
 				,dblForexRate = DetailItem.dblForexRate
 				,intSourceEntityId = Header.intEntityVendorId
+				,strBOLNumber = Header.strBillOfLading 
+				,intTicketId = CASE WHEN Header.intSourceType = 1 THEN DetailItem.intSourceId ELSE NULL END 
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
 				INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -1893,6 +1954,18 @@ BEGIN
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
 				AND i.strType <> 'Bundle' -- Do not include Bundle items in the in-transit costing. Bundle components are the ones included in the in-transit costing. 
 
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@StorageItemsForPost i INNER JOIN vyuICGetReceiptItemSource v
+					ON i.intTransactionDetailId = v.intInventoryReceiptItemId
+					AND i.intTransactionId = v.intInventoryReceiptId
+		END		
+		
 		-- Update currency fields to functional currency. 
 		BEGIN 
 			UPDATE	storageCost

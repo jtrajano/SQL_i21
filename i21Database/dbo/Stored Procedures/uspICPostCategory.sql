@@ -31,6 +31,10 @@ CREATE PROCEDURE [dbo].[uspICPostCategory]
 	,@dblAdjustCostValue AS NUMERIC(38,20)
 	,@dblAdjustRetailValue AS NUMERIC(38,20)	
 	,@intSourceEntityId AS INT = NULL 
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -269,6 +273,10 @@ BEGIN
 		,@dblCategoryRetailValue = @dblRetailValue 
 		,@intSourceEntityId = @intSourceEntityId 
 		,@intTransactionItemUOMId = @intTransactionItemUOMId
+		,@strSourceType = @strSourceType
+		,@strSourceNumber = @strSourceNumber
+		,@strBOLNumber = @strBOLNumber
+		,@intTicketId = @intTicketId
 		,@dtmCreated = @dtmCreated OUTPUT 
 END 
 

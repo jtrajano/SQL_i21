@@ -57,6 +57,10 @@ DECLARE @intId AS INT
 		,@intForexRateTypeId AS INT
 		,@dblForexRate NUMERIC(38, 20)
 		,@intSourceEntityId INT 
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -117,6 +121,10 @@ SELECT  intId
 		,intForexRateTypeId
 		,dblForexRate 
 		,intSourceEntityId
+		,strSourceType 
+		,strSourceNumber
+		,strBOLNumber 
+		,intTicketId 
 FROM	@ItemsToReturn
 
 OPEN loopItems;
@@ -145,6 +153,10 @@ FETCH NEXT FROM loopItems INTO
 	,@intForexRateTypeId
 	,@dblForexRate
 	,@intSourceEntityId
+	,@strSourceType
+	,@strSourceNumber
+	,@strBOLNumber
+	,@intTicketId
 	;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -200,6 +212,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
@@ -230,6 +246,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
@@ -260,6 +280,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
@@ -291,6 +315,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
@@ -322,6 +350,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop
 	END
@@ -374,6 +406,10 @@ BEGIN
 		,@intForexRateTypeId
 		,@dblForexRate
 		,@intSourceEntityId
+		,@strSourceType
+		,@strSourceNumber
+		,@strBOLNumber
+		,@intTicketId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
