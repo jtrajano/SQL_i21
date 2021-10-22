@@ -140,6 +140,10 @@ INSERT INTO tblICBackupDetailInventoryTransaction (
 	,intCreatedUserId
 	,intCreatedEntityId
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 )
 SELECT 	
 	intBackupId
@@ -184,6 +188,10 @@ SELECT
 	,intCreatedUserId
 	,intCreatedEntityId
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 FROM 
 	#tmp_tblICBackupDetailInventoryTransaction_all
 
@@ -230,6 +238,10 @@ INSERT INTO tblICBackupDetailInventoryTransaction (
 	,intCreatedUserId
 	,intCreatedEntityId
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 )
 SELECT 	
 	intBackupId
@@ -274,6 +286,10 @@ SELECT
 	,intCreatedUserId
 	,intCreatedEntityId
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 FROM 
 	#tmp_tblICBackupDetailInventoryTransaction_item
 
@@ -320,6 +336,10 @@ INSERT INTO tblICBackupDetailInventoryTransaction (
 	,intCreatedUserId
 	,intCreatedEntityId
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 )
 SELECT 	
 	intBackupId
@@ -364,6 +384,10 @@ SELECT
 	,intCreatedUserId
 	,intCreatedEntityId
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 FROM 
 	#tmp_tblICBackupDetailInventoryTransaction_category
 
@@ -483,6 +507,10 @@ INSERT INTO tblICBackupDetailInventoryTransactionStorage (
 	,intForexRateTypeId
 	,dblForexRate
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 	,dtmCreated
 	,intCreatedUserId
 	,intCreatedEntityId
@@ -519,6 +547,10 @@ SELECT
 	,intForexRateTypeId
 	,dblForexRate
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 	,dtmCreated
 	,intCreatedUserId
 	,intCreatedEntityId
@@ -557,6 +589,10 @@ INSERT INTO tblICBackupDetailInventoryTransactionStorage (
 	,intForexRateTypeId
 	,dblForexRate
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 	,dtmCreated
 	,intCreatedUserId
 	,intCreatedEntityId
@@ -593,6 +629,10 @@ SELECT
 	,intForexRateTypeId
 	,dblForexRate
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 	,dtmCreated
 	,intCreatedUserId
 	,intCreatedEntityId
@@ -632,6 +672,10 @@ INSERT INTO tblICBackupDetailInventoryTransactionStorage (
 	,intForexRateTypeId
 	,dblForexRate
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 	,dtmCreated
 	,intCreatedUserId
 	,intCreatedEntityId
@@ -668,6 +712,10 @@ SELECT
 	,intForexRateTypeId
 	,dblForexRate
 	,intCompanyId
+	,strSourceType
+	,strSourceNumber
+	,strBOLNumber
+	,intTicketId
 	,dtmCreated
 	,intCreatedUserId
 	,intCreatedEntityId

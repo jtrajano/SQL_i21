@@ -264,6 +264,10 @@ BEGIN
 			,[intSourceEntityId]
 			,[dtmDateCreated]
 			,[intCompanyLocationId]	
+			,[strSourceType]
+			,[strSourceNumber]
+			,[strBOLNumber]
+			,[intTicketId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -302,6 +306,11 @@ BEGIN
 			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 			,[dtmDateCreated]						= GETUTCDATE()
 			,[intCompanyLocationId]					= ActualTransaction.intCompanyLocationId
+			,[strSourceType]						= ActualTransaction.strSourceType
+			,[strSourceNumber]						= ActualTransaction.strSourceNumber
+			,[strBOLNumber]							= ActualTransaction.strBOLNumber
+			,[intTicketId]							= ActualTransaction.intTicketId
+
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
@@ -330,7 +339,11 @@ BEGIN
 		,[dtmCreated] 
 		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
-		,[intSourceEntityId]					
+		,[intSourceEntityId]	
+		,[strSourceType]
+		,[strSourceNumber]
+		,[strBOLNumber]
+		,[intTicketId]		
 	)
 	SELECT	[intItemId]					= ActualTransaction.intItemId
 			,[intLotId]					= ActualTransaction.intLotId
@@ -353,6 +366,10 @@ BEGIN
 			,[intCreatedEntityId]			= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
 			,[intSourceEntityId]		= ActualTransaction.intSourceEntityId
+			,[strSourceType]			= ActualTransaction.strSourceType
+			,[strSourceNumber]			= ActualTransaction.strSourceNumber
+			,[strBOLNumber]				= ActualTransaction.strBOLNumber
+			,[intTicketId]				= ActualTransaction.intTicketId
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 

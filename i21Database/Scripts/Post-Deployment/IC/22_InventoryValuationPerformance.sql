@@ -65,3 +65,9 @@ GO
 
 PRINT N'END - IC Improve Inventory Valuation Performance'
 GO
+
+PRINT N'START- IC Improve Inventory Valuation Performance 2'
+GO
+	EXEC uspICRebuildInventoryTransaction
+GO
+PRINT N'END - IC Improve Inventory Valuation Performance 2'
