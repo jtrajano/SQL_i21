@@ -801,9 +801,11 @@ begin try
 						,intConcurrencyId = 1 
 				end
 
+			    declare @processedPayment table (
+			    	intBillId int
+			    );
 
 				--4. Apply PrePay
-				select @intTicketId = intTicketId from tblSCTicket where intInventoryReceiptId = @intCreatedInventoryReceiptId;
 
 				declare @prePayId Id;
 				delete from @prePayId
@@ -821,8 +823,9 @@ begin try
 					and BL.ysnPosted = 1
 					and BL.ysnPaid = 0
 
-				if exists(select top 1 1 from @prePayId)
+     			if (exists(select top 1 1 from @prePayId) and not exists (select top 1 1 from @processedPayment where intBillId = @intCreatedBillId))
 				begin
+      				insert into @processedPayment select intBillId = @intCreatedBillId;
 					EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
 				end
 
