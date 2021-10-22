@@ -996,6 +996,10 @@ begin try
 					,@intCreatedInventoryReceiptItemId int
 					,@dblCreatedQtyReceived numeric(18,6);
 
+				declare @processedPayment table (
+					intBillId int
+				);
+
 				select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 				while (@intCreatedBillDetailId is not null and @intCreatedBillDetailId > 0)
 				begin
@@ -1062,8 +1066,9 @@ begin try
 						and BL.ysnPosted = 1
 						and BL.ysnPaid = 0
 
-					if exists(select top 1 1 from @prePayId)
+					if (exists(select top 1 1 from @prePayId) and not exists (select top 1 1 from @processedPayment where intBillId = @intCreatedBillId))
 					begin
+						insert into @processedPayment select intBillId = @intCreatedBillId;
 						EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
 					end
 						
