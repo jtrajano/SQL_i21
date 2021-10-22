@@ -16,7 +16,9 @@ B.dblSalvageValue,
 B.dtmPlacedInService,  
 DM.strConvention,  
 DM.strDepreciationType,  
-DM.strDepreciationMethodId
+DM.strDepreciationMethodId,
+AssetGroup.strGroupCode,
+AssetGroup.strGroupDescription
 FROM   
 tblFAFiscalAsset A  
 JOIN tblFABookDepreciation B  
@@ -28,6 +30,7 @@ JOIN tblGLFiscalYearPeriod FP ON FP.intGLFiscalYearPeriodId
 = A.intFiscalPeriodId  
 JOIN tblGLFiscalYear FY ON FY.intFiscalYearId=FP.intFiscalYearId  
 JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = B.intDepreciationMethodId  
+LEFT JOIN tblFAFixedAssetGroup AssetGroup ON AssetGroup.intAssetGroupId = C.intAssetGroupId
 OUTER APPLY(  
     SELECT COUNT(*) cnt  
     FROM tblFAFixedAssetDepreciation  

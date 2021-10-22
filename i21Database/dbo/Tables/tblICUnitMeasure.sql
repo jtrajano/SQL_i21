@@ -23,6 +23,7 @@ Type the overview for the table here.
         [dtmDateModified] DATETIME NULL,
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICUnitMeasure] PRIMARY KEY ([intUnitMeasureId]), 
 		CONSTRAINT [AK_tblICUnitMeasure_strUnitMeasure] UNIQUE ([strUnitMeasure]) 
 	)

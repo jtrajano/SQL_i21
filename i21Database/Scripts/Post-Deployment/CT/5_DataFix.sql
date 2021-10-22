@@ -302,4 +302,10 @@ begin
 	update tblSMCompanySetup set ysnScreenControlListingUpdated = 0;
 end
 
+
+IF EXISTS (SELECT TOP 1 1 FROM tblCTContractBalanceLog WHERE intActionId = 1 AND strTransactionReference = 'Price Fixation' AND intTransactionReferenceDetailId IS NULL)
+BEGIN
+	EXEC uspCTFixCBLogAfterRebuild
+END
+
 GO

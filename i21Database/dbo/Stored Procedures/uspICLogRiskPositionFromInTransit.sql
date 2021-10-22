@@ -8,7 +8,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Create the temp config table. 
 IF OBJECT_ID('tempdb..#tmpLogRiskPosition') IS NULL  
@@ -188,9 +188,15 @@ BEGIN
 				ON iu.intItemUOMId = t.intItemUOMId
 			INNER JOIN tblICUnitMeasure u
 				ON u.intUnitMeasureId = iu.intUnitMeasureId
-			INNER JOIN tblICCommodityUnitMeasure commodityUOM
-				ON commodityUOM.intCommodityId = v.intCommodityId 
-				AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
+			CROSS APPLY (
+				SELECT TOP 1 
+					commodityUOM.* 
+				FROM 
+					tblICCommodityUnitMeasure commodityUOM
+				WHERE 
+					commodityUOM.intCommodityId = v.intCommodityId 
+					AND commodityUOM.intUnitMeasureId = u.intUnitMeasureId	
+			) commodityUOM
 
 			OUTER APPLY (
 				SELECT 

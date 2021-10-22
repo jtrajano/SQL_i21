@@ -101,8 +101,11 @@ BEGIN
 		SET @intPreviousDDReadingId = ISNULL((SELECT TOP 1 intDegreeDayReadingID FROM tblTMDegreeDayReading WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) = DATEADD(dd, DATEDIFF(dd, 0, @dtmLastMonitorReadingEvent), 0)),@intPreviousDDReadingId)
 		SET @intStart = CHARINDEX('Percent Full: ',@strDescription,1) + 14
 		SET @intEnd =  CHARINDEX(CHAR(10), SUBSTRING(@strDescription,@intStart,LEN(@strDescription) - @intStart))
-		SET @dblLastPercentFull = CAST((SELECT SUBSTRING(@strDescription,@intStart, @intEnd - 1)) AS NUMERIC(18,6))
-		SET @dblLastGallonsInTank = ((ISNULL(@dblLastPercentFull,0)/100) * @dblTotalCapacity)
+		IF(@intStart > 14)
+		BEGIN
+			SET @dblLastPercentFull = CAST((SELECT SUBSTRING(@strDescription,@intStart, @intEnd - 1)) AS NUMERIC(18,6))
+			SET @dblLastGallonsInTank = ((ISNULL(@dblLastPercentFull,0)/100) * @dblTotalCapacity)
+		END
 	END
 	
 		

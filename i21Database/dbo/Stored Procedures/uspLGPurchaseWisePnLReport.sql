@@ -220,14 +220,14 @@ FROM
 		,dblPAllocatedQty = CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt
 								 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
 								 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty) END
-		,dblSAllocatedQty = CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN INVC.dblNetShippedWt 
+		,dblSAllocatedQty = CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt)
 								 ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END
 		,dblPAllocatedQtyInPriceUOM = CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, PCD.intPriceItemUOMId, VCHR.dblNetShippedWt)
 										   WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (LS.intItemUOMId, PCD.intPriceItemUOMId, LS.dblNetShippedWt)
 										   ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, PCD.intPriceItemUOMId, ALD.dblPAllocatedQty) END
-		,dblSAllocatedQtyInPriceUOM = CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, SCD.intPriceItemUOMId, INVC.dblNetShippedWt)
+		,dblSAllocatedQtyInPriceUOM = CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, SCD.intPriceItemUOMId, ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt))
 										   ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, SCD.intPriceItemUOMId, ALD.dblSAllocatedQty) END
-		,dblSAllocatedQtyInResUOM = CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, ToUOM.intItemUOMId, INVC.dblNetShippedWt)
+		,dblSAllocatedQtyInResUOM = CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, ToUOM.intItemUOMId, ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt))
 										 ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToUOM.intItemUOMId, ALD.dblSAllocatedQty) END
 		,dblPTerminalPrice = /* P-Terminal Price */
 							ISNULL(PCD.dblFutures, 0)
@@ -240,20 +240,24 @@ FROM
 		,dblInvoicedPValue = /* Invoiced P-Value */
 							ISNULL(VCHR.dblTotalCost, 0) * -1
 		,dblInvoicedSValue = /* Invoiced S-Value */
-							ISNULL(INVC.dblTotalCost, 0)
+							COALESCE(INVC.dblTotalCost, PINVC.dblTotalCost, 0) + ISNULL(INADJ.dblTotalCost, 0)
 		,dblDifference = /* Difference = P-Terminal Price - S-Terminal Price */
 							ISNULL(PCD.dblFutures, 0) - ISNULL(SCD.dblFutures, 0)
 		,dblDifferenceInFC = (ISNULL(PCD.dblFutures, 0) / ISNULL(PCUR.intCent, 1)) - (ISNULL(SCD.dblFutures, 0) / ISNULL(SCUR.intCent, 1))
 		,dblLots = /* Lots = Invoice or Allocated Weight / Contract Weight */
-					ROUND(dbo.fnDivide(CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN INVC.dblNetShippedWt 
+					ROUND(dbo.fnDivide(CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt)
 									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
 									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
-		,dblLotContractSize = /* Invoice or Allocated Weight */
-							CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN INVC.dblNetShippedWt 
-								 ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END
-		,dblLotContractSizeInPriceUOM = /* Invoice or Allocated Weight in Sales Price Unit */
-							CASE WHEN ISNULL(INVC.dblNetShippedWt, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM (ToWUOM.intItemUOMId, SCD.intPriceItemUOMId, INVC.dblNetShippedWt)
-								ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, SCD.intPriceItemUOMId, ALD.dblSAllocatedQty) END
+		,dblLotContractSize = /* Lots Contract Size = Lots x Contract Size*/
+							ROUND(dbo.fnDivide(CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt)
+									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
+									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
+								* dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)
+		,dblLotContractSizeInPriceUOM =  /* Lots Contract Size converted to Price UOM for Eff Hedge PL calculation */
+							ROUND(dbo.fnDivide(CASE WHEN COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, 0) <> 0 THEN ISNULL(INVC.dblNetShippedWt, PINVC.dblNetShippedWt)
+									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
+									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
+								* dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
 		,dblReservesARateTotal = RA.dblReservesARateTotal
 		,dblReservesAValueTotal = RA.dblReservesAValueTotal * -1
 		,dblReservesBRateTotal = RB.dblReservesBRateTotal
@@ -266,7 +270,7 @@ FROM
 						CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt
 							 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
 							 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblPAllocatedQty) END
-						- ISNULL(INVC.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty))
+						- COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty))
 		,dblTotalMargin = /* Reserves B Total in Absolute Value */ 
 							ABS(RB.dblReservesBValueTotal)
 		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal * -1
@@ -349,7 +353,34 @@ FROM
 				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
 			WHERE IVD.ysnPosted = 1 
 				AND IVD.intContractDetailId = SCD.intContractDetailId
-				AND IVDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) INVC
+				AND IVD.intItemId = SCD.intItemId) INVC
+		OUTER APPLY
+			(SELECT 
+				dblTotalCost = SUM(dblTotal)
+				,dblNetShippedWt = SUM(dblQtyShipped)
+			FROM 
+				(SELECT ivd.intInvoiceId, ivd.intItemId, ivd.intContractDetailId, iv.ysnPosted
+					,dblTotal = dblTotal
+					,dblQtyShipped = dbo.fnCalculateQtyBetweenUOM (intItemWeightUOMId, ToWUOM.intItemUOMId, dblShipmentNetWt)
+					FROM tblARInvoiceDetail ivd
+					INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId AND iv.strType = 'Provisional') IVD 
+				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
+			WHERE IVD.ysnPosted = 1 
+				AND IVD.intContractDetailId = SCD.intContractDetailId
+				AND IVD.intItemId = SCD.intItemId) PINVC
+		/* Sales Value Adjustment */
+		OUTER APPLY 
+			(SELECT 
+				dblTotalCost = SUM(dblTotal)
+			FROM 
+				(SELECT ivd.intInvoiceId, ivd.intItemId, ivd.intContractDetailId, iv.ysnPosted
+					,dblTotal = dblTotal * CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
+					FROM tblARInvoiceDetail ivd INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId AND iv.strType = 'Standard') IVD 
+				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
+			WHERE IVD.ysnPosted = 1 
+				AND IVD.intContractDetailId = SCD.intContractDetailId
+				AND IVD.intItemId <> SCD.intItemId
+				AND IVDI.intCategoryId NOT IN (CP.intPnLReportReserveACategoryId, CP.intPnLReportReserveBCategoryId)) INADJ
 		/* Reserves A */
 		OUTER APPLY 
 			(SELECT dblReservesARateTotal = SUM(ISNULL(CC.dblRate, 0))

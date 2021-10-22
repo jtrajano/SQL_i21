@@ -175,7 +175,7 @@ FROM (
 		 , intPricingTypeId			= NULL
 		 , strPricingType			= 'Item Contract'
 		 , dblOrderPrice			= CAST(0 AS NUMERIC(18, 6))
-		 , dblCashPrice				= CAST(0 AS NUMERIC(18, 6))
+		 , dblCashPrice				= CAST(ICC.dblDollarValue AS NUMERIC(18, 6))
 		 , intSubCurrencyId			= NULL
 		 , dblSubCurrencyRate		= NULL
 		 , strSubCurrency			= NULL

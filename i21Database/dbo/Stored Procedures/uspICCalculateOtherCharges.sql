@@ -6,7 +6,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF    
+SET ANSI_WARNINGS ON    
 
 BEGIN
 
@@ -63,7 +63,13 @@ BEGIN
 										1
 							END 
 						, 2)
-			,dblQuantity = ISNULL(NULLIF(ComputedCharges.dblCalculatedQty, 0), 1) 
+			,dblQuantity = 
+				CASE 
+					WHEN ReceiptCharge.strCostMethod = 'Percentage' THEN 
+						1
+					ELSE 
+						ISNULL(NULLIF(ComputedCharges.dblCalculatedQty, 0), 1) 
+				END 
 
 	FROM	dbo.tblICInventoryReceiptCharge ReceiptCharge INNER JOIN  (
 				SELECT	intInventoryReceiptChargeId

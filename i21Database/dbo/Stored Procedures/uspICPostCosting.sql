@@ -34,7 +34,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -80,6 +80,7 @@ DECLARE @InventoryTransactionType_MarkUpOrDown AS INT = 49
 DECLARE @InventoryTransactionType_WriteOff AS INT = 50
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
@@ -126,7 +127,7 @@ SELECT
 	,[intItemLocationId] = p.intItemLocationId
 	,[intItemUOMId] = CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 AND ISNULL(i.strLotTracking, 'No') = 'No' THEN iu.intItemUOMId ELSE p.intItemUOMId END 
 	,[dtmDate] = 
-		p.dtmDate
+		dbo.fnRemoveTimeOnDate(p.dtmDate) 
 		-- Revert the code below. It is causing problems at Pri Mar. See IC-8966. 
 		/**
 		CASE 			
@@ -934,6 +935,17 @@ BEGIN
 				,@strDescription = @strAutoVarianceDescription 
 				,@intSourceEntityId = @intSourceEntityId
 
+		SET @intInventoryTransactionIdentityId = SCOPE_IDENTITY();
+
+		-----------------------------------------
+		-- Log the Daily Stock Quantity
+		-----------------------------------------
+		IF @intInventoryTransactionIdentityId IS NOT NULL 
+		BEGIN 
+			EXEC uspICPostStockDailyQuantity 
+				@intInventoryTransactionId = @intInventoryTransactionIdentityId
+		END 
+
 		-- Delete the item and item-location from the table variable. 
 		DELETE FROM	@ItemsForAutoNegative
 		WHERE	intItemId = @intItemId 
@@ -1087,8 +1099,7 @@ BEGIN
 		,@intContraInventory_ItemLocationId
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
-END 
-
+END 	
 
 -----------------------------------------
 -- Call the Risk Log sp
@@ -1101,3 +1112,4 @@ BEGIN
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
 END 
+

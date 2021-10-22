@@ -10,7 +10,7 @@ BEGIN
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+	SET ANSI_WARNINGS ON
 
 	DECLARE @ErrorMessage NVARCHAR(4000);
 	DECLARE @ErrorSeverity INT;
@@ -213,8 +213,11 @@ BEGIN
 							)
 							SELECT [intId] = intPrepayId
 							FROM #tmpContractPrepay where intPrepayId > 0
-					
-							EXEC uspAPApplyPrepaid @intBillId, @prePayId
+
+							IF EXISTS(SELECT 1 FROM tblAPBill WHERE ISNULL(ysnPosted,0)=0 AND intBillId = @intBillId)
+							BEGIN
+								EXEC uspAPApplyPrepaid @intBillId, @prePayId
+							END							
 							update tblAPBillDetail set intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 						END
 					END

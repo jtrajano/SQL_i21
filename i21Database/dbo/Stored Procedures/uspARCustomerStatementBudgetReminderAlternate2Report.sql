@@ -148,6 +148,7 @@ CREATE TABLE #STATEMENTREPORT (
 	 , dblBudgetPastDue				NUMERIC(18, 6)
 	 , dblBudgetNowDue				NUMERIC(18, 6)
 	 , ysnStatementCreditLimit		BIT
+	 , dtmDateCreated				DATETIME
 )
 
 --CUSTOMER FILTER
@@ -307,9 +308,18 @@ SELECT intPaymentId			= P.intPaymentId
 	 , dblBalance			= P.dblBalance
 	 , dblTotalAR			= P.dblTotalAR
 	 , dblAmountPaid		= P.dblAmountPaid
+	 , dtmDateCreated		= ISNULL(L.dtmDateCreated, P.dtmDatePaid)
 INTO #POSTEDARPAYMENTS
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
+OUTER APPLY(
+	SELECT dtmDateCreated = MIN(SML.dtmDate)
+	FROM tblSMTransaction SMT
+	INNER JOIN tblSMScreen SMS ON SMT.intScreenId = SMS.intScreenId
+	INNER JOIN tblSMLog SML ON SMT.intTransactionId = SML.intTransactionId
+	WHERE SMT.intRecordId = P.intPaymentId
+	AND SMS.strNamespace = 'AccountsReceivable.view.ReceivePaymentsDetail'
+) L
 WHERE P.ysnPosted = 1
    AND ISNULL(P.ysnProcessedToNSF, 0) = 0   
    AND (@intCompanyLocationId IS NULL OR P.intLocationId = @intCompanyLocationId)
@@ -356,6 +366,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dtmDueDate				= I.dtmDueDate
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
 	 , ysnImportedFromOrigin	= I.ysnImportedFromOrigin
+	 , dtmDateCreated			= I.dtmDateCreated
 INTO #POSTEDINVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
@@ -382,6 +393,7 @@ SELECT intInvoiceId					= ARI.intInvoiceId
 	 , dtmDueDate					= ARI.dtmDueDate
 	 , dblInvoiceTotal				= ARPAC.dblBaseAppliedInvoiceDetailAmount
 	 , dblPayment					= ARPAC.dblAppliedInvoiceDetailAmount
+	 , dtmDateCreated				= ARI.dtmDateCreated
 INTO #APPLIEDPPREPAYMENTS
 FROM #POSTEDINVOICES ARI WITH (NOLOCK)
 INNER JOIN tblARPrepaidAndCredit ARPAC ON ARI.intInvoiceId = ARPAC.intInvoiceId
@@ -390,7 +402,6 @@ OUTER APPLY (
 	FROM dbo.tblARInvoice
 	WHERE intInvoiceId = ARPAC.intPrepaymentId
 ) ARICPP 
-
 
 --STATEMENT REPORT
 INSERT INTO #STATEMENTREPORT (
@@ -416,6 +427,7 @@ INSERT INTO #STATEMENTREPORT (
 	 , dblBalance
 	 , dblARBalance
 	 , ysnStatementCreditLimit
+	 , dtmDateCreated
 )
 SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , intInvoiceId					= TRANSACTIONS.intInvoiceId
@@ -439,6 +451,7 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , dblBalance					= TRANSACTIONS.dblBalance
 	 , dblARBalance					= C.dblARBalance
 	 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
+	 , dtmDateCreated				= TRANSACTIONS.dtmDateCreated
 FROM #CUSTOMERS C
 LEFT JOIN (
 	SELECT intInvoiceId			= I.intInvoiceId
@@ -463,6 +476,7 @@ LEFT JOIN (
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
+		 , dtmDateCreated		= I.dtmDateCreated
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
 
@@ -482,6 +496,7 @@ LEFT JOIN (
 		 , dtmDueDate			= CPP.dtmDueDate
 		 , dtmDatePaid			= CPP.dtmDate
 		 , strType				= CPP.strType
+		 , dtmDateCreated		= CPP.dtmDateCreated
 	FROM #APPLIEDPPREPAYMENTS CPP
 
 	UNION ALL
@@ -500,6 +515,7 @@ LEFT JOIN (
 		 , dtmDueDate			= P.dtmDatePaid
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= 'Payment'
+		 , dtmDateCreated		= P.dtmDateCreated
 	FROM #POSTEDARPAYMENTS P
 	WHERE P.ysnInvoicePrepayment = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
@@ -521,6 +537,7 @@ LEFT JOIN (
 		 , dtmDueDate			= NULL
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= 'Applied Payment'
+		 , dtmDateCreated		= P.dtmDateCreated
 	FROM #POSTEDARPAYMENTS P
 	INNER JOIN (
 		SELECT intPaymentId		= PD.intPaymentId
@@ -545,7 +562,7 @@ LEFT JOIN (
 	WHERE P.ysnInvoicePrepayment = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
 	  AND  (DETAILS.dblAmountDue - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0  OR  DETAILS.dblAmountDue - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) = 0)
-	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes, DETAILS.dblAmountDue
+	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes, DETAILS.dblAmountDue, P.dtmDateCreated
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
 --BUDGET
@@ -556,6 +573,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , intInvoiceId
 			 , strCustomerNumber
 			 , strCustomerName
+			 , strInvoiceNumber
 			 , strRecordNumber
 			 , strTransactionType
 			 , strType
@@ -570,11 +588,13 @@ IF @ysnIncludeBudgetLocal = 1
 			 , dblBalance
 			 , dblARBalance
 			 , ysnStatementCreditLimit
+			 , dtmDateCreated
 		)
 		SELECT intEntityCustomerId			= C.intEntityCustomerId 
 			 , intInvoiceId					= CB.intCustomerBudgetId
 			 , strCustomerNumber			= C.strCustomerNumber
 			 , strCustomerName				= C.strCustomerName
+			 , strInvoiceNumber				= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 			 , strRecordNumber				= 'Budget due for: ' + + CONVERT(NVARCHAR(50), CB.dtmBudgetDate, 101)
 			 , strTransactionType			= 'Customer Budget'
 			 , strType						= 'Customer Budget'
@@ -589,6 +609,7 @@ IF @ysnIncludeBudgetLocal = 1
 			 , dblBalance					= 0.00
 			 , dblARBalance					= C.dblARBalance
 			 , ysnStatementCreditLimit		= C.ysnStatementCreditLimit
+			 , dtmDateCreated				= CB.dtmBudgetDate
         FROM tblARCustomerBudget CB
 		INNER JOIN #CUSTOMERS C ON CB.intEntityCustomerId = C.intEntityCustomerId
         WHERE CB.dtmBudgetDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
@@ -744,6 +765,7 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, ysnStatementCreditLimit
 	, blbLogo
 	, dblAmountPaid
+	, dtmDateCreated
 )
 SELECT intEntityCustomerId		= SR.intEntityCustomerId	
 	, intInvoiceId				= SR.intInvoiceId
@@ -777,6 +799,7 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, ysnStatementCreditLimit	= SR.ysnStatementCreditLimit
 	, blbLogo					= @blbLogo
 	, dblAmountPaid				= CASE WHEN SR.strTransactionType IN ('Customer Prepayment', 'Credit Memo') THEN SR.dblPayment WHEN SR.strTransactionType = 'Payment' THEN ABS(SR.dblPayment) * -1 ELSE 0 END
+	, dtmDateCreated			= CASE WHEN SR.strTransactionType = 'Applied Payment' THEN DATEADD(ss, 1, SR.dtmDateCreated) ELSE SR.dtmDateCreated END -- Add 1 second to applied payment. This is to ensure that payments and invoices are presented first before the applied payment.
 FROM #STATEMENTREPORT SR
 
 UPDATE tblARCustomerStatementStagingTable
@@ -801,7 +824,7 @@ IF @ysnPrintCreditBalanceLocal = 0
 
 IF (@@version NOT LIKE '%2008%')
 BEGIN
-	SET @orderRowId = ' ORDER BY dtmDateEntered'
+	SET @orderRowId = ' ORDER BY dtmDateCreated'
 	SET @orderRunningBalance = ' ORDER BY intRowId'
 END
 
@@ -809,18 +832,10 @@ SET @queryRowId = CAST('' AS NVARCHAR(MAX)) + '
 UPDATE CSST
 SET CSST.intRowId = CSST.intRowIdNew
 FROM (
-		SELECT intRowId, ROW_NUMBER() OVER(' + ISNULL(@orderRowId, '') +') AS intRowIdNew
+		SELECT intRowId, ROW_NUMBER() OVER(PARTITION BY intEntityCustomerId ' + ISNULL(@orderRowId, '') +') AS intRowIdNew
 		FROM tblARCustomerStatementStagingTable CSST
-		OUTER APPLY (
-			-- Add 1 second to applied payment. This is to ensure that payments and invoices are presented first before the applied payment.
-			SELECT TOP 1 dtmDateEntered = CASE WHEN CAST(dtmDateEnteredMin AS DATE) <> CAST(dtmDate AS DATE) 
-											   THEN CASE WHEN CSST.strTransactionType = ''Applied Payment'' THEN DATEADD(ss, 1, CAST(dtmDate AS DATETIME)) ELSE CAST(dtmDate AS DATETIME) END
-											   ELSE CASE WHEN CSST.strTransactionType = ''Applied Payment'' THEN DATEADD(ss, 1, dtmDateEntered) ELSE dtmDateEntered END
-										  END 
-			FROM tblGLDetail
-			WHERE strTransactionId = CSST.strRecordNumber
-			AND ysnIsUnposted = 0
-		) LOGDATETIME
+		WHERE CSST.intEntityUserId = '+ @strEntityUserIdLocal +'
+		AND CSST.strStatementFormat = ''Budget Reminder Alternate 2''
       ) CSST'
 
 EXEC sp_executesql @queryRowId
@@ -834,13 +849,14 @@ SET  CSST.dblBalance = CSST_RUNNING_BALANCE.dblRunningBalance
 								ELSE 0 END
 FROM tblARCustomerStatementStagingTable CSST
 INNER JOIN (
-	SELECT intRowId, dblRunningBalance = SUM(CASE WHEN strTransactionType = ''Balance Forward'' THEN dblBalance 
-												  WHEN strTransactionType = ''Invoice'' THEN dblAmountDue 
-												  WHEN strTransactionType IN (''Customer Prepayment'', ''Credit Memo'', ''Payment'') THEN dblAmountPaid
-												  ELSE 0 END) OVER (PARTITION BY strStatementFormat' + ISNULL(@orderRunningBalance, '') +')
+	SELECT intRowId, intEntityCustomerId, dblRunningBalance = SUM(CASE WHEN strTransactionType = ''Balance Forward'' THEN dblBalance 
+															  WHEN strTransactionType = ''Invoice'' THEN dblAmountDue 
+															  WHEN strTransactionType IN (''Customer Prepayment'', ''Credit Memo'', ''Payment'') THEN dblAmountPaid
+															  ELSE 0 END) OVER (PARTITION BY intEntityCustomerId, strStatementFormat' + ISNULL(@orderRunningBalance, '') +')
 	FROM tblARCustomerStatementStagingTable
 ) CSST_RUNNING_BALANCE
 ON CSST.intRowId = CSST_RUNNING_BALANCE.intRowId
+AND CSST.intEntityCustomerId = CSST_RUNNING_BALANCE.intEntityCustomerId
 WHERE CSST.intEntityUserId = '+ @strEntityUserIdLocal +'
   AND CSST.strStatementFormat = ''Budget Reminder Alternate 2'''
 

@@ -25,11 +25,7 @@ BEGIN
 
 		SET @ysnResultSuccess = CAST(1 AS BIT)
 		SET @strResultMessage = ''
-		DECLARE @intItemPricingId INT = (SELECT TOP 1 intItemPricingId FROM tblICItemPricing cip
-											JOIN tblICEffectiveItemCost ic 
-												ON cip.intItemLocationId = ic.intItemLocationId
-										WHERE ic.intEffectiveItemCostId = @intEffectiveItemCostId
-											AND cip.intItemId = @intItemId)
+
 		DECLARE @dtmEffectiveDate DATETIME = (SELECT TOP 1 dtmEffectiveCostDate FROM tblICEffectiveItemCost WHERE intEffectiveItemCostId = @intEffectiveItemCostId)
 
 		
@@ -75,11 +71,9 @@ BEGIN
 		-- [TO] Create temp tablefrom
 		BEGIN
 			DECLARE @tblItemPricing_TO TABLE (
-				intItemPricingId_TO		INT
-				, intItemId_TO			INT
-				, dblStandardCost_TO	NUMERIC(38,20)
-				, dblLastCost_TO		NUMERIC(38,20)
-				, dblSalePrice_TO		NUMERIC(18,6)
+				intItemId_TO				INT
+				, intItemLocationIdId_TO	INT
+				, dblStandardCost_TO		NUMERIC(38,20)
 			);
 		END
 
@@ -104,18 +98,17 @@ BEGIN
 		-- INSERT [TO]
 		INSERT INTO @tblItemPricing_TO
 		(
-			intItemPricingId_TO
-			, intItemId_TO
+			intItemId_TO
+			, intItemLocationIdId_TO
 		)
 		SELECT
-			intItemPricingId_TO		= cip.intItemPricingId
-			, intItemId_TO			= cip.intItemId
-		FROM tblICItemPricing cip
-			JOIN tblICItemLocation itemLocation
-				ON cip.intItemLocationId = itemLocation.intItemLocationId 
-					AND itemLocation.intItemId = cip.intItemId
-		WHERE itemLocation.intLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCopyToItemLocationIdList))
-			AND cip.intItemId = @intItemId
+			intItemId_TO				= i.intItemId
+			, intItemLocationId_TO		= il.intItemLocationId
+		FROM tblICItem i
+		JOIN tblICItemLocation il
+			ON i.intItemId = il.intItemId 
+		WHERE il.intLocationId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCopyToItemLocationIdList))
+			AND i.intItemId = @intItemId
 
 		-- ===============================================
 		-- [START] - PREVIEW IF DEBUG (Temp Table TO)
@@ -139,7 +132,7 @@ BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM @tblItemPricing_TO)
 					BEGIN
 						
-						DECLARE @intLoopItemPricingId_TO	AS INT
+						DECLARE @intLoopItemLocationId_TO	AS INT
 							  , @intLoopItemId_TO			AS INT
 
 
@@ -149,7 +142,7 @@ BEGIN
 							BEGIN
 								
 								SELECT TOP 1
-										@intLoopItemPricingId_TO	= temp.intItemPricingId_TO
+										@intLoopItemLocationId_TO	= temp.intItemLocationIdId_TO
 										, @intLoopItemId_TO			= temp.intItemId_TO
 								FROM @tblItemPricing_TO temp
 
@@ -157,19 +150,15 @@ BEGIN
 
 
 								BEGIN TRY
-									EXEC [uspICUpdateItemPricingForCStore]
-												-- filter params
-												@strUpcCode					= NULL 
-												, @strDescription			= NULL 
-												, @intItemId				= @intLoopItemId_TO 
-												, @intItemPricingId			= @intLoopItemPricingId_TO 
-												, @dtmEffectiveDate			= @dtmEffectiveDate
+									EXEC [uspICUpdateEffectivePricingForCStore]
+										-- filter params
+										@intItemId					= @intLoopItemId_TO 
+										, @intItemLocationId		= @intLoopItemLocationId_TO 
+										, @dtmEffectiveDate			= @dtmEffectiveDate
 
-												-- update params
-												, @dblStandardCost			= @dblStandardCost_FROM 
-												--, @dblRetailPrice			= @dblSalePrice_FROM
-												--, @dblLastCost				= @dblLastCost_FROM
-												, @intEntityUserSecurityId	= @intEntityId
+										-- update params
+										, @dblStandardCost			= @dblStandardCost_FROM 
+										, @intEntityUserSecurityId	= @intEntityId
 								END TRY
 								BEGIN CATCH
 									SET @ysnResultSuccess = 0
@@ -181,31 +170,8 @@ BEGIN
 
 
 								-- Remove
-								DELETE FROM @tblItemPricing_TO WHERE intItemPricingId_TO = @intLoopItemPricingId_TO
+								DELETE FROM @tblItemPricing_TO WHERE intItemLocationIdId_TO = @intLoopItemLocationId_TO AND intItemId_TO = @intLoopItemId_TO
 							END
-
-
-						-- ===============================================
-						-- [START] - PREVIEW UPDATE RECORDS
-						-- ===============================================
-						BEGIN
-							IF(@ysnDebug = 1)
-								BEGIN
-									SELECT 'Preview Updated Item Pricing records'
-										, itemPricing.intItemPricingId
-										, itemPricing.intItemId
-										, itemPricing.dblStandardCost
-										, itemPricing.dblLastCost
-										, itemPricing.dblSalePrice
-									FROM tblICItemPricing itemPricing
-									WHERE itemPricing.intItemPricingId != @intItemPricingId
-										AND itemPricing.intItemPricingId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCopyToItemLocationIdList))
-										
-								END
-						END
-						-- ===============================================
-						-- [END] - PREVIEW UPDATE RECORDS
-						-- ===============================================
 
 					END
 				ELSE

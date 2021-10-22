@@ -22,7 +22,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Create the temp table 
 IF OBJECT_ID('tempdb..#tmpUpdateItemPricingForCStore_Location') IS NULL  
@@ -801,7 +801,7 @@ BEGIN
 	WHERE	pl.strPricingMethod = 'Discount Retail Price'
 			AND pl.dtmEffectiveDate >= ep.dtmEffectiveRetailPriceDate
 			AND pl.dtmEffectiveDate IS NOT NULL
-	IF ISNULL(@strScreen, '') != 'UpdateItemPricing'
+	IF ISNULL(@strScreen, '') != 'UpdateItemPricing' AND ISNULL(@strScreen, '') != 'RetailPriceAdjustment'
 	BEGIN
 		DROP TABLE #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
 	END

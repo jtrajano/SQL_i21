@@ -10,7 +10,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DELETE FROM tblICInventoryCountDetail
 WHERE intInventoryCountId = @intInventoryCountId
@@ -158,7 +158,7 @@ FROM (
 						WHERE
 							t.intItemId = i.intItemId
 							AND t.intItemLocationId = il.intItemLocationId
-							AND dbo.fnDateLessThan(t.dtmDate, c.dtmCountDate) = 1	
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(c.dtmCountDate AS FLOAT))
 					) t
 				WHERE
 					c.intInventoryCountId = @intInventoryCountId
@@ -178,13 +178,12 @@ FROM (
 						WHERE
 							t.intItemId = i.intItemId
 							AND t.intItemLocationId = il.intItemLocationId
-							AND dbo.fnDateLessThan(t.dtmDate, c.dtmCountDate) = 1	
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 						ORDER BY
 							t.intInventoryTransactionId DESC 
 					) lastCost
 				WHERE
-					c.intInventoryCountId = @intInventoryCountId
-		
+					c.intInventoryCountId = @intInventoryCountId		
 			) lastCostAsOfDate
 			OUTER APPLY (
 				SELECT 
@@ -216,7 +215,7 @@ FROM (
 						WHERE
 							ri.intItemId = i.intItemId
 							AND r.intLocationId = il.intLocationId
-							AND dbo.fnDateEquals(r.dtmReceiptDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(r.dtmReceiptDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) receipt
 				WHERE
@@ -251,7 +250,7 @@ FROM (
 						WHERE
 							si.intItemId = i.intItemId
 							AND s.intShipFromLocationId = il.intLocationId
-							AND dbo.fnDateEquals(s.dtmShipDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(s.dtmShipDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) shipment
 				WHERE
@@ -288,8 +287,7 @@ FROM (
 						WHERE
 							invD.intItemId = i.intItemId
 							AND inv.intCompanyLocationId = il.intLocationId
-							AND dbo.fnDateEquals(inv.dtmDate, c.dtmCountDate) = 1
-
+							AND FLOOR(CAST(inv.dtmDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 					) invoice
 				WHERE
 					c.intInventoryCountId = @intInventoryCountId		
@@ -323,7 +321,7 @@ FROM (
 						WHERE
 							t.intItemId = i.intItemId
 							AND t.intItemLocationId = il.intItemLocationId
-							AND dbo.fnDateEquals(t.dtmDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 							AND t.intTransactionTypeId = 8 -- Consume
 					) consume
 				WHERE
@@ -358,7 +356,7 @@ FROM (
 						WHERE
 							v.intItemId = i.intItemId
 							AND v.intCompanyLocationId = il.intLocationId					
-							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(v.dtmCheckoutDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) itemMovements
 				WHERE
@@ -393,7 +391,7 @@ FROM (
 						WHERE
 							v.intItemId = i.intItemId
 							AND v.intCompanyLocationId = il.intLocationId					
-							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(v.dtmCheckoutDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) itemMovements
 				WHERE
@@ -486,7 +484,7 @@ FROM (
 						WHERE
 							t.intCountGroupId = countGroup.intCountGroupId
 							AND t.intLocationId = c.intLocationId
-							AND dbo.fnDateLessThan(t.dtmDate, c.dtmCountDate) = 1	
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(c.dtmCountDate AS FLOAT))
 						ORDER BY
 							t.dtmDate DESC, t.intInventoryShiftPhysicalCountId DESC 
 					) t
@@ -527,7 +525,7 @@ FROM (
 							) sUOM	
 						WHERE
 							il.intCountGroupId = countGroup.intCountGroupId														
-							AND dbo.fnDateEquals(r.dtmReceiptDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(r.dtmReceiptDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) receipt
 				WHERE
@@ -565,8 +563,8 @@ FROM (
 									AND sUOM.ysnStockUnit = 1				
 							) sUOM	
 						WHERE
-							il.intCountGroupId = countGroup.intCountGroupId							
-							AND dbo.fnDateEquals(s.dtmShipDate, c.dtmCountDate) = 1
+							il.intCountGroupId = countGroup.intCountGroupId														
+							AND FLOOR(CAST(s.dtmShipDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 					) shipment
 				WHERE
 					c.intInventoryCountId = @intInventoryCountId		
@@ -605,7 +603,7 @@ FROM (
 							) sUOM	
 						WHERE
 							il.intCountGroupId = countGroup.intCountGroupId							
-							AND dbo.fnDateEquals(inv.dtmDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(inv.dtmDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) invoice
 				WHERE
@@ -644,7 +642,7 @@ FROM (
 							) sUOM	
 						WHERE
 							il.intCountGroupId = countGroup.intCountGroupId							
-							AND dbo.fnDateEquals(t.dtmDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 							AND t.intTransactionTypeId = 8 -- Consume
 
 					) invoice
@@ -684,7 +682,7 @@ FROM (
 							) sUOM	
 						WHERE
 							il.intCountGroupId = countGroup.intCountGroupId							
-							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(v.dtmCheckoutDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) itemMovements
 				WHERE
@@ -723,7 +721,7 @@ FROM (
 							) sUOM	
 						WHERE
 							il.intCountGroupId = countGroup.intCountGroupId							
-							AND dbo.fnDateEquals(v.dtmCheckoutDate, c.dtmCountDate) = 1
+							AND FLOOR(CAST(v.dtmCheckoutDate AS FLOAT)) = FLOOR(CAST(c.dtmCountDate AS FLOAT))
 
 					) itemMovements
 				WHERE
