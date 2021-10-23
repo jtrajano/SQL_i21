@@ -223,6 +223,8 @@
     <Build Include="dbo\Views\vyuICGetInventoryCountOutdatedCountGroupAll.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryCountUpdateOutdatedCountGroupAll.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorSetup.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformVendorSetup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
