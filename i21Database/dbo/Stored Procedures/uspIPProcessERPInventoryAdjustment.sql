@@ -27,7 +27,7 @@ BEGIN TRY
 		,@strMotherLotNo NVARCHAR(50)
 		,@strLotNo NVARCHAR(50)
 		,@strStorageUnit NVARCHAR(50)
-		,@dblQuantity NUMERIC(18, 6)
+		,@dblQuantity NUMERIC(38,20)
 		,@strQuantityUOM NVARCHAR(50)
 		,@strReasonCode NVARCHAR(50)
 		,@strNotes NVARCHAR(2048)
@@ -59,6 +59,7 @@ BEGIN TRY
 		,@intNewStorageLocationId INT
 		,@intNewLotId INT
 		,@intLotItemUOMId INT
+		,@dblWeightPerQty NUMERIC(18, 6)
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -114,6 +115,7 @@ BEGIN TRY
 				,@strNewStorageUnit = NULL
 				,@intCompanyLocationNewSubLocationId = NULL
 				,@intNewStorageLocationId = NULL
+				,@dblWeightPerQty = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
@@ -357,6 +359,7 @@ BEGIN TRY
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
 				,@intLotItemUOMId = intItemUOMId
+				,@dblWeightPerQty=dblWeightPerQty 
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
@@ -365,7 +368,7 @@ BEGIN TRY
 
 			IF @intTransactionTypeId = 20
 			BEGIN
-				SELECT @dblQuantity = dbo.fnMFConvertQuantityToTargetItemUOM(@intItemUOMId, @intLotItemUOMId, @dblQuantity)
+				SELECT @dblQuantity = dbo.[fnDivide](@dblQuantity,@dblWeightPerQty)
 
 				SELECT @intItemUOMId = @intLotItemUOMId
 
