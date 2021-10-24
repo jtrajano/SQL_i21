@@ -79,9 +79,7 @@ WHERE guiApiUniqueId = @guiApiUniqueId;
 -- 6 - Invalid Rebate by
 -- 7 - Invalid Rebate UOM
 -- Rebate Customer Logs
--- 8 - Duplicate imported rebate program customer
--- 9 - Rebate program customer already exist and overwrite is not enabled
--- 10 - Invalid Rebate Customer
+-- 8 - Invalid Rebate Customer
 
 
 DECLARE @tblLogRebateProgram TABLE(
@@ -197,7 +195,7 @@ AND
 UNION
 SELECT -- Invalid Item No
 	FilteredRebateProgram.strItemNo,
-	'Rebate item: ' + FilteredRebateProgram.strItemNo + ' on vendor: ' + FilteredRebateProgram.strVendor + ' does not exist.', 
+	'Rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
 	5
 FROM
@@ -213,7 +211,7 @@ FilteredRebateProgram.strItemNo IS NOT NULL
 UNION
 SELECT -- Invalid Rebate by
 	FilteredRebateProgram.strRebateBy,
-	'Rebate by: ' + FilteredRebateProgram.strRebateBy + ' of rebate item: ' + FilteredRebateProgram.strItemNo +  ' on vendor: ' + FilteredRebateProgram.strVendor + ' does not exist.', 
+	'Rebate by: ' + FilteredRebateProgram.strRebateBy + ' of rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
 	6
 FROM
@@ -223,7 +221,7 @@ WHERE
 UNION
 SELECT -- Invalid Rebate UOM
 	FilteredRebateProgram.strRebateUOM,
-	'Rebate UOM: ' + FilteredRebateProgram.strRebateUOM + ' of rebate item: ' + FilteredRebateProgram.strItemNo + ' on vendor: ' + FilteredRebateProgram.strVendor + ' does not exist.', 
+	'Rebate UOM: ' + FilteredRebateProgram.strRebateUOM + ' of rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
 	7
 FROM
@@ -240,64 +238,11 @@ AND
 FilteredRebateProgram.strRebateUOM IS NOT NULL
 UNION
 ------------------------ Rebate Customers Logs ------------------------
-SELECT -- Duplicate imported rebate program customer
-	DuplicateRebateProgram.strCustomer,
-	'Duplicate import rebate customer: ' + DuplicateRebateProgram.strCustomer + ' on vendor: ' + DuplicateRebateProgram.strVendor + '.', 
-	DuplicateRebateProgram.intRowNumber,
-	8
-FROM
-(
-	SELECT 
-		FilteredRebateProgram.strCustomer,
-		FilteredRebateProgram.strVendor,
-		FilteredRebateProgram.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredRebateProgram.strVendor, FilteredRebateProgram.strCustomer ORDER BY FilteredRebateProgram.intRowNumber)
-	FROM 
-		@tblFilteredRebateProgram FilteredRebateProgram
-) AS DuplicateRebateProgram
-WHERE DuplicateRebateProgram.RowNumber > 1
-AND
-DuplicateRebateProgram.strCustomer IS NOT NULL
-UNION
-SELECT -- Rebate program customer already exist and overwrite is not enabled
-	FilteredRebateProgram.strCustomer,
-	'Rebate customer: ' + FilteredRebateProgram.strCustomer + ' on vendor: ' + FilteredRebateProgram.strVendor + ' already exists and overwrite is not enabled.', 
-	FilteredRebateProgram.intRowNumber,
-	9
-FROM
-	@tblFilteredRebateProgram FilteredRebateProgram
-CROSS APPLY
-(
-	SELECT TOP 1 
-		RebateCustomer.intProgramCustomerId
-	FROM 
-		tblVRProgramCustomer RebateCustomer 
-	INNER JOIN 
-		tblEMEntity Customer 
-		ON 
-			RebateCustomer.intEntityId = Customer.intEntityId 
-	INNER JOIN 
-		tblVRProgram RebateProgram 
-		ON 
-			RebateCustomer.intProgramId = RebateProgram.intProgramId
-	INNER JOIN 
-		tblVRVendorSetup VendorSetup 
-		ON 
-			RebateProgram.intVendorSetupId = VendorSetup.intVendorSetupId
-	INNER JOIN 
-		vyuAPVendor Vendor 
-		ON 
-			VendorSetup.intEntityId = Vendor.intEntityId
-	WHERE 
-	Vendor.strName = FilteredRebateProgram.strVendor AND Customer.strName = FilteredRebateProgram.strCustomer
-) ExistingRebateCustomer
-WHERE FilteredRebateProgram.strCustomer IS NOT NULL
-UNION
 SELECT -- Invalid Rebate Customer
 	FilteredRebateProgram.strCustomer,
-	'Rebate customer: ' + FilteredRebateProgram.strCustomer + ' on vendor: ' + FilteredRebateProgram.strVendor + ' does not exist.', 
+	'Rebate customer: ' + FilteredRebateProgram.strCustomer + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
-	10
+	8
 FROM 
 	@tblFilteredRebateProgram FilteredRebateProgram
 LEFT JOIN
@@ -556,16 +501,16 @@ INSERT INTO tblVRProgramCustomer
 	intEntityId
 )
 SELECT
-	FilteredRebateProgram.guiApiUniqueId,
-	Program.intProgramId,
-	Customer.intEntityId
+	MAX(FilteredRebateProgram.guiApiUniqueId),
+	MAX(Program.intProgramId),
+	MAX(Customer.intEntityId)
 FROM @tblFilteredRebateProgram FilteredRebateProgram
 LEFT JOIN
 	@tblLogRebateProgram LogRebateProgram
 	ON
 		FilteredRebateProgram.intRowNumber = LogRebateProgram.intRowNumber
 		AND
-		LogRebateProgram.intLogType IN (1,8,9,10)
+		LogRebateProgram.intLogType IN (1,8)
 INNER JOIN
 (
 	vyuAPVendor Vendor
@@ -585,4 +530,5 @@ INNER JOIN
 	ON
 		FilteredRebateProgram.strCustomer = Customer.strName
 WHERE 
-LogRebateProgram.intLogType NOT IN (1,8,9,10) OR LogRebateProgram.intLogType IS NULL
+LogRebateProgram.intLogType NOT IN (1,8) OR LogRebateProgram.intLogType IS NULL
+GROUP BY FilteredRebateProgram.strCustomer
