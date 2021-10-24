@@ -449,7 +449,7 @@ BEGIN TRY
 				, intEffectiveItemCostId		= tic.intEffectiveItemCostId
 				, intItemSpecialPricingId		= NULL
 
-				, dtmDateModified				= ISNULL(tic.dtmDateModified, '')
+				, dtmDateModified				= ISNULL(tic.dtmDateModified, GETDATE())
 				, intCompanyLocationId			= CL.intCompanyLocationId
 				, strLocation					= CL.strLocationName
 				, strUpc						= UOM.strLongUPCCode
@@ -575,8 +575,8 @@ BEGIN TRY
 				, intItemLocationId				= IL.intItemLocationId 
 				, intEffectiveItemPriceId		= tip.intEffectiveItemPriceId
 				, intItemSpecialPricingId		= NULL
-
-				, dtmDateModified				= ISNULL(tip.dtmDateModified, '')
+				
+				, dtmDateModified				= ISNULL(tip.dtmDateModified, GETDATE())
 				, intCompanyLocationId			= CL.intCompanyLocationId
 				, strLocation					= CL.strLocationName
 				, strUpc						= UOM.strLongUPCCode
