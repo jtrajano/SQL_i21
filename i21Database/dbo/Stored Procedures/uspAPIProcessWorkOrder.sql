@@ -306,6 +306,7 @@ BEGIN TRY
 					SELECT @intItemFactoryId = intItemFactoryId
 					FROM tblICItemFactory WITH (NOLOCK)
 					WHERE intItemId = @intItemId
+						AND intFactoryId = @intCompanyLocationId
 
 					SELECT @intManufacturingCellId = intManufacturingCellId
 					FROM tblICItemFactoryManufacturingCell WITH (NOLOCK)
