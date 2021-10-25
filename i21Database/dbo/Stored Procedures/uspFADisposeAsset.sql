@@ -491,14 +491,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
-			,[dblDebit]				= CASE WHEN A.dblCost > B.totalForeignDepre
+			,[dblDebit]				= CASE WHEN ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) > 0
 										THEN 
-										ROUND(((A.dblCost - B.totalForeignDepre) * ABS(@dblRate - @dblCurrentRate)), 2)
+											ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2)
 										ELSE 0
 									  END
-			,[dblCredit]			= CASE WHEN B.totalForeignDepre > A.dblCost
+			,[dblCredit]			= CASE WHEN ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2) < 0
 										THEN 
-											ROUND(((B.totalForeignDepre - A.dblCost) * ABS(@dblRate - @dblCurrentRate)), 2)
+											ABS(ROUND((A.dblCost * (@dblRate - @dblCurrentRate)), 2) - ROUND((B.totalForeignDepre * (@dblRate - @dblCurrentRate)), 2))
 										ELSE 0
 									  END
 			,[dblDebitForeign]		= 0
