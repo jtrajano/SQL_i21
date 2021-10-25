@@ -362,6 +362,11 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @userId
 		       ,@BatchIdUsed     = @batchIdUsed OUT
+
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@param))
+
         GOTO Do_Commit
     END
 

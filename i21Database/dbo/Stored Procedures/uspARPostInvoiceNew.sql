@@ -409,6 +409,9 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @UserId
 		       ,@BatchIdUsed     = @BatchIdUsed OUT
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@param))
 
         GOTO Do_Commit
     END
