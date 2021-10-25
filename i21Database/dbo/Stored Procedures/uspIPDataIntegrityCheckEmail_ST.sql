@@ -73,27 +73,19 @@ BEGIN TRY
 		'</tr>'
 		FROM tblCTContractDetail CD
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		OUTER APPLY (
-			SELECT dblShippingInstructionQty = SUM(LD.dblQuantity)
-			FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intPContractDetailId = CD.intContractDetailId
-				AND L.intShipmentType = 2
-				AND ISNULL(L.ysnCancelled, 0) = 0
-			) PLSI
-		OUTER APPLY (
-			SELECT dblShippingInstructionQty = SUM(LD.dblQuantity)
-			FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intSContractDetailId = CD.intContractDetailId
-				AND L.intShipmentType = 2
-				AND ISNULL(L.ysnCancelled, 0) = 0
-			) SLSI
-		WHERE ISNULL(CD.dblShippingInstructionQty, 0) <> CASE 
-				WHEN (CH.intContractTypeId = 2)
-					THEN ISNULL(SLSI.dblShippingInstructionQty, 0)
-				ELSE ISNULL(PLSI.dblShippingInstructionQty, 0)
-				END
+		OUTER APPLY 
+			(SELECT dblShippingInstructionQty = SUM(LD.dblQuantity)
+				FROM tblLGLoadDetail LD
+				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE LD.intPContractDetailId = CD.intContractDetailId
+				AND L.intShipmentType = 2 AND ISNULL(L.ysnCancelled, 0) = 0) PLSI
+		OUTER APPLY 
+			(SELECT dblShippingInstructionQty = SUM(LD.dblQuantity)
+				FROM tblLGLoadDetail LD
+				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE LD.intSContractDetailId = CD.intContractDetailId
+				AND L.intShipmentType = 2 AND ISNULL(L.ysnCancelled, 0) = 0) SLSI
+		WHERE ISNULL(CD.dblShippingInstructionQty, 0) <> CASE WHEN (CH.intContractTypeId = 2) THEN ISNULL(SLSI.dblShippingInstructionQty, 0) ELSE ISNULL(PLSI.dblShippingInstructionQty, 0) END
 
 		IF ISNULL(@strDetail, '') <> ''
 			SELECT @strFinalDetail = @strFinalDetail + @strComments + @strHeader + @strDetail + '</table><br/>'
@@ -123,29 +115,21 @@ BEGIN TRY
 		'</tr>'
 		FROM tblCTContractDetail CD
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		OUTER APPLY (
-			SELECT dblScheduleQty = SUM(LD.dblQuantity)
-			FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intPContractDetailId = CD.intContractDetailId
-				AND L.intShipmentType = 1
-				AND ISNULL(L.ysnCancelled, 0) = 0
-				AND ISNULL(L.ysnPosted, 0) = 0
-			) PLS
-		OUTER APPLY (
-			SELECT dblScheduleQty = SUM(LD.dblQuantity)
-			FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intSContractDetailId = CD.intContractDetailId
-				AND L.intShipmentType = 1
-				AND ISNULL(L.ysnCancelled, 0) = 0
-				AND ISNULL(L.ysnPosted, 0) = 0
-			) SLS
-		WHERE ISNULL(CD.dblScheduleQty, 0) <> CASE 
-				WHEN (CH.intContractTypeId = 2)
-					THEN ISNULL(SLS.dblScheduleQty, 0)
-				ELSE ISNULL(PLS.dblScheduleQty, 0)
-				END
+		OUTER APPLY 
+			(SELECT dblScheduleQty = SUM(LD.dblQuantity)
+				FROM tblLGLoadDetail LD
+				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE LD.intPContractDetailId = CD.intContractDetailId
+				AND L.intShipmentType = 1 AND ISNULL(L.ysnCancelled, 0) = 0 
+				AND ((L.intPurchaseSale = 3 AND ISNULL(L.ysnPosted, 0) = 0) OR L.intShipmentStatus <> 4)) PLS
+		OUTER APPLY 
+			(SELECT dblScheduleQty = SUM(LD.dblQuantity)
+				FROM tblLGLoadDetail LD
+				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE LD.intSContractDetailId = CD.intContractDetailId
+				AND L.intShipmentType = 1 AND ISNULL(L.ysnCancelled, 0) = 0 
+				AND L.intShipmentStatus <> 11) SLS
+		WHERE ISNULL(CD.dblScheduleQty, 0) <> CASE WHEN (CH.intContractTypeId = 2) THEN ISNULL(SLS.dblScheduleQty, 0) ELSE ISNULL(PLS.dblScheduleQty, 0) END
 
 		IF ISNULL(@strDetail, '') <> ''
 			SELECT @strFinalDetail = @strFinalDetail + @strComments + @strHeader + @strDetail + '</table><br/>'
@@ -179,37 +163,23 @@ BEGIN TRY
 		'</tr>'
 		FROM tblCTContractDetail CD
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		OUTER APPLY (
-			SELECT dblPostedQty = SUM(LD.dblQuantity)
-			FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intPContractDetailId = CD.intContractDetailId
-				AND L.intShipmentType = 1
-				AND ISNULL(L.ysnCancelled, 0) = 0
-				AND ISNULL(L.ysnPosted, 0) = 1
-				AND (
-					L.intPurchaseSale = 3
-					OR (
-						L.intPurchaseSale = 1
-						AND L.intShipmentStatus = 4
-						)
-					)
-			) PLS
-		OUTER APPLY (
-			SELECT dblPostedQty = SUM(LD.dblQuantity)
-			FROM tblLGLoadDetail LD
-			INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
-			WHERE LD.intSContractDetailId = CD.intContractDetailId
-				AND L.intShipmentType = 1
-				AND ISNULL(L.ysnCancelled, 0) = 0
-				AND ISNULL(L.ysnPosted, 0) = 1
-				AND L.intShipmentStatus = 10
-			) SLS
-		WHERE ISNULL((CD.dblQuantity - CD.dblBalance), 0) <> CASE 
-				WHEN (CH.intContractTypeId = 2)
-					THEN ISNULL(SLS.dblPostedQty, 0)
-				ELSE ISNULL(PLS.dblPostedQty, 0)
-				END
+		OUTER APPLY 
+			(SELECT dblPostedQty = SUM(LD.dblQuantity) 
+				FROM tblLGLoadDetail LD
+				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE LD.intPContractDetailId = CD.intContractDetailId
+				AND L.intShipmentType = 1 AND ISNULL(L.ysnCancelled, 0) = 0 
+				AND ISNULL(L.ysnPosted, 0) = 1 AND (L.intPurchaseSale = 3 OR L.intShipmentStatus = 4)
+				) PLS
+		OUTER APPLY 
+			(SELECT dblPostedQty = SUM(LD.dblQuantity)
+				FROM tblLGLoadDetail LD
+				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+				WHERE LD.intSContractDetailId = CD.intContractDetailId
+				AND L.intShipmentType = 1 AND ISNULL(L.ysnCancelled, 0) = 0 
+				AND ISNULL(L.ysnPosted, 0) = 1 AND L.intShipmentStatus = 11
+				) SLS
+		WHERE ISNULL((CD.dblQuantity - CD.dblBalance), 0) <> CASE WHEN (CH.intContractTypeId = 2) THEN ISNULL(SLS.dblPostedQty, 0) ELSE ISNULL(PLS.dblPostedQty, 0) END
 
 		IF ISNULL(@strDetail, '') <> ''
 			SELECT @strFinalDetail = @strFinalDetail + @strComments + @strHeader + @strDetail + '</table><br/>'
