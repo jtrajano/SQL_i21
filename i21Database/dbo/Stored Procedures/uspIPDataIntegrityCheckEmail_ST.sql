@@ -188,15 +188,68 @@ BEGIN TRY
 
 	IF @strMessageType = 'CT'
 	BEGIN
-		SET @strComments = '<p></p>'
+		SET @strComments = '<p>1. Data Related Issues:</p>'
 
 		SET @strHeader = '<table class="GeneratedTable"><tr>
-						<th>&nbsp;Contract</th>
+						<th>&nbsp;Wrong Contract Header Id</th>
+						<th>&nbsp;Wrong Contract Detail Id</th>
+						<th>&nbsp;Wrong Contract Number</th>
+						<th>&nbsp;Wrong Contract Seq</th>
+						<th>&nbsp;Wrong Transaction Id</th>
+						<th>&nbsp;Correct Contract Header Id</th>
+						<th>&nbsp;Correct Contract Detail Id</th>
+						<th>&nbsp;Correct Contract Number</th>
+						<th>&nbsp;Correct Contract Seq</th>
+						<th>&nbsp;Correct Transaction Id</th>
 					</tr>'
 
 		SELECT @strDetail = ''
 
-		SELECT @strDetail = NULL
+		declare
+			@strNameSpace nvarchar(100) = 'ContractManagement.view.Contract'
+			,@intScreenId int
+			;
+
+		select top 1 @intScreenId = intScreenId from tblSMScreen where strNamespace = @strNameSpace
+
+		select @strDetail = @strDetail + '<tr>' +
+			'<td>&nbsp;' + ISNULL(LTRIM(intWrongContractHeaderId), '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(LTRIM(intWrongContractDetailId), '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(strWrongContractNumber, '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(LTRIM(intWrongContractSeq), '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(LTRIM(intWrongTransactionId), '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(LTRIM(intCorrectContractHeaderId), '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(LTRIM(intCorrectContractDetailId), '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(strCorrectContractNumber, '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(LTRIM(intCorrectContractSeq), '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(LTRIM(intCorrectTransactionId), '') + '</td>' + 
+		'</tr>'
+			from (
+			select distinct
+				intWrongContractHeaderId = h.intContractHeaderId
+				,intWrongContractDetailId = d.intContractDetailId
+				,strWrongContractNumber = h.strContractNumber
+				,intWrongContractSeq = d.intContractSeq
+				,intWrongTransactionId = t.intTransactionId
+				,intCorrectContractHeaderId = correctContract.intContractHeaderId
+				,intCorrectContractDetailId = correctContract.intContractDetailId
+				,strCorrectContractNumber = correctContract.strContractNumber
+				,intCorrectContractSeq = correctContract.intContractSeq
+				,intCorrectTransactionId = correctContract.intTransactionId
+			from tblSMActivity a
+			join tblSMTransaction t on t.intTransactionId = a.intTransactionId and t.intScreenId = @intScreenId
+			join tblCTContractHeader h on h.intContractHeaderId = t.intRecordId
+			join tblCTContractDetail d on d.intContractHeaderId = h.intContractHeaderId
+			cross apply (
+				select ch.intContractHeaderId,cd.intContractDetailId,ch.strContractNumber,cd.intContractSeq,tx.intTransactionId
+				from tblCTContractDetail cd
+				join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+				join tblSMTransaction tx on tx.intRecordId = ch.intContractHeaderId and tx.intScreenId = @intScreenId
+				where cd.intContractDetailId = t.intRecordId
+			) correctContract
+			where a.strType = 'Email' and a.strSubject like 'Contract%Instruction%'
+			and a.strSubject not like 'Contract - ' + h.strContractNumber +'-' + convert(nvarchar(50),d.intContractSeq) +  '%'
+		) tmp
 
 		IF ISNULL(@strDetail, '') <> ''
 			SELECT @strFinalDetail = @strFinalDetail + @strComments + @strHeader + @strDetail + '</table><br/>'
