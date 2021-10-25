@@ -905,12 +905,12 @@ BEGIN TRY
 				LEFT JOIN	tblRKFutureMarket		MA	WITH (NOLOCK) ON	MA.intFutureMarketId		=	CD.intFutureMarketId		
 				LEFT JOIN	tblRKFuturesMonth		MO	WITH (NOLOCK) ON	MO.intFutureMonthId			=	CD.intFutureMonthId			
 				LEFT JOIN	tblLGContainerType		CT	WITH (NOLOCK) ON	CT.intContainerTypeId		=	CD.intContainerTypeId		
-				INNER JOIN	tblCTPriceFixation		PF	WITH (NOLOCK) ON	PF.intContractDetailId		=	CD.intContractDetailId		
-				INNER JOIN	tblICItemUOM			IU	WITH (NOLOCK) ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		
-				INNER JOIN	tblICUnitMeasure		UM	WITH (NOLOCK) ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
-				INNER JOIN  tblICItemUOM			BU	WITH (NOLOCK) ON	BU.intItemUOMId				=	CD.intBasisUOMId
-				INNER JOIN  tblICUnitMeasure		BM	WITH (NOLOCK) ON	BM.intUnitMeasureId			=	BU.intUnitMeasureId
-				INNER JOIN	tblICItem				BI	WITH (NOLOCK) ON	BI.intItemId				=	CD.intItemBundleId
+				LEFT JOIN	tblCTPriceFixation		PF	WITH (NOLOCK) ON	PF.intContractDetailId		=	CD.intContractDetailId		
+				LEFT JOIN	tblICItemUOM			IU	WITH (NOLOCK) ON	IU.intItemUOMId				=	CD.intPriceItemUOMId		
+				LEFT JOIN	tblICUnitMeasure		UM	WITH (NOLOCK) ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId
+				LEFT JOIN  tblICItemUOM				BU	WITH (NOLOCK) ON	BU.intItemUOMId				=	CD.intBasisUOMId
+				LEFT JOIN  tblICUnitMeasure			BM	WITH (NOLOCK) ON	BM.intUnitMeasureId			=	BU.intUnitMeasureId
+				LEFT JOIN	tblICItem				BI	WITH (NOLOCK) ON	BI.intItemId				=	CD.intItemBundleId
 
 			)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
 														AND SQ.intRowNum = 1
