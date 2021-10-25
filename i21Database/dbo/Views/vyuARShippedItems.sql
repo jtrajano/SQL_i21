@@ -107,6 +107,7 @@ SELECT id							= NEWID()
 	 , ysnShowForShipment			= isnull(SCALETICKET.ysnShowForShipment, 1)
 	 , intItemContractHeaderId		= SHIPPEDITEMS.intItemContractHeaderId
 	 , intItemContractDetailId		= SHIPPEDITEMS.intItemContractDetailId
+	 , dblStandardWeight			= SHIPPEDITEMS.dblStandardWeight
 	 , ysnDestinationWeightsAndGrades   = SHIPPEDITEMS.ysnDestinationWeightsAndGrades
 	 , dblDestinationQuantity		= SHIPPEDITEMS.dblDestinationQuantity
 FROM (
@@ -191,6 +192,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= SOD.dblStandardWeight
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
@@ -377,6 +379,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= ITEMCONTRACT.intItemContractHeaderId
 		 , intItemContractDetailId			= ITEMCONTRACT.intItemContractDetailId
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = ICISI.ysnDestinationWeightsAndGrades
 		 , dblDestinationQuantity			= ICISI.dblDestinationQuantity
 	FROM (
@@ -600,6 +603,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblICInventoryShipmentCharge ICISC WITH (NOLOCK)
@@ -733,6 +737,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblSOSalesOrder SO WITH (NOLOCK)
@@ -849,6 +854,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM dbo.tblICInventoryShipmentItem ICISI WITH (NOLOCK)
@@ -961,6 +967,7 @@ FROM (
 		 , intSubBookId						= intSubBookId
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM 
@@ -1048,6 +1055,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM (
@@ -1171,6 +1179,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM (
@@ -1291,6 +1300,7 @@ FROM (
 		 , intSubBookId						= NULL
 		 , intItemContractHeaderId			= NULL
 		 , intItemContractDetailId			= NULL
+		 , dblStandardWeight				= 0.000000
 		 , ysnDestinationWeightsAndGrades   = NULL
 		 , dblDestinationQuantity			= NULL
 	FROM (
