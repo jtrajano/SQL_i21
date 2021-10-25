@@ -130,6 +130,7 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 152, name = 'Unrealized Gain or Loss Swap Accrual' UNION ALL --GL-8410
 			SELECT id = 153, name = 'Realized Gain or Loss Forward Accrual' UNION ALL --GL-8410
 			SELECT id = 154, name = 'Realized Gain or Loss Swap Accrual' UNION ALL --GL-8410
+			SELECT id = 155, name = 'Bank Transfer In-Transit' UNION ALL --GL-8410
 
 			-- Fixed Asset Unrealized Gain or Loss
 			SELECT id = 160, name = 'Unrealized Gain or Loss Fixed Asset' UNION ALL --GL-8450

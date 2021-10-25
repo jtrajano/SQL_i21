@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	[intBTForwardAccountId] [int] NULL,
 	[intBTForwardAccrualAccountId] [int] NULL,
 	[intBTBankFeesAccountId] [int] NULL,
+	[intBTInTransitAccountId] [int] NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
