@@ -1,4 +1,6 @@
-﻿SELECT
+﻿CREATE VIEW [dbo].[vyuCMCashFlowReportSummary]
+AS
+SELECT
 	S.intCashFlowReportId,
 	S.intCashFlowReportSummaryId,
 	G.intCashFlowReportSummaryGroupId,
