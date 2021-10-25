@@ -5,7 +5,8 @@ strBTFromFXGLAccountId =  B.strAccountId,
 strBTToFXGLAccountId = C.strAccountId,
 strBTForwardAccountId = D.strAccountId,
 strBTForwardAccrualAccountId = E.strAccountId,
-strBTBankFeesAccountId = F.strAccountId
+strBTBankFeesAccountId = F.strAccountId,
+strBTInTransitAccountId = G.strAccountId
 FROM tblCMCompanyPreferenceOption A
 OUTER APPLY(
     SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intBTFromFXGLAccountId
@@ -22,3 +23,6 @@ OUTER APPLY(
 OUTER APPLY(
     SELECT strAccountId FROM tblGLAccount WHERE intAccountId = A.intBTFeesAccountId
 )F
+OUTER APPLY(
+    SELECT strAccountId FROM tblGLAccount WHERE intAccountId = A.intBTInTransitAccountId
+)G
