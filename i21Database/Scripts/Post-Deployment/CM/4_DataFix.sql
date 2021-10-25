@@ -51,6 +51,14 @@ END
 	FROM tblCMBank Bank 
 	WHERE LEN(LTRIM(RTRIM(strRTN))) < @intEncryptCheckLength
 
+
+	-- Correct the length of bank with <9 routing number
+	UPDATE B SET strRTN =  
+	dbo.fnAESEncryptASym( REPLICATE('0',  9 - LEN(SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10))) + 
+	SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10) )
+	FROM vyuCMBank A JOIN tblCMBank B ON A.intBankId = B.intBankId
+	WHERE LEN(A.strRTN) < 9
+
 	UPDATE BankAccount SET strBankAccountNo = ISNULL(dbo.fnAESDecrypt(strBankAccountNo),strBankAccountNo)
 	FROM tblCMBankAccount BankAccount
 	WHERE LEN(LTRIM(RTRIM(strBankAccountNo))) < @intEncryptCheckLength
@@ -58,6 +66,13 @@ END
 	UPDATE BankAccount SET strRTN = ISNULL(dbo.fnAESDecrypt(strRTN),strRTN)
 	FROM tblCMBankAccount BankAccount
 	WHERE LEN(LTRIM(RTRIM(strRTN))) < @intEncryptCheckLength
+
+	-- Correct the length of bank account with <9 routing number
+	UPDATE B SET strRTN =  
+	dbo.fnAESEncryptASym( REPLICATE('0',  9 - LEN(SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10))) + 
+	SUBSTRING(A.strRTN, PATINDEX('%[^0]%', A.strRTN), 10) )
+	FROM vyuCMBankAccount A JOIN tblCMBankAccount B ON A.intBankAccountId = B.intBankAccountId
+	WHERE LEN(A.strRTN) < 9
 
 	UPDATE BankAccount SET strMICRBankAccountNo = ISNULL(dbo.fnAESDecrypt(strMICRBankAccountNo),strMICRBankAccountNo)
 	FROM tblCMBankAccount BankAccount
