@@ -121,7 +121,8 @@ BEGIN TRY
 				INNER JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
 				WHERE LD.intPContractDetailId = CD.intContractDetailId
 				AND L.intShipmentType = 1 AND ISNULL(L.ysnCancelled, 0) = 0 
-				AND ((L.intPurchaseSale = 3 AND ISNULL(L.ysnPosted, 0) = 0) OR L.intShipmentStatus <> 4)) PLS
+				AND ((L.intPurchaseSale = 3 AND ISNULL(L.ysnPosted, 0) = 0) 
+				AND L.intShipmentStatus <> 4)) PLS
 		OUTER APPLY 
 			(SELECT dblScheduleQty = SUM(LD.dblQuantity)
 				FROM tblLGLoadDetail LD
