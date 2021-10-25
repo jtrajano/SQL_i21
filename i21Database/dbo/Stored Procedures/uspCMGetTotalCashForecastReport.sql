@@ -3,6 +3,7 @@
 	@intCashFlowReportId INT,
 	@dtmReportDate DATETIME,
 	@intReportingCurrencyId INT,
+	@intBankId INT = NULL,
 	@intBankAccountId INT = NULL,
 	@intCompanyLocationId INT = NULL
 )
@@ -15,8 +16,7 @@ BEGIN
 		@intCurrentBankAccountId INT,
 		@intDefaultCurrencyId INT,
 		@strCurrentAccountId NVARCHAR(100),
-		@dblBeginBalance NUMERIC(18, 6),
-		@dblBeginBalanceForeign NUMERIC(18, 6),
+		@dblBeginBalance NUMERIC(18, 6) = 0,
 		@dblBucket2 DECIMAL(18, 6) = 0,
 		@dblBucket3 DECIMAL(18, 6) = 0,
 		@dblBucket4 DECIMAL(18, 6) = 0,
@@ -69,30 +69,37 @@ BEGIN
 		0,
 		CAST ((CASE WHEN @intDefaultCurrencyId = BA.intCurrencyId THEN 0 ELSE 1 END) AS BIT),
 		CAST (0 AS BIT)
-	FROM tblCMBankAccount BA
-	JOIN tblGLAccount A ON A.intAccountId = BA.intGLAccountId
-	JOIN @tblFilter F ON F.intFilterCurrencyId = BA.intCurrencyId
-	OUTER APPLY (
-		SELECT S.intAccountSegmentId FROM tblGLAccountSegment S
-		JOIN tblGLAccountSegmentMapping ASM ON ASM.intAccountSegmentId = S.intAccountSegmentId
-		JOIN tblSMCompanyLocation CL ON CL.intProfitCenter = S.intAccountSegmentId
-		WHERE ASM.intAccountId = A.intAccountId AND CL.intCompanyLocationId = @intCompanyLocationId
-	) Segment
-	WHERE 
-		(
-			CASE WHEN @intCompanyLocationId IS NULL
-				THEN 1
-				ELSE CASE WHEN Segment.intAccountSegmentId IS NOT NULL THEN 1 ELSE 0 END
-				END
-		) = 1
-		AND
-		(
-			CASE WHEN @intBankAccountId IS NULL
-				THEN 1
-				ELSE CASE WHEN BA.intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
-				END
-		) = 1
-	ORDER BY A.intAccountId
+		FROM tblCMBankAccount BA
+		JOIN tblGLAccount A ON A.intAccountId = BA.intGLAccountId
+		JOIN @tblFilter F ON F.intFilterCurrencyId = BA.intCurrencyId
+		OUTER APPLY (
+			SELECT S.intAccountSegmentId FROM tblGLAccountSegment S
+			JOIN tblGLAccountSegmentMapping ASM ON ASM.intAccountSegmentId = S.intAccountSegmentId
+			JOIN tblSMCompanyLocation CL ON CL.intProfitCenter = S.intAccountSegmentId
+			WHERE ASM.intAccountId = A.intAccountId AND CL.intCompanyLocationId = @intCompanyLocationId
+		) Segment
+		WHERE 
+			(
+				CASE WHEN @intCompanyLocationId IS NULL
+					THEN 1
+					ELSE CASE WHEN Segment.intAccountSegmentId IS NOT NULL THEN 1 ELSE 0 END
+					END
+			) = 1
+			AND
+			(
+				CASE WHEN @intBankAccountId IS NULL
+					THEN 1
+					ELSE CASE WHEN BA.intBankAccountId = @intBankAccountId THEN 1 ELSE 0 END
+					END
+			) = 1
+			AND
+			(
+				CASE WHEN @intBankId IS NULL
+					THEN 1
+					ELSE CASE WHEN BA.intBankId = @intBankId THEN 1 ELSE 0 END
+					END
+			) = 1
+		ORDER BY A.intAccountId
 
 	-- Loop thru each Bank Account
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tblAccounts WHERE ysnProcessed = 0 ORDER BY intAccountId)
@@ -112,13 +119,13 @@ BEGIN
 		-- Get Beginning Balance of each account then convert to the rate specified in the bucket 1
 		SELECT 
 			@dblBeginBalance = 
-				ISNULL(CASE WHEN Accounts.ysnMultiCurrency = 0 THEN beginBalance ELSE beginBalanceForeign END, 0) * (ISNULL(FilterTable.dblRateBucket1, 1))
+				ISNULL((CASE WHEN Accounts.ysnMultiCurrency = 0 THEN beginBalance ELSE beginBalanceForeign END), 0) * (ISNULL(FilterTable.dblRateBucket1, 1))
 		FROM dbo.fnGLGetBeginningBalanceAndUnit(@strCurrentAccountId, DATEADD(DAY, 1, @dtmReportDate))
 		OUTER APPLY (
 			SELECT intCurrencyId, ysnMultiCurrency FROM #tblAccounts WHERE strAccountId = @strCurrentAccountId AND intAccountId = @intCurrentAccountId
 		) Accounts
 		OUTER APPLY (
-			SELECT dblRateBucket1 dblRateBucket1 FROM @tblFilter WHERE intFilterCurrencyId = Accounts.intCurrencyId
+			SELECT dblRateBucket1 FROM @tblFilter WHERE intFilterCurrencyId = Accounts.intCurrencyId
 		) FilterTable
     
 		-- Set to true to for process next bank account

@@ -9,6 +9,8 @@ SELECT
 	FC.strCurrency strFilterCurrency,
 	R.intReportingCurrencyId,
 	RC.strCurrency strReportingCurrency,
+	R.intBankId,
+	B.strBankName,
 	R.intBankAccountId,
 	BA.strBankAccountNo strBankAccount,
 	R.intCompanyLocationId,
@@ -18,6 +20,8 @@ SELECT
 	ysnGenerated = CAST((CASE WHEN ISNULL(ReportSummary.intCount, 0) > 0 THEN 1 ELSE 0 END) AS BIT),
 	R.intConcurrencyId
 FROM tblCMCashFlowReport R
+LEFT JOIN tblCMBank B 
+	ON B.intBankId = R.intBankId
 LEFT JOIN vyuCMBankAccount BA
 	ON BA.intBankAccountId = R.intBankAccountId
 LEFT JOIN tblSMCurrency FC 

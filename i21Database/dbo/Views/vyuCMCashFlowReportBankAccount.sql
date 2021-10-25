@@ -2,6 +2,7 @@
 AS 
 SELECT
 	BankAccount.intBankAccountId,
+	Bank.intBankId,
 	Bank.strBankName,
 	BankAccount.ysnActive,
 	BankAccount.strBankAccountHolder COLLATE Latin1_General_CI_AS strBankAccountHolder,
