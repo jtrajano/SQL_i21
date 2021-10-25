@@ -51,11 +51,11 @@ BEGIN TRY
 		WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND (I.intId IS NULL OR I.intId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds)))
 		
 		UPDATE PD
-		SET PD.dblDiscount = I.dblDiscount,
-			PD.dblPayment = I.dblPayment,
-			PD.dblInterest = I.dblInterest,
-			PD.dblAmountDue = (I.dblPayment + I.dblDiscount) - I.dblInterest,
-			PD.dblTotal = (I.dblPayment + I.dblDiscount) - I.dblInterest
+		SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
+			PD.dblPayment = ISNULL(I.dblPayment, 0),
+			PD.dblInterest = ISNULL(I.dblInterest, 0),
+			PD.dblAmountDue = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
+			PD.dblTotal = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - I.dblInterest) ELSE PD.dblTotal END
 		FROM tblAPPaymentDetail PD
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 		LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
