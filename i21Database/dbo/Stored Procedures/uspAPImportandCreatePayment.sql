@@ -75,8 +75,8 @@ BEGIN TRY
 		SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
 			PD.dblPayment = ISNULL(I.dblPayment, 0),
 			PD.dblInterest = ISNULL(I.dblInterest, 0),
-			PD.dblAmountDue = (ISNULL(I.dblPayment, 0) + ISNULL(I.dblDiscount, 0)) - ISNULL(I.dblInterest, 0),
-			PD.dblTotal = (ISNULL(I.dblPayment, 0) + ISNULL(I.dblDiscount, 0)) - ISNULL(I.dblInterest, 0)
+			PD.dblAmountDue = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
+			PD.dblTotal = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - I.dblInterest) ELSE PD.dblTotal END
 		FROM tblAPPaymentDetail PD
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
 		LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
