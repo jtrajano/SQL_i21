@@ -1137,8 +1137,6 @@ FROM (
 			, ItemLocation.ysnIdRequiredLiquor = Source_Query.ysnIdRequiredLiquor
 			, ItemLocation.intMinimumAge = Source_Query.intMinimumAge
 			, ItemLocation.intCountGroupId = Source_Query.intCountGroupId
-			, ItemLocation.intIssueUOMId = Source_Query.intIssueUOMId
-			, ItemLocation.intReceiveUOMId = Source_Query.intReceiveUOMId
 			, ItemLocation.intConcurrencyId = ItemLocation.intConcurrencyId + 1
 			, ItemLocation.intIssueUOMId = Source_Query.intIssueUOMId
 			, ItemLocation.intReceiveUOMId = Source_Query.intReceiveUOMId
