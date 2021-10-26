@@ -18,3 +18,5 @@ AND IL.intItemLocationId = tblCFTransaction.intARLocationId
 			AND (ISNULL(IL.intAllowZeroCostTypeId, 1) = 1 )
 			AND ISNULL(tblCFTransaction.ysnPosted,0) = 0 
 
+
+GO
