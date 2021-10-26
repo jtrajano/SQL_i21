@@ -9076,6 +9076,18 @@
     <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDeduction.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeEarnings.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTaxes.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployee.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDeductions.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
