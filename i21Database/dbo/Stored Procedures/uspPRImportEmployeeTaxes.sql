@@ -190,6 +190,23 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
 				
 			END
+
+		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+		SELECT TOP 1
+			  NEWID()
+			, guiApiImportLogId = @guiLogId
+			, strField = 'Employee Taxes'
+			, strValue = SE.strTaxId
+			, strLogLevel = 'Info'
+			, strStatus = 'Success'
+			, intRowNo = SE.intRowNumber
+			, strMessage = 'The employee taxes has been successfully imported.'
+		FROM tblApiSchemaEmployeeTaxes SE
+		LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
+		WHERE SE.guiApiUniqueId = @guiApiUniqueId
+		AND SE.strTaxId = @TaxId
+		AND SE.strTaxDescription = @TaxTaxDesc
+		
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeTaxes')) 
