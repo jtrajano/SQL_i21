@@ -381,7 +381,21 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 
 				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo  AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
 			END
-
+		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+		SELECT TOP 1
+			  NEWID()
+			, guiApiImportLogId = @guiLogId
+			, strField = 'Employee Deductions'
+			, strValue = SE.strDeductionId
+			, strLogLevel = 'Info'
+			, strStatus = 'Success'
+			, intRowNo = SE.intRowNumber
+			, strMessage = 'The employee deduction has been successfully imported.'
+		FROM tblApiSchemaEmployeeDeduction SE
+		LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = SE.intEntityNo 
+		WHERE SE.guiApiUniqueId = @guiApiUniqueId
+		AND SE.strDeductionId = @strDeductionId
+		AND SE.strDeductionDesc = @strDeductionDesc
 
 	END
 
