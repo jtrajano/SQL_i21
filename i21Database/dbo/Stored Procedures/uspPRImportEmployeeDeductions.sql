@@ -131,11 +131,11 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 				SELECT
 					 ISNULL((SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @intEntityNo),0)
 					,(SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
-					,(SELECT TOP 1 strDeductFrom FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
-					,(SELECT TOP 1 strCalculationType FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
+					,@strDeductFromType
+					,@strRateCalcType
 					,dblRateCalc
 					,dblAnnualLimit
-					,100.00
+					,@dblDeductFrom
 					,@dtmBeginDate
 					,@dtmEndDate
 					,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)
@@ -253,25 +253,23 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 			END
 		ELSE
 			BEGIN
-
-				UPDATE tblPREmployeeDeduction SET 
-					 intEntityEmployeeId				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = @intEntityNo)
-					,intTypeDeductionId					= (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
-					,strDeductFrom						= (SELECT TOP 1 strDeductFrom FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
-					,strCalculationType					= (SELECT TOP 1 strCalculationType FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
+				UPDATE tblPREmployeeDeduction SET
+					 intTypeDeductionId					= (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
+					,strDeductFrom						= @strDeductFromType
+					,strCalculationType					= @strRateCalcType
 					,dblAmount							= @dblRateCalc
 					,dblLimit							= @dblAnnualLimit
-					,dblPaycheckMax						= 100.00
+					,dblPaycheckMax						= @dblDeductFrom
 					,dtmBeginDate						= @dtmBeginDate
 					,dtmEndDate							= @dtmEndDate
 					,intAccountId						= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountId)
 					,intExpenseAccountId				= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strExpenseAccountId)
-					,strPaidBy							= (SELECT TOP 1 strPaidBy FROM tblPRTypeTax WHERE strDescription = @strDeductionDesc)
+					,strPaidBy							= (SELECT TOP 1 strPaidBy FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 					,ysnDefault							= @ysnDefault
 					,ysnUseLocationDistribution			= ISNULL(@ysnAccountGLSplit,0)
 					,ysnUseLocationDistributionExpense	= ISNULL(@ysnExpenseGLSplit,0)
-				WHERE intEmployeeDeductionId = @intEntityNo
-				AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
+				WHERE intEntityEmployeeId = @intEntityNo
+					AND intTypeDeductionId = (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 
 				IF @strDeductionTaxId1 IS NOT NULL
 					BEGIN

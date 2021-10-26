@@ -59,6 +59,13 @@ INNER JOIN(
 													ELSE 0
 
 													END
+											WHEN PCTimeOff.intYear IS NOT NULL AND (T.strAwardPeriod = 'End of Year') THEN 
+													CASE WHEN (PCTimeOff.dtmDateFrom < DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1) 
+															AND PCTimeOff.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)  
+															) THEN dblHours
+													ELSE 0
+
+													END 
                                             WHEN TOR.intYear IS NOT NULL AND (T.strAwardPeriod = 'End of Year') THEN   
                                                 CASE WHEN (  TOR.dtmDateFrom >= ISNULL(T.dtmLastAward, E.dtmDateHired)    
 														AND (TOR.dtmDateFrom < DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1))  
@@ -66,6 +73,11 @@ INNER JOIN(
 												ELSE   
 													0	
 												END  
+											WHEN TOR.intYear IS NOT NULL  AND (T.strAwardPeriod = 'Start of Year') THEN
+												CASE WHEN TOR.intYear = YEAR(GETDATE())
+												THEN TOR.dblHoursTOR
+												ELSE 0
+												END
 											ELSE 
 												CASE WHEN PCTimeOff.intYear IS NOT NULL AND (PCTimeOff.intYear = YEAR(GETDATE())) THEN
 														dblHours

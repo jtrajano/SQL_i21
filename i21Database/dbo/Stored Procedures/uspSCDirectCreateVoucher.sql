@@ -93,7 +93,7 @@ BEGIN TRY
 				,dblQuantity				= SCL.dblQty
 				,dblUnitQty					= ICUOM.dblUnitQty
 				,dblDiscount				= 0
-				,dblCost					= LGD.dblUnitPrice
+				,dblCost					= ISNULL(CNT.dblCashPrice,LGD.dblUnitPrice)
 				,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(SCL.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
 				,intInvoiceId				= null
 				,intScaleTicketId			= SC.intTicketId
@@ -125,7 +125,7 @@ BEGIN TRY
 				ON SC.intItemUOMIdTo = ICUOM.intItemUOMId
 			INNER JOIN tblLGLoadDetail LGD 
 				ON SCL.intLoadDetailId = LGD.intLoadDetailId
-			INNER JOIN tblCTContractDetail CNT
+			LEFT JOIN tblCTContractDetail CNT
 				ON CNT.intContractDetailId = LGD.intPContractDetailId
 			INNER JOIN tblSCTicketDistributionAllocation SCTA
 				ON SCL.intTicketLoadUsedId = SCTA.intSourceId
@@ -491,7 +491,7 @@ BEGIN TRY
 					,strMiscDescription		= IC.strDescription
 					,dblQtyReceived			= (CASE 
 												WHEN IC.strCostMethod = 'Amount' THEN 1
-												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
+												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity END
 												ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
 											END) * -1
 					,dblUnitQty				= SC.dblUnitQty
@@ -550,8 +550,8 @@ BEGIN TRY
 					,strMiscDescription		= IC.strDescription
 					,dblQtyReceived			= (CASE 
 												WHEN IC.strCostMethod = 'Amount' THEN 1
-												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
-												ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity * -1 END
+												WHEN IC.strCostMethod = 'Per Unit' THEN CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity END
+												ELSE CASE WHEN ISNULL(SC.ysnFarmerPaysFreight,0) = 0 THEN SC.dblQuantity ELSE SC.dblQuantity END
 											END) * -1
 					,dblUnitQty				= SC.dblUnitQty
 					,dblDiscount			= 0
