@@ -67,6 +67,11 @@ BEGIN
 				WHERE intLoadId = @intLoadId
 					AND dblClaimableWt < 0
 				)
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblLGWeightClaim
+				WHERE intLoadId = @intLoadId
+				)
 		BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
 				,@intNewWeightClaimId = @intNewWeightClaimId OUTPUT
