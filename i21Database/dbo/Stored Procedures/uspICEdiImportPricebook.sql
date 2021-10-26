@@ -37,7 +37,9 @@ DECLARE
 	,@insertedVendorXRef AS INT = 0 
 	,@updatedItemLocation AS INT = 0
 	,@insertedItemLocation AS INT = 0 
-
+	,@insertedProductClass AS INT = 0 
+	,@insertedFamilyClass AS INT = 0 
+	
 	,@originalPricebookCount AS INT = 0 
 	,@duplicatePricebookCount AS INT = 0 
 	,@missingVendorCategoryXRef AS INT = 0 
@@ -602,7 +604,7 @@ FROM (
 				WHERE
 					s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
 				ORDER BY 
-					m.intUnitMeasureId 
+					s.intUnitMeasureId 
 			) s
 			OUTER APPLY (
 				SELECT TOP 1 
@@ -807,7 +809,7 @@ FROM
 		WHERE
 			s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
 		ORDER BY 
-			m.intUnitMeasureId 
+			s.intUnitMeasureId 
 	) s
 	OUTER APPLY (
 		SELECT TOP 1 
@@ -846,6 +848,48 @@ WHERE
 	AND existUPCCode.intItemUOMId IS NULL 
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
+
+-- Insert the Product Sub Category if it does not exists 
+INSERT INTO tblSTSubcategory (
+	strSubcategoryType
+	,strSubcategoryId
+	,intConcurrencyId
+)
+SELECT 
+	DISTINCT 
+	strSubcategoryType = 'C'
+	,strSubcategoryId = CAST(p.strProductClass AS NVARCHAR(8)) 
+	,intConcurrencyId = 1	
+FROM 
+	tblICEdiPricebook p LEFT JOIN tblSTSubcategory sc 
+		ON sc.strSubcategoryId = CAST(NULLIF(p.strProductClass, '') AS NVARCHAR(8))
+		AND sc.strSubcategoryType = 'C'
+WHERE
+	sc.intSubcategoryId IS NULL 
+	AND NULLIF(p.strProductClass, '') IS NOT NULL 
+
+SET @insertedProductClass = ISNULL(@insertedProductClass, 0) + @@ROWCOUNT;
+
+-- Insert the Family Sub Category if it does not exists 
+INSERT INTO tblSTSubcategory (
+	strSubcategoryType
+	,strSubcategoryId
+	,intConcurrencyId
+)
+SELECT 
+	DISTINCT 
+	strSubcategoryType = 'F'
+	,strSubcategoryId = CAST(p.strProductFamily AS NVARCHAR(8)) 
+	,intConcurrencyId = 1	
+FROM 
+	tblICEdiPricebook p LEFT JOIN tblSTSubcategory sc 
+		ON sc.strSubcategoryId = CAST(NULLIF(p.strProductFamily, '') AS NVARCHAR(8))
+		AND sc.strSubcategoryType = 'F'
+WHERE
+	sc.intSubcategoryId IS NULL 
+	AND NULLIF(p.strProductFamily, '') IS NOT NULL 
+
+SET @insertedFamilyClass = ISNULL(@insertedFamilyClass, 0) + @@ROWCOUNT;
 
 -- Upsert the Item Location 
 INSERT INTO #tmpICEdiImportPricebook_tblICItemLocation (
@@ -897,6 +941,9 @@ FROM (
 				,p.ysnUpdateExistingRecords
 				,p.ysnAddNewRecords
 				,p.ysnUpdatePrice
+				,v.intEntityId
+				,intIssueUOMId = saleUOM.intItemUOMId
+				,intReceiveUOMId = receiveUOM.intItemUOMId
 			FROM tblICEdiPricebook p
 				INNER JOIN tblICItemUOM u 
 					ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
@@ -905,10 +952,10 @@ FROM (
 				LEFT JOIN tblICCategory cat 
 					ON cat.intCategoryId = i.intCategoryId
 				LEFT JOIN tblSTSubcategory sc 
-					ON sc.strSubcategoryId = NULLIF(p.strProductClass, '')
+					ON sc.strSubcategoryId = CAST(NULLIF(p.strProductClass, '') AS NVARCHAR(8))
 					AND sc.strSubcategoryType = 'C'
 				LEFT JOIN tblSTSubcategory sf 
-					ON sf.strSubcategoryId = NULLIF(p.strProductFamily, '')
+					ON sf.strSubcategoryId = CAST(NULLIF(p.strProductFamily, '') AS NVARCHAR(8)) 
 					AND sf.strSubcategoryType = 'F'
 				LEFT JOIN tblICCountGroup cg
 					ON cg.strCountGroup = p.strInventoryGroup
@@ -926,6 +973,74 @@ FROM (
 				LEFT JOIN tblICCategoryLocation catLoc 
 					ON catLoc.intCategoryId = cat.intCategoryId
 					AND catLoc.intLocationId = l.intLocationId
+
+				-- Issue (Sale) UOM: strItemUnitOfMeasure 
+				OUTER APPLY (			
+					SELECT TOP 1 
+						m.*
+					FROM tblICUnitMeasure m 
+					WHERE
+						m.strUnitMeasure = NULLIF(p.strItemUnitOfMeasure, '')
+					ORDER BY 
+						m.intUnitMeasureId 
+				) saleUnitMeasure
+				OUTER APPLY (
+					SELECT TOP 1 
+						s.*
+					FROM tblICUnitMeasure s 
+					WHERE
+						s.strSymbol = NULLIF(p.strItemUnitOfMeasure, '')
+					ORDER BY 
+						s.intUnitMeasureId 
+				) saleSymbol
+				OUTER APPLY (
+					SELECT TOP 1 
+						saleUOM.intItemUOMId					
+					FROM 
+						tblICItemUOM saleUOM
+					WHERE
+						saleUOM.intItemId = i.intItemId
+						AND saleUOM.intUnitMeasureId = ISNULL(saleUnitMeasure.intUnitMeasureId, saleSymbol.intUnitMeasureId) 
+				) saleUOM
+
+				-- Receive (Purchase) UOM: strOrderPackageDescription
+				OUTER APPLY (			
+					SELECT TOP 1 
+						m.*
+					FROM tblICUnitMeasure m 
+					WHERE
+						m.strUnitMeasure = NULLIF(p.strOrderPackageDescription, '')
+					ORDER BY 
+						m.intUnitMeasureId 
+				) receiveUnitMeasure
+				OUTER APPLY (
+					SELECT TOP 1 
+						s.*
+					FROM tblICUnitMeasure s 
+					WHERE
+						s.strSymbol = NULLIF(p.strOrderPackageDescription, '')
+					ORDER BY 
+						s.intUnitMeasureId 
+				) receiveSymbol
+				OUTER APPLY (
+					SELECT TOP 1 
+						receiveUOM.intItemUOMId					
+					FROM 
+						tblICItemUOM receiveUOM
+					WHERE
+						receiveUOM.intItemId = i.intItemId
+						AND receiveUOM.intUnitMeasureId = ISNULL(receiveUnitMeasure.intUnitMeasureId, receiveSymbol.intUnitMeasureId) 
+				) receiveUOM
+
+				OUTER APPLY (
+					SELECT TOP 1 
+						v.* 
+					FROM 
+						vyuAPVendor v
+					WHERE 
+						(v.strVendorId = p.strVendorId AND @intVendorId IS NULL) 
+						OR (v.intEntityId = @intVendorId AND @intVendorId IS NOT NULL)
+				) v	
 			WHERE
 				p.strUniqueId = @UniqueId
 	) AS Source_Query  
@@ -960,6 +1075,9 @@ FROM (
 			, ItemLocation.intMinimumAge = Source_Query.intMinimumAge
 			, ItemLocation.intCountGroupId = Source_Query.intCountGroupId
 			, ItemLocation.intConcurrencyId = ItemLocation.intConcurrencyId + 1
+			, ItemLocation.intIssueUOMId = Source_Query.intIssueUOMId
+			, ItemLocation.intReceiveUOMId = Source_Query.intReceiveUOMId
+			, ItemLocation.intVendorId = Source_Query.intEntityId
 
 	-- If none is found, insert a new item location 
 	WHEN 
@@ -1043,16 +1161,16 @@ FROM (
 		VALUES (
 			Source_Query.intItemId --intItemId
 			,Source_Query.intLocationId --,intLocationId
-			,DEFAULT--,intVendorId
+			,Source_Query.intEntityId --,intVendorId
 			,DEFAULT--,strDescription
 			,1--,intCostingMethod
 			,3--,intAllowNegativeInventory
 			,DEFAULT--,intSubLocationId
 			,DEFAULT--,intStorageLocationId
-			,DEFAULT--,intIssueUOMId
-			,DEFAULT--,intReceiveUOMId
+			,Source_Query.intIssueUOMId--,intIssueUOMId
+			,Source_Query.intReceiveUOMId--,intReceiveUOMId
 			,DEFAULT--,intGrossUOMId
-			,DEFAULT--,intFamilyId
+			,Source_Query.intFamilyId--,intFamilyId
 			,Source_Query.intClassId--,intClassId
 			,Source_Query.intProductCodeId--,intProductCodeId
 			,DEFAULT--,intFuelTankId
@@ -1102,7 +1220,7 @@ FROM (
 			,DEFAULT--,ysnCountedDaily
 			,1--,intAllowZeroCostTypeId
 			,DEFAULT--,ysnLockedInventory
-			,DEFAULT--,ysnStorageUnitRequired
+			,0--,ysnStorageUnitRequired
 			,DEFAULT--,strStorageUnitNo
 			,DEFAULT--,intCostAdjustmentType
 			,1--,ysnActive
@@ -1591,8 +1709,26 @@ BEGIN
 	SELECT @TotalRowsSkipped = COUNT(*) FROM tblICImportLogDetail WHERE intImportLogId = @LogId AND strStatus = 'Skipped'
 	SELECT @TotalRowsSkipped = @TotalRowsSkipped - 1 + @duplicatePricebookCount WHERE @duplicatePricebookCount <> 0 
 
-	SET @TotalRowsUpdated = @TotalRowsUpdated + @updatedItem + @updatedItemUOM + @updatedItemLocation + @updatedItemPricing + @updatedSpecialItemPricing + @updatedVendorXRef
-	SET @TotalRowsInserted = @TotalRowsInserted + @insertedItem + @insertedItemUOM + @insertedItemLocation + @insertedItemPricing + @insertedSpecialItemPricing + @insertedVendorXRef 
+	SET @TotalRowsUpdated = 
+			@TotalRowsUpdated 
+			+ @updatedItem 
+			+ @updatedItemUOM 
+			+ @updatedItemLocation 
+			+ @updatedItemPricing 
+			+ @updatedSpecialItemPricing 
+			+ @updatedVendorXRef
+	
+	SET @TotalRowsInserted = 
+			@TotalRowsInserted 
+			+ @insertedItem 
+			+ @insertedItemUOM 
+			+ @insertedProductClass
+			+ @insertedFamilyClass			
+			+ @insertedItemLocation 
+			+ @insertedItemPricing 
+			+ @insertedSpecialItemPricing 
+			+ @insertedVendorXRef 
+
 END 
 
 BEGIN 
@@ -1733,6 +1869,62 @@ BEGIN
 		WHERE 
 			@insertedItemUOM <> 0 
 	END 
+
+	-- Log the created product class
+	IF @insertedProductClass <> 0 
+	BEGIN 
+		INSERT INTO tblICImportLogDetail(
+			intImportLogId
+			, strType
+			, intRecordNo
+			, strField
+			, strValue
+			, strMessage
+			, strStatus
+			, strAction
+			, intConcurrencyId
+		)
+		SELECT 
+			@LogId
+			, 'Info'
+			, NULL
+			, NULL 
+			, NULL 
+			, dbo.fnFormatMessage('%i Product class(es) are created.', @insertedProductClass,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT)
+			, 'Success'
+			, 'Updated'
+			, 1
+		WHERE 
+			@insertedProductClass <> 0 
+	END
+
+	-- Log the created family class
+	IF @insertedFamilyClass <> 0 
+	BEGIN 
+		INSERT INTO tblICImportLogDetail(
+			intImportLogId
+			, strType
+			, intRecordNo
+			, strField
+			, strValue
+			, strMessage
+			, strStatus
+			, strAction
+			, intConcurrencyId
+		)
+		SELECT 
+			@LogId
+			, 'Info'
+			, NULL
+			, NULL 
+			, NULL 
+			, dbo.fnFormatMessage('%i Family class(es) are created.', @insertedFamilyClass,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT,DEFAULT)
+			, 'Success'
+			, 'Updated'
+			, 1
+		WHERE 
+			@insertedFamilyClass <> 0 
+	END
 
 	-- Log the updated item uom. 
 	IF @updatedItemUOM <> 0 
