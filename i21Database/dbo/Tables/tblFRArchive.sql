@@ -21,3 +21,12 @@ CREATE TABLE [dbo].[tblFRArchive] (
 	[intConcurrencyId]	INT NOT NULL,
     CONSTRAINT [PK_tblFRArchive] PRIMARY KEY CLUSTERED ([intArchiveId] ASC)
 );
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblFRArchive_intRowId] ON [dbo].[tblFRArchive] (intRowId asc)
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblFRArchive_strType] ON [dbo].[tblFRArchive] ([strType] asc)
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblFRArchive_strStatus] ON [dbo].[tblFRArchive] ([strStatus] asc)
