@@ -826,59 +826,67 @@ BEGIN TRY
 								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 							END
 						
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Vendor)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Vendor</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Vendor)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Vendor</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + EntityVendor.strName + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Vendor tempVendor
-								INNER JOIN tblEMEntity EntityVendor
-									ON tempVendor.intVendorId = EntityVendor.intEntityId
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + EntityVendor.strName + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Vendor tempVendor
+							INNER JOIN tblEMEntity EntityVendor
+								ON tempVendor.intVendorId = EntityVendor.intEntityId
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
 
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Category</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Category</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Category.strCategoryCode + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Category tempCategory
-								INNER JOIN tblICCategory Category
-									ON tempCategory.intCategoryId = Category.intCategoryId
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Category.strCategoryCode + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Category tempCategory
+							INNER JOIN tblICCategory Category
+								ON tempCategory.intCategoryId = Category.intCategoryId
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
 
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Family</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Family</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubFamily.strSubcategoryId + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Family tempFamily
-								INNER JOIN tblSTSubcategory SubFamily
-									ON tempFamily.intFamilyId = SubFamily.intSubcategoryId
-								WHERE SubFamily.strSubcategoryType = 'F'
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubFamily.strSubcategoryId + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Family tempFamily
+							INNER JOIN tblSTSubcategory SubFamily
+								ON tempFamily.intFamilyId = SubFamily.intSubcategoryId
+							WHERE SubFamily.strSubcategoryType = 'F'
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
 
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Class</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Class</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubClass.strSubcategoryId + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Class tempClass
-								INNER JOIN tblSTSubcategory SubClass
-									ON tempClass.intClassId = SubClass.intSubcategoryId
-								WHERE SubClass.strSubcategoryType = 'C'
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubClass.strSubcategoryId + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Class tempClass
+							INNER JOIN tblSTSubcategory SubClass
+								ON tempClass.intClassId = SubClass.intSubcategoryId
+							WHERE SubClass.strSubcategoryType = 'C'
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
-						-- SELECT @strLottedItem = LEFT(@strLottedItem, LEN(@strLottedItem)-1)
-						-- ===================================================================================
-						-- [END] Filter Criteria
-						-- ===================================================================================
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
+					IF ISNULL(@strUpcCode, '') != ''
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UPC Code</b></p>'
+								
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @strUpcCode + '</p>'
+
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
+
+					-- ===================================================================================
+					-- [END] Filter Criteria
+					-- ===================================================================================
 
 
 
