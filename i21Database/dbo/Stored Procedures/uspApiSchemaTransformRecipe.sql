@@ -312,10 +312,6 @@ AND f.intFarmFieldId IS NULL
 AND NULLIF(sr.strFarm, '') IS NOT NULL
 
 -- Transformation
-
--- Execute pre-requisite
-EXEC dbo.uspApiSchemaTransformRecipeInitialize
-
 DECLARE @intUserId INT = 1
 
 DECLARE @strRecipeName NVARCHAR(50)

@@ -623,16 +623,12 @@ BEGIN TRY
 				,intContractDetailId
 				,dtmEndDate 
 				,dblBasis
-				,dblFutures
-				,intQtyUOMId
 		) AS (
 			SELECT 
 				intContractHeaderId
 				,intContractDetailId
 				,dtmEndDate 
 				,dblBasis
-				,dblFutures
-				,intQtyUOMId
 			FROM (
 				SELECT 
 					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) DESC)
@@ -719,11 +715,11 @@ BEGIN TRY
 				, strLocationName
 				, lcd.dtmEndDate
 				, dblQty = CAST(SUM(dblQuantity) AS NUMERIC(20, 6))
-				, dblFutures = CAST((CASE WHEN intPricingTypeId = 1 OR intPricingTypeId = 3 THEN lcd.dblFutures ELSE 0 END) AS NUMERIC(20, 6))
+				, dblFutures = CAST(MAX(dblFutures) AS NUMERIC(20, 6))
 				, dblBasis = CAST(lcd.dblBasis AS NUMERIC(20, 6))	
 				, dblCashPrice = CAST (MAX(dblCashPrice) AS NUMERIC(20, 6))
-				, dblAmount = CAST ((SUM(dblQuantity) * (lcd.dblBasis + (CASE WHEN intPricingTypeId = 1 OR intPricingTypeId = 3 THEN lcd.dblFutures ELSE 0 END))) AS NUMERIC(20, 6))
-				, lcd.intQtyUOMId
+				, dblAmount = CAST ((SUM(dblQuantity) * (lcd.dblBasis + MAX(dblFutures))) AS NUMERIC(20, 6))
+				, intQtyUOMId
 				, intPricingTypeId
 				, intContractTypeId
 				, intLocationId
@@ -754,12 +750,12 @@ BEGIN TRY
 					, CBL.dtmStartDate
 					--, CBL.dtmEndDate
 					, dblQuantity = CBL.dblQty
-					--, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 OR CBL.intPricingTypeId = 3 THEN CBL.dblFutures ELSE NULL END 
+					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 OR CBL.intPricingTypeId = 3 THEN CBL.dblFutures ELSE NULL END 
 					--, dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
 					, dblCashPrice = CASE WHEN CBL.intPricingTypeId = 1 THEN ISNULL(CBL.dblFutures,0) + ISNULL(CBL.dblBasis,0) ELSE NULL END
 					, dblAmount = CASE WHEN CBL.intPricingTypeId = 1 THEN [dbo].[fnCTConvertQtyToStockItemUOM](CD.intItemUOMId, CBL.dblQty) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(CBL.dblFutures, 0) + ISNULL(CBL.dblBasis, 0))
 										ELSE NULL END
-					--, CBL.intQtyUOMId
+					, CBL.intQtyUOMId
 					, CBL.intPricingTypeId
 					, CBL.intContractTypeId
 					, CBL.intLocationId
@@ -814,7 +810,6 @@ BEGIN TRY
 				--, intFutureMonthId
 				, strPricingStatus
 				, lcd.dblBasis
-				, lcd.dblFutures
 			HAVING SUM(dblQuantity) > 0	
 		) tbl
 		JOIN #ContractStatus cs ON cs.intContractDetailId = tbl.intContractDetailId
@@ -3268,7 +3263,7 @@ BEGIN TRY
 				, DER.intFutureMonthId
 				, strFutureMarket
 				, DER.intFutureMarketId
-				, dblPrice 
+				, dblPrice
 				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
 				, DER.intCurrencyId

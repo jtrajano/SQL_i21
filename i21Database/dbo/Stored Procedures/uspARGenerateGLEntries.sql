@@ -10,13 +10,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET ANSI_WARNINGS ON
 
---PERFORMANCE SNIFFING
-DECLARE @PostTemp              BIT			= @Post
-      , @RecapTemp             BIT			= @Recap
-      , @PostDateTemp          DATETIME     = @PostDate
-      , @BatchIdTemp           NVARCHAR(40)	= @BatchId
-      , @UserIdTemp            INT          = @UserId
-
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
@@ -32,7 +25,7 @@ DECLARE  @AVERAGECOST   INT = 1
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
 DECLARE @ItemsForPost AS ItemCostingTableType
 
-IF @PostTemp = 1
+IF @Post = 1
 
 INSERT INTO @ItemsForPost
     ([intItemId]
@@ -63,9 +56,7 @@ INSERT INTO @ItemsForPost
     ,[intStorageScheduleTypeId]
     ,[dblUnitRetail]
     ,[intCategoryId]
-    ,[dblAdjustRetailValue]
-	,[strBOLNumber]
-) 
+    ,[dblAdjustRetailValue]) 
 SELECT 
      [intItemId]
 	,[intItemLocationId]
@@ -96,14 +87,13 @@ SELECT
 	,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[strBOLNumber]
 FROM 
 	##ARItemsForCosting
-WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 BEGIN
+	-- Call the post routine 
 	INSERT INTO ##ARInvoiceGLEntries (
 		 [dtmDate]
 		,[strBatchId]
@@ -142,16 +132,17 @@ BEGIN
 	)
 	EXEC dbo.uspICPostCosting  
 		 @ItemsForPost  
-		,@BatchIdTemp  
+		,@BatchId  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@UserIdTemp
+		,@UserId
+	
 END
 
 DECLARE  @InTransitItems                ItemInTransitCostingTableType 
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
 				
-IF @PostTemp = 1 OR (@PostTemp = 0 AND EXISTS(SELECT TOP 1 1 FROM ##ARPostInvoiceDetail WHERE intSourceId = 2))
+IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM ##ARPostInvoiceDetail WHERE intSourceId = 2))
 INSERT INTO @InTransitItems
     ([intItemId] 
     ,[intItemLocationId] 
@@ -175,9 +166,7 @@ INSERT INTO @InTransitItems
     ,[intFobPointId] 
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
-    ,[dblForexRate]
-	,[strBOLNumber]	
-)
+    ,[dblForexRate])
 SELECT
      [intItemId] 
     ,[intItemLocationId] 
@@ -202,7 +191,6 @@ SELECT
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
     ,[dblForexRate]
-	,[strBOLNumber]
 FROM ##ARItemsForInTransitCosting
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
@@ -244,9 +232,9 @@ BEGIN		 --Call the post routine
 	)
 	EXEC dbo.uspICPostInTransitCosting  
 		 @InTransitItems  
-		,@BatchIdTemp  
+		,@BatchId  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-		,@UserIdTemp	
+		,@UserId	
 
 	UPDATE B
 	SET intAccountId = dbo.fnGetItemGLAccount(C.intLinkedItemId, A.intItemLocationId, 'Cost Of Goods')		
@@ -259,7 +247,7 @@ BEGIN		 --Call the post routine
 					             AND A.intTransactionDetailId =  C.intTransactionDetailId 
 					             AND A.intItemId = C.intItemId
 					             AND A.intItemLocationId = C.intItemLocationId
-	WHERE A.strBatchId = @BatchIdTemp
+	WHERE A.strBatchId = @BatchId
 	  AND C.intLinkedItemId IS NOT NULL
 	  AND dbo.fnGetItemGLAccount(A.intItemId, A.intItemLocationId, 'Cost of Goods') = B.intAccountId
 
@@ -267,7 +255,7 @@ END
 
 DECLARE @StorageItemsForPost AS ItemCostingTableType  			
 
-IF @PostTemp = 1
+IF @Post = 1
 INSERT INTO @StorageItemsForPost (  
      [intItemId] 
     ,[intItemLocationId] 
@@ -287,7 +275,6 @@ INSERT INTO @StorageItemsForPost (
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
-	,[strBOLNumber]
 ) 
 SELECT 
      [intItemId] 
@@ -308,7 +295,6 @@ SELECT
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
-	,[strBOLNumber]
 FROM 
 	##ARItemsForStorageCosting
 
@@ -352,14 +338,14 @@ BEGIN
 		,[intCommodityId]
 	)
 	EXEC dbo.uspICPostStorage  
-			 @StorageItemsForPost  
-			,@BatchIdTemp  		
-			,@UserIdTemp
+				@StorageItemsForPost  
+			,@BatchId  		
+			,@UserId
 END
 
 UPDATE ##ARInvoiceGLEntries
-SET [dtmDateEntered] = @PostDateTemp
-   ,[strBatchId]     = @BatchIdTemp
+SET [dtmDateEntered] = @PostDate
+   ,[strBatchId]     = @BatchId
 
 UPDATE GL
 SET GL.intSourceEntityId = I.intEntityCustomerId

@@ -35,7 +35,6 @@ BEGIN TRY
 		,@dtmCreated DATETIME
 		,@strStorageLocation NVARCHAR(50)
 		,@strDemandType NVARCHAR(50)
-		,@intCounter INT = 1
 
 	SELECT @intBendDemandStageId = MIN(intBendDemandStageId)
 	FROM tblIPBendDemandStage
@@ -59,7 +58,7 @@ BEGIN TRY
 				,@strWorkCenter = NULL
 				,@dtmDueDate = NULL
 				,@strMachine = NULL
-				,@strDemandType = NULL
+				,@strDemandType =NULL
 
 			SELECT @strCompanyLocation = strCompanyLocation
 				,@intActionId = intActionId
@@ -73,7 +72,7 @@ BEGIN TRY
 				,@strWorkCenter = strWorkCenter
 				,@dtmDueDate = dtmDueDate
 				,@strMachine = strMachine
-				,@strDemandType = strDemandType
+				,@strDemandType=strDemandType
 				,@intTrxSequenceNo = intTrxSequenceNo
 			FROM dbo.tblIPBendDemandStage
 			WHERE intBendDemandStageId = @intBendDemandStageId
@@ -104,13 +103,9 @@ BEGIN TRY
 				FROM dbo.tblSMUserSecurity WITH (NOLOCK)
 				WHERE strUserName = 'IRELYADMIN'
 
-			SELECT @intLocationId = NULL
-
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
 			WHERE strLotOrigin = @strCompanyLocation
-
-			SELECT @intCompanyLocationSubLocationId = NULL
 
 			SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
 			FROM dbo.tblSMCompanyLocationSubLocation
@@ -216,24 +211,13 @@ BEGIN TRY
 
 			IF @intManufacturingCellId IS NULL
 			BEGIN
-				--SELECT @strError = 'Manufacturing Cell ' + @strWorkCenter + ' is not availble in i21.'
-				--RAISERROR (
-				--		@strError
-				--		,16
-				--		,1
-				--		)
-				INSERT INTO tblMFManufacturingCell (
-					strCellName
-					,strDescription
-					,intSubLocationId
-					,intLocationId
-					)
-				SELECT @strWorkCenter
-					,@strWorkCenter
-					,@intCompanyLocationSubLocationId
-					,@intLocationId
+				SELECT @strError = 'Manufacturing Cell ' + @strWorkCenter + ' is not availble in i21.'
 
-				SELECT @intManufacturingCellId = SCOPE_IDENTITY()
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
 			END
 
 			IF @strMachine = ''
@@ -257,36 +241,16 @@ BEGIN TRY
 
 			IF @intMachineId IS NULL
 			BEGIN
-				--SELECT @strError = 'Machine ' + @strMachine + ' is not availble in i21.'
-				--RAISERROR (
-				--		@strError
-				--		,16
-				--		,1
-				--		)
-				INSERT INTO tblMFMachine (
-					strName
-					,strDescription
-					,intSubLocationId
-					,intLocationId
-					)
-				SELECT @strMachine
-					,@strMachine
-					,@intCompanyLocationSubLocationId
-					,@intLocationId
+				SELECT @strError = 'Machine ' + @strMachine + ' is not availble in i21.'
 
-				SELECT @intMachineId = SCOPE_IDENTITY()
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
 			END
 
 			BEGIN TRAN
-
-			IF @intCounter = 1
-			BEGIN
-				DELETE
-				FROM dbo.tblMFBlendDemand
-				WHERE intLocationId = @intLocationId
-
-				SELECT @intCounter = @intCounter + 1
-			END
 
 			INSERT INTO dbo.tblMFBlendDemand (
 				strDemandNo

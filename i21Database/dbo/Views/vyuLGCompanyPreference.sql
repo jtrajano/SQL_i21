@@ -183,12 +183,6 @@ SELECT CP.intCompanyPreferenceId
 	,CP.ysnIncludeArrivedInPortStatus
 	,CP.ysnIncludeStrippingInstructionStatus
 	,CP.ysnWeightClaimsByContainer
-	,CP.intExpirationDays
-	,CP.intExpirationDateBasis
-	,strExpirationDateBasis = CASE CP.intExpirationDateBasis
-		WHEN 1 THEN 'Scheduled Date' 
-		WHEN 2 THEN 'Contract End Date'
-		ELSE '' END COLLATE Latin1_General_CI_AS 
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId

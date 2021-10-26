@@ -9,12 +9,7 @@ BEGIN
 		,@intSubLocationId INT
 		,@intManufacturingCellId INT
 		,@intRecipeId INT
-		,@strSubLocationName NVARCHAR(50)
-		,@ysnRecipeBySite BIT
 	DECLARE @tblMFInputOtherChargeItems TABLE (intItemId INT)
-
-	SELECT @ysnRecipeBySite = ISNULL(ysnRecipeBySite, 0)
-	FROM tblMFCompanyPreference
 
 	IF @intWorkOrderId > 0
 	BEGIN
@@ -38,32 +33,12 @@ BEGIN
 
 		IF @intRecipeId IS NULL
 		BEGIN
-			IF ISNULL(@ysnRecipeBySite, 0) = 1
-			BEGIN
-				SELECT @strSubLocationName = LEFT(strSubLocationName, 2)
-				FROM tblSMCompanyLocationSubLocation
-				WHERE intCompanyLocationSubLocationId = @intSubLocationId
-
-				SELECT @intSubLocationId = intCompanyLocationSubLocationId
-				FROM tblSMCompanyLocationSubLocation
-				WHERE strSubLocationName = @strSubLocationName
-
-				SELECT @intRecipeId = intRecipeId
-				FROM dbo.tblMFRecipe
-				WHERE intItemId = @intItemId
-					AND intLocationId = @intLocationId
-					AND ysnActive = 1
-					AND intSubLocationId = @intSubLocationId
-			END
-			ELSE
-			BEGIN
-				SELECT @intRecipeId = intRecipeId
-				FROM dbo.tblMFRecipe
-				WHERE intItemId = @intItemId
-					AND intLocationId = @intLocationId
-					AND ysnActive = 1
-					AND intSubLocationId = @intSubLocationId
-			END
+			SELECT @intRecipeId = intRecipeId
+			FROM dbo.tblMFRecipe
+			WHERE intItemId = @intItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+				AND intSubLocationId = @intSubLocationId
 
 			IF @intRecipeId IS NULL
 			BEGIN
