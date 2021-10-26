@@ -170,7 +170,6 @@
     <Build Include="dbo\Stored Procedures\uspICAddTransactionLinkOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteAttachment.sql" />
     <Build Include="dbo\Functions\fnFAGetSumDepreciationCMAndYTD.sql" />
-    <Build Include="dbo\Functions\fnFAGetFixedAssetHistoryWithPurchase.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateWV_MFT508.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTONo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetTODetail.sql" />
