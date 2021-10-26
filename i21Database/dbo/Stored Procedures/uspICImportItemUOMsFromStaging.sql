@@ -186,7 +186,12 @@ LEFT JOIN @tblMissingItems missingItem
 	ON missingItem.strItemNo = x.strItemNo COLLATE Latin1_General_CI_AS
 WHERE 
 	x.ysnIsStockUnit = 1 AND 
-	CONVERT(DECIMAL(38,20), x.dblUnitQty) <> 1 AND 
+	(
+		CONVERT(DECIMAL(38,20), x.dblUnitQty) <> 1
+		OR
+		x.dblUnitQty IS NULL
+	)
+	AND
 	missingUOM.strItemNo IS NULL AND
 	missingItem.strItemNo IS NULL
 

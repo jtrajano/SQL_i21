@@ -701,8 +701,7 @@ BEGIN TRY
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
 			UPDATE tblICInventoryReceiptItem
-			SET ysnExported = 1
-				,dtmExportedDate = GETDATE()
+			SET ysnExported = 0
 			WHERE intInventoryReceiptId = @intInventoryReceiptId
 				AND intInventoryReceiptItemId IN (
 					SELECT intInventoryReceiptItemId

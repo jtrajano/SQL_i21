@@ -34,6 +34,7 @@ BEGIN TRY
 		,dblQtyReceived DECIMAL(18, 6)
 		,dblCost DECIMAL(18, 6)
 		,dblCostUnitQty DECIMAL(18, 6)
+		,intCostCurrencyId INT
 		,dblWeightUnitQty DECIMAL(18, 6)
 		,dblClaimAmount DECIMAL(18, 6)
 		,dblUnitQty DECIMAL(18, 6)
@@ -96,6 +97,7 @@ BEGIN TRY
 		  ,dblQtyReceived
 		  ,dblCost
 		  ,dblCostUnitQty
+		  ,intCostCurrencyId
 		  ,dblWeightUnitQty
 		  ,dblClaimAmount
 		  ,dblUnitQty
@@ -124,6 +126,7 @@ BEGIN TRY
 		,dblQtyReceived = (ABS(WCD.dblWeightLoss) - CASE WHEN WCD.dblWeightLoss > 0 THEN 0 ELSE WCD.dblFranchiseWt END)
 		,dblCost = WCD.dblUnitPrice
 		,dblCostUnitQty = ISNULL(IU.dblUnitQty,1)
+		,intCostCurrencyId = CU.intCurrencyID
 		,dblWeightUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
 		,dblClaimAmount
 		,dblUnitQty = ISNULL(ItemUOM.dblUnitQty,1)
@@ -172,6 +175,7 @@ BEGIN TRY
 		,dblQtyReceived = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.dblQuantity ELSE 1 END
 		,dblCost = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN WCOC.dblRate ELSE WCOC.dblAmount END
 		,dblCostUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(CostUOM.dblUnitQty,1) ELSE 1 END
+		,intCostCurrencyId = CU.intCurrencyID
 		,dblWeightUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(DamageWeightUOM.dblUnitQty,1) ELSE 1 END
 		,dblClaimAmount = WCOC.dblAmount
 		,dblUnitQty = CASE WHEN (WCOC.strCostMethod = 'Per Unit') THEN ISNULL(ItemUOM.dblUnitQty,1) ELSE 1 END
@@ -341,7 +345,7 @@ BEGIN TRY
 			,[dblFranchiseAmount] = VDD.dblFranchiseAmount
 			,[dblWeightUnitQty] = VDD.dblWeightUnitQty
 			,[intWeightUOMId] = VDD.intWeightUOMId
-			,[intCostCurrencyId] = VDD.intCurrencyId
+			,[intCostCurrencyId] = VDD.intCostCurrencyId
 			,[dblTax] = 0
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = 1

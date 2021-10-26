@@ -3268,7 +3268,7 @@ BEGIN TRY
 				, DER.intFutureMonthId
 				, strFutureMarket
 				, DER.intFutureMarketId
-				, dblPrice 
+				, dblPrice
 				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
 				, DER.intCurrencyId
@@ -3421,7 +3421,7 @@ BEGIN TRY
 								WHEN strPricingType = 'Priced' THEN dblCalculatedFutures
 								ELSE dblCalculatedFutures END)
 				, dblCash --Contract Cash
-				, dblCosts = ABS(dblCosts)
+				, dblCosts = ABS(dblCosts) 
 				--Market Basis
 				, dblMarketBasis = (CASE WHEN strPricingType ! = 'HTA' THEN
 										CASE WHEN @ysnCanadianCustomer = 1 
