@@ -48,6 +48,12 @@ DECLARE @intId AS INT
 		,@strBOLNumber AS NVARCHAR(100)
 		,@intTicketId AS INT 
 
+		,@intSourceEntityId INT 
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
+
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2

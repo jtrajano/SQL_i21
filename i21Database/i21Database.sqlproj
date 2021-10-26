@@ -1884,6 +1884,13 @@
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchDetail.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchHeader.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointRackPriceEquation.sql" />
+    <Build Include="dbo\Tables\tblApiUserAccount.sql" />
+    <Build Include="dbo\Tables\tblApiImportLog.sql" />
+    <Build Include="dbo\Tables\tblApiImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblApiMonthlyRequestUsage.sql" />
+    <Build Include="dbo\Tables\tblApiMonthlyRequestUsageStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiMonthlyRequestUsageStagingTransform.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSubscriptionMonthlyRequestUsage.sql" />
     <Build Include="dbo\Views\vyuTRRackItems.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
     <Build Include="dbo\Views\vyuTRTerminal.sql" />
@@ -3337,6 +3344,7 @@
     <Build Include="dbo\Functions\fnFAComputeMultipleDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAValidateAssetDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAGetOldestDepreciatedAsset.sql" />
+    <Build Include="dbo\Functions\fnFAComputeDepreciation.sql" />
     <Build Include="dbo\Views\vyuPATCancel.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
     <Build Include="dbo\Views\vyuCFSearchTransaction.sql" />
@@ -5141,6 +5149,8 @@
     <Build Include="dbo\Views\vyuARInvoicesForPayment.sql" />
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetThirdPartyPallet.sql" />
+    <Build Include="dbo\Views\vyuApiSubscriptionHealthStatus.sql" />
+    <Build Include="dbo\Views\vyuRestApiShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgementIDOC.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
@@ -9167,6 +9177,7 @@
     <Build Include="dbo\Views\vyuCCImportDealerCreditCardReconDetail.sql" />
     <Build Include="dbo\Views\vyuLGContainerSample.sql" />
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersDTN.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateDiscountGLEntriesTransfer_DPtoDP.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer_DPtoDP.sql" />
     <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
@@ -9311,6 +9322,7 @@
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
+    <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
@@ -9465,6 +9477,7 @@
     <Build Include="dbo\Tables\tblICImportLogFromStaging.sql" />
     <Build Include="dbo\Tables\tblICImportLogDetailFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateImportLog.sql" />
+    <Build Include="dbo\Views\vyuCTContractOptionView.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspAPProcessClaim.sql" />
