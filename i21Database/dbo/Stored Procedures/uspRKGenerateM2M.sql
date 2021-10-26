@@ -3421,7 +3421,7 @@ BEGIN TRY
 								WHEN strPricingType = 'Priced' THEN dblCalculatedFutures
 								ELSE dblCalculatedFutures END)
 				, dblCash --Contract Cash
-				, dblCosts = ABS(dblCosts)
+				, dblCosts = ABS(dblCosts) 
 				--Market Basis
 				, dblMarketBasis = (CASE WHEN strPricingType ! = 'HTA' THEN
 										CASE WHEN @ysnCanadianCustomer = 1 

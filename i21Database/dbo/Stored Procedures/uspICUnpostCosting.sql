@@ -350,11 +350,6 @@ BEGIN
 			,[strActualCostId]
 			,[intSourceEntityId]
 			,[intCompanyLocationId]
-			,[dtmDateCreated]
-			,[strSourceType]
-			,[strSourceNumber]
-			,[strBOLNumber]
-			,[intTicketId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -398,11 +393,6 @@ BEGIN
 			,[strActualCostId]						= ActualTransaction.strActualCostId
 			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 			,[intCompanyLocationId]					= ActualTransaction.intCompanyLocationId
-			,[dtmDateCreated]						= GETUTCDATE()
-			,[strSourceType]						= ActualTransaction.strSourceType
-			,[strSourceNumber]						= ActualTransaction.strSourceNumber
-			,[strBOLNumber]							= ActualTransaction.strBOLNumber
-			,[intTicketId]							= ActualTransaction.intTicketId
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId				
 	
@@ -433,10 +423,6 @@ BEGIN
 		,[intConcurrencyId] 
 		,[intCompanyId]
 		,[intSourceEntityId]
-		,[strSourceType]
-		,[strSourceNumber]
-		,[strBOLNumber]
-		,[intTicketId]
 	)
 	SELECT	[intItemId]					= ActualTransaction.intItemId
 			,[intLotId]					= ActualTransaction.intLotId
@@ -460,10 +446,6 @@ BEGIN
 			,[intConcurrencyId]			= 1
 			,[intCompanyId]				= ActualTransaction.intCompanyId
 			,[intSourceEntityId]		= ActualTransaction.intSourceEntityId
-			,[strSourceType]			= ActualTransaction.strSourceType
-			,[strSourceNumber]			= ActualTransaction.strSourceNumber
-			,[strBOLNumber]				= ActualTransaction.strBOLNumber
-			,[intTicketId]				= ActualTransaction.intTicketId
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 				AND ActualTransaction.intLotId IS NOT NULL 
@@ -1031,15 +1013,6 @@ BEGIN
 		WHERE intId = @intIdSummaryValuation
 	END 
 
-END 
-
------------------------------------------
--- Log the Daily Stock Quantity
------------------------------------------
-BEGIN 
-	EXEC uspICPostStockDailyQuantity 
-		@strBatchId = @strBatchId
-		,@strTransactionId = @strTransactionId
 END 
 
 -----------------------------------------
