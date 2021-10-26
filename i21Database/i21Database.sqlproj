@@ -1564,9 +1564,7 @@
     <Build Include="dbo\Stored Procedures\uspSTMassAddLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSTDuplicateModifier.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTGridCostAndPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPricePreview.sql" />
-    <Build Include="dbo\Stored Procedures\uspSTGridUpdateCostAndPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePromoSalesTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyCostItemPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyPriceItemPricing.sql" />
