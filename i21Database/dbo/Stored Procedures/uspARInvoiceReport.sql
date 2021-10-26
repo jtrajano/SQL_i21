@@ -96,7 +96,6 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblInvoiceSubtotal
 	 , dblShipping
 	 , dblTax
-	 , dblTaxExempt
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , strItemNo
@@ -216,7 +215,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblInvoiceSubtotal		= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
-	 , dblTaxExempt				= ISNULL(INVOICEDETAIL.dblTaxExempt, 0)
+
 	 , dblInvoiceTotal			= ((dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) * ISNULL(INV.dblInvoiceTotal, 0)) - ISNULL(INV.dblProvisionalAmount, 0) - CASE WHEN ISNULL(@strInvoiceReportName, 'Standard') <> 'Format 2 - Mcintosh' THEN 0 ELSE ISNULL(TOTALTAX.dblNonSSTTax, 0) END) - ISNULL(CREDITSTOTAL.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , strItemNo				= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strItemNo ELSE NULL END
@@ -224,7 +223,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , dblContractBalance		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.dblBalance ELSE NULL END
 	 , strContractNumber		= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber ELSE NULL END
 	 , strContractNoSeq			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN INVOICEDETAIL.strContractNumber + ' - ' + CAST(INVOICEDETAIL.intContractSeq AS NVARCHAR(100)) ELSE NULL END
-	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN INVOICEDETAIL.strItemDescription ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
+	 , strItem					= CASE WHEN ISNULL(INVOICEDETAIL.strItemNo, '') = '' THEN ISNULL(INVOICEDETAIL.strItemDescription, INVOICEDETAIL.strSCInvoiceNumber) ELSE LTRIM(RTRIM(INVOICEDETAIL.strItemNo)) + '-' + ISNULL(INVOICEDETAIL.strItemDescription, '') END
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
 	 , dblQtyShipped			= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN ISNULL(INVOICEDETAIL.dblQtyShipped, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END
@@ -332,7 +331,7 @@ LEFT JOIN (
 		 , dblComputedGrossPrice	= ID.dblComputedGrossPrice	
 		 , dblPrice                 = CASE WHEN ISNULL(PRICING.strPricing, '') = 'MANUAL OVERRIDE' THEN ID.dblPrice ELSE ISNULL(NULLIF(ID.dblComputedGrossPrice, 0), ID.dblPrice) END
 		 , dblTotal					= ID.dblTotal
-		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber		 
+		 , strVFDDocumentNumber		= ID.strVFDDocumentNumber
 		 , strUnitMeasure			= UOM.strUnitMeasure
 		 , intContractSeq			= CONTRACTS.intContractSeq
 		 , dblBalance				= CONTRACTS.dblBalance
@@ -341,7 +340,7 @@ LEFT JOIN (
 		 , strItemNo				= ITEM.strItemNo
 		 , strInvoiceComments		= ITEM.strInvoiceComments
 		 , strItemType				= ITEM.strType
-		 , strItemDescription    	= ISNULL(ISNULL(NULLIF(ID.strItemDescription, '') ,ITEM.strDescription), ID.strSCInvoiceNumber)
+		 , strItemDescription		= CASE WHEN ISNULL(ID.strItemDescription, '') <> '' THEN ID.strItemDescription ELSE ITEM.strDescription END
 		 , strBOLNumber				= SO.strBOLNumber
 		 , ysnListBundleSeparately	= ITEM.ysnListBundleSeparately
 		 , intRecipeId				= RECIPE.intRecipeId
@@ -364,7 +363,6 @@ LEFT JOIN (
 		 , strBOLNumberDetail		= ID.strBOLNumberDetail
 		 , strLotNumber				= LOT.strLotNumbers
 		 , strSubFormula			= ID.strSubFormula
-		 , dblTaxExempt				= TER.dblTaxExempt
 		 , strSCInvoiceNumber		= INVSC.strInvoiceNumber
 		 , dtmDateSC				= INVSC.dtmDate
 		 , dtmToCalculate			= CASE WHEN ISNULL(INVSC.ysnForgiven, 0) = 0 AND ISNULL(INVSC.ysnCalculated, 0) = 1 THEN INVSC.dtmDueDate ELSE INVSC.dtmCalculated END
@@ -520,7 +518,6 @@ LEFT JOIN (
 		 , strBOLNumberDetail		= NULL
 		 , strLotNumber				= NULL
 		 , strSubFormula			= NULL
-		 , dblTaxExempt				= NULL
 		 , strSCInvoiceNumber		= NULL
 		 , dtmDateSC				= NULL
 		 , dtmToCalculate			= NULL

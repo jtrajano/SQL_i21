@@ -49,25 +49,12 @@ BEGIN
 END 
 GO
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryDailyTransaction)	OR NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryStockAsOfDate)
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryDailyTransaction)
 BEGIN
 	EXEC uspICPostStockDailyQuantity
 		@ysnRebuild = 1
 END 
 GO 
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryStorageAsOfDate)
-BEGIN
-	EXEC uspICPostStorageDailyQuantity
-		@ysnRebuild = 1
-END 
-GO 
-
 PRINT N'END - IC Improve Inventory Valuation Performance'
 GO
-
-PRINT N'START- IC Improve Inventory Valuation Performance 2'
-GO
-	EXEC uspICRebuildInventoryTransaction
-GO
-PRINT N'END - IC Improve Inventory Valuation Performance 2'

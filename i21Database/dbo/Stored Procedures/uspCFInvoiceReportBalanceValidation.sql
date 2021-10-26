@@ -5,30 +5,11 @@
 AS
 BEGIN
 
-	SET NOCOUNT ON;
-
-	DECLARE @tblExcludeCustomers TABLE 
-	(
-		intEntityCustomerId INT
-	)
-
-	INSERT INTO @tblExcludeCustomers
-	(
-		intEntityCustomerId
-	)
-	SELECT 
-	DISTINCT tblCFInvoiceStagingTable.intCustomerId
-	FROM tblCFInvoiceStagingTable 
-	INNER JOIN tblCFTransaction ON tblCFTransaction.intTransactionId = tblCFInvoiceStagingTable.intTransactionId
-	INNER JOIN tblCFNetwork ON tblCFNetwork.intNetworkId = tblCFTransaction.intNetworkId
-	WHERE LOWER(tblCFTransaction.strTransactionType) = 'foreign sale'
-	AND ISNULL(tblCFNetwork.ysnPostForeignSales,0) = 0
-	AND LOWER(tblCFInvoiceStagingTable.strUserId) = LOWER(@UserId)
-
 	DECLARE @intUserId INT
 	SELECT TOP 1 @intUserId = intEntityId FROM tblSMUserSecurity WHERE strUserName = @UserId
 
 	
+	SET NOCOUNT ON;
 	
 	DECLARE @tblMainQuery TABLE 
 	(
@@ -77,9 +58,6 @@ BEGIN
 	)
 	EXEC (@sqlString)
 
-
-	DELETE FROM @tblMainQuery WHERE intEntityCustomerId IN (SELECT intEntityCustomerId FROM @tblExcludeCustomers)
-
 	
 	INSERT INTO tblCFInvoiceReportTotalValidation
 	(
@@ -120,3 +98,4 @@ BEGIN
 
 
 END
+GO
