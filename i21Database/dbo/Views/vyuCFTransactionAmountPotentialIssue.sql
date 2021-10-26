@@ -24,3 +24,4 @@ SELECT * FROM
 ) as tblCFTransaction
 WHERE dblTotalPrice != dblInvoicePrice
 
+go
