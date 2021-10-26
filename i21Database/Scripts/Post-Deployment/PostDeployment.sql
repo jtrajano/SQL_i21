@@ -82,6 +82,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\40_DisconnectedReplicationTable.sql 
 :r .\SM\DefaultData\41_TaxReportType.sql 
 :r .\SM\DefaultData\42_InterCompanyMasterScreen.sql
+:r .\SM\DefaultData\43_IDPFieldMapping.sql
 :r .\SM\1810_Reset_Hours_TaxCodeRate.sql
 :r .\SM\1830_Arrange_Portal_Menus.sql
 :r .\SM\1830_DeleteDuplicatetblSMScreenData.sql
@@ -206,6 +207,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
 :r .\DB\7_Create_BusinessInsights.sql
+
+-- Fixed Assets
+:r .\FA\DefaultData\FixedAssetGroup.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql

@@ -354,7 +354,7 @@ BEGIN TRY
 		,dblForexRate									= @dblForexRate
 		,strCompanyName									= (case when @ysnIsParent = convert(bit,0) then LTRIM(RTRIM(EY.strEntityName)) else @strCompanyName end)
 		,intEntityId									= CH.intEntityId
-		,strCustomerName								= (case when @ysnIsParent = convert(bit,0) then @strCompanyName else LTRIM(RTRIM(EY.strEntityName)) end)
+		,strCustomerName								= (case when @ysnIsParent = convert(bit,0) then @strCompanyName else LTRIM(RTRIM(EL.strCheckPayeeName)) end)
 		,strCustomerNumber								= PN.strPhone
 		,strCustomerEmail								= PC.strEmail
 		,blbHeaderLogo									= dbo.fnSMGetCompanyLogo('Header')
@@ -404,6 +404,8 @@ BEGIN TRY
 			AND EY.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 		LEFT JOIN tblEMEntity ET
 			WITH (NOLOCK) ON ET.intEntityId = EY.intEntityId
+		LEFT JOIN tblEMEntityLocation EL
+			WITH (NOLOCK) ON EL.intEntityId	=CH.intEntityId
 		LEFT JOIN tblEMEntity ETS
 			WITH (NOLOCK) ON ETS.intEntityId = CH.intSalespersonId
 		INNER JOIN dbo.[tblEMEntityToContact] ETC

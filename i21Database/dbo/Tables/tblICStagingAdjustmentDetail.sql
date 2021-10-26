@@ -8,7 +8,9 @@ CREATE TABLE tblICStagingAdjustmentDetail (
 	, strStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, intOwnershipType INT NULL
 	, strLotNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	, strUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+	, strUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, intUomId INT NULL
+	, intItemUOMId INT NULL
 	-- Quantity Change
 	, dblAdjustQtyBy NUMERIC(38, 20) NULL
 	, dblNewQuantity NUMERIC(38, 20) NULL
@@ -16,11 +18,13 @@ CREATE TABLE tblICStagingAdjustmentDetail (
 	, dblNewUnitCost NUMERIC(38, 20) NULL
 	-- Uom Change
 	, strNewUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, intNewItemUOMId INT NULL
 	-- Item Change
 	, strNewItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	-- Split Lot, Lot Merge, Lot Move
 	, dblNewLotQty NUMERIC(38, 20) NULL
 	, strNewWeightUom NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, intNewWeightUomId INT NULL
 	, strNewLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, strNewStorageLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, strNewStorageUnit NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL

@@ -113,10 +113,18 @@ BEGIN
 END
 GO
 
+PRINT('/*******************  START Deleting DPR Header data *******************/')
+GO
 IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKDPRHeader')
 BEGIN
+	TRUNCATE TABLE tblRKDPRInventory
+	TRUNCATE TABLE tblRKDPRContractHedge
+	TRUNCATE TABLE tblRKDPRContractHedgeByMonth
+	TRUNCATE TABLE tblRKDPRYearToDate
 	DELETE FROM tblRKDPRHeader
 END
+GO
+PRINT('/*******************  END Deleting DPR Header data *******************/')
 GO
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKLogAction')
@@ -197,6 +205,7 @@ BEGIN
 		UNION ALL SELECT 65, 'Deleted Credit Memo', 'Deleted Credit Memo.'
 		UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
 		UNION ALL SELECT 67, 'Price Updated', 'Price Updated.'
+		UNION ALL SELECT 68, 'Delete Match Derivatives', 'Delete Match Derivatives.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 

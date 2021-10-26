@@ -102,34 +102,111 @@ BEGIN
 		GROUP BY  intAccountId, intSiteDetailId, strItem 
 
 		-- 1099K Adjustment
-		INSERT INTO @Voucher1099K (intTransactionType
-			, dtmDate
-			, dtmVoucherDate
-			, intEntityVendorId
-			, intShipToId
-			, strVendorOrderNumber
-			, intAccountId
-			, intLocationId
-			, intCCSiteDetailId
-			, strMiscDescription
-			, dblCost
-			, dblQuantityToBill
-			, ysnStage)
-		SELECT 9
-			, dtmDate
-			, dtmVoucherDate
-			, intEntityVendorId
-			, intShipToId
-			, strVendorOrderNumber
-			, intAccountId
-			, intLocationId
-			, intCCSiteDetailId
-			, strMiscDescription
-			, dblCost
-			, dblQuantityToBill
-			, 0 
-		FROM @Voucher WHERE strMiscDescription IN ('Dealer Site Gross', 'Dealer Site Net')
+		DECLARE @strInvalidCustomer NVARCHAR(2000) = NULL
+		DECLARE @strNo1099Setup NVARCHAR(2000) = NULL
 
+		DECLARE @dtmDate1099K DATETIME = NULL, @dtmVoucherDate1099K DATETIME = NULL, @intCustomerId1099K INT = NULL, @intShipToId1099K INT = NULL
+		, @strVendorOrderNumber1099K NVARCHAR(100) = NULL, @intAccountId INT = NULL, @intLocationId1099K INT = NULL
+		, @intCCSiteDetailId1099K INT = NULL, @strMiscDescription1099K NVARCHAR(500) = NULL, @dblCost1099K NUMERIC(18,6) = NULL
+		, @dblQuantityToBill1099K NUMERIC(18,6) = NULL, @Vendor1099K INT = NULL
+		, @strCustomerName NVARCHAR(200) = NULL, @str1099Form NVARCHAR(100) = NULL
+
+		DECLARE @Cursor1099KTran AS CURSOR
+		SET @Cursor1099KTran = CURSOR FOR 
+		SELECT V.dtmDate
+			, V.dtmVoucherDate
+			, S.intCustomerId	
+			, V.intShipToId
+			, V.strVendorOrderNumber
+			, V.intAccountId
+			, V.intLocationId
+			, V.intCCSiteDetailId
+			, V.strMiscDescription
+			, V.dblCost
+			, V.dblQuantityToBill
+			, ET.[Vendor]
+			, ET.strEntityName
+			, E.str1099Form
+		FROM @Voucher V INNER JOIN tblCCSiteDetail SD ON SD.intSiteDetailId = V.intCCSiteDetailId
+		INNER JOIN tblCCSite S ON S.intSiteId = SD.intSiteId
+		LEFT JOIN vyuEMEntityBasicWithType ET ON ET.intEntityId = S.intCustomerId
+		LEFT JOIN tblEMEntity E ON E.intEntityId = S.intCustomerId
+		WHERE strMiscDescription IN ('Dealer Site Gross', 'Dealer Site Net')
+		OPEN @Cursor1099KTran
+		FETCH NEXT FROM @Cursor1099KTran INTO @dtmDate1099K, @dtmVoucherDate1099K, @intCustomerId1099K, @intShipToId1099K, @strVendorOrderNumber1099K, @intAccountId, @intLocationId1099K
+			,@intCCSiteDetailId1099K, @strMiscDescription1099K, @dblCost1099K, @dblQuantityToBill1099K, @Vendor1099K, @strCustomerName, @str1099Form
+		WHILE @@FETCH_STATUS = 0
+		BEGIN	
+			-- VALIDATE THE CUSTOMER
+			IF(@Vendor1099K != 1) 
+			BEGIN
+				IF(ISNULL(@strInvalidCustomer,'') = '')
+				BEGIN
+					SET @strInvalidCustomer = @strCustomerName
+				END
+				ELSE
+				BEGIN
+					SET @strInvalidCustomer = @strInvalidCustomer + ', ' + @strCustomerName 
+				END
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @Voucher1099K (intTransactionType
+					, dtmDate
+					, dtmVoucherDate
+					, intEntityVendorId
+					, intShipToId
+					, strVendorOrderNumber
+					, intAccountId
+					, intLocationId
+					, intCCSiteDetailId
+					, strMiscDescription
+					, dblCost
+					, dblQuantityToBill
+					, ysnStage)
+				VALUES(
+					9
+					, @dtmDate1099K
+					, @dtmVoucherDate1099K
+					, @intCustomerId1099K
+					, @intShipToId1099K
+					, @strVendorOrderNumber1099K
+					, @intAccountId
+					, @intLocationId1099K
+					, @intCCSiteDetailId1099K
+					, @strMiscDescription1099K
+					, @dblCost1099K
+					, @dblQuantityToBill1099K
+					, 0
+				)
+			END
+
+			IF(ISNULL(@str1099Form,'') = '')
+			BEGIN
+				SET @strNo1099Setup = @strCustomerName 
+			END
+			ELSE
+			BEGIN
+				SET @strNo1099Setup = @strNo1099Setup + ', ' + @strCustomerName 
+			END
+					
+			FETCH NEXT FROM @Cursor1099KTran INTO @dtmDate1099K, @dtmVoucherDate1099K, @intCustomerId1099K, @intShipToId1099K, @strVendorOrderNumber1099K, @intAccountId, @intLocationId1099K
+			,@intCCSiteDetailId1099K, @strMiscDescription1099K, @dblCost1099K, @dblQuantityToBill1099K, @Vendor1099K, @strCustomerName, @str1099Form
+		END
+		CLOSE @Cursor1099KTran
+		DEALLOCATE @Cursor1099KTran
+
+		IF(ISNULL(@strInvalidCustomer, '') != '')
+		BEGIN
+			DECLARE @strMessage1099 NVARCHAR(4000) = 'Dealer Site ' + @strInvalidCustomer + ' must be setup as a Vendor in order for i21 to create the 1099 Adjustment entry.'
+			RAISERROR(@strMessage1099, 16, 1)
+		END
+
+		IF(ISNULL(@strNo1099Setup, '') != '')
+		BEGIN
+			SET  @strNo1099Setup =  'Vendor ' + @strNo1099Setup + ' is missing its 1099 Form setup.'
+		END
+	
 		IF EXISTS(SELECT TOP 1 1 FROM @Voucher)
 		BEGIN
 			EXEC [dbo].[uspAPCreateVoucher] 
@@ -155,6 +232,15 @@ BEGIN
 				,@error = @errorMessage OUTPUT
 				,@createdVouchersId = @created1099KVouchersId OUTPUT
 			END
+			
+			IF(ISNULL(@errorMessage, '') = '')
+			BEGIN
+				SET @errorMessage = @strNo1099Setup	
+			END
+			ELSE
+			BEGIN
+				SET @errorMessage = @errorMessage + ' ' + @strNo1099Setup	
+			END		
 		END
 		ELSE
 		BEGIN
@@ -246,7 +332,7 @@ BEGIN
 			--		,@success = @success OUTPUT
 			--END
 
-		END
+	END
 	ELSE IF (@post = 0)
 	BEGIN
 			

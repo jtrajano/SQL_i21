@@ -21,6 +21,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	[dblDispositionAmount]		NUMERIC (18, 6) NULL DEFAULT ((0)),
 	[strPoolId]					NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intAccuitent]				INT NULL,
+	[intAssetGroupId]			INT NULL,
 	[intAssetAccountId]			INT NULL,
 	[intExpenseAccountId]		INT NULL,
 	[intDepreciationAccountId]	INT NULL,
@@ -43,6 +44,7 @@ CREATE TABLE [dbo].[tblFAFixedAsset] (
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount2] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount3] FOREIGN KEY ([intDepreciationAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblFRBudget_tblGLAccount4] FOREIGN KEY ([intAccumulatedAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-	CONSTRAINT [FK_tblFAFixedAsset_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId]) REFERENCES [dbo].[tblFADepreciationMethod] ([intDepreciationMethodId])
+	CONSTRAINT [FK_tblFAFixedAsset_tblFADepreciationMethod] FOREIGN KEY([intDepreciationMethodId]) REFERENCES [dbo].[tblFADepreciationMethod] ([intDepreciationMethodId]),
+	CONSTRAINT [FK_tblFAFixedAsset_tblFAFixedAssetGroup] FOREIGN KEY([intAssetGroupId]) REFERENCES [dbo].[tblFAFixedAssetGroup] ([intAssetGroupId])
 );
 

@@ -39,7 +39,11 @@ DECLARE @tblAssetInfo TABLE (
 	intDaysRemainingFirstMonth INT,
 	dblDepre 	DECIMAL (18,6),
 	ysnFullyDepreciated BIT NULL,
-	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+	strTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	strAssetTransaction NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
+	dblQuarterly NUMERIC (18,6),
+	dblMidQuarter NUMERIC (18,6),
+	dblMidYear NUMERIC (18,6)
 
 ) 
 
@@ -52,6 +56,7 @@ INSERT INTO  @tblAssetInfo(
 	dblYear,
 	dblImportGAAPDepToDate,
 	dtmImportedDepThru,
+	strAssetTransaction,
 	strError
 )
 SELECT 
@@ -63,12 +68,13 @@ BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
 CASE WHEN @BookId = 1 THEN  A.dblImportGAAPDepToDate ELSE A.dblImportTaxDepToDate END,
 DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmImportedDepThru)) + 1, 0)),
+Depreciation.strTransaction,
 NULL
 FROM tblFAFixedAsset A join tblFABookDepreciation BD on A.intAssetId = BD.intAssetId 
 JOIN tblFADepreciationMethod DM ON BD.intDepreciationMethodId= DM.intDepreciationMethodId AND BD.intBookId =@BookId
 JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
-	SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
+	SELECT TOP 1 dblDepreciationToDate, strTransaction FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
 	AND ISNULL(intBookId,1) = @BookId
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
@@ -114,6 +120,40 @@ OUTER APPLY(
 )E
 WHERE strError IS NULL
 
+-- Set Quarterly and Mid Quarter Depreciation take for Mid Quarter Convention
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Quarter' AND strError IS NULL)
+BEGIN
+	UPDATE @tblAssetInfo
+	SET dblQuarterly = dblAnnualDep / 4, dblMidQuarter = (dblAnnualDep/4)/2
+	WHERE strError IS NULL
+END
+
+-- Mid Year Depreciation Take for Mid Year Convention
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Year' AND strError IS NULL)
+BEGIN
+	UPDATE @tblAssetInfo
+	SET dblMidYear = dblAnnualDep / 2
+	WHERE strError IS NULL
+END
+
+-- Add Section 179 and Bonus Depreciation to Tax if any on the 1st month of depreciation
+IF (@BookId = 2)
+BEGIN
+		UPDATE A
+		SET A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
+		FROM  @tblAssetInfo A
+		JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
+		JOIN @Id I ON I.intId = A.intAssetId
+		WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+
+	-- If sum of Section179 and BonusDepreciation (current dblDepre) is greater than or equal to the basis, skip monthly depreciation
+	IF EXISTS(SELECT TOP 1 1 FROM  @tblAssetInfo A JOIN @Id I ON I.intId = A.intAssetId 
+				JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId 
+				WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1 AND dblBasis <= dblDepre)
+		BEGIN
+			GOTO Skip_Tax_Monthly_Depreciation
+		END
+END
 
 UPDATE T SET 
 dblPercentage = F.dblPercentage,
@@ -154,15 +194,57 @@ END
 FROM @tblAssetInfo T
 WHERE strError IS NULL AND intMonth = 1 --First Depreciation
 
+-- Mid Quarter Convention -> Compute Mid Quarter depreciation take on the Quarter that the PlacedInService falls into.
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Quarter' AND strError IS NULL)
+BEGIN
+	DECLARE 
+		@intRemainingMonthsInQuarter INT
+
+	SELECT @intRemainingMonthsInQuarter = [dbo].[fnFACountRemainingMonthsInQuarter](dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
+	FROM @tblAssetInfo WHERE strError IS NULL
+
+	UPDATE T SET dblMonth = dblMidQuarter / @intRemainingMonthsInQuarter
+	FROM @tblAssetInfo T
+	WHERE strError IS NULL AND intMonth BETWEEN 1 AND @intRemainingMonthsInQuarter -- From the month of PlacedInService up to the last month of the quarter of the PlacedInService date
+END
+
+-- Mid Year Convention -> Compute Mid Year depreciation take on the year that PlacedInService falls into.
+IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE strConvention = 'Mid Year' AND strError IS NULL)
+BEGIN
+	DECLARE 
+		@intRemainingMonthsInYear INT
+
+	SELECT @intRemainingMonthsInYear = [dbo].[fnFACountRemainingMonthsInYear](dtmPlacedInService, CASE WHEN @BookId = 1 THEN 1 ELSE 0 END)
+	FROM @tblAssetInfo WHERE strError IS NULL
+	UPDATE @tblAssetInfo
+	SET dblMonth = dblMidYear/ @intRemainingMonthsInYear 
+	WHERE strError IS NULL AND intMonth BETWEEN 1 AND @intRemainingMonthsInYear --from month of PlacedInService up to the last month of year of the PlacedInService date
+END
+
 UPDATE T SET dblDepre = dblMonth  + ISNULL(dblYear, 0)
 FROM @tblAssetInfo T
 WHERE strError IS NULL 
+
+
+IF (@BookId = 2)
+BEGIN
+	UPDATE A
+	SET A.dblDepre = ISNULL(A.dblDepre, 0) + ISNULL(BD.dblSection179, 0) + ISNULL(BD.dblBonusDepreciation, 0)
+	FROM  @tblAssetInfo A
+	JOIN tblFABookDepreciation BD ON A.intAssetId = BD.intAssetId
+	JOIN @Id I ON I.intId = A.intAssetId
+	WHERE A.intAssetId = I.intId AND BD.intBookId = 2 AND A.intMonth = 1
+
+	IF EXISTS(SELECT TOP 1 1 FROM @tblAssetInfo WHERE dblBasis < dblDepre)
+		GOTO Basis_Limit_Reached
+END
 
 UPDATE B set ysnFullyDepreciated = 1 FROM @tblAssetInfo B JOIN
 tblFABookDepreciation BD ON BD.intAssetId = B.intAssetId and BD.intBookId = @BookId
 WHERE dblDepre >= (BD.dblCost - BD.dblSalvageValue)
 AND strError IS NULL 
 
+Basis_Limit_Reached:
 
 UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
 dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
@@ -235,7 +317,7 @@ OUTER APPLY(
 )Import
 WHERE dblImportGAAPDepToDate is not null and isnull(dtmImportedDepThru,0) > 0
 
-
+Skip_Tax_Monthly_Depreciation:
 
 UPDATE B set dblDepre = BD.dblCost - BD.dblSalvageValue ,
 dblMonth = (BD.dblCost - BD.dblSalvageValue) - U.dblDepreciationToDate
@@ -249,7 +331,7 @@ OUTER APPLY(
 ) U
 WHERE dblDepre < (BD.dblCost - BD.dblSalvageValue)
 AND intMonth > totalMonths
-AND strConvention <> 'Full Month'
+AND strConvention NOT IN ('Full Month', 'Mid Quarter', 'Mid Year')
 AND ISNULL(BD.ysnFullyDepreciated,0) = 0
 
 --ROUND OFF TO NEAREAST HUNDREDTHS
@@ -269,9 +351,9 @@ INSERT INTO @tbl(
 	)
 	SELECT 
 	intAssetId,
-	dblBasis, 
-	dblMonth, 
-	dblDepre, 
+	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblBasis END,
+	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblMonth END,
+	CASE WHEN strAssetTransaction IS NULL THEN 0 ELSE dblDepre END,
 	ysnFullyDepreciated ,
 	strError,
 	strTransaction

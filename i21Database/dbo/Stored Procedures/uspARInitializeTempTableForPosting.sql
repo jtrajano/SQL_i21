@@ -372,18 +372,6 @@ CREATE TABLE ##ARInvalidInvoiceData (
 	, [strPostingError]			NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
 )
 
-IF(OBJECT_ID('tempdb..##ARInvalidInventories') IS NOT NULL)
-BEGIN
-    DROP TABLE ##ARInvalidInventories
-END
-CREATE TABLE ##ARInvalidInventories (
-      [strMessage]			    NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL
-    , [strTransactionType]	    NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
-    , [strTransactionId]		NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
-    , [strBatchNumber]		    NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
-    , [intTransactionId]		INT              NULL
-)
-
 IF(OBJECT_ID('tempdb..##ARItemsForCosting') IS NOT NULL)
 BEGIN
     DROP TABLE ##ARItemsForCosting
@@ -421,6 +409,7 @@ CREATE TABLE ##ARItemsForCosting (
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL
 	, [strType]                         NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [ysnAutoBlend]                    BIT NULL
+    , [ysnGLOnly]						BIT NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForInTransitCosting') IS NOT NULL)

@@ -1052,8 +1052,9 @@ BEGIN TRY
 			UPDATE PS
 			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
 								SELECT TOP 1 CM.intFutureMarketId
-								FROM tblICCommodityAttribute CA
-								JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+								FROM tblRKCommodityMarketMapping CM 
+								CROSS APPLY  [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
+								JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
 									AND CA.strType = 'ProductType'
 								WHERE CA.intCommodityAttributeId = I.intProductTypeId
 								), C.intFutureMarketId), (
@@ -1063,17 +1064,19 @@ BEGIN TRY
 								AND dtmSpotDate <= @dtmCurrentDateTime
 								AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
 										SELECT TOP 1 CM.intFutureMarketId
-										FROM tblICCommodityAttribute CA
-										JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
-											AND CA.strType = 'ProductType'
+										FROM tblRKCommodityMarketMapping CM 
+										CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
+										JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
+										AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
 							ORDER BY intFutureMonthId DESC
 							), @dtmCurrentDateTime), 0)
 				,intMarketRatePerUnitId = IsNULL((
 						SELECT TOP 1 FM.intUnitMeasureId
-						FROM tblICCommodityAttribute CA
-						JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+						FROM tblRKCommodityMarketMapping CM 
+						CROSS APPLY  [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
+						JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
 							AND CA.strType = 'ProductType'
 						JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CM.intFutureMarketId
 						WHERE CA.intCommodityAttributeId = I.intProductTypeId
@@ -1086,8 +1089,9 @@ BEGIN TRY
 			UPDATE PS
 			SET dblMarketRate = IsNULL(dbo.fnRKGetLatestClosingPrice(IsNULL((
 								SELECT TOP 1 CM.intFutureMarketId
-								FROM tblICCommodityAttribute CA
-								JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
+								FROM tblRKCommodityMarketMapping CM 
+								CROSS APPLY  [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2
+								JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
 									AND CA.strType = 'ProductType'
 								WHERE CA.intCommodityAttributeId = I.intProductTypeId
 								), C.intFutureMarketId), (
@@ -1097,9 +1101,10 @@ BEGIN TRY
 								AND dtmSpotDate <= @dtmCurrentDateTime
 								AND intFutureMarketId = IsNULL(C.intFutureMarketId, (
 										SELECT TOP 1 CM.intFutureMarketId
-										FROM tblICCommodityAttribute CA
-										JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
-											AND CA.strType = 'ProductType'
+										FROM tblRKCommodityMarketMapping CM 
+										CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2 
+										JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
+										AND CA.strType = 'ProductType'
 										WHERE CA.intCommodityAttributeId = I.intProductTypeId
 										))
 							ORDER BY intFutureMonthId DESC
@@ -1108,9 +1113,10 @@ BEGIN TRY
 				,dblCoEfficient = 0
 				,intMarketRatePerUnitId = IsNULL((
 						SELECT TOP 1 FM.intUnitMeasureId
-						FROM tblICCommodityAttribute CA
-						JOIN tblRKCommodityMarketMapping CM ON CM.strCommodityAttributeId = CA.intCommodityAttributeId
-							AND CA.strType = 'ProductType'
+						FROM tblRKCommodityMarketMapping CM 
+						CROSS APPLY [dbo].[fnSplitString](CM.strCommodityAttributeId, ',') CA2 
+						JOIN tblICCommodityAttribute CA ON CA2.Item Collate Latin1_General_CI_AS = CA.intCommodityAttributeId
+						AND CA.strType = 'ProductType'
 						JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CM.intFutureMarketId
 						WHERE CA.intCommodityAttributeId = I.intProductTypeId
 						), FM1.intUnitMeasureId)

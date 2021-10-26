@@ -91,7 +91,7 @@ BEGIN
 				,@strDeferredInvoiceNo10 = strDeferredInvoiceNo10
 				,@dtmDueDate = dtmDueDate
 				,@strInvoiceNo = strInvoiceNo
-			FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
+			FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId AND DD.intImportDtnDetailId = @intImportDtnDetailId
 						
 			SELECT @intTermId = intTermsId, @dblAmountDue = dblAmountDue FROM tblAPBill B WHERE B.intBillId = @intBillId
 

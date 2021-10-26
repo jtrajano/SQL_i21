@@ -85,6 +85,7 @@ Type the overview for the table here.
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL,
 		[intDataSourceId] TINYINT NULL,
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [FK_tblICItemLocation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICItemLocation_tblICUnitMeasure_Issue] FOREIGN KEY ([intIssueUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
