@@ -641,7 +641,7 @@ BEGIN TRY
 				WHERE dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) <= @dtmEndDate
 				AND CBL.intCommodityId = ISNULL(@intCommodityId, CBL.intCommodityId)
 				AND CBL.strTransactionType = 'Contract Balance'
-				AND CBL.dblBasis IS NOT NULL
+				AND (CBL.dblBasis IS NOT NULL OR CBL.intPricingTypeId = 3)
 			) t
 			WHERE intRowNum = 1
 		)
