@@ -177,7 +177,7 @@ BEGIN
 		, strLogLevel = 'Error'
 		, strStatus = 'Failed'
 		, intRowNo = CF.intRowNumber
-		, strMessage = 'Data is already exist in i21 Customer Tariffs'	
+		, strMessage = 'Data is already existing in i21 Customer Freight'	
 	FROM tblApiSchemaTRCustomerFreight CF
 	INNER JOIN tblEMEntity E ON E.strEntityNo = CF.strCustomerEntityNo
 	INNER JOIN tblARCustomer C ON C.intEntityId = E.intEntityId AND C.ysnActive = 1
