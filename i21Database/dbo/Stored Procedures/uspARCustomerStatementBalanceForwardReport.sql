@@ -409,6 +409,7 @@ SELECT intInvoiceId			= NULL
 	 , strType				= NULL
 	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
 	 , strTicketNumbers		= NULL
+	 , ysnServiceChargeCredit = NULL
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
@@ -450,6 +451,7 @@ SELECT intInvoiceId			= NULL
 	 , strType				= NULL
 	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
 	 , strTicketNumbers		= NULL
+	 , ysnServiceChargeCredit = NULL
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT intPaymentId
@@ -493,6 +495,7 @@ SELECT intInvoiceId			= NULL
 	 , strType				= NULL
 	 , strComment			= ISNULL(P.strPaymentInfo, '''') + CASE WHEN ISNULL(P.strNotes, '''') <> '''' THEN '' - '' + P.strNotes ELSE '''' END
 	 , strTicketNumbers		= NULL
+	 , ysnServiceChargeCredit = NULL
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN (
 	SELECT PD.intPaymentId
@@ -548,7 +551,7 @@ SET @query = CAST('' AS NVARCHAR(MAX)) + 'SELECT * FROM
 	  , dblInvoiceTotal		= TRANSACTIONS.dblInvoiceTotal
 	  , intPaymentId		= TRANSACTIONS.intPaymentId
 	  , strRecordNumber		= TRANSACTIONS.strRecordNumber
-	  , strTransactionType  = TRANSACTIONS.strTransactionType
+	  , strTransactionType  = CASE WHEN ISNULL(TRANSACTIONS.ysnServiceChargeCredit, 0) = 1 THEN ''Forgiven Service Charge'' ELSE TRANSACTIONS.strTransactionType END
 	  , strPaymentInfo	    = TRANSACTIONS.strPaymentInfo
 	  , dtmDatePaid			= ISNULL(TRANSACTIONS.dtmDatePaid, ''01/02/1900'')
 	  , dblPayment			= ISNULL(TRANSACTIONS.dblPayment, 0)
@@ -590,6 +593,7 @@ FROM vyuARCustomerSearch C
 			 , strType				= I.strType
 			 , strComment			= dbo.fnEliminateHTMLTags(I.strComments, 0)
 			 , strTicketNumbers		= SCALETICKETS.strTicketNumbers
+			 , ysnServiceChargeCredit = I.ysnServiceChargeCredit
 		FROM dbo.tblARInvoice I WITH (NOLOCK)
 		OUTER APPLY (
 			SELECT strTicketNumbers = LEFT(strTicketNumber, LEN(strTicketNumber) - 1)
