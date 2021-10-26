@@ -91,7 +91,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,strAwardPeriod
 					,dblMaxCarryover
 					,dblMaxEarned
-					,dblMaxBalance
+					--,dblMaxBalance
 					,dtmLastAward
 					,dblHoursAccrued
 					,dblHoursEarned
@@ -112,7 +112,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,@strAwardOn
 					,@dblMaxCarryOver
 					,@dblMaxEarned
-					,@dblMaxBalance
+					--,@dblMaxBalance
 					,CONVERT(DATE, @dtmLastAwardDate)
 					,@dblHoursAccrued
 					,@dblHoursEarned
@@ -138,7 +138,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 					,strAwardPeriod = @strAwardOn
 					,dblMaxCarryover = @dblMaxCarryOver
 					,dblMaxEarned = @dblMaxEarned
-					,dblMaxBalance = @dblMaxBalance
+					--,dblMaxBalance = @dblMaxBalance
 					,dtmLastAward = CONVERT(DATE, @dtmLastAwardDate) 
 					,dblHoursAccrued = @dblHoursAccrued
 					,dblHoursEarned = @dblHoursEarned
