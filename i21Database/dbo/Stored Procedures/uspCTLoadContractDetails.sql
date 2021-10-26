@@ -528,19 +528,20 @@ BEGIN TRY
 		, intDestinationLeadTime = ISNULL(DestinationPort.intLeadTime, 0)
 		, intDestinationLeadTimeSource = ISNULL(DestinationPort.intLeadTimeAtSource, 0)
 		, intFreightRateMatrixLeadTime = ISNULL(FRM.intLeadTime, 0)
-		, strFinanceTradeNo
-		, intBankAccountId
-		, strBankName = ''
-		, strBankAccountNo = ''
-		, intFacilityId
-		, strFacility = ''
-		, intLoanLimitId
-		, strLoanLimit = ''
-		, strLoanReferenceNo = ''
-		, dblLoanAmount
+		, CD.strFinanceTradeNo
+		, CD.intBankAccountId
+		, BA.intBankId
+		, strBankName = BK.strBankName
+		, strBankAccountNo = BA.strBankAccountNo
+		, CD.intFacilityId
+		, strFacility = FA.strBorrowingFacilityId
+		, CD.intLoanLimitId
+		, strLoanLimit = BL.strBankLoanId
+		, strLoanReferenceNo = BL.strLimitDescription
+		, CD.dblLoanAmount
 		, intOverrideFacilityId
-		, strOverrideFacility = ''
-		, strBankReferenceNo
+		, strOverrideFacility = BVR.strBankValuationRule
+		, CD.strBankReferenceNo
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -553,6 +554,15 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure MU ON MU.intUnitMeasureId = MA.intUnitMeasureId
 	LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+	-- Trade Finance
+	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
+	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intFacilityId
+	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
+	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intOverrideFacilityId
+
+	--SELECT * FROM tblCMBankLoan
+
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	LEFT JOIN tblSMCurrency BC ON BC.intCurrencyID = CD.intBasisCurrencyId

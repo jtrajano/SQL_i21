@@ -168,19 +168,20 @@ AS
 			CD.intFreightBasisUOMId,
 			strFreightBasisUOM = FBUM.strUnitMeasure,
 			strFreightBasisBaseUOM = FBBUM.strUnitMeasure
-		, strFinanceTradeNo
-		, intBankAccountId
-		, strBankName = ''
-		, strBankAccountNo = ''
-		, intFacilityId
-		, strFacility = ''
-		, intLoanLimitId
-		, strLoanLimit = ''
-		, strLoanReferenceNo = ''
-		, dblLoanAmount
+		, CD.strFinanceTradeNo
+		, CD.intBankAccountId
+		, BA.intBankId
+		, strBankName = BN.strBankName
+		, strBankAccountNo = BA.strBankAccountNo
+		, CD.intFacilityId
+		, strFacility = FA.strBorrowingFacilityId
+		, CD.intLoanLimitId
+		, strLoanLimit = BL.strBankLoanId
+		, strLoanReferenceNo = BL.strLimitDescription
+		, CD.dblLoanAmount
 		, intOverrideFacilityId
-		, strOverrideFacility = ''
-		, strBankReferenceNo
+		, strOverrideFacility = BVR.strBankValuationRule
+		, CD.strBankReferenceNo
 	FROM	tblCTContractDetail				CD	CROSS
 	JOIN	tblCTCompanyPreference			CP	CROSS
 	APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
@@ -269,3 +270,8 @@ AS
 	JOIN	tblICUnitMeasure				U5	ON	U5.intUnitMeasureId			=	PA.intAllocationUOMId		LEFT	
 	JOIN	tblICUnitMeasure				U6	ON	U6.intUnitMeasureId			=	SA.intAllocationUOMId		LEFT
 	JOIN	tblSMCurrencyExchangeRateType	RT	ON	RT.intCurrencyExchangeRateTypeId	=	CD.intRateTypeId	 
+	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN tblCMBank BN ON BN.intBankId = BA.intBankId
+	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intFacilityId
+	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
+	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intOverrideFacilityId
