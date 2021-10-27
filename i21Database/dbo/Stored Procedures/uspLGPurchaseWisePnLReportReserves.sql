@@ -84,14 +84,14 @@ FROM tblICItem I
 											CC.dblRate 
 											/ dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 												CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
-													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty) 
-													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END)
+													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+													ELSE ALD.dblSAllocatedQty END)
 										ELSE CC.dblRate END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN
 											dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 												CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
-													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty) 
-													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END)
+													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+													ELSE ALD.dblSAllocatedQty END)
 											* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 										WHEN CC.strCostMethod = 'Amount' THEN
 											CC.dblRate
@@ -100,8 +100,8 @@ FROM tblICItem I
 										WHEN CC.strCostMethod = 'Percentage' THEN 
 											dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 												CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
-													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty) 
-													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END) 
+													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+													ELSE ALD.dblSAllocatedQty END)
 											* CD.dblCashPrice * CC.dblRate/100
 										END 
 									* COALESCE(CC.dblFX, FX.dblFXRate, 1)
