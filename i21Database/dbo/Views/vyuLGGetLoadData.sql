@@ -92,6 +92,7 @@ SELECT
     ,L.dtmArrivedInPort
     ,L.dtmDocumentsApproved
     ,L.dtmCustomsReleased
+	,L.dtmLoadExpiration
     ,L.strVessel1
     ,L.strOriginPort1
     ,L.strDestinationPort1

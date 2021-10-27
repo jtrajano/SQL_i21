@@ -100,6 +100,7 @@
 [dtmArrivedInPort] DATETIME NULL,
 [dtmDocumentsApproved] DATETIME NULL,
 [dtmCustomsReleased] DATETIME NULL,
+[dtmLoadExpiration] DATETIME NULL,
 
 [strVessel1] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strOriginPort1] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
