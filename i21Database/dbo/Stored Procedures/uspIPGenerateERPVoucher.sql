@@ -61,6 +61,7 @@ BEGIN TRY
 		,@dblDetailTotalwithTax NUMERIC(18, 6)
 		,@intContractDetailId INT
 		,@strType NVARCHAR(50)
+		,@strReceiptNumber NVARCHAR(50)
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -371,6 +372,7 @@ BEGIN TRY
 				,@dblDetailTotalwithTax = NULL
 				,@intContractDetailId = NULL
 				,@strType = NULL
+				,@strReceiptNumber = NULL
 
 			SELECT @intItemId = BD.intItemId
 			FROM dbo.tblAPBillDetail BD
@@ -437,6 +439,26 @@ BEGIN TRY
 			WHERE BD.intBillDetailId = @intBillDetailId
 
 			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
+
+			IF @intTransactionType = 3 -- Claim
+			BEGIN
+				SELECT @strReceiptNumber = R.strReceiptNumber
+				FROM tblAPBillDetail BD
+				JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = BD.intWeightClaimDetailId
+					AND BD.intContractDetailId IS NOT NULL
+					AND BD.intBillDetailId = @intBillDetailId
+				JOIN tblICInventoryReceiptItem RI ON RI.intContainerId = WCD.intLoadContainerId
+				JOIN tblICInventoryReceipt R ON RI.intInventoryReceiptId = R.intInventoryReceiptId
+			END
+			ELSE
+			BEGIN
+				SELECT @strReceiptNumber = R.strReceiptNumber
+				FROM tblAPBillDetail BD
+				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+					AND BD.intContractDetailId IS NOT NULL
+					AND BD.intBillDetailId = @intBillDetailId
+				JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+			END
 
 			IF ISNULL(@strType, '') = 'Other Charge'
 				AND @intContractDetailId IS NULL
@@ -565,6 +587,8 @@ BEGIN TRY
 			SELECT @strItemXML += '<Tax>' + LTRIM(ISNULL(@dblDetailTax, 0)) + '</Tax>'
 
 			SELECT @strItemXML += '<lineTotal>' + LTRIM(ISNULL(@dblDetailTotalwithTax, 0)) + '</lineTotal>'
+
+			SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + '</ReceiptNo>'
 
 			SELECT @strItemXML += '</line>'
 
