@@ -1054,7 +1054,7 @@ BEGIN TRY
 		If @strOrderType='LOAD DISTRIBUTION'
 		Begin
 			If (Select Count(1) From tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId) 
-				<> (Select Count(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
+				> (Select Count(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
 				RAISERROR('There is not enough stock of an ingredient required to blend. Please review Inventory On-Hand count.',16,1)
 
 			If Exists(
