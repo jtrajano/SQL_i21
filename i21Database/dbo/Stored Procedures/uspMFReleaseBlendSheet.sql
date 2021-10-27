@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFReleaseBlendSheet] @strXml NVARCHAR(Max)
 	,@strWorkOrderNoOut NVARCHAR(50) = '' OUT
-	,@dblBalancedQtyToProduceOut NUMERIC(38,20) = 0 OUTPUT
+	,@dblBalancedQtyToProduceOut NUMERIC(38, 20) = 0 OUTPUT
 	,@intWorkOrderIdOut INT = 0 OUTPUT
 AS
 BEGIN TRY
@@ -19,7 +19,7 @@ BEGIN TRY
 	DECLARE @intLocationId INT
 	DECLARE @intCellId INT
 	DECLARE @intUserId INT
-	DECLARE @dblQtyToProduce NUMERIC(38,20)
+	DECLARE @dblQtyToProduce NUMERIC(38, 20)
 	DECLARE @dtmDueDate DATETIME
 	DECLARE @intExecutionOrder INT = 1
 	DECLARE @intBlendItemId INT
@@ -30,33 +30,35 @@ BEGIN TRY
 	DECLARE @ysnEnableParentLot BIT = 0
 	DECLARE @intRecipeId INT
 	DECLARE @intManufacturingProcessId INT
-	DECLARE @dblBinSize NUMERIC(38,20)
+	DECLARE @dblBinSize NUMERIC(38, 20)
 	DECLARE @intNoOfSheet INT
 	DECLARE @intNoOfSheetOriginal INT
-	DECLARE @dblRemainingQtyToProduce NUMERIC(38,20)
-	DECLARE @PerBlendSheetQty NUMERIC(38,20)
+	DECLARE @dblRemainingQtyToProduce NUMERIC(38, 20)
+	DECLARE @PerBlendSheetQty NUMERIC(38, 20)
 	DECLARE @ysnCalculateNoSheetUsingBinSize BIT = 0
 	DECLARE @ysnKittingEnabled BIT
 	DECLARE @ysnRequireCustomerApproval BIT
 	DECLARE @intWorkOrderStatusId INT
 	DECLARE @intKitStatusId INT = NULL
-	DECLARE @dblBulkReqQuantity NUMERIC(38,20)
-	DECLARE @dblPlannedQuantity NUMERIC(38,20)
-	Declare @ysnAllInputItemsMandatory bit
-			,@dtmBusinessDate DATETIME
+	DECLARE @dblBulkReqQuantity NUMERIC(38, 20)
+	DECLARE @dblPlannedQuantity NUMERIC(38, 20)
+	DECLARE @ysnAllInputItemsMandatory BIT
+		,@dtmBusinessDate DATETIME
 		,@intBusinessShiftId INT
 		,@dtmCurrentDateTime DATETIME
 		,@dtmProductionDate DATETIME
-	Declare @intCategoryId int
-	Declare @strInActiveItems nvarchar(max)
-	DECLARE @dtmDate DATETIME=Convert(DATE, GetDate())
-	DECLARE @intDayOfYear INT=DATEPART(dy, @dtmDate)
-	Declare @strPackagingCategoryId NVARCHAR(Max)
-	Declare @intPlannedShiftId int
+	DECLARE @intCategoryId INT
+	DECLARE @strInActiveItems NVARCHAR(max)
+	DECLARE @dtmDate DATETIME = Convert(DATE, GetDate())
+	DECLARE @intDayOfYear INT = DATEPART(dy, @dtmDate)
+	DECLARE @strPackagingCategoryId NVARCHAR(Max)
+	DECLARE @intPlannedShiftId INT
 	DECLARE @strSavedWONo NVARCHAR(50)
-			,@intSubLocationId int
+		,@intSubLocationId INT
+		,@intIssuedUOMTypeId int
 
 	SELECT @dtmCurrentDateTime = GetDate()
+
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
@@ -68,9 +70,9 @@ BEGIN TRY
 		,intCellId INT
 		,intMachineId INT
 		,dtmDueDate DATETIME
-		,dblQtyToProduce NUMERIC(38,20)
-		,dblPlannedQuantity NUMERIC(38,20)
-		,dblBinSize NUMERIC(38,20)
+		,dblQtyToProduce NUMERIC(38, 20)
+		,dblPlannedQuantity NUMERIC(38, 20)
+		,dblBinSize NUMERIC(38, 20)
 		,strComment NVARCHAR(Max)
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
@@ -84,21 +86,21 @@ BEGIN TRY
 	DECLARE @tblItem TABLE (
 		intRowNo INT Identity(1, 1)
 		,intItemId INT
-		,dblReqQty NUMERIC(38,20)
+		,dblReqQty NUMERIC(38, 20)
 		,ysnIsSubstitute BIT
 		,intConsumptionMethodId INT
 		,intConsumptionStoragelocationId INT
-		,intParentItemId int
-		,dblUpperToleranceQty NUMERIC(38,20)
-		,dblLowerToleranceQty NUMERIC(38,20)
+		,intParentItemId INT
+		,dblUpperToleranceQty NUMERIC(38, 20)
+		,dblLowerToleranceQty NUMERIC(38, 20)
 		)
 	DECLARE @tblLot TABLE (
 		intRowNo INT Identity(1, 1)
 		,intLotId INT
 		,intItemId INT
-		,dblQty NUMERIC(38,20)
-		,dblIssuedQuantity NUMERIC(38,20)
-		,dblWeightPerUnit NUMERIC(38,20)
+		,dblQty NUMERIC(38, 20)
+		,dblIssuedQuantity NUMERIC(38, 20)
+		,dblWeightPerUnit NUMERIC(38, 20)
 		,intItemUOMId INT
 		,intItemIssuedUOMId INT
 		,intUserId INT
@@ -110,11 +112,11 @@ BEGIN TRY
 	DECLARE @tblBSLot TABLE (
 		intLotId INT
 		,intItemId INT
-		,dblQty NUMERIC(38,20)
+		,dblQty NUMERIC(38, 20)
 		,intUOMId INT
-		,dblIssuedQuantity NUMERIC(38,20)
+		,dblIssuedQuantity NUMERIC(38, 20)
 		,intIssuedUOMId INT
-		,dblWeightPerUnit NUMERIC(38,20)
+		,dblWeightPerUnit NUMERIC(38, 20)
 		,intRecipeItemId INT
 		,intLocationId INT
 		,intStorageLocationId INT
@@ -162,9 +164,9 @@ BEGIN TRY
 			,intCellId INT
 			,intMachineId INT
 			,dtmDueDate DATETIME
-			,dblQtyToProduce NUMERIC(38,20)
-			,dblPlannedQuantity NUMERIC(38,20)
-			,dblBinSize NUMERIC(38,20)
+			,dblQtyToProduce NUMERIC(38, 20)
+			,dblPlannedQuantity NUMERIC(38, 20)
+			,dblBinSize NUMERIC(38, 20)
 			,strComment NVARCHAR(Max)
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
@@ -205,10 +207,10 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/lot', 2) WITH (
 			intLotId INT
 			,intItemId INT
-			,dblQty NUMERIC(38,20)
-			,dblIssuedQuantity NUMERIC(38,20)
-			,dblPickedQuantity NUMERIC(38,20)
-			,dblWeightPerUnit NUMERIC(38,20)
+			,dblQty NUMERIC(38, 20)
+			,dblIssuedQuantity NUMERIC(38, 20)
+			,dblPickedQuantity NUMERIC(38, 20)
+			,dblWeightPerUnit NUMERIC(38, 20)
 			,intItemUOMId INT
 			,intItemIssuedUOMId INT
 			,intUserId INT
@@ -218,52 +220,91 @@ BEGIN TRY
 			,ysnParentLot BIT
 			)
 
---Available Qty Check
-Declare @tblLotSummary AS table
-(
-	intRowNo int IDENTITY,
-	intLotId INT,
-	intItemId int,
-	dblQty NUMERIC(38,20),
-	intRecipeItemId int	
-)
-Declare @dblInputAvlQty NUMERIC(38,20)
-Declare @dblInputReqQty NUMERIC(38,20)
-Declare @intInputLotId int
-Declare @intInputItemId int
-Declare @strInputLotNumber nvarchar(50)
+	--Available Qty Check
+	DECLARE @tblLotSummary AS TABLE (
+		intRowNo INT IDENTITY
+		,intLotId INT
+		,intItemId INT
+		,dblQty NUMERIC(38, 20)
+		,intRecipeItemId INT
+		)
+	DECLARE @dblInputAvlQty NUMERIC(38, 20)
+	DECLARE @dblInputReqQty NUMERIC(38, 20)
+	DECLARE @intInputLotId INT
+	DECLARE @intInputItemId INT
+	DECLARE @strInputLotNumber NVARCHAR(50)
 
-Select @intLocationId=intLocationId From @tblBlendSheet
+	SELECT @intLocationId = intLocationId
+	FROM @tblBlendSheet
 
-SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
-FROM tblMFCompanyPreference
+	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+	FROM tblMFCompanyPreference
 
-INSERT INTO @tblLotSummary(intLotId,intItemId,dblQty)
-Select intLotId,intItemId,SUM(dblQty) From @tblLot GROUP BY intLotId,intItemId
+	INSERT INTO @tblLotSummary (
+		intLotId
+		,intItemId
+		,dblQty
+		)
+	SELECT intLotId
+		,intItemId
+		,SUM(dblQty)
+	FROM @tblLot
+	GROUP BY intLotId
+		,intItemId
 
-Declare @intMinLot INT
-Select @intMinLot=Min(intRowNo) From @tblLotSummary
-While(@intMinLot is not null) and @ysnEnableParentLot=0
-Begin
-	Select @intInputLotId=intLotId,@dblInputReqQty=dblQty,@intInputItemId=intItemId From @tblLotSummary Where intRowNo=@intMinLot
-	Select @dblInputAvlQty=CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,tl.intItemUOMId,l.dblQty) End 
-	- (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=@intInputLotId AND ISNULL(ysnPosted,0)=0) 
-	From tblICLot l join @tblLot tl on l.intLotId=tl.intLotId Where l.intLotId=@intInputLotId
+	DECLARE @intMinLot INT
 
-	if @dblInputReqQty > @dblInputAvlQty
-	Begin
-		Select @strInputLotNumber=strLotNumber From tblICLot Where intLotId=@intInputLotId
-		Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+	SELECT @intMinLot = Min(intRowNo)
+	FROM @tblLotSummary
 
-		Set @ErrMsg='Quantity of ' + CONVERT(varchar,@dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(nvarchar,@strInputItemNo) +
-		+ ' cannot be added to blend sheet because the lot has available qty of ' + CONVERT(varchar,@dblInputAvlQty) + '.'
-		RaisError(@ErrMsg,16,1)
-	End
+	WHILE (@intMinLot IS NOT NULL)
+		AND @ysnEnableParentLot = 0
+	BEGIN
+		SELECT @intInputLotId = intLotId
+			,@dblInputReqQty = dblQty
+			,@intInputItemId = intItemId
+		FROM @tblLotSummary
+		WHERE intRowNo = @intMinLot
 
-	Select @intMinLot=Min(intRowNo) From @tblLotSummary Where intRowNo>@intMinLot
-End
---End Available Qty Check
+		SELECT @dblInputAvlQty = CASE 
+				WHEN isnull(l.dblWeight, 0) > 0
+					THEN l.dblWeight
+				ELSE dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId, tl.intItemUOMId, l.dblQty)
+				END - (
+				SELECT ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+				FROM tblICStockReservation
+				WHERE intLotId = @intInputLotId
+					AND ISNULL(ysnPosted, 0) = 0
+				)
+		FROM tblICLot l
+		JOIN @tblLot tl ON l.intLotId = tl.intLotId
+		WHERE l.intLotId = @intInputLotId
 
+		IF @dblInputReqQty > @dblInputAvlQty
+		BEGIN
+			SELECT @strInputLotNumber = strLotNumber
+			FROM tblICLot
+			WHERE intLotId = @intInputLotId
+
+			SELECT @strInputItemNo = strItemNo
+			FROM tblICItem
+			WHERE intItemId = @intInputItemId
+
+			SET @ErrMsg = 'Quantity of ' + CONVERT(VARCHAR, @dblInputReqQty) + ' from lot ' + @strInputLotNumber + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' cannot be added to blend sheet because the lot has available qty of ' + CONVERT(VARCHAR, @dblInputAvlQty) + '.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
+
+		SELECT @intMinLot = Min(intRowNo)
+		FROM @tblLotSummary
+		WHERE intRowNo > @intMinLot
+	END
+
+	--End Available Qty Check
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intLocationId)
 
 	SELECT @intBusinessShiftId = intShiftId
@@ -289,7 +330,12 @@ End
 	UPDATE @tblBlendSheet
 	SET dblQtyToProduce = (
 			SELECT sum(dblQty)
-			FROM @tblLot l join tblICItem i on l.intItemId=i.intItemId Where i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
+			FROM @tblLot l
+			JOIN tblICItem i ON l.intItemId = i.intItemId
+			WHERE i.intCategoryId NOT IN (
+					SELECT *
+					FROM dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId)
+					)
 			)
 
 	UPDATE @tblLot
@@ -312,11 +358,12 @@ End
 	SELECT @strDemandNo = strDemandNo
 	FROM tblMFBlendRequirement
 	WHERE intBlendRequirementId = @intBlendRequirementId
-	
-	Select @intSubLocationId=NULL
-	Select @intSubLocationId=intSubLocationId
-	from tblMFManufacturingCell 
-	Where intManufacturingCellId = @intCellId
+
+	SELECT @intSubLocationId = NULL
+
+	SELECT @intSubLocationId = intSubLocationId
+	FROM tblMFManufacturingCell
+	WHERE intManufacturingCellId = @intCellId
 
 	SELECT @strBlendItemNo = strItemNo
 		,@strBlendItemStatus = strStatus
@@ -368,11 +415,15 @@ End
 
 	IF @ysnEnableParentLot = 0
 		UPDATE a
-		SET a.dblWeightPerUnit = CASE WHEN b.dblWeightPerQty > 0 THEN b.dblWeightPerQty ELSE iu1.dblUnitQty/iu.dblUnitQty END
+		SET a.dblWeightPerUnit = CASE 
+				WHEN b.dblWeightPerQty > 0
+					THEN b.dblWeightPerQty
+				ELSE iu1.dblUnitQty / iu.dblUnitQty
+				END
 		FROM @tblLot a
 		JOIN tblICLot b ON a.intLotId = b.intLotId
-		LEFT JOIN tblICItemUOM iu on a.intItemUOMId=iu.intItemUOMId
-		LEFT JOIN tblICItemUOM iu1 on a.intItemIssuedUOMId=iu1.intItemUOMId
+		LEFT JOIN tblICItemUOM iu ON a.intItemUOMId = iu.intItemUOMId
+		LEFT JOIN tblICItemUOM iu1 ON a.intItemIssuedUOMId = iu1.intItemUOMId
 	ELSE
 		UPDATE a
 		SET a.dblWeightPerUnit = (
@@ -394,148 +445,260 @@ End
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Calculate No Of Blend Sheet Using Blend Bin Size'
 
-	Select @ysnAllInputItemsMandatory=CASE When UPPER(pa.strAttributeValue) = 'TRUE' then 1 Else 0 End 
-	From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
-	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
-	and UPPER(at.strAttributeName)=UPPER('All input items mandatory for consumption')
-
-	Select @intPlannedShiftId=intPlannedShiftId From @tblBlendSheet
-	IF ISNULL(@intPlannedShiftId,0)=0
-	BEGIN
-		If ISNULL(@intBusinessShiftId,0)=0
-			BEGIN
-				SELECT @intPlannedShiftId = intShiftId
-				FROM dbo.tblMFShift
-				WHERE intLocationId = @intLocationId
-					AND intShiftSequence = 1
+	SELECT @ysnAllInputItemsMandatory = CASE 
+			WHEN UPPER(pa.strAttributeValue) = 'TRUE'
+				THEN 1
+			ELSE 0
 			END
-		Else
-			Set @intPlannedShiftId=@intBusinessShiftId
+	FROM tblMFManufacturingProcessAttribute pa
+	JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND UPPER(at.strAttributeName) = UPPER('All input items mandatory for consumption')
 
-		Update @tblBlendSheet set intPlannedShiftId=@intPlannedShiftId
+	SELECT @intPlannedShiftId = intPlannedShiftId
+	FROM @tblBlendSheet
+
+	IF ISNULL(@intPlannedShiftId, 0) = 0
+	BEGIN
+		IF ISNULL(@intBusinessShiftId, 0) = 0
+		BEGIN
+			SELECT @intPlannedShiftId = intShiftId
+			FROM dbo.tblMFShift
+			WHERE intLocationId = @intLocationId
+				AND intShiftSequence = 1
+		END
+		ELSE
+			SET @intPlannedShiftId = @intBusinessShiftId
+
+		UPDATE @tblBlendSheet
+		SET intPlannedShiftId = @intPlannedShiftId
 	END
 
 	--Missing Item Check / Required Qty Check
-	if @ysnAllInputItemsMandatory=1
-	Begin
-		Insert into @tblItem(intItemId,dblReqQty,ysnIsSubstitute,intConsumptionMethodId,intConsumptionStoragelocationId,intParentItemId,dblUpperToleranceQty,dblLowerToleranceQty)
-		Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblPlannedQuantity/r.dblQuantity)) AS RequiredQty,0 AS ysnIsSubstitute,ri.intConsumptionMethodId,ri.intStorageLocationId,0
-		,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblUpperToleranceQty
-		,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblLowerToleranceQty
-		From tblMFRecipeItem ri 
-		Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
-		where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
-		AND (
-		(
-			ri.ysnYearValidationRequired = 1
-			AND @dtmDate BETWEEN ri.dtmValidFrom
-				AND ri.dtmValidTo
+	IF @ysnAllInputItemsMandatory = 1
+	BEGIN
+		INSERT INTO @tblItem (
+			intItemId
+			,dblReqQty
+			,ysnIsSubstitute
+			,intConsumptionMethodId
+			,intConsumptionStoragelocationId
+			,intParentItemId
+			,dblUpperToleranceQty
+			,dblLowerToleranceQty
 			)
-		OR (
-			ri.ysnYearValidationRequired = 0
-			AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
-				AND DATEPART(dy, ri.dtmValidTo)
-			)
-		)
-		AND ri.intConsumptionMethodId IN (1,2,3)
+		SELECT ri.intItemId
+			,(ri.dblCalculatedQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
+			,0 AS ysnIsSubstitute
+			,ri.intConsumptionMethodId
+			,ri.intStorageLocationId
+			,0
+			,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+			,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+		FROM tblMFRecipeItem ri
+		JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		WHERE ri.intRecipeId = @intRecipeId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId IN (
+				1
+				,2
+				,3
+				)
+		
 		UNION
-		Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblPlannedQuantity/r.dblQuantity)) AS RequiredQty,1 AS ysnIsSubstitute,0,0,rs.intItemId
-		,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblUpperToleranceQty
-		,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity/r.dblQuantity)) AS dblLowerToleranceQty
-		From tblMFRecipeSubstituteItem rs 
-		JOIN tblMFRecipeItem ri on ri.intRecipeItemId =rs.intRecipeItemId 
-		Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
-		where rs.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
+		
+		SELECT rs.intSubstituteItemId
+			,(rs.dblQuantity * (@dblPlannedQuantity / r.dblQuantity)) AS RequiredQty
+			,1 AS ysnIsSubstitute
+			,0
+			,0
+			,rs.intItemId
+			,(ri.dblCalculatedUpperTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblUpperToleranceQty
+			,(ri.dblCalculatedLowerTolerance * (@dblPlannedQuantity / r.dblQuantity)) AS dblLowerToleranceQty
+		FROM tblMFRecipeSubstituteItem rs
+		JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
+		JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+		WHERE rs.intRecipeId = @intRecipeId
+			AND rs.intRecipeItemTypeId = 1
 
-		Declare @intMinMissingItem INT
-		Declare @intConsumptionMethodId int
-		Declare @dblInputItemBSQty numeric(38,20)
-		Declare @dblBulkItemAvlQty numeric(38,20)
-		Declare @dblLowerToleranceQty numeric(38,20)
-		Declare @dblUpperToleranceQty numeric(38,20)
+		DECLARE @intMinMissingItem INT
+		DECLARE @intConsumptionMethodId INT
+		DECLARE @dblInputItemBSQty NUMERIC(38, 20)
+		DECLARE @dblBulkItemAvlQty NUMERIC(38, 20)
+		DECLARE @dblLowerToleranceQty NUMERIC(38, 20)
+		DECLARE @dblUpperToleranceQty NUMERIC(38, 20)
 
-		Select @intMinMissingItem=Min(intRowNo) From @tblItem
-		While(@intMinMissingItem is not null)
-		Begin
-			Select @dblLowerToleranceQty=NULL
-					,@dblUpperToleranceQty=NULL
-			Select @intInputItemId=intItemId,@dblInputReqQty=dblReqQty,@intConsumptionMethodId=intConsumptionMethodId 
-					,@dblLowerToleranceQty=dblLowerToleranceQty
-					,@dblUpperToleranceQty=dblUpperToleranceQty
-			From @tblItem Where intRowNo=@intMinMissingItem AND ysnIsSubstitute=0
+		SELECT @intMinMissingItem = Min(intRowNo)
+		FROM @tblItem
 
-			If @intConsumptionMethodId=1
-			Begin
-				If Not Exists (Select 1 From @tblLot Where intItemId=@intInputItemId) 
-				AND 
-				Not Exists (Select 1 From @tblLot Where intItemId=(Select intItemId From @tblItem Where intParentItemId=@intInputItemId))
-				Begin
-					Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+		WHILE (@intMinMissingItem IS NOT NULL)
+		BEGIN
+			SELECT @dblLowerToleranceQty = NULL
+				,@dblUpperToleranceQty = NULL
 
-					Set @ErrMsg='There is no lot selected for item ' + CONVERT(nvarchar,@strInputItemNo) + '.'
-					RaisError(@ErrMsg,16,1)
-				End
+			SELECT @intInputItemId = intItemId
+				,@dblInputReqQty = dblReqQty
+				,@intConsumptionMethodId = intConsumptionMethodId
+				,@dblLowerToleranceQty = dblLowerToleranceQty
+				,@dblUpperToleranceQty = dblUpperToleranceQty
+			FROM @tblItem
+			WHERE intRowNo = @intMinMissingItem
+				AND ysnIsSubstitute = 0
 
-				Select @dblInputItemBSQty=ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblLot Where intItemId=@intInputItemId
+			IF @intConsumptionMethodId = 1
+			BEGIN
+				IF NOT EXISTS (
+						SELECT 1
+						FROM @tblLot
+						WHERE intItemId = @intInputItemId
+						)
+					AND NOT EXISTS (
+						SELECT 1
+						FROM @tblLot
+						WHERE intItemId = (
+								SELECT intItemId
+								FROM @tblItem
+								WHERE intParentItemId = @intInputItemId
+								)
+						)
+				BEGIN
+					SELECT @strInputItemNo = strItemNo
+					FROM tblICItem
+					WHERE intItemId = @intInputItemId
+
+					SET @ErrMsg = 'There is no lot selected for item ' + CONVERT(NVARCHAR, @strInputItemNo) + '.'
+
+					RAISERROR (
+							@ErrMsg
+							,16
+							,1
+							)
+				END
+
+				SELECT @dblInputItemBSQty = ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+				FROM @tblLot
+				WHERE intItemId = @intInputItemId
 
 				--Include Sub Items
-				Set @dblInputItemBSQty=@dblInputItemBSQty + (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From @tblLot 
-				Where intItemId in (Select intItemId From @tblItem Where intParentItemId = @intInputItemId))
-
-				if @dblInputItemBSQty < @dblLowerToleranceQty
-				Begin
-					Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
-
-					Set @ErrMsg='Selected quantity of ' + CONVERT(varchar,@dblInputItemBSQty) + ' of item ' + CONVERT(nvarchar,@strInputItemNo) +
-					+ ' is less than the lower tolerance quantity of ' + CONVERT(varchar,@dblLowerToleranceQty) + '.'
-					RaisError(@ErrMsg,16,1)
-				End
-				if @dblInputItemBSQty > @dblUpperToleranceQty
-				Begin
-					Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
-
-					Set @ErrMsg='Selected quantity of ' + CONVERT(varchar,@dblInputItemBSQty) + ' of item ' + CONVERT(nvarchar,@strInputItemNo) +
-					+ ' is more than the upper tolerance quantity of ' + CONVERT(varchar,@dblUpperToleranceQty) + '.'
-					RaisError(@ErrMsg,16,1)
-				End
-			End
-		
-			--Bulk
-			If @intConsumptionMethodId in (2,3)
-			Begin
-				Select @dblBulkItemAvlQty=ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
-				Where l.intItemId=@intInputItemId AND l.intLocationId = @intLocationId
-					AND ls.strPrimaryStatus IN (
-						'Active'
-						,'Quarantine'
+				SET @dblInputItemBSQty = @dblInputItemBSQty + (
+						SELECT ISNULL(SUM(ISNULL(dblQty, 0)), 0)
+						FROM @tblLot
+						WHERE intItemId IN (
+								SELECT intItemId
+								FROM @tblItem
+								WHERE intParentItemId = @intInputItemId
+								)
 						)
-					AND (l.dtmExpiryDate IS NULL OR l.dtmExpiryDate >= GETDATE())
-					AND l.dblWeight >0
 
-					--Iclude Sub Items
-					Set @dblBulkItemAvlQty = @dblBulkItemAvlQty + (Select ISNULL(SUM(ISNULL(dblWeight,0)),0) From tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
-					Where l.intItemId in (Select intItemId From @tblItem Where intParentItemId = @intInputItemId)
+				IF @dblInputItemBSQty < @dblLowerToleranceQty
+				BEGIN
+					SELECT @strInputItemNo = strItemNo
+					FROM tblICItem
+					WHERE intItemId = @intInputItemId
+
+					SET @ErrMsg = 'Selected quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputItemBSQty) + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' is less than the lower tolerance quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblLowerToleranceQty) + '.'
+
+					RAISERROR (
+							@ErrMsg
+							,16
+							,1
+							)
+				END
+
+				IF @dblInputItemBSQty > @dblUpperToleranceQty
+				BEGIN
+					SELECT @strInputItemNo = strItemNo
+					FROM tblICItem
+					WHERE intItemId = @intInputItemId
+
+					SET @ErrMsg = 'Selected quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblInputItemBSQty) + ' of item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' is more than the upper tolerance quantity of ' + [dbo].[fnRemoveTrailingZeroes](@dblUpperToleranceQty) + '.'
+
+					RAISERROR (
+							@ErrMsg
+							,16
+							,1
+							)
+				END
+			END
+
+			--Bulk
+			IF @intConsumptionMethodId IN (
+					2
+					,3
+					)
+			BEGIN
+				SELECT @dblBulkItemAvlQty = ISNULL(SUM(ISNULL(dblWeight, 0)), 0)
+				FROM tblICLot l
+				JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
+				WHERE l.intItemId = @intInputItemId
 					AND l.intLocationId = @intLocationId
 					AND ls.strPrimaryStatus IN (
 						'Active'
 						,'Quarantine'
 						)
-					AND (l.dtmExpiryDate IS NULL OR l.dtmExpiryDate >= GETDATE())
-					AND l.dblWeight >0)
+					AND (
+						l.dtmExpiryDate IS NULL
+						OR l.dtmExpiryDate >= GETDATE()
+						)
+					AND l.dblWeight > 0
 
-				if @dblBulkItemAvlQty < @dblInputReqQty
-				Begin
-					Select @strInputItemNo=strItemNo From tblICItem Where intItemId=@intInputItemId
+				--Iclude Sub Items
+				SET @dblBulkItemAvlQty = @dblBulkItemAvlQty + (
+						SELECT ISNULL(SUM(ISNULL(dblWeight, 0)), 0)
+						FROM tblICLot l
+						JOIN tblICLotStatus ls ON l.intLotStatusId = ls.intLotStatusId
+						WHERE l.intItemId IN (
+								SELECT intItemId
+								FROM @tblItem
+								WHERE intParentItemId = @intInputItemId
+								)
+							AND l.intLocationId = @intLocationId
+							AND ls.strPrimaryStatus IN (
+								'Active'
+								,'Quarantine'
+								)
+							AND (
+								l.dtmExpiryDate IS NULL
+								OR l.dtmExpiryDate >= GETDATE()
+								)
+							AND l.dblWeight > 0
+						)
 
-					Set @ErrMsg='Required quantity of ' + CONVERT(varchar,@dblInputReqQty) + ' of bulk item ' + CONVERT(nvarchar,@strInputItemNo) +
-					+ ' is not avaliable.'
-					RaisError(@ErrMsg,16,1)
-				End
-			End
+				IF @dblBulkItemAvlQty < @dblInputReqQty
+				BEGIN
+					SELECT @strInputItemNo = strItemNo
+					FROM tblICItem
+					WHERE intItemId = @intInputItemId
 
-			Select @intMinMissingItem=Min(intRowNo) From @tblItem Where intRowNo>@intMinMissingItem AND ysnIsSubstitute=0
-		End
-	End
+					SET @ErrMsg = 'Required quantity of ' + CONVERT(VARCHAR, @dblInputReqQty) + ' of bulk item ' + CONVERT(NVARCHAR, @strInputItemNo) + + ' is not avaliable.'
+
+					RAISERROR (
+							@ErrMsg
+							,16
+							,1
+							)
+				END
+			END
+
+			SELECT @intMinMissingItem = Min(intRowNo)
+			FROM @tblItem
+			WHERE intRowNo > @intMinMissingItem
+				AND ysnIsSubstitute = 0
+		END
+	END
 
 	IF @ysnCalculateNoSheetUsingBinSize = 0
 	BEGIN
@@ -555,21 +718,22 @@ End
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
 			)
-	Begin
-		Select @strSavedWONo=strWorkOrderNo From tblMFWorkOrder
+	BEGIN
+		SELECT @strSavedWONo = strWorkOrderNo
+		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
 		DELETE
 		FROM tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
-	End
+	END
 
 	DECLARE @intItemCount INT
 		,@intLotCount INT
 		,@intItemId INT
-		,@dblReqQty NUMERIC(38,20)
+		,@dblReqQty NUMERIC(38, 20)
 		,@intLotId INT
-		,@dblQty NUMERIC(38,20)
+		,@dblQty NUMERIC(38, 20)
 
 	SELECT @intExecutionOrder = Count(1)
 	FROM tblMFWorkOrder
@@ -581,7 +745,10 @@ End
 			,13
 			)
 
-	WHILE (@intNoOfSheet > 0 and @dblQtyToProduce>1)
+	WHILE (
+			@intNoOfSheet > 0
+			AND @dblQtyToProduce > 1
+			)
 	BEGIN
 		SET @intWorkOrderId = NULL
 
@@ -591,163 +758,205 @@ End
 		ELSE
 			SELECT @PerBlendSheetQty = @dblQtyToProduce
 
-		DELETE
-		FROM @tblItem
-
-		INSERT INTO @tblItem (
-			intItemId
-			,dblReqQty
-			)
-		SELECT ri.intItemId
-			,(ri.dblCalculatedQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
-		FROM tblMFRecipeItem ri
-		JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-		WHERE ri.intRecipeId = @intRecipeId
-			AND ri.intRecipeItemTypeId = 1
-		
-		UNION
-		
-		SELECT rs.intSubstituteItemId
-			,(rs.dblQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
-		FROM tblMFRecipeSubstituteItem rs
-		JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
-		WHERE rs.intRecipeId = @intRecipeId
-			AND rs.intRecipeItemTypeId = 1
-
-		SELECT @intItemCount = Min(intRowNo)
-		FROM @tblItem
-
-		WHILE (@intItemCount IS NOT NULL)
+		IF @intNoOfSheet = 1
 		BEGIN
-			SET @intLotCount = NULL
-			SET @strNextWONo = NULL
-
-			SELECT @intItemId = intItemId
-				,@dblReqQty = dblReqQty
-			FROM @tblItem
-			WHERE intRowNo = @intItemCount
-
-			SELECT @intLotCount = Min(intRowNo)
+			INSERT INTO @tblBSLot (
+				intLotId
+				,intItemId
+				,dblQty
+				,intUOMId
+				,dblIssuedQuantity
+				,intIssuedUOMId
+				,dblWeightPerUnit
+				,intRecipeItemId
+				,intLocationId
+				,intStorageLocationId
+				)
+			SELECT intLotId
+				,intItemId
+				,dblQty
+				,intItemUOMId
+				,dblIssuedQuantity
+				,intItemIssuedUOMId
+				,dblWeightPerUnit
+				,intRecipeItemId
+				,intLocationId
+				,intStorageLocationId
 			FROM @tblLot
-			WHERE intItemId = @intItemId
-				AND dblQty > 0
+			WHERE dblQty>0
+		END
+		ELSE
+		BEGIN
+			--SELECT @intIssuedUOMTypeId = ISNULL(intIssuedUOMTypeId, 0)
+			--FROM tblMFMachine
+			--WHERE intMachineId = @intMachineId
 
-			WHILE (@intLotCount IS NOT NULL)
+			DELETE
+			FROM @tblItem
+
+			INSERT INTO @tblItem (
+				intItemId
+				,dblReqQty
+				)
+			SELECT ri.intItemId
+				,(ri.dblCalculatedQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
+			FROM tblMFRecipeItem ri
+			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+			WHERE ri.intRecipeId = @intRecipeId
+				AND ri.intRecipeItemTypeId = 1
+			
+			UNION
+			
+			SELECT rs.intSubstituteItemId
+				,(rs.dblQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
+			FROM tblMFRecipeSubstituteItem rs
+			JOIN tblMFRecipe r ON r.intRecipeId = rs.intRecipeId
+			WHERE rs.intRecipeId = @intRecipeId
+				AND rs.intRecipeItemTypeId = 1
+
+			SELECT @intItemCount = Min(intRowNo)
+			FROM @tblItem
+
+			WHILE (@intItemCount IS NOT NULL)
 			BEGIN
-				SELECT @intLotId = intLotId
-					,@dblQty = dblQty
-				FROM @tblLot
-				WHERE intRowNo = @intLotCount
+				SET @intLotCount = NULL
+				SET @strNextWONo = NULL
 
-				IF (
-						@dblQty >= @dblReqQty
-						AND @intNoOfSheet > 1
-						)
-				BEGIN
-					INSERT INTO @tblBSLot (
-						intLotId
-						,intItemId
-						,dblQty
-						,intUOMId
-						,dblIssuedQuantity
-						,intIssuedUOMId
-						,dblWeightPerUnit
-						,intRecipeItemId
-						,intLocationId
-						,intStorageLocationId
-						)
-					SELECT intLotId
-						,intItemId
-						,@dblReqQty
-						,intItemUOMId
-						,CASE 
-							WHEN intItemUOMId = intItemIssuedUOMId
-								THEN @dblReqQty
-							ELSE @dblReqQty / CASE WHEN dblWeightPerUnit > 0 THEN dblWeightPerUnit ELSE 1.0 END
-							END
-						,intItemIssuedUOMId
-						,dblWeightPerUnit
-						,intRecipeItemId
-						,intLocationId
-						,intStorageLocationId
-					FROM @tblLot
-					WHERE intRowNo = @intLotCount
-
-					UPDATE @tblLot
-					SET dblQty = dblQty - @dblReqQty
-					WHERE intRowNo = @intLotCount
-
-					GOTO NextItem
-				END
-				ELSE
-				BEGIN
-					INSERT INTO @tblBSLot (
-						intLotId
-						,intItemId
-						,dblQty
-						,intUOMId
-						,dblIssuedQuantity
-						,intIssuedUOMId
-						,dblWeightPerUnit
-						,intRecipeItemId
-						,intLocationId
-						,intStorageLocationId
-						)
-					SELECT intLotId
-						,intItemId
-						,@dblQty
-						,intItemUOMId
-						,CASE 
-							WHEN intItemUOMId = intItemIssuedUOMId
-								THEN @dblQty
-							ELSE @dblQty / CASE WHEN dblWeightPerUnit > 0 THEN dblWeightPerUnit ELSE 1.0 END
-							END
-						,intItemIssuedUOMId
-						,dblWeightPerUnit
-						,intRecipeItemId
-						,intLocationId
-						,intStorageLocationId
-					FROM @tblLot
-					WHERE intRowNo = @intLotCount
-
-					UPDATE @tblLot
-					SET dblQty = 0
-					WHERE intRowNo = @intLotCount
-
-					SET @dblReqQty = @dblReqQty - @dblQty
-				END
+				SELECT @intItemId = intItemId
+					,@dblReqQty = dblReqQty
+				FROM @tblItem
+				WHERE intRowNo = @intItemCount
 
 				SELECT @intLotCount = Min(intRowNo)
 				FROM @tblLot
 				WHERE intItemId = @intItemId
 					AND dblQty > 0
-					AND intRowNo > @intLotCount
+
+				WHILE (@intLotCount IS NOT NULL)
+				BEGIN
+					SELECT @intLotId = intLotId
+						,@dblQty = dblQty
+					FROM @tblLot
+					WHERE intRowNo = @intLotCount
+
+					IF (
+							@dblQty >= @dblReqQty
+							AND @intNoOfSheet > 1
+							)
+					BEGIN
+						INSERT INTO @tblBSLot (
+							intLotId
+							,intItemId
+							,dblQty
+							,intUOMId
+							,dblIssuedQuantity
+							,intIssuedUOMId
+							,dblWeightPerUnit
+							,intRecipeItemId
+							,intLocationId
+							,intStorageLocationId
+							)
+						SELECT intLotId
+							,intItemId
+							,@dblReqQty
+							,intItemUOMId
+							,CASE 
+								WHEN intItemUOMId = intItemIssuedUOMId
+									THEN @dblReqQty
+								ELSE @dblReqQty / CASE 
+										WHEN dblWeightPerUnit > 0
+											THEN dblWeightPerUnit
+										ELSE 1.0
+										END
+								END
+							,intItemIssuedUOMId
+							,dblWeightPerUnit
+							,intRecipeItemId
+							,intLocationId
+							,intStorageLocationId
+						FROM @tblLot
+						WHERE intRowNo = @intLotCount
+
+						UPDATE @tblLot
+						SET dblQty = dblQty - @dblReqQty
+						WHERE intRowNo = @intLotCount
+
+						GOTO NextItem
+					END
+					ELSE
+					BEGIN
+						INSERT INTO @tblBSLot (
+							intLotId
+							,intItemId
+							,dblQty
+							,intUOMId
+							,dblIssuedQuantity
+							,intIssuedUOMId
+							,dblWeightPerUnit
+							,intRecipeItemId
+							,intLocationId
+							,intStorageLocationId
+							)
+						SELECT intLotId
+							,intItemId
+							,@dblQty
+							,intItemUOMId
+							,CASE 
+								WHEN intItemUOMId = intItemIssuedUOMId
+									THEN @dblQty
+								ELSE @dblQty / CASE 
+										WHEN dblWeightPerUnit > 0
+											THEN dblWeightPerUnit
+										ELSE 1.0
+										END
+								END
+							,intItemIssuedUOMId
+							,dblWeightPerUnit
+							,intRecipeItemId
+							,intLocationId
+							,intStorageLocationId
+						FROM @tblLot
+						WHERE intRowNo = @intLotCount
+
+						UPDATE @tblLot
+						SET dblQty = 0
+						WHERE intRowNo = @intLotCount
+
+						SET @dblReqQty = @dblReqQty - @dblQty
+					END
+
+					SELECT @intLotCount = Min(intRowNo)
+					FROM @tblLot
+					WHERE intItemId = @intItemId
+						AND dblQty > 0
+						AND intRowNo > @intLotCount
+				END
+
+				NextItem:
+
+				SELECT @intItemCount = Min(intRowNo)
+				FROM @tblItem
+				WHERE intRowNo > @intItemCount
 			END
-
-			NextItem:
-
-			SELECT @intItemCount = Min(intRowNo)
-			FROM @tblItem
-			WHERE intRowNo > @intItemCount
 		END
 
 		--Create WorkOrder
-		If ISNULL(@strSavedWONo,'')=''
+		IF ISNULL(@strSavedWONo, '') = ''
 			EXEC dbo.uspMFGeneratePatternId @intCategoryId = @intCategoryId
-					,@intItemId = @intBlendItemId
-					,@intManufacturingId = @intCellId
-					,@intSubLocationId = 0
-					,@intLocationId = @intLocationId
-					,@intOrderTypeId = NULL
-					,@intBlendRequirementId = @intBlendRequirementId
-					,@intPatternCode = 93
-					,@ysnProposed = 0
-					,@strPatternString = @strNextWONo OUTPUT
-		Else
-		Begin
-			Set @strNextWONo=@strSavedWONo
-			Set @strSavedWONo=''
-		End
+				,@intItemId = @intBlendItemId
+				,@intManufacturingId = @intCellId
+				,@intSubLocationId = 0
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = @intBlendRequirementId
+				,@intPatternCode = 93
+				,@ysnProposed = 0
+				,@strPatternString = @strNextWONo OUTPUT
+		ELSE
+		BEGIN
+			SET @strNextWONo = @strSavedWONo
+			SET @strSavedWONo = ''
+		END
 
 		SET @intExecutionOrder = @intExecutionOrder + 1
 
@@ -783,7 +992,7 @@ End
 			,intConcurrencyId
 			,intSubLocationId
 			,dtmOrderDate
-			,intSupervisorId 
+			,intSupervisorId
 			)
 		SELECT @strNextWONo
 			,intItemId
@@ -818,7 +1027,7 @@ End
 			,intPlannedShiftId
 			,dtmDueDate
 			,1 AS intConcurrencyId
-			,@intSubLocationId 
+			,@intSubLocationId
 			,GetDate()
 			,intUserId
 		FROM @tblBlendSheet
@@ -830,23 +1039,37 @@ End
 		WHERE intWorkOrderId = @intWorkOrderId
 
 		EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
-		,@intLocationId = @intLocationId
-		,@intUserId = @intUserId
-		,@intWorkOrderId = @intWorkOrderId
+			,@intLocationId = @intLocationId
+			,@intUserId = @intUserId
+			,@intWorkOrderId = @intWorkOrderId
 
 		--Check for Input Items validity
 		SELECT @strInActiveItems = COALESCE(@strInActiveItems + ', ', '') + i.strItemNo
-		FROM @tblLot l join tblICItem i on l.intItemId=i.intItemId 
-		Where l.intItemId NOT IN (Select intItemId From tblMFWorkOrderRecipeItem 
-		Where intWorkOrderId=@intWorkOrderId AND intRecipeItemTypeId=1 
-		Union
-		Select intSubstituteItemId From tblMFWorkOrderRecipeSubstituteItem Where intWorkOrderId=@intWorkOrderId)
+		FROM @tblLot l
+		JOIN tblICItem i ON l.intItemId = i.intItemId
+		WHERE l.intItemId NOT IN (
+				SELECT intItemId
+				FROM tblMFWorkOrderRecipeItem
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND intRecipeItemTypeId = 1
+				
+				UNION
+				
+				SELECT intSubstituteItemId
+				FROM tblMFWorkOrderRecipeSubstituteItem
+				WHERE intWorkOrderId = @intWorkOrderId
+				)
 
-		If ISNULL(@strInActiveItems,'')<>''
-		Begin
-			Set @ErrMsg='Recipe ingredient items ' + @strInActiveItems + ' are inactive. Please remove the lots belong to the inactive items from blend sheet.'
-			RaisError(@ErrMsg,16,1)
-		End
+		IF ISNULL(@strInActiveItems, '') <> ''
+		BEGIN
+			SET @ErrMsg = 'Recipe ingredient items ' + @strInActiveItems + ' are inactive. Please remove the lots belong to the inactive items from blend sheet.'
+
+			RAISERROR (
+					@ErrMsg
+					,16
+					,1
+					)
+		END
 
 		--Insert Into Input/Consumed Lot
 		IF @ysnEnableParentLot = 0
@@ -1002,8 +1225,12 @@ End
 				UPDATE tblMFWorkOrder
 				SET dblQuantity = (
 						SELECT sum(dblQuantity)
-						FROM tblMFWorkOrderConsumedLot wi 
-						join tblICItem i on wi.intItemId=i.intItemId AND i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
+						FROM tblMFWorkOrderConsumedLot wi
+						JOIN tblICItem i ON wi.intItemId = i.intItemId
+							AND i.intCategoryId NOT IN (
+								SELECT *
+								FROM dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId)
+								)
 						WHERE intWorkOrderId = @intWorkOrderId
 						)
 				WHERE intWorkOrderId = @intWorkOrderId
@@ -1011,8 +1238,12 @@ End
 				UPDATE tblMFWorkOrder
 				SET dblQuantity = (
 						SELECT sum(dblQuantity)
-						FROM tblMFWorkOrderInputLot wi 
-						join tblICItem i on wi.intItemId=i.intItemId AND i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
+						FROM tblMFWorkOrderInputLot wi
+						JOIN tblICItem i ON wi.intItemId = i.intItemId
+							AND i.intCategoryId NOT IN (
+								SELECT *
+								FROM dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId)
+								)
 						WHERE intWorkOrderId = @intWorkOrderId
 						)
 				WHERE intWorkOrderId = @intWorkOrderId
@@ -1020,8 +1251,12 @@ End
 			UPDATE tblMFWorkOrder
 			SET dblQuantity = (
 					SELECT sum(dblQuantity)
-					FROM tblMFWorkOrderInputParentLot wi 
-						join tblICItem i on wi.intItemId=i.intItemId AND i.intCategoryId not in (Select * from dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId))
+					FROM tblMFWorkOrderInputParentLot wi
+					JOIN tblICItem i ON wi.intItemId = i.intItemId
+						AND i.intCategoryId NOT IN (
+							SELECT *
+							FROM dbo.[fnCommaSeparatedValueToTable](@strPackagingCategoryId)
+							)
 					WHERE intWorkOrderId = @intWorkOrderId
 					)
 			WHERE intWorkOrderId = @intWorkOrderId
