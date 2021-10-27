@@ -655,150 +655,292 @@ ORDER BY
 -- Section 5
 ------------------------------------------------------------------------------------------------------------------
 --price level 1
+BEGIN 
+	IF OBJECT_ID('tempdb..#tmpImportPricingLevel1') IS NOT NULL  
+		DROP TABLE #tmpImportPricingLevel1
 
-INSERT INTO [dbo].[tblICItemPricingLevel] (
-	[intItemId]
-	,[intItemLocationId]
-	,strPriceLevel
-	,intItemUnitMeasureId
-	,dblUnit
-	,strPricingMethod
-	,dblAmountRate
-	,dblUnitPrice
-	, intCompanyLocationPricingLevelId
-	,[intConcurrencyId]
-)
-SELECT 
-	inv.intItemId
-	,iloc.intItemLocationId
-	,PL.strPricingLevelName strPricingLevel
-	,intItemUnitMeasureId = (
-		SELECT TOP 1 
-			IU.intItemUOMId 
-		FROM 
-			tblICItemUOM IU JOIN tblICUnitMeasure U 
-				ON U.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE 
-			IU.intItemId = inv.intItemId
-			AND U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS
-		)
-	,1 dblUnit
-	,'None' PricingMethod
-	,0
-	,ptitm_prc1
-	,PL.intCompanyLocationPricingLevelId
-	,1 ConcurrencyId
-FROM 
-	ptitmmst AS itm INNER JOIN tblICItem AS inv 
-		ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-	INNER JOIN tblSMCompanyLocation AS loc 
-		ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	INNER JOIN tblICItemLocation AS iloc 
-		ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	JOIN tblSMCompanyLocationPricingLevel PL 
-		ON PL.intCompanyLocationId = iloc.intLocationId 
-WHERE 
-	PL.intSort = 1 
-	AND ptitm_prc1 > 0
+	CREATE TABLE #tmpImportPricingLevel1 (
+		intItemId INT 
+		,intItemLocationId INT NULL 
+		,strPriceLevel NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NULL 
+		,intItemUnitMeasureId INT NULL
+		,dblUnit NUMERIC(18, 6) NULL
+		,strPricingMethod NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NULL 
+		,dblAmountRate NUMERIC(18, 6) NULL 
+		,dblUnitPrice NUMERIC(18, 6) NULL
+		,intCompanyLocationPricingLevelId INT NULL 
+	)
+
+	INSERT INTO #tmpImportPricingLevel1 (
+		intItemId 
+		,intItemLocationId 
+		,strPriceLevel 
+		,intItemUnitMeasureId 
+		,dblUnit 
+		,strPricingMethod 
+		,dblAmountRate 
+		,dblUnitPrice 
+		,intCompanyLocationPricingLevelId 
+	)
+	SELECT 
+		inv.intItemId
+		,iloc.intItemLocationId
+		,PL.strPricingLevelName strPricingLevel
+		,intItemUnitMeasureId = (
+			SELECT TOP 1 
+				IU.intItemUOMId 
+			FROM 
+				tblICItemUOM IU JOIN tblICUnitMeasure U 
+					ON U.intUnitMeasureId = IU.intUnitMeasureId
+			WHERE 
+				IU.intItemId = inv.intItemId
+				AND U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS
+			)
+		,1 dblUnit
+		,'None' PricingMethod
+		,0
+		,ptitm_prc1
+		,PL.intCompanyLocationPricingLevelId
+	FROM 
+		ptitmmst AS itm INNER JOIN tblICItem AS inv 
+			ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
+		INNER JOIN tblSMCompanyLocation AS loc 
+			ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		INNER JOIN tblICItemLocation AS iloc 
+			ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
+		JOIN tblSMCompanyLocationPricingLevel PL 
+			ON PL.intCompanyLocationId = iloc.intLocationId 
+	WHERE 
+		PL.intSort = 1 
+		AND ptitm_prc1 > 0
+
+	INSERT INTO [dbo].[tblICItemPricingLevel] (
+		intItemId
+		,intItemLocationId
+		,strPriceLevel
+		,intItemUnitMeasureId
+		,dblUnit
+		,strPricingMethod
+		,dblAmountRate
+		,dblUnitPrice
+		,intCompanyLocationPricingLevelId
+		,intConcurrencyId
+	)
+	SELECT 
+		t.intItemId 
+		,t.intItemLocationId 
+		,t.strPriceLevel 
+		,t.intItemUnitMeasureId 
+		,t.dblUnit 
+		,t.strPricingMethod 
+		,t.dblAmountRate 
+		,t.dblUnitPrice 
+		,t.intCompanyLocationPricingLevelId 	
+		,intConcurrencyId = 1
+	FROM 
+		#tmpImportPricingLevel1 t LEFT JOIN tblICItemPricingLevel p
+			ON t.intItemId = p.intItemId 
+			AND (t.intItemLocationId = p.intItemLocationId OR (t.intItemLocationId IS NULL AND p.intItemLocationId IS NULL))
+			AND (t.strPriceLevel = p.strPriceLevel COLLATE SQL_Latin1_General_CP1_CS_AS OR (t.strPriceLevel IS NULL AND p.strPriceLevel IS NULL))
+			AND (t.intItemUnitMeasureId = p.intItemUnitMeasureId OR (t.intItemUnitMeasureId IS NULL AND p.intItemUnitMeasureId IS NULL))
+			AND p.dtmEffectiveDate IS NULL 
+	WHERE
+		p.intItemPricingLevelId IS NULL
+END 
+
 ---------------------------------------------------------------------------------------------------------------------
 --price level 2
-INSERT INTO [dbo].[tblICItemPricingLevel] (
-	[intItemId]
-	,[intItemLocationId]
-	,strPriceLevel
-	,intItemUnitMeasureId
-	,dblUnit
-	,strPricingMethod
-	,dblAmountRate
-	,dblUnitPrice
-	, intCompanyLocationPricingLevelId
-	,[intConcurrencyId]
+BEGIN 
+	IF OBJECT_ID('tempdb..#tmpImportPricingLevel2') IS NOT NULL  
+		DROP TABLE #tmpImportPricingLevel2
+
+	CREATE TABLE #tmpImportPricingLevel2 (
+		intItemId INT 
+		,intItemLocationId INT NULL 
+		,strPriceLevel NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NULL 
+		,intItemUnitMeasureId INT NULL
+		,dblUnit NUMERIC(18, 6) NULL
+		,strPricingMethod NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NULL 
+		,dblAmountRate NUMERIC(18, 6) NULL 
+		,dblUnitPrice NUMERIC(18, 6) NULL
+		,intCompanyLocationPricingLevelId INT NULL 
 	)
-SELECT 
-	inv.intItemId
-	,iloc.intItemLocationId
-	,PL.strPricingLevelName strPricingLevel
-	,intItemUnitMeasureId = (
-		SELECT TOP 1 
-			IU.intItemUOMId 
-		FROM 
-			tblICItemUOM IU JOIN tblICUnitMeasure U 
-				ON U.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE 
-			IU.intItemId = inv.intItemId
-			AND U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS
+
+	INSERT INTO #tmpImportPricingLevel2 (
+		intItemId 
+		,intItemLocationId 
+		,strPriceLevel 
+		,intItemUnitMeasureId 
+		,dblUnit 
+		,strPricingMethod 
+		,dblAmountRate 
+		,dblUnitPrice 
+		,intCompanyLocationPricingLevelId 
+	)
+	SELECT 
+		inv.intItemId
+		,iloc.intItemLocationId
+		,PL.strPricingLevelName strPricingLevel
+		,intItemUnitMeasureId = (
+			SELECT TOP 1 
+				IU.intItemUOMId 
+			FROM 
+				tblICItemUOM IU JOIN tblICUnitMeasure U 
+					ON U.intUnitMeasureId = IU.intUnitMeasureId
+			WHERE 
+				IU.intItemId = inv.intItemId
+				AND U.strUnitMeasure COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS
+		) 
+		,1 dblUnit
+		,'None' PricingMethod
+		,0
+		,ptitm_prc2
+		,PL.intCompanyLocationPricingLevelId
+	FROM 
+		ptitmmst AS itm INNER JOIN tblICItem AS inv 
+			ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
+		INNER JOIN tblSMCompanyLocation AS loc 
+			ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		INNER JOIN tblICItemLocation AS iloc 
+			ON (loc.intCompanyLocationId = iloc.intLocationId AND iloc.intItemId = inv.intItemId)
+		JOIN tblSMCompanyLocationPricingLevel PL 
+			ON PL.intCompanyLocationId = iloc.intLocationId 
+	WHERE 
+		PL.intSort = 2 
+		AND ptitm_prc2 > 0
+		--should not check this. Price levels can have same price
+		--and ptitm_prc2 <> ptitm_prc1
+
+	INSERT INTO [dbo].[tblICItemPricingLevel] (
+		[intItemId]
+		,[intItemLocationId]
+		,strPriceLevel
+		,intItemUnitMeasureId
+		,dblUnit
+		,strPricingMethod
+		,dblAmountRate
+		,dblUnitPrice
+		,intCompanyLocationPricingLevelId
+		,[intConcurrencyId]
 	) 
-	,1 dblUnit
-	,'None' PricingMethod
-	,0
-	,ptitm_prc2
-	,PL.intCompanyLocationPricingLevelId
-	,1 ConcurrencyId
-FROM 
-	ptitmmst AS itm INNER JOIN tblICItem AS inv 
-		ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-	INNER JOIN tblSMCompanyLocation AS loc 
-		ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	INNER JOIN tblICItemLocation AS iloc 
-		ON (loc.intCompanyLocationId = iloc.intLocationId AND iloc.intItemId = inv.intItemId)
-	JOIN tblSMCompanyLocationPricingLevel PL 
-		ON PL.intCompanyLocationId = iloc.intLocationId 
-WHERE 
-	PL.intSort = 2 
-	AND ptitm_prc2 > 0
-	--should not check this. Price levels can have same price
-	--and ptitm_prc2 <> ptitm_prc1
-	AND NOT EXISTS (SELECT 1 FROM tblICItemPricingLevel l WHERE l.intItemId = inv.intItemId
-	AND iloc.intItemLocationId = l.intItemLocationId AND l.strPriceLevel = PL.strPricingLevelName)
+	SELECT 
+		t.intItemId 
+		,t.intItemLocationId 
+		,t.strPriceLevel 
+		,t.intItemUnitMeasureId 
+		,t.dblUnit 
+		,t.strPricingMethod 
+		,t.dblAmountRate 
+		,t.dblUnitPrice 
+		,t.intCompanyLocationPricingLevelId 	
+		,intConcurrencyId = 1
+	FROM 
+		#tmpImportPricingLevel2 t LEFT JOIN tblICItemPricingLevel p
+			ON t.intItemId = p.intItemId 
+			AND (t.intItemLocationId = p.intItemLocationId OR (t.intItemLocationId IS NULL AND p.intItemLocationId IS NULL))
+			AND (t.strPriceLevel = p.strPriceLevel COLLATE SQL_Latin1_General_CP1_CS_AS OR (t.strPriceLevel IS NULL AND p.strPriceLevel IS NULL))
+			AND (t.intItemUnitMeasureId = p.intItemUnitMeasureId OR (t.intItemUnitMeasureId IS NULL AND p.intItemUnitMeasureId IS NULL))
+			AND p.dtmEffectiveDate IS NULL 
+	WHERE
+		p.intItemPricingLevelId IS NULL 
+
+END 
+
 --------------------------------------------------------------------------------------------------------------------
 --price level 3
-INSERT INTO [dbo].[tblICItemPricingLevel] (
-	[intItemId]
-	,[intItemLocationId]
-	,strPriceLevel
-	,intItemUnitMeasureId
-	,dblUnit
-	,strPricingMethod
-	,dblAmountRate
-	,dblUnitPrice
-	, intCompanyLocationPricingLevelId
-	,[intConcurrencyId]
-)
-SELECT 
-	inv.intItemId
-	,iloc.intItemLocationId
-	,PL.strPricingLevelName strPricingLevel
-	,intItemUnitMeasureId = (
-		SELECT TOP 1 
-			IU.intItemUOMId 
-		FROM 
-			tblICItemUOM IU JOIN tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
-		WHERE 
-			IU.intItemId = inv.intItemId
-			AND U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS
+BEGIN 
+	IF OBJECT_ID('tempdb..#tmpImportPricingLevel3') IS NOT NULL  
+		DROP TABLE #tmpImportPricingLevel3
+
+	CREATE TABLE #tmpImportPricingLevel3 (
+		intItemId INT 
+		,intItemLocationId INT NULL 
+		,strPriceLevel NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NULL 
+		,intItemUnitMeasureId INT NULL
+		,dblUnit NUMERIC(18, 6) NULL
+		,strPricingMethod NVARCHAR(50) COLLATE SQL_Latin1_General_CP1_CS_AS NULL 
+		,dblAmountRate NUMERIC(18, 6) NULL 
+		,dblUnitPrice NUMERIC(18, 6) NULL
+		,intCompanyLocationPricingLevelId INT NULL 
 	)
-	,1 dblUnit
-	,'None' PricingMethod
-	,0
-	,ptitm_prc3
-	,PL.intCompanyLocationPricingLevelId
-	,1 ConcurrencyId
-FROM 
-	ptitmmst AS itm INNER JOIN tblICItem AS inv 
-		ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
-	INNER JOIN tblSMCompanyLocation AS loc 
-		ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
-	INNER JOIN tblICItemLocation AS iloc 
-		ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
-	JOIN tblSMCompanyLocationPricingLevel PL 
-		ON PL.intCompanyLocationId = iloc.intLocationId 
-WHERE 
-	PL.intSort = 3 
-	AND ptitm_prc3 > 0
-	--should not check this. Price levels can have same price
-    --and ptitm_prc3 not in (ptitm_prc1,ptitm_prc2)
-    AND NOT EXISTS (SELECT 1 FROM tblICItemPricingLevel l where l.intItemId = inv.intItemId 
-    AND iloc.intItemLocationId = l.intItemLocationId and l.strPriceLevel = PL.strPricingLevelName)
+
+	INSERT INTO #tmpImportPricingLevel3 (
+		intItemId 
+		,intItemLocationId 
+		,strPriceLevel 
+		,intItemUnitMeasureId 
+		,dblUnit 
+		,strPricingMethod 
+		,dblAmountRate 
+		,dblUnitPrice 
+		,intCompanyLocationPricingLevelId 
+	)
+	SELECT 
+		inv.intItemId
+		,iloc.intItemLocationId
+		,PL.strPricingLevelName strPricingLevel
+		,intItemUnitMeasureId = (
+			SELECT TOP 1 
+				IU.intItemUOMId 
+			FROM 
+				tblICItemUOM IU JOIN tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
+			WHERE 
+				IU.intItemId = inv.intItemId
+				AND U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS
+		)
+		,1 dblUnit
+		,'None' PricingMethod
+		,0
+		,ptitm_prc3
+		,PL.intCompanyLocationPricingLevelId
+	FROM 
+		ptitmmst AS itm INNER JOIN tblICItem AS inv 
+			ON (itm.ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
+		INNER JOIN tblSMCompanyLocation AS loc 
+			ON (itm.ptitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
+		INNER JOIN tblICItemLocation AS iloc 
+			ON (loc.intCompanyLocationId = iloc.intLocationId	AND iloc.intItemId = inv.intItemId)
+		JOIN tblSMCompanyLocationPricingLevel PL 
+			ON PL.intCompanyLocationId = iloc.intLocationId 
+	WHERE 
+		PL.intSort = 3 
+		AND ptitm_prc3 > 0
+		--should not check this. Price levels can have same price
+		--and ptitm_prc3 not in (ptitm_prc1,ptitm_prc2)
+
+	INSERT INTO [dbo].[tblICItemPricingLevel] (
+		[intItemId]
+		,[intItemLocationId]
+		,strPriceLevel
+		,intItemUnitMeasureId
+		,dblUnit
+		,strPricingMethod
+		,dblAmountRate
+		,dblUnitPrice
+		,intCompanyLocationPricingLevelId
+		,[intConcurrencyId]
+	) 
+	SELECT 
+		t.intItemId 
+		,t.intItemLocationId 
+		,t.strPriceLevel 
+		,t.intItemUnitMeasureId 
+		,t.dblUnit 
+		,t.strPricingMethod 
+		,t.dblAmountRate 
+		,t.dblUnitPrice 
+		,t.intCompanyLocationPricingLevelId 	
+		,intConcurrencyId = 1
+	FROM 
+		#tmpImportPricingLevel3 t LEFT JOIN tblICItemPricingLevel p
+			ON t.intItemId = p.intItemId 
+			AND (t.intItemLocationId = p.intItemLocationId OR (t.intItemLocationId IS NULL AND p.intItemLocationId IS NULL))
+			AND (t.strPriceLevel = p.strPriceLevel COLLATE SQL_Latin1_General_CP1_CS_AS OR (t.strPriceLevel IS NULL AND p.strPriceLevel IS NULL))
+			AND (t.intItemUnitMeasureId = p.intItemUnitMeasureId OR (t.intItemUnitMeasureId IS NULL AND p.intItemUnitMeasureId IS NULL))
+			AND p.dtmEffectiveDate IS NULL 
+	WHERE
+		p.intItemPricingLevelId IS NULL 
+END 
 
 --===Convert Physical items to bundles in i21
 UPDATE I 
