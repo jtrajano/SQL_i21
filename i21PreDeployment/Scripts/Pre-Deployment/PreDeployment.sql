@@ -209,7 +209,7 @@
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
-:r .\20_CF\CardFuelingDropView.sql
+:r .\20_CF\CardFuelingDeleteObject.sql
 
 --PR
 :r .\21_PR\1_1620_to_1630.sql
