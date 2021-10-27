@@ -312,11 +312,13 @@ FROM
 		/* Load Shipment */
 		OUTER APPLY 
 			(SELECT 
-				dblNetShippedWt = SUM(LD.dblShipmentQty)
+				dblNetShippedWt = SUM(LD.dblShipmentNetWt) --LS Net Weight in Tonnage Unit
+				,dblShippedNetQty = SUM(LD.dblShipmentQty) --LS Net Weight in Contract Unit
 				,intItemUOMId = MAX(LD.intWeightItemUOMId)
 			FROM 
 				(SELECT l.intLoadId, ld.intItemId, ld.intPContractDetailId, l.ysnPosted, ld.intWeightItemUOMId
-					,dblShipmentQty = dbo.fnCalculateQtyBetweenUOM (ld.intWeightItemUOMId, ToWUOM.intItemUOMId, ld.dblNet) 
+					,dblShipmentNetWt = dbo.fnCalculateQtyBetweenUOM (ld.intWeightItemUOMId, ToWUOM.intItemUOMId, ld.dblNet) 
+					,dblShipmentQty = dbo.fnCalculateQtyBetweenUOM (ld.intWeightItemUOMId, ld.intItemUOMId, ld.dblNet) 
 					FROM tblLGLoadDetail ld
 					INNER JOIN tblLGLoad l on l.intLoadId = ld.intLoadId and l.intShipmentType = 1
 					WHERE l.ysnPosted = 1 AND ld.intPContractDetailId = PCD.intContractDetailId) LD
@@ -413,14 +415,14 @@ FROM
 													CC.dblRate 
 													/ dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
-															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+															 ELSE ALD.dblSAllocatedQty END)
 												ELSE CC.dblRate END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 								,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
-															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+															 ELSE ALD.dblSAllocatedQty END)
 													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate
@@ -429,8 +431,8 @@ FROM
 												WHEN CC.strCostMethod = 'Percentage' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
-															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+															 ELSE ALD.dblSAllocatedQty END)
 													* CD.dblCashPrice * CC.dblRate/100
 												END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						FROM tblCTContractCost CC
@@ -505,14 +507,14 @@ FROM
 													CC.dblRate 
 													/ dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
-															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+															 ELSE ALD.dblSAllocatedQty END)
 												ELSE CC.dblRate END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 								,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
-															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+															 ELSE ALD.dblSAllocatedQty END)
 													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate
@@ -521,8 +523,8 @@ FROM
 												WHEN CC.strCostMethod = 'Percentage' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
 														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
-															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN LS.dblShippedNetQty
+															 ELSE ALD.dblSAllocatedQty END)
 													* CD.dblCashPrice * CC.dblRate/100
 												END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						FROM tblCTContractCost CC
