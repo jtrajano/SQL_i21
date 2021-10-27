@@ -10,8 +10,8 @@ SELECT intCurrencyExposureId
 	, e.intCompanyId
 	, e.intCommodityId
 	, c.strCommodityCode
-	, dtmFutureClosingDate
-	, intCurrencyId
+	, dtmFutureClosingDate 
+	, e.intCurrencyId
 	, cur.strCurrency
 	, e.intConcurrencyId
 FROM tblRKCurrencyExposure e
