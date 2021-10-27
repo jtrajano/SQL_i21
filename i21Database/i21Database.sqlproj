@@ -1564,6 +1564,8 @@
     <Build Include="dbo\Stored Procedures\uspSTMassAddLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSTDuplicateModifier.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGridCostAndPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTGridUpdateCostAndPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGridCostAndPricePreview.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdatePromoSalesTotal.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyCostItemPricing.sql" />
@@ -6362,6 +6364,7 @@
     <Build Include="dbo\Functions\fnFormatNumber.sql" />
     <Build Include="dbo\Views\vyuQMCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateItemWithEffectiveDatePricingForCStore.sql" />
     <Build Include="dbo\Views\vyuRKGetPurchaseInventory.sql" />
     <Build Include="dbo\Tables\tblMFParentLotNumberPattern.sql" />
     <Build Include="dbo\Tables\tblCRMSalesRepSummary.sql" />
@@ -6429,6 +6432,7 @@
     <Build Include="dbo\User Defined Types\TFInventoryReceiptDetailTransaction.sql" />
     <Build Include="dbo\Views\vyuGRSettlementSummaryReport.sql" />
     <Build Include="dbo\Functions\fnSTSeparateStringToColumns.sql" />
+    <Build Include="dbo\Functions\fnSTRetailRounding.sql" />
     <Build Include="dbo\Functions\fnSTUPCRemoveLeadingZero.sql" />
     <Build Include="dbo\Stored Procedures\uspSTGenerateShelfTags.sql" />
     <None Include="Scripts\Post-Deployment\PAT\2_MigrateStockRecords.sql" />
@@ -6663,6 +6667,7 @@
     <Build Include="dbo\Stored Procedures\uspCRMGenerateSalesRepSummary.sql" />
     <Build Include="dbo\Functions\fnGLGetGLEntriesErrorMessage.sql" />
     <Build Include="dbo\Views\vyuSTItemsToRegister.sql" />
+    <Build Include="dbo\Tables\tblSTGridCostAndPricePreview.sql" />
     <Build Include="dbo\Tables\tblSTUpdateRegisterNotification.sql" />
     <Build Include="dbo\Tables\tblSTModifier.sql" />
     <Build Include="dbo\Stored Procedures\uspSMEditDocumentMessage.sql" />
@@ -7595,6 +7600,7 @@
     <Build Include="dbo\User Defined Types\StoreItemUOMModifier.sql" />
     <Build Include="dbo\User Defined Types\StoreItemPricePricing.sql" />
     <Build Include="dbo\User Defined Types\StoreItemCostPricing.sql" />
+    <Build Include="dbo\User Defined Types\StoreItemGridToUpdate.sql" />
     <Build Include="dbo\Functions\fnGRCalculateStorageCharge.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_CleanStagingTables.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostTransfer.sql" />
