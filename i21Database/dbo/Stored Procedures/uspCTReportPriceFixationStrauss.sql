@@ -236,7 +236,7 @@ BEGIN TRY
 								+ ' per ' + FM.strUnitMeasure,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
-	
+			
 			SubmitterSign =		case
 								when CH.intContractTypeId = 1
 								then 

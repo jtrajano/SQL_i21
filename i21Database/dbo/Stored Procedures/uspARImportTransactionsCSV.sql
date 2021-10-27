@@ -602,7 +602,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]	= 1.000000
 							,[intSubCurrencyId]			= NULL
 							,[dblSubCurrencyRate]		= 1.000000
-							,[ysnUseOriginIdAsInvoiceNumber] =   CASE WHEN  (@OriginId IS NOT NULL  AND  @CustomerNumber <> '9998') THEN CAST(1 AS BIT) ELSE CAST(1 AS BIT) END
+							,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(@OriginId, '') <> '' AND  @CustomerNumber <> '9998' THEN 1 ELSE 0 END
 							,[ysnImpactInventory]		= @ysnImpactInventory
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
