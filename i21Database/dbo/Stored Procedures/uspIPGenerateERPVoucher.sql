@@ -417,7 +417,7 @@ BEGIN TRY
 				,@strERPPONumber = CD.strERPPONumber
 				,@strERPItemNumber = CD.strERPItemNumber
 				,@strItemNo = I.strItemNo
-				,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId, @intItemUOMId, BD.dblQtyReceived), 0))
+				,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intWeightUOMId, @intItemUOMId, BD.dblNetWeight), 0))
 				,@strDetailCurrency = C.strCurrency
 				,@dblDetailCost = (
 					CASE 
