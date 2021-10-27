@@ -557,6 +557,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\36_CStoreSQLJobScheduler.sql
 :r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
 :r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
+:r .\ST\39_FileFieldMapping_Passport_TPM.sql
 
 
 
