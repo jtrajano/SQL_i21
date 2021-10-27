@@ -365,15 +365,17 @@ BEGIN
    ,[dblDebit]   					  = 0  
    ,[dblCredit]   					= dblAmountFrom --   CASE WHEN @ysnForeignToForeign =1 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountFunctional.Val ELSE A.dblAmount END  
    ,[dblDebitForeign]  			= 0  
-   ,[dblCreditForeign]  		= CASE WHEN @ysnFunctionalToForeign = 1 THEN  dblAmountForeignTo ELSE dblAmountForeignFrom END   
+   ,[dblCreditForeign]  		= CASE WHEN @ysnFunctionalToFunctional = 1 THEN 0 
+                                   WHEN @ysnFunctionalToForeign = 1 THEN  dblAmountForeignTo
+                                   ELSE  dblAmountForeignFrom END
    ,[dblDebitUnit]   				= 0  
    ,[dblCreditUnit]  				= 0  
    ,[strDescription]  			= A.strDescription  
    ,[strCode]    					  = @GL_DETAIL_CODE  
    ,[strReference]   				= A.strReferenceFrom  
    ,[intCurrencyId]  				= intCurrencyIdAmountFrom  
-   ,[intCurrencyExchangeRateTypeId] = intRateTypeIdAmountFrom  
-   ,[dblExchangeRate]  				= dblRateAmountFrom  
+   ,[intCurrencyExchangeRateTypeId] =  CASE WHEN @ysnFunctionalToForeign = 1 THEN NULL ELSE  intRateTypeIdAmountFrom  END
+   ,[dblExchangeRate]  				= CASE WHEN @ysnFunctionalToForeign = 1 THEN dblAmountFrom/dblAmountForeignTo ELSE dblRateAmountFrom  END
    ,[dtmDateEntered]  				= GETDATE()  
    ,[dtmTransactionDate] 			= A.dtmDate  
    ,[strJournalLineDescription] 	= GLAccnt.strDescription  
@@ -389,9 +391,6 @@ BEGIN
    INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp  
     ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId  
  WHERE A.strTransactionId = @strTransactionId  
-  
-   
-   
  -- 2. DEBIT SIdE (TARGET OF THE FUND)  
  UNION ALL   
  SELECT [strTransactionId]  = @strTransactionId  
@@ -401,7 +400,9 @@ BEGIN
    ,[intAccountId]   				= GLAccnt.intAccountId  
    ,[dblDebit]    					= dblAmountTo  
    ,[dblCredit]   					= 0   
-   ,[dblDebitForeign]  			= CASE WHEN @ysnForeignToFunctional = 1 or @ysnForeignToForeign = 1 THEN  dblAmountForeignFrom ELSE dblAmountForeignTo END  
+   ,[dblDebitForeign]  			= CASE WHEN @ysnFunctionalToFunctional = 1 THEN 0 
+                                   WHEN @ysnForeignToFunctional = 1 OR @ysnForeignToForeign = 1  THEN  dblAmountForeignFrom 
+                                   ELSE  dblAmountForeignTo END
    ,[dblCreditForeign]  		= 0  
    ,[dblDebitUnit]   				= 0  
    ,[dblCreditUnit]  				= 0  
@@ -410,7 +411,9 @@ BEGIN
    ,[strReference]   				= strReferenceTo  
    ,[intCurrencyId]  				= intCurrencyIdAmountTo  
    ,[intCurrencyExchangeRateTypeId] = CASE WHEN @ysnForeignToFunctional = 1 THEN NULL ELSE intRateTypeIdAmountTo END
-   ,[dblExchangeRate]  				= CASE WHEN @ysnForeignToFunctional = 1 THEN dblCrossRate ELSE dblRateAmountTo END
+   ,[dblExchangeRate]  				= CASE WHEN @ysnForeignToFunctional = 1 THEN dblCrossRate 
+                                     WHEN @ysnForeignToForeign = 1 THEN dblAmountTo/dblAmountForeignFrom
+                                     ELSE dblRateAmountTo END
    ,[dtmDateEntered]  				= GETDATE()  
    ,[dtmTransactionDate] 			= A.dtmDate  
    ,[strJournalLineDescription] 	= GLAccnt.strDescription  
@@ -499,6 +502,17 @@ BEGIN
   BEGIN
       DELETE FROM #tmpGLDetail WHERE dblCredit > 0
 
+       IF @ysnForeignToForeign = 1
+       BEGIN
+        UPDATE A 
+        SET dblDebitForeign = BT.dblAmountForeignTo, dblExchangeRate = BT.dblRateAmountTo
+        FROM #tmpGLDetail A
+          OUTER APPLY(
+            SELECT dblAmountForeignTo, dblRateAmountTo FROM [dbo].tblCMBankTransfer A WHERE strTransactionId = @strTransactionId
+          )BT
+          
+      END
+
         INSERT INTO #tmpGLDetail (  
         [strTransactionId]  
         ,[intTransactionId]  
@@ -536,7 +550,9 @@ BEGIN
         ,[dblDebit]   					  = 0  
         ,[dblCredit]   					  = dblAmountFrom --   CASE WHEN @ysnForeignToForeign =1 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountFunctional.Val ELSE A.dblAmount END  
         ,[dblDebitForeign]  			= 0  
-        ,[dblCreditForeign]  		  = CASE WHEN @ysnFunctionalToForeign = 1 THEN  dblAmountForeignTo ELSE dblAmountForeignFrom END   
+        ,[dblCreditForeign]  		  = CASE WHEN @ysnFunctionalToFunctional = 1 THEN 0 
+                                    WHEN @ysnForeignToFunctional = 1 THEN dblAmountForeignFrom
+                                    ELSE dblAmountForeignTo END--CASE WHEN @ysnFunctionalToForeign = 1 or @ysnForeignToForeign = 1 THEN  dblAmountForeignTo ELSE dblAmountForeignFrom END   
         ,[dblDebitUnit]   				= 0  
         ,[dblCreditUnit]  				= 0  
         ,[strDescription]  			  = A.strDescription
@@ -544,7 +560,10 @@ BEGIN
         ,[strReference]   				= A.strReferenceFrom  
         ,[intCurrencyId]  				= intCurrencyIdAmountFrom  
         ,[intCurrencyExchangeRateTypeId] = NULL  
-        ,[dblExchangeRate]  				= dblAmountFrom/dblAmountForeignFrom
+        ,[dblExchangeRate]  				= CASE WHEN @ysnFunctionalToForeign =1 or @ysnForeignToForeign = 1 THEN dblAmountFrom/dblAmountForeignTo
+                                           --WHEN @ysnForeignToForeign = 1 THEN dblAmountFrom/dblAmountForeignTo
+                                           ELSE dblRateAmountFrom END
+                                           
         ,[dtmDateEntered]  				= GETDATE()  
         ,[dtmTransactionDate] 			= A.dtmDate  
         ,[strJournalLineDescription] 	= GLAccnt.strDescription  
