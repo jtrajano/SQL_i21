@@ -3384,6 +3384,7 @@ BEGIN TRY
 							,intFreightBasisBaseUOMId = CD1.intFreightBasisBaseUOMId
 						--,strFixationBy = CD1.strFixationBy
 						--,intConvPriceCurrencyId = CD1.intConvPriceCurrencyId
+							,CD.intContractDetailRefId=CD1.intContractDetailRefId
 						FROM tblCTContractDetail CD
 						JOIN #tmpContractDetail CD1 ON CD.intContractSeq = CD1.intContractSeq
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId

@@ -29,6 +29,7 @@
 	[ysnOverrideColumnFormula]	BIT             DEFAULT 0 NULL,
     [intSort]					INT             NULL,
     [intConcurrencyId]			INT             DEFAULT 1 NOT NULL,
+    [intCurrencyID]			    INT             NULL,
     CONSTRAINT [PK_tblFRRowDesign] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC),
     CONSTRAINT [FK_tblFRRowDesign_tblFRRow] FOREIGN KEY([intRowId]) REFERENCES [dbo].[tblFRRow] ([intRowId]) ON DELETE CASCADE
 );
