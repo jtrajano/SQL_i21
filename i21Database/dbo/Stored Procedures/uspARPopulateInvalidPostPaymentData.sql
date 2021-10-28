@@ -467,7 +467,7 @@ BEGIN
             P.[ysnPost] = @OneBit
         AND P.[intInvoiceId] IS NOT NULL
         AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-		AND ISNULL(I.[dblAmountDue], 0)   <  (ISNULL(P.[dblWriteOffAmount], 0) * -1)
+		AND ISNULL(I.[dblAmountDue], 0) * (CASE WHEN I.strTransactionType IN ('Overpayment', 'Customer Prepayment', 'Credit Memo') THEN -1 ELSE 1 END) <  (ISNULL(P.[dblWriteOffAmount], 0))
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
