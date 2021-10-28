@@ -2,6 +2,16 @@
 
 AS
 
+with CTECert as
+(
+    select
+        cr.intContractDetailId
+        ,ce.strCertificationName
+    from
+        tblCTContractCertification cr
+        left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+)
+
 SELECT DISTINCT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq AS NVARCHAR)
 	, strPONumber = CD.strERPPONumber
 	, CH.dtmContractDate
@@ -31,6 +41,18 @@ SELECT DISTINCT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intCo
 	, CCTotal.dblOtherCost
 	, CD.dblBasis
 	, CD.dblCashPrice
+    , strCertificateName = (
+        select
+            STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
+        FROM
+            CTECert where intContractDetailId = CD.intContractDetailId
+        FOR XML PATH('')),' #!',', '), 1, 2, '')
+    )
+    , ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
+    , strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS
+    , strOrigin = ISNULL(RY.strCountry, OG.strCountry)
+    , strShipper = PR.strName  
+
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblEMEntity EN ON EN.intEntityId = CH.intEntityId
@@ -71,4 +93,8 @@ LEFT JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = CD.intFutureMont
 LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
 LEFT JOIN tblSMFreightTerms ST ON ST.intFreightTermId = ISNULL(CH.intFreightTermId, CD.intFreightTermId)
 LEFT JOIN tblICCommodityAttribute PT ON	PT.intCommodityAttributeId = IT.intProductTypeId AND PT.strType = 'ProductType'
+LEFT JOIN tblSMCountry RY WITH(NOLOCK) ON RY.intCountryID = IC.intCountryId  
+LEFT JOIN tblICCommodityAttribute CA2 WITH(NOLOCK) ON CA2.intCommodityAttributeId = IT.intOriginId AND CA2.strType = 'Origin'  
+LEFT JOIN tblSMCountry OG WITH(NOLOCK) ON OG.intCountryID = CA2.intCountryID  
+LEFT JOIN tblEMEntity PR WITH(NOLOCK) ON PR.intEntityId = ISNULL(CD.intProducerId, CH.intProducerId) 
 WHERE CD.intContractStatusId <> 3
