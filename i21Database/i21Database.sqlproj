@@ -9078,7 +9078,6 @@
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutSubReport.sql" />
     <Build Include="dbo\Views\vyuSCTicketInOutReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspIPDataIntegrityCheckEmail_ST.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
     <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
