@@ -34,4 +34,4 @@
 );
 
 Go
-CREATE NONCLUSTERED INDEX [IX_tblFRRowDesign_intRowId] ON [dbo.tblFRRowDesign] ([intRowId] asc)
+CREATE NONCLUSTERED INDEX [IX_tblFRRowDesign_intRowId] ON [dbo].[tblFRRowDesign] ([intRowId] asc)
