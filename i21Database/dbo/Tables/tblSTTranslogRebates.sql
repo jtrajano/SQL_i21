@@ -383,4 +383,9 @@ CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_strTrlUPCwithoutCheckDigit_idx]
 GO
 CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_dtmDate_idx]
     ON [dbo].[tblSTTranslogRebates]([dtmDate] ASC);
+	
+GO
+CREATE NONCLUSTERED INDEX [IX_intStoreNumber]
+    ON [dbo].[tblSTTranslogRebates]([intStoreNumber] ASC, [dtmDate] ASC);
+
 
