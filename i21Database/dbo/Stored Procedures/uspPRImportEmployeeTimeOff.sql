@@ -150,6 +150,21 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 
 				DELETE FROM #TempEmployeeTimeOff WHERE intEntityNo = @intEntityNo AND strTimeOffId = @strTimeOffId AND strTimeOffDesc = @strTimeOffDesc
 			END
+		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+		SELECT TOP 1
+			  NEWID()
+			, guiApiImportLogId = @guiLogId
+			, strField = 'Employee Time Off'
+			, strValue = SE.strTimeOffId
+			, strLogLevel = 'Info'
+			, strStatus = 'Success'
+			, intRowNo = SE.intRowNumber
+			, strMessage = 'The employee time off has been successfully imported.'
+		FROM tblApiSchemaEmployeeTimeOff SE
+		LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = SE.intEntityNo
+		WHERE SE.guiApiUniqueId = @guiApiUniqueId
+		AND SE.strTimeOffId = @strTimeOffId
+		AND SE.strTimeOffDesc = @strTimeOffDesc
 
 	END
 
