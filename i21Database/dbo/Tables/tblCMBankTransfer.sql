@@ -51,6 +51,8 @@
     [intRateTypeIdAmountTo]    INT            NULL,
     [intRateTypeIdFeesFrom]    INT            NULL,
     [intRateTypeIdFeesTo]      INT            NULL,
+    [intBankLoanIdFrom]        INT            NULL,
+    [intBankLoanIdTo]          INT            NULL,
     [intConcurrencyId]         INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_From] FOREIGN KEY ([intBankAccountIdFrom]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),

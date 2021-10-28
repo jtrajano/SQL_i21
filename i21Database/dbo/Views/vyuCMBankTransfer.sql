@@ -1,4 +1,4 @@
-CREATE VIEW vyuCMBankTransfer  
+alter VIEW vyuCMBankTransfer  
 AS  
 SELECT A.*,  
 D.*,
@@ -19,7 +19,9 @@ END strBankTransferTypeId,
 CASE WHEN A.intRateTypeIdAmountFrom = 99999 THEN 'Historic Rate' ELSE J.strCurrencyExchangeRateType  END strRateTypeAmountFrom,
 K.strCurrencyExchangeRateType strRateTypeAmountTo,
 L.strCurrencyExchangeRateType strRateTypeFeesFrom,
-M.strCurrencyExchangeRateType strRateTypeFeesTo
+M.strCurrencyExchangeRateType strRateTypeFeesTo,
+N.strBankLoanId strBankLoanIdFrom,
+O.strBankLoanId strBankLoanIdTo
 FROM tblCMBankTransfer A 
 OUTER APPLY(
 	SELECT TOP 1 dtmDateReconciled FROM tblCMBankTransaction WHERE strLink = A.strTransactionId
@@ -61,5 +63,9 @@ OUTER APPLY(
 OUTER APPLY(  
  SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intRateTypeIdFeesTo  
 )M
-  
-  
+OUTER APPLY(  
+ SELECT TOP 1 strBankLoanId FROM tblCMBankLoan WHERE intBankLoanId = intBankLoanIdFrom
+)N
+OUTER APPLY(  
+ SELECT TOP 1 strBankLoanId FROM tblCMBankLoan WHERE intBankLoanId = intBankLoanIdTo
+)O
