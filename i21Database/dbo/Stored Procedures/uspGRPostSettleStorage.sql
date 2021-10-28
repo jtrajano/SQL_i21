@@ -2153,7 +2153,8 @@ BEGIN TRY
 																WHEN (availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 and intItemType = 1) or (@ysnFromPriceBasisContract = 0 and availableQtyForVoucher.intPricingTypeIdHeader = 2 and availableQtyForVoucher.intPricingTypeId /*sequence*/ = 1 and intItemType = 1) 
 																then dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice) 
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice) 
-																ELSE case WHEN (intItemType = 3 and ysnPercentChargeType = 1) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),6) else a.dblCashPrice end
+																ELSE case when (intItemType = 3 and ysnPercentChargeType = 1 and a.dblCashPriceUsed is not null and a.intContractUOMId is not null) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),6) 
+                												else a.dblCashPrice end
 															END
 														end					
 															
