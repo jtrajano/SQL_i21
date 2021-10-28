@@ -258,10 +258,10 @@ FROM
 									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
 									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
 								* dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
-		,dblReservesARateTotal = RA.dblReservesARateTotal
-		,dblReservesAValueTotal = RA.dblReservesAValueTotal * -1
-		,dblReservesBRateTotal = RB.dblReservesBRateTotal
-		,dblReservesBValueTotal = RB.dblReservesBValueTotal * -1
+		,dblReservesARateTotal = ISNULL(RA.dblReservesARateTotal, 0)
+		,dblReservesAValueTotal = ISNULL(RA.dblReservesAValueTotal * -1, 0)
+		,dblReservesBRateTotal = ISNULL(RB.dblReservesBRateTotal, 0)
+		,dblReservesBValueTotal = ISNULL(RB.dblReservesBValueTotal * -1, 0)
 		,dblDifferentialRateTotal = /* P-Differential + Reserves A Total + Reserves B Total */
 								ISNULL(PCD.dblBasis, 0)
 								+ ISNULL(RA.dblReservesARateTotal, 0) 
