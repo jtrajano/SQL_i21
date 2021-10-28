@@ -175,7 +175,7 @@ DuplicateVendorSetup.strCustomer IS NOT NULL
 UNION
 SELECT -- Customer already exists
 	FilteredVendorSetup.strCustomer,
-	'Customer: ' + FilteredVendorSetup.strCustomer + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Customer: ' + FilteredVendorSetup.strCustomer + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	5
 FROM
@@ -198,6 +198,8 @@ INNER JOIN
 		Customer.intEntityId = CustomerXref.intEntityId
 		AND
 		VendorSetup.intVendorSetupId = CustomerXref.intVendorSetupId
+WHERE
+@ysnAllowOverwrite = 0
 UNION
 --------------------------- Item Xref Logs ---------------------------
 SELECT -- Invalid Item
@@ -237,7 +239,7 @@ DuplicateVendorSetup.strItemNo IS NOT NULL
 UNION
 SELECT  -- Item already exists
 	FilteredVendorSetup.strItemNo,
-	'Item: ' + FilteredVendorSetup.strItemNo + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Item: ' + FilteredVendorSetup.strItemNo + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	8
 FROM
@@ -260,6 +262,8 @@ INNER JOIN
 		Item.intItemId = ItemXref.intItemId
 		AND
 		VendorSetup.intVendorSetupId = ItemXref.intVendorSetupId
+WHERE 
+@ysnAllowOverwrite = 0
 UNION
 --------------------------- UOM Xref Logs ---------------------------
 SELECT -- Invalid UOM
@@ -297,7 +301,7 @@ DuplicateVendorSetup.strUnitMeasure IS NOT NULL
 UNION
 SELECT  -- Unit of measure already exists
 	FilteredVendorSetup.strUnitMeasure,
-	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	11
 FROM
@@ -320,6 +324,8 @@ INNER JOIN
 		UnitMeasure.intUnitMeasureId = UOMXref.intUnitMeasureId
 		AND
 		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
+WHERE
+@ysnAllowOverwrite = 0
 UNION
 ------------------------- Category Xref Logs -------------------------
 SELECT -- Invalid Category
@@ -357,7 +363,7 @@ DuplicateVendorSetup.strCategory IS NOT NULL
 UNION
 SELECT  -- Category already exists
 	FilteredVendorSetup.strCategory,
-	'Category: ' + FilteredVendorSetup.strCategory + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Category: ' + FilteredVendorSetup.strCategory + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	14
 FROM
@@ -380,6 +386,8 @@ INNER JOIN
 		Category.intCategoryId = CategoryXref.intCategoryId
 		AND
 		VendorSetup.intVendorSetupId = CategoryXref.intVendorSetupId
+WHERE
+@ysnAllowOverwrite = 0
 
 --Validate Records
 
