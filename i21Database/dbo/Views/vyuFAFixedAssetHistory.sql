@@ -9,9 +9,8 @@ WITH FA AS (
 		,intDepreciationMethodId
 		,dblCost
 		,dblSalvageValue
-		,intConcurrencyId
 	FROM tblFAFixedAsset
-	GROUP BY intAssetId, strAssetId, dtmDateInService, intDepreciationMethodId, dblForexRate, dblCost, dblSalvageValue, intConcurrencyId
+	GROUP BY intAssetId, strAssetId, dtmDateInService, intDepreciationMethodId, dblForexRate, dblCost, dblSalvageValue
 ),
 G AS(
 	SELECT 
@@ -40,7 +39,9 @@ SELECT
 	GL.strTransactionType strTransaction, 
 	GL.strTransactionId, 
 	(FA.dblCost - FA.dblSalvageValue) dblBasis,
+	(FA.dblCost - FA.dblSalvageValue) dblDepreciationBasis,
 	ROUND((FA.dblCost - FA.dblSalvageValue) * ISNULL(FA.dblForexRate, 1), 2) dblFunctionalBasis,
+	ROUND((FA.dblCost - FA.dblSalvageValue) * ISNULL(FA.dblForexRate, 1), 2) dblFunctionalDepreciationBasis,
 	DM.strDepreciationType strType,
 	DM.strConvention, 
 	FA.dtmDateInService, 
@@ -51,7 +52,7 @@ SELECT
 	0 dblFunctionalSection179,
 	0 dblBonusDepreciation,
 	0 dblFunctionalBonusDepreciation,
-	FA.intConcurrencyId
+	1 intConcurrencyId
  FROM FA
  LEFT JOIN tblGLDetail GL ON GL.intTransactionId = FA.intAssetId AND GL.strReference = FA.strAssetId
  LEFT JOIN tblFADepreciationMethod DM ON DM.intDepreciationMethodId = FA.intDepreciationMethodId
@@ -69,8 +70,7 @@ SELECT
 	FA.dblSalvageValue,
 	DM.intDepreciationMethodId,
 	DM.strDepreciationType,
-	GL.dtmTransactionDate,
-	FA.intConcurrencyId
+	GL.dtmTransactionDate
 UNION ALL
 SELECT 
 	G.dtmDepreciationToDate, 
@@ -98,8 +98,10 @@ SELECT
 	ISNULL(GAAP.strDepreciationMethodId, Tax.strDepreciationMethodId) strDepreciationMethodId,
 	ISNULL(GAAP.strTransaction, Tax.strTransaction) strTransaction,
 	ISNULL(GAAP.strTransactionId, Tax.strTransactionId) strTransactionId,
-	ISNULL(GAAP.dblBasis,Tax.dblBasis)dblBasis,
-	ISNULL(GAAP.dblFunctionalBasis,Tax.dblFunctionalBasis)dblFunctionalBasis,
+	ISNULL(GAAP.dblBasis,Tax.dblBasis) dblBasis,
+	ISNULL(GAAP.dblDepreciationBasis,Tax.dblDepreciationBasis) dblDepreciationBasis,
+	ISNULL(GAAP.dblFunctionalBasis,Tax.dblFunctionalBasis) dblFunctionalBasis,
+	ISNULL(GAAP.dblFunctionalDepreciationBasis,Tax.dblFunctionalDepreciationBasis) dblFunctionalDepreciationBasis,
 	ISNULL(GAAP.strType, Tax.strType)strType,
 	ISNULL(GAAP.strConvention, Tax.strConvention)strConvention,
 	ISNULL(GAAP.dtmDateInService, Tax.dtmDateInService)dtmDateInService,
@@ -122,7 +124,9 @@ outer apply(
 	strTransaction,
 	strTransactionId,
 	dblBasis,
+	dblDepreciationBasis,
 	dblFunctionalBasis,
+	dblFunctionalDepreciationBasis,
 	strType,
 	A.strConvention,
 	dtmDateInService,
@@ -150,7 +154,9 @@ OUTER APPLY(
 	strTransaction,
 	strTransactionId,
 	dblBasis,
+	dblDepreciationBasis,
 	dblFunctionalBasis,
+	dblFunctionalDepreciationBasis,
 	strType,
 	A.strConvention,
 	dtmDateInService,

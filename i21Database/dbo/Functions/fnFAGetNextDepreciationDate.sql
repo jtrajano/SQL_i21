@@ -34,20 +34,20 @@ BEGIN
 					THEN 
 						@dtmPlacedInService
 					ELSE
-						EOMONTH(@dtmPlacedInService)
+						CAST((DATEADD(s, -1, DATEADD(mm, DATEDIFF(m, 0, @dtmPlacedInService) + 1, 0))) AS DATE)
 					END
 			ELSE 
 				CASE WHEN ISNULL(@intBookId, 1) = 1
 					THEN 
 						@dtmDepreciationToDate
 					ELSE
-						CASE WHEN (EOMONTH(@dtmDepreciationToDate) = @dtmDepreciationToDate) 
+						CASE WHEN (CAST((DATEADD(s, -1, DATEADD(mm, DATEDIFF(m, 0, @dtmDepreciationToDate) + 1, 0))) AS DATE) = @dtmDepreciationToDate) 
 							THEN 
 								CASE WHEN @strTransaction IN ('Basis Adjustment', 'Depreciation Adjustment')
 									THEN @dtmDepreciationToDate
 									ELSE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (@dtmDepreciationToDate)) + 2, 0))
 									END
-							ELSE EOMONTH(@dtmDepreciationToDate)
+							ELSE CAST((DATEADD(s, -1, DATEADD(mm, DATEDIFF(m, 0, @dtmDepreciationToDate) + 1, 0))) AS DATE)
 						END
 					END
 		END

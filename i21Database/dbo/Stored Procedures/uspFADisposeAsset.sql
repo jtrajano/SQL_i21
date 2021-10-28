@@ -189,12 +189,14 @@ IF ISNULL(@ysnRecap, 0) = 0
                 [intBookId],
                 [intDepreciationMethodId],  
                 [dblBasis],  
+                [dblDepreciationBasis],  
                 [dtmDateInService],  
                 [dtmDispositionDate],  
                 [dtmDepreciationToDate],  
                 [dblDepreciationToDate],  
                 [dblSalvageValue],
                 [dblFunctionalBasis],
+                [dblFunctionalDepreciationBasis],
                 [dblFunctionalDepreciationToDate],
                 [dblFunctionalSalvageValue],
                 [dblRate],  
@@ -209,12 +211,14 @@ IF ISNULL(@ysnRecap, 0) = 0
                 1,
                 D.intDepreciationMethodId,
                 LastDepreciation.dblBasis,  
+                LastDepreciation.dblDepreciationBasis,  
                 BD.dtmPlacedInService,  
                 A.dtmDispose,
 				A.dtmDispose,
 				CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre ELSE A.totalForeignDepre END,  
                 LastDepreciation.dblSalvageValue,
                 LastDepreciation.dblFunctionalBasis,
+                LastDepreciation.dblFunctionalDepreciationBasis,
                 ROUND((CASE WHEN @ysnMultiCurrency = 0 THEN A.totalDepre * @dblRate ELSE A.totalDepre END), 2),
                 LastDepreciation.dblFunctionalSalvageValue,
                 @dblRate,    
@@ -228,7 +232,7 @@ IF ISNULL(@ysnRecap, 0) = 0
                 JOIN tblFABookDepreciation BD ON BD.intAssetId = F.intAssetId
                 JOIN tblFADepreciationMethod D ON D.intDepreciationMethodId = BD.intDepreciationMethodId
 				OUTER APPLY (
-					SELECT TOP 1 dblBasis, dblFunctionalBasis, dblSalvageValue, dblFunctionalSalvageValue 
+					SELECT TOP 1 dblBasis, dblFunctionalBasis, dblDepreciationBasis, dblFunctionalDepreciationBasis, dblSalvageValue, dblFunctionalSalvageValue 
 					FROM tblFAFixedAssetDepreciation 
 					WHERE intAssetId = A.intAssetId AND intBookId = 1 AND strTransaction = 'Depreciation'
 					ORDER BY dtmDepreciationToDate DESC
