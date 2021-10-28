@@ -406,6 +406,10 @@ BEGIN
 			WHERE intContractHeaderId = @intContractHeaderId
 				AND IsNULL(strFeedStatus, '') = ''
 				AND strRowState = @strRowState
+
+			Update tblCTContractHeader 
+			Set ysnExported =1, dtmExported =GETDATE()
+			Where intContractHeaderId = @intContractHeaderId
 		END
 
 		IF EXISTS (
