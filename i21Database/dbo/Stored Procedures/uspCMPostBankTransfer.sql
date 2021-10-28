@@ -68,10 +68,11 @@ DECLARE
  ,@BANK_TRANSFER_DEP AS INT     = 10 -- Transaction code for Bank Transfer Deposit. It also refers to as Bank Transfer TO.   
  ,@BANK_TRANSFER_WD_PREFIX AS NVARCHAR(3) = '-WD'  
  ,@BANK_TRANSFER_DEP_PREFIX AS NVARCHAR(4) = '-DEP'  
-   
+
  -- Local Variables  
  ,@intTransactionId AS INT  
  ,@dtmDate AS DATETIME  
+ ,@dtmAccrualDate AS DATETIME  
  ,@dblAmount AS NUMERIC(18,6)  
  ,@ysnTransactionPostedFlag AS BIT  
  ,@ysnTransactionClearedFlag AS BIT  
@@ -113,6 +114,7 @@ IF @@ERROR <> 0 GOTO Post_Rollback
 SELECT TOP 1   
   @intTransactionId = intTransactionId  
   ,@dtmDate = dtmDate  
+  ,@dtmAccrualDate = dtmAccrualDate
   ,@dblAmount = dblAmountFrom  
   ,@ysnTransactionPostedFlag = ysnPosted  
   ,@intBankAccountIdFrom = intBankAccountIdFrom  
@@ -395,7 +397,7 @@ BEGIN
  UNION ALL   
  SELECT [strTransactionId]  = @strTransactionId  
    ,[intTransactionId]  		= @intTransactionId  
-   ,[dtmDate]    					  = @dtmDate  
+   ,[dtmDate]    					  = CASE WHEN @intBankTransferTypeId =1 THEN @dtmDate  ELSE @dtmAccrualDate END
    ,[strBatchId]   					= @strBatchId  
    ,[intAccountId]   				= GLAccnt.intAccountId  
    ,[dblDebit]    					= dblAmountTo  
@@ -503,18 +505,6 @@ BEGIN
   BEGIN
       DELETE FROM #tmpGLDetail WHERE dblCredit > 0
 
-      --  IF @ysnForeignToForeign = 1
-      --  BEGIN
-      --   UPDATE A 
-      --   SET dblDebitForeign = BT.dblAmountForeignTo, dblExchangeRate = BT.dblRateAmountTo
-      --   FROM #tmpGLDetail A
-      --     OUTER APPLY(
-      --       SELECT dblAmountForeignTo, dblRateAmountTo FROM [dbo].tblCMBankTransfer A WHERE strTransactionId = @strTransactionId
-      --     )BT
-          
-      --END
-      
-
         INSERT INTO #tmpGLDetail (  
         [strTransactionId]  
         ,[intTransactionId]  
@@ -546,15 +536,14 @@ BEGIN
       )  
       SELECT [strTransactionId]   = @strTransactionId  
         ,[intTransactionId]  		  = @intTransactionId  
-        ,[dtmDate]    					  = @dtmDate  
+        ,[dtmDate]    					  = @dtmAccrualDate  
         ,[strBatchId]   					= @strBatchId  
         ,[intAccountId]   				= GLAccnt.intAccountId
         ,[dblDebit]   					  = 0  
-        ,[dblCredit]   					  = dblAmountFrom --   CASE WHEN @ysnForeignToForeign =1 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountFunctional.Val ELSE A.dblAmount END  
+        ,[dblCredit]   					  = dblAmountFrom
         ,[dblDebitForeign]  			= 0  
         ,[dblCreditForeign]  		  = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 0 
-                                    --WHEN @ysnForeignToFunctional = 1 THEN dblAmountForeignFrom
-                                    ELSE dblAmountForeignFrom END--CASE WHEN @ysnFunctionalToForeign = 1 or @ysnForeignToForeign = 1 THEN  dblAmountForeignTo ELSE dblAmountForeignFrom END   
+                                    ELSE dblAmountForeignFrom END
         ,[dblDebitUnit]   				= 0  
         ,[dblCreditUnit]  				= 0  
         ,[strDescription]  			  = A.strDescription
@@ -562,11 +551,8 @@ BEGIN
         ,[strReference]   				= A.strReferenceFrom  
         ,[intCurrencyId]  				= intCurrencyIdAmountFrom  
         ,[intCurrencyExchangeRateTypeId] = NULL  
-        ,[dblExchangeRate]  				= --CASE WHEN @ysnFunctionalToForeign =1 or @ysnForeignToForeign = 1 THEN dblAmountFrom/dblAmountForeignTo
-                                      CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1
-                                           --WHEN @ysnForeignToForeign = 1 THEN dblAmountFrom/dblAmountForeignTo
+        ,[dblExchangeRate]  				= CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1
                                            ELSE dblRateAmountFrom END
-                                           
         ,[dtmDateEntered]  				= GETDATE()  
         ,[dtmTransactionDate] 			= A.dtmDate  
         ,[strJournalLineDescription] 	= GLAccnt.strDescription  
@@ -582,12 +568,8 @@ BEGIN
         SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = @intBTInTransitAccountId
       )GLAccnt
       WHERE A.strTransactionId = @strTransactionId  
-      
-
   END
- 
  END
-
 
  IF @@ERROR <> 0 GOTO Post_Rollback  
   IF @intBankTransferTypeId = 1 OR (@intBankTransferTypeId = 2 AND @ysnPostedInTransit = 1)
