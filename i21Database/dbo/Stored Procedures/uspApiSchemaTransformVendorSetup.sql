@@ -26,10 +26,14 @@ DECLARE @tblFilteredVendorSetup TABLE(
 	strCompany1Id NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCompany2Id NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strEquipmentType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 INSERT INTO @tblFilteredVendorSetup
 (
@@ -42,10 +46,14 @@ INSERT INTO @tblFilteredVendorSetup
 	strCompany1Id,
 	strCompany2Id,
 	strCustomer,
+	strVendorCustomer,
 	strItemNo,
+	strVendorItemNo,
 	strUnitMeasure,
+	strVendorUnitMeasure,
 	strEquipmentType,
-	strCategory
+	strCategory,
+	strVendorCategory
 )
 SELECT 
 	intKey,
@@ -57,10 +65,14 @@ SELECT
 	strCompany1Id,
 	strCompany2Id,
 	strCustomer,
+	strVendorCustomer,
 	strItemNo,
+	strVendorItemNo,
 	strUnitMeasure,
+	strVendorUnitMeasure,
 	strEquipmentType,
-	strCategory
+	strCategory,
+	strVendorCategory
 FROM
 tblApiSchemaTransformVendorSetup
 WHERE guiApiUniqueId = @guiApiUniqueId;
@@ -476,89 +488,131 @@ WHEN NOT MATCHED THEN
 
 --Customer Xref Transform logic
 
-INSERT INTO tblVRCustomerXref 
+;MERGE INTO tblVRCustomerXref AS TARGET
+USING
 (
-	guiApiUniqueId,
-	intEntityId,
-	intVendorSetupId,
-	strVendorCustomer,
-	intConcurrencyId
-)
-SELECT
-	FilteredVendorSetup.guiApiUniqueId,
-	Customer.intEntityId,
-	VendorSetup.intVendorSetupId,
-	Customer.strCustomerNumber,
-	1
-FROM @tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	@tblLogVendorSetup LogVendorSetup
-	ON
-		FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-		AND
-		LogVendorSetup.intLogType IN (1,2,3,4,5)
-INNER JOIN
-	vyuARCustomer Customer
-	ON
-		FilteredVendorSetup.strCustomer = Customer.strCustomerNumber
-		AND
-		Customer.ysnActive = 1
-INNER JOIN
-(
-	vyuAPVendor Vendor
-	INNER JOIN
-		tblVRVendorSetup VendorSetup 
+	SELECT
+		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		intEntityId = Customer.intEntityId,
+		intVendorSetupId = VendorSetup.intVendorSetupId,
+		strVendorCustomer = ISNULL(FilteredVendorSetup.strVendorCustomer, Customer.strCustomerNumber)
+	FROM @tblFilteredVendorSetup FilteredVendorSetup
+	LEFT JOIN
+		@tblLogVendorSetup LogVendorSetup
 		ON
-			Vendor.intEntityId = VendorSetup.intEntityId
-)
-	ON
-		Vendor.strVendorId = FilteredVendorSetup.strVendor
-WHERE 
-LogVendorSetup.intLogType NOT IN (1,2,3,4,5) OR LogVendorSetup.intLogType IS NULL
+			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
+			AND
+			LogVendorSetup.intLogType IN (1,2,3,4,5)
+	INNER JOIN
+		vyuARCustomer Customer
+		ON
+			FilteredVendorSetup.strCustomer = Customer.strCustomerNumber
+			AND
+			Customer.ysnActive = 1
+	INNER JOIN
+	(
+		vyuAPVendor Vendor
+		INNER JOIN
+			tblVRVendorSetup VendorSetup 
+			ON
+				Vendor.intEntityId = VendorSetup.intEntityId
+	)
+		ON
+			Vendor.strVendorId = FilteredVendorSetup.strVendor
+	WHERE 
+	LogVendorSetup.intLogType NOT IN (1,2,3,4,5) OR LogVendorSetup.intLogType IS NULL
+) AS SOURCE
+ON TARGET.intEntityId = SOURCE.intEntityId AND TARGET.intVendorSetupId = SOURCE.intVendorSetupId
+WHEN MATCHED AND @ysnAllowOverwrite = 1 
+THEN
+	UPDATE SET
+		guiApiUniqueId = SOURCE.guiApiUniqueId,
+		intEntityId = SOURCE.intEntityId,
+		intVendorSetupId = SOURCE.intVendorSetupId,
+		strVendorCustomer = SOURCE.strVendorCustomer
+WHEN NOT MATCHED THEN
+	INSERT
+	(
+		guiApiUniqueId,
+		intEntityId,
+		intVendorSetupId,
+		strVendorCustomer,
+		intConcurrencyId
+	)
+	VALUES
+	(
+		guiApiUniqueId,
+		intEntityId,
+		intVendorSetupId,
+		strVendorCustomer,
+		1
+	);
 
 --Item Xref Transform logic
 
-INSERT INTO tblICItemVendorXref 
+;MERGE INTO tblICItemVendorXref AS TARGET
+USING
 (
-	guiApiUniqueId,
-	intItemId,
-	intVendorId,
-	intVendorSetupId,
-	strVendorProduct,
-	intConcurrencyId
-)
-SELECT
-	FilteredVendorSetup.guiApiUniqueId,
-	Item.intItemId,
-	Vendor.intEntityId,
-	VendorSetup.intVendorSetupId,
-	Item.strItemNo,
-	1
-FROM @tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	@tblLogVendorSetup LogVendorSetup
-	ON
-		FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-		AND
-		LogVendorSetup.intLogType IN (1,2,6,7,8)
-INNER JOIN
-	tblICItem Item
-	ON
-		FilteredVendorSetup.strItemNo = Item.strItemNo
-		AND
-		Item.strType NOT LIKE '%Comment%'
-INNER JOIN
-(
-	vyuAPVendor Vendor
-	INNER JOIN
-		tblVRVendorSetup VendorSetup 
+	SELECT
+		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		intItemId = Item.intItemId,
+		intVendorId = Vendor.intEntityId,
+		intVendorSetupId = VendorSetup.intVendorSetupId,
+		strVendorProduct = ISNULL(FilteredVendorSetup.strVendorItemNo, Item.strItemNo)
+	FROM @tblFilteredVendorSetup FilteredVendorSetup
+	LEFT JOIN
+		@tblLogVendorSetup LogVendorSetup
 		ON
-			Vendor.intEntityId = VendorSetup.intEntityId
-)
-	ON
-		Vendor.strVendorId = FilteredVendorSetup.strVendor
-WHERE 
-LogVendorSetup.intLogType NOT IN (1,2,6,7,8) OR LogVendorSetup.intLogType IS NULL
+			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
+			AND
+			LogVendorSetup.intLogType IN (1,2,6,7,8)
+	INNER JOIN
+		tblICItem Item
+		ON
+			FilteredVendorSetup.strItemNo = Item.strItemNo
+			AND
+			Item.strType NOT LIKE '%Comment%'
+	INNER JOIN
+	(
+		vyuAPVendor Vendor
+		INNER JOIN
+			tblVRVendorSetup VendorSetup 
+			ON
+				Vendor.intEntityId = VendorSetup.intEntityId
+	)
+		ON
+			Vendor.strVendorId = FilteredVendorSetup.strVendor
+	WHERE 
+	LogVendorSetup.intLogType NOT IN (1,2,6,7,8) OR LogVendorSetup.intLogType IS NULL
+) AS SOURCE
+ON TARGET.intItemId = SOURCE.intItemId AND TARGET.intVendorSetupId = SOURCE.intVendorSetupId
+WHEN MATCHED AND @ysnAllowOverwrite = 1 
+THEN
+	UPDATE SET
+		guiApiUniqueId = SOURCE.guiApiUniqueId,
+		intItemId = SOURCE.intItemId,
+		intVendorId = SOURCE.intVendorId,
+		intVendorSetupId = SOURCE.intVendorSetupId,
+		strVendorProduct = SOURCE.strVendorProduct
+WHEN NOT MATCHED THEN
+	INSERT
+	(
+		guiApiUniqueId,
+		intItemId,
+		intVendorId,
+		intVendorSetupId,
+		strVendorProduct,
+		intConcurrencyId
+	)
+	VALUES
+	(
+		guiApiUniqueId,
+		intItemId,
+		intVendorId,
+		intVendorSetupId,
+		strVendorProduct,
+		1
+	);
 
 --UOM Xref Transform logic
 
@@ -569,7 +623,7 @@ USING
 		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
 		intUnitMeasureId = UnitMeasure.intUnitMeasureId,
-		strVendorUOM = UnitMeasure.strUnitMeasure,
+		strVendorUOM = ISNULL(FilteredVendorSetup.strVendorUnitMeasure, UnitMeasure.strUnitMeasure),
 		strEquipmentType = FilteredVendorSetup.strEquipmentType
 	FROM @tblFilteredVendorSetup FilteredVendorSetup
 	LEFT JOIN
@@ -629,42 +683,67 @@ WHEN NOT MATCHED THEN
 
 --Category Xref Transform logic
 
-INSERT INTO tblICCategoryVendor 
+;MERGE INTO tblICCategoryVendor AS TARGET
+USING
 (
-	guiApiUniqueId,
-	intCategoryId,
-	intVendorId,
-	intVendorSetupId,
-	strVendorDepartment,
-	intConcurrencyId
-)
-SELECT
-	FilteredVendorSetup.guiApiUniqueId,
-	Category.intCategoryId,
-	Vendor.intEntityId,
-	VendorSetup.intVendorSetupId,
-	Category.strCategoryCode,
-	1
-FROM @tblFilteredVendorSetup FilteredVendorSetup
-LEFT JOIN
-	@tblLogVendorSetup LogVendorSetup
-	ON
-		FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
-		AND
-		LogVendorSetup.intLogType IN (1,2,12,13,14)
-INNER JOIN
-	tblICCategory Category
-	ON
-		FilteredVendorSetup.strCategory = Category.strCategoryCode
-INNER JOIN
-(
-	vyuAPVendor Vendor
-	INNER JOIN
-		tblVRVendorSetup VendorSetup 
+	SELECT
+		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		intCategoryId = Category.intCategoryId,
+		intVendorId = Vendor.intEntityId,
+		intVendorSetupId = VendorSetup.intVendorSetupId,
+		strVendorDepartment = ISNULL(FilteredVendorSetup.strVendorCategory, Category.strCategoryCode)
+	FROM @tblFilteredVendorSetup FilteredVendorSetup
+	LEFT JOIN
+		@tblLogVendorSetup LogVendorSetup
 		ON
-			Vendor.intEntityId = VendorSetup.intEntityId
-)
-	ON
-		Vendor.strVendorId = FilteredVendorSetup.strVendor
-WHERE 
-LogVendorSetup.intLogType NOT IN (1,2,12,13,14) OR LogVendorSetup.intLogType IS NULL
+			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
+			AND
+			LogVendorSetup.intLogType IN (1,2,12,13,14)
+	INNER JOIN
+		tblICCategory Category
+		ON
+			FilteredVendorSetup.strCategory = Category.strCategoryCode
+	INNER JOIN
+	(
+		vyuAPVendor Vendor
+		INNER JOIN
+			tblVRVendorSetup VendorSetup 
+			ON
+				Vendor.intEntityId = VendorSetup.intEntityId
+	)
+		ON
+			Vendor.strVendorId = FilteredVendorSetup.strVendor
+	WHERE 
+	LogVendorSetup.intLogType NOT IN (1,2,12,13,14) OR LogVendorSetup.intLogType IS NULL
+) AS SOURCE
+ON 
+TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
+AND
+TARGET.intCategoryId = SOURCE.intCategoryId 
+WHEN MATCHED AND @ysnAllowOverwrite = 1 
+THEN
+	UPDATE SET
+		guiApiUniqueId = SOURCE.guiApiUniqueId,
+		intCategoryId = SOURCE.intCategoryId,
+		intVendorId = SOURCE.intVendorId,
+		intVendorSetupId = SOURCE.intVendorSetupId,
+		strVendorDepartment = SOURCE.strVendorDepartment
+WHEN NOT MATCHED THEN
+	INSERT
+	(
+		guiApiUniqueId,
+		intCategoryId,
+		intVendorId,
+		intVendorSetupId,
+		strVendorDepartment,
+		intConcurrencyId
+	)
+	VALUES
+	(
+		guiApiUniqueId,
+		intCategoryId,
+		intVendorId,
+		intVendorSetupId,
+		strVendorDepartment,
+		1
+	);
