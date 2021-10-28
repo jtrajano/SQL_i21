@@ -153,6 +153,10 @@ BEGIN TRY
 			FROM @tblCTPriceContractStage PS
 			)
 
+	SELECT @intContractScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+
 	WHILE @intPriceContractStageId > 0
 	BEGIN
 		SET @intPriceContractId = NULL
@@ -759,8 +763,8 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'User'
 				WHERE EY.strName = @strCreatedBy
-					--AND EY.strEntityNo <> ''
 
+				--AND EY.strEntityNo <> ''
 				IF @intCreatedById IS NULL
 				BEGIN
 					IF EXISTS (
@@ -781,8 +785,8 @@ BEGIN TRY
 				JOIN tblEMEntityType ET ON ET.intEntityId = EY.intEntityId
 					AND ET.strType = 'User'
 				WHERE EY.strName = @strLastModifiedBy
-					--AND EY.strEntityNo <> ''
 
+				--AND EY.strEntityNo <> ''
 				IF @intLastModifiedById IS NULL
 				BEGIN
 					IF EXISTS (
@@ -835,11 +839,30 @@ BEGIN TRY
 						,1 AS intConcurrencyId
 						,@intPriceContractId
 						,@intCompanyRefId
-						,1 As ysnReadOnlyInterCoPrice
+						,1 AS ysnReadOnlyInterCoPrice
 
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
 
 					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
+
+					SELECT @intTransactionRefId = intTransactionId
+					FROM tblSMTransaction
+					WHERE intRecordId = @intNewPriceContractId
+						AND intScreenId = @intContractScreenId
+
+					IF @intTransactionRefId IS NULL
+					BEGIN
+						INSERT INTO tblSMTransaction (
+							intScreenId
+							,intRecordId
+							,strTransactionNo
+							,intConcurrencyId
+							)
+						SELECT @intContractScreenId
+							,@intNewPriceContractId
+							,@strNewPriceContractNo
+							,1
+					END
 
 					EXEC uspSMAuditLog @keyValue = @intNewPriceContractId
 						,@screenName = 'ContractManagement.view.PriceContracts'
@@ -861,7 +884,7 @@ BEGIN TRY
 						,intLastModifiedById = @intLastModifiedById
 						,dtmLastModified = @dtmLastModified
 						,intConcurrencyId = intConcurrencyId + 1
-						,ysnReadOnlyInterCoPrice=1
+						,ysnReadOnlyInterCoPrice = 1
 					WHERE intPriceContractRefId = @intPriceContractId
 						AND intPriceContractId = @intNewPriceContractId
 				END
@@ -1791,10 +1814,6 @@ BEGIN TRY
 				--	,@currentUserEntityId = @intCurrentUserEntityId
 				--	,@amount = 0
 				--	,@approverConfiguration = @config
-				SELECT @intContractScreenId = intScreenId
-				FROM tblSMScreen
-				WHERE strNamespace = 'ContractManagement.view.PriceContracts'
-
 				SELECT @intTransactionRefId = intTransactionId
 				FROM tblSMTransaction
 				WHERE intRecordId = @intNewPriceContractId
@@ -1932,8 +1951,8 @@ BEGIN TRY
 				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
 				WHERE ET1.strType = 'User'
 					AND CE.strName = @strUserName
-					--AND CE.strEntityNo <> ''
 
+				--AND CE.strEntityNo <> ''
 				IF @intAuditLogUserId IS NULL
 				BEGIN
 					SELECT TOP 1 @intAuditLogUserId = intEntityId
@@ -2112,8 +2131,8 @@ BEGIN TRY
 					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
-						,@screenId=@intContractScreenId
-						,@populatedByInterCompany=1
+						,@screenId = @intContractScreenId
+						,@populatedByInterCompany = 1
 				END
 
 				UPDATE tblCTPriceContractStage
