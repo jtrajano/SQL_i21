@@ -40,7 +40,7 @@ BEGIN TRY
 		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
 		INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
 
-		EXEC uspAPCreatePayment @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
+		EXEC uspAPCreatePayment @userId, @bankAccountId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
 
 		UPDATE PD
 		SET PD.dblDiscount = I.dblDiscount,
