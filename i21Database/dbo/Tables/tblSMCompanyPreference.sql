@@ -85,6 +85,8 @@
     [strADUserName]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [strADPassword]									NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnEnableUserActivityLog]						BIT NOT NULL DEFAULT 0,
+	[strPowerBIAdminUsername]						NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strPowerBIAdminPassword]						NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPDefaultModel]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPDefaultModelId]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPSasURI]									NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,

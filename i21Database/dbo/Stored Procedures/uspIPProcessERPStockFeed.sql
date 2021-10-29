@@ -34,6 +34,7 @@ BEGIN TRY
 		,@intQtyItemUOMId INT
 		,@intOriginId INT
 		,@intItemLocationId INT
+		,@dblStandardCost NUMERIC(38, 20)
 		,@intBatchId INT
 		,@intInventoryAdjustmentId INT
 		,@dblQty NUMERIC(38, 20)
@@ -103,6 +104,7 @@ BEGIN TRY
 				,@intQtyItemUOMId = NULL
 				,@intOriginId = NULL
 				,@intItemLocationId = NULL
+				,@dblStandardCost = NULL
 				,@intBatchId = NULL
 				,@intInventoryAdjustmentId = NULL
 				,@dblQty = NULL
@@ -184,6 +186,14 @@ BEGIN TRY
 						)
 			END
 
+			SELECT @dblStandardCost = t.dblStandardCost
+			FROM tblICItemPricing t WITH (NOLOCK)
+			WHERE t.intItemId = @intItemId
+				AND t.intItemLocationId = @intItemLocationId
+
+			IF @dblStandardCost IS NULL
+				SELECT @dblStandardCost = 0
+
 			SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
 			FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
 			WHERE t.strSubLocationName = @strSubLocationName
@@ -212,14 +222,14 @@ BEGIN TRY
 						)
 			END
 
-			IF @dblNetWeight < 0
-			BEGIN
-				RAISERROR (
-						'Invalid Net Weight. '
-						,16
-						,1
-						)
-			END
+			--IF @dblNetWeight < 0
+			--BEGIN
+			--	RAISERROR (
+			--			'Invalid Net Weight. '
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intNetWeightUnitMeasureId = t.intUnitMeasureId
 			FROM tblICUnitMeasure t WITH (NOLOCK)
@@ -260,23 +270,28 @@ BEGIN TRY
 				AND L.intSubLocationId = @intSubLocationId
 				AND L.intStorageLocationId = @intStorageLocationId
 
-			IF ISNULL(@intLotId, 0) = 0
-			BEGIN
-				IF @dblNetWeight <= 0
-				BEGIN
-					RAISERROR (
-							'Net Weight cannot be 0. '
-							,16
-							,1
-							)
-				END
-			END
+			--IF ISNULL(@intLotId, 0) = 0
+			--BEGIN
+			--	IF @dblNetWeight <= 0
+			--	BEGIN
+			--		RAISERROR (
+			--				'Net Weight cannot be 0. '
+			--				,16
+			--				,1
+			--				)
+			--	END
+			--END
 
 			BEGIN TRAN
 
 			-- Lot Create / Update
 			IF ISNULL(@intLotId, 0) = 0
 			BEGIN
+				IF ISNULL(@dblNetWeight, 0) = 0
+				BEGIN
+					GOTO NextRec
+				END
+
 				SELECT TOP 1 @dblQty = ISNULL(dbo.fnMFConvertQuantityToTargetItemUOM(@intNetWeightItemUOMId, L.intItemUOMId, @dblNetWeight), 0)
 					,@intQtyItemUOMId = L.intItemUOMId
 				FROM tblICLot L WITH (NOLOCK)
@@ -290,8 +305,15 @@ BEGIN TRY
 						,@intQtyItemUOMId = @intNetWeightItemUOMId
 				END
 				
-				SELECT @dblUnitQty = @dblNetWeight / @dblQty
-
+				IF ISNULL(@dblNetWeight, 0) = 0
+				BEGIN
+					SELECT @dblUnitQty = 0
+				END
+				ELSE
+				BEGIN
+					SELECT @dblUnitQty = @dblNetWeight / @dblQty
+				END
+				
 				EXEC uspMFGeneratePatternId @intCategoryId = NULL
 					,@intItemId = NULL
 					,@intManufacturingId = NULL
@@ -328,7 +350,7 @@ BEGIN TRY
 					,NULL
 					,NULL
 					,NULL
-					,0
+					,@dblStandardCost
 					,'Created from external system'
 					,1
 					,NULL
@@ -357,6 +379,8 @@ BEGIN TRY
 						,@strDescription = 'Adjusted from external system'
 				END
 			END
+
+			NextRec:
 
 			INSERT INTO tblIPInitialAck (
 				intTrxSequenceNo

@@ -500,7 +500,7 @@ BEGIN TRY
 			, intEntityId
 			, intBrokerageAccountId
 			, intFutureMarketId
-			, intInstrumentTypeId
+			, intInstrumentTypeId 
 			, intCommodityId
 			, intLocationId
 			, intTraderId
@@ -520,7 +520,10 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, ysnOffset
-			, dtmCreateDateTime)
+			, dtmCreateDateTime
+			, dblSContractBalanceLots
+			, dblPContractBalanceLots
+			)
 		SELECT @NewFutOptTransactionHeaderId
 			, 1
 			, 1
@@ -550,6 +553,8 @@ BEGIN TRY
 			, t.intSubBookId
 			, t.ysnOffset
 			, GETDATE() 
+			, dblSContractBalanceLots = dblNoOfContract
+			, dblPContractBalanceLots = dblNoOfContract
 		FROM tblRKFutOptTransaction t
 		JOIN tblRKOptionsMonth om ON t.intOptionMonthId = om.intOptionMonthId
 		WHERE intFutOptTransactionId = @intFutOptTransactionId

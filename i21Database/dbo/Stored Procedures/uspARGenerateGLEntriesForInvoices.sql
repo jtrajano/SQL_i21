@@ -1293,7 +1293,7 @@ LEFT OUTER JOIN
 		SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NOLOCK)
 	) ICI ON IDP.[intItemId] = ICI.[intItemId]
 	INNER JOIN (
-    SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
+        SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
 	) ICIL ON ICI.[intItemId] = ICIL.[intItemId]
 		  AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
 	OUTER APPLY (
@@ -1429,7 +1429,7 @@ LEFT OUTER JOIN
 		SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NOLOCK)
 	) ICI ON IDP.[intItemId] = ICI.[intItemId]
 	INNER JOIN (
-    SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
+        SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
 	) ICIL ON ICI.[intItemId] = ICIL.[intItemId]
 		  AND ARI.[intCompanyLocationId] = ICIL.[intLocationId]
 	OUTER APPLY (
@@ -2255,5 +2255,238 @@ LEFT OUTER JOIN
        AND I.[intCompanyLocationId] = IA.[intLocationId]
 WHERE
     I.[dblBaseDiscountAmount] <> @ZeroDecimal
+
+--DIRECT OUT TICKET (COGS)
+INSERT ##ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = ARID.[intAccountId]
+    ,[dblDebit]                     = ARID.[dblCost]
+    ,[dblCredit]                    = @ZeroDecimal
+    ,[dblDebitUnit]                 = ARID.[dblUnitQtyShipped]
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = ARID.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = ARID.[strDescription]
+    ,[intJournalLineNo]             = I.[intInvoiceId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = ARID.[dblCost]
+    ,[dblDebitReport]               = ARID.[dblCost]
+    ,[dblCreditForeign]             = @ZeroDecimal
+    ,[dblCreditReport]              = @ZeroDecimal
+    ,[dblReportingRate]             = I.[dblAverageExchangeRate]
+    ,[dblForeignRate]               = I.[dblAverageExchangeRate]
+    ,[strRateType]                  = NULL
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[ysnRebuild]                   = NULL
+FROM
+    ##ARPostInvoiceHeader I
+LEFT OUTER JOIN
+    (
+    SELECT
+         [dblUnitQtyShipped]	= SUM(ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
+		,[dblTotal]				= SUM(ID.[dblTotal])
+        ,[intInvoiceId]			= ID.[intInvoiceId]
+		,[intAccountId]			= dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'Cost of Goods')
+		,[ysnGLOnly]			= ISNULL(ARIFC.[ysnGLOnly], 0)
+		,[dblCost]				= SUM(ISNULL(ARIFC.[dblCost], @ZeroDecimal) * ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
+		,[strDescription]		= ICI.[strDescription]
+    FROM
+        ##ARPostInvoiceDetail ID
+	INNER JOIN (
+		SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NOLOCK)
+	) ICI ON ID.[intItemId] = ICI.[intItemId]
+	INNER JOIN (
+        SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
+	) ICIL ON ICI.[intItemId] = ICIL.[intItemId] AND ID.[intCompanyLocationId] = ICIL.[intLocationId]
+    INNER JOIN (
+        SELECT [intTransactionId], [intTransactionDetailId], [ysnGLOnly], [dblCost] FROM ##ARItemsForCosting
+	) ARIFC ON ID.[intInvoiceId] = ARIFC.[intTransactionId] AND ID.[intInvoiceDetailId] = ARIFC.[intTransactionDetailId]
+    GROUP BY
+        ID.[intInvoiceId], ID.[intItemId], ICIL.[intItemLocationId], ARIFC.[ysnGLOnly], ARIFC.[dblCost], ICI.[strDescription]
+    ) ARID
+        ON I.[intInvoiceId] = ARID.[intInvoiceId]
+WHERE ISNULL(ARID.[ysnGLOnly], 0) = CAST(1 AS BIT)
+
+--DIRECT OUT TICKET (General)
+INSERT ##ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = ARID.[intAccountId]
+    ,[dblDebit]                     = @ZeroDecimal
+    ,[dblCredit]                    = ARID.[dblCost]
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = ARID.[dblUnitQtyShipped]
+    ,[strDescription]               = ARID.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = ARID.[strDescription]
+    ,[intJournalLineNo]             = I.[intInvoiceId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = @ZeroDecimal
+    ,[dblDebitReport]               = @ZeroDecimal
+    ,[dblCreditForeign]             = ARID.[dblCost]
+    ,[dblCreditReport]              = ARID.[dblCost]
+    ,[dblReportingRate]             = I.[dblAverageExchangeRate]
+    ,[dblForeignRate]               = I.[dblAverageExchangeRate]
+    ,[strRateType]                  = NULL
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[ysnRebuild]                   = NULL
+FROM
+    ##ARPostInvoiceHeader I
+INNER JOIN
+    (
+    SELECT
+         [dblUnitQtyShipped]	= SUM(ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
+		,[dblTotal]				= SUM(ID.[dblTotal])
+        ,[intInvoiceId]			= ID.[intInvoiceId]
+		,[intAccountId]			= dbo.fnGetItemGLAccount(ID.[intItemId], ICIL.[intItemLocationId], 'General')
+		,[ysnGLOnly]			= ISNULL(ARIFC.[ysnGLOnly], 0)
+		,[dblCost]				= SUM(ISNULL(ARIFC.[dblCost], @ZeroDecimal) * ISNULL(ID.[dblUnitQtyShipped], @ZeroDecimal))
+		,[strDescription]		= ICI.[strDescription]
+
+    FROM
+        ##ARPostInvoiceDetail ID
+	INNER JOIN (
+		SELECT [intItemId], [strItemNo], [strType], [strManufactureType], [strDescription], [ysnAutoBlend], [intCategoryId] FROM tblICItem WITH(NOLOCK)
+	) ICI ON ID.[intItemId] = ICI.[intItemId]
+	INNER JOIN (
+        SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
+	) ICIL ON ICI.[intItemId] = ICIL.[intItemId] AND ID.[intCompanyLocationId] = ICIL.[intLocationId]
+    INNER JOIN (
+        SELECT [intTransactionId], [intTransactionDetailId], [ysnGLOnly], [dblCost] FROM ##ARItemsForCosting
+	) ARIFC ON ID.[intInvoiceId] = ARIFC.[intTransactionId] AND ID.[intInvoiceDetailId] = ARIFC.[intTransactionDetailId]
+    GROUP BY
+        ID.[intInvoiceId], ID.[intItemId], ICIL.[intItemLocationId], ARIFC.[ysnGLOnly], ARIFC.[dblCost], ICI.[strDescription]
+    ) ARID
+        ON I.[intInvoiceId] = ARID.[intInvoiceId]
+WHERE ISNULL(ARID.[ysnGLOnly], 0) = CAST(1 AS BIT)
 
 RETURN 1 

@@ -89,11 +89,11 @@ SELECT
 	,[dblAdjustRetailValue]
 FROM 
 	##ARItemsForCosting
+WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 BEGIN
-	-- Call the post routine 
 	INSERT INTO ##ARInvoiceGLEntries (
 		 [dtmDate]
 		,[strBatchId]
@@ -135,7 +135,6 @@ BEGIN
 		,@BatchId  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 		,@UserId
-	
 END
 
 DECLARE  @InTransitItems                ItemInTransitCostingTableType 
@@ -338,7 +337,7 @@ BEGIN
 		,[intCommodityId]
 	)
 	EXEC dbo.uspICPostStorage  
-				@StorageItemsForPost  
+			 @StorageItemsForPost  
 			,@BatchId  		
 			,@UserId
 END

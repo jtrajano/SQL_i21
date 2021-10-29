@@ -47,3 +47,7 @@
 	[ysnDeleted] BIT DEFAULT((0)) NULL,
     CONSTRAINT [PK_tblCTContractBalanceLog] PRIMARY KEY ([intContractBalanceLogId]) 
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractBalanceLog_intContractHeaderId] ON [dbo].[tblCTContractBalanceLog] ([intContractHeaderId])

@@ -254,7 +254,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -275,7 +275,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 		SELECT 
 			 [strTransactionId]		= B.strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
-			,[intAccountId]			= A.[intAccumulatedAccountId]
+			,[intAccountId]			= A.[intAssetAccountId]
 			,[strDescription]		= A.[strAssetDescription]
 			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
@@ -293,7 +293,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -331,7 +331,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
 			,[intCurrencyId]		= A.intCurrencyId
-			,[dblExchangeRate]		= 0
+			,[dblExchangeRate]		= 1
 			,[intUserId]			= 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
@@ -372,7 +372,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback;
 ---------------------------------------------------------------------------------------------------------------------------------------
 UPDATE A
 SET [ysnDisposed] = 1,
-dtmDispositionDate = dtmDispose
+dtmDispositionDate = dtmDispose,
+strDispositionNumber = @strTransactionId
 FROM
 tblFAFixedAsset A
 JOIN @tblAsset B ON B.intAssetId = A.intAssetId

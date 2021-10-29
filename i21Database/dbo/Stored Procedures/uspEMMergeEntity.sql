@@ -125,6 +125,11 @@ BEGIN
 				SET @CurTableName = 'tblSMShipVia'
 				SET @CurTableKey = 'intEntityId'
 			END
+			ELSE IF @curtype = 'Employee'
+			BEGIN
+				SET @CurTableName = 'tblPREmployee'
+				SET @CurTableKey = 'intEntityId'
+			END
 
 			SET @Columns = ''
 			SELECT @Columns = COALESCE(@Columns + ', ', '') + name FROM syscolumns WHERE id = object_id(@CurTableName) AND name <> @CurTableKey

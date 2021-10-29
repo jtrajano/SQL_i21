@@ -76,6 +76,7 @@ Type the overview for the table here.
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnWeighed] BIT NULL DEFAULT ((0)),
 		[strImportDescription] NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
+		[intComputeItemTotalOption] TINYINT NOT NULL DEFAULT(0),
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]), -- ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 

@@ -1,0 +1,93 @@
+﻿CREATE FUNCTION [dbo].[fnApiSchemaValidateVendor]
+(
+	@guiApiUniqueId UNIQUEIDENTIFIER,
+	@guiLogId UNIQUEIDENTIFIER
+)
+RETURNS @returntable TABLE
+(
+	guiApiImportLogDetailId UNIQUEIDENTIFIER NOT NULL,
+	guiApiImportLogId UNIQUEIDENTIFIER NOT NULL,
+	strLogLevel NVARCHAR(100) NOT NULL,
+	strStatus NVARCHAR(150) NOT NULL,
+	strAction NVARCHAR(150) NULL,
+	intRowNumber INT NULL,
+	strField NVARCHAR(100) NULL,
+	strValue NVARCHAR(4000) NULL,
+	strMessage NVARCHAR(4000) NULL
+)
+AS
+BEGIN
+	--strEntityNo
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity No.', strEntityNo, 'Entity No. is required'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND strEntityNo IS NULL
+
+	--strName
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity Name', strName, 'Entity Name is required'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND strName IS NULL
+
+	--strContactNumber
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity Contact Number', strContactNumber, 'Entity Contact Number is required'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND strContactNumber IS NULL
+
+	--strContactName
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity Name', strContactName, 'Entity Contact is required'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND strContactName IS NULL
+
+	--strLocationName
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Location Name', strLocationName, 'Location Name is required'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND strLocationName IS NULL
+
+	--strType
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Entity Type', strType, 'Entity Type is not valid'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND strType IS NULL OR strType <> 'Vendor'
+
+	--strVendorId
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Vendor No.', strVendorId, 'Vendor No. is required'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND strVendorId IS NULL
+
+	--strExpenseAccountId
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, V.intRowNumber, 'Expense Account', V.strExpenseAccountId, 'Expense Account is not valid'
+	FROM tblApiSchemaVendor V
+	LEFT JOIN vyuGLAccountDetail AD ON AD.strAccountId = V.strExpenseAccountId AND AD.strAccountType = 'Expense'
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND (V.strExpenseAccountId IS NULL OR AD.intAccountId IS NULL)
+
+	--strVendorType
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, intRowNumber, 'Vendor Type', strVendorType, 'Vendor Type is not valid'
+	FROM tblApiSchemaVendor
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND (strVendorType <> 'Company' OR strVendorType <> 'Person')
+
+	--strTerm
+	INSERT @returntable
+	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, V.intRowNumber, 'Term', V.strTerm, 'Term is not valid'
+	FROM tblApiSchemaVendor V
+	LEFT JOIN tblSMTerm T ON T.strTerm = V.strTerm
+	OUTER APPLY vyuAPGuidGenerator 
+	WHERE guiApiUniqueId = @guiApiUniqueId AND (V.strTerm IS NULL OR T.intTermID IS NULL)
+	
+	RETURN
+END

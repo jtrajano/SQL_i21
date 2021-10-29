@@ -81,14 +81,20 @@ SELECT   L.intLoadId
 		,PDetail.intContractSeq AS intPContractSeq
 		,SHeader.strContractNumber AS strSContractNumber
 		,SDetail.intContractSeq AS	intSContractSeq
-		,strSampleStatus = (SELECT TOP 1 SS.strStatus
-								     FROM tblQMSample S
-									 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
-									 AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
+		,strSampleStatus = CASE WHEN EXISTS(SELECT 1 FROM tblQMSample WHERE strContainerNumber = LC.strContainerNumber) 
+								THEN (SELECT TOP 1 SS.strStatus
+										FROM tblQMSample S
+										JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId
+										AND S.strContainerNumber = LC.strContainerNumber ORDER BY dtmTestedOn DESC)
+								ELSE NULL END
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,LCIU.strUnitMeasure AS strUnitMeasure
 		,strShipmentStatus = CASE L.intShipmentStatus
-								WHEN 1 THEN 'Scheduled'
+								WHEN 1 THEN 
+									CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
+												AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
+										THEN 'Expired'
+										ELSE 'Scheduled' END
 								WHEN 2 THEN 'Dispatched'
 								WHEN 3 THEN 
 									CASE WHEN (L.ysnDocumentsApproved = 1 
@@ -150,10 +156,11 @@ SELECT   L.intLoadId
 		,L.strMVessel
 		,L.strMVoyageNumber
 		,L.strIMONumber
-FROM tblLGLoad L
-JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
+FROM 
+tblLGLoadContainer LC
+JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
 LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = LC.intWeightUnitMeasureId
 LEFT JOIN tblICUnitMeasure LCIU ON LCIU.intUnitMeasureId = LC.intUnitMeasureId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
@@ -169,7 +176,6 @@ LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOM
 LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId
 LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
-LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId

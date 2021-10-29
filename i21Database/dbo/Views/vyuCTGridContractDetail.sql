@@ -266,7 +266,8 @@ AS
 			RefFuturesMarket.strFutMarketName  strRefFuturesMarket,
 			REPLACE(RefFuturesMonth.strFutureMonth, ' ', '(' + RefFuturesMonth.strSymbol + ') ') strRefFuturesMonth,
 			RefFuturesCurrency.strCurrency strRefFuturesCurrency,
-			RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure
+			RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure,
+			ysnWithPriceFix = convert(bit, isnull(PF.intPriceFixationId,0))
 	FROM			tblCTContractDetail				CD
 			JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	LEFT	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId					=		CD.intMarketZoneId			--strMarketZoneCode

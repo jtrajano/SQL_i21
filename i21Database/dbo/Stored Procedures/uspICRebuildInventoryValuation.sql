@@ -4121,6 +4121,8 @@ BEGIN
 													,ReceiptItem.ysnSubCurrency
 													,Receipt.intSubCurrencyCents
 													,RebuildInvTrans.intItemUOMId
+													,ReceiptItem.intComputeItemTotalOption
+													,ReceiptItem.dblOpenReceive
 												)
 												--/ Receipt.intSubCurrencyCents 
 
@@ -4164,6 +4166,8 @@ BEGIN
 													,NULL--ReceiptItem.ysnSubCurrency
 													,NULL--Receipt.intSubCurrencyCents
 													,RebuildInvTrans.intItemUOMId
+													,ReceiptItem.intComputeItemTotalOption
+													,ReceiptItem.dblOpenReceive 
 												)
 												-- (B) Other Charge
 												+ 
@@ -4222,6 +4226,8 @@ BEGIN
 								,NULL--DetailItem.ysnSubCurrency
 								,NULL--Header.intSubCurrencyCents
 								,RebuildInvTrans.intItemUOMId
+								,ReceiptItem.intComputeItemTotalOption
+								,ReceiptItem.dblOpenReceive 
 							)
 						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
