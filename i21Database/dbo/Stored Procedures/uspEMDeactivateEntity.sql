@@ -1,11 +1,20 @@
 ﻿CREATE PROCEDURE [dbo].[uspEMDeactivateEntity]
-	@Id int
+	@Id int,
+	@intUserId INT = NULL
 AS
 	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Vendor')
 	BEGIN
 		UPDATE tblAPVendor SET ysnPymtCtrlActive = 0 WHERE [intEntityId] = @Id
+		
+		DECLARE @details NVARCHAR(MAX) = '{"change":"ysnPymtCtrlActive","from":"true","to":"false","leaf":true,"iconCls":"small-gear","isField":true,"keyValue":' +CAST(@Id AS NVARCHAR(MAX)) + ',"changeDescription":"Active","hidden":false}'
+		EXEC uspSMAuditLog 
+			@keyValue = @Id,
+			@screenName = 'EntityManagement.view.Entity',
+			@entityId = @intUserId,
+			@actionType = 'Updated',
+			@details = @details
 	END	
 
 	IF EXISTS( SELECT TOP 1 1 FROM [tblEMEntityType] WHERE intEntityId = @Id and strType = 'Customer')

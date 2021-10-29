@@ -869,6 +869,6 @@ END
 	END
 
 
-	SET @SuccessfulCount = @SuccessfulCount --+ @intForeignTransCount
+	SET @SuccessfulCount = @SuccessfulCount + @intForeignTransCount
 
 	--================--

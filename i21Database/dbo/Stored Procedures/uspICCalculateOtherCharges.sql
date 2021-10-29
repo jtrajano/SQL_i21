@@ -63,7 +63,13 @@ BEGIN
 										1
 							END 
 						, 2)
-			,dblQuantity = ISNULL(NULLIF(ComputedCharges.dblCalculatedQty, 0), 1) 
+			,dblQuantity = 
+				CASE 
+					WHEN ReceiptCharge.strCostMethod = 'Percentage' THEN 
+						1
+					ELSE 
+						ISNULL(NULLIF(ComputedCharges.dblCalculatedQty, 0), 1) 
+				END 
 
 	FROM	dbo.tblICInventoryReceiptCharge ReceiptCharge INNER JOIN  (
 				SELECT	intInventoryReceiptChargeId

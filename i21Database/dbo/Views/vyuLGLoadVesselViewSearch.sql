@@ -53,7 +53,11 @@ SELECT  L.intLoadId
 			WHEN 3 THEN 'Vessel Nomination'
 			ELSE '' END COLLATE Latin1_General_CI_AS
 		,strShipmentStatus = CASE L.intShipmentStatus
-			WHEN 1 THEN 'Scheduled'
+			WHEN 1 THEN 
+				CASE WHEN (L.dtmLoadExpiration IS NOT NULL AND GETDATE() > L.dtmLoadExpiration AND L.intShipmentType = 1
+						AND L.intTicketId IS NULL AND L.intLoadHeaderId IS NULL)
+				THEN 'Expired'
+				ELSE 'Scheduled' END
 			WHEN 2 THEN 'Dispatched'
 			WHEN 3 THEN 
 				CASE WHEN (L.ysnDocumentsApproved = 1 

@@ -32,3 +32,6 @@ GO
 
 CREATE INDEX [IX_tblTRLoadDistributionDetail_intItemId] ON [dbo].[tblTRLoadDistributionDetail] ([intItemId] ASC)
 GO 
+
+CREATE INDEX [IX_tblTRLoadDistributionDetail_strBillOfLading] ON [dbo].[tblTRLoadDistributionDetail] ([strBillOfLading] ASC)
+GO 

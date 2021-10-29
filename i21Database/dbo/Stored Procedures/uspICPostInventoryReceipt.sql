@@ -764,6 +764,8 @@ BEGIN
 											,DetailItem.ysnSubCurrency
 											,Header.intSubCurrencyCents
 											,DEFAULT 
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										--/ Header.intSubCurrencyCents 
 
@@ -807,6 +809,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT 
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 
@@ -863,6 +867,8 @@ BEGIN
 						,NULL--DetailItem.ysnSubCurrency
 						,NULL--Header.intSubCurrencyCents
 						,DEFAULT 
+						,DetailItem.intComputeItemTotalOption
+						,DetailItem.dblOpenReceive
 					)
 				,intSourceEntityId = Header.intEntityVendorId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -1462,6 +1468,7 @@ BEGIN
 					
 			IF EXISTS (SELECT TOP 1 1 FROM @ItemsForInTransitCosting)
 			BEGIN 
+
 				-- Call the post routine for the In-Transit costing (Inbound Shipment) 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
@@ -1593,6 +1600,7 @@ BEGIN
 								AND t.intTransactionDetailId = td.intInventoryTransferDetailId						
 								AND t.intItemId = tp.intItemId 
 								AND t.dblQty > 0 
+								AND t.ysnIsUnposted = 0 
 						WHERE
 							(
 								td.intInventoryTransferDetailId = ri.intSourceId
@@ -1826,6 +1834,8 @@ BEGIN
 											,DetailItem.ysnSubCurrency
 											,Header.intSubCurrencyCents
 											,DEFAULT 
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										--/ Header.intSubCurrencyCents 
 
@@ -1857,6 +1867,8 @@ BEGIN
 											,NULL--DetailItem.ysnSubCurrency
 											,NULL--Header.intSubCurrencyCents
 											,DEFAULT 
+											,DetailItem.intComputeItemTotalOption
+											,DetailItem.dblOpenReceive
 										)
 										-- (B) Other Charge
 										+ 

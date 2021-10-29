@@ -427,12 +427,15 @@ BEGIN
 
 					[strPOSCodeFormatFormat]			=	PCF.strPosCodeFormat,
 					[strPOSCode]						=	PCF.strUPCwthOrwthOutCheckDigit,
-					[strPOSCodeModifier]				=	'000'
+					[strPOSCodeModifier]				=	CAST(ISNULL(mo.intModifier, '000') AS VARCHAR(100))
 				FROM tblSTPromotionItemListDetail ILT
 				INNER JOIN tblSTPromotionItemList PIL
 					ON ILT.intPromoItemListId = PIL.intPromoItemListId
 				INNER JOIN tblICItemUOM IUOM 
 					ON IUOM.intItemUOMId = ILT.intItemUOMId
+					AND IUOM.ysnStockUnit = 1
+				LEFT JOIN tblSTModifier mo
+					ON IUOM.intItemUOMId = mo.intItemUOMId
 				INNER JOIN tblICItem I
 					ON IUOM.intItemId = I.intItemId	
 				INNER JOIN tblICItemLocation IL 

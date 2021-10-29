@@ -23,6 +23,7 @@ SELECT
 	B.strVendorOrderNumber,
 	B.dtmBillDate,
 	T.strTerm,
+	S.strPaymentScheduleNumber,
 	B.dtmDueDate,
 	E2.strName AS strFromEntityName, 							--intShipFromEntityId
 	L.strLocationName, 											--intStoreLocationId

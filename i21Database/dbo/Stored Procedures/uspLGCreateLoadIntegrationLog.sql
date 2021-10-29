@@ -655,7 +655,7 @@ BEGIN TRY
 				BEGIN
 					IF ((@dtmCurrentETAPOD IS NOT NULL))
 					BEGIN
-						IF (ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,''))
+						IF (ISNULL(@ysnPOETAFeedToERP,0) = 1 AND ISNULL(@dtmCurrentETAPOD,'') <> ISNULL(@dtmCurrentPlannedAvailabilityDate,'') )
 						BEGIN
 							UPDATE tblCTContractDetail 
 							SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
@@ -665,11 +665,10 @@ BEGIN TRY
 							SELECT @ysnIsETAUpdated = 1
 						END
 
-						IF (@intShipmentType = 1 AND ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
+						IF (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1 AND @intShipmentType = 1 AND ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
 						BEGIN
 							UPDATE tblCTContractDetail 
-							SET dtmUpdatedAvailabilityDate = CASE WHEN (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) THEN DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
-																ELSE dtmUpdatedAvailabilityDate END
+							SET dtmUpdatedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
 								,intConcurrencyId = intConcurrencyId + 1
 							WHERE intContractDetailId = @intContractDetailId 
 								OR (@intPurchaseSale = 3 AND intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId))

@@ -108,6 +108,12 @@ WITH (
 	, [datatype]   NVARCHAR(50)
 )
 
+IF NOT  EXISTS (SELECT TOP 1 1 FROM  @temp_xml_table WHERE fieldname ='strStatementFormat')
+BEGIN
+	INSERT INTO  @temp_xml_table ([fieldname],[condition],[from],[to],[join],[begingroup],[endgroup],[datatype]) 
+	SELECT  'strStatementFormat', 'Equal To' , 'Open Item' , NULL, 'AND', '' , '' , 'string'
+END
+
 -- Gather the variables values from the xml table.
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
  	   ,@dtmDateTo   = CAST(CASE WHEN ISNULL([to], '') <> '' THEN [to] ELSE GETDATE() END AS DATETIME)

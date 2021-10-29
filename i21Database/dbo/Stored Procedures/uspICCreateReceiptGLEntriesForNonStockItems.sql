@@ -379,6 +379,8 @@ AS
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
 					,DEFAULT 
+					,ri.intComputeItemTotalOption
+					,ri.dblOpenReceive
 				)
 		,intSourceEntityId = r.intEntityVendorId
 		,intCommodityId = i.intCommodityId
@@ -629,6 +631,8 @@ BEGIN
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
 					,DEFAULT
+					,ri.intComputeItemTotalOption
+					,ri.dblOpenReceive
 				)
 		,strBatchId = @strBatchId
 	FROM 

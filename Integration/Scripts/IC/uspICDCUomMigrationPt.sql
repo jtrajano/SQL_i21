@@ -17,22 +17,40 @@ SET ANSI_WARNINGS OFF
 -- UnitMeasure data migration from ptuommst origin table to tblICUnitMeasure i21 table 
 -- This does not insert duplicates
 --------------------------------------------------------------------------------------------------------------------------------------------
-DECLARE @UOMS TABLE (strUnitMeasure NVARCHAR(100) COLLATE Latin1_General_CI_AS, strSymbol NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+DECLARE @UOMS TABLE (
+	strUnitMeasure NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strSymbol NVARCHAR(100) COLLATE Latin1_General_CI_AS
+)
+
 INSERT INTO @UOMS
 SELECT DISTINCT
-	  strUnitMeasure	= RTRIM(ptuom_desc) COLLATE Latin1_General_CI_AS 
-	, strSymbol			= RTRIM(ptuom_code) COLLATE Latin1_General_CI_AS
+	  strUnitMeasure	= LTRIM(RTRIM(ptuom_desc)) COLLATE Latin1_General_CI_AS 
+	, strSymbol			= LTRIM(RTRIM(ptuom_code)) COLLATE Latin1_General_CI_AS
 FROM ptuommst
-WHERE ptuom_code != ' '	
+WHERE RTRIM(LTRIM(ptuom_code)) <> ''
 
-UNION
-
+UNION ALL
 SELECT DISTINCT
-	  strUnitMeasure	= RTRIM(ptpkg_desc) COLLATE Latin1_General_CI_AS 
-	, strSymbol			= RTRIM(ptpkg_code) COLLATE Latin1_General_CI_AS
+	  strUnitMeasure	= LTRIM(RTRIM(ptpkg_desc)) COLLATE Latin1_General_CI_AS 
+	, strSymbol			= LTRIM(RTRIM(ptpkg_code)) COLLATE Latin1_General_CI_AS
 FROM ptpkgmst
-WHERE ptpkg_code != ' '
+WHERE RTRIM(LTRIM(ptpkg_code)) <> ''
 
+UNION ALL 
+SELECT DISTINCT
+	  strUnitMeasure	= LTRIM(RTRIM(ptitm_unit)) COLLATE Latin1_General_CI_AS 
+	, strSymbol			= LTRIM(RTRIM(ptitm_unit)) COLLATE Latin1_General_CI_AS
+FROM ptitmmst
+WHERE LTRIM(RTRIM(ptitm_unit)) <> ''
+
+UNION ALL 
+SELECT DISTINCT
+	  strUnitMeasure	= LTRIM(RTRIM(ptitm_pak_desc)) COLLATE Latin1_General_CI_AS 
+	, strSymbol			= LTRIM(RTRIM(ptitm_pak_desc)) COLLATE Latin1_General_CI_AS
+FROM ptitmmst
+WHERE LTRIM(RTRIM(ptitm_pak_desc)) <> ''
+
+-- Delete the duplicate UOMs, relative to strUnitMeasure
 ;WITH CTE AS 
 (
     SELECT strUnitMeasure, strSymbol, ROW_NUMBER() OVER 
@@ -66,8 +84,6 @@ CASE WHEN UPPER(strSymbol) IN ('BUSHEL','BUSHELS','BU', 'GAL', 'OZ', 'GA', 'QT')
 	WHEN UPPER(strSymbol) IN ('HOUR', 'HR') THEN 'Time'
 	ELSE 'Quantity'
 END 
-
-
 
 GO
 

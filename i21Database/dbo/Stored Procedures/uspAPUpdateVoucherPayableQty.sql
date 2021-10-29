@@ -121,6 +121,7 @@ ELSE SAVE TRAN @SavePoint
 				--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
 				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
+				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
@@ -141,6 +142,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intInventoryReceiptItemId,-1) = ISNULL(A.intInventoryReceiptItemId,-1)
 				--AND ISNULL(C.intInventoryShipmentItemId,-1) = ISNULL(A.intInventoryShipmentItemId,-1)
 				AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
+				AND ISNULL(C.intTicketDistributionAllocationId,-1) = ISNULL(A.intTicketDistributionAllocationId,-1)
 				AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
@@ -250,6 +252,7 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intSettleStorageId]
 				,B.[intItemId]						
 				,B.[intLinkingId]			
+				,B.[intTicketDistributionAllocationId]
 				,B.[strItemNo]						
 				,B.[intPurchaseTaxGroupId]			
 				,B.[strTaxGroup]			
@@ -357,7 +360,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intCustomerStorageId]	
 			,[intSettleStorageId]
 			,[intItemId]						
-			,[intLinkingId]				
+			,[intLinkingId]			
+			,[intTicketDistributionAllocationId]	
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
 			,[strTaxGroup]					
@@ -446,7 +450,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intCustomerStorageId]	
 			,[intSettleStorageId]
 			,[intItemId]						
-			,[intLinkingId]					
+			,[intLinkingId]			
+			,[intTicketDistributionAllocationId]		
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
 			,[strTaxGroup]					
@@ -707,7 +712,8 @@ ELSE SAVE TRAN @SavePoint
 				,D.[intWeightClaimId]
 				,D.[intWeightClaimDetailId]
 				,D.[intItemId]						
-				,D.[intLinkingId]					
+				,D.[intLinkingId]		
+				,D.[intTicketDistributionAllocationId]			
 				,D.[strItemNo]						
 				,D.[intPurchaseTaxGroupId]			
 				,D.[strTaxGroup]					
@@ -816,7 +822,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intWeightClaimId]
 			,[intWeightClaimDetailId]
 			,[intItemId]						
-			,[intLinkingId]					
+			,[intLinkingId]			
+			,[intTicketDistributionAllocationId]		
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
 			,[strTaxGroup]					
@@ -903,7 +910,8 @@ ELSE SAVE TRAN @SavePoint
 			,[intWeightClaimId]
 			,[intWeightClaimDetailId]
 			,[intItemId]						
-			,[intLinkingId]					
+			,[intLinkingId]				
+			,[intTicketDistributionAllocationId]	
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
 			,[strTaxGroup]					

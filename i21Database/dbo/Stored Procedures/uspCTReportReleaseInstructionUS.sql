@@ -110,7 +110,7 @@ BEGIN TRY
 		, strSellerRefNo = CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber
 								ELSE CH.strCustomerContract END
 		, strContractNumber = CH.strContractNumber + (CASE WHEN CH2.strContractNumber IS NULL THEN ''
-														ELSE '/' + CH2.strContractNumber END)
+														ELSE ' / ' + CAST(CD.intContractSeq AS varchar(10)) END)
 		, strDestinationPointName = DP.strCity
 		, strItemDescription = IM.strDescription
 		, strReleaseQuantity = dbo.fnRemoveTrailingZeroes(CRI.dblQuantity) + ' ' + CRM.strUnitMeasure
@@ -162,6 +162,7 @@ BEGIN TRY
 		, supplier.strName AS strSupplier
 		, CRI.strNotes strReleaseNotes
 		, CRI.strConditions strReleaseConditions
+		, strUpdateAvailabilityDate = LEFT(DATENAME(DAY,  CD.dtmUpdatedAvailabilityDate), 2) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLaguageId, LEFT(DATENAME(MONTH,  CD.dtmUpdatedAvailabilityDate), 3)), LEFT(DATENAME(MONTH,  CD.dtmUpdatedAvailabilityDate), 3)) + ' ' + LEFT(DATENAME(YEAR, CD.dtmUpdatedAvailabilityDate), 4)
 	FROM tblCTContractReleaseInstruction CRI
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CRI.intContractDetailId
 	JOIN tblCTContractHeader CH WITH(NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -179,7 +180,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCity DP WITH(NOLOCK) ON DP.intCityId = CD.intDestinationPortId
 	LEFT JOIN tblCTPosition POS WITH(NOLOCK) ON POS.intPositionId = CH.intPositionId
 	LEFT JOIN tblLGAllocationDetail AD WITH(NOLOCK) ON CD.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN AD.intPContractDetailId ELSE AD.intSContractDetailId END)
-	LEFT JOIN tblCTContractDetail CD2 WITH(NOLOCK) ON CD2.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN AD.intSContractDetailId ELSE AD.intPContractDetailId END)
+	LEFT JOIN tblCTContractDetail CD2 WITH(NOLOCK) ON CD2.intContractDetailId = (CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(AD.intSContractDetailId,CD.intContractDetailId) ELSE ISNULL(AD.intPContractDetailId,CD.intContractDetailId) END)
 	LEFT JOIN tblCTContractHeader CH2 WITH(NOLOCK) ON CH2.intContractHeaderId = CD2.intContractHeaderId
 	LEFT JOIN tblSMFreightTerms FT WITH(NOLOCK) ON CH.intFreightTermId = FT.intFreightTermId
 	LEFT JOIN tblSMCity CCC WITH(NOLOCK) ON CCC.intCityId = CH.intINCOLocationTypeId

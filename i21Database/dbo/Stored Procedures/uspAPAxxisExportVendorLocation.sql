@@ -21,7 +21,8 @@ BEGIN
 	CREATE TABLE tmpAxxisVendorLocation(
 		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
 		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+		strTerminalNo NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL
 	)
 END
 
@@ -67,10 +68,15 @@ BEGIN
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
-		C.strShipVia
+		C.strShipVia,
+		E.strTerminalControlNumber AS strTerminalNo
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
+	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId
+	LEFT JOIN tblTFTerminalControlNumber E ON D.intTerminalControlNumberId = E.intTerminalControlNumberId
+	WHERE
+		A.ysnTransportTerminal = 1
 END
 ELSE
 BEGIN
@@ -78,11 +84,16 @@ BEGIN
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
-		C.strShipVia
+		C.strShipVia,
+		E.strTerminalControlNumber AS strTerminalNo
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
+	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
 	LEFT JOIN tblSMShipVia C ON B.intShipViaId = C.intEntityId
-	WHERE A.intEntityId = @vendorId
+	LEFT JOIN tblTFTerminalControlNumber E ON D.intTerminalControlNumberId = E.intTerminalControlNumberId
+	WHERE 
+		A.intEntityId = @vendorId
+	AND A.ysnTransportTerminal = 1
 END
 
 END TRY

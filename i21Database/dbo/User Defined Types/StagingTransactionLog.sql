@@ -144,10 +144,15 @@
 	[dblTrlSellUnitPrice] decimal(18, 3) NULL,
 	[dblTrlUnitPrice] decimal(18, 3) NULL,
 	[dblTrlLineTot] decimal(18, 3) NULL,
+	[dblTrlPrcOvrd] decimal(18, 3) NULL,
 	[strTrlDesc] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrlUPC] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrlModifier] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTrlUPCEntryType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[strTrloLnItemDiscProgramId] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblTrloLnItemDiscDiscAmt] decimal(18, 3) NULL, 
+	[dblTrloLnItemDiscQty] decimal(18, 3) NULL,
+	[intTrloLnItemDiscTaxCred] INT NULL,
 
 	-- NEW
 	-- trlFuel

@@ -29,6 +29,13 @@ BEGIN
 	WHERE		strModule = 'Automated Quoting'
 END
 
+IF EXISTS (SELECT 1 FROM tblSMModule WHERE strModule = 'Power BI')
+BEGIN
+	UPDATE		tblSMModule
+	SET			ysnAddonComponent = 1
+	WHERE		strModule = 'Power BI'
+END
+
 PRINT('/*******************  END UPDATING ADDON COMPONENTS  *******************/')
 
 GO
