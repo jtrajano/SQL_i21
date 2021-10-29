@@ -1,12 +1,11 @@
- 
 CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	[intCompanyPreferenceOptionId] [int] IDENTITY(1,1) NOT NULL,
 	[intUTCOffset] [int] NULL,
-	[intBTFromFXGLAccountId] [int] NULL,
-	[intBTToFXGLAccountId] [int] NULL,
+	[intBTForwardFromFXGLAccountId] [int] NULL,
+	[intBTForwardToFXGLAccountId] [int] NULL,
+	[intBTSwapFromFXGLAccountId] [int] NULL,
+	[intBTSwapToFXGLAccountId] [int] NULL,
 	[intBTFeesAccountId] [int] NULL,
-	--[intBTForwardAccountId] [int] NULL,
-	--[intBTForwardAccrualAccountId] [int] NULL,
 	[intBTBankFeesAccountId] [int] NULL,
 	[intBTInTransitAccountId] [int] NULL,
 	[intConcurrencyId] [int] NULL,
