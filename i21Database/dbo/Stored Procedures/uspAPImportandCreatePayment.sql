@@ -60,7 +60,7 @@ BEGIN TRY
 			FROM dbo.fnAPGetPayVoucherForPayment(@currencyId, @paymentMethodId, @datePaid, 1, @vendorId, @payToAddress, 0)
 		END
 
-		EXEC uspAPCreatePayment @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
+		EXEC uspAPCreatePayment @userId, @bankAccountId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
 
 		IF @templateId NOT IN (1, 2, 3)
 		BEGIN
