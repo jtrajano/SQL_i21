@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket In/Out Report' AND strModuleName = 'Ticket Management')
+	IF  NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Out of Balance' AND strModuleName = 'Accounts Payable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -3994,12 +3994,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage B
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Reporting.view.ReportManager?group=Grain&report=StorageByGrades&direct=true&showCriteria=true' WHERE strMenuName = 'Storage By Grades' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket In/Out Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Ticket In/Out Report', N'Ticket Management', @TicketManagementReportParentMenuId, N'Ticket In/Out Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=TicketInOut&direct=true', N'small-menu-report', 0, 0, 0, 1, 7, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'Reporting.view.ReportManager?group=Grain&report=TicketInOut&direct=true' WHERE strMenuName = 'Ticket In/Out Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Destination Weight Variance Report', N'Ticket Management', @TicketManagementReportParentMenuId, N'Destination Weight Variance Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=DestinationWeightVarianceReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 6, 1)
@@ -5167,11 +5161,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Handheld 
 ELSE
 	UPDATE tblSMMasterMenu SET  intSort = 5, strCommand = N'Store.view.HandheldScanner' WHERE strMenuName = 'Handheld Scanners' AND strModuleName = 'Store' AND intParentMenuID = @StoreActivitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mass Add/Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Mass Add/Update Item Pricing', N'Store', @StorePricebookParentMenuId, N'Mass Add/Update Item Pricing', N'Pricebook', N'Screen', N'Store.view.UpdateItemPricing', N'small-menu-pricebook', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Update Item Pricing', N'Store', @StorePricebookParentMenuId, N'Update Item Pricing', N'Pricebook', N'Screen', N'Store.view.UpdateItemPricing', N'small-menu-pricebook', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.UpdateItemPricing' WHERE strMenuName = 'Mass Add/Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.UpdateItemPricing' WHERE strMenuName = 'Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Retail Price Adjustments' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -5391,7 +5385,6 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Purge Promotions' AND strModule
 --DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Radiant Item Type Code' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Generate  Vendor Rebates File' AND strModuleName = 'Store' AND intParentMenuID = @StoreMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Mass' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Update Item Pricing' AND strModuleName = 'Store' AND intParentMenuID = @StorePricebookParentMenuId
 /* STOP DELETE */
 
 /* CRM - Customer Relation Management */
