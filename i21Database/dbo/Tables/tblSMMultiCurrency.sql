@@ -19,6 +19,7 @@
 	[intRiskManagementBasisUnrealizedId]			INT NULL,
 	[intRiskManagementFutureUnrealizedId]			INT NULL,
 	[intRiskManagementCashUnrealizedId]				INT NULL,
+	[intFixedAssetsUnrealizedId]					INT NULL,
 	/* Offset */
 	[ysnRevalue]									BIT NULL DEFAULT 0,
 	[intAccountsPayableOffsetId]					INT NULL,
@@ -30,6 +31,7 @@
 	[intRiskManagementBasisOffsetId]				INT NULL,
 	[intRiskManagementFutureOffsetId]				INT NULL,
 	[intRiskManagementCashOffsetId]					INT NULL,
+	[intFixedAssetsOffsetId]						INT NULL,
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
