@@ -633,8 +633,6 @@ BEGIN TRY
 				WHERE intItemId = @intItemId
 					AND intLocationId = @intCompanyLocationId
 
-				SELECT @intItemLocationId = NULL
-
 				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 					,@strBatchId OUTPUT
 
