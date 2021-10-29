@@ -449,7 +449,13 @@ BEGIN TRY
 				,ri.intItemId
 				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
 				,0 AS ysnIsSubstitute
-				,ri.ysnMinorIngredient
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
@@ -479,7 +485,13 @@ BEGIN TRY
 				,rs.intSubstituteItemId AS intItemId
 				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 				,1 AS ysnIsSubstitute
-				,0
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,ri.intItemId
@@ -498,7 +510,7 @@ BEGIN TRY
 			JOIN tblICItem i ON rs.intSubstituteItemId = i.intItemId
 			WHERE r.intWorkOrderId = @intWorkOrderId
 				AND rs.intRecipeItemTypeId = 1
-			ORDER BY 4 Desc
+			ORDER BY 4 DESC
 				,ysnIsSubstitute
 				,ysnMinorIngredient
 
@@ -532,7 +544,13 @@ BEGIN TRY
 				,ri.intItemId
 				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
 				,0 AS ysnIsSubstitute
-				,ri.ysnMinorIngredient
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
@@ -574,7 +592,13 @@ BEGIN TRY
 				,rs.intSubstituteItemId AS intItemId
 				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 				,1 AS ysnIsSubstitute
-				,0
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,1
 				,0
 				,ri.intItemId
@@ -592,7 +616,7 @@ BEGIN TRY
 			JOIN tblICItem i ON ri.intItemId = i.intItemId
 			WHERE r.intRecipeId = @intRecipeId
 				AND rs.intRecipeItemTypeId = 1
-			ORDER BY 4 Desc
+			ORDER BY 4 DESC
 				,ysnIsSubstitute
 				,ysnMinorIngredient
 
@@ -810,7 +834,9 @@ BEGIN TRY
 					WHERE ysnMinorIngredient = 0
 
 					SELECT @dblQuantityTaken = Sum(dblQuantity)
-					FROM #tblBlendSheetLot
+					FROM #tblBlendSheetLot BS
+					JOIN @tblInputItem I on I.intItemId =BS.intItemId 
+					Where I.ysnMinorIngredient = 0
 
 					IF @dblQuantityTaken > @sRequiredQty
 					BEGIN
@@ -1109,7 +1135,13 @@ BEGIN TRY
 				,L.intParentLotId
 				,ISNULL(L.intWeightUOMId, L.intItemUOMId)
 				,L.intItemUOMId
-				,(Case When SubLoc.intSubLocationId is not null then 1 else 2 End ) AS  intPreference
+				,(
+					CASE 
+						WHEN SubLoc.intSubLocationId IS NOT NULL
+							THEN 1
+						ELSE 2
+						END
+					) AS intPreference
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
@@ -1619,7 +1651,7 @@ BEGIN TRY
 				,intStorageLocationId
 				,dblWeightPerQty
 			FROM #tblInputLot
-			ORDER BY IsNULL(intPreference,1)
+			ORDER BY IsNULL(intPreference, 1)
 
 			OPEN Cursor_FetchItem
 
@@ -1736,7 +1768,10 @@ BEGIN TRY
 									)
 								,@intItemIssuedUOMId = (
 									CASE 
-										WHEN @intIssuedUOMTypeId in (2,3)
+										WHEN @intIssuedUOMTypeId IN (
+												2
+												,3
+												)
 											THEN L.intItemIssuedUOMId
 										ELSE L.intItemUOMId
 										END
@@ -1757,7 +1792,7 @@ BEGIN TRY
 						IF @intIssuedUOMTypeId = 3
 						BEGIN
 							SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0) * @dblWeightPerQty)
-							,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0) )
+								,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0))
 
 							IF @dblQuantity = 0
 							BEGIN

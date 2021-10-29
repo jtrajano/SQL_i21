@@ -633,10 +633,20 @@ BEGIN TRY
 				WHERE intItemId = @intItemId
 					AND intLocationId = @intCompanyLocationId
 
+				SELECT @intItemLocationId = NULL
+
 				EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 					,@strBatchId OUTPUT
 
 				SELECT @dtmDate = dbo.fnGetBusinessDate(GETDATE(), @intCompanyLocationId)
+
+				IF @dblLastCost IS NULL
+				BEGIN
+					SELECT @dblLastCost = t.dblStandardCost
+					FROM tblICItemPricing t WITH (NOLOCK)
+					WHERE t.intItemId = @intItemId
+						AND t.intItemLocationId = @intItemLocationId
+				END
 
 				DELETE
 				FROM @ItemsForPost
