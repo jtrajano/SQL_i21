@@ -9,9 +9,8 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ticket In/Out Report' AND strModuleName = 'Ticket Management')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cash Flow Report' AND strModuleName = 'Cash Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -1432,6 +1431,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Undeposi
 	VALUES (N'Undeposited Fund - Unmatched Report', N'Cash Management', @CashManagementReportParentMenuId, N'Undeposited Fund - Unmatched Report', N'Report', N'Screen', N'CashManagement.view.UndepositedFundUMReports?showSearch=true', N'small-menu-report', 1, 0, 0, 1, 1, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.UndepositedFundUMReports?showSearch=true' WHERE strMenuName = N'Undeposited Fund - Unmatched Report' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Cash Flow Report' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Cash Flow Report', N'Cash Management', @CashManagementReportParentMenuId, N'Cash Flow Report', N'Report', N'Screen', N'CashManagement.view.CashFlowReports?showSearch=true', N'small-menu-report', 1, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'CashManagement.view.CashFlowReports?showSearch=true' WHERE strMenuName = N'Cash Flow Report' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId
 
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Tasks' AND
