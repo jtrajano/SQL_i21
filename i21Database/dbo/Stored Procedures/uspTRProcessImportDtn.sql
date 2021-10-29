@@ -102,6 +102,9 @@ BEGIN
 								@intBillId = @intBillId,
 								@intImportLoadId = @intImportLoadId,
 								@intImportDtnDetailId = @intImportDtnDetailId
+
+						--TR-1730
+							UPDATE tblAPBill SET strVendorOrderNumber = @strInvoiceNo where intBillId = @intBillId
 						END
 					END
 
