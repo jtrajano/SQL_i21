@@ -1,4 +1,4 @@
-alter VIEW vyuCMBankTransfer  
+CREATE VIEW vyuCMBankTransfer  
 AS  
 SELECT A.*,  
 D.*,
