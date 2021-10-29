@@ -18,6 +18,34 @@ SELECT @DefaultLotCondition = strLotCondition FROM tblICCompanyPreference
 DECLARE @strSubLocationDefault NVARCHAR(50);
 DECLARE @strStorageUnitDefault NVARCHAR(50);
 
+DECLARE @intStockUOM AS INT
+		,@intLastInventoryTransactionId AS INT 
+
+-- Get the item's stock unit. 
+SELECT TOP 1 
+	@intStockUOM = iu.intItemUOMId 
+FROM 
+	tblICItemUOM iu
+WHERE
+	iu.intItemId = @intItemId
+	AND iu.ysnStockUnit = 1
+
+-- Get the last valuation id
+SELECT TOP 1 
+	@intLastInventoryTransactionId = t.intInventoryTransactionId
+FROM 
+	tblICItem i INNER JOIN tblICItemLocation il
+		ON il.intItemId = i.intItemId
+		AND il.intLocationId = @intLocationId
+	INNER JOIN tblICInventoryTransaction t 
+		ON i.intItemId = t.intItemId
+WHERE
+	t.intItemId = @intItemId
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+	AND t.intInTransitSourceLocationId IS NULL 
+ORDER BY
+	t.intInventoryTransactionId DESC 
+
 DECLARE @tblInventoryTransaction TABLE(
 	intItemId				INT,
 	intItemUOMId			INT,
@@ -88,7 +116,7 @@ FROM
 		ON Lot.intLotId = t.intLotId
 WHERE 
 	t.intItemId = @intItemId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND t.intInTransitSourceLocationId IS NULL 
 	--AND ISNULL(t.ysnIsUnposted, 0) = 0 
 	AND IL.intLocationId = @intLocationId
@@ -126,8 +154,7 @@ FROM
 WHERE 
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
-	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
-	--AND ISNULL(t.ysnIsUnposted, 0) = 0 
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
 	AND (@intSubLocationId IS NULL OR @intSubLocationId = CASE WHEN t.intLotId IS NULL THEN t.intSubLocationId ELSE Lot.intSubLocationId END)
 	AND (@intStorageLocationId IS NULL OR @intStorageLocationId = CASE WHEN t.intLotId IS NULL THEN t.intStorageLocationId ELSE Lot.intStorageLocationId END)
 	AND @intOwnershipType = 2 -- Storage Stocks
@@ -165,8 +192,7 @@ HAVING
 	SUM(ISNULL(t.dblQty, 0)) <> 0 
 	OR SUM(ISNULL(t.dblUnitStorage, 0)) <> 0 
 
--- If transaction does not exists, add a dummy record. 
-IF NOT EXISTS(SELECT TOP 1 1 FROM @tblInventoryTransactionGrouped)
+-- If transaction does not exists for the item's uom, add a dummy record. 
 BEGIN
 	INSERT INTO @tblInventoryTransactionGrouped (
 		intItemId
@@ -181,31 +207,41 @@ BEGIN
 	)
 	SELECT	
 		intItemId				= i.intItemId
-		,intItemUOMId			= ItemUOMStock.intItemUOMId
+		,intItemUOMId			= iu.intItemUOMId
 		,intItemLocationId		= DefaultLocation.intItemLocationId
 		,intSubLocationId		= @intSubLocationId
 		,intStorageLocationId	= @intStorageLocationId
 		,dblQty					= CAST(0 AS NUMERIC(38, 20)) 
 		,dblUnitStorage			= CAST(0 AS NUMERIC(38, 20)) 
-		,dblCost				= COALESCE(NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
-	FROM tblICItem i
-	CROSS APPLY(
-		SELECT	intItemUOMId
-		FROM	tblICItemUOM iuStock 
-		WHERE iuStock.intItemId = i.intItemId AND iuStock.ysnStockUnit = 1
-	) ItemUOMStock
-	CROSS APPLY (
-		SELECT	ItemLocation.intItemLocationId, ItemLocation.intCostingMethod
-		FROM tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
-			ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
-		WHERE ItemLocation.intItemId = i.intItemId
-		AND [Location].intCompanyLocationId = @intLocationId
-	) DefaultLocation
-	LEFT JOIN tblICItemPricing ItemPricing 
-		ON i.intItemId = ItemPricing.intItemId 
-		AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
-	WHERE i.intItemId = @intItemId
+		,dblCost				= 0
+	FROM 		
+		tblICItem i INNER JOIN tblICItemUOM iu 
+			ON i.intItemId = iu.intItemId 
+		CROSS APPLY (
+			SELECT	
+				ItemLocation.intItemLocationId
+				,ItemLocation.intCostingMethod
+			FROM 
+				tblICItemLocation ItemLocation LEFT JOIN tblSMCompanyLocation [Location] 
+					ON [Location].intCompanyLocationId = ItemLocation.intLocationId		
+			WHERE 
+				ItemLocation.intItemId = i.intItemId
+				AND [Location].intCompanyLocationId = @intLocationId
+		) DefaultLocation
+
+		LEFT JOIN @tblInventoryTransactionGrouped g
+			ON g.intItemId = i.intItemId
+			AND g.intItemUOMId = iu.intItemUOMId
+			AND g.intItemLocationId = DefaultLocation.intItemLocationId 
+
+	WHERE 
+		i.intItemId = @intItemId
 		AND i.strLotTracking = 'No'
+		AND (
+			g.intItemId IS NULL
+			AND g.intItemUOMId IS NULL
+			AND g.intItemLocationId IS NULL 
+		)
 END
 
 -- Return the result back to the caller. 
@@ -230,40 +266,74 @@ SELECT
 	,strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
 	,dblRunningAvailableQty			= t.dblQty
 	,dblStorageAvailableQty			= t.dblUnitStorage
-	,dblCost = COALESCE(NULLIF(CASE 
-				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId)
-				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
-				ELSE t.dblCost
-			END, 0), NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
-FROM @tblInventoryTransactionGrouped t 
-LEFT JOIN tblICItem i 
-	ON i.intItemId = t.intItemId
-INNER JOIN (
+	,dblCost = 
+		COALESCE(
+			NULLIF(
+				CASE 
+					-- If costing method is AVG, get the average cost
+					WHEN CostMethod.intCostingMethodId = 1 AND @intOwnershipType = 1  THEN 
+						dbo.fnCalculateCostBetweenUOM (
+							@intStockUOM
+							,ItemUOM.intItemUOMId
+							,dbo.fnICGetMovingAverageCost(
+								i.intItemId
+								,ItemLocation.intItemLocationId
+								,@intLastInventoryTransactionId
+							)
+						)
+					
+					-- Otherwise, use the last cost from the valaution. 
+					WHEN @intOwnershipType = 1 THEN 
+						dbo.fnCalculateCostBetweenUOM (
+							LastCost.intItemUOMId 
+							,ItemUOM.intItemUOMId
+							,LastCost.dblCost
+						)						
+				END
+				,0
+			)
+			,dbo.fnCalculateCostBetweenUOM (
+				@intStockUOM
+				,ItemUOM.intItemUOMId
+				,COALESCE(NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost) 
+			)
+		)
+FROM 
+	@tblInventoryTransactionGrouped t INNER JOIN tblICItem i 
+		ON i.intItemId = t.intItemId
+	INNER JOIN (
 		tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
 			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
-	) ON ItemUOM.intItemUOMId = t.intItemUOMId
-OUTER APPLY(
-	SELECT TOP 1
-			dblCost
-			,intItemUOMId
-	FROM	tblICInventoryFIFO FIFO 
-	WHERE	t.intItemId = FIFO.intItemId 
-			AND t.intItemLocationId = FIFO.intItemLocationId 
-			AND dblStockIn- dblStockOut > 0
-	ORDER BY dtmDate ASC
-) FIFO 
-LEFT JOIN tblICItemUOM StockUOM 
-	ON StockUOM.intItemId = t.intItemId
-	AND StockUOM.ysnStockUnit = 1
-LEFT JOIN tblICItemLocation ItemLocation 
-	ON ItemLocation.intItemLocationId = t.intItemLocationId
-LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = t.intItemLocationId
-    AND ItemPricing.intItemId = ItemLocation.intItemId
-LEFT JOIN tblICCostingMethod CostMethod
-	ON CostMethod.intCostingMethodId = ItemLocation.intCostingMethod
-LEFT JOIN tblSMCompanyLocation CompanyLocation 
-	ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
-	ON SubLocation.intCompanyLocationSubLocationId = t.intSubLocationId
-LEFT JOIN tblICStorageLocation strgLoc 
-	ON strgLoc.intStorageLocationId = t.intStorageLocationId
+	) 
+		ON ItemUOM.intItemUOMId = t.intItemUOMId
+
+	-- Get the last cost from the valuation. 
+	OUTER APPLY (
+		SELECT TOP 1 
+			t.intItemUOMId
+			,t.dblCost
+		FROM
+			tblICInventoryTransaction t 
+		WHERE
+			t.intItemId = t.intItemId
+			AND t.intItemLocationId = t.intItemLocationId
+			AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+			AND t.intInTransitSourceLocationId IS NULL 
+			AND t.dblQty > 0 
+		ORDER BY
+			t.intInventoryTransactionId DESC 		
+	) LastCost 
+
+	LEFT JOIN tblICItemLocation ItemLocation 
+		ON ItemLocation.intItemLocationId = t.intItemLocationId
+	LEFT JOIN tblICItemPricing ItemPricing 
+		ON ItemPricing.intItemLocationId = t.intItemLocationId
+		AND ItemPricing.intItemId = ItemLocation.intItemId
+	LEFT JOIN tblICCostingMethod CostMethod
+		ON CostMethod.intCostingMethodId = ItemLocation.intCostingMethod
+	LEFT JOIN tblSMCompanyLocation CompanyLocation 
+		ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
+	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation 
+		ON SubLocation.intCompanyLocationSubLocationId = t.intSubLocationId
+	LEFT JOIN tblICStorageLocation strgLoc 
+		ON strgLoc.intStorageLocationId = t.intStorageLocationId
