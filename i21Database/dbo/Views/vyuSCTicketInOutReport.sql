@@ -7,8 +7,8 @@
 		,Entity.strName
 		,CompanyLocation.strLocationName
 		,StorageType.strStorageTypeDescription 
-		,case when Ticket.strInOutFlag = 'I' then 'INBOUND' 
-				when Ticket.strInOutFlag = 'O' then 'OUTBOUND'
+		,case when Ticket.strInOutFlag = 'I' then 'Inbound' 
+				when Ticket.strInOutFlag = 'O' then 'Outbound'
 			else ''
 		end
 			as strIndicator
