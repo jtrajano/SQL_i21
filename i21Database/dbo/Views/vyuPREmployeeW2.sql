@@ -5,7 +5,7 @@ SELECT
 	,[W2].intYear
 	,[W2].intEntityEmployeeId
 	,[EM].strEntityNo 
-	,[EMP].strSocialSecurity	/* box a */
+	,strSocialSecurity = dbo.[fnAESDecryptASym](EMP.strSocialSecurity)  /* box a */  
 	,[COM].strEin				/* box b */
 	,[COM].strCompanyName		/* box c */
 	,strCompanyAddress =		/* box c_1 */
