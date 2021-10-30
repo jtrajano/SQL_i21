@@ -694,7 +694,6 @@ BEGIN TRY
 			END
 		END
 
-
 		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE intContractStatusId = 4)
 		BEGIN
 			SELECT @intHeaderId = intTransactionReferenceId, 
@@ -3465,6 +3464,7 @@ BEGIN TRY
 
 		DECLARE @TotalBasis NUMERIC(24, 10) = 0
 			, @TotalPriced NUMERIC(24, 10) = 0
+			, @TotalHTA NUMERIC(24, 10) = 0
 			, @TotalOrigBasis NUMERIC(24, 10) = 0
 			, @TotalOrigPriced NUMERIC(24, 10) = 0
 			, @TotalConsumed NUMERIC(18, 6)
@@ -3472,17 +3472,25 @@ BEGIN TRY
 			, @intContractTypeId INT
 			, @currPricingTypeId INT
 			, @prevPricingTypeId INT
+			, @truePricingTypeId INT
 			, @strNotes NVARCHAR(MAX)
 			, @strTransactionType NVARCHAR(100)
 			, @strTransactionReference NVARCHAR(100)
 			, @intPriceFixationDetailId INT
 			, @intContractStatusId INT
 			, @prevContractStatusId INT
+			
 
 		SELECT @TotalBasis = ABS(SUM(dblQty)), @TotalOrigBasis = ABS(SUM(dblOrigQty))
 		FROM @cbLogPrev
 		WHERE strTransactionType = 'Contract Balance'
 			AND intPricingTypeId = 2
+		GROUP BY intContractDetailId
+
+		SELECT @TotalHTA = ABS(SUM(dblQty))
+		FROM @cbLogPrev
+		WHERE strTransactionType = 'Contract Balance'
+			AND intPricingTypeId = 3
 		GROUP BY intContractDetailId
 
 		SELECT @TotalPriced = SUM(dblQty), @TotalOrigPriced = SUM(dblOrigQty)
@@ -3534,6 +3542,7 @@ BEGIN TRY
 			, @dblOrigQty = ISNULL(dblOrigQty, 0)
 			, @dblAppliedQty = ISNULL(dblDynamic, 0)
 			, @currPricingTypeId = intPricingTypeId
+			, @truePricingTypeId = intPricingTypeId
 			, @intContractTypeId = intContractTypeId
 			, @strNotes = strNotes
 			, @intPriceFixationDetailId = intTransactionReferenceDetailId
@@ -3732,6 +3741,26 @@ BEGIN TRY
 										ELSE @TotalPriced END
 							, intPricingTypeId = 1
 							, dblFutures = @dblPreviousFutures
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
+					IF (ISNULL(@TotalHTA, 0) <> 0 AND @prevPricingTypeId = 3 AND @truePricingTypeId = 1)
+					BEGIN
+						-- Negate AND add previous record
+						UPDATE @cbLogPrev
+						SET dblQty = @TotalHTA * - 1
+							, intPricingTypeId = 3
+							, intActionId = 43
+
+						-- Negate previous if the value is not 0
+						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
+						BEGIN
+							UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
+							EXEC uspCTLogContractBalance @cbLogPrev, 0
+						END
+
+						UPDATE @cbLogSpecific
+						SET dblQty = @TotalHTA
+							, intPricingTypeId = 1
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 				END		
