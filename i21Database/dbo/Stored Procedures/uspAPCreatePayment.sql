@@ -379,21 +379,24 @@ BEGIN
 				[dblWithheld]	= CAST(@withholdAmount * @rate AS DECIMAL(18,2)),
 				[dblAmountDue]	= ISNULL(C.dblPayment, A.dblAmountDue
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
-								),
+								) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[dblPayment]	= ISNULL(C.dblPayment,
 									((A.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - A.dblPaymentTemp)
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
-								  ),
+								  ) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[dblInterest]	= A.dblInterest,
-				[dblTotal]		= ISNULL(C.dblPayment, A.dblTotal),
+				[dblTotal]		= ISNULL(C.dblPayment, A.dblTotal) * (CASE WHEN A.intTransactionType IN (3) OR (A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 1) THEN -1 ELSE 1 END),
 				[ysnOffset]		= CAST
 									(
-										CASE 
-										WHEN A.intTransactionType = 1  THEN 0
-										WHEN A.intTransactionType = 14 THEN 0
-										WHEN A.intTransactionType = 2 AND A.ysnPrepayHasPayment = 0 THEN 0
-										WHEN A.intTransactionType = 13 AND A.ysnPrepayHasPayment = 0 THEN 0
-										ELSE 1 END
+										CASE WHEN A.intTransactionType IN (1, 14) THEN 0
+										ELSE
+											(
+												CASE WHEN A.intTransactionType IN (2, 13) AND A.ysnPrepayHasPayment = 0
+													THEN 0
+												ELSE 1
+												END
+											)
+										END
 									AS BIT),
 				[intPayScheduleId]= C.intId
 			FROM tblAPBill A
