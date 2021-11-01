@@ -30,7 +30,7 @@
 			join tblGRStorageType StorageType
 				on Ticket.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId
 			join tblSCListTicketTypes TicketType
-				on Ticket.intTicketType = TicketType.intTicketType
+				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
 
 	where Ticket.intTicketType = 1
 		and CompanyLocation.ysnLicensed = 1
@@ -55,7 +55,7 @@
 			join tblSMCompanyLocation EntityCompanyLocation
 				on Ticket.intTransferLocationId= EntityCompanyLocation.intCompanyLocationId	
 			join tblSCListTicketTypes TicketType
-				on Ticket.intTicketType = TicketType.intTicketType
+				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
 
 	where Ticket.intTicketType = 7
 		and CompanyLocation.ysnLicensed = 1
@@ -81,7 +81,7 @@
 			join tblSMCompanyLocation EntityCompanyLocation
 				on Ticket.intProcessingLocationId= EntityCompanyLocation.intCompanyLocationId		
 			join tblSCListTicketTypes TicketType
-				on Ticket.intTicketType = TicketType.intTicketType
+				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
 
 	where Ticket.intTicketType = 7
 		and CompanyLocation.ysnLicensed = 1		
