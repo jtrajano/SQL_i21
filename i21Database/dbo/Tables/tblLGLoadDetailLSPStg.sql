@@ -34,3 +34,8 @@
 
 	CONSTRAINT [FK_tblLGLoadDetailLSPStg_tblLGLoadLSPStg_intLoadStgId] FOREIGN KEY ([intLoadStgId]) REFERENCES [dbo].[tblLGLoadLSPStg] ([intLoadStgId]) ON DELETE CASCADE,
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadDetailLSPStg_intLoadStgId]
+ON [dbo].[tblLGLoadDetailLSPStg] ([intLoadStgId] ASC)
+GO
