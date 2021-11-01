@@ -30,7 +30,7 @@ FROM (
 		, dblGetNoOfContract = CASE WHEN (N'Sell' = ft.[strBuySell]) THEN - (ft.[dblNoOfContract]) ELSE ft.[dblNoOfContract] END
 		, fot.dblContractSize
 		, dblOpenContract = (CASE WHEN intSelectedInstrumentTypeId = 3 THEN (SELECT CONVERT(DECIMAL(18,6), SUM(goc.dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
-								ELSE (SELECT CONVERT(DECIMAL, SUM(goc.dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
+								ELSE (SELECT CONVERT(DECIMAL(18,6), SUM(goc.dblOpenContract)) from vyuRKGetOpenContract goc WHERE goc.intFutOptTransactionId = ft.intFutOptTransactionId)
 								END)
 		, um.strUnitMeasure
 		, ft.strBuySell
