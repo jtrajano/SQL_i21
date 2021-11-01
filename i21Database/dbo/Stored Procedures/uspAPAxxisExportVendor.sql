@@ -14,17 +14,15 @@ BEGIN TRY
 
 IF OBJECT_ID(N'tmpAxxisVendor') IS NOT NULL
 BEGIN
-	DELETE FROM tmpAxxisVendor
+	DROP TABLE tmpAxxisVendor
 END
-ELSE
-BEGIN
-	CREATE TABLE tmpAxxisVendor(
+
+CREATE TABLE tmpAxxisVendor(
 		strName NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
 		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
 		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 		strTaxNumber NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 	)
-END
 
 IF OBJECT_ID(N'tempdb..#tmpModifiedFields') IS NOT NULL DROP TABLE #tmpModifiedFields
 CREATE TABLE #tmpModifiedFields(strFields NVARCHAR(MAX))
