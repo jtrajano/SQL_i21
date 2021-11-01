@@ -312,3 +312,8 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K1_K5] ON [dbo].
 )WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
 CREATE STATISTICS [_dta_stat_1172915250_103_5_1] ON [dbo].[tblLGLoad]([ysnQuantityFinal], [intPurchaseSale], [intLoadId])
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoad_intLoadShippingInstructionId]
+ON [dbo].[tblLGLoad] ([intLoadShippingInstructionId] ASC)
+GO
