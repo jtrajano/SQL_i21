@@ -1,16 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]
+@intRealizedGainAccountId INT,
 @strDescription nvarchar(300)
+
 AS
 BEGIN
 	SET NOCOUNT ON;
-	
-	DECLARE @intAccountsPayableRealizedId INT
-	SELECT TOP 1 @intAccountsPayableRealizedId= intAccountsPayableRealizedId FROM tblSMMultiCurrency
-	IF @intAccountsPayableRealizedId is NULL
-	BEGIN
-		RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
-		RETURN
-	END
 	DECLARE @gainLoss DECIMAL(18,6),@gainLossForeign DECIMAL(18,6)
 	SELECT @gainLoss= sum(dblDebit - dblCredit) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	SELECT @gainLossForeign= sum(dblDebitForeign - dblCreditForeign) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
@@ -47,7 +41,7 @@ BEGIN
 			,[intTransactionId]		= A.intTransactionId
 			,[dtmDate]				= A.dtmDate
 			,[strBatchId]			= A.strBatchId
-			,[intAccountId]			= @intAccountsPayableRealizedId
+			,[intAccountId]			= @intRealizedGainAccountId
 			,[dblDebit]				= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
 			,[dblCredit]			= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
 			--,[dblDebitForeign]		= case when @gainLossForeign < 0 then @gainLossForeign * -1  else 0 end
@@ -71,7 +65,7 @@ BEGIN
 			,[intEntityId]			= A.intEntityId
 	FROM	#tmpGLDetail A
 	CROSS APPLY (
-		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intAccountsPayableRealizedId
+		SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = @intRealizedGainAccountId
 	)GL
 END
 GO
