@@ -209,6 +209,7 @@ SELECT	ReceiptItem.intInventoryReceiptId
 		, ItemLocation.intLocationId
 		, intShipToLocationId = Receipt.intLocationId
 		, strContainer = LogisticsView.strContainerNumber
+		, strMarkings = LogisticsView.strMarkings
 		, ContractView.ysnLoad
 		, ContractView.dblAvailableQty
 		, ContractView.dblQuantityPerLoad
