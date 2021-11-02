@@ -18,7 +18,6 @@ strPropertyName = 'Overwrite'
 
 DECLARE @tblFilteredRebateProgram TABLE(
 	intKey INT NOT NULL,
-    guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
     intRowNumber INT NULL,
 	strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strVendorProgram NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -35,7 +34,6 @@ DECLARE @tblFilteredRebateProgram TABLE(
 INSERT INTO @tblFilteredRebateProgram
 (
 	intKey,
-    guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strVendorProgram,
@@ -51,7 +49,6 @@ INSERT INTO @tblFilteredRebateProgram
 )
 SELECT 
 	intKey,
-    guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strVendorProgram,
@@ -305,7 +302,7 @@ WHERE LogRebateProgram.intLogType BETWEEN 1 AND 10
 USING
 (
 	SELECT
-		guiApiUniqueId = MAX(FilteredRebateProgram.guiApiUniqueId),
+		guiApiUniqueId = @guiApiUniqueId,
 		intVendorSetupId = MAX(VendorSetup.intVendorSetupId),
 		strVendorProgram = MAX(FilteredRebateProgram.strVendorProgram),
 		strProgramDescription = MAX(FilteredRebateProgram.strDescription),
@@ -403,7 +400,7 @@ DEALLOCATE program_cursor
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredRebateProgram.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intItemId = Item.intItemId,
 		intCategoryId = Item.intCategoryId,
 		strRebateBy = FilteredRebateProgram.strRebateBy,
@@ -501,7 +498,7 @@ INSERT INTO tblVRProgramCustomer
 	intEntityId
 )
 SELECT
-	MAX(FilteredRebateProgram.guiApiUniqueId),
+	@guiApiUniqueId,
 	MAX(Program.intProgramId),
 	MAX(Customer.intEntityId)
 FROM @tblFilteredRebateProgram FilteredRebateProgram

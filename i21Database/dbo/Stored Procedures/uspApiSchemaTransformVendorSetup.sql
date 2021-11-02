@@ -18,7 +18,6 @@ strPropertyName = 'Overwrite'
 
 DECLARE @tblFilteredVendorSetup TABLE(
 	intKey INT NOT NULL,
-    guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
     intRowNumber INT NULL,
 	strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
 	strExportFileType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -38,7 +37,6 @@ DECLARE @tblFilteredVendorSetup TABLE(
 INSERT INTO @tblFilteredVendorSetup
 (
 	intKey,
-    guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strExportFileType,
@@ -57,7 +55,6 @@ INSERT INTO @tblFilteredVendorSetup
 )
 SELECT 
 	intKey,
-    guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strExportFileType,
@@ -440,7 +437,7 @@ WHERE LogVendorSetup.intLogType BETWEEN 1 AND 14
 USING
 (
 	SELECT
-		guiApiUniqueId = MAX(FilteredVendorSetup.guiApiUniqueId),
+		guiApiUniqueId = @guiApiUniqueId,
 		intEntityId = MAX(Vendor.intEntityId),
 		strExportFileType = MAX(FilteredVendorSetup.strExportFileType),
 		strExportFilePath = MAX(FilteredVendorSetup.strExportFilePath),
@@ -500,7 +497,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intEntityId = Customer.intEntityId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
 		strVendorCustomer = ISNULL(FilteredVendorSetup.strVendorCustomer, Customer.strCustomerNumber)
@@ -562,7 +559,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intItemId = Item.intItemId,
 		intVendorId = Vendor.intEntityId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
@@ -628,7 +625,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
 		intUnitMeasureId = UnitMeasure.intUnitMeasureId,
 		strVendorUOM = ISNULL(FilteredVendorSetup.strVendorUnitMeasure, UnitMeasure.strUnitMeasure),
@@ -695,7 +692,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intCategoryId = Category.intCategoryId,
 		intVendorId = Vendor.intEntityId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
