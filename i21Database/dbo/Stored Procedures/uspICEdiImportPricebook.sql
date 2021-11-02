@@ -41,6 +41,7 @@ DECLARE
 	,@originalPricebookCount AS INT = 0 
 	,@duplicatePricebookCount AS INT = 0 
 	,@missingVendorCategoryXRef AS INT = 0 
+	,@duplicate2ndUOMUPCCode AS INT = 0 
 	
 DECLARE 
 	@TotalRowsUpdated AS INT = 0 
@@ -682,6 +683,70 @@ FROM (
 SELECT @updatedItemUOM = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemUOM WHERE strAction = 'UPDATE'
 SELECT @insertedItemUOM = COUNT(1) FROM #tmpICEdiImportPricebook_tblICItemUOM WHERE strAction = 'INSERT'
 
+-- Create the valid list of 2nd UOM
+DECLARE @valid2ndUOM AS TABLE (
+	intEdiPricebookId INT 
+	,strLongUPCCode NVARCHAR(50) NULL 
+)
+
+INSERT INTO @valid2ndUOM (
+	intEdiPricebookId
+	,strLongUPCCode
+)
+SELECT  
+	p.intEdiPricebookId
+	,p.strOrderCaseUpcNumber
+FROM 
+	tblICEdiPricebook p
+	LEFT JOIN tblICItemUOM u 
+		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
+	OUTER APPLY (
+		SELECT TOP 1 
+			i.intItemId 
+		FROM
+			tblICItem i 
+		WHERE
+			i.intItemId = u.intItemId
+			OR i.strItemNo = p.strSellingUpcNumber
+	) i		
+WHERE
+	p.strUniqueId = @UniqueId
+	AND i.intItemId IS NOT NULL 
+	AND NULLIF(p.strCaseBoxSizeQuantityPerCaseBox, '') IS NOT NULL 
+	AND NULLIF(p.strOrderPackageDescription, '') IS NOT NULL 
+	AND p.ysnAddOrderingUPC = 1
+
+SELECT @duplicate2ndUOMUPCCode = @@ROWCOUNT;
+
+-- Remove the duplicate records in @valid2ndUOM
+;WITH deleteDuplicate2ndUOMLongUPC_CTE (
+	intEdiPricebookId
+	,strLongUPCCode
+	,dblDuplicateCount
+)
+AS (
+	
+	SELECT 
+		p.intEdiPricebookId
+		,p.strLongUPCCode
+		,dblDuplicateCount = ROW_NUMBER() OVER (PARTITION BY p.strLongUPCCode ORDER BY p.strLongUPCCode)
+	FROM 
+		@valid2ndUOM p
+)
+DELETE FROM deleteDuplicate2ndUOMLongUPC_CTE
+WHERE dblDuplicateCount > 1;
+
+-- Remove the duplicate records in @valid2ndUOM
+DELETE p 
+FROM 
+	tblICItemUOM iu RIGHT JOIN @valid2ndUOM p
+		ON iu.strLongUPCCode = p.strLongUPCCode COLLATE Latin1_General_CI_AS
+WHERE
+	iu.intItemUOMId IS NOT NULL 
+
+SELECT @duplicate2ndUOMUPCCode = ISNULL(@duplicate2ndUOMUPCCode, 0) - COUNT(1) 
+FROM  @valid2ndUOM
+
 -- Insert 2nd UOM
 INSERT INTO tblICItemUOM (			
 	intItemId
@@ -712,6 +777,9 @@ SELECT
 	,intDataSourceId = 2
 FROM 
 	tblICEdiPricebook p
+	INNER JOIN @valid2ndUOM v
+		ON p.intEdiPricebookId = v.intEdiPricebookId
+
 	LEFT JOIN tblICItemUOM u 
 		ON ISNULL(NULLIF(u.strLongUPCCode, ''), u.strUpcCode) = p.strSellingUpcNumber
 	OUTER APPLY (
@@ -759,6 +827,14 @@ FROM
 			iu.intItemId = i.intItemId
 			AND iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
 	) existUOM
+	OUTER APPLY (
+		SELECT TOP 1 
+			iu.intItemUOMId
+		FROM 
+			tblICItemUOM iu
+		WHERE
+			iu.strLongUPCCode = p.strOrderCaseUpcNumber
+	) existUPCCode
 WHERE
 	p.strUniqueId = @UniqueId
 	AND i.intItemId IS NOT NULL 
@@ -767,6 +843,7 @@ WHERE
 	AND p.ysnAddOrderingUPC = 1
 	AND stockUnit.intItemUOMId IS NOT NULL 
 	AND existUOM.intItemUOMId IS NULL  
+	AND existUPCCode.intItemUOMId IS NULL 
 
 SET @insertedItemUOM = ISNULL(@insertedItemUOM, 0) + @@ROWCOUNT;
 
@@ -1516,7 +1593,6 @@ BEGIN
 
 	SET @TotalRowsUpdated = @TotalRowsUpdated + @updatedItem + @updatedItemUOM + @updatedItemLocation + @updatedItemPricing + @updatedSpecialItemPricing + @updatedVendorXRef
 	SET @TotalRowsInserted = @TotalRowsInserted + @insertedItem + @insertedItemUOM + @insertedItemLocation + @insertedItemPricing + @insertedSpecialItemPricing + @insertedVendorXRef 
-
 END 
 
 BEGIN 
@@ -1564,6 +1640,43 @@ BEGIN
 		WHERE 
 			@insertedItem <> 0 
 	END 
+
+	-- Log the records with duplicate records
+	INSERT INTO tblICImportLogDetail(
+		intImportLogId
+		, strType
+		, intRecordNo
+		, strField
+		, strValue
+		, strMessage
+		, strStatus
+		, strAction
+		, intConcurrencyId
+	)
+	SELECT 
+		@LogId
+		, 'Warning'
+		, NULL
+		, NULL 
+		, NULL 
+		, dbo.fnFormatMessage(
+			'There are %i duplicate 2nd UPC Code(s) found in the file.'
+			,@duplicate2ndUOMUPCCode
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+			,DEFAULT
+		)
+		, 'Skipped'
+		, 'Record not imported.'
+		, 1
+	WHERE 
+		@duplicate2ndUOMUPCCode <> 0
 
 	-- Log the updated items. 
 	IF @updatedItem <> 0 
