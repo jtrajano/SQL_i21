@@ -9613,6 +9613,8 @@
     <Build Include="dbo\Views\vyuSCTicketInOutReport.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
+    <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
