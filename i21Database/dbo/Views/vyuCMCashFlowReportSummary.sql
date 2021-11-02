@@ -9,6 +9,8 @@ SELECT
 	C.strCashFlowReportSummaryCode,
 	BA.intBankAccountId,
 	dbo.fnAESDecryptASym(BA.strBankAccountNo) + ' - ' + B.strBankName  strBankAccountId,
+	BA.intCurrencyId intBankAccountCurrencyId,
+	Currency.strCurrency strBankAccountCurrency,
 	RC.intCurrencyID intReportingCurrencyId,
 	RC.strCurrency strReportingCurrency,
 	CL.intCompanyLocationId,
@@ -39,6 +41,8 @@ LEFT JOIN tblCMBankAccount BA
 	ON BA.intBankAccountId = S.intBankAccountId
 LEFT JOIN tblCMBank B 
 	ON B.intBankId = BA.intBankId
+LEFT JOIN tblSMCurrency Currency
+	ON Currency.intCurrencyID = BA.intCurrencyId
 LEFT JOIN tblSMCurrency RC
 	ON RC.intCurrencyID = S.intReportingCurrencyId
 LEFT JOIN tblSMCompanyLocation CL
