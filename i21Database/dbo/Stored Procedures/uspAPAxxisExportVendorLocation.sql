@@ -12,7 +12,7 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-IF OBJECT_ID(N'tmpAxxisVendorLocation') IS NOT NULL 
+IF OBJECT_ID(N'dbo.tmpAxxisVendorLocation') IS NOT NULL 
 BEGIN
 	DROP TABLE tmpAxxisVendorLocation
 END
@@ -62,7 +62,12 @@ END
 
 IF @vendorId IS NULL
 BEGIN
-	INSERT INTO tmpAxxisVendorLocation
+	INSERT INTO tmpAxxisVendorLocation(
+		strLocationName,
+		strPrintedName,
+		strShipVia,
+		strTerminalNo
+	)
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
@@ -78,7 +83,12 @@ BEGIN
 END
 ELSE
 BEGIN
-	INSERT INTO tmpAxxisVendorLocation
+	INSERT INTO tmpAxxisVendorLocation(
+		strLocationName,
+		strPrintedName,
+		strShipVia,
+		strTerminalNo
+	)
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
