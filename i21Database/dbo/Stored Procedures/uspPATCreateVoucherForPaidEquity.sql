@@ -166,7 +166,7 @@ BEGIN TRY
 		, [int1099Form]				= CASE WHEN EquityPay.ysnQualified = 1 AND EquityPay.ysnPriorYear = 0 THEN 4 ELSE 0 END
 		, [int1099Category]			= CASE WHEN EquityPay.ysnQualified = 1 AND EquityPay.ysnPriorYear = 0 THEN 5 ELSE 0 END
 		, [dbl1099]					= CASE WHEN EquityPay.ysnQualified = 1 THEN ROUND(EquityPay.dblEquityPaid, 2) ELSE 0 END
-		, [ysnStage]				= s0
+		, [ysnStage]				= 0
 	FROM #tempEquityPayments EquityPay	
 			
 	EXEC [dbo].[uspAPCreateVoucher] @voucherPayables = @voucherPayable
