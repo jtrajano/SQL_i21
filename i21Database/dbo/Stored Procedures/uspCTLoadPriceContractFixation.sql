@@ -211,7 +211,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CH.intFutureMarketId,
 				MA.strFutMarketName		AS	strFutureMarket,
 				CH.intFutureMonthId,
-				strFutureMonth = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') '),
+				MO.strFutureMonth,
 				CAST(NULL AS INT)		AS	intContractSeq,
 				CT.strContractType,
 				CH.intEntityId,
