@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspCMSyncCashFlowReportRateType]
+﻿CREATE PROCEDURE [dbo].[uspCMSyncCashFlowReportRateType]
 (
 	@intCashFlowReportId INT,
 	@intReportingCurrencyId INT = NULL,
