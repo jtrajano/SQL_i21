@@ -41,8 +41,8 @@ BEGIN
 				@dtmEndDate	DATETIME
 
 			SET @intCounter += 1
-			SET @dtmStartDate = CONCAT(@strYear, '-', @intCounter, '-01')
-			SET @dtmEndDate = CONCAT(EOMONTH(@dtmStartDate), ' 23:59:59.000')
+			SET @dtmStartDate = CAST((CAST(@strYear AS NVARCHAR) + '-' + @intCounter + '-01') AS DATETIME)
+			SET @dtmEndDate =  CAST((CAST(EOMONTH(@dtmStartDate) AS NVARCHAR) + ' 23:59:59.000') AS DATETIME)
 
 			INSERT INTO @tblCalendar VALUES (@intCounter, @dtmStartDate, @dtmEndDate)
 		END
