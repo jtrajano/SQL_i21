@@ -168,6 +168,7 @@
     <None Include="Scripts\Pre-Deployment\22_PAT\6_VolumeSchemaFix.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\CreatePricingInvoiceLink.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\23_DeleteDuplicateEntityMobileNumber.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\DROPAxxisTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
