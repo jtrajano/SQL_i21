@@ -1495,7 +1495,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
@@ -9092,6 +9092,8 @@
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
