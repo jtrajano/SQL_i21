@@ -29,7 +29,8 @@ BEGIN
 		ISNULL(B.strInternalNotes, '') AS strInternalNotes,
 		ISNULL(A.strShipVia, '') AS strShipVia,
 		ISNULL(A.strFederalId, '') AS strFederalId,
-		CONVERT(NVARCHAR(10), ISNULL(A.ysnCompanyOwnedCarrier, '')) COLLATE Latin1_General_CI_AS AS ysnCompanyOwnedCarrier
+		CONVERT(NVARCHAR(10), ISNULL(A.ysnCompanyOwnedCarrier, '')) COLLATE Latin1_General_CI_AS AS ysnCompanyOwnedCarrier,
+		CONVERT(NVARCHAR(10), ISNULL(B.ysnActive, '')) COLLATE Latin1_General_CI_AS AS ysnActive
 	INTO tmpSMShipVia
 	FROM tblSMShipVia A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
@@ -79,7 +80,8 @@ BEGIN
 		   strInternalNotes AS InternalNotes,
 		   strShipVia AS ShipVia,
 		   strFederalId AS FederalID,
-		   ysnCompanyOwnedCarrier AS CompanyOwned
+		   ysnCompanyOwnedCarrier AS CompanyOwned,
+		   ysnActive AS Active
 	FROM tmpSMShipVia
 	SELECT HDCode, strShipVia AS ShipVia, strTruckNumber AS TruckNumber FROM tmpSMShipViaTruck
 	SELECT HDCode, strShipVia AS ShipVia, strTrailerNumber AS TrailerNumber, strTrailerDescription AS TrailerDescription FROM tmpSMShipViaTrailer
