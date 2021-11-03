@@ -13,6 +13,7 @@ DECLARE @NewId AS INT
 DECLARE @EmployeeEntityNo AS INT
 
 DECLARE @intEntityNo AS INT
+DECLARE @strEmployeeId AS NVARCHAR(100)
 DECLARE @strBankName AS NVARCHAR(100)
 DECLARE @strAccountNumber AS NVARCHAR(100)
 DECLARE @strAccountType AS NVARCHAR(100)
@@ -47,7 +48,8 @@ DECLARE @ysnActive AS BIT
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeDirectDeposit)
 	BEGIN
 		SELECT TOP 1 
-			 @intEntityNo = intEntityNo
+			 @strEmployeeId = intEntityNo
+			,@intEntityNo = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = intEntityNo) 
 			,@strBankName = strBankName
 			,@strAccountNumber = strAccountNumber
 			,@strAccountType = strAccountType
@@ -113,7 +115,7 @@ DECLARE @ysnActive AS BIT
 						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 						SET @NewId = SCOPE_IDENTITY()
 
-					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @intEntityNo AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
+					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 			END
 		ELSE
 			BEGIN
@@ -145,7 +147,7 @@ DECLARE @ysnActive AS BIT
 						--======================Close symmetric code snnipet=====================
 						CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
 
-					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @intEntityNo AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
+					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @strEmployeeId AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 
 			END
 
@@ -164,6 +166,8 @@ DECLARE @ysnActive AS BIT
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strBankName = @strBankName
 		AND SE.strAccountNumber = @strAccountNumber
+
+
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDirectDeposit')) 
