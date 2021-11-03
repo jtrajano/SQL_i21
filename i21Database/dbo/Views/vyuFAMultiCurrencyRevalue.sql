@@ -14,12 +14,12 @@ SELECT DISTINCT
 	strItemId				=	'' COLLATE Latin1_General_CI_AS,
 	dblQuantity				=	NULL,
 	dblUnitPrice			=	NULL,
-	dblAmount    			=   FA.dblCost - AccumulatedDepreciation.dblDepreciationToDate, -- Asset's net value
+	dblAmount    			=   FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0), -- Asset's net value
 	intCurrencyId			=	FA.intCurrencyId,
 	intForexRateType		=	RateType.intCurrencyExchangeRateTypeId,
 	strForexRateType		=	RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS,
 	dblForexRate			=	FA.dblForexRate,
-	dblHistoricAmount		=	(FA.dblCost - AccumulatedDepreciation.dblDepreciationToDate) * FA.dblForexRate,
+	dblHistoricAmount		=	ISNULL(FA.dblFunctionalCost, (FA.dblCost * FA.dblForexRate)) - ISNULL(AccumulatedDepreciation.dblAmount, 0),
 	dblNewForexRate         =   0, --Calcuate By GL
     dblNewAmount            =   0, --Calcuate By GL
     dblUnrealizedDebitGain  =   0, --Calcuate By GL
@@ -34,12 +34,17 @@ LEFT JOIN tblSMCurrencyExchangeRateType RateType
 LEFT JOIN tblSMCompanyLocation Company 
 	ON Company.intCompanyLocationId = FA.intCompanyLocationId   
 OUTER APPLY (
-	SELECT TOP 1 dblDepreciationToDate 
-	FROM tblFAFixedAssetDepreciation FAD
-	WHERE FAD.intAssetId = FA.intAssetId AND FAD.intBookId = 1
-	ORDER BY FAD.dtmDepreciationToDate DESC
+	SELECT 
+		SUM(dblCredit - dblDebit) dblAmount,
+		SUM(dblCreditForeign - dblDebitForeign) dblAmountForeign
+	FROM tblGLDetail GL
+	WHERE 
+		GL.intAccountId = FA.intAccumulatedAccountId
+		AND strCode = 'AMDPR'
+		AND ysnIsUnposted = 0
+		AND GL.strReference = FA.strAssetId
+	GROUP BY GL.strReference
 ) AccumulatedDepreciation
 WHERE 
 	FA.ysnAcquired = 1 AND
 	FA.ysnDisposed = 0
-GO

@@ -496,7 +496,8 @@ DECLARE @strMessage NVARCHAR(100)
 					ysnAPRevalued =		1,
 					ysnINVRevalued =	1,
 					ysnCTRevalued =		1,
-					ysnCMRevalued =		1
+					ysnCMRevalued =		1,
+					ysnFARevalued =     1
 				WHERE intGLFiscalYearPeriodId = @intGLFiscalYearPeriodId
 
 			
