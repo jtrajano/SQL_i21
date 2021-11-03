@@ -12,6 +12,7 @@ DECLARE @NewId AS INT
 
 DECLARE @EmployeeEntityNo AS INT
 DECLARE @intEntityNo AS INT
+DECLARE @strEmployeeId AS NVARCHAR(50)
 DECLARE @strEarningId AS NVARCHAR(50)
 DECLARE @dblEarningAmount AS FLOAT(50)
 DECLARE @ysnEarningDefault AS BIT
@@ -62,7 +63,8 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeEarnings)
 	BEGIN
 		SELECT TOP 1 
-			 @intEntityNo				= intEntityNo
+			 @strEmployeeId				= intEntityNo
+			,@intEntityNo				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = intEntityNo) 
 			,@strEarningId				= strEarningDesc
 			,@dblEarningAmount			= dblEarningAmount
 			,@ysnEarningDefault			= ysnEarningDefault
@@ -147,7 +149,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,1
 					,1
 				FROM #TempEmployeeEarnings
-				WHERE intEntityNo = @intEntityNo
+				WHERE intEntityNo = @strEmployeeId
 					AND strEarningDesc = (SELECT TOP 1 strEarning FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
 
 				SET @NewId = SCOPE_IDENTITY()
@@ -236,7 +238,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 						END
 					END
 
-				DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo AND strEarningDesc = @strEarningId
+				DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @strEmployeeId AND strEarningDesc = @strEarningId
 
 			END
 		
@@ -383,9 +385,9 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 							END
 						END
 
-					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo AND strEarningDesc = @strEarningId
+					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @strEmployeeId AND strEarningDesc = @strEarningId
 			END
-			
+
 		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 		SELECT TOP 1
 			  NEWID()
