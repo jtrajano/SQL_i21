@@ -110,16 +110,16 @@ IF @@ERROR <> 0 GOTO Post_Rollback
 
 -- Read bank transfer table   
 SELECT TOP 1   
-  @intTransactionId = intTransactionId  
-  ,@dtmDate = dtmDate  
-  ,@dtmInTransit = dtmInTransit
-  ,@dtmAccrual = dtmAccrual
-  ,@dblAmount = dblAmountFrom  
-  ,@ysnTransactionPostedFlag = ysnPosted  
-  ,@intBankAccountIdFrom = intBankAccountIdFrom  
-  ,@intBankAccountIdTo = intBankAccountIdTo  
-  ,@intCreatedEntityId = intEntityId  
-  ,@dblRate = dblRateAmountTo  
+  @intTransactionId = A.intTransactionId  
+  ,@dtmDate = A.dtmDate  
+  ,@dtmInTransit = A.dtmInTransit
+  ,@dtmAccrual = A.dtmAccrual
+  ,@dblAmount = A.dblAmountFrom  
+  ,@ysnTransactionPostedFlag = A.ysnPosted  
+  ,@intBankAccountIdFrom = A.intBankAccountIdFrom  
+  ,@intBankAccountIdTo = A.intBankAccountIdTo  
+  ,@intCreatedEntityId = A.intEntityId  
+  ,@dblRate = A.dblRateAmountTo  
   ,@intCurrencyIdFrom = B.intCurrencyId  
   ,@intCurrencyIdTo = C.intCurrencyId  
   ,@dblDifference = A.dblDifference
