@@ -452,7 +452,7 @@ BEGIN
 	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
 
 	if(@gainLoss <> 0  AND @ysnForeignTransaction = 1)
-		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 'Gain / Loss on Multicurrency Bank Deposit'
+		EXEC [uspCMInsertGainLossBankTransfer]   @intDefaultCurrencyId, 'Gain / Loss on Multicurrency Bank Deposit'
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	

@@ -1,10 +1,23 @@
 ﻿CREATE PROCEDURE [dbo].[uspCMInsertGainLossBankTransfer]
-@intRealizedGainAccountId INT,
-@strDescription nvarchar(300)
+@intDefaultCurrencyId INT,
+@strDescription nvarchar(300),
+@intRealizedGainAccountId INT = NULL
 
 AS
 BEGIN
 	SET NOCOUNT ON;
+	
+	
+	IF @intRealizedGainAccountId is NULL
+	BEGIN
+		SELECT TOP 1 @intRealizedGainAccountId= intAccountsPayableRealizedId FROM tblSMMultiCurrency
+		IF @intRealizedGainAccountId is NULL
+		BEGIN
+			RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
+			RETURN
+		END
+	END
+
 	DECLARE @gainLoss DECIMAL(18,6),@gainLossForeign DECIMAL(18,6)
 	SELECT @gainLoss= sum(dblDebit - dblCredit) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	SELECT @gainLossForeign= sum(dblDebitForeign - dblCreditForeign) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
@@ -51,7 +64,7 @@ BEGIN
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
 			,[strCode]				= A.strCode
 			,[strReference]			= A.strReference
-			,[intCurrencyId]		= A.intCurrencyId
+			,[intCurrencyId]		= @intDefaultCurrencyId
 			,[dblExchangeRate]		= 1
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate

@@ -139,16 +139,16 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 
 IF @intBankAccountIdFrom != @intDefaultCurrencyId OR @intBankAccountIdTo != @intDefaultCurrencyId
 BEGIN
-  IF @intBankTransferTypeId = 1 OR @intBankTransferTypeId = 2
-  BEGIN
-    SELECT TOP 1 @intRealizedGainAccountId= intAccountsPayableRealizedId 
-    FROM tblSMMultiCurrency
-    IF @intRealizedGainAccountId is NULL
-    BEGIN
-      RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
-      GOTO Post_Rollback  
-    END
-  END
+  -- IF @intBankTransferTypeId = 1 OR @intBankTransferTypeId = 2
+  -- BEGIN
+  --   SELECT TOP 1 @intRealizedGainAccountId= intAccountsPayableRealizedId 
+  --   FROM tblSMMultiCurrency
+  --   IF @intRealizedGainAccountId is NULL
+  --   BEGIN
+  --     RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
+  --     GOTO Post_Rollback  
+  --   END
+  -- END
   IF @intBankTransferTypeId = 3
   BEGIN
     SELECT TOP 1 @intRealizedGainAccountId= intRealizedGainLossForwardAccountId 
@@ -551,12 +551,12 @@ BEGIN
     END
     ELSE
     BEGIN
+        UPDATE A SET dtmDate= @dtmInTransit FROM #tmpGLDetail A 
         UPDATE  A  
         SET 
-        dtmDate = @dtmInTransit,
         dtmTransactionDate = @dtmInTransit,
-        strJournalLineDescription = 'In-Transit ENtry',
-        intAccountId =GLAccnt.intAccountId, strJournalLineDescription = GLAccnt.strDescription
+        strJournalLineDescription = 'In-Transit Entry',
+        intAccountId =GLAccnt.intAccountId
         FROM #tmpGLDetail A 
         CROSS APPLY (
           SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = @intBTInTransitAccountId
@@ -568,12 +568,14 @@ BEGIN
   IF(@intBankTransferTypeId = 3)
   BEGIN
     
-    UPDATE #tmpGLDetail SET dtmDate = @dtmAccrual, dtmTransactionDate= @dtmAccrual
+    
     IF @ysnPostedInTransit = 0
     BEGIN
         UPDATE A 
         SET intAccountId = @intBTForwardToFXGLAccountId 
-        ,strJournalLineDescription = 'Accrued Receivable'
+        ,strJournalLineDescription = 'Accrued Receivable',
+        dtmDate = @dtmAccrual, 
+        dtmTransactionDate= @dtmAccrual
         FROM #tmpGLDetail A
         OUTER APPLY(
           SELECT strDescription FROM tblGLAccount WHERE intAccountId = @intBTForwardToFXGLAccountId 
@@ -587,6 +589,8 @@ BEGIN
         ,dblExchangeRate = BT.dblExchangeRate
         --dblDebitForeign = BT.dblAmountForeignFrom,
         ,intCurrencyExchangeRateTypeId = NULL
+        ,dtmDate = @dtmAccrual
+        ,dtmTransactionDate= @dtmAccrual
         from #tmpGLDetail A 
         OUTER APPLY (
           select dblAmountFrom, strReferenceTo,  (dblAmountForeignTo * dblReverseRate) dblAmountForeignFrom, 
@@ -705,7 +709,7 @@ BEGIN
   IF @intBankTransferTypeId = 1 OR @ysnPostedInTransit = 1
   BEGIN
     IF @dblDifference <> 0
-      EXEC [uspCMInsertGainLossBankTransfer] @intRealizedGainAccountId,'Gain / Loss from Bank Transfer'  
+      EXEC [uspCMInsertGainLossBankTransfer] @intDefaultCurrencyId, 'Gain / Loss from Bank Transfer',@intRealizedGainAccountId
   END
 
   

@@ -449,8 +449,7 @@ BEGIN
 	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
 
 	if(@gainLoss <> 0  AND @intDefaultCurrencyId <> @intCurrencyId)
-		EXEC [uspCMInsertGainLossBankTransfer] @strDescription = 
-		'Gain / Loss on Multicurrency Bank Transaction'
+		EXEC [uspCMInsertGainLossBankTransfer] @intDefaultCurrencyId,'Gain / Loss on Multicurrency Bank Transaction'
 	
 END --@ysnPost = 1
 ELSE IF @ysnPost = 0
