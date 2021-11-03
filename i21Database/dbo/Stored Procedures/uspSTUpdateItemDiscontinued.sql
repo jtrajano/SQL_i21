@@ -1,11 +1,4 @@
-USE [Dev212]
-GO
-/****** Object:  StoredProcedure [dbo].[uspSTUpdateItemDiscontinued]    Script Date: 11/2/2021 10:58:19 AM ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-ALTER PROCEDURE [dbo].[uspSTUpdateItemDiscontinued]
+CREATE PROCEDURE [dbo].[uspSTUpdateItemDiscontinued]
 	@XML VARCHAR(MAX)
 	, @ysnRecap BIT
 	, @strGuid UNIQUEIDENTIFIER
