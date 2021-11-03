@@ -15,5 +15,7 @@ CREATE TABLE [dbo].[tblApiSchemaTransformVendorSetup] (
 	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor unit measure custom name.
 	strEquipmentType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor unit measure cross reference equipment type.
 	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor category cross reference.
-	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL -- The vendor category custom name.
+	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor category custom name.
+	strRebateUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, -- The vendor rebate unit measure cross reference.
+	strVendorRebateUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL -- The vendor rebate unit measure custom name.
 )
