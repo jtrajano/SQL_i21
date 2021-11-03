@@ -924,6 +924,11 @@ BEGIN TRY
 				AND intBookId = @intBookId
 				AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
+			IF @ysnPosted IS NULL
+			BEGIN
+				SELECT @ysnPosted = 0
+			END
+
 			SELECT @intTransactionCount = @@TRANCOUNT
 
 			IF @intTransactionCount = 0
@@ -2160,7 +2165,7 @@ BEGIN TRY
 				SELECT @intNewLoadDetailId = LD.intLoadDetailId
 					,@dblQuantity = LD.dblQuantity
 				FROM tblLGLoadDetail LD
-				JOIN tblLGLoad L on L.intLoadId=LD.intLoadId
+				JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 				WHERE intLoadDetailRefId = @intLoadDetailId
 					AND L.intBookId = @intBookId
 					AND IsNULL(L.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
@@ -2392,11 +2397,35 @@ BEGIN TRY
 								THEN @intSACompanyLocationId
 							ELSE @intSCompanyLocationId
 							END
-						,[dblQuantity] = x.[dblQuantity]
+						,[dblQuantity] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblQuantity]
+								ELSE LD.[dblQuantity]
+								END
+							)
 						,[intItemUOMId] = @intItemUOMId
-						,[dblGross] = x.[dblGross]
-						,[dblTare] = x.[dblTare]
-						,[dblNet] = x.[dblNet]
+						,[dblGross] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblGross]
+								ELSE LD.[dblGross]
+								END
+							)
+						,[dblTare] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblTare]
+								ELSE LD.[dblTare]
+								END
+							)
+						,[dblNet] = (
+							CASE 
+								WHEN @ysnPosted = 0
+									THEN x.[dblNet]
+								ELSE LD.[dblNet]
+								END
+							)
 						,[intWeightItemUOMId] = @intWeightItemUOMId
 						,[strPriceStatus] = x.[strPriceStatus]
 						,[dblUnitPrice] = x.[dblUnitPrice]
@@ -2527,7 +2556,7 @@ BEGIN TRY
 					BEGIN
 						SELECT @dblScheduleQtyToUpdate = NULL
 
-						SELECT @dblScheduleQtyToUpdate = @dblNewQuantity - IsNULL(@dblQuantity,0)
+						SELECT @dblScheduleQtyToUpdate = @dblNewQuantity - IsNULL(@dblQuantity, 0)
 
 						EXEC dbo.uspLGUpdateContractQty @intLoadId = @intNewLoadId
 							,@intLoadDetailId = @intNewLoadDetailId
@@ -3313,11 +3342,35 @@ BEGIN TRY
 			UPDATE LD
 			SET [intConcurrencyId] = LD.[intConcurrencyId] + 1
 				,[strContainerNumber] = x.[strContainerNumber]
-				,[dblQuantity] = x.[dblQuantity]
+				,[dblQuantity] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblQuantity]
+						ELSE LD.[dblQuantity]
+						END
+					)
 				,[intUnitMeasureId] = UM.[intUnitMeasureId]
-				,[dblGrossWt] = x.[dblGrossWt]
-				,[dblTareWt] = x.[dblTareWt]
-				,[dblNetWt] = x.[dblNetWt]
+				,[dblGrossWt] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblGrossWt]
+						ELSE LD.[dblGrossWt]
+						END
+					)
+				,[dblTareWt] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblTareWt]
+						ELSE LD.[dblTareWt]
+						END
+					)
+				,[dblNetWt] = (
+					CASE 
+						WHEN @ysnPosted = 0
+							THEN x.[dblNetWt]
+						ELSE LD.[dblNetWt]
+						END
+					)
 				,[intWeightUnitMeasureId] = WUM.[intUnitMeasureId]
 				,[strComments] = x.[strComments]
 				,[strSealNumber] = x.[strSealNumber]
@@ -3548,12 +3601,36 @@ BEGIN TRY
 						WHERE intLoadDetailRefId = x.intLoadDetailId
 							AND intLoadId = @intNewLoadId
 						)
-					,[dblQuantity] = x.[dblQuantity]
+					,[dblQuantity] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblQuantity]
+							ELSE LDCL.[dblQuantity]
+							END
+						)
 					,[intItemUOMId] = IU.[intItemUOMId]
 					,[dblReceivedQty] = x.[dblReceivedQty]
-					,[dblLinkGrossWt] = x.[dblLinkGrossWt]
-					,[dblLinkTareWt] = x.[dblLinkTareWt]
-					,[dblLinkNetWt] = x.[dblLinkNetWt]
+					,[dblLinkGrossWt] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblLinkGrossWt]
+							ELSE LDCL.[dblLinkGrossWt]
+							END
+						)
+					,[dblLinkTareWt] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblLinkTareWt]
+							ELSE LDCL.[dblLinkTareWt]
+							END
+						)
+					,[dblLinkNetWt] = (
+						CASE 
+							WHEN @ysnPosted = 0
+								THEN x.[dblLinkNetWt]
+							ELSE LDCL.[dblLinkNetWt]
+							END
+						)
 					,[dblUnitCost] = x.[dblUnitCost]
 					,[strIntegrationOrderNumber] = x.[strIntegrationOrderNumber]
 					,[dblIntegrationOrderPrice] = x.[dblIntegrationOrderPrice]
