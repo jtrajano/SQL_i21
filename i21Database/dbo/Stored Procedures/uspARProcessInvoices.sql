@@ -314,6 +314,7 @@ DECLARE  @Id									INT
 		,@ItemAddOnQuantity                     NUMERIC(38, 20)
 		,@ItemContractHeaderId					INT
 		,@ItemContractDetailId					INT
+		,@NewInvoiceNumber						NVARCHAR(50) = ''
 
 --INSERT
 BEGIN TRY
@@ -1227,12 +1228,12 @@ BEGIN
 		
 	IF ISNULL(@NewSourceId, 0) = 16
 	BEGIN
-		EXEC uspARPostInvoice 
-				 @post=1
-				,@recap=1
-				,@param=@NewInvoiceId
-				,@raiseError=@RaiseError
-				,@userId=@EntityId
+		SELECT TOP 1 @NewInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intLoadId = @LoadId
+		IF (@NewInvoiceNumber <> '')
+		BEGIN
+			SET @ErrorMessage = 'Invoice (' + @NewInvoiceNumber + ') was already created for ' + @ItemDocumentNumber
+			RAISERROR(@ErrorMessage, 16, 1);
+		END
 	END
 END
 
