@@ -49,6 +49,7 @@ Declare @intMinHeader				INT,
 		@strWeightUOM				NVARCHAR(50),
 		@dtmETAPOL					DATETIME,
 		@dtmETAPOD					DATETIME,
+		@dtmPlannedAvailabilityDate DATETIME,
 		@strAddressXml				NVARCHAR(MAX),
 		@strHeaderSubLocation		NVARCHAR(50),
 		@strHeaderUOM				NVARCHAR(50),
@@ -156,6 +157,10 @@ Begin
 	Select TOP 1 @strPackingDesc=ct.strPackingDescription,@intPositionId=ch.intPositionId From tblCTContractDetail ct Join tblLGLoadDetail ld on ct.intContractDetailId=ld.intPContractDetailId 
 	Join tblCTContractHeader ch on ch.intContractHeaderId=ct.intContractHeaderId
 	Where ld.intLoadId=@intLoadId
+
+	SELECT @dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate FROM tblLGLoad WHERE intLoadId = @intLoadId
+
+	Update tblLGLoadLSPStg Set dtmPlannedAvailabilityDate=@dtmPlannedAvailabilityDate Where intLoadStgId=@intLoadStgId
 
 	Set @strPositionType=''
 	Select TOP 1 @strPositionType=strPositionType From tblCTPosition Where intPositionId=@intPositionId
@@ -309,7 +314,7 @@ Begin
 	Set @strXml += '<BOLNR>'	+ ISNULL(@strBillOfLading,'')								+ '</BOLNR>'
 	Set @strXml += '<TRAID>'	+ dbo.fnEscapeXML(ISNULL(@strShippingLine,''))				+ '</TRAID>'
 	Set @strXml += '<LIFEX>'	+ ISNULL(@strLoadNumber,'')									+ '</LIFEX>'
-	Set @strXml += '<PODAT>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')			+ '</PODAT>'
+	Set @strXml += '<PODAT>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')			+ '</PODAT>'
 
 	Set @strXml += '<E1EDL22 SEGMENT="1">'
 	Set @strXml += '<VSTEL_BEZ>'	+ ISNULL(@strLocation,'')								+ '</VSTEL_BEZ>'
@@ -320,7 +325,7 @@ Begin
 	Set @strXml += '<QUALF>'	+ '007'			+ '</QUALF>'
 	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOL,112),'')		+ '</NTANF>'
 	Set @strXml += '<NTANZ>'	+ '000000'		+ '</NTANZ>'
-	Set @strXml += '<NTEND>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</NTEND>'
+	Set @strXml += '<NTEND>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')		+ '</NTEND>'
 	Set @strXml += '<NTENZ>'	+ '000000'		+ '</NTENZ>'
 	Set @strXml += '<ISDD>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETSPOL,112),'')		+ '</ISDD>'
 	Set @strXml +=	'</E1EDT13>'
