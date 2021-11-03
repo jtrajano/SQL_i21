@@ -9096,6 +9096,7 @@
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
     <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
