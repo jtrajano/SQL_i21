@@ -466,22 +466,6 @@ WHERE
 	EXISTS(SELECT NULL FROM tblARInvoice ARI WITH (NOLOCK) WHERE ARI.[intInvoiceId] = IT.[intInvoiceId] AND ARI.[ysnPosted] = 1 AND [strTransactionType] = 'Cash Refund')
 	AND IT.[ysnFromAP] = 0
 
-UNION ALL
-
-SELECT
-	 [intId]				= IT.[intId]
-	,[strMessage]			= 'Invoice ' + IT.[strTransactionNumber] + ' is not yet posted!'
-	,[strSourceTransaction]	= IT.[strSourceTransaction]
-	,[intSourceId]			= IT.[intSourceId]
-	,[strSourceId]			= IT.[strSourceId]
-	,[intPaymentId]			= IT.[intPaymentId]
-FROM
-	@ItemEntries IT
-WHERE
-	NOT EXISTS(SELECT NULL FROM tblARInvoice ARI WITH (NOLOCK) WHERE ARI.[intInvoiceId] = IT.[intInvoiceId] AND ((ARI.[ysnPosted] = 1 AND ARI.[strTransactionType] <> 'Customer Prepayment') OR (ARI.[ysnPosted] = 0 AND ARI.[strTransactionType] = 'Customer Prepayment')))
-	AND IT.[ysnFromAP] = 0
-	
-
 IF ISNULL(@RaiseError,0) = 1 AND EXISTS(SELECT TOP 1 NULL FROM @InvalidRecords)
 BEGIN
 	SET @ErrorMessage = (SELECT TOP 1 [strMessage] FROM @InvalidRecords ORDER BY [intId])
