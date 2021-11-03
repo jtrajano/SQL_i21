@@ -143,6 +143,11 @@ INSERT INTO [dbo].[tblPRPaycheckTax]
  ,[strVal6]  
  ,[ysnSet]  
  ,[intSort]  
+ ,[ysnW42020]  
+ ,[ysnW4Step2c]  
+ ,[dblW4ClaimDependents]  
+ ,[dblW4OtherIncome]  
+ ,[dblW4Deductions]  
  ,[intConcurrencyId])  
 SELECT  
  @intPaycheckId  
@@ -167,6 +172,11 @@ SELECT
  ,[strVal6]  
  ,0  
  ,[intSort]  
+ ,[ysnW42020]  
+ ,[ysnW4Step2c]  
+ ,[dblW4ClaimDependents]  
+ ,[dblW4OtherIncome]  
+ ,[dblW4Deductions]  
  ,1  
 FROM [dbo].[tblPREmployeeTax]  
 WHERE [intEntityEmployeeId] = @intEmployee  
