@@ -55,7 +55,9 @@ CREATE TABLE #tmpGLDetail (
  ,[strModuleName] [nvarchar](255)  COLLATE Latin1_General_CI_AS NULL    
  ,[intConcurrencyId] [int] NULL  
 )  
-  
+--CREATE FEES TABLE
+--SELECT * INTO #tmpGLDetailFees FROM #tmpGLDetail
+
 -- Declare the variables   
 DECLARE   
  -- Constant Variables.   
@@ -98,7 +100,8 @@ DECLARE
  ,@intRealizedGainAccountId INT  
  -- Table Variables  
  ,@RecapTable AS RecapTableType   
- ,@GLEntries AS RecapTableType  
+ ,@GLEntries AS RecapTableType 
+ ,@dblFees DECIMAL(18,6)
  -- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.   
    
 IF @@ERROR <> 0 GOTO Post_Rollback    
@@ -126,32 +129,38 @@ SELECT TOP 1
   ,@intBankTransferTypeId = ISNULL(A.intBankTransferTypeId,1)
   ,@ysnPosted = ISNULL(A.ysnPosted,0)
   ,@ysnPostedInTransit = ISNULL(A.ysnPostedInTransit,0)
+  ,@dblFees = ISNULL(A.dblFeesFrom,0) 
 FROM [dbo].tblCMBankTransfer A JOIN  
 [dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN  
 [dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo  
 WHERE strTransactionId = @strTransactionId   
 
-IF @intBankTransferTypeId = 1 OR @intBankTransferTypeId = 2
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference    
+
+IF @intBankAccountIdFrom != @intDefaultCurrencyId OR @intBankAccountIdTo != @intDefaultCurrencyId
 BEGIN
-  SELECT TOP 1 @intRealizedGainAccountId= intAccountsPayableRealizedId 
-	FROM tblSMMultiCurrency
-	IF @intRealizedGainAccountId is NULL
-	BEGIN
-		RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
-		GOTO Post_Rollback  
-	END
+  IF @intBankTransferTypeId = 1 OR @intBankTransferTypeId = 2
+  BEGIN
+    SELECT TOP 1 @intRealizedGainAccountId= intAccountsPayableRealizedId 
+    FROM tblSMMultiCurrency
+    IF @intRealizedGainAccountId is NULL
+    BEGIN
+      RAISERROR ('Accounts Payable Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
+      GOTO Post_Rollback  
+    END
+  END
+  IF @intBankTransferTypeId = 3
+  BEGIN
+    SELECT TOP 1 @intRealizedGainAccountId= intRealizedGainLossForwardAccountId 
+    FROM tblSMMultiCurrency
+    IF @intRealizedGainAccountId is NULL
+    BEGIN
+      RAISERROR ('Forward Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
+      GOTO Post_Rollback  
+    END
+  END
 END
 
-IF @intBankTransferTypeId = 3
-BEGIN
-  SELECT TOP 1 @intRealizedGainAccountId= intRealizedGainLossForwardAccountId 
-	FROM tblSMMultiCurrency
-	IF @intRealizedGainAccountId is NULL
-	BEGIN
-		RAISERROR ('Forward Realized Gain/Loss account was not set in Company Configuration screen.',11,1)
-		GOTO Post_Rollback  
-	END
-END
 -- todo: pre validation area 
 IF @intBankTransferTypeId = 2 AND @ysnPost = 1
 BEGIN
@@ -182,7 +191,6 @@ BEGIN
     END
 END
 
-
 -- Read the user preference  
 SELECT @ysnAllowUserSelfPost = 1  
 FROM dbo.tblSMUserPreference   
@@ -192,7 +200,7 @@ IF @@ERROR <> 0 GOTO Post_Rollback
     
 
 -- initialize variable
-SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference    
+
 
 IF @@ERROR <> 0 GOTO Post_Rollback   
 
@@ -467,6 +475,12 @@ BEGIN
       ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId  
   WHERE A.strTransactionId = @strTransactionId  
 
+
+  -- IF @dblFees >0
+  -- BEGIN
+  --   EXEC dbo.uspCMProcessBankTransferFees @strTransactionId
+  -- END
+
   
   IF @intBankTransferTypeId  =2
   BEGIN
@@ -521,7 +535,7 @@ BEGIN
       ,[dblExchangeRate]  			= dblExchangeRate
       ,[dtmDateEntered]  				= dtmDateEntered
       ,[dtmTransactionDate] 			= dtmTransactionDate
-      ,[strJournalLineDescription] 	= GLAccnt.strDescription  
+      ,[strJournalLineDescription] 	= 'In-Transit Entry'
       ,[ysnIsUnposted]  				= 0   
       ,[intConcurrencyId]  			= 1  
       ,[intUserId]   					  = intUserId  
@@ -541,6 +555,7 @@ BEGIN
         SET 
         dtmDate = @dtmInTransit,
         dtmTransactionDate = @dtmInTransit,
+        strJournalLineDescription = 'In-Transit ENtry',
         intAccountId =GLAccnt.intAccountId, strJournalLineDescription = GLAccnt.strDescription
         FROM #tmpGLDetail A 
         CROSS APPLY (
@@ -556,18 +571,31 @@ BEGIN
     UPDATE #tmpGLDetail SET dtmDate = @dtmAccrual, dtmTransactionDate= @dtmAccrual
     IF @ysnPostedInTransit = 0
     BEGIN
-        UPDATE #tmpGLDetail SET intAccountId = @intBTForwardToFXGLAccountId WHERE dblCredit >0
-        UPDATE A SET intAccountId = @intBTForwardFromFXGLAccountId,
-        dblDebit = BT.dblAmountFrom,
-        dblExchangeRate = BT.dblExchangeRate,
+        UPDATE A 
+        SET intAccountId = @intBTForwardToFXGLAccountId 
+        ,strJournalLineDescription = 'Accrued Receivable'
+        FROM #tmpGLDetail A
+        OUTER APPLY(
+          SELECT strDescription FROM tblGLAccount WHERE intAccountId = @intBTForwardToFXGLAccountId 
+        )GLAccnt
+        WHERE dblCredit >0
+
+        UPDATE A SET 
+        intAccountId = @intBTForwardFromFXGLAccountId
+        ,strJournalLineDescription ='Accrued Payable'
+        ,dblDebit = BT.dblAmountFrom
+        ,dblExchangeRate = BT.dblExchangeRate
         --dblDebitForeign = BT.dblAmountForeignFrom,
-        intCurrencyExchangeRateTypeId = NULL
+        ,intCurrencyExchangeRateTypeId = NULL
         from #tmpGLDetail A 
         OUTER APPLY (
-          select dblAmountFrom,  (dblAmountForeignTo * dblReverseRate) dblAmountForeignFrom, 
+          select dblAmountFrom, strReferenceTo,  (dblAmountForeignTo * dblReverseRate) dblAmountForeignFrom, 
           dblExchangeRate= dblReverseRate
           FROM tblCMBankTransfer WHERE strTransactionId = @strTransactionId
         )BT
+        OUTER APPLY(
+          SELECT strDescription FROM tblGLAccount WHERE intAccountId = @intBTForwardToFXGLAccountId 
+        )GLAccnt
         WHERE dblDebit >0
     END
     ELSE
@@ -619,7 +647,7 @@ BEGIN
         ,[dblExchangeRate]  				= dblExchangeRate
         ,[dtmDateEntered]  				= dtmDateEntered  
         ,[dtmTransactionDate] 			= dtmTransactionDate  
-        ,[strJournalLineDescription] 	= GLAccnt.strDescription  
+        ,[strJournalLineDescription] 	= 'Accrued Payable'
         ,[ysnIsUnposted]  				= 0   
         ,[intConcurrencyId]  			= 1  
         ,[intUserId]   					= intUserId  
@@ -652,7 +680,7 @@ BEGIN
           ,[dblExchangeRate]  			= T.dblReverseRate
           ,[dtmDateEntered]  				= dtmDateEntered  
           ,[dtmTransactionDate] 			= dtmTransactionDate  
-          ,[strJournalLineDescription] 	= GLAccnt.strDescription  
+          ,[strJournalLineDescription] 	= 'Accrued Receivable'
           ,[ysnIsUnposted]  				= 0   
           ,[intConcurrencyId]  			= 1  
           ,[intUserId]   					  = intUserId  
@@ -1066,3 +1094,4 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction.   
 Post_Exit:  
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetailFees')) DROP TABLE #tmpGLDetailFees
