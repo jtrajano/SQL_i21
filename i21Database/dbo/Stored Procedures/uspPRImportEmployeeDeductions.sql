@@ -13,6 +13,7 @@ DECLARE @NewId AS INT
 DECLARE @EmployeeEntityNo AS INT
 
 DECLARE @intEntityNo AS INT
+DECLARE @strEmployeeId  AS NVARCHAR(50)
 DECLARE @strDeductionDesc  AS NVARCHAR(50)
 DECLARE @strDeductionId AS NVARCHAR(50)
 DECLARE @ysnDefault  AS BIT
@@ -67,7 +68,8 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeDeductions)
 	BEGIN
 		SELECT TOP 1 
-			 @intEntityNo = CAST(ISNULL(intEntityNo, 0) AS INT) 
+			 @strEmployeeId = intEntityNo
+			,@intEntityNo = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = intEntityNo) 
 			,@strDeductionDesc  = strDeductionDesc
 			,@strDeductionId = strDeductionId
 			,@ysnDefault  = ysnDefault
@@ -147,7 +149,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 					,1
 					,1
 				FROM #TempEmployeeDeductions
-				WHERE intEntityNo = @intEntityNo
+				WHERE intEntityNo = @strEmployeeId
 				AND strDeductionDesc = (SELECT TOP 1 strDescription FROM tblPRTypeDeduction WHERE strDeduction = @strDeductionId AND strDescription = @strDeductionDesc)
 
 				SET @NewId = SCOPE_IDENTITY()
@@ -248,7 +250,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 						END
 					END
 
-				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
+				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
 
 			END
 		ELSE
@@ -381,6 +383,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 
 				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo  AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
 			END
+
 		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 		SELECT TOP 1
 			  NEWID()
@@ -396,6 +399,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strDeductionId = @strDeductionId
 		AND SE.strDeductionDesc = @strDeductionDesc
+
 
 	END
 
