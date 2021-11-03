@@ -150,7 +150,14 @@ BEGIN
 			SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId AND intCurrencyId = @currency AND ysnActive = 1
 		END
 	END
-
+	ELSE
+	BEGIN
+		--USE THE BANK ACCOUNT PROVIDED
+		SELECT TOP 1   
+		@intGLBankAccountId = intGLAccountId  
+		,@intBankAccountId = intBankAccountId  
+		FROM tblCMBankAccount WHERE intBankAccountId = @intBankAccountId
+	END
 	--if no cash account setup on location, just look for the bank account on same currency
 	IF @intGLBankAccountId IS NULL OR @intBankAccountId IS NULL
 	BEGIN
