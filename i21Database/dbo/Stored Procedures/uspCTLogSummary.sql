@@ -623,8 +623,7 @@ BEGIN TRY
 			, intUserId			
 			, intActionId = 43	
 			, strProcess  = @strProcess
-		FROM
-			@sequenceHistory
+		FROM @sequenceHistory
 		WHERE Row_Num = 1
 
 		select
@@ -635,10 +634,10 @@ BEGIN TRY
 		where
 			Row_Num = 2
 
-		if not (@intPricingTypeId is null)
-		begin
-			update @cbLogTemp set intPricingTypeId = @intPricingTypeId where dblQty < @dblSeqHistoryPreviousQty;
-		end
+		IF (ISNULL(@intPricingTypeId, 0) NOT IN (0, 3))
+		BEGIN
+			UPDATE @cbLogTemp SET intPricingTypeId = @intPricingTypeId WHERE dblQty < @dblSeqHistoryPreviousQty;
+		END
 
 		IF (SELECT COUNT(*) FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) >= 1
 		BEGIN
@@ -3624,21 +3623,39 @@ BEGIN TRY
 			END
 			ELSE -- With changes with dblQty
 			BEGIN
-				--Check if the sequence is being update
-				if exists (select top 1 1 from @cbLogSpecific where intActionId = 43)  
-				begin
-					--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
-					if (@TotalPriced <= @dblContractQty)
-					begin
-						declare @intOrigHeaderPricingTypeId int;
-						select top 1 @intOrigHeaderPricingTypeId = intHeaderPricingTypeId from @tmpContractDetail
-						update @cbLogSpecific set intPricingTypeId = @intOrigHeaderPricingTypeId
-					end
-				end 
+				--Check if the sequence was HTA and then priced
+				IF (@prevPricingTypeId = 3 AND @truePricingTypeId = 1)
+				BEGIN
+					UPDATE @cbLogSpecific
+					SET dblQty = @TotalConsumed * -1
+						, dblOrigQty = @TotalConsumed
+						, intPricingTypeId = 3
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
-				-- Add current record
-				UPDATE  @cbLogSpecific SET dblQty = @total * CASE WHEN @prevContractStatusId <> 3 AND @intContractStatusId = 3 THEN - 1 ELSE 1 END
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0		
+					UPDATE @cbLogSpecific
+					SET dblQty = @TotalConsumed
+						, dblOrigQty = @TotalConsumed
+						, intPricingTypeId = 1
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
+				ELSE
+				BEGIN
+					--Check if the sequence is being update
+					IF EXISTS (SELECT TOP 1 1 FROM @cbLogSpecific WHERE intActionId = 43)  
+					BEGIN
+						--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
+						IF (@TotalPriced <= @dblContractQty)
+						BEGIN
+							DECLARE @intOrigHeaderPricingTypeId INT;
+							SELECT TOP 1 @intOrigHeaderPricingTypeId = intHeaderPricingTypeId FROM @tmpContractDetail
+							UPDATE @cbLogSpecific SET intPricingTypeId = @intOrigHeaderPricingTypeId
+						END
+					END 
+
+					-- Add current record
+					UPDATE  @cbLogSpecific SET dblQty = @total * CASE WHEN @prevContractStatusId <> 3 AND @intContractStatusId = 3 THEN - 1 ELSE 1 END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END	
 			END
 		END
 		ELSE IF @strSource = 'Pricing'
