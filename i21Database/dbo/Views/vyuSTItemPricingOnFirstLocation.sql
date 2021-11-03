@@ -96,7 +96,8 @@ SELECT
 		ON tblICItem.intItemId = effectiveCost.intItemId
 		AND effectiveCost.intItemLocationId = tblICItemLocation.intItemLocationId
 	LEFT JOIN tblICItemUOM 
-		ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+		ON tblICItemUOM.intItemId = tblICItem.intItemId
+		AND tblICItemUOM.ysnStockUnit = 1
 	LEFT JOIN tblICCategory
 		ON tblICCategory.intCategoryId = tblICItem.intCategoryId
 	LEFT JOIN tblEMEntity 
