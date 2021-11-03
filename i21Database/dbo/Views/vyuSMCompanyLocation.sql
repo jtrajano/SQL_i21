@@ -47,6 +47,7 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.ysnLicensed
 ,compLoc.ysnLocationActive
 ,compLoc.intProfitCenter
+,compLoc.intCompanySegment
 ,compLoc.intCashAccount
 ,compLoc.intDepositAccount
 ,compLoc.intARAccount
@@ -207,6 +208,7 @@ SELECT compLoc.intCompanyLocationId
 ,compLoc.ysnPrintInvTagOnReceivingComplete
 ,compLoc.intConcurrencyId
 ,ISNULL(acctSgmt.strCode, '') strProfitCenter
+,ISNULL(acctCompSgmt.strCode, '') strCompanySegment
 ,ISNULL(bank.strBankName + ' - ' +dbo.fnAESDecryptASym([bankAccount].[strBankAccountNo]), '') as strCashAccount
 ,ISNULL(deposit.[strAccountId], '') as strDepositAccount
 ,ISNULL(arAccount.[strAccountId], '') as strARAccount
@@ -258,6 +260,7 @@ SELECT compLoc.intCompanyLocationId
 ,freightTerms.strFreightTerm
 FROM tblSMCompanyLocation compLoc
 LEFT OUTER JOIN dbo.tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
+LEFT OUTER JOIN dbo.tblGLAccountSegment acctCompSgmt ON compLoc.intCompanySegment = acctCompSgmt.intAccountSegmentId
 LEFT JOIN tblCMBankAccount bankAccount ON compLoc.intCashAccount = bankAccount.intGLAccountId
 LEFT JOIN tblCMBank bank ON bankAccount.intBankId = bank.intBankId
 LEFT JOIN tblGLAccount cash ON compLoc.intCashAccount = cash.intAccountId

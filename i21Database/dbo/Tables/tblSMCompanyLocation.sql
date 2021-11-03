@@ -45,6 +45,7 @@
 	[ysnLicensed] BIT NOT NULL DEFAULT (0),
 	[ysnLocationActive] BIT NULL DEFAULT (1),
 	[intProfitCenter] INT NULL,
+	[intCompanySegment] INT NULL,
 	[intCashAccount] INT NULL,
 	[intDepositAccount] INT NULL,
 	[intARAccount] INT NULL,
