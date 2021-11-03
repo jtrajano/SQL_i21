@@ -33,7 +33,9 @@ DECLARE @tblFilteredVendorSetup TABLE(
 	strVendorUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strEquipmentType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strRebateUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorRebateUnitMeasure NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 INSERT INTO @tblFilteredVendorSetup
 (
@@ -53,7 +55,9 @@ INSERT INTO @tblFilteredVendorSetup
 	strVendorUnitMeasure,
 	strEquipmentType,
 	strCategory,
-	strVendorCategory
+	strVendorCategory,
+	strRebateUnitMeasure,
+	strVendorRebateUnitMeasure
 )
 SELECT 
 	intKey,
@@ -72,7 +76,9 @@ SELECT
 	strVendorUnitMeasure,
 	strEquipmentType,
 	strCategory,
-	strVendorCategory
+	strVendorCategory,
+	strRebateUnitMeasure,
+	strVendorRebateUnitMeasure
 FROM
 tblApiSchemaTransformVendorSetup
 WHERE guiApiUniqueId = @guiApiUniqueId;
@@ -80,23 +86,34 @@ WHERE guiApiUniqueId = @guiApiUniqueId;
 -- Error Types
 -- Vendor Setup Logs
 -- 1 - Invalid Vendor
--- 2 - Invalid Export File Type
+-- 2 - Duplicate Vendor Name
+-- 3 - Invalid Export File Type
 -- Customer Xref Logs
--- 3 - Invalid Customer
--- 4 - Duplicate imported customer
--- 5 - Customer already exists
+-- 4 - Invalid Customer
+-- 5 - Duplicate Customer Name
+-- 6 - Duplicate imported customer
+-- 7 - Customer already exists and overwrite is not enabled
+-- 8 - Customer Xref incomplete
 -- Item Xref Logs
--- 6 - Invalid Item
--- 7 - Duplicate imported item
--- 8 - Item already exists
+-- 9 - Invalid Item
+-- 10 - Duplicate imported item
+-- 11 - Item already exists and overwrite is not enabled
+-- 12 - Item Xref incomplete
 -- UOM Xref Logs
--- 9 - Invalid UOM
--- 10 - Duplicate imported UOM
--- 11 - UOM already exists and overwrite is not enabled
+-- 13 - Invalid UOM
+-- 14 - Duplicate imported UOM
+-- 15 - UOM already exists and overwrite is not enabled
+-- 16 - UOM Xref incomplete
 -- Category Xref Logs
--- 12 - Invalid Category
--- 13 - Duplicate imported category
--- 14 - Category already exists
+-- 17 - Invalid Category
+-- 18 - Duplicate imported category
+-- 19 - Category already exists and overwrite is not enabled
+-- 20 - Category Xref incomplete
+-- Rebate UOM Xref Logs
+-- 21 - Invalid Rebate UOM
+-- 22 - Duplicate imported rebate UOM
+-- 23 - Rebate UOM already exists and overwrite is not enabled
+-- 24 - Rebate UOM Xref incomplete
 
 DECLARE @tblLogVendorSetup TABLE(
 	strFieldValue NVARCHAR(100) COLLATE Latin1_General_CI_AS,
@@ -123,42 +140,85 @@ FROM
 LEFT JOIN
 	vyuAPVendor Vendor
 	ON
-		Vendor.strVendorId = FilteredVendorSetup.strVendor
+		Vendor.strName = FilteredVendorSetup.strVendor
 WHERE
 Vendor.intEntityId IS NULL
+AND
+FilteredVendorSetup.strVendor IS NOT NULL
+UNION
+SELECT -- Duplicate Vendor Name
+	FilteredVendorSetup.strVendor,
+	'Vendor: ' + FilteredVendorSetup.strVendor + ' has duplicate name matches.',
+	FilteredVendorSetup.intRowNumber,
+	2
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+OUTER APPLY
+(
+	SELECT 
+		intMatchCount = COUNT(*) 
+	FROM 
+		vyuAPVendor Vendor 
+	WHERE Vendor.strName = FilteredVendorSetup.strVendor 
+) Vendor
+WHERE
+Vendor.intMatchCount > 1
 UNION
 SELECT -- Invalid Export File Type
 	FilteredVendorSetup.strExportFileType,
 	'Export file type: ' + FilteredVendorSetup.strExportFileType + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
-	2
+	3
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 WHERE
 FilteredVendorSetup.strExportFileType NOT IN('CSV','TXT','XML')
+AND
+FilteredVendorSetup.strExportFileType IS NOT NULL
 UNION
 ------------------------- Customer Xref Logs -------------------------
 SELECT -- Invalid Customer
 	FilteredVendorSetup.strCustomer,
 	'Customer: ' + FilteredVendorSetup.strCustomer + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
-	3
+	4
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
 	vyuARCustomer Customer
 	ON
-		FilteredVendorSetup.strCustomer = Customer.strCustomerNumber
+		FilteredVendorSetup.strCustomer = Customer.strName
 		AND
 		Customer.ysnActive = 1
 WHERE
 Customer.intEntityId IS NULL
+AND
+FilteredVendorSetup.strCustomer IS NOT NULL
+UNION
+SELECT -- Duplicate Customer Name
+	FilteredVendorSetup.strCustomer,
+	'Customer: ' + FilteredVendorSetup.strCustomer + ' has duplicate name matches.',
+	FilteredVendorSetup.intRowNumber,
+	5
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+OUTER APPLY
+(
+	SELECT 
+		intMatchCount = COUNT(*) 
+	FROM 
+		vyuARCustomer 
+	WHERE 
+		strName = FilteredVendorSetup.strCustomer 
+) Customer
+WHERE
+Customer.intMatchCount > 1
 UNION
 SELECT -- Duplicate imported customer
 	DuplicateVendorSetup.strCustomer,
 	'Duplicate imported customer: ' + DuplicateVendorSetup.strCustomer + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
 	DuplicateVendorSetup.intRowNumber,
-	4
+	6
 FROM
 (
 	SELECT 
@@ -177,17 +237,17 @@ SELECT -- Customer already exists
 	FilteredVendorSetup.strCustomer,
 	'Customer: ' + FilteredVendorSetup.strCustomer + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
 	FilteredVendorSetup.intRowNumber,
-	5
+	7
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
 	vyuARCustomer Customer
 	ON
-		FilteredVendorSetup.strCustomer = Customer.strCustomerNumber
+		FilteredVendorSetup.strCustomer = Customer.strName
 LEFT JOIN
 	vyuAPVendor Vendor
 	ON
-		FilteredVendorSetup.strVendor = Vendor.strVendorId
+		FilteredVendorSetup.strVendor = Vendor.strName
 INNER JOIN
 	tblVRVendorSetup VendorSetup
 	ON
@@ -199,12 +259,44 @@ INNER JOIN
 		AND
 		VendorSetup.intVendorSetupId = CustomerXref.intVendorSetupId
 UNION
+SELECT -- Customer Xref incomplete
+	CASE
+		WHEN FilteredVendorSetup.strCustomer IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
+		THEN FilteredVendorSetup.strCustomer
+		WHEN FilteredVendorSetup.strCustomer IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
+		THEN FilteredVendorSetup.strVendorCustomer
+		ELSE NULL
+	END,
+	CASE
+		WHEN FilteredVendorSetup.strCustomer IS NOT NULL AND FilteredVendorSetup.strVendorCustomer IS NULL
+		THEN 'Vendor cross reference is missing for customer: ' + FilteredVendorSetup.strCustomer + '.'
+		WHEN FilteredVendorSetup.strCustomer IS NULL AND FilteredVendorSetup.strVendorCustomer IS NOT NULL
+		THEN 'Customer is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorCustomer + '.'
+		ELSE NULL
+	END,
+	FilteredVendorSetup.intRowNumber,
+	8
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+WHERE
+(
+	FilteredVendorSetup.strCustomer IS NOT NULL 
+	AND 
+	FilteredVendorSetup.strVendorCustomer IS NULL
+)
+OR
+(
+	FilteredVendorSetup.strCustomer IS NULL 
+	AND 
+	FilteredVendorSetup.strVendorCustomer IS NOT NULL
+)
+UNION
 --------------------------- Item Xref Logs ---------------------------
 SELECT -- Invalid Item
 	FilteredVendorSetup.strItemNo,
 	'Item: ' + FilteredVendorSetup.strItemNo + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
-	6
+	9
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
@@ -215,12 +307,14 @@ LEFT JOIN
 		Item.strType NOT LIKE '%Comment%'
 WHERE
 Item.intItemId IS NULL
+AND
+FilteredVendorSetup.strItemNo IS NOT NULL
 UNION
 SELECT -- Duplicate imported item
 	DuplicateVendorSetup.strItemNo,
 	'Duplicate imported item: ' + DuplicateVendorSetup.strItemNo + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
 	DuplicateVendorSetup.intRowNumber,
-	7
+	10
 FROM
 (
 	SELECT 
@@ -239,7 +333,7 @@ SELECT  -- Item already exists
 	FilteredVendorSetup.strItemNo,
 	'Item: ' + FilteredVendorSetup.strItemNo + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
 	FilteredVendorSetup.intRowNumber,
-	8
+	11
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
@@ -249,7 +343,7 @@ LEFT JOIN
 LEFT JOIN
 	vyuAPVendor Vendor
 	ON
-		FilteredVendorSetup.strVendor = Vendor.strVendorId
+		FilteredVendorSetup.strVendor = Vendor.strName
 INNER JOIN
 	tblVRVendorSetup VendorSetup
 	ON
@@ -261,12 +355,44 @@ INNER JOIN
 		AND
 		VendorSetup.intVendorSetupId = ItemXref.intVendorSetupId
 UNION
+SELECT -- Item Xref incomplete
+	CASE
+		WHEN FilteredVendorSetup.strItemNo IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
+		THEN FilteredVendorSetup.strItemNo
+		WHEN FilteredVendorSetup.strItemNo IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
+		THEN FilteredVendorSetup.strVendorItemNo
+		ELSE NULL
+	END,
+	CASE
+		WHEN FilteredVendorSetup.strItemNo IS NOT NULL AND FilteredVendorSetup.strVendorItemNo IS NULL
+		THEN 'Vendor cross reference is missing for item: ' + FilteredVendorSetup.strItemNo + '.'
+		WHEN FilteredVendorSetup.strItemNo IS NULL AND FilteredVendorSetup.strVendorItemNo IS NOT NULL
+		THEN 'Item is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorItemNo + '.'
+		ELSE NULL
+	END,
+	FilteredVendorSetup.intRowNumber,
+	12
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+WHERE
+(
+	FilteredVendorSetup.strItemNo IS NOT NULL 
+	AND 
+	FilteredVendorSetup.strVendorItemNo IS NULL
+)
+OR
+(
+	FilteredVendorSetup.strItemNo IS NULL 
+	AND 
+	FilteredVendorSetup.strVendorItemNo IS NOT NULL
+)
+UNION
 --------------------------- UOM Xref Logs ---------------------------
 SELECT -- Invalid UOM
 	FilteredVendorSetup.strUnitMeasure,
 	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
-	9
+	13
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
@@ -275,12 +401,14 @@ LEFT JOIN
 		FilteredVendorSetup.strUnitMeasure = UnitMeasure.strUnitMeasure
 WHERE
 UnitMeasure.intUnitMeasureId IS NULL
+AND
+FilteredVendorSetup.strUnitMeasure IS NOT NULL
 UNION
 SELECT -- Duplicate imported unit of measure
 	DuplicateVendorSetup.strUnitMeasure,
 	'Duplicate imported unit of measure: ' + DuplicateVendorSetup.strUnitMeasure + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
 	DuplicateVendorSetup.intRowNumber,
-	10
+	14
 FROM
 (
 	SELECT 
@@ -299,7 +427,7 @@ SELECT  -- Unit of measure already exists
 	FilteredVendorSetup.strUnitMeasure,
 	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
 	FilteredVendorSetup.intRowNumber,
-	11
+	15
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
@@ -309,7 +437,7 @@ LEFT JOIN
 LEFT JOIN
 	vyuAPVendor Vendor
 	ON
-		FilteredVendorSetup.strVendor = Vendor.strVendorId
+		FilteredVendorSetup.strVendor = Vendor.strName
 INNER JOIN
 	tblVRVendorSetup VendorSetup
 	ON
@@ -321,12 +449,44 @@ INNER JOIN
 		AND
 		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
 UNION
+SELECT -- UOM Xref incomplete
+	CASE
+		WHEN FilteredVendorSetup.strUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NULL
+		THEN FilteredVendorSetup.strUnitMeasure
+		WHEN FilteredVendorSetup.strUnitMeasure IS NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NOT NULL
+		THEN FilteredVendorSetup.strVendorUnitMeasure
+		ELSE NULL
+	END,
+	CASE
+		WHEN FilteredVendorSetup.strUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NULL
+		THEN 'Vendor cross reference is missing for unit of measure: ' + FilteredVendorSetup.strUnitMeasure + '.'
+		WHEN FilteredVendorSetup.strUnitMeasure IS NULL AND FilteredVendorSetup.strVendorUnitMeasure IS NOT NULL
+		THEN 'Unit of measure is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorUnitMeasure + '.'
+		ELSE NULL
+	END,
+	FilteredVendorSetup.intRowNumber,
+	16
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+WHERE
+(
+	FilteredVendorSetup.strUnitMeasure IS NOT NULL 
+	AND 
+	FilteredVendorSetup.strVendorUnitMeasure IS NULL
+)
+OR
+(
+	FilteredVendorSetup.strUnitMeasure IS NULL 
+	AND 
+	FilteredVendorSetup.strVendorUnitMeasure IS NOT NULL
+)
+UNION
 ------------------------- Category Xref Logs -------------------------
 SELECT -- Invalid Category
 	FilteredVendorSetup.strCategory,
 	'Category: ' + FilteredVendorSetup.strCategory + ' does not exist.',
 	FilteredVendorSetup.intRowNumber,
-	12
+	17
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
@@ -335,12 +495,14 @@ LEFT JOIN
 		FilteredVendorSetup.strCategory = Category.strCategoryCode
 WHERE
 Category.intCategoryId IS NULL
+AND
+FilteredVendorSetup.strCategory IS NOT NULL
 UNION
 SELECT -- Duplicate imported category
 	DuplicateVendorSetup.strCategory,
 	'Duplicate imported category: ' + DuplicateVendorSetup.strCategory + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
 	DuplicateVendorSetup.intRowNumber,
-	13
+	18
 FROM
 (
 	SELECT 
@@ -359,7 +521,7 @@ SELECT  -- Category already exists
 	FilteredVendorSetup.strCategory,
 	'Category: ' + FilteredVendorSetup.strCategory + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
 	FilteredVendorSetup.intRowNumber,
-	14
+	19
 FROM
 	@tblFilteredVendorSetup FilteredVendorSetup
 LEFT JOIN
@@ -369,7 +531,7 @@ LEFT JOIN
 LEFT JOIN
 	vyuAPVendor Vendor
 	ON
-		FilteredVendorSetup.strVendor = Vendor.strVendorId
+		FilteredVendorSetup.strVendor = Vendor.strName
 INNER JOIN
 	tblVRVendorSetup VendorSetup
 	ON
@@ -380,6 +542,136 @@ INNER JOIN
 		Category.intCategoryId = CategoryXref.intCategoryId
 		AND
 		VendorSetup.intVendorSetupId = CategoryXref.intVendorSetupId
+WHERE
+@ysnAllowOverwrite = 0
+UNION
+SELECT -- Category Xref incomplete
+	CASE
+		WHEN FilteredVendorSetup.strCategory IS NOT NULL AND FilteredVendorSetup.strVendorCategory IS NULL
+		THEN FilteredVendorSetup.strCategory
+		WHEN FilteredVendorSetup.strCategory IS NULL AND FilteredVendorSetup.strVendorCategory IS NOT NULL
+		THEN FilteredVendorSetup.strVendorCategory
+		ELSE NULL
+	END,
+	CASE
+		WHEN FilteredVendorSetup.strCategory IS NOT NULL AND FilteredVendorSetup.strVendorCategory IS NULL
+		THEN 'Vendor cross reference is missing for category: ' + FilteredVendorSetup.strCategory + '.'
+		WHEN FilteredVendorSetup.strCategory IS NULL AND FilteredVendorSetup.strVendorCategory IS NOT NULL
+		THEN 'Category is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorCategory + '.'
+		ELSE NULL
+	END,
+	FilteredVendorSetup.intRowNumber,
+	20
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+WHERE
+(
+	FilteredVendorSetup.strCategory IS NOT NULL 
+	AND 
+	FilteredVendorSetup.strVendorCategory IS NULL
+)
+OR
+(
+	FilteredVendorSetup.strCategory IS NULL 
+	AND 
+	FilteredVendorSetup.strVendorCategory IS NOT NULL
+)
+UNION
+------------------------ Rebate UOM Xref Logs ------------------------
+SELECT -- Invalid Rebate UOM
+	FilteredVendorSetup.strRebateUnitMeasure,
+	'Rebate Unit of measure: ' + FilteredVendorSetup.strRebateUnitMeasure + ' does not exist.',
+	FilteredVendorSetup.intRowNumber,
+	21
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+LEFT JOIN
+	tblICUnitMeasure UnitMeasure
+	ON
+		FilteredVendorSetup.strRebateUnitMeasure = UnitMeasure.strUnitMeasure
+WHERE
+UnitMeasure.intUnitMeasureId IS NULL
+AND
+FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL
+UNION
+SELECT -- Duplicate imported unit of measure
+	DuplicateVendorSetup.strRebateUnitMeasure,
+	'Duplicate imported rebate unit of measure: ' + DuplicateVendorSetup.strRebateUnitMeasure + ' on vendor: ' + DuplicateVendorSetup.strVendor + '.', 
+	DuplicateVendorSetup.intRowNumber,
+	22
+FROM
+(
+	SELECT 
+		FilteredVendorSetup.strRebateUnitMeasure,
+		FilteredVendorSetup.strVendor,
+		FilteredVendorSetup.intRowNumber,
+		RowNumber = ROW_NUMBER() OVER(PARTITION BY FilteredVendorSetup.strVendor, FilteredVendorSetup.strRebateUnitMeasure ORDER BY FilteredVendorSetup.intRowNumber)
+	FROM 
+		@tblFilteredVendorSetup FilteredVendorSetup
+) AS DuplicateVendorSetup
+WHERE DuplicateVendorSetup.RowNumber > 1
+AND
+DuplicateVendorSetup.strRebateUnitMeasure IS NOT NULL
+UNION
+SELECT  -- Unit of measure already exists
+	FilteredVendorSetup.strRebateUnitMeasure,
+	'Rebate unit of measure: ' + FilteredVendorSetup.strRebateUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
+	FilteredVendorSetup.intRowNumber,
+	23
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+LEFT JOIN
+	tblICUnitMeasure UnitMeasure
+	ON
+		FilteredVendorSetup.strRebateUnitMeasure = UnitMeasure.strUnitMeasure
+LEFT JOIN
+	vyuAPVendor Vendor
+	ON
+		FilteredVendorSetup.strVendor = Vendor.strName
+INNER JOIN
+	tblVRVendorSetup VendorSetup
+	ON
+		VendorSetup.intEntityId = Vendor.intEntityId
+INNER JOIN
+	tblVRUOMXref UOMXref
+	ON
+		UnitMeasure.intUnitMeasureId = UOMXref.intUnitMeasureId
+		AND
+		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
+WHERE
+@ysnAllowOverwrite = 0
+UNION
+SELECT -- Rebate UOM Xref incomplete
+	CASE
+		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NULL
+		THEN FilteredVendorSetup.strRebateUnitMeasure
+		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NOT NULL
+		THEN FilteredVendorSetup.strVendorRebateUnitMeasure
+		ELSE NULL
+	END,
+	CASE
+		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NULL
+		THEN 'Vendor cross reference is missing for rebate unit of measure: ' + FilteredVendorSetup.strRebateUnitMeasure + '.'
+		WHEN FilteredVendorSetup.strRebateUnitMeasure IS NULL AND FilteredVendorSetup.strVendorRebateUnitMeasure IS NOT NULL
+		THEN 'Rebate unit of measure is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorRebateUnitMeasure + '.'
+		ELSE NULL
+	END,
+	FilteredVendorSetup.intRowNumber,
+	24
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+WHERE
+(
+	FilteredVendorSetup.strRebateUnitMeasure IS NOT NULL 
+	AND 
+	FilteredVendorSetup.strVendorRebateUnitMeasure IS NULL
+)
+OR
+(
+	FilteredVendorSetup.strRebateUnitMeasure IS NULL 
+	AND 
+	FilteredVendorSetup.strVendorRebateUnitMeasure IS NOT NULL
+)
 
 --Validate Records
 
@@ -398,33 +690,35 @@ SELECT
 	guiApiImportLogDetailId = NEWID(),
 	guiApiImportLogId = @guiLogId,
 	strField = CASE
-		WHEN LogVendorSetup.intLogType = 1
+		WHEN LogVendorSetup.intLogType IN (1,2)
 		THEN 'Vendor'
-		WHEN LogVendorSetup.intLogType = 2
+		WHEN LogVendorSetup.intLogType = 3
 		THEN 'Export File Type'
-		WHEN LogVendorSetup.intLogType IN (3,4,5)
-		THEN 'Customer'
-		WHEN LogVendorSetup.intLogType IN (6,7,8)
-		THEN 'Item No'
-		WHEN LogVendorSetup.intLogType IN (9,10,11)
-		THEN 'Unit of Measure'
-		ELSE 'Category'
+		WHEN LogVendorSetup.intLogType IN (4,5,6,7,8)
+		THEN 'Customer Name'
+		WHEN LogVendorSetup.intLogType IN (9,10,11,12)
+		THEN 'Item Name'
+		WHEN LogVendorSetup.intLogType IN (13,14,15,16)
+		THEN 'UOM Name'
+		WHEN LogVendorSetup.intLogType IN (17,18,19,20)
+		THEN 'Category Name'
+		ELSE 'Rebate UOM Name'
 	END,
 	strValue = LogVendorSetup.strFieldValue,
 	strLogLevel =  CASE
-		WHEN LogVendorSetup.intLogType IN(4,5,7,8,10,11,13,14)
+		WHEN LogVendorSetup.intLogType IN(2,5,6,7,8,10,11,12,14,15,16,18,19,20,22,23,24)
 		THEN 'Warning'
 		ELSE 'Error'
 	END,
 	strStatus = CASE
-		WHEN LogVendorSetup.intLogType IN(4,5,7,8,10,11,13,14)
+		WHEN LogVendorSetup.intLogType IN(2,5,6,7,8,10,11,12,14,15,16,18,19,20,22,23,24)
 		THEN 'Skipped'
 		ELSE 'Failed'
 	END,
 	intRowNo = LogVendorSetup.intRowNumber,
 	strMessage = LogVendorSetup.strMessage
 FROM @tblLogVendorSetup LogVendorSetup
-WHERE LogVendorSetup.intLogType BETWEEN 1 AND 14
+WHERE LogVendorSetup.intLogType BETWEEN 1 AND 24
 
 --Vendor Setup Transform logic
 
@@ -444,13 +738,13 @@ USING
 		ON
 			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
 			AND
-			LogVendorSetup.intLogType IN (1,2)
+			LogVendorSetup.intLogType IN (1,2,3)
 	INNER JOIN
 		vyuAPVendor Vendor
 		ON
-			Vendor.strVendorId = FilteredVendorSetup.strVendor
+			Vendor.strName = FilteredVendorSetup.strVendor
 	WHERE
-	LogVendorSetup.intLogType NOT IN (1,2) OR LogVendorSetup.intLogType IS NULL
+	LogVendorSetup.intLogType NOT IN (1,2,3) OR LogVendorSetup.intLogType IS NULL
 	GROUP BY
 	FilteredVendorSetup.strVendor
 ) AS SOURCE
@@ -495,18 +789,18 @@ USING
 		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
 		intEntityId = Customer.intEntityId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
-		strVendorCustomer = ISNULL(FilteredVendorSetup.strVendorCustomer, Customer.strCustomerNumber)
+		strVendorCustomer = ISNULL(FilteredVendorSetup.strVendorCustomer, Customer.strName)
 	FROM @tblFilteredVendorSetup FilteredVendorSetup
 	LEFT JOIN
 		@tblLogVendorSetup LogVendorSetup
 		ON
 			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
 			AND
-			LogVendorSetup.intLogType IN (1,2,3,4,5)
+			LogVendorSetup.intLogType IN (1,2,3,4,5,6,7,8)
 	INNER JOIN
 		vyuARCustomer Customer
 		ON
-			FilteredVendorSetup.strCustomer = Customer.strCustomerNumber
+			FilteredVendorSetup.strCustomer = Customer.strName
 			AND
 			Customer.ysnActive = 1
 	INNER JOIN
@@ -518,9 +812,9 @@ USING
 				Vendor.intEntityId = VendorSetup.intEntityId
 	)
 		ON
-			Vendor.strVendorId = FilteredVendorSetup.strVendor
+			Vendor.strName = FilteredVendorSetup.strVendor
 	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,3,4,5) OR LogVendorSetup.intLogType IS NULL
+	LogVendorSetup.intLogType NOT IN (1,2,3,4,5,6,7,8) OR LogVendorSetup.intLogType IS NULL
 ) AS SOURCE
 ON TARGET.intEntityId = SOURCE.intEntityId AND TARGET.intVendorSetupId = SOURCE.intVendorSetupId
 WHEN MATCHED AND @ysnAllowOverwrite = 1 
@@ -565,7 +859,7 @@ USING
 		ON
 			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
 			AND
-			LogVendorSetup.intLogType IN (1,2,6,7,8)
+			LogVendorSetup.intLogType IN (1,2,3,9,10,11,12)
 	INNER JOIN
 		tblICItem Item
 		ON
@@ -581,9 +875,9 @@ USING
 				Vendor.intEntityId = VendorSetup.intEntityId
 	)
 		ON
-			Vendor.strVendorId = FilteredVendorSetup.strVendor
+			Vendor.strName = FilteredVendorSetup.strVendor
 	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,6,7,8) OR LogVendorSetup.intLogType IS NULL
+	LogVendorSetup.intLogType NOT IN (1,2,3,9,10,11,12) OR LogVendorSetup.intLogType IS NULL
 ) AS SOURCE
 ON TARGET.intItemId = SOURCE.intItemId AND TARGET.intVendorSetupId = SOURCE.intVendorSetupId
 WHEN MATCHED AND @ysnAllowOverwrite = 1 
@@ -631,7 +925,7 @@ USING
 		ON
 			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
 			AND
-			LogVendorSetup.intLogType IN (1,2,9,10,11)
+			LogVendorSetup.intLogType IN (1,2,3,13,14,15,16)
 	INNER JOIN
 		tblICUnitMeasure UnitMeasure
 		ON
@@ -645,9 +939,9 @@ USING
 				Vendor.intEntityId = VendorSetup.intEntityId
 	)
 		ON
-			Vendor.strVendorId = FilteredVendorSetup.strVendor
+			Vendor.strName = FilteredVendorSetup.strVendor
 	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,9,10,11) OR LogVendorSetup.intLogType IS NULL
+	LogVendorSetup.intLogType NOT IN (1,2,3,13,14,15,16) OR LogVendorSetup.intLogType IS NULL
 ) AS SOURCE
 ON 
 TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
@@ -698,7 +992,7 @@ USING
 		ON
 			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
 			AND
-			LogVendorSetup.intLogType IN (1,2,12,13,14)
+			LogVendorSetup.intLogType IN (1,2,3,17,18,19,20)
 	INNER JOIN
 		tblICCategory Category
 		ON
@@ -712,9 +1006,9 @@ USING
 				Vendor.intEntityId = VendorSetup.intEntityId
 	)
 		ON
-			Vendor.strVendorId = FilteredVendorSetup.strVendor
+			Vendor.strName = FilteredVendorSetup.strVendor
 	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,12,13,14) OR LogVendorSetup.intLogType IS NULL
+	LogVendorSetup.intLogType NOT IN (1,2,3,17,18,19,20) OR LogVendorSetup.intLogType IS NULL
 ) AS SOURCE
 ON 
 TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
@@ -745,5 +1039,72 @@ WHEN NOT MATCHED THEN
 		intVendorId,
 		intVendorSetupId,
 		strVendorDepartment,
+		1
+	);
+
+--Rebate UOM Xref Transform logic
+
+;MERGE INTO tblVRUOMXref AS TARGET
+USING
+(
+	SELECT
+		guiApiUniqueId = @guiApiUniqueId,
+		intVendorSetupId = VendorSetup.intVendorSetupId,
+		intUnitMeasureId = UnitMeasure.intUnitMeasureId,
+		strVendorUOM = ISNULL(FilteredVendorSetup.strVendorRebateUnitMeasure, UnitMeasure.strUnitMeasure),
+		strEquipmentType = FilteredVendorSetup.strEquipmentType
+	FROM @tblFilteredVendorSetup FilteredVendorSetup
+	LEFT JOIN
+		@tblLogVendorSetup LogVendorSetup
+		ON
+			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
+			AND
+			LogVendorSetup.intLogType IN (1,2,3,21,22,23,24)
+	INNER JOIN
+		tblICUnitMeasure UnitMeasure
+		ON
+			FilteredVendorSetup.strRebateUnitMeasure = UnitMeasure.strUnitMeasure
+	INNER JOIN
+	(
+		vyuAPVendor Vendor
+		INNER JOIN
+			tblVRVendorSetup VendorSetup 
+			ON
+				Vendor.intEntityId = VendorSetup.intEntityId
+	)
+		ON
+			Vendor.strName = FilteredVendorSetup.strVendor
+	WHERE 
+	LogVendorSetup.intLogType NOT IN (1,2,3,21,22,23,24) OR LogVendorSetup.intLogType IS NULL
+) AS SOURCE
+ON 
+TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
+AND
+TARGET.intUnitMeasureId = SOURCE.intUnitMeasureId 
+WHEN MATCHED AND @ysnAllowOverwrite = 1 
+THEN
+	UPDATE SET
+		guiApiUniqueId = SOURCE.guiApiUniqueId,
+		intVendorSetupId = SOURCE.intVendorSetupId,
+		intUnitMeasureId = SOURCE.intUnitMeasureId,
+		strVendorUOM = SOURCE.strVendorUOM,
+		strEquipmentType = SOURCE.strEquipmentType
+WHEN NOT MATCHED THEN
+	INSERT
+	(
+		guiApiUniqueId,
+		intVendorSetupId,
+		intUnitMeasureId,
+		strVendorUOM,
+		strEquipmentType,
+		intConcurrencyId
+	)
+	VALUES
+	(
+		guiApiUniqueId,
+		intVendorSetupId,
+		intUnitMeasureId,
+		strVendorUOM,
+		strEquipmentType,
 		1
 	);
