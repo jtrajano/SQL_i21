@@ -169,6 +169,7 @@ BEGIN
       INSERT INTO @DecryptionTable
         SELECT intBankId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strRTN''''))'', ''varbinary(256)''))
         FROM tblCMBank
+        WHERE LEN(strRTN) < 300
 
       PRINT(''*** Encrypting RTN using certificate ***'')
       INSERT INTO @EncryptionTable
@@ -213,6 +214,7 @@ BEGIN
       INSERT INTO @DecryptionTable
         SELECT intBankAccountId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strBankAccountNo''''))'', ''varbinary(256)''))
         FROM tblCMBankAccount
+        WHERE LEN(strRTN) < 300
 
       PRINT(''*** Encrypting BankAccountNo using certificate ***'')
       INSERT INTO @EncryptionTable
@@ -237,6 +239,7 @@ BEGIN
         SET strRTN = Bank.strRTN
         FROM tblCMBank AS Bank
         WHERE tblCMBankAccount.intBankId = Bank.intBankId
+        AND LEN(strRTN)< 300
 
       INSERT INTO tblEMEntityPreferences (strPreference, strValue, intConcurrencyId) VALUES (''CM tblCMBankAccount RTN re-encryption using certificate'', ''1'', 0)
     ')
@@ -266,6 +269,7 @@ BEGIN
       INSERT INTO @DecryptionTable
         SELECT intBankAccountId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strMICRBankAccountNo''''))'', ''varbinary(256)''))
         FROM tblCMBankAccount
+        WHERE LEN(strMICRBankAccountNo) < 300
 
       PRINT(''*** Encrypting MICRBankAccountNo using certificate ***'')
       INSERT INTO @EncryptionTable
@@ -306,6 +310,7 @@ BEGIN
       INSERT INTO @DecryptionTable
         SELECT intBankAccountId, CONVERT(NVARCHAR(MAX), CAST(N'''' as XML).value(''xs:base64Binary(sql:column(''''strMICRRoutingNo''''))'', ''varbinary(256)''))
         FROM tblCMBankAccount
+        WHERE LEN(strMICRRoutingNo) < 300
 
       PRINT(''*** Encrypting MICRBankAccountNo using certificate ***'')
       INSERT INTO @EncryptionTable
