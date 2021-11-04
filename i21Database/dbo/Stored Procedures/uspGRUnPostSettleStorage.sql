@@ -13,7 +13,7 @@ BEGIN TRY
 	DECLARE @dblUnitsUnposted DECIMAL(24, 10)
 	DECLARE @intCustomerStorageId AS INT
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
-	DECLARE @strBatchId AS NVARCHAR(40)
+	DECLARE @strBatchId AS NVARCHAR(20)
 	DECLARE @TicketNo NVARCHAR(50)
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType

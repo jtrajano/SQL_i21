@@ -62,7 +62,7 @@ BEGIN TRY
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3	
 	DECLARE @ItemsToStorage AS ItemCostingTableType
 	DECLARE @ItemsToPost AS ItemCostingTableType
-	DECLARE @strBatchId AS NVARCHAR(40)
+	DECLARE @strBatchId AS NVARCHAR(20)
 	DECLARE @intReceiptId AS INT
 	DECLARE @intInventoryReceiptItemId AS INT
 	DECLARE @intScaleTicketId AS INT
