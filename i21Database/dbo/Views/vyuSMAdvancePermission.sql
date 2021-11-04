@@ -13,4 +13,4 @@ P.intEntityId
 FROM tblSMUserRoleAdvancePermission A 
 INNER JOIN tblSMAdvancePermission B ON A.intAdvancePermissionId = B.intAdvancePermissionId
 INNER JOIN tblSMModule C ON B.intModuleId = C.intModuleId
-INNER JOIN vyuSMUserLocationSubRolePermission P ON P.intUserRoleId = A.intUserRoleId
+LEFT OUTER JOIN vyuSMUserLocationSubRolePermission P ON P.intUserRoleId = A.intUserRoleId

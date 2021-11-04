@@ -8,7 +8,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Check if daily stock is rebuilding. If yes, exit immediately to avoid deadlocks. 
 IF EXISTS (SELECT TOP 1 1 FROM tblICStagingDailyStockPosition (NOLOCK) WHERE ysnBuilding = 1)

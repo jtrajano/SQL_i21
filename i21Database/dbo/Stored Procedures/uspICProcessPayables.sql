@@ -10,7 +10,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT OFF
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
 
 	-- Generate Payables
 	DECLARE @voucherPayable VoucherPayable
@@ -72,6 +72,8 @@ SET ANSI_WARNINGS OFF
 			,[intFreightTermId]				
 			,[strBillOfLading]					
 			,[ysnReturn]
+			,[intBookId]
+			,[intSubBookId]
 		)
 		SELECT 
 			 GP.[intEntityVendorId]			
@@ -127,6 +129,8 @@ SET ANSI_WARNINGS OFF
 			,GP.[intFreightTermId]				
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
+			,GP.[intBookId]
+			,GP.[intSubBookId]
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
 	END
 	
@@ -209,9 +213,9 @@ SET ANSI_WARNINGS OFF
 				,[intInventoryReceiptChargeId] = NULL
 				,[intInventoryShipmentItemId]		
 				,[intInventoryShipmentChargeId]		
-				,[strLoadShipmentNumber] = NULL 
-				,[intLoadShipmentId] = NULL				
-				,[intLoadShipmentDetailId] = NULL			
+				,[strLoadShipmentNumber] = ShipmentCharges.strLoadNumber
+				,[intLoadShipmentId] = ShipmentCharges.intLoadId
+				,[intLoadShipmentDetailId] = ShipmentCharges.intLoadDetailId
 				,ShipmentCharges.[intItemId]						
 				,[intPurchaseTaxGroupId] = NULL		
 				,[strMiscDescription]				

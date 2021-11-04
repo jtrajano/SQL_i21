@@ -54,13 +54,18 @@ CREATE PROCEDURE [dbo].[uspICPostReturnAverageCosting]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate NUMERIC(38, 20)
 	,@intSourceEntityId INT = NULL
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
+
 AS
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
@@ -181,6 +186,10 @@ BEGIN
 						,@dblForexRate = @dblForexRate
 						,@intSourceEntityId = @intSourceEntityId
 						,@intTransactionItemUOMId = @intTransactionItemUOMId
+						,@strSourceType = @strSourceType
+						,@strSourceNumber = @strSourceType
+						,@strBOLNumber = @strBOLNumber
+						,@intTicketId = @intTicketId
 						,@dtmCreated = @dtmCreated OUTPUT 
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error

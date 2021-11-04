@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGridUpdateCostAndPrice]
+CREATE PROCEDURE [dbo].[uspSTGridUpdateCostAndPrice]
     @intEntityId INT,
     @ysnRecap BIT,
 	@UDTItemGridToUpdate StoreItemGridToUpdate	READONLY,

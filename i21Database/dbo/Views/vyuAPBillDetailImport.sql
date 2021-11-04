@@ -19,7 +19,7 @@ SELECT
 	ExchangeRateType.strCurrencyExchangeRateType,
 	B.dblRate,
 	B.dblCost,
-CostUOM.strUnitMeasure strCostUOM,
+	CostUOM.strUnitMeasure strCostUOM,
 	WeightUOM.strUnitMeasure strWeightUOM,
 	B.dblNetWeight,
 	B.dblNetShippedWeight,
@@ -39,9 +39,7 @@ CostUOM.strUnitMeasure strCostUOM,
 	Form1099.strText str1099Form,
 	Category1099.strText str1099Category,
 	A.intBillId
-	
 FROM dbo.tblAPBill A
-
 LEFT JOIN dbo.tblAPBillDetail B ON A.intBillId = B.intBillId
 LEFT JOIN dbo.tblAPVendor G  ON G.[intEntityId] = A.intEntityVendorId
 LEFT JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId
@@ -55,17 +53,10 @@ LEFT JOIN dbo.tblGLAccount H ON B.intAccountId = H.intAccountId
 LEFT JOIN dbo.tblICItem Item 	ON B.intItemId = Item.intItemId
 LEFT JOIN dbo.tblSMCurrency CUR ON CUR.intCurrencyID = A.intCurrencyId
 OUTER APPLY(
-	SELECT TOP 1 A.strPurchaseOrderNumber from tblPOPurchase A
-	JOIN dbo.tblPOPurchaseDetail C
- 	ON A.intPurchaseId = C.intPurchaseId
+	SELECT TOP 1 A.strPurchaseOrderNumber FROM tblPOPurchase A
+	INNER JOIN dbo.tblPOPurchaseDetail C ON A.intPurchaseId = C.intPurchaseId
  	WHERE C.intPurchaseDetailId = B.intPurchaseDetailId
-)Purchase
+) Purchase
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherForm1099]() where intId = B.int1099Form) Form1099
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherCategories1099](B.int1099Form) WHERE intId = B.int1099Category) Category1099
 OUTER APPLY (SELECT TOP 1 strText FROM dbo.[fnAPGetVoucherPrepayType]() WHERE intId = B.intPrepayTypeId) Prepay
-
-
-
-
-
-GO

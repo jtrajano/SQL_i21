@@ -9,7 +9,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @intEntityVendorId AS INT				
 		,@type_Voucher AS INT = 1
@@ -149,7 +149,9 @@ BEGIN
 				,[intShipViaId]						
 				,[intTermId]						
 				,[strBillOfLading]					
-				,[ysnReturn]						
+				,[ysnReturn]
+				,[intBookId]
+				,[intSubBookId]
 		)
 		SELECT 
 			[intEntityVendorId]			
@@ -202,6 +204,8 @@ BEGIN
 			,[intTermId]						
 			,[strBillOfLading]					
 			,[ysnReturn]	 
+			,[intBookId]
+			,[intSubBookId]
 		FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1)
 
 		END 

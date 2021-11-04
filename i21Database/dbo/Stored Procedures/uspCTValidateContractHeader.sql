@@ -261,12 +261,6 @@ BEGIN TRY
 				SET @ErrMsg = 'No Of Lots is missing while creating contract.'
 				RAISERROR(@ErrMsg,16,1)
 			END
-			
-			IF (ISNULL(@dblQuantity, 0) < ISNULL(@dblTotalPriced, 0))
-			BEGIN
-				SET @ErrMsg = 'Quantity cannot be reduced below price fixed quantity of ' + CAST(ISNULL(@dblTotalPriced, 0) AS NVARCHAR) + '.'
-				RAISERROR(@ErrMsg,16,1)
-			END
 		END
 
 		IF	@strContractNumber IS NULL

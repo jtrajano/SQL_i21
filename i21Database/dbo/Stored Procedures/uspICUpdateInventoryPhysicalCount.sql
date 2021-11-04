@@ -33,6 +33,7 @@ DECLARE @ysnCountByLots BIT
 DECLARE @msg NVARCHAR(600)
 DECLARE @intLocationId INT
 DECLARE @countDate DATETIME
+DECLARE @ysnExcludeReserved BIT 
 
 SELECT
 	  @intInventoryCountId = intInventoryCountId
@@ -40,6 +41,7 @@ SELECT
 	, @ysnCountByLots = ISNULL(ysnCountByLots, 0)
 	, @intLocationId = intLocationId
 	, @countDate = dtmCountDate
+	, @ysnExcludeReserved = ysnExcludeReserved
 FROM tblICInventoryCount 
 WHERE strCountNo = @strCountNo
 
@@ -105,7 +107,7 @@ BEGIN
 						AND t.intLotId = lot.intLotId
 						AND t.dblQty > 0 
 						AND ISNULL(t.ysnIsUnposted, 0) = 0 
-						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1	
+						AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
 					ORDER BY
 						t.intInventoryTransactionId DESC 		
 				) LastLotTransaction
@@ -133,7 +135,7 @@ BEGIN
 						AND t.intSubLocationId = lot.intSubLocationId
 						AND t.intStorageLocationId = lot.intStorageLocationId
 						AND t.intLotId = lot.intLotId
-						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1		
+						AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
 				) LotTransactions
 			WHERE cd.intLotId = @intLotId
 				AND cd.intInventoryCountId = @intInventoryCountId
@@ -236,8 +238,8 @@ BEGIN
 						AND t.intItemLocationId = lot.intItemLocationId
 						AND t.intSubLocationId = lot.intSubLocationId
 						AND t.intStorageLocationId = lot.intStorageLocationId
-						AND t.intLotId = lot.intLotId
-						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1		
+						AND t.intLotId = lot.intLotId						
+						AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
 				) LotTransactions 
 				OUTER APPLY (
 					SELECT
@@ -255,7 +257,7 @@ BEGIN
 						AND t.intLotId = lot.intLotId
 						AND t.dblQty > 0 
 						AND ISNULL(t.ysnIsUnposted, 0) = 0 
-						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1	
+						AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
 					ORDER BY
 						t.intInventoryTransactionId DESC 		
 				) LastLotTransaction
@@ -340,86 +342,80 @@ BEGIN
 				, cd.dtmDateModified			= GETDATE()
 				, cd.intModifiedByUserId		= @intUserSecurityId
 				, cd.intEntityUserSecurityId	= @intUserSecurityId
-				, dblSystemCount			= CASE WHEN i.ysnSeparateStockForUOMs = 1 THEN ISNULL(stock.dblOnHand, 0) ELSE ISNULL(stockUnit.dblOnHand, 0)  END
-				, cd.dblLastCost				= ISNULL(
+				, dblSystemCount				= 
+						CASE 
+							WHEN @ysnExcludeReserved = 1 THEN 
+								ISNULL(stock.dblOnHand, 0) - ISNULL(reserved.dblQty, 0) 
+							ELSE 
+								ISNULL(stock.dblOnHand, 0) 
+						END 
+				, cd.dblLastCost				= 
 						CASE 
 							-- Get the average cost. 
 							WHEN il.intCostingMethod = 1 THEN 				
 								dbo.fnCalculateCostBetweenUOM (
 									stockUOM.intItemUOMId
-									,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-									,ISNULL(
+									,stock.intItemUOMId
+									,COALESCE(
 										dbo.fnICGetMovingAverageCost(
 											i.intItemId
 											,il.intItemLocationId
-											,lastTransaction.intInventoryTransactionId
-							
+											,lastTransaction.intInventoryTransactionId							
 										)
-										,pricing.dblLastCost
-									)					
+										,NULLIF(EffectivePricing.dblCost, 0)
+										,NULLIF(p.dblLastCost, 0)
+										,p.dblStandardCost
+									)
 								)
 					
-							-- Or else, get the last cost. 
-							ELSE 				
+							-- If item not using Avg Costing, get the last cost. 
+							WHEN lastTransaction.intItemUOMId IS NOT NULL THEN 
 								dbo.fnCalculateQtyBetweenUOM (
 									lastTransaction.intItemUOMId
-									, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+									, stock.intItemUOMId
 									, lastTransaction.dblCost
 								)
-						END 
-						, ISNULL(pricing.dblLastCost, pricing.dblStandardCost))
-			FROM tblICInventoryCount c
-				INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
-				INNER JOIN tblICItemLocation il ON il.intItemId = cd.intItemId
-				INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
-				INNER JOIN tblICItemUOM u ON u.intItemId = cd.intItemId
-					AND u.ysnStockUnit = 1
-				LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = cd.intItemId
-					AND pricing.intItemLocationId = il.intItemLocationId
-				INNER JOIN tblICItemUOM stockUOM ON stockUOM.intItemId = il.intItemId
-					AND stockUOM.ysnStockUnit = 1
-				LEFT JOIN (
-					SELECT	 
-						st.intItemId
-						,st.intItemLocationId
-						,st.intSubLocationId
-						,st.intStorageLocationId
-						,st.intLocationId
-						,dblOnHand = SUM (
+
+							-- If last cost is not available, use the item pricing. 
+							ELSE 
 								dbo.fnCalculateQtyBetweenUOM (
-									st.intItemUOMId
-									, suom.intItemUOMId
-									, ISNULL(st.dblOnHand, 0.00)
-								)
-							)
-					FROM	
-						vyuICGetItemStockSummary st
-						INNER JOIN tblICItemUOM suom 
-							ON suom.intItemId = st.intItemId
-							AND suom.ysnStockUnit = 1
-					WHERE	
-						dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
-						AND st.intItemLocationId = @intItemLocationId
-					GROUP BY 
-						st.intItemId
-						,st.intItemLocationId
-						,st.intSubLocationId
-						,st.intStorageLocationId
-						,st.intLocationId
-				) stockUnit 
-				ON stockUnit.intItemId = i.intItemId			
-					AND stockUnit.intItemLocationId = il.intItemLocationId
-					AND stockUnit.intLocationId = il.intLocationId
-					AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0
-				LEFT JOIN (
+									stockUOM.intItemUOMId
+									, stock.intItemUOMId
+									, COALESCE(NULLIF(EffectivePricing.dblCost, 0), NULLIF(p.dblLastCost, 0), p.dblStandardCost) 
+								)					
+						END 
+
+			FROM 
+				tblICInventoryCount c
+				INNER JOIN tblICInventoryCountDetail cd 
+					ON cd.intInventoryCountId = c.intInventoryCountId
+				INNER JOIN tblICItemLocation il 
+					ON il.intItemId = cd.intItemId
+				INNER JOIN tblICItem i 
+					ON i.intItemId = cd.intItemId
+				LEFT OUTER JOIN tblICItemPricing p 
+					ON p.intItemId = cd.intItemId
+					AND p.intItemLocationId = il.intItemLocationId
+				INNER JOIN tblICItemUOM stockUOM 
+					ON stockUOM.intItemId = il.intItemId
+					AND stockUOM.ysnStockUnit = 1
+
+				-- Get the stocks using its own UOM 
+				OUTER APPLY (
 					SELECT	intItemId
 							,intItemUOMId
 							,intItemLocationId
 							,intSubLocationId
 							,intStorageLocationId
 							,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
-					FROM	vyuICGetItemStockSummary
-					WHERE	dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
+					FROM	vyuICGetItemStockSummary v
+					WHERE	
+							FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
+							AND v.intItemId = i.intItemId
+							AND v.intItemLocationId = il.intItemLocationId
+							AND v.intItemUOMId = @intItemUOMId
+							AND ((v.intSubLocationId = @intStorageLocationId AND @intStorageLocationId IS NOT NULL) OR (@intStorageLocationId IS NULL AND v.intSubLocationId IS NULL))
+							AND ((v.intStorageLocationId = @intStorageUnitId AND @intStorageUnitId IS NOT NULL) OR (@intStorageUnitId IS NULL AND v.intStorageLocationId IS NULL))
 					GROUP BY 
 							intItemId,
 							intItemUOMId,
@@ -427,10 +423,27 @@ BEGIN
 							intSubLocationId,
 							intStorageLocationId
 				) stock 
-					ON stock.intItemId = cd.intItemId
-					AND stock.intItemLocationId = il.intItemLocationId
-					--AND stock.intItemUOMId = stockUOM.intItemUOMId 
-					AND i.ysnSeparateStockForUOMs = 1
+				
+				-- Get the stock reservation. 
+				OUTER APPLY (
+					SELECT 
+						dblQty = sum(sr.dblQty)
+						,dblQtyInStockUOM = sum(dbo.fnCalculateQtyBetweenUOM(sr.intItemUOMId, StockUOM.intItemUOMId, sr.dblQty)) 
+					FROM 
+						tblICStockReservation sr
+						INNER JOIN tblICItemUOM StockUOM 
+							ON StockUOM.intItemId = sr.intItemId
+							AND StockUOM.ysnStockUnit = 1
+					WHERE 
+						sr.intItemId = i.intItemId
+						AND sr.intItemLocationId = il.intItemLocationId
+						AND (FLOOR(CAST(sr.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT)) OR sr.dtmDate IS NULL) 
+						AND sr.intItemUOMId = COALESCE(stock.intItemUOMId, sr.intItemUOMId) 				
+						AND ((sr.intSubLocationId = @intStorageLocationId AND @intStorageLocationId IS NOT NULL) OR (@intStorageLocationId IS NULL AND sr.intSubLocationId IS NULL))
+						AND ((sr.intStorageLocationId = @intStorageUnitId AND @intStorageUnitId IS NOT NULL) OR (@intStorageUnitId IS NULL AND sr.intStorageLocationId IS NULL))
+				) reserved			
+				
+				-- last transaction
 				OUTER APPLY (
 					SELECT
 						TOP 1 
@@ -444,10 +457,18 @@ BEGIN
 						AND t.intItemLocationId = il.intItemLocationId 
 						AND t.dblQty > 0 
 						AND ISNULL(t.ysnIsUnposted, 0) = 0 
-						AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @countDate) = 1
+						AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
 					ORDER BY
 						t.intInventoryTransactionId DESC 		
 				) lastTransaction 
+				
+				OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(
+					@countDate
+					, i.intItemId
+					, il.intItemLocationId
+					, 0
+				) EffectivePricing
+
 			WHERE c.intInventoryCountId = @intInventoryCountId
 				AND cd.intItemLocationId = @intItemLocationId
 				AND cd.intItemId = @intItemId
@@ -457,115 +478,112 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			INSERT INTO tblICInventoryCountDetail (
-					intInventoryCountId
-				, intItemId
-				, intItemLocationId
-				, intSubLocationId
-				, intStorageLocationId
-				, intEntityUserSecurityId
-				, dblPhysicalCount
-				, intItemUOMId
-				, intConcurrencyId
-				, dtmDateCreated
-				, intCreatedByUserId
-				, strCountLine
-				, intStockUOMId
-				, dblLastCost
-				, dblSystemCount
-			)
-			SELECT
-				  intInventoryCountId		= @intInventoryCountId
-				, intItemId					= i.intItemId
-				, intItemLocationId			= il.intItemLocationId
-				, intSubLocationId			= @intStorageLocationId
-				, intStorageLocationId		= @intStorageUnitId
-				, intEntityUserSecurityId	= @intUserSecurityId
-				, dblPhysicalCount			= @dblPhysicalCount
-				, intItemUOMId				= @intItemUOMId
-				, intConcurrencyId			= 1
-				, dtmDateCreated			= GETDATE()
-				, intCreatedByUserId		= @intUserSecurityId
-				, strCountLine				= @strCountLine
-				, intStockUOMId				= u.intItemUOMId
-				, dblLastCost				= ISNULL(
-											CASE 
-												-- Get the average cost. 
-												WHEN il.intCostingMethod = 1 THEN 				
-													dbo.fnCalculateCostBetweenUOM (
-														stockUOM.intItemUOMId
-														,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-														,ISNULL(
-															dbo.fnICGetMovingAverageCost(
-																i.intItemId
-																,il.intItemLocationId
-																,lastTransaction.intInventoryTransactionId
-							
-															)
-															,pricing.dblLastCost
-														)					
-													)
-					
-												-- Or else, get the last cost. 
-												ELSE 				
-													dbo.fnCalculateQtyBetweenUOM (
-														lastTransaction.intItemUOMId
-														, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-														, lastTransaction.dblCost
-													)
-											END 
-											, ISNULL(pricing.dblLastCost, pricing.dblStandardCost))
-					, dblSystemCount			= CASE WHEN i.ysnSeparateStockForUOMs = 1 THEN ISNULL(stock.dblOnHand, 0) ELSE ISNULL(stockUnit.dblOnHand, 0)  END
-			FROM tblICItem i
-				INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
-				INNER JOIN tblICItemUOM u ON u.intItemId = i.intItemId
-					AND u.ysnStockUnit = 1
-				LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = i.intItemId
-					AND pricing.intItemLocationId = il.intItemLocationId
-				INNER JOIN tblICItemUOM stockUOM ON stockUOM.intItemId = il.intItemId
-					AND stockUOM.ysnStockUnit = 1
-				LEFT JOIN (
-					SELECT	 
-						st.intItemId
-						,st.intItemLocationId
-						,st.intSubLocationId
-						,st.intStorageLocationId
-						,st.intLocationId
-						,dblOnHand = SUM (
-								dbo.fnCalculateQtyBetweenUOM (
-									st.intItemUOMId
-									, suom.intItemUOMId
-									, ISNULL(st.dblOnHand, 0.00)
+			INSERT INTO tblICInventoryCountDetail(
+					  intInventoryCountId
+					, intItemId
+					, intItemLocationId
+					, intSubLocationId
+					, intStorageLocationId
+					, intLotId
+					, dblSystemCount
+					, dblLastCost
+					, strCountLine
+					, intItemUOMId
+					, intStockUOMId
+					, ysnRecount
+					, ysnFetched
+					, intEntityUserSecurityId
+					, intConcurrencyId
+					, intSort
+					, dblPhysicalCount
+				)
+				SELECT DISTINCT
+					intInventoryCountId = @intInventoryCountId
+					, intItemId = i.intItemId
+					, intItemLocationId = il.intItemLocationId
+					, intSubLocationId = @intStorageLocationId
+					, intStorageLocationId = @intStorageUnitId
+					, intLotId = NULL
+					, dblSystemCount = 		
+						CASE 
+							WHEN @ysnExcludeReserved = 1 THEN 
+								ISNULL(stock.dblOnHand, 0) - ISNULL(reserved.dblQtyItemUOMId, 0) 
+							ELSE 
+								ISNULL(stock.dblOnHand, 0) 
+						END 
+					, dblLastCost =  			
+						CASE 
+							-- Get the average cost. 
+							WHEN il.intCostingMethod = 1 THEN 				
+								dbo.fnCalculateCostBetweenUOM (
+									stockUOM.intItemUOMId
+									,stock.intItemUOMId
+									,COALESCE(
+										dbo.fnICGetMovingAverageCost(
+											i.intItemId
+											,il.intItemLocationId
+											,lastTransaction.intInventoryTransactionId							
+										)
+										,NULLIF(EffectivePricing.dblCost, 0)
+										,NULLIF(p.dblLastCost, 0)
+										,p.dblStandardCost
+									)
 								)
-							)
-					FROM	
-						vyuICGetItemStockSummary st
-						INNER JOIN tblICItemUOM suom 
-							ON suom.intItemId = st.intItemId
-							AND suom.ysnStockUnit = 1
-					WHERE	
-						dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
-						AND st.intItemLocationId = @intItemLocationId
-					GROUP BY 
-						st.intItemId
-						,st.intItemLocationId
-						,st.intSubLocationId
-						,st.intStorageLocationId
-						,st.intLocationId
-				) stockUnit 
-				ON stockUnit.intItemId = i.intItemId			
-					AND stockUnit.intItemLocationId = il.intItemLocationId
-					AND stockUnit.intLocationId = il.intLocationId
-					AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0
-				LEFT JOIN (
+					
+							-- If item not using Avg Costing, get the last cost from the valuation. 
+							WHEN lastTransaction.intItemUOMId IS NOT NULL THEN 
+								dbo.fnCalculateQtyBetweenUOM (
+									lastTransaction.intItemUOMId
+									, stock.intItemUOMId
+									, lastTransaction.dblCost
+								)
+
+							-- If last cost from valuation is not available, use the item pricing. 
+							ELSE 
+								dbo.fnCalculateQtyBetweenUOM (
+									stockUOM.intItemUOMId
+									, stock.intItemUOMId
+									, COALESCE(NULLIF(EffectivePricing.dblCost, 0), NULLIF(p.dblLastCost, 0), p.dblStandardCost) 
+								)					
+						END 
+
+					, strCountLine = @strCountLine
+					, intItemUOMId = @intItemUOMId
+					, intStockUOMId = stockUOM.intItemUOMId
+					, ysnRecount = 0
+					, ysnFetched = 1
+					, intEntityUserSecurityId = @intUserSecurityId
+					, intConcurrencyId = 1
+					, intSort = 1
+					, @dblPhysicalCount
+			FROM 	
+				tblICItemLocation il
+				INNER JOIN tblICItemPricing p 
+					ON p.intItemLocationId = il.intItemLocationId
+					AND p.intItemId = il.intItemId
+				INNER JOIN tblICItemUOM stockUOM 
+					ON stockUOM.intItemId = il.intItemId
+					AND stockUOM.ysnStockUnit = 1
+				INNER JOIN tblICItem i 
+					ON i.intItemId = il.intItemId				
+				
+				-- Get the stocks using its own UOM 
+				OUTER APPLY (
 					SELECT	intItemId
 							,intItemUOMId
 							,intItemLocationId
 							,intSubLocationId
 							,intStorageLocationId
 							,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
-					FROM	vyuICGetItemStockSummary
-					WHERE	dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
+					FROM	vyuICGetItemStockSummary v
+					WHERE	
+							FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
+							AND v.intItemId = i.intItemId
+							AND v.intItemLocationId = il.intItemLocationId
+							AND v.intItemUOMId = @intItemUOMId
+							AND (v.intSubLocationId = @intStorageLocationId OR (@intStorageLocationId IS NULL AND v.intSubLocationId IS NULL))
+							AND (v.intStorageLocationId = @intStorageUnitId OR (@intStorageUnitId IS NULL AND v.intStorageLocationId IS NULL))
+
 					GROUP BY 
 							intItemId,
 							intItemUOMId,
@@ -573,10 +591,31 @@ BEGIN
 							intSubLocationId,
 							intStorageLocationId
 				) stock 
-					ON stock.intItemId = i.intItemId
-					AND stock.intItemLocationId = il.intItemLocationId
-					--AND stock.intItemUOMId = stockUOM.intItemUOMId 
-					AND i.ysnSeparateStockForUOMs = 1
+				
+				-- Get the stock reservation. 
+				OUTER APPLY (
+					SELECT 
+						dblQty = sum(sr.dblQty)
+						,dblQtyInStockUOM = sum(dbo.fnCalculateQtyBetweenUOM(sr.intItemUOMId, StockUOM.intItemUOMId, sr.dblQty)) 
+						,dblQtyItemUOMId = sum(dbo.fnCalculateQtyBetweenUOM(sr.intItemUOMId, @intItemUOMId, sr.dblQty)) 
+					FROM 
+						tblICStockReservation sr
+						INNER JOIN tblICItemUOM StockUOM 
+							ON StockUOM.intItemId = sr.intItemId
+							AND StockUOM.ysnStockUnit = 1
+					WHERE 
+						sr.intItemId = i.intItemId
+						AND sr.intItemLocationId = il.intItemLocationId
+						AND (FLOOR(CAST(sr.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT)) OR sr.dtmDate IS NULL) 						
+						AND (sr.intSubLocationId = @intStorageLocationId OR (@intStorageLocationId IS NULL AND sr.intSubLocationId IS NULL))
+						AND (sr.intStorageLocationId = @intStorageUnitId OR (@intStorageUnitId IS NULL AND sr.intStorageLocationId IS NULL))
+						AND (	
+							(sr.intItemUOMId = @intItemUOMId AND i.ysnSeparateStockForUOMs = 1) 
+							OR i.ysnSeparateStockForUOMs = 0
+						)
+				) reserved
+
+				-- last transaction
 				OUTER APPLY (
 					SELECT
 						TOP 1 
@@ -590,11 +629,20 @@ BEGIN
 						AND t.intItemLocationId = il.intItemLocationId 
 						AND t.dblQty > 0 
 						AND ISNULL(t.ysnIsUnposted, 0) = 0 
-						AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @countDate) = 1
+						AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@countDate AS FLOAT))
 					ORDER BY
 						t.intInventoryTransactionId DESC 		
 				) lastTransaction 
-			WHERE i.intItemId = @intItemId
+
+				OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(
+					@countDate
+					, i.intItemId
+					, il.intItemLocationId
+					, 0
+				) EffectivePricing
+
+			WHERE 
+				i.intItemId = @intItemId
 				AND il.intItemLocationId = @intItemLocationId
 		END
 	END

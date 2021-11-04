@@ -15,6 +15,8 @@
 	[strZipCode]			NVARCHAR (12)   COLLATE Latin1_General_CI_AS NULL,
 	[intCompanyId]			INT             NULL,
     [intConcurrencyId]		INT             NOT NULL,
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
+	[intEntityTariffTypeId] INT NULL,
     CONSTRAINT [PK_tblARCustomerFreightXRef] PRIMARY KEY CLUSTERED ([intFreightXRefId] ASC),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]),	

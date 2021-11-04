@@ -1,4 +1,4 @@
-﻿/*
+/*
 	This stored procedure will update the Sales Price and Cost ONLY in with effective date and pricing level.
 */
 CREATE PROCEDURE [dbo].[uspICUpdateItemWithEffectiveDatePricingForCStore]

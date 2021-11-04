@@ -58,7 +58,7 @@ BEGIN
 				,@fileName = @strFileName												
 				,@fileExtension = @strFileExtension                                      
 				,@filePath = @strPath                                                    
-				,@screenNamespace = 'Grain.Scale'                                   
+				,@screenNamespace = 'Grain.view.Scale'                                   
 				,@useDocumentWatcher = 0                                                 
 				,@throwError = 1
 				,@attachmentId = @intAttachmentId OUTPUT

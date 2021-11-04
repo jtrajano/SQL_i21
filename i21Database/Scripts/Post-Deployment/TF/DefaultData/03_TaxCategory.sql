@@ -591,7 +591,7 @@ INSERT INTO @TaxCategoryMD(
 	, strTaxCategory
 	, intMasterId
 )
-SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', intMasterId = 201
+SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', intMasterId = 201
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Diesel/Biodiesel', intMasterId = 202
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Propane/LNG/CNG', intMasterId = 203
 UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Aviation Gasoline/Turbine Fuel', intMasterId = 204

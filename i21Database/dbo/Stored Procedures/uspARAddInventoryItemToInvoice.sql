@@ -230,8 +230,8 @@ EXEC dbo.[uspARGetItemPrice]
 		,@Quantity						= @ItemQtyShipped
 		,@Price							= @SpecialPrice					OUTPUT
 		,@Pricing						= @Pricing						OUTPUT
-		,@ContractHeaderId				= @intContractDetailId			OUTPUT
-		,@ContractDetailId				= @intContractHeaderId			OUTPUT
+		,@ContractHeaderId				= @intContractHeaderId			OUTPUT
+		,@ContractDetailId				= @intContractDetailId			OUTPUT
 		,@ContractNumber				= @ContractNumber				OUTPUT
 		,@ContractSeq					= @ContractSeq					OUTPUT
 		,@TermDiscount					= @ItemTermDiscount				OUTPUT

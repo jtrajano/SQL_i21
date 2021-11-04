@@ -33,7 +33,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -63,6 +63,10 @@ DECLARE @intId AS INT
 		,@intInventoryTransactionId INT 
 		,@strTransactionForm AS NVARCHAR(255)
 		,@intSourceEntityId INT
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
 
 -- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -78,6 +82,7 @@ DECLARE @AVERAGECOST AS INT = 1
 DECLARE @AUTO_VARIANCE AS INT = 1
 
 DECLARE @intReturnValue AS INT 
+		,@intInventoryTransactionIdentityId AS INT
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Assemble the Stock to Post
@@ -110,6 +115,10 @@ INSERT INTO @StockToPost (
 	,[intForexRateTypeId]
 	,[dblForexRate]
 	,[intSourceEntityId]
+	,[strSourceType] 
+	,[strSourceNumber]
+	,[strBOLNumber]
+	,[intTicketId] 
 )
 SELECT
 	[intItemId] = p.intItemId 
@@ -140,6 +149,10 @@ SELECT
 	,[intForexRateTypeId] = p.intForexRateTypeId
 	,[dblForexRate] = p.dblForexRate
 	,[intSourceEntityId] = p.intSourceEntityId
+	,[strSourceType] = p.strSourceType 
+	,[strSourceNumber] = p.strSourceNumber 
+	,[strBOLNumber] = p.strBOLNumber 
+	,[intTicketId] = p.intTicketId
 FROM 
 	@ItemsToPost p 
 	INNER JOIN tblICItem i 
@@ -205,6 +218,11 @@ SELECT  intId
 		,intForexRateTypeId
 		,dblForexRate
 		,intSourceEntityId
+		,strSourceType 
+		,strSourceNumber 
+		,strBOLNumber 
+		,intTicketId
+
 FROM	@StockToPost
 
 OPEN loopItems;
@@ -235,6 +253,10 @@ FETCH NEXT FROM loopItems INTO
 	,@intForexRateTypeId
 	,@dblForexRate
 	,@intSourceEntityId
+	,@strSourceType 
+	,@strSourceNumber 
+	,@strBOLNumber 
+	,@intTicketId
 ;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -283,6 +305,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId
 			;
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -315,6 +341,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType 
+			,@strSourceNumber 
+			,@strBOLNumber 
+			,@intTicketId
 			;
 
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
@@ -346,6 +376,10 @@ BEGIN
 		,@intForexRateTypeId
 		,@dblForexRate
 		,@intSourceEntityId
+		,@strSourceType 
+		,@strSourceNumber 
+		,@strBOLNumber 
+		,@intTicketId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
@@ -507,6 +541,6 @@ END
 BEGIN 
 	EXEC @intReturnValue = dbo.uspICLogRiskPositionFromInTransit
 		@strBatchId
-		,@strTransactionId
+		,NULL
 		,@intEntityUserSecurityId
 END 

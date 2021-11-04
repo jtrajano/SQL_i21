@@ -103,12 +103,14 @@ BEGIN
 						,strDescription_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 						,strItemNo_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 						,strShortName_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strStatus_Original NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 						-- Modified Fields
 						,intCategoryId_New INT NULL
 						,strCountCode_New NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 						,strDescription_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 						,strItemNo_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 						,strShortName_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
+						,strStatus_New NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL
 					)
 				;
 			END
@@ -300,7 +302,7 @@ BEGIN
 			-- ============================================================================================================================
 		
 
-
+		
 
 			-- ============================================================================================================================
 			-- [START] - ADD ITEM UOM
@@ -310,12 +312,12 @@ BEGIN
 					BEGIN		
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strLongUPCCode = @strLongUpcCode OR intUpcCode = CONVERT(NUMERIC(32, 0), CAST(@strLongUpcCode AS FLOAT)))
 							BEGIN
-								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry))	
+								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = @strUpcCode)	
 									BEGIN
 									
 										-- ITEM UOM
 										BEGIN TRY
-
+										
 											EXEC [uspICAddItemUOMForCStore]
 												@intUnitMeasureId			= @intUnitMeasureId
 												,@intItemId					= @intNewItemId
@@ -356,22 +358,22 @@ BEGIN
 													
 															DECLARE @intItemUOMId INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
 
-															--EXEC [dbo].[uspICUpdateItemForCStore]
-															--	-- filter params	
-															--	@strDescription				= NULL 
-															--	,@dblRetailPriceFrom		= NULL  
-															--	,@dblRetailPriceTo			= NULL 
-															--	,@intItemId					= @intNewItemId 
-															--	,@intItemUOMId				= @intItemUOMId 
-															--	-- update params
-															--	,@intCategoryId				= NULL
-															--	,@strCountCode				= NULL
-															--	,@strItemDescription		= NULL 	
-															--	,@strItemNo					= NULL
-															--	,@strShortName				= NULL 
-															--	,@strUpcCode				= @strUpcCode 
-															--	,@strLongUpcCode			= NULL 
-															--	,@intEntityUserSecurityId	= @intEntityId
+															EXEC [dbo].[uspICUpdateItemForCStore]
+																-- filter params	
+																@strDescription				= NULL 
+																,@dblRetailPriceFrom		= NULL  
+																,@dblRetailPriceTo			= NULL 
+																,@intItemId					= @intNewItemId 
+																,@intItemUOMId				= @intItemUOMId 
+																-- update params
+																,@intCategoryId				= NULL
+																,@strCountCode				= NULL
+																,@strItemDescription		= NULL 	
+																,@strItemNo					= NULL
+																,@strShortName				= NULL 
+																,@strUpcCode				= @strUpcCode 
+																,@strLongUpcCode			= NULL 
+																,@intEntityUserSecurityId	= @intEntityId
 
 														END
 												END

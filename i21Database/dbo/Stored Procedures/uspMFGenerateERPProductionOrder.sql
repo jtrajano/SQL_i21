@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspMFGenerateERPProductionOrder (
+﻿CREATE PROCEDURE [dbo].[uspMFGenerateERPProductionOrder] (
 	@strCompanyLocation NVARCHAR(6) = NULL
 	,@ysnUpdateFeedStatus BIT = 1
 	)
@@ -18,6 +18,7 @@ BEGIN TRY
 		,@strUserName NVARCHAR(50)
 		,@strWorkOrderType NVARCHAR(50)
 		,@strSubLocationName NVARCHAR(50)
+		,@intSubLocationId int
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intWorkOrderId INT
@@ -107,6 +108,7 @@ BEGIN TRY
 		BEGIN
 			SELECT @strWorkOrderNo = strWorkOrderNo
 				,@strERPOrderNo = strERPOrderNo
+				,@intSubLocationId=intSubLocationId
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
 
@@ -115,6 +117,15 @@ BEGIN TRY
 			BEGIN
 				GOTO NextPO
 			END;
+
+
+		SELECT @strSubLocationName = Left(strSubLocationName, 2)
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationSubLocationId = @intSubLocationId
+
+		SELECT @intSubLocationId = intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE strSubLocationName = @strSubLocationName
 
 			SELECT @strXML = @strXML + '<header id="' + ltrim(@intWorkOrderPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(@intWorkOrderPreStageId) +'</TrxSequenceNo>'
@@ -126,6 +137,7 @@ BEGIN TRY
 				+'<ProcessName>'+	MP.strProcessName   +'</ProcessName>'
 				+'<WorkOrderType>'+	(Case When IsNULL(SL.ysnExternal,0) =1 Then 'Offsite' Else 'Inhouse' End)   +'</WorkOrderType>'
 				+'<VendorAccountNo>'+	IsNULL(V.strVendorAccountNum,'')   +'</VendorAccountNo>'
+				+'<Book>' + ISNULL(PM.strPaymentMethod, '') + '</Book>'
 				+'<WorkOrderNo>'+	W.strWorkOrderNo    +'</WorkOrderNo>'
 				+'<ItemNo>'+	I.strItemNo     +'</ItemNo>'
 				+'<FormulaNumber>'+	IsNULL(IsNULL(WR.strERPRecipeNo,R.strERPRecipeNo),'')     +'</FormulaNumber>'
@@ -148,11 +160,12 @@ BEGIN TRY
 			LEFT JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 				AND R.intLocationId = W.intLocationId
 				AND R.ysnActive = 1
-				AND R.intSubLocationId = SL.intCompanyLocationSubLocationId
+				AND R.intSubLocationId = @intSubLocationId
 			JOIN dbo.tblSMUserSecurity US ON US.intEntityId = W.intCreatedUserId
 			LEFT JOIN tblMFMachine M ON M.intMachineId = W.intMachineId
 			LEFT JOIN dbo.tblLGWarehouseRateMatrixHeader WRM ON WRM.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId
 			LEFT JOIN dbo.tblAPVendor V ON V.intEntityId = WRM.intVendorEntityId
+			LEFT JOIN dbo.tblSMPaymentMethod PM ON PM.intPaymentMethodID = V.intPaymentMethodId
 			WHERE W.intWorkOrderId = @intWorkOrderId
 
 

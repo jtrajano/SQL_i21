@@ -50,7 +50,13 @@ BEGIN
 END
 
 INSERT INTO #TempRowDesign ([RowDetailId],[RefNo],[Sort])
-	SELECT RowID = LTRIM(RTRIM(@RowDetailId)), (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowId = @RowId and intRowDetailId = LTRIM(RTRIM(@RowDetailId))), @SORT
+	SELECT RowID = LTRIM(RTRIM(@RowDetailId)),
+	CASE 
+		WHEN EXISTS (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowId = @RowId and intRowDetailId = LTRIM(RTRIM(@RowDetailId)))
+		THEN (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowId = @RowId and intRowDetailId = LTRIM(RTRIM(@RowDetailId)))
+		ELSE 0
+		END
+	,@SORT
 
 SELECT * INTO #TempRowDesign2 FROM #TempRowDesign
 
@@ -127,13 +133,13 @@ BEGIN
 
 				IF(@counter_position = 1)
 				BEGIN
-					IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
+					IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Foreign Currency Filter','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
 					BEGIN
 						SET @new_intRefNo = @new_intRefNo + 1
 						SET @position_1_value = @new_intRefNo
 
 						--PRINT 'counter pos 1 A'
-						IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
+						IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Foreign Currency Filter','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
 							BEGIN
 								--PRINT 'counter pos 1 - A'
 								SET @position_1_value = 0				
@@ -154,14 +160,14 @@ BEGIN
 				BEGIN				
 
 					--PRINT 'counter pos 2'
-					IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
+					IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Foreign Currency Filter','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
 					BEGIN
 						SET @new_intRefNo = @new_intRefNo - 1
 						SET @position_2_value = @new_intRefNo
 
 						--PRINT 'counter pos 2 - A'
 
-						IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
+						IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Foreign Currency Filter','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
 						BEGIN
 							--PRINT 'counter pos 2 - A1'
 							SET @position_2_value = 0
@@ -186,7 +192,7 @@ BEGIN
 				WHILE (@new_intRefNo >= @intRefNo_1)
 				BEGIN
 					IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = @new_intRefNo) = 1 AND (SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo 
-							AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NOT NULL)
+							AND strRowType IN ('Filter Accounts','Foreign Currency Filter','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NOT NULL)
 					BEGIN
 						UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
 						SET @new_intRefNo = @intRefNo_1

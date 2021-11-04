@@ -41,6 +41,8 @@ BEGIN TRY
 		,@intItemId INT
 		,@strItemNo NVARCHAR(50)
 		,@strFileName NVARCHAR(50)
+		,@intInventoryReceiptId INT
+		,@intInventoryReceiptItemId INT
 	DECLARE @VoucherDetail TABLE (
 		Name NVARCHAR(50)
 		,[Text] NVARCHAR(50)
@@ -294,14 +296,22 @@ BEGIN TRY
 					AND intContractSeq = @strContractSequenceNumber
 			END
 
-			IF @strItemNo = ''
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblICItem
+					WHERE strItemNo = @strItemNo
+					)
 			BEGIN
 				SELECT @strItemNo = strItemNo
 				FROM tblICItem
 				WHERE intItemId = @intItemId
 			END
 
-			IF @strQuantityUOM = ''
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strQuantityUOM
+					)
 			BEGIN
 				SELECT @intQuantityUOMId = intUnitMeasureId
 				FROM tblICItemUOM
@@ -312,7 +322,11 @@ BEGIN TRY
 				WHERE intUnitMeasureId = @intQuantityUOMId
 			END
 
-			IF @strUnitRatePerUOM = ''
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strUnitRatePerUOM
+					)
 			BEGIN
 				SELECT @intPriceUOMId = intUnitMeasureId
 				FROM tblICItemUOM
@@ -323,14 +337,22 @@ BEGIN TRY
 				WHERE intUnitMeasureId = @intPriceUOMId
 			END
 
-			IF @strUnitRateCurrency = ''
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblSMCurrency
+					WHERE strCurrency = @strUnitRateCurrency
+					)
 			BEGIN
 				SELECT @strUnitRateCurrency = strCurrency
 				FROM tblSMCurrency
 				WHERE intCurrencyID = @intCurrencyId
 			END
 
-			IF @strUOM = ''
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblICUnitMeasure
+					WHERE strUnitMeasure = @strUOM
+					)
 			BEGIN
 				SELECT @strUOM = strUnitMeasure
 				FROM tblICUnitMeasure
@@ -366,6 +388,22 @@ BEGIN TRY
 					AND LC.strMarks = @strICOMarks
 			END
 
+			SELECT @intInventoryReceiptId = NULL
+				,@intInventoryReceiptItemId = NULL
+
+			SELECT @intInventoryReceiptId = intInventoryReceiptId
+				,@intInventoryReceiptItemId = intInventoryReceiptItemId
+			FROM tblICInventoryReceiptItem
+			WHERE intLoadShipmentDetailId = @intLoadDetailId
+
+			IF @intInventoryReceiptId IS NULL
+			BEGIN
+				SELECT @intInventoryReceiptId = intInventoryReceiptId
+					,@intInventoryReceiptItemId = intInventoryReceiptItemId
+				FROM tblICInventoryReceiptItem
+				WHERE intContractDetailId = @intContractDetailId
+			END
+
 			INSERT INTO tblIPBillDetailStage (
 				intBillStageId
 				,strContractNumber
@@ -391,6 +429,8 @@ BEGIN TRY
 				,intContractDetailId
 				,intLoadId
 				,intLoadDetailId
+				,intInventoryReceiptId
+				,intInventoryReceiptItemId
 				)
 			SELECT @intBillStageId
 				,[Contract Number]
@@ -416,21 +456,15 @@ BEGIN TRY
 						CASE 
 							WHEN Qty = ''
 								THEN NULL
-							ELSE Replace(Qty,',','')
+							ELSE Replace(Qty, ',', '')
 							END
 						))
-				,(
-					CASE 
-						WHEN Uom = ''
-							THEN @strUOM
-						ELSE Uom
-						END
-					)
+				,@strQuantityUOM
 				,Convert(NUMERIC(18, 6), (
 						CASE 
 							WHEN UnitPrice = ''
 								THEN NULL
-							ELSE Replace(UnitPrice,',','')
+							ELSE Replace(UnitPrice, ',', '')
 							END
 						))
 				,(
@@ -451,7 +485,7 @@ BEGIN TRY
 						CASE 
 							WHEN ExtAmt = ''
 								THEN NULL
-							ELSE Replace(ExtAmt,',','')
+							ELSE Replace(ExtAmt, ',', '')
 							END
 						))
 				,[ICO Marks]
@@ -459,16 +493,10 @@ BEGIN TRY
 						CASE 
 							WHEN [Net Weight] = ''
 								THEN NULL
-							ELSE Replace([Net Weight],',','')
+							ELSE Replace([Net Weight], ',', '')
 							END
 						))
-				,(
-					CASE 
-						WHEN [Quantity UOM] = ''
-							THEN @strQuantityUOM
-						ELSE [Quantity UOM]
-						END
-					)
+				,@strUOM
 				,[Container Number]
 				,[Lot Number]
 				,RecId
@@ -476,12 +504,14 @@ BEGIN TRY
 				,@intContractDetailId
 				,@intLoadId
 				,@intLoadDetailId
+				,@intInventoryReceiptId
+				,@intInventoryReceiptItemId
 			FROM (
 				SELECT Name
 					,[Text]
 					,RecId
 				FROM @FinalVoucherDetail
-				Where RecId=1
+				WHERE RecId = 1
 				) AS SourceTable
 			PIVOT(MAX([Text]) FOR Name IN (
 						ArticleNumber

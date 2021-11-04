@@ -36,6 +36,26 @@ FROM tblSMTransaction A
 WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'ContractManagement.view.Contract'
 
 
+--Update TimeOff Request Transaction
+UPDATE tblSMTransaction
+SET strTransactionNo = ISNULL(C.strRequestId, strTransactionNo),
+    dtmDate = C.dtmDateFrom,
+    intEntityId = C.intEntityEmployeeId
+FROM tblSMTransaction A
+INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+LEFT JOIN tblPRTimeOffRequest C ON A.intRecordId = C.intPaycheckId
+WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'Payroll.view.TimeOffRequest'
+
+--Update Employee Transaction 
+UPDATE tblSMTransaction
+SET strTransactionNo = ISNULL(C.strEmployeeId, strTransactionNo),
+    intEntityId = C.intEntityId
+FROM tblSMTransaction A
+INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId
+LEFT JOIN tblPREmployee C ON A.intRecordId = C.intEntityId
+WHERE ISNULL(strTransactionNo, '') = '' AND B.strNamespace = 'Payroll.view.EntityEmployee' 
+
+
 print('/*******************  END UPDATING AUDIT LOG FOR 21.1  *******************/')
 
 GO

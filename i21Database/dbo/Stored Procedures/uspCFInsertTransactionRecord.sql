@@ -960,6 +960,7 @@ BEGIN
 				ON C.intAccountId = A.intAccountId
 				WHERE C.strCardNumber = @strCardId 
 				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+				AND C.intNetworkId = @intNetworkId
 			END
 			ELSE
 			BEGIN
@@ -974,6 +975,7 @@ BEGIN
 					ON C.intAccountId = A.intAccountId
 					WHERE C.strCardNumber = @strCardId
 					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+					AND C.intNetworkId = @intNetworkId
 				END
 				ELSE
 				BEGIN
@@ -984,7 +986,7 @@ BEGIN
 					ON C.intAccountId = A.intAccountId
 					WHERE C.intCardId = @intCardId
 					AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
-
+					AND C.intNetworkId = @intNetworkId
 					SET @ysnCreditCardUsed = 1
 
 				END
@@ -1001,6 +1003,7 @@ BEGIN
 				ON C.intAccountId = A.intAccountId
 				WHERE C.strCardNumber = @strCardId
 				AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+				AND C.intNetworkId = @intNetworkId
 			END
 		END
 	END
@@ -1015,12 +1018,35 @@ BEGIN
 			ON C.intAccountId = A.intAccountId
 			WHERE C.strCardNumber = @strCardId
 			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+			AND C.intNetworkId = @intNetworkId
 		END
 	END
+	
+	
+	--FIND CARD IN LINKED NETWORK CARDS--
+	DECLARE @intLinkedNetworkId INT
+	IF(ISNULL(@intCardId,0) = 0)
+	BEGIN
+		SELECT TOP 1 @intLinkedNetworkId = intLinkedNetworkId FROM tblCFNetwork WHERE intNetworkId = @intNetworkId
+		IF(ISNULL(@intLinkedNetworkId,0) != 0)
+		BEGIN
+			SELECT TOP 1 
+				 @intCardId = C.intCardId
+				,@intCustomerId = A.intCustomerId
+			FROM tblCFCard C
+			INNER JOIN tblCFAccount A
+			ON C.intAccountId = A.intAccountId
+			WHERE C.strCardNumber = @strCardId
+			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
+			AND C.intNetworkId = @intLinkedNetworkId
+		END
+	END
+
 
 	IF(LOWER(@strTransactionType) LIKE '%foreign%')
 	BEGIN
 		SET @intCardId = NULL
+		SET @intCustomerId = @intForeignCustomerId
 	END
 
 	IF (@intCardId = 0)
@@ -1492,6 +1518,8 @@ BEGIN
 			,[intImportCardId]
 			,[intDriverPinId]
 			,[ysnInvoiced]
+			,[intUserId]
+			,[ysnImported]
 		)
 		VALUES
 		(
@@ -1544,6 +1572,8 @@ BEGIN
 			,@intCardId
 			,@intDriverPinId
 			,@ysnInvoiced
+			,@intUserId
+			,1
 		)			
 	
 		DECLARE @Pk	INT		

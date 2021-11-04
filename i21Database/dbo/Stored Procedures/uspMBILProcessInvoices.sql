@@ -50,24 +50,27 @@ CREATE TABLE #TempMBILInvoiceItem (
 		SET @ErrorMessage = 'Record does not exists.'
 		RETURN
 	END
-	WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
+	IF @BatchId IS NULL
 	BEGIN
-		DECLARE @intItemInvoiceId INT
-		DECLARE @intItemId INT
-		DECLARE @intLocationId INT
-		DECLARE @strItemNo NVARCHAR(MAX)
-		DECLARE @strLocationName NVARCHAR(MAX)
-
-		SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
-
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+		WHILE EXISTS(SELECT TOP 1 1 FROM #TempMBILInvoiceItem)
 		BEGIN
-			SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
-			RETURN
-		END
+			DECLARE @intItemInvoiceId INT
+			DECLARE @intItemId INT
+			DECLARE @intLocationId INT
+			DECLARE @strItemNo NVARCHAR(MAX)
+			DECLARE @strLocationName NVARCHAR(MAX)
 
-		DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
-	END		
+			SELECT TOP 1 @intItemInvoiceId = intInvoiceId, @intItemId = intItemId, @strItemNo = strItemNo, @intLocationId = intLocationId, @strLocationName = strLocationName FROM #TempMBILInvoiceItem
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intLocationId = @intLocationId AND intItemId = @intItemId)
+			BEGIN
+				SET @ErrorMessage = 'The item(' + @strItemNo + ') was not set up to be available on the specified location(' + @strLocationName + ')!'
+				RETURN
+			END
+
+			DELETE FROM #TempMBILInvoiceItem WHERE intInvoiceId = @intItemInvoiceId AND intItemId = @intItemId
+		END
+	END
 
 	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL)
 	BEGIN
@@ -322,6 +325,27 @@ CREATE TABLE #TempMBILInvoiceItem (
 		END
 
 	END
+
+	IF @BatchId IS NULL
+	BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
+		BEGIN
+			SELECT TOP 1 @ErrorMessage = ISNULL(strPostingMessage, strMessage) FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
+			
+
+			IF @ErrorMessage like '%was not set up to be available on the specified location%'
+			BEGIN
+				SET @ErrorMessage = @ErrorMessage
+				RAISERROR(@ErrorMessage,16,1)
+			END
+			ELSE IF @ErrorMessage <> 'Transaction successfully posted.'
+			BEGIN
+				SET @ErrorMessage = @ErrorMessage + ' Kindly check the created invoice for details.'
+				RAISERROR(@ErrorMessage,16,1)
+			END
+		END
+	END
+	
 
 END
 

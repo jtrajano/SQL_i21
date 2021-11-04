@@ -62,6 +62,7 @@ BEGIN TRY
 				,strExternalGroup
 				,strOrigin
 				,strProductType
+				,ysnOtherChargeItem
 				)
 			OUTPUT INSERTED.strItemNo
 			INTO @tblIPItem
@@ -110,6 +111,7 @@ BEGIN TRY
 				,ExternalGroup
 				,Origin
 				,ProductType
+				,OtherChargeItem
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
 					TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
@@ -131,6 +133,7 @@ BEGIN TRY
 					,ExternalGroup NVARCHAR(50)
 					,Origin NVARCHAR(100)
 					,ProductType NVARCHAR(50)
+					,OtherChargeItem INT
 					) x
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strItemNo, '') + ','

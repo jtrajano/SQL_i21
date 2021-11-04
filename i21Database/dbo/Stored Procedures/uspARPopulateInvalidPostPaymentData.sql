@@ -83,6 +83,24 @@ BEGIN
         ON P.[intUndepositedFundsId] = GLAD.[intAccountId]
 	WHERE GLAD.[strAccountCategory] IS NULL
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	SELECT
+         [intTransactionId]         = [intTransactionId]
+        ,[strTransactionId]         = [strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = [intTransactionDetailId]
+        ,[strBatchId]               = [strBatchId]
+        ,[strError]                 = 'The GL account has not been set up for the ''Customer Prepaid'' selection (Company Location > GL Accounts Tab).  This invoice is not able to be posted without this information supplied.'
+    FROM #ARPostPaymentHeader
+	WHERE strPaymentMethod = 'Prepay' 
+	  AND ISNULL(intSalesAdvAcct, 0) = 0
+
     INSERT INTO #ARInvalidPaymentData (
          [intTransactionId]
         ,[strTransactionId]
@@ -356,31 +374,6 @@ BEGIN
         AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
         AND ISNULL(P.[intWriteOffAccountDetailId], 0) = 0
 
-	 INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--Write off Amount Greater than amount due on detail
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = NULL
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Write off Amount of ' + P.[strTransactionNumber] + ' should be less than or equal to '+CAST(CONVERT(DECIMAL(10,2), ISNULL(I.[dblAmountDue], 0)) AS NVARCHAR(100))
-	FROM
-		#ARPostPaymentDetail P
-		INNER JOIN tblARInvoice I
-		ON P.intInvoiceId = I.intInvoiceId
-    WHERE
-            P.[ysnPost] = @OneBit
-        AND P.[intInvoiceId] IS NOT NULL
-        AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
-		AND ISNULL(I.[dblAmountDue], 0)   <  (ISNULL(P.[dblWriteOffAmount], 0) * -1)
-
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
@@ -406,6 +399,31 @@ BEGIN
         AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
 		AND 0 < ISNULL(P.[dblWriteOffAmount], 0)
         AND I.strInvoiceNumber LIKE '%COP%'
+
+	 INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Write off Amount Greater than amount due on detail
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Write off Amount of ' + P.[strTransactionNumber] + ' should be less than or equal to '+CAST(CONVERT(DECIMAL(10,2), ISNULL(I.[dblAmountDue], 0)) AS NVARCHAR(100))
+	FROM
+		#ARPostPaymentDetail P
+		INNER JOIN tblARInvoice I
+		ON P.intInvoiceId = I.intInvoiceId
+    WHERE
+            P.[ysnPost] = @OneBit
+        AND P.[intInvoiceId] IS NOT NULL
+        AND ISNULL(P.[dblWriteOffAmount], 0) <> @ZeroDecimal
+		AND ISNULL(I.[dblAmountDue], 0) * (CASE WHEN I.strTransactionType IN ('Overpayment', 'Customer Prepayment', 'Credit Memo') THEN -1 ELSE 1 END) <  (ISNULL(P.[dblWriteOffAmount], 0))
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -639,7 +657,7 @@ BEGIN
         AND P.[dblPayment] <> @ZeroDecimal
         AND P.[ysnTransactionPaid] = @ZeroBit
         AND (P.[dblTransactionPayment] + P.[dblTransactionAmountDue] > ABS(P.[dblInvoiceTotal]) + P.[dblTransactionInterest] - P.[dblTransactionDiscount]
-        OR ABS(P.[dblPayment]) > ABS(P.[dblInvoiceTotal] + P.[dblInterest] - P.[dblDiscount]))
+        OR ABS(P.[dblPayment]) > ABS(P.[dblInvoiceTotal] + P.[dblInterest] - P.[dblDiscount] - P.[dblWriteOffAmount]))
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -1299,4 +1317,3 @@ BEGIN
 END
 
 RETURN 1
-

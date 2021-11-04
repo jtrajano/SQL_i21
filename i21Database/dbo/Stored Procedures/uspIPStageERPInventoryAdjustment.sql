@@ -69,7 +69,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,ActionId
-				,CreatedDate
+				,IsNULL(CreatedDate,GETDATE())
 				,CreatedBy
 				,TransactionTypeId
 				,CASE 

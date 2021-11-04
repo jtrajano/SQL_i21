@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGridCostAndPrice]
+CREATE PROCEDURE [dbo].[uspSTGridCostAndPrice]
     @XML VARCHAR(MAX),
     @ysnRecap BIT,
     @strGuid UNIQUEIDENTIFIER,

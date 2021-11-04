@@ -35,6 +35,7 @@ Type the overview for the table here.
 		[intDataSourceId] TINYINT NULL,
 		[intImportFlagInternal] INT NULL,
 		[ysnAvgLocked] BIT NULL DEFAULT(0),
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICItemPricing] PRIMARY KEY ([intItemPricingId]), 
 		CONSTRAINT [FK_tblICItemPricing_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricing_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
@@ -49,7 +50,7 @@ Type the overview for the table here.
 
 	CREATE NONCLUSTERED INDEX [IX_tblICItemPricing_Posting]
 		ON [dbo].[tblICItemPricing]([intItemId] ASC, [intItemLocationId] ASC)
-		INCLUDE ([dblLastCost], [dblStandardCost])
+		INCLUDE ([dblLastCost], [dblStandardCost], [dblAverageCost])
 	GO
 
 	EXEC sp_addextendedproperty @name = N'MS_Description',

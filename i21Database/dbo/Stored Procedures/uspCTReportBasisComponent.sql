@@ -172,7 +172,17 @@ AS
 	IF OBJECT_ID('tempdb..#BasisComponent') IS NOT NULL  				
 		DROP TABLE #BasisComponent				
 	
-	;WITH CTEDetail AS
+	;
+	with CTECert as
+	(
+		select
+			cr.intContractDetailId
+			,ce.strCertificationName
+		from
+			tblCTContractCertification cr
+			left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+	),
+	CTEDetail AS
 	(
 			SELECT	CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
 					CD.strERPPONumber,
@@ -204,7 +214,13 @@ AS
 					strContractBasis = CB.strFreightTerm,
 					CS.strContractStatus,
 					ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS,
-					ce.strCertificationName,
+					strCertificationName = (
+						select
+							STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
+						FROM
+							CTECert where intContractDetailId = CD.intContractDetailId
+						FOR XML PATH('')),' #!',', '), 1, 2, '')
+					),
 					strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS,
 					strOrigin = ISNULL(RY.strCountry, OG.strCountry),
 					strShipper = PR.strName
@@ -232,8 +248,8 @@ AS
 	LEFT	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId	
 	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
 												AND	CA.strType					=	'ProductType'
-	left join tblCTContractCertification cr on cr.intContractDetailId = CD.intContractDetailId
-	left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+	--left join tblCTContractCertification cr on cr.intContractDetailId = CD.intContractDetailId
+	--left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
 
 
 	LEFT JOIN tblSMCountry RY WITH(NOLOCK) ON RY.intCountryID = IC.intCountryId

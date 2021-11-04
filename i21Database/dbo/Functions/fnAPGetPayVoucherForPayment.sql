@@ -75,6 +75,7 @@ RETURNS TABLE AS RETURN
 		-- ,forPay.ysnPaySchedule
 		,forPay.ysnOffset
 		,entityGroup.strEntityGroupName
+		,forPay.strPaymentScheduleNumber
 	FROM vyuAPBillForPayment forPay
 	INNER JOIN tblAPBill voucher ON voucher.intBillId = forPay.intBillId
 	LEFT JOIN tblAPPaymentDetail payDetail

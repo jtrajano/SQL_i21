@@ -1596,7 +1596,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Matching' AND strModule = 'Cash Management')
-
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 165
+			,[strTransactionType]	= N'Receipt Feed Id'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receipt Feed Id')
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
@@ -1704,3 +1712,9 @@ GO
 	EXEC uspSMFixStartingNumbers
 GO
 	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR SYSTEM MANAGER'
+GO
+	PRINT N'BEGIN CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR LOGISTICS'
+GO
+	EXEC uspLGFixStartingNumbers
+GO
+	PRINT N'END CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR LOGISTICS'

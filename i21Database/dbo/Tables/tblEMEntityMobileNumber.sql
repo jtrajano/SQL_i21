@@ -21,5 +21,6 @@
 
 	CONSTRAINT [FK_tblEMEntityMobileNumber_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [tblEMEntity]([intEntityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblEMEntityMobileNumber_tblSMCountry] FOREIGN KEY ([intCountryId]) REFERENCES [tblSMCountry]([intCountryID]) ON DELETE CASCADE,
-    CONSTRAINT [PK_tblEMEntityMobileNumber] PRIMARY KEY CLUSTERED ([intEntityMobileNumberId] ASC)
+    CONSTRAINT [PK_tblEMEntityMobileNumber] PRIMARY KEY CLUSTERED ([intEntityMobileNumberId] ASC),
+    CONSTRAINT [AK_tblEMEntityMobileNumber_tblEMEntity] UNIQUE NONCLUSTERED ([intEntityId] ASC) 
 )

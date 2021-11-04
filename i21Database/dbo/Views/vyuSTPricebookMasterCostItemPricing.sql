@@ -4,6 +4,7 @@ SELECT
      CAST(ROW_NUMBER() OVER (ORDER BY intItemId, dblCost) AS INT) AS intEffectiveItemCostId
 	 , intItemLocationId
 	 , intItemId
+	 , intPrimaryId
 	 , intStoreId
 	 , intStoreNo
 	 , strLocationName
@@ -18,6 +19,7 @@ FROM
 		cost.intEffectiveItemCostId
 		, cost.intItemLocationId
 		, cost.intItemId
+		, cost.intEffectiveItemCostId AS intPrimaryId
 		, Store.intStoreId
 		, Store.intStoreNo
 		, CompanyLoc.strLocationName
@@ -38,6 +40,7 @@ FROM
 		NULL AS intEffectiveItemPriceId
 		, sp.intItemLocationId
 		, sp.intItemId
+		, sp.intItemSpecialPricingId AS intPrimaryId
 		, Store.intStoreId
 		, Store.intStoreNo
 		, ISNULL(CompanyLoc.strLocationName, '') AS strLocationName
@@ -55,3 +58,4 @@ FROM
 		ON CompanyLoc.intCompanyLocationId = Store.intCompanyLocationId
 	WHERE sp.dblCost != 0
 ) effective
+

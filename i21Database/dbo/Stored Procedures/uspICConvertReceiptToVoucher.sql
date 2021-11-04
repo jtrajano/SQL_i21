@@ -10,7 +10,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @intEntityVendorId AS INT				
 		,@type_Voucher AS INT = 1
@@ -135,6 +135,8 @@ BEGIN
 			,[dtmVoucherDate]
 			,[intStorageLocationId]
 			,[intSubLocationId]
+			,[intBookId]
+			,[intSubBookId]
 	)
 	SELECT 
 		GP.[intEntityVendorId]
@@ -192,6 +194,8 @@ BEGIN
 		,GP.dtmDate
 		,GP.intStorageLocationId
 		,GP.intSubLocationId
+		,GP.intBookId
+		,GP.intSubBookId
 	FROM dbo.fnICGeneratePayables (@intReceiptId, 1, 1) GP
 
 	END 

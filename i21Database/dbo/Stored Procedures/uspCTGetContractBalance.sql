@@ -46,7 +46,7 @@ BEGIN
 		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY cb.intContractDetailId ORDER BY cb.dtmCreatedDate DESC)
 			, cb.intContractDetailId
 			, cb.intContractStatusId
-			, dblFutures = CASE WHEN cb.intPricingTypeId IN (1, 3) THEN ISNULL(cb.dblFutures, cd.dblFutures) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) END
+			, dblFutures = CASE WHEN cb.intPricingTypeId IN (1, 3) THEN ISNULL(cd.dblFutures, cb.dblFutures) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) END
 			, dblBasis = CASE WHEN cb.intPricingTypeId IN (1, 2, 8) THEN ISNULL(cb.dblBasis, cd.dblBasis) ELSE (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblBasis END) END
 		FROM tblCTContractBalanceLog cb
 		join tblCTContractDetail cd on cd.intContractDetailId = cb.intContractDetailId
@@ -195,7 +195,7 @@ BEGIN
 			INNER JOIN tblICUnitMeasure			UOM			ON UOM.intUnitMeasureId = C1.intUnitMeasureId
 			INNER JOIN tblICItem				IM			ON IM.intItemId = CBL.intItemId
 			INNER JOIN tblSMCompanyLocation		L			ON L.intCompanyLocationId = CBL.intLocationId
-			INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+			INNER JOIN vyuCTEntity				EY			ON EY.intEntityId = CBL.intEntityId AND EY.strEntityType = (CASE WHEN CBL.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END) AND ISNULL(EY.ysnDefaultLocation, 0) = 1
 			INNER JOIN tblCTContractHeader		CH			ON CH.intContractHeaderId = CBL.intContractHeaderId
 			INNER JOIN tblCTContractDetail		CD			ON CD.intContractDetailId = CBL.intContractDetailId
 			INNER JOIN tblICItemUOM				ItemUOM		ON ItemUOM.intItemUOMId = CD.intItemUOMId

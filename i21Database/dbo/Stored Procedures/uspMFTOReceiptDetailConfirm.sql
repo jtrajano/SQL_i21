@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspMFTOReceiptDetailConfirm (
-	@intInventoryTransferId int
+	@intInventoryTransferId INT
 	,@intInventoryTransferDetailId INT
 	,@intItemId INT
 	,@dblQuantity NUMERIC(18, 6)
@@ -15,8 +15,8 @@ BEGIN
 		,@dblTOScannedQty NUMERIC(18, 6)
 		,@strError NVARCHAR(50)
 
-	SELECT @dblTOLineItemQty = dblQuantity 
-	FROM dbo.tblICInventoryTransferDetail 
+	SELECT @dblTOLineItemQty = dblQuantity
+	FROM dbo.tblICInventoryTransferDetail
 	WHERE intInventoryTransferDetailId = @intInventoryTransferDetailId
 
 	SELECT @dblTOScannedQty = dblQuantity
@@ -57,8 +57,7 @@ BEGIN
 			,ysnProcessed
 			,intLocationId
 			)
-		SELECT
-			@intInventoryTransferId
+		SELECT @intInventoryTransferId
 			,@intInventoryTransferDetailId
 			,@intItemId
 			,@dblQuantity

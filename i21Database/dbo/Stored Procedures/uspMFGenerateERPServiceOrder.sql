@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspMFGenerateERPServiceOrder (
+﻿CREATE PROCEDURE [dbo].[uspMFGenerateERPServiceOrder] (
 	@strCompanyLocation NVARCHAR(6) = NULL
 	,@ysnUpdateFeedStatus BIT = 1
 	)
@@ -19,6 +19,7 @@ BEGIN TRY
 		,@strWorkOrderType NVARCHAR(50)
 		,@strSubLocationName NVARCHAR(50)
 		,@strERPServiceOrderNo NVARCHAR(50)
+		,@strItemNo nvarchar(50)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intWorkOrderId INT
@@ -64,7 +65,7 @@ BEGIN TRY
 	END
 
 	UPDATE dbo.tblMFWorkOrderPreStage
-	SET intStatusId = - 1
+	SET intServiceOrderStatusId = - 1
 	WHERE intWorkOrderPreStageId IN (
 			SELECT PS.intWorkOrderPreStageId
 			FROM @tblMFWorkOrderPreStage PS
@@ -124,6 +125,11 @@ BEGIN TRY
 			BEGIN
 				GOTO NextPO
 			END;
+			Select @strItemNo=strItemNo 
+			FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail  WWRMD
+			JOIN dbo.tblLGWarehouseRateMatrixDetail WRMD on WRMD.intWarehouseRateMatrixDetailId =WWRMD.intWarehouseRateMatrixDetailId 
+			JOIN dbo.tblICItem I ON I.intItemId = WRMD.intItemId
+			WHERE WWRMD.intWorkOrderId = @intWorkOrderId
 
 			SELECT @strXML = @strXML + '<header id="' + ltrim(@intWorkOrderPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(@intWorkOrderPreStageId) +'</TrxSequenceNo>'
@@ -134,12 +140,13 @@ BEGIN TRY
 				+'<StorageLocation>'+	IsNULL(SL.strSubLocationName,'')  +'</StorageLocation>'
 				+'<ProcessName>'+	MP.strProcessName   +'</ProcessName>'
 				+'<WorkOrderNo>'+	W.strWorkOrderNo    +'</WorkOrderNo>'
-				+'<ItemNo>'+	I.strItemNo     +'</ItemNo>'
+				+'<ItemNo>'+	@strItemNo     +'</ItemNo>'
 				+'<Quantity>'+	ltrim(W.dblQuantity)    +'</Quantity>'
 				+'<QuantityUOM>'+	UM.strUnitMeasure    +'</QuantityUOM>'
 				+'<ERPShopOrderNo>'+	IsNULL(W.strERPOrderNo,'')     +'</ERPShopOrderNo>'
 				+'<ServiceContractNo>'+	IsNULL(WRM.strServiceContractNo ,'')     +'</ServiceContractNo>'
 				+'<VendorAccountNo>'+	IsNULL(V.strVendorAccountNum,'')   +'</VendorAccountNo>'
+				+'<Book>' + ISNULL(PM.strPaymentMethod, '') + '</Book>'
 				+'<Currency>'+	C.strCurrency      +'</Currency>'
 				+'<ERPServicePONumber>'+	IsNULL(W.strERPServicePONumber,'')   +'</ERPServicePONumber>'
 			FROM dbo.tblMFWorkOrder W
@@ -154,6 +161,7 @@ BEGIN TRY
 			JOIN dbo.tblAPVendor V ON V.intEntityId = WRM.intVendorEntityId
 			JOIN dbo.tblSMCurrency C on C.intCurrencyID=WRM.intCurrencyId
 			JOIN dbo.tblSMUserSecurity US ON US.intEntityId = W.intCreatedUserId
+			LEFT JOIN dbo.tblSMPaymentMethod PM ON PM.intPaymentMethodID = V.intPaymentMethodId
 			WHERE W.intWorkOrderId = @intWorkOrderId
 
 			SELECT @strDetailXML = ''
@@ -227,12 +235,12 @@ BEGIN TRY
 	END
 
 	UPDATE dbo.tblMFWorkOrderPreStage
-	SET intStatusId = NULL
+	SET intServiceOrderStatusId = NULL
 	WHERE intWorkOrderPreStageId IN (
 			SELECT PS.intWorkOrderPreStageId
 			FROM @tblMFWorkOrderPreStage PS
 			)
-		AND intStatusId = - 1
+		AND intServiceOrderStatusId = - 1
 
 	SELECT IsNULL(intWorkOrderId, '0') AS id
 		,IsNULL(strXML, '') AS strXml

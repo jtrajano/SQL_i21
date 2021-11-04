@@ -2708,6 +2708,12 @@ BEGIN
     VALUES('HEBPalletLabel',1,1)
 END
 GO
+IF NOT EXISTS(SELECT 1 FROM tblMFReportLabel WHERE strReportName = 'ICIFoodsPalletLabel')
+BEGIN
+    INSERT INTO tblMFReportLabel(strReportName,ysnShow,intConcurrencyId)
+    VALUES('ICIFoodsPalletLabel',1,1)
+END
+GO
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFInventoryShipmentRestrictionType
@@ -4138,4 +4144,9 @@ Go
 UPDATE tblMFCompanyPreference
 SET ysnEnableItemMenuOnHandheld = 0
 WHERE ysnEnableItemMenuOnHandheld IS NULL
+GO
+
+UPDATE tblMFCompanyPreference
+SET ysnWOAutoSelectBOMServiceItems = 0
+WHERE ysnWOAutoSelectBOMServiceItems IS NULL
 GO

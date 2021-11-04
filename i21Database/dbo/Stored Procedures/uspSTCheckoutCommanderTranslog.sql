@@ -329,7 +329,7 @@ BEGIN
 							[strTrlUPCEntryType],
 							[strTrloLnItemDiscProgramId],
 							[dblTrloLnItemDiscDiscAmt],
-							[intTrloLnItemDiscQty],
+							[dblTrloLnItemDiscQty],
 							[intTrloLnItemDiscTaxCred],
 
 							-- NEW
@@ -574,7 +574,7 @@ BEGIN
 							[strTrlUPCEntryType]				= strTrlUPCEntryType,
 							[strTrloLnItemDiscProgramId]		= strTrloLnItemDiscProgramId,
 							[dblTrloLnItemDiscDiscAmt]			= dblTrloLnItemDiscDiscAmt,
-							[intTrloLnItemDiscQty]				= intTrloLnItemDiscQty,
+							[dblTrloLnItemDiscQty]				= dblTrloLnItemDiscQty,
 							[intTrloLnItemDiscTaxCred]			= intTrloLnItemDiscTaxCred,
 
 							-- NEW

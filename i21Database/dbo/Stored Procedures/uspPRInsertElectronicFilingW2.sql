@@ -62,6 +62,11 @@ BEGIN
 		,dtmCreated
 		,intLastModifiedUserId
 		,dtmLastModified
+		,strRepresentativeName
+		,strRepresentativeTitle
+		,strRepresentativePhone
+		,strNAICSCode
+		,strCentralRegistrationNo
 		,intConcurrencyId)
 	SELECT
 		intYear = @intYear
@@ -158,6 +163,11 @@ BEGIN
 		,dtmCreated = GETDATE()
 		,intLastModifiedUserId = @intUserId
 		,dtmLastModified = GETDATE()
+		,strRepresentativeName = ''
+		,strRepresentativeTitle = ''
+		,strRepresentativePhone = ''
+		,strNAICSCode = ISNULL((SELECT TOP 1 strNAICSCode FROM tblPRCompanyPreference),'')
+		,strCentralRegistrationNo = ISNULL((SELECT TOP 1 strNAICSCode FROM tblPRCompanyPreference),'')
 		,intConcurrencyId = 1
 	FROM tblSMCompanySetup COM
 		inner join (SELECT strName = ISNULL(EM.strName, '')

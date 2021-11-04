@@ -138,6 +138,7 @@ Begin
 			Join tblLGLoadDetailContainerLink cl on ld.intLoadDetailId=cl.intLoadDetailId AND cl.strExternalContainerId=ri.strDeliveryItemNo
 			Join tblSMCurrency cr on ct.intCurrencyId=cr.intCurrencyID
 			Where ri.intStageReceiptId=@intMinRowNo AND ri.dblQuantity>0 AND l.intLoadId=@intLoadId
+			Order by cl.strExternalContainerId
 
 			Update rh Set rh.intSubCurrencyCents=(CASE WHEN ISNULL(ri.ysnSubCurrency,0)=1 Then 100 ELSE 1 END) 
 			From tblICInventoryReceipt rh join tblICInventoryReceiptItem ri on rh.intInventoryReceiptId=ri.intInventoryReceiptId

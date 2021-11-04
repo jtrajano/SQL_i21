@@ -9,6 +9,12 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF
 
+--PARAMETER SNIFFING
+DECLARE @PostTemp       BIT				= @Post
+      , @RecapTemp      BIT				= @Recap
+      , @PostDateTemp   DATETIME        = @PostDate
+      , @BatchIdTemp    NVARCHAR(40)    = @BatchId
+
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000 
 
@@ -17,12 +23,12 @@ DECLARE	@ZeroBit BIT
 SET @OneBit = CAST(1 AS BIT)
 SET @ZeroBit = CAST(0 AS BIT)
 
--- --IC Reserve Stock
--- IF @Recap = @ZeroBit	
--- 	EXEC dbo.uspARPostItemResevation
+ --IC Reserve Stock
+IF @RecapTemp = @ZeroBit	
+	EXEC dbo.uspARPostItemResevation
 
 DECLARE @ItemsForContracts					[InvoicePostingTable]
-EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
+EXEC [dbo].[uspARPopulateContractDetails] @Post = @PostTemp
 
 DECLARE @strDatabaseName NVARCHAR(50)
 DECLARE @strCompanyName NVARCHAR(50)
@@ -31,7 +37,7 @@ DECLARE @intInvoiceId INT = 0
 SELECT @intInvoiceId = intInvoiceId FROM ##ARPostInvoiceHeader
 SELECT @strDatabaseName = strDatabaseName, @strCompanyName = strCompanyName FROM [dbo].[fnARGetInterCompany](@intInvoiceId)
 
-IF @Post = @OneBit
+IF @PostTemp = @OneBit
 BEGIN
     DECLARE @InvoiceIds 						[InvoiceId]
 	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
@@ -133,28 +139,8 @@ BEGIN
 		,[strPostingError]		= 'Duplicate Batch ID'
 	FROM ##ARPostInvoiceHeader I
 	WHERE  
-		EXISTS(SELECT strBatchId FROM tblGLDetail WHERE strBatchId = @BatchId)
-
-	INSERT INTO ##ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--INVOICE IS ON QUEUE
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The transaction ' + I.strInvoiceNumber + ' has ongoing posting.'
-	FROM ##ARPostInvoiceHeader I
-	INNER JOIN tblARPostingQueue PQ ON I.intInvoiceId = PQ.intTransactionId AND I.strInvoiceNumber = PQ.strTransactionNumber	
-
+		EXISTS(SELECT strBatchId FROM tblGLDetail WHERE strBatchId = @BatchIdTemp)
+	
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -1977,7 +1963,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,CASE WHEN [strType] IN ('CF Tran') THEN ABS([dblQty]) ELSE [dblQty] END
+		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -1999,61 +1985,7 @@ BEGIN
 		,[intForexRateTypeId]
 		,[dblForexRate]
 	FROM ##ARItemsForCosting
-
-	-- IC Costing Zero Cost
-	INSERT INTO @ItemsForCosting
-		([intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,[dblQty]
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate])
-	SELECT
-		 [intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,CASE WHEN [strType] IN ('POS') THEN ABS([dblQty]) ELSE [dblQty] END
-		,[dblUOMQty]
-		,[dblCost]
-		,[dblValue]
-		,[dblSalesPrice]
-		,[intCurrencyId]
-		,[dblExchangeRate]
-		,[intTransactionId]
-		,[intTransactionDetailId]
-		,[strTransactionId]
-		,[intTransactionTypeId]
-		,[intLotId]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsStorage]
-		,[strActualCostId]
-		,[intSourceTransactionId]
-		,[strSourceTransactionId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate]
-	FROM ##ARItemsForCosting
+	WHERE ISNULL([ysnAutoBlend], 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2063,7 +1995,6 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-
 	SELECT
 		 [intInvoiceId]
 		,[strInvoiceNumber]
@@ -2278,7 +2209,7 @@ BEGIN
 		,[strTransactionType]	= 'Invoice'
 		,[intInvoiceDetailId]	= IC.intInvoiceDetailId
 		,[intItemId]			= IC.intItemId
-		,[strBatchId]			= @BatchId
+		,[strBatchId]			= @BatchIdTemp
 		,[strPostingError]		= ITEM.strItemNo + ' in ' + CL.strLocationName + ' is missing a GL account setup for ' + IC.strAccountCategory + ' account category.'
 	FROM @InvalidItemsForPosting IC
 	INNER JOIN tblICItem ITEM ON IC.intItemId = ITEM.intItemId
@@ -2286,7 +2217,7 @@ BEGIN
 	INNER JOIN tblSMCompanyLocation CL ON IL.intLocationId = CL.intCompanyLocationId
 END
 
-IF @Post = @ZeroBit
+IF @PostTemp = @ZeroBit
 BEGIN
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2458,7 +2389,7 @@ BEGIN
 		##ARPostInvoiceHeader I
 			ON ARPD.[intInvoiceId] = I.[intInvoiceId]
 	WHERE
-		@Recap = @ZeroBit
+		@RecapTemp = @ZeroBit
 		AND I.strTransactionType <> 'Cash Refund'
 
 	INSERT INTO ##ARInvalidInvoiceData
@@ -2485,7 +2416,7 @@ BEGIN
 		##ARPostInvoiceHeader I
 			ON APPD.[intInvoiceId] = I.[intInvoiceId]
 	WHERE
-		@Recap = @ZeroBit
+		@RecapTemp = @ZeroBit
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2512,7 +2443,7 @@ BEGIN
 	INNER JOIN tblCMBankTransactionDetail CMBTD
 			ON CMUF.[intUndepositedFundId] = CMBTD.[intUndepositedFundId]
 	WHERE 
-		@Recap = @ZeroBit
+		@RecapTemp = @ZeroBit
 		AND CMUF.[strSourceSystem] = 'AR'
 
 	INSERT INTO ##ARInvalidInvoiceData
@@ -2541,7 +2472,7 @@ BEGIN
 			AND P.ysnPosted = @OneBit
 	) PAT
 	WHERE
-		@Recap = @ZeroBit
+		@RecapTemp = @ZeroBit
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2569,7 +2500,7 @@ BEGIN
 		WHERE PD.intInvoiceId = I.intInvoiceId
 	) VOUCHER
 	WHERE
-		@Recap = @ZeroBit
+		@RecapTemp = @ZeroBit
 	
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2590,7 +2521,7 @@ BEGIN
 		,[strPostingError]		= 'You cannot unpost this Credit Memo (' + INV.strInvoiceNumber + '). Please unforgive the Service Charge.'
 	FROM ##ARPostInvoiceHeader I
 	INNER JOIN tblARInvoice INV ON INV.intInvoiceId = I.intInvoiceId	
-	WHERE @Recap = @ZeroBit
+	WHERE @RecapTemp = @ZeroBit
 	  AND ISNULL(INV.ysnServiceChargeCredit, 0) = @OneBit
 	  AND INV.strTransactionType = 'Credit Memo'
 
@@ -2615,7 +2546,7 @@ BEGIN
 	FROM ##ARPostInvoiceHeader I
 	LEFT OUTER JOIN tblARInvoice INV 
          ON I.intInvoiceId = INV.intOriginalInvoiceId
-	WHERE @Recap = @ZeroBit
+	WHERE @RecapTemp = @ZeroBit
 	  AND ISNULL(I.[ysnRefundProcessed], 0) = @OneBit
 	  AND I.strTransactionType = 'Credit Memo'
 
@@ -2832,7 +2763,7 @@ BEGIN
         ,[intSourceEntityId])
     SELECT 
          [dtmDate]						= GLD.[dtmDate]
-        ,[strBatchId]					= @BatchId
+        ,[strBatchId]					= @BatchIdTemp
         ,[intAccountId]					= GLD.[intAccountId]
         ,[dblDebit]						= GLD.[dblCredit]
         ,[dblCredit]					= GLD.[dblDebit]
@@ -3044,7 +2975,7 @@ INNER JOIN (
 WHERE II.ysnPost = 1
 
 UPDATE ##ARInvalidInvoiceData
-SET [strBatchId] = @BatchId
+SET [strBatchId] = @BatchIdTemp
 WHERE 
 	LTRIM(RTRIM(ISNULL([strBatchId],''))) = ''
 

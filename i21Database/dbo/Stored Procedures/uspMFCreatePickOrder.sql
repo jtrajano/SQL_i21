@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].uspMFCreatePickOrder (
+﻿CREATE PROCEDURE [dbo].[uspMFCreatePickOrder] (
 	@strXML NVARCHAR(MAX)
 	,@intOrderHeaderId INT OUTPUT
 	)
@@ -62,6 +62,7 @@ BEGIN TRY
 		,@intSubLocationId int
 		,@intWorkOrderItemId int
 		,@intRecipeId int
+		,@strConsumeSourceLocation NVARCHAR(50)
 
 	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
 		,@intIncludeConsumptionByLocationInPickOrder = CASE 
@@ -89,6 +90,16 @@ BEGIN TRY
 			,ysnPickRemainingQty BIT
 			) x
 
+	SELECT @strConsumeSourceLocation = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 124
+
+	IF @strConsumeSourceLocation='True'
+	BEGIN
+		SELECT @ysnPickRemainingQty = 0
+	END
 	--Select @ysnPickRemainingQty=0
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
@@ -461,6 +472,9 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		Declare @strSubLocationName nvarchar(50)
+
+
 		SELECT @intRecipeId = intRecipeId
 		FROM dbo.tblMFRecipe
 		WHERE intItemId = @intWorkOrderItemId
@@ -476,6 +490,24 @@ BEGIN TRY
 				AND intLocationId = @intLocationId
 				AND ysnActive = 1
 				AND intSubLocationId IS NULL
+		END
+
+		IF @intRecipeId IS NULL
+		BEGIN
+			Select @strSubLocationName =Left(strSubLocationName,2) 
+			from tblSMCompanyLocationSubLocation 
+			Where  intCompanyLocationSubLocationId = @intSubLocationId
+
+			Select @intSubLocationId = intCompanyLocationSubLocationId
+			from tblSMCompanyLocationSubLocation 
+			Where  strSubLocationName = @strSubLocationName
+
+			SELECT @intRecipeId = intRecipeId
+			FROM dbo.tblMFRecipe
+			WHERE intItemId = @intWorkOrderItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+				AND intSubLocationId = @intSubLocationId
 		END
 
 		INSERT INTO @OrderDetail (

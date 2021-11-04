@@ -198,10 +198,6 @@ BEGIN
 						IF ISNULL(@intFutOptTransactionId,0) = 0
 						BEGIN
 							UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intOutputId WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-							-- DERIVATIVE ENTRY HISTORY						
-							SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-							EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'ADD', 0
-							-- DERIVATIVE ENTRY AUDIT LOG: EXEC uspSMAuditLog 'RiskManagement.view.DerivativeEntry', @intFutOptTransactionHeaderId, @intUserId, 'Created', 'small-new-plus'
 						END
 						ELSE IF dbo.fnCTCheckIfDuplicateFutOptTransactionHistory(@intOutputId) > 1
 						BEGIN

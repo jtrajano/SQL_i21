@@ -48,14 +48,65 @@ BEGIN
 
 	CREATE TABLE #tblRequiredColumns 
 	(
-		  [intColumnKey] INT IDENTITY(1,1)
-		 ,[intMonthKey] INT
-		 ,[intYearKey] INT
-		 ,[strColumnName] NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		[intColumnKey] INT IDENTITY(1,1)
+		,[intMonthKey] INT
+		,[intYearKey] INT
+		,[strColumnName] NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	 )
 
+	 	IF OBJECT_ID('tempdb..#tblAdditionalColumns') IS NOT NULL
+		DROP TABLE #tblAdditionalColumns
+
+	CREATE TABLE #tblAdditionalColumns 
+	(
+		[intStgBlendDemandId] INT
+		,[intItemId] INT NULL
+		,[strItemName] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
+		,[strItemDescription] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
+		,[strProductType] NVARCHAR(400) COLLATE Latin1_General_CI_AS  NULL
+		,[intSubLocationId] INT NULL
+		,[strSubLocationName] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL
+		,[intUnitMeasureId] INT NULL
+	 )
+
+	  INSERT INTO #tblAdditionalColumns ([intStgBlendDemandId],[intItemId],[strItemName],[strItemDescription],[strProductType],[intSubLocationId],[strSubLocationName],[intUnitMeasureId])
+	  SELECT DISTINCT [intStgBlendDemandId],[intItemId],[strItemName],[strItemDescription],[strProductType],[intSubLocationId],[strSubLocationName],[intUnitMeasureId]
+	  FROM 
+	   (SELECT
+			Stg.intStgBlendDemandId
+		  ,[intItemId] = Item.intItemId
+		  ,[strItemName] = Item.strItemNo
+		  ,[strItemDescription] = Item.strDescription
+		  ,[strProductType] = ProductType.strDescription
+		  ,[intSubLocationId] = SLOC.intCompanyLocationSubLocationId
+		  ,[strSubLocationName] = ISNULL(SLOC.strSubLocationName,'')
+		  ,[intUnitMeasureId] = ItemUOM.intUnitMeasureId
+		FROM tblRKStgBlendDemand Stg
+		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
+		JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId=@IntCommodityId AND Stg.dblQuantity >0
+		JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId
+		LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId	
+		WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)=@strNeedPlan
+		UNION
+		SELECT DISTINCT 
+			Stg.intStgBlendDemandId
+		  ,[intItemId] = Item.intItemId
+		  ,[strItemName] = Item.strItemNo
+		  ,[strItemDescription] = Item.strDescription
+		  ,[strProductType] = ProductType.strDescription
+		  ,[intSubLocationId] = SLOC.intCompanyLocationSubLocationId
+		  ,[strSubLocationName] = ISNULL(SLOC.strSubLocationName,'')
+		  ,[intUnitMeasureId] = ItemUOM.intUnitMeasureId
+		FROM tblRKArchBlendDemand Stg
+		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
+		JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId=@IntCommodityId AND Stg.dblQuantity >0
+		JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId
+		LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
+		WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)=@strNeedPlan
+		)t
+
 	  INSERT INTO #tblRequiredColumns ([intMonthKey], [intYearKey], [strColumnName])
-	  SELECT DISTINCT [intMonthKey], [intYearKey], [strColumnName] 
+	  SELECT DISTINCT [intMonthKey], [intYearKey], [strColumnName]
 	  FROM 
 	   (SELECT DISTINCT 
 			CASE
@@ -210,7 +261,17 @@ BEGIN
 			SELECT TOP 10  @TenthMonth= CASE WHEN [strColumnName]<>@NinthMonth THEN [strColumnName] ELSE NULL END  FROM #tblRequiredColumns ORDER BY [intColumnKey]
 	 END
 
-	 SELECT @intColumnKey = MIN(intColumnKey) FROM #tblRequiredColumns
+	DECLARE @FColumns nvarchar(max),@EColumns nvarchar(max);
+
+	select
+		@FColumns = coalesce(@FColumns + ',', '') +  '[First' + strColumnName + '] DECIMAL(24,2) NULL'
+		,@EColumns = coalesce(@EColumns + ',', '') +  '[End' + strColumnName + '] DECIMAL(24,2) NULL'
+	from
+		#tblRequiredColumns
+
+	exec('ALTER TABLE #tblCoffeeNeedPlan ADD' + @FColumns + ',' + @EColumns + ';');
+
+	SELECT @intColumnKey = MIN(intColumnKey) FROM #tblRequiredColumns
 
 	WHILE @intColumnKey > 0
 	BEGIN
@@ -224,40 +285,24 @@ BEGIN
 
 		SELECT @intMonthKey=intMonthKey,@intYearKey=intYearKey ,@strColumnName = strColumnName
 		FROM #tblRequiredColumns
-		WHERE intColumnKey = @intColumnKey
-					
-		SET @SqlALTER = 'ALTER TABLE #tblCoffeeNeedPlan ADD  [First' + @strColumnName + ']  DECIMAL(24,2) NULL'		
-		EXEC (@SqlALTER)
-
-		SET @SqlALTER=NULL
-		SET @SqlALTER = 'ALTER TABLE #tblCoffeeNeedPlan ADD  [End' + @strColumnName + ']   DECIMAL(24,2) NULL'
-		
-		EXEC (@SqlALTER)		
+		WHERE intColumnKey = @intColumnKey	
 		
 		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,strProductType,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
-							 SELECT Item.intItemId,Item.strItemNo,Item.strDescription,ProductType.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
-							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
-							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
+							 SELECT ac.intItemId,ac.strItemName,ac.strItemDescription,ac.strProductType,ac.intSubLocationId,ac.strSubLocationName,
+							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(ac.intItemId,ac.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
+							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(ac.intItemId,ac.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
 							FROM tblRKStgBlendDemand Stg
-							JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
-							JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId='+LTRIM(@IntCommodityId)+'
-							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId
-							LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId							
-							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)+'
+							LEFT JOIN #tblAdditionalColumns ac on ac.intStgBlendDemandId = Stg.intStgBlendDemandId
+							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)+' and ac.intItemId is not null
 							UNION ALL
-							SELECT Item.intItemId,Item.strItemNo,Item.strDescription,ProductType.strDescription,SLOC.intCompanyLocationSubLocationId,ISNULL(SLOC.strSubLocationName,''''),
-							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
-							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(Item.intItemId,ItemUOM.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
-							FROM tblRKArchBlendDemand Stg
-							JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId=Stg.intUOMId AND ItemUOM.intItemId=Stg.intItemId
-							JOIN tblICItem Item ON Item.intItemId=Stg.intItemId AND Item.intCommodityId='+LTRIM(@IntCommodityId)+'
-							JOIN tblSMCompanyLocationSubLocation SLOC ON SLOC.intCompanyLocationSubLocationId=Stg.intSubLocationId
-							LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId							
-							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey)
+							SELECT ac.intItemId,ac.strItemName,ac.strItemDescription,ac.strProductType,ac.intSubLocationId,ac.strSubLocationName,
+							 CASE WHEN DATEPART(dd,dtmNeedDate)<16 THEN dbo.fnCTConvertQuantityToTargetItemUOM(ac.intItemId,ac.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity1 
+							,CASE WHEN DATEPART(dd,dtmNeedDate)>15 THEN dbo.fnCTConvertQuantityToTargetItemUOM(ac.intItemId,ac.intUnitMeasureId,'+LTRIM(@IntUOMId)+',Stg.dblQuantity) ELSE NULL END AS dblQuantity2 
+							FROM tblRKArchBlendDemand Stg		
+							LEFT JOIN #tblAdditionalColumns ac on ac.intStgBlendDemandId = Stg.intStgBlendDemandId				
+							WHERE CONVERT(NVARCHAR,Stg.dtmImportDate,106)='''+@strNeedPlan+''' AND Stg.dblQuantity >0 AND MONTH(dtmNeedDate)='+LTRIM(@intMonthKey)+' AND YEAR(dtmNeedDate)='+LTRIM(@intYearKey) + ' and ac.intItemId is not null'
 
 		EXEC (@SqlInsert)
-
-		--SELECT @SqlInsert
 
 		SET @SqlInsert=NULL
 		SET @SqlInsert = 'INSERT INTO #tblCoffeeNeedPlan(intItemId,strItemName,strItemDescription,strProductType,[intSubLocationId],[strSubLocationName],[First'+ @strColumnName + '],[End'+ @strColumnName + '])
@@ -265,7 +310,6 @@ BEGIN
 						  FROM #tblCoffeeNeedPlan
 						  GROUP BY intItemId'
 						  
-		--SELECT @SqlInsert	
 		EXEC (@SqlInsert)
 
 

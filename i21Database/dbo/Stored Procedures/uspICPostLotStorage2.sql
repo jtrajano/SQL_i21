@@ -26,13 +26,17 @@ CREATE PROCEDURE [dbo].[uspICPostLotStorage]
 	,@intForexRateTypeId AS INT
 	,@dblForexRate AS NUMERIC(38, 20)
 	,@intSourceEntityId AS INT = NULL
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
@@ -184,6 +188,10 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@intSourceEntityId = @intSourceEntityId
+					,@strSourceType = @strSourceType
+					,@strSourceNumber = @strSourceNumber
+					,@strBOLNumber = @strBOLNumber
+					,@intTicketId = @intTicketId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -312,6 +320,10 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@intSourceEntityId = @intSourceEntityId
+				,@strSourceType = @strSourceType
+				,@strSourceNumber = @strSourceNumber
+				,@strBOLNumber = @strBOLNumber
+				,@intTicketId = @intTicketId
 				,@dtmCreated = @dtmCreated OUTPUT 		
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -406,6 +418,10 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
 							,@intSourceEntityId = @intSourceEntityId
+							,@strSourceType = @strSourceType
+							,@strSourceNumber = @strSourceNumber
+							,@strBOLNumber = @strBOLNumber
+							,@intTicketId = @intTicketId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

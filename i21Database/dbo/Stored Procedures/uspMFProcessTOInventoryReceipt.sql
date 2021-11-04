@@ -12,6 +12,25 @@ BEGIN TRY
 	DECLARE @OtherCharges ReceiptOtherChargesTableType
 
 	IF NOT EXISTS (
+			SELECT 1
+			FROM dbo.tblICInventoryTransfer
+			WHERE intInventoryTransferId = @intInventoryTransferId
+				AND (
+					intStatusId = 1
+					OR intStatusId = 2
+					)
+			)
+	BEGIN
+		RAISERROR (
+				'Inventory Transfer is already Closed.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
+
+	IF NOT EXISTS (
 			SELECT *
 			FROM dbo.tblMFTOReceiptDetail
 			WHERE intInventoryTransferId = @intInventoryTransferId
@@ -92,7 +111,7 @@ BEGIN TRY
 	SELECT DISTINCT strReceiptType = 'Transfer Order'
 		,intShipFromId = T.intFromLocationId
 		,intLocationId = IL.intLocationId
-		,strBillOfLadding = T.strBolNumber 
+		,strBillOfLadding = T.strBolNumber
 		,intItemId = I.intItemId
 		,intItemLocationId = IL.intItemLocationId
 		,intItemUOMId = D.intItemUOMId
@@ -128,8 +147,8 @@ BEGIN TRY
 		,intInventoryReceiptId = NULL
 		,strVendorRefNo = NULL
 		,intTaxGroupId = NULL
-		,intInventoryTransferId=T.intInventoryTransferId
-		,intInventoryTransferDetailId=TD.intInventoryTransferDetailId
+		,intInventoryTransferId = T.intInventoryTransferId
+		,intInventoryTransferDetailId = TD.intInventoryTransferDetailId
 	FROM dbo.tblMFTOReceiptDetail D
 	JOIN dbo.tblICInventoryTransferDetail TD ON TD.intInventoryTransferDetailId = D.intInventoryTransferDetailId
 	JOIN dbo.tblICInventoryTransfer T ON T.intInventoryTransferId = TD.intInventoryTransferId
@@ -161,7 +180,7 @@ BEGIN TRY
 
 		UPDATE tblMFTOReceiptDetail
 		SET ysnProcessed = 1
-		WHERE intInventoryReceiptId = @intInventoryReceiptId
+		WHERE intInventoryTransferId = @intInventoryTransferId
 
 		DELETE
 		FROM #tmpAddItemReceiptResult

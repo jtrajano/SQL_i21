@@ -2,6 +2,7 @@
 	@intProducedItemId INT
 	,@intUserId INT
 	,@intLocationId INT
+	,@strBatchId NVARCHAR(50) OUTPUT
 	)
 AS
 BEGIN
@@ -20,19 +21,37 @@ BEGIN
 		,@intStorageLocationId INT
 		,@intLotId INT
 		,@strLotNumber NVARCHAR(50)
-		,@strBatchId NVARCHAR(50)
 		,@intSubLocationId INT
+		,@strWorkOrderNo NVARCHAR(50)
+	DECLARE @tblMFWODetail TABLE (intDetailId INT)
+
+	INSERT INTO @tblMFWODetail (intDetailId)
+	SELECT intDetailId
+	FROM tblMFWODetail
+	WHERE intProducedItemId = @intProducedItemId
+		AND ysnProcessed = 0
 
 	SELECT @dtmProductionDate = GETDATE()
 
-	SELECT @intProducedItemId = intItemId
+	SELECT @intProducedItemId = intProducedItemId
 		,@dblProducedQuantity = dblQuantity
 		,@intProducedItemUOMId = intItemUOMId
 		,@intTransferToStorageLocationId = intStorageLocationId
 	FROM tblMFWODetail
-	WHERE intItemId = @intProducedItemId
+	WHERE intProducedItemId = @intProducedItemId
 		AND ysnProcessed = 0
 		AND intTransactionTypeId = 9
+
+	IF @dblProducedQuantity IS NULL
+	BEGIN
+		RAISERROR (
+				'Unable to find the record to produce it.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	SELECT @intItemFactoryId = intItemFactoryId
 	FROM tblICItemFactory
@@ -41,6 +60,25 @@ BEGIN
 	SELECT @intManufacturingCellId = intManufacturingCellId
 	FROM tblICItemFactoryManufacturingCell
 	WHERE intItemFactoryId = @intItemFactoryId
+		AND ysnDefault = 1
+
+	IF @intManufacturingCellId IS NULL
+	BEGIN
+		SELECT @intManufacturingCellId = intManufacturingCellId
+		FROM tblICItemFactoryManufacturingCell
+		WHERE intItemFactoryId = @intItemFactoryId
+	END
+
+	IF @intManufacturingCellId IS NULL
+	BEGIN
+		RAISERROR (
+				'Unable to find the manufacturing cell.'
+				,16
+				,1
+				)
+
+		RETURN
+	END
 
 	SELECT @strProduceXml = '<root>'
 
@@ -60,7 +98,7 @@ BEGIN
 
 	SELECT @strProduceXml = @strProduceXml + '<intManufacturingCellId>' + convert(VARCHAR, @intManufacturingCellId) + '</intManufacturingCellId>'
 
-	SELECT @strProduceXml = @strProduceXml + '<dblPlannedQuantity>' + convert(VARCHAR, 10) + '</dblPlannedQuantity>'
+	SELECT @strProduceXml = @strProduceXml + '<dblPlannedQuantity>' + convert(VARCHAR, @dblProducedQuantity) + '</dblPlannedQuantity>'
 
 	SELECT @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
 
@@ -72,7 +110,7 @@ BEGIN
 
 	SELECT @intDetailId = MIN(intDetailId)
 	FROM tblMFWODetail
-	WHERE intItemId = @intProducedItemId
+	WHERE intProducedItemId = @intProducedItemId
 		AND ysnProcessed = 0
 		AND intTransactionTypeId = 8
 
@@ -118,19 +156,50 @@ BEGIN
 
 		SELECT @intDetailId = MIN(intDetailId)
 		FROM tblMFWODetail
-		WHERE intItemId = @intProducedItemId
+		WHERE intProducedItemId = @intProducedItemId
 			AND ysnProcessed = 0
 			AND intTransactionTypeId = 8
 			AND intDetailId > @intDetailId
 	END
 
-	SELECT @strProduceXml = @strProduceXml + '</root>'
+	SELECT @strProduceXml = @strProduceXml + @strConsumeXml + '</root>'
 
-	EXEC [dbo].[uspMFCompleteBlendSheet] @strXml = @strProduceXml
-		,@intLotId = @intLotId OUT
-		,@strLotNumber = @strLotNumber OUT
-		,@intLoadDistributionDetailId = NULL
-		,@ysnRecap = 0
-		,@strBatchId = @strBatchId OUT
-		,@ysnAutoBlend = 0
+	BEGIN TRY
+		EXEC [dbo].[uspMFCompleteBlendSheet] @strXml = @strProduceXml
+			,@intLotId = @intLotId OUT
+			,@strLotNumber = @strLotNumber OUT
+			,@intLoadDistributionDetailId = NULL
+			,@ysnRecap = 0
+			,@strBatchId = @strBatchId OUT
+			,@ysnAutoBlend = 0
+			,@strWorkOrderNo =@strWorkOrderNo OUT
+
+		Select @strBatchId=@strWorkOrderNo
+
+		UPDATE tblMFWODetail
+		SET ysnProcessed = 1
+		WHERE intDetailId IN (
+				SELECT D.intDetailId
+				FROM @tblMFWODetail D
+				)
+	END TRY
+
+	BEGIN CATCH
+		DECLARE @str NVARCHAR(MAX)
+
+		SELECT @str = ERROR_MESSAGE()
+
+		UPDATE tblMFWODetail
+		SET ysnProcessed = 0
+		WHERE intDetailId IN (
+				SELECT D.intDetailId
+				FROM @tblMFWODetail D
+				)
+
+		RAISERROR (
+				@str
+				,16
+				,1
+				)
+	END CATCH
 END

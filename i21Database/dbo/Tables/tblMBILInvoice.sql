@@ -25,6 +25,6 @@ CREATE TABLE [dbo].[tblMBILInvoice](
     CONSTRAINT [FK_tblMBILInvoice_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblMBILInvoice_tblEMEntityDriver] FOREIGN KEY ([intDriverId]) REFERENCES [tblEMEntity]([intEntityId]), 
     CONSTRAINT [FK_tblMBILInvoice_tblMBILShift] FOREIGN KEY ([intShiftId]) REFERENCES [tblMBILShift]([intShiftId]), 
-    CONSTRAINT [FK_tblMBILInvoice_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
-	CONSTRAINT [FK_tblMBILInvoice_tblARInvoice] FOREIGN KEY ([inti21InvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
+    CONSTRAINT [FK_tblMBILInvoice_tblSMTerm] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
+	--CONSTRAINT [FK_tblMBILInvoice_tblARInvoice] FOREIGN KEY ([inti21InvoiceId]) REFERENCES [tblARInvoice]([intInvoiceId])
 )

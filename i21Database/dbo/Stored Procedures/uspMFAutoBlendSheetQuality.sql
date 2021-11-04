@@ -59,6 +59,7 @@ BEGIN TRY
 		,@strOrderBy NVARCHAR(MAX) = ''
 		,@strOrderByFinal NVARCHAR(MAX) = ''
 		,@intProductTypeId INT
+		,@strOrderByPreference nvarchar(MAX)=''
 	DECLARE @intPropertyId INT
 		,@strPropertyName NVARCHAR(100)
 		,@dblMinValue NUMERIC(38, 20)
@@ -462,8 +463,8 @@ BEGIN TRY
 				,1
 				)
 
-	SET @strPivotSelect = 'intParentLotId,intItemId,SUM(dblDeviation),MAX(dblQuantity),Max(dtmCreateDate),Max(dtmExpiryDate),Max(dblUnitCost)'
-	SET @strTableColumns = 'intParentLotId INT,intItemId INT,dblDeviation numeric(38,20),dblQuantity numeric(38,20),dtmCreateDate datetime,dtmExpiryDate datetime,dblUnitCost numeric(38,20)'
+	SET @strPivotSelect = 'intParentLotId,intItemId,SUM(dblDeviation),MAX(dblQuantity),Max(dtmCreateDate),Max(dtmExpiryDate),Max(dblUnitCost),intPreference'
+	SET @strTableColumns = 'intParentLotId INT,intItemId INT,dblDeviation numeric(38,20),dblQuantity numeric(38,20),dtmCreateDate datetime,dtmExpiryDate datetime,dblUnitCost numeric(38,20),intPreference int'
 	SET @strPivotfor = ''
 
 	DECLARE @intMinPropertyId INT
@@ -497,47 +498,46 @@ BEGIN TRY
 		FROM #tblProductProperty
 		WHERE intPropertyId > @intMinPropertyId
 	END
-
-	--Clean Up Code for existing tblItem global temp tables
-	IF (
-			SELECT COUNT(1)
-			FROM tempdb.sys.objects
-			WHERE name LIKE '##tblItem%'
-			) > 0
-	BEGIN
-		INSERT INTO #tblNames (strtblName)
-		SELECT name
-		FROM tempdb.sys.objects
-		WHERE name LIKE '##tblItem%'
-
-		SET @intSeq = 1
-
-		SELECT @intRCount = MAX(intRowNo)
-		FROM #tblNames
-
-		WHILE @intSeq <= @intRCount
-		BEGIN
-			SELECT @strTbl = 'IF OBJECT_ID(''tempdb..' + strtblName + ''') IS NOT NULL DROP TABLE ' + strtblName
-			FROM #tblNames
-			WHERE intRowNo = @intSeq
-
-			EXEC (@strTbl)
-
-			SET @intSeq = @intSeq + 1
-		END
-
-		DELETE
-		FROM #tblNames
-
-		SET @intSeq = 0
-		SET @intRCount = 0
-	END
-
+	
 	UPDATE @tblInputItem
 	SET dblPickedQty = dblRequiredQty
 
 	WHILE @intNoOfSheets > 0 --No Of Sheets Loop
 	BEGIN
+		--Clean Up Code for existing tblItem global temp tables
+		IF (
+				SELECT COUNT(1)
+				FROM tempdb.sys.objects
+				WHERE name LIKE '##tblItem%'
+				) > 0
+		BEGIN
+			INSERT INTO #tblNames (strtblName)
+			SELECT name
+			FROM tempdb.sys.objects
+			WHERE name LIKE '##tblItem%'
+
+			SET @intSeq = 1
+
+			SELECT @intRCount = MAX(intRowNo)
+			FROM #tblNames
+
+			WHILE @intSeq <= @intRCount
+			BEGIN
+				SELECT @strTbl = 'IF OBJECT_ID(''tempdb..' + strtblName + ''') IS NOT NULL DROP TABLE ' + strtblName
+				FROM #tblNames
+				WHERE intRowNo = @intSeq
+
+				EXEC (@strTbl)
+
+				SET @intSeq = @intSeq + 1
+			END
+
+			DELETE
+			FROM #tblNames
+
+			SET @intSeq = 0
+			SET @intRCount = 0
+		END
 		SET @strSQL = ''
 
 		DELETE
@@ -627,6 +627,7 @@ BEGIN TRY
 				,intParentLotId INT
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblParentLot') IS NOT NULL
@@ -647,6 +648,7 @@ BEGIN TRY
 				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			--Get the Lots
@@ -666,6 +668,7 @@ BEGIN TRY
 				,intParentLotId
 				,intItemUOMId
 				,intItemIssuedUOMId
+				,intPreference
 				)
 			SELECT L.intLotId
 				,L.strLotNumber
@@ -682,10 +685,11 @@ BEGIN TRY
 				,L.intParentLotId
 				,L.intWeightUOMId
 				,L.intItemUOMId
+				,(Case When SubLoc.intSubLocationId is not null then 1 else 2 End ) AS  intPreference
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
-			JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+			LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
@@ -757,6 +761,7 @@ BEGIN TRY
 						,strCreatedBy
 						,intItemUOMId
 						,intItemIssuedUOMId
+						,intPreference
 						)
 					SELECT TL.intParentLotId
 						,PL.strParentLotNumber
@@ -772,6 +777,7 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
 					FROM #tblLot TL
 					JOIN tblICParentLot PL ON TL.intParentLotId = PL.intParentLotId
 					GROUP BY TL.intParentLotId
@@ -786,6 +792,7 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
 				END
 				ELSE
 				BEGIN
@@ -887,6 +894,7 @@ BEGIN TRY
 							,p.dblMedian
 							,p.dblMaxValue
 							,p.dblMinValue
+							,IsNULL(pl.intPreference,1) AS intPreference
 						FROM #tblProductProperty p
 						INNER JOIN tblQMTestResult AS r ON p.intPropertyId=r.intPropertyId
 							AND ISNUMERIC(r.strPropertyValue) = 1
@@ -914,6 +922,7 @@ BEGIN TRY
 						,dtmExpiryDate
 						,dblUnitCost
 						,dblQuantity
+						,intPreference
 					HAVING dblQuantity > 0'
 
 			EXEC sp_executesql @strSQL
@@ -930,6 +939,7 @@ BEGIN TRY
 		SET @strOrderByFEFO = ''
 		SET @strOrderByCost = ''
 		SET @strtblnameChk = ''
+		SELECT @strOrderByPreference=''
 		--DECLARE @strPropertName NVARCHAR(50),
 		--DECLARE @Count decimal(38,0)
 		SET @strTblName = ''
@@ -972,7 +982,7 @@ BEGIN TRY
 				DECLARE @aliasName NVARCHAR(max)
 
 				SET @aliasName = '[' + 'Lot' + convert(NVARCHAR, @intRawItemId) + ']'
-				SET @strLot = @strLot + @strTblName + '.' + 'intParentLotId as ' + @aliasName + ',' + @strTblName + '.' + 'intItemId as ' + @strTblName + ',' + @strTblName + '.' + 'dblQuantity as ' + @strTblName + 'Qty' + ',' + @strTblName + '.' + 'dtmCreateDate as ' + @strTblName + 'CDate ' + ',' + @strTblName + '.' + 'dtmExpiryDate as ' + @strTblName + 'EDate' + ',' + @strTblName + '.' + 'dblUnitCost as ' + @strTblName + 'Clb' + ','
+				SET @strLot = @strLot + @strTblName + '.' + 'intParentLotId as ' + @aliasName + ',' + @strTblName + '.' + 'intItemId as ' + @strTblName + ',' + @strTblName + '.' + 'dblQuantity as ' + @strTblName + 'Qty' + ',' + @strTblName + '.' + 'dtmCreateDate as ' + @strTblName + 'CDate ' + ',' + @strTblName + '.' + 'dtmExpiryDate as ' + @strTblName + 'EDate'+ ',' + @strTblName + '.' + 'intPreference as ' + @strTblName + 'Preference' + ',' + @strTblName + '.' + 'dblUnitCost as ' + @strTblName + 'Clb' + ','
 				SET @strFromTB = @strFromTB + @strTblName + ','
 
 				IF CHARINDEX(@strTblName, @strOrderByCost) = 0
@@ -986,6 +996,9 @@ BEGIN TRY
 
 				IF CHARINDEX(@strTblName, @strOrderByFEFO) = 0
 					SET @strOrderByFEFO = @strOrderByFEFO + + @strTblName + 'EDate ASC, '
+
+				IF CHARINDEX(@strTblName, @strOrderByPreference) = 0
+					SELECT @strOrderByPreference = @strOrderByPreference + @strTblName + 'Preference ASC, '
 
 				SELECT @intMinTableName = MIN(intRowNo)
 				FROM #tblNames
@@ -1050,7 +1063,7 @@ BEGIN TRY
 			SET @strOrderByFinal = LEFT(@strOrderByFinal, LEN(@strOrderByFinal) - 1)
 
 		IF RIGHT(@strFromTB, 1) = ','
-			SET @strFromTB = ' INTO ##tblResult FROM ' + LEFT(@strFromTB, LEN(@strFromTB) - 1) + ' Order By ' + @strOrderByFinal
+			SET @strFromTB = ' INTO ##tblResult FROM ' + LEFT(@strFromTB, LEN(@strFromTB) - 1) + ' Order By '+@strOrderByPreference + @strOrderByFinal
 
 		IF RIGHT(@strSQLFinal, 1) = ','
 			SET @strSQLFinal = LEFT(@strSQLFinal, LEN(@strSQLFinal) - 1)
@@ -1271,7 +1284,7 @@ BEGIN TRY
 							ELSE @dblSelectedQty --To Review ROUND(@dblSelectedQty,3) 
 							END AS dblIssuedQuantity
 						,CASE 
-							WHEN @intIssuedUOMTypeId = 2
+							WHEN @intIssuedUOMTypeId in (2,3)
 								THEN L.intItemUOMId
 							ELSE L.intWeightUOMId
 							END AS intItemIssuedUOMId
@@ -1321,7 +1334,7 @@ BEGIN TRY
 						ELSE @dblSelectedQty --To Review ROUND(@dblSelectedQty,3) 
 						END
 					,@intItemIssuedUOMId = CASE 
-						WHEN @intIssuedUOMTypeId = 2
+						WHEN @intIssuedUOMTypeId in (2,3)
 							THEN L.intItemUOMId
 						ELSE L.intWeightUOMId
 						END
@@ -1334,7 +1347,7 @@ BEGIN TRY
 					,@dblLastCost = L.dblLastCost
 				FROM tblICLot L
 				WHERE L.intParentLotId = @intLotId
-					AND L.dblWeight > 0
+					AND L.dblWeight -IsNULL((Select SUM(SR.dblQty) from tblICStockReservation SR Where SR.intLotId =L.intLotId),0)> 0
 
 				IF @intIssuedUOMTypeId = 3
 				BEGIN
@@ -2018,6 +2031,7 @@ BEGIN TRY
 			,SL.strName AS strStorageLocationName
 			,CL.strLocationName
 			,@intLocationId AS intLocationId
+			,CSL.strSubLocationName
 			,CAST(1 AS BIT) ysnParentLot
 			,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS
@@ -2028,6 +2042,7 @@ BEGIN TRY
 		INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.intItemIssuedUOMId
 		INNER JOIN tblICUnitMeasure UM2 ON IU2.intUnitMeasureId = UM2.intUnitMeasureId
 		INNER JOIN tblICStorageLocation SL ON SL.intStorageLocationId = BS.intStorageLocationId
+		INNER JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId
 		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = SL.intLocationId
 		WHERE BS.dblQuantity > 0
 	ELSE

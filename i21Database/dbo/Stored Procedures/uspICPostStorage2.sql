@@ -25,7 +25,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Declare the variables to use for the cursor
 DECLARE @intId AS INT 
@@ -50,6 +50,10 @@ DECLARE @intId AS INT
 		,@intForexRateTypeId AS INT
 		,@dblForexRate NUMERIC(38, 20)
 		,@intSourceEntityId INT 
+		,@strSourceType AS NVARCHAR(100)
+		,@strSourceNumber AS NVARCHAR(100)
+		,@strBOLNumber AS NVARCHAR(100)
+		,@intTicketId AS INT 
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
@@ -106,6 +110,10 @@ INSERT INTO @StorageToPost (
 	,[intCostingMethod]
 	,[ysnAllowVoucher]
 	,[intSourceEntityId]
+	,[strSourceType]
+	,[strSourceNumber]
+	,[strBOLNumber]
+	,[intTicketId]
 )
 SELECT
 	[intItemId] = p.intItemId 
@@ -141,6 +149,10 @@ SELECT
 	,[intCostingMethod] = p.intCostingMethod
 	,[ysnAllowVoucher] = p.ysnAllowVoucher
 	,[intSourceEntityId] = p.intSourceEntityId 
+	,[strSourceType] = p.strSourceType
+	,[strSourceNumber] = p.strSourceNumber
+	,[strBOLNumber] = p.strBOLNumber
+	,[intTicketId] = p.intTicketId
 FROM 
 	@ItemsToStorage p 
 	INNER JOIN tblICItem i 
@@ -191,6 +203,10 @@ SELECT  intId
 		,intForexRateTypeId
 		,dblForexRate
 		,intSourceEntityId
+		,strSourceType
+		,strSourceNumber
+		,strBOLNumber
+		,intTicketId
 FROM	@StorageToPost
 
 OPEN loopItems;
@@ -219,6 +235,10 @@ FETCH NEXT FROM loopItems INTO
 	,@intForexRateTypeId
 	,@dblForexRate
 	,@intSourceEntityId
+	,@strSourceType
+	,@strSourceNumber
+	,@strBOLNumber
+	,@intTicketId
 	;
 	
 -----------------------------------------------------------------------------------------------------------------------------
@@ -275,6 +295,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
@@ -305,6 +329,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
@@ -336,6 +364,10 @@ BEGIN
 			,@intForexRateTypeId
 			,@dblForexRate
 			,@intSourceEntityId
+			,@strSourceType
+			,@strSourceNumber
+			,@strBOLNumber
+			,@intTicketId
 
 		IF @returnValue < 0 GOTO _TerminateLoop;
 	END
@@ -381,6 +413,10 @@ BEGIN
 		,@intForexRateTypeId
 		,@dblForexRate
 		,@intSourceEntityId
+		,@strSourceType
+		,@strSourceNumber
+		,@strBOLNumber
+		,@intTicketId
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop

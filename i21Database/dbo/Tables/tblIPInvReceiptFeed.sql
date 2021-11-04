@@ -3,6 +3,8 @@
 	intReceiptFeedId			INT IDENTITY(1,1),
 	strCompanyLocation			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intInventoryReceiptId		INT,
+	intInventoryReceiptItemId	INT,
+	intReceiptFeedHeaderId		INT,
 	strReceiptNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strTransferNo				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strERPTransferOrderNo		NVARCHAR(50) COLLATE Latin1_General_CI_AS,

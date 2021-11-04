@@ -20,6 +20,8 @@ SELECT @TransactionTypeId = [intTransactionTypeId]
 FROM dbo.tblICInventoryTransactionType 
 WHERE [strName] = 'Invoice'
 
+SELECT  @FromPosting = CASE WHEN  @Post = 1 THEN 1 ELSE 0 END
+
 DECLARE @items ItemReservationTableType
 
 INSERT INTO @items (												
@@ -76,16 +78,17 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
   AND ARID.[intInventoryShipmentItemId] IS NULL
   AND ARID.[intLoadDetailId] IS NULL		
   AND (SC.[intTicketId] IS NULL OR (SC.[intTicketId] IS NOT NULL AND ISNULL(SC.[strTicketType],'') <> 'Direct Out'))
-  AND (
-		(
-			ICI.[strManufactureType] <> 'Finished Good'
-			OR
-			(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
-		)
-	OR 
-		NOT(ICI.[strManufactureType] = 'Finished Good' AND ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
+  AND ISNULL(ICI.[ysnAutoBlend], 0) = 0
+--   (
+-- 		(
+-- 			ICI.[strManufactureType] <> 'Finished Good'
+-- 			OR
+-- 			(ICI.[strManufactureType] = 'Finished Good' AND (ICI.[ysnAutoBlend] = 0  OR ISNULL(@Negate, 0) = 1))
+-- 		)
+-- 	OR 
+-- 		NOT(ICI.[ysnAutoBlend] = 1 AND ICGIS.[dblUnitOnHand] < [dbo].[fnICConvertUOMtoStockUnit](ARID.[intItemId], ARID.[intItemUOMId], ARID.[dblQtyShipped]))			
 				
-	)
+-- 	)
 	
 UNION ALL
 

@@ -279,6 +279,7 @@ BEGIN
 		,TM.strTerm
 		,Inv.dtmDueDate
 		,dtmInvoiceDate = Inv.dtmDate
+		,dtmPostDate = Inv.dtmPostDate
 		,strInvoicePaymentInformation = @strPaymentInfo 
 		,strWarehouse = SWH.strSubLocationName
 		,strWarehouseCondition = (SELECT TOP 1 CASE WHEN ISNULL(ID.strItemDescription, '') = '' 

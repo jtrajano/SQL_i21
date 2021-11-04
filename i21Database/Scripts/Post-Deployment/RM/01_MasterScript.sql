@@ -113,10 +113,18 @@ BEGIN
 END
 GO
 
+PRINT('/*******************  START Deleting DPR Header data *******************/')
+GO
 IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKDPRHeader')
 BEGIN
+	TRUNCATE TABLE tblRKDPRInventory
+	TRUNCATE TABLE tblRKDPRContractHedge
+	TRUNCATE TABLE tblRKDPRContractHedgeByMonth
+	TRUNCATE TABLE tblRKDPRYearToDate
 	DELETE FROM tblRKDPRHeader
 END
+GO
+PRINT('/*******************  END Deleting DPR Header data *******************/')
 GO
 
 IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKLogAction')
@@ -197,10 +205,29 @@ BEGIN
 		UNION ALL SELECT 65, 'Deleted Credit Memo', 'Deleted Credit Memo.'
 		UNION ALL SELECT 66, 'Posted Credit Memo', 'Posted Credit Memo.'
 		UNION ALL SELECT 67, 'Price Updated', 'Price Updated.'
+		UNION ALL SELECT 68, 'Delete Match Derivatives', 'Delete Match Derivatives.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 
 	SET IDENTITY_INSERT tblRKLogAction OFF
 
 END
+
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKM2MType')
+BEGIN
+	SET IDENTITY_INSERT tblRKM2MType ON
+    
+	INSERT INTO tblRKM2MType(intM2MTypeId
+		, strType)
+	SELECT * FROM (
+		SELECT intM2MTypeId = 1
+			, strType = 'Mark to Market'
+		UNION ALL SELECT 2
+			, 'Stress Test'
+	) t
+	WHERE intM2MTypeId NOT IN (SELECT intM2MTypeId FROM tblRKM2MType)
+
+	SET IDENTITY_INSERT tblRKM2MType OFF
+END
+
 GO

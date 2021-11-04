@@ -449,7 +449,13 @@ BEGIN TRY
 				,ri.intItemId
 				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
 				,0 AS ysnIsSubstitute
-				,ri.ysnMinorIngredient
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
@@ -479,7 +485,13 @@ BEGIN TRY
 				,rs.intSubstituteItemId AS intItemId
 				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 				,1 AS ysnIsSubstitute
-				,0
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,ri.intItemId
@@ -498,7 +510,7 @@ BEGIN TRY
 			JOIN tblICItem i ON rs.intSubstituteItemId = i.intItemId
 			WHERE r.intWorkOrderId = @intWorkOrderId
 				AND rs.intRecipeItemTypeId = 1
-			ORDER BY 4 Desc
+			ORDER BY 4 DESC
 				,ysnIsSubstitute
 				,ysnMinorIngredient
 
@@ -532,7 +544,13 @@ BEGIN TRY
 				,ri.intItemId
 				,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) AS dblRequiredQty
 				,0 AS ysnIsSubstitute
-				,ri.ysnMinorIngredient
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,ri.intConsumptionMethodId
 				,ri.intStorageLocationId
 				,0
@@ -574,7 +592,13 @@ BEGIN TRY
 				,rs.intSubstituteItemId AS intItemId
 				,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 				,1 AS ysnIsSubstitute
-				,0
+				,(
+					CASE 
+						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
+							THEN 1
+						ELSE 0
+						END
+					) AS ysnMinorIngredient
 				,1
 				,0
 				,ri.intItemId
@@ -592,7 +616,7 @@ BEGIN TRY
 			JOIN tblICItem i ON ri.intItemId = i.intItemId
 			WHERE r.intRecipeId = @intRecipeId
 				AND rs.intRecipeItemTypeId = 1
-			ORDER BY 4 Desc
+			ORDER BY 4 DESC
 				,ysnIsSubstitute
 				,ysnMinorIngredient
 
@@ -810,7 +834,9 @@ BEGIN TRY
 					WHERE ysnMinorIngredient = 0
 
 					SELECT @dblQuantityTaken = Sum(dblQuantity)
-					FROM #tblBlendSheetLot
+					FROM #tblBlendSheetLot BS
+					JOIN @tblInputItem I on I.intItemId =BS.intItemId 
+					Where I.ysnMinorIngredient = 0
 
 					IF @dblQuantityTaken > @sRequiredQty
 					BEGIN
@@ -851,6 +877,7 @@ BEGIN TRY
 				,intParentLotId INT
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblParentLot') IS NOT NULL
@@ -871,6 +898,7 @@ BEGIN TRY
 				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblAvailableInputLot') IS NOT NULL
@@ -888,6 +916,7 @@ BEGIN TRY
 				,dblUnitCost NUMERIC(38, 20)
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblInputLot') IS NOT NULL
@@ -902,6 +931,7 @@ BEGIN TRY
 				,dblWeightPerQty NUMERIC(38, 20)
 				,intItemUOMId INT
 				,intItemIssuedUOMId INT
+				,intPreference INT
 				)
 
 			IF OBJECT_ID('tempdb..#tblInputLotHandAdd') IS NOT NULL
@@ -1084,6 +1114,7 @@ BEGIN TRY
 				,intParentLotId
 				,intItemUOMId
 				,intItemIssuedUOMId
+				,intPreference
 				)
 			SELECT L.intLotId
 				,L.strLotNumber
@@ -1104,12 +1135,19 @@ BEGIN TRY
 				,L.intParentLotId
 				,ISNULL(L.intWeightUOMId, L.intItemUOMId)
 				,L.intItemUOMId
+				,(
+					CASE 
+						WHEN SubLoc.intSubLocationId IS NOT NULL
+							THEN 1
+						ELSE 2
+						END
+					) AS intPreference
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 			JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 			JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
-			JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
+			LEFT JOIN @tblSourceSubLocation SubLoc ON SubLoc.intSubLocationId = L.intSubLocationId
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
@@ -1193,6 +1231,7 @@ BEGIN TRY
 						,strCreatedBy
 						,intItemUOMId
 						,intItemIssuedUOMId
+						,intPreference
 						)
 					SELECT TL.intParentLotId
 						,PL.strParentLotNumber
@@ -1208,6 +1247,7 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
 					FROM #tblLot TL
 					JOIN tblICParentLot PL ON TL.intParentLotId = PL.intParentLotId
 					GROUP BY TL.intParentLotId
@@ -1222,6 +1262,7 @@ BEGIN TRY
 						,TL.strCreatedBy
 						,TL.intItemUOMId
 						,TL.intItemIssuedUOMId
+						,TL.intPreference
 				END
 				ELSE
 				BEGIN
@@ -1295,6 +1336,7 @@ BEGIN TRY
 					,dblUnitCost
 					,intItemUOMId
 					,intItemIssuedUOMId
+					,intPreference
 					)
 				SELECT PL.intParentLotId
 					,PL.intItemId
@@ -1306,10 +1348,12 @@ BEGIN TRY
 								WHERE SR.intParentLotId = PL.intParentLotId --Review when Parent Lot Reservation Done
 									AND SR.intStorageLocationId = PL.intStorageLocationId
 									AND ISNULL(SR.ysnPosted, 0) = 0
+									AND SR.intItemId = PL.intItemId
 								) + (
 								SELECT ISNULL(SUM(BS.dblQuantity), 0)
 								FROM #tblBlendSheetLot BS
 								WHERE BS.intParentLotId = PL.intParentLotId
+									AND BS.intItemId = PL.intItemId
 								)
 							)
 						) AS dblAvailableQty
@@ -1320,11 +1364,13 @@ BEGIN TRY
 					,PL.dblUnitCost
 					,PL.intItemUOMId
 					,PL.intItemIssuedUOMId
+					,PL.intPreference
 				FROM #tblParentLot AS PL
 				WHERE PL.intItemId = @intRawItemId
 			END
 
 			IF @ysnEnableParentLot = 1
+				AND @ysnShowAvailableLotsByStorageLocation = 0
 			BEGIN
 				INSERT INTO #tblAvailableInputLot (
 					intParentLotId
@@ -1409,9 +1455,9 @@ BEGIN TRY
 			--Apply Business Rules
 			IF ISNULL(@ysnWOStagePick, 0) = 0
 			BEGIN
-				SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
-									   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId 
-									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > ' + CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' ORDER BY ' + @strOrderByFinal
+				SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId,intPreference) 
+									   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId,IsNULL(intPreference,1)  
+									   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > ' + CONVERT(VARCHAR(50), @dblDefaultResidueQty) + ' ORDER BY IsNULL(intPreference,1), ' + @strOrderByFinal
 
 				EXEC (@strSQL)
 			END
@@ -1605,6 +1651,7 @@ BEGIN TRY
 				,intStorageLocationId
 				,dblWeightPerQty
 			FROM #tblInputLot
+			ORDER BY IsNULL(intPreference, 1)
 
 			OPEN Cursor_FetchItem
 
@@ -1721,7 +1768,10 @@ BEGIN TRY
 									)
 								,@intItemIssuedUOMId = (
 									CASE 
-										WHEN @intIssuedUOMTypeId in (2,3)
+										WHEN @intIssuedUOMTypeId IN (
+												2
+												,3
+												)
 											THEN L.intItemIssuedUOMId
 										ELSE L.intItemUOMId
 										END
@@ -1742,7 +1792,7 @@ BEGIN TRY
 						IF @intIssuedUOMTypeId = 3
 						BEGIN
 							SELECT @dblQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0) * @dblWeightPerQty)
-							,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0) )
+								,@dblIssuedQuantity = Convert(NUMERIC(38, 20), Round(@dblRequiredQty / @dblWeightPerQty, 0))
 
 							IF @dblQuantity = 0
 							BEGIN
@@ -1928,7 +1978,7 @@ BEGIN TRY
 								,dblWeightPerQty
 								,dblUnitCost
 								)
-							SELECT L.intParentLotId
+							SELECT TOP 1 L.intParentLotId
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2

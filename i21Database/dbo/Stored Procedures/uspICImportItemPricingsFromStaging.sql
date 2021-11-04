@@ -1,19 +1,13 @@
 CREATE PROCEDURE uspICImportItemPricingsFromStaging 
 	@strIdentifier NVARCHAR(100)
+	, @ysnAllowOverwrite BIT = 0
+	, @ysnVerboseLog BIT = 1
 	, @intDataSourceId INT = 2
 AS
 
 DELETE FROM tblICImportStagingItemPricing WHERE strImportIdentifier <> @strIdentifier
 
-;WITH cte AS
-(
-   SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation) AS RowNumber
-   FROM tblICImportStagingItemPricing
-   WHERE strImportIdentifier = @strIdentifier
-)
-DELETE FROM cte WHERE RowNumber > 1;
-
-CREATE TABLE #tmp (
+CREATE TABLE #tmpItemPricing (
 	  intId INT IDENTITY(1, 1) PRIMARY KEY
 	, intItemId INT NULL
 	, intItemLocationId INT NULL
@@ -30,7 +24,159 @@ CREATE TABLE #tmp (
 	, intCreatedByUserId INT NULL
 )
 
-INSERT INTO #tmp
+CREATE TABLE #tmp_invalidItems (
+	intId INT 
+	,strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+)
+
+CREATE TABLE #tmp_invalidLocations (
+	intId INT 
+	,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+)
+
+CREATE TABLE #tmp_invalidItemLocations (
+	intId INT 
+	,strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+)
+
+-----------------------------------------------
+-- Begin Validate records
+-----------------------------------------------
+BEGIN 
+	-- Invalid items
+	INSERT INTO #tmp_invalidItems (
+		intId
+		, strItemNo
+	)
+	SELECT 		
+		s.intId 
+		, s.strItemNo
+	FROM 
+		(
+			SELECT 
+				intId = ROW_NUMBER() OVER(ORDER BY s.intImportStagingItemPricingId) 
+				,s.* 
+			FROM 
+				tblICImportStagingItemPricing s 
+			WHERE
+				s.strImportIdentifier = @strIdentifier		
+		) s
+		LEFT JOIN tblICItem i
+			ON s.strItemNo = i.strItemNo
+	WHERE	
+		i.intItemId IS NULL 
+	
+	-- Invalid Locations
+	INSERT INTO #tmp_invalidLocations (
+		s.intId
+		, strLocationName
+	)
+	SELECT 
+		s.intId 
+		, s.strLocation
+	FROM 
+		(
+			SELECT 
+				intId = ROW_NUMBER() OVER(ORDER BY s.intImportStagingItemPricingId) 
+				,s.* 
+			FROM 
+				tblICImportStagingItemPricing s 
+			WHERE
+				s.strImportIdentifier = @strIdentifier		
+		) s
+		LEFT JOIN tblSMCompanyLocation cl
+			ON s.strLocation = cl.strLocationName
+	WHERE	
+		cl.intCompanyLocationId IS NULL 
+
+	-- Invalid Locations
+	INSERT INTO #tmp_invalidItemLocations (
+		intId
+		, strItemNo
+		, strLocationName
+	)
+	SELECT 
+		s.intId 
+		,s.strItemNo
+		,s.strLocation
+	FROM 
+		(
+			SELECT 
+				intId = ROW_NUMBER() OVER(ORDER BY s.intImportStagingItemPricingId) 
+				,s.* 
+			FROM 
+				tblICImportStagingItemPricing s 
+			WHERE
+				s.strImportIdentifier = @strIdentifier		
+		) s
+		INNER JOIN tblICItem i 
+			ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo))) 
+		INNER JOIN tblSMCompanyLocation c 
+			ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+			OR LOWER(c.strLocationNumber) = LTRIM(RTRIM(LOWER(s.strLocation)))
+		LEFT JOIN tblICItemLocation il 
+			ON il.intLocationId = c.intCompanyLocationId
+			AND il.intItemId = i.intItemId
+	WHERE 
+		i.intItemId IS NOT NULL
+		AND c.intCompanyLocationId IS NOT NULL 
+		AND il.intItemLocationId IS NULL 
+
+END 
+-----------------------------------------------
+-- End Validate records
+-----------------------------------------------
+
+-- Get the total rows. 
+DECLARE @TotalRows AS INT 
+SELECT @TotalRows = COUNT(1) FROM tblICImportStagingItemPricing s WHERE s.strImportIdentifier = @strIdentifier
+
+DECLARE @tblDuplicateItemNo TABLE(
+	intId INT 
+	,strItemNo NVARCHAR(200)
+	,strLocationName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+);
+
+-- Retrieve the duplicate records. 
+INSERT INTO @tblDuplicateItemNo (
+	intId 
+	,strItemNo
+	,strLocationName
+)
+SELECT 
+	intId
+	,strItemNo
+	,strLocation 
+FROM
+	(
+		SELECT 
+			*
+			, RowNumber = ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation)
+			, intId = ROW_NUMBER() OVER(ORDER BY intImportStagingItemPricingId) 
+		FROM 
+			tblICImportStagingItemPricing
+		WHERE 
+			strImportIdentifier = @strIdentifier
+	) AS DuplicateCounter
+WHERE 
+	RowNumber > 1
+
+-- Delete the duplicate records. 
+;WITH cte AS
+(
+   SELECT 
+		*
+		, ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation) AS RowNumber
+   FROM 
+		tblICImportStagingItemPricing
+   WHERE 
+		strImportIdentifier = @strIdentifier
+)
+DELETE FROM cte WHERE RowNumber > 1;
+
+-- Get the valid records
+INSERT INTO #tmpItemPricing
 (
 	  intItemId				
 	, intItemLocationId		
@@ -90,7 +236,7 @@ USING
 	, dblDefaultGrossPrice
 	, dtmDateCreated		
 	, intCreatedByUserId
-	FROM #tmp s
+	FROM #tmpItemPricing s
 ) AS 
 	source ON [target].intItemId = source.intItemId
 	AND [target].intItemLocationId = source.intItemLocationId
@@ -152,7 +298,7 @@ EXEC dbo.uspICUpdateItemImportedPricingLevel
 DECLARE @intItemId INT
 DECLARE @intUserId INT
 DECLARE cur CURSOR FOR
-SELECT DISTINCT intItemId, intCreatedByUserId FROM #tmp
+SELECT DISTINCT intItemId, intCreatedByUserId FROM #tmpItemPricing
 
 OPEN cur
 
@@ -169,18 +315,293 @@ DEALLOCATE cur
 
 -- Logs 
 BEGIN 
+	DECLARE 
+		@intRowsImported AS INT 
+		,@intRowsUpdated AS INT
+		,@intRowsSkipped AS INT	
+
+	SELECT @intRowsImported = COUNT(*) FROM #output WHERE strAction = 'INSERT'
+	SELECT @intRowsUpdated = COUNT(*) FROM #output WHERE strAction = 'UPDATE'
+	
+	SELECT 
+		@intRowsSkipped = ISNULL(@TotalRows, 0) - ISNULL(@intRowsImported, 0) - ISNULL(@intRowsUpdated, 0)
+	FROM 
+		tblICImportStagingItemPricing s
+	WHERE
+		s.strImportIdentifier = @strIdentifier
+
 	INSERT INTO tblICImportLogFromStaging (
 		[strUniqueId] 
 		,[intRowsImported] 
 		,[intRowsUpdated] 
+		,[intRowsSkipped]
 	)
 	SELECT
 		@strIdentifier
-		,intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
-		,intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
+		,intRowsImported = @intRowsImported
+		,intRowsUpdated = @intRowsUpdated
+		,intRowsSkipped = ISNULL(@intRowsSkipped, 0)
+
+	IF @ysnVerboseLog = 1
+	BEGIN 
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, intId
+			, 'Item No'
+			, 'Import Failed.'
+			, strItemNo
+			, 'Item "' + strItemNo + '" is not found.'
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			#tmp_invalidItems
+
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, intId
+			, 'Location'
+			, 'Import Failed.'
+			, strLocationName
+			, 'Location "' + strLocationName + '" is not found.'
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			#tmp_invalidLocations
+
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, intId
+			, 'Item Location'
+			, 'Import Failed.'
+			, strItemNo
+			, 'Location "' + strLocationName + '" is not configured for Item "' + strItemNo + '".'
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			#tmp_invalidItemLocations
+
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, intId
+			, 'Item No'
+			, 'Import Failed.'
+			, strItemNo
+			, 'Duplicate Item No "' + strItemNo + '" and Location "' + strLocationName + '"'
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			@tblDuplicateItemNo
+	END 
+	ELSE 
+	BEGIN 
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, 1
+			, 'Item No'
+			, 'Import Failed.'
+			, NULL
+			, dbo.fnFormatMessage(
+				'There are %i Item(s) not found'
+				,COUNT(1) 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+			)
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			#tmp_invalidItems
+		HAVING 
+			COUNT(1) > 0
+
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, 1
+			, 'Location'
+			, 'Import Failed.'
+			, NULL
+			, dbo.fnFormatMessage(
+				'There are %i Location(s) not found.'
+				,COUNT(1) 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+			)
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			#tmp_invalidLocations
+		HAVING 
+			COUNT(1) > 0
+
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, 1
+			, 'Item Location'
+			, 'Import Failed.'
+			, NULL 
+			, dbo.fnFormatMessage(
+				'There are %i Location(s) missing in the Item setup.'
+				,COUNT(1) 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+			)
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			#tmp_invalidItemLocations
+		HAVING 
+			COUNT(1) > 0
+
+		INSERT INTO tblICImportLogDetailFromStaging(
+			strUniqueId
+			, intRecordNo
+			, strField
+			, strAction
+			, strValue
+			, strMessage
+			, strStatus
+			, strType
+			, intConcurrencyId
+		)
+		SELECT 
+			@strIdentifier
+			, 1
+			, 'Item No'
+			, 'Import Failed.'
+			, NULL 
+			--, 'Duplicate Item No "' + strItemNo + '" and Location "' + strLocationName + '"'
+			, dbo.fnFormatMessage(
+				'There are %i duplicate record(s) found.'
+				,COUNT(1) 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+				,DEFAULT 
+			)
+			, 'Failed'
+			, 'Error'
+			, 1
+		FROM 
+			@tblDuplicateItemNo
+		HAVING 
+			COUNT(1) > 0
+
+	END 
 END
 
-DROP TABLE #tmp
+DROP TABLE #tmpItemPricing
 DROP TABLE #output
+DROP TABLE #tmp_invalidItems
+DROP TABLE #tmp_invalidLocations
+DROP TABLE #tmp_invalidItemLocations
 
 DELETE FROM [tblICImportStagingItemPricing] WHERE strImportIdentifier = @strIdentifier

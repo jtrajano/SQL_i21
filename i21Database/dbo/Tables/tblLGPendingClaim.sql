@@ -43,3 +43,10 @@
 	CONSTRAINT [FK_tblLGPendingClaim_tblICItemUOM_intSeqPriceUOMId] FOREIGN KEY ([intSeqPriceUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblICUnitMeasure] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGPendingClaim_intLoadId] ON [dbo].[tblLGPendingClaim]
+(
+	[intLoadId], [intPurchaseSale], [intContractDetailId], [intLoadContainerId]
+)
+GO

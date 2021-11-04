@@ -14,6 +14,12 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;  
 IF @transCount = 0 BEGIN TRANSACTION; 
 
+UPDATE I
+SET I.intEntityVendorId = ISNULL(MD.intEntityVendorId, -1), I.strNotes = CASE WHEN MD.intEntityVendorId IS NULL THEN 'Vendor Mapping not found.' ELSE NULL END
+FROM tblAPImportPaidVouchersForPayment I
+LEFT JOIN tblGLVendorMapping VM ON VM.intVendorMappingId = I.intEntityVendorId
+LEFT JOIN tblGLVendorMappingDetail MD ON MD.intVendorMappingId = VM.intVendorMappingId AND MD.strMapVendorName = I.strEntityVendorName
+
 ;WITH cte AS (
 	SELECT ROW_NUMBER() OVER(PARTITION BY A.strVendorOrderNumber ORDER BY A.intId) intRow,
 	A.intId
@@ -35,14 +41,20 @@ UPDATE A
 						B.intBillId IS NULL
 					THEN 'Voucher not found.'
 					WHEN 
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue
-					THEN 'Overpayment'
-					WHEN 
-						((A.dblPayment + A.dblDiscount) - A.dblInterest) < (B.dblAmountDue * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END))
-					THEN 'Underpayment'
+						A.dblPayment > 0 AND B.intTransactionType != 1
+					THEN 'Amount is positive. Voucher type is expected.'
 					WHEN 
 						A.dblPayment < 0 AND B.intTransactionType != 3
 					THEN 'Amount is negative. Debit Memo type is expected.'
+					WHEN 
+						B.intTransactionType = 3 AND ((A.dblPayment + A.dblDiscount) - A.dblInterest) > 0
+					THEN 'Debit Memo type amount should be negative.'
+					WHEN 
+						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue
+					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Underpayment' ELSE 'Overpayment' END)
+					WHEN 
+						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue
+					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Overpayment' ELSE 'Underpayment' END)
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
@@ -53,10 +65,11 @@ OUTER APPLY	(
 	FROM (
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
 		FROM tblAPBill 
-		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId
+		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId AND CONVERT(NVARCHAR(10), dtmBillDate, 101) = CONVERT(NVARCHAR(10), A.dtmBillDate, 101)
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
+WHERE A.strNotes IS NULL
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
   

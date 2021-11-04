@@ -11,7 +11,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Create the variables used by fnGetItemGLAccount
 DECLARE @AccountCategory_APClearing AS NVARCHAR(255) = 'AP Clearing'
@@ -380,6 +380,8 @@ AS
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
 					,DEFAULT
+					,ri.intComputeItemTotalOption
+					,ri.dblOpenReceive
 				)
 		,intSourceEntityId = r.intEntityVendorId
 		,intCommodityId = i.intCommodityId
@@ -630,6 +632,8 @@ BEGIN
 					,ri.ysnSubCurrency
 					,r.intSubCurrencyCents
 					,DEFAULT
+					,ri.intComputeItemTotalOption
+					,ri.dblOpenReceive
 				)
 		,strBatchId = @strBatchId
 	FROM 

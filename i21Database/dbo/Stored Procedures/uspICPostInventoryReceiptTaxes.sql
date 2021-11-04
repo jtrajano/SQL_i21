@@ -730,6 +730,7 @@ BEGIN
 	WHERE	
 		Receipt.intInventoryReceiptId = @intInventoryReceiptId
 		AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own	
+		AND Receipt.intEntityVendorId IS NOT NULL  
 
 	-- Taxes from the Other Charges that is for the Receipt Vendor. 
 	INSERT INTO tblICAPClearing (
@@ -823,7 +824,7 @@ BEGIN
 	WHERE	
 		Receipt.intInventoryReceiptId = @intInventoryReceiptId	
 		AND (ReceiptCharge.ysnAccrue = 1 OR ReceiptCharge.ysnPrice = 1) -- Note: Tax is only computed if ysnAccrue is Y or ysnPrice is Y. 
-
+		AND Receipt.intEntityVendorId IS NOT NULL 
 
 	-- Taxes from the Other Charges that is for the 3rd Party Vendor. 
 	INSERT INTO tblICAPClearing (
@@ -919,6 +920,7 @@ BEGIN
 		Receipt.intInventoryReceiptId = @intInventoryReceiptId
 		AND ReceiptCharge.ysnAccrue = 1 
 		AND ReceiptCharge.ysnPrice = 1 
+		AND ReceiptCharge.intEntityVendorId IS NOT NULL 
 END
 
 -- Exit point

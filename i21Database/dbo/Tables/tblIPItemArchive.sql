@@ -92,6 +92,7 @@
 	,ysnRainForestCertified BIT DEFAULT 0
 	,strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	,ysnOtherChargeItem BIT DEFAULT 0
 
 	,CONSTRAINT [PK_tblIPItemArchive_intStageItemId] PRIMARY KEY ([intStageItemId]) 
 )

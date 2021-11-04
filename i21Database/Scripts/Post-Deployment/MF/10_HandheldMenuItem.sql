@@ -240,6 +240,17 @@ BEGIN
 END
 GO
 
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHandheldMenuItem
+		WHERE strHandheldMenuItemName = 'LCR Shipment / Transfer'
+		)
+BEGIN
+	INSERT INTO tblMFHandheldMenuItem
+	VALUES ('LCR Shipment / Transfer')
+END
+GO
+
 --INSERT INTO tblMFHaldheldUserMenuItemMap
 --SELECT b.intEntityId
 -- ,intHandheldMenuItemId

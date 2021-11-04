@@ -10,6 +10,7 @@ BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@strMessage NVARCHAR(MAX)
+		,@OriginalTrxSequenceNo BIGINT
 		,@TrxSequenceNo BIGINT
 		,@CompanyLocation NVARCHAR(6)
 		,@CreatedDate DATETIME
@@ -25,6 +26,7 @@ BEGIN TRY
 		,@ERPServicePONo NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
+		,OriginalTrxSequenceNo BIGINT
 		,TrxSequenceNo BIGINT
 		,CompanyLocation NVARCHAR(6)
 		,CreatedDate DATETIME
@@ -44,7 +46,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'Service Order Ack'
+	WHERE strType = 'Service PO Ack'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -67,7 +69,8 @@ BEGIN TRY
 			FROM @tblAcknowledgement
 
 			INSERT INTO @tblAcknowledgement (
-				TrxSequenceNo
+				OriginalTrxSequenceNo
+				,TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
@@ -77,7 +80,8 @@ BEGIN TRY
 				,StatusId
 				,StatusText
 				)
-			SELECT TrxSequenceNo
+			SELECT OriginalTrxSequenceNo
+				,TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
@@ -87,7 +91,8 @@ BEGIN TRY
 				,StatusId
 				,StatusText
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo BIGINT
+					OriginalTrxSequenceNo BIGINT
+					,TrxSequenceNo BIGINT
 					,CompanyLocation NVARCHAR(6)
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
@@ -103,7 +108,7 @@ BEGIN TRY
 
 			WHILE (@intMinRowNo IS NOT NULL)
 			BEGIN
-				SELECT @TrxSequenceNo = NULL
+				SELECT @OriginalTrxSequenceNo = NULL
 					,@CompanyLocation = NULL
 					,@CreatedDate = NULL
 					,@CreatedBy = NULL
@@ -112,8 +117,9 @@ BEGIN TRY
 					,@StatusId = NULL
 					,@StatusText = NULL
 					,@ERPServicePONo = NULL
+					,@TrxSequenceNo = NULL
 
-				SELECT @TrxSequenceNo = TrxSequenceNo
+				SELECT @OriginalTrxSequenceNo = OriginalTrxSequenceNo
 					,@CompanyLocation = CompanyLocation
 					,@CreatedDate = CreatedDate
 					,@CreatedBy = CreatedBy
@@ -122,32 +128,49 @@ BEGIN TRY
 					,@ERPServicePONo = ERPServicePONo
 					,@StatusId = StatusId
 					,@StatusText = StatusText
+					,@TrxSequenceNo = TrxSequenceNo
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
 				SELECT @intWorkOrderId = intWorkOrderId
 				FROM tblMFWorkOrderPreStage
-				WHERE intWorkOrderPreStageId = @TrxSequenceNo
+				WHERE intWorkOrderPreStageId = @OriginalTrxSequenceNo
 
 				UPDATE tblMFWorkOrderPreStage
 				SET intStatusId = 6
-					,strMessage='Success'
-				WHERE intWorkOrderPreStageId = @TrxSequenceNo
+					,strMessage = 'Success'
+				WHERE intWorkOrderPreStageId = @OriginalTrxSequenceNo
 
 				UPDATE tblMFWorkOrder
 				SET strERPServicePONumber = @ERPServicePONo
 					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intWorkOrderId = @intWorkOrderId
 
-				UPDATE RMD
-				SET strERPServicePOLineNo = ERPServicePOlineNo
+				UPDATE tblMFWorkOrderWarehouseRateMatrixDetail
+				SET strERPServicePOLineNo = x.ERPServicePOLineNo
 				FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-						TrxSequenceNo BIGINT
-						,ERPServicePOlineNo NVARCHAR(50)
-						,parentId BIGINT '@parentId'
+						OriginalTrxSequenceNo BIGINT '../OriginalTrxSequenceNo'
+						,ERPServicePOLineNo NVARCHAR(50)
 						) x
-				JOIN dbo.tblMFWorkOrderWarehouseRateMatrixDetail RMD ON RMD.intWorkOrderWarehouseRateMatrixDetailId = x.TrxSequenceNo
-				WHERE RMD.intWorkOrderId = @intWorkOrderId and parentId=@TrxSequenceNo
+				WHERE intWorkOrderId = @intWorkOrderId
+					AND x.OriginalTrxSequenceNo = @OriginalTrxSequenceNo
+
+				INSERT INTO tblIPInitialAck (
+					intTrxSequenceNo
+					,strCompanyLocation
+					,dtmCreatedDate
+					,strCreatedBy
+					,intMessageTypeId
+					,intStatusId
+					,strStatusText
+					)
+				SELECT @TrxSequenceNo
+					,@CompanyLocation
+					,@CreatedDate
+					,@CreatedBy
+					,21
+					,1
+					,'Success'
 
 				INSERT INTO @tblMessage (
 					strMessageType
@@ -156,7 +179,7 @@ BEGIN TRY
 					,strInfo2
 					)
 				VALUES (
-					'Service Order Ack'
+					'Service PO Ack'
 					,'Success'
 					,@WorkOrderNo
 					,@ERPServicePONo
@@ -215,7 +238,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Service Order Ack'
+			AND strType = 'Service PO Ack'
 	END
 
 	SELECT strMessageType

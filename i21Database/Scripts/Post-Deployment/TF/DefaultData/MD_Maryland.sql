@@ -190,12 +190,12 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, intMasterId
 	)
 	SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '1', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 20001
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '2', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20002
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '5', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 20003
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '6', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20004
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '8', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20005
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '9', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20006
-	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '10', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20007
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '2', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20002
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '5', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 20003
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '6', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20004
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '8', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20005
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '9', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20006
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methanol/E85', strState = 'MD', strFormCode = 'D',  strScheduleCode = '10', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 20007
 
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Diesel/Biodiesel', strState = 'MD', strFormCode = 'S',  strScheduleCode = '1', strType = 'Diesel/Biodiesel', strCriteria = '<> 0', intMasterId = 20008
 	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MD Excise Tax Propane/LNG/CNG', strState = 'MD', strFormCode = 'S',  strScheduleCode = '1', strType = 'LPG/LNG/CNG', strCriteria = '<> 0', intMasterId = 20009

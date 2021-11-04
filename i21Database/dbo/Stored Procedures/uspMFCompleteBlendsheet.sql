@@ -6,6 +6,7 @@
 	,@ysnRecap BIT = 0
     ,@strBatchId NVARCHAR(50)='' OUT
 	,@ysnAutoBlend BIT=0
+	,@strWorkOrderNo NVARCHAR(50) = '' OUT
 )
 AS
 BEGIN TRY
@@ -22,7 +23,7 @@ BEGIN TRY
 		,@intUserId INT
 		,@strRetBatchId NVARCHAR(40)
 		,@intStatusId INT
-		,@strWorkOrderNo NVARCHAR(50)
+		--,@strWorkOrderNo NVARCHAR(50)
 		,@strProduceXml NVARCHAR(Max)
 		,@intManufacturingProcessId INT
 		,@intLocationId INT
@@ -54,6 +55,7 @@ BEGIN TRY
 		,@strReferenceNo NVARCHAR(50)
 		,@intTransactionFrom INT
 		,@strItemNo nvarchar(50)
+		,@intMCSubLocationId INT
 
 	DECLARE @tblQuantityBreakup AS Table
 	(
@@ -251,6 +253,7 @@ BEGIN TRY
 
 		SELECT TOP 1 @intMachineId = m.intMachineId
 			,@dblBlendBinSize = mp.dblMachineCapacity
+			,@intMCSubLocationId = mc.intSubLocationId
 		FROM tblMFMachine m
 		JOIN tblMFMachinePackType mp ON m.intMachineId = mp.intMachineId
 		JOIN tblMFManufacturingCellPackType mcp ON mp.intPackTypeId = mcp.intPackTypeId
@@ -290,6 +293,9 @@ BEGIN TRY
 			,intManufacturingProcessId
 			,intTransactionFrom
 			,intConcurrencyId
+			,intSubLocationId
+			,dtmPlannedDate
+			,dtmOrderDate
 			)
 		SELECT @strWorkOrderNo
 			,@intItemId
@@ -317,6 +323,9 @@ BEGIN TRY
 			,@intManufacturingProcessId
 			,4
 			,1
+			,@intMCSubLocationId
+			,@dtmProductionDate
+			,@dtmProductionDate
 
 		SELECT @intWorkOrderId = SCOPE_IDENTITY()
 
@@ -588,15 +597,15 @@ BEGIN TRY
 			SET @strProduceXml = @strProduceXml + '<dblPhysicalCount>' + convert(VARCHAR, @dblIssuedQuantity) + '</dblPhysicalCount>'
 			SET @strProduceXml = @strProduceXml + '<intPhysicalItemUOMId>' + convert(VARCHAR, @intItemIssuedUOMId) + '</intPhysicalItemUOMId>'
 			SET @strProduceXml = @strProduceXml + '<dblUnitQty>' + convert(VARCHAR, @dblWeightPerUnit) + '</dblUnitQty>'
-			SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, @strVesselNo) + '</strVesselNo>'
+			SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, ISNULL(@strVesselNo,'')) + '</strVesselNo>'
 			SET @strProduceXml = @strProduceXml + '<intUserId>' + convert(VARCHAR, @intUserId) + '</intUserId>'
 			Set @strProduceXml = @strProduceXml + '<strOutputLotNumber>' + ISNULL(@strLotNumber,'') + '</strOutputLotNumber>'
 			SET @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
-			SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, @intSubLocationId) + '</intSubLocationId>'
-			SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
+			SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, ISNULL(@intSubLocationId, 0)) + '</intSubLocationId>'
+			SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, ISNULL(@intStorageLocationId, 0)) + '</intStorageLocationId>'
 			SET @strProduceXml = @strProduceXml + '<intProductionTypeId>' + convert(VARCHAR, 2) + '</intProductionTypeId>'
 			SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, CASE WHEN ISNULL(@strLotAlias,'')='' THEN @strWorkOrderNo ELSE @strLotAlias End) + '</strLotAlias>'
-			SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
+			SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, ISNULL(@strVesselNo,'')) + '</strVendorLotNo>'
 			SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 			SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, @dtmProductionDate) + '</dtmPlannedDate>'
 			SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, ISNULL(@intShiftId,'')) + '</intPlannedShiftId>'
@@ -631,16 +640,16 @@ BEGIN TRY
 				SET @strProduceXml = @strProduceXml + '<dblPhysicalCount>' + convert(VARCHAR, @dblIssuedQuantity) + '</dblPhysicalCount>'
 				SET @strProduceXml = @strProduceXml + '<intPhysicalItemUOMId>' + convert(VARCHAR, @intItemIssuedUOMId) + '</intPhysicalItemUOMId>'
 				SET @strProduceXml = @strProduceXml + '<dblUnitQty>' + convert(VARCHAR, @dblWeightPerUnit) + '</dblUnitQty>'
-				SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, @strVesselNo) + '</strVesselNo>'
+				SET @strProduceXml = @strProduceXml + '<strVesselNo>' + convert(VARCHAR, ISNULL(@strVesselNo,'')) + '</strVesselNo>'
 				SET @strProduceXml = @strProduceXml + '<intUserId>' + convert(VARCHAR, @intUserId) + '</intUserId>'
 				Set @strProduceXml = @strProduceXml + '<strParentLotNumber>' + ISNULL(@strParentLotNumber,'') + '</strParentLotNumber>'
 				Set @strProduceXml = @strProduceXml + '<strOutputLotNumber>' + ISNULL(@strLotNumber,'') + '</strOutputLotNumber>'
 				SET @strProduceXml = @strProduceXml + '<intLocationId>' + convert(VARCHAR, @intLocationId) + '</intLocationId>'
-				SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, @intSubLocationId) + '</intSubLocationId>'
-				SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, @intStorageLocationId) + '</intStorageLocationId>'
+				SET @strProduceXml = @strProduceXml + '<intSubLocationId>' + convert(VARCHAR, ISNULL(@intSubLocationId,0)) + '</intSubLocationId>'
+				SET @strProduceXml = @strProduceXml + '<intStorageLocationId>' + convert(VARCHAR, ISNULL(@intStorageLocationId,0)) + '</intStorageLocationId>'
 				SET @strProduceXml = @strProduceXml + '<intProductionTypeId>' + convert(VARCHAR, 2) + '</intProductionTypeId>'
 				SET @strProduceXml = @strProduceXml + '<strLotAlias>' + convert(VARCHAR, CASE WHEN ISNULL(@strLotAlias,'')='' THEN @strWorkOrderNo ELSE @strLotAlias End) + '</strLotAlias>'
-				SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, @strVesselNo) + '</strVendorLotNo>'
+				SET @strProduceXml = @strProduceXml + '<strVendorLotNo>' + convert(VARCHAR, ISNULL(@strVesselNo,'')) + '</strVendorLotNo>'
 				SET @strProduceXml = @strProduceXml + '<intLotStatusId>' + convert(VARCHAR, @intLotStatusId) + '</intLotStatusId>'
 				SET @strProduceXml = @strProduceXml + '<dtmPlannedDate>' + convert(VARCHAR, @dtmProductionDate) + '</dtmPlannedDate>'
 				SET @strProduceXml = @strProduceXml + '<intPlannedShiftId>' + convert(VARCHAR, ISNULL(@intShiftId,'')) + '</intPlannedShiftId>'

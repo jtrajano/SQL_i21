@@ -8,7 +8,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
 
 -- Declare the constants 
 DECLARE	-- Receipt Types
@@ -100,6 +100,12 @@ BEGIN
 	IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
 	BEGIN 
 		EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt, @intEntityUserSecurityId, @ysnPost
+	END
+
+	-- Insert records in staging table to check and set the lot status
+	IF @ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT
+	BEGIN
+		EXEC dbo.uspIPPreStageReceipt @intTransactionId, @intEntityUserSecurityId, @ysnPost
 	END
 
 	-- Update the received quantities back to the Contract Management (Inventory Return)

@@ -255,6 +255,7 @@ UPDATE tblSMCSVDynamicImport SET
 	declare @mobileno								nvarchar(100)
 	declare @locationname							nvarchar(100)
 	declare @freightterm							nvarchar(100)
+	declare @lob									nvarchar(100)
 
 
 	declare @printedname							nvarchar(100)
@@ -352,6 +353,9 @@ UPDATE tblSMCSVDynamicImport SET
 	
 	declare @genfederaltaxid						nvarchar(50)
 	declare @genstatetaxid							nvarchar(50)
+
+	declare @taxgroup								nvarchar(100)
+
 	SELECT 
 		@entityno = ''@entityno@'',														@name = ''@name@'',
 		@phone = ''@phone@'',																@contactname= ''@contactname@'',
@@ -417,7 +421,7 @@ UPDATE tblSMCSVDynamicImport SET
 		@patronagemembershipdate = ''@patronagemembershipdate@'',
 		@patronagebirthdate = ''@patronagebirthdate@'',									@patronagestockstatus = ''@patronagestockstatus@'',
 		@patronagedeceaseddate = ''@patronagedeceaseddate@'',								@patronagelastactivitydate = ''@patronagelastactivitydate@'',
-		@genstatetaxid = ''@genstatetaxid@'', @genfederaltaxid = ''@genfederaltaxid@'', @freightterm = ''@freightterm@'',
+		@genstatetaxid = ''@genstatetaxid@'', @genfederaltaxid = ''@genfederaltaxid@'', @freightterm = ''@freightterm@'', @taxgroup = ''@taxgroup@'', @lob = ''@lob@'',
 
 
 		@IsValid = 1
@@ -455,6 +459,8 @@ UPDATE tblSMCSVDynamicImport SET
 		declare @approvalpastdueid					int
 		declare @approvalpricechargeid				int
 		declare @freighttermid						int
+		declare @taxgroupId							int
+		declare @lobid								int
 
 		if @entityno <> '''' 
 		begin
@@ -888,6 +894,27 @@ UPDATE tblSMCSVDynamicImport SET
 			end
 		end
 
+		if @taxgroup <> ''''
+		begin
+			select @taxgroupid = intTaxGroupId from tblSMTaxGroup where strTaxGroup = @taxgroup
+
+			if isnull(@taxgroupid, 0) <= 0
+			begin
+				set @ValidationMessage = @ValidationMessage + '', Tax Group (''+  @taxgroup +'') does not exists.''
+				set @IsValid = 0
+			end
+		end
+
+		if @lob <> ''''
+		begin
+			select @lobid = intLineOfBusinessId from tblSMLineOfBusiness where strLineOfBusiness = @lob
+
+			if isnull(@lobid, 0) <= 0
+			begin
+				set @ValidationMessage = @ValidationMessage + '', Line of Business (''+  @lob +'') does not exists.''
+				set @IsValid = 0
+			end
+		end
 
 		if isnull(@printedname, '''') = ''''
 		BEGIN
@@ -907,8 +934,8 @@ UPDATE tblSMCSVDynamicImport SET
 
 			set @contactId = @@IDENTITY
 
-			insert into tblEMEntityLocation(intEntityId, strLocationName, strCheckPayeeName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, intDefaultCurrencyId, intTermsId, intShipViaId, ysnDefaultLocation, intFreightTermId)
-			select @entityId, @locationname, @printedname, @address, @city, @state, @zip, @country, @timezone, @defaultCurId, @detailTermsId, @detailShipViaId, 1, @freighttermid
+			insert into tblEMEntityLocation(intEntityId, strLocationName, strCheckPayeeName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, intDefaultCurrencyId, intTermsId, intShipViaId, ysnDefaultLocation, intFreightTermId, intTaxGroupId)
+			select @entityId, @locationname, @printedname, @address, @city, @state, @zip, @country, @timezone, @defaultCurId, @detailTermsId, @detailShipViaId, 1, @freighttermid, @taxgroupid
 
 			set @locationId = @@IDENTITY
 
@@ -1091,6 +1118,10 @@ UPDATE tblSMCSVDynamicImport SET
 				insert into tblARCustomerCompetitor(intEntityCustomerId, intEntityId)
 					select @entityId, @detailCurrentSysId
 
+			if isnull(@lobid, 0) > 0
+				insert into tblEMEntityLineOfBusiness(intEntityId, intLineOfBusinessId)
+					select @entityId, @lobid
+
 
 		end
 
@@ -1134,6 +1165,8 @@ UPDATE tblSMCSVDynamicImport SET
 	SELECT @NewHeaderId, 'zip', 'Zip', 0
 	Union All
 	SELECT @NewHeaderId, 'country', 'Country', 0
+	Union All
+	SELECT @NewHeaderId, 'lob', 'LOB', 0
 	Union All
 	SELECT @NewHeaderId, 'timezone', 'TimeZone', 0
 	Union All
@@ -1304,8 +1337,9 @@ UPDATE tblSMCSVDynamicImport SET
 	SELECT @NewHeaderId, 'genfederaltaxid', 'GEN FEDTAX ID', 0
 	Union All
 	SELECT @NewHeaderId, 'genstatetaxid', 'GEN STATE TAX ID', 0
-
-	--General Tab
+	--Location
+	Union All
+	SELECT @NewHeaderId, 'taxgroup', 'Tax Group', 0
 
 
 --Customer Import End

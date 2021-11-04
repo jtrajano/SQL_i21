@@ -36,6 +36,7 @@ Type the overview for the table here.
         [intCreatedByUserId] INT NULL,
         [intModifiedByUserId] INT NULL, 
 		[strDataSource] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICItemPricingLevel] PRIMARY KEY ([intItemPricingLevelId]), 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemPricingLevel_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
@@ -45,6 +46,11 @@ Type the overview for the table here.
 	)
 
 	GO
+
+		CREATE NONCLUSTERED INDEX [IX_tblICItemPricingLevel]
+		ON [dbo].[tblICItemPricingLevel]([intItemId] ASC, [intItemLocationId] ASC, strPricingMethod ASC)
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',

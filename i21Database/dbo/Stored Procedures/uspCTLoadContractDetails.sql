@@ -5,110 +5,164 @@ AS
 
 BEGIN TRY
 
-	DECLARE @tblInvoice TABLE 
-	(  
-		intContractDetailId  INT,        
-		dblQuantity    NUMERIC(18,6)
-	) 
-
-	INSERT INTO @tblInvoice (
-		intContractDetailId
-		,dblQuantity
-	)
-	SELECT
-		CD.intContractDetailId
-		,dblQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(InvoiceDetail.intItemUOMId,CD.intItemUOMId,InvoiceDetail.dblQtyShipped)),0) - ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(InvoiceDetail.intItemUOMId,CD.intItemUOMId,CM.dblQtyShipped)),0)
-	FROM
-		tblARInvoiceDetail InvoiceDetail
-		JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId AND Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
-		JOIN tblCTContractDetail CD ON CD.intContractHeaderId = InvoiceDetail.intContractHeaderId AND CD.intContractDetailId = InvoiceDetail.intContractDetailId
-		LEFT JOIN 
-		(
-			SELECT
-				dblQtyShipped = SUM(ID.dblQtyShipped)
-				,ID.intOriginalInvoiceDetailId
-			FROM
-				tblARInvoice IV
-				INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
-			WHERE
-				IV.strTransactionType = 'Credit Memo'
-				AND  IV.ysnPosted = 1
-			GROUP BY
-				ID.intOriginalInvoiceDetailId
-		) CM ON CM.intOriginalInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
-	WHERE Invoice.ysnPosted = 1
-		AND Invoice.strTransactionType = 'Invoice'
-		AND CD.intContractHeaderId = @intContractHeaderId
-	GROUP BY
-		CD.intContractDetailId
  
- DECLARE @ErrMsg NVARCHAR(MAX)
- DECLARE @tblShipment TABLE (intContractHeaderId INT
+	DECLARE
+		@ErrMsg NVARCHAR(MAX)
+		,@intContractTypeId int;
+
+
+	DECLARE @tblShipment TABLE (
+		intContractHeaderId INT
 		, intContractDetailId INT
 		, dblQuantity NUMERIC(18, 6)
-		, dblDestinationQuantity NUMERIC(18, 6))
+		, dblDestinationQuantity NUMERIC(18, 6)
+	);
 
-	DECLARE @tblBill TABLE (intContractDetailId INT
-		, dblQuantity NUMERIC(18, 6))
-	
-	DECLARE @OpenLoad TABLE (intContractDetailId INT
-		, ysnOpenLoad BIT)
+	DECLARE @tblInvoice TABLE (  
+		intContractDetailId  INT,        
+		dblQuantity    NUMERIC(18,6)
+	); 
 
-	SELECT *
-	INTO #tmpContractDetail
-	FROM tblCTContractDetail WITH (NOLOCK)
-	WHERE intContractHeaderId = @intContractHeaderId;
-	
-	INSERT INTO @tblShipment (intContractHeaderId
-		, intContractDetailId
-		, dblQuantity
-		, dblDestinationQuantity)
-	SELECT intContractHeaderId = ShipmentItem.intOrderId
-		, intContractDetailId = ShipmentItem.intLineNo
-		, dblQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId, CD.intItemUOMId, CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity ELSE 0 END)), 0)
-		, dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId, CD.intItemUOMId, CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ISNULL(ShipmentItem.dblDestinationNet, ShipmentItem.dblQuantity) ELSE 0 END )), 0)
-	FROM tblICInventoryShipmentItem ShipmentItem WITH (NOLOCK)
-	JOIN tblICInventoryShipment Shipment WITH (NOLOCK) ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1
-	JOIN #tmpContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId
-	LEFT JOIN (
-		SELECT DISTINCT ID.intInventoryShipmentItemId
-			, IV.ysnPosted
-		FROM tblARInvoice IV WITH (NOLOCK)
-		INNER JOIN tblARInvoiceDetail ID WITH (NOLOCK) ON IV.intInvoiceId = ID.intInvoiceId
-		WHERE IV.strTransactionType = 'Invoice'
-			AND IV.ysnPosted = 1
-	) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-	LEFT JOIN (
-		SELECT DISTINCT ID.intInventoryShipmentItemId
-		FROM tblARInvoice IV WITH (NOLOCK)
-		INNER JOIN tblARInvoiceDetail ID WITH (NOLOCK) ON IV.intInvoiceId = ID.intInvoiceId
-		WHERE IV.strTransactionType = 'Credit Memo'
-			AND IV.ysnPosted = 1
-	) CM ON CM.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-	WHERE Shipment.ysnPosted = 1
-		AND ShipmentItem.intOrderId = @intContractHeaderId
-	GROUP BY ShipmentItem.intOrderId
-		, ShipmentItem.intLineNo
-	
-	INSERT INTO @tblBill (intContractDetailId
-		, dblQuantity)
-	SELECT intContractDetailId = ReceiptItem.intLineNo
-		, dblQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ReceiptItem.intUnitMeasureId, CD.intItemUOMId, ReceiptItem.dblReceived)), 0)
-	FROM tblICInventoryReceiptItem ReceiptItem WITH (NOLOCK)
-	JOIN tblICInventoryReceipt Receipt WITH (NOLOCK) ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-		AND Receipt.strReceiptType = 'Purchase Contract'
-	JOIN #tmpContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
-		AND CD.intContractHeaderId = ReceiptItem.intOrderId
-	WHERE CD.intContractHeaderId = @intContractHeaderId
-	GROUP BY ReceiptItem.intLineNo
+	DECLARE @tblBill TABLE (
+		intContractDetailId INT
+		, dblQuantity NUMERIC(18, 6)
+	);
 
-	INSERT INTO @OpenLoad
-	SELECT intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
+	DECLARE @OpenLoad TABLE (
+		intContractDetailId INT
+		, ysnOpenLoad BIT
+	);
+
+	select top 1 @intContractTypeId = intContractTypeId from tblCTContractHeader where intContractHeaderId = @intContractHeaderId
+	
+	SELECT
+		*
+	INTO
+		#tmpContractDetail
+	FROM
+		tblCTContractDetail WITH (NOLOCK)
+	WHERE
+		intContractHeaderId = @intContractHeaderId;
+
+	if (@intContractTypeId = 1)
+	begin
+		INSERT INTO @tblBill (
+			intContractDetailId
+			, dblQuantity
+		)
+		SELECT
+			intContractDetailId = ReceiptItem.intLineNo
+			, dblQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ReceiptItem.intUnitMeasureId, CD.intItemUOMId, ReceiptItem.dblReceived)), 0)
+		FROM
+			tblICInventoryReceiptItem ReceiptItem WITH (NOLOCK)
+			JOIN tblICInventoryReceipt Receipt WITH (NOLOCK)
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				AND Receipt.strReceiptType = 'Purchase Contract'
+			JOIN #tmpContractDetail CD
+				ON CD.intContractDetailId = ReceiptItem.intLineNo
+				AND CD.intContractHeaderId = ReceiptItem.intOrderId
+		WHERE
+			CD.intContractHeaderId = @intContractHeaderId
+		GROUP BY
+			ReceiptItem.intLineNo
+	end
+	else
+	begin
+		INSERT INTO @tblInvoice (
+			intContractDetailId
+			,dblQuantity
+		)
+		SELECT
+			CD.intContractDetailId
+			,dblQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(InvoiceDetail.intItemUOMId,CD.intItemUOMId,InvoiceDetail.dblQtyShipped)),0) - ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(InvoiceDetail.intItemUOMId,CD.intItemUOMId,CM.dblQtyShipped)),0)
+		FROM
+			tblARInvoiceDetail InvoiceDetail
+			JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId AND Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+			JOIN tblCTContractDetail CD ON CD.intContractHeaderId = InvoiceDetail.intContractHeaderId AND CD.intContractDetailId = InvoiceDetail.intContractDetailId
+			LEFT JOIN 
+			(
+				SELECT
+					dblQtyShipped = SUM(ID.dblQtyShipped)
+					,ID.intOriginalInvoiceDetailId
+				FROM
+					tblARInvoice IV
+					INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+				WHERE
+					IV.strTransactionType = 'Credit Memo'
+					AND  IV.ysnPosted = 1
+				GROUP BY
+					ID.intOriginalInvoiceDetailId
+			) CM ON CM.intOriginalInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
+		WHERE Invoice.ysnPosted = 1
+			AND Invoice.strTransactionType = 'Invoice'
+			AND CD.intContractHeaderId = @intContractHeaderId
+		GROUP BY
+				CD.intContractDetailId
+	
+		INSERT INTO @tblShipment (
+			intContractHeaderId
+			, intContractDetailId
+			, dblQuantity
+			, dblDestinationQuantity
+		)
+		SELECT intContractHeaderId = ShipmentItem.intOrderId
+			, intContractDetailId = ShipmentItem.intLineNo
+			, dblQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId, CD.intItemUOMId, CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity ELSE 0 END)), 0)
+			, dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId, CD.intItemUOMId, CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ISNULL(ShipmentItem.dblDestinationNet, ShipmentItem.dblQuantity) ELSE 0 END )), 0)
+		FROM
+			tblICInventoryShipmentItem ShipmentItem WITH (NOLOCK)
+			JOIN tblICInventoryShipment Shipment WITH (NOLOCK)
+				ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId 
+				AND Shipment.intOrderType = 1
+			JOIN #tmpContractDetail CD 
+				ON CD.intContractDetailId = ShipmentItem.intLineNo 
+				AND CD.intContractHeaderId = ShipmentItem.intOrderId
+			LEFT JOIN (
+				SELECT DISTINCT
+					ID.intInventoryShipmentItemId
+					, IV.ysnPosted
+				FROM
+					tblARInvoice IV WITH (NOLOCK)
+					INNER JOIN tblARInvoiceDetail ID WITH (NOLOCK)
+						ON IV.intInvoiceId = ID.intInvoiceId
+				WHERE
+					IV.strTransactionType = 'Invoice'
+					AND IV.ysnPosted = 1
+			) INV
+				ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+			LEFT JOIN (
+				SELECT DISTINCT
+					ID.intInventoryShipmentItemId
+				FROM
+					tblARInvoice IV WITH (NOLOCK)
+					INNER JOIN tblARInvoiceDetail ID WITH (NOLOCK) 
+						ON IV.intInvoiceId = ID.intInvoiceId
+				WHERE
+					IV.strTransactionType = 'Credit Memo'
+					AND IV.ysnPosted = 1
+			) CM
+				ON CM.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
+		WHERE
+			Shipment.ysnPosted = 1
+			AND ShipmentItem.intOrderId = @intContractHeaderId
+		GROUP BY
+			ShipmentItem.intOrderId
+			, ShipmentItem.intLineNo
+	end
+
+	INSERT INTO
+		@OpenLoad
+	SELECT
+		intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
 		, ysnOpenLoad = CAST(LD.intLoadDetailId AS BIT)
-	FROM tblLGLoad LO
-	JOIN tblLGLoadDetail LD ON LD.intLoadId = LO.intLoadId
-	JOIN #tmpContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
-	WHERE intTicketId IS NULL
+	FROM
+		tblLGLoad LO
+		JOIN tblLGLoadDetail LD
+			ON LD.intLoadId = LO.intLoadId
+		JOIN #tmpContractDetail CD
+			ON CD.intContractDetailId = ISNULL(LD.intSContractDetailId, LD.intPContractDetailId)
+	WHERE
+		intTicketId IS NULL
 		AND LO.intShipmentStatus NOT IN(4, 10)
 		AND LO.intShipmentType <> 2
 		AND CD.intContractHeaderId = @intContractHeaderId;
@@ -121,7 +175,7 @@ BEGIN TRY
 			, AD.intSeqPriceUOMId
 			, AD.strSeqPriceUOM
 			, AD.dblSeqPrice
-			, ysnLoadAvailable = CAST(ISNULL(LG.intLoadDetailId, 0) AS BIT)
+			, ysnLoadAvailable = CAST(ISNULL(LG.ysnOpenLoad, 0) AS BIT)
 			, CQ.dblBulkQuantity
 			, CQ.dblBagQuantity
 			, CQ.strContainerType
@@ -157,19 +211,16 @@ BEGIN TRY
 			, CH.ysnLoad
 			, CH.intCommodityUOMId			
 			, CH.ysnMultiplePriceFixation
-		FROM #tmpContractDetail CD
-		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		OUTER APPLY (
-			SELECT TOP 1 intLoadDetailId
-			FROM tblLGLoadDetail
-			WHERE CD.intContractDetailId = CASE WHEN CH.intContractTypeId = 1 THEN intPContractDetailId ELSE intSContractDetailId END
-			ORDER BY intLoadDetailId DESC
-		) LG
-		OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
-		OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
-		OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId, CD.intContainerTypeId, dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin')) CQ
-		OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
-		CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD)
+		FROM
+			#tmpContractDetail CD
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			left join @OpenLoad LG on LG.intContractDetailId = CD.intContractDetailId
+			OUTER APPLY dbo.fnCTGetSampleDetail(CD.intContractDetailId) QA
+			OUTER APPLY dbo.fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) FI
+			OUTER APPLY dbo.fnCTGetSeqContainerInfo(CH.intCommodityId, CD.intContainerTypeId, dbo.[fnCTGetSeqDisplayField](CD.intContractDetailId, 'Origin')) CQ
+			OUTER APPLY dbo.fnCTGetSeqWashoutInfo(CD.intContractDetailId) WO
+			CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	)
 	
 	SELECT DISTINCT CD.intContractDetailId
 		, CD.intSplitFromId
@@ -360,12 +411,6 @@ BEGIN TRY
 		, dblConversionFactor = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId, CM.intItemUOMId, 1)
 		, strUOM = dbo.[fnCTGetSeqDisplayField](CD.intItemUOMId, 'tblICItemUOM')
 		, dblAppliedQty = CASE WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0) ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END
-		/*
-		, dblAppliedLoadQty = CASE WHEN Shipment.dblQuantity > 0 THEN Shipment.dblDestinationQuantity
-									WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
-									ELSE CASE WHEN CT.ysnLoad = 1 THEN ISNULL(CD.intNoOfLoad, 0) - ISNULL(CD.dblBalanceLoad, 0)
-											ELSE ISNULL(CD.dblQuantity, 0) - ISNULL(CD.dblBalance, 0) END * CD.dblQuantityPerLoad END
-		*/
 	    , dblAppliedLoadQty = CASE WHEN CT.ysnLoad = 1
 									THEN CASE WHEN Bill.dblQuantity > 0 THEN Bill.dblQuantity
 											WHEN Invoice.dblQuantity > 0 THEN Invoice.dblQuantity
@@ -460,7 +505,6 @@ BEGIN TRY
 		, dblShipmentQuantity = Shipment.dblQuantity
 		, dblBillQty = Bill.dblQuantity
 		, ysnOpenLoad = ISNULL(OL.ysnOpenLoad, 0)
-		--, ysnContractAllocated = CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
         , ysnContractAllocated = CAST(CASE WHEN isnull(AD.dblAllocatedQty,0) > 0 THEN 1 ELSE 0 END AS BIT)
 		, strFreightBasisUOM = FBUM.strUnitMeasure
 		, strFreightBasisBaseUOM = FBBUM.strUnitMeasure
@@ -517,7 +561,6 @@ BEGIN TRY
 		AND FRM.intType = 2 -- General type
 	OUTER APPLY dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	LEFT JOIN tblAPBillDetail BD ON BD.intContractDetailId = CD.intContractDetailId
-	--LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
     outer apply (
         select dblAllocatedQty = sum(lga.dblSAllocatedQty) from tblLGAllocationDetail lga where lga.intSContractDetailId = CD.intContractDetailId
     ) AD

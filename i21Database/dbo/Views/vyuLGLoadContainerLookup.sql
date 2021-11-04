@@ -14,6 +14,7 @@ SELECT	L.strLoadNumber
 		,intWeightUOMId = WeightItemUOM.intItemUOMId
 		,dblWeightUOMConvFactor = WeightItemUOM.dblUnitQty 
 		,LC.dblNetWt
+		,strMarkings = LC.strMarks 
 FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC 

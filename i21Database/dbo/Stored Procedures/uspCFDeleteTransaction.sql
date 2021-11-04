@@ -87,7 +87,7 @@ BEGIN
 			WHERE	[intEntityId] = @intUserId
 
 	INSERT INTO @IVTable
-	SELECT intTransactionId,intInvoiceId  from tblARInvoice INV
+	SELECT intTransactionId,intInvoiceId  from tblCFTransaction INV
 	WHERE intTransactionId = @intTransactionId
 
 

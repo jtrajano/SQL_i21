@@ -11,7 +11,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @StartingNumberId_InventoryShipment AS INT = 31;
 DECLARE @ShipmentNumber AS NVARCHAR(20)
@@ -739,6 +739,9 @@ END
 																			ELSE 1 END
 									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblLGLoadDetail LoadDetail
+									JOIN tblSCTicketLoadUsed TicketUsed
+										on LoadDetail.intLoadDetailId = TicketUsed.intLoadDetailId
+											and TicketUsed.intTicketId = @intTicketId
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 									LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
@@ -810,6 +813,9 @@ END
 																			ELSE 1 END
 									,ysnAddPayable						= CASE WHEN @ysnDestinationWeightGrade  = 1 THEN 0 ELSE 1 END
 									FROM tblLGLoadDetail LoadDetail
+									JOIN tblSCTicketLoadUsed TicketUsed
+										on LoadDetail.intLoadDetailId = TicketUsed.intLoadDetailId
+											and TicketUsed.intTicketId = @intTicketId
 									LEFT JOIN @ShipmentStagingTable SE ON SE.intLineNo = LoadDetail.intSContractDetailId
 									LEFT JOIN tblSCTicket SC ON SC.intTicketId = SE.intSourceId
 									LEFT JOIN tblLGLoadCost LoadCost ON LoadCost.intLoadId = LoadDetail.intLoadId

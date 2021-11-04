@@ -47,6 +47,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@begingroup					AS NVARCHAR(50)
 		,@endgroup						AS NVARCHAR(50)
 		,@datatype						AS NVARCHAR(50)
+		,@intPerformanceLogId			AS INT = NULL
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -107,6 +108,12 @@ WITH (
 	, [endgroup]   NVARCHAR(50)
 	, [datatype]   NVARCHAR(50)
 )
+
+IF NOT  EXISTS (SELECT TOP 1 1 FROM  @temp_xml_table WHERE fieldname ='strStatementFormat')
+BEGIN
+	INSERT INTO  @temp_xml_table ([fieldname],[condition],[from],[to],[join],[begingroup],[endgroup],[datatype]) 
+	SELECT  'strStatementFormat', 'Equal To' , 'Open Item' , NULL, 'AND', '' , '' , 'string'
+END
 
 -- Gather the variables values from the xml table.
 SELECT  @dtmDateFrom = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE CAST(-53690 AS DATETIME) END AS DATETIME)
@@ -188,6 +195,8 @@ SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
 IF CHARINDEX('''', @strCustomerName) > 0 
 	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
+
+EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', 1, @intEntityUserId, NULL, @intPerformanceLogId OUT
 	
 IF @strStatementFormat = 'Balance Forward'
 	BEGIN
@@ -339,3 +348,5 @@ SELECT @strCustomerName
 	 , @intEntityUserId
 
 SELECT * FROM @temp_SOA_table
+
+EXEC dbo.uspARLogPerformanceRuntime @strStatementFormat, 'uspARCustomerStatementReport', 0, @intEntityUserId, @intPerformanceLogId, NULL

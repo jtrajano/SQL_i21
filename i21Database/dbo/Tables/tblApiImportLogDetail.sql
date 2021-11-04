@@ -2,7 +2,8 @@ CREATE TABLE tblApiImportLogDetail (
     guiApiImportLogDetailId UNIQUEIDENTIFIER NOT NULL,
     guiApiImportLogId UNIQUEIDENTIFIER NOT NULL,
     strLogLevel NVARCHAR(100) NOT NULL, --Error, Info, Warning
-    strStatus NVARCHAR(150) NOT NULL, --Failed, Success
+    strStatus NVARCHAR(150) NOT NULL, --Failed, Success, Warning
+    strAction NVARCHAR(150) NULL, --Skipped, etc.
     intRowNo INT NULL,
     strField NVARCHAR(100) NULL,
     strValue NVARCHAR(4000) NULL,

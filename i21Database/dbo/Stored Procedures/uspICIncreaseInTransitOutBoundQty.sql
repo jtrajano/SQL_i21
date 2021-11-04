@@ -12,7 +12,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2;
@@ -236,6 +236,8 @@ WHEN NOT MATCHED THEN
 		intItemId
 		,intItemLocationId
 		,intItemUOMId
+		,intSubLocationId
+		,intStorageLocationId 
 		,dblInTransitOutbound
 		,dtmLastSaleDate
 		,intConcurrencyId
@@ -244,6 +246,8 @@ WHEN NOT MATCHED THEN
 		Source_Query.intItemId
 		,Source_Query.intItemLocationId
 		,Source_Query.intItemUOMId
+		,Source_Query.intSubLocationId
+		,Source_Query.intStorageLocationId 
 		,Source_Query.Aggregrate_Qty 
 		,CASE WHEN Source_Query.intTransactionTypeId = @TransactionType_Invoice AND Source_Query.Aggregrate_Qty < 0 THEN Source_Query.dtmTransactionDate ELSE NULL END
 		,1	

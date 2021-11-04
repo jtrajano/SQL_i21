@@ -172,8 +172,6 @@ BEGIN TRY
 			UPDATE	CD
 			SET		CD.dblBasis				=	CASE WHEN CH.intPricingTypeId = 3 THEN NULL ELSE ISNULL(CD.dblOriginalBasis,0) END,
 					CD.dblFreightBasisBase	=	CASE WHEN CH.intPricingTypeId = 3 THEN NULL ELSE ISNULL(CD.dblFreightBasisBase,0) END,
-					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
-					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 					CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId = 8 THEN 8 WHEN CH.intPricingTypeId = 3 THEN 3 ELSE 2 END,
 					CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE null END,
 					CD.dblCashPrice			=	NULL,

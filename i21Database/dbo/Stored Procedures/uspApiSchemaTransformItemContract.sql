@@ -161,8 +161,8 @@ SELECT
 	, sc.dtmDueDate
     , sc.strEntryContract
     , sc.strContract
-    , ISNULL(sc.ysnIsSigned, 0) ysnIsSigned
-    , ISNULL(sc.ysnIsPrinted, 0) ysnIsPrinted
+    , sc.ysnIsSigned
+    , sc.ysnIsPrinted
     , loc.intCompanyLocationId
     , currency.intCurrencyID
     , sp.intEntityId AS intSalespersonId
@@ -225,8 +225,8 @@ GROUP BY
 	, sc.dtmDueDate
     , sc.strEntryContract
     , sc.strContract
-    , ISNULL(sc.ysnIsSigned, 0)
-    , ISNULL(sc.ysnIsPrinted, 0)
+    , sc.ysnIsSigned
+    , sc.ysnIsPrinted
     , loc.intCompanyLocationId
     , currency.intCurrencyID
     , sp.intEntityId
@@ -501,8 +501,7 @@ BEGIN
         , dblPrice
         , dtmDeliveryDate
         , intTaxGroupId
-        , strContractStatus
-		, intLineNo)
+        , strContractStatus)
     SELECT
           @intItemContractStagingId
         , i.intItemId
@@ -512,7 +511,6 @@ BEGIN
         , sc.dtmDeliveryDate
         , taxGroup.intTaxGroupId
         , s.intContractStatusId
-		, ROW_NUMBER() OVER(PARTITION BY @intItemContractStagingId ORDER BY @intItemContractStagingId)
     FROM tblRestApiSchemaItemContract sc
     INNER JOIN tblCTContractStatus s ON s.strContractStatus = sc.strStatus
     INNER JOIN tblICItem i ON i.strItemNo = sc.strItemNo

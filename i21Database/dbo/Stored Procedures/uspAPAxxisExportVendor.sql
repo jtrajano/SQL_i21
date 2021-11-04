@@ -12,19 +12,17 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
-IF OBJECT_ID(N'tmpAxxisVendor') IS NOT NULL
+IF OBJECT_ID(N'dbo.tmpAxxisVendor') IS NOT NULL
 BEGIN
-	DELETE FROM tmpAxxisVendor
+	DROP TABLE tmpAxxisVendor
 END
-ELSE
-BEGIN
-	CREATE TABLE tmpAxxisVendor(
+
+CREATE TABLE tmpAxxisVendor(
 		strName NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
 		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
 		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 		strTaxNumber NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
 	)
-END
 
 IF OBJECT_ID(N'tempdb..#tmpModifiedFields') IS NOT NULL DROP TABLE #tmpModifiedFields
 CREATE TABLE #tmpModifiedFields(strFields NVARCHAR(MAX))
@@ -64,7 +62,12 @@ END
 
 IF @vendorId IS NULL
 BEGIN
-	INSERT INTO tmpAxxisVendor
+	INSERT INTO tmpAxxisVendor(
+		strName,
+		strLocationName,
+		strPrintedName,
+		strTaxNumber
+	)
 	SELECT
 		B.strName,
 		C.strLocationName,
@@ -73,10 +76,17 @@ BEGIN
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId
+	WHERE
+		A.ysnTransportTerminal = 1
 END
 ELSE
 BEGIN
-	INSERT INTO tmpAxxisVendor
+	INSERT INTO tmpAxxisVendor(
+		strName,
+		strLocationName,
+		strPrintedName,
+		strTaxNumber
+	)
 	SELECT
 		B.strName,
 		C.strLocationName,
@@ -85,7 +95,9 @@ BEGIN
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId
-	WHERE A.intEntityId = @vendorId
+	WHERE 
+		A.intEntityId = @vendorId
+	AND A.ysnTransportTerminal = 1
 END
 
 END TRY

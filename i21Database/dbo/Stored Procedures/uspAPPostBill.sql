@@ -25,7 +25,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 IF @userId IS NULL
 BEGIN
@@ -33,7 +33,7 @@ BEGIN
 	RETURN;
 END
 
-IF NULLIF(@param, '') IS NULL
+IF NULLIF(@param, '') IS NULL AND NULLIF(@billBatchId, '') IS NULL
 BEGIN
 	RAISERROR('@param is empty. No voucher to post.', 16, 1);
 	RETURN;
@@ -162,11 +162,11 @@ SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
 
--- IF NULLIF(@billIds, '') IS NULL
--- BEGIN
--- 	RAISERROR('Posting is already in process.', 16, 1);
--- 	GOTO Post_Rollback
--- END
+IF NULLIF(@billIds, '') IS NULL
+BEGIN
+	RAISERROR('Posting/unposting already in process.', 16, 1);
+	GOTO Post_Rollback
+END
 
 --Update the prepay and debit memo
 EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
@@ -1196,10 +1196,28 @@ BEGIN
 			INSERT INTO @clearingIds
 			SELECT intBillId FROM #tmpPostBillData
 
-			INSERT INTO @APClearing
-			SELECT * FROM fnAPClearing(@clearingIds)
+			IF EXISTS(
+				SELECT 1
+				FROM tblAPBillDetail A
+				INNER JOIN #tmpPostBillData B ON A.intBillId = B.intBillId
+				WHERE
+					A.intInventoryReceiptItemId > 0
+				OR A.intInventoryReceiptChargeId > 0
+				OR A.intInventoryShipmentChargeId > 0
+				OR A.intLoadDetailId > 0
+				OR A.intLoadShipmentCostId > 0
+				OR A.intSettleStorageId > 0
+			)
+			BEGIN
+				INSERT INTO @APClearing
+				SELECT * FROM fnAPClearing(@clearingIds)
 
-			EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+				IF EXISTS(SELECT 1 FROM @APClearing)
+				BEGIN
+					EXEC uspAPClearing @APClearing = @APClearing, @post = @post
+				END
+			END
+
 		END TRY
 		BEGIN CATCH
 				DECLARE @errorClearing NVARCHAR(200) = ERROR_MESSAGE()

@@ -2,7 +2,7 @@
 
 AS
 
-WITH lgLoad1 AS (
+WITH lgLoad AS (
 	SELECT LD.intPContractDetailId
 		, LO.strLoadNumber
 		, LO.strOriginPort
@@ -14,71 +14,7 @@ WITH lgLoad1 AS (
 		, LO.strBLNumber
 		, strLoadShippingLine = SL.strName
 		, LO.intShipmentType
-		, strShipmentType = 'Shipment' COLLATE Latin1_General_CI_AS
-		, strContainerNumber = LD.strContainerNumbers
-		, LO.dtmStuffingDate
-		, LO.dtmETAPOL
-		, LO.dtmETAPOD
-		, LO.dtmETSPOL
-		, LO.strBookingReference
-		, LO.intLoadId
-		, LO.dtmDeadlineCargo
-		, strETAPOLReasonCode = EA.strReasonCode
-		, strETSPOLReasonCode = ES.strReasonCode
-		, strETAPODReasonCode = PD.strReasonCode
-		, strETAPOLReasonCodeDescription = EA.strReasonCodeDescription
-		, strETSPOLReasonCodeDescription = ES.strReasonCodeDescription
-		, strETAPODReasonCodeDescription = PD.strReasonCodeDescription
-		, ysnDocsReceived = LO.ysnDocumentsReceived
-		, dblQuantity = SUM(LD.dblQuantity)
-	FROM tblLGLoad LO WITH(NOLOCK)
-	JOIN tblLGLoadDetail LD WITH(NOLOCK) ON LO.intLoadId = LD.intLoadId
-	LEFT JOIN tblEMEntity SL ON SL.intEntityId = LO.intShippingLineEntityId
-	LEFT JOIN tblLGReasonCode EA ON EA.intReasonCodeId = LO.intETAPOLReasonCodeId
-	LEFT JOIN tblLGReasonCode ES ON ES.intReasonCodeId = LO.intETSPOLReasonCodeId
-	LEFT JOIN tblLGReasonCode PD ON PD.intReasonCodeId = LO.intETAPODReasonCodeId
-	WHERE LO.intShipmentType = 1
-		AND LO.intShipmentStatus <> 10
-	GROUP BY LD.intPContractDetailId
-		, LO.strLoadNumber
-		, SL.strName
-		, LO.strOriginPort
-		, LO.strDestinationPort
-		, LO.strMVessel
-		, LO.strMVoyageNumber
-		, LO.strFVessel
-		, LO.strFVoyageNumber
-		, LO.strBLNumber
-		, LO.intShipmentType
-		, LD.strContainerNumbers
-		, LO.dtmStuffingDate
-		, LO.dtmETAPOL
-		, LO.dtmETAPOD
-		, LO.dtmETSPOL
-		, LO.strBookingReference
-		, LO.intLoadId
-		, LO.dtmDeadlineCargo
-		, EA.strReasonCode
-		, ES.strReasonCode
-		, PD.strReasonCode
-		, EA.strReasonCodeDescription
-		, ES.strReasonCodeDescription
-		, PD.strReasonCodeDescription
-		, LO.ysnDocumentsReceived)
-
-, lgLoad AS (
-	SELECT LD.intPContractDetailId
-		, LO.strLoadNumber
-		, LO.strOriginPort
-		, LO.strDestinationPort
-		, LO.strMVessel
-		, LO.strMVoyageNumber
-		, LO.strFVessel
-		, LO.strFVoyageNumber
-		, LO.strBLNumber
-		, strLoadShippingLine = SL.strName
-		, LO.intShipmentType
-		, strShipmentType = 'Shipping Instructions'
+		, strShipmentType = (case when LO.intShipmentType = 2 then 'Shipping Instructions' else 'Shipment' end) COLLATE Latin1_General_CI_AS
 		, strContainerNumber = NULL
 		, LO.dtmStuffingDate
 		, LO.dtmETAPOL
@@ -101,7 +37,7 @@ WITH lgLoad1 AS (
 	LEFT JOIN tblLGReasonCode EA ON EA.intReasonCodeId = LO.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode ES ON ES.intReasonCodeId = LO.intETSPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode PD ON PD.intReasonCodeId = LO.intETAPODReasonCodeId
-	WHERE LO.intShipmentType = 2
+	WHERE (LO.intShipmentType = 2 or LO.intShipmentType = 1)
 		AND LO.intShipmentStatus <> 10
 	GROUP BY LD.intPContractDetailId
 		, LO.strLoadNumber
@@ -295,8 +231,8 @@ LEFT JOIN tblICItemUOM WU WITH(NOLOCK) ON WU.intItemUOMId = CD.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure U7 WITH(NOLOCK) ON U7.intUnitMeasureId = WU.intUnitMeasureId
 LEFT JOIN tblICUnitMeasure U8 WITH(NOLOCK) ON 1 = 1
 	AND U8.strUnitMeasure = 'Ton'
-LEFT JOIN lgLoad LG ON LG.intPContractDetailId = CD.intContractDetailId
-LEFT JOIN lgLoad1 LG1 ON LG1.intPContractDetailId = CD.intContractDetailId
+LEFT JOIN lgLoad LG ON LG.intPContractDetailId = CD.intContractDetailId and LG.intShipmentType = 2
+LEFT JOIN lgLoad LG1 ON LG1.intPContractDetailId = CD.intContractDetailId and LG1.intShipmentType = 1
 LEFT JOIN vyuCTQualityApprovedRejected QA WITH(NOLOCK) ON QA.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblICItem BIM WITH(NOLOCK) ON BIM.intItemId = CD.intItemBundleId
 LEFT JOIN tblICItemUOM QU ON QU.intItemUOMId = CD.intItemUOMId

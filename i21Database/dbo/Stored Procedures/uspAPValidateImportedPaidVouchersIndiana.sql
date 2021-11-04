@@ -32,16 +32,16 @@ WHERE C.strLocationXRef = SUBSTRING(A.strVendorOrderNumber, 1, CHARINDEX('-', A.
 
 UPDATE A
 	SET A.strNotes = CASE
-						WHEN 
-								A.intCurrencyId = B.intCurrencyId
-							AND B.ysnPaid = 0
-							AND B.ysnPosted = 1
-							AND B.intBillId > 0
-							-- AND 1 = (CASE WHEN B.intTransactionType = 1 AND A.dblPayment > 0 AND A.dblPayment <= B.dblAmountDue THEN 1
-							-- 		WHEN B.intTransactionType = 3 AND A.dblPayment < 0 AND ABS(A.dblPayment) <= B.dblAmountDue THEN 1
-							-- 		ELSE 0 END)
-							AND ABS(A.dblPayment) = B.dblAmountDue
-						THEN NULL
+					-- WHEN 
+					-- 		A.intCurrencyId = B.intCurrencyId
+					-- 	AND B.ysnPaid = 0
+					-- 	AND B.ysnPosted = 1
+					-- 	AND B.intBillId > 0
+					-- 	-- AND 1 = (CASE WHEN B.intTransactionType = 1 AND A.dblPayment > 0 AND A.dblPayment <= B.dblAmountDue THEN 1
+					-- 	-- 		WHEN B.intTransactionType = 3 AND A.dblPayment < 0 AND ABS(A.dblPayment) <= B.dblAmountDue THEN 1
+					-- 	-- 		ELSE 0 END)
+					-- 	AND ABS(A.dblPayment) = B.dblAmountDue
+					-- THEN NULL
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
 					THEN 'Currency is different on current selected currency.'
@@ -69,6 +69,9 @@ UPDATE A
 					WHEN 
 						A.dblPayment < 0 AND B.intTransactionType != 3
 					THEN 'Amount is negative. Debit Memo type is expected.'
+					WHEN
+						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > (B.dblTotal - B.dblPaymentTemp)
+					THEN 'Already included in payment' + P.strPaymentRecordNum
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
@@ -77,6 +80,17 @@ LEFT JOIN tblAPBill B
 ON 
 	B.strVendorOrderNumber = A.strVendorOrderNumber
 AND B.intEntityVendorId = A.intEntityVendorId
+OUTER APPLY (
+	SELECT STUFF(
+		(
+			SELECT ', ' + P.strPaymentRecordNum 
+			FROM tblAPPaymentDetail PD 
+			INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId 
+			WHERE PD.intBillId = B.intBillId AND PD.dblPayment <> 0
+			ORDER BY P.intPaymentId FOR XML PATH('')
+		), 1, 1, ''
+	) AS strPaymentRecordNum
+) P
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
   

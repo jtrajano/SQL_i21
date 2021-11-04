@@ -1003,7 +1003,7 @@ BEGIN TRY
 				,intLocationId
 				)
 			AS (
-				SELECT IsNULL(DD.intSubstituteItemId, DD.intItemId)
+				SELECT IsNULL(DD.intSubstituteItemId, RI.intItemId)
 					,Convert(NUMERIC(18, 6), (RI.dblCalculatedQuantity / R.dblQuantity) * dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity))
 					,8 AS intAttributeId --Forecasted Consumption
 					,DD.dtmDemandDate

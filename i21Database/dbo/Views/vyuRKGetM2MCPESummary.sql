@@ -93,7 +93,7 @@ FROM (
 					SELECT CPE.*
 						, strRiskIndicator
 						, dblRiskTotalBusinessVolume = dbo.fnCTConvertQuantityToTargetCommodityUOM(toUOM.intCommodityUnitMeasureId
-																				, CASE WHEN ISNULL(M2M.intQtyUOMId, 0) = 0 THEN toUOM.intCommodityUnitMeasureId ELSE M2M.intQtyUOMId END
+																				, CASE WHEN ISNULL(fromUOM.intCommodityUnitMeasureId, 0) = 0 THEN toUOM.intCommodityUnitMeasureId ELSE fromUOM.intCommodityUnitMeasureId END
 																				, ISNULL(dblRiskTotalBusinessVolume, 0.00))
 						, intRiskUnitOfMeasureId
 						, dblCompanyExposurePercentage = ROUND(ISNULL(dblCompanyExposurePercentage, 0.00), 2)

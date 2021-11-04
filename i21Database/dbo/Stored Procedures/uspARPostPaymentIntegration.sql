@@ -327,7 +327,15 @@ BEGIN
     --INSERT TO TRANSACTION LINKS
   DECLARE @tblTransactionLinks    udtICTransactionLinks
   DECLARE @refundInvoiceId INT, @refundInvoiceNumber VARCHAR(25)
+  DECLARE @PaymentId TABLE  (intId INT)
 
+  INSERT INTO @PaymentId
+  SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [intTransactionId] IS NOT NULL
+
+  WHILE EXISTS(SELECT 1 FROM @PaymentId)
+  BEGIN
+  DECLARE @intId INT
+  SELECT @intId = intId FROM @PaymentId
  --Refund
   INSERT INTO @tblTransactionLinks (
        intSrcId
@@ -367,7 +375,7 @@ BEGIN
 	INNER JOIN tblARPaymentDetail PDORIGIN ON  PDORIGIN.strTransactionNumber=ARI.strInvoiceNumber
 	INNER JOIN tblARPayment    PAYMENT  ON PAYMENT.intPaymentId=PDORIGIN.intPaymentId
 		WHERE PD.intInvoiceId IS NOT NULL
-		     AND PD.intPaymentId = (SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [intTransactionId] IS NOT NULL)
+		     AND PD.intPaymentId = @intId
 	  ) SRC
 
 	UNION ALL
@@ -399,7 +407,7 @@ BEGIN
 		INNER JOIN tblARPaymentDetail PDORIGIN ON  PDORIGIN.strTransactionNumber=ARI.strInvoiceNumber
 		INNER JOIN tblARPayment    PAYMENT  ON PAYMENT.intPaymentId=PDORIGIN.intPaymentId
 		WHERE PD.intInvoiceId IS NOT NULL
-			 AND PD.intPaymentId = (SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [intTransactionId] IS NOT NULL)
+			 AND PD.intPaymentId = @intId
 	  ) SRC
 
 
@@ -441,10 +449,14 @@ BEGIN
   ) SRC
 
   SELECT  @refundInvoiceId = intSrcId, @refundInvoiceNumber=strSrcTransactionNo 
-  FROM  @tblTransactionLinks   WHERE intDestId != (SELECT DISTINCT [intTransactionId] FROM #ARPostPaymentHeader WHERE [intTransactionId] IS NOT NULL)
+  FROM  @tblTransactionLinks   WHERE intDestId != @intId
 
   EXEC dbo.[uspICDeleteTransactionLinks] @refundInvoiceId, @refundInvoiceNumber, 'Invoice', 'Accounts Receivable'
   EXEC dbo.uspICAddTransactionLinks @tblTransactionLinks
+
+  DELETE FROM @PaymentId WHERE intId = @intId
+
+  END
 
 END
 

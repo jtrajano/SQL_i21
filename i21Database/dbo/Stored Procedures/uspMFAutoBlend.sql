@@ -59,6 +59,10 @@ BEGIN TRY
 	DECLARE @intRecipeItemUOMId INT
 	DECLARE @strOrderType nvarchar(50)
 			,@intLotItemUOMId int
+			,@intSrcId int 
+			,@strSrcTransactionNo NVARCHAR(50) 
+			,@strSrcModuleName NVARCHAR(50) 
+			,@strSrcTransactionType NVARCHAR(50) 
 
 	DECLARE @tblInputItem TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -164,6 +168,10 @@ BEGIN TRY
 			SELECT 
 					@intSalesOrderLocationId = s.intCompanyLocationId
 					,@intBlendItemId = sd.intItemId
+					,@intSrcId =s.intSalesOrderId
+					,@strSrcTransactionNo =s.strSalesOrderNumber
+					,@strSrcModuleName ='Sales'
+					,@strSrcTransactionType='Sales Order'
 			FROM	tblSOSalesOrderDetail sd INNER JOIN tblSOSalesOrder s 
 						ON sd.intSalesOrderId=s.intSalesOrderId 
 			WHERE	intSalesOrderDetailId = @intSalesOrderDetailId
@@ -195,6 +203,10 @@ BEGIN TRY
 
 			SELECT	@intSalesOrderLocationId=iv.intCompanyLocationId
 					,@intBlendItemId=id.intItemId
+					,@intSrcId =iv.intInvoiceId
+					,@strSrcTransactionNo =iv.strInvoiceNumber
+					,@strSrcModuleName ='Sales'
+					,@strSrcTransactionType='Invoices'
 			FROM	tblARInvoiceDetail id INNER JOIN tblARInvoice iv 
 						ON id.intInvoiceId = iv.intInvoiceId
 			WHERE	id.intInvoiceDetailId = @intInvoiceDetailId
@@ -226,8 +238,13 @@ BEGIN TRY
 
 			SELECT	@intSalesOrderLocationId=h.intCompanyLocationId
 					,@intBlendItemId=d.intItemId
+					,@intSrcId =LH.intLoadHeaderId
+					,@strSrcTransactionNo =LH.strTransaction
+					,@strSrcModuleName ='Transport'
+					,@strSrcTransactionType='Transport'
 			FROM	tblTRLoadDistributionDetail d INNER JOIN tblTRLoadDistributionHeader h 
 						ON d.intLoadDistributionHeaderId = h.intLoadDistributionHeaderId
+			LEFT JOIN tblTRLoadHeader LH on LH.intLoadHeaderId=h.intLoadHeaderId
 			WHERE	d.intLoadDistributionDetailId = @intLoadDistributionDetailId
 
 			IF @intSalesOrderLocationId <> ISNULL(@intLocationId,0)
@@ -956,6 +973,11 @@ BEGIN TRY
 			,@ysnPostGL = 1
 			,@intLoadDistributionDetailId = @intLoadDistributionDetailId
 			,@dtmDate = @dtmDate
+			,@strOrderType =@strOrderType
+			,@intSrcId =@intSrcId
+			,@strSrcTransactionNo =@strSrcTransactionNo
+			,@strSrcModuleName =@strSrcModuleName
+			,@strSrcTransactionType=@strSrcTransactionType
 
 		--Check if the consumption entries exist
 		IF (SELECT COUNT(1) FROM tblMFWorkOrderConsumedLot WHERE intWorkOrderId = @intWorkOrderId)=0
@@ -1032,7 +1054,7 @@ BEGIN TRY
 		If @strOrderType='LOAD DISTRIBUTION'
 		Begin
 			If (Select Count(1) From tblTRLoadBlendIngredient Where intLoadDistributionDetailId=@intLoadDistributionDetailId) 
-				<> (Select Count(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
+				> (Select Count(1) From tblMFWorkOrderConsumedLot Where intWorkOrderId=@intWorkOrderId)
 				RAISERROR('There is not enough stock of an ingredient required to blend. Please review Inventory On-Hand count.',16,1)
 
 			If Exists(

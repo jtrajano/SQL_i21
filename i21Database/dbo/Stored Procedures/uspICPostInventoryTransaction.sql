@@ -36,6 +36,10 @@
 	,@dblCategoryRetailValue NUMERIC(38,20) = NULL  
 	,@intSourceEntityId INT = NULL  
 	,@intTransactionItemUOMId INT = NULL 
+	,@strSourceType NVARCHAR(100) = NULL 
+	,@strSourceNumber NVARCHAR(100) = NULL 
+	,@strBOLNumber NVARCHAR(100) = NULL 
+	,@intTicketId INT = NULL 
 	,@dtmCreated DATETIME = NULL OUTPUT 
 AS
 
@@ -43,7 +47,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @InventoryStockMovementId AS INT 
 
@@ -112,6 +116,10 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intCompanyLocationId]
 		,[dtmDateCreated]
 		,[intTransactionItemUOMId]
+		,[strSourceType]
+		,[strSourceNumber]
+		,[strBOLNumber]
+		,[intTicketId]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -155,6 +163,10 @@ SELECT	[intItemId]							= @intItemId
 		,[intCompanyLocationId]				= [location].intCompanyLocationId
 		,[dtmDateCreated]					= GETUTCDATE()
 		,[intTransactionItemUOMId]			= @intTransactionItemUOMId
+		,[strSourceType]					= @strSourceType
+		,[strSourceNumber]					= @strSourceNumber
+		,[strBOLNumber]						= @strBOLNumber
+		,[intTicketId]						= @intTicketId
 FROM	tblICItem i 
 		CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 WHERE	i.intItemId = @intItemId
@@ -185,6 +197,10 @@ BEGIN
 		,@strTransactionForm 
 		,@intEntityUserSecurityId 
 		,@intSourceEntityId
+		,@strSourceType 
+		,@strSourceNumber
+		,@strBOLNumber
+		,@intTicketId 
 		,NULL  
 END
 
@@ -213,6 +229,14 @@ BEGIN
 		,@intTransactionTypeId 
 		,@dtmDate
 		,@intInTransitSourceLocationId
+		
+	-----------------------------------------
+	-- Log the Daily Stock Quantity
+	-----------------------------------------
+	BEGIN 
+		EXEC uspICPostStockDailyQuantity 
+			@intInventoryTransactionId = @InventoryTransactionIdentityId
+	END 
 END 
 
 _EXIT:

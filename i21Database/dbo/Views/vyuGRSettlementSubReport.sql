@@ -186,6 +186,7 @@ FROM
 				,Bill.intBillId
 				,BillDtl.intInventoryReceiptItemId
 				,BillDtl.intLinkingId
+				,BillDtl.dblQtyReceived
 			FROM tblAPBillDetail BillDtl
 			JOIN tblAPBill Bill 
 				ON BillDtl.intBillId = Bill.intBillId
@@ -234,6 +235,7 @@ FROM
 				,strTaxClass = TaxClass.strTaxClass
 				,BillDtl.intInventoryReceiptItemId
 				,BillDtl.intLinkingId
+				,BillDtl.dblQtyReceived
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId --and Bill.intTransactionType = 1
@@ -288,6 +290,6 @@ FROM
 		ON --t3.intBillId = t2.intBillId AND t3.intBillId = t1.intBillId
 				t3.intBillId = t1.intBillId 
 					and isnull(t3.intInventoryReceiptItemId, isnull(t1.intInventoryReceiptItemId, 0)) = isnull(t1.intInventoryReceiptItemId, 0)
-					and (ISNULL(t3.intLinkingId, 0) = ISNULL(t1.intLinkingId, 0) OR ISNULL(t3.intLinkingId,-90) = -90)
+					and ((ISNULL(t3.intLinkingId, 0) = ISNULL(t1.intLinkingId, 0) OR ISNULL(t3.intLinkingId,-90) = -90) and (t1.dblQtyReceived = ABS(t3.dblQtyReceived) OR ABS(t3.dblQtyReceived) = 1))
 	WHERE t3.intItemId IS NOT NULL 
 )t	

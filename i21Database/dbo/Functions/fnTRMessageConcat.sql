@@ -14,7 +14,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
-		SET @strConcatMsg = @strOriginalMsg + ' ,' + @strAddMsg
+		SET @strConcatMsg = @strOriginalMsg + ', ' + @strAddMsg
 	END
 
 	RETURN @strConcatMsg

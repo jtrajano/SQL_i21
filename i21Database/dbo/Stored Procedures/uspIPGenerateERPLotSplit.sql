@@ -32,6 +32,7 @@ BEGIN TRY
 	SELECT TOP 20 intLotSplitFeedId
 	FROM dbo.tblIPLotSplitFeed
 	WHERE strCompanyLocation = @strCompanyLocation
+	AND intStatusId IS NULL
 
 	SELECT @intLotSplitFeedId = MIN(intLotSplitFeedId)
 	FROM @tblIPLotSplitFeed
@@ -62,9 +63,9 @@ BEGIN TRY
 		 +'<MotherLotNo>'+ IsNULL(strMotherLotNo,'')  +'</MotherLotNo>'  
 		 +'<LotNo>'+ IsNULL(strLotNo,'')  +'</LotNo>'  
 		 +'<StorageUnit>'+ IsNULL(strStorageUnit,'')  +'</StorageUnit>'  
-		 +'<DestinationStorageLocation>'+ IsNULL(strSplitStorageLocation,'')  +'</DestinationStorageLocation>'  
-		 +'<DestinationStorageUnit>'+ IsNULL(strSplitStorageUnit,'')  +'</DestinationStorageUnit>'  
-		 +'<DestinationLotNo>'+ IsNULL(strSplitLotNo,'')  +'</DestinationLotNo>'  
+		 +'<SplitStorageLocation>'+ IsNULL(strSplitStorageLocation,'')  +'</SplitStorageLocation>'  
+		 +'<SplitStorageUnit>'+ IsNULL(strSplitStorageUnit,'')  +'</SplitStorageUnit>'  
+		 +'<SplitLotNo>'+ IsNULL(strSplitLotNo,'')  +'</SplitLotNo>'  
 		 +'<Quantity>'+ ltrim(dblQuantity)  +'</Quantity>'  
 		 +'<QuantityUOM>'+ IsNULL(strQuantityUOM,'')  +'</QuantityUOM>'  
 		 +'<ReasonCode>'+ IsNULL(strReasonCode,'')  +'</ReasonCode>'  

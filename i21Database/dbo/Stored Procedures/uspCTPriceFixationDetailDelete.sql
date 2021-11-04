@@ -4,7 +4,8 @@
 	@intPriceFixationDetailId	INT = NULL,
 	@intPriceFixationTicketId	INT = NULL,
 	@intUserId					INT,
-	@ysnDeleteFromInvoice bit = 0
+	@ysnDeleteFromInvoice bit = 0,
+	@ysnDeleteWholePricing bit = 0
 	
 AS
 BEGIN TRY
@@ -21,7 +22,8 @@ BEGIN TRY
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT,
 			@intContractHeaderId int,
-			@intContractDetailId int;
+			@intContractDetailId int,
+			@strSummaryLogProcess nvarchar(50);
 
 			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 			declare @strFinalMessage nvarchar(max);
@@ -189,8 +191,6 @@ BEGIN TRY
 		
 		UPDATE	CD
 		SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
-				CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
-				CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 				CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
 				CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE NULL END,
 				CD.dblCashPrice			=	NULL,
@@ -217,21 +217,26 @@ BEGIN TRY
 		SELECT @QtyToDelete = dblQuantity FROM tblCTPriceFixationDetail
 		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
+		select @strSummaryLogProcess = (case when @ysnDeleteWholePricing = 1 then 'Price Delete' else 'Fixation Detail Delete' end)
+
 		EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
 								  @intContractDetailId 	= @intContractDetailId, 
 								  @strSource 			= 'Pricing',
-								  @strProcess 			= 'Fixation Detail Delete',
+								  @strProcess 			= @strSummaryLogProcess,
 								  @intUserId			=  @intUserId
 
 		-- Summary Log
-		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							@intContractDetailId 	= 	@intContractDetailId,
-							@strSource			 	= 	'Pricing',
-							@strProcess		 	    = 	'Fixation Detail Delete',
-							@contractDetail 		= 	@contractDetails,
-							@intUserId				= 	@intUserId,
-							@intTransactionId		= 	@intPriceFixationDetailId,
-							@dblTransactionQty		= 	@QtyToDelete
+		if (@ysnDeleteWholePricing <> 1)
+		begin
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 	    = 	'Fixation Detail Delete',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@intUserId,
+								@intTransactionId		= 	@intPriceFixationDetailId,
+								@dblTransactionQty		= 	@QtyToDelete
+		end
 
 		-- Summary Log
 		IF EXISTS 

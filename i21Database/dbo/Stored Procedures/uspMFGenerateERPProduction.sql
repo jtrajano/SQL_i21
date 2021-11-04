@@ -18,6 +18,11 @@ BEGIN TRY
 		,@strUserName NVARCHAR(50)
 		,@strWorkOrderType NVARCHAR(50)
 		,@strSubLocationName NVARCHAR(50)
+		,@dblProdQuantity numeric(18,6)
+		,@strProducedUOM nvarchar(50)
+		,@strServiceItemNo nvarchar(50)
+		,@TrxSequenceNo INT
+
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intWorkOrderId INT
@@ -93,7 +98,35 @@ BEGIN TRY
 		JOIN dbo.tblSMUserSecurity US ON US.intEntityId = W.intCreatedUserId
 		WHERE W.intWorkOrderId = @intWorkOrderId
 
+		SELECT 
+			@dblProdQuantity=SUM(WP.dblQuantity)
+			,@strProducedUOM=MIN(UM.strUnitMeasure )
+		FROM dbo.tblMFWorkOrderProducedLot WP
+		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intItemUOMId
+		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
+		WHERE WP.intWorkOrderId = @intWorkOrderId
+
+		Select @strServiceItemNo=I.strItemNo,@TrxSequenceNo=intWorkOrderRecipeItemId
+		from dbo.tblMFWorkOrderRecipeItem RI
+		JOIN dbo.tblICItem I on I.intItemId=RI.intItemId and I.strType='Other Charge'
+		Where RI.intWorkOrderId = @intWorkOrderId
+
 		SELECT @strDetailXML = ''
+
+		IF @strServiceItemNo IS NOT NULL
+		BEGIN
+		SELECT @strDetailXML = @strDetailXML + '<line  id="' + ltrim(@TrxSequenceNo) + '" parentId="' + ltrim(@intProductionPreStageId) + '">'
+			+'<TrxSequenceNo>'+ltrim(@TrxSequenceNo) +'</TrxSequenceNo>'
+			+'<TransactionType>8</TransactionType>'
+			+'<ItemNo>'+	@strServiceItemNo  +'</ItemNo>'
+			+'<Quantity>'+	ltrim(Convert(Numeric(18,6),@dblProdQuantity))    +'</Quantity>'
+			+'<QuantityUOM>'+	@strProducedUOM    +'</QuantityUOM>'
+			+'</line>'
+		END
+
+		If @strDetailXML is null
+		Select @strDetailXML=''
+	
 		SELECT @strDetailXML = @strDetailXML + '<line  id="' + ltrim(WC.intWorkOrderConsumedLotId) + '" parentId="' + ltrim(@intProductionPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(WC.intWorkOrderConsumedLotId) +'</TrxSequenceNo>'
 			+'<TransactionType>8</TransactionType>'

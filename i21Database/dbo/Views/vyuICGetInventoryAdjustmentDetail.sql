@@ -45,14 +45,18 @@ SELECT
 	, AdjDetail.dblAdjustByQuantity
 	, AdjDetail.intItemUOMId
 	, strItemUOM = ItemUOM.strUnitMeasure
+	, intUOMId = ItemUOM.intUnitMeasureId
 	, dblItemUOMUnitQty = ItemUOM.dblUnitQty
 	, AdjDetail.intNewItemUOMId
 	, strNewItemUOM = NewItemUOM.strUnitMeasure
+	, intNewUOMId = NewItemUOM.intUnitMeasureId
 	, dblNewItemUOMUnitQty = NewItemUOM.dblUnitQty
-	, AdjDetail.intWeightUOMId
+	, AdjDetail.intWeightUOMId intWeightItemUOMId
 	, strWeightUOM = WeightUOM.strUnitMeasure
-	, AdjDetail.intNewWeightUOMId
+	, intWeightUOMId = WeightUOM.intUnitMeasureId
+	, AdjDetail.intNewWeightUOMId intNewWeightItemUOMId
 	, strNewWeightUOM = NewWeightUOM.strUnitMeasure
+	, intNewWeightUOMId = NewWeightUOM.intUnitMeasureId
 	, AdjDetail.dblWeight
 	, AdjDetail.dblNewWeight
 	, AdjDetail.dblWeightPerQty

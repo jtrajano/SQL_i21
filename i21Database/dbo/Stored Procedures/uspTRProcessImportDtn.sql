@@ -102,6 +102,9 @@ BEGIN
 								@intBillId = @intBillId,
 								@intImportLoadId = @intImportLoadId,
 								@intImportDtnDetailId = @intImportDtnDetailId
+
+						--TR-1730
+							UPDATE tblAPBill SET strVendorOrderNumber = @strInvoiceNo where intBillId = @intBillId
 						END
 					END
 
@@ -123,13 +126,13 @@ BEGIN
 
 						END TRY
 						BEGIN CATCH
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher cannot be posted')
+							SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
 							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, ERROR_MESSAGE())
 						END CATCH
 
 						IF (@success = 0)
 						BEGIN
-							SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Voucher cannot be posted')
+							SELECT @strMessage = dbo.fnTRStringConcat(@strMessage, 'Voucher cannot be posted', ' / ')
 							SELECT TOP 1 dbo.fnTRMessageConcat(@strMessage,strMessage) FROM tblAPPostResult WHERE intTransactionId = @intBillId ORDER BY intId DESC
 						END
 						ELSE

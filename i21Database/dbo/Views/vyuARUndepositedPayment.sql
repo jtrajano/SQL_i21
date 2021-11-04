@@ -44,6 +44,7 @@ FROM (
 					FROM tblARPOSPayment POSPAYMENT
 					INNER JOIN tblARPOSEndOfDay POSEOD ON POSPAYMENT.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
 					WHERE POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
+					GROUP BY POSEOD.strEODNo
 					FOR XML PATH('')
 				), 1, 2, '')
 			)
@@ -54,6 +55,7 @@ FROM (
 					INNER JOIN tblARPOSEndOfDay POSEOD ON POSPAYMENT.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
 					INNER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
 					WHERE POSPAYMENT.intPaymentId = PAYMENT.intPaymentId
+					GROUP BY POSDRAWER.strPOSDrawerName
 					FOR XML PATH('')
 				), 1, 2, '')
 			)

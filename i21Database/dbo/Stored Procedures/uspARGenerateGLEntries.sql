@@ -8,7 +8,7 @@ AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
@@ -56,7 +56,9 @@ INSERT INTO @ItemsForPost
     ,[intStorageScheduleTypeId]
     ,[dblUnitRetail]
     ,[intCategoryId]
-    ,[dblAdjustRetailValue]) 
+    ,[dblAdjustRetailValue]
+	,[strBOLNumber]
+) 
 SELECT 
      [intItemId]
 	,[intItemLocationId]
@@ -87,6 +89,7 @@ SELECT
 	,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
+	,[strBOLNumber]
 FROM 
 	##ARItemsForCosting
 
@@ -166,7 +169,9 @@ INSERT INTO @InTransitItems
     ,[intFobPointId] 
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
-    ,[dblForexRate])
+    ,[dblForexRate]
+	,[strBOLNumber]	
+)
 SELECT
      [intItemId] 
     ,[intItemLocationId] 
@@ -191,6 +196,7 @@ SELECT
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
     ,[dblForexRate]
+	,[strBOLNumber]
 FROM ##ARItemsForInTransitCosting
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
@@ -275,6 +281,7 @@ INSERT INTO @StorageItemsForPost (
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
+	,[strBOLNumber]
 ) 
 SELECT 
      [intItemId] 
@@ -295,6 +302,7 @@ SELECT
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
+	,[strBOLNumber]
 FROM 
 	##ARItemsForStorageCosting
 

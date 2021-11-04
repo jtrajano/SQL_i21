@@ -276,6 +276,7 @@ BEGIN
 					, dtmDateModified
 					, intSize
 					, intConcurrencyId
+					,intTransactionId
 				)
 				VALUES (
 					@fileName + '.' + @fileExtension
@@ -286,6 +287,7 @@ BEGIN
 					, GETDATE()
 					, DATALENGTH(@fileContent)
 					, 1
+					,@transactionId
 				)
 				
 				SET @attachmentId = SCOPE_IDENTITY()
@@ -326,6 +328,7 @@ BEGIN
 					, intSize
 					, intEntityId
 					, intConcurrencyId
+					,intTransactionId
 				)
 				SELECT doc.strName
 					, doc.strType
@@ -336,6 +339,7 @@ BEGIN
 					, doc.intSize
 					, doc.intEntityId
 					, 1
+					,@transactionId
 				FROM tblSMNewDocument doc 
 				INNER JOIN tblSMUpload upload ON doc.intUploadId = upload.intUploadId
 				WHERE doc.intUploadId = @uploadId

@@ -14,7 +14,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Create the temp table for the specific items/categories to rebuild
 IF OBJECT_ID('tempdb..#tmpRebuildList') IS NULL  
@@ -339,6 +339,8 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
+							,ri.intComputeItemTotalOption
+							,ri.dblOpenReceive
 						)	
 					)
 			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
@@ -439,6 +441,8 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
+									,ri.intComputeItemTotalOption
+									,ri.dblOpenReceive
 								)
 								,2 
 							)
@@ -545,6 +549,8 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
+							,ri.intComputeItemTotalOption
+							,ri.dblOpenReceive
 						)						
 					)
 					,2
@@ -575,6 +581,8 @@ AS
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
 							,t.intItemUOMId
+							,ri.intComputeItemTotalOption
+							,ri.dblOpenReceive
 						)	
 						, t.dblCost
 						, (
@@ -600,6 +608,8 @@ AS
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
 									,t.intItemUOMId
+									,ri.intComputeItemTotalOption
+									,ri.dblOpenReceive
 								)
 								,2
 							)
@@ -680,6 +690,8 @@ AS
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
 						,t.intItemUOMId
+						,ri.intComputeItemTotalOption
+						,ri.dblOpenReceive
 					)
 					,2 
 				)

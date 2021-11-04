@@ -7,7 +7,7 @@ BEGIN
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+	SET ANSI_WARNINGS ON
 
 
 	DECLARE @intTicketContractDetailId INT
@@ -20,6 +20,7 @@ BEGIN
 		,@intTicketItemUOM = intItemUOMIdTo
 	FROM tblSCTicket 
 	WHERE intTicketId = @intTicketId
+		and intStorageScheduleTypeId = -2 -- CONTRACT DISTRIBUTION TYPE
 
 	IF(ISNULL(@intTicketContractDetailId,0) > 0)
 	BEGIN

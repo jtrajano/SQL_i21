@@ -127,7 +127,7 @@
     [strTrlUPCEntryType]                     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrloLnItemDiscProgramId]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [dblTrloLnItemDiscDiscAmt]               DECIMAL (18, 3) NULL,
-    [intTrloLnItemDiscQty]                   INT             NULL,
+    [dblTrloLnItemDiscQty]                   DECIMAL (18, 3) NULL,
     [intTrloLnItemDiscTaxCred]               INT             NULL,
 
     [strTrlFuelType]                         NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
@@ -383,4 +383,9 @@ CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_strTrlUPCwithoutCheckDigit_idx]
 GO
 CREATE NONCLUSTERED INDEX [tblSTTranslogRebates_dtmDate_idx]
     ON [dbo].[tblSTTranslogRebates]([dtmDate] ASC);
+	
+GO
+CREATE NONCLUSTERED INDEX [IX_intStoreNumber]
+    ON [dbo].[tblSTTranslogRebates]([intStoreNumber] ASC, [dtmDate] ASC);
+
 

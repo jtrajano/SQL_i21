@@ -60,6 +60,7 @@ BEGIN
 																	FROM tblSTSubcategory 
 																	WHERE strSubcategoryType = 'C'
 																	AND strSubcategoryId = @strClass) END
+	WHERE intItemId = @intItemId
 
 END
 			

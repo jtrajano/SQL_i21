@@ -1634,7 +1634,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''PROD_STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember' WHERE intAttributeId =75
+	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE SL.intLocationId=@intLocationId Order by DisplayMember' WHERE intAttributeId =75
 END
 GO
 IF NOT EXISTS (
@@ -1660,7 +1660,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE UT.strInternalCode = ''STAGING'' AND SL.intLocationId=@intLocationId Order by DisplayMember' WHERE intAttributeId =76
+	UPDATE dbo.tblMFAttribute SET strSQL='SELECT CONVERT(nvarchar,intStorageLocationId) AS ValueMember,strName + '' - '' + CSL.strSubLocationName as DisplayMember FROM dbo.tblICStorageLocation SL JOIN dbo.tblICStorageUnitType UT ON SL.intStorageUnitTypeId = UT.intStorageUnitTypeId JOIN tblSMCompanyLocationSubLocation CSL ON CSL.intCompanyLocationSubLocationId = SL.intSubLocationId WHERE SL.intLocationId=@intLocationId Order by DisplayMember' WHERE intAttributeId =76
 END
 
 GO
@@ -2715,6 +2715,51 @@ BEGIN
         )
     SELECT 123
         ,'Pick By Storage Location'
+        ,5
+        ,1
+		,0
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 124
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+		,ysnMultiSelect
+		,strSQL
+        )
+    SELECT 124
+        ,'Consume Source Location'
+        ,5
+        ,1
+		,0
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 125
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+		,ysnMultiSelect
+		,strSQL
+        )
+    SELECT 125
+        ,'Pick By Full Bag'
         ,5
         ,1
 		,0

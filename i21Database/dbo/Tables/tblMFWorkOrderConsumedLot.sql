@@ -22,7 +22,7 @@
 	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	ysnFeedSent BIT Constraint DF_tblMFWorkOrderConsumedLot_ysnFeedSent Default (0),
 	dtmActualInputDateTime DATETIME,
-	strBatchId nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+	strBatchId nvarchar(40) COLLATE Latin1_General_CI_AS NULL,
 	[dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL,
 	[dtmLastModified] DATETIME NULL, 

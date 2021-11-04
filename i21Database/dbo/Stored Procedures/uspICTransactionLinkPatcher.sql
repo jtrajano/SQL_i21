@@ -6,7 +6,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-SET ANSI_WARNINGS OFF  
+SET ANSI_WARNINGS ON  
 
 --Begin Transaction
 BEGIN TRAN TransactionLinkPatch
@@ -199,7 +199,7 @@ BEGIN
 						WHEN Shipment.intOrderType = 1
 							THEN CASE 
 								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
-									THEN 'Ticket'
+									THEN 'Scale Ticket'
 								WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
 									THEN 'Contract'
 							END
@@ -208,7 +208,7 @@ BEGIN
 						WHEN Shipment.intOrderType = 4 
 							THEN CASE 
 								WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
-									THEN 'Ticket'
+									THEN 'Scale Ticket'
 							END
 						WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
 						WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
@@ -499,7 +499,7 @@ BEGIN
 							WHEN Shipment.intOrderType = 1
 								THEN CASE 
 									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
-										THEN 'Ticket'
+										THEN 'Scale Ticket'
 									WHEN ShipmentItemSource.intOrderId IS NOT NULL AND ShipmentItemSource.strOrderNumber IS NOT NULL
 										THEN 'Contract'
 								END
@@ -508,7 +508,7 @@ BEGIN
 							WHEN Shipment.intOrderType = 4 
 								THEN CASE 
 									WHEN ShipmentItemSource.intSourceId IS NOT NULL AND ShipmentItemSource.strSourceNumber IS NOT NULL
-										THEN 'Ticket'
+										THEN 'Scale Ticket'
 								END
 							WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
 							WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'

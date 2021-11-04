@@ -53,6 +53,9 @@ GO
 CREATE INDEX [IX_tblTRLoadReceipt_intItemId] ON [dbo].[tblTRLoadReceipt] ([intItemId] ASC)
 GO 
 
+CREATE INDEX [IX_tblTRLoadReceipt_intTerminalId] ON [dbo].[tblTRLoadReceipt] ([intTerminalId] ASC)
+GO
 
-
+CREATE INDEX [IX_tblTRLoadReceipt_strBillOfLading] ON [dbo].[tblTRLoadReceipt] ([strBillOfLading] ASC)
+GO
 

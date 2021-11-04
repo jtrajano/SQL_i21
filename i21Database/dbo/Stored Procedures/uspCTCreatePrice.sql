@@ -77,7 +77,7 @@ begin try
 		,@intOriginalFutureMarketId =  cd.intFutureMarketId
 		,@intOriginalFutureMonthId = cd.intFutureMonthId
 		,@dblOriginalBasis = cd.dblOriginalBasis
-		,@dblTotalLots = (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)
+		,@dblTotalLots = (case when ch.ysnMultiplePriceFixation = 1 then ch.dblNoOfLots else cd.dblNoOfLots end)
 		,@dblLotsFixed = @dblTotalLots
 		,@intQtyItemUOMId = cd.intItemUOMId
 		,@dblQuantityPerLot = cd.dblQuantity / (case when ch.ysnMultiplePriceFixation = 1 then cd.dblQuantity / (ch.dblQuantity/ch.dblNoOfLots) else cd.dblNoOfLots end)

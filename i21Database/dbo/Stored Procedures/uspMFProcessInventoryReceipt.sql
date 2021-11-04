@@ -122,7 +122,7 @@ BEGIN TRY
 		,intStorageLocationId = D.intStorageLocationId
 		,ysnIsStorage = 0
 		,intSourceId = PD.intPurchaseId
-		,intSourceType = 6
+		,intSourceType = 0
 		,strSourceId = P.strPurchaseOrderNumber
 		,strSourceScreenName = 'Scanner'
 		,ysnSubCurrency = 0
@@ -170,6 +170,20 @@ BEGIN TRY
 		UPDATE tblMFPODetail
 		SET ysnProcessed = 1
 		WHERE intPurchaseId = @intPurchaseId
+
+		-- Update the PO Received Qty
+		UPDATE	pod
+		SET		pod.dblQtyReceived = pod.dblQtyOrdered
+		FROM	tblPOPurchase po INNER JOIN tblPOPurchaseDetail pod
+					ON po.intPurchaseId = pod.intPurchaseId
+				LEFT JOIN tblICItem i
+						ON i.intItemId = pod.intItemId
+		WHERE	po.intPurchaseId = @intPurchaseId 
+				AND pod.intItemId IS NOT NULL				--DO NOT UPDATE MISC ENTRY
+				AND i.strType NOT IN ('Other Charge')		--DOT NOT UPDATE OTHER CHARGES TYPE
+	
+		-- Update the PO Status 
+		EXEC dbo.uspPOUpdateStatus @intPurchaseId
 
 		DELETE
 		FROM #tmpAddItemReceiptResult

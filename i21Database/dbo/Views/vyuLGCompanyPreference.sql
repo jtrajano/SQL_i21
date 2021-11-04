@@ -186,7 +186,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.intExpirationDays
 	,CP.intExpirationDateBasis
 	,strExpirationDateBasis = CASE CP.intExpirationDateBasis
-		WHEN 1 THEN 'Scheduled Date' 
+		WHEN 1 THEN 'Load Scheduled Date' 
 		WHEN 2 THEN 'Contract End Date'
 		ELSE '' END COLLATE Latin1_General_CI_AS 
 FROM tblLGCompanyPreference CP

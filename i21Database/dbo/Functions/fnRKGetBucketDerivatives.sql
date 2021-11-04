@@ -61,7 +61,7 @@ BEGIN
 			, sl.intFutureMarketId
 		FROM vyuRKGetSummaryLog sl
 		WHERE strTransactionType = 'Match Derivatives'
-			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
+			AND dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
@@ -86,7 +86,7 @@ BEGIN
 			, sl.intFutureMarketId
 		FROM vyuRKGetSummaryLog sl
 		WHERE strTransactionType = 'Options Lifecycle'
-			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
+			AND dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))  
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
@@ -135,7 +135,7 @@ BEGIN
 		, strUserName
 		, strAction
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strDistributionType, c.strInOut, c.intFutureMarketId ORDER BY c.intSummaryLogId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, CASE WHEN intActionId = 57 THEN 1 ELSE 0 END ORDER BY c.intSummaryLogId DESC)
 			, c.intFutOptTransactionId
 			, dblOpenContract =  ISNULL(c.dblOrigNoOfLots, 0) - CASE WHEN c.strInOut = 'IN' THEN  ISNULL(ABS(md.dblOrigNoOfLots), 0) ELSE ISNULL(md.dblOrigNoOfLots, 0) END
 			, intCommodityId
@@ -160,7 +160,7 @@ BEGIN
 			, strBrokerAccount = mf.strBrokerAccount
 			, intEntityId
 			, strBroker = mf.strBroker
-			, strBuySell = mf.strBuySell
+			, strBuySell = c.strDistributionType
 			, ysnPreCrush = CAST(ISNULL(mf.ysnPreCrush, 0) AS BIT)
 			, strNotes
 			, strBrokerTradeNo = mf.strBrokerTradeNo			
@@ -176,15 +176,17 @@ BEGIN
 		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
 		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId and md.strDistributionType = c.strDistributionType and md.intFutureMarketId = c.intFutureMarketId
 		WHERE strTransactionType IN ('Derivative Entry')
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
+			AND c.dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))  
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 			AND intFutOptTransactionId NOT IN (SELECT intTransactionRecordId FROM OptionsLifecycle)
-			AND isnull(c.ysnNegate,0) = 0
+			--AND isnull(c.ysnNegate,0) = 0
 
 	) t WHERE intRowNum = 1
 
 RETURN
 
 END
+
+

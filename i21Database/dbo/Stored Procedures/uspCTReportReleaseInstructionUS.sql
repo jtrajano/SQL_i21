@@ -162,6 +162,7 @@ BEGIN TRY
 		, supplier.strName AS strSupplier
 		, CRI.strNotes strReleaseNotes
 		, CRI.strConditions strReleaseConditions
+		, strUpdateAvailabilityDate = LEFT(DATENAME(DAY,  CD.dtmUpdatedAvailabilityDate), 2) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLaguageId, LEFT(DATENAME(MONTH,  CD.dtmUpdatedAvailabilityDate), 3)), LEFT(DATENAME(MONTH,  CD.dtmUpdatedAvailabilityDate), 3)) + ' ' + LEFT(DATENAME(YEAR, CD.dtmUpdatedAvailabilityDate), 4)
 	FROM tblCTContractReleaseInstruction CRI
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = CRI.intContractDetailId
 	JOIN tblCTContractHeader CH WITH(NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId

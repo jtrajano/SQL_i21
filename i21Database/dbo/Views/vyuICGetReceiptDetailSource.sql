@@ -169,17 +169,17 @@ SELECT DISTINCT
 				WHEN Receipt.strReceiptType = 'Purchase Contract'
 					THEN CASE
 						WHEN ReceiptItem.intSourceId IS NOT NULL
-							THEN 'Ticket'
+							THEN 'Scale Ticket'
 						WHEN ReceiptItem.intOrderId IS NOT NULL
 							THEN 'Contract'
 						ELSE NULL
 						END
 				WHEN Receipt.strReceiptType = 'Transfer Order'
-					THEN 'Ticket'
+					THEN 'Scale Ticket'
 				WHEN Receipt.strReceiptType = 'Inventory Return'
-					THEN 'Ticket'
+					THEN 'Scale Ticket'
 				WHEN Receipt.strReceiptType = 'Direct'
-					THEN 'Ticket'
+					THEN 'Scale Ticket'
 				ELSE NULL
 				END
 		WHEN Receipt.intSourceType = 2
@@ -199,7 +199,7 @@ SELECT DISTINCT
 			THEN CASE 
 				WHEN Receipt.strReceiptType = 'Inventory Return'
 					THEN 'Inventory Receipt'
-				ELSE 'Ticket'
+				ELSE 'Scale Ticket'
 				END
 		WHEN Receipt.intSourceType = 5
 			THEN CASE 

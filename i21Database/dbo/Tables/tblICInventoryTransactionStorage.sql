@@ -48,6 +48,10 @@ This tables holds all inventory transactions for storage/custody items (not comp
 		[intCompanyId] INT NULL, 
 		[intSourceEntityId] INT NULL,
 		[intTransactionItemUOMId] INT NULL,
+		[strSourceType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strSourceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		[intTicketId] INT NULL,
 		CONSTRAINT [PK_tblICInventoryTransactionStorage] PRIMARY KEY ([intInventoryTransactionStorageId]),
 		CONSTRAINT [FK_tblICInventoryTransactionStorage_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryTransactionStorage_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
@@ -64,6 +68,8 @@ This tables holds all inventory transactions for storage/custody items (not comp
 		ON [dbo].[tblICInventoryTransactionStorage]([intItemId] ASC, [intItemLocationId] ASC);
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionStorage_intTransactionId]
-		ON [dbo].[tblICInventoryTransactionStorage]([intTransactionId] ASC, [intTransactionTypeId] ASC);
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransactionStorage_Unposting]
+		ON [dbo].[tblICInventoryTransactionStorage]([intTransactionId] ASC, [strTransactionId] ASC)
+		INCLUDE (ysnIsUnposted, dblQty)
+		;
 	GO

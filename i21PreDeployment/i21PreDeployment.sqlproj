@@ -167,6 +167,8 @@
     <None Include="Scripts\Pre-Deployment\22_PAT\7_VolumeConstraintFix.sql" />
     <None Include="Scripts\Pre-Deployment\22_PAT\6_VolumeSchemaFix.sql" />
     <None Include="Scripts\Pre-Deployment\14_CT\CreatePricingInvoiceLink.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\23_DeleteDuplicateEntityMobileNumber.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\DROPAxxisTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -410,6 +412,16 @@
     <None Include="Scripts\Pre-Deployment\14_CT\DropIndexes.sql" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\14_RefreshARTempTable.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\19_MF\DropConstraints.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\7_AR\15_FixtblARCustomer_MissingColumn.sql" />
+    <None Include="Scripts\Pre-Deployment\20_CF\CardFuelingDeleteObject.sql" />
   </ItemGroup>
 </Project>

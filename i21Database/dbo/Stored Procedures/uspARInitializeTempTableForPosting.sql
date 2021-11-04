@@ -169,6 +169,7 @@ CREATE TABLE ##ARPostInvoiceHeader (
 	,[strReceiptNumber]						NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
 	,[ysnInterCompany]                      BIT             NULL
 	,[intInterCompanyVendorId]				INT				NULL
+	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARPostInvoiceDetail') IS NOT NULL)
@@ -335,6 +336,7 @@ CREATE TABLE ##ARPostInvoiceDetail (
 	,[strReceiptNumber]						NVARCHAR(15)    COLLATE Latin1_General_CI_AS    NULL
 	,[ysnInterCompany]                      BIT             NULL
 	,[intInterCompanyVendorId]				INT				NULL
+	,[strBOLNumber]							NVARCHAR(100)	COLLATE Latin1_General_CI_AS    NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARInvoiceItemAccount') IS NOT NULL)
@@ -408,6 +410,9 @@ CREATE TABLE ##ARItemsForCosting (
 	, [dblAdjustCostValue]				NUMERIC(38, 20) NULL
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL
 	, [strType]                         NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , [ysnAutoBlend]                    BIT NULL
+    , [ysnGLOnly]						BIT NULL
+	, [strBOLNumber]					NVARCHAR(100) NULL 
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForInTransitCosting') IS NOT NULL)
@@ -440,6 +445,7 @@ CREATE TABLE ##ARItemsForInTransitCosting (
 	, [dblForexRate]					NUMERIC(38, 20) NULL DEFAULT 1
 	, [intLinkedItem]					INT NULL
 	, [intLinkedItemId]					INT NULL
+	, [strBOLNumber]					NVARCHAR(100) NULL 
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForStorageCosting') IS NOT NULL)
@@ -477,6 +483,7 @@ CREATE TABLE ##ARItemsForStorageCosting (
 	, [intCategoryId]					INT NULL 
 	, [dblAdjustCostValue]				NUMERIC(38, 20) NULL
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL
+	, [strBOLNumber]					NVARCHAR(100) NULL 
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForContracts') IS NOT NULL)

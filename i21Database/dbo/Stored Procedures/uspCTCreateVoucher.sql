@@ -27,7 +27,7 @@ begin try
         ,@voucherPayableTax = @voucherPayableTax    
         ,@userId = @userId    
         ,@throwError = @throwError  
-        ,@error = @error    
+        ,@error = @error out
         ,@createdVouchersId  = @createdVouchersId out  
 
         goto _return;
@@ -134,9 +134,11 @@ begin try
 	declare @voucherPayablesDataTemp as table (
 		intVoucherPayableId int
 		,dblQuantityToBill decimal(38,15)
+		,dblNetWeight decimal(38,15)
 		,intContractDetailId int
 		,intInventoryReceiptItemId int
 		,intQtyToBillUOMId int
+		,intWeightUOMId int
 	);
 
 	declare @availablePrice as table (
@@ -168,6 +170,7 @@ begin try
 		,@dblPriceQuantity numeric(18,6)
 		,@intAvailablePriceLoad int
 		,@dblTransactionQuantity numeric(18,6)
+		,@dblTransactionNetWeight numeric(18,6)
 		,@ysnLoad bit = 0
 		,@intInventoryReceiptId int
 		,@strReceiptNo NVARCHAR(50)
@@ -196,9 +199,11 @@ begin try
 		select
 			intVoucherPayableId = a.intVoucherPayableId
 			,dblQuantityToBill = a.dblQuantityToBill
+			,dblNetWeight = a.dblNetWeight
 			,intContractDetailId = a.intContractDetailId
 			,intInventoryReceiptItemId = a.intInventoryReceiptItemId
 			,intQtyToBillUOMId = a.intQtyToBillUOMId
+			,intWeightUOMId = a.intWeightUOMId
 		from
 			@voucherPayables a
 		where
@@ -213,9 +218,11 @@ begin try
 			select
 				@intVoucherPayableId = intVoucherPayableId
 				,@dblQuantityToBill = dblQuantityToBill
+				,@dblNetWeight = dblNetWeight
 				,@intContractDetailId = intContractDetailId
 				,@intInventoryReceiptItemId = intInventoryReceiptItemId
 				,@intQtyToBillUOMId = intQtyToBillUOMId
+				,@intWeightUOMId = intWeightUOMId
 			from
 				@voucherPayablesDataTemp
 			where
@@ -322,10 +329,12 @@ begin try
 
 				--Set @dblTransactionQuantity = @dblQuantityToBill by default (this is also correct quantity for Load Based)
 				set @dblTransactionQuantity = @dblQuantityToBill;
+				set @dblTransactionNetWeight = @dblNetWeight;
 
 				if (isnull(@ysnLoad,0) = 0 and @dblTransactionQuantity > @dblAvailablePriceQuantity)
 				begin
 					--If not load based and the @dblAvailablePriceQuantity is less than the @dblQuantityToBill, price quantity should be the quantity to bill
+					set @dblTransactionNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intQtyToBillUOMId,@intWeightUOMId,@dblAvailablePriceQuantity)
 					set @dblTransactionQuantity = @dblAvailablePriceQuantity;
 				end
 				else
@@ -336,7 +345,8 @@ begin try
 
 				--Deduct the quantity
 				set @dblQuantityToBill = (@dblQuantityToBill - @dblTransactionQuantity);
-				update @voucherPayablesDataTemp set dblQuantityToBill = (dblQuantityToBill - @dblTransactionQuantity) where intVoucherPayableId = @intVoucherPayableId;
+				set @dblNetWeight = (@dblNetWeight - @dblTransactionNetWeight);
+				update @voucherPayablesDataTemp set dblQuantityToBill = (dblQuantityToBill - @dblTransactionQuantity), dblNetWeight = (dblNetWeight - @dblTransactionNetWeight) where intVoucherPayableId = @intVoucherPayableId;
 				update @availablePrice set dblAvailablePriceQuantity = (dblAvailablePriceQuantity - @dblTransactionQuantity) where intPriceFixationDetailId = @intPriceFixationDetailId;
 				
 				--Construct voucher data
@@ -502,7 +512,7 @@ begin try
 					,intCostUOMId = vp.intCostUOMId
 					,intCostCurrencyId = vp.intCostCurrencyId
 					,dblWeight = vp.dblWeight
-					,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(vp.intQtyToBillUOMId,vp.intWeightUOMId,@dblTransactionQuantity)
+					,dblNetWeight = @dblTransactionNetWeight
 					,dblWeightUnitQty = vp.dblWeightUnitQty
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
@@ -1007,7 +1017,7 @@ begin try
 				,@voucherPayableTax = @voucherPayableTaxFinal  
 				,@userId = @userId  
 				,@throwError = @throwError
-				,@error = @error  
+				,@error = @error out
 				,@createdVouchersId  = @createdVouchersId out
 
 			insert into @CreatedVoucher

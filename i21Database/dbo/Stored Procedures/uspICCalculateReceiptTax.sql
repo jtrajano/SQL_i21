@@ -12,7 +12,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
+SET ANSI_WARNINGS ON
 
 -- Ownership Types
 DECLARE	@OWNERSHIP_TYPE_Own AS INT = 1
@@ -149,7 +149,7 @@ BEGIN
 	SELECT TOP 1
 		@Amount = 				
 			CASE 
-				WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+				WHEN ReceiptItem.intWeightUOMId IS NOT NULL AND ReceiptItem.intComputeItemTotalOption = 0 THEN 
 					dbo.fnCalculateCostBetweenUOM(
 						COALESCE(ReceiptItem.intCostUOMId, ReceiptItem.intUnitMeasureId)
 						, ReceiptItem.intWeightUOMId
@@ -174,7 +174,7 @@ BEGIN
 			END 	
 		,@Qty	 = 
 			CASE	
-				WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+				WHEN ReceiptItem.intWeightUOMId IS NOT NULL AND ReceiptItem.intComputeItemTotalOption = 0 THEN 
 					ReceiptItem.dblNet 
 				ELSE 
 					ReceiptItem.dblOpenReceive 

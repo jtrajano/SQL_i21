@@ -16,7 +16,7 @@ BEGIN TRY
 		, @intCommodityId INT
 		, @intLocationId INT
 		, @intTraderId INT
-		, @strInternalTradeNo NVARCHAR(10)
+		, @strInternalTradeNo NVARCHAR(100)
 		, @strBrokerTradeNo NVARCHAR(50)
 		, @strBuySell NVARCHAR(10)
 		, @dblNoOfContract NUMERIC(18, 6)

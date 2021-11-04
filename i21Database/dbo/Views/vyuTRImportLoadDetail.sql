@@ -2,6 +2,7 @@
 	AS 
 SELECT ILD.[intImportLoadDetailId]
       ,IL.[intImportLoadId]
+      ,ILD.[intLoadHeaderId]
       ,ILD.[intTruckId]
       ,ILD.[strTruck]
       ,ILD.[intTerminalId]

@@ -97,39 +97,34 @@ LEFT JOIN tblSMPaymentMethod custPaymentMethod ON CUSTOMER.intPaymentMethodId = 
 LEFT JOIN tblSMTerm custTerm ON CUSTOMER.intTermsId = custTerm.intTermID
 LEFT JOIN tblSMFreightTerms fTerms ON ISNULL(shipLocation.intFreightTermId, custLocation.intFreightTermId) = fTerms.intFreightTermId
 LEFT JOIN tblSMShipVia shipVia on shipLocation.intShipViaId = shipVia.intEntityId
-OUTER APPLY (
-	SELECT dtmDate = MAX(INV.dtmDate) 
+LEFT JOIN (
+	SELECT dtmDate				= MAX(INV.dtmDate)
+		 , intEntityCustomerId	= INV.intEntityCustomerId
 	FROM dbo.tblARInvoice INV WITH (NOLOCK) 
-	WHERE INV.intEntityCustomerId = CUSTOMER.intEntityId
-) LASTINVOICE
-OUTER APPLY (
-	SELECT dtmDatePaid = MAX(PAYMENT.dtmDatePaid) 
+	GROUP BY INV.intEntityCustomerId
+) LASTINVOICE ON LASTINVOICE.intEntityCustomerId = CUSTOMER.intEntityId
+LEFT JOIN (
+	SELECT dtmDatePaid			= MAX(PAYMENT.dtmDatePaid)
+		 , intEntityCustomerId	= PAYMENT.intEntityCustomerId 
 	FROM dbo.tblARPayment PAYMENT WITH (NOLOCK) 
-	WHERE PAYMENT.intEntityCustomerId = CUSTOMER.intEntityId
-) LASTPAYMENT
-OUTER APPLY (
-	SELECT ysnHasBudgetSetup = CASE WHEN COUNT(*) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
-	WHERE intEntityCustomerId = CUSTOMER.intEntityId
-) BUDGET
---OUTER APPLY (
---	SELECT intEntityLineOfBusinessIds = intLineOfBusinessId
---	FROM (
---		SELECT CAST(intLineOfBusinessId AS VARCHAR(200)) + CASE WHEN CAST(intLineOfBusinessId AS VARCHAR(200)) <> NULL THEN '|^|' ELSE '' END
---		FROM dbo.tblEMEntityLineOfBusiness WITH(NOLOCK)
---		WHERE intEntityId = CUSTOMER.intEntityId
---		FOR XML PATH ('')
---	) INV (intLineOfBusinessId)
---) LINEOFBUSINESS
-OUTER APPLY(
-	SELECT COUNT(ARC.intEntityId) AS intApproverCount
+	GROUP BY PAYMENT.intEntityCustomerId
+) LASTPAYMENT ON LASTPAYMENT.intEntityCustomerId = CUSTOMER.intEntityId
+LEFT JOIN (
+	SELECT ysnHasBudgetSetup	= CASE WHEN COUNT(*) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+		 , intEntityCustomerId	= CB.intEntityCustomerId
+	FROM dbo.tblARCustomerBudget CB WITH (NOLOCK)
+	GROUP BY CB.intEntityCustomerId 
+) BUDGET ON BUDGET.intEntityCustomerId = CUSTOMER.intEntityId
+LEFT JOIN (
+	SELECT intApproverCount		= COUNT(ARC.intEntityId)
+		 , intEntityId			= ARC.intEntityId
 	FROM dbo.tblARCustomer ARC
 	INNER JOIN dbo.tblEMEntityRequireApprovalFor ERA
 		ON ARC.intEntityId = ERA.[intEntityId]
 	INNER JOIN tblSMScreen SC
 		ON ERA.intScreenId = SC.intScreenId
 		AND SC.strScreenName = 'Invoice'
-	WHERE ARC.intEntityId = CUSTOMER.intEntityId
-) CUSTOMERCREDITAPPROVER
+	GROUP BY ARC.intEntityId 
+) CUSTOMERCREDITAPPROVER ON CUSTOMERCREDITAPPROVER.intEntityId = CUSTOMER.intEntityId
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO

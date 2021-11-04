@@ -70,13 +70,16 @@ SELECT
 		,receiptItemLot.strWarrantNo
 		, fiscal.strPeriod strAccountingPeriod
 FROM	tblICInventoryReceiptItemLot receiptItemLot
-		INNER JOIN tblICInventoryReceiptItem item ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
-		INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = item.intInventoryReceiptId
-		INNER JOIN tblICItem oItem ON oItem.intItemId = item.intItemId
-		LEFT OUTER JOIN tblICCategory cat ON cat.intCategoryId = oItem.intCategoryId
-		LEFT OUTER JOIN tblICCommodity com ON com.intCommodityId = oItem.intCommodityId
-		INNER JOIN tblICInventoryReceipt receipt
+		INNER JOIN tblICInventoryReceiptItem item 
+			ON item.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
+		INNER JOIN tblICInventoryReceipt receipt 
 			ON receipt.intInventoryReceiptId = item.intInventoryReceiptId
+		INNER JOIN tblICItem oItem 
+			ON oItem.intItemId = item.intItemId
+		LEFT OUTER JOIN tblICCategory cat 
+			ON cat.intCategoryId = oItem.intCategoryId
+		LEFT OUTER JOIN tblICCommodity com 
+			ON com.intCommodityId = oItem.intCommodityId
 		LEFT OUTER JOIN tblSMCompanyLocationSubLocation sub 
 			ON sub.intCompanyLocationSubLocationId = receiptItemLot.intSubLocationId
 		LEFT OUTER JOIN tblICStorageLocation sloc 
@@ -107,5 +110,5 @@ FROM	tblICInventoryReceiptItemLot receiptItemLot
 		OUTER APPLY (
 			SELECT TOP 1 fp.strPeriod
 			FROM tblGLFiscalYearPeriod fp
-			WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+			WHERE receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
 		) fiscal

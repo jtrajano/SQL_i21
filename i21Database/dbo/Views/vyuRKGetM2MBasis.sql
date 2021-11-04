@@ -59,7 +59,8 @@ LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
-WHERE dblBalance > 0 AND cd.intPricingTypeId <> 5 AND cd.intContractStatusId <> 3	
+WHERE dblBalance > 0 AND cd.intPricingTypeId NOT IN (5,6) AND cd.intContractStatusId <> 3	
+
 UNION SELECT DISTINCT strCommodityCode
 	, im.strItemNo
 	, strOriginDest = ca.strDescription
@@ -110,7 +111,7 @@ LEFT JOIN tblICItemUOM u ON cd.intItemUOMId = u.intItemUOMId
 LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
 CROSS APPLY (SELECT TOP 1 ysnUseBoardMonth = ISNULL(ysnUseBoardMonth, 0) FROM tblRKCompanyPreference) CP
-WHERE cd.intPricingTypeId = 5 AND cd.intContractStatusId <> 3
+WHERE cd.intPricingTypeId IN( 5,6) AND cd.intContractStatusId <> 3
 
 UNION SELECT DISTINCT iis.strCommodityCode
 	, iis.strItemNo

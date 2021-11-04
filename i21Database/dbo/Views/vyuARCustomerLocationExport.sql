@@ -18,7 +18,11 @@ SELECT intEntityId				= ARC.intEntityId
      , dblLatitude				= EMEL.dblLatitude
      , strTimezone				= ISNULL(EMEL.strTimezone, '')
      , strShipVia				= ISNULL(SMSV.strShipVia, '')
+     , ysnDefaultLocation		= ISNULL(EMEL.ysnDefaultLocation, 0)
 FROM tblARCustomer ARC
 INNER JOIN tblEMEntityLocation EMEL ON ARC.intEntityId = EMEL.intEntityId
 INNER JOIN tblEMEntity EME ON ARC.intEntityId = EME.intEntityId
+INNER JOIN tblEMEntityLineOfBusiness EMELOB ON EME.intEntityId = EMELOB.intEntityId
+INNER JOIN tblSMLineOfBusiness SMLOB ON EMELOB.intLineOfBusinessId = SMLOB.intLineOfBusinessId
 LEFT JOIN tblSMShipVia SMSV ON EMEL.intShipViaId = SMSV.intEntityId
+WHERE SMLOB.strLineOfBusiness = 'Wholesale Transports'

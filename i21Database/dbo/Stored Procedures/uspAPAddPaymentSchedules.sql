@@ -27,6 +27,7 @@ INSERT INTO tblAPVoucherPaymentSchedule
 (
 	intBillId,
 	intTermsId,
+	strPaymentScheduleNumber,
 	dtmDueDate,
 	dtmDiscountDate,
 	dblPayment,
@@ -37,6 +38,7 @@ INSERT INTO tblAPVoucherPaymentSchedule
 SELECT
 	intBillId,
 	intTermsId,
+	strPaymentScheduleNumber,
 	dtmDueDate,
 	dtmDiscountDate,
 	dblPayment,
