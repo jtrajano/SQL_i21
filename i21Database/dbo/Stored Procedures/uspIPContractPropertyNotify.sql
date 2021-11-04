@@ -7,7 +7,28 @@ DECLARE @strStyle NVARCHAR(MAX)
 	,@strHeader2 NVARCHAR(MAX)
 	,@strDetail2 NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
-	,@intBookId int
+	,@intBookId INT
+	,@dtmProcessedDate DATETIME
+
+SELECT @dtmProcessedDate = Convert(DATETIME, Convert(CHAR, Getdate(), 101))
+
+IF EXISTS (
+		SELECT *
+		FROM tblIPContractPropertyNotify
+		WHERE dtmProcessedDate = @dtmProcessedDate
+		)
+BEGIN
+	SET @strMessage = ''
+
+	SELECT @strMessage AS strMessage
+
+	RETURN
+END
+ELSE
+BEGIN
+	INSERT INTO tblIPContractPropertyNotify (dtmProcessedDate)
+	SELECT @dtmProcessedDate
+END
 
 SET @strStyle = '<style type="text/css" scoped>
 					table.GeneratedTable {
@@ -184,8 +205,8 @@ SELECT strAllocationNumber
 	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
 	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'Book'
-	,IsNULL(PB.strBook,'')
-	,IsNULL(SB.strBook,'')
+	,IsNULL(PB.strBook, '')
+	,IsNULL(SB.strBook, '')
 	,B.strBook
 FROM dbo.tblLGAllocationDetail AD
 JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -207,8 +228,8 @@ SELECT strAllocationNumber
 	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
 	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'Subbook'
-	,isNULL(PSB.strSubBook,'')
-	,IsNULL(SSB.strSubBook,'')
+	,isNULL(PSB.strSubBook, '')
+	,IsNULL(SSB.strSubBook, '')
 	,B.strBook
 FROM dbo.tblLGAllocationDetail AD
 JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -219,13 +240,11 @@ JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderI
 LEFT JOIN dbo.tblCTSubBook PSB ON PSB.intSubBookId = P.intSubBookId
 LEFT JOIN dbo.tblCTSubBook SSB ON SSB.intSubBookId = S.intSubBookId
 JOIN tblCTBook B ON B.intBookId = SH.intBookId
-WHERE IsNULL(P.intSubBookId,0) <> IsNULL(S.intSubBookId,0)
+WHERE IsNULL(P.intSubBookId, 0) <> IsNULL(S.intSubBookId, 0)
 	AND (
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
 		)
-
-
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -272,6 +291,7 @@ WHERE Convert(CHAR(10), P.dtmStartDate, 126) <> Convert(CHAR(10), S.dtmStartDate
 		OR S.intContractStatusId = 1
 		)
 	AND SH.intBookId <> @intBookId
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -294,6 +314,7 @@ WHERE Convert(CHAR(10), P.dtmEndDate, 126) <> Convert(CHAR(10), S.dtmEndDate, 12
 		OR S.intContractStatusId = 1
 		)
 	AND SH.intBookId <> @intBookId
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -317,6 +338,7 @@ WHERE Convert(CHAR(10), P.dtmStartDate, 126) <> Convert(CHAR(10), S.dtmStartDate
 		)
 	AND SH.intBookId = @intBookId
 	AND PH.intPositionId = SH.intPositionId
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -340,19 +362,23 @@ WHERE Convert(CHAR(10), P.dtmEndDate, 126) <> Convert(CHAR(10), S.dtmEndDate, 12
 		)
 	AND SH.intBookId = @intBookId
 	AND PH.intPositionId = SH.intPositionId
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data2
 SELECT SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'Quantity'
-	,[dbo].[fnRemoveTrailingZeroes](S.dblAllocatedQty)
-	,[dbo].[fnRemoveTrailingZeroes](S.dblQuantity)
+	,IsNULL([dbo].[fnRemoveTrailingZeroes](SUM(AD.dblSAllocatedQty)), 0)
+	,[dbo].[fnRemoveTrailingZeroes](MAX(S.dblQuantity))
 	,B.strBook
 FROM dbo.tblCTContractDetail S
 JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
+LEFT JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = S.intContractDetailId
 JOIN tblCTBook B ON B.intBookId = SH.intBookId
-WHERE S.dblAllocatedQty <> S.dblQuantity
-	AND S.intContractStatusId = 1
+WHERE S.intContractStatusId = 1
 	AND SH.intContractTypeId = 2
+GROUP BY SH.strContractNumber + '/' + ltrim(S.intContractSeq)
+	,B.strBook
+HAVING IsNULL(SUM(AD.dblSAllocatedQty), 0) <> MAX(S.dblQuantity)
 
 SET @strHeader2 = '<tr><th>&nbsp;SerialNo</th>
 						<th>&nbsp;AllocationNumber</th>
@@ -381,7 +407,7 @@ SET @strHeader = '<tr><th>&nbsp;SerialNo</th>
 					</tr>'
 
 SELECT @strDetail = @strDetail + '<tr><td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intRecordId), '') + '</td>
-			<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + IsNULL(strPValue, '') + '</td>' + '<td>&nbsp;' + IsNULL(strSValue, '') + '</td>'+ '<td>&nbsp;' + strBook + '</td>  
+			<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + IsNULL(strPValue, '') + '</td>' + '<td>&nbsp;' + IsNULL(strSValue, '') + '</td>' + '<td>&nbsp;' + strBook + '</td>  
 	</tr>'
 FROM @Data2
 ORDER BY intRecordId
