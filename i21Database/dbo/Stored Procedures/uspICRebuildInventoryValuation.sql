@@ -1061,9 +1061,9 @@ BEGIN
 		SELECT	id = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
-							-CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
+							-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 						ELSE
-							CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
+							CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 					END 
 				,id2 = intInventoryTransactionId
 				,intSortByQty = 
@@ -1128,7 +1128,7 @@ BEGIN
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
-					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
+					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				ELSE
 					NULL
 			END DESC 
@@ -1148,7 +1148,7 @@ BEGIN
 			ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NULL THEN 
-					CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
+					CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				ELSE
 					1
 			END ASC 			
@@ -1217,7 +1217,7 @@ BEGIN
 			ON #tmpICInventoryTransaction(sortId ASC);
 
 		INSERT INTO #tmpICInventoryTransaction
-		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT)
+		SELECT	id = CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				,id2 = intInventoryTransactionId
 				,intSortByQty = 
 					CASE 
@@ -1269,7 +1269,7 @@ BEGIN
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
 		ORDER BY 
-			intInventoryTransactionId ASC,  CAST(REPLACE(strBatchId, 'BATCH-', '') AS FLOAT) ASC 
+			intInventoryTransactionId ASC,  CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT) ASC 
 
 		INSERT INTO #tmpAutoVarianceBatchesForAVGCosting (
 			intItemId

@@ -23,7 +23,7 @@ BEGIN
 		, @dblQtyShipped NUMERIC(18, 6)
 		, @strInvoiceNumber NVARCHAR(25)
 		, @strTransactionType NVARCHAR(25)
-		, @strBatchId NVARCHAR(40)
+		, @strBatchId NVARCHAR(25)
 		, @intItemId INT
 		, @strItemNo NVARCHAR(50)
 		, @ErrMsg NVARCHAR(MAX)

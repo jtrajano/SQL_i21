@@ -22,7 +22,7 @@ BEGIN TRY
 	DECLARE @NegativeUnits  DECIMAL(24, 10)
 	
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
-		   ,@strBatchId AS NVARCHAR(40)
+		   ,@strBatchId AS NVARCHAR(20)
 	DECLARE @ItemsToStorage AS ItemCostingTableType
 	DECLARE @ItemsToPost  AS ItemCostingTableType
 	DECLARE @TicketNo NVARCHAR(50)
