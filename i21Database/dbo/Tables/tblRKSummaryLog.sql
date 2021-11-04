@@ -2,7 +2,7 @@
 (
 	intSummaryLogId INT IDENTITY NOT NULL,
 	strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-	dtmCreatedDate DATETIME NULL DEFAULT(GETDATE()),
+	dtmCreatedDate DATETIME NULL DEFAULT (GETUTCDATE()),
 	strBucketType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intActionId INT NULL,
 	strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
