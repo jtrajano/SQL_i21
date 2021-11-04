@@ -159,26 +159,26 @@ BEGIN
 		, strEntity = EN.strName
 		, CH.strInternalComment
 		, strItem = IT.strItemNo
-		, dblQuantity = dbo.fnRemoveTrailingZeroes(ROUND(CD.dblQuantity, @intQtyDec))
+		, dblQuantity = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblQuantity), @intQtyDec)
 		, strQtyUOM = IUOM.strUnitMeasure
-		, dblNetWeight = dbo.fnRemoveTrailingZeroes(ROUND(CD.dblNetWeight, @intQtyDec))
+		, dblNetWeight = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), @intQtyDec)
 		, strWeightUOM = WUOM.strUnitMeasure
 		, strContractItem = IC.strContractItemName
 		, strMarket = FMarket.strFutMarketName
 		, strMonth = FMonth.strFutureMonth
 		, CU.strCurrency
 		, strPriceUOM = PUOM.strUnitMeasure
-		, dblFutures = dbo.fnRemoveTrailingZeroes(ROUND(CD.dblFutures, @intPriceDec))
+		, dblFutures = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblFutures), @intPriceDec)
 		, strProductType = PT.strDescription
 		, strINCOShipTerms = ST.strFreightTerm
 		, CS.strContractStatus
-		, dblFinancingCost = dbo.fnRemoveTrailingZeroes(ROUND(CCTotal.dblFinancingCost, @intPriceDec))
-		, dblFOB = dbo.fnRemoveTrailingZeroes(ROUND(CCTotal.dblFOB, @intPriceDec))
-		, dblSustainabilityPremium = dbo.fnRemoveTrailingZeroes(ROUND(CCTotal.dblSustainabilityPremium, @intPriceDec))
-		, dblFOBCAD = dbo.fnRemoveTrailingZeroes(ROUND(CCTotal.dblFOBCAD, @intPriceDec))
-		, dblOtherCost = dbo.fnRemoveTrailingZeroes(ROUND(CCTotal.dblOtherCost, @intPriceDec))
-		, dblBasis = dbo.fnRemoveTrailingZeroes(ROUND(CD.dblBasis, @intPriceDec))
-		, dblCashPrice = dbo.fnRemoveTrailingZeroes(ROUND(CD.dblCashPrice, @intPriceDec))
+		, dblFinancingCost = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFinancingCost), @intPriceDec)
+		, dblFOB = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOB), @intPriceDec)
+		, dblSustainabilityPremium = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblSustainabilityPremium), @intPriceDec)
+		, dblFOBCAD = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOBCAD), @intPriceDec)
+		, dblOtherCost =  ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblOtherCost), @intPriceDec)
+		, dblBasis = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblBasis), @intPriceDec)
+		, dblCashPrice = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblCashPrice), @intPriceDec)
 		, ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
 		, strCertificateName = (
 						select
