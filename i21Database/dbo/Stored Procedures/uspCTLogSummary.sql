@@ -4054,6 +4054,7 @@ BEGIN TRY
 						LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = a.intLineNo AND cd.intContractHeaderId = a.intOrderId
 						WHERE b.intContractHeaderId = a.intOrderId
 						AND a.intLineNo = ISNULL(b.intContractDetailId, a.intLineNo)
+						AND a.intInventoryShipmentItemId = b.intTransactionReferenceDetailId
 					END
 					-- Inventory Receipt
 					ELSE IF (@strTransactionReference = 'Inventory Receipt')
@@ -4061,6 +4062,7 @@ BEGIN TRY
 						SELECT @dblActual = SUM(dblOpenReceive)
 						FROM tblICInventoryReceiptItem a
 						INNER JOIN @cbLogSpecific b ON a.intInventoryReceiptId = b.intTransactionReferenceId
+						WHERE a.intInventoryReceiptItemId = b.intTransactionReferenceDetailId
 					END
 					-- Settle Storage
 					ELSE IF (@strTransactionReference = 'Settle Storage')
