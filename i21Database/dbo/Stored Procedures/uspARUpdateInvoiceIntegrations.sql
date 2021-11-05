@@ -6,6 +6,7 @@
 	,@ysnLogRisk		BIT = 1
 	,@Post				BIT	= 0
 	,@Recap				BIT	= 1
+	,@FromPosting		BIT = 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
