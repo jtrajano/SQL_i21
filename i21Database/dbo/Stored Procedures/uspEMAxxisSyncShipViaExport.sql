@@ -6,10 +6,6 @@ BEGIN
 	SET NOCOUNT ON
 	SET ANSI_WARNINGS OFF
 
-	IF OBJECT_ID(N'tmpSMShipVia') IS NOT NULL DROP TABLE tmpSMShipVia
-	IF OBJECT_ID(N'tmpSMShipViaTrailer') IS NOT NULL DROP TABLE tmpSMShipViaTrailer
-	IF OBJECT_ID(N'tmpSMShipViaTruck') IS NOT NULL DROP TABLE tmpSMShipViaTruck
-
 	SELECT A.intEntityId,
 		'H' COLLATE Latin1_General_CI_AS AS HDCode,
 		ISNULL(B.strExternalERPId, '') AS SCAC,
