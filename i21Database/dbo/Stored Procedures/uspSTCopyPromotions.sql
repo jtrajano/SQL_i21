@@ -732,6 +732,27 @@ BEGIN TRY
 								, ysnDeleteFromRegister
 								, ysnSentToRuby
 								, dtmLastUpdateDate
+								, ysnWeekDayPromotionSunday
+								, ysnWeekDayPromotionMonday
+								, ysnWeekDayPromotionTuesday
+								, ysnWeekDayPromotionWednesday
+								, ysnWeekDayPromotionThursday
+								, ysnWeekDayPromotionFriday
+								, ysnWeekDayPromotionSaturday
+								, dtmStartTimePromotionSunday
+								, dtmStartTimePromotionMonday
+								, dtmStartTimePromotionTuesday
+								, dtmStartTimePromotionWednesday
+								, dtmStartTimePromotionThursday
+								, dtmStartTimePromotionFriday
+								, dtmStartTimePromotionSaturday
+								, dtmEndTimePromotionSunday
+								, dtmEndTimePromotionMonday
+								, dtmEndTimePromotionTuesday
+								, dtmEndTimePromotionWednesday
+								, dtmEndTimePromotionThursday
+								, dtmEndTimePromotionFriday
+								, dtmEndTimePromotionSaturday
 								, intConcurrencyId
 						   ) 
 						   SELECT 
@@ -766,6 +787,27 @@ BEGIN TRY
 								, ysnDeleteFromRegister
 								, ysnSentToRuby
 								, dtmLastUpdateDate
+								, ysnWeekDayPromotionSunday
+								, ysnWeekDayPromotionMonday
+								, ysnWeekDayPromotionTuesday
+								, ysnWeekDayPromotionWednesday
+								, ysnWeekDayPromotionThursday
+								, ysnWeekDayPromotionFriday
+								, ysnWeekDayPromotionSaturday
+								, dtmStartTimePromotionSunday
+								, dtmStartTimePromotionMonday
+								, dtmStartTimePromotionTuesday
+								, dtmStartTimePromotionWednesday
+								, dtmStartTimePromotionThursday
+								, dtmStartTimePromotionFriday
+								, dtmStartTimePromotionSaturday
+								, dtmEndTimePromotionSunday
+								, dtmEndTimePromotionMonday
+								, dtmEndTimePromotionTuesday
+								, dtmEndTimePromotionWednesday
+								, dtmEndTimePromotionThursday
+								, dtmEndTimePromotionFriday
+								, dtmEndTimePromotionSaturday
 								, intConcurrencyId
 						   FROM tblSTPromotionSalesList 
 						   WHERE intPromoSalesId = @intPromotionComboListId --IN (SELECT intPromoComboSalesId FROM @temptblPromoCOMBOList)
@@ -909,6 +951,27 @@ BEGIN TRY
 								, ysnDeleteFromRegister
 								, ysnSentToRuby
 								, dtmLastUpdateDate
+								, ysnWeekDayPromotionSunday
+								, ysnWeekDayPromotionMonday
+								, ysnWeekDayPromotionTuesday
+								, ysnWeekDayPromotionWednesday
+								, ysnWeekDayPromotionThursday
+								, ysnWeekDayPromotionFriday
+								, ysnWeekDayPromotionSaturday
+								, dtmStartTimePromotionSunday
+								, dtmStartTimePromotionMonday
+								, dtmStartTimePromotionTuesday
+								, dtmStartTimePromotionWednesday
+								, dtmStartTimePromotionThursday
+								, dtmStartTimePromotionFriday
+								, dtmStartTimePromotionSaturday
+								, dtmEndTimePromotionSunday
+								, dtmEndTimePromotionMonday
+								, dtmEndTimePromotionTuesday
+								, dtmEndTimePromotionWednesday
+								, dtmEndTimePromotionThursday
+								, dtmEndTimePromotionFriday
+								, dtmEndTimePromotionSaturday
 								, intConcurrencyId
 						   ) 
 						   SELECT 
@@ -943,6 +1006,27 @@ BEGIN TRY
 								, ysnDeleteFromRegister
 								, ysnSentToRuby
 								, dtmLastUpdateDate
+								, ysnWeekDayPromotionSunday
+								, ysnWeekDayPromotionMonday
+								, ysnWeekDayPromotionTuesday
+								, ysnWeekDayPromotionWednesday
+								, ysnWeekDayPromotionThursday
+								, ysnWeekDayPromotionFriday
+								, ysnWeekDayPromotionSaturday
+								, dtmStartTimePromotionSunday
+								, dtmStartTimePromotionMonday
+								, dtmStartTimePromotionTuesday
+								, dtmStartTimePromotionWednesday
+								, dtmStartTimePromotionThursday
+								, dtmStartTimePromotionFriday
+								, dtmStartTimePromotionSaturday
+								, dtmEndTimePromotionSunday
+								, dtmEndTimePromotionMonday
+								, dtmEndTimePromotionTuesday
+								, dtmEndTimePromotionWednesday
+								, dtmEndTimePromotionThursday
+								, dtmEndTimePromotionFriday
+								, dtmEndTimePromotionSaturday
 								, intConcurrencyId
 						   FROM tblSTPromotionSalesList 
 						   WHERE intPromoSalesId = @intPromotionMixMatchListId 
