@@ -3,7 +3,9 @@
 	,@ForDelete			BIT = 0    
 	,@UserId			INT = NULL
 	,@InvoiceDetailId 	INT = NULL
-	,@ysnLogRisk		BIT = 1     
+	,@ysnLogRisk		BIT = 1
+	,@Post				BIT	= 0
+	,@FromPosting		BIT = 0
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
