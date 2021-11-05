@@ -300,6 +300,7 @@
     <Build Include="dbo\Tables\tblApiSchemaTransformVendorSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRebateProgram.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformRebateProgram.sql" />
+    <Build Include="dbo\Views\vyuICGetStoreLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1754,7 +1755,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
