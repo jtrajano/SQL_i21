@@ -232,7 +232,7 @@ LEFT JOIN tblICUnitMeasure U7 WITH(NOLOCK) ON U7.intUnitMeasureId = WU.intUnitMe
 LEFT JOIN tblICUnitMeasure U8 WITH(NOLOCK) ON 1 = 1
 	AND U8.strUnitMeasure = 'Ton'
 LEFT JOIN lgLoad LG ON LG.intPContractDetailId = CD.intContractDetailId and LG.intShipmentType = 2
-LEFT JOIN lgLoad LG1 ON LG1.intPContractDetailId = CD.intContractDetailId and LG.intShipmentType = 1
+LEFT JOIN lgLoad LG1 ON LG1.intPContractDetailId = CD.intContractDetailId and LG1.intShipmentType = 1
 LEFT JOIN vyuCTQualityApprovedRejected QA WITH(NOLOCK) ON QA.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblICItem BIM WITH(NOLOCK) ON BIM.intItemId = CD.intItemBundleId
 LEFT JOIN tblICItemUOM QU ON QU.intItemUOMId = CD.intItemUOMId
