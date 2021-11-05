@@ -273,7 +273,7 @@ FROM
 						- COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty))
 		,dblTotalMargin = /* Reserves B Total in Absolute Value */ 
 							ABS(RB.dblReservesBValueTotal)
-		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal * -1
+		,dblReservesATotalVariance = ISNULL(RA.dblReservesAVarianceTotal, 0) * -1
 		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 		,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
