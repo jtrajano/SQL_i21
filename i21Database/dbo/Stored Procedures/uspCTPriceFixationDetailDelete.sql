@@ -201,7 +201,6 @@ BEGIN TRY
 		-- JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		-- JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
 		-- AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
-		FROM	tblCTContractDetail	CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblCTPriceFixation	PF	ON PF.intContractHeaderId = CH.intContractHeaderId and	isnull(PF.intContractDetailId,0) = (case when CH.ysnMultiplePriceFixation = 1 then isnull(PF.intContractDetailId,0) else CD.intContractDetailId end) OR PF.intContractDetailId = CD.intSplitFromId
 		AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation pff WHERE pff.intContractHeaderId = CH.intContractHeaderId and isnull(pff.intContractDetailId,0) = (case when CH.ysnMultiplePriceFixation = 1 then isnull(pff.intContractDetailId,0) else ISNULL(CD.intContractDetailId,0) end))
