@@ -3,7 +3,7 @@ CREATE TABLE tblApiSchemaEmployeeTimeOff(
      guiApiUniqueId UNIQUEIDENTIFIER NOT NULL
     ,intRowNumber INT NULL
     ,intKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY
-    ,intEntityNo NVARCHAR(100) NOT NULL                                               --Required       
+    ,intEntityNo NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL NOT NULL                                               --Required       
     ,strTimeOffId NVARCHAR(100) COLLATE Latin1_General_CI_AS  NOT NULL      --Required        
     ,strTimeOffDesc NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL     --Required  
     ,dtmEligibleDate NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL
