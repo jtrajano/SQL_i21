@@ -257,6 +257,7 @@ BEGIN
 			AND ISNULL(strZipCode, '') = ISNULL(@strSupplierZipCode, '')
 			AND intCategoryId = @intCategoryId
 			AND strFreightType = @strFreightType
+			AND ISNULL(intEntityTariffTypeId, 0) = @intEntityTariffTypeId
 			AND ISNULL(intShipViaId, 0) = ISNULL(@intShipViaEntityId, 0)
 			AND ISNULL(dblFreightAmount, 0) = ISNULL(@dblFreightAmount, 0)
 			AND ISNULL(dblFreightRate, 0) = ISNULL(@dblFreightRate, 0) 
