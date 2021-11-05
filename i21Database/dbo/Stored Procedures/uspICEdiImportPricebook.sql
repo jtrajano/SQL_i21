@@ -1013,6 +1013,30 @@ WHERE
 
 SET @insertedFamilyClass = ISNULL(@insertedFamilyClass, 0) + @@ROWCOUNT;
 
+-- Check if import is for all locations
+DECLARE @ValidLocations UdtCompanyLocations 
+IF EXISTS (SELECT TOP 1 1 FROM @Locations WHERE intCompanyLocationId = -1) 
+BEGIN 
+	INSERT INTO @ValidLocations (
+		intCompanyLocationId
+	) 
+	SELECT 
+		ss.intCompanyLocationId
+	FROM	
+		tblSTStore ss INNER JOIN tblSMCompanyLocation cl  
+			ON ss.intCompanyLocationId = cl.intCompanyLocationId
+END 
+ELSE
+BEGIN 
+	INSERT INTO @ValidLocations (
+		intCompanyLocationId
+	) 
+	SELECT 
+		intCompanyLocationId
+	FROM	
+		@Locations
+END 
+
 -- Upsert the Item Location 
 INSERT INTO #tmpICEdiImportPricebook_tblICItemLocation (
 	strAction
@@ -1098,7 +1122,7 @@ FROM (
 					SELECT 
 						loc.intCompanyLocationId 					
 					FROM 						
-						@Locations loc INNER JOIN tblSMCompanyLocation cl 
+						@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 							ON loc.intCompanyLocationId = cl.intCompanyLocationId
 				) loc
 				OUTER APPLY (
@@ -1498,7 +1522,7 @@ FROM (
 					loc.intCompanyLocationId 
 					,l.*
 				FROM 						
-					@Locations loc INNER JOIN tblSMCompanyLocation cl 
+					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 						ON loc.intCompanyLocationId = cl.intCompanyLocationId
 					INNER JOIN tblICItemLocation l 
 						ON l.intItemId = i.intItemId
@@ -1652,7 +1676,7 @@ FROM (
 					loc.intCompanyLocationId 
 					,l.*
 				FROM 						
-					@Locations loc INNER JOIN tblICItemLocation l 
+					@ValidLocations loc INNER JOIN tblICItemLocation l 
 						ON l.intItemId = i.intItemId
 						AND loc.intCompanyLocationId = l.intLocationId
 			) il
