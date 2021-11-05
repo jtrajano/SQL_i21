@@ -218,6 +218,8 @@
     <Build Include="dbo\Triggers\trgAfterDeleteTRSupplyPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRShipViaTariff.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRShipViaTariff.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaCCTransformVendorSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
