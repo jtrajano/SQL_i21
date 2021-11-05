@@ -301,6 +301,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRebateProgram.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformRebateProgram.sql" />
     <Build Include="dbo\Views\vyuICGetStoreLocation.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaCCTransformVendorSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

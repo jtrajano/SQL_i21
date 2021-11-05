@@ -29,6 +29,7 @@
 	[strType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 
 
 	CONSTRAINT [PK_tblCCSite] PRIMARY KEY ([intSiteId]),
