@@ -45,7 +45,7 @@ BEGIN TRY
 	--- Uncomment line below when debugging ---
 	-------------------------------------------
 	-- SELECT strSource = @strSource, strProcess = @strProcess
-	
+
 	IF @strProcess IN 
 	(
 		'Update Scheduled Quantity',
@@ -816,7 +816,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			-- Insert negating entry due to other changes besides Qty
-			IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE (intFutureMarketId <> @intSeqHistoryPreviousFutMkt OR intFutureMonthId <> @intSeqHistoryPreviousFutMonth) AND dblQty <> @dblSeqHistoryPreviousQty)
+			IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE (intFutureMarketId <> @intSeqHistoryPreviousFutMkt OR intFutureMonthId <> @intSeqHistoryPreviousFutMonth) AND dblQty <> @dblSeqHistoryPreviousQty) AND @strProcess <> 'Do Roll'
 			BEGIN
 				INSERT INTO @cbLogCurrent (strBatchId
 					, dtmTransactionDate
@@ -3718,7 +3718,25 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
+							UPDATE @cbLogPrev
+							SET strBatchId = @strBatchId
+								, strProcess = @strProcess
+								, dtmTransactionDate = @_dtmCurrent
+
+							IF (@strProcess = 'Do Roll')
+							BEGIN
+								UPDATE @cbLogPrev
+								SET intPriceUOMId = curr.intPriceUOMId
+									, strTransactionReference = curr.strTransactionReference
+									, strTransactionReferenceNo = curr.strTransactionReferenceNo
+									, intTransactionReferenceId = curr.intTransactionReferenceId
+									, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+									, intUserId = curr.intUserId
+									, dblOrigQty = curr.dblOrigQty
+									, strNotes = ''
+								FROM (SELECT * FROM @cbLogSpecific) curr
+							END
+
 							EXEC uspCTLogContractBalance @cbLogPrev, 0
 						END
 
@@ -3742,7 +3760,25 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
+							UPDATE @cbLogPrev
+							SET strBatchId = @strBatchId
+								, strProcess = @strProcess
+								, dtmTransactionDate = @_dtmCurrent
+
+							IF (@strProcess = 'Do Roll')
+							BEGIN
+								UPDATE @cbLogPrev
+								SET intPriceUOMId = curr.intPriceUOMId
+									, strTransactionReference = curr.strTransactionReference
+									, strTransactionReferenceNo = curr.strTransactionReferenceNo
+									, intTransactionReferenceId = curr.intTransactionReferenceId
+									, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+									, intUserId = curr.intUserId
+									, dblOrigQty = curr.dblOrigQty
+									, strNotes = ''
+								FROM (SELECT * FROM @cbLogSpecific) curr
+							END
+
 							EXEC uspCTLogContractBalance @cbLogPrev, 0
 						END
 
@@ -3764,7 +3800,25 @@ BEGIN TRY
 						-- Negate previous if the value is not 0
 						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
 						BEGIN
-							UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
+							UPDATE @cbLogPrev
+							SET strBatchId = @strBatchId
+								, strProcess = @strProcess
+								, dtmTransactionDate = @_dtmCurrent
+
+							IF (@strProcess = 'Do Roll')
+							BEGIN
+								UPDATE @cbLogPrev
+								SET intPriceUOMId = curr.intPriceUOMId
+									, strTransactionReference = curr.strTransactionReference
+									, strTransactionReferenceNo = curr.strTransactionReferenceNo
+									, intTransactionReferenceId = curr.intTransactionReferenceId
+									, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+									, intUserId = curr.intUserId
+									, dblOrigQty = curr.dblOrigQty
+									, strNotes = ''
+								FROM (SELECT * FROM @cbLogSpecific) curr
+							END
+
 							EXEC uspCTLogContractBalance @cbLogPrev, 0
 						END
 
@@ -3831,6 +3885,64 @@ BEGIN TRY
 						, dblOrigQty = @TotalConsumed
 						, intPricingTypeId = 1
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
+				ELSE IF (@strProcess = 'Do Roll')
+				BEGIN
+					IF (ISNULL(@TotalBasis, 0) <> 0)
+					BEGIN
+						-- Negate AND add previous record
+						UPDATE @cbLogPrev
+						SET dblQty = @TotalBasis * - 1
+							, intPricingTypeId = 2
+							, dblFutures = NULL
+							, intActionId = 43
+							, strBatchId = @strBatchId
+							, strProcess = @strProcess
+							, dtmTransactionDate = @_dtmCurrent
+							, intPriceUOMId = curr.intPriceUOMId
+							, strTransactionReference = curr.strTransactionReference
+							, strTransactionReferenceNo = curr.strTransactionReferenceNo
+							, intTransactionReferenceId = curr.intTransactionReferenceId
+							, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+							, intUserId = curr.intUserId
+							, dblOrigQty = curr.dblOrigQty
+							, strNotes = ''
+						FROM (SELECT * FROM @cbLogSpecific) curr
+						EXEC uspCTLogContractBalance @cbLogPrev, 0
+
+						UPDATE @cbLogSpecific
+						SET dblQty = @TotalBasis
+							, intPricingTypeId = 2
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END		
+					IF (ISNULL(@TotalPriced, 0) <> 0)
+					BEGIN
+						-- Negate AND add previous record
+						UPDATE @cbLogPrev
+						SET dblQty = @TotalPriced * - 1
+							, intPricingTypeId = 1
+							, dblFutures = @dblPreviousFutures
+							, intActionId = 43
+							, strBatchId = @strBatchId
+							, strProcess = @strProcess
+							, dtmTransactionDate = @_dtmCurrent
+							, intPriceUOMId = curr.intPriceUOMId
+							, strTransactionReference = curr.strTransactionReference
+							, strTransactionReferenceNo = curr.strTransactionReferenceNo
+							, intTransactionReferenceId = curr.intTransactionReferenceId
+							, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+							, intUserId = curr.intUserId
+							, dblOrigQty = curr.dblOrigQty
+							, strNotes = ''
+						FROM (SELECT * FROM @cbLogSpecific) curr
+						EXEC uspCTLogContractBalance @cbLogPrev, 0
+
+						UPDATE @cbLogSpecific
+						SET dblQty = 1
+							, intPricingTypeId = 1
+							, dblFutures = @dblPreviousFutures
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
 				END
 				ELSE
 				BEGIN
