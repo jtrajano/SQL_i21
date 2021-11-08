@@ -332,6 +332,7 @@
     <Build Include="dbo\Tables\tblFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Views\vyuFACompanyPreferenceOption.sql" />
     <Build Include="dbo\Views\vyuICGetStoreLocation.sql" />
+    <Build Include="dbo\Functions\fnCMGetForexRateFromCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

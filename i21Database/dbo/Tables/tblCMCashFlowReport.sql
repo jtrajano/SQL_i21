@@ -10,6 +10,15 @@
 	[intBankAccountId]			INT NULL,
 	[intCompanyLocationId]		INT NULL,
 	[intEntityId]				INT NULL,
+	[intBucket1RateTypeId]		INT NULL,
+	[intBucket2RateTypeId]		INT NULL,
+	[intBucket3RateTypeId]		INT NULL,
+	[intBucket4RateTypeId]		INT NULL,
+	[intBucket5RateTypeId]		INT NULL,
+	[intBucket6RateTypeId]		INT NULL,
+	[intBucket7RateTypeId]		INT NULL,
+	[intBucket8RateTypeId]		INT NULL,
+	[intBucket9RateTypeId]		INT NULL,
 	[intConcurrencyId]			INT DEFAULT 1 NOT NULL,
 
 	CONSTRAINT [PK_tblCMCashFlowReport] PRIMARY KEY CLUSTERED ([intCashFlowReportId] ASC),
@@ -17,5 +26,14 @@
 	CONSTRAINT [FK_tblCMCashFlowReport_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount]([intBankAccountId]),
 	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrency_Filter] FOREIGN KEY ([intFilterCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrency_Reporting] FOREIGN KEY ([intReportingCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
-	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation]([intCompanyLocationId])
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation]([intCompanyLocationId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket1] FOREIGN KEY ([intBucket1RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket2] FOREIGN KEY ([intBucket2RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket3] FOREIGN KEY ([intBucket3RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket4] FOREIGN KEY ([intBucket4RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket5] FOREIGN KEY ([intBucket5RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket6] FOREIGN KEY ([intBucket6RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket7] FOREIGN KEY ([intBucket7RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket8] FOREIGN KEY ([intBucket8RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
+	CONSTRAINT [FK_tblCMCashFlowReport_tblSMCurrencyExchangRateType_Bucket9] FOREIGN KEY ([intBucket9RateTypeId]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 )

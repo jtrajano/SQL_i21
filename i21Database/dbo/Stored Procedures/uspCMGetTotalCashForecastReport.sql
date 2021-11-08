@@ -135,21 +135,21 @@ BEGIN
 
 		/* Get all posted bank transactions (after report date) on each bank account per bucket*/
 		-- 1-7
-		SELECT @dblBucket2 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(2, @intCurrentAccountId, DATEADD(DAY, 1, @dtmReportDate), DATEADD(DAY, 7, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket2 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(2, @intCurrentAccountId, DATEADD(DAY, 1, @dtmReportDate), DATEADD(DAY, 7, @dtmReportDate), @tblFilter);
 		-- 8-14
-		SELECT @dblBucket3 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(3, @intCurrentAccountId, DATEADD(DAY, 8, @dtmReportDate), DATEADD(DAY, 14, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket3 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(3, @intCurrentAccountId, DATEADD(DAY, 8, @dtmReportDate), DATEADD(DAY, 14, @dtmReportDate), @tblFilter);
 		-- 15-21
-		SELECT @dblBucket4 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(4, @intCurrentAccountId, DATEADD(DAY, 15, @dtmReportDate), DATEADD(DAY, 21, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket4 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(4, @intCurrentAccountId, DATEADD(DAY, 15, @dtmReportDate), DATEADD(DAY, 21, @dtmReportDate), @tblFilter);
 		-- 22-29
-		SELECT @dblBucket5 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(5, @intCurrentAccountId, DATEADD(DAY, 22, @dtmReportDate), DATEADD(DAY, 29, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket5 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(5, @intCurrentAccountId, DATEADD(DAY, 22, @dtmReportDate), DATEADD(DAY, 29, @dtmReportDate), @tblFilter);
 		-- 30-60
-		SELECT @dblBucket6 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(6, @intCurrentAccountId, DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket6 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(6, @intCurrentAccountId, DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate), @tblFilter);
 		-- 60-90
-		SELECT @dblBucket7 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(7, @intCurrentAccountId, DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket7 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(7, @intCurrentAccountId, DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate), @tblFilter);
 		-- 90-120
-		SELECT @dblBucket8 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(8, @intCurrentAccountId, DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket8 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(8, @intCurrentAccountId, DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate), @tblFilter);
 		-- 120+ (120 + 10 yrs)
-		SELECT @dblBucket9 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(9, @intCurrentAccountId, DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate), @intCompanyLocationId, @tblFilter);
+		SELECT @dblBucket9 = ISNULL(dblAmount, 0) FROM dbo.fnCMGetTotalPostedBankTransactionFromDate(9, @intCurrentAccountId, DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate), @tblFilter);
 	
 		-- Insert all buckets to report summary table
 		INSERT INTO tblCMCashFlowReportSummary
