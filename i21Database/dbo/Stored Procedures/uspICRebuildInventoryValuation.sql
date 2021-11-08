@@ -5448,6 +5448,7 @@ BEGIN
 					,@AccountCategory_ContraInventory = 'AP Clearing'
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@ysnForRebuild = 1
+					,@intSettleStorageId = @intTransactionId
 
 				IF @intReturnValue <> 0 
 				BEGIN 
