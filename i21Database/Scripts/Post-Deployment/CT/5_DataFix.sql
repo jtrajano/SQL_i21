@@ -291,4 +291,9 @@ BEGIN
 	EXEC uspCTFixCBLogAfterRebuild
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblCTSequenceHistory WHERE ISNULL(intDtlQtyInCommodityUOMId, 0) = 0)
+BEGIN
+	EXEC uspCTFixCBLogAfterRebuild
+END
+
 GO
