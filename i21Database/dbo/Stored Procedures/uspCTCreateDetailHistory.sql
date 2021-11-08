@@ -130,49 +130,112 @@ BEGIN TRY
 		, intPriceItemUOMId
 		, intBookId
 		, intSubBookId
-	FROM (
-		SELECT * FROM (
-			SELECT	*, ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
-			FROM	tblCTSequenceHistory
-			WHERE	intContractHeaderId =@intContractHeaderId
-		) t
-		WHERE intRowNum = 1
-	) t1
-
-	INSERT INTO tblCTSequenceHistory
-	(
-		intContractHeaderId,			intContractDetailId,			intContractTypeId,					intCommodityId,				intEntityId
-		,intContractStatusId,			intCompanyLocationId,			intItemId,							intPricingTypeId,		    intFutureMarketId
-		,intFutureMonthId,				intCurrencyId,					intDtlQtyInCommodityUOMId,			intDtlQtyUnitMeasureId,	    intCurrencyExchangeRateId
-		,dtmStartDate,					dtmEndDate,						dblQuantity,						dblBalance,					dblFutures
-		,dblBasis,						dblLotsPriced,					dblLotsUnpriced,					dblQtyPriced,				dblQtyUnpriced
-		,dblFinalPrice,					dtmFXValidFrom,					dtmFXValidTo,						dblRate,					strCommodity
-		,strContractNumber,				intContractSeq,					strLocation,						strContractType,		    strPricingType
-		,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus,			intContractBasisId			
-		,intGradeId,					intItemUOMId,					intPositionId,						intPriceItemUOMId,			intTermId			
-		,intWeightId,					intBookId,						intSubBookId,						dblRatio,					strBook
-		,strSubBook,					intSequenceUsageHistoryId,		dtmDateAdded,						intUserId,					intFreightTermId
-	)
-	OUTPUT	inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
-	SELECT CD.intContractHeaderId,		CD.intContractDetailId,			CH.intContractTypeId,				CH.intCommodityId,		    intEntityId
-		, intContractStatusId,			CD.intCompanyLocationId,		intItemId,							CD.intPricingTypeId,	    CD.intFutureMarketId
-		, CD.intFutureMonthId,			intCurrencyId,					CASE WHEN CD.intUnitMeasureId IS NULL THEN QU.intCommodityUnitMeasureId ELSE NULL END
-		, CD.intUnitMeasureId,			CD.intCurrencyExchangeRateId,   dtmStartDate,						dtmEndDate,						CD.dblQuantity
-		, dblBalance,					CD.dblFutures,					dblBasis
-		, CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblNoOfLots 
-				WHEN    @strComment = 'Pricing Delete' THEN 0 
-				ELSE	ISNULL(PF.dblLotsFixed,0) END
-		, CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
-				WHEN    @strComment = 'Pricing Delete' THEN CD.dblNoOfLots 
-				ELSE	CD.dblNoOfLots - ISNULL(PF.dblLotsFixed,0) END
-		, CASE   WHEN	CD.intPricingTypeId	=	1 THEN CD.dblQuantity 
-				WHEN    @strComment = 'Pricing Delete' THEN 0 
-				ELSE	ISNULL(FD.dblQuantity,0) END
-		, CASE   WHEN	CD.intPricingTypeId	=	1 THEN 0 
-				WHEN    @strComment = 'Pricing Delete' THEN CD.dblQuantity
-				ELSE	CD.dblQuantity - ISNULL(FD.dblQuantity,0) END
-		, dblFinalPrice,				dtmFXValidFrom,					dtmFXValidTo,						dblRate,					CO.strCommodityCode
-		, strContractNumber,			intContractSeq,					CL.strLocationName,					strContractType,		    strPricingType
+	FROM (SELECT *
+		FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
+						FROM tblCTSequenceHistory
+						WHERE intContractHeaderId = @intContractHeaderId
+		) t WHERE intRowNum = 1
+	) t1;
+	
+	INSERT INTO tblCTSequenceHistory (intContractHeaderId
+		, intContractDetailId
+		, intContractTypeId
+		, intCommodityId
+		, intEntityId
+		, intContractStatusId
+		, intCompanyLocationId
+		, intItemId
+		, intPricingTypeId
+		, intFutureMarketId
+		, intFutureMonthId
+		, intCurrencyId
+		, intDtlQtyInCommodityUOMId
+		, intDtlQtyUnitMeasureId
+		, intCurrencyExchangeRateId
+		, dtmStartDate
+		, dtmEndDate
+		, dblQuantity
+		, dblBalance
+		, dblFutures
+		, dblBasis
+		, dblLotsPriced
+		, dblLotsUnpriced
+		, dblQtyPriced
+		, dblQtyUnpriced
+		, dblFinalPrice
+		, dtmFXValidFrom
+		, dtmFXValidTo
+		, dblRate
+		, strCommodity
+		, strContractNumber
+		, intContractSeq
+		, strLocation
+		, strContractType
+		, strPricingType
+		, dblScheduleQty
+		, dtmHistoryCreated
+		, dblCashPrice
+		, strPricingStatus
+		, intContractBasisId
+		, intGradeId
+		, intItemUOMId
+		, intPositionId
+		, intPriceItemUOMId
+		, intTermId
+		, intWeightId
+		, intBookId
+		, intSubBookId
+		, dblRatio
+		, strBook
+		, strSubBook
+		, intSequenceUsageHistoryId
+		, dtmDateAdded
+		, intUserId
+		, intFreightTermId)
+	OUTPUT inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
+	SELECT CD.intContractHeaderId
+		, CD.intContractDetailId
+		, CH.intContractTypeId
+		, CH.intCommodityId
+		, intEntityId
+		, intContractStatusId
+		, CD.intCompanyLocationId
+		, intItemId
+		, CD.intPricingTypeId
+		, CD.intFutureMarketId
+		, CD.intFutureMonthId
+		, intCurrencyId
+		, QU.intCommodityUnitMeasureId
+		, CD.intUnitMeasureId
+		, CD.intCurrencyExchangeRateId
+		, dtmStartDate
+		, dtmEndDate
+		, CD.dblQuantity
+		, dblBalance
+		, CD.dblFutures
+		, dblBasis
+		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblNoOfLots
+				WHEN @strComment = 'Pricing Delete' THEN 0
+				ELSE ISNULL(PF.dblLotsFixed, 0) END
+		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
+				WHEN @strComment = 'Pricing Delete' THEN CD.dblNoOfLots
+				ELSE CD.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0) END
+		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblQuantity
+				WHEN @strComment = 'Pricing Delete' THEN 0
+				ELSE ISNULL(FD.dblQuantity, 0) END
+		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
+				WHEN @strComment = 'Pricing Delete' THEN CD.dblQuantity
+				ELSE CD.dblQuantity - ISNULL(FD.dblQuantity, 0) END
+		, dblFinalPrice
+		, dtmFXValidFrom
+		, dtmFXValidTo
+		, dblRate
+		, CO.strCommodityCode
+		, strContractNumber
+		, intContractSeq
+		, CL.strLocationName
+		, strContractType
+		, strPricingType
 		, CD.dblScheduleQty
 		, CASE	WHEN @ysnUseContractDate = 1 THEN ISNULL(CD.dtmCreated, CH.dtmCreated) ELSE GETDATE() END
 		, dblCashPrice
