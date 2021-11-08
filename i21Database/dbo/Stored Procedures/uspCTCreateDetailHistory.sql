@@ -218,7 +218,7 @@ BEGIN TRY
 		, CD.intFutureMarketId
 		, CD.intFutureMonthId
 		, intCurrencyId
-		, CASE WHEN CD.intUnitMeasureId IS NULL THEN QU.intCommodityUnitMeasureId ELSE NULL END
+		, QU.intCommodityUnitMeasureId
 		, CD.intUnitMeasureId
 		, CD.intCurrencyExchangeRateId
 		, dtmStartDate
