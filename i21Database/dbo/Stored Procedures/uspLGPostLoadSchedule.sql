@@ -14,6 +14,7 @@ BEGIN TRY
 	DECLARE @intSourceType INT
 	DECLARE @strInvoiceNo NVARCHAR(1000)
 	DECLARE @strMsg NVARCHAR(MAX)
+	DECLARE @strAuditLogActionType NVARCHAR(200)
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
@@ -34,6 +35,15 @@ BEGIN TRY
 	IF ISNULL(@intSourceType,0) = 1
 	BEGIN
 		UPDATE tblLGLoad SET ysnPosted = @ysnPost, dtmPostedDate=GETDATE() WHERE intLoadId = @intLoadId
+
+		SELECT @strAuditLogActionType = CASE WHEN ISNULL(@ysnPost,0) = 1 THEN 'Posted' ELSE 'Unposted' END
+		EXEC uspSMAuditLog	
+				@keyValue	=	@intLoadId,
+				@screenName =	'Logistics.view.ShipmentSchedule',
+				@entityId	=	@intEntityUserSecurityId,
+				@actionType =	@strAuditLogActionType,
+				@actionIcon =	'small-tree-modified',
+				@details	=	''
 	END
 	ELSE 
 	BEGIN
@@ -97,6 +107,17 @@ BEGIN TRY
 					,@ysnInventorize = @ysnPost
 					,@ysnUnShip = @ysnUnShip
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
+			END
+			ELSE
+			BEGIN
+				SELECT @strAuditLogActionType = CASE WHEN ISNULL(@ysnPost,0) = 1 THEN 'Posted' ELSE 'Unposted' END
+				EXEC uspSMAuditLog	
+						@keyValue	=	@intLoadId,
+						@screenName =	'Logistics.view.ShipmentSchedule',
+						@entityId	=	@intEntityUserSecurityId,
+						@actionType =	@strAuditLogActionType,
+						@actionIcon =	'small-tree-modified',
+						@details	=	''
 			END
 
 			IF(@ysnPost = 0)
