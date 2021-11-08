@@ -24,12 +24,17 @@ DECLARE @tblFilteredRebateProgram TABLE(
 	strDescription NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	ysnActive BIT NULL,
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strRebateBy NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strRebateUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorRebateUOM NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	dblRebateRate NUMERIC(38, 20) NULL,
 	dtmBeginDate DATETIME NULL,
 	dtmEndDate DATETIME NULL,
-	strCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strVendorCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 )
 INSERT INTO @tblFilteredRebateProgram
 (
@@ -40,12 +45,17 @@ INSERT INTO @tblFilteredRebateProgram
 	strDescription,
 	ysnActive,
 	strItemNo,
+	strVendorItemNo,
 	strRebateBy,
 	strRebateUOM,
+	strVendorRebateUOM,
 	dblRebateRate,
 	dtmBeginDate,
 	dtmEndDate,
-	strCustomer
+	strCategory,
+	strVendorCategory,
+	strCustomer,
+	strVendorCustomer
 )
 SELECT 
 	intKey,
@@ -55,12 +65,17 @@ SELECT
 	strDescription,
 	ysnActive,
 	strItemNo,
+	strVendorItemNo,
 	strRebateBy,
 	strRebateUOM,
+	strVendorRebateUOM,
 	dblRebateRate,
 	dtmBeginDate,
 	dtmEndDate,
-	strCustomer
+	strCategory,
+	strVendorCategory,
+	strCustomer,
+	strVendorCustomer
 FROM
 tblApiSchemaTransformRebateProgram
 WHERE guiApiUniqueId = @guiApiUniqueId;
@@ -73,10 +88,15 @@ WHERE guiApiUniqueId = @guiApiUniqueId;
 -- 3 - Overlapping existing record on rebate program item effectivity duration
 -- 4 - Rebate program item effectivity duration already exist and overwrite is not enabled
 -- 5 - Invalid Item No
--- 6 - Invalid Rebate by
--- 7 - Invalid Rebate UOM
+-- 6 - Invalid Category
+-- 7 - Invalid Item No Xref
+-- 8 - Invalid Category Xref
+-- 9 - Invalid Rebate by
+-- 10 - Invalid Rebate UOM
+-- 11 - Invalid Rebate UOM Xref
 -- Rebate Customer Logs
--- 8 - Invalid Rebate Customer
+-- 12 - Invalid Rebate Customer
+-- 13 - Invalid Customer Xref
 
 
 DECLARE @tblLogRebateProgram TABLE(
@@ -116,28 +136,128 @@ Vendor.intEntityId IS NULL
 UNION
 -------------------------- Rebate Item Logs --------------------------
 SELECT -- Duplicate or overlapping imported rebate program item effectivity duration
-	DuplicateRebateProgram.strItemNo,
-	'Duplicate or overlapping effectivitiy duration of imported rebate item: ' + DuplicateRebateProgram.strItemNo + ' on vendor: ' + DuplicateRebateProgram.strVendor + '.', 
+	CASE
+		WHEN DuplicateRebateProgram.Error = 'Category'
+		THEN ISNULL(DuplicateRebateProgram.strVendorCategory, DuplicateRebateProgram.strCategory)
+		ELSE ISNULL(DuplicateRebateProgram.strVendorItemNo, DuplicateRebateProgram.strItemNo)
+	END,
+	CASE
+		WHEN DuplicateRebateProgram.Error = 'Category'
+		THEN 'Duplicate or overlapping effectivity duration of imported rebate referenced item category: ' + DuplicateRebateProgram.strCategory + ' on vendor: ' + DuplicateRebateProgram.strVendor + '.'
+		ELSE 'Duplicate or overlapping effectivity duration of imported rebate referenced item: ' + DuplicateRebateProgram.strItemNo + ' on vendor: ' + DuplicateRebateProgram.strVendor + '.' 
+	END,
 	DuplicateRebateProgram.intRowNumber,
 	2
 FROM
 (
 	SELECT 
-		strItemNo = MIN(FilteredRebateProgram.strVendor),
-		strLocation = MIN(FilteredRebateProgram.strItemNo),
+		strItemNo = ISNULL(MIN(FilteredItem.strItemNo), MIN(FilteredRebateProgram.strItemNo)),
+		strVendorItemNo = MIN(FilteredRebateProgram.strVendorItemNo),
+		strCategory = ISNULL(MIN(FilteredCategory.strCategoryCode), MIN(FilteredRebateProgram.strCategory)),
+		strVendorCategory = MIN(FilteredRebateProgram.strVendorCategory),
 		strVendor = MIN(FilteredRebateProgram.strVendor),
 		FilteredRebateProgram.intRowNumber,
-		RowNumber = ROW_NUMBER() OVER(PARTITION BY 
-			MIN(FilteredRebateProgram.strVendor), 
-			MIN(FilteredRebateProgram.strItemNo) ORDER BY FilteredRebateProgram.intRowNumber)
+		Error = CASE
+			WHEN MIN(FilteredRebateProgram.strItemNo) IS NULL AND MIN(FilteredRebateProgram.strVendorItemNo) IS NULL
+			THEN 'Category'
+			ELSE 'Item'
+		END,
+		RowNumber = CASE
+			WHEN MIN(FilteredRebateProgram.strItemNo) IS NULL AND MIN(FilteredRebateProgram.strVendorItemNo) IS NULL
+			THEN ROW_NUMBER() OVER(PARTITION BY 
+					MIN(FilteredRebateProgram.strVendor), 
+					ISNULL(MIN(FilteredCategory.strCategoryCode), MIN(FilteredRebateProgram.strCategory)) ORDER BY FilteredRebateProgram.intRowNumber)
+			ELSE ROW_NUMBER() OVER(PARTITION BY 
+					MIN(FilteredRebateProgram.strVendor), 
+					ISNULL(MIN(FilteredItem.strItemNo), MIN(FilteredRebateProgram.strItemNo)) ORDER BY FilteredRebateProgram.intRowNumber)
+		END
 	FROM 
 		@tblFilteredRebateProgram FilteredRebateProgram
+	LEFT JOIN
+	(
+		vyuAPVendor Vendor
+		INNER JOIN
+			tblVRVendorSetup VendorSetup 
+			ON
+				Vendor.intEntityId = VendorSetup.intEntityId
+	)
+		ON
+			Vendor.strName = FilteredRebateProgram.strVendor
+	LEFT JOIN 
+		tblICItemVendorXref FilteredItemXref
+		ON
+			FilteredItemXref.intVendorSetupId = VendorSetup.intVendorSetupId
+			AND
+			FilteredItemXref.strVendorProduct = FilteredRebateProgram.strVendorItemNo
+	LEFT JOIN
+		tblICItem FilteredItem
+		ON
+			FilteredItemXref.intItemId = FilteredItem.intItemId
+	LEFT JOIN 
+		tblICCategoryVendor FilteredCategoryXref
+		ON
+			FilteredCategoryXref.intVendorSetupId = VendorSetup.intVendorSetupId
+			AND
+			FilteredCategoryXref.strVendorDepartment = FilteredRebateProgram.strVendorCategory
+	LEFT JOIN
+		tblICCategory FilteredCategory
+		ON
+			FilteredCategoryXref.intCategoryId = FilteredCategory.intCategoryId
 	INNER JOIN
+	(
 		@tblFilteredRebateProgram ComparedRebateProgram
+		LEFT JOIN
+		(
+			vyuAPVendor ComparedVendor
+			INNER JOIN
+				tblVRVendorSetup ComparedVendorSetup 
+				ON
+					ComparedVendor.intEntityId = ComparedVendorSetup.intEntityId
+		)
+			ON
+				ComparedVendor.strName = ComparedRebateProgram.strVendor
+		LEFT JOIN 
+			tblICItemVendorXref ComparedItemXref
+			ON
+				ComparedItemXref.intVendorSetupId = ComparedVendorSetup.intVendorSetupId
+				AND
+				ComparedItemXref.strVendorProduct = ComparedRebateProgram.strVendorItemNo
+		LEFT JOIN
+			tblICItem ComparedItem
+			ON
+				ComparedItemXref.intItemId = ComparedItem.intItemId
+		LEFT JOIN 
+			tblICCategoryVendor ComparedCategoryXref
+			ON
+				ComparedCategoryXref.intVendorSetupId = ComparedVendorSetup.intVendorSetupId
+				AND
+				ComparedCategoryXref.strVendorDepartment = ComparedRebateProgram.strVendorCategory
+		LEFT JOIN
+			tblICCategory ComparedCategory
+			ON
+				ComparedCategoryXref.intCategoryId = ComparedCategory.intCategoryId
+			
+	)
 		ON
 			FilteredRebateProgram.strVendor = ComparedRebateProgram.strVendor
 			AND
-			FilteredRebateProgram.strItemNo = ComparedRebateProgram.strItemNo
+			(
+				(
+					ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+					AND
+					ISNULL(FilteredRebateProgram.strVendorCategory, FilteredRebateProgram.strCategory) IS NOT NULL
+					AND
+					ISNULL(FilteredCategory.strCategoryCode, FilteredRebateProgram.strCategory) = ISNULL(ComparedCategory.strCategoryCode, ComparedRebateProgram.strCategory)	
+				)
+				OR
+				(
+					ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+					AND
+					ISNULL(FilteredItem.strItemNo, FilteredRebateProgram.strItemNo) = ISNULL(ComparedItem.strItemNo, ComparedRebateProgram.strItemNo)	
+				)
+			)
+			AND
+			FilteredRebateProgram.intRowNumber <> ComparedRebateProgram.intRowNumber
 			AND
 			FilteredRebateProgram.dtmBeginDate < ComparedRebateProgram.dtmEndDate
 			AND
@@ -147,18 +267,78 @@ FROM
 WHERE DuplicateRebateProgram.RowNumber > 1
 UNION
 SELECT -- Overlapping existing record on rebate program item effectivity duration
-	FilteredRebateProgram.strItemNo,
-	'Rebate item: ' + FilteredRebateProgram.strItemNo + ' on vendor: ' + FilteredRebateProgram.strVendor + ' overlaps effectivity date of existing record.', 
+	CASE
+		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		THEN ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory)
+		ELSE ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo)
+	END,
+	CASE
+		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		THEN 'Rebate item category: ' + ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' overlaps effectivity date of existing record.'
+		ELSE 'Rebate item: ' + ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' overlaps effectivity date of existing record.'
+	END,
 	FilteredRebateProgram.intRowNumber,
 	3
 FROM
 	@tblFilteredRebateProgram FilteredRebateProgram
 INNER JOIN
+(
+	vyuAPVendor Vendor
+	INNER JOIN
+		tblVRVendorSetup VendorSetup 
+		ON
+			Vendor.intEntityId = VendorSetup.intEntityId
+)
+	ON
+		Vendor.strName = FilteredRebateProgram.strVendor
+LEFT JOIN
+	tblICCategoryVendor CategoryXref
+	ON
+		ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		AND
+		FilteredRebateProgram.strVendorCategory IS NOT NULL
+		AND
+		CategoryXref.strVendorDepartment = FilteredRebateProgram.strVendorCategory
+LEFT JOIN
+	tblICCategory Category
+	ON
+		Category.intCategoryId = CategoryXref.intCategoryId
+LEFT JOIN
+	tblICItemVendorXref ItemXref
+	ON
+		FilteredRebateProgram.strVendorItemNo IS NOT NULL
+		AND
+		ItemXref.strVendorProduct = FilteredRebateProgram.strVendorItemNo
+LEFT JOIN 
+	tblICItem Item
+	ON
+		Item.intItemId = ItemXref.intItemId
+INNER JOIN
 	vyuVRProgramItemDetail RebateItem
 	ON
 		FilteredRebateProgram.strVendor = RebateItem.strVendorName
 		AND
-		FilteredRebateProgram.strItemNo = RebateItem.strItemNumber
+		(
+			(
+				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+				AND
+				ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) IS NOT NULL
+				AND
+				ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) = RebateItem.strCategoryCode
+				AND
+				(
+					RebateItem.strItemNumber IS NULL 
+					OR 
+					RebateItem.strItemNumber = ''
+				)
+			)
+			OR
+			(
+				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+				AND
+				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) = RebateItem.strItemNumber
+			)
+		)
 WHERE
 FilteredRebateProgram.dtmBeginDate < RebateItem.dtmEndDate
 AND
@@ -171,18 +351,78 @@ AND
 )
 UNION
 SELECT -- Rebate program item effectivity duration already exist and overwrite is not enabled
-	FilteredRebateProgram.strItemNo,
-	'Rebate item: ' + FilteredRebateProgram.strItemNo + ' on vendor: ' + FilteredRebateProgram.strVendor + ' with this effectivity date already exist and overwrite is not enabled.', 
+	CASE
+		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		THEN ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory)
+		ELSE ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo)
+	END,
+	CASE
+		WHEN ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		THEN 'Rebate item category: ' + ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' with this effectivity date already exist and overwrite is not enabled.'
+		ELSE 'Rebate item: ' + ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) + ' on vendor: ' + FilteredRebateProgram.strVendor + ' with this effectivity date already exist and overwrite is not enabled.'
+	END,
 	FilteredRebateProgram.intRowNumber,
 	4
 FROM
 	@tblFilteredRebateProgram FilteredRebateProgram
 INNER JOIN
+(
+	vyuAPVendor Vendor
+	INNER JOIN
+		tblVRVendorSetup VendorSetup 
+		ON
+			Vendor.intEntityId = VendorSetup.intEntityId
+)
+	ON
+		Vendor.strName = FilteredRebateProgram.strVendor
+LEFT JOIN
+	tblICCategoryVendor CategoryXref
+	ON
+		ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		AND
+		FilteredRebateProgram.strVendorCategory IS NOT NULL
+		AND
+		CategoryXref.strVendorDepartment = FilteredRebateProgram.strVendorCategory
+LEFT JOIN
+	tblICCategory Category
+	ON
+		Category.intCategoryId = CategoryXref.intCategoryId
+LEFT JOIN
+	tblICItemVendorXref ItemXref
+	ON
+		FilteredRebateProgram.strVendorItemNo IS NOT NULL
+		AND
+		ItemXref.strVendorProduct = FilteredRebateProgram.strVendorItemNo
+LEFT JOIN 
+	tblICItem Item
+	ON
+		Item.intItemId = ItemXref.intItemId
+INNER JOIN
 	vyuVRProgramItemDetail RebateItem
 	ON
 		FilteredRebateProgram.strVendor = RebateItem.strVendorName
 		AND
-		FilteredRebateProgram.strItemNo = RebateItem.strItemNumber
+		(
+			(
+				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NULL
+				AND
+				ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) IS NOT NULL
+				AND
+				ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory) = RebateItem.strCategoryCode
+				AND
+				(
+					RebateItem.strItemNumber IS NULL 
+					OR 
+					RebateItem.strItemNumber = ''
+				)
+			)
+			OR
+			(
+				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+				AND
+				ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo) = RebateItem.strItemNumber
+			)
+		)
 WHERE
 FilteredRebateProgram.dtmBeginDate = RebateItem.dtmBeginDate
 AND
@@ -206,40 +446,208 @@ Item.intItemId IS NULL
 AND
 FilteredRebateProgram.strItemNo IS NOT NULL
 UNION
+SELECT -- Invalid Category
+	FilteredRebateProgram.strCategory,
+	'Rebate category: ' + FilteredRebateProgram.strCategory + ' does not exist.', 
+	FilteredRebateProgram.intRowNumber,
+	6
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+LEFT JOIN
+	tblICCategory Category
+	ON
+		FilteredRebateProgram.strCategory = Category.strCategoryCode
+WHERE
+Category.intCategoryId IS NULL
+AND
+FilteredRebateProgram.strItemNo IS NULL
+AND
+FilteredRebateProgram.strVendorItemNo IS NULL
+AND
+FilteredRebateProgram.strCategory IS NOT NULL
+UNION
+SELECT -- Invalid Item No Xref
+	FilteredRebateProgram.strVendorItemNo,
+	'Rebate vendor item no: ' + FilteredRebateProgram.strVendorItemNo + ' cross reference does not exist.', 
+	FilteredRebateProgram.intRowNumber,
+	7
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+LEFT JOIN
+(
+	vyuAPVendor Vendor
+	INNER JOIN
+		tblVRVendorSetup VendorSetup 
+		ON
+			Vendor.intEntityId = VendorSetup.intEntityId
+)
+	ON
+		Vendor.strName = FilteredRebateProgram.strVendor
+LEFT JOIN 
+	tblICItemVendorXref ItemXref
+	ON
+		VendorSetup.intVendorSetupId = ItemXref.intVendorSetupId
+		AND
+		FilteredRebateProgram.strVendorItemNo = ItemXref.strVendorProduct
+WHERE
+ItemXref.intItemVendorXrefId IS NULL
+AND
+FilteredRebateProgram.strVendorItemNo IS NOT NULL
+UNION
+SELECT -- Invalid Category Xref
+	FilteredRebateProgram.strVendorCategory,
+	'Rebate vendor category: ' + FilteredRebateProgram.strVendorCategory + ' cross reference does not exist.', 
+	FilteredRebateProgram.intRowNumber,
+	8
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+LEFT JOIN
+(
+	vyuAPVendor Vendor
+	INNER JOIN
+		tblVRVendorSetup VendorSetup 
+		ON
+			Vendor.intEntityId = VendorSetup.intEntityId
+)
+	ON
+		Vendor.strName = FilteredRebateProgram.strVendor
+LEFT JOIN 
+	tblICCategoryVendor CategoryXref
+	ON
+		VendorSetup.intVendorSetupId = CategoryXref.intVendorSetupId
+		AND
+		FilteredRebateProgram.strVendorCategory = CategoryXref.strVendorDepartment
+WHERE
+CategoryXref.intCategoryVendorId IS NULL
+AND
+FilteredRebateProgram.strItemNo IS NULL
+AND
+FilteredRebateProgram.strVendorItemNo IS NULL
+AND
+FilteredRebateProgram.strVendorCategory IS NOT NULL
+UNION
 SELECT -- Invalid Rebate by
 	FilteredRebateProgram.strRebateBy,
 	'Rebate by: ' + FilteredRebateProgram.strRebateBy + ' of rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
-	6
+	9
 FROM
 	@tblFilteredRebateProgram FilteredRebateProgram
 WHERE
 	FilteredRebateProgram.strRebateBy NOT IN ('Unit', 'Percentage')
 UNION
 SELECT -- Invalid Rebate UOM
-	FilteredRebateProgram.strRebateUOM,
-	'Rebate UOM: ' + FilteredRebateProgram.strRebateUOM + ' of rebate item: ' + FilteredRebateProgram.strItemNo + ' does not exist.', 
+	ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM),
+	CASE
+		WHEN ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		THEN 'Rebate UOM: ' + ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) + ' of rebate category: ' + 
+			COALESCE(Category.strCategoryCode, FilteredRebateProgram.strVendorCategory, FilteredRebateProgram.strCategory) + ' does not exist or not configured.'
+		ELSE 'Rebate UOM: ' + ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) + ' of rebate item: ' + 
+			COALESCE(Item.strItemNo, FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) + ' does not exist or not configured.'
+	END,
 	FilteredRebateProgram.intRowNumber,
-	7
+	10
 FROM
 	@tblFilteredRebateProgram FilteredRebateProgram
 LEFT JOIN
+(
+	vyuAPVendor Vendor
+	INNER JOIN
+		tblVRVendorSetup VendorSetup 
+		ON
+			Vendor.intEntityId = VendorSetup.intEntityId
+)
+	ON
+		Vendor.strName = FilteredRebateProgram.strVendor
+LEFT JOIN
+	tblICCategoryVendor CategoryXref
+	ON
+		ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+		AND
+		FilteredRebateProgram.strVendorCategory IS NOT NULL
+		AND
+		CategoryXref.strVendorDepartment = FilteredRebateProgram.strVendorCategory
+LEFT JOIN
+	tblICCategory Category
+	ON
+		Category.intCategoryId = CategoryXref.intCategoryId
+LEFT JOIN
+	tblICItemVendorXref ItemXref
+	ON
+		FilteredRebateProgram.strVendorItemNo IS NOT NULL
+		AND
+		ItemXref.strVendorProduct = FilteredRebateProgram.strVendorItemNo
+LEFT JOIN 
+	tblICItem Item
+	ON
+		Item.intItemId = ItemXref.intItemId
+LEFT JOIN
+	tblVRUOMXref UOMXref
+	ON
+		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
+		AND
+		FilteredRebateProgram.strVendorRebateUOM = UOMXref.strVendorUOM
+LEFT JOIN
+	tblICUnitMeasure UnitMeasure
+	ON
+		UnitMeasure.intUnitMeasureId = UOMXref.intUnitMeasureId
+LEFT JOIN
 	vyuICItemUOM ItemUOM
 	ON
-		FilteredRebateProgram.strItemNo = ItemUOM.strItemNo
+		(
+			(
+				ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+				AND
+				ItemUOM.strCategoryCode = ISNULL(Category.strCategoryCode, FilteredRebateProgram.strCategory)
+			)
+			OR
+			(
+				ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NOT NULL
+				AND
+				ItemUOM.strItemNo = ISNULL(Item.strItemNo, FilteredRebateProgram.strItemNo)
+			)
+		)
 		AND
-		FilteredRebateProgram.strRebateUOM = ItemUOM.strUnitMeasure
+		ItemUOM.strUnitMeasure = ISNULL(UnitMeasure.strUnitMeasure, FilteredRebateProgram.strRebateUOM)
 WHERE
 ItemUOM.intItemUOMId IS NULL
 AND
-FilteredRebateProgram.strRebateUOM IS NOT NULL
+ISNULL(FilteredRebateProgram.strVendorRebateUOM, FilteredRebateProgram.strRebateUOM) IS NOT NULL
+UNION
+SELECT -- Invalid Rebate UOM Xref
+	FilteredRebateProgram.strVendorRebateUOM,
+	'Rebate vendor rebate unit of measure: ' + FilteredRebateProgram.strVendorRebateUOM + ' cross reference does not exist.', 
+	FilteredRebateProgram.intRowNumber,
+	11
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+LEFT JOIN
+(
+	vyuAPVendor Vendor
+	INNER JOIN
+		tblVRVendorSetup VendorSetup 
+		ON
+			Vendor.intEntityId = VendorSetup.intEntityId
+)
+	ON
+		Vendor.strName = FilteredRebateProgram.strVendor
+LEFT JOIN 
+	tblVRUOMXref UOMXref
+	ON
+		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
+		AND
+		FilteredRebateProgram.strVendorRebateUOM = UOMXref.strVendorUOM
+WHERE
+UOMXref.intUOMXrefId IS NULL
+AND
+FilteredRebateProgram.strVendorRebateUOM IS NOT NULL
 UNION
 ------------------------ Rebate Customers Logs ------------------------
 SELECT -- Invalid Rebate Customer
 	FilteredRebateProgram.strCustomer,
 	'Rebate customer: ' + FilteredRebateProgram.strCustomer + ' does not exist.', 
 	FilteredRebateProgram.intRowNumber,
-	8
+	12
 FROM 
 	@tblFilteredRebateProgram FilteredRebateProgram
 LEFT JOIN
@@ -252,6 +660,34 @@ WHERE
 Customer.intEntityId IS NULL
 AND
 FilteredRebateProgram.strCustomer IS NOT NULL
+UNION
+SELECT -- Invalid Customer Xref
+	FilteredRebateProgram.strVendorCustomer,
+	'Rebate vendor customer: ' + FilteredRebateProgram.strVendorCustomer + ' cross reference does not exist.', 
+	FilteredRebateProgram.intRowNumber,
+	13
+FROM
+	@tblFilteredRebateProgram FilteredRebateProgram
+LEFT JOIN
+(
+	vyuAPVendor Vendor
+	INNER JOIN
+		tblVRVendorSetup VendorSetup 
+		ON
+			Vendor.intEntityId = VendorSetup.intEntityId
+)
+	ON
+		Vendor.strName = FilteredRebateProgram.strVendor
+LEFT JOIN 
+	tblVRCustomerXref CustomerXref
+	ON
+		VendorSetup.intVendorSetupId = CustomerXref.intVendorSetupId
+		AND
+		FilteredRebateProgram.strVendorCustomer = CustomerXref.strVendorCustomer
+WHERE
+CustomerXref.intCustomerXrefId IS NULL
+AND
+FilteredRebateProgram.strVendorCustomer IS NOT NULL
 
 --Validate Records
 
@@ -270,31 +706,39 @@ SELECT
 	guiApiImportLogDetailId = NEWID(),
 	guiApiImportLogId = @guiLogId,
 	strField = CASE
-		WHEN LogRebateProgram.intLogType = 1
+		WHEN LogRebateProgram.intLogType IN (1,2,3,4)
 		THEN 'Vendor'
-		WHEN LogRebateProgram.intLogType IN (2,3,4,5)
+		WHEN LogRebateProgram.intLogType = 5
 		THEN 'Item No'
 		WHEN LogRebateProgram.intLogType = 6
+		THEN 'Category'
+		WHEN LogRebateProgram.intLogType = 7
+		THEN 'Vendor Item No'
+		WHEN LogRebateProgram.intLogType = 8
+		THEN 'Vendor Category'
+		WHEN LogRebateProgram.intLogType = 9
 		THEN 'Rebate By'
-		WHEN LogRebateProgram.intLogType IN (8,9,10)
+		WHEN LogRebateProgram.intLogType = 12
 		THEN 'Customer'
+		WHEN LogRebateProgram.intLogType = 13
+		THEN 'Vendor Customer'
 		ELSE 'Rebate UOM'
 	END,
 	strValue = LogRebateProgram.strFieldValue,
 	strLogLevel =  CASE
-		WHEN LogRebateProgram.intLogType IN(2,3,4,8,9)
+		WHEN LogRebateProgram.intLogType IN(2,3,4)
 		THEN 'Warning'
 		ELSE 'Error'
 	END,
 	strStatus = CASE
-		WHEN LogRebateProgram.intLogType IN(2,3,4,8,9)
+		WHEN LogRebateProgram.intLogType IN(2,3,4)
 		THEN 'Skipped'
 		ELSE 'Failed'
 	END,
 	intRowNo = LogRebateProgram.intRowNumber,
 	strMessage = LogRebateProgram.strMessage
 FROM @tblLogRebateProgram LogRebateProgram
-WHERE LogRebateProgram.intLogType BETWEEN 1 AND 10
+WHERE LogRebateProgram.intLogType BETWEEN 1 AND 13
 
 --Rebate Program Transform logic
 
@@ -306,7 +750,7 @@ USING
 		intVendorSetupId = MAX(VendorSetup.intVendorSetupId),
 		strVendorProgram = MAX(FilteredRebateProgram.strVendorProgram),
 		strProgramDescription = MAX(FilteredRebateProgram.strDescription),
-		ysnActive = ISNULL(MAX(CAST(FilteredRebateProgram.ysnActive AS tinyint)), 1)
+		ysnActive = MAX(CAST(FilteredRebateProgram.ysnActive AS tinyint))
 	FROM @tblFilteredRebateProgram FilteredRebateProgram
 	LEFT JOIN
 		@tblLogRebateProgram LogRebateProgram
@@ -336,7 +780,7 @@ THEN
 		guiApiUniqueId = SOURCE.guiApiUniqueId,
 		strVendorProgram = SOURCE.strVendorProgram,
 		strProgramDescription = SOURCE.strProgramDescription,
-		ysnActive = SOURCE.ysnActive
+		ysnActive = COALESCE(SOURCE.ysnActive, TARGET.ysnActive)
 WHEN NOT MATCHED THEN
 	INSERT
 	(
@@ -353,7 +797,7 @@ WHEN NOT MATCHED THEN
 		intVendorSetupId,
 		strVendorProgram,
 		strProgramDescription,
-		ysnActive,
+		COALESCE(ysnActive, 1),
 		1
 	);
 
@@ -401,21 +845,21 @@ USING
 (
 	SELECT
 		guiApiUniqueId = @guiApiUniqueId,
-		intItemId = Item.intItemId,
-		intCategoryId = Item.intCategoryId,
+		intItemId = COALESCE(ItemXref.intItemId, Item.intItemId),
+		intCategoryId = COALESCE(CategoryXref.intCategoryId, Category.intCategoryId, Item.intCategoryId),
 		strRebateBy = FilteredRebateProgram.strRebateBy,
 		dblRebateRate = FilteredRebateProgram.dblRebateRate,
 		dtmBeginDate = FilteredRebateProgram.dtmBeginDate,
 		dtmEndDate = FilteredRebateProgram.dtmEndDate,
 		intProgramId = Program.intProgramId,
-		intUnitMeasureId = UnitMeasure.intUnitMeasureId
+		intUnitMeasureId = COALESCE(UOMXref.intUnitMeasureId, UnitMeasure.intUnitMeasureId)
 	FROM @tblFilteredRebateProgram FilteredRebateProgram
 	LEFT JOIN
 		@tblLogRebateProgram LogRebateProgram
 		ON
 			FilteredRebateProgram.intRowNumber = LogRebateProgram.intRowNumber
 			AND
-			LogRebateProgram.intLogType IN (1,2,3,4,5,6,7)
+			LogRebateProgram.intLogType IN (1,2,3,4,5,6,7,8,9,10,11)
 	INNER JOIN
 	(
 		vyuAPVendor Vendor
@@ -426,20 +870,52 @@ USING
 	)
 		ON
 			Vendor.strName = FilteredRebateProgram.strVendor
-	INNER JOIN 
+	LEFT JOIN 
 		tblICItem Item
 		ON
 			FilteredRebateProgram.strItemNo = Item.strItemNo
-	INNER JOIN
+	LEFT JOIN
+		tblICCategory Category
+		ON
+			ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+			AND
+			FilteredRebateProgram.strCategory = Category.strCategoryCode
+	LEFT JOIN
 		tblICUnitMeasure UnitMeasure
 		ON
 			FilteredRebateProgram.strRebateUOM = UnitMeasure.strUnitMeasure
+	LEFT JOIN
+		tblICItemVendorXref ItemXref
+		ON
+			FilteredRebateProgram.strVendorItemNo IS NOT NULL
+			AND
+			ItemXref.intVendorSetupId = VendorSetup.intVendorSetupId
+			AND
+			ItemXref.strVendorProduct = FilteredRebateProgram.strVendorItemNo
+	LEFT JOIN
+		tblICCategoryVendor CategoryXref
+		ON
+			ISNULL(FilteredRebateProgram.strVendorItemNo, FilteredRebateProgram.strItemNo) IS NULL
+			AND
+			FilteredRebateProgram.strVendorCategory IS NOT NULL
+			AND
+			CategoryXref.intVendorSetupId = VendorSetup.intVendorSetupId
+			AND
+			CategoryXref.strVendorDepartment = FilteredRebateProgram.strVendorCategory
+	LEFT JOIN 
+		tblVRUOMXref UOMXref
+		ON
+			VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
+			AND
+			UOMXref.intVendorSetupId = VendorSetup.intVendorSetupId
+			AND
+			UOMXref.strVendorUOM = FilteredRebateProgram.strVendorRebateUOM
 	OUTER APPLY
 	(
 		SELECT TOP 1 intProgramId FROM tblVRProgram WHERE intVendorSetupId = VendorSetup.intVendorSetupId ORDER BY intProgramId DESC	
 	) Program
 	WHERE 
-	LogRebateProgram.intLogType NOT IN (1,2,3,4,5,6,7) OR LogRebateProgram.intLogType IS NULL
+	LogRebateProgram.intLogType NOT IN (1,2,3,4,5,6,7,8,9,10,11) OR LogRebateProgram.intLogType IS NULL
 ) AS SOURCE
 ON 
 TARGET.intProgramId = SOURCE.intProgramId
@@ -495,19 +971,21 @@ INSERT INTO tblVRProgramCustomer
 (
 	guiApiUniqueId,
 	intProgramId,
-	intEntityId
+	intEntityId,
+	intConcurrencyId
 )
 SELECT
 	@guiApiUniqueId,
 	MAX(Program.intProgramId),
-	MAX(Customer.intEntityId)
+	ISNULL(MAX(CustomerXref.intEntityId), MAX(Customer.intEntityId)),
+	1
 FROM @tblFilteredRebateProgram FilteredRebateProgram
 LEFT JOIN
 	@tblLogRebateProgram LogRebateProgram
 	ON
 		FilteredRebateProgram.intRowNumber = LogRebateProgram.intRowNumber
 		AND
-		LogRebateProgram.intLogType IN (1,8)
+		LogRebateProgram.intLogType IN (1,12,13)
 INNER JOIN
 (
 	vyuAPVendor Vendor
@@ -522,10 +1000,32 @@ OUTER APPLY
 (
 	SELECT TOP 1 intProgramId FROM tblVRProgram WHERE intVendorSetupId = VendorSetup.intVendorSetupId ORDER BY intProgramId DESC	
 ) Program
-INNER JOIN 
+LEFT JOIN 
 	tblEMEntity Customer
 	ON
 		FilteredRebateProgram.strCustomer = Customer.strName
+LEFT JOIN
+	tblVRCustomerXref CustomerXref
+	ON
+		CustomerXref.intVendorSetupId = VendorSetup.intVendorSetupId
+		AND
+		FilteredRebateProgram.strVendorCustomer = CustomerXref.strVendorCustomer
+LEFT JOIN
+	tblEMEntity VendorCustomer
+	ON
+		CustomerXref.intEntityId = VendorCustomer.intEntityId
+LEFT JOIN
+	tblVRProgramCustomer ProgramCustomer
+	ON
+		ProgramCustomer.intProgramId = Program.intProgramId
+		AND
+		ProgramCustomer.intEntityId = ISNULL(CustomerXref.intEntityId, Customer.intEntityId)
 WHERE 
-LogRebateProgram.intLogType NOT IN (1,8) OR LogRebateProgram.intLogType IS NULL
-GROUP BY FilteredRebateProgram.strCustomer
+(
+	LogRebateProgram.intLogType NOT IN (1,12,13) 
+	OR 
+	LogRebateProgram.intLogType IS NULL
+)
+AND
+ProgramCustomer.intProgramCustomerId IS NULL
+GROUP BY ISNULL(VendorCustomer.strName, FilteredRebateProgram.strCustomer)
