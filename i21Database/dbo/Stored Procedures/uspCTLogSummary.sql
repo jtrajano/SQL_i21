@@ -4005,8 +4005,11 @@ BEGIN TRY
 					-- If Reassign prices, do not bring back Basis qty
 					IF (@ysnReassign = 0)
 					BEGIN
+
+						declare @intHeaderPricingTypeId int;
+						select top 1 @intHeaderPricingTypeId = intHeaderPricingTypeId from @tmpContractDetail
 						-- Increase basis, qtyDiff is negative so multiply to -1
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 
