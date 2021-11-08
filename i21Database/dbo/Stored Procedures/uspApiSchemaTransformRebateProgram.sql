@@ -846,7 +846,7 @@ USING
 	SELECT
 		guiApiUniqueId = @guiApiUniqueId,
 		intItemId = COALESCE(ItemXref.intItemId, Item.intItemId),
-		intCategoryId = COALESCE(CategoryXref.intCategoryId, Category.intCategoryId, Item.intCategoryId),
+		intCategoryId = COALESCE(CategoryXref.intCategoryId, Category.intCategoryId, Item.intCategoryId, ItemCategoryXref.intCategoryId),
 		strRebateBy = FilteredRebateProgram.strRebateBy,
 		dblRebateRate = FilteredRebateProgram.dblRebateRate,
 		dtmBeginDate = FilteredRebateProgram.dtmBeginDate,
@@ -902,6 +902,10 @@ USING
 			CategoryXref.intVendorSetupId = VendorSetup.intVendorSetupId
 			AND
 			CategoryXref.strVendorDepartment = FilteredRebateProgram.strVendorCategory
+	OUTER APPLY
+	(
+		SELECT TOP 1 intCategoryId FROM tblICItem WHERE intItemId = ItemXref.intItemId
+	) ItemCategoryXref
 	LEFT JOIN 
 		tblVRUOMXref UOMXref
 		ON
