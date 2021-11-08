@@ -87,6 +87,8 @@ DECLARE
  ,@dblHistoricRate DECIMAL (18,6)  
  ,@intCurrencyIdFrom INT  
  ,@intCurrencyIdTo INT  
+ ,@intGLAccountIdFrom INT  
+ ,@intGLAccountIdTo INT  
  ,@intDefaultCurrencyId INT
  ,@dblDifference DECIMAL(18,6)
  ,@intBTInTransitAccountId INT
@@ -101,7 +103,8 @@ DECLARE
  -- Table Variables  
  ,@RecapTable AS RecapTableType   
  ,@GLEntries AS RecapTableType 
- ,@dblFees DECIMAL(18,6)
+ ,@dblFeesFrom DECIMAL(18,6)
+ ,@dblFeesTo DECIMAL(18,6)
  -- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.   
    
 IF @@ERROR <> 0 GOTO Post_Rollback    
@@ -129,7 +132,10 @@ SELECT TOP 1
   ,@intBankTransferTypeId = ISNULL(A.intBankTransferTypeId,1)
   ,@ysnPosted = ISNULL(A.ysnPosted,0)
   ,@ysnPostedInTransit = ISNULL(A.ysnPostedInTransit,0)
-  ,@dblFees = ISNULL(A.dblFeesFrom,0) 
+  ,@dblFeesFrom = ISNULL(A.dblFeesFrom,0) 
+  ,@dblFeesTo = ISNULL(A.dblFeesTo,0) 
+  ,@intGLAccountIdFrom = intGLAccountIdFrom
+  ,@intGLAccountIdTo = intGLAccountIdTo
 FROM [dbo].tblCMBankTransfer A JOIN  
 [dbo].tblCMBankAccount B ON B.intBankAccountId = A.intBankAccountIdFrom JOIN  
 [dbo].tblCMBankAccount C ON C.intBankAccountId = A.intBankAccountIdTo  
@@ -475,18 +481,14 @@ BEGIN
       ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId  
   WHERE A.strTransactionId = @strTransactionId  
 
-
-  -- IF @dblFees >0
-  -- BEGIN
-  --   EXEC dbo.uspCMProcessBankTransferFees @strTransactionId
-  -- END
-
+  IF @intBankTransferTypeId = 1
+    SET @ysnPostedInTransit = 1
   
   IF @intBankTransferTypeId  =2
   BEGIN
     IF @ysnPostedInTransit = 0
     BEGIN
-      DELETE FROM #tmpGLDetail WHERE dblDebit > 0
+      DELETE FROM #tmpGLDetail WHERE intAccountId = @intGLAccountIdTo
       INSERT INTO #tmpGLDetail (  
       [strTransactionId]  
       ,[intTransactionId]  
@@ -561,14 +563,12 @@ BEGIN
         CROSS APPLY (
           SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = @intBTInTransitAccountId
         )GLAccnt
-        WHERE dblCredit > 0
+        WHERE A.intAccountId = @intGLAccountIdFrom
     END
   END
     
   IF(@intBankTransferTypeId = 3)
   BEGIN
-    
-    
     IF @ysnPostedInTransit = 0
     BEGIN
         UPDATE A 
@@ -580,7 +580,7 @@ BEGIN
         OUTER APPLY(
           SELECT strDescription FROM tblGLAccount WHERE intAccountId = @intBTForwardToFXGLAccountId 
         )GLAccnt
-        WHERE dblCredit >0
+        WHERE A.intAccountId = @intGLAccountIdFrom
 
         UPDATE A SET 
         intAccountId = @intBTForwardFromFXGLAccountId
@@ -600,7 +600,7 @@ BEGIN
         OUTER APPLY(
           SELECT strDescription FROM tblGLAccount WHERE intAccountId = @intBTForwardToFXGLAccountId 
         )GLAccnt
-        WHERE dblDebit >0
+        WHERE A.intAccountId = @intGLAccountIdTo
     END
     ELSE
     BEGIN
@@ -663,7 +663,7 @@ BEGIN
         CROSS APPLY(
           SELECT TOP 1 intAccountId,strDescription FROM tblGLAccount where intAccountId =@intBTForwardToFXGLAccountId  -- todo for clarification
         )GLAccnt
-        WHERE dblCredit > 0
+        WHERE A.intAccountId = @intGLAccountIdFrom
         UNION ALL
         SELECT [strTransactionId]   = strTransactionId
           ,[intTransactionId]  		  = intTransactionId
@@ -699,13 +699,16 @@ BEGIN
           CROSS APPLY(
             SELECT dblAmountFrom,dblReverseRate, dblAmountForeignTo  FROM tblCMBankTransfer A WHERE strTransactionId = @strTransactionId
           )T
-          WHERE dblDebit > 0
+          WHERE A.intAccountId = @intGLAccountIdTo
         END
       END
     
   
 
   IF @@ERROR <> 0 GOTO Post_Rollback  
+
+  EXEC dbo.uspCMProcessBankTransferFees @strTransactionId, @strBatchId, @intDefaultCurrencyId
+
   IF @intBankTransferTypeId = 1 OR @ysnPostedInTransit = 1
   BEGIN
     IF @dblDifference <> 0
@@ -1098,4 +1101,4 @@ Audit_Log:
 -- Delete all temporary tables used during the post transaction.   
 Post_Exit:  
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
- IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetailFees')) DROP TABLE #tmpGLDetailFees
+

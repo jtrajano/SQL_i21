@@ -7,14 +7,14 @@ C.strPeriod,
 F.strCurrencyExchangeRateType ,  
 G.strCurrency  strCurrencyIdFeesFrom,
 H.strCurrency strCurrencyIdFeesTo,
-I.strAccountId  strGLAccountIdFeesFrom,
+GLAccount.strAccountId  strGLAccountIdFeesFrom,
+GLAccount1.strAccountId  strGLAccountIdFeesTo,
 CASE WHEN B.dtmDateReconciled IS NOT NULL THEN 1 ELSE 0 END ysnReconciled,  
 CASE WHEN intBankTransferTypeId = 1 THEN 'Bank Transfer'  
  WHEN intBankTransferTypeId = 2 THEN 'Bank Transfer With In transit'   
  WHEN intBankTransferTypeId = 3 THEN 'Bank Forward'   
  WHEN intBankTransferTypeId = 4 THEN 'Swap In'   
- WHEN intBankTransferTypeId = 5 THEN 'Swap Out'   
- WHEN intBankTransferTypeId = 6 THEN 'Create Loan'   
+ WHEN intBankTransferTypeId = 5 THEN 'Swap Out' 
 END strBankTransferTypeId,
 CASE WHEN A.intRateTypeIdAmountFrom = 99999 THEN 'Historic Rate' ELSE J.strCurrencyExchangeRateType  END strRateTypeAmountFrom,
 K.strCurrencyExchangeRateType strRateTypeAmountTo,
@@ -50,7 +50,10 @@ OUTER APPLY(
 )H  
 OUTER APPLY(  
  	SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intGLAccountIdFeesFrom  
-)I 
+)GLAccount
+OUTER APPLY(  
+ 	SELECT TOP 1 strAccountId FROM tblGLAccount WHERE intAccountId = A.intGLAccountIdFeesTo
+)GLAccount1
 OUTER APPLY(  
  SELECT TOP 1 strCurrencyExchangeRateType FROM tblSMCurrencyExchangeRateType WHERE intCurrencyExchangeRateTypeId = A.intRateTypeIdAmountFrom  
 )J  
