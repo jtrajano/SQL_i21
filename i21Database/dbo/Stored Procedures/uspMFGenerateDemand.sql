@@ -134,7 +134,7 @@ BEGIN TRY
 				END
 			)
 		,@ysnForecastedConsumptionByRemainingDays = ysnForecastedConsumptionByRemainingDays
-		,@ysnConsiderBookInDemandView = IsNULL(ysnConsiderBookInDemandView,1)
+		,@ysnConsiderBookInDemandView = IsNULL(ysnConsiderBookInDemandView, 1)
 	FROM tblMFCompanyPreference
 
 	SELECT @strContainerType = strContainerType
@@ -830,6 +830,17 @@ BEGIN TRY
 		,intLocationId INT
 		)
 
+	IF OBJECT_ID('tempdb..#tblMFInventory') IS NOT NULL
+		DROP TABLE #tblMFInventory
+
+	CREATE TABLE #tblMFInventory (
+		intItemId INT
+		,dblQty NUMERIC(18, 6)
+		,intAttributeId INT
+		,intMonthId INT
+		,intLocationId INT
+		)
+
 	IF OBJECT_ID('tempdb..#tblMFContractDetail') IS NOT NULL
 		DROP TABLE #tblMFContractDetail
 
@@ -872,7 +883,7 @@ BEGIN TRY
 	BEGIN
 		IF @ysnRefreshStock = 1
 		BEGIN
-			INSERT INTO #tblMFDemand (
+			INSERT INTO #tblMFInventory (
 				intItemId
 				,dblQty
 				,intAttributeId
@@ -923,6 +934,80 @@ BEGIN TRY
 					ELSE I.intMainItemId
 					END
 				,L.intLocationId
+
+			INSERT INTO #tblMFInventory (
+				intItemId
+				,dblQty
+				,intAttributeId
+				,intMonthId
+				,intLocationId
+				)
+			SELECT CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intItemId
+					ELSE I.intMainItemId
+					END AS intItemId
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, (
+							CASE 
+								WHEN L.intWeightUOMId IS NULL
+									THEN TD.dblQuantity
+								ELSE TD.dblNet
+								END
+							)) * I.dblRatio) AS dblIntrasitQty
+				,2 AS intAttributeId --Opening Inventory
+				,- 1 AS intMonthId
+				,L.intLocationId
+			FROM @tblMFItemDetail I
+			JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
+			JOIN dbo.tblICInventoryTransferDetail TD ON TD.intNewLotId = L.intLotId
+				AND TD.intItemId = L.intItemId
+			JOIN dbo.tblICInventoryTransfer T ON T.intInventoryTransferId = TD.intInventoryTransferId
+				AND T.intStatusId = 2
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
+				AND L.intLocationId = IsNULL(@intCompanyLocationId, L.intLocationId)
+			WHERE EXISTS (
+					SELECT *
+					FROM @tblMFRefreshtemStock EI
+					WHERE EI.intItemId = I.intItemId
+					)
+				AND (
+					CASE 
+						WHEN @ysnConsiderBookInDemandView = 1
+							THEN IsNULL(L.intBookId, 0)
+						ELSE IsNULL(@intBookId, 0)
+						END
+					) = IsNULL(@intBookId, 0)
+				AND (
+					CASE 
+						WHEN @ysnConsiderBookInDemandView = 1
+							THEN IsNULL(L.intSubBookId, 0)
+						ELSE IsNULL(@intSubBookId, 0)
+						END
+					) = IsNULL(@intSubBookId, 0)
+			GROUP BY CASE 
+					WHEN I.ysnSpecificItemDescription = 1
+						THEN I.intItemId
+					ELSE I.intMainItemId
+					END
+				,L.intLocationId
+
+			INSERT INTO #tblMFDemand (
+				intItemId
+				,dblQty
+				,intAttributeId
+				,intMonthId
+				,intLocationId
+				)
+			SELECT intItemId
+				,SUM(dblQty)
+				,intAttributeId
+				,intMonthId
+				,intLocationId
+			FROM #tblMFInventory
+			GROUP BY intItemId
+				,intAttributeId
+				,intMonthId
+				,intLocationId
 
 			INSERT INTO #tblMFDemand (
 				intItemId
@@ -1424,19 +1509,19 @@ BEGIN TRY
 				END
 			) < @dtmStartOfMonth
 		AND (
-					CASE 
-						WHEN @ysnConsiderBookInDemandView = 1
-							THEN IsNULL(SS.intBookId, 0)
-						ELSE IsNULL(@intBookId, 0)
-						END
-					) = IsNULL(@intBookId, 0)
+			CASE 
+				WHEN @ysnConsiderBookInDemandView = 1
+					THEN IsNULL(SS.intBookId, 0)
+				ELSE IsNULL(@intBookId, 0)
+				END
+			) = IsNULL(@intBookId, 0)
 		AND (
-					CASE 
-						WHEN @ysnConsiderBookInDemandView = 1
-							THEN IsNULL(SS.intSubBookId, 0)
-						ELSE IsNULL(@intSubBookId, 0)
-						END
-					) = IsNULL(@intSubBookId, 0)
+			CASE 
+				WHEN @ysnConsiderBookInDemandView = 1
+					THEN IsNULL(SS.intSubBookId, 0)
+				ELSE IsNULL(@intSubBookId, 0)
+				END
+			) = IsNULL(@intSubBookId, 0)
 	GROUP BY CASE 
 			WHEN I.ysnSpecificItemDescription = 1
 				THEN I.intItemId
@@ -1498,19 +1583,19 @@ BEGIN TRY
 				END
 			) >= @dtmStartOfMonth
 		AND (
-					CASE 
-						WHEN @ysnConsiderBookInDemandView = 1
-							THEN IsNULL(SS.intBookId, 0)
-						ELSE IsNULL(@intBookId, 0)
-						END
-					) = IsNULL(@intBookId, 0)
+			CASE 
+				WHEN @ysnConsiderBookInDemandView = 1
+					THEN IsNULL(SS.intBookId, 0)
+				ELSE IsNULL(@intBookId, 0)
+				END
+			) = IsNULL(@intBookId, 0)
 		AND (
-					CASE 
-						WHEN @ysnConsiderBookInDemandView = 1
-							THEN IsNULL(SS.intSubBookId, 0)
-						ELSE IsNULL(@intSubBookId, 0)
-						END
-					) = IsNULL(@intSubBookId, 0)
+			CASE 
+				WHEN @ysnConsiderBookInDemandView = 1
+					THEN IsNULL(SS.intSubBookId, 0)
+				ELSE IsNULL(@intSubBookId, 0)
+				END
+			) = IsNULL(@intSubBookId, 0)
 	GROUP BY CASE 
 			WHEN I.ysnSpecificItemDescription = 1
 				THEN I.intItemId
