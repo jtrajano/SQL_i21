@@ -309,60 +309,58 @@ BEGIN TRY
 			DROP TABLE #tempSequenceHistoryCompare;
 		end
 
-		select top 2
-		intContractStatusId
-		,intCompanyLocationId
-		,intPricingTypeId
-		,intFutureMarketId
-		,intFutureMonthId
-		,intCurrencyId
-		,intDtlQtyInCommodityUOMId
-		,intDtlQtyUnitMeasureId
-		,intCurrencyExchangeRateId
-		,intBookId
-		,intSubBookId
-		,dtmStartDate
-		,dtmEndDate
-		,dblQuantity
-		,dblBalance
-		,dblScheduleQty
-		,dblFutures
-		,dblBasis
-		,dblCashPrice
-		,dblLotsPriced
-		,dblLotsUnpriced
-		,dblQtyPriced
-		,dblQtyUnpriced
-		,dblFinalPrice
-		,dblRatio
-		,dtmFXValidFrom
-		,dtmFXValidTo
-		,dblRate
-		,strPricingType
-		,strPricingStatus
-		,strCurrencypair
-		,strBook
-		,strSubBook
-		,intPriceItemUOMId
-		,ysnStatusChange
-		into #tempSequenceHistoryCompare
-		from tblCTSequenceHistory where intContractDetailId = @intContractDetailId order by intSequenceHistoryId desc
+		SELECT TOP 2 intContractStatusId
+			, intCompanyLocationId
+			, intPricingTypeId
+			, intFutureMarketId
+			, intFutureMonthId
+			, intCurrencyId
+			, intDtlQtyInCommodityUOMId
+			, intDtlQtyUnitMeasureId
+			, intCurrencyExchangeRateId
+			, intBookId
+			, intSubBookId
+			, dtmStartDate
+			, dtmEndDate
+			, dblQuantity
+			, dblBalance
+			, dblScheduleQty
+			, dblFutures
+			, dblBasis
+			, dblCashPrice
+			, dblLotsPriced
+			, dblLotsUnpriced
+			, dblQtyPriced
+			, dblQtyUnpriced
+			, dblFinalPrice
+			, dblRatio
+			, dtmFXValidFrom
+			, dtmFXValidTo
+			, dblRate
+			, strPricingType
+			, strPricingStatus
+			, strCurrencypair
+			, strBook
+			, strSubBook
+			, intPriceItemUOMId
+			, ysnIsClosed = CASE WHEN intContractStatusId IN (1, 4) THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+		INTO #tempSequenceHistoryCompare
+		FROM tblCTSequenceHistory WHERE intContractDetailId = @intContractDetailId ORDER BY intSequenceHistoryId DESC
 
-		select @intSequenceHistoryCount = count(*) from #tempSequenceHistoryCompare
+		SELECT @intSequenceHistoryCount = COUNT(*) FROM #tempSequenceHistoryCompare
 
-		select @intValidSequenceHistoryCount = count(*) from (
-			select distinct * from #tempSequenceHistoryCompare
+		SELECT @intValidSequenceHistoryCount = COUNT(*) FROM (
+			SELECT DISTINCT * FROM #tempSequenceHistoryCompare
 		)tbl
 
-		if (@intSequenceHistoryCount = 2 and @intValidSequenceHistoryCount = 1)
-		begin
+		IF (@intSequenceHistoryCount = 2 AND @intValidSequenceHistoryCount = 1)
+		BEGIN
 			DELETE
 			FROM tblCTSequenceHistory
 			WHERE intSequenceHistoryId = @intSequenceHistoryId;
-		end
-		else
-		begin
-			
+		END
+		ELSE
+		BEGIN			
 			SELECT @intPrevHistoryId = MAX(intSequenceHistoryId)
 			FROM tblCTSequenceHistory WITH(NOLOCK)
 			WHERE intSequenceHistoryId < @intSequenceHistoryId
