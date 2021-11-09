@@ -314,6 +314,7 @@ BEGIN TRY
 								intMinimumAge				INT		NULL,
 								dblMinOrder					NUMERIC(18, 6) NULL,
 								dblSuggestedQty				NUMERIC(18, 6) NULL,
+								strStorageUnitNo			NVARCHAR(1000) NULL,
 								intStorageLocationId		INT		NULL,
 								intCountGroupId				INT		NULL
 						)
@@ -352,6 +353,7 @@ BEGIN TRY
 							intMinimumAge,
 							dblMinOrder,
 							dblSuggestedQty,
+							strStorageUnitNo,
 							intStorageLocationId,
 							intCountGroupId
 						)
@@ -384,6 +386,7 @@ BEGIN TRY
 							intMinimumAge			= CASE WHEN piv.intMinimumAge = '' THEN NULL ELSE piv.intMinimumAge END, -- piv.intMinimumAge,
 							dblMinOrder				= CASE WHEN piv.dblMinOrder = '' THEN NULL ELSE piv.dblMinOrder END, -- piv.dblMinOrder,
 							dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty,
+							strStorageUnitNo		= piv.strStorageUnitNo,
 							intStorageLocationId	= CASE WHEN piv.intStorageLocationId = '' THEN NULL ELSE piv.intStorageLocationId END, --piv.intStorageLocationId
 							intCountGroupId			= CASE WHEN piv.intCountGroupId = '' THEN NULL ELSE piv.intCountGroupId END --piv.intStorageLocationId
 						FROM (
@@ -400,7 +403,7 @@ BEGIN TRY
 						PIVOT (
 							MAX(strOldData) FOR strTableColumnName IN (ysnTaxFlag1,ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnDepositRequired, intDepositPLUId, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable,
 																		ysnReturnable, ysnSaleable, ysnIdRequiredLiquor, ysnIdRequiredCigarette, ysnPromotionalItem, ysnPrePriced, ysnApplyBlueLaw1, ysnApplyBlueLaw2,
-																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, 
+																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, strStorageUnitNo, 
 																		intStorageLocationId, intCountGroupId)
 						) piv
 
@@ -462,6 +465,7 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
+									 ItemLoc.strStorageUnitNo,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc
@@ -513,6 +517,7 @@ BEGIN TRY
 											@intMinimumAge				INT,
 											@dblMinOrder				NUMERIC(18, 6),
 											@dblSuggestedQty			NUMERIC(18, 6),
+											@strStorageUnitNo			NVARCHAR(1000),
 											@intStorageLocationId		INT,
 											@intCountGroupId			INT
 				
@@ -546,6 +551,7 @@ BEGIN TRY
 											@intMinimumAge				= ISNULL(temp.intMinimumAge, ItemLoc.intMinimumAge),
 											@dblMinOrder				= ISNULL(temp.dblMinOrder, ItemLoc.dblMinOrder),
 											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty),
+											@strStorageUnitNo			= ISNULL(temp.strStorageUnitNo, ItemLoc.strStorageUnitNo),
 											@intStorageLocationId		= ISNULL(temp.intStorageLocationId, ItemLoc.intStorageLocationId), -- CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
 											@intCountGroupId			= ISNULL(temp.intCountGroupId, ItemLoc.intCountGroupId)
 								FROM @tempITEMLOCATION temp
@@ -592,6 +598,7 @@ BEGIN TRY
 										,@intMinimumAge								= @intMinimumAge 
 										,@dblMinOrder								= @dblMinOrder 
 										,@dblSuggestedQty							= @dblSuggestedQty
+										,@strStorageUnitNo							= @strStorageUnitNo
 										,@intCountGroupId							= @intCountGroupId
 										,@intStorageLocationId						= @intStorageLocationId 
 										,@dblReorderPoint							= NULL
@@ -687,6 +694,7 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
+									 ItemLoc.strStorageUnitNo,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc

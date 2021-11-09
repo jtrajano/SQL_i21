@@ -52,6 +52,8 @@ SELECT --DISTINCT
 											THEN CAST(CAST(ItemLoc.dblMinOrder AS FLOAT) AS NVARCHAR(50))
 										WHEN RHD.strTableColumnName = 'dblSuggestedQty'
 											THEN CAST(CAST(ItemLoc.dblSuggestedQty AS FLOAT) AS NVARCHAR(50))
+										WHEN RHD.strTableColumnName = 'strStorageUnitNo'
+											THEN CAST(ItemLoc.strStorageUnitNo AS NVARCHAR(1000))
 										WHEN RHD.strTableColumnName = 'intStorageLocationId'
 											THEN ISNULL(StorageLoc_New.strName, '')
 										WHEN RHD.strTableColumnName = 'intCountGroupId'
