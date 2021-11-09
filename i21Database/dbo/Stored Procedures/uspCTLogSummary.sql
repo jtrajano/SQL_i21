@@ -760,48 +760,49 @@ BEGIN TRY
 				)		
 				SELECT strBatchId = @strBatchId
 					, dtmTransactionDate = @_transactionDate
-					, strTransactionType
-					, strTransactionReference
-					, intTransactionReferenceId
-					, intTransactionReferenceDetailId
-					, strTransactionReferenceNo
-					, intContractDetailId
-					, intContractHeaderId
-					, strContractNumber		
-					, intContractSeq
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty
-					, dblOrigQty
+					, o.strTransactionType
+					, o.strTransactionReference
+					, o.intTransactionReferenceId
+					, o.intTransactionReferenceDetailId
+					, o.strTransactionReferenceNo
+					, o.intContractDetailId
+					, o.intContractHeaderId
+					, o.strContractNumber		
+					, o.intContractSeq
+					, o.intContractTypeId
+					, o.intEntityId
+					, o.intCommodityId
+					, o.intItemId
+					, o.intLocationId
+					, price.intPricingTypeId
+					, o.intFutureMarketId
+					, o.intFutureMonthId
+					, o.dblBasis
+					, o.dblFutures
+					, o.intQtyUOMId
+					, o.intQtyCurrencyId
+					, o.intBasisUOMId
+					, o.intBasisCurrencyId
+					, o.intPriceUOMId
+					, o.dtmStartDate
+					, o.dtmEndDate
+					, o.dblQty
+					, o.dblOrigQty
 					, intContractStatusId = 4
-					, intBookId
-					, intSubBookId
-					, strNotes
+					, o.intBookId
+					, o.intSubBookId
+					, o.strNotes
 					, intUserId = @intUserId
-					, intActionId
+					, o.intActionId
 					, strProcess = @strProcess
-				FROM tblCTContractBalanceLog  WITH (UPDLOCK)
-				WHERE intTransactionReferenceId = @intHeaderId
-				AND intTransactionReferenceDetailId = @intDetailId
-				AND intContractHeaderId = @intContractHeaderId
-				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
-				AND intContractStatusId IN (3,6)
-				ORDER BY dtmCreatedDate DESC
+				FROM tblCTContractBalanceLog  o WITH (UPDLOCK)
+				cross apply (select top 1 p.intPricingTypeId from tblCTContractBalanceLog p where p.intContractHeaderId = o.intContractHeaderId and p.intContractDetailId = ISNULL(@intContractDetailId, o.intContractDetailId) order by p.intContractBalanceLogId desc) price
+				WHERE o.intTransactionReferenceId = @intHeaderId
+				AND o.intTransactionReferenceDetailId = @intDetailId
+				AND o.intContractHeaderId = @intContractHeaderId
+				AND o.intContractDetailId = ISNULL(@intContractDetailId, o.intContractDetailId)
+				AND o.intContractStatusId IN (3,6)
+				ORDER BY o.dtmCreatedDate DESC
 
 				UPDATE CBL SET strNotes = 'Re-opened'
 				FROM tblCTContractBalanceLog CBL
