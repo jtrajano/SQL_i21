@@ -160,8 +160,8 @@ SELECT
  ,[dblExtraWithholding]  
  ,[dblLimit]  
  ,0  
-	,[intAccountId]
-	,[intExpenseAccountId]
+ ,[intAccountId]  
+ ,[intExpenseAccountId]  
  ,[intAllowance]  
  ,[strPaidBy]  
  ,[strVal1]  
