@@ -263,13 +263,17 @@ BEGIN
 
 	DECLARE @FColumns nvarchar(max),@EColumns nvarchar(max);
 
-	select
-		@FColumns = coalesce(@FColumns + ',', '') +  '[First' + strColumnName + '] DECIMAL(24,2) NULL'
-		,@EColumns = coalesce(@EColumns + ',', '') +  '[End' + strColumnName + '] DECIMAL(24,2) NULL'
-	from
-		#tblRequiredColumns
 
-	exec('ALTER TABLE #tblCoffeeNeedPlan ADD' + @FColumns + ',' + @EColumns + ';');
+	IF EXISTS(SELECT TOP 1 1 From #tblRequiredColumns)
+	BEGIN
+		select
+			@FColumns = coalesce(@FColumns + ',', '') +  '[First' + strColumnName + '] DECIMAL(24,2) NULL'
+			,@EColumns = coalesce(@EColumns + ',', '') +  '[End' + strColumnName + '] DECIMAL(24,2) NULL'
+		from
+			#tblRequiredColumns
+
+		exec('ALTER TABLE #tblCoffeeNeedPlan ADD' + @FColumns + ',' + @EColumns + ';');
+	END
 
 	SELECT @intColumnKey = MIN(intColumnKey) FROM #tblRequiredColumns
 
