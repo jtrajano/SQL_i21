@@ -50,7 +50,7 @@ BEGIN TRANSACTION;
     [strTransactionId]  
    ,[intTransactionId]  
    ,[intAccountId]     
-   ,[strDescription]  =  A.strJournalLineDescription  
+   ,[strDescription]  =  FA.[strAssetDescription]
    ,[strReference]     
    ,[dtmTransactionDate]   
    ,[dblDebit]    = A.[dblCredit]  
@@ -63,7 +63,7 @@ BEGIN TRANSACTION;
    ,[ysnIsUnposted] = 1   
    ,[intConcurrencyId] = A.[intConcurrencyId]    
    ,[dblExchangeRate]  
-   ,[intCurrencyId]
+   ,[intCurrencyId] = A.[intCurrencyId]
    ,[intJournalLineNo] 
    ,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]  
    ,[intUserId]   = 0  
@@ -74,9 +74,11 @@ BEGIN TRANSACTION;
    ,[strTransactionType]  
    ,[strTransactionForm]  
    ,[strModuleName]  
-  FROM tblGLDetail A JOIN
-  @Id B on B.intId = A.intGLDetailId
-  AND ysnIsUnposted = 0  
+  FROM tblGLDetail A 
+  JOIN  @Id B 
+    ON B.intId = A.intGLDetailId AND ysnIsUnposted = 0  
+  JOIN tblFAFixedAsset FA
+    ON FA.intAssetId = A.intTransactionId AND FA.strAssetId = A.strReference
   ORDER BY intGLDetailId  
 
 
