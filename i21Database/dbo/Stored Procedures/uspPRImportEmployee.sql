@@ -1089,6 +1089,21 @@ SELECT * INTO #TempEmployeeDetails FROM tblApiSchemaEmployee where guiApiUniqueI
 					END
 			END
 			DELETE FROM #TempEmployeeDetails WHERE strEmployeeId = @EmployeeID
+
+		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+		SELECT TOP 1
+			  NEWID()
+			, guiApiImportLogId = @guiLogId
+			, strField = 'Entity and Employee'
+			, strValue = CAST(ISNULL(SE.strEmployeeId, '') AS NVARCHAR(100))
+			, strLogLevel = 'Info'
+			, strStatus = 'Success'
+			, intRowNo = SE.intRowNumber
+			, strMessage = 'The entity and employee record has been successfully imported.'
+		FROM tblApiSchemaEmployee SE
+		LEFT JOIN tblPREmployee E ON E.strEmployeeId = SE.strEmployeeId
+		WHERE SE.guiApiUniqueId = @guiApiUniqueId
+		AND SE.strEmployeeId = @EmployeeID
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDetails')) 

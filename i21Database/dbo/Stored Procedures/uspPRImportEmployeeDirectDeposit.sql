@@ -148,6 +148,22 @@ DECLARE @ysnActive AS BIT
 					DELETE FROM #TempEmployeeDirectDeposit WHERE intEntityNo = @intEntityNo AND strBankName = @strBankName AND strAccountNumber = @strAccountNumber AND strAccountType = @strAccountType
 
 			END
+
+		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+		SELECT TOP 1
+			  NEWID()
+			, guiApiImportLogId = @guiLogId
+			, strField = 'Employee Direct Deposit'
+			, strValue = SE.strBankName + ' - ' + SE.strAccountNumber
+			, strLogLevel = 'Info'
+			, strStatus = 'Success'
+			, intRowNo = SE.intRowNumber
+			, strMessage = 'The employee direct deposit has been successfully imported.'
+		FROM tblApiSchemaEmployeeDirectDeposit SE
+		LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = SE.intEntityNo
+		WHERE SE.guiApiUniqueId = @guiApiUniqueId
+		AND SE.strBankName = @strBankName
+		AND SE.strAccountNumber = @strAccountNumber
 	END
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeDirectDeposit')) 

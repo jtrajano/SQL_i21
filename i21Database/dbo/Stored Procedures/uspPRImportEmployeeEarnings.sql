@@ -385,6 +385,21 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 
 					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo AND strEarningDesc = @strEarningId
 			END
+			
+		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+		SELECT TOP 1
+			  NEWID()
+			, guiApiImportLogId = @guiLogId
+			, strField = 'Employee Earnings'
+			, strValue = SE.strEarningDesc
+			, strLogLevel = 'Info'
+			, strStatus = 'Success'
+			, intRowNo = SE.intRowNumber
+			, strMessage = 'The employee earnings has been successfully imported.'
+		FROM tblApiSchemaEmployeeEarnings SE
+		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
+		   WHERE SE.guiApiUniqueId = @guiApiUniqueId
+		AND SE.strEarningDesc = @strEarningId
 
 
 	END

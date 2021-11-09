@@ -55,9 +55,6 @@ UPDATE A
 					WHEN 
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue
 					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Overpayment' ELSE 'Underpayment' END)
-					WHEN
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > (B.dblTotal - B.dblPaymentTemp)
-					THEN 'Already included in payment' + P.strPaymentRecordNum
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
@@ -73,17 +70,6 @@ OUTER APPLY	(
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
-OUTER APPLY (
-	SELECT STUFF(
-		(
-			SELECT ', ' + P.strPaymentRecordNum 
-			FROM tblAPPaymentDetail PD 
-			INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId 
-			WHERE PD.intBillId = B.intBillId AND ISNULL(PD.intPayScheduleId, 0) = ISNULL(B.intPayScheduleId, 0) AND PD.dblPayment <> 0
-			ORDER BY P.intPaymentId FOR XML PATH('')
-		), 1, 1, ''
-	) AS strPaymentRecordNum
-) P
 WHERE A.strNotes IS NULL
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
