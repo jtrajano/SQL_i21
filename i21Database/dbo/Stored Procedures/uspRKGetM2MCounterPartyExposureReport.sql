@@ -1111,7 +1111,9 @@ BEGIN TRY
 				, cd.strPosition
 				, strPeriod = RIGHT(CONVERT(VARCHAR(8), dtmStartDate, 3), 5) + '-' + RIGHT(CONVERT(VARCHAR(8), dtmEndDate, 3), 5)
 				, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20), cd.dtmEndDate, 106), 4, 8)
-				, strPriOrNotPriOrParPriced = cd.strPricingStatus
+				, strPriOrNotPriOrParPriced = CASE WHEN cd.intPricingTypeId = 1 AND strPricingType = 'Priced' 
+								THEN 'Fully Priced'
+								ELSE cd.strPricingStatus END
 				, cd.intPricingTypeId
 				, cd.strPricingType
 				, cd.dblRatio
