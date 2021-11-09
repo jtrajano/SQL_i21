@@ -19,7 +19,7 @@ SELECT DISTINCT
 	intForexRateType		=	RateType.intCurrencyExchangeRateTypeId,
 	strForexRateType		=	RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS,
 	dblForexRate			=	FA.dblForexRate,
-	dblHistoricAmount		=	ISNULL(FA.dblFunctionalCost, (FA.dblCost * FA.dblForexRate)) - ISNULL(AccumulatedDepreciation.dblAmount, 0),
+	dblHistoricAmount		=	(FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)) * FA.dblForexRate,
 	dblNewForexRate         =   0, --Calcuate By GL
     dblNewAmount            =   0, --Calcuate By GL
     dblUnrealizedDebitGain  =   0, --Calcuate By GL
