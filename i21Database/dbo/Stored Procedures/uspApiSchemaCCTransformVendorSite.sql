@@ -140,7 +140,7 @@ BEGIN
 	DECLARE cur CURSOR FOR
 	SELECT VS.intKey 
 		 , VS.intRowNumber
-		 , VS.ysnPostNet
+		 , VS.strDescription
 		 , VS.dblSharedFee
 		 , VS.strSite
 		 , VS.strSiteType
@@ -149,14 +149,16 @@ BEGIN
 		 , AC.intAccountId
 		 , AC2.intAccountId
 		 , PM.intPaymentMethodID
+		 , PM2.intPaymentMethodID
 	FROM tblApiSchemaCCVendorSite VS
 		INNER JOIN tblAPVendor V ON VS.strVendorNumber = V.strVendorId
 		INNER JOIN tblCCVendorDefault VD ON V.intEntityId = VD.intVendorId
 		INNER JOIN tblARCustomer C ON VS.strCustomerNumber = C.strCustomerNumber
 		INNER JOIN tblGLAccount AC ON VS.strAccount = AC.strAccountId
-		INNER JOIN tblSMPaymentMethod PM ON VS.strPayType = PM.strPaymentMethod
 		LEFT JOIN tblGLAccount AC2 ON VS.strFeeExpenseGL = AC2.strAccountId
 		LEFT JOIN tblCCSite CS ON VS.strSite = CS.strSite
+		LEFT JOIN tblSMPaymentMethod PM2 ON PM2.strPaymentMethod = 'Debit Memos and Payments'
+		LEFT JOIN tblSMPaymentMethod PM ON VS.strPayType = PM.strPaymentMethod
 	WHERE VS.guiApiUniqueId = @guiApiUniqueId
 		AND 1 = (
 				CASE 
@@ -167,23 +169,24 @@ BEGIN
 				END
 			)
 
-    DECLARE @intKey 				INT = NULL
-	DECLARE @intRowNumber			INT = NULL
-	DECLARE @ysnPostNet				BIT = NULL
-	DECLARE @dblSharedFee			NUMERIC(18, 6) = NULL
-	DECLARE @strSite				NVARCHAR(100) = NULL
-	DECLARE @strSiteType			NVARCHAR(1) = NULL
-	DECLARE @intVendorDefaultId		INT = NULL
-	DECLARE @intCustomerEntityId	INT = NULL
-	DECLARE @intAccountId			INT = NULL
-	DECLARE @intFeeExpenseAccountId	INT = NULL
-	DECLARE @intPaymentMethodID		INT = NULL
+    DECLARE @intKey 					INT = NULL
+	DECLARE @intRowNumber				INT = NULL
+	DECLARE @strDescription				NVARCHAR(250) = NULL
+	DECLARE @dblSharedFee				NUMERIC(18, 6) = NULL
+	DECLARE @strSite					NVARCHAR(100) = NULL
+	DECLARE @strSiteType				NVARCHAR(1) = NULL
+	DECLARE @intVendorDefaultId			INT = NULL
+	DECLARE @intCustomerEntityId		INT = NULL
+	DECLARE @intAccountId				INT = NULL
+	DECLARE @intFeeExpenseAccountId		INT = NULL
+	DECLARE @intPaymentMethodID			INT = NULL
+	DECLARE @intPaymentMethodIdDefault	INT = NULL
 
 	OPEN cur
 	FETCH NEXT FROM cur INTO
 	 @intKey 				 
 	,@intRowNumber			 
-	,@ysnPostNet				
+	,@strDescription			
 	,@dblSharedFee			
 	,@strSite				
 	,@strSiteType			
@@ -192,7 +195,8 @@ BEGIN
 	,@intAccountId			
 	,@intFeeExpenseAccountId	
 	,@intPaymentMethodID		
-	
+	,@intPaymentMethodIdDefault
+
 	WHILE @@FETCH_STATUS = 0   
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCCSite WHERE strSite = @strSite AND intVendorDefaultId = @intVendorDefaultId)
@@ -209,6 +213,7 @@ BEGIN
 				,[ysnPostNetToArCustomer]
 				,[strMerchantCategory]
 				,[strTransactionType]
+				,[ysnSharedFee]
 				,[dblSharedFeePercentage]
 				,[strType]
 				,[intSort]
@@ -216,8 +221,8 @@ BEGIN
 			VALUES(@guiApiUniqueId
 				,@intVendorDefaultId
 				,@strSite
-				,@strSite
-				,@intPaymentMethodID
+				,@strDescription
+				,CASE WHEN ISNULL(@intPaymentMethodID, 0) = 0 THEN @intPaymentMethodIdDefault ELSE @intPaymentMethodID END
 				,@intCustomerEntityId
 				,0
 				,@intAccountId
@@ -225,6 +230,7 @@ BEGIN
 				,CASE WHEN @strSiteType = 'E' THEN 1 ELSE 0 END
 				,''
 				,''
+				,CASE WHEN ISNULL(@dblSharedFee, 0) = 0 THEN 0 ELSE 1 END
 				,@dblSharedFee
 				,CASE WHEN @strSiteType = 'E' THEN 'DEALER' ELSE 'COMPANY OWNED' END
 				,NULL
@@ -236,8 +242,8 @@ BEGIN
 			UPDATE tblCCSite SET [guiApiUniqueId] = @guiApiUniqueId
 				,[intVendorDefaultId] = @intVendorDefaultId
 				,[strSite] = @strSite
-				,[strSiteDescription] =  @strSite
-				,[intPaymentMethodId] = @intPaymentMethodID
+				,[strSiteDescription] =  @strDescription
+				,[intPaymentMethodId] = CASE WHEN ISNULL(@intPaymentMethodID, 0) = 0 THEN @intPaymentMethodIdDefault ELSE @intPaymentMethodID END
 				,[intCustomerId] = @intCustomerEntityId
 				,[ysnPassedThruArCustomer] = 0
 				,[intAccountId] = @intAccountId
@@ -245,6 +251,7 @@ BEGIN
 				,[ysnPostNetToArCustomer] = CASE WHEN @strSiteType = 'E' THEN 1 ELSE 0 END
 				,[strMerchantCategory] = ''
 				,[strTransactionType] = ''
+				,[ysnSharedFee] = CASE WHEN ISNULL(@dblSharedFee, 0) = 0 THEN 0 ELSE 1 END
 				,[dblSharedFeePercentage] = @dblSharedFee
 				,[strType] = CASE WHEN @strSiteType = 'E' THEN 'DEALER' WHEN @strSiteType = 'I' THEN 'COMPANY OWNED' ELSE NULL END
 				,[intSort] = NULL
@@ -255,7 +262,7 @@ BEGIN
 	FETCH NEXT FROM cur INTO
 	 @intKey 				 
 	,@intRowNumber			 
-	,@ysnPostNet				
+	,@strDescription			
 	,@dblSharedFee			
 	,@strSite				
 	,@strSiteType			
@@ -263,8 +270,10 @@ BEGIN
 	,@intCustomerEntityId			
 	,@intAccountId			
 	,@intFeeExpenseAccountId	
-	,@intPaymentMethodID		
+	,@intPaymentMethodID
+	,@intPaymentMethodIdDefault
 	END
 	CLOSE cur
 	DEALLOCATE cur
 END
+
