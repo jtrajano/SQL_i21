@@ -78,6 +78,7 @@ WHERE guiApiUniqueId = @guiApiUniqueId;
 -- 5 - Invalid Customer Location
 -- 6 - Duplicate imported customer location
 -- 7 - Customer location already exists and overwrite is not enabled
+-- 8 - Customer Location Xref Incomplete
 
 DECLARE @tblLogVendorSetup TABLE(
 	strFieldValue NVARCHAR(100) COLLATE Latin1_General_CI_AS,
@@ -170,6 +171,8 @@ LEFT JOIN
 		FilteredVendorSetup.strLocation = EntityLocation.strLocationName
 WHERE
 EntityLocation.intEntityLocationId IS NULL
+AND
+FilteredVendorSetup.strLocation IS NOT NULL
 UNION
 SELECT -- Duplicate imported customer location
 	DuplicateVendorSetup.strLocation,
@@ -229,6 +232,38 @@ INNER JOIN
 		EntityLocation.intEntityLocationId = CustomerLocationXref.intEntityLocationId
 		AND
 		VendorSetup.intVendorSetupId = CustomerLocationXref.intVendorSetupId
+UNION
+SELECT -- Customer Location Xref incomplete
+	CASE
+		WHEN FilteredVendorSetup.strLocation IS NOT NULL AND FilteredVendorSetup.strVendorCustomerLocation IS NULL
+		THEN FilteredVendorSetup.strLocation
+		WHEN FilteredVendorSetup.strLocation IS NULL AND FilteredVendorSetup.strVendorCustomerLocation IS NOT NULL
+		THEN FilteredVendorSetup.strVendorCustomerLocation
+		ELSE NULL
+	END,
+	CASE
+		WHEN FilteredVendorSetup.strLocation IS NOT NULL AND FilteredVendorSetup.strVendorCustomerLocation IS NULL
+		THEN 'Vendor cross reference is missing for customer location: ' + FilteredVendorSetup.strLocation + '.'
+		WHEN FilteredVendorSetup.strLocation IS NULL AND FilteredVendorSetup.strVendorCustomerLocation IS NOT NULL
+		THEN 'Customer Location is missing for vendor cross reference: ' + FilteredVendorSetup.strVendorCustomerLocation + '.'
+		ELSE NULL
+	END,
+	FilteredVendorSetup.intRowNumber,
+	8
+FROM
+	@tblFilteredVendorSetup FilteredVendorSetup
+WHERE
+(
+	FilteredVendorSetup.strLocation IS NOT NULL 
+	AND 
+	FilteredVendorSetup.strVendorCustomerLocation IS NULL
+)
+OR
+(
+	FilteredVendorSetup.strLocation IS NULL 
+	AND 
+	FilteredVendorSetup.strVendorCustomerLocation IS NOT NULL
+)
 
 --Validate Records
 
@@ -247,7 +282,7 @@ SELECT
 	guiApiImportLogDetailId = NEWID(),
 	guiApiImportLogId = @guiLogId,
 	strField = CASE
-		WHEN LogVendorSetup.intLogType = 1
+		WHEN LogVendorSetup.intLogType IN (1,8)
 		THEN 'Vendor'
 		WHEN LogVendorSetup.intLogType = 2
 		THEN 'Export File Type'
@@ -271,7 +306,7 @@ SELECT
 	intRowNo = LogVendorSetup.intRowNumber,
 	strMessage = LogVendorSetup.strMessage
 FROM @tblLogVendorSetup LogVendorSetup
-WHERE LogVendorSetup.intLogType BETWEEN 1 AND 7
+WHERE LogVendorSetup.intLogType BETWEEN 1 AND 8
 
 --Buyback Vendor Setup Transform logic
 
@@ -371,7 +406,7 @@ USING
 		ON
 			FilteredVendorSetup.intRowNumber = LogVendorSetup.intRowNumber
 			AND
-			LogVendorSetup.intLogType IN (1,2,3,4,5,6,7)
+			LogVendorSetup.intLogType IN (1,2,3,4,5,6,7,8)
 	INNER JOIN
 	(
 		tblEMEntity Entity
@@ -399,7 +434,7 @@ USING
 			AND
 			FilteredVendorSetup.strLocation = EntityLocation.strLocationName
 	WHERE 
-	LogVendorSetup.intLogType NOT IN (1,2,3,4,5,6,7) OR LogVendorSetup.intLogType IS NULL
+	LogVendorSetup.intLogType NOT IN (1,2,3,4,5,6,7,8) OR LogVendorSetup.intLogType IS NULL
 ) AS SOURCE
 ON 
 TARGET.intVendorSetupId = SOURCE.intVendorSetupId 
