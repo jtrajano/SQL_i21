@@ -150,6 +150,10 @@ BEGIN
 		DECLARE @intHeaderPricingTypeId INT = 0
 		SELECT @intHeaderPricingTypeId = ISNULL(intPricingTypeId, 0) FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
+		DECLARE @intDetailPricingTypeId INT = 0
+		SELECT @intDetailPricingTypeId = ISNULL(intPricingTypeId, 0) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+		
+
 		INSERT INTO @FinalTable(strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -227,7 +231,7 @@ BEGIN
 			, strProcess
 			, ysnDeleted
 		FROM #tmpLogItems WHERE intId = @Id
-		AND NOT (@intHeaderPricingTypeId = 1 AND strTransactionType LIKE '%Basis Deliveries%')
+		AND NOT (@intHeaderPricingTypeId = 1 and @intDetailPricingTypeId = 1 AND strTransactionType LIKE '%Basis Deliveries%')
 
 		SET @intTransCtr += 1
 		IF (@intTransCtr % 10000 = 0)
