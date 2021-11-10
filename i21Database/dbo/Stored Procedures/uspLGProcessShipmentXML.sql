@@ -241,6 +241,11 @@ BEGIN TRY
 	DECLARE @tblIPContractDetail TABLE (intContractDetailId INT)
 	DECLARE @tblLGDeleteLoadWarehouse TABLE (intLoadWarehouseId INT)
 	DECLARE @tblLGDeleteLoadContainer TABLE (intLoadContainerId INT)
+	DECLARE @tblLGDeleteLoadDetailContainerLink TABLE (
+		intLoadDetailContainerLinkId INT
+		,strContainerNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,ysnSampleExists BIT
+		)
 
 	SELECT @intCompanyRefId = intCompanyId
 		,@ysnParent = ysnParent
@@ -3129,25 +3134,6 @@ BEGIN TRY
 				EXEC sp_xml_removedocument @idoc
 			END
 
-			--IF @strLoadDetailContainerLink IS NOT NULL
-			--BEGIN
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strLoadDetailContainerLink
-
-			DELETE LDCL
-			FROM tblLGLoadDetailContainerLink LDCL
-			WHERE LDCL.intLoadId = @intNewLoadId
-				AND NOT EXISTS (
-					SELECT *
-					FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH ([intLoadDetailContainerLinkId] INT) x
-					WHERE LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
-					)
-
-			EXEC sp_xml_removedocument @idoc
-
-			--END
-			--IF @strLoadContainer IS NOT NULL
-			--BEGIN
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLoadContainer
 
@@ -3466,6 +3452,9 @@ BEGIN TRY
 			LEFT JOIN tblSMCurrency CU ON CU.strCurrency = x.strStaticValueCurrency
 			LEFT JOIN tblSMCurrency ACU ON ACU.strCurrency = x.strAmountCurrency
 
+			DELETE
+			FROM @tblLGDeleteLoadContainer
+
 			INSERT INTO @tblLGDeleteLoadContainer (intLoadContainerId)
 			SELECT LC.intLoadContainerId
 			FROM tblLGLoadContainer LC
@@ -3478,7 +3467,6 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
-			--END
 			IF @strLoadDetailContainerLink IS NOT NULL
 			BEGIN
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -3674,8 +3662,17 @@ BEGIN TRY
 							AND LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
 						)
 
-				DELETE LDCL
+				DELETE
+				FROM @tblLGDeleteLoadDetailContainerLink
+
+				INSERT INTO @tblLGDeleteLoadDetailContainerLink (
+					intLoadDetailContainerLinkId
+					,strContainerNumber
+					)
+				SELECT LDCL.intLoadDetailContainerLinkId
+					,strContainerNumber
 				FROM tblLGLoadDetailContainerLink LDCL
+				JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 				WHERE LDCL.intLoadId = @intNewLoadId
 					AND NOT EXISTS (
 						SELECT *
@@ -4298,6 +4295,43 @@ BEGIN TRY
 			DELETE LW
 			FROM @tblLGDeleteLoadWarehouse DLW
 			JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = DLW.intLoadWarehouseId
+
+			IF EXISTS (
+					SELECT *
+					FROM @tblLGDeleteLoadDetailContainerLink LDC
+					JOIN tblQMSample S ON LDC.intLoadDetailContainerLinkId = S.intLoadDetailContainerLinkId
+						AND S.intBookId = @intBookId
+						AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+						AND S.intLoadId = @intNewLoadId
+					)
+				AND @ysnParent = 0
+			BEGIN
+				UPDATE LDC
+				SET ysnSampleExists = 1
+				FROM @tblLGDeleteLoadDetailContainerLink LDC
+				JOIN tblQMSample S ON LDC.intLoadDetailContainerLinkId = S.intLoadDetailContainerLinkId
+					AND S.intBookId = @intBookId
+					AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					AND S.intLoadId = @intNewLoadId
+
+				UPDATE S
+				SET S.intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					,S.intLoadContainerId = LC.intLoadContainerId
+				FROM @tblLGDeleteLoadDetailContainerLink LDC
+				JOIN tblQMSample S ON LDC.intLoadDetailContainerLinkId = S.intLoadDetailContainerLinkId
+					AND ysnSampleExists = 1
+					AND S.intBookId = @intBookId
+					AND IsNULL(S.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					AND S.intLoadId = @intNewLoadId
+				JOIN tblLGLoadContainer LC ON LC.strContainerNumber = LDC.strContainerNumber
+					AND LC.intLoadId = @intNewLoadId
+				JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+					AND LDCL.intLoadId = @intNewLoadId
+			END
+
+			DELETE LDC
+			FROM @tblLGDeleteLoadDetailContainerLink DLDC
+			JOIN tblLGLoadDetailContainerLink LDC ON LDC.intLoadDetailContainerLinkId = DLDC.intLoadDetailContainerLinkId
 
 			DELETE LC
 			FROM @tblLGDeleteLoadContainer DLC
