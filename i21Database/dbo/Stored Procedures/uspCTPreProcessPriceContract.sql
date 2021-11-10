@@ -209,6 +209,17 @@ BEGIN
 				where
 					pf.intPriceContractId = @intPriceContractId
 
+				update
+					ch
+				set
+					ch.dblFutures = null
+				from
+					tblCTPriceFixation pf
+					join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
+				where
+					pf.intPriceContractId = @intPriceContractId
+					and ch.ysnMultiplePriceFixation = 1
+
 			end  
 
 			if (@strPriceFixationState = 'Deleted' and isnull(@intPriceFixationId,0) > 0)  
