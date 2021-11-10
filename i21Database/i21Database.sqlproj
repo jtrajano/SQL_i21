@@ -347,6 +347,7 @@
     <Build Include="dbo\Views\vyuTRFSearchTradeFinanceLog.sql" />
     <Build Include="dbo\Tables\tblLGDispatchOrder.sql" />
     <Build Include="dbo\Tables\tblLGDispatchOrderDetail.sql" />
+    <Build Include="dbo\Triggers\trgAfterDeleteTRSupplyPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

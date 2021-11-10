@@ -16,6 +16,5 @@
 	CONSTRAINT [AK_tblTRSupplyPoint_intEntityVendorId_intEntityLocationId] UNIQUE ([intEntityVendorId],[intEntityLocationId]),
 	CONSTRAINT [FK_tblTRSupplyPoint_tblAPVendor_intEntityVendorId] FOREIGN KEY (intEntityVendorId) REFERENCES [dbo].[tblAPVendor] (intEntityId),
 	CONSTRAINT [FK_tblTRSupplyPoint_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblTRSupplyPoint_tblTRSupplyPoint_intRackPriceSupplyPointId] FOREIGN KEY (intRackPriceSupplyPointId) REFERENCES [dbo].[tblTRSupplyPoint] (intSupplyPointId),
 	CONSTRAINT [FK_tblTRSupplyPoint_tblTFTerminalControlNumber_intTerminalControlNumberId] FOREIGN KEY (intTerminalControlNumberId) REFERENCES [dbo].[tblTFTerminalControlNumber] (intTerminalControlNumberId)
 )
