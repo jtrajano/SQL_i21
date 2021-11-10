@@ -211,8 +211,8 @@ BEGIN
 				,CL.strZipPostalCode AS strCompanyLocationZipCode
 				,A.intClockID AS intClockId
 				,J.ysnCallEntryPrinted ysnPrinted
-				,A.intDriverID AS intDriverId
-				,A.intUserID AS intEntityUserSecurityId
+				,J.intDriverID AS intDriverId
+				,J.intUserID AS intEntityUserSecurityId
 				,A.intRouteId AS intRouteId
 				,A.intLocationId AS intLocationId
 			FROM tblTMSite A
