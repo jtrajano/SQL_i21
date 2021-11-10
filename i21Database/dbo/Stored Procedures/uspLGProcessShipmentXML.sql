@@ -97,6 +97,10 @@ BEGIN TRY
 		,@dblNewQuantity NUMERIC(18, 6)
 		,@intNewLoadDetailId INT
 		,@dblScheduleQtyToUpdate NUMERIC(18, 6)
+		,@dblLoadQuantity NUMERIC(18, 6)
+		,@dblContractQuantity NUMERIC(18, 6)
+		,@intNewContractDetailId INT
+		,@intNewSContractDetailId INT
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -2531,6 +2535,114 @@ BEGIN TRY
 						AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = IsNULL(PCD.intContractHeaderId, SCD.intContractHeaderId)
 					WHERE x.intLoadDetailId = @intLoadDetailId
+				END
+
+				IF @ysnParent = 0
+				BEGIN
+					SELECT @intNewContractDetailId = NULL
+
+					SELECT @intNewContractDetailId = intContractDetailId
+					FROM @tblIPContractDetail
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewContractDetailId
+						AND L.intShipmentType = 1
+
+					SELECT @dblContractQuantity = NULL
+
+					SELECT @dblContractQuantity = SUM(dblQuantity)
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intNewContractDetailId
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Load shipment quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewContractDetailId
+						AND L.intShipmentType = 2
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Shipping instruction quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+				END
+				ELSE
+				BEGIN
+					SELECT @intNewContractDetailId = NULL
+						,@intNewSContractDetailId = NULL
+
+					SELECT @intNewContractDetailId = intContractDetailId
+					FROM @tblIPContractDetail
+
+					SELECT @intNewSContractDetailId = AD.intSContractDetailId
+					FROM tblLGAllocationDetail AD
+					WHERE AD.intPContractDetailId = @intNewContractDetailId
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewSContractDetailId
+						AND L.intShipmentType = 1
+
+					SELECT @dblContractQuantity = NULL
+
+					SELECT @dblContractQuantity = SUM(dblQuantity)
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intNewSContractDetailId
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Load shipment quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
+
+					SELECT @dblLoadQuantity = NULL
+
+					SELECT @dblLoadQuantity = SUM(LD.dblQuantity)
+					FROM tblLGLoadDetail LD
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+					WHERE LD.intPContractDetailId = @intNewSContractDetailId
+						AND L.intShipmentType = 2
+
+					IF IsNULL(@dblLoadQuantity, 0) > (IsNULL(@dblContractQuantity, 0) + IsNULL(@dblContractQuantity, 0) * .1)
+					BEGIN
+						SELECT @strErrorMessage = 'Shipping instruction quantity cannot be more than contract quantity.'
+
+						RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+					END
 				END
 
 				IF IsNULL(@ysnPosted, 0) = 0
