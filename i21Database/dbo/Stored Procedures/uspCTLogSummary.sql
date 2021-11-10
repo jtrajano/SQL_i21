@@ -377,7 +377,7 @@ BEGIN TRY
 	BEGIN
 		SET @ysnDWGPriceOnly = 1
 	END
-
+	
 	IF @strSource = 'Contract'
 	BEGIN
 		-- Contract Sequence:
