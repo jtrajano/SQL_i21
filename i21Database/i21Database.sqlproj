@@ -250,8 +250,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformCustomerFreight.sql" />
     <Build Include="dbo\Views\vyuCTActiveEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetFiscalPeriod.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaTRCustomerFreight.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformCustomerFreight.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherTransactionType2.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRShipViaTariff.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRShipViaTariff.sql" />
