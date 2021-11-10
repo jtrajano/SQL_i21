@@ -290,20 +290,10 @@ BEGIN TRY
 
 		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 
-		IF @intPrevHistoryId IS NOT NULL
+		IF (OBJECT_ID('tempdb..#tempSequenceHistoryCompare') IS NOT NULL)
 		BEGIN
-			SELECT	@dblPrevQty = dblQuantity,@dblPrevBal = dblBalance,@intPrevStatusId = intContractStatusId,
-					@dblPrevFutures = dblFutures,@dblPrevBasis = dblBasis,@dblPrevCashPrice = dblCashPrice
-			FROM	tblCTSequenceHistory WHERE intSequenceHistoryId = @intPrevHistoryId
-
-			SELECT	@dblQuantity = dblQuantity,@dblBalance = dblBalance,@intContractStatusId = intContractStatusId,
-					@dblFutures = dblFutures,@dblBasis = dblBasis,@dblCashPrice = dblCashPrice
-			FROM	tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
-
-			IF (OBJECT_ID('tempdb..#tempSequenceHistoryCompare') IS NOT NULL)
-			BEGIN
-				DROP TABLE #tempSequenceHistoryCompare;
-			END
+			DROP TABLE #tempSequenceHistoryCompare;
+		END
 
 		SELECT TOP 2 intContractStatusId
 			, intCompanyLocationId
@@ -418,19 +408,6 @@ BEGIN TRY
 										 @contractDetail 		= 	@contractDetails,		
 										 @intUserId				=	@intUserId
 				END
-			END
-		END
-		ELSE
-		BEGIN
-			IF NOT (ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory')
-			BEGIN
-				-- CONTRACT BALANCE LOG
-				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-									 @intContractDetailId 	= 	@intContractDetailId,
-									 @strSource			 	= 	@strSource,
-									 @strProcess		 	= 	@strProcess,
-									 @contractDetail 		= 	@contractDetails,		
-									 @intUserId				=	@intUserId
 			END
 		END
 
