@@ -376,7 +376,8 @@ FROM
 	) tblTax ON tblTax.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
-			Bill.intBillId
+			--Bill.intBillId
+			APD.intPaymentId
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
@@ -387,8 +388,10 @@ FROM
 			ON BD.intBillId = Bill.intBillId
 				AND BD.intCustomerStorageId IS NULL
 				AND BD.intSettleStorageId IS NULL
-		GROUP BY Bill.intBillId
-	) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId			
+		--GROUP BY Bill.intBillId
+		GROUP BY APD.intPaymentId
+	--) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId
+	) tblAdjustment ON tblAdjustment.intPaymentId = PYMT.intPaymentId		
 	LEFT JOIN (
 		SELECT
 			PYMT.intPaymentId
