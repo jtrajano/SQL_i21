@@ -186,7 +186,7 @@ BEGIN
 				,strSiteZipCode = ISNULL(A.strZipCode,'''')
 				,dblRequestedQuantity = ISNULL(J.dblMinimumQuantity,0.0)
 				,dblQuantity = (CASE WHEN ISNULL(J.dblMinimumQuantity,0.0) > 0 THEN J.dblMinimumQuantity ELSE J.dblQuantity END)
-				,K.intRouteId
+				--,K.intRouteId
 				,intDispatchId = J.intDispatchID
 				,strReportType = M.strDeliveryTicketFormat
 				,intConcurrencyId = J.intConcurrencyId
@@ -204,7 +204,20 @@ BEGIN
 				,strSiteDescription = ISNULL(A.strDescription,'''')
 				,strSiteRecurringPO = ISNULL(A.strRecurringPONumber,'''')
 				,Driver.strEntityNo AS strDriverNumber
+				,CL.strLocationName AS strCompanyLocationName
+				,CL.strAddress AS strCompanyLocationAddress
+				,CL.strCity AS strCompanyLocationCity
+				,CL.strStateProvince AS strCompanyLocationState
+				,CL.strZipPostalCode AS strCompanyLocationZipCode
+				,A.intClockID AS intClockId
+				,J.ysnCallEntryPrinted ysnPrinted
+				,A.intDriverID AS intDriverId
+				,A.intUserID AS intEntityUserSecurityId
+				,A.intRouteId AS intRouteId
+				,A.intLocationId AS intLocationId
 			FROM tblTMSite A
+			INNER JOIN tblSMCompanyLocation CL
+				ON CL.intCompanyLocationId = A.intLocationId
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
 			INNER JOIN tblEMEntity Ent
