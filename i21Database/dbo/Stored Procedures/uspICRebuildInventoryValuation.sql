@@ -4232,6 +4232,9 @@ BEGIN
 			-- Repost 'Inventory Receipt/Return'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Receipt', 'Inventory Return')) 
 			BEGIN 
+				-- In case of category change, fix the Inventory GL Account id used by the Receipt other charges. 
+				EXEC uspICFixOtherChargeGLEntries @strReceiptNumber = @strTransactionId
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
