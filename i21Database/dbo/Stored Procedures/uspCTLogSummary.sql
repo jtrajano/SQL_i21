@@ -3995,12 +3995,12 @@ BEGIN TRY
 				END
 				
 				-- Negate all the priced quantities
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
+				UPDATE @cbLogSpecific SET dblQty = (case when @FinalQty > @TotalPriced then @TotalPriced else @FinalQty end) * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				-- Add all the basis quantities
 				-- Use current Basis Price when putting back basis qty
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
+				UPDATE @cbLogSpecific SET dblQty = (case when @FinalQty > @TotalBasis then @TotalBasis else @FinalQty end), intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
