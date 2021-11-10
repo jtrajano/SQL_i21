@@ -87,7 +87,7 @@ SELECT
     ,dblTotalLC =  ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)
 	,strItemCategory = cfItem.strCategoryCode           
 	,cfDuplicateUnpostedTransaction.intTotalDuplicateUnposted
-	,intTotalTransactionWithPotentialIssue = ISNULL((SELECT COUNT(1) FROM vyuCFTransactionAmountPotentialIssue),0) + ISNULL((SELECT COUNT(1) FROM vyuCFTransactionItemCostPotentialIssue),0)
+	,intTotalTransactionWithPotentialIssue = ISNULL(cfTransactionAmountPotentialIssue.intCount,0) + ISNULL(cfCFTransactionItemCostPotentialIssue.intCount,0)
 	,cfCard.strCardDepartment
 	,cfCard.strPrimaryDepartment
 	,cfVehicle.strVehicleDepartment
@@ -233,13 +233,17 @@ LEFT OUTER JOIN (SELECT intTransactionId,
                         AND ( strTaxClass <> 'SST' ) 
                 GROUP  BY intTransactionId) AS LCTaxes_1 
     ON cfTransaction.intTransactionId = LCTaxes_1.intTransactionId 
-inner join 
-	(  
-  SELECT TOP 1 COUNT(1) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0  
- ) AS cfDuplicateUnpostedTransaction on 1=1
- 
+ ,(  
+  SELECT TOP 1 COUNT(*) AS intTotalDuplicateUnposted FROM tblCFTransaction  WHERE  ISNULL(ysnDuplicate,0) = 1 AND ISNULL(ysnPosted,0) = 0  
+ ) AS cfDuplicateUnpostedTransaction
+ ,(  
+  SELECT COUNT(1) as intCount FROM vyuCFTransactionAmountPotentialIssue
+ ) AS cfTransactionAmountPotentialIssue
+ ,(
+  SELECT COUNT(1) as intCount FROM vyuCFTransactionItemCostPotentialIssue 
+) AS cfCFTransactionItemCostPotentialIssue
+
 
 GO
-
 
 
