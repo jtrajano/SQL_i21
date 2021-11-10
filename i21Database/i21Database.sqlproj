@@ -303,6 +303,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBuybackVendorSetup.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformBuybackVendorSetup.sql" />
     <Build Include="dbo\Views\vyuICGetStoreLocation.sql" />
+    <Build Include="dbo\Triggers\trgAfterDeleteTRSupplyPoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
