@@ -4408,7 +4408,7 @@ BEGIN TRY
 						
 						if exists (select top 1 1 from @cbLogSpecific where intPricingTypeId = 1 and dblQty < 0 and dblOrigQty - abs(dblQty) > 0)
 						begin
-							UPDATE @cbLogSpecific SET dblQty = (dblOrigQty - abs(dblQty)) * - 1, intPricingTypeId = 2
+							UPDATE @cbLogSpecific SET dblQty = (dblOrigQty - abs(dblQty)) * - 1, intPricingTypeId = 2, intActionId = case when intActionId = 46 then 18 else intActionId end
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						end
 						
@@ -4430,13 +4430,13 @@ BEGIN TRY
 							begin
 								if (isnull(@ysnWithPriceFix,0) = 1 )
 								begin
-									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
+									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = case when intActionId = 18 then 46 else intActionId end
 									EXEC uspCTLogContractBalance @cbLogSpecific, 0 
 								end
 							end
 							else
 							begin
-								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = case when intActionId = 18 then 46 else intActionId end
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
 							end
 						END
