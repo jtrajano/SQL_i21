@@ -356,7 +356,7 @@ BEGIN
 												END
 				,strUnitMeasure					= ISNULL(CostUOM.strSymbol,UOM.strSymbol)
 				,dblTotal						= BillDtl.dblTotal
-				,dblTax							= BillDtl.dblTax
+				,dblTax							= BillDtl.dblTax + ISNULL(BillByReceiptChargeTax.dblTax,0)
 				,dblNetTotal					= BillDtl.dblTotal + BillDtl.dblTax
 				,lblSourceType					= CASE 
 													WHEN ISNULL(BillDtl.intContractHeaderId,0)= 0 THEN 'Dist Type'
@@ -519,7 +519,18 @@ BEGIN
 							AND intInventoryReceiptItemId IS NULL
 						GROUP BY intBillId
 					) BillByReceiptItem 
-					ON BillByReceiptItem.intBillId = BillDtl.intBillId  
+					ON BillByReceiptItem.intBillId = BillDtl.intBillId
+			LEFT JOIN (
+						SELECT 
+							intBillId
+							,intInventoryReceiptItemId
+							,SUM(dblTax) AS dblTax
+						FROM tblAPBillDetail
+						WHERE intInventoryReceiptChargeId IS NOT NULL
+						GROUP BY intBillId,intInventoryReceiptItemId
+					) BillByReceiptChargeTax 
+					ON BillByReceiptChargeTax.intBillId = BillDtl.intBillId
+						AND BillByReceiptChargeTax.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 			LEFT JOIN (
 						SELECT
 							PYMT.intPaymentId
