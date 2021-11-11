@@ -471,7 +471,10 @@ outer apply (
 		join tblAPPayment Payment
 			on PaymentDetail.intPaymentId = Payment.intPaymentId
 		where Payment.intPaymentId = t.intPaymentId
-			and ((BillDetail.intCustomerStorageId is null and BillDetail.intSettleStorageId is null) or (BillDetail.intScaleTicketId is null))
+			and ((BillDetail.intCustomerStorageId is null and BillDetail.intSettleStorageId is null) 
+					or (BillDetail.intScaleTicketId is null)
+					or (BillDetail.intInventoryReceiptChargeId IS NULL)
+				)
 			and t.intMark = 1
 			and BillDetail.ysnStage = 0
 ) AdditionalTax
