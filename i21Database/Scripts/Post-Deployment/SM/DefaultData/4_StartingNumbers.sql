@@ -1632,6 +1632,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Trade Finance Transaction No')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 167
+			,[strTransactionType]	= N'Bank Swap'
+			,[strPrefix]			= N'BSWAP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bank Swap')
+
 
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
