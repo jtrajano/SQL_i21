@@ -1250,7 +1250,7 @@ BEGIN TRY
 				, cbl.intSubBookId
 				, strNotes = ''
 				, cbl.intUserId
-				, intActionId = 17
+				, intActionId = 63
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Invoice' AND pLog.strProcess = 'Create Invoice' AND pLog.intTransactionReferenceDetailId = @intTransactionId
@@ -4491,7 +4491,7 @@ BEGIN TRY
 							end
 							else
 							begin
-								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1
+								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1, intActionId = (case when intActionId = 18 then 46 else intActionId end)
 							end
 						END
 						ELSE
@@ -4501,7 +4501,7 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
+						UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = (case when intActionId = 18 then 46 else intActionId end)
 					END
 					
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
