@@ -432,6 +432,34 @@ FROM
 		,PYMT.dblAmountPaid	
 		--,BasisPayment.dblVendorPrepayment					
 ) t
+
+--This is added for GRN-2639
+-- The focus of this fix is for the tax part of the settlement report
+-- the issue is that the manually added other charge item is used to offset the tax
+-- we cannot link those taxes to the settlement because we do not have link to it. 
+-- so the best way, I think, is to get all the tax and just add it at the end of this query.
+-- Only applicable to the scale part :) 
+-- MonGonzales 20210414
+outer apply (
+	select 
+		sum(BillDetail.dblTax) dblTax
+	from tblAPPaymentDetail PaymentDetail
+		join tblAPBillDetail BillDetail
+			on BillDetail.intBillId = PaymentDetail.intBillId
+		join tblICItem Item
+			on Item.intItemId = BillDetail.intItemId
+				and Item.strType = 'Other Charge'
+		join tblAPPayment Payment
+			on PaymentDetail.intPaymentId = Payment.intPaymentId
+		where Payment.intPaymentId = t.intPaymentId
+			and ((BillDetail.intCustomerStorageId is null and BillDetail.intSettleStorageId is null) 
+					or (BillDetail.intScaleTicketId is null)
+					or (BillDetail.intInventoryReceiptChargeId IS NULL)
+				)
+			and t.intMark = 1
+			and BillDetail.ysnStage = 0
+) AdditionalTax
+
 GROUP BY 			
 	intPaymentId	
 	,strPaymentNo
