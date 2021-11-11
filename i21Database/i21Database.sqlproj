@@ -225,6 +225,8 @@
     <Build Include="dbo\Tables\tblApiSchemaTransformRebateProgram.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformVendorSetup.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformVendorSetup.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBuybackProgram.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformBuybackProgram.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
