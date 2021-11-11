@@ -9952,6 +9952,7 @@
     <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
