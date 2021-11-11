@@ -331,11 +331,13 @@ FROM
 			FROM 
 				(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
 					,dblTotal = bld.dblTotal * CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
-					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, ToWUOM.intItemUOMId, 
-										CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 
-											ELSE 
-												CASE WHEN bl.intTransactionType IN (11) THEN bld.dblQtyOrdered ELSE bld.dblNetWeight  END
-											END) 
+					,dblQtyReceived = CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 
+										ELSE 
+											CASE WHEN bl.intTransactionType IN (11) 
+												THEN dbo.fnCalculateQtyBetweenUOM (bld.intUnitOfMeasureId, ToWUOM.intItemUOMId, bld.dblQtyOrdered)
+												ELSE dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, ToWUOM.intItemUOMId, bld.dblNetWeight)  
+											END
+										END
 									* CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
 					FROM tblAPBillDetail bld
 					INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD
@@ -366,7 +368,10 @@ FROM
 			FROM 
 				(SELECT ivd.intInvoiceId, ivd.intItemId, ivd.intContractDetailId, iv.ysnPosted
 					,dblTotal = dblTotal * CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
-					,dblQtyShipped = dbo.fnCalculateQtyBetweenUOM (intItemWeightUOMId, ToWUOM.intItemUOMId, dblShipmentNetWt) 
+					,dblQtyShipped = CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0)
+											THEN dbo.fnCalculateQtyBetweenUOM (ivd.intItemUOMId, ToWUOM.intItemUOMId, ivd.dblQtyShipped) 
+											ELSE dbo.fnCalculateQtyBetweenUOM (ivd.intItemWeightUOMId, ToWUOM.intItemUOMId, ivd.dblShipmentNetWt)  
+										END
 									* CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
 					FROM tblARInvoiceDetail ivd
 					INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId AND iv.strType = 'Standard') IVD 
@@ -412,7 +417,7 @@ FROM
 										ELSE 0 END)
 			FROM tblICItem I 
 				/* Reserves Rate and Amount */
-				CROSS APPLY (SELECT dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
+				OUTER APPLY (SELECT dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													CC.dblRate
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate 
@@ -450,7 +455,7 @@ FROM
 										AND ((ER.intFromCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID) AND ER.intToCurrencyId = @intDefaultCurrencyId) 
 											OR (ER.intFromCurrencyId = @intDefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)))
 									ORDER BY RD.dtmValidFromDate DESC) FX
-					WHERE CC.intItemId = I.intItemId AND CD.intContractDetailId = ALD.intSContractDetailId AND CC.dblRate <> 0) CC
+					WHERE CC.intItemId = I.intItemId AND CD.intContractDetailId = ALD.intSContractDetailId) CC
 				/* Reserves Voucher Amount */
 				OUTER APPLY 
 					(SELECT dblTotal = SUM(CASE WHEN BL.intTransactionType IN (3, 11) 
@@ -501,7 +506,7 @@ FROM
 												ELSE ISNULL(CC.dblAmount, 0) END)
 			FROM tblICItem I 
 				/* Reserves Rate and Amount */
-				CROSS APPLY (SELECT dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
+				OUTER APPLY (SELECT dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													CC.dblRate
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate 
@@ -539,7 +544,7 @@ FROM
 										AND ((ER.intFromCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID) AND ER.intToCurrencyId = @intDefaultCurrencyId) 
 											OR (ER.intFromCurrencyId = @intDefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)))
 									ORDER BY RD.dtmValidFromDate DESC) FX
-					WHERE CC.intItemId = I.intItemId AND CD.intContractDetailId = ALD.intSContractDetailId AND CC.dblRate <> 0) CC
+					WHERE CC.intItemId = I.intItemId AND CD.intContractDetailId = ALD.intSContractDetailId) CC
 				/* Reserves Voucher Amount */
 				OUTER APPLY 
 					(SELECT dblTotal = SUM(CASE WHEN BL.intTransactionType IN (3, 11) 
