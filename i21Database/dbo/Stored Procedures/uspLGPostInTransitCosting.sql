@@ -271,6 +271,8 @@ BEGIN TRY
 			,SC.intCurrencyID
 			,FX.intForexRateTypeId
 			,FX.dblFXRate
+			,ISNULL(LD.intVendorEntityId, LD.intCustomerEntityId) 
+			,L.strLoadNumber
 
 		BEGIN
 			INSERT INTO @GLEntries (
