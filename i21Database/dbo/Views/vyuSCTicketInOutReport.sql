@@ -46,7 +46,7 @@
 		,CompanyLocation.strLocationName
 		,'Transfer' as strStorageTypeDescription
 		,'Outbound' as strIndicator
-		, Ticket.dblGrossUnits
+		, Ticket.dblGrossUnits * -1
 		, Ticket.intTicketType
 		, TicketType.strTicketType
 		, Ticket.dtmTicketDateTime
