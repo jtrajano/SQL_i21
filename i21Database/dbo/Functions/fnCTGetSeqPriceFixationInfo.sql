@@ -30,15 +30,34 @@ BEGIN
 			@ysnFixationDetailAvailable	BIT = 0,
 			@ysnMultiPricingDetail		BIT = 0
 
-    IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+    IF EXISTS(
+		SELECT
+			top 1 1 
+		FROM
+			tblCTContractDetail cd
+			join tblCTContractHeader ch
+				on ch.intContractHeaderId = cd.intContractHeaderId
+			join tblCTPriceFixation pf
+				on pf.intContractHeaderId = ch.intContractHeaderId
+				and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
+		WHERE
+			cd.intContractDetailId = @intContractDetailId
+	)
     BEGIN
 
-		SELECT	@dblTotalLots		=	dblTotalLots,
-				@dblLotsFixed		=	dblLotsFixed,
-				@intPriceFixationId	=	intPriceFixationId,
-				@intPriceContractId =	intPriceContractId 
-		FROM	tblCTPriceFixation 
-		WHERE	intContractDetailId =	@intContractDetailId
+		SELECT	@dblTotalLots		=	pf.dblTotalLots,
+				@dblLotsFixed		=	pf.dblLotsFixed,
+				@intPriceFixationId	=	pf.intPriceFixationId,
+				@intPriceContractId =	pf.intPriceContractId 
+		FROM
+			tblCTContractDetail cd
+			join tblCTContractHeader ch
+				on ch.intContractHeaderId = cd.intContractHeaderId
+			join tblCTPriceFixation pf
+				on pf.intContractHeaderId = ch.intContractHeaderId
+				and isnull(pf.intContractDetailId,0) = (case when ch.ysnMultiplePriceFixation = 1 then isnull(pf.intContractDetailId,0) else cd.intContractDetailId end)
+		WHERE
+			cd.intContractDetailId = @intContractDetailId
 
 		SELECT	 @intPFDCount			=   COUNT(intPriceFixationDetailId) 
 				,@dblQuantityPriceFixed =   SUM(dblQuantity) 
