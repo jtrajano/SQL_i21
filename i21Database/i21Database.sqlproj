@@ -146,6 +146,7 @@
     <Build Include="dbo\Views\vyuGRRestApiCustomerStorageBalances.sql" />
     <Build Include="dbo\Views\vyuCTApiContractText.sql" />
     <Build Include="dbo\Views\vyuApiEntity.sql" />
+    <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
     <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
@@ -165,6 +166,9 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformDollarContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformCommodityContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiGetItemStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiGetItemStockByUom.sql" />
+    <Build Include="dbo\Tables\tblApiInventoryItemStock.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
