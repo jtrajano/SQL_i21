@@ -107,7 +107,7 @@
 	[intDocumentMaintenanceId]			INT												NULL,	
 	[intTruckDriverId]					INT												NULL,        	
 	[intTruckDriverReferenceId]			INT												NULL,
-	[strBatchId]						NVARCHAR (20)	COLLATE Latin1_General_CI_AS	NULL,	
+	[strBatchId]						NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL,	
 	[dtmBatchDate]						DATETIME										NULL,
 	[dtmDateFullyPaid]					DATETIME										NULL,
 	[intPostedById]						INT												NULL,
