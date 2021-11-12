@@ -678,9 +678,17 @@ BEGIN TRY
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
 										END
-			, strPreviewOldData			= [Changes].strOldData
+			, strPreviewOldData			= CASE WHEN [Changes].strOldData = 'NULLVAL'
+												THEN NULL
+											ELSE
+												[Changes].strOldData
+											END
 			, strPreviewNewData			= [Changes].strNewData
-			, strOldDataPreview			= [Changes].strOldData
+			, strOldDataPreview			= CASE WHEN [Changes].strOldData = 'NULLVAL'
+												THEN NULL
+											ELSE
+												[Changes].strOldData
+											END
 			, strAction						= [Changes].strAction
 			, ysnPreview				= 1
 			, ysnForRevert				= 1
@@ -691,7 +699,7 @@ BEGIN TRY
 			(
 				SELECT intItemId 
 					,intItemSpecialPricingId 
-					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_Original
+					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), 'NULLVAL') AS strUnitAfterDiscount_Original
 					,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
 					,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
 					,ISNULL(CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_New
