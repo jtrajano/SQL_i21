@@ -1128,7 +1128,7 @@ BEGIN TRY
 			BEGIN
 				IF @ysnPercResetRequired = 0
 				BEGIN
-					SELECT @sRequiredQty = SUM(dblRequiredQty) / @intEstNoOfSheets
+					SELECT @sRequiredQty = SUM(dblRequiredQty) 
 					FROM @tblInputItem
 					WHERE ysnMinorIngredient = 0
 
