@@ -3783,7 +3783,7 @@ BEGIN TRY
 					END
 					IF (ISNULL(@TotalBasis, 0) = 0) AND (ISNULL(@TotalPriced, 0) = 0)
 					BEGIN
-						IF (@truePricingTypeId IN (3, 5, 6))
+						IF (@truePricingTypeId IN (3, 5, 6) OR (@truePricingTypeId = 1 AND @prevPricingTypeId = 3))
 						BEGIN
 							DECLARE @ptQty NUMERIC(18, 6)
 							SELECT @ptQty = CASE WHEN @truePricingTypeId = 3 THEN @TotalHTA
