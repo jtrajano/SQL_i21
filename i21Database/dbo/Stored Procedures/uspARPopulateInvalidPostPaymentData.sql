@@ -1015,6 +1015,33 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	--Customer has no Term setup
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Customer has no Term setup!'
+	FROM #ARPostPaymentHeader P
+    INNER JOIN tblARCustomer C ON P.intEntityCustomerId = C.intEntityId
+    WHERE P.[ysnPost] = @OneBit
+     AND ISNULL(C.intTermsId, 0) = 0
+	 AND (
+         ((P.[dblAmountPaid]) > (SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = P.[intTransactionId]) -- Overpayment
+		  AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
+     OR ((P.[dblAmountPaid]) <> @ZeroDecimal --Prepayment
+		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId]), @ZeroDecimal) = @ZeroDecimal	
+		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
+    )
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--INVALID VOUCHER AMOUNT DUE
     SELECT
          [intTransactionId]         = P.[intTransactionId]
