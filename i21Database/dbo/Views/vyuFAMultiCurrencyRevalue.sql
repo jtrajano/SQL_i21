@@ -14,12 +14,16 @@ SELECT DISTINCT
 	strItemId				=	'' COLLATE Latin1_General_CI_AS,
 	dblQuantity				=	NULL,
 	dblUnitPrice			=	NULL,
-	dblAmount    			=   FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0), -- Asset's net value
+	dblAmount    			=   CASE WHEN BD.ysnFullyDepreciated = 1
+									THEN FA.dblCost - ISNULL(FA.dblSalvageValue, 0) - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)
+									ELSE FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0) END,-- Asset's net value
 	intCurrencyId			=	FA.intCurrencyId,
 	intForexRateType		=	RateType.intCurrencyExchangeRateTypeId,
 	strForexRateType		=	RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS,
 	dblForexRate			=	FA.dblForexRate,
-	dblHistoricAmount		=	(FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)) * FA.dblForexRate,
+	dblHistoricAmount		=	CASE WHEN BD.ysnFullyDepreciated = 1
+									THEN (FA.dblCost - ISNULL(FA.dblSalvageValue, 0) - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)) * FA.dblForexRate
+									ELSE (FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)) * FA.dblForexRate END,
 	dblNewForexRate         =   0, --Calcuate By GL
     dblNewAmount            =   0, --Calcuate By GL
     dblUnrealizedDebitGain  =   0, --Calcuate By GL
@@ -27,6 +31,8 @@ SELECT DISTINCT
     dblDebit                =   0, --Calcuate By GL
     dblCredit               =   0  --Calcuate By GL
 FROM tblFAFixedAsset FA
+JOIN tblFABookDepreciation BD
+	ON BD.intAssetId = FA.intAssetId
 LEFT JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = FA.intCompanyLocationId
 LEFT JOIN tblSMCurrencyExchangeRateType RateType 
@@ -49,4 +55,5 @@ OUTER APPLY (
 WHERE 
 	FA.ysnDepreciated = 1
 	AND FA.ysnDisposed = 0
+	AND BD.intBookId = 1
 	AND AccumulatedDepreciation.dtmTransactionDate IS NOT NULL
