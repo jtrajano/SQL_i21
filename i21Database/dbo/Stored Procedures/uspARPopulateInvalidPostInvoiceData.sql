@@ -1961,7 +1961,7 @@ BEGIN
 	SELECT
 		 [intItemId]
 		,[intItemLocationId]
-		,[intItemUOMId]
+		,ISNULL(dbo.fnGetMatchingItemUOMId([intItemId], ICIUOM.intUnitMeasureId), COSTING.intItemUOMId)
 		,[dtmDate]
 		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
@@ -1984,7 +1984,11 @@ BEGIN
 		,[intInTransitSourceLocationId]
 		,[intForexRateTypeId]
 		,[dblForexRate]
-	FROM ##ARItemsForCosting
+	FROM ##ARItemsForCosting COSTING
+	LEFT OUTER JOIN 
+	(SELECT intUnitMeasureId,intItemUOMId FROM tblICItemUOM ICUOM  WITH (NOLOCK)
+		) ICIUOM
+		ON COSTING.intItemUOMId = ICIUOM.intItemUOMId
 	WHERE ISNULL([ysnAutoBlend], 0) = 0
 
 	INSERT INTO ##ARInvalidInvoiceData
