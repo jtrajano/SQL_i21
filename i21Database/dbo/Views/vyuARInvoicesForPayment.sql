@@ -235,7 +235,7 @@ FROM (
 			WHERE intPOSId = POS.intPOSId
 			AND strPaymentMethod = 'On Account'
 		) ONACCOUNT
-		WHERE ARI.[ysnPosted] = 1
+		WHERE (ARI.[ysnPosted] = 1 OR (ARI.[ysnPosted] = 0 AND	ARI.strComments = 'NSF Processed' AND ARI.strTransactionType = 'Overpayment'))
 			AND ISNULL(ARI.ysnCancelled, 0) = 0
 			AND (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 1 OR ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 0 )
 			AND strTransactionType != 'Credit Note'
@@ -434,4 +434,3 @@ LEFT OUTER JOIN (
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) SMCL ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
-
