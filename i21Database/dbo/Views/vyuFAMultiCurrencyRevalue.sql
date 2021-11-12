@@ -2,8 +2,8 @@
 AS
 SELECT DISTINCT
 	strTransactionType		=	'Asset' COLLATE Latin1_General_CI_AS,
-	strTransactionId		=	FA.strAssetId,
-	strTransactionDate		=	FA.dtmDateInService,
+	strTransactionId		=	FA.strAssetId COLLATE Latin1_General_CI_AS,
+	strTransactionDate		=	AccumulatedDepreciation.dtmTransactionDate,
 	strTransactionDueDate	=	NULL,
 	strVendorName			=	'' COLLATE Latin1_General_CI_AS,
 	strCommodity			=	'' COLLATE Latin1_General_CI_AS,
@@ -36,7 +36,8 @@ LEFT JOIN tblSMCompanyLocation Company
 OUTER APPLY (
 	SELECT 
 		SUM(dblCredit - dblDebit) dblAmount,
-		SUM(dblCreditForeign - dblDebitForeign) dblAmountForeign
+		SUM(dblCreditForeign - dblDebitForeign) dblAmountForeign,
+		MAX(GL.dtmDate) dtmTransactionDate
 	FROM tblGLDetail GL
 	WHERE 
 		GL.intAccountId = FA.intAccumulatedAccountId
@@ -46,5 +47,6 @@ OUTER APPLY (
 	GROUP BY GL.strReference
 ) AccumulatedDepreciation
 WHERE 
-	FA.ysnAcquired = 1 AND
-	FA.ysnDisposed = 0
+	FA.ysnDepreciated = 1
+	AND FA.ysnDisposed = 0
+	AND AccumulatedDepreciation.dtmTransactionDate IS NOT NULL
