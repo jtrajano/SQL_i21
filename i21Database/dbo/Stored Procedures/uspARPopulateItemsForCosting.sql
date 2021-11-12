@@ -59,11 +59,12 @@ INSERT INTO ##ARItemsForCosting
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId])
+	,[intItemUOMId]				= CASE WHEN ysnSeparateStockForUOMs = 0 THEN ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) ELSE  ARID.[intItemUOMId] END
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
-										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
+										WHEN ARIDL.[intLotId] IS NULL THEN  CASE WHEN ysnSeparateStockForUOMs = 1 THEN  ARID.[dblQtyShipped]
+										ELSE ARID.[dblQtyShipped] * (CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END) END 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ISNULL(NULLIF(ARIDL.[dblWeightPerQty], 0), 1))
 								   END
@@ -133,7 +134,9 @@ LEFT OUTER JOIN
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN 
-	(SELECT intUnitMeasureId,intItemUOMId FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
+	(SELECT intUnitMeasureId,intItemUOMId,ysnSeparateStockForUOMs FROM tblICItemUOM ICUOM  WITH (NOLOCK)
+		INNER JOIN tblICItem ITEM ON ICUOM.intItemId=ITEM.intItemId
+		) ICIUOM
 		ON ARID.intItemUOMId = ICIUOM.intItemUOMId
 
 WHERE
