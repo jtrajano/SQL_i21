@@ -11,7 +11,11 @@ SELECT SPS.intSamplePreStageId AS TrxSequenceNo
 			THEN 4
 		ELSE 2
 		END AS ActionId
-	,S.strSampleNumber AS SampleNo
+	,CASE SPS.strRowState
+		WHEN 'Delete'
+			THEN SPS.strSampleNumber
+		ELSE S.strSampleNumber
+		END AS SampleNo
 	,ST.strSampleTypeName AS SampleType
 	,CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) AS ContractNo
 	,VE.strVendorAccountNum AS PartyAccountNo
