@@ -1128,7 +1128,7 @@ BEGIN TRY
 							WHERE detail.strTableName = N'tblICItemSpecialPricing' 
 								AND detail.intRevertHolderId = @intRevertHolderId
 								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-								AND detail.strPreviewOldData != detail.strPreviewNewData
+								AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 						 )
 					BEGIN
 	
@@ -1189,7 +1189,7 @@ BEGIN TRY
 								WHERE detail.strTableName = N'tblICItemSpecialPricing'
 									AND detail.intRevertHolderId = @intRevertHolderId
 									AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-									AND detail.strPreviewOldData != detail.strPreviewNewData
+									AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 							) src
 							PIVOT (
 								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dblCost, dtmBeginDate, dtmEndDate)
@@ -1202,7 +1202,7 @@ BEGIN TRY
 																		WHERE detail.strTableName = N'tblICItemSpecialPricing' 
 																			AND detail.intRevertHolderId = @intRevertHolderId
 																			AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-																			AND detail.strPreviewOldData != detail.strPreviewNewData
+																			AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 																	  )
 
 
@@ -1330,7 +1330,7 @@ BEGIN TRY
 										ON ItemSpecialPricing.intItemSpecialPricingId = detail.intItemSpecialPricingId	
 									WHERE detail.strTableName = N'tblICItemSpecialPricing'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										--AND detail.strPreviewOldData != detail.strPreviewNewData
+										AND detail.strPreviewOldData != detail.strPreviewNewData
 									ORDER BY ItemSpecialPricing.intItemSpecialPricingId ASC
 								END
 							-----------------------------------------------------------------------------
