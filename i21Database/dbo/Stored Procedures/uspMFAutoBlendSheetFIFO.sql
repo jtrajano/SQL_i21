@@ -923,7 +923,8 @@ BEGIN TRY
 				DROP TABLE #tblInputLot
 
 			CREATE TABLE #tblInputLot (
-				intParentLotId INT
+				intRecordId int identity(1,1)
+				,intParentLotId INT
 				,--NVARCHAR(50) COLLATE Latin1_General_CI_AS, --Review
 				intItemId INT
 				,dblAvailableQty NUMERIC(38, 20)
@@ -1651,7 +1652,7 @@ BEGIN TRY
 				,intStorageLocationId
 				,dblWeightPerQty
 			FROM #tblInputLot
-			ORDER BY IsNULL(intPreference, 1)
+			ORDER BY intRecordId
 
 			OPEN Cursor_FetchItem
 
@@ -2531,7 +2532,7 @@ BEGIN TRY
 			,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
-		INNER JOIN tblICItem I ON I.intItemId = PL.intItemId
+		INNER JOIN tblICItem I ON I.intItemId = BS.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId
 		INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.intItemIssuedUOMId
@@ -2585,7 +2586,7 @@ BEGIN TRY
 			,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS
 		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId --AND PL.dblWeight > 0
-		INNER JOIN tblICItem I ON I.intItemId = PL.intItemId
+		INNER JOIN tblICItem I ON I.intItemId = BS.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId = UM1.intUnitMeasureId
 		INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.intItemIssuedUOMId
