@@ -126,6 +126,8 @@ BEGIN TRY
 		,@intLogId INT
 		,@strUserName NVARCHAR(50)
 		,@intAuditLogUserId INT
+		,@intBookId int
+		,@intSubBookId int
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -179,6 +181,8 @@ BEGIN TRY
 		SELECT @ysnApproval = NULL
 			,@strLogXML = NULL
 			,@strAuditXML = NULL
+			,@intBookId=NULL
+			,@intSubBookId=NULL
 
 		SELECT @intPriceContractId = intPriceContractId
 			,@strPriceContractNo = strPriceContractNo
@@ -199,6 +203,8 @@ BEGIN TRY
 			,@intCompanyId = intCompanyId
 			,@strLogXML = strLogXML
 			,@strAuditXML = strAuditXML
+			,@intBookId=intBookId
+			,@intSubBookId=intSubBookId
 		FROM tblCTPriceContractStage
 		WHERE intPriceContractStageId = @intPriceContractStageId
 
@@ -557,14 +563,15 @@ BEGIN TRY
 				,@intContractHeaderId = NULL
 				,@intNewPriceContractId = NULL
 
-			SELECT @intNewPriceContractId = intPriceContractId
-			FROM tblCTPriceContract
-			WHERE intPriceContractRefId = @intPriceContractId
-
-			SELECT @intPriceFixationId = intPriceFixationId
-				,@intContractHeaderId = intContractHeaderId
-			FROM tblCTPriceFixation
-			WHERE intPriceContractId = @intNewPriceContractId
+			SELECT @intNewPriceContractId = PC.intPriceContractId
+				,@intPriceFixationId = PF.intPriceFixationId
+				,@intContractHeaderId = PF.intContractHeaderId
+			FROM tblCTPriceContract PC
+			JOIN tblCTPriceFixation PF on PF.intPriceContractId=PC.intPriceContractId
+			JOIN tblCTContractHeader CH on CH.intContractHeaderId =PF.intContractHeaderId 
+			WHERE PC.intPriceContractRefId = @intPriceContractId
+				and CH.intBookId =@intBookId
+				AND IsNULL(CH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
 			DELETE
 			FROM tblCTIntrCompApproval
