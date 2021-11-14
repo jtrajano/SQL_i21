@@ -829,14 +829,14 @@ BEGIN TRY
 			BEGIN
 				IF @ysnPercResetRequired = 0
 				BEGIN
-					SELECT @sRequiredQty = SUM(dblRequiredQty) 
+					SELECT @sRequiredQty = SUM(dblRequiredQty)
 					FROM @tblInputItem
 					WHERE ysnMinorIngredient = 0
 
 					SELECT @dblQuantityTaken = Sum(dblQuantity)
 					FROM #tblBlendSheetLot BS
-					JOIN @tblInputItem I on I.intItemId =BS.intItemId 
-					Where I.ysnMinorIngredient = 0
+					JOIN @tblInputItem I ON I.intItemId = BS.intItemId
+					WHERE I.ysnMinorIngredient = 0
 
 					IF @dblQuantityTaken > @sRequiredQty
 					BEGIN
@@ -923,7 +923,7 @@ BEGIN TRY
 				DROP TABLE #tblInputLot
 
 			CREATE TABLE #tblInputLot (
-				intRecordId int identity(1,1)
+				intRecordId INT identity(1, 1)
 				,intParentLotId INT
 				,--NVARCHAR(50) COLLATE Latin1_General_CI_AS, --Review
 				intItemId INT
@@ -1703,9 +1703,9 @@ BEGIN TRY
 										THEN Convert(NUMERIC(38, 20), (
 													(
 														CASE 
-															WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
+															WHEN Round(@dblRequiredQty / L.dblWeightPerQty, 0) = 0
 																THEN 1
-															ELSE Floor(@dblRequiredQty / L.dblWeightPerQty)
+															ELSE Round(@dblRequiredQty / L.dblWeightPerQty, 0)
 															END
 														) * L.dblWeightPerQty
 													))
@@ -1716,9 +1716,9 @@ BEGIN TRY
 									WHEN @intIssuedUOMTypeId = 2
 										THEN Convert(NUMERIC(38, 20), (
 													CASE 
-														WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
+														WHEN Round(@dblRequiredQty / L.dblWeightPerQty, 0) = 0
 															THEN 1
-														ELSE Convert(NUMERIC(38, 20), Floor(@dblRequiredQty / L.dblWeightPerQty))
+														ELSE Convert(NUMERIC(38, 20), Round(@dblRequiredQty / L.dblWeightPerQty, 0))
 														END
 													))
 									ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
@@ -1744,9 +1744,9 @@ BEGIN TRY
 											THEN Convert(NUMERIC(38, 20), (
 														(
 															CASE 
-																WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
+																WHEN Round(@dblRequiredQty / L.dblWeightPerQty, 0) = 0
 																	THEN 1
-																ELSE Floor(@dblRequiredQty / L.dblWeightPerQty)
+																ELSE Round(@dblRequiredQty / L.dblWeightPerQty, 0)
 																END
 															) * L.dblWeightPerQty
 														))
@@ -1759,9 +1759,9 @@ BEGIN TRY
 										WHEN @intIssuedUOMTypeId = 2
 											THEN Convert(NUMERIC(38, 20), (
 														CASE 
-															WHEN Floor(@dblRequiredQty / L.dblWeightPerQty) = 0
+															WHEN Round(@dblRequiredQty / L.dblWeightPerQty, 0) = 0
 																THEN 1
-															ELSE Convert(NUMERIC(38, 20), Floor(@dblRequiredQty / L.dblWeightPerQty))
+															ELSE Convert(NUMERIC(38, 20), Round(@dblRequiredQty / L.dblWeightPerQty, 0))
 															END
 														))
 										ELSE @dblRequiredQty --To Review ROUND(@dblRequiredQty,3) 
@@ -1900,7 +1900,7 @@ BEGIN TRY
 						IF ISNULL(@intPartialQuantitySubLocationId, 0) > 0
 							AND @intIssuedUOMTypeId = 2
 						BEGIN
-							SET @dblRequiredQty = @dblRequiredQty - Floor(@dblRequiredQty / @dblWeightPerQty) * @dblWeightPerQty
+							SET @dblRequiredQty = @dblRequiredQty - Round(@dblRequiredQty / @dblWeightPerQty, 0) * @dblWeightPerQty
 
 							IF @dblRequiredQty = 0
 								GOTO LOOP_END;
@@ -1934,9 +1934,9 @@ BEGIN TRY
 										THEN Convert(NUMERIC(38, 20), (
 													(
 														CASE 
-															WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
+															WHEN Round(@dblAvailableQty / L.dblWeightPerQty, 2) = 0
 																THEN 1
-															ELSE Floor(@dblAvailableQty / L.dblWeightPerQty)
+															ELSE Round(@dblAvailableQty / L.dblWeightPerQty, 2)
 															END
 														) * L.dblWeightPerQty
 													))
@@ -1947,9 +1947,9 @@ BEGIN TRY
 									WHEN @intIssuedUOMTypeId = 2
 										THEN Convert(NUMERIC(38, 20), (
 													CASE 
-														WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
+														WHEN Round(@dblAvailableQty / L.dblWeightPerQty, 0) = 0
 															THEN 1
-														ELSE Convert(NUMERIC(38, 20), Floor(@dblAvailableQty / L.dblWeightPerQty))
+														ELSE Convert(NUMERIC(38, 20), Round(@dblAvailableQty / L.dblWeightPerQty, 2))
 														END
 													))
 									ELSE @dblAvailableQty --To Review ROUND(@dblAvailableQty,3) 
@@ -1986,9 +1986,9 @@ BEGIN TRY
 										THEN Convert(NUMERIC(38, 20), (
 													(
 														CASE 
-															WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
+															WHEN Round(@dblAvailableQty / L.dblWeightPerQty, 2) = 0
 																THEN 1
-															ELSE Floor(@dblAvailableQty / L.dblWeightPerQty)
+															ELSE Round(@dblAvailableQty / L.dblWeightPerQty, 2)
 															END
 														) * L.dblWeightPerQty
 													))
@@ -2009,9 +2009,9 @@ BEGIN TRY
 									WHEN @intIssuedUOMTypeId = 2
 										THEN Convert(NUMERIC(38, 20), (
 													CASE 
-														WHEN Floor(@dblAvailableQty / L.dblWeightPerQty) = 0
+														WHEN Round(@dblAvailableQty / L.dblWeightPerQty, 0) = 0
 															THEN 1
-														ELSE Convert(NUMERIC(38, 20), Floor(@dblAvailableQty / L.dblWeightPerQty))
+														ELSE Convert(NUMERIC(38, 20), Round(@dblAvailableQty / L.dblWeightPerQty, 2))
 														END
 													))
 									WHEN @intIssuedUOMTypeId = 3
@@ -2044,6 +2044,14 @@ BEGIN TRY
 							WHERE L.intParentLotId = @intParentLotId
 
 						SET @dblRequiredQty = @dblRequiredQty - @dblAvailableQty
+
+						IF @intIssuedUOMTypeId = 2
+							AND Round(@dblRequiredQty / @dblWeightPerQty, 0) * @dblWeightPerQty = 0
+						BEGIN
+							SELECT @dblRequiredQty = 0
+
+							GOTO LOOP_END;
+						END
 					END
 				END
 
