@@ -398,18 +398,19 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblCTSequenceHistory SET dblOldCashPrice = @dblPrevCashPrice,ysnCashPriceChange = 1 WHERE intSequenceHistoryId = @intSequenceHistoryId
 				END
-
-				IF NOT (ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory')
-				BEGIN
-					-- CONTRACT BALANCE LOG
-					EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-										 @intContractDetailId 	= 	@intContractDetailId,
-										 @strSource			 	= 	@strSource,
-										 @strProcess		 	= 	@strProcess,
-										 @contractDetail 		= 	@contractDetails,		
-										 @intUserId				=	@intUserId
-				END
 			END
+
+			IF NOT (ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory')
+			BEGIN
+				-- CONTRACT BALANCE LOG
+				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									 @intContractDetailId 	= 	@intContractDetailId,
+									 @strSource			 	= 	@strSource,
+									 @strProcess		 	= 	@strProcess,
+									 @contractDetail 		= 	@contractDetails,		
+									 @intUserId				=	@intUserId
+			END
+			
 		END
 
 		SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
