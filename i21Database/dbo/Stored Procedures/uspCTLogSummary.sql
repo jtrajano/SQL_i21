@@ -3947,29 +3947,33 @@ BEGIN TRY
 				DECLARE @prevOrigQty NUMERIC(18, 6)
 					, @qtyDiff NUMERIC(18, 6)
 					, @unloggedBasis NUMERIC(18, 6)
+					, @dblRemainingQty NUMERIC(18, 6)
+					, @dblQuantityAppliedAndPriced NUMERIC(18, 6)
+					, @dblCurrentQty NUMERIC(18, 6)
 					, @tmpTotal NUMERIC(18, 6)
 
-				SET @dblRunningQty += @dblOrigQty
-
-				SELECT TOP 1
-					@prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
-					,@qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
-				FROM
-					tblCTPriceFixationDetail    
-				WHERE
-					intPriceFixationDetailId = @intPriceFixationDetailId
+				SELECT @dblRunningQty += @dblOrigQty
+					, @dblRemainingQty = 0
+				
+				SELECT TOP 1 @prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
+					, @qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
+					, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
+					, @dblCurrentQty = dblQuantity
+					, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced
+				FROM tblCTPriceFixationDetail
+				WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
 				IF (@intContractTypeId = 1)
 				BEGIN
 					IF (@qtyDiff > 0)
 					BEGIN
 						-- Qty increased
-						SET @FinalQty = CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END
+						SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END ELSE 0 END
 					END
 					ELSE IF (@qtyDiff < 0)
 					BEGIN
 						-- Qty decreased
-						SET @FinalQty = CASE WHEN @TotalPriced + @dblQty > @TotalConsumed THEN @qtyDiff ELSE 0 END
+						SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalPriced + @dblQty > @TotalConsumed THEN @qtyDiff ELSE 0 END ELSE 0 END
 					END
 					ELSE
 					BEGIN
@@ -3982,7 +3986,7 @@ BEGIN TRY
 					IF (@qtyDiff > 0)
 					BEGIN
 						-- Qty increased
-						SET @FinalQty = CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END
+						SET @FinalQty =  CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END ELSE 0 END
 					END
 					ELSE IF (@qtyDiff < 0)
 					BEGIN
@@ -3992,7 +3996,7 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							SET @FinalQty = CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END
+							SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END ELSE 0 END
 						END
 					END
 					ELSE
