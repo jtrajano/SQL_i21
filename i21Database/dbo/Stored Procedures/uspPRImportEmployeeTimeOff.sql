@@ -43,7 +43,7 @@ SELECT
 	,intRowNo		= SE.intRowNumber
 	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	FROM tblApiSchemaEmployeeTimeOff SE
-	LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = SE.intEntityNo
+	LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
 	WHERE SE.guiApiUniqueId = @guiApiUniqueId
 	AND SE.intEntityNo IS NULL
 
@@ -164,7 +164,7 @@ SELECT * INTO #TempEmployeeTimeOff FROM tblApiSchemaEmployeeTimeOff where guiApi
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee time off has been successfully imported.'
 		FROM tblApiSchemaEmployeeTimeOff SE
-		LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = SE.intEntityNo
+		LEFT JOIN tblPREmployeeTimeOff E ON E.intEntityEmployeeId = @intEntityNo
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strTimeOffId = @strTimeOffId
 		AND SE.strTimeOffDesc = @strTimeOffDesc
