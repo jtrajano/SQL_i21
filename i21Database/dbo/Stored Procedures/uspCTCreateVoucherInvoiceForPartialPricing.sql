@@ -124,6 +124,8 @@ BEGIN TRY
 			,@dblQuantityForSpot				numeric(18,6)
 			,@NewInvoiceSpotDetailId			int
 			,@dblRemainingPricedQuantityForInvoice numeric(18,6)
+			,@dblBalance 						numeric(18,6)
+			,@dblBalanceLoad 					numeric(18,6)
 			;
 
 		
@@ -198,7 +200,9 @@ BEGIN TRY
 			@intContractHeaderId		=	intContractHeaderId,
 			@intCompanyLocationId		=	intCompanyLocationId,
 			@intSequenceFreightTermId 	= 	intFreightTermId,
-			@intItemUOMId 				= 	intItemUOMId
+			@intItemUOMId 				= 	intItemUOMId,
+			@dblBalance					=	isnull(dblBalance,0),
+			@dblBalanceLoad				=	isnull(dblBalanceLoad,0)
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId			=	@intContractDetailId
 
@@ -224,7 +228,8 @@ BEGIN TRY
 	FROM	tblCTContractHeader with (nolock)
 	WHERE	intContractHeaderId = @intContractHeaderId
 
-	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
+
+	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById), @dblBalance = (case when @ysnLoad = 1 then @dblBalanceLoad else @dblBalance end)
 
 	SELECT	@ysnAllowChangePricing = ysnAllowChangePricing, @ysnEnablePriceContractApproval = ISNULL(ysnEnablePriceContractApproval,0) FROM tblCTCompanyPreference
 
@@ -1814,6 +1819,10 @@ BEGIN TRY
 		SET @ErrMsg = 'Cannot Update price as following posted Invoice/Vouchers are available. ' + @strPostedAPAR +'. Unpost those Invoice/Voucher to continue update the price.'
 		RAISERROR(@ErrMsg,16,1)
 	END
+
+	exec uspCTUpdateAppliedAndPrice
+	@intContractDetailId = @intContractDetailId
+	,@dblBalance = @dblBalance
 
 END TRY
 
