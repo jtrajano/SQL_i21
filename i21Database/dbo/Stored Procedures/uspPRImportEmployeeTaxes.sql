@@ -53,7 +53,8 @@ SELECT
 	,intRowNo		= SE.intRowNumber
 	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	FROM tblApiSchemaEmployeeTaxes SE
-	LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
+	LEFT JOIN tblPREmployeeTax E 
+		ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
 	WHERE SE.guiApiUniqueId = @guiApiUniqueId
 	AND SE.intEntityNo IS NULL
 
@@ -62,11 +63,11 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 	BEGIN
 
 	SELECT TOP 1 
-			 @strEmployeeId						= intEntityNo
-			,@EntityNo							= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = intEntityNo)  
+			 @strEmployeeId						= CAST(tempTax.intEntityNo AS NVARCHAR(100))
+			,@EntityNo							= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = tempTax.intEntityNo)  
 			,@TaxId								= strTaxId
 			,@TaxTaxDesc						= strTaxDescription
-			,@intEntityEmployeeId				= intEntityNo
+			,@intEntityEmployeeId				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = tempTax.intEntityNo)
 			,@strCalculationType				= strCalculationType
 			,@strFilingStatus					= strFilingStatus
 			,@intSupplementalCalc				= (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
@@ -85,7 +86,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			,@dblW4Deductions					= 0.00
 			,@ysnUseLocationDistribution		= ysnLiabilityGlSplit
 			,@ysnUseLocationDistributionExpense = ysnExpenseAccountGlSplit
-		FROM #TempEmployeeTaxes
+		FROM #TempEmployeeTaxes tempTax
 
 		SELECT TOP 1 
 				 @TypeTaxId= T.intTypeTaxId
@@ -95,7 +96,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			FROM tblPRTypeTax T 
 		left join tblPREmployeeTax PRTE
 		on T.intTypeTaxId = PRTE.intTypeTaxId
-			AND PRTE.intEntityEmployeeId = @EntityNo
+			AND PRTE.intEntityEmployeeId = @intEntityEmployeeId
 		WHERE strTax = @TaxId and strDescription = @TaxTaxDesc
 
 		IF @EmployeeTaxId IS NULL
@@ -130,7 +131,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,intConcurrencyId 
 						)
 						SELECT TOP 1
-							 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = EMT.intEntityNo)
+							 @EntityNo
 							,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
 							,EMT.strCalculationType
 							,EMT.strFilingStatus
@@ -204,7 +205,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee taxes has been successfully imported.'
 		FROM tblApiSchemaEmployeeTaxes SE
-		LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
+		LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strTaxId = @TaxId
 		AND SE.strTaxDescription = @TaxTaxDesc
