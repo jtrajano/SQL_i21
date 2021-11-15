@@ -249,7 +249,7 @@ BEGIN
 			,strOld = dblOldCost
 			,strNew = dblNewCost
 	FROM	#tmpUpdateItemPricingForCStore_ItemSpecialPricingAuditLog auditLog
-	WHERE	ISNULL(dblOldUnitAfterDiscount, 0) <> ISNULL(dblNewUnitAfterDiscount, 0) AND auditLog.strAction = 'UPDATE'
+	WHERE	ISNULL(dblOldCost, 0) <> ISNULL(dblNewCost, 0) AND auditLog.strAction = 'UPDATE'
 	UNION ALL 
 	SELECT	intItemId
 			,strDescription = 'C-Store updates the Promotional Begin Date'
