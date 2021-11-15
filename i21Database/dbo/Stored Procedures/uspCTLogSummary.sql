@@ -3781,13 +3781,51 @@ BEGIN TRY
 							, dblFutures = @dblPreviousFutures
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
-					IF (ISNULL(@TotalBasis, 0) = 0) AND (ISNULL(@TotalPriced, 0) = 0)
+					IF (ISNULL(@TotalHTA, 0) <> 0 AND (@truePricingTypeId = 1 AND @prevPricingTypeId = 3))
 					BEGIN
-						IF (@truePricingTypeId IN (3, 5, 6) OR (@truePricingTypeId = 1 AND @prevPricingTypeId = 3))
+						-- Negate AND add previous record
+						UPDATE @cbLogPrev
+						SET dblQty = @TotalHTA * - 1
+							, intPricingTypeId = 3
+							, dblBasis = NULL
+							, intActionId = 43
+
+						-- Negate previous if the value is not 0
+						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
+						BEGIN
+							UPDATE @cbLogPrev
+							SET strBatchId = @strBatchId
+								, strProcess = @strProcess
+								, dtmTransactionDate = @_dtmCurrent
+
+							IF (@strProcess = 'Do Roll')
+							BEGIN
+								UPDATE @cbLogPrev
+								SET intPriceUOMId = curr.intPriceUOMId
+									, strTransactionReference = curr.strTransactionReference
+									, strTransactionReferenceNo = curr.strTransactionReferenceNo
+									, intTransactionReferenceId = curr.intTransactionReferenceId
+									, intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+									, intUserId = curr.intUserId
+									, dblOrigQty = curr.dblOrigQty
+									, strNotes = ''
+								FROM (SELECT * FROM @cbLogSpecific) curr
+							END
+
+							EXEC uspCTLogContractBalance @cbLogPrev, 0
+						END
+
+						UPDATE @cbLogSpecific
+						SET dblQty = @TotalHTA
+							, intPricingTypeId = 1
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
+					IF (ISNULL(@TotalBasis, 0) = 0) AND (ISNULL(@TotalPriced, 0) = 0) AND ISNULL(@TotalHTA, 0) = 0
+					BEGIN
+						IF (@truePricingTypeId IN (5, 6))
 						BEGIN
 							DECLARE @ptQty NUMERIC(18, 6)
-							SELECT @ptQty = CASE WHEN @truePricingTypeId = 3 OR (@truePricingTypeId = 1 AND @prevPricingTypeId = 3) THEN @TotalHTA
-												WHEN @truePricingTypeId = 5 THEN @dblDP
+							SELECT @ptQty = CASE WHEN @truePricingTypeId = 5 THEN @dblDP
 												WHEN @truePricingTypeId = 6 THEN @dblCash END
 
 							-- Negate AND add previous record
