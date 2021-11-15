@@ -45,6 +45,7 @@ INSERT INTO ##ARItemsForInTransitCosting
 	,[dblForexRate]
 	,[intLinkedItem]
 	,[strBOLNumber]
+	,[intTicketId]
 )
 --INVENTORY SHIPMENT NON-LOTTED
 SELECT
@@ -73,6 +74,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
@@ -135,6 +137,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]
@@ -217,6 +220,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItem ITEM ON ARID.intItemId = ITEM.intItemId
 INNER JOIN (	
@@ -283,6 +287,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
@@ -365,6 +370,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -436,6 +442,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -525,6 +532,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= NULL
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -596,6 +604,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= NULL
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT LGD.[intLoadId]
@@ -663,6 +672,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM 
 (SELECT 
 	ARPID.intInvoiceId
@@ -765,6 +775,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM 
 (SELECT 
 	ARPID.intInvoiceId
@@ -869,6 +880,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM 
 (SELECT 
 	INVD.intInvoiceId
@@ -958,6 +970,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM 
 (SELECT 
 	INVD.intInvoiceId
@@ -1048,6 +1061,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]
@@ -1136,6 +1150,7 @@ SELECT
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
 	,[strBOLNumber]					= ARID.strBOLNumber
+	,[intTicketId]					= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN (
 	SELECT[intInvoiceDetailLotId]

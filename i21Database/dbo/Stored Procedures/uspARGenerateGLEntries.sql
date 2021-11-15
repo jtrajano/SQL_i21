@@ -58,6 +58,7 @@ INSERT INTO @ItemsForPost
     ,[intCategoryId]
     ,[dblAdjustRetailValue]
 	,[strBOLNumber]
+    ,[intTicketId]
 ) 
 SELECT 
      [intItemId]
@@ -90,6 +91,7 @@ SELECT
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strBOLNumber]
+    ,[intTicketId]
 FROM 
 	##ARItemsForCosting
 WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
@@ -169,7 +171,8 @@ INSERT INTO @InTransitItems
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
     ,[dblForexRate]
-	,[strBOLNumber]	
+	,[strBOLNumber]
+    ,[intTicketId]	
 )
 SELECT
      [intItemId] 
@@ -196,6 +199,7 @@ SELECT
     ,[intForexRateTypeId]
     ,[dblForexRate]
 	,[strBOLNumber]
+    ,[intTicketId]
 FROM ##ARItemsForInTransitCosting
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
