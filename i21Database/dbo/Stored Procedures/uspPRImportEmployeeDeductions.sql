@@ -56,7 +56,7 @@ SELECT
    ,intRowNo		= SE.intRowNumber
    ,strMessage		= 'Cannot find the Employee Entity No: '+  CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
    FROM tblApiSchemaEmployeeDeduction SE
-   LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = SE.intEntityNo 
+   LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
    WHERE SE.guiApiUniqueId = @guiApiUniqueId
    AND SE.intEntityNo IS NULL
 
@@ -381,7 +381,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 						END
 					END
 
-				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @intEntityNo  AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
+				DELETE FROM #TempEmployeeDeductions WHERE intEntityNo = @strEmployeeId  AND strDeductionId = @strDeductionId AND strDeductionDesc = @strDeductionDesc
 			END
 
 		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
@@ -395,7 +395,7 @@ SELECT * INTO #TempEmployeeDeductions FROM tblApiSchemaEmployeeDeduction where g
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee deduction has been successfully imported.'
 		FROM tblApiSchemaEmployeeDeduction SE
-		LEFT JOIN tblPREmployeeDeduction E ON E.intEmployeeDeductionId = SE.intEntityNo 
+		LEFT JOIN tblPREmployeeDeduction E ON E.intEntityEmployeeId = @intEntityNo
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strDeductionId = @strDeductionId
 		AND SE.strDeductionDesc = @strDeductionDesc
