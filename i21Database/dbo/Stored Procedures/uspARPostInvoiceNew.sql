@@ -600,7 +600,7 @@ BEGIN TRY
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @Post)
 
     DECLARE @invalidGLCount INT
-	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
+	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries WHERE [strTransactionId] IS NOT NULL), 0)
 	SET @totalRecords = @totalRecords - @invalidGLCount
 
     INSERT INTO tblARPostResult
