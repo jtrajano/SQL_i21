@@ -15,14 +15,14 @@ SELECT DISTINCT
 	dblQuantity				=	NULL,
 	dblUnitPrice			=	NULL,
 	dblAmount    			=   CASE WHEN BD.ysnFullyDepreciated = 1
-									THEN FA.dblCost - ISNULL(FA.dblSalvageValue, 0) - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)
+									THEN FA.dblCost - ISNULL(FA.dblSalvageValue, 0)
 									ELSE FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0) END,-- Asset's net value
 	intCurrencyId			=	FA.intCurrencyId,
 	intForexRateType		=	RateType.intCurrencyExchangeRateTypeId,
 	strForexRateType		=	RateType.strCurrencyExchangeRateType COLLATE Latin1_General_CI_AS,
 	dblForexRate			=	FA.dblForexRate,
 	dblHistoricAmount		=	CASE WHEN BD.ysnFullyDepreciated = 1
-									THEN (FA.dblCost - ISNULL(FA.dblSalvageValue, 0) - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)) * FA.dblForexRate
+									THEN (FA.dblCost - ISNULL(FA.dblSalvageValue, 0)) * FA.dblForexRate
 									ELSE (FA.dblCost - ISNULL(AccumulatedDepreciation.dblAmountForeign, 0)) * FA.dblForexRate END,
 	dblNewForexRate         =   0, --Calcuate By GL
     dblNewAmount            =   0, --Calcuate By GL
