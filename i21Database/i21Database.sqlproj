@@ -5856,6 +5856,7 @@
     <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPrepay.sql" />
     <Build Include="dbo\Functions\fnAPValidateVoucherPrepay.sql" />
     <Build Include="dbo\Tables\tblGLDeletedAccount.sql" />
+    <Build Include="dbo\Tables\tblGLDataFixLog.sql" />
     <Build Include="dbo\Tables\tblSMMultiCompany.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\28_MultiCompany.sql" />
     <Build Include="dbo\Views\vyuCTDashboardJDEHistorical.sql" />
