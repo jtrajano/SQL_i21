@@ -3722,7 +3722,7 @@ BEGIN TRY
 						IF (@truePricingTypeId IN (3, 5, 6) OR (@truePricingTypeId = 1 AND @prevPricingTypeId = 3))
 						BEGIN
 							DECLARE @ptQty NUMERIC(18, 6)
-							SELECT @ptQty = CASE WHEN @truePricingTypeId = 3 THEN @TotalHTA
+							SELECT @ptQty = CASE WHEN @truePricingTypeId = 3 OR (@truePricingTypeId = 1 AND @prevPricingTypeId = 3) THEN @TotalHTA
 												WHEN @truePricingTypeId = 5 THEN @dblDP
 												WHEN @truePricingTypeId = 6 THEN @dblCash END
 
