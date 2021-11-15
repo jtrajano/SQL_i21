@@ -37,10 +37,13 @@ begin
 				on Discount.intDiscountScheduleCodeId = DiscountCode.intDiscountScheduleCodeId
 			join tblICItem Item
 				on DiscountCode.intItemId = Item.intItemId
-			join tblSCISTrackingDiscountCode TrackingDiscount
-				on Item.intItemId = TrackingDiscount.intItemId
-
-		where Ticket.intStorageLocationId = intStorageLocationId
+			join tblSCISBinSearch BinSearch
+				on Ticket.intStorageLocationId = BinSearch.intStorageLocationId
+					and (BinSearch.dtmTrackingDate is null or Ticket.dtmTicketDateTime >= BinSearch.dtmTrackingDate) 
+			join tblSCISBinSearchDiscountTracking DiscountTracking
+				on Item.intItemId = DiscountTracking.intItemId
+				
+		where Ticket.intStorageLocationId = @intStorageLocationId
 			and ( strShortName is not null or strShortName <> '')
 		 group by Item.strShortName
 

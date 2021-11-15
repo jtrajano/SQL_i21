@@ -13,3 +13,5 @@
 	,constraint [UQ_BinSearchDiscountHeader_BinSearchHeader] unique nonclustered (intBinSearchId, intBinDiscountHeaderId)
 	,constraint [UQ_BinSearchDiscountHeader_BinSearchHeaderItem] unique nonclustered (intBinSearchId, intBinDiscountHeaderId, intItemId)
 )
+
+GO

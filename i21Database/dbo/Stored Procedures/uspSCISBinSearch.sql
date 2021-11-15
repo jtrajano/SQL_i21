@@ -9,7 +9,7 @@ as
 begin
 	declare @Columns nvarchar(500)
 	set @Columns = ''
-	select @Columns = @Columns + strHeader + ',' 
+	select @Columns = @Columns + replace(strHeader, ' ', '_') + ',' 
 		from tblSCISBinDiscountHeader
 
 	IF len(@Columns) > 0 
@@ -74,9 +74,11 @@ begin
 			(
 				select Bin.intBinSearchId
 						, Bin.intStorageLocationId
-						, StorageLocation.strName as strStorageLocationName
+						, SubLocation.strSubLocationName as strStorageLocationName
+						, StorageLocation.strName as strStorageUnitName
 						, Commodity.strCommodityCode
-						, DiscountHeader.strHeader
+						, BinDetails.strItemNo
+						, replace(DiscountHeader.strHeader, '' '', ''_'') as strHeader
 						, Bin.strBinType
 						, Bin.strBinType2
 						, Bin.strBinNotes
@@ -84,16 +86,21 @@ begin
 						, Bin.strBinNotesBackgroundColor
 						, AverageDiscount.dblAverageReading
 						, BinDetails.dblPercentageFull
-						, BinDetails.dblAvailable
+						, BinDetails.dblAvailable as dblSpaceAvailable
+						, BinDetails.dblQuantity
+						, BinDetails.dblCapacity
+						, Bin.strComBinNotesColor
+						, Bin.strComBinNotesBackgroundColor
 					from tblSCISBinSearch Bin 
 						left join tblSCISBinSearchDiscountHeader BinDiscount
 							on Bin.intBinSearchId = BinDiscount.intBinSearchId
 						left join tblSCISBinDiscountHeader DiscountHeader
 							on BinDiscount.intBinDiscountHeaderId = DiscountHeader.intBinDiscountHeaderId
-						left join tblICItem Item
-							on BinDiscount.intItemId = Item.intItemId
+						
 						left join tblICStorageLocation StorageLocation
 							on Bin.intStorageLocationId = StorageLocation.intStorageLocationId
+						left join tblSMCompanyLocationSubLocation SubLocation
+							on StorageLocation.intSubLocationId = SubLocation.intCompanyLocationSubLocationId
 						left join tblICCommodity Commodity
 							on Bin.intCommodityId = Commodity.intCommodityId
 						outer apply dbo.fnSCISGetAverageDiscountPerStorageLocation(Bin.intStorageLocationId, BinDiscount.intItemId) AverageDiscount
@@ -102,9 +109,13 @@ begin
 								,dblAvailable
 								/*,dblCapacity
 								,(dblCapacity - dblAvailable) as dblOccupiedOutput */
+								, dblStock as dblQuantity
+								, dblCapacity
+								, strItemNo
 							from vyuICGetStorageBinDetails 
 								where intStorageLocationId = Bin.intStorageLocationId
 						)BinDetails
+						
 						inner join #tmpLocationFilter locationFilter
 							on StorageLocation.intStorageLocationId = locationFilter.intStorageLocationId
 							or locationFilter.intStorageLocationId IS NULL 

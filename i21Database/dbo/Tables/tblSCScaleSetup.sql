@@ -89,6 +89,9 @@
     [strDriver] NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
     [intRequireTrailerId] INT NOT NULL DEFAULT(2),
 
+    [intISiteDefaultGradeReadingView] INT NOT NULL DEFAULT(0), 
+    [intISiteDefaultTrucksInYardView] INT NOT NULL DEFAULT(0), 
+
 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 

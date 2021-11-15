@@ -8,10 +8,10 @@ begin
 		strColumnName nvarchar(100)
 	)
 	insert into @HeaderTable(strColumnName)
-	select Item from dbo.fnSplitString('intBinSearchId,intStorageLocationId,strStorageLocationName,strCommodityCode,dblPercentageFull,dblAvailable,strBinType,strBinType2,strBinNotes,strBinNotesColor,strBinNotesBackgroundColor',',')
+	select Item from dbo.fnSplitString('intBinSearchId,intStorageLocationId,strStorageLocationName,strStorageUnitName,strCommodityCode,strItemNo,dblPercentageFull,dblCapacity,dblQuantity,dblSpaceAvailable,strBinType,strBinType2,strBinNotes,strBinNotesColor,strBinNotesBackgroundColor,strComBinNotesColor,strComBinNotesBackgroundColor',',')
 
 	insert into @HeaderTable(strColumnName)
-	select strHeader from tblSCISBinDiscountHeader order by intBinDiscountHeaderId asc 
+	select replace(strHeader, ' ', '_')  as strHeader from tblSCISBinDiscountHeader order by intBinDiscountHeaderId asc 
 
 
 	select * from @HeaderTable
