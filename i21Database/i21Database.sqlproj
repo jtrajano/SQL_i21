@@ -256,6 +256,10 @@
     <Build Include="dbo\Views\vyuICGetStoreLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBuybackProgram.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformBuybackProgram.sql" />
+	<Build Include="dbo\Tables\tblApiSchemaTMConsumptionSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMConsumptionSite.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMDevice.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMDevice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
