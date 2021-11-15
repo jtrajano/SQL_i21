@@ -36,7 +36,7 @@ DECLARE @ysnActive AS BIT
 	   ,intRowNo		= SE.intRowNumber
 	   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	   FROM tblApiSchemaEmployeeDirectDeposit SE
-	   LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = SE.intEntityNo
+	   LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
 	   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 	   AND SE.intEntityNo IS NULL
 
@@ -162,7 +162,7 @@ DECLARE @ysnActive AS BIT
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee direct deposit has been successfully imported.'
 		FROM tblApiSchemaEmployeeDirectDeposit SE
-		LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = SE.intEntityNo
+		LEFT JOIN tblEMEntityEFTInformation E ON E.intEntityId = @intEntityNo
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strBankName = @strBankName
 		AND SE.strAccountNumber = @strAccountNumber
