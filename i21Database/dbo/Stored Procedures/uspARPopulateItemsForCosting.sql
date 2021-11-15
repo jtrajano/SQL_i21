@@ -53,6 +53,7 @@ INSERT INTO #ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[strBOLNumber]
+	,[intTicketId]
 )
 
 SELECT 
@@ -113,6 +114,7 @@ SELECT
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
 	,[strBOLNumber]				= ARID.strBOLNumber 
+	,[intTicketId]				= ARID.intTicketId
 FROM
     #ARPostInvoiceDetail ARID
 INNER JOIN
@@ -183,6 +185,7 @@ INSERT INTO #ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
+	,[intTicketId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intComponentItemId]
@@ -219,6 +222,7 @@ SELECT
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
+	,[intTicketId]				= ARID.intTicketId
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
@@ -280,6 +284,7 @@ INSERT INTO #ARItemsForCosting
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strType]
+	,[intTicketId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -307,6 +312,7 @@ SELECT
 	,ARIC.[intCategoryId]
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
+	,ARID.[intTicketId]
 FROM #ARItemsForCosting ARIC
 INNER JOIN #ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId

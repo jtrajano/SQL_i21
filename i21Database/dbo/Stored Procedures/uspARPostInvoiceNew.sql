@@ -158,6 +158,7 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 	,[ysnFromReturn]                        BIT             NULL
+	,[strBOLNumber]							NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
 
     ,[intInvoiceDetailId]                   INT             NULL
     ,[intItemId]                            INT             NULL
@@ -318,6 +319,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
 	,[ysnFromReturn]                        BIT             NULL
+	,[strBOLNumber]							NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
 
     ,[intInvoiceDetailId]                   INT             NOT NULL PRIMARY KEY
     ,[intItemId]                            INT             NULL
@@ -521,7 +523,10 @@ CREATE TABLE #ARItemsForCosting
 	,[intCategoryId] INT NULL 
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL
-	,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
+	,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[intTicketId] INT NULL
+)
 
 IF(OBJECT_ID('tempdb..#ARItemsForInTransitCosting') IS NOT NULL)
 BEGIN
@@ -552,7 +557,10 @@ CREATE TABLE #ARItemsForInTransitCosting
 	,[intForexRateTypeId] INT NULL
 	,[dblForexRate] NUMERIC(38, 20) NULL DEFAULT 1
 	,[intLinkedItem] INT NULL
-	,[intLinkedItemId] INT NULL)
+	,[intLinkedItemId] INT NULL
+	,[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	,[intTicketId] INT NULL
+)
 
 IF(OBJECT_ID('tempdb..#ARItemsForStorageCosting') IS NOT NULL)
 BEGIN
@@ -588,7 +596,9 @@ CREATE TABLE #ARItemsForStorageCosting
     ,[dblUnitRetail] NUMERIC(38, 20) NULL
 	,[intCategoryId] INT NULL 
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
-	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
+	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL
+	,[strBOLNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+)
 
 IF(OBJECT_ID('tempdb..#ARItemsForContracts') IS NOT NULL)
 BEGIN

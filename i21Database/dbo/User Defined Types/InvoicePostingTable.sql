@@ -70,6 +70,7 @@
     ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
     ,[ysnFromReturn]                        BIT             NULL
+    ,[strBOLNumber]							NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
 
     ,[intInvoiceDetailId]                   INT             NULL
     ,[intItemId]                            INT             NULL
