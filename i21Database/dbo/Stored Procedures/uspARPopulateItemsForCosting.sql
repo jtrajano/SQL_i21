@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
+﻿ CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -125,7 +125,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [dblQtyShipped], [dblShipmentNetWt] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
 		ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId], [intItemUOMId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
