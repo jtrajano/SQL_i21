@@ -28,19 +28,6 @@ LEFT JOIN tblGLVendorMappingDetail MD ON MD.intVendorMappingId = VM.intVendorMap
 
 UPDATE A
 	SET A.strNotes = CASE
-					-- WHEN 
-					-- 		A.intCurrencyId = B.intCurrencyId
-					-- 	AND B.ysnPaid = 0
-					-- 	AND B.ysnPosted = 1
-					-- 	AND B.intBillId > 0
-					-- 	AND (A.dblPayment + A.dblDiscount) = B.dblAmountDue
-					-- 	THEN 
-					-- 		(
-					-- 			CASE 
-					-- 			WHEN A.dblPayment < 0 AND B.intTransactionType = 1
-					-- 			THEN 'Invalid amount.'
-					-- 			ELSE NULL END
-					-- 		)
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
 					THEN 'Currency is different on current selected currency.'
@@ -60,14 +47,17 @@ UPDATE A
 						A.dblPayment < 0 AND B.intTransactionType != 3
 					THEN 'Amount is negative. Debit Memo type is expected.'
 					WHEN 
-						B.intTransactionType = 3 AND ((A.dblPayment + A.dblDiscount) - A.dblInterest) > 0
-					THEN 'Debit Memo type amount should be negative.'
+						A.dblPayment > (B.dblAmountDue * -1) AND B.intTransactionType = 3
+					THEN 'Overpayment'
 					WHEN 
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue
-					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Underpayment' ELSE 'Overpayment' END)
+						((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Overpayment'
+					WHEN
+						A.dblPayment < (B.dblAmountDue * -1) AND B.intTransactionType = 3
+					THEN 'Underpayment'
 					WHEN 
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue
-					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Overpayment' ELSE 'Underpayment' END)
+						((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Underpayment'
 					WHEN
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > (B.dblTotal - B.dblPaymentTemp)
 					THEN 'Already included in payment' + P.strPaymentRecordNum
