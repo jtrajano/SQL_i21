@@ -1344,6 +1344,16 @@ GO
 		   [strPrefix]						=		N'AQ',
 		   [ysnAddonComponent]              =       1
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'iSite')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		130,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'iSite',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		128,
+		   [strPrefix]						=		N'IS',
+		   [ysnAddonComponent]              =       1
 
 
 
