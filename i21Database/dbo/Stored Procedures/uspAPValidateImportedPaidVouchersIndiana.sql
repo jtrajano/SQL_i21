@@ -32,6 +32,16 @@ WHERE C.strLocationXRef = SUBSTRING(A.strVendorOrderNumber, 1, CHARINDEX('-', A.
 
 UPDATE A
 	SET A.strNotes = CASE
+					-- WHEN 
+					-- 		A.intCurrencyId = B.intCurrencyId
+					-- 	AND B.ysnPaid = 0
+					-- 	AND B.ysnPosted = 1
+					-- 	AND B.intBillId > 0
+					-- 	-- AND 1 = (CASE WHEN B.intTransactionType = 1 AND A.dblPayment > 0 AND A.dblPayment <= B.dblAmountDue THEN 1
+					-- 	-- 		WHEN B.intTransactionType = 3 AND A.dblPayment < 0 AND ABS(A.dblPayment) <= B.dblAmountDue THEN 1
+					-- 	-- 		ELSE 0 END)
+					-- 	AND ABS(A.dblPayment) = B.dblAmountDue
+					-- THEN NULL
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
 					THEN 'Currency is different on current selected currency.'
@@ -45,23 +55,20 @@ UPDATE A
 						B.intBillId IS NULL
 					THEN 'Voucher not found.'
 					WHEN 
-						A.dblPayment > 0 AND B.intTransactionType != 1
-					THEN 'Amount is positive. Voucher type is expected.'
-					WHEN 
-						A.dblPayment < 0 AND B.intTransactionType != 3
-					THEN 'Amount is negative. Debit Memo type is expected.'
-					WHEN 
 						A.dblPayment > (B.dblAmountDue * -1) AND B.intTransactionType = 3
 					THEN 'Overpayment'
 					WHEN 
-						((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue  AND B.intTransactionType = 1
+						A.dblPayment > B.dblAmountDue  AND B.intTransactionType = 1
 					THEN 'Overpayment'
 						WHEN 
 						A.dblPayment < (B.dblAmountDue * -1) AND B.intTransactionType = 3
 					THEN 'Underpayment'
 					WHEN 
-						((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue  AND B.intTransactionType = 1
+						A.dblPayment < B.dblAmountDue  AND B.intTransactionType = 1
 					THEN 'Underpayment'
+					WHEN 
+						A.dblPayment < 0 AND B.intTransactionType != 3
+					THEN 'Amount is negative. Debit Memo type is expected.'
 					WHEN
 						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > (B.dblTotal - B.dblPaymentTemp)
 					THEN 'Already included in payment' + P.strPaymentRecordNum
