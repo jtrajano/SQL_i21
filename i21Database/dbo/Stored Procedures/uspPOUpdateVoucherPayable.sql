@@ -119,12 +119,6 @@ BEGIN
 END
 ELSE
 BEGIN
-	--DON'T INCLUDE NON-INVENTORY PAYABLES THAT IS NO LONGER IN tblAPVoucherPayable
-	DELETE P
-	FROM @voucherPayables P
-	LEFT JOIN tblAPVoucherPayable VP ON VP.intPurchaseDetailId = P.intPurchaseDetailId
-	WHERE VP.intVoucherPayableId IS NULL
-
 	EXEC uspAPRemoveVoucherPayable @voucherPayables, DEFAULT, DEFAULT
 END
 
