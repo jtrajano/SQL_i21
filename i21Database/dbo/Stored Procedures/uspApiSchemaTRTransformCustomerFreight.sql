@@ -344,7 +344,7 @@ BEGIN
 				, strLogLevel = 'Info'
 				, strStatus = 'Skipped'
 				, intRowNo = @intRowNumber
-				, strMessage = 'Already exist in Customer Freight'	
+				, strMessage = 'Data is already existing in i21 Customer Freight'	
 		END
    	 	
 	 	FETCH NEXT FROM DataCursor INTO @intCustomerEntityId, @intEntityTariffTypeId, @intCustomerEntityLocationId, @strSupplierZipCode, @intCategoryId, @ysnFreightOnly, @strFreightType, @intShipViaEntityId, @dblFreightAmount, @dblFreightRate, @dblFreightMile, @ysnFreightInPrice, @dblMinimumUnit, @intRowNumber
