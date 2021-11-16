@@ -7048,9 +7048,9 @@ DECLARE @TFParentMenuId INT
 SELECT @TFParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Trade Finance' AND strModuleName = 'Trade Finance' AND intParentMenuID = 0
 
 --ACTIVITIES
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'IDP' AND intParentMenuID = @TFParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Activities', N'IDP', @TFParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+	VALUES (N'Activities', N'Trade Finance', @TFParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId
 
@@ -7077,7 +7077,7 @@ ELSE
 	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Reports' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId
 
 DECLARE @TFReportsParentMenuId INT
-SELECT @TFReportsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'IDP' AND intParentMenuID = @TFParentMenuId
+SELECT @TFReportsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trade Line Inquiry' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
@@ -7091,7 +7091,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trade Fi
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'TradeFinance.view.TradeFinanceLog' WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Facility Limits Report' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 	VALUES (N'Facility Limits Report', N'Trade Finance', @TFReportsParentMenuId, N'Facility Limits Report', N'Reports', N'Screen', N'TradeFinance.view.FacilityLimits', N'small-menu-activity', 1, 1, 0, 1, 4, 1)
 ELSE

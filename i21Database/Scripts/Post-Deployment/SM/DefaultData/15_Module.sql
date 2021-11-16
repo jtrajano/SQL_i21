@@ -1354,6 +1354,17 @@ GO
 		   [intSort]						=		128,
 		   [strPrefix]						=		N'IS',
 		   [ysnAddonComponent]              =       1
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Trade Finance')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix], [ysnAddonComponent] )
+	SELECT [intModuleId]					=		131,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Trade Finance',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+		   [intSort]						=		129,
+		   [strPrefix]						=		N'TRF',
+		   [ysnAddonComponent]              =       0
 
 
 
