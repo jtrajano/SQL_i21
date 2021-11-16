@@ -239,7 +239,7 @@ BEGIN
         SET strRTN = Bank.strRTN
         FROM tblCMBank AS Bank
         WHERE tblCMBankAccount.intBankId = Bank.intBankId
-        AND LEN(strRTN)< 300
+        AND LEN(tblCMBankAccount.strRTN)< 300
 
       INSERT INTO tblEMEntityPreferences (strPreference, strValue, intConcurrencyId) VALUES (''CM tblCMBankAccount RTN re-encryption using certificate'', ''1'', 0)
     ')
