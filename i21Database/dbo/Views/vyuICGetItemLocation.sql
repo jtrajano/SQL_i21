@@ -76,7 +76,7 @@ SELECT ItemLocation.intItemLocationId
 	, ItemLocation.ysnApplyBlueLaw2
 	, ItemLocation.ysnCarWash
 	, ItemLocation.intItemTypeCode
-	, strItemTypeCode = CAST(ISNULL(ItemTypeCode.intRadiantItemTypeCode, '') AS NVARCHAR) COLLATE Latin1_General_CI_AS
+	, strItemTypeCode = ItemTypeCode.strDescription
 	, ItemLocation.intItemTypeSubCode
 	, ItemLocation.ysnAutoCalculateFreight
 	, ItemLocation.intFreightMethodId
