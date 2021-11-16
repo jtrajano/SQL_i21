@@ -17,7 +17,7 @@ begin
 		select @Columns = substring(@Columns, 1, len(@Columns) - 1)
 	end
 
-	declare @sql nvarchar(3000)
+	declare @sql nvarchar(max)
 
 
 
@@ -86,9 +86,33 @@ begin
 						, Bin.strBinNotesBackgroundColor
 						, AverageDiscount.dblAverageReading
 						, BinDetails.dblPercentageFull
-						, BinDetails.dblAvailable as dblSpaceAvailable
-						, BinDetails.dblQuantity
-						, BinDetails.dblCapacity
+						, case when Bin.intUnitMeasureId is not null and Bin.intUnitMeasureId != BinDetails.intUnitMeasureId then 
+								dbo.fnGRConvertQuantityToTargetItemUOM(
+									BinDetails.intItemId
+									, BinDetails.intUnitMeasureId
+									, Bin.intUnitMeasureId
+									, BinDetails.dblAvailable) 
+							else 
+								BinDetails.dblAvailable
+							end  as dblSpaceAvailable
+						, case when Bin.intUnitMeasureId is not null and Bin.intUnitMeasureId != BinDetails.intUnitMeasureId then 
+								dbo.fnGRConvertQuantityToTargetItemUOM(
+									BinDetails.intItemId
+									, BinDetails.intUnitMeasureId
+									, Bin.intUnitMeasureId
+									, BinDetails.dblQuantity) 
+							else 
+								BinDetails.dblQuantity
+							end as dblQuantity
+						, case when Bin.intUnitMeasureId is not null and Bin.intUnitMeasureId != BinDetails.intUnitMeasureId then 
+								dbo.fnGRConvertQuantityToTargetItemUOM(
+									BinDetails.intItemId
+									, BinDetails.intUnitMeasureId
+									, Bin.intUnitMeasureId
+									, BinDetails.dblCapacity) 
+							else 
+								BinDetails.dblCapacity
+							end as dblCapacity
 						, Bin.strComBinNotesColor
 						, Bin.strComBinNotesBackgroundColor
 					from tblSCISBinSearch Bin 
@@ -105,15 +129,19 @@ begin
 							on Bin.intCommodityId = Commodity.intCommodityId
 						outer apply dbo.fnSCISGetAverageDiscountPerStorageLocation(Bin.intStorageLocationId, BinDiscount.intItemId) AverageDiscount
 						outer apply (
-							select round( dbo.fnMultiply( dbo.fnDivide( (dblCapacity - dblAvailable),  dblCapacity) , 100), 2) as dblPercentageFull
-								,dblAvailable
+							select round( dbo.fnMultiply( dbo.fnDivide( ( StorageBinDetails.dblCapacity -  StorageBinDetails.dblAvailable),   StorageBinDetails.dblCapacity) , 100), 2) as dblPercentageFull
+								, StorageBinDetails.dblAvailable
 								/*,dblCapacity
 								,(dblCapacity - dblAvailable) as dblOccupiedOutput */
-								, dblStock as dblQuantity
-								, dblCapacity
-								, strItemNo
-							from vyuICGetStorageBinDetails 
-								where intStorageLocationId = Bin.intStorageLocationId
+								, StorageBinDetails.dblStock as dblQuantity
+								, StorageBinDetails.dblCapacity
+								, StorageBinDetails.strItemNo
+								, ItemUOM.intUnitMeasureId
+								, StorageBinDetails.intItemId
+							from vyuICGetStorageBinDetails StorageBinDetails
+								join tblICItemUOM ItemUOM
+									on StorageBinDetails.intItemUOMId = ItemUOM.intItemUOMId
+								where StorageBinDetails.intStorageLocationId = Bin.intStorageLocationId
 						)BinDetails
 						
 						inner join #tmpLocationFilter locationFilter
