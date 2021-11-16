@@ -350,6 +350,8 @@
     <Build Include="dbo\Tables\tblQMTicketDiscountEstimatedSource.sql" />
     <Build Include="dbo\Tables\tblSCISBinSearchDiscountTracking.sql" />
     <Build Include="dbo\Triggers\trgAfterDeleteTRSupplyPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRFLogTradeFinance.sql" />
+    <Build Include="dbo\User Defined Types\TRFLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
