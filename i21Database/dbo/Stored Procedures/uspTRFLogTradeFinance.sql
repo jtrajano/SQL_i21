@@ -120,10 +120,7 @@ BEGIN
 			, @intContractDetailId = intContractDetailId
 		
 		FROM #tmpTradeFinanceLogs
-
-		---------------------------------------
-		------------ DERIVATIVES --------------
-		---------------------------------------
+		
 		INSERT INTO @FinalTable(
 				   strAction
 				 , strTransactionType
