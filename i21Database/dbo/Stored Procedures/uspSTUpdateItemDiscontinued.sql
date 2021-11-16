@@ -100,7 +100,10 @@ BEGIN TRY
 		IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Items') IS NULL 
 			BEGIN
 				CREATE TABLE #tmpUpdateItemForCStore_Items (
-					intItemId INT 
+					intItemId INT,
+                    dtmNotSoldSince DATETIME,
+					dtmNotPurchased DATETIME,
+					dtmCreatedOlderThan DATETIME
 				)
 			END
 
@@ -177,24 +180,35 @@ BEGIN TRY
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
 			
-		IF(@CreatedOlder IS NOT NULL AND @CreatedOlder != '')
+		--Add OR condition for ST-2009	
+		IF (@CreatedOlder IS NOT NULL OR @CreatedOlder != '' OR
+			@NotSoldSince IS NOT NULL OR @NotSoldSince != '' OR
+			@NotPurchasedSince IS NOT NULL OR @NotPurchasedSince != '' )
 			BEGIN
-				INSERT INTO #tmpUpdateItemForCStore_Items (
-					intItemId
+					INSERT INTO #tmpUpdateItemForCStore_Items (
+					intItemId,
+					dtmCreatedOlderThan,
+					dtmNotSoldSince,
+					dtmNotPurchased
 				)
-				SELECT DISTINCT item.intItemId FROM tblICItem item
+				SELECT DISTINCT item.intItemId as intItemId,
+				item.dtmDateCreated as dtmCreatedOlderThan,
+				invoice.dtmDate as dtmNotSoldSince,
+				receipt.dtmDateCreated as dtmNotPurchased
+				FROM tblICItem item
 				LEFT JOIN tblARInvoiceDetail invoicedetail
 					ON item.intItemId = invoicedetail.intItemId
 				LEFT JOIN tblARInvoice invoice
 					ON invoicedetail.intInvoiceId = invoice.intInvoiceId
 				LEFT JOIN tblICInventoryReceiptItem receipt
 					ON item.intItemId = receipt.intItemId
-				WHERE item.dtmDateCreated < ISNULL(@CreatedOlder, '1/1/1900') 
-						AND invoice.dtmDate < ISNULL(@NotSoldSince, '1/1/1900')
-						AND receipt.dtmDateCreated < ISNULL(@NotPurchasedSince, '1/1/1900')
-						AND item.strStatus != 'Discontinued'
+				WHERE item.strStatus != 'Discontinued'
+
 			END
+
+
 	END
+    -- END Add the filter records
 
 	-- MARK START UPDATE
 	SET @dtmDateTimeModifiedFrom = GETUTCDATE()
@@ -279,6 +293,9 @@ BEGIN TRY
 			, strOldDataPreview			NVARCHAR(MAX)
 			, ysnPreview				BIT DEFAULT(1)
 			, ysnForRevert				BIT DEFAULT(0)
+            , dtmNotSoldSince			DATETIME -- Added 
+			, dtmNotPurchased			DATETIME -- Added 
+			, dtmCreatedOlderThan		DATETIME -- Added 
 		)
 
 
@@ -309,6 +326,9 @@ BEGIN TRY
 			, strOldDataPreview
 			, ysnPreview
 			, ysnForRevert
+            , dtmNotSoldSince			 -- Added 
+			, dtmNotPurchased			 -- Added 
+			, dtmCreatedOlderThan		 -- Added 
 		)
 		SELECT	DISTINCT
 				strTableName					= N'tblICItem'
@@ -336,6 +356,10 @@ BEGIN TRY
 
 				, ysnPreview					= 1
 				, ysnForRevert					= 1
+
+                , dtmNotSoldSince			    = (SELECT TOP 1 dtmNotSoldSince FROM #tmpUpdateItemForCStore_Items WHERE intItemId = I.intItemId) -- Added 
+				, dtmNotPurchased			    = (SELECT TOP 1 dtmNotPurchased FROM #tmpUpdateItemForCStore_Items WHERE intItemId = I.intItemId) -- Added 
+				, dtmCreatedOlderThan		    = (SELECT TOP 1 dtmCreatedOlderThan FROM #tmpUpdateItemForCStore_Items WHERE intItemId = I.intItemId) -- Added 
 		FROM 
 		(
 			SELECT DISTINCT intItemId
@@ -349,6 +373,15 @@ BEGIN TRY
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemUOM UOM 
 			ON I.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
+            
+        --START Remove the Duplicate on the @tblPreview
+			;WITH CTE AS(
+			   SELECT intItemId,
+				   RN = ROW_NUMBER()OVER(PARTITION BY intItemId ORDER BY intItemId)
+			   FROM @tblPreview
+			)
+			DELETE FROM CTE WHERE RN > 1 
+		--END Remove the Duplicate on the @tblPreview
 	END
 
 
