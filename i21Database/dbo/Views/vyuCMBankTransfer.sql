@@ -13,8 +13,8 @@ CASE WHEN B.dtmDateReconciled IS NOT NULL THEN 1 ELSE 0 END ysnReconciled,
 CASE WHEN intBankTransferTypeId = 1 THEN 'Bank Transfer'  
  WHEN intBankTransferTypeId = 2 THEN 'Bank Transfer With In transit'   
  WHEN intBankTransferTypeId = 3 THEN 'Bank Forward'   
- WHEN intBankTransferTypeId = 4 THEN 'Swap In'   
- WHEN intBankTransferTypeId = 5 THEN 'Swap Out' 
+ WHEN intBankTransferTypeId = 4 THEN 'Swap Short'   
+ WHEN intBankTransferTypeId = 5 THEN 'Swap Long' 
 END strBankTransferTypeId,
 CASE WHEN A.intRateTypeIdAmountFrom = 99999 THEN 'Historic Rate' ELSE J.strCurrencyExchangeRateType  END strRateTypeAmountFrom,
 K.strCurrencyExchangeRateType strRateTypeAmountTo,

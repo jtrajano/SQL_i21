@@ -21,6 +21,7 @@ BEGIN
 	DECLARE @gainLoss DECIMAL(18,6),@gainLossForeign DECIMAL(18,6)
 	SELECT @gainLoss= sum(dblDebit - dblCredit) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
 	SELECT @gainLossForeign= sum(dblDebitForeign - dblCreditForeign) FROM #tmpGLDetail -- WHERE intTransactionId = @intTransactionId
+	IF @gainLoss <> 0
 	INSERT INTO #tmpGLDetail (
 			[strTransactionId]
 			,[intTransactionId]
