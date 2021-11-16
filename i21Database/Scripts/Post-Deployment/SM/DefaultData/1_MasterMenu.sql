@@ -9,8 +9,7 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cash Flow Report' AND strModuleName = 'Cash Management')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trade Finance' AND strModuleName = 'Trade Finance')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -6997,6 +6996,75 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Custom Document Models' AND int
 
 
 /* END Integrated Document Processing */
+
+
+
+
+
+/* START Trade Finance */
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trade Finance' AND strModuleName = 'Trade Finance' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Trade Finance', N'Trade Finance', 0, N'Trade Finance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 21, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 22 WHERE strMenuName = 'Trade Finance' AND strModuleName = 'Trade Finance' AND intParentMenuID = 0
+
+DECLARE @TFParentMenuId INT
+SELECT @TFParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Trade Finance' AND strModuleName = 'Trade Finance' AND intParentMenuID = 0
+
+--ACTIVITIES
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'IDP' AND intParentMenuID = @TFParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Activities', N'IDP', @TFParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId
+
+DECLARE @TFActivitiesParentMenuId INT
+SELECT @TFActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Incoming Documents' AND strModuleName = 'IDP' AND intParentMenuID = @TFActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Borrowing Facility', N'IDP', @TFActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'TradeFinance.view.BorrowingFacility', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'TradeFinance.view.BorrowingFacility' WHERE strMenuName = 'Borrowing Facility' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Loan/Line' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Bank Loan/Line', N'Trade Finance', @TFActivitiesParentMenuId, N'Bank Loan/Line', N'Activity', N'Screen', N'TradeFinance.view.BankLoanLine', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'TradeFinance.view.BankLoanLine' WHERE strMenuName = 'Bank Loan/Line' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId
+
+--REPORTS
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Reports', N'Trade Finance', @TFParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Reports' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId
+
+DECLARE @TFReportsParentMenuId INT
+SELECT @TFReportsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'IDP' AND intParentMenuID = @TFParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trade Line Inquiry' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Trade Line Inquiry', N'Trade Finance', @TFReportsParentMenuId, N'Trade Line Inquiry', N'Reports', N'Screen', N'TradeFinance.view.TradeLineInquiry', N'small-menu-activity', 1, 1, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'TradeFinance.view.TradeLineInquiry' WHERE strMenuName = N'Trade Line Inquiry' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Trade Finance Log', N'Trade Finance', @TFReportsParentMenuId, N'Trade Line Inquiry', N'Reports', N'Screen', N'TradeFinance.view.TradeFinanceLog', N'small-menu-activity', 1, 1, 0, 1, 3, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'TradeFinance.view.TradeFinanceLog' WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Facility Limits Report', N'Trade Finance', @TFReportsParentMenuId, N'Facility Limits Report', N'Reports', N'Screen', N'TradeFinance.view.FacilityLimits', N'small-menu-activity', 1, 1, 0, 1, 4, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'TradeFinance.view.FacilityLimits' WHERE strMenuName = N'Facility Limits Report' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId
+
+
+/* END Trade Finance */
+
 
 
 
