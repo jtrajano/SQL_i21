@@ -3795,6 +3795,35 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModul
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Position Report' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementActivitiesParentMenuId
 
+--DELETE DUPLICATE DATA
+DECLARE @BrokerageAccountsCount INT
+SELECT @BrokerageAccountsCount = count(*) from tblSMMasterMenu where strMenuName = 'Brokerage Accounts' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+IF ISNULL(@BrokerageAccountsCount, 1) > 1
+BEGIN
+	DELETE TOP (ISNULL(@BrokerageAccountsCount, 1) - 1) from tblSMMasterMenu where strMenuName = 'Brokerage Accounts' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+END
+
+DECLARE @FuturesMarketsCount INT
+SELECT @FuturesMarketsCount = count(*) from tblSMMasterMenu where strMenuName = 'Futures Markets' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+IF ISNULL(@FuturesMarketsCount, 1) > 1
+BEGIN
+	DELETE TOP (ISNULL(@FuturesMarketsCount, 1) - 1) from tblSMMasterMenu where strMenuName = 'Futures Markets' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+END
+
+DECLARE @MMConfigurationCount INT
+SELECT @MMConfigurationCount = count(*) from tblSMMasterMenu where strMenuName = 'M2M Configuration' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+IF ISNULL(@MMConfigurationCount, 1) > 1
+BEGIN
+	DELETE TOP (ISNULL(@MMConfigurationCount, 1) - 1) from tblSMMasterMenu where strMenuName = 'M2M Configuration' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+END
+
+DECLARE @RiskRatingMatrixCount INT
+SELECT @RiskRatingMatrixCount = count(*) from tblSMMasterMenu where strMenuName = 'Risk Rating Matrix' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+IF ISNULL(@RiskRatingMatrixCount, 1) > 1
+BEGIN
+	DELETE TOP (ISNULL(@RiskRatingMatrixCount, 1) - 1) from tblSMMasterMenu where strMenuName = 'Risk Rating Matrix' and strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementMaintenanceParentMenuId
+END
+
 /* END OF DELETE */
 
 /* TICKET MANAGEMENT */
