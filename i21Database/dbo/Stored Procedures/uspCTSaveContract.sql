@@ -2,7 +2,8 @@
 	
 	@intContractHeaderId INT,
 	@userId INT,
-	@strXML	NVARCHAR(MAX)	
+	@strXML	NVARCHAR(MAX),
+	@strTFXML	NVARCHAR(MAX) = ''
 	
 AS
 

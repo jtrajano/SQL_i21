@@ -58,7 +58,7 @@ BEGIN
 		+ '</intContractHeaderId></tblCTContractHeader></tblCTContractHeaders>'
 	EXEC uspCTValidateContractHeader @XML2, 'Modified'
 
-	EXEC uspCTSaveContract @intContractHeaderId, @intUserId, ''
+	EXEC	uspCTSaveContract @intContractHeaderId=@intContractHeaderId, @userId=@intUserId, @strXML='',@strTFXML='';
 
 	EXEC uspCTValidateContractAfterSave @intContractHeaderId
 END

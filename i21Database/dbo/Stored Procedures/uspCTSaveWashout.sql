@@ -152,7 +152,7 @@ BEGIN TRY
 		SET		dblFXPrice = @dblFXPrice 
 		WHERE	intContractDetailId = @intWashoutDetailId
 
-		EXEC	uspCTSaveContract @intWashoutHeaderId, NULL
+		EXEC	uspCTSaveContract @intContractHeaderId=@intWashoutHeaderId, @userId=NULL, @strXML='',@strTFXML='';
 
 		UPDATE	tblCTWashout SET intWashoutHeaderId = @intWashoutHeaderId, intWashoutDetailId = @intWashoutDetailId WHERE intWashoutId = @intWashoutId
 	END
