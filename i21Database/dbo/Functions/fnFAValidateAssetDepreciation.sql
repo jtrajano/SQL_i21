@@ -65,15 +65,6 @@ BEGIN
         WHERE BD.intAssetId IS NULL
 
         INSERT INTO @tbl
-        SELECT A.intAssetId, 'There is Depreciation Date on a closed period in this asset.' 
-        FROM tblFAFixedAssetDepreciation A 
-        JOIN  tblFAFixedAsset B on A.intAssetId = B.intAssetId
-	    JOIN @Id I on I.intId =  A.intAssetId
-        WHERE dbo.fnFAIsOpenAccountingDate(A.[dtmDepreciationToDate]) = 0
-        AND ISNULL(A.intBookId,1) = @BookId
-        GROUP BY  A.intAssetId
-
-        INSERT INTO @tbl
         SELECT 
         intId,  'Next Depreciation Date is on a closed period in this asset.'
         FROM @Id I 
