@@ -2,7 +2,7 @@ CREATE TABLE tblApiSchemaEmployeeTaxes(
     guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
     intRowNumber INT NULL,
     intKey INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    intEntityNo INT NOT NULL,                                                   --Required. Employee Entity ID
+    intEntityNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,                                                   --Required. Employee Entity ID
     strTaxId NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
     strTaxDescription NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,         --Description of the Tax
     strCalculationType NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
