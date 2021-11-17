@@ -36,6 +36,7 @@ BEGIN
     DECLARE @InvoiceIds 						[InvoiceId]
 	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
 	DECLARE @ItemsForCosting 					[ItemCostingTableType]
+	DECLARE @ItemsForCostingZeroCostValidation 	[ItemCostingTableType]
 	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
 	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
 	
@@ -1957,7 +1958,7 @@ BEGIN
 		,[intItemLocationId]
 		,ISNULL(dbo.fnGetMatchingItemUOMId([intItemId], ICIUOM.intUnitMeasureId), COSTING.intItemUOMId)
 		,[dtmDate]
-		,CASE WHEN [strType] IN ('CF Tran', 'POS') THEN ABS([dblQty]) ELSE [dblQty] END
+		,[dblQty]
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -2004,6 +2005,85 @@ BEGIN
 	FROM 
 		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCosting, @OneBit)
 
+	-- IC Zero Cost
+	INSERT INTO @ItemsForCostingZeroCostValidation
+		([intItemId]
+		,[intItemLocationId]
+		,[intItemUOMId]
+		,[dtmDate]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate])
+	SELECT
+		 [intItemId]
+		,[intItemLocationId]
+		,ISNULL(dbo.fnGetMatchingItemUOMId([intItemId], ICIUOM.intUnitMeasureId), COSTING.intItemUOMId)
+		,[dtmDate]
+		,ABS([dblQty])
+		,[dblUOMQty]
+		,[dblCost]
+		,[dblValue]
+		,[dblSalesPrice]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+		,[intTransactionId]
+		,[intTransactionDetailId]
+		,[strTransactionId]
+		,[intTransactionTypeId]
+		,[intLotId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[ysnIsStorage]
+		,[strActualCostId]
+		,[intSourceTransactionId]
+		,[strSourceTransactionId]
+		,[intInTransitSourceLocationId]
+		,[intForexRateTypeId]
+		,[dblForexRate]
+	FROM ##ARItemsForCosting COSTING
+	LEFT OUTER JOIN 
+	(SELECT intUnitMeasureId,intItemUOMId FROM tblICItemUOM ICUOM  WITH (NOLOCK)
+		) ICIUOM
+		ON COSTING.intItemUOMId = ICIUOM.intItemUOMId
+	WHERE ISNULL([ysnAutoBlend], 0) = 0
+	AND COSTING.intTransactionId NOT IN (SELECT intInvoiceId FROM ##ARInvalidInvoiceData)
+
+	INSERT INTO ##ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	SELECT
+		 [intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError]
+	FROM 
+		[dbo].[fnICGetInvalidInvoicesForCosting](@ItemsForCostingZeroCostValidation, @OneBit)
 
 	-- IC In Transit Costing
 	DELETE FROM @ItemsForInTransitCosting
