@@ -7728,7 +7728,7 @@
     <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationSegmentId.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationId.sql" />
     <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
     <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
     <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />

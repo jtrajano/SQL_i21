@@ -1,4 +1,4 @@
-ALTER VIEW vyuGLJournal
+CREATE VIEW vyuGLJournal
 AS
 SELECT 
     [intJournalId], 
