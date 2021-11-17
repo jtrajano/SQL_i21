@@ -176,6 +176,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strCategoryCode						= ICATEGORY.strCategoryCode
 	 , strCategoryDescription				= ICATEGORY.strDescription
 	 , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceDetailId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+	 , intTicketLoadDetailId				= ISNULL(TICKET.intLoadDetailId, 0)
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -296,7 +297,8 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intTicketId
 		 , strTicketNumber
-		, strCustomerReference		
+		 , strCustomerReference
+		 , intLoadDetailId
 	FROM tblSCTicket WITH(NOLOCK)
 ) TICKET ON INV.intTicketId = TICKET.intTicketId
 LEFT JOIN (
