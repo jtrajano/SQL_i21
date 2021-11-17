@@ -305,7 +305,7 @@ LEFT JOIN (
 LEFT JOIN (
 	SELECT intTicketId
 		 , strTicketNumber
-		, strCustomerReference	
+		 , strCustomerReference
 		 , intLoadDetailId
 	FROM tblSCTicket WITH(NOLOCK)
 ) TICKET ON INV.intTicketId = TICKET.intTicketId
