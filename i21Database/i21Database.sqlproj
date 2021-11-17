@@ -354,6 +354,9 @@
     <Build Include="dbo\User Defined Types\TRFLog.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessTFLogs.sql" />
+    <Build Include="dbo\Tables\tblCMCashFlowReportSummaryDetail.sql" />
+    <Build Include="dbo\Views\vyuCMCashFlowReportSummaryDetail.sql" />
+    <Build Include="dbo\Functions\fnCMGetPostedBankTransactionFromDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
