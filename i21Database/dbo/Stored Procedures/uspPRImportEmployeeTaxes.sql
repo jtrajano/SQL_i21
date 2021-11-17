@@ -10,6 +10,7 @@ BEGIN
 --DECLARE @guiApiUniqueId AS UNIQUEIDENTIFIER = N'6703E376-141D-4C67-B14A-B2CA86B3F502'
 --DECLARE @guiLogId AS UNIQUEIDENTIFIER = NEWID()
 DECLARE @EntityNo AS INT
+DECLARE @strEmployeeId  AS NVARCHAR(100)
 DECLARE @EmployeeTaxId AS INT
 DECLARE @TypeTaxId AS INT
 DECLARE @TaxId AS NVARCHAR(100)
@@ -52,7 +53,8 @@ SELECT
 	,intRowNo		= SE.intRowNumber
 	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	FROM tblApiSchemaEmployeeTaxes SE
-	LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
+	LEFT JOIN tblPREmployeeTax E 
+		ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
 	WHERE SE.guiApiUniqueId = @guiApiUniqueId
 	AND SE.intEntityNo IS NULL
 
@@ -61,29 +63,30 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 	BEGIN
 
 	SELECT TOP 1 
-			 @EntityNo = intEntityNo 
-			,@TaxId = strTaxId
-			,@TaxTaxDesc = strTaxDescription
-			,@intEntityEmployeeId = intEntityNo
-			,@strCalculationType  = strCalculationType
-			,@strFilingStatus  = strFilingStatus
-			,@intSupplementalCalc = (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
-			,@dblAmount = dblAmount
-			,@dblExtraWithholding = dblExtraWithholding
-			,@dblLimit = dblLimit
-			,@intAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strLiabilityAccount)
-			,@intExpenseAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
-			,@intAllowance = dblFederalAllowance
-			,@strPaidBy  = strPaidBy
-			,@ysnDefault = ysnDefault
-			,@ysnW42020 =  ysn2020W4
-			,@ysnW4Step2c = ysnStep2c
-			,@dblW4ClaimDependents = dblClaimDependents
-			,@dblW4OtherIncome  = dblotherIncome
-			,@dblW4Deductions = 0.00
-			,@ysnUseLocationDistribution = ysnLiabilityGlSplit
+			 @strEmployeeId						= CAST(tempTax.intEntityNo AS NVARCHAR(100))
+			,@EntityNo							= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = tempTax.intEntityNo)  
+			,@TaxId								= strTaxId
+			,@TaxTaxDesc						= strTaxDescription
+			,@intEntityEmployeeId				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = tempTax.intEntityNo)
+			,@strCalculationType				= strCalculationType
+			,@strFilingStatus					= strFilingStatus
+			,@intSupplementalCalc				= (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
+			,@dblAmount							= dblAmount
+			,@dblExtraWithholding				= dblExtraWithholding
+			,@dblLimit							= dblLimit
+			,@intAccountId						= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strLiabilityAccount)
+			,@intExpenseAccountId				= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
+			,@intAllowance						= dblFederalAllowance
+			,@strPaidBy							= strPaidBy
+			,@ysnDefault						= ysnDefault
+			,@ysnW42020							= ysn2020W4
+			,@ysnW4Step2c						= ysnStep2c
+			,@dblW4ClaimDependents				= dblClaimDependents
+			,@dblW4OtherIncome					= dblotherIncome
+			,@dblW4Deductions					= 0.00
+			,@ysnUseLocationDistribution		= ysnLiabilityGlSplit
 			,@ysnUseLocationDistributionExpense = ysnExpenseAccountGlSplit
-		FROM #TempEmployeeTaxes
+		FROM #TempEmployeeTaxes tempTax
 
 		SELECT TOP 1 
 				 @TypeTaxId= T.intTypeTaxId
@@ -93,7 +96,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			FROM tblPRTypeTax T 
 		left join tblPREmployeeTax PRTE
 		on T.intTypeTaxId = PRTE.intTypeTaxId
-			AND PRTE.intEntityEmployeeId = @EntityNo
+			AND PRTE.intEntityEmployeeId = @intEntityEmployeeId
 		WHERE strTax = @TaxId and strDescription = @TaxTaxDesc
 
 		IF @EmployeeTaxId IS NULL
@@ -128,7 +131,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 						,intConcurrencyId 
 						)
 						SELECT TOP 1
-							 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = EMT.intEntityNo)
+							 @EntityNo
 							,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
 							,EMT.strCalculationType
 							,EMT.strFilingStatus
@@ -153,11 +156,11 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 							,0
 							,1
 							FROM #TempEmployeeTaxes EMT
-						WHERE EMT.intEntityNo = @EntityNo AND EMT.strTaxId = @TaxId AND EMT.strTaxDescription = @TaxTaxDesc
+						WHERE EMT.intEntityNo = @strEmployeeId AND EMT.strTaxId = @TaxId AND EMT.strTaxDescription = @TaxTaxDesc
 					SET @NewId = SCOPE_IDENTITY()
 					END
 				
-				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
+				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @strEmployeeId AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
 
 			END
 		ELSE
@@ -187,7 +190,7 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 					WHERE intEntityEmployeeId = @EntityNo
 						AND intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
 
-				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @EntityNo AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
+				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @strEmployeeId AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
 				
 			END
 
@@ -202,12 +205,13 @@ SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniq
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee taxes has been successfully imported.'
 		FROM tblApiSchemaEmployeeTaxes SE
-		LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = SE.intEntityNo
+		LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
 		WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strTaxId = @TaxId
 		AND SE.strTaxDescription = @TaxTaxDesc
-		
 	END
+
+	
 
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeTaxes')) 
 	DROP TABLE #TempEmployeeTaxes
