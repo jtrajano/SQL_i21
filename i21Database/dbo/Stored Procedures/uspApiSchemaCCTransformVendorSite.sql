@@ -157,6 +157,7 @@ BEGIN
 	, strMessage = 'Invalid Site Type. Valid values: "I" = Company Owned Site, "E" = Dealer Site'
 	FROM tblApiSchemaCCVendorSite VS
 	WHERE VS.strSiteType NOT IN ('I', 'E')
+		AND VS.guiApiUniqueId = @guiApiUniqueId
 
 	--TRANSFORM
 	DECLARE cur CURSOR FOR
@@ -324,7 +325,7 @@ BEGIN
 		FROM tblCCSite
 		WHERE guiApiUniqueId = log.guiApiUniqueId
 	) r
-	WHERE log.guiApiImportLogId = @guiApiUniqueId
+	WHERE log.guiApiImportLogId = @guiLogId
 END
 
 
