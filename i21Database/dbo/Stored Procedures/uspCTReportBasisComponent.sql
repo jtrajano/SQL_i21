@@ -1,145 +1,178 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTReportBasisComponent]
-	@xmlParam NVARCHAR(MAX) = NULL
-
+				@xmlParam NVARCHAR(MAX) = NULL  
 AS
+	DECLARE @intContractDetailId	NVARCHAR(MAX),
+			@xmlDocumentId			INT,
+			@ContractFromDate		DATETIME,
+			@ContractToDate			DATETIME,
+			@StartFromDate			DATETIME,
+			@StartToDate			DATETIME,
+			@Condition				NVARCHAR(MAX) = '',
+			@SQL					NVARCHAR(MAX),
+			@EndFromDate			DATETIME,
+			@EndToDate				DATETIME,
+			@Position				NVARCHAR(100),
+			@Vendor					NVARCHAR(900),
+			@strMappingXML			NVARCHAR(MAX),
+			@dtmFromContractDate	DATETIME,
+			@dtmToContractDate		DATETIME,
+			@strProductType			NVARCHAR(100),
+			@strReportLogId			NVARCHAR(50),
+			@strPosition			NVARCHAR(200),
+			@EqualStartDate			DATETIME,
+			@EqualEndDate			DATETIME
 
-BEGIN
-	DECLARE @intContractDetailId	NVARCHAR(MAX)
-		, @xmlDocumentId			INT
-		, @Vendor					NVARCHAR(900)
-		, @dtmFromContractDate		DATETIME
-		, @dtmToContractDate		DATETIME
-		, @dtmFromStartDate			DATETIME
-		, @dtmToStartDate			DATETIME
-		, @dtmFromEndDate			DATETIME
-		, @dtmToEndDate				DATETIME
-		, @strProductType			NVARCHAR(100)
-		, @strReportLogId			NVARCHAR(50)
-		, @strPosition				NVARCHAR(200)
-		, @EqualStartDate			DATETIME
-		, @EqualEndDate				DATETIME
-		, @EqualContractDate		DATETIME
-		, @intQtyDec				INT
-		, @intPriceDec				INT
+	IF	LTRIM(RTRIM(@xmlParam)) = ''   
+		SET @xmlParam = NULL   
+      
+	DECLARE @temp_xml_table TABLE 
+	(  
+			[fieldname]		NVARCHAR(50),  
+			condition		NVARCHAR(20),        
+			[from]			NVARCHAR(MAX), 
+			[to]			NVARCHAR(MAX),  
+			[join]			NVARCHAR(10),  
+			[begingroup]	NVARCHAR(50),  
+			[endgroup]		NVARCHAR(50),  
+			[datatype]		NVARCHAR(50) 
+	)
 
-	SELECT @intQtyDec = intQuantityDecimals, @intPriceDec = intPricingDecimals FROM tblCTCompanyPreference
-
-	IF LTRIM(RTRIM(@xmlParam)) = ''
-		SET @xmlParam = NULL
-	
-	DECLARE @temp_xml_table TABLE ([fieldname] NVARCHAR(50)
-		, [condition] NVARCHAR(20)
-		, [from] NVARCHAR(MAX)
-		, [to] NVARCHAR(MAX)
-		, [join] NVARCHAR(10)
-		, [begingroup] NVARCHAR(50)
-		, [endgroup] NVARCHAR(50)
-		, [datatype] NVARCHAR(50))
-
-	DECLARE @dummy_xml_table TABLE ( [fieldname]		NVARCHAR(50)
-		, [condition] NVARCHAR(20)
-		, [from] NVARCHAR(MAX)
-		, [to] NVARCHAR(MAX)
-		, [join] NVARCHAR(10)
-		, [begingroup] NVARCHAR(50)
-		, [endgroup] NVARCHAR(50)
-		, [datatype] NVARCHAR(50))
-		
+	DECLARE @dummy_xml_table TABLE 
+	(  
+			[fieldname]		NVARCHAR(50),  
+			condition		NVARCHAR(20),        
+			[from]			NVARCHAR(MAX), 
+			[to]			NVARCHAR(MAX),  
+			[join]			NVARCHAR(10),  
+			[begingroup]	NVARCHAR(50),  
+			[endgroup]		NVARCHAR(50),  
+			[datatype]		NVARCHAR(50) 
+	)  
+  
 	IF ISNULL(@xmlParam,'') = '' OR @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam>''''</xmlparam>'
 	BEGIN
-		-- Return No Records
-		SELECT * FROM vyuCTGetBasisComponentJDE CD
-		WHERE 1 = 2
+		SELECT  CD.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+				CD.strERPPONumber,
+				CD.dtmStartDate,
+				CD.dtmEndDate,
+				CD.strCustomerVendor,
+				CD.strItemNo,
+				CD.dblDetailQuantity,
+				CD.strItemUOM,
+				CD.dblNetWeight,
+				CD.strWeightUOM,
+				CD.dtmContractDate,
+				CD.strContractItemName, 
+				CD.strContractItemNo,
+				CD.strFutMarketName, 
+				CD.strFutureMonth,
+				CD.dblFutures,
+				CD.strCurrency,
+				BI.strItemNo	AS strComponentItem,
+				CC.dblRate,
+				CD.strPriceUOM,
+				CD.dblBasis,
+				CD.dblCashPrice,
+				1 AS intDisplayOrder,
+				CD.strInternalComment,
+				CD.intContractDetailId,
+				ISNULL(CD.strPosition, '') AS Position,
+				CD.dtmPlannedAvailabilityDate
+
+		FROM	vyuCTSearchContractDetail	CD
+		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
+		JOIN	tblICItem					BI	ON	BI.intItemId			=	CC.intItemId
+		WHERE	1 = 2 
+
 		RETURN
 	END
 
 	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
   
 	INSERT INTO @temp_xml_table  
-	SELECT *
-	FROM OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)
-	WITH ([fieldname] NVARCHAR(50)
-		, [condition] NVARCHAR(20)
-		, [from] NVARCHAR(MAX)
-		, [to] NVARCHAR(MAX)
-		, [join] NVARCHAR(10)
-		, [begingroup] NVARCHAR(50)
-		, [endgroup] NVARCHAR(50)
-		, [datatype] NVARCHAR(50))
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(MAX), 
+				[to]			NVARCHAR(MAX),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
+	)
 
 	INSERT INTO @dummy_xml_table  
-	SELECT *
-	FROM OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)
-	WITH ([fieldname] NVARCHAR(50)
-		, [condition] NVARCHAR(20)
-		, [from] NVARCHAR(MAX)
-		, [to] NVARCHAR(MAX)
-		, [join] NVARCHAR(10)
-		, [begingroup] NVARCHAR(50)
-		, [endgroup] NVARCHAR(50)
-		, [datatype] NVARCHAR(50))
-	
-	SELECT @intContractDetailId = [from]
-	FROM @temp_xml_table   
-	WHERE [fieldname] = 'intContractDetailId'
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(MAX), 
+				[to]			NVARCHAR(MAX),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
+	)  
+    
+    
+	SELECT	@intContractDetailId = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'intContractDetailId'
 
-	SELECT @dtmFromContractDate = [from]
-		, @dtmToContractDate = [to]
-	FROM @temp_xml_table   
-	WHERE [fieldname] = 'ContractDate'
-		AND	UPPER(condition) = 'BETWEEN'
+	SELECT	@dtmFromContractDate = [from],
+			@dtmToContractDate = [to]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'ContractDate'
+			AND	condition = 'Between'
 
-	SELECT @strProductType = [from]
-	FROM @temp_xml_table   
-	WHERE [fieldname] = 'ProductType'
-		AND	condition = 'Equal To'
+	SELECT	@strProductType = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'ProductType'
+			AND	condition = 'Equal To'
 
-	SELECT @Vendor = [from]
-	FROM @temp_xml_table   
-	WHERE [fieldname] = 'Vendor'
-		AND	condition = 'Equal To'
+	SELECT	@strPosition = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'Position'
+	AND		condition = 'Equal To'
 
-	SELECT @strPosition = [from]
-	FROM @temp_xml_table   
-	WHERE [fieldname] = 'Position'
-		AND condition = 'Equal To'
+	SELECT	@strReportLogId = [from]
+	FROM	@dummy_xml_table   
+	WHERE	[fieldname] = 'strReportLogId'
 
-	SELECT @strReportLogId = [from]
-	FROM @dummy_xml_table
-	WHERE [fieldname] = 'strReportLogId'
+	SELECT	@StartFromDate = [from],
+			@StartToDate = [to]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'StartDate'
+			AND	condition = 'Between'
 
-	SELECT @dtmFromStartDate = [from]
-		, @dtmToStartDate = [to]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'StartDate'
-		AND	UPPER(condition) = 'BETWEEN'
+	SELECT	@EndFromDate = [from],
+			@EndToDate = [to]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'EndDate'
+			AND	condition = 'Between'
 
-	SELECT @dtmFromEndDate = [from]
-		, @dtmToEndDate = [to]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'EndDate'
-		AND	UPPER(condition) = 'BETWEEN'
-	
-	SELECT @EqualStartDate = [from]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'StartDate'
-		AND	condition = 'Equal To'
-	
-	SELECT @EqualEndDate = [from]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'EndDate'
-		AND	condition = 'Equal To'
+	SELECT	@EqualStartDate = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'StartDate'
+			AND	condition = 'Equal To'
 
-	SELECT @EqualContractDate = [from]
-	FROM @temp_xml_table
-	WHERE [fieldname] = 'ContractDate'
-		AND	condition = 'Equal To'
-	
+	SELECT	@EqualEndDate = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'EndDate'
+			AND	condition = 'Equal To'
+
 	IF EXISTS(SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 	BEGIN	
 		RETURN
-	END;
+	END
 
+	IF OBJECT_ID('tempdb..#BasisComponent') IS NOT NULL  				
+		DROP TABLE #BasisComponent				
+	
+	;
 	with CTECert as
 	(
 		select
@@ -148,104 +181,244 @@ BEGIN
 		from
 			tblCTContractCertification cr
 			left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
-	)
-
-	SELECT DISTINCT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq AS NVARCHAR)
-		, strPONumber = CD.strERPPONumber
-		, CH.dtmContractDate
-		, dtmStartDate = CONVERT(DATE, CD.dtmStartDate)
-		, dtmEndDate = CONVERT(DATE, CD.dtmEndDate)
-		, CD.dtmPlannedAvailabilityDate
-		, strEntity = EN.strName
-		, CH.strInternalComment
-		, strItem = IT.strItemNo
-		, dblQuantity = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblQuantity), @intQtyDec)
-		, strQtyUOM = IUOM.strUnitMeasure
-		, dblNetWeight = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), @intQtyDec)
-		, strWeightUOM = WUOM.strUnitMeasure
-		, strContractItem = IC.strContractItemName
-		, strMarket = FMarket.strFutMarketName
-		, strMonth = FMonth.strFutureMonth
-		, CU.strCurrency
-		, strPriceUOM = PUOM.strUnitMeasure
-		, dblFutures = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblFutures), @intPriceDec)
-		, strProductType = PT.strDescription
-		, strINCOShipTerms = ST.strFreightTerm
-		, CS.strContractStatus
-		, dblFinancingCost = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFinancingCost), @intPriceDec)
-		, dblFOB = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOB), @intPriceDec)
-		, dblSustainabilityPremium = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblSustainabilityPremium), @intPriceDec)
-		, dblFOBCAD = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOBCAD), @intPriceDec)
-		, dblOtherCost =  ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblOtherCost), @intPriceDec)
-		, dblBasis = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblBasis), @intPriceDec)
-		, dblCashPrice = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblCashPrice), @intPriceDec)
-		, ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
-		, strCertificateName = (
+	),
+	CTEDetail AS
+	(
+			SELECT	CH.strContractNumber + ' - ' + LTRIM(CD.intContractSeq) strContractSeq,
+					CD.strERPPONumber,
+					CD.dtmStartDate,
+					CD.dtmEndDate,				
+					CD.dblQuantity AS dblDetailQuantity,					
+					CD.dblNetWeight,
+					CD.dblFutures,
+					CD.dblBasis,
+					CD.dblCashPrice,
+					CD.intContractDetailId,
+					CD.dtmPlannedAvailabilityDate,
+					
+					CH.strInternalComment,
+					EY.strName AS strCustomerVendor,
+					IM.strItemNo,
+					UM.strUnitMeasure AS strItemUOM,
+					U4.strUnitMeasure AS strWeightUOM,
+					CH.dtmContractDate,
+					IC.strContractItemName, 
+					IC.strContractItemNo,
+					FM.strFutMarketName, 
+					MO.strFutureMonth,
+					CU.strCurrency,
+					U2.strUnitMeasure AS strPriceUOM,
+					strPosition = ISNULL(PO.strPosition, ''),
+					CA.strDescription  AS strProductType,
+					--CB.strContractBasis,
+					strContractBasis = CB.strFreightTerm,
+					CS.strContractStatus,
+					ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS,
+					strCertificationName = (
 						select
 							STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
 						FROM
 							CTECert where intContractDetailId = CD.intContractDetailId
 						FOR XML PATH('')),' #!',', '), 1, 2, '')
-					)
-		, strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS
-		, strOrigin = ISNULL(RY.strCountry, OG.strCountry)
-		, strShipper = PR.strName
-	FROM tblCTContractDetail CD
-	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-	JOIN tblEMEntity EN ON EN.intEntityId = CH.intEntityId
-	JOIN tblICItem IT ON IT.intItemId = CD.intItemId
-	JOIN tblICUnitMeasure IUOM ON IUOM.intUnitMeasureId = CD.intUnitMeasureId
-	JOIN tblICItemUOM WIUOM ON WIUOM.intItemUOMId = CD.intNetWeightUOMId
-	JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = WIUOM.intUnitMeasureId
-	JOIN tblICItemUOM PIUOM ON PIUOM.intItemUOMId = CD.intPriceItemUOMId
-	JOIN tblICUnitMeasure PUOM ON PUOM.intUnitMeasureId = PIUOM.intUnitMeasureId
-	JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
-	LEFT JOIN (
-		SELECT intContractDetailId
-			, dblFinancingCost = [Financing cost]
-			, dblFOB = [FOB +]
-			, dblSustainabilityPremium = [Sustainability Premium]
-			, dblFOBCAD = [FOB CAD]
-			, dblOtherCost = [Other costs]
-		FROM (
-			SELECT intContractDetailId
-				, strItemNo
-				, dblRate
-			FROM vyuCTContractCostView
-			WHERE ysnBasis = 1
-		) t 
-		PIVOT(
-			SUM(dblRate)
-			FOR strItemNo IN ([Financing cost]
-				, [FOB +]
-				, [Sustainability Premium]
-				, [FOB CAD]
-				, [Other costs])
-		) AS pivot_table
-	) CCTotal ON CCTotal.intContractDetailId = CD.intContractDetailId
-	LEFT JOIN tblICItemUOM IIUOM ON IIUOM.intItemUOMId = CD.intItemUOMId
-	LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
-	LEFT JOIN tblRKFutureMarket FMarket ON FMarket.intFutureMarketId = CD.intFutureMarketId
-	LEFT JOIN tblRKFuturesMonth FMonth ON FMonth.intFutureMonthId = CD.intFutureMonthId
-	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId
-	LEFT JOIN tblSMFreightTerms ST ON ST.intFreightTermId = ISNULL(CH.intFreightTermId, CD.intFreightTermId)
-	LEFT JOIN tblICCommodityAttribute PT ON	PT.intCommodityAttributeId = IT.intProductTypeId AND PT.strType = 'ProductType'
-	LEFT JOIN tblCTPosition PS ON PS.intPositionId = CH.intPositionId
+					),
+					strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS,
+					strOrigin = ISNULL(RY.strCountry, OG.strCountry),
+					strShipper = PR.strName
+
+			FROM	tblCTContractDetail		CD
+			JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
+											AND	CD.intContractStatusId			<>	3
+											AND CH.dtmContractDate	BETWEEN ISNULL(@dtmFromContractDate,dtmContractDate)
+																	AND		ISNULL(@dtmToContractDate,dtmContractDate)
+			JOIN	tblEMEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
+			JOIN	tblCTContractStatus		CS	ON	CS.intContractStatusId		=	CD.intContractStatusId
+			JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
+			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
+
+	--LEFT	JOIN	tblCTContractBasis		CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
+	LEFT	JOIN	tblSMFreightTerms		CB	ON	CB.intFreightTermId		=	isnull(CH.intFreightTermId,CD.intFreightTermId)
+	LEFT	JOIN	tblCTPosition			PO	ON	PO.intPositionId			=	CH.intPositionId
+	LEFT	JOIN	tblICItemUOM			WU	ON	WU.intItemUOMId				=	CD.intNetWeightUOMId		
+	LEFT	JOIN	tblICUnitMeasure		U4	ON	U4.intUnitMeasureId			=	WU.intUnitMeasureId	
+	LEFT	JOIN	tblICItemContract		IC	ON	IC.intItemContractId		=	CD.intItemContractId
+	LEFT	JOIN	tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId
+	LEFT	JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			
+	LEFT	JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
+	LEFT	JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId		
+	LEFT	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	PU.intUnitMeasureId	
+	LEFT	JOIN	tblICCommodityAttribute	CA	ON	CA.intCommodityAttributeId	=	IM.intProductTypeId
+												AND	CA.strType					=	'ProductType'
+	--left join tblCTContractCertification cr on cr.intContractDetailId = CD.intContractDetailId
+	--left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+
+
 	LEFT JOIN tblSMCountry RY WITH(NOLOCK) ON RY.intCountryID = IC.intCountryId
-	LEFT JOIN tblICCommodityAttribute CA2 WITH(NOLOCK) ON CA2.intCommodityAttributeId = IT.intOriginId AND CA2.strType = 'Origin'  
-	LEFT JOIN tblSMCountry OG WITH(NOLOCK) ON OG.intCountryID = CA2.intCountryID  
-	LEFT JOIN tblEMEntity PR WITH(NOLOCK) ON PR.intEntityId = ISNULL(CD.intProducerId, CH.intProducerId) 
-	WHERE CD.intContractStatusId <> 3
-		AND CD.dtmStartDate >= ISNULL(@dtmFromStartDate, CD.dtmStartDate) AND CD.dtmStartDate <= ISNULL(@dtmToStartDate, CD.dtmStartDate)
-		AND CD.dtmEndDate >= ISNULL(@dtmFromEndDate, CD.dtmEndDate) AND CD.dtmEndDate <= ISNULL(@dtmToEndDate, CD.dtmEndDate)
-		AND CH.dtmContractDate >= ISNULL(@dtmFromContractDate, CH.dtmContractDate) AND CH.dtmContractDate <= ISNULL(@dtmToContractDate, CH.dtmContractDate)
-		AND CONVERT(DATE, CH.dtmContractDate) = ISNULL(@EqualContractDate, CONVERT(DATE, CH.dtmContractDate))
-		AND CONVERT(DATE, CD.dtmStartDate) = ISNULL(@EqualStartDate, CONVERT(DATE, CD.dtmStartDate))
-		AND CONVERT(DATE, CD.dtmEndDate) = ISNULL(@EqualEndDate, CONVERT(DATE, CD.dtmEndDate))
-		AND CD.intContractDetailId = ISNULL(@intContractDetailId, CD.intContractDetailId)
-		AND ISNULL(PT.strDescription, '') = ISNULL(@strProductType, ISNULL(PT.strDescription, ''))
-		AND	ISNULL(PS.strPosition, '') = ISNULL(@strPosition, ISNULL(PS.strPosition, ''))
-		AND	ISNULL(EN.strName, '') = ISNULL(@Vendor, ISNULL(EN.strName, ''))
+	LEFT JOIN tblICCommodityAttribute CA2 WITH(NOLOCK) ON CA2.intCommodityAttributeId = IM.intOriginId AND CA2.strType = 'Origin'
+	LEFT JOIN tblSMCountry OG WITH(NOLOCK) ON OG.intCountryID = CA2.intCountryID
+	LEFT JOIN tblEMEntity PR WITH(NOLOCK) ON PR.intEntityId = ISNULL(CD.intProducerId, CH.intProducerId)
+
+	WHERE CD.dtmStartDate between ISNULL(@StartFromDate,CD.dtmStartDate) and ISNULL(@StartToDate,CD.dtmStartDate)
+	AND convert(date,CD.dtmStartDate) = isnull(@EqualStartDate,convert(date,CD.dtmStartDate))
+	AND CD.dtmEndDate between ISNULL(@EndFromDate,CD.dtmEndDate) and ISNULL(@EndToDate,CD.dtmEndDate)
+	AND convert(date,CD.dtmEndDate) = ISNULL(@EqualEndDate,convert(date,CD.dtmEndDate))
+	AND ISNULL(CA.strDescription, '') = ISNULL(@strProductType, ISNULL(CA.strDescription, ''))
+	AND	ISNULL(PO.strPosition, '') = ISNULL(@strPosition, ISNULL(PO.strPosition, ''))
+	)
+
+	SELECT	* 
+	INTO	#BasisComponent
+	FROM
+	(
+		SELECT  CD.strContractSeq,
+				CD.strERPPONumber,
+				CD.dtmStartDate,
+				CD.dtmEndDate,
+				CD.strCustomerVendor,
+				CD.strItemNo,
+				CD.dblDetailQuantity,
+				CD.strItemUOM,
+				CD.dblNetWeight,
+				CD.strWeightUOM,
+				CD.dtmContractDate,
+				CD.strContractItemName, 
+				CD.strContractItemNo,
+				CD.strFutMarketName, 
+				CD.strFutureMonth,
+				CD.dblFutures,
+				CD.strCurrency,
+				BI.strItemNo	AS strComponentItem,
+				CC.dblRate,
+				CD.strPriceUOM,
+				CD.dblBasis,
+				CD.dblCashPrice,
+				1 AS intDisplayOrder,
+				CD.strInternalComment,
+				CD.intContractDetailId,
+				strPosition = ISNULL(CD.strPosition, ''),
+				CD.dtmPlannedAvailabilityDate,
+				CD.strProductType,
+				CD.strContractBasis,
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
+
+		FROM	CTEDetail	CD
+		JOIN	tblCTContractCost			CC	ON	CC.intContractDetailId	=	CD.intContractDetailId
+		JOIN	tblICItem					BI	ON	BI.intItemId			=	CC.intItemId
+		WHERE	CC.ysnBasis	=	1 
+
+		UNION ALL
+
+		SELECT  CD.strContractSeq,
+				CD.strERPPONumber,
+				CD.dtmStartDate,
+				CD.dtmEndDate,
+				CD.strCustomerVendor,
+				CD.strItemNo,
+				CD.dblDetailQuantity,
+				CD.strItemUOM,
+				CD.dblNetWeight,
+				CD.strWeightUOM,
+				CD.dtmContractDate,
+				CD.strContractItemName, 
+				CD.strContractItemNo,
+				CD.strFutMarketName, 
+				CD.strFutureMonth,
+				CD.dblFutures,
+				CD.strCurrency,
+				'Basis'			AS	strComponentItem,
+				CD.dblBasis		AS  dblRate,
+				CD.strPriceUOM,
+				CD.dblBasis,
+				CD.dblCashPrice,
+				2 AS intDisplayOrder,
+				CD.strInternalComment,
+				CD.intContractDetailId,
+				strPosition = ISNULL(CD.strPosition, ''),
+				CD.dtmPlannedAvailabilityDate,
+				CD.strProductType,
+				CD.strContractBasis,
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
+
+		FROM	CTEDetail	CD
+
+		UNION ALL
+
+		SELECT  CD.strContractSeq,
+				CD.strERPPONumber,
+				CD.dtmStartDate,
+				CD.dtmEndDate,
+				CD.strCustomerVendor,
+				CD.strItemNo,
+				CD.dblDetailQuantity,
+				CD.strItemUOM,
+				CD.dblNetWeight,
+				CD.strWeightUOM,
+				CD.dtmContractDate,
+				CD.strContractItemName, 
+				CD.strContractItemNo,
+				CD.strFutMarketName, 
+				CD.strFutureMonth,
+				CD.dblFutures,
+				CD.strCurrency,
+				'Cash Price'		AS	strComponentItem,
+				CD.dblCashPrice		AS  dblRate,
+				CD.strPriceUOM,
+				CD.dblBasis,
+				CD.dblCashPrice,
+				3 AS intDisplayOrder,
+				CD.strInternalComment,
+				CD.intContractDetailId,
+				strPosition = ISNULL(CD.strPosition, ''),
+				CD.dtmPlannedAvailabilityDate,
+				CD.strProductType,
+				CD.strContractBasis,
+				CD.strContractStatus,
+				CD.ysnStrategic,
+				strCertificateName = CD.strCertificationName,
+				strFronting = CD.strFronting,
+				strOrigin = CD.strOrigin,
+				strShipper = CD.strShipper
+
+		FROM	CTEDetail	CD
+	)t
+	
+	SELECT @strMappingXML = 
+	'<mappings>
+		<mapping><fieldname>ContractDate</fieldname><fromField>dtmContractDate</fromField><toField></toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>StartDate</fieldname><fromField>dtmStartDate</fromField><toField>dtmEndDate</toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>EndDate</fieldname><fromField>dtmEndDate</fromField><toField>dtmStartDate</toField><ignoreTime>1</ignoreTime></mapping>
+		<mapping><fieldname>Position</fieldname><fromField>strPosition</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
+		<mapping><fieldname>Vendor</fieldname><fromField>strCustomerVendor</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
+		<mapping><fieldname>ProductType</fieldname><fromField>strProductType</fromField><toField></toField><ignoreTime></ignoreTime></mapping>
+	</mappings>'
+
+	IF ISNULL(@intContractDetailId,'') <> ''
+	BEGIN
+		SET @Condition = ' intContractDetailId IN (' + @intContractDetailId + ') '
+	END
+	ELSE
+	BEGIN
+		EXEC	uspCTGenerateWhereClause
+				@strDataXML= @xmlParam
+			   ,@strMappingXML = @strMappingXML
+			   ,@strClause = @Condition OUTPUT
+	END
+	
+	IF LEN(LTRIM(RTRIM(ISNULL(@Condition,'')))) > 0
+		SET @SQL = 'SELECT * FROM #BasisComponent WHERE ' + @Condition
+	ELSE
+		SET @SQL = 'SELECT * FROM #BasisComponent'
 	
 	INSERT INTO tblSRReportLog(strReportLogId,dtmDate) VALUES(@strReportLogId ,GETDATE())
-END
+
+	--SELECT @SQL
+	EXEC sp_executesql @SQL

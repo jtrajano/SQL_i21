@@ -19,16 +19,9 @@
     [ysnCMRevalued]				BIT				DEFAULT 0 NULL,
 	[ysnConsolidated]			BIT				DEFAULT 0 NULL,
     [intConcurrencyId]			INT				DEFAULT 1 NOT NULL,
-   CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED 
-(
-	[intGLFiscalYearPeriodId] ASC,
-	[intFiscalYearId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 70) ON [PRIMARY],
- CONSTRAINT [IX_tblGLFiscalYearPeriod] UNIQUE NONCLUSTERED 
-(
-	[strPeriod] ASC --GL-8520 Make Fiscal Period unique
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY]
+    CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED ([intGLFiscalYearPeriodId] ASC, [intFiscalYearId] ASC),
+    CONSTRAINT [FK_tblGLPeriod_tblGLFiscalYearPeriod] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId]) ON DELETE CASCADE
+);
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblGLFiscalYearPeriod_intFiscalYearId]

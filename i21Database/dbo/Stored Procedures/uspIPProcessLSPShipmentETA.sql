@@ -37,8 +37,6 @@ DECLARE @intMinLoadDetailRecordId INT
 DECLARE @intContractDetailId INT
 DECLARE @intContractHeaderId INT
 DECLARE @intApprovedById INT
-DECLARE @dtmCalculatedAvailabilityDate DATETIME
-	,@intLeadTime INT
 
 If ISNULL(@strSessionId,'')=''
 	Select @intMinRowNo=Min(intStageShipmentETAId) From tblIPShipmentETAStage
@@ -51,9 +49,6 @@ Begin
 		Set @intNoOfRowsAffected=1
 		Set @intLoadId=NULL
 		Set @intLoadStgId=NULL
-
-		SELECT @dtmCalculatedAvailabilityDate = NULL
-			,@intLeadTime = NULL
 
 		Select @strDeliveryNo=strDeliveryNo,@dtmETA=dtmETA,@strPartnerNo=strPartnerNo
 		From tblIPShipmentETAStage Where intStageShipmentETAId=@intMinRowNo
@@ -79,17 +74,9 @@ Begin
 		If ISNULL(CONVERT(VARCHAR(10),@dtmOldETA,112),'') = ISNULL(CONVERT(VARCHAR(10),@dtmETA,112),'')
 			RaisError('No Change in ETA',16,1)
 
-		SELECT @intLeadTime = ISNULL(DPort.intLeadTime, 0)
-		FROM tblLGLoad L
-		OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
-					WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
-		WHERE L.intLoadId = @intLoadId
-		
-		SELECT @dtmCalculatedAvailabilityDate = DATEADD(DD, ISNULL(@intLeadTime, 0), @dtmETA)
-
 		Begin Tran
 
-		Update tblLGLoad Set dtmETAPOD=@dtmETA,dtmETAPOD1=@dtmETA,dtmPlannedAvailabilityDate=@dtmCalculatedAvailabilityDate,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
+		Update tblLGLoad Set dtmETAPOD=@dtmETA,dtmETAPOD1=@dtmETA,dtmPlannedAvailabilityDate=@dtmETA,intConcurrencyId=intConcurrencyId+1 Where intLoadId=@intLoadId
 
 		-- Set planned availability date and send a feed to SAP
 		DELETE
@@ -104,7 +91,7 @@ Begin
 		FROM tblCTContractDetail CD
 		JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
 			AND LD.intLoadId = @intLoadId
-			AND CD.dtmPlannedAvailabilityDate <> @dtmCalculatedAvailabilityDate
+			AND CD.dtmPlannedAvailabilityDate <> @dtmETA
 
 		SELECT @intMinLoadDetailRecordId = MIN(intDetailRecordId)
 		FROM @tblLoadDetail
@@ -126,7 +113,7 @@ Begin
 			ORDER BY intApprovedContractId DESC
 
 			UPDATE tblCTContractDetail
-			SET dtmPlannedAvailabilityDate = @dtmCalculatedAvailabilityDate
+			SET dtmPlannedAvailabilityDate = @dtmETA
 				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intContractDetailId = @intContractDetailId
 

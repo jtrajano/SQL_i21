@@ -8,7 +8,6 @@
     [dtmBeginDate] DATETIME NULL, 
     [dtmEndDate] DATETIME NULL, 
     [dblRatePerUnit] NUMERIC(18, 6) NULL, 
-    [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblBBRate] PRIMARY KEY CLUSTERED ([intRateId] ASC), 
     CONSTRAINT [FK_tblBBRate_tblBBProgramCharge] FOREIGN KEY ([intProgramChargeId]) REFERENCES [tblBBProgramCharge] ([intProgramChargeId]) ON DELETE CASCADE,
 )

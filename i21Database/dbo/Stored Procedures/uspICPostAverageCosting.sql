@@ -116,11 +116,6 @@ DECLARE @TransactionType_InventoryReceipt AS INT = 4
 DECLARE @intReturnValue AS INT 
 		,@dtmCreated AS DATETIME 
 
-DECLARE @AverageFIFOOUt AS TABLE (
-	intInventoryFIFOId INT 
-	,dblQty NUMERIC(38, 20) 
-)
-
 IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
 BEGIN 	
 	-- Replace the UOM to 'Stock Unit'. 
@@ -173,45 +168,7 @@ BEGIN
 				AND @dblLastCost IS NOT NULL
 
 		-- Make sure the cost is not null. 
-		SET @dblCost = ISNULL(@dblCost, 0) 		
-
-		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
-		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
-		WHILE (ISNULL(@dblReduceQty, 0) < 0)
-		BEGIN 
-			EXEC @intReturnValue = dbo.uspICReduceStockInAvg
-				@intItemId
-				,@intItemLocationId
-				,@intItemUOMId
-				,@dtmDate
-				,@dblReduceQty
-				,@dblCost
-				,@strTransactionId
-				,@intTransactionId
-				,@intTransactionDetailId
-				,@intEntityUserSecurityId
-				,@RemainingQty OUTPUT
-				,@CostUsed OUTPUT 
-				,@QtyOffset OUTPUT 
-				,@UpdatedFifoId OUTPUT 
-			
-			IF @intReturnValue < 0 RETURN @intReturnValue;
-
-			-- Insert the record into the @AverageFIFOOUt
-			INSERT INTO @AverageFIFOOUt (
-				intInventoryFIFOId
-				,dblQty
-			)
-			SELECT	
-				intInventoryFIFOId = @UpdatedFifoId
-				,dblQty = @QtyOffset				
-			WHERE	
-				@UpdatedFifoId IS NOT NULL 
-				AND @QtyOffset IS NOT NULL 
-
-			-- Reduce the remaining qty
-			SET @dblReduceQty = @RemainingQty;
-		END 
+		SET @dblCost = ISNULL(@dblCost, 0) 
 
 		EXEC @intReturnValue = [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -253,22 +210,46 @@ BEGIN
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
 
-		-- Insert the record into the fifo-out table
-		INSERT INTO dbo.tblICInventoryFIFOOut (
-			intInventoryTransactionId
-			,intInventoryFIFOId
-			,dblQty
-			,dtmCreated
-		)
-		SELECT	
-			intInventoryTransactionId = @InventoryTransactionIdentityId
-			,intInventoryFIFOId
-			,dblQty
-			,dtmCreated = @dtmCreated
-		FROM 
-			@AverageFIFOOUt
-		WHERE
-			@InventoryTransactionIdentityId IS NOT NULL;
+		-- Repeat call on uspICReduceStockInFIFO until @dblReduceQty is completely distributed to all available fifo buckets 
+		-- If there is no avaiable fifo buckets, it will add a new negative bucket. 
+		WHILE (ISNULL(@dblReduceQty, 0) < 0)
+		BEGIN 
+			EXEC @intReturnValue = dbo.uspICReduceStockInAvg
+				@intItemId
+				,@intItemLocationId
+				,@intItemUOMId
+				,@dtmDate
+				,@dblReduceQty
+				,@dblCost
+				,@strTransactionId
+				,@intTransactionId
+				,@intTransactionDetailId
+				,@intEntityUserSecurityId
+				,@RemainingQty OUTPUT
+				,@CostUsed OUTPUT 
+				,@QtyOffset OUTPUT 
+				,@UpdatedFifoId OUTPUT 
+			
+			IF @intReturnValue < 0 RETURN @intReturnValue;
+
+			-- Insert the record to the fifo-out table
+			INSERT INTO dbo.tblICInventoryFIFOOut (
+					intInventoryTransactionId
+					,intInventoryFIFOId
+					,dblQty
+					,dtmCreated
+			)
+			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
+					,intInventoryFIFOId = @UpdatedFifoId
+					,dblQty = @QtyOffset
+					,@dtmCreated
+			WHERE	@InventoryTransactionIdentityId IS NOT NULL
+					AND @UpdatedFifoId IS NOT NULL 
+					AND @QtyOffset IS NOT NULL 
+
+			-- Reduce the remaining qty
+			SET @dblReduceQty = @RemainingQty;
+		END 
 	END
 
 	-- Add stock 

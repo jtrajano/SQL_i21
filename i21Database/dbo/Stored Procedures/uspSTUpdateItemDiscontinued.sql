@@ -175,20 +175,18 @@ BEGIN TRY
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
 			
-			IF (@CreatedOlder IS NOT NULL OR @CreatedOlder != '' OR
-			@NotSoldSince IS NOT NULL OR @NotSoldSince != '' OR
-			@NotPurchasedSince IS NOT NULL OR @NotPurchasedSince != '' )
+		IF(@CreatedOlder IS NOT NULL AND @CreatedOlder != '')
 			BEGIN
-					INSERT INTO #tmpUpdateItemForCStore_Items (
+				INSERT INTO #tmpUpdateItemForCStore_Items (
 					intItemId,
-					dtmCreatedOlderThan,
-					dtmNotSoldSince,
-					dtmNotPurchased
+					dtmNotSoldSince ,
+					dtmNotPurchased ,
+					dtmCreatedOlderThan 
 				)
 				SELECT DISTINCT item.intItemId as intItemId,
-				item.dtmDateCreated as dtmCreatedOlderThan,
 				invoice.dtmDate as dtmNotSoldSince,
-				receipt.dtmDateCreated as dtmNotPurchased
+				receipt.dtmDateCreated as dtmNotPurchased,
+				item.dtmDateCreated as dtmCreatedOlderThan
 				FROM tblICItem item
 				LEFT JOIN tblARInvoiceDetail invoicedetail
 					ON item.intItemId = invoicedetail.intItemId
@@ -196,11 +194,11 @@ BEGIN TRY
 					ON invoicedetail.intInvoiceId = invoice.intInvoiceId
 				LEFT JOIN tblICInventoryReceiptItem receipt
 					ON item.intItemId = receipt.intItemId
-				WHERE item.strStatus != 'Discontinued'
-
-		END
-
-
+				WHERE	item.dtmDateCreated < ISNULL(@CreatedOlder, 0)  -- CHANGE TO OR CONDITION October 25, 2021
+						OR invoice.dtmDate < ISNULL(@NotSoldSince, 0) -- CHANGE TO OR CONDITION October 25, 2021
+						OR receipt.dtmDateCreated < ISNULL(@NotPurchasedSince, 0) -- CHANGE TO OR CONDITION October 25, 2021
+						OR item.strStatus != 'Discontinued' -- CHANGE TO OR CONDITION October 25, 2021
+			END
 	END
 	-- END Add the filter records
 

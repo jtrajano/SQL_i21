@@ -10,7 +10,6 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-		,@intSamplePreStageId INT
 
 	IF EXISTS (
 			SELECT 1
@@ -38,22 +37,6 @@ BEGIN TRY
 		,@intItemId
 		,@intCountryID
 		,@intCompanyLocationSubLocationId
-
-	SELECT @intSamplePreStageId = SCOPE_IDENTITY()
-
-	UPDATE SPS
-	SET SPS.intContractDetailId = S.intContractDetailId
-		,SPS.intEntityId = S.intEntityId
-		,SPS.intCreatedUserId = S.intCreatedUserId
-		,SPS.strContainerNumber = S.strContainerNumber
-		,SPS.strMarks = S.strMarks
-		,SPS.strLotNumber = S.strLotNumber
-		,SPS.dblRepresentingQty = S.dblRepresentingQty
-		,SPS.dtmSampleReceivedDate = S.dtmSampleReceivedDate
-		,SPS.dtmCreated = S.dtmCreated
-	FROM dbo.tblQMSamplePreStage SPS
-	JOIN dbo.tblQMSample S ON S.intSampleId = SPS.intSampleId
-		AND intSamplePreStageId = @intSamplePreStageId
 END TRY
 
 BEGIN CATCH

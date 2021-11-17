@@ -66,7 +66,6 @@
 		[strFVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 		[strDateQualifier] NVARCHAR(10) COLLATE Latin1_General_CI_AS,
 		[dtmScheduledDate] DATETIME, 
-		dtmPlannedAvailabilityDate DATETIME,
 		[dtmETAPOD] DATETIME, 
 		[dtmETAPOL] DATETIME, 
 		[dtmETSPOL] DATETIME, 

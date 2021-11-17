@@ -86,7 +86,6 @@ BEGIN TRY
 				@dblNewMinVendorOrderQty   DECIMAL(18,6),
 				@dblNewVendorSuggestedQty  DECIMAL(18,6),
 				@dblNewMinQtyOnHand        DECIMAL(18,6),
-				@strNewStorageUnitNo       NVARCHAR(1000),
 				@intNewBinLocation         INT,
 				@intNewGLPurchaseAccount   INT,
 				@intNewGLSalesAccount      INT,
@@ -146,7 +145,6 @@ BEGIN TRY
 				@dblNewMinVendorOrderQty = NewMinVendorOrderQty,
 				@dblNewVendorSuggestedQty = NewVendorSuggestedQty,
 				@dblNewMinQtyOnHand     = NewMinQtyOnHand,
-				@strNewStorageUnitNo     = NewStorageUnitNo,
 				@intNewBinLocation      = NewBinLocation,
 				@intNewGLPurchaseAccount  = NewGLPurchaseAccount,
 			    @intNewGLSalesAccount     = NewGLSalesAccount,
@@ -205,7 +203,6 @@ BEGIN TRY
 				NewMinVendorOrderQty      DECIMAL(18,6),
 				NewVendorSuggestedQty     DECIMAL(18,6),
 				NewMinQtyOnHand           DECIMAL(18,6),
-				NewStorageUnitNo          NVARCHAR(1000),
 				NewBinLocation            INT,
 				NewGLPurchaseAccount      INT,
 			    NewGLSalesAccount         INT,
@@ -348,7 +345,6 @@ BEGIN TRY
 				,intMinimumAge_Original INT NULL 
 				,dblMinOrder_Original NUMERIC(18, 6) NULL 
 				,dblSuggestedQty_Original NUMERIC(18, 6) NULL
-				,strStorageUnitNo_Original NVARCHAR(1000) NULL
 				,intCountGroupId_Original INT NULL 
 				,intStorageLocationId_Original INT NULL 
 				,dblReorderPoint_Original NUMERIC(18, 6) NULL
@@ -382,7 +378,6 @@ BEGIN TRY
 				,intMinimumAge_New INT NULL 
 				,dblMinOrder_New NUMERIC(18, 6) NULL 
 				,dblSuggestedQty_New NUMERIC(18, 6) NULL
-				,strStorageUnitNo_New NVARCHAR(1000) NULL
 				,intCountGroupId_New INT NULL 
 				,intStorageLocationId_New INT NULL 
 				,dblReorderPoint_New NUMERIC(18, 6) NULL
@@ -466,7 +461,6 @@ BEGIN TRY
 				,strMinimumAge_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strMinOrder_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strSuggestedQty_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,strStorageUnitNo_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCountGroupId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCountGroup_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strStorageLocationId_Original NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
@@ -509,7 +503,6 @@ BEGIN TRY
 				,strMinimumAge_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strMinOrder_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strSuggestedQty_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
-				,strStorageUnitNo_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCountGroupId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strCountGroup_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
 				,strStorageLocationId_New NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL
@@ -811,7 +804,6 @@ BEGIN TRY
 				,@intMinimumAge = @intNewMinAge 
 				,@dblMinOrder = @dblNewMinVendorOrderQty 
 				,@dblSuggestedQty  = @dblNewVendorSuggestedQty
-				,@strStorageUnitNo  = @strNewStorageUnitNo
 				,@intCountGroupId =  @intNewInventoryGroup
 				,@intStorageLocationId = @intNewBinLocation 
 				,@dblReorderPoint = NULL
@@ -1000,7 +992,6 @@ BEGIN TRY
 				,strMinimumAge_Original
 				,strMinOrder_Original
 				,strSuggestedQty_Original
-				,strStorageUnitNo_Original
 				,strStorageLocationId_Original
 				,strStorageLocation_Original
 				,strCountGroupId_Original
@@ -1041,7 +1032,6 @@ BEGIN TRY
 				,strMinimumAge_New
 				,strMinOrder_New
 				,strSuggestedQty_New
-				,strStorageUnitNo_New
 				,strStorageLocationId_New
 				,strStorageLocation_New
 				,strCountGroupId_New
@@ -1130,7 +1120,6 @@ BEGIN TRY
 			, CAST((ISNULL([Changes].intMinimumAge_Original, '')) AS NVARCHAR(1000))--ISNULL((, '')
 			, ISNULL(CAST([Changes].dblMinOrder_Original AS NVARCHAR(1000)), '')
 			, ISNULL(CAST([Changes].dblSuggestedQty_Original AS NVARCHAR(1000)), '')
-			, ISNULL(CAST([Changes].strStorageUnitNo_Original AS NVARCHAR(1000)), '')
 			, strStorageLocationId_Original = CAST([Changes].intStorageLocationId_Original AS NVARCHAR(50))
 			, strStorageLocation_Original	= ISNULL(StorageLocOriginal.strSubLocationName, '') -- ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_Original), '')
 			, strCountGroupId_Original		= CountGroup_Orig.intCountGroupId
@@ -1207,7 +1196,6 @@ BEGIN TRY
 			, CAST((ISNULL([Changes].intMinimumAge_New, '')) AS NVARCHAR(1000))
 			, ISNULL(CAST([Changes].dblMinOrder_New AS NVARCHAR(1000)), '')
 			, ISNULL(CAST([Changes].dblSuggestedQty_New AS NVARCHAR(1000)), '')
-			, ISNULL(CAST([Changes].strStorageUnitNo_New AS NVARCHAR(1000)), '')
 			, strStorageLocationId_New		= CAST([Changes].intStorageLocationId_New AS NVARCHAR(50))
 			, strStorageLocation_New		= ISNULL(StorageLocNew.strSubLocationName, '') -- ISNULL((SELECT strSubLocationName FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationSubLocationId = [Changes].intStorageLocationId_New), '')
 			, strCountGroupId_New			= CountGroup_New.intCountGroupId
@@ -1284,14 +1272,6 @@ BEGIN TRY
 		UPDATE @tblItemLocationForCStore
 		SET strDepositPLUId_New = ''
 		WHERE strDepositPLUId_New IS NULL
-		
-		UPDATE @tblItemLocationForCStore
-		SET strStorageUnitNo_New = ''
-		WHERE strStorageUnitNo_New IS NULL
-		
-		UPDATE @tblItemLocationForCStore
-		SET strStorageUnitNo_Original = ''
-		WHERE strStorageUnitNo_Original IS NULL
 
 
 
@@ -1494,7 +1474,6 @@ BEGIN TRY
 																				WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'intMinimumAge' 
 																				WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'dblMinOrder' 
 																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'dblSuggestedQty' 
-																				WHEN [Changes].oldColumnName = 'strStorageUnitNo_Original' THEN 'strStorageUnitNo' 
 																				WHEN [Changes].oldColumnName = 'strStorageLocationId_Original' THEN 'intStorageLocationId'
 																				WHEN [Changes].oldColumnName = 'strStorageLocation_Original' THEN 'strStorageLocation'
 																				WHEN [Changes].oldColumnName = 'strCountGroupId_Original' THEN 'intCountGroupId'
@@ -1535,7 +1514,6 @@ BEGIN TRY
 																				WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'INT' 
 																				WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'NUMERIC(18, 10)' 
 																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'NUMERIC(18, 10)' 
-																				WHEN [Changes].oldColumnName = 'strStorageUnitNo_Original' THEN 'NVARCHAR(1000)' 
 																				WHEN [Changes].oldColumnName = 'strStorageLocationId_Original' THEN 'INT'
 																				WHEN [Changes].oldColumnName = 'strStorageLocation_Original' THEN 'NVARCHAR(150)'
 																				WHEN [Changes].oldColumnName = 'strCountGroupId_Original' THEN 'INT'
@@ -1595,8 +1573,7 @@ BEGIN TRY
 																				WHEN [Changes].oldColumnName = 'strVendorId_Original' THEN 'Vendor' 
 																				WHEN [Changes].oldColumnName = 'strMinimumAge_Original' THEN 'Minimum Age' 
 																				WHEN [Changes].oldColumnName = 'strMinOrder_Original' THEN 'Minimum Order' 
-																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'Suggested Quantity'
-																				WHEN [Changes].oldColumnName = 'strStorageUnitNo_Original' THEN 'Storage Unit No' 
+																				WHEN [Changes].oldColumnName = 'strSuggestedQty_Original' THEN 'Suggested Quantity' 
 																				WHEN [Changes].oldColumnName = 'strStorageLocation_Original' THEN 'Storage Location'
 																				WHEN [Changes].oldColumnName = 'strStorageLocationId_Original' THEN 'Storage Location'
 																				WHEN [Changes].oldColumnName = 'strCountGroup_Original' THEN 'Inventory Count Group'
@@ -1652,7 +1629,7 @@ BEGIN TRY
 				strOldData for oldColumnName in (strTaxFlag1_Original, strTaxFlag2_Original, strTaxFlag3_Original, strTaxFlag4_Original, strTransactionQtyLimit_Original, strDepositRequired_Original, strDepositPLU_Original, strQuantityRequired_Original, strScaleItem_Original, strFoodStampable_Original
 				                                 , strReturnable_Original, strSaleable_Original, strIdRequiredLiquor_Original,strIdRequiredCigarette_Original, strPromotionalItem_Original, strPrePriced_Original, strApplyBlueLaw1_Original, strApplyBlueLaw2_Original
 												 , strCountedDaily_Original, strCounted_Original, strCountBySINo_Original, strFamily_Original, strClass_Original, strProductCode_Original, strVendor_Original, strMinimumAge_Original, strMinOrder_Original
-												 , strSuggestedQty_Original, strStorageUnitNo_Original, strStorageLocation_Original, strCountGroup_Original
+												 , strSuggestedQty_Original, strStorageLocation_Original, strCountGroup_Original
 												 
 												 , strFamilyId_Original, strClassId_Original, strProductCodeId_Original, strVendorId_Original, strStorageLocationId_Original, strCountGroupId_Original, strDepositPLUId_Original)
 			) o
@@ -1661,7 +1638,7 @@ BEGIN TRY
 				strNewData for newColumnName in (strTaxFlag1_New, strTaxFlag2_New, strTaxFlag3_New, strTaxFlag4_New, strTransactionQtyLimit_New, strDepositRequired_New, strDepositPLU_New, strQuantityRequired_New, strScaleItem_New, strFoodStampable_New
 				                                 , strReturnable_New, strSaleable_New, strIdRequiredLiquor_New,strIdRequiredCigarette_New, strPromotionalItem_New, strPrePriced_New, strApplyBlueLaw1_New, strApplyBlueLaw2_New
 												 , strCountedDaily_New, strCounted_New, strCountBySINo_New, strFamily_New,strClass_New, strProductCode_New, strVendor_New, strMinimumAge_New, strMinOrder_New
-												 , strSuggestedQty_New, strStorageUnitNo_New, strStorageLocation_New, strCountGroup_New
+												 , strSuggestedQty_New, strStorageLocation_New, strCountGroup_New
 												 
 												 , strFamilyId_New, strClassId_New, strProductCodeId_New, strVendorId_New, strStorageLocationId_New, strCountGroupId_New, strDepositPLUId_New)
 			) n
@@ -2026,15 +2003,6 @@ BEGIN TRY
 								INNER JOIN tblSTSubcategory SubClass
 									ON tempClass.intClassId = SubClass.intSubcategoryId
 								WHERE SubClass.strSubcategoryType = 'C'
-
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
-							
-						IF ISNULL(@strUpcCode, '') != ''
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UPC Code</b></p>'
-								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @strUpcCode + '</p>'
 
 								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 							END

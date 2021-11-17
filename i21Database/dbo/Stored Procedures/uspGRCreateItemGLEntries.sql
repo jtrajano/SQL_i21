@@ -9,7 +9,6 @@ CREATE PROCEDURE [dbo].[uspGRCreateItemGLEntries]
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@dblSelectedUnits AS DECIMAL(24,10) = null
-	,@intSettleStorageId INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -314,7 +313,6 @@ AS
 		AND t.intItemId = ISNULL(@intRebuildItemId, t.intItemId) 
 		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND t.intInTransitSourceLocationId IS NULL -- If there is a value in intInTransitSourceLocationId, then it is for In-Transit costing. Use uspICCreateGLEntriesForInTransitCosting instead of this sp.
-		AND t.intTransactionId = ISNULL(@intSettleStorageId, t.intTransactionId)
 )
 -------------------------------------------------------------------------------------------
 -- This part is for the usual G/L entries for Inventory Account and its contra account 

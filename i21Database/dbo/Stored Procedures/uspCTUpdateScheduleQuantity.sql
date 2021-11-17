@@ -167,13 +167,6 @@ BEGIN TRY
 			@strProcess 				= 	'Update Scheduled Quantity',
 			@intUserId					= 	@intUserId
 
-
-	exec uspCTUpdateAppliedAndPrice
-		@intContractDetailId = @intContractDetailId
-		,@dblBalance = @dblBalance
-
-
-
 END TRY
 
 BEGIN CATCH

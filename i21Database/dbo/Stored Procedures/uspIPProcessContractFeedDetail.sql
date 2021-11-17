@@ -4,13 +4,12 @@ BEGIN TRY
 	DECLARE @intContractFeedHeaderId INT
 		,@intContractHeaderId INT
 		,@strApproverXML NVARCHAR(MAX)
-		,@strSubmittedByXML NVARCHAR(MAX)
+		,@strSubmittedByXML  NVARCHAR(MAX)
 		,@intContractHeaderRefId INT
 		,@strErrorMessage NVARCHAR(MAX)
 		,@intTransactionCount INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@idoc INT
-		,@strContractNumber NVARCHAR(50)
 
 	SELECT @intContractFeedHeaderId = MIN(intContractFeedHeaderId)
 	FROM tblIPContractFeedHeader
@@ -21,35 +20,22 @@ BEGIN TRY
 		SELECT @intContractHeaderId = NULL
 			,@strApproverXML = NULL
 			,@intContractHeaderRefId = NULL
-			,@strSubmittedByXML = NULL
-			,@strContractNumber = NULL
+			,@strSubmittedByXML=NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strApproverXML = strApproverXML
 			,@strSubmittedByXML = strSubmittedByXML
-			,@strContractNumber = strContractNumber
 		FROM tblIPContractFeedHeader
 		WHERE intContractFeedHeaderId = @intContractFeedHeaderId
 
 		SELECT @intContractHeaderRefId = intContractHeaderId
 		FROM tblCTContractHeader
-		WHERE strContractNumber = @strContractNumber
+		WHERE intContractHeaderRefId = @intContractHeaderId
 
 		EXEC sp_xml_preparedocument @idoc OUTPUT
 			,@strApproverXML
 
 		BEGIN TRY
-			IF @intContractHeaderRefId IS NULL
-			BEGIN
-				SELECT @strErrorMessage = 'Unable to find contract number in Zug for the contract number ' + @strContractNumber
-
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
 			IF EXISTS (
 					SELECT *
 					FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS) x
@@ -77,8 +63,8 @@ BEGIN TRY
 			DELETE
 			FROM tblCTIntrCompApproval
 			WHERE intContractHeaderId = @intContractHeaderRefId
-				AND ysnApproval = 1
-				AND intPriceFixationId IS NULL
+			AND ysnApproval=1
+			AND intPriceFixationId is NULL
 
 			INSERT INTO tblCTIntrCompApproval (
 				intContractHeaderId
@@ -103,13 +89,13 @@ BEGIN TRY
 			EXEC sp_xml_removedocument @idoc
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strSubmittedByXML
-
+			,@strSubmittedByXML
+				
 			DELETE
 			FROM tblCTIntrCompApproval
 			WHERE intContractHeaderId = @intContractHeaderRefId
-				AND ysnApproval = 0
-				AND intPriceFixationId IS NULL
+			AND ysnApproval=0
+			AND intPriceFixationId is NULL
 
 			INSERT INTO tblCTIntrCompApproval (
 				intContractHeaderId
@@ -134,7 +120,7 @@ BEGIN TRY
 			UPDATE tblIPContractFeedHeader
 			SET strFeedStatus = 'Processed'
 				,strMessage = NULL
-				,intStatusId = 1
+				,intStatusId =1
 			WHERE intContractFeedHeaderId = @intContractFeedHeaderId
 
 			EXEC sp_xml_removedocument @idoc
@@ -156,7 +142,7 @@ BEGIN TRY
 			UPDATE tblIPContractFeedHeader
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
-				,intStatusId = 0
+				,intStatusId =0
 			WHERE intContractFeedHeaderId = @intContractFeedHeaderId
 		END CATCH
 

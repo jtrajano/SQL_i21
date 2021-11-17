@@ -26,7 +26,7 @@ JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
 LEFT JOIN dbo.tblSMCompanyLocationSubLocation subl ON subl.intCompanyLocationSubLocationId = TD.intToSubLocationId
 LEFT JOIN dbo.tblICStorageLocation sl ON sl.intStorageLocationId = TD.intToStorageLocationId
 WHERE T.strTransferNo = @strTransferOrderNumber
-	AND T.intToLocationId = @intLocationId
+	AND T.intFromLocationId = @intLocationId
 	AND T.ysnPosted = 1
 	AND T.ysnShipmentRequired = 1
 	AND (

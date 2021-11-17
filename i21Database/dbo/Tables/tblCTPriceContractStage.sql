@@ -23,6 +23,4 @@
 	,strLogXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strAuditXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,strContractNumber	NVARCHAR(50) COLLATE Latin1_General_CI_AS
-	,intBookId int
-	,intSubBookId int
 )

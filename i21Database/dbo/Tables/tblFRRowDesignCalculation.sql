@@ -12,9 +12,3 @@
     CONSTRAINT [FK_tblFRRowDesign_tblFRRowDesignCalculation] FOREIGN KEY([intRowDetailId]) REFERENCES [dbo].[tblFRRowDesign] ([intRowDetailId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblFRRowDesignCalculation_tblFRRowDesign] FOREIGN KEY([intRowDetailRefNo]) REFERENCES [dbo].[tblFRRowDesign] ([intRowDetailId])
 );
-
-GO
-CREATE NONCLUSTERED INDEX [IX_tblFRRowDesignCalculation_intRowId] ON [dbo].[tblFRRowDesignCalculation] ([intRowId] asc)
-
-GO
-CREATE NONCLUSTERED INDEX [IX_tblFRRowDesignCalculation_intRowDetailId] ON [dbo].[tblFRRowDesignCalculation] ([intRowDetailId] asc)

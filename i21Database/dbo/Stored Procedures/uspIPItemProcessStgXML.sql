@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPItemProcessStgXML]
 AS
 BEGIN TRY
-	SET NOCOUNT ON;
-	ALTER TABLE [dbo].[tblICItem] NOCHECK CONSTRAINT [CK_AllowItemTypeChange];
+	SET NOCOUNT ON
+
 	DECLARE @idoc INT
 		,@intTransactionCount INT
 		,@strErrorMessage NVARCHAR(MAX)
@@ -108,13 +108,14 @@ BEGIN TRY
 		,@intPhysicalItemId INT
 		,@strNewLotTracking NVARCHAR(50)
 		,@strOldLotTracking NVARCHAR(50)
+
 	DECLARE @tblICItemStage TABLE (intItemStageId INT)
 
 	INSERT INTO @tblICItemStage (intItemStageId)
 	SELECT intItemStageId
 	FROM tblICItemStage
 	WHERE strFeedStatus IS NULL
-	ORDER BY intItemStageId
+	Order by intItemStageId
 
 	UPDATE tblICItemStage
 	SET strFeedStatus = 'In-Progress'
@@ -122,6 +123,7 @@ BEGIN TRY
 			SELECT S.intItemStageId
 			FROM @tblICItemStage S
 			)
+
 
 	SELECT @intItemStageId = MIN(intItemStageId)
 	FROM @tblICItemStage
@@ -728,8 +730,8 @@ BEGIN TRY
 			JOIN tblEMEntityType ET ON ET.intEntityId = t.intEntityId
 			WHERE ET.strType = 'User'
 				AND t.strName = @strUserName
+				--AND t.strEntityNo <> ''
 
-			--AND t.strEntityNo <> ''
 			IF @intLastModifiedUserId IS NULL
 			BEGIN
 				IF EXISTS (
@@ -743,18 +745,6 @@ BEGIN TRY
 				ELSE
 					SELECT TOP 1 @intLastModifiedUserId = intEntityId
 					FROM tblSMUserSecurity
-			END
-
-			IF EXISTS (
-					SELECT 1
-					FROM tblICItem
-					WHERE strItemNo = @strItemNo
-						AND intItemRefId IS NULL
-					)
-			BEGIN
-				UPDATE tblICItem
-				SET intItemRefId = @intItemId
-				WHERE strItemNo = @strItemNo
 			END
 
 			IF @strRowState <> 'Delete'
@@ -4281,11 +4271,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -4499,7 +4489,7 @@ BEGIN TRY
 					WHERE IA1.intItemId = IA.intItemId
 						AND IA1.intLocationId = IA.intLocationId
 					)
-				AND IA.intLocationId IS NOT NULL
+				AND IA.intLocationId is not null
 
 			UPDATE IA1
 			SET intVendorId = @intVendorId
@@ -4843,11 +4833,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				end
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -5126,11 +5116,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -5412,11 +5402,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -5678,11 +5668,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -5924,11 +5914,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -6136,11 +6126,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -6902,11 +6892,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -7287,11 +7277,11 @@ BEGIN TRY
 				FROM tblSMCompanyLocation
 				WHERE strLocationName = @strLocationName
 
-				IF @intLocationId IS NULL
-				BEGIN
+				if @intLocationId is null
+				Begin
 					SELECT @intLocationId = intCompanyLocationId
 					FROM tblSMCompanyLocation
-				END
+				End
 
 				IF @strLocationName IS NOT NULL
 					AND @intLocationId IS NULL
@@ -7544,7 +7534,7 @@ BEGIN TRY
 					SELECT *
 					FROM OPENXML(@idoc, 'vyuIPGetItemSubLocations/vyuIPGetItemSubLocation', 2) WITH (strLocationName NVARCHAR(50) Collate Latin1_General_CI_AS) x
 					--LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strLocationName
-					LEFT JOIN tblICItemLocation IL ON IL.intLocationId = @intLocationId
+					LEFT JOIN tblICItemLocation IL ON IL.intLocationId =@intLocationId
 						AND IL.intItemId = @intNewItemId
 					WHERE IL.intItemLocationId IS NULL
 					)
@@ -8199,8 +8189,8 @@ BEGIN TRY
 				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 					,@referenceTransactionId = @intTransactionId
 					,@referenceCompanyId = @intCompanyId
-					,@screenId = @intItemScreenId
-					,@populatedByInterCompany = 1
+					,@screenId=@intItemScreenId
+					,@populatedByInterCompany=1
 			END
 
 			INSERT INTO tblICItemAcknowledgementStage (
@@ -8270,6 +8260,7 @@ BEGIN TRY
 		SELECT @intItemStageId = MIN(intItemStageId)
 		FROM @tblICItemStage
 		WHERE intItemStageId > @intItemStageId
+
 	END
 
 	UPDATE tblICItemStage
@@ -8278,12 +8269,11 @@ BEGIN TRY
 			SELECT S.intItemStageId
 			FROM @tblICItemStage S
 			)
-		AND IsNULL(strFeedStatus, '') = 'In-Progress'
-		ALTER TABLE [dbo].[tblICItem] CHECK CONSTRAINT [CK_AllowItemTypeChange]
+	AND IsNULL(strFeedStatus,'') = 'In-Progress'
+
 END TRY
 
 BEGIN CATCH
-	ALTER TABLE [dbo].[tblICItem] CHECK CONSTRAINT [CK_AllowItemTypeChange]
 	SET @ErrMsg = ERROR_MESSAGE()
 
 	RAISERROR (

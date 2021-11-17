@@ -60,7 +60,7 @@ begin
 	FROM @temp_xml_table
 	WHERE [fieldname] = 'dtmTicketDateTime';
 
-	/*
+
 	select 
 	   strGroupIndicator as strStorageTypeDescription
 	   , sum(dblGrossUnits) as dblGrossUnits 
@@ -70,38 +70,7 @@ begin
 
 	group by strGroupIndicator
 	
-	*/
 
-	declare @sFrom nvarchar(50)
-	declare @sTo nvarchar(50)
-
-	if(@dtmTicketDateTimeFrom is null)
-		set @sFrom = convert(nvarchar, GETDATE(), 111)
-	else 
-		set @sFrom = convert(nvarchar, @dtmTicketDateTimeFrom, 111)
-
-
-	if(@dtmTicketDateTimeTo is null)
-		set @sTo = convert(nvarchar,  dateadd(day, 1, GETDATE()), 111)
-	else 
-		set @sTo = convert(nvarchar, dateadd(day, 1, @dtmTicketDateTimeTo), 111)
-
-	
-	select @sTo = replace(@sTo, '/', '-') 
-			,@sFrom = replace(@sFrom, '/', '-') 
-
-	declare @sqlcmd nvarchar(500)
-	set @sqlcmd = 'select 
-					   strGroupIndicator as strStorageTypeDescription
-					   , sum(dblGrossUnits) as dblGrossUnits 
-
-					from vyuSCTicketInOutReport
-						where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')
-						group by strGroupIndicator	
-					'
-
-
-	exec (@sqlcmd)
 
 end
 

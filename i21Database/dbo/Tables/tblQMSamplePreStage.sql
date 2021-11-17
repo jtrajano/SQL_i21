@@ -13,15 +13,5 @@
 	intSampleTypeId			INT,
 	intItemId				INT,
 	intCountryID			INT,
-	intCompanyLocationSubLocationId INT,
-	intContractDetailId		INT,
-	intEntityId				INT,
-	intCreatedUserId		INT,
-
-	strContainerNumber		NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strMarks				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
-	strLotNumber			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-	dblRepresentingQty		NUMERIC(18, 6),
-	dtmSampleReceivedDate	DATETIME,
-	dtmCreated				DATETIME
+	intCompanyLocationSubLocationId INT
 )

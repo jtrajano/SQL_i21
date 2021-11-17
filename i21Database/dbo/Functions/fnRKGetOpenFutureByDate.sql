@@ -168,17 +168,17 @@ BEGIN
 		FROM (
 			--Futures Buy & Sell
 			SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-											ELSE ISNULL(History.dtmTransactionDate, FOT.dtmTransactionDate) END
+											ELSE History.dtmTransactionDate END
 				, FOT.intFutOptTransactionId
 				, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-										ELSE ISNULL(History.dblOpenContract, FOT.dblOpenContract) END
+										ELSE History.dblOpenContract END
 				, FOT.intCommodityId
 				, FOT.strCommodityCode
 				, FOT.strInternalTradeNo
 				, FOT.intLocationId
 				, FOT.strLocationName
 				, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
-										ELSE ISNULL(History.dblContractSize, FOT.dblContractSize) END
+										ELSE History.dblContractSize END
 				, FOT.intFutureMarketId
 				, strFutureMarket = FOT.strFutMarketName
 				, FOT.intFutureMonthId
@@ -240,17 +240,17 @@ BEGIN
 			UNION ALL
 			--Options Buy & Sell
 			SELECT dtmTransactionDate = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dtmTransactionDate
-											ELSE ISNULL(History.dtmTransactionDate, FOT.dtmTransactionDate) END
+											ELSE History.dtmTransactionDate END
 				, FOT.intFutOptTransactionId
 				, dblOpenContract = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblOpenContract
-										ELSE ISNULL(History.dblOpenContract, FOT.dblOpenContract) END
+										ELSE History.dblOpenContract END
 				, FOT.intCommodityId
 				, FOT.strCommodityCode
 				, FOT.strInternalTradeNo
 				, FOT.intLocationId
 				, FOT.strLocationName
 				, dblContractSize = CASE WHEN ISNULL(@ysnCrush, 0) = 0 THEN FOT.dblContractSize
-										ELSE ISNULL(History.dblContractSize, FOT.dblContractSize) END
+										ELSE History.dblContractSize END
 				, FOT.intFutureMarketId
 				, FOT.strFutMarketName
 				, FOT.intFutureMonthId

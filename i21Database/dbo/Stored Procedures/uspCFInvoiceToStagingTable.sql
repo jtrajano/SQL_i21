@@ -1234,7 +1234,6 @@ BEGIN TRY
 
 		WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
 			THEN 'print'
-		ELSE 'print'
 	END))													
 	FROM tblARCustomerStatementStagingTable
 	INNER JOIN vyuCFCustomerEntity AS emEntity 

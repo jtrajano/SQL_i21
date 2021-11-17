@@ -1074,25 +1074,15 @@ BEGIN
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
 						WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
-						WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.		
-						/*
-							12	Inventory Transfer	Inventory Transfer
-							13	Inventory Transfer with Shipment	Inventory Transfer
-							14	Inventory Adjustment - UOM Change	Inventory Adjustment
-							15	Inventory Adjustment - Item Change	Inventory Adjustment
-							17	Inventory Adjustment - Split Lot	Inventory Adjustment
-							19	Inventory Adjustment - Lot Merge	Inventory Adjustment
-							20	Inventory Adjustment - Lot Move	Inventory Adjustment
-						*/
-						WHEN t.intTransactionTypeId IN (12, 13, 14, 15, 17, 19, 20) THEN 4 
+						WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.						
 						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
-						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
-						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 6
-						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
-						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
-						WHEN t.strTransactionForm IN ('Inventory Count') THEN 11
-						WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
-						ELSE 10
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+						WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+						WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 8
+						ELSE 9
 					END
 				,intItemId
 				,intItemLocationId
@@ -1154,24 +1144,14 @@ BEGIN
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
 				WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
 				WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.				
-				/*
-					12	Inventory Transfer	Inventory Transfer
-					13	Inventory Transfer with Shipment	Inventory Transfer
-					14	Inventory Adjustment - UOM Change	Inventory Adjustment
-					15	Inventory Adjustment - Item Change	Inventory Adjustment
-					17	Inventory Adjustment - Split Lot	Inventory Adjustment
-					19	Inventory Adjustment - Lot Merge	Inventory Adjustment
-					20	Inventory Adjustment - Lot Move	Inventory Adjustment
-				*/
-				WHEN t.intTransactionTypeId IN (12, 13, 14, 15, 17, 19, 20) THEN 4 
-				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice','Inventory Shipment','Inventory Count','Credit Memo') THEN 3 
-				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
-				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 6
-				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 7
-				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 8
-				WHEN t.strTransactionForm IN ('Inventory Count') THEN 11
-				WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 9
-				ELSE 10
+				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+				WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+				WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 8
+				ELSE 9
 			END    
 			ASC 
 			,CASE 
@@ -4232,9 +4212,6 @@ BEGIN
 			-- Repost 'Inventory Receipt/Return'
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Inventory Receipt', 'Inventory Return')) 
 			BEGIN 
-				-- In case of category change, fix the Inventory GL Account id used by the Receipt other charges. 
-				EXEC uspICFixOtherChargeGLEntries @strReceiptNumber = @strTransactionId
-
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -5702,7 +5679,6 @@ BEGIN
 					,@AccountCategory_ContraInventory = 'AP Clearing'
 					,@intEntityUserSecurityId = @intEntityUserSecurityId
 					,@ysnForRebuild = 1
-					,@intSettleStorageId = @intTransactionId
 
 				IF @intReturnValue <> 0 
 				BEGIN 

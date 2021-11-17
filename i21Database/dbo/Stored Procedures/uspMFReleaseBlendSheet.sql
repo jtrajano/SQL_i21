@@ -453,14 +453,12 @@ BEGIN TRY
 	ELSE
 		UPDATE a
 		SET a.dblWeightPerUnit = (
-				SELECT TOP 1 L.dblWeightPerQty
-				FROM tblICLot L
-				WHERE L.intParentLotId = a.intLotId
-					AND L.intStorageLocationId = a.intStorageLocationId
-					AND L.dblWeight > 0
-				ORDER BY intLotId DESC
+				SELECT TOP 1 dblWeightPerQty
+				FROM tblICLot
+				WHERE intParentLotId = b.intParentLotId
 				)
 		FROM @tblLot a
+		JOIN tblICParentLot b ON a.intLotId = b.intParentLotId
 
 	SELECT @ysnCalculateNoSheetUsingBinSize = CASE 
 			WHEN UPPER(pa.strAttributeValue) = 'TRUE'
@@ -759,7 +757,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			SET @intNoOfSheet = Ceiling(@dblPlannedQuantity / @dblBinSize)
+			SET @intNoOfSheet = Ceiling(@dblQtyToProduce / @dblBinSize)
 			SET @PerBlendSheetQty = @dblBinSize
 			SET @intNoOfSheetOriginal = @intNoOfSheet
 		END
@@ -858,21 +856,13 @@ BEGIN TRY
 				,dblLowerToleranceQty
 				,ysnComplianceItem
 				,dblCompliancePercent
-				,ysnMinorIngredient
 				)
 			SELECT ri.intItemId
 				,(ri.dblCalculatedQuantity * (@PerBlendSheetQty / r.dblQuantity)) AS RequiredQty
-				,(ri.dblCalculatedUpperTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedUpperTolerance
-				,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
+				,(ri.dblCalculatedUpperTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedUpperTolerance
+				,(ri.dblCalculatedLowerTolerance * (@dblQtyToProduce / r.dblQuantity)) AS dblCalculatedLowerTolerance
 				,ri.ysnComplianceItem
 				,ri.dblCompliancePercent
-				,(
-					CASE 
-						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
-							THEN 1
-						ELSE 0
-						END
-					) AS ysnMinorIngredient
 			FROM tblMFRecipeItem ri
 			JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			WHERE ri.intRecipeId = @intRecipeId
@@ -886,13 +876,6 @@ BEGIN TRY
 				,(ri.dblCalculatedLowerTolerance * (@PerBlendSheetQty / r.dblQuantity)) AS dblCalculatedLowerTolerance
 				,ri.ysnComplianceItem
 				,ri.dblCompliancePercent
-				,(
-					CASE 
-						WHEN (ri.dblCalculatedQuantity / SUM(ri.dblCalculatedQuantity) OVER ()) * 100 <= 10
-							THEN 1
-						ELSE 0
-						END
-					) AS ysnMinorIngredient
 			FROM tblMFRecipeSubstituteItem rs
 			JOIN tblMFRecipeItem ri ON ri.intRecipeItemId = rs.intRecipeItemId
 				AND ri.intRecipeId = rs.intRecipeId
@@ -947,8 +930,8 @@ BEGIN TRY
 
 						SELECT @dblQuantityTaken = Sum(dblQty)
 						FROM @tblBSLot BS
-						JOIN @tblItem I ON I.intItemId = BS.intItemId
-						WHERE I.ysnMinorIngredient = 0
+						JOIN @tblItem I on I.intItemId =BS.intItemId 
+						Where I.ysnMinorIngredient = 0
 
 						IF @dblQuantityTaken > @sRequiredQty
 						BEGIN
@@ -1007,9 +990,9 @@ BEGIN TRY
 											THEN Convert(NUMERIC(38, 20), (
 														(
 															CASE 
-																WHEN Round(@dblReqQty / @dblWeightPerUnit, 0) = 0
+																WHEN Floor(@dblReqQty / @dblWeightPerUnit) = 0
 																	THEN 1
-																ELSE Round(@dblReqQty / @dblWeightPerUnit, 0)
+																ELSE Floor(@dblReqQty / @dblWeightPerUnit)
 																END
 															) * @dblWeightPerUnit
 														))
@@ -1021,9 +1004,9 @@ BEGIN TRY
 										WHEN @intIssuedUOMTypeId = 2
 											THEN Convert(NUMERIC(38, 20), (
 														CASE 
-															WHEN Round(@dblReqQty / @dblWeightPerUnit, 0) = 0
+															WHEN Floor(@dblReqQty / @dblWeightPerUnit) = 0
 																THEN 1
-															ELSE Convert(NUMERIC(38, 20), Round(@dblReqQty / @dblWeightPerUnit, 0))
+															ELSE Convert(NUMERIC(38, 20), Floor(@dblReqQty / @dblWeightPerUnit))
 															END
 														))
 										ELSE @dblReqQty --To Review ROUND(@dblRequiredQty,3) 
@@ -1185,9 +1168,9 @@ BEGIN TRY
 										THEN Convert(NUMERIC(38, 20), (
 													(
 														CASE 
-															WHEN Round(@dblQty / @dblWeightPerUnit, 0) = 0
+															WHEN Floor(@dblQty / @dblWeightPerUnit) = 0
 																THEN 1
-															ELSE Round(@dblQty / @dblWeightPerUnit, 0)
+															ELSE Floor(@dblQty / @dblWeightPerUnit)
 															END
 														) * @dblWeightPerUnit
 													))
@@ -1212,9 +1195,9 @@ BEGIN TRY
 										AND @ysnMinorIngredient = 0
 										THEN Convert(NUMERIC(38, 20), (
 													CASE 
-														WHEN Round(@dblQty / @dblWeightPerUnit, 0) = 0
+														WHEN Floor(@dblQty / @dblWeightPerUnit) = 0
 															THEN 1
-														ELSE Convert(NUMERIC(38, 20), Round(@dblQty / @dblWeightPerUnit, 0))
+														ELSE Convert(NUMERIC(38, 20), Floor(@dblQty / @dblWeightPerUnit))
 														END
 													))
 									WHEN @intIssuedUOMTypeId = 3

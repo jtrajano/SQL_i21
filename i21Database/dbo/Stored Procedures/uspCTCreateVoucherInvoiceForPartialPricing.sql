@@ -20,30 +20,23 @@ BEGIN TRY
 			,@intContractHeaderId				INT
 			,@ysnMultiPrice						BIT = 0
 			,@intLastModifiedById				INT
-			,@dblBalance						NUMERIC(18,6)
-			,@dblBalanceLoad					NUMERIC(18,6)
-			,@ysnLoad							BIT
 			;
 
 	SELECT	@intPricingTypeId			=	intPricingTypeId,
 			@intLastModifiedById		=	ISNULL(intLastModifiedById,intCreatedById),
-			@intContractHeaderId		=	intContractHeaderId,
-            @dblBalance                    =    isnull(dblBalance,0),
-            @dblBalanceLoad                =    isnull(dblBalanceLoad,0)
+			@intContractHeaderId		=	intContractHeaderId
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId			=	@intContractDetailId
 		
 	SELECT
 		@intContractTypeId	=	intContractTypeId,
-		@ysnMultiPrice 		= 	ISNULL(ysnMultiplePriceFixation,0),
-		@ysnLoad			=	ysnLoad
+		@ysnMultiPrice 		= 	ISNULL(ysnMultiplePriceFixation,0)
 	FROM
 		tblCTContractHeader with (nolock)
 	WHERE
 		intContractHeaderId = @intContractHeaderId
 
-
-	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById), @dblBalance = (case when @ysnLoad = 1 then @dblBalanceLoad else @dblBalance end)
+	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
 
 	SELECT
 		@ysnAllowChangePricing = ysnAllowChangePricing
@@ -161,10 +154,6 @@ BEGIN TRY
 			,@intUserId = @intUserId
 
 	END
-
-	exec uspCTUpdateAppliedAndPrice
-	@intContractDetailId = @intContractDetailId
-	,@dblBalance = @dblBalance
 
 END TRY
 

@@ -55,18 +55,16 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnAutoBlend]
 	,[ysnGLOnly]
 	,[strBOLNumber]
-	,[intTicketId]
 )
 
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= CASE WHEN ysnSeparateStockForUOMs = 0 THEN ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) ELSE  ARID.[intItemUOMId] END
+	,[intItemUOMId]				= ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId])
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
-										WHEN ARIDL.[intLotId] IS NULL THEN  CASE WHEN ysnSeparateStockForUOMs = 1 THEN  ARID.[dblQtyShipped]
-										ELSE ARID.[dblQtyShipped] * (CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END) END 
+										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ISNULL(NULLIF(ARIDL.[dblWeightPerQty], 0), 1))
@@ -120,7 +118,6 @@ SELECT
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
 	,[strBOLNumber]				= ARID.strBOLNumber 
-	,[intTicketId]				= ARID.intTicketId
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -139,9 +136,7 @@ LEFT OUTER JOIN
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN 
-	(SELECT intUnitMeasureId,intItemUOMId,ysnSeparateStockForUOMs FROM tblICItemUOM ICUOM  WITH (NOLOCK)
-		INNER JOIN tblICItem ITEM ON ICUOM.intItemId=ITEM.intItemId
-		) ICIUOM
+	(SELECT intUnitMeasureId,intItemUOMId FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
 		ON ARID.intItemUOMId = ICIUOM.intItemUOMId
 
 WHERE
@@ -191,8 +186,6 @@ INSERT INTO ##ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[ysnAutoBlend]
-	,[strBOLNumber] 
-	,[intTicketId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -230,8 +223,6 @@ SELECT
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
-	,[strBOLNumber]				= ARID.strBOLNumber 
-	,[intTicketId]				= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
@@ -290,8 +281,6 @@ INSERT INTO ##ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[ysnAutoBlend]
-	,[strBOLNumber] 
-	,[intTicketId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -320,8 +309,6 @@ SELECT
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
 	,ARID.[ysnAutoBlend]
-	,ARID.[strBOLNumber] 
-	,ARID.[intTicketId]
 FROM ##ARItemsForCosting ARIC
 INNER JOIN ##ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId

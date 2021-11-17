@@ -20,8 +20,6 @@ SELECT @TransactionTypeId = [intTransactionTypeId]
 FROM dbo.tblICInventoryTransactionType 
 WHERE [strName] = 'Invoice'
 
-SELECT  @FromPosting = CASE WHEN  @Post = 1 THEN 1 ELSE 0 END
-
 DECLARE @items ItemReservationTableType
 
 INSERT INTO @items (												

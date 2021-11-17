@@ -382,8 +382,7 @@ FROM
 	) tblTax ON tblTax.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
-			--Bill.intBillId
-			APD.intPaymentId
+			Bill.intBillId
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
@@ -394,10 +393,11 @@ FROM
 			ON BD.intBillId = Bill.intBillId
 				AND BD.intCustomerStorageId IS NULL
 				AND BD.intSettleStorageId IS NULL
-		--GROUP BY Bill.intBillId
-		GROUP BY APD.intPaymentId
-	--) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId
-	) tblAdjustment ON tblAdjustment.intPaymentId = PYMT.intPaymentId		
+		LEFT JOIN tblGRSettleStorageBillDetail SBD
+			ON SBD.intBillId = Bill.intBillId
+		WHERE SBD.intBillId IS NULL
+		GROUP BY Bill.intBillId
+	) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT
 			PYMT.intPaymentId
@@ -491,25 +491,22 @@ FROM
 -- so the best way, I think, is to get all the tax and just add it at the end of this query.
 -- Only applicable to the scale part :) 
 -- MonGonzales 20210414
-outer apply (
-	select 
-		sum(BillDetail.dblTax) dblTax
-	from tblAPPaymentDetail PaymentDetail
-		join tblAPBillDetail BillDetail
-			on BillDetail.intBillId = PaymentDetail.intBillId
-		join tblICItem Item
-			on Item.intItemId = BillDetail.intItemId
-				and Item.strType = 'Other Charge'
-		join tblAPPayment Payment
-			on PaymentDetail.intPaymentId = Payment.intPaymentId
-		where Payment.intPaymentId = t.intPaymentId
-			and ((BillDetail.intCustomerStorageId is null and BillDetail.intSettleStorageId is null) 
-					or (BillDetail.intScaleTicketId is null)
-					or (BillDetail.intInventoryReceiptChargeId IS NULL)
-				)
-			and t.intMark = 1
-			and BillDetail.ysnStage = 0
-) AdditionalTax
+-- outer apply (
+-- 	select 
+-- 		sum(BillDetail.dblTax) dblTax
+-- 	from tblAPPaymentDetail PaymentDetail
+-- 		join tblAPBillDetail BillDetail
+-- 			on BillDetail.intBillId = PaymentDetail.intBillId
+-- 		join tblICItem Item
+-- 			on Item.intItemId = BillDetail.intItemId
+-- 				and Item.strType = 'Other Charge'
+-- 		join tblAPPayment Payment
+-- 			on PaymentDetail.intPaymentId = Payment.intPaymentId
+-- 		where Payment.intPaymentId = t.intPaymentId
+-- 			and ((BillDetail.intCustomerStorageId is null and BillDetail.intSettleStorageId is null) or (BillDetail.intScaleTicketId is null))
+-- 			and t.intMark = 1
+-- 			and BillDetail.ysnStage = 0
+-- ) AdditionalTax
 
 GROUP BY 			
 	intPaymentId	

@@ -309,55 +309,48 @@ BEGIN TRY
 	DECLARE @dtmEffectiveDateConv AS DATE = CAST(@EffectiveDate AS DATE)
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
 
-	IF @dtmEffectiveDateConv IS NOT NULL
-	BEGIN
-		BEGIN TRY
-			-- ITEM PRICING
-			EXEC [uspICUpdateEffectivePricingForCStore]
-				  @strUpcCode				= @strUpcCode
-				, @strScreen				= 'UpdateItemPricing'
-				, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
-				, @intItemId				= NULL
-				, @dblStandardCost			= @dblStandardCostConv
-				, @dblRetailPrice			= @dblRetailPriceConv
-				, @intEntityUserSecurityId	= @intCurrentUserIdConv
-				, @dtmEffectiveDate			= @dtmEffectiveDateConv
-		END TRY
-		BEGIN CATCH
-			SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
-			SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
 
-			GOTO ExitWithRollback 
-		END CATCH
-	END
+	BEGIN TRY
+		-- ITEM PRICING
+		EXEC [uspICUpdateEffectivePricingForCStore]
+			  @strUpcCode				= @strUpcCode
+			, @strScreen				= 'UpdateItemPricing'
+			, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
+			, @intItemId				= NULL
+			, @dblStandardCost			= @dblStandardCostConv
+			, @dblRetailPrice			= @dblRetailPriceConv
+			, @intEntityUserSecurityId	= @intCurrentUserIdConv
+			, @dtmEffectiveDate			= @dtmEffectiveDateConv
+	END TRY
+	BEGIN CATCH
+		SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
+		SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
 
-
-
-
+		GOTO ExitWithRollback 
+	END CATCH
+	
 
 	DECLARE @dblSalesPriceConv AS DECIMAL(18, 6) = CAST(@SalesPrice AS DECIMAL(18, 6))
 	DECLARE @dblPromotionalCostConv AS DECIMAL(18, 6) = CAST(@PromotionalCost AS DECIMAL(18, 6))
 	DECLARE @dtmSalesStartingDateConv AS DATE = CAST(@SalesStartDate AS DATE)
 	DECLARE @dtmSalesEndingDateConv AS DATE = CAST(@SalesEndDate AS DATE)
-	IF @dtmSalesStartingDateConv IS NOT NULL AND @dtmSalesEndingDateConv IS NOT NULL
-	BEGIN
-		BEGIN TRY
-			-- ITEM SPECIAL PRICING
-			EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
-				 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
-				,@dblPromotionalCost			= @dblPromotionalCostConv 
-				,@dtmBeginDate					= @dtmSalesStartingDateConv
-				,@dtmEndDate					= @dtmSalesEndingDateConv 
-				,@strUpcCode					= @strUpcCode
-				,@intEntityUserSecurityId		= @intCurrentUserIdConv
-		END TRY
-		BEGIN CATCH
-			SELECT 'uspICUpdateItemPromotionalPricingForCStore', ERROR_MESSAGE()
-			SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
 
-			GOTO ExitWithRollback 
-		END CATCH
-	END
+	BEGIN TRY
+		-- ITEM SPECIAL PRICING
+		EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
+			 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
+			,@dblPromotionalCost			= @dblPromotionalCostConv 
+			,@dtmBeginDate					= @dtmSalesStartingDateConv
+			,@dtmEndDate					= @dtmSalesEndingDateConv 
+			,@strUpcCode					= @strUpcCode
+			,@intEntityUserSecurityId		= @intCurrentUserIdConv
+	END TRY
+	BEGIN CATCH
+		SELECT 'uspICUpdateItemPromotionalPricingForCStore', ERROR_MESSAGE()
+		SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
+
+		GOTO ExitWithRollback 
+	END CATCH
 
 
 
@@ -728,17 +721,9 @@ BEGIN TRY
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
 										END
-			, strPreviewOldData			= CASE WHEN [Changes].strOldData = ''
-												THEN NULL
-											ELSE
-												[Changes].strOldData
-											END
+			, strPreviewOldData			= [Changes].strOldData
 			, strPreviewNewData			= [Changes].strNewData
-			, strOldDataPreview			= CASE WHEN [Changes].strOldData = ''
-												THEN NULL
-											ELSE
-												[Changes].strOldData
-											END
+			, strOldDataPreview			= [Changes].strOldData
 			, strAction					= [Changes].strAction
 			, ysnPreview				= 1
 			, ysnForRevert				= 1
@@ -749,8 +734,8 @@ BEGIN TRY
 			(
 				SELECT intItemId 
 					,intItemSpecialPricingId 
-					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '') AS strUnitAfterDiscount_Original
-					,ISNULL(CAST(CAST(dblOldCost AS DECIMAL(18,3)) AS NVARCHAR(50)), '') AS strCost_Original
+					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_Original
+					,ISNULL(CAST(CAST(dblOldCost AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strCost_Original
 					,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
 					,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
 					,ISNULL(CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_New

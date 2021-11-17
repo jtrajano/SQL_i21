@@ -175,7 +175,6 @@ BEGIN TRY
 					EXEC uspRKFutOptTransactionHistory @intNewFutOptTransactionId, NULL, 'Contracts', @intUserId, 'ADD' , 0;
 
 					SET @XML =	'<root><toUpdate><intHedgedLots>'+STR(@dblChildSeqLots,18,6)+'</intHedgedLots>'+
-								'<dblHedgedLots>'+STR(@dblChildSeqLots,18,6)+'</dblHedgedLots>'+
 								'<intFutOptTransactionId>'+STR(@intNewFutOptTransactionId)+'</intFutOptTransactionId>'+
 								'<dtmMatchDate>'+@strDate+'</dtmMatchDate>'+
 								'<intContractDetailId>'+STR(@intChildContractDetailId)+'</intContractDetailId></toUpdate></root>' 

@@ -63,8 +63,6 @@ BEGIN TRY
 		,@ysnSubCurrency BIT
 		,@intLocationId INT
 		,@intLoadContainerId INT
-		,@dblReceivedQty NUMERIC(18, 6)
-		,@ysnPosted BIT
 	DECLARE @strDescription AS NVARCHAR(MAX)
 	DECLARE @intNewStageReceiptId INT
 
@@ -188,8 +186,6 @@ BEGIN TRY
 					,@ysnSubCurrency = 0
 					,@intLocationId = NULL
 					,@intLoadContainerId = NULL
-					,@dblReceivedQty = NULL
-					,@ysnPosted = 0
 
 				SELECT @strERPPONumber = strERPPONumber
 					,@strERPItemNumber = strERPItemNumber
@@ -480,8 +476,6 @@ BEGIN TRY
 				SELECT @intLoadId = L.intLoadId
 					,@intLoadDetailId = LD.intLoadDetailId
 					,@intLoadContainerId = LC.intLoadContainerId
-					,@dblReceivedQty = LDCL.dblReceivedQty
-					,@ysnPosted = L.ysnPosted
 				FROM tblLGLoad L WITH (NOLOCK)
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intShipmentType = 1
@@ -500,23 +494,6 @@ BEGIN TRY
 							)
 				END
 
-				IF ISNULL(@ysnPosted, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Load is not yet posted. '
-							,16
-							,1
-							)
-				END
-
-				IF ISNULL(@dblReceivedQty, 0) > 0
-				BEGIN
-					RAISERROR (
-							'Container is already received. '
-							,16
-							,1
-							)
-				END
 				IF @intInventoryReceiptId IS NULL
 				BEGIN
 					EXEC dbo.uspSMGetStartingNumber 23

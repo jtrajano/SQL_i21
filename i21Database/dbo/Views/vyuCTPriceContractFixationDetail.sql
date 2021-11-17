@@ -119,8 +119,7 @@ AS
 			ysnBilled = FDV.ysnBilled,
 			strBillIds = FDV.strBillIds COLLATE Latin1_General_CI_AS,
 			strBills = FDV.strBills COLLATE Latin1_General_CI_AS,
-			ysnPaid = CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(PV.ysnPaid,0) ELSE 0 END,
-			REPLACE(FM.strFutureMonth, ' ', '(' + MO.strSymbol + ') ') AS strPricingMonth
+			ysnPaid = CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(PV.ysnPaid,0) ELSE 0 END
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
@@ -130,7 +129,6 @@ AS
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	MA.intCurrencyId			LEFT
 	JOIN	tblICUnitMeasure			UM	ON	UM.intUnitMeasureId				=	MA.intUnitMeasureId			LEFT
 	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId				=	FD.intHedgeFutureMonthId	LEFT
-	JOIN	tblRKFuturesMonth			FM	ON	FM.intFutureMonthId				=	FD.intFutureMonthId			LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	FD.intBrokerId				LEFT
 	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId	LEFT
 	JOIN	tblRKFutOptTransaction		TR	ON	TR.intFutOptTransactionId		=	FD.intFutOptTransactionId	LEFT

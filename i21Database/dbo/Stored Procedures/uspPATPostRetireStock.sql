@@ -469,11 +469,7 @@ BEGIN
 
 			IF(@success = 0)
 			BEGIN
-				SELECT TOP 1 @error = strMessage 
-				FROM tblAPPostResult 
-				WHERE intTransactionId = @voucher 
-				ORDER BY intId DESC
-
+				SET @error = 'Unable to unpost transaction';
 				RAISERROR(@error, 16, 1);
 				GOTO Post_Rollback;
 			END

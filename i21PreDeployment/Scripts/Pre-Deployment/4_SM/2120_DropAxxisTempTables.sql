@@ -1,3 +1,0 @@
-﻿IF OBJECT_ID(N'tmpSMShipVia') IS NOT NULL DROP TABLE tmpSMShipVia
-IF OBJECT_ID(N'tmpSMShipViaTrailer') IS NOT NULL DROP TABLE tmpSMShipViaTrailer
-IF OBJECT_ID(N'tmpSMShipViaTruck') IS NOT NULL DROP TABLE tmpSMShipViaTruck

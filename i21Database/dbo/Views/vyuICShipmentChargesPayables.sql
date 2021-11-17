@@ -65,9 +65,6 @@ SELECT
 	,intForexRateTypeId							=	ShipmentCharge.intForexRateTypeId
 	,dblForexRate								=	ShipmentCharge.dblForexRate
 	,ShipmentCharge.ysnAddPayable
-	,ScaleTicket.strLoadNumber
-	,ScaleTicket.intLoadId
-	,ScaleTicket.intLoadDetailId
 
 FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item 
 		ON ShipmentCharge.intChargeId = Item.intItemId
@@ -122,10 +119,7 @@ FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item
 			)
 	) ShipmentItem  
 
-	OUTER APPLY dbo.fnICGetScaleTicketIdForShipmentCharge(
-		Shipment.intInventoryShipmentId
-		,Shipment.strShipmentNumber
-	) ScaleTicket
+	OUTER APPLY dbo.fnICGetScaleTicketIdForShipmentCharge(Shipment.intInventoryShipmentId, Shipment.strShipmentNumber) ScaleTicket
 
 	-- Refactor this part after we put a schedule on the change on AP-1934 and IC-1648
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing

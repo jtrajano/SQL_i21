@@ -6,7 +6,7 @@
 		Ticket.strTicketNumber
 		,Entity.strName
 		,CompanyLocation.strLocationName
-		, case when StorageType.strStorageTypeDescription = 'Split' then coalesce(DeliverySheet.strDeliverySheetNumber, StorageType.strStorageTypeDescription) else StorageType.strStorageTypeDescription  end as strStorageTypeDescription 
+		,StorageType.strStorageTypeDescription 
 		,case when Ticket.strInOutFlag = 'I' then 'Inbound' 
 				when Ticket.strInOutFlag = 'O' then 'Outbound'
 			else ''
@@ -21,8 +21,7 @@
 				when Ticket.strInOutFlag = 'O' then 'Outbound'
 			else ''
 		end as strGroupIndicator
-		, Ticket.intProcessingLocationId
-		
+
 		from tblSCTicket Ticket
 			join tblEMEntity Entity
 				on Ticket.intEntityId = Entity.intEntityId
@@ -32,8 +31,7 @@
 				on Ticket.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId
 			join tblSCListTicketTypes TicketType
 				on Ticket.intTicketTypeId = TicketType.intTicketTypeId
-			left join tblSCDeliverySheet DeliverySheet
-				on Ticket.intDeliverySheetId = DeliverySheet.intDeliverySheetId
+
 	where Ticket.intTicketType = 1
 		and CompanyLocation.ysnLicensed = 1
 		--and dtmTicketDateTime between '2021-10-15' and '2021-10-22'
@@ -46,12 +44,11 @@
 		,CompanyLocation.strLocationName
 		,'Transfer' as strStorageTypeDescription
 		,'Outbound' as strIndicator
-		, Ticket.dblGrossUnits * -1
+		, Ticket.dblGrossUnits
 		, Ticket.intTicketType
 		, TicketType.strTicketType
 		, Ticket.dtmTicketDateTime
 		, 'Transfer Outbound' as strGroupIndicator
-		, Ticket.intProcessingLocationId
 		from tblSCTicket Ticket			
 			join tblSMCompanyLocation CompanyLocation
 				on Ticket.intProcessingLocationId = CompanyLocation.intCompanyLocationId
@@ -78,7 +75,6 @@
 		, TicketType.strTicketType
 		, Ticket.dtmTicketDateTime
 		, 'Transfer Inbound' as strGroupIndicator
-		, Ticket.intTransferLocationId
 		from tblSCTicket Ticket			
 			join tblSMCompanyLocation CompanyLocation
 				on Ticket.intTransferLocationId = CompanyLocation.intCompanyLocationId		

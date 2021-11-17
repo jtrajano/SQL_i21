@@ -169,7 +169,6 @@
     <None Include="Scripts\Pre-Deployment\14_CT\CreatePricingInvoiceLink.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\23_DeleteDuplicateEntityMobileNumber.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\DROPAxxisTable.sql" />
-    <None Include="Scripts\Pre-Deployment\4_SM\2120_DropAxxisTempTables.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

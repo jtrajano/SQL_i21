@@ -198,19 +198,10 @@ BEGIN
 	SELECT @StorageUnitFilterCount = COUNT(*) FROM @StorageUnitIds
 END
 
-IF OBJECT_ID('tempdb..#tblICInventoryCountDetailUnSorted') IS NOT NULL  
-BEGIN 
-	DROP TABLE #tblICInventoryCountDetailUnSorted
-END 
-
-SELECT *
-INTO #tblICInventoryCountDetailUnSorted
-FROM tblICInventoryCountDetail
-WHERE 1 = 0 
-
 IF @ysnCountByLots = 1
 BEGIN
-	INSERT INTO #tblICInventoryCountDetailUnSorted(
+
+	INSERT INTO tblICInventoryCountDetail(
 		  intInventoryCountId
 		, intItemId
 		, intItemLocationId
@@ -225,7 +216,7 @@ BEGIN
 		, dblSystemCount
 		, dblWeightQty
 		, dblLastCost
-		--, strCountLine
+		, strCountLine
 		, intItemUOMId
 		, intStockUOMId
 		, intWeightUOMId
@@ -259,7 +250,7 @@ BEGIN
 					ELSE 
 						ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, Lot.intItemUOMId, LastLotTransaction.dblCost), 0)
 				END 
-			--, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
+			, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY Lot.intItemId ASC) AS NVARCHAR(50))
 			, Lot.intItemUOMId
 			, StockUOM.intItemUOMId
 			, Lot.intWeightUOMId
@@ -361,7 +352,7 @@ END
 
 ELSE IF @strCountBy = 'Pack'
 BEGIN
-	INSERT INTO #tblICInventoryCountDetailUnSorted(
+	INSERT INTO tblICInventoryCountDetail(
 		  intInventoryCountId
 		, intItemId
 		, intItemLocationId
@@ -370,7 +361,7 @@ BEGIN
 		, intLotId
 		, dblSystemCount
 		, dblLastCost
-		--, strCountLine
+		, strCountLine
 		, intItemUOMId
 		, intStockUOMId
 		, ysnRecount
@@ -442,7 +433,7 @@ BEGIN
 				,0
 			)
 
-		--, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, itemUOM.intItemUOMId ASC) AS NVARCHAR(50))
+		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, itemUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = itemUOM.intItemUOMId
 		, intStockUOMId = stockUOM.intItemUOMId
 		, ysnRecount = 0
@@ -569,7 +560,7 @@ END
 
 ELSE
 BEGIN
-	INSERT INTO #tblICInventoryCountDetailUnSorted(
+	INSERT INTO tblICInventoryCountDetail(
 		  intInventoryCountId
 		, intItemId
 		, intItemLocationId
@@ -578,7 +569,7 @@ BEGIN
 		, intLotId
 		, dblSystemCount
 		, dblLastCost
-		--, strCountLine
+		, strCountLine
 		, intItemUOMId
 		, intStockUOMId
 		, ysnRecount
@@ -669,7 +660,7 @@ BEGIN
 					)					
 			END	
 
-		--, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
+		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 		, intStockUOMId = stockUOM.intItemUOMId
 		, ysnRecount = 0

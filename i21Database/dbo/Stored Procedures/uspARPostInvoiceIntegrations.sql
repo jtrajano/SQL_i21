@@ -1017,12 +1017,6 @@ EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds 	= @tblInvoicesToUpdate
 								, @ysnRebuild 			= 0
 								, @ysnPost 				= @Post
 
---SALES ANALYSIS REPORT
-EXEC dbo.uspARSalesAnalysisReport @tblTransactionIds 	= @tblInvoicesToUpdate
-							    , @ysnInvoice 			= 1
-								, @ysnRebuild 			= 0
-								, @ysnPost 				= @Post
-
 --DELETE FROM POSTING QUEUE
 DELETE PQ
 FROM tblARPostingQueue PQ

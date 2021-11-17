@@ -52,30 +52,13 @@ BEGIN TRY
 
 	DECLARE @PFTable TABLE(
 		intPriceFixationId INT,
-		intPriceContractId INT,
-		intContractHeaderId int,
-		intContractDetailId int
+		intPriceContractId INT
 	)
 
-	INSERT INTO @PFTable (intPriceFixationId, intPriceContractId,intContractHeaderId,intContractDetailId)
-	SELECT intPriceFixationId, intPriceContractId, intContractHeaderId, intContractDetailId
+	INSERT INTO @PFTable (intPriceFixationId, intPriceContractId)
+	SELECT intPriceFixationId, intPriceContractId 
 	FROM tblCTPriceFixation 
 	WHERE intPriceContractId = @intPriceContractId
-
-	if exists (
-		select
-			top 1 1
-		from
-			tblCTContractDetail cd
-			join @PFTable pf
-				on pf.intContractHeaderId = cd.intContractHeaderId
-				and pf.intContractDetailId = cd.intContractDetailId
-		where
-			cd.intContractStatusId = 3
-	)
-	begin
-		RAISERROR ('Cancelled sequences cannot be priced.',18,1,'WITH NOWAIT');
-	end
 
 	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM @PFTable WHERE intPriceContractId = @intPriceContractId
 

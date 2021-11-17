@@ -258,10 +258,10 @@ FROM
 									ELSE dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END,
 									dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, @intWeightUnitMeasureId, FM.dblContractSize)), 0)
 								* dbo.fnCTConvertQuantityToTargetItemUOM(I.intItemId, FM.intUnitMeasureId, IUOM.intUnitMeasureId, FM.dblContractSize)
-		,dblReservesARateTotal = ISNULL(RA.dblReservesARateTotal, 0)
-		,dblReservesAValueTotal = ISNULL(RA.dblReservesAValueTotal * -1, 0)
-		,dblReservesBRateTotal = ISNULL(RB.dblReservesBRateTotal, 0)
-		,dblReservesBValueTotal = ISNULL(RB.dblReservesBValueTotal * -1, 0)
+		,dblReservesARateTotal = RA.dblReservesARateTotal
+		,dblReservesAValueTotal = RA.dblReservesAValueTotal * -1
+		,dblReservesBRateTotal = RB.dblReservesBRateTotal
+		,dblReservesBValueTotal = RB.dblReservesBValueTotal * -1
 		,dblDifferentialRateTotal = /* P-Differential + Reserves A Total + Reserves B Total */
 								ISNULL(PCD.dblBasis, 0)
 								+ ISNULL(RA.dblReservesARateTotal, 0) 
@@ -273,7 +273,7 @@ FROM
 						- COALESCE(INVC.dblNetShippedWt, PINVC.dblNetShippedWt, dbo.fnCalculateQtyBetweenUOM (SUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty))
 		,dblTotalMargin = /* Reserves B Total in Absolute Value */ 
 							ABS(RB.dblReservesBValueTotal)
-		,dblReservesATotalVariance = ISNULL(RA.dblReservesAVarianceTotal, 0) * -1
+		,dblReservesATotalVariance = RA.dblReservesAVarianceTotal * -1
 		,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 		,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 		,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
@@ -312,13 +312,11 @@ FROM
 		/* Load Shipment */
 		OUTER APPLY 
 			(SELECT 
-				dblNetShippedWt = SUM(LD.dblShipmentNetWt) --LS Net Weight in Tonnage Unit
-				,dblShippedNetQty = SUM(LD.dblShipmentQty) --LS Net Weight in Contract Unit
+				dblNetShippedWt = SUM(LD.dblShipmentQty)
 				,intItemUOMId = MAX(LD.intWeightItemUOMId)
 			FROM 
 				(SELECT l.intLoadId, ld.intItemId, ld.intPContractDetailId, l.ysnPosted, ld.intWeightItemUOMId
-					,dblShipmentNetWt = dbo.fnCalculateQtyBetweenUOM (ld.intWeightItemUOMId, ToWUOM.intItemUOMId, ld.dblNet) 
-					,dblShipmentQty = dbo.fnCalculateQtyBetweenUOM (ld.intWeightItemUOMId, ld.intItemUOMId, ld.dblNet) 
+					,dblShipmentQty = dbo.fnCalculateQtyBetweenUOM (ld.intWeightItemUOMId, ToWUOM.intItemUOMId, ld.dblNet) 
 					FROM tblLGLoadDetail ld
 					INNER JOIN tblLGLoad l on l.intLoadId = ld.intLoadId and l.intShipmentType = 1
 					WHERE l.ysnPosted = 1 AND ld.intPContractDetailId = PCD.intContractDetailId) LD
@@ -331,13 +329,8 @@ FROM
 			FROM 
 				(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
 					,dblTotal = bld.dblTotal * CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
-					,dblQtyReceived = CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 
-										ELSE 
-											CASE WHEN bl.intTransactionType IN (11) 
-												THEN dbo.fnCalculateQtyBetweenUOM (bld.intUnitOfMeasureId, ToWUOM.intItemUOMId, bld.dblQtyOrdered)
-												ELSE dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, ToWUOM.intItemUOMId, bld.dblNetWeight)  
-											END
-										END
+					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, ToWUOM.intItemUOMId, 
+										CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 ELSE bld.dblNetWeight END) 
 									* CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
 					FROM tblAPBillDetail bld
 					INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD
@@ -368,10 +361,7 @@ FROM
 			FROM 
 				(SELECT ivd.intInvoiceId, ivd.intItemId, ivd.intContractDetailId, iv.ysnPosted
 					,dblTotal = dblTotal * CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
-					,dblQtyShipped = CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0)
-											THEN dbo.fnCalculateQtyBetweenUOM (ivd.intItemUOMId, ToWUOM.intItemUOMId, ivd.dblQtyShipped) 
-											ELSE dbo.fnCalculateQtyBetweenUOM (ivd.intItemWeightUOMId, ToWUOM.intItemUOMId, ivd.dblShipmentNetWt)  
-										END
+					,dblQtyShipped = dbo.fnCalculateQtyBetweenUOM (intItemWeightUOMId, ToWUOM.intItemUOMId, dblShipmentNetWt) 
 									* CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
 					FROM tblARInvoiceDetail ivd
 					INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId AND iv.strType = 'Standard') IVD 
@@ -421,23 +411,26 @@ FROM
 													CC.dblRate
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate 
-													/ CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
-															 ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
+													/ dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
+														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
+															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
+															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
 												ELSE CC.dblRate END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 								,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
-													CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
-															 ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
-													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CCTonUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
+													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
+														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
+															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
+															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate
 												WHEN CC.strCostMethod = 'Per Container'	THEN
 													CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers,1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers,1) END)
 												WHEN CC.strCostMethod = 'Percentage' THEN 
-													CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
-															 ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
+													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
+														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
+															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
+															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
 													* CD.dblCashPrice * CC.dblRate/100
 												END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						FROM tblCTContractCost CC
@@ -447,7 +440,7 @@ FROM
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 										WHERE intItemId = CC.intItemId AND intUnitMeasureId = CDUOM.intUnitMeasureId) CToUOM
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
-									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intWeightUnitMeasureId) CCTonUOM
+									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intUnitMeasureId) TonUOM
 							OUTER APPLY (SELECT	TOP 1 dblFXRate = CASE WHEN ER.intFromCurrencyId = @intDefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
 									FROM tblSMCurrencyExchangeRate ER
 									JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
@@ -510,23 +503,26 @@ FROM
 													CC.dblRate
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate 
-													/ CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
-															 ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,CCTonUOM.intItemUOMId,ALD.dblSAllocatedQty) END
+													/ dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
+														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
+															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
+															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
 												ELSE CC.dblRate END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 								,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
-													CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
-															 ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
-													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CCTonUOM.intItemUOMId,ISNULL(CC.dblRate, 0)) / ISNULL(CCUR.intCent, 1)
+													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
+														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
+															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
+															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
+													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 												WHEN CC.strCostMethod = 'Amount' THEN
 													CC.dblRate
 												WHEN CC.strCostMethod = 'Per Container'	THEN
 													CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers,1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers,1) END)
 												WHEN CC.strCostMethod = 'Percentage' THEN 
-													CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
-															 WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
-															 ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
+													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
+														CASE WHEN ISNULL(VCHR.dblNetShippedWt, 0) <> 0 THEN VCHR.dblNetShippedWt + ISNULL(VCADJ.dblWtAdjustment, 0)
+															 WHEN ISNULL(LS.dblNetShippedWt, 0) <> 0 THEN LS.dblNetShippedWt
+															 ELSE dbo.fnCalculateQtyBetweenUOM (PUOM.intItemUOMId, ToWUOM.intItemUOMId, ALD.dblSAllocatedQty) END)
 													* CD.dblCashPrice * CC.dblRate/100
 												END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						FROM tblCTContractCost CC
@@ -536,7 +532,7 @@ FROM
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 										WHERE intItemId = CC.intItemId AND intUnitMeasureId = CDUOM.intUnitMeasureId) CToUOM
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
-									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intWeightUnitMeasureId) CCTonUOM
+									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intUnitMeasureId) TonUOM
 							OUTER APPLY (SELECT	TOP 1 dblFXRate = CASE WHEN ER.intFromCurrencyId = @intDefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
 									FROM tblSMCurrencyExchangeRate ER
 									JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId

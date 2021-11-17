@@ -70,7 +70,6 @@
 :r .\4_SM\11_RemoveDuplicateTaxCodeUnderTaxGroup.sql
 :r .\4_SM\12_MigrateRecentlyViewed.sql
 :r .\4_SM\2110_RemoveDuplicateScreensAndTransaction.sql
-:r .\4_SM\2120_DropAxxisTempTables.sql
 
 -- GL
 :r .\6_GL\1_1410_to_1420.sql
