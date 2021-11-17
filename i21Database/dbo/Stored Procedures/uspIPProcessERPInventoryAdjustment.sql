@@ -441,6 +441,7 @@ BEGIN TRY
 					,@ysnBulkChange = 0
 					,@strReferenceNo = NULL
 					,@intAdjustmentId = @intAdjustmentId OUTPUT
+					,@ysnDifferenceQty=1
 
 				SELECT @strAdjustmentNo = NULL
 
