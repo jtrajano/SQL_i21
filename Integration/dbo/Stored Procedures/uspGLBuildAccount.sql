@@ -120,7 +120,7 @@ BEGIN
 		END
 
 
-
+		EXEC dbo.uspGLUpdateAccountLocationId
 		EXEC uspGLAccountOriginSync @intUserId
 		EXEC dbo.uspGLInsertOriginCrossReferenceMapping
 

@@ -7728,6 +7728,7 @@
     <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAccountLocationSegmentId.sql" />
     <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
     <Build Include="dbo\Tables\tblHDTicketSubcause.sql" />
     <Build Include="dbo\Tables\tblHDTicketCorrectiveAction.sql" />
@@ -10224,6 +10225,8 @@
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <Build Include="dbo\Functions\fnGLGetFiscalPeriod.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1u_InsertDefaultDataSync.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1v_PostHistoryGroupings.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1w_UpdateGLAccount.sql" />
     <None Include="Scripts\Post-Deployment\CM\6_InsertDefaultDataSync.sql" />
     <Build Include="dbo\Tables\tblCMDataFixLog.sql" />
     <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />

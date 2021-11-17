@@ -14,6 +14,7 @@
     [strCashFlow]       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intEntityIdLastModified] INT NULL, 
     [intCurrencyID] INT NULL, 
+    [intLocationSegmentId] INT NULL, 
     [intCurrencyExchangeRateTypeId] INT NULL, 
 	[strOldAccountId]   NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_GLAccount_AccountId] PRIMARY KEY CLUSTERED ([intAccountId] ASC),

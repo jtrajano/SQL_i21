@@ -180,8 +180,6 @@ WHERE isnull(ysnInvalid,0) = 0
   
 UPDATE ST SET intAccountId = GL.intAccountId FROM [tblGLAccountImportDataStaging2] ST join tblGLAccount GL ON GL.strAccountId = ST.strAccountId   
   
-  
-  
 ;WITH Segments AS(  
  SELECT intAccountId, intPrimarySegmentId SegmentId FROM [tblGLAccountImportDataStaging2]  WHERE isnull(ysnInvalid,0) = 0 UNION ALL  
  SELECT intAccountId, [intLocationSegmentId] FROM [tblGLAccountImportDataStaging2]  WHERE isnull(ysnInvalid,0) = 0 UNION ALL  
@@ -189,7 +187,9 @@ UPDATE ST SET intAccountId = GL.intAccountId FROM [tblGLAccountImportDataStaging
 )  
 INSERT intO tblGLAccountSegmentMapping(intAccountSegmentId, intAccountId, intConcurrencyId)  
 SELECT SegmentId, intAccountId, 1  FROM Segments
-  
+
+EXEC dbo.uspGLUpdateAccountLocationId
+
 INSERT INTO tblGLCOACrossReference ([inti21Id],[stri21Id],[strExternalId], [strCurrentExternalId], [strCompanyId], [intConcurrencyId])    
 SELECT B.intAccountId as inti21Id,    
 B.strAccountId as stri21Id,    
@@ -200,7 +200,8 @@ B.strPrimarySegment + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccount
 FROM [tblGLAccountImportDataStaging2] B    
 JOIN tblGLAccount A on A.intAccountId = B.intAccountId  
 WHERE A.strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE strCompanyId='Legacy')
- 
+
+
  IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))    
  BEGIN  
  SET ANSI_WARNINGS  OFF

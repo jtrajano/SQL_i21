@@ -11,6 +11,7 @@
 	[intDBVersion] INT NULL,
 	[ysnHistoricalJournalImported] BIT NULL,
 	[ysnShowAccountingPeriod] BIT NULL,
+	[ysnRequireLocation] BIT NULL,
 	[strSubsidiaryCompanyJson] NVARCHAR(MAX),
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )

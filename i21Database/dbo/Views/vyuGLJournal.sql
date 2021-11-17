@@ -1,4 +1,4 @@
-CREATE VIEW vyuGLJournal
+ALTER VIEW vyuGLJournal
 AS
 SELECT 
     [intJournalId], 
@@ -8,15 +8,15 @@ SELECT
     [dtmPosted], 
     [dtmReverseDate], 
     [intCompanyId], 
-    Extent1.[intConcurrencyId], 
-    Extent1.[intCurrencyId], 
+    GJ.[intConcurrencyId], 
+    GJ.[intCurrencyId], 
     [strCurrency], 
     [intEntityId], 
     [intFiscalPeriodId], 
-    Extent1.[intFiscalYearId], 
+    GJ.[intFiscalYearId], 
     [intJournalIdToReverse], 
     [intUserId], 
-    Extent1.[strDescription], 
+    GJ.[strDescription], 
     [strJournalId], 
     [strSourceId], 
     [strSourceType], 
@@ -30,11 +30,13 @@ SELECT
     [strPeriod] strFiscalPeriodName, 
     [dtmStartDate] dtmFiscalPeriodStart, 
     [dtmEndDate] dtmFiscalPeriodEnd, 
-    [intCurrencyExchangeRateId]
-    FROM   [dbo].[tblGLJournal] AS [Extent1]
-    LEFT JOIN [dbo].[tblSMCurrency] AS [Extent2] ON [Extent1].[intCurrencyId] = [Extent2].[intCurrencyID]
-    LEFT JOIN [dbo].[tblGLFiscalYearPeriod] AS [Extent3] ON [Extent1].[intFiscalPeriodId] = [Extent3].[intGLFiscalYearPeriodId]
-    
+    [intCurrencyExchangeRateId],
+    intLocationSegmentId,
+    SG.strCode strLocationSegment
+    FROM   [dbo].[tblGLJournal] AS GJ
+    LEFT JOIN [dbo].[tblSMCurrency] AS SM ON GJ.[intCurrencyId] = SM.[intCurrencyID]
+    LEFT JOIN [dbo].[tblGLFiscalYearPeriod] AS FP ON GJ.[intFiscalPeriodId] = FP.[intGLFiscalYearPeriodId]
+    LEFT JOIN tblGLAccountSegment SG ON SG.intAccountSegmentId = GJ.intLocationSegmentId
     
     
 

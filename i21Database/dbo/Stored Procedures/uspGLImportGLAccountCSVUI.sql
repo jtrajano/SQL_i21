@@ -136,6 +136,8 @@ FROM  [tblGLAccountImportDataStaging2] S
 JOIN tblGLAccountSegment SG ON SG.intAccountSegmentId = S.[intPrimarySegmentId]  
 WHERE ISNULL(ysnInvalid,0) = 0 
 
+
+
 UPDATE ST SET intAccountId = GL.intAccountId 
 FROM [tblGLAccountImportDataStaging2] ST 
 JOIN tblGLAccount GL ON GL.strAccountId = ST.strAccountId  
@@ -159,6 +161,8 @@ B.strPrimarySegment + REPLICATE('0',(select 8 - SUM(intLength) from tblGLAccount
 FROM [tblGLAccountImportDataStaging2] B    
 JOIN tblGLAccount A on A.intAccountId = B.intAccountId  
 WHERE A.strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE strCompanyId='Legacy')
+
+EXEC dbo.uspGLUpdateAccountLocationId
  
  IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))    
  BEGIN  
