@@ -17,7 +17,22 @@ BEGIN
 		SET strScreen = ''Logistics.view.DeliveredNotInvoicedReport''
 		WHERE strScreen = ''Logistics.view.ShipmentSchedule7'' AND strGrid = ''grdSearch''
 	')
+END
+GO
 
+/*
+* Fix Shipment Status of Load/Shipment Schedule processed to Posted Provisional Invoice with GL Impact
+*/
+IF (EXISTS (SELECT 1 from tblARCompanyPreference WHERE ysnImpactForProvisional = 1)
+	AND EXISTS(SELECT 1 FROM tblLGLoad L WHERE L.intShipmentStatus = 6 
+				AND EXISTS (SELECT 1 from tblARInvoice iv where iv.ysnPosted = 1 
+							and intLoadId = L.intLoadId and strTransactionType = 'Invoice' and iv.strType = 'Provisional')))
+BEGIN
+	UPDATE L
+	SET intShipmentStatus = 11
+	FROM tblLGLoad L
+	WHERE L.intShipmentStatus = 6 
+	AND EXISTS (SELECT 1 from tblARInvoice iv where iv.ysnPosted = 1 and intLoadId = L.intLoadId and strTransactionType = 'Invoice' and iv.strType = 'Provisional')
 END
 GO
 

@@ -657,10 +657,6 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
 		end
 
-		exec uspCTUpdateAppliedAndPrice
-			@intContractDetailId = @intActiveContractDetailId
-			,@dblBalance = @dblBalance
-
 	end try
 	begin catch
 		SET @ErrMsg = ERROR_MESSAGE()  

@@ -74,6 +74,12 @@ SELECT
 	,CL.strCity AS strCompanyLocationCity
 	,CL.strStateProvince AS strCompanyLocationState
 	,CL.strZipPostalCode AS strCompanyLocationZipCode
+	,A.intClockID AS intClockId
+	,J.ysnCallEntryPrinted ysnPrinted
+	,J.intDriverID AS intDriverId
+	,J.intUserID AS intEntityUserSecurityId
+	,A.intRouteId AS intRouteId
+	,A.intLocationId AS intLocationId
 FROM tblTMSite A
 INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = A.intLocationId

@@ -17,14 +17,23 @@ BEGIN TRY
 	IF @transCount = 0 BEGIN TRANSACTION
 
 	DECLARE @datePaid DATETIME;
-	DECLARE @checkNumber NVARCHAR(1000);
-	DECLARE @intIds NVARCHAR(1000);
-	DECLARE @billIds NVARCHAR(1000);
+	DECLARE @vendorId INT;
+	DECLARE @checkNumber NVARCHAR(55);
+	DECLARE @intIds NVARCHAR(MAX);
+	DECLARE @billIds NVARCHAR(MAX);
 	DECLARE @createdPaymentId INT;
-	DECLARE @createdPayments NVARCHAR(1000) = '';
+	DECLARE @createdPayments NVARCHAR(MAX) = '';
+
+	--VENDOR DEFAULTS
+	DECLARE @currencyId INT = NULL;
+	DECLARE @paymentMethodId INT = NULL;
+	DECLARE @payToAddress INT = NULL;
+
+	DELETE FROM tblAPImportPaidVouchersForPayment WHERE strNotes IS NOT NULL
 
 	IF OBJECT_ID('tempdb..#tmpMultiVouchersImport') IS NOT NULL DROP TABLE #tmpMultiVouchersImport
 	SELECT dtmDatePaid,
+		   intEntityVendorId,
 		   strCheckNumber,
 		   intIds = STUFF((SELECT ',' + CONVERT(VARCHAR(12), I2.intId) FROM tblAPImportPaidVouchersForPayment I2 WHERE I2.dtmDatePaid = I.dtmDatePaid AND I2.intEntityVendorId = I.intEntityVendorId AND (I2.strCheckNumber = I.strCheckNumber OR (I2.strCheckNumber IS NULL AND I.strCheckNumber IS NULL)) AND I2.intCustomPartition = I.intCustomPartition FOR XML PATH('')), 1, 1, '')
 	INTO #tmpMultiVouchersImport
@@ -33,26 +42,46 @@ BEGIN TRY
 
 	WHILE EXISTS(SELECT TOP 1 1 FROM #tmpMultiVouchersImport)
 	BEGIN
-		SELECT TOP 1 @datePaid = dtmDatePaid, @checkNumber = strCheckNumber, @intIds = intIds, @billIds = '' FROM #tmpMultiVouchersImport
+		SELECT TOP 1 @datePaid = dtmDatePaid, @vendorId = intEntityVendorId, @checkNumber = strCheckNumber, @intIds = intIds, @billIds = '' FROM #tmpMultiVouchersImport
 
-		SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
-		FROM dbo.fnGetRowsFromDelimitedValues(@intIds) IDS
-		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
-		INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
+		IF @templateId NOT IN (1, 2, 3)
+		BEGIN
+			SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), B.intBillId)
+			FROM dbo.fnGetRowsFromDelimitedValues(@intIds) IDS
+			INNER JOIN tblAPImportPaidVouchersForPayment I ON I.intId = IDS.intID
+			INNER JOIN tblAPBill B ON B.strBillId = I.strBillId
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @currencyId = intCurrencyId FROM vyuCMBankAccount WHERE intBankAccountId = @bankAccountId
+			SELECT TOP 1 @paymentMethodId = intPaymentMethodId, @payToAddress = intDefaultLocationId FROM vyuAPVendor WHERE intEntityId = @vendorId
+
+			SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12), intBillId)
+			FROM dbo.fnAPGetPayVoucherForPayment(@currencyId, @paymentMethodId, @datePaid, 1, @vendorId, @payToAddress, 0)
+		END
 
 		EXEC uspAPCreatePayment @userId, @bankAccountId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, @datePaid, DEFAULT, DEFAULT, @billIds, @createdPaymentId OUTPUT
 
+		IF @templateId NOT IN (1, 2, 3)
+		BEGIN
+			DELETE PD
+			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
+			LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strVendorOrderNumber = PS.strPaymentScheduleNumber
+			WHERE PD.intPaymentId = @createdPaymentId AND PD.intPayScheduleId IS NOT NULL AND (I.intId IS NULL OR I.intId NOT IN (SELECT intID FROM dbo.fnGetRowsFromDelimitedValues(@intIds)))
+		END
+		
 		UPDATE PD
-		SET PD.dblDiscount = I.dblDiscount,
-			PD.dblPayment = I.dblPayment,
-			PD.dblInterest = I.dblInterest,
-			PD.dblAmountDue = (I.dblPayment + I.dblDiscount) - I.dblInterest,
-			PD.dblTotal = (I.dblPayment + I.dblDiscount) - I.dblInterest
+		SET PD.dblDiscount = ISNULL(I.dblDiscount, 0),
+			PD.dblPayment = ISNULL(I.dblPayment, 0),
+			PD.dblInterest = ISNULL(I.dblInterest, 0),
+			PD.dblAmountDue = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - PD.dblInterest) ELSE PD.dblAmountDue END,
+			PD.dblTotal = CASE WHEN I.intId IS NOT NULL THEN ((I.dblPayment + I.dblDiscount) - I.dblInterest) ELSE PD.dblTotal END
 		FROM tblAPPaymentDetail PD
-		INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		INNER JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId
-		WHERE P.intPaymentId = @createdPaymentId
+		LEFT JOIN tblAPVoucherPaymentSchedule PS ON PS.intId = PD.intPayScheduleId
+		LEFT JOIN tblAPImportPaidVouchersForPayment I ON I.strBillId = B.strBillId AND I.strVendorOrderNumber = ISNULL(PS.strPaymentScheduleNumber, B.strVendorOrderNumber)
+		WHERE PD.intPaymentId = @createdPaymentId
 
 		UPDATE P
 		SET P.intBankAccountId = @bankAccountId,

@@ -76,7 +76,7 @@ begin try
 		,@intFinalCurrencyId = cd.intCurrencyId
 		,@intOriginalFutureMarketId =  cd.intFutureMarketId
 		,@intOriginalFutureMonthId = cd.intFutureMonthId
-		,@dblOriginalBasis = cd.dblOriginalBasis
+		,@dblOriginalBasis = isnull(cd.dblOriginalBasis,cd.dblBasis)
 		,@dblTotalLots = (case when ch.ysnMultiplePriceFixation = 1 then ch.dblNoOfLots else cd.dblNoOfLots end)
 		,@dblLotsFixed = @dblTotalLots
 		,@intQtyItemUOMId = cd.intItemUOMId

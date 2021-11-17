@@ -50,6 +50,7 @@ Declare @intMinHeader				INT,
 		@dblNetWeight				NUMERIC(38,20),
 		@strWeightUOM				NVARCHAR(50),
 		@dtmETAPOD					DATETIME,
+		@dtmPlannedAvailabilityDate DATETIME,
 		@intNoOfContainer			INT,
 		@intExternalContainerNo		INT,
 		@str10Zeros					NVARCHAR(50)='0000000000',
@@ -136,8 +137,10 @@ Begin
 	Select TOP 1 @strVendorAccountNo=v.strVendorAccountNum 
 	From tblLGLoadDetail ld Join vyuAPVendor v on ld.intVendorEntityId=v.intEntityId Where intLoadId = @intLoadId
 
+	SELECT @dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate FROM tblLGLoad WHERE intLoadId = @intLoadId
+
 	--Validation
-	Update tblLGLoadStg Set strMessage=NULL  Where intLoadStgId=@intLoadStgId --message should be null not empty(used in loadstg sps as null)
+	Update tblLGLoadStg Set strMessage=NULL,dtmPlannedAvailabilityDate=@dtmPlannedAvailabilityDate Where intLoadStgId=@intLoadStgId --message should be null not empty(used in loadstg sps as null)
 
 	--Do not send instruction if advice is created
 	If @strTransactionType='Shipping Instructions'
@@ -158,6 +161,11 @@ Begin
 	If @dtmETAPOD is null
 	Begin
 		Update tblLGLoadStg Set strMessage='ETA POD is empty.'  Where intLoadStgId=@intLoadStgId
+		GOTO NEXT_SHIPMENT
+	End
+	If @dtmPlannedAvailabilityDate is null
+	Begin
+		Update tblLGLoadStg Set strMessage='Planned Availability Date is empty.'  Where intLoadStgId=@intLoadStgId
 		GOTO NEXT_SHIPMENT
 	End
 
@@ -243,7 +251,7 @@ Begin
 
 	Set @strXml += '<E1EDT13 SEGMENT="1">'
 	Set @strXml += '<QUALF>'	+ '007'			+ '</QUALF>'
-	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmETAPOD,112),'')		+ '</NTANF>'
+	Set @strXml += '<NTANF>'	+ ISNULL(CONVERT(VARCHAR(10),@dtmPlannedAvailabilityDate,112),'')		+ '</NTANF>'
 	Set @strXml +=	'</E1EDT13>'
 
 	Delete From @tblDetail

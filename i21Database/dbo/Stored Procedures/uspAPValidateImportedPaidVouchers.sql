@@ -47,14 +47,20 @@ UPDATE A
 						A.dblPayment < 0 AND B.intTransactionType != 3
 					THEN 'Amount is negative. Debit Memo type is expected.'
 					WHEN 
-						B.intTransactionType = 3 AND ((A.dblPayment + A.dblDiscount) - A.dblInterest) > 0
-					THEN 'Debit Memo type amount should be negative.'
+						A.dblPayment > (B.dblAmountDue * -1) AND B.intTransactionType = 3
+					THEN 'Overpayment'
 					WHEN 
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue
-					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Underpayment' ELSE 'Overpayment' END)
+						((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Overpayment'
+						WHEN 
+						A.dblPayment < (B.dblAmountDue * -1) AND B.intTransactionType = 3
+					THEN 'Underpayment'
 					WHEN 
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue
-					THEN (CASE WHEN B.intTransactionType = 3 THEN 'Overpayment' ELSE 'Underpayment' END)
+						((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue  AND B.intTransactionType = 1
+					THEN 'Underpayment'
+					WHEN
+						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > (B.dblTotal - B.dblPaymentTemp)
+					THEN 'Already included in payment' + P.strPaymentRecordNum
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId
@@ -64,11 +70,23 @@ OUTER APPLY	(
 	SELECT *
 	FROM (
 		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
-		FROM tblAPBill 
-		WHERE strVendorOrderNumber = A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId AND CONVERT(NVARCHAR(10), dtmBillDate, 101) = CONVERT(NVARCHAR(10), A.dtmBillDate, 101)
+		FROM vyuAPBillForImport 
+		WHERE intEntityVendorId = A.intEntityVendorId AND CONVERT(NVARCHAR(10), dtmBillDate, 101) = CONVERT(NVARCHAR(10), A.dtmBillDate, 101)
+			AND ISNULL(strPaymentScheduleNumber, strVendorOrderNumber) = A.strVendorOrderNumber
 	) voucher
 	WHERE voucher.intRow = cte.intRow
 ) B
+OUTER APPLY (
+	SELECT STUFF(
+		(
+			SELECT ', ' + P.strPaymentRecordNum 
+			FROM tblAPPaymentDetail PD 
+			INNER JOIN tblAPPayment P ON P.intPaymentId = PD.intPaymentId 
+			WHERE PD.intBillId = B.intBillId AND ISNULL(PD.intPayScheduleId, 0) = ISNULL(B.intPayScheduleId, 0) AND PD.dblPayment <> 0
+			ORDER BY P.intPaymentId FOR XML PATH('')
+		), 1, 1, ''
+	) AS strPaymentRecordNum
+) P
 WHERE A.strNotes IS NULL
 	
 IF @transCount = 0 COMMIT TRANSACTION;  

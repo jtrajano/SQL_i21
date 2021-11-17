@@ -213,9 +213,9 @@ SET ANSI_WARNINGS ON
 				,[intInventoryReceiptChargeId] = NULL
 				,[intInventoryShipmentItemId]		
 				,[intInventoryShipmentChargeId]		
-				,[strLoadShipmentNumber] = NULL 
-				,[intLoadShipmentId] = NULL				
-				,[intLoadShipmentDetailId] = NULL			
+				,[strLoadShipmentNumber] = ShipmentCharges.strLoadNumber
+				,[intLoadShipmentId] = ShipmentCharges.intLoadId
+				,[intLoadShipmentDetailId] = ShipmentCharges.intLoadDetailId
 				,ShipmentCharges.[intItemId]						
 				,[intPurchaseTaxGroupId] = NULL		
 				,[strMiscDescription]				

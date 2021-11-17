@@ -53,8 +53,13 @@ FROM tblICItem I
 			dblNetShippedWt = SUM(BLD.dblQtyReceived)
 		FROM 
 			(SELECT bl.intBillId, bld.intItemId, bld.intContractDetailId, bl.ysnPosted, bl.intTransactionType
-				,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, PCD.intItemUOMId, 
-										CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 ELSE bld.dblNetWeight END) 
+				,dblQtyReceived = CASE WHEN (bld.intItemId <> PCD.intItemId) THEN 0 
+										ELSE 
+											CASE WHEN bl.intTransactionType IN (11) 
+												THEN dbo.fnCalculateQtyBetweenUOM (bld.intUnitOfMeasureId, PCD.intItemUOMId, bld.dblQtyOrdered)
+												ELSE dbo.fnCalculateQtyBetweenUOM (bld.intWeightUOMId, PCD.intItemUOMId, bld.dblNetWeight)  
+											END
+										END
 									* CASE WHEN bl.intTransactionType IN (3, 11) THEN -1 ELSE 1 END
 				FROM tblAPBillDetail bld
 				INNER JOIN tblAPBill bl on bl.intBillId = bld.intBillId) BLD
@@ -82,26 +87,23 @@ FROM tblICItem I
 											CC.dblRate
 										WHEN CC.strCostMethod = 'Amount' THEN
 											CC.dblRate 
-											/ dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
-												CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
-													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty) 
-													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END)
+											/ CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
+													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
+													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
 										ELSE CC.dblRate END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN
-											dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
-												CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
-													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty) 
-													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END)
+											CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
+													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
+													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
 											* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
 										WHEN CC.strCostMethod = 'Amount' THEN
 											CC.dblRate
 										WHEN CC.strCostMethod = 'Per Container'	THEN
 											CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers,1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers,1) END)
 										WHEN CC.strCostMethod = 'Percentage' THEN 
-											dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,
-												CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
-													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty) 
-													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END) 
+											CASE WHEN ISNULL(PTON.dblNetShippedWt, 0) <> 0 THEN PTON.dblNetShippedWt + ISNULL(PTONAdj.dblWtAdjustment, 0)
+													WHEN ISNULL(LS.dblShippedNetQty, 0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,LS.dblShippedNetQty)
+													ELSE dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty) END
 											* CD.dblCashPrice * CC.dblRate/100
 										END 
 									* COALESCE(CC.dblFX, FX.dblFXRate, 1)

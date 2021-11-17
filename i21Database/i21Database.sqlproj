@@ -203,6 +203,10 @@
     <Build Include="dbo\Stored Procedures\uspLGFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWarehouseRateMatrix.sql" />
     <Build Include="dbo\Views\vyuCTFutureMarketItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiGetItemStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiGetItemStockByUom.sql" />
+    <Build Include="dbo\Tables\tblApiInventoryItemStock.sql" />
+    <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
     <Build Include="dbo\Functions\fnTRStringConcat.sql" />
     <Build Include="dbo\Tables\tblSMIDPSharedToken.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
@@ -250,8 +254,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformCustomerFreight.sql" />
     <Build Include="dbo\Views\vyuCTActiveEntity.sql" />
     <Build Include="dbo\Functions\fnAPGetFiscalPeriod.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaTRCustomerFreight.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformCustomerFreight.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherTransactionType2.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRShipViaTariff.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRShipViaTariff.sql" />
@@ -300,6 +302,14 @@
     <Build Include="dbo\Tables\tblApiSchemaTransformVendorSetup.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRebateProgram.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTransformRebateProgram.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaCCVendorSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaCCTransformVendorSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBuybackVendorSetup.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformBuybackVendorSetup.sql" />
+    <Build Include="dbo\Views\vyuICGetStoreLocation.sql" />
+    <Build Include="dbo\Triggers\trgAfterDeleteTRSupplyPoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformBuybackProgram.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformBuybackProgram.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1754,7 +1764,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMFromRunningStock.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
@@ -1970,6 +1980,7 @@
     <Build Include="dbo\Tables\tblApiUserAccount.sql" />
     <Build Include="dbo\Tables\tblApiImportLog.sql" />
     <Build Include="dbo\Tables\tblApiImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTransformProperty.sql" />
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsage.sql" />
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsageStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiMonthlyRequestUsageStagingTransform.sql" />
@@ -5847,6 +5858,7 @@
     <Build Include="dbo\Stored Procedures\uspAPReverseVoucherPrepay.sql" />
     <Build Include="dbo\Functions\fnAPValidateVoucherPrepay.sql" />
     <Build Include="dbo\Tables\tblGLDeletedAccount.sql" />
+    <Build Include="dbo\Tables\tblGLDataFixLog.sql" />
     <Build Include="dbo\Tables\tblSMMultiCompany.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\28_MultiCompany.sql" />
     <Build Include="dbo\Views\vyuCTDashboardJDEHistorical.sql" />
@@ -7304,7 +7316,6 @@
     <Build Include="dbo\Stored Procedures\uspQMReportCertificateOfAnalysis.sql" />
     <Build Include="dbo\Stored Procedures\uspQMReportTest.sql" />
     <None Include="Scripts\Post-Deployment\ST\15_FileFieldMapping_Passport_TLM_330.sql" />
-    <None Include="Scripts\Post-Deployment\ST\39_FileFieldMapping_Passport_TPM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTLM.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCheckoutPassportTPM.sql" />
     <Build Include="dbo\Functions\fnICGetCategoryAverageMargin.sql" />
@@ -8288,6 +8299,7 @@
     <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchers.sql" />
     <Build Include="dbo\Tables\tblAPImportPaidVouchersForPayment.sql" />
     <None Include="Scripts\Post-Deployment\ST\35_RegisterSetupEntries.sql" />
+    <None Include="Scripts\Post-Deployment\ST\39_FileFieldMapping_Passport_TPM.sql" />
     <None Include="Scripts\Post-Deployment\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql" />
     <None Include="Scripts\Post-Deployment\ST\26_FileFieldMapping_Commander_Department.sql" />
     <None Include="Scripts\Post-Deployment\ST\27_FileFieldMapping_Commander_FPHose.sql" />
@@ -8903,6 +8915,11 @@
     <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
+    <Build Include="dbo\User Defined Types\StagingPassportFGM.sql" />
+    <Build Include="dbo\User Defined Types\StagingPassportISM.sql" />
+    <Build Include="dbo\User Defined Types\StagingPassportMCM.sql" />
+    <Build Include="dbo\User Defined Types\StagingPassportMSM.sql" />
+    <Build Include="dbo\User Defined Types\StagingPassportTLM.sql" />
     <Build Include="dbo\Tables\tblAPImportVoucherLassus.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassus.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherLassusSas.sql" />
@@ -9856,8 +9873,25 @@
     <Build Include="dbo\Views\vyuSCTicketInOutReport.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDeduction.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeEarnings.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTaxes.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployee.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDeductions.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
     <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
