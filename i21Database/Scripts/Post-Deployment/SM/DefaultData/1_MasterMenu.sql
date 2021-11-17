@@ -8,8 +8,10 @@
 		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
 	END
 GO
+
+
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trade Finance' AND strModuleName = 'Trade Finance')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Borrowing Facility' AND strModuleName = 'Trade Finance' AND strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -7057,17 +7059,17 @@ ELSE
 DECLARE @TFActivitiesParentMenuId INT
 SELECT @TFActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Incoming Documents' AND strModuleName = 'IDP' AND intParentMenuID = @TFActivitiesParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Borrowing Facility' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Borrowing Facility', N'IDP', @TFActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'TradeFinance.view.BorrowingFacility', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Borrowing Facility', N'Trade Finance', @TFActivitiesParentMenuId, N'Borrowing Facility', N'Activity', N'Screen', N'CashManagement.view.BorrowingFacility?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'TradeFinance.view.BorrowingFacility' WHERE strMenuName = 'Borrowing Facility' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'CashManagement.view.BorrowingFacility?showSearch=true' WHERE strMenuName = 'Borrowing Facility' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Loan/Line' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Bank Loan/Line', N'Trade Finance', @TFActivitiesParentMenuId, N'Bank Loan/Line', N'Activity', N'Screen', N'TradeFinance.view.BankLoanLine', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
+	VALUES (N'Bank Loan/Line', N'Trade Finance', @TFActivitiesParentMenuId, N'Bank Loan/Line', N'Activity', N'Screen', N'CashManagement.view.BankLoan?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'TradeFinance.view.BankLoanLine' WHERE strMenuName = 'Bank Loan/Line' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.BankLoan?showSearch=true' WHERE strMenuName = 'Bank Loan/Line' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFActivitiesParentMenuId
 
 --REPORTS
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Trade Finance' AND intParentMenuID = @TFParentMenuId)
