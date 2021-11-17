@@ -254,6 +254,7 @@ SELECT
 	,strItemUOMType = iUOM.strUnitType
 	,ItemUOM.ysnStockUnit
 	,ItemUOM.dblUnitQty
+	,ItemUOM.dblStandardWeight
 	,CostMethod.strCostingMethod
 	,CostMethod.intCostingMethodId
 	,ItemLocation.intLocationId
@@ -302,7 +303,7 @@ FROM
 	@tblInventoryTransactionGrouped t INNER JOIN tblICItem i 
 		ON i.intItemId = t.intItemId
 	INNER JOIN (
-		tblICItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
+		vyuICGetItemUOM ItemUOM INNER JOIN tblICUnitMeasure iUOM
 			ON ItemUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 	) 
 		ON ItemUOM.intItemUOMId = t.intItemUOMId
