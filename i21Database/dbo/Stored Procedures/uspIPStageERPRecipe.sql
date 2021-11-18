@@ -15,10 +15,55 @@ BEGIN TRY
 		,@intRowNo INT
 		,@strXml NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
+		,@strInputItemLowerTolerance NVARCHAR(50)
+		,@strInputItemUpperTolerance NVARCHAR(50)
+		,@strOutputItemLowerTolerance NVARCHAR(50)
+		,@strOutputItemUpperTolerance NVARCHAR(50)
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
 	WHERE strType = 'Recipe'
+
+	IF @intRowNo IS NULL
+	BEGIN
+		RETURN
+	END
+
+	SELECT @strInputItemLowerTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Input Item Lower Tolerance')
+
+	SELECT @strInputItemUpperTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Input Item Upper Tolerance')
+
+	SELECT @strOutputItemLowerTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Output Item Lower Tolerance')
+
+	SELECT @strOutputItemUpperTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Output Item Upper Tolerance')
+
+	IF @strInputItemLowerTolerance IS NULL
+		OR @strInputItemLowerTolerance = ''
+		OR isNUmeric(@strInputItemLowerTolerance) = 0
+	BEGIN
+		SELECT @strInputItemLowerTolerance = 0
+	END
+
+	IF @strInputItemUpperTolerance IS NULL
+		OR @strInputItemUpperTolerance = ''
+		OR isNUmeric(@strInputItemUpperTolerance) = 0
+	BEGIN
+		SELECT @strInputItemUpperTolerance = 0
+	END
+
+	IF @strOutputItemLowerTolerance IS NULL
+		OR @strOutputItemLowerTolerance = ''
+		OR isNUmeric(@strOutputItemLowerTolerance) = 0
+	BEGIN
+		SELECT @strOutputItemLowerTolerance = 0
+	END
+
+	IF @strOutputItemUpperTolerance IS NULL
+		OR @strOutputItemUpperTolerance = ''
+		OR isNUmeric(@strOutputItemUpperTolerance) = 0
+	BEGIN
+		SELECT @strOutputItemUpperTolerance = 0
+	END
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -106,10 +151,9 @@ BEGIN TRY
 					,Active INT
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
-			LEFT JOIN tblICItem I on I.strItemNo =x.ItemNo Collate Latin1_General_CI_AS
-			LEFT JOIN tblIPCommodityManufacturingProcess CP on CP.intCommodityId=I.intCommodityId
-			LEFT JOIN tblMFManufacturingProcess MP on MP.intManufacturingProcessId=CP.intManufacturingProcessId
-
+			LEFT JOIN tblICItem I ON I.strItemNo = x.ItemNo Collate Latin1_General_CI_AS
+			LEFT JOIN tblIPCommodityManufacturingProcess CP ON CP.intCommodityId = I.intCommodityId
+			LEFT JOIN tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = CP.intManufacturingProcessId
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strERPRecipeNo, '') + ','
 			FROM @tblIPRecipeName
@@ -147,8 +191,16 @@ BEGIN TRY
 						THEN 'INPUT'
 					ELSE 'OUTPUT'
 					END AS RecipeItemType
-				,LowerTolerance
-				,UpperTolerance
+				,CASE 
+					WHEN ItemType = 1
+						THEN @strInputItemLowerTolerance
+					ELSE @strOutputItemLowerTolerance
+					END AS LowerTolerance
+				,CASE 
+					WHEN ItemType = 1
+						THEN @strInputItemUpperTolerance
+					ELSE @strOutputItemUpperTolerance
+					END AS UpperTolerance
 				,ValidFrom
 				,ValidTo
 				,YearValidation
@@ -182,13 +234,15 @@ BEGIN TRY
 					,ValidTo DATETIME
 					,YearValidation INT
 					,parentId BIGINT '@parentId'
-					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation' 
+					,CompanyLocation NVARCHAR(6) Collate Latin1_General_CI_AS '../CompanyLocation'
 					) x
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLotOrigin = x.CompanyLocation
 
 			UPDATE RI
-			SET strRecipeHeaderItemNo = R.strItemNo,strRecipeName=R.strItemNo
-				,strValidFrom=R.strValidFrom,strValidTo=R.strValidTo
+			SET strRecipeHeaderItemNo = R.strItemNo
+				,strRecipeName = R.strItemNo
+				,strValidFrom = R.strValidFrom
+				,strValidTo = R.strValidTo
 			FROM tblMFRecipeStage R
 			JOIN tblMFRecipeItemStage RI ON RI.intParentTrxSequenceNo = R.intTrxSequenceNo
 
