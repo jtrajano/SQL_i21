@@ -194,7 +194,7 @@ BEGIN
     -- Process reversal of transactions
     BEGIN TRY
     IF (@ysnReverseCurrentDate = 1)
-        SET @dtmReverse = CAST(CONVERT(NVARCHAR(10), GETDATE(), 101) AS DATETIME)
+        SET @dtmReverse = CAST(CONVERT(NVARCHAR(10), @dtmDepreciationToDate, 101) AS DATETIME)
     
     IF EXISTS(SELECT TOP 1 1 FROM tblGLFiscalYearPeriod where @dtmReverse BETWEEN dtmStartDate AND dtmEndDate 
         AND (ysnFAOpen = 0 OR ysnOpen = 0))

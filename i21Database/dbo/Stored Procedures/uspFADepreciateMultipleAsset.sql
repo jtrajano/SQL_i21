@@ -852,13 +852,53 @@ UPDATE BD  SET BD.ysnFullyDepreciated  =1
   
 UPDATE A  SET A.ysnDepreciated  =1  
   FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
-  WHERE B.ysnDepreciated = 1  AND 1 = @BookId
+  WHERE B.ysnDepreciated = 1  AND @BookId = 1
 
 UPDATE A  SET A.ysnTaxDepreciated = 1  
   FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
-  WHERE B.ysnDepreciated = 1  AND 2 = @BookId
+  WHERE B.ysnDepreciated = 1  AND @BookId = 2
 
+-- Check the fiscal asset if fiscal period of depreciation exists
+-- Fiscal periods of assets in the tblFAFiscalAsset might be remove/deleted due to reversing of previous depreciation transactions
+-- If previous depreciation transaction is reversed, it also removes the entry on fiscal asset - then upon depreciating the asset again,
+-- we should recreate the removed fiscal asset.
+DECLARE @IdAsset Id
+INSERT INTO @IdAsset
+SELECT intAssetId FROM @tblDepComputation
 
+WHILE EXISTS (SELECT TOP 1 1 FROM @IdAsset)
+BEGIN
+    DECLARE 
+        @intAssetId INT,
+        @dtmDepreciationToDate DATETIME,
+        @intFiscalPeriodId INT,
+        @intFiscalYearId INT
+
+    SELECT TOP 1 @intAssetId = intId FROM @IdAsset
+    
+    SELECT TOP 1 @dtmDepreciationToDate = dtmDepreciationToDate
+    FROM tblFAFixedAssetDepreciation
+    WHERE intAssetId = @intAssetId AND intBookId = @BookId AND strTransaction IN ('Depreciation', 'Imported')
+    ORDER BY intAssetDepreciationId DESC
+
+    SELECT @intFiscalYearId = intFiscalYearId, @intFiscalPeriodId = intGLFiscalYearPeriodId
+	FROM tblGLFiscalYearPeriod WHERE @dtmDepreciationToDate BETWEEN dtmStartDate AND dtmEndDate
+
+    IF NOT EXISTS(SELECT TOP 1 1 FROM tblFAFiscalAsset WHERE intAssetId = @intAssetId AND intBookId = @BookId AND intFiscalPeriodId = @intFiscalPeriodId AND intFiscalYearId = @intFiscalYearId)
+        INSERT INTO tblFAFiscalAsset(
+            [intAssetId]
+            ,[intBookId]
+            ,[intFiscalPeriodId]
+            ,[intFiscalYearId]
+        ) VALUES (
+            @intAssetId
+            ,@BookId
+            ,@intFiscalPeriodId
+            ,@intFiscalYearId
+        )
+
+    DELETE @IdAsset WHERE intId = @intAssetId
+END
 
 --=====================================================================================================================================  
 --  RETURN TOTAL NUMBER OF VALID FIXEDASSETS  
