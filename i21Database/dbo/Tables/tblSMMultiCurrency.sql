@@ -36,6 +36,7 @@
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
 	[intFixedAssetsRealizedId]						INT NULL,
+	[intCashManagementRealizedId]					INT NULL,
 	/* Bank Transfer */
 	[intUnrealizedGainLossForwardAccountId]			INT NULL, 
 	[intUnrealizedGainLossForwardOffsetAccountId]	INT NULL, 
