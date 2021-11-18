@@ -9093,6 +9093,7 @@
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
