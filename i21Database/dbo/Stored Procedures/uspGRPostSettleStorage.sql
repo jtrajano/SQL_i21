@@ -690,7 +690,18 @@ BEGIN TRY
 					ON CD.intContractDetailId = SC.intContractDetailId
 				WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
 					--AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
-			END		
+
+
+				UPDATE SS
+				SET dblDiscountsDue = ds.dblTotal * -1
+				FROM tblGRSettleStorage SS
+				OUTER APPLY (
+					SELECT dblTotal = SUM(dblCashPrice * dblUnits)
+					FROM @SettleVoucherCreate
+					WHERE intItemType = 3
+				) ds
+				WHERE SS.intSettleStorageId = @intSettleStorageId
+			END
 
 			--Unpaid Fee		
 			IF EXISTS (
@@ -2854,6 +2865,16 @@ BEGIN TRY
 	UPDATE tblGRStorageHistory
 	SET intBillId = @createdVouchersId
 	WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
+
+	UPDATE SS
+	SET dblDiscountsDue = DS.dblTotal
+	FROM tblGRSettleStorage SS
+	OUTER APPLY (
+		SELECT dblTotal = SUM(dblDiscountsDue)
+		FROM tblGRSettleStorage 
+		WHERE intParentSettleStorageId = @intParentSettleStorageId
+	) DS
+	WHERE SS.intSettleStorageId = @intParentSettleStorageId
 
 	DECLARE @intVoucherId2 AS INT
 	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
