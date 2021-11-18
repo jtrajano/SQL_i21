@@ -1349,7 +1349,10 @@ BEGIN TRY
 					,ysnInventoryCost		
 				FROM @SettleVoucherCreate SVC
 				OUTER APPLY (
-					SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intContractDetailId = SVC.intContractDetailId
+					SELECT GR.* FROM tblGRSettleContractPriceFixationDetail GR
+					INNER JOIN tblCTPriceFixationDetail CT
+						ON CT.intPriceFixationDetailId = GR.intPriceFixationDetailId
+					WHERE GR.intSettleStorageId = @intSettleStorageId AND GR.intContractDetailId = SVC.intContractDetailId
 				) A
 
 				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
@@ -2598,9 +2601,19 @@ BEGIN TRY
 
 				
 						update  a set 
-								dblQuantityToBill = case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblQuantityToBill) end, 
-								dblNetWeight = case when b.ysnDiscountFromGrossWeight = 1 then dblNetWeight else isnull(@total_units_for_voucher, dblNetWeight) end,
-								dblOrderQty =  case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblOrderQty) end
+								dblQuantityToBill = case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblQuantityToBill)
+														else dblQuantityToBill
+													end,
+								dblNetWeight = 		case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblNetWeight)
+														else dblNetWeight
+													end,
+								dblOrderQty =  		case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblOrderQty)
+														when b.ysnDiscountFromGrossWeight = 1 then dblOrderQty
+														else isnull(@total_units_for_voucher, dblOrderQty)
+													end
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
