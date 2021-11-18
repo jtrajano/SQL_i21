@@ -577,7 +577,7 @@ BEGIN TRY
 
 			end
 
-			
+
 			--Discount
 			IF EXISTS (
 						SELECT 1
@@ -606,7 +606,6 @@ BEGIN TRY
 					,ysnDiscountFromGrossWeight
 					,intPricingTypeId
 					,intContractUOMId
-					,ysnPercentChargeType
 				)
 				SELECT 
 					 intCustomerStorageId		= CS.intCustomerStorageId
@@ -645,7 +644,6 @@ BEGIN TRY
 												END
 					,intPricingTypeId			= CD.intPricingTypeId
 					,intContractUOMId			= SC.intContractUOMId
-					,ysnPercentChargeType		= CASE WHEN DSC.strDiscountChargeType = 'Dollar' THEN 0 ELSE 1 /* Percent */END
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = CS.intCustomerStorageId 
@@ -674,17 +672,7 @@ BEGIN TRY
 					ON CD.intContractDetailId = SC.intContractDetailId
 				WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
 					--AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
-			END
-
-			UPDATE SS
-			SET dblDiscountsDue = ds.dblTotal * -1
-			FROM tblGRSettleStorage SS
-			OUTER APPLY (
-				SELECT dblTotal = SUM(dblCashPrice * dblUnits)
-				FROM @SettleVoucherCreate
-				WHERE intItemType = 3
-			) ds
-			WHERE SS.intSettleStorageId = @intSettleStorageId
+			END		
 
 			--Unpaid Fee		
 			IF EXISTS (
@@ -1802,19 +1790,20 @@ BEGIN TRY
 								from @avqty  			
 								--from vyuCTAvailableQuantityForVoucher 					
 						) availableQtyForVoucher
-							on availableQtyForVoucher.intContractDetailId = a.intContractDetailId					
+							on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
+					
 						WHERE a.dblCashPrice <> 0 
 							AND a.dblUnits <> 0 
 							AND SST.intSettleStorageId = @intSettleStorageId
 						AND CASE WHEN (a.intPricingTypeId = 2 AND ISNULL(@dblCashPriceFromCt,0) = 0) THEN 0 ELSE 1 END = 1
 						and a.intItemType = 1
 
-					--UPDATE SVC
-					--SET SVC.dblUnits = CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (@dblTotalUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity ELSE @dblTotalUnits END
-					--FROM @SettleVoucherCreate SVC
-					--INNER JOIN tblGRCustomerStorage CS
-					--	ON CS.intCustomerStorageId = SVC.intCustomerStorageId
-					--WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
+					UPDATE SVC
+					SET SVC.dblUnits = CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (@dblTotalUnits / CS.dblOriginalBalance) * CS.dblGrossQuantity ELSE @dblTotalUnits END
+					FROM @SettleVoucherCreate SVC
+					INNER JOIN tblGRCustomerStorage CS
+						ON CS.intCustomerStorageId = SVC.intCustomerStorageId
+					WHERE SVC.intItemType in (2, 3) and SVC.dblUnits > @dblTotalUnits
 				end
 				
 				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
@@ -1903,9 +1892,7 @@ BEGIN TRY
 																END
 													END
 					,[intCustomerStorageId]   = CASE 
-													WHEN RI.intInventoryReceiptId IS NULL OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL)
-													OR (RC.intInventoryReceiptChargeId IS NOT NULL AND a.ysnPercentChargeType = 1) --just for reference; this will be updated to NULL
-													THEN a.[intCustomerStorageId] 
+													WHEN RI.intInventoryReceiptId IS NULL OR (RI.intInventoryReceiptId IS NOT NULL AND CS.intDeliverySheetId IS NOT NULL) THEN a.[intCustomerStorageId] 
 													ELSE NULL END
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
@@ -2128,107 +2115,6 @@ BEGIN TRY
 
 				---we should update the voucher payable to remove the contract detail that has a null contract header
 				update @voucherPayable set intContractDetailId = null where intContractDetailId is not null and intContractHeaderId is null
-
-				--update qty and cost for discount items with percent discount charge type and amount cost method		
-				INSERT INTO @voucherPayable
-				(
-					[intEntityVendorId]
-					,[intPayToAddressId]
-					,[intTransactionType]
-					,[intLocationId]
-					,[intShipToId]
-					,[intShipFromId]
-					,[intShipFromEntityId]
-					,[strVendorOrderNumber]
-					,[strMiscDescription]
-					,[intItemId]
-					,[intAccountId]					
-					,[intContractHeaderId]
-					,[intContractDetailId]
-					,[intInventoryReceiptItemId]
-					,[intInventoryReceiptChargeId]
-					,[intCustomerStorageId]
-					,[intSettleStorageId]
-					,[dblOrderQty]
-					,[dblOrderUnitQty]
-					,[intOrderUOMId]	
-					,[dblQuantityToBill]
-					,[intQtyToBillUOMId]
-					,[dblCost]
-					,[dblOldCost]
-					,[dblCostUnitQty]
-					,[intCostUOMId]
-					,[dblNetWeight]
-					,[dblWeightUnitQty]
-					,[intWeightUOMId]
-					,[intPurchaseTaxGroupId]
-				 )
-				SELECT 
-					[intEntityVendorId]				= BL.intEntityVendorId
-					,[intPayToAddressId]			= BL.intPayToAddressId
-					,[intTransactionType]			= 1
-					,[intLocationId]				= BL.intLocationId
-					,[intShipToId]					= BL.intShipToId
-					,[intShipFromId]				= BL.intShipFromId
-					,[intShipFromEntityId]			= BL.intShipFromEntityId
-					,[strVendorOrderNumber]			= BL.strVendorOrderNumber
-					,[strMiscDescription]			= BL.strMiscDescription
-					,[intItemId]					= BL.intItemId
-					,[intAccountId]					= [dbo].[fnGetItemGLAccount](DSC.intItemId,@ItemLocationId,'Other Charge Expense')
-					,[intContractHeaderId]			= BL.intContractHeaderId
-					,[intContractDetailId]			= BL.intContractDetailId
-					,[intInventoryReceiptItemId]	= BL.intInventoryReceiptItemId
-					,[intInventoryReceiptChargeId]	= NULL
-					,[intCustomerStorageId]			= BL.intCustomerStorageId
-					,[intSettleStorageId]			= BL.intSettleStorageId
-					,[dblOrderQty]					= 1
-					,[dblOrderUnitQty]				= 1
-					,[intOrderUOMId]				= BL.intOrderUOMId
-					,[dblQuantityToBill]			= 1
-					,[intQtyToBillUOMId]			= BL.intQtyToBillUOMId
-					,[dblCost]						= (dblOrderQty * dblCost) + ((IRC.dblAmount / CS.dblOriginalBalance) * dblOrderQty) --BL.dblCost
-					,[dblOldCost]					= BL.dblOldCost
-					,[dblCostUnitQty]				= BL.dblCostUnitQty
-					,[intCostUOMId]					= BL.intCostUOMId
-					,[dblNetWeight]					= 1
-					,[dblWeightUnitQty]				= 1 
-					,[intWeightUOMId]				= BL.intWeightUOMId
-					,[intPurchaseTaxGroupId]		= BL.intPurchaseTaxGroupId
-				FROM @voucherPayable BL
-				INNER JOIN tblICInventoryReceiptCharge IRC
-					ON IRC.intInventoryReceiptChargeId = BL.intInventoryReceiptChargeId
-				INNER JOIN tblGRCustomerStorage CS
-					ON CS.intCustomerStorageId = BL.intCustomerStorageId
-				INNER JOIN tblQMTicketDiscount TD
-					ON TD.intTicketFileId = CS.intCustomerStorageId
-						AND TD.strSourceType = 'Storage'
-						AND TD.strDiscountChargeType = 'Percent'
-				INNER JOIN tblGRDiscountScheduleCode DSC
-					ON DSC.intDiscountScheduleCodeId = TD.intDiscountScheduleCodeId
-				INNER JOIN tblICItem IC
-					ON IC.intItemId = DSC.intItemId
-						AND IC.ysnInventoryCost = 0
-				WHERE IRC.strCostMethod = 'Amount'
-					AND (ISNULL(TD.dblDiscountDue, 0) - ISNULL(TD.dblDiscountPaid, 0)) <> 0
-
-				--select '@voucherPayable1',* from @voucherPayable
-
-				UPDATE BL
-				SET intCustomerStorageId = NULL
-					,dblOrderQty = 1
-					,dblQuantityToBill = 1
-					,dblCost = ((IRC.dblAmount / CS.dblOriginalBalance) * dblOrderQty) * -1--dblQuantityToBill * dblCost
-					,dblNetWeight = 1
-				FROM @voucherPayable BL
-				INNER JOIN tblICInventoryReceiptCharge IRC
-					ON IRC.intInventoryReceiptChargeId = BL.intInventoryReceiptChargeId
-				INNER JOIN tblGRCustomerStorage CS
-					ON CS.intCustomerStorageId = BL.intCustomerStorageId
-				INNER JOIN tblQMTicketDiscount TD
-					ON TD.intTicketFileId = CS.intCustomerStorageId
-						AND TD.strSourceType = 'Storage'
-						AND TD.strDiscountChargeType = 'Percent'
-				--select '@voucherPayable2',* from @voucherPayable
 
 				if @ysnFromPriceBasisContract = 1
 				begin
@@ -2502,8 +2388,6 @@ BEGIN TRY
 				delete from @voucherPayable where dblQuantityToBill = 0
 
 				DECLARE @dblVoucherTotalPrecision DECIMAL(18,6) = round(@dblVoucherTotal,2)
-
-				--select '@voucherPayable3',* from @voucherPayable
 
 				IF @dblVoucherTotalPrecision > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
 				BEGIN					
@@ -2899,7 +2783,8 @@ BEGIN TRY
 	FROM tblGRSettleStorage	
 	WHERE intParentSettleStorageId = @intParentSettleStorageId 
 		AND intSettleStorageId > @intSettleStorageId
-	END	
+	END
+
 
 	UPDATE tblGRSettleStorage
 	SET ysnPosted = 1
@@ -2908,16 +2793,6 @@ BEGIN TRY
 	UPDATE tblGRStorageHistory
 	SET intBillId = @createdVouchersId
 	WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
-
-	UPDATE SS
-	SET dblDiscountsDue = DS.dblTotal
-	FROM tblGRSettleStorage SS
-	OUTER APPLY (
-		SELECT dblTotal = SUM(dblDiscountsDue)
-		FROM tblGRSettleStorage 
-		WHERE intParentSettleStorageId = @intParentSettleStorageId
-	) DS
-	WHERE SS.intSettleStorageId = @intParentSettleStorageId
 
 	DECLARE @intVoucherId2 AS INT
 	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
