@@ -13,6 +13,21 @@
 	,strComBinNotesBackgroundColor nvarchar(50)
 	,dtmTrackingDate datetime null
 	,intUnitMeasureId int null
+
+	,[dblCapacityT] DECIMAL(24, 10) NULL
+	,[dblEffectiveDepthT] DECIMAL(24, 10) NULL
+	,[dblBuFtT] DECIMAL(24, 10) NULL
+	,[dblBasePackT] DECIMAL(24, 10) NULL
+
+
+	,[dblCapacityB] DECIMAL(24, 10) NULL
+	,[dblEffectiveDepthB] DECIMAL(24, 10) NULL
+	,[dblBuFtB] DECIMAL(24, 10) NULL
+	,[dblBasePackB] DECIMAL(24, 10) NULL
+	
+
+
+
 	,intConcurrencyId int default(1) not null
 	
 	,CONSTRAINT [PK_tblSCISBinSearch] PRIMARY KEY CLUSTERED ([intBinSearchId] ASC)
