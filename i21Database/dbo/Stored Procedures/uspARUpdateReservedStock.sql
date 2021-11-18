@@ -145,7 +145,7 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
 				
 		)
 			
-IF (ISNULL(@FromPosting, 0 ) = 0)
+IF (ISNULL(@FromPosting, 0 ) = 0) AND (ISNULL(@Post, 0 ) != 0)
 	BEGIN		
 		DECLARE @strInvalidItemNo AS NVARCHAR(50) 		
 		DECLARE @intInvalidItemId AS INT
