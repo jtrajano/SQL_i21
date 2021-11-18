@@ -310,12 +310,12 @@ BEGIN
 			BEGIN
 				IF(@intUnitMeasureId IS NOT NULL AND @intNewItemId IS NOT NULL AND @strLongUpcCode IS NOT NULL)
 					BEGIN		
-						SET @strLongUpcCode = CASE WHEN @strLongUpcCode = '' 
-												THEN NULL
-											ELSE @strLongUpcCode
-											END
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strLongUPCCode = @strLongUpcCode OR intUpcCode = CONVERT(NUMERIC(32, 0), CAST(@strLongUpcCode AS FLOAT)))
 							BEGIN
+								SET @strUpcCode = CASE WHEN @strUpcCode = '' 
+														THEN NULL
+													ELSE @strUpcCode
+													END
 								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = @strUpcCode)	
 									BEGIN
 									
@@ -357,7 +357,7 @@ BEGIN
 														END
 
 
-													IF(@strUpcCode IS NOT NULL OR @strUpcCode != '')
+													IF(@strUpcCode IS NOT NULL OR ISNULL(@strUpcCode, '') != '')
 														BEGIN
 													
 															DECLARE @intItemUOMId INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
