@@ -7844,6 +7844,7 @@
     <Build Include="dbo\Stored Procedures\uspAPClearingReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPAccountReportVSGLSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCompareBalance.sql" />
+    <Build Include="dbo\Tables\tblGRSettleStorageBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8112,6 +8113,7 @@
     <Build Include="dbo\Functions\fnCTConvertToSubCurrency.sql" />
     <Build Include="dbo\Functions\fnCTConvertToBaseCurrency.sql" />
     <None Include="Scripts\Post-Deployment\AP\NonEmployeeCompensationTo1099NEC.sql" />
+    <None Include="Scripts\Post-Deployment\GR\ImportSettleStorageBillDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1h_AccountRange.sql" />
