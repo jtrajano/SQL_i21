@@ -178,7 +178,7 @@ BEGIN
 			intTypeEarningId, strCalculationType, intEmployeeDepartmentId, intWorkersCompensationId, dblTotal 
 		  FROM tblPRPaycheckEarning INNER JOIN tblPRPaycheck ON tblPRPaycheckEarning.intPaycheckId = tblPRPaycheck.intPaycheckId) A 
 		LEFT JOIN tblPREmployeeLocationDistribution B
-				ON A.intEntityEmployeeId = B.intEntityEmployeeId
+				ON A.intEntityEmployeeId = B.intEntityEmployeeId AND B.dblPercentage <> 0
 		LEFT JOIN tblPRDepartment C 
 	ON A.intEmployeeDepartmentId = C.intDepartmentId
 	WHERE A.dblTotal <> 0 AND A.strCalculationType <> 'Fringe Benefit'
@@ -350,7 +350,7 @@ BEGIN
 		  WHERE PD.intExpenseAccountId IS NOT NULL
 			) A
 		LEFT JOIN tblPREmployeeLocationDistribution B
-			ON A.intEntityEmployeeId = B.intEntityEmployeeId AND A.ysnSplit = 1
+			ON A.intEntityEmployeeId = B.intEntityEmployeeId AND A.ysnSplit = 1 AND B.dblPercentage <> 0
 		LEFT JOIN (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) D 
 			ON A.ysnSplit = 0 OR B.intEmployeeLocationDistributionId IS NULL
 		LEFT JOIN tblPRDepartment C 
@@ -503,7 +503,7 @@ BEGIN
 			WHERE PT.intExpenseAccountId IS NOT NULL
 			) A
 		LEFT JOIN tblPREmployeeLocationDistribution B
-			ON A.intEntityEmployeeId = B.intEntityEmployeeId AND A.ysnSplit = 1
+			ON A.intEntityEmployeeId = B.intEntityEmployeeId AND A.ysnSplit = 1 AND B.dblPercentage <> 0
 		LEFT JOIN (SELECT intEmployeeDepartmentId = intDepartmentId, dblDepartmentPercent = dblPercent FROM #tmpEarningDepartmentPercentage) D 
 			ON A.ysnSplit = 0 OR B.intEmployeeLocationDistributionId IS NULL
 		LEFT JOIN tblPRDepartment C 
