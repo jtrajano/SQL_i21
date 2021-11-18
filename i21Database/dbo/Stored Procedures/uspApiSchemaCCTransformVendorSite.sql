@@ -240,42 +240,60 @@ BEGIN
 		BEGIN
 			IF (@strSiteType = 'I' AND @intFeeExpenseAccountId IS NOT NULL) -- Import only Company Owned Site with valid Fee Expense GL
 				OR (@strSiteType = 'E')
+				INSERT INTO tblCCSite ([guiApiUniqueId]
+					,[intVendorDefaultId]
+					,[strSite]
+					,[strSiteDescription]
+					,[intPaymentMethodId]
+					,[intCustomerId]
+					,[ysnPassedThruArCustomer]
+					,[intAccountId]
+					,[intFeeExpenseAccountId]
+					,[ysnPostNetToArCustomer]
+					,[strMerchantCategory]
+					,[strTransactionType]
+					,[ysnSharedFee]
+					,[dblSharedFeePercentage]
+					,[strType]
+					,[intSort]
+					,[intConcurrencyId])
+				VALUES(@guiApiUniqueId
+					,@intVendorDefaultId
+					,@strSite
+					,@strDescription
+					,CASE WHEN ISNULL(@intPaymentMethodID, 0) = 0 THEN @intPaymentMethodIdDefault ELSE @intPaymentMethodID END
+					,@intCustomerEntityId
+					,0
+					,@intAccountId
+					,@intFeeExpenseAccountId
+					,CASE WHEN @strSiteType = 'E' THEN 1 ELSE 0 END
+					,''
+					,''
+					,CASE WHEN ISNULL(@dblSharedFee, 0) = 0 THEN 0 ELSE 1 END
+					,@dblSharedFee
+					,CASE WHEN @strSiteType = 'E' THEN 'DEALER' ELSE 'COMPANY OWNED' END
+					,NULL
+					,1)
 
-			INSERT INTO tblCCSite ([guiApiUniqueId]
-				,[intVendorDefaultId]
-				,[strSite]
-				,[strSiteDescription]
-				,[intPaymentMethodId]
-				,[intCustomerId]
-				,[ysnPassedThruArCustomer]
-				,[intAccountId]
-				,[intFeeExpenseAccountId]
-				,[ysnPostNetToArCustomer]
-				,[strMerchantCategory]
-				,[strTransactionType]
-				,[ysnSharedFee]
-				,[dblSharedFeePercentage]
-				,[strType]
-				,[intSort]
-				,[intConcurrencyId])
-			VALUES(@guiApiUniqueId
-				,@intVendorDefaultId
-				,@strSite
-				,@strDescription
-				,CASE WHEN ISNULL(@intPaymentMethodID, 0) = 0 THEN @intPaymentMethodIdDefault ELSE @intPaymentMethodID END
-				,@intCustomerEntityId
-				,0
-				,@intAccountId
-				,@intFeeExpenseAccountId
-				,CASE WHEN @strSiteType = 'E' THEN 1 ELSE 0 END
-				,''
-				,''
-				,CASE WHEN ISNULL(@dblSharedFee, 0) = 0 THEN 0 ELSE 1 END
-				,@dblSharedFee
-				,CASE WHEN @strSiteType = 'E' THEN 'DEALER' ELSE 'COMPANY OWNED' END
-				,NULL
-				,1
-			)
+					-- INSERT LOGS
+					INSERT INTO tblApiImportLogDetail (
+						guiApiImportLogDetailId
+						, guiApiImportLogId
+						, strField
+						, strValue
+						, strLogLevel
+						, strStatus
+						, intRowNo
+						, strMessage
+					)
+					SELECT guiApiImportLogDetailId = NEWID()
+						, guiApiImportLogId = @guiLogId
+						, strField = ''
+						, strValue = ''
+						, strLogLevel = 'Success'
+						, strStatus = 'Success'
+						, intRowNo = @intRowNumber
+						, strMessage = 'Data Imported Successfully'	
 			END
 		ELSE -- IF EXISTS
 		BEGIN
@@ -297,6 +315,26 @@ BEGIN
 				,[intSort] = NULL
 				,[intConcurrencyId] = 1
 			WHERE strSite = @strSite AND intVendorDefaultId = @intVendorDefaultId
+
+			-- INSERT LOGS
+			INSERT INTO tblApiImportLogDetail (
+				guiApiImportLogDetailId
+				, guiApiImportLogId
+				, strField
+				, strValue
+				, strLogLevel
+				, strStatus
+				, intRowNo
+				, strMessage
+			)
+			SELECT guiApiImportLogDetailId = NEWID()
+				, guiApiImportLogId = @guiLogId
+				, strField = ''
+				, strValue = ''
+				, strLogLevel = 'Success'
+				, strStatus = 'Success'
+				, intRowNo = @intRowNumber
+				, strMessage = 'Data Imported Successfully'	
 		END
 
 	FETCH NEXT FROM cur INTO
