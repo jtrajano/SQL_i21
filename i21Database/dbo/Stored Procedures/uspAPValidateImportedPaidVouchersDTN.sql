@@ -47,19 +47,19 @@ UPDATE A
 						A.dblPayment < 0 AND B.intTransactionType != 3
 					THEN 'Amount is negative. Debit Memo type is expected.'
 					WHEN 
-						A.dblPayment > (B.dblAmountDue * -1) AND B.intTransactionType = 3
+						A.dblPayment > B.dblAmountDue AND B.intTransactionType = 3
 					THEN 'Overpayment'
 					WHEN 
 						((A.dblPayment + A.dblDiscount) - A.dblInterest) > B.dblAmountDue  AND B.intTransactionType = 1
 					THEN 'Overpayment'
 					WHEN
-						A.dblPayment < (B.dblAmountDue * -1) AND B.intTransactionType = 3
+						A.dblPayment < B.dblAmountDue AND B.intTransactionType = 3
 					THEN 'Underpayment'
 					WHEN 
 						((A.dblPayment + A.dblDiscount) - A.dblInterest) < B.dblAmountDue  AND B.intTransactionType = 1
 					THEN 'Underpayment'
 					WHEN
-						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > (B.dblTotal - B.dblPaymentTemp)
+						ABS((A.dblPayment + A.dblDiscount) - A.dblInterest) > ABS((B.dblTotal - B.dblPaymentTemp))
 					THEN 'Already included in payment' + P.strPaymentRecordNum
 					ELSE NULL
 					END,
