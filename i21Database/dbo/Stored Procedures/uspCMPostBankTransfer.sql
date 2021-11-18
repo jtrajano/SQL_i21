@@ -165,7 +165,7 @@ BEGIN
   -- END  
   IF @intBankTransferTypeId = 3  
   BEGIN  
-    SELECT TOP 1 @intRealizedGainAccountId= intRealizedGainLossForwardAccountId   
+    SELECT TOP 1 @intRealizedGainAccountId= intGainOnForwardRealizedId   
     FROM tblSMMultiCurrency  
     IF @intRealizedGainAccountId is NULL  
     BEGIN  
