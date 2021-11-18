@@ -20,6 +20,8 @@
 	[intRiskManagementFutureUnrealizedId]			INT NULL,
 	[intRiskManagementCashUnrealizedId]				INT NULL,
 	[intFixedAssetsUnrealizedId]					INT NULL,
+	[intGainOnForwardUnrealizedId]					INT NULL,
+	[intGainOnSwapUnrealizedId]						INT NULL,
 	/* Offset */
 	[ysnRevalue]									BIT NULL DEFAULT 0,
 	[intAccountsPayableOffsetId]					INT NULL,
@@ -32,20 +34,19 @@
 	[intRiskManagementFutureOffsetId]				INT NULL,
 	[intRiskManagementCashOffsetId]					INT NULL,
 	[intFixedAssetsOffsetId]						INT NULL,
+	[intGainOnForwardOffsetId]						INT NULL,
+	[intGainOnSwapOffsetId]							INT NULL,
 	/* Offset */
 	[intAccountsPayableRealizedId]					INT NULL,
 	[intAccountsReceivableRealizedId]				INT NULL, 	
 	[intFixedAssetsRealizedId]						INT NULL,
 	[intCashManagementRealizedId]					INT NULL,
+	[intGainOnForwardRealizedId]					INT NULL,
+	[intGainOnSwapRealizedId]						INT NULL,
 	/* Bank Transfer */
-	[intUnrealizedGainLossForwardAccountId]			INT NULL, 
-	[intUnrealizedGainLossForwardOffsetAccountId]	INT NULL, 
-	[intUnrealizedGainLossSwapAccountId]			INT NULL, 
-	[intUnrealizedGainLossSwapOffsetAccountId]		INT NULL, 
-	[intRealizedGainLossForwardAccountId]			INT NULL, 
-	[intRealizedGainLossSwapAccountId]				INT NULL, 
-	/* Bank Transfer */
+
 	[intConcurrencyId]								INT NOT NULL DEFAULT 1, 
+
     CONSTRAINT [FK_tblSMMultiCurrency_RateType_AccountsPayable] FOREIGN KEY ([intAccountsPayableRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_CashManagement] FOREIGN KEY ([intCashManagementRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 	CONSTRAINT [FK_tblSMMultiCurrency_RateType_Inventory] FOREIGN KEY ([intInventoryRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
