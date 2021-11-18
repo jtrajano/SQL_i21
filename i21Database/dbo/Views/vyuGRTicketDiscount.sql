@@ -18,10 +18,11 @@ SELECT
 	,TD.intSort
 	,TD.intConcurrencyId
 	,QD.dblDefaultValue
-	,QD.intDiscountCalculationOptionId
+	,intDiscountCalculationOptionId=TD.strCalcMethod---,QD.intDiscountCalculationOptionId
+ --,TD.strCalcMethod
 	,QD.intDiscountScheduleId
 	,QD.intItemId
-	,QD.strDiscountChargeType
+	,TD.strDiscountChargeType--QD.strDiscountChargeType
 	,QD.strDiscountCodeDescription
 	,QD.strDiscountDescription
 	,strDiscountCode = QD.strShortName
@@ -30,5 +31,6 @@ FROM tblQMTicketDiscount TD
 INNER JOIN vyuGRGetQualityDiscountCode QD
 	ON TD.intDiscountScheduleCodeId = QD.intDiscountScheduleCodeId 
 INNER JOIN tblGRDiscountCalculationOption DCO
-	ON DCO.intDiscountCalculationOptionId = QD.intDiscountCalculationOptionId
+	--ON DCO.intDiscountCalculationOptionId = QD.intDiscountCalculationOptionId
+	ON DCO.intDiscountCalculationOptionId = TD.strCalcMethod
 WHERE TD.strSourceType = 'Storage'
