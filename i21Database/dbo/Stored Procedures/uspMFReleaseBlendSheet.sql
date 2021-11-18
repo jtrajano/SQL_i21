@@ -810,7 +810,7 @@ BEGIN TRY
 		ELSE
 			SELECT @PerBlendSheetQty = @dblQtyToProduce
 
-		IF @intNoOfSheet = 1
+		IF @intNoOfSheet = 1 and @intNoOfSheetOriginal = @intNoOfSheet
 		BEGIN
 			INSERT INTO @tblBSLot (
 				intLotId

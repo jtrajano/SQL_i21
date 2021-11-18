@@ -31,6 +31,7 @@ DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@strERPRecipeNo NVARCHAR(50)
 	,@strSubLocationName NVARCHAR(50)
 	,@intSubLocationId INT
+	,@strUpdateTolerance NVARCHAR(50)
 DECLARE @tblIPInitialAck TABLE (intTrxSequenceNo BIGINT);
 
 --Recipe Delete
@@ -901,6 +902,14 @@ END
 --Recipe Item
 IF @strImportType = 'Recipe Item'
 BEGIN
+	SELECT @strUpdateTolerance = dbo.[fnIPGetSAPIDOCTagValue]('Recipe', 'Update Tolerance')
+
+	IF @strUpdateTolerance IS NULL
+		OR @strUpdateTolerance = ''
+		OR isNUmeric(@strUpdateTolerance) = 0
+	BEGIN
+		SELECT @strUpdateTolerance = 1
+	END
 	--Recipe Name is required
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Recipe Name is required'
@@ -1549,10 +1558,10 @@ BEGIN
 				,ri.intItemUOMId = t.intItemUOMId
 				,ri.intRecipeItemTypeId = t.intRecipeItemTypeId
 				,ri.strItemGroupName = t.strItemGroupName
-				,ri.dblUpperTolerance = IsNULL(t.[strUpperTolerance], 0)
-				,ri.dblLowerTolerance = IsNULL(t.[strLowerTolerance], 0)
-				,ri.dblCalculatedUpperTolerance = t.dblCalculatedUpperTolerance
-				,ri.dblCalculatedLowerTolerance = t.dblCalculatedLowerTolerance
+				,ri.dblUpperTolerance = (Case When @strUpdateTolerance='1' Then IsNULL(t.[strUpperTolerance], 0) Else ri.dblUpperTolerance End)
+				,ri.dblLowerTolerance = (Case When @strUpdateTolerance='1' Then IsNULL(t.[strLowerTolerance], 0) Else ri.dblLowerTolerance End)
+				,ri.dblCalculatedUpperTolerance = (Case When @strUpdateTolerance='1' Then t.dblCalculatedUpperTolerance Else ri.dblCalculatedUpperTolerance End)
+				,ri.dblCalculatedLowerTolerance = (Case When @strUpdateTolerance='1' Then t.dblCalculatedLowerTolerance Else ri.dblCalculatedLowerTolerance End)
 				,ri.dblShrinkage = t.dblShrinkage
 				,ri.ysnScaled = t.ysnScaled
 				,ri.intConsumptionMethodId = t.intConsumptionMethodId
