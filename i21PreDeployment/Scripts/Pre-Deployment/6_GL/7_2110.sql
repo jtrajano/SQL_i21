@@ -3,8 +3,6 @@ IF object_id('tblGLAccountImportDataStaging2') IS NOT NULL
     DROP TABLE dbo.tblGLAccountImportDataStaging2  
 GO
 
-/* BEGIN 21.2  */
---GL-8520 Make Fiscal Period unique
 IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLDataFixLog]') AND type in (N'U')) 
     CREATE TABLE [dbo].[tblGLDataFixLog](
 	[intLogId] [int] IDENTITY(1,1) NOT NULL,
@@ -17,14 +15,14 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[db
     ) ON [PRIMARY]
     GO
 
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= 'Update fiscal period name')
+/* add data fixes before the constraint is applied*/
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= 'Update fiscal period name.')
 BEGIN
-    IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblGLFiscalYearPeriod]') AND type in (N'U')) 
-    BEGIN
-        UPDATE tblGLFiscalYearPeriod SET strPeriod = DATENAME(MONTH, dtmStartDate) + ' ' + DATENAME(YEAR, dtmStartDate)
-        INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), 'Update fiscal period name')
-    END
+    UPDATE tblGLFiscalYearPeriod SET strPeriod = DATENAME(MONTH, dtmStartDate) + ' ' + DATENAME(YEAR, dtmStartDate)
+    INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), 'Update fiscal period name.')
 END
-GO
-/* END 21.2  */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= 'Remove orphaned fiscal period.')
+BEGIN
+	DELETE FROM tblGLFiscalYearPeriod WHERE intFiscalYearId NOT IN(SELECT intFiscalYearId FROM tblGLFiscalYear)
+	INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), 'Remove orphaned fiscal period.')
+END
