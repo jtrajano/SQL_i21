@@ -5240,7 +5240,7 @@ BEGIN TRY
 					FROM @tblICFinalItemContract IA1
 					WHERE IA1.intItemId = IA.intItemId
 						AND IA1.intItemLocationId = IA.intItemLocationId
-						AND IA1.strContractItemNo = IA.strContractItemNo
+						AND IA1.strContractItemName = IA.strContractItemName
 					)
 
 			UPDATE IA1
@@ -5262,7 +5262,7 @@ BEGIN TRY
 			FROM @tblICFinalItemContract IA
 			JOIN tblICItemContract IA1 ON IA1.intItemId = IA.intItemId
 				AND IA1.intItemLocationId = IA.intItemLocationId
-				AND IA1.strContractItemNo = IA.strContractItemNo
+				AND IA1.strContractItemName = IA.strContractItemName
 
 			INSERT INTO tblICItemContract (
 				intItemId
@@ -5308,7 +5308,7 @@ BEGIN TRY
 					FROM tblICItemContract IA1
 					WHERE IA1.intItemId = IA.intItemId
 						AND IA1.intItemLocationId = IA.intItemLocationId
-						AND IA1.strContractItemNo = IA.strContractItemNo
+						AND IA1.strContractItemName = IA.strContractItemName
 					)
 
 			DELETE
