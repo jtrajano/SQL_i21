@@ -14,10 +14,4 @@ GO
 	 	SELECT TOP 1 @intFiscalYearId = intFiscalYearId from tblGLCurrentFiscalYear
 		UPDATE fy SET ysnCurrent = 1 FROM tblGLFiscalYear fy JOIN tblGLCurrentFiscalYear cu on cu.intFiscalYearId =  fy.intFiscalYearId
 	 END
-
-	 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLDataFixLog WHERE strDescription= 'Update fiscal period name')
-	 BEGIN
-		UPDATE tblGLFiscalYearPeriod SET strPeriod = DATENAME(MONTH, dtmStartDate) + ' ' + DATENAME(YEAR, dtmStartDate)
-		INSERT INTO tblGLDataFixLog(dtmDate, strDescription) VALUES(GETDATE(), 'Update fiscal period name')
-	 END
 GO
