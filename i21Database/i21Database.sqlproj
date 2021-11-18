@@ -361,6 +361,7 @@
     <Build Include="dbo\Tables\tblCMCashFlowReportBucketType.sql" />
     <None Include="Scripts\Post-Deployment\CM\13_InsertDefaultCashFlowReportBucketType.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFFacilityLimitsReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddImportLoadAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
