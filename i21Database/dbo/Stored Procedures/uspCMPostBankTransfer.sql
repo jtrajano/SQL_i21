@@ -1684,8 +1684,8 @@ BEGIN
               ,strCity            = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = dblAmountFrom    
-              ,strAmountInWords     = dbo.fnConvertNumberToWord(A.dblAmountFrom)    
+              ,dblAmount          = dblAmountForeignFrom    
+              ,strAmountInWords     = dbo.fnConvertNumberToWord(A.dblAmountForeignFrom)    
               ,strMemo            = CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN A.strDescription     
                                         WHEN ISNULL(A.strDescription,'') = '' THEN A.strReferenceFrom    
                                         ELSE A.strDescription + ' / ' + A.strReferenceFrom END    
@@ -1727,8 +1727,8 @@ BEGIN
               ,strCity          = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = dblAmountTo    
-              ,strAmountInWords      = dbo.fnConvertNumberToWord(dblAmountTo)    
+              ,dblAmount          = dblAmountForeignTo    
+              ,strAmountInWords      = dbo.fnConvertNumberToWord(dblAmountForeignTo)    
               ,strMemo          = CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN     
                               A.strDescription     
                               WHEN ISNULL(A.strDescription,'') = '' THEN    
