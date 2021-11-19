@@ -809,10 +809,21 @@ BEGIN TRY
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = SC.intContractDetailId
 				WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+					--AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
 			END
 
-			--select '@SettleVoucherCreate dsct',* from @SettleVoucherCreate
-			
+			UPDATE SS
+			SET dblDiscountsDue = ABS(ds.dblTotal)
+			FROM tblGRSettleStorage SS
+			OUTER APPLY (
+				SELECT dblTotal  = SUM(A.dblTotal) FROM (
+				SELECT dblTotal = CASE WHEN ysnPercentChargeType = 1 THEN (dblCashPrice * dblCashPriceUsed * dblUnits) ELSE (dblCashPrice * dblUnits) END
+				FROM @SettleVoucherCreate
+				WHERE intItemType = 3
+				) A
+			) ds
+			WHERE SS.intSettleStorageId = @intSettleStorageId
+
 			--Unpaid Fee		
 			IF EXISTS (
 						SELECT 1
