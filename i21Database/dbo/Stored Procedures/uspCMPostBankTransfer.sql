@@ -186,7 +186,29 @@ BEGIN
   END  
 
 END  
-  
+
+
+DECLARE @intSwapShortId INT,@intSwapLongId INT, @intBankSwapId INT, @ysnLockShort BIT
+IF @intBankTransferTypeId = 5
+BEGIN
+  SET @intSwapLongId = @intTransactionId
+  SELECT @intSwapShortId= intSwapShortId, @intBankSwapId = intBankSwapId, @ysnLockShort = ysnLockShort 
+  FROM tblCMBankSwap A WHERE intSwapLongId= @intTransactionId
+END
+
+IF @intBankTransferTypeId = 4
+BEGIN
+  SET @intSwapShortId = @intTransactionId
+  SELECT @intSwapLongId= intSwapLongId, @intBankSwapId = intBankSwapId, @ysnLockShort = ysnLockShort 
+  FROM tblCMBankSwap A WHERE intSwapShortId= @intTransactionId
+END
+
+IF @ysnLockShort = 1 AND @intBankTransferTypeId = 4
+BEGIN
+    RAISERROR ('Swap short is locked for posting/unposting.',11,1)  
+    GOTO Post_Rollback    
+END
+      
 -- todo: pre validation area   
 IF ((@intBankTransferTypeId = 2 OR @intBankTransferTypeId = 4) AND @ysnPost = 1 ) OR  @intBankTransferTypeId = 5 
 BEGIN  
@@ -196,15 +218,9 @@ BEGIN
     RAISERROR('Cannot find the in transit GL Account ID Setting in Company Configuration.', 11, 1)    
     GOTO Post_Rollback    
   END 
-
-
- 
+  
   IF @intBankTransferTypeId = 5
   BEGIN
-    DECLARE @intSwapShortId INT
-    SELECT @intSwapShortId= intSwapShortId FROM tblCMBankSwap A JOIN  tblCMBankTransfer B ON
-      A.intSwapLongId = B.intTransactionId
-    
     IF @intSwapShortId IS NULL
     BEGIN
       RAISERROR('Cannot find the bank swap short transaction.', 11, 1)    
@@ -1593,6 +1609,13 @@ BEGIN
                 SET  ysnPostedInTransit = @ysnPost  
                 ,intConcurrencyId += 1     
                 WHERE strTransactionId = @strTransactionId    
+
+                IF @intBankTransferTypeId = 5 AND @ysnPost = 1
+                BEGIN
+                  UPDATE tblCMBankSwap SET ysnLockShort = 1 WHERE intBankSwapId = @intBankSwapId
+                END
+
+                -- lock the swap short when swap long is posted
           END  
           ELSE
           BEGIN  
@@ -1602,20 +1625,42 @@ BEGIN
                 UPDATE tblCMBankTransfer    
                 SET  ysnPosted = @ysnPost  
                 ,intConcurrencyId += 1     
-                WHERE strTransactionId = @strTransactionId    
+                WHERE strTransactionId = @strTransactionId   
+                
+
               ELSE  
+              BEGIN
                 UPDATE tblCMBankTransfer    
                 SET  ysnPostedInTransit = @ysnPost  
                 ,intConcurrencyId += 1     
                 WHERE strTransactionId = @strTransactionId    
+
+                IF @intBankTransferTypeId = 5
+                BEGIN
+                  UPDATE tblCMBankSwap SET ysnLockShort = 0 WHERE intBankSwapId = @intBankSwapId
+                END
+
+               
+              END
             END  
             ELSE  
             BEGIN  
               IF @ysnPost = 0  
+              BEGIN
+
                 UPDATE tblCMBankTransfer    
                 SET  ysnPosted = @ysnPost  
                 ,intConcurrencyId += 1     
                 WHERE strTransactionId = @strTransactionId    
+
+
+                IF(@intBankTransferTypeId = 4 ) -- posted= 0 && postedintransit =1 && unpost
+                BEGIN
+                  UPDATE tblCMBankSwap SET intSwapLongId = NULL, ysnLockShort = 0 WHERE @intBankSwapId = intBankSwapId
+                  DELETE FROM tblCMBankTransfer WHERE intTransactionId = @intSwapLongId AND ysnPosted = 0 AND ysnPostedInTransit = 0
+
+                END
+              END
             END  
           END  
       END  

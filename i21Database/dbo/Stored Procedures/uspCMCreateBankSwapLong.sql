@@ -77,5 +77,5 @@ OUTER APPLY(
 where intTransactionId = @intSwapShortId
 
 SET @intSwapLongId = SCOPE_IDENTITY()
-UPDATE tblCMBankSwap set intSwapLongId =@intSwapLongId, ysnLockShort = 1, ysnLockLong = 0 WHERE intBankSwapId = @intBankSwapId
+UPDATE tblCMBankSwap set intSwapLongId =@intSwapLongId, ysnLockLong = 0 WHERE intBankSwapId = @intBankSwapId
 
