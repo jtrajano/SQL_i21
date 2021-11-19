@@ -17,6 +17,7 @@ SELECT DISTINCT
 	 , strEODNumber				= TRANSACTIONS.strEODNumber
 	 , strDrawerName			= TRANSACTIONS.strDrawerName
 	 , ysnCompleted				= TRANSACTIONS.ysnCompleted
+	 , strPaymentInfo			= TRANSACTIONS.strPaymentInfo
 FROM (
 	SELECT strSourceTransactionId	= PAYMENT.strRecordNumber
 		 , intSourceTransactionId	= PAYMENT.intPaymentId		 
@@ -32,6 +33,7 @@ FROM (
 		 , strEODNumber				= POSEOD.strEODNo
 		 , strDrawerName			= POSEOD.strPOSDrawerName
 		 , ysnCompleted				= CASE WHEN EodCLose.ysnClosed = 0 Then  CAST(ysnClosed AS BIT)  ELSE CAST(1 AS BIT) END 
+		 , strPaymentInfo			= strPaymentInfo
 	FROM tblARPayment PAYMENT
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON PAYMENT.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
@@ -83,6 +85,7 @@ FROM (
 		 , strEODNumber				= NULL
 		 , strDrawerName			= NULL
 		 , ysnCompleted				= 0
+		 , strPaymentInfo			= strPaymentInfo
 	FROM tblARInvoice INVOICE
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON INVOICE.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON INVOICE.intInvoiceId = CM.intSourceTransactionId 
@@ -111,6 +114,7 @@ FROM (
 		 , strEODNumber				= EOD.strEODNo
 		 , strDrawerName			= DRAWER.strPOSDrawerName
 		 , ysnCompleted				= ysnClosed
+		 , strPaymentInfo			= NULL
 	FROM tblARPOSEndOfDay EOD
 	INNER JOIN (
 		SELECT intCompanyLocationId
