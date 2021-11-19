@@ -358,6 +358,8 @@
     <Build Include="dbo\Tables\tblCMCashFlowReportSummaryDetail.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportSummaryDetail.sql" />
     <Build Include="dbo\Functions\fnCMGetPostedBankTransactionFromDate.sql" />
+    <Build Include="dbo\Tables\tblCMCashFlowReportBucketType.sql" />
+    <None Include="Scripts\Post-Deployment\CM\13_InsertDefaultCashFlowReportBucketType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
