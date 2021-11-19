@@ -31,7 +31,8 @@ BEGIN TRY
 				@strTransactionType		NVARCHAR(20),
 				@ysnStayAsDraftContractUntilApproved BIT,
 				@ysnAddAmendmentForNonDraftContract BIT = 0,
-				@ysnPricingAsAmendment BIT = 1
+				@ysnPricingAsAmendment BIT = 1,
+				@ysnAmendmentForCashFuture BIT = 0
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -302,6 +303,27 @@ BEGIN TRY
 		END
 		SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
 	END
+
+
+	IF EXISTS(
+		SELECT
+		TOP 1 1
+		FROM tblCTSequenceHistory			CurrentRow
+				JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
+				JOIN @tblDetail				PreviousRow	 ON    ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0) 
+															OR ISNULL(CurrentRow.dblCashPrice,0)   <> ISNULL(PreviousRow.dblCashPrice,0) 
+		WHERE	CurrentRow.intContractDetailId = PreviousRow.intContractDetailId 
+				AND (CurrentRow.dblOldFutures IS NOT NULL OR CurrentRow.dblOldCashPrice IS NOT NULL)	
+				AND @ysnPricingAsAmendment <> 1
+	)
+
+	BEGIN
+		SET @ysnAmendmentForCashFuture = 1
+	END
+
+
+
+
 
 	if exists (
 		select
@@ -667,7 +689,7 @@ BEGIN TRY
 		   JOIN @SCOPE_IDENTITY				    NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
 		   JOIN @tblDetail					    PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-		   and @ysnPricingAsAmendment = 1
+		   and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 
 		   UNION
 		   --Basis
@@ -704,7 +726,7 @@ BEGIN TRY
 		   JOIN @SCOPE_IDENTITY					NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
 		   JOIN @tblDetail					    PreviousRow			ON   ISNULL(CurrentRow.dblCashPrice,0)  <> ISNULL(PreviousRow.dblCashPrice,0)
 		   WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-		   and @ysnPricingAsAmendment = 1
+		   and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 		   
 		   UNION
 		   --Cash Price UOM
