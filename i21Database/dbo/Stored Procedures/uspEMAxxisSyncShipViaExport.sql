@@ -46,16 +46,14 @@ BEGIN
 			   shipVia.strEmail = (SELECT ISNULL(strEmail, '') FROM tblEMEntity WHERE intEntityId = contact.intEntityContactId),
 			   shipVia.strPhone = (SELECT ISNULL(strPhone, '') FROM tblEMEntity WHERE intEntityId = contact.intEntityContactId);
 
-	SELECT  B.intEntityId,
-			'TR' AS HDCode, 
+	SELECT 'TR' AS HDCode, 
 			ISNULL(B.strShipVia, '') AS strShipVia, 
 			ISNULL(A.strTruckNumber, '') AS strTruckNumber 
 	INTO tmpSMShipViaTruck 
 	FROM tblSMShipViaTruck A
 	INNER JOIN tblSMShipVia B ON A.intEntityShipViaId = B.intEntityId
 
-	SELECT B.intEntityId,
-			'TL' AS HDCode, 
+	SELECT 'TL' AS HDCode, 
 			ISNULL(B.strShipVia, '') AS strShipVia, 
 			ISNULL(A.strTrailerNumber, '') AS strTrailerNumber, 
 			ISNULL(A.strTrailerDescription, '') AS strTrailerDescription
