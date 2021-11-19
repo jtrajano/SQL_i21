@@ -126,11 +126,12 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 
 			-- Bank Transfer Category
 			SELECT id = 150, name = 'Forex AP/AR' UNION ALL --GL-8243
-			SELECT id = 151, name = 'Unrealized Gain or Loss Forward Accrual' UNION ALL --GL-8410
-			SELECT id = 152, name = 'Unrealized Gain or Loss Swap Accrual' UNION ALL --GL-8410
-			SELECT id = 153, name = 'Realized Gain or Loss Forward Accrual' UNION ALL --GL-8410
-			SELECT id = 154, name = 'Realized Gain or Loss Swap Accrual' UNION ALL --GL-8410
-			SELECT id = 155, name = 'Bank Transfer In-Transit' UNION ALL --GL-8410
+			SELECT id = 151, name = 'Forward Accrual Unrealized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 152, name = 'Swap Accrual Unrealized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 153, name = 'Forward Accrual Realized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 154, name = 'Swap Accrual Realized Gain or Loss' UNION ALL --GL-8410
+			SELECT id = 155, name = 'Bank Transfer In-Transit' UNION ALL --GL-8411 for intransit account 
+			SELECT id = 156, name = 'Cash Management Realized Gain or Loss' UNION ALL --GL-8529 For bank transfer gain loss intransit / transfer only
 
 			-- Fixed Asset Unrealized Gain or Loss
 			SELECT id = 160, name = 'Unrealized Gain or Loss Fixed Asset' UNION ALL --GL-8450
