@@ -15,39 +15,21 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblCMCashFlowReportRateType WHERE intCashFlowR
 BEGIN
 	IF (@intFilterCurrencyId IS NOT NULL)
 	BEGIN
-		INSERT INTO tblCMCashFlowReportRateType
-		SELECT 
-			intCashFlowReportId,
-			@intFilterCurrencyId,
-			intBucket1RateTypeId,
-			intBucket2RateTypeId,
-			intBucket3RateTypeId,
-			intBucket4RateTypeId,
-			intBucket5RateTypeId,
-			intBucket6RateTypeId,
-			intBucket7RateTypeId,
-			intBucket8RateTypeId,
-			intBucket9RateTypeId,
-			1
-		FROM tblCMCashFlowReport
-		WHERE intCashFlowReportId = @intCashFlowReportId
-
-		INSERT INTO tblCMCashFlowReportRate
-		SELECT
-			intCashFlowReportId,
-			@intFilterCurrencyId,
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket1RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket2RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket3RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket4RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket5RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket6RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket7RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket8RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket9RateTypeId, dtmReportDate),
-			1
-		FROM tblCMCashFlowReport
-		WHERE intCashFlowReportId = @intCashFlowReportId
+		INSERT INTO tblCMCashFlowReportRateType (intCashFlowReportId, intFilterCurrencyId) VALUES (@intCashFlowReportId, @intFilterCurrencyId)
+		INSERT INTO tblCMCashFlowReportRate (
+			intCashFlowReportId, 
+			intFilterCurrencyId,
+			dblRateBucket1,
+			dblRateBucket2,
+			dblRateBucket3,
+			dblRateBucket4,
+			dblRateBucket5,
+			dblRateBucket6,
+			dblRateBucket7,
+			dblRateBucket8,
+			dblRateBucket9
+		) 
+		VALUES (@intCashFlowReportId, @intFilterCurrencyId, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 		
 		GOTO EXIT_PROCESS
 	END
@@ -61,39 +43,21 @@ BEGIN
 		DELETE tblCMCashFlowReportRateType WHERE intCashFlowReportId = @intCashFlowReportId
 		DELETE tblCMCashFlowReportRate WHERE intCashFlowReportId = @intCashFlowReportId
 
-		INSERT INTO tblCMCashFlowReportRateType
-		SELECT 
-			intCashFlowReportId,
-			@intFilterCurrencyId,
-			intBucket1RateTypeId,
-			intBucket2RateTypeId,
-			intBucket3RateTypeId,
-			intBucket4RateTypeId,
-			intBucket5RateTypeId,
-			intBucket6RateTypeId,
-			intBucket7RateTypeId,
-			intBucket8RateTypeId,
-			intBucket9RateTypeId,
-			1
-		FROM tblCMCashFlowReport
-		WHERE intCashFlowReportId = @intCashFlowReportId
-
-		INSERT INTO tblCMCashFlowReportRate
-		SELECT
-			intCashFlowReportId,
-			@intFilterCurrencyId,
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket1RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket2RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket3RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket4RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket5RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket6RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket7RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket8RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket9RateTypeId, dtmReportDate),
-			1
-		FROM tblCMCashFlowReport
-		WHERE intCashFlowReportId = @intCashFlowReportId
+		INSERT INTO tblCMCashFlowReportRateType (intCashFlowReportId, intFilterCurrencyId) VALUES (@intCashFlowReportId, @intFilterCurrencyId)
+		INSERT INTO tblCMCashFlowReportRate (
+			intCashFlowReportId, 
+			intFilterCurrencyId,
+			dblRateBucket1,
+			dblRateBucket2,
+			dblRateBucket3,
+			dblRateBucket4,
+			dblRateBucket5,
+			dblRateBucket6,
+			dblRateBucket7,
+			dblRateBucket8,
+			dblRateBucket9
+		) 
+		VALUES (@intCashFlowReportId, @intFilterCurrencyId, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 		
 		GOTO EXIT_PROCESS
 	END
@@ -126,100 +90,36 @@ BEGIN
 		INSERT INTO @tblCurrency SELECT DISTINCT intCurrencyID FROM tblSMCurrency
 	ELSE
 	BEGIN
-		INSERT INTO tblCMCashFlowReportRateType
-		SELECT 
-			intCashFlowReportId,
-			@intFilterCurrencyId,
-			intBucket1RateTypeId,
-			intBucket2RateTypeId,
-			intBucket3RateTypeId,
-			intBucket4RateTypeId,
-			intBucket5RateTypeId,
-			intBucket6RateTypeId,
-			intBucket7RateTypeId,
-			intBucket8RateTypeId,
-			intBucket9RateTypeId,
-			1
-		FROM tblCMCashFlowReport
-		WHERE intCashFlowReportId = @intCashFlowReportId
+		INSERT INTO tblCMCashFlowReportRateType (intCashFlowReportId, intFilterCurrencyId) 
+		VALUES 
+			(@intCashFlowReportId, @intFilterCurrencyId)
 
-		INSERT INTO tblCMCashFlowReportRate
-		SELECT
-			intCashFlowReportId,
-			@intFilterCurrencyId,
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket1RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket2RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket3RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket4RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket5RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket6RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket7RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket8RateTypeId, dtmReportDate),
-			[dbo].[fnCMGetForexRateFromCurrency](@intFilterCurrencyId, @intReportingCurrencyId, intBucket9RateTypeId, dtmReportDate),
-			1
-		FROM tblCMCashFlowReport
-		WHERE intCashFlowReportId = @intCashFlowReportId
+		INSERT INTO tblCMCashFlowReportRate (
+				intCashFlowReportId, 
+				intFilterCurrencyId,
+				dblRateBucket1,
+				dblRateBucket2,
+				dblRateBucket3,
+				dblRateBucket4,
+				dblRateBucket5,
+				dblRateBucket6,
+				dblRateBucket7,
+				dblRateBucket8,
+				dblRateBucket9
+			) 
+		VALUES 
+			(@intCashFlowReportId, @intReportingCurrencyId, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 	END
 END
 
-INSERT INTO tblCMCashFlowReportRateType
-SELECT DISTINCT 
-	@intCashFlowReportId, 
-	intFromCurrencyId,
-	Report.intBucket1RateTypeId,
-	Report.intBucket2RateTypeId,
-	Report.intBucket3RateTypeId,
-	Report.intBucket4RateTypeId,
-	Report.intBucket5RateTypeId,
-	Report.intBucket6RateTypeId,
-	Report.intBucket7RateTypeId,
-	Report.intBucket8RateTypeId,
-	Report.intBucket9RateTypeId,
-	1
+INSERT INTO tblCMCashFlowReportRateType (intCashFlowReportId, intFilterCurrencyId, intConcurrencyId)
+SELECT DISTINCT @intCashFlowReportId, intFromCurrencyId, 1
 FROM @tblCurrency
-OUTER APPLY (
-	SELECT 
-		intBucket1RateTypeId,
-		intBucket2RateTypeId,
-		intBucket3RateTypeId,
-		intBucket4RateTypeId,
-		intBucket5RateTypeId,
-		intBucket6RateTypeId,
-		intBucket7RateTypeId,
-		intBucket8RateTypeId,
-		intBucket9RateTypeId
-	FROM tblCMCashFlowReport WHERE intCashFlowReportId = @intCashFlowReportId
-) Report
+
 
 INSERT INTO tblCMCashFlowReportRate
-SELECT DISTINCT 
-	@intCashFlowReportId, 
-	intFromCurrencyId,
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket1RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket2RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket3RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket4RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket5RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket6RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket7RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket8RateTypeId, Report.dtmReportDate),
-	[dbo].[fnCMGetForexRateFromCurrency](intFromCurrencyId, @intReportingCurrencyId, Report.intBucket9RateTypeId, Report.dtmReportDate),
-	1
+SELECT DISTINCT @intCashFlowReportId, intFromCurrencyId, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 FROM @tblCurrency
-OUTER APPLY (
-	SELECT 
-		intBucket1RateTypeId,
-		intBucket2RateTypeId,
-		intBucket3RateTypeId,
-		intBucket4RateTypeId,
-		intBucket5RateTypeId,
-		intBucket6RateTypeId,
-		intBucket7RateTypeId,
-		intBucket8RateTypeId,
-		intBucket9RateTypeId,
-		dtmReportDate
-	FROM tblCMCashFlowReport WHERE intCashFlowReportId = @intCashFlowReportId
-) Report
 
 EXIT_PROCESS:
 
