@@ -370,7 +370,7 @@ BEGIN
         ,[strTransactionType]       = @TransType
         ,[intTransactionDetailId]   = NULL
         ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Write off Amount of ' + P.[strTransactionNumber] + ' should be less than or equal to '+CAST(CONVERT(DECIMAL(10,2), ISNULL(I.[dblAmountDue], 0)) AS NVARCHAR(100))
+        ,[strError]                 = 'Write off Amount of ' + P.[strTransactionNumber] + ' should be less than or equal to ' + CAST(CONVERT(DECIMAL(10,2), ISNULL(I.[dblAmountDue], 0) * (CASE WHEN I.strInvoiceNumber LIKE '%COP%' THEN -1 ELSE 1 END)) AS NVARCHAR(100))
 	FROM
 		#ARPostPaymentDetail P
 		INNER JOIN tblARInvoice I
