@@ -418,7 +418,7 @@ BEGIN TRY
 	BEGIN
 		SET @ysnDWGPriceOnly = 1
 	END
-	
+
 	IF @strSource = 'Contract'
 	BEGIN
 		-- Contract Sequence:
@@ -3560,7 +3560,7 @@ BEGIN TRY
 		WHERE strTransactionType = 'Contract Balance'
 			AND intActionId IN (42, 43)
 		ORDER BY intId
-
+		
 		IF (@prevPricingTypeId = 3)
 		BEGIN
 			SET @currPricingTypeId = 3
@@ -3740,6 +3740,9 @@ BEGIN TRY
 					END		
 					IF (ISNULL(@TotalPriced, 0) <> 0)
 					BEGIN
+						DECLARE @truePreviousPricingType INT
+						SELECT @truePreviousPricingType = intPricingTypeId FROM @cbLogPrev
+
 						-- Negate AND add previous record
 						UPDATE @cbLogPrev
 						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' --previous priced
@@ -3777,11 +3780,11 @@ BEGIN TRY
 						UPDATE @cbLogSpecific
 						SET dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty * - 1 FROM @cbLogPrev)
 										ELSE @TotalPriced END
-							, intPricingTypeId = 1
+							, intPricingTypeId = CASE WHEN ISNULL(@truePreviousPricingType, 0) = 1 AND ISNULL(@truePricingTypeId, 0) <> 1 THEN @truePricingTypeId ELSE 1 END
 							, dblFutures = @dblPreviousFutures
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
-					IF (ISNULL(@TotalHTA, 0) <> 0 AND (@truePricingTypeId = 1 AND @prevPricingTypeId = 3))
+					IF (ISNULL(@TotalHTA, 0) <> 0)
 					BEGIN
 						-- Negate AND add previous record
 						UPDATE @cbLogPrev
@@ -3817,8 +3820,8 @@ BEGIN TRY
 
 						UPDATE @cbLogSpecific
 						SET dblQty = @TotalHTA
-							, intPricingTypeId = 1
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							, intPricingTypeId = CASE WHEN (@truePricingTypeId = 1 AND @prevPricingTypeId = 3) THEN 1 ELSE @truePricingTypeId END
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0						
 					END
 					IF (ISNULL(@TotalBasis, 0) = 0) AND (ISNULL(@TotalPriced, 0) = 0) AND ISNULL(@TotalHTA, 0) = 0
 					BEGIN
