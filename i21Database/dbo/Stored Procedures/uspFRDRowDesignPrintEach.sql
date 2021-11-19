@@ -33,7 +33,10 @@ DECLARE @ysnForceReversedExpense BIT
 DECLARE @ysnOverrideFormula BIT
 DECLARE @ysnOverrideColumnFormula BIT
 DECLARE @intSort INT
+DECLARE @ysnShowCurrencies  BIT      
+DECLARE @intCurrencyID INT      
 DECLARE @queryString NVARCHAR(MAX)
+DECLARE @strCurrency NVARCHAR(50)      
 
 CREATE TABLE #tempGLAccount (
 		[intAccountId]		INT,
@@ -82,7 +85,10 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 					@ysnForceReversedExpense	= [ysnForceReversedExpense],
 					@ysnOverrideFormula			= [ysnOverrideFormula],
 					@ysnOverrideColumnFormula	= [ysnOverrideColumnFormula],
-					@intSort					= [intSort]
+					@intSort					= [intSort],
+					@ysnShowCurrencies  = [ysnShowCurrencies]  ,  
+					@intCurrencyID = [intCurrencyID],  
+					@strCurrency = [strCurrency]  
 				
 					FROM #tempRowDesignPrintEach ORDER BY [intSort]
 				
@@ -139,8 +145,8 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 				SET @strAccountsType = 'IS'
 			END
 
-			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId)
-								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strPercentage,@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,1,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1)
+			INSERT INTO #tempRowDesign (intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency)
+								VALUES (@intRowId,@intRefNo,@strAccountDescription,@strRowType,@strBalanceSide,@strSource,@strRelatedRows,'[ID] = ''' + @strAccountId + '''',@strPercentage,@strAccountsType,@ysnShowCredit,@ysnShowDebit,@ysnShowOthers,@ysnLinktoGL,1,@ysnHidden,@dblHeight,@strFontName,@strFontStyle,@strFontColor,@intFontSize,@strOverrideFormatMask,@ysnForceReversedExpense,@ysnOverrideFormula,@ysnOverrideColumnFormula,@intSort,1,@ysnShowCurrencies,@intCurrencyID,@strCurrency)
 
 			DELETE #tempGLAccount WHERE [intAccountId] = @intAccountId
 		END
@@ -151,7 +157,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblFRRowDesignPrintEach WHERE intRowId = @intR
 	INSERT INTO tblFRRowDesignPrintEach
 	SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strRelatedRows,
 			strAccountsUsed,strPercentage,strAccountsType,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,
-			strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,GETDATE() as dtmEntered,@ConcurrencyId as intConcurrencyId 
+			strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,GETDATE() as dtmEntered,@ConcurrencyId as intConcurrencyId,ysnShowCurrencies,intCurrencyID,strCurrency
 	FROM #tempRowDesign
 
 END
