@@ -17,7 +17,7 @@ BEGIN
 	)
 	SELECT 
 		i.intItemId 
-		,changeLog.intNewCategoryId
+		,COALESCE(changeLog.intNewCategoryId, i.intCategoryId, 0) 
 	FROM 
 		tblICItem i 
 		CROSS APPLY (
@@ -35,7 +35,7 @@ BEGIN
 	-- Remove it from the list if the categories is already changed. 
 	DELETE l
 	FROM 
-		@rebuildList l
+		@rebuildList l 
 		OUTER APPLY (
 			SELECT TOP 1 
 				t.intInventoryTransactionId 
@@ -45,7 +45,7 @@ BEGIN
 			WHERE
 				t.intItemId = l.intItemId
 				AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
-				AND t.intCategoryId <> l.intNewCategoryId
+				AND ISNULL(t.intCategoryId, 0) <> ISNULL(l.intNewCategoryId, 0) 
 		) t
 	WHERE
 		t.intInventoryTransactionId IS NULL 
@@ -74,4 +74,4 @@ BEGIN
 			,@isPeriodic = 1
 			,@intUserId = @intUserId
 	END 
-END 
+END
