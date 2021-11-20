@@ -373,7 +373,7 @@ BEGIN TRY
 			SELECT @strContractNumber = ISNULL(CH.strContractNumber, '')
 				,@strSequenceNo = ISNULL(LTRIM(CD.intContractSeq), '')
 				,@strItemNo = I.strItemNo
-				,@dblReceiptQty = CONVERT(NUMERIC(18, 6), RI.dblOrderQty)
+				,@dblReceiptQty = CONVERT(NUMERIC(18, 6), RI.dblOpenReceive)
 				,@strReceiptQtyUOM = UOM.strUnitMeasure
 				,@dblGross = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RI.dblGross), 0))
 				,@dblNet = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(RI.intWeightUOMId, @intItemUOMId, RI.dblNet), 0))
