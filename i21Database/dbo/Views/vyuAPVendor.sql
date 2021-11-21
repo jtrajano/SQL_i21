@@ -63,8 +63,10 @@ SELECT
 															WHERE apbill.ysnPosted = 1
 																AND intInvoiceId = AA.intInvoiceId
 														   )
-												AND AA.strTransactionType IN ('Cash Refund','Invoice','Debit Memo', 'Cash')
 												AND AA.ysnPosted = 1
+												AND AA.dblAmountDue != 0
+												AND AA.strTransactionType IN ('Cash Refund','Invoice','Debit Memo', 'Cash')
+												AND AA.strType != 'CT Tran'
 												AND AA.intEntityCustomerId = B.[intEntityId]
 											) 
 						THEN 1 ELSE 0 END) AS BIT),
