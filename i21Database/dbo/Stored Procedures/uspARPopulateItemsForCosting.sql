@@ -330,4 +330,13 @@ ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
 WHERE ARID.[intSourceId] = 2
 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0) OR (ARID.[dblQtyShipped] < ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))
 
+UPDATE IC
+SET strSourceType = 'Transport'
+  , strSourceNumber	= LH.strTransaction
+FROM ##ARItemsForCosting IC
+INNER JOIN tblARInvoice I ON IC.intTransactionId = I.intInvoiceId AND IC.strTransactionId = I.strInvoiceNumber
+INNER JOIN tblTRLoadDistributionHeader DH ON I.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId 
+INNER JOIN tblTRLoadHeader LH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+WHERE IC.strType = 'Transport Delivery'
+
 RETURN 1
