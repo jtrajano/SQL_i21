@@ -29,6 +29,7 @@ BEGIN TRY
 		, @dblBasis NUMERIC(18, 6)
 		, @dblCashPrice NUMERIC(18, 6)
 		, @strTransactionType NVARCHAR(20)
+		, @strScreenName NVARCHAR(20)
         , @ysnStayAsDraftContractUntilApproved BIT
         , @ysnAddAmendmentForNonDraftContract BIT = 0
         , @ysnPricingAsAmendment BIT = 1
