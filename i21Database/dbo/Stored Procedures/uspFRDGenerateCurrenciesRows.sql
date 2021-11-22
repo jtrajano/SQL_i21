@@ -34,8 +34,7 @@ WHERE intRowId = @intRowId AND ysnShowCurrencies = 1
       
 BEGIN        
  INSERT INTO #TMPFILTER       
- SELECT intRowDetailId,REPLACE(REPLACE(REPLACE(REPLACE(strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription')[strFilter] FROM tblFRRowDesign WHERE ysnShowCurrencies  = 1 AND intRowI
-d = @intRowId      
+ SELECT intRowDetailId,REPLACE(REPLACE(REPLACE(REPLACE(strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription')[strFilter] FROM tblFRRowDesign WHERE ysnShowCurrencies  = 1 AND intRowId = @intRowId      
       
  WHILE EXISTS(SELECT 1 FROM #TMPFILTER)             
   BEGIN         
