@@ -172,23 +172,45 @@ BEGIN
 
 	--Insert Earning Distribution to Temporary Table
 	INSERT INTO #tmpEarning (intPaycheckEarningId, intPaycheckId, intEmployeeEarningId, intTypeEarningId, intAccountId, dblAmount, dblPercentage, intDepartmentId, intProfitCenter, intLOB, intWCCodeId)
-	SELECT A.intPaycheckEarningId, A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, ISNULL(A.dblTotal, 0), ISNULL(B.dblPercentage, 0),
-			C.intDepartmentId, ISNULL(B.intProfitCenter, C.intProfitCenter), C.intLOB, intWCCodeId = A.intWorkersCompensationId
+	SELECT DISTINCT A.intPaycheckEarningId, A.intPaycheckId, A.intEmployeeEarningId, A.intTypeEarningId, A.intAccountId, ISNULL(A.dblTotal, 0) as dblTotal,
+			---for dblPercentage
+			CASE WHEN(ysnUseLocationDistribution = 1 OR C.intDepartmentId IS NULL or C.intDepartmentId = '')
+				THEN	
+					ISNULL(B.dblPercentage, 0)
+				ELSE
+					'100'
+			END
+			,
+			C.intDepartmentId, 
+			--for profit center
+			CASE WHEN(ysnUseLocationDistribution = 1 OR C.intDepartmentId IS NULL or C.intDepartmentId = '')
+				THEN	
+					ISNULL(B.intProfitCenter, C.intProfitCenter)
+				ELSE
+					ISNULL(C.intProfitCenter, B.intProfitCenter)
+			END
+			,
+			
+			C.intLOB, intWCCodeId = A.intWorkersCompensationId	
 	FROM (SELECT intPaycheckEarningId, tblPRPaycheckEarning.intPaycheckId, intEmployeeEarningId, intEntityEmployeeId, intAccountId,
 			intTypeEarningId, strCalculationType, intEmployeeDepartmentId, intWorkersCompensationId, dblTotal 
 		  FROM tblPRPaycheckEarning INNER JOIN tblPRPaycheck ON tblPRPaycheckEarning.intPaycheckId = tblPRPaycheck.intPaycheckId) A 
 		LEFT JOIN tblPREmployeeLocationDistribution B
 				ON A.intEntityEmployeeId = B.intEntityEmployeeId
 		LEFT JOIN tblPRDepartment C 
-	ON A.intEmployeeDepartmentId = C.intDepartmentId
+				ON A.intEmployeeDepartmentId = C.intDepartmentId
+		LEFT JOIN tblPREmployeeEarning EE
+				ON A.intEmployeeEarningId = EE.intEmployeeEarningId			
 	WHERE A.dblTotal <> 0 AND A.strCalculationType <> 'Fringe Benefit'
-	AND intPaycheckId = @intPaycheckId
-
+	AND intPaycheckId =@intPaycheckId
 	--PERFORM GL ACCOUNT SEGMENT SWITCHING AND VALIDATION
 	--Place Earning to Temporary Table to Validate Account ID Distribution
 	SELECT * INTO #tmpEarningValidateAccounts 
-	FROM #tmpEarning WHERE intEmployeeEarningId IN (SELECT intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
-	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 OR intDepartmentId IS NOT NULL)
+	FROM #tmpEarning WHERE (intEmployeeEarningId IN (SELECT intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEmployeeId AND ysnUseLocationDistribution = 1)
+	AND (ISNULL((SELECT SUM(dblPercentage) FROM tblPREmployeeLocationDistribution WHERE intEntityEmployeeId = @intEmployeeId), 0) = 100 ))
+	OR intDepartmentId IS NOT NULL
+
+
 
 	DECLARE @intEarningTempEarningId INT, @intEarningTempDepartmentId INT, @intEarningTempWCCodeId INT, @intEarningTempAccountId INT,
 		@intEarningTempProfitCenter INT, @intEarningTempLOB INT, @intEarningTempFinalAccountId INT, @strMsg NVARCHAR(MAX) = ''
