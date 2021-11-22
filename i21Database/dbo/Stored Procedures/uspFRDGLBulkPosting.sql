@@ -10,12 +10,12 @@ SET NOCOUNT ON
  --MAIN DATA SOURCE        
  TRUNCATE TABLE tblGLPosted    
  ---------------------------------------------------------------------------------------------------------------------------------------          
- INSERT INTO tblGLPosted (intAccountId,dtmDate,dblDebit,dblCredit,dblDebitForeign,dblCreditForeign,dblDebitUnit,dblCreditUnit,strCode,intCurrencyId)         
+ INSERT INTO tblGLPosted (intAccountId,dtmDate,dblDebit,dblCredit,dblDebitForeign,dblCreditForeign,dblDebitUnit,dblCreditUnit,strCode,intConcurrencyId,intCurrencyId)         
  SELECT  T2.intAccountId,T2.dtmDate,  
   SUM(dblDebit)dblDebit,SUM(dblCredit)dblCredit,            
   SUM(dblDebitForeign)dblDebitForeign,SUM(dblCreditForeign)dblCreditForeign,            
   SUM(dblDebitUnit)dblDebitUnit,SUM(dblCreditUnit)dblCreditUnit,            
-  T2.strCode,T2.intCurrencyID  
+  T2.strCode,1,T2.intCurrencyID  
   FROM (  
    SELECT T0.intAccountId,T0.dtmDate,            
    SUM(dblDebit)dblDebit,SUM(dblCredit)dblCredit,            
