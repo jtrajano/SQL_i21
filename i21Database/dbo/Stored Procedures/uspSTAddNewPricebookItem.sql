@@ -321,7 +321,8 @@ BEGIN
 									
 										-- ITEM UOM
 										BEGIN TRY
-										
+											SET @intNewItemUOMId = NULL
+
 											EXEC [uspICAddItemUOMForCStore]
 												@intUnitMeasureId			= @intUnitMeasureId
 												,@intItemId					= @intNewItemId
@@ -329,6 +330,7 @@ BEGIN
 												,@ysnStockUnit				= 1
 												,@intEntityUserSecurityId	= @intEntityId 
 												,@intItemUOMId				= @intNewItemUOMId OUTPUT 
+												
 
 											-- =================================================================================
 											-- [START] - ADD ITEM UOM DEBUG
@@ -412,438 +414,731 @@ BEGIN
 			-- ============================================================================================================================
 
 			
+			-- temp table for ItemPricing
+			BEGIN
+				DECLARE @tblItemCostPricing TABLE (
+					intItemPricingId			INT
+					, intEffectiveItemCostId	INT
+					, intStoreNo				INT
+					, intItemId					INT
+					, dblCost					NUMERIC(38,20)
+					, intCompanyLocationId		INT
+					, intItemLocationId			INT
+					, dtmCostEffectiveDate		DATETIME
+				)
+			END
+			
+			-- temp table for ItemPricing
+			BEGIN
+				DECLARE @tblItemRetailPricing TABLE (
+					intItemPricingId			INT
+					, intEffectiveItemPriceId	INT
+					, intStoreNo				INT
+					, intItemId					INT
+					, dblRetailPrice			NUMERIC(38,20)
+					, intCompanyLocationId		INT
+					, intItemLocationId			INT
+					, dtmRetailEffectiveDate	DATETIME
+				)
+			END
 
 			-- ============================================================================================================================
-			-- [START] - ADD ITEM LOCATION
+			-- [START] - ITEM PRICING UPDATE - COST 
 			-- ============================================================================================================================
 			BEGIN
-	
-					BEGIN TRY
-					
-						-- [START] - ADD ITEM LOCATION
-
-						--Cost
-						SELECT st.intStoreId, st.intCompanyLocationId
-						INTO #tmpEffectiveDate 
-						FROM  @UDTItemCostPricing cp
-							LEFT JOIN tblSTStore st
-								ON cp.intStoreNo = st.intStoreNo
-								
-						--Retail
-						INSERT INTO #tmpEffectiveDate (intStoreId, intCompanyLocationId)
-						SELECT st.intStoreId, st.intCompanyLocationId
-						FROM  @UDTItemRetailPricing rp
-							LEFT JOIN tblSTStore st
-								ON rp.intStoreNo = st.intStoreNo
-						WHERE rp.intStoreNo NOT IN (SELECT intStoreNo FROM @UDTItemCostPricing) 
-
-						-- [END] - ADD ITEM LOCATION
-
-						INSERT INTO @tempCStoreLocation
-						(
-							intStoreId,
-							intCompanyLocationId,
-
-							-- Item Location
-							ysnUseTaxFlag1,
-							ysnUseTaxFlag2,
-							ysnUseTaxFlag3,
-							ysnUseTaxFlag4,
-							ysnBlueLaw1,
-							ysnBlueLaw2,
-							ysnFoodStampable,
-							ysnReturnable,
-							ysnSaleable,
-							ysnPrePriced,
-							ysnIdRequiredLiquor,
-							ysnIdRequiredCigarette,
-							intProductCodeId,
-							intFamilyId,
-							intClassId,
-							intMinimumAge
-						)
-						SELECT 
-							intStoreId					= st.intStoreId,
-							intCompanyLocationId		= st.intCompanyLocationId,
-
-							-- Item Location
-							ysnUseTaxFlag1				= ISNULL(catLoc.ysnUseTaxFlag1, CAST(0 AS BIT)),
-							ysnUseTaxFlag2				= ISNULL(catLoc.ysnUseTaxFlag2, CAST(0 AS BIT)),
-							ysnUseTaxFlag3				= ISNULL(catLoc.ysnUseTaxFlag3, CAST(0 AS BIT)),
-							ysnUseTaxFlag4				= ISNULL(catLoc.ysnUseTaxFlag4, CAST(0 AS BIT)),
-							ysnBlueLaw1					= ISNULL(catLoc.ysnBlueLaw1, CAST(0 AS BIT)),
-							ysnBlueLaw2					= ISNULL(catLoc.ysnBlueLaw2, CAST(0 AS BIT)),
-							ysnFoodStampable			= ISNULL(catLoc.ysnFoodStampable, CAST(0 AS BIT)),
-							ysnReturnable				= ISNULL(catLoc.ysnReturnable, CAST(0 AS BIT)),
-							ysnSaleable					= ISNULL(catLoc.ysnSaleable, CAST(0 AS BIT)),
-							ysnPrePriced				= ISNULL(catLoc.ysnPrePriced, CAST(0 AS BIT)),
-							ysnIdRequiredLiquor			= ISNULL(catLoc.ysnIdRequiredLiquor, CAST(0 AS BIT)),
-							ysnIdRequiredCigarette		= ISNULL(catLoc.ysnIdRequiredCigarette, CAST(0 AS BIT)),
-							intProductCodeId			= catLoc.intProductCodeId,
-							intFamilyId					= ISNULL(@intFamilyId, catLoc.intFamilyId),
-							intClassId					= ISNULL(@intClassId, catLoc.intClassId),
-							intMinimumAge				= catLoc.intMinimumAge
-						FROM #tmpEffectiveDate cp
-						LEFT JOIN tblSTStore st
-							ON cp.intStoreId = st.intStoreId
-						LEFT JOIN tblICCategoryLocation catLoc
-							ON st.intCompanyLocationId = catLoc.intLocationId
-						WHERE st.intCompanyLocationId IS NOT NULL
-							
-							
-							
-						IF NOT EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
-							BEGIN
-								SET @strResultMessage = 'Category Selected does not have POS config setup for 1 or more store locations'
-
-								GOTO ExitWithRollback
-							END
-					END TRY
-					BEGIN CATCH
-						SET @strResultMessage = 'Error creating location table: ' + ERROR_MESSAGE() 
-
-						GOTO ExitWithRollback
-					END CATCH
-
-					-- =================================================================================
-					-- [START] - ADD ITEM LOCATION DEBUG
-					-- =================================================================================
-					IF(@ysnDebug = 1)
+					IF EXISTS(SELECT TOP 1 1 FROM @UDTItemCostPricing)
 						BEGIN
-								SELECT '@tempCStoreLocation', * FROM @tempCStoreLocation
-						END
-					-- =================================================================================
-					-- [END] - ADD ITEM LOCATION DEBUG
-					-- =================================================================================
-					
 
+							INSERT INTO @tblItemCostPricing
+							(
+								intEffectiveItemCostId	
+								, intStoreNo	
+								, intItemId	
+								, dblCost	
+								, dtmCostEffectiveDate
+								, intCompanyLocationId
+								, intItemLocationId
 
-					IF EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
-						BEGIN
-							
-							DECLARE @intStoreId_New					INT,
-									@intCompanyLocationId_New		INT,
-									@ysnUseTaxFlag1_New				BIT,
-									@ysnUseTaxFlag2_New				BIT,
-									@ysnUseTaxFlag3_New				BIT,
-									@ysnUseTaxFlag4_New				BIT,
-									@ysnBlueLaw1_New				BIT,
-									@ysnBlueLaw2_New				BIT,
-									@ysnFoodStampable_New			BIT,
-									@ysnReturnable_New				BIT,
-									@ysnSaleable_New				BIT,
-									@ysnPrePriced_New				BIT,
-									@ysnIdRequiredLiquor_New		BIT,
-									@ysnIdRequiredCigarette_New		BIT,
-									@intProductCodeId_New			INT,
-									@intFamilyId_New				INT,
-									@intClassId_New					INT,
-									@intMinimumAge_New				INT,
+							)
+							SELECT DISTINCT
+								intEffectiveItemCostId	= udt.intEffectiveItemCostId
+								, intStoreNo				= st.intStoreNo
+								, intItemId					= @intNewItemId
+								, dblCost					= udt.dblCost
+								, dtmCostEffectiveDate		= udt.dtmEffectiveCostDate
+								, intCompanyLocationId		= st.intCompanyLocationId
+								, intItemLocationId			= ISNULL(til.intItemLocationId, 0)
+							FROM @UDTItemCostPricing udt
+								INNER JOIN tblSTStore st
+									ON udt.intStoreNo = st.intStoreNo
+								LEFT JOIN tblICItemLocation til
+									ON til.intLocationId = st.intCompanyLocationId
+									AND til.intItemId = @intNewItemId
 
-									@dblStandardCost_New			NUMERIC(18, 6),
-									@dblLastCost_New				NUMERIC(18, 6),
-									@dblSalePrice_New				NUMERIC(18, 6)
-
-							DECLARE @tmp_CostEffectiveDate AS StoreItemCostPricing
-							DECLARE @tmp_RetailEffectiveDate AS StoreItemPricePricing
-
-							INSERT INTO @tmp_CostEffectiveDate
-							   SELECT *
-							   FROM @UDTItemCostPricing;
-							   
-							INSERT INTO @tmp_RetailEffectiveDate
-							   SELECT *
-							   FROM @UDTItemRetailPricing;
-							   
-
-							WHILE EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
+							DECLARE @intLoopEffectiveItemCostId	AS INT
+							        , @intLoopStoreNo				AS INT
+							        , @intLoopItemId				AS INT
+									, @dblLoopCost					AS NUMERIC(38,20)
+									, @dtmLoopCostEffectiveDate		AS DATETIME
+									, @intLoopCompanyLocationId		AS INT
+									, @intLoopItemLocationId		AS INT
+									
+							WHILE EXISTS(SELECT TOP 1 1 FROM @tblItemCostPricing)
 								BEGIN
-									
+						
 									SELECT TOP 1
-											@intStoreId_New				= intStoreId,
-											@intCompanyLocationId_New	= intCompanyLocationId,
-											@ysnUseTaxFlag1_New			= ysnUseTaxFlag1,
-											@ysnUseTaxFlag2_New			= ysnUseTaxFlag2,
-											@ysnUseTaxFlag3_New			= ysnUseTaxFlag3,
-											@ysnUseTaxFlag4_New			= ysnUseTaxFlag4,
-											@ysnBlueLaw1_New			= ysnBlueLaw1,
-											@ysnBlueLaw2_New			= ysnBlueLaw2,
-											@ysnFoodStampable_New		= ysnFoodStampable,
-											@ysnReturnable_New			= ysnReturnable,
-											@ysnSaleable_New			= ysnSaleable,
-											@ysnPrePriced_New			= ysnPrePriced,
-											@ysnIdRequiredLiquor_New	= ysnIdRequiredLiquor,
-											@ysnIdRequiredCigarette_New	= ysnIdRequiredCigarette,
-											@intProductCodeId_New		= intProductCodeId,
-											@intFamilyId_New			= intFamilyId,
-											@intClassId_New				= intClassId,
-											@intMinimumAge_New			= intMinimumAge
-									FROM @tempCStoreLocation
+										@intLoopEffectiveItemCostId	= temp.intEffectiveItemCostId
+										, @intLoopStoreNo				= temp.intStoreNo
+										, @intLoopItemId				= temp.intItemId
+										, @dblLoopCost					= CAST(temp.dblCost AS NUMERIC(38, 20))
+										, @dtmLoopCostEffectiveDate		= temp.dtmCostEffectiveDate
+										, @intLoopCompanyLocationId		= temp.intCompanyLocationId
+										, @intLoopItemLocationId		= temp.intItemLocationId
+									FROM @tblItemCostPricing temp
 									
-									-- =================================================================================
-									-- [START] - ADD ITEM LOCATION DEBUG
-									-- =================================================================================
-									IF(@ysnDebug = 1)
-										BEGIN
-												SELECT 'LOOP', @intStoreId_New, @intCompanyLocationId_New, @ysnUseTaxFlag1_New, @ysnUseTaxFlag2_New, @ysnUseTaxFlag3_New, @ysnUseTaxFlag4_New, @ysnBlueLaw1_New, @ysnBlueLaw2_New, @ysnFoodStampable_New,
-															   @ysnReturnable_New, @ysnSaleable_New, @ysnPrePriced_New, @ysnIdRequiredLiquor_New, @ysnIdRequiredCigarette_New, @intProductCodeId_New, @intFamilyId_New, @intClassId_New, @intMinimumAge_New
-										END
-									-- =================================================================================
-									-- [END] - ADD ITEM LOCATION DEBUG
-									-- =================================================================================
-
-	
-									-- ITEM LOCATION
-									BEGIN TRY
-										
-										EXEC [uspICAddItemLocationForCStore]
-											@intLocationId				= @intCompanyLocationId_New 
-											,@intItemId					= @intNewItemId
-
-											,@ysnTaxFlag1				= @ysnUseTaxFlag1_New 
-											,@ysnTaxFlag2				= @ysnUseTaxFlag2_New
-											,@ysnTaxFlag3				= @ysnUseTaxFlag3_New
-											,@ysnTaxFlag4				= @ysnUseTaxFlag4_New
-											,@ysnApplyBlueLaw1			= @ysnBlueLaw1_New
-											,@ysnApplyBlueLaw2			= @ysnBlueLaw2_New
-											,@intProductCodeId			= @intProductCodeId_New
-											,@intFamilyId				= @intFamilyId_New
-											,@intClassId				= @intClassId_New
-											,@ysnFoodStampable			= @ysnFoodStampable_New
-											,@ysnReturnable				= @ysnReturnable_New
-											,@ysnSaleable				= @ysnSaleable_New
-											,@ysnPrePriced				= @ysnPrePriced_New
-											,@ysnIdRequiredLiquor		= @ysnIdRequiredLiquor_New
-											,@ysnIdRequiredCigarette	= @ysnIdRequiredCigarette_New
-											,@intMinimumAge				= @intMinimumAge_New
-											,@intVendorId				= @intVendorId
-											,@intEntityUserSecurityId	= @intEntityId
-											,@intItemLocationId			= @intNewItemLocationId OUTPUT 
-
-										
-										-- =================================================================================
-										-- [START] - ADD ITEM UOM DEBUG
-										-- =================================================================================
-										IF(@ysnDebug = 1)
+										BEGIN TRY
+											IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intLoopItemLocationId AND intItemId = @intLoopItemId)
 											BEGIN
-												SELECT 'New Added Item Location', * FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId
-											END
-										-- =================================================================================
-										-- [END] - ADD ITEM UOM DEBUG
-										-- =================================================================================
+											
+											
+												-- temp table for ItemPricing
+												BEGIN
+													DECLARE @tblCStoreItemPricing TABLE (
+														intItemId					INT
+														, dblStandardCost			NUMERIC(38,20)
+														, dblLastCost				NUMERIC(38,20)
+														, dblSalePrice				NUMERIC(38,20)
+														, intCompanyLocationId		INT
+													)
+												END
 
-										IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId)
-											BEGIN
-												SET @strResultMessage = 'Item Location is not created successfully'  
 
-												GOTO ExitWithRollback
-											END
-										ELSE
-											BEGIN
-												
-												-- Fill @intUniqueId to return to client side
-												SET @intUniqueId = @intNewItemLocationId
-											END
+												-- ============================================================================================================================
+												-- [START] - ADD ITEM LOCATION
+												-- ============================================================================================================================
+												BEGIN
+													BEGIN TRY
+														INSERT INTO @tempCStoreLocation
+														(
+															intStoreId,
+															intCompanyLocationId,
 
-										IF(@intVendorId IS NOT NULL AND @intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
-											BEGIN
+															-- Item Location
+															ysnUseTaxFlag1,
+															ysnUseTaxFlag2,
+															ysnUseTaxFlag3,
+															ysnUseTaxFlag4,
+															ysnBlueLaw1,
+															ysnBlueLaw2,
+															ysnFoodStampable,
+															ysnReturnable,
+															ysnSaleable,
+															ysnPrePriced,
+															ysnIdRequiredLiquor,
+															ysnIdRequiredCigarette,
+															intProductCodeId,
+															intFamilyId,
+															intClassId,
+															intMinimumAge
+														)
+														SELECT TOP 1
+															intStoreId					= st.intStoreId,
+															intCompanyLocationId		= st.intCompanyLocationId,
 
-												-- ITEM VENDOR
-												EXEC [uspICAddItemVendorXrefForCStore]
-													@intItemId					= @intNewItemId
-													,@intItemLocationId			= @intNewItemLocationId
-													,@intVendorId				= @intVendorId
-													,@strVendorProduct			= @strVendorProduct
-													,@intEntityUserSecurityId	= @intEntityId 
-													,@intItemVendorXrefId		= @intNewItemVendorXrefId OUTPUT 
-												
-												-- =================================================================================
-												-- [START] - ADD ITEM VENDOR DEBUG
-												-- =================================================================================
-												IF(@ysnDebug = 1)
-													BEGIN
-														SELECT 'New Added Item Vendor', * FROM tblICItemVendorXref WHERE intItemVendorXrefId = @intNewItemVendorXrefId
-													END
-												-- =================================================================================
-												-- [END] - ADD ITEM VENDOR DEBUG
-												-- =================================================================================
-
-												IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemVendorXref WHERE intItemVendorXrefId = @intNewItemVendorXrefId)
-													BEGIN
-
-														SET @ysnResultSuccess = 0
-														SET @strResultMessage = 'Item Vendor is not created successfully'  
+															-- Item Location
+															ysnUseTaxFlag1				= ISNULL(catLoc.ysnUseTaxFlag1, CAST(0 AS BIT)),
+															ysnUseTaxFlag2				= ISNULL(catLoc.ysnUseTaxFlag2, CAST(0 AS BIT)),
+															ysnUseTaxFlag3				= ISNULL(catLoc.ysnUseTaxFlag3, CAST(0 AS BIT)),
+															ysnUseTaxFlag4				= ISNULL(catLoc.ysnUseTaxFlag4, CAST(0 AS BIT)),
+															ysnBlueLaw1					= ISNULL(catLoc.ysnBlueLaw1, CAST(0 AS BIT)),
+															ysnBlueLaw2					= ISNULL(catLoc.ysnBlueLaw2, CAST(0 AS BIT)),
+															ysnFoodStampable			= ISNULL(catLoc.ysnFoodStampable, CAST(0 AS BIT)),
+															ysnReturnable				= ISNULL(catLoc.ysnReturnable, CAST(0 AS BIT)),
+															ysnSaleable					= ISNULL(catLoc.ysnSaleable, CAST(0 AS BIT)),
+															ysnPrePriced				= ISNULL(catLoc.ysnPrePriced, CAST(0 AS BIT)),
+															ysnIdRequiredLiquor			= ISNULL(catLoc.ysnIdRequiredLiquor, CAST(0 AS BIT)),
+															ysnIdRequiredCigarette		= ISNULL(catLoc.ysnIdRequiredCigarette, CAST(0 AS BIT)),
+															intProductCodeId			= catLoc.intProductCodeId,
+															intFamilyId					= ISNULL(@intFamilyId, catLoc.intFamilyId),
+															intClassId					= ISNULL(@intClassId, catLoc.intClassId),
+															intMinimumAge				= catLoc.intMinimumAge
+														FROM tblSTStore st
+														LEFT JOIN tblICCategoryLocation catLoc
+															ON st.intCompanyLocationId = catLoc.intLocationId
+														WHERE st.intCompanyLocationId IS NOT NULL
+															AND st.intStoreNo = @intLoopStoreNo
+													END TRY
+													BEGIN CATCH
+														SET @strResultMessage = 'Error creating location table: ' + ERROR_MESSAGE() 
 
 														GOTO ExitWithRollback
+													END CATCH
+
+													INSERT INTO @tblCStoreItemPricing 
+													(
+														intItemId
+														, dblStandardCost
+														, intCompanyLocationId
+													)
+													SELECT intItemId				= @intLoopItemId
+														, dblStandardCost		= @dblLoopCost
+														, intCompanyLocationId  = @intLoopCompanyLocationId
+
+													IF EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
+														BEGIN
+							
+															DECLARE @intStoreId_New					INT,
+																	@intCompanyLocationId_New		INT,
+																	@ysnUseTaxFlag1_New				BIT,
+																	@ysnUseTaxFlag2_New				BIT,
+																	@ysnUseTaxFlag3_New				BIT,
+																	@ysnUseTaxFlag4_New				BIT,
+																	@ysnBlueLaw1_New				BIT,
+																	@ysnBlueLaw2_New				BIT,
+																	@ysnFoodStampable_New			BIT,
+																	@ysnReturnable_New				BIT,
+																	@ysnSaleable_New				BIT,
+																	@ysnPrePriced_New				BIT,
+																	@ysnIdRequiredLiquor_New		BIT,
+																	@ysnIdRequiredCigarette_New		BIT,
+																	@intProductCodeId_New			INT,
+																	@intFamilyId_New				INT,
+																	@intClassId_New					INT,
+																	@intMinimumAge_New				INT,
+
+																	@dblStandardCost_New			NUMERIC(18, 6),
+																	@dblLastCost_New				NUMERIC(18, 6),
+																	@dblSalePrice_New				NUMERIC(18, 6)
+
+															SELECT TOP 1
+																	@intStoreId_New				= intStoreId,
+																	@intCompanyLocationId_New	= intCompanyLocationId,
+																	@ysnUseTaxFlag1_New			= ysnUseTaxFlag1,
+																	@ysnUseTaxFlag2_New			= ysnUseTaxFlag2,
+																	@ysnUseTaxFlag3_New			= ysnUseTaxFlag3,
+																	@ysnUseTaxFlag4_New			= ysnUseTaxFlag4,
+																	@ysnBlueLaw1_New			= ysnBlueLaw1,
+																	@ysnBlueLaw2_New			= ysnBlueLaw2,
+																	@ysnFoodStampable_New		= ysnFoodStampable,
+																	@ysnReturnable_New			= ysnReturnable,
+																	@ysnSaleable_New			= ysnSaleable,
+																	@ysnPrePriced_New			= ysnPrePriced,
+																	@ysnIdRequiredLiquor_New	= ysnIdRequiredLiquor,
+																	@ysnIdRequiredCigarette_New	= ysnIdRequiredCigarette,
+																	@intProductCodeId_New		= intProductCodeId,
+																	@intFamilyId_New			= intFamilyId,
+																	@intClassId_New				= intClassId,
+																	@intMinimumAge_New			= intMinimumAge
+															FROM @tempCStoreLocation
+
+									
+															-- =================================================================================
+															-- [START] - ADD ITEM LOCATION DEBUG
+															-- =================================================================================
+															IF(@ysnDebug = 1)
+																BEGIN
+																		SELECT 'LOOP', @intStoreId_New, @intCompanyLocationId_New, @ysnUseTaxFlag1_New, @ysnUseTaxFlag2_New, @ysnUseTaxFlag3_New, @ysnUseTaxFlag4_New, @ysnBlueLaw1_New, @ysnBlueLaw2_New, @ysnFoodStampable_New,
+																						@ysnReturnable_New, @ysnSaleable_New, @ysnPrePriced_New, @ysnIdRequiredLiquor_New, @ysnIdRequiredCigarette_New, @intProductCodeId_New, @intFamilyId_New, @intClassId_New, @intMinimumAge_New
+																END
+															-- =================================================================================
+															-- [END] - ADD ITEM LOCATION DEBUG
+															-- =================================================================================
+
+	
+															-- ITEM LOCATION
+															BEGIN TRY
+										
+															EXEC [uspICAddItemLocationForCStore]
+																@intLocationId				= @intCompanyLocationId_New 
+																,@intItemId					= @intNewItemId
+
+																,@ysnTaxFlag1				= @ysnUseTaxFlag1_New 
+																,@ysnTaxFlag2				= @ysnUseTaxFlag2_New
+																,@ysnTaxFlag3				= @ysnUseTaxFlag3_New
+																,@ysnTaxFlag4				= @ysnUseTaxFlag4_New
+																,@ysnApplyBlueLaw1			= @ysnBlueLaw1_New
+																,@ysnApplyBlueLaw2			= @ysnBlueLaw2_New
+																,@intProductCodeId			= @intProductCodeId_New
+																,@intFamilyId				= @intFamilyId_New
+																,@intClassId				= @intClassId_New
+																,@ysnFoodStampable			= @ysnFoodStampable_New
+																,@ysnReturnable				= @ysnReturnable_New
+																,@ysnSaleable				= @ysnSaleable_New
+																,@ysnPrePriced				= @ysnPrePriced_New
+																,@ysnIdRequiredLiquor		= @ysnIdRequiredLiquor_New
+																,@ysnIdRequiredCigarette	= @ysnIdRequiredCigarette_New
+																,@intMinimumAge				= @intMinimumAge_New
+																,@intVendorId				= @intVendorId
+																,@intEntityUserSecurityId	= @intEntityId
+																,@intItemLocationId			= @intNewItemLocationId OUTPUT 
+																
+																-- =================================================================================
+																-- [START] - ADD ITEM UOM DEBUG
+																-- =================================================================================
+																IF(@ysnDebug = 1)
+																	BEGIN
+																		SELECT 'New Added Item Location', * FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId
+																	END
+																-- =================================================================================
+																-- [END] - ADD ITEM UOM DEBUG
+																-- =================================================================================
+
+																IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId)
+																	BEGIN
+																		SET @strResultMessage = 'Item Location is not created successfully'  
+
+																		GOTO ExitWithRollback
+																	END
+																				
+
+																IF EXISTS(SELECT TOP 1 1 FROM @tblCStoreItemPricing WHERE intCompanyLocationId = @intCompanyLocationId_New)
+																	BEGIN
+																		SELECT TOP 1
+																			@dblStandardCost_New	= dblStandardCost
+																		FROM @tblCStoreItemPricing 
+																		WHERE intCompanyLocationId = @intCompanyLocationId_New
+
+																		IF(@intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
+																			BEGIN
+																						
+																				-- ITEM PRICING
+																				EXEC [uspICUpdateEffectivePricingForCStore]
+																					@intItemId					= @intNewItemId
+																					,@intItemLocationId			= @intNewItemLocationId
+
+																					,@dblStandardCost			= @dblStandardCost_New 
+																					,@dtmEffectiveDate			= @dtmLoopCostEffectiveDate 
+																					,@intEntityUserSecurityId	= @intEntityId
+
+																			END
+																	END
+															END TRY
+															BEGIN CATCH
+																SET @strResultMessage = 'Error Adding new Item Location: ' + ERROR_MESSAGE()  
+
+																GOTO ExitWithRollback
+															END CATCH
+
+
+															SET @intNewItemLocationId		= NULL
+
+														END
 													END
-											END
-										
 
-
-											SELECT TOP 1
-												@dblStandardCost_New	= dblCost
-											FROM  @UDTItemCostPricing cp
-												LEFT JOIN tblSTStore st
-													ON cp.intStoreNo = st.intStoreNo
-											WHERE st.intStoreId = @intStoreId_New
+												END
 											
-											SELECT TOP 1
-												@dblSalePrice_New	= dblRetailPrice
-											FROM  @UDTItemRetailPricing rp
-												LEFT JOIN tblSTStore st
-													ON rp.intStoreNo = st.intStoreNo
-											WHERE st.intStoreId = @intStoreId_New
-
-											IF(@intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
-												BEGIN
+											--If item pricing is existing
+											IF EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intLoopItemLocationId AND intItemId = @intLoopItemId)
+											BEGIN
 												
-													-- ITEM PRICING
-													EXEC [uspICAddItemPricingForCStore]
-														@intItemId					= @intNewItemId
-														,@intItemLocationId			= @intNewItemLocationId
+												EXEC [uspICUpdateEffectivePricingForCStore]
+													-- filter params
+													@strUpcCode					= NULL 
+													, @strDescription			= NULL 
+													, @intItemId				= @intLoopItemId 
+													, @intItemLocationId		= @intLoopItemLocationId 
 
-														,@dblStandardCost			= @dblStandardCost_New 
-														,@dblLastCost				= @dblLastCost_New 
-														,@dblSalePrice				= @dblSalePrice_New
-														,@intEntityUserSecurityId	= @intEntityId
-														,@intItemPricingId			= @intNewItemPricingId OUTPUT
-													
-													-- =================================================================================
-													-- [START] - ADD ITEM PRICING DEBUG
-													-- =================================================================================
-													IF(@ysnDebug = 1)
-														BEGIN
-															SELECT 'New Added Item Pricing', * FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId
-														END
-													-- =================================================================================
-													-- [END] - ADD ITEM PRICING DEBUG
-													-- =================================================================================
+													-- update params
+													, @dblStandardCost			= @dblLoopCost 
+													, @dtmEffectiveDate			= @dtmLoopCostEffectiveDate 
+													, @intEntityUserSecurityId	= @intEntityId
+											END
 
-													IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemPricing WHERE intItemPricingId = @intNewItemPricingId)
-														BEGIN
-															SET @strResultMessage = 'Item Pricing is not created successfully'  
 
-															GOTO ExitWithRollback
-														END
-														
-													--Cost Loop
-													WHILE EXISTS(SELECT TOP 1 1 FROM @tmp_CostEffectiveDate ce
-																				INNER JOIN tblSTStore st
-																					ON st.intStoreId = @intStoreId_New
-																						AND ce.intStoreNo = st.intStoreNo)
-														BEGIN
+										END TRY
+										BEGIN CATCH
+											SET @ysnResultSuccess = 0
+											SET @strResultMessage = 'Error updating Item Pricing: ' + ERROR_MESSAGE()  
 
-															DECLARE @intItemId_new					INT,
-																	@intEffectiveItemCostId_new		INT,
-																	@intPricingId_New				INT,
-																	@intStoreNoCost_New				INT,
-																	@dblCost_new					NUMERIC(18, 6),
-																	@dtmEffectiveDate_new			DATETIME
+											GOTO ExitWithRollback
+										END CATCH
 
+									DELETE FROM @tempCStoreLocation
+
+									DELETE FROM @tblItemCostPricing 
+									WHERE intStoreNo = @intLoopStoreNo
+										AND intItemId = @intLoopItemId 
+										AND dblCost = @dblLoopCost 
+										AND dtmCostEffectiveDate = @dtmLoopCostEffectiveDate 
+										AND intItemLocationId = @intLoopItemLocationId
+								END
+						END 
+			END
+			-- ============================================================================================================================
+			-- [END] - ITEM PRICING UPDATE - COST 
+			-- ============================================================================================================================
+			
+			
+			-- ============================================================================================================================
+			-- [START] - ITEM PRICING UPDATE - PRICE 
+			-- ============================================================================================================================
+			BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM @UDTItemRetailPricing)
+						BEGIN
+						
+							INSERT INTO @tblItemRetailPricing
+							(
+								intEffectiveItemPriceId	
+								, intStoreNo	
+								, intItemId	
+								, dblRetailPrice	
+								, dtmRetailEffectiveDate
+								, intCompanyLocationId
+								, intItemLocationId
+
+							)
+							SELECT DISTINCT
+								intEffectiveItemPriceId		= udt.intEffectiveItemPriceId
+								, intStoreNo				= st.intStoreNo
+								, intItemId					= @intNewItemId
+								, dblRetailPrice			= udt.dblRetailPrice
+								, dtmCostEffectiveDate		= udt.dtmEffectiveRetailPriceDate
+								, intCompanyLocationId		= st.intCompanyLocationId
+								, intItemLocationId			= ISNULL(til.intItemLocationId, 0)
+							FROM @UDTItemRetailPricing udt
+								INNER JOIN tblSTStore st
+									ON udt.intStoreNo = st.intStoreNo
+								LEFT JOIN tblICItemLocation til
+									ON til.intLocationId = st.intCompanyLocationId
+									AND til.intItemId = @intNewItemId
+
+							DECLARE @intLoopRetailEffectiveItemCostId		AS INT
+							        , @intLoopRetailStoreNo					AS INT
+							        , @intLoopRetailItemId					AS INT
+									, @dblLoopRetail						AS NUMERIC(38,20)
+									, @dtmLoopRetailEffectiveDate			AS DATETIME
+									, @intLoopRetailCompanyLocationId		AS INT
+									, @intLoopRetailItemLocationId			AS INT
 									
-															SELECT TOP 1
-																	@intItemId_new					= @intNewItemId,
-																	@intEffectiveItemCostId_new		= ce.intEffectiveItemCostId,
-																	@intPricingId_New				= @intNewItemPricingId,
-																	@intStoreNoCost_New				= ce.intStoreNo,
-																	@dblCost_new					= ce.dblCost,
-																	@dtmEffectiveDate_new			= ce.dtmEffectiveCostDate
-															FROM @tmp_CostEffectiveDate ce
+							WHILE EXISTS(SELECT TOP 1 1 FROM @tblItemRetailPricing)
+								BEGIN
 
-															-- ITEM LOCATION
-															BEGIN TRY
+									SELECT TOP 1 @intLoopRetailEffectiveItemCostId		= temp.intEffectiveItemPriceId
+										, @intLoopRetailStoreNo							= temp.intStoreNo
+										, @intLoopRetailItemId							= temp.intItemId
+										, @dblLoopRetail								= CAST(temp.dblRetailPrice AS NUMERIC(38, 20))
+										, @dtmLoopRetailEffectiveDate					= temp.dtmRetailEffectiveDate
+										, @intLoopRetailCompanyLocationId				= temp.intCompanyLocationId
+										, @intLoopRetailItemLocationId					= temp.intItemLocationId
+									FROM @tblItemRetailPricing temp
+										BEGIN TRY
 										
 
-																	EXEC [uspICUpdateItemPricingForCStore]
-																		@intItemId						= @intItemId_new 
-																		,@intItemPricingId				= @intPricingId_New
-																		,@dblStandardCost				= @dblCost_new 
-																		,@dtmEffectiveDate				= @dtmEffectiveDate_new
-																		,@intEntityUserSecurityId		= @intEntityId
-										
-															END TRY
-															BEGIN CATCH
-																SET @strResultMessage = 'Error Adding Cost new Item Location: ' + ERROR_MESSAGE()  
+											IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intLoopRetailItemLocationId AND intItemId = @intLoopRetailItemId)
+											BEGIN
+											
+												DECLARE @intNewItemRetailLocationId	AS INT
+											
 
-																GOTO ExitWithRollback
-															END CATCH
-															
-															DELETE @tmp_CostEffectiveDate 
-															WHERE intStoreNo = @intStoreNoCost_New
-																AND dtmEffectiveCostDate = @dtmEffectiveDate_new
-
-														END
-													
-													--Retail Loop
-													WHILE EXISTS(SELECT TOP 1 1 FROM @tmp_RetailEffectiveDate rp
-																				INNER JOIN tblSTStore st
-																					ON st.intStoreId = @intStoreId_New
-																						AND rp.intStoreNo = st.intStoreNo)
-														BEGIN
-
-															DECLARE @intItemIdRetail_new				INT,
-																	@intPricingIdRetail_New				INT,
-																	@intStoreNoRetail_New				INT,
-																	@dblRetail_new						NUMERIC(18, 6),
-																	@dtmEffectiveDateRetail_new			DATETIME
-
-									
-															SELECT TOP 1
-																	@intItemIdRetail_new		= @intNewItemId,
-																	@intPricingIdRetail_New		= @intNewItemPricingId,
-																	@intStoreNoRetail_New		= rp.intStoreNo,
-																	@dblRetail_new				= rp.dblRetailPrice,
-																	@dtmEffectiveDateRetail_new	= rp.dtmEffectiveRetailPriceDate
-															FROM @tmp_RetailEffectiveDate rp
-
-															-- ITEM LOCATION
-															BEGIN TRY
-																	EXEC [uspICUpdateItemPricingForCStore]
-																		@intItemId						= @intItemIdRetail_new  
-																		,@intItemPricingId				= @intPricingIdRetail_New
-																		,@dblRetailPrice				= @dblRetail_new 
-																		,@dtmEffectiveDate				= @dtmEffectiveDateRetail_new
-																		,@intEntityUserSecurityId		= @intEntityId
-										
-															END TRY
-															BEGIN CATCH
-																SET @strResultMessage = 'Error Adding Retail new Item Location: ' + ERROR_MESSAGE()  
-
-																GOTO ExitWithRollback
-															END CATCH
-															
-															DELETE @tmp_RetailEffectiveDate 
-															WHERE intStoreNo = @intStoreNoRetail_New
-																AND dtmEffectiveRetailPriceDate = @dtmEffectiveDateRetail_new
-
-														END
+												-- temp table for ItemPricing
+												BEGIN
+													DECLARE @tblCStoreItemRetailPricing TABLE (
+														intItemId					INT
+														, dblStandardCost			NUMERIC(38,20)
+														, dblLastCost				NUMERIC(38,20)
+														, dblSalePrice				NUMERIC(38,20)
+														, intCompanyLocationId		INT
+													)
 												END
 												
 
-									END TRY
-									BEGIN CATCH
-										SET @strResultMessage = 'Error Adding new Item Location: ' + ERROR_MESSAGE()  
+												-- temp table for ItemLocations
+												BEGIN
+													DECLARE @tempCStoreRetailLocation TABLE
+													(
+														intStoreId				INT,
+														intCompanyLocationId	INT,
 
-										GOTO ExitWithRollback
-									END CATCH
+														-- Item Location
+														ysnUseTaxFlag1			BIT,
+														ysnUseTaxFlag2			BIT,
+														ysnUseTaxFlag3			BIT,
+														ysnUseTaxFlag4			BIT,
+														ysnBlueLaw1				BIT,
+														ysnBlueLaw2				BIT,
+														ysnFoodStampable		BIT,
+														ysnReturnable			BIT,
+														ysnSaleable				BIT,
+														ysnPrePriced			BIT,
+														ysnIdRequiredLiquor		BIT,
+														ysnIdRequiredCigarette	BIT,
+														intProductCodeId		INT,
+														intFamilyId				INT,
+														intClassId				INT,
+														intMinimumAge			INT
+													)
+												END
+														
+												-- ============================================================================================================================
+												-- [START] - ADD ITEM LOCATION
+												-- ============================================================================================================================
+												BEGIN
+													BEGIN TRY
+														INSERT INTO @tempCStoreRetailLocation
+														(
+															intStoreId,
+															intCompanyLocationId,
+
+															-- Item Location
+															ysnUseTaxFlag1,
+															ysnUseTaxFlag2,
+															ysnUseTaxFlag3,
+															ysnUseTaxFlag4,
+															ysnBlueLaw1,
+															ysnBlueLaw2,
+															ysnFoodStampable,
+															ysnReturnable,
+															ysnSaleable,
+															ysnPrePriced,
+															ysnIdRequiredLiquor,
+															ysnIdRequiredCigarette,
+															intProductCodeId,
+															intFamilyId,
+															intClassId,
+															intMinimumAge
+														)
+														SELECT TOP 1
+															intStoreId					= st.intStoreId,
+															intCompanyLocationId		= st.intCompanyLocationId,
+
+															-- Item Location
+															ysnUseTaxFlag1				= ISNULL(catLoc.ysnUseTaxFlag1, CAST(0 AS BIT)),
+															ysnUseTaxFlag2				= ISNULL(catLoc.ysnUseTaxFlag2, CAST(0 AS BIT)),
+															ysnUseTaxFlag3				= ISNULL(catLoc.ysnUseTaxFlag3, CAST(0 AS BIT)),
+															ysnUseTaxFlag4				= ISNULL(catLoc.ysnUseTaxFlag4, CAST(0 AS BIT)),
+															ysnBlueLaw1					= ISNULL(catLoc.ysnBlueLaw1, CAST(0 AS BIT)),
+															ysnBlueLaw2					= ISNULL(catLoc.ysnBlueLaw2, CAST(0 AS BIT)),
+															ysnFoodStampable			= ISNULL(catLoc.ysnFoodStampable, CAST(0 AS BIT)),
+															ysnReturnable				= ISNULL(catLoc.ysnReturnable, CAST(0 AS BIT)),
+															ysnSaleable					= ISNULL(catLoc.ysnSaleable, CAST(0 AS BIT)),
+															ysnPrePriced				= ISNULL(catLoc.ysnPrePriced, CAST(0 AS BIT)),
+															ysnIdRequiredLiquor			= ISNULL(catLoc.ysnIdRequiredLiquor, CAST(0 AS BIT)),
+															ysnIdRequiredCigarette		= ISNULL(catLoc.ysnIdRequiredCigarette, CAST(0 AS BIT)),
+															intProductCodeId			= catLoc.intProductCodeId,
+															intFamilyId					= ISNULL(@intFamilyId, catLoc.intFamilyId),
+															intClassId					= ISNULL(@intClassId, catLoc.intClassId),
+															intMinimumAge				= catLoc.intMinimumAge
+														FROM tblSTStore st
+														LEFT JOIN tblICCategoryLocation catLoc
+															ON st.intCompanyLocationId = catLoc.intLocationId
+														WHERE st.intCompanyLocationId IS NOT NULL
+															AND st.intStoreNo = @intLoopRetailStoreNo
+															--AND catLoc.intCategoryId = @intCategoryId
+
+															
+													END TRY
+													BEGIN CATCH
+														SET @strResultMessage = 'Error creating location table: ' + ERROR_MESSAGE() 
+
+														GOTO ExitWithRollback
+													END CATCH
+
+													
+
+													--Truncate table before insert
+													DELETE FROM @tblCStoreItemPricing
+
+													INSERT INTO @tblCStoreItemPricing 
+													(
+														intItemId
+														, dblSalePrice
+														, intCompanyLocationId
+													)
+													SELECT 
+														intItemId				= @intLoopRetailItemId
+														, dblSalePrice			= @dblLoopRetail
+														, intCompanyLocationId  = @intLoopRetailCompanyLocationId
+
+													IF EXISTS(SELECT TOP 1 1 FROM @tempCStoreRetailLocation)
+														BEGIN
+							
+															DECLARE @intRetailStoreId_New					INT,
+																	@intRetailCompanyLocationId_New			INT,
+																	@ysnRetailUseTaxFlag1_New				BIT,
+																	@ysnRetailUseTaxFlag2_New				BIT,
+																	@ysnRetailUseTaxFlag3_New				BIT,
+																	@ysnRetailUseTaxFlag4_New				BIT,
+																	@ysnRetailBlueLaw1_New				BIT,
+																	@ysnRetailBlueLaw2_New				BIT,
+																	@ysnRetailFoodStampable_New			BIT,
+																	@ysnRetailReturnable_New				BIT,
+																	@ysnRetailSaleable_New				BIT,
+																	@ysnRetailPrePriced_New				BIT,
+																	@ysnRetailIdRequiredLiquor_New		BIT,
+																	@ysnRetailIdRequiredCigarette_New		BIT,
+																	@intRetailProductCodeId_New			INT,
+																	@intRetailFamilyId_New				INT,
+																	@intRetailClassId_New					INT,
+																	@intRetailMinimumAge_New				INT,
+																		
+																	@dblRetailStandardCost_New			NUMERIC(18, 6),
+																	@dblRetailLastCost_New				NUMERIC(18, 6),
+																	@dblRetailSalePrice_New				NUMERIC(18, 6)
+
+															SELECT TOP 1
+																	@intRetailStoreId_New				= intStoreId,
+																	@intRetailCompanyLocationId_New	= intCompanyLocationId,
+																	@ysnRetailUseTaxFlag1_New			= ysnUseTaxFlag1,
+																	@ysnRetailUseTaxFlag2_New			= ysnUseTaxFlag2,
+																	@ysnRetailUseTaxFlag3_New			= ysnUseTaxFlag3,
+																	@ysnRetailUseTaxFlag4_New			= ysnUseTaxFlag4,
+																	@ysnRetailBlueLaw1_New			= ysnBlueLaw1,
+																	@ysnRetailBlueLaw2_New			= ysnBlueLaw2,
+																	@ysnRetailFoodStampable_New		= ysnFoodStampable,
+																	@ysnRetailReturnable_New			= ysnReturnable,
+																	@ysnRetailSaleable_New			= ysnSaleable,
+																	@ysnRetailPrePriced_New			= ysnPrePriced,
+																	@ysnRetailIdRequiredLiquor_New	= ysnIdRequiredLiquor,
+																	@ysnRetailIdRequiredCigarette_New	= ysnIdRequiredCigarette,
+																	@intRetailProductCodeId_New		= intProductCodeId,
+																	@intRetailFamilyId_New			= intFamilyId,
+																	@intRetailClassId_New				= intClassId,
+																	@intRetailMinimumAge_New			= intMinimumAge
+															FROM @tempCStoreRetailLocation
+
+									
+															-- =================================================================================
+															-- [START] - ADD ITEM LOCATION DEBUG
+															-- =================================================================================
+															IF(@ysnDebug = 1)
+																BEGIN
+																		SELECT 'LOOP', @intStoreId_New, @intRetailCompanyLocationId_New, @ysnUseTaxFlag1_New, @ysnUseTaxFlag2_New, @ysnUseTaxFlag3_New, @ysnUseTaxFlag4_New, @ysnBlueLaw1_New, @ysnBlueLaw2_New, @ysnFoodStampable_New,
+																						@ysnReturnable_New, @ysnSaleable_New, @ysnPrePriced_New, @ysnIdRequiredLiquor_New, @ysnIdRequiredCigarette_New, @intProductCodeId_New, @intFamilyId_New, @intClassId_New, @intMinimumAge_New
+																END
+															-- =================================================================================
+															-- [END] - ADD ITEM LOCATION DEBUG
+															-- =================================================================================
+
+	
+															-- ITEM LOCATION
+															BEGIN TRY
+										
+
+															EXEC [uspICAddItemLocationForCStore]
+																@intLocationId				= @intRetailCompanyLocationId_New 
+																,@intItemId					= @intNewItemId
+																								  
+																,@ysnTaxFlag1				= @ysnRetailUseTaxFlag1_New 
+																,@ysnTaxFlag2				= @ysnRetailUseTaxFlag2_New
+																,@ysnTaxFlag3				= @ysnRetailUseTaxFlag3_New
+																,@ysnTaxFlag4				= @ysnRetailUseTaxFlag4_New
+																,@ysnApplyBlueLaw1			= @ysnRetailBlueLaw1_New
+																,@ysnApplyBlueLaw2			= @ysnRetailBlueLaw2_New
+																,@intProductCodeId			= @intRetailProductCodeId_New
+																,@intFamilyId				= @intRetailFamilyId_New
+																,@intClassId				= @intRetailClassId_New
+																,@ysnFoodStampable			= @ysnRetailFoodStampable_New
+																,@ysnReturnable				= @ysnRetailReturnable_New
+																,@ysnSaleable				= @ysnRetailSaleable_New
+																,@ysnPrePriced				= @ysnRetailPrePriced_New
+																,@ysnIdRequiredLiquor		= @ysnRetailIdRequiredLiquor_New
+																,@ysnIdRequiredCigarette	= @ysnRetailIdRequiredCigarette_New
+																,@intMinimumAge				= @intRetailMinimumAge_New
+																,@intVendorId				= @intVendorId
+																,@intEntityUserSecurityId	= @intEntityId
+																,@intItemLocationId			= @intNewItemLocationId OUTPUT 
+										
+
+																-- =================================================================================
+																-- [START] - ADD ITEM UOM DEBUG
+																-- =================================================================================
+																IF(@ysnDebug = 1)
+																	BEGIN
+																		SELECT 'New Added Item Location', * FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId
+																	END
+																-- =================================================================================
+																-- [END] - ADD ITEM UOM DEBUG
+																-- =================================================================================
+
+																IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intNewItemLocationId)
+																	BEGIN
+																		SET @strResultMessage = 'Item Location is not created successfully'  
+
+																		GOTO ExitWithRollback
+																	END
+																		
+
+																IF EXISTS(SELECT TOP 1 1 FROM @tblCStoreItemPricing WHERE intCompanyLocationId = @intRetailCompanyLocationId_New)
+																	BEGIN
+																		SELECT TOP 1
+																			@dblSalePrice_New	= dblSalePrice
+																		FROM @tblCStoreItemPricing 
+																		WHERE intCompanyLocationId = @intCompanyLocationId_New
+																		
+
+																		IF(@intNewItemId IS NOT NULL AND @intNewItemLocationId IS NOT NULL)
+																			BEGIN
+																				-- To add Effective Dates on IC
+																				EXEC [uspICUpdateEffectivePricingForCStore]
+																					-- filter params
+																					@strUpcCode					= NULL 
+																					, @strDescription			= NULL 
+																					, @intItemId				= @intNewItemId 
+																					, @intItemLocationId		= @intNewItemLocationId 
+
+																					-- update params
+																					, @dblRetailPrice			= @dblLoopRetail 
+																					, @dtmEffectiveDate			= @dtmLoopRetailEffectiveDate 
+																					, @intEntityUserSecurityId	= @intEntityId
+																			END
+																	END
+															END TRY
+															BEGIN CATCH
+																SET @strResultMessage = 'Error Adding new Item Location: ' + ERROR_MESSAGE()  
+
+																GOTO ExitWithRollback
+															END CATCH
 
 
-									SET @intNewItemLocationId		= NULL
-									SET @intNewItemPricingId		= NULL
-									SET @intNewItemVendorXrefId		= NULL
+															SET @intNewItemLocationId		= NULL
 
+														END
+													END
 
-									DELETE @tempCStoreLocation 
-									WHERE intStoreId = @intStoreId_New
-										AND intCompanyLocationId = @intCompanyLocationId_New
+												END
+											
+											
+
+											--If item effective pricing PRICE is existing
+											IF EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemLocationId = @intLoopRetailItemLocationId AND intItemId = @intLoopRetailItemId)
+											BEGIN				
+
+												EXEC [uspICUpdateEffectivePricingForCStore]
+													-- filter params
+													@strUpcCode					= NULL 
+													, @strDescription			= NULL 
+													, @intItemId				= @intLoopRetailItemId 
+													, @intItemLocationId		= @intLoopRetailItemLocationId 
+
+													-- update params
+													, @dblRetailPrice			= @dblLoopRetail 
+													, @dtmEffectiveDate			= @dtmLoopRetailEffectiveDate 
+													, @intEntityUserSecurityId	= @intEntityId
+											END
+											
+
+										END TRY
+										BEGIN CATCH
+											SET @ysnResultSuccess = 0
+											SET @strResultMessage = 'Error updating Item Pricing: ' + ERROR_MESSAGE()  
+
+											GOTO ExitWithRollback
+										END CATCH
+										
+									DELETE FROM @tempCStoreRetailLocation 
+
+									DELETE FROM @tblItemRetailPricing 
+									WHERE intStoreNo = @intLoopRetailStoreNo
+										AND intItemId = @intLoopRetailItemId 
+										AND dtmRetailEffectiveDate = @dtmLoopRetailEffectiveDate 
+										AND intItemLocationId = @intLoopRetailItemLocationId
 								END
-						END
-
+						END 
 			END
+			
 			-- ============================================================================================================================
-			-- [END] - ADD ITEM LOCATION
+			-- [END] - ITEM PRICING UPDATE - PRICE 
 			-- ============================================================================================================================
-
 			
 
 
