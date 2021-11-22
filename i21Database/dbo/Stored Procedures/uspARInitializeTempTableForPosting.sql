@@ -402,6 +402,8 @@ CREATE TABLE ##ARItemsForCosting (
     , [ysnGLOnly]						BIT NULL
 	, [strBOLNumber]					NVARCHAR(100) NULL 
     , [intTicketId]                     INT NULL
+    , [strSourceType]                   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , [strSourceNumber]                 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForInTransitCosting') IS NOT NULL)
