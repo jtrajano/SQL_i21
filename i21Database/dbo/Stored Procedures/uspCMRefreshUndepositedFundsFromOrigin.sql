@@ -108,7 +108,7 @@ UNION SELECT DISTINCT
 	strEODNumber,
 	strEODDrawer = strDrawerName ,		
     ysnEODComplete = ysnCompleted ,
-	strPaymentInfo,
+	v.strPaymentInfo,
 	v.intCurrencyId
 FROM vyuARUndepositedPayment v
 
@@ -138,7 +138,7 @@ INSERT INTO tblCMUndepositedFund (
 		,strEODNumber
 		,strEODDrawer
     	,ysnEODComplete
-		,strReferenceTo
+		,strReferenceNo
 		,intCurrencyId
 )
 SELECT 
