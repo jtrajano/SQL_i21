@@ -59,6 +59,8 @@ INSERT INTO @ItemsForPost
     ,[dblAdjustRetailValue]
 	,[strBOLNumber]
     ,[intTicketId]
+	,[strSourceNumber]
+	,[strSourceType]
 ) 
 SELECT 
      [intItemId]
@@ -92,6 +94,8 @@ SELECT
 	,[dblAdjustRetailValue]
 	,[strBOLNumber]
     ,[intTicketId]
+	,[strSourceNumber]
+	,[strSourceType]
 FROM 
 	##ARItemsForCosting
 
