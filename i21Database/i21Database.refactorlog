@@ -7665,4 +7665,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[uspGRModifyTicketDiscountItemInfo]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="0d013dd7-f2ac-4ff8-b00d-45fad727b921" ChangeDateTime="11/22/2021 02:50:12">
+    <Property Name="ElementName" Value="[dbo].[tblFAFixedAsset].[intAccuitent]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblFAFixedAsset]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intLegacyId" />
+  </Operation>
 </Operations>
