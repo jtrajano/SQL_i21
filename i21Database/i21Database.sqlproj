@@ -9101,6 +9101,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
