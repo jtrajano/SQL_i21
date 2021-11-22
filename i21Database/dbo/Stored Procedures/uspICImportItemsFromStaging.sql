@@ -16,7 +16,6 @@ CREATE TABLE #tmp_validRecords (
 	, intLifeTime INT NULL
 	, strShortName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, strLotTracking NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, ysnLotWeightsRequired BIT NULL
 	, ysnUseWeighScales BIT NULL
 	, strBarcodePrint NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, intManufacturerId INT NULL
@@ -44,23 +43,12 @@ CREATE TABLE #tmp_validRecords (
 	, ysnAutoBlend BIT NULL
 	, dblUserGroupFee NUMERIC(38, 20)
 	, dblWeightTolerance NUMERIC(38, 20)
+	, dblOverReceiveTolerancePercentage NUMERIC(38, 20)
 	, dblOverReceiveTolerance NUMERIC(38, 20)
-	, ysnLandedCost BIT NULL
-	, strLeadTime NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, ysnTaxable BIT NULL
-	, strKeywords NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, dblCaseQty NUMERIC(38, 20)
-	, dtmDateShip DATETIME NULL
-	, dblTaxExempt NUMERIC(38, 20)
-	, ysnDropShip BIT NULL
-	, ysnCommisionable BIT NULL
-	, ysnSpecialCommission BIT NULL
 	, ysnTankRequired BIT NULL
 	, ysnAvailableTM BIT NULL
 	, dblDefaultFull NUMERIC(38, 20)
 	, dblMaintenanceRate NUMERIC(38, 20)
-	, strNACSCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, ysnReceiptCommentRequired BIT NULL
 	, intPatronageCategoryDirectId INT NULL
 	, intPatronageCategoryId INT NULL
 	, intPhysicalItem INT NULL
@@ -69,7 +57,8 @@ CREATE TABLE #tmp_validRecords (
 	, intMedicationTag INT NULL
 	, intRINFuelTypeId INT NULL
 	, strFuelInspectFee NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	, [ysnSeparateStockForUOMs] BIT NULL DEFAULT ((0))
+	, ysnSeparateStockForUOMs BIT NULL DEFAULT ((0))
+    , ysn1099Box3 BIT NULL
 	, dtmDateCreated DATETIME NULL
 	, intCreatedByUserId INT NULL
 )
@@ -228,7 +217,6 @@ INSERT INTO #tmp_validRecords(
 	, intLifeTime
 	, strShortName
 	, strLotTracking
-	, ysnLotWeightsRequired
 	, ysnUseWeighScales
 	, strBarcodePrint
 	, intManufacturerId
@@ -256,23 +244,11 @@ INSERT INTO #tmp_validRecords(
 	, ysnAutoBlend
 	, dblUserGroupFee
 	, dblWeightTolerance
-	, dblOverReceiveTolerance
-	, ysnLandedCost
-	, strLeadTime
-	, ysnTaxable
-	, strKeywords
-	, dblCaseQty
-	, dtmDateShip
-	, dblTaxExempt
-	, ysnDropShip
-	, ysnCommisionable
-	, ysnSpecialCommission
+	, dblOverReceiveTolerancePercentage
 	, ysnTankRequired
 	, ysnAvailableTM
 	, dblDefaultFull
 	, dblMaintenanceRate
-	, strNACSCategory
-	, ysnReceiptCommentRequired
 	, intPatronageCategoryDirectId
 	, intPatronageCategoryId
 	, intPhysicalItem
@@ -282,6 +258,7 @@ INSERT INTO #tmp_validRecords(
 	, intRINFuelTypeId
 	, strFuelInspectFee
 	, ysnSeparateStockForUOMs
+	, ysn1099Box3
 	, dtmDateCreated
 	, intCreatedByUserId
 )
@@ -293,7 +270,6 @@ SELECT
 	, intLifeTime					= 1
 	, strShortName					= s.strShortName
 	, strLotTracking				= COALESCE(lotTrackTypes.strLotTracking, 'No')
-	, ysnLotWeightsRequired			= s.ysnLotWeightsRequired
 	, ysnUseWeighScales				= s.ysnUseWeighScales
 	, strBarcodePrint				= s.strBarcodePrint
 	, intManufacturerId				= m.intManufacturerId
@@ -322,22 +298,10 @@ SELECT
 	, dblUserGroupFee				= s.dblUserGroupFeePercentage
 	, dblWeightTolerance			= s.dblWgtTolerancePercentage
 	, dblOverReceiveTolerance		= s.dblOverReceiveTolerancePercentage
-	, ysnLandedCost					= ISNULL(s.ysnLandedCost, 0)
-	, strLeadTime					= s.strLeadTime
-	, ysnTaxable					= ISNULL(s.ysnTaxable, 0)
-	, strKeywords					= s.strKeywords
-	, dblCaseQty					= s.dblCaseQty
-	, dtmDateShip					= s.dtmDateShip
-	, dblTaxExempt					= s.dblTaxExempt
-	, ysnDropShip					= ISNULL(s.ysnDropShip, 0)
-	, ysnCommisionable				= ISNULL(s.ysnCommissionable, 0)
-	, ysnSpecialCommission			= ISNULL(s.ysnSpecialCommission, 0)
 	, ysnTankRequired				= s.ysnTankRequired
 	, ysnAvailableTM				= s.ysnAvailableforTM
 	, dblDefaultFull				= s.dblDefaultPercentageFull
 	, dblMaintenanceRate			= s.dblRate
-	, strNACSCategory				= s.strNACSCategory
-	, ysnReceiptCommentRequired		= s.ysnReceiptCommentReq
 	, intPatronageCategoryDirectId	= ds.intPatronageCategoryId
 	, intPatronageCategoryId		= p.intPatronageCategoryId
 	, intPhysicalItem				= ph.intItemId
@@ -347,6 +311,7 @@ SELECT
 	, intRINFuelTypeId				= rin.intRinFuelCategoryId
 	, strFuelInspectFee				= s.strFuelInspectFee
 	, ysnSeparateStockForUOMs		= s.ysnSeparateStockForUOMs
+	, ysn1099Box3					= s.ysn1099Box3
 	, dtmDateCreated				= s.dtmDateCreated
 	, intCreatedByUserId			= s.intCreatedByUserId
 FROM tblICImportStagingItem s
@@ -416,7 +381,6 @@ USING
 		, intLifeTime
 		, strShortName
 		, strLotTracking
-		, ysnLotWeightsRequired
 		, ysnUseWeighScales
 		, strBarcodePrint
 		, intManufacturerId
@@ -445,22 +409,10 @@ USING
 		, dblUserGroupFee
 		, dblWeightTolerance
 		, dblOverReceiveTolerance
-		, ysnLandedCost
-		, strLeadTime
-		, ysnTaxable
-		, strKeywords
-		, dblCaseQty
-		, dtmDateShip
-		, dblTaxExempt
-		, ysnDropShip
-		, ysnCommisionable
-		, ysnSpecialCommission
 		, ysnTankRequired
 		, ysnAvailableTM
 		, dblDefaultFull
 		, dblMaintenanceRate
-		, strNACSCategory
-		, ysnReceiptCommentRequired
 		, intPatronageCategoryDirectId
 		, intPatronageCategoryId
 		, intPhysicalItem
@@ -470,6 +422,7 @@ USING
 		, intRINFuelTypeId
 		, strFuelInspectFee
 		, ysnSeparateStockForUOMs
+		, ysn1099Box3
 		, dtmDateCreated
 		, intCreatedByUserId
 	FROM #tmp_validRecords s
@@ -488,7 +441,6 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 		, strStatus = source.strStatus
 		, intLifeTime = source.intLifeTime
 		, strShortName = source.strShortName
-		, ysnLotWeightsRequired = source.ysnLotWeightsRequired
 		, ysnUseWeighScales = source.ysnUseWeighScales
 		, strBarcodePrint = source.strBarcodePrint
 		, intManufacturerId = source.intManufacturerId		
@@ -516,22 +468,10 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 		, dblUserGroupFee = source.dblUserGroupFee
 		, dblWeightTolerance = source.dblWeightTolerance
 		, dblOverReceiveTolerance = source.dblOverReceiveTolerance
-		, ysnLandedCost = source.ysnLandedCost
-		, strLeadTime = source.strLeadTime
-		, ysnTaxable = source.ysnTaxable
-		, strKeywords = source.strKeywords
-		, dblCaseQty = source.dblCaseQty
-		, dtmDateShip = source.dtmDateShip
-		, dblTaxExempt = source.dblTaxExempt
-		, ysnDropShip = source.ysnDropShip
-		, ysnCommisionable = source.ysnCommisionable
-		, ysnSpecialCommission = source.ysnSpecialCommission
 		, ysnTankRequired = source.ysnTankRequired
 		, ysnAvailableTM = source.ysnAvailableTM
 		, dblDefaultFull = source.dblDefaultFull
 		, dblMaintenanceRate = source.dblMaintenanceRate
-		, strNACSCategory = source.strNACSCategory
-		, ysnReceiptCommentRequired = source.ysnReceiptCommentRequired
 		, intPatronageCategoryDirectId = source.intPatronageCategoryDirectId
 		, intPatronageCategoryId = source.intPatronageCategoryId
 		, intPhysicalItem = source.intPhysicalItem
@@ -541,6 +481,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 		, intRINFuelTypeId = source.intRINFuelTypeId
 		, strFuelInspectFee = source.strFuelInspectFee
 		, ysnSeparateStockForUOMs = source.ysnSeparateStockForUOMs
+		, ysn1099Box3 = source.ysn1099Box3
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
 WHEN NOT MATCHED THEN
@@ -554,7 +495,6 @@ WHEN NOT MATCHED THEN
 		, intLifeTime
 		, strShortName
 		, strLotTracking
-		, ysnLotWeightsRequired
 		, ysnUseWeighScales
 		, strBarcodePrint
 		, intManufacturerId
@@ -583,22 +523,10 @@ WHEN NOT MATCHED THEN
 		, dblUserGroupFee
 		, dblWeightTolerance
 		, dblOverReceiveTolerance
-		, ysnLandedCost
-		, strLeadTime
-		, ysnTaxable
-		, strKeywords
-		, dblCaseQty
-		, dtmDateShip
-		, dblTaxExempt
-		, ysnDropShip
-		, ysnCommisionable
-		, ysnSpecialCommission
 		, ysnTankRequired
 		, ysnAvailableTM
 		, dblDefaultFull
 		, dblMaintenanceRate
-		, strNACSCategory
-		, ysnReceiptCommentRequired
 		, intPatronageCategoryDirectId
 		, intPatronageCategoryId
 		, intPhysicalItem
@@ -608,6 +536,7 @@ WHEN NOT MATCHED THEN
 		, intRINFuelTypeId
 		, strFuelInspectFee
 		, ysnSeparateStockForUOMs
+		, ysn1099Box3
 		, dtmDateCreated
 		, intDataSourceId
 	)
@@ -623,7 +552,6 @@ WHEN NOT MATCHED THEN
 		, intLifeTime
 		, strShortName
 		, strLotTracking
-		, ysnLotWeightsRequired
 		, ysnUseWeighScales
 		, strBarcodePrint
 		, intManufacturerId
@@ -652,22 +580,10 @@ WHEN NOT MATCHED THEN
 		, dblUserGroupFee
 		, dblWeightTolerance
 		, dblOverReceiveTolerance
-		, ysnLandedCost
-		, strLeadTime
-		, ysnTaxable
-		, strKeywords
-		, dblCaseQty
-		, dtmDateShip
-		, dblTaxExempt
-		, ysnDropShip
-		, ysnCommisionable
-		, ysnSpecialCommission
 		, ysnTankRequired
 		, ysnAvailableTM
 		, dblDefaultFull
 		, dblMaintenanceRate
-		, strNACSCategory
-		, ysnReceiptCommentRequired
 		, intPatronageCategoryDirectId
 		, intPatronageCategoryId
 		, intPhysicalItem
@@ -677,6 +593,7 @@ WHEN NOT MATCHED THEN
 		, intRINFuelTypeId
 		, strFuelInspectFee
 		, ysnSeparateStockForUOMs
+		, ysn1099Box3
 		, dtmDateCreated
 		, @intDataSourceId
 	)

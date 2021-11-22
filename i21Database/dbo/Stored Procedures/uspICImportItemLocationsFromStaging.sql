@@ -73,6 +73,7 @@ CREATE TABLE #tmp (
 	, ysnCountBySINo BIT NULL
 	, strSerialNoBegin NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
 	, strSerialNoEnd NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	, ysnAutoCalculateFreight BIT NULL
 	, dblFreightRate NUMERIC(38, 20)
 	, intCostingMethod INT NULL
@@ -132,6 +133,7 @@ INSERT INTO #tmp (
 	, ysnCountBySINo
 	, strSerialNoBegin
 	, strSerialNoEnd
+	, strStorageUnitNo
 	, ysnAutoCalculateFreight
 	, dblFreightRate
 	, intCostingMethod
@@ -190,6 +192,7 @@ SElECT
 	, ysnCountBySINo            = s.ysnCountbySerialNumber
 	, strSerialNoBegin          = s.strSerialNumberBegin
 	, strSerialNoEnd            = s.strSerialNumberEnd
+	, strStorageUnitNo			= s.strStorageUnitNo
 	, ysnAutoCalculateFreight   = s.ysnAutoCalculateFreight
 	, dblFreightRate            = s.dblFreightRate
     , intCostingMethod          = ISNULL(cm.intCostingMethod, 1)
@@ -284,7 +287,8 @@ USING
 		, ysnCountedDaily           
 		, ysnCountBySINo            
 		, strSerialNoBegin          
-		, strSerialNoEnd            
+		, strSerialNoEnd
+		, strStorageUnitNo            
 		, ysnAutoCalculateFreight   
 		, dblFreightRate            
 		, intCostingMethod          
@@ -346,6 +350,7 @@ UPDATE SET
 	, ysnCountBySINo = source.ysnCountBySINo
 	, strSerialNoBegin = source.strSerialNoBegin
 	, strSerialNoEnd = source.strSerialNoEnd
+	, strStorageUnitNo = source.strStorageUnitNo
 	, ysnAutoCalculateFreight = source.ysnAutoCalculateFreight
 	, dblFreightRate = source.dblFreightRate
 	, intCostingMethod = source.intCostingMethod
@@ -404,7 +409,8 @@ INSERT
 	, ysnCountedDaily           
 	, ysnCountBySINo            
 	, strSerialNoBegin          
-	, strSerialNoEnd            
+	, strSerialNoEnd
+	, strStorageUnitNo            
 	, ysnAutoCalculateFreight   
 	, dblFreightRate            
 	, intCostingMethod          
@@ -464,7 +470,8 @@ VALUES
 	, ysnCountedDaily           
 	, ysnCountBySINo            
 	, strSerialNoBegin          
-	, strSerialNoEnd            
+	, strSerialNoEnd
+	, strStorageUnitNo            
 	, ysnAutoCalculateFreight   
 	, dblFreightRate            
 	, intCostingMethod          

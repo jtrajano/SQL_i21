@@ -56,6 +56,7 @@ CREATE TABLE [dbo].[tblICImportStagingItemLocation]
     [ysnCountbySerialNumber] BIT NULL DEFAULT(0),
     [strSerialNumberBegin] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strSerialNumberEnd] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+    [strStorageUnitNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [ysnAutoCalculateFreight] BIT NULL DEFAULT(0),
     [dblFreightRate] NUMERIC(38, 20) NULL,
     [strFreightTerm] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
