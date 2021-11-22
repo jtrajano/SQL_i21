@@ -312,6 +312,10 @@
     <Build Include="dbo\Tables\tblApiSchemaTransformBuybackProgram.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddImportLoadAuditLog.sql" />
     <Build Include="dbo\Tables\tblGLPosted.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGLBulkPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGLPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesRows.sql" />
+    <Build Include="dbo\Tables\tblFRRowDesignCurrencies.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
