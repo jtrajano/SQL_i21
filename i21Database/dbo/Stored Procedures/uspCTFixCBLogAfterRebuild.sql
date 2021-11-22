@@ -226,4 +226,44 @@ BEGIN
 	-- End Fix Basis Price of previous partial pricings (CT-6137) --
 	------------------------------------------------------------
 
+
+	--------------------------------------------------------------------
+	-- Fix Null intDtlQtyInCommodityUOMId From Sequence History Table --
+	--------------------------------------------------------------------
+	UPDATE sh
+	SET sh.intDtlQtyInCommodityUOMId = cd.intCommodityUOMId
+	--SELECT cd.intContractDetailId, cd.intCommodityId, cd.intItemUOMId, cd.intCommodityUOMId
+	FROM tblCTSequenceHistory sh
+	JOIN (
+		SELECT sh.intContractDetailId, sh.intCommodityId, sh.intItemUOMId, intCommodityUOMId = MIN(sh.intDtlQtyInCommodityUOMId)
+		FROM tblCTSequenceHistory sh
+		JOIN (
+			SELECT DISTINCT intContractDetailId, intCommodityId, intItemUOMId
+			FROM tblCTSequenceHistory WHERE intDtlQtyInCommodityUOMId IS NULL
+		) cd ON  cd.intContractDetailId = sh.intContractDetailId AND cd.intCommodityId = sh.intCommodityId AND cd.intItemUOMId = sh.intItemUOMId
+		GROUP BY sh.intContractDetailId, sh.intCommodityId, sh.intItemUOMId
+	) cd ON cd.intContractDetailId = sh.intContractDetailId AND cd.intCommodityId = sh.intCommodityId AND cd.intItemUOMId = sh.intItemUOMId
+	WHERE sh.intDtlQtyInCommodityUOMId IS NULL
+
+
+	UPDATE sh
+	SET sh.intDtlQtyInCommodityUOMId = cd.intCommodityUOMId
+	--SELECT cd.intContractDetailId, cd.intCommodityId, cd.intItemUOMId, cd.intCommodityUOMId
+	FROM tblCTSequenceHistory sh
+	JOIN (
+		SELECT main.intContractDetailId, main.intCommodityId, main.intItemUOMId, intCommodityUOMId = cum.intCommodityUnitMeasureId
+		FROM (
+			SELECT DISTINCT intContractDetailId, intCommodityId, intItemUOMId
+			FROM tblCTSequenceHistory
+			GROUP BY intContractDetailId, intCommodityId, intItemUOMId
+			HAVING MIN(intDtlQtyInCommodityUOMId) IS NULL
+		) main
+		JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = main.intItemUOMId
+		JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = main.intCommodityId AND cum.intUnitMeasureId = iUOM.intUnitMeasureId
+	) cd ON cd.intContractDetailId = sh.intContractDetailId AND cd.intCommodityId = sh.intCommodityId AND cd.intItemUOMId = sh.intItemUOMId
+	WHERE sh.intDtlQtyInCommodityUOMId IS NULL
+	------------------------------------------------------------------------
+	-- End Fix Null intDtlQtyInCommodityUOMId From Sequence History Table --
+	------------------------------------------------------------------------
+
 END
