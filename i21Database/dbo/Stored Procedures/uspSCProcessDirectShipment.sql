@@ -891,7 +891,7 @@ BEGIN TRY
 				ON SC.intContractId = CT.intContractDetailId
 			WHERE  SC.intTicketId = @intTicketId))
 
-
+	
 			---CREATE INVOICE
 			BEGIN
 				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
