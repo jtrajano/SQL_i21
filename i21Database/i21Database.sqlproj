@@ -9898,6 +9898,8 @@
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
+  
+    <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10431,3 +10433,4 @@
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
   </ItemGroup>
 </Project>
+
