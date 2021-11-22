@@ -16,4 +16,5 @@
     [intLoadDetailId]               INT             NULL,
 	[intScaleTicketId]				INT				NULL,
     intTicketDistributionAllocationId INT NULL
+    ,intPriceFixationDetailId    INT NULL
 )

@@ -9651,6 +9651,8 @@
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
+  
+    <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10176,4 +10178,5 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
   </ItemGroup>
+</Project>
 </Project>
