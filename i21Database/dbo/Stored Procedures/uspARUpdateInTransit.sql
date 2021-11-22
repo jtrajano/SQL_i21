@@ -61,7 +61,56 @@ BEGIN
 			(ID.[strType] = 'Provisional' AND ID.[ysnProvisionalWithGL] = 1)
 		)	  
 
-	IF EXISTS(SELECT TOP 1 NULL FROM @tblItemsToUpdate)		
-		EXEC dbo.uspICIncreaseInTransitOutBoundQty @tblItemsToUpdate
+	DECLARE @TransactionDate DATE
+	DECLARE @tblItemsToUpdateByDate InTransitTableType
+
+	DECLARE MY_CURSOR CURSOR 
+	  LOCAL STATIC READ_ONLY FORWARD_ONLY
+	FOR 
+	SELECT DISTINCT @TransactionDate 
+	FROM @tblItemsToUpdate
+
+	OPEN MY_CURSOR
+	FETCH NEXT FROM MY_CURSOR INTO @TransactionDate
+	WHILE @@FETCH_STATUS = 0
+	BEGIN 
+
+		 INSERT INTO @tblItemsToUpdateByDate 
+			( [intItemId]
+			, [intItemLocationId]
+			, [intItemUOMId]
+			, [intLotId]
+			, [intSubLocationId]
+			, [intStorageLocationId]
+			, [dblQty]
+			, [intTransactionId]
+			, [strTransactionId]
+			, [intTransactionTypeId]
+			, [intFOBPointId]
+			, [dtmTransactionDate] )
+		 SELECT [intItemId]
+			, [intItemLocationId]
+			, [intItemUOMId]
+			, [intLotId]
+			, [intSubLocationId]
+			, [intStorageLocationId]
+			, [dblQty]
+			, [intTransactionId]
+			, [strTransactionId]
+			, [intTransactionTypeId]
+			, [intFOBPointId]
+			, [dtmTransactionDate]	
+		 FROM @tblItemsToUpdate ItemsToUpdate
+		 WHERE dtmTransactionDate = @TransactionDate
+
+		 EXEC dbo.uspICIncreaseInTransitOutBoundQty @tblItemsToUpdateByDate
+
+		 DELETE FROM @tblItemsToUpdateByDate 
+		 WHERE dtmTransactionDate = @TransactionDate
+
+		 FETCH NEXT FROM MY_CURSOR INTO @TransactionDate
+	END
+	CLOSE MY_CURSOR
+	DEALLOCATE MY_CURSOR
 
 END
