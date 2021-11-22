@@ -27,6 +27,7 @@
 	[ysnOverrideColumnFormula]	BIT             DEFAULT 0 NULL,
     [intSort]					INT             NULL,
     [intConcurrencyId]			INT             DEFAULT 1 NOT NULL,
+    [ysnShowCurrencies]	        BIT             DEFAULT 0 NULL,
     [intCurrencyID]				INT             DEFAULT 0 NULL,
     [strCurrency]		        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,    
     CONSTRAINT [PK_tblFRRowDesignDrillDown] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC)
