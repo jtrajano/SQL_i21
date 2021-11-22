@@ -58,6 +58,8 @@ INSERT INTO @ItemsForPost
     ,[intCategoryId]
     ,[dblAdjustRetailValue]
 	,[strBOLNumber]
+	,[strSourceNumber]
+	,[strSourceType]
 ) 
 SELECT 
      [intItemId]
@@ -90,6 +92,8 @@ SELECT
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
 	,[strBOLNumber]
+	,[strSourceNumber]
+	,[strSourceType]
 FROM 
 	##ARItemsForCosting
 WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
