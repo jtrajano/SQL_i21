@@ -10,29 +10,31 @@
 AS	   
 
 BEGIN TRY
-	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@intApprovalListId		INT,
-			@intLastModifiedById	INT,
-			@ysnAmdWoAppvl			BIT,
-			@intSequenceHistoryId	INT,
-			@intPrevHistoryId		iNT,
-			@dblPrevQty				NUMERIC(18,6),
-			@dblPrevBal				NUMERIC(18,6),
-			@intPrevStatusId		INT,
-			@dblQuantity			NUMERIC(18,6),
-			@dblBalance				NUMERIC(18,6),
-			@intContractStatusId	INT,
-			@dblPrevFutures			NUMERIC(18,6),
-			@dblPrevBasis			NUMERIC(18,6),
-			@dblPrevCashPrice		NUMERIC(18,6),
-			@dblFutures				NUMERIC(18,6),
-			@dblBasis				NUMERIC(18,6),
-			@dblCashPrice			NUMERIC(18,6),
-			@strTransactionType		NVARCHAR(20),
-			@strScreenName			NVARCHAR(20),
-			@ysnStayAsDraftContractUntilApproved BIT,
-			@ysnAddAmendmentForNonDraftContract BIT = 0,
-			@ysnPricingAsAmendment BIT = 1
+	DECLARE @ErrMsg NVARCHAR(MAX)
+		, @intApprovalListId INT
+		, @intLastModifiedById INT
+		, @ysnAmdWoAppvl BIT
+		, @intSequenceHistoryId INT
+		, @intPrevHistoryId INT
+		, @dblPrevQty NUMERIC(18, 6)
+		, @dblPrevBal NUMERIC(18, 6)
+		, @intPrevStatusId INT
+		, @dblQuantity NUMERIC(18, 6)
+		, @dblBalance NUMERIC(18, 6)
+		, @intContractStatusId INT
+		, @dblPrevFutures NUMERIC(18, 6)
+		, @dblPrevBasis NUMERIC(18, 6)
+		, @dblPrevCashPrice NUMERIC(18, 6)
+		, @dblFutures NUMERIC(18, 6)
+		, @dblBasis NUMERIC(18, 6)
+		, @dblCashPrice NUMERIC(18, 6)
+		, @strTransactionType NVARCHAR(20)
+		, @strScreenName NVARCHAR(20)
+        , @ysnStayAsDraftContractUntilApproved BIT
+        , @ysnAddAmendmentForNonDraftContract BIT = 0
+        , @ysnPricingAsAmendment BIT = 1
+		, @ysnAmendmentForCashFuture BIT = 0
+		;
 	
 	DECLARE @tblHeader AS TABLE (intContractHeaderId INT
 		, intEntityId INT
@@ -426,11 +428,39 @@ BEGIN TRY
         SET @ysnAddAmendmentForNonDraftContract = 1;
     END
 
-	IF EXISTS (SELECT TOP 1 1 FROM tblCTContractHeader
-				WHERE intContractHeaderId = @intContractHeaderId
-				AND ((ISNULL(@ysnStayAsDraftContractUntilApproved, 0) = 0
-						AND (ISNULL(ysnPrinted, 0) = 1 OR ISNULL(ysnSigned, 0) = 1))
-					OR ISNULL(@ysnAddAmendmentForNonDraftContract, 0) = 1))
+    if exists (
+        select
+            top 1 1
+        from
+            tblSMScreen scr
+            left join tblSMTransaction txn on txn.intScreenId = scr.intScreenId and txn.intRecordId = @intContractHeaderId
+            left join tblSMApproval ap on ap.intTransactionId = txn.intTransactionId
+        where
+            scr.strNamespace = 'ContractManagement.view.Contract'
+            and ap.strStatus = 'Approved'
+            and @ysnStayAsDraftContractUntilApproved = 1
+    )
+    begin
+        set @ysnAddAmendmentForNonDraftContract = 1;
+    end
+	
+	IF EXISTS (
+        SELECT TOP 1 1
+        FROM tblCTContractHeader
+        WHERE intContractHeaderId = @intContractHeaderId
+        AND (
+                (
+                    isnull(@ysnStayAsDraftContractUntilApproved,0)=0
+                    and
+                    (
+                        ISNULL(ysnPrinted,0)=1
+                        OR ISNULL(ysnSigned,0)=1                
+                    )
+                )
+
+            OR isnull(@ysnAddAmendmentForNonDraftContract,0)=1
+        )
+	)
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intLastModifiedById AND intApprovalListId = @intApprovalListId) OR (@ysnAmdWoAppvl = 1)
 		BEGIN
@@ -705,8 +735,8 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-				and @ysnPricingAsAmendment = 1
-
+			and @ysnPricingAsAmendment = 1
+			
 			--Basis
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
 				, dtmHistoryCreated			= GETDATE()
@@ -736,8 +766,8 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY		NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.dblCashPrice,0)  <> ISNULL(PreviousRow.dblCashPrice,0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-				and @ysnPricingAsAmendment = 1
-
+			and @ysnPricingAsAmendment = 1
+			
 			--Cash Price UOM
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
 				, dtmHistoryCreated			= GETDATE()
