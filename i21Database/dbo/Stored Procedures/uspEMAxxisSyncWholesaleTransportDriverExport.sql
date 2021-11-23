@@ -14,7 +14,8 @@ BEGIN
 		A.strName AS strContactName, 
 		A.strEmail, 
 		A.strEmail AS strEmailUserName, 
-		ISNULL((SELECT strName from tblEMEntity where intEntityId = D.intShipViaId), '') AS strShipVia
+		ISNULL((SELECT strName from tblEMEntity where intEntityId = D.intShipViaId), '') AS strShipVia,
+		CONVERT(NVARCHAR(10), ISNULL(D.ysnActive, '')) COLLATE Latin1_General_CI_AS AS ysnActive
 	INTO tmpEMAxxisDriver
 	FROM tblEMEntity A
 	INNER JOIN tblEMEntityLineOfBusiness B ON A.intEntityId = B.intEntityId
@@ -37,6 +38,7 @@ BEGIN
 		   strContactName AS ContactName, 
 		   strEmail AS Email, 
 		   strEmailUserName AS EmailUserName, 
-		   strShipVia AS ShipVia 
+		   strShipVia AS ShipVia,
+		   ysnActive AS Active
 	FROM tmpEMAxxisDriver
 END
