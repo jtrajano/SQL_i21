@@ -141,10 +141,13 @@ BEGIN TRY
 					,strMessage = 'Success'
 				WHERE intWorkOrderPreStageId = @OriginalTrxSequenceNo
 
-				UPDATE tblMFWorkOrder
-				SET strERPServicePONumber = @ERPServicePONo
-					,intConcurrencyId = intConcurrencyId + 1
-				WHERE intWorkOrderId = @intWorkOrderId
+				IF @ERPServicePONo IS NOT NULL
+				BEGIN
+					UPDATE tblMFWorkOrder
+					SET strERPServicePONumber = @ERPServicePONo
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE intWorkOrderId = @intWorkOrderId
+				END
 
 				UPDATE tblMFWorkOrderWarehouseRateMatrixDetail
 				SET strERPServicePOLineNo = x.ERPServicePOLineNo
