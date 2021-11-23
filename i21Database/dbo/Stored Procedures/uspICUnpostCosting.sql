@@ -903,7 +903,7 @@ BEGIN
 	FROM	dbo.tblICInventoryStockMovement t 
 	WHERE	t.intRelatedTransactionId = @intTransactionId
 			AND t.strRelatedTransactionId = @strTransactionId
-			AND t.ysnIsUnposted = 0
+			--AND t.ysnIsUnposted = 0
 
 	--------------------------------------------------------------
 	-- Update the ysnIsUnposted flag for the transaction
@@ -913,7 +913,7 @@ BEGIN
 	FROM	dbo.tblICInventoryStockMovement t 
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
-			AND t.ysnIsUnposted = 0
+			--AND t.ysnIsUnposted = 0
 END 
 
 -----------------------------------------
