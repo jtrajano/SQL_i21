@@ -65,12 +65,18 @@ BEGIN
 				SELECT *
 				FROM tblLGPendingClaim
 				WHERE intLoadId = @intLoadId
-					AND dblClaimableWt < 0
 				)
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblLGWeightClaim
 				WHERE intLoadId = @intLoadId
+				)
+			AND NOT EXISTS (
+				SELECT 1
+				FROM tblLGLoadContainer LC
+				JOIN tblLGLoadDetailContainerLink LCL ON LCL.intLoadContainerId = LC.intLoadContainerId
+				WHERE LC.intLoadId = @intLoadId
+					AND IsNULL(LCL.dblReceivedQty,0)=0
 				)
 		BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
