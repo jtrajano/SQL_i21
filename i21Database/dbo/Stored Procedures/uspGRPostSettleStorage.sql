@@ -230,6 +230,9 @@ BEGIN TRY
 		,dblFutureMarketPrice DECIMAL(24, 10)
 	)
 
+	DECLARE @strContractNumber NVARCHAR(50)
+	DECLARE @intContractSeq INT
+
 	-- Get the Batch Id 
 	EXEC dbo.uspSMGetStartingNumber 
 		@STARTING_NUMBER_BATCH
@@ -1050,8 +1053,21 @@ BEGIN TRY
 						WHERE intSettleContractKey 	= @SettleContractKey
 
 						SELECT @intContractHeaderId = intContractHeaderId
+							,@intContractSeq		= intContractSeq
 						FROM tblCTContractDetail
 						WHERE intContractDetailId = @intContractDetailId
+
+						SELECT @strContractNumber = strContractNumber
+						FROM tblCTContractHeader
+						WHERE intContractHeaderId = @intContractHeaderId
+
+						IF(SELECT intContractStatusId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) = 6 --SHORT-CLOSED
+						BEGIN
+							SET @ErrMsg = 'Contract '+ @strContractNumber +'-sequence '+ CAST(@intContractSeq AS NVARCHAR(50)) +' has been short-closed.  Please reopen contract sequence in order to post settle storage.'
+
+							RAISERROR(@ErrMsg,16,1,1)
+							RETURN;
+						END
 
 						IF @dblStorageUnits <= @dblContractUnits
 						BEGIN
