@@ -289,6 +289,7 @@ BEGIN
 								AND WC.intWeightClaimId IS NULL
 								AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 								AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale)
+								AND (L.intPurchaseSale = 1 AND NOT EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId AND ISNULL(dblReceivedQty, 0) = 0))
 							) LI
 						END
 			END
