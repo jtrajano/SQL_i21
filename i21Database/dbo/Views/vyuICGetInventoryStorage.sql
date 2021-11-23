@@ -110,6 +110,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionStorageId, 
 		,ScaleView.intTicketId
 		,strTransactionUOM			= transactionUOM.strUnitMeasure 
 		,strDescription				= '' --t.strDescription 
+		,intItemStockUOM			= iuStock.intItemUOMId 
+		,intUnitMeasureStockUOM		= iuStock.intUnitMeasureId
 FROM 	tblICInventoryTransactionStorage t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
@@ -120,6 +122,7 @@ FROM 	tblICInventoryTransactionStorage t
 			SELECT	TOP 1 
 					intItemUOMId			
 					,umStock.strUnitMeasure
+					,umStock.intUnitMeasureId
 			FROM	tblICItemUOM iuStock INNER JOIN tblICUnitMeasure umStock
 						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
 			WHERE	iuStock.intItemId = i.intItemId
