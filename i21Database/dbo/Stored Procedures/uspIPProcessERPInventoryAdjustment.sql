@@ -61,6 +61,7 @@ BEGIN TRY
 		,@intLotItemUOMId INT
 		,@dblWeightPerQty NUMERIC(18, 6)
 		,@dblStandardCost NUMERIC(38, 20)
+		,@ysnDifferenceQty BIT = 1
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -430,6 +431,15 @@ BEGIN TRY
 			ELSE IF @intTransactionTypeId = 10
 				AND @intLotId IS NOT NULL
 			BEGIN
+				IF @strReasonCode = 30
+				BEGIN
+					SELECT @ysnDifferenceQty = 0
+				END
+				ELSE
+				BEGIN
+					SELECT @ysnDifferenceQty = 1
+				END
+
 				EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
 					,@dblNewLotQty = @dblQuantity
 					,@intAdjustItemUOMId = @intItemUOMId
@@ -441,7 +451,7 @@ BEGIN TRY
 					,@ysnBulkChange = 0
 					,@strReferenceNo = NULL
 					,@intAdjustmentId = @intAdjustmentId OUTPUT
-					,@ysnDifferenceQty=1
+					,@ysnDifferenceQty = @ysnDifferenceQty
 
 				SELECT @strAdjustmentNo = NULL
 
@@ -535,8 +545,8 @@ BEGIN TRY
 						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 						UPDATE tblIPInventoryAdjustment
-						SET dblNet = @dblQuantity
-							,dblGross = @dblQuantity
+						SET dblNet = dblNet + @dblQuantity
+							,dblGross = dblGross + @dblQuantity
 						WHERE intInventoryReceiptId = @intInventoryReceiptId
 							AND strLotNumber = @strLotNo
 
@@ -566,7 +576,6 @@ BEGIN TRY
 					,@intPatternCode = 33 -- Transaction Batch Id
 					,@ysnProposed = 0
 					,@strPatternString = @intBatchId OUTPUT
-					,@dblStandardCost = NULL
 
 				SELECT @intItemLocationId = NULL
 
