@@ -139,7 +139,7 @@ BEGIN TRY
 		, cd.dblBasis
 		, cd.intBookId
 		, cd.intSubBookId
-		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then (case when ch.intPricingTypeId = 2 and cd.intPricingTypeId = 1 then 1 else 0 end) else 1 end
+  		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then (case when ch.intPricingTypeId = 2 and cd.intPricingTypeId = 1 then 1 else 0 end) else 1 end
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
