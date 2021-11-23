@@ -386,6 +386,7 @@ BEGIN
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 1
 										AND (LC.intLoadContainerId IS NULL OR (LC.intLoadContainerId IS NOT NULL AND intLoadContainerId = LC.intLoadContainerId)))
+					AND (L.intPurchaseSale = 1 AND NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId AND ISNULL(dblReceivedQty, 0) = 0))
 
 			UNION ALL
 
