@@ -360,6 +360,7 @@
     <Build Include="dbo\Functions\fnCMGetPostedBankTransactionFromDate.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportBucketType.sql" />
     <None Include="Scripts\Post-Deployment\CM\13_InsertDefaultCashFlowReportBucketType.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRFFacilityLimitsReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -9979,7 +9980,6 @@
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
-  
     <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -10517,4 +10517,3 @@
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
   </ItemGroup>
 </Project>
-
