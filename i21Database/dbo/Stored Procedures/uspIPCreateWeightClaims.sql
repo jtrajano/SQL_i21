@@ -56,8 +56,20 @@ BEGIN TRY
 		,NULL dtmActualWeighingDate
 		,NULL dtmClaimValidTill
 		,PC.intPurchaseSale
-		,NULL
-		,NULL
+		,(
+			CASE 
+				WHEN dblClaimableWt < 0
+					THEN NULL
+				ELSE 1
+				END
+			)
+		,(
+			CASE 
+				WHEN dblClaimableWt < 0
+					THEN NULL
+				ELSE GETDATE()
+				END
+			)
 		,L.intCompanyId
 		,L.intBookId
 		,L.intSubBookId
@@ -86,7 +98,6 @@ BEGIN TRY
 		,dblClaimAmount
 		,intPriceItemUOMId
 		,dblAdditionalCost
-		,ysnNoClaim
 		,intContractDetailId
 		,intBillId
 		,intInvoiceId
@@ -94,6 +105,7 @@ BEGIN TRY
 		,dblSeqPriceConversionFactoryWeightUOM
 		,dblToGross
 		,dblToTare
+		,ysnNoClaim
 		)
 	/*SELECT 1
 		,@intNewWeightClaimId
@@ -133,7 +145,6 @@ BEGIN TRY
 		,dblClaimableAmount
 		,intSeqPriceUOMId
 		,NULL
-		,NULL
 		,intContractDetailId
 		,NULL
 		,NULL
@@ -141,11 +152,24 @@ BEGIN TRY
 		,dblSeqPriceConversionFactoryWeightUOM
 		,dblReceivedGrossWt
 		,dblReceivedGrossWt - dblReceivedNetWt
+		,(
+			CASE 
+				WHEN dblClaimableWt < 0
+					THEN 0
+				ELSE 1
+				END
+			)
 	FROM tblLGPendingClaim
 	WHERE intLoadId = @intLoadId
 
-	INSERT INTO tblLGWeightClaimPreStage (intWeightClaimId)
-	SELECT @intNewWeightClaimId
+	IF EXISTS (
+			SELECT *
+			FROM tblLGPendingClaim
+			WHERE intLoadId = @intLoadId
+				AND dblClaimableWt < 0
+			)
+		INSERT INTO tblLGWeightClaimPreStage (intWeightClaimId)
+		SELECT @intNewWeightClaimId
 
 	DELETE
 	FROM tblLGPendingClaim
