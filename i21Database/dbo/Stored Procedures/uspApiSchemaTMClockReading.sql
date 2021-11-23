@@ -52,7 +52,7 @@ BEGIN
 
 		DECLARE @intDegreeDayReadingId INT = NULL
 
-		SELECT @intDegreeDayReadingId =  intDegreeDayReadingId FROM tblTMDegreeDayReading WHERE intClockID = @intClockID AND dtmDate = @dtmReadingDate
+		SELECT @intDegreeDayReadingId = intDegreeDayReadingID FROM tblTMDegreeDayReading WHERE intClockID = @intClockId AND dtmDate = @dtmReadingDate
 
 		IF(@intDegreeDayReadingId IS NOT NULL)
 		BEGIN
@@ -84,7 +84,7 @@ BEGIN
 				, dblAccumulatedDegreeDay = @intAccumulatedDegreeDay
 				, guiApiUniqueId = @guiLogId
 				, intRowNumber = @intRowNumber 
-			WHERE intDegreeDayReadingId = @intDegreeDayReadingId
+			WHERE intDegreeDayReadingID = @intDegreeDayReadingId
 
 			INSERT INTO tblApiImportLogDetail (
 				guiApiImportLogDetailId
