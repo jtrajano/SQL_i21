@@ -128,6 +128,7 @@ WHERE P.intFutureMarketId <> S.intFutureMarketId
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
 		)
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -151,6 +152,7 @@ WHERE P.intFutureMonthId <> S.intFutureMonthId
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
 		)
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -176,6 +178,7 @@ WHERE P.intItemBundleId <> S.intItemBundleId
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
 		)
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -199,6 +202,7 @@ WHERE P.intItemId <> S.intItemId
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
 		)
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -222,6 +226,7 @@ WHERE P.intBookId <> S.intBookId
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
 		)
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -245,6 +250,7 @@ WHERE IsNULL(P.intSubBookId, 0) <> IsNULL(S.intSubBookId, 0)
 		P.intContractStatusId = 1
 		OR S.intContractStatusId = 1
 		)
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
@@ -269,6 +275,7 @@ WHERE PH.intPositionId <> SH.intPositionId
 		OR S.intContractStatusId = 1
 		)
 	AND SH.intBookId <> @intBookId
+	AND IsNULL(PH.ysnMaxPrice, 0) <> 1
 
 INSERT INTO @Data
 SELECT strAllocationNumber
