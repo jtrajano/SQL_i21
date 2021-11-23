@@ -164,6 +164,9 @@ BEGIN TRY
 
 	IF	ISNULL(@intContractDetailId,0) > 0
 	BEGIN
+
+		exec uspSCCheckContractStatus  @intContractDetailId = @intContractDetailId
+
 		SELECT	@ysnAllowedToShow	=	ysnAllowedToShow,
 				@strContractStatus	=	strContractStatus,
 				@ysnLoad			=	ysnLoad

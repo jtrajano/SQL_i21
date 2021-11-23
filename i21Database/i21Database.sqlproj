@@ -9653,6 +9653,7 @@
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
   
     <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
