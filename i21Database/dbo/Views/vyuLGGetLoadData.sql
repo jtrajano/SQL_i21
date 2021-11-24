@@ -86,6 +86,8 @@ SELECT
     ,L.dtmStartDate
     ,L.dtmEndDate
     ,L.dtmPlannedAvailabilityDate
+	,L.dtmCashFlowDate
+	,L.ysnCashFlowOverride
     ,L.ysnArrivedInPort
     ,L.ysnDocumentsApproved
     ,L.ysnCustomsReleased

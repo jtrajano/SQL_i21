@@ -94,6 +94,8 @@
 [dtmStartDate] DATETIME NULL,
 [dtmEndDate] DATETIME NULL,
 [dtmPlannedAvailabilityDate] DATETIME NULL,
+[dtmCashFlowDate] DATETIME NULL,
+[ysnCashFlowOverride] [bit] NULL,
 [ysnArrivedInPort] [bit] NULL,
 [ysnDocumentsApproved] [bit] NULL,
 [ysnCustomsReleased] [bit] NULL,
