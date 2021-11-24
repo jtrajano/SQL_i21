@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblFRRowDesign] (
+﻿CREATE TABLE [dbo].[tblFRRowDesignCurrencies] (
     [intRowDetailId]			INT             IDENTITY (1, 1) NOT NULL,
     [intRowId]					INT             NOT NULL,
     [intRefNo]					INT             NOT NULL,
@@ -6,7 +6,6 @@
     [strRowType]				NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strBalanceSide]			NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
 	[strSource]					NVARCHAR (10)   COLLATE Latin1_General_CI_AS NULL,
-	[strCalculationOverride]	NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,	
     [strRelatedRows]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strAccountsUsed]			NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strPercentage]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -32,9 +31,9 @@
     [ysnShowCurrencies]	        BIT             DEFAULT 0 NULL,
     [intCurrencyID]				INT             DEFAULT 0 NULL,
     [strCurrency]		        NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,    
-    CONSTRAINT [PK_tblFRRowDesign] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC),
-    CONSTRAINT [FK_tblFRRowDesign_tblFRRow] FOREIGN KEY([intRowId]) REFERENCES [dbo].[tblFRRow] ([intRowId]) ON DELETE CASCADE
+    CONSTRAINT [PK_tblFRRowDesignCurrencies] PRIMARY KEY CLUSTERED ([intRowDetailId] ASC),
+    CONSTRAINT [FK_tblFRRowDesignCurrencies_tblFRRow] FOREIGN KEY([intRowId]) REFERENCES [dbo].[tblFRRow] ([intRowId]) ON DELETE CASCADE
 );
 
 Go
-CREATE NONCLUSTERED INDEX [IX_tblFRRowDesign_intRowId] ON [dbo].[tblFRRowDesign] ([intRowId] asc)
+CREATE NONCLUSTERED INDEX [IX_tblFRRowDesignCurrencies_intRowId] ON [dbo].[tblFRRowDesignCurrencies] ([intRowId] asc)

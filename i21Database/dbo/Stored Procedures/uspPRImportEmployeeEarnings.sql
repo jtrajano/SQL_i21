@@ -12,6 +12,7 @@ DECLARE @NewId AS INT
 
 DECLARE @EmployeeEntityNo AS INT
 DECLARE @intEntityNo AS INT
+DECLARE @strEmployeeId AS NVARCHAR(50)
 DECLARE @strEarningId AS NVARCHAR(50)
 DECLARE @dblEarningAmount AS FLOAT(50)
 DECLARE @ysnEarningDefault AS BIT
@@ -51,7 +52,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 	   ,intRowNo		= SE.intRowNumber
 	   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	   FROM tblApiSchemaEmployeeEarnings SE
-	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
+	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
 	   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 	   AND SE.intEntityNo IS NULL
 
@@ -62,7 +63,8 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeEarnings)
 	BEGIN
 		SELECT TOP 1 
-			 @intEntityNo				= intEntityNo
+			 @strEmployeeId				= intEntityNo
+			,@intEntityNo				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = intEntityNo) 
 			,@strEarningId				= strEarningDesc
 			,@dblEarningAmount			= dblEarningAmount
 			,@ysnEarningDefault			= ysnEarningDefault
@@ -120,7 +122,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,intConcurrencyId
 				)
 				SELECT
-					(SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = intEntityNo)  
+					@intEntityNo
 				   ,(SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = strEarningDesc)
 				   ,strCalculationType
 				   ,CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
@@ -147,7 +149,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,1
 					,1
 				FROM #TempEmployeeEarnings
-				WHERE intEntityNo = @intEntityNo
+				WHERE intEntityNo = @strEmployeeId
 					AND strEarningDesc = (SELECT TOP 1 strEarning FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
 
 				SET @NewId = SCOPE_IDENTITY()
@@ -236,7 +238,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 						END
 					END
 
-				DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo AND strEarningDesc = @strEarningId
+				DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @strEmployeeId AND strEarningDesc = @strEarningId
 
 			END
 		
@@ -266,7 +268,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,intEmployeeEarningLinkId		= (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strLinkedEarning)
 					,intPayGroupId					= (SELECT TOP 1 intPayGroupId FROM tblPRPayGroup WHERE strPayGroup = @strPayGroup)
 					,ysnDefault						= @ysnEarningDefault
-					WHERE intEntityEmployeeId = @EmployeeEntityNo
+					WHERE intEntityEmployeeId = @intEntityNo
 						AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId)
 
 					IF @strTaxID1 IS NOT NULL
@@ -383,9 +385,9 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 							END
 						END
 
-					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @intEntityNo AND strEarningDesc = @strEarningId
+					DELETE FROM #TempEmployeeEarnings WHERE intEntityNo = @strEmployeeId AND strEarningDesc = @strEarningId
 			END
-			
+
 		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 		SELECT TOP 1
 			  NEWID()
@@ -397,7 +399,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee earnings has been successfully imported.'
 		FROM tblApiSchemaEmployeeEarnings SE
-		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
+		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
 		   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strEarningDesc = @strEarningId
 

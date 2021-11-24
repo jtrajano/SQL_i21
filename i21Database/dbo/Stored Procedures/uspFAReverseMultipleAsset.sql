@@ -82,6 +82,7 @@ BEGIN TRANSACTION;
   ORDER BY intGLDetailId  
 
 
+
 IF EXISTS(
     SELECT TOP 1 1 FROM  @GLEntries
     WHERE dbo.fnFAIsOpenAccountingDate(dtmDate) = 0
