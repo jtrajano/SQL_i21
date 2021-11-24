@@ -232,15 +232,15 @@ BEGIN TRY
 			,IsNULL((
 					CASE 
 						WHEN CA.strDescription = 'ROBUSTA'
-							THEN (VB.dblTotalCost - @dblComputedArbitrage) * VRI.dblCalculatedQuantity / 100
-						ELSE VB.dblTotalCost * VRI.dblCalculatedQuantity / 100
+							THEN (VB.dblTotalCost - @dblComputedArbitrage) * VRI.dblCalculatedQuantity 
+						ELSE VB.dblTotalCost * VRI.dblCalculatedQuantity 
 						END
 					), 0) AS dblVirtualBasis
 			,IsNULL((
 					CASE 
 						WHEN CA.strDescription = 'ROBUSTA'
-							THEN (AB.dblTotalCost - @dblComputedArbitrage) * ARI.dblCalculatedQuantity / 100
-						ELSE AB.dblTotalCost * ARI.dblCalculatedQuantity / 100
+							THEN (AB.dblTotalCost - @dblComputedArbitrage) * ARI.dblCalculatedQuantity 
+						ELSE AB.dblTotalCost * ARI.dblCalculatedQuantity 
 						END
 					), 0) AS dblActualBasis
 			,C.dblCost1 AS dblCost1

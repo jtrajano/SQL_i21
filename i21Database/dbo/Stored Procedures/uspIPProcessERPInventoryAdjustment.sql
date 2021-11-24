@@ -62,6 +62,9 @@ BEGIN TRY
 		,@dblWeightPerQty NUMERIC(18, 6)
 		,@dblStandardCost NUMERIC(38, 20)
 		,@ysnDifferenceQty BIT = 1
+		,@intContractHeaderId INT
+		,@intContractDetailId INT
+		,@intLoadDetailId INT
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -476,9 +479,15 @@ BEGIN TRY
 
 						SELECT @intInventoryReceiptId = NULL
 							,@intLoadContainerId = NULL
+							,@intContractHeaderId = NULL
+							,@intContractDetailId = NULL
+							,@intLoadDetailId = NULL
 
 						SELECT @intInventoryReceiptId = intInventoryReceiptId
 							,@intLoadContainerId = intContainerId
+							,@intContractHeaderId = intOrderId
+							,@intContractDetailId = intLineNo
+							,@intLoadDetailId = intSourceId
 						FROM tblICInventoryReceiptItem
 						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -501,26 +510,15 @@ BEGIN TRY
 							,dblGross
 							)
 						SELECT GETDATE() AS dtmCreatedDate
-							,RI.intOrderId AS intContractHeaderId
-							,RI.intLineNo AS intContractDetailId
+							,@intContractHeaderId 
+							,@intContractDetailId
 							,@intLoadId
-							,RI.intSourceId AS intLoadDetailId
-							,RI.intContainerId AS intLoadContainerId
-							,RI.intInventoryReceiptId
-							,RL.strLotNumber
-							,CASE 
-								WHEN RL.strLotNumber = @strLotNo
-									THEN @dblQuantity
-								ELSE RL.dblGrossWeight - RL.dblTareWeight
-								END AS dblNet
-							,CASE 
-								WHEN RL.strLotNumber = @strLotNo
-									THEN @dblQuantity
-								ELSE RL.dblGrossWeight - RL.dblTareWeight
-								END AS dblGrossWeight
-						FROM tblICInventoryReceiptItemLot RL
-						JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RL.intInventoryReceiptItemId
-						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+							,@intLoadDetailId
+							,@intLoadContainerId  
+							,@intInventoryReceiptId
+							,@strLotNo
+							,@dblQuantity AS dblNet
+							,@dblQuantity AS dblGrossWeight
 
 						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
 							,@intPurchaseSale = 1
