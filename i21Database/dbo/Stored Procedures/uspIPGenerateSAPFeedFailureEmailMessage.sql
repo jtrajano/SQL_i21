@@ -162,6 +162,23 @@ Begin
 	From tblLGLoadStg lg WITH (NOLOCK)
 	Where strFeedStatus='Ack Rcvd' AND ISNULL(strMessage,'') NOT IN ('', 'Success')
 	AND ISNULL(strMessage, '') LIKE 'Received different Shipment Number from SAP%'
+
+	Select @strDetail=@strDetail + 
+	'<tr>
+		   <td>&nbsp;'  + ISNULL(L.strLoadNumber,'') + '</td>'
+		+ '<td>&nbsp;' + 'Data Correction' + '</td>'
+		+ '<td>&nbsp;' + ISNULL(L.strExternalShipmentNumber,'') + '</td>'
+		+ '<td>&nbsp;' + ISNULL(C.strCommodityCode,'') + '</td>'
+		+ '<td>&nbsp;' + 'Update strExternalShipmentItemNumber in tblLGLoadDetail and tblLGLoadDetailStg according to commodity' + '</td>
+	</tr>'
+	FROM tblICItem I WITH (NOLOCK)
+	JOIN tblLGLoadDetail LD WITH (NOLOCK) ON I.intItemId = LD.intItemId
+	JOIN tblLGLoad L WITH (NOLOCK) ON L.intLoadId = LD.intLoadId
+	JOIN tblICCommodity C WITH (NOLOCK) ON I.intCommodityId = C.intCommodityId
+		AND L.intShipmentStatus <> 10
+		AND ISNULL(LD.strExternalShipmentItemNumber, '') = ''
+		AND ISNULL(L.strExternalShipmentNumber, '') <> ''
+		AND L.strLoadNumber LIKE 'LS-%'
 End
 
 If @strMessageType='Receipt'
