@@ -146,6 +146,7 @@
     <Build Include="dbo\Views\vyuGRRestApiCustomerStorageBalances.sql" />
     <Build Include="dbo\Views\vyuCTApiContractText.sql" />
     <Build Include="dbo\Views\vyuApiEntity.sql" />
+    <Build Include="dbo\Views\vyuApiStorageLocation.sql" />
     <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
@@ -316,6 +317,13 @@
     <Build Include="dbo\Stored Procedures\uspFRDGLPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesRows.sql" />
     <Build Include="dbo\Tables\tblFRRowDesignCurrencies.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMConsumptionSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMConsumptionSite.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMDevice.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMDevice.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTMClockReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTMClockReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -9898,7 +9906,7 @@
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
-  
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
   </ItemGroup>
