@@ -9103,6 +9103,7 @@
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
+    <Build Include="dbo\Views\vyuICShipmentInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
