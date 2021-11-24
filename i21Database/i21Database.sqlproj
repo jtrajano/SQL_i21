@@ -9656,6 +9656,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
     <Build Include="dbo\Views\vyuICShipmentInTransit.sql" />
+    <Build Include="dbo\Tables\tblSCTicketDirectBasisContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
