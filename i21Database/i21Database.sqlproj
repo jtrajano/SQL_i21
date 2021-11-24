@@ -220,6 +220,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeItem.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformRecipeSubstituteItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiPostAdjustmentTransaction.sql" />
     <Build Include="dbo\Tables\tblApiCompletedWorkOrderStocked.sql" />
     <Build Include="dbo\Tables\tblApiRESTErrorLog.sql" />
     <Build Include="dbo\Stored Procedures\uspApiForwardWorkOrders.sql" />

@@ -79,14 +79,14 @@ WHERE c.guiApiUniqueId = @guiApiUniqueId
 EXEC dbo.uspAPIProcessWorkOrder @guiApiUniqueId
 EXEC dbo.uspAPIGetCompletedWorkOrder @guiApiUniqueId, ''
 
-INSERT INTO tblRestApiErrorLog (guiApiUniqueId, strError, strLogLevel)
+INSERT INTO tblApiRESTErrorLog (guiApiUniqueId, strError, strLogLevel)
 SELECT @guiApiUniqueId, strMessage, 'Error'
 FROM tblAPIWODetail d
 WHERE d.guiApiUniqueId = @guiApiUniqueId
 	AND d.ysnProcessed = 1
     AND d.strFeedStatus = 'Failed'
 
-INSERT INTO tblRestApiErrorLog (guiApiUniqueId, strValue, strError, strLogLevel, intLinePosition, intLineNumber)
+INSERT INTO tblApiRESTErrorLog (guiApiUniqueId, strValue, strError, strLogLevel, intLinePosition, intLineNumber)
 SELECT @guiApiUniqueId, d.strWorkOrderNo, strMessage, 'Success', d.intItemId, wo.intWorkOrderId
 FROM tblAPIWODetail d
 JOIN tblMFWorkOrder wo ON wo.strWorkOrderNo = d.strWorkOrderNo
