@@ -428,6 +428,26 @@ BEGIN TRY
         SET @ysnAddAmendmentForNonDraftContract = 1;
     END
 
+
+	
+	IF EXISTS(
+		SELECT
+		TOP 1 1
+		FROM tblCTSequenceHistory	CurrentRow
+			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
+			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0) OR ISNULL(CurrentRow.dblCashPrice,0)   <> ISNULL(PreviousRow.dblCashPrice,0) 
+		WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId 
+			 AND (CurrentRow.dblOldFutures IS NOT NULL OR CurrentRow.dblOldCashPrice IS NOT NULL)	
+			 AND @ysnPricingAsAmendment <> 1
+	)
+
+	BEGIN
+		SET @ysnAmendmentForCashFuture = 1
+	END
+
+
+
+
     if exists (
         select
             top 1 1
@@ -735,7 +755,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY		NewRecords   ON   NewRecords.intSequenceHistoryId	= CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow	 ON   ISNULL(CurrentRow.dblFutures,0)   <> ISNULL(PreviousRow.dblFutures,0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-			and @ysnPricingAsAmendment = 1
+			and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 			
 			--Basis
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId
@@ -766,7 +786,7 @@ BEGIN TRY
 			JOIN @SCOPE_IDENTITY		NewRecords          ON   NewRecords.intSequenceHistoryId	=  CurrentRow.intSequenceHistoryId 
 			JOIN @tblDetail				PreviousRow			ON   ISNULL(CurrentRow.dblCashPrice,0)  <> ISNULL(PreviousRow.dblCashPrice,0)
 			WHERE CurrentRow.intContractDetailId = PreviousRow.intContractDetailId
-			and @ysnPricingAsAmendment = 1
+			and (@ysnPricingAsAmendment = 1 OR @ysnAmendmentForCashFuture = 1)
 			
 			--Cash Price UOM
 			UNION SELECT intSequenceHistoryId = NewRecords.intSequenceHistoryId

@@ -9652,6 +9652,7 @@
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
   </ItemGroup>
