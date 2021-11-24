@@ -20,9 +20,19 @@ SELECT DISTINCT
 
 	-- tblICItemPricing
 	, Pricing.intItemPricingId
-	, Pricing.dblSalePrice
+	, (CASE
+				WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+					THEN SplPrc.dblUnitAfterDiscount 
+				WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+					THEN effectivePrice.dblRetailPrice --Effective Retail Price
+				ELSE Pricing.dblSalePrice
+			END) AS dblSalePrice
 	, Pricing.dblLastCost
-	, Pricing.dblStandardCost
+	, (CASE
+				WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+					THEN effectiveCost.dblCost --Effective Cost
+				ELSE Pricing.dblStandardCost
+			END) AS dblStandardCost
 	, Pricing.dblAverageCost
 	, CASE
 		WHEN Pricing.dblSalePrice > 0
@@ -73,6 +83,52 @@ LEFT JOIN dbo.tblEMEntity Vendor
 LEFT JOIN dbo.tblICItemVendorXref VendorXref
 	ON Item.intItemId = VendorXref.intItemId
 	AND ItemLoc.intItemLocationId = VendorXref.intItemLocationId
+LEFT JOIN 
+(
+	SELECT * FROM (
+		SELECT 
+				intItemId,
+				intItemLocationId,
+				dtmEffectiveRetailPriceDate,
+				dblRetailPrice,
+				ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveRetailPriceDate DESC) AS intRowNum
+		FROM tblICEffectiveItemPrice
+		WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveRetailPriceDate
+	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+) AS effectivePrice
+	ON Item.intItemId = effectivePrice.intItemId
+	AND effectivePrice.intItemLocationId = ItemLoc.intItemLocationId
+LEFT JOIN 
+(
+	SELECT * FROM (
+		SELECT 
+				intItemId,
+				intItemLocationId,
+				dtmEffectiveCostDate,
+				dblCost,
+				ROW_NUMBER() OVER (PARTITION BY intItemId, intItemLocationId ORDER BY dtmEffectiveCostDate DESC) AS intRowNum
+		FROM tblICEffectiveItemCost
+		WHERE CAST(GETDATE() AS DATE) >= dtmEffectiveCostDate
+	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+) AS effectiveCost
+	ON Item.intItemId = effectiveCost.intItemId
+	AND effectiveCost.intItemLocationId = ItemLoc.intItemLocationId
+LEFT JOIN 
+(
+	SELECT * FROM (
+		SELECT 
+				intItemId,
+				intItemLocationId,
+				dtmBeginDate,
+				dtmEndDate,
+				dblUnitAfterDiscount,
+				row_number() over (partition by intItemId, intItemLocationId order by intItemLocationId asc) as intRowNum
+		FROM tblICItemSpecialPricing
+		WHERE CAST(GETDATE() AS DATE) BETWEEN dtmBeginDate AND dtmEndDate
+	) AS tblSTItemOnFirstLocation WHERE intRowNum = 1
+) AS SplPrc
+	ON Item.intItemId = SplPrc.intItemId
+	AND ItemLoc.intItemLocationId = SplPrc.intItemLocationId
 WHERE Uom.ysnStockUnit = 1
 
 
