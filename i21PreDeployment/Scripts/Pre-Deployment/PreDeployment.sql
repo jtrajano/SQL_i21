@@ -247,3 +247,6 @@
 
 --LG
 :r .\26_LG\0_DataCleanup.sql
+
+--SCH
+:r .\27_SCH\1_FixOrphanDistribution.sql
