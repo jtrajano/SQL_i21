@@ -1,9 +1,11 @@
 CREATE PROCEDURE [dbo].[uspApiImportInventoryAdjustmentsFromStaging]
 	@guiApiUniqueId UNIQUEIDENTIFIER,
+	@ysnAutoPost BIT = 0,
 	@intUserId INT = 1
 AS
 BEGIN
 
+DECLARE @strBatchId NVARCHAR(40)
 DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
 
 -- Log required company locations
@@ -402,6 +404,16 @@ BEGIN
 	IF (NOT EXISTS(SELECT TOP 1 1 FROM tblICInventoryAdjustmentDetail WHERE intInventoryAdjustmentId = @intAdjustmentId))
 		DELETE FROM tblICInventoryAdjustment WHERE intInventoryAdjustmentId = @intAdjustmentId
 
+	IF @ysnAutoPost = 1
+	BEGIN
+		EXEC dbo.uspApiPostAdjustmentTransaction @strAdjustmentNo, 1, 0, 1, @strBatchId OUTPUT
+		-- INSERT INTO tblApiRESTErrorLog(guiApiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel)
+		-- SELECT @guiApiUniqueId, r.strDescription, @strAdjustmentNo, @strBatchId, r.intGLDetailId, 1, 1, 'GL Detail'
+		-- FROM tblGLDetail r
+		-- WHERE r.strBatchId = @strBatchId
+		-- 	AND r.strTransactionId = @strAdjustmentNo
+	END
+
 	FETCH NEXT FROM cur INTO @strTempAdjustmentNo, @intLocationId, @intAdjustmentType, @dtmAdjustmentDate, @strDescription, @strIntegrationDocNo
 END
 
@@ -417,6 +429,9 @@ JOIN tblICStagingAdjustment a ON a.intStagingAdjustmentId = d.intAdjustmentId
 WHERE a.guiApiUniqueId = @guiApiUniqueId
 
 DELETE FROM tblICStagingAdjustment WHERE guiApiUniqueId = @guiApiUniqueId
+
+INSERT INTO tblApiRESTErrorLog(guiApiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel)
+SELECT @guiApiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel FROM @Logs
 
 SELECT * FROM @Logs
 
