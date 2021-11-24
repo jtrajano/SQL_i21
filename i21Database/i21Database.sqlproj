@@ -262,6 +262,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMDevice.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTMClockReading.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMClockReading.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -9651,7 +9652,6 @@
     <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
-  
     <Build Include="dbo\Stored Procedures\uspSCGetAndAllocateBasisContractUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckContractStatus.sql" />
   </ItemGroup>
@@ -10180,4 +10180,3 @@
     <None Include="Scripts\Post-Deployment\TF\DefaultData\AL_Alabama.sql" />
   </ItemGroup>
 </Project>
-
