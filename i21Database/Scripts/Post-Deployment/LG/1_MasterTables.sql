@@ -380,12 +380,14 @@ BEGIN
 									AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
 									AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType = ''Inventory Return'') IRN
 				WHERE 
-					L.intPurchaseSale IN (1, 3)
-					AND ((L.intPurchaseSale = 1 AND L.intShipmentStatus = 4) OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
+					L.intShipmentType = 1 AND L.intPurchaseSale IN (1, 3)
+					AND ((L.intPurchaseSale = 1 AND (CP.ysnWeightClaimsByContainer = 1 OR (L.intShipmentStatus = 4 AND NOT EXISTS(SELECT 1 from tblLGLoadDetailContainerLink WHERE intLoadId = L.intLoadId AND ISNULL(dblReceivedQty, 0) = 0))))
+						OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
 					AND WC.intWeightClaimId IS NULL
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
 					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 1
 										AND (LC.intLoadContainerId IS NULL OR (LC.intLoadContainerId IS NOT NULL AND intLoadContainerId = LC.intLoadContainerId)))
+					
 
 			UNION ALL
 
@@ -444,7 +446,7 @@ BEGIN
 				OUTER APPLY (SELECT intCount = COUNT(1) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
 				OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt),dblLinkGrossWt = SUM(dblLinkGrossWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 				WHERE 
-					L.intPurchaseSale IN (2, 3)
+					L.intShipmentType = 1 AND L.intPurchaseSale IN (2, 3)
 					AND L.intShipmentStatus IN (6, 11)
 					AND WC.intWeightClaimId IS NULL
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
