@@ -87,7 +87,7 @@ BEGIN
 		, strPriceUOM
 		, strStockUOM
 		, dblAvailableQty
-		, dblAmount 						= CASE WHEN intPricingTypeId = 1 THEN round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals) * dblQuantity ELSE NULL END
+		, dblAmount 						= CASE WHEN intPricingTypeId = 1 THEN round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals) * dblQuantity WHEN intPricingTypeId = 6 then dblCashPrice * dblQuantity ELSE NULL END
 		, dblQtyinCommodityStockUOM
 		, dblFuturesinCommodityStockUOM 	= CASE WHEN intPricingTypeId IN (1, 3) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), ISNULL(dblFutures, 0)), 0) ELSE NULL END
 		, dblBasisinCommodityStockUOM		= CASE WHEN intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), ISNULL(dblBasis, 0)), 0) ELSE NULL END
