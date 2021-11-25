@@ -7,9 +7,10 @@
 	, @strSource NVARCHAR(50)
 	, @strProcess NVARCHAR(50)
 	, @intUserId INT
+
 AS
 
-BEGIN TRY
+BEGIN TRY	
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		, @intApprovalListId INT
 		, @intLastModifiedById INT
@@ -150,7 +151,7 @@ BEGIN TRY
 						WHERE intContractHeaderId = @intContractHeaderId
 		) t WHERE intRowNum = 1
 	) t1;
-	
+
 	INSERT INTO tblCTSequenceHistory (intContractHeaderId
 		, intContractDetailId
 		, intContractTypeId
@@ -229,18 +230,18 @@ BEGIN TRY
 		, CD.dblFutures
 		, dblBasis
 		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblNoOfLots
-				WHEN @strComment = 'Pricing Delete' THEN 0
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 0
 				ELSE ISNULL(PF.dblLotsFixed, 0) END
 		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
-				WHEN @strComment = 'Pricing Delete' THEN CD.dblNoOfLots
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN CD.dblNoOfLots
 				ELSE CD.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0) END
 		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblQuantity
-				WHEN @strComment = 'Pricing Delete' THEN 0
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 0
 				ELSE ISNULL(FD.dblQuantity, 0) END
 		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
-				WHEN @strComment = 'Pricing Delete' THEN CD.dblQuantity
+				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN CD.dblQuantity
 				ELSE CD.dblQuantity - ISNULL(FD.dblQuantity, 0) END
-		, dblFinalPrice
+		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN NULL ELSE dblFinalPrice END
 		, dtmFXValidFrom
 		, dtmFXValidTo
 		, dblRate
@@ -253,10 +254,11 @@ BEGIN TRY
 		, CD.dblScheduleQty
 		, CASE WHEN @ysnUseContractDate = 1 THEN ISNULL(CD.dtmCreated, CH.dtmCreated) ELSE GETDATE() END
 		, dblCashPrice
-		, CASE WHEN CD.intPricingTypeId = 1 THEN 'Fully Priced'
-				WHEN ISNULL(CD.dblNoOfLots, 0) = ISNULL(PF.dblLotsFixed, 0) AND CD.intPricingTypeId NOT IN(2, 8) THEN 'Fully Priced'
-				WHEN ISNULL(CD.dblNoOfLots, 0) - ISNULL(PF.dblLotsFixed, 0) > 0 AND PF.intPriceFixationId IS NOT NULL THEN 'Partially Priced'
-				ELSE 'Unpriced' END
+		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 'Unpriced'
+			ELSE CASE WHEN CD.intPricingTypeId = 1 THEN 'Fully Priced'
+					WHEN ISNULL(CD.dblNoOfLots, 0) = ISNULL(PF.dblLotsFixed, 0) AND CD.intPricingTypeId NOT IN(2, 8) THEN 'Fully Priced'
+					WHEN ISNULL(CD.dblNoOfLots, 0) - ISNULL(PF.dblLotsFixed, 0) > 0 AND PF.intPriceFixationId IS NOT NULL THEN 'Partially Priced'
+					ELSE 'Unpriced' END END
 		, intContractBasisId = CH.intContractBasisId
 		, intGradeId = CH.intGradeId
 		, intItemUOMId = CD.intItemUOMId
@@ -430,22 +432,19 @@ BEGIN TRY
 					WHERE intSequenceHistoryId = @intSequenceHistoryId;
 				END;
 			END
-				
+
 			EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId
 				, @intContractDetailId = @intContractDetailId
 				, @strSource = @strSource
 				, @strProcess = @strProcess
 				, @contractDetail = @contractDetails
 				, @intUserId = @intUserId;
-
-		end
+		END
 		
 		SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId)
 		FROM @SCOPE_IDENTITY
 		WHERE intSequenceHistoryId > @intSequenceHistoryId;
 	END;
-
-
 	
 	IF EXISTS(
 		SELECT
