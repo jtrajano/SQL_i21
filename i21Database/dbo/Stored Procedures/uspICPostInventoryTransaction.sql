@@ -73,108 +73,146 @@ BEGIN
 	GOTO _EXIT
 END
 
-INSERT INTO dbo.tblICInventoryTransaction (
-		[intItemId] 
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[intLotId]
-		,[dtmDate] 
-		,[dblQty] 
-		,[dblUOMQty]
-		,[dblCost] 
-		,[dblValue]
-		,[dblSalesPrice] 		
-		,[intCurrencyId] 
-		,[dblExchangeRate] 
-		,[intTransactionId] 
-		,[intTransactionDetailId]
-		,[strTransactionId] 
-		,[strBatchId] 
-		,[intTransactionTypeId] 
-		,[strRelatedTransactionId]
-		,[intRelatedTransactionId]
-		,[strTransactionForm]
-		,[intSubLocationId]
-		,[intStorageLocationId]
-		,[ysnIsUnposted]
-		,[intRelatedInventoryTransactionId]
-		,[dtmCreated] 
-		,[intCreatedEntityId] 
-		,[intConcurrencyId] 
-		,[intCostingMethod]
-		,[intFobPointId]
-		,[intInTransitSourceLocationId]
-		,[intForexRateTypeId]
-		,[dblForexRate]
-		,[strDescription]
-		,[strActualCostId]
-		,[dblUnitRetail]
-		,[dblCategoryCostValue]
-		,[dblCategoryRetailValue]
-		,[intCategoryId]
-		,[intSourceEntityId]
-		,[intCompanyLocationId]
-		,[dtmDateCreated]
-		,[intTransactionItemUOMId]
-		,[strSourceType]
-		,[strSourceNumber]
-		,[strBOLNumber]
-		,[intTicketId]
-)
-SELECT	[intItemId]							= @intItemId
-		,[intItemLocationId]				= @intItemLocationId
-		,[intItemUOMId]						= @intItemUOMId
-		,[intLotId]							= @intLotId
-		,[dtmDate]							= @dtmDate
-		,[dblQty]							= ISNULL(@dblQty, 0)
-		,[dblUOMQty]						= ISNULL(@dblUOMQty, 0)
-		,[dblCost]							= ISNULL(@dblCost, 0)
-		,[dblValue]							= ISNULL(@dblValue, 0)
-		,[dblSalesPrice]					= ISNULL(@dblSalesPrice, 0)
-		,[intCurrencyId]					= ISNULL(@intCurrencyId, @intFunctionalCurrencyId) 
-		,[dblExchangeRate]					= ISNULL(@dblForexRate, 1)
-		,[intTransactionId]					= @intTransactionId
-		,[intTransactionDetailId]			= @intTransactionDetailId
-		,[strTransactionId]					= @strTransactionId
-		,[strBatchId]						= @strBatchId
-		,[intTransactionTypeId]				= @intTransactionTypeId
-		,[strRelatedTransactionId]			= @strRelatedTransactionId
-		,[intRelatedTransactionId]			= @intRelatedTransactionId
-		,[strTransactionForm]				= @strTransactionForm
-		,[intSubLocationId]					= @intSubLocationId
-		,[intStorageLocationId]				= @intStorageLocationId
-		,[ysnIsUnposted]					= 0 
-		,[intRelatedInventoryTransactionId] = @intRelatedInventoryTransactionId
-		,[dtmCreated]						= @dtmCreated
-		,[intCreatedEntityId]				= @intEntityUserSecurityId
-		,[intConcurrencyId]					= 1
-		,[intCostingMethod]					= @intCostingMethod
-		,[intFobPointId]					= @intFobPointId
-		,[intInTransitSourceLocationId]		= @intInTransitSourceLocationId
-		,[intForexRateTypeId]				= @intForexRateTypeId	
-		,[dblForexRate]						= @dblForexRate
-		,[strDescription]					= @strDescription
-		,[strActualCostId]					= @strActualCostId
-		,[dblUnitRetail]					= @dblUnitRetail
-		,[dblCategoryCostValue]				= @dblCategoryCostValue
-		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
-		,[intCategoryId]					= i.intCategoryId
-		,[intSourceEntityId]				= @intSourceEntityId
-		,[intCompanyLocationId]				= [location].intCompanyLocationId
-		,[dtmDateCreated]					= GETUTCDATE()
-		,[intTransactionItemUOMId]			= @intTransactionItemUOMId
-		,[strSourceType]					= @strSourceType
-		,[strSourceNumber]					= @strSourceNumber
-		,[strBOLNumber]						= @strBOLNumber
-		,[intTicketId]						= @intTicketId
-FROM	tblICItem i 
-		CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
-WHERE	i.intItemId = @intItemId
-		AND @intItemId IS NOT NULL
-		AND @intItemLocationId IS NOT NULL
-		AND @intItemUOMId IS NOT NULL 
+-- Check if it has an existing inventory trnsaction. If yes, update it instead of creating a new record. 
+BEGIN 
+	SELECT TOP 1 
+		@InventoryTransactionIdentityId = t.intInventoryTransactionId
+	FROM 
+		tblICInventoryTransaction t
+	WHERE
+		t.strTransactionId = @strTransactionId
+		AND t.strBatchId = @strBatchId
+		AND t.intTransactionId = @intTransactionId
+		AND t.intTransactionDetailId = @intTransactionDetailId
+		AND t.intItemId = @intItemId
+		AND t.intItemLocationId = @intItemLocationId
+		AND t.intItemUOMId = @intItemUOMId
+		AND t.intTransactionTypeId = @intTransactionTypeId
+		AND (t.intLotId = @intLotId OR (t.intLotId IS NULL AND @intLotId IS NULL))
+		AND (t.intSubLocationId = @intSubLocationId OR (t.intSubLocationId IS NULL AND @intSubLocationId IS NULL))
+		AND (t.intStorageLocationId = @intStorageLocationId OR (t.intStorageLocationId IS NULL AND intStorageLocationId IS NULL))
+		AND (t.dblCost = @dblCost OR (t.dblCost IS NULL AND @dblCost IS NULL))
+		AND (t.dblSalesPrice = @dblSalesPrice OR (t.dblSalesPrice IS NULL AND @dblSalesPrice IS NULL))
+		AND (t.intRelatedTransactionId = @intRelatedTransactionId OR (t.intRelatedTransactionId IS NULL AND @intRelatedTransactionId IS NULL))
+		AND (t.strRelatedTransactionId = @strRelatedTransactionId OR (t.strRelatedTransactionId IS NULL AND @strRelatedTransactionId IS NULL))
+		AND (t.strActualCostId = @strActualCostId OR (t.strActualCostId IS NULL AND @strActualCostId IS NULL))
+		AND @dblQty < 0 
+		AND t.dblQty < 0 
 
-SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+	UPDATE tblICInventoryTransaction 
+	SET 
+		dblQty = dblQty + @dblQty
+	WHERE 
+		intInventoryTransactionId = @InventoryTransactionIdentityId
+		AND @InventoryTransactionIdentityId IS NOT NULL 
+END 
+
+-- If it does not exists, create a new transaction. 
+IF @InventoryTransactionIdentityId IS NULL 
+BEGIN 
+	INSERT INTO dbo.tblICInventoryTransaction (
+			[intItemId] 
+			,[intItemLocationId]
+			,[intItemUOMId]
+			,[intLotId]
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty]
+			,[dblCost] 
+			,[dblValue]
+			,[dblSalesPrice] 		
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId] 
+			,[intTransactionDetailId]
+			,[strTransactionId] 
+			,[strBatchId] 
+			,[intTransactionTypeId] 
+			,[strRelatedTransactionId]
+			,[intRelatedTransactionId]
+			,[strTransactionForm]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[ysnIsUnposted]
+			,[intRelatedInventoryTransactionId]
+			,[dtmCreated] 
+			,[intCreatedEntityId] 
+			,[intConcurrencyId] 
+			,[intCostingMethod]
+			,[intFobPointId]
+			,[intInTransitSourceLocationId]
+			,[intForexRateTypeId]
+			,[dblForexRate]
+			,[strDescription]
+			,[strActualCostId]
+			,[dblUnitRetail]
+			,[dblCategoryCostValue]
+			,[dblCategoryRetailValue]
+			,[intCategoryId]
+			,[intSourceEntityId]
+			,[intCompanyLocationId]
+			,[dtmDateCreated]
+			,[intTransactionItemUOMId]
+			,[strSourceType]
+			,[strSourceNumber]
+			,[strBOLNumber]
+			,[intTicketId]
+	)
+	SELECT	[intItemId]							= @intItemId
+			,[intItemLocationId]				= @intItemLocationId
+			,[intItemUOMId]						= @intItemUOMId
+			,[intLotId]							= @intLotId
+			,[dtmDate]							= @dtmDate
+			,[dblQty]							= ISNULL(@dblQty, 0)
+			,[dblUOMQty]						= ISNULL(@dblUOMQty, 0)
+			,[dblCost]							= ISNULL(@dblCost, 0)
+			,[dblValue]							= ISNULL(@dblValue, 0)
+			,[dblSalesPrice]					= ISNULL(@dblSalesPrice, 0)
+			,[intCurrencyId]					= ISNULL(@intCurrencyId, @intFunctionalCurrencyId) 
+			,[dblExchangeRate]					= ISNULL(@dblForexRate, 1)
+			,[intTransactionId]					= @intTransactionId
+			,[intTransactionDetailId]			= @intTransactionDetailId
+			,[strTransactionId]					= @strTransactionId
+			,[strBatchId]						= @strBatchId
+			,[intTransactionTypeId]				= @intTransactionTypeId
+			,[strRelatedTransactionId]			= @strRelatedTransactionId
+			,[intRelatedTransactionId]			= @intRelatedTransactionId
+			,[strTransactionForm]				= @strTransactionForm
+			,[intSubLocationId]					= @intSubLocationId
+			,[intStorageLocationId]				= @intStorageLocationId
+			,[ysnIsUnposted]					= 0 
+			,[intRelatedInventoryTransactionId] = @intRelatedInventoryTransactionId
+			,[dtmCreated]						= @dtmCreated
+			,[intCreatedEntityId]				= @intEntityUserSecurityId
+			,[intConcurrencyId]					= 1
+			,[intCostingMethod]					= @intCostingMethod
+			,[intFobPointId]					= @intFobPointId
+			,[intInTransitSourceLocationId]		= @intInTransitSourceLocationId
+			,[intForexRateTypeId]				= @intForexRateTypeId	
+			,[dblForexRate]						= @dblForexRate
+			,[strDescription]					= @strDescription
+			,[strActualCostId]					= @strActualCostId
+			,[dblUnitRetail]					= @dblUnitRetail
+			,[dblCategoryCostValue]				= @dblCategoryCostValue
+			,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
+			,[intCategoryId]					= i.intCategoryId
+			,[intSourceEntityId]				= @intSourceEntityId
+			,[intCompanyLocationId]				= [location].intCompanyLocationId
+			,[dtmDateCreated]					= GETUTCDATE()
+			,[intTransactionItemUOMId]			= @intTransactionItemUOMId
+			,[strSourceType]					= @strSourceType
+			,[strSourceNumber]					= @strSourceNumber
+			,[strBOLNumber]						= @strBOLNumber
+			,[intTicketId]						= @intTicketId
+	FROM	tblICItem i 
+			CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
+	WHERE	i.intItemId = @intItemId
+			AND @intItemId IS NOT NULL
+			AND @intItemLocationId IS NOT NULL
+			AND @intItemUOMId IS NOT NULL 
+
+	SET @InventoryTransactionIdentityId = SCOPE_IDENTITY();
+END 
 
 IF @intLotId IS NOT NULL 
 BEGIN 
