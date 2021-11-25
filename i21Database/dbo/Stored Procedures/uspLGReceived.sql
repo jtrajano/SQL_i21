@@ -153,9 +153,12 @@ SET ANSI_WARNINGS OFF
 						END
 					END
 
-					IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) >= SUM(ISNULL(dblQuantity, 0)))
+					IF (@ysnWeightClaimsByContainer = 1)
 						UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
-				
+						AND EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) >= SUM(ISNULL(dblQuantity, 0)))
+					ELSE 
+						UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+
 					-- Insert to Pending Claims
 					IF (@ysnWeightClaimsByContainer = 1)
 						EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId
@@ -245,7 +248,10 @@ SET ANSI_WARNINGS OFF
 
 			IF @ysnReverse = 0
 			BEGIN
-				IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) >= SUM(ISNULL(dblQuantity, 0)))
+				IF (@ysnWeightClaimsByContainer = 1)
+					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+					AND EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) >= SUM(ISNULL(dblQuantity, 0)))
+				ELSE 
 					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
 				-- Insert to Pending Claims
