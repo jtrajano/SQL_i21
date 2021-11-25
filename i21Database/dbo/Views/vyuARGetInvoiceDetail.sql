@@ -337,3 +337,4 @@ LEFT JOIN (
 	WHERE intInvoiceDetailId IS NOT NULL
 	GROUP BY intInvoiceDetailId
 ) APAR ON INV.intInvoiceDetailId = APAR.intInvoiceDetailId
+GO
