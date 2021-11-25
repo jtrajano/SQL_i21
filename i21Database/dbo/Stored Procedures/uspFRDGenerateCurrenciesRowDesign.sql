@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspFRDGenerateCurrenciesRows]            
+﻿CREATE PROCEDURE [dbo].[uspFRDGenerateCurrenciesRowDesign]            
  @intRowId   AS INT          
 AS            
             
@@ -30,12 +30,11 @@ SELECT intRowId,intRefNo,strDescription,strRowType,strBalanceSide,strSource,strR
 strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,          
 ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,'0' intCurrencyID,strCurrency          
 FROM tblFRRowDesign          
-WHERE intRowId = @intRowId AND ysnShowCurrencies = 1        
+WHERE intRowDetailId = @intRowId AND ysnShowCurrencies = 1        
           
 BEGIN            
  INSERT INTO #TMPFILTER           
- SELECT intRowDetailId,REPLACE(REPLACE(REPLACE(REPLACE(strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription')[strFilter] FROM tblFRRowDesign WHERE ysnShowCurrencies  = 1 AND intRowI
-d = @intRowId          
+ SELECT intRowDetailId,REPLACE(REPLACE(REPLACE(REPLACE(strAccountsUsed,'[ID]','strAccountId'),'[Group]','strAccountGroup'),'[Type]','strAccountType'),'[Description]','strDescription')[strFilter] FROM tblFRRowDesign WHERE ysnShowCurrencies  = 1 AND intRowDetailId = @intRowId          
           
  WHILE EXISTS(SELECT 1 FROM #TMPFILTER)                 
   BEGIN             
@@ -52,7 +51,7 @@ d = @intRowId
           
  --Final Query          
  INSERT INTO tblFRRowDesignCurrencies          
- SELECT intRowId,intRefNo,strDescription + ' - ' + T1.strCurrency collate SQL_Latin1_General_CP1_CI_AS,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,          
+ SELECT T0.intRowDetailId,intRefNo,strDescription + ' - ' + T1.strCurrency collate SQL_Latin1_General_CP1_CI_AS,strRowType,strBalanceSide,strSource,strRelatedRows,strAccountsUsed,strPercentage,strAccountsType,          
  strDateOverride,ysnShowCredit,ysnShowDebit,ysnShowOthers,ysnLinktoGL,ysnPrintEach,ysnHidden,dblHeight,strFontName,strFontStyle,strFontColor,intFontSize,strOverrideFormatMask,          
  ysnForceReversedExpense,ysnOverrideFormula,ysnOverrideColumnFormula,intSort,intConcurrencyId,ysnShowCurrencies,T1.intCurrencyId,T1.strCurrency          
  FROM tblFRRowDesign T0          

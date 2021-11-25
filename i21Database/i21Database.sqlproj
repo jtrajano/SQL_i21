@@ -325,6 +325,10 @@
     <Build Include="dbo\Tables\tblApiSchemaTMClockReading.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMClockReading.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesDrilldown.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesPrintEach.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesRowDesign.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGenerateDrillDownCurrencies.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10446,4 +10450,3 @@
     <None Include="Scripts\Post-Deployment\TR\FreightTariffTypeSetup.sql" />
   </ItemGroup>
 </Project>
-
