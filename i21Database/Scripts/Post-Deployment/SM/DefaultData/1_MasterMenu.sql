@@ -9,7 +9,7 @@
 	END
 GO
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Printing' AND strModuleName = 'Payroll')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Trade Finance Log' AND strCommand = 'TradeFinance.view.TradeFinanceLog?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -7103,9 +7103,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Trade Finance Log', N'Trade Finance', @TFReportsParentMenuId, N'Trade Line Inquiry', N'Reports', N'Screen', N'TradeFinance.view.TradeFinanceLog', N'small-menu-activity', 1, 1, 0, 1, 3, 1)
+	VALUES (N'Trade Finance Log', N'Trade Finance', @TFReportsParentMenuId, N'Trade Line Inquiry', N'Reports', N'Screen', N'TradeFinance.view.TradeFinanceLog?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 3, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'TradeFinance.view.TradeFinanceLog' WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'TradeFinance.view.TradeFinanceLog?showSearch=true' WHERE strMenuName = N'Trade Finance Log' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Facility Limits Report' AND strModuleName = N'Trade Finance' AND intParentMenuID = @TFReportsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
