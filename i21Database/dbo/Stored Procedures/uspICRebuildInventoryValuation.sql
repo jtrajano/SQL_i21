@@ -6723,6 +6723,9 @@ BEGIN
 	--BEGIN 
 	--	PRINT 'Failed in ' + @strTransactionId + '.'
 	--END 
+	UPDATE	tblICBackup 
+	SET		ysnFailed = 1
+	WHERE	intBackupId = @intBackupId
 
 	GOTO _CLEAN_UP
 END
