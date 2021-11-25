@@ -251,9 +251,16 @@ BEGIN TRY
 							
 							DECLARE splitCursor CURSOR LOCAL FAST_FORWARD
 							FOR
-							SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty,SPL.strDistributionOption FROM tblSCTicketSplit SPL
+							SELECT SCC.intContractDetailId ,SCC.intEntityId,SCC.dblScheduleQty
+								-- If contract pricing type is DP, set strDistributionOption to 'DP' to avoid updating the scheduled qty of the DP contract
+								,[strDistributionOption] = CASE WHEN CTH.intPricingTypeId = 5 THEN 'DP' ELSE SPL.strDistributionOption END
+							FROM tblSCTicketSplit SPL
 							INNER JOIN tblSCTicketContractUsed SCC 
 								ON SCC.intTicketId = SCC.intTicketId
+							INNER JOIN tblCTContractDetail CTD
+								ON SCC.intContractDetailId = CTD.intContractDetailId
+							INNER JOIN tblCTContractHeader CTH
+								ON CTH.intContractHeaderId = CTD.intContractHeaderId
 							WHERE SPL.intTicketId = @intTicketId and SCC.intTicketId = @intTicketId and SPL.intCustomerId = SCC.intEntityId and SPL.intCustomerId = @_intIRVendorId
 
 							OPEN splitCursor;
