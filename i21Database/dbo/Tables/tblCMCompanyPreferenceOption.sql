@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 	[intBTFeesAccountId] [int] NULL,
 	[intBTBankFeesAccountId] [int] NULL,
 	[intBTInTransitAccountId] [int] NULL,
+	[intBTForexDiffAccountId] INT NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblCMCompanyPreferenceOption] PRIMARY KEY CLUSTERED 
 (
@@ -15,4 +16,3 @@ CREATE TABLE [dbo].[tblCMCompanyPreferenceOption](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-
