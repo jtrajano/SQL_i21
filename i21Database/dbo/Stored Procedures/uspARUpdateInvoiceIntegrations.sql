@@ -159,10 +159,14 @@ BEGIN TRY
 		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId,@Post
 
 	IF @ForDelete = 1
-		BEGIN
-			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
-		END
-	
+	BEGIN
+		EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId
+		
+		DELETE FROM tblARPricingHistory 
+		WHERE intTransactionId = @InvoiceId
+		AND intSourceTransactionId = 2
+	END
+
 	--INSERT TO TRANSACTION LINKS
 	EXEC dbo.[uspARInsertInvoiceTransactionLink] @InvoiceIds
 
