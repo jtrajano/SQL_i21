@@ -35,8 +35,37 @@ SELECT DISTINCT
 			END) AS dblStandardCost
 	, Pricing.dblAverageCost
 	, CASE
-		WHEN Pricing.dblSalePrice > 0
-			THEN (Pricing.dblSalePrice - Pricing.dblLastCost) / Pricing.dblSalePrice
+		WHEN ((CASE
+				WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+					THEN SplPrc.dblUnitAfterDiscount 
+				WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+					THEN effectivePrice.dblRetailPrice --Effective Retail Price
+				ELSE Pricing.dblSalePrice
+			END) > 0) AND (CASE
+						WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+							THEN effectiveCost.dblCost --Effective Cost
+						ELSE Pricing.dblStandardCost
+					END) != 0
+				THEN 
+				(
+					(CASE
+						WHEN (CAST(GETDATE() AS DATE) BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
+							THEN SplPrc.dblUnitAfterDiscount 
+						WHEN (CAST(GETDATE() AS DATE) >= effectivePrice.dtmEffectiveRetailPriceDate)
+							THEN effectivePrice.dblRetailPrice --Effective Retail Price
+						ELSE Pricing.dblSalePrice
+					END) 
+					- (CASE
+						WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+							THEN effectiveCost.dblCost --Effective Cost
+						ELSE Pricing.dblStandardCost
+					END)
+				) 
+				/ (CASE
+						WHEN (CAST(GETDATE() AS DATE) >= effectiveCost.dtmEffectiveCostDate)
+							THEN effectiveCost.dblCost --Effective Cost
+						ELSE Pricing.dblStandardCost
+					END)
 		ELSE 0
 	END AS dblGrossMargin
 
