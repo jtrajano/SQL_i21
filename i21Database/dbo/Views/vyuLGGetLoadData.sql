@@ -197,6 +197,7 @@ SELECT
 	,L.ysnAllowReweighs
 	,L.dblFreightRate
 	,L.dblSurcharge
+	,L.intTermId
 FROM tblLGLoad L
 LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
@@ -229,6 +230,7 @@ LEFT JOIN tblICUnitMeasure DischargeUnit ON DischargeUnit.intUnitMeasureId = L.i
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
+LEFT JOIN tblSMTerm TM ON TM.intTermID = L.intTermId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 				WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD

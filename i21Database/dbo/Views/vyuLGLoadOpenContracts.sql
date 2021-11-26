@@ -35,6 +35,7 @@ SELECT CD.intContractDetailId
 	,CD.dtmStartDate
 	,CD.dtmEndDate
 	,CD.dtmPlannedAvailabilityDate
+	,CD.dtmCashFlowDate
 	,E.intDefaultLocationId
 	,dblScheduleQty = CASE WHEN (ShipType.intShipmentType = 2) THEN ISNULL(CD.dblShippingInstructionQty, 0) ELSE ISNULL(CD.dblScheduleQty, 0) END
 	,CH.strCustomerContract
@@ -111,6 +112,7 @@ SELECT CD.intContractDetailId
 	,intHeaderBookId = CH.intBookId
 	,intHeaderSubBookId = CH.intSubBookId
 	,ysnAllowReweighs = WW.ysnPayablesOnShippedWeights
+	,CH.intTermId
 FROM (SELECT intShipmentType = 1 UNION SELECT intShipmentType = 2) ShipType
 CROSS JOIN tblCTContractHeader CH
 INNER JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -148,6 +150,7 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 LEFT JOIN tblSMCountry CO ON CO.intCountryID = ICI.intCountryId
 LEFT JOIN tblSMCountry CO2 ON CO2.intCountryID = CA.intCountryID
 LEFT JOIN tblEMEntityLocation SH ON SH.intEntityLocationId = CD.intShipToId
+LEFT JOIN tblSMTerm TM ON TM.intTermID = CH.intTermId
 OUTER APPLY (
 	SELECT TOP 1
 		S.intContractDetailId
