@@ -329,6 +329,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesPrintEach.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesRowDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateDrillDownCurrencies.sql" />
+    <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
