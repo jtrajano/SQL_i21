@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGridCostAndPrice]
+CREATE PROCEDURE [dbo].[uspSTGridCostAndPrice]
     @XML VARCHAR(MAX),
     @ysnRecap BIT,
     @strGuid UNIQUEIDENTIFIER,
@@ -107,6 +107,7 @@ BEGIN TRY
                 intQuantity INT,
                 dblPrice DECIMAL(18, 6) NULL,
                 strCategory VARCHAR(MAX),
+                dblCategoryMargin DECIMAL(18, 6) NULL,
                 strFamily VARCHAR(MAX),
                 strClass VARCHAR(MAX)
             );
@@ -180,13 +181,14 @@ BEGIN TRY
         intItemId,
         strDescription,
         dblNewCost,
-        --strLocation,
-        --intStoreNo,
+        strLocation,
+        intStoreNo,
         strLongUPCCode,
         strUnit,
         intQuantity,
-        --dblPrice,
+        dblPrice,
         strCategory,
+        dblCategoryMargin,
         strFamily,
         strClass,
         strGuid,
@@ -197,47 +199,44 @@ BEGIN TRY
            it.intItemId AS intItemId,
            it.strDescription AS strDescription,
            0 AS dblNewCost,
-           --ill.strLocationName AS strLocation,
-           --st.intStoreNo AS intStoreNo,
+           ill.strLocationName AS strLocation,
+           st.intStoreNo AS intStoreNo,
            uom.strLongUPCCode AS strLongUPCCode,
            um.strUnitMeasure AS strUnit,
            uom.dblUnitQty AS intQuantity,
-			--	ROUND(CAST(
-			--		CASE
-			--			WHEN (SELECT TOP 1 dblUnitAfterDiscount 
-			--					FROM tblICItemSpecialPricing spr 
-			--					WHERE @StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate
-			--						AND spr.intItemId = it.intItemId) != 0
-			--				THEN (SELECT TOP 1 dblUnitAfterDiscount 
-			--					FROM tblICItemSpecialPricing spr 
-			--					WHERE @StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate
-			--						AND spr.intItemId = it.intItemId)
-			--			WHEN (@StartDate > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
-			--										WHERE EIP.intItemLocationId = il.intItemLocationId
-			--										AND @StartDate >= dtmEffectiveRetailPriceDate
-			--										ORDER BY dtmEffectiveRetailPriceDate ASC))
-			--				THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
-			--										WHERE EIP.intItemLocationId = il.intItemLocationId
-			--										AND @StartDate >= dtmEffectiveRetailPriceDate
-			--										ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
-			--			WHEN ISNULL(ipr.intItemPricingId, 0) != 0
-			--				THEN ipr.dblSalePrice
-			--			ELSE 0
-			--		END 
-			--AS FLOAT),2)
-			--AS dblPrice,
+				ROUND(CAST(
+					CASE
+						WHEN (SELECT TOP 1 dblUnitAfterDiscount 
+								FROM tblICItemSpecialPricing spr 
+								WHERE @StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate
+									AND spr.intItemId = it.intItemId) != 0
+							THEN (SELECT TOP 1 dblUnitAfterDiscount 
+								FROM tblICItemSpecialPricing spr 
+								WHERE @StartDate BETWEEN spr.dtmBeginDate AND spr.dtmEndDate
+									AND spr.intItemId = it.intItemId)
+						WHEN (@StartDate > (SELECT TOP 1 dtmEffectiveRetailPriceDate FROM tblICEffectiveItemPrice EIP 
+													WHERE EIP.intItemLocationId = il.intItemLocationId
+													AND @StartDate >= dtmEffectiveRetailPriceDate
+													ORDER BY dtmEffectiveRetailPriceDate ASC))
+							THEN (SELECT TOP 1 dblRetailPrice FROM tblICEffectiveItemPrice EIP 
+													WHERE EIP.intItemLocationId = il.intItemLocationId
+													AND @StartDate >= dtmEffectiveRetailPriceDate
+													ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
+						WHEN ISNULL(ipr.intItemPricingId, 0) != 0
+							THEN ipr.dblSalePrice
+						ELSE 0
+					END 
+			AS FLOAT),2)
+			AS dblPrice,
            cat.strCategoryCode AS strCategory,
-           (SELECT TOP 1 strSubcategoryDesc FROM tblSTSubcategory sc
-						INNER JOIN tblICItemLocation il
-						ON sc.intSubcategoryId = il.intFamilyId
-						WHERE intSubcategoryId IS NOT NULL AND il.intItemId = it.intItemId) AS strFamily,
-           (SELECT TOP 1 strSubcategoryDesc FROM tblSTSubcategory sc
-						INNER JOIN tblICItemLocation il
-						ON sc.intSubcategoryId = il.intClassId
-						WHERE intSubcategoryId IS NOT NULL AND il.intItemId = it.intItemId) AS strClass,
+           catloc.dblTargetGrossProfit AS dblCategoryMargin, -- TO CONFIRM
+           fam.strSubcategoryDesc AS strFamily,
+           class.strSubcategoryDesc AS strClass,
            @strGuid,
            1
     FROM tblICItem it
+        JOIN tblICItemLocation il
+            ON it.intItemId = il.intItemId
         JOIN tblICItemUOM uom
             ON it.intItemId = uom.intItemId
                AND uom.ysnStockUnit = 1
@@ -245,8 +244,18 @@ BEGIN TRY
             ON uom.intUnitMeasureId = um.intUnitMeasureId
         JOIN tblICCategory cat
             ON it.intCategoryId = cat.intCategoryId
-        LEFT JOIN tblICItemLocation il
-            ON il.intItemId = it.intItemId
+        LEFT JOIN tblICCategoryLocation catloc
+            ON cat.intCategoryId = catloc.intCategoryId AND catloc.intLocationId = il.intLocationId
+        LEFT JOIN tblSTSubcategory fam
+            ON il.intFamilyId = fam.intSubcategoryId
+        LEFT JOIN tblSTSubcategory class
+            ON il.intClassId = class.intSubcategoryId
+        LEFT JOIN tblICItemPricing ipr
+            ON ipr.intItemLocationId = il.intItemLocationId
+        JOIN tblSMCompanyLocation ill
+            ON il.intLocationId = ill.intCompanyLocationId
+        JOIN tblSTStore st
+            ON ill.intCompanyLocationId = st.intCompanyLocationId
     WHERE (
               NOT EXISTS
     (

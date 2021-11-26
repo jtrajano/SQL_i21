@@ -92,8 +92,8 @@ BEGIN
 			@dtmEndDate	DATETIME
 
 		SET @intRow += 1
-		SET @dtmStartDate = CONCAT(@strYear, '-', @intRow, '-01')
-		SET @dtmEndDate = CONCAT(EOMONTH(@dtmStartDate), ' 23:59:59.000')
+		SET @dtmStartDate = CAST((CAST(@strYear AS NVARCHAR) + '-' + CAST(@intRow AS NVARCHAR) + '-01') AS DATETIME)
+		SET @dtmEndDate =  CAST((DATEADD(s, -1, DATEADD(mm, DATEDIFF(m, 0, @dtmStartDate ) + 1, 0))) AS DATETIME)
 
 		IF (@intRow = 1)
 			SET @dtmFiscalStartDate = @dtmStartDate

@@ -96,8 +96,7 @@ BEGIN
 					WITH	(HOLDLOCK) 
 					AS		itemSpecialPricing	
 					USING (
-						SELECT	DISTINCT 
-								i.intItemId,
+						SELECT	DISTINCT i.intItemId,
 								il.intItemLocationId,
 								uom.intItemUOMId,
 								dtmBeginDate = @dtmBeginDate,
@@ -149,7 +148,7 @@ BEGIN
 						AND itemSpecialPricing.intItemId = Source_Query.intItemId
 						AND itemSpecialPricing.dtmBeginDate = Source_Query.dtmBeginDate
 						AND itemSpecialPricing.dtmEndDate = Source_Query.dtmEndDate
-					
+
 					-- If matched and Action is insert, delete. the Promotional Retail Price. 
 					WHEN MATCHED AND @strAction = 'INSERT' THEN 
 						DELETE
@@ -161,6 +160,7 @@ BEGIN
 								,dblCost = ISNULL(@dblPromotionalCost, itemSpecialPricing.dblCost)
 								,dtmDateModified = GETUTCDATE()
 								,intModifiedByUserId = @intEntityUserSecurityId
+
 					-- If not matched, insert the Promotional Retail Price. 
 					WHEN NOT MATCHED
 						-- https://stackoverflow.com/questions/325933/determine-whether-two-date-ranges-overlap
@@ -168,11 +168,7 @@ BEGIN
 						AND (1 NOT IN  (SELECT 1 FROM tblICItemSpecialPricing 
 									WHERE intItemLocationId = Source_Query.intItemLocationId
 									AND intItemId = Source_Query.intItemId
-									AND Source_Query.dtmBeginDate <= dtmEndDate)) 
-						AND (1 NOT IN  (SELECT 1 FROM tblICItemSpecialPricing 
-									WHERE intItemLocationId = Source_Query.intItemLocationId
-									AND intItemId = Source_Query.intItemId
-									AND Source_Query.dtmEndDate <= dtmBeginDate)) 
+									AND Source_Query.dtmBeginDate <= dtmEndDate AND dtmBeginDate <= Source_Query.dtmEndDate))
 						THEN 
 						INSERT (
 							intItemId
@@ -185,7 +181,7 @@ BEGIN
 							, dblDiscount
 							, intCurrencyId
 							, dblUnitAfterDiscount --Retail Price
-							, dblCost
+							, dblCost --Cost
 							, intCreatedByUserId
 						)
 						VALUES (

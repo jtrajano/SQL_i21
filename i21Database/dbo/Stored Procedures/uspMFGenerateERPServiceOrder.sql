@@ -115,7 +115,7 @@ BEGIN TRY
 			FROM tblMFWorkOrder
 			WHERE intWorkOrderId = @intWorkOrderId
 
-			if @strERPOrderNo is NULL
+			if @strERPOrderNo is NULL or @strERPOrderNo=''
 			Begin
 				GOTO NextPO
 			End

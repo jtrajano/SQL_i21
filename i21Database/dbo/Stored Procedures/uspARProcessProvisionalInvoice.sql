@@ -222,18 +222,18 @@ BEGIN TRY
 		,[ysnFromProvisional]               = 1
 	
 		,[intInvoiceDetailId]				= NULL 
-		,[intItemId]						= ARSID.[intItemId] 
+		,[intItemId]						= ARID.[intItemId] 
 		,[ysnInventory]						= 1
 		,[strDocumentNumber]				= @InvoiceNumber
-		,[strItemDescription]				= ARSID.[strItemDescription] 
-		,[intOrderUOMId]					= ARSID.[intOrderUOMId]
-		,[dblQtyOrdered]					= ARSID.[dblQtyOrdered] 
-		,[intItemUOMId]						= ARSID.[intItemUOMId]
-		,[intPriceUOMId]					= ARSID.[intPriceUOMId]
-		,[dblQtyShipped]					= ARSID.[dblShipmentQuantity]
-		,[dblDiscount]						= ARSID.[dblDiscount]
-		,[dblPrice]							= ISNULL(ARSID.[dblPrice], ARID.[dblPrice]) 
-		,[dblUnitPrice]						= ISNULL(ARSID.[dblShipmentUnitPrice], ARID.[dblUnitPrice]) 
+		,[strItemDescription]				= ARID.[strItemDescription] 
+		,[intOrderUOMId]					= ARID.[intOrderUOMId]
+		,[dblQtyOrdered]					= ARID.[dblQtyOrdered] 
+		,[intItemUOMId]						= ARID.[intItemUOMId]
+		,[intPriceUOMId]					= ARID.[intPriceUOMId]
+		,[dblQtyShipped]					= ARID.[dblQtyShipped]
+		,[dblDiscount]						= ARID.[dblDiscount]
+		,[dblPrice]							= ISNULL(ARID.[dblPrice], 0) 
+		,[dblUnitPrice]						= ISNULL(ARID.[dblUnitPrice], 0) 
 		,[ysnRefreshPrice]					= 0
 		,[strMaintenanceType]				= ARID.[strMaintenanceType]
 		,[strFrequency]						= ARID.[strFrequency]
@@ -248,15 +248,15 @@ BEGIN TRY
 		,[strShipmentNumber]				= ARID.[strShipmentNumber]
 		,[intSalesOrderDetailId]			= ARID.[intSalesOrderDetailId]
 		,[strSalesOrderNumber]				= ARID.[strSalesOrderNumber] 
-		,[intContractHeaderId]				= ARSID.[intContractHeaderId] 
-		,[intContractDetailId]				= ARSID.[intContractDetailId] 
+		,[intContractHeaderId]				= ARID.[intContractHeaderId] 
+		,[intContractDetailId]				= ARID.[intContractDetailId] 
 		,[intShipmentPurchaseSalesContractId]	= NULL
-		,[intItemWeightUOMId]				= ARSID.[intWeightUOMId]
-		,[dblItemWeight]					= ARSID.[dblWeight] 
-		,[dblShipmentGrossWt]				= ARSID.[dblGrossWt]
-		,[dblShipmentTareWt]				= ARSID.[dblTareWt]
-		,[dblShipmentNetWt]					= ARSID.[dblNetWt]
-		,[intLoadDetailId]					= ARSID.[intLoadDetailId]
+		,[intItemWeightUOMId]				= ARID.[intItemWeightUOMId]
+		,[dblItemWeight]					= ARID.[dblItemWeight] 
+		,[dblShipmentGrossWt]				= ARID.[dblShipmentGrossWt]
+		,[dblShipmentTareWt]				= ARID.[dblShipmentTareWt]
+		,[dblShipmentNetWt]					= ARID.[dblShipmentNetWt]
+		,[intLoadDetailId]					= ARID.[intLoadDetailId]
 		,[intTicketId]						= ARID.[intTicketId]
 		,[intTicketHoursWorkedId]			= ARID.[intTicketHoursWorkedId]
 		,[intOriginalInvoiceDetailId]		= ARID.[intInvoiceDetailId] 
@@ -269,31 +269,21 @@ BEGIN TRY
 		,[intPerformerId]					= ARID.[intPerformerId]
 		,[ysnLeaseBilling]					= ARID.[ysnLeaseBilling]
 		,[ysnVirtualMeterReading]			= ARID.[ysnVirtualMeterReading]
-		,[intDestinationGradeId]			= ARSID.[intDestinationGradeId]
-		,[intDestinationWeightId]			= ARSID.[intDestinationWeightId]
-		,[intCurrencyExchangeRateTypeId]	= ARSID.[intCurrencyExchangeRateTypeId]
-		,[intCurrencyExchangeRateId]		= ARSID.[intCurrencyExchangeRateId]
-		,[dblCurrencyExchangeRate]			= ARSID.[dblCurrencyExchangeRate]
-		,[intSubCurrencyId]					= ARSID.[intSubCurrencyId]
-		,[dblSubCurrencyRate]				= ARSID.[dblSubCurrencyRate]
+		,[intDestinationGradeId]			= ARID.[intDestinationGradeId]
+		,[intDestinationWeightId]			= ARID.[intDestinationWeightId]
+		,[intCurrencyExchangeRateTypeId]	= ARID.[intCurrencyExchangeRateTypeId]
+		,[intCurrencyExchangeRateId]		= ARID.[intCurrencyExchangeRateId]
+		,[dblCurrencyExchangeRate]			= ARID.[dblCurrencyExchangeRate]
+		,[intSubCurrencyId]					= ARID.[intSubCurrencyId]
+		,[dblSubCurrencyRate]				= ARID.[dblSubCurrencyRate]
 		,[intStorageLocationId]				= ARID.[intStorageLocationId]
 		,[intCompanyLocationSubLocationId]	= ARID.[intCompanyLocationSubLocationId]
 	FROM
-		vyuARShippedItemDetail ARSID
-	INNER JOIN
-		vyuLGLoadViewSearch ARSI
-			ON ARSID.[intShipmentId] = ARSI.[intLoadId] 
-	LEFT OUTER JOIN		
 		tblARInvoiceDetail ARID
-			ON ARSID.[intLoadDetailId] = ARID.[intLoadDetailId]
-			AND ARID.[intInvoiceId] = @InvoiceId
+	INNER JOIN
+		tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	WHERE
-		ARSI.[intLoadId] IN	(	SELECT LG.[intShipmentId] 
-									FROM [vyuARShippedItemDetail] LG 
-										INNER JOIN tblARInvoiceDetail AR 
-											ON LG.[intLoadDetailId] = AR.[intLoadDetailId] 
-									WHERE AR.[intInvoiceId] = @InvoiceId
-								)
+		ARID.[intInvoiceId] = @InvoiceId
 								
 UNION ALL
 
@@ -544,7 +534,7 @@ DECLARE	@CurrentErrorMessage NVARCHAR(250)
 		,@UpdatedIvoices NVARCHAR(MAX)	
 
 DECLARE @LineItemTaxes AS LineItemTaxDetailStagingTable
-				
+
 BEGIN TRY
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries		= @EntriesForInvoice

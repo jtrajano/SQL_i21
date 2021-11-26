@@ -60,7 +60,7 @@ BEGIN TRY
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,ActionId
-				,CreatedDate
+				,IsNULL(CreatedDate,Getdate())
 				,CreatedBy
 				,StorageLocation
 				,DemandType
@@ -72,7 +72,7 @@ BEGIN TRY
 				,DueDate
 				,Machine
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					TrxSequenceNo BIGINT '../TrxSequenceNo'
+					TrxSequenceNo BIGINT 
 					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
 					,ActionId INT '../ActionId'
 					,CreatedDate DATETIME '../CreatedDate'

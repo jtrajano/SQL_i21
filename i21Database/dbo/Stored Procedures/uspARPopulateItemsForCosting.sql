@@ -54,21 +54,25 @@ INSERT INTO ##ARItemsForCosting
 	,[strType]
 	,[ysnAutoBlend]
 	,[ysnGLOnly]
+	,[strBOLNumber]
+	,[intTicketId]
 )
 
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId])
+	,[intItemUOMId]				= CASE WHEN ysnSeparateStockForUOMs = 0 THEN ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId]) ELSE  ARID.[intItemUOMId] END
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
-										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
+										WHEN ARIDL.[intLotId] IS NULL THEN  CASE WHEN ysnSeparateStockForUOMs = 1 THEN  ARID.[dblQtyShipped]
+										ELSE ARID.[dblQtyShipped] * (CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END) END 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
+										WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ISNULL(NULLIF(ARIDL.[dblWeightPerQty], 0), 1))
 								   END
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
-	,[dblUOMQty]				= ARID.[dblUnitQty]
+	,[dblUOMQty]				= CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
 	,[dblCost]					= ISNULL(dbo.fnMultiply (dbo.fnMultiply (	CASE WHEN ARID.[ysnBlended] = @OneBit 
@@ -93,7 +97,7 @@ SELECT
 																		END 
 																END
 																,ARID.[dblSplitPercent])
-															,ARID.[dblUnitQty]
+															,CASE WHEN LOT.[intItemUOMId] = ARID.[intItemUOMId] THEN 1 ELSE ARID.[dblUnitQty] END
 														),@ZeroDecimal)
 	,[dblSalesPrice]			= ARID.[dblPrice] 
 	,[intCurrencyId]			= ARID.[intCurrencyId]
@@ -115,6 +119,8 @@ SELECT
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
+	,[strBOLNumber]				= ARID.strBOLNumber 
+	,[intTicketId]				= ARID.intTicketId
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -124,7 +130,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [dblQtyShipped], [dblShipmentNetWt] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
 		ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
+	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId], [intItemUOMId] FROM tblICLot WITH (NOLOCK)) LOT
 		ON LOT.[intLotId] = ARIDL.[intLotId]
 LEFT OUTER JOIN
     (SELECT [intLoadId], [intPurchaseSale] FROM tblLGLoad WITH (NOLOCK)) LGL
@@ -133,7 +139,9 @@ LEFT OUTER JOIN
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
 LEFT OUTER JOIN 
-	(SELECT intUnitMeasureId,intItemUOMId FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
+	(SELECT intUnitMeasureId,intItemUOMId,ysnSeparateStockForUOMs FROM tblICItemUOM ICUOM  WITH (NOLOCK)
+		INNER JOIN tblICItem ITEM ON ICUOM.intItemId=ITEM.intItemId
+		) ICIUOM
 		ON ARID.intItemUOMId = ICIUOM.intItemUOMId
 
 WHERE
@@ -183,6 +191,8 @@ INSERT INTO ##ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[ysnAutoBlend]
+	,[strBOLNumber] 
+	,[intTicketId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -220,6 +230,8 @@ SELECT
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intBundleItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
+	,[strBOLNumber]				= ARID.strBOLNumber 
+	,[intTicketId]				= ARID.intTicketId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
@@ -278,6 +290,8 @@ INSERT INTO ##ARItemsForCosting
 	,[dblAdjustRetailValue]
 	,[strType]
 	,[ysnAutoBlend]
+	,[strBOLNumber] 
+	,[intTicketId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -306,6 +320,8 @@ SELECT
 	,ARIC.[dblAdjustRetailValue]
 	,ARID.[strType]
 	,ARID.[ysnAutoBlend]
+	,ARID.[strBOLNumber] 
+	,ARID.[intTicketId]
 FROM ##ARItemsForCosting ARIC
 INNER JOIN ##ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
@@ -313,5 +329,14 @@ INNER JOIN tblARInvoiceDetail ARIDP
 ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
 WHERE ARID.[intSourceId] = 2
 AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0) OR (ARID.[dblQtyShipped] < ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))
+
+UPDATE IC
+SET strSourceType = 'Transport'
+  , strSourceNumber	= LH.strTransaction
+FROM ##ARItemsForCosting IC
+INNER JOIN tblARInvoice I ON IC.intTransactionId = I.intInvoiceId AND IC.strTransactionId = I.strInvoiceNumber
+INNER JOIN tblTRLoadDistributionHeader DH ON I.intLoadDistributionHeaderId = DH.intLoadDistributionHeaderId 
+INNER JOIN tblTRLoadHeader LH ON DH.intLoadHeaderId = LH.intLoadHeaderId
+WHERE IC.strType = 'Transport Delivery'
 
 RETURN 1

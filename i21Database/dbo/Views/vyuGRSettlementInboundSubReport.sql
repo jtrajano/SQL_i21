@@ -81,14 +81,21 @@ AS
 					FROM tblICInventoryReceiptCharge INVRCPTCHR 
 					LEFT JOIN tblICInventoryReceipt INVRCPT 
 						ON INVRCPTCHR.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+					-- LEFT JOIN (
+					-- 		SELECT intSourceId
+					-- 			,intInventoryReceiptId
+					-- 			,ROW_NUMBER() OVER (PARTITION BY intInventoryReceiptId ORDER BY intSourceId) intRowNum
+					-- 		FROM tblICInventoryReceiptItem
+					-- ) INVRCPTITEM 
+					-- 	ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId 
+					-- 		AND INVRCPTITEM.intRowNum =1
 					LEFT JOIN (
-							SELECT intSourceId
+							SELECT MIN(intSourceId) intSourceId
 								,intInventoryReceiptId
-								,ROW_NUMBER() OVER (PARTITION BY intInventoryReceiptId ORDER BY intSourceId) intRowNum
 							FROM tblICInventoryReceiptItem
+							GROUP BY intInventoryReceiptId
 					) INVRCPTITEM 
-						ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId 
-							AND INVRCPTITEM.intRowNum =1
+						ON INVRCPTITEM.intInventoryReceiptId =INVRCPT.intInventoryReceiptId
 					LEFT JOIN (
 								SELECT 
 									QM.intTicketId

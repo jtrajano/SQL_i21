@@ -785,6 +785,7 @@ BEGIN TRY
 				,intTermId
 				,intCostCurrencyId
 				,intInventoryReceiptItemId
+				,intLocationId
 				)
 			SELECT @intEntityId
 				,1
@@ -814,6 +815,7 @@ BEGIN TRY
 				,@intTermID
 				,intCurrencyId
 				,intInventoryReceiptItemId
+				,@intLocationId
 			FROM @tblIPFinalInvoiceDetail FID
 
 			IF @dblFinanceChargeAmount > 0
@@ -846,6 +848,7 @@ BEGIN TRY
 					,dtmDueDate
 					,intTermId
 					,intCostCurrencyId
+					,intLocationId
 					)
 				SELECT @intEntityId
 					,1
@@ -874,6 +877,7 @@ BEGIN TRY
 					,@dtmDueDate
 					,@intTermID
 					,intCurrencyId
+					,@intLocationId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 
@@ -907,6 +911,7 @@ BEGIN TRY
 					,dtmDueDate
 					,intTermId
 					,intCostCurrencyId
+					,intLocationId
 					)
 				SELECT @intEntityId
 					,1
@@ -935,6 +940,7 @@ BEGIN TRY
 					,@dtmDueDate
 					,@intTermID
 					,intCurrencyId
+					,@intLocationId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 
@@ -968,6 +974,7 @@ BEGIN TRY
 					,dtmDueDate
 					,intTermId
 					,intCostCurrencyId
+					,intLocationId
 					)
 				SELECT @intEntityId
 					,1
@@ -996,6 +1003,7 @@ BEGIN TRY
 					,@dtmDueDate
 					,@intTermID
 					,intCurrencyId
+					,@intLocationId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 

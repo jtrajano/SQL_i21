@@ -4,6 +4,7 @@
 	,@intCurrencyId INT = NULL
 	,@intUnitMeasureId INT = NULL
 	,@intLocationId INT = NULL
+	,@dblComputedArbitrage NUMERIC(18, 6) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -30,6 +31,11 @@ BEGIN TRY
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strMarketBasisXML
+
+	IF @dblComputedArbitrage IS NULL
+	BEGIN
+		SELECT @dblComputedArbitrage = 0
+	END
 
 	DELETE
 	FROM @MarketBasis
@@ -96,7 +102,7 @@ BEGIN TRY
 		,intRecipeItemId
 		,intRecipeItemTypeId
 		,dblCalculatedQuantity
-		,intVirtualRecipeId 
+		,intVirtualRecipeId
 		)
 	SELECT VA.intRecipeId
 		,RI.intItemId
@@ -105,7 +111,7 @@ BEGIN TRY
 		,RI.dblCalculatedQuantity
 		,VA.intVirtualRecipeId
 	FROM dbo.tblMFVirtualRecipeMap VA
-	JOIN tblMFRecipeItem RI on RI.intRecipeId =VA.intRecipeId 
+	JOIN tblMFRecipeItem RI ON RI.intRecipeId = VA.intRecipeId
 	WHERE VA.intVirtualRecipeId IN (
 			SELECT Item COLLATE Latin1_General_CI_AS
 			FROM [dbo].[fnSplitString](@strVirtualRecipe, ',')
@@ -192,13 +198,13 @@ BEGIN TRY
 		,strProductType AS strItemProductType
 	FROM (
 		SELECT ROW_NUMBER() OVER (
-				ORDER BY IsNULL(VRI.intRecipeId,ARI.intVirtualRecipeId)
+				ORDER BY IsNULL(VRI.intRecipeId, ARI.intVirtualRecipeId)
 					,VRI.intRecipeItemId
 				) intRowNumber
-			,IsNULL(VRI.intRecipeId,ARI.intVirtualRecipeId) AS intVirtualRecipeId
+			,IsNULL(VRI.intRecipeId, ARI.intVirtualRecipeId) AS intVirtualRecipeId
 			,VRI.intRecipeItemId AS intVirtualRecipeItemId
 			,VRI.intItemId AS intVirtualItemId
-			,IsNULL(ARI.intRecipeId,VA.intRecipeId) AS intActualRecipeId
+			,IsNULL(ARI.intRecipeId, VA.intRecipeId) AS intActualRecipeId
 			,ARI.intRecipeItemId AS intActualRecipeItemId
 			,ARI.intItemId AS intActualItemId
 			,CASE 
@@ -223,8 +229,20 @@ BEGIN TRY
 				END AS strActualInputItemNo
 			,VRI.dblCalculatedQuantity AS dblVirtualPercentage
 			,ARI.dblCalculatedQuantity AS dblActualPercentage
-			,IsNULL(VB.dblTotalCost * VRI.dblCalculatedQuantity / 100,0) AS dblVirtualBasis
-			,IsNULL(AB.dblTotalCost * ARI.dblCalculatedQuantity / 100,0) AS dblActualBasis
+			,IsNULL((
+					CASE 
+						WHEN CA.strDescription = 'ROBUSTA'
+							THEN (VB.dblTotalCost - @dblComputedArbitrage) * VRI.dblCalculatedQuantity 
+						ELSE VB.dblTotalCost * VRI.dblCalculatedQuantity 
+						END
+					), 0) AS dblVirtualBasis
+			,IsNULL((
+					CASE 
+						WHEN CA.strDescription = 'ROBUSTA'
+							THEN (AB.dblTotalCost - @dblComputedArbitrage) * ARI.dblCalculatedQuantity 
+						ELSE AB.dblTotalCost * ARI.dblCalculatedQuantity 
+						END
+					), 0) AS dblActualBasis
 			,C.dblCost1 AS dblCost1
 			,C.dblCost2 AS dblCost2
 			,C.dblCost3 AS dblCost3
@@ -235,7 +253,7 @@ BEGIN TRY
 		FROM dbo.tblMFVirtualRecipeMap VA
 		JOIN dbo.tblMFRecipeItem VRI ON VRI.intRecipeId = VA.intVirtualRecipeId
 		JOIN dbo.tblICItem VI ON VI.intItemId = VRI.intItemId
-		JOIN [dbo].[fnSplitString](@strVirtualRecipe, ',') VR on VR.Item=VA.intVirtualRecipeId
+		JOIN [dbo].[fnSplitString](@strVirtualRecipe, ',') VR ON VR.Item = VA.intVirtualRecipeId
 		FULL OUTER JOIN @tblMFRecipeItem ARI ON ARI.intRecipeId = VA.intRecipeId
 			AND ARI.intItemId = VRI.intItemId
 		LEFT JOIN dbo.tblICItem AI ON AI.intItemId = ARI.intItemId
@@ -243,11 +261,12 @@ BEGIN TRY
 		LEFT JOIN @MarketBasis AB ON AB.intItemId = AI.intItemId
 		LEFT JOIN @Cost C ON C.intRecipeId = VA.intVirtualRecipeId
 			AND C.intItemId = ISNULL(VI.intItemId, AI.intItemId)
-			LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = ISNULL(VI.intCommodityId,AI.intCommodityId )
-			AND CA.intCommodityAttributeId = ISNULL(VI.intProductTypeId,AI.intProductTypeId)
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = ISNULL(VI.intCommodityId, AI.intCommodityId)
+			AND CA.intCommodityAttributeId = ISNULL(VI.intProductTypeId, AI.intProductTypeId)
 		) AS DT
 	ORDER BY ISNULL(DT.intVirtualRecipeId, DT.intActualRecipeId)
-		,DT.intRecipeItemTypeId DESC,DT.intVirtualRecipeItemId Desc
+		,DT.intRecipeItemTypeId DESC
+		,DT.intVirtualRecipeItemId DESC
 END TRY
 
 BEGIN CATCH

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSTGridUpdateCostAndPrice]
+CREATE PROCEDURE [dbo].[uspSTGridUpdateCostAndPrice]
     @intEntityId INT,
     @ysnRecap BIT,
 	@UDTItemGridToUpdate StoreItemGridToUpdate	READONLY,
@@ -75,7 +75,7 @@ AS
 
 					BEGIN TRY
 
-						EXEC [uspICUpdateEffectivePricingForCStore]
+						EXEC [uspICUpdateItemWithEffectiveDatePricingForCStore]
 							@intItemId					= @intLoopItemId		,
 							@intItemLocationId 			= @intLoopItemLocationId,
 							@dblStandardCost 			= @dblLoopNewCost		,
@@ -113,7 +113,7 @@ AS
 			DECLARE @tblGridCostAndPriceToUpdatePromotional TABLE (
 				[strUpcCode]			[varchar](250) NULL,
 				[intItemId]				[int] NULL,
-				[intItemLocationId]			[int] NULL,
+				[intLocationId]				[int] NULL,
 				[intCompanyLocationId]	[int] NULL,
 				[dblNewCost]			[numeric](38, 2) NULL,
 				[dblNewPrice]			[numeric](38, 2) NULL,
@@ -123,8 +123,9 @@ AS
 
 			INSERT INTO @tblGridCostAndPriceToUpdatePromotional
 			(
-				[intItemId]	
-				, [intItemLocationId]
+				[strUpcCode]	
+				, [intItemId]	
+				, [intLocationId]
 				, [intCompanyLocationId]	--This will be the company location for this table
 				, [dblNewCost]	
 				, [dblNewPrice]	
@@ -132,8 +133,9 @@ AS
 				, [dtmEndDate]	
 			)
 			SELECT DISTINCT
-				[intItemId]				= udt.intItemId
-				, [intItemLocationId]		= il.intItemLocationId
+				[strUpcCode]				= uom.strLongUPCCode
+				, [intItemId]				= udt.intItemId
+				, [intLocationId]			= il.intItemLocationId
 				, [intCompanyLocationId]	= st.intCompanyLocationId
 				, [dblNewCost]				= udt.dblNewCost
 				, [dblNewPrice]				= udt.dblNewPrice
@@ -150,7 +152,9 @@ AS
 					AND uom.ysnStockUnit = 1
 
 	
-			DECLARE @intPromoLoopItemId				AS INT
+			DECLARE @strPromoLoopUpcCode				AS VARCHAR(250)
+					, @strTESTResult  					AS VARCHAR(250)
+					, @intPromoLoopItemId				AS INT
 					, @intPromoLoopItemLocationId		AS INT
 					, @intPromoLoopCompanyLocationId	AS INT
 					, @dblPromoLoopNewCost				AS NUMERIC(38,6)
@@ -161,8 +165,9 @@ AS
 			WHILE EXISTS(SELECT TOP 1 1 FROM @tblGridCostAndPriceToUpdatePromotional)
 				BEGIN
 					SELECT TOP 1
-						@intPromoLoopItemId					= temp.[intItemId]
-						, @intPromoLoopItemLocationId		= temp.[intItemLocationId]
+						@strPromoLoopUpcCode				= temp.[strUpcCode]
+						, @intPromoLoopItemId				= temp.[intItemId]
+						, @intPromoLoopItemLocationId		= temp.[intLocationId]
 						, @intPromoLoopCompanyLocationId	= temp.[intCompanyLocationId]
 						, @dblLoopNewCost					= temp.[dblNewCost]
 						, @dblLoopNewPrice					= temp.[dblNewPrice]
@@ -170,6 +175,7 @@ AS
 						, @dtmLoopEndDate					= CONVERT(DATETIME, CONVERT(DATE, temp.[dtmEndDate])) --Get the Date only
 					FROM @tblGridCostAndPriceToUpdatePromotional temp
 
+					DELETE FROM #tmpUpdateItemPricingForCStore_Location
 
 
 					--This will apply a filtering of location based per item in Updating Promotional Cost and Price
@@ -191,8 +197,9 @@ AS
 							,@dblPromotionalCost			= @dblLoopNewCost 
 							,@dtmBeginDate					= @dtmLoopStartDate
 							,@dtmEndDate					= @dtmLoopEndDate 
+							,@strUpcCode					= @strPromoLoopUpcCode
 							,@intItemId						= @intPromoLoopItemId
-							,@intItemLocationId				= @intPromoLoopItemLocationId
+							,@intLocationId					= @intPromoLoopItemLocationId
 							,@intEntityUserSecurityId		= @intEntityId
 						
 						
@@ -203,12 +210,12 @@ AS
 
 						GOTO ExitWithRollback;
 					END CATCH
-					
-					DELETE FROM #tmpUpdateItemPricingForCStore_Location
+
 					
 					SELECT TOP 1
-						@intPromoLoopItemId				= temp.[intItemId]
-						, @intPromoLoopItemLocationId		= temp.[intItemLocationId]
+						@strPromoLoopUpcCode				= temp.[strUpcCode]
+						, @intPromoLoopItemId				= temp.[intItemId]
+						, @intPromoLoopItemLocationId		= temp.[intLocationId]
 						, @intPromoLoopCompanyLocationId	= temp.[intCompanyLocationId]
 						, @dblLoopNewCost					= temp.[dblNewCost]
 						, @dblLoopNewPrice					= temp.[dblNewPrice]
@@ -219,8 +226,9 @@ AS
 
 					DELETE FROM @tblGridCostAndPriceToUpdatePromotional
 					WHERE  
-						[intItemId]										= @intPromoLoopItemId
-						AND [intItemLocationId]							= @intPromoLoopItemLocationId
+						ISNULL([strUpcCode], '')						= ISNULL(@strPromoLoopUpcCode, '')
+						AND [intItemId]									= @intPromoLoopItemId
+						AND [intLocationId]								= @intPromoLoopItemLocationId
 						AND [intCompanyLocationId]						= @intPromoLoopCompanyLocationId
 						AND CAST([dblNewCost] AS NUMERIC(18,6))			= CAST(@dblLoopNewCost AS NUMERIC(18,2))		
 						AND CAST([dblNewPrice] AS NUMERIC(18,6))		= CAST(@dblLoopNewPrice	 AS NUMERIC(18,2))	

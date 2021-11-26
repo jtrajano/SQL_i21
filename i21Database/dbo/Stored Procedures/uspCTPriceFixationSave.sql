@@ -78,6 +78,19 @@ BEGIN TRY
 	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	PC.intFinalCurrencyId
 	WHERE	intPriceFixationId		=	@intPriceFixationId
 
+	if exists (
+		select
+			top 1 1
+		from
+			tblCTContractDetail cd
+		where
+			cd.intContractStatusId = 3
+			and cd.intContractDetailId = @intContractDetailId
+	)
+	begin
+		RAISERROR ('Cancelled sequences cannot be priced.',18,1,'WITH NOWAIT');
+	end
+
 	SELECT	@dblTotalPFDetailNoOfLots	=	SUM([dblNoOfLots]),
 			@dblTotalPFDetailQuantiy	=	SUM(dblQuantity)
 	FROM	tblCTPriceFixationDetail

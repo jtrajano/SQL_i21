@@ -69,7 +69,7 @@ BEGIN
 				,@dblDeferredAmt10 = dblDeferredAmt10
 				,@dtmDeferredDate10 = dtmDeferredDate10
 				,@dtmDueDate = dtmDueDate
-			FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId AND DD.intImportDtnDetailId = @intImportDtnDetailId
+			FROM tblTRImportDtnDetail DD WHERE DD.ysnValid = 1 AND DD.intImportDtnId = @intImportLoadId
 						
 			SELECT @intTermId = intTermsId, @dblAmountDue = dblAmountDue FROM tblAPBill B WHERE B.intBillId = @intBillId
 

@@ -30,6 +30,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@intInvoiceIdFrom				AS INT
 		,@xmlDocumentId					AS INT
 		,@intEntityUserId				AS INT
+		,@strCompanyName				AS NVARCHAR(MAX) = NULL
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -153,6 +154,7 @@ SET @strMeterBillingInvoiceFormat = ISNULL(@strMeterBillingInvoiceFormat, 'Stand
 SET @strCreditMemoReportName = ISNULL(@strInvoiceReportName, 'Standard')
 SET @strServiceChargeFormat = ISNULL(@strServiceChargeFormat, 'Standard')
 SET @ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
+set @strCompanyName =  (select strCompanyName from tblSMCompanySetup where strCompanyName like '%Cel Oil%')
 
 --GET INVOICES WITH FILTERS
 INSERT INTO @INVOICETABLE (
@@ -218,8 +220,14 @@ UPDATE @INVOICETABLE SET strInvoiceFormat = 'Format 3 - Swink' WHERE strInvoiceF
 INSERT INTO @MCPINVOICES
 SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
 
-IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES)
+IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES) AND @strCompanyName = NULL
+BEGIN
 	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId, @strRequestId
+END
+ELSE
+BEGIN
+	EXEC dbo.[uspARInvoiceMCPReportCustom] @MCPINVOICES, @intEntityUserId, @strRequestId
+END
 
 INSERT INTO @STANDARDINVOICES
 SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')

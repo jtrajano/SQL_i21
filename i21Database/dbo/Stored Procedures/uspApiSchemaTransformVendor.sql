@@ -3,6 +3,10 @@
 	@guiLogId UNIQUEIDENTIFIER
 AS
 
+--SET DEFAULT VALUES
+UPDATE tblApiSchemaVendor SET strType = 'Vendor' WHERE guiApiUniqueId = @guiApiUniqueId AND strType IS NULL
+UPDATE tblApiSchemaVendor SET strVendorType = 'Company' WHERE guiApiUniqueId = @guiApiUniqueId AND strVendorType IS NULL
+
 --VALIDATE
 INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strLogLevel, strStatus, strAction, intRowNo, strField, strValue, strMessage)
 SELECT * FROM dbo.fnApiSchemaValidateVendor(@guiApiUniqueId, @guiLogId)
@@ -23,22 +27,32 @@ BEGIN
 		SELECT TOP 1 * INTO #tmpApiSchemaVendorTop FROM #tmpApiSchemaVendor
 
 		--ENTITY
-		INSERT INTO tblEMEntity(strEntityNo, strName, strWebsite, strContactNumber, strMobile, strFax, strEmail, strTimezone)
-		SELECT strEntityNo, strName, strWebsite, strContactNumber, strMobile, strFax, strEmail, strTimezone
+		INSERT INTO tblEMEntity(strEntityNo, strName, strWebsite, strContactNumber, strFax, strEmail, strTimezone)
+		SELECT strEntityNo, strName, strWebsite, '', strFax, strEmail, strTimezone
 		FROM #tmpApiSchemaVendorTop
 
 		SET @entityId = SCOPE_IDENTITY()
 
 		--ENTITY CONTACT
-		INSERT INTO tblEMEntity(strEntityNo, strName, strWebsite, strContactNumber, strMobile, strFax, strEmail, strTimezone)
-		SELECT strEntityNo, strContactName, strWebsite, strContactNumber, strMobile, strFax, strEmail, strTimezone
+		INSERT INTO tblEMEntity(strName, strWebsite, strContactNumber, strFax, strEmail, strTimezone)
+		SELECT strContactName, strWebsite, '', strFax, strEmail, strTimezone
 		FROM #tmpApiSchemaVendorTop
 
 		SET @entityContactId = SCOPE_IDENTITY()
 
+		--ENTITY PHONE
+		INSERT INTO tblEMEntityPhoneNumber(intEntityId, strPhone, intCountryId)
+		SELECT @entityContactId, strContactNumber, NULL
+		FROM #tmpApiSchemaVendorTop
+
+		--ENTITY MOBILE
+		INSERT INTO tblEMEntityMobileNumber(intEntityId, strPhone, intCountryId)
+		SELECT @entityContactId, strMobile, NULL
+		FROM #tmpApiSchemaVendorTop
+
 		--ENTITY LOCATION
-		INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, strPricingLevel, ysnDefaultLocation)
-		SELECT @entityId, strLocationName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, strPricingLevel, 1
+		INSERT INTO tblEMEntityLocation(intEntityId, strLocationName, strCheckPayeeName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, strPricingLevel, ysnDefaultLocation)
+		SELECT @entityId, strLocationName, strName, strAddress, strCity, strState, strZipCode, strCountry, strTimezone, strPricingLevel, 1
 		FROM #tmpApiSchemaVendorTop
 			
 		SET @entityLocationId = SCOPE_IDENTITY()
@@ -62,6 +76,12 @@ BEGIN
 			UNION ALL
 			SELECT 1 intVendorType, 'Person' strVendorType
 		) VT ON VT.strVendorType = V.strVendorType
+		LEFT JOIN tblSMTerm T ON T.strTerm = V.strTerm
+
+		--VENDOR TERMS
+		INSERT INTO tblAPVendorTerm(intEntityVendorId, intTermId)
+		SELECT @entityId, T.intTermID
+		FROM #tmpApiSchemaVendorTop V
 		LEFT JOIN tblSMTerm T ON T.strTerm = V.strTerm
 
 		DELETE FROM #tmpApiSchemaVendor WHERE intKey IN (SELECT intKey FROM #tmpApiSchemaVendorTop)

@@ -13,6 +13,10 @@ BEGIN TRY
 		,@intBillId INT
 		,@intProcessedItemUOMId INT
 		,@intUnitMeasureId INT
+		,@intVendorEntityId INT
+		,@intBookId INT
+		,@intPaymentMethodId INT
+		,@strPaymentMethod NVARCHAR(50)
 	DECLARE @xmlVoucherIds XML
 		,@intCents INT
 	DECLARE @createVoucherIds NVARCHAR(MAX)
@@ -35,7 +39,7 @@ BEGIN TRY
 	FROM tblICItemUOM
 	WHERE intItemUOMId = @intProcessedItemUOMId
 
-	Select @intUnitMeasureId=1
+	SELECT @intUnitMeasureId = 1
 
 	SELECT @intAPAccount = ISNULL(intServiceCharges, 0)
 	FROM tblSMCompanyLocation CL
@@ -44,9 +48,22 @@ BEGIN TRY
 	SELECT @intCurrencyId = intCurrencyId
 		,@ysnSubCurrency = ysnSubCurrency
 		,@intCents = CU.intCent
+		,@intVendorEntityId = intVendorEntityId
 	FROM tblLGWarehouseRateMatrixHeader WRMH
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = WRMH.intCurrencyId
 	WHERE intWarehouseRateMatrixHeaderId = @intWarehouseRateMatrixHeaderId
+
+	SELECT @intPaymentMethodId = intPaymentMethodId
+	FROM tblAPVendor
+	WHERE intEntityId = @intVendorEntityId
+
+	SELECT @strPaymentMethod = strPaymentMethod
+	FROM tblSMPaymentMethod
+	WHERE intPaymentMethodID = @intPaymentMethodId
+
+	SELECT @intBookId = intBookId
+	FROM tblCTBook
+	WHERE strBook = @strPaymentMethod
 
 	DECLARE @voucherPayables AS VoucherPayable
 
@@ -73,11 +90,12 @@ BEGIN TRY
 		,strSourceNumber
 		,intOrderUOMId
 		,intQtyToBillUOMId
-		,intCostCurrencyId 
-		,dblWeight 
-		,dblNetWeight 
+		,intCostCurrencyId
+		,dblWeight
+		,dblNetWeight
 		,intWeightUOMId
 		,strReference
+		,intBookId
 		)
 	SELECT 1 AS intPartitionId
 		,RH.intVendorEntityId
@@ -106,8 +124,15 @@ BEGIN TRY
 		,RD.strActivity
 		,@intLocationId
 		,W.intSubLocationId
-		,strWorkOrderNo,IU.intItemUOMId,IU.intItemUOMId  ,@intCurrencyId,WRD.dblProcessedQty,WRD.dblProcessedQty,IU.intItemUOMId
 		,strWorkOrderNo
+		,IU.intItemUOMId
+		,IU.intItemUOMId
+		,@intCurrencyId
+		,WRD.dblProcessedQty
+		,WRD.dblProcessedQty
+		,IU.intItemUOMId
+		,strWorkOrderNo
+		,@intBookId
 	FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WRD
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WRD.intWorkOrderId
 	JOIN dbo.tblLGWarehouseRateMatrixHeader RH ON RH.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId

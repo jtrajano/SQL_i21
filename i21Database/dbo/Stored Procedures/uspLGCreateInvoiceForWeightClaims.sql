@@ -266,9 +266,9 @@ BEGIN TRY
 		,[intOrderUOMId] = LD.intWeightItemUOMId
 		,[dblQtyOrdered] = WCD.dblFromNet
 		,[intItemUOMId] = WCD.intPriceItemUOMId
-		,[dblQtyShipped] = CASE WHEN LD.intWeightItemUOMId <> WCD.intPriceItemUOMId THEN  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,WCD.intPriceItemUOMId,ABS(WCD.dblClaimableWt)),2) ELSE ROUND(WCD.dblClaimableWt,2) END
+		,[dblQtyShipped] = dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,WCD.intPriceItemUOMId,ABS(WCD.dblClaimableWt))
 		,[dblDiscount] = 0 
-		,[dblItemWeight] = CASE WHEN LD.intWeightItemUOMId <> WCD.intPriceItemUOMId THEN  ROUND(dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,WCD.intPriceItemUOMId,ABS(WCD.dblClaimableWt)),2) ELSE ROUND(WCD.dblClaimableWt,2) END
+		,[dblItemWeight] = dbo.fnCTConvertQtyToTargetItemUOM(LD.intWeightItemUOMId,WCD.intPriceItemUOMId,ABS(WCD.dblClaimableWt))
 		,[intItemWeightUOMId] = LD.intWeightItemUOMId
 		,[dblPrice] = WCD.dblUnitPrice
 		,[dblUnitPrice] = WCD.dblUnitPrice
@@ -297,9 +297,9 @@ BEGIN TRY
 		,[intContractHeaderId] = CD.intContractHeaderId
 		,[intContractDetailId] = CD.[intContractDetailId]
 		,[intShipmentPurchaseSalesContractId] = NULL
-		,[dblShipmentGrossWt] = 1
-		,[dblShipmentTareWt] = 1
-		,[dblShipmentNetWt] = 1
+		,[dblShipmentGrossWt] = ABS(WCD.dblClaimableWt)
+		,[dblShipmentTareWt] = 0
+		,[dblShipmentNetWt] = ABS(WCD.dblClaimableWt)
 		,[intTicketId] = NULL
 		,[intTicketHoursWorkedId] = NULL
 		,[intOriginalInvoiceDetailId] = NULL

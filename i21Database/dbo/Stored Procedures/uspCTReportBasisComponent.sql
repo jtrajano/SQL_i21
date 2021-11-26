@@ -138,17 +138,17 @@ BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 	BEGIN	
 		RETURN
-	END
+	END;
 
-	;with CTECert as
-    (
-        select
-            cr.intContractDetailId
-            ,ce.strCertificationName
-        from
-            tblCTContractCertification cr
-            left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
-    )
+	with CTECert as
+	(
+		select
+			cr.intContractDetailId
+			,ce.strCertificationName
+		from
+			tblCTContractCertification cr
+			left JOIN tblICCertification ce ON ce.intCertificationId = cr.intCertificationId
+	)
 
 	SELECT DISTINCT strContractNumber = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq AS NVARCHAR)
 		, strPONumber = CD.strERPPONumber
@@ -159,37 +159,37 @@ BEGIN
 		, strEntity = EN.strName
 		, CH.strInternalComment
 		, strItem = IT.strItemNo
-		, dblQuantity = ROUND(CD.dblQuantity, @intQtyDec)
+		, dblQuantity = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblQuantity), @intQtyDec)
 		, strQtyUOM = IUOM.strUnitMeasure
-		, dblNetWeight = ROUND(CD.dblNetWeight, @intQtyDec)
+		, dblNetWeight = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblNetWeight), @intQtyDec)
 		, strWeightUOM = WUOM.strUnitMeasure
 		, strContractItem = IC.strContractItemName
 		, strMarket = FMarket.strFutMarketName
 		, strMonth = FMonth.strFutureMonth
 		, CU.strCurrency
 		, strPriceUOM = PUOM.strUnitMeasure
-		, dblFutures = ROUND(CD.dblFutures, @intPriceDec)
+		, dblFutures = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblFutures), @intPriceDec)
 		, strProductType = PT.strDescription
 		, strINCOShipTerms = ST.strFreightTerm
 		, CS.strContractStatus
-		, dblFinancingCost = ROUND(CCTotal.dblFinancingCost, @intPriceDec)
-		, dblFOB = ROUND(CCTotal.dblFOB, @intPriceDec)
-		, dblSustainabilityPremium = ROUND(CCTotal.dblSustainabilityPremium, @intPriceDec)
-		, dblFOBCAD = ROUND(CCTotal.dblFOBCAD, @intPriceDec)
-		, dblOtherCost = ROUND(CCTotal.dblOtherCost, @intPriceDec)
-		, dblBasis = ROUND(CD.dblBasis, @intPriceDec)
-		, dblCashPrice = ROUND(CD.dblCashPrice, @intPriceDec)
-        , strCertificateName = (
-            select
-                STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
-            FROM
-                CTECert where intContractDetailId = CD.intContractDetailId
-            FOR XML PATH('')),' #!',', '), 1, 2, '')
-        )
-	    , ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
-	    , strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS
-	    , strOrigin = ISNULL(RY.strCountry, OG.strCountry)
-	    , strShipper = PR.strName 
+		, dblFinancingCost = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFinancingCost), @intPriceDec)
+		, dblFOB = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOB), @intPriceDec)
+		, dblSustainabilityPremium = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblSustainabilityPremium), @intPriceDec)
+		, dblFOBCAD = ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblFOBCAD), @intPriceDec)
+		, dblOtherCost =  ROUND(dbo.fnRemoveTrailingZeroes(CCTotal.dblOtherCost), @intPriceDec)
+		, dblBasis = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblBasis), @intPriceDec)
+		, dblCashPrice = ROUND(dbo.fnRemoveTrailingZeroes(CD.dblCashPrice), @intPriceDec)
+		, ysnStrategic = (case when isnull(CH.ysnStrategic,0) = 0 then 'N' else 'Y' end) COLLATE Latin1_General_CI_AS
+		, strCertificateName = (
+						select
+							STUFF(REPLACE((SELECT '#!' + LTRIM(RTRIM(strCertificationName)) AS 'data()'
+						FROM
+							CTECert where intContractDetailId = CD.intContractDetailId
+						FOR XML PATH('')),' #!',', '), 1, 2, '')
+					)
+		, strFronting = CASE WHEN ISNULL(CD.ysnRiskToProducer, 0) = 0 THEN 'N' ELSE 'Y' END COLLATE Latin1_General_CI_AS
+		, strOrigin = ISNULL(RY.strCountry, OG.strCountry)
+		, strShipper = PR.strName
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	JOIN tblEMEntity EN ON EN.intEntityId = CH.intEntityId
@@ -231,7 +231,7 @@ BEGIN
 	LEFT JOIN tblSMFreightTerms ST ON ST.intFreightTermId = ISNULL(CH.intFreightTermId, CD.intFreightTermId)
 	LEFT JOIN tblICCommodityAttribute PT ON	PT.intCommodityAttributeId = IT.intProductTypeId AND PT.strType = 'ProductType'
 	LEFT JOIN tblCTPosition PS ON PS.intPositionId = CH.intPositionId
-	LEFT JOIN tblSMCountry RY WITH(NOLOCK) ON RY.intCountryID = IC.intCountryId  
+	LEFT JOIN tblSMCountry RY WITH(NOLOCK) ON RY.intCountryID = IC.intCountryId
 	LEFT JOIN tblICCommodityAttribute CA2 WITH(NOLOCK) ON CA2.intCommodityAttributeId = IT.intOriginId AND CA2.strType = 'Origin'  
 	LEFT JOIN tblSMCountry OG WITH(NOLOCK) ON OG.intCountryID = CA2.intCountryID  
 	LEFT JOIN tblEMEntity PR WITH(NOLOCK) ON PR.intEntityId = ISNULL(CD.intProducerId, CH.intProducerId) 

@@ -125,6 +125,7 @@
 :r .\8_AP\UpdateVoucherDetailRate.sql
 :r .\8_AP\DeleteOld1099PATRData.sql
 :r .\8_AP\ChangePrimaryKeyToIdentity.sql
+:r .\8_AP\DROPAxxisTable.sql
 
 -- FRD
 :r .\9_FRD\1_1420_to_1430.sql
@@ -211,6 +212,7 @@
 
 --CF
 :r .\20_CF\FixeDataWithContraints.sql
+:r .\20_CF\CardFuelingDeleteObject.sql
 
 --PR
 :r .\21_PR\1_1620_to_1630.sql
@@ -249,3 +251,6 @@
 
 --LG
 :r .\26_LG\0_DataCleanup.sql
+
+--SCH
+:r .\27_SCH\1_FixOrphanDistribution.sql

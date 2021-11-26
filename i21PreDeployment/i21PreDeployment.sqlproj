@@ -88,6 +88,7 @@
     <Folder Include="Scripts\Pre-Deployment\24_SC" />
     <Folder Include="Scripts\Pre-Deployment\25_ST" />
     <Folder Include="Scripts\Pre-Deployment\26_LG" />
+    <Folder Include="Scripts\Pre-Deployment\27_SCH" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -170,6 +171,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\23_DeleteDuplicateEntityMobileNumber.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\DROPAxxisTable.sql" />
     <None Include="Scripts\Pre-Deployment\4_SM\2120_DropAxxisTempTables.sql" />
+    <None Include="Scripts\Pre-Deployment\27_SCH\1_FixOrphanDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
@@ -423,5 +425,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\7_AR\15_FixtblARCustomer_MissingColumn.sql" />
+    <None Include="Scripts\Pre-Deployment\20_CF\CardFuelingDeleteObject.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\9_FRD\4_2110_to_2120.sql" />
   </ItemGroup>
 </Project>

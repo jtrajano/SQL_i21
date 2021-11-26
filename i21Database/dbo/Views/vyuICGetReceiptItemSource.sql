@@ -206,6 +206,17 @@ SELECT
 				END
 			ELSE NULL
 		END
+	, strMarkings =
+		CASE
+			-- Purchase Contract
+			WHEN Receipt.strReceiptType = 'Purchase Contract' THEN
+				CASE
+					-- Inbound Shipment
+					WHEN Receipt.intSourceType = 2 THEN Logistics.strMarks
+					ELSE NULL
+				END
+			ELSE NULL
+		END
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	OUTER APPLY (
@@ -270,6 +281,7 @@ FROM tblICInventoryReceiptItem ReceiptItem
 			, LogisticsLookup.dblContainerWeightPerQty
 			, LogisticsLookup.dblFranchise
 			, LogisticsLookup.strContainerNumber
+			, LogisticsLookup.strMarks
 		FROM vyuICLoadContainers LogisticsLookup
 		WHERE LogisticsLookup.intLoadDetailId = ReceiptItem.intSourceId 
 			AND LogisticsLookup.intLoadContainerId = ReceiptItem.intContainerId

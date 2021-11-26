@@ -65,6 +65,23 @@ BEGIN TRY
 				RETURN 0;
 		END
 
+		--Validate if an invoice exist before unposting
+		IF EXISTS (
+			SELECT TOP 1 strInvoiceNo = I.strInvoiceNumber
+			FROM tblLGLoad L
+			JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+			WHERE L.intLoadId = @intLoadId
+			) AND @ysnPost = 0
+		BEGIN
+			SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
+			FROM tblLGLoad L
+			JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+			WHERE L.intLoadId = @intLoadId
+			SET @strMsg = 'Invoice ' + @strInvoiceNo + ' has been generated for ' + @strLoadNumber + '. Cannot unpost. Please delete the invoice and try again.';
+			RAISERROR (@strMsg,16,1);
+			RETURN 0;
+		END
+
 		IF @intPurchaseSale = 1
 		BEGIN
 		

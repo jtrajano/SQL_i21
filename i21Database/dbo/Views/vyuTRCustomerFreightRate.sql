@@ -20,9 +20,12 @@ SELECT CF.intFreightXRefId
 , CF.dblFreightRate AS dblFreightRate
 , CF.dblFreightMiles AS dblFreightMiles
 , CF.ysnFreightInPrice AS ysnFreightInPrice
+, SMLOB.strLineOfBusiness AS strLineOfBusiness
 FROM tblARCustomerFreightXRef CF
 INNER JOIN tblARCustomer C ON C.intEntityId = CF.intEntityCustomerId
 INNER JOIN tblEMEntity EM ON EM.intEntityId = C.intEntityId
+INNER JOIN tblEMEntityLineOfBusiness EMELOB ON EM.intEntityId = EMELOB.intEntityId
+INNER JOIN tblSMLineOfBusiness SMLOB ON EMELOB.intLineOfBusinessId = SMLOB.intLineOfBusinessId
 LEFT JOIN tblEMEntityTariffType TT ON TT.intEntityTariffTypeId = CF.intEntityTariffTypeId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = C.intEntityId AND EL.intEntityLocationId = CF.intEntityLocationId
 LEFT JOIN tblEMEntityTariff TA ON TA.intEntityTariffTypeId = CF.intEntityTariffTypeId 
@@ -31,4 +34,3 @@ LEFT JOIN tblEMEntity EMSV ON EMSV.intEntityId = SV.intEntityId
 LEFT JOIN tblICCategory CC ON CC.intCategoryId = CF.intCategoryId
 LEFT JOIN tblSMShipVia FSV ON FSV.intEntityId = CF.intShipViaId
 LEFT JOIN tblEMEntity EMFSV ON EMFSV.intEntityId = FSV.intEntityId
-

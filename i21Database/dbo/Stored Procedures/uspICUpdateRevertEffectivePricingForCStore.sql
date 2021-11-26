@@ -19,7 +19,7 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS ON
+SET ANSI_WARNINGS OFF
 	   
 -- Create the temp table for the audit log. 
 IF OBJECT_ID('tempdb..#tmpEffectiveCostForCStore_AuditLog') IS NULL  
@@ -265,20 +265,32 @@ BEGIN
 
 		-- If matched, update the effective price.
 		WHEN MATCHED 
-			AND @strAction IN ('UPDATE')
+			AND @strAction IN ('UPDATE', 'INSERT')
 			AND u.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
+			AND @dblRetailPrice IS NOT NULL
 			THEN 
 			UPDATE 
 			SET 
 				e.dblRetailPrice = @dblRetailPrice
 				,e.dtmDateModified = GETDATE()
 				,e.intModifiedByUserId = @intEntityUserSecurityId
-	
+		
+		-- If matched with the same effective date on Revert Mass Pricebook Change
+		-- AND if Retail Price from Revert Mass Pricebook change is NULL
 		-- Delete Effective Item price
 		WHEN MATCHED 
 			AND @strAction = 'INSERT'
 			AND u.dtmEffectiveRetailPriceDate = @dtmEffectiveDate
+			AND @dblRetailPrice IS NULL
 			THEN DELETE
+			
+		-- If not matched on or mismatch specifically on effective date pricing vs effective date on Revert Mass Pricebook 
+		-- Create a new effective date
+		WHEN NOT MATCHED 
+			AND @strAction IN ('INSERT', 'UPDATE')
+			THEN 
+			INSERT (intItemId, intItemLocationId, dblRetailPrice, dtmEffectiveRetailPriceDate, intConcurrencyId, dtmDateCreated, intCreatedByUserId)
+			VALUES (u.intItemId, u.intItemLocationId, @dblRetailPrice, @dtmEffectiveDate, 1, GETDATE(), @intEntityUserSecurityId)
 
 		OUTPUT 
 			$action
