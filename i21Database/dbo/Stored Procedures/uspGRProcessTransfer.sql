@@ -46,30 +46,81 @@ BEGIN
 	)
 	DECLARE @GLForItem AS GLForItem
 	
-	---START---TRANSACTIONS FOR THE SOURCE-----	
-	IF EXISTS(SELECT TOP 1 1 
-			FROM tblGRCustomerStorage A 
-			INNER JOIN tblGRTransferStorageSourceSplit B 
-				ON B.intSourceCustomerStorageId = A.intCustomerStorageId 
-			WHERE B.intTransferStorageId = @intTransferStorageId AND B.dblOriginalUnits <> A.dblOpenBalance
-	)
-	BEGIN
-		DECLARE @TicketNo VARCHAR(50)
+	DECLARE @CustomerStorageIds AS Id
+	DECLARE @intId2 AS INT
+	DECLARE @dblTotalUnits AS DECIMAL(24,10)
+	DECLARE @dblTransferTotal AS DECIMAL(24,10)
+	DECLARE @TicketNo VARCHAR(50)
+	DECLARE @TicketNo2 VARCHAR(50)
 
-		SELECT @TicketNo = STUFF((
-			SELECT ',' + strStorageTicketNumber 
-			FROM tblGRCustomerStorage A 
-			INNER JOIN tblGRTransferStorageSourceSplit B 
-				ON B.intSourceCustomerStorageId = A.intCustomerStorageId 
-			WHERE B.intTransferStorageId = @intTransferStorageId AND B.dblOriginalUnits <> A.dblOpenBalance
-			FOR XML PATH('')
-		),1,1,'')
-		
-		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user. Transfer process cannot proceed.'
+	DECLARE @Transfers TABLE
+	(
+		intSourceCustomerStorageId INT
+		,dblOriginalBalance DECIMAL(24,10)
+		,dblOpenBalance DECIMAL(24,10)
+		,dblTotalTransactions DECIMAL(24,10)
+		,ysnTransferStorage BIT
+	)
+
+	DELETE FROM @CustomerStorageIds
+	INSERT INTO @CustomerStorageIds
+	SELECT DISTINCT intSourceCustomerStorageId FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = @intTransferStorageId
+
+	WHILE EXISTS(SELECT 1 FROM @CustomerStorageIds)
+	BEGIN
+		SET @intId2 = NULL
+		SET @dblTotalUnits = NULL
+		SET @dblTransferTotal = NULL
+
+		SELECT TOP 1 @intId2 = intId FROM @CustomerStorageIds
+
+		SELECT @TicketNo				= strStorageTicketNo
+			,@dblTotalUnits			= ISNULL(dblHistoryTotalUnits,0)
+			,@dblTransferTotal		= ISNULL(dblTransferTotal,0)
+		FROM [dbo].[fnGRCheckStorageBalance](@intId2, @intTransferStorageId)
+
+		IF ROUND(@dblTransferTotal,4) > ROUND(@dblTotalUnits,4)
+		BEGIN
+			SELECT @TicketNo2 = STUFF((
+				SELECT ',' + @TicketNo
+				FOR XML PATH('')
+			),1,1,'')
+		END
+
+		DELETE FROM @CustomerStorageIds WHERE intId = @intId2
+	END
+
+	IF ISNULL(@TicketNo2,'') <> ''
+	BEGIN
+		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo2 + ' has been modified by another user. Transfer process cannot proceed.'
 		
 		RAISERROR(@ErrMsg,16,1)
 		RETURN;
 	END
+	-----START---TRANSACTIONS FOR THE SOURCE-----
+	--IF EXISTS(SELECT TOP 1 1 
+	--		FROM tblGRCustomerStorage A 
+	--		INNER JOIN tblGRTransferStorageSourceSplit B 
+	--			ON B.intSourceCustomerStorageId = A.intCustomerStorageId 
+	--		WHERE B.intTransferStorageId = @intTransferStorageId AND B.dblOriginalUnits <> A.dblOpenBalance
+	--)
+	--BEGIN
+	--	DECLARE @TicketNo VARCHAR(50)
+
+	--	SELECT @TicketNo = STUFF((
+	--		SELECT ',' + strStorageTicketNumber 
+	--		FROM tblGRCustomerStorage A 
+	--		INNER JOIN tblGRTransferStorageSourceSplit B 
+	--			ON B.intSourceCustomerStorageId = A.intCustomerStorageId 
+	--		WHERE B.intTransferStorageId = @intTransferStorageId AND B.dblOriginalUnits <> A.dblOpenBalance
+	--		FOR XML PATH('')
+	--	),1,1,'')
+		
+	--	SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user. Transfer process cannot proceed.'
+		
+	--	RAISERROR(@ErrMsg,16,1)
+	--	RETURN;
+	--END
 	
 	BEGIN TRANSACTION
 	BEGIN TRY
