@@ -18,6 +18,19 @@ BEGIN
 		DELETE FROM tblCFCSRSingleQuote	WHERE intEntityUserId = @intEntityUserId OR ISNULL(intEntityUserId,0) = 0
 		--DELETE FROM tblCFCSRSingleQuoteDetailTax
 	END
+
+	DECLARE @dblMaxAvailableDiscount NUMERIC(18,6)
+
+
+	
+	SELECT @dblMaxAvailableDiscount = MAX(dblRate) FROM tblCFDiscountSchedule 
+	INNER JOIN tblCFAccount
+	ON tblCFDiscountSchedule.intDiscountScheduleId = tblCFAccount.intDiscountScheduleId
+	LEFT JOIN tblCFDiscountScheduleDetail
+	ON tblCFDiscountSchedule.intDiscountScheduleId = tblCFDiscountScheduleDetail.intDiscountScheduleId
+	WHERE tblCFAccount.intCustomerId = @intCustomerId
+
+
 	
 	
 	DECLARE @tblNetworkSiteItem TABLE (
@@ -447,6 +460,7 @@ BEGIN
 			,dblNetPrice	= @dblOutNetTaxCalculatedAmount
 			,dblGrossPrice	= @dblOutGrossTaxCalculatedAmount
 			,dblTaxes		= @dblOutTaxCalculatedAmount
+			,dblBestPrice = @dblOutGrossTaxCalculatedAmount - @dblMaxAvailableDiscount
 			WHERE 
 			intCSRSingleQuoteId = @pk
 		
@@ -501,6 +515,7 @@ BEGIN
 						,dblItemPrice
 						,dtmEffectiveDate
 						,intEntityUserId
+						,dblBestPrice
 					)
 					SELECT
 						 intSiteId
@@ -514,6 +529,7 @@ BEGIN
 						,@dblAmount
 						,@effectiveDate
 						,@intEntityUserId
+						,@dblAmount - @dblMaxAvailableDiscount
 					FROM @tblNetworkSiteItem
 					WHERE 
 					intNetworkId	 = @loopNetworkId	
