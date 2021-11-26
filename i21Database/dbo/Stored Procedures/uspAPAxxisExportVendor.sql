@@ -21,7 +21,8 @@ CREATE TABLE tmpAxxisVendor(
 		strName NVARCHAR (100)  COLLATE Latin1_General_CI_AS NOT NULL,
 		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
 		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-		strTaxNumber NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL
+		strTaxNumber NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
+		ysnActive BIT
 	)
 
 IF OBJECT_ID(N'tempdb..#tmpModifiedFields') IS NOT NULL DROP TABLE #tmpModifiedFields
@@ -55,7 +56,7 @@ FROM tmp
 
 -- SELECT * FROM @tblFields
 
-IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strName','strTaxNumber','strLocationName','strCheckPayeeName')) 
+IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strName','strTaxNumber','strLocationName','strCheckPayeeName','ysnPymtCtrlActive')) 
 BEGIN
 	RETURN;
 END
@@ -66,13 +67,15 @@ BEGIN
 		strName,
 		strLocationName,
 		strPrintedName,
-		strTaxNumber
+		strTaxNumber,
+		ysnActive
 	)
 	SELECT
 		B.strName,
 		C.strLocationName,
 		ISNULL(C.strCheckPayeeName,'') AS strPrintedName,
-		ISNULL(A.strTaxNumber,'') AS strTaxNumber
+		ISNULL(A.strTaxNumber,'') AS strTaxNumber,
+		A.ysnPymtCtrlActive
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId
@@ -85,13 +88,15 @@ BEGIN
 		strName,
 		strLocationName,
 		strPrintedName,
-		strTaxNumber
+		strTaxNumber,
+		ysnActive
 	)
 	SELECT
 		B.strName,
 		C.strLocationName,
 		ISNULL(C.strCheckPayeeName,'') AS strPrintedName,
-		ISNULL(A.strTaxNumber,'') AS strTaxNumber
+		ISNULL(A.strTaxNumber,'') AS strTaxNumber,
+		A.ysnPymtCtrlActive
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblEMEntityLocation C ON B.intEntityId = C.intEntityId
