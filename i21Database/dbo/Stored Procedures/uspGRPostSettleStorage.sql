@@ -252,7 +252,18 @@ BEGIN TRY
 	BEGIN
 		DECLARE @CustomerStorageIds AS Id
 		DECLARE @intId AS INT
-		DECLARE @dblSettlementTotal AS DECIMAL(24,10)		
+		DECLARE @dblSettlementTotal AS DECIMAL(24,10)
+		DECLARE @dblTransferTotal AS DECIMAL(24,10)
+		DECLARE @dblHistoryTotal AS DECIMAL(24,10)
+
+		DECLARE @Transfers TABLE
+		(
+			intSourceCustomerStorageId INT
+			,dblOriginalBalance DECIMAL(24,10)
+			,dblOpenBalance DECIMAL(24,10)
+			,dblTotalTransactions DECIMAL(24,10)
+			,ysnTransferStorage BIT
+		)
 
 		DELETE FROM @CustomerStorageIds
 		INSERT INTO @CustomerStorageIds
@@ -262,21 +273,25 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
 
-			SELECT @dblSettlementTotal = SUM(dblUnits) 
-			FROM tblGRSettleStorageTicket A
-			INNER JOIN tblGRSettleStorage B
-				ON B.intSettleStorageId = A.intSettleStorageId
-				AND B.intParentSettleStorageId IS NULL
-			WHERE intCustomerStorageId = @intId
-				--AND A.intSettleStorageId <> @intSettleStorageId
+			IF (SELECT ysnTransferStorage FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId) = 1
+			BEGIN
+				--CHECK IF THERE IS NO EXISTING OVER-TRANSFER FROM THE ORIGINAL STORAGE
+				INSERT INTO @Transfers
+				SELECT * FROM [dbo].[fnGRFindOriginalCustomerStorage](@intId)
 
-			SELECT @dblTotalUnits = SUM(dblUnits)
-			FROM tblGRStorageHistory
-			WHERE (intTransactionTypeId IN (5,1,9) OR (intTransactionTypeId = 3 AND strType = 'From Transfer'))
-				AND intCustomerStorageId = @intId
-			GROUP BY intCustomerStorageId
+				IF EXISTS(SELECT 1 FROM @Transfers WHERE ABS(dblTotalTransactions) > 1)
+				BEGIN
+					RAISERROR('Unable to settle storage. Please check the storage and try again.',16,1,1)
+					RETURN;
+				END
+			END
 
-			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.1
+			SELECT @dblSettlementTotal	= ISNULL(dblSettlementTotal,0)
+				,@dblTransferTotal		= ISNULL(dblTransferTotal,0)
+				,@dblHistoryTotal		= ISNULL(dblHistoryTotalUnits,0)
+			FROM [dbo].[fnGRCheckStorageBalance](@intId, NULL)
+
+			IF (@dblSettlementTotal + @dblTransferTotal) > @dblHistoryTotal OR ABS(@dblSettlementTotal - @dblHistoryTotal) > 0.1
 			BEGIN
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
