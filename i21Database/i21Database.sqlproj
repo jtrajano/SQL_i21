@@ -264,6 +264,7 @@
     <Build Include="dbo\Tables\tblApiSchemaTMClockReading.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMClockReading.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
+    <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
