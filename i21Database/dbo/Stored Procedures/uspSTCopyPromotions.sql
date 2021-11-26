@@ -178,57 +178,6 @@ BEGIN TRY
 	-- [END] - POPULATE TEMP TABLES
 	-- =========================================================================
 
-	 -- =========================================================================
-	 -- [START] - POPULATE TEMP TABLES FOR EMPTY FILTER 
-	 -- =========================================================================
-		IF (@intBeginningItemsListNo = 0 AND @intEndingItemsListNo = 0
-			AND @intBeginningComboID = 0 AND @intEndingComboID = 0
-			AND @intBeginingMixMatchID = 0 AND @intEndingMixMatchID = 0)
-			BEGIN
-
-			 -- DELETE First the Value of tem table
-			 DELETE FROM @temptblPromoITEMList 
-			 -- Insert All Promotion ITEM to temp table
-			 INSERT INTO @temptblPromoITEMList 
-			 (
-				intPromoItemListId
-				, intPromoItemListNo
-			 )
-			 SELECT intPromoItemListId
-					, intPromoItemListNo
-			 FROM tblSTPromotionItemList 
-			 WHERE intStoreId = @intFromStoreId
-
-
-			 -- DELETE First the Value of tem table
-			 DELETE FROM @temptblPromoCOMBOList 
-			 -- Insert All Promotion COMBO to temp table
-			 INSERT INTO @temptblPromoCOMBOList 
-			 (
-				intPromoComboSalesId
-			 )
-			 SELECT intPromoSalesId 
-			 FROM tblSTPromotionSalesList 
-			 WHERE  intStoreId = @intFromStoreId 
-					AND strPromoType = 'C'
-
-			 -- DELETE First the Value of tem table
-			 DELETE FROM @temptblPromoMIXMATCHList 
-			-- Insert All Promotion MIX-MATCH to temp table
-			 INSERT INTO @temptblPromoMIXMATCHList 
-			 (
-						intPromoMixMatchSalesId
-			 )
-			 SELECT intPromoSalesId 
-			 FROM tblSTPromotionSalesList 
-			 WHERE intStoreId = @intFromStoreId 
-				AND strPromoType = 'M'
-
-		END
-	 -- =========================================================================
-	 -- [END] - POPULATE TEMP TABLES FOR EMPTY FILTER
-	 -- =========================================================================
-
 
 ----TEST
 --SELECT '@temptblStore', * FROM @temptblStore
@@ -599,7 +548,7 @@ BEGIN TRY
 							SELECT TOP 1 @intPromotionItemListId = intPromoItemListId FROM @temptblPromoITEMList WHERE intPrimaryID = @intITEMListPrimaryID
 
 
-							IF NOT EXISTS(
+							IF EXISTS(
 										SELECT TOP 1 1 
 										FROM tblSTPromotionItemList ItemList
 										WHERE ItemList.intStoreId = @intFromStoreId 
@@ -748,15 +697,7 @@ BEGIN TRY
 						BEGIN
 							
 						   SELECT TOP 1 @intPromotionComboListId = intPromoComboSalesId FROM @temptblPromoCOMBOList WHERE intPrimaryID = @intCOMBOPrimaryID
-  						 
-						   IF NOT EXISTS(
-										SELECT TOP 1 1 
-										FROM tblSTPromotionSalesList SalesList
-										WHERE SalesList.intStoreId = @ToStore 
-											AND SalesList.intPromoSalesId = @intPromotionComboListId
-											AND strPromoType = 'C'
-									 )
-								BEGIN
+
 						   ----Inserting Combo Header From to ToStore
 						   INSERT INTO tblSTPromotionSalesList 
 						   (
@@ -879,7 +820,7 @@ BEGIN TRY
 						   ) AS ItemListTwo
 								ON ItemList.intPromoItemListNo = ItemListTwo.intPromoItemListNo
 						   WHERE SalesList.intPromoSalesId = @intPromotionComboListId
-						END
+
 
 
 						    SET @intCOMBOPrimaryID = @intCOMBOPrimaryID + 1
@@ -932,12 +873,8 @@ BEGIN TRY
 							
 						   SELECT TOP 1 @intPromotionMixMatchListId = intPromoMixMatchSalesId FROM @temptblPromoMIXMATCHList WHERE intPrimaryID = @intMIXMATCHPrimaryID
 
-  IF NOT EXISTS(SELECT TOP 1 1 
-										FROM tblSTPromotionSalesList SalesList
-										WHERE SalesList.intStoreId = @ToStore 
-											AND SalesList.intPromoSalesId = @intPromotionMixMatchListId
-											AND strPromoType = 'M')
-						   BEGIN
+--PRINT '@intPromotionMixMatchListId: ' + CAST(@intPromotionMixMatchListId AS NVARCHAR(50))
+
 						   ----Inserting Mix-Match Header From to ToStore
 						   INSERT INTO tblSTPromotionSalesList 
 						   (
@@ -1073,17 +1010,19 @@ BEGIN TRY
 								ON ItemList.intPromoItemListNo = ItemListTwo.intPromoItemListNo
 						   WHERE SalesList.intPromoSalesId = @intPromotionMixMatchListId
 
+
 						   SET @intMIXMATCHPrimaryID = @intMIXMATCHPrimaryID + 1
 						   IF NOT EXISTS(SELECT TOP 1 1 FROM @temptblPromoMIXMATCHList WHERE intPrimaryID = @intMIXMATCHPrimaryID)
 								BEGIN
 									SET @intMIXMATCHPrimaryID = 0 -- This will exit the loop
 								END
+						   -- DELETE TOP (1) FROM @temptblPromoMIXMATCHList
 						END
+				   
 				  -- ====================================================================================================================
 				   -- [START] - Loop to all PROMOTION MIX_MATCH LIST
 				   -- ====================================================================================================================
-				END
-			END  
+				END  
 
 		   -- ======================================================================================
 		   -- [END] - MIX-MATCH LIST
