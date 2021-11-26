@@ -69,14 +69,21 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateCommitted] @intInvoiceId, @ForDelete, @intUserId, 0
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
 	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
-	IF @ForDelete = 1 EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId
 
 	INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
+
 	IF @ForDelete = 1
-	EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
+	BEGIN
+		EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
+		EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
+		
+		DELETE FROM tblARPricingHistory 
+		WHERE intTransactionId = @InvoiceId
+		AND intSourceTransactionId = 2
+	END
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
