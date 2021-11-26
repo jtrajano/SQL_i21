@@ -53,6 +53,7 @@ BEGIN
 		,strForexRateType = ERT.strCurrencyExchangeRateType
 		,strPriceUOM = PUM.strUnitMeasure
 		,ysnSubCurrency = PCU.ysnSubCurrency
+		,dtmCashFlowDate = CASE WHEN (L.intPurchaseSale = 2) THEN SDetail.dtmCashFlowDate ELSE PDetail.dtmCashFlowDate END
 	FROM tblLGLoadDetail LoadDetail
 		 JOIN tblLGLoad							L			ON		L.intLoadId = LoadDetail.intLoadId AND L.intLoadId = @intLoadId
 	LEFT JOIN tblSMCompanyLocation				PCL				ON		PCL.intCompanyLocationId = LoadDetail.intPCompanyLocationId
