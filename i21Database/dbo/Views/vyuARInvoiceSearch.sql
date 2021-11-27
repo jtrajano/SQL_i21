@@ -86,6 +86,8 @@ SELECT
 										   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 									  END
 	,ysnProcessedToNSF				= ISNULL(ISNULL(PAYMENT.ysnProcessedToNSF, I.ysnProcessedToNSF), 0)
+	,ysnOverrideCashFlow            = I.ysnOverrideCashFlow
+    ,dtmCashFlowDate                = I.dtmCashFlowDate
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
