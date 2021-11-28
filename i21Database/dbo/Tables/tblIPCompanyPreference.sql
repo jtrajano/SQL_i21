@@ -12,5 +12,6 @@
 	intFinancingCostItemId int,
 	intFreightCostItemId int,
 	intMiscItemId int,
+	intWeightAdjItemId int,
 	CONSTRAINT [PK_tblIPCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
