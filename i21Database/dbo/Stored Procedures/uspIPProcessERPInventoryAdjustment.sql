@@ -28,6 +28,7 @@ BEGIN TRY
 		,@strLotNo NVARCHAR(50)
 		,@strStorageUnit NVARCHAR(50)
 		,@dblQuantity NUMERIC(38, 20)
+		,@dblQty NUMERIC(38, 20)
 		,@strQuantityUOM NVARCHAR(50)
 		,@strReasonCode NVARCHAR(50)
 		,@strNotes NVARCHAR(2048)
@@ -59,12 +60,20 @@ BEGIN TRY
 		,@intNewStorageLocationId INT
 		,@intNewLotId INT
 		,@intLotItemUOMId INT
-		,@dblWeightPerQty NUMERIC(18, 6)
+		,@dblWeightPerQty NUMERIC(38, 20)
 		,@dblStandardCost NUMERIC(38, 20)
 		,@ysnDifferenceQty BIT = 1
 		,@intContractHeaderId INT
 		,@intContractDetailId INT
 		,@intLoadDetailId INT
+		,@intParentLotId INT
+		,@strParentLotNumber NVARCHAR(50)
+		,@dblNoOfPack NUMERIC(38, 20)
+		,@dblNetWeight NUMERIC(38, 20)
+		,@strContainerNo NVARCHAR(50)
+		,@strMarkings NVARCHAR(50)
+		,@intEntityVendorId INT
+		,@strCondition NVARCHAR(50)
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -378,11 +387,13 @@ BEGIN TRY
 				AND intUnitMeasureId = @intUnitMeasureId
 
 			SELECT @intLotId = NULL
+				,@dblQty = NULL
 
 			SELECT @intLotId = intLotId
 				,@dblLastCost = dblLastCost
 				,@intLotItemUOMId = intItemUOMId
 				,@dblWeightPerQty = dblWeightPerQty
+				,@dblQty = dblQty
 			FROM tblICLot
 			WHERE strLotNumber = @strLotNo
 				AND intStorageLocationId = @intStorageLocationId
@@ -432,35 +443,133 @@ BEGIN TRY
 				WHERE intInventoryAdjustmentId = @intAdjustmentId
 			END
 			ELSE IF @intTransactionTypeId = 10
-				AND @intLotId IS NOT NULL
 			BEGIN
-				IF @strReasonCode = 30
+				IF @intLotId IS NULL
 				BEGIN
-					SELECT @ysnDifferenceQty = 0
+					EXEC uspMFGeneratePatternId @intCategoryId = NULL
+						,@intItemId = NULL
+						,@intManufacturingId = NULL
+						,@intSubLocationId = NULL
+						,@intLocationId = @intCompanyLocationId
+						,@intOrderTypeId = NULL
+						,@intBlendRequirementId = NULL
+						,@intPatternCode = 33 -- Transaction Batch Id
+						,@ysnProposed = 0
+						,@strPatternString = @intBatchId OUTPUT
+
+					SELECT @intItemLocationId = NULL
+
+					SELECT @intItemLocationId = intItemLocationId
+					FROM tblICItemLocation
+					WHERE intItemId = @intItemId
+						AND intLocationId = @intCompanyLocationId
+
+					SELECT @dblStandardCost = NULL
+
+					SELECT @dblStandardCost = t.dblStandardCost
+					FROM tblICItemPricing t WITH (NOLOCK)
+					WHERE t.intItemId = @intItemId
+						AND t.intItemLocationId = @intItemLocationId
+
+					SELECT @intParentLotId = NULL
+						,@dblWeightPerQty = NULL
+						,@intLotItemUOMId = NULL
+						,@strParentLotNumber = NULL
+						,@strContainerNo = NULL
+						,@strMarkings = NULL
+						,@intEntityVendorId = NULL
+						,@strCondition=NULL 
+						,@intInventoryReceiptId=NULL
+
+					SELECT Top 1 @intParentLotId = intParentLotId
+						,@dblWeightPerQty = dblWeightPerQty
+						,@intLotItemUOMId = intItemUOMId
+						,@strContainerNo = strContainerNo
+						,@strMarkings = strMarkings
+						,@intEntityVendorId = intEntityVendorId
+						,@strCondition=strCondition 
+					FROM tblICLot
+					WHERE intItemId = @intItemId
+						AND strLotNumber = @strLotNo
+						Order by intLotId 
+
+					IF @intParentLotId IS NULL
+					BEGIN
+						SELECT @dblWeightPerQty = 1
+
+						SELECT @dblNoOfPack = @dblQuantity
+
+						SELECT @intLotItemUOMId = @intItemUOMId
+					END
+					ELSE
+					BEGIN
+						SELECT @dblNoOfPack = NULL
+
+						SELECT @dblNoOfPack = dbo.[fnDivide](@dblQuantity, @dblWeightPerQty)
+					END
+
+					SELECT @strParentLotNumber = strParentLotNumber
+					FROM tblICParentLot
+					WHERE intParentLotId = @intParentLotId
+
+					EXEC uspMFPostProduction 1
+						,0
+						,NULL
+						,@intItemId
+						,@intUserId
+						,NULL
+						,@intStorageLocationId
+						,@dblQuantity
+						,@intItemUOMId
+						,@dblWeightPerQty
+						,@dblNoOfPack
+						,@intLotItemUOMId
+						,@strLotNo
+						,@strLotNo
+						,@intBatchId
+						,@intLotId OUTPUT
+						,NULL
+						,NULL
+						,@strParentLotNumber --Parent Lot Number
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,NULL
+						,@dblStandardCost
+						,'Created from external system'
+						,1
+						,NULL
+						,NULL
+						,NULL
+						,@strContainerNo 
+						,@strMarkings 
+						,@intEntityVendorId
+						,@strCondition
+
 				END
 				ELSE
 				BEGIN
-					SELECT @ysnDifferenceQty = 1
+					EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
+						,@dblNewLotQty = @dblQuantity
+						,@intAdjustItemUOMId = @intItemUOMId
+						,@intUserId = @intUserId
+						,@strReasonCode = @strReasonCode
+						,@blnValidateLotReservation = 0
+						,@strNotes = @strNotes
+						,@dtmDate = NULL
+						,@ysnBulkChange = 0
+						,@strReferenceNo = NULL
+						,@intAdjustmentId = @intAdjustmentId OUTPUT
+						,@ysnDifferenceQty = @ysnDifferenceQty
+
+					SELECT @strAdjustmentNo = NULL
+
+					SELECT @strAdjustmentNo = strAdjustmentNo
+					FROM dbo.tblICInventoryAdjustment
+					WHERE intInventoryAdjustmentId = @intAdjustmentId
 				END
-
-				EXEC dbo.uspMFLotAdjustQty @intLotId = @intLotId
-					,@dblNewLotQty = @dblQuantity
-					,@intAdjustItemUOMId = @intItemUOMId
-					,@intUserId = @intUserId
-					,@strReasonCode = @strReasonCode
-					,@blnValidateLotReservation = 0
-					,@strNotes = @strNotes
-					,@dtmDate = NULL
-					,@ysnBulkChange = 0
-					,@strReferenceNo = NULL
-					,@intAdjustmentId = @intAdjustmentId OUTPUT
-					,@ysnDifferenceQty = @ysnDifferenceQty
-
-				SELECT @strAdjustmentNo = NULL
-
-				SELECT @strAdjustmentNo = strAdjustmentNo
-				FROM dbo.tblICInventoryAdjustment
-				WHERE intInventoryAdjustmentId = @intAdjustmentId
 
 				IF @strReasonCode = 30
 				BEGIN
@@ -482,12 +591,14 @@ BEGIN TRY
 							,@intContractHeaderId = NULL
 							,@intContractDetailId = NULL
 							,@intLoadDetailId = NULL
+							,@dblNetWeight = NULL
 
 						SELECT @intInventoryReceiptId = intInventoryReceiptId
 							,@intLoadContainerId = intContainerId
 							,@intContractHeaderId = intOrderId
 							,@intContractDetailId = intLineNo
 							,@intLoadDetailId = intSourceId
+							,@dblNetWeight = dblNet
 						FROM tblICInventoryReceiptItem
 						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
 
@@ -510,20 +621,21 @@ BEGIN TRY
 							,dblGross
 							)
 						SELECT GETDATE() AS dtmCreatedDate
-							,@intContractHeaderId 
+							,@intContractHeaderId
 							,@intContractDetailId
 							,@intLoadId
 							,@intLoadDetailId
-							,@intLoadContainerId  
+							,@intLoadContainerId
 							,@intInventoryReceiptId
 							,@strLotNo
-							,@dblQuantity AS dblNet
-							,@dblQuantity AS dblGrossWeight
+							,@dblNetWeight + @dblQuantity AS dblNet
+							,@dblNetWeight + @dblQuantity AS dblGrossWeight
 
 						EXEC uspIPAddPendingClaim @intLoadId = @intLoadId
 							,@intPurchaseSale = 1
 							,@intLoadContainerId = @intLoadContainerId
 							,@ysnAddClaim = 1
+
 					END
 					ELSE
 					BEGIN
@@ -558,68 +670,9 @@ BEGIN TRY
 							,@intPurchaseSale = 1
 							,@intLoadContainerId = @intLoadContainerId
 							,@ysnAddClaim = 1
+
 					END
 				END
-			END
-			ELSE IF @intTransactionTypeId = 10
-				AND @intLotId IS NULL
-			BEGIN
-				EXEC uspMFGeneratePatternId @intCategoryId = NULL
-					,@intItemId = NULL
-					,@intManufacturingId = NULL
-					,@intSubLocationId = NULL
-					,@intLocationId = @intCompanyLocationId
-					,@intOrderTypeId = NULL
-					,@intBlendRequirementId = NULL
-					,@intPatternCode = 33 -- Transaction Batch Id
-					,@ysnProposed = 0
-					,@strPatternString = @intBatchId OUTPUT
-
-				SELECT @intItemLocationId = NULL
-
-				SELECT @intItemLocationId = intItemLocationId
-				FROM tblICItemLocation
-				WHERE intItemId = @intItemId
-					AND intLocationId = @intCompanyLocationId
-
-				SELECT @dblStandardCost = NULL
-
-				SELECT @dblStandardCost = t.dblStandardCost
-				FROM tblICItemPricing t WITH (NOLOCK)
-				WHERE t.intItemId = @intItemId
-					AND t.intItemLocationId = @intItemLocationId
-
-				EXEC uspMFPostProduction 1
-					,0
-					,NULL
-					,@intItemId
-					,@intUserId
-					,NULL
-					,@intStorageLocationId
-					,@dblQuantity
-					,@intItemUOMId
-					,1
-					,@dblQuantity
-					,@intItemUOMId
-					,@strLotNo
-					,@strLotNo
-					,@intBatchId
-					,@intLotId OUTPUT
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,NULL
-					,@dblStandardCost
-					,'Created from external system'
-					,1
-					,NULL
-					,NULL
-					,NULL
 			END
 			ELSE IF @intTransactionTypeId = 8
 			BEGIN
