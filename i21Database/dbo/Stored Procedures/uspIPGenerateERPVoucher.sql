@@ -62,6 +62,9 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@strType NVARCHAR(50)
 		,@strReceiptNumber NVARCHAR(50)
+		,@intWeightAdjItemId int
+		,@dblCostAdjustment NUMERIC(18, 6)
+		,@intNoOfItem int
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -104,6 +107,14 @@ BEGIN TRY
 	IF @intBillPreStageId IS NULL
 	BEGIN
 		RETURN
+	END
+
+	SELECT @intWeightAdjItemId = intWeightAdjItemId
+	FROM tblIPCompanyPreference
+
+	IF @intWeightAdjItemId IS NULL
+	BEGIN
+		SELECT @intWeightAdjItemId = 0
 	END
 
 	WHILE @intBillPreStageId IS NOT NULL
@@ -340,6 +351,8 @@ BEGIN TRY
 		SELECT BD.intBillDetailId
 		FROM tblAPBillDetail BD
 		WHERE BD.intBillId = @intBillId
+		AND intItemId <> @intWeightAdjItemId
+
 
 		SELECT @intBillDetailId = MIN(intBillDetailId)
 		FROM @tblAPBillDetail
@@ -437,6 +450,36 @@ BEGIN TRY
 			LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = BD.intContractHeaderId
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = BD.intContractDetailId
 			WHERE BD.intBillDetailId = @intBillDetailId
+
+			IF EXISTS (
+				SELECT *
+				FROM tblAPBillDetail
+				WHERE intBillId = @intBillId
+					AND intItemId = @intWeightAdjItemId
+			)
+			BEGIN
+				SELECT @dblCostAdjustment = NULL
+
+				SELECT @dblCostAdjustment = dblCost
+				FROM tblAPBillDetail
+				WHERE intBillId = @intBillId
+					AND intItemId = @intWeightAdjItemId
+
+				SELECT @intNoOfItem = NULL
+
+				SELECT @intNoOfItem = Count(*)
+				FROM tblAPBillDetail
+				WHERE intBillId = @intBillId
+					AND intInventoryReceiptItemId IS NOT NULL
+
+				IF @intNoOfItem IS NULL
+					SELECT @intNoOfItem = 1
+
+				SELECT @dblDetailTotal = @dblDetailTotal + (@dblCostAdjustment / @intNoOfItem)
+
+				SELECT @dblDetailQuantity = @dblDetailTotal / @dblDetailCost
+			END
+
 
 			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
 

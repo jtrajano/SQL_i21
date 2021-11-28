@@ -29,6 +29,10 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@intBookId INT = NULL
 	,@intSubBookId INT = NULL
 	,@intOriginId INT = NULL
+	,@strContainerNo nvarchar(50)=NULL
+	,@strMarkings nvarchar(50)=NULL
+	,@intEntityVendorId int=NULL
+	,@strCondition NVARCHAR(50)
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -316,6 +320,9 @@ BEGIN
 		,strParentLotNumber
 		,intBookId
 		,intSubBookId
+		,strContainerNo
+		,dblWeightPerQty
+		,strCondition
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -334,9 +341,9 @@ BEGIN
 		,strBOLNo = NULL
 		,strVessel = @strVessel
 		,strReceiptNumber = NULL
-		,strMarkings = NULL
+		,strMarkings = @strMarkings
 		,strNotes = @strNotes
-		,intEntityVendorId = NULL
+		,intEntityVendorId =@intEntityVendorId
 		,strVendorLotNo = @strVendorLotNo
 		,strGarden = NULL
 		,intDetailId = @intTransactionId
@@ -348,6 +355,9 @@ BEGIN
 		,strParentLotNumber = @strParentLotNumber
 		,intBookId = @intBookId
 		,intSubBookId = @intSubBookId
+		,strContainerNo = @strContainerNo
+		,dblWeightPerQty=@dblUnitQty
+		,strCondition=@strCondition
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
