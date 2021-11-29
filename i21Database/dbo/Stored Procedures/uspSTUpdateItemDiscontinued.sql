@@ -9,6 +9,8 @@ BEGIN TRY
 	
 	BEGIN TRANSACTION
 
+
+
 	SET @strEntityIds = ''
 
 	DECLARE @dtmDateTimeModifiedFrom AS DATETIME
@@ -58,7 +60,7 @@ BEGIN TRY
 			currentUserId			INT
 	)  
 
-	--START Create the filter tables
+	-- Create the filter tables
 	BEGIN
 		IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL 
 			BEGIN
@@ -99,12 +101,16 @@ BEGIN TRY
 			BEGIN
 				CREATE TABLE #tmpUpdateItemForCStore_Items (
 					intItemId INT,
-					dtmNotSoldSince DATETIME,
+                    dtmNotSoldSince DATETIME,
 					dtmNotPurchased DATETIME,
 					dtmCreatedOlderThan DATETIME
 				)
 			END
 
+
+
+		
+		
 		-- Create the temp table for the audit log. 
 		IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NULL  
 			CREATE TABLE #tmpUpdateItemForCStore_itemAuditLog (
@@ -126,9 +132,8 @@ BEGIN TRY
 			)
 		;
 	END
-	-- END Create the filter tables
 
-	-- START Add the filter records
+	-- Add the filter records
 	BEGIN
 		IF(@Location IS NOT NULL AND @Location != '')
 			BEGIN
@@ -175,7 +180,8 @@ BEGIN TRY
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
 			
-			IF (@CreatedOlder IS NOT NULL OR @CreatedOlder != '' OR
+		--Add OR condition for ST-2009	
+		IF (@CreatedOlder IS NOT NULL OR @CreatedOlder != '' OR
 			@NotSoldSince IS NOT NULL OR @NotSoldSince != '' OR
 			@NotPurchasedSince IS NOT NULL OR @NotPurchasedSince != '' )
 			BEGIN
@@ -196,22 +202,33 @@ BEGIN TRY
 					ON invoicedetail.intInvoiceId = invoice.intInvoiceId
 				LEFT JOIN tblICInventoryReceiptItem receipt
 					ON item.intItemId = receipt.intItemId
-				WHERE item.strStatus != 'Discontinued' AND invoice.dtmDate IS NOT NULL AND
-				item.dtmDateCreated IS NOT NULL AND receipt.dtmDateCreated IS NOT NULL
-		END
+				WHERE item.strStatus != 'Discontinued'
+
+			END
 
 
 	END
-	-- END Add the filter records
+    -- END Add the filter records
 
 	-- MARK START UPDATE
 	SET @dtmDateTimeModifiedFrom = GETUTCDATE()
 
+	-- Get strUpcCode
+	--DECLARE @strUpcCode AS NVARCHAR(20) = (
+	--										SELECT CASE
+	--												WHEN strLongUPCCode IS NOT NULL AND strLongUPCCode != '' THEN strLongUPCCode ELSE strUpcCode
+	--										END AS strUpcCode
+	--										FROM tblICItemUOM 
+	--										WHERE intItemUOMId = @intItemUOMId
+	--										)
+
+	--DECLARE @dblStandardCostConv AS NUMERIC(38, 20) = CAST(@StandardCost AS NUMERIC(38, 20))
+	--DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@RetailPrice AS NUMERIC(38, 20))
+	--DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
+
 	BEGIN TRY
-		
-		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Location)
-		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Vendor) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Category)
-		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Family) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Class))
+	
+		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items))
 		BEGIN
 			-- This is where IC SP Executed for updating 
 			EXEC [uspICUpdateItemForCStore]
@@ -239,6 +256,8 @@ BEGIN TRY
 
 		GOTO ExitWithRollback 
 	END CATCH
+
+
 
 	-- MARK END UPDATE
 	SET @dtmDateTimeModifiedTo = GETUTCDATE()
@@ -274,10 +293,12 @@ BEGIN TRY
 			, strOldDataPreview			NVARCHAR(MAX)
 			, ysnPreview				BIT DEFAULT(1)
 			, ysnForRevert				BIT DEFAULT(0)
-			, dtmNotSoldSince			DATETIME -- Added 
+            , dtmNotSoldSince			DATETIME -- Added 
 			, dtmNotPurchased			DATETIME -- Added 
 			, dtmCreatedOlderThan		DATETIME -- Added 
 		)
+
+
 
 		-- ITEM PRICING
 		INSERT INTO @tblPreview (
@@ -305,7 +326,7 @@ BEGIN TRY
 			, strOldDataPreview
 			, ysnPreview
 			, ysnForRevert
-			, dtmNotSoldSince			 -- Added 
+            , dtmNotSoldSince			 -- Added 
 			, dtmNotPurchased			 -- Added 
 			, dtmCreatedOlderThan		 -- Added 
 		)
@@ -336,7 +357,7 @@ BEGIN TRY
 				, ysnPreview					= 1
 				, ysnForRevert					= 1
 
-				, dtmNotSoldSince			    = (SELECT TOP 1 dtmNotSoldSince FROM #tmpUpdateItemForCStore_Items WHERE intItemId = I.intItemId) -- Added 
+                , dtmNotSoldSince			    = (SELECT TOP 1 dtmNotSoldSince FROM #tmpUpdateItemForCStore_Items WHERE intItemId = I.intItemId) -- Added 
 				, dtmNotPurchased			    = (SELECT TOP 1 dtmNotPurchased FROM #tmpUpdateItemForCStore_Items WHERE intItemId = I.intItemId) -- Added 
 				, dtmCreatedOlderThan		    = (SELECT TOP 1 dtmCreatedOlderThan FROM #tmpUpdateItemForCStore_Items WHERE intItemId = I.intItemId) -- Added 
 		FROM 
@@ -352,8 +373,8 @@ BEGIN TRY
 			ON [Changes].intItemId = I.intItemId
 		INNER JOIN tblICItemUOM UOM 
 			ON I.intItemId = UOM.intItemId AND UOM.ysnStockUnit = 1
-		
-		--START Remove the Duplicate on the @tblPreview
+            
+        --START Remove the Duplicate on the @tblPreview
 			;WITH CTE AS(
 			   SELECT intItemId,
 				   RN = ROW_NUMBER()OVER(PARTITION BY intItemId ORDER BY intItemId)
@@ -363,7 +384,11 @@ BEGIN TRY
 		--END Remove the Duplicate on the @tblPreview
 	END
 
+
+
 	DELETE FROM @tblPreview WHERE ISNULL(strPreviewOldData, '') = ISNULL(strPreviewNewData, '')
+
+
 
 	 IF(@ysnRecap = 1)
 		BEGIN
@@ -372,7 +397,6 @@ BEGIN TRY
 				BEGIN
 					ROLLBACK TRANSACTION 
 				END
-
 
 			-- INSERT TO PREVIEW TABLE
 			INSERT INTO tblSTUpdateItemDiscontinuedPreview
@@ -392,10 +416,7 @@ BEGIN TRY
 				strTableName,
 				strColumnName,
 				strColumnDataType,
-				intConcurrencyId,
-				dtmNotSoldSince	,		     -- Added 
-			    dtmNotPurchased,			 -- Added 
-			    dtmCreatedOlderThan         -- Added 
+				intConcurrencyId
 			)
 			SELECT DISTINCT 
 				@strGuid
@@ -414,12 +435,9 @@ BEGIN TRY
 				, strTableColumnName
 				, strTableColumnDataType
 				, 1
-				, dtmNotSoldSince			     -- Added 
-			    , dtmNotPurchased			     -- Added 
-			    , dtmCreatedOlderThan	         -- Added
 			FROM @tblPreview
 			WHERE ysnPreview = 1
-			--ORDER BY strItemDescription, strChangeDescription ASC
+			ORDER BY strItemDescription, strChangeDescription ASC
 
 		END
 	 ELSE IF(@ysnRecap = 0)
