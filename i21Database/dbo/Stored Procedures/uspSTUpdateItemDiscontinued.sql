@@ -174,9 +174,8 @@ BEGIN TRY
 				SELECT [intID] AS intClassId
 				FROM [dbo].[fnGetRowsFromDelimitedValues](@Class)
 			END
-
-		--Add OR condition for ST-2009	
-		IF (@CreatedOlder IS NOT NULL OR @CreatedOlder != '' OR
+			
+			IF (@CreatedOlder IS NOT NULL OR @CreatedOlder != '' OR
 			@NotSoldSince IS NOT NULL OR @NotSoldSince != '' OR
 			@NotPurchasedSince IS NOT NULL OR @NotPurchasedSince != '' )
 			BEGIN
@@ -197,8 +196,8 @@ BEGIN TRY
 					ON invoicedetail.intInvoiceId = invoice.intInvoiceId
 				LEFT JOIN tblICInventoryReceiptItem receipt
 					ON item.intItemId = receipt.intItemId
-				WHERE item.strStatus != 'Discontinued'
-
+				WHERE item.strStatus != 'Discontinued' AND invoice.dtmDate IS NOT NULL AND
+				item.dtmDateCreated IS NOT NULL AND receipt.dtmDateCreated IS NOT NULL
 		END
 
 
@@ -210,7 +209,9 @@ BEGIN TRY
 
 	BEGIN TRY
 		
-		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items))
+		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Location)
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Vendor) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Category)
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Family) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Class))
 		BEGIN
 			-- This is where IC SP Executed for updating 
 			EXEC [uspICUpdateItemForCStore]
