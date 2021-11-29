@@ -406,6 +406,7 @@ DECLARE   @strEntityNumber				NVARCHAR(100)
 		, @strPhone						NVARCHAR(100)
 		, @strMobileNo					NVARCHAR(100)
 		, @strCurrentSystem				NVARCHAR(100)
+		, @intRowNumber					INT
 
 DECLARE cursorSC CURSOR LOCAL FAST_FORWARD
 FOR
@@ -477,6 +478,7 @@ SELECT
 	, strPhone
 	, strMobileNo
 	, strCurrentSystem
+	, intRowNumber
 FROM	tblApiSchemaCustomer SC
 WHERE	guiApiUniqueId = @guiApiUniqueId
 AND		intRowNumber NOT IN (SELECT intRowNo FROM tblApiImportLogDetail WHERE guiApiImportLogId = @guiLogId)
@@ -551,7 +553,7 @@ FETCH NEXT FROM cursorSC INTO
 	, @strPhone
 	, @strMobileNo
 	, @strCurrentSystem
-
+	, @intRowNumber
 WHILE @@FETCH_STATUS = 0
 BEGIN
 	IF(ISNULL(@strEntityNumber, '') = '')
@@ -657,6 +659,8 @@ BEGIN
 		, 'Customer'
 		, 1
 
+	SET @strCustomerNumber = CASE WHEN ISNULL(@strCustomerNumber, '') = '' THEN @strEntityNumber ELSE @strCustomerNumber END
+
 	INSERT INTO tblARCustomer (
 		  intEntityId
 		, strType
@@ -752,7 +756,7 @@ SELECT
 	, @intLocationId
 	, @intLocationId
 	, 0
-	, CASE WHEN ISNULL(@strCustomerNumber, '') = '' THEN @strEntityNumber ELSE @strCustomerNumber END
+	, @strCustomerNumber
 	, @guiApiUniqueId
 
 	IF @strPhone <> ''
@@ -778,6 +782,20 @@ SELECT
 		INSERT INTO tblARCustomerCompetitor(intEntityCustomerId, intEntityId)
 		SELECT @intEntityId, (SELECT TOP 1 EME.intEntityId FROM tblEMEntity EME join tblEMEntityType EMET ON EME.intEntityId = EMET.intEntityId and EMET.strType = 'Competitor' WHERE strName = @strCurrentSystem)
 	END
+
+	INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+	SELECT
+		  guiApiImportLogDetailId = NEWID()
+		, guiApiImportLogId = @guiLogId
+		, strField = 'Customer Number'
+		, strValue = @strCustomerNumber
+		, strLogLevel = 'Info'
+		, strStatus = 'Success'
+		, intRowNo = @intRowNumber
+		, strMessage = 'The record was imported successfully.'
+	FROM tblApiSchemaCustomer SC
+	WHERE guiApiUniqueId = @guiApiUniqueId
+	
 
 	FETCH NEXT FROM cursorSC INTO 
           @strEntityNumber
@@ -847,6 +865,7 @@ SELECT
 		, @strPhone
 		, @strMobileNo
 		, @strCurrentSystem
+		, @intRowNumber
 END
 
 CLOSE cursorSC;
