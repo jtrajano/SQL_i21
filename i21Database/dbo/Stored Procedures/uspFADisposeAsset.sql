@@ -52,6 +52,11 @@ FROM #AssetID A
 JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId
 JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId AND BD.intBookId = 1
 OUTER APPLY(
+	SELECT TOP 1 DATEADD(DAY,1, dtmDepreciationToDate)dtmDepreciationToDate 
+	FROM tblFAFixedAssetDepreciation WHERE intAssetId = A.intAssetId
+	ORDER BY dtmDepreciationToDate DESC
+)D
+OUTER APPLY(
 	SELECT ISNULL(ysnOpen,0) &  ISNULL(ysnFAOpen,0) ysnOpenPeriod FROM tblGLFiscalYearPeriod WHERE 
 	D.dtmDepreciationToDate BETWEEN
 	dtmStartDate AND dtmEndDate
