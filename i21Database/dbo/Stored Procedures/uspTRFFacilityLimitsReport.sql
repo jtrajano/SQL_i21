@@ -66,6 +66,8 @@ BEGIN TRY
 		DROP TABLE #tempLatestLogValues
 	IF OBJECT_ID('tempdb..#tempContractBalance') IS NOT NULL
 		DROP TABLE #tempContractBalance
+	IF OBJECT_ID('tempdb..#tempLogisticsLog') IS NOT NULL
+		DROP TABLE #tempLogisticsLog
 	IF OBJECT_ID('tempdb..#tempShipmentDetails') IS NOT NULL
 		DROP TABLE #tempShipmentDetails
 	IF OBJECT_ID('tempdb..#tempTicketInfo') IS NOT NULL
@@ -76,6 +78,11 @@ BEGIN TRY
 		DROP TABLE #tempReceiptInfo
 	IF OBJECT_ID('tempdb..#tempVoucherInfo') IS NOT NULL
 		DROP TABLE #tempVoucherInfo
+		
+	IF OBJECT_ID('tempdb..#tempVoucher') IS NOT NULL
+		DROP TABLE #tempVoucher
+	IF OBJECT_ID('tempdb..#tempVoucherPayment') IS NOT NULL
+		DROP TABLE #tempVoucherPayment
 
 	IF OBJECT_ID('tempdb..#tempContractPair') IS NOT NULL
 		DROP TABLE #tempContractPair
@@ -104,17 +111,7 @@ BEGIN TRY
 	-- Filter by Loan/Limit of selected bank and facility.
 	SELECT DISTINCT 
 		  facility.intBorrowingFacilityId
-		 , loanLimits.intBankLoanId
-		--, loanLimits.strBankLoanId
-		--, loanLimits.dblLimit
-		--, loanLimits.strLimitDescription
-		--, loanLimits.strLimitComments
-		--, loanLimits.dblHaircut
-		--, loanLimits.dblLoanAmount
-		--, loanLimits.intLoanTypeId
-		--, loanLimits.dtmOpened
-		--, loanLimits.dtmMaturity
-		--, loanLimits.dtmEntered
+		, loanLimits.intBankLoanId
 		, facility.intBankId
 		, bank.strBankName
 		, bankValRule.intBankValuationRuleId
@@ -335,7 +332,22 @@ BEGIN TRY
 	AND ctd.intPricingTypeId IN (1, 2, 3) -- Basis, Priced and HTA
 
 
-	-- Get Purchase Contract Shipment details
+	SELECT * 
+	INTO #tempLogisticsLog
+	FROM
+	(
+		SELECT 
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmTransactionDate DESC)
+			, tlog.intContractHeaderId
+			, tlog.intContractDetailId
+			, tlog.intTransactionHeaderId
+			, tlog.intTransactionDetailId
+		FROM #tempTradeFinanceLog tlog 
+		WHERE tlog.strTransactionType = 'Logistics'
+	) t
+	WHERE intRowNum = 1
+
+
 	SELECT 
 		  intPContractDetailId
 		, intShipmentStatus
@@ -355,6 +367,9 @@ BEGIN TRY
 	FROM tblLGLoadDetail shipmentDetail
 	JOIN tblLGLoad shipment
 		ON shipment.intLoadId = shipmentDetail.intLoadId
+	JOIN #tempLogisticsLog logisticsLog
+		ON logisticsLog.intTransactionHeaderId = shipment.intLoadId
+		AND logisticsLog.intTransactionDetailId = shipmentDetail.intLoadDetailId
 	LEFT JOIN tblICItemUOM itemUOM
 		ON itemUOM.intItemUOMId = shipmentDetail.intItemUOMId
 	LEFT JOIN tblICUnitMeasure itemUnitMeasure
@@ -362,11 +377,41 @@ BEGIN TRY
 	LEFT JOIN vyuLGLoadViewSearch loadView
 		ON loadView.intLoadId = shipmentDetail.intLoadId
 	WHERE shipmentDetail.intPContractDetailId IN (SELECT intContractDetailId FROM #tempPurchaseContracts)
-		AND EXISTS (SELECT TOP 1 '' FROM #tempTradeFinanceLog tlog 
-					WHERE tlog.strTransactionType = 'Logistics'
-					AND	tlog.intTransactionHeaderId = shipmentDetail.intLoadId
-					AND tlog.intTransactionDetailId = shipmentDetail.intLoadDetailId
-					AND shipmentDetail.intPContractDetailId = tlog.intContractDetailId)
+
+	
+	SELECT * 
+	INTO #tempVoucher
+	FROM
+	(
+		SELECT 
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmTransactionDate DESC)
+			, tlog.intContractHeaderId
+			, tlog.intContractDetailId
+			, tlog.intTransactionHeaderId
+			, tlog.intTransactionDetailId
+		FROM #tempTradeFinanceLog tlog 
+		WHERE tlog.strTransactionType = 'AP'
+		AND tlog.strAction = 'Created Voucher'
+	) t
+	WHERE intRowNum = 1
+	
+
+	SELECT * 
+	INTO #tempVoucherPayment
+	FROM
+	(
+		SELECT 
+			intRowNum = ROW_NUMBER() OVER (PARTITION BY tlog.intContractDetailId ORDER BY dtmTransactionDate DESC)
+			, tlog.intContractHeaderId
+			, tlog.intContractDetailId
+			, tlog.intTransactionHeaderId
+			, tlog.intTransactionDetailId
+		FROM #tempTradeFinanceLog tlog 
+		WHERE tlog.strTransactionType = 'AP'
+		AND tlog.strAction = 'Created AP Payment'
+	) t
+	WHERE intRowNum = 1
+
 
 	-- Get Purchase Contract Ticket
 	SELECT intContractDetailId = intContractId
@@ -386,6 +431,10 @@ BEGIN TRY
 		, intTicketId = intSourceId
 		, receiptItem.intInventoryReceiptItemId
 		, receipt.intInventoryReceiptId
+		, ysnHasVoucher = CAST(CASE WHEN EXISTS (SELECT TOP 1 '' FROM #tempVoucher tempV WHERE tempV.intContractDetailId = intContractDetailId)
+			THEN 1 ELSE 0 END AS BIT)
+		, ysnHasVoucherPayment = CAST(CASE WHEN EXISTS (SELECT TOP 1 '' FROM #tempVoucherPayment tempV WHERE tempV.intContractDetailId = intContractDetailId)
+			THEN 1 ELSE 0 END AS BIT)
 	INTO #tempReceiptInfo
 	FROM tblICInventoryReceiptItem receiptItem
 	JOIN tblICInventoryReceipt receipt
@@ -399,7 +448,7 @@ BEGIN TRY
 		, voucher.intInventoryReceiptItemId
 		, voucher.intBillId
 		, strInvoiceNumber = bill.strVendorOrderNumber
-		, strSupplierVoucherReference = voucherHist.strBillId
+		, strSupplierVoucherReference = voucher.strBillId
 		, dblPurchaseInvoiceAmount = bill.dblTotalController
 		, dtmVoucherDate = bill.dtmDate
 		, dtmVoucherDueDate = bill.dtmDueDate
@@ -410,9 +459,7 @@ BEGIN TRY
 	FROM vyuICGetInventoryReceiptVoucher voucher
 	JOIN tblAPBill bill
 	ON bill.intBillId = voucher.intBillId
-	LEFT JOIN tblAPVoucherHistory voucherHist
-	ON	voucherHist.intBillId = voucher.intBillId
-	WHERE voucher.intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM #tempReceiptInfo)
+	WHERE voucher.intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM #tempReceiptInfo WHERE ysnHasVoucher = 1)
 
 
 	-- Get Purchase Contract's Allocated Sale Contract
@@ -437,23 +484,6 @@ BEGIN TRY
 		ON fmonth.intFutureMonthId = derivative.intFutureMonthId
 	WHERE HedgeSummary.intContractDetailId IN (SELECT intSContractDetailId FROM #tempContractPair)
 	AND HedgeSummary.ysnIsHedged = 1
-
-
-	--SELECT matchDetail.intLFutOptTransactionId
-	--	, matchDetail.intSFutOptTransactionId
-	--	, HedgeSummary.intContractDetailId
-	--	, HedgeSummary.dblHedgedLots
-	--	, fmonth.strFutureMonth
-	--INTO #tempSaleHedgeInfo
-	--FROM tblRKMatchFuturesPSDetail matchDetail
-	--JOIN tblRKAssignFuturesToContractSummary HedgeSummary
-	--	ON	HedgeSummary.intFutOptTransactionId = matchDetail.intLFutOptTransactionId
-	--LEFT JOIN tblRKFutOptTransaction derivative
-	--	ON	derivative.intFutOptTransactionId = matchDetail.intLFutOptTransactionId
-	--LEFT JOIN tblRKFuturesMonth fmonth
-	--	ON fmonth.intFutureMonthId = derivative.intFutureMonthId
-	--WHERE matchDetail.intSFutOptTransactionId IN (SELECT intFutOptTransactionId FROM #tempHedgeInfo)
-	--AND HedgeSummary.ysnIsHedged = 1
 
 
 	-- Allocated Sale Contract Info
@@ -820,8 +850,13 @@ BEGIN TRY
 		, dblPurchaseInvoiceAmount = ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
 		, pVoucher.dtmVoucherDate
 		, pVoucher.dtmVoucherDueDate
-		, dblVoucherPaidAmount = ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero)
-		, dblVoucherBalance = ISNULL(pVoucher.dblVoucherBalance, @dblZero)
+		, dblVoucherPaidAmount = CASE WHEN pReceipt.ysnHasVoucherPayment = 1 
+										THEN ISNULL(pVoucher.dblVoucherPaidAmount, @dblZero)
+										ELSE @dblZero END
+		, dblVoucherBalance = CASE WHEN pReceipt.ysnHasVoucherPayment = 1 
+									THEN ISNULL(pVoucher.dblVoucherBalance, @dblZero)
+									ELSE ISNULL(pVoucher.dblPurchaseInvoiceAmount, @dblZero)
+									END
 		, dblPContractCost = ISNULL(pContractCost.dblCosts, @dblZero)
 
 		-- Sale Column
@@ -954,11 +989,14 @@ BEGIN TRY
 	DROP TABLE #tempLatestLogValues
 	DROP TABLE #tempContractBalance
 	DROP TABLE #tempCommodity
+	DROP TABLE #tempLogisticsLog
 	DROP TABLE #tempShipmentDetails
 	DROP TABLE #tempTicketInfo
 	DROP TABLE #tempHedgeInfo
 	DROP TABLE #tempReceiptInfo
 	DROP TABLE #tempVoucherInfo
+	DROP TABLE #tempVoucher
+	DROP TABLE #tempVoucherPayment
 
 	DROP TABLE #tempContractPair
 	DROP TABLE #tempSaleHedgeInfo
