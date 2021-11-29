@@ -25,7 +25,7 @@
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityId]),	
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
-	CONSTRAINT [UK_tblARCustomerFreightXRef_reference_columns] UNIQUE NONCLUSTERED ([intEntityTariffTypeId] ASC, [strZipCode] ASC, [intCategoryId] ASC,[intEntityLocationId] ASC),	--THE NAME IS USED IN THE FRONT END, IF THERE ARE CHANGES PLEASE INFORM MON.GONZALES	
+	CONSTRAINT [UK_tblARCustomerFreightXRef_reference_columns] UNIQUE NONCLUSTERED ([intEntityTariffTypeId] ASC, [strZipCode] ASC, [intCategoryId] ASC,[intEntityLocationId] ASC, [intShipViaId] ASC),	--THE NAME IS USED IN THE FRONT END, IF THERE ARE CHANGES PLEASE INFORM MON.GONZALES	
     CONSTRAINT [FK_tblARCustomerFreightXRef_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
 );
 
