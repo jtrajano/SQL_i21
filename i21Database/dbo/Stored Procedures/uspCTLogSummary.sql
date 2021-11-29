@@ -139,7 +139,7 @@ BEGIN TRY
 		, cd.dblBasis
 		, cd.intBookId
 		, cd.intSubBookId
-  		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then 0 else 1 end
+		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then (case when ch.intPricingTypeId = 2 and cd.intPricingTypeId = 1 then 1 else 0 end) else 1 end
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
@@ -3493,11 +3493,30 @@ BEGIN TRY
 			AND intPricingTypeId = 3
 		GROUP BY intContractDetailId
 
-		SELECT @TotalPriced = SUM(dblQty), @TotalOrigPriced = SUM(dblOrigQty)
+		SELECT @TotalPriced = SUM(dblQty)
 		FROM @cbLogPrev
 		WHERE strTransactionType = 'Contract Balance'
 			AND intPricingTypeId = 1
 		GROUP BY intContractDetailId
+				
+		SELECT @TotalOrigPriced = SUM(dblQty) FROM (
+			SELECT intContractDetailId
+				, intTransactionReferenceDetailId
+				, dblQty = CASE WHEN intActionId = 17 THEN ABS(dblOrigQty)
+					WHEN intActionId = 55 THEN 0
+					WHEN intActionId = 1 THEN ABS(dblOrigQty) END
+			FROM (
+				SELECT intRowId = ROW_NUMBER() OVER (PARTITION BY intContractDetailId, intTransactionReferenceDetailId ORDER BY dtmTransactionDate DESC)
+					, intContractDetailId
+					, intTransactionReferenceDetailId
+					, intActionId
+					, dblOrigQty
+				FROM @cbLogPrev
+				WHERE strTransactionType = 'Contract Balance'
+					AND intPricingTypeId = 1
+					AND strTransactionReference = 'Price Fixation'
+			) tbl WHERE intRowId = 1
+		) tbl
 
 		SELECT @dblQtys = SUM(dblQty)
 		FROM @cbLogPrev
@@ -4489,18 +4508,28 @@ BEGIN TRY
 					BEGIN
 						IF (@TotalBasis < @dblOrigQty)
 						BEGIN
-							if exists (select top 1 1 from @cbLogSpecific where strTransactionType = 'Contract Balance' and strTransactionReference Like 'Inventory%') and @TotalPriced = 0
-							begin
+							IF (@strTransactionType = 'Contract Balance' AND @strTransactionReference LIKE 'Inventory%') AND @TotalPriced = 0
+							BEGIN
 								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
-							end
-							else
-							begin
-								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1
-							end
+
+								IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
+								BEGIN
+									UPDATE @cbLogSpecific SET intPricingTypeId = 2, intActionId = (CASE WHEN intActionId = 46 THEN 18 ELSE intActionId END)
+								END
+							END
+							ELSE
+							BEGIN
+								UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intPricingTypeId = 1, intActionId = (CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END)
+							END
 						END
 						ELSE
 						BEGIN
 							UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
+
+							IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
+							BEGIN
+								UPDATE @cbLogSpecific SET intPricingTypeId = 2, intActionId = (CASE WHEN intActionId = 46 THEN 18 ELSE intActionId END)
+							END
 						END
 					END
 					ELSE
