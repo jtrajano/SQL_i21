@@ -80,7 +80,8 @@ BEGIN TRY
 			@strPostedAPAR					NVARCHAR(MAX),
 			@ysnLoad						BIT,
 			@allowAddDetail					BIT,
-			@detailCreated					Id
+			@detailCreated					Id,
+			@ysnDWG							BIT
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -106,11 +107,14 @@ BEGIN TRY
 
 	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-	SELECT	@intEntityId		=	intEntityId,
-			@intContractTypeId	=	intContractTypeId,
-			@ysnLoad			=	ysnLoad
-	FROM	tblCTContractHeader 
-	WHERE	intContractHeaderId = @intContractHeaderId
+	SELECT	@intEntityId		=	ch.intEntityId,
+			@intContractTypeId	=	ch.intContractTypeId,
+			@ysnLoad			=	ch.ysnLoad,
+			@ysnDWG				=	(case when w.intWeightGradeId is null and g.intWeightGradeId is null then convert(bit,0) else convert(bit,1) end)
+	FROM	tblCTContractHeader ch
+	left join tblCTWeightGrade w on w.intWeightGradeId = ch.intWeightId and lower(ltrim(rtrim(w.strWhereFinalized))) = 'destination'
+	left join tblCTWeightGrade g on g.intWeightGradeId = ch.intWeightId and lower(ltrim(rtrim(g.strWhereFinalized))) = 'destination'
+	WHERE	ch.intContractHeaderId = @intContractHeaderId
 
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
 
@@ -522,11 +526,11 @@ BEGIN TRY
 		IF @intContractTypeId = 2 
 		BEGIN
 			IF OBJECT_ID('tempdb..#tblShipment') IS NOT NULL  								
-				DROP TABLE #tblShipment								
+				DROP TABLE #tblShipment
 
 			SELECT  RI.intInventoryShipmentId,
 					RI.intInventoryShipmentItemId,
-					dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,RI.dblQuantity) dblShipped,
+					dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,(case when @ysnDWG = 1 then RI.dblDestinationQuantity else RI.dblQuantity end)) dblShipped,
 					IR.strShipmentNumber,
 					(
 						SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
