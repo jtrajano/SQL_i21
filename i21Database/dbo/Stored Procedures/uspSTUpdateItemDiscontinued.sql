@@ -196,9 +196,11 @@ BEGIN TRY
 					ON invoicedetail.intInvoiceId = invoice.intInvoiceId
 				LEFT JOIN tblICInventoryReceiptItem receipt
 					ON item.intItemId = receipt.intItemId
-				WHERE item.strStatus != 'Discontinued'
-
+				WHERE item.strStatus != 'Discontinued' AND invoice.dtmDate IS NOT NULL AND
+				item.dtmDateCreated IS NOT NULL AND receipt.dtmDateCreated IS NOT NULL
 		END
+
+
 	END
 	-- END Add the filter records
 
@@ -207,7 +209,9 @@ BEGIN TRY
 
 	BEGIN TRY
 		
-		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items))
+		IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Location)
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Vendor) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Category)
+		OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Family) OR EXISTS(SELECT * FROM #tmpUpdateItemForCStore_Class))
 		BEGIN
 			-- This is where IC SP Executed for updating 
 			EXEC [uspICUpdateItemForCStore]
