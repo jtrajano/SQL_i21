@@ -25,6 +25,7 @@ DECLARE @vouchers AS TABLE(
 	,intLoadShipmentCostId INT NULL
 	,intCustomerStorageId INT NULL
 	,intSettleStorageId INT NULL
+	,intPriceFixationDetailId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
 	);
@@ -41,6 +42,7 @@ DECLARE @payablesDeleted AS TABLE(
 	,intLoadShipmentCostId INT NULL
 	,intCustomerStorageId INT NULL
 	,intSettleStorageId INT NULL
+	,intPriceFixationDetailId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
 	);
@@ -78,6 +80,7 @@ BEGIN
 		,B.intLoadShipmentCostId
 		,B.intCustomerStorageId
 		,B.intSettleStorageId
+		,B.intPriceFixationDetailId
 		,B.intItemId
 		,A.intTransactionType
 	FROM tblAPBill A
@@ -115,6 +118,7 @@ BEGIN
 			,deleted.intLoadShipmentCostId
 			,deleted.intCustomerStorageId
 			,deleted.intSettleStorageId
+			,deleted.intPriceFixationDetailId
 			,deleted.intItemId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
@@ -187,6 +191,7 @@ BEGIN
 			,deleted.intLoadShipmentCostId
 			,deleted.intCustomerStorageId
 			,deleted.intSettleStorageId
+			,deleted.intPriceFixationDetailId
 			,deleted.intItemId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
