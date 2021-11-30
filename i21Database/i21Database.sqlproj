@@ -330,6 +330,8 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesRowDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateDrillDownCurrencies.sql" />
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
+	<Build Include="dbo\Tables\tblApiSchemaTRRackPriceEquation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTRRackPriceEquation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
