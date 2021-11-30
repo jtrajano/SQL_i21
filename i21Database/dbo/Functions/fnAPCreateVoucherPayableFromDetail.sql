@@ -108,6 +108,7 @@ RETURNS TABLE AS RETURN
 	OR	B.intBuybackChargeId > 0
 	OR	B.intScaleTicketId > 0
 	OR	B.intInventoryShipmentChargeId > 0
+	OR	B.intPriceFixationDetailId > 0
 		)
 )
 
