@@ -96,6 +96,7 @@ BEGIN
 		AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 		AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 		AND ISNULL(C.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
+		AND ISNULL(C.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
 		AND ISNULL(C.intItemId,-1) = ISNULL(B.intItemId,-1)
 	
 	IF EXISTS(SELECT 1 FROM @vouchers)
@@ -130,6 +131,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
+			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(A.intItemId,-1)
 		WHERE A.dblQuantityToBill = 0
 
@@ -156,6 +158,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
+			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
 	END
 
@@ -200,6 +203,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
+			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(B.intPriceFixationDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
 		LEFT JOIN @vouchers C ON ISNULL(A.intEntityVendorId,-1) = ISNULL(C.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(C.intPurchaseDetailId,-1)
@@ -212,6 +216,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(C.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(C.intCustomerStorageId,-1)
 			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(C.intSettleStorageId,-1)
+			AND ISNULL(A.intPriceFixationDetailId,-1) = ISNULL(C.intPriceFixationDetailId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(C.intItemId,-1)
 		WHERE C.intEntityVendorId IS NULL --make sure to delete only if no voucher created
 
