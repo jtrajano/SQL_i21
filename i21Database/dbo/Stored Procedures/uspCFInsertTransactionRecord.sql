@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
+﻿
+CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	
 	 @strGUID						NVARCHAR(MAX)
 	,@strProcessDate				NVARCHAR(MAX)
@@ -119,7 +120,7 @@
 	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
 	,@intUserId							INT				= NULL
-
+	,@LinkedNetworkCardNumber			NVARCHAR(MAX)	= NULL
 	
 
 
@@ -1023,6 +1024,7 @@ BEGIN
 	END
 	
 	
+
 	--FIND CARD IN LINKED NETWORK CARDS--
 	DECLARE @intLinkedNetworkId INT
 	IF(ISNULL(@intCardId,0) = 0)
@@ -1036,7 +1038,7 @@ BEGIN
 			FROM tblCFCard C
 			INNER JOIN tblCFAccount A
 			ON C.intAccountId = A.intAccountId
-			WHERE C.strCardNumber = @strCardId
+			WHERE C.strCardNumber = @LinkedNetworkCardNumber
 			AND ( ISNULL(C.ysnActive,0) = 1  OR @ysnPostedCSV = 1)
 			AND C.intNetworkId = @intLinkedNetworkId
 		END
