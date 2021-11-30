@@ -252,89 +252,105 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
     END  
   
   
-   WHILE EXISTS(SELECT TOP 1 1 FROM #exclusionTable)
-			BEGIN
-				SELECT TOP 1
-				 @intTempTransferLogId = intInterCompanyTransferLogForDMS,
-				 @intTempSourceDocumentId =	intSourceRecordId,
-			     @intTempDestinationDocumentId = intDestinationRecordId,
-			     @dtmLogDate = dtmCreated,
-			     @strLogTableDataSource = strDatabaseName
-			FROM #exclusionTable
+	WHILE EXISTS(SELECT TOP 1 1 FROM #exclusionTable)
+	BEGIN
+		SELECT TOP 1
+				@intTempTransferLogId = intInterCompanyTransferLogForDMS,
+				@intTempSourceDocumentId =	intSourceRecordId,
+				@intTempDestinationDocumentId = intDestinationRecordId,
+				@dtmLogDate = dtmCreated,
+				@strLogTableDataSource = strDatabaseName
+		FROM #exclusionTable
 			
-				SET @sql = N'SELECT @paramOut = DATEADD(MILLISECOND,DATEDIFF(MILLISECOND,getutcdate(),GETDATE()), dtmDateModified) FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId);
-				EXEC sp_executesql @sql, @ParamDateTimeDefinition, @paramOut = @dtmSourceDate OUTPUT;
+		SET @sql = N'SELECT @paramOut = DATEADD(MILLISECOND,DATEDIFF(MILLISECOND,getutcdate(),GETDATE()), dtmDateModified) FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId);
+		EXEC sp_executesql @sql, @ParamDateTimeDefinition, @paramOut = @dtmSourceDate OUTPUT;
 
 		/*===============================START CHECKING FOLDER PATH================================================*/
-				IF(OBJECT_ID('tempdb..#tmpFolderTable') IS NOT NULL) 
-						DROP TABLE #tmpFolderTable
+		IF(OBJECT_ID('tempdb..#tmpFolderTable') IS NOT NULL) 
+				DROP TABLE #tmpFolderTable
 
-			 SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR,ISNULL(@intReferToDocumentId, @intTempSourceDocumentId)) 
-			 EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
-			--DECLARE @folderPath NVARCHAR(MAX) = (SELECT strFolderPath FROM vyuSMDocument WHERE intDocumentId = ISNULL(@intReferToDocumentId, @intTempSourceDocumentId)) --folder path of updated document
+		--update only the folder of the document, prevent update all document records in the transaction Id
+		IF ISNULL(@intReferToDocumentId, 0) <> 0
+		BEGIN
+			IF (@intReferToDocumentId = @intTempSourceDocumentId OR @intReferToDocumentId = @intTempDestinationDocumentId)
+				AND (@strLogTableDataSource IS NULL OR @strLogTableDataSource = @strCurrentDatabaseName)
+			BEGIN
+				SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intReferToDocumentId)
+				EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
+			END
+			ELSE
+			BEGIN
+				SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId)
+				EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
+			END
+		END
 
-			CREATE TABLE #tmpFolderTable
-			(
-				[intDocumentSourceFolderId] INT,
-				[intDocumentTypeId] INT,
-				[strFolderPath] NVARCHAR(MAX)
-			)
+		--SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR,ISNULL(@intReferToDocumentId, @intTempSourceDocumentId)) 
+		--EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
+		--DECLARE @folderPath NVARCHAR(MAX) = (SELECT strFolderPath FROM vyuSMDocument WHERE intDocumentId = ISNULL(@intReferToDocumentId, @intTempSourceDocumentId)) --folder path of updated document
 
-				SET @smFolderPathSQL = N'WITH FolderHeirarchy AS (
-										  SELECT 
-											intDocumentSourceFolderId,  
-											A.intDocumentTypeId,
-											CAST(strName AS VARCHAR(MAX)) AS strFolderPath
-										  FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder A
-										  WHERE intDocumentFolderParentId IS NULL
+		CREATE TABLE #tmpFolderTable
+		(
+			[intDocumentSourceFolderId] INT,
+			[intDocumentTypeId] INT,
+			[strFolderPath] NVARCHAR(MAX)
+		)
 
-										  UNION ALL
+			SET @smFolderPathSQL = N'WITH FolderHeirarchy AS (
+										SELECT 
+										intDocumentSourceFolderId,  
+										A.intDocumentTypeId,
+										CAST(strName AS VARCHAR(MAX)) AS strFolderPath
+										FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder A
+										WHERE intDocumentFolderParentId IS NULL
 
-										  SELECT 
-											B.intDocumentSourceFolderId, 
-											B.intDocumentTypeId,
-											CAST(strFolderPath + ''\'' + CAST(B.strName AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS strFolderPath
-										  FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder B
-											INNER JOIN FolderHeirarchy C ON C.intDocumentSourceFolderId = B.intDocumentFolderParentId
-										) INSERT INTO #tmpFolderTable 
-												SELECT intDocumentSourceFolderId, intDocumentTypeId, strFolderPath FROM FolderHeirarchy WHERE strFolderPath = '''+ @folderPathOut + ''''
+										UNION ALL
+
+										SELECT 
+										B.intDocumentSourceFolderId, 
+										B.intDocumentTypeId,
+										CAST(strFolderPath + ''\'' + CAST(B.strName AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS strFolderPath
+										FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder B
+										INNER JOIN FolderHeirarchy C ON C.intDocumentSourceFolderId = B.intDocumentFolderParentId
+									) INSERT INTO #tmpFolderTable 
+											SELECT intDocumentSourceFolderId, intDocumentTypeId, strFolderPath FROM FolderHeirarchy WHERE strFolderPath = '''+ @folderPathOut + ''''
 				
-				EXEC sp_executesql @smFolderPathSQL
+			EXEC sp_executesql @smFolderPathSQL
 
 		/*=====================================END CHECKING FOLDER PATH===============================================================*/
 
 
-			--	IF ISNULL(@dtmSourceDate, 0 ) > ISNULL(@dtmLogDate, 0)
-				--BEGIN
-					--SET @sql = N'
-					--	UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMDocument] SET
-					--	intDocumentSourceFolderId = (
-					--		SELECT intDocumentSourceFolderId FROM [' + @strCurrentDatabaseName +'].dbo.tblSMDocument WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId) + '
-					--	) WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempDestinationDocumentId);
+		--	IF ISNULL(@dtmSourceDate, 0 ) > ISNULL(@dtmLogDate, 0)
+			--BEGIN
+				--SET @sql = N'
+				--	UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMDocument] SET
+				--	intDocumentSourceFolderId = (
+				--		SELECT intDocumentSourceFolderId FROM [' + @strCurrentDatabaseName +'].dbo.tblSMDocument WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId) + '
+				--	) WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempDestinationDocumentId);
 
-					DECLARE @newDocumentSourceFolderID INT = (SELECT TOP 1 intDocumentSourceFolderId FROM #tmpFolderTable)
+				DECLARE @newDocumentSourceFolderID INT = (SELECT TOP 1 intDocumentSourceFolderId FROM #tmpFolderTable)
 
-					SET @sql = N'
-						UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMDocument] SET
-						intDocumentSourceFolderId = (
-							'+ CONVERT(VARCHAR, @newDocumentSourceFolderID) +'
-						) WHERE intDocumentId = ' + CONVERT(VARCHAR, ISNULL(@intTempDestinationDocumentId, 0));
+				SET @sql = N'
+					UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMDocument] SET
+					intDocumentSourceFolderId = (
+						'+ CONVERT(VARCHAR, @newDocumentSourceFolderID) +'
+					) WHERE intDocumentId = ' + CONVERT(VARCHAR, ISNULL(@intTempDestinationDocumentId, 0));
 
-					EXEC sp_executesql @sql
+				EXEC sp_executesql @sql
 
-					--update logging table
-					SET @sql = N'
-						UPDATE [' + @strLogTableDataSource + '].dbo.[tblSMInterCompanyTransferLogForDMS] SET dtmCreated = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
-						WHERE intInterCompanyTransferLogId = '+ CONVERT(VARCHAR, @intTempTransferLogId)
+				--update logging table
+				SET @sql = N'
+					UPDATE [' + @strLogTableDataSource + '].dbo.[tblSMInterCompanyTransferLogForDMS] SET dtmCreated = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
+					WHERE intInterCompanyTransferLogId = '+ CONVERT(VARCHAR, @intTempTransferLogId)
 					
-					EXEC sp_executesql @sql;
-				--END
+				EXEC sp_executesql @sql;
+			--END
 
 	
 				
-				DELETE FROM #exclusionTable WHERE intInterCompanyTransferLogForDMS = @intTempTransferLogId
+			DELETE FROM #exclusionTable WHERE intInterCompanyTransferLogForDMS = @intTempTransferLogId
 
-			END 
+	END 
 
 			
 		
