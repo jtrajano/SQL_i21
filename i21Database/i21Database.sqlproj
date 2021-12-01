@@ -3935,6 +3935,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCreateBankSwapLong.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionTable.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionDetailTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementPaymentActivityReport.sql" />
