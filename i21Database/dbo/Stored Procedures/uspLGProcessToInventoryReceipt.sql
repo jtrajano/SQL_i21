@@ -462,17 +462,6 @@ BEGIN TRY
 									WHERE intLocationId = @intPCompanyLocationId AND intSubLocationId = LW.intSubLocationId)
 		END
 
-		/* Auto-correct Vendor */
-		IF EXISTS (SELECT LD.intVendorEntityId FROM tblLGLoadDetail LD WHERE LD.intLoadId = @intLoadId AND LD.intVendorEntityId IS NULL)
-		BEGIN
-			UPDATE LD 
-			SET LD.intVendorEntityId = CH.intEntityId	
-			FROM tblLGLoadDetail LD
-				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			WHERE LD.intLoadId = @intLoadId AND LD.intVendorEntityId IS NULL
-		END
-
 		/* Update LS Unit Cost for Unpriced Contracts */
 		UPDATE LD 
 		SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
