@@ -53,8 +53,8 @@ FROM
        , TR.dtmDate AS dtmDateTime
        , CONVERT(VARCHAR, TR.dtmDate, 23) AS dtmDate
        , CAST(TR.intCashierPosNum AS INT) AS intCashierPosNum
-       , CAST(ST.intStoreId AS INT) AS intStoreId
-       , CAST(ST.intStoreNo AS INT) AS intStoreNo
+       , CAST(TR.intStoreId AS INT) AS intStoreId
+       , CAST(TR.intStoreNumber AS INT) AS intStoreNo
        , CAST(TR.intTrTickNumPosNum AS INT) AS intTicketPosNum -- Ticket Number
        , CAST(TR.intTrTickNumTrSeq AS INT) AS intTicketTrSeq -- Ticket Number
        , TR.strTransType 
@@ -100,8 +100,8 @@ FROM
 		,TR.strTrlMatchLineTrlMatchName  -- Added 09/26/2021
 
        FROM tblSTTranslogRebates TR 
-       JOIN tblSTStore ST 
-              ON TR.intStoreId = ST.intStoreId 
+       --JOIN tblSTStore ST 
+       --       ON TR.intStoreId = ST.intStoreId 
         WHERE (strTransRollback IS NULL) AND (strTransFuelPrepayCompletion IS NULL) and (strTransType not Like '%void%') -- Added 09/26/2021
           
 ) x
