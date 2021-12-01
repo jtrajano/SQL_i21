@@ -379,6 +379,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMClockReading.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Views\vyuICRebuildHistory.sql" />
+	<Build Include="dbo\Tables\tblApiSchemaTRRackPriceEquation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTRRackPriceEquation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
