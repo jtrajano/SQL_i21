@@ -208,7 +208,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , intCompanyLocationId	= I.intCompanyLocationId
 	 , intEntitySalespersonId = I.intEntitySalespersonId
 	 , dtmPostDate			= I.dtmPostDate
-	 , dtmDueDate			= DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate)
+	 , dtmDueDate			= CASE WHEN I.ysnOverrideCashFlow = 1 THEN I.dtmCashFlowDate ELSE DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate) END
 	 , dtmDate				= CAST(I.dtmDate AS DATE)
 	 , strTransactionType	= I.strTransactionType
 	 , strType				= I.strType

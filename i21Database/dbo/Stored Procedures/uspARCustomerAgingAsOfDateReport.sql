@@ -265,7 +265,7 @@ SELECT I.intInvoiceId
 	 , I.intEntitySalespersonId
 	 , I.intCompanyLocationId
 	 , I.dtmPostDate
-	 , I.dtmDueDate
+	 , dtmDueDate	= CASE WHEN I.ysnOverrideCashFlow = 1 THEN I.dtmCashFlowDate ELSE I.dtmDueDate END
 	 , I.dtmDate
 	 , I.strTransactionType
 	 , I.strType
