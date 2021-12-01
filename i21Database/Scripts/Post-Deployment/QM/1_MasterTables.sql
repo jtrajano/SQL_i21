@@ -1237,3 +1237,67 @@ UPDATE tblQMSampleType
 SET ysnMultipleContractSeq = 0
 WHERE ysnMultipleContractSeq IS NULL
 GO
+
+IF NOT EXISTS(SELECT 1 FROM tblQMComponentMap)
+BEGIN
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component1',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component2',1
+	
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component3',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component4',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component5',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component6',1
+	
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component7',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component8',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component9',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component10',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component11',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component12',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component13',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component14',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component15',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component16',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component17',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component18',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component19',1
+
+	INSERT INTO tblQMComponentMap(strComponent,intConcurrencyId)
+	SELECT 'Component20',1
+END
+GO
