@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuCTGetAvailablePriceForVoucher]
 	AS
 		select
-		    intId = convert(int,ROW_NUMBER() over (order by intPriceFixationDetailId))            
+		    intId
 			,intContractDetailId      
 			,intPriceFixationId      
 			,intPriceFixationDetailId      
@@ -20,7 +20,8 @@
 		from      
 			(      
 				select      
-					pf.intContractDetailId      
+					intId = pfd.intPriceFixationDetailId
+					,pf.intContractDetailId      
 					,pf.intPriceFixationId      
 					,pfd.intPriceFixationDetailId     
 					,pfd.dtmFixationDate     
@@ -62,7 +63,8 @@
                 union all
 
                 select        
-                    cd.intContractDetailId        
+                	intId = cd.intContractDetailId
+                    ,cd.intContractDetailId        
                     ,intPriceFixationId = null
                     ,intPriceFixationDetailId = null
                     ,dtmFixationDate = null
@@ -85,7 +87,6 @@
                     		intPricingCount = count(*)
                     	from
 	                    	tblCTPriceFixation pf
-	                    	join tblCTPriceContract pc on pc.intPriceContractId = pf.intPriceContractId
                     	where
                     		pf.intContractDetailId = cd.intContractDetailId
                     ) noPrice
