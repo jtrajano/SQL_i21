@@ -58,8 +58,8 @@ BEGIN
 			,[intAccountId]			= @intRealizedGainAccountId
 			,[dblDebit]				= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
 			,[dblCredit]			= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
-			,[dblDebitForeign]		= case when @gainLoss < 0 then @gainLoss * -1  else 0 end
-			,[dblCreditForeign]		= case when @gainLoss >= 0 then @gainLoss  else 0 end--   A.dblAmount * ISNULL(A.dblRate,1)
+			,[dblDebitForeign]		= 0
+			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= @strDescription --'Gain / Loss on Multicurrency Bank Transfer'
