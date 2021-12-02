@@ -51,7 +51,7 @@ BEGIN
 	INSERT @returntable
 	SELECT strNewId, @guiLogId, 'Error', 'Failed', NULL, VL.intRowNumber, 'Terms', VL.strTerm, 'Terms is not valid'
 	FROM tblApiSchemaVendorLocation VL
-	LEFT JOIN tblSMTerms T ON T.strTerm = VL.strTerm
+	LEFT JOIN tblSMTerm T ON T.strTerm = VL.strTerm
 	OUTER APPLY vyuAPGuidGenerator 
 	WHERE guiApiUniqueId = @guiApiUniqueId AND (NULLIF(VL.strTerm, '') IS NOT NULL AND T.intTermID IS NULL)
 
