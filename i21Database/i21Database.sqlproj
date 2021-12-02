@@ -9108,6 +9108,7 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessTicketWithBasisContract.sql" />
     <Build Include="dbo\Functions\fnGRCheckStorageBalance.sql" />
     <Build Include="dbo\Functions\fnGRFindOriginalCustomerStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
