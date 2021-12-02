@@ -9139,6 +9139,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
     <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
