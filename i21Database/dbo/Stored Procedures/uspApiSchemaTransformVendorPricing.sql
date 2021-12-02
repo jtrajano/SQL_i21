@@ -31,11 +31,11 @@ BEGIN
 		)
 		SELECT V.intEntityId, EL.intEntityLocationId, I.intItemId, UM.intUnitMeasureId, VP.dtmBeginDate, VP.dtmEndDate, VP.dblPrice, C.intCurrencyID, @guiApiUniqueId
 		FROM #tmpApiSchemaVendorPricingTop VP
-		INNER JOIN tblAPVendor V ON V.strVendorId = VP.strVendorId
-		INNER JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.strLocationName = VP.strLocationName
-		INNER JOIN tblICItem I ON I.strItemNo = VP.strItemNo
-		INNER JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = VP.strUnitMeasure
-		INNER JOIN tblSMCurrency C ON C.strCurrency = VP.strCurrency
+		LEFT JOIN tblAPVendor V ON V.strVendorId = VP.strVendorId
+		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = V.intEntityId AND EL.strLocationName = VP.strLocationName
+		LEFT JOIN tblICItem I ON I.strItemNo = VP.strItemNo
+		LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = VP.strUnitMeasure
+		LEFT JOIN tblSMCurrency C ON C.strCurrency = VP.strCurrency
 
 		DELETE FROM #tmpApiSchemaVendorPricing WHERE intKey IN (SELECT intKey FROM #tmpApiSchemaVendorPricingTop)
 	END
