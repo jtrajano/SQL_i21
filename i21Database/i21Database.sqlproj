@@ -383,10 +383,11 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesRowDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateDrillDownCurrencies.sql" />
     <Build Include="dbo\Views\vyuICRebuildHistory.sql" />
-	<Build Include="dbo\Tables\tblApiSchemaTRRackPriceEquation.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRRackPriceEquation.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRRackPriceEquation.sql" />
     <Build Include="dbo\Tables\tblQMComponentMap.sql" />
     <Build Include="dbo\Views\vyuQMComponentPropertyMap.sql" />
+    <Build Include="dbo\Views\vyuLGDispatchOrderSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
