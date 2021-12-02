@@ -2,7 +2,7 @@ CREATE PROCEDURE uspCMCreateBankTransferPostEntries
 @strTransactionId NVARCHAR(20),
 @intBankTransferTypeId INT,
 @dtmDate DATETIME,
-@strBatchID NVARCHAR(40),
+@strBatchId NVARCHAR(40),
 @intDefaultCurrencyId INT = 3,
 @ysnPostedInTransit BIT = 0
 AS
