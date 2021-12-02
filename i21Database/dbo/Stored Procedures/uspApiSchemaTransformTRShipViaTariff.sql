@@ -214,9 +214,9 @@ BEGIN
 
 
 		-- Tariff Fuel Surcharge
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityTariffFuelSurcharge WHERE intEntityTariffId = @tariffId AND (dblFuelSurcharge = @dblSurcharge AND dtmEffectiveDate = @dtmSurchargeEffectiveDate))
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblEMEntityTariffFuelSurcharge WHERE intEntityTariffId = @tariffId AND dtmEffectiveDate = @dtmSurchargeEffectiveDate)
 		BEGIN
-			IF ISNULL(@dblSurcharge, 0) > 0
+			IF ISNULL(@dblSurcharge, -1) <> -1
 			BEGIN
 				INSERT INTO tblEMEntityTariffFuelSurcharge ([intEntityTariffId]
 					, [dblFuelSurcharge]
@@ -231,6 +231,14 @@ BEGIN
 				)
 			END
 		END
+		ELSE
+		BEGIN
+			UPDATE tblEMEntityTariffFuelSurcharge 
+			SET [dblFuelSurcharge] = ISNULL(@dblSurcharge, 0), [guiApiUniqueId] = @guiApiUniqueId
+			WHERE intEntityTariffId = @tariffId 
+				AND dtmEffectiveDate = @dtmSurchargeEffectiveDate
+		END
+
 
 	--	-- Tariff Mileage
 		--	INSERT INTO tblEMEntityTariffMileage ([intEntityTariffId]
