@@ -114,7 +114,7 @@ BEGIN
 		FROM #tmpApiSchemaVendorLocationTop VL
 		INNER JOIN tblEMEntity E ON E.strEntityNo = VL.strEntityNo
 		INNER JOIN tblSMShipVia SV ON SV.strShipVia = VL.strShipVia
-		INNER JOIN tblSMTerms T ON T.strTerm = VL.strTerm
+		INNER JOIN tblSMTerm T ON T.strTerm = VL.strTerm
 		INNER JOIN tblSMCompanyLocation CL ON CL.strLocationName = VL.strWarehouseName
 		INNER JOIN tblSMFreightTerms FT ON FT.strFreightTerm = VL.strFreightTerm
 		INNER JOIN tblSMTaxCode TC ON TC.strTaxCode = VL.strTaxCode
