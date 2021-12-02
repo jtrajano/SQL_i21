@@ -109,7 +109,7 @@
 		,IR.intInventoryReceiptId
 		,IRD.intInventoryReceiptItemId
 		,IR.strReceiptNumber
-		,IRD.dblGross
+		, case when isnull(STORAGE_TICKET.ysnTransferStorage, 0) = 0 then IRD.dblGross else STORAGE_TICKET.dblGrossQty end as dblGross
 		,dblShrinkage = CASE WHEN DS.intDeliverySheetId IS NULL
 			THEN 
 				CASE WHEN ISNULL(SC.dblShrink,0) = 0 THEN 0
@@ -119,11 +119,11 @@
 			ELSE CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END
 			END
 		,dblNet =  CASE WHEN DS.intDeliverySheetId IS NULL
-			THEN IRD.dblNet
+			THEN ( case when isnull(STORAGE_TICKET.ysnTransferStorage, 0) = 0 then IRD.dblNet else STORAGE_TICKET.dblNetQty end )
 			ELSE IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
 			END
-		,dblLineGrossWeight =(IRD.dblNet / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)) 
-		,dblLineNetWeight = ((IRD.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) 
+		,dblLineGrossWeight =( case when isnull(STORAGE_TICKET.ysnTransferStorage, 0) = 0 then IRD.dblNet else STORAGE_TICKET.dblNetQty end / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)) 
+		,dblLineNetWeight = (( case when isnull(STORAGE_TICKET.ysnTransferStorage, 0) = 0 then IRD.dblNet else STORAGE_TICKET.dblNetQty end / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) 
 		,tblGRDiscountId.strDiscountId
 		-- ,dtmReceiptDate = ISNULL(Voucher.dtmDate, IR.dtmReceiptDate)
 		,dtmReceiptDate = ISNULL(VOUCHER_STORAGE.dtmDate, VOUCHER_IR.dtmDate)
@@ -227,9 +227,13 @@
             GRCS2.intCustomerStorageId
             ,GRCS2.intEntityId
             ,GRCS2.intItemId
+			, GRCS2.dblGrossQuantity as dblGrossQty
+			, GRCS2.dblOriginalBalance as dblNetQty
+			, GRCS2.ysnTransferStorage
         FROM tblGRCustomerStorage GRCS2
         WHERE GRCS2.intTicketId = SC.intTicketId
         AND GRCS2.intEntityId = EM.intEntityId
+		-- AND GRCS2.ysnTransferStorage = 0
     ) STORAGE_TICKET
     OUTER APPLY(
 		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
