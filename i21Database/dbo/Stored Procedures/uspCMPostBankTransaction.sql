@@ -110,6 +110,7 @@ DECLARE
 	,@intDefaultCurrencyId INT 
 	,@intCurrencyId INT
 	,@dblExchangeRate DECIMAL(18,6)
+	,@dblAmountDetailTotalForeign DECIMAL(18,6)
 	,@ysnForeignTransaction AS BIT = 0 
 	-- Note: Table variables are unaffected by COMMIT or ROLLBACK TRANSACTION.	
 	
@@ -148,6 +149,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 		
 -- Read the detail table and populate the variables. 
 SELECT	@dblAmountDetailTotal = ISNULL(SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit, 0)), 0)
+,@dblAmountDetailTotalForeign = ISNULL(SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0)), 0)
 FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
 IF @@ERROR <> 0	GOTO Post_Rollback		
@@ -261,7 +263,8 @@ BEGIN
 	END
 
 	-- Check the bank transaction balance. 
-	IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0)
+	IF ISNULL(CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END, 0) <>
+	 ISNULL(@dblAmount, 0)
 	BEGIN
 		-- The debit and credit amounts are not balanced.
 		RAISERROR('The debit and credit amounts are not balanced.', 11, 1)
@@ -379,9 +382,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE ROUND(@dblAmountDetailTotal * @dblExchangeRate,2) END  
+			,[dblDebit]				= @dblAmountDetailTotal
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE @dblAmountDetailTotal END
+			,[dblDebitForeign]		= @dblAmountDetailTotalForeign
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -416,9 +419,9 @@ BEGIN
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
 			,[dblDebit]				= 0
-			,[dblCredit]			= ROUND((ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)) * CASE WHEN @ysnForeignTransaction = 0 THEN 1 ELSE @dblExchangeRate END ,2) 
+			,[dblCredit]			= ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)
 			,[dblDebitForeign]		= 0
-			,[dblCreditForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE ISNULL(B.dblCredit, 0) - ISNULL(B.dblDebit, 0)  END
+			,[dblCreditForeign]		= ISNULL(B.dblCreditForeign, 0) - ISNULL(B.dblDebitForeign, 0)
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
 			,[strDescription]		= A.strMemo
@@ -426,7 +429,7 @@ BEGIN
 			,[strReference]			= NULL
 			,[intCurrencyId]		= A.intCurrencyId
 			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
-			,[dblExchangeRate]		= @dblExchangeRate
+			,[dblExchangeRate]		= B.dblExchangeRate
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = GLAccnt.strDescription
