@@ -79,7 +79,12 @@ BEGIN
 	OR ( premp_ded_code_col = 'premp_ded_code_6' and premp_ded_type_col = 'premp_ded_type_6' and premp_ded_active_col ='premp_ded_active_yn_6' and  premp_ded_calc_code_col = 'premp_ded_calc_code_6' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_6' and premp_ded_limit_col = 'premp_ded_limit_6')
 	)
 
-	SELECT @intRecordCount = COUNT(1) FROM prempmst_deductions_cv
+	select @intRecordCount = COUNT(1) from tblPRTypeDeduction tded
+	left join prempmst_deductions_cv mded
+	on tded.strDeduction = mded.premp_emp_code collate Latin1_General_CI_AS
+	
+
+	--SELECT @intRecordCount = COUNT(1) FROM prempmst_deductions_cv
 
 	IF (@ysnDoImport = 1)
 	BEGIN
@@ -111,7 +116,7 @@ BEGIN
 					   ([intEntityEmployeeId]
 					   ,[intTypeDeductionId]
 					   ,[strDeductFrom]
-					   --,[strCalculationType]
+					   ,[strCalculationType]
 					   ,[dblAmount]
 					   ,[dblLimit]
 					   ,[intAccountId]
@@ -125,7 +130,7 @@ BEGIN
 						 @intEntityEmployeeId
 						,@intTypeDeductionId
 						,@strDeductFrom
-						--,@strCalculationType
+						,@strCalculationType
 						,@dblAmount
 						,@dblLimit
 						,@intAccountId
