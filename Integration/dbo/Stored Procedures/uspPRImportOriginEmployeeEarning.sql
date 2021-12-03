@@ -128,7 +128,10 @@ BEGIN
 		or ( premp_ern_code_col = 'premp_ern_code_10' and premp_ern_active_yn_col = 'premp_ern_active_yn_10' and premp_ern_freq_col ='premp_ern_freq_10' and  premp_ern_amount_col = 'premp_ern_amount_10')
 		)
 	
-	SELECT @intRecordCount = COUNT(1) FROM prempmst_earnings_cv
+	select @intRecordCount = COUNT(1) from tblPRTypeEarning tern
+	left join prempmst_earnings_cv mern
+	on tern.strEarning = mern.premp_emp_code collate Latin1_General_CI_AS
+	--SELECT @intRecordCount = COUNT(1) FROM prempmst_earnings_cv
 
 	IF (@ysnDoImport = 1)
 	BEGIN
