@@ -279,7 +279,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 				EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
 			END
 			--reference to other db
-			ELSE IF (@intReferToDocumentId = @intTempSourceDocumentId OR @intReferToDocumentId = @intTempDestinationDocumentId) AND @strLogTableDataSource IS NULL
+			ELSE IF @intReferToDocumentId = @intTempSourceDocumentId AND @strLogTableDataSource IS NULL
 			BEGIN
 				SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intReferToDocumentId)
 				EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
