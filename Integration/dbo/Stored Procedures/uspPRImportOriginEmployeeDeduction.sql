@@ -111,7 +111,7 @@ BEGIN
 					   ([intEntityEmployeeId]
 					   ,[intTypeDeductionId]
 					   ,[strDeductFrom]
-					   ,[strCalculationType]
+					   --,[strCalculationType]
 					   ,[dblAmount]
 					   ,[dblLimit]
 					   ,[intAccountId]
@@ -125,7 +125,7 @@ BEGIN
 						 @intEntityEmployeeId
 						,@intTypeDeductionId
 						,@strDeductFrom
-						,@strCalculationType
+						--,@strCalculationType
 						,@dblAmount
 						,@dblLimit
 						,@intAccountId

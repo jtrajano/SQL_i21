@@ -9093,11 +9093,8 @@
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
     <Build Include="dbo\Tables\tblSCTicketOnProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCheckUpdateTicketProcessed.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
     <Build Include="dbo\Functions\fnSCGetStartingNumericValue.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
