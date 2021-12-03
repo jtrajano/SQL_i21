@@ -21,8 +21,8 @@ BEGIN
 		,strDeductFrom			=	''
 		,strCalculationType		=	prded_type
 		,dblAmount				=	prded_glbs_acct
-		,dblLimit				=	prded_cycle_earn_limit
-		,dblPaycheckMax			=	prded_annual_max
+		,dblLimit				=	prded_annual_max
+		,dblPaycheckMax			=	prded_cycle_earn_limit
 		,strW2Code				=	''
 		,strPaidBy				=	CASE WHEN prded_co_emp_cd = 'E'THEN 'Employee' ELSE 'Company' END
 		,ysnCreatePayable		=	null
