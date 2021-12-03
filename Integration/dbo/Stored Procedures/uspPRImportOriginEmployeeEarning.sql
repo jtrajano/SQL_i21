@@ -127,11 +127,17 @@ BEGIN
 		or ( premp_ern_code_col = 'premp_ern_code_9' and premp_ern_active_yn_col = 'premp_ern_active_yn_9' and premp_ern_freq_col ='premp_ern_freq_9' and  premp_ern_amount_col = 'premp_ern_amount_9')
 		or ( premp_ern_code_col = 'premp_ern_code_10' and premp_ern_active_yn_col = 'premp_ern_active_yn_10' and premp_ern_freq_col ='premp_ern_freq_10' and  premp_ern_amount_col = 'premp_ern_amount_10')
 		)
-	
-	select @intRecordCount = COUNT(1) from tblPRTypeEarning tern
-	left join prempmst_earnings_cv mern
-	on tern.strEarning = mern.premp_emp_code collate Latin1_General_CI_AS
-	--SELECT @intRecordCount = COUNT(1) FROM prempmst_earnings_cv
+
+
+	select @intRecordCount = COUNT(*) from prempmst_earnings_cv mern
+	left join tblPRTypeEarning tern
+	on mern.premp_ern_code collate Latin1_General_CI_AS = tern.strEarning
+	left join tblPREmployee emp
+	on emp.strEmployeeId = mern.premp_emp_code collate Latin1_General_CI_AS
+	WHERE tern.strEarning is not null
+	AND emp.intEntityId is not null
+
+
 
 	IF (@ysnDoImport = 1)
 	BEGIN
