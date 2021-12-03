@@ -11,6 +11,7 @@
 	, @ysnInclude120Days		BIT = 0
 	, @ysnExcludeAccountStatus	BIT = 0
 	, @intGracePeriod			INT = 0
+	, @ysnOverrideCashFlow		BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -29,7 +30,8 @@ DECLARE @dtmDateFromLocal			DATETIME = NULL,
 		@strCompanyName				NVARCHAR(100) = NULL,
 		@strCompanyAddress			NVARCHAR(500) = NULL,
 		@intEntityUserIdLocal		INT = NULL,
-		@intGracePeriodLocal		INT = 0
+		@intGracePeriodLocal		INT = 0,
+		@ysnOverrideCashFlowLocal	BIT = 0
 
 DECLARE @tblCustomers TABLE (
 	    intEntityCustomerId			INT	  
@@ -51,6 +53,7 @@ SET @strCompanyLocationIdsLocal	= NULLIF(@strCompanyLocationIds, '')
 SET @strAccountStatusIdsLocal	= NULLIF(@strAccountStatusIds, '')
 SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
+SET @ysnOverrideCashFlowLocal   = ISNULL(@ysnOverrideCashFlow, 0)
 
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
@@ -208,7 +211,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , intCompanyLocationId	= I.intCompanyLocationId
 	 , intEntitySalespersonId = I.intEntitySalespersonId
 	 , dtmPostDate			= I.dtmPostDate
-	 , dtmDueDate			= CASE WHEN I.ysnOverrideCashFlow = 1 THEN I.dtmCashFlowDate ELSE DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate) END
+	 , dtmDueDate			= CASE WHEN I.ysnOverrideCashFlow = 1 AND @ysnOverrideCashFlowLocal = 1 THEN I.dtmCashFlowDate ELSE DATEADD(DAYOFYEAR, @intGracePeriodLocal, I.dtmDueDate) END
 	 , dtmDate				= CAST(I.dtmDate AS DATE)
 	 , strTransactionType	= I.strTransactionType
 	 , strType				= I.strType

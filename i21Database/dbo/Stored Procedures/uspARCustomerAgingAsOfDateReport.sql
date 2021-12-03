@@ -14,6 +14,7 @@
 	, @ysnFromBalanceForward		BIT = 0
 	, @ysnPrintFromCF				BIT = 0
 	, @ysnExcludeAccountStatus		BIT = 0
+	, @ysnOverrideCashFlow			BIT = 0
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
@@ -28,7 +29,8 @@ DECLARE @dtmDateFromLocal				DATETIME		= NULL,
 		@strCompanyAddress				NVARCHAR(500)	= NULL,
 		@ysnIncludeCreditsLocal			BIT				= 1,
 		@ysnIncludeWriteOffPaymentLocal BIT				= 1,
-		@ysnPrintFromCFLocal			BIT				= 0
+		@ysnPrintFromCFLocal			BIT				= 0,
+		@ysnOverrideCashFlowLocal		BIT				= 0
 
 DECLARE @tblSalesperson TABLE (intSalespersonId INT)
 DECLARE @tblCompanyLocation TABLE (intCompanyLocationId INT)
@@ -52,7 +54,7 @@ SET @strCustomerIdsLocal			= NULLIF(@strCustomerIds, '')
 SET @strSalespersonIdsLocal			= NULLIF(@strSalespersonIds, '')
 SET @strCompanyLocationIdsLocal		= NULLIF(@strCompanyLocationIds, '')
 SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')
-
+SET @ysnOverrideCashFlowLocal		= ISNULL(@ysnOverrideCashFlow, 0)
 SET @dtmDateFromLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmDateToLocal					= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 
@@ -265,7 +267,7 @@ SELECT I.intInvoiceId
 	 , I.intEntitySalespersonId
 	 , I.intCompanyLocationId
 	 , I.dtmPostDate
-	 , dtmDueDate	= CASE WHEN I.ysnOverrideCashFlow = 1 THEN I.dtmCashFlowDate ELSE I.dtmDueDate END
+	 , dtmDueDate	= CASE WHEN I.ysnOverrideCashFlow = 1 AND @ysnOverrideCashFlowLocal = 1 THEN I.dtmCashFlowDate ELSE I.dtmDueDate END
 	 , I.dtmDate
 	 , I.strTransactionType
 	 , I.strType
