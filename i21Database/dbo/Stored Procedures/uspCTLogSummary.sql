@@ -4094,47 +4094,16 @@ BEGIN TRY
 				FROM tblCTPriceFixationDetail
 				WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
-				IF (@intContractTypeId = 1)
+				IF (@qtyDiff <> 0)
 				BEGIN
-					IF (@qtyDiff > 0)
-					BEGIN
-						-- Qty increased
-						SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END ELSE 0 END
-					END
-					ELSE IF (@qtyDiff < 0)
-					BEGIN
-						-- Qty decreased
-						SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalPriced + @dblQty > @TotalConsumed THEN @qtyDiff ELSE 0 END ELSE 0 END
-					END
-					ELSE
-					BEGIN
-						-- New Price or No change
-						SET @FinalQty = @dblQty
-					END
+					-- Qty Changed
+					SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
+										ELSE @dblCurrentQty - @prevOrigQty END
 				END
 				ELSE
 				BEGIN
-					IF (@qtyDiff > 0)
-					BEGIN
-						-- Qty increased
-						SET @FinalQty =  CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END ELSE 0 END
-					END
-					ELSE IF (@qtyDiff < 0)
-					BEGIN
-						-- Qty decreased
-						IF @dblAppliedQty = 0 BEGIN
-							SET @FinalQty = @qtyDiff
-						END
-						ELSE
-						BEGIN
-							SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END ELSE 0 END
-						END
-					END
-					ELSE
-					BEGIN
-						-- New Price or No change
-						SET @FinalQty = @dblQty
-					END
+					-- New Price or No change
+					SET @FinalQty = @dblQty
 				END
 
 				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
