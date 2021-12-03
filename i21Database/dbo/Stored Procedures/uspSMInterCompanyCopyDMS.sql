@@ -32,7 +32,8 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
    [intSize] int,  
    [strType] nvarchar(max),  
    [intUploadId] int,  
-   [strFolderPath] nvarchar(max)  
+   [strFolderPath] nvarchar(max),
+   [strUserName] nvarchar(max)
  )  
   
  DECLARE @strCurrentDatabaseName NVARCHAR(250) = DB_NAME();  
@@ -87,7 +88,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
   
    --insert those not in existing logs  
    INSERT INTO @dmsTable  
-   SELECT intDocumentId, strName,intDocumentSourceFolderId,intTransactionId,intEntityId, intSize,strType, intUploadId, strFolderPath FROM vyuSMDocument WHERE intTransactionId = @currentTransId  
+   SELECT intDocumentId, strName,intDocumentSourceFolderId,intTransactionId,intEntityId, intSize,strType, intUploadId, strFolderPath, strUserName FROM vyuSMDocument WHERE intTransactionId = @currentTransId  
    AND intDocumentId NOT IN  
    (  
     SELECT  intSourceRecordId FROM #exclusionTable  
@@ -126,12 +127,17 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
         @strType = strType,  
         @intSize = intSize,  
         @intUploadId = intUploadId,  
-        @strFolderPath = strFolderPath  
+        @strFolderPath = strFolderPath,
+		    @strEntityName = strUsername
           
      FROM @dmsTable  
   
      SELECT @blbFile = blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId  
-     SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId  
+
+	    IF ISNULL(@strEntityName, '') = ''
+	    BEGIN
+		   SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId  
+	    END
   
      --Temp Table Folder Path  
      IF(OBJECT_ID('tempdb..#folderPathTable') IS NOT NULL)   
