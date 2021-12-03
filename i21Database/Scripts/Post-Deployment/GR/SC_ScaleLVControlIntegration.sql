@@ -1183,7 +1183,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								, @intItemUOMId = 0
 
 							
-							select @current_discount_result = case when lower(strDiscountChargeType) = ''dollar'' then dblDiscountAmount else dblDiscountAmount / 100 end 
+							select @current_discount_result = case when lower(strCalculationDiscountOption) = ''dollar'' then dblDiscountAmount else dblDiscountAmount / 100 end 
 								, @current_shrink_result = dblShrink
 								, @current_discount_message = strMessage								
 							from @calculated_discount
