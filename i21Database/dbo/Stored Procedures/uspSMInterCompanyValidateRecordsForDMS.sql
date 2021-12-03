@@ -215,18 +215,26 @@ BEGIN
 									IF ISNULL(@intReferToDocumentId, 0) <> 0
 									BEGIN
 										DECLARE @newReferDocumentId INT
+
+										--file uploaded from Zug, the data for transfer log is on the zug database
 										SET @sql = N'
 										SELECT @paramOut = A.intSourceRecordId FROM [' + @strReferenceDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForDMS] A  
-										INNER JOIN [irelyCH].dbo.[tblSMDocument] B on A.intSourceRecordId = B.intDocumentId  
-										INNER JOIN [irelyRO].dbo.[tblSMDocument] C on C.intDocumentId = A.intDestinationRecordId  
-										WHERE (  
-											B.intTransactionId = ' + CONVERT(VARCHAR, @intReferenceTransactionId) + ' AND  
-											C.intTransactionId = ' +  CONVERT(VARCHAR, @intCurrentTransactionId) +'AND  
-											ISNULL(A.intDestinationCompanyId, 0) = ' + CONVERT(VARCHAR, @intCurrentCompanyId) + '
-										)
+										WHERE ISNULL(A.intDestinationCompanyId, 0) = ' + CONVERT(VARCHAR, @intCurrentCompanyId) + '
 										AND A.intDestinationRecordId = ' + CAST(@intReferToDocumentId AS NVARCHAR) + '
 										'
 										EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @newReferDocumentId OUTPUT;
+
+										--file uploaded from BU, the data for transfer log is on the bu database
+										IF ISNULL(@newReferDocumentId, 0) = 0
+										BEGIN
+											SET @sql = N'
+											SELECT @paramOut = A.intDestinationRecordId FROM [' + CONVERT(VARCHAR(MAX),DB_NAME()) + '].dbo.[tblSMInterCompanyTransferLogForDMS] A  
+											WHERE ISNULL(A.intDestinationCompanyId, 0) = ' + CONVERT(VARCHAR, @intReferenceCompanyId) + '
+											AND A.intSourceRecordId = ' + CAST(@intReferToDocumentId AS NVARCHAR) + '
+											'
+											EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @newReferDocumentId OUTPUT;
+										END
+
 										IF ISNULL(@newReferDocumentId, 0) <> 0
 										BEGIN
 											SET @intReferToDocumentId = @newReferDocumentId
