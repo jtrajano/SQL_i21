@@ -95,6 +95,13 @@ BEGIN TRY
 		, strCertifications NVARCHAR(MAX)
 	)
 
+	if (isnull(@strTFXML,'') <> '')
+	begin
+		exec uspCTProcessTFLogs
+			@strXML = @strTFXML
+			,@intUserId = @userId;
+	end
+
 	INSERT INTO @CDTableUpdate(intContractDetailId
 		, intPricingTypeId
 		, dblFutures
