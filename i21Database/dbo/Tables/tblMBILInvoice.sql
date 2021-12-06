@@ -13,6 +13,8 @@ CREATE TABLE [dbo].[tblMBILInvoice](
 	[strVoidComments] NVARCHAR (400) COLLATE Latin1_General_CI_AS NULL,
 	[dblTotal] NUMERIC (18, 6) NULL,
 	[intTermId] INT NULL,
+	[intPaymentMethodId] INT NULL,
+	[strPaymentInfo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPosted]	BIT DEFAULT ((0)) NULL,
 	[ysnVoided]	BIT DEFAULT ((0)) NULL,
 	[dtmPostedDate] DATETIME NULL,
