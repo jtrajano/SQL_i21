@@ -4179,7 +4179,8 @@ BEGIN TRY
 						BEGIN				
 							IF @dblBasis >= @dblQty
 							BEGIN									
-								UPDATE @cbLogSpecific SET dblQty = dblQty *- 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, intActionId = 18
+							--Dont log DWG Contract Balance if there's no change in quantity in posting DWG.
+							IF ((@dblBasis >= @dblQty) and exists(select top 1 1 from @cbLogSpecific where dblQty <> 0 and dblOrigQty <> 0))
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0
 							END
 						END
