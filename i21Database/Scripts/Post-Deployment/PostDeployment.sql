@@ -261,8 +261,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\11_TradingFinance.sql
 :r .\CM\12_CashFlowReportSummary.sql
 :r .\CM\13_InsertDefaultCashFlowReportBucketType.sql
-:r .\CM\14_InsertDefaultBankAccountType.sql
-:r .\CM\15_UpdateBankAccountType.sql
+:r .\CM\14_UpdateBankAccountType.sql
+:r .\CM\15_InsertDefaultBankAccountType.sql
 :r .\CM\vyuCMBankAccountRegisterRunningBalance.sql
 
 
