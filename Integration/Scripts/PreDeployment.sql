@@ -311,6 +311,6 @@
 :r "..\dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql"
 :r "..\dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql"
 :r "..\dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql"
-:r "..\dbo\Stored Procedures\uspPRImportOriginEarningTypes"
+:r "..\dbo\Stored Procedures\uspPRImportOriginEarningTypes.sql"
 
 
