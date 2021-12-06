@@ -278,8 +278,14 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 		--update only the folder of the document, prevent update all document records in the transaction Id
 		IF ISNULL(@intReferToDocumentId, 0) <> 0
 		BEGIN
-			IF (@intReferToDocumentId = @intTempSourceDocumentId OR @intReferToDocumentId = @intTempDestinationDocumentId)
-				AND (@strLogTableDataSource IS NULL OR @strLogTableDataSource = @strCurrentDatabaseName)
+			--reference to current db
+			IF (@intReferToDocumentId = @intTempSourceDocumentId OR @intReferToDocumentId = @intTempDestinationDocumentId) AND @strLogTableDataSource = @strCurrentDatabaseName
+			BEGIN
+				SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intReferToDocumentId)
+				EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
+			END
+			--reference to other db
+			ELSE IF @intReferToDocumentId = @intTempSourceDocumentId AND @strLogTableDataSource IS NULL
 			BEGIN
 				SET @sql = N'SELECT @pathOut = strFolderPath FROM ['+ @strDatabaseToUseForUpdate +'].dbo.[vyuSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intReferToDocumentId)
 				EXEC sp_executesql @sql, @ParamFolderPath,@pathOut = @folderPathOut OUTPUT;
