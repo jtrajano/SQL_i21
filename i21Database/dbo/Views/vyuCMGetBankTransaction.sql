@@ -9,7 +9,7 @@ RT.strCurrencyExchangeRateType,
 BTT.strBankTransactionTypeName,
 FP.strPeriod
 FROM tblCMBankTransaction BT 
-LEFT JOIN [dbo].[vyuCMBankAccount] BA on BA.intBankAccountId = BT.intBankAccountId
+LEFT JOIN vyuCMBankAccount BA on BA.intBankAccountId = BT.intBankAccountId
 LEFT JOIN tblCMBankTransactionType BTT ON BTT.intBankTransactionTypeId = BT.intBankTransactionTypeId
 LEFT JOIN tblSMCompanyLocation CL on CL.intCompanyLocationId = BT.intCompanyLocationId
 LEFT JOIN tblSMCurrency CU on CU.intCurrencyID = BT.intCurrencyId
