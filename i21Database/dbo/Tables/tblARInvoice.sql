@@ -134,8 +134,6 @@
 	[strReceiptNumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL,
 	[ysnInterCompany]					BIT												NULL DEFAULT ((0)),
 	[ysnImportFromCSV] 					BIT											    NULL	CONSTRAINT [DF_tblARInvoice_ysnImportFromCSV] DEFAULT ((0)),
-	[ysnOverrideCashFlow]				BIT											    NULL	CONSTRAINT [DF_tblARInvoice_ysnOverrideCashFlow] DEFAULT ((0)),
-	[dtmCashFlowDate]					DATETIME										NULL,
 	[guiApiUniqueId]					UNIQUEIDENTIFIER NULL
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
@@ -203,6 +201,24 @@ CREATE NONCLUSTERED INDEX [IDX_tblARInvoice_intCompanyLocationId_ysnRecurring]
 	ON [dbo].[tblARInvoice] ([intCompanyLocationId], [ysnRecurring]) 
 INCLUDE ([strTransactionType], [strType], [intEntityCustomerId], [ysnProcessedToNSF], [intPeriodId])
 GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intPaymentId_intTransactionId_intMeterReadingId] 
+	ON [dbo].[tblARInvoice] ([intPaymentId], [intTransactionId], [intMeterReadingId])
+INCLUDE ([intInvoiceId], [strInvoiceNumber], [strTransactionType], [strType], [dblInvoiceTotal])
+GO
+CREATE NONCLUSTERED INDEX [IX_tblARInvoice_intAccountId] 
+	ON [dbo].[tblARInvoice] ([intAccountId])
+INCLUDE ([intInvoiceId], [strInvoiceNumber], [strTransactionType], [dblInvoiceTotal])
+GO
+CREATE NONCLUSTERED INDEX [NC_tblARInvoice_AgingSummary]
+ON [dbo].[tblARInvoice] ([ysnPosted],[ysnCancelled],[strTransactionType],[dtmPostDate])
+INCLUDE ([strInvoiceNumber],[strType],[intEntityCustomerId],[intCompanyLocationId],[intAccountId],[dtmDate],[dtmDueDate],[dblInvoiceTotal],[dblDiscount],[dblInterest],[dblAmountDue],[intEntitySalespersonId],[strBOLNumber],[ysnPaid],[ysnForgiven],[intPaymentId],[dtmForgiveDate])
+GO
+GO
+CREATE NONCLUSTERED INDEX [NC_tblARInvoice_AgingDetail]
+ON [dbo].[tblARInvoice] ([intAccountId],[ysnPosted],[ysnCancelled],[dtmPostDate])
+INCLUDE ([strInvoiceNumber],[strTransactionType],[strType],[intEntityCustomerId],[intCompanyLocationId],[dtmDate],[dtmDueDate],[dblInvoiceTotal],[dblDiscount],[dblInterest],[dblAmountDue],[intEntitySalespersonId],[ysnForgiven],[intPaymentId],[dtmForgiveDate])
+GO
+
 
 --TRIGGERS INSERT
 GO
