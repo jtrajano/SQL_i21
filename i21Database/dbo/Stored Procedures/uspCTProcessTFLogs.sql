@@ -75,7 +75,7 @@ BEGIN
 			, intLoanLimitId = cd.intLoanLimitId
 			, strLoanLimitNumber = bl.strBankLoanId
 			, strLoanLimitType = bl.strLimitDescription
-			, dtmAppliedToTransactionDate = isnull(et.dtmAppliedToTransactionDate,getdate())
+			, dtmAppliedToTransactionDate = getdate()
 			, intStatusId = case when cd.intContractStatusId = 5 then 2 else 1 end
 			, intWarrantId = null
 			, strWarrantId = null
@@ -89,7 +89,7 @@ BEGIN
 			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
 			cross apply (
-				select intTradeFinanceLogId = max(intTradeFinanceLogId),dtmAppliedToTransactionDate from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId group by dtmAppliedToTransactionDate
+				select intTradeFinanceLogId = max(intTradeFinanceLogId) from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId
 			) et
 		;
 
