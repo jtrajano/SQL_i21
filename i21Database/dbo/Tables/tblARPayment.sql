@@ -56,7 +56,12 @@ INCLUDE ([dtmDatePaid], [dblAmountPaid], [strRecordNumber], [ysnInvoicePrepaymen
 GO
 CREATE NONCLUSTERED INDEX [IDX_tblARPayment_strRecordNumber_intAccountId] 
 	ON [dbo].[tblARPayment] ([strRecordNumber], [intAccountId])
-	
+GO
+CREATE NONCLUSTERED INDEX [NC_tblARPayment_AgingSummary]
+ON [dbo].[tblARPayment] ([ysnPosted],[dtmDatePaid],[ysnProcessedToNSF])
+INCLUDE ([intEntityCustomerId],[intPaymentMethodId],[dblAmountPaid],[strRecordNumber],[ysnInvoicePrepayment])
+GO
+
 --TRIGGERS INSERT
 GO
 CREATE TRIGGER trgReceivePaymentRecordNumber
