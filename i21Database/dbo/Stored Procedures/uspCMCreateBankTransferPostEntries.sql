@@ -49,7 +49,7 @@ BEGIN
         ,[strBatchId]            = @strBatchId    
         ,[intAccountId]          = GLAccnt.intAccountId    
         ,[dblDebit]              = 0    
-        ,[dblCredit]             = dblAmountFrom --   CASE WHEN @ysnForeignToForeign =1 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountFunctional.Val ELSE A.dblAmount END    
+        ,[dblCredit]             = dblAmountFrom
         ,[dblDebitForeign]       = 0    
         ,[dblCreditForeign]      = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom   
                                     THEN dblAmountFrom ELSE  dblAmountForeignFrom END  

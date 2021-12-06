@@ -473,129 +473,9 @@ BEGIN
   IF @intBankTransferTypeId = 1  
   BEGIN  
     SET @ysnPostedInTransit = 1  
-  
-  INSERT INTO #tmpGLDetail (    
-      [strTransactionId]    
-      ,[intTransactionId]    
-      ,[dtmDate]    
-      ,[strBatchId]    
-      ,[intAccountId]    
-      ,[dblDebit]    
-      ,[dblCredit]    
-      ,[dblDebitForeign]     
-      ,[dblCreditForeign]    
-      ,[dblDebitUnit]    
-      ,[dblCreditUnit]    
-      ,[strDescription]    
-      ,[strCode]    
-      ,[strReference]    
-      ,[intCurrencyId]    
-      ,[intCurrencyExchangeRateTypeId]    
-      ,[dblExchangeRate]    
-      ,[dtmDateEntered]    
-      ,[dtmTransactionDate]    
-      ,[strJournalLineDescription]    
-      ,[ysnIsUnposted]    
-      ,[intConcurrencyId]    
-      ,[intUserId]    
-      ,[strTransactionType]    
-      ,[strTransactionForm]    
-      ,[strModuleName]    
-      ,[intEntityId]    
-      )    
-      SELECT   
-        [strTransactionId]  = A.strTransactionId    
-        ,[intTransactionId]     = A.intTransactionId    
-        ,[dtmDate]           = A.dtmDate    
-        ,[strBatchId]        = @strBatchId    
-        ,[intAccountId]       = GLAccnt.intAccountId    
-        ,[dblDebit]         = A.dblFeesFrom  
-        ,[dblCredit]        = 0     
-        ,[dblDebitForeign]     =  CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom  
-                                    THEN dblFeesFrom ELSE  dblFeesForeignFrom END  
-        ,[dblCreditForeign]    = 0    
-        ,[dblDebitUnit]       = 0    
-        ,[dblCreditUnit]      = 0    
-        ,[strDescription]     = A.strDescription    
-        ,[strCode]           = @GL_DETAIL_CODE    
-        ,[strReference]       = strReferenceFrom   
-        ,[intCurrencyId]      = intCurrencyIdAmountFrom   
-        ,[intCurrencyExchangeRateTypeId] = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountFrom THEN NULL ELSE intRateTypeIdFeesFrom END  
-        ,[dblExchangeRate]      = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountFrom THEN 1  
-                                          --WHEN @ysnForeignToForeign = 1 THEN dblAmountSettlementTo/dblAmountForeignFrom  
-                                          ELSE dblRateFeesFrom END  
-        ,[dtmDateEntered]      = GETDATE()    
-        ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = 'Bank Transfer fees'  
-        ,[ysnIsUnposted]      = 0     
-        ,[intConcurrencyId]     = 1    
-        ,[intUserId]        = A.intLastModifiedUserId    
-        ,[strTransactionType]    = @TRANSACTION_FORM    
-        ,[strTransactionForm]    = @TRANSACTION_FORM    
-        ,[strModuleName]      = @MODULE_NAME    
-        ,[intEntityId]       = A.intEntityId    
-        FROM tblCMBankTransfer  A  
-        OUTER APPLY(  
-          SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = A.intGLAccountIdFeesFrom  
-        )GLAccnt  
-        WHERE @strTransactionId = A.strTransactionId  
-        AND dblFeesFrom >0  
-      UNION ALL  
-      SELECT   
-        [strTransactionId]     = A.strTransactionId    
-        ,[intTransactionId]     = A.intTransactionId    
-        ,[dtmDate]           = A.dtmInTransit    
-        ,[strBatchId]        = @strBatchId    
-        ,[intAccountId]       = GLAccnt.intAccountId    
-        ,[dblDebit]         = 0  
-        ,[dblCredit]        = A.dblFeesTo    
-        ,[dblDebitForeign]     =  0  
-        ,[dblCreditForeign]    = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo  
-                                    THEN dblFeesTo ELSE  dblFeesForeignTo END  
-        ,[dblDebitUnit]       = 0    
-        ,[dblCreditUnit]      = 0    
-        ,[strDescription]     = A.strDescription    
-        ,[strCode]           = @GL_DETAIL_CODE    
-        ,[strReference]       = strReferenceFrom   
-        ,[intCurrencyId]      = intCurrencyIdAmountTo  
-        ,[intCurrencyExchangeRateTypeId] = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountTo THEN NULL ELSE intRateTypeIdFeesTo END  
-        ,[dblExchangeRate]      = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountTo THEN 1  
-                                          --WHEN @ysnForeignToForeign = 1 THEN dblAmountSettlementTo/dblAmountForeignFrom  
-                                          ELSE dblRateFeesTo END  
-        ,[dtmDateEntered]      = GETDATE()    
-        ,[dtmTransactionDate]    = A.dtmDate    
-        ,[strJournalLineDescription]  = 'Bank Transfer fees'  
-        ,[ysnIsUnposted]      = 0     
-        ,[intConcurrencyId]     = 1    
-        ,[intUserId]        = A.intLastModifiedUserId    
-        ,[strTransactionType]    = @TRANSACTION_FORM    
-        ,[strTransactionForm]    = @TRANSACTION_FORM    
-        ,[strModuleName]      = @MODULE_NAME    
-        ,[intEntityId]       = A.intEntityId    
-        FROM tblCMBankTransfer  A  
-        OUTER APPLY(  
-          SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = A.intGLAccountIdFeesTo  
-        )GLAccnt  
-        WHERE @strTransactionId = A.strTransactionId  
-        AND dblFeesTo >0  
-  
-      IF (@dblFeesFrom > 0)  
-      UPDATE A   
-      SET dblCredit = dblCredit + @dblFeesFrom,  
-      dblCreditForeign = dblCreditForeign + @dblFeesForeignFrom  
-      from #tmpGLDetail A  
-      WHERE intAccountId = @intGLAccountIdFrom  
-  
-      IF @dblFeesTo > 0  
-      UPDATE   
-      A  
-      SET dblDebit = dblDebit + @dblFeesTo, dblDebitForeign = dblDebitForeign + @dblFeesForeignTo  
-      FROM  
-      #tmpGLDetail A  
-      WHERE intAccountId = @intGLAccountIdTo  
-        
-  
-  
+      EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom,  @intDefaultCurrencyId
+      EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  , @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom, @intDefaultCurrencyId
+
   END  
 
 -- BANK TRANSFER WITH IN-TRANSIT POSTING
@@ -614,83 +494,9 @@ BEGIN
         SELECT intCurrencyExchangeRateTypeId FROM #tmpGLDetail WHERE  intAccountId = @intGLAccountIdFrom
       )F
       WHERE intAccountId = @intGLAccountIdTo 
-
-
-      -- INSERT INTO #tmpGLDetail (    
-      -- [strTransactionId]    
-      -- ,[intTransactionId]    
-      -- ,[dtmDate]    
-      -- ,[strBatchId]    
-      -- ,[intAccountId]    
-      -- ,[dblDebit]    
-      -- ,[dblCredit]    
-      -- ,[dblDebitForeign]     
-      -- ,[dblCreditForeign]    
-      -- ,[dblDebitUnit]    
-      -- ,[dblCreditUnit]    
-      -- ,[strDescription]    
-      -- ,[strCode]    
-      -- ,[strReference]    
-      -- ,[intCurrencyId]    
-      -- ,[intCurrencyExchangeRateTypeId]    
-      -- ,[dblExchangeRate]    
-      -- ,[dtmDateEntered]    
-      -- ,[dtmTransactionDate]    
-      -- ,[strJournalLineDescription]    
-      -- ,[ysnIsUnposted]    
-      -- ,[intConcurrencyId]    
-      -- ,[intUserId]    
-      -- ,[strTransactionType]    
-      -- ,[strTransactionForm]    
-      -- ,[strModuleName]    
-      -- ,[intEntityId]    
-      -- )    
-      -- SELECT   
-      --  [strTransactionId]  = A.strTransactionId    
-      -- ,[intTransactionId]     = A.intTransactionId    
-      -- ,[dtmDate]           = A.dtmDate    
-      -- ,[strBatchId]        = @strBatchId    
-      -- ,[intAccountId]       = GLAccnt.intAccountId    
-      -- ,[dblDebit]         = A.dblFeesFrom  
-      -- ,[dblCredit]        = 0     
-      -- ,[dblDebitForeign]     =  CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom  
-      --                             THEN dblFeesFrom ELSE  dblFeesForeignFrom END  
-      -- ,[dblCreditForeign]    = 0    
-      -- ,[dblDebitUnit]       = 0    
-      -- ,[dblCreditUnit]      = 0    
-      -- ,[strDescription]     = A.strDescription    
-      -- ,[strCode]           = @GL_DETAIL_CODE    
-      -- ,[strReference]       = strReferenceFrom   
-      -- ,[intCurrencyId]      = intCurrencyIdAmountFrom   
-      -- ,[intCurrencyExchangeRateTypeId] = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountFrom THEN NULL ELSE intRateTypeIdFeesFrom END  
-      -- ,[dblExchangeRate]      = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountFrom THEN 1  
-      --                                   --WHEN @ysnForeignToForeign = 1 THEN dblAmountSettlementTo/dblAmountForeignFrom  
-      --                                   ELSE dblRateFeesFrom END  
-      -- ,[dtmDateEntered]      = GETDATE()    
-      -- ,[dtmTransactionDate]    = A.dtmDate    
-      -- ,[strJournalLineDescription]  = 'Bank Transfer fees'  
-      -- ,[ysnIsUnposted]      = 0     
-      -- ,[intConcurrencyId]     = 1    
-      -- ,[intUserId]        = A.intLastModifiedUserId    
-      -- ,[strTransactionType]    = @TRANSACTION_FORM    
-      -- ,[strTransactionForm]    = @TRANSACTION_FORM    
-      -- ,[strModuleName]      = @MODULE_NAME    
-      -- ,[intEntityId]       = A.intEntityId    
-      -- FROM tblCMBankTransfer  A  
-        
-      -- OUTER APPLY(  
-      --   SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = A.intGLAccountIdFeesFrom  
-      -- )GLAccnt  
-      -- WHERE @strTransactionId = A.strTransactionId  
-      -- AND dblFeesFrom >0  
-  
-      -- IF (@dblFeesFrom > 0)  
-      -- UPDATE A   
-      -- SET dblCredit = dblCredit + @dblFeesFrom,  
-      -- dblCreditForeign = dblCreditForeign + @dblFeesForeignFrom  
-      -- from #tmpGLDetail A  
-      -- WHERE intAccountId = @intGLAccountIdFrom  
-        
+      
+      EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', 
+        @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom,  @intDefaultCurrencyId  
   
             
     END  
@@ -726,96 +532,10 @@ BEGIN
             SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = @intGLAccountIdTo  
           )GLAccnt  
           WHERE A.intAccountId = @intGLAccountIdFrom
+
+        EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  
+          , @dtmInTransit, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom, @intDefaultCurrencyId  
       
-      
-      --   UPDATE A SET dtmDate= @dtmInTransit FROM #tmpGLDetail A  
-      --    UPDATE  A    
-      --     SET   
-      --     dtmTransactionDate = @dtmInTransit,  
-      --     strJournalLineDescription = 'In-Transit Entry',  
-      --     intAccountId =GLAccnt.intAccountId
-      --     FROM #tmpGLDetail A   
-      --     CROSS APPLY (  
-      --       SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = @intBTInTransitAccountId  
-      --     )GLAccnt  
-      --     WHERE A.intAccountId = @intGLAccountIdFrom  
-  
-      -- INSERT INTO #tmpGLDetail (    
-      -- [strTransactionId]    
-      -- ,[intTransactionId]    
-      -- ,[dtmDate]    
-      -- ,[strBatchId]    
-      -- ,[intAccountId]    
-      -- ,[dblDebit]    
-      -- ,[dblCredit]    
-      -- ,[dblDebitForeign]     
-      -- ,[dblCreditForeign]    
-      -- ,[dblDebitUnit]    
-      -- ,[dblCreditUnit]    
-      -- ,[strDescription]    
-      -- ,[strCode]    
-      -- ,[strReference]    
-      -- ,[intCurrencyId]    
-      -- ,[intCurrencyExchangeRateTypeId]    
-      -- ,[dblExchangeRate]    
-      -- ,[dtmDateEntered]    
-      -- ,[dtmTransactionDate]    
-      -- ,[strJournalLineDescription]    
-      -- ,[ysnIsUnposted]    
-      -- ,[intConcurrencyId]    
-      -- ,[intUserId]    
-      -- ,[strTransactionType]    
-      -- ,[strTransactionForm]    
-      -- ,[strModuleName]    
-      -- ,[intEntityId]    
-      -- )      
-            
-      --     SELECT   
-      -- [strTransactionId]  = A.strTransactionId    
-      -- ,[intTransactionId]     = A.intTransactionId    
-      -- ,[dtmDate]           = A.dtmInTransit    
-      -- ,[strBatchId]        = @strBatchId    
-      -- ,[intAccountId]       = GLAccnt.intAccountId    
-      -- ,[dblDebit]         = 0  
-      -- ,[dblCredit]        = A.dblFeesTo    
-      -- ,[dblDebitForeign]     =  0  
-      -- ,[dblCreditForeign]    = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo  
-      --                             THEN dblFeesTo ELSE  dblFeesForeignTo END  
-      -- ,[dblDebitUnit]       = 0    
-      -- ,[dblCreditUnit]      = 0    
-      -- ,[strDescription]     = A.strDescription    
-      -- ,[strCode]           = @GL_DETAIL_CODE    
-      -- ,[strReference]       = strReferenceFrom   
-      -- ,[intCurrencyId]      = intCurrencyIdAmountTo  
-      -- ,[intCurrencyExchangeRateTypeId] = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountTo THEN NULL ELSE intRateTypeIdFeesTo END  
-      -- ,[dblExchangeRate]      = CASE WHEN @intDefaultCurrencyId =  intCurrencyIdAmountTo THEN 1  
-      --                                   --WHEN @ysnForeignToForeign = 1 THEN dblAmountSettlementTo/dblAmountForeignFrom  
-      --                                   ELSE dblRateFeesTo END  
-      -- ,[dtmDateEntered]      = GETDATE()    
-      -- ,[dtmTransactionDate]    = A.dtmDate    
-      -- ,[strJournalLineDescription]  = 'Bank Transfer fees'  
-      -- ,[ysnIsUnposted]      = 0     
-      -- ,[intConcurrencyId]     = 1    
-      -- ,[intUserId]        = A.intLastModifiedUserId    
-      -- ,[strTransactionType]    = @TRANSACTION_FORM    
-      -- ,[strTransactionForm]    = @TRANSACTION_FORM    
-      -- ,[strModuleName]      = @MODULE_NAME    
-      -- ,[intEntityId]       = A.intEntityId    
-      -- FROM tblCMBankTransfer  A  
-        
-      -- OUTER APPLY(  
-      --   SELECT TOP 1 intAccountId, strDescription FROM tblGLAccount WHERE intAccountId = A.intGLAccountIdFeesTo  
-      -- )GLAccnt  
-      -- WHERE @strTransactionId = A.strTransactionId  
-      -- AND dblFeesTo >0  
-  
-      -- IF @dblFeesTo > 0  
-      -- UPDATE   
-      -- A  
-      -- SET dblDebit = dblDebit + @dblFeesTo, dblDebitForeign = dblDebitForeign + @dblFeesForeignTo  
-      -- FROM  
-      -- #tmpGLDetail A  
-      -- WHERE intAccountId = @intGLAccountIdTo  
     END  
   END  
   
@@ -850,116 +570,53 @@ BEGIN
           SELECT strDescription FROM tblGLAccount WHERE intAccountId = @intBTForwardToFXGLAccountId   
         )GLAccnt  
         WHERE A.intAccountId = @intGLAccountIdFrom 
+
+        
+
+
     END  
     ELSE  
     BEGIN  
       -- from 
+      print('123')
+      -- stopped here
       
-      INSERT INTO #tmpGLDetail (    
-      [strTransactionId]    
-      ,[intTransactionId]    
-      ,[dtmDate]    
-      ,[strBatchId]    
-      ,[intAccountId]    
-      ,[dblDebit]    
-      ,[dblCredit]    
-      ,[dblDebitForeign]     
-      ,[dblCreditForeign]    
-      ,[dblDebitUnit]    
-      ,[dblCreditUnit]    
-      ,[strDescription]    
-      ,[strCode]    
-      ,[strReference]    
-      ,[intCurrencyId]    
-      ,[intCurrencyExchangeRateTypeId]    
-      ,[dblExchangeRate]    
-      ,[dtmDateEntered]    
-      ,[dtmTransactionDate]    
-      ,[strJournalLineDescription]    
-      ,[ysnIsUnposted]    
-      ,[intConcurrencyId]    
-      ,[intUserId]    
-      ,[strTransactionType]    
-      ,[strTransactionForm]    
-      ,[strModuleName]    
-      ,[intEntityId])    
-      SELECT [strTransactionId]  = strTransactionId  
-      ,[intTransactionId]    = intTransactionId  
-      ,[dtmDate]           = dtmDate  
-      ,[strBatchId]        = strBatchId    
-      ,[intAccountId]       = GLAccnt.intAccountId    
-      ,[dblDebit]          = dblCredit
-      ,[dblCredit]          = 0 --   CASE WHEN @ysnForeignToForeign =1 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountFunctional.Val ELSE A.dblAmount END    
-      ,[dblDebitForeign]    = dblCreditForeign  
-      ,[dblCreditForeign]      = 0  
-      ,[dblDebitUnit]       = 0    
-      ,[dblCreditUnit]      = 0    
-      ,[strDescription]       = A.strDescription    
-      ,[strCode]           = strCode  
-      ,[strReference]       = strReference  
-      ,[intCurrencyId]      = intCurrencyId    
-      ,[intCurrencyExchangeRateTypeId] =  intCurrencyExchangeRateTypeId  
-      ,[dblExchangeRate]      = dblExchangeRate  
-      ,[dtmDateEntered]      = dtmDateEntered    
-      ,[dtmTransactionDate]    = dtmTransactionDate    
-      ,[strJournalLineDescription]  = 'Accrued Payable'  
-      ,[ysnIsUnposted]      = 0     
-      ,[intConcurrencyId]     = 1    
-      ,[intUserId]        = intUserId    
-      ,[strTransactionType]    = strTransactionType    
-      ,[strTransactionForm]    = strTransactionForm    
-      ,[strModuleName]      = strModuleName    
-      ,[intEntityId]       = intEntityId    
-      FROM #tmpGLDetail A  
-      CROSS APPLY(  
-        SELECT TOP 1 intAccountId,strDescription FROM tblGLAccount where intAccountId =@intBTForwardToFXGLAccountId  -- todo for clarification  
-      )GLAccnt  
-      WHERE A.intAccountId = @intGLAccountIdFrom
-       UNION ALL  
-      SELECT [strTransactionId]   = strTransactionId  
-      ,[intTransactionId]      = intTransactionId  
-      ,[dtmDate]           = dtmDate  
-      ,[strBatchId]        = strBatchId    
-      ,[intAccountId]       = GLAccnt.intAccountId    
-      ,[dblDebit]          = 0    
-      ,[dblCredit]          = dblCredit
-      ,[dblDebitForeign]     = 0  
-      ,[dblCreditForeign]     = dblCreditForeign
-      ,[dblDebitUnit]       = 0    
-      ,[dblCreditUnit]      = 0    
-      ,[strDescription]       = A.strDescription    
-      ,[strCode]           = strCode  
-      ,[strReference]       = strReference  
-      ,[intCurrencyId]      = intCurrencyId    
-      ,[intCurrencyExchangeRateTypeId] = NULL-- intCurrencyExchangeRateTypeId  
-      ,[dblExchangeRate]     = T.dblAmountFrom/ T.dblAmountForeignTo -- T.dblReverseRate  
-      ,[dtmDateEntered]      = dtmDateEntered    
-      ,[dtmTransactionDate]    = dtmTransactionDate    
-      ,[strJournalLineDescription]  = 'Accrued Receivable'  
-      ,[ysnIsUnposted]      = 0     
-      ,[intConcurrencyId]     = 1    
-      ,[intUserId]          = intUserId    
-      ,[strTransactionType]   = strTransactionType    
-      ,[strTransactionForm]   = strTransactionForm    
-      ,[strModuleName]      = strModuleName    
-      ,[intEntityId]         = intEntityId    
-      FROM #tmpGLDetail A 
-      CROSS APPLY(  
-        SELECT TOP 1 intAccountId,strDescription FROM tblGLAccount where intAccountId =@intBTForwardFromFXGLAccountId  
-      )GLAccnt  
-      CROSS APPLY(  
-        SELECT dblAmountFrom,dblReverseRate, dblAmountForeignTo  FROM tblCMBankTransfer A WHERE strTransactionId = @strTransactionId  
-      )T  
-      WHERE A.intAccountId = @intGLAccountIdTo
-      -- UNION ALL  
+      -- INSERT INTO #tmpGLDetail (    
+      -- [strTransactionId]    
+      -- ,[intTransactionId]    
+      -- ,[dtmDate]    
+      -- ,[strBatchId]    
+      -- ,[intAccountId]    
+      -- ,[dblDebit]    
+      -- ,[dblCredit]    
+      -- ,[dblDebitForeign]     
+      -- ,[dblCreditForeign]    
+      -- ,[dblDebitUnit]    
+      -- ,[dblCreditUnit]    
+      -- ,[strDescription]    
+      -- ,[strCode]    
+      -- ,[strReference]    
+      -- ,[intCurrencyId]    
+      -- ,[intCurrencyExchangeRateTypeId]    
+      -- ,[dblExchangeRate]    
+      -- ,[dtmDateEntered]    
+      -- ,[dtmTransactionDate]    
+      -- ,[strJournalLineDescription]    
+      -- ,[ysnIsUnposted]    
+      -- ,[intConcurrencyId]    
+      -- ,[intUserId]    
+      -- ,[strTransactionType]    
+      -- ,[strTransactionForm]    
+      -- ,[strModuleName]    
+      -- ,[intEntityId])    
       -- SELECT [strTransactionId]  = strTransactionId  
       -- ,[intTransactionId]    = intTransactionId  
       -- ,[dtmDate]           = dtmDate  
       -- ,[strBatchId]        = strBatchId    
       -- ,[intAccountId]       = GLAccnt.intAccountId    
-      -- ,[dblDebit]          = T.dblFeesFrom   
+      -- ,[dblDebit]          = dblCredit
       -- ,[dblCredit]          = 0 --   CASE WHEN @ysnForeignToForeign =1 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  AmountFunctional.Val ELSE A.dblAmount END    
-      -- ,[dblDebitForeign]     = T.dblFeesForeignFrom   
+      -- ,[dblDebitForeign]    = dblCreditForeign  
       -- ,[dblCreditForeign]      = 0  
       -- ,[dblDebitUnit]       = 0    
       -- ,[dblCreditUnit]      = 0    
@@ -967,11 +624,11 @@ BEGIN
       -- ,[strCode]           = strCode  
       -- ,[strReference]       = strReference  
       -- ,[intCurrencyId]      = intCurrencyId    
-      -- ,[intCurrencyExchangeRateTypeId] =  T.intRateTypeIdFeesFrom  
-      -- ,[dblExchangeRate]      = T.dblRateFeesFrom  
+      -- ,[intCurrencyExchangeRateTypeId] =  intCurrencyExchangeRateTypeId  
+      -- ,[dblExchangeRate]      = dblExchangeRate  
       -- ,[dtmDateEntered]      = dtmDateEntered    
       -- ,[dtmTransactionDate]    = dtmTransactionDate    
-      -- ,[strJournalLineDescription]  = 'Bank Forward Fees'  
+      -- ,[strJournalLineDescription]  = 'Accrued Payable'  
       -- ,[ysnIsUnposted]      = 0     
       -- ,[intConcurrencyId]     = 1    
       -- ,[intUserId]        = intUserId    
@@ -981,35 +638,30 @@ BEGIN
       -- ,[intEntityId]       = intEntityId    
       -- FROM #tmpGLDetail A  
       -- CROSS APPLY(  
-      --     SELECT dblFeesFrom,dblFeesForeignFrom, dblRateFeesFrom, intRateTypeIdFeesFrom, intGLAccountIdFeesFrom  FROM tblCMBankTransfer A   
-      --     WHERE strTransactionId = @strTransactionId  
-      -- )T  
-      -- CROSS APPLY(  
-      --   SELECT TOP 1 intAccountId,strDescription FROM tblGLAccount where intAccountId =T.intGLAccountIdFeesFrom  -- todo for clarification  
+      --   SELECT TOP 1 intAccountId,strDescription FROM tblGLAccount where intAccountId =@intBTForwardToFXGLAccountId  -- todo for clarification  
       -- )GLAccnt  
-      -- WHERE A.intAccountId = @intGLAccountIdFrom  
-      -- AND @dblFeesFrom >0  
-      -- UNION ALL  
+      -- WHERE A.intAccountId = @intGLAccountIdFrom
+      --  UNION ALL  
       -- SELECT [strTransactionId]   = strTransactionId  
       -- ,[intTransactionId]      = intTransactionId  
       -- ,[dtmDate]           = dtmDate  
       -- ,[strBatchId]        = strBatchId    
       -- ,[intAccountId]       = GLAccnt.intAccountId    
       -- ,[dblDebit]          = 0    
-      -- ,[dblCredit]          = T.dblFeesTo  
+      -- ,[dblCredit]          = dblCredit
       -- ,[dblDebitForeign]     = 0  
-      -- ,[dblCreditForeign]      = T.dblFeesForeignTo  
+      -- ,[dblCreditForeign]     = dblCreditForeign
       -- ,[dblDebitUnit]       = 0    
       -- ,[dblCreditUnit]      = 0    
       -- ,[strDescription]       = A.strDescription    
       -- ,[strCode]           = strCode  
       -- ,[strReference]       = strReference  
       -- ,[intCurrencyId]      = intCurrencyId    
-      -- ,[intCurrencyExchangeRateTypeId] = T.intRateTypeIdFeesTo  
-      -- ,[dblExchangeRate]     = T.dblRateFeesTo -- T.dblReverseRate  
+      -- ,[intCurrencyExchangeRateTypeId] = NULL-- intCurrencyExchangeRateTypeId  
+      -- ,[dblExchangeRate]     = T.dblAmountFrom/ T.dblAmountForeignTo -- T.dblReverseRate  
       -- ,[dtmDateEntered]      = dtmDateEntered    
       -- ,[dtmTransactionDate]    = dtmTransactionDate    
-      -- ,[strJournalLineDescription]  = 'Bank Forward Fees'  
+      -- ,[strJournalLineDescription]  = 'Accrued Receivable'  
       -- ,[ysnIsUnposted]      = 0     
       -- ,[intConcurrencyId]     = 1    
       -- ,[intUserId]          = intUserId    
@@ -1017,29 +669,17 @@ BEGIN
       -- ,[strTransactionForm]   = strTransactionForm    
       -- ,[strModuleName]      = strModuleName    
       -- ,[intEntityId]         = intEntityId    
-      -- FROM #tmpGLDetail A  
+      -- FROM #tmpGLDetail A 
       -- CROSS APPLY(  
-      --   SELECT dblFeesTo,dblFeesForeignTo, dblRateFeesTo, intRateTypeIdFeesTo,intGLAccountIdFeesTo  FROM tblCMBankTransfer A  
-      --   WHERE strTransactionId = @strTransactionId  
-      -- )T  
-      -- CROSS APPLY(  
-      --   SELECT TOP 1 intAccountId,strDescription FROM tblGLAccount where intAccountId =T.intGLAccountIdFeesTo  
+      --   SELECT TOP 1 intAccountId,strDescription FROM tblGLAccount where intAccountId =@intBTForwardFromFXGLAccountId  
       -- )GLAccnt  
-      -- WHERE A.intAccountId = @intGLAccountIdTo  
-      -- AND @dblFeesTo >0  
-
-      UPDATE #tmpGLDetail SET  
-      dblCredit = dblCredit + @dblFeesFrom,  
-      dblCreditForeign = dblCreditForeign + @dblFeesForeignFrom  
-      WHERE  intAccountId = @intGLAccountIdFrom  
-
-      UPDATE #tmpGLDetail SET  
-      dblDebit = @dblAmountSettlementTo + @dblFeesTo,  
-      dblCredit = 0,
-      dblDebitForeign = dblCreditForeign + @dblFeesForeignTo,
-      dblCreditForeign = 0,
-      dblExchangeRate = @dblRateAmountTo
-      WHERE  intAccountId = @intGLAccountIdTo  
+      -- CROSS APPLY(  
+      --   SELECT dblAmountFrom,dblReverseRate, dblAmountForeignTo  FROM tblCMBankTransfer A WHERE strTransactionId = @strTransactionId  
+      -- )T  
+      -- WHERE A.intAccountId = @intGLAccountIdTo
+      --EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom,  @intDefaultCurrencyId
+      --EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  , @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom, @intDefaultCurrencyId
+      
     END  
   END
   IF @intBankTransferTypeId = 4
