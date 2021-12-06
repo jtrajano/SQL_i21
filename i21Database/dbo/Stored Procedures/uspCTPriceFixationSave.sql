@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCTPriceFixationSave]
+﻿/*Test commit to trigger the release*/
+CREATE PROCEDURE [dbo].[uspCTPriceFixationSave]
 	
 	@intPriceFixationId INT,
 	@strAction			NVARCHAR(50),
