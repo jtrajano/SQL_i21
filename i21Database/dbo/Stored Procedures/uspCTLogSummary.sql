@@ -3242,7 +3242,6 @@ BEGIN TRY
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
 			@intId INT,
-			@dblRunningQty NUMERIC(24, 10) = 0,
 			@ysnAddToLogSpecific BIT = 1,
 			@intNegatedCount int = 0
 
@@ -4109,41 +4108,37 @@ BEGIN TRY
 		END
 		ELSE IF @strSource = 'Pricing'
 		BEGIN
+			DECLARE @prevOrigQty NUMERIC(18, 6)
+				, @qtyDiff NUMERIC(18, 6)
+				, @unloggedBasis NUMERIC(18, 6)
+				, @dblRemainingQty NUMERIC(18, 6)
+				, @dblQuantityAppliedAndPriced NUMERIC(18, 6)
+				, @dblCurrentQty NUMERIC(18, 6)
+
+			SELECT @dblRemainingQty = 0
+				
+			SELECT TOP 1 @prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
+				, @qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
+				, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
+				, @dblCurrentQty = dblQuantity
+				, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced
+			FROM tblCTPriceFixationDetail
+			WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+
 			IF @strProcess = 'Price Delete' OR @strProcess = 'Fixation Detail Delete'
 			BEGIN
 				-- 	1.1. Decrease available priced quantities
 				-- 	1.2. Increase available basis quantities
 				--  1.3. Increase basis deliveries if DWG
-				IF (@dblContractQty = @TotalConsumed)
-				BEGIN
-					SET @FinalQty = 0.00
-				END
-				ELSE
-				BEGIN
-					IF (@strProcess = 'Price Delete')
-					BEGIN
-						SET @FinalQty = @dblQty
-					END
-					ELSE
-					BEGIN
-						IF ((@dblContractQty - @TotalConsumed) < @dblOrigQty)
-						BEGIN
-							SET @FinalQty = @dblContractQty - @TotalConsumed
-						END
-						ELSE
-						BEGIN
-							SET @FinalQty = @dblOrigQty
-						END
-					END
-				END
-				
+				SET @FinalQty = @dblCurrentQty - @dblQuantityAppliedAndPriced
+
 				-- Negate all the priced quantities
-				UPDATE @cbLogSpecific SET dblQty = (case when @FinalQty > @TotalPriced then @TotalPriced else @FinalQty end) * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
+				UPDATE @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 				-- Add all the basis quantities
 				-- Use current Basis Price when putting back basis qty
-				UPDATE @cbLogSpecific SET dblQty = (case when @TotalBasis > 0 and @FinalQty > @TotalBasis then @TotalBasis else @FinalQty end), intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
+				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
@@ -4156,25 +4151,6 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				DECLARE @prevOrigQty NUMERIC(18, 6)
-					, @qtyDiff NUMERIC(18, 6)
-					, @unloggedBasis NUMERIC(18, 6)
-					, @dblRemainingQty NUMERIC(18, 6)
-					, @dblQuantityAppliedAndPriced NUMERIC(18, 6)
-					, @dblCurrentQty NUMERIC(18, 6)
-					, @tmpTotal NUMERIC(18, 6)
-
-				SELECT @dblRunningQty += @dblOrigQty
-					, @dblRemainingQty = 0
-				
-				SELECT TOP 1 @prevOrigQty = ISNULL(dblPreviousQty,dblQuantity)    
-					, @qtyDiff = dblQuantity - ISNULL(dblPreviousQty,dblQuantity)  
-					, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
-					, @dblCurrentQty = dblQuantity
-					, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced
-				FROM tblCTPriceFixationDetail
-				WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-
 				IF (@qtyDiff <> 0)
 				BEGIN
 					-- Qty Changed
