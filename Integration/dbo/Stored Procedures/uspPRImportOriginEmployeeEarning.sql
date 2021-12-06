@@ -1,3 +1,7 @@
+IF EXISTS (select top 1 1 from sys.procedures where name = 'uspPRImportOriginEmployeeEarning')
+	DROP PROCEDURE [dbo].uspPRImportOriginEmployeeEarning
+GO
+
 CREATE PROCEDURE dbo.uspPRImportOriginEmployeeEarning(
     @ysnDoImport BIT = 0,
 	@intRecordCount INT = 0 OUTPUT
