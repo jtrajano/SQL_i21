@@ -394,8 +394,8 @@
     <Build Include="dbo\Views\vyuQMQualityCriteriaDetailList.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
     <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
-    <Build Include="Scripts\Post-Deployment\CM\15_InsertDefaultBankAccountType.sql" />
-    <Build Include="Scripts\Post-Deployment\CM\14_UpdateBankAccountType.sql" />
+    <Build Include="Scripts\Post-Deployment\CM\14_InsertDefaultBankAccountType.sql" />
+    <Build Include="Scripts\Post-Deployment\CM\15_UpdateBankAccountType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
