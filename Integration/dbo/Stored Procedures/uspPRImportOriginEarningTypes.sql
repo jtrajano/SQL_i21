@@ -1,4 +1,4 @@
-CREATE PROCEDURE dbo.uspPRImportOriginDeductionTypes(
+CREATE PROCEDURE dbo.uspPRImportOriginEarningTypes(
     @ysnDoImport BIT = 0,
 	@intRecordCount INT = 0 OUTPUT
 )
@@ -6,80 +6,63 @@ CREATE PROCEDURE dbo.uspPRImportOriginDeductionTypes(
 AS
 
 BEGIN
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDeductions')) 
-	DROP TABLE #tmpDeductions
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarnings')) 
+	DROP TABLE #tmpEarnings
 
 	SELECT DISTINCT 
-		 strDeduction			=	prded_code
-		,strDescription			=	prded_desc
-		,strCategory			=	''
-		,strCheckLiteral		=	prded_literal
-		,intAccountId			=	(SELECT TOP 1 intAccountId FROM tblGLAccount 
-										WHERE strAccountId = CONVERT(varchar(10),CAST(prded_glbs_acct AS int))+ '-' +CONVERT(varchar(10),RIGHT(PARSENAME(prded_glbs_acct,1),3)))
-		,intExpenseAccountId	=	(SELECT TOP 1 intAccountId FROM tblGLAccount 
-										WHERE strAccountId = CONVERT(varchar(10),CAST(prded_glexp_acct AS int))+ '-' +CONVERT(varchar(10),RIGHT(PARSENAME(prded_glexp_acct,1),3)))
-		,strDeductFrom			=	''
-		,strCalculationType		=	prded_type
-		,dblAmount				=	prded_glbs_acct
-		,dblLimit				=	prded_cycle_earn_limit
-		,dblPaycheckMax			=	prded_annual_max
-		,strW2Code				=	''
-		,strPaidBy				=	CASE WHEN prded_co_emp_cd = 'E'THEN 'Employee' ELSE 'Company' END
-		,ysnCreatePayable		=	null
-		,intVendorId			=	null
-		,intSort				=	0
-		,intConcurrencyId		=	1
-	INTO #tmpDeductions
+		 strEarning					=	prern_code
+		,strDescription				=	prern_description
+		,strCheckLiteral			=	prern_literal
+		,strCalculationType			=	''
+		,dblAmount					=	prern_rate_factor
+		,dblDefaultHours			=	0
+		,strW2Code					=	''
+		,intAccountId				=	(SELECT TOP 1 intAccountId FROM tblGLAccount 
+										WHERE strAccountId = CONVERT(varchar(10),CAST(prern_glexp_acct AS int))+ '-' +CONVERT(varchar(10),RIGHT(PARSENAME(prern_glexp_acct,1),3)))
+		,intTaxCalculationType		=	0
+		,intSort					=	1
+		,intConcurrencyId			=	1
+	INTO #tmpEarnings
 	FROM
-		prdedmst
+		prernmst
 	WHERE
-		prded_code COLLATE Latin1_General_CI_AS NOT IN (SELECT strDeduction FROM tblPRTypeDeduction)
+		prern_code COLLATE Latin1_General_CI_AS NOT IN (SELECT strEarning FROM tblPRTypeEarning)
 
-	SELECT @intRecordCount = COUNT(1) FROM #tmpDeductions
+	SELECT @intRecordCount = COUNT(1) FROM #tmpEarnings
 
 	IF (@ysnDoImport = 1)
 	BEGIN
-		INSERT INTO tblPRTypeDeduction
-			(strDeduction
-			,strDescription
-			,strCategory
-			,strCheckLiteral
-			,intAccountId
-			,intExpenseAccountId
-			,strDeductFrom
-			,strCalculationType
-			,dblAmount
-			,dblLimit
-			,dblPaycheckMax
-			,strW2Code
-			,strPaidBy
-			,ysnCreatePayable
-			,intVendorId
-			,intSort
-			,intConcurrencyId)
+		INSERT INTO tblPRTypeEarning
+			(
+				 strEarning
+				,strDescription
+				,strCheckLiteral
+				,strCalculationType
+				,dblAmount
+				,dblDefaultHours
+				,strW2Code
+				,intAccountId
+				,intTaxCalculationType
+				,intSort
+				,intConcurrencyId
+			)
 		SELECT
-			 strDeduction
+			 strEarning
 			,strDescription
-			,strCategory
 			,strCheckLiteral
-			,intAccountId
-			,intExpenseAccountId
-			,strDeductFrom
 			,strCalculationType
 			,dblAmount
-			,dblLimit
-			,dblPaycheckMax
-			,strW2Code
-			,strPaidBy
-			,ysnCreatePayable
-			,intVendorId
+			,dblDefaultHours
+			,strW2Code	
+			,intAccountId
+			,intTaxCalculationType
 			,intSort
 			,intConcurrencyId
-		FROM #tmpDeductions
+		FROM #tmpEarnings
 	END
 
-	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpDeductions')) 
-	DROP TABLE #tmpDeductions
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarnings')) 
+	DROP TABLE #tmpEarnings
 END
 
 GO
