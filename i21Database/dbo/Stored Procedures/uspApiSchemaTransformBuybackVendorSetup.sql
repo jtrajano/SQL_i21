@@ -314,7 +314,7 @@ WHERE LogVendorSetup.intLogType BETWEEN 1 AND 8
 USING
 (
 	SELECT
-		guiApiUniqueId = MAX(FilteredVendorSetup.guiApiUniqueId),
+		guiApiUniqueId = @guiApiUniqueId,
 		intEntityId = MAX(Vendor.intEntityId),
 		strBuybackExportFileType = MAX(FilteredVendorSetup.strBuybackExportFileType),
 		strBuybackExportFilePath = MAX(FilteredVendorSetup.strBuybackExportFilePath),
