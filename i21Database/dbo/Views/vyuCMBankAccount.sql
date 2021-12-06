@@ -12,7 +12,10 @@ SELECT	i21.intBankAccountId
 		,strGLAccountId = (SELECT strAccountId FROM dbo.tblGLAccount WHERE intAccountId = i21.intGLAccountId)
 		,i21.intCurrencyId
 		,strCurrency = (SELECT strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = i21.intCurrencyId)
-		,i21.intBankAccountType
+		,i21.intBankAccountTypeId
+		,BAT.strBankAccountType
+		,i21.intBrokerageAccountId
+		,RKBA.strAccountNumber strBrokerageAccount
 		,i21.strContact
 		,i21.strBankAccountHolder
 		,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo
@@ -137,6 +140,8 @@ SELECT	i21.intBankAccountId
 						) tbl),0) AS bit)
 FROM	dbo.tblCMBankAccount i21
 LEFT JOIN dbo.tblEMEntity E on E.intEntityId = i21.intResponsibleEntityId
+LEFT JOIN dbo.tblCMBankAccountType BAT ON BAT.intBankAccountTypeId = i21.intBankAccountTypeId
+LEFT JOIN dbo.tblRKBrokerageAccount RKBA ON RKBA.intBrokerageAccountId = i21.intBrokerageAccountId
 GO
 --Create trigger that will insert on the main table
 
@@ -159,7 +164,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,ysnActive
 						,intGLAccountId
 						,intCurrencyId
-						,intBankAccountType
+						,[intBankAccountTypeId]
 						,strContact
 						,strBankAccountHolder
 						,strBankAccountNo
@@ -245,7 +250,7 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,ysnActive							= i.ysnActive
 						,intGLAccountId						= i.intGLAccountId
 						,intCurrencyId						= i.intCurrencyId
-						,intBankAccountType					= i.intBankAccountType
+						,intBankAccountType					= i.[intBankAccountTypeId]
 						,strContact							= i.strContact
 						,strBankAccountHolder				= i.strBankAccountHolder
 						,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
@@ -354,7 +359,7 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,ysnActive							= i.ysnActive
 					,intGLAccountId						= i.intGLAccountId
 					,intCurrencyId						= i.intCurrencyId
-					,intBankAccountType					= i.intBankAccountType
+					,[intBankAccountTypeId]					= i.[intBankAccountTypeId]
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo                    = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
