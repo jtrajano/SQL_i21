@@ -36,6 +36,8 @@ CROSS APPLY(
 	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
+	AND dtmCheckPrinted IS NOT NULL
+	AND dtmDateReconciled IS NULL
     AND ysnClr = 0
 	AND 1 = 
 	CASE WHEN  RTRIM(LTRIM(ISNULL(C.strReferenceNo,''))) = '' AND LTRIM(RTRIM(ISNULL(ABR.strReferenceNo,''))) = '' 
