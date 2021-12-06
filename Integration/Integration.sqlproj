@@ -481,9 +481,9 @@
     <Build Include="dbo\Stored Procedures\uspGRGrainInventoryInquiryReport.sql" />
     <Build Include="dbo\Tables\tblEMImportedSplit.sql" />
     <Build Include="dbo\Stored Procedures\uspEMImportEntitySplitOrigin.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginEarningTypes.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEarningTypes.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
   </ItemGroup>
 </Project>
