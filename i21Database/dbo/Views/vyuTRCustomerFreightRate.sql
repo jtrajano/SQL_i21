@@ -36,7 +36,7 @@ LEFT JOIN tblICCategory CC ON CC.intCategoryId = CF.intCategoryId
 LEFT JOIN tblSMShipVia FSV ON FSV.intEntityId = CF.intShipViaId
 LEFT JOIN tblEMEntity EMFSV ON EMFSV.intEntityId = FSV.intEntityId
 LEFT JOIN (
-    SELECT CN.strTerminalControlNumber, ELV.strZipCode, ELV.strLocationName FROM tblAPVendor V
+    SELECT DISTINCT CN.strTerminalControlNumber, ELV.strZipCode FROM tblAPVendor V
     INNER JOIN tblEMEntityLocation ELV ON ELV.intEntityId = V.intEntityId
     INNER JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = ELV.intEntityLocationId AND SP.intEntityVendorId = V.intEntityId
     INNER JOIN tblTFTerminalControlNumber CN ON CN.intTerminalControlNumberId = SP.intTerminalControlNumberId
