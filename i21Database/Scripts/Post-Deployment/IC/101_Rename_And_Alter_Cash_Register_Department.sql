@@ -1,17 +1,19 @@
 PRINT 'Checking tblICCategoryLocation for intRegisterDepartmentId'
+GO
 IF(EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICCategoryLocation'  and [COLUMN_NAME] = 'intRegisterDepartmentId' ))
 BEGIN
 	PRINT 'EXECUTE'
+	GO
 	
-	BEGIN
-	UPDATE tblICCategoryLocation SET strCashRegisterDepartment = CAST(intRegisterDepartmentId AS NVARCHAR); 
-	END
+	UPDATE tblICCategoryLocation SET strCashRegisterDepartment = CAST(intRegisterDepartmentId AS NVARCHAR)
+	GO
 
-	BEGIN
-	EXEC('
-		ALTER TABLE tblICCategoryLocation
-		DROP COLUMN intRegisterDepartmentId
-	')
-	END
+	-- EXEC('
+	-- 	ALTER TABLE tblICCategoryLocation
+	-- 	DROP COLUMN intRegisterDepartmentId
+	-- ')
+	-- GO
 END
+GO
 PRINT 'Done checking tblICCategoryLocation for intRegisterDepartmentId'
+GO
