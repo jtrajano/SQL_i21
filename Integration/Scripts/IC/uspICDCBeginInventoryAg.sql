@@ -7,7 +7,7 @@ CREATE PROCEDURE [dbo].[uspICDCBeginInventoryAg]
 --   Then adjustment posting need to be done in i21 application, which will update the onhand units of inventory.
 --   So here we do not directly update the onhand units from ptitmmst origin table into i21 item tblICItem table, rather we update 
 --   i21 table tblICInventoryAdjustment from agitmmst table and then adjustment posting is done which updates tblICItem table. ** 
- @adjLoc NVARCHAR(3) = NULL,	
+ @adjLoc NVARCHAR(200) = NULL,	
  @adjdt  DATETIME  = NULL, 
  @intEntityUserSecurityId AS INT = 0
 AS
@@ -51,13 +51,16 @@ BEGIN
 		BEGIN
 			DECLARE loc_cursor CURSOR
 			FOR
-			SELECT rtrim(agloc_loc_no) agloc_loc_no	FROM aglocmst
+			SELECT rtrim(agloc_loc_no) agloc_loc_no	
+			FROM aglocmst
 		END	
 	ELSE
 		BEGIN
 			DECLARE loc_cursor CURSOR
 			FOR
-			SELECT @adjLoc	
+			SELECT rtrim(agloc_loc_no) agloc_loc_no	
+			FROM aglocmst
+			WHERE agloc_name = @adjLoc
 		END	
 
 		OPEN loc_cursor
@@ -69,7 +72,7 @@ BEGIN
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
 	
-	SELECT @cnt = COUNT(*)
+		SELECT @cnt = COUNT(*)
 		FROM	tblICItem inv INNER JOIN agitmmst itm 
 					ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
 				LEFT JOIN tblICItemUOM uom 
@@ -82,7 +85,9 @@ BEGIN
 	
 		IF @cnt > 0
 		BEGIN
-		--** Update the item status, that are discontinued in Origin to Active so the the Adjustment Posting will not fail 
+			PRINT 'creating the adj'
+			
+			--** Update the item status, that are discontinued in Origin to Active so the the Adjustment Posting will not fail 
 				UPDATE inv SET strOriginStatus = strStatus, strStatus = 'Active'
 				FROM	tblICItem inv INNER JOIN agitmmst itm 
 							ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
@@ -223,7 +228,6 @@ BEGIN
 	AND aglot_un_on_hand <> 0
 	AND inv.strType = 'Inventory'
 	AND rtrim((agitm_lot_yns)) = 'Y'
-
 
 	-- Create an Audit Log
 	BEGIN 
@@ -382,5 +386,3 @@ BEGIN
 END
 
 Post_Exit:
-
-
