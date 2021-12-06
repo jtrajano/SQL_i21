@@ -164,7 +164,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,ysnActive
 						,intGLAccountId
 						,intCurrencyId
-						,[intBankAccountTypeId]
+						,intBankAccountTypeId
+						,intBrokerageAccountId
 						,strContact
 						,strBankAccountHolder
 						,strBankAccountNo
@@ -250,7 +251,8 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 						,ysnActive							= i.ysnActive
 						,intGLAccountId						= i.intGLAccountId
 						,intCurrencyId						= i.intCurrencyId
-						,intBankAccountTypeId				= i.[intBankAccountTypeId]
+						,intBankAccountTypeId				= i.intBankAccountTypeId
+						,intBrokerageAccountId				= i.intBrokerageAccountId
 						,strContact							= i.strContact
 						,strBankAccountHolder				= i.strBankAccountHolder
 						,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
@@ -359,7 +361,8 @@ CREATE TRIGGER trg_update_vyuCMBankAccount
 					,ysnActive							= i.ysnActive
 					,intGLAccountId						= i.intGLAccountId
 					,intCurrencyId						= i.intCurrencyId
-					,[intBankAccountTypeId]				= i.[intBankAccountTypeId]
+					,intBankAccountTypeId				= i.intBankAccountTypeId
+					,intBrokerageAccountId				= i.intBrokerageAccountId
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo                    = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END
