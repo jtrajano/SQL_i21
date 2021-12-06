@@ -265,6 +265,7 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTMClockReading.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
+    <Build Include="Scripts\Post-Deployment\IC\101_Rename_And_Alter_Cash_Register_Department.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

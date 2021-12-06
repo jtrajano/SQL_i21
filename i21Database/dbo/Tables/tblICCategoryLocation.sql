@@ -15,7 +15,6 @@ Type the overview for the table here.
 		[intCategoryLocationId] INT NOT NULL IDENTITY, 
 		[intCategoryId] INT NOT NULL, 
 		[intLocationId] INT NOT NULL, 
-		[intRegisterDepartmentId] INT NULL,
 		[strCashRegisterDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnUpdatePrices] BIT NULL DEFAULT ((0)), 
 		[ysnUseTaxFlag1] BIT NULL DEFAULT ((0)), 
@@ -88,15 +87,6 @@ Type the overview for the table here.
 		@level1name = N'tblICCategoryLocation',
 		@level2type = N'COLUMN',
 		@level2name = N'intLocationId'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Register Department Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCategoryLocation',
-		@level2type = N'COLUMN',
-		@level2name = N'intRegisterDepartmentId'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Update Prices on Pricebook imports',
