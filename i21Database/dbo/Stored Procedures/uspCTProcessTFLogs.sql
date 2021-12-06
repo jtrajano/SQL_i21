@@ -60,23 +60,23 @@ BEGIN
 
 		insert into @TRFLog
 		select
-			strAction = (case when et.intTradeFinanceLogId is null then 'Create Contract' else 'Update Contract' end)
+			strAction = (case when et.intTradeFinanceLogId is null then 'Created Contract' else 'Updated Contract' end)
 			, strTransactionType = 'Contract'
 			, intTradeFinanceTransactionId = null
 			, strTradeFinanceTransaction = isnull(cd.strFinanceTradeNo,tf.strFinanceTradeNo)
-			, intTransactionHeaderId = null
-			, intTransactionDetailId = null
-			, strTransactionNumber = isnull(cd.strFinanceTradeNo,tf.strFinanceTradeNo)
-			, dtmTransactionDate = null
+			, intTransactionHeaderId = cd.intContractHeaderId
+			, intTransactionDetailId = cd.intContractDetailId
+			, strTransactionNumber = ch.strContractNumber + '-' + convert(nvarchar(20),cd.intContractSeq)
+			, dtmTransactionDate = getdate()
 			, intBankTransactionId = cd.intBankAccountId
 			, strBankTransactionId = cd.strBankReferenceNo
-			, dblTransactionAmountAllocated = null
+			, dblTransactionAmountAllocated = cd.dblLoanAmount
 			, dblTransactionAmountActual = cd.dblLoanAmount
 			, intLoanLimitId = cd.intLoanLimitId
 			, strLoanLimitNumber = bl.strBankLoanId
 			, strLoanLimitType = bl.strLimitDescription
-			, dtmAppliedToTransactionDate = null
-			, intStatusId = null
+			, dtmAppliedToTransactionDate = isnull(et.dtmAppliedToTransactionDate,getdate())
+			, intStatusId = case when cd.intContractStatusId = 5 then 2 else 1 end
 			, intWarrantId = null
 			, strWarrantId = null
 			, intUserId = @intUserId
@@ -86,9 +86,10 @@ BEGIN
 		from
 			@TFXML tf
 			join tblCTContractDetail cd on cd.intContractDetailId = tf.intContractDetailId
+			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 			left join tblCMBankLoan bl on bl.intBankLoanId = cd.intLoanLimitId
 			cross apply (
-				select intTradeFinanceLogId = max(intTradeFinanceLogId) from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId
+				select intTradeFinanceLogId = max(intTradeFinanceLogId),dtmAppliedToTransactionDate from tblTRFTradeFinanceLog where intContractDetailId = tf.intContractDetailId group by dtmAppliedToTransactionDate
 			) et
 		;
 
