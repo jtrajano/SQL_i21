@@ -164,7 +164,7 @@ WHERE strTransactionId = @strTransactionId
   
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference      
   
-IF @intBankAccountIdFrom != @intDefaultCurrencyId OR @intBankAccountIdTo != @intDefaultCurrencyId AND @ysnPost = 1
+IF ((@intCurrencyIdFrom != @intDefaultCurrencyId) OR (@intCurrencyIdTo != @intDefaultCurrencyId ) )AND @ysnPost = 1
 BEGIN  
     IF @intBankTransferTypeId = 1 OR @ysnPostedInTransit = 0 -- FOR BANK TRANSFER TYPE THERE IS NO GAIN/LOSS- ONLY DIFFERENCE
     BEGIN
