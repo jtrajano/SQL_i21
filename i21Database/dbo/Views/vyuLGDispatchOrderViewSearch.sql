@@ -2,6 +2,7 @@
 AS
 SELECT 
 	DO.intDispatchOrderId
+	,DOD.intDispatchOrderDetailId
 	,DO.strDispatchOrderNumber
 	,strDispatchStatus = CASE DO.intDispatchStatus
 		WHEN 1 THEN 'Scheduled'
@@ -10,6 +11,8 @@ SELECT
 		WHEN 4 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DO.dtmDispatchDate
+	,DO.intEntityShipViaId
+	,DO.intEntityShipViaTruckId
 	,strShipVia = SV.strName
 	,strTruckNumber = SVT.strTruckNumber
 	,strDriver = DR.strName
@@ -23,17 +26,18 @@ SELECT
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOD.dtmStartTime
 	,DOD.dtmEndTime
+	,DOD.intOrderStatus
 	,strOrderStatus = CASE DOD.intOrderStatus
 		WHEN 1 THEN 'Ready'
 		WHEN 2 THEN 'In Transit'
-		WHEN 3 THEN 'Delivered'
+		WHEN 3 THEN CASE WHEN (DOD.intStopType = 1) THEN 'Loaded' ELSE 'Delivered' END
 		WHEN 4 THEN 'On-hold'
 		WHEN 5 THEN 'Cancelled'
 		ELSE '' END COLLATE Latin1_General_CI_AS
 	,DOD.strOrderNumber
 	,DOD.strOrderType
-	,strEntityName = CASE WHEN (strOrderType IN ('Outbound Load', 'Sales Order') AND DOD.intStopType = 1) OR (strOrderType IN ('Inventory Transfer')) THEN CL.strLocationName ELSE E.strName END
-	,strLocationName = CASE WHEN (strOrderType IN ('Outbound Load', 'Sales Order') AND DOD.intStopType = 1) OR (strOrderType IN ('Inventory Transfer')) THEN CLSL.strSubLocationName ELSE EL.strLocationName END
+	,strEntityName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (strOrderType IN ('Transfer')) THEN CL.strLocationName ELSE E.strName END
+	,strLocationName = CASE WHEN (DOD.strOrderType IN ('Outbound', 'Sales') AND DOD.intStopType = 1) OR (strOrderType IN ('Transfer')) THEN CLSL.strSubLocationName ELSE EL.strLocationName END
 	,DOD.strEntityContact
 	,DOD.strAddress
 	,DOD.strCity
