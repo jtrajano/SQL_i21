@@ -37,13 +37,23 @@ BEGIN
 						IF DATEADD(MINUTE, 10, (SELECT dtmCheckoutProcessDate FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)) >= GETDATE()
 							BEGIN
 								DECLARE @strCheckoutCurrentProcess NVARCHAR(150) = ''
+								DECLARE @strMinuteDiff AS NVARCHAR(20) =  CAST(11 - ABS((SELECT DATEDIFF(MINUTE, GETDATE(), (SELECT TOP 1
+									dtmCheckoutProcessDate
+								FROM tblSTCheckoutHeader 
+								WHERE intCheckoutId = @intCheckoutId)))) AS VARCHAR(20))
 
+								SET @strMinuteDiff = CASE WHEN @strMinuteDiff = '1' THEN 
+														@strMinuteDiff + ' minute'
+														ELSE @strMinuteDiff + ' minutes'
+														END
+
+								
 								SELECT 
 									@strCheckoutCurrentProcess = CASE
 																	WHEN intCheckoutCurrentProcess = 1
-																		THEN 'Checkout is currently being Posted.'
+																		THEN 'Checkout is currently posting, please try again after ' + @strMinuteDiff
 																	WHEN intCheckoutCurrentProcess = 2
-																		THEN 'Checkout is currently being Unposted.'
+																		THEN 'Checkout is currently unposting, please try again after ' + @strMinuteDiff
 																END
 								FROM tblSTCheckoutHeader 
 								WHERE intCheckoutId = @intCheckoutId 
