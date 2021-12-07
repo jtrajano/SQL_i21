@@ -52,7 +52,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 	   ,intRowNo		= SE.intRowNumber
 	   ,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
 	   FROM tblApiSchemaEmployeeEarnings SE
-	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo) 
+	   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
 	   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 	   AND SE.intEntityNo IS NULL
 
@@ -122,7 +122,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,intConcurrencyId
 				)
 				SELECT
-					@intEntityNo
+					(SELECT TOP 1 intEntityId FROM tblPREmployee WHERE intEntityId = intEntityNo)  
 				   ,(SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = strEarningDesc)
 				   ,strCalculationType
 				   ,CASE WHEN strCalculationType = 'Shift Differential' OR strCalculationType = 'Overtime' OR strCalculationType = 'Rate Factor'
@@ -268,7 +268,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,intEmployeeEarningLinkId		= (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strLinkedEarning)
 					,intPayGroupId					= (SELECT TOP 1 intPayGroupId FROM tblPRPayGroup WHERE strPayGroup = @strPayGroup)
 					,ysnDefault						= @ysnEarningDefault
-					WHERE intEntityEmployeeId = @intEntityNo
+					WHERE intEntityEmployeeId = @EmployeeEntityNo
 						AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId)
 
 					IF @strTaxID1 IS NOT NULL
@@ -399,7 +399,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 			, intRowNo = SE.intRowNumber
 			, strMessage = 'The employee earnings has been successfully imported.'
 		FROM tblApiSchemaEmployeeEarnings SE
-		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
+		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = SE.intEntityNo
 		   WHERE SE.guiApiUniqueId = @guiApiUniqueId
 		AND SE.strEarningDesc = @strEarningId
 
