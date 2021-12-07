@@ -94,149 +94,155 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
     SELECT  intSourceRecordId FROM #exclusionTable  
    ) AND intDocumentSourceFolderId IN (SELECT intDocumentSourceFolderId FROM tblSMDocumentSourceFolder WHERE ysnInterCompany = 1) -- only those enabled document folders as source  
   
-   WHILE(EXISTS(SELECT TOP 1 1 FROM @dmsTable))  
-    BEGIN  
-     DECLARE @intDocumentId INT;  
-     DECLARE  @intDocumentSourceFolderId INT;  
-     DECLARE  @strName NVARCHAR(max)  
-     DECLARE  @strType NVARCHAR(max)  
-     DECLARE  @intSize INT  
-     DECLARE  @intUploadId INT  
-     DECLARE  @intEntityId INT  
-     DECLARE  @blbFile VARBINARY(max)  
-     DECLARE  @strFolderPath NVARCHAR(MAX)  
+	WHILE(EXISTS(SELECT TOP 1 1 FROM @dmsTable))  
+	BEGIN  
+		DECLARE @intDocumentId INT;  
+		DECLARE  @intDocumentSourceFolderId INT;  
+		DECLARE  @strName NVARCHAR(max)  
+		DECLARE  @strType NVARCHAR(max)  
+		DECLARE  @intSize INT  
+		DECLARE  @intUploadId INT  
+		DECLARE  @intEntityId INT  
+		DECLARE  @blbFile VARBINARY(max)  
+		DECLARE  @strFolderPath NVARCHAR(MAX)  
         
-     DECLARE  @smUploadSQL NVARCHAR(max) = N''  
-     DECLARE  @smDocumentSQL NVARCHAR(max) = N''  
-     DECLARE  @smSourceFolderSQL NVARCHAR(max) = N''  
-     DECLARE  @smFolderExistsSQL NVARCHAR(max) = N''  
-     DECLARE  @smFolderPathSQL NVARCHAR(MAX) = N''  
-     DECLARE  @intNewUploadId INT  
-     DECLARE  @intNewDocumentId INT  
-     DECLARE  @outFolderId INT  
-     DECLARE  @outEnabledFolder INT  
+		DECLARE  @smUploadSQL NVARCHAR(max) = N''  
+		DECLARE  @smDocumentSQL NVARCHAR(max) = N''  
+		DECLARE  @smSourceFolderSQL NVARCHAR(max) = N''  
+		DECLARE  @smFolderExistsSQL NVARCHAR(max) = N''  
+		DECLARE  @smFolderPathSQL NVARCHAR(MAX) = N''  
+		DECLARE  @intNewUploadId INT  
+		DECLARE  @intNewDocumentId INT  
+		DECLARE  @outFolderId INT  
+		DECLARE  @outEnabledFolder INT  
   
-     DECLARE @strEntityName NVARCHAR(MAX) = N''  
+		DECLARE @strEntityName NVARCHAR(MAX) = N''  
        
   
-     SELECT TOP 1 @intDocumentId = intDocumentId,  
-        @intEntityId = intEntityId,  
-        @intDocumentSourceFolderId = intDocumentSourceFolderId,  
-        @strName = strName,  
-        @intDocumentSourceFolderId = intDocumentSourceFolderId,  
-        @strType = strType,  
-        @intSize = intSize,  
-        @intUploadId = intUploadId,  
-        @strFolderPath = strFolderPath,
-		    @strEntityName = strUserName
+		SELECT TOP 1 @intDocumentId = intDocumentId,  
+		@intEntityId = intEntityId,  
+		@intDocumentSourceFolderId = intDocumentSourceFolderId,  
+		@strName = strName,  
+		@intDocumentSourceFolderId = intDocumentSourceFolderId,  
+		@strType = strType,  
+		@intSize = intSize,  
+		@intUploadId = intUploadId,  
+		@strFolderPath = strFolderPath,
+		@strEntityName = strUserName
           
-     FROM @dmsTable  
+		FROM @dmsTable  
   
-     SELECT @blbFile = blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId  
+		SELECT @blbFile = blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId  
 
-	    IF ISNULL(@strEntityName, '') = ''
-	    BEGIN
-		   SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId  
-	    END
+		IF ISNULL(@strEntityName, '') = ''
+		BEGIN
+			SELECT @strEntityName = strName FROM tblEMEntity WHERE intEntityId = @intEntityId  
+		END
   
-     --Temp Table Folder Path  
-     IF(OBJECT_ID('tempdb..#folderPathTable') IS NOT NULL)   
-      DROP TABLE #folderPathTable  
+		--Temp Table Folder Path  
+		IF(OBJECT_ID('tempdb..#folderPathTable') IS NOT NULL)   
+			DROP TABLE #folderPathTable  
       
-    CREATE TABLE #folderPathTable  
-    (  
-     [intDocumentSourceFolderId] INT,  
-     [intDocumentTypeId] INT,  
-     [strFolderPath] NVARCHAR(MAX)  
-    )  
+		CREATE TABLE #folderPathTable  
+		(  
+		[intDocumentSourceFolderId] INT,  
+		[intDocumentTypeId] INT,  
+		[strFolderPath] NVARCHAR(MAX)  
+		)  
   
-    SET @smFolderPathSQL = N'WITH FolderHeirarchy AS (  
-            SELECT   
-           intDocumentSourceFolderId,    
-           A.intDocumentTypeId,  
-           CAST(strName AS VARCHAR(MAX)) AS strFolderPath  
-            FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder A  
-            WHERE intDocumentFolderParentId IS NULL  
+		SET @smFolderPathSQL = N'WITH FolderHeirarchy AS (  
+		SELECT   
+		intDocumentSourceFolderId,    
+		A.intDocumentTypeId,  
+		CAST(strName AS VARCHAR(MAX)) AS strFolderPath  
+		FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder A  
+		WHERE intDocumentFolderParentId IS NULL  
   
-            UNION ALL  
+		UNION ALL  
   
-            SELECT   
-           B.intDocumentSourceFolderId,   
-           B.intDocumentTypeId,  
-           CAST(strFolderPath + ''\'' + CAST(B.strName AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS strFolderPath  
-            FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder B  
-           INNER JOIN FolderHeirarchy C ON C.intDocumentSourceFolderId = B.intDocumentFolderParentId  
-          ) INSERT INTO #folderPathTable   
-            SELECT intDocumentSourceFolderId, intDocumentTypeId, strFolderPath FROM FolderHeirarchy WHERE strFolderPath = '''+ @strFolderPath + ''' '  
+		SELECT   
+		B.intDocumentSourceFolderId,   
+		B.intDocumentTypeId,  
+		CAST(strFolderPath + ''\'' + CAST(B.strName AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS strFolderPath  
+		FROM ['+ @strDestinationDatabaseName +'].dbo.tblSMDocumentSourceFolder B  
+		INNER JOIN FolderHeirarchy C ON C.intDocumentSourceFolderId = B.intDocumentFolderParentId  
+		) INSERT INTO #folderPathTable   
+		SELECT intDocumentSourceFolderId, intDocumentTypeId, strFolderPath FROM FolderHeirarchy WHERE strFolderPath = '''+ @strFolderPath + ''' '  
   
-    EXEC sp_executesql @smFolderPathSQL  
-    -- User folder path as keypoint instead of Source Folder Id - Because you might fetch wrong id  
-    DECLARE @intDestinationDocumentSourceFolderId INT = (SELECT TOP 1 ISNULL(intDocumentSourceFolderId,0) FROM #folderPathTable WHERE strFolderPath = @strFolderPath)  
+		EXEC sp_executesql @smFolderPathSQL  
+		-- User folder path as keypoint instead of Source Folder Id - Because you might fetch wrong id  
+		DECLARE @intDestinationDocumentSourceFolderId INT = (SELECT TOP 1 ISNULL(intDocumentSourceFolderId,0) FROM #folderPathTable WHERE strFolderPath = @strFolderPath)  
      
      
-    ---------------------check if folder exists- and enabled for multicompany------------------------------------  
+		---------------------check if folder exists- and enabled for multicompany------------------------------------  
   
-    SET @smSourceFolderSQL = N'SELECT @outFolderId = intDocumentSourceFolderId, @ysnFolderEnabled = ysnInterCompany FROM [@db].[dbo].[tblSMDocumentSourceFolder] WHERE intDocumentSourceFolderId = @intDocumentSourceFolderId  '  
-    SET @smSourceFolderSQL = REPLACE(REPLACE(@smSourceFolderSQL,'@db',@strDestinationDatabaseName),'@intDocumentSourceFolderId', @intDestinationDocumentSourceFolderId)  
-    EXEC sp_executesql @smSourceFolderSQL, N'@outFolderId INT OUTPUT, @ysnFolderEnabled INT OUTPUT', @outFolderId OUTPUT, @outEnabledFolder OUTPUT  
+		SET @smSourceFolderSQL = N'SELECT @outFolderId = intDocumentSourceFolderId, @ysnFolderEnabled = ysnInterCompany FROM [@db].[dbo].[tblSMDocumentSourceFolder] WHERE intDocumentSourceFolderId = @intDocumentSourceFolderId  '  
+		SET @smSourceFolderSQL = REPLACE(REPLACE(@smSourceFolderSQL,'@db',@strDestinationDatabaseName),'@intDocumentSourceFolderId', @intDestinationDocumentSourceFolderId)  
+		EXEC sp_executesql @smSourceFolderSQL, N'@outFolderId INT OUTPUT, @ysnFolderEnabled INT OUTPUT', @outFolderId OUTPUT, @outEnabledFolder OUTPUT  
   
-    IF(ISNULL(@outEnabledFolder,0) = 0  OR ISNULL(@outFolderId,0) = 0)  
-     BEGIN  
-         DELETE FROM @dmsTable WHERE intDocumentId = @intDocumentId  
-      CONTINUE; --not enabled or folder not exists  
-     END  
+		IF(ISNULL(@outEnabledFolder,0) = 0  OR ISNULL(@outFolderId,0) = 0)  
+		BEGIN  
+			DELETE FROM @dmsTable WHERE intDocumentId = @intDocumentId  
+			CONTINUE; --not enabled or folder not exists  
+		END  
   
-    -----------------------------------------END QUOTE-------------------------------------------------------------------  
-    --work around on blob  
-     SET @smUploadSQL = N'INSERT INTO [@db].[dbo].[tblSMUpload](strFileIdentifier, blbFile, dtmDateUploaded, intConcurrencyId) values(NEWID(), (select blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId), GETUTCDATE(), 1) ' +  
-         'SET @id = (SELECT SCOPE_IDENTITY()) '  
+		-----------------------------------------END QUOTE-------------------------------------------------------------------  
+		--work around on blob  
+		SET @smUploadSQL = N'INSERT INTO [@db].[dbo].[tblSMUpload](strFileIdentifier, blbFile, dtmDateUploaded, intConcurrencyId) values(NEWID(), (select blbFile FROM tblSMUpload WHERE intUploadId = @intUploadId), GETUTCDATE(), 1) ' +  
+		'SET @id = (SELECT SCOPE_IDENTITY()) '  
        
-     SET @smUploadSQL = (REPLACE(REPLACE(REPLACE(@smUploadSQL,'@blbFile',@blbFile),'@db',@strDestinationDatabaseName),'@intUploadId', @intUploadId))  
+		SET @smUploadSQL = (REPLACE(REPLACE(REPLACE(@smUploadSQL,'@blbFile',@blbFile),'@db',@strDestinationDatabaseName),'@intUploadId', @intUploadId))  
   
-     EXEC sp_executesql @smUploadSQL, N'@id INT OUTPUT', @intNewUploadId OUTPUT  
+		EXEC sp_executesql @smUploadSQL, N'@id INT OUTPUT', @intNewUploadId OUTPUT  
   
-     DECLARE @placeHolderEntityId INT; --Documents copied from other db should have null entity id  
+		DECLARE @placeHolderEntityId INT; --Documents copied from other db should have null entity id  
   
   
-    -- SET @smDocumentSQL = N' INSERT INTO [@db].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intConcurrencyId) ' +
-	--						'VALUES (@strName, @strType, GETUTCDATE(), @intSize, @intDocumentSourceFolderId, @referenceTransId, @intEntityId, @intNewUploadId, 1) ' +
-	--						'SET @id = (SELECT SCOPE_IDENTITY()) '
+		-- SET @smDocumentSQL = N' INSERT INTO [@db].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intConcurrencyId) ' +
+		--						'VALUES (@strName, @strType, GETUTCDATE(), @intSize, @intDocumentSourceFolderId, @referenceTransId, @intEntityId, @intNewUploadId, 1) ' +
+		--						'SET @id = (SELECT SCOPE_IDENTITY()) '
   
-    --SET @smDocumentSQL = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@smDocumentSQL, '@strName', ''''+@strName+''''),'@strType', ''''+@strType+''''),'@intSize', @intSize),'@intDocumentSourceFolderId', @intDocumentSourceFolderId),'@referenceTransId', @referenceTransId),'@intEntityId', @intEntityId),'@intNewUploadId', @intNewUploadId),'@db', @strDestinationDatabaseName)  
+		--SET @smDocumentSQL = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@smDocumentSQL, '@strName', ''''+@strName+''''),'@strType', ''''+@strType+''''),'@intSize', @intSize),'@intDocumentSourceFolderId', @intDocumentSourceFolderId),'@referenceTransId', @referenceTransId),'@intEntityId', @intEntityId),'@intNewUploadId', @intNewUploadId),'@db', @strDestinationDatabaseName)  
      
-	 DECLARE @ifExistingSQL NVARCHAR(max) = N''
-	 DECLARE @ifExistResult INT
+		DECLARE @ifExistingSQL NVARCHAR(max) = N''
+		DECLARE @ifExistResult INT
 
-	 SET @ifExistingSQL = N'SELECT TOP 1 1 FROM ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] WHERE strName = ''' + @strName + ''' AND intTransactionId = '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +''
+		SET @ifExistingSQL = N'SELECT TOP 1 1 FROM ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] WHERE strName = ''' + @strName + ''' AND intTransactionId = '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +''
 
-	 EXEC sp_executesql @ifExistingSQL
+		EXEC sp_executesql @ifExistingSQL
 	 
-	 SELECT @ifExistResult = @@ROWCOUNT
+		SELECT @ifExistResult = @@ROWCOUNT
 	 
-	 IF @ifExistResult = 0
-	 BEGIN
-       SET @smDocumentSQL = N'INSERT INTO ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intInterCompanyEntityId, intInterCompanyId, strInterCompanyEntityName , intConcurrencyId )   
-          VALUES ('''+ @strName  +''',   
-            '''+@strType+''',   
-             GETUTCDATE(),  
-             '+CASE WHEN @intSize IS NULL THEN 'NULL' ELSE  CONVERT(NVARCHAR,@intSize) END + ',   
-             '+CASE WHEN @outFolderId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@outFolderId) END+ ',  
-              '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +',   
-              '+CASE WHEN @placeHolderEntityId IS NULL THEN 'NULL' ELSE CONVERT(VARCHAR,@placeHolderEntityId) END+',   
-              '+CASE WHEN @intNewUploadId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intNewUploadId) END+',   
-              '+CASE WHEN @intEntityId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intEntityId) END+',  
-              '+CASE WHEN @intCurrentCompanyId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intCurrentCompanyId) END+',   
-               '''+ @strEntityName+''', 1 ) SET @id = (SELECT SCOPE_IDENTITY())'   
-    EXEC sp_executesql @smDocumentSQL, N'@id INT OUTPUT', @intNewDocumentId OUTPUT  
+		--lets delete the exisitng file so that it will always get the new file
+		IF @ifExistResult = 1
+		BEGIN
+			SET @ifExistingSQL = N'DELETE FROM ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] WHERE strName = ''' + @strName + ''' AND intTransactionId = '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +''
+
+			EXEC sp_executesql @ifExistingSQL
+		END
+
+	 
+		SET @smDocumentSQL = N'INSERT INTO ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intInterCompanyEntityId, intInterCompanyId, strInterCompanyEntityName , intConcurrencyId )   
+		VALUES ('''+ @strName  +''',   
+		'''+@strType+''',   
+		GETUTCDATE(),  
+		'+CASE WHEN @intSize IS NULL THEN 'NULL' ELSE  CONVERT(NVARCHAR,@intSize) END + ',   
+		'+CASE WHEN @outFolderId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@outFolderId) END+ ',  
+		'+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +',   
+		'+CASE WHEN @placeHolderEntityId IS NULL THEN 'NULL' ELSE CONVERT(VARCHAR,@placeHolderEntityId) END+',   
+		'+CASE WHEN @intNewUploadId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intNewUploadId) END+',   
+		'+CASE WHEN @intEntityId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intEntityId) END+',  
+		'+CASE WHEN @intCurrentCompanyId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intCurrentCompanyId) END+',   
+		'''+ @strEntityName+''', 1 ) SET @id = (SELECT SCOPE_IDENTITY())'   
+
+		EXEC sp_executesql @smDocumentSQL, N'@id INT OUTPUT', @intNewDocumentId OUTPUT  
       
-    --SAVE TO LOGGING TABLE  
-    INSERT INTO tblSMInterCompanyTransferLogForDMS (intSourceRecordId, intDestinationRecordId, intDestinationCompanyId,dtmCreated)  
-     VALUES(@intDocumentId, @intNewDocumentId,@referenceCompanyId,  GETUTCDATE())  
-     
-	END
+		--SAVE TO LOGGING TABLE  
+		INSERT INTO tblSMInterCompanyTransferLogForDMS (intSourceRecordId, intDestinationRecordId, intDestinationCompanyId,dtmCreated)  
+		VALUES(@intDocumentId, @intNewDocumentId,@referenceCompanyId,  GETUTCDATE())
 
-     DELETE FROM @dmsTable WHERE intDocumentId = @intDocumentId  
-   end  
+		DELETE FROM @dmsTable WHERE intDocumentId = @intDocumentId  
+	END
   
    ------------------------------------END COPYING DMS-----------------------------------------  
   
