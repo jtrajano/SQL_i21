@@ -356,6 +356,13 @@ DECLARE	 @Price							NUMERIC(18,6)
 	IF @ItemPricingOnly = 0								
 	BEGIN
 	--Customer Special Pricing		
+		IF ISNULL(@ShipToLocationId, 0) = 0 AND @CustomerId IS NOT NULL
+			BEGIN
+				SELECT @ShipToLocationId = intShipToId
+				FROM tblARCustomer 
+				WHERE intEntityId = @CustomerId 
+			END
+
 		IF @GetAllAvailablePricing = 0 
 			BEGIN
 				SELECT TOP 1
