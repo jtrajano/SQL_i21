@@ -9,9 +9,11 @@ CREATE PROCEDURE dbo.uspPRImportOriginEmployeeDeduction(
 
 AS
 
+DECLARE @EmployeeCount AS NVARCHAR(50)
+DECLARE @EntityId AS INT
 DECLARE @strEmployeeId AS NVARCHAR(50)
 DECLARE @strDeduction AS NVARCHAR(50)
-DECLARE @intEntityEmployeeId AS INT
+DECLARE @intEntityEmployeeId AS NVARCHAR(50)
 DECLARE @intTypeDeductionId AS INT
 DECLARE @strDeductFrom AS NVARCHAR(50)
 DECLARE @strCalculationType AS NVARCHAR(50)
@@ -83,23 +85,20 @@ BEGIN
 	OR ( premp_ded_code_col = 'premp_ded_code_6' and premp_ded_type_col = 'premp_ded_type_6' and premp_ded_active_col ='premp_ded_active_yn_6' and  premp_ded_calc_code_col = 'premp_ded_calc_code_6' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_6' and premp_ded_limit_col = 'premp_ded_limit_6')
 	)
 
-	select @intRecordCount = COUNT(1) from prempmst_deductions_cv tded
+	select  @intRecordCount = COUNT(*) from prempmst_deductions_cv tded
 	left join tblPRTypeDeduction mded
 	on tded.premp_ded_data collate Latin1_General_CI_AS = mded.strDeduction
 	left join tblPREmployee emp
 	on emp.strEmployeeId = tded.premp_emp_code collate Latin1_General_CI_AS
 	WHERE mded.strDeduction is not null
 	AND emp.intEntityId is not null
-	
-
-	--SELECT @intRecordCount = COUNT(1) FROM prempmst_deductions_cv
 
 	IF (@ysnDoImport = 1)
 	BEGIN
 		WHILE EXISTS(SELECT TOP 1 NULL FROM prempmst_deductions_cv)
 		BEGIN
 			SELECT TOP 1 
-				 @intEntityEmployeeId				= ISNULL((SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = ded.premp_emp_code collate Latin1_General_CI_AS),0)
+				 @intEntityEmployeeId				= ded.premp_emp_code collate Latin1_General_CI_AS
 				,@intTypeDeductionId				= (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = ded.premp_ded_data collate Latin1_General_CI_AS)
 				,@strDeductFrom						= (SELECT TOP 1 strDeductFrom FROM tblPRTypeDeduction WHERE strDeduction = ded.premp_ded_data collate Latin1_General_CI_AS)
 				,@strCalculationType				= (SELECT TOP 1 strCalculationType FROM tblPRTypeDeduction WHERE strDeduction = ded.premp_ded_data collate Latin1_General_CI_AS)
@@ -114,12 +113,13 @@ BEGIN
 				,@strEmployeeId						= ded.premp_emp_code
 				,@strDeduction						= ded.premp_ded_data
 				FROM prempmst_deductions_cv ded
-			
-			IF (@intEntityEmployeeId != 0)
+	
+			SELECT @EntityId = intEntityId FROM tblPREmployee WHERE strEmployeeId = @intEntityEmployeeId
+			IF (@EmployeeCount IS NOT NULL)
 			BEGIN
 				IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeduction)
 				BEGIN
-					IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax where intEmployeeDeductionId = @intEntityEmployeeId 
+					IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax where intEmployeeDeductionId = @EntityId 
 									AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeduction))
 					BEGIN
 						INSERT INTO [dbo].[tblPREmployeeDeduction]
@@ -137,7 +137,7 @@ BEGIN
 						   ,[ysnDefault])
 						VALUES
 						(
-							 @intEntityEmployeeId
+							 @EntityId
 							,@intTypeDeductionId
 							,@strDeductFrom
 							,@strCalculationType
@@ -157,8 +157,8 @@ BEGIN
 
 
 			DELETE FROM prempmst_deductions_cv 
-				  WHERE premp_emp_code = @strEmployeeId
-					AND premp_ded_data = @strDeduction
+				  WHERE premp_emp_code collate Latin1_General_CI_AS = @strEmployeeId
+					AND premp_ded_data collate Latin1_General_CI_AS = @strDeduction
 
 		END
 
