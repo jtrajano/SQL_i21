@@ -19,7 +19,10 @@ BEGIN
 				,strGLAccountId = (SELECT strAccountId FROM dbo.tblGLAccount WHERE intAccountId = i21.intGLAccountId)
 				,i21.intCurrencyId
 				,strCurrency = (SELECT strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = i21.intCurrencyId)
-				,i21.intBankAccountType
+				,i21.intBankAccountTypeId
+				,BankAccountType.strBankAccountType
+				,i21.intBrokerageAccountId
+				,Brokerage.strAccountNumber strBrokerageAccount
 				,i21.strContact
 				,i21.strBankAccountHolder
 				,ISNULL(dbo.fnAESDecryptASym(i21.strBankAccountNo),strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo
@@ -145,6 +148,8 @@ BEGIN
 		FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_origin origin
 					ON i21.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
 					LEFT JOIN dbo.tblEMEntity E on E.intEntityId = i21.intResponsibleEntityId
+					LEFT JOIN dbo.tblCMBankAccountType BankAccountType ON BankAccountType.intBankAccountTypeId = i21.intBankAccountTypeId
+					LEFT JOIN dbo.tblRKBrokerageAccount Brokerage ON Brokerage.intBrokerageAccountId = i21.intBrokerageAccountId
 					')
 		
 
@@ -252,7 +257,8 @@ BEGIN
 					,ysnActive
 					,intGLAccountId
 					,intCurrencyId
-					,intBankAccountType
+					,intBankAccountTypeId
+					,intBrokerageAccountId
 					,strContact
 					,strBankAccountHolder
 					,strBankAccountNo
@@ -338,7 +344,8 @@ BEGIN
 					,ysnActive							= i.ysnActive
 					,intGLAccountId						= i.intGLAccountId
 					,intCurrencyId						= i.intCurrencyId
-					,intBankAccountType					= i.intBankAccountType
+					,intBankAccountType					= i.intBankAccountTypeId
+					,intBrokerageAccountId				= i.intBrokerageAccountId
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo					= [dbo].fnAESEncryptASym(i.strBankAccountNo)
@@ -542,7 +549,8 @@ BEGIN
 					,ysnActive							= i.ysnActive
 					,intGLAccountId						= i.intGLAccountId
 					,intCurrencyId						= i.intCurrencyId
-					,intBankAccountType					= i.intBankAccountType
+					,intBankAccountTypeId				= i.intBankAccountTypeId
+					,intBrokerageAccountId				= i.intBrokerageAccountId
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
 					,strBankAccountNo                    = CASE WHEN i.strBankAccountNo = B.strBankAccountNo THEN i.strBankAccountNo ELSE [dbo].fnAESEncryptASym(i.strBankAccountNo) END

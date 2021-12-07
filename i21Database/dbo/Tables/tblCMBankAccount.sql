@@ -4,7 +4,8 @@
     [ysnActive]                        BIT            DEFAULT 1 NOT NULL,
     [intGLAccountId]                   INT            NOT NULL,
     [intCurrencyId]                    INT            NULL,
-    [intBankAccountType]               INT            DEFAULT 1 NOT NULL,
+    [intBankAccountTypeId]             INT            DEFAULT 1 NOT NULL,
+    [intBrokerageAccountId]            INT            NULL,
     [strContact]                       NVARCHAR (150) COLLATE Latin1_General_CI_AS NULL,
 	[strBankAccountHolder]             NVARCHAR (150) COLLATE Latin1_General_CI_AS NULL,
     [strBankAccountNo]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
@@ -93,7 +94,8 @@
     CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_EFT] FOREIGN KEY ([intEFTBankFileFormatId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
 	CONSTRAINT [FK_tblCMBankFileFormattblCMBankAccount_BankStatement] FOREIGN KEY ([intBankStatementImportId]) REFERENCES [dbo].[tblCMBankFileFormat] ([intBankFileFormatId]),
     CONSTRAINT [FK_tblCMBanktblCMBankAccount] FOREIGN KEY ([intBankId]) REFERENCES [dbo].[tblCMBank] ([intBankId]),
-    CONSTRAINT [FK_tblGLAccounttblCMBankAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+    CONSTRAINT [FK_tblGLAccounttblCMBankAccount] FOREIGN KEY ([intGLAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
+    CONSTRAINT [FK_tblCMBankAccount_tblRKBrokerageAccount] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [dbo].[tblRKBrokerageAccount]([intBrokerageAccountId])
 );
 
 

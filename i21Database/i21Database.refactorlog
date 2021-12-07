@@ -7672,4 +7672,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLegacyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ab5d7c1c-3b3a-4365-ae5d-a3e39658a35a" ChangeDateTime="12/07/2021 00:40:56">
+    <Property Name="ElementName" Value="[dbo].[tblCMBankAccount].[intBankAccountType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCMBankAccount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intBankAccountTypeId]" />
+  </Operation>
 </Operations>

@@ -393,7 +393,8 @@
     <Build Include="dbo\Views\vyuQMQualityCriteriaList.sql" />
     <Build Include="dbo\Views\vyuQMQualityCriteriaDetailList.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
-	<Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
+	  <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
+    <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3949,7 +3950,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferFeesEntries.sql"/>
+    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferFeesEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankSwapLong.sql" />
     <Build Include="dbo\User Defined Types\BankTransactionTable.sql" />
@@ -10337,6 +10338,7 @@
     <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
     <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
+    <None Include="Scripts\Post-Deployment\CM\14_BankAccountTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
