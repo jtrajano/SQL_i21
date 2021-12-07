@@ -85,13 +85,13 @@ BEGIN
 	OR ( premp_ded_code_col = 'premp_ded_code_6' and premp_ded_type_col = 'premp_ded_type_6' and premp_ded_active_col ='premp_ded_active_yn_6' and  premp_ded_calc_code_col = 'premp_ded_calc_code_6' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_6' and premp_ded_limit_col = 'premp_ded_limit_6')
 	)
 
-	select  @intRecordCount = COUNT(*) from prempmst_deductions_cv tded
+	select @intRecordCount = COUNT(1) from prempmst_deductions_cv tded
 	left join tblPRTypeDeduction mded
 	on tded.premp_ded_data collate Latin1_General_CI_AS = mded.strDeduction
 	left join tblPREmployee emp
 	on emp.strEmployeeId = tded.premp_emp_code collate Latin1_General_CI_AS
 	WHERE mded.strDeduction is not null
-	AND emp.intEntityId is not null
+	AND emp.strEmployeeId is not null
 
 	IF (@ysnDoImport = 1)
 	BEGIN
@@ -115,12 +115,12 @@ BEGIN
 				FROM prempmst_deductions_cv ded
 	
 			SELECT @EntityId = intEntityId FROM tblPREmployee WHERE strEmployeeId = @intEntityEmployeeId
-			IF (@EmployeeCount IS NOT NULL)
+			IF (@EntityId IS NOT NULL)
 			BEGIN
 				IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeduction)
 				BEGIN
-					IF NOT EXISTS (SELECT * FROM tblPREmployeeDeductionTax where intEmployeeDeductionId = @EntityId 
-									AND intTypeTaxId =  (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strDeduction))
+					IF NOT EXISTS (SELECT * FROM tblPREmployeeDeduction where intEntityEmployeeId = @EntityId 
+									AND intTypeDeductionId =  (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeduction))
 					BEGIN
 						INSERT INTO [dbo].[tblPREmployeeDeduction]
 						   ([intEntityEmployeeId]
