@@ -344,7 +344,7 @@ BEGIN
 					,ysnActive							= i.ysnActive
 					,intGLAccountId						= i.intGLAccountId
 					,intCurrencyId						= i.intCurrencyId
-					,intBankAccountType					= i.intBankAccountTypeId
+					,intBankAccountTypeId				= i.intBankAccountTypeId
 					,intBrokerageAccountId				= i.intBrokerageAccountId
 					,strContact							= i.strContact
 					,strBankAccountHolder				= i.strBankAccountHolder
