@@ -1,20 +1,8 @@
-﻿CREATE VIEW [dbo].[vyuLGDispatchOrderViewSearch]
+﻿CREATE VIEW [dbo].[vyuLGDispatchOrderDetail]
 AS
 SELECT 
-	DO.intDispatchOrderId
-	,DO.strDispatchOrderNumber
-	,strDispatchStatus = CASE DO.intDispatchStatus
-		WHEN 1 THEN 'Scheduled'
-		WHEN 2 THEN 'In Progress'
-		WHEN 3 THEN 'Complete'
-		WHEN 4 THEN 'Cancelled'
-		ELSE '' END COLLATE Latin1_General_CI_AS
-	,DO.dtmDispatchDate
-	,strShipVia = SV.strName
-	,strTruckNumber = SVT.strTruckNumber
-	,strDriver = DR.strName
-	,strFromLocation = CL.strLocationName
-	,strFromStorageLocation = CLSL.strSubLocationName 
+	DOD.intDispatchOrderDetailId
+	,DOD.intDispatchOrderId
 	,DOD.intSequence
 	,DOD.intStopType
 	,strStopType = CASE DOD.intStopType 
@@ -45,14 +33,9 @@ SELECT
 	,DOD.dblQuantity
 	,DOD.strOrderComments
 	,DOD.strDeliveryComments
-	,DO.intConcurrencyId
-FROM 
-tblLGDispatchOrder DO
-LEFT JOIN tblLGDispatchOrderDetail DOD ON DOD.intDispatchOrderId = DO.intDispatchOrderId
+	,DOD.intConcurrencyId
+FROM tblLGDispatchOrderDetail DOD 
 LEFT JOIN tblICItem I ON I.intItemId = DOD.intItemId
-LEFT JOIN tblEMEntity SV ON SV.intEntityId = DO.intEntityShipViaId
-LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = DO.intEntityShipViaTruckId
-LEFT JOIN tblEMEntity DR ON DR.intEntityId = DO.intDriverEntityId
 LEFT JOIN tblEMEntity E ON E.intEntityId = DOD.intEntityId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DOD.intEntityLocationId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = DOD.intCompanyLocationId
