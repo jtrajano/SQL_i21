@@ -3242,7 +3242,9 @@ BEGIN TRY
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
 			@intId INT,
-			@dblRunningQty NUMERIC(24, 10) = 0
+			@dblRunningQty NUMERIC(24, 10) = 0,
+			@ysnAddToLogSpecific BIT = 1,
+			@intNegatedCount int = 0
 
 	SELECT @intId = MIN(intId) FROM @cbLogCurrent
 	WHILE @intId > 0--EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
@@ -3270,6 +3272,85 @@ BEGIN TRY
 		end
 
 		DELETE FROM @cbLogPrev
+
+		/*CT-5532 - If unposting and the contract is DWG, check the @cbLogCurrent if it's contains a self negated records*/
+
+		if ((@ysnDWGPriceOnly = 1) and (@ysnUnposted = 1) and exists (select top 1 1 from @cbLogCurrent where intId = @intId and dblQty > 0))
+		begin
+
+			IF OBJECT_ID('tempdb..#tmpNegated') IS NOT NULL DROP TABLE #tmpNegated;
+
+			select * into #tmpNegated from
+			(
+				SELECT 
+					ext.*
+				FROM @cbLogCurrent curr
+				join @cbLogCurrent ext on (ext.dblQty * -1) = curr.dblQty
+				WHERE curr.intId = @intId
+
+				union all
+
+				SELECT 
+					curr.*
+				FROM @cbLogCurrent curr
+				WHERE curr.intId = @intId
+			)tbl
+
+			if ((select count(*) from #tmpNegated) = 2)
+			begin
+
+				select @intNegatedCount = count(*) from
+				(
+				select distinct
+				strBatchId  
+				, dtmTransactionDate  
+				, strTransactionType  
+				, strTransactionReference  
+				, intTransactionReferenceId  
+				, intTransactionReferenceDetailId  
+				, strTransactionReferenceNo  
+				, intContractDetailId  
+				, intContractHeaderId  
+				, strContractNumber  
+				, intContractSeq  
+				, intContractTypeId  
+				, intEntityId  
+				, intCommodityId  
+				, intItemId  
+				, intLocationId  
+				, intPricingTypeId  
+				, intFutureMarketId  
+				, intFutureMonthId  
+				, dblBasis  
+				, dblFutures  
+				, intQtyUOMId  
+				, intQtyCurrencyId  
+				, intBasisUOMId  
+				, intBasisCurrencyId  
+				, intPriceUOMId  
+				, dtmStartDate  
+				, dtmEndDate  
+				, dblDynamic  
+				, intContractStatusId  
+				, intBookId  
+				, intSubBookId  
+				, strNotes  
+				, intUserId  
+				, intActionId  
+				, strProcess  
+				from #tmpNegated
+				) tbl1
+
+				if (@intNegatedCount = 1)
+				begin
+					set @ysnAddToLogSpecific = 0;
+				end
+
+			end
+
+		end
+
+		/**/
 
 		INSERT INTO @cbLogSpecific (strBatchId
 			, dtmTransactionDate
@@ -3348,7 +3429,7 @@ BEGIN TRY
 			, intActionId
 			, strProcess
 		FROM @cbLogCurrent
-		WHERE intId = @intId
+		WHERE intId = @intId and @ysnAddToLogSpecific = 1
 
 		SELECT TOP 1 @currentContractDetalId = intContractDetailId
 			, @intContractHeaderId = intContractHeaderId
