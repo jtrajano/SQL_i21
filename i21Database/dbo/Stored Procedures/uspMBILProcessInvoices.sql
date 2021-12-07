@@ -155,7 +155,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 			, [dtmPostDate]
 			, [strComments]
 			, [ysnPost]
-			--, [intSalesAccountId]
+			, [intPaymentMethodId]
 			, [strItemDescription]
 			, [intTaxGroupId]
 			, [intTermId]
@@ -195,7 +195,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 		,[dtmPostDate] = InvoiceItem.dtmPostedDate
 		,[strComments] = InvoiceItem.strComments
 		,[ysnPost] = @ysnPost
-		--,[intEntitySalespersonId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
+		,[intPaymentMethodId] = InvoiceItem.intPaymentMethodId
 		,[strItemDescription] = InvoiceItem.strItemDescription
 		,[intTaxGroupId] = NULL
 		,[intTermId] = InvoiceItem.intTermId
