@@ -33,8 +33,8 @@ BEGIN
 			intContractDetailId
 		)
 		SELECT
-			*
-		FROM OPENXML(@xmlDocumentId, 'TFLogs', 2)
+			intContractDetailId
+		FROM OPENXML(@xmlDocumentId, 'rows/row', 2)
 		WITH (
 			intContractDetailId INT
 		)
@@ -55,7 +55,6 @@ BEGIN
 			select top 1 @intActiveContractDetailId = min(intContractDetailId) from @TFXML where intContractDetailId > @intActiveContractDetailId;
 		end
 
-		select * from @TFXML;
 
 
 		insert into @TRFLog
