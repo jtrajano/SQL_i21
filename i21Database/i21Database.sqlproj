@@ -365,6 +365,7 @@
     <Build Include="dbo\Functions\fnTFCoalesceCardFuelingSite.sql" />
     <Build Include="dbo\Tables\tblTFReportingComponentCardFuelingSiteType.sql" />
     <Build Include="dbo\Views\vyuTFGetReportingComponentCardFuelingSiteType.sql" />
+	<Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

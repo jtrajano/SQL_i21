@@ -448,6 +448,26 @@ BEGIN TRY
 				AND Trans.intTransactionId IS NOT NULL
 
 		END
+		ELSE IF (@TaxAuthorityCode = 'WV' AND @FormCode = 'MFT-507')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicWV
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicWV (intTransactionId
+				,strWVLegalCustomerName
+				,intConcurrencyId)
+			SELECT Trans.intTransactionId
+				, tblEMEntity.str1099Name  AS strCustomerLegalName
+				,1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+			INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARInvoice.intEntityCustomerId
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intTransactionId IS NOT NULL	
+		END
 
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 
