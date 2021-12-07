@@ -128,7 +128,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
         @intSize = intSize,  
         @intUploadId = intUploadId,  
         @strFolderPath = strFolderPath,
-		    @strEntityName = strUsername
+		    @strEntityName = strUserName
           
      FROM @dmsTable  
   
