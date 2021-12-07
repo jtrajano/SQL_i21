@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSCTicketInOutSubReport]
+﻿CREATE PROCEDURE [dbo].[uspSCTicketInOutLocationSubReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 begin
@@ -94,17 +94,15 @@ begin
 	set @sqlcmd = 'select 
 					   strGroupIndicator as strStorageTypeDescription
 					   , strCommodityCode
+					   , strLocationName 
 					   , sum(dblComputedGrossUnits) as dblGrossUnits 
 
 					from vyuSCTicketInOutReport
 						where (dtmTicketDateTime between ''' + @sFrom + ''' and  ''' + @sTo + ''')
-						group by strGroupIndicator, strCommodityCode	
+						group by strGroupIndicator, strCommodityCode, strLocationName
 					'
 
 
 	exec (@sqlcmd)
 
 end
-
-
-go
