@@ -207,7 +207,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 		DECLARE @ifExistingSQL NVARCHAR(max) = N''
 		DECLARE @ifExistResult INT
 
-		SET @ifExistingSQL = N'SELECT TOP 1 1 FROM ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] WHERE strName = ''' + @strName + ''' AND intTransactionId = '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +''
+	  SET @ifExistingSQL = N'SELECT TOP 1 1 FROM ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] WHERE strName = ''' + REPLACE(@strName, '''', '''''') + ''' AND intTransactionId = '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +''
 
 		EXEC sp_executesql @ifExistingSQL
 	 
@@ -223,7 +223,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 
 	 
 		SET @smDocumentSQL = N'INSERT INTO ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intInterCompanyEntityId, intInterCompanyId, strInterCompanyEntityName , intConcurrencyId )   
-		VALUES ('''+ @strName  +''',   
+		VALUES ('''+ REPLACE(@strName, '''', '''''')  +''',   
 		'''+@strType+''',   
 		GETUTCDATE(),  
 		'+CASE WHEN @intSize IS NULL THEN 'NULL' ELSE  CONVERT(NVARCHAR,@intSize) END + ',   
