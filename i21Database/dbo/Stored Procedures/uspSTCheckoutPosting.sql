@@ -46,29 +46,45 @@ BEGIN
 				-- 2 = Currently being Un-Posted
 				IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId AND intCheckoutCurrentProcess != 0)
 					BEGIN
-				
-						DECLARE @strCheckoutCurrentProcess NVARCHAR(150) = ''
+						IF DATEADD(MINUTE, 10, (SELECT dtmCheckoutProcessDate FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId)) >= GETDATE()
+							BEGIN
+								DECLARE @strCheckoutCurrentProcess NVARCHAR(150) = ''
 
-						SELECT 
-							@strCheckoutCurrentProcess = CASE
-															WHEN intCheckoutCurrentProcess = 1
-																THEN 'Checkout is currently being Posted.'
-															WHEN intCheckoutCurrentProcess = 2
-																THEN 'Checkout is currently being Unposted.'
-														END
-						FROM tblSTCheckoutHeader 
-						WHERE intCheckoutId = @intCheckoutId 
+								SELECT 
+									@strCheckoutCurrentProcess = CASE
+																	WHEN intCheckoutCurrentProcess = 1
+																		THEN 'Checkout is currently being Posted.'
+																	WHEN intCheckoutCurrentProcess = 2
+																		THEN 'Checkout is currently being Unposted.'
+																END
+								FROM tblSTCheckoutHeader 
+								WHERE intCheckoutId = @intCheckoutId 
 
 
 
-						SET @strStatusMsg = @strCheckoutCurrentProcess
-						SET @strNewCheckoutStatus = ''
-						SET @ysnInvoiceStatus = 0
-						SET @ysnCustomerChargesInvoiceStatus = 0
-						SET @strBatchIdForNewPostRecap = ''
-						SET @strErrorCode = 'Err'
+								SET @strStatusMsg = @strCheckoutCurrentProcess
+								SET @strNewCheckoutStatus = ''
+								SET @ysnInvoiceStatus = 0
+								SET @ysnCustomerChargesInvoiceStatus = 0
+								SET @strBatchIdForNewPostRecap = ''
+								SET @strErrorCode = 'Err'
 
-						GOTO ExitPost
+								GOTO ExitPost
+							END
+						ELSE
+							BEGIN
+								UPDATE tblSTCheckoutHeader
+								SET intCheckoutCurrentProcess = CASE 
+																	WHEN @strDirection = 'Post'
+																		THEN 1
+																	WHEN @strDirection = 'UnPost'
+																		THEN 2
+																END,
+									dtmCheckoutProcessDate = GETDATE()
+								WHERE intCheckoutId = @intCheckoutId  
+
+								SET @ysnSetToReady = CAST(1 AS BIT)
+							END
 
 					END
 				ELSE IF EXISTS (SELECT TOP 1 1 FROM tblSTCheckoutHeader WHERE intCheckoutId = @intCheckoutId AND intCheckoutCurrentProcess = 0)
@@ -80,7 +96,8 @@ BEGIN
 																THEN 1
 															WHEN @strDirection = 'UnPost'
 																THEN 2
-														END
+														END,
+							dtmCheckoutProcessDate = GETDATE()
 						WHERE intCheckoutId = @intCheckoutId  
 
 						SET @ysnSetToReady = CAST(1 AS BIT)
@@ -6644,6 +6661,12 @@ ExitWithCommit:
 	
 
 ExitWithRollback:
+
+	UPDATE tblSTCheckoutHeader
+	SET intCheckoutCurrentProcess = 0,
+		dtmCheckoutProcessDate = NULL
+	WHERE intCheckoutId = @intCheckoutId  
+
     -- Rollback Transaction here
 	IF @@TRANCOUNT > 0
 		BEGIN
@@ -6678,7 +6701,8 @@ ExitPost:
 		BEGIN
 			
 			UPDATE tblSTCheckoutHeader
-			SET intCheckoutCurrentProcess = 0
+			SET intCheckoutCurrentProcess = 0,
+				dtmCheckoutProcessDate = NULL
 			WHERE intCheckoutId = @intCheckoutId  
 
 		END
