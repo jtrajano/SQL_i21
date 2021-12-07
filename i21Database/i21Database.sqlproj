@@ -393,6 +393,7 @@
     <Build Include="dbo\Views\vyuQMQualityCriteriaList.sql" />
     <Build Include="dbo\Views\vyuQMQualityCriteriaDetailList.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetTemplateProperty.sql" />
+	<Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
