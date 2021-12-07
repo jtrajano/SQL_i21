@@ -9,9 +9,11 @@ CREATE PROCEDURE dbo.uspPRImportOriginEmployeeEarning(
 
 AS
 
+DECLARE @EmployeeCount AS NVARCHAR(50)
+DECLARE @EntityId AS INT
 DECLARE @strEmployeeId AS NVARCHAR(50)
 DECLARE @strEarning AS NVARCHAR(50)
-DECLARE @intEntityEmployeeId AS INT
+DECLARE @intEntityEmployeeId AS NVARCHAR(50)
 DECLARE @intTypeEarningId AS INT
 DECLARE @strCalculationType AS NVARCHAR(50)
 DECLARE @dblAmount AS FLOAT
@@ -141,14 +143,12 @@ BEGIN
 	WHERE tern.strEarning is not null
 	AND emp.intEntityId is not null
 
-
-
 	IF (@ysnDoImport = 1)
 	BEGIN
 		WHILE EXISTS(SELECT TOP 1 NULL FROM prempmst_earnings_cv)
 		BEGIN
 			SELECT TOP 1
-				 @intEntityEmployeeId			=	(SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = ern.premp_emp_code collate Latin1_General_CI_AS)
+				 @intEntityEmployeeId			=	ern.premp_emp_code collate Latin1_General_CI_AS
 				,@intTypeEarningId				=	(SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = ern.premp_ern_code collate Latin1_General_CI_AS)
 				,@strCalculationType			=	(SELECT TOP 1 strCalculationType FROM tblPRTypeEarning WHERE strEarning = ern.premp_ern_code collate Latin1_General_CI_AS)
 				,@dblAmount						=	premp_ern_amount
@@ -159,32 +159,40 @@ BEGIN
 				,@strEarning					= ern.premp_ern_code
 			FROM prempmst_earnings_cv ern
 
-			IF EXISTS (SELECT TOP 1 * FROM tblPRTypeEarning WHERE strEarning = @strEarning)
+			SELECT @EntityId = intEntityId FROM tblPREmployee WHERE strEmployeeId = @intEntityEmployeeId
+
+			IF (@EntityId IS NOT NULL)
 			BEGIN
-				IF NOT EXISTS (SELECT * FROM tblPREmployeeEarning where intEmployeeEarningId = @intEntityEmployeeId 
-					AND intTypeEarningId =  (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarning))
+				IF EXISTS (SELECT TOP 1 * FROM tblPRTypeEarning WHERE strEarning = @strEarning)
 				BEGIN
-					INSERT INTO [dbo].[tblPREmployeeEarning]
-					   ([intEntityEmployeeId]
-					   ,[intTypeEarningId]
-					   ,[strCalculationType]
-					   ,[dblAmount]
-					   ,[intAccountId]
-					   ,[ysnUseLocationDistribution]
-					   ,[ysnDefault])
-					VALUES
-					(
-					    @intEntityEmployeeId
-					   ,@intTypeEarningId
-					   ,@strCalculationType
-					   ,@dblAmount
-					   ,@intAccountId
-					   ,0
-					   ,1
-					)
+					IF NOT EXISTS (SELECT * FROM tblPREmployeeEarning where intEntityEmployeeId = @EntityId 
+						AND intTypeEarningId =  (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarning))
+					BEGIN
+						INSERT INTO [dbo].[tblPREmployeeEarning]
+						   ([intEntityEmployeeId]
+						   ,[intTypeEarningId]
+						   ,[strCalculationType]
+						   ,[dblAmount]
+						   ,[intAccountId]
+						   ,[ysnUseLocationDistribution]
+						   ,[ysnDefault]
+						   ,intPayGroupId)
+						   
+						VALUES
+						(
+							@EntityId
+						   ,@intTypeEarningId
+						   ,@strCalculationType
+						   ,@dblAmount
+						   ,@intAccountId
+						   ,0
+						   ,1
+						   ,(SELECT TOP 1 intPayGroupId FROM tblPRPayGroup WHERE strPayGroup = 'Weekly')
+						)
+					END
 				END
 			END
-
+			
 			DELETE FROM prempmst_earnings_cv 
 				  WHERE premp_emp_code = @strEmployeeId
 					AND premp_ern_code = @strEarning
