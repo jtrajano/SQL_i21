@@ -118,7 +118,7 @@ BEGIN
 	) unpiv 
 
 	Select 
-		'E'+ premp_emp  AS premp_emp_code
+		 premp_emp  AS premp_emp_code
 		,* INTO prempmst_earnings_cv 
 	FROM prempmst_ern_rows 
 		WHERE (
