@@ -981,7 +981,7 @@ BEGIN TRY
 
 			SELECT @dblVoucherTotal = NULL
 
-			SELECT @dbli21VoucherTotal = SUM(dblNetWeight * dblCost)
+			SELECT @dbli21VoucherTotal = SUM(ROUND((dblNetWeight * dblCost),2))
 			FROM @voucherNonInvDetails
 
 			IF @dblFinanceChargeAmount > 0

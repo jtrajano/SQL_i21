@@ -32,7 +32,8 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@strContainerNo nvarchar(50)=NULL
 	,@strMarkings nvarchar(50)=NULL
 	,@intEntityVendorId int=NULL
-	,@strCondition NVARCHAR(50)
+	,@strCondition NVARCHAR(50)=NULL
+	,@dtmExpiryDate Datetime=NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -56,7 +57,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 	,@strLifeTimeType NVARCHAR(50)
 	,@intLifeTime INT
-	,@dtmExpiryDate DATETIME
+	--,@dtmExpiryDate DATETIME
 	,@ItemsForPost AS ItemCostingTableType
 	,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 	,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
@@ -271,6 +272,9 @@ BEGIN
 	SELECT @ysnLifeTimeByEndOfMonth = ysnLifeTimeByEndOfMonth
 	FROM tblMFCompanyPreference
 
+	if @dtmExpiryDate is null
+	Begin
+
 	IF @strLifeTimeType = 'Years'
 		SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmProductionDate)
 	ELSE IF @strLifeTimeType = 'Months'
@@ -287,7 +291,7 @@ BEGIN
 		SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmProductionDate)
 	ELSE
 		SET @dtmExpiryDate = DateAdd(yy, 1, @dtmProductionDate)
-
+	End
 	INSERT INTO @ItemsThatNeedLotId (
 		intLotId
 		,strLotNumber

@@ -16,4 +16,5 @@
 	,strMachine NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,ysnMailSent BIT 
+	,intLineTrxSequenceNo BIGINT
 	)
