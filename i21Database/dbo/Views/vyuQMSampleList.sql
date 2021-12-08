@@ -82,6 +82,7 @@ SELECT S.intSampleId
 	,CE.strName AS strCreatedUserName
 	,S.dtmLastModified AS dtmLastUpdated
 	,UE.strName AS strUpdatedUserName
+	,S.ysnImpactPricing
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	AND S.ysnIsContractCompleted <> 1

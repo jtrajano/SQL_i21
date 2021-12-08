@@ -69,6 +69,7 @@
 	intSampleRefId INT,
 	ysnParent BIT CONSTRAINT [DF_tblQMSample_ysnParent] DEFAULT 1,
 	ysnIgnoreContract BIT CONSTRAINT [DF_tblQMSample_ysnIgnoreContract] DEFAULT 0,
+	ysnImpactPricing BIT CONSTRAINT [DF_tblQMSample_ysnImpactPricing] DEFAULT 0,
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSample_dtmCreated] DEFAULT GetDate(),

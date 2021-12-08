@@ -1301,3 +1301,8 @@ BEGIN
 	SELECT 'Component20',1
 END
 GO
+
+UPDATE tblQMSample
+SET ysnImpactPricing = 0
+WHERE ysnImpactPricing IS NULL
+GO

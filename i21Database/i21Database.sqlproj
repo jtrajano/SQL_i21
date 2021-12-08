@@ -397,6 +397,8 @@
     <Build Include="dbo\Tables\tblCMBankAccountType.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTSaveContractSamplePremium.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSamplePremiumTestResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -3952,8 +3954,8 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferIntransitPostEntries.sql"/>
-    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferForwardPostEntries.sql"/>
+    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferIntransitPostEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferForwardPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferFeesEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankSwapLong.sql" />

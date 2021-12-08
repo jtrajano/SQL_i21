@@ -392,6 +392,7 @@ BEGIN TRY
 		,strForwardingAgentRef
 		,strSentBy
 		,intSentById
+		,ysnImpactPricing
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -461,6 +462,7 @@ BEGIN TRY
 		,strForwardingAgentRef
 		,strSentBy
 		,intSentById
+		,ysnImpactPricing
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -520,6 +522,7 @@ BEGIN TRY
 			,strForwardingAgentRef NVARCHAR(50)
 			,strSentBy NVARCHAR(50)
 			,intSentById INT
+			,ysnImpactPricing BIT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
