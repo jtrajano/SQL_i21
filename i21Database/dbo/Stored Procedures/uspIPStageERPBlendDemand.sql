@@ -56,8 +56,9 @@ BEGIN TRY
 				,strWorkCenter
 				,dtmDueDate
 				,strMachine
+				,intLineTrxSequenceNo
 				)
-			SELECT TrxSequenceNo
+			SELECT parentId
 				,CompanyLocation
 				,ActionId
 				,IsNULL(CreatedDate,Getdate())
@@ -71,8 +72,9 @@ BEGIN TRY
 				,WorkCenter
 				,DueDate
 				,Machine
+				,TrxSequenceNo
 			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					TrxSequenceNo BIGINT 
+					parentId BIGINT '@parentId'
 					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
 					,ActionId INT '../ActionId'
 					,CreatedDate DATETIME '../CreatedDate'
@@ -86,6 +88,7 @@ BEGIN TRY
 					,WorkCenter NVARCHAR(50)
 					,DueDate DATETIME
 					,Machine NVARCHAR(50)
+					,TrxSequenceNo BIGINT 
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ','

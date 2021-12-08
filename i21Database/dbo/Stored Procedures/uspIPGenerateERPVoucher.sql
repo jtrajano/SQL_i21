@@ -62,9 +62,9 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@strType NVARCHAR(50)
 		,@strReceiptNumber NVARCHAR(50)
-		,@intWeightAdjItemId int
+		,@intWeightAdjItemId INT
 		,@dblCostAdjustment NUMERIC(18, 6)
-		,@intNoOfItem int
+		,@intNoOfItem INT
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -288,7 +288,7 @@ BEGIN TRY
 			IF ISNULL(@strERPVoucherNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
-				
+
 				UPDATE tblAPBillPreStage
 				SET strMessage = @strError
 					,intStatusId = 1
@@ -351,8 +351,7 @@ BEGIN TRY
 		SELECT BD.intBillDetailId
 		FROM tblAPBillDetail BD
 		WHERE BD.intBillId = @intBillId
-		AND intItemId <> @intWeightAdjItemId
-
+			AND intItemId <> @intWeightAdjItemId
 
 		SELECT @intBillDetailId = MIN(intBillDetailId)
 		FROM @tblAPBillDetail
@@ -452,11 +451,17 @@ BEGIN TRY
 			WHERE BD.intBillDetailId = @intBillDetailId
 
 			IF EXISTS (
-				SELECT *
-				FROM tblAPBillDetail
-				WHERE intBillId = @intBillId
-					AND intItemId = @intWeightAdjItemId
-			)
+					SELECT *
+					FROM tblAPBillDetail
+					WHERE intBillId = @intBillId
+						AND intItemId = @intWeightAdjItemId
+					)
+				AND EXISTS (
+					SELECT 1
+					FROM tblAPBillDetail
+					WHERE intBillDetailId = @intBillDetailId
+						AND intInventoryReceiptItemId IS NOT NULL
+					)
 			BEGIN
 				SELECT @dblCostAdjustment = NULL
 
@@ -476,10 +481,8 @@ BEGIN TRY
 					SELECT @intNoOfItem = 1
 
 				SELECT @dblDetailTotal = @dblDetailTotal + (@dblCostAdjustment / @intNoOfItem)
-
-				SELECT @dblDetailQuantity = @dblDetailTotal / @dblDetailCost
+					--SELECT @dblDetailQuantity = @dblDetailTotal / @dblDetailCost
 			END
-
 
 			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
 
@@ -545,7 +548,7 @@ BEGIN TRY
 				IF ISNULL(@strMapItemNo, '') <> ''
 					SELECT @strItemNo = @strMapItemNo
 			END
-			
+
 			IF ISNULL(@strItemNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Item No cannot be blank. '

@@ -25,7 +25,16 @@ BEGIN TRY
 		,@dblCalculatedQuantity DECIMAL(24, 10)
 		,@ysnSubstituteItem BIT
 		,@intMainItemId INT
-		,@strWorkOrderNo NVARCHAR(50)
+		,@strWorkOrderNo NVARCHAR(50) 
+		,@dblTareWeight DECIMAL(24, 10)
+		,@dblGrossWeight DECIMAL(24, 10)
+		,@dblNetWeight DECIMAL(24, 10)
+		,@intWeightItemUOMId int
+		,@dblWeightPerUnit DECIMAL(24, 10)
+		,@intActualItemUnitMeasureId int
+		,@strActualItemUnitMeasure nvarchar(50)
+		,@intQuantityUnitMeasureId int
+		,@strQuantityUnitMeasure nvarchar(50)
 
 	CREATE TABLE #tblMFConsumptionDetail (
 		intContainerId INT
@@ -227,8 +236,32 @@ BEGIN TRY
 			ELSE 0
 			END
 		,@strType = 'O'
+		,@dblTareWeight = dblTareWeight
+		,@dblGrossWeight = dblGrossWeight
+		,@dblNetWeight = dblNetWeight
+		,@intWeightItemUOMId = intWeightItemUOMId
+		,@dblWeightPerUnit = dblWeightPerUnit
 	FROM @tblMFProduceItem
 	WHERE ysnSelected = 1
+
+	IF @strType = 'O'
+	BEGIN
+		SELECT @intActualItemUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intWeightItemUOMId
+
+		SELECT @strActualItemUnitMeasure = strUnitMeasure
+		FROM tblICUnitMeasure
+		WHERE intUnitMeasureId = @intActualItemUnitMeasureId
+
+		SELECT @intQuantityUnitMeasureId = intUnitMeasureId
+		FROM tblICItemUOM
+		WHERE intItemUOMId = @intQuantityItemUOMId
+
+		SELECT @strQuantityUnitMeasure = strUnitMeasure
+		FROM tblICUnitMeasure
+		WHERE intUnitMeasureId = @intQuantityUnitMeasureId
+	END
 
 	IF @intItemId IS NULL
 	BEGIN
@@ -482,21 +515,91 @@ BEGIN TRY
 			,intActualItemId
 			,strActualItemNo
 			,strActualItemDescription
-			,dblPhysicalCount
-			,intPhysicalItemUOMId
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @dblQuantity
+					ELSE dblPhysicalCount
+					END
+				) AS dblPhysicalCount
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @intQuantityItemUOMId
+					ELSE intPhysicalItemUOMId
+					END
+				) AS intPhysicalItemUOMId
 			,intUnitUOMId
-			,strPhysicalItemUOM
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @strQuantityUnitMeasure
+					ELSE strPhysicalItemUOM
+					END
+				)strPhysicalItemUOM
 			,strOutputLotNumber
 			,strParentLotNumber
 			,intContainerId
 			,strContainerId
-			,dblTareWeight
-			,dblPhysicalCount * dblWeight AS dblGrossWeight
-			,dblPhysicalCount * dblWeight AS dblProduceQty
-			,intActualItemUOMId
-			,intActualItemUnitMeasureId
-			,strActualItemUnitMeasure
-			,dblWeight AS dblUnitQty
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @dblTareWeight
+					ELSE dblTareWeight
+					END
+				) dblTareWeight
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @dblGrossWeight
+					ELSE dblPhysicalCount * dblWeight
+					END
+				) AS dblGrossWeight
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @dblNetWeight
+					ELSE dblPhysicalCount * dblWeight
+					END
+				) AS dblProduceQty
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @intWeightItemUOMId
+					ELSE intActualItemUOMId
+					END
+				) intActualItemUOMId
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @intActualItemUnitMeasureId
+					ELSE intActualItemUnitMeasureId
+					END
+				) intActualItemUnitMeasureId
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @strActualItemUnitMeasure
+					ELSE strActualItemUnitMeasure
+					END
+				) strActualItemUnitMeasure
+			,(
+				CASE 
+					WHEN intActualItemId = @intItemId
+						AND @strType = 'O'
+						THEN @dblWeightPerUnit
+					ELSE dblWeight
+					END
+				) AS dblUnitQty
 			,strReferenceNo
 			,strComment
 			,intRowNo
@@ -659,7 +762,7 @@ BEGIN TRY
 			,L.strLotNumber strInputLotNumber
 			,L.dblQty dblInputLotQuantity
 			,UM.strUnitMeasure strInputLotUnitMeasure
-			,Convert(Bit,0) ysnEmptyOutSource
+			,Convert(BIT, 0) ysnEmptyOutSource
 			,GETDATE() AS dtmFeedTime
 			,NULL strReferenceNo
 			,GETDATE() dtmActualInputDateTime
