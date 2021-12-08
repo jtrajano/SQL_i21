@@ -139,7 +139,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 				   ,dblDefaultHours -- dblHoursToProcess test
 				   ,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountID)
 				   ,@ysnUseGLSplit
-				   ,CASE WHEN @strCalculationType = 'Tax as Normal' THEN 0 WHEN @strCalculationType = 'Tax as Supplemental' THEN 1 ELSE 2 END
+				   ,CASE WHEN @strTaxCalculation = 'Tax as Normal' THEN 0 WHEN @strTaxCalculation = 'Tax as Supplemental' THEN 1 ELSE 2 END
 				   ,'' --strW2Code for test only
 				   ,(SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = strDeductTimeOff)
 				   ,(SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = strAccrueTimeOff)
@@ -261,7 +261,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,dblDefaultHours				= @dblDefaultHours
 					,dblHoursToProcess				= @dblDefaultHours -- dblHoursToProcess test
 					,intAccountId					= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountID)
-					,intTaxCalculationType			= CASE WHEN @strCalculationType = 'Tax as Normal' THEN 0 WHEN @strCalculationType = 'Tax as Supplemental' THEN 1 ELSE 2 END
+					,intTaxCalculationType			= CASE WHEN @strTaxCalculation = 'Tax as Normal' THEN 0 WHEN @strTaxCalculation = 'Tax as Supplemental' THEN 1 ELSE 2 END
 					,strW2Code						= '' --strW2Code for test only
 					,intEmployeeTimeOffId			= (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strDeductTimeOff)
 					,intEmployeeAccrueTimeOffId		= (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strAccrueTimeOff)
