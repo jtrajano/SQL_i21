@@ -77,7 +77,7 @@ BEGIN
 
 
 	--finalizing data
-	SELECT 'E'+ premp_emp  AS premp_emp_code, * INTO prempmst_deductions_cv FROM prempmst_ded_rows WHERE (( premp_ded_code_col = 'premp_ded_code_1' and premp_ded_type_col = 'premp_ded_type_1' and premp_ded_active_col ='premp_ded_active_yn_1' and  premp_ded_calc_code_col = 'premp_ded_calc_code_1' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_1' and premp_ded_limit_col = 'premp_ded_limit_1')
+	SELECT premp_emp  AS premp_emp_code, * INTO prempmst_deductions_cv FROM prempmst_ded_rows WHERE (( premp_ded_code_col = 'premp_ded_code_1' and premp_ded_type_col = 'premp_ded_type_1' and premp_ded_active_col ='premp_ded_active_yn_1' and  premp_ded_calc_code_col = 'premp_ded_calc_code_1' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_1' and premp_ded_limit_col = 'premp_ded_limit_1')
 	OR ( premp_ded_code_col = 'premp_ded_code_2' and premp_ded_type_col = 'premp_ded_type_2' and premp_ded_active_col ='premp_ded_active_yn_2' and  premp_ded_calc_code_col = 'premp_ded_calc_code_2' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_2' and premp_ded_limit_col = 'premp_ded_limit_2')
 	OR ( premp_ded_code_col = 'premp_ded_code_3' and premp_ded_type_col = 'premp_ded_type_3' and premp_ded_active_col ='premp_ded_active_yn_3' and  premp_ded_calc_code_col = 'premp_ded_calc_code_3' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_3' and premp_ded_limit_col = 'premp_ded_limit_3')
 	OR ( premp_ded_code_col = 'premp_ded_code_4' and premp_ded_type_col = 'premp_ded_type_4' and premp_ded_active_col ='premp_ded_active_yn_4' and  premp_ded_calc_code_col = 'premp_ded_calc_code_4' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_4' and premp_ded_limit_col = 'premp_ded_limit_4')
