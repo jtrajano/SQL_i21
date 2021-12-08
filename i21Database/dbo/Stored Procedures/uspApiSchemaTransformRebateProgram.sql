@@ -1,4 +1,4 @@
-ALTER PROCEDURE uspApiSchemaTransformRebateProgram 
+CREATE PROCEDURE uspApiSchemaTransformRebateProgram 
 	@guiApiUniqueId UNIQUEIDENTIFIER,
 	@guiLogId UNIQUEIDENTIFIER
 AS
