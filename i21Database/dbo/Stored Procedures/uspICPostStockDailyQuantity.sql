@@ -40,7 +40,7 @@ BEGIN
 				,[dblValue] = SUM(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0))
 				,[dblValueRounded] = SUM(ROUND(dbo.fnMultiply(ISNULL(t.dblQty, 0), ISNULL(t.dblCost, 0)) + ISNULL(t.dblValue, 0), 2))
 			FROM 
-				tblICInventoryTransaction t 				
+				tblICInventoryTransaction t
 			GROUP BY
 				[intItemId] 
 				,[intItemLocationId] 
@@ -257,10 +257,12 @@ BEGIN
 	FROM 
 		tblICInventoryTransaction t 
 	WHERE
-		t.intInventoryTransactionId = @intInventoryTransactionId			
-		OR (
-			t.strBatchId = @strBatchId
-			AND t.strTransactionId = @strTransactionId 
+		(
+			t.intInventoryTransactionId = @intInventoryTransactionId			
+			OR (
+				t.strBatchId = @strBatchId
+				AND t.strTransactionId = @strTransactionId 
+			)
 		)
 		AND t.intItemUOMId IS NOT NULL 
 	GROUP BY
@@ -269,7 +271,7 @@ BEGIN
 		,[intItemUOMId] 
 		,[dtmDate] 
 
-	-- insert as zero record. 
+	-- insert a new record if it does not exists. 
 	INSERT INTO tblICInventoryStockAsOfDate 
 	(
 		[intItemId]
@@ -283,13 +285,26 @@ BEGIN
 		,s.intItemLocationId
 		,s.intItemUOMId
 		,s.dtmDate
-		,[dblQty] = 0 
+		,[dblQty] = ISNULL(carryOverStock.dblQty, 0)  
 	FROM 
 		tblICInventoryStockAsOfDate asOfDate RIGHT JOIN @stock s
 			ON asOfDate.[intItemId] = s.intItemId 
 			AND asOfDate.[intItemLocationId] = s.intItemLocationId 
 			AND asOfDate.[intItemUOMId] = s.intItemUOMId 
 			AND asOfDate.[dtmDate] = s.dtmDate 
+		OUTER APPLY (
+			SELECT TOP 1
+				t.dblQty
+			FROM 
+				tblICInventoryStockAsOfDate t
+			WHERE
+				t.intItemId = s.intItemId
+				AND t.intItemLocationId = s.intItemLocationId
+				AND t.intItemUOMId = s.intItemUOMId	
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(s.dtmDate AS FLOAT))
+			ORDER BY
+				t.intId DESC 
+		) carryOverStock
 	WHERE
 		asOfDate.intId IS NULL 
 		 
