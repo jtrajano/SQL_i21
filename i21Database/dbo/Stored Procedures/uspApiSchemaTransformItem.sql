@@ -3,7 +3,14 @@ CREATE PROCEDURE uspApiSchemaTransformItem
 	@guiLogId UNIQUEIDENTIFIER
 AS
 
-DECLARE @ysnAllowOverwrite BIT = 0
+DECLARE @ysnAllowOverwrite BIT
+
+SELECT @ysnAllowOverwrite = CAST(varPropertyValue AS BIT)
+FROM tblApiSchemaTransformProperty
+WHERE 
+guiApiUniqueId = @guiApiUniqueId
+AND
+strPropertyName = 'Overwrite'
 
 DECLARE @tblFilteredItem TABLE(
 	intKey INT NOT NULL,
@@ -12,12 +19,12 @@ DECLARE @tblFilteredItem TABLE(
 	strItemNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strShortName NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+	strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL,
 	strManufacturer NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strCommodity NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strBrand NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	strModelNo NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strCategory NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
 	ysnStockedItem BIT NULL,
 	ysnDyedFuel BIT NULL,
 	ysnMSDSRequired BIT NULL,
@@ -40,6 +47,8 @@ DECLARE @tblFilteredItem TABLE(
 	dblUserGroupFeePercentage NUMERIC(38, 20) NULL,
 	dblWgtTolerancePercentage NUMERIC(38, 20) NULL,
 	dblOverReceiveTolerancePercentage NUMERIC(38, 20) NULL,
+	strMaintenanceCalculationMethod NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	strWICCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	ysnLandedCost BIT NULL,
 	strLeadTime NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	ysnTaxable BIT NULL,
@@ -109,6 +118,8 @@ INSERT INTO @tblFilteredItem
 	dblUserGroupFeePercentage,
 	dblWgtTolerancePercentage,
 	dblOverReceiveTolerancePercentage,
+	strMaintenanceCalculationMethod,
+	strWICCode,
 	ysnLandedCost,
 	strLeadTime,
 	ysnTaxable,
@@ -177,6 +188,8 @@ SELECT
 	dblUserGroupFeePercentage,
 	dblWgtTolerancePercentage,
 	dblOverReceiveTolerancePercentage,
+	strMaintenanceCalculationMethod,
+	strWICCode,
 	ysnLandedCost,
 	strLeadTime,
 	ysnTaxable,
@@ -414,6 +427,8 @@ USING
 		dblUserGroupFee = FilteredItem.dblUserGroupFeePercentage,
 		dblWeightTolerance = FilteredItem.dblWgtTolerancePercentage,
 		dblOverReceiveTolerance = FilteredItem.dblOverReceiveTolerancePercentage,
+		strMaintenanceCalculationMethod = FilteredItem.strMaintenanceCalculationMethod,
+		strWICCode = FilteredItem.strWICCode,
 		ysnLandedCost = ISNULL(FilteredItem.ysnLandedCost, 0),
 		strLeadTime = FilteredItem.strLeadTime,
 		ysnTaxable = ISNULL(FilteredItem.ysnTaxable, 0),
@@ -529,6 +544,8 @@ THEN
 		dblUserGroupFee = SOURCE.dblUserGroupFee,
 		dblWeightTolerance = SOURCE.dblWeightTolerance,
 		dblOverReceiveTolerance = SOURCE.dblOverReceiveTolerance,
+		strMaintenanceCalculationMethod = SOURCE.strMaintenanceCalculationMethod,
+		strWICCode = SOURCE.strWICCode,
 		ysnLandedCost = SOURCE.ysnLandedCost,
 		strLeadTime = SOURCE.strLeadTime,
 		ysnTaxable = SOURCE.ysnTaxable,
@@ -597,6 +614,8 @@ WHEN NOT MATCHED THEN
 		dblUserGroupFee,
 		dblWeightTolerance,
 		dblOverReceiveTolerance,
+		strMaintenanceCalculationMethod,
+		strWICCode,
 		ysnLandedCost,
 		strLeadTime,
 		ysnTaxable,
@@ -667,6 +686,8 @@ WHEN NOT MATCHED THEN
 		dblUserGroupFee,
 		dblWeightTolerance,
 		dblOverReceiveTolerance,
+		strMaintenanceCalculationMethod,
+		strWICCode,
 		ysnLandedCost,
 		strLeadTime,
 		ysnTaxable,

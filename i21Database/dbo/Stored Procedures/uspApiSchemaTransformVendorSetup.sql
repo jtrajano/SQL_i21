@@ -18,7 +18,7 @@ strPropertyName = 'Overwrite'
 
 DECLARE @tblFilteredVendorSetup TABLE(
 	intKey INT NOT NULL,
-    guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
+	guiApiUniqueId UNIQUEIDENTIFIER NOT NULL,
     intRowNumber INT NULL,
 	strVendor NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
 	strExportFileType NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
@@ -40,7 +40,7 @@ DECLARE @tblFilteredVendorSetup TABLE(
 INSERT INTO @tblFilteredVendorSetup
 (
 	intKey,
-    guiApiUniqueId,
+	guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strExportFileType,
@@ -61,7 +61,7 @@ INSERT INTO @tblFilteredVendorSetup
 )
 SELECT 
 	intKey,
-    guiApiUniqueId,
+	guiApiUniqueId,
     intRowNumber,
 	strVendor,
 	strExportFileType,
@@ -235,7 +235,7 @@ DuplicateVendorSetup.strCustomer IS NOT NULL
 UNION
 SELECT -- Customer already exists
 	FilteredVendorSetup.strCustomer,
-	'Customer: ' + FilteredVendorSetup.strCustomer + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Customer: ' + FilteredVendorSetup.strCustomer + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	7
 FROM
@@ -258,6 +258,8 @@ INNER JOIN
 		Customer.intEntityId = CustomerXref.intEntityId
 		AND
 		VendorSetup.intVendorSetupId = CustomerXref.intVendorSetupId
+WHERE
+@ysnAllowOverwrite = 0
 UNION
 SELECT -- Customer Xref incomplete
 	CASE
@@ -331,7 +333,7 @@ DuplicateVendorSetup.strItemNo IS NOT NULL
 UNION
 SELECT  -- Item already exists
 	FilteredVendorSetup.strItemNo,
-	'Item: ' + FilteredVendorSetup.strItemNo + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Item: ' + FilteredVendorSetup.strItemNo + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	11
 FROM
@@ -354,6 +356,8 @@ INNER JOIN
 		Item.intItemId = ItemXref.intItemId
 		AND
 		VendorSetup.intVendorSetupId = ItemXref.intVendorSetupId
+WHERE 
+@ysnAllowOverwrite = 0
 UNION
 SELECT -- Item Xref incomplete
 	CASE
@@ -425,7 +429,7 @@ DuplicateVendorSetup.strUnitMeasure IS NOT NULL
 UNION
 SELECT  -- Unit of measure already exists
 	FilteredVendorSetup.strUnitMeasure,
-	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Unit of measure: ' + FilteredVendorSetup.strUnitMeasure + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	15
 FROM
@@ -448,6 +452,8 @@ INNER JOIN
 		UnitMeasure.intUnitMeasureId = UOMXref.intUnitMeasureId
 		AND
 		VendorSetup.intVendorSetupId = UOMXref.intVendorSetupId
+WHERE
+@ysnAllowOverwrite = 0
 UNION
 SELECT -- UOM Xref incomplete
 	CASE
@@ -519,7 +525,7 @@ DuplicateVendorSetup.strCategory IS NOT NULL
 UNION
 SELECT  -- Category already exists
 	FilteredVendorSetup.strCategory,
-	'Category: ' + FilteredVendorSetup.strCategory + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists.',
+	'Category: ' + FilteredVendorSetup.strCategory + ' on vendor: ' + FilteredVendorSetup.strVendor + ' already exists and overwrite is not enabled.',
 	FilteredVendorSetup.intRowNumber,
 	19
 FROM
@@ -726,7 +732,7 @@ WHERE LogVendorSetup.intLogType BETWEEN 1 AND 24
 USING
 (
 	SELECT
-		guiApiUniqueId = MAX(FilteredVendorSetup.guiApiUniqueId),
+		guiApiUniqueId = @guiApiUniqueId,
 		intEntityId = MAX(Vendor.intEntityId),
 		strExportFileType = MAX(FilteredVendorSetup.strExportFileType),
 		strExportFilePath = MAX(FilteredVendorSetup.strExportFilePath),
@@ -786,7 +792,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intEntityId = Customer.intEntityId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
 		strVendorCustomer = ISNULL(FilteredVendorSetup.strVendorCustomer, Customer.strName)
@@ -848,7 +854,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intItemId = Item.intItemId,
 		intVendorId = Vendor.intEntityId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
@@ -914,7 +920,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
 		intUnitMeasureId = UnitMeasure.intUnitMeasureId,
 		strVendorUOM = ISNULL(FilteredVendorSetup.strVendorUnitMeasure, UnitMeasure.strUnitMeasure),
@@ -981,7 +987,7 @@ WHEN NOT MATCHED THEN
 USING
 (
 	SELECT
-		guiApiUniqueId = FilteredVendorSetup.guiApiUniqueId,
+		guiApiUniqueId = @guiApiUniqueId,
 		intCategoryId = Category.intCategoryId,
 		intVendorId = Vendor.intEntityId,
 		intVendorSetupId = VendorSetup.intVendorSetupId,
