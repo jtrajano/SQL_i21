@@ -114,12 +114,12 @@ BEGIN
 				,@strDeduction						= ded.premp_ded_data
 				FROM prempmst_deductions_cv ded
 	
-			SELECT @EntityId = intEntityId FROM tblPREmployee WHERE strEmployeeId = @intEntityEmployeeId
-			IF (@EntityId IS NOT NULL)
+			SELECT @EntityId = COUNT(1) FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId
+			IF (@EntityId != 0)
 			BEGIN
-				IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strDeduction)
+				IF EXISTS (SELECT TOP 1 * FROM tblPRTypeDeduction WHERE strDeduction = @strDeduction)
 				BEGIN
-					IF NOT EXISTS (SELECT * FROM tblPREmployeeDeduction where intEntityEmployeeId = @EntityId 
+					IF NOT EXISTS (SELECT * FROM tblPREmployeeDeduction where intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId) 
 									AND intTypeDeductionId =  (SELECT TOP 1 intTypeDeductionId FROM tblPRTypeDeduction WHERE strDeduction = @strDeduction))
 					BEGIN
 						INSERT INTO [dbo].[tblPREmployeeDeduction]
@@ -137,7 +137,7 @@ BEGIN
 						   ,[ysnDefault])
 						VALUES
 						(
-							 @EntityId
+							 (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = @strEmployeeId) 
 							,@intTypeDeductionId
 							,@strDeductFrom
 							,@strCalculationType

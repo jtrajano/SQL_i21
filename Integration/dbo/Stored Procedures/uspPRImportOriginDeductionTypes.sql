@@ -51,7 +51,7 @@ BEGIN
 			,intAccountId
 			,intExpenseAccountId
 			,strDeductFrom
-			,strCalculationType
+			--,strCalculationType
 			,dblAmount
 			,dblLimit
 			,dblPaycheckMax
@@ -69,7 +69,7 @@ BEGIN
 			,intAccountId
 			,intExpenseAccountId
 			,strDeductFrom
-			,strCalculationType
+			--,strCalculationType
 			,dblAmount
 			,dblLimit
 			,dblPaycheckMax
