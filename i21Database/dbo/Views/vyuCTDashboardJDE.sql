@@ -2,7 +2,10 @@
 
 AS
 
-WITH lgLoad AS (
+WITH containers as (
+	select intLoadId,strContainerNumber from tblLGLoadContainer
+),
+lgLoad AS (
 	SELECT LD.intPContractDetailId
 		, LO.strLoadNumber
 		, LO.strOriginPort
@@ -15,7 +18,7 @@ WITH lgLoad AS (
 		, strLoadShippingLine = SL.strName
 		, LO.intShipmentType
 		, strShipmentType = (case when LO.intShipmentType = 2 then 'Shipping Instructions' else 'Shipment' end) COLLATE Latin1_General_CI_AS
-		, strContainerNumber = NULL
+		, strContainerNumber = con.strContainerNumber
 		, LO.dtmStuffingDate
 		, LO.dtmETAPOL
 		, LO.dtmETAPOD
@@ -37,6 +40,16 @@ WITH lgLoad AS (
 	LEFT JOIN tblLGReasonCode EA ON EA.intReasonCodeId = LO.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode ES ON ES.intReasonCodeId = LO.intETSPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode PD ON PD.intReasonCodeId = LO.intETAPODReasonCodeId
+	LEFT JOIN (
+		SELECT DISTINCT c1.intLoadId
+			, strContainerNumber = SUBSTRING((SELECT ', ' + c2.strContainerNumber  AS [text()]
+											FROM containers c2
+											WHERE c2.intLoadId = c1.intLoadId
+											ORDER BY c2.intLoadId
+											FOR XML PATH ('')), 3, 1000)
+
+		FROM containers c1
+		) con ON con.intLoadId = LO.intLoadId
 	WHERE (LO.intShipmentType = 2 or LO.intShipmentType = 1)
 		AND LO.intShipmentStatus <> 10
 	GROUP BY LD.intPContractDetailId
@@ -64,7 +77,8 @@ WITH lgLoad AS (
 		, EA.strReasonCodeDescription
 		, ES.strReasonCodeDescription
 		, PD.strReasonCodeDescription
-		, LO.ysnDocumentsReceived)
+		, LO.ysnDocumentsReceived
+		, con.strContainerNumber)
 , cer AS (
 	SELECT cr.intContractDetailId
 		, cr.intContractCertificationId
