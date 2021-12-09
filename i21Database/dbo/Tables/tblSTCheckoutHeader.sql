@@ -71,6 +71,7 @@
 	-- 1 = Currently being Posted
 	-- 2 = Currently being Un-Posted
 	[intCheckoutCurrentProcess]	INT NOT NULL DEFAULT(0), 
+    [dtmCheckoutProcessDate] DATETIME NULL,
 
     [intConcurrencyId] INT NULL,
     CONSTRAINT [PK_tblSTCheckoutHeader] PRIMARY KEY CLUSTERED ([intCheckoutId] ASC),
