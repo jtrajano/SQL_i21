@@ -85,13 +85,16 @@ BEGIN
 	OR ( premp_ded_code_col = 'premp_ded_code_6' and premp_ded_type_col = 'premp_ded_type_6' and premp_ded_active_col ='premp_ded_active_yn_6' and  premp_ded_calc_code_col = 'premp_ded_calc_code_6' and premp_ded_amt_pct_col = 'premp_ded_amt_pct_6' and premp_ded_limit_col = 'premp_ded_limit_6')
 	)
 
-	select @intRecordCount = COUNT(1) from prempmst_deductions_cv tded
-	left join tblPRTypeDeduction mded
-	on tded.premp_ded_data collate Latin1_General_CI_AS = mded.strDeduction
-	left join tblPREmployee emp
-	on emp.strEmployeeId = tded.premp_emp_code collate Latin1_General_CI_AS
-	WHERE mded.strDeduction is not null
-	AND emp.strEmployeeId is not null
+	SELECT @intRecordCount = COUNT(*) from prempmst_deductions_cv tded
+	INNER JOIN tblPRTypeDeduction mded
+	ON tded.premp_ded_data COLLATE Latin1_General_CI_AS = mded.strDeduction
+	INNER JOIN tblPREmployee emp
+	ON emp.strEmployeeId = tded.premp_emp_code COLLATE Latin1_General_CI_AS
+	WHERE NOT EXISTS(
+		SELECT 1 FROM tblPREmployeeDeduction 
+				WHERE intEntityEmployeeId = emp.intEntityId
+				AND intTypeDeductionId = mded.intTypeDeductionId
+	)
 
 	IF (@ysnDoImport = 1)
 	BEGIN
