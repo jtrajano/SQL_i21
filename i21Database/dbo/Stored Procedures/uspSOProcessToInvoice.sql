@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOProcessToInvoice]
-	@SalesOrderId			INT,
-	@UserId					INT,
-	@NewInvoiceId			INT = NULL OUTPUT,
-	@dtmDateProcessed		DATETIME = NULL	
+	@SalesOrderId		INT,
+	@UserId				INT,
+	@NewInvoiceId		INT = NULL OUTPUT,
+	@dtmDateProcessed	DATETIME = NULL, 
+	@intTicketId		INT = NULL
 AS
 BEGIN
 
@@ -120,7 +121,7 @@ ELSE
 									, @dtmDateProcessed		= @dtmDateProcessed
 
 		--UPDATE OVERRAGE CONTRACTS
-		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SOD.intContractDetailId AND SOD.dblQtyOrdered > CTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)
+		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SOD.intContractDetailId AND SOD.dblQtyOrdered > CTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId) AND ISNULL(@intTicketId, 0) = 0
 			BEGIN
 				EXEC dbo.uspARUpdateOverageContracts @intInvoiceId = @NewInvoiceId
 												   , @intScaleUOMId = NULL
