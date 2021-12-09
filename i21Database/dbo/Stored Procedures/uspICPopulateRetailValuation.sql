@@ -17,6 +17,23 @@ BEGIN
 	TRUNCATE TABLE [tblICRetailValuation]
 END 
 
+-- Check if there is a Location Restriction for the user. 
+DECLARE @hasPermissionSetup AS BIT = 0 
+
+IF EXISTS (
+	SELECT TOP 1 * 
+	FROM 
+		tblSMUserSecurity su INNER JOIN tblSMUserRole r 
+			ON r.intUserRoleID = su.intUserRoleID
+		INNER JOIN tblSMUserSecurityCompanyLocationRolePermission cr 
+			ON cr.intEntityUserSecurityId = su.intEntityId
+	WHERE
+		su.intEntityId = @intUserId
+)
+BEGIN
+	SET @hasPermissionSetup = 1
+END 
+
 INSERT INTO tblICRetailValuation (
 		intCategoryId
 		,intCategoryLocationId
@@ -61,9 +78,14 @@ FROM 	tblICCategory category LEFT JOIN tblICCategoryLocation categoryLocation
 			ON category.intCategoryId = categoryLocation.intCategoryId
 		LEFT JOIN tblSMCompanyLocation companyLocation
 			ON categoryLocation.intLocationId = companyLocation.intCompanyLocationId
-		INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = categoryLocation.intLocationId
+		LEFT JOIN vyuICUserCompanyLocations permission 
+			ON permission.intCompanyLocationId = categoryLocation.intLocationId
+			AND permission.intEntityId = @intUserId
 WHERE	category.ysnRetailValuation = 1
-	AND permission.intEntityId = @intUserId
+		AND (
+			permission.intEntityId IS NOT NULL 
+			OR @hasPermissionSetup = 0 
+		)
 
 -- Populate the beginning retail 
 UPDATE	rv
