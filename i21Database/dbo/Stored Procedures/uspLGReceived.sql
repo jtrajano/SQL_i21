@@ -45,6 +45,7 @@ SET ANSI_WARNINGS OFF
 		SELECT @intItemId = NULL
 				,@intSourceId = NULL
 				,@intContainerId = NULL
+				,@dblQtyDifference = NULL
 
 		SELECT @intItemId = intItemId
 				,@intSourceId = intSourceId
