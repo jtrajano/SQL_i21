@@ -24,6 +24,7 @@
 	,@MobileBillingShiftNo			NVARCHAR(50)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@BOLNumber						NVARCHAR(50)	= ''
+	,@PaymentInfo					NVARCHAR(50)	= ''
 	,@Comment						NVARCHAR(MAX)	= ''
 	,@FooterComment					NVARCHAR(MAX)	= ''
 	,@ShipToLocationId				INT				= NULL
@@ -443,6 +444,7 @@ BEGIN TRY
 		,[strMobileBillingShiftNo]
 		,[strPONumber]
 		,[strBOLNumber]
+		,[strPaymentInfo]
 		,[strComments]
 		,[strFooterComments]
 		,[intShipToLocationId]
@@ -523,6 +525,7 @@ BEGIN TRY
 		,[strMobileBillingShiftNo]		= @MobileBillingShiftNo
 		,[strPONumber]					= @PONumber
 		,[strBOLNumber]					= @BOLNumber
+		,[strPaymentInfo]				= @PaymentInfo
 		,[strComments]					= CASE WHEN ISNULL(@Comment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Header', NULL, 0) ELSE @Comment END
 		,[strFooterComments]			= CASE WHEN ISNULL(@FooterComment, '') = '' THEN dbo.fnARGetDefaultComment(@CompanyLocationId, C.[intEntityId], @TransactionType, @Type, 'Footer', NULL, 0) ELSE @FooterComment END
 		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))

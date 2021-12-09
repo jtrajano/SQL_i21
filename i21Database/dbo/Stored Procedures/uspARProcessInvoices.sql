@@ -191,6 +191,7 @@ DECLARE  @Id									INT
 		,@MobileBillingShiftNo					NVARCHAR(50)
 		,@PONumber								NVARCHAR(25)
 		,@BOLNumber								NVARCHAR(50)
+		,@PaymentInfo							NVARCHAR(50)
 		,@Comment								NVARCHAR(MAX)
 		,@FooterComment							NVARCHAR(MAX)
 		,@ShipToLocationId						INT
@@ -390,6 +391,7 @@ BEGIN
 		,@MobileBillingShiftNo			= [strMobileBillingShiftNo]
 		,@PONumber						= [strPONumber]
 		,@BOLNumber						= [strBOLNumber]
+		,@PaymentInfo					= [strPaymentInfo]
 		,@Comment						= [strComments]
 		,@FooterComment					= [strFooterComments]
 		,@ShipToLocationId				= [intShipToLocationId]
@@ -656,6 +658,7 @@ BEGIN
 			,@MobileBillingShiftNo			= @MobileBillingShiftNo
 			,@PONumber						= @PONumber
 			,@BOLNumber						= @BOLNumber
+			,@PaymentInfo					= @PaymentInfo
 			,@Comment						= @Comment
 			,@FooterComment					= @FooterComment
 			,@ShipToLocationId				= @ShipToLocationId
@@ -1413,6 +1416,7 @@ BEGIN TRY
 			,@MobileBillingShiftNo			= [strMobileBillingShiftNo]
 			,@PONumber						= [strPONumber]
 			,@BOLNumber						= [strBOLNumber]
+			,@PaymentInfo					= [strPaymentInfo]
 			,@Comment						= [strComments]
 			,@FooterComment					= [strFooterComments]
 			,@ShipToLocationId				= [intShipToLocationId]
@@ -1547,6 +1551,7 @@ BEGIN TRY
 			,[strMobileBillingShiftNo]	= @MobileBillingShiftNo
 			,[strPONumber]				= @PONumber
 			,[strBOLNumber]				= @BOLNumber
+			,[strPaymentInfo]			= @PaymentInfo
 			,[strComments]				= @Comment
 			,[intShipToLocationId]		= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
 			,[strShipToLocationName]	= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
