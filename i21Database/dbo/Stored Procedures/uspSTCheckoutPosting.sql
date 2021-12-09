@@ -6685,11 +6685,6 @@ ExitWithCommit:
 
 ExitWithRollback:
 
-	UPDATE tblSTCheckoutHeader
-	SET intCheckoutCurrentProcess = 0,
-		dtmCheckoutProcessDate = NULL
-	WHERE intCheckoutId = @intCheckoutId  
-
     -- Rollback Transaction here
 	IF @@TRANCOUNT > 0
 		BEGIN
