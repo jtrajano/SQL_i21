@@ -135,13 +135,16 @@ BEGIN
 		)
 
 
-	select @intRecordCount = COUNT(*) from prempmst_earnings_cv mern
-	left join tblPRTypeEarning tern
-	on mern.premp_ern_code collate Latin1_General_CI_AS = tern.strEarning
-	left join tblPREmployee emp
-	on emp.strEmployeeId = mern.premp_emp_code collate Latin1_General_CI_AS
-	WHERE tern.strEarning is not null
-	AND emp.intEntityId is not null
+	SELECT @intRecordCount = COUNT(*) FROM prempmst_earnings_cv mern
+	INNER JOIN tblPRTypeEarning tern
+	ON mern.premp_ern_code COLLATE Latin1_General_CI_AS = tern.strEarning
+	INNER JOIN tblPREmployee emp
+	ON emp.strEmployeeId = mern.premp_emp_code COLLATE Latin1_General_CI_AS
+	WHERE NOT EXISTS(
+		SELECT 1 FROM tblPREmployeeEarning
+				WHERE intEntityEmployeeId = emp.intEntityId
+				AND intTypeEarningId = tern.intTypeEarningId
+	)
 
 	IF (@ysnDoImport = 1)
 	BEGIN
