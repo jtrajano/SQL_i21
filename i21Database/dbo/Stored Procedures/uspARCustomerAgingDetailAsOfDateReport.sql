@@ -406,7 +406,7 @@ FROM
 	  , dblAvailableCredit		= 0
 	  , dblPrepayments			= 0
 	  , I.strType
-	  , strRecordNumber			= NULL	
+	  , strRecordNumber			= NULL
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 WHERE I.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')
 
@@ -433,7 +433,8 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 	) PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+AND  ISNULL(CR.dblRefundTotal, 0) = 0
+AND I.dblAmountDue <> 0
 
 UNION ALL
 
@@ -453,8 +454,8 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 WHERE I.strTransactionType = 'Customer Prepayment'
-AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-
+AND  ISNULL(CR.dblRefundTotal, 0) = 0 
+						      
 UNION ALL      
       
 SELECT DISTINCT
