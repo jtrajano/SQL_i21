@@ -97,6 +97,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 		FROM tblPREmployeeEarning 
 		WHERE intEntityEmployeeId = @intEntityNo
 		  AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+	
 
 		IF @EmployeeEntityNo IS NULL
 			BEGIN
@@ -404,7 +405,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 			, strLogLevel = 'Info'
 			, strStatus = 'Success'
 			, intRowNo = SE.intRowNumber
-			, strMessage = 'The employee earnings has been successfully imported.'
+			, strMessage = 'The employee earnings has been successfully imported to i21.'
 		FROM tblApiSchemaEmployeeEarnings SE
 		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
 		   WHERE SE.guiApiUniqueId = @guiApiUniqueId
