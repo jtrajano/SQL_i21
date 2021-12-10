@@ -133,7 +133,7 @@ BEGIN TRY
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
 												THEN NULL
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
-												THEN MIN(TL.strTransaction)
+												THEN NULL--MIN(TL.strTransaction)
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location'
 												THEN NULL
 											END)
@@ -200,9 +200,9 @@ BEGIN TRY
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) = MIN(DH.intCompanyLocationId)
 												THEN NULL
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Customer' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
-												THEN MIN(TL.strTransaction)
+												THEN NULL --MIN(TL.strTransaction)
 											WHEN MIN(TR.strOrigin) = 'Location' AND MIN(DH.strDestination) = 'Location' AND MIN(TR.intCompanyLocationId) != MIN(DH.intCompanyLocationId)
-												THEN MIN(TL.strTransaction)
+												THEN NULL
 											END)
 		,[intItemId]                = MIN(TR.intItemId)
 		,[intLotId]                 = NULL
