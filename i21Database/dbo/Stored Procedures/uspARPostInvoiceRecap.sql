@@ -63,8 +63,8 @@ BEGIN TRY
 	IF @Post = 1
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]  
     	
-	IF @Post = 1
-	EXEC dbo.uspARGenerateEntriesForAccrual  
+	--IF @Post = 1
+	--EXEC dbo.uspARGenerateEntriesForAccrual  
 
     EXEC [dbo].[uspARGenerateGLEntries]
          @Post     = @Post
