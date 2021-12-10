@@ -399,6 +399,8 @@
     <Build Include="dbo\Views\vyuLGDispatchOrderDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTSaveContractSamplePremium.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSamplePremiumTestResult.sql" />
+    <Build Include="dbo\Tables\tblRKM2MCustomerExposure.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MCustomerExposureSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
