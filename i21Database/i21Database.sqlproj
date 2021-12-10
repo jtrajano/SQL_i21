@@ -1495,7 +1495,7 @@
     <Build Include="dbo\Stored Procedures\uspSCGetScaleTicketByNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspSCScanAndSaveSealNumber.sql" />
     <Build Include="dbo\Views\vyuCFAccountSearchCustomer.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionItemCostPotentialIssue.sql"/>
     <Build Include="dbo\Functions\fnICGetItemLocationIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemUOMIdFromDuplicateItem.sql" />
     <Build Include="dbo\Functions\fnICGetItemLocation.sql" />
@@ -9092,20 +9092,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
     <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryTransaction.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEmployee.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEmployeeDeduction.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEmployeeDirectDeposit.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEmployeeEarnings.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEmployeeTaxes.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaEmployeeTimeOff.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportEmployee.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDeductions.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeDirectDeposit.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />
-    <Build Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
