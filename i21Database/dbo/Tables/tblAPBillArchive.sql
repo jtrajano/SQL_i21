@@ -88,7 +88,9 @@
 	[dtmDateDeleted] DATETIME NULL,
 	[dtmExportedDate] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 
-	[dtmOrigDateDeleted] DATETIME NULL
+	[dtmOrigDateDeleted] DATETIME NULL,
+	[ysnOverrideCashFlow] BIT NULL DEFAULT 0,
+	[dtmCashFlowDate] DATETIME NULL
     CONSTRAINT [PK_dbo.tblAPBillArchive] PRIMARY KEY CLUSTERED ([intBillId] ASC),
 	CONSTRAINT [UK_dbo.tblAPBillArchive_strBillId] UNIQUE (strBillId)
 );

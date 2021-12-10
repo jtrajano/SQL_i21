@@ -131,6 +131,8 @@ USING
 		,A.dtmExportedDate
 		,A.dtmDateCreated
 		,CASE WHEN GETDATE() < A.dtmDate THEN A.dtmDate ELSE GETDATE() END AS dtmOrigDateDeleted
+		,ysnOverrideCashFlow
+		,dtmCashFlowDate
 	FROM tblAPBill A
 	OUTER APPLY (
 		SELECT TOP 1 MAX(P.dtmDatePaid) AS dtmDateDeleted
