@@ -200,7 +200,7 @@ CREATE TABLE #TempMBILInvoiceItem (
 		,[intTaxGroupId] = NULL
 		,[intTermId] = InvoiceItem.intTermId
 		,[intTruckDriverId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
-		--,[strMobileBillingShiftNo] = InvoiceItem.intShiftNumber
+		,[strPaymentInfo]
 		,[ysnRecap] = @ysnRecap
 		
 		--Detail																																															
