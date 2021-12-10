@@ -25,6 +25,7 @@ SET NOCOUNT ON
    tblGLDetail T0    
    LEFT JOIN tblGLAccount T1    
    ON T0.intAccountId = T1.intAccountId    
+   WHERE T0.ysnIsUnposted = 0
    GROUP BY T0.intAccountId,T0.dtmDate,T0.strCode,T0.intCurrencyId,T1.intCurrencyID     
   )T2  
   GROUP BY T2.intAccountId,T2.dtmDate,T2.strCode,T2.intCurrencyID          
