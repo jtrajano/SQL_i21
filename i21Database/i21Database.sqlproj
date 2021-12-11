@@ -402,6 +402,10 @@
     <Build Include="dbo\Tables\tblRKM2MCustomerExposure.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MCustomerExposureSummary.sql" />
     <Build Include="dbo\Functions\fnAPCashFlowTransactions.sql" />
+    <Build Include="dbo\Tables\tblQMLotSampleImport.sql" />
+    <Build Include="dbo\Tables\tblQMLotSampleImportArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateImportFailureEmailMessage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessLotSampleImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
