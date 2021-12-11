@@ -9212,6 +9212,8 @@
     <Build Include="dbo\Stored Procedures\uspARLogPerformanceRuntime.sql" />
     <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
+    <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

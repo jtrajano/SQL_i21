@@ -2,35 +2,75 @@
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
-SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
 
-DECLARE @INVOICETABLE 		AS dbo.InvoiceReportTable
-DECLARE @MCPINVOICES  		AS dbo.InvoiceReportTable
-DECLARE @STANDARDINVOICES	AS dbo.InvoiceReportTable
+IF(OBJECT_ID('tempdb..#DELIMITEDROWS') IS NOT NULL)
+BEGIN
+    DROP TABLE #DELIMITEDROWS
+END
+IF(OBJECT_ID('tempdb..#INVOICETABLE') IS NOT NULL)
+BEGIN
+    DROP TABLE #INVOICETABLE
+END
+IF(OBJECT_ID('tempdb..#MCPINVOICES') IS NOT NULL)
+BEGIN
+    DROP TABLE #MCPINVOICES
+END
+IF(OBJECT_ID('tempdb..#STANDARDINVOICES') IS NOT NULL)
+BEGIN
+    DROP TABLE #STANDARDINVOICES
+END
+
+CREATE TABLE #INVOICETABLE
+(
+	 [intInvoiceId]		INT	NULL
+	,[intEntityUserId]	INT	NULL
+	,[strRequestId]		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strInvoiceFormat]	NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[strType]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnStretchLogo]	BIT NULL
+);
+CREATE TABLE #MCPINVOICES
+(
+	 [intInvoiceId]		INT	NULL
+	,[intEntityUserId]	INT	NULL
+	,[strRequestId]		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strInvoiceFormat]	NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[strType]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnStretchLogo]	BIT NULL
+);
+CREATE TABLE #STANDARDINVOICES
+(
+	 [intInvoiceId]		INT	NULL
+	,[intEntityUserId]	INT	NULL
+	,[strRequestId]		NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS	NULL
+	,[strInvoiceFormat]	NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[strType]			NVARCHAR(200)	COLLATE Latin1_General_CI_AS	NULL
+	,[ysnStretchLogo]	BIT NULL
+);
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
 
-		SELECT * FROM @INVOICETABLE
+		SELECT * FROM #INVOICETABLE
 	END
 
 -- Declare the variables.
-DECLARE  @dtmDateTo						AS DATETIME
-		,@dtmDateFrom					AS DATETIME
-		,@strInvoiceIds					AS NVARCHAR(MAX)
-		,@strTransactionType			AS NVARCHAR(MAX)
-		,@strRequestId					AS NVARCHAR(MAX)
-		,@intInvoiceIdTo				AS INT
-		,@intInvoiceIdFrom				AS INT
-		,@xmlDocumentId					AS INT
-		,@intEntityUserId				AS INT
-		
+DECLARE  @dtmDateTo				AS DATETIME
+		,@dtmDateFrom			AS DATETIME
+		,@strInvoiceIds			AS NVARCHAR(MAX)
+		,@strTransactionType	AS NVARCHAR(MAX)
+		,@strRequestId			AS NVARCHAR(MAX)
+		,@intInvoiceIdTo		AS INT
+		,@intInvoiceIdFrom		AS INT
+		,@xmlDocumentId			AS INT
+		,@intEntityUserId		AS INT
+		,@strMainQuery			AS NVARCHAR(MAX)	
+			
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
 	 [id]			INT IDENTITY(1,1)
@@ -155,7 +195,8 @@ SET @strServiceChargeFormat = ISNULL(@strServiceChargeFormat, 'Standard')
 SET @ysnStretchLogo = ISNULL(@ysnStretchLogo, 0)
 
 --GET INVOICES WITH FILTERS
-INSERT INTO @INVOICETABLE (
+SET @strMainQuery = CAST('' AS NVARCHAR(MAX)) + 
+'INSERT INTO #INVOICETABLE (
 	intInvoiceId
   , intEntityUserId
   , strRequestId
@@ -164,27 +205,27 @@ INSERT INTO @INVOICETABLE (
   , strInvoiceFormat  
 )
 SELECT intInvoiceId			= INVOICE.intInvoiceId
-	 , intEntityUserId		= @intEntityUserId
-	 , strRequestId			= @strRequestId
+	 , intEntityUserId		= ' + CAST(@intEntityUserId AS NVARCHAR(10)) + '
+	 , strRequestId			= ''' + @strRequestId + '''
 	 , strType				= INVOICE.strType
-	 , ysnStretchLogo		= @ysnStretchLogo
-	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN ('Software', 'Standard') THEN
+	 , ysnStretchLogo		= ' + CAST(@ysnStretchLogo AS NVARCHAR(2)) + '
+	 , strInvoiceFormat		= CASE WHEN INVOICE.strType IN (''Software'', ''Standard'') THEN
 	 									CASE WHEN ISNULL(INVENTORY.intInvoiceId, 0) <> 0 THEN 
 												CASE WHEN ISNULL(TICKET.intInvoiceId, 0) <> 0 
-													 THEN @strGrainInvoiceFormat
-													 ELSE @strInvoiceReportName
+													 THEN ''' + @strGrainInvoiceFormat + '''
+													 ELSE ''' + @strInvoiceReportName + '''
 												END
 											 ELSE
-												CASE WHEN INVOICE.strTransactionType IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')
-													 THEN @strOtherChargeInvoiceReport
-													 ELSE @strOtherChargeCreditMemoReport
+												CASE WHEN INVOICE.strTransactionType IN (''Invoice'', ''Debit Memo'', ''Cash'', ''Proforma Invoice'')
+													 THEN ''' + @strOtherChargeInvoiceReport + '''
+													 ELSE ''' + @strOtherChargeCreditMemoReport + '''
 												END
 										END
-								   WHEN INVOICE.strType IN ('Service Charge') THEN @strServiceChargeFormat
-								   WHEN INVOICE.strType IN ('Tank Delivery') THEN @strTankDeliveryInvoiceFormat
-								   WHEN INVOICE.strType IN ('Transport Delivery') THEN @strTransportsInvoiceFormat
-								   WHEN INVOICE.strType IN ('Meter Billing') THEN @strMeterBillingInvoiceFormat
-								   ELSE @strInvoiceReportName
+								   WHEN INVOICE.strType IN (''Service Charge'') THEN ''' + @strServiceChargeFormat + '''
+								   WHEN INVOICE.strType IN (''Tank Delivery'') THEN ''' + @strTankDeliveryInvoiceFormat + '''
+								   WHEN INVOICE.strType IN (''Transport Delivery'') THEN ''' + @strTransportsInvoiceFormat + '''
+								   WHEN INVOICE.strType IN (''Meter Billing'') THEN ''' + @strMeterBillingInvoiceFormat + '''
+								   ELSE ''' + @strInvoiceReportName + '''
 							   END								
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 LEFT JOIN (
@@ -198,33 +239,43 @@ LEFT JOIN (
 	FROM dbo.tblARInvoiceDetail DETAIL
 	INNER JOIN tblICItem ITEM ON DETAIL.intItemId = ITEM.intItemId
 	WHERE DETAIL.intItemId IS NOT NULL
-	  AND ITEM.strType NOT IN ('Comment', 'Other Charge', 'Non-Inventory')
+	  AND ITEM.strType NOT IN (''Comment'', ''Other Charge'', ''Non-Inventory'')
 	GROUP BY DETAIL.intInvoiceId
 ) INVENTORY ON INVOICE.intInvoiceId = INVENTORY.intInvoiceId
-WHERE INVOICE.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
-  AND INVOICE.intInvoiceId BETWEEN @intInvoiceIdFrom AND @intInvoiceIdTo
-  AND ((@strTransactionType IS NOT NULL AND INVOICE.strTransactionType = @strTransactionType) OR @strTransactionType IS NULL)
-ORDER BY INVOICE.intInvoiceId
+WHERE INVOICE.dtmDate BETWEEN ' + ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''' AND ''' + CONVERT(NVARCHAR(50),@dtmDateTo, 110) + '''
+  AND INVOICE.intInvoiceId BETWEEN ' + CAST(@intInvoiceIdFrom AS NVARCHAR(100)) + ' AND ' + CAST(@intInvoiceIdTo AS NVARCHAR(100)) + ''
+
+IF @strTransactionType IS NOT NULL
+  SET @strMainQuery += ' AND INVOICE.strTransactionType = ' + @strTransactionType
+
+SET @strMainQuery += ' ORDER BY INVOICE.intInvoiceId'
+
+EXEC sp_executesql @strMainQuery
 
 IF ISNULL(@strInvoiceIds, '') <> ''
 	BEGIN
+		SELECT DISTINCT intInvoiceId = intID 
+		INTO #DELIMITEDROWS
+		FROM fnGetRowsFromDelimitedValues(@strInvoiceIds)
+
 		DELETE INVOICE 
-		FROM @INVOICETABLE INVOICE
-		WHERE INVOICE.intInvoiceId NOT IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@strInvoiceIds))
+		FROM #INVOICETABLE INVOICE
+		LEFT JOIN #DELIMITEDROWS DR ON INVOICE.intInvoiceId = DR.intInvoiceId
+		WHERE ISNULL(DR.intInvoiceId, 0) = 0
 	END
 
-UPDATE @INVOICETABLE SET strInvoiceFormat = 'Format 3 - Swink' WHERE strInvoiceFormat = 'Format 1 - Swink'
+UPDATE #INVOICETABLE SET strInvoiceFormat = 'Format 3 - Swink' WHERE strInvoiceFormat = 'Format 1 - Swink'
 
-INSERT INTO @MCPINVOICES
-SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
+INSERT INTO #MCPINVOICES
+SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
 
-IF EXISTS (SELECT TOP 1 NULL FROM @MCPINVOICES)
-	EXEC dbo.[uspARInvoiceMCPReport] @MCPINVOICES, @intEntityUserId, @strRequestId
+IF EXISTS (SELECT TOP 1 NULL FROM #MCPINVOICES)
+	EXEC dbo.[uspARInvoiceMCPReport] @intEntityUserId, @strRequestId
 
-INSERT INTO @STANDARDINVOICES
-SELECT * FROM @INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+INSERT INTO #STANDARDINVOICES
+SELECT * FROM #INVOICETABLE WHERE strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
 
-IF EXISTS (SELECT TOP 1 NULL FROM @STANDARDINVOICES)
-	EXEC dbo.[uspARInvoiceReport] @STANDARDINVOICES, @intEntityUserId, @strRequestId
+IF EXISTS (SELECT TOP 1 NULL FROM #STANDARDINVOICES)
+	EXEC dbo.[uspARInvoiceReport] @intEntityUserId, @strRequestId
 
-SELECT * FROM @INVOICETABLE
+SELECT * FROM #INVOICETABLE
