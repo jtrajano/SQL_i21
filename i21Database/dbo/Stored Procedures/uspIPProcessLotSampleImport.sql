@@ -13,12 +13,12 @@ BEGIN TRY
 
 	--SET ANSI_WARNINGS OFF
 	DECLARE @ErrMsg NVARCHAR(MAX)
-		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@intUserId INT
 		,@dtmDateCreated DATETIME = GETDATE()
-		,@strError NVARCHAR(MAX)
+		,@strPreviousErrMsg NVARCHAR(MAX)
 	DECLARE @intLotSampleImportId INT
 		,@strSampleNumber NVARCHAR(30)
+		,@strSampleRefNo NVARCHAR(30)
 		,@dtmSampleReceivedDate DATETIME
 		,@strLotNumber NVARCHAR(50)
 		,@strStorageUnit NVARCHAR(50)
@@ -47,7 +47,35 @@ BEGIN TRY
 	DECLARE @intValidDate INT
 		,@strSampleImportDateTimeFormat NVARCHAR(50)
 		,@intConvertYear INT
-		,@strNewSampleNumber NVARCHAR(30)
+		,@intShiftId INT
+		,@dtmBusinessDate DATETIME
+		,@dtmCurrentDate DATETIME = GETDATE()
+	DECLARE @intLotId INT
+		,@intItemId INT
+		,@intCategoryId INT
+		,@intLocationId INT
+		,@intSampleTypeId INT
+		,@intSampleStatusId INT
+		,@intRepresentingUOMId INT
+		,@intStorageLocationId INT
+		,@intCompanyLocationSubLocationId INT
+		,@intProductId INT
+		,@intLotStatusId INT
+		,@strParentLotNumber NVARCHAR(50)
+		,@intProductTypeId INT
+		,@intProductValueId INT
+		,@intContractHeaderId INT
+		,@intEntityId INT
+		,@intContractDetailId INT
+		,@intItemContractId INT
+		,@intCountryID INT
+		,@strCountry NVARCHAR(100)
+		,@intInventoryReceiptId INT
+		,@strContainerNumber NVARCHAR(100)
+		,@intLoadId INT
+		,@intLoadDetailId INT
+		,@intLoadContainerId INT
+		,@intLoadDetailContainerLinkId INT
 
 	IF ISNULL(@strSampleTypeName, '') = ''
 		SELECT @strSampleTypeName = 'Quality Sample'
@@ -111,6 +139,7 @@ BEGIN TRY
 	BEGIN
 		BEGIN TRY
 			SELECT @strSampleNumber = NULL
+				,@strSampleRefNo = NULL
 				,@dtmSampleReceivedDate = NULL
 				,@strLotNumber = NULL
 				,@strStorageUnit = NULL
@@ -137,9 +166,39 @@ BEGIN TRY
 				,@strProperty19 = NULL
 				,@strProperty20 = NULL
 
-			SELECT @strNewSampleNumber = NULL
+			SELECT @intShiftId = NULL
+				,@dtmBusinessDate = NULL
+				,@dtmCurrentDate = NULL
+				,@strPreviousErrMsg = ''
 
-			SELECT @strSampleNumber = strSampleNumber
+			SELECT @intLotId = NULL
+				,@intItemId = NULL
+				,@intCategoryId = NULL
+				,@intLocationId = NULL
+				,@intSampleTypeId = NULL
+				,@intSampleStatusId = NULL
+				,@intRepresentingUOMId = NULL
+				,@intStorageLocationId = NULL
+				,@intCompanyLocationSubLocationId = NULL
+				,@intProductId = NULL
+				,@intLotStatusId = NULL
+				,@strParentLotNumber = NULL
+				,@intProductTypeId = NULL
+				,@intProductValueId = NULL
+				,@intContractHeaderId = NULL
+				,@intEntityId = NULL
+				,@intContractDetailId = NULL
+				,@intItemContractId = NULL
+				,@intCountryID = NULL
+				,@strCountry = NULL
+				,@intInventoryReceiptId = NULL
+				,@strContainerNumber = NULL
+				,@intLoadId = NULL
+				,@intLoadDetailId = NULL
+				,@intLoadContainerId = NULL
+				,@intLoadDetailContainerLinkId = NULL
+
+			SELECT @strSampleRefNo = strSampleNumber
 				,@dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
 				,@strLotNumber = strLotNumber
 				,@strStorageUnit = strStorageUnit
@@ -168,37 +227,212 @@ BEGIN TRY
 			FROM tblQMLotSampleImport
 			WHERE intLotSampleImportId = @intLotSampleImportId
 
-			--SELECT @intItemId = intItemId
-			--FROM dbo.tblICItem WITH (NOLOCK)
-			--WHERE strItemNo = @strItemNo
-			--IF @intCompanyLocationId IS NULL
-			--BEGIN
-			--	SELECT @strError = 'Company Location not found.'
-			--	RAISERROR (
-			--			@strError
-			--			,16
-			--			,1
-			--			)
-			--END
-			--IF ISNULL(@strItemNo, '') = ''
-			--BEGIN
-			--	SELECT @strError = 'Item No cannot be blank.'
-			--	RAISERROR (
-			--			@strError
-			--			,16
-			--			,1
-			--			)
-			--END
-			--IF ISNULL(@strOrigin, '') <> ''
-			--	AND @intCountryID IS NULL
-			--BEGIN
-			--	SELECT @strError = 'Origin not found.'
-			--	RAISERROR (
-			--			@strError
-			--			,16
-			--			,1
-			--			)
-			--END
+			-- Sample No
+			IF ISNULL(@strSampleRefNo, '') = ''
+				SELECT @strPreviousErrMsg += 'Invalid Sample No. '
+			ELSE
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblQMSample WITH (NOLOCK)
+						WHERE strSampleRefNo = @strSampleRefNo
+						)
+					SELECT @strPreviousErrMsg += 'Sample No already exists. '
+			END
+
+			-- Sample Date
+			IF ISNULL(@dtmSampleReceivedDate, '') = ''
+				SELECT @strPreviousErrMsg += 'Invalid Sample Date. '
+			ELSE
+			BEGIN
+				IF ISDATE(@dtmSampleReceivedDate) = 0
+					SELECT @strPreviousErrMsg += 'Invalid Sample Date. '
+				ELSE
+				BEGIN
+					IF CONVERT(DATE, @dtmSampleReceivedDate) > CONVERT(DATE, GETDATE())
+						SELECT @strPreviousErrMsg += 'Sample Date cannot be Future Date. '
+				END
+			END
+
+			-- Sample Type
+			SELECT @intSampleTypeId = intSampleTypeId
+			FROM tblQMSampleType WITH (NOLOCK)
+			WHERE strSampleTypeName = @strSampleTypeName
+
+			IF @intSampleTypeId IS NULL
+				SELECT @strPreviousErrMsg += 'Invalid Sample Type. '
+
+			-- Quantity
+			IF ISNULL(@dblRepresentingQty, 0) = 0
+				SELECT @strPreviousErrMsg += 'Invalid Quantity. '
+			ELSE
+			BEGIN
+				IF ISNUMERIC(@dblRepresentingQty) = 0
+					SELECT @strPreviousErrMsg += 'Invalid Quantity. '
+				ELSE
+				BEGIN
+					IF @dblRepresentingQty <= 0
+						SELECT @strPreviousErrMsg += 'Quantity should be greater than 0. '
+				END
+			END
+
+			-- Sample Status
+			SELECT @intSampleStatusId = intSampleStatusId
+			FROM tblQMSampleStatus WITH (NOLOCK)
+			WHERE strStatus = @strSampleStatus
+
+			IF @intSampleStatusId IS NULL
+				SELECT @strPreviousErrMsg += 'Invalid Sample Status. '
+
+			-- Quantity UOM
+			SELECT @intRepresentingUOMId = intUnitMeasureId
+			FROM tblICUnitMeasure WITH (NOLOCK)
+			WHERE strUnitMeasure = @strQuantityUOM
+
+			IF @intRepresentingUOMId IS NULL
+				SELECT @strPreviousErrMsg += 'Invalid Quantity UOM. '
+			ELSE
+			BEGIN
+				IF ISNULL(@intItemId, 0) > 0
+				BEGIN
+					IF NOT EXISTS (
+							SELECT 1
+							FROM tblICItemUOM IUOM WITH (NOLOCK)
+							JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON UOM.intUnitMeasureId = IUOM.intUnitMeasureId
+							WHERE IUOM.intItemId = @intItemId
+								AND UOM.strUnitMeasure = @strQuantityUOM
+							)
+						SELECT @strPreviousErrMsg += 'Quantity UOM is not available in the configured Item UOM. '
+				END
+			END
+
+			-- Storage Unit
+			IF ISNULL(@strStorageUnit, '') <> ''
+			BEGIN
+				SELECT @intStorageLocationId = intStorageLocationId
+				FROM tblICStorageLocation WITH (NOLOCK)
+				WHERE strName = @strStorageUnit
+
+				IF @intStorageLocationId IS NULL
+					SELECT @strPreviousErrMsg += 'Invalid Storage Unit. '
+			END
+
+			-- Lot Number
+			IF ISNULL(@strLotNumber, '') = ''
+				SELECT @strPreviousErrMsg += 'Invalid Lot Number. '
+			ELSE
+			BEGIN
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblICLot WITH (NOLOCK)
+						WHERE strLotNumber = @strLotNumber
+							AND dblQty > 0
+						)
+					SELECT @strPreviousErrMsg += 'Invalid Lot Number. '
+				ELSE
+				BEGIN
+					SELECT TOP 1 @intLotId = L.intLotId
+						,@intLocationId = L.intLocationId
+						,@intItemId = L.intItemId
+						,@intCategoryId = I.intCategoryId
+						,@intCompanyLocationSubLocationId = L.intSubLocationId
+						,@intStorageLocationId = L.intStorageLocationId
+						,@intLotStatusId = L.intLotStatusId
+						,@strParentLotNumber = PL.strParentLotNumber
+						,@intProductTypeId = 6
+						,@intProductValueId = L.intLotId
+					FROM tblICLot L WITH (NOLOCK)
+					JOIN tblICParentLot PL WITH (NOLOCK) ON PL.intParentLotId = L.intParentLotId
+					JOIN tblICItem I WITH (NOLOCK) ON I.intItemId = L.intItemId
+					WHERE L.strLotNumber = @strLotNumber
+						AND L.dblQty > 0
+					ORDER BY L.intLotId DESC
+
+					SELECT @intContractHeaderId = CH.intContractHeaderId
+						,@intEntityId = CH.intEntityId
+						,@intContractDetailId = CD.intContractDetailId
+						,@intItemContractId = CD.intItemContractId
+						,@intCountryID = ISNULL(CA.intCountryID, IC.intCountryId)
+						,@strCountry = ISNULL(CA.strDescription, CG.strCountry)
+						,@intInventoryReceiptId = RI.intInventoryReceiptId
+						,@strContainerNumber = LC.strContainerNumber
+						,@intLoadId = LD.intLoadId
+						,@intLoadDetailId = LD.intLoadDetailId
+						,@intLoadContainerId = LC.intLoadContainerId
+						,@intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
+					FROM tblICInventoryReceiptItemLot RIL
+					JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+						AND RIL.intLotId = @intLotId
+					JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intContractDetailId
+					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					JOIN tblICItem IM ON IM.intItemId = CD.intItemId
+					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
+					LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+					LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
+					LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
+					LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+					LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+
+					IF @intContractDetailId IS NULL
+						SELECT @strPreviousErrMsg += 'Contract is not available. '
+				END
+			END
+
+			-- Template
+			IF (
+					ISNULL(@intItemId, 0) > 0
+					AND ISNULL(@intSampleTypeId, 0) > 0
+					)
+			BEGIN
+				SELECT @intProductId = (
+						SELECT P.intProductId
+						FROM tblQMProduct AS P
+						JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+						WHERE P.intProductTypeId = 2 -- Item
+							AND P.intProductValueId = @intItemId
+							AND PC.intSampleTypeId = @intSampleTypeId
+							AND P.ysnActive = 1
+						)
+
+				IF (
+						@intProductId IS NULL
+						AND ISNULL(@intCategoryId, 0) > 0
+						)
+					SELECT @intProductId = (
+							SELECT P.intProductId
+							FROM tblQMProduct AS P
+							JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+							WHERE P.intProductTypeId = 1 -- Item Category
+								AND P.intProductValueId = @intCategoryId
+								AND PC.intSampleTypeId = @intSampleTypeId
+								AND P.ysnActive = 1
+							)
+
+				IF @intProductId IS NULL
+					SELECT @strPreviousErrMsg += 'Quality Template is not configured for the Item and Sample Type. '
+			END
+
+			-- Business Date and Shift Id
+			SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
+
+			SELECT @intShiftId = intShiftId
+			FROM tblMFShift
+			WHERE intLocationId = @intLocationId
+				AND @dtmCurrentDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
+					AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
+
+			-- Property Validation - Pending
+			-- After all validation, insert / update the error
+			IF ISNULL(@strPreviousErrMsg, '') <> ''
+			BEGIN
+				RAISERROR (
+						@strPreviousErrMsg
+						,16
+						,1
+						)
+			END
+
 			BEGIN TRAN
 
 			--New Sample Creation
@@ -211,11 +445,11 @@ BEGIN TRY
 			--	,@intBlendRequirementId = NULL
 			--	,@intPatternCode = 62
 			--	,@ysnProposed = 0
-			--	,@strPatternString = @strNewSampleNumber OUTPUT
+			--	,@strPatternString = @strSampleNumber OUTPUT
 			IF EXISTS (
 					SELECT 1
 					FROM tblQMSample
-					WHERE strSampleNumber = @strNewSampleNumber
+					WHERE strSampleNumber = @strSampleNumber
 					)
 			BEGIN
 				RAISERROR (
@@ -225,6 +459,7 @@ BEGIN TRY
 						)
 			END
 
+			-- Sample Insertion - Pending
 			MOVE_TO_ARCHIVE:
 
 			INSERT INTO tblQMLotSampleImportArchive (
@@ -305,7 +540,6 @@ BEGIN TRY
 				ROLLBACK TRANSACTION
 
 			SET @ErrMsg = ERROR_MESSAGE()
-			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
 			INSERT INTO tblQMLotSampleImportArchive (
 				intLotSampleImportId
@@ -381,13 +615,6 @@ BEGIN TRY
 		FROM tblQMLotSampleImport
 		WHERE intLotSampleImportId > @intLotSampleImportId
 	END
-
-	IF ISNULL(@strFinalErrMsg, '') <> ''
-		RAISERROR (
-				@strFinalErrMsg
-				,16
-				,1
-				)
 END TRY
 
 BEGIN CATCH
