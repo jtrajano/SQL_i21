@@ -542,6 +542,8 @@ BEGIN TRY
 		, intOverrideFacilityId
 		, strOverrideFacility = BVR.strBankValuationRule
 		, CD.strBankReferenceNo
+		, CD.dblQualityPremium
+		, CD.dblOptionalityPremium
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
