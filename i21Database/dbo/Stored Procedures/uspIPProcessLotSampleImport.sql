@@ -11,11 +11,10 @@ BEGIN TRY
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
 
-	--SET ANSI_WARNINGS OFF
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@intUserId INT
-		,@dtmDateCreated DATETIME = GETDATE()
 		,@strPreviousErrMsg NVARCHAR(MAX)
+		,@strSuccessMsg NVARCHAR(MAX)
 	DECLARE @intLotSampleImportId INT
 		,@strSampleNumber NVARCHAR(30)
 		,@strSampleRefNo NVARCHAR(30)
@@ -76,6 +75,11 @@ BEGIN TRY
 		,@intLoadDetailId INT
 		,@intLoadContainerId INT
 		,@intLoadDetailContainerLinkId INT
+		,@intSampleId INT
+	DECLARE @Component TABLE (
+		intPropertyId INT
+		,strPropertyValue NVARCHAR(MAX)
+		)
 
 	IF ISNULL(@strSampleTypeName, '') = ''
 		SELECT @strSampleTypeName = 'Quality Sample'
@@ -168,8 +172,8 @@ BEGIN TRY
 
 			SELECT @intShiftId = NULL
 				,@dtmBusinessDate = NULL
-				,@dtmCurrentDate = NULL
 				,@strPreviousErrMsg = ''
+				,@strSuccessMsg = 'Success'
 
 			SELECT @intLotId = NULL
 				,@intItemId = NULL
@@ -197,6 +201,7 @@ BEGIN TRY
 				,@intLoadDetailId = NULL
 				,@intLoadContainerId = NULL
 				,@intLoadDetailContainerLinkId = NULL
+				,@intSampleId = NULL
 
 			SELECT @strSampleRefNo = strSampleNumber
 				,@dtmSampleReceivedDate = CONVERT(DATETIME, dtmSampleReceivedDate, @intConvertYear)
@@ -227,7 +232,9 @@ BEGIN TRY
 			FROM tblQMLotSampleImport
 			WHERE intLotSampleImportId = @intLotSampleImportId
 
-			-- Sample No
+			BEGIN TRAN
+
+			-- Sample Ref No
 			IF ISNULL(@strSampleRefNo, '') = ''
 				SELECT @strPreviousErrMsg += 'Invalid Sample No. '
 			ELSE
@@ -237,7 +244,11 @@ BEGIN TRY
 						FROM tblQMSample WITH (NOLOCK)
 						WHERE strSampleRefNo = @strSampleRefNo
 						)
-					SELECT @strPreviousErrMsg += 'Sample No already exists. '
+				BEGIN
+					SELECT @strSuccessMsg = 'Sample already processed. '
+
+					GOTO MOVE_TO_ARCHIVE
+				END
 			END
 
 			-- Sample Date
@@ -360,19 +371,19 @@ BEGIN TRY
 						,@intLoadDetailId = LD.intLoadDetailId
 						,@intLoadContainerId = LC.intLoadContainerId
 						,@intLoadDetailContainerLinkId = LDCL.intLoadDetailContainerLinkId
-					FROM tblICInventoryReceiptItemLot RIL
-					JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+					FROM tblICInventoryReceiptItemLot RIL WITH (NOLOCK)
+					JOIN tblICInventoryReceiptItem RI WITH (NOLOCK) ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
 						AND RIL.intLotId = @intLotId
-					JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
-					JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intContractDetailId
-					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					JOIN tblICItem IM ON IM.intItemId = CD.intItemId
-					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
-					LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
-					LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
-					LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = RI.intContainerId
-					LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
-					LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+					JOIN tblICInventoryReceipt R WITH (NOLOCK) ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+					JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = RI.intContractDetailId
+					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+					JOIN tblICItem IM WITH (NOLOCK) ON IM.intItemId = CD.intItemId
+					LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
+					LEFT JOIN tblICItemContract IC WITH (NOLOCK) ON IC.intItemContractId = CD.intItemContractId
+					LEFT JOIN tblSMCountry CG WITH (NOLOCK) ON CG.intCountryID = IC.intCountryId
+					LEFT JOIN tblLGLoadContainer LC WITH (NOLOCK) ON LC.intLoadContainerId = RI.intContainerId
+					LEFT JOIN tblLGLoadDetailContainerLink LDCL WITH (NOLOCK) ON LDCL.intLoadContainerId = LC.intLoadContainerId
+					LEFT JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadDetailId = LDCL.intLoadDetailId
 
 					IF @intContractDetailId IS NULL
 						SELECT @strPreviousErrMsg += 'Contract is not available. '
@@ -387,8 +398,8 @@ BEGIN TRY
 			BEGIN
 				SELECT @intProductId = (
 						SELECT P.intProductId
-						FROM tblQMProduct AS P
-						JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+						FROM tblQMProduct AS P WITH (NOLOCK)
+						JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
 						WHERE P.intProductTypeId = 2 -- Item
 							AND P.intProductValueId = @intItemId
 							AND PC.intSampleTypeId = @intSampleTypeId
@@ -401,8 +412,8 @@ BEGIN TRY
 						)
 					SELECT @intProductId = (
 							SELECT P.intProductId
-							FROM tblQMProduct AS P
-							JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+							FROM tblQMProduct AS P WITH (NOLOCK)
+							JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
 							WHERE P.intProductTypeId = 1 -- Item Category
 								AND P.intProductValueId = @intCategoryId
 								AND PC.intSampleTypeId = @intSampleTypeId
@@ -417,12 +428,45 @@ BEGIN TRY
 			SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate, @intLocationId)
 
 			SELECT @intShiftId = intShiftId
-			FROM tblMFShift
+			FROM tblMFShift WITH (NOLOCK)
 			WHERE intLocationId = @intLocationId
 				AND @dtmCurrentDate BETWEEN @dtmBusinessDate + dtmShiftStartTime + intStartOffset
 					AND @dtmBusinessDate + dtmShiftEndTime + intEndOffset
 
-			-- Property Validation - Pending
+			DELETE
+			FROM @Component
+
+			INSERT INTO @Component
+			SELECT M.intPropertyId
+				,ActualValue AS strPropertyValue
+			FROM tblQMLotSampleImport
+			UNPIVOT(ActualValue FOR strComponent IN (
+						strProperty1
+						,strProperty2
+						,strProperty3
+						,strProperty4
+						,strProperty5
+						,strProperty6
+						,strProperty7
+						,strProperty8
+						,strProperty9
+						,strProperty10
+						,strProperty11
+						,strProperty12
+						,strProperty13
+						,strProperty14
+						,strProperty15
+						,strProperty16
+						,strProperty17
+						,strProperty18
+						,strProperty19
+						,strProperty20
+						)) unpvt
+			JOIN tblQMComponentMap M ON M.strComponent = REPLACE(unpvt.strComponent, 'strProperty', 'Component') COLLATE Latin1_General_CI_AS
+				AND unpvt.intLotSampleImportId = @intLotSampleImportId
+				AND M.intPropertyId IS NOT NULL
+			JOIN tblQMProperty P ON P.intPropertyId = M.intPropertyId
+
 			-- After all validation, insert / update the error
 			IF ISNULL(@strPreviousErrMsg, '') <> ''
 			BEGIN
@@ -433,22 +477,21 @@ BEGIN TRY
 						)
 			END
 
-			BEGIN TRAN
-
 			--New Sample Creation
-			--EXEC uspMFGeneratePatternId @intCategoryId = NULL
-			--	,@intItemId = NULL
-			--	,@intManufacturingId = NULL
-			--	,@intSubLocationId = NULL
-			--	,@intLocationId = @intLocationId
-			--	,@intOrderTypeId = NULL
-			--	,@intBlendRequirementId = NULL
-			--	,@intPatternCode = 62
-			--	,@ysnProposed = 0
-			--	,@strPatternString = @strSampleNumber OUTPUT
+			EXEC uspMFGeneratePatternId @intCategoryId = NULL
+				,@intItemId = NULL
+				,@intManufacturingId = NULL
+				,@intSubLocationId = NULL
+				,@intLocationId = @intLocationId
+				,@intOrderTypeId = NULL
+				,@intBlendRequirementId = NULL
+				,@intPatternCode = 62
+				,@ysnProposed = 0
+				,@strPatternString = @strSampleNumber OUTPUT
+
 			IF EXISTS (
 					SELECT 1
-					FROM tblQMSample
+					FROM tblQMSample WITH (NOLOCK)
 					WHERE strSampleNumber = @strSampleNumber
 					)
 			BEGIN
@@ -459,7 +502,250 @@ BEGIN TRY
 						)
 			END
 
-			-- Sample Insertion - Pending
+			IF @intSampleId IS NULL
+			BEGIN
+				INSERT INTO tblQMSample (
+					intConcurrencyId
+					,intSampleTypeId
+					,strSampleNumber
+					,strSampleRefNo
+					,intProductTypeId
+					,intProductValueId
+					,intSampleStatusId
+					,intItemId
+					,intItemContractId
+					,intContractDetailId
+					,intCountryID
+					,ysnIsContractCompleted
+					,intLotStatusId
+					,intEntityId
+					,strLotNumber
+					,dtmSampleReceivedDate
+					,dtmTestedOn
+					,intTestedById
+					,dblRepresentingQty
+					,intRepresentingUOMId
+					,dtmTestingStartDate
+					,dtmTestingEndDate
+					,dtmSamplingEndDate
+					,strContainerNumber
+					,intCompanyLocationSubLocationId
+					,strCountry
+					,intLoadContainerId
+					,intLoadDetailContainerLinkId
+					,intLoadId
+					,intLoadDetailId
+					,dtmBusinessDate
+					,intShiftId
+					,intLocationId
+					,intInventoryReceiptId
+					,strComment
+					,intStorageLocationId
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+					)
+				SELECT 1
+					,@intSampleTypeId
+					,@strSampleNumber
+					,@strSampleRefNo
+					,@intProductTypeId
+					,@intProductValueId
+					,@intSampleStatusId
+					,@intItemId
+					,@intItemContractId
+					,@intContractDetailId
+					,@intCountryID
+					,0
+					,@intLotStatusId
+					,@intEntityId
+					,@strLotNumber
+					,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
+					,@dtmCurrentDate
+					,@intUserId
+					,@dblRepresentingQty
+					,@intRepresentingUOMId
+					,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
+					,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
+					,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmSampleReceivedDate)
+					,@strContainerNumber
+					,@intCompanyLocationSubLocationId
+					,@strCountry
+					,@intLoadContainerId
+					,@intLoadDetailContainerLinkId
+					,@intLoadId
+					,@intLoadDetailId
+					,@dtmBusinessDate
+					,@intShiftId
+					,@intLocationId
+					,@intInventoryReceiptId
+					,@strComment
+					,@intStorageLocationId
+					,@intUserId
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+
+				SELECT @intSampleId = SCOPE_IDENTITY()
+
+				INSERT INTO tblQMSampleDetail (
+					intConcurrencyId
+					,intSampleId
+					,intAttributeId
+					,strAttributeValue
+					,intListItemId
+					,ysnIsMandatory
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+					)
+				SELECT 1
+					,@intSampleId
+					,A.intAttributeId
+					,ISNULL(A.strAttributeValue, '') AS strAttributeValue
+					,A.intListItemId
+					,ST.ysnIsMandatory
+					,@intUserId
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+				FROM tblQMSampleTypeDetail ST WITH (NOLOCK)
+				JOIN tblQMAttribute A WITH (NOLOCK) ON A.intAttributeId = ST.intAttributeId
+				WHERE ST.intSampleTypeId = @intSampleTypeId
+
+				INSERT INTO tblQMTestResult (
+					intConcurrencyId
+					,intSampleId
+					,intProductId
+					,intProductTypeId
+					,intProductValueId
+					,intTestId
+					,intPropertyId
+					,strPropertyValue
+					,dtmCreateDate
+					,strResult
+					,ysnFinal
+					,intSequenceNo
+					,dtmValidFrom
+					,dtmValidTo
+					,strPropertyRangeText
+					,dblMinValue
+					,dblMaxValue
+					,dblLowValue
+					,dblHighValue
+					,intUnitMeasureId
+					,strFormulaParser
+					,dblCrdrPrice
+					,dblCrdrQty
+					,intProductPropertyValidityPeriodId
+					,intPropertyValidityPeriodId
+					,intControlPointId
+					,intParentPropertyId
+					,intRepNo
+					,strFormula
+					,intListItemId
+					,strIsMandatory
+					,dtmPropertyValueCreated
+					,intCreatedUserId
+					,dtmCreated
+					,intLastModifiedUserId
+					,dtmLastModified
+					)
+				SELECT DISTINCT 1
+					,@intSampleId
+					,@intProductId
+					,@intProductTypeId
+					,@intProductValueId
+					,PP.intTestId
+					,PP.intPropertyId
+					,''
+					,@dtmCurrentDate
+					,''
+					,0
+					,PP.intSequenceNo
+					,PPV.dtmValidFrom
+					,PPV.dtmValidTo
+					,PPV.strPropertyRangeText
+					,PPV.dblMinValue
+					,PPV.dblMaxValue
+					,PPV.dblLowValue
+					,PPV.dblHighValue
+					,PPV.intUnitMeasureId
+					,PP.strFormulaParser
+					,NULL
+					,NULL
+					,PPV.intProductPropertyValidityPeriodId
+					,NULL
+					,PC.intControlPointId
+					,NULL
+					,0
+					,PP.strFormulaField
+					,NULL
+					,PP.strIsMandatory
+					,NULL
+					,@intUserId
+					,@dtmCurrentDate
+					,@intUserId
+					,@dtmCurrentDate
+				FROM tblQMProduct AS PRD WITH (NOLOCK)
+				JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = PRD.intProductId
+				JOIN tblQMProductProperty AS PP WITH (NOLOCK) ON PP.intProductId = PRD.intProductId
+				JOIN tblQMProductTest AS PT WITH (NOLOCK) ON PT.intProductId = PP.intProductId
+					AND PT.intProductId = PRD.intProductId
+				JOIN tblQMTest AS T WITH (NOLOCK) ON T.intTestId = PP.intTestId
+					AND T.intTestId = PT.intTestId
+				JOIN tblQMTestProperty AS TP WITH (NOLOCK) ON TP.intPropertyId = PP.intPropertyId
+					AND TP.intTestId = PP.intTestId
+					AND TP.intTestId = T.intTestId
+					AND TP.intTestId = PT.intTestId
+				JOIN tblQMProperty AS PRT WITH (NOLOCK) ON PRT.intPropertyId = PP.intPropertyId
+					AND PRT.intPropertyId = TP.intPropertyId
+				JOIN tblQMProductPropertyValidityPeriod AS PPV WITH (NOLOCK) ON PPV.intProductPropertyId = PP.intProductPropertyId
+				WHERE PRD.intProductId = @intProductId
+					AND PC.intSampleTypeId = @intSampleTypeId
+					AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
+						AND DATEPART(dy, PPV.dtmValidTo)
+				ORDER BY PP.intSequenceNo
+			END
+
+			-- Update Property Value for only the available properties which is having value in the import file
+			UPDATE TR
+			SET TR.strPropertyValue = C.strPropertyValue
+				,TR.dtmPropertyValueCreated = (
+					CASE 
+						WHEN ISNULL(C.strPropertyValue, '') <> ''
+							THEN GETDATE()
+						ELSE NULL
+						END
+					)
+			FROM @Component C
+			JOIN tblQMTestResult TR ON TR.intPropertyId = C.intPropertyId
+				AND TR.intSampleId = @intSampleId
+
+			-- Setting result for the properties
+			UPDATE tblQMTestResult
+			SET strResult = dbo.fnQMGetPropertyTestResult(TR.intTestResultId)
+			FROM tblQMTestResult TR
+			WHERE TR.intSampleId = @intSampleId
+				AND ISNULL(TR.strResult, '') = ''
+
+			-- Audit Log
+			IF (@intSampleId > 0)
+			BEGIN
+				DECLARE @StrDescription AS NVARCHAR(MAX) = 'Created from sample import : ' + @strSampleRefNo
+
+				EXEC uspSMAuditLog @keyValue = @intSampleId
+					,@screenName = 'Quality.view.QualitySample'
+					,@entityId = @intUserId
+					,@actionType = 'Created (from Import)'
+					,@actionIcon = 'small-new-plus'
+					,@changeDescription = @StrDescription
+					,@fromValue = ''
+					,@toValue = @strSampleNumber
+			END
+
 			MOVE_TO_ARCHIVE:
 
 			INSERT INTO tblQMLotSampleImportArchive (
@@ -523,7 +809,7 @@ BEGIN TRY
 				,strProperty19
 				,strProperty20
 				,0
-				,'Success'
+				,@strSuccessMsg
 			FROM tblQMLotSampleImport
 			WHERE intLotSampleImportId = @intLotSampleImportId
 
