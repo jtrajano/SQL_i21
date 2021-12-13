@@ -81,6 +81,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @strFileName2 = @strFileName
 					SELECT @strFileName = Replace(@strFileName, '.pdf', '')
+					SELECT @newAttachmentId=NULL
 					EXEC [uspSMCreateAttachmentFromFile] @transactionId = @intTransactionId -- the intTransactionId
 						,@fileName = @strFileName -- file name
 						,@fileExtension = 'pdf' -- extension
@@ -93,7 +94,8 @@ BEGIN TRY
 
 					SELECT @newAttachmentId
 						,@message
-					IF Exists(Select *from tblSMAttachment Where strName=@strFileName2)
+
+					IF @newAttachmentId is not null and Exists(Select *from tblSMAttachment Where strName=@strFileName2 AND intTransactionId=@intTransactionId)
 					BEGIN
 						UPDATE tblIPBillStage
 						SET intDocAttached = 1

@@ -588,15 +588,27 @@ BEGIN TRY
 				END
 
 				-- Arrival Sample (Container) check
-				IF @strError <> ''
+				IF @strError <> '' 
 				BEGIN
 					SELECT @intSampleStatusId = NULL
 						,@strError = ''
 
-					SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
-					FROM tblQMSample S
-					WHERE S.strContainerNumber = @strContainerNumber
-					ORDER BY S.intSampleId DESC
+					IF @strContainerNumber IS NULL
+						OR @strContainerNumber = ''
+					BEGIN
+						SELECT @strContainerNumber = strContainerNo
+						FROM tblICInventoryReceiptItemLot
+						WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+					END
+					
+					IF IsNULL(@strContainerNumber,'') <> ''
+					BEGIN
+						SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
+						FROM tblQMSample S
+						JOIN tblQMSampleType ST on ST.intSampleTypeId =S.intSampleTypeId and ST.intControlPointId =5
+						WHERE S.strContainerNumber = @strContainerNumber
+						ORDER BY S.intSampleId DESC
+					End
 
 					--SELECT TOP 1 @intSampleStatusId = S.intSampleStatusId
 					--FROM tblQMSample S

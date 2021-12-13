@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
+﻿ CREATE PROCEDURE [dbo].[uspARPopulateItemsForCosting]
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  

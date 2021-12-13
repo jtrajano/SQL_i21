@@ -1898,6 +1898,49 @@ BEGIN TRY
 		END
 	END
 
+	--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
+	BEGIN
+
+		--- COntract
+		INSERT INTO tblSCTicketDirectBasisContract(
+			intTicketId
+			,intContractDetailId
+			,ysnProcessed
+		)
+		SELECT 
+			A.intTicketId
+			,A.intContractDetailId
+			,ysnProcessed = 0
+		FROM tblSCTicketContractUsed A
+		INNER JOIN tblCTContractDetail B
+			ON A.intContractDetailId = B.intContractDetailId
+		INNER JOIN tblCTContractHeader C
+			ON B.intContractHeaderId = C.intContractHeaderId
+		WHERE A.intTicketId = @intTicketId
+			AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+		
+
+		--LOAD
+		INSERT INTO tblSCTicketDirectBasisContract(
+			intTicketId
+			,intContractDetailId
+			,ysnProcessed
+		)
+		SELECT 
+			A.intTicketId
+			,B.intContractDetailId 
+			,ysnProcessed = 0
+		FROM tblSCTicketLoadUsed A
+		INNER JOIN tblLGLoadDetail E
+			ON A.intLoadDetailId = E.intLoadDetailId
+		INNER JOIN tblCTContractDetail B
+			ON E.intSContractDetailId = B.intContractDetailId
+		INNER JOIN tblCTContractHeader C
+			ON B.intContractHeaderId = C.intContractHeaderId
+		WHERE A.intTicketId = @intTicketId
+			AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+	END
+
 	---CREATE INVOICE
 	BEGIN
 		SELECT TOP 1 @recCount = COUNT(1) FROM @invoiceIntegrationStagingTable;

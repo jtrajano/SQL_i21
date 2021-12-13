@@ -13,7 +13,6 @@
     [intEndOdometer] INT NULL, 
     [dblFuelGallonsDelievered] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblFuelSales] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	[strTrailerNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblMBILShift] PRIMARY KEY ([intShiftId])
 )
