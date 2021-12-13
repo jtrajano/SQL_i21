@@ -745,6 +745,35 @@ IF EXISTS(SELECT 1 FROM tblSMGridLayout WHERE strGridLayoutFields LIKE '%{"strFi
 GO
 
 
+
+
+
+--tblCTOption
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 1)
+BEGIN
+	INSERT INTO tblCTOption
+	SELECT 1,'Loading port','citycombo', 1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 2)
+BEGIN
+	INSERT INTO tblCTDiscountType
+	SELECT 2,'Destination port','citycombo', 1
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 3)
+BEGIN
+	INSERT INTO tblCTDiscountType
+	SELECT 3,'Crop Year','cropyearcombo', 1
+END
+GO
+
+
 --=====================================================================================================================================
 -- 	MOVE CONTRACT BASIS TO FREIGHT TERMS
 ---------------------------------------------------------------------------------------------------------------------------------------
