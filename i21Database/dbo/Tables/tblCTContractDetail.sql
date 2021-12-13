@@ -166,6 +166,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	dblLoanAmount NUMERIC(18, 6) NULL,
 	intOverrideFacilityId INT NULL,
 	strBankReferenceNo NVARCHAR(100) NULL,
+	 
+	-- Quality/Optionality
+	dblQualityPremium numeric(18, 6) NULL,
+	dblOptionalityPremium numeric(18, 6) NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
