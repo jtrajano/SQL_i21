@@ -761,7 +761,7 @@ GO
 GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 2)
 BEGIN
-	INSERT INTO tblCTDiscountType
+	INSERT INTO tblCTOption
 	SELECT 2,'Destination port','citycombo', 1
 END
 GO
@@ -769,7 +769,7 @@ GO
 GO
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTOption WHERE intOptionId = 3)
 BEGIN
-	INSERT INTO tblCTDiscountType
+	INSERT INTO tblCTOption
 	SELECT 3,'Crop Year','cropyearcombo', 1
 END
 GO

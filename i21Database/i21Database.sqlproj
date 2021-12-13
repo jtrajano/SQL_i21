@@ -407,6 +407,10 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateImportFailureEmailMessage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessLotSampleImport.sql" />
     <None Include="Scripts\Post-Deployment\IC\101_Rename_And_Alter_Cash_Register_Department.sql" />
+    <Build Include="dbo\Tables\tblCTContractOptionality.sql" />
+    <Build Include="dbo\Tables\tblCTOption.sql" />
+    <Build Include="dbo\Tables\tblCTContractQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLoadContractQuality.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
