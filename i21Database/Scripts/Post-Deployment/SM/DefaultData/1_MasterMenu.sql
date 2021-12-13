@@ -9,7 +9,7 @@
 	END
 GO
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Item Quality Premium Criteria' AND strModuleName = 'Quality')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Switch Position' AND strModuleName = 'Risk Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 
@@ -3720,6 +3720,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Settlemen
 	VALUES (N'Settlement Price', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Settlement Price', N'Derivative', N'Screen', N'RiskManagement.view.FuturesOptionsSettlementPrices?showSearch=true', N'small-menu-derivative', 0, 0, 0, 1, 4, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 4, strCommand = N'RiskManagement.view.FuturesOptionsSettlementPrices?showSearch=true' WHERE strMenuName = 'Settlement Price' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Switch Position' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Switch Position', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Switch Position', N'Derivative', N'Screen', N'RiskManagement.view.SwitchPosition', N'small-menu-derivative', 0, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'RiskManagement.view.SwitchPosition' WHERE strMenuName = 'Switch Position' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
+
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Derivative Entry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
