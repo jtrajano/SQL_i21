@@ -19,8 +19,7 @@ BEGIN TRANSACTION
 		strGroupName,
 		ysnSearch
 	)
-	SELECT DISTINCT
-		'',
+	SELECT '',
 		strScreenName,
 		strModule,
 		strNamespace,
