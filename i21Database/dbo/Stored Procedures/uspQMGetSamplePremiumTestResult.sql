@@ -33,6 +33,7 @@ BEGIN
 	JOIN dbo.tblQMSample S ON S.intSampleId = TR.intSampleId
 		AND TR.intSampleId = @intSampleId
 	JOIN dbo.tblQMProperty PRT ON PRT.intPropertyId = TR.intPropertyId
+		AND PRT.intDataTypeId in (1,2)
 	LEFT JOIN dbo.tblQMQualityCriteria QC ON QC.intItemId = S.intItemId
 	LEFT JOIN dbo.tblQMQualityCriteriaDetail QCD ON QCD.intQualityCriteriaId = QC.intQualityCriteriaId
 		AND QCD.intPropertyId = PRT.intPropertyId
