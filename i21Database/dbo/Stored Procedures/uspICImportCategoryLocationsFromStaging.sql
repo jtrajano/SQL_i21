@@ -20,6 +20,7 @@ CREATE TABLE #tmp (
 	[intCategoryId] INT,
 	[intLocationId] INT,
 	[intCashRegisterDepartment] INT NULL,
+	[strCashRegisterDepartment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnUpdatePrices] BIT NULL DEFAULT ((0)),
 	[ysnUseTaxFlag1] BIT NULL DEFAULT ((0)),
 	[ysnUseTaxFlag2] BIT NULL DEFAULT ((0)),
@@ -61,6 +62,7 @@ INSERT INTO #tmp (
 	  intCategoryId
 	, intLocationId
 	, intCashRegisterDepartment
+	, strCashRegisterDepartment
 	, ysnUpdatePrices
 	, ysnUseTaxFlag1
 	, ysnUseTaxFlag2
@@ -99,6 +101,7 @@ SELECT
 	  c.intCategoryId
 	, l.intCompanyLocationId
 	, x.intCashRegisterDepartment
+	, x.strCashRegisterDepartment
 	, ISNULL(x.ysnUpdatePrices, 0)
 	, x.ysnUseTaxFlag1
 	, x.ysnUseTaxFlag2
@@ -165,6 +168,7 @@ USING
 		  intCategoryId
 		, intLocationId
 		, intCashRegisterDepartment
+		, strCashRegisterDepartment
 		, ysnUpdatePrices
 		, ysnUseTaxFlag1
 		, ysnUseTaxFlag2
@@ -204,6 +208,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 		intCategoryId = source.intCategoryId,
 		intLocationId = source.intLocationId,
 		intRegisterDepartmentId = source.intCashRegisterDepartment,
+		strCashRegisterDepartment = source.strCashRegisterDepartment,
 		ysnUpdatePrices = source.ysnUpdatePrices,
 		ysnUseTaxFlag1 = source.ysnUseTaxFlag1,
 		ysnUseTaxFlag2 = source.ysnUseTaxFlag2,
@@ -244,6 +249,7 @@ WHEN NOT MATCHED THEN
 		  intCategoryId
 		, intLocationId
 		, intRegisterDepartmentId
+		, strCashRegisterDepartment
 		, ysnUpdatePrices
 		, ysnUseTaxFlag1
 		, ysnUseTaxFlag2
@@ -282,6 +288,7 @@ WHEN NOT MATCHED THEN
 		  intCategoryId
 		, intLocationId
 		, intCashRegisterDepartment
+		, strCashRegisterDepartment
 		, ysnUpdatePrices
 		, ysnUseTaxFlag1
 		, ysnUseTaxFlag2
