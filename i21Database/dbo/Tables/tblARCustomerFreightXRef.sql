@@ -25,4 +25,3 @@
 	CONSTRAINT [UK_tblARCustomerFreightXRef_reference_columns] UNIQUE NONCLUSTERED ([intEntityTariffTypeId] ASC, [strZipCode] ASC, [intCategoryId] ASC,[intEntityLocationId] ASC, [intShipViaId] ASC),	--THE NAME IS USED IN THE FRONT END, IF THERE ARE CHANGES PLEASE INFORM MON.GONZALES	
     CONSTRAINT [FK_tblARCustomerFreightXRef_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
 );
-
