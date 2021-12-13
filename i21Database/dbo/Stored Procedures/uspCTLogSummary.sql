@@ -4350,23 +4350,30 @@ BEGIN TRY
 						END
 
 						-- Increase SBD upon creation of IS
-						IF (@strTransactionReference = 'Inventory Shipment')
+						IF (@strTransactionReference = 'Inventory Shipment' AND @currPricingTypeId <> 3)
 						BEGIN
-							if (@currPricingTypeId = 1)
-							begin
-								if (isnull(@ysnWithPriceFix,0) = 1 )
-								begin
-									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
+							IF (@currPricingTypeId = 1)
+							BEGIN
+								IF (ISNULL(@ysnWithPriceFix, 0) = 1 )
+								BEGIN
+									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END
 									EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-								end
-							end
-							else
-							begin
-								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
+								END
+							END
+							ELSE
+							BEGIN
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries', intActionId = CASE WHEN intActionId = 18 THEN 46 ELSE intActionId END
 								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
 							end
 						END
-
+						ELSE IF (@strTransactionReference = 'Inventory Receipt' AND @currPricingTypeId <> 3)
+						BEGIN  
+							IF (@currPricingTypeId = 1 and isnull(@ysnWithPriceFix, 0) = 1)  
+							BEGIN  
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0   
+							END
+						END
 					END				
 					ELSE IF ISNULL(@dblBasis, 0) > 0
 					BEGIN
