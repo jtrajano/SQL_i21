@@ -50,8 +50,8 @@ BEGIN
 		,PRT.strPropertyName
 		,PRT.strDescription
 		,PP.intSequenceNo
-		,NULL AS dblMinValue--PPV.dblMinValue
-		,NULL AS dblMaxValue--PPV.dblMaxValue
+		,PPV.dblMinValue
+		,PPV.dblMaxValue
 	FROM dbo.tblQMProduct AS PRD
 	JOIN dbo.tblQMProductControlPoint PC ON PC.intProductId = PRD.intProductId
 	JOIN dbo.tblQMProductProperty AS PP ON PP.intProductId = PRD.intProductId
