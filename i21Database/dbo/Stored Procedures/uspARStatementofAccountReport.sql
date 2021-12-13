@@ -47,6 +47,7 @@ DECLARE  @dtmDateTo						AS DATETIME
 		,@begingroup					AS NVARCHAR(50)
 		,@endgroup						AS NVARCHAR(50)
 		,@datatype						AS NVARCHAR(50)
+		,@strReportLogId				AS NVARCHAR(MAX)
 		
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -59,20 +60,6 @@ DECLARE @temp_xml_table TABLE (
 	,[begingroup]	NVARCHAR(50)
 	,[endgroup]		NVARCHAR(50)
 	,[datatype]		NVARCHAR(50)
-)
-
-DECLARE @temp_SOA_table TABLE(
-	 [strCustomerName]			NVARCHAR(MAX)
-	,[strAccountStatusCode]		NVARCHAR(5)
-	,[strLocationName]			NVARCHAR(50)
-	,[ysnPrintZeroBalance]		BIT
-	,[ysnPrintCreditBalance]	BIT
-	,[ysnIncludeBudget]			BIT
-	,[ysnPrintOnlyPastDue]		BIT
-	,[strStatementFormat]		NVARCHAR(100)	
-	,[dtmDateFrom]				DATETIME
-	,[dtmDateTo]				DATETIME
-	,[intEntityUserId]			INT
 )
 
 -- Prepare the XML 
@@ -177,171 +164,188 @@ SELECT @intEntityUserId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'intSrCurrentUserId'
 
--- SANITIZE THE DATE AND REMOVE THE TIME.
-IF @dtmDateTo IS NOT NULL
-	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
-ELSE 			  
-	SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+SELECT @strReportLogId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strReportLogId'
 
-IF @dtmDateFrom IS NOT NULL
-	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
-ELSE 			  
-	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
+IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+BEGIN
+	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+	VALUES (@strReportLogId, GETDATE())
+
+	-- SANITIZE THE DATE AND REMOVE THE TIME.
+	IF @dtmDateTo IS NOT NULL
+		SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)	
+	ELSE 			  
+		SET @dtmDateTo = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+
+	IF @dtmDateFrom IS NOT NULL
+		SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
+	ELSE 			  
+		SET @dtmDateFrom = CAST(-53690 AS DATETIME)
 	
-SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
-SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
-SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
+	SET @strDateTo = ''''+ CONVERT(NVARCHAR(50),@dtmDateTo, 110) + ''''
+	SET @strDateFrom = ''''+ CONVERT(NVARCHAR(50),@dtmDateFrom, 110) + ''''
+	SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
-IF CHARINDEX('''', @strCustomerName) > 0 
-	SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
+	IF CHARINDEX('''', @strCustomerName) > 0 
+		SET @strCustomerName = REPLACE(@strCustomerName, '''''', '''')
 	
-IF @strStatementFormat = 'Balance Forward'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementBalanceForwardReport 
-			  @dtmDateTo					= @dtmDateTo
-			, @dtmDateFrom					= @dtmDateFrom
-			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
-			, @ysnIncludeBudget				= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnActiveCustomers			= @ysnActiveCustomers
-			, @ysnPrintFromCF				= 0
-			, @strCustomerNumber			= @strCustomerNumber
-			, @strAccountStatusCode			= @strAccountStatusCode
-			, @strLocationName				= @strLocationName
-			, @strCustomerName				= @strCustomerName
-			, @strCustomerIds				= @strCustomerIds
-			, @ysnEmailOnly					= @ysnEmailOnly
-			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
-			, @intEntityUserId				= @intEntityUserId
-	END
-ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
-	BEGIN
-		EXEC dbo.uspARCustomerStatementReport
-		      @dtmDateTo					= @dtmDateTo
-		    , @dtmDateFrom					= @dtmDateFrom
-		    , @ysnPrintZeroBalance			= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget				= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnActiveCustomers			= @ysnActiveCustomers
-		    , @strCustomerNumber			= @strCustomerNumber
-		    , @strAccountStatusCode			= @strAccountStatusCode
-		    , @strLocationName				= @strLocationName
-		    , @strStatementFormat			= @strStatementFormat
-			, @strCustomerName				= @strCustomerName
-			, @strCustomerIds				= @strCustomerIds
-			, @ysnEmailOnly					= @ysnEmailOnly
-			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
-			, @intEntityUserId				= @intEntityUserId
-	END
-ELSE IF @strStatementFormat = 'Payment Activity'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementPaymentActivityReport
-			  @dtmDateTo					= @dtmDateTo
-		    , @dtmDateFrom					= @dtmDateFrom
-		    , @ysnPrintZeroBalance			= @ysnPrintZeroBalance
-		    , @ysnPrintCreditBalance		= @ysnPrintCreditBalance
-		    , @ysnIncludeBudget				= @ysnIncludeBudget
-		    , @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnActiveCustomers			= @ysnActiveCustomers
-		    , @strCustomerNumber			= @strCustomerNumber
-		    , @strAccountStatusCode			= @strAccountStatusCode
-		    , @strLocationName				= @strLocationName
-			, @strCustomerName				= @strCustomerName
-			, @strCustomerIds				= @strCustomerIds
-			, @ysnEmailOnly					= @ysnEmailOnly
-			, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
-			, @intEntityUserId				= @intEntityUserId
-	END
-ELSE IF @strStatementFormat = 'Full Details - No Card Lock'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementFullDetailReport
-			  @dtmDateTo					= @dtmDateTo
-			, @dtmDateFrom					= @dtmDateFrom
-			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
-			, @ysnIncludeBudget				= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnActiveCustomers			= @ysnActiveCustomers
-			, @strCustomerNumber			= @strCustomerNumber
-			, @strAccountStatusCode			= @strAccountStatusCode
-			, @strLocationName				= @strLocationName
-			, @strCustomerName				= @strCustomerName
-			, @strCustomerIds				= @strCustomerIds
-			, @ysnEmailOnly					= @ysnEmailOnly
-			, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
-			, @intEntityUserId				= @intEntityUserId
-	END
-ELSE IF @strStatementFormat = 'Budget Reminder'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementBudgetReminderReport
-			  @dtmDateTo					= @dtmDateTo
-			, @dtmDateFrom					= @dtmDateFrom
-			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
-			, @ysnIncludeBudget				= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnActiveCustomers			= @ysnActiveCustomers
-			, @strCustomerNumber			= @strCustomerNumber
-			, @strAccountStatusCode			= @strAccountStatusCode
-			, @strLocationName				= @strLocationName
-			, @strCustomerName				= @strCustomerName
-			, @strCustomerIds				= @strCustomerIds
-			, @ysnEmailOnly					= @ysnEmailOnly
-			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
-			, @intEntityUserId				= @intEntityUserId
-	END
-ELSE IF @strStatementFormat = 'Budget Reminder Alternate 2'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementBudgetReminderAlternate2Report
-			  @dtmDateTo					= @dtmDateTo
-			, @dtmDateFrom					= @dtmDateFrom
-			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
-			, @ysnIncludeBudget				= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnActiveCustomers			= @ysnActiveCustomers
-			, @strCustomerNumber			= @strCustomerNumber
-			, @strAccountStatusCode			= @strAccountStatusCode
-			, @strLocationName				= @strLocationName
-			, @strCustomerName				= @strCustomerName
-			, @strCustomerIds				= @strCustomerIds
-			, @ysnEmailOnly					= @ysnEmailOnly
-			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
-			, @intEntityUserId				= @intEntityUserId
-	END
-ELSE IF @strStatementFormat = 'Honstein Oil'
-	BEGIN
-		EXEC dbo.uspARCustomerStatementHonsteinReport
-			  @dtmDateTo					= @dtmDateTo
-			, @dtmDateFrom					= @dtmDateFrom
-			, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
-			, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
-			, @ysnIncludeBudget				= @ysnIncludeBudget
-			, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
-			, @ysnActiveCustomers			= @ysnActiveCustomers
-			, @strCustomerNumber			= @strCustomerNumber
-			, @strAccountStatusCode			= @strAccountStatusCode
-			, @strLocationName				= @strLocationName
-			, @strCustomerName				= @strCustomerName
-			, @strCustomerIds				= @strCustomerIds
-			, @ysnEmailOnly					= @ysnEmailOnly
-			, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
-			, @intEntityUserId				= @intEntityUserId
-	END
+	IF @strStatementFormat = 'Balance Forward'
+		BEGIN
+			EXEC dbo.uspARCustomerStatementBalanceForwardReport 
+				  @dtmDateTo					= @dtmDateTo
+				, @dtmDateFrom					= @dtmDateFrom
+				, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+				, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+				, @ysnIncludeBudget				= @ysnIncludeBudget
+				, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+				, @ysnActiveCustomers			= @ysnActiveCustomers
+				, @ysnPrintFromCF				= 0
+				, @strCustomerNumber			= @strCustomerNumber
+				, @strAccountStatusCode			= @strAccountStatusCode
+				, @strLocationName				= @strLocationName
+				, @strCustomerName				= @strCustomerName
+				, @strCustomerIds				= @strCustomerIds
+				, @ysnEmailOnly					= @ysnEmailOnly
+				, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
+				, @intEntityUserId				= @intEntityUserId
+		END
+	ELSE IF @strStatementFormat IN ('Open Item', 'Running Balance', 'Open Statement - Lazer')
+		BEGIN
+			EXEC dbo.uspARCustomerStatementReport
+				  @dtmDateTo					= @dtmDateTo
+				, @dtmDateFrom					= @dtmDateFrom
+				, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+				, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+				, @ysnIncludeBudget				= @ysnIncludeBudget
+				, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+				, @ysnActiveCustomers			= @ysnActiveCustomers
+				, @strCustomerNumber			= @strCustomerNumber
+				, @strAccountStatusCode			= @strAccountStatusCode
+				, @strLocationName				= @strLocationName
+				, @strStatementFormat			= @strStatementFormat
+				, @strCustomerName				= @strCustomerName
+				, @strCustomerIds				= @strCustomerIds
+				, @ysnEmailOnly					= @ysnEmailOnly
+				, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
+				, @intEntityUserId				= @intEntityUserId
+		END
+	ELSE IF @strStatementFormat = 'Payment Activity'
+		BEGIN
+			EXEC dbo.uspARCustomerStatementPaymentActivityReport
+				  @dtmDateTo					= @dtmDateTo
+				, @dtmDateFrom					= @dtmDateFrom
+				, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+				, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+				, @ysnIncludeBudget				= @ysnIncludeBudget
+				, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+				, @ysnActiveCustomers			= @ysnActiveCustomers
+				, @strCustomerNumber			= @strCustomerNumber
+				, @strAccountStatusCode			= @strAccountStatusCode
+				, @strLocationName				= @strLocationName
+				, @strCustomerName				= @strCustomerName
+				, @strCustomerIds				= @strCustomerIds
+				, @ysnEmailOnly					= @ysnEmailOnly
+				, @ysnIncludeWriteOffPayment 	= @ysnIncludeWriteOffPayment
+				, @intEntityUserId				= @intEntityUserId
+		END
+	ELSE IF @strStatementFormat = 'Full Details - No Card Lock'
+		BEGIN
+			EXEC dbo.uspARCustomerStatementFullDetailReport
+				  @dtmDateTo					= @dtmDateTo
+				, @dtmDateFrom					= @dtmDateFrom
+				, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+				, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+				, @ysnIncludeBudget				= @ysnIncludeBudget
+				, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+				, @ysnActiveCustomers			= @ysnActiveCustomers
+				, @strCustomerNumber			= @strCustomerNumber
+				, @strAccountStatusCode			= @strAccountStatusCode
+				, @strLocationName				= @strLocationName
+				, @strCustomerName				= @strCustomerName
+				, @strCustomerIds				= @strCustomerIds
+				, @ysnEmailOnly					= @ysnEmailOnly
+				, @ysnIncludeWriteOffPayment    = @ysnIncludeWriteOffPayment
+				, @intEntityUserId				= @intEntityUserId
+		END
+	ELSE IF @strStatementFormat = 'Budget Reminder'
+		BEGIN
+			EXEC dbo.uspARCustomerStatementBudgetReminderReport
+				  @dtmDateTo					= @dtmDateTo
+				, @dtmDateFrom					= @dtmDateFrom
+				, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+				, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+				, @ysnIncludeBudget				= @ysnIncludeBudget
+				, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+				, @ysnActiveCustomers			= @ysnActiveCustomers
+				, @strCustomerNumber			= @strCustomerNumber
+				, @strAccountStatusCode			= @strAccountStatusCode
+				, @strLocationName				= @strLocationName
+				, @strCustomerName				= @strCustomerName
+				, @strCustomerIds				= @strCustomerIds
+				, @ysnEmailOnly					= @ysnEmailOnly
+				, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
+				, @intEntityUserId				= @intEntityUserId
+		END
+	ELSE IF @strStatementFormat = 'Budget Reminder Alternate 2'
+		BEGIN
+			EXEC dbo.uspARCustomerStatementBudgetReminderAlternate2Report
+				  @dtmDateTo					= @dtmDateTo
+				, @dtmDateFrom					= @dtmDateFrom
+				, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+				, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+				, @ysnIncludeBudget				= @ysnIncludeBudget
+				, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+				, @ysnActiveCustomers			= @ysnActiveCustomers
+				, @strCustomerNumber			= @strCustomerNumber
+				, @strAccountStatusCode			= @strAccountStatusCode
+				, @strLocationName				= @strLocationName
+				, @strCustomerName				= @strCustomerName
+				, @strCustomerIds				= @strCustomerIds
+				, @ysnEmailOnly					= @ysnEmailOnly
+				, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
+				, @intEntityUserId				= @intEntityUserId
+		END
+	ELSE IF @strStatementFormat = 'Honstein Oil'
+		BEGIN
+			EXEC dbo.uspARCustomerStatementHonsteinReport
+				  @dtmDateTo					= @dtmDateTo
+				, @dtmDateFrom					= @dtmDateFrom
+				, @ysnPrintZeroBalance			= @ysnPrintZeroBalance
+				, @ysnPrintCreditBalance		= @ysnPrintCreditBalance
+				, @ysnIncludeBudget				= @ysnIncludeBudget
+				, @ysnPrintOnlyPastDue			= @ysnPrintOnlyPastDue
+				, @ysnActiveCustomers			= @ysnActiveCustomers
+				, @strCustomerNumber			= @strCustomerNumber
+				, @strAccountStatusCode			= @strAccountStatusCode
+				, @strLocationName				= @strLocationName
+				, @strCustomerName				= @strCustomerName
+				, @strCustomerIds				= @strCustomerIds
+				, @ysnEmailOnly					= @ysnEmailOnly
+				, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffPayment
+				, @intEntityUserId				= @intEntityUserId
+		END
 
-INSERT INTO @temp_SOA_table
-SELECT @strCustomerName
-     , @strAccountStatusCode
-	 , @strLocationName
-	 , ISNULL(@ysnPrintZeroBalance, 0)
-	 , ISNULL(@ysnPrintCreditBalance, 1)
-	 , ISNULL(@ysnIncludeBudget, 0)
-	 , ISNULL(@ysnPrintOnlyPastDue, 0)
-	 , @strStatementFormat
-	 , @dtmDateFrom
-	 , @dtmDateTo
-	 , @intEntityUserId
+	DELETE FROM tblARCustomerStatementOfAccountStagingTable
+	WHERE intEntityUserId = @intEntityUserId
+	AND strReportLogId <> @strReportLogId
 
-SELECT * FROM @temp_SOA_table
+	INSERT INTO tblARCustomerStatementOfAccountStagingTable
+	SELECT @strCustomerName
+		 , @strAccountStatusCode
+		 , @strLocationName
+		 , ISNULL(@ysnPrintZeroBalance, 0)
+		 , ISNULL(@ysnPrintCreditBalance, 1)
+		 , ISNULL(@ysnIncludeBudget, 0)
+		 , ISNULL(@ysnPrintOnlyPastDue, 0)
+		 , @strStatementFormat
+		 , @dtmDateFrom
+	 	 , @dtmDateTo
+		 , @intEntityUserId
+		 , @strReportLogId
+END
+
+SELECT * 
+FROM tblARCustomerStatementOfAccountStagingTable
+WHERE strReportLogId = @strReportLogId
