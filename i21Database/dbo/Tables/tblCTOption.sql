@@ -6,3 +6,4 @@ CREATE TABLE [dbo].[tblCTOption]
 	[intConcurrencyId] [int] NOT NULL, 
     CONSTRAINT [PK_tblCTOption_intOptionId] PRIMARY KEY ([intOptionId])
 )
+
