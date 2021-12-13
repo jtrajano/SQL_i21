@@ -384,6 +384,15 @@ BEGIN
 
 
 	END
+	ELSE IF (@strNetworkType = 'NBS')
+	BEGIN
+			IF(@strCardId LIKE '%X%')
+			BEGIN
+				SET @strTransactionType = 'Foreign Sale'
+				SET @dblOriginalGrossPrice = @dblTransferCost
+				SET @intCustomerId = @intForeignCustomerId
+			END
+	END
 	ELSE IF (@strNetworkType = 'Voyager')
 	BEGIN 
 		IF(ISNULL(@intSiteId,0) = 0)
