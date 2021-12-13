@@ -97,6 +97,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 		FROM tblPREmployeeEarning 
 		WHERE intEntityEmployeeId = @intEntityNo
 		  AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+	
 
 		IF @EmployeeEntityNo IS NULL
 			BEGIN
@@ -139,7 +140,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 				   ,dblDefaultHours -- dblHoursToProcess test
 				   ,(SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountID)
 				   ,@ysnUseGLSplit
-				   ,0
+				   ,CASE WHEN @strTaxCalculation = 'Tax as Normal' THEN 0 WHEN @strTaxCalculation = 'Tax as Supplemental' THEN 1 ELSE 2 END
 				   ,'' --strW2Code for test only
 				   ,(SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = strDeductTimeOff)
 				   ,(SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = strAccrueTimeOff)
@@ -156,84 +157,89 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 
 				IF @strTaxID1 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID1 AND strDescription = @strTaxDescription1)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID1)
 						BEGIN
 							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID1 AND strDescription = @strTaxDescription1) 
+								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID1) 
 								and intEmployeeEarningId = @NewId)
 							BEGIN
 								INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
-								VALUES ((SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID1 AND strDescription = @strTaxDescription1),1,1)
+								VALUES (
+										 @NewId
+										,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID1)
+										,1
+										,1
+									   )
 							END
 						END
 					END
 
 				IF @strTaxID2 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID2 AND strDescription = @strTaxDescription2)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID2)
 						BEGIN
 							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID2 AND strDescription = @strTaxDescription2) 
+								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID2) 
 								and intEmployeeEarningId = @NewId)
 							BEGIN
 								INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
-								VALUES ((SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID2 AND strDescription = @strTaxDescription2),1,1)
+								VALUES (@NewId,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID2),1,1)
 							END
 						END
 					END
 
 				IF @strTaxID3 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID3 AND strDescription = @strTaxDescription3)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID3)
 						BEGIN
 							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID3 AND strDescription = @strTaxDescription3) 
+								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID3) 
 								and intEmployeeEarningId = @NewId)
 							BEGIN
 								INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
-								VALUES ((SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID3 AND strDescription = @strTaxDescription3),1,1)
+								VALUES (@NewId,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID3),1,1)
 							END
 						END
 					END
 
 				IF @strTaxID4 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID1 AND strDescription = @strTaxDescription1)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID1)
 						BEGIN
 							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID4 AND strDescription = @strTaxDescription4) 
+								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID4) 
 								and intEmployeeEarningId = @NewId)
 							BEGIN
 								INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
-							VALUES ((SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID4 AND strDescription = @strTaxDescription4),1,1)
+							VALUES (@NewId,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID4),1,1)
 							END
 						END
 					END
 
 				IF @strTaxID5 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID5 AND strDescription = @strTaxDescription5)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID5)
 						BEGIN
 							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID5 AND strDescription = @strTaxDescription5) 
+								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID5) 
 								and intEmployeeEarningId = @NewId)
 							BEGIN
 								INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
-								VALUES ((SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID5 AND strDescription = @strTaxDescription5),1,1)
+								VALUES (@NewId,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID5),1,1)
 							END
 						END
 					END
 
 				IF @strTaxID6 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID6 AND strDescription = @strTaxDescription6)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID6)
 						BEGIN
 							IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID6 AND strDescription = @strTaxDescription6) 
+								WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID6) 
 								and intEmployeeEarningId = @NewId)
 							BEGIN
 								INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
-								VALUES ((SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @NewId),(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID6 AND strDescription = @strTaxDescription6),1,1)
+								VALUES (@NewId,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID6),1,1)
 							END
 						END
 					END
@@ -261,7 +267,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					,dblDefaultHours				= @dblDefaultHours
 					,dblHoursToProcess				= @dblDefaultHours -- dblHoursToProcess test
 					,intAccountId					= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = @strAccountID)
-					,intTaxCalculationType			= (SELECT TOP 1 intTaxCalculationType FROM tblPRTypeEarning where strEarning = @strEarningId)
+					,intTaxCalculationType			= CASE WHEN @strTaxCalculation = 'Tax as Normal' THEN 0 WHEN @strTaxCalculation = 'Tax as Supplemental' THEN 1 ELSE 2 END
 					,strW2Code						= '' --strW2Code for test only
 					,intEmployeeTimeOffId			= (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strDeductTimeOff)
 					,intEmployeeAccrueTimeOffId		= (SELECT TOP 1 intTypeTimeOffId FROM tblPRTypeTimeOff WHERE strTimeOff = @strAccrueTimeOff)
@@ -271,39 +277,54 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 					WHERE intEntityEmployeeId = @intEntityNo
 						AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId)
 
+					--Delete current record and replace with 
+					DELETE FROM tblPREmployeeEarningTax 
+						WHERE intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning where intEntityEmployeeId = @intEntityNo
+														AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning= @strEarningId))
+
 					IF @strTaxID1 IS NOT NULL
 					BEGIN
-						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID1 AND strDescription = @strTaxDescription1)
+						IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID1)
 						BEGIN
 							IF NOT EXISTS (
 								SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID1 AND strDescription = @strTaxDescription1)
-									AND intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning where intEntityEmployeeId = @intEntityNo)
+									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID1)
+									AND intEmployeeEarningId = (
+										SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+											WHERE intEntityEmployeeId = @intEntityNo
+											AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+										)
 							)
 							BEGIN
 								INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
 								VALUES (
-								 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @EmployeeEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
-								,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID1 AND strDescription = @strTaxDescription1),1,1)
+									(SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+										WHERE intEntityEmployeeId = @intEntityNo 
+										AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId)
+									)
+								,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID1),1,1)
 							END
-							
 						END
 					END
 
 					IF @strTaxID2 IS NOT NULL
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID2 AND strDescription = @strTaxDescription2)
+							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID2)
 							BEGIN
 								IF NOT EXISTS (
 								SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID2 AND strDescription = @strTaxDescription2)
-									AND intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning where intEntityEmployeeId = @intEntityNo)
+									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID2)
+									AND intEmployeeEarningId = (
+										SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+											WHERE intEntityEmployeeId = @intEntityNo
+											AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+										)
 								)
 								BEGIN
 									INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
 									VALUES (
-									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @EmployeeEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID2 AND strDescription = @strTaxDescription2),1,1)
+									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID2),1,1)
 								END
 								
 							END
@@ -311,18 +332,22 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 
 					IF @strTaxID3 IS NOT NULL
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID3 AND strDescription = @strTaxDescription3)
+							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID3)
 							BEGIN
 								IF NOT EXISTS (
 								SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID3 AND strDescription = @strTaxDescription3)
-									AND intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning where intEntityEmployeeId = @intEntityNo)
+									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID3)
+									AND intEmployeeEarningId = (
+										SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+											WHERE intEntityEmployeeId = @intEntityNo
+											AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+										)
 								)
 								BEGIN
 									INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
 									VALUES (
-									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @EmployeeEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID3 AND strDescription = @strTaxDescription3),1,1)
+									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID3),1,1)
 								END
 								
 							END
@@ -330,18 +355,22 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 
 					IF @strTaxID4 IS NOT NULL
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID1 AND strDescription = @strTaxDescription1)
+							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID4)
 							BEGIN
 								IF NOT EXISTS (
 								SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID4 AND strDescription = @strTaxDescription4)
-									AND intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning where intEntityEmployeeId = @intEntityNo)
+									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID4)
+									AND intEmployeeEarningId = (
+										SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+											WHERE intEntityEmployeeId = @intEntityNo
+											AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+										)
 								)
 								BEGIN
 									INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
 									VALUES (
-									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @EmployeeEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID4 AND strDescription = @strTaxDescription4),1,1)
+									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID4),1,1)
 								END
 								
 							END
@@ -349,18 +378,22 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 
 					IF @strTaxID5 IS NOT NULL
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID5 AND strDescription = @strTaxDescription5)
+							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID5)
 							BEGIN
 								IF NOT EXISTS (
-									SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-										WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID5 AND strDescription = @strTaxDescription5)
-										AND intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning where intEntityEmployeeId = @intEntityNo)
+								SELECT TOP 1 * FROM tblPREmployeeEarningTax 
+									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID5)
+									AND intEmployeeEarningId = (
+										SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+											WHERE intEntityEmployeeId = @intEntityNo
+											AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+										)
 								)
 								BEGIN
 									INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
 									VALUES (
-									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @EmployeeEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID5 AND strDescription = @strTaxDescription5),1,1)
+									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID5),1,1)
 								END
 								
 							END
@@ -368,18 +401,22 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 
 					IF @strTaxID6 IS NOT NULL
 						BEGIN
-							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID6 AND strDescription = @strTaxDescription6)
+							IF EXISTS (SELECT TOP 1 * FROM tblPRTypeTax WHERE strTax = @strTaxID6)
 							BEGIN
 							IF NOT EXISTS (
 								SELECT TOP 1 * FROM tblPREmployeeEarningTax 
-									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID6 AND strDescription = @strTaxDescription6)
-									AND intEmployeeEarningId = (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning where intEntityEmployeeId = @intEntityNo)
-								)
+									WHERE intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE  strTax = @strTaxID6)
+									AND intEmployeeEarningId = (
+										SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning 
+											WHERE intEntityEmployeeId = @intEntityNo
+											AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning WHERE strEarning = @strEarningId)
+										)
+							)
 								BEGIN
 									INSERT INTO tblPREmployeeEarningTax (intEmployeeEarningId,intTypeTaxId,intSort,intConcurrencyId)
 									VALUES (
-									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @EmployeeEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
-									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID6 AND strDescription = @strTaxDescription6),1,1)
+									 (SELECT TOP 1 intEmployeeEarningId FROM tblPREmployeeEarning WHERE intEntityEmployeeId = @intEntityNo AND intTypeEarningId = (SELECT TOP 1 intTypeEarningId FROM tblPRTypeEarning where strEarning = @strEarningId))
+									,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @strTaxID6),1,1)
 								END
 								
 							END
@@ -397,7 +434,7 @@ DECLARE @strTaxDescription6 AS NVARCHAR(50)
 			, strLogLevel = 'Info'
 			, strStatus = 'Success'
 			, intRowNo = SE.intRowNumber
-			, strMessage = 'The employee earnings has been successfully imported.'
+			, strMessage = 'The employee earnings has been successfully imported to i21.'
 		FROM tblApiSchemaEmployeeEarnings SE
 		   LEFT JOIN tblPREmployeeEarning E ON E.intEntityEmployeeId = @intEntityNo
 		   WHERE SE.guiApiUniqueId = @guiApiUniqueId
