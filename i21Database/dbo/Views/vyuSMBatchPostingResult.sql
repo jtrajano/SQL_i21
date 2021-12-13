@@ -11,6 +11,9 @@ dtmDate                         AS		dtmDate,
 intEntityId						AS		intEntityId
 FROM
 (
+	SELECT intPostForeignTransResult as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
+	FROM tblCFPostForeignTransResult
+	UNION ALL
 	SELECT intResult as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
 	FROM tblGLPostResult
 	UNION ALL
