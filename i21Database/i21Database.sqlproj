@@ -334,6 +334,8 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRRackPriceEquation.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRShipViaTariff.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRShipViaTariff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
