@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblCTContractOptionality](
 	[intContractDetailId] [int] NOT NULL,
 	[intOptionId] [int] NULL,
 	[strValue] [nvarchar](100)  COLLATE Latin1_General_CI_AS NOT NULL,
-	[intPremiumDiscount]  [numeric](18, 6) NULL,
+	[dblPremiumDiscount]  [numeric](18, 6) NULL,
 	[intCurrencyId] [int] NULL,
 	[intUnitMeasureId] [int] NULL,
 	[dtmDateCreated] [datetime] NULL,
