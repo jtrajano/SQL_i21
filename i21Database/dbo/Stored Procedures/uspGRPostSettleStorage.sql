@@ -227,6 +227,9 @@ BEGIN TRY
 		,dblFutureMarketPrice DECIMAL(24, 10)
 	)
 
+	DECLARE @strContractNumber NVARCHAR(50)
+	DECLARE @intContractSeq INT
+
 	-- Get the Batch Id 
 	EXEC dbo.uspSMGetStartingNumber 
 		@STARTING_NUMBER_BATCH
@@ -249,7 +252,18 @@ BEGIN TRY
 	BEGIN
 		DECLARE @CustomerStorageIds AS Id
 		DECLARE @intId AS INT
-		DECLARE @dblSettlementTotal AS DECIMAL(24,10)		
+		DECLARE @dblSettlementTotal AS DECIMAL(24,10)
+		DECLARE @dblTransferTotal AS DECIMAL(24,10)
+		DECLARE @dblHistoryTotal AS DECIMAL(24,10)
+
+		DECLARE @Transfers TABLE
+		(
+			intSourceCustomerStorageId INT
+			,dblOriginalBalance DECIMAL(24,10)
+			,dblOpenBalance DECIMAL(24,10)
+			,dblTotalTransactions DECIMAL(24,10)
+			,ysnTransferStorage BIT
+		)
 
 		DELETE FROM @CustomerStorageIds
 		INSERT INTO @CustomerStorageIds
@@ -259,21 +273,25 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
 
-			SELECT @dblSettlementTotal = SUM(dblUnits) 
-			FROM tblGRSettleStorageTicket A
-			INNER JOIN tblGRSettleStorage B
-				ON B.intSettleStorageId = A.intSettleStorageId
-				AND B.intParentSettleStorageId IS NULL
-			WHERE intCustomerStorageId = @intId
-				--AND A.intSettleStorageId <> @intSettleStorageId
+			IF (SELECT ysnTransferStorage FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId) = 1
+			BEGIN
+				--CHECK IF THERE IS NO EXISTING OVER-TRANSFER FROM THE ORIGINAL STORAGE
+				INSERT INTO @Transfers
+				SELECT * FROM [dbo].[fnGRFindOriginalCustomerStorage](@intId)
 
-			SELECT @dblTotalUnits = SUM(dblUnits)
-			FROM tblGRStorageHistory
-			WHERE (intTransactionTypeId IN (5,1,9) OR (intTransactionTypeId = 3 AND strType = 'From Transfer'))
-				AND intCustomerStorageId = @intId
-			GROUP BY intCustomerStorageId
+				IF EXISTS(SELECT 1 FROM @Transfers WHERE ABS(dblTotalTransactions) > 1)
+				BEGIN
+					RAISERROR('Unable to settle storage. Please check the storage and try again.',16,1,1)
+					RETURN;
+				END
+			END
 
-			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.1
+			SELECT @dblSettlementTotal	= ISNULL(dblSettlementTotal,0)
+				,@dblTransferTotal		= ISNULL(dblTransferTotal,0)
+				,@dblHistoryTotal		= ISNULL(dblHistoryTotalUnits,0)
+			FROM [dbo].[fnGRCheckStorageBalance](@intId, NULL)
+
+			IF (@dblSettlementTotal + @dblTransferTotal) > @dblHistoryTotal OR ABS(@dblSettlementTotal - @dblHistoryTotal) > 0.1
 			BEGIN
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
@@ -791,10 +809,21 @@ BEGIN TRY
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = SC.intContractDetailId
 				WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+					--AND CASE WHEN (CD.intPricingTypeId = 2 AND (ISNULL(CD.dblTotalCost, 0) = 0)) THEN 0 ELSE 1 END = 1
 			END
 
-			--select '@SettleVoucherCreate dsct',* from @SettleVoucherCreate
-			
+			UPDATE SS
+			SET dblDiscountsDue = ABS(ds.dblTotal)
+			FROM tblGRSettleStorage SS
+			OUTER APPLY (
+				SELECT dblTotal  = SUM(A.dblTotal) FROM (
+				SELECT dblTotal = CASE WHEN ysnPercentChargeType = 1 THEN (dblCashPrice * dblCashPriceUsed * dblUnits) ELSE (dblCashPrice * dblUnits) END
+				FROM @SettleVoucherCreate
+				WHERE intItemType = 3
+				) A
+			) ds
+			WHERE SS.intSettleStorageId = @intSettleStorageId
+
 			--Unpaid Fee		
 			IF EXISTS (
 						SELECT 1
@@ -1046,8 +1075,21 @@ BEGIN TRY
 						WHERE intSettleContractKey 	= @SettleContractKey
 
 						SELECT @intContractHeaderId = intContractHeaderId
+							,@intContractSeq		= intContractSeq
 						FROM tblCTContractDetail
 						WHERE intContractDetailId = @intContractDetailId
+
+						SELECT @strContractNumber = strContractNumber
+						FROM tblCTContractHeader
+						WHERE intContractHeaderId = @intContractHeaderId
+
+						IF(SELECT intContractStatusId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) = 6 --SHORT-CLOSED
+						BEGIN
+							SET @ErrMsg = 'Contract '+ @strContractNumber +'-sequence '+ CAST(@intContractSeq AS NVARCHAR(50)) +' has been short-closed.  Please reopen contract sequence in order to post settle storage.'
+
+							RAISERROR(@ErrMsg,16,1,1)
+							RETURN;
+						END
 
 						IF @dblStorageUnits <= @dblContractUnits
 						BEGIN
@@ -1349,7 +1391,10 @@ BEGIN TRY
 					,ysnInventoryCost		
 				FROM @SettleVoucherCreate SVC
 				OUTER APPLY (
-					SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intContractDetailId = SVC.intContractDetailId
+					SELECT GR.* FROM tblGRSettleContractPriceFixationDetail GR
+					INNER JOIN tblCTPriceFixationDetail CT
+						ON CT.intPriceFixationDetailId = GR.intPriceFixationDetailId
+					WHERE GR.intSettleStorageId = @intSettleStorageId AND GR.intContractDetailId = SVC.intContractDetailId
 				) A
 
 				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
@@ -2397,11 +2442,9 @@ BEGIN TRY
 																WHEN (availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 and intItemType = 1) or (@ysnFromPriceBasisContract = 0 and availableQtyForVoucher.intPricingTypeIdHeader = 2 and availableQtyForVoucher.intPricingTypeId /*sequence*/ = 1 and intItemType = 1) 
 																then dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice) 
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice) 
-																--Dev Note ( Mon Gonzales)
-																--Added a.dblCashPriceUsed is not null and a.intContractUOMId is not null, spot settlement will have an issue here
-																--some discount might not get contract uom for spot settlements
-																ELSE case when (intItemType = 3 and ysnPercentChargeType = 1 and a.dblCashPriceUsed is not null and a.intContractUOMId is not null) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),6) 
-																else a.dblCashPrice end
+
+																ELSE case when (intItemType = 3 and ysnPercentChargeType = 1 and a.dblCashPriceUsed is not null and a.intContractUOMId is not null) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, a.dblCashPriceUsed),6) 
+                												else a.dblCashPrice end
 															END
 														end					
 													END		
@@ -2604,9 +2647,19 @@ BEGIN TRY
 
 				
 						update  a set 
-								dblQuantityToBill = case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblQuantityToBill) end, 
-								dblNetWeight = case when b.ysnDiscountFromGrossWeight = 1 then dblNetWeight else isnull(@total_units_for_voucher, dblNetWeight) end,
-								dblOrderQty =  case when b.ysnDiscountFromGrossWeight = 1 then dblQuantityToBill else isnull(@total_units_for_voucher, dblOrderQty) end
+								dblQuantityToBill = case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblQuantityToBill)
+														else dblQuantityToBill
+													end,
+								dblNetWeight = 		case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblNetWeight)
+														else dblNetWeight
+													end,
+								dblOrderQty =  		case
+														when b.intItemType = 2 then isnull(@total_units_for_voucher, dblOrderQty)
+														when b.ysnDiscountFromGrossWeight = 1 then dblOrderQty
+														else isnull(@total_units_for_voucher, dblOrderQty)
+													end
 							from @voucherPayable a
 							join @SettleVoucherCreate b
 								on a.intItemId = b.intItemId
