@@ -344,6 +344,11 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCurrenciesRowDesign.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateDrillDownCurrencies.sql" />
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixationDetailMultiplePrice.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixationMultiplePrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessPriceFixationMultiplePrice.sql" />
+    <Build Include="dbo\Views\vyuCTCombinePriceFixation.sql" />
+    <Build Include="dbo\Views\vyuCTCombinePriceFixationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
