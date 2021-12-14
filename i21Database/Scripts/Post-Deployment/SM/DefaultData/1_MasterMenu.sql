@@ -3723,9 +3723,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Switch Position' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Switch Position', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Switch Position', N'Derivative', N'Screen', N'RiskManagement.view.SwitchPosition', N'small-menu-derivative', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Switch Position', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Switch Position', N'Derivative', N'Screen', N'RiskManagement.view.SwitchPosition?showSearch=true,', N'small-menu-derivative', 0, 0, 0, 1, 5, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'RiskManagement.view.SwitchPosition' WHERE strMenuName = 'Switch Position' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 5, strCommand = N'RiskManagement.view.SwitchPosition?showSearch=true,' WHERE strMenuName = 'Switch Position' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Derivative Entry' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
