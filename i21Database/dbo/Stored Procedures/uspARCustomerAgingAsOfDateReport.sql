@@ -195,31 +195,16 @@ FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN @tblCustomers C ON P.intEntityCustomerId = C.intEntityCustomerId
 LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE P.ysnPosted = 1
-  AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND CAST(NSF.dtmDate AS DATE) > @dtmDateToLocal))
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-  
---WRITE OFF FILTER
-IF (@ysnIncludeWriteOffPaymentLocal = 1)
-	BEGIN
-		IF(OBJECT_ID('tempdb..#WRITEOFFS') IS NOT NULL)
-		BEGIN
-			DROP TABLE #WRITEOFFS
-		END
+  AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
+  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
-		SELECT intPaymentMethodID
-		INTO #WRITEOFFS 
-		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
-		WHERE UPPER(strPaymentMethod) LIKE '%WRITE OFF%'
-
-		DELETE FROM ARP
-		FROM #ARPOSTEDPAYMENT ARP 
-		INNER JOIN #WRITEOFFS WO ON ARP.intPaymentMethodId = WO.intPaymentMethodID		
-	END
-
---#INVOICETOTALPREPAYMENTS
-SELECT dblPayment = SUM(dblPayment) + SUM(ISNULL(dblWriteOffAmount, 0))
-		, PD.intInvoiceId
-INTO #INVOICETOTALPREPAYMENTS
+--##INVOICETOTALPREPAYMENTS
+INSERT INTO ##INVOICETOTALPREPAYMENTS (
+	  intInvoiceId
+	, dblPayment
+)
+SELECT intInvoiceId	= PD.intInvoiceId
+	 , dblPayment	= SUM(PD.dblPayment) + SUM(PD.dblWriteOffAmount)
 FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) 
 INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
                              AND P.ysnInvoicePrepayment = 0
