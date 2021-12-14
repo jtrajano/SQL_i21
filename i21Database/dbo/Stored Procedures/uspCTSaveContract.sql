@@ -399,7 +399,21 @@ BEGIN TRY
 		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
-		EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		if (@ysnMultiplePriceFixation = 1)
+		begin
+			declare @intPriceContractId int;
+
+			select top 1 @intPriceContractId = intPriceContractId from tblCTPriceFixationMultiplePrice where intContractDetailId = @intContractDetailId;
+			
+			exec uspCTProcessPriceFixationMultiplePrice
+				@intPriceContractId = @intPriceContractId
+				,@intUserId = @intLastModifiedById
+
+		end
+		else
+		begin
+			EXEC uspCTSplitSequencePricing @intContractDetailId, @intLastModifiedById
+		end
 
 		IF	@intContractStatusId	=	1	AND
 			@ysnOnceApproved		=	1	AND
