@@ -165,24 +165,6 @@ LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransact
 WHERE P.ysnPosted = 1
   AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
   AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
-  
---WRITE OFF FILTER
-IF (@ysnIncludeWriteOffPaymentLocal = 1)
-	BEGIN
-		IF(OBJECT_ID('tempdb..#WRITEOFFS') IS NOT NULL)
-		BEGIN
-			DROP TABLE #WRITEOFFS
-		END
-
-		SELECT intPaymentMethodID
-		INTO #WRITEOFFS 
-		FROM dbo.tblSMPaymentMethod WITH (NOLOCK) 
-		WHERE UPPER(strPaymentMethod) LIKE '%WRITE OFF%'
-
-		DELETE FROM ARP
-		FROM ##ARPOSTEDPAYMENT ARP 
-		INNER JOIN #WRITEOFFS WO ON ARP.intPaymentMethodId = WO.intPaymentMethodID		
-	END
 
 --##INVOICETOTALPREPAYMENTS
 INSERT INTO ##INVOICETOTALPREPAYMENTS (
