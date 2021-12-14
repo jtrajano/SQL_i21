@@ -233,7 +233,7 @@ BEGIN TRY
 				WHEN CD.intPricingTypeId = 1 THEN 0
 				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN CD.dblQuantity
 				ELSE CD.dblQuantity - ISNULL(FD.dblQuantity, 0) END
-		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN NULL WHEN isnull(CH.ysnMultiplePriceFixation,0) = 1 THEN PFM.dblFinalPrice ELSE PF.dblFinalPrice END
+		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN NULL WHEN isnull(CH.ysnMultiplePriceFixation,0) = 1 THEN PFM.dblCashPrice ELSE PF.dblFinalPrice END
 		, dtmFXValidFrom
 		, dtmFXValidTo
 		, dblRate
