@@ -44,7 +44,6 @@ SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
-SET @strReportLogId				= NULLIF(@strReportLogId, NEWID())
 
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
@@ -146,7 +145,7 @@ INNER JOIN ##ADCUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
 LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
 WHERE P.ysnPosted = 1
   AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND NSF.dtmDate > @dtmDateToLocal))
-  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+  AND P.dtmDatePaid BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 --##INVOICETOTALPREPAYMENTS
 INSERT INTO ##INVOICETOTALPREPAYMENTS (
@@ -172,6 +171,24 @@ SELECT intAccountId
 FROM vyuGLAccountDetail
 WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments', 'AP Account')
 
+--##FORGIVENSERVICECHARGE
+INSERT INTO ##FORGIVENSERVICECHARGE (
+	   intInvoiceId
+	 , strInvoiceNumber
+)
+SELECT SC.intInvoiceId
+	 , SC.strInvoiceNumber
+FROM tblARInvoice I
+INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
+WHERE I.strInvoiceOriginId IS NOT NULL 
+  AND I.strTransactionType = 'Credit Memo' 
+  AND I.strType = 'Standard'
+  AND SC.strTransactionType = 'Invoice'
+  AND SC.strType = 'Service Charge'
+  AND SC.ysnForgiven = 1
+
 --##POSTEDINVOICES
 INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId
@@ -193,7 +210,7 @@ INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 )
 SELECT intInvoiceId				= I.intInvoiceId
 	 , intEntityCustomerId		= I.intEntityCustomerId
-	 , intPaymentId				= I.intPaymentId
+	 , intPaymentId				= I.intPaymentId	
 	 , intCompanyLocationId		= I.intCompanyLocationId
 	 , intEntitySalespersonId	= I.intEntitySalespersonId
 	 , strTransactionType		= I.strTransactionType
@@ -210,13 +227,18 @@ SELECT intInvoiceId				= I.intInvoiceId
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+LEFT JOIN ##FORGIVENSERVICECHARGE SC ON I.intInvoiceId = SC.intInvoiceId 
 INNER JOIN ##GLACCOUNTS GL ON GL.intAccountId = I.intAccountId AND (GL.strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND GL.strAccountCategory = 'AP Account'))
 WHERE ysnPosted = 1
 	AND (@ysnPaidInvoice is null or (ysnPaid = @ysnPaidInvoice))
 	AND ysnCancelled = 0
 	AND strTransactionType <> 'Cash Refund'
-	AND ((strType = 'Service Charge' AND  @dtmDateToLocal < I.dtmForgiveDate) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((strType <> 'Service Charge' AND ysnForgiven = 1) OR (strType <> 'Service Charge' AND ysnForgiven = 0)))	
-	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+	AND ( 
+		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
+		OR 
+		SC.intInvoiceId IS NOT NULL
+	)
+	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 --##CASHREFUNDS
@@ -364,7 +386,8 @@ FROM
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 90 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) <= 120 THEN '91 - 120 Days' 
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, @dtmDateToLocal) > 120 THEN 'Over 120' END
 				END
-FROM ##POSTEDINVOICES I WITH (NOLOCK)) AS A    
+FROM ##POSTEDINVOICES I WITH (NOLOCK)
+WHERE strTransactionType IN ('Invoice', 'Debit Memo', 'Cash Refund')) AS A
 
 LEFT JOIN
     
@@ -432,8 +455,7 @@ FROM ##POSTEDINVOICES I WITH (NOLOCK)
 	) PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN ##CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-  AND (CR.dblRefundTotal IS NULL OR CR.dblRefundTotal = 0)
-  AND I.dblAmountDue <> 0
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 UNION ALL
 
@@ -453,8 +475,8 @@ FROM ##POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN ##INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN ##CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment')
 WHERE I.strTransactionType = 'Customer Prepayment'
-  AND (CR.dblRefundTotal IS NULL OR CR.dblRefundTotal = 0)
-						      
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+
 UNION ALL      
       
 SELECT DISTINCT
@@ -559,4 +581,14 @@ INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 		, strAgingType
 		, strReportLogId
 )
-SELECT * FROM ##AGINGSTAGING
+SELECT AGING.* 
+FROM ##AGINGSTAGING AGING
+LEFT JOIN (
+	SELECT DISTINCT intInvoiceId 
+	FROM ##AGINGSTAGING 
+	GROUP BY intInvoiceId 
+	HAVING SUM(ISNULL(dblTotalAR, 0)) <> 0
+) UNPAID ON AGING.intInvoiceId = UNPAID.intInvoiceId
+WHERE ISNULL(UNPAID.intInvoiceId, 0) <> 0
+AND intEntityUserId = @intEntityUserId 
+AND strAgingType = 'Detail'
