@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCTProcessPriceFixationMultiplePrice]
+﻿ALTER PROCEDURE [dbo].[uspCTProcessPriceFixationMultiplePrice]
 	@intPriceContractId INT
 	,@intUserId INT
 AS
