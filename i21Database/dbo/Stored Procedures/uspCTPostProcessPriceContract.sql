@@ -71,6 +71,14 @@ BEGIN
 			RETURN
 		END
 
+		if exists (select top 1 1 from tblCTPriceFixation pf join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId where pf.intPriceContractId = @intPriceContractId and isnull(ch.ysnMultiplePriceFixation,0) = 1)
+		begin
+
+			exec uspCTProcessPriceFixationMultiplePrice
+				@intPriceContractId = @intPriceContractId
+				,@intUserId = @intUserId
+		end
+
 		INSERT INTO @PFTable (
 			intPriceFixationId
 			,intPriceContractId
