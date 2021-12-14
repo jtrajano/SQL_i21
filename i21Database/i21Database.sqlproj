@@ -9108,6 +9108,7 @@
     <Build Include="dbo\Functions\fnGRFindOriginalCustomerStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
