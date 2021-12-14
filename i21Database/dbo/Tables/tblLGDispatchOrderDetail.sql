@@ -22,6 +22,7 @@
 	[strZipCode] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strCountry] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intItemId] INT NULL,
+	[strItemNo] NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[dblQuantity] NUMERIC(18, 6) NULL,
 	[strOrderComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strDeliveryComments] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
