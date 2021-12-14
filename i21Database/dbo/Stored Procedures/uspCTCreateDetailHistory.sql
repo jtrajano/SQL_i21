@@ -217,19 +217,23 @@ BEGIN TRY
 		, dblBalance
 		, CD.dblFutures
 		, dblBasis
-		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblNoOfLots
+		, CASE	WHEN isnull(CH.ysnMultiplePriceFixation,0) = 1 THEN ISNULL(PFM.dblLotsFixed, 0)
+				WHEN CD.intPricingTypeId = 1 THEN CD.dblNoOfLots
 				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 0
 				ELSE ISNULL(PF.dblLotsFixed, 0) END
-		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
+		, CASE	WHEN isnull(CH.ysnMultiplePriceFixation,0) = 1 THEN CD.dblNoOfLots - ISNULL(PFM.dblLotsFixed, 0)
+				WHEN CD.intPricingTypeId = 1 THEN 0
 				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN CD.dblNoOfLots
 				ELSE CD.dblNoOfLots - ISNULL(PF.dblLotsFixed, 0) END
-		, CASE WHEN CD.intPricingTypeId = 1 THEN CD.dblQuantity
+		, CASE	WHEN isnull(CH.ysnMultiplePriceFixation,0) = 1 THEN ISNULL(FDM.dblQuantity, 0)
+				WHEN CD.intPricingTypeId = 1 THEN CD.dblQuantity
 				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN 0
 				ELSE ISNULL(FD.dblQuantity, 0) END
-		, CASE WHEN CD.intPricingTypeId = 1 THEN 0
+		, CASE	WHEN isnull(CH.ysnMultiplePriceFixation,0) = 1 THEN CD.dblQuantity - ISNULL(FDM.dblQuantity, 0)
+				WHEN CD.intPricingTypeId = 1 THEN 0
 				WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN CD.dblQuantity
 				ELSE CD.dblQuantity - ISNULL(FD.dblQuantity, 0) END
-		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN NULL ELSE dblFinalPrice END
+		, CASE WHEN ISNULL(@strProcess, '') = 'Price Delete' THEN NULL WHEN isnull(CH.ysnMultiplePriceFixation,0) = 1 THEN PFM.dblCashPrice ELSE PF.dblFinalPrice END
 		, dtmFXValidFrom
 		, dtmFXValidTo
 		, dblRate
@@ -278,6 +282,13 @@ BEGIN TRY
 		FROM	   tblCTPriceFixationDetail
 		GROUP   BY  intPriceFixationId
 	) FD  ON  FD.intPriceFixationId	  =	 PF.intPriceFixationId
+  
+	LEFT JOIN tblCTPriceFixationMultiplePrice      PFM  ON  PFM.intContractDetailId = CD.intContractDetailId  
+	LEFT JOIN (  
+		SELECT  intPriceFixationMultiplePriceId,SUM(dblQuantity) AS  dblQuantity  
+		FROM    tblCTPriceFixationDetailMultiplePrice  
+		GROUP   BY  intPriceFixationMultiplePriceId  
+	) FDM  ON  FDM.intPriceFixationMultiplePriceId   =  PFM.intPriceFixationMultiplePriceId 
 	WHERE   CD.intContractHeaderId  =   @intContractHeaderId
 		AND	CD.intContractDetailId	=   ISNULL(@intContractDetailId,CD.intContractDetailId)
 

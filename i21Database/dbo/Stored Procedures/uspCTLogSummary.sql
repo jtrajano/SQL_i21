@@ -143,7 +143,7 @@ BEGIN TRY
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
-		select pf.intPriceFixationId from tblCTPriceFixation pf where pf.intContractDetailId = @intContractDetailId
+		select pf.intPriceFixationId from vyuCTCombinePriceFixation pf where pf.intContractDetailId = @intContractDetailId
 	 ) priceFix
 	WHERE cd.intContractHeaderId = @intContractHeaderId
 		AND cd.intContractDetailId = @intContractDetailId
@@ -1178,7 +1178,7 @@ BEGIN TRY
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
-			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId
+			LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -1350,7 +1350,7 @@ BEGIN TRY
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
-			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId
+			LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -1530,7 +1530,7 @@ BEGIN TRY
 				FROM tblCTContractBalanceLog cbl
 				INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
 				INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
-				LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
+				LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 				WHERE cbl.intPricingTypeId = 1			
 					AND cbl.intContractHeaderId = @intContractHeaderId
 					AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
@@ -1620,7 +1620,7 @@ BEGIN TRY
 					FROM tblCTContractBalanceLog cbl
 					INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
 					INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
-					LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
+					LEFT JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 					WHERE cbl.intPricingTypeId = 1			
 						AND cbl.intContractHeaderId = @intContractHeaderId
 						AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
@@ -1845,10 +1845,11 @@ BEGIN TRY
 				OUTER APPLY 
 				(
 					SELECT dblFutures = AVG(pfd.dblFutures)
-					FROM tblCTPriceFixation pf 
-					INNER JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId
+					FROM vyuCTCombinePriceFixation pf 
+					INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 					WHERE pf.intContractHeaderId = suh.intContractHeaderId 
-					AND suh.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN suh.intContractDetailId ELSE pf.intContractDetailId END)
+					AND suh.intContractDetailId = pf.intContractDetailId
+					AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				) price
 				WHERE strFieldName = 'Balance'
 				AND suh.intExternalHeaderId is not null
@@ -2540,10 +2541,10 @@ BEGIN TRY
 					, intOrderBy = 1
 					, intUserId = @intUserId
 					, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
-				FROM tblCTPriceFixationDetail pfd
-				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+				FROM vyuCTCombinePriceFixationDetail pfd
+				INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				WHERE pfd.ysnToBeDeleted = 1
@@ -2555,6 +2556,7 @@ BEGIN TRY
 					AND intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
 				)			
+				 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			) tbl
 			WHERE intContractHeaderId = @intContractHeaderId
 			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)
@@ -2640,7 +2642,7 @@ BEGIN TRY
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess <> 'Priced DWG'
-			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
+			INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -2727,7 +2729,7 @@ BEGIN TRY
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess <> 'Priced DWG'
-			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
+			INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -2815,7 +2817,7 @@ BEGIN TRY
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strTransactionReference = 'Price Fixation'
-			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
+			INNER JOIN vyuCTCombinePriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -2958,10 +2960,10 @@ BEGIN TRY
 					, strNotes = (CASE WHEN ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity
 										THEN (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Quantity. Change Futures Price.' ELSE 'Change Quantity.' END)
 										ELSE (CASE WHEN ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures THEN 'Change Futures Price' ELSE NULL END) END)
-				FROM tblCTPriceFixationDetail pfd
-				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+				FROM vyuCTCombinePriceFixationDetail pfd
+				INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				OUTER APPLY (
 					SELECT TOP 1 dblOrigQty = CASE WHEN intActionId = 1 THEN ABS(pl.dblOrigQty) ELSE pl.dblOrigQty END, pl.dblFutures
@@ -2971,7 +2973,7 @@ BEGIN TRY
 						AND intContractDetailId = @intContractDetailId
 					ORDER BY dtmTransactionDate DESC
 				) prevLog
-				WHERE ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity OR ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures
+				WHERE ISNULL(prevLog.dblOrigQty, pfd.dblQuantity) <> pfd.dblQuantity OR ISNULL(prevLog.dblFutures, pfd.dblFutures) <> pfd.dblFutures AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			) tbl
 			/*End of CT-4833*/
 
@@ -3096,10 +3098,10 @@ BEGIN TRY
 						, intUserId = @intUserId
 						, intActionId = 17
 						, strNotes = null
-					FROM tblCTPriceFixationDetail pfd
-					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					FROM vyuCTCombinePriceFixationDetail pfd
+					INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-					INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+					INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 					LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 					WHERE pfd.intPriceFixationDetailId NOT IN
 					(
@@ -3108,6 +3110,7 @@ BEGIN TRY
 						WHERE strTransactionReference = 'Price Fixation'
 							AND intContractDetailId = @intContractDetailId
 					)
+					 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 				) tbl
 			END
 			/*End of CT-5179*/
@@ -3230,10 +3233,10 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId = 17
 					, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
-				FROM tblCTPriceFixationDetail pfd
-				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+				FROM vyuCTCombinePriceFixationDetail pfd
+				INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				WHERE pfd.intPriceFixationDetailId NOT IN
@@ -3243,6 +3246,7 @@ BEGIN TRY
 					WHERE strTransactionReference = 'Price Fixation'
 						AND intContractDetailId = @intContractDetailId
 				)
+				 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 			) tbl
 		END
 	END
@@ -3692,10 +3696,10 @@ BEGIN TRY
 				FROM
 				(
 					SELECT pf.intContractHeaderId, dbTotallQuantity = ch.dblQuantity, pfd.dblQuantity
-					FROM tblCTPriceFixationDetail pfd
-					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					FROM vyuCTCombinePriceFixationDetail pfd
+					INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 					INNER JOIN tblCTContractHeader ch ON pf.intContractHeaderId = ch.intContractHeaderId
-					WHERE pf.intContractHeaderId = @intContractHeaderId
+					WHERE pf.intContractHeaderId = @intContractHeaderId AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice
 				) pricing
 				WHERE intContractHeaderId = @intContractHeaderId
 				GROUP BY intContractHeaderId
@@ -3707,10 +3711,10 @@ BEGIN TRY
 				FROM
 				(
 					SELECT pf.intContractHeaderId, pf.intContractDetailId, dbTotallQuantity = cd.dblQuantity, pfd.dblQuantity
-					FROM tblCTPriceFixationDetail pfd
-					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					FROM vyuCTCombinePriceFixationDetail pfd
+					INNER JOIN vyuCTCombinePriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId AND pf.ysnMultiplePriceFixation = @ysnMultiPrice
 					INNER JOIN tblCTContractDetail cd ON ISNULL(pf.intContractDetailId, 0) = cd.intContractDetailId
-					WHERE pf.intContractHeaderId = @intContractHeaderId			
+					WHERE pf.intContractHeaderId = @intContractHeaderId	 AND pfd.ysnMultiplePriceFixation = @ysnMultiPrice		
 				) pricing
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = @intContractDetailId
@@ -4181,8 +4185,8 @@ BEGIN TRY
 					, @dblRemainingQty = CASE WHEN ISNULL(@ysnLoadBased, 0) = 1 THEN (dblLoadPriced - dblLoadAppliedAndPriced) * @dblQuantityPerLoad ELSE dblQuantity - dblQuantityAppliedAndPriced END
 					, @dblCurrentQty = dblQuantity
 					, @dblQuantityAppliedAndPriced = dblQuantityAppliedAndPriced
-				FROM tblCTPriceFixationDetail
-				WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+				FROM vyuCTCombinePriceFixationDetail
+				WHERE intPriceFixationDetailId = @intPriceFixationDetailId AND ysnMultiplePriceFixation = @ysnMultiPrice
 
 				IF (@intContractTypeId = 1)
 				BEGIN
