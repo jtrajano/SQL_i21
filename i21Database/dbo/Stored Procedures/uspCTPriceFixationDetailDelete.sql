@@ -237,29 +237,67 @@ BEGIN TRY
 		UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
 		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
+		UPDATE tblCTPriceFixationDetailMultiplePrice SET ysnToBeDeleted = 1
+		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+
 		DECLARE @QtyToDelete NUMERIC(24, 10)
 		SELECT @QtyToDelete = dblQuantity FROM tblCTPriceFixationDetail
 		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
 		select @strSummaryLogProcess = (case when @ysnDeleteWholePricing = 1 then 'Price Delete' else 'Fixation Detail Delete' end)
 
-		EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
-								  @intContractDetailId 	= @intContractDetailId, 
-								  @strSource 			= 'Pricing',
-								  @strProcess 			= @strSummaryLogProcess,
-								  @intUserId			=  @intUserId
+		IF OBJECT_ID('tempdb..#tmpPriceFixationDetailMultiplePrice') IS NOT NULL DROP TABLE #tmpPriceFixationDetailMultiplePrice
 
-		-- Summary Log
-		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							@intContractDetailId 	= 	@intContractDetailId,
-							@strSource			 	= 	'Pricing',
-							@strProcess		 	    = 	'Fixation Detail Delete',
-							@contractDetail 		= 	@contractDetails,
-							@intUserId				= 	@intUserId,
-							@intTransactionId		= 	@intPriceFixationDetailId,
-							@dblTransactionQty		= 	@QtyToDelete
+		select distinct pf.intContractDetailId
+		into #tmpPriceFixationDetailMultiplePrice
+		from tblCTPriceFixationDetailMultiplePrice pfd
+		join tblCTPriceFixationMultiplePrice pf on pf.intPriceFixationMultiplePriceId = pfd.intPriceFixationMultiplePriceId
+		where pfd.intPriceFixationDetailId = @intPriceFixationDetailId
 
-		-- Summary Log
+		if exists(select top 1 1 from #tmpPriceFixationDetailMultiplePrice)
+		begin
+			select @intContractDetailId = null;
+			select @intContractDetailId = min(intContractDetailId) from #tmpPriceFixationDetailMultiplePrice
+			while (@intContractDetailId is not null)
+			begin
+				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									@intContractDetailId 	= 	@intContractDetailId,
+									@strSource			 	= 	'Pricing',
+									@strProcess		 	    = 	'Fixation Detail Delete',
+									@contractDetail 		= 	@contractDetails,
+									@intUserId				= 	@intUserId,
+									@intTransactionId		= 	@intPriceFixationDetailId,
+									@dblTransactionQty		= 	@QtyToDelete
+				
+				delete #tmpPriceFixationDetailMultiplePrice where intContractDetailId = @intContractDetailId;
+				select @intContractDetailId = min(intContractDetailId) from #tmpPriceFixationDetailMultiplePrice;
+			end
+
+		end
+		else
+		begin
+
+			EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
+									  @intContractDetailId 	= @intContractDetailId, 
+									  @strSource 			= 'Pricing',
+									  @strProcess 			= @strSummaryLogProcess,
+									  @intUserId			=  @intUserId
+
+			-- Summary Log
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 	    = 	'Fixation Detail Delete',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@intUserId,
+								@intTransactionId		= 	@intPriceFixationDetailId,
+								@dblTransactionQty		= 	@QtyToDelete
+			-- Summary Log
+
+		end
+
+		IF OBJECT_ID('tempdb..#tmpPriceFixationDetailMultiplePrice') IS NOT NULL DROP TABLE #tmpPriceFixationDetailMultiplePrice
+
 		IF EXISTS 
 		(
 			select top 1 1 
