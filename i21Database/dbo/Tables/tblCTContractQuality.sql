@@ -27,4 +27,7 @@ CREATE TABLE [dbo].[tblCTContractQuality](
 )
 
 
+GO
 
+ALTER TABLE [dbo].[tblCTContractQuality] ADD  DEFAULT ((0)) FOR [intConcurrencyId]
+GO
