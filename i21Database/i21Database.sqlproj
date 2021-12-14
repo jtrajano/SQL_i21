@@ -266,6 +266,7 @@
     <Build Include="dbo\Stored Procedures\uspFAReversePreviousAssetTransaction.sql" />
     <Build Include="dbo\Functions\fnFAGetMonthPeriodFromDate.sql" />
     <None Include="Scripts\Post-Deployment\IC\101_Rename_And_Alter_Cash_Register_Department.sql" />
+    <None Include="Scripts\Post-Deployment\ST\40_Rename_And_Alter_int_trl_dept_number.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
   </ItemGroup>
