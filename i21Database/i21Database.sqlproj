@@ -421,6 +421,7 @@
     <Build Include="dbo\Tables\tblDBRiskDemoStressTestingIndex.sql" />
     <Build Include="dbo\Tables\tblDBRiskDemoStressTestingVolumeAndSpot.sql" />
     <Build Include="dbo\Tables\tblDBRiskDemoOptionSensitivity.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
