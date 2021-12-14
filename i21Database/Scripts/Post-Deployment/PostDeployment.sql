@@ -212,6 +212,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
 :r .\DB\7_Create_BusinessInsights.sql
+:r .\DB\8_RiskDemoData.sql
 
 -- Fixed Assets
 :r .\FA\DefaultData\FixedAssetGroup.sql

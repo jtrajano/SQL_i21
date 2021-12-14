@@ -416,6 +416,11 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessPriceFixationMultiplePrice.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixation.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixationDetail.sql" />
+    <Build Include="dbo\Tables\tblDBRiskDemoVaR.sql" />
+    <Build Include="dbo\Tables\tblDBRiskDemoMultiDayVar.sql" />
+    <Build Include="dbo\Tables\tblDBRiskDemoStressTestingIndex.sql" />
+    <Build Include="dbo\Tables\tblDBRiskDemoStressTestingVolumeAndSpot.sql" />
+    <Build Include="dbo\Tables\tblDBRiskDemoOptionSensitivity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -10365,6 +10370,7 @@
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
+    <None Include="Scripts\Post-Deployment\DB\7_RiskDemoData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
