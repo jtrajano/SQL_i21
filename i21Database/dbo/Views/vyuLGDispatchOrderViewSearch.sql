@@ -44,7 +44,7 @@ SELECT
 	,DOD.strState
 	,DOD.strCountry
 	,DOD.strZipCode
-	,I.strItemNo
+	,strItemNo = ISNULL(I.strItemNo, DOD.strItemNo)
 	,strItemDescription = I.strDescription
 	,DOD.dblQuantity
 	,DOD.strOrderComments
