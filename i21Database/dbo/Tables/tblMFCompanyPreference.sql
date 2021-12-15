@@ -96,6 +96,7 @@
 	intDemandAnalysisMonthlyCutOffDay INT,
 	ysnForecastedConsumptionByRemainingDays BIT,
 	ysnEnableItemMenuOnHandheld BIT,
+	ysnSkipStorageUnitScreenInHandheld BIT,
 	ysnWOAutoSelectBOMServiceItems BIT,
 	ysnRecipeBySite Bit,
 	ysnConsiderBookInDemandView BIT,

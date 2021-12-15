@@ -4150,3 +4150,8 @@ UPDATE tblMFCompanyPreference
 SET ysnWOAutoSelectBOMServiceItems = 0
 WHERE ysnWOAutoSelectBOMServiceItems IS NULL
 GO
+
+UPDATE tblMFCompanyPreference
+SET ysnSkipStorageUnitScreenInHandheld = 0
+WHERE ysnSkipStorageUnitScreenInHandheld IS NULL
+GO
