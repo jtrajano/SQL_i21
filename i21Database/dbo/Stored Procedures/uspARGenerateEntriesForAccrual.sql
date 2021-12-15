@@ -1188,6 +1188,10 @@ WHERE
     I.[intInvoiceId] = @InvoiceId
     AND ARITD.[dblBaseAdjustedTax] <> @ZeroDecimal
 
+    IF NOT EXISTS(SELECT TOP 1 NULL FROM @GLEntries)
+	BEGIN
+		BREAK;
+	END
 END
 
 INSERT INTO ##ARInvoiceGLEntries
