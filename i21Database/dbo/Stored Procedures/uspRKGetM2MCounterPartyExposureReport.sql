@@ -1274,7 +1274,9 @@ BEGIN TRY
 							WHERE pfh.intPriceFixationId = pfdi.intPriceFixationId
 							AND pfdi.dtmFixationDate <= @dtmEndDate
 						) pricedTotal
-					WHERE intContractDetailId = cd.intContractDetailId
+					WHERE (cd.ysnMultiplePriceFixation = 1 AND intContractHeaderId = cd.intContractHeaderId 
+							OR intContractDetailId = cd.intContractDetailId
+						   )
 						AND (   
 								-- Basis (Partially Priced) Priced Record
 								(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
@@ -2641,7 +2643,7 @@ BEGIN TRY
 					, e.intEntityId
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 														WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 														ELSE strPriOrNotPriOrParPriced END)
@@ -2719,7 +2721,7 @@ BEGIN TRY
 					, intEntityId = ISNULL(fd.intProducerId, fd.intEntityId)
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 							WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 							ELSE strPriOrNotPriOrParPriced END)
