@@ -885,10 +885,8 @@ END
   
       IF @ysnPost =1
       BEGIN
-        DECLARE @strGainDesc NVARCHAR(50)
-        SELECT @strGainDesc = CASE WHEN @ysnPostedInTransit = 0 THEN 'Forex Difference' ELSE 'Gain / Loss from Bank Transfer' END
         EXEC [uspCMInsertGainLossBankTransfer] @intDefaultCurrencyId, 
-        @strGainDesc,
+        'Gain / Loss from Bank Transfer',
         @intRealizedAccountId  
       END
   --END  
