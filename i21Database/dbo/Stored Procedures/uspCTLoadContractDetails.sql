@@ -557,7 +557,7 @@ BEGIN TRY
 	LEFT JOIN tblRKFuturesMonth MO ON MO.intFutureMonthId = CD.intFutureMonthId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
 	-- Trade Finance
-	LEFT JOIN tblCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
+	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
 	LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
 	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intFacilityId
 	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId

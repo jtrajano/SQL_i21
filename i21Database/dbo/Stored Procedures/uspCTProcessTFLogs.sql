@@ -67,8 +67,8 @@ BEGIN
 			, intTransactionDetailId = cd.intContractDetailId
 			, strTransactionNumber = ch.strContractNumber + '-' + convert(nvarchar(20),cd.intContractSeq)
 			, dtmTransactionDate = getdate()
-			, intBankTransactionId = cd.intBankAccountId
-			, strBankTransactionId = cd.strBankReferenceNo
+			, intBankTransactionId = null
+			, strBankTransactionId = null
 			, dblTransactionAmountAllocated = cd.dblLoanAmount
 			, dblTransactionAmountActual = cd.dblLoanAmount
 			, intLoanLimitId = cd.intLoanLimitId
