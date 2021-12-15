@@ -11,6 +11,7 @@
 	, @ysnInclude120Days		BIT = 0
 	, @ysnExcludeAccountStatus	BIT = 0
 	, @intGracePeriod			INT = 0
+	, @strReportLogId			NVARCHAR(MAX) = NULL
 AS
 
 SET ANSI_NULLS ON  
@@ -43,6 +44,7 @@ SET @intEntityUserIdLocal		= NULLIF(@intEntityUserId, 0)
 SET @intGracePeriodLocal		= ISNULL(@intGracePeriod, 0)
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
+SET @strReportLogId				= NULLIF(@strReportLogId, NEWID())
 
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
@@ -338,6 +340,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyName		= @strCompanyName
 	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Detail'
+	 , strReportLogId		= @strReportLogId
 INTO ##AGINGSTAGING
 FROM
 (SELECT A.strInvoiceNumber
@@ -578,6 +581,7 @@ INSERT INTO tblARCustomerAgingStagingTable WITH (TABLOCK) (
 		, strCompanyName
 		, strCompanyAddress
 		, strAgingType
+		, strReportLogId
 )
 SELECT AGING.* 
 FROM ##AGINGSTAGING AGING
