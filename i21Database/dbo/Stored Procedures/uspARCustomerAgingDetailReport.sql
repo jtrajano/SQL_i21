@@ -289,18 +289,18 @@ BEGIN
 
 	SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
 
-EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom				= @dtmDateFrom
-											  , @dtmDateTo					= @dtmDateTo											  
-											  , @strSourceTransaction		= @strSourceTransaction
-											  , @strCustomerIds				= @strCustomerIds
-											  , @strSalespersonIds			= @strSalespersonIds
-											  , @strCompanyLocationIds		= @strCompanyLocationIds
-											  , @strAccountStatusIds		= @strAccountStatusIds
-											  , @ysnInclude120Days			= 0
-											  , @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
-											  , @intEntityUserId			= @intEntityUserId
-											  , @ysnOverrideCashFlow		= @ysnOverrideCashFlow
-											  , @strReportLogId				= @strReportLogId
+	EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom				= @dtmDateFrom
+												  , @dtmDateTo					= @dtmDateTo											  
+												  , @strSourceTransaction		= @strSourceTransaction
+												  , @strCustomerIds				= @strCustomerIds
+												  , @strSalespersonIds			= @strSalespersonIds
+												  , @strCompanyLocationIds		= @strCompanyLocationIds
+												  , @strAccountStatusIds		= @strAccountStatusIds
+												  , @ysnInclude120Days			= 0
+												  , @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
+												  , @intEntityUserId			= @intEntityUserId
+												  , @ysnOverrideCashFlow		= @ysnOverrideCashFlow
+												  , @strReportLogId				= @strReportLogId
 
 	IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
 	BEGIN

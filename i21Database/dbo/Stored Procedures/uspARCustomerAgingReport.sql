@@ -286,18 +286,23 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-	
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom				= @dtmDateFrom
-										, @dtmDateTo				= @dtmDateTo
-										, @intEntityUserId			= @intEntityUserId
-										, @strCustomerIds			= @strCustomerIds
-										, @strSalespersonIds		= @strSalespersonIds
-										, @strCompanyLocationIds	= @strCompanyLocationIds
-										, @strAccountStatusIds		= @strAccountStatusIds
-										, @strSourceTransaction		= @strSourceTransaction										
-										, @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
-										, @ysnOverrideCashFlow		= @ysnOverrideCashFlow
-										, @strReportLogId			= @strReportLogId
+
+IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
+BEGIN
+	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+	VALUES (@strReportLogId, GETDATE())
+
+	EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom				= @dtmDateFrom
+											, @dtmDateTo				= @dtmDateTo
+											, @intEntityUserId			= @intEntityUserId
+											, @strCustomerIds			= @strCustomerIds
+											, @strSalespersonIds		= @strSalespersonIds
+											, @strCompanyLocationIds	= @strCompanyLocationIds
+											, @strAccountStatusIds		= @strAccountStatusIds
+											, @strSourceTransaction		= @strSourceTransaction										
+											, @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
+											, @ysnOverrideCashFlow		= @ysnOverrideCashFlow
+											, @strReportLogId			= @strReportLogId
 
 	EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
 								, @intEntityUserId = @intEntityUserId
