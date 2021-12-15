@@ -39,6 +39,7 @@ DECLARE @dtmDateTo						DATETIME
 	  , @ysnPrintOnlyOverCreditLimit	BIT
 	  , @ysnRollCredits					BIT
 	  , @ysnExcludeAccountStatus		BIT
+	  , @strReportLogId					NVARCHAR(MAX)
 	
 -- Create a table variable to hold the XML data. 		
 DECLARE @temp_xml_table TABLE (
@@ -266,6 +267,10 @@ SELECT  @intEntityUserId = NULLIF(CAST(ISNULL([from], '') AS INT), 0)
 FROM	@temp_xml_table
 WHERE	[fieldname] = 'intSrCurrentUserId'
 
+SELECT @strReportLogId = [from]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strReportLogId'
+
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
 	SET @dtmDateTo = CAST(FLOOR(CAST(@dtmDateTo AS FLOAT)) AS DATETIME)
@@ -276,372 +281,390 @@ IF @dtmDateFrom IS NOT NULL
 	SET @dtmDateFrom = CAST(FLOOR(CAST(@dtmDateFrom AS FLOAT)) AS DATETIME)	
 ELSE 			  
 	SET @dtmDateFrom = CAST(-53690 AS DATETIME)
-	
-EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom				= @dtmDateFrom
-										, @dtmDateTo				= @dtmDateTo
-										, @intEntityUserId			= @intEntityUserId
-										, @strCustomerIds			= @strCustomerIds
-										, @strSalespersonIds		= @strSalespersonIds
-										, @strCompanyLocationIds	= @strCompanyLocationIds
-										, @strAccountStatusIds		= @strAccountStatusIds
-										, @strSourceTransaction		= @strSourceTransaction										
-										, @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
 
-EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
-							, @intEntityUserId = @intEntityUserId
-							
---ROLL CREDITS
-IF(OBJECT_ID('tempdb..#CUSTOMERSWITHCREDITS') IS NOT NULL)
+IF NOT EXISTS(SELECT * FROM tblSRReportLog WHERE strReportLogId = @strReportLogId)
 BEGIN
-    DROP TABLE #CUSTOMERSWITHCREDITS
-END
+	INSERT INTO tblSRReportLog (strReportLogId, dtmDate)
+	VALUES (@strReportLogId, GETDATE())
 
-IF ISNULL(@ysnRollCredits, 0) = 1
+	EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom				= @dtmDateFrom
+											, @dtmDateTo				= @dtmDateTo
+											, @intEntityUserId			= @intEntityUserId
+											, @strCustomerIds			= @strCustomerIds
+											, @strSalespersonIds		= @strSalespersonIds
+											, @strCompanyLocationIds	= @strCompanyLocationIds
+											, @strAccountStatusIds		= @strAccountStatusIds
+											, @strSourceTransaction		= @strSourceTransaction										
+											, @ysnExcludeAccountStatus	= @ysnExcludeAccountStatus
+											, @strReportLogId			= @strReportLogId
+
+	EXEC dbo.uspARGLAccountReport @dtmAsOfDate = @dtmDateTo
+								, @intEntityUserId = @intEntityUserId
+							
+	--ROLL CREDITS
+	IF(OBJECT_ID('tempdb..#CUSTOMERSWITHCREDITS') IS NOT NULL)
 	BEGIN
-		--GET CUSTOMERS WITH OPEN CREDITS AND INVOICES
-		SELECT intEntityCustomerId	= intEntityCustomerId
-			 , dbl0Days				= ISNULL(dbl0Days, 0)	
-			 , dbl10Days			= ISNULL(dbl10Days, 0)
-			 , dbl30Days			= ISNULL(dbl30Days, 0)
-			 , dbl60Days			= ISNULL(dbl60Days, 0)
-			 , dbl90Days			= ISNULL(dbl90Days, 0)
-			 , dbl91Days			= ISNULL(dbl91Days, 0)
-			 , dblCredits			= ISNULL(dblCredits, 0)
-			 , dblPrepayments		= ISNULL(dblPrepayments, 0)
-			 , ysnComputed			= CAST(0 AS BIT)
-		INTO #CUSTOMERSWITHCREDITS
-		FROM tblARCustomerAgingStagingTable
-		WHERE intEntityUserId = 1 
-		  AND strAgingType = 'Summary'
-		  AND ABS(ISNULL(dblCredits, 0)) + ABS(ISNULL(dblPrepayments, 0)) <> 0
-		  AND ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) <> 0
-
-		WHILE EXISTS (SELECT TOP 1 NULL FROM #CUSTOMERSWITHCREDITS WHERE ysnComputed = 0)
-			BEGIN
-				DECLARE @intEntityCustomerId	INT = NULL
-					  , @dblRunningCredits		NUMERIC(18, 6) = 0
-					  , @dblRunningPrepaids		NUMERIC(18, 6) = 0
-					  , @dblNewValue			NUMERIC(18, 6) = 0
-
-				SELECT TOP 1 @intEntityCustomerId	= intEntityCustomerId
-						   , @dblRunningCredits		= ABS(dblCredits)
-						   , @dblRunningPrepaids	= ABS(dblPrepayments) 
-				FROM #CUSTOMERSWITHCREDITS
-				WHERE ysnComputed = 0
-
-				WHILE ((SELECT ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) FROM #CUSTOMERSWITHCREDITS WHERE intEntityCustomerId = @intEntityCustomerId) > 0 AND (@dblRunningCredits > 0 OR @dblRunningPrepaids > 0))
-					BEGIN
-						--CREDITS OVER 90 DAYS
-						IF @dblRunningCredits > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl91Days > @dblRunningCredits THEN dbl91Days - @dblRunningCredits ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS 
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl91Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl91Days = @dblNewValue
-								  , @dblRunningCredits = CASE WHEN dbl91Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl91Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl91Days > 0
-							END
-
-						--CREDITS 61-90 DAYS
-						IF @dblRunningCredits > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl90Days > @dblRunningCredits THEN dbl90Days - @dblRunningCredits ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS 
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl90Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl90Days = @dblNewValue
-								  , @dblRunningCredits = CASE WHEN dbl90Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl90Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl90Days > 0
-							END
-
-						--CREDITS 31-60 DAYS
-						IF @dblRunningCredits > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl60Days > @dblRunningCredits THEN dbl60Days - @dblRunningCredits ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS 
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl60Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl60Days = @dblNewValue
-								  , @dblRunningCredits = CASE WHEN dbl60Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl60Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl60Days > 0
-							END
-
-						--CREDITS 11-30 DAYS
-						IF @dblRunningCredits > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl30Days > @dblRunningCredits THEN dbl30Days - @dblRunningCredits ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS 
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl30Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl30Days = @dblNewValue
-								  , @dblRunningCredits = CASE WHEN dbl30Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl30Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl30Days > 0
-							END
-
-						--CREDITS 1-10 DAYS
-						IF @dblRunningCredits > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl10Days > @dblRunningCredits THEN dbl10Days - @dblRunningCredits ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS 
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl10Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl10Days = @dblNewValue
-								  , @dblRunningCredits = CASE WHEN dbl10Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl10Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl10Days > 0
-							END
-
-						--CREDITS CURRENT
-						IF @dblRunningCredits > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl0Days > @dblRunningCredits THEN dbl0Days - @dblRunningCredits ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS 
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl0Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl0Days = @dblNewValue
-								  , @dblRunningCredits = CASE WHEN dbl0Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl0Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl0Days > 0
-							END
-
-						--PREPAIDS OVER 90 DAYS
-						IF @dblRunningPrepaids > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl91Days > @dblRunningPrepaids THEN dbl91Days - @dblRunningPrepaids ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS 
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl91Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl91Days = @dblNewValue
-								  , @dblRunningPrepaids = CASE WHEN dbl91Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl91Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl91Days > 0
-							END
-
-						--PREPAIDS 61-90 DAYS
-						IF @dblRunningPrepaids > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl90Days > @dblRunningPrepaids THEN dbl90Days - @dblRunningPrepaids ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl90Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl90Days = @dblNewValue
-								  , @dblRunningPrepaids = CASE WHEN dbl90Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl90Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl90Days > 0
-							END
-
-						--PREPAIDS 31-60 DAYS
-						IF @dblRunningPrepaids > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl60Days > @dblRunningPrepaids THEN dbl60Days - @dblRunningPrepaids ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl60Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl60Days = @dblNewValue
-								  , @dblRunningPrepaids = CASE WHEN dbl60Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl60Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl60Days > 0
-							END
-
-						--PREPAIDS 11-30 DAYS
-						IF @dblRunningPrepaids > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl30Days > @dblRunningPrepaids THEN dbl30Days - @dblRunningPrepaids ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl30Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl30Days = @dblNewValue
-								  , @dblRunningPrepaids = CASE WHEN dbl30Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl30Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl30Days > 0
-							END
-
-						--PREPAIDS 1-10 DAYS
-						IF @dblRunningPrepaids > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl10Days > @dblRunningPrepaids THEN dbl10Days - @dblRunningPrepaids ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl10Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl10Days = @dblNewValue
-								  , @dblRunningPrepaids = CASE WHEN dbl10Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl10Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl10Days > 0
-							END
-
-						--PREPAIDS CURRENT
-						IF @dblRunningPrepaids > 0
-							BEGIN
-								SET @dblNewValue = 0
-								SELECT @dblNewValue = CASE WHEN dbl0Days > @dblRunningPrepaids THEN dbl0Days - @dblRunningPrepaids ELSE 0 END 
-								FROM #CUSTOMERSWITHCREDITS
-								WHERE intEntityCustomerId = @intEntityCustomerId 
-								  AND dbl0Days > 0
-
-								UPDATE #CUSTOMERSWITHCREDITS 
-								SET dbl0Days = @dblNewValue
-								  , @dblRunningPrepaids = CASE WHEN dbl0Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl0Days END
-								WHERE intEntityCustomerId = @intEntityCustomerId
-								  AND dbl0Days > 0
-							END
-					END
-
-				UPDATE #CUSTOMERSWITHCREDITS 
-				SET ysnComputed		= CAST(1 AS BIT) 
-				  , dblCredits		= @dblRunningCredits * -1
-				  , dblPrepayments	= @dblRunningPrepaids * -1
-				WHERE intEntityCustomerId = @intEntityCustomerId
-			END
-		
-		UPDATE AGING 
-		SET dbl0Days		= CC.dbl0Days
-		  , dbl10Days		= CC.dbl10Days
-		  , dbl30Days		= CC.dbl30Days
-		  , dbl60Days		= CC.dbl60Days
-		  , dbl90Days		= CC.dbl90Days
-		  , dbl91Days		= CC.dbl91Days
-		  , dblCredits		= CC.dblCredits
-		  , dblPrepayments	= CC.dblPrepayments
-		  , dblPrepaids		= CC.dblPrepayments
-		FROM tblARCustomerAgingStagingTable AGING
-		INNER JOIN #CUSTOMERSWITHCREDITS CC ON CC.intEntityCustomerId = AGING.intEntityCustomerId
-		WHERE AGING.intEntityUserId = 1 
-		  AND AGING.strAgingType = 'Summary'
-		  AND CC.ysnComputed = 1
+		DROP TABLE #CUSTOMERSWITHCREDITS
 	END
 
---AGED BALANCES
-IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
-BEGIN
-    DROP TABLE #AGEDBALANCES
-END
-
-SELECT strAgedBalances = ISNULL([from], 'All')
-INTO #AGEDBALANCES
-FROM	@temp_xml_table
-WHERE	[fieldname] = 'strAgedBalances'
-
-IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') <> 'All')
-	BEGIN
-		IF(OBJECT_ID('tempdb..#CUSTOMERWITHBALANCES') IS NOT NULL)
+	IF ISNULL(@ysnRollCredits, 0) = 1
 		BEGIN
-			DROP TABLE #CUSTOMERWITHBALANCES
+			--GET CUSTOMERS WITH OPEN CREDITS AND INVOICES
+			SELECT intEntityCustomerId	= intEntityCustomerId
+				 , dbl0Days				= ISNULL(dbl0Days, 0)	
+				 , dbl10Days			= ISNULL(dbl10Days, 0)
+				 , dbl30Days			= ISNULL(dbl30Days, 0)
+				 , dbl60Days			= ISNULL(dbl60Days, 0)
+				 , dbl90Days			= ISNULL(dbl90Days, 0)
+				 , dbl91Days			= ISNULL(dbl91Days, 0)
+				 , dblCredits			= ISNULL(dblCredits, 0)
+				 , dblPrepayments		= ISNULL(dblPrepayments, 0)
+				 , ysnComputed			= CAST(0 AS BIT)
+			INTO #CUSTOMERSWITHCREDITS
+			FROM tblARCustomerAgingStagingTable
+			WHERE intEntityUserId = 1 
+			  AND strAgingType = 'Summary'
+			  AND ABS(ISNULL(dblCredits, 0)) + ABS(ISNULL(dblPrepayments, 0)) <> 0
+			  AND ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) <> 0
+			  AND strReportLogId = @strReportLogId
+
+			WHILE EXISTS (SELECT TOP 1 NULL FROM #CUSTOMERSWITHCREDITS WHERE ysnComputed = 0)
+				BEGIN
+					DECLARE @intEntityCustomerId	INT = NULL
+						  , @dblRunningCredits		NUMERIC(18, 6) = 0
+						  , @dblRunningPrepaids		NUMERIC(18, 6) = 0
+						  , @dblNewValue			NUMERIC(18, 6) = 0
+
+					SELECT TOP 1 @intEntityCustomerId	= intEntityCustomerId
+							   , @dblRunningCredits		= ABS(dblCredits)
+							   , @dblRunningPrepaids	= ABS(dblPrepayments) 
+					FROM #CUSTOMERSWITHCREDITS
+					WHERE ysnComputed = 0
+
+					WHILE ((SELECT ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) FROM #CUSTOMERSWITHCREDITS WHERE intEntityCustomerId = @intEntityCustomerId) > 0 AND (@dblRunningCredits > 0 OR @dblRunningPrepaids > 0))
+						BEGIN
+							--CREDITS OVER 90 DAYS
+							IF @dblRunningCredits > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl91Days > @dblRunningCredits THEN dbl91Days - @dblRunningCredits ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS 
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl91Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl91Days = @dblNewValue
+									  , @dblRunningCredits = CASE WHEN dbl91Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl91Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl91Days > 0
+								END
+
+							--CREDITS 61-90 DAYS
+							IF @dblRunningCredits > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl90Days > @dblRunningCredits THEN dbl90Days - @dblRunningCredits ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS 
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl90Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl90Days = @dblNewValue
+									  , @dblRunningCredits = CASE WHEN dbl90Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl90Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl90Days > 0
+								END
+
+							--CREDITS 31-60 DAYS
+							IF @dblRunningCredits > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl60Days > @dblRunningCredits THEN dbl60Days - @dblRunningCredits ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS 
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl60Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl60Days = @dblNewValue
+									  , @dblRunningCredits = CASE WHEN dbl60Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl60Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl60Days > 0
+								END
+
+							--CREDITS 11-30 DAYS
+							IF @dblRunningCredits > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl30Days > @dblRunningCredits THEN dbl30Days - @dblRunningCredits ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS 
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl30Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl30Days = @dblNewValue
+									  , @dblRunningCredits = CASE WHEN dbl30Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl30Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl30Days > 0
+								END
+
+							--CREDITS 1-10 DAYS
+							IF @dblRunningCredits > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl10Days > @dblRunningCredits THEN dbl10Days - @dblRunningCredits ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS 
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl10Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl10Days = @dblNewValue
+									  , @dblRunningCredits = CASE WHEN dbl10Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl10Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl10Days > 0
+								END
+
+							--CREDITS CURRENT
+							IF @dblRunningCredits > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl0Days > @dblRunningCredits THEN dbl0Days - @dblRunningCredits ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS 
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl0Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl0Days = @dblNewValue
+									  , @dblRunningCredits = CASE WHEN dbl0Days > @dblRunningCredits THEN 0 ELSE @dblRunningCredits - dbl0Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl0Days > 0
+								END
+
+							--PREPAIDS OVER 90 DAYS
+							IF @dblRunningPrepaids > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl91Days > @dblRunningPrepaids THEN dbl91Days - @dblRunningPrepaids ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS 
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl91Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl91Days = @dblNewValue
+									  , @dblRunningPrepaids = CASE WHEN dbl91Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl91Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl91Days > 0
+								END
+
+							--PREPAIDS 61-90 DAYS
+							IF @dblRunningPrepaids > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl90Days > @dblRunningPrepaids THEN dbl90Days - @dblRunningPrepaids ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl90Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl90Days = @dblNewValue
+									  , @dblRunningPrepaids = CASE WHEN dbl90Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl90Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl90Days > 0
+								END
+
+							--PREPAIDS 31-60 DAYS
+							IF @dblRunningPrepaids > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl60Days > @dblRunningPrepaids THEN dbl60Days - @dblRunningPrepaids ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl60Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl60Days = @dblNewValue
+									  , @dblRunningPrepaids = CASE WHEN dbl60Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl60Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl60Days > 0
+								END
+
+							--PREPAIDS 11-30 DAYS
+							IF @dblRunningPrepaids > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl30Days > @dblRunningPrepaids THEN dbl30Days - @dblRunningPrepaids ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl30Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl30Days = @dblNewValue
+									  , @dblRunningPrepaids = CASE WHEN dbl30Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl30Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl30Days > 0
+								END
+
+							--PREPAIDS 1-10 DAYS
+							IF @dblRunningPrepaids > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl10Days > @dblRunningPrepaids THEN dbl10Days - @dblRunningPrepaids ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl10Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl10Days = @dblNewValue
+									  , @dblRunningPrepaids = CASE WHEN dbl10Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl10Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl10Days > 0
+								END
+
+							--PREPAIDS CURRENT
+							IF @dblRunningPrepaids > 0
+								BEGIN
+									SET @dblNewValue = 0
+									SELECT @dblNewValue = CASE WHEN dbl0Days > @dblRunningPrepaids THEN dbl0Days - @dblRunningPrepaids ELSE 0 END 
+									FROM #CUSTOMERSWITHCREDITS
+									WHERE intEntityCustomerId = @intEntityCustomerId 
+									  AND dbl0Days > 0
+
+									UPDATE #CUSTOMERSWITHCREDITS 
+									SET dbl0Days = @dblNewValue
+									  , @dblRunningPrepaids = CASE WHEN dbl0Days > @dblRunningPrepaids THEN 0 ELSE @dblRunningPrepaids - dbl0Days END
+									WHERE intEntityCustomerId = @intEntityCustomerId
+									  AND dbl0Days > 0
+								END
+						END
+
+					UPDATE #CUSTOMERSWITHCREDITS 
+					SET ysnComputed		= CAST(1 AS BIT) 
+					  , dblCredits		= @dblRunningCredits * -1
+					  , dblPrepayments	= @dblRunningPrepaids * -1
+					WHERE intEntityCustomerId = @intEntityCustomerId
+				END
+		
+			UPDATE AGING 
+			SET dbl0Days		= CC.dbl0Days
+			  , dbl10Days		= CC.dbl10Days
+			  , dbl30Days		= CC.dbl30Days
+			  , dbl60Days		= CC.dbl60Days
+			  , dbl90Days		= CC.dbl90Days
+			  , dbl91Days		= CC.dbl91Days
+			  , dblCredits		= CC.dblCredits
+			  , dblPrepayments	= CC.dblPrepayments
+			  , dblPrepaids		= CC.dblPrepayments
+			FROM tblARCustomerAgingStagingTable AGING
+			INNER JOIN #CUSTOMERSWITHCREDITS CC ON CC.intEntityCustomerId = AGING.intEntityCustomerId
+			WHERE AGING.intEntityUserId = 1 
+			  AND AGING.strAgingType = 'Summary'
+			  AND strReportLogId = @strReportLogId
+			  AND CC.ysnComputed = 1
 		END
 
-		SELECT intEntityCustomerId 
-		INTO #CUSTOMERWITHBALANCES
-		FROM tblARCustomerAgingStagingTable
-		WHERE intEntityUserId = @intEntityUserId
-		AND strAgingType = 'Summary'
-		AND (
-			   ((ISNULL(dbl0Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current')))
-			OR ((ISNULL(dbl10Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '1-10 Days')))
-			OR ((ISNULL(dbl30Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days')))
-			OR ((ISNULL(dbl60Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days')))
-			OR ((ISNULL(dbl90Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days')))
-			OR ((ISNULL(dbl91Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
-		)
+	--AGED BALANCES
+	IF(OBJECT_ID('tempdb..#AGEDBALANCES') IS NOT NULL)
+	BEGIN
+		DROP TABLE #AGEDBALANCES
+	END
 
-		DELETE AGING 
-		FROM tblARCustomerAgingStagingTable AGING
-		LEFT JOIN #CUSTOMERWITHBALANCES BAL ON AGING.intEntityCustomerId = BAL.intEntityCustomerId
-		WHERE intEntityUserId = @intEntityUserId 
-		  AND strAgingType = 'Summary'
-		  AND ISNULL(BAL.intEntityCustomerId, 0) = 0
+	SELECT strAgedBalances = ISNULL([from], 'All')
+	INTO #AGEDBALANCES
+	FROM	@temp_xml_table
+	WHERE	[fieldname] = 'strAgedBalances'
 
-		UPDATE GL
-		SET GL.dblTotalAR 				= ISNULL(AGING.dblTotalAR, 0)
-		  , GL.dblTotalReportBalance 	= ISNULL(AGING.dblTotalAR, 0) + ISNULL(AGING.dblTotalPrepayments, 0)
-		FROM tblARGLSummaryStagingTable GL
-		OUTER APPLY (
-			SELECT dblTotalAR 			= SUM((ISNULL(dblFuture, 0) + ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0)) + ISNULL(dblCredits, 0))
-				 , dblTotalPrepayments 	= SUM(ISNULL(dblPrepayments, 0))
-			FROM dbo.tblARCustomerAgingStagingTable
+	IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') <> 'All')
+		BEGIN
+			IF(OBJECT_ID('tempdb..#CUSTOMERWITHBALANCES') IS NOT NULL)
+			BEGIN
+				DROP TABLE #CUSTOMERWITHBALANCES
+			END
+
+			SELECT intEntityCustomerId 
+			INTO #CUSTOMERWITHBALANCES
+			FROM tblARCustomerAgingStagingTable
+			WHERE intEntityUserId = @intEntityUserId
+			AND strAgingType = 'Summary'
+			AND strReportLogId = @strReportLogId
+			AND (
+				   ((ISNULL(dbl0Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Current')))
+				OR ((ISNULL(dbl10Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '1-10 Days')))
+				OR ((ISNULL(dbl30Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days')))
+				OR ((ISNULL(dbl60Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days')))
+				OR ((ISNULL(dbl90Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days')))
+				OR ((ISNULL(dbl91Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
+			)
+
+			DELETE AGING 
+			FROM tblARCustomerAgingStagingTable AGING
+			LEFT JOIN #CUSTOMERWITHBALANCES BAL ON AGING.intEntityCustomerId = BAL.intEntityCustomerId
 			WHERE intEntityUserId = @intEntityUserId 
-		  	  AND strAgingType = 'Summary'
-		) AGING
-		WHERE intEntityUserId = @intEntityUserId 
-	END
+			  AND strAgingType = 'Summary'
+			  AND ISNULL(BAL.intEntityCustomerId, 0) = 0
+			  AND strReportLogId = @strReportLogId
 
-DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
-											 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
-											 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
-											 AND intEntityUserId = @intEntityUserId
-											 AND strAgingType = 'Summary'
+			UPDATE GL
+			SET GL.dblTotalAR 				= ISNULL(AGING.dblTotalAR, 0)
+			  , GL.dblTotalReportBalance 	= ISNULL(AGING.dblTotalAR, 0) + ISNULL(AGING.dblTotalPrepayments, 0)
+			FROM tblARGLSummaryStagingTable GL
+			OUTER APPLY (
+				SELECT dblTotalAR 			= SUM((ISNULL(dblFuture, 0) + ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0)) + ISNULL(dblCredits, 0))
+					 , dblTotalPrepayments 	= SUM(ISNULL(dblPrepayments, 0))
+				FROM dbo.tblARCustomerAgingStagingTable
+				WHERE intEntityUserId = @intEntityUserId 
+		  		  AND strAgingType = 'Summary'
+				  AND strReportLogId = @strReportLogId
+			) AGING
+			WHERE intEntityUserId = @intEntityUserId 
+		END
 
-IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
-	BEGIN
-		DELETE FROM tblARCustomerAgingStagingTable WHERE (ISNULL(dblCreditLimit, 0) > ISNULL(dblTotalAR, 0)
-									    OR (ISNULL(dblCreditLimit, 0) = 0 AND ISNULL(dblTotalAR, 0) = 0)
-										OR ISNULL(dblCreditLimit, 0) = 0)
-										AND intEntityUserId = @intEntityUserId
-										AND strAgingType = 'Summary'
-	END
+	DELETE FROM tblARCustomerAgingStagingTable WHERE dbo.fnRoundBanker(dblTotalAR, 2) = 0.00 
+												 AND dbo.fnRoundBanker(dblCredits, 2) = 0.00 
+												 AND dbo.fnRoundBanker(dblPrepayments, 2) = 0.00
+												 AND intEntityUserId = @intEntityUserId
+												 AND strAgingType = 'Summary'
+												 AND strReportLogId = @strReportLogId
 
-IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary')
-	BEGIN
-		INSERT INTO tblARCustomerAgingStagingTable (
-			  strCompanyName
-			, strCompanyAddress
-			, dtmAsOfDate
-			, intEntityUserId
-			, strAgingType
-		)
-		SELECT strCompanyName		= COMPANY.strCompanyName
-			 , strCompanyAddress	= COMPANY.strCompanyAddress
-			 , dtmAsOfDate			= @dtmDateTo
-			 , intEntityUserId		= @intEntityUserId
-			 , strAgingType			= 'Summary'
-		FROM (
-			SELECT TOP 1 strCompanyName
-					   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
-			FROM dbo.tblSMCompanySetup WITH (NOLOCK)
-		) COMPANY
-	END
+	IF ISNULL(@ysnPrintOnlyOverCreditLimit, 0) = 1
+		BEGIN
+			DELETE FROM tblARCustomerAgingStagingTable WHERE (ISNULL(dblCreditLimit, 0) > ISNULL(dblTotalAR, 0)
+											OR (ISNULL(dblCreditLimit, 0) = 0 AND ISNULL(dblTotalAR, 0) = 0)
+											OR ISNULL(dblCreditLimit, 0) = 0)
+											AND intEntityUserId = @intEntityUserId
+											AND strAgingType = 'Summary'
+		END
 
-IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary')
-	BEGIN
-		UPDATE AGING
-		SET dblTotalCustomerAR = ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) + ISNULL(dblCredits, 0) + ISNULL(dblPrepayments, 0)
-		FROM tblARCustomerAgingStagingTable AGING
-		WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
-	END
-SELECT * FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary'
+	IF NOT EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary' AND strReportLogId = @strReportLogId)
+		BEGIN
+			INSERT INTO tblARCustomerAgingStagingTable (
+				  strCompanyName
+				, strCompanyAddress
+				, dtmAsOfDate
+				, intEntityUserId
+				, strAgingType
+			)
+			SELECT strCompanyName		= COMPANY.strCompanyName
+				 , strCompanyAddress	= COMPANY.strCompanyAddress
+				 , dtmAsOfDate			= @dtmDateTo
+				 , intEntityUserId		= @intEntityUserId
+				 , strAgingType			= 'Summary'
+			FROM (
+				SELECT TOP 1 strCompanyName
+						   , strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
+				FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+			) COMPANY
+		END
+
+	IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomerAgingStagingTable WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary' AND strReportLogId = @strReportLogId)
+		BEGIN
+			UPDATE AGING
+			SET  dblTotalCustomerAR = ISNULL(dbl0Days, 0) + ISNULL(dbl10Days, 0) + ISNULL(dbl30Days, 0) + ISNULL(dbl60Days, 0) + ISNULL(dbl90Days, 0) + ISNULL(dbl91Days, 0) + ISNULL(dblCredits, 0) + ISNULL(dblPrepayments, 0)
+			FROM tblARCustomerAgingStagingTable AGING
+			WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Summary' AND strReportLogId = @strReportLogId
+		END
+END
+
+SELECT * 
+FROM tblARCustomerAgingStagingTable 
+WHERE intEntityUserId = @intEntityUserId 
+AND strAgingType = 'Summary' 
+AND strReportLogId = @strReportLogId
