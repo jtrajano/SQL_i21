@@ -139,13 +139,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 DECLARE @dblRatio NUMERIC (18,6)
 
 IF @dblAmountDetailTotalForeign > 0
-BEGIN
-	IF @dblShortAmount > 0
-	BEGIN
-		SELECT @dblRatio = @dblAmount / @dblAmountDetailTotalForeign
-
-	END
-END
+	SELECT @dblRatio = @dblAmount / @dblAmountDetailTotalForeign
 --=====================================================================================================================================
 -- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
