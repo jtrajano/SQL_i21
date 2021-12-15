@@ -14,6 +14,7 @@
 	, @ysnFromBalanceForward		BIT = 0
 	, @ysnPrintFromCF				BIT = 0
 	, @ysnExcludeAccountStatus		BIT = 0
+	, @strReportLogId				NVARCHAR(MAX) = NULL
 AS
 
 DECLARE @dtmDateFromLocal				DATETIME		= NULL,
@@ -55,6 +56,7 @@ SET @strAccountStatusIdsLocal		= NULLIF(@strAccountStatusIds, '')
 
 SET @dtmDateFromLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
 SET @dtmDateToLocal					= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
+SET @strReportLogId					= NULLIF(@strReportLogId, NEWID())
 
 SELECT TOP 1 @strCompanyName	= strCompanyName
 		   , @strCompanyAddress = dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) 
@@ -397,6 +399,7 @@ INSERT INTO tblARCustomerAgingStagingTable (
 	 , strCompanyName
 	 , strCompanyAddress
 	 , strAgingType
+	 , strReportLogId
 )	
 SELECT strCustomerName		= CUSTOMER.strCustomerName
      , strEntityNo			= CUSTOMER.strCustomerNumber
@@ -424,6 +427,7 @@ SELECT strCustomerName		= CUSTOMER.strCustomerName
 	 , strCompanyName		= @strCompanyName
 	 , strCompanyAddress	= @strCompanyAddress
 	 , strAgingType			= 'Summary'
+	 , strReportLogId		= @strReportLogId
 FROM
 (SELECT A.intEntityCustomerId
      , dblTotalAR           = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit) - SUM(B.dblPrepayments)
