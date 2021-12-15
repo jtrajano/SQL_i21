@@ -148,7 +148,7 @@ SELECT a.intContractDetailId
 	, n.strLocationName
 	, o.strCurrency
 	, p.strContractStatus
-	, strShipmentStatus = r.strShipmentStatus
+	, strShipmentStatus = ISNULL(r.strShipmentStatus,'Open')
 	, strFinancialStatus = CASE WHEN b.intContractTypeId = 1 THEN CASE WHEN a.ysnFinalPNL = 1 THEN 'Final P&L Created'
 																	WHEN a.ysnProvisionalPNL = 1 THEN 'Provisional P&L Created'
 																	ELSE CASE WHEN s.intContractDetailId IS NOT NULL THEN 'Purchase Invoice Received'
