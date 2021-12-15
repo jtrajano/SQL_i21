@@ -11,8 +11,7 @@ DECLARE @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Det
  ,@TRANSACTION_FORM AS NVARCHAR(100)   = 'Bank Transfer',
  @dblFeesFrom DECIMAL(18,6),@dblFeesForeignFrom DECIMAL(18,6), @intGLAccountIdFrom INT,@intGLAccountIdTo INT
 
-SELECT @dblFeesFrom = dblFeesFrom, @dblFeesForeignFrom =dblFeesForeignFrom, 
-@intGLAccountIdFrom=intGLAccountIdFrom,@intGLAccountIdTo = intGLAccountIdTo
+SELECT @intGLAccountIdFrom=intGLAccountIdFrom,@intGLAccountIdTo = intGLAccountIdTo
 FROM tblCMBankTransfer WHERE @strTransactionId = strTransactionId
 
     INSERT INTO #tmpGLDetail (    
@@ -113,7 +112,7 @@ FROM tblCMBankTransfer WHERE @strTransactionId = strTransactionId
     WHERE A.strTransactionId = @strTransactionId   
 
 EXEC uspCMCreateBankTransferDiffEntries @strTransactionId,@dtmDate,@strBatchId,@intDefaultCurrencyId
-EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom,  @intDefaultCurrencyId
-EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  , @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom, @intDefaultCurrencyId
+EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', @dtmDate, @strBatchId,  @intDefaultCurrencyId
+EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  , @dtmDate, @strBatchId, @intDefaultCurrencyId
 
 SELECT 1

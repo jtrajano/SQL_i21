@@ -19,11 +19,11 @@ BEGIN
     RAISERROR('Cannot find the in transit GL Account ID Setting in Company Configuration.', 11, 1)    
     RETURN
 END 
-DECLARE @dblFeesFrom DECIMAL(18,6),@dblFeesForeignFrom DECIMAL(18,6), @intGLAccountIdFrom INT,@intGLAccountIdTo INT
-SELECT @dblFeesFrom = dblFeesFrom, @dblFeesForeignFrom =dblFeesForeignFrom,
- @intGLAccountIdFrom=intGLAccountIdFrom,@intGLAccountIdTo = intGLAccountIdTo,
- @dtmDate = CASE WHEN @ysnPostedInTransit = 0 THEN dtmDate ELSE dtmInTransit END
- FROM tblCMBankTransfer WHERE @strTransactionId = strTransactionId
+DECLARE @intGLAccountIdFrom INT,@intGLAccountIdTo INT
+SELECT 
+@intGLAccountIdFrom=intGLAccountIdFrom,@intGLAccountIdTo = intGLAccountIdTo,
+@dtmDate = CASE WHEN @ysnPostedInTransit = 0 THEN dtmDate ELSE dtmInTransit END
+FROM tblCMBankTransfer WHERE @strTransactionId = strTransactionId
 
 
 IF @ysnPostedInTransit = 0
@@ -129,7 +129,7 @@ BEGIN
 
     EXEC uspCMCreateBankTransferDiffEntries @strTransactionId, @dtmDate, @strBatchId, @intDefaultCurrencyId
     EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', 
-        @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom,  @intDefaultCurrencyId   
+        @dtmDate, @strBatchId, @intDefaultCurrencyId   
     
 END
 ELSE
@@ -233,8 +233,7 @@ BEGIN
     WHERE A.strTransactionId = @strTransactionId    
 
     
-    EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  
-    , @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom, @intDefaultCurrencyId  
+    EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To' , @dtmDate, @strBatchId, @intDefaultCurrencyId  
 
 
 END

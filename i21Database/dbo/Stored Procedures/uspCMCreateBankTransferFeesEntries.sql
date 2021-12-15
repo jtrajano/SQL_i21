@@ -4,8 +4,7 @@ CREATE PROCEDURE uspCMCreateBankTransferFeesEntries
 @strDir NVARCHAR(5),
 @dtmDate DATETIME,
 @strBatchId NVARCHAR(40),
-@dblFees DECIMAL(18,6),
-@dblFeesForeign DECIMAL(18,6),
+
 @intDefaultCurrencyId INT = 3
 
 AS
@@ -13,6 +12,15 @@ AS
 declare @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Detail table.     
  ,@MODULE_NAME AS NVARCHAR(100)    = 'Cash Management' -- Module where this posting code belongs.    
  ,@TRANSACTION_FORM AS NVARCHAR(100)   = 'Bank Transfer'    
+ ,@dblFees DECIMAL(18,6)
+ ,@dblFeesForeign DECIMAL(18,6)
+
+
+SELECT @dblFees = 
+case WHEN @strDir = 'From' THEN dblFeesFrom ELSE dblFeesTo END,
+@dblFeesForeign = case WHEN @strDir = 'From' THEN dblFeesForeignFrom ELSE dblFeesForeignTo END
+FROM tblCMBankTransfer 
+WHERE strTransactionId =@strTransactionId
 
 IF @dblFees > 0
 BEGIN
@@ -170,6 +178,7 @@ BEGIN
     END
         
 END
+
 END
 
     
