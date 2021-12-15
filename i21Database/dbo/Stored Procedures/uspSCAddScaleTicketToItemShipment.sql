@@ -408,7 +408,7 @@ END
 																	ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))  
 																END
 															) / SE.dblQuantity
-														) * CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END 														
+														) * - 1--CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END
 													
 												WHEN IC.strCostMethod = 'Amount' THEN --0
 													CASE
@@ -418,7 +418,7 @@ END
 																WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0))    
 																ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))  
 															END 
-															* CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END 														
+															* - 1 --CASE WHEN QM.dblDiscountAmount < 0 THEN  -1 ELSE 1 END
 
 															
 													END
@@ -436,18 +436,13 @@ END
 													CASE 
 														WHEN SE.intOwnershipType = 2 THEN 0
 														WHEN SE.intOwnershipType = 1 THEN
-														CASE
-															WHEN QM.dblDiscountAmount < 0 THEN 
-															CASE
-																WHEN @splitDistribution = 'SPL' THEN (dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0) * -1)
-																ELSE (dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice) * -1)
-															END 
-															WHEN QM.dblDiscountAmount > 0 THEN 
-															CASE
-																WHEN @splitDistribution = 'SPL' THEN dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0)
-																ELSE dbo.fnSCCalculateDiscount(SE.intSourceId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice)
-															END 
-														END
+															CASE WHEN @splitDistribution = 'SPL' THEN 
+																(dbo.fnSCCalculateDiscountSplit(SE.intSourceId, SE.intEntityCustomerId, QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice, 0))
+															ELSE 
+																(dbo.fnSCCalculateDiscount(SE.intSourceId,QM.intTicketDiscountId, SE.dblQuantity, GR.intUnitMeasureId, SE.dblUnitPrice))
+															END
+															* -1
+
 													END,2)
 											END
 		,[ysnAccrue]						= 0
