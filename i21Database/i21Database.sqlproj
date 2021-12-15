@@ -3977,6 +3977,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransactionEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferDiffEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferIntransitPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferForwardPostEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCreateBankTransferFeesEntries.sql" />

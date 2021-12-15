@@ -112,7 +112,7 @@ FROM tblCMBankTransfer WHERE @strTransactionId = strTransactionId
     ON A.intGLAccountIdTo = GLAccnt.intAccountId      
     WHERE A.strTransactionId = @strTransactionId   
 
-
+EXEC uspCMCreateBankTransferDiffEntries @strTransactionId,@dtmDate,@strBatchId,@intDefaultCurrencyId
 EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdFrom, 'From', @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom,  @intDefaultCurrencyId
 EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  , @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom, @intDefaultCurrencyId
 

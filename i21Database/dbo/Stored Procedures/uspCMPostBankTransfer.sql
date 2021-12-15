@@ -102,7 +102,8 @@ DECLARE
  ,@ysnPostedInTransit BIT  
  ,@intBankTransferTypeId INT  
  ,@dtmAccrual DATETIME  
- ,@intRealizedOrDiffAccountId INT    
+ ,@intRealizedAccountId INT    
+ 
  -- Table Variables    
  ,@RecapTable AS RecapTableType     
  ,@GLEntries AS RecapTableType   
@@ -166,49 +167,35 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
   
 IF ((@intCurrencyIdFrom != @intDefaultCurrencyId) OR (@intCurrencyIdTo != @intDefaultCurrencyId ) )AND @ysnPost = 1
 BEGIN  
-    IF @intBankTransferTypeId = 1 OR @ysnPostedInTransit = 0 -- FOR BANK TRANSFER TYPE THERE IS NO GAIN/LOSS- ONLY DIFFERENCE
-    BEGIN
-          SELECT TOP 1 @intRealizedOrDiffAccountId= intBTForexDiffAccountId   
-          FROM tblCMCompanyPreferenceOption  
-          IF @intRealizedOrDiffAccountId is NULL  
-          BEGIN  
-            RAISERROR ('Foreign Difference Account was not set in Company Configuration screen.',11,1)  
-            GOTO Post_Rollback    
-          END  
-    END
-    ELSE
---    IF @ysnPostedInTransit =1 -- GAIN / LOSS WILL BE POSTED IN THE LAST  POSTING
-    BEGIN
-        IF @intBankTransferTypeId = 2  
-        BEGIN  
-          SELECT TOP 1 @intRealizedOrDiffAccountId= intCashManagementRealizedId   
-          FROM tblSMMultiCurrency  
-          IF @intRealizedOrDiffAccountId is NULL  
-          BEGIN  
-            RAISERROR ('Cash Management Realized Gain/Loss account was not set in Company Configuration screen.',11,1)  
-            GOTO Post_Rollback    
-          END  
-        END  
-        IF @intBankTransferTypeId = 3  
-        BEGIN  
-          SELECT TOP 1 @intRealizedOrDiffAccountId= intGainOnForwardRealizedId   
-          FROM tblSMMultiCurrency  
-          IF @intRealizedOrDiffAccountId is NULL  
-          BEGIN  
-            RAISERROR ('Forward Realized Gain/Loss account was not set in Company Configuration screen.',11,1)  
-            GOTO Post_Rollback    
-          END  
-        END  
-        IF @intBankTransferTypeId = 5
-        BEGIN  
-          SELECT TOP 1 @intRealizedOrDiffAccountId= intGainOnSwapRealizedId   
-          FROM tblSMMultiCurrency  
-          IF @intRealizedOrDiffAccountId is NULL  
-          BEGIN  
-            RAISERROR ('Swap Realized Gain/Loss account was not set in Company Configuration screen.',11,1)  
-            GOTO Post_Rollback    
-          END  
-        END  
+    IF @intBankTransferTypeId = 2  
+    BEGIN  
+      SELECT TOP 1 @intRealizedAccountId= intCashManagementRealizedId   
+      FROM tblSMMultiCurrency  
+      IF @intRealizedAccountId is NULL  
+      BEGIN  
+        RAISERROR ('Cash Management Realized Gain/Loss account was not set in Company Configuration screen.',11,1)  
+        GOTO Post_Rollback    
+      END  
+    END  
+    IF @intBankTransferTypeId = 3  
+    BEGIN  
+      SELECT TOP 1 @intRealizedAccountId= intGainOnForwardRealizedId   
+      FROM tblSMMultiCurrency  
+      IF @intRealizedAccountId is NULL  
+      BEGIN  
+        RAISERROR ('Forward Realized Gain/Loss account was not set in Company Configuration screen.',11,1)  
+        GOTO Post_Rollback    
+      END  
+    END  
+    IF @intBankTransferTypeId = 5
+    BEGIN  
+      SELECT TOP 1 @intRealizedAccountId= intGainOnSwapRealizedId   
+      FROM tblSMMultiCurrency  
+      IF @intRealizedAccountId is NULL  
+      BEGIN  
+        RAISERROR ('Swap Realized Gain/Loss account was not set in Company Configuration screen.',11,1)  
+        GOTO Post_Rollback    
+      END  
     END
 END  
 
@@ -902,7 +889,7 @@ END
         SELECT @strGainDesc = CASE WHEN @ysnPostedInTransit = 0 THEN 'Forex Difference' ELSE 'Gain / Loss from Bank Transfer' END
         EXEC [uspCMInsertGainLossBankTransfer] @intDefaultCurrencyId, 
         @strGainDesc,
-        @intRealizedOrDiffAccountId  
+        @intRealizedAccountId  
       END
   --END  
   
@@ -1353,5 +1340,4 @@ Audit_Log:
 -- Clean-up routines:    
 -- Delete all temporary tables used during the post transaction.     
 Post_Exit:    
- IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail  
-  
+ IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail

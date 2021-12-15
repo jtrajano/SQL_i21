@@ -229,6 +229,8 @@ BEGIN
     )GLAccnt
     WHERE A.strTransactionId = @strTransactionId    
 
+    EXEC uspCMCreateBankTransferDiffEntries @strTransactionId, @dtmDate, @strBatchId, @intDefaultCurrencyId
+
     EXEC uspCMCreateBankTransferFeesEntries @strTransactionId, @intGLAccountIdTo, 'To'  
     , @dtmDate, @strBatchId,@dblFeesFrom,@dblFeesForeignFrom, @intDefaultCurrencyId  
 
