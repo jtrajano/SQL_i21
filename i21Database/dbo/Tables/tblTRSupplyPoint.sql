@@ -13,6 +13,7 @@
 	[intRackPriceSupplyPointId] INT NULL,
 	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 	[intConcurrencyId] [int] NOT NULL,
+	[strFreightSalesUnit] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblTRSupplyPoint] PRIMARY KEY ([intSupplyPointId]),
 	CONSTRAINT [AK_tblTRSupplyPoint_intEntityVendorId_intEntityLocationId] UNIQUE ([intEntityVendorId],[intEntityLocationId]),
 	CONSTRAINT [FK_tblTRSupplyPoint_tblAPVendor_intEntityVendorId] FOREIGN KEY (intEntityVendorId) REFERENCES [dbo].[tblAPVendor] (intEntityId),
