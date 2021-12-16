@@ -56,6 +56,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnGLOnly]
 	,[strBOLNumber]
 	,[intTicketId]
+	,[intSourceEntityId]
 )
 
 SELECT 
@@ -121,6 +122,7 @@ SELECT
 	,[ysnGLOnly]				= CASE WHEN (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0) THEN @ZeroBit ELSE @OneBit END
 	,[strBOLNumber]				= ARID.strBOLNumber 
 	,[intTicketId]				= ARID.intTicketId
+	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -193,6 +195,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnAutoBlend]
 	,[strBOLNumber] 
 	,[intTicketId]
+	,[intSourceEntityId]
 )
 SELECT
 	 [intItemId]				= ARIC.[intBundleItemId]
@@ -232,6 +235,7 @@ SELECT
 	,[ysnAutoBlend]				= ARID.[ysnAutoBlend]
 	,[strBOLNumber]				= ARID.strBOLNumber 
 	,[intTicketId]				= ARID.intTicketId
+	,[intSourceEntityId]		= ARID.intEntityCustomerId
 FROM ##ARPostInvoiceDetail ARID
 INNER JOIN tblICItemBundle ARIC WITH (NOLOCK) ON ARID.intItemId = ARIC.intItemId
 INNER JOIN tblICItemLocation ILOC WITH (NOLOCK) ON ILOC.intItemId = ARIC.intItemId AND ILOC.intLocationId = ARID.intCompanyLocationId
@@ -293,6 +297,7 @@ INSERT INTO ##ARItemsForCosting
 	,[ysnAutoBlend]
 	,[strBOLNumber] 
 	,[intTicketId]
+	,[intSourceEntityId]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -323,6 +328,7 @@ SELECT
 	,ARID.[ysnAutoBlend]
 	,ARID.[strBOLNumber] 
 	,ARID.[intTicketId]
+	,ARID.[intEntityCustomerId]
 FROM ##ARItemsForCosting ARIC
 INNER JOIN ##ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
