@@ -14,11 +14,13 @@ declare @GL_DETAIL_CODE AS NVARCHAR(10)   = 'BTFR' -- String code used in GL Det
  ,@TRANSACTION_FORM AS NVARCHAR(100)   = 'Bank Transfer'    
  ,@dblFees DECIMAL(18,6)
  ,@dblFeesForeign DECIMAL(18,6)
-
+ ,@dblExchangeRate DECIMAL(18,6)
+ ,@dblFeesRate DECIMAL(18,6)
 
 SELECT @dblFees = 
 case WHEN @strDir = 'From' THEN dblFeesFrom ELSE dblFeesTo END,
-@dblFeesForeign = case WHEN @strDir = 'From' THEN dblFeesForeignFrom ELSE dblFeesForeignTo END
+@dblFeesForeign = case WHEN @strDir = 'From' THEN dblFeesForeignFrom ELSE dblFeesForeignTo END,
+@dblFeesRate =case WHEN @strDir = 'From' THEN dblRateFeesFrom ELSE dblRateFeesTo END
 FROM tblCMBankTransfer 
 WHERE strTransactionId =@strTransactionId
 
@@ -90,12 +92,23 @@ BEGIN
             = GLAccnt.intAccountId    
             WHERE A.strTransactionId = @strTransactionId  
 
-            UPDATE A   
-            SET dblCredit = dblCredit + @dblFees,  
-            dblCreditForeign = dblCreditForeign + @dblFeesForeign ,
-            dblExchangeRate = (dblCredit + @dblFees)/ (dblCreditForeign + @dblFeesForeign )
+            -- for fees having different exchange rate
+            
+            SELECT 
+            @dblExchangeRate = ((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblCreditForeign)) / (dblCreditForeign + @dblFeesForeign)
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
+
+            UPDATE A   
+            SET dblCreditForeign = dblCreditForeign + @dblFeesForeign ,
+            dblExchangeRate = @dblExchangeRate,
+            dblCredit = (dblCreditForeign + @dblFeesForeign) * @dblExchangeRate
+            from #tmpGLDetail A  
+            WHERE intAccountId = @intBankGLAccountId  
+
+
+
+
     END
     
 END
@@ -147,9 +160,9 @@ BEGIN
             ,[strDescription]        = A.strDescription    
             ,[strCode]               = @GL_DETAIL_CODE    
             ,[strReference]          = A.strReferenceTo   
-            ,[intCurrencyId]         = intCurrencyIdAmountFrom    
+            ,[intCurrencyId]         = intCurrencyIdAmountTo  
             ,[intCurrencyExchangeRateTypeId] =  CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo THEN NULL ELSE  intRateTypeIdFeesTo  END  
-            ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountFrom THEN 1 ELSE dblRateFeesTo  END  
+            ,[dblExchangeRate]       = CASE WHEN @intDefaultCurrencyId = intCurrencyIdAmountTo THEN 1 ELSE dblRateFeesTo  END  
             ,[dtmDateEntered]        = GETDATE()    
             ,[dtmTransactionDate]    = @dtmDate
             ,[strJournalLineDescription]  = 'Bank Transfer Fees'
@@ -166,15 +179,20 @@ BEGIN
             = GLAccnt.intAccountId    
             WHERE A.strTransactionId = @strTransactionId    
 
-
-
-            UPDATE   
-            A  
-            SET dblDebit = dblDebit - @dblFees, dblDebitForeign = dblDebitForeign - @dblFeesForeign  
-            ,dblExchangeRate = (dblDebit - @dblFees)/ (dblDebitForeign - @dblFeesForeign )
-            FROM  
-            #tmpGLDetail A  
+            
+            SELECT 
+            @dblExchangeRate = ((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblDebitForeign)) / (dblDebitForeign + @dblFeesForeign)
+            from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
+
+            UPDATE A   
+            SET dblDebitForeign = dblDebitForeign - @dblFeesForeign ,
+            dblExchangeRate = @dblExchangeRate,
+            dblDebit = (dblDebitForeign - @dblFeesForeign) * @dblExchangeRate
+            from #tmpGLDetail A  
+            WHERE intAccountId = @intBankGLAccountId  
+
+
     END
         
 END
