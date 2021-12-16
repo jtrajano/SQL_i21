@@ -45,6 +45,7 @@ SELECT intEntityLocationId			= EL.intEntityLocationId
 	 , intSalespersonId				= ISNULL(EL.intSalespersonId, CUSTOMER.intSalespersonId)
 	 , strSalespersonId				= SALESPERSON.strSalespersonId
 	 , strSalesPersonName			= SALESPERSON.strSalesPersonName
+	 , strFreightSalesUnit			= SP.strFreightSalesUnit
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntityType ET ON EL.intEntityId = ET.intEntityId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = EL.intEntityLocationId 
