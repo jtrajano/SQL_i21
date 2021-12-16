@@ -343,6 +343,8 @@
     <Build Include="dbo\Views\vyuCTCombinePriceFixation.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixationDetail.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRVendorSupplyPointDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
