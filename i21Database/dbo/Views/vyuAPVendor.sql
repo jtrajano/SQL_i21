@@ -31,7 +31,6 @@ SELECT
 	B.dblCreditLimit,
 	C.intShipViaId,
 	--C.intTaxCodeId,
-	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId  END as intTermsId,
 	--C.strContactName,
 	C.strAddress,
 	C.strCity,
@@ -89,8 +88,9 @@ SELECT
 	B.intChainAccountNumber,
 	B.intCsvFormat,
 	storeDescription = I.strDescription,
-	ysnTransportTerminal
-	,strTerm = J.strTerm
+	ysnTransportTerminal,
+	CASE WHEN C.intTermsId > 0 THEN C.intTermsId ELSE B.intTermsId END as intTermsId,
+	CASE WHEN C.intTermsId > 0 THEN K.strTerm ELSE J.strTerm END as strTerm
 FROM
 		dbo.tblEMEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -116,3 +116,5 @@ FROM
 		ON I.intStoreId = B.intStoreStoreId
 	LEFT JOIN tblSMTerm J
 		ON B.intTermsId = J.intTermID
+	LEFT JOIN tblSMTerm K
+		ON C.intTermsId = K.intTermID
