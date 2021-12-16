@@ -60,6 +60,7 @@ INSERT INTO @ItemsForPost
 	,[strBOLNumber]
 	,[strSourceNumber]
 	,[strSourceType]
+	,[intSourceEntityId]
 ) 
 SELECT 
      [intItemId]
@@ -94,6 +95,7 @@ SELECT
 	,[strBOLNumber]
 	,[strSourceNumber]
 	,[strSourceType]
+	,[intSourceEntityId]
 FROM 
 	##ARItemsForCosting
 
