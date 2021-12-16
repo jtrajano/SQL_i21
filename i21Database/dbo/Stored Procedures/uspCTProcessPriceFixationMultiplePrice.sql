@@ -69,6 +69,8 @@ BEGIN
 			join tblCTContractDetail cd on cd.intContractHeaderId = ch.intContractHeaderId
 		where
 			pf.intPriceContractId = @intPriceContractId
+			and isnull(ch.dblQuantity,0) > 0
+			and isnull(ch.dblNoOfLots,0) > 0
 		order by cd.intContractDetailId
 
 		select @intActiveContractDetailId = min(intContractDetailId) from #tmpPriceFixation where intContractDetailId > isnull(@intActiveContractDetailId,0)
@@ -156,6 +158,13 @@ BEGIN
 		begin
 			
 			select @intPriceFixationMultiplePriceId = min(intPriceFixationMultiplePriceId) from #tmpPriceFixationMultiplePrice where dblQuantity > 0
+
+			if (@intPriceFixationMultiplePriceId is null)
+			begin
+				update #tmpPriceFixationDetail set dblQuantity = dblQuantity - @dblQuantityToPriced where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+				select @intActivePriceFixationDetailId = min(intPriceFixationDetailId) from #tmpPriceFixationDetail where dblQuantity > 0;
+			end
+
 			while (@intPriceFixationMultiplePriceId is not null)
 			begin
 				select @dblQuantity = dblQuantity, @intPriceFixationId = intPriceFixationId from #tmpPriceFixationDetail where intPriceFixationDetailId = @intActivePriceFixationDetailId;
