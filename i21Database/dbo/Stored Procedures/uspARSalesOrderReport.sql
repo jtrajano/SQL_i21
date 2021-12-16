@@ -49,6 +49,8 @@ DECLARE @strCompanyFullAddress	NVARCHAR(500) = NULL
 	  , @intSalesOrderIdFrom	INT = NULL
 	  , @intSalesOrderIdTo		INT = NULL
 	  , @xmlDocumentId			INT = NULL
+	  , @strEmail				NVARCHAR(100) = NULL
+	  , @strPhone				NVARCHAR(100) = NULL
 
 --PREPARE XML 
 EXEC sp_xml_preparedocument @xmlDocumentId OUTPUT, @xmlParam
@@ -125,6 +127,8 @@ ELSE
 --COMPANY INFO
 SELECT TOP 1 @strCompanyFullAddress	= strAddress + CHAR(13) + char(10) + strCity + ', ' + strState + ', ' + strZip + ', ' + strCountry
 		   , @strCompanyName		= strCompanyName
+		   , @strPhone				= strPhone
+		   , @strEmail				= strEmail
 FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ORDER BY intCompanySetupID DESC
 
@@ -153,6 +157,10 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 									   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
 									   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
 								  END
+	 , strCompanyInfo			= CASE WHEN L.strUseLocationAddress IN ('No', 'Always') THEN @strCompanyFullAddress
+									   WHEN L.strUseLocationAddress = 'Yes' THEN L.strFullAddress
+									   WHEN L.strUseLocationAddress = 'Letterhead' THEN ''
+								  END  + CHAR(10) + ISNULL(@strEmail,'')   + CHAR(10) + ISNULL(@strPhone,'')
 	 , strOrderType				= ISNULL(SO.strType, 'Standard')
 	 , strLocationName			= L.strLocationName
 	 , dtmDate					= SO.dtmDate
@@ -389,6 +397,7 @@ INSERT INTO tblARSalesOrderReportStagingTable WITH (TABLOCK) (
 	 , intEntityCustomerId
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strCompanyInfo
 	 , strOrderType
 	 , strLocationName
 	 , dtmDate
@@ -462,6 +471,7 @@ SELECT intSalesOrderId
 	 , intEntityCustomerId
 	 , strCompanyName
 	 , strCompanyAddress
+	 , strCompanyInfo
 	 , strOrderType
 	 , strLocationName
 	 , dtmDate
