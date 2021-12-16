@@ -65,7 +65,6 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[ysnUseOriginIdAsInvoiceNumber]		BIT												NULL		-- Indicate whether [strInvoiceOriginId] will be used as Invoice Number
 	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL		-- Purchase Order Number
 	,[strBOLNumber]							NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- BOL Number	
-	,[strPaymentInfo]						NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL		-- Check Number
 	,[strComments]							NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL		-- Comments		
 	,[intShipToLocationId]					INT												NULL		-- Customer Ship To Location Id(If NULL, customer's default location will be used)
 	,[intBillToLocationId]					INT												NULL		-- Customer Bill To Location Id(If NULL, customer's default location will be used)

@@ -54,7 +54,6 @@ INSERT INTO @InvoicesToGenerate (
 	,[ysnUseOriginIdAsInvoiceNumber]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strPaymentInfo]
 	,[strComments]
 	,[intShipToLocationId]
 	,[intBillToLocationId]
@@ -207,7 +206,6 @@ SELECT
 	,[ysnUseOriginIdAsInvoiceNumber]	= [ysnUseOriginIdAsInvoiceNumber]
 	,[strPONumber]						= [strPONumber]
 	,[strBOLNumber]						= [strBOLNumber]
-	,[strPaymentInfo]					= [strPaymentInfo]
 	,[strComments]						= [strComments]
 	,[intShipToLocationId]				= [intShipToLocationId]
 	,[intBillToLocationId]				= [intBillToLocationId]
@@ -1268,7 +1266,6 @@ CREATE TABLE #CustomerInvoice
 	,[strInvoiceOriginId]			NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strPONumber]					NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 	,[strBOLNumber]					NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
-	,[strPaymentInfo]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL
 	,[strComments]					NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
 	,[strFooterComments]			NVARCHAR(500)	COLLATE Latin1_General_CI_AS	NULL
 	,[intShipToLocationId]			INT												NULL
@@ -1375,7 +1372,6 @@ INSERT INTO #CustomerInvoice
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strPaymentInfo]
 	,[strComments]
 	,[strFooterComments]
 	,[intShipToLocationId]
@@ -1481,7 +1477,6 @@ SELECT
 	,[strInvoiceOriginId]			= ITG.strInvoiceOriginId
 	,[strPONumber]					= ITG.strPONumber
 	,[strBOLNumber]					= ITG.strBOLNumber
-	,[strPaymentInfo]				= ITG.strPaymentInfo
 	,[strComments]					= CASE WHEN ISNULL(ITG.strComments, '') = '' THEN dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Header', NULL, 0) ELSE ITG.strComments END
 	,[strFooterComments]			= dbo.fnARGetDefaultComment(ITG.intCompanyLocationId, ARC.intEntityId, ITG.strTransactionType, ITG.strType, 'Footer', NULL, 0)
 	,[intShipToLocationId]			= ISNULL(ITG.intShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
@@ -1668,7 +1663,6 @@ USING
 		,[strInvoiceOriginId]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strPaymentInfo]
 		,[strComments]
 		,[strFooterComments]
 		,[intShipToLocationId]
@@ -1778,7 +1772,6 @@ INSERT(
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strPaymentInfo]
 	,[strComments]
 	,[strFooterComments]
 	,[intShipToLocationId]
@@ -1875,7 +1868,6 @@ VALUES(
 	,[strInvoiceOriginId]
 	,[strPONumber]
 	,[strBOLNumber]
-	,[strPaymentInfo]
 	,[strComments]
 	,[strFooterComments]
 	,[intShipToLocationId]
@@ -2058,7 +2050,6 @@ BEGIN TRY
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strPaymentInfo]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -2207,7 +2198,6 @@ BEGIN TRY
 		,[ysnUseOriginIdAsInvoiceNumber]		= ITG.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]							= ITG.[strPONumber]
 		,[strBOLNumber]							= ITG.[strBOLNumber]
-		,[strPaymentInfo]						= ITG.[strPaymentInfo]
 		,[strComments]							= ITG.[strComments]
 		,[intShipToLocationId]					= ITG.[intShipToLocationId]
 		,[intBillToLocationId]					= ITG.[intBillToLocationId]
