@@ -21,9 +21,11 @@ SELECT CHK.dtmDate
 	       END COLLATE Latin1_General_CI_AS
 		, CHK.intBankTransactionTypeId --DETAIL PART
 		, strBillId = BILL.strBillId
-		, strInvoice = BILL.strVendorOrderNumber
-		, dtmDetailDate = BILL.dtmBillDate
-		, strComment = BILL.strComment
+		, strInvoice = CASE WHEN BILL.intBillId IS NOT NULL THEN  BILL.strVendorOrderNumber ELSE INVOICE.strInvoiceNumber END
+		, dtmDetailDate = CASE WHEN BILL.intBillId IS NOT NULL THEN BILL.dtmBillDate ELSE INVOICE.dtmDate END
+		, strComment = CASE WHEN BILL.intBillId IS NOT NULL THEN  BILL.strComment ELSE 
+				CASE WHEN INVOICE.strTransactionType = 'Cash Refund' THEN 'Cash Refund' ELSE '' END
+		  END
 		, dblDetailAmount = PYMTDTL.dblTotal-- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 		, dblDiscount = PYMTDTL.dblDiscount
 		, dblNet = PYMTDTL.dblPayment-- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
@@ -47,7 +49,8 @@ SELECT CHK.dtmDate
 FROM dbo.tblCMBankTransaction CHK 
 LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum 
 INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId 
-INNER JOIN tblAPBill BILL ON PYMTDTL.intBillId = BILL.intBillId 
+LEFT JOIN tblAPBill BILL ON PYMTDTL.intBillId = BILL.intBillId 
+LEFT JOIN tblARInvoice INVOICE on INVOICE.intInvoiceId = PYMTDTL.intInvoiceId  
 INNER JOIN tblCMBankAccount BA ON BA.intBankAccountId = CHK.intBankAccountId 
 INNER JOIN tblCMBank Bank ON Bank.intBankId = BA.intBankId 
 LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL (PYMT.[intEntityVendorId], CHK.intEntityId) 
