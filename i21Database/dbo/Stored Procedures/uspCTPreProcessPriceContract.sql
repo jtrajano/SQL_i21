@@ -77,7 +77,7 @@ BEGIN
 		)    
 		SELECT
 			*
-		FROM OPENXML(@xmlDocumentId, 'PreProcessXML', 2)      
+		FROM OPENXML(@xmlDocumentId, 'PreProcessXMLs/PreProcessXML', 2)      
 		WITH (
 			intPriceContractId    INT    
 			, strPriceContractState   NVARCHAR(20)    
