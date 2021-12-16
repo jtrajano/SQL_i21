@@ -15,6 +15,12 @@ BEGIN
 		,@dblTOScannedQty NUMERIC(18, 6)
 		,@strError NVARCHAR(50)
 
+	IF @intStorageLocationId = 0
+		SELECT @intStorageLocationId = NULL
+
+	IF @intSubLocationId = 0
+		SELECT @intSubLocationId = NULL
+
 	SELECT @dblTOLineItemQty = dblQuantity
 	FROM dbo.tblICInventoryTransferDetail
 	WHERE intInventoryTransferDetailId = @intInventoryTransferDetailId

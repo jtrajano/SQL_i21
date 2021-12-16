@@ -24,6 +24,12 @@ BEGIN
 	DECLARE @dblTOLineItemQty NUMERIC(18, 6)
 		,@dblTOScannedQty NUMERIC(18, 6)
 
+	IF @intStorageLocationId = 0
+		SELECT @intStorageLocationId = NULL
+
+	IF @intSubLocationId = 0
+		SELECT @intSubLocationId = NULL
+
 	SELECT @intRouteId = intRouteId
 		,@strOrderType = strOrderType
 	FROM tblLGRouteOrder
