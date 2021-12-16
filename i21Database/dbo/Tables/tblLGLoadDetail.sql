@@ -40,6 +40,10 @@
 	[strLoadDirectionMsg]	NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnUpdateLoadDirections] [bit] NULL,
 	[ysnPrintLoadDirections] [bit] NULL,
+	[dtmPickUpFrom] DATETIME NULL,
+	[dtmPickUpTo] DATETIME NULL,
+	[dtmDeliveryFrom] DATETIME NULL,
+	[dtmDeliveryTo] DATETIME NULL,
 
 	[strVendorReference] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerReference] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
