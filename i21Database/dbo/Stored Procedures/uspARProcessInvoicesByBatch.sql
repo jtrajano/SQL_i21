@@ -20,7 +20,6 @@
 																	-- 14 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]
 																    -- 15 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]
                                                                     -- 16 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]
-																	-- 17 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory], [strPaymentInfo]
 	,@RaiseError					BIT								= 0
 	,@BatchId						NVARCHAR(40)					= NULL
 	,@ErrorMessage					NVARCHAR(250)					= NULL			OUTPUT
@@ -88,7 +87,6 @@ BEGIN TRY
 		,[intShipViaId]					INT												NULL
 		,[strPONumber]					NVARCHAR (25)	COLLATE Latin1_General_CI_AS	NULL
 		,[strBOLNumber]					NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
-		,[strPaymentInfo]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS	NULL
 		,[strComments]					NVARCHAR (500)  COLLATE Latin1_General_CI_AS	NULL
 		,[intAccountId]					INT												NULL
 		,[intFreightTermId]				INT												NULL
@@ -131,8 +129,7 @@ BEGIN TRY
 						WHEN @GroupingOption =13 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId]'
 						WHEN @GroupingOption =14 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId]'
 						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId]'
-						WHEN @GroupingOption =16 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]'
-						WHEN @GroupingOption =17 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory], [strPaymentInfo]'
+						WHEN @GroupingOption =15 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments], [intAccountId], [intFreightTermId], [intPaymentMethodId], [strInvoiceOriginId], [ysnImpactInventory]'
 					END)
 					
 				
@@ -245,7 +242,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strPaymentInfo]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -394,7 +390,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]	= IE.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]						= IE.[strPONumber]
 		,[strBOLNumber]						= IE.[strBOLNumber]
-		,[strPaymentInfo]					= IE.[strPaymentInfo]
 		,[strComments]						= IE.[strComments]
 		,[intShipToLocationId]				= IE.[intShipToLocationId]
 		,[intBillToLocationId]				= IE.[intBillToLocationId]
@@ -613,7 +608,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]
 			,[strBOLNumber]
-			,[strPaymentInfo]
 			,[strComments]
 			,[intShipToLocationId]
 			,[intBillToLocationId]
@@ -763,7 +757,6 @@ BEGIN
 			,[ysnUseOriginIdAsInvoiceNumber]		= ITG.[ysnUseOriginIdAsInvoiceNumber]
 			,[strPONumber]							= ARI.[strPONumber]
 			,[strBOLNumber]							= ARI.[strBOLNumber]
-			,[strPaymentInfo]						= ARI.[strPaymentInfo]
 			,[strComments]							= ARI.[strComments]
 			,[intShipToLocationId]					= ARI.[intShipToLocationId]
 			,[intBillToLocationId]					= ARI.[intBillToLocationId]
@@ -908,7 +901,6 @@ BEGIN
 				AND (ISNULL(ITG.[intPaymentMethodId],0) = ISNULL(EFP.[intPaymentMethodId],0) OR (EFP.[intPaymentMethodId] IS NULL AND @GroupingOption < 14))            
 				AND (ISNULL(ITG.[strInvoiceOriginId],'') = ISNULL(EFP.[strInvoiceOriginId],'') OR (EFP.[strInvoiceOriginId] IS NULL AND @GroupingOption < 15))
 				AND (ISNULL(ITG.[ysnImpactInventory], CAST(1 AS BIT)) = ISNULL(EFP.[ysnImpactInventory], CAST(1 AS BIT)) OR (EFP.[ysnImpactInventory] IS NULL AND @GroupingOption < 16))
-				AND (ISNULL(ITG.[strPaymentInfo],'') = ISNULL(EFP.[strPaymentInfo],'') OR (EFP.[strPaymentInfo] IS NULL AND @GroupingOption < 17))    
 		INNER JOIN
 			(SELECT
 				 [strTransactionType]
@@ -932,7 +924,6 @@ BEGIN
 				,[strInvoiceOriginId]
 				,[strPONumber]
 				,[strBOLNumber]
-				,[strPaymentInfo]
 				,[strComments]
 				,[intShipToLocationId]
 				,[intBillToLocationId]
@@ -1247,7 +1238,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]
 		,[strBOLNumber]
-		,[strPaymentInfo]
 		,[strComments]
 		,[intShipToLocationId]
 		,[intBillToLocationId]
@@ -1390,7 +1380,6 @@ BEGIN
 		,[ysnUseOriginIdAsInvoiceNumber]	= IE.[ysnUseOriginIdAsInvoiceNumber]
 		,[strPONumber]						= IE.[strPONumber]
 		,[strBOLNumber]						= IE.[strBOLNumber]
-		,[strPaymentInfo]					= IE.[strPaymentInfo]
 		,[strComments]						= IE.[strComments]
 		,[intShipToLocationId]				= IE.[intShipToLocationId]
 		,[intBillToLocationId]				= IE.[intBillToLocationId]
