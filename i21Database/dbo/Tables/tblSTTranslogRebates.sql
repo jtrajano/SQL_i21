@@ -111,7 +111,6 @@
     [strTrlFlagsTrlMatch]                    NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlDept]                             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intTrlDeptNumber]                       INT             NULL,
-    [strTrlDeptNumber]                       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlDeptType]                         NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
     [strTrlCat]                              NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intTrlCatNumber]                        INT             NULL,

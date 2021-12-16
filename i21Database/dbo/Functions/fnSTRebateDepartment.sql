@@ -4,8 +4,7 @@ RETURNS @TempTableDepartments TABLE
 	ysnSuccess BIT
 	, strStatusMessage NVARCHAR(200)
 	, intStoreId INT NULL
-	--, intRegisterDepartmentId INT NULL -- Change to strCashRegisterDepartment ST-2050
-	, strCashRegisterDepartment nvarchar(50) NULL 
+	, intRegisterDepartmentId INT NULL
 	, intCategoryId INT NULL
 	, strCategoryCode NVARCHAR(30) NULL
 	, strCategoryDescription NVARCHAR(150) NULL
@@ -21,8 +20,7 @@ BEGIN
 				ysnSuccess
 				, strStatusMessage
 				, intStoreId
-				--, intRegisterDepartmentId -- Change to strCashRegisterDepartment ST-2050
-				, strCashRegisterDepartment
+				, intRegisterDepartmentId
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription
@@ -32,8 +30,7 @@ BEGIN
 				strStatus							= 1
 				, strMessage						= NULL
 				, intStoreId						= Rebates.intStoreId
-				--, intRegisterDepartmentId			= CatLoc.intRegisterDepartmentId
-				, strCashRegisterDepartment			= CatLoc.strCashRegisterDepartment -- Change to strCashRegisterDepartment ST-2050
+				, intRegisterDepartmentId			= CatLoc.intRegisterDepartmentId
 				, intCategoryId						= Category.intCategoryId
 				, strCategoryCode					= Category.strCategoryCode
 				, strCategoryDescription			= Category.strDescription
@@ -58,8 +55,7 @@ BEGIN
 				ysnSuccess
 				, strStatusMessage
 				, intStoreId
-				--, intRegisterDepartmentId -- Change to strCashRegisterDepartment ST-2050
-				, strCashRegisterDepartment
+				, intRegisterDepartmentId
 				, intCategoryId
 				, strCategoryCode
 				, strCategoryDescription

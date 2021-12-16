@@ -54,7 +54,7 @@ BEGIN
 					, I.intItemId [intItemId]
 					, 1 [intConcurrencyId]
 				FROM #tempCheckoutInsert Chk
-				JOIN dbo.tblICCategoryLocation Cat ON CAST(ISNULL(Chk.MerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.strCashRegisterDepartment AS NVARCHAR(50))
+				JOIN dbo.tblICCategoryLocation Cat ON CAST(ISNULL(Chk.MerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(Cat.intRegisterDepartmentId AS NVARCHAR(50))
 				--JOIN dbo.tblICItem I ON I.intCategoryId = Cat.intCategoryId
 				LEFT JOIN dbo.tblICItem I ON Cat.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
@@ -88,7 +88,7 @@ BEGIN
 				FROM tblSTCheckoutDepartmetTotals DT
 				JOIN tblICCategory Cat ON DT.intCategoryId = Cat.intCategoryId
 				JOIN tblICCategoryLocation CatLoc ON Cat.intCategoryId = CatLoc.intCategoryId
-				JOIN #tempCheckoutInsert Chk ON CAST(ISNULL(Chk.MerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.strCashRegisterDepartment AS NVARCHAR(50))
+				JOIN #tempCheckoutInsert Chk ON CAST(ISNULL(Chk.MerchandiseCode, '') AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS = CAST(CatLoc.intRegisterDepartmentId AS NVARCHAR(50))
 				LEFT JOIN dbo.tblICItem I ON CatLoc.intGeneralItemId = I.intItemId
 				JOIN dbo.tblICItemLocation IL ON IL.intItemId = I.intItemId
 				JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = IL.intLocationId

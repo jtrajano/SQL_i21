@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuSTGetCheckoutDepartmentTotals]
 AS
 SELECT CDT.*
-	, CatLoc.strCashRegisterDepartment
+	, CatLoc.intRegisterDepartmentId
 	, Cat.strCategoryCode
 	, Cat.strDescription AS strCategoryDesc
 	, I.strDescription AS strItemDescription
