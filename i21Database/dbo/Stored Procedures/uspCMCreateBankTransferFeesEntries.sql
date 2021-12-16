@@ -92,22 +92,18 @@ BEGIN
             = GLAccnt.intAccountId    
             WHERE A.strTransactionId = @strTransactionId  
 
-            -- for fees having different exchange rate
-            
             SELECT 
-            @dblExchangeRate = ((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblCreditForeign)) / (dblCreditForeign + @dblFeesForeign)
+            @dblExchangeRate = ROUND((((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblCreditForeign)) / (dblCreditForeign + @dblFeesForeign)),6)
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
             UPDATE A   
-            SET dblCreditForeign = dblCreditForeign + @dblFeesForeign ,
+            SET 
+            dblCredit = dblCredit + @dblFees ,
             dblExchangeRate = @dblExchangeRate,
-            dblCredit = (dblCreditForeign + @dblFeesForeign) * @dblExchangeRate
+            dblCreditForeign = ROUND(((dblCredit + @dblFees) / @dblExchangeRate),2)
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
-
-
-
 
     END
     
@@ -179,16 +175,15 @@ BEGIN
             = GLAccnt.intAccountId    
             WHERE A.strTransactionId = @strTransactionId    
 
-            
             SELECT 
-            @dblExchangeRate = ((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblDebitForeign)) / (dblDebitForeign + @dblFeesForeign)
+            @dblExchangeRate =ROUND((((@dblFeesRate * @dblFeesForeign) + (dblExchangeRate * dblDebitForeign)) / (dblDebitForeign + @dblFeesForeign)),6)
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
             UPDATE A   
-            SET dblDebitForeign = dblDebitForeign - @dblFeesForeign ,
+            SET dblDebit = dblDebit - @dblFees ,
             dblExchangeRate = @dblExchangeRate,
-            dblDebit = (dblDebitForeign - @dblFeesForeign) * @dblExchangeRate
+            dblDebitForeign = ROUND(((dblDebit - @dblFees) / @dblExchangeRate),2)
             from #tmpGLDetail A  
             WHERE intAccountId = @intBankGLAccountId  
 
