@@ -273,7 +273,8 @@ IF @ysnIncludeWriteOffPaymentLocal = 1
 		WHERE UPPER(strPaymentMethod) = 'WRITE OFF'
 	END
 
-EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo					= @dtmDateToLocal
+EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateFrom				= @dtmDateFromLocal
+										  , @dtmDateTo					= @dtmDateToLocal
 										  , @intEntityUserId			= @intEntityUserIdLocal
 										  , @strCustomerIds				= @strCustomerIdsLocal
 										  , @strCompanyLocationIds		= @strCompanyLocationIdsLocal
