@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblARSalesOrderReportStagingTable] (
 	[intDetailCount]					INT             NULL,	
 	[strCompanyName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyAddress]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strCompanyInfo]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strOrderType]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strCustomerName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerNumber]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
