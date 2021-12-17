@@ -16,7 +16,7 @@ Activity.dtmClear,
 Activity.strBankDescription,  
 dblActivityAmount,  
 Activity.strDebitCredit,  
-A.dtmDateReconciled,  
+Trans.dtmDateReconciled,  
 Trans.intBankTransactionTypeId,  
 A.intConcurrencyId  
 FROM   
@@ -40,7 +40,8 @@ OUTER APPLY(
 	dtmDate,  
 	ABS(dblAmount) * CASE WHEN (BTY.strDebitCredit = 'D') OR (BTY.strDebitCredit = 'DC' AND dblAmount <0) THEN -1 ELSE 1 END dblTransAmount,
 	strBankTransactionTypeName,  
-	BT.intBankTransactionTypeId  
+	BT.intBankTransactionTypeId,
+	BT.dtmDateReconciled
     FROM tblCMBankTransaction   BT join tblCMBankTransactionType BTY on BT.intBankTransactionTypeId = BTY.intBankTransactionTypeId
     WHERE intTransactionId = A.intTransactionId  
 ) Trans

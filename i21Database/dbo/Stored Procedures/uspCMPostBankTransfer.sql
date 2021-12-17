@@ -1056,6 +1056,9 @@ BEGIN
     IF @ysnPost = 1   
     BEGIN    
       IF  @ysnPostedInTransit = 1
+
+
+
       --@intBankTransferTypeId =1 OR ((@intBankTransferTypeId = 2 OR @intBankTransferTypeId = 3 OR @intBankTransferTypeId = 4  OR @intBankTransferTypeId = 5) AND
       BEGIN  
             INSERT INTO tblCMBankTransaction (    
@@ -1095,11 +1098,11 @@ BEGIN
             -- Bank Transaction Credit    
             SELECT strTransactionId     = A.strTransactionId + @BANK_TRANSFER_WD_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_WD    
-              ,intBankAccountId      = A.intBankAccountIdFrom    
-              ,intCurrencyId        = @intCurrencyIdFrom    
-              ,intCurrencyExchangeRateTypeId  = intRateTypeIdAmountFrom    
-              ,dblExchangeRate      = dblRateAmountFrom    
-              ,dtmDate            = A.dtmDate    
+              ,intBankAccountId      = @intBankAccountIdFrom
+              ,intCurrencyId        = intCurrencyId    
+              ,intCurrencyExchangeRateTypeId  = intCurrencyExchangeRateTypeId
+              ,dblExchangeRate      = dblExchangeRate
+              ,dtmDate            = dtmDate    
               ,strPayee          = ''    
               ,intPayeeId         = NULL    
               ,strAddress         = ''    
@@ -1107,42 +1110,45 @@ BEGIN
               ,strCity            = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = dblAmountForeignFrom    
-              ,strAmountInWords     = dbo.fnConvertNumberToWord(A.dblAmountForeignFrom)    
-              ,strMemo            = CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN A.strDescription     
-                                        WHEN ISNULL(A.strDescription,'') = '' THEN A.strReferenceFrom    
-                                        ELSE A.strDescription + ' / ' + A.strReferenceFrom END    
+              ,dblAmount          = dblCreditForeign    
+              ,strAmountInWords     = dbo.fnConvertNumberToWord(A.dblCreditForeign)    
+              ,strMemo            = CASE WHEN ISNULL(strReference,'') = '' THEN strDescription     
+                                        WHEN ISNULL(strDescription,'') = '' THEN strReference    
+                                        ELSE strDescription + ' / ' + strReference END    
               ,strReferenceNo        = ''    
               ,dtmCheckPrinted       = NULL    
               ,ysnCheckToBePrinted    = 0    
               ,ysnCheckVoid          = 0    
               ,ysnPosted            = 1    
-              ,strLink              = A.strTransactionId    
+              ,strLink              = @strTransactionId    
               ,intFiscalPeriodId      = F.intGLFiscalYearPeriodId    
               ,ysnClr               = 0    
               ,intEntityId          = A.intEntityId    
               ,dtmDateReconciled      = NULL    
-              ,intCreatedUserId      = A.intCreatedUserId    
+              ,intCreatedUserId      = intUserId
               ,dtmCreated               = GETDATE()    
-              ,intLastModifiedUserId   = A.intLastModifiedUserId    
+              ,intLastModifiedUserId   = intEntityId
               ,dtmLastModified       = GETDATE()    
               ,intConcurrencyId      = 1     
-            FROM [dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt    
-              ON A.intGLAccountIdFrom = GLAccnt.intAccountId      
-              INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp    
-              ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId    
-            CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F    
-            WHERE A.strTransactionId = @strTransactionId    
+              FROM #tmpGLDetail A
+              CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F    
+              WHERE intAccountId = @intGLAccountIdFrom
+            -- FROM [dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt    
+            --   ON A.intGLAccountIdFrom = GLAccnt.intAccountId      
+            --   INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp    
+            --   ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId    
+            
+            
               
             -- Bank Transaction Debit    
             UNION ALL    
             SELECT strTransactionId     = A.strTransactionId + @BANK_TRANSFER_DEP_PREFIX    
               ,intBankTransactionTypeId   = @BANK_TRANSFER_DEP    
-              ,intBankAccountId      = A.intBankAccountIdTo    
-              ,intCurrencyId        = @intCurrencyIdTo    
-              ,intCurrencyExchangeRateTypeId  =intRateTypeIdAmountTo    
-              ,dblExchangeRate       =  @dblRateAmountTo    
-              ,dtmDate          = A.dtmDate    
+              ,intBankAccountId      = @intBankAccountIdTo
+              ,intCurrencyId        = intCurrencyId
+              ,intCurrencyExchangeRateTypeId  =intCurrencyExchangeRateTypeId
+              ,dblExchangeRate       =  dblExchangeRate
+              ,dtmDate          = dtmDate    
               ,strPayee          = ''    
               ,intPayeeId         = NULL    
               ,strAddress         = ''    
@@ -1150,36 +1156,40 @@ BEGIN
               ,strCity          = ''    
               ,strState          = ''    
               ,strCountry         = ''    
-              ,dblAmount          = dblAmountForeignTo    
-              ,strAmountInWords      = dbo.fnConvertNumberToWord(dblAmountForeignTo)    
-              ,strMemo          = CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN     
-                              A.strDescription     
-                              WHEN ISNULL(A.strDescription,'') = '' THEN    
-                              A.strReferenceTo    
-                              ELSE A.strDescription + ' / ' + A.strReferenceTo     
+              ,dblAmount          = dblDebitForeign
+              ,strAmountInWords      = dbo.fnConvertNumberToWord(dblDebitForeign)    
+              ,strMemo          = CASE WHEN ISNULL(strReference,'') = '' THEN     
+                              strDescription     
+                              WHEN ISNULL(strDescription,'') = '' THEN    
+                              strReference    
+                              ELSE strDescription + ' / ' + strReference
                               END    
               ,strReferenceNo        = ''    
               ,dtmCheckPrinted       = NULL    
               ,ysnCheckToBePrinted     = 0    
               ,ysnCheckVoid        = 0    
               ,ysnPosted          = 1    
-              ,strLink          = A.strTransactionId    
+              ,strLink          = @strTransactionId
               ,intFiscalPeriodId      = F.intGLFiscalYearPeriodId    
               ,ysnClr           = 0    
-              ,intEntityId        = A.intEntityId    
+              ,intEntityId        = intEntityId    
               ,dtmDateReconciled      = NULL    
-              ,intCreatedUserId      = A.intCreatedUserId    
+              ,intCreatedUserId      = intUserId    
               ,dtmCreated         = GETDATE()    
-              ,intLastModifiedUserId    = A.intLastModifiedUserId    
+              ,intLastModifiedUserId    = A.intEntityId
               ,dtmLastModified       = GETDATE()    
               ,intConcurrencyId      = 1     
-            FROM [dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt    
-              ON A.intGLAccountIdFrom = GLAccnt.intAccountId      
-              INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp    
-              ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId    
+              FROM #tmpGLDetail A
+              CROSS APPLY dbo.fnGLGetFiscalPeriod(dtmDate) F    
+              WHERE intAccountId = @intGLAccountIdTo
+
+            -- FROM [dbo].tblCMBankTransfer A INNER JOIN [dbo].tblGLAccount GLAccnt    
+            --   ON A.intGLAccountIdFrom = GLAccnt.intAccountId      
+            --   INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp    
+            --   ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId    
                   
-              CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F    
-              WHERE A.strTransactionId = @strTransactionId     
+              
+              
         
             IF @intBankTransferTypeId = 4
               EXEC uspCMCreateBankSwapLong @intTransactionId
@@ -1187,7 +1197,7 @@ BEGIN
       END    -- @ysnPost =1
     ELSE    
     BEGIN    
-      IF @ysnPostedInTransit = 1 --@intBankTransferTypeId = 1 OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
+      IF @ysnPostedInTransit = 1 --OR @intBankTransferTypeId = 1 --OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
       BEGIN  
         DELETE FROM tblCMBankTransaction    
         WHERE strLink = @strTransactionId    
