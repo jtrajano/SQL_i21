@@ -629,16 +629,22 @@ BEGIN TRY
 			, z.intQtyUOMId
 			, ysnFullyPriced = CAST(CASE WHEN ctd.intPricingTypeId = 1 AND pricingLatestDate.pricedCount = pricingByEndDate.pricedCount THEN 1
 						ELSE 0 END AS bit)
+			, intEntityId
+			, strEntityName
+			, intQtyCurrencyId
 		INTO #tempLatestContractDetails
 		FROM
 		(
 			SELECT 
 				intContractHeaderId
-				,intContractDetailId
-				,dtmEndDate 
-				,dblBasis
-				,dblFutures
-				,intQtyUOMId
+				, intContractDetailId
+				, dtmEndDate 
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, t.intEntityId
+				, strEntityName = EM.strName
+				, intQtyCurrencyId
 			FROM (
 				SELECT 
 					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END DESC)
@@ -649,6 +655,7 @@ BEGIN TRY
 				AND CBL.strTransactionType = 'Contract Balance'
 				AND (CBL.dblBasis IS NOT NULL OR CBL.intPricingTypeId = 3)
 			) t
+			LEFT JOIN tblEMEntity EM ON EM.intEntityId = t.intEntityId
 			WHERE intRowNum = 1
 		) z
 
@@ -753,12 +760,12 @@ BEGIN TRY
 				, strPricingType
 				, intCommodityUnitMeasureId = NULL
 				, tbl.intContractDetailId
-				, intEntityId
-				, intQtyCurrencyId
+				, lcd.intEntityId
+				, lcd.intQtyCurrencyId
 				, strType = strContractType + ' ' + strPricingType
 				, intItemId
 				, strItemNo
-				, strEntityName
+				, lcd.strEntityName
 				, strCustomerContract = ''
 				--, intFutureMarketId
 				--, intFutureMonthId
@@ -787,11 +794,11 @@ BEGIN TRY
 					, CBL.intLocationId
 					, strContractType = CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 					, PT.strPricingType
-					, CBL.intEntityId
-					, CBL.intQtyCurrencyId
+					--, CBL.intEntityId
+					--, CBL.intQtyCurrencyId
 					, CBL.intItemId
 					, strItemNo
-					, strEntityName = EM.strName
+					--, strEntityName = EM.strName
 					--, CBL.intFutureMarketId
 					--, CBL.intFutureMonthId
 					, stat.strPricingStatus
