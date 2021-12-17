@@ -428,6 +428,7 @@
     <Build Include="dbo\Tables\tblFAAssetInvoice.sql" />
     <Build Include="dbo\Views\vyuFAAPBill.sql" />
     <Build Include="dbo\Views\vyuFAARInvoice.sql" />
+    <Build Include="dbo\Functions\fnLGCashFlowTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
