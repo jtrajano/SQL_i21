@@ -6,6 +6,7 @@
 	[intItemId] INT NOT NULL,	
 	[intContractDetailId] INT NULL,
 	[dblUnits] DECIMAL(18, 6) NULL DEFAULT 0, 
+	[dblFreightUnit] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblPrice] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0,
 	[dblDistSurcharge] DECIMAL(18, 6) NULL DEFAULT 0,
