@@ -110,7 +110,7 @@ BEGIN TRY
 		,[intOrderUOMId]						= Item.intIssueUOMId
 		,[intItemUOMId]							= Item.intIssueUOMId
 		,[dblQtyOrdered]						= DD.dblUnits
-		,[dblQtyShipped]						= DD.dblUnits
+		,[dblQtyShipped]						= DD.dblFreightUnit
 		,[dblDiscount]							= 0
 		,[dblPrice]								--= DD.dblPrice
 												= CASE WHEN DD.ysnFreightInPrice = 0 THEN DD.dblPrice
@@ -576,7 +576,7 @@ BEGIN TRY
 		FROM #tmpSourceTable
 	) Invoices
 
-		--Freight Items
+	--Freight Items
 	INSERT INTO #tmpSourceTableFinal(
 		[intId] 
 		,[strSourceTransaction]
@@ -867,7 +867,7 @@ BEGIN TRY
 		,[intOrderUOMId]						= TR.intOrderUOMId
 		,[intItemUOMId]							= TR.intItemUOMId
 		,[dblQtyOrdered]						= TR.dblQtyOrdered
-		,[dblQtyShipped]						= TR.dblQtyShipped
+		,[dblQtyShipped]						= CASE WHEN intId = 0 THEN TR.dblQtyShipped ELSE TR.dblQtyOrdered END
 		,[dblDiscount]							= TR.dblDiscount
 		,[dblPrice]								= TR.dblPrice
 		,[ysnRefreshPrice]						= TR.ysnRefreshPrice
