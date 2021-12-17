@@ -9090,6 +9090,8 @@
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeEarnings.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspPRImportEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
+    <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
