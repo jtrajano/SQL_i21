@@ -63,7 +63,7 @@ SET XACT_ABORT ON
 			SELECT	@isValid = 0  
 			FROM	( 
 						SELECT	v.intUndepositedFundId  
-								,total = SUM(ISNULL(v.dblAmount, 0))  
+								,total = SUM(ISNULL(v.dblAmount, 0))
 						FROM	tblCMBankTransaction h INNER JOIN tblCMBankTransactionDetail d  
 									ON h.intTransactionId = d.intTransactionId  
 								INNER JOIN vyuCMOriginUndepositedFund v   
@@ -73,12 +73,17 @@ SET XACT_ABORT ON
 						GROUP BY v.intUndepositedFundId   
 					) AS Q1 INNER JOIN (  
 						SELECT	d.intUndepositedFundId  
-								,total = SUM(ISNULL(d.dblCredit,0)) - SUM(ISNULL(d.dblDebit, 0))  
+								,total = 
+								CASE WHEN d.dblExchangeRate = 1 THEN
+								SUM(ISNULL(d.dblCredit,0)) - SUM(ISNULL(d.dblDebit, 0))  
+								ELSE
+								SUM(ISNULL(d.dblCreditForeign,0)) - SUM(ISNULL(d.dblDebitForeign, 0))  
+								END
 						FROM	tblCMBankTransaction h INNER JOIN tblCMBankTransactionDetail d  
 									ON h.intTransactionId = d.intTransactionId  
 						WHERE	h.strTransactionId = @strTransactionId  
 								AND d.intUndepositedFundId IS NOT NULL   
-						GROUP BY d.intUndepositedFundId  
+						GROUP BY d.intUndepositedFundId, d.dblExchangeRate
 					) AS Q2  
 						ON Q1.intUndepositedFundId = Q1.intUndepositedFundId  
 			WHERE	Q1.intUndepositedFundId = Q2.intUndepositedFundId  
