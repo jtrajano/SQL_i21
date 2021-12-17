@@ -109,7 +109,7 @@ CREATE TABLE ##GLACCOUNTS (
 	, strAccountCategory			NVARCHAR (100)   COLLATE Latin1_General_CI_AS	NULL
 )
 CREATE TABLE ##INVOICETOTALPREPAYMENTS (
-	  intInvoiceId					INT												NULL
+	  intInvoiceId					INT												NOT NULL PRIMARY KEY
 	, dblPayment					NUMERIC(18, 6)									NULL DEFAULT 0
 )
 CREATE TABLE ##CASHREFUNDS (
