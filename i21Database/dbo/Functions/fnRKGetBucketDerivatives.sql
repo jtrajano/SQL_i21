@@ -181,7 +181,9 @@ BEGIN
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 			AND intFutOptTransactionId NOT IN (SELECT intTransactionRecordId FROM OptionsLifecycle)
-			AND isnull(c.ysnNegate,0) = CASE WHEN CONVERT(DATE, @dtmDate) = CONVERT(DATE, GETDATE()) THEN  0  ELSE isnull(c.ysnNegate,0) END
+			AND isnull(c.ysnNegate,0) = CASE WHEN CONVERT(DATE, @dtmDate) = CONVERT(DATE, GETDATE()) THEN  0  
+												ELSE CASE WHEN  c.dtmCreatedDate < DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate))) THEN 0 ELSE  isnull(c.ysnNegate,0) END 
+										END
 
 	) t WHERE intRowNum = 1
 
