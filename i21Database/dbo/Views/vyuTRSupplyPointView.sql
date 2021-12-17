@@ -20,6 +20,7 @@ SELECT SupplyPoint.intSupplyPointId
 	, SupplyPoint.ysnMultipleBolInvoiced
 	, SupplyPoint.intRackPriceSupplyPointId
 	, EntityLocation.ysnActive
+	, SupplyPoint.strFreightSalesUnit
 FROM tblTRSupplyPoint SupplyPoint
 LEFT JOIN vyuEMEntity Supplier ON Supplier.intEntityId = SupplyPoint.intEntityVendorId AND Supplier.strType = 'Vendor'
 LEFT JOIN tblEMEntityLocation EntityLocation ON EntityLocation.intEntityLocationId = SupplyPoint.intEntityLocationId
