@@ -199,7 +199,7 @@ AS
 							,@dtmEndDate					= @dtmLoopEndDate 
 							,@strUpcCode					= @strPromoLoopUpcCode
 							,@intItemId						= @intPromoLoopItemId
-							,@intLocationId					= @intPromoLoopItemLocationId
+							,@intItemLocationId				= @intPromoLoopItemLocationId
 							,@intEntityUserSecurityId		= @intEntityId
 						
 						
