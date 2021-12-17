@@ -422,6 +422,12 @@
     <Build Include="dbo\Tables\tblDBRiskDemoStressTestingVolumeAndSpot.sql" />
     <Build Include="dbo\Tables\tblDBRiskDemoOptionSensitivity.sql" />
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
+    <Build Include="dbo\Tables\tblFAAssetVoucher.sql" />
+    <Build Include="dbo\Views\vyuFAAssetVoucher.sql" />
+    <Build Include="dbo\Views\vyuFAAssetInvoice.sql" />
+    <Build Include="dbo\Tables\tblFAAssetInvoice.sql" />
+    <Build Include="dbo\Views\vyuFAAPBill.sql" />
+    <Build Include="dbo\Views\vyuFAARInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
