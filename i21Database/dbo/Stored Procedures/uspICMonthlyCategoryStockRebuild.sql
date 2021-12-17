@@ -63,8 +63,8 @@ BEGIN TRY
 			FROM (
 					SELECT 
 						t.dtmDate
-						,correctSeq = ROW_NUMBER() OVER (ORDER BY t.dtmDate, t.intInventoryTransactionId)
-						,actualSeq = ROW_NUMBER() OVER (ORDER BY t.intInventoryTransactionId)
+						,correctSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.dtmDate, t.intInventoryTransactionId)
+						,actualSeq = ROW_NUMBER() OVER (ORDER BY t.intItemId, t.intInventoryTransactionId)
 					FROM 
 						tblICInventoryTransaction t INNER JOIN tblICItem i 
 							ON t.intItemId = i.intItemId
