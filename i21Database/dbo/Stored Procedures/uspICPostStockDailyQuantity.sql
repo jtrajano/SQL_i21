@@ -120,7 +120,7 @@ BEGIN
 		,[intItemUOMId] 
 		,dbo.fnRemoveTimeOnDate(t.dtmDate) 
 	ORDER BY
-		dbo.fnRemoveTimeOnDate(t.dtmDate)  DESC 
+		dbo.fnRemoveTimeOnDate(t.dtmDate) ASC
 
 	-- insert as zero record. 
 	INSERT INTO tblICInventoryStockAsOfDate 
