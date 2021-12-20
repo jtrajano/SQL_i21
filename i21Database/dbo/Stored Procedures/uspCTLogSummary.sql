@@ -3241,9 +3241,9 @@ BEGIN TRY
 
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
-			@intId INT,
 			@ysnAddToLogSpecific BIT = 1,
-			@intNegatedCount int = 0
+			@intNegatedCount int = 0,
+			@intId INT
 
 	SELECT @intId = MIN(intId) FROM @cbLogCurrent
 	WHILE @intId > 0--EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
@@ -3274,82 +3274,82 @@ BEGIN TRY
 
 		/*CT-5532 - If unposting and the contract is DWG, check the @cbLogCurrent if it's contains a self negated records*/
 
-		if ((@ysnDWGPriceOnly = 1) and (@ysnUnposted = 1) and exists (select top 1 1 from @cbLogCurrent where intId = @intId and dblQty > 0))
-		begin
+        if ((@ysnDWGPriceOnly = 1) and (@ysnUnposted = 1) and exists (select top 1 1 from @cbLogCurrent where intId = @intId and dblQty > 0))
+        begin
 
-			IF OBJECT_ID('tempdb..#tmpNegated') IS NOT NULL DROP TABLE #tmpNegated;
+            IF OBJECT_ID('tempdb..#tmpNegated') IS NOT NULL DROP TABLE #tmpNegated;
 
-			select * into #tmpNegated from
-			(
-				SELECT 
-					ext.*
-				FROM @cbLogCurrent curr
-				join @cbLogCurrent ext on (ext.dblQty * -1) = curr.dblQty
-				WHERE curr.intId = @intId
+            select * into #tmpNegated from
+            (
+                SELECT 
+                    ext.*
+                FROM @cbLogCurrent curr
+                join @cbLogCurrent ext on (ext.dblQty * -1) = curr.dblQty
+                WHERE curr.intId = @intId
 
-				union all
+                union all
 
-				SELECT 
-					curr.*
-				FROM @cbLogCurrent curr
-				WHERE curr.intId = @intId
-			)tbl
+                SELECT 
+                    curr.*
+                FROM @cbLogCurrent curr
+                WHERE curr.intId = @intId
+            )tbl
 
-			if ((select count(*) from #tmpNegated) = 2)
-			begin
+            if ((select count(*) from #tmpNegated) = 2)
+            begin
 
-				select @intNegatedCount = count(*) from
-				(
-				select distinct
-				strBatchId  
-				, dtmTransactionDate  
-				, strTransactionType  
-				, strTransactionReference  
-				, intTransactionReferenceId  
-				, intTransactionReferenceDetailId  
-				, strTransactionReferenceNo  
-				, intContractDetailId  
-				, intContractHeaderId  
-				, strContractNumber  
-				, intContractSeq  
-				, intContractTypeId  
-				, intEntityId  
-				, intCommodityId  
-				, intItemId  
-				, intLocationId  
-				, intPricingTypeId  
-				, intFutureMarketId  
-				, intFutureMonthId  
-				, dblBasis  
-				, dblFutures  
-				, intQtyUOMId  
-				, intQtyCurrencyId  
-				, intBasisUOMId  
-				, intBasisCurrencyId  
-				, intPriceUOMId  
-				, dtmStartDate  
-				, dtmEndDate  
-				, dblDynamic  
-				, intContractStatusId  
-				, intBookId  
-				, intSubBookId  
-				, strNotes  
-				, intUserId  
-				, intActionId  
-				, strProcess  
-				from #tmpNegated
-				) tbl1
+                select @intNegatedCount = count(*) from
+                (
+                select distinct
+                strBatchId  
+                , dtmTransactionDate  
+                , strTransactionType  
+                , strTransactionReference  
+                , intTransactionReferenceId  
+                , intTransactionReferenceDetailId  
+                , strTransactionReferenceNo  
+                , intContractDetailId  
+                , intContractHeaderId  
+                , strContractNumber  
+                , intContractSeq  
+                , intContractTypeId  
+                , intEntityId  
+                , intCommodityId  
+                , intItemId  
+                , intLocationId  
+                , intPricingTypeId  
+                , intFutureMarketId  
+                , intFutureMonthId  
+                , dblBasis  
+                , dblFutures  
+                , intQtyUOMId  
+                , intQtyCurrencyId  
+                , intBasisUOMId  
+                , intBasisCurrencyId  
+                , intPriceUOMId  
+                , dtmStartDate  
+                , dtmEndDate  
+                , dblDynamic  
+                , intContractStatusId  
+                , intBookId  
+                , intSubBookId  
+                , strNotes  
+                , intUserId  
+                , intActionId  
+                , strProcess  
+                from #tmpNegated
+                ) tbl1
 
-				if (@intNegatedCount = 1)
-				begin
-					set @ysnAddToLogSpecific = 0;
-				end
+                if (@intNegatedCount = 1)
+                begin
+                    set @ysnAddToLogSpecific = 0;
+                end
 
-			end
+            end
 
-		end
+        end
 
-		/**/
+        /**/
 
 		INSERT INTO @cbLogSpecific (strBatchId
 			, dtmTransactionDate
@@ -4092,7 +4092,8 @@ BEGIN TRY
 					IF EXISTS (SELECT TOP 1 1 FROM @cbLogSpecific WHERE intActionId = 43)  
 					BEGIN
 						--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
-						IF (@TotalPriced <= @dblContractQty)
+						IF (@TotalOrigPriced <= @dblContractQty)
+						--IF (@TotalPriced <= @dblContractQty)
 						BEGIN
 							DECLARE @intOrigHeaderPricingTypeId INT;
 							SELECT TOP 1 @intOrigHeaderPricingTypeId = intHeaderPricingTypeId FROM @tmpContractDetail
@@ -4162,7 +4163,7 @@ BEGIN TRY
 					-- New Price or No change
 					SET @FinalQty = @dblQty
 				END
-
+				
 				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
 				BEGIN
 					-- Decrease Priced
@@ -4315,9 +4316,12 @@ BEGIN TRY
 						BEGIN				
 							IF @dblBasis >= @dblQty
 							BEGIN									
-							--Dont log DWG Contract Balance if there's no change in quantity in posting DWG.
-							IF ((@dblBasis >= @dblQty) and exists(select top 1 1 from @cbLogSpecific where dblQty <> 0 and dblOrigQty <> 0))
-								EXEC uspCTLogContractBalance @cbLogSpecific, 0
+								--Dont log DWG Contract Balance if there's no change in quantity in posting DWG.
+								IF ((@dblBasis >= @dblQty) and exists(select top 1 1 from @cbLogSpecific where dblQty <> 0 and dblOrigQty <> 0))
+								BEGIN
+									UPDATE @cbLogSpecific SET dblQty = dblQty *- 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, intActionId = 18
+									EXEC uspCTLogContractBalance @cbLogSpecific, 0
+								END
 							END
 						END
 					END
