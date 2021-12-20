@@ -27,7 +27,7 @@ DECLARE @ZeroDecimal					DECIMAL(18,6) = 0
 	  , @ysnHasPriceFixation			BIT = 0
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
-SET @dtmShipmentDate			 = ISNULL(CAST(@dtmShipmentDate AS DATE), @DateOnly)
+--SET @dtmShipmentDate			 = ISNULL(CAST(@dtmShipmentDate AS DATE), @DateOnly)
 
 DECLARE
 	 @TransactionType			NVARCHAR(25)
@@ -61,10 +61,10 @@ SELECT
 	,@CurrencyId				= ISNULL( ICIS.intCurrencyId, ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
-	,@Date						= @dtmShipmentDate
+	,@Date						= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
 	,@ShipDate					= ICIS.[dtmShipDate]
-	,@PostDate					= @dtmShipmentDate
-	,@CalculatedDate			= @dtmShipmentDate
+	,@PostDate					= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
+	,@CalculatedDate			= ISNULL(@dtmShipmentDate, ICIS.[dtmShipDate])
 	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
