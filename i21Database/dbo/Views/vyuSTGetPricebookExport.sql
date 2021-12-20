@@ -28,7 +28,7 @@ SELECT CAST(ItemPricing.intItemPricingId AS NVARCHAR(1000)) + '0' + CAST(ItemUOM
 	, ItemUOM.ysnStockUnit
 	, dblAvailableQty = CAST(ItemStock.dblAvailableQty AS NUMERIC(18, 6))
 	, dblOnHand = CAST(ItemStock.dblOnHand AS NUMERIC(18, 6))
-	, CategoryLocation.intRegisterDepartmentId
+	, CategoryLocation.strCashRegisterDepartment
 	, CASE 
 			WHEN ItemUOM.strLongUPCCode NOT LIKE '%[^0-9]%' 
 				THEN CAST(1 AS BIT)
@@ -60,3 +60,4 @@ AND Item.intCategoryId IS NOT NULL
 AND CategoryLocation.intRegisterDepartmentId IS NOT NULL
 
 --http://jira.irelyserver.com/browse/ST-1036
+--http://jira.irelyserver.com/browse/ST-2050
