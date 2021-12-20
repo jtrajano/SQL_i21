@@ -10380,6 +10380,7 @@
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
     <None Include="Scripts\Post-Deployment\DB\7_RiskDemoData.sql" />
+    <None Include="Scripts\Post-Deployment\GL\02_UpdateGeneralJournalDetailCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

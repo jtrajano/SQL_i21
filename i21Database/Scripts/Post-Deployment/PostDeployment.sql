@@ -245,6 +245,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
 :r .\GL\DefaultData\1v_PostHistoryGroupings.sql
 :r .\GL\DefaultData\1w_UpdateGLAccount.sql
+:r .\GL\02_UpdateGeneralJournalDetailCurrency.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
