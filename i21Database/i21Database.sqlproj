@@ -834,7 +834,8 @@
     <Build Include="dbo\Tables\tblCMTradeFinanceLimitType.sql" />
     <Build Include="dbo\Tables\tblCMBankValuationRule.sql" />
     <Build Include="dbo\Tables\tblCMBorrowingFacility.sql" />
-    <Build Include="dbo\Tables\tblCMBorrowingFacilityDetail.sql" />
+    <Build Include="dbo\Tables\tblCMBorrowingFacilityLimit.sql" />
+    <Build Include="dbo\Tables\tblCMBorrowingFacilityLimitDetail.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
     <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
     <Build Include="dbo\Functions\fnGetBankGLBalance.sql" />
