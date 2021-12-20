@@ -817,8 +817,6 @@
     <Build Include="dbo\Views\vyuFAFixedAssetHistory.sql" />
     <Build Include="dbo\Views\vyuFAUndepreciatedAssetAllPeriods.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
-    <Build Include="dbo\Views\vyuCMBorrowingFacility.sql" />
-    <Build Include="dbo\Views\vyuCMBorrowingFacilityDetail.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
     <Build Include="dbo\Views\vyuGLFiscalYearPeriod.sql" />
