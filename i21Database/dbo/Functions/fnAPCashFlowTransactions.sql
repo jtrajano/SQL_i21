@@ -7,6 +7,7 @@ RETURNS @returntable TABLE
 (
 	intTransactionId INT NOT NULL,
 	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+	strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intCurrencyId INT NOT NULL,
 	dtmDate DATETIME NOT NULL,
 	dblAmount DECIMAL(18, 6) NOT NULL,
@@ -21,6 +22,18 @@ BEGIN
 	SELECT
 	B.intBillId,
 	B.strBillId,
+	CASE B.intTransactionType
+		WHEN 1 THEN 'Voucher'
+		WHEN 2 THEN 'Vendor Prepayment'
+		WHEN 3 THEN 'Debit Memo'
+		WHEN 7 THEN 'Invalid Type'
+		WHEN 9 THEN '1099 Adjustment'
+		WHEN 11 THEN 'Claim'
+		WHEN 12 THEN 'Prepayment Reversal'
+		WHEN 13 THEN 'Basis Advance'
+		WHEN 14 THEN 'Deferred Interest'
+		ELSE 'Invalid Type'
+	END COLLATE Latin1_General_CI_AS AS strTransactionType,
 	B.intCurrencyId,
 	CASE WHEN B.ysnOverrideCashFlow = 1 THEN B.dtmCashFlowDate ELSE dtmDueDate END dtmDate,
 	tmpAgingSummaryTotal.dblAmountDue,
@@ -73,6 +86,18 @@ BEGIN
 	SELECT
 	B.intBillId,
 	B.strBillId,
+	CASE B.intTransactionType
+		WHEN 1 THEN 'Voucher'
+		WHEN 2 THEN 'Vendor Prepayment'
+		WHEN 3 THEN 'Debit Memo'
+		WHEN 7 THEN 'Invalid Type'
+		WHEN 9 THEN '1099 Adjustment'
+		WHEN 11 THEN 'Claim'
+		WHEN 12 THEN 'Prepayment Reversal'
+		WHEN 13 THEN 'Basis Advance'
+		WHEN 14 THEN 'Deferred Interest'
+		ELSE 'Invalid Type'
+	END COLLATE Latin1_General_CI_AS AS strTransactionType,
 	B.intCurrencyId,
 	CASE WHEN B.ysnOverrideCashFlow = 1 THEN B.dtmCashFlowDate ELSE dtmDueDate END dtmDate,
 	tmpAgingSummaryTotal.dblAmountDue,
@@ -108,6 +133,7 @@ BEGIN
 	SELECT
 		I.intInvoiceId,
 		I.strInvoiceNumber,
+		I.strTransactionType,
 		I.intCurrencyId,
 		CASE WHEN I.ysnOverrideCashFlow = 1 THEN I.dtmCashFlowDate ELSE dtmDueDate END dtmDate,
 		tmpAgingSummaryTotal.dblAmountDue,
