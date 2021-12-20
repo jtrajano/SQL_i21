@@ -81,7 +81,7 @@ FROM tblARCustomerAgingStagingTable AGING WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
 	FROM tblARCustomer WITH (NOLOCK)
-	WHERE (@ysnDetailedFormatLocal = 0 AND ISNULL(NULLIF(strStatementFormat, ''), 'Open Item') = ISNULL(@strStatementFormat, 'Open Item')) OR @ysnDetailedFormatLocal = 1
+	WHERE (@ysnDetailedFormatLocal = 0 AND strStatementFormat = ISNULL(@strStatementFormat, 'Open Item')) OR @ysnDetailedFormatLocal = 1
 ) C ON AGING.intEntityCustomerId = C.intEntityId
 OUTER APPLY (
 	SELECT intEmailSetupCount = COUNT(*) 
