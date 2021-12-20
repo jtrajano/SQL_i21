@@ -475,7 +475,7 @@ BEGIN
 							[strTrlFlagsTrlMatch]				= strTrlFlagsTrlMatch,
 
 							[strTrlDept]						= strTrlDept,
-							[strTrlDeptNumber]					= strTrlDeptNumber,
+							[strTrlDeptNumber]					= intTrlDeptNumber,
 							[strTrlDeptType]					= strTrlDeptType,
 							[strTrlCat]							= strTrlCat,
 							[intTrlCatNumber]					= intTrlCatNumber,
