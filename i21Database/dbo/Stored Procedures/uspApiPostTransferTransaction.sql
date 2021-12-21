@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspApiPostTransferTransaction] (
+CREATE PROCEDURE [dbo].[uspApiPostTransferTransaction] (
     @strTransactionId NVARCHAR(40),
     @ysnPost BIT,
     @ysnRecap BIT = 0,
