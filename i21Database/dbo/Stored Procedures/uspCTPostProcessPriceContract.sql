@@ -66,11 +66,6 @@ BEGIN
 			intRecordId = @intPriceContractId
 			AND intScreenId = @intScreenId
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intUserId AND intScreenId = @intScreenId)
-		BEGIN
-			RETURN
-		END
-
 		if exists (select top 1 1 from tblCTPriceFixation pf join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId where pf.intPriceContractId = @intPriceContractId and isnull(ch.ysnMultiplePriceFixation,0) = 1)
 		begin
 
@@ -78,6 +73,11 @@ BEGIN
 				@intPriceContractId = @intPriceContractId
 				,@intUserId = @intUserId
 		end
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE intEntityUserSecurityId = @intUserId AND intScreenId = @intScreenId)
+		BEGIN
+			RETURN
+		END
 
 		INSERT INTO @PFTable (
 			intPriceFixationId
