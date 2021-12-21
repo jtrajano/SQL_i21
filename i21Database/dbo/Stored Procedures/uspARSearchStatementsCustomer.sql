@@ -58,6 +58,8 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateTo 					= @dtmAsOfDate
 										, @strCompanyLocationIds		= @strCompanyLocationIdsLocal
 										, @ysnIncludeWriteOffPayment	= @ysnIncludeWriteOffLocal
 
+DELETE FROM  tblARCustomerAgingStagingTable WHERE dblFuture <> 0 and ISNULL(@strStatementFormat, 'Open Item') = 'Open Item'
+
 DELETE FROM tblARSearchStatementCustomer WHERE intEntityUserId = @intEntityUserId
 INSERT INTO tblARSearchStatementCustomer (
 	  intEntityCustomerId
