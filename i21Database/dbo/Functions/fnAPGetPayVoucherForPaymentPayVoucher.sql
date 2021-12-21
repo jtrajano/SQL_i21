@@ -18,6 +18,7 @@ RETURNS TABLE AS RETURN
 		,forPay.intPayToAddressId
 		,forPay.ysnReadyForPayment
 		,forPay.dtmDueDate
+		,forPay.dtmCashFlowDate
 		,forPay.dtmDate
 		,forPay.dtmBillDate
 		,forPay.intAccountId

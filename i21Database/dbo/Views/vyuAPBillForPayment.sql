@@ -11,6 +11,7 @@ FROM (
 		,voucher.intTransactionType
 		,voucher.ysnReadyForPayment
 		,voucher.dtmDueDate
+		,ISNULL(voucher.dtmCashFlowDate, voucher.dtmDueDate) dtmCashFlowDate
 		,voucher.dtmDate
 		,voucher.dtmBillDate
 		,CASE WHEN voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 0 
@@ -101,6 +102,7 @@ FROM (
 		,voucher.intTransactionType
 		,paySched.ysnReadyForPayment
 		,paySched.dtmDueDate
+		,ISNULL(voucher.dtmCashFlowDate, voucher.dtmDueDate) dtmCashFlowDate
 		,voucher.dtmDate
 		,voucher.dtmBillDate
 		,voucher.intAccountId
