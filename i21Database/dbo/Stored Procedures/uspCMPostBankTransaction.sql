@@ -132,7 +132,6 @@ SELECT	TOP 1
 		,@intCreatedEntityId = intEntityId
 		,@intCurrencyId = intCurrencyId
 		,@ysnPOS = ysnPOS
-		,@dblExchangeRate = ISNULL(dblExchangeRate,1)
 		,@ysnForeignTransaction = CASE WHEN @intDefaultCurrencyId <> intCurrencyId THEN CAST(1 as bit) ELSE CAST(0 AS BIT) END
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
@@ -152,6 +151,9 @@ SELECT	@dblAmountDetailTotal = ISNULL(SUM(ISNULL(dblCredit, 0) - ISNULL(dblDebit
 ,@dblAmountDetailTotalForeign = ISNULL(SUM(ISNULL(dblCreditForeign, 0) - ISNULL(dblDebitForeign, 0)), 0)
 FROM	[dbo].tblCMBankTransactionDetail
 WHERE	intTransactionId = @intTransactionId 
+
+select @dblExchangeRate = @dblAmountDetailTotal / CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END
+
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
 -- Determine the CODE to use based from the bank transaction type. 
