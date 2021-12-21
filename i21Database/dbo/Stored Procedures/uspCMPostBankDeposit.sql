@@ -138,8 +138,8 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 DECLARE @dblComputedExchangeRate NUMERIC (18,6)
 
-IF @dblAmountDetailTotalForeign > 0
-	SELECT @dblComputedExchangeRate = @dblAmount / @dblAmountDetailTotalForeign
+
+SELECT @dblComputedExchangeRate = @dblAmountDetailTotal / CASE WHEN @ysnForeignTransaction = 0 THEN @dblAmountDetailTotal ELSE @dblAmountDetailTotalForeign END
 --=====================================================================================================================================
 -- 	VALIDATION 
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -348,7 +348,7 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= BankAccnt.intGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN A.dblAmount ELSE  ROUND(@dblComputedExchangeRate * @dblAmountDetailTotal,2)END
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblAmount,2) ELSE A.dblAmount END
 			,[dblCredit]			= 0
 			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblAmount ELSE 0 END
 			,[dblCreditForeign]		= 0
@@ -359,9 +359,7 @@ BEGIN
 			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
 			,[intCurrencyId]		= A.intCurrencyId
 			,[intCurrencyExchangeRateTypeId] =  NULL
-			,[dblExchangeRate]		= CASE WHEN @ysnForeignTransaction =1 THEN
-				  @dblComputedExchangeRate 
-				  ELSE 1 END -- ISNULL(A.dblExchangeRate,1)
+			,[dblExchangeRate]		= @dblComputedExchangeRate 
 			,[dtmDateEntered]		= GETDATE()
 			,[dtmTransactionDate]	= A.dtmDate
 			,[strJournalLineDescription] = A.strMemo
@@ -388,9 +386,9 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= A.intShortGLAccountId
-			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 0 THEN A.dblShortAmount ELSE ROUND((@dblComputedExchangeRate * A.dblShortAmount),2) END
+			,[dblDebit]				= CASE WHEN @ysnForeignTransaction = 1 THEN ROUND(@dblComputedExchangeRate * A.dblShortAmount,2) ELSE A.dblShortAmount END
 			,[dblCredit]			= 0
-			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 0 THEN 0 ELSE A.dblShortAmount  END
+			,[dblDebitForeign]		= CASE WHEN @ysnForeignTransaction = 1  THEN A.dblShortAmount ELSE 0 END
 			,[dblCreditForeign]		= 0
 			,[dblDebitUnit]			= 0
 			,[dblCreditUnit]		= 0
@@ -458,15 +456,9 @@ BEGIN
 				ON B.intEntityId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
 
-	DECLARE @gainLoss DECIMAL (18,6)
-	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
-
-	if(@gainLoss <> 0  AND @ysnForeignTransaction = 1)
-		EXEC [uspCMInsertGainLossBankTransfer]   @intDefaultCurrencyId, 'Gain / Loss on Multicurrency Bank Deposit'
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
-	-- Update the posted flag in the transaction table
 
 	
 END -- @ysnPost = 1

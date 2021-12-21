@@ -450,11 +450,6 @@ BEGIN
 	WHERE	A.strTransactionId = @strTransactionId
 	
 	IF @@ERROR <> 0	GOTO Post_Rollback
-	DECLARE @gainLoss DECIMAL (18,6)
-	SELECT @gainLoss = SUM(dblDebit - dblCredit) from #tmpGLDetail WHERE dblExchangeRate <> 1
-
-	if(@gainLoss <> 0  AND @intDefaultCurrencyId <> @intCurrencyId)
-		EXEC [uspCMInsertGainLossBankTransfer] @intDefaultCurrencyId,'Gain / Loss on Multicurrency Bank Transaction'
 	
 END --@ysnPost = 1
 ELSE IF @ysnPost = 0
