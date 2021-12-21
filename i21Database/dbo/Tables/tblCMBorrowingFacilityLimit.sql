@@ -6,7 +6,7 @@ CREATE TABLE [dbo].[tblCMBorrowingFacilityLimit](
     strBorrowingFacilityLimit           NVARCHAR(40)        NOT NULL,
     dblLimit                            DECIMAL(18,6)       NOT NULL,
     intConcurrencyId                    INT                 NOT NULL,
- CONSTRAINT [PK_BorrowingFacilityDetailId] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_BorrowingFacilityLimitId] PRIMARY KEY CLUSTERED 
 (
 	[intBorrowingFacilityLimitId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
