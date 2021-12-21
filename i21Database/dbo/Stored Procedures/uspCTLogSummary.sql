@@ -39,7 +39,8 @@ BEGIN TRY
    			@dblSeqHistoryPreviousQty		NUMERIC(24, 10),
 			@intSeqHistoryPreviousFutMkt	INT,
 			@intSeqHistoryPreviousFutMonth	INT,
-			@dblCurrentBasis				NUMERIC(24, 10);
+			@dblCurrentBasis				NUMERIC(24, 10),
+			@intHeaderPricingTypeId		INT;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -405,6 +406,7 @@ BEGIN TRY
 		, @ysnWithPriceFix = ysnWithPriceFix
 		, @intCurrStatusId = intContractStatusId
 		, @dblCurrentBasis = dblBasis
+		, @intHeaderPricingTypeId = intHeaderPricingTypeId
 	FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
@@ -3737,7 +3739,9 @@ BEGIN TRY
 						SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 						FROM @cbLogSpecific
 
-						UPDATE @cbLogSpecific SET dblQty = @dblBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, intActionId = @_action
+						UPDATE @cbLogSpecific SET dblQty = @dblBasis * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3
+																									WHEN @intHeaderPricingTypeId = 1 THEN 1
+																									ELSE 2 END, intActionId = @_action
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 					IF ISNULL(@dblPriced, 0) > 0
@@ -4104,9 +4108,7 @@ BEGIN TRY
 						--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
 						IF (@TotalPriced <= @dblContractQty)
 						BEGIN
-							DECLARE @intOrigHeaderPricingTypeId INT;
-							SELECT TOP 1 @intOrigHeaderPricingTypeId = intHeaderPricingTypeId FROM @tmpContractDetail
-							UPDATE @cbLogSpecific SET intPricingTypeId = @intOrigHeaderPricingTypeId
+							UPDATE @cbLogSpecific SET intPricingTypeId = @intHeaderPricingTypeId
 						END
 					END 
 
@@ -4238,9 +4240,6 @@ BEGIN TRY
 					-- If Reassign prices, do not bring back Basis qty
 					IF (@ysnReassign = 0)
 					BEGIN
-
-						declare @intHeaderPricingTypeId int;
-						select top 1 @intHeaderPricingTypeId = intHeaderPricingTypeId from @tmpContractDetail
 						-- Increase basis, qtyDiff is negative so multiply to -1
 						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
@@ -4280,8 +4279,7 @@ BEGIN TRY
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @ysnReturn = 1
-			BEGIN				
-			
+			BEGIN
 				DECLARE @_dblRemaining NUMERIC(24, 10),
 						@_dblBasis NUMERIC(24, 10),
 						@_dblPriced NUMERIC(24, 10),
@@ -4684,7 +4682,9 @@ BEGIN TRY
 
 								IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 								BEGIN
-									UPDATE @cbLogSpecific SET intPricingTypeId = 2, intActionId = (CASE WHEN intActionId = 46 THEN 18 ELSE intActionId END)
+									UPDATE @cbLogSpecific SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1
+																						WHEN @intHeaderPricingTypeId = 1 THEN 1
+																						ELSE 2 END, intActionId = (CASE WHEN intActionId = 46 AND @currPricingTypeId <> 3 THEN 18 ELSE intActionId END)
 								END
 							END
 							ELSE
@@ -4698,7 +4698,9 @@ BEGIN TRY
 
 							IF (ISNULL(@TotalOrigPriced, 0) = 0) OR (@TotalOrigPriced - (@TotalConsumed + @dblQty) <= 0)
 							BEGIN
-								UPDATE @cbLogSpecific SET intPricingTypeId = 2, intActionId = (CASE WHEN intActionId = 46 THEN 18 ELSE intActionId END)
+								UPDATE @cbLogSpecific SET intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 1 
+																					WHEN @intHeaderPricingTypeId = 1 THEN 1
+																					ELSE 2 END, intActionId = (CASE WHEN intActionId = 46 AND @currPricingTypeId <> 3 THEN 18 ELSE intActionId END)
 							END
 						END
 					END
