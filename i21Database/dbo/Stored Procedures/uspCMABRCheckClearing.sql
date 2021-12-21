@@ -36,7 +36,10 @@ CROSS APPLY(
 	WHERE intBankAccountId = ISNULL (ABR.intBankAccountId, @intBankAccountId)
 	AND ysnPosted = 1
 	AND ysnCheckVoid = 0
-	AND dtmCheckPrinted IS NOT NULL
+	AND (
+		(dtmCheckPrinted IS NOT NULL AND strTransactionId NOT LIKE 'B%')
+	OR  (dtmCheckPrinted IS NULL AND strTransactionId LIKE 'B%') --exempt bank transactions
+	) 
 	AND dtmDateReconciled IS NULL
     AND ysnClr = 0
 	AND 1 = 
