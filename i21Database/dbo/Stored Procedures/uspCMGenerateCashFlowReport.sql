@@ -26,7 +26,16 @@ DECLARE
 		intCashFlowReportId = @intCashFlowReportId
 
 	-- Total Cash
-	EXEC [dbo].[uspCMGetTotalCashForecastReport] 
+	EXEC [dbo].[uspCMGenerateCMCashFlow] 
+		@intCashFlowReportId = @intCashFlowReportId, 
+		@dtmReportDate = @dtmReportDate, 
+		@intReportingCurrencyId = @intReportingCurrencyId, 
+		@intBankId = @intBankId, 
+		@intBankAccountId = @intBankAccountId, 
+		@intCompanyLocationId = @intCompanyLocationId
+
+	-- Total AP
+	EXEC [dbo].[uspCMGenerateAPCashFlow] 
 		@intCashFlowReportId = @intCashFlowReportId, 
 		@dtmReportDate = @dtmReportDate, 
 		@intReportingCurrencyId = @intReportingCurrencyId, 

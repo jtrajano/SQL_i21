@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspCMGetTotalCashForecastReport]
+﻿CREATE PROCEDURE [dbo].[uspCMGenerateCMCashFlow]
 (
 	@intCashFlowReportId INT,
 	@dtmReportDate DATETIME,
@@ -161,6 +161,7 @@ BEGIN
 			[intCashFlowReportId]
 			,[intTransactionId]
 			,[strTransactionId]
+			,[strTransactionType]
 			,[dtmTransactionDate]
 			,[dblBucket1]
 			,[dblBucket2]
@@ -182,8 +183,9 @@ BEGIN
 		)
 		SELECT 
 			@intCashFlowReportId,
-			1, -- no specific transactions for Current bucket - it can be thousands/millions of records.
+			-1, -- no specific transactions for Current bucket - it can be thousands/millions of records.
 			'Current',
+			NULL,
 			@dtmReportDate,
 			@dblBeginBalance,
 			0,
@@ -214,6 +216,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			(dblAmount * RateFilter.dblRateBucket2),
@@ -232,7 +235,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 1, @dtmReportDate), DATEADD(DAY, 7, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 1, @dtmReportDate), DATEADD(DAY, 7, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
@@ -243,6 +246,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			0,
@@ -261,7 +265,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 8, @dtmReportDate), DATEADD(DAY, 14, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 8, @dtmReportDate), DATEADD(DAY, 14, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
@@ -272,6 +276,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			0,
@@ -290,7 +295,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 15, @dtmReportDate), DATEADD(DAY, 21, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 15, @dtmReportDate), DATEADD(DAY, 21, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
@@ -301,6 +306,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			0,
@@ -319,7 +325,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 22, @dtmReportDate), DATEADD(DAY, 29, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 22, @dtmReportDate), DATEADD(DAY, 29, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
@@ -330,6 +336,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			0,
@@ -348,7 +355,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 30, @dtmReportDate), DATEADD(DAY, 60, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
@@ -359,6 +366,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			0,
@@ -377,7 +385,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 60, @dtmReportDate), DATEADD(DAY, 90, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
@@ -388,6 +396,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			0,
@@ -406,7 +415,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 90, @dtmReportDate), DATEADD(DAY, 120, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
@@ -417,6 +426,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
+			strBankTransactionTypeName,
 			dtmDate,
 			0,
 			0,
@@ -435,7 +445,7 @@ BEGIN
 			intBankAccountId,
 			intCompanyLocationId,
 			1
-		FROM [dbo].[fnCMGetPostedBankTransactionFromDate](@intCurrentBankAccountId, DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, DATEADD(DAY, 120, @dtmReportDate), DATEADD(DAY, 3650, @dtmReportDate))
 		JOIN @tblRateFilters RateFilter
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter

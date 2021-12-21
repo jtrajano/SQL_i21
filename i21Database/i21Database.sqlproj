@@ -318,8 +318,7 @@
     <Build Include="dbo\Views\vyuCMCashFlowReportRateType.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportRate.sql" />
     <Build Include="dbo\User Defined Types\CMCashFlowReportFilterRateType.sql" />
-    <Build Include="dbo\Functions\fnCMGetTotalPostedBankTransactionFromDate.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMGetTotalCashForecastReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGenerateCMCashFlow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCashFlowReport.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportBankAccount.sql" />
     <Build Include="dbo\Tables\tblApiSchemaVendorLocation.sql" />
@@ -360,7 +359,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessTFLogs.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportSummaryDetail.sql" />
     <Build Include="dbo\Views\vyuCMCashFlowReportSummaryDetail.sql" />
-    <Build Include="dbo\Functions\fnCMGetPostedBankTransactionFromDate.sql" />
+    <Build Include="dbo\Functions\fnCMCashFlowTransactions.sql" />
     <Build Include="dbo\Tables\tblCMCashFlowReportBucketType.sql" />
     <None Include="Scripts\Post-Deployment\CM\13_InsertDefaultCashFlowReportBucketType.sql" />
     <Build Include="dbo\Stored Procedures\uspTRFFacilityLimitsReport.sql" />
@@ -432,6 +431,7 @@
     <Build Include="dbo\Functions\fnLGCashFlowTransactions.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemLotQuality.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMGenerateAPCashFlow.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />

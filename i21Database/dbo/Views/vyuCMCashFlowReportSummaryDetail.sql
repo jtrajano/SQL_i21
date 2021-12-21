@@ -7,6 +7,7 @@ SELECT
 	Detail.intTransactionId,
 	Detail.strTransactionId,
 	Detail.dtmTransactionDate,
+	Detail.strTransactionType,
 	Detail.dblBucket1,
 	Detail.dblBucket2,
 	Detail.dblBucket3,

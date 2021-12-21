@@ -15,7 +15,7 @@
 	[intConcurrencyId]			INT DEFAULT 1 NOT NULL,
 
 	CONSTRAINT [PK_tblCMCashFlowReportRateType] PRIMARY KEY CLUSTERED ([intCashFlowReportRateTypeId] ASC),
-	CONSTRAINT [FK_tblCMCashFlowReportRateType_tblCMCashFlowReport] FOREIGN KEY ([intCashFlowReportId]) REFERENCES [dbo].[tblCMCashFlowReport]([intCashFlowReportId]),
+	CONSTRAINT [FK_tblCMCashFlowReportRateType_tblCMCashFlowReport] FOREIGN KEY ([intCashFlowReportId]) REFERENCES [dbo].[tblCMCashFlowReport]([intCashFlowReportId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCMCashFlowReportRateType_tblSMCurrency] FOREIGN KEY ([intFilterCurrencyId]) REFERENCES [dbo].[tblSMCurrency]([intCurrencyID]),
     CONSTRAINT [FK_tblCMCashFlowReportRateType_tblSMCurrencyExchangeRateTypeBucket1] FOREIGN KEY ([intRateTypeBucket1]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
     CONSTRAINT [FK_tblCMCashFlowReportRateType_tblSMCurrencyExchangeRateTypeBucket2] FOREIGN KEY ([intRateTypeBucket2]) REFERENCES [dbo].[tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),

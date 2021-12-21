@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCMGetPostedBankTransactionFromDate]
+﻿CREATE FUNCTION [dbo].[fnCMCashFlowTransactions]
 (
 	@intBankAccountId INT,
     @dtmFrom DATETIME,
@@ -20,7 +20,8 @@ RETURN
                         ELSE BT.dblAmount
                         END,
         BA.intGLAccountId,
-		BT.intCompanyLocationId
+		BT.intCompanyLocationId,
+        BTT.strBankTransactionTypeName
     FROM [dbo].[tblCMBankTransaction] BT
     JOIN [dbo].[tblCMBankAccount] BA ON BA.intBankAccountId = BT.intBankAccountId
     LEFT JOIN [dbo].[tblCMBankTransactionType] BTT ON BTT.intBankTransactionTypeId = BT.intBankTransactionTypeId

@@ -7679,4 +7679,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intBankAccountTypeId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="610c2d03-3953-4e99-93ff-a2211b13d875" ChangeDateTime="12/14/2021 08:48:03">
+    <Property Name="ElementName" Value="[dbo].[uspCMGetTotalCashForecastReport]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[uspCMGenerateCMCashFlow]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b26f4d7a-ec65-45a8-8b6e-8f3f8735924d" ChangeDateTime="12/20/2021 07:21:26">
+    <Property Name="ElementName" Value="[dbo].[fnCMGetPostedBankTransactionFromDate]" />
+    <Property Name="ElementType" Value="SqlInlineTableValuedFunction" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="fnCMCashFlowTransactions" />
+  </Operation>
 </Operations>
