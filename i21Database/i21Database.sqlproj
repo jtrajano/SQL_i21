@@ -429,6 +429,8 @@
     <Build Include="dbo\Views\vyuFAAPBill.sql" />
     <Build Include="dbo\Views\vyuFAARInvoice.sql" />
     <Build Include="dbo\Functions\fnLGCashFlowTransactions.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptItemLotQuality.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotQuality.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
