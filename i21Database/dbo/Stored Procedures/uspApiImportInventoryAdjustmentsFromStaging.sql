@@ -337,7 +337,7 @@ BEGIN
 		sad.dblNewLotQty
 		, COALESCE(sad.dblNewUnitCost, dbo.fnICGetItemRunningCost(item.intItemId, @intLocationId, lot.intLotId, sub.intCompanyLocationSubLocationId, su.intStorageLocationId, item.intCommodityId, item.intCategoryId, @dtmAdjustmentDate, 0), pricing.dblLastCost)
 		, sad.dtmNewExpiryDate
-		, newLoc.intCompanyLocationId, newItemUOM.intItemUOMId, newWeightUOM.intItemUOMId, itemUOM.intItemUOMId
+		, newLoc.intCompanyLocationId, COALESCE(newItemUOM.intItemUOMId, itemUOM.intItemUOMId), newWeightUOM.intItemUOMId, itemUOM.intItemUOMId
 		, newSub.intCompanyLocationSubLocationId, newSu.intStorageLocationId, ISNULL(sad.intOwnershipType,  1)
 		, dbo.fnICGetItemRunningStockQty(item.intItemId, @intLocationId, lot.intLotId, sub.intCompanyLocationSubLocationId, su.intStorageLocationId, item.intCommodityId, item.intCategoryId, @dtmAdjustmentDate, 0)
 		, @intUserId, GETDATE()
@@ -406,7 +406,10 @@ BEGIN
 
 	IF @ysnAutoPost = 1
 	BEGIN
-		EXEC dbo.uspApiPostAdjustmentTransaction @strAdjustmentNo, 1, 0, 1, @strBatchId OUTPUT
+		IF EXISTS(SELECT * FROM tblICInventoryAdjustment WHERE strAdjustmentNo = @strAdjustmentNo)
+		BEGIN
+			EXEC dbo.uspApiPostAdjustmentTransaction @strAdjustmentNo, 1, 0, 1, @strBatchId OUTPUT
+		END
 		-- INSERT INTO tblApiRESTErrorLog(guiApiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel)
 		-- SELECT @guiApiUniqueId, r.strDescription, @strAdjustmentNo, @strBatchId, r.intGLDetailId, 1, 1, 'GL Detail'
 		-- FROM tblGLDetail r
