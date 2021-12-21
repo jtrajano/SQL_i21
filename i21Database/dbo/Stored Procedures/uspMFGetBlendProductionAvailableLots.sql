@@ -4,6 +4,7 @@
 	,@ysnShowAllPallets BIT
 	,@intItemUOMId INT = 0
 	,@intManufacturingProcessId INT = 0
+	,@strLotNumber NVARCHAR(50) = '%'
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -135,6 +136,7 @@ WHERE l.intItemId = @intItemId
 	AND ls.strPrimaryStatus = 'Active'
 	AND l.intLocationId = @intLocationId
 	AND ISNULL(sl.ysnAllowConsume, 0) = 1
+	AND l.strLotNumber LIKE '%' + @strLotNumber + '%'
 ORDER BY l.dtmExpiryDate
 	,l.dtmDateCreated
 
