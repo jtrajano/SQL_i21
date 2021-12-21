@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspApiImportInventoryTransferFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER)
+ALTER PROCEDURE [dbo].[uspApiImportInventoryTransferFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER, @ysnAutoPost BIT = 0)
 AS
 
 DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
@@ -134,11 +134,28 @@ BEGIN
 	SET @intInventorTransferId = SCOPE_IDENTITY()
 
 	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
+	SELECT 'The itemId/itemNo is required.', td.intItemId, 'itemId/itemNo', 'Error'
+	FROM tblApiInventoryTransferDetailStaging td
+	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
+		AND td.intItemId IS NULL
+		AND NULLIF(td.strItemNo, '') IS NULL
+
+	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
 	SELECT 'Can''t find the itemId: ''' + CAST(td.intItemId AS NVARCHAR(50)) + '''', td.intItemId, 'itemId', 'Error'
 	FROM tblApiInventoryTransferDetailStaging td
 	LEFT JOIN tblICItem item ON item.intItemId = td.intItemId
 	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
 		AND item.intItemId IS NULL
+		AND td.intItemId IS NOT NULL
+
+	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
+	SELECT 'Can''t find the itemNo: ''' + CAST(td.strItemNo AS NVARCHAR(50)) + '''', td.strItemNo, 'itemNo', 'Error'
+	FROM tblApiInventoryTransferDetailStaging td
+	LEFT JOIN tblICItem item ON item.strItemNo = td.strItemNo
+	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
+		AND item.intItemId IS NULL
+		AND td.strItemNo IS NOT NULL
+		AND td.intItemId IS NULL
 
 	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
 	SELECT 'The item with an itemId of ''' + CAST(td.intItemId AS NVARCHAR(50)) + ''' is not active.', td.intItemId, 'itemId', 'Error'
@@ -147,9 +164,19 @@ BEGIN
 	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
 		AND item.strStatus != 'Active'
 		AND item.intItemId IS NOT NULL
+		AND td.intItemId IS NOT NULL
 
 	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
-	SELECT 'The item ''' + item.strItemNo + ''' with itemId ''' + CAST(td.intItemId AS NVARCHAR(50)) + ''' is not set up for the location ''' + c.strLocationName + ''' with fromLocationId ''' +
+	SELECT 'The item with an itemId of ''' + CAST(td.intItemId AS NVARCHAR(50)) + ''' is not active.', td.intItemId, 'itemId', 'Error'
+	FROM tblApiInventoryTransferDetailStaging td
+	LEFT JOIN tblICItem item ON item.strItemNo = td.strItemNo
+	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
+		AND item.strStatus != 'Active'
+		AND item.intItemId IS NOT NULL
+		AND td.intItemId IS NULL
+
+	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
+	SELECT 'The item ''' + item.strItemNo + ''' with itemId ''' + ISNULL(CAST(td.intItemId AS NVARCHAR(50)), '') + ''' was not set up for the location ''' + c.strLocationName + ''' with fromLocationId ''' +
 		CAST(@intFromLocationId AS nvarchar(50)) + '''', td.intItemId, 'itemId', 'Error'
 	FROM tblApiInventoryTransferDetailStaging td
 	LEFT JOIN tblICItem item ON item.intItemId = td.intItemId
@@ -160,15 +187,70 @@ BEGIN
 		AND item.intItemId IS NOT NULL
 		AND c.intCompanyLocationId IS NOT NULL
 		AND il.intItemLocationId IS NULL
+		AND td.intItemId IS NOT NULL
+	
+	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
+	SELECT 'The item ''' + td.strItemNo + ''' with strItemNo ''' + ISNULL(CAST(item.intItemId AS NVARCHAR(50)), '') + ''' was not set up for the location ''' + c.strLocationName + ''' with fromLocationId ''' +
+		CAST(@intFromLocationId AS nvarchar(50)) + '''', td.strItemNo, 'itemNo', 'Error'
+	FROM tblApiInventoryTransferDetailStaging td
+	LEFT JOIN tblICItem item ON item.strItemNo = td.strItemNo
+	LEFT JOIN tblICItemLocation il ON il.intItemId = item.intItemId
+		AND il.intLocationId = @intFromLocationId
+	LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = @intFromLocationId
+	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
+		AND item.intItemId IS NOT NULL
+		AND c.intCompanyLocationId IS NOT NULL
+		AND il.intItemLocationId IS NULL
+		AND td.intItemId IS NULL
+		AND NULLIF(td.strItemNo, '') IS NOT NULL
 
 	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
-	SELECT 'Can''t find the itemUOMId: ''' + CAST(td.intItemUOMId AS NVARCHAR(50)) + '''', td.intItemUOMId, 'itemUOMId', 'Error'
+	SELECT 'Can''t find the uomId: ''' + ISNULL(CAST(td.intUOMId AS NVARCHAR(50)), '') + '''', td.intUOMId, 'uomId', 'Error'
+	FROM tblApiInventoryTransferDetailStaging td
+	LEFT JOIN tblICUnitMeasure u ON u.intUnitMeasureId = td.intUOMId
+	WHERE u.intUnitMeasureId IS NULL
+		AND td.intUOMId IS NOT NULL
+
+	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
+	SELECT 'The UOM ''' + u.strUnitMeasure + ''' with uomId: ''' + ISNULL(CAST(td.intUOMId AS nvarchar(50)), '') + ''' is not valid for the item ''' +
+		item.strItemNo + ''' with itemId ''' + CAST(td.intItemId AS nvarchar(100)) + '''', td.intUOMId, 'uomId', 'Error'
+	FROM tblApiInventoryTransferDetailStaging td
+	LEFT JOIN tblICItem item ON item.intItemId = td.intItemId
+	LEFT JOIN tblICUnitMeasure u ON u.intUnitMeasureId = td.intUOMId
+	LEFT JOIN tblICItemUOM um ON um.intItemId = item.intItemId
+		AND um.intUnitMeasureId = u.intUnitMeasureId
+	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
+		AND td.intUOMId IS NOT NULL
+		AND u.intUnitMeasureId IS NOT NULL
+		AND um.intItemUOMId IS NULL
+		AND td.intItemId IS NOT NULL
+		AND item.intItemId IS NOT NULL
+
+	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
+	SELECT 'The UOM ''' + u.strUnitMeasure + ''' with uomId: ''' + ISNULL(CAST(td.intUOMId AS nvarchar(50)), '') + ''' is not valid for the item ''' +
+		item.strItemNo + ''' with itemId ''' + CAST(item.intItemId AS nvarchar(100)) + '''', td.intUOMId, 'uomId', 'Error'
+	FROM tblApiInventoryTransferDetailStaging td
+	LEFT JOIN tblICItem item ON item.strItemNo = td.strItemNo
+	LEFT JOIN tblICUnitMeasure u ON u.intUnitMeasureId = td.intUOMId
+	LEFT JOIN tblICItemUOM um ON um.intItemId = item.intItemId
+		AND um.intUnitMeasureId = u.intUnitMeasureId
+	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
+		AND td.intUOMId IS NOT NULL
+		AND u.intUnitMeasureId IS NOT NULL
+		AND um.intItemUOMId IS NULL
+		AND td.intItemId IS NULL
+		AND ISNULL(td.strItemNo, '') IS NOT NULL
+		AND item.intItemId IS NOT NULL
+
+	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
+	SELECT 'Can''t find the itemUOMId: ''' + ISNULL(CAST(td.intItemUOMId AS NVARCHAR(50)), '') + '''', td.intItemUOMId, 'itemUOMId', 'Error'
 	FROM tblApiInventoryTransferDetailStaging td
 	LEFT JOIN tblICItemUOM uom ON uom.intItemUOMId = td.intItemUOMId
 	WHERE uom.intItemUOMId IS NULL
+		AND td.intItemUOMId IS NOT NULL
 
 	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
-	SELECT 'The item UOM ''' + u.strUnitMeasure + ''' with itemUOMId: ''' + CAST(td.intItemUOMId AS nvarchar(50)) + ''' is not valid for the item ''' +
+	SELECT 'The item UOM ''' + u.strUnitMeasure + ''' with itemUOMId: ''' + ISNULL(CAST(td.intItemUOMId AS nvarchar(50)), '') + ''' is not valid for the item ''' +
 		item.strItemNo + ''' with itemId ''' + CAST(td.intItemId AS nvarchar(100)) + '''', td.intItemUOMId, 'itemUOMId', 'Error'
 	FROM tblApiInventoryTransferDetailStaging td
 	LEFT JOIN tblICItem item ON item.intItemId = td.intItemId
@@ -179,6 +261,8 @@ BEGIN
 	WHERE td.intApiInventoryTransferStagingId = @intApiInventoryTransferStagingId
 		AND uom.intItemUOMId IS NULL
 		AND uom1.intItemId IS NOT NULL
+		AND item.intItemId IS NOT NULL
+		AND td.intItemUOMId IS NOT NULL
 
 	INSERT INTO @Logs(strError, strValue, strField, strLogLevel)
 	SELECT 'grossUOMId was not specified', CAST(td.intGrossUOMId AS NVARCHAR(50)), 'grossUOMId', 'Error'
@@ -334,8 +418,8 @@ BEGIN
 		)
 		SELECT
 			@intInventorTransferId
-			, td.intItemId
-			, td.intItemUOMId
+			, COALESCE(i.intItemId, alternativeItem.intItemId)
+			, COALESCE(td.intItemUOMId, alternativeUom.intItemUOMId)
 			, td.dblTransferQty
 			, td.intOwnershipType
 			, td.intFromStorageLocationId
@@ -376,9 +460,21 @@ BEGIN
 			, 1
 		FROM tblApiInventoryTransferDetailStaging td
 		LEFT JOIN tblICLotStatus s ON s.strPrimaryStatus = td.strNewLotStatus
-		INNER JOIN tblICItem i ON i.intItemId = td.intItemId
+		LEFT JOIN tblICItem i ON i.intItemId = td.intItemId
+		OUTER APPLY (
+			SELECT TOP 1 intItemId
+			FROM tblICItem
+			WHERE strItemNo = td.strItemNo
+		) alternativeItem
 		LEFT JOIN tblICCategory ct ON ct.intCategoryId = i.intCategoryId
 		LEFT JOIN tblICCommodity cm ON cm.intCommodityId = i.intCommodityId
+		OUTER APPLY (
+			SELECT TOP 1 x2.intItemUOMId
+			FROM tblICUnitMeasure x1
+			JOIN tblICItemUOM x2 ON x2.intItemId = COALESCE(i.intItemId, alternativeItem.intItemId)
+				AND x2.intUnitMeasureId = x1.intUnitMeasureId
+			WHERE x1.intUnitMeasureId = td.intUOMId
+		) alternativeUom
 		LEFT JOIN tblICItemLocation il ON il.intItemId = i.intItemId
 			AND il.intLocationId = @intFromLocationId
 		LEFT JOIN tblICItemPricing p ON p.intItemId = i.intItemId
@@ -409,6 +505,30 @@ BEGIN
 		SELECT @intInventorTransferId, c.strConditionName, c.strConditionDesc, GETUTCDATE(), 1
 		FROM tblCTCondition c
 		WHERE c.strType = 'Inventory Transfer'
+
+		DELETE t
+		FROM tblICInventoryTransfer t
+		WHERE NOT EXISTS(
+			SELECT TOP 1 1
+			FROM tblICInventoryTransferDetail td
+			WHERE td.intInventoryTransferId = t.intInventoryTransferId
+		)
+			AND t.intInventoryTransferId = @intInventorTransferId
+
+		IF @ysnAutoPost = 1
+		BEGIN
+			DECLARE @strTransferNo NVARCHAR(50)
+			DECLARE @strBatchId NVARCHAR(40)
+
+			SELECT @strTransferNo = strTransferNo 
+			FROM tblICInventoryTransfer 
+			WHERE intInventoryTransferId = @intInventorTransferId
+
+			IF @strTransferNo IS NOT NULL
+			BEGIN
+				EXEC dbo.uspApiPostTransferTransaction @strTransferNo, 1, 0, 1, @strBatchId OUTPUT
+			END
+		END
 	END
 
 	FETCH NEXT FROM cur INTO
@@ -434,6 +554,9 @@ FROM tblICInventoryTransfer t
 LEFT JOIN tblICInventoryTransferDetail ti ON ti.intInventoryTransferId = t.intInventoryTransferId
 WHERE t.guiApiUniqueId = @guiApiUniqueId
 GROUP BY t.intInventoryTransferId, t.strTransferNo
+
+INSERT INTO tblApiRESTErrorLog(guiApiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel)
+SELECT @guiApiUniqueId, strError, strField, strValue, intLineNumber, dblTotalAmount, intLinePosition, strLogLevel FROM @Logs
 
 DELETE FROM tblApiInventoryTransferStaging WHERE guiApiUniqueId = @guiApiUniqueId
 
