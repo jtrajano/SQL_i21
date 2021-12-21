@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspApiImportInventoryTransferFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER, @ysnAutoPost BIT = 0)
+CREATE PROCEDURE [dbo].[uspApiImportInventoryTransferFromStaging] (@guiApiUniqueId UNIQUEIDENTIFIER, @ysnAutoPost BIT = 0)
 AS
 
 DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, dblTotalAmount NUMERIC(18, 6), intLinePosition INT NULL, strLogLevel NVARCHAR(50))
