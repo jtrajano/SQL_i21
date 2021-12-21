@@ -16,7 +16,7 @@ SELECT L.strLoadNumber
 	,LD.intItemId
 	,I.strItemNo AS strItemNo
 	,I.strDescription AS strItemDescription
-	,LD.dblQuantity
+	,ISNULL(LDCL.dblQuantity, LD.dblQuantity) AS dblQuantity
 	,IU.intItemUOMId
 	,UM.strUnitMeasure
 	,LC.strMarks
@@ -59,7 +59,7 @@ SELECT L.strLoadNumber
 	,LD.intItemId
 	,I.strItemNo AS strItemNo
 	,I.strDescription AS strItemDescription
-	,LD.dblQuantity
+	,ISNULL(LDCL.dblQuantity, LD.dblQuantity) AS dblQuantity
 	,IU.intItemUOMId
 	,UM.strUnitMeasure
 	,LC.strMarks
