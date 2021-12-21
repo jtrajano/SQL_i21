@@ -29,7 +29,10 @@ SELECT
 	strFax				=	ISNULL(contactEntity.strFax,''),
 	strEmail			=	ISNULL(contactEntity.strEmail,''),
 	strWebsite			=	ISNULL(contactEntity.strWebsite,''),
-	strCountry			=	ISNULL(entityLocation.strCountry, '')
+	strCountry			=	ISNULL(entityLocation.strCountry, ''),
+	vendor.ysnTransportTerminal,
+	entityLocation.intShipViaId,
+	shipVia.strShipVia
 FROM tblAPVendor vendor
 JOIN tblEMEntity entity ON entity.intEntityId = vendor.intEntityId
 JOIN tblEMEntityType entityType ON entityType.intEntityId = entity.intEntityId
@@ -42,6 +45,7 @@ LEFT JOIN tblEMEntityLocation entityLocation ON entityLocation.intEntityId = ent
 LEFT JOIN tblEMEntityLocation shipFromLocation ON shipFromLocation.intEntityLocationId = vendor.intShipFromId
 	AND shipFromLocation.intEntityId = vendor.intEntityId
 LEFT JOIN tblEMEntityPhoneNumber phoneNumber ON phoneNumber.intEntityId = contactEntity.intEntityId
+LEFT JOIN tblSMShipVia shipVia ON shipVia.intEntityId = entityLocation.intShipViaId
 --ORDER BY v.strName ASC, v.ysnActive DESC, v.dtmOriginationDate ASC
 
 GO
