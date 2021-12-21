@@ -195,6 +195,8 @@ SELECT intAccountId
 	 , strAccountCategory
 FROM vyuGLAccountDetail
 WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments', 'AP Account')
+GROUP BY intAccountId,
+		 strAccountCategory
 
 --##FORGIVENSERVICECHARGE
 INSERT INTO ##FORGIVENSERVICECHARGE (
