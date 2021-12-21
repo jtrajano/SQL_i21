@@ -213,33 +213,28 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 	 
 		SELECT @ifExistResult = @@ROWCOUNT
 	 
-		--lets delete the exisitng file so that it will always get the new file
-		IF @ifExistResult = 1
+		IF @ifExistResult = 0
 		BEGIN
-			SET @ifExistingSQL = N'DELETE FROM ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] WHERE strName = ''' + @strName + ''' AND intTransactionId = '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +''
+			SET @smDocumentSQL = N'INSERT INTO ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intInterCompanyEntityId, intInterCompanyId, strInterCompanyEntityName , intConcurrencyId )   
+			VALUES ('''+ REPLACE(@strName, '''', '''''')  +''',   
+			'''+@strType+''',   
+			GETUTCDATE(),  
+			'+CASE WHEN @intSize IS NULL THEN 'NULL' ELSE  CONVERT(NVARCHAR,@intSize) END + ',   
+			'+CASE WHEN @outFolderId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@outFolderId) END+ ',  
+			'+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +',   
+			'+CASE WHEN @placeHolderEntityId IS NULL THEN 'NULL' ELSE CONVERT(VARCHAR,@placeHolderEntityId) END+',   
+			'+CASE WHEN @intNewUploadId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intNewUploadId) END+',   
+			'+CASE WHEN @intEntityId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intEntityId) END+',  
+			'+CASE WHEN @intCurrentCompanyId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intCurrentCompanyId) END+',   
+			'''+ @strEntityName+''', 1 ) SET @id = (SELECT SCOPE_IDENTITY())'   
 
-			EXEC sp_executesql @ifExistingSQL
-		END
-
-	 
-		SET @smDocumentSQL = N'INSERT INTO ['+ @strDestinationDatabaseName +'].[dbo].[tblSMDocument] (strName, strType,dtmDateModified, intSize, intDocumentSourceFolderId, intTransactionId, intEntityId, intUploadId, intInterCompanyEntityId, intInterCompanyId, strInterCompanyEntityName , intConcurrencyId )   
-		VALUES ('''+ REPLACE(@strName, '''', '''''')  +''',   
-		'''+@strType+''',   
-		GETUTCDATE(),  
-		'+CASE WHEN @intSize IS NULL THEN 'NULL' ELSE  CONVERT(NVARCHAR,@intSize) END + ',   
-		'+CASE WHEN @outFolderId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@outFolderId) END+ ',  
-		'+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +',   
-		'+CASE WHEN @placeHolderEntityId IS NULL THEN 'NULL' ELSE CONVERT(VARCHAR,@placeHolderEntityId) END+',   
-		'+CASE WHEN @intNewUploadId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intNewUploadId) END+',   
-		'+CASE WHEN @intEntityId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intEntityId) END+',  
-		'+CASE WHEN @intCurrentCompanyId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intCurrentCompanyId) END+',   
-		'''+ @strEntityName+''', 1 ) SET @id = (SELECT SCOPE_IDENTITY())'   
-
-		EXEC sp_executesql @smDocumentSQL, N'@id INT OUTPUT', @intNewDocumentId OUTPUT  
+			EXEC sp_executesql @smDocumentSQL, N'@id INT OUTPUT', @intNewDocumentId OUTPUT  
       
-		--SAVE TO LOGGING TABLE  
-		INSERT INTO tblSMInterCompanyTransferLogForDMS (intSourceRecordId, intDestinationRecordId, intDestinationCompanyId,dtmCreated)  
-		VALUES(@intDocumentId, @intNewDocumentId,@referenceCompanyId,  GETUTCDATE())
+			--SAVE TO LOGGING TABLE  
+			INSERT INTO tblSMInterCompanyTransferLogForDMS (intSourceRecordId, intDestinationRecordId, intDestinationCompanyId,dtmCreated)  
+			VALUES(@intDocumentId, @intNewDocumentId,@referenceCompanyId,  GETUTCDATE())
+
+		END
 
 		DELETE FROM @dmsTable WHERE intDocumentId = @intDocumentId  
 	END
