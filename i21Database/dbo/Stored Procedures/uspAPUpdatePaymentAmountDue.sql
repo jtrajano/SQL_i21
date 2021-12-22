@@ -38,9 +38,13 @@ BEGIN
 					ELSE 0 END,
 		tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
 												THEN CAST((B.dblDiscount + B.dblPayment - B.dblInterest) AS DECIMAL(18,2))
-											ELSE (B.dblAmountDue + B.dblPayment - B.dblInterest) END),
-		tblAPPaymentDetail.dblDiscount = CASE WHEN C.ysnDiscountOverride = 1 THEN C.dblDiscount ELSE @discount END,
-		tblAPPaymentDetail.dblInterest = @interest
+											ELSE (B.dblAmountDue + B.dblPayment - B.dblInterest) END)
+		--WE CANNOT DETERMINE IF DISCOUNT WILL BE REVERTED IF IT IS OVERRIDE AND PARTIAL
+		--WE WILL RETAIN THE VALUE OF tblAPPaymentDetail.dblDiscount TO AVOID CONFUSION ON WHAT IT SHOULD BE THE VALUE AFTER UNPOSTING
+		--We originally need this logic to recalculate the interest or discount on unpost to correctly show the computation base on terms.
+		--tblAPPaymentDetail.dblDiscount = CASE WHEN C.ysnDiscountOverride = 1 THEN C.dblDiscount ELSE @discount END,
+		--SAME WITH INTEREST
+		--tblAPPaymentDetail.dblInterest = @interest
 	FROM tblAPPayment A
 		LEFT JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
