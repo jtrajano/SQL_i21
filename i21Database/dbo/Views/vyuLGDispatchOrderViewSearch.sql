@@ -13,8 +13,10 @@ SELECT
 	,DO.dtmDispatchDate
 	,DO.intEntityShipViaId
 	,DO.intEntityShipViaTruckId
+	,DO.intEntityShipViaTrailerId
 	,strShipVia = SV.strName
 	,strTruckNumber = SVT.strTruckNumber
+	,strTrailerNumber = SVTL.strTrailerNumber
 	,strDriver = DR.strName
 	,strFromLocation = CL.strLocationName
 	,strFromStorageLocation = CLSL.strSubLocationName 
@@ -56,6 +58,7 @@ LEFT JOIN tblLGDispatchOrderDetail DOD ON DOD.intDispatchOrderId = DO.intDispatc
 LEFT JOIN tblICItem I ON I.intItemId = DOD.intItemId
 LEFT JOIN tblEMEntity SV ON SV.intEntityId = DO.intEntityShipViaId
 LEFT JOIN tblSMShipViaTruck SVT ON SVT.intEntityShipViaTruckId = DO.intEntityShipViaTruckId
+LEFT JOIN tblSMShipViaTrailer SVTL ON SVTL.intEntityShipViaTrailerId = DO.intEntityShipViaTrailerId
 LEFT JOIN tblEMEntity DR ON DR.intEntityId = DO.intDriverEntityId
 LEFT JOIN tblEMEntity E ON E.intEntityId = DOD.intEntityId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = DOD.intEntityLocationId
