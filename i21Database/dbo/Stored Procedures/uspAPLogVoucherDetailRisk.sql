@@ -33,6 +33,8 @@ BEGIN
 		intUserId,
 		intTicketId,
 		strMiscFields,
+		intInventoryReceiptItemId,
+		intLoadDetailId,
 		intActionId
 	)
 	SELECT 
@@ -55,7 +57,9 @@ BEGIN
 		, intEntityId = b.intEntityVendorId
 		, intUserId = b.intEntityId
 		, intTicketId = bd.intScaleTicketId
-		, strMiscFields = '{intInventoryReceiptItemId = "'+ CAST(ISNULL(bd.intInventoryReceiptItemId,'') AS NVARCHAR) +'"} {intLoadDetailId = "' + CAST(ISNULL(bd.intLoadDetailId,'') AS NVARCHAR) +'"}'
+		, strMiscFields = NULL
+		, bd.intInventoryReceiptItemId
+		, bd.intLoadDetailId
 		, intActionId = CASE WHEN @remove = 1 THEN 62 ELSE 15 END
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId

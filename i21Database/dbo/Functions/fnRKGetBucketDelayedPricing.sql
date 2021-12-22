@@ -65,7 +65,7 @@ BEGIN
 			, dtmCreatedDate
 			, dtmTransactionDate
 			, strDistributionType
-			, a.strStorageTypeCode
+			, strStorageTypeCode
 			, dblTotal = sl.dblOrigQty
 			, intEntityId
 			, strEntityName
@@ -86,17 +86,6 @@ BEGIN
 			, intOrigUOMId
 			, strNotes
 		FROM vyuRKGetSummaryLog sl
-		CROSS APPLY (
-			SELECT 
-				strStorageTypeCode
-			FROM (
-				select * from dbo.fnRKGetMiscFieldTable(sl.strMiscField)
-			) t
-			PIVOT (
-				min(strValue)
-				FOR strFieldName IN (strStorageTypeCode)
-			) AS pt
-		) a
 		WHERE strBucketType = 'Delayed Pricing'
 			--AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
