@@ -4604,14 +4604,11 @@ BEGIN TRY
 							end  
 
 						END 
-
-						-- Increase SBD upon creation of IR
-						IF (@strTransactionReference = 'Inventory Receipt')
-						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'
-							EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+						ELSE IF (@strTransactionReference = 'Settle Storage' AND @currPricingTypeId = 2 and exists (select top 1 1 from @cbLogSpecific where dblQty < 0))
+						BEGIN  
+							UPDATE @cbLogSpecific SET dblQty = abs(dblQty), intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0;
 						END
-
 					END				
 					ELSE IF ISNULL(@dblBasis, 0) > 0
 					BEGIN
