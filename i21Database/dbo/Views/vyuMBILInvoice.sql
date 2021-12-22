@@ -28,6 +28,9 @@ SELECT Invoice.intInvoiceId
 	, Invoice.ysnVoided
 	, Invoice.dtmPostedDate
 	, Invoice.dtmVoidedDate
+	, Invoice.intPaymentMethodId
+	, PaymentMethod.strPaymentMethod
+	, Invoice.strPaymentInfo
 	--, Invoice.inti21InvoiceId
 	, inti21InvoiceId = i21Invoice.intInvoiceId
 	, stri21InvoiceNo = i21Invoice.strInvoiceNumber
@@ -43,6 +46,7 @@ LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Invoice.intDriverId
 LEFT JOIN tblMBILShift InvoiceShift ON InvoiceShift.intShiftId = Invoice.intShiftId
 LEFT JOIN tblMBILOrder InvoiceOrder ON InvoiceOrder.intOrderId = Invoice.intOrderId
 LEFT JOIN tblSMTerm Term ON Term.intTermID = Invoice.intTermId
+LEFT JOIN tblSMPaymentMethod PaymentMethod ON PaymentMethod.intPaymentMethodID = Invoice.intPaymentMethodId
 LEFT JOIN tblARInvoice i21Invoice ON i21Invoice.intInvoiceId = Invoice.inti21InvoiceId
 LEFT JOIN (    
   SELECT item.intInvoiceId,SUM(isnull(dblItemTotal,0))dblItemTotal,SUM(isnull(dblTaxTotal,0))dblTaxTotal
