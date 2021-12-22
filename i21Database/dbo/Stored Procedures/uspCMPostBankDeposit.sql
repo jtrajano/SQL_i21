@@ -424,8 +424,8 @@ BEGIN
 			,[dtmDate]				= @dtmDate
 			,[strBatchId]			= @strBatchId
 			,[intAccountId]			= B.intGLAccountId
-			,[dblDebit]				= B.dblDebit
-			,[dblCredit]			= B.dblCredit
+			,[dblDebit]				= ROUND(B.dblDebit,2)
+			,[dblCredit]			= ROUND(B.dblCredit,2)
 			,[dblDebitForeign]		= B.dblDebitForeign
 			,[dblCreditForeign]		= B.dblCreditForeign
 			,[dblDebitUnit]			= 0

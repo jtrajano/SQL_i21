@@ -79,8 +79,8 @@ FROM @BankTransactionBatchDetailEntries
 				,@strDescriptionDetail	= strDescription
 				,@strName				= strName
 				,@dblAmount				= dblAmount
-				,@dblDebit				= dblDebit
-				,@dblCredit				= dblCredit
+				,@dblDebit				= ROUND(dblDebit,2)
+				,@dblCredit				= ROUND(dblCredit,2)
 				,@intCurrencyExchangeRateTypeId = intCurrencyExchangeRateTypeId
 				,@dblExchangeRate 		= dblExchangeRate
 				,@dblDebitForeign		= dblDebitForeign
