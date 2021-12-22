@@ -704,15 +704,18 @@ BEGIN TRY
 				@_transactionDate = dtmTransactionDate, 
 				@intUserId = intUserId 
 			FROM @cbLogTemp
-
+			
 			DECLARE @prevStatus INT
+				, @dblPrevBalance NUMERIC(18, 6) = 0
+
 			SELECT TOP 1 @prevStatus = intContractStatusId
+				, @dblPrevBalance = dblQty
 			FROM @cbLogPrev
 			WHERE strTransactionType = 'Contract Balance'
 				AND intContractDetailId = @intContractDetailId
 			ORDER BY intId DESC
-
-			IF (ISNULL(@prevStatus, 0) <> 4)
+			
+			IF (ISNULL(@prevStatus, 0) NOT IN (0, 4))
 			BEGIN
 				INSERT INTO @cbLogCurrent (strBatchId
 					, dtmTransactionDate
@@ -805,6 +808,84 @@ BEGIN TRY
 				AND intContractHeaderId = @intContractHeaderId
 				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
 				AND intContractStatusId IN (3,6)
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @cbLogCurrent (strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, dblOrigQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId
+					, intActionId
+					, strProcess)
+				SELECT strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, CASE WHEN ISNULL(@prevStatus, 0) = 0 THEN dblQty ELSE @dblPrevBalance - dblQty END
+					, dblOrigQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId
+					, intActionId
+					, strProcess
+				FROM @cbLogTemp
 			END
 		END
 		ELSE
@@ -3278,7 +3359,6 @@ BEGIN TRY
 
         if ((@ysnDWGPriceOnly = 1) and (@ysnUnposted = 1) and exists (select top 1 1 from @cbLogCurrent where intId = @intId and dblQty > 0))
         begin
-
             IF OBJECT_ID('tempdb..#tmpNegated') IS NOT NULL DROP TABLE #tmpNegated;
 
             select * into #tmpNegated from
@@ -4514,10 +4594,10 @@ BEGIN TRY
 							END
 						END
 						ELSE IF (@strTransactionReference = 'Settle Storage' AND @currPricingTypeId = 2 and exists (select top 1 1 from @cbLogSpecific where dblQty < 0))
-						BEGIN  
-							UPDATE @cbLogSpecific SET dblQty = abs(dblQty), intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
-							EXEC uspCTLogContractBalance @cbLogSpecific, 0;
-						END
+                        BEGIN  
+                            UPDATE @cbLogSpecific SET dblQty = abs(dblQty), intPricingTypeId = 1, strTransactionType = 'Purchase Basis Deliveries'    
+                            EXEC uspCTLogContractBalance @cbLogSpecific, 0;
+                        END
 					END				
 					ELSE IF ISNULL(@dblBasis, 0) > 0
 					BEGIN
