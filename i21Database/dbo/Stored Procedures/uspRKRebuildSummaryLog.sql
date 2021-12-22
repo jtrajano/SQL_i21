@@ -1355,6 +1355,17 @@ BEGIN TRY
 			, strInOut
 			, strNotes
 			, strMiscFields
+			, intOptionMonthId 
+			, strOptionMonth 
+			, dblStrike
+			, strOptionType
+			, strInstrumentType
+			, intBrokerageAccountId
+			, strBrokerAccount
+			, strBroker
+			, strBuySell
+			, ysnPreCrush
+			, strBrokerTradeNo
 			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives' 
@@ -1381,17 +1392,18 @@ BEGIN TRY
 			, cUOM.intCommodityUnitMeasureId
 			, strInOut = CASE WHEN UPPER(der.strNewBuySell) = 'BUY' THEN 'IN' ELSE 'OUT' END
 			, strNotes = strNotes
-			, strMiscFields = '{intOptionMonthId = "' + ISNULL(CAST(intOptionMonthId AS NVARCHAR), '') +'"}'
-								+ ' {strOptionMonth = "' + ISNULL(strOptionMonth, '') +'"}'
-								+ ' {dblStrike = "' + CAST(ISNULL(dblStrike,0) AS NVARCHAR) +'"}'
-								+ ' {strOptionType = "' + ISNULL(strOptionType, '') +'"}'
-								+ ' {strInstrumentType = "' + ISNULL(strInstrumentType, '') +'"}'
-								+ ' {intBrokerageAccountId = "' + ISNULL(CAST(intBrokerId AS NVARCHAR), '') +'"}'
-								+ ' {strBrokerAccount = "' + ISNULL(strBrokerAccount, '') +'"}'
-								+ ' {strBroker = "' + ISNULL(strBroker, '') +'"}'
-								+ ' {strBuySell = "' + ISNULL(strNewBuySell, '') +'"}'
-								+ ' {ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
-								+ ' {strBrokerTradeNo = "' + ISNULL(strBrokerTradeNo, '') +'"}'
+			, strMiscFields = NULL
+			, intOptionMonthId =  intOptionMonthId
+			, strOptionMonth =  strOptionMonth
+			, dblStrike =  dblStrike
+			, strOptionType =  strOptionType
+			, strInstrumentType =  strInstrumentType
+			, intBrokerageAccountId =  intBrokerId
+			, strBrokerAccount =  strBrokerAccount
+			, strBroker =  strBroker
+			, strBuySell =  strNewBuySell
+			, ysnPreCrush =  ISNULL(ysnPreCrush,0)
+			, strBrokerTradeNo =  strBrokerTradeNo
 			, intActionId  = 1 --Rebuild
 		FROM vyuRKGetFutOptTransactionHistory der
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
@@ -1484,7 +1496,8 @@ BEGIN TRY
 				, intUserId = e.intEntityId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
 				, intMatchDerivativeHistoryId
-				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
+				, strMiscFields =  NULL
+				, ysnPreCrush = ISNULL(ysnPreCrush,0)
 			FROM tblRKMatchDerivativesHistory history
 			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
 			JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
@@ -1521,7 +1534,8 @@ BEGIN TRY
 				, intUserId = e.intEntityId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
 				, intMatchDerivativeHistoryId
-				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
+				, strMiscFields = NULL
+				, ysnPreCrush = ISNULL(ysnPreCrush,0) 
 			FROM tblRKMatchDerivativesHistory history
 			JOIN tblRKMatchFuturesPSHeader header ON header.intMatchFuturesPSHeaderId = history.intMatchFuturesPSHeaderId
 			JOIN tblRKMatchFuturesPSDetail detail ON detail.intMatchFuturesPSDetailId = history.intMatchFuturesPSDetailId
@@ -1572,6 +1586,7 @@ BEGIN TRY
 			, intUserId
 			, intCommodityUOMId
 			, strMiscFields
+			, ysnPreCrush
 			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives' 
@@ -1598,6 +1613,7 @@ BEGIN TRY
 			, intUserId
 			, intCommodityUOMId
 			, strMiscFields
+			, ysnPreCrush
 			, intActionId  = 1 --Rebuild
 		FROM (
 			SELECT strTransactionType = 'Expired Options'
@@ -1622,7 +1638,8 @@ BEGIN TRY
 				, intEntityId = de.intEntityId
 				, intUserId = @intCurrentUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
-				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
+				, strMiscFields =  NULL
+				, ysnPreCrush = ISNULL(ysnPreCrush,0)
 			FROM tblRKOptionsPnSExpired detail
 			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
@@ -1651,7 +1668,8 @@ BEGIN TRY
 				, intEntityId = de.intEntityId
 				, intUserId = @intCurrentUserId
 				, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
-				, strMiscFields =  '{ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
+				, strMiscFields =  NULL
+				, ysnPreCrush = ISNULL(ysnPreCrush,0)
 			FROM tblRKOptionsPnSExercisedAssigned detail
 			JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 			JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
@@ -2346,6 +2364,17 @@ BEGIN TRY
 			, intUserId 
 			, strNotes
 			, strMiscFields
+			, strStorageTypeCode
+			, ysnReceiptedStorage
+			, intTypeId
+			, strStorageType
+			, intDeliverySheetId
+			, strTicketStatus
+			, strOwnedPhysicalStock
+			, strStorageTypeDescription
+			, ysnActive
+			, ysnExternal
+			, intStorageHistoryId
 			, intActionId)
 		SELECT strBatchId = NULL
 			, strBucketType
@@ -2365,16 +2394,18 @@ BEGIN TRY
 			, intEntityId
 			, intUserId
 			, strNotes = (CASE WHEN intTransactionRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
-			, strMiscFields = CASE WHEN ISNULL(strStorageTypeCode, '') = '' THEN '' ELSE '{ strStorageTypeCode = "' + strStorageTypeCode + '" }' END
-								+ CASE WHEN ISNULL(ysnReceiptedStorage, '') = '' THEN '' ELSE '{ ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) + '" }' END
-								+ CASE WHEN ISNULL(intTypeId, '') = '' THEN '' ELSE '{ intTypeId = "' + CAST(intTypeId AS NVARCHAR) + '" }' END
-								+ CASE WHEN ISNULL(strStorageType, '') = '' THEN '' ELSE '{ strStorageType = "' + strStorageType + '" }' END
-								+ CASE WHEN ISNULL(intDeliverySheetId, '') = '' THEN '' ELSE '{ intDeliverySheetId = "' + CAST(intDeliverySheetId AS NVARCHAR) + '" }' END
-								+ CASE WHEN ISNULL(strTicketStatus, '') = '' THEN '' ELSE '{ strTicketStatus = "' + strTicketStatus + '" }' END
-								+ CASE WHEN ISNULL(strOwnedPhysicalStock, '') = '' THEN '' ELSE '{ strOwnedPhysicalStock = "' + strOwnedPhysicalStock + '" }' END
-								+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
-								+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
-								+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
+			, strMiscFields = NULL
+			, strStorageTypeCode
+			, ysnReceiptedStorage
+			, intTypeId
+			, strStorageType
+			, intDeliverySheetId
+			, strTicketStatus
+			, strOwnedPhysicalStock
+			, strStorageTypeDescription
+			, ysnActive
+			, ysnExternal
+			, intStorageHistoryId
 			, intActionId  = 1 --Rebuild
 		FROM #tmpCustomerOwned co
 		ORDER BY dtmDeliveryDate, intStorageHistoryId

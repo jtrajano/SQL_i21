@@ -78,11 +78,10 @@ BEGIN
 						,strInternalTradeNo = strTransactionNumber
 						,intTransactionRecordId
 						,intTransactionRecordHeaderId
-						,mf.ysnPreCrush
+						,ysnPreCrush
 						,strCommodityCode
 						,strTransactionType = sl.strTransactionType
 						FROM vyuRKGetSummaryLog sl
-						CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(sl.strMiscField) mf
 						WHERE strTransactionType IN ('Derivative Entry')
 							AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
 							AND CONVERT(DATETIME, CONVERT(VARCHAR(10), sl.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToTransactionDate)
@@ -99,11 +98,10 @@ BEGIN
 						,strInternalTradeNo = strTransactionNumber
 						,intTransactionRecordId
 						,intTransactionRecordHeaderId
-						,mf.ysnPreCrush
+						,ysnPreCrush
 						,strCommodityCode
 						,strTransactionType = sl.strTransactionType
 						FROM vyuRKGetSummaryLog sl
-						CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(sl.strMiscField) mf
 						WHERE strTransactionType = 'Match Derivatives'
 							AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
 							AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
@@ -121,11 +119,10 @@ BEGIN
 						,strInternalTradeNo = strTransactionNumber
 						,intTransactionRecordId
 						,intTransactionRecordHeaderId
-						,mf.ysnPreCrush
+						,ysnPreCrush
 						,strCommodityCode
 						,strTransactionType = sl.strTransactionType
 						FROM vyuRKGetSummaryLog sl
-						CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(sl.strMiscField) mf
 						WHERE strTransactionType = 'Options Lifecycle'
 							AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
 							AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToTransactionDate
