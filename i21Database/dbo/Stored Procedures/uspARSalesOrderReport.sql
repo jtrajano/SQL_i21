@@ -194,7 +194,7 @@ SELECT intSalesOrderId			= SO.intSalesOrderId
 	 , strProductTypeDescription = CASE WHEN SO.strTransactionType = 'Quote' THEN CASE WHEN SALESORDERDETAIL.intProductTypeId IS NULL THEN 'No Product Type' ELSE SALESORDERDETAIL.strProductTypeName + ' - ' + SALESORDERDETAIL.strProductTypeDescription END ELSE NULL END
 	 , strProductTypeName		= CASE WHEN SO.strTransactionType = 'Quote' THEN SALESORDERDETAIL.strProductTypeName ELSE NULL END
 	 , dtmExpirationDate		= CASE WHEN SO.strTransactionType = 'Quote' THEN SO.dtmExpirationDate ELSE NULL END
-	 , strBillTo				= ISNULL(RTRIM(SO.strBillToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(SO.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(SO.strBillToCity), '') + ISNULL(RTRIM(', ' + SO.strBillToState), '') + ISNULL(RTRIM(', ' + SO.strBillToZipCode), '') + ISNULL(RTRIM(', ' + SO.strBillToCountry), '')
+	 , strBillTo				= ISNULL(RTRIM(ENTITYLOCATION.strCheckPayeeName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(SO.strBillToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(SO.strBillToCity), '') + ISNULL(RTRIM(', ' + SO.strBillToState), '') + ISNULL(RTRIM(', ' + SO.strBillToZipCode), '') + ISNULL(RTRIM(', ' + SO.strBillToCountry), '')
 	 , strShipTo				= ISNULL(RTRIM(SO.strShipToLocationName) + CHAR(13) + char(10), '') + ISNULL(RTRIM(SO.strShipToAddress) + CHAR(13) + char(10), '')	+ ISNULL(RTRIM(SO.strShipToCity), '') + ISNULL(RTRIM(', ' + SO.strShipToState), '') + ISNULL(RTRIM(', ' + SO.strShipToZipCode), '') + ISNULL(RTRIM(', ' + SO.strShipToCountry), '')
 	 , strSalespersonName		= SPE.strName
 	 , strOrderedByName			= EOB.strName
@@ -284,6 +284,7 @@ LEFT JOIN tblARSalesperson SALESPERSON WITH (NOLOCK) ON SO.intEntitySalespersonI
 LEFT JOIN tblEMEntity SPE WITH (NOLOCK) ON SALESPERSON.intEntityId = SPE.intEntityId
 LEFT JOIN tblSMShipVia SHIPVIA ON SO.intShipViaId = SHIPVIA.intEntityId
 LEFT JOIN tblEMEntity SVE WITH (NOLOCK) ON SHIPVIA.intEntityId = SVE.intEntityId
+LEFT JOIN tblEMEntityLocation ENTITYLOCATION ON ENTITYLOCATION.intEntityLocationId = SO.intBillToLocationId
 LEFT JOIN tblSMCurrency CUR WITH (NOLOCK) ON SO.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN tblSMTerm T WITH (NOLOCK) ON SO.intTermId = T.intTermID
 LEFT JOIN tblEMEntity EOB WITH (NOLOCK) ON SO.intOrderedById = EOB.intEntityId
