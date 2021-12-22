@@ -450,6 +450,7 @@ CREATE TABLE ##ARItemsForInTransitCosting (
 	, [intLinkedItem]					INT NULL
 	, [intLinkedItemId]					INT NULL
 	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [intTicketId]                     INT NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForStorageCosting') IS NOT NULL)
