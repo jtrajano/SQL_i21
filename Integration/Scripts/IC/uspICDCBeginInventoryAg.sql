@@ -212,7 +212,7 @@ BEGIN
 				--,sl.intStorageLocationId
 		,1
 		,NULLIF(lot.aglot_lot_no, '')
-		,CAST(CONVERT(NVARCHAR(10), aglot_expire_date) AS DATE)
+		,CAST(CONVERT(NVARCHAR(10), NULLIF(aglot_expire_date, 0)) AS DATE)
 
 	FROM	tblICItem inv INNER JOIN agitmmst itm 
 				ON  inv.strItemNo COLLATE Latin1_General_CI_AS = itm.agitm_no COLLATE Latin1_General_CI_AS
@@ -227,7 +227,7 @@ BEGIN
 	AND aglot_loc_no = @adjLoc
 	AND aglot_un_on_hand <> 0
 	AND inv.strType = 'Inventory'
-	AND rtrim((agitm_lot_yns)) = 'Y'
+	AND rtrim((agitm_lot_yns)) = 'Y'	
 
 	-- Create an Audit Log
 	BEGIN 
