@@ -76,5 +76,6 @@
 	[strIDPEndpointURI]								NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strIDPApiKey]									NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strAzureApplicationInsightsInstrumentationKey] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [strApiHostUrl] 								NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]								INT NOT NULL DEFAULT 1
 )
