@@ -185,6 +185,11 @@ BEGIN TRY
 				, intUserId
 				, intCommodityUOMId
 				, strMiscFields
+				, strInstrumentType
+				, strBrokerAccount
+				, strBroker
+				, ysnPreCrush 
+				, strBrokerTradeNo
 				, intActionId)
 			SELECT strBucketType
 				, strTransactionType
@@ -206,7 +211,12 @@ BEGIN TRY
 				, intEntityId
 				, intUserId
 				, intCommodityUOMId
-				, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
+				, strMiscFields = NULL
+				, strInstrumentType
+				, strBrokerAccount
+				, strBroker
+				, ysnPreCrush = ISNULL(ysnPreCrush,0)
+				, strBrokerTradeNo
 				, intActionId = 36
 			FROM #tmpFinalList WHERE intTransactionRecordId = @intDetailId
 

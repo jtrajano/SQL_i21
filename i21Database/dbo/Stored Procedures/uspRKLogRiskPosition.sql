@@ -46,6 +46,33 @@ BEGIN
 		, @strMiscFields NVARCHAR(MAX)
 		, @intTransCtr INT = 0
 		, @intTotal INT
+		, @intOptionMonthId INT
+		, @strOptionMonth NVARCHAR(20)
+		, @dblStrike DECIMAL(24, 10)
+		, @strOptionType NVARCHAR(10)
+		, @strInstrumentType NVARCHAR(30)
+		, @intBrokerageAccountId INT
+		, @strBrokerAccount NVARCHAR(50)
+		, @strBroker NVARCHAR(50)
+		, @strBuySell NVARCHAR(10)
+		, @ysnPreCrush BIT
+		, @strBrokerTradeNo NVARCHAR(50)
+		, @intMatchNo INT
+		, @intMatchDerivativesHeaderId INT
+		, @intMatchDerivativesDetailId INT
+		, @strStorageTypeCode NVARCHAR(3)
+		, @ysnReceiptedStorage BIT
+		, @intTypeId INT
+		, @strStorageType NVARCHAR(50)
+		, @intDeliverySheetId INT
+		, @strTicketStatus NVARCHAR(50)
+		, @strOwnedPhysicalStock NVARCHAR(50)
+		, @strStorageTypeDescription NVARCHAR(50)
+		, @ysnActive BIT
+		, @ysnExternal BIT
+		, @intStorageHistoryId INT
+		, @intInventoryReceiptItemId INT
+		, @intLoadDetailId INT
 
 	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strBucketType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -79,7 +106,34 @@ BEGIN
 		, strNotes NVARCHAR(250) NULL
 		, ysnNegate BIT NULL
 		, intRefSummaryLogId INT NULL
-		, strMiscFields NVARCHAR(MAX))
+		, strMiscFields NVARCHAR(MAX)
+		, intOptionMonthId INT NULL
+		, strOptionMonth NVARCHAR(20) NULL
+		, dblStrike DECIMAL(24, 10) NULL
+		, strOptionType NVARCHAR(10) NULL
+		, strInstrumentType NVARCHAR(30) NULL
+		, intBrokerageAccountId INT NULL
+		, strBrokerAccount NVARCHAR(50) NULL
+		, strBroker NVARCHAR(50) NULL
+		, strBuySell NVARCHAR(10) NULL
+		, ysnPreCrush BIT NULL
+		, strBrokerTradeNo NVARCHAR(50) NULL
+		, intMatchNo INT NULL
+		, intMatchDerivativesHeaderId INT NULL
+		, intMatchDerivativesDetailId INT NULL
+		, strStorageTypeCode NVARCHAR(3) NULL
+		, ysnReceiptedStorage BIT NULL
+		, intTypeId INT NULL
+		, strStorageType NVARCHAR(50) NULL
+		, intDeliverySheetId INT NULL
+		, strTicketStatus NVARCHAR(50) NULL
+		, strOwnedPhysicalStock NVARCHAR(50) NULL
+		, strStorageTypeDescription NVARCHAR(50) NULL
+		, ysnActive BIT NULL
+		, ysnExternal BIT NULL
+		, intStorageHistoryId INT NULL
+		, intInventoryReceiptItemId INT NULL
+		, intLoadDetailId INT NULL)
 
 	SELECT @intTotal = COUNT(*) FROM @SummaryLogs
 
@@ -136,6 +190,33 @@ BEGIN
 			, @strNotes = NULL
 			, @strInOut = NULL			
 			, @strMiscFields = NULL
+			, @intOptionMonthId = NULL
+			, @strOptionMonth = NULL
+			, @dblStrike = NULL
+			, @strOptionType = NULL
+			, @strInstrumentType = NULL
+			, @intBrokerageAccountId = NULL
+			, @strBrokerAccount = NULL
+			, @strBroker = NULL
+			, @strBuySell = NULL
+			, @ysnPreCrush = NULL
+			, @strBrokerTradeNo = NULL
+			, @intMatchNo = NULL
+			, @intMatchDerivativesHeaderId = NULL
+			, @intMatchDerivativesDetailId = NULL
+			, @strStorageTypeCode = NULL
+			, @ysnReceiptedStorage = NULL
+			, @intTypeId = NULL
+			, @strStorageType = NULL
+			, @intDeliverySheetId = NULL
+			, @strTicketStatus = NULL
+			, @strOwnedPhysicalStock = NULL
+			, @strStorageTypeDescription = NULL
+			, @ysnActive = NULL
+			, @ysnExternal = NULL
+			, @intStorageHistoryId = NULL
+			, @intInventoryReceiptItemId = NULL
+			, @intLoadDetailId = NULL
 
 		SELECT TOP 1 @intId = intId
 			, @strBatchId = strBatchId
@@ -169,6 +250,33 @@ BEGIN
 			, @strInOut = strInOut
 			, @ysnDelete = ysnDelete
 			, @strMiscFields = strMiscFields
+			, @intOptionMonthId =  intOptionMonthId
+			, @strOptionMonth =  strOptionMonth
+			, @dblStrike =  dblStrike
+			, @strOptionType =  strOptionType
+			, @strInstrumentType =  strInstrumentType
+			, @intBrokerageAccountId =  intBrokerageAccountId
+			, @strBrokerAccount =  strBrokerAccount
+			, @strBroker =  strBroker
+			, @strBuySell =  strBuySell
+			, @ysnPreCrush =  ysnPreCrush
+			, @strBrokerTradeNo =  strBrokerTradeNo
+			, @intMatchNo = intMatchNo
+			, @intMatchDerivativesHeaderId = intMatchDerivativesHeaderId
+			, @intMatchDerivativesDetailId = intMatchDerivativesDetailId
+			, @strStorageTypeCode =  strStorageTypeCode
+			, @ysnReceiptedStorage =  ysnReceiptedStorage
+			, @intTypeId =  intTypeId
+			, @strStorageType =  strStorageType
+			, @intDeliverySheetId =  intDeliverySheetId
+			, @strTicketStatus =  strTicketStatus
+			, @strOwnedPhysicalStock =  strOwnedPhysicalStock
+			, @strStorageTypeDescription =  strStorageTypeDescription
+			, @ysnActive =  ysnActive
+			, @ysnExternal =  ysnExternal
+			, @intStorageHistoryId =  intStorageHistoryId
+			, @intInventoryReceiptItemId =  intInventoryReceiptItemId
+			, @intLoadDetailId =  intLoadDetailId
 		FROM #tmpSummaryLogs
 		ORDER BY dtmTransactionDate
 
@@ -220,7 +328,34 @@ BEGIN
 					, strNotes
 					, ysnNegate
 					, intRefSummaryLogId
-					, strMiscFields)
+					, strMiscFields
+					, intOptionMonthId
+					, strOptionMonth
+					, dblStrike
+					, strOptionType
+					, strInstrumentType
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker
+					, strBuySell
+					, ysnPreCrush
+					, strBrokerTradeNo
+					, intMatchNo
+					, intMatchDerivativesHeaderId
+					, intMatchDerivativesDetailId
+					, strStorageTypeCode
+					, ysnReceiptedStorage
+					, intTypeId
+					, strStorageType
+					, intDeliverySheetId
+					, strTicketStatus
+					, strOwnedPhysicalStock
+					, strStorageTypeDescription
+					, ysnActive
+					, ysnExternal
+					, intStorageHistoryId
+					, intInventoryReceiptItemId
+					, intLoadDetailId)
 				SELECT strBatchId
 					, strBucketType
 					, intActionId
@@ -254,6 +389,33 @@ BEGIN
 					, ysnNegate = 1
 					, intRefSummaryLogId
 					, strMiscFields
+					, intOptionMonthId
+					, strOptionMonth
+					, dblStrike
+					, strOptionType
+					, strInstrumentType
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker
+					, strBuySell
+					, ysnPreCrush
+					, strBrokerTradeNo
+					, intMatchNo
+					, intMatchDerivativesHeaderId
+					, intMatchDerivativesDetailId
+					, strStorageTypeCode
+					, ysnReceiptedStorage
+					, intTypeId
+					, strStorageType
+					, intDeliverySheetId
+					, strTicketStatus
+					, strOwnedPhysicalStock
+					, strStorageTypeDescription
+					, ysnActive
+					, ysnExternal
+					, intStorageHistoryId
+					, intInventoryReceiptItemId
+					, intLoadDetailId
 				FROM @FinalTable
 				WHERE intTransactionRecordId = @intTransactionRecordId
 					AND strBucketType = @strBucketType
@@ -316,7 +478,34 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes
-				, strMiscFields)
+				, strMiscFields
+				, intOptionMonthId
+				, strOptionMonth
+				, dblStrike
+				, strOptionType
+				, strInstrumentType
+				, intBrokerageAccountId
+				, strBrokerAccount
+				, strBroker
+				, strBuySell
+				, ysnPreCrush
+				, strBrokerTradeNo
+				, intMatchNo
+				, intMatchDerivativesHeaderId
+				, intMatchDerivativesDetailId
+				, strStorageTypeCode
+				, ysnReceiptedStorage
+				, intTypeId
+				, strStorageType
+				, intDeliverySheetId
+				, strTicketStatus
+				, strOwnedPhysicalStock
+				, strStorageTypeDescription
+				, ysnActive
+				, ysnExternal
+				, intStorageHistoryId
+				, intInventoryReceiptItemId
+				, intLoadDetailId)
 			SELECT strBatchId
 				, strBucketType
 				, intActionId
@@ -348,6 +537,33 @@ BEGIN
 				, @intUserId
 				, 'Delete Record'
 				, strMiscField
+				, intOptionMonthId
+				, strOptionMonth
+				, dblStrike
+				, strOptionType
+				, strInstrumentType
+				, intBrokerageAccountId
+				, strBrokerAccount
+				, strBroker
+				, strBuySell
+				, ysnPreCrush
+				, strBrokerTradeNo
+				, intMatchNo
+				, intMatchDerivativesHeaderId
+				, intMatchDerivativesDetailId
+				, strStorageTypeCode
+				, ysnReceiptedStorage
+				, intTypeId
+				, strStorageType
+				, intDeliverySheetId
+				, strTicketStatus
+				, strOwnedPhysicalStock
+				, strStorageTypeDescription
+				, ysnActive
+				, ysnExternal
+				, intStorageHistoryId
+				, intInventoryReceiptItemId
+				, intLoadDetailId
 			FROM #tmpPrevLog
 
 			DELETE FROM #tmpSummaryLogs
@@ -417,7 +633,34 @@ BEGIN
 					, strNotes
 					, ysnNegate
 					, intRefSummaryLogId
-					, strMiscFields)
+					, strMiscFields
+					, intOptionMonthId
+					, strOptionMonth
+					, dblStrike
+					, strOptionType
+					, strInstrumentType
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker
+					, strBuySell
+					, ysnPreCrush
+					, strBrokerTradeNo
+					, intMatchNo
+					, intMatchDerivativesHeaderId
+					, intMatchDerivativesDetailId
+					, strStorageTypeCode
+					, ysnReceiptedStorage
+					, intTypeId
+					, strStorageType
+					, intDeliverySheetId
+					, strTicketStatus
+					, strOwnedPhysicalStock
+					, strStorageTypeDescription
+					, ysnActive
+					, ysnExternal
+					, intStorageHistoryId
+					, intInventoryReceiptItemId
+					, intLoadDetailId)
 				SELECT @strBatchId
 					, strBucketType
 					, intActionId
@@ -451,6 +694,33 @@ BEGIN
 					, 1
 					, intSummaryLogId
 					, strMiscField
+					, intOptionMonthId
+					, strOptionMonth
+					, dblStrike
+					, strOptionType
+					, strInstrumentType
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker
+					, strBuySell
+					, ysnPreCrush
+					, strBrokerTradeNo
+					, intMatchNo
+					, intMatchDerivativesHeaderId
+					, intMatchDerivativesDetailId
+					, strStorageTypeCode
+					, ysnReceiptedStorage
+					, intTypeId
+					, strStorageType
+					, intDeliverySheetId
+					, strTicketStatus
+					, strOwnedPhysicalStock
+					, strStorageTypeDescription
+					, ysnActive
+					, ysnExternal
+					, intStorageHistoryId
+					, intInventoryReceiptItemId
+					, intLoadDetailId
 				FROM #tmpPrevLog
 			END
 		END
@@ -490,7 +760,34 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes
-				, strMiscFields)
+				, strMiscFields
+				, intOptionMonthId
+				, strOptionMonth
+				, dblStrike
+				, strOptionType
+				, strInstrumentType
+				, intBrokerageAccountId
+				, strBrokerAccount
+				, strBroker
+				, strBuySell
+				, ysnPreCrush
+				, strBrokerTradeNo
+				, intMatchNo
+				, intMatchDerivativesHeaderId
+				, intMatchDerivativesDetailId
+				, strStorageTypeCode
+				, ysnReceiptedStorage
+				, intTypeId
+				, strStorageType
+				, intDeliverySheetId
+				, strTicketStatus
+				, strOwnedPhysicalStock
+				, strStorageTypeDescription
+				, ysnActive
+				, ysnExternal
+				, intStorageHistoryId
+				, intInventoryReceiptItemId
+				, intLoadDetailId)
 			SELECT @strBatchId
 				, @strBucketType
 				, @intActionId
@@ -522,6 +819,33 @@ BEGIN
 				, @intUserId
 				, @strNotes
 				, @strMiscFields
+				, @intOptionMonthId
+				, @strOptionMonth
+				, @dblStrike
+				, @strOptionType
+				, @strInstrumentType
+				, @intBrokerageAccountId
+				, @strBrokerAccount
+				, @strBroker
+				, @strBuySell
+				, @ysnPreCrush
+				, @strBrokerTradeNo
+				, @intMatchNo
+				, @intMatchDerivativesHeaderId
+				, @intMatchDerivativesDetailId
+				, @strStorageTypeCode
+				, @ysnReceiptedStorage
+				, @intTypeId
+				, @strStorageType
+				, @intDeliverySheetId
+				, @strTicketStatus
+				, @strOwnedPhysicalStock
+				, @strStorageTypeDescription
+				, @ysnActive
+				, @ysnExternal
+				, @intStorageHistoryId
+				, @intInventoryReceiptItemId
+				, @intLoadDetailId
 		END
 
 		---------------------------------------
@@ -773,7 +1097,34 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes
-				, strMiscFields)
+				, strMiscFields
+				, intOptionMonthId
+				, strOptionMonth
+				, dblStrike
+				, strOptionType
+				, strInstrumentType
+				, intBrokerageAccountId
+				, strBrokerAccount
+				, strBroker
+				, strBuySell
+				, ysnPreCrush
+				, strBrokerTradeNo
+				, intMatchNo
+				, intMatchDerivativesHeaderId
+				, intMatchDerivativesDetailId
+				, strStorageTypeCode
+				, ysnReceiptedStorage
+				, intTypeId
+				, strStorageType
+				, intDeliverySheetId
+				, strTicketStatus
+				, strOwnedPhysicalStock
+				, strStorageTypeDescription
+				, ysnActive
+				, ysnExternal
+				, intStorageHistoryId
+				, intInventoryReceiptItemId
+				, intLoadDetailId)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
 				, @intActionId
@@ -803,6 +1154,33 @@ BEGIN
 				, @intUserId
 				, @strNotes
 				, @strMiscFields
+				, @intOptionMonthId
+				, @strOptionMonth
+				, @dblStrike
+				, @strOptionType
+				, @strInstrumentType
+				, @intBrokerageAccountId
+				, @strBrokerAccount
+				, @strBroker
+				, @strBuySell
+				, @ysnPreCrush
+				, @strBrokerTradeNo
+				, @intMatchNo
+				, @intMatchDerivativesHeaderId
+				, @intMatchDerivativesDetailId
+				, @strStorageTypeCode
+				, @ysnReceiptedStorage
+				, @intTypeId
+				, @strStorageType
+				, @intDeliverySheetId
+				, @strTicketStatus
+				, @strOwnedPhysicalStock
+				, @strStorageTypeDescription
+				, @ysnActive
+				, @ysnExternal
+				, @intStorageHistoryId
+				, @intInventoryReceiptItemId
+				, @intLoadDetailId
 		END
 
 		------------------------------------
@@ -968,7 +1346,34 @@ BEGIN
 				, intTicketId
 				, intUserId
 				, strNotes
-				, strMiscFields)
+				, strMiscFields
+				, intOptionMonthId
+				, strOptionMonth
+				, dblStrike
+				, strOptionType
+				, strInstrumentType
+				, intBrokerageAccountId
+				, strBrokerAccount
+				, strBroker
+				, strBuySell
+				, ysnPreCrush
+				, strBrokerTradeNo
+				, intMatchNo
+				, intMatchDerivativesHeaderId
+				, intMatchDerivativesDetailId
+				, strStorageTypeCode
+				, ysnReceiptedStorage
+				, intTypeId
+				, strStorageType
+				, intDeliverySheetId
+				, strTicketStatus
+				, strOwnedPhysicalStock
+				, strStorageTypeDescription
+				, ysnActive
+				, ysnExternal
+				, intStorageHistoryId
+				, intInventoryReceiptItemId
+				, intLoadDetailId)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
 				, @intActionId
@@ -998,6 +1403,33 @@ BEGIN
 				, @intUserId
 				, @strNotes
 				, @strMiscFields
+				, @intOptionMonthId
+				, @strOptionMonth
+				, @dblStrike
+				, @strOptionType
+				, @strInstrumentType
+				, @intBrokerageAccountId
+				, @strBrokerAccount
+				, @strBroker
+				, @strBuySell
+				, @ysnPreCrush
+				, @strBrokerTradeNo
+				, @intMatchNo
+				, @intMatchDerivativesHeaderId
+				, @intMatchDerivativesDetailId
+				, @strStorageTypeCode
+				, @ysnReceiptedStorage
+				, @intTypeId
+				, @strStorageType
+				, @intDeliverySheetId
+				, @strTicketStatus
+				, @strOwnedPhysicalStock
+				, @strStorageTypeDescription
+				, @ysnActive
+				, @ysnExternal
+				, @intStorageHistoryId
+				, @intInventoryReceiptItemId
+				, @intLoadDetailId
 
 		END
 
@@ -1200,7 +1632,34 @@ BEGIN
 		, intTicketId
 		, intUserId
 		, strNotes
-		, strMiscFields)
+		, strMiscFields
+		, intOptionMonthId
+		, strOptionMonth
+		, dblStrike
+		, strOptionType
+		, strInstrumentType
+		, intBrokerageAccountId
+		, strBrokerAccount
+		, strBroker
+		, strBuySell
+		, ysnPreCrush
+		, strBrokerTradeNo
+		, intMatchNo
+		, intMatchDerivativesHeaderId
+		, intMatchDerivativesDetailId
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intTypeId
+		, strStorageType
+		, intDeliverySheetId
+		, strTicketStatus
+		, strOwnedPhysicalStock
+		, strStorageTypeDescription
+		, ysnActive
+		, ysnExternal
+		, intStorageHistoryId
+		, intInventoryReceiptItemId
+		, intLoadDetailId)
 	SELECT strBatchId
 		, strBucketType
 		, intActionId
@@ -1247,6 +1706,33 @@ BEGIN
 		, intUserId
 		, strNotes
 		, strMiscFields
+		, intOptionMonthId
+		, strOptionMonth
+		, dblStrike
+		, strOptionType
+		, strInstrumentType
+		, intBrokerageAccountId
+		, strBrokerAccount
+		, strBroker
+		, strBuySell
+		, ysnPreCrush
+		, strBrokerTradeNo
+		, intMatchNo
+		, intMatchDerivativesHeaderId
+		, intMatchDerivativesDetailId
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intTypeId
+		, strStorageType
+		, intDeliverySheetId
+		, strTicketStatus
+		, strOwnedPhysicalStock
+		, strStorageTypeDescription
+		, ysnActive
+		, ysnExternal
+		, intStorageHistoryId
+		, intInventoryReceiptItemId
+		, intLoadDetailId
 	FROM #tmpSummaryLogs
 
 
@@ -1290,7 +1776,34 @@ BEGIN
 		, strNotes
 		, ysnNegate
 		, intRefSummaryLogId
-		, strMiscField)
+		, strMiscField
+		, intOptionMonthId
+		, strOptionMonth
+		, dblStrike
+		, strOptionType
+		, strInstrumentType
+		, intBrokerageAccountId
+		, strBrokerAccount
+		, strBroker
+		, strBuySell
+		, ysnPreCrush
+		, strBrokerTradeNo
+		, intMatchNo
+		, intMatchDerivativesHeaderId
+		, intMatchDerivativesDetailId
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intTypeId
+		, strStorageType
+		, intDeliverySheetId
+		, strTicketStatus
+		, strOwnedPhysicalStock
+		, strStorageTypeDescription
+		, ysnActive
+		, ysnExternal
+		, intStorageHistoryId
+		, intInventoryReceiptItemId
+		, intLoadDetailId)
 	SELECT strBatchId
 		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETUTCDATE() END
 		, strBucketType
@@ -1326,6 +1839,33 @@ BEGIN
 		, ysnNegate
 		, intRefSummaryLogId
 		, strMiscFields
+		, intOptionMonthId
+		, strOptionMonth
+		, dblStrike
+		, strOptionType
+		, strInstrumentType
+		, intBrokerageAccountId
+		, strBrokerAccount
+		, strBroker
+		, strBuySell
+		, ysnPreCrush
+		, strBrokerTradeNo
+		, intMatchNo
+		, intMatchDerivativesHeaderId
+		, intMatchDerivativesDetailId
+		, strStorageTypeCode
+		, ysnReceiptedStorage
+		, intTypeId
+		, strStorageType
+		, intDeliverySheetId
+		, strTicketStatus
+		, strOwnedPhysicalStock
+		, strStorageTypeDescription
+		, ysnActive
+		, ysnExternal
+		, intStorageHistoryId
+		, intInventoryReceiptItemId
+		, intLoadDetailId
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 	ORDER BY dtmTransactionDate
