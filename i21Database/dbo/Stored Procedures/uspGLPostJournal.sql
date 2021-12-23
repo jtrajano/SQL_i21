@@ -205,7 +205,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 										END 
 			,[ysnIsUnposted]		= 0 
 			,[intConcurrencyId]		= 1
-			,[intCurrencyId]		= B.intCurrencyId
+			,[intCurrencyId]		= ISNULL(A.intCurrencyId, B.intCurrencyId)
 			,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]		= ISNULL(ISNULL(dblDebitRate,dblCreditRate),1)
 			,[intUserId]			= 0
@@ -467,9 +467,9 @@ BEGIN
 				,@intJournalId_NEW
 				,@dtmDate_NEW
 				,[intAccountId]			
-				,[dblCredit]  =CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId AND @applyCurrentRate = 1 THEN (dblCreditForeign * B.dblRate) else dblCredit end
+				,[dblCredit]  =CASE WHEN @intDefaultCurrencyId <> ISNULL(A.intCurrencyId, C.intCurrencyId) AND @applyCurrentRate = 1 THEN (dblCreditForeign * B.dblRate) else dblCredit end
 				,[dblCreditRate] = CASE WHEN @applyCurrentRate = 1 THEN  B.dblRate ELSE dblCreditRate END 
-				,[dblDebit] =   CASE WHEN @intDefaultCurrencyId <> C.intCurrencyId AND @applyCurrentRate = 1 THEN (dblDebitForeign * B.dblRate) else dblDebit end
+				,[dblDebit] =   CASE WHEN @intDefaultCurrencyId <> ISNULL(A.intCurrencyId, C.intCurrencyId) AND @applyCurrentRate = 1 THEN (dblDebitForeign * B.dblRate) else dblDebit end
 				,[dblDebitRate]	 = CASE WHEN @applyCurrentRate = 1 THEN  B.dblRate ELSE dblDebitRate END 
 				,[dblCreditUnit]
 				,[dblDebitUnit]
