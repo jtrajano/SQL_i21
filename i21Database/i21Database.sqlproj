@@ -433,6 +433,10 @@
     <Build Include="dbo\Tables\tblICInventoryReceiptItemLotQuality.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateAPCashFlow.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportReceiptItemLotFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportReceiptItemLotQualityFromStaging.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingReceiptItemLot.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingReceiptItemLotQuality.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
