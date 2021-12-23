@@ -201,7 +201,7 @@ BEGIN TRY
 			, @strScreenName
 			, NULL
 			, T.strBuySell
-			, dtmTransactionDate = GETDATE()
+			, CASE WHEN @action = 'ADD' THEN T.dtmTransactionDate ELSE GETDATE() END
 			, intBookId
 			, intSubBookId
 			, ysnMonthExpired = FMonth.ysnExpired
