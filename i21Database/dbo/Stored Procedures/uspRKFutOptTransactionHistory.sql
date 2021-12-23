@@ -263,7 +263,18 @@ BEGIN TRY
 					, strInOut
 					, intCommodityUOMId
 					, strNotes
-					, strMiscFields)
+					, strMiscFields
+					, intOptionMonthId
+					, strOptionMonth 
+					, dblStrike
+					, strOptionType 
+					, strInstrumentType 
+					, intBrokerageAccountId
+					, strBrokerAccount
+					, strBroker
+					, strBuySell 
+					, ysnPreCrush 
+					, strBrokerTradeNo )
 				SELECT
 					  strBucketType = 'Derivatives' 
 					, strTransactionType = 'Derivative Entry'
