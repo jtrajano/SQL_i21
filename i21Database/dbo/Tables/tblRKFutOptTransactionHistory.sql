@@ -36,5 +36,6 @@
 	[strAction] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strNotes] [NVARCHAR](MAX) COLLATE Latin1_General_CI_AS NULL,
 	[ysnPreCrush] [BIT] NULL,
+	[dtmCreateDateTime] [datetime] NULL DEFAULT(GETDATE()),
 	CONSTRAINT [PK_tblRKFutOptTransactionHistory_intFutOptTransactionHistoryId] PRIMARY KEY CLUSTERED (intFutOptTransactionHistoryId ASC)
 )

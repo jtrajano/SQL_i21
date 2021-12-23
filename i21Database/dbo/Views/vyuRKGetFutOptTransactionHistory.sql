@@ -56,6 +56,7 @@ SELECT intFutOptTransactionHistoryId
 	, intContractDetailId
 	, intContractHeaderId
 	, intUserId
+	, dtmCreateDateTime
 FROM (
 	SELECT intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
@@ -118,6 +119,7 @@ FROM (
 		, Trans.intContractDetailId
 		, Trans.intContractHeaderId
 		, intUserId = secUser.intEntityId
+		, History.dtmCreateDateTime
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.strFutMarketName = History.strFutureMarket
