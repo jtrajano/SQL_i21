@@ -178,6 +178,7 @@ INSERT INTO @InTransitItems
     ,[intForexRateTypeId]
     ,[dblForexRate]
 	,[strBOLNumber]	
+	,[intTicketId]
 )
 SELECT
      [intItemId] 
