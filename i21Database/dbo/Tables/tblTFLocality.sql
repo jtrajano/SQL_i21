@@ -8,7 +8,7 @@
 	[intMasterId] INT NULL,
     [intConcurrencyId] INT  DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblTFLocality] PRIMARY KEY CLUSTERED ([intLocalityId] ASC),
-	CONSTRAINT [FK_tblTFLocality_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [dbo].[tblTFTaxAuthority] ([intTaxAuthorityId])
+	CONSTRAINT [FK_tblTFLocality_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [dbo].[tblTFTaxAuthority] ([intTaxAuthorityId]) ON DELETE CASCADE
 )
 GO
 
