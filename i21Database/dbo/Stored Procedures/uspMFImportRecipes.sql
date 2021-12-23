@@ -32,6 +32,7 @@ DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@strSubLocationName NVARCHAR(50)
 	,@intSubLocationId INT
 	,@strUpdateTolerance NVARCHAR(50)
+	,@ysnVirtualRecipe BIT
 DECLARE @tblIPInitialAck TABLE (intTrxSequenceNo BIGINT);
 
 --Recipe Delete
@@ -530,6 +531,8 @@ BEGIN
 
 		SELECT @intSubLocationId = NULL
 
+		SELECT @ysnVirtualRecipe = NULL
+
 		--Margin By
 		UPDATE tblMFRecipeStage
 		SET strMarginBy = 'Amount'
@@ -547,6 +550,7 @@ BEGIN
 			,@strFarmNumber = strFarm
 			,@strERPRecipeNo = strERPRecipeNo
 			,@strSubLocationName = strSubLocationName
+			,@ysnVirtualRecipe = ysnVirtualRecipe
 		FROM tblMFRecipeStage
 		WHERE intRecipeStageId = @intMinId
 
@@ -582,27 +586,39 @@ BEGIN
 			GOTO NEXT_RECIPE
 		END
 
-		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+		IF IsNULL(@ysnVirtualRecipe, 0) = 1
 		BEGIN
-			IF @strERPRecipeNo IS NOT NULL
-			BEGIN
-				SELECT @intRecipeId = intRecipeId
-				FROM tblMFRecipe
-				WHERE strERPRecipeNo = @strERPRecipeNo
-			END
-			ELSE
-			BEGIN
-				SELECT TOP 1 @intRecipeId = intRecipeId
-				FROM tblMFRecipe
-				WHERE intItemId = @intItemId
-					AND intVersionNo = @intVersionNo
-					AND intLocationId = @intLocationId
-			END
-		END
-		ELSE --Virtual Recipe
 			SELECT TOP 1 @intRecipeId = intRecipeId
 			FROM tblMFRecipe
-			WHERE strName = @strRecipeName
+			WHERE intItemId = @intItemId
+				AND intVersionNo = @intVersionNo
+				AND intLocationId = @intLocationId
+				AND ysnVirtualRecipe = @ysnVirtualRecipe
+		END
+		ELSE
+		BEGIN
+			IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+			BEGIN
+				IF @strERPRecipeNo IS NOT NULL
+				BEGIN
+					SELECT @intRecipeId = intRecipeId
+					FROM tblMFRecipe
+					WHERE strERPRecipeNo = @strERPRecipeNo
+				END
+				ELSE
+				BEGIN
+					SELECT TOP 1 @intRecipeId = intRecipeId
+					FROM tblMFRecipe
+					WHERE intItemId = @intItemId
+						AND intVersionNo = @intVersionNo
+						AND intLocationId = @intLocationId
+				END
+			END
+			ELSE --Virtual Recipe
+				SELECT TOP 1 @intRecipeId = intRecipeId
+				FROM tblMFRecipe
+				WHERE strName = @strRecipeName
+		END
 
 		IF @intRecipeId IS NULL --insert
 		BEGIN
@@ -647,6 +663,7 @@ BEGIN
 				,intSubLocationId
 				,strERPRecipeNo
 				,intConcurrencyId
+				,ysnVirtualRecipe
 				)
 			SELECT TOP 1 s.strRecipeName
 				,i.intItemId
@@ -674,6 +691,7 @@ BEGIN
 				,@intSubLocationId
 				,@strERPRecipeNo
 				,1 AS intConcurrencyId
+				,@ysnVirtualRecipe
 			FROM tblMFRecipeStage s
 			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
@@ -836,7 +854,7 @@ BEGIN
 		JOIN tblMFRecipe R ON R.intRecipeId = RI.intRecipeId
 		JOIN tblICItem HI ON HI.intItemId = R.intItemId
 		WHERE RI.intRecipeId = @intRecipeId
-			AND RI.intRecipeItemTypeId=1
+			AND RI.intRecipeItemTypeId = 1
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFRecipeItemStage
@@ -891,7 +909,7 @@ BEGIN
 	FROM tblMFRecipeStage R
 	JOIN tblSMCompanyLocation CL ON CL.strLocationName = R.strLocationName
 	WHERE R.ysnInitialAckSent IS NULL
-	AND strSessionId = @strSessionId
+		AND strSessionId = @strSessionId
 
 	UPDATE R
 	SET ysnInitialAckSent = 1
@@ -910,6 +928,7 @@ BEGIN
 	BEGIN
 		SELECT @strUpdateTolerance = 1
 	END
+
 	--Recipe Name is required
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Recipe Name is required'
@@ -1362,12 +1381,15 @@ BEGIN
 			AND ISNULL(strMessage, '') = ''
 			AND intRecipeItemStageId = @intMinId
 
+		SELECT @ysnVirtualRecipe = NULL
+
 		SELECT @strRecipeName = strRecipeName
 			,@strItemNo = strRecipeHeaderItemNo
 			,@intVersionNo = [strVersionNo]
 			,@strLocationName = strLocationName
 			,@strRecipeDetailItemNo = strRecipeItemNo
 			,@strRecipeItemType = strRecipeItemType
+			,@ysnVirtualRecipe = ysnVirtualRecipe
 		FROM tblMFRecipeItemStage
 		WHERE intRecipeItemStageId = @intMinId
 
@@ -1383,7 +1405,8 @@ BEGIN
 		FROM tblICItem
 		WHERE strItemNo = @strRecipeDetailItemNo
 
-		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+		IF IsNULL(@ysnVirtualRecipe, 0) = 1
+		BEGIN
 			SELECT TOP 1 @intRecipeId = intRecipeId
 				,@intRecipeTypeId = intRecipeTypeId
 				,@intLocationId = intLocationId
@@ -1391,13 +1414,26 @@ BEGIN
 			WHERE intItemId = @intItemId
 				AND intVersionNo = @intVersionNo
 				AND intLocationId = @intLocationId
-		ELSE --Virtual Recipe
-			SELECT TOP 1 @intRecipeId = intRecipeId
-				,@intRecipeTypeId = intRecipeTypeId
-				,@intLocationId = intLocationId
-			FROM tblMFRecipe
-			WHERE strName = @strRecipeName
-				AND intLocationId = @intLocationId
+				AND ysnVirtualRecipe = @ysnVirtualRecipe
+		END
+		ELSE
+		BEGIN
+			IF ISNULL(@strItemNo, '') <> '' --Production Recipe
+				SELECT TOP 1 @intRecipeId = intRecipeId
+					,@intRecipeTypeId = intRecipeTypeId
+					,@intLocationId = intLocationId
+				FROM tblMFRecipe
+				WHERE intItemId = @intItemId
+					AND intVersionNo = @intVersionNo
+					AND intLocationId = @intLocationId
+			ELSE --Virtual Recipe
+				SELECT TOP 1 @intRecipeId = intRecipeId
+					,@intRecipeTypeId = intRecipeTypeId
+					,@intLocationId = intLocationId
+				FROM tblMFRecipe
+				WHERE strName = @strRecipeName
+					AND intLocationId = @intLocationId
+		END
 
 		IF @intRecipeId IS NULL
 		BEGIN
@@ -1558,10 +1594,34 @@ BEGIN
 				,ri.intItemUOMId = t.intItemUOMId
 				,ri.intRecipeItemTypeId = t.intRecipeItemTypeId
 				,ri.strItemGroupName = t.strItemGroupName
-				,ri.dblUpperTolerance = (Case When @strUpdateTolerance='1' Then IsNULL(t.[strUpperTolerance], 0) Else ri.dblUpperTolerance End)
-				,ri.dblLowerTolerance = (Case When @strUpdateTolerance='1' Then IsNULL(t.[strLowerTolerance], 0) Else ri.dblLowerTolerance End)
-				,ri.dblCalculatedUpperTolerance = (Case When @strUpdateTolerance='1' Then t.dblCalculatedUpperTolerance Else ri.dblCalculatedUpperTolerance End)
-				,ri.dblCalculatedLowerTolerance = (Case When @strUpdateTolerance='1' Then t.dblCalculatedLowerTolerance Else ri.dblCalculatedLowerTolerance End)
+				,ri.dblUpperTolerance = (
+					CASE 
+						WHEN @strUpdateTolerance = '1'
+							THEN IsNULL(t.[strUpperTolerance], 0)
+						ELSE ri.dblUpperTolerance
+						END
+					)
+				,ri.dblLowerTolerance = (
+					CASE 
+						WHEN @strUpdateTolerance = '1'
+							THEN IsNULL(t.[strLowerTolerance], 0)
+						ELSE ri.dblLowerTolerance
+						END
+					)
+				,ri.dblCalculatedUpperTolerance = (
+					CASE 
+						WHEN @strUpdateTolerance = '1'
+							THEN t.dblCalculatedUpperTolerance
+						ELSE ri.dblCalculatedUpperTolerance
+						END
+					)
+				,ri.dblCalculatedLowerTolerance = (
+					CASE 
+						WHEN @strUpdateTolerance = '1'
+							THEN t.dblCalculatedLowerTolerance
+						ELSE ri.dblCalculatedLowerTolerance
+						END
+					)
 				,ri.dblShrinkage = t.dblShrinkage
 				,ri.ysnScaled = t.ysnScaled
 				,ri.intConsumptionMethodId = t.intConsumptionMethodId
@@ -1724,7 +1784,7 @@ BEGIN
 	FROM tblMFRecipeItemStage RI
 	JOIN tblSMCompanyLocation CL ON CL.strLocationName = RI.strLocationName
 	WHERE RI.ysnInitialAckSent IS NULL
-	AND strSessionId = @strSessionId
+		AND strSessionId = @strSessionId
 
 	UPDATE RI
 	SET ysnInitialAckSent = 1
