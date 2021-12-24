@@ -437,6 +437,7 @@
     <Build Include="dbo\Stored Procedures\uspICImportReceiptItemLotQualityFromStaging.sql" />
     <Build Include="dbo\Tables\tblICImportStagingReceiptItemLot.sql" />
     <Build Include="dbo\Tables\tblICImportStagingReceiptItemLotQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPEmail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
