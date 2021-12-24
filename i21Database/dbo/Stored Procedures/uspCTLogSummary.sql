@@ -106,6 +106,7 @@ BEGIN TRY
 		, intBookId INT
 		, intSubBookId INT
   		, ysnWithPriceFix bit
+		, dblBalance NUMERIC(18, 6)
 	)
 
 	-- Get Contract Details
@@ -141,6 +142,7 @@ BEGIN TRY
 		, cd.intBookId
 		, cd.intSubBookId
 		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then (case when ch.intPricingTypeId = 2 and cd.intPricingTypeId = 1 then 1 else 0 end) else 1 end
+		, dblBalance = CASE WHEN ISNULL(ch.ysnLoad, 0) = 0 THEN cd.dblBalance ELSE ch.dblQuantityPerLoad * cd.dblBalanceLoad END
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	 outer apply (
@@ -446,6 +448,7 @@ BEGIN TRY
 			, intContractTypeId INT
 			, dblQty NUMERIC(18, 6)
 			, dblOrigQty NUMERIC(18, 6)
+			, dblDynamicQty NUMERIC(18, 6)
 			, intQtyUOMId INT
 			, intPricingTypeId INT
 			, strPricingType NVARCHAR(50)
@@ -482,6 +485,7 @@ BEGIN TRY
 			, intContractTypeId
 			, dblQty
 			, dblOrigQty
+			, dblDynamicQty
 			, intQtyUOMId
 			, intPricingTypeId
 			, strPricingType
@@ -517,6 +521,7 @@ BEGIN TRY
 			, cd.intContractTypeId
 			, dblQty = sh.dblBalance
 			, dblOrigQty = sh.dblBalance
+			, dblDynamicQty = sh.dblBalance - ISNULL(sh.dblOldBalance, 0)
 			, intQtyUOMId = cd.intCommodityUOMId
 			, sh.intPricingTypeId
 			, sh.strPricingType
@@ -714,14 +719,15 @@ BEGIN TRY
 			FROM @cbLogTemp
 			
 			DECLARE @prevStatus INT
-				, @dblPrevBalance NUMERIC(18, 6) = 0
+				, @dblBalanceChange NUMERIC(18, 6) = 0
 
 			SELECT TOP 1 @prevStatus = intContractStatusId
-				, @dblPrevBalance = dblQty
 			FROM @cbLogPrev
 			WHERE strTransactionType = 'Contract Balance'
 				AND intContractDetailId = @intContractDetailId
 			ORDER BY intId DESC
+
+			SELECT TOP 1 @dblBalanceChange = dblDynamicQty FROM @sequenceHistory WHERE Row_Num = 1
 			
 			IF (ISNULL(@prevStatus, 0) NOT IN (0, 4))
 			BEGIN
@@ -798,7 +804,7 @@ BEGIN TRY
 					, o.intSubBookId
 					, o.strNotes
 					, intUserId = @intUserId
-					, o.intActionId
+					, intActionId = 61
 					, strProcess = @strProcess
 				FROM tblCTContractBalanceLog  o WITH (UPDLOCK)
 				cross apply (select top 1 p.intPricingTypeId from tblCTContractBalanceLog p where p.intContractHeaderId = o.intContractHeaderId and p.intContractDetailId = ISNULL(@intContractDetailId, o.intContractDetailId) order by p.intContractBalanceLogId desc) price
@@ -884,14 +890,14 @@ BEGIN TRY
 					, intPriceUOMId
 					, dtmStartDate
 					, dtmEndDate
-					, CASE WHEN ISNULL(@prevStatus, 0) = 0 THEN dblQty ELSE @dblPrevBalance - dblQty END
+					, CASE WHEN ISNULL(@prevStatus, 0) = 0 THEN dblQty ELSE @dblBalanceChange * -1 END
 					, dblOrigQty
 					, intContractStatusId
 					, intBookId
 					, intSubBookId
 					, strNotes
 					, intUserId
-					, intActionId
+					, intActionId = CASE WHEN ISNULL(@prevStatus, 0) = 0 THEN 42 ELSE 43 END
 					, strProcess
 				FROM @cbLogTemp
 			END
@@ -3862,7 +3868,7 @@ BEGIN TRY
 			END			
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 4)
 			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = 61
+				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1 --, intActionId = 61
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @total = 0-- No changes with dblQty
