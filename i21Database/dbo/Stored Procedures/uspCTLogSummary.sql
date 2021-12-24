@@ -4118,7 +4118,7 @@ BEGIN TRY
 			ELSE -- With changes with dblQty
 			BEGIN
 				--Check if the sequence was HTA and then priced
-				IF (@prevPricingTypeId = 3 AND @truePricingTypeId = 1)
+				IF (@prevPricingTypeId = 3 AND @truePricingTypeId = 1 AND @TotalHTA > 0)
 				BEGIN
 					UPDATE @cbLogSpecific
 					SET dblQty = @TotalConsumed * -1
