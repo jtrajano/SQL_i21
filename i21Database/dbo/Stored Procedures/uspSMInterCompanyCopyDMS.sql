@@ -252,6 +252,10 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
    DECLARE @folderPathOut NVARCHAR(MAX);  
    DECLARE @ParamDateTimeDefinition NVARCHAR(250) = N'@paramOut DATETIME OUTPUT';  
    DECLARE @ParamFolderPath NVARCHAR(MAX) = N'@pathOut NVARCHAR(MAX) OUTPUT';  
+   DECLARE @ParamSourceName NVARCHAR(MAX) = N'@pathOut NVARCHAR(1000) OUTPUT';  
+   DECLARE @ParamDestinationName NVARCHAR(MAX) = N'@pathOut NVARCHAR(1000) OUTPUT';  
+   DECLARE @SourceName NVARCHAR(MAX) = N'@pathOut NVARCHAR(1000) OUTPUT';  
+   DECLARE @DestinationName NVARCHAR(MAX) = N'@pathOut NVARCHAR(1000) OUTPUT';  
   
       IF(ISNULL(@strDatabaseToUseForUpdate,'') = '')  
     BEGIN  
@@ -348,6 +352,27 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 					intDocumentSourceFolderId = (
 						'+ CONVERT(VARCHAR, @newDocumentSourceFolderID) +'
 					) WHERE intDocumentId = ' + CONVERT(VARCHAR, ISNULL(@intTempDestinationDocumentId, 0));
+
+				EXEC sp_executesql @sql
+
+
+				--update the name
+				SET @sql = N'SELECT @paramOut = strName FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempSourceDocumentId);
+				EXEC sp_executesql @sql, @ParamSourceName, @paramOut = @SourceName OUTPUT;
+				SET @sql = N'SELECT @paramOut = strName FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMDocument] WHERE intDocumentId = ' + CONVERT(VARCHAR, @intTempDestinationDocumentId);
+				EXEC sp_executesql @sql, @ParamDestinationName, @paramOut = @DestinationName OUTPUT;
+				IF ISNULL(@SourceName, '') != '' AND ISNULL(@DestinationName, '') != ''
+				BEGIN
+					IF @SourceName != @DestinationName
+					BEGIN
+						SET @sql = N'
+						UPDATE [' + @strDestinationDatabaseName + '].dbo.[tblSMInterCompanyTransferLogForDMS] 
+						SET strName = ''' + @SourceName + '''
+						WHERE intDocumentId = ' + CONVERT(VARCHAR, ISNULL(@intTempDestinationDocumentId, 0));
+					
+						EXEC sp_executesql @sql;
+					END
+				END
 
 				EXEC sp_executesql @sql
 
