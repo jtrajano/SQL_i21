@@ -21,7 +21,7 @@ RETURN
                         END,
         BA.intGLAccountId,
 		BT.intCompanyLocationId,
-        BTT.strBankTransactionTypeName
+        BTT.strBankTransactionTypeName strTransactionType
     FROM [dbo].[tblCMBankTransaction] BT
     JOIN [dbo].[tblCMBankAccount] BA ON BA.intBankAccountId = BT.intBankAccountId
     LEFT JOIN [dbo].[tblCMBankTransactionType] BTT ON BTT.intBankTransactionTypeId = BT.intBankTransactionTypeId
@@ -48,9 +48,16 @@ RETURN
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 2
-        AND BTR.ysnPosted = 0
         AND BTR.ysnPostedInTransit = 1
         AND BTR.intBankAccountIdFrom = @intBankAccountId
+        AND (CASE 
+                WHEN @dtmFrom IS NULL
+                    THEN CASE WHEN BTR.dtmDate <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
+                WHEN BTR.ysnPosted = 0 
+                    THEN 1
+                ELSE 0 
+            END
+        ) = 1
         AND 
         (CASE WHEN @dtmFrom IS NOT NULL
             THEN CASE WHEN (BTR.dtmDate BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
@@ -71,9 +78,16 @@ RETURN
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 2
-        AND BTR.ysnPosted = 0
         AND BTR.ysnPostedInTransit = 1
         AND BTR.intBankAccountIdTo = @intBankAccountId
+        AND (CASE 
+                WHEN @dtmFrom IS NULL
+                    THEN CASE WHEN BTR.dtmInTransit <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
+                WHEN BTR.ysnPosted = 0 
+                    THEN 1
+                ELSE 0 
+            END
+        ) = 1
         AND 
         (CASE WHEN @dtmFrom IS NOT NULL
             THEN CASE WHEN (BTR.dtmInTransit BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
@@ -94,9 +108,16 @@ RETURN
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 3
-        AND BTR.ysnPosted = 0
         AND BTR.ysnPostedInTransit = 1
         AND BTR.intBankAccountIdFrom = @intBankAccountId
+        AND (CASE 
+                WHEN @dtmFrom IS NULL
+                    THEN CASE WHEN BTR.dtmAccrual <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
+                WHEN BTR.ysnPosted = 0 
+                    THEN 1
+                ELSE 0 
+            END
+        ) = 1
         AND 
         (CASE WHEN @dtmFrom IS NOT NULL
             THEN CASE WHEN (BTR.dtmAccrual BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
@@ -117,9 +138,16 @@ RETURN
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 3
-        AND BTR.ysnPosted = 0
         AND BTR.ysnPostedInTransit = 1
         AND BTR.intBankAccountIdTo = @intBankAccountId
+        AND (CASE 
+                WHEN @dtmFrom IS NULL
+                    THEN CASE WHEN BTR.dtmDate <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
+                WHEN BTR.ysnPosted = 0 
+                    THEN 1
+                ELSE 0 
+            END
+        ) = 1
         AND 
         (CASE WHEN @dtmFrom IS NOT NULL
             THEN CASE WHEN (BTR.dtmDate BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END

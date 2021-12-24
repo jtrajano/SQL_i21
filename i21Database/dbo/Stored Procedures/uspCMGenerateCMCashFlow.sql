@@ -210,13 +210,43 @@ BEGIN
 		JOIN @tblRateTypeFilters RateTypeFilter
 			ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 		WHERE intAccountId = @intCurrentAccountId
+		UNION ALL -- For Bank In-Transit and Bank Forward that's not yet on final posting but will fall under 'Current' bucket
+		SELECT 
+			@intCashFlowReportId,
+			intTransactionId,
+			strTransactionId,
+			strTransactionType,
+			dtmDate,
+			(dblAmount * RateFilter.dblRateBucket1),
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			intCurrencyId,
+			@intReportingCurrencyId,
+			RateTypeFilter.intRateTypeBucket1,
+			RateFilter.dblRateBucket1,
+			intGLAccountId,
+			intBankAccountId,
+			intCompanyLocationId,
+			1
+		FROM [dbo].fnCMCashFlowTransactions(@intCurrentBankAccountId, NULL, @dtmReportDate)
+		JOIN @tblRateFilters RateFilter
+			ON RateFilter.intFilterCurrencyId = intCurrencyId
+		JOIN @tblRateTypeFilters RateTypeFilter
+			ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
+		WHERE strTransactionType IN ('Bank Transfer With In transit', 'Bank Forward')
 		-- 1-7
 		UNION ALL
 		SELECT 
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			(dblAmount * RateFilter.dblRateBucket2),
@@ -246,7 +276,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			0,
@@ -276,7 +306,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			0,
@@ -306,7 +336,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			0,
@@ -336,7 +366,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			0,
@@ -366,7 +396,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			0,
@@ -396,7 +426,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			0,
@@ -426,7 +456,7 @@ BEGIN
 			@intCashFlowReportId,
 			intTransactionId,
 			strTransactionId,
-			strBankTransactionTypeName,
+			strTransactionType,
 			dtmDate,
 			0,
 			0,
