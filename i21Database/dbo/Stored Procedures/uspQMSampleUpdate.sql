@@ -267,7 +267,7 @@ BEGIN TRY
 		,strLotNumber = x.strLotNumber
 		,strSampleNote = x.strSampleNote
 		,dtmSampleReceivedDate = x.dtmSampleReceivedDate
-		,dtmTestedOn = x.dtmTestedOn
+		--,dtmTestedOn = x.dtmTestedOn
 		--,intTestedById = x.intTestedById
 		,dblSampleQty = x.dblSampleQty
 		,intSampleUOMId = x.intSampleUOMId
@@ -326,7 +326,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
-			,dtmTestedOn DATETIME
+			--,dtmTestedOn DATETIME
 			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
@@ -366,6 +366,11 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblQMSample
 		SET intPreviousSampleStatusId = @intPreviousSampleStatusId
+		WHERE intSampleId = @intSampleId
+
+		UPDATE tblQMSample
+		SET dtmTestedOn = NULL
+			,intTestedById = NULL
 		WHERE intSampleId = @intSampleId
 	END
 
