@@ -347,6 +347,7 @@
     <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPEmail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
