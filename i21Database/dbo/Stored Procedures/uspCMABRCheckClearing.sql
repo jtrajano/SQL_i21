@@ -72,7 +72,8 @@ SELECT ROW_NUMBER() OVER(ORDER BY intABRActivityId) rowId,  intABRActivityId, in
 
 
 UPDATE CM
-SET ysnClr = 1
+SET ysnClr = 1,
+dtmClr = GETDATE()
 FROM
 tblCMBankTransaction CM JOIN
 ##tempActivityMatched T ON
