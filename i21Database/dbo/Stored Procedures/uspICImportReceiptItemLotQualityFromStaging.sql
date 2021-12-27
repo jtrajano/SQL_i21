@@ -31,7 +31,7 @@ LEFT JOIN
 WHERE
     ComponentPropertyMap.intComponentMapId IS NULL
 	AND
-	ReceiptItemLotQuality.strImportIdentifier = @strImportIdentifier
+	ReceiptItemLotQuality.strImportIdentifier = @strIdentifier
 
 DECLARE @tblOutput TABLE(strAction NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL)
 
@@ -49,7 +49,7 @@ USING
 		ON
 			ReceiptItemLotQuality.strComponent = ComponentPropertyMap.strComponent
 	WHERE
-		ReceiptItemLotQuality.strImportIdentifier = @strImportIdentifier
+		ReceiptItemLotQuality.strImportIdentifier = @strIdentifier
 ) AS SOURCE 
 	ON 
 		TARGET.intInventoryReceiptItemLotId = SOURCE.intInventoryReceiptItemLotId
