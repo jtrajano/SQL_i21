@@ -4276,49 +4276,44 @@ BEGIN TRY
 				FROM vyuCTCombinePriceFixationDetail
 				WHERE intPriceFixationDetailId = @intPriceFixationDetailId AND ysnMultiplePriceFixation = @ysnMultiPrice
 
-				IF (@intContractTypeId = 1)
+			IF @strProcess = 'Price Delete' OR @strProcess = 'Fixation Detail Delete'
+			BEGIN
+				-- 	1.1. Decrease available priced quantities
+				-- 	1.2. Increase available basis quantities
+				--  1.3. Increase basis deliveries if DWG
+				SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN @dblCurrentQty - @dblQuantityAppliedAndPriced ELSE 0 END
+
+				-- Negate all the priced quantities
+				UPDATE @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+
+				-- Add all the basis quantities
+				-- Use current Basis Price when putting back basis qty
+				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			END
+			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
+			BEGIN
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			END
+			ELSE IF @strNotes = 'Change Futures Price'
+			BEGIN
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			END
+			ELSE
+			BEGIN
+				IF (@qtyDiff <> 0)
 				BEGIN
-					IF (@qtyDiff > 0)
-					BEGIN
-						-- Qty increased
-						SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END ELSE 0 END
-					END
-					ELSE IF (@qtyDiff < 0)
-					BEGIN
-						-- Qty decreased
-						SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalPriced + @dblQty > @TotalConsumed THEN @qtyDiff ELSE 0 END ELSE 0 END
-					END
-					ELSE
-					BEGIN
-						-- New Price or No change
-						SET @FinalQty = @dblQty
-					END
+					-- Qty Changed
+					SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
+										ELSE @dblCurrentQty - @prevOrigQty END
 				END
 				ELSE
 				BEGIN
-					IF (@qtyDiff > 0)
-					BEGIN
-						-- Qty increased
-						SET @FinalQty =  CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END ELSE 0 END
-					END
-					ELSE IF (@qtyDiff < 0)
-					BEGIN
-						-- Qty decreased
-						IF @dblAppliedQty = 0 BEGIN
-							SET @FinalQty = @qtyDiff
-						END
-						ELSE
-						BEGIN
-							SET @FinalQty = CASE WHEN @dblRemainingQty > 0 THEN CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END ELSE 0 END
-						END
-					END
-					ELSE
-					BEGIN
-						-- New Price or No change
-						SET @FinalQty = @dblQty
-					END
+					-- New Price or No change
+					SET @FinalQty = @dblQty
 				END
-
+				
 				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
 				BEGIN
 					-- Decrease Priced
