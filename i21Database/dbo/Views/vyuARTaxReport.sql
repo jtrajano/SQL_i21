@@ -167,18 +167,14 @@ INNER JOIN (
 			 , strItemNo
 		FROM dbo.tblICItem WITH (NOLOCK)
 	) ITEM ON ID.intItemId = ITEM.intItemId
-	INNER JOIN (
-		SELECT intTaxClassId
-			 , intCategoryId
-		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
-	) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = IDT.intTaxClassId
-					 AND ITEMTAXCATEGORY.intCategoryId = ITEM.intCategoryId
 	CROSS APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
-		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
-		WHERE ICT.intCategoryId = ITEM.intCategoryId
-		  AND ICT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
-		GROUP BY intCategoryId
+		FROM dbo.tblARInvoiceDetailTax TCT_IDT WITH (NOLOCK)
+		INNER JOIN tblARInvoiceDetail TCT_ID WITH (NOLOCK)
+		ON TCT_IDT.intInvoiceDetailId = TCT_ID.intInvoiceDetailId
+		WHERE TCT_ID.intItemId = ITEM.intItemId
+		  AND IDT.intTaxClassId IN (SELECT TC.intTaxClassId FROM tblSMTaxGroupCode TGC INNER JOIN tblSMTaxCode TC ON TGC.intTaxCodeId = TC.intTaxCodeId WHERE ID.intTaxGroupId IS NOT NULL AND TGC.intTaxGroupId = ID.intTaxGroupId OR ID.intTaxGroupId IS NULL)
+		GROUP BY TCT_ID.intCategoryId
 	) TAXCLASSTOTAL
 	LEFT JOIN (
 		SELECT intItemUOMId
