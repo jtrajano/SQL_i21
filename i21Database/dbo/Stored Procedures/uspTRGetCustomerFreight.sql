@@ -78,16 +78,17 @@ set @dblInvoiceSurchargeRate =0;
 	                @strFreightType = BPF.strFreightType,
 	           		@intEntityShipViaId = BPF.intShipViaId,
 	           		@intMiles = convert(int,BPF.dblFreightMiles),
+					@dblFreightRateIn = ISNULL(BPF.dblFreightRateIn, 0),
 	           		@dblFreightRateOut = ISNULL(BPF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = convert(bit,0), 
 	           		@dblMinimumUnits = BPF.dblMinimumUnits,
-					@intTariffType   = BPF.intEntityTariffTypeId
+					@intTariffType   = BPF.intEntityTariffTypeId,
+					@dblSurchargeRateOut = BPF.dblSurchargeOut
 	    from tblTRBulkPlantFreight BPF 
 	            where BPF.strZipCode = @strZipCode
 	           			and BPF.intCategoryId = @intCategoryid
                         and BPF.intCompanyLocationId = @intShipToId
 
-		SET @dblFreightRateIn = @dblFreightRateOut
      END
 
 
