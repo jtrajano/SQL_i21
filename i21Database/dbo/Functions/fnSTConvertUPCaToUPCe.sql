@@ -30,13 +30,13 @@ BEGIN
 END 
 
 -- Replace the check digit (last digit) with zero to make it 12 or more digits. 
-SET @strUPCA = @strUPCA + '0'
+-- SET @strUPCA = @strUPCA + '0'
 
 -- Validate if UPC A is numeric
 IF 
 	(@strUPCA NOT LIKE '%[^0-9]%')	
 	AND @strUPCA IS NOT NULL 
-	AND LEN(@strUPCA) >= 12
+	AND LEN(@strUPCA) = 11
 BEGIN
 	-- Logic derived from https://www.taltech.com/js/UPC.js and https://en.wikipedia.org/wiki/Universal_Product_Code
 	-- To verify, use the converter in https://www.morovia.com/education/utility/upc-ean.asp. 
@@ -44,23 +44,26 @@ BEGIN
 		CASE 
 			-- Check if Long UPC begins with zero or one. 
 			WHEN SUBSTRING(@strUPCA, 1, 1) NOT IN ('0', '1') THEN NULL
-
-			-- Check if the product codes are between 000 and 999. 
-			WHEN CAST(SUBSTRING(@strUPCA, 7, 5) AS INT) > 999 THEN NULL 
-			
-			-- Check for specific valid chars in the code to convert to Short UPC Code
-			WHEN SUBSTRING(@strUPCA, 4, 3) IN ('000' , '100', '200')  THEN 
-				SUBSTRING(@strUPCA, 2, 2) + SUBSTRING(@strUPCA, 9, 3) + SUBSTRING(@strUPCA, 4, 1) 
-
-			WHEN SUBSTRING(@strUPCA, 5, 2) IN ('00') THEN 
-				SUBSTRING(@strUPCA, 2, 3) + SUBSTRING(@strUPCA, 10, 2) + '3'
-
-			WHEN SUBSTRING(@strUPCA, 6, 1) IN ('0') THEN 
-				SUBSTRING(@strUPCA, 2, 4) + SUBSTRING(@strUPCA, 11, 1) + '4'
-
-			WHEN CAST(SUBSTRING(@strUPCA, 11, 1) AS INT) >= 5 THEN 
-				SUBSTRING(@strUPCA, 2, 5) + SUBSTRING(@strUPCA, 11, 1)
-					
+			WHEN 
+				SUBSTRING(@strUPCA, 4, 1) IN ('0', '1', '2') 
+				AND 
+				SUBSTRING(@strUPCA, 5, 4) = '0000'
+				THEN
+					SUBSTRING(SUBSTRING(@strUPCA, 1, 3) + SUBSTRING(@strUPCA, 9, 3) + SUBSTRING(@strUPCA, 4, 1), 2, 11)
+			WHEN
+				SUBSTRING(@strUPCA, 5, 5) = '00000'
+				THEN
+					SUBSTRING(SUBSTRING(@strUPCA, 1, 4) + SUBSTRING(@strUPCA, 10, 2) + '3', 2, 11)
+			WHEN
+				SUBSTRING(@strUPCA, 6, 5) = '00000'
+				THEN
+					SUBSTRING(SUBSTRING(@strUPCA, 1, 5) + SUBSTRING(@strUPCA, 11, 1) + '4', 2, 11)
+			WHEN
+				SUBSTRING(@strUPCA, 11, 1) IN ('5', '6', '7', '8', '9') 
+				AND 
+				SUBSTRING(@strUPCA, 7, 4) = '0000'
+				THEN
+					SUBSTRING(SUBSTRING(@strUPCA, 1, 6) + SUBSTRING(@strUPCA, 11, 1), 2, 11)
 			ELSE 
 				NULL 
 		END
