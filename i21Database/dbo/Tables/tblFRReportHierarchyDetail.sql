@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[tblFRReportHierarchyDetail] (
     [intParentGroupId]					INT             NULL,
     [intSort]							INT             NULL,
     [intConcurrencyId]					INT             DEFAULT 1 NOT NULL,
+    [strDescription]					NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblFRReportHierarchyDetail_intReportHierarchyDetailId] PRIMARY KEY CLUSTERED ([intReportHierarchyDetailId] ASC), 
     CONSTRAINT [FK_tblFRReportHierarchyDetail_tblFRReportHierarchy] FOREIGN KEY([intReportHierarchyId])	REFERENCES [dbo].[tblFRReportHierarchy] ([intReportHierarchyId]) ON DELETE CASCADE
 
