@@ -5,11 +5,6 @@ AS
 
 BEGIN
 
-	DECLARE @tmpFreightType TABLE (strFreightType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL)
-	INSERT INTO @tmpFreightType (strFreightType) VALUES ('Rate')
-	INSERT INTO @tmpFreightType (strFreightType) VALUES ('Miles')
-	INSERT INTO @tmpFreightType (strFreightType) VALUES ('Amount')
-
 -- VALIDATE Ship Via
 	INSERT INTO tblApiImportLogDetail (
 		guiApiImportLogDetailId
@@ -83,30 +78,6 @@ BEGIN
 	WHERE C.intCategoryId IS NULL 
 	AND SVT.guiApiUniqueId = @guiApiUniqueId
 
-	-- VALIDATE Freight Type
-	INSERT INTO tblApiImportLogDetail (
-		guiApiImportLogDetailId
-		, guiApiImportLogId
-		, strField
-		, strValue
-		, strLogLevel
-		, strStatus
-		, intRowNo
-		, strMessage
-	)
-	SELECT guiApiImportLogDetailId = NEWID()
-		, guiApiImportLogId = @guiLogId
-		, strField = 'Freight Type'
-		, strValue = SVT.strFreightType
-		, strLogLevel = 'Error'
-		, strStatus = 'Failed'
-		, intRowNo = SVT.intRowNumber
-		, strMessage = 'Cannot find the Freight Type ''' + SVT.strFreightType + ''' in i21 Freight Types'
-	FROM tblApiSchemaTRShipViaTariff SVT
-	LEFT JOIN @tmpFreightType F ON F.strFreightType = SVT.strFreightType
-	WHERE F.strFreightType IS NULL 
-	AND SVT.guiApiUniqueId = @guiApiUniqueId
-
 	--TRANSFORM
 	DECLARE cur CURSOR FOR
 	SELECT SVT.intKey 
@@ -115,7 +86,6 @@ BEGIN
 	,SVT.strTariffDescription
 	,ET.intEntityTariffId
 	,ETT.intEntityTariffTypeId			
-	,SVT.strFreightType				
 	,C.intCategoryId					
 	,SVT.dblSurcharge				
 	,SVT.dtmShipViaEffectiveDate		
@@ -129,7 +99,6 @@ BEGIN
 		INNER JOIN tblEMEntity E ON SV.intEntityId = E.intEntityId
 		INNER JOIN tblEMEntityTariffType ETT ON ETT.strTariffType = SVT.strTariffType
 		INNER JOIN tblICCategory C ON C.strCategoryCode = SVT.strCategory
-		INNER JOIN @tmpFreightType FT ON FT.strFreightType = SVT.strFreightType
 		LEFT JOIN tblEMEntityTariff ET ON ET.intEntityId = E.intEntityId
 			AND ET.intEntityTariffTypeId = ETT.intEntityTariffTypeId
 			AND SVT.strTariffDescription = ET.strDescription
@@ -143,7 +112,6 @@ BEGIN
 	DECLARE @intEntityTariffId			INT = NULL
 	DECLARE @intEntityTariffTypeId		INT = NULL
 	DECLARE @strTariffDescription		NVARCHAR(50) = NULL
-	DECLARE @strFreightType				NVARCHAR(50) = NULL
 	DECLARE @intCategoryId				INT = NULL
 	DECLARE @dblSurcharge				NUMERIC(18, 6) = NULL
 	DECLARE @dtmShipViaEffectiveDate	DATETIME = NULL
@@ -161,7 +129,6 @@ BEGIN
 	,@strTariffDescription
 	,@intEntityTariffId
 	,@intEntityTariffTypeId
-	,@strFreightType				
 	,@intCategoryId				
 	,@dblSurcharge				
 	,@dtmShipViaEffectiveDate	
@@ -174,7 +141,7 @@ BEGIN
 	WHILE @@FETCH_STATUS = 0   
 	BEGIN
 		DECLARE @tariffId INT = NULL
-
+		DECLARE @Updated BIT = 0
 
 		-- Tariff
 		IF @intEntityTariffId IS NULL
@@ -192,6 +159,7 @@ BEGIN
 				, @guiApiUniqueId
 				, 1)
 			SET @tariffId = SCOPE_IDENTITY()
+			--SET @Created = 1
 		END
 		ELSE
 		BEGIN
@@ -210,6 +178,8 @@ BEGIN
 				, @intCategoryId
 				, @guiApiUniqueId
 				, 1)
+
+			--SET @Created = 1
 		END
 
 
@@ -229,6 +199,8 @@ BEGIN
 					, @guiApiUniqueId
 					, 1
 				)
+
+				--SET @Created = 1
 			END
 		END
 		ELSE
@@ -237,7 +209,29 @@ BEGIN
 			SET [dblFuelSurcharge] = ISNULL(@dblSurcharge, 0), [guiApiUniqueId] = @guiApiUniqueId
 			WHERE intEntityTariffId = @tariffId 
 				AND dtmEffectiveDate = @dtmSurchargeEffectiveDate
+
+			SET @Updated = 1
 		END
+
+		-- INSERT LOGS
+			INSERT INTO tblApiImportLogDetail (
+				guiApiImportLogDetailId
+				, guiApiImportLogId
+				, strField
+				, strValue
+				, strLogLevel
+				, strStatus
+				, intRowNo
+				, strMessage
+			)
+			SELECT guiApiImportLogDetailId = NEWID()
+				, guiApiImportLogId = @guiLogId
+				, strField = ''
+				, strValue = ''
+				, strLogLevel = 'Success'
+				, strStatus = 'Success'
+				, intRowNo = @intRowNumber
+				, strMessage = CASE WHEN @Updated = 1 THEN 'Data updated successfully' ELSE 'Data added successfully' END
 
 
 	--	-- Tariff Mileage
@@ -276,8 +270,7 @@ BEGIN
 	,@intEntityId
 	,@strTariffDescription
 	,@intEntityTariffId
-	,@intEntityTariffTypeId
-	,@strFreightType				
+	,@intEntityTariffTypeId				
 	,@intCategoryId				
 	,@dblSurcharge				
 	,@dtmShipViaEffectiveDate	
