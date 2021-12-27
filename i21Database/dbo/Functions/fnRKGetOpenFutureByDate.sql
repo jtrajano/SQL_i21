@@ -213,10 +213,10 @@ BEGIN
 				, FOT.strNotes
 				, FOT.ysnPreCrush
 				, FOT.ysnExpired
-				, FOT.intBookId
-				, FOT.strBook
-				, FOT.intSubBookId
-				, FOT.strSubBook
+				, intBookId = History.intBookId
+				, strBook = History.strBook COLLATE Latin1_General_CI_AS
+				, intSubBookId = History.intSubBookId
+				, strSubBook = History.strSubBook COLLATE Latin1_General_CI_AS
 				, FOT.intEntityId
 				, FOT.intCurrencyId
 				, FOT.intRollingMonthId
@@ -319,10 +319,10 @@ BEGIN
 				, FOT.strNotes
 				, FOT.ysnPreCrush
 				, FOT.ysnExpired
-				, FOT.intBookId
-				, FOT.strBook
-				, FOT.intSubBookId
-				, FOT.strSubBook
+				, intBookId = History.intBookId 
+				, strBook = History.strBook COLLATE Latin1_General_CI_AS
+				, intSubBookId = History.intSubBookId
+				, strSubBook = History.strSubBook COLLATE Latin1_General_CI_AS
 				, FOT.intEntityId
 				, FOT.intCurrencyId
 				, FOT.intRollingMonthId
@@ -456,16 +456,13 @@ BEGIN
 					LEFT JOIN MatchDerivatives mc ON mc.intFutOptTransactionId = History.intFutOptTransactionId
 					WHERE History.intFutOptTransactionId NOT IN (SELECT intFutOptTransactionId FROM tblRKFutOptTransaction)
 						AND (  (@strReportByDate = 'Create Date'
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
-											AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
-										OR
-										((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-										AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
-									)
-						
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
-						AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate
+									AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) >= @dtmFromDate
+									AND CAST(FLOOR(CAST(History.dtmCreateDateTime AS FLOAT)) AS DATETIME) <= @dtmToDate)
+								OR
+								((@strReportByDate = 'Filled Date' OR @strReportByDate = 'Batch Date')
+								AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) >= @dtmFromDate
+								AND CAST(FLOOR(CAST(History.dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmToDate)
+							)
 				) t WHERE intRowNum = 1
 						AND @ysnDisableHistoricalDerivative = 0
 			) History
