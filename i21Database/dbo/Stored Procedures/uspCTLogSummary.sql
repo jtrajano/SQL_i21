@@ -4276,63 +4276,64 @@ BEGIN TRY
 				FROM vyuCTCombinePriceFixationDetail
 				WHERE intPriceFixationDetailId = @intPriceFixationDetailId AND ysnMultiplePriceFixation = @ysnMultiPrice
 
-			IF @strProcess = 'Price Delete' OR @strProcess = 'Fixation Detail Delete'
-			BEGIN
-				-- 	1.1. Decrease available priced quantities
-				-- 	1.2. Increase available basis quantities
-				--  1.3. Increase basis deliveries if DWG
-				SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN @dblCurrentQty - @dblQuantityAppliedAndPriced ELSE 0 END
+				IF @strProcess = 'Price Delete' OR @strProcess = 'Fixation Detail Delete'
+				BEGIN
+					-- 	1.1. Decrease available priced quantities
+					-- 	1.2. Increase available basis quantities
+					--  1.3. Increase basis deliveries if DWG
+					SET @FinalQty = CASE WHEN @intContractStatusId IN (1, 4) THEN @dblCurrentQty - @dblQuantityAppliedAndPriced ELSE 0 END
 
-				-- Negate all the priced quantities
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					-- Negate all the priced quantities
+					UPDATE @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
-				-- Add all the basis quantities
-				-- Use current Basis Price when putting back basis qty
-				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
-			END
-			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
-			BEGIN
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
-			END
-			ELSE IF @strNotes = 'Change Futures Price'
-			BEGIN
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
-			END
-			ELSE
-			BEGIN
-				IF (@qtyDiff <> 0)
-				BEGIN
-					-- Qty Changed
-					SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
-										ELSE @dblCurrentQty - @prevOrigQty END
+					-- Add all the basis quantities
+					-- Use current Basis Price when putting back basis qty
+					UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, dblBasis = @dblCurrentBasis
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
-				ELSE
+				ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
 				BEGIN
-					-- New Price or No change
-					SET @FinalQty = @dblQty
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
-				
-				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
+				ELSE IF @strNotes = 'Change Futures Price'
 				BEGIN
-					-- Decrease Priced
-					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 				ELSE
 				BEGIN
-					-- If Reassign prices, do not bring back Basis qty
-					IF (@ysnReassign = 0)
+					IF (@qtyDiff <> 0)
 					BEGIN
-						-- Increase basis, qtyDiff is negative so multiply to -1
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
+						-- Qty Changed
+						SET @FinalQty =  CASE WHEN @dblAppliedQty > @prevOrigQty THEN @dblCurrentQty - @dblAppliedQty
+											ELSE @dblCurrentQty - @prevOrigQty END
+					END
+					ELSE
+					BEGIN
+						-- New Price or No change
+						SET @FinalQty = @dblQty
+					END
+				
+					IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
+					BEGIN
+						-- Decrease Priced
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
+					ELSE
+					BEGIN
+						-- If Reassign prices, do not bring back Basis qty
+						IF (@ysnReassign = 0)
+						BEGIN
+							-- Increase basis, qtyDiff is negative so multiply to -1
+							UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						END
 
-					-- Decrease Priced
-					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						-- Decrease Priced
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
 				END
 			END
 		END
