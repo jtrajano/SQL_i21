@@ -39,9 +39,9 @@ DECLARE @tblOutput TABLE(strAction NVARCHAR(200) COLLATE Latin1_General_CI_AS NU
 USING
 (
 	SELECT
-		  intInventoryReceiptItemLotId = ReceiptItemLotQuality.intInventoryReceiptItemLotId,
-		  intComponentMapId = ComponentPropertyMap.intComponentMapId,
-		  strValue = ReceiptItemLotQuality.strValue
+		ReceiptItemLotQuality.intInventoryReceiptItemLotId,
+		ComponentPropertyMap.intComponentMapId,
+		ReceiptItemLotQuality.strValue
 	FROM 
 		tblICImportStagingReceiptItemLotQuality ReceiptItemLotQuality
 	INNER JOIN
@@ -69,9 +69,9 @@ WHEN NOT MATCHED THEN
 	)
 	VALUES
 	(
-		intInventoryReceiptItemLotId,
-		intComponentMapId,
-		strValue,
+		SOURCE.intInventoryReceiptItemLotId,
+		SOURCE.intComponentMapId,
+		SOURCE.strValue,
 		GETUTCDATE()
 	)
 	OUTPUT $action INTO @tblOutput;
