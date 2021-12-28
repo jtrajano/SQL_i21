@@ -3365,13 +3365,16 @@ BEGIN TRY
 					and (cter.dblQty * -1) = curr.dblQty
 					and cter.intId <> curr.intId
 					and cter.strTransactionType = curr.strTransactionType
+					and @ysnDWGPriceOnly = 1
+					and cter.strProcess = curr.strProcess
 			where
 				curr.intId = @intId
 		)
 		begin
-			goto _Exit;
+			SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
+			continue;
 		end
-
+		
 		DELETE FROM @cbLogPrev
 
 		/*CT-5532 - If unposting and the contract is DWG, check the @cbLogCurrent if it's contains a self negated records*/
@@ -4802,8 +4805,6 @@ BEGIN TRY
 		END
 
 		DELETE FROM @cbLogSpecific
-
-		_Exit:
 
 		SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 	END
