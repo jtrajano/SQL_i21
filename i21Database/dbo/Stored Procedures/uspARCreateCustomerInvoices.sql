@@ -1094,7 +1094,7 @@ INNER JOIN (
 GROUP BY strSourceId 
 ) ID ON  ITG.[strSourceId] =  ID.[strSourceId]  
 WHERE ID.SourceCount > 1
-  AND [strType] <> 'POS'
+  AND [strType] NOT IN ('POS', 'Store Checkout')
   AND ITG.[strSourceTransaction] <> 'Store Charge'
 
 INSERT INTO #ARInvalidInvoiceRecords
