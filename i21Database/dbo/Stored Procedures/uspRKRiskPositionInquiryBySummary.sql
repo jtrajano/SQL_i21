@@ -69,6 +69,7 @@ AS
 		, @strFutureMonth NVARCHAR(15)
 		, @dblForecastWeeklyConsumption NUMERIC(24, 10)
 		, @strParamFutureMonth NVARCHAR(12)
+		, @ysnUseM2MDate BIT
 
 	SELECT @dblContractSize = convert(INT, dblContractSize)
 	FROM tblRKFutureMarket
@@ -92,6 +93,7 @@ AS
 	WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intUOMId
 
 	SELECT TOP 1 @ysnIncludeInventoryHedge = ysnIncludeInventoryHedge
+		, @ysnUseM2MDate = ysnUseM2MDate
 	FROM tblRKCompanyPreference
 
 	DECLARE @intForecastWeeklyConsumptionUOMId1 INT
@@ -613,8 +615,11 @@ AS
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
 			JOIN tblICItem i ON h.intItemId = i.intItemId
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
-				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+			WHERE h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+				AND ((@ysnUseM2MDate = 0 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate)
+					 OR 
+					 (@ysnUseM2MDate = 1 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate)
+					)
 		) a
 		WHERE a.intRowNum = 1 AND strPricingStatus IN ('Fully Priced') AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN (1, 2, 8)
 		
@@ -665,8 +670,11 @@ AS
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
 			JOIN tblICItem i ON h.intItemId = i.intItemId
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
-				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+			WHERE h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+				AND ((@ysnUseM2MDate = 0 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate)
+					 OR 
+					 (@ysnUseM2MDate = 1 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate)
+					)
 		) a
 		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND intPricingTypeId IN(2, 8) AND strPricingStatus IN ('Partially Priced', 'Unpriced')
 		
@@ -756,8 +764,11 @@ AS
 			JOIN tblCTContractHeader ch ON ch.intContractHeaderId = h.intContractHeaderId
 			JOIN tblICItem i ON h.intItemId = i.intItemId
 			JOIN tblEMEntity e ON e.intEntityId = h.intEntityId
-			WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate
-				AND h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+			WHERE h.intCommodityId = ISNULL(@intCommodityId, h.intCommodityId)
+				AND ((@ysnUseM2MDate = 0 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmHistoryCreated, 110), 110) <= @dtmToDate)
+					 OR 
+					 (@ysnUseM2MDate = 1 AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cd.dtmM2MDate, 110), 110) <= @dtmToDate)
+					)
 		) a
 		WHERE a.intRowNum = 1 AND intContractStatusId NOT IN (2, 3, 6) AND strPricingStatus = 'Partially Priced' AND intPricingTypeId IN (2, 8)
 	)t
