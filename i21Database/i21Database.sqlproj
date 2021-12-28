@@ -348,6 +348,7 @@
     <Build Include="dbo\Tables\tblApiSchemaTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRVendorSupplyPointDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPEmail.sql" />
+    <Build Include="dbo\Views\vyuMFLotDetailViewForDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
