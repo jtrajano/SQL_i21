@@ -2,7 +2,7 @@
 as
 select 
 	b.[intEntityId],
-	strSalespersonId = case when b.strSalespersonId = '' then a.strEntityNo else b.strSalespersonId end ,
+	strSalespersonId = case when b.strSalespersonId = '' OR b.strSalespersonId IS NULL then a.strEntityNo else b.strSalespersonId end ,
 	strSalespersonName = a.strName,
 	a.strName,
 	b.strType,	
