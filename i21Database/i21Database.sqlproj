@@ -440,6 +440,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPEmail.sql" />
     <Build Include="dbo\Functions\fnARCashFlowTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetTruckDispatchResource.sql" />
+    <Build Include="dbo\Views\vyuMFLotDetailViewForDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
