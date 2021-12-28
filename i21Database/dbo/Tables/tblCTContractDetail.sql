@@ -161,11 +161,17 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	-- Trade Finance Fields
 	strFinanceTradeNo NVARCHAR(50) NULL,
 	intBankAccountId INT NULL,
+	intBorrowingFacilityId INT NULL,
+	intBorrowingFacilityLimitId INT NULL,
+	intBorrowingFacilityLimitDetailId INT NULL,
+	strReferenceNo NVARCHAR(100) NULL,
+	dblLoanAmount NUMERIC(18, 6) NULL,
+	intBankValuationRuleId INT NULL,
+	strBankReferenceNo NVARCHAR(100) NULL,
+	strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intFacilityId INT NULL,
 	intLoanLimitId INT NULL,
-	dblLoanAmount NUMERIC(18, 6) NULL,
 	intOverrideFacilityId INT NULL,
-	strBankReferenceNo NVARCHAR(100) NULL,
 	 
 	-- Quality/Optionality
 	dblQualityPremium numeric(18, 6) NULL,

@@ -531,17 +531,22 @@ BEGIN TRY
 		, CD.strFinanceTradeNo
 		, CD.intBankAccountId
 		, BA.intBankId
-		, strBankName = BK.strBankName
-		, strBankAccountNo = BA.strBankAccountNo
-		, CD.intFacilityId
-		, strFacility = FA.strBorrowingFacilityId
-		, CD.intLoanLimitId
-		, strLoanLimit = BL.strBankLoanId
-		, strLoanReferenceNo = BL.strLimitDescription
+		, BK.strBankName
+		, BA.strBankAccountNo
+		, CD.intBorrowingFacilityId
+		, FA.strBorrowingFacilityId
+		, CD.intBorrowingFacilityLimitId
+		, FL.strBorrowingFacilityLimit
+		, CD.intBorrowingFacilityLimitDetailId
+		, FLD.strLimitDescription
 		, CD.dblLoanAmount
-		, intOverrideFacilityId
-		, strOverrideFacility = BVR.strBankValuationRule
+		, CD.intBankValuationRuleId
+		, BVR.strBankValuationRule
+		, CD.strReferenceNo
 		, CD.strBankReferenceNo
+		, FL.dblLimit
+		, dblSublimit = FLD.dblLimit
+		, CD.strComments
 		, CD.dblQualityPremium
 		, CD.dblOptionalityPremium
 	FROM #tmpContractDetail CD
@@ -559,9 +564,10 @@ BEGIN TRY
 	-- Trade Finance
 	LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = CD.intBankAccountId
 	LEFT JOIN tblCMBank BK ON BK.intBankId = BA.intBankId
-	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intFacilityId
-	LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = CD.intLoanLimitId
-	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intOverrideFacilityId
+	LEFT JOIN tblCMBorrowingFacility FA ON FA.intBorrowingFacilityId = CD.intBorrowingFacilityId
+	LEFT JOIN tblCMBorrowingFacilityLimit FL ON FL.intBorrowingFacilityLimitId = CD.intBorrowingFacilityLimitId
+	LEFT JOIN tblCMBorrowingFacilityLimitDetail FLD ON FLD.intBorrowingFacilityLimitDetailId = CD.intBorrowingFacilityLimitDetailId
+	LEFT JOIN tblCMBankValuationRule BVR ON BVR.intBankValuationRuleId = CD.intBankValuationRuleId
 
 	--SELECT * FROM tblCMBankLoan
 
