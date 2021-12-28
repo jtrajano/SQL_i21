@@ -125,23 +125,29 @@ BEGIN
 				SET @strOrigin = CASE WHEN @intVendorId IS NULL THEN 'Location' ELSE 'Terminal' END
 
 				-- GET UNIT COST
+				SELECT @dblUnitCost = dblReceiveLastCost 
+					FROM vyuICGetItemStock WHERE intItemId = @intPullProductId 
+					AND intLocationId = @intVendorCompanyLocationId 
+					AND strType NOT IN ('Other Charge','Bundle','Kit','Service','Sofware')
+
 				IF(@strOrigin = 'Terminal')
 				BEGIN
+					DECLARE @dblRackPriceUnitCost NUMERIC(18,6) = NULL
 					EXECUTE [dbo].[uspTRGetRackPrice] 
 						@dtmPullDate
 						,0
 						,@intSupplyPointId
 						,@intPullProductId
-						,@dblUnitCost OUTPUT
+						,@dblRackPriceUnitCost OUTPUT
+
+					IF(ISNULL(@dblRackPriceUnitCost, 0) != 0)
+					BEGIN
+						SET @dblUnitCost = @dblRackPriceUnitCost
+					END
 				END
 				ELSE
 				BEGIN
-					SET @strGrossNet = 'Gross'
-
-					SELECT @dblUnitCost = dblReceiveLastCost 
-					FROM vyuICGetItemStock WHERE intItemId = @intPullProductId 
-					AND intLocationId = @intVendorCompanyLocationId 
-					AND strType NOT IN ('Other Charge','Bundle','Kit','Service','Sofware')
+					SET @strGrossNet = 'Gross'	
 				END
 
 				-- RECEIPT
