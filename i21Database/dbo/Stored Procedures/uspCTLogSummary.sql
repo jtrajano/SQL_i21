@@ -40,7 +40,8 @@ BEGIN TRY
 			@intSeqHistoryPreviousFutMkt	INT,
 			@intSeqHistoryPreviousFutMonth	INT,
 			@dblCurrentBasis				NUMERIC(24, 10),
-			@intHeaderPricingTypeId		INT;
+			@intHeaderPricingTypeId		INT,
+			@ysnInvoicePosted			BIT = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -1225,7 +1226,8 @@ BEGIN TRY
 				, strNotes
 				, intUserId
 				, intActionId
-				, strProcess)
+				, strProcess
+				, ysnInvoicePosted)
 			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Sales Basis Deliveries'
@@ -1264,6 +1266,7 @@ BEGIN TRY
 				, cbl.intUserId
 				, intActionId = 16
 				, strProcess = @strProcess
+				, ysnInvoicePosted = i.ysnPosted
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
 			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
@@ -4344,14 +4347,39 @@ BEGIN TRY
 		BEGIN
 			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo', 'Create Voucher', 'Delete Voucher')
 			BEGIN
-				UPDATE @cbLogSpecific SET intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
-										WHEN @strProcess = 'Create Credit Memo' THEN 64
-										WHEN @strProcess = 'Delete Invoice' THEN 63
-										WHEN @strProcess = 'Delete Credit Memo' THEN 65
-										WHEN @strProcess = 'Create Voucher' THEN 15
-										WHEN @strProcess = 'Delete Voucher' THEN 62
-										ELSE intActionId END
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+
+				
+				--Unposting invoice should not log SBD
+				set @ysnInvoicePosted = 0;
+
+				if (@strProcess = 'Create Invoice' and exists (
+					select top 1 1
+					from @cbLogPrev lp
+					join @cbLogCurrent i on i.intTransactionReferenceId = lp.intTransactionReferenceId
+					join @cbLogSpecific ls
+					on ls.strProcess = lp.strProcess
+					and ls.strTransactionType = lp.strTransactionType
+					and ls.strTransactionReference = lp.strTransactionReference
+					and ls.intTransactionReferenceId = lp.intTransactionReferenceId
+					and ls.intTransactionReferenceDetailId = lp.intTransactionReferenceDetailId
+					and ls.intActionId = lp.intActionId
+					and i.ysnInvoicePosted = 1				
+				))
+				begin
+					set @ysnInvoicePosted = 1;
+				end
+
+				if (@ysnInvoicePosted = 0)
+				begin
+					UPDATE @cbLogSpecific SET intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
+											WHEN @strProcess = 'Create Credit Memo' THEN 64
+											WHEN @strProcess = 'Delete Invoice' THEN 63
+											WHEN @strProcess = 'Delete Credit Memo' THEN 65
+											WHEN @strProcess = 'Create Voucher' THEN 15
+											WHEN @strProcess = 'Delete Voucher' THEN 62
+											ELSE intActionId END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				end 
 
 				SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 				CONTINUE
