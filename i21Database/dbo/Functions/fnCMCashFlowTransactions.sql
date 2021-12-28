@@ -34,30 +34,7 @@ RETURN
             ELSE CASE WHEN (BT.dtmDate <= @dtmTo) THEN 1 ELSE 0 END
             END
         ) = 1
-    UNION ALL -- Bank Transfer With In transit From
-    SELECT
-        BTR.intTransactionId,
-        BTR.strTransactionId,
-        BTR.intBankAccountIdFrom,
-        BTR.intCurrencyIdAmountFrom,
-        BTR.dtmDate,
-        BTR.dblAmountForeignFrom * -1,
-        BTR.intGLAccountIdFrom,
-        NULL,
-        'Bank Transfer With In transit (Withdraw)'
-    FROM [dbo].[tblCMBankTransfer] BTR
-    WHERE 
-        BTR.intBankTransferTypeId = 2
-        AND BTR.ysnPostedInTransit = 1
-        AND BTR.ysnPosted = 0
-        AND BTR.intBankAccountIdFrom = @intBankAccountId
-        AND 
-        (CASE WHEN @dtmFrom IS NOT NULL
-            THEN CASE WHEN (BTR.dtmDate BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
-            ELSE CASE WHEN (BTR.dtmDate <= @dtmTo) THEN 1 ELSE 0 END
-            END
-        ) = 1
-     UNION ALL -- Bank Transfer With In transit To
+    UNION ALL -- Bank Transfer With In transit To
     SELECT
         BTR.intTransactionId,
         BTR.strTransactionId,
