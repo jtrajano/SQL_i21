@@ -210,7 +210,7 @@ BEGIN
 		JOIN @tblRateTypeFilters RateTypeFilter
 			ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
 		WHERE intAccountId = @intCurrentAccountId
-		UNION ALL -- For Bank In-Transit and Bank Forward that's not yet on final posting but will fall under 'Current' bucket
+		UNION ALL -- For Bank In-Transit (Deposit) and Bank Forward (Withdraw and Deposit) that's not yet on final posting but will fall under 'Current' bucket
 		SELECT 
 			@intCashFlowReportId,
 			intTransactionId,
@@ -239,7 +239,7 @@ BEGIN
 			ON RateFilter.intFilterCurrencyId = intCurrencyId
 		JOIN @tblRateTypeFilters RateTypeFilter
 			ON RateTypeFilter.intFilterCurrencyId = intCurrencyId
-		WHERE strTransactionType IN ('Bank Transfer With In transit', 'Bank Forward')
+		WHERE strTransactionType IN ('Bank Transfer With In transit (Deposit)', 'Bank Forward (Withdraw)', 'Bank Forward (Deposit)')
 		-- 1-7
 		UNION ALL
 		SELECT 
@@ -483,44 +483,19 @@ BEGIN
 
 		-- Get sum of each bucket
 		SELECT 
-			@dblBucket2 = ISNULL(SUM(dblBucket2), 0)
+			@dblBucket2 = ISNULL(SUM(dblBucket2), 0), 
+			@dblBucket3 = ISNULL(SUM(dblBucket3), 0),
+			@dblBucket4 = ISNULL(SUM(dblBucket4), 0),
+			@dblBucket4 = ISNULL(SUM(dblBucket5), 0),
+			@dblBucket4 = ISNULL(SUM(dblBucket6), 0),
+			@dblBucket4 = ISNULL(SUM(dblBucket7), 0),
+			@dblBucket4 = ISNULL(SUM(dblBucket8), 0),
+			@dblBucket4 = ISNULL(SUM(dblBucket9), 0)
 		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
-		SELECT 
-			@dblBucket3 = ISNULL(SUM(dblBucket3), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
-		SELECT 
-			@dblBucket4 = ISNULL(SUM(dblBucket4), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
-		SELECT 
-			@dblBucket5 = ISNULL(SUM(dblBucket5), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
-		SELECT 
-			@dblBucket6 = ISNULL(SUM(dblBucket6), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
-		SELECT 
-			@dblBucket7 = ISNULL(SUM(dblBucket7), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
-		SELECT 
-			@dblBucket8 = ISNULL(SUM(dblBucket8), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
-
-		SELECT 
-			@dblBucket9 = ISNULL(SUM(dblBucket9), 0)
-		FROM tblCMCashFlowReportSummaryDetail 
-		WHERE intCashFlowReportId = @intCashFlowReportId AND intCashFlowReportSummaryId IS NULL
+		WHERE 
+			intCashFlowReportId = @intCashFlowReportId
+			AND intCashFlowReportSummaryId IS NULL
+			AND strTransactionType NOT IN ('Bank Transfer With In transit (Deposit)', 'Bank Forward (Withdraw)', 'Bank Forward (Deposit)')
 
 		-- Insert sum of buckets to report summary table
 		INSERT INTO tblCMCashFlowReportSummary

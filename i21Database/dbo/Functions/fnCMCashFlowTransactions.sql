@@ -44,20 +44,13 @@ RETURN
         BTR.dblAmountForeignFrom * -1,
         BTR.intGLAccountIdFrom,
         NULL,
-        'Bank Transfer With In transit'
+        'Bank Transfer With In transit (Withdraw)'
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 2
         AND BTR.ysnPostedInTransit = 1
+        AND BTR.ysnPosted = 0
         AND BTR.intBankAccountIdFrom = @intBankAccountId
-        AND (CASE 
-                WHEN @dtmFrom IS NULL
-                    THEN CASE WHEN BTR.dtmDate <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
-                WHEN BTR.ysnPosted = 0 
-                    THEN 1
-                ELSE 0 
-            END
-        ) = 1
         AND 
         (CASE WHEN @dtmFrom IS NOT NULL
             THEN CASE WHEN (BTR.dtmDate BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
@@ -74,20 +67,13 @@ RETURN
         BTR.dblAmountForeignTo,
         BTR.intGLAccountIdTo,
         NULL,
-        'Bank Transfer With In transit'
+        'Bank Transfer With In transit (Deposit)'
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 2
         AND BTR.ysnPostedInTransit = 1
+        AND BTR.ysnPosted = 0
         AND BTR.intBankAccountIdTo = @intBankAccountId
-        AND (CASE 
-                WHEN @dtmFrom IS NULL
-                    THEN CASE WHEN BTR.dtmInTransit <= @dtmTo AND BTR.ysnPosted = 0 THEN 1 ELSE 0 END
-                WHEN BTR.ysnPosted = 0 
-                    THEN 1
-                ELSE 0 
-            END
-        ) = 1
         AND 
         (CASE WHEN @dtmFrom IS NOT NULL
             THEN CASE WHEN (BTR.dtmInTransit BETWEEN @dtmFrom AND @dtmTo) THEN 1 ELSE 0 END
@@ -104,7 +90,7 @@ RETURN
         BTR.dblAmountForeignFrom  * -1,
         BTR.intGLAccountIdFrom,
         NULL,
-        'Bank Forward'
+        'Bank Forward (Withdraw)'
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 3
@@ -134,7 +120,7 @@ RETURN
         BTR.dblAmountForeignTo,
         BTR.intGLAccountIdTo,
         NULL,
-        'Bank Forward'
+        'Bank Forward (Deposit)'
     FROM [dbo].[tblCMBankTransfer] BTR
     WHERE 
         BTR.intBankTransferTypeId = 3
