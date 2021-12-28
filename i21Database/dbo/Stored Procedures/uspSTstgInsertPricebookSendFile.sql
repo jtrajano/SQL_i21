@@ -389,7 +389,7 @@ BEGIN
 																								ORDER BY dtmEffectiveRetailPriceDate ASC) --Effective Retail Price
 																	ELSE Prc.dblSalePrice
 																END, 
-							[strITTDataMerchandiseCode]			= CatLoc.intRegisterDepartmentId,
+							[strITTDataMerchandiseCode]			= CatLoc.strCashRegisterDepartment,
 							[dblITTDataRegularSellPrice]		= CASE 
 																	WHEN (GETDATE() BETWEEN SplPrc.dtmBeginDate AND SplPrc.dtmEndDate)
 																		THEN SplPrc.dblUnitAfterDiscount 
@@ -1100,7 +1100,7 @@ BEGIN
 					, [strUpc]						=	PCF.strUPCwthOrwthOutCheckDigit -- IF COMMANDER/SAPPHIRE include check digit
 					, [strUpcModifier]				=	'000'
 					, [strDescription]				=	LEFT(  REPLACE(REPLACE(REPLACE(REPLACE(Item.strDescription, '''', ''), '"', ''), '/', ''), '\', '')   , 40) 
-					, [strDepartment]				=	CAST(CategoryLoc.intRegisterDepartmentId AS NVARCHAR(50))
+					, [strDepartment]				=	CAST(CategoryLoc.strCashRegisterDepartment AS NVARCHAR(50))
 					, [strFee]						=	CAST(ItemLoc.intBottleDepositNo AS NVARCHAR(10)) -- CAST(ISNULL(ItemLoc.intBottleDepositNo, '') AS NVARCHAR(10)) --'00'
 					, [strPCode]					=	ISNULL(StorePCode.strRegProdCode, '') -- ISNULL(StorePCode.strRegProdCode, '')
 					, [dblPrice]					=	ISNULL(CASE  WHEN GETDATE() BETWEEN spPrice.dtmBeginDate AND spPrice.dtmEndDate THEN spPrice.dblUnitAfterDiscount 

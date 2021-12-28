@@ -57,7 +57,7 @@ WHERE ItemPricing.intItemPricingId IS NOT NULL
 AND ItemUOM.intItemUOMId IS NOT NULL
 AND ST.intStoreId IS NOT NULL
 AND Item.intCategoryId IS NOT NULL
-AND CategoryLocation.intRegisterDepartmentId IS NOT NULL
+AND CategoryLocation.strCashRegisterDepartment IS NOT NULL
 
 --http://jira.irelyserver.com/browse/ST-1036
 --http://jira.irelyserver.com/browse/ST-2050
