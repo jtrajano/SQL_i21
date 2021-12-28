@@ -703,6 +703,16 @@ BEGIN
 			AND Charge.strCostMethod = @COST_METHOD_CUSTOM_UNIT
 			AND ChargeItem.intOnCostTypeId IS NULL
 
+	UPDATE	Charge
+	SET
+			dblAmount = ROUND(dbo.fnMultiply(Charge.dblQuantity, Charge.dblRate), 2)
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem ChargeItem 
+				ON ChargeItem.intItemId = Charge.intChargeId			
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND Charge.strCostMethod = @COST_METHOD_CUSTOM_UNIT
+			AND ChargeItem.intOnCostTypeId IS NULL
 END 
 
 
