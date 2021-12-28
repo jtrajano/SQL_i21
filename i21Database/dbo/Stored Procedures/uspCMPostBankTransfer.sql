@@ -987,7 +987,6 @@ BEGIN
                 SET  ysnPostedInTransit = @ysnPost  
                 ,intConcurrencyId += 1     
                 WHERE strTransactionId = @strTransactionId    
-
                 IF @intBankTransferTypeId = 5 AND @ysnPost = 1
                 BEGIN
                   UPDATE tblCMBankSwap SET ysnLockShort = 1 WHERE intBankSwapId = @intBankSwapId
@@ -1055,7 +1054,7 @@ BEGIN
     
     IF @ysnPost = 1   
     BEGIN    
-      IF  @ysnPostedInTransit = 1
+      IF  @ysnPostedInTransit = 1 OR @intBankTransferTypeId =2
 
 
 
@@ -1102,7 +1101,7 @@ BEGIN
               ,intCurrencyId        = intCurrencyId    
               ,intCurrencyExchangeRateTypeId  = intCurrencyExchangeRateTypeId
               ,dblExchangeRate      = dblExchangeRate
-              ,dtmDate            = dtmDate    
+              ,dtmDate            =ISNULL( @dtmAccrual, dtmDate)
               ,strPayee          = ''    
               ,intPayeeId         = NULL    
               ,strAddress         = ''    
@@ -1197,6 +1196,21 @@ BEGIN
       END    -- @ysnPost =1
     ELSE    
     BEGIN    
+      IF @intBankTransferTypeId = 2
+      BEGIN
+        IF @ysnPosted = 1
+          DELETE FROM tblCMBankTransaction    
+          WHERE strLink = @strTransactionId    
+          AND ysnClr = 0    
+          AND intBankTransactionTypeId IN (@BANK_TRANSFER_DEP)      
+        ELSE
+          DELETE FROM tblCMBankTransaction    
+          WHERE strLink = @strTransactionId    
+          AND ysnClr = 0    
+          AND intBankTransactionTypeId IN (@BANK_TRANSFER_WD)      
+
+      END
+      ELSE
       IF @ysnPostedInTransit = 1 --OR @intBankTransferTypeId = 1 --OR (@intBankTransferTypeId = 2 AND @ysnPosted = 1)  
       BEGIN  
         DELETE FROM tblCMBankTransaction    
