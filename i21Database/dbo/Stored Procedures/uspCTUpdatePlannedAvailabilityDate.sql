@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdatePlannedAvailabilityDate]
 	@intContractHeaderId int --> Contract Header ID
 	,@intContractDetailId int --> Contract Sequence ID
-	,@intUserId int = null --> Supply if you have as this will reflect in the audit log who change the date. If no value was supplied, this will use the last user that update/create the sequence.
 
 as
 
@@ -21,6 +20,7 @@ as
 		,@ysnCalculatePlannedAvailabilityDateForSale bit = 0
 		,@ysnCalculatePlannedAvailabilityDateForPurchase bit = 0
 		,@intPositionId int
+		,@intUserId int
 		;
 
 	begin try
@@ -30,8 +30,10 @@ as
 			,@intPositionId = isnull(ch.intPositionId,0)
 		from
 			tblCTContractHeader ch
+			join tblICCommodity co on co.intCommodityId = ch.intCommodityId
 		where
-			ch.intContractHeaderId = @intContractHeaderId;
+			ch.intContractHeaderId = @intContractHeaderId
+			and lower(ltrim(rtrim(co.strCommodityCode))) = 'coffee';
 	
 		select
 			@ysnCalculatePlannedAvailabilityDateForPurchase = isnull(ysnCalculatePlannedAvailabilityPurchase,0)
@@ -39,13 +41,12 @@ as
 		from
 			tblCTCompanyPreference
 
-		if (@intContractTypeId = 1 and @ysnCalculatePlannedAvailabilityDateForPurchase = 0) return;
-		if (@intContractTypeId = 2 and @ysnCalculatePlannedAvailabilityDateForSale = 0) return;
+		if (@intContractTypeId is null or (@intContractTypeId = 1 and @ysnCalculatePlannedAvailabilityDateForPurchase = 0)) return;
+		if (@intContractTypeId is null or (@intContractTypeId = 2 and @ysnCalculatePlannedAvailabilityDateForSale = 0)) return;
 
 		select
 			@dtmSequenceStartDate = cd.dtmStartDate
 			,@intContractSeq = cd.intContractSeq
-			,@intUserId = case when isnull(@intUserId,0) = 0 then isnull(cd.intLastModifiedById,cd.intCreatedById) else @intUserId end
 			,@dtmCurrentPlannedAvailabilityDate = cd.dtmPlannedAvailabilityDate
 			,@intLoadingPortLeadTime = isnull(l.intLeadTime,0)
 			,@intDestinationPortLeadTime = isnull(d.intLeadTime,0)
@@ -70,6 +71,9 @@ as
 
 		if (@dtmCalculatedPlannedAvailabilityDate <> @dtmCurrentPlannedAvailabilityDate)
 		begin
+			
+			select top 1 @intUserId = intEntityId from tblEMEntityCredential where lower(rtrim(ltrim(strUserName))) = 'irelyadmin';
+
 			update
 				tblCTContractDetail
 			set
