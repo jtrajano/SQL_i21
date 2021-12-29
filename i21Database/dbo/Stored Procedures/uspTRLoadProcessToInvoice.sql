@@ -156,6 +156,7 @@ BEGIN TRY
 		,ysnImpactInventory = CASE WHEN ISNULL(CustomerFreight.ysnFreightOnly, 0) = 1 THEN 0 ELSE 1 END
 		,strBOLNumberDetail  = DD.strBillOfLading
 		,ysnBlended = CASE WHEN BlendingIngredient.intLoadDistributionDetailId IS NULL THEN 0 ELSE 1 END
+		,dblMinimumUnits						= DD.dblMinimumUnits
 	INTO #tmpSourceTable
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadDistributionHeader DH ON DH.intLoadHeaderId = TL.intLoadHeaderId
@@ -702,7 +703,7 @@ BEGIN TRY
 		,[intOrderUOMId]						= @intFreightItemUOMId
 		,[intItemUOMId]							= @intFreightItemUOMId
 		,[dblQtyOrdered]						= IE.dblQtyOrdered
-		,[dblQtyShipped]						= IE.dblQtyShipped
+		,[dblQtyShipped]						= CASE WHEN IE.dblQtyShipped <= IE.dblMinimumUnits THEN IE.dblMinimumUnits ELSE IE.dblQtyShipped END
 		,[dblDiscount]							= 0
 		,[dblPrice]								= CASE WHEN ISNULL(IE.dblSurcharge,0) != 0 AND @ysnItemizeSurcharge = 0 THEN ISNULL(IE.[dblFreightRate],0) + (ISNULL(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
 													WHEN ISNULL(IE.dblSurcharge,0) = 0 OR @ysnItemizeSurcharge = 1  THEN ISNULL(IE.[dblFreightRate],0) END 
@@ -1280,7 +1281,7 @@ BEGIN TRY
 		,[ysnImpactInventory]
 		,[strBOLNumberDetail]
 
-	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable 
+	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice
