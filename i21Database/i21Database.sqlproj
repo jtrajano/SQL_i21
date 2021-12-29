@@ -195,6 +195,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessPriceFixationMultiplePrice.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixation.sql" />
     <Build Include="dbo\Views\vyuCTCombinePriceFixationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdatePlannedAvailabilityDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
