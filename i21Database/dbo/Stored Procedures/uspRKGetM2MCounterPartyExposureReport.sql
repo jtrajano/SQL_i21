@@ -379,7 +379,7 @@ BEGIN TRY
 		) b
 		GROUP BY a.intContractDetailId, a.strContractNumber, strPricingType, a.strContractType, b.intCounter
 		HAVING SUM(dblQty) > 0
-
+		
 		SELECT z.intContractHeaderId
 			, z.intContractDetailId
 			, z.dtmEndDate 
@@ -389,16 +389,22 @@ BEGIN TRY
 			, z.intQtyUOMId
 			, ysnFullyPriced = CAST(CASE WHEN ctd.intPricingTypeId = 1 AND pricingLatestDate.pricedCount = pricingByEndDate.pricedCount THEN 1
 						ELSE 0 END AS bit)
+			, intEntityId
+			, strEntityName
+			, intQtyCurrencyId
 		INTO #tempLatestContractDetails
 		FROM
 		(
 			SELECT 
 				intContractHeaderId
-				,intContractDetailId
-				,dtmEndDate 
-				,dblBasis
-				,dblFutures
-				,intQtyUOMId
+				, intContractDetailId
+				, dtmEndDate 
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, t.intEntityId
+				, strEntityName = EM.strName
+				, intQtyCurrencyId
 			FROM (
 				SELECT 
 					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dbo.fnRemoveTimeOnDate(CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END) DESC)
@@ -409,6 +415,7 @@ BEGIN TRY
 				AND CBL.strTransactionType = 'Contract Balance'
 				AND CBL.dblBasis IS NOT NULL
 			) t
+			LEFT JOIN tblEMEntity EM ON EM.intEntityId = t.intEntityId
 			WHERE intRowNum = 1
 		) z
 
@@ -501,10 +508,10 @@ BEGIN TRY
 				, strLocationName
 				, lcd.dtmEndDate
 				, dblQty = CAST(SUM(dblQuantity) AS NUMERIC(20, 6))
-				, dblFutures = CAST(lcd.dblFutures AS NUMERIC(20, 6))
+				, dblFutures = CAST((CASE WHEN intPricingTypeId = 1 OR intPricingTypeId = 3 THEN lcd.dblFutures ELSE 0 END) AS NUMERIC(20, 6))
 				, dblBasis = CAST(lcd.dblBasis AS NUMERIC(20, 6))	
 				, dblCashPrice = CAST (MAX(dblCashPrice) AS NUMERIC(20, 6))
-				, dblAmount = CAST ((SUM(dblQuantity) * (lcd.dblBasis + lcd.dblFutures)) AS NUMERIC(20, 6))
+				, dblAmount = CAST ((SUM(dblQuantity) * (lcd.dblBasis + (CASE WHEN intPricingTypeId = 1 OR intPricingTypeId = 3 THEN lcd.dblFutures ELSE 0 END))) AS NUMERIC(20, 6))
 				, lcd.intQtyUOMId
 				, intPricingTypeId
 				, intContractTypeId
@@ -513,12 +520,12 @@ BEGIN TRY
 				, strPricingType
 				, intCommodityUnitMeasureId = NULL
 				, tbl.intContractDetailId
-				, intEntityId
-				, intQtyCurrencyId
+				, lcd.intEntityId
+				, lcd.intQtyCurrencyId
 				, strType = strContractType + ' ' + strPricingType
 				, intItemId
 				, strItemNo
-				, strEntityName
+				, lcd.strEntityName
 				, strCustomerContract = ''
 				--, intFutureMarketId
 				--, intFutureMonthId
@@ -547,11 +554,11 @@ BEGIN TRY
 					, CBL.intLocationId
 					, strContractType = CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 					, PT.strPricingType
-					, CBL.intEntityId
-					, CBL.intQtyCurrencyId
+					--, CBL.intEntityId
+					--, CBL.intQtyCurrencyId
 					, CBL.intItemId
 					, strItemNo
-					, strEntityName = EM.strName
+					--, strEntityName = EM.strName
 					--, CBL.intFutureMarketId
 					--, CBL.intFutureMonthId
 					, stat.strPricingStatus
@@ -1274,7 +1281,9 @@ BEGIN TRY
 							WHERE pfh.intPriceFixationId = pfdi.intPriceFixationId
 							AND pfdi.dtmFixationDate <= @dtmEndDate
 						) pricedTotal
-					WHERE intContractDetailId = cd.intContractDetailId
+					WHERE (cd.ysnMultiplePriceFixation = 1 AND intContractHeaderId = cd.intContractHeaderId 
+							OR intContractDetailId = cd.intContractDetailId
+						   )
 						AND (   
 								-- Basis (Partially Priced) Priced Record
 								(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
@@ -2641,7 +2650,7 @@ BEGIN TRY
 					, e.intEntityId
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 														WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 														ELSE strPriOrNotPriOrParPriced END)
@@ -2719,7 +2728,7 @@ BEGIN TRY
 					, intEntityId = ISNULL(fd.intProducerId, fd.intEntityId)
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 							WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 							ELSE strPriOrNotPriOrParPriced END)

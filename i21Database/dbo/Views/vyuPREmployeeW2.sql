@@ -55,10 +55,14 @@ SELECT
 	,[W2].dblTaxableLocal2		/* box 18_line_2 */
 	,[W2].dblLocalTax2			/* box 19_line_2 */
 	,[W2].strLocality2			/* box 20_line_2 */
+	,[EM2].strEmail
+	,[EM2].strEmail2
 FROM
 	tblPREmployeeW2 [W2]
 	INNER JOIN tblPREmployee [EMP] ON [W2].intEntityEmployeeId = [EMP].[intEntityId]
 	INNER JOIN tblEMEntity [EM] ON [EM].intEntityId = [EMP].[intEntityId]
+	INNER JOIN tblEMEntityToContact [EC] ON [EC].intEntityId = [EM].intEntityId
+	INNER JOIN tblEMEntity [EM2] ON [EM2].intEntityId = [EC].intEntityContactId
 	INNER JOIN tblEMEntityLocation [EML] ON [EM].intEntityId = [EML].intEntityId AND [EML].ysnDefaultLocation = 1
 	OUTER APPLY (SELECT TOP 1 * FROM tblSMCompanySetup) [COM]
 GO

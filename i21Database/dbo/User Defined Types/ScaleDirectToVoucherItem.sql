@@ -30,5 +30,6 @@ CREATE TYPE [dbo].ScaleDirectToVoucherItem AS TABLE
 		,[intStorageScheduleTypeId]		INT				NULL
 		,intUnitItemUOMId				INT				NULL
 		,intTicketDistributionAllocationId INT NULL
+		,intPriceFixationDetailId		INT NULL
 )
 

@@ -56,17 +56,7 @@ FROM
 	tblICEdiPricebook p
 WHERE 
 	p.strUniqueId = @UniqueId
-
--- Clean the UPC codes 
-UPDATE p
-SET 
-	p.strSellingUpcNumber = NULLIF(NULLIF(LTRIM(RTRIM(strSellingUpcNumber)), ''), '0') 
-	,p.strOrderCaseUpcNumber = NULLIF(NULLIF(LTRIM(RTRIM(strOrderCaseUpcNumber)), ''), '0') 
-FROM 
-	tblICEdiPricebook p
-WHERE 
-	p.strUniqueId = @UniqueId
-
+	
 -- Remove the duplicate records in tblICEdiPricebook
 ;WITH deleteDuplicate_CTE (
 	intEdiPricebookId
@@ -206,6 +196,7 @@ IF OBJECT_ID('tempdb..#tmpICEdiImportPricebook_tblICItemSpecialPricing') IS NULL
 	)
 ;
 
+	   
 -------------------------------------------------
 -- BEGIN Validation 
 -------------------------------------------------
@@ -946,10 +937,7 @@ FROM
 			tblICItemUOM iu
 		WHERE
 			iu.intItemId = i.intItemId
-			AND (
-				iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
-				OR iu.strLongUPCCode = NULLIF(p.strOrderCaseUpcNumber, '0') 
-			)
+			AND iu.intUnitMeasureId = COALESCE(m.intUnitMeasureId, s.intUnitMeasureId)
 	) existUOM
 	OUTER APPLY (
 		SELECT TOP 1 
@@ -1012,6 +1000,30 @@ WHERE
 	AND NULLIF(p.strProductFamily, '') IS NOT NULL 
 
 SET @insertedFamilyClass = ISNULL(@insertedFamilyClass, 0) + @@ROWCOUNT;
+
+-- Check if import is for all locations
+DECLARE @ValidLocations UdtCompanyLocations 
+IF EXISTS (SELECT TOP 1 1 FROM @Locations WHERE intCompanyLocationId = -1) 
+BEGIN 
+	INSERT INTO @ValidLocations (
+		intCompanyLocationId
+	) 
+	SELECT 
+		ss.intCompanyLocationId
+	FROM	
+		tblSTStore ss INNER JOIN tblSMCompanyLocation cl  
+			ON ss.intCompanyLocationId = cl.intCompanyLocationId
+END 
+ELSE
+BEGIN 
+	INSERT INTO @ValidLocations (
+		intCompanyLocationId
+	) 
+	SELECT 
+		intCompanyLocationId
+	FROM	
+		@Locations
+END 
 
 -- Upsert the Item Location 
 INSERT INTO #tmpICEdiImportPricebook_tblICItemLocation (
@@ -1098,7 +1110,7 @@ FROM (
 					SELECT 
 						loc.intCompanyLocationId 					
 					FROM 						
-						@Locations loc INNER JOIN tblSMCompanyLocation cl 
+						@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 							ON loc.intCompanyLocationId = cl.intCompanyLocationId
 				) loc
 				OUTER APPLY (
@@ -1498,7 +1510,7 @@ FROM (
 					loc.intCompanyLocationId 
 					,l.*
 				FROM 						
-					@Locations loc INNER JOIN tblSMCompanyLocation cl 
+					@ValidLocations loc INNER JOIN tblSMCompanyLocation cl 
 						ON loc.intCompanyLocationId = cl.intCompanyLocationId
 					INNER JOIN tblICItemLocation l 
 						ON l.intItemId = i.intItemId
@@ -1652,7 +1664,7 @@ FROM (
 					loc.intCompanyLocationId 
 					,l.*
 				FROM 						
-					@Locations loc INNER JOIN tblICItemLocation l 
+					@ValidLocations loc INNER JOIN tblICItemLocation l 
 						ON l.intItemId = i.intItemId
 						AND loc.intCompanyLocationId = l.intLocationId
 			) il

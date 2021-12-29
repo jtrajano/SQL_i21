@@ -241,7 +241,7 @@ BEGIN TRY
 			,@strFuturesMonth = FMO.strFutureMonth
 			,@intNoOfLots = ISNULL(CONVERT(INT, CD.dblNoOfLots), 0)
 			,@dblFuturesPrice = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, @intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblFutures, NULL), 0))
-			,@dblFXRate = ISNULL(CD.dblRate, 0)
+			,@dblFXRate = ISNULL(CD.dblRate, 1)
 			,@strFXCurrency = C.strCurrency
 			,@strRefFuturesMarket = RFM.strFutMarketName
 			,@strRefFuturesMonth = RFMO.strFutureMonth

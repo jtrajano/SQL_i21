@@ -52,6 +52,7 @@ Type the overview for the table here.
 						CAST(NULL AS BIGINT) 
 				END
 			) PERSISTED,
+        [guiApiUniqueId] UNIQUEIDENTIFIER NULL,
 		CONSTRAINT [PK_tblICItemUOM] PRIMARY KEY ([intItemUOMId]), 
 		CONSTRAINT [FK_tblICItemUOM_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICItemUOM_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
@@ -63,25 +64,14 @@ Type the overview for the table here.
 	)
 	GO
 
-	--	CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId_intUnitMeasureId_intItemId]
-	--	ON [dbo].[tblICItemUOM]([intItemUOMId] ASC, [intUnitMeasureId] ASC, [intItemId] ASC);
-	--GO
-		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemUOMId]
-		ON [dbo].[tblICItemUOM]([intItemUOMId] ASC)
-		INCLUDE(intUnitMeasureId, intItemId, ysnStockUnit, dblUnitQty); 
-	GO
 		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intUnitMeasureId]
-		ON [dbo].[tblICItemUOM]([intUnitMeasureId] ASC)
-		INCLUDE(intItemId, intItemUOMId, ysnStockUnit, dblUnitQty); 
-	GO
-		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemId]
-		ON [dbo].[tblICItemUOM]([intItemId] ASC)
-		INCLUDE(intUnitMeasureId, intItemUOMId, ysnStockUnit, dblUnitQty); 
+		ON [dbo].[tblICItemUOM]([intUnitMeasureId] ASC, [intItemId] ASC, ysnStockUnit ASC)
+		INCLUDE (dblUnitQty); 
 	GO
 
-		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemId_ysnStockUnit]
-		ON [dbo].[tblICItemUOM]([intItemId] ASC, [ysnStockUnit] ASC)
-		INCLUDE(intUnitMeasureId, intItemUOMId, dblUnitQty); 
+		CREATE NONCLUSTERED INDEX [IX_tblICItemUOM_intItemId]
+		ON [dbo].[tblICItemUOM]([intItemId] ASC, intUnitMeasureId ASC, ysnStockUnit ASC)
+		INCLUDE (dblUnitQty); 
 	GO
 
 		CREATE UNIQUE NONCLUSTERED INDEX [AK_tblICItemUOM_strUpcCode]

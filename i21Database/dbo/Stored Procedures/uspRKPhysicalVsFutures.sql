@@ -74,7 +74,7 @@ SELECT
 	  intRowNumber = 9999990 + ROW_NUMBER() OVER (ORDER BY BUY.strInternalTradeNo) 
 	, strContractNumber = NULL
 	, strContractType = NULL
-	, dblContractLots = 0 
+	, dblContractLots = NULL
 	, strPONumber = NULL
 	, strStartDate = NULL
 	, strEndDate = NULL

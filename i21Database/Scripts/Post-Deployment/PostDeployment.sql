@@ -549,6 +549,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\22_FileFieldMapping_Passport_ITT.sql
 :r .\ST\23_FileFieldMapping_Passport_ILT.sql
 :r .\ST\24_FileFieldMapping_Passport_MMT.sql
+:r .\ST\39_FileFieldMapping_Passport_TPM.sql
+:r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
 :r .\ST\25_DataFix.sql
 :r .\ST\26_FileFieldMapping_Commander_Department.sql
 :r .\ST\27_FileFieldMapping_Commander_FPHose.sql
@@ -559,10 +561,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\ST\32_FileFieldMapping_Commander_uMaintenance_ItemList.sql
 :r .\ST\33_FileFieldMapping_Commander_uMaintenance_Combo.sql
 :r .\ST\34_FileFieldMapping_Commander_uMaintenance_MixMatch.sql
+:r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
 :r .\ST\35_RegisterSetupEntries.sql
 :r .\ST\36_CStoreSQLJobScheduler.sql
-:r .\ST\37_FileFieldMapping_Passport_CPJR_340.sql
-:r .\ST\38_FileFieldMapping_Commander_NetworkCards.sql
 
 
 

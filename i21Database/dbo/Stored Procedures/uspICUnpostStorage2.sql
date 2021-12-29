@@ -257,6 +257,12 @@ BEGIN
 			,[intCostingMethod]
 			,[intForexRateTypeId]
 			,[dblForexRate]
+			,[intCompanyId]
+			,[intSourceEntityId]
+			,[strSourceType]
+			,[strSourceNumber]
+			,[strBOLNumber]
+			,[intTicketId]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -289,6 +295,12 @@ BEGIN
 			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 			,[intForexRateTypeId]					= ActualTransaction.intForexRateTypeId
 			,[dblForexRate]							= ActualTransaction.dblForexRate
+			,[intCompanyId]							= ActualTransaction.intCompanyId
+			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
+			,[strSourceType]						= ActualTransaction.strSourceType
+			,[strSourceNumber]						= ActualTransaction.strSourceNumber
+			,[strBOLNumber]							= ActualTransaction.strBOLNumber
+			,[intTicketId]							= ActualTransaction.intTicketId
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionStorageId = ActualTransaction.intInventoryTransactionStorageId
 	
@@ -318,6 +330,13 @@ BEGIN
 		,[dtmCreated] 
 		,[intCreatedEntityId] 
 		,[intConcurrencyId] 
+		,[intCompanyId]
+		,[intSourceEntityId]
+		,[strSourceType]
+		,[strSourceNumber]
+		,[strBOLNumber]
+		,[intTicketId]
+
 	)
 	SELECT	[intItemId]					= ActualTransaction.intItemId
 			,[intLotId]					= ActualTransaction.intLotId
@@ -340,6 +359,12 @@ BEGIN
 			,[dtmCreated]				= GETDATE()
 			,[intCreatedEntityId]			= @intEntityUserSecurityId
 			,[intConcurrencyId]			= 1
+			,[intCompanyId]				= ActualTransaction.intCompanyId
+			,[intSourceEntityId]		= ActualTransaction.intSourceEntityId
+			,[strSourceType]			= ActualTransaction.strSourceType
+			,[strSourceNumber]			= ActualTransaction.strSourceNumber
+			,[strBOLNumber]				= ActualTransaction.strBOLNumber
+			,[intTicketId]				= ActualTransaction.intTicketId
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionStorage ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionStorageId = ActualTransaction.intInventoryTransactionStorageId
 				AND ActualTransaction.intLotId IS NOT NULL 

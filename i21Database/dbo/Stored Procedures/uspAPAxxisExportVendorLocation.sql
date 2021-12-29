@@ -21,7 +21,8 @@ CREATE TABLE tmpAxxisVendorLocation(
 		strLocationName NVARCHAR (200) COLLATE Latin1_General_CI_AS,
 		strPrintedName NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 		strShipVia NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-		strTerminalNo NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL
+		strTerminalNo NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
+		ysnActive BIT
 	)
 
 IF OBJECT_ID(N'tempdb..#tmpModifiedFields') IS NOT NULL DROP TABLE #tmpModifiedFields
@@ -55,7 +56,7 @@ FROM tmp
 
 -- SELECT * FROM @tblFields
 
-IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strLocationName','strCheckPayeeName','strShipVia')) 
+IF NOT EXISTS(SELECT 1 FROM @tblFields WHERE strField IN ('strLocationName','strCheckPayeeName','strShipVia','strTerminalNo','ysnActive')) 
 BEGIN
 	RETURN;
 END
@@ -66,13 +67,15 @@ BEGIN
 		strLocationName,
 		strPrintedName,
 		strShipVia,
-		strTerminalNo
+		strTerminalNo,
+		ysnActive
 	)
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
 		C.strShipVia,
-		E.strTerminalControlNumber AS strTerminalNo
+		E.strTerminalControlNumber AS strTerminalNo,
+		B.ysnActive
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId
@@ -87,13 +90,15 @@ BEGIN
 		strLocationName,
 		strPrintedName,
 		strShipVia,
-		strTerminalNo
+		strTerminalNo,
+		ysnActive
 	)
 	SELECT
 		B.strLocationName,
 		B.strCheckPayeeName AS strPrintedName,
 		C.strShipVia,
-		E.strTerminalControlNumber AS strTerminalNo
+		E.strTerminalControlNumber AS strTerminalNo,
+		B.ysnActive
 	FROM tblAPVendor A
 	INNER JOIN tblEMEntityLocation B ON A.intEntityId = B.intEntityId
 	INNER JOIN tblTRSupplyPoint D ON B.intEntityLocationId = D.intEntityLocationId

@@ -263,7 +263,6 @@ BEGIN TRY
 					--SET strERPTransferOrderNo = @ERPReferenceNo
 					--WHERE intInventoryReceiptId = @intInventoryReceiptId
 					--	AND ISNULL(intStatusId, 1) = 1
-
 					INSERT INTO @tblMessage (
 						strMessageType
 						,strMessage
@@ -384,10 +383,14 @@ BEGIN TRY
 						,strMessage = @StatusText
 					WHERE intWorkOrderPreStageId = @TrxSequenceNo
 
-					UPDATE tblMFWorkOrder
-					SET strERPOrderNo = @ERPShopOrderNo
-						,intConcurrencyId = intConcurrencyId + 1
-					WHERE intWorkOrderId = @intWorkOrderId
+					IF @ERPShopOrderNo IS NOT NULL
+					BEGIN
+						UPDATE tblMFWorkOrder
+						SET strERPOrderNo = @ERPShopOrderNo
+							,strReferenceNo = @ERPShopOrderNo
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intWorkOrderId = @intWorkOrderId
+					END
 
 					INSERT INTO @tblMessage (
 						strMessageType

@@ -2,7 +2,8 @@
 CREATE PROCEDURE uspCMReconcileBankRecords
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL,
-	@intUserId AS INT
+	@intUserId AS INT,
+	@dtmDateEntered AS DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF

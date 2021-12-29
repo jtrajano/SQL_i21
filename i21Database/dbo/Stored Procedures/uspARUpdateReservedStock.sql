@@ -20,6 +20,8 @@ SELECT @TransactionTypeId = [intTransactionTypeId]
 FROM dbo.tblICInventoryTransactionType 
 WHERE [strName] = 'Invoice'
 
+SELECT  @FromPosting = CASE WHEN  @Post = 1 THEN 1 ELSE 0 END
+
 DECLARE @items ItemReservationTableType
 
 INSERT INTO @items (												
@@ -143,17 +145,20 @@ WHERE ISNULL(@FromPosting, 0 ) = 0
 				
 		)
 			
-IF (ISNULL(@FromPosting, 0 ) = 0)
+IF (ISNULL(@FromPosting, 0 ) = 0) 
 	BEGIN		
 		DECLARE @strInvalidItemNo AS NVARCHAR(50) 		
 		DECLARE @intInvalidItemId AS INT
 		DECLARE @intReturn AS INT
 		SET  @intReturn = 0 
 		
+		IF @Post = 1
+		BEGIN
 		-- Validate the reservation 
 		EXEC @intReturn = dbo.uspICValidateStockReserves @items
 														,@strInvalidItemNo OUTPUT 
-														,@intInvalidItemId OUTPUT 
+														,@intInvalidItemId OUTPUT
+		END
 
 		IF @intReturn <> 0 
 			RETURN @intReturn

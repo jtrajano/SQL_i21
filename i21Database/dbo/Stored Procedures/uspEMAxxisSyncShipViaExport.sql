@@ -5,7 +5,7 @@ BEGIN
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET ANSI_WARNINGS OFF
-
+	
 	IF OBJECT_ID(N'tmpSMShipVia') IS NOT NULL DROP TABLE tmpSMShipVia
 	IF OBJECT_ID(N'tmpSMShipViaTrailer') IS NOT NULL DROP TABLE tmpSMShipViaTrailer
 	IF OBJECT_ID(N'tmpSMShipViaTruck') IS NOT NULL DROP TABLE tmpSMShipViaTruck
@@ -29,7 +29,8 @@ BEGIN
 		ISNULL(B.strInternalNotes, '') AS strInternalNotes,
 		ISNULL(A.strShipVia, '') AS strShipVia,
 		ISNULL(A.strFederalId, '') AS strFederalId,
-		CONVERT(NVARCHAR(10), ISNULL(A.ysnCompanyOwnedCarrier, '')) COLLATE Latin1_General_CI_AS AS ysnCompanyOwnedCarrier
+		CONVERT(NVARCHAR(10), ISNULL(A.ysnCompanyOwnedCarrier, '')) COLLATE Latin1_General_CI_AS AS ysnCompanyOwnedCarrier,
+		CONVERT(NVARCHAR(10), ISNULL(B.ysnActive, '')) COLLATE Latin1_General_CI_AS AS ysnActive
 	INTO tmpSMShipVia
 	FROM tblSMShipVia A
 	INNER JOIN tblEMEntity B ON A.intEntityId = B.intEntityId
@@ -46,14 +47,16 @@ BEGIN
 			   shipVia.strEmail = (SELECT ISNULL(strEmail, '') FROM tblEMEntity WHERE intEntityId = contact.intEntityContactId),
 			   shipVia.strPhone = (SELECT ISNULL(strPhone, '') FROM tblEMEntity WHERE intEntityId = contact.intEntityContactId);
 
-	SELECT 'TR' AS HDCode, 
+	SELECT  B.intEntityId,
+			'TR' AS HDCode, 
 			ISNULL(B.strShipVia, '') AS strShipVia, 
 			ISNULL(A.strTruckNumber, '') AS strTruckNumber 
 	INTO tmpSMShipViaTruck 
 	FROM tblSMShipViaTruck A
 	INNER JOIN tblSMShipVia B ON A.intEntityShipViaId = B.intEntityId
 
-	SELECT 'TL' AS HDCode, 
+	SELECT B.intEntityId,
+			'TL' AS HDCode, 
 			ISNULL(B.strShipVia, '') AS strShipVia, 
 			ISNULL(A.strTrailerNumber, '') AS strTrailerNumber, 
 			ISNULL(A.strTrailerDescription, '') AS strTrailerDescription
@@ -79,7 +82,8 @@ BEGIN
 		   strInternalNotes AS InternalNotes,
 		   strShipVia AS ShipVia,
 		   strFederalId AS FederalID,
-		   ysnCompanyOwnedCarrier AS CompanyOwned
+		   ysnCompanyOwnedCarrier AS CompanyOwned,
+		   ysnActive AS Active
 	FROM tmpSMShipVia
 	SELECT HDCode, strShipVia AS ShipVia, strTruckNumber AS TruckNumber FROM tmpSMShipViaTruck
 	SELECT HDCode, strShipVia AS ShipVia, strTrailerNumber AS TrailerNumber, strTrailerDescription AS TrailerDescription FROM tmpSMShipViaTrailer

@@ -221,6 +221,7 @@ BEGIN
 						,intMinimumAge_Original INT NULL 
 						,dblMinOrder_Original NUMERIC(18, 6) NULL 
 						,dblSuggestedQty_Original NUMERIC(18, 6) NULL
+						,strStorageUnitNo_Original NVARCHAR(1000) NULL
 						,intCountGroupId_Original INT NULL 
 						,intStorageLocationId_Original INT NULL 
 						,dblReorderPoint_Original NUMERIC(18, 6) NULL
@@ -253,6 +254,7 @@ BEGIN
 						,intMinimumAge_New INT NULL 
 						,dblMinOrder_New NUMERIC(18, 6) NULL 
 						,dblSuggestedQty_New NUMERIC(18, 6) NULL
+						,strStorageUnitNo_New NVARCHAR(1000) NULL
 						,intCountGroupId_New INT NULL 
 						,intStorageLocationId_New INT NULL 
 						,dblReorderPoint_New NUMERIC(18, 6) NULL
@@ -333,13 +335,18 @@ BEGIN
 						-- [END] - PREVIEW IF DEBUG (ITEM)
 						-- ===============================================@strUpcCode @strLongUpcCode
 						
-						IF LEN(@strUpcCode) < 4 OR  LEN(@strLongUpcCode) < 6
-							BEGIN
-							SET @ysnResultSuccess = 0
-							SET @strResultMessage = 'Error updating Item: Short UPC Code or UPC Code is in wrong format'  
+						--IF LEN(@strUpcCode) < 4 OR  LEN(@strLongUpcCode) < 6
+						--	BEGIN
+						--	SET @ysnResultSuccess = 0
+						--	SET @strResultMessage = 'Error updating Item: Short UPC Code or UPC Code is in wrong format'  
 
-							GOTO ExitWithRollback
-							END
+						--	GOTO ExitWithRollback
+						--	END
+
+						SET @strUpcCode = CASE WHEN @strUpcCode = '' 
+												THEN NULL
+											ELSE @strUpcCode
+											END
 
 						IF EXISTS (SELECT TOP 1 intItemId FROM tblICItemUOM WHERE intItemId != @intItemId AND (strUpcCode = @strUpcCode OR strLongUPCCode = @strLongUpcCode))
 							BEGIN

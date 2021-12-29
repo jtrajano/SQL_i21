@@ -386,6 +386,7 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,strActualCostId
+				,intTicketId 
 		) 
 		SELECT	Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
@@ -405,6 +406,7 @@ BEGIN
 				,Detail.intFromSubLocationId
 				,Detail.intFromStorageLocationId
 				,strActualCostId = Detail.strFromLocationActualCostId
+				,intTicketId = CASE WHEN Header.intSourceType = 1 THEN Detail.intSourceId ELSE NULL END
 		FROM tblICInventoryTransferDetail Detail 
 			INNER JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 			INNER JOIN tblICInventoryTransfer Header ON Header.intInventoryTransferId = Detail.intInventoryTransferId
@@ -418,6 +420,20 @@ BEGIN
 		WHERE Header.intInventoryTransferId = @intTransactionId
 			AND Item.strType <> 'Comment'
 			AND Detail.intOwnershipType = @ownershipType_Own
+
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@CompanyOwnedStock i INNER JOIN vyuICGetInventoryTransferDetail v
+					ON i.intTransactionDetailId = v.intInventoryTransferDetailId
+					AND i.intTransactionId = v.intInventoryTransferId
+			WHERE
+				v.strSourceType <> 'None'
+		END 
 
 		DECLARE @StorageOwnedStock AS ItemCostingTableType  
 		-- COMMENT OUT THIS CODE. IT IS ILLEGAL TO TRANSFER STOCK FROM CUSTOMER-OWNED STOCKS. SEE IC-9816
@@ -579,6 +595,7 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 				,strActualCostId
+				,intTicketId
 		) 
 		SELECT Detail.intItemId
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intToLocationId)
@@ -598,6 +615,7 @@ BEGIN
 				,Detail.intToSubLocationId
 				,Detail.intToStorageLocationId
 				,strActualCostId = Detail.strToLocationActualCostId
+				,intTicketId = CASE WHEN Header.intSourceType = 1 THEN Detail.intSourceId ELSE NULL END
 		FROM	tblICInventoryTransfer Header INNER JOIN tblICInventoryTransferDetail Detail 
 					ON Header.intInventoryTransferId = Detail.intInventoryTransferId
 				INNER JOIN tblICItem Item 
@@ -617,6 +635,20 @@ BEGIN
 			AND Item.strType <> 'Comment'
 			AND Header.intInventoryTransferId = @intTransactionId
 			AND Detail.intOwnershipType = @ownershipType_Own
+
+		-- Update the @ItemsForPost for source type and source no.
+		BEGIN
+			UPDATE i
+			SET
+				i.strSourceType = v.strSourceType
+				,i.strSourceNumber = v.strSourceNumber			
+			FROM 
+				@TransferCompanyOwnedStock i INNER JOIN vyuICGetInventoryTransferDetail v
+					ON i.intTransactionDetailId = v.intInventoryTransferDetailId
+					AND i.intTransactionId = v.intInventoryTransferId
+			WHERE
+				v.strSourceType <> 'None'
+		END 
 
 		DECLARE @TransferStoragetock AS ItemCostingTableType  
 		-- COMMENT OUT THIS CODE. IT IS ILLEGAL TO TRANSFER STOCK FROM CUSTOMER-OWNED STOCKS. SEE IC-9816
@@ -749,6 +781,9 @@ BEGIN
 				,[intForexRateTypeId]
 				,[dblForexRate]
 				,[intSourceEntityId]
+				,[intTicketId]
+				,[strSourceType]
+				,[strSourceNumber]
 		)
 		SELECT
 				[intItemId] 
@@ -775,6 +810,9 @@ BEGIN
 				,[intForexRateTypeId] = FromStock.intForexRateTypeId
 				,[dblForexRate] = FromStock.dblForexRate
 				,[intSourceEntityId]
+				,[intTicketId]
+				,[strSourceType]
+				,[strSourceNumber]
 		FROM	tblICInventoryTransaction FromStock 
 		WHERE	FromStock.strTransactionId = @strTransactionId
 				AND ISNULL(FromStock.ysnIsUnposted, 0) = 0 

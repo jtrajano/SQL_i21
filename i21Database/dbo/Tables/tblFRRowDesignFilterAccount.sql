@@ -12,3 +12,8 @@
     CONSTRAINT [PK_tblFRRowDesignFilterAccount] PRIMARY KEY CLUSTERED ([intRowFilterAccountId] ASC),
     CONSTRAINT [FK_tblFRRowDesign_tblFRRowDesignFilterAccount] FOREIGN KEY([intRowDetailId]) REFERENCES [dbo].[tblFRRowDesign] ([intRowDetailId]) ON DELETE CASCADE
 );
+GO
+CREATE NONCLUSTERED INDEX [IX_tblFRRowDesignFilterAccount_intRowId] ON [dbo].[tblFRRowDesignFilterAccount] ([intRowId] asc)
+
+GO
+CREATE NONCLUSTERED INDEX [IX_tblFRRowDesignFilterAccount_intRowDetailId] ON [dbo].[tblFRRowDesignFilterAccount] ([intRowDetailId] asc)

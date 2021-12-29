@@ -10,3 +10,8 @@ CREATE TABLE tblGRSettleContractPriceFixationDetail
 	,CONSTRAINT [PK_tblGRSettleContractPriceFixationDetail_intSettleContractPriceFixationDetailId] PRIMARY KEY ([intSettleContractPriceFixationDetailId])
 	,CONSTRAINT [FK_tblGRSettleContractPriceFixationDetail_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].[tblGRSettleStorage] ([intSettleStorageId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX IX_tblGRSettleContractPriceFixationDetail_intPriceFixationDetailId
+	ON tblGRSettleContractPriceFixationDetail (intPriceFixationDetailId ASC);
+GO

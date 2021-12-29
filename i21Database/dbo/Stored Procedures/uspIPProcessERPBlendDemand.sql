@@ -35,6 +35,8 @@ BEGIN TRY
 		,@dtmCreated DATETIME
 		,@strStorageLocation NVARCHAR(50)
 		,@strDemandType NVARCHAR(50)
+		,@intCounter INT = 1
+		,@intLineTrxSequenceNo BIGINT
 
 	SELECT @intBendDemandStageId = MIN(intBendDemandStageId)
 	FROM tblIPBendDemandStage
@@ -42,6 +44,11 @@ BEGIN TRY
 	SELECT @strInfo1 = ''
 
 	SELECT @strInfo2 = ''
+
+	if @intBendDemandStageId is null
+	Begin
+		Return
+	End
 
 	WHILE @intBendDemandStageId IS NOT NULL
 	BEGIN
@@ -58,7 +65,8 @@ BEGIN TRY
 				,@strWorkCenter = NULL
 				,@dtmDueDate = NULL
 				,@strMachine = NULL
-				,@strDemandType =NULL
+				,@strDemandType = NULL
+				,@intLineTrxSequenceNo = NULL
 
 			SELECT @strCompanyLocation = strCompanyLocation
 				,@intActionId = intActionId
@@ -72,18 +80,19 @@ BEGIN TRY
 				,@strWorkCenter = strWorkCenter
 				,@dtmDueDate = dtmDueDate
 				,@strMachine = strMachine
-				,@strDemandType=strDemandType
+				,@strDemandType = strDemandType
 				,@intTrxSequenceNo = intTrxSequenceNo
+				,@intLineTrxSequenceNo = intLineTrxSequenceNo
 			FROM dbo.tblIPBendDemandStage
 			WHERE intBendDemandStageId = @intBendDemandStageId
 
 			IF EXISTS (
 					SELECT 1
 					FROM dbo.tblIPBendDemandArchive
-					WHERE intTrxSequenceNo = @intTrxSequenceNo
+					WHERE intLineTrxSequenceNo = @intLineTrxSequenceNo
 					)
 			BEGIN
-				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intTrxSequenceNo) + ' is already processed in i21.'
+				SELECT @strError = 'TrxSequenceNo ' + ltrim(@intLineTrxSequenceNo) + ' is already processed in i21.'
 
 				RAISERROR (
 						@strError
@@ -103,9 +112,13 @@ BEGIN TRY
 				FROM dbo.tblSMUserSecurity WITH (NOLOCK)
 				WHERE strUserName = 'IRELYADMIN'
 
+			SELECT @intLocationId = NULL
+
 			SELECT @intLocationId = intCompanyLocationId
 			FROM dbo.tblSMCompanyLocation
 			WHERE strLotOrigin = @strCompanyLocation
+
+			SELECT @intCompanyLocationSubLocationId = NULL
 
 			SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
 			FROM dbo.tblSMCompanyLocationSubLocation
@@ -211,13 +224,24 @@ BEGIN TRY
 
 			IF @intManufacturingCellId IS NULL
 			BEGIN
-				SELECT @strError = 'Manufacturing Cell ' + @strWorkCenter + ' is not availble in i21.'
+				--SELECT @strError = 'Manufacturing Cell ' + @strWorkCenter + ' is not availble in i21.'
+				--RAISERROR (
+				--		@strError
+				--		,16
+				--		,1
+				--		)
+				INSERT INTO tblMFManufacturingCell (
+					strCellName
+					,strDescription
+					,intSubLocationId
+					,intLocationId
+					)
+				SELECT @strWorkCenter
+					,@strWorkCenter
+					,@intCompanyLocationSubLocationId
+					,@intLocationId
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
+				SELECT @intManufacturingCellId = SCOPE_IDENTITY()
 			END
 
 			IF @strMachine = ''
@@ -241,16 +265,36 @@ BEGIN TRY
 
 			IF @intMachineId IS NULL
 			BEGIN
-				SELECT @strError = 'Machine ' + @strMachine + ' is not availble in i21.'
+				--SELECT @strError = 'Machine ' + @strMachine + ' is not availble in i21.'
+				--RAISERROR (
+				--		@strError
+				--		,16
+				--		,1
+				--		)
+				INSERT INTO tblMFMachine (
+					strName
+					,strDescription
+					,intSubLocationId
+					,intLocationId
+					)
+				SELECT @strMachine
+					,@strMachine
+					,@intCompanyLocationSubLocationId
+					,@intLocationId
 
-				RAISERROR (
-						@strError
-						,16
-						,1
-						)
+				SELECT @intMachineId = SCOPE_IDENTITY()
 			END
 
 			BEGIN TRAN
+
+			IF @intCounter = 1
+			BEGIN
+				DELETE
+				FROM dbo.tblMFBlendDemand
+				WHERE intLocationId = @intLocationId
+
+				SELECT @intCounter = @intCounter + 1
+			END
 
 			INSERT INTO dbo.tblMFBlendDemand (
 				strDemandNo
@@ -291,23 +335,22 @@ BEGIN TRY
 
 			MOVE_TO_ARCHIVE:
 
-			INSERT INTO dbo.tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT @intTrxSequenceNo
-				,@strCompanyLocation
-				,@dtmCreatedDate
-				,@strCreatedBy
-				,10 AS intMessageTypeId
-				,1 AS intStatusId
-				,'Success' AS strStatusText
-
+			--INSERT INTO dbo.tblIPInitialAck (
+			--	intTrxSequenceNo
+			--	,strCompanyLocation
+			--	,dtmCreatedDate
+			--	,strCreatedBy
+			--	,intMessageTypeId
+			--	,intStatusId
+			--	,strStatusText
+			--	)
+			--SELECT @intTrxSequenceNo
+			--	,@strCompanyLocation
+			--	,@dtmCreatedDate
+			--	,@strCreatedBy
+			--	,10 AS intMessageTypeId
+			--	,1 AS intStatusId
+			--	,'Success' AS strStatusText
 			--Move to Archive
 			INSERT INTO dbo.tblIPBendDemandArchive (
 				intTrxSequenceNo
@@ -324,6 +367,7 @@ BEGIN TRY
 				,strWorkCenter
 				,dtmDueDate
 				,strMachine
+				,intLineTrxSequenceNo
 				)
 			SELECT intTrxSequenceNo
 				,strCompanyLocation
@@ -339,6 +383,7 @@ BEGIN TRY
 				,strWorkCenter
 				,dtmDueDate
 				,strMachine
+				,intLineTrxSequenceNo
 			FROM dbo.tblIPBendDemandStage
 			WHERE intBendDemandStageId = @intBendDemandStageId
 
@@ -357,23 +402,22 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
-			INSERT INTO dbo.tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT @intTrxSequenceNo
-				,@strCompanyLocation
-				,@dtmCreatedDate
-				,@strCreatedBy
-				,10 AS intMessageTypeId
-				,0 AS intStatusId
-				,@ErrMsg AS strStatusText
-
+			--INSERT INTO dbo.tblIPInitialAck (
+			--	intTrxSequenceNo
+			--	,strCompanyLocation
+			--	,dtmCreatedDate
+			--	,strCreatedBy
+			--	,intMessageTypeId
+			--	,intStatusId
+			--	,strStatusText
+			--	)
+			--SELECT @intTrxSequenceNo
+			--	,@strCompanyLocation
+			--	,@dtmCreatedDate
+			--	,@strCreatedBy
+			--	,10 AS intMessageTypeId
+			--	,0 AS intStatusId
+			--	,@ErrMsg AS strStatusText
 			--Move to Error
 			INSERT INTO dbo.tblIPBendDemandError (
 				intTrxSequenceNo
@@ -391,6 +435,7 @@ BEGIN TRY
 				,dtmDueDate
 				,strMachine
 				,strErrorMessage
+				,intLineTrxSequenceNo
 				)
 			SELECT intTrxSequenceNo
 				,strCompanyLocation
@@ -407,6 +452,7 @@ BEGIN TRY
 				,dtmDueDate
 				,strMachine
 				,@ErrMsg
+				,intLineTrxSequenceNo
 			FROM dbo.tblIPBendDemandStage
 			WHERE intBendDemandStageId = @intBendDemandStageId
 
@@ -418,6 +464,45 @@ BEGIN TRY
 		SELECT @intBendDemandStageId = MIN(intBendDemandStageId)
 		FROM dbo.tblIPBendDemandStage
 		WHERE intBendDemandStageId > @intBendDemandStageId
+	END
+
+	IF ISNULL(@strFinalErrMsg, '') <> ''
+	BEGIN
+		INSERT INTO dbo.tblIPInitialAck (
+			intTrxSequenceNo
+			,strCompanyLocation
+			,dtmCreatedDate
+			,strCreatedBy
+			,intMessageTypeId
+			,intStatusId
+			,strStatusText
+			)
+		SELECT @intTrxSequenceNo
+			,@strCompanyLocation
+			,@dtmCreatedDate
+			,@strCreatedBy
+			,10 AS intMessageTypeId
+			,0 AS intStatusId
+			,@strFinalErrMsg AS strStatusText
+	END
+	ELSE
+	BEGIN
+		INSERT INTO dbo.tblIPInitialAck (
+			intTrxSequenceNo
+			,strCompanyLocation
+			,dtmCreatedDate
+			,strCreatedBy
+			,intMessageTypeId
+			,intStatusId
+			,strStatusText
+			)
+		SELECT @intTrxSequenceNo
+			,@strCompanyLocation
+			,@dtmCreatedDate
+			,@strCreatedBy
+			,10 AS intMessageTypeId
+			,1 AS intStatusId
+			,'Success' AS strStatusText
 	END
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''

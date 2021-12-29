@@ -263,7 +263,7 @@ BEGIN TRY
 					, CT.intFutOptTransactionId intContractDetailId
 					, intContractHeaderId = NULL
 					, CT.intFutOptTransactionHeaderId
-					, CL.strLocationName
+					, CL.strLocationName	
 					, C.strCommodityCode
 					, strContractType = strBuySell
 					, strContractNumber = CT.strInternalTradeNo
@@ -550,7 +550,7 @@ BEGIN TRY
 			, dblUnPricedQty NUMERIC(24, 10)
 			, dblPricedAmount NUMERIC(24, 10)
 			, strMarketZoneCode NVARCHAR(200))
-
+			
 		--There is an error "An INSERT EXEC statement cannot be nested." that is why we cannot directly call the uspRKDPRContractDetail AND insert
 		DECLARE @ContractBalance TABLE (intRowNum INT
 			, strCommodityCode NVARCHAR(100)
@@ -629,16 +629,22 @@ BEGIN TRY
 			, z.intQtyUOMId
 			, ysnFullyPriced = CAST(CASE WHEN ctd.intPricingTypeId = 1 AND pricingLatestDate.pricedCount = pricingByEndDate.pricedCount THEN 1
 						ELSE 0 END AS bit)
+			, intEntityId
+			, strEntityName
+			, intQtyCurrencyId
 		INTO #tempLatestContractDetails
 		FROM
 		(
 			SELECT 
 				intContractHeaderId
-				,intContractDetailId
-				,dtmEndDate 
-				,dblBasis
-				,dblFutures
-				,intQtyUOMId
+				, intContractDetailId
+				, dtmEndDate 
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, t.intEntityId
+				, strEntityName = EM.strName
+				, intQtyCurrencyId
 			FROM (
 				SELECT 
 					intRowNum = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END DESC)
@@ -649,6 +655,7 @@ BEGIN TRY
 				AND CBL.strTransactionType = 'Contract Balance'
 				AND (CBL.dblBasis IS NOT NULL OR CBL.intPricingTypeId = 3)
 			) t
+			LEFT JOIN tblEMEntity EM ON EM.intEntityId = t.intEntityId
 			WHERE intRowNum = 1
 		) z
 
@@ -753,12 +760,12 @@ BEGIN TRY
 				, strPricingType
 				, intCommodityUnitMeasureId = NULL
 				, tbl.intContractDetailId
-				, intEntityId
-				, intQtyCurrencyId
+				, lcd.intEntityId
+				, lcd.intQtyCurrencyId
 				, strType = strContractType + ' ' + strPricingType
 				, intItemId
 				, strItemNo
-				, strEntityName
+				, lcd.strEntityName
 				, strCustomerContract = ''
 				--, intFutureMarketId
 				--, intFutureMonthId
@@ -787,11 +794,11 @@ BEGIN TRY
 					, CBL.intLocationId
 					, strContractType = CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 					, PT.strPricingType
-					, CBL.intEntityId
-					, CBL.intQtyCurrencyId
+					--, CBL.intEntityId
+					--, CBL.intQtyCurrencyId
 					, CBL.intItemId
 					, strItemNo
-					, strEntityName = EM.strName
+					--, strEntityName = EM.strName
 					--, CBL.intFutureMarketId
 					--, CBL.intFutureMonthId
 					, stat.strPricingStatus
@@ -1514,18 +1521,21 @@ BEGIN TRY
 							WHERE pfh.intPriceFixationId = pfdi.intPriceFixationId
 							AND pfdi.dtmFixationDate <= @dtmEndDate
 						) pricedTotal
-					WHERE intContractDetailId = cd.intContractDetailId
-						AND (   
-								-- Basis (Partially Priced) Priced Record
-								(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
-								-- Backdated and not yet fully priced in that specific date
-								OR ((cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced') 
-									 AND EXISTS (SELECT TOP 1 '' FROM @ContractBalance cb
-												WHERE cb.intContractDetailId = cd.intContractDetailId
-												AND cb.strPricingType = 'Basis'
-												)
-									)
-							)
+					WHERE (cd.ysnMultiplePriceFixation = 1 AND intContractHeaderId = cd.intContractHeaderId 
+							OR intContractDetailId = cd.intContractDetailId
+						   )
+							AND (   
+									-- Basis (Partially Priced) Priced Record
+									(cd.intPricingTypeId = 2 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced')
+									-- Backdated and not yet fully priced in that specific date
+									OR ((cd.intPricingTypeId = 1 AND strPricingType = 'Priced' AND strPricingStatus = 'Partially Priced') 
+											AND EXISTS (SELECT TOP 1 '' FROM @ContractBalance cb
+													WHERE cb.intContractDetailId = cd.intContractDetailId
+													AND cb.strPricingType = 'Basis'
+													)
+										)
+								)
+							
 				) t
 			) priceFixationDetail
 			WHERE cd.intCommodityId = @intCommodityId 
@@ -3446,7 +3456,7 @@ BEGIN TRY
 								WHEN strPricingType = 'Priced' THEN dblCalculatedFutures
 								ELSE dblCalculatedFutures END)
 				, dblCash --Contract Cash
-				, dblCosts = ABS(dblCosts)
+				, dblCosts = ABS(dblCosts) 
 				--Market Basis
 				, dblMarketBasis = (CASE WHEN strPricingType ! = 'HTA' THEN
 										CASE WHEN @ysnCanadianCustomer = 1 
@@ -4159,7 +4169,7 @@ BEGIN TRY
 					, e.intEntityId
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 														WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 														ELSE strPriOrNotPriOrParPriced END)
@@ -4237,7 +4247,7 @@ BEGIN TRY
 					, intEntityId = ISNULL(fd.intProducerId, fd.intEntityId)
 					, fd.dblOpenQty
 					, dblM2M = ISNULL(dblResult, 0)
-					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
+					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN CASE WHEN strPricingType = 'Priced' THEN 'Priced' ELSE 'Unpriced' END
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 							WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
 							ELSE strPriOrNotPriOrParPriced END)

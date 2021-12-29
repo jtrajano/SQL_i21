@@ -699,6 +699,9 @@ END
 CLOSE cur
 DEALLOCATE cur
 
+-- Execute post script
+EXEC dbo.uspApiSchemaTransformRecipeFinalize
+
 -- Log successful imports
 INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
 SELECT

@@ -409,6 +409,10 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @UserId
 		       ,@BatchIdUsed     = @BatchIdUsed OUT
+		
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @IntegrationLogId)
 
         GOTO Do_Commit
     END
@@ -606,7 +610,7 @@ BEGIN TRY
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @Post)
 
     DECLARE @invalidGLCount INT
-	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
+	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries WHERE [strTransactionId] IS NOT NULL), 0)
 	SET @totalRecords = @totalRecords - @invalidGLCount
 
     INSERT INTO tblARPostResult
