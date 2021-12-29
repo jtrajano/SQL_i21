@@ -5,167 +5,215 @@ CREATE PROCEDURE dbo.uspPRImportEmployeeTaxes(
 
 AS
 
+BEGIN
 
+--DECLARE @guiApiUniqueId AS UNIQUEIDENTIFIER = N'6703E376-141D-4C67-B14A-B2CA86B3F502'
+--DECLARE @guiLogId AS UNIQUEIDENTIFIER = NEWID()
+DECLARE @EntityNo AS INT
+DECLARE @strEmployeeId  AS NVARCHAR(100)
+DECLARE @EmployeeTaxId AS INT
+DECLARE @TypeTaxId AS INT
+DECLARE @TaxId AS NVARCHAR(100)
+DECLARE @TaxTaxDesc AS NVARCHAR(100)
+DECLARE @TaxStateId as INT
+DECLARE @TaxLocalId as INT
+DECLARE @NewId AS INT
+
+DECLARE @intEntityEmployeeId AS INT
+DECLARE @strCalculationType  AS NVARCHAR(100)
+DECLARE @strFilingStatus  AS NVARCHAR(100)
+DECLARE @intTypeTaxStateId AS INT
+DECLARE @intTypeTaxLocalId  AS INT
+DECLARE @intSupplementalCalc AS INT
+DECLARE @dblAmount AS FLOAT(50)
+DECLARE @dblExtraWithholding  AS FLOAT(50)
+DECLARE @dblLimit AS FLOAT(50)
+DECLARE @intAccountId AS INT
+DECLARE @intExpenseAccountId AS INT
+DECLARE @intAllowance AS INT
+DECLARE @strPaidBy  AS NVARCHAR(100)
+DECLARE @ysnDefault AS BIT
+DECLARE @intSort AS INT
+DECLARE @ysnW42020 AS BIT
+DECLARE @ysnW4Step2c AS BIT
+DECLARE @dblW4ClaimDependents AS FLOAT(50)
+DECLARE @dblW4OtherIncome  AS FLOAT(50)
+DECLARE @dblW4Deductions  AS FLOAT(50)
+DECLARE @ysnUseLocationDistribution AS BIT
+DECLARE @ysnUseLocationDistributionExpense AS BIT
+
+INSERT INTO tblApiImportLogDetail(guiApiImportLogDetailId,guiApiImportLogId, strField,strValue,strLogLevel,strStatus,intRowNo,strMessage)
+SELECT
+	guiApiImportLogDetailId = NEWID()
+	,guiApiImportLogId = @guiLogId
+	,strField		= 'Employee ID'
+	,strValue		= SE.intEntityNo
+	,strLogLevel		= 'Error'
+	,strStatus		= 'Failed'
+	,intRowNo		= SE.intRowNumber
+	,strMessage		= 'Cannot find the Employee Entity No: '+ CAST(ISNULL(SE.intEntityNo, '') AS NVARCHAR(100)) + '.'
+	FROM tblApiSchemaEmployeeTaxes SE
+	LEFT JOIN tblPREmployeeTax E 
+		ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+	WHERE SE.guiApiUniqueId = @guiApiUniqueId
+	AND SE.intEntityNo IS NULL
+
+SELECT * INTO #TempEmployeeTaxes FROM tblApiSchemaEmployeeTaxes where guiApiUniqueId = @guiApiUniqueId
+	WHILE EXISTS(SELECT TOP 1 NULL FROM #TempEmployeeTaxes)
 	BEGIN
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
-	SET NOCOUNT ON
-	SET XACT_ABORT ON
 
-	DECLARE @strPrefix NVARCHAR(10)
-	SET @strPrefix = 'E'
+	SELECT TOP 1 
+			 @strEmployeeId						= CAST(tempTax.intEntityNo AS NVARCHAR(100))
+			,@EntityNo							= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = tempTax.intEntityNo)  
+			,@TaxId								= strTaxId
+			,@TaxTaxDesc						= strTaxDescription
+			,@intEntityEmployeeId				= (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = tempTax.intEntityNo)
+			,@strCalculationType				= strCalculationType
+			,@strFilingStatus					= strFilingStatus
+			,@intSupplementalCalc				= (CASE WHEN strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
+			,@dblAmount							= dblAmount
+			,@dblExtraWithholding				= dblExtraWithholding
+			,@dblLimit							= dblLimit
+			,@intAccountId						= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strLiabilityAccount)
+			,@intExpenseAccountId				= (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE strAccountId = strExpenseAccount)
+			,@intAllowance						= dblFederalAllowance
+			,@strPaidBy							= strPaidBy
+			,@ysnDefault						= ysnDefault
+			,@ysnW42020							= ysn2020W4
+			,@ysnW4Step2c						= ysnStep2c
+			,@dblW4ClaimDependents				= dblClaimDependents
+			,@dblW4OtherIncome					= dblotherIncome
+			,@dblW4Deductions					= 0.00
+			,@ysnUseLocationDistribution		= ysnLiabilityGlSplit
+			,@ysnUseLocationDistributionExpense = ysnExpenseAccountGlSplit
+		FROM #TempEmployeeTaxes tempTax
 
-		SELECT DISTINCT
-			intEntityEmployeeId = iEMP.intEntityEmployeeId
-			,intTypeTaxId = iTAX.intTypeTaxId
-			,strCalculationType = iTAX.strCalculationType
-			,strFilingStatus = CASE (oEMP.premp_tax_ms)
-								WHEN 'M' THEN 'Married'
-								WHEN 'S' THEN 'Single'
-								ELSE iEMP.strMaritalStatus END
-			,intTypeTaxStateId = iTAX.intTypeTaxStateId
-			,intTypeTaxLocalId = iTAX.intTypeTaxLocalId
-			,intSupplementalCalc = 1
-			,dblAmount = 0
-			,dblExtraWithholding = CASE (CAST(oEMT.premt_tax_type AS VARCHAR(2)) + oEMT.premt_code)
-										WHEN premp_tax_id_1 THEN premp_tax_addl_pct_amt_1
-										WHEN premp_tax_id_2 THEN premp_tax_addl_pct_amt_2
-										WHEN premp_tax_id_3 THEN premp_tax_addl_pct_amt_3
-										WHEN premp_tax_id_4 THEN premp_tax_addl_pct_amt_4
-										WHEN premp_tax_id_5 THEN premp_tax_addl_pct_amt_5
-										WHEN premp_tax_id_6 THEN premp_tax_addl_pct_amt_6
-										WHEN premp_tax_id_7 THEN premp_tax_addl_pct_amt_7
-										WHEN premp_tax_id_8 THEN premp_tax_addl_pct_amt_8
-										WHEN premp_tax_id_9 THEN premp_tax_addl_pct_amt_9
-										WHEN premp_tax_id_10 THEN premp_tax_addl_pct_amt_10
-										WHEN premp_tax_id_11 THEN premp_tax_addl_pct_amt_11
-										WHEN premp_tax_id_12 THEN premp_tax_addl_pct_amt_12
-										WHEN premp_tax_id_13 THEN premp_tax_addl_pct_amt_13
-										WHEN premp_tax_id_14 THEN premp_tax_addl_pct_amt_14
-										WHEN premp_tax_id_15 THEN premp_tax_addl_pct_amt_15
-										WHEN premp_tax_id_16 THEN premp_tax_addl_pct_amt_16
-									ELSE 0 END
-			,dblLimit = CASE WHEN (oTAX.prtax_tax_type IN (3, 4)) THEN prtax_wage_cutoff ELSE ISNULL(iTAX.dblLimit, 0) END
-			,intAccountId = dbo.fnGetGLAccountIdFromOriginToi21(oTAX.prtax_gl_bs)
-			,intExpenseAccountId = dbo.fnGetGLAccountIdFromOriginToi21(oTAX.prtax_gl_exp)
-			,intAllowance = CASE (CAST(oEMT.premt_tax_type AS VARCHAR(2)) + oEMT.premt_code)
-									WHEN premp_tax_id_1 THEN premp_tax_exempts_1
-									WHEN premp_tax_id_2 THEN premp_tax_exempts_2
-									WHEN premp_tax_id_3 THEN premp_tax_exempts_3
-									WHEN premp_tax_id_4 THEN premp_tax_exempts_4
-									WHEN premp_tax_id_5 THEN premp_tax_exempts_5
-									WHEN premp_tax_id_6 THEN premp_tax_exempts_6
-									WHEN premp_tax_id_7 THEN premp_tax_exempts_7
-									WHEN premp_tax_id_8 THEN premp_tax_exempts_8
-									WHEN premp_tax_id_9 THEN premp_tax_exempts_9
-									WHEN premp_tax_id_10 THEN premp_tax_exempts_10
-									WHEN premp_tax_id_11 THEN premp_tax_exempts_11
-									WHEN premp_tax_id_12 THEN premp_tax_exempts_12
-									WHEN premp_tax_id_13 THEN premp_tax_exempts_13
-									WHEN premp_tax_id_14 THEN premp_tax_exempts_14
-									WHEN premp_tax_id_15 THEN premp_tax_exempts_15
-									WHEN premp_tax_id_16 THEN premp_tax_exempts_16
-								ELSE 0 END
-			,strPaidBy = iTAX.strPaidBy
-			,strVal1 = NULL
-			,strVal2 = NULL
-			,strVal3 = NULL
-			,strVal4 = NULL
-			,strVal5 = NULL
-			,strVal6 = NULL
-			,ysnDefault = CASE (CAST(oEMT.premt_tax_type AS VARCHAR(2)) + oEMT.premt_code)
-									WHEN premp_tax_id_1 THEN CASE premp_tax_active_yn_1 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_2 THEN CASE premp_tax_active_yn_2 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_3 THEN CASE premp_tax_active_yn_3 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_4 THEN CASE premp_tax_active_yn_4 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_5 THEN CASE premp_tax_active_yn_5 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_6 THEN CASE premp_tax_active_yn_6 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_7 THEN CASE premp_tax_active_yn_7 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_8 THEN CASE premp_tax_active_yn_8 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_9 THEN CASE premp_tax_active_yn_9 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_10 THEN CASE premp_tax_active_yn_10 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_11 THEN CASE premp_tax_active_yn_11 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_12 THEN CASE premp_tax_active_yn_12 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_13 THEN CASE premp_tax_active_yn_13 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_14 THEN CASE premp_tax_active_yn_14 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_15 THEN CASE premp_tax_active_yn_15 WHEN 'Y' THEN 1 ELSE 0 END
-									WHEN premp_tax_id_16 THEN CASE premp_tax_active_yn_16 WHEN 'Y' THEN 1 ELSE 0 END
-								ELSE 0 END
-			,intSort = iTAX.intSort
-			,intConcurrencyId = 1
-		INTO
-			#tmpEmployeeTaxes
-		FROM
-			(select premt_emp, premt_code, premt_tax_type from premtmst
-				where premt_year = (select max(premt_year) from premtmst)) oEMT
-			INNER JOIN prempmst oEMP
-				ON oEMP.premp_emp = oEMT.premt_emp
-			INNER JOIN (select distinct prtax_tax_type, prtax_code, prtax_gl_bs, 
-							prtax_gl_exp, prtax_wage_cutoff from prtaxmst
-						where prtax_year = (select max(prtax_year) from prtaxmst)) oTAX
-				ON oEMT.premt_code = oTAX.prtax_code
-			INNER JOIN (select intEntityEmployeeId = intEntityId, strEmployeeId, strMaritalStatus from tblPREmployee) iEMP
-				ON iEMP.strEmployeeId = (@strPrefix + LTRIM(RTRIM(oEMT.premt_emp))) COLLATE Latin1_General_CI_AS
-			INNER JOIN tblPRTypeTax iTAX
-				ON iTAX.strTax = premt_code COLLATE Latin1_General_CI_AS
-		WHERE NOT EXISTS (
-				SELECT 1 FROM tblPREmployeeTax 
-				WHERE intEntityEmployeeId = iEMP.intEntityEmployeeId 
-				AND intTypeTaxId = iTAX.intTypeTaxId)
+		SELECT TOP 1 
+				 @TypeTaxId= T.intTypeTaxId
+				,@TaxStateId = ISNULL(T.intTypeTaxStateId,0)
+				,@TaxLocalId = ISNULL(T.intTypeTaxLocalId,0)
+				,@EmployeeTaxId = PRTE.intEmployeeTaxId
+			FROM tblPRTypeTax T 
+		left join tblPREmployeeTax PRTE
+		on T.intTypeTaxId = PRTE.intTypeTaxId
+			AND PRTE.intEntityEmployeeId = @intEntityEmployeeId
+		WHERE strTax = @TaxId and strDescription = @TaxTaxDesc
 
-		SELECT @intRecordCount = COUNT(1) FROM #tmpEmployeeTaxes
+		IF @EmployeeTaxId IS NULL
+			BEGIN
+				IF NOT EXISTS (SELECT TOP 1 * FROM tblPREmployeeTax WHERE intEntityEmployeeId = @EntityNo and intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc))
+					BEGIN
+						INSERT INTO tblPREmployeeTax
+						(
+						 intEntityEmployeeId
+						,intTypeTaxId
+						,strCalculationType
+						,strFilingStatus
+						,intTypeTaxStateId
+						,intTypeTaxLocalId 
+						,intSupplementalCalc
+						,dblAmount
+						,dblExtraWithholding 
+						,dblLimit
+						,intAccountId
+						,intExpenseAccountId
+						,ysnUseLocationDistribution
+						,ysnUseLocationDistributionExpense
+						,intAllowance
+						,strPaidBy
+						,ysnDefault
+						,intSort
+						,ysnW42020
+						,ysnW4Step2c
+						,dblW4ClaimDependents
+						,dblW4OtherIncome 
+						,dblW4Deductions 
+						,intConcurrencyId 
+						)
+						SELECT TOP 1
+							 @EntityNo
+							,(SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
+							,EMT.strCalculationType
+							,EMT.strFilingStatus
+							,(SELECT TOP 1 intTypeTaxStateId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
+							,(SELECT TOP 1 intTypeTaxLocalId FROM tblPRTypeTax WHERE strTax = EMT.strTaxId and strDescription = EMT.strTaxDescription)
+							,(CASE WHEN EMT.strSupplimentalCalc = 'Flat Rate' THEN 0 ELSE 1 END)
+							,EMT.dblAmount
+							,EMT.dblExtraWithholding
+							,EMT.dblLimit
+							,@intAccountId
+							,@intExpenseAccountId
+							,EMT.ysnLiabilityGlSplit
+							,EMT.ysnExpenseAccountGlSplit
+							,EMT.dblFederalAllowance
+							,EMT.strPaidBy
+							,EMT.ysnDefault
+							,1
+							,EMT.ysn2020W4
+							,EMT.ysnStep2c
+							,EMT.dblClaimDependents
+							,0
+							,0
+							,1
+							FROM #TempEmployeeTaxes EMT
+						WHERE EMT.intEntityNo = @strEmployeeId AND EMT.strTaxId = @TaxId AND EMT.strTaxDescription = @TaxTaxDesc
+					SET @NewId = SCOPE_IDENTITY()
+					END
+				
+				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @strEmployeeId AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
 
-		IF (@ysnDoImport = 1)
-		BEGIN
-			INSERT INTO tblPREmployeeTax
-				(intEntityEmployeeId
-				,intTypeTaxId
-				,strCalculationType
-				,strFilingStatus
-				,intTypeTaxStateId
-				,intTypeTaxLocalId
-				,intSupplementalCalc
-				,dblAmount
-				,dblExtraWithholding
-				,dblLimit
-				,intAccountId
-				,intExpenseAccountId
-				,intAllowance
-				,strPaidBy
-				,strVal1
-				,strVal2
-				,strVal3
-				,strVal4
-				,strVal5
-				,strVal6
-				,ysnDefault
-				,intSort
-				,intConcurrencyId)
-			SELECT
-				intEntityEmployeeId
-				,intTypeTaxId
-				,strCalculationType
-				,strFilingStatus
-				,intTypeTaxStateId
-				,intTypeTaxLocalId
-				,intSupplementalCalc
-				,dblAmount
-				,dblExtraWithholding
-				,dblLimit
-				,intAccountId
-				,intExpenseAccountId
-				,intAllowance
-				,strPaidBy
-				,strVal1
-				,strVal2
-				,strVal3
-				,strVal4
-				,strVal5
-				,strVal6
-				,ysnDefault
-				,intSort
-				,intConcurrencyId
-			FROM #tmpEmployeeTaxes
-		END
+			END
+		ELSE
+			BEGIN
+				UPDATE tblPREmployeeTax SET
+						 intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+						,strCalculationType = @strCalculationType
+						,strFilingStatus = @strFilingStatus
+						,intTypeTaxStateId = (SELECT TOP 1 intTypeTaxStateId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+						,intTypeTaxLocalId  = (SELECT TOP 1 intTypeTaxLocalId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+						,intSupplementalCalc = @intSupplementalCalc
+						,dblAmount = @dblAmount
+						,dblExtraWithholding  = @dblExtraWithholding
+						,dblLimit = @dblLimit
+						,intAccountId = @intAccountId
+						,intExpenseAccountId = @intExpenseAccountId
+						,intAllowance = @intAllowance
+						,strPaidBy = @strPaidBy
+						,ysnUseLocationDistribution = @ysnUseLocationDistribution
+						,ysnUseLocationDistributionExpense = @ysnUseLocationDistributionExpense
+						,ysnDefault = @ysnDefault
+						,ysnW42020 = @ysnW42020
+						,ysnW4Step2c = @ysnW4Step2c
+						,dblW4ClaimDependents = @dblW4ClaimDependents
+						,dblW4OtherIncome  = @dblW4OtherIncome
+						,dblW4Deductions  = @dblW4Deductions
+					WHERE intEntityEmployeeId = @EntityNo
+						AND intTypeTaxId = (SELECT TOP 1 intTypeTaxId FROM tblPRTypeTax WHERE strTax = @TaxId and strDescription = @TaxTaxDesc)
+
+				DELETE FROM #TempEmployeeTaxes WHERE intEntityNo = @strEmployeeId AND strTaxId = @TaxId and strTaxDescription = @TaxTaxDesc
+				
+			END
+
+		INSERT INTO tblApiImportLogDetail (guiApiImportLogDetailId, guiApiImportLogId, strField, strValue, strLogLevel, strStatus, intRowNo, strMessage)
+		SELECT TOP 1
+			  NEWID()
+			, guiApiImportLogId = @guiLogId
+			, strField = 'Employee Taxes'
+			, strValue = SE.strTaxId
+			, strLogLevel = 'Info'
+			, strStatus = 'Success'
+			, intRowNo = SE.intRowNumber
+			, strMessage = 'The employee taxes has been successfully imported.'
+		FROM tblApiSchemaEmployeeTaxes SE
+		LEFT JOIN tblPREmployeeTax E ON E.intEntityEmployeeId = (SELECT TOP 1 intEntityId FROM tblPREmployee WHERE strEmployeeId = SE.intEntityNo)
+		WHERE SE.guiApiUniqueId = @guiApiUniqueId
+		AND SE.strTaxId = @TaxId
+		AND SE.strTaxDescription = @TaxTaxDesc
 	END
+
+	
+
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#TempEmployeeTaxes')) 
+	DROP TABLE #TempEmployeeTaxes
+END
 GO

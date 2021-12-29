@@ -56,7 +56,12 @@ INSERT INTO @ItemsForPost
     ,[intStorageScheduleTypeId]
     ,[dblUnitRetail]
     ,[intCategoryId]
-    ,[dblAdjustRetailValue]) 
+    ,[dblAdjustRetailValue]
+	,[strBOLNumber]
+    ,[intTicketId]
+	,[strSourceNumber]
+	,[strSourceType]
+) 
 SELECT 
      [intItemId]
 	,[intItemLocationId]
@@ -87,13 +92,17 @@ SELECT
 	,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
+	,[strBOLNumber]
+    ,[intTicketId]
+	,[strSourceNumber]
+	,[strSourceType]
 FROM 
 	##ARItemsForCosting
-WHERE ISNULL([ysnGLOnly], 0) = CAST(0 AS BIT)
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 BEGIN
+	-- Call the post routine 
 	INSERT INTO ##ARInvoiceGLEntries (
 		 [dtmDate]
 		,[strBatchId]
@@ -135,6 +144,7 @@ BEGIN
 		,@BatchId  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 		,@UserId
+	
 END
 
 DECLARE  @InTransitItems                ItemInTransitCostingTableType 
@@ -165,7 +175,10 @@ INSERT INTO @InTransitItems
     ,[intFobPointId] 
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
-    ,[dblForexRate])
+    ,[dblForexRate]
+	,[strBOLNumber]
+    ,[intTicketId]	
+)
 SELECT
      [intItemId] 
     ,[intItemLocationId] 
@@ -190,6 +203,8 @@ SELECT
     ,[intInTransitSourceLocationId]
     ,[intForexRateTypeId]
     ,[dblForexRate]
+	,[strBOLNumber]
+    ,[intTicketId]
 FROM ##ARItemsForInTransitCosting
 
 IF EXISTS (SELECT TOP 1 1 FROM @InTransitItems)
@@ -274,6 +289,7 @@ INSERT INTO @StorageItemsForPost (
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
+	,[strBOLNumber]
 ) 
 SELECT 
      [intItemId] 
@@ -294,6 +310,7 @@ SELECT
     ,[intSubLocationId]
     ,[intStorageLocationId]
     ,[strActualCostId]
+	,[strBOLNumber]
 FROM 
 	##ARItemsForStorageCosting
 
@@ -337,7 +354,7 @@ BEGIN
 		,[intCommodityId]
 	)
 	EXEC dbo.uspICPostStorage  
-			 @StorageItemsForPost  
+				@StorageItemsForPost  
 			,@BatchId  		
 			,@UserId
 END

@@ -53,8 +53,26 @@ DECLARE @strWhereFinalizedGrade NVARCHAR(20)
 DECLARE @intTicketCommodityId INT
 dECLARE @intFutureMarketId INT
 DECLARE @intFutureMonthId INT
+DECLARE @intTicketStorageScheduleTypeId INT
+
+
+DECLARE @_dblQty NUMERIC(36,20)
+DECLARE @_intTicketContractUsed INT
+DECLARE @_intBillId INT
+DECLARE @_intBillDetailId INT
+DECLARE @_intLoadDetailId INT
+DECLARE @_intTicketLoadUsedId INT
+
+
 
 DECLARE @invoiceItemIntegrationStagingTable InvoiceIntegrationStagingTable
+
+DECLARE @contractBasisPriceTable TABLE(
+		intContractDetailId int
+		,intPriceFixationDetailId int
+		,dblQuantity NUMERIC(36,20)
+		,dblPrice numeric(18,6)
+)
 
 
 -- DECLARE @tblPriceContractAvailableFixation AS TABLE(
@@ -91,6 +109,7 @@ BEGIN TRY
 		,@intTicketContractDetailId = SC.intContractId
 		,@intTicketContractHeaderId = CH.intContractHeaderId
 		,@_intTicketId = SC.intTicketId
+		,@intTicketStorageScheduleTypeId =  intStorageScheduleTypeId
 	FROM tblSCTicket SC
 	INNER JOIN tblCTContractDetail CD
 		ON CD.intContractDetailId = SC.intContractId
@@ -99,6 +118,7 @@ BEGIN TRY
 	WHERE SC.intTicketId = @intTicketId
 
 	--Priced Basis
+	/*
 	IF @intContractHeaderPricingTypeId = 2
 	BEGIN	
 		IF(ISNULL((SELECT SUM(dblQuantity) FROM #tmpSCContractPrice),0) <  @_dblRemainingNetUnits)	
@@ -532,6 +552,7 @@ BEGIN TRY
 
 	END
 	ELSE
+	*/
 	BEGIN
 		--FOR LINE ITEM
 		BEGIN
@@ -539,174 +560,498 @@ BEGIN TRY
 
 				----LOAD
 				BEGIN
-					INSERT INTO @invoiceIntegrationStagingTable (
-						[strTransactionType]
-						,[strType]
-						,[strSourceTransaction]
-						,[intSourceId]
-						,[strSourceId]
-						,[intInvoiceId]
-						,[intEntityCustomerId]
-						,[intCompanyLocationId]
-						,[intCurrencyId]
-						,[intTermId]
-						,[dtmDate]
-						,[ysnTemplate]
-						,[ysnForgiven]
-						,[ysnCalculated]
-						,[ysnSplitted]
-						,[intEntityId]
-						,[ysnResetDetails]
-						,[intItemId]
-						,[strItemDescription]
-						,[intOrderUOMId]
-						,[intItemUOMId]
-						,[dblQtyOrdered]
-						,[dblQtyShipped]
-						,[dblDiscount]
-						,[dblPrice]
-						,[ysnRefreshPrice]
-						,[intTaxGroupId]
-						,[ysnRecomputeTax]
-						,[intContractDetailId]
-						,[intTicketId]
-						,[intDestinationGradeId]
-						,[intDestinationWeightId]		
-						,intLoadDetailId
-					)
-					SELECT 
-						[strTransactionType] = 'Invoice'
-						,[strType] = 'Standard'
-						,[strSourceTransaction] = 'Ticket Management'
-						,[intSourceId] = SC.intTicketId
-						,[strSourceId] = ''
-						,[intInvoiceId] = NULL --NULL Value will create new invoice
-						,[intEntityCustomerId] = SCLoad.intEntityId
-						,[intCompanyLocationId] = SC.intProcessingLocationId
-						,[intCurrencyId] = SC.intCurrencyId
-						,[intTermId] = EM.intTermsId
-						,[dtmDate] = SC.dtmTicketDateTime
-						,[ysnTemplate] = 0
-						,[ysnForgiven] = 0
-						,[ysnCalculated] = 0
-						,[ysnSplitted] = 0
-						,[intEntityId] = @intUserId
-						,[ysnResetDetails] = 0
-						,[intItemId] = SC.intItemId
-						,[strItemDescription] = ICI.strItemNo
-						,[intOrderUOMId] = LGD.intItemUOMId
-						,[intItemUOMId]  = SC.intItemUOMIdTo
-						,[dblQtyOrdered] = LGD.dblQuantity
-						,[dblQtyShipped] = SCLoad.dblQty
-						,[dblDiscount] = 0
-						,[dblPrice] = ISNULL(LGD.dblUnitPrice,0)
-						,[ysnRefreshPrice] = 0
-						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
-						,[ysnRecomputeTax] = 1
-						,[intContractDetailId] = CTD.intContractDetailId
-						,[intTicketId] = SC.intTicketId
-						,[intDestinationGradeId] = SC.intGradeId
-						,[intDestinationWeightId] = SC.intWeightId
-						,intLoadDetailId = LGD.intLoadDetailId
-					FROM tblSCTicket SC
-					INNER JOIN tblSCTicketLoadUsed SCLoad
-						ON SC.intTicketId = SCLoad.intTicketId
-					INNER JOIN tblARCustomer AR 
-						ON AR.intEntityId = SCLoad.intEntityId
-					LEFT JOIN tblEMEntityLocation EM 
-						ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
-					INNER JOIN tblICItem ICI 
-						ON ICI.intItemId = SC.intItemId		
-					INNER JOIN tblLGLoadDetail LGD 
-						ON LGD.intLoadDetailId = SCLoad.intLoadDetailId 
-					LEFT JOIN tblCTContractDetail CTD 
-						ON CTD.intContractDetailId = LGD.intSContractDetailId
-					WHERE SC.intTicketId = @intTicketId
+					--- using Non BASIS/HTA COntract
+					BEGIN
+						INSERT INTO @invoiceIntegrationStagingTable (
+							[strTransactionType]
+							,[strType]
+							,[strSourceTransaction]
+							,[intSourceId]
+							,[strSourceId]
+							,[intInvoiceId]
+							,[intEntityCustomerId]
+							,[intCompanyLocationId]
+							,[intCurrencyId]
+							,[intTermId]
+							,[dtmDate]
+							,[ysnTemplate]
+							,[ysnForgiven]
+							,[ysnCalculated]
+							,[ysnSplitted]
+							,[intEntityId]
+							,[ysnResetDetails]
+							,[intItemId]
+							,[strItemDescription]
+							,[intOrderUOMId]
+							,[intItemUOMId]
+							,[dblQtyOrdered]
+							,[dblQtyShipped]
+							,[dblDiscount]
+							,[dblPrice]
+							,[ysnRefreshPrice]
+							,[intTaxGroupId]
+							,[ysnRecomputeTax]
+							,[intContractDetailId]
+							,[intTicketId]
+							,[intDestinationGradeId]
+							,[intDestinationWeightId]		
+							,intLoadDetailId
+						)
+						SELECT 
+							[strTransactionType] = 'Invoice'
+							,[strType] = 'Standard'
+							,[strSourceTransaction] = 'Ticket Management'
+							,[intSourceId] = SC.intTicketId
+							,[strSourceId] = ''
+							,[intInvoiceId] = NULL --NULL Value will create new invoice
+							,[intEntityCustomerId] = SCLoad.intEntityId
+							,[intCompanyLocationId] = SC.intProcessingLocationId
+							,[intCurrencyId] = SC.intCurrencyId
+							,[intTermId] = EM.intTermsId
+							,[dtmDate] = SC.dtmTicketDateTime
+							,[ysnTemplate] = 0
+							,[ysnForgiven] = 0
+							,[ysnCalculated] = 0
+							,[ysnSplitted] = 0
+							,[intEntityId] = @intUserId
+							,[ysnResetDetails] = 0
+							,[intItemId] = SC.intItemId
+							,[strItemDescription] = ICI.strItemNo
+							,[intOrderUOMId] = LGD.intItemUOMId
+							,[intItemUOMId]  = SC.intItemUOMIdTo
+							,[dblQtyOrdered] = LGD.dblQuantity
+							,[dblQtyShipped] = SCLoad.dblQty
+							,[dblDiscount] = 0
+							,[dblPrice] = ISNULL(CTD.dblCashPrice,LGD.dblUnitPrice)
+							,[ysnRefreshPrice] = 0
+							,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							,[ysnRecomputeTax] = 1
+							,[intContractDetailId] = CTD.intContractDetailId
+							,[intTicketId] = SC.intTicketId
+							,[intDestinationGradeId] = SC.intGradeId
+							,[intDestinationWeightId] = SC.intWeightId
+							,intLoadDetailId = LGD.intLoadDetailId
+						FROM tblSCTicket SC
+						INNER JOIN tblSCTicketLoadUsed SCLoad
+							ON SC.intTicketId = SCLoad.intTicketId
+						INNER JOIN tblARCustomer AR 
+							ON AR.intEntityId = SCLoad.intEntityId
+						LEFT JOIN tblEMEntityLocation EM 
+							ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+						INNER JOIN tblICItem ICI 
+							ON ICI.intItemId = SC.intItemId		
+						INNER JOIN tblLGLoadDetail LGD 
+							ON LGD.intLoadDetailId = SCLoad.intLoadDetailId 
+						LEFT JOIN tblCTContractDetail CTD 
+							ON CTD.intContractDetailId = LGD.intSContractDetailId
+						LEFT JOIN tblCTContractHeader CTH
+							ON CTD.intContractHeaderId = CTH.intContractHeaderId
+						WHERE SC.intTicketId = @intTicketId
+							AND (CTH.intPricingTypeId <> 2 AND CTH.intPricingTypeId <> 3)
+					END
+
+					--- using BASIS/HTA COntract
+					BEGIN
+
+						IF OBJECT_ID('tempdb..#tmpLoadBasisContractUsed') IS NOT NULL DROP TABLE #tmpLoadBasisContractUsed
+
+						SELECT
+							SCL.intTicketLoadUsedId
+							,SCL.dblQty
+							,CTD.intContractDetailId
+							,SCL.intLoadDetailId
+						INTO #tmpLoadBasisContractUsed
+						FROM tblSCTicket SC 
+						INNER JOIN tblSCTicketLoadUsed SCL
+							ON SC.intTicketId = SCL.intTicketId
+						INNER JOIN tblLGLoadDetail LD
+							ON SCL.intLoadDetailId = LD.intLoadDetailId
+						INNER JOIN tblCTContractDetail CTD
+							ON LD.intSContractDetailId = CTD.intContractDetailId
+						INNER JOIN tblCTContractHeader CTH
+							ON CTD.intContractHeaderId = CTH.intContractHeaderId
+						WHERE SC.intTicketId = @intTicketId
+							AND (CTH.intPricingTypeId = 2 OR CTH.intPricingTypeId = 3)
+						ORDER BY intTicketLoadUsedId
+
+						SET @_intTicketLoadUsedId = NULL
+						SELECT TOP 1 
+							@_intTicketLoadUsedId = intTicketLoadUsedId
+							,@_dblQty = dblQty
+							,@_intContractDetailId = intContractDetailId
+							,@_intLoadDetailId = intLoadDetailId
+						FROM #tmpLoadBasisContractUsed
+						ORDER BY intTicketLoadUsedId
+
+						WHILE ISNULL(@_intTicketLoadUsedId,0) > 0
+						BEGIN
+							DELETE FROM @contractBasisPriceTable 
+							INSERT INTO @contractBasisPriceTable (
+								intContractDetailId 
+								,intPriceFixationDetailId
+								,dblQuantity 
+								,dblPrice 
+							)
+							EXEC uspSCGetAndAllocateBasisContractUnits @_dblQty,@_intContractDetailId
+
+							INSERT INTO @invoiceIntegrationStagingTable (
+								[strTransactionType]
+								,[strType]
+								,[strSourceTransaction]
+								,[intSourceId]
+								,[strSourceId]
+								,[intInvoiceId]
+								,[intEntityCustomerId]
+								,[intCompanyLocationId]
+								,[intCurrencyId]
+								,[intTermId]
+								,[dtmDate]
+								,[ysnTemplate]
+								,[ysnForgiven]
+								,[ysnCalculated]
+								,[ysnSplitted]
+								,[intEntityId]
+								,[ysnResetDetails]
+								,[intItemId]
+								,[strItemDescription]
+								,[intOrderUOMId]
+								,[intItemUOMId]
+								,[dblQtyOrdered]
+								,[dblQtyShipped]
+								,[dblDiscount]
+								,[dblPrice]
+								,[ysnRefreshPrice]
+								,[intTaxGroupId]
+								,[ysnRecomputeTax]
+								,[intContractDetailId]
+								,[intTicketId]
+								,[intDestinationGradeId]
+								,[intDestinationWeightId]		
+								,intLoadDetailId
+							)
+							SELECT 
+								[strTransactionType] = 'Invoice'
+								,[strType] = 'Standard'
+								,[strSourceTransaction] = 'Ticket Management'
+								,[intSourceId] = SC.intTicketId
+								,[strSourceId] = ''
+								,[intInvoiceId] = NULL --NULL Value will create new invoice
+								,[intEntityCustomerId] = SCLoad.intEntityId
+								,[intCompanyLocationId] = SC.intProcessingLocationId
+								,[intCurrencyId] = SC.intCurrencyId
+								,[intTermId] = EM.intTermsId
+								,[dtmDate] = SC.dtmTicketDateTime
+								,[ysnTemplate] = 0
+								,[ysnForgiven] = 0
+								,[ysnCalculated] = 0
+								,[ysnSplitted] = 0
+								,[intEntityId] = @intUserId
+								,[ysnResetDetails] = 0
+								,[intItemId] = SC.intItemId
+								,[strItemDescription] = ICI.strItemNo
+								,[intOrderUOMId] = LGD.intItemUOMId
+								,[intItemUOMId]  = SC.intItemUOMIdTo
+								,[dblQtyOrdered] = LGD.dblQuantity
+								,[dblQtyShipped] = SCLC.dblQuantity
+								,[dblDiscount] = 0
+								,[dblPrice] = SCLC.dblPrice
+								,[ysnRefreshPrice] = 0
+								,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCLoad.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+								,[ysnRecomputeTax] = 1
+								,[intContractDetailId] = CTD.intContractDetailId
+								,[intTicketId] = SC.intTicketId
+								,[intDestinationGradeId] = SC.intGradeId
+								,[intDestinationWeightId] = SC.intWeightId
+								,intLoadDetailId = LGD.intLoadDetailId
+							FROM tblSCTicket SC
+							INNER JOIN tblSCTicketLoadUsed SCLoad
+								ON SC.intTicketId = SCLoad.intTicketId
+							INNER JOIN tblARCustomer AR 
+								ON AR.intEntityId = SCLoad.intEntityId
+							LEFT JOIN tblEMEntityLocation EM 
+								ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+							INNER JOIN tblICItem ICI 
+								ON ICI.intItemId = SC.intItemId		
+							INNER JOIN tblLGLoadDetail LGD 
+								ON LGD.intLoadDetailId = SCLoad.intLoadDetailId 
+							INNER JOIN tblCTContractDetail CTD 
+								ON CTD.intContractDetailId = LGD.intSContractDetailId
+							INNER JOIN tblCTContractHeader CTH
+								ON CTD.intContractHeaderId = CTH.intContractHeaderId
+							INNER JOIN @contractBasisPriceTable SCLC
+								ON CTD.intContractDetailId = SCLC.intContractDetailId
+							WHERE SC.intTicketId = @intTicketId
+								AND (CTH.intPricingTypeId = 2 OR CTH.intPricingTypeId = 3)
+
+							--- LOOP iterator
+							BEGIN
+								IF NOT EXISTS(SELECT TOP 1 1 
+												FROM #tmpLoadBasisContractUsed
+												WHERE intTicketLoadUsedId > @_intTicketLoadUsedId
+												ORDER BY intTicketLoadUsedId)
+								BEGIN
+									SET @_intTicketLoadUsedId = NULL
+								END 
+								ELSE
+								BEGIN
+									SELECT TOP 1 
+										@_intTicketLoadUsedId = intTicketLoadUsedId
+										,@_dblQty = dblQty
+										,@_intContractDetailId = intContractDetailId
+										,@_intLoadDetailId = intLoadDetailId
+									FROM #tmpLoadBasisContractUsed
+									WHERE intTicketLoadUsedId > @_intTicketLoadUsedId
+									ORDER BY intTicketLoadUsedId
+								END
+							END
+						END
+
+						
+					END
 				END
 
 				----CONTRACT
 				BEGIN
-					INSERT INTO @invoiceIntegrationStagingTable (
-						[strTransactionType]
-						,[strType]
-						,[strSourceTransaction]
-						,[intSourceId]
-						,[strSourceId]
-						,[intInvoiceId]
-						,[intEntityCustomerId]
-						,[intCompanyLocationId]
-						,[intCurrencyId]
-						,[intTermId]
-						,[dtmDate]
-						,[ysnTemplate]
-						,[ysnForgiven]
-						,[ysnCalculated]
-						,[ysnSplitted]
-						,[intEntityId]
-						,[ysnResetDetails]
-						,[intItemId]
-						,[strItemDescription]
-						,[intOrderUOMId]
-						,[intItemUOMId]
-						,[dblQtyOrdered]
-						,[dblQtyShipped]
-						,[dblDiscount]
-						,[dblPrice]
-						,[ysnRefreshPrice]
-						,[intTaxGroupId]
-						,[ysnRecomputeTax]
-						,[intContractDetailId]
-						,[intTicketId]
-						,[intDestinationGradeId]
-						,[intDestinationWeightId]		
-						,intLoadDetailId
-					)
-					SELECT 
-						[strTransactionType] = 'Invoice'
-						,[strType] = 'Standard'
-						,[strSourceTransaction] = 'Ticket Management'
-						,[intSourceId] = SC.intTicketId
-						,[strSourceId] = ''
-						,[intInvoiceId] = NULL --NULL Value will create new invoice
-						,[intEntityCustomerId] = SCContract.intEntityId
-						,[intCompanyLocationId] = SC.intProcessingLocationId
-						,[intCurrencyId] = CTD.intCurrencyId
-						,[intTermId] = EM.intTermsId
-						,[dtmDate] = SC.dtmTicketDateTime
-						,[ysnTemplate] = 0
-						,[ysnForgiven] = 0
-						,[ysnCalculated] = 0
-						,[ysnSplitted] = 0
-						,[intEntityId] = @intUserId
-						,[ysnResetDetails] = 0
-						,[intItemId] = SC.intItemId
-						,[strItemDescription] = ICI.strItemNo
-						,[intOrderUOMId] = CTD.intItemUOMId
-						,[intItemUOMId]  = SC.intItemUOMIdTo
-						,[dblQtyOrdered] = CTD.dblOriginalQty
-						,[dblQtyShipped] = SCContract.dblScheduleQty
-						,[dblDiscount] = 0
-						,[dblPrice] = ISNULL(CTD.dblBasis,0) + ISNULL(CTD.dblFutures,0)
-						,[ysnRefreshPrice] = 0
-						,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
-						,[ysnRecomputeTax] = 1
-						,[intContractDetailId] = CTD.intContractDetailId
-						,[intTicketId] = SC.intTicketId
-						,[intDestinationGradeId] = SC.intGradeId
-						,[intDestinationWeightId] = SC.intWeightId
-						,intLoadDetailId = NULL
-					FROM tblSCTicket SC
-					INNER JOIN tblSCTicketContractUsed SCContract
-						ON SC.intTicketId = SCContract.intTicketId
-					INNER JOIN tblARCustomer AR 
-						ON AR.intEntityId = SCContract.intEntityId
-					LEFT JOIN tblEMEntityLocation EM 
-						ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
-					INNER JOIN tblICItem ICI 
-						ON ICI.intItemId = SC.intItemId		
-					INNER JOIN tblCTContractDetail CTD 
-						ON CTD.intContractDetailId = SCContract.intContractDetailId
-					WHERE SC.intTicketId = @intTicketId
+					--NON BASIS/HTA CONTRACT
+					BEGIN
+						INSERT INTO @invoiceIntegrationStagingTable (
+							[strTransactionType]
+							,[strType]
+							,[strSourceTransaction]
+							,[intSourceId]
+							,[strSourceId]
+							,[intInvoiceId]
+							,[intEntityCustomerId]
+							,[intCompanyLocationId]
+							,[intCurrencyId]
+							,[intTermId]
+							,[dtmDate]
+							,[ysnTemplate]
+							,[ysnForgiven]
+							,[ysnCalculated]
+							,[ysnSplitted]
+							,[intEntityId]
+							,[ysnResetDetails]
+							,[intItemId]
+							,[strItemDescription]
+							,[intOrderUOMId]
+							,[intItemUOMId]
+							,[dblQtyOrdered]
+							,[dblQtyShipped]
+							,[dblDiscount]
+							,[dblPrice]
+							,[ysnRefreshPrice]
+							,[intTaxGroupId]
+							,[ysnRecomputeTax]
+							,[intContractDetailId]
+							,[intTicketId]
+							,[intDestinationGradeId]
+							,[intDestinationWeightId]		
+							,intLoadDetailId
+						)
+						SELECT 
+							[strTransactionType] = 'Invoice'
+							,[strType] = 'Standard'
+							,[strSourceTransaction] = 'Ticket Management'
+							,[intSourceId] = SC.intTicketId
+							,[strSourceId] = ''
+							,[intInvoiceId] = NULL --NULL Value will create new invoice
+							,[intEntityCustomerId] = SCContract.intEntityId
+							,[intCompanyLocationId] = SC.intProcessingLocationId
+							,[intCurrencyId] = CTD.intCurrencyId
+							,[intTermId] = EM.intTermsId
+							,[dtmDate] = SC.dtmTicketDateTime
+							,[ysnTemplate] = 0
+							,[ysnForgiven] = 0
+							,[ysnCalculated] = 0
+							,[ysnSplitted] = 0
+							,[intEntityId] = @intUserId
+							,[ysnResetDetails] = 0
+							,[intItemId] = SC.intItemId
+							,[strItemDescription] = ICI.strItemNo
+							,[intOrderUOMId] = CTD.intItemUOMId
+							,[intItemUOMId]  = SC.intItemUOMIdTo
+							,[dblQtyOrdered] = CTD.dblOriginalQty
+							,[dblQtyShipped] = SCContract.dblScheduleQty
+							,[dblDiscount] = 0
+							,[dblPrice] = ISNULL(CTD.dblCashPrice,0)
+							,[ysnRefreshPrice] = 0
+							,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							,[ysnRecomputeTax] = 1
+							,[intContractDetailId] = CTD.intContractDetailId
+							,[intTicketId] = SC.intTicketId
+							,[intDestinationGradeId] = SC.intGradeId
+							,[intDestinationWeightId] = SC.intWeightId
+							,intLoadDetailId = NULL
+						FROM tblSCTicket SC
+						INNER JOIN tblSCTicketContractUsed SCContract
+							ON SC.intTicketId = SCContract.intTicketId
+						INNER JOIN tblARCustomer AR 
+							ON AR.intEntityId = SCContract.intEntityId
+						LEFT JOIN tblEMEntityLocation EM 
+							ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+						INNER JOIN tblICItem ICI 
+							ON ICI.intItemId = SC.intItemId		
+						INNER JOIN tblCTContractDetail CTD 
+							ON CTD.intContractDetailId = SCContract.intContractDetailId
+						INNER JOIN tblCTContractHeader CTH
+							ON CTD.intContractHeaderId = CTH.intContractHeaderId
+						WHERE SC.intTicketId = @intTicketId	
+							AND CTH.intPricingTypeId <> 2 
+							AND CTH.intPricingTypeId <> 3
+					END
+
+					--BASIS/HTA CONTRACT
+					BEGIN
+
+						IF OBJECT_ID('tempdb..#tmpBasisContractUsed') IS NOT NULL DROP TABLE #tmpBasisContractUsed
+
+						SELECT
+							intTicketContractUsed 
+							,SCC.dblScheduleQty
+							,SCC.intContractDetailId
+						INTO #tmpBasisContractUsed
+						FROM tblSCTicket SC 
+						INNER JOIN tblSCTicketContractUsed SCC
+							ON SC.intTicketId = SCC.intTicketId
+						INNER JOIN tblCTContractDetail CTD
+							ON SCC.intContractDetailId = CTD.intContractDetailId
+						INNER JOIN tblCTContractHeader CTH
+							ON CTD.intContractHeaderId = CTH.intContractHeaderId
+						WHERE SC.intTicketId = @intTicketId
+							AND (CTH.intPricingTypeId = 2 OR CTH.intPricingTypeId = 3)
+						ORDER BY intTicketContractUsed
+
+						SET @_intTicketContractUsed = NULL
+						SELECT TOP 1 
+							@_intTicketContractUsed = intTicketContractUsed
+							,@_dblQty = dblScheduleQty
+							,@_intContractDetailId = intContractDetailId
+						FROM #tmpBasisContractUsed
+						ORDER BY intTicketContractUsed
+
+						WHILE ISNULL(@_intTicketContractUsed,0) > 0
+						BEGIN
+
+							INSERT INTO @contractBasisPriceTable (
+								intContractDetailId 
+								,intPriceFixationDetailId
+								,dblQuantity 
+								,dblPrice 
+							)
+							EXEC uspSCGetAndAllocateBasisContractUnits @_dblQty,@_intContractDetailId
+
+
+							INSERT INTO @invoiceIntegrationStagingTable (
+								[strTransactionType]
+								,[strType]
+								,[strSourceTransaction]
+								,[intSourceId]
+								,[strSourceId]
+								,[intInvoiceId]
+								,[intEntityCustomerId]
+								,[intCompanyLocationId]
+								,[intCurrencyId]
+								,[intTermId]
+								,[dtmDate]
+								,[ysnTemplate]
+								,[ysnForgiven]
+								,[ysnCalculated]
+								,[ysnSplitted]
+								,[intEntityId]
+								,[ysnResetDetails]
+								,[intItemId]
+								,[strItemDescription]
+								,[intOrderUOMId]
+								,[intItemUOMId]
+								,[dblQtyOrdered]
+								,[dblQtyShipped]
+								,[dblDiscount]
+								,[dblPrice]
+								,[ysnRefreshPrice]
+								,[intTaxGroupId]
+								,[ysnRecomputeTax]
+								,[intContractDetailId]
+								,[intTicketId]
+								,[intDestinationGradeId]
+								,[intDestinationWeightId]		
+								,intLoadDetailId
+								,intPriceFixationDetailId
+							)
+							SELECT 
+								[strTransactionType] = 'Invoice'
+								,[strType] = 'Standard'
+								,[strSourceTransaction] = 'Ticket Management'
+								,[intSourceId] = SC.intTicketId
+								,[strSourceId] = ''
+								,[intInvoiceId] = NULL --NULL Value will create new invoice
+								,[intEntityCustomerId] = SCContract.intEntityId
+								,[intCompanyLocationId] = SC.intProcessingLocationId
+								,[intCurrencyId] = CTD.intCurrencyId
+								,[intTermId] = EM.intTermsId
+								,[dtmDate] = SC.dtmTicketDateTime
+								,[ysnTemplate] = 0
+								,[ysnForgiven] = 0
+								,[ysnCalculated] = 0
+								,[ysnSplitted] = 0
+								,[intEntityId] = @intUserId
+								,[ysnResetDetails] = 0
+								,[intItemId] = SC.intItemId
+								,[strItemDescription] = ICI.strItemNo
+								,[intOrderUOMId] = CTD.intItemUOMId
+								,[intItemUOMId]  = SC.intItemUOMIdTo
+								,[dblQtyOrdered] = CTD.dblOriginalQty
+								,[dblQtyShipped] = SCBC.dblQuantity
+								,[dblDiscount] = 0
+								,[dblPrice] = SCBC.dblPrice
+								,[ysnRefreshPrice] = 0
+								,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(SCContract.intEntityId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+								,[ysnRecomputeTax] = 1
+								,[intContractDetailId] = CTD.intContractDetailId
+								,[intTicketId] = SC.intTicketId
+								,[intDestinationGradeId] = SC.intGradeId
+								,[intDestinationWeightId] = SC.intWeightId
+								,intLoadDetailId = NULL
+								,intPriceFixationDetailId
+							FROM tblSCTicket SC
+							INNER JOIN tblSCTicketContractUsed SCContract
+								ON SC.intTicketId = SCContract.intTicketId
+							INNER JOIN @contractBasisPriceTable SCBC
+								ON SCContract.intContractDetailId = SCBC.intContractDetailId
+							INNER JOIN tblARCustomer AR 
+								ON AR.intEntityId = SCContract.intEntityId
+							LEFT JOIN tblEMEntityLocation EM 
+								ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+							INNER JOIN tblICItem ICI 
+								ON ICI.intItemId = SC.intItemId		
+							INNER JOIN tblCTContractDetail CTD 
+								ON CTD.intContractDetailId = SCContract.intContractDetailId
+							INNER JOIN tblCTContractHeader CTH
+								ON CTD.intContractHeaderId = CTH.intContractHeaderId
+							WHERE SC.intTicketId = @intTicketId	
+								AND (CTH.intPricingTypeId = 2 OR CTH.intPricingTypeId = 3)
+
+							--- LOOP iterator
+							BEGIN
+								IF NOT EXISTS(SELECT TOP 1 1 
+												FROM #tmpBasisContractUsed
+												WHERE intTicketContractUsed > @_intTicketContractUsed
+												ORDER BY intTicketContractUsed)
+								BEGIN
+									SET @_intTicketContractUsed = NULL
+								END 
+								ELSE
+								BEGIN
+									SELECT TOP 1 
+										@_intTicketContractUsed = intTicketContractUsed
+										,@_dblQty = dblScheduleQty
+										,@_intContractDetailId = intContractDetailId
+									FROM #tmpBasisContractUsed
+									ORDER BY intTicketContractUsed
+								END
+							END
+						END
+					END
 				END
 
 				----STORAGE (DP ONLY)
@@ -899,7 +1244,8 @@ BEGIN TRY
 				[strTransactionType]
 				,[strType]
 				,[strSourceTransaction]
-				,[intSourceId],[strSourceId]
+				,[intSourceId]
+				,[strSourceId]
 				,[intInvoiceId]
 				,[intEntityCustomerId]
 				,[intCompanyLocationId]
@@ -933,7 +1279,8 @@ BEGIN TRY
 				[strTransactionType]
 				,[strType]
 				,[strSourceTransaction]
-				,[intSourceId],[strSourceId]
+				,[intSourceId]
+				,[strSourceId]
 				,[intInvoiceId]
 				,[intEntityCustomerId]
 				,[intCompanyLocationId]
@@ -968,87 +1315,297 @@ BEGIN TRY
 
 		--FOR FREIGHT CHARGES
 		BEGIN
-			INSERT INTO @invoiceIntegrationStagingTable (
-				[strTransactionType]
-				,[strType]
-				,[strSourceTransaction]
-				,[intSourceId]
-				,[strSourceId]
-				,[intInvoiceId]
-				,[intEntityCustomerId]
-				,[intCompanyLocationId]
-				,[intCurrencyId]
-				,[intTermId]
-				,[dtmDate]
-				,[ysnTemplate]
-				,[ysnForgiven]
-				,[ysnCalculated]
-				,[ysnSplitted]
-				,[intEntityId]
-				,[ysnResetDetails]
-				,[intItemId]
-				,[strItemDescription]
-				,[intOrderUOMId]
-				,[intItemUOMId]
-				,[dblQtyOrdered]
-				,[dblQtyShipped]
-				,[dblDiscount]
-				,[dblPrice]
-				,[ysnRefreshPrice]
-				,[intTaxGroupId]
-				,[ysnRecomputeTax]
-				,[intContractDetailId]
-				,[intTicketId]
-				,[intDestinationGradeId]
-				,[intDestinationWeightId]		
-			)
-			SELECT 
-				[strTransactionType] = 'Invoice'
-				,[strType] = 'Standard'
-				,[strSourceTransaction] = 'Ticket Management'
-				,[intSourceId] = SC.intTicketId
-				,[strSourceId] = ''
-				,[intInvoiceId] = NULL --NULL Value will create new invoice
-				,[intEntityCustomerId] = Staging.intEntityCustomerId
-				,[intCompanyLocationId] = SC.intProcessingLocationId
-				,[intCurrencyId] = SC.intCurrencyId
-				,[intTermId] = EM.intTermsId
-				,[dtmDate] = SC.dtmTicketDateTime
-				,[ysnTemplate] = 0
-				,[ysnForgiven] = 0
-				,[ysnCalculated] = 0
-				,[ysnSplitted] = 0
-				,[intEntityId] = @intUserId
-				,[ysnResetDetails] = 0
-				,[intItemId] = ICI.intItemId
-				,[strItemDescription] = ICI.strItemNo
-				,[intOrderUOMId]= NULL
-				,[intItemUOMId] = NULL
-				,[dblQtyOrdered] = Staging.dblQtyOrdered
-				,[dblQtyShipped] = Staging.dblQtyShipped
-				,[dblDiscount] = 0
-				,[dblPrice] = SC.dblFreightRate
-				,[ysnRefreshPrice] = 0
-				,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
-				,[ysnRecomputeTax] = 1
-				,[intContractDetailId] = Staging.intContractDetailId
-				,[intTicketId] = SC.intTicketId
-				,[intDestinationGradeId] = SC.intGradeId
-				,[intDestinationWeightId] = SC.intWeightId
-			FROM tblSCTicket SC
-			INNER JOIN @invoiceItemIntegrationStagingTable Staging
-				ON SC.intTicketId = Staging.intSourceId
-			INNER JOIN tblSCScaleSetup SCS 
-				ON SCS.intScaleSetupId = SC.intScaleSetupId
-			LEFT JOIN tblARCustomer AR 
-				ON AR.intEntityId = Staging.intEntityCustomerId
-			LEFT JOIN tblEMEntityLocation EM 
-				ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
-			INNER JOIN tblICItem ICI 
-				ON ICI.intItemId = SCS.intFreightItemId		
-			WHERE SC.intTicketId = @intTicketId 
-				AND SC.dblFreightRate != 0
-				
+
+
+			---LOAD
+			IF(@intTicketStorageScheduleTypeId = -6)
+			BEGIN
+			
+				INSERT INTO @invoiceIntegrationStagingTable (
+					[strTransactionType]
+					,[strType]
+					,[strSourceTransaction]
+					,[intSourceId]
+					,[strSourceId]
+					,[intInvoiceId]
+					,[intEntityCustomerId]
+					,[intCompanyLocationId]
+					,[intCurrencyId]
+					,[intTermId]
+					,[dtmDate]
+					,[ysnTemplate]
+					,[ysnForgiven]
+					,[ysnCalculated]
+					,[ysnSplitted]
+					,[intEntityId]
+					,[ysnResetDetails]
+					,[intItemId]
+					,[strItemDescription]
+					,[intOrderUOMId]
+					,[intItemUOMId]
+					,[dblQtyOrdered]
+					,[dblQtyShipped]
+					,[dblDiscount]
+					,[dblPrice]
+					,[ysnRefreshPrice]
+					,[intTaxGroupId]
+					,[ysnRecomputeTax]
+					,[intContractDetailId]
+					,[intTicketId]
+					,[intDestinationGradeId]
+					,[intDestinationWeightId]		
+				)
+				SELECT 
+					[strTransactionType] = 'Invoice'
+					,[strType] = 'Standard'
+					,[strSourceTransaction] = 'Ticket Management'
+					,[intSourceId] = SC.intTicketId
+					,[strSourceId] = ''
+					,[intInvoiceId] = NULL --NULL Value will create new invoice
+					,[intEntityCustomerId] = Staging.intEntityCustomerId
+					,[intCompanyLocationId] = SC.intProcessingLocationId
+					,[intCurrencyId] = SC.intCurrencyId
+					,[intTermId] = EM.intTermsId
+					,[dtmDate] = SC.dtmTicketDateTime
+					,[ysnTemplate] = 0
+					,[ysnForgiven] = 0
+					,[ysnCalculated] = 0
+					,[ysnSplitted] = 0
+					,[intEntityId] = @intUserId
+					,[ysnResetDetails] = 0
+					,[intItemId] = ICI.intItemId
+					,[strItemDescription] = ICI.strItemNo
+					,[intOrderUOMId]= LDCTC.intItemUOMId
+					,[intItemUOMId] = LDCTC.intItemUOMId
+					,[dblQtyOrdered] = Staging.dblQtyOrdered 
+					,[dblQtyShipped] = Staging.dblQtyShipped 
+					,[dblDiscount] = 0
+					,[dblPrice] = LDCTC.dblRate 
+					,[ysnRefreshPrice] = 0
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[ysnRecomputeTax] = 1
+					,[intContractDetailId] = Staging.intContractDetailId
+					,[intTicketId] = SC.intTicketId
+					,[intDestinationGradeId] = SC.intGradeId
+					,[intDestinationWeightId] = SC.intWeightId
+				FROM tblSCTicket SC
+				INNER JOIN @invoiceItemIntegrationStagingTable Staging
+					ON SC.intTicketId = Staging.intSourceId
+				INNER JOIN tblSCScaleSetup SCS 
+					ON SCS.intScaleSetupId = SC.intScaleSetupId
+				LEFT JOIN tblARCustomer AR 
+					ON AR.intEntityId = Staging.intEntityCustomerId
+				LEFT JOIN tblEMEntityLocation EM 
+					ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+				INNER JOIN tblICItem ICI 
+					ON ICI.intItemId = SCS.intFreightItemId	
+				------******* START Load Contract Cost *****----------------
+				INNER JOIN tblLGLoadDetail LD
+					ON SC.intLoadDetailId = LD.intLoadDetailId
+				INNER JOIN tblCTContractDetail LDCT
+					ON LD.intSContractDetailId = LDCT.intContractDetailId
+				INNER JOIN tblCTContractCost LDCTC
+					ON LDCT.intContractDetailId = LDCTC.intContractDetailId
+						AND LDCTC.intItemId = SCS.intFreightItemId
+				INNER JOIN tblICItemUOM LDCTCITM		
+					ON LDCTCITM.intItemUOMId = LDCTC.intItemUOMId
+				------******* END Load Contract Cost *****----------------
+				WHERE SC.intTicketId = @intTicketId 
+					AND LDCTC.dblRate != 0
+					AND LDCTC.ysnPrice = 1
+			END
+			---CONTRACT
+			ELSE IF (@intTicketStorageScheduleTypeId = -2)
+			BEGIN
+			
+				INSERT INTO @invoiceIntegrationStagingTable (
+					[strTransactionType]
+					,[strType]
+					,[strSourceTransaction]
+					,[intSourceId]
+					,[strSourceId]
+					,[intInvoiceId]
+					,[intEntityCustomerId]
+					,[intCompanyLocationId]
+					,[intCurrencyId]
+					,[intTermId]
+					,[dtmDate]
+					,[ysnTemplate]
+					,[ysnForgiven]
+					,[ysnCalculated]
+					,[ysnSplitted]
+					,[intEntityId]
+					,[ysnResetDetails]
+					,[intItemId]
+					,[strItemDescription]
+					,[intOrderUOMId]
+					,[intItemUOMId]
+					,[dblQtyOrdered]
+					,[dblQtyShipped]
+					,[dblDiscount]
+					,[dblPrice]
+					,[ysnRefreshPrice]
+					,[intTaxGroupId]
+					,[ysnRecomputeTax]
+					,[intContractDetailId]
+					,[intTicketId]
+					,[intDestinationGradeId]
+					,[intDestinationWeightId]		
+				)
+				SELECT 
+					[strTransactionType] = 'Invoice'
+					,[strType] = 'Standard'
+					,[strSourceTransaction] = 'Ticket Management'
+					,[intSourceId] = SC.intTicketId
+					,[strSourceId] = ''
+					,[intInvoiceId] = NULL --NULL Value will create new invoice
+					,[intEntityCustomerId] = Staging.intEntityCustomerId
+					,[intCompanyLocationId] = SC.intProcessingLocationId
+					,[intCurrencyId] = SC.intCurrencyId
+					,[intTermId] = EM.intTermsId
+					,[dtmDate] = SC.dtmTicketDateTime
+					,[ysnTemplate] = 0
+					,[ysnForgiven] = 0
+					,[ysnCalculated] = 0
+					,[ysnSplitted] = 0
+					,[intEntityId] = @intUserId
+					,[ysnResetDetails] = 0
+					,[intItemId] = ICI.intItemId
+					,[strItemDescription] = ICI.strItemNo
+					,[intOrderUOMId]= CTDC.intItemUOMId
+					,[intItemUOMId] = CTDC.intItemUOMId
+					,[dblQtyOrdered] = Staging.dblQtyOrdered 
+					,[dblQtyShipped] = Staging.dblQtyShipped 
+					,[dblDiscount] = 0
+					,[dblPrice] = SC.dblFreightRate
+					,[ysnRefreshPrice] = 0
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[ysnRecomputeTax] = 1
+					,[intContractDetailId] = Staging.intContractDetailId
+					,[intTicketId] = SC.intTicketId
+					,[intDestinationGradeId] = SC.intGradeId
+					,[intDestinationWeightId] = SC.intWeightId
+				FROM tblSCTicket SC
+				INNER JOIN @invoiceItemIntegrationStagingTable Staging
+					ON SC.intTicketId = Staging.intSourceId
+				INNER JOIN tblSCTicketContractUsed SCC
+					ON SC.intTicketId = SCC.intTicketId
+				INNER JOIN tblSCScaleSetup SCS 
+					ON SCS.intScaleSetupId = SC.intScaleSetupId
+				LEFT JOIN tblARCustomer AR 
+					ON AR.intEntityId = Staging.intEntityCustomerId
+				LEFT JOIN tblEMEntityLocation EM 
+					ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+				INNER JOIN tblICItem ICI 
+					ON ICI.intItemId = SCS.intFreightItemId	
+				------******* START Contract Cost *****----------------
+				INNER JOIN tblCTContractDetail CTD
+					ON SC.intContractId = CTD.intContractDetailId
+				INNER JOIN tblCTContractCost CTDC
+					ON CTD.intContractDetailId = CTDC.intContractDetailId
+						AND CTDC.intItemId = SCS.intFreightItemId
+				INNER JOIN tblICItemUOM CTCITM		
+					ON CTCITM.intItemUOMId = CTDC.intItemUOMId
+				------******* END Contract Cost *****----------------
+				WHERE SC.intTicketId = @intTicketId 
+					AND SC.dblFreightRate != 0
+					AND SC.dblFreightRate IS NOT NULL
+					AND ysnFarmerPaysFreight = 1
+			END
+			---OTHERS
+			ELSE 
+			BEGIN
+			
+				INSERT INTO @invoiceIntegrationStagingTable (
+					[strTransactionType]
+					,[strType]
+					,[strSourceTransaction]
+					,[intSourceId]
+					,[strSourceId]
+					,[intInvoiceId]
+					,[intEntityCustomerId]
+					,[intCompanyLocationId]
+					,[intCurrencyId]
+					,[intTermId]
+					,[dtmDate]
+					,[ysnTemplate]
+					,[ysnForgiven]
+					,[ysnCalculated]
+					,[ysnSplitted]
+					,[intEntityId]
+					,[ysnResetDetails]
+					,[intItemId]
+					,[strItemDescription]
+					,[intOrderUOMId]
+					,[intItemUOMId]
+					,[dblQtyOrdered]
+					,[dblQtyShipped]
+					,[dblDiscount]
+					,[dblPrice]
+					,[ysnRefreshPrice]
+					,[intTaxGroupId]
+					,[ysnRecomputeTax]
+					,[intContractDetailId]
+					,[intTicketId]
+					,[intDestinationGradeId]
+					,[intDestinationWeightId]		
+				)
+				SELECT 
+					[strTransactionType] = 'Invoice'
+					,[strType] = 'Standard'
+					,[strSourceTransaction] = 'Ticket Management'
+					,[intSourceId] = SC.intTicketId
+					,[strSourceId] = ''
+					,[intInvoiceId] = NULL --NULL Value will create new invoice
+					,[intEntityCustomerId] = Staging.intEntityCustomerId
+					,[intCompanyLocationId] = SC.intProcessingLocationId
+					,[intCurrencyId] = SC.intCurrencyId
+					,[intTermId] = EM.intTermsId
+					,[dtmDate] = SC.dtmTicketDateTime
+					,[ysnTemplate] = 0
+					,[ysnForgiven] = 0
+					,[ysnCalculated] = 0
+					,[ysnSplitted] = 0
+					,[intEntityId] = @intUserId
+					,[ysnResetDetails] = 0
+					,[intItemId] = ICI.intItemId
+					,[strItemDescription] = ICI.strItemNo
+					,[intOrderUOMId]= ICUOM.intItemUOMId
+					,[intItemUOMId] = ICUOM.intItemUOMId
+					,[dblQtyOrdered] = Staging.dblQtyOrdered 
+					,[dblQtyShipped] = Staging.dblQtyShipped 
+					,[dblDiscount] = 0
+					,[dblPrice] = SC.dblFreightRate
+					,[ysnRefreshPrice] = 0
+					,[intTaxGroupId] = dbo.fnGetTaxGroupIdForVendor(Staging.intEntityCustomerId,SC.intProcessingLocationId,ICI.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,[ysnRecomputeTax] = 1
+					,[intContractDetailId] = Staging.intContractDetailId
+					,[intTicketId] = SC.intTicketId
+					,[intDestinationGradeId] = SC.intGradeId
+					,[intDestinationWeightId] = SC.intWeightId
+				FROM tblSCTicket SC
+				INNER JOIN @invoiceItemIntegrationStagingTable Staging
+					ON SC.intTicketId = Staging.intSourceId
+				INNER JOIN tblSCTicketContractUsed SCC
+					ON SC.intTicketId = SCC.intTicketId
+				INNER JOIN tblSCScaleSetup SCS 
+					ON SCS.intScaleSetupId = SC.intScaleSetupId
+				INNER JOIN tblICItemUOM SCITMUOM
+					ON SC.intItemUOMIdTo = SCITMUOM.intItemUOMId
+				LEFT JOIN tblARCustomer AR 
+					ON AR.intEntityId = Staging.intEntityCustomerId
+				LEFT JOIN tblEMEntityLocation EM 
+					ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
+				INNER JOIN tblICItem ICI 
+					ON ICI.intItemId = SCS.intFreightItemId	
+				INNER JOIN tblICItemUOM ICUOM
+					ON ICI.intItemId = ICUOM.intItemId
+						AND ICUOM.intUnitMeasureId =  SCITMUOM.intUnitMeasureId
+				WHERE SC.intTicketId = @intTicketId 
+					AND SC.dblFreightRate != 0
+					AND SC.dblFreightRate IS NOT NULL
+					AND ysnFarmerPaysFreight = 1
+			END
 		END
 
 		--FOR FEE CHARGES
@@ -1219,7 +1776,7 @@ BEGIN TRY
 					ON EM.intEntityId = AR.intEntityId AND EM.intEntityLocationId = AR.intShipToId
 				INNER JOIN tblICItem ICI 
 					ON ICI.intItemId = GR.intItemId		
-				INNER JOIN tblICItemUOM UM 
+				LEFT JOIN tblICItemUOM UM 
 					ON UM.intItemId = GR.intItemId AND UM.intUnitMeasureId = GR.intUnitMeasureId
 				LEFT JOIN (
 					SELECT 
@@ -1341,6 +1898,49 @@ BEGIN TRY
 		END
 	END
 
+	--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
+	BEGIN
+
+		--- COntract
+		INSERT INTO tblSCTicketDirectBasisContract(
+			intTicketId
+			,intContractDetailId
+			,ysnProcessed
+		)
+		SELECT 
+			A.intTicketId
+			,A.intContractDetailId
+			,ysnProcessed = 0
+		FROM tblSCTicketContractUsed A
+		INNER JOIN tblCTContractDetail B
+			ON A.intContractDetailId = B.intContractDetailId
+		INNER JOIN tblCTContractHeader C
+			ON B.intContractHeaderId = C.intContractHeaderId
+		WHERE A.intTicketId = @intTicketId
+			AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+		
+
+		--LOAD
+		INSERT INTO tblSCTicketDirectBasisContract(
+			intTicketId
+			,intContractDetailId
+			,ysnProcessed
+		)
+		SELECT 
+			A.intTicketId
+			,B.intContractDetailId 
+			,ysnProcessed = 0
+		FROM tblSCTicketLoadUsed A
+		INNER JOIN tblLGLoadDetail E
+			ON A.intLoadDetailId = E.intLoadDetailId
+		INNER JOIN tblCTContractDetail B
+			ON E.intSContractDetailId = B.intContractDetailId
+		INNER JOIN tblCTContractHeader C
+			ON B.intContractHeaderId = C.intContractHeaderId
+		WHERE A.intTicketId = @intTicketId
+			AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+	END
+
 	---CREATE INVOICE
 	BEGIN
 		SELECT TOP 1 @recCount = COUNT(1) FROM @invoiceIntegrationStagingTable;
@@ -1383,6 +1983,7 @@ BEGIN TRY
 				
 			END
 
+			EXEC uspARReComputeInvoiceAmounts @intInvoiceId
 
 			EXEC [dbo].[uspARPostInvoice]
 				@batchId			= NULL,

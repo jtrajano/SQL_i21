@@ -64,6 +64,8 @@ BEGIN TRY
 		,@strComments NVARCHAR(MAX)
 		,@strBOLInstructions NVARCHAR(MAX)
 		,@strContainerErrMsg NVARCHAR(MAX)
+		,@intLeadTime INT
+		,@dtmCalculatedAvailabilityDate DATETIME
 	DECLARE @strDescription NVARCHAR(MAX)
 		,@intOldPurchaseSale INT
 		,@intOldPositionId INT
@@ -282,6 +284,8 @@ BEGIN TRY
 				,@strComments = NULL
 				,@strBOLInstructions = NULL
 				,@strContainerErrMsg = ''
+				,@intLeadTime = NULL
+				,@dtmCalculatedAvailabilityDate = NULL
 
 			SELECT @strDescription = NULL
 				,@intOldPurchaseSale = NULL
@@ -674,6 +678,20 @@ BEGIN TRY
 
 				SELECT @intLoadId = SCOPE_IDENTITY()
 
+				SELECT @intLeadTime = ISNULL(DPort.intLeadTime, 0)
+				FROM tblLGLoad L
+				OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+							WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
+				WHERE L.intLoadId = @intLoadId
+
+				SELECT @dtmCalculatedAvailabilityDate = DATEADD(DD, ISNULL(@intLeadTime, 0), @dtmETAPOD)
+
+				UPDATE tblLGLoad
+				SET dtmPlannedAvailabilityDate = @dtmCalculatedAvailabilityDate
+				WHERE intLoadId = @intLoadId
+
+				SELECT @dtmPlannedAvailabilityDate = @dtmCalculatedAvailabilityDate
+
 				-- Audit Log
 				IF (@intLoadId > 0)
 				BEGIN
@@ -754,6 +772,20 @@ BEGIN TRY
 					,strCustomerReference = @strCustomerReference
 					,intLoadShippingInstructionId = @intLoadShippingInstructionId
 				WHERE intLoadId = @intLoadId
+
+				SELECT @intLeadTime = ISNULL(DPort.intLeadTime, 0)
+				FROM tblLGLoad L
+				OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
+							WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
+				WHERE L.intLoadId = @intLoadId
+
+				SELECT @dtmCalculatedAvailabilityDate = DATEADD(DD, ISNULL(@intLeadTime, 0), @dtmETAPOD)
+
+				UPDATE tblLGLoad
+				SET dtmPlannedAvailabilityDate = @dtmCalculatedAvailabilityDate
+				WHERE intLoadId = @intLoadId
+
+				SELECT @dtmPlannedAvailabilityDate = @dtmCalculatedAvailabilityDate
 
 				-- Audit Log
 				IF (@intLoadId > 0)

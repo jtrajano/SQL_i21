@@ -314,6 +314,7 @@ BEGIN TRY
 								intMinimumAge				INT		NULL,
 								dblMinOrder					NUMERIC(18, 6) NULL,
 								dblSuggestedQty				NUMERIC(18, 6) NULL,
+								strStorageUnitNo			NVARCHAR(1000) NULL,
 								dblTransactionQtyLimit		NUMERIC(18, 6) NULL,
 								intStorageLocationId		INT		NULL,
 								intCountGroupId				INT		NULL
@@ -354,6 +355,7 @@ BEGIN TRY
 							dblMinOrder,
 							dblSuggestedQty,
 							dblTransactionQtyLimit,
+							strStorageUnitNo,
 							intStorageLocationId,
 							intCountGroupId
 						)
@@ -387,6 +389,7 @@ BEGIN TRY
 							dblMinOrder				= CASE WHEN piv.dblMinOrder = '' THEN NULL ELSE piv.dblMinOrder END, -- piv.dblMinOrder,
 							dblSuggestedQty			= CASE WHEN piv.dblSuggestedQty = '' THEN NULL ELSE piv.dblSuggestedQty END, -- piv.dblSuggestedQty, 
 							dblTransactionQtyLimit	= CASE WHEN piv.dblTransactionQtyLimit = '' THEN NULL ELSE piv.dblTransactionQtyLimit END, -- piv.dblTransactionQtyLimit, 
+							strStorageUnitNo		= piv.strStorageUnitNo,
 							intStorageLocationId	= CASE WHEN piv.intStorageLocationId = '' THEN NULL ELSE piv.intStorageLocationId END, --piv.intStorageLocationId
 							intCountGroupId			= CASE WHEN piv.intCountGroupId = '' THEN NULL ELSE piv.intCountGroupId END --piv.intStorageLocationId
 						FROM (
@@ -403,7 +406,7 @@ BEGIN TRY
 						PIVOT (
 							MAX(strOldData) FOR strTableColumnName IN (ysnTaxFlag1,ysnTaxFlag2, ysnTaxFlag3, ysnTaxFlag4, ysnDepositRequired, intDepositPLUId, ysnQuantityRequired, ysnScaleItem, ysnFoodStampable,
 																		ysnReturnable, ysnSaleable, ysnIdRequiredLiquor, ysnIdRequiredCigarette, ysnPromotionalItem, ysnPrePriced, ysnApplyBlueLaw1, ysnApplyBlueLaw2,
-																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, dblTransactionQtyLimit,
+																		ysnCountedDaily, strCounted, ysnCountBySINo, intFamilyId, intClassId, intProductCodeId, intVendorId, intMinimumAge, dblMinOrder, dblSuggestedQty, dblTransactionQtyLimit, strStorageUnitNo, 
 																		intStorageLocationId, intCountGroupId)
 						) piv
 
@@ -466,6 +469,7 @@ BEGIN TRY
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
 									 ItemLoc.dblTransactionQtyLimit,
+									 ItemLoc.strStorageUnitNo,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
 								FROM tblICItemLocation ItemLoc
@@ -518,6 +522,7 @@ BEGIN TRY
 											@dblMinOrder				NUMERIC(18, 6),
 											@dblSuggestedQty			NUMERIC(18, 6), 
 											@dblTransactionQtyLimit		NUMERIC(18, 6),
+											@strStorageUnitNo			NVARCHAR(1000),
 											@intStorageLocationId		INT,
 											@intCountGroupId			INT
 				
@@ -550,7 +555,8 @@ BEGIN TRY
 											@intVendorId				= ISNULL(temp.intVendorId, ItemLoc.intVendorId), -- CASE WHEN temp.intVendorId IS NULL THEN ItemLoc.intVendorId ELSE temp.intVendorId END, -- temp.intVendorId,
 											@intMinimumAge				= ISNULL(temp.intMinimumAge, ItemLoc.intMinimumAge),
 											@dblMinOrder				= ISNULL(temp.dblMinOrder, ItemLoc.dblMinOrder),
-											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty), 
+											@dblSuggestedQty			= ISNULL(temp.dblSuggestedQty, ItemLoc.dblSuggestedQty),
+											@strStorageUnitNo			= ISNULL(temp.strStorageUnitNo, ItemLoc.strStorageUnitNo),
 											@dblTransactionQtyLimit		= ISNULL(temp.dblTransactionQtyLimit, ItemLoc.dblTransactionQtyLimit),
 											@intStorageLocationId		= ISNULL(temp.intStorageLocationId, ItemLoc.intStorageLocationId), -- CASE WHEN temp.intStorageLocationId IS NULL THEN ItemLoc.intStorageLocationId ELSE temp.intStorageLocationId END -- temp.intStorageLocationId
 											@intCountGroupId			= ISNULL(temp.intCountGroupId, ItemLoc.intCountGroupId)
@@ -598,6 +604,7 @@ BEGIN TRY
 										,@intMinimumAge								= @intMinimumAge 
 										,@dblMinOrder								= @dblMinOrder 
 										,@dblSuggestedQty							= @dblSuggestedQty
+										,@strStorageUnitNo							= @strStorageUnitNo
 										,@dblTransactionQtyLimit					= @dblTransactionQtyLimit
 										,@intCountGroupId							= @intCountGroupId
 										,@intStorageLocationId						= @intStorageLocationId 
@@ -694,6 +701,7 @@ BEGIN TRY
 									 ItemLoc.intMinimumAge,
 									 ItemLoc.dblMinOrder,
 									 ItemLoc.dblSuggestedQty,
+									 ItemLoc.strStorageUnitNo,
 									 ItemLoc.dblTransactionQtyLimit,
 									 ItemLoc.intStorageLocationId,
 									 ItemLoc.intCountGroupId
@@ -1120,7 +1128,7 @@ BEGIN TRY
 							WHERE detail.strTableName = N'tblICItemSpecialPricing' 
 								AND detail.intRevertHolderId = @intRevertHolderId
 								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-								AND detail.strPreviewOldData != detail.strPreviewNewData
+								AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 						 )
 					BEGIN
 	
@@ -1181,7 +1189,7 @@ BEGIN TRY
 								WHERE detail.strTableName = N'tblICItemSpecialPricing'
 									AND detail.intRevertHolderId = @intRevertHolderId
 									AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-									AND detail.strPreviewOldData != detail.strPreviewNewData
+									AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 							) src
 							PIVOT (
 								MAX(strOldData) FOR strTableColumnName IN (dblUnitAfterDiscount, dblCost, dtmBeginDate, dtmEndDate)
@@ -1194,7 +1202,7 @@ BEGIN TRY
 																		WHERE detail.strTableName = N'tblICItemSpecialPricing' 
 																			AND detail.intRevertHolderId = @intRevertHolderId
 																			AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-																			AND detail.strPreviewOldData != detail.strPreviewNewData
+																			AND ISNULL(detail.strPreviewOldData, '') != detail.strPreviewNewData
 																	  )
 
 
@@ -1322,7 +1330,7 @@ BEGIN TRY
 										ON ItemSpecialPricing.intItemSpecialPricingId = detail.intItemSpecialPricingId	
 									WHERE detail.strTableName = N'tblICItemSpecialPricing'
 										AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
-										--AND detail.strPreviewOldData != detail.strPreviewNewData
+										AND detail.strPreviewOldData != detail.strPreviewNewData
 									ORDER BY ItemSpecialPricing.intItemSpecialPricingId ASC
 								END
 							-----------------------------------------------------------------------------

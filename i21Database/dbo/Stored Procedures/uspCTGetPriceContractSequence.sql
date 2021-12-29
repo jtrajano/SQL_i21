@@ -117,7 +117,7 @@ BEGIN TRY
 			, strPriceUOM = CD.strPriceUOM
 			, strItemUOM = QM.strUnitMeasure
 			, strFutureMarket = MA.strFutMarketName
-			, strFutureMonth = MO.strFutureMonth
+			, strFutureMonth = REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ')--MO.strFutureMonth
 			, intContractSeq = CAST(NULL AS INT)
 			, CT.strContractType
 			, CH.intEntityId

@@ -240,7 +240,11 @@ OPEN intListCursor;
 
 						END  
 						ELSE  
-						BEGIN  
+						BEGIN
+							
+							exec uspSCCheckContractStatus  @intContractDetailId = @intLoopContractId
+
+							
 							SET @ysnLoadContract = 0
 							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0)
 							FROM tblCTContractHeader A

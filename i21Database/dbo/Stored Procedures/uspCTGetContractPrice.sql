@@ -15,7 +15,7 @@ declare @intPriceFixationId int;
 declare @intPriceFixationDetailId int;
 declare @dblPricedQuantity numeric(18,6);
 declare @dblFinalPrice numeric(18,6);
-declare @dblShippedForInvoice numeric(18,6);
+declare @dblShippedForInvoice numeric(18,6);		
 declare @dblInvoicedPricedQuantity  numeric(18,6);
 declare @intItemUOMId int;
 declare @dblPricedQuantityForInvoice  numeric(18,6);

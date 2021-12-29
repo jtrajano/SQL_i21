@@ -28,6 +28,7 @@ SELECT
 			ELSE 0
 		END
 	, strContainerNumber = LoadContainer.strContainerNumber
+	, strMarks = LoadContainer.strMarks 
 FROM tblLGLoad [Load]
 	INNER JOIN tblLGLoadDetail LoadDetail ON [Load].intLoadId = LoadDetail.intLoadId
 	LEFT OUTER JOIN tblLGLoadDetailContainerLink ContainerLink ON ContainerLink.intLoadDetailId = LoadDetail.intLoadDetailId

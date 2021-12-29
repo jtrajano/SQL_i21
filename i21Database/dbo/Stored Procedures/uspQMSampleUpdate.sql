@@ -185,11 +185,26 @@ BEGIN TRY
 				)
 	END
 
+	-- If it is not Inter Company then update SampleRefNo
+	IF NOT EXISTS (
+			SELECT TOP 1 1
+			FROM dbo.tblIPMultiCompany
+			)
+	BEGIN
+		UPDATE tblQMSample
+		SET strSampleRefNo = x.strSampleRefNo
+		FROM OPENXML(@idoc, 'root', 2) WITH (
+				strSampleRefNo NVARCHAR(30)
+				,strRowState NVARCHAR(50)
+				) x
+		WHERE dbo.tblQMSample.intSampleId = @intSampleId
+			AND x.strRowState = 'MODIFIED'
+	END
+
 	-- Sample Header Update
 	UPDATE tblQMSample
 	SET intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 		,intSampleTypeId = x.intSampleTypeId
-		,strSampleRefNo = x.strSampleRefNo
 		,intProductTypeId = x.intProductTypeId
 		,intProductValueId = x.intProductValueId
 		,intSampleStatusId = x.intSampleStatusId
@@ -218,7 +233,7 @@ BEGIN TRY
 		,strLotNumber = x.strLotNumber
 		,strSampleNote = x.strSampleNote
 		,dtmSampleReceivedDate = x.dtmSampleReceivedDate
-		,dtmTestedOn = x.dtmTestedOn
+		--,dtmTestedOn = x.dtmTestedOn
 		--,intTestedById = x.intTestedById
 		,dblSampleQty = x.dblSampleQty
 		,intSampleUOMId = x.intSampleUOMId
@@ -249,7 +264,6 @@ BEGIN TRY
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
-			,strSampleRefNo NVARCHAR(30)
 			,intProductTypeId INT
 			,intProductValueId INT
 			,intSampleStatusId INT
@@ -277,7 +291,7 @@ BEGIN TRY
 			,strLotNumber NVARCHAR(50)
 			,strSampleNote NVARCHAR(512)
 			,dtmSampleReceivedDate DATETIME
-			,dtmTestedOn DATETIME
+			--,dtmTestedOn DATETIME
 			--,intTestedById INT
 			,dblSampleQty NUMERIC(18, 6)
 			,intSampleUOMId INT
@@ -316,6 +330,11 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblQMSample
 		SET intPreviousSampleStatusId = @intPreviousSampleStatusId
+		WHERE intSampleId = @intSampleId
+
+		UPDATE tblQMSample
+		SET dtmTestedOn = NULL
+			,intTestedById = NULL
 		WHERE intSampleId = @intSampleId
 	END
 

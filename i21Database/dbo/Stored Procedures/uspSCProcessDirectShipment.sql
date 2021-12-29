@@ -690,14 +690,56 @@ BEGIN TRY
 				EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 			END
 						
+				
+			---Create GL Entries
+			EXEC uspSCCreateDirectInGLEntries @intTicketId, 1, @intUserId 
+
+			--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
+			BEGIN
+
+				--- COntract
+				INSERT INTO tblSCTicketDirectBasisContract(
+					intTicketId
+					,intContractDetailId
+					,ysnProcessed
+				)
+				SELECT 
+					A.intTicketId
+					,A.intContractDetailId
+					,ysnProcessed = 0
+				FROM tblSCTicketContractUsed A
+				INNER JOIN tblCTContractDetail B
+					ON A.intContractDetailId = B.intContractDetailId
+				INNER JOIN tblCTContractHeader C
+					ON B.intContractHeaderId = C.intContractHeaderId
+				WHERE A.intTicketId = @intTicketId
+					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+				
+
+				--LOAD
+				INSERT INTO tblSCTicketDirectBasisContract(
+					intTicketId
+					,intContractDetailId
+					,ysnProcessed
+				)
+				SELECT 
+					A.intTicketId
+					,B.intContractDetailId 
+					,ysnProcessed = 0
+				FROM tblSCTicketLoadUsed A
+				INNER JOIN tblLGLoadDetail E
+					ON A.intLoadDetailId = E.intLoadDetailId
+				INNER JOIN tblCTContractDetail B
+					ON E.intPContractDetailId = B.intContractDetailId
+				INNER JOIN tblCTContractHeader C
+					ON B.intContractHeaderId = C.intContractHeaderId
+				WHERE A.intTicketId = @intTicketId
+					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+			END
 
 			--Create Voucher
 			EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
 			
-		
-				
-			---Create GL Entries
-			EXEC uspSCCreateDirectInGLEntries @intTicketId, 1, @intUserId 
 
 			/*------Increase inventory inbound in transit
 				BEGIN
@@ -890,6 +932,93 @@ BEGIN TRY
 			INNER JOIN tblSCTicket SC
 				ON SC.intContractId = CT.intContractDetailId
 			WHERE  SC.intTicketId = @intTicketId))
+
+			--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
+			BEGIN
+
+				--- COntract
+				INSERT INTO tblSCTicketDirectBasisContract(
+					intTicketId
+					,intContractDetailId
+					,ysnProcessed
+				)
+				SELECT 
+					A.intTicketId
+					,A.intContractDetailId
+					,ysnProcessed = 0
+				FROM tblSCTicketContractUsed A
+				INNER JOIN tblCTContractDetail B
+					ON A.intContractDetailId = B.intContractDetailId
+				INNER JOIN tblCTContractHeader C
+					ON B.intContractHeaderId = C.intContractHeaderId
+				WHERE A.intTicketId = @intTicketId
+					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+				
+
+				--LOAD
+				INSERT INTO tblSCTicketDirectBasisContract(
+					intTicketId
+					,intContractDetailId
+					,ysnProcessed
+				)
+				SELECT 
+					A.intTicketId
+					,B.intContractDetailId 
+					,ysnProcessed = 0
+				FROM tblSCTicketLoadUsed A
+				INNER JOIN tblLGLoadDetail E
+					ON A.intLoadDetailId = E.intLoadDetailId
+				INNER JOIN tblCTContractDetail B
+					ON E.intSContractDetailId = B.intContractDetailId
+				INNER JOIN tblCTContractHeader C
+					ON B.intContractHeaderId = C.intContractHeaderId
+				WHERE A.intTicketId = @intTicketId
+					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+			END
+
+			--CHECK for BASIS/HTA Contract used and insert in tblSCTicketDirectBasisContract
+			BEGIN
+
+				--- COntract
+				INSERT INTO tblSCTicketDirectBasisContract(
+					intTicketId
+					,intContractDetailId
+					,ysnProcessed
+				)
+				SELECT 
+					A.intTicketId
+					,A.intContractDetailId
+					,ysnProcessed = 0
+				FROM tblSCTicketContractUsed A
+				INNER JOIN tblCTContractDetail B
+					ON A.intContractDetailId = B.intContractDetailId
+				INNER JOIN tblCTContractHeader C
+					ON B.intContractHeaderId = C.intContractHeaderId
+				WHERE A.intTicketId = @intTicketId
+					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+				
+
+				--LOAD
+				INSERT INTO tblSCTicketDirectBasisContract(
+					intTicketId
+					,intContractDetailId
+					,ysnProcessed
+				)
+				SELECT 
+					A.intTicketId
+					,B.intContractDetailId 
+					,ysnProcessed = 0
+				FROM tblSCTicketLoadUsed A
+				INNER JOIN tblLGLoadDetail E
+					ON A.intLoadDetailId = E.intLoadDetailId
+				INNER JOIN tblCTContractDetail B
+					ON E.intSContractDetailId = B.intContractDetailId
+				INNER JOIN tblCTContractHeader C
+					ON B.intContractHeaderId = C.intContractHeaderId
+				WHERE A.intTicketId = @intTicketId
+					AND (C.intPricingTypeId = 2 OR C.intPricingTypeId = 3)
+			END
+
 
 
 			---CREATE INVOICE

@@ -431,7 +431,9 @@ SELECT
   LEFT JOIN  tblEMEntitySplit SP ON SP.intSplitId = SC.intSplitId
   LEFT JOIN tblEMEntitySplitDetail SPD ON SPD.intSplitId = SP.intSplitId AND SPD.intEntityId = SC.intEntityId
   LEFT JOIN tblICItem ITEM ON ITEM.intItemId = SC.intItemId
-  LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = SC.intContractId 
+  left join tblCTContractDetail ContractDetail
+		on SC.intContractId = ContractDetail.intContractDetailId
+  LEFT JOIN tblCTContractHeader CT ON CT.intContractHeaderId = ContractDetail.intContractHeaderId
   WHERE SC.intTicketId = @intScaleTicketId
 
 END TRY

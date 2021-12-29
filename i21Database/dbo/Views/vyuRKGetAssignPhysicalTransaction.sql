@@ -7,6 +7,7 @@ SELECT intRowNum = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY intContractDetailId))
 FROM (
 	SELECT *
 		, dblToBeHedgedLots = dblNoOfLots - dblHedgedLots
+		, dblToBeAssignedLots = dblNoOfLots - dblAssignedLots
 	FROM (
 		SELECT intContractDetailId
 			, CH.intContractHeaderId
@@ -53,6 +54,7 @@ FROM (
 	
 	UNION ALL SELECT *
 		, dblToBeHedgedLots = dblNoOfLots - dblHedgedLots
+		, dblToBeAssignedLots = dblNoOfLots - dblAssignedLots
 	FROM (
 		SELECT intContractDetailId = (SELECT TOP 1 intContractDetailId FROM tblCTContractDetail WHERE intContractHeaderId = CH.intContractHeaderId)
 			, CH.intContractHeaderId

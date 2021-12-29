@@ -96,6 +96,11 @@ BEGIN TRY
 		,@dblRMVoucherTotal NUMERIC(18, 6)
 		,@strLiborMsg NVARCHAR(MAX)
 		,@ysnMailReq BIT
+		,@intShipFromId INT
+		,@intShipFromEntityId INT
+		,@intPayToAddressId INT
+		,@dbli21VoucherTotal NUMERIC(18, 6)
+		,@intWeightAdjItemId INT
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -159,6 +164,7 @@ BEGIN TRY
 		,@intFinancingCostItemId = intFinancingCostItemId
 		,@intFreightCostItemId = intFreightCostItemId
 		,@intMiscItemId = intMiscItemId
+		,@intWeightAdjItemId = intWeightAdjItemId
 	FROM tblIPCompanyPreference
 
 	SELECT @intScreenId = intScreenId
@@ -274,7 +280,7 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblLiborAmount = NULL
 
-					SELECT @dblLiborAmount = ((1.75 + @strLIBORrate) * 90 / 300) * (@dblVoucherTotal - @dblFinanceChargeAmount) / 100
+					SELECT @dblLiborAmount = ((1.75 + @strLIBORrate) * 90 / 360) * (@dblVoucherTotal - @dblFinanceChargeAmount) / 100
 
 					IF @dblLiborAmount <> @dblFinanceChargeAmount
 					BEGIN
@@ -690,6 +696,31 @@ BEGIN TRY
 					END
 				END
 
+				IF EXISTS (
+						SELECT 1
+						FROM dbo.tblICInventoryReceiptItem RI
+						JOIN dbo.tblAPBillDetail B ON B.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+						WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+						)
+				BEGIN
+					SELECT @strBillId = NULL
+
+					SELECT @strBillId = strBillId
+					FROM dbo.tblICInventoryReceiptItem RI
+					JOIN dbo.tblAPBillDetail BD ON BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+					JOIN dbo.tblAPBill B ON B.intBillId = BD.intBillId
+					WHERE RI.intInventoryReceiptId = @intInventoryReceiptId
+
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Voucher ' + @strBillId + ' is already created for the invoice no ' + @strInvoiceNo
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Voucher ' + @strBillId + ' is already created for the invoice no ' + @strInvoiceNo
+					END
+				END
+
 				IF @strErrorMessage <> ''
 				BEGIN
 					RAISERROR (
@@ -756,7 +787,7 @@ BEGIN TRY
 			DELETE
 			FROM @voucherNonInvDetails
 
-			INSERT INTO @voucherNonInvDetails (
+			/*INSERT INTO @voucherNonInvDetails (
 				intEntityVendorId
 				,intTransactionType
 				,intShipToId
@@ -785,6 +816,7 @@ BEGIN TRY
 				,intTermId
 				,intCostCurrencyId
 				,intInventoryReceiptItemId
+				,intLocationId
 				)
 			SELECT @intEntityId
 				,1
@@ -814,7 +846,143 @@ BEGIN TRY
 				,@intTermID
 				,intCurrencyId
 				,intInventoryReceiptItemId
-			FROM @tblIPFinalInvoiceDetail FID
+				,@intLocationId
+			FROM @tblIPFinalInvoiceDetail FID*/
+			INSERT INTO @voucherNonInvDetails (
+				[intEntityVendorId]
+				,[intTransactionType]
+				,[intLocationId]
+				,[intShipToId]
+				,[intShipFromId]
+				,[intShipFromEntityId]
+				,[intPayToAddressId]
+				,[intCurrencyId]
+				,[dtmDate]
+				,[strVendorOrderNumber]
+				,[strReference]
+				,[strSourceNumber]
+				,[intPurchaseDetailId]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[intContractSeqId]
+				,[intScaleTicketId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryShipmentItemId]
+				,[intInventoryShipmentChargeId]
+				,[strLoadShipmentNumber]
+				,[intLoadShipmentId]
+				,[intLoadShipmentDetailId]
+				,[intLoadShipmentCostId]
+				,[intItemId]
+				,[intPurchaseTaxGroupId]
+				,[strMiscDescription]
+				,[dblOrderQty]
+				,[dblOrderUnitQty]
+				,[intOrderUOMId]
+				,[dblQuantityToBill]
+				,[dblQtyToBillUnitQty]
+				,[intQtyToBillUOMId]
+				,[dblCost]
+				,[dblCostUnitQty]
+				,[intCostUOMId]
+				,[dblNetWeight]
+				,[dblWeightUnitQty]
+				,[intWeightUOMId]
+				,[intCostCurrencyId]
+				,[dblTax]
+				,[dblDiscount]
+				,[intCurrencyExchangeRateTypeId]
+				,[dblExchangeRate]
+				,[ysnSubCurrency]
+				,[intSubCurrencyCents]
+				,[intAccountId]
+				,[intShipViaId]
+				,[intTermId]
+				,[strBillOfLading]
+				,[ysnReturn]
+				,[dtmVoucherDate]
+				,[intStorageLocationId]
+				,[intSubLocationId]
+				,[intBookId]
+				,[intSubBookId]
+				,intPartitionId
+				,dtmDueDate
+				)
+			SELECT GP.[intEntityVendorId]
+				,GP.[intTransactionType]
+				,GP.[intLocationId]
+				,[intShipToId] = GP.intLocationId
+				,[intShipFromId] = GP.intShipFromId
+				,[intShipFromEntityId] = GP.intShipFromEntityId
+				,[intPayToAddressId] = GP.intPayToAddressId
+				,GP.[intCurrencyId]
+				,GP.dtmDate
+				,@strInvoiceNo
+				,GP.[strReference]
+				,GP.[strSourceNumber]
+				,GP.[intPurchaseDetailId]
+				,GP.[intContractHeaderId]
+				,GP.[intContractDetailId]
+				,[intContractSeqId] = NULL
+				,GP.[intScaleTicketId]
+				,GP.[intInventoryReceiptItemId]
+				,GP.[intInventoryReceiptChargeId]
+				,GP.[intInventoryShipmentItemId]
+				,GP.[intInventoryShipmentChargeId]
+				,GP.strLoadShipmentNumber
+				,GP.[intLoadShipmentId]
+				,GP.[intLoadShipmentDetailId]
+				,GP.[intLoadShipmentCostId]
+				,GP.[intItemId]
+				,GP.[intPurchaseTaxGroupId]
+				,GP.[strMiscDescription]
+				,GP.dblOrderQty --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblOrderQty]	ELSE GP.dblOrderQty END
+				,[dblOrderUnitQty] = 0.00
+				,[intOrderUOMId] = NULL
+				,GP.[dblQuantityToBill] --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblQuantityToBill]	ELSE GP.[dblQuantityToBill] END	
+				,GP.[dblQtyToBillUnitQty]
+				,GP.[intQtyToBillUOMId]
+				,[dblCost] = GP.dblUnitCost
+				,ISNULL(GP.[dblCostUnitQty], 1)
+				,GP.[intCostUOMId]
+				,GP.[dblNetWeight]
+				,ISNULL([dblWeightUnitQty], 1)
+				,GP.[intWeightUOMId]
+				,GP.[intCostCurrencyId]
+				,GP.[dblTax]
+				,GP.[dblDiscount]
+				,GP.[intCurrencyExchangeRateTypeId]
+				,[dblExchangeRate] = GP.dblRate
+				,GP.[ysnSubCurrency]
+				,GP.[intSubCurrencyCents]
+				,GP.[intAccountId]
+				,GP.[intShipViaId]
+				,GP.[intTermId]
+				,GP.[strBillOfLading]
+				,GP.[ysnReturn]
+				,@dtmInvoiceDate
+				,GP.intStorageLocationId
+				,GP.intSubLocationId
+				,GP.intBookId
+				,GP.intSubBookId
+				,1
+				,@dtmDueDate
+			FROM dbo.fnICGeneratePayables(@intInventoryReceiptId, 1, 1) GP
+
+			SELECT @intShipFromId = NULL
+				,@intShipFromEntityId = NULL
+				,@intPayToAddressId = NULL
+
+			SELECT @intShipFromId = [intShipFromId]
+				,@intShipFromEntityId = [intShipFromEntityId]
+				,@intPayToAddressId = [intPayToAddressId]
+			FROM @voucherNonInvDetails
+
+			SELECT @dblVoucherTotal = NULL
+
+			SELECT @dbli21VoucherTotal = SUM(ROUND((dblNetWeight * dblCost),2))
+			FROM @voucherNonInvDetails
 
 			IF @dblFinanceChargeAmount > 0
 			BEGIN
@@ -846,6 +1014,11 @@ BEGIN TRY
 					,dtmDueDate
 					,intTermId
 					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
 					)
 				SELECT @intEntityId
 					,1
@@ -874,6 +1047,11 @@ BEGIN TRY
 					,@dtmDueDate
 					,@intTermID
 					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 
@@ -907,6 +1085,11 @@ BEGIN TRY
 					,dtmDueDate
 					,intTermId
 					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
 					)
 				SELECT @intEntityId
 					,1
@@ -935,6 +1118,11 @@ BEGIN TRY
 					,@dtmDueDate
 					,@intTermID
 					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
 
@@ -968,6 +1156,11 @@ BEGIN TRY
 					,dtmDueDate
 					,intTermId
 					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
 					)
 				SELECT @intEntityId
 					,1
@@ -996,13 +1189,115 @@ BEGIN TRY
 					,@dtmDueDate
 					,@intTermID
 					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
 				FROM @tblIPFinalInvoiceDetail FID
 			END
+
+			IF @dblRMVoucherTotal <> @dbli21VoucherTotal
+				AND @intWeightAdjItemId IS NOT NULL
+			BEGIN
+				INSERT INTO @voucherNonInvDetails (
+					intEntityVendorId
+					,intTransactionType
+					,intShipToId
+					,intItemId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblOrderQty
+					,intOrderUOMId
+					,dblQuantityToBill
+					,intQtyToBillUOMId
+					,dblCost
+					,dblNetWeight
+					,dblWeight
+					,intWeightUOMId
+					,strVendorOrderNumber
+					,dtmVoucherDate
+					,intBillId
+					,ysnStage
+					,intLoadShipmentId
+					,intLoadShipmentDetailId
+					,intLineNo
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					,dtmDueDate
+					,intTermId
+					,intCostCurrencyId
+					,intLocationId
+					,intPartitionId
+					,intShipFromId
+					,intShipFromEntityId
+					,intPayToAddressId
+					)
+				SELECT @intEntityId
+					,1
+					,@intLocationId
+					,@intWeightAdjItemId
+					,NULL AS intContractHeaderId
+					,NULL AS intContractDetailId
+					,(
+						CASE 
+							WHEN @dblRMVoucherTotal - @dbli21VoucherTotal < 0
+								THEN - 1
+							ELSE 1
+							END
+						) AS dblQtyOrdered
+					,NULL AS intOrderItemUOMId
+					,(
+						CASE 
+							WHEN @dblRMVoucherTotal - @dbli21VoucherTotal < 0
+								THEN - 1
+							ELSE 1
+							END
+						) AS dblQtyShipped
+					,NULL AS intUnitMeasureId
+					,ABS(@dblRMVoucherTotal - @dbli21VoucherTotal) AS dblPrice
+					,0 AS dblShipmentNetWt
+					,0 AS dblItemWeight
+					,NULL AS intWeightUnitMeasureId
+					,@strInvoiceNo
+					,@dtmInvoiceDate
+					,@intBillId
+					,0
+					,NULL AS intLoadId
+					,NULL AS intLoadDetailId
+					,NULL AS intFinalInvoiceDetailId
+					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
+					,@dtmDueDate
+					,@intTermID
+					,intCurrencyId
+					,@intLocationId
+					,1
+					,@intShipFromId
+					,@intShipFromEntityId
+					,@intPayToAddressId
+				FROM @tblIPFinalInvoiceDetail FID
+			END
+
+			SELECT @intBillInvoiceId = NULL
 
 			EXEC uspAPCreateVoucher @voucherPayables = @voucherNonInvDetails
 				,@userId = @intUserId
 				,@throwError = 1
 				,@createdVouchersId = @intBillInvoiceId OUT
+
+			IF @intBillInvoiceId IS NULL
+			BEGIN
+				SELECT @strErrorMessage = 'Unable to create a voucher entry for the invoice no ' + @strInvoiceNo
+
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
+			END
 
 			SELECT @strBillId = NULL
 

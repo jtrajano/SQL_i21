@@ -19,3 +19,9 @@
 	CONSTRAINT [FK_tblICParentLot_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblICParentLot_tblICLotStatus_intLotStatusId] FOREIGN KEY ([intLotStatusId]) REFERENCES [tblICLotStatus]([intLotStatusId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICParentLot]
+	ON [dbo].[tblICParentLot](intItemId ASC, intParentLotId ASC);
+
+GO 

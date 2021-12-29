@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMEntityMenuFavorite]
 (
     [intEntityMenuFavoriteId]				INT NOT NULL PRIMARY KEY IDENTITY, 
-	[strMenuName]							NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,  
+	[strMenuName]							NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,  
     [intMenuId]								INT NULL,
 	[intCustomId]							INT NULL, 
 	[intEntityId]							INT NOT NULL, 

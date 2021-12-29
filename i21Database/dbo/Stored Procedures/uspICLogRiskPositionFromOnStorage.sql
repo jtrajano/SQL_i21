@@ -105,8 +105,8 @@ BEGIN
 			,intFutureMarketId = NULL
 			,intFutureMonthId = NULL
 			,dblNoOfLots = NULL
-			,dblQty = t.dblQty
-			,dblPrice = t.dblCost
+			,dblQty = v.dblQuantityInStockUOM --t.dblQty
+			,dblPrice = v.dblCostInStockUOM -- t.dblCost
 			,intEntityId = v.intEntityId
 			,ysnDelete = 0
 			,intUserId = @intEntityUserSecurityId

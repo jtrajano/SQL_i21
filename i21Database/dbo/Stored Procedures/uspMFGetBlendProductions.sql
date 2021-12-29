@@ -45,6 +45,9 @@ IF ISNULL(@ysnProduced, 0) = 0
 		,w.intManufacturingProcessId
 		,i.intCategoryId
 		,w.intTransactionFrom
+		,w.dtmActualProductionStartDate
+		,w.dtmActualProductionEndDate
+		,w.dblActualQuantity
 	FROM tblMFWorkOrder w
 	JOIN tblICItem i ON w.intItemId = i.intItemId
 	JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -100,8 +103,12 @@ BEGIN
 			,mc.strCellName
 			,i.strLotTracking
 			,i.intItemId
+			,w.strERPOrderNo
 			,i.intCategoryId
 			,w.intTransactionFrom
+			,w.dtmActualProductionStartDate
+			,w.dtmActualProductionEndDate
+			,w.dblActualQuantity
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId
@@ -146,8 +153,12 @@ BEGIN
 			,mc.strCellName
 			,i.strLotTracking
 			,i.intItemId
+			,w.strERPOrderNo
 			,i.intCategoryId
 			,w.intTransactionFrom
+			,w.dtmActualProductionStartDate
+			,w.dtmActualProductionEndDate
+			,w.dblActualQuantity
 		FROM tblMFWorkOrder w
 		JOIN tblICItem i ON w.intItemId = i.intItemId
 		JOIN tblICItemUOM iu ON w.intItemUOMId = iu.intItemUOMId

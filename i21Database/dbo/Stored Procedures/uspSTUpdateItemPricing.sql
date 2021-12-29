@@ -309,48 +309,55 @@ BEGIN TRY
 	DECLARE @dtmEffectiveDateConv AS DATE = CAST(@EffectiveDate AS DATE)
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
 
+	IF @dtmEffectiveDateConv IS NOT NULL
+	BEGIN
+		BEGIN TRY
+			-- ITEM PRICING
+			EXEC [uspICUpdateEffectivePricingForCStore]
+				  @strUpcCode				= @strUpcCode
+				, @strScreen				= 'UpdateItemPricing'
+				, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
+				, @intItemId				= NULL
+				, @dblStandardCost			= @dblStandardCostConv
+				, @dblRetailPrice			= @dblRetailPriceConv
+				, @intEntityUserSecurityId	= @intCurrentUserIdConv
+				, @dtmEffectiveDate			= @dtmEffectiveDateConv
+		END TRY
+		BEGIN CATCH
+			SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
+			SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
 
-	BEGIN TRY
-		-- ITEM PRICING
-		EXEC [uspICUpdateEffectivePricingForCStore]
-			  @strUpcCode				= @strUpcCode
-			, @strScreen				= 'UpdateItemPricing'
-			, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
-			, @intItemId				= NULL
-			, @dblStandardCost			= @dblStandardCostConv
-			, @dblRetailPrice			= @dblRetailPriceConv
-			, @intEntityUserSecurityId	= @intCurrentUserIdConv
-			, @dtmEffectiveDate			= @dtmEffectiveDateConv
-	END TRY
-	BEGIN CATCH
-		SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
-		SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
+			GOTO ExitWithRollback 
+		END CATCH
+	END
 
-		GOTO ExitWithRollback 
-	END CATCH
-	
+
+
+
 
 	DECLARE @dblSalesPriceConv AS DECIMAL(18, 6) = CAST(@SalesPrice AS DECIMAL(18, 6))
 	DECLARE @dblPromotionalCostConv AS DECIMAL(18, 6) = CAST(@PromotionalCost AS DECIMAL(18, 6))
 	DECLARE @dtmSalesStartingDateConv AS DATE = CAST(@SalesStartDate AS DATE)
 	DECLARE @dtmSalesEndingDateConv AS DATE = CAST(@SalesEndDate AS DATE)
+	IF @dtmSalesStartingDateConv IS NOT NULL AND @dtmSalesEndingDateConv IS NOT NULL
+	BEGIN
+		BEGIN TRY
+			-- ITEM SPECIAL PRICING
+			EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
+				 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
+				,@dblPromotionalCost			= @dblPromotionalCostConv 
+				,@dtmBeginDate					= @dtmSalesStartingDateConv
+				,@dtmEndDate					= @dtmSalesEndingDateConv 
+				,@strUpcCode					= @strUpcCode
+				,@intEntityUserSecurityId		= @intCurrentUserIdConv
+		END TRY
+		BEGIN CATCH
+			SELECT 'uspICUpdateItemPromotionalPricingForCStore', ERROR_MESSAGE()
+			SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
 
-	BEGIN TRY
-		-- ITEM SPECIAL PRICING
-		EXEC [dbo].[uspICUpdateItemPromotionalPricingForCStore]
-			 @dblPromotionalSalesPrice		= @dblSalesPriceConv 
-			,@dblPromotionalCost			= @dblPromotionalCostConv 
-			,@dtmBeginDate					= @dtmSalesStartingDateConv
-			,@dtmEndDate					= @dtmSalesEndingDateConv 
-			,@strUpcCode					= @strUpcCode
-			,@intEntityUserSecurityId		= @intCurrentUserIdConv
-	END TRY
-	BEGIN CATCH
-		SELECT 'uspICUpdateItemPromotionalPricingForCStore', ERROR_MESSAGE()
-		SET @strResultMsg = 'Error Message: ' + ERROR_MESSAGE()
-
-		GOTO ExitWithRollback 
-	END CATCH
+			GOTO ExitWithRollback 
+		END CATCH
+	END
 
 
 
@@ -449,7 +456,7 @@ BEGIN TRY
 				, intEffectiveItemCostId		= tic.intEffectiveItemCostId
 				, intItemSpecialPricingId		= NULL
 
-				, dtmDateModified				= ISNULL(tic.dtmDateModified, '')
+				, dtmDateModified				= ISNULL(tic.dtmDateModified, GETDATE())
 				, intCompanyLocationId			= CL.intCompanyLocationId
 				, strLocation					= CL.strLocationName
 				, strUpc						= UOM.strLongUPCCode
@@ -575,8 +582,8 @@ BEGIN TRY
 				, intItemLocationId				= IL.intItemLocationId 
 				, intEffectiveItemPriceId		= tip.intEffectiveItemPriceId
 				, intItemSpecialPricingId		= NULL
-
-				, dtmDateModified				= ISNULL(tip.dtmDateModified, '')
+				
+				, dtmDateModified				= ISNULL(tip.dtmDateModified, GETDATE())
 				, intCompanyLocationId			= CL.intCompanyLocationId
 				, strLocation					= CL.strLocationName
 				, strUpc						= UOM.strLongUPCCode
@@ -721,9 +728,17 @@ BEGIN TRY
 											WHEN [Changes].oldColumnName = 'strBeginDate_Original' THEN 'Begin Date'
 											WHEN [Changes].oldColumnName = 'strEndDate_Original' THEN 'End Date'
 										END
-			, strPreviewOldData			= [Changes].strOldData
+			, strPreviewOldData			= CASE WHEN [Changes].strOldData = ''
+												THEN NULL
+											ELSE
+												[Changes].strOldData
+											END
 			, strPreviewNewData			= [Changes].strNewData
-			, strOldDataPreview			= [Changes].strOldData
+			, strOldDataPreview			= CASE WHEN [Changes].strOldData = ''
+												THEN NULL
+											ELSE
+												[Changes].strOldData
+											END
 			, strAction					= [Changes].strAction
 			, ysnPreview				= 1
 			, ysnForRevert				= 1
@@ -734,8 +749,8 @@ BEGIN TRY
 			(
 				SELECT intItemId 
 					,intItemSpecialPricingId 
-					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_Original
-					,ISNULL(CAST(CAST(dblOldCost AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strCost_Original
+					,ISNULL(CAST(CAST(dblOldUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '') AS strUnitAfterDiscount_Original
+					,ISNULL(CAST(CAST(dblOldCost AS DECIMAL(18,3)) AS NVARCHAR(50)), '') AS strCost_Original
 					,CAST(CAST(dtmOldBeginDate AS DATE) AS NVARCHAR(50)) AS strBeginDate_Original
 					,CAST(CAST(dtmOldEndDate AS DATE) AS NVARCHAR(50)) AS strEndDate_Original
 					,ISNULL(CAST(CAST(dblNewUnitAfterDiscount AS DECIMAL(18,3)) AS NVARCHAR(50)), '0') AS strUnitAfterDiscount_New
@@ -871,59 +886,67 @@ BEGIN TRY
 								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
 							END
 						
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Vendor)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Vendor</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Vendor)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Vendor</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + EntityVendor.strName + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Vendor tempVendor
-								INNER JOIN tblEMEntity EntityVendor
-									ON tempVendor.intVendorId = EntityVendor.intEntityId
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + EntityVendor.strName + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Vendor tempVendor
+							INNER JOIN tblEMEntity EntityVendor
+								ON tempVendor.intVendorId = EntityVendor.intEntityId
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
 
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Category</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Category)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Category</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Category.strCategoryCode + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Category tempCategory
-								INNER JOIN tblICCategory Category
-									ON tempCategory.intCategoryId = Category.intCategoryId
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + Category.strCategoryCode + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Category tempCategory
+							INNER JOIN tblICCategory Category
+								ON tempCategory.intCategoryId = Category.intCategoryId
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
 
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Family</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Family)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Family</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubFamily.strSubcategoryId + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Family tempFamily
-								INNER JOIN tblSTSubcategory SubFamily
-									ON tempFamily.intFamilyId = SubFamily.intSubcategoryId
-								WHERE SubFamily.strSubcategoryType = 'F'
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubFamily.strSubcategoryId + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Family tempFamily
+							INNER JOIN tblSTSubcategory SubFamily
+								ON tempFamily.intFamilyId = SubFamily.intSubcategoryId
+							WHERE SubFamily.strSubcategoryType = 'F'
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
 
-						IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
-							BEGIN
-								SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Class</b></p>'
+					IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_Class)
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>Class</b></p>'
 								
-								SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubClass.strSubcategoryId + '</p>'
-								FROM #tmpUpdateItemPricingForCStore_Class tempClass
-								INNER JOIN tblSTSubcategory SubClass
-									ON tempClass.intClassId = SubClass.intSubcategoryId
-								WHERE SubClass.strSubcategoryType = 'C'
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + SubClass.strSubcategoryId + '</p>'
+							FROM #tmpUpdateItemPricingForCStore_Class tempClass
+							INNER JOIN tblSTSubcategory SubClass
+								ON tempClass.intClassId = SubClass.intSubcategoryId
+							WHERE SubClass.strSubcategoryType = 'C'
 
-								--SET @strFilterCriteria = @strFilterCriteria + '<br>'
-							END
-						-- SELECT @strLottedItem = LEFT(@strLottedItem, LEN(@strLottedItem)-1)
-						-- ===================================================================================
-						-- [END] Filter Criteria
-						-- ===================================================================================
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
+					IF ISNULL(@strUpcCode, '') != ''
+						BEGIN
+							SET @strFilterCriteria = @strFilterCriteria + '<p id="p2"><b>UPC Code</b></p>'
+								
+							SELECT @strFilterCriteria = @strFilterCriteria + '<p id="p2">&emsp;' + @strUpcCode + '</p>'
+
+							--SET @strFilterCriteria = @strFilterCriteria + '<br>'
+						END
+
+					-- ===================================================================================
+					-- [END] Filter Criteria
+					-- ===================================================================================
 
 
 

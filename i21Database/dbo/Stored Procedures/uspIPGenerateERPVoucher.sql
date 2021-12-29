@@ -61,6 +61,10 @@ BEGIN TRY
 		,@dblDetailTotalwithTax NUMERIC(18, 6)
 		,@intContractDetailId INT
 		,@strType NVARCHAR(50)
+		,@strReceiptNumber NVARCHAR(50)
+		,@intWeightAdjItemId INT
+		,@dblCostAdjustment NUMERIC(18, 6)
+		,@intNoOfItem INT
 	DECLARE @tblAPBillPreStage TABLE (intBillPreStageId INT)
 	DECLARE @tblAPBillDetail TABLE (intBillDetailId INT)
 	DECLARE @tblOutput AS TABLE (
@@ -103,6 +107,14 @@ BEGIN TRY
 	IF @intBillPreStageId IS NULL
 	BEGIN
 		RETURN
+	END
+
+	SELECT @intWeightAdjItemId = intWeightAdjItemId
+	FROM tblIPCompanyPreference
+
+	IF @intWeightAdjItemId IS NULL
+	BEGIN
+		SELECT @intWeightAdjItemId = 0
 	END
 
 	WHILE @intBillPreStageId IS NOT NULL
@@ -276,7 +288,7 @@ BEGIN TRY
 			IF ISNULL(@strERPVoucherNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'ERP Voucher No. cannot be blank. '
-				
+
 				UPDATE tblAPBillPreStage
 				SET strMessage = @strError
 					,intStatusId = 1
@@ -339,6 +351,7 @@ BEGIN TRY
 		SELECT BD.intBillDetailId
 		FROM tblAPBillDetail BD
 		WHERE BD.intBillId = @intBillId
+			AND intItemId <> @intWeightAdjItemId
 
 		SELECT @intBillDetailId = MIN(intBillDetailId)
 		FROM @tblAPBillDetail
@@ -371,6 +384,7 @@ BEGIN TRY
 				,@dblDetailTotalwithTax = NULL
 				,@intContractDetailId = NULL
 				,@strType = NULL
+				,@strReceiptNumber = NULL
 
 			SELECT @intItemId = BD.intItemId
 			FROM dbo.tblAPBillDetail BD
@@ -415,7 +429,7 @@ BEGIN TRY
 				,@strERPPONumber = CD.strERPPONumber
 				,@strERPItemNumber = CD.strERPItemNumber
 				,@strItemNo = I.strItemNo
-				,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId, @intItemUOMId, BD.dblQtyReceived), 0))
+				,@dblDetailQuantity = CONVERT(NUMERIC(18, 6), ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(BD.intWeightUOMId, @intItemUOMId, BD.dblNetWeight), 0))
 				,@strDetailCurrency = C.strCurrency
 				,@dblDetailCost = (
 					CASE 
@@ -436,7 +450,61 @@ BEGIN TRY
 			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = BD.intContractDetailId
 			WHERE BD.intBillDetailId = @intBillDetailId
 
+			IF EXISTS (
+					SELECT *
+					FROM tblAPBillDetail
+					WHERE intBillId = @intBillId
+						AND intItemId = @intWeightAdjItemId
+					)
+				AND EXISTS (
+					SELECT 1
+					FROM tblAPBillDetail
+					WHERE intBillDetailId = @intBillDetailId
+						AND intInventoryReceiptItemId IS NOT NULL
+					)
+			BEGIN
+				SELECT @dblCostAdjustment = NULL
+
+				SELECT @dblCostAdjustment = dblCost
+				FROM tblAPBillDetail
+				WHERE intBillId = @intBillId
+					AND intItemId = @intWeightAdjItemId
+
+				SELECT @intNoOfItem = NULL
+
+				SELECT @intNoOfItem = Count(*)
+				FROM tblAPBillDetail
+				WHERE intBillId = @intBillId
+					AND intInventoryReceiptItemId IS NOT NULL
+
+				IF @intNoOfItem IS NULL
+					SELECT @intNoOfItem = 1
+
+				SELECT @dblDetailTotal = @dblDetailTotal + (@dblCostAdjustment / @intNoOfItem)
+					--SELECT @dblDetailQuantity = @dblDetailTotal / @dblDetailCost
+			END
+
 			SELECT @dblDetailTotalwithTax = @dblDetailTotal + @dblDetailTax
+
+			IF @intTransactionType = 3 -- Claim
+			BEGIN
+				SELECT @strReceiptNumber = R.strReceiptNumber
+				FROM tblAPBillDetail BD
+				JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimDetailId = BD.intWeightClaimDetailId
+					AND BD.intContractDetailId IS NOT NULL
+					AND BD.intBillDetailId = @intBillDetailId
+				JOIN tblICInventoryReceiptItem RI ON RI.intContainerId = WCD.intLoadContainerId
+				JOIN tblICInventoryReceipt R ON RI.intInventoryReceiptId = R.intInventoryReceiptId
+			END
+			ELSE
+			BEGIN
+				SELECT @strReceiptNumber = R.strReceiptNumber
+				FROM tblAPBillDetail BD
+				JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+					AND BD.intContractDetailId IS NOT NULL
+					AND BD.intBillDetailId = @intBillDetailId
+				JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+			END
 
 			IF ISNULL(@strType, '') = 'Other Charge'
 				AND @intContractDetailId IS NULL
@@ -480,7 +548,7 @@ BEGIN TRY
 				IF ISNULL(@strMapItemNo, '') <> ''
 					SELECT @strItemNo = @strMapItemNo
 			END
-			
+
 			IF ISNULL(@strItemNo, '') = ''
 			BEGIN
 				SELECT @strError = @strError + 'Item No cannot be blank. '
@@ -565,6 +633,8 @@ BEGIN TRY
 			SELECT @strItemXML += '<Tax>' + LTRIM(ISNULL(@dblDetailTax, 0)) + '</Tax>'
 
 			SELECT @strItemXML += '<lineTotal>' + LTRIM(ISNULL(@dblDetailTotalwithTax, 0)) + '</lineTotal>'
+
+			SELECT @strItemXML += '<ReceiptNo>' + ISNULL(@strReceiptNumber, '') + '</ReceiptNo>'
 
 			SELECT @strItemXML += '</line>'
 

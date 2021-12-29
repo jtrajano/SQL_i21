@@ -276,13 +276,26 @@ BEGIN
 			
 			SELECT @Total = @Total + COUNT(*) FROM ptcusmst OCUS 
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblSMTaxClassXref Xrf ON  Xrf.strTaxClassType = 'SST' 
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
+			CROSS APPLY (
+				SELECT DISTINCT TC.intTaxClassId
+				FROM tblSMTaxClass TC
+				INNER JOIN tblSMTaxClassXref XREF ON TC.intTaxClassId = XREF.intTaxClassId 
+				WHERE TC.strOriginTaxType = 'SST'
+				  AND XREF.strTaxClassType = 'SST' 
+			) TCD 
 			WHERE OCUS.ptcus_sales_tax_yn = 'N' --AND PDV.ptpdv_cus_no = @CustomerId
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] = NULL AND [intCategoryId] = NULL AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])
-						
+			AND CUS.intEntityId NOT IN (
+				SELECT DISTINCT intEntityCustomerId 
+				FROM tblARCustomerTaxingTaxException TE
+				INNER JOIN tblSMTaxClass TC ON TE.intTaxClassId = TC.intTaxClassId
+				INNER JOIN tblSMTaxCode TCODE ON TC.intTaxClassId = TCODE.intTaxClassId  
+				INNER JOIN tblSMTaxClassXref XREF ON TC.intTaxClassId = XREF.intTaxClassId 
+				WHERE TC.strOriginTaxType = 'SST'
+				  AND XREF.strTaxClassType = 'SST' 
+				  AND [intEntityCustomerId] = CUS.intEntityId
+				  AND [intItemId] IS NULL 
+				  AND [intCategoryId] IS NULL 
+			   )
 
 		RETURN @Total
 	 
@@ -516,7 +529,7 @@ BEGIN
 			AND [intTaxClassId] = TCD.[intTaxClassId])		
 			Order by OCUS.ptcus_cus_no
 
---IMPORT SALES TAX EXEMPTION FROM PTCUSMST 
+		--IMPORT SALES TAX EXEMPTION FROM PTCUSMST 
 		INSERT INTO [dbo].[tblARCustomerTaxingTaxException]
 			   ([intEntityCustomerId]
 			   ,[intTaxClassId]
@@ -535,13 +548,27 @@ BEGIN
 			   ,1	
 			FROM ptcusmst OCUS 
 			INNER JOIN tblARCustomer CUS ON CUS.strCustomerNumber COLLATE SQL_Latin1_General_CP1_CS_AS = OCUS.ptcus_bill_to COLLATE SQL_Latin1_General_CP1_CS_AS
-			INNER JOIN tblSMTaxClassXref Xrf ON  Xrf.strTaxClassType = 'SST' 
-			INNER JOIN tblSMTaxCode TCD ON TCD.intTaxClassId =  Xrf.intTaxClassId
+			CROSS APPLY (
+				SELECT DISTINCT TC.intTaxClassId
+				FROM tblSMTaxClass TC
+				INNER JOIN tblSMTaxClassXref XREF ON TC.intTaxClassId = XREF.intTaxClassId 
+				WHERE TC.strOriginTaxType = 'SST'
+				  AND XREF.strTaxClassType = 'SST' 
+			) TCD 
 			WHERE OCUS.ptcus_sales_tax_yn = 'N' --AND PDV.ptpdv_cus_no = @CustomerId
-			AND NOT EXISTS ( SELECT * FROM tblARCustomerTaxingTaxException WHERE [intEntityCustomerId] = CUS.intEntityId
-			AND [intItemId] = NULL AND [intCategoryId] = NULL AND [intTaxCodeId] = TCD.[intTaxCodeId]
-			AND [intTaxClassId] = TCD.[intTaxClassId])		
-			Order by OCUS.ptcus_cus_no
+			AND CUS.intEntityId NOT IN (
+				SELECT DISTINCT intEntityCustomerId 
+				FROM tblARCustomerTaxingTaxException TE
+				INNER JOIN tblSMTaxClass TC ON TE.intTaxClassId = TC.intTaxClassId
+				INNER JOIN tblSMTaxCode TCODE ON TC.intTaxClassId = TCODE.intTaxClassId  
+				INNER JOIN tblSMTaxClassXref XREF ON TC.intTaxClassId = XREF.intTaxClassId 
+				WHERE TC.strOriginTaxType = 'SST'
+				  AND XREF.strTaxClassType = 'SST' 
+				  AND [intEntityCustomerId] = CUS.intEntityId
+				  AND [intItemId] IS NULL 
+				  AND [intCategoryId] IS NULL 
+			   )
+			ORDER BY OCUS.ptcus_cus_no
 			
 	DECLARE @cnt INT = 1
 	DECLARE @SQLCMD NVARCHAR(3000),@SQLCMD1 NVARCHAR(3000)		

@@ -362,6 +362,11 @@ BEGIN TRY
 		       ,@PostDate        = @PostDate
 		       ,@UserId          = @userId
 		       ,@BatchIdUsed     = @batchIdUsed OUT
+
+		DELETE 
+		FROM tblARPostingQueue
+		WHERE intTransactionId IN (SELECT [intID] FROM dbo.fnGetRowsFromDelimitedValues(@param))
+
         GOTO Do_Commit
     END
 
@@ -561,7 +566,7 @@ BEGIN TRY
     FROM [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
     DECLARE @invalidGLCount INT
-	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
+	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT [strTransactionId]) FROM @InvalidGLEntries WHERE [strTransactionId] IS NOT NULL), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
 	SET @totalRecords = @totalRecords - @invalidGLCount
 

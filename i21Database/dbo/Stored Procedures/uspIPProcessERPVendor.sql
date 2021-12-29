@@ -445,53 +445,53 @@ BEGIN TRY
 								)
 					END
 
-					IF ISNULL(@strDetailCity, '') = ''
-					BEGIN
-						SELECT @strError = 'Detail - City cannot be blank.'
+					--IF ISNULL(@strDetailCity, '') = ''
+					--BEGIN
+					--	SELECT @strError = 'Detail - City cannot be blank.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 
-					IF ISNULL(@strDetailState, '') = ''
-					BEGIN
-						SELECT @strError = 'Detail - State cannot be blank.'
+					--IF ISNULL(@strDetailState, '') = ''
+					--BEGIN
+					--	SELECT @strError = 'Detail - State cannot be blank.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 
-					IF ISNULL(@strDetailZip, '') = ''
-					BEGIN
-						SELECT @strError = 'Detail - Zip Code cannot be blank.'
+					--IF ISNULL(@strDetailZip, '') = ''
+					--BEGIN
+					--	SELECT @strError = 'Detail - Zip Code cannot be blank.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 
 					SELECT @intDetailCountryId = intCountryID
 					FROM dbo.tblSMCountry WITH (NOLOCK)
 					WHERE strCountry = @strDetailCountry
 
-					IF @intDetailCountryId IS NULL
-					BEGIN
-						SELECT @strError = 'Detail - Country not found.'
+					--IF @intDetailCountryId IS NULL
+					--BEGIN
+					--	SELECT @strError = 'Detail - Country not found.'
 
-						RAISERROR (
-								@strError
-								,16
-								,1
-								)
-					END
+					--	RAISERROR (
+					--			@strError
+					--			,16
+					--			,1
+					--			)
+					--END
 				END
 				ELSE IF @intDetailLineType = 3
 				BEGIN
