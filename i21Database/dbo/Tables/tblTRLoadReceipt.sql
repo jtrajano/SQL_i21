@@ -21,6 +21,7 @@
 	[strReceiptLine] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intLoadDetailId] [int] NULL,
+	[dblMinimumUnits] DECIMAL(18, 6) NULL,
 	CONSTRAINT [PK_tblTRLoadReceipt] PRIMARY KEY ([intLoadReceiptId]),
 	CONSTRAINT [FK_tblTRLoadReceipt_tblTRLoadHeader_intLoadHeaderId] FOREIGN KEY ([intLoadHeaderId]) REFERENCES [dbo].[tblTRLoadHeader] ([intLoadHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRLoadReceipt_tblAPVendor_intTermianlId] FOREIGN KEY ([intTerminalId]) REFERENCES [dbo].[tblAPVendor] (intEntityId),

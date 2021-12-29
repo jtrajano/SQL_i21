@@ -107,6 +107,7 @@ END
 		,strChargesLink				= MIN(TR.strReceiptLine)
 		,strDestinationType			= ISNULL(MIN(TLD.strDestination), MIN(BID.strDestination))
 		,strFreightBilledBy			= MIN(ShipVia.strFreightBilledBy)
+		,dblMinimumUnits			= MIN(TR.dblMinimumUnits)
 	INTO #tmpReceipts
 	FROM tblTRLoadHeader TL
 	LEFT JOIN tblTRLoadReceipt TR ON TR.intLoadHeaderId = TL.intLoadHeaderId			
@@ -264,7 +265,8 @@ END
 			,[intContractDetailId] 
 			,[ysnAccrue]
 			,[strChargesLink]
-	) 
+			,[dblQuantity]
+	) 	
    SELECT	[intEntityVendorId]				= RE.intEntityVendorId
 			,[strBillOfLadding]				= RE.strBillOfLadding
 			,[strReceiptType]				= RE.strReceiptType
@@ -277,7 +279,7 @@ END
 													WHEN @FreightCostAllocationMethod = 3 THEN CAST (0 AS BIT)
 													ELSE (CASE WHEN RE.strDestinationType = 'Location' THEN CAST(1 AS BIT)
 																ELSE CAST(0 AS BIT) END) END)
-			,[strCostMethod]				= @strCostMethodFreight
+			,[strCostMethod]				= CASE WHEN dblQty <= dblMinimumUnits THEN 'Custom Unit' ELSE @strCostMethodFreight END
 			,[dblRate]						= RE.dblFreightRate
 			,[intCostUOMId]					= @FreightUOMId
 			,[intOtherChargeEntityVendorId]	= CASE	WHEN RE.strFreightBilledBy = 'Vendor' THEN RE.intEntityVendorId
@@ -293,6 +295,7 @@ END
 													WHEN RE.strFreightBilledBy = 'Other' THEN 1
 													ELSE 0 END
 			,strChargesLink					= RE.strChargesLink
+			,[dblQuantity]					= CASE WHEN dblQty <= dblMinimumUnits THEN dblMinimumUnits ELSE dblQty END
     FROM	#tmpReceipts RE 
 	WHERE	RE.dblFreightRate != 0
 
@@ -327,6 +330,7 @@ END
 													ELSE 0 END
 
 			,strChargesLink					= RE.strChargesLink
+			,dblQuantity					= NULL
     FROM	#tmpReceipts RE 
 	WHERE	RE.dblSurcharge != 0 
 
