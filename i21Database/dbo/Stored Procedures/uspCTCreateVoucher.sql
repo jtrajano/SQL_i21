@@ -52,7 +52,7 @@ begin try
 		,@intPayToAddressId				INT
 		,@intCurrencyId					INT
 		,@dtmDate						DATETIME
-		,@dtmVoucherDate				DATETIME = getdate()
+		,@dtmVoucherDate				DATETIME = GETUTCDATE()
 		,@dtmDueDate					DATETIME
 		,@strVendorOrderNumber			NVARCHAR (MAX)
 		,@strReference					NVARCHAR(400)
@@ -1058,7 +1058,7 @@ begin try
 							,intBillDetailId = @intCreatedBillDetailId 
 							,intSourceId = @intCreatedInventoryReceiptItemId
 							,dblQuantity = @dblCreatedQtyReceived
-							,dtmCreatedDate = getdate()
+							,dtmCreatedDate = GETUTCDATE()
 							,ysnMarkDelete = null
 							,intConcurrencyId = 1
 					end
