@@ -50,7 +50,7 @@ begin try
 		,@intPayToAddressId				INT
 		,@intCurrencyId					INT
 		,@dtmDate						DATETIME
-		,@dtmVoucherDate				DATETIME = getdate()
+		,@dtmVoucherDate				DATETIME = GETUTCDATE()
 		,@dtmDueDate					DATETIME
 		,@strVendorOrderNumber			NVARCHAR (MAX)
 		,@strReference					NVARCHAR(400)
