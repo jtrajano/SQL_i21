@@ -14,7 +14,9 @@ CREATE PROCEDURE [dbo].[uspTRGetCustomerFreight]
 	 @dblReceiptSurchargeRate decimal(18,6) OUTPUT,
 	 @dblInvoiceSurchargeRate decimal(18,6) OUTPUT,
 	 @ysnFreightInPrice bit OUTPUT,
-	 @ysnFreightOnly bit OUTPUT
+	 @ysnFreightOnly bit OUTPUT,
+	 @dblMinimumUnitsIn decimal(18,6) OUTPUT,
+	 @dblMinimumUnitsOut decimal(18,6) OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -46,6 +48,8 @@ set @dblReceiptFreightRate = 0;
 set @dblReceiptSurchargeRate =0;
 set @dblInvoiceSurchargeRate =0;
 
+SET @dblMinimumUnitsIn = 0
+SET	@dblMinimumUnitsOut = 0
 
      select @intCategoryid = intCategoryId from tblICItem where intItemId = @intItemId
      IF @intCategoryid IS NULL 
@@ -62,7 +66,8 @@ set @dblInvoiceSurchargeRate =0;
 					@dblFreightRateIn = ISNULL(CF.dblFreightRateIn, 0),
 	           		@dblFreightRateOut = ISNULL(CF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = CF.ysnFreightInPrice, 
-	           		@dblMinimumUnits = CF.dblMinimumUnits,
+					@dblMinimumUnitsIn = CF.dblMinimumUnitsIn,
+	           		@dblMinimumUnitsOut = CF.dblMinimumUnits,
 					@intTariffType  = CF.intEntityTariffTypeId,
 					@dblSurchargeRateOut = CF.dblSurchargeOut
 	    from tblARCustomerFreightXRef CF 
@@ -78,24 +83,26 @@ set @dblInvoiceSurchargeRate =0;
 	                @strFreightType = BPF.strFreightType,
 	           		@intEntityShipViaId = BPF.intShipViaId,
 	           		@intMiles = convert(int,BPF.dblFreightMiles),
+					@dblFreightRateIn = ISNULL(BPF.dblFreightRateIn, 0),
 	           		@dblFreightRateOut = ISNULL(BPF.dblFreightRate, 0),
 	           		@ysnFreightInPrice = convert(bit,0), 
-	           		@dblMinimumUnits = BPF.dblMinimumUnits,
-					@intTariffType   = BPF.intEntityTariffTypeId
+					@dblMinimumUnitsIn = BPF.dblMinimumUnitsIn,
+	           		@dblMinimumUnitsOut = BPF.dblMinimumUnits,
+					@intTariffType   = BPF.intEntityTariffTypeId,
+					@dblSurchargeRateOut = BPF.dblSurchargeOut
 	    from tblTRBulkPlantFreight BPF 
 	            where BPF.strZipCode = @strZipCode
 	           			and BPF.intCategoryId = @intCategoryid
                         and BPF.intCompanyLocationId = @intShipToId
 
-		SET @dblFreightRateIn = @dblFreightRateOut
      END
 
 
 
-     IF ((isNull(@dblMinimumUnits,0) > isNull(@dblInvoiceGallons,0)) or (isNull(@dblMinimumUnits,0) > isNull(@dblReceiptGallons,0)) )
-     BEGIN
-	     RAISERROR('Gallons less than Minimum Freight Units' , 16, 1);
-	 END
+    --  IF ((isNull(@dblMinimumUnits,0) > isNull(@dblInvoiceGallons,0)) or (isNull(@dblMinimumUnits,0) > isNull(@dblReceiptGallons,0)) )
+    --  BEGIN
+	--      RAISERROR('Gallons less than Minimum Freight Units' , 16, 1);
+	--  END
 	 
 	 IF isNull(@strFreightType,0) = '0'
 	 BEGIN
