@@ -117,6 +117,28 @@ BEGIN TRY
 		END
 	END
 
+	IF @strMessageType = 'Customer'
+	BEGIN
+		SET @strHeader = '<tr>
+							<th>&nbsp;Location</th>
+							<th>&nbsp;Contract No</th>
+							<th>&nbsp;Customer</th>
+						</tr>'
+
+		SELECT @strDetail = @strDetail + '<tr>' + 
+				'<td>&nbsp;' + ISNULL(CL.strLocationName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(CH.strContractNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(E.strName, '') + '</td>' + 
+		'</tr>'
+		FROM tblCTContractHeader CH WITH (NOLOCK)
+		JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId
+			AND CH.intContractTypeId = 2
+		JOIN tblSMCompanyLocation CL WITH (NOLOCK) ON CL.intCompanyLocationId = CD.intCompanyLocationId
+		JOIN tblARCustomer C WITH (NOLOCK) ON C.intEntityId = CH.intEntityId
+		JOIN tblEMEntity E WITH (NOLOCK) ON E.intEntityId = C.intEntityId
+			AND ISNULL(C.strLinkCustomerNumber, '') = ''
+	END
+
 	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
 	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
 	SET @strMessage = @strStyle + @strHtml
