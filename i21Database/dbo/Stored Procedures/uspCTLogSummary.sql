@@ -4874,7 +4874,7 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = (case when intActionId = 18 then 46 else intActionId end)
+						UPDATE @cbLogSpecific SET dblQty = dblQty * - 1, intActionId = (case when intActionId = 18 then 46 when intActionId = 46 and @TotalOrigPriced = 0 and (dblQty * - 1) < 0 and strTransactionType = 'Sales Basis Deliveries' then 18 else intActionId end)
 					END
 					
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
