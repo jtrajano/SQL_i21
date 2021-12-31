@@ -350,6 +350,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPEmail.sql" />
     <Build Include="dbo\Views\vyuMFLotDetailViewForDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePlannedAvailabilityDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
+    <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
