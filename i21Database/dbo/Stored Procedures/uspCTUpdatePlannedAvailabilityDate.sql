@@ -12,15 +12,19 @@ as
 		,@strAuditDescription nvarchar(500)
 		,@intContractSeq int
 		,@intApprovedById int
-		,@intLoadingPortLeadTime int
 		,@intDestinationPortLeadTime int
 		,@intLeadTimeAtSource int
+		,@intFreightRateMatrixLeadTime int
 		,@intTotalLeadTime int
 		,@intContractTypeId int
 		,@ysnCalculatePlannedAvailabilityDateForSale bit = 0
 		,@ysnCalculatePlannedAvailabilityDateForPurchase bit = 0
 		,@intPositionId int
 		,@intUserId int
+		,@intLoadingPortId int
+		,@intDestinationPortId int
+		,@strLoadingPort nvarchar(50)
+		,@strDestinationPort nvarchar(50)
 		;
 
 	begin try
@@ -48,9 +52,12 @@ as
 			@dtmSequenceStartDate = cd.dtmStartDate
 			,@intContractSeq = cd.intContractSeq
 			,@dtmCurrentPlannedAvailabilityDate = cd.dtmPlannedAvailabilityDate
-			,@intLoadingPortLeadTime = isnull(l.intLeadTime,0)
-			,@intDestinationPortLeadTime = isnull(d.intLeadTime,0)
-			,@intLeadTimeAtSource = isnull(l.intLeadTimeAtSource,0)
+			,@intDestinationPortLeadTime = d.intLeadTime
+			,@intLeadTimeAtSource = l.intLeadTimeAtSource
+			,@intLoadingPortId = cd.intLoadingPortId
+			,@intDestinationPortId = cd.intDestinationPortId
+			,@strLoadingPort = l.strCity
+			,@strDestinationPort = d.strCity
 		from
 			tblCTContractDetail cd
 			left join tblSMCity l on l.intCityId = cd.intLoadingPortId
@@ -58,9 +65,20 @@ as
 		where
 			cd.intContractDetailId = @intContractDetailId;
 
-		set @intTotalLeadTime = @intLoadingPortLeadTime + @intDestinationPortLeadTime + @intLeadTimeAtSource;
+		select top 1
+			@intFreightRateMatrixLeadTime = intLeadTime
+		from
+			tblLGFreightRateMatrix
+		where
+			intType = 2
+			and strOriginPort = @strLoadingPort
+			and strDestinationCity = @strDestinationPort
+		order by
+			intFreightRateMatrixId desc;
 
-		if (@intTotalLeadTime = 0)
+		set @intTotalLeadTime = isnull(@intFreightRateMatrixLeadTime,0) + isnull(@intDestinationPortLeadTime,0) + isnull(@intLeadTimeAtSource,0);
+
+		if (isnull(@intLoadingPortId,0) = 0 and isnull(@intDestinationPortId,0) = 0)
 		begin
 			select @intTotalLeadTime = isnull(intNoOfDays,0) from tblCTPosition where intPositionId = @intPositionId;
 		end
