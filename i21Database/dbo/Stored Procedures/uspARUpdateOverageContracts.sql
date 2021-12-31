@@ -5,7 +5,7 @@
 	, @dblNetWeight			NUMERIC(18, 6) = 0
 	, @ysnFromSalesOrder	BIT = 0
 	, @ysnFromImport		BIT = 0
-	, @dblSpotPirce			NUMERIC(18, 6) = 0
+	, @dblSpotPrice			NUMERIC(18, 6) = 0
 AS
 
 DECLARE @tblInvoiceIds				InvoiceId
@@ -668,7 +668,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 									 , ysnCharge			= CAST(1 AS BIT)
 								FROM #SHIPMENTCHARGES
 							END
-					END				
+					END
 
 				--ADD INVOICE DETAIL LINE WITHOUT CONTRACT AND INVENTORY SHIPMENT LINK
 				IF @dblQtyOverAged > 0
@@ -681,7 +681,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 							 , intItemId			= @intItemId
 							 , intItemUOMId			= @intItemUOMId
 							 , dblQtyShipped		= @dblQtyOverAged
-							 , dblPrice				= @dblSpotPirce
+							 , dblPrice				= @dblSpotPrice
 							 , ysnCharge			= CAST(0 AS BIT)
 
 						INSERT INTO #INVOICEDETAILSTOADD (intInvoiceDetailId, intContractDetailId, intContractHeaderId, intTicketId, intItemId, intItemUOMId, dblQtyShipped, dblPrice, ysnCharge)
