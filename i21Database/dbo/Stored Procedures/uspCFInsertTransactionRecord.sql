@@ -389,6 +389,7 @@ BEGIN
 			IF(@strCardId LIKE '%X%')
 			BEGIN
 				SET @strTransactionType = 'Foreign Sale'
+				SET @dblTransferCost = @dblOriginalGrossPrice
 				SET @dblOriginalGrossPrice = @dblTransferCost
 				SET @intCustomerId = @intForeignCustomerId
 			END
