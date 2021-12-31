@@ -414,7 +414,7 @@ BEGIN TRY
 				END
 			END
 
-			IF NOT (ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory')
+			IF NOT ((ISNULL(@strScreenName, '') = 'Credit Memo' AND @strProcess = 'Update Sequence Balance' AND @strSource = 'Inventory') or (ISNULL(@strScreenName, '') = '' AND @strProcess = 'Price Delete' AND @strSource = 'Pricing'))
 			BEGIN
 				-- CONTRACT BALANCE LOG
 				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
