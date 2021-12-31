@@ -15,7 +15,8 @@
 		@is_wesroc BIT = 1,
 		@qty_in_tank  NUMERIC(18,6) = NULL,
 		@resultLog NVARCHAR(4000)= '' OUTPUT,
-		@resultSavingStatus int = 3 output -- should include in build (9/4/2019)
+		@resultSavingStatus int = 3 output, -- should include in build (9/4/2019)
+		@intInterfaceTypeId INT = NULL
 	AS  
 	BEGIN 
 
@@ -309,12 +310,25 @@
 			BEGIN
 				GOTO CREATECALLENTRY
 			END
-			IF (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
-						FROM tblTMSite 
-						WHERE intSiteID = @siteId),0) <= 5)
+
+			IF(@intInterfaceTypeId = 3)
 			BEGIN
-				GOTO CREATECALLENTRY
-			END 
+				IF (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
+							FROM tblTMSite 
+							WHERE intSiteID = @siteId AND dtmRunOutDate IS NOT NULL),0) <= 5)
+				BEGIN
+					GOTO CREATECALLENTRY
+				END 
+			END
+			ELSE
+			BEGIN
+				IF (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
+							FROM tblTMSite 
+							WHERE intSiteID = @siteId),0) <= 5)
+				BEGIN
+					GOTO CREATECALLENTRY
+				END
+			END
 		
 			
 		
