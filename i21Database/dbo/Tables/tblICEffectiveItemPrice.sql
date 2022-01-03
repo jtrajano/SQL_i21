@@ -3,6 +3,7 @@ CREATE TABLE [dbo].[tblICEffectiveItemPrice]
 	[intEffectiveItemPriceId] INT NOT NULL IDENTITY,
 	[intItemId] INT NOT NULL,
 	[intItemLocationId] INT NOT NULL,
+	[intItemUOMId] INT NOT NULL,
 	[dblRetailPrice] NUMERIC(38, 20) NULL DEFAULT ((0)),
 	[dtmEffectiveRetailPriceDate] DATETIME NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((0)),

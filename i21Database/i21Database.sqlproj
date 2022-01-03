@@ -442,6 +442,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetTruckDispatchResource.sql" />
     <Build Include="dbo\Views\vyuMFLotDetailViewForDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePlannedAvailabilityDate.sql" />
+    <Build Include="dbo\Views\vyuICGetEffectiveItemPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
