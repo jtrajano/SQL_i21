@@ -290,35 +290,46 @@
 			SET intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 			WHERE intSiteID = @siteId
 
-			--prevent eco green from creating order since @ta_ltankcrit is not supplied from API and run out date is not calculated due to lack of requirement to calculate
-			if (@is_wesroc = 0)
-			begin
-				set @dblTankReserve = (select dblTankReserve = sum(isnull(c.dblTankReserve,0.00)) from tblTMSiteDevice b, tblTMDevice c where b.intSiteID = @siteId and c.intDeviceId = b.intDeviceId and isnull(c.ysnAppliance,0) = 0);
-				if (@qty_in_tank >= @dblTankReserve)
-				begin
-					SET @resultLog = @resultLog + 'Import successful';
-					return;
-				end
-				else
-				begin
-					GOTO CREATECALLENTRY;
-				end
-			end
-		
-			PRINT @ta_ltankcrit
-			IF(@ta_ltankcrit = 1)
+			-- Prevent Anova from creating order
+			IF(@intInterfaceTypeId != 3)
 			BEGIN
-				GOTO CREATECALLENTRY
+				--prevent eco green from creating order since @ta_ltankcrit is not supplied from API and run out date is not calculated due to lack of requirement to calculate
+				if (@is_wesroc = 0)
+				begin
+					set @dblTankReserve = (select dblTankReserve = sum(isnull(c.dblTankReserve,0.00)) from tblTMSiteDevice b, tblTMDevice c where b.intSiteID = @siteId and c.intDeviceId = b.intDeviceId and isnull(c.ysnAppliance,0) = 0);
+					if (@qty_in_tank >= @dblTankReserve)
+					begin
+						SET @resultLog = @resultLog + 'Import successful';
+						return;
+					end
+					else
+					begin
+						GOTO CREATECALLENTRY;
+					end
+				end
+			
+				PRINT @ta_ltankcrit
+				IF(@ta_ltankcrit = 1)
+				BEGIN
+					GOTO CREATECALLENTRY
+				END
 			END
 
 			IF(@intInterfaceTypeId = 3)
 			BEGIN
-				IF (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
-							FROM tblTMSite 
-							WHERE intSiteID = @siteId AND dtmRunOutDate IS NOT NULL),0) <= 5)
+				IF EXISTS(SELECT TOP 1 1 FROM tblTMSite WHERE intSiteID = @siteId AND dtmRunOutDate IS NOT NULL)
 				BEGIN
-					GOTO CREATECALLENTRY
-				END 
+					IF (ISNULL((SELECT DATEDIFF(dd,DATEADD(dd, DATEDIFF(dd, 0, @rpt_date_ti), 0),dtmRunOutDate) 
+								FROM tblTMSite 
+								WHERE intSiteID = @siteId),0) <= 5)
+					BEGIN
+						GOTO CREATECALLENTRY
+					END
+				END
+				ELSE
+				BEGIN
+					SET @resultLog = @resultLog + 'Import successful';
+				END
 			END
 			ELSE
 			BEGIN
