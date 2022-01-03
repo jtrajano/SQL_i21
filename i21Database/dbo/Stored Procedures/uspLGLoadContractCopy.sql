@@ -333,6 +333,8 @@ BEGIN TRY
 		,strCustomerReference
 		,intAllocationDetailId
 		,intPickLotDetailId
+		,intSellerId
+		,intSalespersonId
 		,intPSubLocationId
 		,intSSubLocationId
 		,strExternalShipmentItemNumber
@@ -372,6 +374,8 @@ BEGIN TRY
 		,strCustomerReference
 		,intAllocationDetailId
 		,intPickLotDetailId
+		,intSellerId
+		,intSalespersonId
 		,@intNewContractSubLocationId
 		,intSSubLocationId
 		,NULL
