@@ -832,6 +832,9 @@ BEGIN TRY
 			, sh.intFutureMonthId
 			, intUserId = si.intCreatedByUserId
 			, si.ysnDestinationWeightsAndGrades
+			, sh.dblBasis
+			, sh.dtmStartDate
+			, sh.dtmEndDate
 		into #tblBasisDeliveries
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
@@ -869,6 +872,9 @@ BEGIN TRY
 			, sh.intFutureMonthId
 			, intUserId = si.intCreatedByUserId
 			, si.ysnDestinationWeightsAndGrades
+			, sh.dblBasis
+			, sh.dtmStartDate
+			, sh.dtmEndDate
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -905,6 +911,9 @@ BEGIN TRY
 			, sh.intFutureMonthId
 			, intUserId = ri.intCreatedByUserId
 			, ysnDestinationWeightsAndGrades = 0
+			, sh.dblBasis
+			, sh.dtmStartDate
+			, sh.dtmEndDate
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -940,6 +949,9 @@ BEGIN TRY
 			, sh.intFutureMonthId
 			, intUserId = ri.intCreatedByUserId
 			, ysnDestinationWeightsAndGrades = 0
+			, sh.dblBasis
+			, sh.dtmStartDate
+			, sh.dtmEndDate
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -976,6 +988,9 @@ BEGIN TRY
 			, sh.intFutureMonthId
 			, intUserId = sh.intUserId
 			, ysnDestinationWeightsAndGrades = 0
+			, sh.dblBasis
+			, sh.dtmStartDate
+			, sh.dtmEndDate
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -1006,6 +1021,9 @@ BEGIN TRY
 			, sh.intFutureMarketId
 			, sh.intFutureMonthId
 			, sh.intUserId
+			, sh.dblBasis
+			, sh.dtmStartDate
+			, sh.dtmEndDate
 		) t where dblQty <> 0
 
 		union all
@@ -1033,6 +1051,9 @@ BEGIN TRY
 			, sh.intFutureMonthId
 			, intUserId = ss.intCreatedUserId
 			, ysnDestinationWeightsAndGrades = 0
+			, sh.dblBasis
+			, sh.dtmStartDate
+			, sh.dtmEndDate
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -1071,6 +1092,9 @@ BEGIN TRY
 				, intFutureMarketId
 				, intFutureMonthId
 				, intUserId
+				, dblBasis
+				, dtmStartDate
+				, dtmEndDate
 			from #tblBasisDeliveries
 
 			union all
@@ -1097,6 +1121,9 @@ BEGIN TRY
 				, intFutureMarketId
 				, intFutureMonthId
 				, intUserId = b.intUserId
+				, ba.dblBasis
+				, ba.dtmStartDate
+				, ba.dtmEndDate
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType = 'Inventory Receipt' and ba.intContractTypeId = 1 and ba.intItemId = bd.intItemId
@@ -1125,6 +1152,9 @@ BEGIN TRY
 				, intFutureMarketId
 				, intFutureMonthId
 				, intUserId = b.intUserId
+				, ba.dblBasis
+				, ba.dtmStartDate
+				, ba.dtmEndDate
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intSettleStorageId and ba.strTransactionType = 'Settle Storage' and ba.intContractTypeId = 1 and ba.intItemId = bd.intItemId
@@ -1154,6 +1184,9 @@ BEGIN TRY
 				, intFutureMarketId
 				, intFutureMonthId
 				, intUserId = b.intUserId
+				, ba.dblBasis
+				, ba.dtmStartDate
+				, ba.dtmEndDate
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 1
@@ -1182,6 +1215,9 @@ BEGIN TRY
 				, intFutureMarketId
 				, intFutureMonthId
 				, intUserId = i.intEntityId 
+				, ba.dblBasis
+				, ba.dtmStartDate
+				, ba.dtmEndDate
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intInventoryShipmentItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 2
@@ -1211,6 +1247,9 @@ BEGIN TRY
 				, intFutureMarketId
 				, intFutureMonthId
 				, intUserId = i.intEntityId 
+				, ba.dblBasis
+				, ba.dtmStartDate
+				, ba.dtmEndDate
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 2
@@ -1240,22 +1279,28 @@ BEGIN TRY
 				, FD.intFutureMarketId
 				, FD.intFutureMonthId
 				, intUserId = PC.intCreatedById
+				, ba.dblBasis
+				, ba.dtmStartDate
+				, ba.dtmEndDate
 			FROM tblCTPriceFixation PF 
 			INNER JOIN tblCTPriceFixationDetail FD ON PF.intPriceFixationId = FD.intPriceFixationId
 			INNER JOIN tblCTPriceContract PC ON PC.intPriceContractId = PF.intPriceContractId
 			CROSS APPLY (
 				select distinct  
 					intContractHeaderId
-					,intContractDetailId
-					,strContractNumber
-					,intContractSeq
-					,intContractTypeId
-					,intContractStatusId
-					,intCommodityId
-					,intItemId
-					,intEntityId
-					,intCompanyLocationId
-					,intQtyUOMId
+					, intContractDetailId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intContractStatusId
+					, intCommodityId
+					, intItemId
+					, intEntityId
+					, intCompanyLocationId
+					, intQtyUOMId
+					, dblBasis
+					, dtmStartDate
+					, dtmEndDate
 				from #tblBasisDeliveries
 				where intContractDetailId = PF.intContractDetailId
 				and strTransactionType <> 'Load Schedule'
@@ -1291,6 +1336,9 @@ BEGIN TRY
 			, intFutureMonthId
 			, intUserId
 			, intActionId
+			, dblBasis
+			, dtmStartDate
+			, dtmEndDate
 		)
 		SELECT 
 			strBatch = NULL
@@ -1316,6 +1364,10 @@ BEGIN TRY
 			, intFutureMonthId
 			, intUserId
 			, intActionId  = 1 --Rebuild
+			, BD.dblBasis
+			, BD.dtmStartDate
+			, BD.dtmEndDate
+			
 		FROM #tblFinalBasisDeliveries BD
 		inner join tblICItemUOM IUOM on IUOM.intItemUOMId = BD.intQtyUOMId
 		inner join tblICCommodityUnitMeasure CUM on CUM.intCommodityId = BD.intCommodityId AND CUM.intUnitMeasureId = IUOM.intUnitMeasureId 
