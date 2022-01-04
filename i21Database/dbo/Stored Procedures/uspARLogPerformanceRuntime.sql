@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARLogPerformanceRuntime]
 	  @strScreenName            NVARCHAR(200)
     , @strProcedureName         NVARCHAR(200)
+    , @strRequestId             NVARCHAR(500)
     , @ysnStart		            BIT = 1
 	, @intUserId	            INT = NULL
     , @intPerformanceLogId      INT = NULL
@@ -23,15 +24,17 @@ BEGIN
             ORDER BY intVersionID DESC
 
             INSERT INTO tblARPerformanceLog (
-                strScreenName
+                  strScreenName
                 , strProcedureName
                 , strBuildNumber
+                , strRequestId
                 , dtmStartDateTime
                 , intUserId
             )
             SELECT strScreenName		= @strScreenName
                 , strProcedureName		= @strProcedureName
                 , strBuildNumber		= @strBuildNumber
+                , strRequestId          = @strRequestId
                 , dtmStartDateTime		= GETDATE()
                 , intUserId				= @intUserId
 

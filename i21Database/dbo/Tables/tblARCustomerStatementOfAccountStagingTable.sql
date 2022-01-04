@@ -11,5 +11,6 @@
 	,[dtmDateTo]				DATETIME
 	,[intEntityUserId]			INT
 	,[strReportLogId]			NVARCHAR(MAX)
+	,[blbLogo]					VARBINARY(MAX)
 );
 
