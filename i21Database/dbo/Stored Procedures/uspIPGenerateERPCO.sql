@@ -51,6 +51,8 @@ BEGIN TRY
 		,@intDestinationPortId INT
 		,@intShipperId INT
 		,@intCompanyLocationId INT
+		,@intContractStatusId INT
+		,@dtmUpdatedAvailabilityDate DATETIME
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,intContractFeedId INT
@@ -146,6 +148,8 @@ BEGIN TRY
 			,@intDestinationPortId = NULL
 			,@intShipperId = NULL
 			,@intCompanyLocationId = NULL
+			,@intContractStatusId = NULL
+			,@dtmUpdatedAvailabilityDate = NULL
 
 		SELECT @intContractDetailId = intContractDetailId
 			,@intContractHeaderId = intContractHeaderId
@@ -227,6 +231,8 @@ BEGIN TRY
 			,@intDestinationPortId = intDestinationPortId
 			,@intShipperId = intShipperId
 			,@intCompanyLocationId = intCompanyLocationId
+			,@intContractStatusId = intContractStatusId
+			,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -423,6 +429,8 @@ BEGIN TRY
 					,intDestinationPortId
 					,intCompanyLocationId
 					,intHeaderBookId
+					,intContractStatusId
+					,dtmUpdatedAvailabilityDate
 					)
 				SELECT @intContractHeaderId
 					,@intContractDetailId
@@ -431,6 +439,8 @@ BEGIN TRY
 					,@intDestinationPortId
 					,@intCompanyLocationId
 					,@intBookId
+					,@intContractStatusId
+					,@dtmUpdatedAvailabilityDate
 			END
 			ELSE
 			BEGIN
