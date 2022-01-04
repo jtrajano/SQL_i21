@@ -1853,6 +1853,7 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
+				, strInvoiceType
 			)		
 			SELECT strBatchId = @strBatchId
 				, dtmTransactionDate
@@ -1892,6 +1893,7 @@ BEGIN TRY
 				, intUserId
 				, intActionId = NULL
 				, strProcess = @strProcess
+				, strInvoiceType
 			FROM 
 			(
 				SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
@@ -1929,11 +1931,13 @@ BEGIN TRY
 					, sh.intBookId
 					, sh.intSubBookId		
 					, sh.intUserId	
+					, strInvoiceType = invoice.strTransactionType
 				FROM vyuCTSequenceUsageHistory suh
 				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = suh.intContractDetailId
 				LEFT JOIN tblICInventoryShipment shipment ON suh.intExternalHeaderId = shipment.intInventoryShipmentId
 				LEFT JOIN tblICInventoryReceipt receipt ON suh.intExternalHeaderId = receipt.intInventoryReceiptId
+				LEFT JOIN tblARInvoice invoice ON suh.intExternalHeaderId = invoice.intInvoiceId
 				OUTER APPLY 
 				(
 					SELECT dblFutures = AVG(pfd.dblFutures)
@@ -1987,7 +1991,8 @@ BEGIN TRY
 					, strNotes
 					, intUserId
 					, intActionId
-					, strProcess)		
+					, strProcess
+					, strInvoiceType)		
 				SELECT lt.strBatchId
 					, lt.dtmTransactionDate
 					, lt.strTransactionType
@@ -2025,6 +2030,7 @@ BEGIN TRY
 					, lt.intUserId
 					, lt.intActionId
 					, lt.strProcess
+					, lt.strInvoiceType
 				FROM @cbLogTemp lt
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Receipt Return')
@@ -3491,7 +3497,8 @@ BEGIN TRY
 			, strNotes
 			, intUserId
 			, intActionId
-			, strProcess)
+			, strProcess
+			, strInvoiceType)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -3530,6 +3537,7 @@ BEGIN TRY
 			, intUserId
 			, intActionId
 			, strProcess
+			, strInvoiceType
 		FROM @cbLogCurrent
 		WHERE intId = @intId and @ysnAddToLogSpecific = 1
 
@@ -4430,10 +4438,11 @@ BEGIN TRY
 			BEGIN				
 				UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
 					, intActionId = CASE WHEN @strProcess = 'Create Invoice' THEN 16
-										WHEN @strProcess = 'Create Credit Memo' THEN 64
+										WHEN @strProcess = 'Create Credit Memo' or strInvoiceType = 'Credit Memo' THEN 64
 										WHEN @strProcess = 'Delete Invoice' THEN 63
 										WHEN @strProcess = 'Delete Credit Memo' THEN 65
 										ELSE intActionId END
+					, strTransactionReference = case when strInvoiceType = 'Credit Memo' then 'Credit Memo' else strTransactionReference end
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @ysnReturn = 1
