@@ -261,6 +261,10 @@ BEGIN TRY
 			IF @strRowState <> 'Added'
 				AND IsNULL(@strERPPONumber, '') = ''
 			BEGIN
+				UPDATE dbo.tblCTContractFeed
+				SET strMessage = 'ERP PO Number is not available. '
+				WHERE intContractFeedId = @intContractFeedId
+
 				GOTO NextPO
 			END
 
@@ -277,6 +281,10 @@ BEGIN TRY
 				ORDER BY CF.intContractFeedId DESC
 			)
 			BEGIN
+				UPDATE dbo.tblCTContractFeed
+				SET strMessage = 'Previous feed is waiting for acknowledgement. '
+				WHERE intContractFeedId = @intContractFeedId
+
 				GOTO NextPO
 			END
 
@@ -429,6 +437,7 @@ BEGIN TRY
 					,intCompanyLocationId
 					,intHeaderBookId
 					,intContractStatusId
+					,dtmUpdatedAvailabilityDate
 					)
 				SELECT @intContractHeaderId
 					,@intContractDetailId
@@ -438,6 +447,7 @@ BEGIN TRY
 					,@intCompanyLocationId
 					,@intBookId
 					,@intOrgContractStatusId
+					,@dtmUpdatedAvailabilityDate
 			END
 			ELSE
 			BEGIN

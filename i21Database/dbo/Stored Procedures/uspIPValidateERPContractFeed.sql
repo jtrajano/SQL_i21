@@ -23,6 +23,7 @@ BEGIN
 		,@intContractFeedId INT
 		,@intOrgContractFeedId INT
 		,@strSubLocation NVARCHAR(50)
+		,@dtmUpdatedAvailabilityDate DATETIME
 	DECLARE @tblCTContractDetail TABLE (
 		intContractDetailId INT
 		,intContractHeaderId INT
@@ -73,6 +74,7 @@ BEGIN
 			,@strContractNumber = NULL
 			,@strVendorRefNo = NULL
 			,@intBookId = NULL
+			,@dtmUpdatedAvailabilityDate = NULL
 
 		SELECT @intContractFeedLogId = intContractFeedLogId
 			,@intContractHeaderId = intContractHeaderId
@@ -350,6 +352,7 @@ BEGIN
 			,@intShipperId = intShipperId
 			,@intDestinationPortId = intDestinationPortId
 			,@intCompanyLocationId = intCompanyLocationId
+			,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
 		FROM tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -371,6 +374,7 @@ BEGIN
 			,intDestinationPortId
 			,intCompanyLocationId
 			,intHeaderBookId
+			,dtmUpdatedAvailabilityDate
 			)
 		SELECT @intContractHeaderId
 			,@intContractDetailId
@@ -379,6 +383,7 @@ BEGIN
 			,@intDestinationPortId
 			,@intCompanyLocationId
 			,@intBookId
+			,@dtmUpdatedAvailabilityDate
 
 		SELECT @strInfo1 = @strContractNumber + ' / ' + ISNULL(@strContractSeq, '')
 
