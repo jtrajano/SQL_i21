@@ -42,7 +42,11 @@ FA.dtmImportedDepThru,
 FA.dblImportGAAPDepToDate,  
 FA.dblImportTaxDepToDate,  
 dblGAAPDepToDate = ISNULL(GAAPDepreciation.dblDepreciationToDate,0),
+dblFunctionalGAAPDepToDate = ISNULL(GAAPDepreciation.dblFunctionalDepreciationToDate,0),
 dblTaxDepToDate = ISNULL(TaxDepreciation.dblDepreciationToDate,0),
+dblFunctionalTaxDepToDate = ISNULL(TaxDepreciation.dblFunctionalDepreciationToDate,0),
+dblNetBookValue =ISNULL(FA.dblCost - ISNULL(GAAPDepreciation.dblDepreciationToDate, 0), 0),
+dblFunctionalNetBookValue =ISNULL(FA.dblCost - ISNULL(GAAPDepreciation.dblFunctionalDepreciationToDate, 0), 0),
 ysnTaxDepreciated = ISNULL(FA.ysnTaxDepreciated,0),  
 ysnDepreciated = ISNULL(FA.ysnDepreciated, 0) | ISNULL(FA.ysnTaxDepreciated, 0),  
 FA.ysnDisposed,       
@@ -105,19 +109,19 @@ OUTER APPLY(
     AND ISNULL(ysnFullyDepreciated,0) = 0  
 )BDFD
 OUTER APPLY (
-    SELECT 
-    MAX(dblDepreciationToDate) dblDepreciationToDate
+    SELECT TOP 1 dblDepreciationToDate, dblFunctionalDepreciationToDate
     FROM tblFAFixedAssetDepreciation
     WHERE intAssetId = FA.intAssetId
     AND intBookId = 1
+    ORDER BY dtmDepreciationToDate DESC
     
 )GAAPDepreciation
 OUTER APPLY (
-    SELECT 
-    MAX(dblDepreciationToDate) dblDepreciationToDate
+    SELECT TOP 1 dblDepreciationToDate, dblFunctionalDepreciationToDate
     FROM tblFAFixedAssetDepreciation
     WHERE intAssetId = FA.intAssetId
     AND intBookId = 2
+    ORDER BY dtmDepreciationToDate DESC
     
 )TaxDepreciation
 OUTER APPLY (
