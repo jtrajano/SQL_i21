@@ -5,6 +5,8 @@ CREATE PROCEDURE [dbo].[uspARSalesAnalysisReport]
     , @ysnPost              BIT = 1
 AS
 
+DECLARE @strRequestId NVARCHAR(200) = NEWID()
+
 IF(OBJECT_ID('tempdb..#INVOICES') IS NOT NULL)
 BEGIN
     DROP TABLE #INVOICES
@@ -28,6 +30,7 @@ IF ISNULL(@ysnRebuild, 0) = 1
 	BEGIN
 		EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Rebuild Sales Analysis Report'
 										  , @strProcedureName       = 'uspARSalesAnalysisReport'
+										  , @strRequestId			= @strRequestId
 										  , @ysnStart		        = 1
 										  , @intUserId	            = 1
 										  , @intPerformanceLogId    = NULL
@@ -983,6 +986,7 @@ IF ISNULL(@intNewPerformanceLogId, 0) <> 0 AND ISNULL(@ysnRebuild, 0) = 1
 	BEGIN
 		EXEC dbo.uspARLogPerformanceRuntime @strScreenName			= 'Rebuild Sales Analysis Report'
 										  , @strProcedureName       = 'uspARSalesAnalysisReport'
+										  , @strRequestId			= @strRequestId
 										  , @ysnStart		        = 0
 										  , @intUserId	            = 1
 										  , @intPerformanceLogId    = @intNewPerformanceLogId
