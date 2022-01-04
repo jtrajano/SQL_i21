@@ -17,6 +17,7 @@ BEGIN
 		,@intCompanyLocationId INT
 		,@intBookId INT
 		,@intContractStatusId INT
+		,@dtmUpdatedAvailabilityDate DATETIME
 		,@intContractFeedId INT
 	--,@intOrgContractFeedId INT
 	DECLARE @tblCTContractDetail TABLE (
@@ -39,6 +40,19 @@ BEGIN
 		AND CH.intContractTypeId = 1
 		AND CD.intContractStatusId <> 1
 	WHERE ISNULL(L.intContractStatusId, 0) <> ISNULL(CD.intContractStatusId, 0)
+
+	INSERT INTO @tblCTContractDetail (
+		intContractDetailId
+		,intContractHeaderId
+		)
+	SELECT DISTINCT L.intContractDetailId
+		,L.intContractHeaderId
+	FROM tblIPContractFeedLog L
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
+		AND CD.intContractStatusId = 1
+	WHERE ISNULL(L.strCustomerContract, '') <> ISNULL(CH.strCustomerContract, '')
+		OR ISNULL(L.dtmUpdatedAvailabilityDate, 0) <> ISNULL(CD.dtmUpdatedAvailabilityDate, 0)
 
 	SELECT @intContractDetailId = NULL
 
@@ -65,6 +79,7 @@ BEGIN
 			,@strVendorRefNo = NULL
 			,@intBookId = NULL
 			,@intContractStatusId = NULL
+			,@dtmUpdatedAvailabilityDate = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 		FROM tblIPContractFeedLog
@@ -189,6 +204,7 @@ BEGIN
 			,@intDestinationCityId = intDestinationCityId
 			,@intCompanyLocationId = intCompanyLocationId
 			,@intContractStatusId = intContractStatusId
+			,@dtmUpdatedAvailabilityDate = dtmUpdatedAvailabilityDate
 		FROM tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -212,6 +228,7 @@ BEGIN
 			,intCompanyLocationId
 			,intHeaderBookId
 			,intContractStatusId
+			,dtmUpdatedAvailabilityDate
 			)
 		SELECT @intContractHeaderId
 			,@intContractDetailId
@@ -222,6 +239,7 @@ BEGIN
 			,@intCompanyLocationId
 			,@intBookId
 			,@intContractStatusId
+			,@dtmUpdatedAvailabilityDate
 
 		SELECT @strInfo1 = @strContractNumber + ' / ' + ISNULL(@strContractSeq, '')
 
