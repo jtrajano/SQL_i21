@@ -157,6 +157,8 @@ BEGIN
 			,[strSourceNumber]
 			,[strBOLNumber]
 			,[intTicketId]
+			,[strAccountIdInventory]
+			,[strAccountIdInTransit]
 	)
 	SELECT	[intItemId]							= @intItemId
 			,[intItemLocationId]				= @intItemLocationId
@@ -204,8 +206,25 @@ BEGIN
 			,[strSourceNumber]					= @strSourceNumber
 			,[strBOLNumber]						= @strBOLNumber
 			,[intTicketId]						= @intTicketId
+			,[strAccountIdInventory]			= glAccountIdInventory.strAccountId
+			,[strAccountIdInTransit]			= glAccountIdInTransit.strAccountId
 	FROM	tblICItem i 
 			CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				@intItemId
+				,ISNULL(@intInTransitSourceLocationId, @intItemLocationId)
+				,'Inventory'
+			) accountIdInventory
+			LEFT JOIN tblGLAccount glAccountIdInventory
+				ON accountIdInventory.intAccountId = glAccountIdInventory.intAccountId
+			OUTER APPLY dbo.fnGetItemGLAccountAsTable(
+				@intItemId
+				,ISNULL(@intInTransitSourceLocationId, @intItemLocationId)
+				,'Inventory In-Transit'
+			) accountIdInTransit
+			LEFT JOIN tblGLAccount glAccountIdInTransit
+				ON accountIdInTransit.intAccountId = glAccountIdInTransit.intAccountId
+
 	WHERE	i.intItemId = @intItemId
 			AND @intItemId IS NOT NULL
 			AND @intItemLocationId IS NOT NULL

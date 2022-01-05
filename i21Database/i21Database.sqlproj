@@ -449,6 +449,7 @@
     <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
     <None Include="Scripts\Post-Deployment\ST\40_Rename_And_Alter_int_trl_dept_number.sql" />
     <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
+    <None Include="Scripts\Post-Deployment\IC\30_InventoryValuationAccountIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -1540,7 +1541,6 @@
     <Build Include="dbo\Stored Procedures\uspICCreateStockPathRoot.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateStockPathNode.sql" />
     <Build Include="dbo\Functions\fnGetInventoryTransactionId.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCreatePOInventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogItemStockPath.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateOverPayment.sql" />

@@ -60,6 +60,8 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,strDescription				= t.strDescription 
 		,intItemStockUOM			= stockUOM.intItemUOMId 
 		,intUnitMeasureStockUOM		= stockUnitMeasure.intUnitMeasureId
+		,t.strAccountIdInventory
+		,t.strAccountIdInTransit
 FROM 	tblICInventoryTransaction t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
