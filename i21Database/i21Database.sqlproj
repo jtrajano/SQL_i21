@@ -350,6 +350,8 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdatePlannedAvailabilityDate.sql" />
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRTransformProductSearch.sql" />
     <Build Include="dbo\Tables\tblApiSchemaTRProductSearch.sql" />
+    <None Include="Scripts\Post-Deployment\ST\40_Rename_And_Alter_int_trl_dept_number.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties" />
@@ -9766,6 +9768,48 @@
     <Build Include="dbo\Tables\tblIPTestResultError.sql" />
     <Build Include="dbo\Tables\tblIPTestResultArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspQMProcessERPTestResult.sql" />
+    <Build Include="dbo\Views\vyuCTApiContractText.sql" />
+    <Build Include="dbo\Views\vyuCTApiDollarContract.sql" />
+    <Build Include="dbo\Views\vyuCTApiItemContract.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractCost.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractDetails.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractDetailsV1.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractHeader.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractHeaderV1.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiTicketDiscount.sql" />
+    <Build Include="dbo\Views\vyuICApiCategory.sql" />
+    <Build Include="dbo\Views\vyuRestApiCTPriceContractFixationDetail.sql" />
+    <Build Include="dbo\Views\vyuRestApiEntityUsers.sql" />
+    <Build Include="dbo\Views\vyuRestApiInvoiceDetail.sql" />
+    <Build Include="dbo\Views\vyuRestApiVendors.sql" />
+    <Build Include="dbo\Views\vyuApiTransportTerminals.sql" />
+    <Build Include="dbo\Views\vyuRestApiVoucherChecks.sql" />
+    <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
+    <Build Include="dbo\Views\vyuSCRestApiTickets.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportDollarContractsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportInventoryAdjustmentsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiCreateItemContractPrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiImportInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiImportReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiSchemaTransformDollarContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiSchemaTransformItemContract.sql" />
+    <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
+    <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
+    <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
+    <Build Include="dbo\Tables\tblRestApiInvoiceStaging.sql" />
+    <Build Include="dbo\Tables\tblRestApiItemTaxes.sql" />
+    <Build Include="dbo\Tables\tblRestApiReceiptChargeStaging.sql" />
+    <Build Include="dbo\Tables\tblRestApiReceiptItemLotStaging.sql" />
+    <Build Include="dbo\Tables\tblRestApiReceiptItemStaging.sql" />
+    <Build Include="dbo\Tables\tblRestApiReceiptStaging.sql" />
+    <Build Include="dbo\Tables\tblRestApiSchemaDollarContract.sql" />
+    <Build Include="dbo\Tables\tblRestApiSchemaItemContract.sql" />
+    <Build Include="dbo\Tables\tblRestApiTransformationDelta.sql" />
+    <Build Include="dbo\Tables\tblRestApiTransformationLog.sql" />
+    <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
+    <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementBudgetReminderAlternate2Report.sql" />
     <Build Include="dbo\Tables\tblSMLanguageTranslation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetSourcingReport.sql" />
@@ -9906,6 +9950,9 @@
     <Build Include="dbo\Tables\tblICInventoryDailyTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockDailyQuantity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryDailyValuation.sql" />
+    <Build Include="dbo\Tables\tblICLocationBinsReportLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixOtherChargeGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCompareValuationVsGL.sql" />
     <Build Include="dbo\Tables\tblICInventoryStockAsOfDate.sql" />
     <Build Include="dbo\Tables\tblICInventoryStorageAsOfDate.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStorageDailyQuantity.sql" />
@@ -9939,6 +9986,7 @@
     <Build Include="dbo\Functions\fnGRCheckStorageBalance.sql" />
     <Build Include="dbo\Functions\fnGRFindOriginalCustomerStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspSCTicketInOutLocationSubReport.sql" />
+    <Build Include="dbo\Tables\tblARCustomerStatementOfAccountStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -10250,7 +10298,6 @@
     <Build Include="dbo\Tables\tblARSalesAnalysisStagingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesAnalysisReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteDMSDocument.sql" />
-    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForAging.sql" />
     <Build Include="dbo\Tables\tblARSalesOrderReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesOrderReport.sql" />
   </ItemGroup>

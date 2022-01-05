@@ -14,8 +14,7 @@ Type the overview for the table here.
 	(
 		[intCategoryLocationId] INT NOT NULL IDENTITY, 
 		[intCategoryId] INT NOT NULL, 
-		[intLocationId] INT NOT NULL, 
-		[intRegisterDepartmentId] INT NULL,
+		[intLocationId] INT NOT NULL,
 		[strCashRegisterDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnUpdatePrices] BIT NULL DEFAULT ((0)), 
 		[ysnUseTaxFlag1] BIT NULL DEFAULT ((0)), 
