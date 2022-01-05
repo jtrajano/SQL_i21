@@ -9595,11 +9595,6 @@
     <Build Include="dbo\Stored Procedures\uspApiImportInventoryAdjustmentsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
-    <Build Include="dbo\Stored Procedures\uspRestApiCreateItemContractPrepayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspRestApiImportInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspRestApiImportReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspRestApiSchemaTransformDollarContract.sql" />
-    <Build Include="dbo\Stored Procedures\uspRestApiSchemaTransformItemContract.sql" />
     <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
     <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
