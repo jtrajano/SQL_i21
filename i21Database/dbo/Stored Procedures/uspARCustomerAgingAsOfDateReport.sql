@@ -259,9 +259,9 @@ WHERE ysnPosted = 1
 		(SC.intInvoiceId IS NULL AND ((I.strType = 'Service Charge' AND (@ysnFromBalanceForward = 0 AND @dtmDateToLocal < I.dtmForgiveDate)) OR (I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0))))
 		OR 
 		SC.intInvoiceId IS NOT NULL
-	)
-	AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
-	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
+  )
+  AND I.dtmPostDate BETWEEN @dtmDateFromLocal AND @dtmDateToLocal		
+  AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
