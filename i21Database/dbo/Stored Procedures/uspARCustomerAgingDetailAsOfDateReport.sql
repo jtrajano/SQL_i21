@@ -192,6 +192,24 @@ WHERE I.strInvoiceOriginId IS NOT NULL
   AND SC.strType = 'Service Charge'
   AND SC.ysnForgiven = 1
 
+--##FORGIVENSERVICECHARGE
+INSERT INTO ##FORGIVENSERVICECHARGE (
+	   intInvoiceId
+	 , strInvoiceNumber
+)
+SELECT SC.intInvoiceId
+	 , SC.strInvoiceNumber
+FROM tblARInvoice I
+INNER JOIN ##ADCUSTOMERS C ON I.intEntityCustomerId = C.intEntityCustomerId
+INNER JOIN ##ADLOCATION CL ON I.intCompanyLocationId = CL.intCompanyLocationId
+INNER JOIN tblARInvoice SC ON I.strInvoiceOriginId = SC.strInvoiceNumber
+WHERE I.strInvoiceOriginId IS NOT NULL 
+  AND I.strTransactionType = 'Credit Memo' 
+  AND I.strType = 'Standard'
+  AND SC.strTransactionType = 'Invoice'
+  AND SC.strType = 'Service Charge'
+  AND SC.ysnForgiven = 1
+
 --##POSTEDINVOICES
 INSERT INTO ##POSTEDINVOICES WITH (TABLOCK) (
 	   intInvoiceId

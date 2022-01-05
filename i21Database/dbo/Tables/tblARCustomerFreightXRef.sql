@@ -29,3 +29,27 @@
     CONSTRAINT [FK_tblARCustomerFreightXRef_tblEMEntityTariffType_intEntityTariffTypeId] FOREIGN KEY ([intEntityTariffTypeId]) REFERENCES [dbo].[tblEMEntityTariffType] ([intEntityTariffTypeId])
 );
 
+GO
+
+CREATE TRIGGER [dbo].[trgARCustomerFreight]
+	ON [dbo].[tblARCustomerFreightXRef]
+FOR INSERT,UPDATE
+AS
+BEGIN
+	DECLARE @ErrMsg nvarchar(max) = NULL
+	DECLARE @ysnFreightInRequired BIT = NULL
+	DECLARE @dblFreightRateIn DECIMAL(18,6) = NULL
+	DECLARE @strFreightType NVARCHAR(100) = NULL
+
+	SELECT TOP 1 @ysnFreightInRequired = ysnFreightInRequired FROM tblTRCompanyPreference 
+
+	SELECT @dblFreightRateIn = dblFreightRateIn, @strFreightType = strFreightType 
+		FROM 
+		inserted
+
+	IF(@ysnFreightInRequired = 1 AND @dblFreightRateIn <= 0 AND  @strFreightType = 'Rate')
+	BEGIN
+		RAISERROR ('Customer > Transports > Freight > Freight-In must be greater than 0.',18,1,'WITH NOWAIT') 
+	END
+END
+GO

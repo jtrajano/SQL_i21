@@ -207,7 +207,7 @@ WHEN MATCHED AND @ysnAllowOverwrite = 1 THEN
 	UPDATE SET 
 		intCategoryId = source.intCategoryId,
 		intLocationId = source.intLocationId,
-		intRegisterDepartmentId = source.intCashRegisterDepartment,
+		-- intRegisterDepartmentId = source.intCashRegisterDepartment,
 		strCashRegisterDepartment = source.strCashRegisterDepartment,
 		ysnUpdatePrices = source.ysnUpdatePrices,
 		ysnUseTaxFlag1 = source.ysnUseTaxFlag1,
@@ -248,7 +248,7 @@ WHEN NOT MATCHED THEN
 	(
 		  intCategoryId
 		, intLocationId
-		, intRegisterDepartmentId
+		-- , intRegisterDepartmentId
 		, strCashRegisterDepartment
 		, ysnUpdatePrices
 		, ysnUseTaxFlag1
@@ -287,7 +287,7 @@ WHEN NOT MATCHED THEN
 	(
 		  intCategoryId
 		, intLocationId
-		, intCashRegisterDepartment
+		-- , intCashRegisterDepartment
 		, strCashRegisterDepartment
 		, ysnUpdatePrices
 		, ysnUseTaxFlag1

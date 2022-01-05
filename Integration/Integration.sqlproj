@@ -167,6 +167,10 @@
     <None Include="dbo\Stored Procedures\uspGRImportTicketPool.sql" />
     <None Include="dbo\Stored Procedures\uspPRImportOriginTaxTypes.sql" />
     <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeTaxes.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginDeductionTypes.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeDeduction.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEarningTypes.sql" />
+    <None Include="dbo\Stored Procedures\uspPRImportOriginEmployeeEarning.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportSettleScaleTicket.sql" />
     <None Include="dbo\Stored Procedures\uspGRImportReceiptandBill.sql" />
     <None Include="dbo\Stored Procedures\uspCTImportOriginContract.sql" />

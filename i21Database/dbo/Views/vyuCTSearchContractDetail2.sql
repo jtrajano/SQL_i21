@@ -4,7 +4,7 @@ AS
 
 WITH shipmentstatus AS (
 	SELECT DISTINCT intContractDetailId
-		, strShipmentStatus
+		, strShipmentStatus = ISNULL(strShipmentStatus,'Open')
 	FROM (
 		SELECT ROW_NUMBER() OVER(PARTITION BY intPContractDetailId ORDER BY dtmScheduledDate DESC) AS intNumberId
 			, intContractDetailId = intPContractDetailId

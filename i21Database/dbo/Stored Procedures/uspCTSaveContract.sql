@@ -310,9 +310,9 @@ BEGIN TRY
 		BEGIN
 			UPDATE @CDTableUpdate SET dblOriginalBasis = @dblBasis WHERE intContractDetailId = @intContractDetailId;
 
-			DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
-			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
-			ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			--DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			--EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
+			--ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 		END
 
 		IF @intPricingTypeId IN (1,2,8)
