@@ -63,6 +63,7 @@ begin try
 
 	if (@intFixationCount = 1)
 	begin   
+        set @strXML = @strXML + '<PreProcessXML>';
         set @strXML = @strXML + '<intPriceContractId>' + convert(nvarchar(20),@intPriceContractId) + '</intPriceContractId>';
         set @strXML = @strXML + '<strPriceContractState>Deleted</strPriceContractState>';
         set @strXML = @strXML + '<intPriceFixationId>0</intPriceFixationId>';
@@ -71,11 +72,13 @@ begin try
         set @strXML = @strXML + '<strPriceFixationDetailState>None</strPriceFixationDetailState>';
         set @strXML = @strXML + '<dblTransactionQuantity>0</dblTransactionQuantity>';
         set @strXML = @strXML + '<dblFuturePrice>0</dblFuturePrice>';
+        set @strXML = @strXML + '</PreProcessXML>';
 	end
 	else
 	begin
 		if (@intFixationDetailCount = 1)
 		begin
+        	set @strXML = @strXML + '<PreProcessXML>';
 	        set @strXML = @strXML + '<intPriceContractId>0</intPriceContractId>';
 	        set @strXML = @strXML + '<strPriceContractState>Modified</strPriceContractState>';
 	        set @strXML = @strXML + '<intPriceFixationId>' + convert(nvarchar(20),@intPriceFixationId) + '</intPriceFixationId>';
@@ -84,9 +87,11 @@ begin try
 	        set @strXML = @strXML + '<strPriceFixationDetailState>None</strPriceFixationDetailState>';
 	        set @strXML = @strXML + '<dblTransactionQuantity>0</dblTransactionQuantity>';
 	        set @strXML = @strXML + '<dblFuturePrice>0</dblFuturePrice>';
+        	set @strXML = @strXML + '</PreProcessXML>';
 		end
 		else
 		begin
+        	set @strXML = @strXML + '<PreProcessXML>';
 	        set @strXML = @strXML + '<intPriceContractId>0</intPriceContractId>';
 	        set @strXML = @strXML + '<strPriceContractState>Modified</strPriceContractState>';
 	        set @strXML = @strXML + '<intPriceFixationId>0</intPriceFixationId>';
@@ -95,10 +100,11 @@ begin try
 	        set @strXML = @strXML + '<strPriceFixationDetailState>Deleted</strPriceFixationDetailState>';
 	        set @strXML = @strXML + '<dblTransactionQuantity>' + convert(nvarchar(20),@dblQuantity) + '</dblTransactionQuantity>';
 	        set @strXML = @strXML + '<dblFuturePrice>' + convert(nvarchar(20),@dblFutures) + '</dblFuturePrice>';
+        	set @strXML = @strXML + '</PreProcessXML>';
 		end
 	end
 
-	set @strXML = '<PreProcessXML>' + @strXML + '</PreProcessXML>'
+	set @strXML = '<PreProcessXMLs>' + @strXML + '</PreProcessXMLs>'
 
 	EXEC uspCTPreProcessPriceContract @strXML = @strXML, @intUserId = @intUserId;
 
