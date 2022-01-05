@@ -462,11 +462,9 @@ BEGIN TRY
 				, tblEMEntity.str1099Name  AS strCustomerLegalName
 				,1
 			FROM tblTFTransaction Trans
-			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
-			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
-			INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = tblARInvoice.intEntityCustomerId
+			INNER JOIN tblEMEntity ON tblEMEntity.intEntityId = Trans.intCustomerId
 			WHERE Trans.uniqTransactionGuid = @Guid
-			AND Trans.intTransactionId IS NOT NULL	
+			AND Trans.intTransactionId IS NOT NULL
 		END
 
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId

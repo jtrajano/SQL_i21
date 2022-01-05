@@ -71,6 +71,7 @@
     [strImportVerificationNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strTransportNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxAuthorityCountyLocationId] INT NULL,
+	[intCustomerId] INT NULL,
     CONSTRAINT [PK_tblTFTransaction] PRIMARY KEY ([intTransactionId]), 
     CONSTRAINT [FK_tblTFTransaction_tblTFReportingComponent] FOREIGN KEY ([intReportingComponentId]) REFERENCES [tblTFReportingComponent]([intReportingComponentId]), 
     CONSTRAINT [FK_tblTFTransaction_tblTFProductCode] FOREIGN KEY ([intProductCodeId]) REFERENCES [tblTFProductCode]([intProductCodeId]),
