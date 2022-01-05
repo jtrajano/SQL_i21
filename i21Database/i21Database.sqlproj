@@ -10231,6 +10231,7 @@
     <Build Include="dbo\Functions\fnGLCheckScale.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitTB.sql" />
     <Build Include="dbo\Functions\fnGLGetBeginningBalanceAndUnitRETB.sql" />
+    <Build Include="dbo\Functions\fnGLGetOverrideGLAccount.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\2_ElectronicFileFormats.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\21_UpdateFromPrepaymentToCustomerPrepayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityCredentialContact2.sql" />
