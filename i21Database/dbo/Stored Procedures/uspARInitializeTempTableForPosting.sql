@@ -416,7 +416,6 @@ CREATE TABLE ##ARItemsForCosting (
     , [strSourceType]                   NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [strSourceNumber]                 NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , [intTicketId]                     INT NULL
-    , [intSourceEntityId]				INT NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForInTransitCosting') IS NOT NULL)
@@ -450,6 +449,7 @@ CREATE TABLE ##ARItemsForInTransitCosting (
 	, [intLinkedItem]					INT NULL
 	, [intLinkedItemId]					INT NULL
 	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [intTicketId]                     INT NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForStorageCosting') IS NOT NULL)
@@ -488,6 +488,7 @@ CREATE TABLE ##ARItemsForStorageCosting (
 	, [dblAdjustCostValue]				NUMERIC(38, 20) NULL
 	, [dblAdjustRetailValue]			NUMERIC(38, 20) NULL
 	, [strBOLNumber]					NVARCHAR(100) NULL 
+    , [intTicketId]                     INT NULL
 )
 
 IF(OBJECT_ID('tempdb..##ARItemsForContracts') IS NOT NULL)

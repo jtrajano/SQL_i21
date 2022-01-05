@@ -336,8 +336,6 @@
     <Build Include="dbo\Stored Procedures\uspApiSchemaTRRackPriceEquation.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicWV.sql" />
     <Build Include="dbo\Functions\fnSTConvertUPCaToUPCe.sql" />
-    <Build Include="dbo\Stored Procedures\uspApiSchemaTransformTRShipViaTariff.sql" />
-    <Build Include="dbo\Tables\tblApiSchemaTRShipViaTariff.sql" />
     <None Include="Scripts\Post-Deployment\IC\101_Rename_And_Alter_Cash_Register_Department.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationDetailMultiplePrice.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationMultiplePrice.sql" />
