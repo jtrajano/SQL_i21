@@ -23,6 +23,7 @@
     [strProgramType]			NVARCHAR(100)	COLLATE Latin1_General_CI_AS NULL,
 	[intCompanyId]				INT				NULL,
     [intConcurrencyId]			INT             NOT NULL,
+    [guiApiUniqueId]            UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblARCustomerSpecialPrice] PRIMARY KEY CLUSTERED ([intSpecialPriceId] ASC),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEMEntityLocation_Rack] FOREIGN KEY ([intRackLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
