@@ -98,7 +98,8 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, intCustomerId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -143,8 +144,8 @@ BEGIN TRY
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
 					, strCustomerZipCode = NULL
-					, tblSMCompanySetup.strCompanyName AS strCustomerName
-					, tblSMCompanySetup.strEin AS strCustomerFederalTaxId
+					, CustomerEntity.strName AS strCustomerName
+					, strCustomerFederalTaxId = NULL
 					, strReportingComponentNote = tblTFReportingComponent.strNote
 					, strTransactionType = 'Receipt'
 					, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId 
@@ -152,6 +153,7 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -173,6 +175,7 @@ BEGIN TRY
 					LEFT JOIN tblSMCompanyLocation DestinationLoc ON DestinationLoc.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLoc ON CustomerLoc.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 					LEFT JOIN tblARCustomer ON tblARCustomer.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId
+						LEFT JOIN tblEMEntity CustomerEntity ON CustomerEntity.intEntityId = tblARCustomer.intEntityId
 						LEFT JOIN tblARCustomerAccountStatus ON tblARCustomerAccountStatus.intEntityCustomerId = tblARCustomer.intEntityId
 				CROSS JOIN tblSMCompanySetup
 				CROSS JOIN tblTFCompanyPreference
@@ -264,7 +267,8 @@ BEGIN TRY
 				, strVendorLicenseNumber
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, intCustomerId)
 			SELECT DISTINCT ROW_NUMBER() OVER(ORDER BY intInventoryReceiptItemId, intTaxAuthorityId DESC) AS intId, *
 			FROM (SELECT DISTINCT tblICInventoryReceiptItem.intInventoryReceiptItemId
 					, tblTFReportingComponent.intTaxAuthorityId
@@ -309,8 +313,8 @@ BEGIN TRY
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
 					, strCustomerZipCode = NULL
-					, tblSMCompanySetup.strCompanyName AS strCustomerName
-					, tblSMCompanySetup.strEin AS strCustomerFederalTaxId
+					, strCustomerName = NULL
+					, strCustomerFederalTaxId = NULL
 					, strReportingComponentNote = tblTFReportingComponent.strNote
 					, strTransactionType = 'Receipt'
 					, intTransactionNumberId = tblICInventoryReceiptItem.intInventoryReceiptItemId 
@@ -318,6 +322,7 @@ BEGIN TRY
 					, strContactName = tblTFCompanyPreference.strContactName
 					, strEmail = tblTFCompanyPreference.strContactEmail
 					, strImportVerificationNumber = tblTRLoadHeader.strImportVerificationNumber
+					, intCustomerId = tblTRLoadDistributionHeader.intEntityCustomerId
 				FROM tblTFReportingComponent 
 				INNER JOIN tblTFReportingComponentProductCode ON tblTFReportingComponentProductCode.intReportingComponentId = tblTFReportingComponent.intReportingComponentId
 				INNER JOIN tblTFProductCode ON tblTFProductCode.intProductCodeId = tblTFReportingComponentProductCode.intProductCodeId
@@ -338,6 +343,7 @@ BEGIN TRY
 					LEFT JOIN tblSMCompanyLocation DestinationLoc ON DestinationLoc.intCompanyLocationId = tblTRLoadDistributionHeader.intCompanyLocationId
 					LEFT JOIN tblEMEntityLocation CustomerLoc ON CustomerLoc.intEntityLocationId = tblTRLoadDistributionHeader.intShipToLocationId
 					LEFT JOIN tblARCustomer ON tblARCustomer.intEntityId = tblTRLoadDistributionHeader.intEntityCustomerId
+						LEFT JOIN tblEMEntity CustomerEntity ON CustomerEntity.intEntityId = tblARCustomer.intEntityId
 						LEFT JOIN tblARCustomerAccountStatus ON tblARCustomerAccountStatus.intEntityCustomerId = tblARCustomer.intEntityId
 				CROSS JOIN tblSMCompanySetup
 				CROSS JOIN tblTFCompanyPreference
@@ -516,7 +522,8 @@ BEGIN TRY
 				, dblQtyShipped
 				, strContactName
 				, strEmail
-				, strImportVerificationNumber)
+				, strImportVerificationNumber
+				, intCustomerId)
 			SELECT DISTINCT @Guid
 				, intItemId
 				, intReportingComponentId
@@ -579,6 +586,7 @@ BEGIN TRY
 				, strContactName
 				, strEmail
 				, strImportVerificationNumber
+				, intCustomerId
 			FROM @TFTransaction Trans
 		END
 
