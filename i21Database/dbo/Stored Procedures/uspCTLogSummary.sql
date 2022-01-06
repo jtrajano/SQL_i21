@@ -4474,10 +4474,8 @@ BEGIN TRY
 				BEGIN
 					-- DP Update Balance
 					UPDATE @cbLogSpecific
-					SET strTransactionReference = 'Contract Sequence'
-						, strTransactionType = 'Contract Balance'
-						, intActionId = 43
-						, strTransactionReferenceNo = strContractNumber
+					SET strTransactionType = 'Contract Balance'
+						, intActionId = CASE WHEN intContractTypeId = 1 THEN 49 ELSE 50 END
 						, dblQty = dblQty * -1
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					
