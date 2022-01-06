@@ -486,11 +486,11 @@ BEGIN
 			@dblBucket2 = ISNULL(SUM(dblBucket2), 0), 
 			@dblBucket3 = ISNULL(SUM(dblBucket3), 0),
 			@dblBucket4 = ISNULL(SUM(dblBucket4), 0),
-			@dblBucket4 = ISNULL(SUM(dblBucket5), 0),
-			@dblBucket4 = ISNULL(SUM(dblBucket6), 0),
-			@dblBucket4 = ISNULL(SUM(dblBucket7), 0),
-			@dblBucket4 = ISNULL(SUM(dblBucket8), 0),
-			@dblBucket4 = ISNULL(SUM(dblBucket9), 0)
+			@dblBucket5 = ISNULL(SUM(dblBucket5), 0),
+			@dblBucket6 = ISNULL(SUM(dblBucket6), 0),
+			@dblBucket7 = ISNULL(SUM(dblBucket7), 0),
+			@dblBucket8 = ISNULL(SUM(dblBucket8), 0),
+			@dblBucket9 = ISNULL(SUM(dblBucket9), 0)
 		FROM tblCMCashFlowReportSummaryDetail 
 		WHERE 
 			intCashFlowReportId = @intCashFlowReportId
